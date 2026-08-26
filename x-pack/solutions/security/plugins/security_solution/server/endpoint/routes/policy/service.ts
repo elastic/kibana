@@ -5,15 +5,20 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
-import type { Agent } from '@kbn/fleet-plugin/common/types/models';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ISearchRequestParams } from '@kbn/search-types';
 import type { EndpointFleetServicesInterface } from '../../services/fleet';
 import { policyIndexPattern } from '../../../../common/endpoint/constants';
 import { catchAndWrapError } from '../../utils';
-import type { EndpointAppContext } from '../../types';
 import { INITIAL_POLICY_ID } from '.';
 import type { GetHostPolicyResponse, HostPolicyResponse } from '../../../../common/endpoint/types';
+import { prefixIndexPatternsWithCcs } from '../../utils/ccs_utils';
+import { isFannedInHit } from '../../utils/cps_read_routing';
+import { areFannedInAgentsVisibleInSpace } from '../../utils/fanned_in_space_check';
+import type {
+  EndpointAppContextService,
+  ScopedEndpointServices,
+} from '../../endpoint_app_context_services';
 
 export const getESQueryPolicyResponseByAgentID = (
   agentID: string,
@@ -46,17 +51,46 @@ export const getESQueryPolicyResponseByAgentID = (
   };
 };
 
-export async function getPolicyResponseByAgentId(
-  agentID: string,
-  esClient: ElasticsearchClient,
-  fleetServices: EndpointFleetServicesInterface
-): Promise<GetHostPolicyResponse | undefined> {
-  const query = getESQueryPolicyResponseByAgentID(agentID, policyIndexPattern);
-  const response = await esClient.search<HostPolicyResponse>(query).catch(catchAndWrapError);
+export interface GetPolicyResponseByAgentIdOptions {
+  agentID: string;
+  esClient: ElasticsearchClient;
+  endpointService: EndpointAppContextService;
+  fleetServices: EndpointFleetServicesInterface;
+  ccsEnabled: boolean;
+  /** Required for the read to fan out under CPS; without it the read is origin-only */
+  scoped?: ScopedEndpointServices;
+}
+
+export async function getPolicyResponseByAgentId({
+  agentID,
+  esClient,
+  endpointService,
+  fleetServices,
+  ccsEnabled,
+  scoped,
+}: GetPolicyResponseByAgentIdOptions): Promise<GetHostPolicyResponse | undefined> {
+  const cpsRead = scoped?.isCpsRead() ?? false;
+  // CCS remote outputs and CPS fan-in both prefix a hit's `_index` with an alias, and the visibility
+  // check below can only read one meaning out of that colon. Under CPS the policy read therefore
+  // gives up searching CCS remote outputs — deliberate, since the two topologies are not meant to be
+  // enabled together.
+  const query = getESQueryPolicyResponseByAgentID(
+    agentID,
+    prefixIndexPatternsWithCcs(policyIndexPattern, ccsEnabled && !cpsRead)
+  );
+  const response = await (cpsRead && scoped ? scoped.getEsClient() : esClient)
+    .search<HostPolicyResponse>(query)
+    .catch(catchAndWrapError);
 
   if (response.hits.hits.length > 0 && response.hits.hits[0]._source != null) {
-    // Ensure agent is in the current space id. Call to fleet will Error if agent is not in current space
-    await fleetServices.ensureInCurrentSpace({ agentIds: [agentID] });
+    await ensureAgentVisibleInCurrentSpace({
+      agentID,
+      endpointService,
+      fleetServices,
+      cpsRead,
+      hitIndex: response.hits.hits[0]._index,
+      scoped,
+    });
 
     return {
       policy_response: response.hits.hits[0]._source,
@@ -66,38 +100,78 @@ export async function getPolicyResponseByAgentId(
   return undefined;
 }
 
-export async function agentVersionsMap(
-  endpointAppContext: EndpointAppContext,
-  request: KibanaRequest,
-  kqlQuery: string,
-  pageSize: number = 1000
-): Promise<Map<string, number>> {
-  const searchOptions = (pageNum: number) => {
-    return {
-      page: pageNum,
-      perPage: pageSize,
-      showInactive: false,
-      kuery: kqlQuery,
-    };
-  };
+/**
+ * Ensures the agent whose policy response was found is visible in this space. These documents carry
+ * no space field, so unlike the action index the check has to stay with Fleet.
+ *
+ * Under CPS, Fleet conflates two cases that must diverge: an agent enrolled here in another space,
+ * which stays hidden, and one not enrolled here at all, which is a fanned-in document and must render.
+ *
+ * @internal
+ */
+const ensureAgentVisibleInCurrentSpace = async ({
+  agentID,
+  endpointService,
+  fleetServices,
+  cpsRead,
+  hitIndex,
+  scoped,
+}: Pick<GetPolicyResponseByAgentIdOptions, 'agentID' | 'endpointService' | 'fleetServices'> & {
+  cpsRead: boolean;
+  hitIndex?: string;
+  scoped?: ScopedEndpointServices;
+}): Promise<void> => {
+  try {
+    await fleetServices.ensureInCurrentSpace({ agentIds: [agentID] });
+  } catch (err) {
+    // An origin-local agent that has since been unenrolled from Fleet is indistinguishable from a
+    // linked project's agent by lookup alone, so the document has to have come from one.
+    if (!cpsRead || !isFannedInHit(hitIndex)) {
+      throw err;
+    }
 
-  let page = 1;
-  const result: Map<string, number> = new Map<string, number>();
-  let hasMore = true;
-  while (hasMore) {
-    const queryResult = await endpointAppContext.service
-      .getInternalFleetServices()
-      .agent.listAgents(searchOptions(page++));
-    queryResult.agents.forEach((agent: Agent) => {
-      const agentVersion = agent.local_metadata?.elastic?.agent?.version;
-      if (result.has(agentVersion)) {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        result.set(agentVersion, result.get(agentVersion)! + 1);
-      } else {
-        result.set(agentVersion, 1);
-      }
-    });
-    hasMore = queryResult.agents.length > 0;
+    const logger = endpointService.createLogger('getPolicyResponseByAgentId');
+    const [locallyEnrolledAgent] = await endpointService
+      .getInternalFleetServices(undefined, true)
+      .fetchAgentsById([agentID], { ignoreMissing: true })
+      .catch(catchAndWrapError);
+
+    if (locallyEnrolledAgent) {
+      logger.debug(() => `Agent [${agentID}] is not visible in space [${fleetServices.spaceId}]`);
+
+      throw err;
+    }
+
+    // The active space id is parsed from the URL and never validated for API routes, so a linked
+    // project's namespace could otherwise vouch for a space that does not exist here. Resolve the
+    // space on this project first; a linked document must never be the evidence that it exists.
+    const activeSpaceExists = await (scoped?.getSpace().then(
+      () => true,
+      () => false
+    ) ?? Promise.resolve(false));
+
+    if (!activeSpaceExists) {
+      throw err;
+    }
+
+    // Provenance alone does not bound a fanned-in read: a space with no routing expression fans
+    // out to every project, so the document must also match the active space on the one field it
+    // carries. This applies the same rule the endpoint list uses via buildCpsMetadataFilter.
+    const visibleInSpace = scoped
+      ? await areFannedInAgentsVisibleInSpace({
+          esClient: scoped.getEsClient(),
+          agentIds: [agentID],
+          spaceId: scoped.getSpaceId(),
+        })
+      : false;
+
+    if (!visibleInSpace) {
+      throw err;
+    }
+
+    logger.debug(
+      () =>
+        `Agent [${agentID}] is not enrolled in this project; treating as a linked project's agent`
+    );
   }
-  return result;
-}
+};

@@ -21,8 +21,9 @@ export class TransactionDetailsByNameLocatorDefinition
     rangeTo,
     serviceName,
     transactionName,
+    environment,
   }: TransactionDetailsByNameParams) => {
-    const params = { rangeFrom, rangeTo, serviceName, transactionName };
+    const params = { rangeFrom, rangeTo, serviceName, transactionName, environment };
     return {
       app: 'apm',
       path: `/link-to/transaction?${qs.stringify(params)}`,

@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/268945
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-05-19
+areas:
+- Search and data
+title: Add `ai.prompt`, `ai.summarize`, and `ai.classify` workflow AI steps to the Feature Settings page
+description: These changes allow administrators to customize the model list of each AI step on a per-space basis.

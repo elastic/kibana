@@ -6,11 +6,13 @@
  */
 
 import { EuiFlexGrid, EuiFlexItem, EuiPanel, EuiSpacer, EuiFlexGroup } from '@elastic/eui';
-import React from 'react';
+import React, { useMemo } from 'react';
+import { unit } from '@kbn/apm-common';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { AnnotationsContextProvider } from '../../../../context/annotations/annotations_context';
 import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
 import { ServiceOverviewThroughputChart } from '../../../app/service_overview/service_overview_throughput_chart';
+import { ContextualServiceMapSection } from '../../../app/service_map/contextual_map/contextual_service_map_section';
 import { LatencyChart } from '../latency_chart';
 import { TransactionBreakdownChart } from '../transaction_breakdown_chart';
 import { TransactionColdstartRateChart } from '../transaction_coldstart_rate_chart';
@@ -23,6 +25,10 @@ import {
   isRumAgentName,
 } from '../../../../../common/agent_name';
 import type { AgentName } from '../../../../../typings/es_schemas/ui/fields/agent';
+import { TRANSACTION_NAME, TRANSACTION_TYPE } from '../../../../../common/es_fields/apm';
+
+/** Shared outer height for failed-rate and service-map panels on transaction details row 2. */
+const TRANSACTION_DETAILS_ROW_TWO_SECTION_HEIGHT = unit * 24;
 
 export function TransactionCharts({
   kuery,
@@ -31,6 +37,8 @@ export function TransactionCharts({
   end,
   serviceName,
   transactionName,
+  rangeFrom,
+  rangeTo,
   isServerlessContext,
   comparisonEnabled,
   offset,
@@ -41,17 +49,33 @@ export function TransactionCharts({
   end: string;
   serviceName: string;
   transactionName?: string;
+  rangeFrom?: string;
+  rangeTo?: string;
   isServerlessContext?: boolean;
   comparisonEnabled?: boolean;
   offset?: string;
 }) {
   // The default EuiFlexGroup breaks at 768, but we want to break at 1200
   const { isLarge } = useBreakpoints();
-  const { agentName } = useApmServiceContext();
+  const { agentName, transactionType } = useApmServiceContext();
   const isOpenTelemetryAgent = isOpenTelemetryAgentName(agentName as AgentName);
   const isRumAgent = isRumAgentName(agentName as AgentName);
   const isMobileAgent = isMobileAgentName(agentName as AgentName);
   const rowDirection = isLarge ? 'column' : 'row';
+  const showTopErrors = !isOpenTelemetryAgent && !isRumAgent;
+  const showTransactionDetailsServiceMap =
+    Boolean(transactionName) && Boolean(rangeFrom) && Boolean(rangeTo) && Boolean(serviceName);
+
+  const transactionFilterPills = useMemo(() => {
+    const pills: Array<{ field: string; value: string }> = [];
+    if (transactionType) {
+      pills.push({ field: TRANSACTION_TYPE, value: transactionType });
+    }
+    if (transactionName) {
+      pills.push({ field: TRANSACTION_NAME, value: transactionName });
+    }
+    return pills;
+  }, [transactionName, transactionType]);
 
   const latencyChart = (
     <EuiFlexItem data-cy={`transaction-duration-charts`}>
@@ -86,10 +110,43 @@ export function TransactionCharts({
   );
 
   const failedTransactionRateChart = (
-    <EuiFlexItem grow={1}>
+    <EuiFlexItem grow={1} style={{ minWidth: 0 }}>
       <FailedTransactionRateChart kuery={kuery} />
     </EuiFlexItem>
   );
+
+  const failedTransactionRateChartRowTwo = (
+    <EuiFlexItem grow={1} style={{ minWidth: 0 }}>
+      <FailedTransactionRateChart
+        kuery={kuery}
+        sectionHeight={TRANSACTION_DETAILS_ROW_TWO_SECTION_HEIGHT}
+      />
+    </EuiFlexItem>
+  );
+
+  const contextualServiceMapSection = showTransactionDetailsServiceMap ? (
+    <EuiFlexItem grow={1} style={{ minWidth: 0 }}>
+      <ContextualServiceMapSection
+        serviceName={serviceName}
+        rangeFrom={rangeFrom!}
+        rangeTo={rangeTo!}
+        environment={environment}
+        kuery={kuery}
+        filterPills={transactionFilterPills}
+        sectionHeight={TRANSACTION_DETAILS_ROW_TWO_SECTION_HEIGHT}
+        embeddableMinHeight={0}
+        sectionTestSubj="apmTransactionDetailsServiceMapSection"
+        exploreLinkTestSubj="apmTransactionDetailsExploreInServiceMap"
+        embeddableContainerTestSubj="apmTransactionDetailsServiceMapEmbeddableContainer"
+      />
+    </EuiFlexItem>
+  ) : null;
+
+  const topErrorsPanel = showTopErrors ? (
+    <EuiPanel hasBorder={true}>
+      <TopErrors />
+    </EuiPanel>
+  ) : null;
 
   return (
     <>
@@ -109,15 +166,15 @@ export function TransactionCharts({
               </EuiFlexGroup>
               <EuiSpacer size="l" />
               <EuiFlexGroup direction={rowDirection} gutterSize="s" responsive={false}>
-                {failedTransactionRateChart}
-                {!isOpenTelemetryAgent && !isRumAgent && (
-                  <EuiFlexItem grow={2}>
-                    <EuiPanel hasBorder={true}>
-                      <TopErrors />
-                    </EuiPanel>
-                  </EuiFlexItem>
-                )}
+                {failedTransactionRateChartRowTwo}
+                {contextualServiceMapSection}
               </EuiFlexGroup>
+              {topErrorsPanel && (
+                <>
+                  <EuiSpacer size="l" />
+                  {topErrorsPanel}
+                </>
+              )}
             </>
           ) : (
             <>

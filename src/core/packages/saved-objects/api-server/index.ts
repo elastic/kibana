@@ -69,6 +69,8 @@ export type {
   SavedObjectsChangeAccessModeOptions,
   SavedObjectsSearchOptions,
   SavedObjectsSearchResponse,
+  SavedObjectsEsqlOptions,
+  SavedObjectsEsqlResponse,
 } from './src/apis';
 
 export { type Left, type Either, type Right, isLeft, isRight, left, right } from './src/utils';
@@ -81,4 +83,7 @@ export type {
   SavedObjectAttributeSingle,
   SavedObjectReference,
   SavedObjectsRawDocSource,
+  SavedObjectErrorResult,
+  SavedObjectBulkResult,
 } from '@kbn/core-saved-objects-common/src/server_types';
+export { isSavedObjectErrorResult } from '@kbn/core-saved-objects-common/src/server_types';

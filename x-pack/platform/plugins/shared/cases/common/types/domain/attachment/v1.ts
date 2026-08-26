@@ -148,11 +148,6 @@ export type DocumentAttachmentAttributes = rt.TypeOf<typeof DocumentAttachmentAt
  * Actions
  */
 
-export enum IsolateHostActionType {
-  isolate = 'isolate',
-  unisolate = 'unisolate',
-}
-
 export const ActionsAttachmentPayloadRt = rt.strict({
   type: rt.literal(AttachmentType.actions),
   comment: rt.string,

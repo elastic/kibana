@@ -8,19 +8,16 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiLoadingChart, useEuiTheme } from '@elastic/eui';
+import { EuiLoadingChart, transparentize, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
-import {
-  useBatchedPublishingSubjects,
-  useStateFromPublishingSubject,
-} from '@kbn/presentation-publishing';
+import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import { apiCanCancelRequests, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import classNames from 'classnames';
-import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
-import { presentationUtilService } from '../../services/kibana_services';
 import { printViewportVisStyles } from '../print_styles';
 import { DASHBOARD_MARGIN_SIZE } from './constants';
 import { getHighlightStyles } from './highlight_styles';
@@ -37,7 +34,7 @@ export interface Props extends DivProps {
   setDragHandles?: (refs: Array<HTMLElement | null>) => void;
 }
 
-export const Item = React.forwardRef<HTMLDivElement, Props>(
+export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>(
   (
     {
       appFixedViewport,
@@ -54,7 +51,9 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
   ) => {
     const dashboardApi = useDashboardApi();
     const dashboardInternalApi = useDashboardInternalApi();
+    const embeddableApiRef = useRef<DefaultEmbeddableApi | null>(null);
     const [
+      hidePanelBorders,
       highlightPanelId,
       scrollToPanelId,
       expandedPanelId,
@@ -62,8 +61,10 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
       useMargins,
       viewMode,
       dashboardContainerRef,
-      arePanelsRelated,
+      relatedPanelsIndicatorId,
+      blurredPanelIds,
     ] = useBatchedPublishingSubjects(
+      dashboardApi.hideBorder$,
       dashboardApi.highlightPanelId$,
       dashboardApi.scrollToPanelId$,
       dashboardApi.expandedPanelId$,
@@ -71,21 +72,30 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
       dashboardApi.settings.useMargins$,
       dashboardApi.viewMode$,
       dashboardInternalApi.dashboardContainerRef$,
-      dashboardInternalApi.arePanelsRelated$
+      dashboardApi.relatedPanelsIndicatorId$,
+      dashboardApi.blurredPanelIds$
     );
 
     const expandPanel = expandedPanelId !== undefined && expandedPanelId === id;
     const hidePanel = expandedPanelId !== undefined && expandedPanelId !== id;
-    const focusPanel = focusedPanelId !== undefined && focusedPanelId === id;
-    const blurPanel =
-      focusedPanelId !== undefined &&
-      focusedPanelId !== id &&
-      !arePanelsRelated(id, focusedPanelId);
+
+    const isIndicatingRelatedPanels =
+      relatedPanelsIndicatorId !== undefined && relatedPanelsIndicatorId === id;
+
+    const focusPanel =
+      isIndicatingRelatedPanels || (focusedPanelId !== undefined && focusedPanelId === id);
+    const focusedForEdit = focusedPanelId !== undefined && focusedPanelId === id;
+
+    const blurPanel = blurredPanelIds.includes(id);
+
+    const showBorder = useMargins && !hidePanelBorders; // we do not show panel borders when margins are disabled
     const classes = classNames('dshDashboardGrid__item', {
       'dshDashboardGrid__item--expanded': expandPanel,
       'dshDashboardGrid__item--hidden': hidePanel,
       'dshDashboardGrid__item--focused': focusPanel,
       'dshDashboardGrid__item--blurred': blurPanel,
+      'dshDashboardGrid__item--selected': isIndicatingRelatedPanels,
+      'dshDashboardGrid__item--hideHoverActions': blurPanel || focusedForEdit,
       // eslint-disable-next-line @typescript-eslint/naming-convention
       printViewport__vis: viewMode === 'print',
     });
@@ -112,6 +122,14 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
       }
     }, [id, dashboardApi, scrollToPanelId, highlightPanelId, ref, blurPanel]);
 
+    useEffect(() => {
+      return () => {
+        if (embeddableApiRef.current && apiCanCancelRequests(embeddableApiRef.current)) {
+          embeddableApiRef.current.cancelRequests();
+        }
+      };
+    }, []);
+
     const dashboardContainerTopOffset = dashboardContainerRef?.offsetTop || 0;
     const globalNavTopOffset = appFixedViewport?.offsetTop || 0;
     const styles = useMemoCss(dashboardGridItemStyles);
@@ -119,8 +137,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
     const renderedEmbeddable = useMemo(() => {
       const panelProps = {
         showBadges: true,
-        showBorder: useMargins,
-        showNotifications: true,
+        showBorder,
         showShadow: false,
         setDragHandles,
       };
@@ -132,10 +149,13 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
           getParentApi={() => dashboardApi}
           key={`${type}_${id}`}
           panelProps={panelProps}
-          onApiAvailable={(api) => dashboardApi.registerChildApi(api)}
+          onApiAvailable={(api) => {
+            embeddableApiRef.current = api;
+            dashboardApi.registerChildApi(api);
+          }}
         />
       );
-    }, [id, dashboardApi, type, useMargins, setDragHandles]);
+    }, [id, dashboardApi, type, showBorder, setDragHandles]);
 
     const { euiTheme } = useEuiTheme();
     const hoverActionsHeight = euiTheme.base * 2;
@@ -175,51 +195,6 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
   }
 );
 
-export const ObservedItem = React.forwardRef<HTMLDivElement, Props>((props, panelRef) => {
-  const [intersection, updateIntersection] = useState<IntersectionObserverEntry>();
-  const [isRenderable, setIsRenderable] = useState(false);
-
-  const observerRef = useRef(
-    new window.IntersectionObserver(([value]) => updateIntersection(value), {
-      root: (panelRef as React.RefObject<HTMLDivElement>).current,
-    })
-  );
-
-  useEffect(() => {
-    const { current: currentObserver } = observerRef;
-    currentObserver.disconnect();
-    const { current } = panelRef as React.RefObject<HTMLDivElement>;
-
-    if (current) {
-      currentObserver.observe(current);
-    }
-
-    return () => currentObserver.disconnect();
-  }, [panelRef]);
-
-  useEffect(() => {
-    if (intersection?.isIntersecting && !isRenderable) {
-      setIsRenderable(true);
-    }
-  }, [intersection, isRenderable]);
-
-  return <Item ref={panelRef} isRenderable={isRenderable} {...props} />;
-});
-
-export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>((props, ref) => {
-  const dashboardApi = useDashboardApi();
-  const viewMode = useStateFromPublishingSubject(dashboardApi.viewMode$);
-
-  const deferBelowFoldEnabled = useMemo(
-    () => presentationUtilService.labsService.isProjectEnabled('labs:dashboard:deferBelowFold'),
-    []
-  );
-
-  const isEnabled = viewMode !== 'print' && deferBelowFoldEnabled;
-
-  return isEnabled ? <ObservedItem ref={ref} {...props} /> : <Item ref={ref} {...props} />;
-});
-
 const dashboardGridItemStyles = {
   item: (context: UseEuiTheme) =>
     css([
@@ -231,6 +206,22 @@ const dashboardGridItemStyles = {
         },
         '.kbnAppWrapper--hiddenChrome & .dshDashboardGrid__item--expanded': {
           padding: 0,
+        },
+        // Call out focused panels with a simple border
+        '&.dshDashboardGrid__item--focused .embPanel': {
+          outline: `${context.euiTheme.border.width.thick} solid ${context.euiTheme.colors.vis.euiColorVis0}`,
+        },
+        // Call out panels that are selected to indicate their related panels with the same border plus a semitransparent overlay
+        '&.dshDashboardGrid__item--selected': {
+          // Ensure the overall panel still has a plain background so we can apply the semitransparent overlay on top of it
+          backgroundColor: context.euiTheme.colors.backgroundBasePlain,
+          '& .embPanel': {
+            backgroundColor: transparentize(context.euiTheme.colors.vis.euiColorVis0, 0.1),
+
+            '& div, & button': {
+              backgroundColor: 'transparent',
+            },
+          },
         },
       },
       getHighlightStyles(context),

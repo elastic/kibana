@@ -33,7 +33,7 @@ describe('CleanUpTempSummary', () => {
     service = new CleanUpTempSummary(
       esClientMock,
       loggingSystemMock.createLogger(),
-      new AbortController()
+      new AbortController().signal
     );
   });
 

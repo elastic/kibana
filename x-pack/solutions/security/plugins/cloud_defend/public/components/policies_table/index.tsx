@@ -141,6 +141,9 @@ export const PoliciesTable = ({
 
   return (
     <EuiBasicTable
+      tableCaption={i18n.translate('xpack.cloudDefend.policies.policiesTable.tableCaption', {
+        defaultMessage: 'Cloud defend policies',
+      })}
       data-test-subj={rest['data-test-subj']}
       items={policies}
       columns={POLICIES_TABLE_COLUMNS}

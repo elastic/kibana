@@ -19,9 +19,10 @@ import type { OnCompleteParams } from './types';
 import { EntityEventTypes } from '../../../common/lib/telemetry';
 
 export const AssetCriticalityFileUploader: React.FC = () => {
+  const { telemetry } = useKibana().services;
+
   const [state, dispatch] = useReducer(reducer, INITIAL_STATE);
   const { uploadAssetCriticalityFile } = useEntityAnalyticsRoutes();
-  const { telemetry } = useKibana().services;
 
   const onValidationComplete = useCallback(
     ({ validatedFile, processingStartTime, processingEndTime, tookMs }: OnCompleteParams) => {

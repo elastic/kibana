@@ -22,28 +22,27 @@ export const ViewAlertDetailsAlertAction = typedMemo(
     rowIndex,
     onExpandedAlertIndexChange,
     onActionExecuted,
-    isAlertDetailsEnabled,
-    resolveAlertPagePath,
-    tableId,
+    alertDetailsNavigation,
     openLinksInNewTab,
   }: AlertActionsProps<AC>) => {
     const {
       services: {
-        http: {
-          basePath: { prepend },
-        },
+        application: { getUrlForApp },
       },
     } = useAlertsTableContext();
     const alertId = (alert[ALERT_UUID]?.[0] as string) ?? null;
-    const pagePath = alertId && tableId && resolveAlertPagePath?.(alertId, tableId);
-    const linkToAlert = pagePath ? prepend(pagePath) : null;
+    const linkToAlert =
+      alertDetailsNavigation && alertId
+        ? getUrlForApp(alertDetailsNavigation.appId, {
+            path: alertDetailsNavigation.getPath(alertId),
+          })
+        : null;
 
-    if (isAlertDetailsEnabled && linkToAlert) {
+    if (linkToAlert) {
       return (
         <EuiContextMenuItem
           data-test-subj="viewAlertDetailsPage"
           key="viewAlertDetailsPage"
-          size="s"
           href={linkToAlert}
           target={openLinksInNewTab ? '_blank' : undefined}
         >
@@ -58,7 +57,6 @@ export const ViewAlertDetailsAlertAction = typedMemo(
       <EuiContextMenuItem
         data-test-subj="viewAlertDetailsFlyout"
         key="viewAlertDetailsFlyout"
-        size="s"
         onClick={() => {
           onActionExecuted?.();
           onExpandedAlertIndexChange(rowIndex);

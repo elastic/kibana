@@ -75,7 +75,11 @@ export class SOReferenceExtractor {
 
       if (reference) {
         set(dataToManipulate.attributes, field.path, reference.id);
-      } else {
+      } else if (_.get(dataToManipulate.attributes, field.path) === undefined) {
+        // No reference and no pre-existing attribute value — mark as `null`
+        // (legacy semantic: "dependency missing/deleted"). If the attribute
+        // already holds a value (e.g. unified flow keeps `attachmentId` in
+        // place) we leave it untouched.
         set(dataToManipulate.attributes, field.path, null);
       }
     }

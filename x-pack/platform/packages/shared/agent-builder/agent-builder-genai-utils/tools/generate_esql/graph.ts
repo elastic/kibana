@@ -5,26 +5,42 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { StateGraph, Annotation } from '@langchain/langgraph';
-import type { ScopedModel, ToolEventEmitter } from '@kbn/agent-builder-server';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { TimeRange } from '@kbn/agent-builder-common';
+import type { ScopedModel } from '@kbn/agent-builder-server';
+import type { ChatCompleteCacheControl } from '@kbn/inference-common';
+import type { InferenceChatModelCallOptions } from '@kbn/inference-langchain';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EsqlDocumentBase } from '@kbn/inference-plugin/server/tasks/nl_to_esql/doc_base';
 import { correctCommonEsqlMistakes } from '@kbn/inference-plugin/common';
 import { extractTextContent } from '../../langchain/messages';
 import type { EsqlResponse } from '../utils/esql';
-import { extractEsqlQueries, executeEsql } from '../utils/esql';
-import { resolveResourceWithSamplingStats } from '../utils/resources';
+import { resolveResourceForEsqlWithSamplingStats } from '../utils/resources';
+import type { ValidateEsqlQueryCallbacks } from '../utils/esql';
+import {
+  extractEsqlQueries,
+  executeEsql,
+  validateEsqlQuery,
+  buildTimeRangeParams,
+} from '../utils/esql';
 import { createRequestDocumentationPrompt, createGenerateEsqlPrompt } from './prompts';
 import type { ResolvedResourceWithSampling } from '../utils/resources';
 import type {
   Action,
   ExecuteQueryAction,
+  ValidateQueryAction,
   AutocorrectQueryAction,
   GenerateQueryAction,
   RequestDocumentationAction,
 } from './actions';
-import { isGenerateQueryAction, isAutocorrectQueryAction, isExecuteQueryAction } from './actions';
+import {
+  isGenerateQueryAction,
+  isAutocorrectQueryAction,
+  isExecuteQueryAction,
+  isValidateQueryAction,
+} from './actions';
+import type { EsqlLoadedDocumentation } from './documentation';
 
 const StateAnnotation = Annotation.Root({
   // inputs
@@ -35,6 +51,8 @@ const StateAnnotation = Annotation.Root({
   additionalInstructions: Annotation<string | undefined>(),
   additionalContext: Annotation<string | undefined>(),
   rowLimit: Annotation<number | undefined>(),
+  disableNamedParams: Annotation<boolean | undefined>(),
+  timeRange: Annotation<TimeRange>(),
   // internal
   resource: Annotation<ResolvedResourceWithSampling>(),
   currentTry: Annotation<number>({ reducer: (a, b) => b, default: () => 0 }),
@@ -55,48 +73,58 @@ export const createNlToEsqlGraph = ({
   model,
   esClient,
   docBase,
-  logger,
-  events,
+  documentation,
+  esqlCallbacks,
+  includeDatasets = false,
+  sessionId,
+  cacheControl,
 }: {
   model: ScopedModel;
   esClient: ElasticsearchClient;
   docBase: EsqlDocumentBase;
-  logger?: Logger;
-  events?: ToolEventEmitter;
+  documentation: EsqlLoadedDocumentation;
+  esqlCallbacks?: ValidateEsqlQueryCallbacks;
+  includeDatasets?: boolean;
+  sessionId?: string;
+  cacheControl?: ChatCompleteCacheControl;
 }) => {
-  // resolve the search target / generate sampling data
   const resolveTarget = async (state: StateType) => {
-    const resolvedResource = await resolveResourceWithSamplingStats({
+    const resolvedResource = await resolveResourceForEsqlWithSamplingStats({
       resourceName: state.target,
       samplingSize: 100,
+      includeDatasets,
       esClient,
     });
 
     return { resource: resolvedResource };
   };
 
+  const modelCallConfig: Partial<InferenceChatModelCallOptions> = { sessionId, cacheControl };
+
   // request doc step - retrieve the list of relevant commands and functions that may be useful to generate the query
   const requestDocumentation = async (state: StateType) => {
-    const requestDocModel = model.chatModel.withStructuredOutput(
-      z
-        .object({
-          commands: z
-            .array(z.string())
-            .optional()
-            .describe('ES|QL source and processing commands to get documentation for.'),
-          functions: z
-            .array(z.string())
-            .optional()
-            .describe('ES|QL functions to get documentation for.'),
-        })
-        .describe('Tool to use to request ES|QL documentation'),
-      { name: 'request_documentation' }
-    );
+    const requestDocModel = model.chatModel
+      .withStructuredOutput(
+        z
+          .object({
+            commands: z
+              .array(z.string())
+              .optional()
+              .describe('ES|QL source and processing commands to get documentation for.'),
+            functions: z
+              .array(z.string())
+              .optional()
+              .describe('ES|QL functions to get documentation for.'),
+          })
+          .describe('Tool to use to request ES|QL documentation'),
+        { name: 'request_documentation' }
+      )
+      .withConfig(modelCallConfig);
 
     const { commands = [], functions = [] } = await requestDocModel.invoke(
       createRequestDocumentationPrompt({
         nlQuery: state.nlQuery,
-        prompts: docBase.getPrompts(),
+        documentation,
         resource: state.resource,
       })
     );
@@ -117,17 +145,18 @@ export const createNlToEsqlGraph = ({
 
   // generate esql step - generate the esql query based on the doc and the user's input
   const generateEsql = async (state: StateType) => {
-    const generateModel = model.chatModel;
+    const generateModel = model.chatModel.withConfig(modelCallConfig);
 
     const response = await generateModel.invoke(
       createGenerateEsqlPrompt({
         nlQuery: state.nlQuery,
-        prompts: docBase.getPrompts(),
+        documentation,
         resource: state.resource,
         previousActions: state.actions,
         additionalInstructions: state.additionalInstructions,
         additionalContext: state.additionalContext,
         rowLimit: state.rowLimit,
+        disableNamedParams: state.disableNamedParams,
       })
     );
 
@@ -186,13 +215,12 @@ export const createNlToEsqlGraph = ({
     if (state.executeQuery) {
       return 'execute_query';
     } else {
-      return 'finalize';
+      return 'validate_query';
     }
   };
 
-  // execute query step - execute the query and get the results
-  const executeQuery = async (state: StateType) => {
-    let query;
+  const validateQueryStep = async (state: StateType) => {
+    let query: string;
     const lastAction = state.actions[state.actions.length - 1];
     if (isGenerateQueryAction(lastAction) && lastAction.query) {
       query = lastAction.query;
@@ -202,9 +230,64 @@ export const createNlToEsqlGraph = ({
       throw new Error(`Last action is not a generate_query or autocorrect_query action`);
     }
 
+    const errorMessage = await validateEsqlQuery(query, esqlCallbacks);
+    const action: ValidateQueryAction = {
+      type: 'validate_query',
+      success: !errorMessage,
+      query,
+      error: errorMessage,
+    };
+
+    return {
+      actions: [action],
+    };
+  };
+
+  const branchAfterValidate = async (state: StateType) => {
+    const lastAction = state.actions[state.actions.length - 1];
+    if (!isValidateQueryAction(lastAction)) {
+      throw new Error(`Last action is not a validate_query action`);
+    }
+    if (lastAction.success || state.currentTry >= state.maxRetries) {
+      return 'finalize';
+    } else {
+      return 'generate_esql';
+    }
+  };
+
+  // execute query step - validate first (ANTLR), then execute only if valid
+  const executeQuery = async (state: StateType) => {
+    let query: string;
+    const lastAction = state.actions[state.actions.length - 1];
+    if (isGenerateQueryAction(lastAction) && lastAction.query) {
+      query = lastAction.query;
+    } else if (isAutocorrectQueryAction(lastAction)) {
+      query = lastAction.output;
+    } else {
+      throw new Error(`Last action is not a generate_query or autocorrect_query action`);
+    }
+
+    const validationError = await validateEsqlQuery(query, esqlCallbacks);
+    if (validationError) {
+      return {
+        actions: [
+          {
+            type: 'execute_query',
+            success: false,
+            query,
+            error: validationError,
+          },
+        ],
+      };
+    }
+
     let action: ExecuteQueryAction;
     try {
-      const results = await executeEsql({ query, esClient });
+      const results = await executeEsql({
+        query,
+        params: buildTimeRangeParams(state.timeRange),
+        esClient,
+      });
       action = {
         type: 'execute_query',
         success: true,
@@ -251,7 +334,15 @@ export const createNlToEsqlGraph = ({
         error: lastAction.error,
       };
     }
-    // ended via autocorrect - if executeQuery=false
+    // ended via AST validation when executeQuery=false - success or failure hitting max retries
+    if (isValidateQueryAction(lastAction)) {
+      return {
+        answer: generateActions[generateActions.length - 1].response,
+        query: lastAction.query,
+        error: lastAction.error,
+      };
+    }
+    // ended via autocorrect - when executeQuery=false and validation was skipped (should not happen after adding validate_query)
     if (isAutocorrectQueryAction(lastAction)) {
       return {
         answer: generateActions[generateActions.length - 1].response,
@@ -278,6 +369,7 @@ export const createNlToEsqlGraph = ({
     .addNode('generate_esql', generateEsql)
     .addNode('autocorrect_query', autocorrectQuery)
     .addNode('execute_query', executeQuery)
+    .addNode('validate_query', validateQueryStep)
     .addNode('finalize', finalize)
     // edges
     .addEdge('__start__', 'resolve_target')
@@ -290,9 +382,13 @@ export const createNlToEsqlGraph = ({
     })
     .addConditionalEdges('autocorrect_query', branchAfterAutocorrect, {
       execute_query: 'execute_query',
-      finalize: 'finalize',
+      validate_query: 'validate_query',
     })
     .addConditionalEdges('execute_query', branchAfterQueryExecution, {
+      generate_esql: 'generate_esql',
+      finalize: 'finalize',
+    })
+    .addConditionalEdges('validate_query', branchAfterValidate, {
       generate_esql: 'generate_esql',
       finalize: 'finalize',
     })

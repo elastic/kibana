@@ -21,6 +21,7 @@ import type { History } from 'history';
 import { createMemoryHistory } from 'history';
 import type { CoreStart } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { coreMock } from '@kbn/core/public/mocks';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
@@ -28,6 +29,7 @@ import type { KibanaServices } from '@kbn/kibana-react-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import type { ChromeStyle } from '@kbn/core-chrome-browser';
 import { mockState } from './__mocks__/synthetics_store.mock';
@@ -156,6 +158,7 @@ export const mockCore: () => Partial<CoreStart> = () => {
         PageTemplate: KibanaPageTemplate,
       },
     },
+    charts: chartPluginMock.createStartContract(),
     exploratoryView: {
       createExploratoryViewUrl: jest.fn(),
       getAppDataView: jest.fn(),
@@ -186,13 +189,23 @@ export function MockKibanaProvider<ExtraCore>({
 
   kibanaService.coreStart = coreOptions as any;
 
+  // Mirrors the real app (SyntheticsSharedContext), which wraps the tree in a
+  // QueryClientProvider. Retries are disabled so react-query hooks don't retry
+  // failed requests during tests.
+  const queryClient = React.useMemo(
+    () => new QueryClient({ defaultOptions: { queries: { retry: false } } }),
+    []
+  );
+
   return (
     <KibanaContextProvider services={{ ...coreOptions }} {...kibanaProps}>
-      <SyntheticsRefreshContextProvider>
-        <EuiThemeProvider darkMode={false}>
-          <I18nProvider>{children}</I18nProvider>
-        </EuiThemeProvider>
-      </SyntheticsRefreshContextProvider>
+      <QueryClientProvider client={queryClient}>
+        <SyntheticsRefreshContextProvider>
+          <EuiThemeProvider darkMode={false}>
+            <I18nProvider>{children}</I18nProvider>
+          </EuiThemeProvider>
+        </SyntheticsRefreshContextProvider>
+      </QueryClientProvider>
     </KibanaContextProvider>
   );
 }

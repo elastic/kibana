@@ -5,25 +5,14 @@
  * 2.0.
  */
 
-import type { ComponentType } from 'react';
 import React from 'react';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import type { InstancesLatencyDistributionChartProps } from '.';
 import { InstancesLatencyDistributionChart } from '.';
-import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
 
 export default {
   title: 'shared/charts/InstancesLatencyDistributionChart',
   component: InstancesLatencyDistributionChart,
-  decorators: [
-    (StoryComponent: ComponentType) => {
-      return (
-        <MockApmPluginStorybook>
-          <StoryComponent />
-        </MockApmPluginStorybook>
-      );
-    },
-  ],
 };
 
 export function Example({ items }: InstancesLatencyDistributionChartProps) {

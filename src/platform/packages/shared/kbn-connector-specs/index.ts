@@ -9,5 +9,67 @@
 
 export * as connectorsSpecs from './src/all_specs';
 export type * from './src/connector_spec';
-
+export type { ConnectorActionErrorMeta } from './src/connector_utils';
 export * as authTypeSpecs from './src/all_auth_types';
+export { EARS_AUTH_ID, EARS_PROVIDERS } from './src/auth_types/ears';
+export { OAUTH_AUTHORIZATION_CODE_AUTH_ID } from './src/auth_types/oauth_authorization_code';
+export {
+  CERTIFICATE_BINDING_KINDS,
+  CLIENT_ASSERTION_TYPE,
+  JWT_ALGORITHMS,
+  OAUTH_CLIENT_CREDENTIALS_PRIVATE_KEY_JWT_ID,
+  type CertificateBindingKind,
+  type JwtAlgorithm,
+} from './src/auth_types/oauth_client_credentials_private_key_jwt';
+
+export { getConnectorSpec } from './src/get_connector_spec';
+export { isToolAction, TEST_CONNECTOR_SUB_ACTION } from './src/connector_spec';
+export type {
+  ConnectorIngressContext,
+  EventDefinition,
+  EventPayload,
+  HandleEventsResult,
+  ConnectorSpecEvents,
+} from './src/connector_spec_events';
+export {
+  buildEventId,
+  connectorTypeToEventNamespace,
+  normalizeConnectorTypeId,
+  MAX_CONNECTOR_TYPE_ID_LENGTH,
+} from './src/event_type_id';
+export {
+  validateEmittedEvents,
+  type ValidateEmittedEventsError,
+  type ValidateEmittedEventsResult,
+} from './src/validate_emitted_events';
+export {
+  getConnectorActionErrorMeta,
+  setConnectorActionErrorMeta,
+  getFinitePositiveNumber,
+  getEstimatedBase64OutputBytes,
+  getHeaderValue,
+  getResponseContentLengthBytes,
+  ESTIMATED_JSON_OUTPUT_OVERHEAD_BYTES,
+} from './src/connector_utils';
+export { normalizeAuthorizationHeaderValue } from './src/auth_types/oauth_authz_code_and_ears_helpers';
+export { isEarsExperimentalConnector } from './src/lib/ears_experimental_utils';
+
+export { ConnectorAuthorizationError, isConnectorAuthorizationError } from './src/errors';
+export type { ConnectorAuthorizationReason } from './src/errors';
+export {
+  AUTH_MODE_BY_AUTH_TYPE_ID,
+  getAuthModeForAuthTypeId,
+} from './src/auth_mode_by_auth_type_id';
+export { getMeta, setMeta, addMeta } from './src/connector_spec_ui';
+export type { BaseMetadata } from './src/connector_spec_ui';
+export { clientTypes } from './src/lib/clients';
+export type {
+  ClientTypeSpec,
+  BuildContext,
+  ConnectorNetworkSettings,
+  ConnectorResponseSettings,
+  CredentialAccessor,
+  ClientRegistry,
+  ClientTypeId,
+  ClientTypeSpecs,
+} from './src/lib/clients';

@@ -8,7 +8,8 @@
 import React from 'react';
 import { waitForEuiPopoverOpen, waitForEuiPopoverClose } from '@elastic/eui/lib/test/rtl';
 import { AddDataProviderPopover } from '../add_data_provider_popover';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { TestProvidersComponent } from '../../../../../common/mock/test_providers';
 import { mockBrowserFields } from '../../../../../common/containers/source/mock';
 
@@ -16,9 +17,9 @@ const TEST_ID = {
   ADD_FIELD: 'addField',
 };
 
-const clickOnAddField = () => {
+const clickOnAddField = async () => {
   const addFieldButton = screen.getByTestId(TEST_ID.ADD_FIELD);
-  fireEvent.click(addFieldButton);
+  await userEvent.click(addFieldButton);
 };
 
 describe('Testing AddDataProviderPopover', () => {
@@ -29,7 +30,7 @@ describe('Testing AddDataProviderPopover', () => {
       </TestProvidersComponent>
     );
 
-    clickOnAddField();
+    await clickOnAddField();
     await waitForEuiPopoverOpen();
   });
 
@@ -40,10 +41,10 @@ describe('Testing AddDataProviderPopover', () => {
       </TestProvidersComponent>
     );
 
-    clickOnAddField();
+    await clickOnAddField();
     await waitForEuiPopoverOpen();
 
-    clickOnAddField();
+    await clickOnAddField();
     await waitForEuiPopoverClose();
   });
 });

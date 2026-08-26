@@ -29,6 +29,7 @@ export enum AppIds {
   SERVERLESS_SETTINGS = 'settings',
   ROLES = 'roles',
   API_KEYS = 'api_keys',
+  APPLICATION_CONNECTIONS = 'application_connections',
   DATA_QUALITY = 'data_quality',
   SPACES = 'spaces',
   DATA_USAGE = 'data_usage',

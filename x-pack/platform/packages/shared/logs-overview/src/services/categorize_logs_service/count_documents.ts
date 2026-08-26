@@ -8,7 +8,7 @@
 import { getSampleProbability } from '@kbn/ml-random-sampler-utils';
 import type { ISearchGeneric } from '@kbn/search-types';
 import { lastValueFrom } from 'rxjs';
-import { fromPromise } from 'xstate5';
+import { fromPromise } from 'xstate';
 import type { LogCategorizationParams } from './types';
 import { createCategorizationQuery } from './queries';
 

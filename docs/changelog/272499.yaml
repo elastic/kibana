@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/272499
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-07-14
+areas:
+- Dashboards and visualizations
+title: "Add background trendline charts for ES|QL metric visualizations"
+description: "Lens metric visualizations using ES|QL now support background trendline charts. Trendlines can be enabled via the \"Line\" background option in the metric chart editor and configured programmatically via the Lens as code API using `background_chart: { type: 'trend' }`."

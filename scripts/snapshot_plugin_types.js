@@ -7,16 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-require('@kbn/setup-node-env');
+require('@kbn/setup-node-env/setup_env');
+
+require('@kbn/swc-register').install({ ignore: [/\.(?:js|ts|tsx)$/] });
+require('@babel/register')({
+  extensions: ['.js', '.ts', '.tsx'],
+  presets: [require.resolve('@kbn/babel-preset/node_preset')],
+  babelrc: false,
+  sourceMaps: 'both',
+});
+
+require('@kbn/security-hardening');
 
 var command = process.argv[2];
 
 switch (command) {
   case 'snapshot':
-    require('../src/dev/so_migration/so_migration_snapshot_cli');
+    require('@kbn/check-saved-objects-cli').runSoMigrationSnapshotCli();
     break;
   case 'compare':
-    require('../src/dev/so_migration/so_migration_compare_cli');
+    require('@kbn/check-saved-objects-cli').runSoMigrationCompareCli();
     break;
   default:
     printHelp();

@@ -80,7 +80,9 @@ const getTableCellsText = (row: HTMLElement) => {
   const cells = within(row).getAllByRole('cell');
   return cells.map((cell) => {
     const normalized = (cell.textContent ?? '').replace(/\s+/g, ' ').trim();
-    if (normalized === 'Edit Delete') return 'EditDelete';
+    if (normalized.includes('Edit this pipeline') && normalized.includes('Delete this pipeline')) {
+      return 'EditDelete';
+    }
     return normalized;
   });
 };
@@ -248,11 +250,23 @@ describe('<PipelinesList />', () => {
         httpRequestsMockHelpers.setLoadPipelineResponse(pipelineName, pipeline1);
         await renderPipelinesList(httpSetup, '', { expectedTestId: 'pipelinesTable' });
 
+        const getCallsBeforeOpenFlyout = httpSetup.get.mock.calls.length;
         fireEvent.click(
           within(getPipelineRowByName(pipelineName)).getByTestId('pipelineDetailsLink')
         );
+
+        // Wait for the pipeline load request to be issued and resolved to avoid
+        // racing the flyout rendering against useRequest's async state updates.
+        const pipelinePath = `${API_BASE_PATH}/${encodeURIComponent(pipelineName)}`;
+        await waitFor(() =>
+          expect(httpSetup.get.mock.calls.length).toBeGreaterThan(getCallsBeforeOpenFlyout)
+        );
+        await waitFor(() =>
+          expect(httpSetup.get).toHaveBeenCalledWith(pipelinePath, expect.any(Object))
+        );
+
         expect(screen.getByTestId('pipelinesTable')).toBeInTheDocument();
-        expect(screen.getByTestId('pipelineDetails')).toBeInTheDocument();
+        await screen.findByTestId('pipelineDetails');
         expect(await screen.findByTestId('detailsPanelTitle')).toHaveTextContent(pipelineName);
       });
 
@@ -316,7 +330,9 @@ describe('<PipelinesList />', () => {
           const flyout = await screen.findByTestId('pipelineErrorFlyout');
           expect(within(flyout).getByTestId('title')).toHaveTextContent(customPipeline);
           expect(screen.getByTestId('missingCustomPipeline')).toBeInTheDocument();
-          expect(screen.getByTestId('createCustomPipeline')).toBeInTheDocument();
+          // The callout uses `announceOnMount`, which transiently renders a second,
+          // screen-reader-only copy of the button in a live region, so match all copies.
+          expect(screen.getAllByTestId('createCustomPipeline').length).toBeGreaterThan(0);
         });
       });
 
@@ -368,8 +384,8 @@ describe('<PipelinesList />', () => {
           });
 
           expect(screen.getByTestId('pipelinesTable')).toBeInTheDocument();
-          expect(screen.getByTestId('pipelineDetails')).toBeInTheDocument();
-          expect(screen.getByTestId('pipelineTreePanel')).toBeInTheDocument();
+          expect(await screen.findByTestId('pipelineDetails')).toBeInTheDocument();
+          expect(await screen.findByTestId('pipelineTreePanel')).toBeInTheDocument();
         });
       });
     });

@@ -15,16 +15,14 @@ import type { GridLayoutData } from '@kbn/grid-layout';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type {
   CanExpandPanels,
+  CanIndicateRelatedChildren,
   CanPinPanels,
   HasLastSavedChildState,
   HasSections,
   HasSerializedChildState,
-  PassThroughContext,
   PresentationContainer,
   PublishesSettings,
   TrackContentfulRender,
-} from '@kbn/presentation-containers';
-import type {
   EmbeddableAppContext,
   HasAppContext,
   HasExecutionContext,
@@ -34,17 +32,20 @@ import type {
   PublishesDataViews,
   PublishesDescription,
   PublishesEditablePauseFetch,
+  PublishesHideBorder,
   PublishesSavedObjectId,
   PublishesTitle,
   PublishesUnifiedSearch,
   PublishesProjectRouting,
+  PublishesApproximation,
   PublishesViewMode,
   PublishesWritableViewMode,
   PublishingSubject,
   ViewMode,
+  PublishesSearchSession,
+  PublishesReload,
+  PublishesFetchOnlyVisible,
 } from '@kbn/presentation-publishing';
-import type { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
-import type { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import { type TracksOverlays } from '@kbn/presentation-util';
 import type { TimeSlice } from '@kbn/controls-schemas';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
@@ -52,28 +53,47 @@ import type { BehaviorSubject, Observable, Subject } from 'rxjs';
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 import type { Reference } from '@kbn/content-management-utils';
 import type { DashboardLocatorParams } from '../../common';
-import type { DashboardReadResponseBody, DashboardState, GridData } from '../../server';
+import type { DashboardState, GridData } from '../../server';
 import type { SaveDashboardReturn } from './save_modal/types';
 import type { DashboardLayout } from './layout_manager/types';
 import type { DashboardSettings } from './settings_manager';
+import type { ReadBodyWithResolve } from '../dashboard_client/dashboard_client';
+import type { initializeUnsavedChangesManager } from './unsaved_changes_manager';
 
 /** The type identifier for dashboard APIs. */
 export const DASHBOARD_API_TYPE = 'dashboard';
 
+/**
+ * Interface for APIs that publish save events.
+ */
+export interface DashboardSaveEvent {
+  previousDashboardId?: string;
+  dashboardId?: string;
+  dashboardState: DashboardState;
+}
+
+export interface PublishesOnSave {
+  /** Observable that emits when a save operation completes successfully. */
+  onSave$: Observable<DashboardSaveEvent>;
+}
+
 export const ReservedLayoutItemTypes: readonly string[] = ['section'] as const;
+
+export type DashboardInitializationState = Partial<
+  DashboardState & { references?: Reference[]; viewMode?: ViewMode }
+>;
 
 /**
  * Options for creating a dashboard.
  * These options control how the dashboard is initialized and integrates with various Kibana features.
  */
 export interface DashboardCreationOptions {
-  /** Returns the initial dashboard state and view mode. */
-  getInitialInput?: () => Partial<
-    DashboardState & { references?: Reference[]; viewMode?: ViewMode }
-  >;
-
-  /** Returns context to pass through to child embeddables. */
-  getPassThroughContext?: PassThroughContext['getPassThroughContext'];
+  /**
+   * Returns a partial initial dashboard state and view mode. Keys provided here
+   * will act as overrides that replace all other sources of state for that key
+   * e.g. default state, saved object state, session backup state.
+   */
+  getInitialInput?: () => DashboardInitializationState;
 
   /** Returns embeddables to add to the dashboard on load. */
   getIncomingEmbeddables?: () => EmbeddablePackageState[] | undefined;
@@ -100,15 +120,16 @@ export interface DashboardCreationOptions {
   /** Settings for unified search integration. */
   unifiedSearchSettings?: { kbnUrlStateStorage: IKbnUrlStateStorage };
 
+  /** Whether to render the control group above the dashboard viewport. */
+  useControlsIntegration?: boolean;
+
   /**
    * Validates a loaded saved object and determines whether it is valid.
    *
    * @param result - The loaded dashboard response body.
    * @returns The validation result: 'valid', 'invalid', or 'redirected'.
    */
-  validateLoadedSavedObject?: (
-    result: DashboardReadResponseBody
-  ) => 'valid' | 'invalid' | 'redirected';
+  validateLoadedSavedObject?: (result: ReadBodyWithResolve) => 'valid' | 'invalid' | 'redirected';
 
   /** Whether to start the dashboard in full screen mode. */
   fullScreenMode?: boolean;
@@ -129,6 +150,7 @@ export interface DashboardCreationOptions {
  * This type combines multiple capability interfaces to provide full dashboard functionality.
  */
 export type DashboardApi = CanExpandPanels &
+  CanIndicateRelatedChildren &
   CanPinPanels &
   HasSections &
   HasAppContext &
@@ -137,11 +159,11 @@ export type DashboardApi = CanExpandPanels &
   HasSerializedChildState &
   HasType<typeof DASHBOARD_API_TYPE> &
   HasUniqueId &
-  PassThroughContext &
   PresentationContainer &
   PublishesDataLoading &
   PublishesDataViews &
   PublishesDescription &
+  PublishesHideBorder &
   Pick<PublishesTitle, 'title$' | 'hideTitle$'> &
   PublishesReload &
   PublishesSavedObjectId &
@@ -150,11 +172,20 @@ export type DashboardApi = CanExpandPanels &
   PublishesSettings &
   PublishesUnifiedSearch &
   PublishesProjectRouting &
+  PublishesApproximation &
   PublishesViewMode &
   PublishesWritableViewMode &
   PublishesEditablePauseFetch &
   TrackContentfulRender &
-  TracksOverlays & {
+  TracksOverlays &
+  PublishesOnSave &
+  PublishesFetchOnlyVisible & {
+    /*
+     * Emits on any dashboard state change
+     *
+     * Recommend to debounce when subscribing
+     */
+    anyStateChange$: Observable<void>;
     asyncResetToLastSavedState: () => Promise<void>;
     fullScreenMode$: PublishingSubject<boolean>;
     focusedPanelId$: PublishingSubject<string | undefined>;
@@ -166,14 +197,16 @@ export type DashboardApi = CanExpandPanels &
     };
     getDashboardPanelFromId: (id: string) => {
       type: string;
-      grid: GridData;
+      grid?: GridData;
       serializedState: object;
     };
     hasOverlays$: PublishingSubject<boolean>;
     hasUnsavedChanges$: PublishingSubject<boolean>;
     highlightPanel: (panelRef: HTMLDivElement) => void;
     highlightPanelId$: PublishingSubject<string | undefined>;
+    blurredPanelIds$: PublishingSubject<string[]>;
     isEmbeddedExternally: boolean;
+    isEditableByUser: boolean;
     isManaged: boolean;
     locator?: Pick<LocatorPublic<DashboardLocatorParams>, 'navigate' | 'getRedirectUrl'>;
     runInteractiveSave: () => Promise<SaveDashboardReturn | undefined>;
@@ -188,10 +221,12 @@ export type DashboardApi = CanExpandPanels &
     setHighlightPanelId: (id: string | undefined) => void;
     setQuery: (query?: Query | undefined) => void;
     setProjectRouting: (projectRouting?: ProjectRouting) => void;
+    setEsqlApproximation: (esqlApproximation: boolean) => void;
     setScrollToPanelId: (id: string | undefined) => void;
-    setSettings: (settings: DashboardSettings) => void;
+    setSettings: (settings: Partial<DashboardSettings>) => void;
     setTags: (tags: string[]) => void;
     setTimeRange: (timeRange?: TimeRange | undefined) => void;
+    setState: (state: DashboardState) => void;
 
     publishedChildFilters$: PublishingSubject<Filter[] | undefined>;
     unpublishedChildFilters$: PublishingSubject<Filter[] | undefined>;
@@ -209,10 +244,20 @@ export type DashboardApi = CanExpandPanels &
     changeAccessMode: (accessMode: SavedObjectAccessControl['accessMode']) => Promise<void>;
     createdBy?: string;
     user?: DashboardUser;
+    userActivity$: Subject<UserActivity>;
     isAccessControlEnabled?: boolean;
+
+    addIncomingEmbeddables: (embeddables?: EmbeddablePackageState[]) => void;
   };
 
-export interface DashboardInternalApi {
+type ActivityType = 'view' | 'refresh';
+export type UserActivity =
+  | { type: ActivityType; start: number; end?: undefined }
+  | { type: ActivityType; start?: undefined; end: number };
+
+export type DashboardInternalApi = ReturnType<
+  typeof initializeUnsavedChangesManager
+>['internalApi'] & {
   gridLayout$: BehaviorSubject<GridLayoutData>;
   serializeLayout: () => Pick<DashboardState, 'panels' | 'pinned_panels'>;
   isSectionCollapsed: (sectionId?: string) => boolean;
@@ -221,8 +266,7 @@ export interface DashboardInternalApi {
   publishedEsqlVariables$: PublishingSubject<ESQLControlVariable[]>;
   unpublishedEsqlVariables$: PublishingSubject<ESQLControlVariable[]>;
   publishVariables: () => void;
-  arePanelsRelated$: BehaviorSubject<(a: string, b: string) => boolean>;
-}
+};
 
 export interface DashboardUser {
   uid: string;

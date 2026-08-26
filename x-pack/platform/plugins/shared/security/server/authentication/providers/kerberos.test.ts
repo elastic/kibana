@@ -17,6 +17,7 @@ import { KerberosAuthenticationProvider } from './kerberos';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import { InvalidGrantError } from '../../errors';
 import { securityMock } from '../../mocks';
+import { sessionMock } from '../../session_management/session.mock';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
 
@@ -144,7 +145,8 @@ describe('KerberosAuthenticationProvider', () => {
 
       expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
       expect(mockOptions.client.asInternalUser.security.getToken).toHaveBeenCalledWith({
-        body: { grant_type: '_kerberos', kerberos_ticket: 'spnego' },
+        grant_type: '_kerberos',
+        kerberos_ticket: 'spnego',
       });
 
       expect(request.headers.authorization).toBe('negotiate spnego');
@@ -180,7 +182,8 @@ describe('KerberosAuthenticationProvider', () => {
 
       expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
       expect(mockOptions.client.asInternalUser.security.getToken).toHaveBeenCalledWith({
-        body: { grant_type: '_kerberos', kerberos_ticket: 'spnego' },
+        grant_type: '_kerberos',
+        kerberos_ticket: 'spnego',
       });
 
       expect(request.headers.authorization).toBe('negotiate spnego');
@@ -206,7 +209,8 @@ describe('KerberosAuthenticationProvider', () => {
       );
 
       expect(mockOptions.client.asInternalUser.security.getToken).toHaveBeenCalledWith({
-        body: { grant_type: '_kerberos', kerberos_ticket: 'spnego' },
+        grant_type: '_kerberos',
+        kerberos_ticket: 'spnego',
       });
 
       expect(request.headers.authorization).toBe('negotiate spnego');
@@ -232,7 +236,8 @@ describe('KerberosAuthenticationProvider', () => {
       );
 
       expect(mockOptions.client.asInternalUser.security.getToken).toHaveBeenCalledWith({
-        body: { grant_type: '_kerberos', kerberos_ticket: 'spnego' },
+        grant_type: '_kerberos',
+        kerberos_ticket: 'spnego',
       });
 
       expect(request.headers.authorization).toBe('negotiate spnego');
@@ -251,7 +256,8 @@ describe('KerberosAuthenticationProvider', () => {
       await expect(operation(request)).resolves.toEqual(AuthenticationResult.failed(failureReason));
 
       expect(mockOptions.client.asInternalUser.security.getToken).toHaveBeenCalledWith({
-        body: { grant_type: '_kerberos', kerberos_ticket: 'spnego' },
+        grant_type: '_kerberos',
+        kerberos_ticket: 'spnego',
       });
 
       expect(request.headers.authorization).toBe('negotiate spnego');
@@ -287,10 +293,9 @@ describe('KerberosAuthenticationProvider', () => {
         accessToken: 'some-valid-token',
         refreshToken: 'some-valid-refresh-token',
       };
-
-      await expect(provider.authenticate(request, tokenPair)).resolves.toEqual(
-        AuthenticationResult.notHandled()
-      );
+      await expect(
+        provider.authenticate(request, sessionMock.createValue({ state: tokenPair }))
+      ).resolves.toEqual(AuthenticationResult.notHandled());
 
       expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
       expect(mockOptions.client.asInternalUser.security.getToken).not.toHaveBeenCalled();
@@ -310,9 +315,9 @@ describe('KerberosAuthenticationProvider', () => {
         InvalidGrantError.expiredOrInvalidRefreshToken()
       );
 
-      await expect(provider.authenticate(request, tokenPair)).resolves.toEqual(
-        AuthenticationResult.failed(Boom.unauthorized())
-      );
+      await expect(
+        provider.authenticate(request, sessionMock.createValue({ state: tokenPair }))
+      ).resolves.toEqual(AuthenticationResult.failed(Boom.unauthorized()));
 
       expect(mockOptions.tokens.refresh).toHaveBeenCalledTimes(1);
       expect(mockOptions.tokens.refresh).toHaveBeenCalledWith(tokenPair.refreshToken);
@@ -351,7 +356,9 @@ describe('KerberosAuthenticationProvider', () => {
       mockScopedClusterClient.asCurrentUser.security.authenticate.mockResponse(user);
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
-      await expect(provider.authenticate(request, tokenPair)).resolves.toEqual(
+      await expect(
+        provider.authenticate(request, sessionMock.createValue({ state: tokenPair }))
+      ).resolves.toEqual(
         AuthenticationResult.succeeded(
           { ...user, authentication_provider: { type: 'kerberos', name: 'kerberos' } },
           { authHeaders: { authorization } }
@@ -380,7 +387,9 @@ describe('KerberosAuthenticationProvider', () => {
         authenticationInfo: user,
       });
 
-      await expect(provider.authenticate(request, tokenPair)).resolves.toEqual(
+      await expect(
+        provider.authenticate(request, sessionMock.createValue({ state: tokenPair }))
+      ).resolves.toEqual(
         AuthenticationResult.succeeded(
           { ...user, authentication_provider: { type: 'kerberos', name: 'kerberos' } },
           {
@@ -410,9 +419,9 @@ describe('KerberosAuthenticationProvider', () => {
       mockScopedClusterClient.asCurrentUser.security.authenticate.mockRejectedValue(failureReason);
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
-      await expect(provider.authenticate(request, tokenPair)).resolves.toEqual(
-        AuthenticationResult.failed(failureReason)
-      );
+      await expect(
+        provider.authenticate(request, sessionMock.createValue({ state: tokenPair }))
+      ).resolves.toEqual(AuthenticationResult.failed(failureReason));
 
       expectAuthenticateCall(mockOptions.client, {
         headers: { authorization: `Bearer ${tokenPair.accessToken}` },
@@ -442,7 +451,10 @@ describe('KerberosAuthenticationProvider', () => {
         accessToken: 'expired-token',
         refreshToken: 'some-valid-refresh-token',
       };
-      await expect(provider.authenticate(nonAjaxRequest, nonAjaxTokenPair)).resolves.toEqual(
+
+      await expect(
+        provider.authenticate(nonAjaxRequest, sessionMock.createValue({ state: nonAjaxTokenPair }))
+      ).resolves.toEqual(
         AuthenticationResult.failed(Boom.unauthorized(), {
           authResponseHeaders: { 'WWW-Authenticate': 'Negotiate' },
         })
@@ -453,7 +465,9 @@ describe('KerberosAuthenticationProvider', () => {
         accessToken: 'expired-token',
         refreshToken: 'ajax-some-valid-refresh-token',
       };
-      await expect(provider.authenticate(ajaxRequest, ajaxTokenPair)).resolves.toEqual(
+      await expect(
+        provider.authenticate(ajaxRequest, sessionMock.createValue({ state: ajaxTokenPair }))
+      ).resolves.toEqual(
         AuthenticationResult.failed(Boom.unauthorized(), {
           authResponseHeaders: { 'WWW-Authenticate': 'Negotiate' },
         })
@@ -465,7 +479,10 @@ describe('KerberosAuthenticationProvider', () => {
         refreshToken: 'optional-some-valid-refresh-token',
       };
       await expect(
-        provider.authenticate(optionalAuthRequest, optionalAuthTokenPair)
+        provider.authenticate(
+          optionalAuthRequest,
+          sessionMock.createValue({ state: optionalAuthTokenPair })
+        )
       ).resolves.toEqual(
         AuthenticationResult.failed(Boom.unauthorized(), {
           authResponseHeaders: { 'WWW-Authenticate': 'Negotiate' },
@@ -480,7 +497,7 @@ describe('KerberosAuthenticationProvider', () => {
   });
 
   describe('`logout` method', () => {
-    it('returns `notHandled` if state is not presented.', async () => {
+    it('returns `notHandled` if session is not presented.', async () => {
       const request = httpServerMock.createKibanaRequest();
 
       await expect(provider.logout(request)).resolves.toEqual(DeauthenticationResult.notHandled());
@@ -488,7 +505,7 @@ describe('KerberosAuthenticationProvider', () => {
       expect(mockOptions.tokens.invalidate).not.toHaveBeenCalled();
     });
 
-    it('redirects to logged out view if state is `null`.', async () => {
+    it('redirects to logged out view if session is `null`.', async () => {
       const request = httpServerMock.createKibanaRequest();
 
       await expect(provider.logout(request, null)).resolves.toEqual(
@@ -505,9 +522,9 @@ describe('KerberosAuthenticationProvider', () => {
       const failureReason = new Error('failed to delete token');
       mockOptions.tokens.invalidate.mockRejectedValue(failureReason);
 
-      await expect(provider.logout(request, tokenPair)).resolves.toEqual(
-        DeauthenticationResult.failed(failureReason)
-      );
+      await expect(
+        provider.logout(request, sessionMock.createValue({ state: tokenPair }))
+      ).resolves.toEqual(DeauthenticationResult.failed(failureReason));
 
       expect(mockOptions.tokens.invalidate).toHaveBeenCalledTimes(1);
       expect(mockOptions.tokens.invalidate).toHaveBeenCalledWith(tokenPair);
@@ -522,9 +539,9 @@ describe('KerberosAuthenticationProvider', () => {
 
       mockOptions.tokens.invalidate.mockResolvedValue(undefined);
 
-      await expect(provider.logout(request, tokenPair)).resolves.toEqual(
-        DeauthenticationResult.redirectTo(mockOptions.urls.loggedOut(request))
-      );
+      await expect(
+        provider.logout(request, sessionMock.createValue({ state: tokenPair }))
+      ).resolves.toEqual(DeauthenticationResult.redirectTo(mockOptions.urls.loggedOut(request)));
 
       expect(mockOptions.tokens.invalidate).toHaveBeenCalledTimes(1);
       expect(mockOptions.tokens.invalidate).toHaveBeenCalledWith(tokenPair);

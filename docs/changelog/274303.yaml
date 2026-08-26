@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/274303
+issues:
+- https://github.com/elastic/search-team/issues/14921
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-02
+title: Fix Agent Builder not finding Google Drive files owned by a shared drive

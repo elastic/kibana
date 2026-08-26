@@ -6,13 +6,20 @@
  */
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import { escapeQuotes } from '@kbn/es-query';
 import { keyBy } from 'lodash';
 
 import { packageHasNoPolicyTemplates } from '../../../common/services/policy_template';
-import type { NewPackagePolicy, RegistryStream, UpdatePackagePolicy } from '../../../common';
+import type {
+  NewPackagePolicy,
+  PackagePolicyConfigRecordEntry,
+  RegistryStream,
+  UpdatePackagePolicy,
+} from '../../../common';
 import { SO_SEARCH_LIMIT } from '../../../common';
 import {
   doesPackageHaveIntegrations,
+  getInputEffectiveName,
   getNormalizedDataStreams,
   getNormalizedInputs,
 } from '../../../common/services';
@@ -115,7 +122,14 @@ export async function extractAndUpdateSecrets(opts: {
 
   const { toCreate, toDelete, noChange } = diffSecretPaths(oldSecretPaths, updatedSecretPaths);
 
-  const secretsToCreate = toCreate.filter((secretPath) => !!secretPath.value.value);
+  // Handle the case of a secret being migrated from a different input type:
+  // the old input no longer exists in the new package, so `oldSecretPaths` is empty and `diffSecretPaths` puts
+  // the path in `toCreate`. We shouldn't create a new secret from an object value,
+  // instead, preserve the existing reference exactly as-is.
+  const secretsToCreate = toCreate.filter(
+    (secretPath) => !!secretPath.value.value && !secretPath.value.value?.isSecretRef
+  );
+  const existingSecretRefs = toCreate.filter((secretPath) => !!secretPath.value.value?.isSecretRef);
 
   const createdSecrets = await createSecrets({
     esClient,
@@ -140,6 +154,14 @@ export async function extractAndUpdateSecrets(opts: {
         return [...acc, ...secret.map(({ id }) => ({ id }))];
       }
       return [...acc, { id: secret.id }];
+    }, []),
+    // Migrated secret references (isSecretRef already set): carry them forward
+    // as tracked references without re-creating the underlying Elasticsearch secret.
+    ...existingSecretRefs.reduce((acc: SecretReference[], secretPath) => {
+      if (secretPath.value.value.ids) {
+        return [...acc, ...secretPath.value.value.ids.map((id: string) => ({ id }))];
+      }
+      return [...acc, { id: secretPath.value.value.id }];
     }, []),
   ];
 
@@ -218,7 +240,9 @@ export async function findPackagePoliciesUsingSecrets(opts: {
 }): Promise<Array<{ id: string; policyIds: string[] }>> {
   const { soClient, ids } = opts;
   const packagePolicies = await packagePolicyService.list(soClient, {
-    kuery: `ingest-package-policies.secret_references.id: (${ids.join(' or ')})`,
+    kuery: `ingest-package-policies.secret_references.id: (${ids
+      .map((id) => `"${escapeQuotes(id)}"`)
+      .join(' or ')})`,
     perPage: SO_SEARCH_LIMIT,
     page: 1,
   });
@@ -318,6 +342,13 @@ function isSecretVar(varDef: RegistryVarsEntry) {
   return varDef.secret === true;
 }
 
+// A var's value can already be a secret reference even if the current package spec
+// no longer marks it `secret: true` (e.g. the var was dropped from a newer package version).
+// Such values must still be treated as secret paths so their underlying secrets get cleaned up.
+function isSecretRefValue(configEntry: PackagePolicyConfigRecordEntry) {
+  return !!configEntry?.value?.isSecretRef;
+}
+
 function containsSecretVar(vars?: RegistryVarsEntry[]) {
   return vars?.some(isSecretVar);
 }
@@ -330,8 +361,8 @@ function _getPackageLevelSecretPaths(
   const packageSecretVarsByName = keyBy(packageSecretVars, 'name');
   const packageVars = Object.entries(packagePolicy.vars || {});
 
-  return packageVars.reduce((vars, [name, configEntry], i) => {
-    if (packageSecretVarsByName[name]) {
+  return packageVars.reduce((vars, [name, configEntry]) => {
+    if (packageSecretVarsByName[name] || isSecretRefValue(configEntry)) {
       vars.push({
         value: configEntry,
         path: ['vars', name],
@@ -364,7 +395,10 @@ function _getInputSecretPaths(
     const inputVars = Object.entries(input.vars || {});
     if (inputVars.length) {
       inputVars.forEach(([name, configEntry]) => {
-        if (inputSecretVarDefsByPolicyTemplateAndType[inputKey]?.[name]) {
+        if (
+          inputSecretVarDefsByPolicyTemplateAndType[inputKey]?.[name] ||
+          isSecretRefValue(configEntry)
+        ) {
           currentInputVarPaths.push({
             path: ['inputs', inputIndex.toString(), 'vars', name],
             value: configEntry,
@@ -376,24 +410,24 @@ function _getInputSecretPaths(
     if (input.streams.length) {
       input.streams.forEach((stream, streamIndex) => {
         const streamVarDefs =
-          streamSecretVarDefsByDatasetAndInput[`${stream.data_stream.dataset}-${input.type}`];
-        if (streamVarDefs && Object.keys(streamVarDefs).length) {
-          Object.entries(stream.vars || {}).forEach(([name, configEntry]) => {
-            if (streamVarDefs[name]) {
-              currentInputVarPaths.push({
-                path: [
-                  'inputs',
-                  inputIndex.toString(),
-                  'streams',
-                  streamIndex.toString(),
-                  'vars',
-                  name,
-                ],
-                value: configEntry,
-              });
-            }
-          });
-        }
+          streamSecretVarDefsByDatasetAndInput[
+            `${stream.data_stream.dataset}-${getInputEffectiveName(input)}`
+          ] || {};
+        Object.entries(stream.vars || {}).forEach(([name, configEntry]) => {
+          if (streamVarDefs[name] || isSecretRefValue(configEntry)) {
+            currentInputVarPaths.push({
+              path: [
+                'inputs',
+                inputIndex.toString(),
+                'streams',
+                streamIndex.toString(),
+                'vars',
+                name,
+              ],
+              value: configEntry,
+            });
+          }
+        });
       });
     }
 

@@ -119,7 +119,7 @@ const VisibilityFilterComponent: React.FC<Props> = ({ isLoading = false, setShar
       <EuiFilterButton
         badgeColor="subdued"
         disabled={isLoading}
-        iconType="arrowDown"
+        iconType="chevronSingleDown"
         isSelected={isPopoverOpen}
         onClick={onFilterButtonClick}
         hasActiveFilters={!!items.find((item) => item.checked === 'on')}
@@ -159,11 +159,12 @@ const VisibilityFilterComponent: React.FC<Props> = ({ isLoading = false, setShar
   return (
     <EuiFilterGroup>
       <EuiPopover
+        aria-label={i18n.VISIBILITY}
         button={button}
         closePopover={closePopover}
         id={filterGroupPopoverId}
         isOpen={isPopoverOpen}
-        panelPaddingSize="none"
+        panelPaddingSize="s"
       >
         <EuiSelectable
           aria-label={i18n.VISIBILITY}

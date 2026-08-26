@@ -8,7 +8,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { AxiosError, AxiosInstance, AxiosResponse } from 'axios';
-import type { z } from '@kbn/zod';
+import type { z } from '@kbn/zod/v4';
 import type { Logger } from '@kbn/core/server';
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import type { ConnectorUsageCollector, ValidatorServices } from '@kbn/actions-plugin/server/types';
@@ -39,8 +39,27 @@ export type ServiceNowExecutorResultData =
   | GetCommonFieldsResponse
   | GetChoicesResponse;
 
+export type ServiceNowEndpoint = 'table' | 'import_set' | 'oauth' | 'jwt' | 'event' | 'other';
+
 export interface CreateCommentRequest {
   [key: string]: string;
+}
+
+export interface RequestContext {
+  endpoint: string;
+  method?: 'get' | 'post' | 'patch';
+}
+
+export class ServiceNowApiError extends Error {
+  readonly status: number;
+  readonly body?: unknown;
+
+  constructor(message: string, options: { status: number; body?: unknown }) {
+    super(message);
+    this.name = 'ServiceNowApiError';
+    this.status = options.status;
+    this.body = options.body;
+  }
 }
 
 export type ExecutorParams =
@@ -196,6 +215,11 @@ export interface ServiceNowError {
 }
 
 export type ResponseError = AxiosError<ServiceNowError>;
+
+export interface ErrorMessageFormat {
+  error: string;
+  reason: string;
+}
 
 export interface ImportSetApiResponseSuccess {
   import_set: string;

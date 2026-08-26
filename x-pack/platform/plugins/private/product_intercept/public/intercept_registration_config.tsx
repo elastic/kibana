@@ -7,7 +7,14 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiLink, EuiText } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiText,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Intercept } from '@kbn/intercepts-plugin/public';
 import type { PromptTelemetry } from './telemetry';
@@ -29,125 +36,189 @@ export const productInterceptRegistrationConfig = ({
   surveyUrl,
   productOffering,
 }: ProductInterceptRegistrationHandlerParams): Omit<Intercept, 'id'> => {
+  const startInterceptStep = {
+    id: 'start',
+    title: i18n.translate('productIntercept.prompter.step.start.title', {
+      defaultMessage: 'Help us improve {productOffering}',
+      values: {
+        productOffering,
+      },
+    }),
+    content: () => (
+      <EuiText size="s" key="productInterceptPrompterStartContent">
+        <FormattedMessage
+          id="productIntercept.prompter.step.start.content"
+          defaultMessage="We are always looking for ways to improve {productOffering}. Please take a moment to share your feedback with us."
+          values={{ productOffering }}
+        />
+      </EuiText>
+    ),
+  } satisfies Extract<Intercept['steps'][number], { id: 'start' }>;
+
+  const satisfactionInterceptStep = {
+    id: 'satisfaction',
+    title: i18n.translate('productIntercept.prompter.step.satisfaction.title', {
+      defaultMessage: 'Overall, how satisfied or dissatisfied are you with {productOffering}?',
+      values: {
+        productOffering,
+      },
+    }),
+    content: ({ onValue }) => {
+      return (
+        <NPSScoreInput
+          lowerBoundHelpText={i18n.translate(
+            'productIntercept.prompter.step.satisfaction.lowerBoundDescriptionText',
+            {
+              defaultMessage: 'Very dissatisfied',
+            }
+          )}
+          upperBoundHelpText={i18n.translate(
+            'productIntercept.prompter.step.satisfaction.upperBoundDescriptionText',
+            {
+              defaultMessage: 'Very satisfied',
+            }
+          )}
+          onChange={onValue}
+        />
+      );
+    },
+  } satisfies Exclude<Intercept['steps'][number], { id: 'start' } | { id: 'completion' }>;
+
+  const easeInterceptStep = {
+    id: 'ease',
+    title: i18n.translate('productIntercept.prompter.step.ease.title', {
+      defaultMessage: 'Overall, how difficult or easy is it to use {productOffering}?',
+      values: {
+        productOffering,
+      },
+    }),
+    content: ({ onValue }) => {
+      return (
+        <NPSScoreInput
+          lowerBoundHelpText={i18n.translate(
+            'productIntercept.prompter.step.ease.lowerBoundDescriptionText',
+            {
+              defaultMessage: 'Very difficult',
+            }
+          )}
+          upperBoundHelpText={i18n.translate(
+            'productIntercept.prompter.step.ease.upperBoundDescriptionText',
+            {
+              defaultMessage: 'Very easy',
+            }
+          )}
+          onChange={onValue}
+        />
+      );
+    },
+  } satisfies Exclude<Intercept['steps'][number], { id: 'start' } | { id: 'completion' }>;
+
+  const completionInterceptStep = {
+    id: 'completion',
+    title: (
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} component="span">
+        <EuiFlexItem grow={false} component="span">
+          <EuiIcon type="checkCircleFill" color="success" size="m" aria-hidden />
+        </EuiFlexItem>
+        <EuiFlexItem component="span">
+          <FormattedMessage
+            id="productIntercept.prompter.step.completion.title"
+            defaultMessage="Thanks for the feedback!"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ),
+    content: ({
+      onValue,
+      responseMap,
+    }: {
+      onValue: (v: unknown) => void;
+      responseMap: Record<string, unknown>;
+    }) => {
+      const href = new URL(surveyUrl.toString());
+      Object.entries(responseMap).forEach(([key, value]) => {
+        if (key === satisfactionInterceptStep.id || key === easeInterceptStep.id) {
+          href.searchParams.set(key, String(value));
+        }
+      });
+
+      return (
+        <EuiFlexGroup gutterSize="s" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="empty" size="m" aria-hidden />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFlexGroup direction="column" gutterSize="s">
+              <EuiFlexItem>
+                <EuiText size="s">
+                  <FormattedMessage
+                    id="productIntercept.prompter.step.completion.body"
+                    defaultMessage="Want to help shape the future of Elastic? Sign up to join our research panel!"
+                  />
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFlexGroup gutterSize="s" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      color="success"
+                      iconType="external"
+                      iconSide="right"
+                      href={href.toString()}
+                      target="_blank"
+                      data-test-subj="productInterceptSurveyLink"
+                    >
+                      <FormattedMessage
+                        id="productIntercept.prompter.step.completion.participateButton"
+                        defaultMessage="Participate"
+                      />
+                    </EuiButton>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty color="success" onClick={() => onValue(null)}>
+                      <FormattedMessage
+                        id="productIntercept.prompter.step.completion.maybeLaterButton"
+                        defaultMessage="Maybe later"
+                      />
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    },
+  } satisfies Extract<Intercept['steps'][number], { id: 'completion' }>;
+
   return {
     steps: [
-      {
-        id: 'start',
-        title: i18n.translate('productIntercept.prompter.step.start.title', {
-          defaultMessage: 'Help us improve {productOffering}',
-          values: {
-            productOffering,
-          },
-        }),
-        content: () => (
-          <EuiText size="s" key="productInterceptPrompterStartContent">
-            <FormattedMessage
-              id="productIntercept.prompter.step.start.content"
-              defaultMessage="We are always looking for ways to improve {productOffering}. Please take a moment to share your feedback with us."
-              values={{ productOffering }}
-            />
-          </EuiText>
-        ),
-      },
-      {
-        id: 'satisfaction',
-        title: i18n.translate('productIntercept.prompter.step.satisfaction.title', {
-          defaultMessage: 'Overall, how satisfied or dissatisfied are you with {productOffering}?',
-          values: {
-            productOffering,
-          },
-        }),
-        content: ({ onValue }) => {
-          return (
-            <NPSScoreInput
-              lowerBoundHelpText={i18n.translate(
-                'productIntercept.prompter.step.satisfaction.lowerBoundDescriptionText',
-                {
-                  defaultMessage: 'Very dissatisfied',
-                }
-              )}
-              upperBoundHelpText={i18n.translate(
-                'productIntercept.prompter.step.satisfaction.upperBoundDescriptionText',
-                {
-                  defaultMessage: 'Very satisfied',
-                }
-              )}
-              onChange={onValue}
-            />
-          );
-        },
-      },
-      {
-        id: 'ease',
-        title: i18n.translate('productIntercept.prompter.step.ease.title', {
-          defaultMessage: 'Overall, how difficult or easy is it to use {productOffering}?',
-          values: {
-            productOffering,
-          },
-        }),
-        content: ({ onValue }) => {
-          return (
-            <NPSScoreInput
-              lowerBoundHelpText={i18n.translate(
-                'productIntercept.prompter.step.ease.lowerBoundDescriptionText',
-                {
-                  defaultMessage: 'Very difficult',
-                }
-              )}
-              upperBoundHelpText={i18n.translate(
-                'productIntercept.prompter.step.ease.upperBoundDescriptionText',
-                {
-                  defaultMessage: 'Very easy',
-                }
-              )}
-              onChange={onValue}
-            />
-          );
-        },
-      },
-      {
-        id: 'completion',
-        title: i18n.translate('productIntercept.prompter.step.completion.title', {
-          defaultMessage: 'Thanks for the feedback!',
-        }),
-        content: () => {
-          return (
-            <EuiText size="s" key="productInterceptPrompterCompletionContent">
-              <FormattedMessage
-                id="productIntercept.prompter.step.completion.content"
-                defaultMessage="If you'd like to participate in future research to help improve {productOffering}, <link>click here</link>."
-                values={{
-                  productOffering,
-                  link: (chunks) => (
-                    <EuiLink external target="_blank" href={surveyUrl.toString()}>
-                      {chunks}
-                    </EuiLink>
-                  ),
-                }}
-              />
-            </EuiText>
-          );
-        },
-      },
+      startInterceptStep,
+      satisfactionInterceptStep,
+      easeInterceptStep,
+      completionInterceptStep,
     ],
-    onProgress: ({ stepId, stepResponse, runId }) => {
+    onProgress: ({ stepId, stepResponse, runId, interceptId }) => {
       eventReporter.reportInterceptInteractionProgress({
         interceptRunId: runId,
+        interceptId,
         metricId: stepId,
         value: Number(stepResponse),
       });
     },
-    onFinish: ({ response: feedbackResponse, runId }) => {
+    onFinish: ({ runId, interceptId }) => {
       eventReporter.reportInterceptInteractionTermination({
         interactionType: 'completion',
         interceptRunId: runId,
+        interceptId,
       });
     },
-    onDismiss: ({ runId }) => {
+    onDismiss: ({ runId, interceptId }) => {
       // still update user profile run count, a dismissal is still an interaction
       eventReporter.reportInterceptInteractionTermination({
         interactionType: 'dismissal',
         interceptRunId: runId,
+        interceptId,
       });
     },
   };

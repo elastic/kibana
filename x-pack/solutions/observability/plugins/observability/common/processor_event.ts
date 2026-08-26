@@ -5,9 +5,4 @@
  * 2.0.
  */
 
-export enum ProcessorEvent {
-  transaction = 'transaction',
-  error = 'error',
-  metric = 'metric',
-  span = 'span',
-}
+export { ProcessorEvent } from '@kbn/apm-types-shared';

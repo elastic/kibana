@@ -40,8 +40,8 @@ import {
 import { useAiopsAppContext } from '../../../hooks/use_aiops_app_context';
 import { LogRateAnalysisAttachmentsMenu } from './log_rate_analysis_attachments_menu';
 
-export const DEFAULT_SEARCH_QUERY: estypes.QueryDslQueryContainer = { match_all: {} };
-const DEFAULT_SEARCH_BAR_QUERY: estypes.QueryDslQueryContainer = {
+export const DEFAULT_SEARCH_QUERY: NonNullable<estypes.QueryDslQueryContainer> = { match_all: {} };
+const DEFAULT_SEARCH_BAR_QUERY: NonNullable<estypes.QueryDslQueryContainer> = {
   bool: {
     filter: [],
     must: [
@@ -282,7 +282,7 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
           hasBorder={false}
           css={{ minWidth: '100%' }}
           title={
-            <h2>
+            <h3>
               {changePointType === LOG_RATE_ANALYSIS_TYPE.SPIKE && (
                 <FormattedMessage
                   id="xpack.aiops.logRateAnalysis.page.changePointSpikePromptTitle"
@@ -302,7 +302,7 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
                     defaultMessage="Log rate change point detected"
                   />
                 )}
-            </h2>
+            </h3>
           }
           titleSize="xs"
           body={
@@ -334,12 +334,12 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
           hasBorder={false}
           css={{ minWidth: '100%' }}
           title={
-            <h2>
+            <h3>
               <FormattedMessage
                 id="xpack.aiops.logRateAnalysis.page.emptyPromptTitle"
                 defaultMessage="Start by clicking a spike or dip in the histogram chart."
               />
-            </h2>
+            </h3>
           }
           titleSize="xs"
           body={

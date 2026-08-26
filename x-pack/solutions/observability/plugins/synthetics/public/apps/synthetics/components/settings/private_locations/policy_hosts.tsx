@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import type { EuiSuperSelectProps } from '@elastic/eui';
 import {
   EuiFlexGroup,
@@ -135,9 +135,7 @@ export const PolicyHostsField = ({
               aria-label={SELECT_POLICY_HOSTS}
               placeholder={SELECT_POLICY_HOSTS}
               valueOfSelected={field.value}
-              itemLayoutAlign="top"
               popoverProps={{ repositionOnScroll: true }}
-              hasDividers
               isInvalid={showFieldInvalid}
               options={policyHostsOptions ?? []}
               {...field}

@@ -25,4 +25,23 @@ describe('i18n json serializer', () => {
       ])
     ).toMatchSnapshot();
   });
+
+  test('writes locale as the first key when provided', () => {
+    const output = serializeToJson(
+      [{ id: 'plugin1.message.id-1', defaultMessage: 'Message text 1' }],
+      undefined,
+      'fr-FR'
+    );
+    const parsed = JSON.parse(output);
+    expect(Object.keys(parsed)[0]).toBe('locale');
+    expect(parsed.locale).toBe('fr-FR');
+  });
+
+  test('omits locale key when not provided', () => {
+    const output = serializeToJson([
+      { id: 'plugin1.message.id-1', defaultMessage: 'Message text 1' },
+    ]);
+    const parsed = JSON.parse(output);
+    expect(parsed).not.toHaveProperty('locale');
+  });
 });

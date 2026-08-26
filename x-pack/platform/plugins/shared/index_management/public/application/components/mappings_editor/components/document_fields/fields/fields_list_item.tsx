@@ -168,7 +168,7 @@ function FieldListItemComponent(
           <EuiFlexItem grow={false}>
             <EuiToolTip content={addPropertyButtonLabel} disableScreenReaderOutput>
               <EuiButtonIcon
-                iconType="plusInCircle"
+                iconType="plusCircle"
                 onClick={addField}
                 data-test-subj="addPropertyButton"
                 aria-label={addPropertyButtonLabel}
@@ -231,6 +231,7 @@ function FieldListItemComponent(
           <EuiFlexGroup
             gutterSize="s"
             alignItems="center"
+            wrap
             css={[
               styles.content,
               !hasChildFields &&
@@ -241,12 +242,8 @@ function FieldListItemComponent(
           >
             {(hasChildFields || hasMultiFields) && (
               <EuiFlexItem grow={false} css={styles.toggle}>
-                <EuiButtonIcon
-                  color="text"
-                  onClick={toggleExpand}
-                  iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
-                  data-test-subj="toggleExpandButton"
-                  aria-label={
+                <EuiToolTip
+                  content={
                     isExpanded
                       ? i18n.translate('xpack.idxMgmt.mappingsEditor.collapseFieldButtonLabel', {
                           defaultMessage: 'Collapse field {name}',
@@ -261,22 +258,49 @@ function FieldListItemComponent(
                           },
                         })
                   }
-                />
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    color="text"
+                    onClick={toggleExpand}
+                    iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
+                    data-test-subj="toggleExpandButton"
+                    aria-label={
+                      isExpanded
+                        ? i18n.translate('xpack.idxMgmt.mappingsEditor.collapseFieldButtonLabel', {
+                            defaultMessage: 'Collapse field {name}',
+                            values: {
+                              name: source.name,
+                            },
+                          })
+                        : i18n.translate('xpack.idxMgmt.mappingsEditor.expandFieldButtonLabel', {
+                            defaultMessage: 'Expand field {name}',
+                            values: {
+                              name: source.name,
+                            },
+                          })
+                    }
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
             )}
 
-            {isMultiField && (
-              <EuiFlexItem grow={false}>
-                <EuiIcon color="subdued" type="documents" />
-              </EuiFlexItem>
-            )}
+            <EuiFlexItem>
+              <EuiFlexGroup gutterSize="s" alignItems="center" wrap={false} responsive={false}>
+                {isMultiField && (
+                  <EuiFlexItem grow={false}>
+                    <EuiIcon color="subdued" type="documents" aria-hidden="true" />
+                  </EuiFlexItem>
+                )}
 
-            <EuiFlexItem
-              grow={false}
-              data-test-subj={`fieldName ${dataTestSubj}-fieldName`}
-              aria-label={i18nTexts.fieldListNameLabel}
-            >
-              {source.name}
+                <EuiFlexItem
+                  grow={false}
+                  data-test-subj={`fieldName ${dataTestSubj}-fieldName`}
+                  aria-label={i18nTexts.fieldListNameLabel}
+                >
+                  {source.name}
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
 
             <EuiFlexGroup aria-label={i18nTexts.fieldListTypesLabel}>

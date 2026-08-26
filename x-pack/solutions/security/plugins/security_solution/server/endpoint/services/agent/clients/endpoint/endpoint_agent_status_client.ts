@@ -10,7 +10,6 @@ import { type AgentStatusRecords, HostStatus } from '../../../../../../common/en
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { AgentStatusClient } from '../lib/base_agent_status_client';
 import { getPendingActionsSummary } from '../../../actions';
-import { AgentStatusClientError } from '../errors';
 
 export class EndpointAgentStatusClient extends AgentStatusClient {
   protected readonly agentType: ResponseActionAgentType = 'endpoint';
@@ -24,11 +23,17 @@ export class EndpointAgentStatusClient extends AgentStatusClient {
     try {
       const agentIdsKql = agentIds.map((agentId) => `agent.id: ${agentId}`).join(' or ');
       const [{ data: hostInfoForAgents }, allPendingActions] = await Promise.all([
-        metadataService.getHostMetadataList({
-          page: 0,
-          pageSize: 1000,
-          kuery: agentIdsKql,
-        }),
+        // The scoped services are threaded through so this read can fan out under CPS. Without it the
+        // read is origin-only, an agent enrolled in a linked project is simply not found, and the
+        // status below falls back to offline for a host the endpoint list is showing as healthy.
+        metadataService.getHostMetadataList(
+          {
+            page: 0,
+            pageSize: 1000,
+            kuery: agentIdsKql,
+          },
+          this.options.scoped
+        ),
         getPendingActionsSummary(this.options.endpointService, this.options.spaceId, agentIds),
       ]).catch(catchAndWrapError);
 
@@ -54,15 +59,7 @@ export class EndpointAgentStatusClient extends AgentStatusClient {
         return acc;
       }, {});
     } catch (err) {
-      const error = new AgentStatusClientError(
-        `Failed to fetch endpoint agent statuses for agentIds: [${agentIds.join()}], failed with: ${
-          err.message
-        }`,
-        500,
-        err
-      );
-      this.log.error(error);
-      throw error;
+      return this.handleUnexpectedFailureAndReturnDefaultResponse(agentIds, err);
     }
   }
 }

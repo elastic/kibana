@@ -38,7 +38,7 @@ export default ({ getService }: FtrProviderContext) => {
    * aggregated in the below tracking sheet:
    * https://docs.google.com/spreadsheets/d/1kDNu98XR4eMIlKNq2iHlx5lVS5Npzm9cyDLyUVroiP8/edit?gid=0#gid=0
    *
-   * Note: Suite is disabled in `.buildkite/ftr_security_stateful_configs.yml` as it has its own
+   * Note: Suite is disabled in `.buildkite/ftr-manifests/ftr_security_stateful_configs.yml` as it has its own
    * weekly pipeline located at `.buildkite/pipelines/security_solution/gen_ai_evals.yml`
    */
   describe('@ess Basic Security AI Assistant Evaluations', () => {

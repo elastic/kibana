@@ -6,6 +6,17 @@
  */
 
 import type { IRouter, CustomRequestHandlerContext, KibanaRequest } from '@kbn/core/server';
+
+/**
+ * Validates a close reason.
+ * Register via {@link CasesServerSetup.registerCloseReasonValidator}.
+ * @param closeReason - the close reason provided in the request
+ * @param request - the originating Kibana request, for scoping services
+ */
+export type CloseReasonValidator = (
+  closeReason: string,
+  request: KibanaRequest
+) => Promise<boolean>;
 import type {
   ActionTypeConfig,
   ActionTypeSecrets,
@@ -31,10 +42,15 @@ import type { NotificationsPluginStart } from '@kbn/notifications-plugin/server'
 import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
 import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
+import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import type {
+  WorkflowsExtensionsServerPluginSetup,
+  WorkflowsExtensionsServerPluginStart,
+} from '@kbn/workflows-extensions/server';
 import type { CasesClient } from './client';
 import type { AttachmentFramework } from './attachment_framework/types';
-import type { ExternalReferenceAttachmentTypeRegistry } from './attachment_framework/external_reference_registry';
-import type { PersistableStateAttachmentTypeRegistry } from './attachment_framework/persistable_state_registry';
+import type { UnifiedAttachmentTypeRegistry } from './attachment_framework/unified_attachment_registry';
 import type { ConfigType } from './config';
 
 export interface CasesServerSetupDependencies {
@@ -49,6 +65,8 @@ export interface CasesServerSetupDependencies {
   usageCollection?: UsageCollectionSetup;
   spaces?: SpacesPluginSetup;
   cloud?: CloudSetup;
+  workflowsExtensions?: WorkflowsExtensionsServerPluginSetup;
+  agentBuilder?: AgentBuilderPluginSetup;
 }
 
 export interface CasesServerStartDependencies {
@@ -61,6 +79,18 @@ export interface CasesServerStartDependencies {
   spaces?: SpacesPluginStart;
   notifications: NotificationsPluginStart;
   ruleRegistry: RuleRegistryPluginStartContract;
+  workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
+  /**
+   * Data views server plugin — needed by cases-analytics v2 to create
+   * per-space managed `Cases` data views. Optional because v2 is the only
+   * consumer and is a no-op when `xpack.cases.analyticsV2.enabled=false`;
+   * deployments not running v2 shouldn't have to install dataViews.
+   *
+   * When `analyticsV2.enabled=true` AND this is absent, plugin start logs
+   * at ERROR and skips v2 start — the administrator can either install
+   * dataViews or flip the flag off.
+   */
+  dataViews?: DataViewsServerPluginStart;
 }
 
 export interface CaseRequestContext {
@@ -93,14 +123,24 @@ export interface CasesServerStart {
    * @returns a {@link CasesClient}
    */
   getCasesClientWithRequest(request: KibanaRequest): Promise<CasesClient>;
-  getExternalReferenceAttachmentTypeRegistry(): ExternalReferenceAttachmentTypeRegistry;
-  getPersistableStateAttachmentTypeRegistry(): PersistableStateAttachmentTypeRegistry;
+  getUnifiedAttachmentTypeRegistry(): UnifiedAttachmentTypeRegistry;
   config: ConfigType;
 }
 
 export interface CasesServerSetup {
   attachmentFramework: AttachmentFramework;
   config: ConfigType;
+  /**
+   * Registers a validator for close reasons for a specific case owner.
+   * Cases with the given owner will be allowed to use any close reason accepted by the validator.
+   */
+  registerCloseReasonValidator: (owner: string, validator: CloseReasonValidator) => void;
+  /**
+   * Registers an owner's unified-attachment prefix so its legacy `alert`/`event`
+   * attachments resolve to a valid unified type (e.g. `security.alert`). For
+   * dynamically registered owners (e.g. FTR fixtures); built-in solutions are pre-registered.
+   */
+  registerOwnerPrefix: (owner: string, prefix: string) => void;
 }
 
 export type PartialField<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;

@@ -9,7 +9,7 @@ import type { Logger } from '@kbn/core/server';
 import { KibanaShuttingDownError } from '@kbn/reporting-common';
 import type { SavedReport } from './store';
 
-const MAX_DELAY_SECONDS = 30;
+export const MAX_DELAY_SECONDS = 30;
 
 interface RetryOpts {
   attempt?: number;

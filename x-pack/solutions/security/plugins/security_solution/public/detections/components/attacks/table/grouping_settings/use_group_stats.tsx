@@ -8,11 +8,11 @@
 import { useCallback } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import type { GroupStatsItem, NamedAggregation, RawBucket } from '@kbn/grouping';
-import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
-import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import { i18n } from '@kbn/i18n';
 
+import { dsl } from '../../utils/dsl';
 import type { AlertsGroupingAggregation } from '../../../alerts_table/grouping_settings/types';
+import type { AttackForGroup } from '../../../../hooks/attacks/use_attack_group_handler';
 
 const STATS_GROUP_ALERTS = i18n.translate(
   'xpack.securitySolution.attacks.alertsTable.groups.stats.alertsCount',
@@ -21,16 +21,11 @@ const STATS_GROUP_ALERTS = i18n.translate(
   }
 );
 
-const dsl = {
-  isAttack(): QueryDslQueryContainer {
-    return { term: { 'kibana.alert.rule.rule_type_id': ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } };
-  },
-  isNotAttack(): QueryDslQueryContainer {
-    return { bool: { must_not: dsl.isAttack() } };
-  },
-};
+export interface UseGroupStatsProps {
+  getAttack: AttackForGroup;
+}
 
-export const useGroupStats = () => {
+export const useGroupStats = ({ getAttack }: UseGroupStatsProps) => {
   const { euiTheme } = useEuiTheme();
 
   const groupStatsAggregations = useCallback((): NamedAggregation[] => {
@@ -42,19 +37,24 @@ export const useGroupStats = () => {
   }, []);
 
   const groupStatsRenderer = useCallback(
-    (_: string, bucket: RawBucket<AlertsGroupingAggregation>): GroupStatsItem[] => {
+    (selectedGroup: string, bucket: RawBucket<AlertsGroupingAggregation>): GroupStatsItem[] => {
+      const attack = getAttack(selectedGroup, bucket);
+      const totalAlerts = attack
+        ? attack.alertIds.length
+        : bucket.attackRelatedAlerts?.doc_count ?? 0;
+
       return [
         {
           title: STATS_GROUP_ALERTS,
           badge: {
-            value: bucket.attackRelatedAlerts?.doc_count ?? 0,
+            value: totalAlerts,
             width: 50,
             color: euiTheme.colors.danger,
           },
         },
       ];
     },
-    [euiTheme.colors.danger]
+    [euiTheme.colors.danger, getAttack]
   );
 
   return {

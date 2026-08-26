@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { readConfigFile } from './read_config_file';
+export { readConfigFile, loadRawServerConfig } from './read_config_file';

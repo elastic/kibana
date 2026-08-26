@@ -56,17 +56,20 @@ export let callObservabilityOnboardingApi: ObservabilityOnboardingClient = () =>
 export function createCallApi(core: CoreStart | CoreSetup) {
   callObservabilityOnboardingApi = ((endpoint, options) => {
     const { params } = options as unknown as {
-      params?: Partial<Record<string, any>>;
+      params?: Partial<Record<string, unknown>>;
     };
 
-    const { method, pathname } = formatRequest(endpoint, params?.path);
+    const { method, pathname } = formatRequest(
+      endpoint,
+      params?.path as Record<string, string> | undefined
+    );
 
     return callApi(core, {
       ...options,
       method,
       pathname,
-      body: params?.body,
-      query: params?.query,
+      body: params?.body as Record<string, unknown> | undefined,
+      query: params?.query as Record<string, unknown> | undefined,
     } as unknown as Parameters<CallApi>[1]);
   }) as ObservabilityOnboardingClient;
 }

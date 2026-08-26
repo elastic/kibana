@@ -1,93 +1,267 @@
 {
-  "lastModified": "2026-01-30T09:08:36.921Z",
-  "sha1": "9ff4c374e07f726b2ece916dd201b054b31c1a0b",
+  "sha1": "b6350390618e8585f79248fc095f2ff45480929e",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
+    {
+      "id": "fbc74590a1185af-3e73699777c3b59",
+      "title": "Host Onboarding Linux tile navigates to /host/linux with OTel as the selected collection method",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/host_flow.spec.ts",
+        "line": 29,
+        "column": 25
+      }
+    },
+    {
+      "id": "fbc74590a1185af-d0fb6d281c16577",
+      "title": "Host Onboarding Linux collection method selector toggles between OTel and Elastic Agent",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/host_flow.spec.ts",
+        "line": 36,
+        "column": 7
+      }
+    },
+    {
+      "id": "fbc74590a1185af-63b5c9f2ad36b99",
+      "title": "Host Onboarding macOS landing has OTel as the selected collection method",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/host_flow.spec.ts",
+        "line": 48,
+        "column": 7
+      }
+    },
+    {
+      "id": "fbc74590a1185af-fb63b4e45269443",
+      "title": "Host Onboarding macOS tile navigates to /host/macos with OTel as the selected collection method",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/host_flow.spec.ts",
+        "line": 57,
+        "column": 13
+      }
+    },
+    {
+      "id": "fbc74590a1185af-87aa8a07902c229",
+      "title": "Host Onboarding Windows install step renders the PowerShell collector command",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/host_flow.spec.ts",
+        "line": 67,
+        "column": 11
+      }
+    },
+    {
+      "id": "fbc74590a1185af-124e4c557f3c63d",
+      "title": "Host Onboarding setup failure keeps the V2 chrome visible with an inline error and a working retry",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/host_flow.spec.ts",
+        "line": 80,
+        "column": 7
+      }
+    },
+    {
+      "id": "fbc74590a1185af-ceeb214ccdb0780",
+      "title": "Host Onboarding pre-existing data activates the visualize step get-started panel",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/host_flow.spec.ts",
+        "line": 100,
+        "column": 13
+      }
+    },
+    {
+      "id": "fbc74590a1185af-c3d465fbd81d999",
+      "title": "Host Onboarding navigating to /host/linux redirects to the V1 landing root when V2 is disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/host_flow.spec.ts",
+        "line": 111,
+        "column": 25
+      }
+    },
+    {
+      "id": "ac68e3762339a89-bb09d459720bf2c",
+      "title": "Kubernetes Onboarding Kubernetes tile navigates directly to the OTel Kubernetes flow",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/kubernetes_flow.spec.ts",
+        "line": 21,
+        "column": 25
+      }
+    },
+    {
+      "id": "ac68e3762339a89-a2c7ce3359b6f7b",
+      "title": "Kubernetes Onboarding navigating to /otel-kubernetes redirects to /kubernetes without deprecated ingestion param",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/kubernetes_flow.spec.ts",
+        "line": 29,
+        "column": 25
+      }
+    },
+    {
+      "id": "ac68e3762339a89-86879ebe1541a2a",
+      "title": "Kubernetes Onboarding Kubernetes step controls expose expected branch UI",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/kubernetes_flow.spec.ts",
+        "line": 40,
+        "column": 25
+      }
+    },
     {
       "id": "bd77233fbb28a70-b95459eaf733782",
       "title": "Onboarding UI Validation validates main page structure and navigation",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt",
-        "@svlLogsEssentials"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
-        "line": 21,
-        "column": 7
+        "line": 17,
+        "column": 63
       }
     },
     {
       "id": "bd77233fbb28a70-2d3f3cfafbdcb6b",
       "title": "Onboarding UI Validation navigates correctly within Host Auto-Detect flow",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt",
-        "@svlLogsEssentials"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
-        "line": 85,
-        "column": 7
+        "line": 76,
+        "column": 26
       }
     },
     {
       "id": "bd77233fbb28a70-4ba70b686a845a9",
       "title": "Onboarding UI Validation navigates correctly within Host OTel flow",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt",
-        "@svlLogsEssentials"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
-        "line": 95,
-        "column": 7
+        "line": 93,
+        "column": 38
       }
     },
     {
-      "id": "bd77233fbb28a70-44dc6eb47e723c0",
-      "title": "Onboarding UI Validation navigates correctly within Kubernetes Host flow",
-      "expectedStatus": "skipped",
+      "id": "bd77233fbb28a70-327b1fabac0e74c",
+      "title": "Onboarding UI Validation navigates correctly within Kubernetes OpenTelemetry flow using the keyboard only",
+      "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt",
-        "@svlLogsEssentials"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
-        "line": 107,
-        "column": 7
-      }
-    },
-    {
-      "id": "bd77233fbb28a70-4ab634c0d169c88",
-      "title": "Onboarding UI Validation Navigates correctly within Kubernetes Host flow using the keyboard only",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@ess",
-        "@svlOblt",
-        "@svlLogsEssentials"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
-        "line": 121,
-        "column": 7
+        "line": 112,
+        "column": 26
       }
     },
     {
       "id": "bd77233fbb28a70-e9264fd8f89345b",
       "title": "Onboarding UI Validation validates logs-essentials tier restrictions",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
-        "@svlLogsEssentials"
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
         "line": 154,
-        "column": 7
+        "column": 26
       }
     }
   ]

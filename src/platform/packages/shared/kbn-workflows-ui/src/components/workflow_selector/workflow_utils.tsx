@@ -7,10 +7,57 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import React from 'react';
-import type { WorkflowListDto } from '@kbn/workflows';
+import type {
+  ManagedWorkflowSelector,
+  ManagedWorkflowSolution,
+  WorkflowListDto,
+  WorkflowsSearchParams,
+} from '@kbn/workflows';
+import {
+  getManagedWorkflowSelectorVisibilityContext,
+  getManagedWorkflowSolutionVisibilityContext,
+} from '@kbn/workflows';
 import { TagsBadge } from './tags_badge';
 import * as i18n from './translations';
+
+export interface WorkflowSelectorVisibility {
+  selectors?: ManagedWorkflowSelector[];
+  solutions?: ManagedWorkflowSolution[];
+}
+
+export const getVisibilityContext = (
+  visibility: WorkflowSelectorVisibility | undefined
+): string[] | undefined => {
+  if (!visibility) return undefined;
+
+  const contexts = [
+    ...(visibility.selectors ?? []).map(getManagedWorkflowSelectorVisibilityContext),
+    ...(visibility.solutions ?? []).map(getManagedWorkflowSolutionVisibilityContext),
+  ];
+
+  return contexts.length > 0 ? contexts : undefined;
+};
+
+export const getWorkflowsListQueryParams = ({
+  visibility,
+  canReadManagedWorkflow,
+}: {
+  visibility: WorkflowSelectorVisibility | undefined;
+  canReadManagedWorkflow: boolean;
+}): WorkflowsSearchParams => {
+  const visibilityContext = getVisibilityContext(visibility);
+
+  return {
+    size: 1000,
+    page: 1,
+    query: '',
+    ...(visibilityContext && canReadManagedWorkflow
+      ? { managed: 'all' as const, visibilityContext }
+      : {}),
+  };
+};
 
 export interface WorkflowValidationResult {
   severity: 'error' | 'warning';
@@ -34,6 +81,11 @@ export interface WorkflowOption {
 }
 
 export interface WorkflowSelectorConfig {
+  // Server-side managed workflow visibility — filters managed workflows by selector/solution
+  // before they are returned by the server. Only managed workflows tagged with a matching
+  // managedVisibilityContexts value are included. When omitted, no managed workflows are fetched.
+  visibility?: WorkflowSelectorVisibility;
+
   // Filtering
   filterFunction?: (workflows: WorkflowListDto['results']) => WorkflowListDto['results'];
 
@@ -49,6 +101,13 @@ export interface WorkflowSelectorConfig {
   label?: string;
   placeholder?: string;
   createWorkflowLinkText?: string;
+  listView?: boolean;
+  listViewMaxHeight?: number;
+  // hides the 'Select workflow' label and 'Create new' link
+  hideTopRowHeader?: boolean;
+  hideViewWorkflowLink?: boolean;
+  // When true (default), the selected workflow's name is displayed in the search input.
+  showSelectedInSearch?: boolean;
 
   // Error Messages
   errorMessages?: {
@@ -75,14 +134,27 @@ export function processWorkflowsToOptions(
   return processedWorkflows.map((workflow) => {
     const validationResult = config.validationFunction ? config.validationFunction(workflow) : null;
     return {
+      key: workflow.id,
       id: workflow.id,
       name: workflow.name,
       description: workflow.description,
       tags: workflow.definition?.tags || [],
-      label: workflow.name,
+      label: workflow.id,
+      searchableLabel: workflow.name,
       disabled: !workflow.enabled,
       checked: workflow.id === selectedWorkflowId ? 'on' : undefined,
-      append: <TagsBadge tags={workflow.definition?.tags || []} />,
+      append: (
+        <>
+          {workflow.managed ? (
+            <EuiToolTip content={i18n.MANAGED_BADGE_TOOLTIP} position="bottom">
+              <EuiBadge color="hollow" title={i18n.MANAGED_BADGE_LABEL} tabIndex={0}>
+                {i18n.MANAGED_BADGE_LABEL}
+              </EuiBadge>
+            </EuiToolTip>
+          ) : null}
+          <TagsBadge tags={workflow.definition?.tags || []} />
+        </>
+      ),
       validationResult,
       data: {
         secondaryContent: workflow.description || i18n.WORKFLOW_EMPTY_DESCRIPTION,

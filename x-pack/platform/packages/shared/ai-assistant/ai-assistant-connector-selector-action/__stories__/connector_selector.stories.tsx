@@ -56,7 +56,7 @@ export default {
       return (
         <EuiPopover
           button={
-            <EuiButton iconType="arrowDown" iconSide="right" onClick={onButtonClick}>
+            <EuiButton iconType="chevronSingleDown" iconSide="right" onClick={onButtonClick}>
               Click me to load a context menu
             </EuiButton>
           }
@@ -64,6 +64,7 @@ export default {
           closePopover={closePopover}
           panelPaddingSize="none"
           anchorPosition="downLeft"
+          aria-label="Connector selector"
         >
           <EuiContextMenu initialPanelId={0} panels={panels} />
         </EuiPopover>

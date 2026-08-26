@@ -64,6 +64,7 @@ export const ModalThresholdSelector = ({
         isInvalid={isInvalid}
         isDisabled={isDisabled}
         error={isChecked ? error : []}
+        aria-label={title}
       >
         <EuiFlexGroup gutterSize="s" responsive={false}>
           <EuiFlexItem grow={1}>

@@ -7,16 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { EuiProvider } from '@elastic/eui';
+import { action } from '@storybook/addon-actions';
+import { ErrorCallout } from '@kbn/discover-utils';
 import React from 'react';
-import { DiscoverServicesProvider } from '../../__mocks__/__storybook_mocks__/with_discover_services';
-import { ErrorCallout } from './error_callout';
+
+const withEui = (children: React.ReactNode) => (
+  <EuiProvider highContrastMode={false}>{children}</EuiProvider>
+);
 
 export const _ErrorCallout = () => {
   const sampleError = new Error('This is a sample error message');
-  return (
-    <DiscoverServicesProvider>
-      <ErrorCallout title="Sample Error Title" error={sampleError} />
-    </DiscoverServicesProvider>
+  return withEui(
+    <ErrorCallout
+      title="Sample Error Title"
+      error={sampleError}
+      showErrorDialog={action('showErrorDialog')}
+    />
   );
 };
 
@@ -29,12 +36,30 @@ export const ErrorCalloutWithAVeryLongErrorMessageWithoutWhitespace = {
     const sampleError = new Error(
       'ThisIsASampleErrorMessageThisIsASampleErrorMessageThisIsASampleErrorMessageThisIsASampleErrorMessageThisIsASampleErrorMessage'
     );
-    return (
-      <DiscoverServicesProvider>
-        <ErrorCallout title="Sample Error Title" error={sampleError} />
-      </DiscoverServicesProvider>
+    return withEui(
+      <ErrorCallout
+        title="Sample Error Title"
+        error={sampleError}
+        showErrorDialog={action('showErrorDialog')}
+      />
     );
   },
 
   name: 'Error Callout with a very long error message without whitespace',
+};
+
+export const ErrorCalloutEsqlMode = {
+  render: () => {
+    const sampleError = new Error('ES|QL sample error');
+    return withEui(
+      <ErrorCallout
+        title="Sample Error Title"
+        error={sampleError}
+        isEsqlMode
+        esqlReferenceHref="https://www.elastic.co/guide/en/elasticsearch/reference/current/esql.html"
+      />
+    );
+  },
+
+  name: 'Error Callout (ES|QL mode)',
 };

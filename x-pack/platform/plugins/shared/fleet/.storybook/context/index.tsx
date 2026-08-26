@@ -100,6 +100,7 @@ export const StorybookContext: React.FC<{
         Context: function I18nContext({ children }) {
           return <I18nProvider>{children}</I18nProvider>;
         },
+        getConfigLocale: () => 'en',
       },
       injection: {} as unknown as CoreDiServiceStart,
       notifications: getNotifications(),
@@ -129,6 +130,7 @@ export const StorybookContext: React.FC<{
           allAgentPolicies: true,
           addAgents: true,
           addFleetServers: true,
+          generateAgentReports: true,
         },
         integrations: {
           all: true,

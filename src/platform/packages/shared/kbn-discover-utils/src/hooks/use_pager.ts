@@ -17,14 +17,16 @@ interface MetaParams {
 
 export const usePager = ({
   initialPageSize,
+  initialPageIndex = 0,
   totalItems,
 }: {
   totalItems: number;
   initialPageSize: number;
+  initialPageIndex?: number;
 }) => {
   const [pageSize, setPageSize] = useState(initialPageSize);
   // zero based index, if curPageIndex is set to 1, it will represent the second page.
-  const [curPageIndex, setCurPageIndex] = useState(0);
+  const [curPageIndex, setCurPageIndex] = useState(initialPageIndex);
 
   const meta: MetaParams = useMemo(() => {
     const totalPages = Math.ceil(totalItems / pageSize);

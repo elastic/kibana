@@ -7,7 +7,7 @@
 
 import type { ICMPFields } from '../../../../common/runtime_types';
 import { ConfigKey } from '../../../../common/runtime_types';
-import { secondsToCronFormatter } from './formatting_utils';
+import { secondsToCronFormatter } from '../formatting_utils';
 
 import type { Formatter } from './common_formatters';
 import { commonFormatters } from './common_formatters';

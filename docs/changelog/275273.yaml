@@ -1,0 +1,13 @@
+prs:
+- https://github.com/elastic/kibana/pull/275273
+issues:
+- https://github.com/elastic/security-team/issues/16140
+- https://github.com/elastic/security-team/issues/16712
+- https://github.com/elastic/security-team/issues/16708
+- https://github.com/elastic/security-team/issues/18035
+type: feature
+products:
+- product: cloud-serverless
+  target: 2026-07-09
+title: Add human-in-the-loop external resume for workflows
+description: "Adds external resume channels for workflow approvals and input, including signed links, Slack notifications, and hosted HTML forms for responders without a Kibana session."

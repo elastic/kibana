@@ -18,6 +18,11 @@ export function definePingRoute({ router, logger, elasticsearch, preboot }: Rout
     {
       path: '/internal/interactive_setup/ping',
       security: {
+        authc: {
+          enabled: false,
+          reason:
+            'This route is used during initial Kibana setup before authentication is configured.',
+        },
         authz: {
           enabled: false,
           reason:
@@ -29,7 +34,6 @@ export function definePingRoute({ router, logger, elasticsearch, preboot }: Rout
           host: schema.uri({ scheme: ['http', 'https'] }),
         }),
       },
-      options: { authRequired: false },
     },
     async (context, request, response) => {
       if (!preboot.isSetupOnHold()) {

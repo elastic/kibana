@@ -14,7 +14,8 @@
   "kbn_references": [
     "@kbn/core-mount-utils-browser",
     "@kbn/core-application-common",
-    "@kbn/core-chrome-app-menu-components",
+    "@kbn/app-menu",
+    "@kbn/ui-app-header",
     "@kbn/deeplinks-devtools",
     "@kbn/deeplinks-analytics",
     "@kbn/deeplinks-ml",
@@ -26,10 +27,13 @@
     "@kbn/deeplinks-fleet",
     "@kbn/deeplinks-shared",
     "@kbn/deeplinks-workplace-ai",
+    "@kbn/deeplinks-vectordb",
     "@kbn/projects-solutions-groups",
     "@kbn/deeplinks-workflows",
     "@kbn/deeplinks-agent-builder",
-    "@kbn/deeplinks-data-sources"
+    "@kbn/deeplinks-context-engine",
+    "@kbn/ui-side-navigation",
+    "@kbn/core-chrome-sidebar"
   ],
   "exclude": [
     "target/**/*",

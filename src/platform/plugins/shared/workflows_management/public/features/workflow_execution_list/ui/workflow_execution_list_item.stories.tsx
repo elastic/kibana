@@ -8,7 +8,9 @@
  */
 
 import type { Meta, StoryObj } from '@storybook/react';
+import moment from 'moment';
 import React from 'react';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowExecutionListItem } from './workflow_execution_list_item';
 import { kibanaReactDecorator } from '../../../../.storybook/decorators';
@@ -22,10 +24,36 @@ const meta: Meta = {
 export default meta;
 type Story = StoryObj<typeof WorkflowExecutionListItem>;
 
+const executedByProfile: UserProfileWithAvatar = {
+  uid: 'u_john_doe',
+  enabled: true,
+  user: {
+    username: 'john.doe@example.com',
+    full_name: 'John Doe',
+    email: 'john.doe@example.com',
+  },
+  data: {},
+};
+
 export const Completed: Story = {
   args: {
     status: ExecutionStatus.COMPLETED,
     startedAt: new Date(),
+    executedByProfile,
+    showExecutor: true,
+    triggeredBy: 'manual',
+  },
+};
+
+// Regression story for elastic/kibana#275866: a completed execution that finished
+// a few days ago but crosses the calendar-month boundary. Before the fix this
+// rendered "1 month ago"; after, "N days ago" / "N weeks ago".
+export const CompletedRecentPrevMonth: Story = {
+  args: {
+    status: ExecutionStatus.COMPLETED,
+    startedAt: moment().startOf('month').subtract(6, 'days').toDate(),
+    executedByLabel: 'john.doe@example.com',
+    triggeredBy: 'manual',
   },
 };
 
@@ -33,6 +61,9 @@ export const Failed: Story = {
   args: {
     status: ExecutionStatus.FAILED,
     startedAt: new Date(),
+    executedByProfile,
+    showExecutor: true,
+    triggeredBy: 'manual',
   },
 };
 
@@ -75,6 +106,9 @@ export const Selected: Story = {
   args: {
     status: ExecutionStatus.COMPLETED,
     startedAt: new Date(),
+    executedByProfile,
+    showExecutor: true,
+    triggeredBy: 'scheduled',
     selected: true,
   },
 };
@@ -83,6 +117,9 @@ export const RunningSelected: Story = {
   args: {
     status: ExecutionStatus.RUNNING,
     startedAt: new Date(),
+    executedByProfile,
+    showExecutor: true,
+    triggeredBy: 'scheduled',
     selected: true,
   },
 };

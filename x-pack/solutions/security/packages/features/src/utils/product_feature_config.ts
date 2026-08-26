@@ -6,7 +6,11 @@
  */
 
 import { mergeWith, uniq } from 'lodash';
-import type { ProductFeatureKeyType, ProductFeaturesConfig } from '../types';
+import type {
+  ProductFeatureKeyType,
+  ProductFeaturesConfig,
+  ProductFeaturesConfigKey,
+} from '../types';
 
 /**
  * Custom merge function for product feature configs. To be used with `mergeWith`.
@@ -27,15 +31,16 @@ export const featureConfigMerger = (objValue: unknown, srcValue: unknown) => {
  * Extends multiple ProductFeaturesConfig objects into a single one.
  * It merges arrays by removing duplicates and keeps the rest of the properties as is.
  * It does not mutate the original objects.
+ * Accepts any config type C whose key type extends ProductFeatureKeyType (inferred via ProductFeaturesConfigKey).
  *
  * @param productFeatureConfigs - The product feature configs to merge
  * @returns A single extended ProductFeaturesConfig object
  */
 export const extendProductFeatureConfigs = <
-  K extends ProductFeatureKeyType,
+  C extends ProductFeaturesConfig<ProductFeaturesConfigKey<C> & ProductFeatureKeyType>,
   S extends string = string
 >(
-  ...productFeatureConfigs: Array<ProductFeaturesConfig<K, S>>
-): ProductFeaturesConfig<K, S> => {
+  ...productFeatureConfigs: C[]
+): ProductFeaturesConfig<ProductFeatureKeyType, S> => {
   return mergeWith({}, ...productFeatureConfigs, featureConfigMerger);
 };

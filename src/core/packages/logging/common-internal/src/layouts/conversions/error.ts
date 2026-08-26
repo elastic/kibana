@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// import { EcsError } from '@elastic/ecs';
 import type { LogRecord } from '@kbn/logging';
 import type { Conversion } from './types';
 

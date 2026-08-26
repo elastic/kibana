@@ -16,16 +16,15 @@ import {
   ALERT_TIME_RANGE,
   ALERT_UUID,
 } from '@kbn/rule-data-utils';
-import type { Alert, LegacyField } from '@kbn/alerting-types';
+import type { Alert } from '@kbn/alerting-types';
 import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { fetchAlertsFields } from '@kbn/alerts-ui-shared/src/common/apis/fetch_alerts_fields';
 import { searchAlerts } from '@kbn/alerts-ui-shared/src/common/apis/search_alerts/search_alerts';
 import { testQueryClientConfig } from '@kbn/alerts-ui-shared/src/common/test_utils/test_query_client_config';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import { getMutedAlertsInstancesByRule } from '@kbn/response-ops-alerts-apis/apis/get_muted_alerts_instances_by_rule';
+import { getAlertSnoozeStateByRule } from '@kbn/response-ops-alerts-apis/apis/get_muted_alerts_instances_by_rule';
 import { applicationServiceMock, notificationServiceMock } from '@kbn/core/public/mocks';
-import { afterAll } from '@elastic/synthetics';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import type {
@@ -46,6 +45,7 @@ import { useLicense } from '../hooks/use_license';
 import { getJsDomPerformanceFix } from '../utils/test';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { defaultAlertsTableColumns } from '../configuration';
+import { renderingServiceMock } from '@kbn/core-rendering-browser-mocks';
 
 // Search alerts mock
 jest.mock('@kbn/alerts-ui-shared/src/common/apis/search_alerts/search_alerts');
@@ -103,89 +103,8 @@ const alerts: Alert[] = [
     [ALERT_MAINTENANCE_WINDOW_IDS]: [],
   },
 ];
-const oldAlertsData = [
-  [
-    {
-      field: AlertsField.name,
-      value: ['one'],
-    },
-    {
-      field: AlertsField.reason,
-      value: ['two'],
-    },
-  ],
-  [
-    {
-      field: AlertsField.name,
-      value: ['three'],
-    },
-    {
-      field: AlertsField.reason,
-      value: ['four'],
-    },
-  ],
-  [
-    {
-      field: AlertsField.name,
-      value: ['five'],
-    },
-    {
-      field: AlertsField.reason,
-      value: ['six'],
-    },
-  ],
-] as LegacyField[][];
-const ecsAlertsData = [
-  [
-    {
-      '@timestamp': ['2023-01-28T10:48:49.559Z'],
-      _id: 'SomeId',
-      _index: 'SomeIndex',
-      kibana: {
-        alert: {
-          rule: {
-            name: ['one'],
-          },
-          reason: ['two'],
-        },
-      },
-    },
-  ],
-  [
-    {
-      '@timestamp': ['2023-01-27T10:48:49.559Z'],
-      _id: 'SomeId2',
-      _index: 'SomeIndex',
-      kibana: {
-        alert: {
-          rule: {
-            name: ['three'],
-          },
-          reason: ['four'],
-        },
-      },
-    },
-  ],
-  [
-    {
-      '@timestamp': ['2023-01-26T10:48:49.559Z'],
-      _id: 'SomeId3',
-      _index: 'SomeIndex',
-      kibana: {
-        alert: {
-          rule: {
-            name: ['five'],
-          },
-          reason: ['six'],
-        },
-      },
-    },
-  ],
-];
 const mockSearchAlertsResponse: Awaited<ReturnType<typeof searchAlerts>> = {
   alerts,
-  ecsAlertsData,
-  oldAlertsData,
   total: alerts.length,
   querySnapshot: { request: [], response: [] },
 };
@@ -214,9 +133,9 @@ jest.mocked(fetchAlertsFields).mockResolvedValue({
   fields: [],
 });
 
-// Muted alerts mock
+// Alert snooze state mock
 jest.mock('@kbn/response-ops-alerts-apis/apis/get_muted_alerts_instances_by_rule');
-jest.mocked(getMutedAlertsInstancesByRule).mockResolvedValue({
+jest.mocked(getAlertSnoozeStateByRule).mockResolvedValue({
   data: [],
 });
 
@@ -307,6 +226,7 @@ describe('AlertsTable', () => {
       fieldFormats: fieldFormatsMock,
       licensing: licensingMock.createStart(),
       notifications: notificationServiceMock.createStartContract(),
+      rendering: renderingServiceMock.create(),
       settings: settingsServiceMock.createStartContract(),
     },
   };
@@ -317,7 +237,7 @@ describe('AlertsTable', () => {
   let refresh: RenderContext<AdditionalContext>['refresh'];
   let refreshSpy: jest.SpyInstance<void, []>;
 
-  mockAlertsDataGrid.mockImplementation((props) => {
+  const realAlertsDataGridMockImplementation = (props: AlertsDataGridProps) => {
     const { AlertsDataGrid: ActualAlertsDataGrid } = jest.requireActual('./alerts_data_grid');
     onPageIndexChange = props.renderContext.onPageIndexChange;
     onToggleColumn = props.onToggleColumn;
@@ -325,7 +245,9 @@ describe('AlertsTable', () => {
     refresh = props.renderContext.refresh;
     refreshSpy = jest.spyOn(props.renderContext, 'refresh');
     return <ActualAlertsDataGrid {...props} />;
-  });
+  };
+
+  mockAlertsDataGrid.mockImplementation(realAlertsDataGridMockImplementation);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -335,6 +257,23 @@ describe('AlertsTable', () => {
 
   describe('Columns', () => {
     describe('with no saved configuration', () => {
+      beforeAll(() => {
+        mockAlertsDataGrid.mockImplementation((props) => {
+          onToggleColumn = props.onToggleColumn;
+          onResetColumns = props.onResetColumns;
+          return (
+            <div>
+              {props.columnVisibility.visibleColumns.map((columnId: string) => (
+                <div key={columnId} data-test-subj={`dataGridHeaderCell-${columnId}`} />
+              ))}
+            </div>
+          );
+        });
+      });
+
+      afterAll(() => {
+        mockAlertsDataGrid.mockImplementation(realAlertsDataGridMockImplementation);
+      });
       it('should show the default columns if the columns prop is not set', async () => {
         render(<AlertsTable {...tableProps} columns={undefined} />);
 
@@ -897,8 +836,6 @@ describe('AlertsTable', () => {
     beforeEach(() => {
       mockSearchAlerts.mockResolvedValue({
         alerts: [],
-        oldAlertsData: [],
-        ecsAlertsData: [],
         total: 0,
         querySnapshot: { request: [], response: [] },
       });
@@ -921,8 +858,6 @@ describe('AlertsTable', () => {
       mockStorageData.clear();
       mockSearchAlerts.mockResolvedValue({
         alerts: [],
-        oldAlertsData: [],
-        ecsAlertsData: [],
         total: 0,
         querySnapshot: { request: [], response: [] },
         error: new Error('An error occurred'),
@@ -932,8 +867,6 @@ describe('AlertsTable', () => {
     it('should show error if sorted by column which is not supported', async () => {
       mockSearchAlerts.mockResolvedValue({
         alerts: [],
-        oldAlertsData: [],
-        ecsAlertsData: [],
         total: 0,
         querySnapshot: { request: [], response: [] },
         error: new Error('Sorting by range field [kibana.alert.time_range] is not supported'),
@@ -969,8 +902,6 @@ describe('AlertsTable', () => {
     it('should render reset button on error', async () => {
       mockSearchAlerts.mockResolvedValue({
         alerts: [],
-        oldAlertsData: [],
-        ecsAlertsData: [],
         total: 0,
         querySnapshot: { request: [], response: [] },
         error: new Error('Error while fetching alerts'),
@@ -986,8 +917,6 @@ describe('AlertsTable', () => {
     it('should go back to previous state when reset sort button is clicked', async () => {
       mockSearchAlerts.mockResolvedValue({
         alerts: [],
-        oldAlertsData: [],
-        ecsAlertsData: [],
         total: 0,
         querySnapshot: { request: [], response: [] },
         error: new Error('Sorting by range field [kibana.alert.time_range] is not supported'),
@@ -1030,8 +959,6 @@ describe('AlertsTable', () => {
     it('should go back to default state when reset button is clicked', async () => {
       mockSearchAlerts.mockResolvedValue({
         alerts: [],
-        oldAlertsData: [],
-        ecsAlertsData: [],
         total: 0,
         querySnapshot: { request: [], response: [] },
         error: new Error('Something went wrong'),

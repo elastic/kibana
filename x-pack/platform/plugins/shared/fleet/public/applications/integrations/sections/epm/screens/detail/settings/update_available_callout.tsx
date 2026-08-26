@@ -10,7 +10,6 @@ import { css } from '@emotion/react';
 
 import {
   EuiButton,
-  EuiCallOut,
   EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
@@ -19,6 +18,7 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { type BreakingChangesLog } from '../utils';
@@ -60,11 +60,7 @@ export const UpdateAvailableCallout = ({
   );
 
   return (
-    <EuiCallOut
-      color="warning"
-      iconType="warning"
-      title={breakingChanges ? titleWithBreakingChanges : defaultTitle}
-    >
+    <KbnWarningCallout title={breakingChanges ? titleWithBreakingChanges : defaultTitle}>
       {isOneChange ? (
         <>
           <FormattedMessage
@@ -129,13 +125,14 @@ export const UpdateAvailableCallout = ({
           <EuiSpacer size="m" />
           <EuiCheckbox
             id={checkboxId}
+            data-test-subj="breakingChangeCheckbox"
             label="I've reviewed the breaking changes and understand the impact."
             onChange={breakingChanges.toggleIsUnderstood}
             checked={breakingChanges.isUnderstood}
           />
         </>
       )}
-    </EuiCallOut>
+    </KbnWarningCallout>
   );
 };
 
@@ -153,7 +150,7 @@ const BreakingChangesButton = ({ href, onClick }: { href?: string; onClick: () =
           id="xpack.fleet.integrations.settings.versionInfo.reviewBreakingChangesButton"
           defaultMessage="Review breaking changes"
         />
-        <EuiIcon type="popout" />
+        <EuiIcon type="external" aria-hidden={true} />
       </EuiButton>
     );
   }

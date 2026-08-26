@@ -7,7 +7,7 @@
 
 import { DEFAULT_DOWNLOAD_SOURCE_URI } from '../../../../common/constants';
 import { PLATFORM_WITH_INSTALL_SERVERS, type EXTENDED_PLATFORM_TYPE } from '../../../hooks';
-import type { DownloadSource, FleetProxy, FleetServerHost } from '../../../types';
+import type { DownloadSource, ProxyConfig, FleetServerHost } from '../../../types';
 
 function getFleetServerHostsEnrollArgs({
   apiKey,
@@ -20,7 +20,7 @@ function getFleetServerHostsEnrollArgs({
   apiKey: string;
   fleetServerHost: string;
   fleetServerHostConfig?: FleetServerHost;
-  fleetProxy?: FleetProxy;
+  fleetProxy?: ProxyConfig;
   showInstallServers?: boolean;
   platform: EXTENDED_PLATFORM_TYPE;
 }) {
@@ -54,7 +54,7 @@ export const getDownloadBaseUrl = (downloadSource?: DownloadSource) => {
   return source.endsWith('/') ? source.substring(0, source.length - 1) : source;
 };
 
-export const getDownloadSourceProxyArgs = (downloadSourceProxy?: FleetProxy) => {
+export const getDownloadSourceProxyArgs = (downloadSourceProxy?: ProxyConfig) => {
   const windows = `${downloadSourceProxy?.url ? `-Proxy "${downloadSourceProxy.url}"` : ''} ${
     downloadSourceProxy?.proxy_headers
       ? `-Headers @{${Object.entries(downloadSourceProxy.proxy_headers)
@@ -98,9 +98,9 @@ export const ManualInstructions = ({
   apiKey: string;
   fleetServerHost: string;
   fleetServerHostConfig?: FleetServerHost;
-  fleetProxy?: FleetProxy;
+  fleetProxy?: ProxyConfig;
   downloadSource?: DownloadSource;
-  downloadSourceProxy?: FleetProxy;
+  downloadSourceProxy?: ProxyConfig;
   agentVersion: string;
   gcpProjectId?: string;
   gcpOrganizationId?: string;
@@ -127,9 +127,9 @@ export const ManualInstructions = ({
   const debOrRpmWithInstallServers = showInstallServers ? `ELASTIC_AGENT_FLAVOR=servers ` : '';
 
   const linuxAarch64Command = `curl -L -O ${downloadBaseUrl}/beats/elastic-agent/elastic-agent-${agentVersion}-linux-arm64.tar.gz ${curlDownloadSourceProxyArgs}
-  tar xzvf elastic-agent-${agentVersion}-linux-arm64.tar.gz
-  cd elastic-agent-${agentVersion}-linux-arm64
-  sudo ./elastic-agent install ${getEnrollArgsByPlatForm('linux_aarch64')}`;
+tar xzvf elastic-agent-${agentVersion}-linux-arm64.tar.gz
+cd elastic-agent-${agentVersion}-linux-arm64
+sudo ./elastic-agent install ${getEnrollArgsByPlatForm('linux_aarch64')}`;
 
   const linuxX8664Command = `curl -L -O ${downloadBaseUrl}/beats/elastic-agent/elastic-agent-${agentVersion}-linux-x86_64.tar.gz ${curlDownloadSourceProxyArgs}
 tar xzvf elastic-agent-${agentVersion}-linux-x86_64.tar.gz

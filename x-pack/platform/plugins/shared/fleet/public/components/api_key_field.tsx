@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -13,43 +13,58 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
-import type { SendRequestResponse } from '@kbn/es-ui-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 
 import { useStartServices } from '../hooks';
 
+const TOKEN_MASK = '•'.repeat(24);
+
 export const ApiKeyField: React.FunctionComponent<{
   apiKeyId: string;
-  length: number;
-  sendGetAPIKey: (id: string) => Promise<SendRequestResponse>;
-  tokenGetter: (response: SendRequestResponse) => string | undefined;
-}> = ({ apiKeyId, length, sendGetAPIKey, tokenGetter }) => {
+  getToken: (id: string) => Promise<string>;
+}> = ({ apiKeyId, getToken }) => {
   const { euiTheme } = useEuiTheme();
   const { notifications } = useStartServices();
   const [state, setState] = useState<'VISIBLE' | 'HIDDEN' | 'LOADING'>('HIDDEN');
   const [key, setKey] = useState<string | undefined>();
 
-  const tokenMask = useMemo(() => '•'.repeat(length), [length]);
+  const fetchKey = async () => {
+    try {
+      setState('LOADING');
+      const fetchedKey = await getToken(apiKeyId);
+      setKey(fetchedKey);
+      setState('VISIBLE');
+      return fetchedKey;
+    } catch (err) {
+      notifications.toasts.addError(err as Error, {
+        title: 'Error',
+      });
+      setState('HIDDEN');
+    }
+  };
 
   const toggleKey = async () => {
     if (state === 'VISIBLE') {
       setState('HIDDEN');
     } else if (state === 'HIDDEN') {
-      try {
-        setState('LOADING');
-        const res = await sendGetAPIKey(apiKeyId);
-        if (res.error) {
-          throw res.error;
-        }
-        setKey(tokenGetter(res));
-        setState('VISIBLE');
-      } catch (err) {
-        notifications.toasts.addError(err as Error, {
-          title: 'Error',
-        });
-        setState('HIDDEN');
-      }
+      await fetchKey();
+    }
+  };
+
+  const copyToken = async () => {
+    let tokenToCopy = key;
+    if (!tokenToCopy) {
+      tokenToCopy = await fetchKey();
+    }
+    if (tokenToCopy) {
+      navigator.clipboard.writeText(tokenToCopy);
+      notifications.toasts.addSuccess({
+        title: i18n.translate('xpack.fleet.enrollmentTokensList.tokenCopied', {
+          defaultMessage: 'Token copied to clipboard',
+        }),
+        toastLifeTimeMs: 2000,
+      });
     }
   };
 
@@ -64,7 +79,7 @@ export const ApiKeyField: React.FunctionComponent<{
           `}
           data-test-subj="apiKeyField"
         >
-          {state === 'VISIBLE' ? key : tokenMask}
+          {state === 'VISIBLE' ? key : TOKEN_MASK}
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -92,8 +107,26 @@ export const ApiKeyField: React.FunctionComponent<{
             }
             color="text"
             onClick={toggleKey}
-            iconType={state === 'VISIBLE' ? 'eyeClosed' : 'eye'}
+            iconType={state === 'VISIBLE' ? 'eyeSlash' : 'eye'}
             data-test-subj="showHideTokenButton"
+          />
+        </EuiToolTip>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiToolTip
+          content={i18n.translate('xpack.fleet.enrollmentTokensList.copyTokenButtonLabel', {
+            defaultMessage: 'Copy token',
+          })}
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            aria-label={i18n.translate('xpack.fleet.enrollmentTokensList.copyTokenButtonLabel', {
+              defaultMessage: 'Copy token',
+            })}
+            color="text"
+            onClick={copyToken}
+            iconType="copy"
+            data-test-subj="copyTokenButton"
           />
         </EuiToolTip>
       </EuiFlexItem>

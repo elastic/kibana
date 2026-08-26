@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/275650
+issues:
+- https://github.com/elastic/kibana/issues/256044
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-14
+areas:
+- Kibana platform
+title: "Fix Kibana page-load metrics creating a separate transaction for every URL"
+description: "Kibana page-load performance transactions are now named by application (for example, `/app/discover`) instead of the full URL path, so aggregated metrics stay usable and don't grow with every unique page visited."

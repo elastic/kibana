@@ -1,0 +1,13 @@
+prs:
+- https://github.com/elastic/kibana/pull/280524
+issues:
+- https://github.com/elastic/kibana/issues/280403
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-28
+- product: kibana
+areas:
+- Discover and ES|QL
+title: Fix ES|QL autocomplete after TS_INFO and METRICS_INFO commands
+description: Autocomplete now suggests columns that match the metadata rows returned by `TS_INFO` and `METRICS_INFO`, not the original time series table.

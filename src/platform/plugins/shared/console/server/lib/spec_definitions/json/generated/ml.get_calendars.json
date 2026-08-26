@@ -10,6 +10,12 @@
         "10000"
       ]
     },
+    "data_autocomplete_rules": {
+      "page": {
+        "from": "",
+        "size": ""
+      }
+    },
     "methods": [
       "GET",
       "POST"
@@ -19,6 +25,7 @@
       "_ml/calendars/{calendar_id}"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-calendars",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-ml-get-calendars",
     "availability": {
       "stack": true,
       "serverless": true

@@ -20,6 +20,8 @@ import type {
 import type { ContextWithProfileId } from '../profile_service';
 import type { ScopedDiscoverEBTManager } from '../../ebt_manager';
 import type { AppliedProfile } from '../composable_profile';
+import type { ContextAwarenessToolkit } from '../toolkit';
+import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../toolkit';
 import { logResolutionError } from './utils';
 import { ScopedProfilesManager } from './scoped_profiles_manager';
 import { ContextualProfileLevel } from './consts';
@@ -33,13 +35,13 @@ interface SerializedRootProfileParams {
  */
 export interface ResolveRootProfileResult {
   /**
-   * Render app wrapper accessor
-   */
-  getRenderAppWrapper: AppliedProfile['getRenderAppWrapper'];
-  /**
    * Default ad hoc data views accessor
    */
   getDefaultAdHocDataViews: AppliedProfile['getDefaultAdHocDataViews'];
+  /**
+   * Default ES|QL query accessor
+   */
+  getDefaultEsqlQuery: AppliedProfile['getDefaultEsqlQuery'];
 }
 
 export class ProfilesManager {
@@ -55,10 +57,16 @@ export class ProfilesManager {
     private readonly documentProfileService: DocumentProfileService
   ) {
     this.rootContext$ = new BehaviorSubject(rootProfileService.defaultContext);
-    this.rootProfile = rootProfileService.getProfile({ context: this.rootContext$.getValue() });
+    this.rootProfile = rootProfileService.getProfile({
+      context: this.rootContext$.getValue(),
+      toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
+    });
 
     this.rootContext$.pipe(skip(1)).subscribe((context) => {
-      this.rootProfile = rootProfileService.getProfile({ context });
+      this.rootProfile = rootProfileService.getProfile({
+        context,
+        toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
+      });
     });
   }
 
@@ -73,8 +81,8 @@ export class ProfilesManager {
 
     if (isEqual(this.prevRootProfileParams, serializedParams)) {
       return {
-        getRenderAppWrapper: this.rootProfile.getRenderAppWrapper,
         getDefaultAdHocDataViews: this.rootProfile.getDefaultAdHocDataViews,
+        getDefaultEsqlQuery: this.rootProfile.getDefaultEsqlQuery,
       };
     }
 
@@ -92,8 +100,8 @@ export class ProfilesManager {
 
     if (abortController.signal.aborted) {
       return {
-        getRenderAppWrapper: this.rootProfile.getRenderAppWrapper,
         getDefaultAdHocDataViews: this.rootProfile.getDefaultAdHocDataViews,
+        getDefaultEsqlQuery: this.rootProfile.getDefaultEsqlQuery,
       };
     }
 
@@ -101,8 +109,8 @@ export class ProfilesManager {
     this.prevRootProfileParams = serializedParams;
 
     return {
-      getRenderAppWrapper: this.rootProfile.getRenderAppWrapper,
       getDefaultAdHocDataViews: this.rootProfile.getDefaultAdHocDataViews,
+      getDefaultEsqlQuery: this.rootProfile.getDefaultEsqlQuery,
     };
   }
 
@@ -112,15 +120,22 @@ export class ProfilesManager {
    */
   public createScopedProfilesManager({
     scopedEbtManager,
+    toolkit,
   }: {
     scopedEbtManager: ScopedDiscoverEBTManager;
+    toolkit: ContextAwarenessToolkit;
   }) {
     return new ScopedProfilesManager(
       this.rootContext$,
-      () => this.rootProfile,
+      () =>
+        this.rootProfileService.getProfile({
+          context: this.rootContext$.getValue(),
+          toolkit,
+        }),
       this.dataSourceProfileService,
       this.documentProfileService,
-      scopedEbtManager
+      scopedEbtManager,
+      toolkit
     );
   }
 }

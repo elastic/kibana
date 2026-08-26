@@ -4,24 +4,24 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/security-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-security'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/security-plugin'
+  title: '@kbn/security-plugin'
   description: Moon project for @kbn/security-plugin
   channel: ''
   owner: '@elastic/kibana-security'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/shared/security
+  sourceRoot: x-pack/platform/plugins/shared/security
 dependsOn:
   - '@kbn/cloud-plugin'
   - '@kbn/features-plugin'
   - '@kbn/licensing-plugin'
   - '@kbn/spaces-plugin'
+  - '@kbn/core-spaces-common'
   - '@kbn/task-manager-plugin'
   - '@kbn/data-views-plugin'
   - '@kbn/es-ui-shared-plugin'
@@ -83,6 +83,7 @@ dependsOn:
   - '@kbn/core-analytics-browser-mocks'
   - '@kbn/core-user-profile-server'
   - '@kbn/core-user-profile-browser'
+  - '@kbn/core-user-profile-browser-hooks'
   - '@kbn/security-api-key-management'
   - '@kbn/security-form-components'
   - '@kbn/core-security-server-mocks'
@@ -102,7 +103,21 @@ dependsOn:
   - '@kbn/licensing-types'
   - '@kbn/lazy-object'
   - '@kbn/scout'
+  - '@kbn/dev-utils'
+  - '@kbn/security-api-integration-helpers'
   - '@kbn/mock-idp-utils'
+  - '@kbn/core-user-activity-server'
+  - '@kbn/core-user-activity-server-mocks'
+  - '@kbn/deeplinks-agent-builder'
+  - '@kbn/react-query'
+  - '@kbn/agent-builder-common'
+  - '@kbn/agent-builder-browser'
+  - '@kbn/core-user-profile-common'
+  - '@kbn/core-chrome-browser-components'
+  - '@kbn/core-logging-server'
+  - '@kbn/projects-solutions-groups'
+  - '@kbn/unsaved-changes-prompt'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod
@@ -117,16 +132,6 @@ fileGroups:
     - test/**/*
     - __mocks__/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

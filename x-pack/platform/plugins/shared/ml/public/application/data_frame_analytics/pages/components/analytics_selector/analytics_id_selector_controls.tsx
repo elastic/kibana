@@ -87,6 +87,12 @@ const SelectorControl = ({ analyticsId, 'data-test-subj': dataTestSubj }: Select
       closePopover={closePopover}
       panelPaddingSize="none"
       anchorPosition="downLeft"
+      aria-label={i18n.translate(
+        'xpack.ml.overview.dataFrameAnalytics.analyticsDetailsPopoverAriaLabel',
+        {
+          defaultMessage: 'Job details',
+        }
+      )}
     >
       <EuiContextMenu initialPanelId={0} panels={panels} />
     </EuiPopover>
@@ -157,6 +163,7 @@ export const AnalyticsIdSelectorControls: FC<Props> = ({
             <EuiButtonEmpty
               size="s"
               color="primary"
+              iconType="gear"
               onClick={redirectToDfaJobManagement}
               disabled={!canGetDataFrameAnalytics}
               data-test-subj="mlJobSelectorManageJobsButton"

@@ -10,6 +10,7 @@ import {
   NODE_WIDTH,
   NODE_HEIGHT,
   NODE_LABEL_WIDTH,
+  ENTITY_NODE_LABEL_WIDTH,
   NODE_LABEL_HEIGHT,
 } from './constants';
 
@@ -24,6 +25,10 @@ describe('constants', () => {
 
   it('should set NODE_LABEL_WIDTH a multiplication of 2*GRID_SIZE', () => {
     expect(NODE_LABEL_WIDTH % (2 * GRID_SIZE)).toBe(0);
+  });
+
+  it('should set ENTITY_NODE_LABEL_WIDTH a multiplication of 2*GRID_SIZE', () => {
+    expect(ENTITY_NODE_LABEL_WIDTH % (2 * GRID_SIZE)).toBe(0);
   });
 
   it('should set NODE_LABEL_HEIGHT a multiplication of 2*GRID_SIZE', () => {

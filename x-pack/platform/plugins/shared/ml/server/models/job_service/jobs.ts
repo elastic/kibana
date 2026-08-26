@@ -13,33 +13,35 @@ import type { RulesClient } from '@kbn/alerting-plugin/server';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { parseInterval } from '@kbn/ml-parse-interval';
 
-import {
-  getSingleMetricViewerJobErrorMessage,
-  parseTimeIntervalForJob,
-  isJobWithGeoData,
-  createDatafeedId,
-} from '../../../common/util/job_utils';
-import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';
-import type { JobAction } from '../../../common/constants/job_actions';
+import type {
+  DatafeedWithStats,
+  CombinedJobWithStats,
+} from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type {
+  MlSummaryJob,
+  AuditMessage,
+} from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
+import type {
+  JobsExistResponse,
+  BulkCreateResults,
+  ResetJobsResponse,
+} from '@kbn/ml-common-types/job_service';
 import {
   getJobActionString,
   JOB_ACTION_TASK,
   JOB_ACTION_TASKS,
   JOB_ACTION,
 } from '../../../common/constants/job_actions';
-import type {
-  MlSummaryJob,
-  AuditMessage,
-  DatafeedWithStats,
-  CombinedJobWithStats,
-  Datafeed,
-  Job,
-} from '../../../common/types/anomaly_detection_jobs';
-import type {
-  JobsExistResponse,
-  BulkCreateResults,
-  ResetJobsResponse,
-} from '../../../common/types/job_service';
+import type { JobAction } from '../../../common/constants/job_actions';
+import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';
+import {
+  getSingleMetricViewerJobErrorMessage,
+  parseTimeIntervalForJob,
+  isJobWithGeoData,
+  createDatafeedId,
+} from '../../../common/util/job_utils';
 import { GLOBAL_CALENDAR } from '../../../common/constants/calendars';
 import { datafeedsProvider } from './datafeeds';
 import { jobAuditMessagesProvider } from '../job_audit_messages';
@@ -54,7 +56,7 @@ import { groupsProvider } from './groups';
 import type { MlClient } from '../../lib/ml_client';
 import { ML_ALERT_TYPES } from '../../../common/constants/alerts';
 import type { MlAnomalyDetectionAlertParams } from '../../routes/schemas/alerting_schema';
-import type { AuthorizationHeader } from '../../lib/request_authorization';
+import type { ServerlessInfo } from '../../types';
 
 interface Results {
   [id: string]: {
@@ -66,6 +68,7 @@ interface Results {
 export function jobsProvider(
   client: IScopedClusterClient,
   mlClient: MlClient,
+  serverless: ServerlessInfo,
   rulesClient?: RulesClient
 ) {
   const { asInternalUser } = client;
@@ -74,7 +77,7 @@ export function jobsProvider(
     client,
     mlClient
   );
-  const { getAuditMessagesSummary } = jobAuditMessagesProvider(client, mlClient);
+  const { getAuditMessagesSummary } = jobAuditMessagesProvider(client, mlClient, serverless);
   const { getLatestBucketTimestampByJob } = resultsServiceProvider(mlClient);
   const calMngr = new CalendarManager(mlClient);
 
@@ -284,6 +287,10 @@ export function jobsProvider(
         jobTags: job.custom_settings?.job_tags ?? {},
         bucketSpanSeconds: parseInterval(job.analysis_config.bucket_span!)!.asSeconds(),
       };
+
+      if (serverless.cpsEnabled && hasDatafeed) {
+        tempJob.projectRouting = job.datafeed_config.project_routing ?? null;
+      }
 
       if (jobIds.find((j) => j === tempJob.id)) {
         tempJob.fullJob = job;
@@ -672,10 +679,7 @@ export function jobsProvider(
     return job.node === undefined && job.state === JOB_STATE.OPENING;
   }
 
-  async function bulkCreate(
-    jobs: Array<{ job: Job; datafeed: Datafeed }>,
-    authHeader: AuthorizationHeader
-  ) {
+  async function bulkCreate(jobs: Array<{ job: Job; datafeed: Datafeed }>) {
     const results: BulkCreateResults = Object.create(null);
     await Promise.all(
       jobs.map(async ({ job, datafeed }) => {
@@ -689,7 +693,7 @@ export function jobsProvider(
         }
 
         try {
-          await mlClient.putDatafeed(datafeed, authHeader);
+          await mlClient.putDatafeed(datafeed);
           results[job.job_id].datafeed = { success: true };
         } catch (error) {
           results[job.job_id].datafeed = { success: false, error: error.body ?? error };

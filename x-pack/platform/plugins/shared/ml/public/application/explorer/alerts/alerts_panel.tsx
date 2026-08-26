@@ -130,7 +130,7 @@ const sort: AlertsTableSortCombinations[] = [
 ];
 
 export const AlertsPanel: FC = () => {
-  const { data, http, notifications, fieldFormats, application, licensing, settings } =
+  const { data, http, notifications, rendering, fieldFormats, application, licensing, settings } =
     useMlKibana().services;
 
   const [isOpen, setIsOpen] = useState(true);
@@ -227,6 +227,7 @@ export const AlertsPanel: FC = () => {
               data,
               http,
               notifications,
+              rendering,
               fieldFormats,
               application,
               licensing,

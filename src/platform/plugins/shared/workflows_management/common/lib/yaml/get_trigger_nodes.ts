@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Document, Pair, YAMLMap } from 'yaml';
-import { isMap, isPair, isScalar, visit } from 'yaml';
+import type { Document, Pair, Scalar, YAMLMap } from 'yaml';
+import { isMap, isPair, isScalar, isSeq } from 'yaml';
 
 /**
  * Finds the triggers pair in the YAML document, even if it's empty or has empty items
@@ -38,50 +38,42 @@ export function getTriggersPair(yamlDocument: Document): Pair | null {
  */
 export function getTriggerNodes(
   yamlDocument: Document
-): Array<{ node: YAMLMap; triggerType: string; typePair: Pair }> {
+): Array<{ node: YAMLMap; triggerType: string; typePair: Pair<Scalar, Scalar> }> {
   const triggerNodes: Array<{
     node: YAMLMap;
     triggerType: string;
-    typePair: Pair;
+    typePair: Pair<Scalar, Scalar>;
   }> = [];
 
   if (!yamlDocument?.contents) {
     return triggerNodes;
   }
 
-  visit(yamlDocument, {
-    Pair(key, pair, ancestors) {
-      if (!pair.key || !isScalar(pair.key) || pair.key.value !== 'type') {
-        return;
-      }
+  const triggersPair = getTriggersPair(yamlDocument);
+  if (!triggersPair?.value || !isSeq(triggersPair.value)) {
+    return triggerNodes;
+  }
 
-      // Check if this is a type field within a trigger
-      const path = ancestors.slice();
-      let isTriggerType = false;
+  for (const item of triggersPair.value.items) {
+    if (isMap(item)) {
+      const typePair = item.items.find(
+        (pair): pair is Pair<Scalar, Scalar> =>
+          isPair(pair) &&
+          isScalar(pair.key) &&
+          pair.key.value === 'type' &&
+          isScalar(pair.value) &&
+          typeof pair.value.value === 'string'
+      );
 
-      // Walk up the ancestors to see if we're in a triggers array
-      for (let i = path.length - 1; i >= 0; i--) {
-        const ancestor = path[i];
-        if (isPair(ancestor) && isScalar(ancestor.key) && ancestor.key.value === 'triggers') {
-          isTriggerType = true;
-          break;
-        }
+      if (typePair && isScalar(typePair.value) && typeof typePair.value.value === 'string') {
+        triggerNodes.push({
+          node: item,
+          triggerType: typePair.value.value,
+          typePair,
+        });
       }
-
-      if (isTriggerType && isScalar(pair.value)) {
-        const triggerType = pair.value.value as string;
-        // Find the parent map node that contains this trigger
-        const triggerMapNode = ancestors[ancestors.length - 1];
-        if (isMap(triggerMapNode)) {
-          triggerNodes.push({
-            node: triggerMapNode,
-            triggerType,
-            typePair: pair, // Store the actual type pair for precise positioning
-          });
-        }
-      }
-    },
-  });
+    }
+  }
 
   return triggerNodes;
 }

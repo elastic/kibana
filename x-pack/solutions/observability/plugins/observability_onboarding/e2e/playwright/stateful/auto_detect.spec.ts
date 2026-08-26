@@ -10,9 +10,11 @@ import path from 'node:path';
 import { test } from './fixtures/base_page';
 import { HostDetailsPage } from './pom/pages/host_details.page';
 import { assertEnv } from '../lib/assert_env';
+import { assertDiscoverHasData } from '../lib/validation_helpers';
 
-test.beforeEach(async ({ page }) => {
+test.beforeEach(async ({ page, onboardingHomePage }) => {
   await page.goto(`${process.env.KIBANA_BASE_URL}/app/observabilityOnboarding`);
+  await onboardingHomePage.maybeClickIntroducingAIAgentModalContinueBtn();
 });
 
 test('Auto-detect logs and metrics', async ({ page, onboardingHomePage, autoDetectFlowPage }) => {
@@ -62,12 +64,7 @@ test('Auto-detect logs and metrics', async ({ page, onboardingHomePage, autoDete
     await hostDetailsPage.assertCpuPercentageNotEmpty();
   } else {
     await autoDetectFlowPage.assertReceivedDataIndicator();
-
     await page.goto(`${process.env.KIBANA_BASE_URL}/app/discover`);
-
-    const { DiscoverValidationPage } = await import('./pom/pages/discover_validation.page');
-    const discoverValidation = new DiscoverValidationPage(page);
-    await discoverValidation.waitForDiscoverToLoad();
-    await discoverValidation.assertHasAnyLogData();
+    await assertDiscoverHasData(page);
   }
 });

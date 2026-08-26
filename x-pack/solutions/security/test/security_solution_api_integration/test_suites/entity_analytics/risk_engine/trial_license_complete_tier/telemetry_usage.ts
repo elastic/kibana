@@ -28,7 +28,7 @@ export default ({ getService }: FtrProviderContext) => {
   const createAndSyncRuleAndAlerts = createAndSyncRuleAndAlertsFactory({ supertest, log });
   const riskEngineRoutes = riskEngineRouteHelpersFactory(supertest);
 
-  describe('@ess @serverless telemetry', () => {
+  describe('@ess @serverless @skipInServerlessMKI telemetry', () => {
     const { indexListOfDocuments } = dataGeneratorFactory({
       es,
       index: 'ecs_compliant',

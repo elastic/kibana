@@ -15,9 +15,11 @@ import type {
   PublishesTitle,
   PublishesSavedObjectId,
   PublishesUnifiedSearch,
+  PublishesWritableTitle,
+  SupportsJsonExport,
 } from '@kbn/presentation-publishing';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type { HasSerializedChildState, PresentationContainer } from '@kbn/presentation-containers';
+import type { HasSerializedChildState, PresentationContainer } from '@kbn/presentation-publishing';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { DASHBOARD_API_TYPE } from '@kbn/dashboard-plugin/public';
 import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
@@ -43,10 +45,13 @@ export type LinksParentApi = PresentationContainer &
 
 export type LinksApi = HasType<typeof LINKS_EMBEDDABLE_TYPE> &
   DefaultEmbeddableApi<LinksEmbeddableState> &
+  PublishesWritableTitle &
   HasEditCapabilities &
-  HasLibraryTransforms<LinksByReferenceState, LinksByValueState>;
+  HasLibraryTransforms<LinksByReferenceState, LinksByValueState> &
+  SupportsJsonExport;
 
 export type ResolvedLink = Link & {
+  id: string;
   title: string;
   label?: string;
   description?: string;

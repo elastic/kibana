@@ -7,6 +7,7 @@
 import { i18n } from '@kbn/i18n';
 
 import { schema } from '@kbn/config-schema';
+import type { IntervalSchedule } from '@kbn/task-manager-plugin/server';
 import {
   getSyntheticsDynamicSettings,
   setSyntheticsDynamicSettings,
@@ -14,7 +15,19 @@ import {
 import type { SyntheticsRestApiRouteFactory } from '../types';
 import type { DynamicSettings } from '../../../common/runtime_types';
 import type { DynamicSettingsAttributes } from '../../runtime_types/settings';
-import { SYNTHETICS_API_URLS } from '../../../common/constants';
+import {
+  SYNTHETICS_API_URLS,
+  MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL,
+  MAX_PRIVATE_LOCATIONS_SYNC_INTERVAL,
+} from '../../../common/constants';
+import {
+  DEFAULT_TASK_SCHEDULE,
+  PRIVATE_LOCATIONS_SYNC_TASK_ID,
+  runSynPrivateLocationMonitorsTaskSoon,
+} from '../../tasks/sync_private_locations_monitors_task';
+
+const parseIntervalMinutes = (interval: string): number =>
+  parseInt(interval, 10) || MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL;
 
 export const createGetDynamicSettingsRoute: SyntheticsRestApiRouteFactory<
   DynamicSettings
@@ -22,31 +35,80 @@ export const createGetDynamicSettingsRoute: SyntheticsRestApiRouteFactory<
   method: 'GET',
   path: SYNTHETICS_API_URLS.DYNAMIC_SETTINGS,
   validate: false,
-  handler: async ({ savedObjectsClient }) => {
+  handler: async ({ savedObjectsClient, server }) => {
     const dynamicSettingsAttributes: DynamicSettingsAttributes = await getSyntheticsDynamicSettings(
       savedObjectsClient
     );
-    return fromSettingsAttribute(dynamicSettingsAttributes);
+
+    let privateLocationsSyncInterval = MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL;
+    try {
+      const task = await server.pluginsStart.taskManager.get(PRIVATE_LOCATIONS_SYNC_TASK_ID);
+      const taskInterval = (task.schedule as IntervalSchedule | undefined)?.interval;
+      if (taskInterval) {
+        privateLocationsSyncInterval = parseIntervalMinutes(taskInterval);
+      }
+    } catch (_err) {
+      // not yet created
+    }
+
+    return { ...fromSettingsAttribute(dynamicSettingsAttributes), privateLocationsSyncInterval };
   },
 });
 
-export const createPostDynamicSettingsRoute: SyntheticsRestApiRouteFactory = () => ({
+export const createPostDynamicSettingsRoute: SyntheticsRestApiRouteFactory<
+  DynamicSettings
+> = () => ({
   method: 'PUT',
   path: SYNTHETICS_API_URLS.DYNAMIC_SETTINGS,
   validate: {
     body: DynamicSettingsSchema,
   },
   writeAccess: true,
-  handler: async ({ savedObjectsClient, request }): Promise<DynamicSettingsAttributes> => {
-    const newSettings = request.body;
+  handler: async ({ savedObjectsClient, request, response, server }): Promise<DynamicSettings> => {
+    const { privateLocationsSyncInterval, ...otherSettings } = request.body;
     const prevSettings = await getSyntheticsDynamicSettings(savedObjectsClient);
 
     const attr = await setSyntheticsDynamicSettings(savedObjectsClient, {
       ...prevSettings,
-      ...newSettings,
+      ...otherSettings,
     } as DynamicSettingsAttributes);
 
-    return fromSettingsAttribute(attr as DynamicSettingsAttributes);
+    if (privateLocationsSyncInterval != null) {
+      await server.pluginsStart.taskManager.bulkUpdateSchedules([PRIVATE_LOCATIONS_SYNC_TASK_ID], {
+        interval: `${privateLocationsSyncInterval}m`,
+      });
+      void runSynPrivateLocationMonitorsTaskSoon({ server });
+    }
+
+    let persistedInterval = MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL;
+    try {
+      const task = await server.pluginsStart.taskManager.get(PRIVATE_LOCATIONS_SYNC_TASK_ID);
+      const taskInterval = (task.schedule as IntervalSchedule | undefined)?.interval;
+      if (taskInterval) {
+        persistedInterval = parseIntervalMinutes(taskInterval);
+      }
+    } catch (_err) {
+      persistedInterval = parseIntervalMinutes(DEFAULT_TASK_SCHEDULE);
+    }
+
+    if (
+      privateLocationsSyncInterval != null &&
+      persistedInterval !== privateLocationsSyncInterval
+    ) {
+      return response.conflict({
+        body: {
+          message: i18n.translate('xpack.synthetics.settings.syncInterval.taskRunning', {
+            defaultMessage:
+              'The sync task is currently running. Please try saving the interval again in a moment.',
+          }),
+        },
+      }) as never;
+    }
+
+    return {
+      ...fromSettingsAttribute(attr as DynamicSettingsAttributes),
+      privateLocationsSyncInterval: persistedInterval,
+    };
   },
 });
 
@@ -87,6 +149,13 @@ export const DynamicSettingsSchema = schema.object({
       to: schema.arrayOf(schema.string()),
       cc: schema.maybe(schema.arrayOf(schema.string())),
       bcc: schema.maybe(schema.arrayOf(schema.string())),
+    })
+  ),
+  privateLocationsSyncInterval: schema.maybe(
+    schema.number({
+      min: MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL,
+      max: MAX_PRIVATE_LOCATIONS_SYNC_INTERVAL,
+      validate: validateInteger,
     })
   ),
 });

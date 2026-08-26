@@ -7,22 +7,17 @@
 
 import { createAttachmentServiceMock } from '../../../services/mocks';
 import { AlertLimiter } from './alerts';
-import { createAlertRequests, createUserRequests } from '../test_utils';
+import { createAlertRequests, createUnifiedAlertRequests, createUserRequests } from '../test_utils';
 
 describe('AlertLimiter', () => {
   const attachmentService = createAttachmentServiceMock();
-  attachmentService.executeCaseAggregations.mockImplementation(async () => {
-    return {
-      limiter: {
-        value: 5,
-      },
-    };
-  });
+  attachmentService.countAlertsWithinCase.mockResolvedValue(5);
 
   const alert = new AlertLimiter(attachmentService);
 
   beforeEach(() => {
     jest.clearAllMocks();
+    attachmentService.countAlertsWithinCase.mockResolvedValue(5);
   });
 
   describe('public fields', () => {
@@ -72,31 +67,41 @@ describe('AlertLimiter', () => {
         ])
       ).toBe(2);
     });
+
+    it('counts unified alert attachments', () => {
+      expect(
+        alert.countOfItemsInRequest(createUnifiedAlertRequests(1, ['unified-1', 'unified-2']))
+      ).toBe(2);
+    });
+
+    it('aggregates legacy and unified alerts in the same request batch', () => {
+      const requests = [
+        ...createUserRequests(1),
+        ...createAlertRequests(1, ['legacy-1', 'legacy-2']), // 2
+        ...createAlertRequests(2, 'legacy-3'), // 2 (1 each)
+        ...createUnifiedAlertRequests(1, ['unified-1', 'unified-2', 'unified-3']), // 3
+        ...createUnifiedAlertRequests(2, 'unified-4'), // 2 (1 each)
+      ];
+      expect(alert.countOfItemsInRequest(requests)).toBe(2 + 2 + 3 + 2);
+    });
   });
 
   describe('countOfItemsWithinCase', () => {
-    it('calls the aggregation function with the correct arguments', async () => {
+    it('delegates to attachmentService.countAlertsWithinCase with the case id', async () => {
       await alert.countOfItemsWithinCase('id');
 
-      expect(attachmentService.executeCaseAggregations.mock.calls[0]).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "aggregations": Object {
-              "limiter": Object {
-                "value_count": Object {
-                  "field": "cases-comments.attributes.alertId",
-                },
-              },
-            },
-            "attachmentType": "alert",
-            "caseId": "id",
-          },
-        ]
-      `);
+      expect(attachmentService.countAlertsWithinCase).toHaveBeenCalledTimes(1);
+      expect(attachmentService.countAlertsWithinCase).toHaveBeenCalledWith('id');
     });
 
-    it('returns 5', async () => {
-      expect(await alert.countOfItemsWithinCase('id')).toBe(5);
+    it('returns the count from the service (covers legacy + unified totals)', async () => {
+      attachmentService.countAlertsWithinCase.mockResolvedValueOnce(7);
+      expect(await alert.countOfItemsWithinCase('id')).toBe(7);
+    });
+
+    it('returns 0 when the service returns 0 (no legacy nor unified alerts)', async () => {
+      attachmentService.countAlertsWithinCase.mockResolvedValueOnce(0);
+      expect(await alert.countOfItemsWithinCase('id')).toBe(0);
     });
   });
 });

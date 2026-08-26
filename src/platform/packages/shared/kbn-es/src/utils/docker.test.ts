@@ -10,7 +10,7 @@
 import mockFs from 'mock-fs';
 
 import Fsp from 'fs/promises';
-import { basename } from 'path';
+import { basename, join } from 'path';
 
 import type { ServerlessOptions, ServerlessProjectType } from './docker';
 import * as dockerUiam from './docker_uiam';
@@ -33,6 +33,8 @@ import {
   teardownServerlessClusterSync,
   verifyDockerInstalled,
   getESp12Volume,
+  getServerlessNodes,
+  getSharedServerlessParams,
 } from './docker';
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
 import { CA_CERT_PATH, ES_P12_PATH } from '@kbn/dev-utils';
@@ -40,6 +42,7 @@ import {
   SERVERLESS_CONFIG_PATH,
   SERVERLESS_RESOURCES_PATHS,
   SERVERLESS_SECRETS_PATH,
+  SERVERLESS_SECRETS_SSL_PATH,
   SERVERLESS_JWKS_PATH,
   SERVERLESS_IDP_METADATA_PATH,
   SERVERLESS_OPERATOR_PATH,
@@ -48,8 +51,26 @@ import * as waitClusterUtil from './wait_until_cluster_ready';
 import * as waitForSecurityIndexUtil from './wait_for_security_index';
 import * as mockIdpPluginUtil from '@kbn/mock-idp-utils';
 
+/**
+ * This is set to 'true' on CI, and it causes some docker behaviours to differ.
+ * There's a specific test that verifies the cached image is used when set to true.
+ */
+process.env.KBN_ES_SNAPSHOT_USE_CACHED = 'false';
+
 jest.mock('execa');
 const execa = jest.requireMock('execa');
+execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
+
+jest.mock('./read_string_secrets', () => ({
+  readStringSecrets: jest.fn().mockResolvedValue({}),
+}));
+
+const readStringSecretsMock = (
+  jest.requireMock('./read_string_secrets') as {
+    readStringSecrets: jest.MockedFunction<(path: string) => Promise<Record<string, string>>>;
+  }
+).readStringSecrets;
+
 jest.mock('@elastic/elasticsearch', () => {
   return {
     Client: jest.fn(),
@@ -135,6 +156,63 @@ const volumeCmdTest = async (volumeCmd: string[]) => {
   // eslint-disable-next-line no-bitwise
   expect((await Fsp.stat(serverlessObjectStorePath)).mode & 0o777).toBe(0o777);
 };
+
+describe('getServerlessNodes()', () => {
+  test('should return default node names and ports with no arguments', () => {
+    const nodes = getServerlessNodes();
+    expect(nodes).toHaveLength(2);
+    expect(nodes[0].name).toBe('es01');
+    expect(nodes[1].name).toBe('es02');
+    expect(nodes[0].params).toEqual(expect.arrayContaining(['127.0.0.1:9300:9300']));
+    expect(nodes[1].params).toEqual(expect.arrayContaining(['127.0.0.1:9202:9202']));
+    expect(nodes[1].params).toEqual(expect.arrayContaining(['127.0.0.1:9302:9302']));
+    expect(nodes[0].params).toEqual(
+      expect.arrayContaining([
+        'node.roles=["master","remote_cluster_client","ingest","index","ml","transform"]',
+      ])
+    );
+    expect(nodes[1].params).toEqual(
+      expect.arrayContaining(['node.roles=["master","remote_cluster_client","search"]'])
+    );
+    expect(nodes[0].esArgs).toEqual(
+      expect.arrayContaining([
+        ['xpack.searchable.snapshot.shared_cache.size', '16MB'],
+        ['xpack.searchable.snapshot.shared_cache.region_size', '256K'],
+        ['ES_JAVA_OPTS', '-Xms1536m -Xmx1536m'],
+      ])
+    );
+  });
+
+  test('should apply name suffix and port offset for linked cluster', () => {
+    const nodes = getServerlessNodes('-linked', 10);
+    expect(nodes).toHaveLength(2);
+    expect(nodes[0].name).toBe('es01-linked');
+    expect(nodes[1].name).toBe('es02-linked');
+    expect(nodes[0].params).toEqual(expect.arrayContaining(['127.0.0.1:9310:9310']));
+    expect(nodes[1].params).toEqual(expect.arrayContaining(['127.0.0.1:9212:9212']));
+    expect(nodes[1].params).toEqual(expect.arrayContaining(['127.0.0.1:9312:9312']));
+  });
+
+  test('should configure discovery hosts with suffixed names', () => {
+    const nodes = getServerlessNodes('-linked', 10);
+    expect(nodes[0].params).toEqual(expect.arrayContaining([`discovery.seed_hosts=es02-linked`]));
+    expect(nodes[1].params).toEqual(expect.arrayContaining([`discovery.seed_hosts=es01-linked`]));
+  });
+});
+
+describe('getSharedServerlessParams()', () => {
+  test('should return default master nodes with no arguments', () => {
+    const params = getSharedServerlessParams();
+    expect(params).toEqual(expect.arrayContaining(['cluster.initial_master_nodes=es01,es02']));
+  });
+
+  test('should return suffixed master nodes for linked cluster', () => {
+    const params = getSharedServerlessParams('-linked');
+    expect(params).toEqual(
+      expect.arrayContaining(['cluster.initial_master_nodes=es01-linked,es02-linked'])
+    );
+  });
+});
 
 describe('resolveDockerImage()', () => {
   const defaultRepo = 'another/repo';
@@ -230,7 +308,7 @@ describe('resolvePort()', () => {
 
 describe('verifyDockerInstalled()', () => {
   test('should call the correct Docker command and log the version', async () => {
-    execa.mockImplementationOnce(() => Promise.resolve({ stdout: 'Docker Version 123' }));
+    execa.mockImplementation(() => Promise.resolve({ stdout: 'Docker Version 123' }));
 
     await verifyDockerInstalled(log);
 
@@ -254,7 +332,7 @@ describe('verifyDockerInstalled()', () => {
   });
 
   test('should reject when Docker is not installed', async () => {
-    execa.mockImplementationOnce(() => Promise.reject({ message: 'Hello World' }));
+    execa.mockImplementation(() => Promise.reject({ message: 'Hello World' }));
 
     await expect(verifyDockerInstalled(log)).rejects.toThrowErrorMatchingInlineSnapshot(`
       "Docker not found locally. Install it from: https://www.docker.com
@@ -266,7 +344,7 @@ describe('verifyDockerInstalled()', () => {
 
 describe('maybeCreateDockerNetwork()', () => {
   test('should call the correct Docker command and create the network if needed', async () => {
-    execa.mockImplementationOnce(() => Promise.resolve({ exitCode: 0 }));
+    execa.mockImplementation(() => Promise.resolve({ exitCode: 0 }));
 
     await maybeCreateDockerNetwork(log);
 
@@ -292,7 +370,7 @@ describe('maybeCreateDockerNetwork()', () => {
   });
 
   test('should use an existing network', async () => {
-    execa.mockImplementationOnce(() =>
+    execa.mockImplementation(() =>
       Promise.reject({ message: 'network with name elastic already exists' })
     );
 
@@ -307,7 +385,7 @@ describe('maybeCreateDockerNetwork()', () => {
   });
 
   test('should reject for any other Docker error', async () => {
-    execa.mockImplementationOnce(() => Promise.reject({ message: 'some error' }));
+    execa.mockImplementation(() => Promise.reject({ message: 'some error' }));
 
     await expect(maybeCreateDockerNetwork(log)).rejects.toThrowErrorMatchingInlineSnapshot(
       `"some error"`
@@ -317,12 +395,42 @@ describe('maybeCreateDockerNetwork()', () => {
 
 describe('maybePullDockerImage()', () => {
   test('should pull the passed image', async () => {
-    execa.mockImplementationOnce(() => Promise.resolve({ exitCode: 0 }));
+    execa.mockImplementation(() => Promise.resolve({ exitCode: 0 }));
 
     await maybePullDockerImage(log, DOCKER_IMG);
 
     expect(execa.mock.calls[0][0]).toEqual('docker');
     expect(execa.mock.calls[0][1]).toEqual(expect.arrayContaining(['pull', DOCKER_IMG]));
+  });
+
+  describe('with KBN_ES_SNAPSHOT_USE_CACHED=true', () => {
+    beforeEach(() => {
+      process.env.KBN_ES_SNAPSHOT_USE_CACHED = 'true';
+    });
+
+    afterEach(() => {
+      process.env.KBN_ES_SNAPSHOT_USE_CACHED = 'false';
+    });
+
+    test('skips pull when the image is available locally', async () => {
+      execa.mockImplementationOnce(() => Promise.resolve({ stdout: 'local-image-id' }));
+
+      await maybePullDockerImage(log, DOCKER_IMG);
+
+      expect(execa.mock.calls).toHaveLength(1);
+      expect(execa.mock.calls[0][1]).toEqual(['images', '-q', DOCKER_IMG]);
+    });
+
+    test('pulls when the image is not available locally', async () => {
+      execa
+        .mockImplementationOnce(() => Promise.resolve({ stdout: '' }))
+        .mockImplementationOnce(() => Promise.resolve({ exitCode: 0 }));
+
+      await maybePullDockerImage(log, DOCKER_IMG);
+
+      expect(execa.mock.calls[0][1]).toEqual(['images', '-q', DOCKER_IMG]);
+      expect(execa.mock.calls[1][1]).toEqual(expect.arrayContaining(['pull', DOCKER_IMG]));
+    });
   });
 });
 
@@ -330,7 +438,7 @@ describe('detectRunningNodes()', () => {
   const nodes = ['es01', 'es02', 'es03'];
 
   test('should not error if no nodes detected', async () => {
-    execa.mockImplementationOnce(() => Promise.resolve({ stdout: '' }));
+    execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
 
     await detectRunningNodes(log, {});
 
@@ -339,7 +447,7 @@ describe('detectRunningNodes()', () => {
   });
 
   test('should kill nodes if detected and kill passed', async () => {
-    execa.mockImplementationOnce(() =>
+    execa.mockImplementation(() =>
       Promise.resolve({
         stdout: nodes.join('\n'),
       })
@@ -352,7 +460,7 @@ describe('detectRunningNodes()', () => {
   });
 
   test('should error if nodes detected and kill not passed', async () => {
-    execa.mockImplementationOnce(() =>
+    execa.mockImplementation(() =>
       Promise.resolve({
         stdout: nodes.join('\n'),
       })
@@ -441,32 +549,9 @@ describe('resolveEsArgs()', () => {
     `);
   });
 
-  test('should add SSL args when SSL is passed', () => {
-    const esArgs = resolveEsArgs(defaultEsArgs, { ssl: true });
-
-    expect(esArgs).toHaveLength(12);
-    expect(esArgs).toMatchInlineSnapshot(`
-      Array [
-        "--env",
-        "foo=bar",
-        "--env",
-        "qux=zip",
-        "--env",
-        "xpack.security.http.ssl.enabled=true",
-        "--env",
-        "xpack.security.http.ssl.keystore.path=/usr/share/elasticsearch/config/certs/elasticsearch.p12",
-        "--env",
-        "xpack.security.http.ssl.verification_mode=certificate",
-        "--env",
-        "ES_JAVA_OPTS=-Des.stateless.allow.index.refresh_interval.override=true",
-      ]
-    `);
-  });
-
-  test('should add SAML realm args when kibanaUrl and SSL are passed', () => {
+  test('should add SAML realm args when SSL is passed', () => {
     const esArgs = resolveEsArgs([], {
       ssl: true,
-      kibanaUrl: 'https://localhost:5601/',
     });
 
     expect(esArgs).toMatchInlineSnapshot(`
@@ -486,11 +571,11 @@ describe('resolveEsArgs()', () => {
         "--env",
         "xpack.security.authc.realms.saml.cloud-saml-kibana.idp.entity_id=urn:mock-idp",
         "--env",
-        "xpack.security.authc.realms.saml.cloud-saml-kibana.sp.entity_id=https://localhost:5601",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.sp.entity_id=http://localhost:5601",
         "--env",
-        "xpack.security.authc.realms.saml.cloud-saml-kibana.sp.acs=https://localhost:5601/api/security/saml/callback",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.sp.acs=http://localhost:5601/api/security/saml/callback",
         "--env",
-        "xpack.security.authc.realms.saml.cloud-saml-kibana.sp.logout=https://localhost:5601/logout",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.sp.logout=http://localhost:5601/logout",
         "--env",
         "xpack.security.authc.realms.saml.cloud-saml-kibana.attributes.principal=http://saml.elastic-cloud.com/attributes/principal",
         "--env",
@@ -508,7 +593,6 @@ describe('resolveEsArgs()', () => {
   test('should not add SAML realm args when security is disabled', () => {
     const esArgs = resolveEsArgs([['xpack.security.enabled', 'false']], {
       ssl: true,
-      kibanaUrl: 'https://localhost:5601/',
     });
 
     expect(esArgs).toMatchInlineSnapshot(`
@@ -530,7 +614,6 @@ describe('resolveEsArgs()', () => {
   test('should not add UIAM-related args when run in Serverless mode without `--uiam` option', () => {
     const esArgs = resolveEsArgs([], {
       ssl: true,
-      kibanaUrl: 'http://localhost:5601/',
       projectType,
       basePath: baseEsPath,
       uiam: false,
@@ -577,7 +660,6 @@ describe('resolveEsArgs()', () => {
   test('should add UIAM-related args when run in Serverless mode with `--uiam` option', () => {
     const esArgs = resolveEsArgs([], {
       ssl: true,
-      kibanaUrl: 'http://localhost:5601/',
       projectType,
       basePath: baseEsPath,
       uiam: true,
@@ -614,25 +696,53 @@ describe('resolveEsArgs()', () => {
         "--env",
         "xpack.security.authc.realms.saml.cloud-saml-kibana.attributes.mail=http://saml.elastic-cloud.com/attributes/email",
         "--env",
-        "metering.url=http://localhost:5601/",
+        "metering.url=http://localhost:5601",
         "--env",
         "metering.report_period=60m",
         "--env",
         "xpack.security.authc.realms.saml.cloud-saml-kibana.private_attributes=http://saml.elastic-cloud.com/attributes/uiam/authentication/access_token,http://saml.elastic-cloud.com/attributes/uiam/authentication/access_token_expires_at,http://saml.elastic-cloud.com/attributes/uiam/authentication/refresh_token,http://saml.elastic-cloud.com/attributes/uiam/authentication/refresh_token_expires_at",
         "--env",
-        "serverless.organization_id=org1234567890",
-        "--env",
         "serverless.project_type=elasticsearch_general_purpose",
         "--env",
-        "serverless.project_id=abcde1234567890",
+        "serverless.project_id=abcdef12345678901234567890123456",
         "--env",
         "serverless.universal_iam_service.enabled=true",
         "--env",
-        "serverless.universal_iam_service.url=http://uiam:8080",
+        "serverless.universal_iam_service.url=https://uiam:8443",
+        "--env",
+        "serverless.universal_iam_service.ssl.verification_mode=none",
         "--env",
         "ES_JAVA_OPTS=-Des.stateless.allow.index.refresh_interval.override=true",
       ]
     `);
+  });
+
+  test('should use projectIdOverride when provided in UIAM mode', () => {
+    const overrideId = 'custom_project_id_123';
+    const esArgs = resolveEsArgs(
+      [],
+      {
+        ssl: true,
+        projectType,
+        basePath: baseEsPath,
+        uiam: true,
+      },
+      overrideId
+    );
+
+    expect(findEnvValue(esArgs, 'serverless.project_id')).toBe(overrideId);
+    expect(findEnvValue(esArgs, 'serverless.universal_iam_service.enabled')).toBe('true');
+  });
+
+  test('should use default project ID when no override is provided in UIAM mode', () => {
+    const esArgs = resolveEsArgs([], {
+      ssl: true,
+      projectType,
+      basePath: baseEsPath,
+      uiam: true,
+    });
+
+    expect(findEnvValue(esArgs, 'serverless.project_id')).toBe('abcdef12345678901234567890123456');
   });
 
   test('should append refresh interval override when ES_JAVA_OPTS is provided', () => {
@@ -698,7 +808,7 @@ describe('setupServerlessVolumes()', () => {
     ).rejects.toThrowError();
   });
 
-  test('should add SSL and IDP metadata volumes when ssl and kibanaUrl are passed', async () => {
+  test('should add SSL and IDP metadata volumes when ssl is passed', async () => {
     mockFs(existingObjectStore);
     createMockIdpMetadataMock.mockResolvedValue('<xml/>');
 
@@ -706,11 +816,10 @@ describe('setupServerlessVolumes()', () => {
       projectType,
       basePath: baseEsPath,
       ssl: true,
-      kibanaUrl: 'https://localhost:5603/',
     });
 
     expect(createMockIdpMetadataMock).toHaveBeenCalledTimes(1);
-    expect(createMockIdpMetadataMock).toHaveBeenCalledWith('https://localhost:5603/');
+    expect(createMockIdpMetadataMock).toHaveBeenCalledWith();
 
     const requiredPaths = [
       `${baseEsPath}:/objectstore:z`,
@@ -774,6 +883,53 @@ describe('setupServerlessVolumes()', () => {
     );
     await expect(Fsp.access(`${baseEsPath}/${dataPath}`)).resolves.not.toThrow();
   });
+
+  test('should embed readStringSecrets output in operator settings.json', async () => {
+    mockFs(existingObjectStore);
+    const stringSecretsFixture = {
+      'xpack.security.transport.ssl.keystore.secure_password': 'storepass',
+      'xpack.security.authc.realms.jwt.jwt1.client_authentication.shared_secret': 'my_super_secret',
+    };
+    readStringSecretsMock.mockResolvedValue(stringSecretsFixture);
+
+    const volumeCmd = await setupServerlessVolumes(log, {
+      projectType,
+      basePath: baseEsPath,
+    });
+
+    await volumeCmdTest(volumeCmd);
+    expect(readStringSecretsMock).toHaveBeenCalledWith(SERVERLESS_SECRETS_PATH);
+    const settings = JSON.parse(
+      await Fsp.readFile(join(SERVERLESS_OPERATOR_PATH, 'settings.json'), 'utf-8')
+    );
+    expect(settings.state.project.tags).toEqual(
+      expect.objectContaining({ _csp: 'aws', _region: 'eu-west-1' })
+    );
+    expect(settings.state.cluster_secrets.string_secrets).toEqual(stringSecretsFixture);
+  });
+
+  test('should use SSL secrets file and embed string_secrets when ssl is enabled', async () => {
+    mockFs(existingObjectStore);
+    createMockIdpMetadataMock.mockResolvedValue('<xml/>');
+    const stringSecretsFixture = {
+      'xpack.security.http.ssl.keystore.secure_password': 'storepass',
+    };
+    readStringSecretsMock.mockResolvedValue(stringSecretsFixture);
+
+    const volumeCmd = await setupServerlessVolumes(log, {
+      projectType,
+      basePath: baseEsPath,
+      ssl: true,
+    });
+
+    expect(volumeCmd).toHaveLength(26);
+    expect(volumeCmd.some((cmd) => cmd.includes(SERVERLESS_SECRETS_SSL_PATH))).toBe(true);
+    expect(readStringSecretsMock).toHaveBeenCalledWith(SERVERLESS_SECRETS_SSL_PATH);
+    const settings = JSON.parse(
+      await Fsp.readFile(join(SERVERLESS_OPERATOR_PATH, 'settings.json'), 'utf-8')
+    );
+    expect(settings.state.cluster_secrets.string_secrets).toEqual(stringSecretsFixture);
+  });
 });
 
 describe('runServerlessEsNode()', () => {
@@ -784,7 +940,7 @@ describe('runServerlessEsNode()', () => {
   };
 
   test('should call the correct Docker command', async () => {
-    execa.mockImplementationOnce(() => Promise.resolve({ stdout: 'containerId1234' }));
+    execa.mockImplementation(() => Promise.resolve({ stdout: 'containerId1234' }));
 
     await runServerlessEsNode(log, node);
 
@@ -818,7 +974,7 @@ describe('runServerlessCluster()', () => {
     >;
   });
 
-  test('should start 3 serverless nodes', async () => {
+  test('should start 2 serverless nodes', async () => {
     waitUntilClusterReadyMock.mockResolvedValue();
     mockFs({
       [baseEsPath]: {},
@@ -829,20 +985,20 @@ describe('runServerlessCluster()', () => {
 
     // docker version (1)
     // docker ps (1)
-    // docker container rm (5 = 3 for ES nodes, 2 for UIAM containers)
+    // docker container rm (7 = 2 ES nodes, 2 linked ES nodes, 3 UIAM containers)
     // docker network create (1)
     // docker pull (1)
     // docker inspect (1)
-    // docker run (3)
+    // docker run (2)
     // docker logs (1)
-    expect(execa.mock.calls).toHaveLength(14);
+    expect(execa.mock.calls).toHaveLength(15);
 
     // UIAM containers should not be started when `--uiam` is not passed
     expect(runUiamContainerMock).not.toHaveBeenCalled();
     expect(initializeUiamContainersMock).not.toHaveBeenCalled();
   });
 
-  test('should start 3 serverless ES nodes and two UIAM containers when in UIAM mode', async () => {
+  test('should start 2 serverless ES nodes and two UIAM containers when in UIAM mode', async () => {
     waitUntilClusterReadyMock.mockResolvedValue();
     mockFs({
       [baseEsPath]: {},
@@ -853,13 +1009,13 @@ describe('runServerlessCluster()', () => {
 
     // docker version (1)
     // docker ps (1)
-    // docker container rm (5 = 3 for ES nodes, 2 for UIAM containers)
+    // docker container rm (7 = 2 ES nodes, 2 linked ES nodes, 3 UIAM containers)
     // docker network create (1)
     // docker pull (3 = 1 for ES nodes, 2 for UIAM containers)
     // docker inspect (2 = image info call for ES nodes is memoized in the previous test, 2 for UIAM containers)
-    // docker run (3)
+    // docker run (2)
     // docker logs (1)
-    expect(execa.mock.calls).toHaveLength(17);
+    expect(execa.mock.calls).toHaveLength(18);
 
     expect(runUiamContainerMock).toHaveBeenCalledTimes(2);
     expect(runUiamContainerMock).toHaveBeenCalledWith(
@@ -886,7 +1042,7 @@ describe('runServerlessCluster()', () => {
     expect(waitUntilClusterReadyMock.mock.calls[0][0].readyTimeout).toEqual(undefined);
   });
 
-  test(`should create SAML role mapping when ssl and kibanaUrl are passed`, async () => {
+  test(`should create SAML role mapping when ssl is passed`, async () => {
     waitUntilClusterReadyMock.mockResolvedValue();
     mockFs({
       [CA_CERT_PATH]: '',
@@ -900,7 +1056,6 @@ describe('runServerlessCluster()', () => {
       basePath: baseEsPath,
       waitForReady: true,
       ssl: true,
-      kibanaUrl: 'https://localhost:5601/',
     });
 
     expect(ensureSAMLRoleMappingMock).toHaveBeenCalledTimes(1);
@@ -1021,12 +1176,12 @@ describe('runDockerContainer()', () => {
     await expect(runDockerContainer(log, {})).resolves.toBeUndefined();
     // docker version (1)
     // docker ps (1)
-    // docker container rm (5 = 3 for ES nodes, 2 for UIAM containers)
+    // docker container rm (7 = 2 ES nodes, 2 linked ES nodes, 3 UIAM containers)
     // docker network create (1)
     // docker pull (1)
     // docker inspect (1)
     // docker run (1)
-    expect(execa.mock.calls).toHaveLength(11);
+    expect(execa.mock.calls).toHaveLength(13);
   });
 });
 

@@ -7,6 +7,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
+import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import {
   EuiFlexGroup,
@@ -87,6 +88,9 @@ export const SeverityLevelChart: React.FC<SeverityLevelProps> = ({
           columns={columns}
           items={data}
           loading={isLoading}
+          tableCaption={i18n.translate('xpack.securitySolution.severityLevelChart.tableCaption', {
+            defaultMessage: 'Severity levels',
+          })}
         />
       </EuiFlexItem>
       <EuiFlexItem data-test-subj="severity-level-donut">

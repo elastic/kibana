@@ -8,15 +8,14 @@
 import React, { createContext, memo, useContext, useMemo } from 'react';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
+import type { SearchHit } from '../../../common/search_strategy';
 import { useCreateEaseAlertsDataView } from '../../detections/hooks/alert_summary/use_create_data_view';
 import { useDocumentDetails } from './hooks/use_document_details';
 import { useRuleWithFallback } from '../../detection_engine/rule_management/logic/use_rule_with_fallback';
-import { useSpaceId } from '../../common/hooks/use_space_id';
 import type { GetFieldsData } from '../document_details/shared/hooks/use_get_fields_data';
-import { FlyoutLoading } from '../shared/components/flyout_loading';
+import { FlyoutLoading } from '../../flyout_v2/shared/components/flyout_loading';
 import type { EaseDetailsProps } from './types';
-import { FlyoutError } from '../shared/components/flyout_error';
+import { FlyoutError } from '../../flyout_v2/shared/components/flyout_error';
 import { useBasicDataFromDetailsData } from '../document_details/shared/hooks/use_basic_data_from_details_data';
 
 export interface EaseDetailsContext {
@@ -37,15 +36,13 @@ export interface EaseDetailsContext {
    */
   getFieldsData: GetFieldsData;
   /**
+   * The actual raw document object
+   */
+  searchHit: SearchHit;
+  /**
    * User defined fields to highlight (defined on the rule)
    */
   investigationFields: string[];
-  /**
-   * Anonymization switch state in local storage
-   * If undefined, the spaceId is not retrievable and the switch is not shown
-   */
-  showAnonymizedValues?: boolean;
-  setShowAnonymizedValues: React.Dispatch<React.SetStateAction<boolean | undefined>>;
 }
 
 /**
@@ -63,8 +60,7 @@ export type EaseDetailsProviderProps = {
 export const EaseDetailsProvider = memo(({ id, children }: EaseDetailsProviderProps) => {
   const { dataView } = useCreateEaseAlertsDataView();
 
-  const spaceId = useSpaceId();
-  const { dataAsNestedObject, dataFormattedForFieldBrowser, getFieldsData, loading } =
+  const { dataAsNestedObject, dataFormattedForFieldBrowser, getFieldsData, loading, searchHit } =
     useDocumentDetails({
       dataView,
       documentId: id,
@@ -73,22 +69,16 @@ export const EaseDetailsProvider = memo(({ id, children }: EaseDetailsProviderPr
   const { ruleId } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
   const { rule: maybeRule } = useRuleWithFallback(ruleId);
 
-  const [showAnonymizedValues = spaceId ? false : undefined, setShowAnonymizedValues] =
-    useLocalStorage<boolean | undefined>(
-      `securitySolution.aiAlertFlyout.showAnonymization.${spaceId}`
-    );
-
   const contextValue = useMemo(
     () =>
-      dataFormattedForFieldBrowser && dataAsNestedObject && id && dataView
+      dataFormattedForFieldBrowser && dataAsNestedObject && id && dataView && searchHit
         ? {
             dataFormattedForFieldBrowser,
             dataAsNestedObject,
             eventId: id,
             getFieldsData,
             investigationFields: maybeRule?.investigation_fields?.field_names ?? [],
-            setShowAnonymizedValues,
-            showAnonymizedValues,
+            searchHit,
           }
         : undefined,
     [
@@ -98,8 +88,7 @@ export const EaseDetailsProvider = memo(({ id, children }: EaseDetailsProviderPr
       getFieldsData,
       id,
       maybeRule,
-      setShowAnonymizedValues,
-      showAnonymizedValues,
+      searchHit,
     ]
   );
 

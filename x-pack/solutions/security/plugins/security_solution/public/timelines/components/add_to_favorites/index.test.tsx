@@ -15,8 +15,8 @@ import { useUserPrivileges } from '../../../common/components/user_privileges';
 jest.mock('../../../common/components/user_privileges');
 
 const mockGetState = jest.fn();
-jest.mock('react-redux', () => {
-  const original = jest.requireActual('react-redux');
+jest.mock('react-redux-v7', () => {
+  const original = jest.requireActual('react-redux-v7');
   return {
     ...original,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -61,7 +61,7 @@ describe('AddToFavoritesButton', () => {
 
     expect(button).toBeInTheDocument();
     expect(button).toHaveProperty('id', '');
-    expect(button.firstChild).toHaveAttribute('data-euiicon-type', 'starEmpty');
+    expect(button.firstChild).toHaveAttribute('data-euiicon-type', 'star');
     expect(queryByTestId('timeline-favorite-filled-star')).not.toBeInTheDocument();
   });
 

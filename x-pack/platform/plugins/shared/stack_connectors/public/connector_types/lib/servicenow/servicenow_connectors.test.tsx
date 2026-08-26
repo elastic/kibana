@@ -147,7 +147,7 @@ describe('ServiceNowActionConnectorFields renders', () => {
     };
 
     render(
-      <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
+      <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit} isEdit>
         <ServiceNowConnectorFields
           readOnly={false}
           isEdit={false}
@@ -158,26 +158,18 @@ describe('ServiceNowActionConnectorFields renders', () => {
 
     await userEvent.click(screen.getByTestId('use-oauth-switch'));
 
-    await userEvent.type(
-      await screen.findByRole('textbox', { name: 'Client ID' }),
-      'test-client-id'
-    );
-
-    await userEvent.type(
-      screen.getByRole('textbox', { name: 'User identifier' }),
-      'test-user-identifier'
-    );
-    await userEvent.type(
-      screen.getByRole('textbox', { name: 'JWT verifier key ID' }),
-      'test-jwt-key-id'
-    );
-
-    await userEvent.type(screen.getByLabelText('Client secret'), 'test-client-secret');
-    await userEvent.type(screen.getByLabelText('Private key'), 'test-private-key');
-    await userEvent.type(
-      screen.getByLabelText('Private key password'),
-      'test-private-key-password'
-    );
+    await userEvent.click(await screen.findByRole('textbox', { name: 'Client ID' }));
+    await userEvent.paste('test-client-id');
+    await userEvent.click(screen.getByRole('textbox', { name: 'User identifier' }));
+    await userEvent.paste('test-user-identifier');
+    await userEvent.click(screen.getByRole('textbox', { name: 'JWT verifier key ID' }));
+    await userEvent.paste('test-jwt-key-id');
+    await userEvent.click(screen.getByLabelText('Client secret'));
+    await userEvent.paste('test-client-secret');
+    await userEvent.click(screen.getByLabelText('Private key'));
+    await userEvent.paste('test-private-key');
+    await userEvent.click(screen.getByLabelText('Private key password'));
+    await userEvent.paste('test-private-key-password');
 
     await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
 
@@ -366,7 +358,7 @@ describe('ServiceNowActionConnectorFields renders', () => {
       updateActionConnectorMock.mockResolvedValue({ isDeprecated: false });
 
       render(
-        <ConnectorFormTestProvider connector={usesTableApiConnector}>
+        <ConnectorFormTestProvider connector={usesTableApiConnector} isEdit>
           <ServiceNowConnectorFields
             readOnly={false}
             isEdit={false}
@@ -495,7 +487,7 @@ describe('ServiceNowActionConnectorFields renders', () => {
       'connector validation succeeds when connector config is valid',
       async (connector) => {
         render(
-          <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
+          <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit} isEdit>
             <ServiceNowConnectorFields
               readOnly={false}
               isEdit={false}
@@ -524,7 +516,7 @@ describe('ServiceNowActionConnectorFields renders', () => {
       };
 
       render(
-        <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
+        <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit} isEdit>
           <ServiceNowConnectorFields
             readOnly={false}
             isEdit={false}

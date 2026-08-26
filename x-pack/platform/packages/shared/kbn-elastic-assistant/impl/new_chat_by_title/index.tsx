@@ -6,14 +6,12 @@
  */
 
 import type { EuiButtonColor } from '@elastic/eui';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import { AssistantIcon } from '@kbn/ai-assistant-icon';
+import { AiButton } from '@kbn/shared-ux-ai-components';
 import type { EuiButtonEmptySizes } from '@elastic/eui/src/components/button/button_empty/button_empty';
 import * as i18n from './translations';
 
 export const BUTTON_TEST_ID = 'newChatByTitle';
-export const BUTTON_ICON_TEST_ID = 'newChatByTitleIcon';
 export const BUTTON_TEXT_TEST_ID = 'newChatByTitleText';
 
 export interface NewChatByTitleComponentProps {
@@ -44,25 +42,31 @@ const NewChatByTitleComponent: React.FC<NewChatByTitleComponentProps> = ({
 }) => {
   const showOverlay = useCallback(() => showAssistantOverlay(true), [showAssistantOverlay]);
 
+  if (!text) {
+    return (
+      <AiButton
+        aria-label={i18n.ASK_AI_ASSISTANT}
+        data-test-subj={BUTTON_TEST_ID}
+        onClick={showOverlay}
+        size={size}
+        variant="empty"
+        iconType="aiAssistantLogo"
+        iconOnly
+      />
+    );
+  }
+
   return (
-    <EuiButtonEmpty
+    <AiButton
       aria-label={i18n.ASK_AI_ASSISTANT}
-      color={color}
       data-test-subj={BUTTON_TEST_ID}
       onClick={showOverlay}
       size={size}
+      variant="empty"
+      iconType="aiAssistantLogo"
     >
-      <EuiFlexGroup alignItems="center" gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <AssistantIcon data-test-subj={BUTTON_ICON_TEST_ID} size="m" />
-        </EuiFlexItem>
-        {text && (
-          <EuiFlexItem data-test-subj={BUTTON_TEXT_TEST_ID} grow={false}>
-            {text}
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-    </EuiButtonEmpty>
+      <span data-test-subj={BUTTON_TEXT_TEST_ID}>{text}</span>
+    </AiButton>
   );
 };
 

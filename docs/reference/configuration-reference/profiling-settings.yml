@@ -1,0 +1,26 @@
+---
+# This file is used to generate "Universal Profiling settings" page in the product docs
+# For the schema and an example refer to the automated settings reference:
+# https://github.com/elastic/docs-builder/blob/main/docs/syntax/automated_settings.md
+
+product: Kibana
+collection: Universal Profiling settings in Kibana
+id: profiling-settings
+page_description: |
+  Configure the following Universal Profiling settings in the `kibana.yml` file.
+  Universal Profiling is only available on {{ech}}.
+
+groups:
+  - group: Universal Profiling settings
+    id: universal-profiling-settings
+    settings:
+
+      - setting: xpack.profiling.enabled
+        description: |
+          Set to `true` to enable Universal Profiling, which provides always-on, fleet-wide continuous profiling. Available on {{ech}} only.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: ga 8.5
+          ech: ga
+          self: unavailable

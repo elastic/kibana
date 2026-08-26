@@ -16,7 +16,7 @@ export interface OnboardingApiService {
   ) => Promise<void>;
 }
 
-export const getOnboardingApiHelper = (kbnClient: KbnClient) => {
+export const getOnboardingApiHelper = (kbnClient: KbnClient): OnboardingApiService => {
   return {
     updateInstallationStepStatus: async (
       onboardingId: string,

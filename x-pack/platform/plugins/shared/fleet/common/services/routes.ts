@@ -26,7 +26,7 @@ import {
   UNINSTALL_TOKEN_ROUTES,
   FLEET_DEBUG_ROUTES,
   REMOTE_SYNCED_INTEGRATIONS_API_ROUTES,
-  AGENTLESS_POLICIES_ROUTES,
+  MANAGED_INTEGRATIONS_ROUTES,
 } from '../constants';
 
 export const epmRouteService = {
@@ -53,19 +53,23 @@ export const epmRouteService = {
   getInfoPath: (pkgName: string, pkgVersion?: string) => {
     if (pkgVersion) {
       return EPM_API_ROUTES.INFO_PATTERN.replace('{pkgName}', pkgName).replace(
-        '{pkgVersion?}',
+        '{pkgVersion}',
         pkgVersion
       );
-    } else {
-      return EPM_API_ROUTES.INFO_PATTERN.replace('{pkgName}', pkgName).replace(
-        '/{pkgVersion?}',
-        ''
-      );
     }
+
+    return EPM_API_ROUTES.INFO_WITHOUT_VERSION_PATTERN.replace('{pkgName}', pkgName);
   },
 
   getStatsPath: (pkgName: string) => {
     return EPM_API_ROUTES.STATS_PATTERN.replace('{pkgName}', pkgName);
+  },
+
+  getDependenciesPath: (pkgName: string, pkgVersion: string) => {
+    return EPM_API_ROUTES.DEPENDENCIES_PATTERN.replace('{pkgName}', pkgName).replace(
+      '{pkgVersion}',
+      pkgVersion
+    );
   },
 
   getFilePath: (filePath: string) => {
@@ -75,13 +79,14 @@ export const epmRouteService = {
   getInstallPath: (pkgName: string, pkgVersion?: string) => {
     if (pkgVersion) {
       return EPM_API_ROUTES.INSTALL_FROM_REGISTRY_PATTERN.replace('{pkgName}', pkgName)
-        .replace('{pkgVersion?}', pkgVersion)
-        .replace(/\/$/, ''); // trim trailing slash
-    } else {
-      return EPM_API_ROUTES.INSTALL_FROM_REGISTRY_PATTERN.replace('{pkgName}', pkgName)
-        .replace('/{pkgVersion?}', '')
+        .replace('{pkgVersion}', pkgVersion)
         .replace(/\/$/, ''); // trim trailing slash
     }
+
+    return EPM_API_ROUTES.INSTALL_FROM_REGISTRY_WITHOUT_VERSION_PATTERN.replace(
+      '{pkgName}',
+      pkgName
+    ).replace(/\/$/, ''); // trim trailing slash
   },
 
   getBulkInstallPath: () => {
@@ -123,13 +128,14 @@ export const epmRouteService = {
   getRemovePath: (pkgName: string, pkgVersion?: string) => {
     if (pkgVersion) {
       return EPM_API_ROUTES.DELETE_PATTERN.replace('{pkgName}', pkgName)
-        .replace('{pkgVersion?}', pkgVersion)
-        .replace(/\/$/, ''); // trim trailing slash
-    } else {
-      return EPM_API_ROUTES.DELETE_PATTERN.replace('{pkgName}', pkgName)
-        .replace('/{pkgVersion?}', '')
+        .replace('{pkgVersion}', pkgVersion)
         .replace(/\/$/, ''); // trim trailing slash
     }
+
+    return EPM_API_ROUTES.DELETE_WITHOUT_VERSION_PATTERN.replace('{pkgName}', pkgName).replace(
+      /\/$/,
+      ''
+    ); // trim trailing slash
   },
 
   getInstallKibanaAssetsPath: (pkgName: string, pkgVersion: string) => {
@@ -149,6 +155,14 @@ export const epmRouteService = {
       '{pkgVersion}',
       pkgVersion
     );
+  },
+
+  getReviewUpgradePath: (pkgName: string) => {
+    return EPM_API_ROUTES.REVIEW_UPGRADE_PATTERN.replace('{pkgName}', pkgName);
+  },
+
+  getNamespacePreflightCheckPath: (pkgName: string) => {
+    return EPM_API_ROUTES.NAMESPACE_PREFLIGHT_CHECK_PATTERN.replace('{pkgName}', pkgName);
   },
 
   getReauthorizeTransformsPath: (pkgName: string, pkgVersion: string) => {
@@ -173,6 +187,9 @@ export const epmRouteService = {
       '{pkgVersion}',
       pkgVersion
     );
+  },
+  getIlmPoliciesPath: () => {
+    return EPM_API_ROUTES.ILM_POLICIES_PATTERN;
   },
 };
 
@@ -216,10 +233,28 @@ export const packagePolicyRouteService = {
 
 export const agentlessPolicyRouteService = {
   getCreatePath: () => {
-    return AGENTLESS_POLICIES_ROUTES.CREATE_PATTERN;
+    return MANAGED_INTEGRATIONS_ROUTES.CREATE_PATTERN;
+  },
+  getListPath: () => {
+    return MANAGED_INTEGRATIONS_ROUTES.LIST_PATTERN;
+  },
+  getInfoPath: (policyId: string) => {
+    return MANAGED_INTEGRATIONS_ROUTES.GET_PATTERN.replace('{policyId}', policyId);
+  },
+  getUpdatePath: (policyId: string) => {
+    return MANAGED_INTEGRATIONS_ROUTES.UPDATE_PATTERN.replace('{policyId}', policyId);
   },
   getDeletePath: (policyId: string) => {
-    return AGENTLESS_POLICIES_ROUTES.DELETE_PATTERN.replace('{policyId}', policyId);
+    return MANAGED_INTEGRATIONS_ROUTES.DELETE_PATTERN.replace('{policyId}', policyId);
+  },
+  getUpgradePath: () => {
+    return MANAGED_INTEGRATIONS_ROUTES.UPGRADE_PATTERN;
+  },
+  getUpgradeDryRunPath: () => {
+    return MANAGED_INTEGRATIONS_ROUTES.UPGRADE_DRYRUN_PATTERN;
+  },
+  getBulkThroughputPath: () => {
+    return MANAGED_INTEGRATIONS_ROUTES.BULK_THROUGHPUT_PATTERN;
   },
 };
 
@@ -316,6 +351,9 @@ export const agentRouteService = {
   getUnenrollPath: (agentId: string) =>
     AGENT_API_ROUTES.UNENROLL_PATTERN.replace('{agentId}', agentId),
   getBulkUnenrollPath: () => AGENT_API_ROUTES.BULK_UNENROLL_PATTERN,
+  getRemoveCollectorPath: (agentId: string) =>
+    AGENT_API_ROUTES.REMOVE_COLLECTOR_PATTERN.replace('{agentId}', agentId),
+  getBulkRemoveCollectorsPath: () => AGENT_API_ROUTES.BULK_REMOVE_COLLECTORS_PATTERN,
   getReassignPath: (agentId: string) =>
     AGENT_API_ROUTES.REASSIGN_PATTERN.replace('{agentId}', agentId),
   getBulkReassignPath: () => AGENT_API_ROUTES.BULK_REASSIGN_PATTERN,
@@ -354,6 +392,9 @@ export const agentRouteService = {
   postAgentRollback: (agentId: string) =>
     AGENT_API_ROUTES.ROLLBACK_PATTERN.replace('{agentId}', agentId),
   postBulkAgentRollback: () => AGENT_API_ROUTES.BULK_ROLLBACK_PATTERN,
+  postGenerateAgentsReport: () => AGENT_API_ROUTES.GENERATE_REPORT_PATTERN,
+  getAgentEffectiveConfig: (agentId: string) =>
+    AGENT_API_ROUTES.EFFECTIVE_CONFIG_PATTERN.replace('{agentId}', agentId),
 };
 
 export const outputRoutesService = {
@@ -414,12 +455,15 @@ export const enrollmentAPIKeyRouteService = {
   getInfoPath: (keyId: string) => ENROLLMENT_API_KEY_ROUTES.INFO_PATTERN.replace('{keyId}', keyId),
   getDeletePath: (keyId: string) =>
     ENROLLMENT_API_KEY_ROUTES.DELETE_PATTERN.replace('{keyId}', keyId),
+  getBulkDeletePath: () => ENROLLMENT_API_KEY_ROUTES.BULK_DELETE_PATTERN,
 };
 
 export const uninstallTokensRouteService = {
   getListPath: () => UNINSTALL_TOKEN_ROUTES.LIST_PATTERN,
   getInfoPath: (uninstallTokenId: string) =>
     UNINSTALL_TOKEN_ROUTES.INFO_PATTERN.replace('{uninstallTokenId}', uninstallTokenId),
+  getRotatePath: (agentPolicyId: string) =>
+    UNINSTALL_TOKEN_ROUTES.ROTATE_PATTERN.replace('{agentPolicyId}', agentPolicyId),
 };
 
 export const setupRouteService = {

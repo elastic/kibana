@@ -17,29 +17,28 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import type { PartialTheme } from '@elastic/charts';
-import { Chart, Partition, Settings, PartitionLayout, LIGHT_THEME } from '@elastic/charts';
+import { Chart, Partition, Settings, PartitionLayout } from '@elastic/charts';
+import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { i18n } from '@kbn/i18n';
-import {
-  useDetectionRulesByIntegration,
-  useIntegrationDisplayNames,
-  useSiemReadinessApi,
-} from '@kbn/siem-readiness';
-import type { SiemReadinessPackageInfo } from '@kbn/siem-readiness';
+import { useDetectionRulesByIntegration } from '../../../../hooks/use_get_detection_rules_by_integration';
+import { useIntegrationDisplayNames } from '../../../../hooks/use_integration_display_names';
+import { useSiemReadinessApi } from '../../../../hooks/use_siem_readiness_api';
 import { IntegrationSelectablePopover } from '../../../components/integrations_selectable_popover';
+import { createIntegrationStatusMapFromSets } from '../create_integration_status_maps';
 
 export const AllRuleCoveragePanel: React.FC = () => {
   const { euiTheme } = useEuiTheme();
+  const baseTheme = useElasticChartsTheme();
 
-  const { getIntegrations, getDetectionRules } = useSiemReadinessApi();
+  const { getDetectionRules } = useSiemReadinessApi();
 
-  const getInstalledIntegrations =
-    getIntegrations?.data?.items?.filter(
-      (pkg: SiemReadinessPackageInfo) => pkg.status === 'installed'
-    ) || [];
+  const allRules = useMemo(
+    () => getDetectionRules.data?.data || [],
+    [getDetectionRules.data?.data]
+  );
 
-  const integrationNames = getInstalledIntegrations?.map((item) => item.name) || [];
-
-  const installedIntegrationRules = useDetectionRulesByIntegration(integrationNames);
+  const { ruleIntegrationCoverage, enabledPackagesSet, disabledPackagesSet } =
+    useDetectionRulesByIntegration();
 
   const integrationDisplayNames = useIntegrationDisplayNames();
 
@@ -50,35 +49,76 @@ export const AllRuleCoveragePanel: React.FC = () => {
     [integrationDisplayNames.data]
   );
 
-  const installedIntegrationsOptions = useMemo(() => {
-    return (installedIntegrationRules.ruleIntegrationCoverage?.installedIntegrations || []).map(
-      (integration) => ({
-        label: getIntegrationDisplayName(integration),
-        key: integration,
-      })
-    );
-  }, [
-    getIntegrationDisplayName,
-    installedIntegrationRules.ruleIntegrationCoverage?.installedIntegrations,
-  ]);
+  // Get enabled rules from all rules
+  const enabledRules = useMemo(() => allRules.filter((rule) => rule.enabled), [allRules]);
 
-  const missingIntegrationsOptions = useMemo(() => {
-    return (installedIntegrationRules.ruleIntegrationCoverage?.missingIntegrations || []).map(
-      (integration) => ({
-        label: getIntegrationDisplayName(integration),
-        key: integration,
-      })
+  // Get unique integration names from enabled rules
+  const relatedIntegrationNames = useMemo(() => {
+    const uniqueNames = new Set<string>();
+
+    enabledRules.forEach((rule) => {
+      (rule.related_integrations || []).forEach((integration) => {
+        if (integration.package) {
+          uniqueNames.add(integration.package);
+        }
+      });
+    });
+
+    return [...uniqueNames];
+  }, [enabledRules]);
+
+  const enabledIntegrationsOptions = useMemo(() => {
+    return relatedIntegrationNames
+      .filter((name) => enabledPackagesSet.has(name))
+      .map((name) => ({
+        label: getIntegrationDisplayName(name),
+        key: name,
+      }))
+      .sort((a, b) => a.label.localeCompare(b.label));
+  }, [relatedIntegrationNames, enabledPackagesSet, getIntegrationDisplayName]);
+
+  const enabledIntegrationsStatusMap = useMemo(() => {
+    const enabledIntegrations = relatedIntegrationNames.filter((name) =>
+      enabledPackagesSet.has(name)
     );
-  }, [
-    getIntegrationDisplayName,
-    installedIntegrationRules.ruleIntegrationCoverage?.missingIntegrations,
-  ]);
+    return createIntegrationStatusMapFromSets(
+      enabledIntegrations,
+      enabledPackagesSet,
+      disabledPackagesSet
+    );
+  }, [relatedIntegrationNames, enabledPackagesSet, disabledPackagesSet]);
+
+  const missingOrDisabledIntegrationsOptions = useMemo(() => {
+    return relatedIntegrationNames
+      .filter((name) => !enabledPackagesSet.has(name))
+      .map((name) => ({
+        label: getIntegrationDisplayName(name),
+        key: name,
+      }))
+      .sort((a, b) => {
+        const aDisabled = disabledPackagesSet.has(a.key as string);
+        const bDisabled = disabledPackagesSet.has(b.key as string);
+        if (aDisabled !== bDisabled) return aDisabled ? -1 : 1;
+        return a.label.localeCompare(b.label);
+      });
+  }, [relatedIntegrationNames, enabledPackagesSet, disabledPackagesSet, getIntegrationDisplayName]);
+
+  const missingOrDisabledStatusMap = useMemo(() => {
+    const missingOrDisabledIntegrations = relatedIntegrationNames.filter(
+      (name) => !enabledPackagesSet.has(name)
+    );
+    return createIntegrationStatusMapFromSets(
+      missingOrDisabledIntegrations,
+      enabledPackagesSet,
+      disabledPackagesSet
+    );
+  }, [relatedIntegrationNames, enabledPackagesSet, disabledPackagesSet]);
 
   const chartBaseTheme = useMemo(
     () => ({
-      ...LIGHT_THEME,
+      ...baseTheme,
       colors: {
-        ...LIGHT_THEME.colors,
+        ...baseTheme.colors,
         vizColors: [
           euiTheme.colors.vis.euiColorVis1,
           euiTheme.colors.vis.euiColorVis2,
@@ -86,7 +126,7 @@ export const AllRuleCoveragePanel: React.FC = () => {
         ],
       },
     }),
-    [euiTheme]
+    [baseTheme, euiTheme]
   );
 
   const themeOverrides: PartialTheme = {
@@ -111,7 +151,7 @@ export const AllRuleCoveragePanel: React.FC = () => {
       'data-test-subj': 'firstNameCell',
       render: (status: string) => {
         const color =
-          status === 'Installed integrations'
+          status === 'Enabled integrations'
             ? euiTheme.colors.vis.euiColorVis0
             : euiTheme.colors.vis.euiColorVis6;
         return <EuiHealth color={color}>{status}</EuiHealth>;
@@ -119,7 +159,7 @@ export const AllRuleCoveragePanel: React.FC = () => {
       mobileOptions: {
         render: (item: { status: string; numberOfRulesAssociated: number; actions: string }) => {
           const color =
-            item.status === 'Installed integrations'
+            item.status === 'Enabled integrations'
               ? euiTheme.colors.vis.euiColorVis0
               : euiTheme.colors.vis.euiColorVis6;
           return <EuiHealth color={color}>{item.status}</EuiHealth>;
@@ -143,11 +183,24 @@ export const AllRuleCoveragePanel: React.FC = () => {
       name: 'Actions',
       truncateText: true,
       render: (actions: string, item) => {
-        if (item.status === 'Installed integrations') {
-          return <IntegrationSelectablePopover options={installedIntegrationsOptions} />;
+        if (item.status === 'Enabled integrations') {
+          return (
+            <IntegrationSelectablePopover
+              options={enabledIntegrationsOptions}
+              statusMap={enabledIntegrationsStatusMap}
+              disabled={enabledIntegrationsOptions.length === 0}
+              telemetrySource="all_rules_enabled"
+            />
+          );
         } else {
-          // For "Missing Integrations" row
-          return <IntegrationSelectablePopover options={missingIntegrationsOptions} />;
+          return (
+            <IntegrationSelectablePopover
+              options={missingOrDisabledIntegrationsOptions}
+              statusMap={missingOrDisabledStatusMap}
+              disabled={missingOrDisabledIntegrationsOptions.length === 0}
+              telemetrySource="all_rules_missing"
+            />
+          );
         }
       },
       mobileOptions: {
@@ -156,42 +209,40 @@ export const AllRuleCoveragePanel: React.FC = () => {
     },
   ];
 
-  const installedIntegrationAssociatedRulesCount =
-    installedIntegrationRules.ruleIntegrationCoverage?.coveredRules?.length || 0;
+  const enabledIntegrationRulesCount = ruleIntegrationCoverage?.coveredRules?.length || 0;
 
-  const missingIntegrationAssociatedRulesCount =
-    (getDetectionRules.data?.data?.length || 0) - installedIntegrationAssociatedRulesCount;
+  const missingOrDisabledIntegrationRulesCount =
+    (getDetectionRules.data?.data?.length || 0) - enabledIntegrationRulesCount;
 
   const RULE_STATS_DATA = useMemo(
     () => [
       {
-        status: 'Installed integrations',
-        numberOfRulesAssociated: installedIntegrationAssociatedRulesCount || 0,
+        status: 'Enabled integrations',
+        numberOfRulesAssociated: enabledIntegrationRulesCount || 0,
         actions: '',
       },
       {
-        status: 'Missing Integrations',
-        numberOfRulesAssociated: missingIntegrationAssociatedRulesCount || 0,
+        status: 'Missing or Disabled Integrations',
+        numberOfRulesAssociated: missingOrDisabledIntegrationRulesCount || 0,
         actions: '',
       },
     ],
-    [installedIntegrationAssociatedRulesCount, missingIntegrationAssociatedRulesCount]
+    [enabledIntegrationRulesCount, missingOrDisabledIntegrationRulesCount]
   );
-  const isLoading = getIntegrations.isLoading || getDetectionRules.isLoading;
+
+  const isLoading = getDetectionRules.isLoading;
   const DONUT_CHART_DATA = useMemo(
     () => [
       {
-        status: 'Rules with installed integrations',
-        count: installedIntegrationAssociatedRulesCount || 0,
+        status: 'Rules with enabled integrations',
+        count: enabledIntegrationRulesCount || 0,
       },
       {
-        status: 'Rules missing integrations',
-        count:
-          (getDetectionRules.data?.data?.length || 0) -
-          (installedIntegrationAssociatedRulesCount || 0),
+        status: 'Rules with missing or disabled integrations',
+        count: (getDetectionRules.data?.data?.length || 0) - (enabledIntegrationRulesCount || 0),
       },
     ],
-    [getDetectionRules.data?.data?.length, installedIntegrationAssociatedRulesCount]
+    [getDetectionRules.data?.data?.length, enabledIntegrationRulesCount]
   );
   return (
     <>
@@ -201,7 +252,7 @@ export const AllRuleCoveragePanel: React.FC = () => {
             'xpack.securitySolution.siemReadiness.coverage.dataRuleCoverage.description',
             {
               defaultMessage:
-                'The following table shows the total number of enabled rules, and those missing integrations.',
+                'The following table shows the total number of enabled rules, and those with missing or disabled integrations.',
             }
           )}
         </EuiText>
@@ -232,19 +283,17 @@ export const AllRuleCoveragePanel: React.FC = () => {
                     {
                       groupByRollup: (d: (typeof DONUT_CHART_DATA)[0]) => 'Rules',
                       shape: {
-                        fillColor:
-                          chartBaseTheme.partition?.sectorLineStroke || euiTheme.colors.lightShade,
+                        fillColor: euiTheme.colors.backgroundBasePlain,
                       },
                     },
                     {
                       groupByRollup: (d: (typeof DONUT_CHART_DATA)[0]) => d.status,
                       shape: {
-                        fillColor: (key, sortIndex) => {
-                          const colors = [
-                            euiTheme.colors.vis.euiColorVis0,
-                            euiTheme.colors.vis.euiColorVis6,
-                          ];
-                          return colors[sortIndex % colors.length];
+                        fillColor: (key) => {
+                          if (key === 'Rules with enabled integrations') {
+                            return euiTheme.colors.vis.euiColorVis0; // Always green for enabled
+                          }
+                          return euiTheme.colors.vis.euiColorVis6; // Always orange for missing/disabled
                         },
                       },
                     },

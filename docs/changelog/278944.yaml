@@ -1,0 +1,14 @@
+prs:
+- https://github.com/elastic/kibana/pull/278944
+issues:
+- https://github.com/elastic/kibana/issues/276375
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-22
+- product: kibana
+areas:
+- Dashboards and visualizations
+title: Fix Dashboard Fast mode not preserved in shared links
+description: Sharing a dashboard link did not include the Fast mode (`esql_approximation`)
+  setting. Shared dashboard links now preserve Fast mode when it is enabled.

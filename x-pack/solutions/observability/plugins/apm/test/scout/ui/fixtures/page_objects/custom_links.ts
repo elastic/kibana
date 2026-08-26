@@ -6,8 +6,8 @@
  */
 
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout-oblt';
-import { expect, EuiComboBoxWrapper } from '@kbn/scout-oblt';
-import { waitForApmSettingsHeaderLink } from '../page_helpers';
+import { expect } from '@kbn/scout-oblt/ui';
+import { waitForApmAppMenuReady } from '../page_helpers';
 import { EXTENDED_TIMEOUT } from '../constants';
 
 export class CustomLinksPage {
@@ -18,7 +18,7 @@ export class CustomLinksPage {
 
   async goto() {
     await this.page.goto(`${this.kbnUrl.app('apm')}/settings/custom-links`);
-    return await waitForApmSettingsHeaderLink(this.page);
+    return await waitForApmAppMenuReady(this.page);
   }
 
   async getCreateCustomLinkButton() {
@@ -49,10 +49,15 @@ export class CustomLinksPage {
     await saveButton.waitFor({ state: 'visible' });
     await expect(saveButton).toBeEnabled();
     await saveButton.click();
+    await saveButton.waitFor({ state: 'hidden' });
   }
 
   async clickDelete() {
+    await expect(this.page.getByTestId('apmDeleteButtonDeleteButton')).toBeVisible({
+      timeout: EXTENDED_TIMEOUT,
+    });
     await this.page.getByTestId('apmDeleteButtonDeleteButton').click();
+    await this.page.getByTestId('apmDeleteButtonDeleteButton').waitFor({ state: 'hidden' });
   }
 
   async getEditCustomLinkButton() {
@@ -77,6 +82,9 @@ export class CustomLinksPage {
     const editButton = row.getByTestId('editCustomLink');
     await editButton.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
     await editButton.click();
+    await expect(this.page.getByTestId('apmCustomLinkFlyoutFooterCloseButton')).toBeVisible({
+      timeout: EXTENDED_TIMEOUT,
+    });
   }
 
   /**
@@ -105,8 +113,13 @@ export class CustomLinksPage {
     const valueInput = this.page.getByTestId(`${key}.value`);
     await valueInput.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
 
-    const valueComboBox = new EuiComboBoxWrapper(this.page, { dataTestSubj: `${key}.value` });
-    await valueComboBox.selectSingleOption(value);
+    // SuggestionsSelect pulls options from `/internal/apm/suggestions`; on serverless terms_enum is
+    // stubbed and aggregation can return empty under load, leaving no clickable option (#262047).
+    // setCustomSelectedOptions types the value and commits it via onCreateOption (Enter); we can't
+    // rely on a clickable suggestion existing here (see the #262047 note above).
+    await this.page.components
+      .comboBox(`${key}.value`)
+      .setCustomSelectedOptions([value], { timeout: EXTENDED_TIMEOUT });
   }
 
   /**

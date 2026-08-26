@@ -21,6 +21,8 @@ interface Props {
   elasticsearchUrl: string;
   isCopyPrimaryAction: boolean;
   elasticAgentVersionInfo: ElasticAgentVersionInfo;
+  useInlineCopyOnly?: boolean;
+  useColoredSyntax?: boolean;
 }
 
 export function CommandSnippet({
@@ -29,10 +31,13 @@ export function CommandSnippet({
   elasticsearchUrl,
   isCopyPrimaryAction,
   elasticAgentVersionInfo,
+  useInlineCopyOnly = false,
+  useColoredSyntax = false,
 }: Props) {
   const metricsEnabled = usePricingFeature(
     ObservabilityOnboardingPricingFeature.METRICS_ONBOARDING
   );
+
   const command = buildHelmCommand({
     encodedApiKey,
     onboardingId,
@@ -43,11 +48,11 @@ export function CommandSnippet({
 
   return (
     <>
-      <EuiText>
+      <EuiText size={useColoredSyntax ? 's' : 'm'}>
         <p>
           <FormattedMessage
             id="xpack.observability_onboarding.kubernetesPanel.installElasticAgentDescription"
-            defaultMessage="Copy and run the install command. Note that the following manifest contains resource limits that may not be appropriate for a production environment, review our guide on {scalingLink} before deploying this manifest."
+            defaultMessage="Copy and run the install command. Note that the following manifest contains resource limits that may not be appropriate for a production environment, review our guide on {scalingLink} before deploying this manifest. Refer to the {docsLink} for information on supported Helm versions."
             values={{
               scalingLink: (
                 <EuiLink
@@ -62,6 +67,19 @@ export function CommandSnippet({
                   )}
                 </EuiLink>
               ),
+              docsLink: (
+                <EuiLink
+                  data-test-subj="observabilityOnboardingKubernetesPanelQuickstartDocsLink"
+                  href="https://www.elastic.co/docs/solutions/observability/get-started/quickstart-monitor-kubernetes-cluster-with-elastic-agent"
+                  external
+                  target="_blank"
+                >
+                  {i18n.translate(
+                    'xpack.observability_onboarding.kubernetesPanel.quickstartDocsLinkLabel',
+                    { defaultMessage: 'quickstart guide' }
+                  )}
+                </EuiLink>
+              ),
             }}
           />
         </p>
@@ -70,17 +88,22 @@ export function CommandSnippet({
       <EuiSpacer />
 
       <EuiCodeBlock
-        language="text"
+        language={useColoredSyntax ? 'bash' : 'text'}
         paddingSize="m"
-        fontSize="m"
+        fontSize={useColoredSyntax ? 's' : 'm'}
+        isCopyable={useInlineCopyOnly}
+        overflowHeight={useInlineCopyOnly ? 300 : undefined}
         data-test-subj="observabilityOnboardingKubernetesPanelCodeSnippet"
       >
         {command}
       </EuiCodeBlock>
+      {!useInlineCopyOnly ? (
+        <>
+          <EuiSpacer />
 
-      <EuiSpacer />
-
-      <CopyToClipboardButton textToCopy={command} fill={isCopyPrimaryAction} />
+          <CopyToClipboardButton textToCopy={command} fill={isCopyPrimaryAction} />
+        </>
+      ) : null}
     </>
   );
 }

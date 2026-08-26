@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/files-example-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/appex-sharedux'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/files-example-plugin'
+  title: '@kbn/files-example-plugin'
   description: Moon project for @kbn/files-example-plugin
   channel: ''
   owner: '@elastic/appex-sharedux'
-  metadata:
-    sourceRoot: examples/files_example
+  sourceRoot: examples/files_example
 dependsOn:
   - '@kbn/core'
   - '@kbn/files-plugin'

@@ -11,11 +11,19 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
+import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import type { Alert } from '@kbn/alerting-types';
 import type { AdditionalContext, RenderContext } from '../types';
 import { createPartialObjectMock } from '../utils/test';
 import AlertDetailFlyout from './alert_detail_flyout';
 import { AlertsTableContextProvider } from '../contexts/alerts_table_context';
+
+jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions');
+
+jest
+  .requireMock('@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions')
+  .useGetRuleTypesPermissions.mockReturnValue({ authorizedToReadRuleType: () => true });
 
 const mockColumns = [
   {
@@ -73,12 +81,18 @@ const props = createPartialObjectMock<
   pageIndex: 0,
   pageSize: 20,
   isLoading: false,
+  services: {
+    http: httpServiceMock.createStartContract(),
+    fieldFormats: fieldFormatsMock,
+    application: applicationServiceMock.createStartContract(),
+  },
 });
 
 const context = createPartialObjectMock<RenderContext<AdditionalContext>>({
   services: {
     http: httpServiceMock.createStartContract(),
     fieldFormats: fieldFormatsMock,
+    notifications: notificationServiceMock.createStartContract(),
   },
 });
 
@@ -121,6 +135,34 @@ describe('AlertDetailFlyout', () => {
       renderWithContext(<AlertDetailFlyout {...props} />);
       await userEvent.click(screen.getByTestId(subj));
       expect(screen.getByTestId(`${subj}Panel`)).toBeInTheDocument();
+    });
+  });
+
+  describe('footer', () => {
+    it('should not render the footer when alertDetailsNavigation is not provided', () => {
+      renderWithContext(<AlertDetailFlyout {...props} />);
+      expect(screen.queryByTestId('alertFlyoutAlertDetailsButton')).not.toBeInTheDocument();
+    });
+
+    it('should render the alert details button when alertDetailsNavigation is provided', () => {
+      const application = applicationServiceMock.createStartContract();
+      application.getUrlForApp.mockReturnValue('/app/test-app/alerts/mock-id');
+
+      renderWithContext(
+        <AlertDetailFlyout
+          {...props}
+          alertDetailsNavigation={{
+            appId: 'test-app',
+            getPath: (alertId) => `/alerts/${alertId}`,
+          }}
+          services={{
+            ...props.services,
+            application,
+          }}
+        />
+      );
+
+      expect(screen.getByTestId('alertFlyoutAlertDetailsButton')).toBeInTheDocument();
     });
   });
 });

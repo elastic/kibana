@@ -50,7 +50,7 @@ describe('Uninstall token page', () => {
       it('should show token by clicking on the eye button', () => {
         // tokens are hidden by default
         cy.getBySel(UNINSTALL_TOKENS.TOKEN_FIELD).each(($tokenField) => {
-          expect($tokenField).to.contain.text('••••••••••••••••••••••••••••••••');
+          expect($tokenField).to.contain.text('••••••••••••••••••••••••');
         });
 
         // token is reveiled when clicking on eye button
@@ -62,7 +62,7 @@ describe('Uninstall token page', () => {
 
           cy.getBySel(UNINSTALL_TOKENS.TOKEN_FIELD)
             .first()
-            .should('not.contain.text', '••••••••••••••••••••••••••••••••')
+            .should('not.contain.text', '••••••••••••••••••••••••')
             .should('contain.text', fetchedToken.token);
         });
       });

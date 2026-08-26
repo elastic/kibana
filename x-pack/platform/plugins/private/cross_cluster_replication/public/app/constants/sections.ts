@@ -10,4 +10,4 @@ export const SECTIONS = {
   FOLLOWER_INDEX: 'followerIndex',
   REMOTE_CLUSTER: 'remoteCluster',
   CCR_STATS: 'ccrStats',
-};
+} as const;

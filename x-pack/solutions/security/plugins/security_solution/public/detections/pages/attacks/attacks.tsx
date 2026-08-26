@@ -8,7 +8,6 @@
 import { EuiFlexGroup, EuiLoadingSpinner } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
 import type { DocLinks } from '@kbn/doc-links';
-import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { Wrapper } from '../../components/attacks/wrapper';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
 import { NoApiIntegrationKeyCallOut } from '../../components/callouts/no_api_integration_key_callout';
@@ -17,11 +16,14 @@ import { NoIndexEmptyPage } from '../../components/alerts/empty_pages/no_index_e
 import { useListsConfig } from '../../containers/detection_engine/lists/use_lists_config';
 import { UserUnauthenticatedEmptyPage } from '../../components/alerts/empty_pages/user_unauthenticated_empty_page';
 import * as i18n from './translations';
-import { useSignalHelpers } from '../../../sourcerer/containers/use_signal_helpers';
+import { PageScope } from '../../../data_view_manager/constants';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { useSignalHelpers } from '../../hooks/use_signal_helpers';
 import { NeedAdminForUpdateRulesCallOut } from '../../../detection_engine/rule_management/components/callouts/need_admin_for_update_rules_callout';
 import { MissingAttacksPrivilegesCallOut } from '../../components/callouts/missing_attacks_privileges_callout';
 import { NoPrivileges } from '../../../common/components/no_privileges';
 import { HeaderPage } from '../../../common/components/header_page';
+import { useAlertsPrivileges } from '../../containers/detection_engine/alerts/use_alerts_privileges';
 
 export const ATTACKS_PAGE_LOADING_TEST_ID = 'attacks-page-loading';
 
@@ -30,11 +32,12 @@ export const ATTACKS_PAGE_LOADING_TEST_ID = 'attacks-page-loading';
  * the actual content of the attacks page is rendered
  */
 export const AttacksPage = memo(() => {
-  const [{ loading: userInfoLoading, isAuthenticated, hasIndexRead }] = useUserData();
-  const canReadAlerts = useUserPrivileges().rulesPrivileges.rules.read;
+  const [{ loading: userInfoLoading, isAuthenticated }] = useUserData();
+  const { hasAlertsRead: canReadAlerts } = useAlertsPrivileges();
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
-  const { signalIndexNeedsInit } = useSignalHelpers();
+  const { dataView, status } = useDataView(PageScope.alerts);
+  const { signalIndexNeedsInit } = useSignalHelpers(dataView, status);
 
   const loading: boolean = useMemo(
     () => userInfoLoading || listsConfigLoading,
@@ -49,8 +52,8 @@ export const AttacksPage = memo(() => {
     [needsListsConfiguration, signalIndexNeedsInit]
   );
   const privilegesRequired: boolean = useMemo(
-    () => !signalIndexNeedsInit && (hasIndexRead === false || canReadAlerts === false),
-    [canReadAlerts, hasIndexRead, signalIndexNeedsInit]
+    () => !signalIndexNeedsInit && canReadAlerts === false,
+    [canReadAlerts, signalIndexNeedsInit]
   );
 
   if (loading) {

@@ -12,9 +12,10 @@ import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
 import React from 'react';
 
+import type { UserProfileUserInfo } from '@kbn/core-user-profile-common';
+
 import type { UserProfileAvatarData } from './types';
 import { UserAvatar } from './user_avatar';
-import type { UserProfileUserInfo } from './user_profile';
 import { getUserDisplayName } from './user_profile';
 
 /**

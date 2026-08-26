@@ -7,6 +7,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
+import type { IdentityFields } from '../../../../flyout/document_details/shared/utils';
 import { firstNonNullValue } from '../../../../../common/endpoint/models/ecs_safety_helpers';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
@@ -41,6 +42,8 @@ export interface HostAlertsItem {
   medium: number;
   high: number;
   critical: number;
+  /** When provided, used for precise host resolution in links and alerts navigation */
+  identityFields?: IdentityFields;
 }
 
 export type UseHostAlertsItems = (props: UseHostAlertsItemsProps) => {
@@ -225,6 +228,12 @@ export const buildVulnerableHostAggregationQuery = ({
               },
             },
           },
+          host_sample: {
+            top_hits: {
+              size: 1,
+              _source: ['host'],
+            },
+          },
           bucketOfPagination: {
             bucket_sort: {
               from: fromValue,
@@ -241,11 +250,74 @@ interface SeverityContainer {
   doc_count: number;
 }
 
+/** ECS host object from _source; fields may be string or string[] */
+interface EsHostSource {
+  entity?: { id?: string | string[] };
+  id?: string | string[];
+  name?: string | string[];
+  domain?: string | string[];
+  mac?: string | string[];
+  hostname?: string | string[];
+}
+
+function getFirst(value: string | string[] | undefined): string | undefined {
+  if (value == null) return undefined;
+  if (typeof value === 'string') return value;
+  return value.length > 0 ? value[0] : undefined;
+}
+
+/**
+ * Build host identityFields from an ES hit's host object (same priority as entity store EUID).
+ * Priority: host.entity.id > host.id > host.name (with domain, mac) > host.hostname (with domain, mac).
+ */
+function getHostIdentityFieldsFromEsHit(
+  host: EsHostSource | undefined
+): IdentityFields | undefined {
+  if (!host) return undefined;
+  const identifiers: IdentityFields = {};
+  const entityId = getFirst(host.entity?.id);
+  if (entityId) {
+    identifiers['host.entity.id'] = entityId;
+    return identifiers;
+  }
+  const hostId = getFirst(host.id);
+  if (hostId) {
+    identifiers['host.id'] = hostId;
+    return identifiers;
+  }
+  const hostName = getFirst(host.name);
+  if (hostName) {
+    identifiers['host.name'] = hostName;
+    const domain = getFirst(host.domain);
+    if (domain) identifiers['host.domain'] = domain;
+    const mac = getFirst(host.mac);
+    if (mac) identifiers['host.mac'] = mac;
+    return identifiers;
+  }
+  const hostname = getFirst(host.hostname);
+  if (hostname) {
+    identifiers['host.hostname'] = hostname;
+    const domain = getFirst(host.domain);
+    if (domain) identifiers['host.domain'] = domain;
+    const mac = getFirst(host.mac);
+    if (mac) identifiers['host.mac'] = mac;
+    return identifiers;
+  }
+  return Object.keys(identifiers).length > 0 ? identifiers : undefined;
+}
+
+interface HostSampleHit {
+  _source?: { host?: EsHostSource };
+}
+
 interface AlertBySeverityBucketData extends GenericBuckets {
   low: SeverityContainer;
   medium: SeverityContainer;
   high: SeverityContainer;
   critical: SeverityContainer;
+  host_sample?: {
+    hits: { hits: HostSampleHit[] };
+  };
 }
 
 interface AlertCountersBySeverityAndHostAggregation {
@@ -261,13 +333,19 @@ function parseHostsData(
   const buckets = rawAggregation?.[HOSTS_BY_SEVERITY_AGG].buckets ?? [];
 
   return buckets.reduce<HostAlertsItem[]>((accumalatedAlertsByHost, currentHost) => {
+    const hostName = firstNonNullValue(currentHost.key) ?? '-';
+    const hostSource = currentHost.host_sample?.hits?.hits?.[0]?._source?.host;
+    const identityFields =
+      getHostIdentityFieldsFromEsHit(hostSource) ?? ({ 'host.name': hostName } as IdentityFields);
+
     accumalatedAlertsByHost.push({
-      hostName: firstNonNullValue(currentHost.key) ?? '-',
+      hostName,
       totalAlerts: currentHost.doc_count,
       low: currentHost.low.doc_count,
       medium: currentHost.medium.doc_count,
       high: currentHost.high.doc_count,
       critical: currentHost.critical.doc_count,
+      identityFields,
     });
 
     return accumalatedAlertsByHost;

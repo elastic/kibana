@@ -154,7 +154,6 @@ export default ({ getService }: FtrProviderContext): void => {
               CaseMetricsFeature.ALERTS_HOSTS,
               CaseMetricsFeature.ALERTS_USERS,
               CaseMetricsFeature.CONNECTORS,
-              CaseMetricsFeature.ACTIONS_ISOLATE_HOST,
             ],
             auth: { user, space: 'space1' },
           });
@@ -166,9 +165,6 @@ export default ({ getService }: FtrProviderContext): void => {
           });
           expect(metrics.connectors).to.eql({
             total: 0,
-          });
-          expect(metrics.actions).to.eql({
-            isolateHost: { isolate: { total: 0 }, unisolate: { total: 0 } },
           });
           expect(metrics.lifespan).to.not.eql(undefined);
         }
@@ -195,7 +191,6 @@ export default ({ getService }: FtrProviderContext): void => {
               CaseMetricsFeature.ALERTS_HOSTS,
               CaseMetricsFeature.ALERTS_USERS,
               CaseMetricsFeature.CONNECTORS,
-              CaseMetricsFeature.ACTIONS_ISOLATE_HOST,
             ],
             expectedHttpCode: 403,
             auth: { user, space: 'space1' },
@@ -223,7 +218,6 @@ export default ({ getService }: FtrProviderContext): void => {
             CaseMetricsFeature.ALERTS_HOSTS,
             CaseMetricsFeature.ALERTS_USERS,
             CaseMetricsFeature.CONNECTORS,
-            CaseMetricsFeature.ACTIONS_ISOLATE_HOST,
           ],
           expectedHttpCode: 403,
           auth: { user: secOnly, space: 'space2' },

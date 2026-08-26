@@ -13,6 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -25,9 +26,10 @@ const API_KEY_MASK = '•'.repeat(60);
 
 interface ApiKeyFormProps {
   hasTitle?: boolean;
+  minWidth?: number;
 }
 
-export const ApiKeyForm: React.FC<ApiKeyFormProps> = ({ hasTitle = true }) => {
+export const ApiKeyForm: React.FC<ApiKeyFormProps> = ({ hasTitle = true, minWidth }) => {
   const [showFlyout, setShowFlyout] = useState(false);
   const { apiKey, status, updateApiKey, toggleApiKeyVisibility } = useSearchApiKey();
 
@@ -43,17 +45,25 @@ export const ApiKeyForm: React.FC<ApiKeyFormProps> = ({ hasTitle = true }) => {
         copyValue={apiKey}
         dataTestSubj="apiKeyFormAPIKey"
         copyValueDataTestSubj="APIKeyButtonCopy"
+        minWidth={minWidth}
         actions={[
-          <EuiButtonIcon
-            iconType={status === Status.showPreviewKey ? 'eyeClosed' : 'eye'}
-            size="s"
-            color="text"
-            onClick={toggleApiKeyVisibility}
-            data-test-subj="showAPIKeyButton"
-            aria-label={i18n.translate('searchApiKeysComponents.apiKeyForm.showApiKey', {
+          <EuiToolTip
+            content={i18n.translate('searchApiKeysComponents.apiKeyForm.showApiKey', {
               defaultMessage: 'Show API Key',
             })}
-          />,
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              iconType={status === Status.showPreviewKey ? 'eyeSlash' : 'eye'}
+              size="s"
+              color="text"
+              onClick={toggleApiKeyVisibility}
+              data-test-subj="showAPIKeyButton"
+              aria-label={i18n.translate('searchApiKeysComponents.apiKeyForm.showApiKey', {
+                defaultMessage: 'Show API Key',
+              })}
+            />
+          </EuiToolTip>,
         ]}
       />
     );

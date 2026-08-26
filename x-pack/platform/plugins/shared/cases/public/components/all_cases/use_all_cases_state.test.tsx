@@ -25,24 +25,20 @@ import { CustomFieldTypes } from '../../../common/types/domain';
 import { useCaseConfigureResponse } from '../configure_cases/__mock__';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 
+jest.mock('../../containers/configure/use_get_case_configuration');
+
 const mockLocation = { search: '' };
 const mockPush = jest.fn();
 const mockReplace = jest.fn();
-
-jest.mock('../../containers/configure/use_get_case_configuration');
+let mockHistory: unknown = {
+  replace: mockReplace,
+  push: mockPush,
+  location: mockLocation,
+};
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
-  useLocation: jest.fn().mockImplementation(() => {
-    return mockLocation;
-  }),
-  useHistory: jest.fn().mockImplementation(() => ({
-    replace: mockReplace,
-    push: mockPush,
-    location: {
-      search: '',
-    },
-  })),
+  useHistory: () => mockHistory,
 }));
 
 const useGetCaseConfigurationMock = useGetCaseConfiguration as jest.Mock;
@@ -53,6 +49,11 @@ describe('useAllCasesQueryParams', () => {
   beforeEach(() => {
     localStorage.clear();
     mockLocation.search = '';
+    mockHistory = {
+      replace: mockReplace,
+      push: mockPush,
+      location: mockLocation,
+    };
 
     useGetCaseConfigurationMock.mockImplementation(() => useCaseConfigureResponse);
   });
@@ -205,6 +206,7 @@ describe('useAllCasesQueryParams', () => {
         customFields: {
           testCustomField: { options: ['foo'], type: CustomFieldTypes.TEXT },
         },
+        extendedFieldFilters: [],
         from: DEFAULT_FROM_DATE,
         to: DEFAULT_TO_DATE,
       },
@@ -715,6 +717,30 @@ describe('useAllCasesQueryParams', () => {
   });
 
   describe('Modal', () => {
+    it('does not require router context', () => {
+      mockHistory = undefined;
+
+      const { result } = renderHook(() => useAllCasesState(true), {
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+          <TestProviders>{children}</TestProviders>
+        ),
+      });
+
+      expect(result.current.queryParams).toStrictEqual(DEFAULT_CASES_TABLE_STATE.queryParams);
+      expect(result.current.filterOptions).toStrictEqual(DEFAULT_CASES_TABLE_STATE.filterOptions);
+
+      act(() => {
+        result.current.setFilterOptions({ status: [CaseStatuses.closed] });
+      });
+
+      expect(result.current.filterOptions).toStrictEqual({
+        ...DEFAULT_CASES_TABLE_STATE.filterOptions,
+        status: [CaseStatuses.closed],
+      });
+      expect(mockPush).not.toHaveBeenCalled();
+      expect(mockReplace).not.toHaveBeenCalled();
+    });
+
     it('returns default state with empty URL and local storage', () => {
       const { result } = renderHook(() => useAllCasesState(true), {
         wrapper: ({ children }: React.PropsWithChildren<{}>) => (

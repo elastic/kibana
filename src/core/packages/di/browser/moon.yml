@@ -4,24 +4,26 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/core-di-browser'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-core'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/core-di-browser'
+  title: '@kbn/core-di-browser'
   description: Moon project for @kbn/core-di-browser
   channel: ''
   owner: '@elastic/kibana-core'
-  metadata:
-    sourceRoot: src/core/packages/di/browser
+  sourceRoot: src/core/packages/di/browser
 dependsOn:
   - '@kbn/core-application-browser'
   - '@kbn/core-lifecycle-browser'
   - '@kbn/core-plugins-browser'
+  - '@kbn/core-security-common'
+  - '@kbn/core-ui-settings-browser'
   - '@kbn/core-di-internal'
+  - '@kbn/core-di'
 tags:
   - shared-browser
   - package
@@ -34,16 +36,6 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

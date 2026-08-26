@@ -16,13 +16,6 @@ import {
   validateTagDescription,
 } from '../../../common';
 
-/**
- * Returns the hex representation of a random color (e.g `#F1B7E2`)
- */
-export const getRandomColor = (): string => {
-  return '#' + String(Math.floor(Math.random() * 16777215).toString(16)).padStart(6, '0');
-};
-
 export const duplicateTagNameErrorMessage = i18n.translate(
   'xpack.savedObjectsTagging.validation.name.duplicateError',
   {

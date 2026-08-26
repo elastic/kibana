@@ -6,11 +6,11 @@
  */
 import { i18n } from '@kbn/i18n';
 import { Outlet } from '@kbn/typed-react-router-config';
-import * as t from 'io-ts';
+import { z } from '@kbn/zod/v4';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
-import { agentConfigurationPageStepRt } from '../../../../common/agent_configuration/constants';
-import { environmentRt } from '../../../../common/environment_rt';
+import { AgentConfigurationPageStep } from '../../../../common/agent_configuration/constants';
+import { environmentSchema } from '../../../../common/environment_rt';
 import { Breadcrumb } from '../../app/breadcrumb';
 import { AgentConfigurations } from '../../app/settings/agent_configurations';
 import { AgentExplorer } from '../../app/settings/agent_explorer';
@@ -80,10 +80,18 @@ export const settingsRoute = {
           tab: 'agent-configuration',
           element: <CreateAgentConfigurationRouteView />,
         }),
-        params: t.partial({
-          query: t.partial({
-            pageStep: agentConfigurationPageStepRt,
-          }),
+        params: z.object({
+          query: z
+            .object({
+              pageStep: z
+                .union([
+                  z.literal(AgentConfigurationPageStep.ChooseService),
+                  z.literal(AgentConfigurationPageStep.ChooseSettings),
+                  z.literal(AgentConfigurationPageStep.Review),
+                ])
+                .optional(),
+            })
+            .optional(),
         }),
       },
       '/settings/agent-configuration/edit': {
@@ -94,12 +102,20 @@ export const settingsRoute = {
           tab: 'agent-configuration',
           element: <EditAgentConfigurationRouteView />,
         }),
-        params: t.partial({
-          query: t.partial({
-            environment: t.string,
-            name: t.string,
-            pageStep: agentConfigurationPageStepRt,
-          }),
+        params: z.object({
+          query: z
+            .object({
+              environment: z.string().optional(),
+              name: z.string().optional(),
+              pageStep: z
+                .union([
+                  z.literal(AgentConfigurationPageStep.ChooseService),
+                  z.literal(AgentConfigurationPageStep.ChooseSettings),
+                  z.literal(AgentConfigurationPageStep.Review),
+                ])
+                .optional(),
+            })
+            .optional(),
         }),
       },
       '/settings/apm-indices': page({
@@ -145,15 +161,14 @@ export const settingsRoute = {
           element: <AgentExplorer />,
           tab: 'agent-explorer',
         }),
-        params: t.type({
-          query: t.intersection([
-            environmentRt,
-            t.type({
-              kuery: t.string,
-              agentLanguage: t.string,
-              serviceName: t.string,
-            }),
-          ]),
+        params: z.object({
+          query: environmentSchema.merge(
+            z.object({
+              kuery: z.string(),
+              agentLanguage: z.string(),
+              serviceName: z.string(),
+            })
+          ),
         }),
       },
       '/settings': {

@@ -21,6 +21,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
+  htmlIdGenerator,
 } from '@elastic/eui';
 
 import { cloneDeep } from 'lodash';
@@ -206,6 +207,7 @@ export class GroupSelectorUI extends Component {
 
   render() {
     const { groups, selectedGroups, edited } = this.state;
+    const popoverTitleId = htmlIdGenerator()('popoverTitle');
     const button = (
       <EuiToolTip
         position="bottom"
@@ -238,9 +240,10 @@ export class GroupSelectorUI extends Component {
         button={button}
         isOpen={this.state.isPopoverOpen}
         closePopover={() => this.closePopover()}
+        aria-labelledby={popoverTitleId}
       >
         <div>
-          <EuiPopoverTitle>
+          <EuiPopoverTitle id={popoverTitleId}>
             <FormattedMessage
               id="xpack.ml.jobsList.multiJobActions.groupSelector.applyGroupsToJobTitle"
               defaultMessage="Apply groups to {jobsCount, plural, one {job} other {jobs}}"

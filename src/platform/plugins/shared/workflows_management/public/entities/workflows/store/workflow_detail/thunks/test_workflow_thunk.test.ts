@@ -7,9 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { createMockWorkflowApi } from '@kbn/workflows-ui/mocks';
+
 import { testWorkflowThunk } from './test_workflow_thunk';
 import { createMockStore, getMockServices } from '../../__mocks__/store.mock';
 import type { MockServices, MockStore } from '../../__mocks__/store.mock';
+
+const mockWorkflowApi = createMockWorkflowApi();
+jest.mock('@kbn/workflows-ui', () => ({
+  WorkflowApi: jest.fn().mockImplementation(() => mockWorkflowApi),
+}));
 
 describe('testWorkflowThunk', () => {
   let store: MockStore;
@@ -37,15 +44,14 @@ describe('testWorkflowThunk', () => {
     // Set workflow to undefined
     store.dispatch({ type: 'detail/setWorkflow', payload: undefined });
 
-    mockServices.http.post.mockResolvedValue(mockResponse);
+    mockWorkflowApi.testWorkflow.mockResolvedValue(mockResponse);
 
     const result = await store.dispatch(testWorkflowThunk({ inputs: testInputs }));
 
-    expect(mockServices.http.post).toHaveBeenCalledWith('/api/workflows/test', {
-      body: JSON.stringify({
-        workflowYaml: 'name: Test Workflow\nsteps: []',
-        inputs: testInputs,
-      }),
+    expect(mockWorkflowApi.testWorkflow).toHaveBeenCalledWith({
+      workflowYaml: 'name: Test Workflow\nsteps: []',
+      workflowId: undefined,
+      inputs: testInputs,
     });
     expect(mockServices.notifications.toasts.addSuccess).toHaveBeenCalledWith(
       'Workflow test execution started',
@@ -70,16 +76,14 @@ describe('testWorkflowThunk', () => {
     // Set workflow
     store.dispatch({ type: 'detail/setWorkflow', payload: { id: 'workflow-123' } });
 
-    mockServices.http.post.mockResolvedValue(mockResponse);
+    mockWorkflowApi.testWorkflow.mockResolvedValue(mockResponse);
 
     const result = await store.dispatch(testWorkflowThunk({ inputs: testInputs }));
 
-    expect(mockServices.http.post).toHaveBeenCalledWith('/api/workflows/test', {
-      body: JSON.stringify({
-        workflowYaml: 'name: Test Workflow\nsteps: []',
-        inputs: testInputs,
-        workflowId: 'workflow-123',
-      }),
+    expect(mockWorkflowApi.testWorkflow).toHaveBeenCalledWith({
+      workflowYaml: 'name: Test Workflow\nsteps: []',
+      workflowId: 'workflow-123',
+      inputs: testInputs,
     });
     expect(mockServices.notifications.toasts.addSuccess).toHaveBeenCalledWith(
       'Workflow test execution started',
@@ -106,7 +110,7 @@ describe('testWorkflowThunk', () => {
     };
 
     store.dispatch({ type: 'detail/setYamlString', payload: 'name: Test Workflow\nsteps: []' });
-    mockServices.http.post.mockRejectedValue(error);
+    mockWorkflowApi.testWorkflow.mockRejectedValue(error);
 
     const result = await store.dispatch(testWorkflowThunk({ inputs: {} }));
 
@@ -120,13 +124,64 @@ describe('testWorkflowThunk', () => {
     expect(result.payload).toBe('Workflow test failed');
   });
 
+  it('should surface validation reasons from body.attributes.validationErrors', async () => {
+    const error = {
+      body: {
+        message: 'Workflow validation failed',
+        attributes: {
+          validationErrors: [
+            'Parallel step "outer" has a branch body containing unsupported flow-control ("enter-parallel").',
+            'Parallel step "fan_out" requires at least 2 branches.',
+          ],
+        },
+      },
+      message: 'Bad Request',
+    };
+
+    store.dispatch({ type: 'detail/setYamlString', payload: 'name: Test Workflow\nsteps: []' });
+    mockWorkflowApi.testWorkflow.mockRejectedValue(error);
+
+    const result = await store.dispatch(testWorkflowThunk({ inputs: {} }));
+
+    const expectedMessage =
+      'Workflow validation failed:\n' +
+      '• Parallel step "outer" has a branch body containing unsupported flow-control ("enter-parallel").\n' +
+      '• Parallel step "fan_out" requires at least 2 branches.';
+    expect(mockServices.notifications.toasts.addError).toHaveBeenCalledWith(
+      new Error(expectedMessage),
+      {
+        title: 'Failed to test workflow',
+      }
+    );
+    expect(result.type).toBe('detail/testWorkflowThunk/rejected');
+    expect(result.payload).toBe(expectedMessage);
+  });
+
+  it('should fall back to body message when validationErrors is empty', async () => {
+    const error = {
+      body: { message: 'Workflow validation failed', attributes: { validationErrors: [] } },
+      message: 'Bad Request',
+    };
+
+    store.dispatch({ type: 'detail/setYamlString', payload: 'name: Test Workflow\nsteps: []' });
+    mockWorkflowApi.testWorkflow.mockRejectedValue(error);
+
+    const result = await store.dispatch(testWorkflowThunk({ inputs: {} }));
+
+    expect(mockServices.notifications.toasts.addError).toHaveBeenCalledWith(
+      new Error('Workflow validation failed'),
+      { title: 'Failed to test workflow' }
+    );
+    expect(result.payload).toBe('Workflow validation failed');
+  });
+
   it('should handle HTTP error without body message', async () => {
     const error = {
       message: 'Network Error',
     };
 
     store.dispatch({ type: 'detail/setYamlString', payload: 'name: Test Workflow\nsteps: []' });
-    mockServices.http.post.mockRejectedValue(error);
+    mockWorkflowApi.testWorkflow.mockRejectedValue(error);
 
     const result = await store.dispatch(testWorkflowThunk({ inputs: {} }));
 
@@ -144,7 +199,7 @@ describe('testWorkflowThunk', () => {
     const error = {};
 
     store.dispatch({ type: 'detail/setYamlString', payload: 'name: Test Workflow\nsteps: []' });
-    mockServices.http.post.mockRejectedValue(error);
+    mockWorkflowApi.testWorkflow.mockRejectedValue(error);
 
     const result = await store.dispatch(testWorkflowThunk({ inputs: {} }));
 
@@ -164,15 +219,14 @@ describe('testWorkflowThunk', () => {
     };
 
     store.dispatch({ type: 'detail/setYamlString', payload: 'name: Test Workflow\nsteps: []' });
-    mockServices.http.post.mockResolvedValue(mockResponse);
+    mockWorkflowApi.testWorkflow.mockResolvedValue(mockResponse);
 
     const result = await store.dispatch(testWorkflowThunk({ inputs: {} }));
 
-    expect(mockServices.http.post).toHaveBeenCalledWith('/api/workflows/test', {
-      body: JSON.stringify({
-        workflowYaml: 'name: Test Workflow\nsteps: []',
-        inputs: {},
-      }),
+    expect(mockWorkflowApi.testWorkflow).toHaveBeenCalledWith({
+      workflowYaml: 'name: Test Workflow\nsteps: []',
+      workflowId: undefined,
+      inputs: {},
     });
     expect(mockServices.notifications.toasts.addSuccess).toHaveBeenCalledWith(
       'Workflow test execution started',

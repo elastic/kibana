@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { ActionsClientLlm } from '@kbn/langchain/server';
+import type { BaseLLM } from '@langchain/core/language_models/llms';
 import type { Logger } from '@kbn/core/server';
-import type { ZodType } from '@kbn/zod';
+import type { ZodType } from '@kbn/zod/v4';
 
 import type { BaseGraphState, GraphInsightTypes } from '../../../graphs';
 import { discardPreviousRefinements } from './helpers/discard_previous_refinements';
@@ -27,7 +27,7 @@ export const getRefineNode = <T extends GraphInsightTypes>({
   responseIsHallucinated,
   generationSchema,
 }: {
-  llm: ActionsClientLlm;
+  llm: BaseLLM;
   logger?: Logger;
   responseIsHallucinated: (response: string) => boolean;
   generationSchema: ZodType<{ insights: T[] }>;

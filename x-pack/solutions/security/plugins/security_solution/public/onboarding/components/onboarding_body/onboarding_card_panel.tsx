@@ -8,13 +8,14 @@
 import React, { useMemo, type PropsWithChildren } from 'react';
 import type { IconType } from '@elastic/eui';
 import {
-  EuiPanel,
   EuiBadge,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiPanel,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import classnames from 'classnames';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
@@ -82,7 +83,7 @@ export const OnboardingCardPanel = React.memo<PropsWithChildren<OnboardingCardPa
         >
           <EuiFlexItem grow={false}>
             <span className="onboardingCardIcon">
-              <EuiIcon type={iconType} size="l" />
+              <EuiIcon type={iconType} size="l" aria-hidden={true} />
             </span>
           </EuiFlexItem>
           <EuiFlexItem>
@@ -115,13 +116,15 @@ export const OnboardingCardPanel = React.memo<PropsWithChildren<OnboardingCardPa
           )}
 
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              color="primary"
-              size="xs"
-              iconType={isExpanded ? 'arrowUp' : 'arrowDown'}
-              aria-label={EXPAND_CARD_BUTTON_LABEL(title)}
-              aria-expanded={isExpanded}
-            />
+            <EuiToolTip content={EXPAND_CARD_BUTTON_LABEL(title)} disableScreenReaderOutput>
+              <EuiButtonIcon
+                color="primary"
+                size="xs"
+                iconType={isExpanded ? 'chevronSingleUp' : 'chevronSingleDown'}
+                aria-label={EXPAND_CARD_BUTTON_LABEL(title)}
+                aria-expanded={isExpanded}
+              />
+            </EuiToolTip>
           </EuiFlexItem>
         </EuiFlexGroup>
         <div className="onboardingCardContentWrapper">

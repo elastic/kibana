@@ -7,14 +7,16 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { PointVisibilityOptions } from '@kbn/expression-xy-plugin/public';
+import { AreaFillOptions, PointVisibilityOptions } from '@kbn/expression-xy-plugin/public';
+import type { VisualizationToolbarProps } from '@kbn/lens-common';
 import { BarOrientationSettings } from '../../../../shared_components/bar_orientation';
 import { ToolbarDivider } from '../../../../shared_components/toolbar_divider';
 import { MissingValuesOptions } from './missing_values_option';
 import { LineCurveOption } from './line_curve_option';
 import { FillOpacityOption } from './fill_opacity_option';
+import { AreaFillOption } from './fill_option';
 import { PointVisibilityOption } from './point_visibility_option';
-import type { XYState } from '../../types';
+import type { XYVisualizationState } from '../../types';
 import {
   flipSeriesType,
   getBarSeriesLayers,
@@ -47,10 +49,11 @@ export function getValueLabelDisableReason({
   });
 }
 
-export const XyAppearanceSettings: React.FC<{
-  state: XYState;
-  setState: (newState: XYState) => void;
-}> = ({ state, setState }) => {
+export const XyAppearanceSettings: React.FC<VisualizationToolbarProps<XYVisualizationState>> = ({
+  state,
+  setState,
+  frame,
+}) => {
   const dataLayers = getDataLayers(state.layers);
   const isAreaPercentage = dataLayers.some(
     ({ seriesType }) => seriesType === 'area_percentage_stacked'
@@ -58,7 +61,10 @@ export const XyAppearanceSettings: React.FC<{
 
   const isHasNonBarSeries = hasNonBarSeries(dataLayers);
 
-  const isFittingEnabled = isHasNonBarSeries && !isAreaPercentage;
+  const hasTextBasedDatasource = dataLayers.some(
+    (layer) => frame.datasourceLayers[layer.layerId]?.isTextBasedLanguage() === true
+  );
+  const isFittingEnabled = isHasNonBarSeries && !isAreaPercentage && !hasTextBasedDatasource;
   const isCurveTypeEnabled = isHasNonBarSeries || isAreaPercentage;
 
   const isHorizontal = isHorizontalChart(state.layers);
@@ -99,10 +105,20 @@ export const XyAppearanceSettings: React.FC<{
           <FillOpacityOption
             isFillOpacityEnabled={true}
             value={state?.fillOpacity ?? 0.3}
+            fill={state?.areaFill ?? AreaFillOptions.SOLID}
             onChange={(newValue) => {
               setState({
                 ...state,
                 fillOpacity: newValue,
+              });
+            }}
+          />
+          <AreaFillOption
+            value={state?.areaFill ?? AreaFillOptions.SOLID}
+            onChange={(newValue) => {
+              setState({
+                ...state,
+                areaFill: newValue,
               });
             }}
           />

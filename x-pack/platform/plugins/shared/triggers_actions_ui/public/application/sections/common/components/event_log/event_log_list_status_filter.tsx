@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useCallback } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { RuleAlertingOutcome } from '@kbn/alerting-plugin/common';
 import { EuiFilterButton, EuiPopover, EuiFilterGroup, EuiFilterSelectItem } from '@elastic/eui';
@@ -47,10 +48,14 @@ export const EventLogListStatusFilter = (props: EventLogListStatusFilterProps) =
         isOpen={isPopoverOpen}
         closePopover={() => setIsPopoverOpen(false)}
         data-test-subj="eventLogStatusFilter"
+        aria-label={i18n.translate(
+          'xpack.triggersActionsUI.sections.eventLogStatusFilter.ariaLabel',
+          { defaultMessage: 'Filter by response status' }
+        )}
         button={
           <EuiFilterButton
             data-test-subj="eventLogStatusFilterButton"
-            iconType="arrowDown"
+            iconType="chevronSingleDown"
             isSelected={isPopoverOpen}
             hasActiveFilters={selectedOptions.length > 0}
             numActiveFilters={selectedOptions.length}

@@ -6,8 +6,11 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { LogDocument } from '../routes/ai_insights/get_log_document_by_id';
 
-const WARNING_AND_ABOVE_VALUES = [
+const ERROR_PATTERNS = [/\berror\b/i, /\bexception\b/i, /\bfail(?:ed|ure|ing)?\b/i, /\btimeout\b/i];
+
+export const WARNING_AND_ABOVE_VALUES = [
   'ALERT',
   'CRIT',
   'CRITICAL',
@@ -42,4 +45,31 @@ export function warningAndAboveLogFilter(): QueryDslQueryContainer {
       minimum_should_match: 1,
     },
   };
+}
+
+/**
+ * Analyzes a log entry to determine if it is warning level or above
+ * (warn, error, critical, fatal)
+ */
+export function isWarningOrAbove(logDocument: LogDocument): boolean {
+  const logLevel = logDocument['log.level'];
+  if (logLevel && WARNING_AND_ABOVE_VALUES.includes(logLevel.toLowerCase())) {
+    return true;
+  }
+
+  const statusCode = Number(logDocument['http.response.status_code']);
+  if (statusCode >= 500) {
+    return true;
+  }
+
+  if (logDocument['error.exception.message']) {
+    return true;
+  }
+
+  const message = logDocument.message;
+  if (typeof message === 'string' && ERROR_PATTERNS.some((pattern) => pattern.test(message))) {
+    return true;
+  }
+
+  return false;
 }

@@ -31,7 +31,6 @@ export const setCommand = {
     declaration: `SET <setting> = <value>`,
     examples: ['SET project_routing = "_alias:_origin";', 'SET project_routing = "_alias:*";'],
     hidden: isHidden,
-    preview: true,
     name: 'set',
   },
 };

@@ -438,7 +438,7 @@ export default function findBackfillTests({ getService }: FtrProviderContext) {
                 expect(response.statusCode).to.eql(403);
                 expect(response.body).to.eql({
                   error: 'Forbidden',
-                  message: `Failed to find backfills: Unauthorized to find rules for any rule types`,
+                  message: `Failed to find backfills: Unauthorized to find rules for any rule types.`,
                   statusCode: 403,
                 });
               });

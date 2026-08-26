@@ -21,7 +21,7 @@ export function calculateMinInterval(
 ) {
   const filteredLayers = getFilteredLayers(layers);
   if (filteredLayers.length === 0) return;
-  const isTimeViz = isTimeChart(getDataLayers(filteredLayers));
+  const isTimeVis = isTimeChart(getDataLayers(filteredLayers));
   const xColumn =
     isDataLayer(filteredLayers[0]) &&
     filteredLayers[0].xAccessor &&
@@ -31,7 +31,7 @@ export function calculateMinInterval(
   if (minTimeBarInterval) {
     return search.aggs.parseInterval(minTimeBarInterval)?.as('milliseconds');
   }
-  if (!isTimeViz) {
+  if (!isTimeVis) {
     const histogramInterval = datatableUtilities.getNumberHistogramInterval(xColumn);
     if (typeof histogramInterval === 'number') {
       return histogramInterval;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import moment from 'moment';
 import { ByteSizeValue } from '@kbn/config-schema';
 import type { MockedLogger } from '@kbn/logging-mocks';
@@ -52,6 +52,8 @@ import type { estypes } from '@elastic/elasticsearch';
 import { ConnectorRateLimiter } from '../lib/connector_rate_limiter';
 import { getConnectorType } from '../fixtures';
 import { createMockInMemoryConnector } from '../application/connector/mocks';
+import { authTypeRegistryMock } from '../auth_types/auth_type_registry.mock';
+import type { AuthTypeRegistry } from '../auth_types/auth_type_registry';
 
 jest.mock('@kbn/core-saved-objects-utils-server', () => {
   const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
@@ -99,7 +101,7 @@ let actionsClient: ActionsClient;
 let mockedLicenseState: jest.Mocked<ILicenseState>;
 let actionTypeRegistry: ActionTypeRegistry;
 let actionTypeRegistryParams: ActionTypeRegistryOpts;
-
+let authTypeRegistry: AuthTypeRegistry;
 const connectorTokenClient = connectorTokenClientMock.create();
 const inMemoryMetrics = inMemoryMetricsMock.create();
 
@@ -134,9 +136,11 @@ beforeEach(() => {
     inMemoryConnectors: [],
   };
   actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+  authTypeRegistry = authTypeRegistryMock.create() as unknown as AuthTypeRegistry;
   actionsClient = new ActionsClient({
     logger,
     actionTypeRegistry,
+    authTypeRegistry,
     unsecuredSavedObjectsClient,
     scopedClusterClient,
     kibanaIndices,
@@ -397,9 +401,10 @@ describe('create()', () => {
           secrets: {},
         },
       })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type config: Field \\"param1\\": Required"`
-    );
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`
+      "error validating connector type config: ✖ Invalid input: expected string, received undefined
+        → at param1"
+    `);
   });
 
   test('validates connector: config and secrets', async () => {
@@ -536,6 +541,19 @@ describe('create()', () => {
       microsoftGraphApiUrl: DEFAULT_MICROSOFT_GRAPH_API_URL,
       microsoftGraphApiScope: DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
       microsoftExchangeUrl: DEFAULT_MICROSOFT_EXCHANGE_URL,
+      auth: {
+        oauth_authorization_code: {
+          rate_limits: {
+            authorize: { lookbackWindow: '1h', limit: 100 },
+            callback: { lookbackWindow: '1h', limit: 100 },
+          },
+        },
+      },
+      inboundEvents: {
+        enabled: false,
+        maxBodyBytes: new ByteSizeValue(1024 * 1024),
+        maxEmitted: 25,
+      },
     });
 
     const localActionTypeRegistryParams = {
@@ -559,6 +577,7 @@ describe('create()', () => {
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
+      authTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -638,6 +657,7 @@ describe('create()', () => {
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
+      authTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -711,6 +731,7 @@ describe('create()', () => {
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
+      authTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -770,6 +791,7 @@ describe('get()', () => {
       actionsClient = new ActionsClient({
         logger,
         actionTypeRegistry,
+        authTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
         kibanaIndices,
@@ -807,6 +829,7 @@ describe('get()', () => {
       actionsClient = new ActionsClient({
         logger,
         actionTypeRegistry,
+        authTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
         kibanaIndices,
@@ -862,6 +885,7 @@ describe('get()', () => {
       actionsClient = new ActionsClient({
         logger,
         actionTypeRegistry,
+        authTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
         kibanaIndices,
@@ -905,6 +929,7 @@ describe('get()', () => {
       actionsClient = new ActionsClient({
         logger,
         actionTypeRegistry,
+        authTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
         kibanaIndices,
@@ -1014,6 +1039,7 @@ describe('get()', () => {
     expect(result).toContainConnector({
       id: '1',
       isMissingSecrets: false,
+      authMode: 'shared',
     });
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.get.mock.calls[0]).toMatchInlineSnapshot(`
@@ -1028,6 +1054,7 @@ describe('get()', () => {
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
+      authTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -1063,6 +1090,7 @@ describe('get()', () => {
       isPreconfigured: true,
       name: 'test',
       config: undefined, // in memory connectors do not return unless exposeConfig is true
+      authMode: 'shared',
     });
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
   });
@@ -1071,6 +1099,7 @@ describe('get()', () => {
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
+      authTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -1102,6 +1131,7 @@ describe('get()', () => {
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
+      authTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -1131,6 +1161,7 @@ describe('get()', () => {
       id: 'system-connector-.cases',
       isSystemAction: true,
       name: 'System action: .cases',
+      authMode: 'shared',
     });
   });
 });
@@ -1168,6 +1199,7 @@ describe('getBulk()', () => {
       actionsClient = new ActionsClient({
         logger,
         actionTypeRegistry,
+        authTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
         kibanaIndices,
@@ -1305,6 +1337,7 @@ describe('getBulk()', () => {
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
+      authTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -1349,6 +1382,7 @@ describe('getBulk()', () => {
         actionTypeId: '.slack',
         isPreconfigured: true,
         name: 'test',
+        authMode: 'shared',
       },
       {
         id: '1',
@@ -1356,6 +1390,7 @@ describe('getBulk()', () => {
         name: 'test',
         config: { foo: 'bar' },
         isMissingSecrets: false,
+        authMode: 'shared',
       },
     ]);
   });
@@ -1392,6 +1427,7 @@ describe('getBulk()', () => {
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
+      authTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -1460,6 +1496,7 @@ describe('getBulk()', () => {
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
+      authTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -1503,12 +1540,14 @@ describe('getBulk()', () => {
         id: 'testPreconfigured',
         isPreconfigured: true,
         name: 'test',
+        authMode: 'shared',
       },
       {
         actionTypeId: '.cases',
         id: 'system-connector-.cases',
         isSystemAction: true,
         name: 'System action: .cases',
+        authMode: 'shared',
       },
       {
         actionTypeId: 'test',
@@ -1516,6 +1555,7 @@ describe('getBulk()', () => {
         id: '1',
         isMissingSecrets: false,
         name: 'test',
+        authMode: 'shared',
       },
     ]);
   });
@@ -1528,6 +1568,7 @@ describe('getOAuthAccessToken()', () => {
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
+      authTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -1739,6 +1780,7 @@ describe('getOAuthAccessToken()', () => {
       logger,
       configurationUtilities,
       credentials: {
+        type: 'client_secret',
         config: {
           clientId: 'abc',
         },
@@ -1866,12 +1908,121 @@ describe('delete()', () => {
       expect(connectorTokenClient.deleteConnectorTokens).toHaveBeenCalledTimes(1);
     });
 
+    test('revokes tokens before deleting the saved object', async () => {
+      const callOrder: string[] = [];
+      connectorTokenClient.deleteConnectorTokens.mockImplementationOnce(async () => {
+        callOrder.push('deleteConnectorTokens');
+      });
+      unsecuredSavedObjectsClient.delete.mockImplementationOnce(async () => {
+        callOrder.push('soDelete');
+        return {};
+      });
+
+      await actionsClient.delete({ id: '1' });
+
+      expect(callOrder).toEqual(['deleteConnectorTokens', 'soDelete']);
+    });
+
+    describe('when connector has authMode per-user', () => {
+      beforeEach(() => {
+        unsecuredSavedObjectsClient.get.mockReset();
+        unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+          id: '1',
+          type: 'action',
+          attributes: {
+            actionTypeId: 'my-action-delete',
+            isMissingSecrets: false,
+            config: {},
+            secrets: {},
+            authMode: 'per-user',
+          },
+          references: [],
+        });
+      });
+
+      test(`passes authMode per-user to deleteConnectorTokens`, async () => {
+        await actionsClient.delete({ id: '1' });
+        expect(connectorTokenClient.deleteConnectorTokens).toHaveBeenCalledWith({
+          connectorId: '1',
+          authMode: 'per-user',
+        });
+      });
+    });
+
+    describe('when connector has authMode shared', () => {
+      beforeEach(() => {
+        unsecuredSavedObjectsClient.get.mockReset();
+        unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+          id: '1',
+          type: 'action',
+          attributes: {
+            actionTypeId: 'my-action-delete',
+            isMissingSecrets: false,
+            config: {},
+            secrets: {},
+            authMode: 'shared',
+          },
+          references: [],
+        });
+      });
+
+      test(`passes authMode shared to deleteConnectorTokens`, async () => {
+        await actionsClient.delete({ id: '1' });
+        expect(connectorTokenClient.deleteConnectorTokens).toHaveBeenCalledWith({
+          connectorId: '1',
+          authMode: 'shared',
+        });
+      });
+    });
+
     test(`failing to delete tokens logs error instead of throw`, async () => {
       connectorTokenClient.deleteConnectorTokens.mockRejectedValueOnce(new Error('Fail'));
       await expect(actionsClient.delete({ id: '1' })).resolves.toBeUndefined();
       expect(logger.error).toHaveBeenCalledWith(
-        `Failed to delete auth tokens for connector "1" after delete: Fail`
+        `Failed to delete auth tokens for connector "1": Fail`
       );
+    });
+
+    test('evicts clients before deleting connector tokens', async () => {
+      const callOrder: string[] = [];
+      const evictClientPool = jest.fn().mockImplementation(async () => {
+        callOrder.push('evictClientPoolStarted');
+        await Promise.resolve();
+        callOrder.push('evictClientPoolFinished');
+      });
+      connectorTokenClient.deleteConnectorTokens.mockImplementationOnce(async () => {
+        callOrder.push('deleteConnectorTokens');
+      });
+      const client = new ActionsClient({
+        logger,
+        actionTypeRegistry,
+        authTypeRegistry,
+        unsecuredSavedObjectsClient,
+        scopedClusterClient,
+        kibanaIndices,
+        inMemoryConnectors: [],
+        actionExecutor,
+        bulkExecutionEnqueuer,
+        request,
+        authorization: authorization as unknown as ActionsAuthorization,
+        auditLogger,
+        usageCounter: mockUsageCounter,
+        connectorTokenClient,
+        getEventLogClient,
+        encryptedSavedObjectsClient,
+        isESOCanEncrypt,
+        getAxiosInstanceWithAuth,
+        evictClientPool,
+      });
+
+      await client.delete({ id: '1' });
+
+      expect(evictClientPool).toHaveBeenCalledWith('1');
+      expect(callOrder).toEqual([
+        'evictClientPoolStarted',
+        'evictClientPoolFinished',
+        'deleteConnectorTokens',
+      ]);
     });
   });
 
@@ -1933,9 +2084,13 @@ describe('delete()', () => {
   });
 
   it('throws when trying to delete a preconfigured connector', async () => {
+    unsecuredSavedObjectsClient.get.mockReset();
+    unsecuredSavedObjectsClient.get.mockRejectedValue(new Error('Not found'));
+
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
+      authTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -1971,10 +2126,57 @@ describe('delete()', () => {
     );
   });
 
+  it('allows delete when both preconfigured and saved object exist (deletes saved object only)', async () => {
+    const savedObject = {
+      id: 'shared-id',
+      type: 'action',
+      attributes: {
+        actionTypeId: 'my-connector-type',
+        config: {},
+      },
+      references: [],
+    };
+    unsecuredSavedObjectsClient.get
+      .mockResolvedValueOnce(savedObject)
+      .mockResolvedValueOnce(savedObject);
+    unsecuredSavedObjectsClient.delete.mockResolvedValueOnce({});
+
+    actionsClient = new ActionsClient({
+      logger,
+      actionTypeRegistry,
+      authTypeRegistry,
+      unsecuredSavedObjectsClient,
+      scopedClusterClient,
+      kibanaIndices,
+      inMemoryConnectors: [
+        createMockInMemoryConnector({
+          id: 'shared-id',
+          actionTypeId: 'my-connector-type',
+          isPreconfigured: true,
+          name: 'Preconfigured',
+        }),
+      ],
+      actionExecutor,
+      bulkExecutionEnqueuer,
+      request,
+      authorization: authorization as unknown as ActionsAuthorization,
+      connectorTokenClient: connectorTokenClientMock.create(),
+      getEventLogClient,
+      encryptedSavedObjectsClient,
+      isESOCanEncrypt,
+      getAxiosInstanceWithAuth,
+    });
+
+    await actionsClient.delete({ id: 'shared-id' });
+
+    expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledWith('action', 'shared-id');
+  });
+
   it('throws when trying to delete a system connector', async () => {
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
+      authTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -2095,6 +2297,86 @@ describe('update()', () => {
       expect(connectorTokenClient.deleteConnectorTokens).toHaveBeenCalledTimes(1);
     });
 
+    describe('when connector has authMode per-user', () => {
+      beforeEach(() => {
+        actionTypeRegistry.register(getConnectorType());
+        unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+          id: '1',
+          type: 'action',
+          attributes: {
+            actionTypeId: 'my-connector-type',
+            isMissingSecrets: false,
+            authMode: 'per-user',
+          },
+          references: [],
+        });
+        unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+          id: 'my-action',
+          type: 'action',
+          attributes: {
+            actionTypeId: 'my-connector-type',
+            isMissingSecrets: false,
+            name: 'my name',
+            config: {},
+            secrets: {},
+          },
+          references: [],
+        });
+      });
+
+      test(`passes authMode per-user to deleteConnectorTokens`, async () => {
+        await actionsClient.update({
+          id: 'my-action',
+          action: { name: 'my name', config: {}, secrets: {} },
+        });
+        expect(connectorTokenClient.deleteConnectorTokens).toHaveBeenCalledWith({
+          connectorId: 'my-action',
+          authMode: 'per-user',
+          skipRevocation: true,
+        });
+      });
+    });
+
+    describe('when connector has authMode shared', () => {
+      beforeEach(() => {
+        actionTypeRegistry.register(getConnectorType());
+        unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+          id: '1',
+          type: 'action',
+          attributes: {
+            actionTypeId: 'my-connector-type',
+            isMissingSecrets: false,
+            authMode: 'shared',
+          },
+          references: [],
+        });
+        unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+          id: 'my-action',
+          type: 'action',
+          attributes: {
+            actionTypeId: 'my-connector-type',
+            isMissingSecrets: false,
+            name: 'my name',
+            config: {},
+            secrets: {},
+          },
+          references: [],
+        });
+      });
+
+      test(`passes authMode shared to deleteConnectorTokens`, async () => {
+        await actionsClient.update({
+          id: 'my-action',
+          action: { name: 'my name', config: {}, secrets: {} },
+        });
+        expect(connectorTokenClient.deleteConnectorTokens).toHaveBeenCalledWith({
+          connectorId: 'my-action',
+          authMode: 'shared',
+          skipRevocation: true,
+        });
+      });
+    });
+
     test(`failing to delete tokens logs error instead of throw`, async () => {
       connectorTokenClient.deleteConnectorTokens.mockRejectedValueOnce(new Error('Fail'));
       await expect(updateOperation()).resolves.toBeTruthy();
@@ -2179,6 +2461,7 @@ describe('update()', () => {
       isMissingSecrets: false,
       name: 'my name',
       config: {},
+      authMode: 'shared',
     });
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
@@ -2247,6 +2530,7 @@ describe('update()', () => {
       isMissingSecrets: true,
       name: 'my name',
       config: {},
+      authMode: 'shared',
     });
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
@@ -2299,9 +2583,10 @@ describe('update()', () => {
           secrets: {},
         },
       })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type config: Field \\"param1\\": Required"`
-    );
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`
+      "error validating connector type config: ✖ Invalid input: expected string, received undefined
+        → at param1"
+    `);
   });
 
   test('validates connector: config and secrets', async () => {
@@ -2397,6 +2682,7 @@ describe('update()', () => {
         b: true,
         c: true,
       },
+      authMode: 'shared',
     });
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
@@ -2463,6 +2749,7 @@ describe('update()', () => {
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
+      authTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -2509,6 +2796,7 @@ describe('update()', () => {
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
+      authTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -2604,6 +2892,7 @@ describe('execute()', () => {
         ],
         logger,
         actionTypeRegistry,
+        authTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
         kibanaIndices,
@@ -2663,6 +2952,7 @@ describe('execute()', () => {
         ],
         logger,
         actionTypeRegistry,
+        authTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
         kibanaIndices,
@@ -2718,6 +3008,7 @@ describe('execute()', () => {
         ],
         logger,
         actionTypeRegistry,
+        authTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
         kibanaIndices,
@@ -2860,6 +3151,57 @@ describe('execute()', () => {
       actionExecutionId,
     });
   });
+
+  test('preconfigured connector takes precedence over saved object connector with same ID', async () => {
+    const duplicateConnectorId = 'duplicate-connector-id';
+
+    actionsClient = new ActionsClient({
+      inMemoryConnectors: [
+        createMockInMemoryConnector({
+          id: duplicateConnectorId,
+          actionTypeId: 'my-connector-type',
+          name: 'Preconfigured Connector',
+          isPreconfigured: true,
+          config: { url: 'https://preconfigured.example.com' },
+        }),
+      ],
+      logger,
+      actionTypeRegistry,
+      authTypeRegistry,
+      unsecuredSavedObjectsClient,
+      scopedClusterClient,
+      kibanaIndices,
+      actionExecutor,
+      bulkExecutionEnqueuer,
+      request,
+      authorization: authorization as unknown as ActionsAuthorization,
+      auditLogger,
+      usageCounter: mockUsageCounter,
+      connectorTokenClient,
+      getEventLogClient,
+      encryptedSavedObjectsClient,
+      isESOCanEncrypt,
+      getAxiosInstanceWithAuth,
+    });
+
+    actionExecutor.execute.mockResolvedValue({ status: 'ok', actionId: duplicateConnectorId });
+
+    await actionsClient.execute({
+      actionId: duplicateConnectorId,
+      params: { message: 'test' },
+      source: asHttpRequestExecutionSource(request),
+    });
+
+    // Verify that savedObjectsClient.get was NOT called because preconfigured connector takes precedence
+    expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
+
+    // Verify the actionExecutor was called with the correct connector ID
+    expect(actionExecutor.execute).toHaveBeenCalledWith(
+      expect.objectContaining({
+        actionId: duplicateConnectorId,
+      })
+    );
+  });
 });
 
 describe('bulkEnqueueExecution()', () => {
@@ -2988,6 +3330,7 @@ describe('isPreconfigured()', () => {
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
+      authTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -3019,6 +3362,7 @@ describe('isPreconfigured()', () => {
         unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
         encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
         logger,
+        configurationUtilities: actionsConfigMock.create(),
       }),
       getEventLogClient,
       encryptedSavedObjectsClient,
@@ -3033,6 +3377,7 @@ describe('isPreconfigured()', () => {
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
+      authTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -3064,6 +3409,7 @@ describe('isPreconfigured()', () => {
         unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
         encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
         logger,
+        configurationUtilities: actionsConfigMock.create(),
       }),
       getEventLogClient,
       encryptedSavedObjectsClient,
@@ -3080,6 +3426,7 @@ describe('isSystemAction()', () => {
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
+      authTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -3111,6 +3458,7 @@ describe('isSystemAction()', () => {
         unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
         encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
         logger,
+        configurationUtilities: actionsConfigMock.create(),
       }),
       getEventLogClient,
       encryptedSavedObjectsClient,
@@ -3125,6 +3473,7 @@ describe('isSystemAction()', () => {
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
+      authTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -3156,6 +3505,7 @@ describe('isSystemAction()', () => {
         unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
         encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
         logger,
+        configurationUtilities: actionsConfigMock.create(),
       }),
       getEventLogClient,
       encryptedSavedObjectsClient,

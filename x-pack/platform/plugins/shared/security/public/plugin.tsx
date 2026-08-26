@@ -144,7 +144,9 @@ export class SecurityPlugin
       securityApiClients: this.securityApiClients,
     });
 
-    core.security.registerSecurityDelegate(buildSecurityApi({ authc: this.authc }));
+    core.security.registerSecurityDelegate(
+      buildSecurityApi({ authc: this.authc, config: this.config })
+    );
     core.userProfile.registerUserProfileDelegate(
       buildUserProfileApi({ userProfile: this.securityApiClients.userProfiles })
     );
@@ -249,6 +251,7 @@ export class SecurityPlugin
         userProfile$: this.securityApiClients.userProfiles.userProfile$,
         userProfileLoaded$: this.securityApiClients.userProfiles.userProfileLoaded$,
         enabled$: this.securityApiClients.userProfiles.enabled$,
+        dataUpdates$: this.securityApiClients.userProfiles.dataUpdates$,
       },
     };
   }

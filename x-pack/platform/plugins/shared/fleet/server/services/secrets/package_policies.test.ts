@@ -6,10 +6,12 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { fromKueryExpression } from '@kbn/es-query';
 
 import { appContextService } from '../app_context';
 import { createAppContextStartContractMock } from '../../mocks';
+import { packagePolicyService } from '../package_policy';
 import type {
   NewPackagePolicy,
   PackageInfo,
@@ -22,7 +24,12 @@ import {
   diffSecretPaths,
   extractAndWriteSecrets,
   extractAndUpdateSecrets,
+  findPackagePoliciesUsingSecrets,
 } from './package_policies';
+
+jest.mock('../package_policy');
+
+const mockedPackagePolicyService = packagePolicyService as jest.Mocked<typeof packagePolicyService>;
 
 describe('Package policy secrets', () => {
   let mockContract: ReturnType<typeof createAppContextStartContractMock>;
@@ -1757,6 +1764,306 @@ describe('Package policy secrets', () => {
 
         expect(result.secretsToDelete).toHaveLength(6);
       });
+    });
+
+    describe('when secret vars are migrated from an input type with migrate_from to another', () => {
+      // New package: only `cel` input, with a secret var `api_key`.
+      // The old `httpjson` input is gone, so getPolicySecretPaths on the old policy
+      // returns [] because the package no longer declares httpjson secrets.
+      // The migrated cel policy carries the old secret reference in `api_key`.
+      const newCelPackageInfo = {
+        name: 'test-package',
+        title: 'Test Package',
+        version: '2.0.0',
+        description: 'description',
+        type: 'integration',
+        status: 'not_installed',
+        data_streams: [
+          {
+            dataset: 'test_package.cel_log',
+            streams: [
+              {
+                input: 'cel',
+                title: 'CEL',
+                vars: [{ name: 'tags', type: 'text', secret: false }],
+              },
+            ],
+          },
+        ],
+        policy_templates: [
+          {
+            name: 'template_1',
+            title: 'Template 1',
+            description: 'Template 1',
+            inputs: [
+              {
+                type: 'cel',
+                title: 'CEL',
+                description: 'CEL Input',
+                vars: [{ name: 'api_key', type: 'text', secret: true }],
+              },
+            ],
+          },
+        ],
+      } as unknown as PackageInfo;
+
+      it('does not create a new secret when the migrated value is already a secret reference', async () => {
+        const oldHttpjsonPolicy = {
+          inputs: [
+            {
+              type: 'httpjson',
+              policy_template: 'template_1',
+              enabled: true,
+              vars: {
+                api_key: { value: { id: 'httpjson-secret-id', isSecretRef: true } },
+              },
+              streams: [],
+            },
+          ],
+        } as unknown as PackagePolicy;
+
+        const migratedCelPolicy = {
+          inputs: [
+            {
+              type: 'cel',
+              policy_template: 'template_1',
+              enabled: true,
+              vars: {
+                api_key: { value: { id: 'httpjson-secret-id', isSecretRef: true } },
+              },
+              streams: [],
+            },
+          ],
+        } as unknown as UpdatePackagePolicy;
+
+        const result = await extractAndUpdateSecrets({
+          oldPackagePolicy: oldHttpjsonPolicy,
+          packagePolicyUpdate: migratedCelPolicy,
+          packageInfo: newCelPackageInfo,
+          esClient: esClientMock,
+        });
+
+        // No new Elasticsearch secret should be created — the existing one is reused.
+        expect(esClientMock.transport.request).not.toHaveBeenCalled();
+
+        // The original secret reference must be tracked so the policy retains it.
+        expect(result.secretReferences).toEqual([{ id: 'httpjson-secret-id' }]);
+
+        // Nothing to delete — the old secret is still in use by the new policy.
+        expect(result.secretsToDelete).toHaveLength(0);
+
+        // The migrated policy's api_key value should be unchanged.
+        expect((result.packagePolicyUpdate.inputs[0].vars as any).api_key.value).toEqual({
+          id: 'httpjson-secret-id',
+          isSecretRef: true,
+        });
+      });
+
+      it('handles multi-value migrated secret references without creating new secrets', async () => {
+        const oldHttpjsonPolicy = {
+          inputs: [
+            {
+              type: 'httpjson',
+              policy_template: 'template_1',
+              enabled: true,
+              vars: {
+                api_key: { value: { ids: ['secret-id-1', 'secret-id-2'], isSecretRef: true } },
+              },
+              streams: [],
+            },
+          ],
+        } as unknown as PackagePolicy;
+
+        const migratedCelPolicy = {
+          inputs: [
+            {
+              type: 'cel',
+              policy_template: 'template_1',
+              enabled: true,
+              vars: {
+                api_key: { value: { ids: ['secret-id-1', 'secret-id-2'], isSecretRef: true } },
+              },
+              streams: [],
+            },
+          ],
+        } as unknown as UpdatePackagePolicy;
+
+        const result = await extractAndUpdateSecrets({
+          oldPackagePolicy: oldHttpjsonPolicy,
+          packagePolicyUpdate: migratedCelPolicy,
+          packageInfo: newCelPackageInfo,
+          esClient: esClientMock,
+        });
+
+        expect(esClientMock.transport.request).not.toHaveBeenCalled();
+        expect(result.secretReferences).toEqual([{ id: 'secret-id-1' }, { id: 'secret-id-2' }]);
+        expect(result.secretsToDelete).toHaveLength(0);
+      });
+
+      it('handles a mix: migrated secret reference alongside a new plaintext secret', async () => {
+        // New package has two secret vars on the cel input.
+        const newCelPackageInfoTwoSecrets = {
+          ...newCelPackageInfo,
+          policy_templates: [
+            {
+              name: 'template_1',
+              title: 'Template 1',
+              description: 'Template 1',
+              inputs: [
+                {
+                  type: 'cel',
+                  title: 'CEL',
+                  description: 'CEL Input',
+                  vars: [
+                    { name: 'api_key', type: 'text', secret: true },
+                    { name: 'token', type: 'text', secret: true },
+                  ],
+                },
+              ],
+            },
+          ],
+        } as unknown as PackageInfo;
+
+        const oldHttpjsonPolicy = {
+          inputs: [
+            {
+              type: 'httpjson',
+              policy_template: 'template_1',
+              enabled: true,
+              vars: {
+                api_key: { value: { id: 'httpjson-secret-id', isSecretRef: true } },
+              },
+              streams: [],
+            },
+          ],
+        } as unknown as PackagePolicy;
+
+        // api_key is migrated (already a reference); token is a new plaintext value.
+        const migratedCelPolicy = {
+          inputs: [
+            {
+              type: 'cel',
+              policy_template: 'template_1',
+              enabled: true,
+              vars: {
+                api_key: { value: { id: 'httpjson-secret-id', isSecretRef: true } },
+                token: { value: 'my-new-token' },
+              },
+              streams: [],
+            },
+          ],
+        } as unknown as UpdatePackagePolicy;
+
+        const result = await extractAndUpdateSecrets({
+          oldPackagePolicy: oldHttpjsonPolicy,
+          packagePolicyUpdate: migratedCelPolicy,
+          packageInfo: newCelPackageInfoTwoSecrets,
+          esClient: esClientMock,
+        });
+
+        // Only the new plaintext `token` should trigger a secret creation.
+        expect(esClientMock.transport.request).toHaveBeenCalledTimes(1);
+
+        // Both the migrated reference and the newly created token should be tracked.
+        expect(result.secretReferences).toHaveLength(2);
+        expect(result.secretReferences).toContainEqual({ id: 'httpjson-secret-id' });
+
+        // The new token var should have been replaced with a secret reference.
+        expect((result.packagePolicyUpdate.inputs[0].vars as any).token.value.isSecretRef).toBe(
+          true
+        );
+
+        // The api_key should still hold the original reference, unchanged.
+        expect((result.packagePolicyUpdate.inputs[0].vars as any).api_key.value).toEqual({
+          id: 'httpjson-secret-id',
+          isSecretRef: true,
+        });
+
+        expect(result.secretsToDelete).toHaveLength(0);
+      });
+    });
+
+    describe('when a secret var is removed entirely from a newer package version', () => {
+      // Mirrors the `secrets` test fixture package used by the policy_secrets FTR suite:
+      // `package_var_multi_secret` exists in 1.0.0 but is dropped from 1.1.0's manifest.
+      const newPackageInfoWithoutMultiSecret = {
+        name: 'mock-package',
+        title: 'Mock package',
+        version: '1.1.0',
+        description: 'description',
+        type: 'integration',
+        status: 'not_installed',
+        vars: [{ name: 'pkg-secret-1', type: 'text', secret: true, required: true }],
+        data_streams: [],
+        policy_templates: [],
+      } as unknown as PackageInfo;
+
+      it('still marks the orphaned secret for deletion even though the new package no longer declares it', async () => {
+        const oldPackagePolicy = {
+          vars: {
+            'pkg-secret-1': {
+              value: { id: 'pkg-secret-1-id', isSecretRef: true },
+            },
+            'pkg-multi-secret': {
+              value: { ids: ['orphan-id-1', 'orphan-id-2'], isSecretRef: true },
+            },
+          },
+          inputs: [],
+        } as unknown as PackagePolicy;
+
+        const packagePolicyUpdate = {
+          vars: {
+            'pkg-secret-1': {
+              value: { id: 'pkg-secret-1-id', isSecretRef: true },
+            },
+          },
+          inputs: [],
+        } as unknown as UpdatePackagePolicy;
+
+        const result = await extractAndUpdateSecrets({
+          oldPackagePolicy,
+          packagePolicyUpdate,
+          packageInfo: newPackageInfoWithoutMultiSecret,
+          esClient: esClientMock,
+        });
+
+        expect(result.secretsToDelete).toEqual([{ id: 'orphan-id-1' }, { id: 'orphan-id-2' }]);
+      });
+    });
+  });
+
+  describe('findPackagePoliciesUsingSecrets', () => {
+    const soClient = savedObjectsClientMock.create();
+
+    beforeEach(() => {
+      mockedPackagePolicyService.list.mockReset();
+      mockedPackagePolicyService.list.mockResolvedValue({ total: 0, items: [] } as any);
+    });
+
+    it('quotes each id so the generated kuery is valid even when an id contains a KQL keyword', async () => {
+      // Real-world ids from https://github.com/elastic/kibana/issues/273040 that end in "Not",
+      // which an unquoted kuery would parse as the NOT operator.
+      const ids = ['_3bpqZ4BbB0ae8-cYNot', '_nbpqZ4BbB0ae8-cYNot'];
+
+      await findPackagePoliciesUsingSecrets({ soClient, ids });
+
+      const { kuery } = mockedPackagePolicyService.list.mock.calls[0][1];
+
+      expect(kuery).toBe(
+        'ingest-package-policies.secret_references.id: ("_3bpqZ4BbB0ae8-cYNot" or "_nbpqZ4BbB0ae8-cYNot")'
+      );
+      // This is the actual bug: before quoting, this expression throws KQLSyntaxError.
+      expect(() => fromKueryExpression(kuery as string)).not.toThrow();
+    });
+
+    it('produces a parseable kuery for ids containing other KQL keywords and quote characters', async () => {
+      const ids = ['idAndSuffix', 'idOrSuffix', 'id"with"quotes'];
+
+      await findPackagePoliciesUsingSecrets({ soClient, ids });
+
+      const { kuery } = mockedPackagePolicyService.list.mock.calls[0][1];
+
+      expect(() => fromKueryExpression(kuery as string)).not.toThrow();
     });
   });
 });

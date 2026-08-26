@@ -13,7 +13,7 @@ import { serverMock } from '../../../../../__mocks__/server';
 import { requestContextMock } from '../../../../../__mocks__/request_context';
 import { getAttackDiscoverySchedulesRequest } from '../../../../../__mocks__/request';
 import { getAttackDiscoveryScheduleMock } from '../../../../../__mocks__/attack_discovery_schedules.mock';
-import type { AttackDiscoveryScheduleDataClient } from '../../../../../lib/attack_discovery/schedules/data_client';
+import type { AttackDiscoveryScheduleDataClient } from '@kbn/attack-discovery-schedules-common';
 import { performChecks } from '../../../../helpers';
 
 jest.mock('../../../../helpers', () => ({

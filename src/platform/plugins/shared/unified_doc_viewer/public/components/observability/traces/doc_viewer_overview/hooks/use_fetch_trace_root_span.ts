@@ -18,7 +18,6 @@ interface UseFetchTraceRootItemParams {
 
 const useFetchTraceRootSpan = ({ traceId }: UseFetchTraceRootItemParams) => {
   const { data, discoverShared } = getUnifiedDocViewerServices();
-  const timeFilter = data.query.timefilter.timefilter.getAbsoluteTime();
 
   const fetchRootSpanByTraceId = discoverShared.features.registry.getById(
     'observability-traces-fetch-root-span-by-trace-id'
@@ -30,6 +29,8 @@ const useFetchTraceRootSpan = ({ traceId }: UseFetchTraceRootItemParams) => {
         return undefined;
       }
 
+      const timeFilter = data.query.timefilter.timefilter.getAbsoluteTime();
+
       return fetchRootSpanByTraceId.fetchRootSpanByTraceId(
         {
           traceId,
@@ -39,7 +40,7 @@ const useFetchTraceRootSpan = ({ traceId }: UseFetchTraceRootItemParams) => {
         signal
       );
     },
-    [fetchRootSpanByTraceId, traceId, timeFilter.from, timeFilter.to]
+    [fetchRootSpanByTraceId, traceId, data.query.timefilter.timefilter]
   );
 
   return {

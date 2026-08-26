@@ -1,0 +1,35 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        postDownloadSourceRequestExample:
+          description: 'Create a new agent binary download source'
+          value:
+            name: 'My custom download source'
+            host: 'https://my-custom-host.example.com/downloads/'
+            is_default: false
+responses:
+  200:
+    description: 'Successful response'
+    content:
+      application/json:
+        examples:
+          postDownloadSourceExample:
+            description: 'The created agent binary download source'
+            value:
+              item:
+                id: 'download-source-id-2'
+                name: 'My custom download source'
+                host: 'https://my-custom-host.example.com/downloads/'
+                is_default: false
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'Example of a generic error response'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'An error message describing what went wrong'

@@ -6,6 +6,19 @@
       "human": "__flag__",
       "pretty": "__flag__"
     },
+    "data_autocomplete_rules": {
+      "id": "",
+      "ids": [],
+      "name": "",
+      "owner": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "realm_name": "",
+      "username": ""
+    },
     "methods": [
       "DELETE"
     ],
@@ -13,6 +26,7 @@
       "_security/api_key"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-invalidate-api-key",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-security-invalidate-api-key",
     "availability": {
       "stack": true,
       "serverless": true

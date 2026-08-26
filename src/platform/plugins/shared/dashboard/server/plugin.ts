@@ -24,31 +24,36 @@ import type {
   CoreStart,
   Plugin,
   Logger,
-  RequestHandlerContext,
+  SavedObjectsClientContract,
+  UiSettingsParams,
 } from '@kbn/core/server';
 import { registerContentInsights } from '@kbn/content-management-content-insights-server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import { registerAccessControl } from '@kbn/content-management-access-control-server';
-import { tagSavedObjectTypeName } from '@kbn/saved-objects-tagging-plugin/common';
+import { once } from 'lodash';
+import { schema } from '@kbn/config-schema';
+import { i18n } from '@kbn/i18n';
 import {
   initializeDashboardTelemetryTask,
   scheduleDashboardTelemetry,
   TASK_ID,
 } from './usage/dashboard_telemetry_collection_task';
-import { getUISettings } from './ui_settings';
 import { capabilitiesProvider } from './capabilities_provider';
 import type { DashboardPluginSetup, DashboardPluginStart } from './types';
-import type { DashboardSavedObjectAttributes } from './dashboard_saved_object';
-import { DASHBOARD_SAVED_OBJECT_TYPE } from '../common/constants';
 import { createDashboardSavedObjectType } from './dashboard_saved_object';
 import { registerDashboardUsageCollector } from './usage/register_collector';
 import { dashboardPersistableStateServiceFactory } from './dashboard_container/dashboard_container_embeddable_factory';
-import { registerRoutes, create, read, update, deleteDashboard } from './api';
+import { registerRoutes, read } from './api';
 import { DashboardAppLocatorDefinition } from '../common/locator/locator';
 import { setKibanaServices } from './kibana_services';
 import { scanDashboards } from './scan_dashboards';
+import { registerDashboardDrilldown } from './dashboard_drilldown/register_dashboard_drilldown';
+import { getDashboardStateSchema } from './api/dashboard_state_schemas';
+
+export const DEFER_BELOW_FOLD = `labs:dashboard:deferBelowFold` as const;
 
 interface SetupDeps {
   embeddable: EmbeddableSetup;
@@ -70,6 +75,7 @@ export class DashboardPlugin
   implements Plugin<DashboardPluginSetup, DashboardPluginStart, SetupDeps, StartDeps>
 {
   private readonly logger: Logger;
+  private apiUsageCounter?: UsageCounter;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -101,6 +107,8 @@ export class DashboardPlugin
     }
 
     if (plugins.usageCollection) {
+      this.apiUsageCounter = plugins.usageCollection.createUsageCounter('dashboard_api');
+
       // Registers routes for tracking and fetching dashboard views
       registerContentInsights(
         {
@@ -123,9 +131,24 @@ export class DashboardPlugin
       dashboardPersistableStateServiceFactory(plugins.embeddable)
     );
 
-    core.uiSettings.register(getUISettings());
+    const dashboardUiSettings: Record<string, UiSettingsParams<boolean>> = {
+      [DEFER_BELOW_FOLD]: {
+        schema: schema.boolean(),
+        requiresPageReload: true,
+        category: ['Dashboard'],
+        value: false,
+        name: i18n.translate('dashboard.labs.enableDeferBelowFoldProjectName', {
+          defaultMessage: 'Defer loading panels below "the fold"',
+        }),
+        description: i18n.translate('dashboard.labs.enableDeferBelowFoldProjectDescription', {
+          defaultMessage:
+            'Any panels below "the fold"-- the area hidden beyond the bottom of the window, accessed by scrolling-- will not be loaded immediately, but only when they enter the viewport',
+        }),
+      },
+    };
+    core.uiSettings.register(dashboardUiSettings);
 
-    registerRoutes(core.http);
+    registerRoutes(core.http, this.apiUsageCounter, this.logger);
 
     void registerAccessControl({
       http: core.http,
@@ -136,13 +159,15 @@ export class DashboardPlugin
         })),
     });
 
+    registerDashboardDrilldown(plugins.embeddable);
+
     return {};
   }
 
   public start(core: CoreStart, plugins: StartDeps) {
     this.logger.debug('dashboard: Started');
 
-    setKibanaServices(plugins, this.logger);
+    setKibanaServices(core, plugins, this.logger);
 
     if (plugins.share) {
       plugins.share.url.locators.create(
@@ -167,29 +192,23 @@ export class DashboardPlugin
         });
     }
 
+    // Do not call getDashboardStateSchema when registering plugin.
+    // Plugin is registered during setup and before all plugins have registered embeddable schemas.
+    // Instead, use once to only call getDashboardStateSchema the first time client is executed.
+    const getCachedDashboardStateSchema = once(() => {
+      return getDashboardStateSchema(false);
+    });
+
     return {
-      getDashboard: async (ctx: RequestHandlerContext, id: string) => {
-        const { core: coreCtx } = await ctx.resolve(['core']);
-        const soResponse =
-          await coreCtx.savedObjects.client.resolve<DashboardSavedObjectAttributes>(
-            DASHBOARD_SAVED_OBJECT_TYPE,
-            id
-          );
-        return {
-          id: soResponse.saved_object.id,
-          description: soResponse.saved_object.attributes.description,
-          tags: soResponse.saved_object.references
-            .filter(({ type }) => type === tagSavedObjectTypeName)
-            .map((ref) => ref.id),
-          title: soResponse.saved_object.attributes.title,
-        };
-      },
-      scanDashboards,
+      scanDashboards: (
+        savedObjectsClient: SavedObjectsClientContract,
+        page: number,
+        perPage: number
+      ) => scanDashboards(savedObjectsClient, page, perPage, getCachedDashboardStateSchema()),
       client: {
-        create,
-        read,
-        update,
-        delete: deleteDashboard,
+        read: async (savedObjectsClient: SavedObjectsClientContract, id: string) => {
+          return (await read(savedObjectsClient, getCachedDashboardStateSchema(), id)).body;
+        },
       },
     };
   }

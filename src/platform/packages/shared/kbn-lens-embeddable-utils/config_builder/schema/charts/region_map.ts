@@ -7,33 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import {
   fieldMetricOrFormulaOperationDefinitionSchema,
   esqlColumnSchema,
-  esqlColumnOperationWithLabelAndFormatSchema,
+  esqlColumnWithFormatSchema,
 } from '../metric_ops';
-import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
+import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
 import { dslOnlyPanelInfoSchema, layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
-import { mergeAllBucketsWithChartDimensionSchema } from './shared';
+import { getBucketsWithChartDimensionSchema } from './shared';
 
-const regionMapStateRegionOptionsSchema = {
-  ems: schema.maybe(
-    schema.object({
-      boundaries: schema.string({ meta: { description: 'EMS boundaries' } }),
-      join: schema.string({ meta: { description: 'EMS join field' } }),
+const regionMapConfigRegionOptionsShape = {
+  ems: z
+    .object({
+      boundaries: z.string().meta({ description: 'EMS boundaries' }),
+      join: z.string().meta({ description: 'EMS join field' }),
     })
-  ),
+    .strict()
+    .optional(),
 };
 
-export const regionMapStateSchemaNoESQL = schema.object(
-  {
-    type: schema.literal('region_map'),
-    ...sharedPanelInfoSchema,
-    ...dslOnlyPanelInfoSchema,
-    ...layerSettingsSchema,
-    ...datasetSchema,
+export const regionMapConfigSchemaNoESQL = z
+  .object({
+    type: z.literal('region_map'),
+    ...sharedPanelInfoSchema.shape,
+    ...dslOnlyPanelInfoSchema.shape,
+    ...layerSettingsSchema.shape,
+    ...dataSourceSchema.shape,
     /**
      * Metric configuration
      */
@@ -41,34 +41,47 @@ export const regionMapStateSchemaNoESQL = schema.object(
     /**
      * Configure how to break down to regions
      */
-    region: mergeAllBucketsWithChartDimensionSchema(regionMapStateRegionOptionsSchema),
-  },
-  { meta: { id: 'regionMapNoESQL' } }
-);
+    region: getBucketsWithChartDimensionSchema('regionMapRegion').and(
+      z.object(regionMapConfigRegionOptionsShape)
+    ),
+  })
+  .meta({
+    id: 'regionMapNoESQL',
+    title: 'Region Map (DSL)',
+    description:
+      'Region Map configuration using a data view, mapping metric values to geographic regions by color.',
+  });
 
-export const regionMapStateSchemaESQL = schema.object(
-  {
-    type: schema.literal('region_map'),
-    ...sharedPanelInfoSchema,
-    ...layerSettingsSchema,
-    ...datasetEsqlTableSchema,
+export const regionMapConfigSchemaESQL = z
+  .object({
+    type: z.literal('region_map'),
+    ...sharedPanelInfoSchema.shape,
+    ...layerSettingsSchema.shape,
+    ...dataSourceEsqlTableSchema.shape,
     /**
      * Metric configuration
      */
-    metric: esqlColumnOperationWithLabelAndFormatSchema,
+    metric: esqlColumnWithFormatSchema,
     /**
      * Configure how to break down to regions
      */
-    region: esqlColumnSchema.extends(regionMapStateRegionOptionsSchema),
-  },
-  { meta: { id: 'regionMapESQL' } }
-);
+    region: esqlColumnSchema.extend(regionMapConfigRegionOptionsShape),
+  })
+  .meta({
+    id: 'regionMapESQL',
+    title: 'Region Map (ES|QL)',
+    description:
+      'Region Map configuration using an ES|QL query, mapping metric values to geographic regions by color.',
+  });
 
-export const regionMapStateSchema = schema.oneOf(
-  [regionMapStateSchemaNoESQL, regionMapStateSchemaESQL],
-  { meta: { id: 'regionMapChartSchema' } }
-);
+export const regionMapConfigSchema = z
+  .union([regionMapConfigSchemaNoESQL, regionMapConfigSchemaESQL])
+  .meta({
+    id: 'regionMapChart',
+    title: 'Region Map',
+    description: 'A choropleth map with geographic regions colored by the aggregated metric value.',
+  });
 
-export type RegionMapState = TypeOf<typeof regionMapStateSchema>;
-export type RegionMapStateNoESQL = TypeOf<typeof regionMapStateSchemaNoESQL>;
-export type RegionMapStateESQL = TypeOf<typeof regionMapStateSchemaESQL>;
+export type RegionMapConfig = z.output<typeof regionMapConfigSchema>;
+export type RegionMapConfigNoESQL = z.output<typeof regionMapConfigSchemaNoESQL>;
+export type RegionMapConfigESQL = z.output<typeof regionMapConfigSchemaESQL>;

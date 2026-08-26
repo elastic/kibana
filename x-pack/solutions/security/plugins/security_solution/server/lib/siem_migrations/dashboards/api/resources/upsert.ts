@@ -6,7 +6,7 @@
  */
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { partition } from 'lodash';
 import { SIEM_DASHBOARD_MIGRATION_RESOURCES_PATH } from '../../../../../../common/siem_migrations/dashboards/constants';
 import {
@@ -62,6 +62,8 @@ export const registerSiemDashboardMigrationsResourceUpsertRoute = (
               const dashboardMigrationsClient =
                 ctx.securitySolution.siemMigrations.getDashboardsClient();
 
+              const { experimentalFeatures } = ctx.securitySolution.getConfig();
+
               await siemMigrationAuditLogger.logUploadResources({ migrationId });
 
               const [lookups, macros] = partition(resources, { type: 'lookup' });
@@ -76,7 +78,9 @@ export const registerSiemDashboardMigrationsResourceUpsertRoute = (
               }));
 
               // Create identified resource documents to keep track of them (without content)
-              const resourceIdentifier = new DashboardResourceIdentifier('splunk');
+              const resourceIdentifier = new DashboardResourceIdentifier('splunk', {
+                experimentalFeatures,
+              });
               const identifiedResources = await resourceIdentifier.fromResources(resources);
               const resourcesToCreate = identifiedResources.map<CreateSiemMigrationResourceInput>(
                 (resource) => ({

@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
-import { transformTitlesOut } from '@kbn/presentation-publishing';
+import type { LensSerializedState } from '@kbn/lens-common';
+import { transformTimeRangeOut, transformTitlesOut } from '@kbn/presentation-publishing';
 import { LENS_UNKNOWN_VIS, type LensByValueSerializedState } from '@kbn/lens-common';
 import { LENS_ITEM_VERSION_V2 } from '@kbn/lens-common/content_management/constants';
-import type { LensAttributes } from '@kbn/lens-embeddable-utils';
-import type { LensTransformDependencies } from '.';
+import type { LensAttributes, LensConfigBuilder } from '@kbn/lens-embeddable-utils';
+import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
+import { flow } from 'lodash';
 import { transformToV1LensItemAttributes } from '../content_management/v1';
 import { transformToV2LensItemAttributes } from '../content_management/v2';
 import { injectLensReferences } from '../references';
@@ -19,68 +20,117 @@ import type {
   LensByValueTransformOutResult,
   LensTransformOut,
 } from './types';
-import { findLensReference, isByRefLensState } from './utils';
+import { findLensReference } from './utils';
 import { isLensAttributesV0, isLensAttributesV1 } from '../content_management/utils';
+import { stripInheritedContext } from './helpers';
 
 /**
  * Transform from Lens Stored State to Lens API format
  */
-export const getTransformOut = ({
-  builder,
-  transformEnhancementsOut,
-}: LensTransformDependencies): LensTransformOut => {
-  return function transformOut(storedState, panelReferences) {
-    const state = transformTitlesOut(storedState);
-    const enhancements = state.enhancements
-      ? transformEnhancementsOut?.(state.enhancements, panelReferences ?? [])
-      : undefined;
-    const enhancementsState = (
-      enhancements ? { enhancements } : {}
-    ) as DynamicActionsSerializedState;
+export const getTransformOut = (
+  builder: LensConfigBuilder,
+  transformDrilldownsOut: DrilldownTransforms['transformOut'],
+  isDashboardAppRequest: boolean
+): LensTransformOut => {
+  return function transformOut(storedState, panelReferences, containerReferences, id) {
+    // Capture savedObjectId prior to stripInheritedContext
+    const legacySavedObjectId =
+      'savedObjectId' in storedState ? storedState.savedObjectId : undefined;
+
+    const transformsFlow = flow(
+      transformTitlesOut<LensSerializedState>,
+      transformTimeRangeOut<LensSerializedState>,
+      (state: LensSerializedState) => transformDrilldownsOut(state, panelReferences),
+      stripInheritedContext
+    );
+
+    const { attributes, ...state } = transformsFlow(storedState);
 
     const savedObjectRef = findLensReference(panelReferences);
 
-    if (savedObjectRef && isByRefLensState(state)) {
+    if (savedObjectRef) {
       return {
         ...state,
-        ...enhancementsState,
-        savedObjectId: savedObjectRef.id,
+        ref_id: savedObjectRef.id,
       } satisfies LensByRefTransformOutResult;
     }
 
-    const migratedAttributes = migrateAttributes(state.attributes);
+    // Fallback to handle legacy SO with missing savedObjectRef reference
+    if (!attributes && legacySavedObjectId && typeof legacySavedObjectId === 'string') {
+      return { ...state, ref_id: legacySavedObjectId } satisfies LensByRefTransformOutResult;
+    }
+
+    const migratedAttributes = migrateAttributes(attributes);
     const injectedState = injectLensReferences(
       {
         ...state,
-        ...enhancementsState,
         attributes: migratedAttributes,
       },
       panelReferences
     );
 
-    const chartType = builder.getType(migratedAttributes);
-
-    if (!builder.isSupported(chartType)) {
-      // TODO: remove this once all formats are supported
+    if (isDashboardAppRequest && !builder.isEnabled) {
       return injectedState as LensByValueTransformOutResult;
     }
 
-    const apiConfig = builder.toAPIFormat({
-      ...migratedAttributes,
-      visualizationType: migratedAttributes.visualizationType ?? LENS_UNKNOWN_VIS,
+    // Use the reference-injected attributes (not `migratedAttributes`) so the
+    // resolved/remapped panel references win over the chart's embedded ones.
+    // When a dashboard is copied to another space, SO import remaps the panel
+    // `index-pattern` references; `toAPIFormat` reads data view ids from the
+    // attributes' references, so it must see the remapped ids. Otherwise the
+    // panel keeps the original (wrong-space) data view id and fails to render.
+    // See https://github.com/elastic/kibana/issues/268821.
+    const injectedAttributes = injectedState.attributes ?? migratedAttributes;
+
+    const chartType = builder.getType(injectedAttributes);
+    // should be filtered out my unmapped panel check
+    if (!builder.isSupported(chartType)) {
+      throw new Error(`Lens "${chartType}" chart type is not supported`);
+    }
+
+    const {
+      title: attributesTitle, // attributes title is only a legacy fallback (see below)
+      description: attributesDescription,
+      ...apiConfig
+    } = builder.toAPIFormat({
+      ...injectedAttributes,
+      visualizationType: injectedAttributes.visualizationType ?? LENS_UNKNOWN_VIS,
     });
 
-    return {
+    // For by-value panels the panel-level title/description take precedence and the
+    // attributes title/description are ignored. Legacy by-value panels, however, were
+    // sometimes persisted with the title only inside `attributes` and no panel-level title.
+    // Without a fallback those panels would lose their title through the apiFormat
+    // round-trip (the non-apiFormat path keeps it via `defaultTitle$ = attributes.title`).
+    //
+    // `stripInheritedContext` already dropped any `undefined` title/description key, so a
+    // missing key here means the panel has no title (either absent or explicitly
+    // `undefined`) and we fall back to the attributes title. An explicit empty string
+    // survives stripping, so it is a real panel title and the fallback is NOT applied.
+    // See https://github.com/elastic/kibana/issues/268821
+    const titleFallback = !('title' in state) && attributesTitle ? { title: attributesTitle } : {};
+    const descriptionFallback =
+      !('description' in state) && attributesDescription
+        ? { description: attributesDescription }
+        : {};
+
+    const apiPanelConfig = {
+      ...titleFallback,
+      ...descriptionFallback,
       ...state,
-      attributes: apiConfig,
+      ...apiConfig,
     } satisfies LensByValueTransformOutResult;
+
+    return apiPanelConfig;
   };
 };
 
 /**
  * Handles transforming old lens SO in dashboard to v1 Lens SO
  */
-function migrateAttributes(attributes: LensByValueSerializedState['attributes']): LensAttributes {
+export function migrateAttributes(
+  attributes: LensByValueSerializedState['attributes']
+): LensAttributes {
   if (!attributes) {
     throw new Error('Why are attributes undefined?');
   }

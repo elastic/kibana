@@ -29,6 +29,7 @@
       "_resolve/index/{name}"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-resolve-index",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-indices-resolve-index",
     "availability": {
       "stack": true,
       "serverless": true

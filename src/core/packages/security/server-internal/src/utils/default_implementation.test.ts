@@ -24,6 +24,13 @@ describe('getDefaultSecurityImplementation', () => {
     });
   });
 
+  describe('authc.getRedactedSessionId', () => {
+    it('returns undefined', async () => {
+      const sessionId = await implementation.authc.getRedactedSessionId({} as any);
+      expect(sessionId).toBeUndefined();
+    });
+  });
+
   describe('authc.apiKeys', () => {
     it('returns stub object', async () => {
       const { apiKeys } = implementation.authc;
@@ -45,6 +52,20 @@ describe('getDefaultSecurityImplementation', () => {
       const logger = implementation.audit.withoutRequest;
       expect(logger.enabled).toBe(false);
       expect(logger.log({ message: 'no request' })).toBeUndefined();
+    });
+  });
+
+  describe('serviceAccounts.isEnabled', () => {
+    it('returns false', () => {
+      expect(implementation.serviceAccounts.isEnabled()).toBe(false);
+    });
+  });
+
+  describe('fakeRequestEnricher', () => {
+    it('is a no-op (no security delegate registered)', () => {
+      expect(() =>
+        implementation.fakeRequestEnricher({} as any, { profileId: 'u_test_profile_123' })
+      ).not.toThrow();
     });
   });
 });

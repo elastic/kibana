@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/search-synonyms'
-type: unknown
+layer: unknown
 owners:
-  defaultOwner: '@elastic/search-kibana'
-toolchain:
+  defaultOwner: '@elastic/search-ml-ux'
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/search-synonyms'
+  title: '@kbn/search-synonyms'
   description: Moon project for @kbn/search-synonyms
   channel: ''
-  owner: '@elastic/search-kibana'
-  metadata:
-    sourceRoot: x-pack/solutions/search/plugins/search_synonyms
+  owner: '@elastic/search-ml-ux'
+  sourceRoot: x-pack/solutions/search/plugins/search_synonyms
 dependsOn:
   - '@kbn/config-schema'
   - '@kbn/core'
@@ -40,6 +39,8 @@ dependsOn:
   - '@kbn/cloud-plugin'
   - '@kbn/share-plugin'
   - '@kbn/react-query'
+  - '@kbn/app-header'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod
@@ -53,16 +54,6 @@ fileGroups:
     - public/**/*
     - server/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

@@ -50,17 +50,57 @@ describe('updateAlertsStatus', () => {
             },
             "script": Object {
               "lang": "painless",
-              "source": "if (ctx._source['kibana.alert.workflow_status'] != null) {
-                      ctx._source['kibana.alert.workflow_status'] = 'closed';
-                      ctx._source['kibana.alert.workflow_status_updated_at'] = '2022-02-21T17:35:00.000Z';
-                    }
-                    if (ctx._source.signal != null && ctx._source.signal.status != null) {
-                      ctx._source.signal.status = 'closed'
-                    }",
+              "params": Object {
+                "reason": null,
+                "shouldRemoveWorkflowReason": false,
+                "status": "closed",
+                "updatedAt": "2022-02-21T17:35:00.000Z",
+              },
+              "source": "
+            boolean statusChanged = false;
+            boolean signalStatusChanged = false;
+            if (ctx._source['kibana.alert.workflow_status'] != null && ctx._source['kibana.alert.workflow_status'] != params.status) {
+              statusChanged = true;
+              ctx._source['kibana.alert.workflow_status'] = params.status;
+              ctx._source['kibana.alert.workflow_status_updated_at'] = params.updatedAt;
+              if (params.reason != null) {
+                  ctx._source['kibana.alert.workflow_reason'] = params.reason;
+              }
+              if (params.shouldRemoveWorkflowReason) {
+                ctx._source.remove('kibana.alert.workflow_reason');
+              }
+            }
+            if (
+              ctx._source.signal != null &&
+              ctx._source.signal.status != null &&
+              ctx._source.signal.status != params.status
+            ) {
+              signalStatusChanged = true;
+              ctx._source.signal.status = params.status;
+            }
+
+            if (!statusChanged && !signalStatusChanged) {
+              ctx.op = 'noop';
+            }
+          ",
             },
           },
         ]
       `);
+    });
+
+    it('returns total updated alert count', async () => {
+      esClient.updateByQuery
+        .mockResolvedValueOnce({ updated: 2, version_conflicts: 0 })
+        .mockResolvedValueOnce({ updated: 1, version_conflicts: 1 });
+
+      const result = await alertService.updateAlertsStatus([
+        { id: 'id1', index: '1', status: CaseStatuses.closed },
+        { id: 'id2', index: '1', status: CaseStatuses.closed },
+        { id: 'id3', index: '1', status: CaseStatuses.open },
+      ]);
+
+      expect(result).toBe(3);
     });
 
     it('buckets the alerts by index', async () => {
@@ -88,13 +128,39 @@ describe('updateAlertsStatus', () => {
             },
             "script": Object {
               "lang": "painless",
-              "source": "if (ctx._source['kibana.alert.workflow_status'] != null) {
-                      ctx._source['kibana.alert.workflow_status'] = 'closed';
-                      ctx._source['kibana.alert.workflow_status_updated_at'] = '2022-02-21T17:35:00.000Z';
-                    }
-                    if (ctx._source.signal != null && ctx._source.signal.status != null) {
-                      ctx._source.signal.status = 'closed'
-                    }",
+              "params": Object {
+                "reason": null,
+                "shouldRemoveWorkflowReason": false,
+                "status": "closed",
+                "updatedAt": "2022-02-21T17:35:00.000Z",
+              },
+              "source": "
+            boolean statusChanged = false;
+            boolean signalStatusChanged = false;
+            if (ctx._source['kibana.alert.workflow_status'] != null && ctx._source['kibana.alert.workflow_status'] != params.status) {
+              statusChanged = true;
+              ctx._source['kibana.alert.workflow_status'] = params.status;
+              ctx._source['kibana.alert.workflow_status_updated_at'] = params.updatedAt;
+              if (params.reason != null) {
+                  ctx._source['kibana.alert.workflow_reason'] = params.reason;
+              }
+              if (params.shouldRemoveWorkflowReason) {
+                ctx._source.remove('kibana.alert.workflow_reason');
+              }
+            }
+            if (
+              ctx._source.signal != null &&
+              ctx._source.signal.status != null &&
+              ctx._source.signal.status != params.status
+            ) {
+              signalStatusChanged = true;
+              ctx._source.signal.status = params.status;
+            }
+
+            if (!statusChanged && !signalStatusChanged) {
+              ctx.op = 'noop';
+            }
+          ",
             },
           },
         ]
@@ -122,14 +188,39 @@ describe('updateAlertsStatus', () => {
             },
             "script": Object {
               "lang": "painless",
-              "source": "if (ctx._source['kibana.alert.workflow_status'] != null) {
-                      ctx._source['kibana.alert.workflow_status'] = 'acknowledged';
-                      ctx._source['kibana.alert.workflow_status_updated_at'] = '2022-02-21T17:35:00.000Z';
-                    }
-                    if (ctx._source.signal != null && ctx._source.signal.status != null) {
-                      ctx._source.signal.status = 'acknowledged'
-                    }
-                    ctx._source.remove('kibana.alert.workflow_reason')",
+              "params": Object {
+                "reason": null,
+                "shouldRemoveWorkflowReason": true,
+                "status": "acknowledged",
+                "updatedAt": "2022-02-21T17:35:00.000Z",
+              },
+              "source": "
+            boolean statusChanged = false;
+            boolean signalStatusChanged = false;
+            if (ctx._source['kibana.alert.workflow_status'] != null && ctx._source['kibana.alert.workflow_status'] != params.status) {
+              statusChanged = true;
+              ctx._source['kibana.alert.workflow_status'] = params.status;
+              ctx._source['kibana.alert.workflow_status_updated_at'] = params.updatedAt;
+              if (params.reason != null) {
+                  ctx._source['kibana.alert.workflow_reason'] = params.reason;
+              }
+              if (params.shouldRemoveWorkflowReason) {
+                ctx._source.remove('kibana.alert.workflow_reason');
+              }
+            }
+            if (
+              ctx._source.signal != null &&
+              ctx._source.signal.status != null &&
+              ctx._source.signal.status != params.status
+            ) {
+              signalStatusChanged = true;
+              ctx._source.signal.status = params.status;
+            }
+
+            if (!statusChanged && !signalStatusChanged) {
+              ctx.op = 'noop';
+            }
+          ",
             },
           },
         ]
@@ -161,13 +252,39 @@ describe('updateAlertsStatus', () => {
             },
             "script": Object {
               "lang": "painless",
-              "source": "if (ctx._source['kibana.alert.workflow_status'] != null) {
-                      ctx._source['kibana.alert.workflow_status'] = 'closed';
-                      ctx._source['kibana.alert.workflow_status_updated_at'] = '2022-02-21T17:35:00.000Z';
-                    }
-                    if (ctx._source.signal != null && ctx._source.signal.status != null) {
-                      ctx._source.signal.status = 'closed'
-                    }",
+              "params": Object {
+                "reason": null,
+                "shouldRemoveWorkflowReason": false,
+                "status": "closed",
+                "updatedAt": "2022-02-21T17:35:00.000Z",
+              },
+              "source": "
+            boolean statusChanged = false;
+            boolean signalStatusChanged = false;
+            if (ctx._source['kibana.alert.workflow_status'] != null && ctx._source['kibana.alert.workflow_status'] != params.status) {
+              statusChanged = true;
+              ctx._source['kibana.alert.workflow_status'] = params.status;
+              ctx._source['kibana.alert.workflow_status_updated_at'] = params.updatedAt;
+              if (params.reason != null) {
+                  ctx._source['kibana.alert.workflow_reason'] = params.reason;
+              }
+              if (params.shouldRemoveWorkflowReason) {
+                ctx._source.remove('kibana.alert.workflow_reason');
+              }
+            }
+            if (
+              ctx._source.signal != null &&
+              ctx._source.signal.status != null &&
+              ctx._source.signal.status != params.status
+            ) {
+              signalStatusChanged = true;
+              ctx._source.signal.status = params.status;
+            }
+
+            if (!statusChanged && !signalStatusChanged) {
+              ctx.op = 'noop';
+            }
+          ",
             },
           },
         ]
@@ -189,14 +306,39 @@ describe('updateAlertsStatus', () => {
             },
             "script": Object {
               "lang": "painless",
-              "source": "if (ctx._source['kibana.alert.workflow_status'] != null) {
-                      ctx._source['kibana.alert.workflow_status'] = 'open';
-                      ctx._source['kibana.alert.workflow_status_updated_at'] = '2022-02-21T17:35:00.000Z';
-                    }
-                    if (ctx._source.signal != null && ctx._source.signal.status != null) {
-                      ctx._source.signal.status = 'open'
-                    }
-                    ctx._source.remove('kibana.alert.workflow_reason')",
+              "params": Object {
+                "reason": null,
+                "shouldRemoveWorkflowReason": true,
+                "status": "open",
+                "updatedAt": "2022-02-21T17:35:00.000Z",
+              },
+              "source": "
+            boolean statusChanged = false;
+            boolean signalStatusChanged = false;
+            if (ctx._source['kibana.alert.workflow_status'] != null && ctx._source['kibana.alert.workflow_status'] != params.status) {
+              statusChanged = true;
+              ctx._source['kibana.alert.workflow_status'] = params.status;
+              ctx._source['kibana.alert.workflow_status_updated_at'] = params.updatedAt;
+              if (params.reason != null) {
+                  ctx._source['kibana.alert.workflow_reason'] = params.reason;
+              }
+              if (params.shouldRemoveWorkflowReason) {
+                ctx._source.remove('kibana.alert.workflow_reason');
+              }
+            }
+            if (
+              ctx._source.signal != null &&
+              ctx._source.signal.status != null &&
+              ctx._source.signal.status != params.status
+            ) {
+              signalStatusChanged = true;
+              ctx._source.signal.status = params.status;
+            }
+
+            if (!statusChanged && !signalStatusChanged) {
+              ctx.op = 'noop';
+            }
+          ",
             },
           },
         ]
@@ -228,13 +370,39 @@ describe('updateAlertsStatus', () => {
             },
             "script": Object {
               "lang": "painless",
-              "source": "if (ctx._source['kibana.alert.workflow_status'] != null) {
-                      ctx._source['kibana.alert.workflow_status'] = 'closed';
-                      ctx._source['kibana.alert.workflow_status_updated_at'] = '2022-02-21T17:35:00.000Z';
-                    }
-                    if (ctx._source.signal != null && ctx._source.signal.status != null) {
-                      ctx._source.signal.status = 'closed'
-                    }",
+              "params": Object {
+                "reason": null,
+                "shouldRemoveWorkflowReason": false,
+                "status": "closed",
+                "updatedAt": "2022-02-21T17:35:00.000Z",
+              },
+              "source": "
+            boolean statusChanged = false;
+            boolean signalStatusChanged = false;
+            if (ctx._source['kibana.alert.workflow_status'] != null && ctx._source['kibana.alert.workflow_status'] != params.status) {
+              statusChanged = true;
+              ctx._source['kibana.alert.workflow_status'] = params.status;
+              ctx._source['kibana.alert.workflow_status_updated_at'] = params.updatedAt;
+              if (params.reason != null) {
+                  ctx._source['kibana.alert.workflow_reason'] = params.reason;
+              }
+              if (params.shouldRemoveWorkflowReason) {
+                ctx._source.remove('kibana.alert.workflow_reason');
+              }
+            }
+            if (
+              ctx._source.signal != null &&
+              ctx._source.signal.status != null &&
+              ctx._source.signal.status != params.status
+            ) {
+              signalStatusChanged = true;
+              ctx._source.signal.status = params.status;
+            }
+
+            if (!statusChanged && !signalStatusChanged) {
+              ctx.op = 'noop';
+            }
+          ",
             },
           },
         ]
@@ -256,14 +424,39 @@ describe('updateAlertsStatus', () => {
             },
             "script": Object {
               "lang": "painless",
-              "source": "if (ctx._source['kibana.alert.workflow_status'] != null) {
-                      ctx._source['kibana.alert.workflow_status'] = 'open';
-                      ctx._source['kibana.alert.workflow_status_updated_at'] = '2022-02-21T17:35:00.000Z';
-                    }
-                    if (ctx._source.signal != null && ctx._source.signal.status != null) {
-                      ctx._source.signal.status = 'open'
-                    }
-                    ctx._source.remove('kibana.alert.workflow_reason')",
+              "params": Object {
+                "reason": null,
+                "shouldRemoveWorkflowReason": true,
+                "status": "open",
+                "updatedAt": "2022-02-21T17:35:00.000Z",
+              },
+              "source": "
+            boolean statusChanged = false;
+            boolean signalStatusChanged = false;
+            if (ctx._source['kibana.alert.workflow_status'] != null && ctx._source['kibana.alert.workflow_status'] != params.status) {
+              statusChanged = true;
+              ctx._source['kibana.alert.workflow_status'] = params.status;
+              ctx._source['kibana.alert.workflow_status_updated_at'] = params.updatedAt;
+              if (params.reason != null) {
+                  ctx._source['kibana.alert.workflow_reason'] = params.reason;
+              }
+              if (params.shouldRemoveWorkflowReason) {
+                ctx._source.remove('kibana.alert.workflow_reason');
+              }
+            }
+            if (
+              ctx._source.signal != null &&
+              ctx._source.signal.status != null &&
+              ctx._source.signal.status != params.status
+            ) {
+              signalStatusChanged = true;
+              ctx._source.signal.status = params.status;
+            }
+
+            if (!statusChanged && !signalStatusChanged) {
+              ctx.op = 'noop';
+            }
+          ",
             },
           },
         ]
@@ -276,6 +469,45 @@ describe('updateAlertsStatus', () => {
       ]);
 
       expect(esClient.updateByQuery).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('executeAggregations', () => {
+    const aggregationBuilders = [
+      {
+        getName: () => 'hosts',
+        build: () => ({ hosts_total: { cardinality: { field: 'host.id' } } }),
+        formatResponse: () => ({}),
+      },
+    ];
+
+    it('searches unique alert ids and indices with ignore_unavailable', async () => {
+      const aggregations = { hosts_total: { value: 2 } };
+      esClient.search.mockResolvedValue({
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: { hits: [] },
+        aggregations,
+      });
+
+      const res = await alertService.executeAggregations({
+        aggregationBuilders,
+        alerts: [
+          { id: 'alert-1', index: '.alerts-security.alerts-default' },
+          { id: 'alert-2', index: '.alerts-security.alerts-default' },
+          { id: 'alert-3', index: '.alerts-observability.alerts-default' },
+        ],
+      });
+
+      expect(esClient.search).toHaveBeenCalledWith({
+        index: ['.alerts-security.alerts-default', '.alerts-observability.alerts-default'],
+        ignore_unavailable: true,
+        query: { ids: { values: ['alert-1', 'alert-2', 'alert-3'] } },
+        size: 0,
+        aggregations: { hosts_total: { cardinality: { field: 'host.id' } } },
+      });
+      expect(res).toEqual(aggregations);
     });
   });
 
@@ -465,6 +697,139 @@ describe('updateAlertsStatus', () => {
 
       expect(logger.error).toHaveBeenCalledWith(
         'Failed removing cases test-case-1,test-case-2 for all alerts: An error'
+      );
+    });
+  });
+
+  describe('ensureAlertsAuthorized', () => {
+    const alerts = [
+      {
+        id: 'alert-1',
+        index: '.alerts-security.alerts-default',
+      },
+    ];
+
+    it('authorizes local alerts', async () => {
+      alertsClient.ensureAllAlertsAuthorizedRead.mockResolvedValueOnce(undefined);
+
+      await expect(alertService.ensureAlertsAuthorized({ alerts })).resolves.not.toThrow();
+
+      expect(alertsClient.ensureAllAlertsAuthorizedRead).toHaveBeenCalledWith({ alerts });
+    });
+
+    it('throws without calling ensureAllAlertsAuthorizedRead when the index belongs to a linked project (CPS)', async () => {
+      await expect(
+        alertService.ensureAlertsAuthorized({
+          alerts: [{ id: 'alert-1', index: 'my-linked-project:.alerts-security.alerts-default' }],
+        })
+      ).rejects.toThrow(/linked project or remote cluster/);
+
+      expect(alertsClient.ensureAllAlertsAuthorizedRead).not.toHaveBeenCalled();
+    });
+
+    it('throws without calling ensureAllAlertsAuthorizedRead when the index is a remote-cluster (CCS) reference', async () => {
+      await expect(
+        alertService.ensureAlertsAuthorized({
+          alerts: [{ id: 'alert-1', index: 'my-remote-cluster:.alerts-security.alerts-default' }],
+        })
+      ).rejects.toThrow(/linked project or remote cluster/);
+
+      expect(alertsClient.ensureAllAlertsAuthorizedRead).not.toHaveBeenCalled();
+    });
+
+    it('does not call ensureAllAlertsAuthorizedRead when there are no non-empty alerts', async () => {
+      await expect(
+        alertService.ensureAlertsAuthorized({ alerts: [{ id: '', index: '' }] })
+      ).resolves.not.toThrow();
+
+      expect(alertsClient.ensureAllAlertsAuthorizedRead).not.toHaveBeenCalled();
+    });
+
+    it('wraps and rethrows authorization errors', async () => {
+      alertsClient.ensureAllAlertsAuthorizedRead.mockRejectedValueOnce(new Error('boom'));
+
+      await expect(alertService.ensureAlertsAuthorized({ alerts })).rejects.toThrow(
+        /Failed to authorize alerts/
+      );
+    });
+  });
+
+  describe('ensureDocumentsExist', () => {
+    const alerts = [
+      {
+        id: 'event-1',
+        index: '.ds-logs-endpoint.events.process-default',
+      },
+    ];
+
+    it('does not throw when the document exists', async () => {
+      esClient.mget.mockResolvedValueOnce({
+        docs: [
+          {
+            _index: '.ds-logs-endpoint.events.process-default',
+            _id: 'event-1',
+            found: true,
+            _source: {},
+          },
+        ],
+      });
+
+      await expect(alertService.ensureDocumentsExist({ alerts })).resolves.not.toThrow();
+    });
+
+    it('throws when the document is not found', async () => {
+      esClient.mget.mockResolvedValueOnce({
+        docs: [
+          {
+            _index: '.ds-logs-endpoint.events.process-default',
+            _id: 'event-1',
+            found: false,
+          },
+        ],
+      });
+
+      await expect(alertService.ensureDocumentsExist({ alerts })).rejects.toThrow(
+        /Referenced event\(s\) not found: event-1/
+      );
+    });
+
+    it('throws without calling mget when the index belongs to a linked project (CPS)', async () => {
+      await expect(
+        alertService.ensureDocumentsExist({
+          alerts: [
+            { id: 'event-1', index: 'my-linked-project:.ds-logs-endpoint.events.process-default' },
+          ],
+        })
+      ).rejects.toThrow(/linked project or remote cluster/);
+
+      expect(esClient.mget).not.toHaveBeenCalled();
+    });
+
+    it('throws without calling mget when the index is a remote-cluster (CCS) reference', async () => {
+      await expect(
+        alertService.ensureDocumentsExist({
+          alerts: [
+            { id: 'event-1', index: 'my-remote-cluster:.ds-logs-endpoint.events.process-default' },
+          ],
+        })
+      ).rejects.toThrow(/linked project or remote cluster/);
+
+      expect(esClient.mget).not.toHaveBeenCalled();
+    });
+
+    it('does not call mget when there are no non-empty alerts', async () => {
+      await expect(
+        alertService.ensureDocumentsExist({ alerts: [{ id: '', index: '' }] })
+      ).resolves.not.toThrow();
+
+      expect(esClient.mget).not.toHaveBeenCalled();
+    });
+
+    it('wraps and rethrows mget errors', async () => {
+      esClient.mget.mockRejectedValueOnce(new Error('boom'));
+
+      await expect(alertService.ensureDocumentsExist({ alerts })).rejects.toThrow(
+        /Failed to verify referenced events exist/
       );
     });
   });

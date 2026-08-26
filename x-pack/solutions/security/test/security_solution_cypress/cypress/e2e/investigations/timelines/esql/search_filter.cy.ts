@@ -6,12 +6,9 @@
  */
 
 import {
-  GET_LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON,
-  GET_LOCAL_SHOW_DATES_BUTTON,
-} from '../../../../screens/date_picker';
-import {
+  expectDateRangeToBe,
+  setDateRange,
   setStartDate,
-  showStartEndDate,
   updateDateRangeInLocalDatePickers,
   updateDates,
 } from '../../../../tasks/date_picker';
@@ -80,37 +77,26 @@ describe(
 
     it('should remove the query when the back button is pressed after adding a query', () => {
       addDiscoverEsqlQuery(esqlQuery);
-      cy.get(DISCOVER_ESQL_INPUT_TEXT_CONTAINER).then((subj) => {
-        const currentQuery = subj.text();
-        const sanitizedQuery = convertEditorNonBreakingSpaceToSpace(currentQuery);
-        expect(sanitizedQuery).to.eq(esqlQuery);
+      cy.get(DISCOVER_ESQL_INPUT_TEXT_CONTAINER).should(($input) => {
+        expect(convertEditorNonBreakingSpaceToSpace($input.text())).to.eq(esqlQuery);
       });
       cy.go('back');
-      cy.get(DISCOVER_ESQL_INPUT_TEXT_CONTAINER).then((subj) => {
-        const currentQuery = subj.text();
-        const sanitizedQuery = convertEditorNonBreakingSpaceToSpace(currentQuery);
-        expect(sanitizedQuery).to.not.eq(esqlQuery);
+      cy.get(DISCOVER_ESQL_INPUT_TEXT_CONTAINER).should(($input) => {
+        expect(convertEditorNonBreakingSpaceToSpace($input.text())).to.not.eq(esqlQuery);
       });
     });
 
     it(`should change the timerange to ${DEFAULT_DATE} when back is pressed after modifying timerange to ${NEW_START_DATE} without saving`, () => {
       // The datepicker is only active when a query exists.
       addDiscoverEsqlQuery(esqlQuery);
-      cy.get(GET_LOCAL_SHOW_DATES_BUTTON(DISCOVER_CONTAINER)).click();
-      cy.get(GET_LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON(DISCOVER_CONTAINER)).first().click({});
+
+      setDateRange('now-15m', 'now', DISCOVER_CONTAINER);
 
       setStartDate(NEW_START_DATE, DISCOVER_CONTAINER);
-
-      cy.get(GET_LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON(DISCOVER_CONTAINER)).first().click({});
-
       updateDates(DISCOVER_CONTAINER);
 
       cy.go('back');
-      showStartEndDate(DISCOVER_CONTAINER);
-      cy.get(GET_LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON(DISCOVER_CONTAINER)).should(
-        'have.text',
-        DEFAULT_DATE
-      );
+      expectDateRangeToBe(DISCOVER_CONTAINER, { start: 'now-15m', end: 'now' });
     });
   }
 );

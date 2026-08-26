@@ -33,7 +33,7 @@ export const DataTableCopyRowsAsJson: React.FC<DataTableCopyRowsAsJsonProps> = (
   return (
     <EuiContextMenuItem
       data-test-subj="dscGridCopySelectedDocumentsJSON"
-      icon="copyClipboard"
+      icon="copy"
       disabled={isProcessing}
       onClick={async () => {
         setIsProcessing(true);

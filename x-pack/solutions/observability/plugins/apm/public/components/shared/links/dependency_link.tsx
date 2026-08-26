@@ -10,8 +10,8 @@ import type { TypeOf } from '@kbn/typed-react-router-config';
 import React from 'react';
 import styled from '@emotion/styled';
 import { SpanIcon } from '@kbn/apm-ui-shared';
+import { truncate } from '@kbn/apm-common';
 import { useApmRouter } from '../../../hooks/use_apm_router';
-import { truncate } from '../../../utils/style';
 import type { ApmRoutes } from '../../routing/apm_route_config';
 
 const StyledLink = styled(EuiLink)`

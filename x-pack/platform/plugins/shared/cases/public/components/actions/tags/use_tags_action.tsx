@@ -30,7 +30,7 @@ export const useTagsAction = ({ onAction, onActionSuccess, isDisabled }: UseActi
       onClick: () => openFlyout(selectedCases),
       disabled: isActionDisabled,
       'data-test-subj': 'cases-bulk-action-tags',
-      icon: <EuiIcon type="tag" size="m" />,
+      icon: <EuiIcon type="tag" size="m" aria-hidden={true} />,
       key: 'cases-bulk-action-tags',
     };
   };

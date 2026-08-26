@@ -11,6 +11,8 @@ Palettes are integrated with the expression as well using the `system_palette` a
 
 To consume the palette service, use `charts.palettes.getPalettes` to lazily load the async bundle implementing existing palettes. This is recommended to be called in the renderer, not as part of the `setup` or `start` phases of a plugin.
 
+The palette service is reactive to the active Kibana theme. The registry returned by `getPalettes` is "live" — its `get`/`getAll` methods always read the palettes built for the current theme, so consumers that re-render on theme (e.g. dark mode) changes automatically pick up the new colors. To react to theme changes explicitly, subscribe to `charts.palettes.getPalettes$()`, which emits a new registry whenever the relevant theme values change.
+
 All palette definitions can be loaded using `paletteService.getAll()`. If the id of the palette is known, it can be fetched using `paleteService.get(id)`.
 
 One a palette is loaded, there are two ways to request colors - either by fetching a list of colors (`getColors`) or by specifying the chart object to be colored (`getColor`). If possible, using `getColor` is recommended because it allows the palette implementation to apply custom logic to coloring (e.g. lightening up colors or syncing colors) which has to be implemented by the consumer if `getColors` is used).

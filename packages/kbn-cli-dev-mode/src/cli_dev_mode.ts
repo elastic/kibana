@@ -150,6 +150,11 @@ export class CliDevMode {
           .split(`${this.basePathProxy.host}:${this.basePathProxy.targetPort}`)
           .join(`${this.basePathProxy.host}:${this.basePathProxy.port}`);
       },
+      proxyUrl: this.basePathProxy
+        ? `${config.http.ssl.enabled ? 'https' : 'http'}://${this.basePathProxy.host}:${
+            this.basePathProxy.port
+          }${this.basePathProxy.basePath ?? ''}`
+        : undefined,
     });
 
     this.optimizer = new Optimizer({
@@ -164,6 +169,7 @@ export class CliDevMode {
       watch: cliArgs.watch,
       pluginPaths: config.plugins.additionalPluginPaths,
       pluginScanDirs: config.plugins.pluginSearchPaths,
+      basePath: this.basePathProxy?.basePath,
     });
   }
 
@@ -245,8 +251,10 @@ export class CliDevMode {
     }
 
     this.subscription.add(
-      this.optimizer.run$
+      // the same pattern as: `kibana/packages/kbn-cli-dev-mode/src/dev_server.ts`
+      Rx.concat([undefined], this.watcher.optimizerShouldRestart$())
         .pipe(
+          switchMap(() => this.optimizer.run$),
           // stop the optimizer as soon as we get an exit signal
           takeUntil(exitSignal$)
         )

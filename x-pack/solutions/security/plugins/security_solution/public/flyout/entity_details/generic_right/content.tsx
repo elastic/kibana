@@ -22,14 +22,14 @@ import {
   EntityDetailsLeftPanelTab,
   type EntityDetailsPath,
 } from '../shared/components/left_panel/left_panel_header';
-import type { CloudPostureEntityIdentifier } from '../../../cloud_security_posture/components/entity_insight';
+import type { IdentityFields } from '../../document_details/shared/utils';
 import { EntityInsight } from '../../../cloud_security_posture/components/entity_insight';
-import { useExpandSection } from '../../shared/hooks/use_expand_section';
+import { useExpandSection } from '../../../flyout_v2/shared/hooks/use_expand_section';
 import { GENERIC_FLYOUT_STORAGE_KEYS } from './constants';
 import { FieldsTable, usePinnedFields } from './components/fields_table';
-import { ExpandableSection } from '../../shared/components/expandable_section';
+import { ExpandableSection } from '../../../flyout_v2/shared/components/expandable_section';
 import { FlyoutBody } from '../../shared/components/flyout_body';
-import { ExpandablePanel } from '../../shared/components/expandable_panel';
+import { ExpandablePanel } from '../../../flyout_v2/shared/components/expandable_panel';
 import { AssetCriticalityAccordion } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
 
 const defaultPinnedFields = [
@@ -50,19 +50,30 @@ const defaultPinnedFields = [
 interface GenericEntityFlyoutContentProps {
   source: GenericEntityRecord;
   openGenericEntityDetailsPanelByPath: (path: EntityDetailsPath) => void;
-  insightsField: CloudPostureEntityIdentifier;
-  insightsValue: string;
+  identityFields: IdentityFields;
   onAssetCriticalityChange: () => void;
+  /**
+   * Overrides forwarded to the underlying {@link FlyoutBody} (e.g. `panelProps` for compact spacing
+   * in the EUI system flyout). Legacy callers omit this and keep the default.
+   */
+  flyoutBodyProps?: Omit<React.ComponentProps<typeof FlyoutBody>, 'children'>;
+  /**
+   * When true, hides the "open in tool" header icons on the section panels. Used by the new EUI
+   * system flyout, where sections are opened via {@link openGenericEntityDetailsPanelByPath}.
+   */
+  hideHeaderIcons?: boolean;
 }
 
 export const GenericEntityFlyoutContent = ({
   source,
   openGenericEntityDetailsPanelByPath,
-  insightsField,
-  insightsValue,
+  identityFields,
   onAssetCriticalityChange,
+  flyoutBodyProps,
+  hideHeaderIcons = false,
 }: GenericEntityFlyoutContentProps) => {
   const { euiTheme } = useEuiTheme();
+  const entityDisplayValue = Object.values(identityFields)[0] ?? '';
 
   const fieldsSectionExpandedState = useExpandSection({
     title: 'fields',
@@ -91,9 +102,12 @@ export const GenericEntityFlyoutContent = ({
   }, [source, pinnedFields]);
 
   return (
-    <FlyoutBody>
+    <FlyoutBody {...flyoutBodyProps}>
       <AssetCriticalityAccordion
-        entity={{ name: insightsValue, type: EntityType.generic }}
+        entity={{
+          name: entityDisplayValue as string,
+          type: EntityType.generic,
+        }}
         onChange={() => {
           uiMetricService.trackUiMetric(
             METRIC_TYPE.CLICK,
@@ -104,10 +118,11 @@ export const GenericEntityFlyoutContent = ({
         }}
       />
       <EntityInsight
-        field={insightsField}
-        value={insightsValue}
+        identityFields={identityFields}
         isPreviewMode={false}
         openDetailsPanel={openGenericEntityDetailsPanelByPath}
+        entityType={EntityType.generic}
+        hideHeaderIcons={hideHeaderIcons}
       />
       <ExpandableSection
         title={
@@ -122,7 +137,7 @@ export const GenericEntityFlyoutContent = ({
       >
         <ExpandablePanel
           header={{
-            iconType: 'arrowStart',
+            iconType: 'chevronLimitLeft',
             title: (
               <EuiTitle
                 css={css`

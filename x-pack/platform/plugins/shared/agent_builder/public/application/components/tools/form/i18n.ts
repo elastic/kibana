@@ -34,6 +34,16 @@ export const i18nMessages = {
   optionalParamLabel: i18n.translate('xpack.agentBuilder.tools.newTool.optionalParamLabel', {
     defaultMessage: 'Optional',
   }),
+  defaultValueLabel: i18n.translate('xpack.agentBuilder.tools.newTool.defaultValueLabel', {
+    defaultMessage: 'Default value',
+  }),
+  defaultValuePlaceholder: i18n.translate(
+    'xpack.agentBuilder.tools.newTool.defaultValuePlaceholder',
+
+    {
+      defaultMessage: 'Enter default value...',
+    }
+  ),
   removeParamButtonLabel: i18n.translate(
     'xpack.agentBuilder.tools.newTool.removeParamButtonLabel',
     {
@@ -159,6 +169,39 @@ export const i18nMessages = {
           'xpack.agentBuilder.tools.newTool.configuration.form.type.mcpOption',
           {
             defaultMessage: 'MCP',
+          }
+        ),
+      },
+      confirmation: {
+        label: i18n.translate(
+          'xpack.agentBuilder.tools.newTool.configuration.form.confirmation.label',
+          {
+            defaultMessage: 'Require user confirmation',
+          }
+        ),
+        helpText: i18n.translate(
+          'xpack.agentBuilder.tools.newTool.configuration.form.confirmation.helpText',
+          {
+            defaultMessage:
+              'Sets the policy for when the agent should require user confirmation before executing the tool.',
+          }
+        ),
+        neverOption: i18n.translate(
+          'xpack.agentBuilder.tools.newTool.configuration.form.confirmation.neverOptionLabel',
+          {
+            defaultMessage: 'Never',
+          }
+        ),
+        onceOption: i18n.translate(
+          'xpack.agentBuilder.tools.newTool.configuration.form.confirmation.onceOptionLabel',
+          {
+            defaultMessage: 'Once',
+          }
+        ),
+        alwaysOption: i18n.translate(
+          'xpack.agentBuilder.tools.newTool.configuration.form.confirmation.alwaysOptionLabel',
+          {
+            defaultMessage: 'Always',
           }
         ),
       },

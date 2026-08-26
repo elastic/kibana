@@ -6,7 +6,7 @@
  */
 
 import type { AttachmentType } from '../../../common/types/domain';
-import type { AttachmentRequest } from '../../../common/types/api';
+import type { AttachmentRequestV2 } from '../../../common/types/api';
 import type { Limiter } from './types';
 
 interface LimiterParams {
@@ -26,7 +26,7 @@ export abstract class BaseLimiter implements Limiter {
   }
 
   public abstract countOfItemsWithinCase(caseId: string): Promise<number>;
-  public abstract countOfItemsInRequest(requests: AttachmentRequest[]): number;
+  public abstract countOfItemsInRequest(requests: AttachmentRequestV2[]): number;
 }
 
 const makeErrorMessage = (limit: number, noun: string) => {

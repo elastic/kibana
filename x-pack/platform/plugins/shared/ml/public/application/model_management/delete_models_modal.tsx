@@ -11,7 +11,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiCheckbox,
   EuiModal,
   EuiModalBody,
@@ -19,11 +18,13 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiSpacer,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import type { TrainedModelItem, TrainedModelUIItem } from '../../../common/types/trained_models';
-import { isExistingModel } from '../../../common/types/trained_models';
-import { type WithRequired } from '../../../common/types/common';
+import type { TrainedModelItem, TrainedModelUIItem } from '@kbn/ml-common-types/trained_models';
+import { isExistingModel } from '@kbn/ml-common-types/trained_models';
+import { type WithRequired } from '@kbn/ml-common-types/common';
 import { DeleteSpaceAwareItemCheckModal } from '../components/delete_space_aware_item_check_modal';
 import { useMlKibana } from '../contexts/kibana';
 
@@ -40,6 +41,7 @@ export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ models, onClose,
     },
   } = useMlKibana();
 
+  const modalTitleId = useGeneratedHtmlId();
   const [canDeleteModel, setCanDeleteModel] = useState(false);
   const [deletePipelines, setDeletePipelines] = useState<boolean>(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -83,9 +85,10 @@ export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ models, onClose,
       onClose={onClose.bind(null)}
       initialFocus="[name=cancelModelDeletion]"
       data-test-subj="mlModelsDeleteModal"
+      aria-labelledby={modalTitleId}
     >
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>
           <FormattedMessage
             id="xpack.ml.trainedModels.modelsList.deleteModal.header"
             defaultMessage="Delete {modelsCount, plural, one {{modelId}} other {# models}}?"
@@ -100,7 +103,7 @@ export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ models, onClose,
       <EuiModalBody>
         {modelsWithPipelines.length > 0 ? (
           <>
-            <EuiCallOut
+            <KbnWarningCallout
               announceOnMount
               title={
                 <FormattedMessage
@@ -112,31 +115,27 @@ export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ models, onClose,
                   }}
                 />
               }
-              color="warning"
-              iconType="warning"
+              text={
+                <FormattedMessage
+                  id="xpack.ml.trainedModels.modelsList.deleteModal.warningMessage"
+                  defaultMessage="Deleting the trained model and its associated {pipelinesCount, plural, one {pipeline} other {pipelines}} will permanently remove these resources. Any process configured to send data to the {pipelinesCount, plural, one {pipeline} other {pipelines}} will no longer be able to do so once you delete the {pipelinesCount, plural, one {pipeline} other {pipelines}}. Deleting only the trained model will cause failures in the {pipelinesCount, plural, one {pipeline} other {pipelines}} that {pipelinesCount, plural, one {depends} other {depend}} on the model."
+                  values={{ pipelinesCount }}
+                />
+              }
             >
-              <div>
-                <p>
+              <EuiCheckbox
+                id={'delete-model-pipelines'}
+                label={
                   <FormattedMessage
-                    id="xpack.ml.trainedModels.modelsList.deleteModal.warningMessage"
-                    defaultMessage="Deleting the trained model and its associated {pipelinesCount, plural, one {pipeline} other {pipelines}} will permanently remove these resources. Any process configured to send data to the {pipelinesCount, plural, one {pipeline} other {pipelines}} will no longer be able to do so once you delete the {pipelinesCount, plural, one {pipeline} other {pipelines}}. Deleting only the trained model will cause failures in the {pipelinesCount, plural, one {pipeline} other {pipelines}} that {pipelinesCount, plural, one {depends} other {depend}} on the model."
+                    id="xpack.ml.trainedModels.modelsList.deleteModal.approvePipelinesDeletionLabel"
+                    defaultMessage="Delete {pipelinesCount, plural, one {pipeline} other {pipelines}}"
                     values={{ pipelinesCount }}
                   />
-                </p>
-                <EuiCheckbox
-                  id={'delete-model-pipelines'}
-                  label={
-                    <FormattedMessage
-                      id="xpack.ml.trainedModels.modelsList.deleteModal.approvePipelinesDeletionLabel"
-                      defaultMessage="Delete {pipelinesCount, plural, one {pipeline} other {pipelines}}"
-                      values={{ pipelinesCount }}
-                    />
-                  }
-                  checked={deletePipelines}
-                  onChange={setDeletePipelines.bind(null, (prev) => !prev)}
-                  data-test-subj="mlModelsDeleteModalDeletePipelinesCheckbox"
-                />
-              </div>
+                }
+                checked={deletePipelines}
+                onChange={setDeletePipelines.bind(null, (prev) => !prev)}
+                data-test-subj="mlModelsDeleteModalDeletePipelinesCheckbox"
+              />
               <ul>
                 {modelsWithPipelines.flatMap((model) => {
                   return Object.keys(model.pipelines).map((pipelineId) => (
@@ -144,13 +143,13 @@ export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ models, onClose,
                   ));
                 })}
               </ul>
-            </EuiCallOut>
+            </KbnWarningCallout>
             <EuiSpacer size="m" />
           </>
         ) : null}
 
         {modelsWithInferenceAPIs.length > 0 ? (
-          <EuiCallOut
+          <KbnWarningCallout
             announceOnMount
             title={
               <FormattedMessage
@@ -162,25 +161,20 @@ export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ models, onClose,
                 }}
               />
             }
-            color="warning"
-            iconType="warning"
+            text={
+              <FormattedMessage
+                id="xpack.ml.trainedModels.modelsList.deleteModal.warningInferenceMessage"
+                defaultMessage="Deleting the trained model will cause failures in the inference {inferenceAPIsCount, plural, one {service} other {services}} that {inferenceAPIsCount, plural, one {depends} other {depend}} on the model."
+                values={{ inferenceAPIsCount: inferenceAPIsIDs.length }}
+              />
+            }
           >
             <ul>
               {inferenceAPIsIDs.map((inferenceAPIModelId) => (
                 <li key={inferenceAPIModelId}>{inferenceAPIModelId}</li>
               ))}
             </ul>
-
-            <div>
-              <p>
-                <FormattedMessage
-                  id="xpack.ml.trainedModels.modelsList.deleteModal.warningInferenceMessage"
-                  defaultMessage="Deleting the trained model will cause failures in the inference {inferenceAPIsCount, plural, one {service} other {services}} that {inferenceAPIsCount, plural, one {depends} other {depend}} on the model."
-                  values={{ inferenceAPIsCount: inferenceAPIsIDs.length }}
-                />
-              </p>
-            </div>
-          </EuiCallOut>
+          </KbnWarningCallout>
         ) : null}
       </EuiModalBody>
 

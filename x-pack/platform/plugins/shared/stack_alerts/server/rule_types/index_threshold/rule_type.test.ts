@@ -7,13 +7,14 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import sinon from 'sinon';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import type { Writable } from '@kbn/utility-types';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { RuleExecutorServices } from '@kbn/alerting-plugin/server';
 import type { ActionGroupId } from './rule_type';
 import { getRuleType } from './rule_type';
 import type { ActionContext } from './action_context';
-import type { Params } from '@kbn/response-ops-rule-params/index_threshold';
+import type { IndexThresholdRuleParams } from '@kbn/response-ops-rule-params/index_threshold';
 import { TIME_SERIES_BUCKET_SELECTOR_FIELD } from '@kbn/triggers-actions-ui-plugin/server';
 import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
@@ -134,7 +135,7 @@ describe('ruleType', () => {
   });
 
   it('validator succeeds with valid params', async () => {
-    const params: Partial<Writable<Params>> = {
+    const params: Partial<Writable<IndexThresholdRuleParams>> = {
       index: 'index-name',
       timeField: 'time-field',
       aggType: 'count',
@@ -152,7 +153,7 @@ describe('ruleType', () => {
     const paramsSchema = ruleType.validate.params;
     if (!paramsSchema) throw new Error('params validator not set');
 
-    const params: Partial<Writable<Params>> = {
+    const params: Partial<Writable<IndexThresholdRuleParams>> = {
       index: 'index-name',
       timeField: 'time-field',
       aggType: 'foo',
@@ -179,7 +180,7 @@ describe('ruleType', () => {
         ],
       };
     });
-    const params: Params = {
+    const params: IndexThresholdRuleParams = {
       index: 'index-name',
       timeField: 'time-field',
       aggType: 'foo',
@@ -206,7 +207,7 @@ describe('ruleType', () => {
       state: {
         latestTimestamp: undefined,
       },
-      spaceId: uuidv4(),
+      spaceId: asSpaceId(uuidv4()),
       rule: {
         id: uuidv4(),
         name: ruleName,
@@ -277,7 +278,7 @@ describe('ruleType', () => {
         ],
       };
     });
-    const params: Params = {
+    const params: IndexThresholdRuleParams = {
       index: 'index-name',
       timeField: 'time-field',
       aggType: 'foo',
@@ -303,7 +304,7 @@ describe('ruleType', () => {
       state: {
         latestTimestamp: undefined,
       },
-      spaceId: uuidv4(),
+      spaceId: asSpaceId(uuidv4()),
       rule: {
         id: uuidv4(),
         name: uuidv4(),
@@ -348,7 +349,7 @@ describe('ruleType', () => {
         ],
       };
     });
-    const params: Params = {
+    const params: IndexThresholdRuleParams = {
       index: 'index-name',
       timeField: 'time-field',
       aggType: 'foo',
@@ -374,7 +375,7 @@ describe('ruleType', () => {
       state: {
         latestTimestamp: undefined,
       },
-      spaceId: uuidv4(),
+      spaceId: asSpaceId(uuidv4()),
       rule: {
         id: uuidv4(),
         name: uuidv4(),
@@ -418,7 +419,7 @@ describe('ruleType', () => {
         ],
       };
     });
-    const params: Params = {
+    const params: IndexThresholdRuleParams = {
       index: 'index-name',
       timeField: 'time-field',
       aggType: 'foo',
@@ -444,7 +445,7 @@ describe('ruleType', () => {
       state: {
         latestTimestamp: undefined,
       },
-      spaceId: uuidv4(),
+      spaceId: asSpaceId(uuidv4()),
       rule: {
         id: uuidv4(),
         name: uuidv4(),

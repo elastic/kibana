@@ -10,11 +10,14 @@ import type { estypes } from '@elastic/elasticsearch';
 import { omit } from 'lodash';
 import { Report } from '../store';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { KibanaShuttingDownError } from '@kbn/reporting-common';
-import type { ReportDocument } from '@kbn/reporting-common/types';
+import type { CancellationToken } from '@kbn/reporting-common';
+import { KibanaShuttingDownError, QueueTimeoutError } from '@kbn/reporting-common';
+import type { ReportDocument, TaskRunResult } from '@kbn/reporting-common/types';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { cryptoFactory, type ExportType, type ReportingConfigType } from '@kbn/reporting-server';
 import type { RunContext } from '@kbn/task-manager-plugin/server';
+import { TaskErrorSource } from '@kbn/task-manager-plugin/server';
+import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 
 import { RunSingleReportTask, REPORTING_EXECUTE_TYPE } from '.';
@@ -31,7 +34,11 @@ interface StreamMock {
   write: (data: string) => void;
   fail: () => void;
   end: () => void;
+  destroy: jest.Mock;
   transform: Transform;
+  on: (event: string, listener: (...args: unknown[]) => void) => StreamMock;
+  once: (event: string, listener: (...args: unknown[]) => void) => StreamMock;
+  removeListener: (event: string, listener: (...args: unknown[]) => void) => StreamMock;
 }
 
 const coreSetupMock = coreMock.createSetup();
@@ -76,12 +83,14 @@ const headers = {
   authorization: 'Basic ZWxhc3RpYzpTaUtXTlFWekhpRUoybmZ6SkpGMDlLT3c=',
 };
 
-function createStreamMock(): StreamMock {
+function createStreamMock({
+  seqNo = 10,
+  primaryTerm = 20,
+}: Partial<Record<'seqNo' | 'primaryTerm', number>> = {}): StreamMock {
   const transform: Transform = new Transform({});
-
-  return {
-    getSeqNo: () => 10,
-    getPrimaryTerm: () => 20,
+  const mock = {
+    getSeqNo: () => seqNo,
+    getPrimaryTerm: () => primaryTerm,
     write: (data: string) => {
       transform.push(`${data}\n`);
     },
@@ -93,14 +102,29 @@ function createStreamMock(): StreamMock {
     end: () => {
       transform.end();
     },
+    destroy: jest.fn(),
+    on: (event: string, listener: (...args: unknown[]) => void) => {
+      transform.on(event, listener);
+      return mock;
+    },
+    once: (event: string, listener: (...args: unknown[]) => void) => {
+      transform.once(event, listener);
+      return mock;
+    },
+    removeListener: (event: string, listener: (...args: unknown[]) => void) => {
+      transform.removeListener(event, listener);
+      return mock;
+    },
   };
+  return mock as StreamMock;
 }
 
-const mockStream = createStreamMock();
+let mockStream = createStreamMock();
+const mockGetContentStream = jest.fn();
 const mockEventTracker = eventTrackerMock.create();
 
 jest.mock('../content_stream', () => ({
-  getContentStream: () => mockStream,
+  getContentStream: (...args: unknown[]) => mockGetContentStream(...args),
   finishedWithNoPendingCallbacks: () => Promise.resolve(),
 }));
 
@@ -109,7 +133,6 @@ const fakeRawRequest: FakeRawRequest = {
   headers: {
     authorization: `ApiKey skdjtq4u543yt3rhewrh`,
   },
-  path: '/',
 };
 
 describe('Run Single Report Task', () => {
@@ -117,6 +140,7 @@ describe('Run Single Report Task', () => {
   let configType: ReportingConfigType;
   beforeEach(async () => {
     jest.clearAllMocks();
+    mockGetContentStream.mockImplementation(() => mockStream);
     configType = createMockConfigSchema();
     mockReporting = await createMockReportingCore(configType);
   });
@@ -209,6 +233,7 @@ describe('Run Single Report Task', () => {
           _id: 'test',
           jobtype: 'test1',
           status: 'pending',
+          useInternalUser: false,
         },
       },
       { request: fakeRawRequest }
@@ -241,6 +266,7 @@ describe('Run Single Report Task', () => {
         _id: 'test',
         jobtype: 'test1',
         status: 'pending',
+        useInternalUser: false,
       },
     });
   });
@@ -271,6 +297,7 @@ describe('Run Single Report Task', () => {
         _id: 'test',
         jobtype: 'test1',
         status: 'pending',
+        useInternalUser: false,
       },
     });
   });
@@ -622,6 +649,207 @@ describe('Run Single Report Task', () => {
     );
   });
 
+  it('catches stream error during performJob and rejects the operation', async () => {
+    const runTaskFn = jest.fn().mockImplementation((opts: { stream: StreamMock }) => {
+      const { stream } = opts;
+      setImmediate(() => stream.fail());
+      return new Promise(() => {}); // never resolve so the stream error throws
+    });
+    mockReporting.getExportTypesRegistry().register({
+      id: 'test1',
+      name: 'Test1',
+      setup: jest.fn(),
+      start: jest.fn(),
+      createJob: () => new Promise(() => {}),
+      runTask: runTaskFn,
+      shouldNotifyUsage: () => true,
+      getFeatureUsageName: () => 'Reporting: test1 single export',
+      notifyUsage: jest.fn(),
+      jobContentEncoding: 'base64',
+      jobType: 'test1',
+      validLicenses: [],
+    } as unknown as ExportType);
+    const store = await mockReporting.getStore();
+    store.setReportError = jest.fn(() =>
+      Promise.resolve({
+        _id: 'test',
+        jobtype: 'test1',
+        status: 'processing',
+      } as unknown as estypes.UpdateUpdateWriteResponseBase<ReportDocument>)
+    );
+    store.setReportFailed = jest.fn();
+    logger.error = jest.fn();
+    mockReporting.getEventTracker = jest.fn().mockReturnValue(mockEventTracker);
+
+    const task = new RunSingleReportTask({ reporting: mockReporting, config: configType, logger });
+    jest
+      // @ts-expect-error TS compilation fails: this overrides a private method of the RunSingleReportTask instance
+      .spyOn(task, 'claimJob')
+      .mockResolvedValueOnce({
+        _id: 'test1',
+        _index: 'cool-reporting-index',
+        jobtype: 'test1',
+        status: 'pending',
+      } as never);
+    jest
+      // @ts-expect-error TS compilation fails: this overrides a protected method of the RunSingleReportTask instance
+      .spyOn(task, 'getEventTracker')
+      // @ts-ignore
+      .mockReturnValue(new EventTracker(coreSetupMock.analytics, 'jobId', 'exportTypeId', 'appId'));
+    await task.init(taskManagerMock.createStart());
+
+    const taskDef = task.getTaskDefinition();
+    const taskRunner = taskDef.createTaskRunner({
+      taskInstance: {
+        id: 'random-task-id',
+        params: { index: 'cool-reporting-index', id: 'test1', jobtype: 'test1', payload: {} },
+      },
+      fakeRequest: fakeRawRequest,
+    } as unknown as RunContext);
+
+    await expect(() => taskRunner.run()).rejects.toThrowError('Stream failed');
+    expect(store.setReportError).not.toHaveBeenCalled();
+    expect(store.setReportFailed).toHaveBeenCalledWith(
+      {
+        _id: 'test1',
+        _index: 'cool-reporting-index',
+        jobtype: 'test1',
+        status: 'pending',
+      },
+      {
+        output: {
+          content: 'ReportingError(code: unknown_error) "Stream failed"',
+          content_type: null,
+          error_code: 'unknown_error',
+          size: 51,
+          warnings: ['ReportingError(code: unknown_error) "Stream failed"'],
+        },
+        completed_at: expect.any(String),
+        error: expect.objectContaining({ name: 'Error', message: 'Stream failed' }),
+      }
+    );
+  });
+
+  describe('timeout classification', () => {
+    // Runs the task with a runTask implementation that resolves (with the given result) only
+    // once the internal queue timeout cancels it - mirroring how the CSV searchsource path
+    // returns partial data on timeout. Returns the error the task run rejected with.
+    const runTimedOutTask = async (
+      result: Partial<TaskRunResult>,
+      { rejectOnCancel = false }: { rejectOnCancel?: boolean } = {}
+    ): Promise<Error | undefined> => {
+      // A 1ms queue timeout ensures the internal timer cancels the run promptly.
+      configType = createMockConfigSchema({ queue: { timeout: 1 } });
+      mockReporting = await createMockReportingCore(configType);
+
+      const runTaskFn = jest.fn().mockImplementation(
+        ({ cancellationToken }: { cancellationToken: CancellationToken }) =>
+          new Promise<TaskRunResult>((resolve, reject) => {
+            cancellationToken.on(() => {
+              if (rejectOnCancel) {
+                // Mirror takeUntil-based export types (PDF/PNG): the stream completes empty on
+                // cancel, so lastValueFrom rejects rather than resolving with partial data.
+                reject(new Error('no elements in sequence'));
+              } else {
+                resolve(result as TaskRunResult);
+              }
+            });
+          })
+      );
+      mockReporting.getExportTypesRegistry().register({
+        id: 'test1',
+        name: 'Test1',
+        setup: jest.fn(),
+        start: jest.fn(),
+        createJob: () => new Promise(() => {}),
+        runTask: runTaskFn,
+        shouldNotifyUsage: () => true,
+        getFeatureUsageName: () => 'Reporting: test1 single export',
+        notifyUsage: jest.fn(),
+        jobContentEncoding: 'base64',
+        jobType: 'test1',
+        validLicenses: [],
+      } as unknown as ExportType);
+      const store = await mockReporting.getStore();
+      store.setReportError = jest.fn();
+      store.setReportFailed = jest.fn(() =>
+        Promise.resolve({
+          _id: 'test1',
+          jobtype: 'test1',
+          status: 'failed',
+        } as unknown as estypes.UpdateUpdateWriteResponseBase<ReportDocument>)
+      );
+      logger.error = jest.fn();
+      mockReporting.getEventTracker = jest.fn().mockReturnValue(mockEventTracker);
+
+      const task = new RunSingleReportTask({
+        reporting: mockReporting,
+        config: configType,
+        logger,
+      });
+      jest
+        // @ts-expect-error TS compilation fails: this overrides a private method of the RunSingleReportTask instance
+        .spyOn(task, 'claimJob')
+        .mockResolvedValueOnce({
+          _id: 'test1',
+          _index: 'cool-reporting-index',
+          jobtype: 'test1',
+          status: 'pending',
+        } as never);
+      await task.init(taskManagerMock.createStart());
+
+      const taskDef = task.getTaskDefinition();
+      const taskRunner = taskDef.createTaskRunner({
+        taskInstance: {
+          id: 'random-task-id',
+          params: { index: 'cool-reporting-index', id: 'test1', jobtype: 'test1', payload: {} },
+        },
+        fakeRequest: fakeRawRequest,
+      } as unknown as RunContext);
+
+      let thrownError: Error | undefined;
+      await taskRunner.run().catch((err) => {
+        thrownError = err;
+      });
+      return thrownError;
+    };
+
+    beforeEach(() => {
+      // Use a fresh stream so the dangling error listener left on timeout doesn't leak across tests.
+      mockStream = createStreamMock();
+    });
+
+    it('throws a QueueTimeoutError when the run times out', async () => {
+      const error = await runTimedOutTask({ content_type: 'text/csv', warnings: [] });
+      expect(error).toBeInstanceOf(QueueTimeoutError);
+    });
+
+    it('classifies a timed-out run as a user error when the result has user_error', async () => {
+      const error = await runTimedOutTask({
+        content_type: 'text/csv',
+        warnings: ['row count mismatch'],
+        user_error: true,
+      });
+      expect(error).toBeInstanceOf(QueueTimeoutError);
+      expect(getErrorSource(error!)).toEqual(TaskErrorSource.USER);
+    });
+
+    it('does not classify a timed-out run as a user error when user_error is falsy', async () => {
+      const error = await runTimedOutTask({ content_type: 'text/csv', warnings: [] });
+      expect(error).toBeInstanceOf(QueueTimeoutError);
+      expect(getErrorSource(error!)).not.toEqual(TaskErrorSource.USER);
+    });
+
+    it('classifies a timed-out run as a QueueTimeoutError even when runTask rejects on cancel', async () => {
+      const error = await runTimedOutTask(
+        { content_type: 'application/pdf', warnings: [] },
+        { rejectOnCancel: true }
+      );
+      expect(error).toBeInstanceOf(QueueTimeoutError);
+      expect(getErrorSource(error!)).not.toEqual(TaskErrorSource.USER);
+    });
+  });
+
   it('updates report with error message and failed status if error occurs during task run during last attempt', async () => {
     const runTaskFn = jest.fn().mockImplementation(() => {
       throw new Error('failure generating report');
@@ -699,6 +927,104 @@ describe('Run Single Report Task', () => {
         completed_at: expect.any(String),
         error: expect.objectContaining({ name: 'Error', message: 'failure generating report' }),
       }
+    );
+  });
+
+  // Regression test for https://github.com/elastic/kibana/issues/255230 and
+  // https://github.com/elastic/kibana/issues/234877: when the job fails after the stream advances
+  // the doc's seq_no, the failure-status write must refresh the OCC values, else setReportFailed
+  // hits a version conflict and the report stays "processing".
+  it('updates the failure status with fresh seq_no/primary_term when the job fails after the stream has flushed', async () => {
+    const claimSeqNo = 10;
+    const claimPrimaryTerm = 20;
+    // the doc's actual seq_no/primary_term after the stream's writeHead advanced it
+    const freshSeqNo = 42;
+    const freshPrimaryTerm = 21;
+
+    const runTaskFn = jest.fn().mockImplementation(() => {
+      throw new Error('failure generating report');
+    });
+    mockReporting.getExportTypesRegistry().register({
+      id: 'test1',
+      name: 'Test1',
+      setup: jest.fn(),
+      start: jest.fn(),
+      createJob: () => new Promise(() => {}),
+      runTask: runTaskFn,
+      shouldNotifyUsage: () => true,
+      getFeatureUsageName: () => 'Reporting: test1 single export',
+      notifyUsage: jest.fn(),
+      jobContentEncoding: 'base64',
+      jobType: 'test1',
+      validLicenses: [],
+    } as unknown as ExportType);
+
+    const stream = createStreamMock({ seqNo: freshSeqNo, primaryTerm: freshPrimaryTerm });
+    mockGetContentStream.mockImplementation(() => stream);
+
+    // refreshReportSeqNo re-fetches the doc; return the advanced values
+    const { asInternalUser: esClient } = await mockReporting.getEsClient();
+    (esClient.get as unknown as jest.Mock).mockResolvedValue({
+      _id: 'test1',
+      _index: 'cool-reporting-index',
+      _seq_no: freshSeqNo,
+      _primary_term: freshPrimaryTerm,
+      found: true,
+      _source: { jobtype: 'test1', status: 'processing' },
+    });
+
+    const store = await mockReporting.getStore();
+    store.setReportFailed = jest.fn(() =>
+      Promise.resolve({
+        _id: 'test1',
+        jobtype: 'test1',
+        status: 'failed',
+      } as unknown as estypes.UpdateUpdateWriteResponseBase<ReportDocument>)
+    );
+    store.setReportError = jest.fn();
+
+    const task = new RunSingleReportTask({ reporting: mockReporting, config: configType, logger });
+    jest
+      // @ts-expect-error TS compilation fails: this overrides a private method of the RunSingleReportTask instance
+      .spyOn(task, 'claimJob')
+      .mockResolvedValueOnce({
+        _id: 'test1',
+        _index: 'cool-reporting-index',
+        _seq_no: claimSeqNo,
+        _primary_term: claimPrimaryTerm,
+        jobtype: 'test1',
+        status: 'processing',
+      } as never);
+    jest
+      // @ts-expect-error TS compilation fails: this overrides a protected method of the RunSingleReportTask instance
+      .spyOn(task, 'getEventTracker')
+      // @ts-ignore
+      .mockReturnValue(new EventTracker(coreSetupMock.analytics, 'jobId', 'exportTypeId', 'appId'));
+    const mockTaskManager = taskManagerMock.createStart();
+    await task.init(mockTaskManager);
+
+    const taskDef = task.getTaskDefinition();
+    const taskRunner = taskDef.createTaskRunner({
+      taskInstance: {
+        id: 'random-task-id',
+        attempts: 3, // last attempt, so the failure status is written via setReportFailed
+        params: { index: 'cool-reporting-index', id: 'test1', jobtype: 'test1', payload: {} },
+      },
+      fakeRequest: fakeRawRequest,
+    } as unknown as RunContext);
+
+    await expect(() => taskRunner.run()).rejects.toThrowError('failure generating report');
+
+    // the status update must target the doc's current (refreshed) values, not the claim-time ones
+    expect(store.setReportFailed).toHaveBeenCalledWith(
+      expect.objectContaining({
+        _id: 'test1',
+        _seq_no: freshSeqNo,
+        _primary_term: freshPrimaryTerm,
+      }),
+      expect.objectContaining({
+        error: expect.objectContaining({ message: 'failure generating report' }),
+      })
     );
   });
 });

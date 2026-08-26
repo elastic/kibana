@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
 
 export const <%= connector.className %>: ConnectorSpec = {
@@ -7,11 +7,14 @@ export const <%= connector.className %>: ConnectorSpec = {
     displayName: '<%= connector.displayName %>',
     description: '',
     minimumLicense: 'basic',
-    supportedFeatureIds: ['workflows'],
+    supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
-  schema: z.object({}),
+  schema: lazySchema(() => z.object({})),
   actions: {},
   test: {
+    // enabled must be explicitly set to true, otherwise the "Test connector"
+    // button stays disabled in the UI even though a handler is defined.
+    enabled: true,
     handler: async () => ({ ok: true }),
   },
 };

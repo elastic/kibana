@@ -15,10 +15,12 @@ import type {
   UpdateExceptionListItemOptions,
 } from '@kbn/lists-plugin/server';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
+import type { PromiseFromStreams } from '@kbn/lists-plugin/server/services/exception_lists/import_exception_list_and_items';
 import { BaseValidator } from './base_validator';
 import type { ExceptionItemLikeOptions } from '../types';
 import { isValidHash } from '../../../../common/endpoint/service/artifacts/validations';
 import { EndpointArtifactExceptionValidationError } from './errors';
+import { ENTRY_VALUE_MAX_LENGTH } from './constants';
 
 const allowedHashes: Readonly<string[]> = ['file.hash.md5', 'file.hash.sha1', 'file.hash.sha256'];
 const allowedFilePaths: Readonly<string[]> = ['file.path', 'file.path.caseless'];
@@ -63,27 +65,30 @@ const CommonEntrySchema = {
     FileHashField,
     schema.arrayOf(
       schema.string({
+        maxLength: ENTRY_VALUE_MAX_LENGTH,
         validate: (hash: string) =>
           isValidHash(hash) ? undefined : `invalid hash value [${hash}]`,
       }),
-      { minSize: 1 }
+      { minSize: 1, maxSize: 2000 }
     ),
     schema.conditional(
       schema.siblingRef('field'),
       FilePath,
       schema.arrayOf(
         schema.string({
+          maxLength: ENTRY_VALUE_MAX_LENGTH,
           validate: (pathValue: string) =>
             pathValue.length > 0 ? undefined : `invalid path value [${pathValue}]`,
         }),
-        { minSize: 1 }
+        { minSize: 1, maxSize: 2000 }
       ),
       schema.arrayOf(
         schema.string({
+          maxLength: ENTRY_VALUE_MAX_LENGTH,
           validate: (signerValue: string) =>
             signerValue.length > 0 ? undefined : `invalid signer value [${signerValue}]`,
         }),
-        { minSize: 1 }
+        { minSize: 1, maxSize: 2000 }
       )
     )
   ),
@@ -100,13 +105,15 @@ const WindowsSignerEntrySchema = schema.object({
       value: schema.conditional(
         schema.siblingRef('type'),
         schema.literal('match'),
-        schema.string({ minLength: 1 }),
-        schema.arrayOf(schema.string({ minLength: 1 }))
+        schema.string({ minLength: 1, maxLength: ENTRY_VALUE_MAX_LENGTH }),
+        schema.arrayOf(schema.string({ minLength: 1, maxLength: ENTRY_VALUE_MAX_LENGTH }), {
+          maxSize: 2000,
+        })
       ),
       type: schema.oneOf([schema.literal('match'), schema.literal('match_any')]),
       operator: schema.literal('included'),
     }),
-    { minSize: 1 }
+    { minSize: 1, maxSize: 250 }
   ),
 });
 
@@ -155,6 +162,7 @@ const hashEntriesValidation = (entries: BlocklistConditionEntry[]) => {
 // Validate there is only one entry when signer or path and the allowed entries for hashes
 const entriesSchemaOptions = {
   minSize: 1,
+  maxSize: 250,
   validate(entries: BlocklistConditionEntry[]) {
     if (allowedHashes.includes(entries[0].field)) {
       return hashEntriesValidation(entries);
@@ -228,6 +236,24 @@ export class BlocklistValidator extends BaseValidator {
 
   protected async validateHasReadPrivilege(): Promise<void> {
     return super.validateHasPrivilege('canReadBlocklist');
+  }
+
+  async validatePreImport(items: PromiseFromStreams): Promise<void> {
+    await this.validateHasWritePrivilege();
+
+    await this.validatePreImportItems(items, async (item) => {
+      // import specific validations
+      await this.validateImportOwnerSpaceIds(item); // instead of validateCreateOwnerSpaceIds
+      await this.validateCanImportGlobalArtifacts(item); // instead of validateCanCreateGlobalArtifacts
+      await this.removeInvalidPolicyIds(item); // instead of validateByPolicyItem
+
+      // usual validators from pre-create
+      (item.entries as BlocklistConditionEntry[]) = removeDuplicateEntryValues(
+        item.entries as BlocklistConditionEntry[]
+      );
+      await this.validateBlocklistData(item);
+      await this.validateCanCreateByPolicyArtifacts(item);
+    });
   }
 
   async validatePreCreateItem(

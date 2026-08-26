@@ -9,8 +9,11 @@ source .buildkite/scripts/steps/functional/common.sh
 
 CONFIG_PATH="x-pack/solutions/security/plugins/cloud_security_posture/test/scout_cspm_agentless/ui/parallel.playwright.config.ts"
 
-# Run modes for CSPM Agentless tests
-RUN_MODES="--stateful --serverless=security"
+# Run modes for CSPM Agentless tests (each element: --arch X --domain Y)
+RUN_MODES=(
+  '--arch stateful --domain classic'
+  '--arch serverless --domain security_complete'
+)
 
 results=()
 failedConfigs=()
@@ -52,16 +55,16 @@ upload_events_if_available() {
 
 echo "--- CSPM Agentless Scout Tests"
 echo "Config: $CONFIG_PATH"
-echo "Run modes: $RUN_MODES"
+echo "Run modes: ${RUN_MODES[*]}"
 
-for mode in $RUN_MODES; do
+for mode in "${RUN_MODES[@]}"; do
   echo "--- Running CSPM Agentless tests: $mode"
 
   start=$(date +%s)
 
   # Prevent non-zero exit code from breaking the loop
   set +e
-  node scripts/scout.js run-tests "$mode" --config "$CONFIG_PATH" --kibana-install-dir "$KIBANA_BUILD_LOCATION"
+  node scripts/scout run-tests --location local $mode --config "$CONFIG_PATH" --kibanaInstallDir "$KIBANA_BUILD_LOCATION"
   EXIT_CODE=$?
   set -e
 

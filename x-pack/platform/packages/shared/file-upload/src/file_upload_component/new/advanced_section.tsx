@@ -26,11 +26,7 @@ import type { CombinedField } from './combined_fields';
 import { CombinedFieldsForm } from './combined_fields';
 import { useFileUploadContext, UPLOAD_TYPE } from '../../use_file_upload';
 
-interface Props {
-  canCreateDataView?: boolean;
-}
-
-export const AdvancedSection: FC<Props> = ({ canCreateDataView = true }) => {
+export const AdvancedSection: FC = () => {
   const {
     filesStatus,
     fileUploadManager,
@@ -42,6 +38,7 @@ export const AdvancedSection: FC<Props> = ({ canCreateDataView = true }) => {
     dataViewName,
     dataViewNameError,
     indexCreateMode,
+    canCreateDataView,
   } = useFileUploadContext();
   const [combinedFields, setCombinedFields] = useState<CombinedField[]>([]);
   return (

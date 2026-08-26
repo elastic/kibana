@@ -8,39 +8,27 @@
  */
 
 import { useMemo } from 'react';
-import type { MetricField, Dimension } from '../../../../types';
+import { fieldNameWildcardMatcher } from '@kbn/field-utils';
+import type { ParsedMetricItem } from '../../../../types';
 
 export const useMetricFieldsFilter = ({
-  fields,
-  dimensions,
+  metricItems,
   searchTerm,
 }: {
-  fields: MetricField[];
+  metricItems: ParsedMetricItem[];
   searchTerm: string;
-  dimensions: Dimension[];
 }) => {
-  const filteredFields = useMemo(() => {
-    const dimensionFieldNamesSet = new Set(dimensions.map((d) => d.name));
-    const searchTermLower = searchTerm?.toLowerCase();
+  const filteredMetricItems = useMemo(() => {
+    const normalizedSearchTerm = searchTerm.trim().toLowerCase();
 
-    const hasClientFilters = dimensionFieldNamesSet.size > 0 || searchTermLower?.length > 0;
-
-    if (!hasClientFilters) {
-      return fields;
-    }
-
-    return fields.filter((field) => {
-      if (searchTermLower && !field.name.toLowerCase().includes(searchTermLower)) {
-        return false;
+    return metricItems.filter((metricItem) => {
+      if (!normalizedSearchTerm) {
+        return true;
       }
 
-      if (dimensionFieldNamesSet.size > 0) {
-        return field.dimensions.some((d) => dimensionFieldNamesSet.has(d.name));
-      }
-
-      return true;
+      return fieldNameWildcardMatcher({ name: metricItem.metricName }, normalizedSearchTerm);
     });
-  }, [fields, searchTerm, dimensions]);
+  }, [metricItems, searchTerm]);
 
-  return { filteredFields };
+  return { filteredMetricItems };
 };

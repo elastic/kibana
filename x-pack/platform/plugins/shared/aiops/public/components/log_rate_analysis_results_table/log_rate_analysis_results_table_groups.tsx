@@ -11,17 +11,18 @@ import { orderBy, isEqual } from 'lodash';
 
 import type { EuiBasicTableColumn, EuiTableSortingType, Criteria } from '@elastic/eui';
 import {
-  useEuiBackgroundColor,
   EuiBadge,
   EuiBasicTable,
   EuiButtonIcon,
+  EuiIconTip,
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiText,
-  EuiIconTip,
+  EuiToolTip,
   RIGHT_ALIGNMENT,
-  useEuiTheme,
   euiPaletteColorBlind,
+  useEuiBackgroundColor,
+  useEuiTheme,
 } from '@elastic/eui';
 
 import type { estypes } from '@elastic/elasticsearch';
@@ -129,10 +130,8 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
         </EuiScreenReaderOnly>
       ),
       render: (item: GroupTableItem) => (
-        <EuiButtonIcon
-          data-test-subj={'aiopsLogRateAnalysisResultsGroupsTableRowExpansionButton'}
-          onClick={() => toggleDetails(item)}
-          aria-label={
+        <EuiToolTip
+          content={
             itemIdToExpandedRowMap[item.id]
               ? i18n.translate('xpack.aiops.logRateAnalysis.resultsTable.collapseAriaLabel', {
                   defaultMessage: 'Collapse',
@@ -141,8 +140,23 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
                   defaultMessage: 'Expand',
                 })
           }
-          iconType={itemIdToExpandedRowMap[item.id] ? 'arrowDown' : 'arrowRight'}
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            data-test-subj={'aiopsLogRateAnalysisResultsGroupsTableRowExpansionButton'}
+            onClick={() => toggleDetails(item)}
+            aria-label={
+              itemIdToExpandedRowMap[item.id]
+                ? i18n.translate('xpack.aiops.logRateAnalysis.resultsTable.collapseAriaLabel', {
+                    defaultMessage: 'Collapse',
+                  })
+                : i18n.translate('xpack.aiops.logRateAnalysis.resultsTable.expandAriaLabel', {
+                    defaultMessage: 'Expand',
+                  })
+            }
+            iconType={itemIdToExpandedRowMap[item.id] ? 'chevronSingleDown' : 'chevronSingleRight'}
+          />
+        </EuiToolTip>
       ),
       valign: 'top',
     },

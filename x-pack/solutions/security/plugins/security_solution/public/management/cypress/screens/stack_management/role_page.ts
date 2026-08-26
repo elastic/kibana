@@ -88,7 +88,7 @@ export const setKibanaPrivilegeSpace = (spaceId: string) => {
     .click();
 
   cy.getByTestSubj('comboBoxOptionsList spaceSelectorComboBox-optionsList')
-    .find(`button#spaceOption_${spaceId}`)
+    .find(`.euiComboBoxOption#spaceOption_${spaceId}`)
     .click();
 
   // Wait for the selection to be added to the list of selected spaces

@@ -8,6 +8,7 @@
 import { ToolType } from '@kbn/agent-builder-common';
 import type {
   BuiltinToolDefinition,
+  McpToolAnnotations,
   StaticToolRegistration,
   InternalToolDefinition,
 } from '@kbn/agent-builder-server/tools';
@@ -38,6 +39,7 @@ export const convertTool = ({
       tags: tool.tags,
       configuration: {},
       readonly: true,
+      experimental: tool.experimental ?? false,
       confirmation: tool.confirmation ?? { askUser: 'never' },
       isAvailable: async (ctx) => {
         if (tool.availability) {
@@ -49,6 +51,9 @@ export const convertTool = ({
       getSchema: () => tool.schema,
       getHandler: () => tool.handler,
       summarizeToolReturn: tool.summarizeToolReturn,
+      maxResultTokens: tool.maxResultTokens,
+      annotations: tool.annotations,
+      excludeFromMcp: tool.excludeFromMcp,
     };
   }
   if (!isBuiltinDefinition(definition)) {
@@ -65,6 +70,7 @@ export const convertTool = ({
       description: tool.description,
       tags: tool.tags,
       readonly: true,
+      experimental: tool.experimental ?? false,
       confirmation: tool.confirmation ?? { askUser: 'never' },
       isAvailable: (ctx) => {
         if (tool.availability) {
@@ -85,6 +91,9 @@ export const convertTool = ({
         const props = await getDynamicProps();
         return props.getLlmDescription ? props.getLlmDescription(args) : tool.description;
       },
+      summarizeToolReturn: tool.summarizeToolReturn,
+      maxResultTokens: tool.maxResultTokens,
+      annotations: getDefaultAnnotationsForToolType(tool),
     };
   }
 
@@ -98,4 +107,23 @@ export const isBuiltinToolRegistration = (
   tool: StaticToolRegistration
 ): tool is BuiltinToolDefinition => {
   return tool.type === ToolType.builtin;
+};
+
+const READ_ONLY_DEFAULTS: Omit<McpToolAnnotations, 'title'> = {
+  readOnlyHint: true,
+  destructiveHint: false,
+  idempotentHint: true,
+  openWorldHint: false,
+};
+
+const DESTRUCTIVE_DEFAULTS: Omit<McpToolAnnotations, 'title'> = {
+  readOnlyHint: false,
+  destructiveHint: true,
+  idempotentHint: false,
+  openWorldHint: true,
+};
+
+const getDefaultAnnotationsForToolType = (tool: StaticToolRegistration): McpToolAnnotations => {
+  const defaults = tool.type === ToolType.workflow ? DESTRUCTIVE_DEFAULTS : READ_ONLY_DEFAULTS;
+  return { title: tool.id, ...defaults };
 };

@@ -27,7 +27,8 @@ export const streamToResponse = <TToolOptions extends ToolOptions = ToolOptions>
       toArray(),
       map((events) => {
         const messageEvent = events.find(isChatCompletionMessageEvent);
-        const tokenEvent = events.find(isChatCompletionTokenCountEvent);
+        // if several token events are present, the latest reflects the final usage
+        const tokenEvent = events.findLast(isChatCompletionTokenCountEvent);
 
         if (!messageEvent) {
           throw createInferenceInternalError('No message event found');
@@ -41,6 +42,7 @@ export const streamToResponse = <TToolOptions extends ToolOptions = ToolOptions>
           deanonymized_input: messageEvent.deanonymized_input,
           deanonymized_output: messageEvent.deanonymized_output,
           model: tokenEvent?.model,
+          metadata: messageEvent.metadata,
         };
       })
     )

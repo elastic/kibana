@@ -6,6 +6,7 @@
  */
 import type {
   AssistantMessage,
+  ChatCompletionTokenCount,
   Message,
   PromptOptions,
   ToolCall,
@@ -19,10 +20,14 @@ import type {
   UnboundPromptOptions,
 } from '@kbn/inference-common';
 import { MessageRole, ToolChoiceType, type Prompt } from '@kbn/inference-common';
-import { withActiveInferenceSpan, withExecuteToolSpan } from '@kbn/inference-tracing';
-import { trace } from '@opentelemetry/api';
+import {
+  withActiveInferenceSpan,
+  withExecuteToolSpan,
+  markToolSpanAsError,
+} from '@kbn/inference-tracing';
+
 import { omit, partition } from 'lodash';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import {
   createCompleteToolCall,
   createCompleteToolCallResponse,
@@ -37,6 +42,30 @@ import type {
   ReasoningPromptResponse,
   ReasoningPromptResponseOf,
 } from './types';
+
+/**
+ * The reasoning loop issues one LLM call per step, so the caller's token
+ * accounting has to be the sum over every step, not just the final one.
+ */
+function addTokens(
+  accumulated: ChatCompletionTokenCount | undefined,
+  added: ChatCompletionTokenCount | undefined
+): ChatCompletionTokenCount | undefined {
+  if (!accumulated || !added) {
+    return accumulated ?? added;
+  }
+
+  const thinking = (accumulated.thinking ?? 0) + (added.thinking ?? 0);
+  const cached = (accumulated.cached ?? 0) + (added.cached ?? 0);
+
+  return {
+    prompt: accumulated.prompt + added.prompt,
+    completion: accumulated.completion + added.completion,
+    total: accumulated.total + added.total,
+    ...(accumulated.thinking !== undefined || added.thinking !== undefined ? { thinking } : {}),
+    ...(accumulated.cached !== undefined || added.cached !== undefined ? { cached } : {}),
+  };
+}
 
 export function executeAsReasoningAgent<
   TPrompt extends Prompt,
@@ -88,13 +117,30 @@ export async function executeAsReasoningAgent(
       finalToolChoice?: ToolChoice;
     }
 ): Promise<ReasoningPromptResponse> {
-  const { inferenceClient, maxSteps = 10, power = 'medium', toolCallbacks } = options;
+  const {
+    inferenceClient,
+    maxDurationMs,
+    maxSteps = 10,
+    power = 'medium',
+    toolCallbacks,
+    abortSignal,
+  } = options;
+  const startTime = Date.now();
 
   async function callTools(toolCalls: ToolCall[]): Promise<ToolMessage[]> {
     return await Promise.all(
       toolCalls.map(async (toolCall): Promise<ToolMessage> => {
         if (isPlanningToolName(toolCall.function.name)) {
           throw new Error(`Unexpected planning tool call ${toolCall.function.name}`);
+        }
+
+        if (abortSignal?.aborted) {
+          return {
+            response: { error: new Error('Request was aborted'), data: undefined },
+            name: toolCall.function.name,
+            toolCallId: toolCall.toolCallId,
+            role: MessageRole.Tool,
+          };
         }
 
         const callback = toolCallbacks[toolCall.function.name];
@@ -107,13 +153,16 @@ export async function executeAsReasoningAgent(
               toolCallId: toolCall.toolCallId,
             },
           },
-          () => callback(toolCall)
-        ).catch((error): ToolCallbackResult => {
-          trace.getActiveSpan()?.recordException(error);
-          return {
-            response: { error, data: undefined },
-          };
-        });
+          (span) =>
+            callback(toolCall).catch((error): ToolCallbackResult => {
+              if (span) {
+                markToolSpanAsError(span, { error });
+              }
+              return {
+                response: { error, data: undefined },
+              };
+            })
+        );
 
         return {
           response: response.response,
@@ -130,11 +179,17 @@ export async function executeAsReasoningAgent(
     messages: givenMessages,
     stepsLeft,
     temperature,
+    tokensSoFar,
   }: {
     messages: Message[];
     stepsLeft: number;
     temperature?: number;
+    tokensSoFar?: ChatCompletionTokenCount;
   }): Promise<ReasoningPromptResponse> {
+    if (abortSignal?.aborted) {
+      throw new Error('Request was aborted');
+    }
+
     const lastAssistantMessage = givenMessages.findLast(
       (msg): msg is AssistantMessage => msg.role === MessageRole.Assistant
     );
@@ -144,7 +199,10 @@ export async function executeAsReasoningAgent(
         message.role === MessageRole.Tool && isPlanningToolName(message.name)
     )?.name;
 
-    const shouldComplete = stepsLeft <= 0 || lastSystemToolCallName === 'complete';
+    const isOverDurationBudget =
+      maxDurationMs !== undefined && Date.now() - startTime >= maxDurationMs;
+    const shouldComplete =
+      stepsLeft <= 0 || lastSystemToolCallName === 'complete' || isOverDurationBudget;
 
     // reason when:
     // - not completing
@@ -231,6 +289,7 @@ export async function executeAsReasoningAgent(
       stream: false,
       temperature,
       toolChoice,
+      abortSignal,
       prevMessages: formatMessages({
         messages: prevMessages,
         power,
@@ -238,6 +297,8 @@ export async function executeAsReasoningAgent(
       }),
       stopSequences: [END_INTERNAL_REASONING_MARKER],
     });
+
+    const tokens = addTokens(tokensSoFar, response.tokens);
 
     let content = response.content;
 
@@ -296,7 +357,7 @@ export async function executeAsReasoningAgent(
       // completing
       return {
         content: response.content,
-        tokens: response.tokens,
+        tokens,
         toolCalls: response.toolCalls.filter(
           (toolCall) => toolCall.function.name === finalToolCallName
         ),
@@ -331,6 +392,7 @@ export async function executeAsReasoningAgent(
       return innerCallPromptUntil({
         messages: prevMessages.concat(assistantMessage, ...allToolMessages),
         stepsLeft: 0,
+        tokensSoFar: tokens,
       });
     }
 
@@ -341,6 +403,7 @@ export async function executeAsReasoningAgent(
         ...(nonSystemToolCalls.length ? createReasonToolCall() : [])
       ),
       stepsLeft: stepsLeft - 1,
+      tokensSoFar: tokens,
     });
   }
 

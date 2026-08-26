@@ -110,7 +110,7 @@ export function getSyntheticsKPIConfig({ dataView }: ConfigProps): SeriesConfig 
         columnFilters: [
           {
             language: 'kuery',
-            query: `${FINAL_SUMMARY_KQL} and summary.down > 0`,
+            query: `summary.down > 0`,
           },
         ],
       },

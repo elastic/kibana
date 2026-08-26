@@ -11,6 +11,7 @@ export function CrossClusterReplicationPageProvider({ getService }: FtrProviderC
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const comboBox = getService('comboBox');
+  const find = getService('find');
 
   return {
     async appTitleText() {
@@ -66,6 +67,22 @@ export function CrossClusterReplicationPageProvider({ getService }: FtrProviderC
       await comboBox.setCustom('comboBoxInput', indexPattern);
       await testSubjects.click('submitButton');
       await retry.waitForWithTimeout('flyout title to show up', 20000, async () => {
+        return await testSubjects.isDisplayed('settingsValues');
+      });
+    },
+    async openAutoFollowerPatternDetails(name: string) {
+      await retry.waitForWithTimeout('auto-follow pattern to be listed', 20000, async () => {
+        const links = await find.allByCssSelector('[data-test-subj="autoFollowPatternLink"]');
+        for (const link of links) {
+          if ((await link.getVisibleText()) === name) {
+            await link.click();
+            return true;
+          }
+        }
+        return false;
+      });
+
+      await retry.waitForWithTimeout('auto-follow pattern details to show up', 20000, async () => {
         return await testSubjects.isDisplayed('settingsValues');
       });
     },

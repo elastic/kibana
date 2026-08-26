@@ -7,14 +7,28 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 
-export interface LogDocument {
+const LOG_DOCUMENT_FIELDS = [
+  '@timestamp',
+  'message',
+  'log.level',
+  'service.name',
+  'trace.id',
+  'span.id',
+  'http.response.status_code',
+  'error.exception.message',
+] as const;
+
+type FieldKeys = (typeof LOG_DOCUMENT_FIELDS)[number];
+
+export type LogDocument = {
+  'log.level'?: string;
   '@timestamp'?: string;
-  service?: {
-    name?: string;
-    environment?: string;
-  };
-  [key: string]: unknown;
-}
+  message?: string;
+  'http.response.status_code'?: number;
+  'error.exception.message'?: string;
+} & {
+  [K in FieldKeys]?: unknown;
+};
 
 export const getLogDocumentById = async ({
   esClient,
@@ -25,10 +39,26 @@ export const getLogDocumentById = async ({
   index: string;
   id: string;
 }): Promise<LogDocument | undefined> => {
-  const result = await esClient.get<LogDocument>({
+  const result = await esClient.search({
     index,
-    id,
+    size: 1,
+    _source: false,
+    fields: [...LOG_DOCUMENT_FIELDS],
+    query: {
+      ids: { values: [id] },
+    },
   });
 
-  return result._source;
+  const hit = result.hits.hits[0];
+
+  if (!hit?.fields) {
+    return undefined;
+  }
+
+  return Object.fromEntries(
+    Object.entries(hit.fields).map(([key, value]) => [
+      key,
+      Array.isArray(value) && value.length === 1 ? value[0] : value,
+    ])
+  ) as LogDocument;
 };

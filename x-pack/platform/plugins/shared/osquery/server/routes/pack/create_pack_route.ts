@@ -6,35 +6,45 @@
  */
 
 import moment from 'moment-timezone';
+import { v4 as uuidv4 } from 'uuid';
 import { set } from '@kbn/safer-lodash-set';
-import { has, unset, some, mapKeys } from 'lodash';
-import { produce } from 'immer';
+import { has, unset, some, mapKeys, mapValues } from 'lodash';
+import { produce } from 'immer-v9';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
-import {
-  LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
-  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-} from '@kbn/fleet-plugin/common';
+import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type { IRouter } from '@kbn/core/server';
 
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import type { CreatePackRequestBodySchema } from '../../../common/api';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import { API_VERSIONS } from '../../../common/constants';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
-import { OSQUERY_INTEGRATION_NAME } from '../../../common';
+import type { StartPlugins } from '../../types';
 import { PLUGIN_ID } from '../../../common';
 import { packSavedObjectType } from '../../../common/types';
 import {
   convertSOQueriesToPackConfig,
   convertPackQueriesToSO,
+  fetchAllPackagePolicies,
   findMatchingShards,
   getInitialPolicies,
+  groupAgentPolicyIdsByPackagePolicy,
+  makePackKey,
+  resolveSharedPackagePolicyShard,
+  validatePackScheduleFields,
+  buildScheduleResponseSlice,
+  stripPerQueryRruleFields,
+  convergePerQueryIntervals,
 } from './utils';
 import { convertShardsToArray } from '../utils';
 import type { PackSavedObject } from '../../common/types';
 import type { PackResponseData } from './types';
+import type { PackQueryInput } from './utils';
 import { createPackRequestBodySchema } from '../../../common/api';
 import { getUserInfo } from '../../lib/get_user_info';
+import { escapeFilterValue } from '../utils/generate_copy_name';
+import { createPackResponseSchema } from './response_schemas';
 
 type PackSavedObjectLimited = Omit<PackSavedObject, 'saved_object_id' | 'references'>;
 
@@ -59,6 +69,11 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
               CreatePackRequestBodySchema
             >(createPackRequestBodySchema),
           },
+          response: {
+            200: {
+              body: () => createPackResponseSchema,
+            },
+          },
         },
       },
       async (context, request, response) => {
@@ -70,21 +85,82 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           request
         );
 
+        const spaceId = osqueryContext?.service?.getActiveSpace
+          ? (await osqueryContext.service.getActiveSpace(request))?.id || DEFAULT_SPACE_ID
+          : DEFAULT_SPACE_ID;
+
         const agentPolicyService = osqueryContext.service.getAgentPolicyService();
 
         const packagePolicyService = osqueryContext.service.getPackagePolicyService();
 
+        const [, startPlugins] = await osqueryContext.getStartServices();
         const currentUser = await getUserInfo({
           request,
-          security: osqueryContext.security,
+          security: (startPlugins as StartPlugins).security,
           logger: osqueryContext.logFactory.get('pack'),
         });
         const username = currentUser?.username ?? undefined;
+        const profileUid = currentUser?.profile_uid ?? undefined;
 
-        const { name, description, queries, enabled, policy_ids, shards = {} } = request.body;
+        const isRruleFeatureEnabled = osqueryContext.experimentalFeatures.rruleScheduling;
+
+        const {
+          name,
+          description,
+          queries: rawQueries,
+          enabled,
+          policy_ids,
+          shards = {},
+          // Pack-level schedule fields (PR C). Stripped when the feature
+          // flag is off so a request that smuggles them in still produces
+          // a legacy-shape SO and Fleet config.
+          schedule_type: rawScheduleType,
+          interval: rawInterval,
+          rrule_schedule: rawRruleSchedule,
+        } = request.body;
+
+        const scheduleType = isRruleFeatureEnabled ? rawScheduleType : undefined;
+        const packInterval = isRruleFeatureEnabled ? rawInterval : undefined;
+        const rruleSchedule = isRruleFeatureEnabled ? rawRruleSchedule : undefined;
+
+        // Strip per-query RRULE override fields when the flag is off (request-
+        // boundary gate). The wire-boundary gate in convertSOQueriesToPackConfig
+        // is defense in depth — this gate keeps RRULE state off the SO entirely.
+        const gatedQueries = isRruleFeatureEnabled
+          ? rawQueries
+          : mapValues(rawQueries, (rawQuery) => {
+              const {
+                schedule_type: _scheduleType,
+                rrule_schedule: _rruleSchedule,
+                ...rest
+              } = rawQuery as PackQueryInput;
+
+              return rest;
+            });
+
+        const convergedQueries = gatedQueries
+          ? convergePerQueryIntervals(gatedQueries as Record<string, PackQueryInput>, scheduleType)
+          : gatedQueries;
+
+        const scheduleErr = validatePackScheduleFields({
+          packScheduleType: scheduleType,
+          packInterval,
+          packRrule: rruleSchedule,
+          queries: convergedQueries as Record<string, PackQueryInput>,
+        });
+        if (scheduleErr) {
+          return response.badRequest({ body: { message: scheduleErr } });
+        }
+
+        const now = moment().toISOString();
+        const queries = mapValues(convergedQueries, (queryData) => ({
+          ...queryData,
+          schedule_id: uuidv4(),
+          start_date: now,
+        })) as Record<string, PackQueryInput>;
         const conflictingEntries = await spaceScopedClient.find({
           type: packSavedObjectType,
-          filter: `${packSavedObjectType}.attributes.name: "${name}"`,
+          filter: `${packSavedObjectType}.attributes.name: "${escapeFilterValue(name)}"`,
         });
 
         if (
@@ -94,15 +170,16 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           return response.conflict({ body: `Pack with name "${name}" already exists.` });
         }
 
-        const { items: packagePolicies } = (await packagePolicyService?.list(spaceScopedClient, {
-          kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
-          perPage: 1000,
-          page: 1,
-        })) ?? { items: [] };
+        // Drain ALL policies via keyset `fetchAllItems`; an offset-capped
+        // `list({ perPage: 1000 })` would drop attachments on policies past 1000.
+        const packagePolicies = await fetchAllPackagePolicies(
+          packagePolicyService,
+          spaceScopedClient
+        );
 
         const { policiesList, invalidPolicies } = getInitialPolicies(
           packagePolicies,
-          policy_ids,
+          policy_ids ?? [],
           shards
         );
         if (invalidPolicies?.length) {
@@ -132,9 +209,22 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
             enabled,
             created_at: moment().toISOString(),
             created_by: username,
+            created_by_profile_uid: profileUid,
             updated_at: moment().toISOString(),
             updated_by: username,
+            updated_by_profile_uid: profileUid,
             shards: convertShardsToArray(shards),
+            // Pack-level schedule fields. Stamped only when the feature flag
+            // is on — the gated `scheduleType` is `undefined` otherwise. The
+            // mode/value coupling below is already enforced by
+            // `validatePackScheduleFields`; the redundant null/defined checks
+            // are defense in depth so a missed validator branch can never
+            // write a mode-mismatched pair to the SO.
+            ...(scheduleType ? { schedule_type: scheduleType } : {}),
+            ...(scheduleType === 'interval' && packInterval !== undefined
+              ? { interval: packInterval }
+              : {}),
+            ...(scheduleType === 'rrule' && rruleSchedule ? { rrule_schedule: rruleSchedule } : {}),
           },
           {
             references,
@@ -143,13 +233,19 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         );
 
         if (enabled && policiesList.length) {
+          // Group by resolved package-policy id first: a package policy's
+          // `policy_ids` can span multiple of this pack's agent policies, so
+          // writing per-agent-policy-id (as before) could issue concurrent
+          // updates against the same package policy from the same stale base.
+          const packagePolicyWriteTargets = groupAgentPolicyIdsByPackagePolicy(
+            policiesList,
+            packagePolicies
+          );
+
           await Promise.all(
-            policiesList.map((agentPolicyId) => {
-              const packagePolicy = packagePolicies.find((policy) =>
-                policy.policy_ids.includes(agentPolicyId)
-              );
-              if (packagePolicy) {
-                return packagePolicyService?.update(
+            Array.from(packagePolicyWriteTargets.values()).map(
+              ({ packagePolicy, agentPolicyIds }) =>
+                packagePolicyService?.update(
                   spaceScopedClient,
                   esClient,
                   packagePolicy.id,
@@ -159,16 +255,33 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                       set(draft, 'inputs[0].streams', []);
                     }
 
-                    set(draft, `inputs[0].config.osquery.value.packs.${packSO.attributes.name}`, {
-                      shard: policyShards[agentPolicyId] ?? 100,
-                      queries: convertSOQueriesToPackConfig(queries),
+                    const packKey = makePackKey(packSO.attributes.name, spaceId);
+                    const { queries: builtQueries, ...packDefaults } = convertSOQueriesToPackConfig(
+                      queries,
+                      {
+                        spaceId,
+                        packSchedule: {
+                          schedule_type: scheduleType,
+                          interval: packInterval,
+                          rrule_schedule: rruleSchedule,
+                        },
+                        isRruleFeatureEnabled,
+                      }
+                    );
+                    set(draft, `inputs[0].config.osquery.value.packs.${packKey}`, {
+                      shard: resolveSharedPackagePolicyShard(agentPolicyIds, policyShards),
+                      pack_id: packSO.id,
+                      // Human-readable name osquerybeat stamps on scheduled
+                      // result docs (config.Pack.pack_name contract).
+                      pack_name: packSO.attributes.name,
+                      ...packDefaults,
+                      queries: builtQueries,
                     });
 
                     return draft;
                   })
-                );
-              }
-            })
+                )
+            )
           );
         }
 
@@ -179,16 +292,23 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         const data: PackResponseData = {
           name: attributes.name,
           description: attributes.description,
-          queries: attributes.queries,
+          queries: stripPerQueryRruleFields(attributes.queries, isRruleFeatureEnabled),
           version: attributes.version,
           enabled: attributes.enabled,
           created_at: attributes.created_at,
           created_by: attributes.created_by,
+          created_by_profile_uid: attributes.created_by_profile_uid,
           updated_at: attributes.updated_at,
           updated_by: attributes.updated_by,
+          updated_by_profile_uid: attributes.updated_by_profile_uid,
           policy_ids: attributes.policy_ids,
           shards: attributes.shards,
           saved_object_id: packSO.id,
+          // Discriminated response — see buildScheduleResponseSlice.
+          ...buildScheduleResponseSlice(
+            { schedule_type: scheduleType, interval: packInterval, rrule_schedule: rruleSchedule },
+            isRruleFeatureEnabled
+          ),
         };
 
         return response.ok({

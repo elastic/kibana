@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { RuleIntervalFrom, RuleIntervalTo } from './common_attributes.gen';
 import { TimeDuration as TimeDurationSchema } from './time_duration';
 

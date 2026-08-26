@@ -18,7 +18,7 @@ import { shouldShowFieldFilterInOutActions } from '@kbn/unified-doc-viewer/utils
 import type { DataTableContext } from '../table_context';
 import { UnifiedDataTableContext } from '../table_context';
 import { copyValueToClipboard } from '../utils/copy_value_to_clipboard';
-import type { ValueToStringConverter } from '../types';
+import type { SourceDisplayMode, ValueToStringConverter } from '../types';
 
 function onFilterCell(
   context: DataTableContext,
@@ -57,7 +57,7 @@ export const FilterInBtn = ({
       onClick={() => {
         onFilterCell(context, rowIndex, columnId, '+', field, dataGridRef);
       }}
-      iconType="plusInCircle"
+      iconType="plusCircle"
       aria-label={buttonTitle}
       title={buttonTitle}
       data-test-subj="filterForButton"
@@ -89,7 +89,7 @@ export const FilterOutBtn = ({
       onClick={() => {
         onFilterCell(context, rowIndex, columnId, '-', field, dataGridRef);
       }}
-      iconType="minusInCircle"
+      iconType="minusCircle"
       aria-label={buttonTitle}
       title={buttonTitle}
       data-test-subj="filterOutButton"
@@ -104,7 +104,8 @@ export const FilterOutBtn = ({
 export function buildCopyValueButton(
   { Component, rowIndex, columnId }: EuiDataGridColumnCellActionProps,
   toastNotifications: ToastsStart,
-  valueToStringConverter: ValueToStringConverter
+  valueToStringConverter: ValueToStringConverter,
+  sourceDisplayMode: SourceDisplayMode
 ) {
   const buttonTitle = i18n.translate('unifiedDataTable.grid.copyClipboardButtonTitle', {
     defaultMessage: 'Copy value of {column}',
@@ -121,7 +122,7 @@ export function buildCopyValueButton(
           toastNotifications,
         });
       }}
-      iconType="copyClipboard"
+      iconType="copy"
       aria-label={buttonTitle}
       title={buttonTitle}
       data-test-subj="copyClipboardButton"
@@ -137,6 +138,7 @@ export function buildCellActions(
   field: DataViewField,
   toastNotifications: ToastsStart,
   valueToStringConverter: ValueToStringConverter,
+  sourceDisplayMode: SourceDisplayMode,
   onFilter?: DocViewFilterFn,
   dataGridRef?: MutableRefObject<EuiDataGridRefProps | null>,
   hideFilteringOnComputedColumns?: boolean
@@ -168,7 +170,8 @@ export function buildCellActions(
       buildCopyValueButton(
         { Component, rowIndex, columnId } as EuiDataGridColumnCellActionProps,
         toastNotifications,
-        valueToStringConverter
+        valueToStringConverter,
+        sourceDisplayMode
       ),
   ];
 }

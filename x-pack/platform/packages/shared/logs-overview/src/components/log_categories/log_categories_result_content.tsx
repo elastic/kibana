@@ -9,7 +9,7 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { StateFrom } from 'xstate5';
+import type { StateFrom } from 'xstate';
 import type { categoryDetailsService } from '../../services/category_details_service';
 import type { LogCategory } from '../../types';
 import type { ResolvedIndexNameLogsSourceConfiguration } from '../../utils/logs_source';

@@ -1,0 +1,8 @@
+prs:
+- https://github.com/elastic/kibana/pull/273410
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-07-02
+title: Improve authentication options for Agent Builder connectors
+description: "Recommended auth methods are listed first and marked with a \"Recommended\" badge, and legacy options are hidden when creating new connectors while remaining valid for existing ones."

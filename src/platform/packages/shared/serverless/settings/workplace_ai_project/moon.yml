@@ -4,20 +4,20 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/serverless-workplace-ai-settings'
-type: unknown
+layer: unknown
 owners:
-  defaultOwner: '@elastic/search-kibana'
-toolchain:
+  defaultOwner: '@elastic/search-ml-ux'
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/serverless-workplace-ai-settings'
+  title: '@kbn/serverless-workplace-ai-settings'
   description: Moon project for @kbn/serverless-workplace-ai-settings
   channel: ''
-  owner: '@elastic/search-kibana'
-  metadata:
-    sourceRoot: src/platform/packages/shared/serverless/settings/workplace_ai_project
-dependsOn: []
+  owner: '@elastic/search-ml-ux'
+  sourceRoot: src/platform/packages/shared/serverless/settings/workplace_ai_project
+dependsOn:
+  - '@kbn/management-settings-ids'
 tags:
   - shared-common
   - package

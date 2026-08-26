@@ -4,21 +4,21 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/setup-node-env'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-operations'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/setup-node-env'
+  title: '@kbn/setup-node-env'
   description: Moon project for @kbn/setup-node-env
   channel: ''
   owner: '@elastic/kibana-operations'
-  metadata:
-    sourceRoot: src/setup_node_env
+  sourceRoot: src/setup_node_env
 dependsOn:
-  - '@kbn/babel-register'
+  - '@kbn/repo-info'
+  - '@kbn/swc-register'
   - '@kbn/security-hardening'
 tags:
   - shared-common
@@ -34,16 +34,6 @@ fileGroups:
     - '*.js'
     - '*.ts'
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

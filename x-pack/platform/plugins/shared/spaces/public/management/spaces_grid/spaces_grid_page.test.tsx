@@ -228,6 +228,57 @@ describe('SpacesGridPage', () => {
     ]);
   });
 
+  it('re-applies an in-flight search when loadGrid resolves', async () => {
+    let resolveSpaces: (value: typeof spaces) => void = () => {};
+    const spacesPromise = new Promise<typeof spaces>((resolve) => {
+      resolveSpaces = resolve;
+    });
+
+    const deferredSpacesManager = spacesManagerMock.create();
+    deferredSpacesManager.getSpaces = jest.fn().mockReturnValue(spacesPromise);
+    deferredSpacesManager.getActiveSpace.mockResolvedValue(spaces[0]);
+
+    const wrapper = shallowWithIntl(
+      <SpacesGridPage
+        spacesManager={deferredSpacesManager}
+        getFeatures={featuresStart.getFeatures}
+        notifications={notificationServiceMock.createStartContract()}
+        getUrlForApp={getUrlForApp}
+        history={history}
+        capabilities={{
+          navLinks: {},
+          management: {},
+          catalogue: {},
+          spaces: { manage: true },
+        }}
+        allowSolutionVisibility={false}
+        {...spacesGridCommonProps}
+      />
+    );
+
+    const page = wrapper.instance() as SpacesGridPage;
+    act(() => {
+      page.onQueryChange({
+        query: { text: 'Custom 1' },
+      } as Parameters<SpacesGridPage['onQueryChange']>[0]);
+    });
+    wrapper.update();
+
+    await act(async () => {
+      resolveSpaces(spaces);
+      await spacesPromise;
+    });
+    wrapper.update();
+
+    expect(wrapper.find('EuiInMemoryTable').prop('items')).toEqual([
+      {
+        id: 'custom-1',
+        name: 'Custom 1',
+        disabledFeatures: [],
+      },
+    ]);
+  });
+
   it('renders a "current" badge for the current space', async () => {
     const spacesWithCurrent = [
       { id: 'default', name: 'Default', disabledFeatures: [], _reserved: true },

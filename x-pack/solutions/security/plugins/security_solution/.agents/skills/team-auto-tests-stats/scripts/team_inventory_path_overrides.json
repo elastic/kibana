@@ -1,0 +1,11 @@
+{
+  "@elastic/security-entity-analytics": [
+    "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/entity_analytics"
+  ],
+  "@elastic/security-threat-hunting": [
+    "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/flyout",
+    "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/investigations",
+    "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/navigation",
+    "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/global.setup.ts"
+  ]
+}

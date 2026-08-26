@@ -52,4 +52,23 @@ describe('getRedirectToTransactionDetailPageUrl', () => {
       );
     });
   });
+
+  describe('with environment', () => {
+    it('includes environment in the url when provided', () => {
+      const url = getRedirectToTransactionDetailPageUrl({
+        transaction,
+        rangeFrom: '2020-01-01T00:02:00.000Z',
+        rangeTo: '2020-01-01T00:17:59.999Z',
+        environment: 'production',
+      });
+
+      expect(parse(url, true).query.environment).toBe('production');
+    });
+
+    it('omits environment from the url when not provided', () => {
+      const url = getRedirectToTransactionDetailPageUrl({ transaction });
+
+      expect(parse(url, true).query.environment).toBeUndefined();
+    });
+  });
 });

@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import { encode } from '@kbn/rison';
-import { expandableFlyoutStateFromEventMeta } from '../../../flyout/document_details/shared/hooks/url/expandable_flyout_state_from_event_meta';
+import { DocumentDetailsRightPanelKey } from '../../../flyout/document_details/shared/constants/panel_keys';
+import {
+  expandableFlyoutStateRightPanelOnly,
+  resolveFlyoutUrlParam,
+} from '../../../flyout/shared/utils/expandable_flyout_url_state';
+import { encodeFlyoutV2UrlParam } from '../../../flyout_v2/shared/url_state/flyout_v2_url_param';
 
 export interface ResolveFlyoutParamsConfig {
   index: string;
@@ -22,12 +26,30 @@ export interface ResolveFlyoutParamsConfig {
 export const resolveFlyoutParams = (
   { index, alertId }: ResolveFlyoutParamsConfig,
   currentParamsString: string | null
-) => {
+) =>
+  resolveFlyoutUrlParam(
+    currentParamsString,
+    expandableFlyoutStateRightPanelOnly({
+      id: DocumentDetailsRightPanelKey,
+      params: {
+        id: alertId,
+        indexName: index,
+        scopeId: 'alerts-page',
+      },
+    })
+  );
+
+/**
+ * Resolves the flyoutV2 URL parameter for the new flyout system.
+ * If the URL already carries a flyoutV2 param (e.g. from a prior share link), preserves it.
+ * Otherwise encodes a document descriptor for the given alert.
+ */
+export const resolveFlyoutV2Params = (
+  { index, alertId }: ResolveFlyoutParamsConfig,
+  currentParamsString: string | null
+): string => {
   if (currentParamsString) {
     return currentParamsString;
   }
-
-  return encode(
-    expandableFlyoutStateFromEventMeta({ index, eventId: alertId, scopeId: 'alerts-page' })
-  );
+  return encodeFlyoutV2UrlParam([{ kind: 'document', documentId: alertId, indexName: index }]);
 };

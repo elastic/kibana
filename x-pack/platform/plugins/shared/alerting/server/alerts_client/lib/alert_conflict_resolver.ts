@@ -14,6 +14,7 @@ import type {
 
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import {
+  ALERT_INSTANCE_ID,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
@@ -82,6 +83,8 @@ async function resolveAlertConflicts_(params: ResolveAlertConflictsParams): Prom
   const conflictRequest = getConflictRequest(bulkRequest, bulkResponse);
   if (conflictRequest.length === 0) return;
 
+  logBulkWriteConflicts(logger, logTags, ruleInfoMessage, conflictRequest);
+
   // get the fresh versions of those docs
   const freshDocs = await getFreshDocs(esClient, conflictRequest);
 
@@ -127,6 +130,23 @@ async function resolveAlertConflicts_(params: ResolveAlertConflictsParams): Prom
   }
 }
 
+// log a warning for each alert write conflict
+function logBulkWriteConflicts(
+  logger: Logger,
+  logTags: { tags: string[] },
+  ruleInfoMessage: string,
+  conflictRequest: NormalizedBulkRequest[]
+): void {
+  for (const req of conflictRequest) {
+    const alertUuid = req.op?.index?._id || 'unknown';
+    const instanceId = get(req.doc, ALERT_INSTANCE_ID) || 'unknown';
+    logger.warn(
+      `Alert bulk write conflict ${ruleInfoMessage}: alert UUID '${alertUuid}', instance ID '${instanceId}'`,
+      logTags
+    );
+  }
+}
+
 interface MakeBulkRequestResponse {
   bulkRequest: BulkRequest;
   bulkResponse?: BulkResponse;
@@ -156,7 +176,7 @@ async function refreshFieldsInDocs(
   freshResponses: MgetResponseItem[]
 ) {
   for (const [conflictRequest, freshResponse] of zip(conflictRequests, freshResponses)) {
-    if (!conflictRequest?.op.index || !freshResponse) continue;
+    if (!conflictRequest?.op?.index || !freshResponse) continue;
 
     // @ts-expect-error @elastic/elasticsearch _source is not in the type!
     const freshDoc = freshResponse._source;
@@ -191,7 +211,7 @@ async function refreshFieldsInDocs(
 /** Update the OCC info in the conflict request with the fresh info. */
 async function updateOCC(conflictRequests: NormalizedBulkRequest[], freshDocs: MgetResponseItem[]) {
   for (const [req, freshDoc] of zip(conflictRequests, freshDocs)) {
-    if (!req?.op.index || !freshDoc) continue;
+    if (!req?.op?.index || !freshDoc) continue;
 
     // @ts-expect-error @elastic/elasticsearch _seq_no is not in the type!
     const seqNo: number | undefined = freshDoc._seq_no;
@@ -214,7 +234,7 @@ async function getFreshDocs(
   const docs: Array<{ _id: string; _index: string }> = [];
 
   conflictRequests.forEach((req) => {
-    const [id, index] = [req.op.index?._id, req.op.index?._index];
+    const [id, index] = [req.op?.index?._id, req.op?.index?._index];
     if (!id || !index) return;
 
     docs.push({ _id: id, _index: index });
@@ -262,7 +282,7 @@ function normalizeRequest(bulkRequest: BulkRequest) {
   let index = 0;
   while (index < bulkRequest.operations.length) {
     // the "op" data
-    const op = bulkRequest.operations[index] as BulkOperationContainer;
+    const op = bulkRequest.operations[index] as NonNullable<BulkOperationContainer>;
 
     // now the "doc" data, if there is any (none for delete)
     if (op.create || op.index || op.update) {

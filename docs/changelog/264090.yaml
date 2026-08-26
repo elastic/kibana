@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/264090
+type: feature
+products:
+- product: cloud-serverless
+  target: 2026-07-02
+areas:
+- Alerting and reporting
+title: Allow users to snooze and unsnooze individual alert instances
+description: "Users can snooze individual alert instances with optional time-based expiry, field-change, severity-change, or severity-equals conditions, and unsnooze them later. A new `kibana.alert.snoozed` field is written to alert documents."

@@ -6,8 +6,10 @@
  */
 
 import type { SavedObject, SavedObjectsBulkResponse } from '@kbn/core/server';
-import { get, isEmpty } from 'lodash';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
+import { get, isEmpty, pickBy } from 'lodash';
 import type {
+  CaseAssignee,
   CaseAssignees,
   CaseCustomField,
   CaseCustomFields,
@@ -26,6 +28,7 @@ import { isUserActionType } from '../../../../common/utils/user_actions';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import { BuilderFactory } from '../builder_factory';
 import type {
+  AddSyncedAlertsCountToUserActionsParams,
   BuildUserActionsDictParams,
   BuilderParameters,
   BulkCreateAttachmentUserAction,
@@ -46,8 +49,10 @@ import type {
 import {
   isAssigneesArray,
   isCaseSettings,
+  isCaseTemplate,
   isCustomFieldsArray,
   isStringArray,
+  isExtendedFields,
 } from '../type_guards';
 import type { IndexRefresh } from '../../types';
 import { UserActionAuditLogger } from '../audit_logger';
@@ -61,14 +66,16 @@ export class UserActionPersister {
   private readonly auditLogger: UserActionAuditLogger;
 
   constructor(private readonly context: ServiceContext) {
-    this.builderFactory = new BuilderFactory({
-      persistableStateAttachmentTypeRegistry: this.context.persistableStateAttachmentTypeRegistry,
-    });
+    this.builderFactory = new BuilderFactory();
 
     this.auditLogger = new UserActionAuditLogger(this.context.auditLogger);
   }
 
-  public buildUserActions({ updatedCases, user }: BuildUserActionsDictParams): UserActionsDict {
+  public buildUserActions({
+    updatedCases,
+    user,
+    templateNamesByKey,
+  }: BuildUserActionsDictParams): UserActionsDict {
     return updatedCases.cases.reduce<UserActionsDict>((acc, updatedCase) => {
       const originalCase = updatedCase.originalCase;
 
@@ -81,12 +88,47 @@ export class UserActionPersister {
 
       const userActions: UserActionEvent[] = [];
       const updatedFields = Object.keys(updatedCase.updatedAttributes);
+      // Templates v2 can mirror a customFields edit into extended_fields in the same patch (see
+      // replace_custom_field.ts / bulk_update.ts), landing both keys in `updatedAttributes`
+      // together. Surfacing two activity-log entries for what the user experiences as one edit is
+      // redundant, so the customFields entries whose paired storage key the extended_fields
+      // action already records are suppressed (#282474) — see getSuppressedCustomFieldKeys.
+      const suppressedCustomFieldKeys = this.getSuppressedCustomFieldKeys(updatedCase);
 
       updatedFields
         .filter((field) => UserActionPersister.userActionFieldsAllowed.has(field))
         .forEach((field) => {
+          // Special case for status as it can possibly have an associated closeReason (syncing to alerts)
+          // Persist the closeReason to the status userAction
+          if (field === UserActionTypes.status && updatedCase.updatedAttributes.status != null) {
+            const userActionBuilder = this.builderFactory.getBuilder(UserActionTypes.status);
+            const statusUserAction = userActionBuilder?.build({
+              caseId,
+              owner,
+              user,
+              payload: {
+                status: updatedCase.updatedAttributes.status,
+                closeReason: updatedCase.closeReason,
+                syncAlerts:
+                  updatedCase.updatedAttributes.settings?.syncAlerts ??
+                  originalCase.attributes.settings.syncAlerts,
+              },
+            });
+
+            if (statusUserAction != null) {
+              userActions.push(statusUserAction);
+            }
+            return;
+          }
+
           const originalValue = get(originalCase, ['attributes', field]);
           const newValue = get(updatedCase, ['updatedAttributes', field]);
+          // For a newly-applied template, resolve its name so the user action records it. Keyed by
+          // "id@version" so the name matches the exact version applied, not the current latest.
+          const templateName =
+            field === UserActionTypes.template && isCaseTemplate(newValue)
+              ? templateNamesByKey?.get(`${newValue.id}@${newValue.version}`)
+              : undefined;
           userActions.push(
             ...this.getUserActionItemByDifference({
               field,
@@ -95,11 +137,50 @@ export class UserActionPersister {
               user,
               owner,
               caseId,
+              templateName,
+              suppressedCustomFieldKeys,
             })
           );
         });
 
       acc[caseId] = userActions;
+      return acc;
+    }, {});
+  }
+  // Returns a new UserActionsDict with syncedAlertCountCount added to status actions
+  public addSyncedAlertsCountToUserActions({
+    userActionsDict,
+    syncedAlertCountCountByCaseId,
+  }: AddSyncedAlertsCountToUserActionsParams): UserActionsDict {
+    return Object.keys(userActionsDict).reduce<UserActionsDict>((acc, caseId) => {
+      const syncedAlertCountCount = syncedAlertCountCountByCaseId.get(caseId);
+      const userActions = userActionsDict[caseId];
+
+      if (syncedAlertCountCount == null) {
+        acc[caseId] = userActions;
+        return acc;
+      }
+
+      acc[caseId] = userActions.map((userAction) => {
+        if (userAction.parameters.attributes.type !== UserActionTypes.status) {
+          return userAction;
+        }
+
+        return {
+          ...userAction,
+          parameters: {
+            ...userAction.parameters,
+            attributes: {
+              ...userAction.parameters.attributes,
+              payload: {
+                ...userAction.parameters.attributes.payload,
+                syncedAlertCount: syncedAlertCountCount,
+              },
+            },
+          },
+        };
+      });
+
       return acc;
     }, {});
   }
@@ -147,6 +228,24 @@ export class UserActionPersister {
         originalValue,
         newValue,
       });
+    } else if (field === UserActionTypes.extended_fields && isExtendedFields(newValue)) {
+      return this.buildExtendedFieldsUserActions(params);
+    } else if (field === UserActionTypes.template && newValue !== undefined) {
+      // Enrich the applied-template payload with the resolved name (a point-in-time snapshot) so the
+      // activity log can render "applied <name> template" without a lookup.
+      const templateValue = newValue as { id: string; version: number } | null;
+      const payloadTemplate =
+        templateValue != null
+          ? { ...templateValue, ...(params.templateName ? { name: params.templateName } : {}) }
+          : null;
+      const userActionBuilder = this.builderFactory.getBuilder(UserActionTypes.template);
+      const fieldUserAction = userActionBuilder?.build({
+        caseId,
+        owner,
+        user,
+        payload: { template: payloadTemplate },
+      });
+      return fieldUserAction ? [fieldUserAction] : [];
     } else if (isUserActionType(field) && newValue !== undefined) {
       const userActionBuilder = this.builderFactory.getBuilder(UserActionTypes[field]);
       const fieldUserAction = userActionBuilder?.build({
@@ -162,13 +261,87 @@ export class UserActionPersister {
     return [];
   }
 
-  private buildAssigneesUserActions(params: TypedUserActionDiffedItems<CaseUserProfile>) {
+  /**
+   * Returns the customFields keys whose edit the same update also records
+   * through the canonical `extended_fields` user action — their duplicate
+   * legacy `customFields` user actions are suppressed (#282474). A paired key
+   * is only suppressed when its storage key is among the *recorded*
+   * extended_fields changes: clears delete the storage key, which the
+   * extended_fields activity does not record, so the legacy customFields
+   * action remains the only record of that edit and is kept.
+   */
+  private getSuppressedCustomFieldKeys(
+    updatedCase: BuildUserActionsDictParams['updatedCases']['cases'][number]
+  ): Set<string> | undefined {
+    const paired = updatedCase.pairedCustomFieldStorageKeys;
+    const newExtendedFields = updatedCase.updatedAttributes.extended_fields;
+
+    if (paired == null || !isExtendedFields(newExtendedFields)) {
+      return undefined;
+    }
+
+    const originalExtendedFields = updatedCase.originalCase?.attributes.extended_fields;
+    const oldExtendedFields = isExtendedFields(originalExtendedFields)
+      ? originalExtendedFields
+      : {};
+    const recordedStorageKeys = new Set(
+      Object.keys(newExtendedFields).filter(
+        (key) => oldExtendedFields[key] !== newExtendedFields[key]
+      )
+    );
+
+    const suppressed = new Set(
+      Object.entries(paired)
+        .filter(([, storageKey]) => recordedStorageKeys.has(storageKey))
+        .map(([key]) => key)
+    );
+
+    return suppressed.size > 0 ? suppressed : undefined;
+  }
+
+  private buildExtendedFieldsUserActions(params: GetUserActionItemByDifference): UserActionEvent[] {
+    const { originalValue, newValue, caseId, owner, user } = params;
+    // Only record the fields that actually changed, not the full merged object.
+    const oldFields = isExtendedFields(originalValue) ? originalValue : {};
+    const changedFields = pickBy(
+      isExtendedFields(newValue) ? newValue : {},
+      (value, key) => oldFields[key] !== value
+    );
+
+    if (Object.keys(changedFields).length === 0) {
+      return [];
+    }
+
+    const userActionBuilder = this.builderFactory.getBuilder(UserActionTypes.extended_fields);
+    const fieldUserAction = userActionBuilder?.build({
+      caseId,
+      owner,
+      user,
+      payload: { extended_fields: changedFields },
+    });
+    return fieldUserAction ? [fieldUserAction] : [];
+  }
+
+  private buildAssigneesUserActions(params: TypedUserActionDiffedItems<CaseAssignee>) {
     const createPayload: CreatePayloadFunction<
       CaseUserProfile,
       typeof UserActionTypes.assignees
     > = (items: CaseAssignees) => ({ assignees: items });
 
-    return this.buildAddDeleteUserActions(params, createPayload, UserActionTypes.assignees);
+    // assigneeIdentity persists username/full_name/email on the SO; client PATCHes uid-only.
+    // Diff by uid so retained assignees are not recorded as delete+add.
+    const toUidOnly = (assignees: CaseAssignee[]): CaseUserProfile[] =>
+      assignees.map(({ uid }) => ({ uid }));
+
+    return this.buildAddDeleteUserActions(
+      {
+        ...params,
+        originalValue: toUidOnly(params.originalValue),
+        newValue: toUidOnly(params.newValue),
+      },
+      createPayload,
+      UserActionTypes.assignees
+    );
   }
 
   private buildTagsUserActions(params: TypedUserActionDiffedItems<string>) {
@@ -215,7 +388,11 @@ export class UserActionPersister {
       typeof UserActionTypes.customFields
     > = (items: CaseCustomFields) => ({ customFields: items });
 
-    const { originalValue: originalCustomFields, newValue: newCustomFields } = params;
+    const {
+      originalValue: originalCustomFields,
+      newValue: newCustomFields,
+      suppressedCustomFieldKeys,
+    } = params;
 
     const originalCustomFieldsKeys = new Set(
       originalCustomFields.map((customField) => customField.key)
@@ -225,6 +402,12 @@ export class UserActionPersister {
 
     const updatedCustomFieldsUsersActions = compareValues?.addedItems
       .filter((customField) => {
+        // The canonical extended_fields user action of this update already
+        // records this paired edit — skip the duplicate legacy action (#282474).
+        if (suppressedCustomFieldKeys?.has(customField.key)) {
+          return false;
+        }
+
         if (customField.value != null) {
           return true;
         }
@@ -356,7 +539,8 @@ export class UserActionPersister {
         caseId,
         user,
         owner: attachment.owner,
-        attachmentId: attachment.id,
+        savedObjectId: attachment.id,
+        savedObjectType: attachment.savedObjectType,
         payload: { attachment: attachment.attachment },
       });
 
@@ -401,20 +585,37 @@ export class UserActionPersister {
     try {
       this.context.log.debug(`Attempting to bulk create user actions`);
 
-      return await this.context.unsecuredSavedObjectsClient.bulkCreate<UserActionPersistedAttributes>(
-        actions.map((action) => {
-          const decodedAttributes = decodeOrThrow(UserActionPersistedAttributesRt)(
-            action.parameters.attributes
-          );
+      const response =
+        await this.context.unsecuredSavedObjectsClient.bulkCreate<UserActionPersistedAttributes>(
+          actions.map((action) => {
+            const decodedAttributes = decodeOrThrow(UserActionPersistedAttributesRt)(
+              action.parameters.attributes
+            );
 
-          return {
-            type: CASE_USER_ACTION_SAVED_OBJECT,
-            attributes: decodedAttributes,
-            references: action.parameters.references,
-          };
-        }),
-        { refresh }
-      );
+            return {
+              type: CASE_USER_ACTION_SAVED_OBJECT,
+              attributes: decodedAttributes,
+              references: action.parameters.references,
+            };
+          }),
+          { refresh }
+        );
+
+      // analyticsV2 mirror to `.cases-activity`. Fire-and-forget — the
+      // SO write is the source of truth; the writer logs and lets
+      // reconciliation fix anything that fails. `bulkCreate` returns one
+      // entry per request entry (in the same order); a per-entry
+      // `error` field marks failures, which we skip so we don't mirror
+      // a doc that wasn't actually persisted.
+      const successes: Array<SavedObject<UserActionPersistedAttributes>> = [];
+      for (const so of response.saved_objects) {
+        if (!isSavedObjectErrorResult(so)) successes.push(so);
+      }
+      if (successes.length > 0) {
+        this.context.analyticsV2ActivityWriter.bulkUpsertActions(successes);
+      }
+
+      return response;
     } catch (error) {
       this.context.log.error(`Error on bulk creating user action: ${error}`);
       throw error;
@@ -425,7 +626,17 @@ export class UserActionPersister {
     userAction,
     refresh,
   }: CreateUserActionArgs<T>): Promise<void> {
-    const { action, type, caseId, user, owner, payload, connectorId, attachmentId } = userAction;
+    const {
+      action,
+      type,
+      caseId,
+      user,
+      owner,
+      payload,
+      connectorId,
+      savedObjectId,
+      savedObjectType,
+    } = userAction;
 
     try {
       this.context.log.debug(`Attempting to create a user action of type: ${type}`);
@@ -437,7 +648,8 @@ export class UserActionPersister {
         user,
         owner,
         connectorId,
-        attachmentId,
+        savedObjectId,
+        savedObjectType,
         payload,
       });
 
@@ -462,24 +674,37 @@ export class UserActionPersister {
       }
 
       const userActionsPayload = userActions
-        .map(({ action, type, caseId, user, owner, payload, connectorId, attachmentId }) => {
-          const userActionBuilder = this.builderFactory.getBuilder<T>(type);
-          const userAction = userActionBuilder?.build({
+        .map(
+          ({
             action,
+            type,
             caseId,
             user,
             owner,
-            connectorId,
-            attachmentId,
             payload,
-          });
+            connectorId,
+            savedObjectId,
+            savedObjectType,
+          }) => {
+            const userActionBuilder = this.builderFactory.getBuilder<T>(type);
+            const userAction = userActionBuilder?.build({
+              action,
+              caseId,
+              user,
+              owner,
+              connectorId,
+              savedObjectId,
+              savedObjectType,
+              payload,
+            });
 
-          if (userAction == null) {
-            return null;
+            if (userAction == null) {
+              return null;
+            }
+
+            return userAction;
           }
-
-          return userAction;
-        })
+        )
         .filter(Boolean) as UserActionEvent[];
 
       await this.bulkCreateAndLog({ userActions: userActionsPayload, refresh });
@@ -518,6 +743,16 @@ export class UserActionPersister {
           refresh,
         }
       );
+
+      // analyticsV2 mirror to `.cases-activity`. Fire-and-forget — see
+      // `bulkCreate` above for the rationale. The cast lines up with the
+      // generic `T`: callers pass `UserActionPersistedAttributes`-shaped
+      // attributes; the Saved Objects API just forwards them through `T`
+      // for consumer convenience, so re-narrowing here is safe.
+      this.context.analyticsV2ActivityWriter.upsertAction(
+        res as unknown as SavedObject<UserActionPersistedAttributes>
+      );
+
       return res;
     } catch (error) {
       this.context.log.error(`Error on POST a new case user action: ${error}`);

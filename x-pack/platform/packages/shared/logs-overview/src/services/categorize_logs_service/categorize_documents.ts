@@ -7,7 +7,7 @@
 
 import type { ISearchGeneric } from '@kbn/search-types';
 import { lastValueFrom } from 'rxjs';
-import { fromPromise } from 'xstate5';
+import { fromPromise } from 'xstate';
 import { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
 import { z } from '@kbn/zod/v4';
 import type { LogCategorizationParams } from './types';

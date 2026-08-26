@@ -3,6 +3,7 @@
 exports[`Inspect component renders correctly 1`] = `
 <CodeEditor
   aria-label="inspect MyIndexPattern*"
+  enableFindAction={true}
   languageId="xjson"
   options={
     Object {

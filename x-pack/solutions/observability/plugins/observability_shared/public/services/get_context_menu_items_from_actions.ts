@@ -8,7 +8,6 @@
 import type { EuiContextMenuItemProps } from '@elastic/eui';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { buildContextMenuForActions } from '@kbn/ui-actions-plugin/public';
-import type { ObservabilityTriggerId } from '../../common';
 
 export type ObservabilityActionContextMenuItemProps = EuiContextMenuItemProps & {
   children: React.ReactElement;
@@ -20,7 +19,7 @@ export function getContextMenuItemsFromActions({
   context,
 }: {
   uiActions: UiActionsStart;
-  triggerId: ObservabilityTriggerId;
+  triggerId: string;
   context: Record<string, any>;
 }): Promise<ObservabilityActionContextMenuItemProps[]> {
   return uiActions

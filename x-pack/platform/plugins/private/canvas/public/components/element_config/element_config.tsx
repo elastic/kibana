@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiStat, EuiAccordion } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -85,8 +84,4 @@ export const ElementConfig = ({ elementStats }: Props) => {
       </EuiAccordion>
     </div>
   );
-};
-
-ElementConfig.propTypes = {
-  elementStats: PropTypes.object,
 };

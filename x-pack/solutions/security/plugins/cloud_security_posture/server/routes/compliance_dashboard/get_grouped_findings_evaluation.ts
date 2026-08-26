@@ -8,6 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type {
   AggregationsMultiBucketAggregateBase as Aggregation,
+  OpenPointInTimeResponse,
   QueryDslQueryContainer,
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
@@ -112,14 +113,18 @@ export const getPostureStatsFromAggs = (
 export const getGroupedFindingsEvaluation = async (
   esClient: ElasticsearchClient,
   query: QueryDslQueryContainer,
-  pitId: string,
+  pit: OpenPointInTimeResponse,
   runtimeMappings: MappingRuntimeFields,
   logger: Logger
 ): Promise<ComplianceDashboardData['groupedFindingsEvaluation']> => {
   try {
     const resourceTypesQueryResult = await esClient.search<unknown, FailedFindingsQueryResult>(
-      getRisksEsQuery(query, pitId, runtimeMappings)
+      getRisksEsQuery(query, pit.id, runtimeMappings)
     );
+
+    if (resourceTypesQueryResult.pit_id) {
+      pit.id = resourceTypesQueryResult.pit_id;
+    }
 
     const ruleSections = resourceTypesQueryResult.aggregations?.aggs_by_resource_type.buckets;
     if (!Array.isArray(ruleSections)) {

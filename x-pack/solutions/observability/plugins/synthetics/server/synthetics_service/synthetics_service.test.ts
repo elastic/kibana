@@ -79,6 +79,9 @@ describe('SyntheticsService', () => {
     authSavedObjectsClient: {
       bulkUpdate: jest.fn(),
     },
+    basePath: {
+      publicBaseUrl: 'https://localhost:5601',
+    },
     config: {
       service: {
         username: 'dev',
@@ -98,6 +101,7 @@ describe('SyntheticsService', () => {
       manifestUrl: 'https://test-manifest.com',
     },
     enabled: true,
+    rebalancePrivateLocationShardsTaskEnabled: true,
   };
 
   mockLicense();
@@ -186,6 +190,7 @@ describe('SyntheticsService', () => {
         password: '12345',
       },
       enabled: true,
+      rebalancePrivateLocationShardsTaskEnabled: true,
     };
     const service = new SyntheticsService(serverMock);
 

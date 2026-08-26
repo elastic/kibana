@@ -6,7 +6,7 @@
  */
 
 import { createHash } from 'node:crypto';
-import stringify from 'json-stable-stringify';
+import { stableStringify } from '@kbn/std';
 
 import { isEmpty } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
@@ -28,7 +28,7 @@ describe('CasesService', () => {
       const grouping = { 'host.ip': '0.0.0.1' };
       const counter = 1;
 
-      const payload = `${ruleId}:${spaceId}:${owner}:${stringify(grouping)}:${counter}`;
+      const payload = `${ruleId}:${spaceId}:${owner}:${stableStringify(grouping)}:${counter}`;
       const hash = createHash('sha256');
 
       hash.update(payload);
@@ -46,7 +46,7 @@ describe('CasesService', () => {
       const sortedGrouping = { 'agent.id': '8a4f500d', 'host.ip': '0.0.0.1' };
       const counter = 1;
 
-      const payload = `${ruleId}:${spaceId}:${owner}:${stringify(sortedGrouping)}:${counter}`;
+      const payload = `${ruleId}:${spaceId}:${owner}:${stableStringify(sortedGrouping)}:${counter}`;
       const hash = createHash('sha256');
 
       hash.update(payload);
@@ -79,7 +79,7 @@ describe('CasesService', () => {
       const grouping = {};
       const counter = 1;
 
-      const payload = `${ruleId}:${spaceId}:${owner}:${stringify(grouping)}:${counter}`;
+      const payload = `${ruleId}:${spaceId}:${owner}:${stableStringify(grouping)}:${counter}`;
       const hash = createHash('sha256');
 
       hash.update(payload);
@@ -95,7 +95,7 @@ describe('CasesService', () => {
       const grouping = { 'host.ip': '0.0.0.1' };
       const counter = 1;
 
-      const payload = `${spaceId}:${owner}:${stringify(grouping)}:${counter}`;
+      const payload = `${spaceId}:${owner}:${stableStringify(grouping)}:${counter}`;
       const hash = createHash('sha256');
 
       hash.update(payload);
@@ -134,7 +134,7 @@ describe('CasesService', () => {
 
         const payload = `${getPayloadValue(params.ruleId)}${getPayloadValue(
           params.spaceId
-        )}${getPayloadValue(params.owner)}${stringify(grouping)}:${counter}`;
+        )}${getPayloadValue(params.owner)}${stableStringify(grouping)}:${counter}`;
 
         const hash = createHash('sha256');
 
@@ -153,7 +153,7 @@ describe('CasesService', () => {
       const grouping = { '{:}': `{}=:&".'/{}}` };
       const counter = 1;
 
-      const payload = `${ruleId}:${spaceId}:${owner}:${stringify(grouping)}:${counter}`;
+      const payload = `${ruleId}:${spaceId}:${owner}:${stableStringify(grouping)}:${counter}`;
       const hash = createHash('sha256');
 
       hash.update(payload);

@@ -71,6 +71,8 @@ export class ProductDocBasePlugin
     core: CoreStart,
     { licensing, taskManager }: ProductDocBaseStartDependencies
   ): ProductDocBaseStartContract {
+    const isServerless = this.context.env.packageInfo.buildFlavor === 'serverless';
+
     const soClient = new SavedObjectsClient(
       core.savedObjects.createInternalRepository([productDocInstallStatusSavedObjectTypeName])
     );
@@ -79,14 +81,17 @@ export class ProductDocBasePlugin
       log: this.logger,
     });
 
+    const productDocConfig = this.context.config.get();
     const packageInstaller = new PackageInstaller({
       esClient: core.elasticsearch.client.asInternalUser,
       productDocClient,
       kibanaVersion: this.context.env.packageInfo.version,
       artifactsFolder: 'ai-kb-artifacts',
-      artifactRepositoryUrl: this.context.config.get().artifactRepositoryUrl,
+      artifactRepositoryUrl: productDocConfig.artifactRepositoryUrl,
+      artifactRepositoryProxyUrl: productDocConfig.artifactRepositoryProxyUrl,
       elserInferenceId: this.context.config.get().elserInferenceId,
       logger: this.logger.get('package-installer'),
+      isServerless,
     });
 
     const searchService = new SearchService({

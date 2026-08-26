@@ -31,7 +31,7 @@ export const StaticHeader = ({
     >
       {icon && (
         <EuiFlexItem grow={false}>
-          <EuiIcon type={icon} />{' '}
+          <EuiIcon type={icon} aria-hidden={true} />{' '}
         </EuiFlexItem>
       )}
       <EuiFlexItem

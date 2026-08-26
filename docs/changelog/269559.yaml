@@ -1,0 +1,8 @@
+prs:
+- https://github.com/elastic/kibana/pull/269559
+type: feature
+products:
+- product: cloud-serverless
+  target: 2026-07-02
+title: Add rule suggestion skill for Elastic Security
+description: "Adds an Agent Builder skill that recommends prebuilt detection rules based on your environment."

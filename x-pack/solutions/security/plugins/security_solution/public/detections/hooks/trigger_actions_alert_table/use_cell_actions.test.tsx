@@ -8,7 +8,7 @@
 import { createMockStore, mockGlobalState, TestProviders } from '../../../common/mock';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { useCellActionsOptions } from './use_cell_actions';
-import { columns as mockColumns, data as mockData } from './mock/data';
+import { columns as mockColumns, alerts as mockAlerts } from './mock/data';
 import type {
   EuiDataGridColumn,
   EuiDataGridColumnCellAction,
@@ -21,7 +21,6 @@ import type { ComponentProps, JSXElementConstructor, PropsWithChildren } from 'r
 import React from 'react';
 import { makeAction } from '../../../common/components/cell_actions/mocks';
 import { VIEW_SELECTION } from '../../../../common/constants';
-import type { LegacyField } from '@kbn/alerting-types';
 
 const mockDataGridRef: {
   current: EuiDataGridRefProps;
@@ -88,7 +87,7 @@ describe('getUseCellActionsHook', () => {
       () =>
         useCellActionsOptions(TableId.test, {
           columns: mockColumns as unknown as EuiDataGridColumn[],
-          oldAlertsData: mockData as LegacyField[][],
+          alerts: mockAlerts,
           dataGridRef: mockDataGridRef,
           pageSize: 10,
           pageIndex: 0,
@@ -112,7 +111,7 @@ describe('getUseCellActionsHook', () => {
       () =>
         useCellActionsOptions(TableId.test, {
           columns: mockColumns as unknown as EuiDataGridColumn[],
-          oldAlertsData: mockData as LegacyField[][],
+          alerts: mockAlerts,
           dataGridRef: mockDataGridRef,
           pageSize: 10,
           pageIndex: 0,

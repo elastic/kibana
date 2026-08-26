@@ -9,38 +9,38 @@
 
 import type { DataControlState } from '@kbn/controls-schemas';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
-import type { FieldFormatConvertFunction } from '@kbn/field-formats-plugin/common';
-import type { HasPanelCapabilities } from '@kbn/presentation-containers';
+import type { TextContextTypeConvert } from '@kbn/field-formats-plugin/common';
+import type { HasPanelCapabilities } from '@kbn/presentation-publishing';
 import type {
   AppliesFilters,
   HasEditCapabilities,
   PublishesBlockingError,
   PublishesDataLoading,
   PublishesDataViews,
-  PublishesTitle,
   PublishingSubject,
 } from '@kbn/presentation-publishing';
 import type { StateManager } from '@kbn/presentation-publishing/state_manager/types';
 
+import type { initializeLabelManager } from '../control_labels';
 import type { HasCustomPrepend } from '../types';
 
-export type DataControlFieldFormatter = FieldFormatConvertFunction | ((toFormat: any) => string);
+export type DataControlFieldFormatter = TextContextTypeConvert | ((toFormat: any) => string);
 
 export interface PublishesField {
   field$: PublishingSubject<DataViewField | undefined>;
   fieldFormatter: PublishingSubject<DataControlFieldFormatter>;
 }
 
-export type DataControlApi = StateManager<DataControlState>['api'] &
+export type DataControlApi = StateManager<Omit<DataControlState, 'title'>>['api'] &
   Partial<HasCustomPrepend> &
   HasEditCapabilities &
   PublishesDataViews &
   PublishesBlockingError &
   PublishesField &
-  Pick<PublishesTitle, 'defaultTitle$'> &
   PublishesDataLoading &
   AppliesFilters &
-  HasPanelCapabilities & {
+  HasPanelCapabilities &
+  ReturnType<typeof initializeLabelManager>['api'] & {
     setDataLoading: (loading: boolean) => void;
     setBlockingError: (error: Error | undefined) => void;
   };

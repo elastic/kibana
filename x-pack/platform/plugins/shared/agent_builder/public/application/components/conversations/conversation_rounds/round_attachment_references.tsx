@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, type EuiFlexGroupProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, type EuiFlexGroupProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type {
   Attachment,
@@ -21,7 +21,8 @@ import {
   estimateTokens,
   hashContent,
 } from '@kbn/agent-builder-common/attachments';
-import { AttachmentReferencePill } from './round_attachment_reference_pill';
+import { css } from '@emotion/react';
+import { RoundAttachmentPill } from './round_attachment_pill';
 
 export interface RoundAttachmentReferencesProps {
   attachmentRefs?: AttachmentVersionRef[];
@@ -41,6 +42,9 @@ interface ResolvedReference {
 const labels = {
   attachments: i18n.translate('xpack.agentBuilder.roundAttachmentReferences.attachments', {
     defaultMessage: 'Attachments',
+  }),
+  added: i18n.translate('xpack.agentBuilder.roundAttachmentReferences.added', {
+    defaultMessage: 'Added',
   }),
 };
 
@@ -76,6 +80,8 @@ const buildFallbackVersionedAttachments = (attachments: Attachment[]): Versioned
     current_version: 1,
     active: true,
     hidden: attachment.hidden,
+    ...(attachment.groupId !== undefined ? { group_id: attachment.groupId } : {}),
+    ...(attachment.description !== undefined ? { description: attachment.description } : {}),
   }));
 };
 
@@ -87,12 +93,17 @@ export const RoundAttachmentReferences: React.FC<RoundAttachmentReferencesProps>
   justifyContent = 'flexStart',
 }) => {
   const resolvedReferences = useMemo((): ResolvedReference[] => {
-    const effectiveAttachments =
-      conversationAttachments?.length && conversationAttachments.length > 0
-        ? conversationAttachments
-        : fallbackAttachments?.length
-        ? buildFallbackVersionedAttachments(fallbackAttachments)
-        : [];
+    const fallbackVersioned = fallbackAttachments?.length
+      ? buildFallbackVersionedAttachments(fallbackAttachments)
+      : [];
+    const effectiveAttachments = conversationAttachments?.length
+      ? [
+          ...conversationAttachments,
+          ...fallbackVersioned.filter((attachment) =>
+            conversationAttachments.every((existing) => existing.id !== attachment.id)
+          ),
+        ]
+      : fallbackVersioned;
 
     const refs =
       attachmentRefs?.length || !fallbackAttachments?.length
@@ -117,6 +128,7 @@ export const RoundAttachmentReferences: React.FC<RoundAttachmentReferencesProps>
     }
 
     const resolved: ResolvedReference[] = [];
+    const seenGroupIds = new Set<string>();
     for (const ref of refs) {
       const attachment = attachmentMap.get(ref.attachment_id);
       if (!attachment) {
@@ -131,6 +143,13 @@ export const RoundAttachmentReferences: React.FC<RoundAttachmentReferencesProps>
       const operation = resolveOperation(ref.operation, ref.version);
       if (operation === ATTACHMENT_REF_OPERATION.read) {
         continue;
+      }
+
+      if (attachment.group_id) {
+        if (seenGroupIds.has(attachment.group_id)) {
+          continue;
+        }
+        seenGroupIds.add(attachment.group_id);
       }
 
       resolved.push({
@@ -151,22 +170,42 @@ export const RoundAttachmentReferences: React.FC<RoundAttachmentReferencesProps>
   return (
     <EuiFlexGroup
       gutterSize="s"
-      wrap
+      direction="column"
       responsive={false}
-      justifyContent={justifyContent}
-      role="list"
-      aria-label={labels.attachments}
       data-test-subj="agentBuilderRoundAttachmentReferences"
     >
-      {resolvedReferences.map((ref) => (
-        <EuiFlexItem key={`${ref.attachment.id}-v${ref.version}-${ref.actor}`} grow={false}>
-          <AttachmentReferencePill
-            attachment={ref.attachment}
-            version={ref.version}
-            operation={ref.operation}
-          />
-        </EuiFlexItem>
-      ))}
+      <EuiFlexItem grow={false}>
+        <EuiText
+          size="xs"
+          color="subdued"
+          css={
+            justifyContent === 'flexEnd'
+              ? css`
+                  text-align: right;
+                `
+              : undefined
+          }
+        >
+          {labels.added}
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup
+          direction="row"
+          wrap
+          responsive={false}
+          gutterSize="s"
+          justifyContent={justifyContent}
+          role="list"
+          aria-label={labels.attachments}
+        >
+          {resolvedReferences.map((ref) => (
+            <EuiFlexItem grow={false} key={`${ref.attachment.id}-v${ref.version}-${ref.actor}`}>
+              <RoundAttachmentPill attachment={ref.attachment} version={ref.version} />
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

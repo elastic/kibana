@@ -4,23 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { ApmSourceMapArtifactBody, ListSourceMapArtifactsResponse } from '@kbn/apm-api-shared';
 import type { CoreStart, ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type { Artifact } from '@kbn/fleet-plugin/server';
 import { promisify } from 'util';
 import { unzip } from 'zlib';
-import type { Artifact } from '@kbn/fleet-plugin/server';
-import type { SourceMap } from '../source_maps/route';
 import type { APMPluginStartDependencies } from '../../types';
 import { getApmPackagePolicies } from './get_apm_package_policies';
 import { getPackagePolicyWithSourceMap } from './get_package_policy_decorators';
 
 const doUnzip = promisify(unzip);
 
-interface ApmSourceMapArtifactBody {
-  serviceName: string;
-  serviceVersion: string;
-  bundleFilepath: string;
-  sourceMap: SourceMap;
-}
 export type ArtifactSourceMap = Omit<Artifact, 'body'> & {
   body: ApmSourceMapArtifactBody;
 };
@@ -34,25 +28,6 @@ export async function getUnzippedArtifactBody(artifactBody: string) {
 
 export function getApmArtifactClient(fleetPluginStart: FleetPluginStart) {
   return fleetPluginStart.createArtifactsClient('apm');
-}
-
-export interface ListSourceMapArtifactsResponse {
-  artifacts: Array<{
-    body: ApmSourceMapArtifactBody;
-    id: string;
-    created: string;
-    compressionAlgorithm: 'none' | 'zlib';
-    encryptionAlgorithm: 'none';
-    decodedSha256: string;
-    decodedSize: number;
-    encodedSha256: string;
-    encodedSize: number;
-    identifier: string;
-    packageName: string;
-    relative_url: string;
-    type?: string | undefined;
-  }>;
-  total: number;
 }
 
 export async function listSourceMapArtifacts({

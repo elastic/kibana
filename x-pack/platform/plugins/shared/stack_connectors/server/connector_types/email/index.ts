@@ -34,8 +34,13 @@ import {
   UptimeConnectorFeatureId,
   SecurityConnectorFeatureId,
   WorkflowsConnectorFeatureId,
+  AgentBuilderConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
 import { withoutMustacheTemplate } from '@kbn/actions-plugin/common';
+import {
+  isNotificationExecutionSource,
+  NOTIFICATIONS_REQUESTER_ID,
+} from '@kbn/actions-plugin/server';
 import {
   renderMustacheObject,
   renderMustacheString,
@@ -72,6 +77,25 @@ export const ELASTIC_CLOUD_SERVICE: SMTPConnection.Options = {
 
 const EMAIL_FOOTER_DIVIDER = '\n\n---\n\n';
 
+// Emails sent from Elastic Cloud trial deployments (ECH and Serverless) go through the shared
+// Elastic SMTP relay (the `elastic_cloud` service). Their subjects are prefixed so trial traffic
+// can be identified and, if abused, filtered at the SMTP gateway.
+export const ELASTIC_CLOUD_TRIAL_SUBJECT_PREFIX = '[Elastic Cloud Trial]';
+
+const NO_RECIPIENTS_ERROR_MESSAGE = i18n.translate(
+  'xpack.stackConnectors.email.noRecipientsErrorMessage',
+  { defaultMessage: 'At least one entry in [to], [cc], or [bcc] is required' }
+);
+
+const HTML_NOT_ALLOWED_ERROR_MESSAGE = i18n.translate(
+  'xpack.stackConnectors.email.htmlNotAllowedErrorMessage',
+  {
+    defaultMessage: 'HTML email can only be sent when the connector is configured to allow HTML',
+  }
+);
+
+const isNonBlankRecipient = (email: string) => email.trim().length > 0;
+
 function validateConfig(
   configObject: ConnectorTypeConfigType,
   validatorServices: ValidatorServices
@@ -100,6 +124,10 @@ function validateConfig(
   });
   if (invalidEmailsMessage) {
     throw new Error(`[from]: ${invalidEmailsMessage}`);
+  }
+
+  if (config.service === AdditionalEmailServices.ELASTIC_CLOUD && config.allowHtml === true) {
+    throw new Error('[allowHtml]: cannot be true when [service] is "elastic_cloud"');
   }
 
   const { oauthTokenUrl } = config;
@@ -178,32 +206,47 @@ function validateParams(paramsObject: unknown, validatorServices: ValidatorServi
   // avoids circular reference ...
   const params = paramsObject as ActionParamsType;
 
-  const { to, cc, bcc } = params;
-  const addrs = to.length + cc.length + bcc.length;
+  const { to, cc, bcc, replyTo } = params;
+  // Mirror the executor's filter so that empty/whitespace-only entries don't
+  // trick the recipients-required check, and aren't surfaced as confusing
+  // "Invalid email addresses" errors below.
+  const validTo = to.filter(isNonBlankRecipient);
+  const validCc = cc.filter(isNonBlankRecipient);
+  const validBcc = bcc.filter(isNonBlankRecipient);
 
-  if (addrs === 0) {
-    throw new Error('no [to], [cc], or [bcc] entries');
+  if (validTo.length + validCc.length + validBcc.length === 0) {
+    throw new Error(NO_RECIPIENTS_ERROR_MESSAGE);
   }
 
   try {
-    emailSchema.parse(to);
-    emailSchema.parse(cc);
-    emailSchema.parse(bcc);
+    emailSchema.parse(validTo);
+    emailSchema.parse(validCc);
+    emailSchema.parse(validBcc);
+
+    if (replyTo) {
+      emailSchema.parse(replyTo);
+    }
   } catch (error) {
     throw new Error(`Invalid email addresses: ${error}`);
   }
 
-  const emails = withoutMustacheTemplate(to.concat(cc).concat(bcc));
+  const emails = withoutMustacheTemplate(validTo.concat(validCc).concat(validBcc)).concat(
+    replyTo ?? []
+  );
+
   const invalidEmailsMessage = configurationUtilities.validateEmailAddresses(emails, {
     treatMustacheTemplatesAsValid: true,
   });
   if (invalidEmailsMessage) {
-    throw new Error(`[to/cc/bcc]: ${invalidEmailsMessage}`);
+    const labels = ['to', 'cc', 'bcc'];
+    if (params.replyTo && params.replyTo.length) labels.push('replyTo');
+    throw new Error(`[${labels.join('/')}]: ${invalidEmailsMessage}`);
   }
 }
 
 interface GetConnectorTypeParams {
   publicBaseUrl?: string;
+  isElasticCloudTrial?: () => Promise<boolean>;
 }
 
 function validateConnector(
@@ -227,7 +270,7 @@ function validateConnector(
 
 // connector type definition
 export function getConnectorType(params: GetConnectorTypeParams): EmailConnectorType {
-  const { publicBaseUrl } = params;
+  const { publicBaseUrl, isElasticCloudTrial } = params;
   return {
     id: CONNECTOR_ID,
     minimumLicenseRequired: 'gold',
@@ -237,6 +280,7 @@ export function getConnectorType(params: GetConnectorTypeParams): EmailConnector
       UptimeConnectorFeatureId,
       SecurityConnectorFeatureId,
       WorkflowsConnectorFeatureId,
+      AgentBuilderConnectorFeatureId,
     ],
     validate: {
       config: {
@@ -253,7 +297,7 @@ export function getConnectorType(params: GetConnectorTypeParams): EmailConnector
       connector: validateConnector,
     },
     renderParameterTemplates,
-    executor: curry(executor)({ publicBaseUrl }),
+    executor: curry(executor)({ publicBaseUrl, isElasticCloudTrial }),
   };
 }
 
@@ -267,7 +311,26 @@ function renderParameterTemplates(
     ...renderMustacheObject(logger, params, variables),
     // message however, needs to escaped as markdown
     message: renderMustacheString(logger, params.message, variables, 'markdown'),
+    messageHTML: renderMustacheString(logger, params.messageHTML, variables, 'html'),
   };
+}
+
+function isTrustedNotificationHtmlSource(
+  source: EmailConnectorTypeExecutorOptions['source']
+): boolean {
+  if (!isNotificationExecutionSource(source)) {
+    return false;
+  }
+
+  // Async notification tasks are rebuilt with asEmptySource(NOTIFICATION), which strips requesterId.
+  // Trust null requesterId here so enqueued notification HTML emails continue to run.
+  return (
+    source.source?.requesterId == null || source.source.requesterId === NOTIFICATIONS_REQUESTER_ID
+  );
+}
+
+function isHtmlAllowedForConnector(config: ConnectorTypeConfigType): boolean {
+  return config.allowHtml === true && config.service !== AdditionalEmailServices.ELASTIC_CLOUD;
 }
 
 // action executor
@@ -275,8 +338,10 @@ function renderParameterTemplates(
 async function executor(
   {
     publicBaseUrl,
+    isElasticCloudTrial,
   }: {
     publicBaseUrl: GetConnectorTypeParams['publicBaseUrl'];
+    isElasticCloudTrial: GetConnectorTypeParams['isElasticCloudTrial'];
   },
   execOptions: EmailConnectorTypeExecutorOptions
 ): Promise<ConnectorTypeExecutorResult<unknown>> {
@@ -294,7 +359,18 @@ async function executor(
   const awsSesConfig = configurationUtilities.getAwsSesConfig();
 
   const emails = params.to.concat(params.cc).concat(params.bcc);
-  let invalidEmailsMessage = configurationUtilities.validateEmailAddresses(emails);
+  const validEmails = emails.filter(isNonBlankRecipient);
+
+  if (validEmails.length === 0) {
+    return {
+      status: 'error',
+      actionId,
+      message: NO_RECIPIENTS_ERROR_MESSAGE,
+      errorSource: TaskErrorSource.USER,
+    };
+  }
+
+  let invalidEmailsMessage = configurationUtilities.validateEmailAddresses(validEmails);
   if (invalidEmailsMessage) {
     return { status: 'error', actionId, message: `[to/cc/bcc]: ${invalidEmailsMessage}` };
   }
@@ -307,11 +383,15 @@ async function executor(
   }
 
   if (params.messageHTML != null) {
-    if (execOptions.source?.type !== ActionExecutionSourceType.NOTIFICATION) {
+    if (
+      !isTrustedNotificationHtmlSource(execOptions.source) &&
+      !isHtmlAllowedForConnector(config)
+    ) {
       return {
         status: 'error',
         actionId,
-        message: `HTML email can only be sent via notifications`,
+        message: HTML_NOT_ALLOWED_ERROR_MESSAGE,
+        errorSource: TaskErrorSource.USER,
       };
     }
   }
@@ -392,6 +472,14 @@ async function executor(
     actualMessage = `${actualMessage}${EMAIL_FOOTER_DIVIDER}${footerMessage}`;
   }
 
+  // Trial deployments (ECH and Serverless) route through the shared Elastic SMTP relay
+  // (the `elastic_cloud` service), so their subjects are prefixed to identify trial traffic.
+  // `&&` short-circuits, so the trial lookup only runs for the `elastic_cloud` service.
+  const subject =
+    config.service === AdditionalEmailServices.ELASTIC_CLOUD && (await isElasticCloudTrial?.())
+      ? prefixTrialSubject(params.subject)
+      : params.subject;
+
   const sendEmailOptions: SendEmailOptions = {
     connectorId: actionId,
     transport,
@@ -400,9 +488,10 @@ async function executor(
       to: params.to,
       cc: params.cc,
       bcc: params.bcc,
+      ...(params.replyTo ? { replyTo: params.replyTo } : {}),
     },
     content: {
-      subject: params.subject,
+      subject,
       message: actualMessage || 'no message set',
       messageHTML: actualHTMLMessage,
     },
@@ -447,6 +536,15 @@ async function executor(
 }
 
 // utilities
+
+// Prepend the trial marker unless the subject already carries it, so re-rendered or
+// user-authored subjects don't accumulate duplicate prefixes.
+function prefixTrialSubject(subject: string): string {
+  if (subject.startsWith(ELASTIC_CLOUD_TRIAL_SUBJECT_PREFIX)) {
+    return subject;
+  }
+  return `${ELASTIC_CLOUD_TRIAL_SUBJECT_PREFIX} ${subject}`;
+}
 
 function trimMessageIfRequired(
   connectorId: string,

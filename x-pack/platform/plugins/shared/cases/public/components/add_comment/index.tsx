@@ -23,7 +23,7 @@ import {
   UseField,
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { AttachmentType } from '../../../common/types/domain';
+import { COMMENT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
 import type { CaseUI } from '../../containers/types';
 import type { MarkdownEditorRef } from '../markdown_editor';
@@ -37,6 +37,7 @@ import { schema } from './schema';
 import { InsertTimeline } from '../insert_timeline';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { MAX_COMMENT_LENGTH } from '../../../common/constants';
+import type { CaseAttachmentsWithoutOwner } from '../../types';
 
 const initialCommentValue: AddCommentFormSchema = {
   comment: '',
@@ -55,12 +56,21 @@ export interface AddCommentProps {
   onCommentPosted: (newCase: CaseUI) => void;
   showLoading?: boolean;
   statusActionButton: JSX.Element | null;
+  attachActionButton?: JSX.Element | null;
 }
 
 export const AddComment = React.memo(
   forwardRef<AddCommentRefObject, AddCommentProps>(
     (
-      { id, caseId, onCommentPosted, onCommentSaving, showLoading = true, statusActionButton },
+      {
+        id,
+        caseId,
+        onCommentPosted,
+        onCommentSaving,
+        showLoading = true,
+        statusActionButton,
+        attachActionButton,
+      },
       ref
     ) => {
       const editorRef = useRef<MarkdownEditorRef>(null);
@@ -113,11 +123,15 @@ export const AddComment = React.memo(
             onCommentSaving();
           }
 
+          const attachments: CaseAttachmentsWithoutOwner = [
+            { type: COMMENT_ATTACHMENT_TYPE, data: { content: data.comment } },
+          ];
+
           createAttachments(
             {
               caseId,
               caseOwner: owner[0],
-              attachments: [{ ...data, type: AttachmentType.user }],
+              attachments,
             },
             {
               onSuccess: (theCase) => {
@@ -232,11 +246,14 @@ export const AddComment = React.memo(
                       {statusActionButton && (
                         <EuiFlexItem grow={false}>{statusActionButton}</EuiFlexItem>
                       )}
+                      {attachActionButton && (
+                        <EuiFlexItem grow={false}>{attachActionButton}</EuiFlexItem>
+                      )}
                       <EuiFlexItem grow={false}>
                         <EuiButton
                           data-test-subj="submit-comment"
                           fill
-                          iconType="plusInCircle"
+                          iconType="plusCircle"
                           isDisabled={isDisabled}
                           isLoading={isLoading}
                           onClick={onSubmit}

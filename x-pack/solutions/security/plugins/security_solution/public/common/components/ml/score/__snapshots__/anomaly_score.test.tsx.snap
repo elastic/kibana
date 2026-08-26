@@ -81,6 +81,7 @@ exports[`anomaly_scores renders correctly against snapshot 1`] = `
   >
     <EuiPopover
       anchorPosition="downLeft"
+      aria-label="Anomaly score details"
       button={
         <Icon
           type="info"

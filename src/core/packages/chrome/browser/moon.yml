@@ -4,23 +4,23 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/core-chrome-browser'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/appex-sharedux'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/core-chrome-browser'
+  title: '@kbn/core-chrome-browser'
   description: Moon project for @kbn/core-chrome-browser
   channel: ''
   owner: '@elastic/appex-sharedux'
-  metadata:
-    sourceRoot: src/core/packages/chrome/browser
+  sourceRoot: src/core/packages/chrome/browser
 dependsOn:
   - '@kbn/core-mount-utils-browser'
   - '@kbn/core-application-common'
-  - '@kbn/core-chrome-app-menu-components'
+  - '@kbn/app-menu'
+  - '@kbn/ui-app-header'
   - '@kbn/deeplinks-devtools'
   - '@kbn/deeplinks-analytics'
   - '@kbn/deeplinks-ml'
@@ -32,10 +32,13 @@ dependsOn:
   - '@kbn/deeplinks-fleet'
   - '@kbn/deeplinks-shared'
   - '@kbn/deeplinks-workplace-ai'
+  - '@kbn/deeplinks-vectordb'
   - '@kbn/projects-solutions-groups'
   - '@kbn/deeplinks-workflows'
   - '@kbn/deeplinks-agent-builder'
-  - '@kbn/deeplinks-data-sources'
+  - '@kbn/deeplinks-context-engine'
+  - '@kbn/ui-side-navigation'
+  - '@kbn/core-chrome-sidebar'
 tags:
   - shared-browser
   - package
@@ -48,16 +51,6 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

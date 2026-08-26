@@ -6,4 +6,5 @@
  */
 
 export { createDatasetQualityESClient } from './create_dataset_quality_es_client';
+export { isFieldAggregatable } from './is_field_aggregatable';
 export { wildcardQuery } from './queries';

@@ -93,12 +93,17 @@ jest.mock('@kbn/esql-utils', () => {
   };
 });
 
+// Shared state object for reference equality in isEqual comparisons
+const mockFormBasedState = { layers: {} };
+// Different state to simulate changes detected
+const mockFormBasedStateChanged = { layers: { layer1: {} } };
+
 const lensAttributes = {
   title: 'test',
   visualizationType: 'testVis',
   state: {
     datasourceStates: {
-      testDatasource: {},
+      formBased: mockFormBasedStateChanged,
     },
     visualization: {},
     filters: [],
@@ -144,6 +149,12 @@ const startDependencies = {
 const datasourceMap = mockDatasourceMap();
 const visualizationMap = mockVisualizationMap();
 
+const expectToBeEUIAriaDisabledButton = (element: HTMLElement) => {
+  expect(element).toHaveClass('euiButton');
+  expect(element).toHaveAttribute('type', 'button');
+  expect(element).toHaveAttribute('aria-disabled', 'true');
+};
+
 describe('LensEditConfigurationFlyout', () => {
   async function renderConfigFlyout(
     propsOverrides: Partial<EditConfigPanelProps> = {},
@@ -171,12 +182,12 @@ describe('LensEditConfigurationFlyout', () => {
       {
         preloadedState: {
           datasourceStates: {
-            testDatasource: {
+            formBased: {
               isLoading: false,
-              state: 'state',
+              state: mockFormBasedState,
             },
           },
-          activeDatasourceId: 'testDatasource',
+          activeDatasourceId: 'formBased',
           query: query as Query,
           visualization: {
             state: {},
@@ -221,6 +232,35 @@ describe('LensEditConfigurationFlyout', () => {
     expect(closeFlyoutSpy).toHaveBeenCalled();
   });
 
+  it('should cancel editing when the header close button is clicked', async () => {
+    const closeFlyoutSpy = jest.fn();
+    const onCancelSpy = jest.fn();
+
+    await renderConfigFlyout({
+      closeFlyout: closeFlyoutSpy,
+      onCancel: onCancelSpy,
+      displayFlyoutHeader: true,
+    });
+    await userEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
+
+    expect(onCancelSpy).toHaveBeenCalledTimes(1);
+    expect(closeFlyoutSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('should cancel editing when Escape is pressed', async () => {
+    const closeFlyoutSpy = jest.fn();
+    const onCancelSpy = jest.fn();
+
+    await renderConfigFlyout({
+      closeFlyout: closeFlyoutSpy,
+      onCancel: onCancelSpy,
+    });
+    await userEvent.keyboard('{Escape}');
+
+    expect(onCancelSpy).toHaveBeenCalledTimes(1);
+    expect(closeFlyoutSpy).toHaveBeenCalledTimes(1);
+  });
+
   it('should call the updatePanelState callback if cancel button is clicked', async () => {
     const updatePanelStateSpy = jest.fn();
     await renderConfigFlyout({
@@ -231,7 +271,7 @@ describe('LensEditConfigurationFlyout', () => {
     expect(updatePanelStateSpy).toHaveBeenCalled();
   });
 
-  it('should call the updateByRefInput callback if cancel button is clicked and savedObjectId exists', async () => {
+  it('should call the updateByRefInput callback with savedObjectId and previous attributes if cancel button is clicked and savedObjectId exists', async () => {
     const updateByRefInputSpy = jest.fn();
 
     await renderConfigFlyout({
@@ -240,10 +280,10 @@ describe('LensEditConfigurationFlyout', () => {
       savedObjectId: 'id',
     });
     await userEvent.click(screen.getByTestId('cancelFlyoutButton'));
-    expect(updateByRefInputSpy).toHaveBeenCalled();
+    expect(updateByRefInputSpy).toHaveBeenCalledWith('id', lensAttributes);
   });
 
-  it('should call the saveByRef callback if apply button is clicked and savedObjectId exists', async () => {
+  it('should call the saveByRef and updateByRefInput with the current attributes when apply button is clicked and savedObjectId exists', async () => {
     const updateByRefInputSpy = jest.fn();
     const saveByRefSpy = jest.fn();
 
@@ -254,8 +294,14 @@ describe('LensEditConfigurationFlyout', () => {
       saveByRef: saveByRefSpy,
     });
     await userEvent.click(screen.getByTestId('applyFlyoutButton'));
-    expect(updateByRefInputSpy).toHaveBeenCalled();
     expect(saveByRefSpy).toHaveBeenCalled();
+    expect(updateByRefInputSpy).toHaveBeenCalledWith(
+      'id',
+      expect.objectContaining({
+        title: 'test',
+        visualizationType: 'testVis',
+      })
+    );
   });
 
   it('should call the onApplyCb callback if apply button is clicked', async () => {
@@ -273,7 +319,7 @@ describe('LensEditConfigurationFlyout', () => {
       title: 'test',
       visualizationType: 'testVis',
       state: {
-        datasourceStates: { testDatasource: 'state' },
+        datasourceStates: { formBased: mockFormBasedState },
         visualization: {},
         filters: [],
         query: { esql: 'from index1 | limit 10' },
@@ -350,11 +396,10 @@ describe('LensEditConfigurationFlyout', () => {
       saveByRef: saveByRefSpy,
       attributes: lensAttributes,
     };
-    // todo: replace testDatasource with formBased or textBased as it's the only ones accepted
-    // @ts-ignore
-    newProps.attributes.state.datasourceStates.testDatasource = 'state';
+    // Set formBased to match the preloaded Redux state so no changes are detected
+    newProps.attributes.state.datasourceStates.formBased = mockFormBasedState;
     await renderConfigFlyout(newProps);
-    expect(screen.getByRole('button', { name: /apply and close/i })).toBeDisabled();
+    expectToBeEUIAriaDisabledButton(screen.getByRole('button', { name: /apply and close/i }));
   });
 
   it('save button should be disabled if expression cannot be generated', async () => {
@@ -367,15 +412,15 @@ describe('LensEditConfigurationFlyout', () => {
       saveByRef: saveByRefSpy,
       datasourceMap: {
         ...datasourceMap,
-        testDatasource: {
-          ...datasourceMap.testDatasource,
+        formBased: {
+          ...datasourceMap.formBased,
           toExpression: jest.fn(() => null),
         },
       },
     };
 
     await renderConfigFlyout(newProps);
-    expect(screen.getByRole('button', { name: /apply and close/i })).toBeDisabled();
+    expectToBeEUIAriaDisabledButton(screen.getByRole('button', { name: /apply and close/i }));
   });
 
   it('should use correct activeVisualization', async () => {

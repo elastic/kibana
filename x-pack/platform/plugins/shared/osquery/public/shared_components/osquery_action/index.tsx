@@ -22,7 +22,7 @@ export interface OsqueryActionProps {
   defaultValues?: {};
   formType: 'steps' | 'simple';
   hideAgentsField?: boolean;
-  onSuccess?: () => void;
+  onSuccess?: (actionId: string) => void;
   addToTimeline?: AddToTimelineHandler;
 }
 

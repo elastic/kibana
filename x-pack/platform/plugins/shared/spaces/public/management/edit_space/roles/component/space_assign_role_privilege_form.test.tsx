@@ -80,8 +80,10 @@ const licenseMock = {
 
 const renderPrivilegeRolesForm = ({
   preSelectedRoles,
+  features = kibanaFeatures,
 }: {
   preSelectedRoles?: Role[];
+  features?: typeof kibanaFeatures;
 } = {}) => {
   return render(
     <EuiThemeProvider>
@@ -119,7 +121,7 @@ const renderPrivilegeRolesForm = ({
           <PrivilegesRolesForm
             {...{
               space,
-              features: kibanaFeatures,
+              features,
               closeFlyout,
               defaultSelected: preSelectedRoles,
               onSaveCompleted,
@@ -146,13 +148,17 @@ describe('PrivilegesRolesForm', () => {
     jest.clearAllMocks();
   });
 
-  it("would open the 'manage roles' link in a new tab", () => {
+  it("would open the 'manage roles' link in a new tab", async () => {
     getRolesSpy.mockResolvedValue([]);
     getAllKibanaPrivilegeSpy.mockResolvedValue(createRawKibanaPrivileges(kibanaFeatures));
 
     renderPrivilegeRolesForm();
 
     expect(screen.getByText('Manage roles')).toHaveAttribute('target', '_blank');
+
+    await waitFor(() =>
+      expect(screen.getByTestId('space-assign-role-create-roles-privilege-button')).toBeDisabled()
+    );
   });
 
   it('does not display the privilege selection buttons or customization form when no role is selected', async () => {
@@ -161,7 +167,9 @@ describe('PrivilegesRolesForm', () => {
 
     renderPrivilegeRolesForm();
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
+    await waitFor(() =>
+      expect(screen.getByTestId('space-assign-role-create-roles-privilege-button')).toBeDisabled()
+    );
 
     ['all', 'read', 'custom'].forEach((privilege) => {
       expect(screen.queryByTestId(`${privilege}-privilege-button`)).not.toBeInTheDocument();
@@ -183,11 +191,15 @@ describe('PrivilegesRolesForm', () => {
     );
   });
 
-  it('makes a request to refetch available roles if page transitions back from a user interaction page visibility change', () => {
+  it('makes a request to refetch available roles if page transitions back from a user interaction page visibility change', async () => {
     getRolesSpy.mockResolvedValue([]);
     getAllKibanaPrivilegeSpy.mockResolvedValue(createRawKibanaPrivileges(kibanaFeatures));
 
     renderPrivilegeRolesForm();
+
+    await waitFor(() =>
+      expect(screen.getByTestId('space-assign-role-create-roles-privilege-button')).toBeDisabled()
+    );
 
     expect(getRolesSpy).toHaveBeenCalledTimes(1);
 
@@ -197,7 +209,7 @@ describe('PrivilegesRolesForm', () => {
     // trigger page visibility change
     fireEvent(document, new Event('visibilitychange'));
 
-    expect(getRolesSpy).toHaveBeenCalledTimes(2);
+    await waitFor(() => expect(getRolesSpy).toHaveBeenCalledTimes(2));
   });
 
   it('renders with the assign roles button disabled when no base privileges or feature privileges are selected', async () => {
@@ -212,11 +224,11 @@ describe('PrivilegesRolesForm', () => {
       preSelectedRoles: roles,
     });
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(screen.getByTestId(`${FEATURE_PRIVILEGES_READ}-privilege-button`)).toHaveAttribute(
-      'aria-pressed',
-      String(false)
+    await waitFor(() =>
+      expect(screen.getByTestId(`${FEATURE_PRIVILEGES_READ}-privilege-button`)).toHaveAttribute(
+        'aria-pressed',
+        String(false)
+      )
     );
 
     expect(
@@ -260,11 +272,11 @@ describe('PrivilegesRolesForm', () => {
       preSelectedRoles: roles,
     });
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(screen.getByTestId(`${FEATURE_PRIVILEGES_READ}-privilege-button`)).toHaveAttribute(
-      'aria-pressed',
-      String(true)
+    await waitFor(() =>
+      expect(screen.getByTestId(`${FEATURE_PRIVILEGES_READ}-privilege-button`)).toHaveAttribute(
+        'aria-pressed',
+        String(true)
+      )
     );
 
     expect(
@@ -324,6 +336,8 @@ describe('PrivilegesRolesForm', () => {
 
   describe('applying custom privileges', () => {
     it('for a selection of roles pre-assigned to a space, the first encountered privilege with a custom privilege is used as the starting point', async () => {
+      const user = userEvent.setup({ delay: null });
+
       getRolesSpy.mockResolvedValue([]);
       getAllKibanaPrivilegeSpy.mockResolvedValue(createRawKibanaPrivileges(kibanaFeatures));
 
@@ -352,9 +366,16 @@ describe('PrivilegesRolesForm', () => {
         preSelectedRoles: roles,
       });
 
-      await waitFor(() => new Promise((resolve) => resolve(null)));
+      // Wait for KibanaPrivilegeTable to render — it only appears once kibanaPrivileges is loaded
+      // from the async fetchRequiredData call. custom-privilege-button renders immediately when
+      // roles are selected, so it is not a reliable sentinel for data-load completion.
+      await waitFor(() =>
+        expect(
+          screen.getByTestId(`${featureIds[0]}_${FEATURE_PRIVILEGES_READ}`)
+        ).toBeInTheDocument()
+      );
 
-      await userEvent.click(screen.getByTestId('custom-privilege-button'));
+      await user.click(screen.getByTestId('custom-privilege-button'));
 
       expect(screen.getByTestId(`${FEATURE_PRIVILEGES_CUSTOM}-privilege-button`)).toHaveAttribute(
         'aria-pressed',
@@ -377,7 +398,7 @@ describe('PrivilegesRolesForm', () => {
     });
 
     it('allows modifying individual features after selecting a base privilege within the customize table', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
 
       getRolesSpy.mockResolvedValue([]);
       getAllKibanaPrivilegeSpy.mockResolvedValue(createRawKibanaPrivileges(kibanaFeatures));
@@ -403,9 +424,11 @@ describe('PrivilegesRolesForm', () => {
 
       await user.click(screen.getByTestId('custom-privilege-button'));
 
-      expect(screen.getByTestId(`${FEATURE_PRIVILEGES_CUSTOM}-privilege-button`)).toHaveAttribute(
-        'aria-pressed',
-        String(true)
+      await waitFor(() =>
+        expect(screen.getByTestId(`${FEATURE_PRIVILEGES_CUSTOM}-privilege-button`)).toHaveAttribute(
+          'aria-pressed',
+          String(true)
+        )
       );
 
       expect(
@@ -419,6 +442,14 @@ describe('PrivilegesRolesForm', () => {
       );
 
       await user.click(screen.getByTestId('changeAllPrivilegesButton'));
+
+      // EUI sets pointer-events: none via inline style on the popover panel during its opening
+      // animation. With delay:null there is no buffer, so we must wait for it to clear before
+      // user-event can interact with the button inside.
+      await waitFor(() => {
+        const btn = screen.getByTestId(`changeAllPrivileges-${FEATURE_PRIVILEGES_READ}`);
+        expect(btn.closest('[style*="pointer-events: none"]')).toBeNull();
+      });
 
       // change all privileges to read
       await user.click(screen.getByTestId(`changeAllPrivileges-${FEATURE_PRIVILEGES_READ}`));
@@ -446,7 +477,7 @@ describe('PrivilegesRolesForm', () => {
     });
 
     it('prevents customization up to sub privilege level by default', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
 
       const roles: Role[] = [
         createRole('test_role_1', [
@@ -455,23 +486,34 @@ describe('PrivilegesRolesForm', () => {
       ];
 
       getRolesSpy.mockResolvedValue([]);
-      getAllKibanaPrivilegeSpy.mockResolvedValue(createRawKibanaPrivileges(kibanaFeatures));
 
-      const featuresWithSubFeatures = kibanaFeatures.filter((kibanaFeature) =>
+      // Render only the single feature-with-sub-features this spec asserts on. Rendering the full
+      // kibanaFeatures set makes each user.click re-render the entire privilege table, and the
+      // accumulated cost tips the test over Jest's 5s budget under CI load.
+      const featureUT = kibanaFeatures.filter((kibanaFeature) =>
         Boolean(kibanaFeature.subFeatures.length)
-      );
+      )[0];
+      const featuresUT = [featureUT];
+
+      getAllKibanaPrivilegeSpy.mockResolvedValue(createRawKibanaPrivileges(featuresUT));
 
       renderPrivilegeRolesForm({
         preSelectedRoles: roles,
+        features: featuresUT,
       });
+
+      // Wait for KibanaPrivilegeTable to render — it only appears once kibanaPrivileges is loaded
+      // from the async fetchRequiredData call. custom-privilege-button renders immediately when
+      // roles are selected, so it is not a reliable sentinel for data-load completion.
+      await waitFor(() =>
+        expect(screen.getByTestId(`${featureUT.id}_${FEATURE_PRIVILEGES_READ}`)).toBeInTheDocument()
+      );
 
       await user.click(screen.getByTestId('custom-privilege-button'));
 
       expect(
         screen.getByTestId('space-assign-role-privilege-customization-form')
       ).toBeInTheDocument();
-
-      const featureUT = featuresWithSubFeatures[0];
 
       // change a single feature with sub features to read from default privilege "none"
       await user.click(screen.getByTestId(`${featureUT.id}_${FEATURE_PRIVILEGES_READ}`));
@@ -484,11 +526,13 @@ describe('PrivilegesRolesForm', () => {
       );
 
       // sub feature table renders
-      expect(
-        screen.getByTestId(`${featureUT.category.id}_${featureUT.id}_subFeaturesTable`)
-      ).toBeInTheDocument();
+      await waitFor(() =>
+        expect(
+          screen.getByTestId(`${featureUT.category.id}_${featureUT.id}_subFeaturesTable`)
+        ).toBeInTheDocument()
+      );
 
-      // assert switch to customize sub feature can toggled
+      // assert switch to customize sub feature cannot be toggled
       expect(
         within(
           screen.getByTestId(
@@ -499,7 +543,7 @@ describe('PrivilegesRolesForm', () => {
     });
 
     it('supports customization up to sub privilege level only when security license allows', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
 
       const roles: Role[] = [
         createRole('test_role_1', [
@@ -513,23 +557,34 @@ describe('PrivilegesRolesForm', () => {
       });
 
       getRolesSpy.mockResolvedValue([]);
-      getAllKibanaPrivilegeSpy.mockResolvedValue(createRawKibanaPrivileges(kibanaFeatures));
 
-      const featuresWithSubFeatures = kibanaFeatures.filter((kibanaFeature) =>
+      // Render only the single feature-with-sub-features this spec asserts on. Rendering the full
+      // kibanaFeatures set makes each user.click re-render the entire privilege table, and the
+      // accumulated cost tips the test over Jest's 5s budget under CI load.
+      const featureUT = kibanaFeatures.filter((kibanaFeature) =>
         Boolean(kibanaFeature.subFeatures.length)
-      );
+      )[0];
+      const featuresUT = [featureUT];
+
+      getAllKibanaPrivilegeSpy.mockResolvedValue(createRawKibanaPrivileges(featuresUT));
 
       renderPrivilegeRolesForm({
         preSelectedRoles: roles,
+        features: featuresUT,
       });
+
+      // Wait for KibanaPrivilegeTable to render — it only appears once kibanaPrivileges is loaded
+      // from the async fetchRequiredData call. custom-privilege-button renders immediately when
+      // roles are selected, so it is not a reliable sentinel for data-load completion.
+      await waitFor(() =>
+        expect(screen.getByTestId(`${featureUT.id}_${FEATURE_PRIVILEGES_READ}`)).toBeInTheDocument()
+      );
 
       await user.click(screen.getByTestId('custom-privilege-button'));
 
       expect(
         screen.getByTestId('space-assign-role-privilege-customization-form')
       ).toBeInTheDocument();
-
-      const featureUT = featuresWithSubFeatures[0];
 
       // change a single feature with sub features to read from default privilege "none"
       await user.click(screen.getByTestId(`${featureUT.id}_${FEATURE_PRIVILEGES_READ}`));
@@ -542,11 +597,13 @@ describe('PrivilegesRolesForm', () => {
       );
 
       // sub feature table renders
-      expect(
-        screen.getByTestId(`${featureUT.category.id}_${featureUT.id}_subFeaturesTable`)
-      ).toBeInTheDocument();
+      await waitFor(() =>
+        expect(
+          screen.getByTestId(`${featureUT.category.id}_${featureUT.id}_subFeaturesTable`)
+        ).toBeInTheDocument()
+      );
 
-      // assert switch to customize sub feature can toggled
+      // assert switch to customize sub feature can be toggled
       expect(
         within(
           screen.getByTestId(

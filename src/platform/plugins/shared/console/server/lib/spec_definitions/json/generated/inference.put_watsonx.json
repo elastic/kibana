@@ -19,6 +19,31 @@
         "completion"
       ]
     },
+    "data_autocomplete_rules": {
+      "chunking_settings": {
+        "max_chunk_size": "",
+        "overlap": "",
+        "sentence_overlap": "",
+        "separator_group": "",
+        "separators": [],
+        "strategy": ""
+      },
+      "service": {
+        "__one_of": [
+          "watsonxai"
+        ]
+      },
+      "service_settings": {
+        "api_key": "",
+        "api_version": "",
+        "model_id": "",
+        "project_id": "",
+        "rate_limit": {
+          "requests_per_minute": ""
+        },
+        "url": ""
+      }
+    },
     "methods": [
       "PUT"
     ],
@@ -26,6 +51,7 @@
       "_inference/{task_type}/{watsonx_inference_id}"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put-watsonx",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-inference-put-watsonx",
     "availability": {
       "stack": true,
       "serverless": true

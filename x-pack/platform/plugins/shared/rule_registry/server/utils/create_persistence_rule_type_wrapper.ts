@@ -12,7 +12,7 @@ import {
   shouldCreateAlertsInAllSpaces,
   type RuleExecutorOptions,
 } from '@kbn/alerting-plugin/server';
-import { chunk, partition } from 'lodash';
+import { chunk, get, partition } from 'lodash';
 import {
   ALERT_INSTANCE_ID,
   ALERT_LAST_DETECTED,
@@ -28,11 +28,14 @@ import {
   TIMESTAMP,
   VERSION,
   ALERT_RULE_EXECUTION_TIMESTAMP,
+  CPS_SCOPE_LINKED_PROJECTS,
+  CPS_SCOPE_EXPRESSION,
 } from '@kbn/rule-data-utils';
 import { mapKeys, snakeCase } from 'lodash/fp';
 
 import type { UntypedRuleTypeAlerts } from '@kbn/alerting-plugin/server/types';
 import { SECURITY_SOLUTION_SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING } from '@kbn/management-settings-ids';
+import type { CpsData } from '@kbn/alerting-plugin/server';
 import type { IRuleDataClient } from '..';
 import { getCommonAlertFields } from './get_common_alert_fields';
 import type { CreatePersistenceRuleTypeWrapper } from './persistence_types';
@@ -62,12 +65,14 @@ const augmentAlerts = async <T>({
   kibanaVersion,
   currentTimeOverride,
   dangerouslyCreateAlertsInAllSpaces,
+  cpsData,
 }: {
   alerts: Array<{ _id: string; _source: T }>;
   options: RuleExecutorOptions<any, any, any, any, any>;
   kibanaVersion: string;
   currentTimeOverride: Date | undefined;
   dangerouslyCreateAlertsInAllSpaces?: boolean;
+  cpsData?: CpsData;
 }) => {
   const commonRuleFields = getCommonAlertFields(options, dangerouslyCreateAlertsInAllSpaces);
   const maintenanceWindowIds: string[] =
@@ -75,6 +80,18 @@ const augmentAlerts = async <T>({
 
   const currentDate = new Date();
   const timestampOverrideOrCurrent = currentTimeOverride ?? currentDate;
+
+  const maintenanceWindowIdsField = maintenanceWindowIds.length
+    ? { [ALERT_MAINTENANCE_WINDOW_IDS]: maintenanceWindowIds }
+    : {};
+  const cpsFields = cpsData
+    ? {
+        [CPS_SCOPE_EXPRESSION]: cpsData.resolvedExpression ?? null,
+        // `null` means linked projects could not be resolved for the run; an empty array means
+        // the resolved scope genuinely contains no linked projects.
+        [CPS_SCOPE_LINKED_PROJECTS]: cpsData.linkedProjects ?? null,
+      }
+    : {};
   return alerts.map((alert) => {
     return {
       ...alert,
@@ -83,9 +100,8 @@ const augmentAlerts = async <T>({
         [ALERT_START]: timestampOverrideOrCurrent,
         [ALERT_LAST_DETECTED]: timestampOverrideOrCurrent,
         [VERSION]: kibanaVersion,
-        ...(maintenanceWindowIds.length
-          ? { [ALERT_MAINTENANCE_WINDOW_IDS]: maintenanceWindowIds }
-          : {}),
+        ...maintenanceWindowIdsField,
+        ...cpsFields,
         ...commonRuleFields,
         ...alert._source,
       },
@@ -207,6 +223,24 @@ export const suppressAlertsInMemory = <
 };
 
 /**
+ * Reads a field from an alert document `_source` regardless of the document's source shape.
+ *
+ * Alerts are written by Kibana with flat (dotted) keys, but `_source` read back from
+ * Elasticsearch is not guaranteed to keep that shape: synthetic `_source` and ingest
+ * pipelines (e.g. `dot_expander`) return the same indexed fields as nested objects.
+ * Reading existing alerts with a bare `_source[field]` access silently misses such
+ * documents, which disables cross-execution alert suppression and results in duplicated
+ * alerts, so every read of an existing alert `_source` must go through this helper.
+ *
+ * `get` handles both shapes: it returns the value of the flat dotted key when the document
+ * has one, and otherwise walks the dotted path through the nested objects.
+ */
+export const getAlertSourceField = <T = unknown>(
+  source: object | null | undefined,
+  field: string
+): T | undefined => get(source, field);
+
+/**
  * Compare existing alert suppression date props with alert to suppressed alert values
  **/
 export const isExistingDateGtEqThanAlert = <
@@ -216,7 +250,7 @@ export const isExistingDateGtEqThanAlert = <
   alert: { _id: string; _source: T },
   property: typeof ALERT_SUPPRESSION_END | typeof ALERT_SUPPRESSION_START
 ) => {
-  const existingDate = existingAlert?._source?.[property];
+  const existingDate = getAlertSourceField<string>(existingAlert?._source, property);
   return existingDate ? existingDate >= alert._source[property].toISOString() : false;
 };
 
@@ -241,7 +275,8 @@ export const getUpdatedSuppressionBoundaries = <T extends SuppressionBoundaries>
   // start date can only be updated for alert created in the same rule execution
   // it can happen when alert was created in first bulk created, but some of the alerts can be suppressed in the next bulk create request
   if (
-    existingAlert?._source?.[ALERT_RULE_EXECUTION_UUID] === executionId &&
+    getAlertSourceField<string>(existingAlert?._source, ALERT_RULE_EXECUTION_UUID) ===
+      executionId &&
     isExistingDateGtEqThanAlert(existingAlert, alert, ALERT_SUPPRESSION_START)
   ) {
     boundaries[ALERT_SUPPRESSION_START] = alert._source[ALERT_SUPPRESSION_START];
@@ -261,6 +296,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
     return {
       ...type,
       executor: async (options) => {
+        const cpsData = options.cpsData;
         const result = await type.executor({
           ...options,
           services: {
@@ -320,6 +356,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   kibanaVersion: ruleDataClient.kibanaVersion,
                   currentTimeOverride: undefined,
                   dangerouslyCreateAlertsInAllSpaces: createAlertsInAllSpaces,
+                  cpsData,
                 });
 
                 const response = await ruleDataClientWriter.bulk({
@@ -485,10 +522,27 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                     BackendAlertWithSuppressionFields870
                   >(suppressionAlertSearchRequest);
 
+                // an incomplete response is not proof that no alert to suppress against exists,
+                // so fail the execution instead of creating duplicates of existing alerts
+                if (response.timed_out || (response._shards?.failed ?? 0) > 0) {
+                  throw new Error(
+                    `Suppression alert search returned an incomplete response, cannot determine suppression state of alert candidates: timed_out=${
+                      response.timed_out
+                    }, failed shards=${response._shards?.failed ?? 0}`
+                  );
+                }
+
                 const existingAlertsByInstanceId = response.hits.hits.reduce<
                   Record<string, estypes.SearchHit<BackendAlertWithSuppressionFields870>>
                 >((acc, hit) => {
-                  acc[hit._source[ALERT_INSTANCE_ID]] = hit;
+                  const instanceId = getAlertSourceField<string>(hit._source, ALERT_INSTANCE_ID);
+                  if (instanceId != null) {
+                    acc[instanceId] = hit;
+                  } else {
+                    logger.warn(
+                      `Suppression alert search returned document "${hit._id}" without a readable "${ALERT_INSTANCE_ID}" field, the document will be ignored for alert suppression`
+                    );
+                  }
                   return acc;
                 }, {});
 
@@ -504,7 +558,10 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
 
                   if (
                     !existingAlert ||
-                    existingAlert?._source?.[ALERT_RULE_EXECUTION_UUID] === options.executionId
+                    getAlertSourceField<string>(
+                      existingAlert._source,
+                      ALERT_RULE_EXECUTION_UUID
+                    ) === options.executionId
                   ) {
                     return true;
                   }
@@ -532,7 +589,10 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   // alert created in the same rule execution. Otherwise, we need to create a new alert to accommodate per rule execution suppression
                   if (isRuleExecutionOnly) {
                     return (
-                      existingAlert?._source?.[ALERT_RULE_EXECUTION_UUID] === options.executionId
+                      getAlertSourceField<string>(
+                        existingAlert?._source,
+                        ALERT_RULE_EXECUTION_UUID
+                      ) === options.executionId
                     );
                   } else {
                     return existingAlert != null;
@@ -543,7 +603,10 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   const existingAlert =
                     existingAlertsByInstanceId[alert._source[ALERT_INSTANCE_ID]];
                   const existingDocsCount =
-                    existingAlert._source?.[ALERT_SUPPRESSION_DOCS_COUNT] ?? 0;
+                    getAlertSourceField<number>(
+                      existingAlert._source,
+                      ALERT_SUPPRESSION_DOCS_COUNT
+                    ) ?? 0;
 
                   return [
                     {
@@ -599,6 +662,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   kibanaVersion: ruleDataClient.kibanaVersion,
                   currentTimeOverride,
                   dangerouslyCreateAlertsInAllSpaces: createAlertsInAllSpaces,
+                  cpsData,
                 });
 
                 const bulkResponse = await ruleDataClientWriter.bulk({

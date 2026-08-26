@@ -13,6 +13,7 @@ import { isSpaceAwarenessEnabled as _isSpaceAwarenessEnabled } from '../spaces/h
 
 import { AgentNotFoundError } from '../..';
 
+import { SO_SEARCH_LIMIT } from '../../../common/constants';
 import { AGENTS_INDEX } from '../../constants';
 import { createAppContextStartContractMock } from '../../mocks';
 import type { Agent } from '../../types';
@@ -25,11 +26,14 @@ import {
   closePointInTime,
   getAgentsByKuery,
   getAgentTags,
+  filterAgentIdsByNamespace,
   openPointInTime,
   updateAgent,
   _joinFilters,
   getByIds,
+  getAgentsById,
   fetchAllAgentsByKuery,
+  getAgentVersionsForAgentPolicyIds,
 } from './crud';
 
 jest.mock('../audit_logging');
@@ -81,9 +85,11 @@ describe('Agents CRUD test', () => {
     ids: string[],
     total: number,
     status: AgentStatus,
-    generateSource: (id: string) => Partial<Agent> = () => ({})
+    generateSource: (id: string) => Partial<Agent> = () => ({}),
+    pitId?: string
   ) {
     return {
+      ...(pitId ? { pit_id: pitId } : {}),
       hits: {
         total,
         hits: ids.map((id: string) => ({
@@ -172,9 +178,120 @@ describe('Agents CRUD test', () => {
         )
       );
     });
+
+    it('should apply namespace filter when spaceId is provided and space awareness is enabled', async () => {
+      isSpaceAwarenessEnabledMock.mockResolvedValue(true);
+      searchMock.mockResolvedValueOnce({
+        aggregations: { tags: { buckets: [{ key: 'finance-tag' }] } },
+      });
+
+      await getAgentTags(soClientMock, esClientMock, {
+        showInactive: false,
+        spaceId: 'finance',
+      });
+
+      const calledQuery = searchMock.mock.calls.at(-1)[0].query;
+      expect(JSON.stringify(calledQuery)).toContain('finance');
+    });
+
+    it('should not apply namespace filter when space awareness is disabled', async () => {
+      isSpaceAwarenessEnabledMock.mockResolvedValue(false);
+      searchMock.mockResolvedValueOnce({
+        aggregations: { tags: { buckets: [{ key: 'tag1' }] } },
+      });
+
+      await getAgentTags(soClientMock, esClientMock, {
+        showInactive: false,
+        spaceId: 'finance',
+      });
+
+      const calledQuery = searchMock.mock.calls.at(-1)[0].query;
+      expect(JSON.stringify(calledQuery)).not.toContain('finance');
+    });
+  });
+
+  describe('filterAgentIdsByNamespace', () => {
+    it('should return all ids unchanged when space awareness is disabled', async () => {
+      isSpaceAwarenessEnabledMock.mockResolvedValue(false);
+      (soClientMock.getCurrentNamespace as jest.Mock).mockReturnValue('default');
+
+      const result = await filterAgentIdsByNamespace(esClientMock, soClientMock, [
+        'agent1',
+        'agent2',
+      ]);
+
+      expect(result).toEqual(['agent1', 'agent2']);
+      expect(searchMock).not.toHaveBeenCalled();
+    });
+
+    it('should return empty array when input is empty', async () => {
+      isSpaceAwarenessEnabledMock.mockResolvedValue(true);
+
+      const result = await filterAgentIdsByNamespace(esClientMock, soClientMock, []);
+
+      expect(result).toEqual([]);
+      expect(searchMock).not.toHaveBeenCalled();
+    });
+
+    it('should filter ids by namespace when space awareness is enabled', async () => {
+      isSpaceAwarenessEnabledMock.mockResolvedValue(true);
+      (soClientMock.getCurrentNamespace as jest.Mock).mockReturnValue('finance');
+      searchMock.mockResolvedValueOnce({
+        hits: { hits: [{ _id: 'agent1' }] },
+      });
+
+      const result = await filterAgentIdsByNamespace(esClientMock, soClientMock, [
+        'agent1',
+        'agent2',
+      ]);
+
+      expect(result).toEqual(['agent1']);
+      expect(searchMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: AGENTS_INDEX,
+          query: expect.objectContaining({
+            bool: expect.objectContaining({
+              filter: expect.arrayContaining([{ terms: { _id: ['agent1', 'agent2'] } }]),
+            }),
+          }),
+        })
+      );
+    });
   });
 
   describe('getAgentsByKuery', () => {
+    it('should roll forward PIT id from search responses', async () => {
+      searchMock.mockResolvedValueOnce(getEsResponse(['1'], 1, 'online', () => ({}), 'pit-2'));
+
+      const firstRes = await getAgentsByKuery(esClientMock, soClientMock, {
+        showAgentless: true,
+        showInactive: false,
+        pitId: 'pit-1',
+      });
+
+      expect(searchMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          pit: expect.objectContaining({ id: 'pit-1' }),
+        })
+      );
+      expect(firstRes.pit).toBe('pit-2');
+
+      searchMock.mockResolvedValueOnce(getEsResponse(['2'], 1, 'online', () => ({}), 'pit-3'));
+
+      const secondRes = await getAgentsByKuery(esClientMock, soClientMock, {
+        showAgentless: true,
+        showInactive: false,
+        pitId: firstRes.pit,
+      });
+
+      expect(searchMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          pit: expect.objectContaining({ id: 'pit-2' }),
+        })
+      );
+      expect(secondRes.pit).toBe('pit-3');
+    });
+
     it('should return upgradeable on first page', async () => {
       searchMock
         .mockImplementationOnce(() =>
@@ -565,6 +682,34 @@ describe('Agents CRUD test', () => {
         expect(searchMock).toHaveBeenCalledTimes(1);
       });
     });
+
+    describe('kuery replace attributes', () => {
+      beforeEach(() => {
+        searchMock.mockImplementationOnce(() => Promise.resolve(getEsResponse([], 0, 'online')));
+      });
+
+      it('should replace .attributes in kuery', async () => {
+        await getAgentsByKuery(esClientMock, soClientMock, {
+          showInactive: true,
+          kuery: 'agent.attributes.agent.id:agent1',
+        });
+
+        const query = searchMock.mock.calls.at(-1)[0].query;
+        expect(query.bool.filter[0].bool.should[0].match).toEqual({ 'agent.agent.id': 'agent1' });
+      });
+
+      it('should not replace identifying_attributes in kuery', async () => {
+        await getAgentsByKuery(esClientMock, soClientMock, {
+          showInactive: true,
+          kuery: 'agent.identifying_attributes.agent.id:agent1',
+        });
+
+        const query = searchMock.mock.calls.at(-1)[0].query;
+        expect(query.bool.filter[0].bool.should[0].match).toEqual({
+          'agent.identifying_attributes.agent.id': 'agent1',
+        });
+      });
+    });
   });
 
   describe('update', () => {
@@ -578,6 +723,18 @@ describe('Agents CRUD test', () => {
       expect(mockedAuditLoggingService.writeCustomAuditLog).toHaveBeenCalledWith({
         message: 'User updated agent [id=test-agent-id]',
       });
+    });
+
+    it('should use retry_on_conflict', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      esClient.update.mockResolvedValueOnce({} as any);
+
+      await updateAgent(esClient, 'test-agent-id', { tags: ['new-tag'] });
+
+      expect(esClient.update).toHaveBeenCalledWith(
+        expect.objectContaining({ retry_on_conflict: 5 })
+      );
     });
   });
 
@@ -604,6 +761,47 @@ describe('Agents CRUD test', () => {
       expect(mockedAuditLoggingService.writeCustomAuditLog).toHaveBeenCalledWith({
         message: `User closing point in time query [pitId=test-pit]`,
       });
+    });
+  });
+
+  describe('getAgentsById()', () => {
+    beforeEach(() => {
+      (soClientMock.getCurrentNamespace as jest.Mock).mockReturnValue('foo');
+    });
+
+    it('chunks requests so each search stays within max_result_window (10k)', async () => {
+      const overflow = 400;
+      const firstBatch = Array.from({ length: SO_SEARCH_LIMIT }, (_, i) => `agent-${i}`);
+      const secondBatch = Array.from(
+        { length: overflow },
+        (_, i) => `agent-${SO_SEARCH_LIMIT + i}`
+      );
+      const agentIds = [...firstBatch, ...secondBatch];
+
+      searchMock
+        .mockResolvedValueOnce(
+          getEsResponse(firstBatch, firstBatch.length, 'online', (id) => ({
+            id,
+            namespaces: ['foo'],
+          }))
+        )
+        .mockResolvedValueOnce(
+          getEsResponse(secondBatch, secondBatch.length, 'online', (id) => ({
+            id,
+            namespaces: ['foo'],
+          }))
+        );
+
+      const result = await getAgentsById(esClientMock, soClientMock, agentIds);
+
+      expect(searchMock).toHaveBeenCalledTimes(2);
+      expect(searchMock.mock.calls[0][0].size).toBe(SO_SEARCH_LIMIT);
+      expect(searchMock.mock.calls[1][0].size).toBe(overflow);
+      expect(result).toHaveLength(agentIds.length);
+      expect(result[0]).toEqual(expect.objectContaining({ id: 'agent-0' }));
+      expect(result[SO_SEARCH_LIMIT]).toEqual(
+        expect.objectContaining({ id: `agent-${SO_SEARCH_LIMIT}` })
+      );
     });
   });
 
@@ -687,5 +885,130 @@ describe('Agents CRUD test', () => {
 
       expect(searchMock).toHaveBeenCalledTimes(3);
     });
+
+    it('should not include _source in the search body by default', async () => {
+      searchMock.mockResolvedValueOnce(createEsSearchResultMock([]));
+      for await (const _ of await fetchAllAgentsByKuery(esClientMock, soClientMock, {})) {
+        // consume to trigger search
+      }
+      expect(searchMock.mock.calls[0][0]).not.toHaveProperty('_source');
+    });
+
+    it('should pass _source through when provided', async () => {
+      searchMock.mockResolvedValueOnce(createEsSearchResultMock([]));
+      for await (const _ of await fetchAllAgentsByKuery(esClientMock, soClientMock, {
+        _source: ['policy_id'],
+      })) {
+        // consume to trigger search
+      }
+      expect(searchMock).toHaveBeenCalledWith(expect.objectContaining({ _source: ['policy_id'] }));
+    });
+
+    it('should pass fetchFields through as fields param when provided', async () => {
+      searchMock.mockResolvedValueOnce(createEsSearchResultMock([]));
+      for await (const _ of await fetchAllAgentsByKuery(esClientMock, soClientMock, {
+        fetchFields: ['status'],
+      })) {
+        // consume to trigger search
+      }
+      expect(searchMock).toHaveBeenCalledWith(expect.objectContaining({ fields: ['status'] }));
+    });
+
+    it('should map agents correctly from filtered _source', async () => {
+      const mock = createEsSearchResultMock(['agent-1']);
+      mock.hits.hits[0]._source = {
+        policy_id: 'p1',
+        local_metadata: { host: { hostname: 'h1' } },
+      } as any;
+      searchMock.mockResolvedValueOnce(mock).mockResolvedValueOnce(createEsSearchResultMock([]));
+
+      const agents: Agent[] = [];
+      for await (const page of await fetchAllAgentsByKuery(esClientMock, soClientMock, {
+        _source: ['policy_id', 'local_metadata.host.hostname'],
+      })) {
+        agents.push(...page);
+      }
+
+      expect(agents[0].id).toBe('agent-1');
+      expect(agents[0].policy_id).toBe('p1');
+      expect(agents[0].status).toBe('online');
+      expect((agents[0] as any).type).toBeUndefined();
+    });
+  });
+});
+
+describe('getAgentVersionsForAgentPolicyIds', () => {
+  it('returns an empty array when no policy ids are provided', async () => {
+    const searchMock = jest.fn();
+    const esClientMock = { search: searchMock } as unknown as ElasticsearchClient;
+
+    const result = await getAgentVersionsForAgentPolicyIds(
+      esClientMock,
+      savedObjectsClientMock.create(),
+      []
+    );
+
+    expect(result).toEqual([]);
+    expect(searchMock).not.toHaveBeenCalled();
+  });
+
+  it('queries with a term-or-variant filter and rolls up version-specific variants under their base policy id', async () => {
+    const searchMock = jest.fn().mockResolvedValue({
+      hits: {
+        hits: [
+          {
+            _source: {
+              policy_id: 'policy-a',
+              local_metadata: { elastic: { agent: { version: '8.15.0' } } },
+            },
+          },
+          {
+            // version-specific variant of policy-a — must roll up under 'policy-a'
+            _source: {
+              policy_id: 'policy-a#8.16',
+              local_metadata: { elastic: { agent: { version: '8.16.0' } } },
+            },
+          },
+          {
+            _source: {
+              policy_id: 'policy-b',
+              local_metadata: { elastic: { agent: { version: '8.15.0' } } },
+            },
+          },
+        ],
+      },
+    });
+    const esClientMock = { search: searchMock } as unknown as ElasticsearchClient;
+
+    const result = await getAgentVersionsForAgentPolicyIds(
+      esClientMock,
+      savedObjectsClientMock.create(),
+      ['policy-a', 'policy-b']
+    );
+
+    expect(searchMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: {
+          bool: {
+            filter: [
+              expect.objectContaining({
+                bool: expect.objectContaining({
+                  should: expect.arrayContaining([
+                    { terms: { policy_base_id: ['policy-a', 'policy-b'] } },
+                  ]),
+                }),
+              }),
+            ],
+          },
+        },
+      })
+    );
+
+    expect(result).toEqual(
+      expect.arrayContaining([
+        { policyId: 'policy-a', versionCounts: { '8.15.0': 1, '8.16.0': 1 } },
+        { policyId: 'policy-b', versionCounts: { '8.15.0': 1 } },
+      ])
+    );
   });
 });

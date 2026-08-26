@@ -15,11 +15,12 @@ import {
   selectEvaluators,
   withEvaluatorSpan,
   createSpanLatencyEvaluator,
+  createSkillInvocationEvaluator,
   createRagEvaluators,
   type GroundTruth,
-  type RetrievedDoc,
   type ExperimentTask,
   type TaskOutput,
+  type Evaluator,
 } from '@kbn/evals';
 import type { EsClient } from '@kbn/scout';
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -32,7 +33,9 @@ import {
   getStringMeta,
   getToolCallSteps,
 } from '@kbn/evals';
+import { isInternalTool } from '@kbn/agent-builder-common/tools';
 import type { AgentBuilderEvaluationChatClient } from './chat_client';
+import { extractSearchRetrievedDocs } from './rag_extractor';
 
 interface DatasetExample extends Example {
   input: {
@@ -58,6 +61,43 @@ export type EvaluateDataset = ({
 }) => Promise<void>;
 
 export type EvaluateExternalDataset = (datasetName: string) => Promise<void>;
+
+/**
+ * Builds a deterministic CODE evaluator that asserts the final assistant message contains every
+ * string listed under `metadata[metadataKey]`. Returns score 1 when the metadata key is absent or
+ * empty, so datasets that don't opt in are unaffected. Matching is case-insensitive, and `missing`
+ * is derived with the same rule so the debug metadata never contradicts the score.
+ */
+const createRequiredTermsEvaluator = ({
+  name,
+  metadataKey,
+}: {
+  name: string;
+  metadataKey: string;
+}): Evaluator => ({
+  name,
+  kind: 'CODE',
+  evaluate: async ({ output, metadata }) => {
+    const raw = metadata?.[metadataKey];
+    const required = Array.isArray(raw)
+      ? (raw as unknown[]).filter((term): term is string => typeof term === 'string')
+      : [];
+    if (required.length === 0) return { score: 1 };
+
+    const answer = getFinalAssistantMessage(output as TaskOutput);
+    const lowerAnswer = answer.toLowerCase();
+    const missing = required.filter((term) => !lowerAnswer.includes(term.toLowerCase()));
+
+    return {
+      score: missing.length === 0 ? 1 : 0,
+      metadata: {
+        [metadataKey]: required,
+        missing,
+        answerPreview: answer.slice(0, 600),
+      },
+    };
+  },
+});
 
 function configureExperiment({
   evaluators,
@@ -114,31 +154,53 @@ function configureExperiment({
   const ragEvaluators = createRagEvaluators({
     k: 10,
     relevanceThreshold: 1,
-    extractRetrievedDocs: (output: TaskOutput) => {
-      const steps =
-        (
-          output as {
-            steps?: Array<{
-              type: string;
-              tool_id?: string;
-              results?: Array<{ data?: { reference?: { id?: string; index?: string } } }>;
-            }>;
-          }
-        )?.steps ?? [];
-      return steps
-        .filter((step) => step.type === 'tool_call' && step.tool_id === 'platform.core.search')
-        .flatMap((step) => step.results ?? [])
-        .map((result) => ({
-          index: result.data?.reference?.index,
-          id: result.data?.reference?.id,
-        }))
-        .filter((doc): doc is RetrievedDoc => Boolean(doc.id && doc.index));
-    },
+    extractRetrievedDocs: extractSearchRetrievedDocs,
     extractGroundTruth: (referenceOutput: DatasetExample['output']) =>
       referenceOutput?.groundTruth ?? {},
   });
 
   const selectedEvaluators = selectEvaluators([
+    {
+      name: 'ExpectedToolCalled',
+      kind: 'CODE' as const,
+      evaluate: async ({ output, metadata }) => {
+        const expectedToolId = getStringMeta(metadata, 'expectedToolId');
+        if (!expectedToolId) return { score: 1 };
+
+        const toolCalls = getToolCallSteps(output as TaskOutput);
+        if (toolCalls.length === 0) {
+          return { score: 0, metadata: { reason: 'No tool calls found', expectedToolId } };
+        }
+
+        const usedToolIds = toolCalls.map((t) => t.tool_id).filter(Boolean);
+        const invoked = usedToolIds.includes(expectedToolId);
+
+        return {
+          score: invoked ? 1 : 0,
+          metadata: { expectedToolId, usedToolIds },
+        };
+      },
+    },
+    // Asserts a tool was NOT invoked in the turn — used by mutating-skill evals to enforce
+    // "no silent mutation" (e.g. start_rule_migration must not fire without user confirmation).
+    // Score 1 when the tool is absent; 0 when it was called. No-op when metadata is unset.
+    {
+      name: 'ShouldNotCallTool',
+      kind: 'CODE' as const,
+      evaluate: async ({ output, metadata }) => {
+        const shouldNotCallToolId = getStringMeta(metadata, 'shouldNotCallToolId');
+        if (!shouldNotCallToolId) return { score: 1 };
+
+        const toolCalls = getToolCallSteps(output as TaskOutput);
+        const usedToolIds = toolCalls.map((t) => t.tool_id).filter(Boolean);
+        const invoked = usedToolIds.includes(shouldNotCallToolId);
+
+        return {
+          score: invoked ? 0 : 1,
+          metadata: { shouldNotCallToolId, usedToolIds },
+        };
+      },
+    },
     {
       name: 'ToolUsageOnly',
       kind: 'CODE' as const,
@@ -146,12 +208,18 @@ function configureExperiment({
         const expectedOnlyToolId = getStringMeta(metadata, 'expectedOnlyToolId');
         if (!expectedOnlyToolId) return { score: 1 };
 
+        // Exclude attachment/filestore/internal framework tools (see isInternalTool).
         const toolCalls = getToolCallSteps(output as TaskOutput);
-        if (toolCalls.length === 0) {
-          return { score: 0, metadata: { reason: 'No tool calls found', expectedOnlyToolId } };
+        const domainToolCalls = toolCalls.filter((t) => t.tool_id && !isInternalTool(t.tool_id));
+
+        if (domainToolCalls.length === 0) {
+          return {
+            score: 0,
+            metadata: { reason: 'No domain tool calls found', expectedOnlyToolId },
+          };
         }
 
-        const usedToolIds = toolCalls.map((t) => t.tool_id).filter(Boolean);
+        const usedToolIds = domainToolCalls.map((t) => t.tool_id).filter(Boolean);
         const hasExpected = usedToolIds.includes(expectedOnlyToolId);
         const allExpected = usedToolIds.every((id) => id === expectedOnlyToolId);
 
@@ -197,6 +265,14 @@ function configureExperiment({
         };
       },
     },
+    // Asserts seeded alert _ids appear verbatim in the final response (alert-triage grounded evals).
+    createRequiredTermsEvaluator({
+      name: 'RequiredAlertIdsInResponse',
+      metadataKey: 'requiredAlertIds',
+    }),
+    // Guards that literal terms (e.g. seeded risk scores) appear in the final response, catching
+    // regressions where the tool silently reads 0 for fields like kibana.alert.risk_score.
+    createRequiredTermsEvaluator({ name: 'RequiredTermsInResponse', metadataKey: 'requiredTerms' }),
     ...createQuantitativeCorrectnessEvaluators(),
     createQuantitativeGroundednessEvaluator(),
     ...ragEvaluators,
@@ -208,6 +284,85 @@ function configureExperiment({
         spanName: 'Converse',
       }),
     }),
+    createSkillInvocationEvaluator({
+      traceEsClient,
+      log,
+      skillName: 'data-exploration',
+    }),
+    {
+      name: 'ExpectedSkillInvocation',
+      kind: 'CODE' as const,
+      evaluate: async ({ output, metadata }) => {
+        const expectedSkill = getStringMeta(metadata, 'expectedSkill');
+        const shouldNotActivate = getStringMeta(metadata, 'shouldNotActivateSkill');
+        const skillName = expectedSkill ?? shouldNotActivate;
+        if (!skillName) return { score: 1 };
+        if (!/^[a-zA-Z0-9_-]+$/.test(skillName)) {
+          return { score: null, label: 'error', explanation: `Invalid skill name: ${skillName}` };
+        }
+
+        const loadedSkills = (() => {
+          const toolCalls = getToolCallSteps(output as TaskOutput);
+          const seen: string[] = [];
+
+          for (const step of toolCalls) {
+            const stepRecord = step as Record<string, unknown>;
+            const stepParams =
+              (stepRecord.params as Record<string, unknown> | undefined) ??
+              (stepRecord.arguments as Record<string, unknown> | undefined);
+
+            if (step.tool_id === 'load_skill') {
+              const skillParam = stepParams?.skill;
+              if (typeof skillParam === 'string') seen.push(skillParam);
+
+              for (const result of step.results ?? []) {
+                const skill = (
+                  result as { data?: { skill?: { name?: string; id?: string; path?: string } } }
+                )?.data?.skill;
+                if (typeof skill?.name === 'string') seen.push(skill.name);
+                if (typeof skill?.id === 'string') seen.push(skill.id);
+                if (typeof skill?.path === 'string') seen.push(skill.path);
+              }
+            }
+
+            if (step.tool_id === 'read_file' || step.tool_id === 'filestore.read') {
+              const path = stepParams?.path;
+              if (typeof path === 'string') seen.push(path);
+            }
+          }
+
+          return [...new Set(seen.filter(Boolean))];
+        })();
+
+        const isSkillPresent = (name: string): boolean => {
+          const lower = name.toLowerCase();
+          const pathSegment = lower.replace(/\./g, '/');
+          return loadedSkills.some((n) => {
+            const nl = n.toLowerCase();
+            return (
+              nl === lower || nl.endsWith(`.${lower}`) || nl.includes(`/${pathSegment}/skill.md`)
+            );
+          });
+        };
+
+        const invoked = isSkillPresent(skillName);
+
+        if (expectedSkill) {
+          return {
+            score: invoked ? 1 : 0,
+            metadata: { expectedSkill, invoked, loadedNames: loadedSkills },
+          };
+        }
+        return {
+          score: invoked ? 0 : 1,
+          metadata: {
+            shouldNotActivateSkill: shouldNotActivate,
+            invoked,
+            loadedNames: loadedSkills,
+          },
+        };
+      },
+    },
   ]);
 
   return { task, evaluators: selectedEvaluators };
@@ -215,13 +370,13 @@ function configureExperiment({
 
 export function createEvaluateDataset({
   evaluators,
-  phoenixClient,
+  executorClient,
   chatClient,
   traceEsClient,
   log,
 }: {
   evaluators: DefaultEvaluators;
-  phoenixClient: EvalsExecutorClient;
+  executorClient: EvalsExecutorClient;
   chatClient: AgentBuilderEvaluationChatClient;
   traceEsClient: EsClient;
   log: ToolingLog;
@@ -248,9 +403,9 @@ export function createEvaluateDataset({
       log,
     });
 
-    await phoenixClient.runExperiment(
+    await executorClient.runExperiment(
       {
-        dataset,
+        datasets: [dataset],
         task,
       },
       selectedEvaluators
@@ -260,13 +415,13 @@ export function createEvaluateDataset({
 
 export function createEvaluateExternalDataset({
   evaluators,
-  phoenixClient,
+  executorClient,
   chatClient,
   traceEsClient,
   log,
 }: {
   evaluators: DefaultEvaluators;
-  phoenixClient: EvalsExecutorClient;
+  executorClient: EvalsExecutorClient;
   chatClient: AgentBuilderEvaluationChatClient;
   traceEsClient: EsClient;
   log: ToolingLog;
@@ -279,13 +434,16 @@ export function createEvaluateExternalDataset({
       log,
     });
 
-    await phoenixClient.runExperiment(
+    await executorClient.runExperiment(
       {
-        dataset: {
-          name: datasetName,
-          description: 'External dataset resolved from Phoenix by name',
-          examples: [], // Examples will be loaded from Phoenix, not provided in code
-        },
+        datasets: [
+          {
+            name: datasetName,
+            description: 'External dataset resolved from Elasticsearch by name',
+            // Examples are resolved from upstream dataset storage, not provided in code.
+            examples: [],
+          },
+        ],
         task,
         trustUpstreamDataset: true,
       },

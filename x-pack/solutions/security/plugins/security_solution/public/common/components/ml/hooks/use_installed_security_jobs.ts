@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MlSummaryJob } from '@kbn/ml-plugin/public';
+import type { MlSummaryJob } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
 import { useMemo } from 'react';
 import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
 import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';

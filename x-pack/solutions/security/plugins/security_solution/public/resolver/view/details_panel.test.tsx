@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import { Provider } from 'react-redux';
+import { Provider } from 'react-redux-v7';
 import { render } from '@testing-library/react';
 import { Router } from '@kbn/shared-ux-router';
 import { I18nProvider } from '@kbn/i18n-react';
-import { TestProviders, createMockStore, mockGlobalState } from '../../common/mock';
+import { createMockStore, mockGlobalState, TestProviders } from '../../common/mock';
 import type { ResolverState } from '../types';
 import { createMemoryHistory } from 'history';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -18,6 +18,7 @@ import { DetailsPanel } from './details_panel';
 import { EMPTY_RESOLVER } from '../store/helpers';
 import { uiSetting } from '../mocks/ui_setting';
 import '../test_utilities/extend_jest';
+import { cellActionRenderer } from '../../flyout_v2/shared/components/cell_actions';
 
 const defaultInstanceID = 'details-panel-test';
 const parameters = { databaseDocumentID: 'id', indices: [], agentId: '', filters: {} };
@@ -35,16 +36,6 @@ const renderDetailsPanel = ({
   const store = createMockStore(
     {
       ...mockGlobalState,
-      sourcerer: {
-        ...mockGlobalState.sourcerer,
-        sourcererScopes: {
-          ...mockGlobalState.sourcerer.sourcererScopes,
-          analyzer: {
-            ...mockGlobalState.sourcerer.sourcererScopes.default,
-            selectedPatterns: [],
-          },
-        },
-      },
       analyzer: {
         'details-panel-test': reduxState,
       },
@@ -67,7 +58,10 @@ const renderDetailsPanel = ({
       <I18nProvider>
         <Router history={history}>
           <Provider store={store}>
-            <DetailsPanel resolverComponentInstanceID={resolverComponentInstanceID} />
+            <DetailsPanel
+              resolverComponentInstanceID={resolverComponentInstanceID}
+              renderCellActions={cellActionRenderer}
+            />
           </Provider>
         </Router>
       </I18nProvider>

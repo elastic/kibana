@@ -93,7 +93,7 @@ export const RuleFlyout = ({
   return (
     <>
       {isShowRequestScreenVisible ? (
-        <RuleFlyoutShowRequest isEdit={isEdit} onClose={onCloseShowRequest} />
+        <RuleFlyoutShowRequest onClose={onCloseShowRequest} />
       ) : isConnectorsScreenVisible ? (
         <RuleFlyoutSelectConnector onClose={onCloseConnectorsScreen} />
       ) : (

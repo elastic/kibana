@@ -9,8 +9,12 @@ paths:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
       operationId: PrivMonPrivileges
+      deprecated: true
       summary: Run a privileges check on Privilege Monitoring
-      description: Check if the current user has all required permissions for Privilege Monitoring
+      description: |
+        **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
+
+        Check if the current user has all required permissions for Privilege Monitoring.
       responses:
         '200':
           description: Successful response
@@ -18,10 +22,13 @@ paths:
             application/json:
               schema:
                 $ref: '../common/common.schema.yaml#/components/schemas/EntityAnalyticsPrivileges'
-              example:
-                privileges:
-                  elasticsearch:
-                    index:
-                      '.entity_analytics.monitoring.user-default':
-                        read: true
-                has_all_required: true
+              examples:
+                PrivMonPrivilegesResponse:
+                  summary: Privileges check response
+                  value:
+                    privileges:
+                      elasticsearch:
+                        index:
+                          '.entity_analytics.monitoring.user-default':
+                            read: true
+                    has_all_required: true

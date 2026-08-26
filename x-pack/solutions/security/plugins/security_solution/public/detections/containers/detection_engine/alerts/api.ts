@@ -19,6 +19,7 @@ import {
   DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL,
 } from '../../../../../common/constants';
 import { HOST_METADATA_GET_ROUTE } from '../../../../../common/endpoint/constants';
+import { searchAttacks } from '../../../../common/containers/attacks/api';
 import { KibanaServices } from '../../../../common/lib/kibana';
 import type {
   BasicSignals,
@@ -81,6 +82,21 @@ export const fetchQueryUnifiedAlerts = async <Hit, Aggregations>({
 };
 
 /**
+ * Fetch Attacks by providing a query via the public attacks API.
+ *
+ * @param query String to match a dsl
+ * @param signal to cancel request
+ *
+ * @throws An error if response is not OK
+ */
+export const fetchQueryAttacks = async <Hit, Aggregations>({
+  query,
+  signal,
+}: QueryAlerts): Promise<AlertSearchResponse<Hit, Aggregations>> => {
+  return searchAttacks<AlertSearchResponse<Hit, Aggregations>>({ query, signal });
+};
+
+/**
  * Fetch Alerts by providing a query
  *
  * @param query String to match a dsl
@@ -116,11 +132,18 @@ export const updateAlertStatusByQuery = async ({
   status,
   signal,
   reason,
+  runtimeFields,
 }: UpdateAlertStatusByQueryProps): Promise<estypes.UpdateByQueryResponse> =>
   KibanaServices.get().http.fetch(DETECTION_ENGINE_SIGNALS_STATUS_URL, {
     version: '2023-10-31',
     method: 'POST',
-    body: JSON.stringify({ conflicts: 'proceed', status, query, reason }),
+    body: JSON.stringify({
+      conflicts: 'proceed',
+      status,
+      query,
+      reason,
+      runtime_fields: runtimeFields,
+    }),
     signal,
   });
 

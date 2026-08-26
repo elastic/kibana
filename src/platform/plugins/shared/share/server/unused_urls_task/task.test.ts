@@ -451,34 +451,39 @@ describe('unused_urls_task', () => {
         taskManager: mockTaskManager,
         checkInterval,
         isEnabled: true,
+        logger: mockLogger,
       });
 
       expect(mockTaskManager.ensureScheduled).toHaveBeenCalledWith(expectedTaskInstance);
     });
 
-    it('should throw an error if scheduling fails with a message', async () => {
+    it('should log an error if scheduling fails with a message', async () => {
       const errorMessage = 'Scheduling failed';
       mockTaskManager.ensureScheduled.mockRejectedValue(new Error(errorMessage));
 
-      await expect(
-        scheduleUnusedUrlsCleanupTask({
-          taskManager: mockTaskManager,
-          checkInterval,
-          isEnabled: true,
-        })
-      ).rejects.toThrow(errorMessage);
+      await scheduleUnusedUrlsCleanupTask({
+        taskManager: mockTaskManager,
+        checkInterval,
+        isEnabled: true,
+        logger: mockLogger,
+      });
+
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'Failed to schedule unused URLs cleanup task. Error: Scheduling failed'
+      );
     });
 
-    it('should throw a generic error if scheduling fails without a message', async () => {
+    it('should log a generic error if scheduling fails without a message', async () => {
       mockTaskManager.ensureScheduled.mockRejectedValue(new Error());
 
-      await expect(
-        scheduleUnusedUrlsCleanupTask({
-          taskManager: mockTaskManager,
-          checkInterval,
-          isEnabled: true,
-        })
-      ).rejects.toThrow('Failed to schedule unused URLs cleanup task');
+      await scheduleUnusedUrlsCleanupTask({
+        taskManager: mockTaskManager,
+        checkInterval,
+        isEnabled: true,
+        logger: mockLogger,
+      });
+
+      expect(mockLogger.error).toHaveBeenCalledWith('Failed to schedule unused URLs cleanup task.');
     });
 
     it('should remove the task if isEnabled is false and not run it', async () => {
@@ -488,6 +493,7 @@ describe('unused_urls_task', () => {
         taskManager: mockTaskManager,
         checkInterval,
         isEnabled: false,
+        logger: mockLogger,
       });
 
       expect(mockTaskManager.ensureScheduled).not.toHaveBeenCalled();

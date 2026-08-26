@@ -6,12 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import type {
-  ExternalReferenceAttachmentAttributes,
-  ExternalReferenceSOAttachmentAttributes,
-  Case,
-  PersistableStateAttachment,
-} from '@kbn/cases-plugin/common/types/domain';
+import type { Case } from '@kbn/cases-plugin/common/types/domain';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import {
@@ -19,9 +14,6 @@ import {
   getPostCaseRequest,
   postCommentUserReq,
   postCommentAlertReq,
-  persistableStateAttachment,
-  postExternalReferenceSOReq,
-  postExternalReferenceESReq,
 } from '../../../../common/lib/mock';
 import {
   deleteAllCaseItems,
@@ -66,7 +58,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should retrieve a single attachment', async () => {
         const response = await bulkGetAttachments({
-          attachmentIds: [updatedCase.comments![0].id],
+          savedObjectIds: [updatedCase.comments![0].id],
           caseId: updatedCase.id,
           supertest,
         });
@@ -78,7 +70,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should retrieve a multiple attachments', async () => {
         const response = await bulkGetAttachments({
-          attachmentIds: [updatedCase.comments![0].id, updatedCase.comments![1].id],
+          savedObjectIds: [updatedCase.comments![0].id, updatedCase.comments![1].id],
           caseId: updatedCase.id,
           supertest,
         });
@@ -91,7 +83,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('populates the errors field with attachments that could not be found', async () => {
         const response = await bulkGetAttachments({
-          attachmentIds: [updatedCase.comments![0].id, 'does-not-exist'],
+          savedObjectIds: [updatedCase.comments![0].id, 'does-not-exist'],
           caseId: updatedCase.id,
           supertest,
           expectedHttpCode: 200,
@@ -99,85 +91,13 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(response.attachments.length).to.be(1);
         expect(response.errors.length).to.be(1);
-        expect(response.errors[0]).to.eql({
-          error: 'Not Found',
-          message: 'Saved object [cases-comments/does-not-exist] not found',
-          status: 404,
-          attachmentId: 'does-not-exist',
-        });
-      });
-    });
-
-    describe('inject references into attributes', () => {
-      it('should inject the persistable state attachment references into the attributes', async () => {
-        const postedCase = await createCase(supertest, postCaseReq);
-        const patchedCase = await createComment({
-          supertest,
-          caseId: postedCase.id,
-          params: persistableStateAttachment,
-        });
-
-        const response = await bulkGetAttachments({
-          attachmentIds: [patchedCase.comments![0].id],
-          caseId: patchedCase.id,
-          supertest,
-        });
-
-        const persistableState = response.attachments[0] as PersistableStateAttachment;
-
-        expect(persistableState.persistableStateAttachmentState).to.eql(
-          persistableStateAttachment.persistableStateAttachmentState
-        );
-      });
-
-      it("should inject saved object external reference style attachment's references into the attributes", async () => {
-        const postedCase = await createCase(supertest, postCaseReq);
-        const patchedCase = await createComment({
-          supertest,
-          caseId: postedCase.id,
-          params: postExternalReferenceSOReq,
-        });
-
-        const response = await bulkGetAttachments({
-          attachmentIds: [patchedCase.comments![0].id],
-          caseId: patchedCase.id,
-          supertest,
-        });
-
-        const externalRefSO = response.attachments[0] as ExternalReferenceSOAttachmentAttributes;
-
-        expect(externalRefSO.externalReferenceId).to.eql(
-          postExternalReferenceSOReq.externalReferenceId
-        );
-        expect(externalRefSO.externalReferenceStorage.soType).to.eql(
-          postExternalReferenceSOReq.externalReferenceStorage.soType
-        );
-        expect(externalRefSO.externalReferenceStorage.type).to.eql(
-          postExternalReferenceSOReq.externalReferenceStorage.type
-        );
-      });
-
-      it("should inject the elasticsearch external reference style attachment's references into the attributes", async () => {
-        const postedCase = await createCase(supertest, postCaseReq);
-        const patchedCase = await createComment({
-          supertest,
-          caseId: postedCase.id,
-          params: postExternalReferenceESReq,
-        });
-
-        const response = await bulkGetAttachments({
-          attachmentIds: [patchedCase.comments![0].id],
-          caseId: patchedCase.id,
-          supertest,
-        });
-
-        const externalRefES = response.attachments[0] as ExternalReferenceAttachmentAttributes;
-
-        expect(externalRefES.externalReferenceId).to.eql(
-          postExternalReferenceESReq.externalReferenceId
-        );
-        expect(externalRefES.externalReferenceStorage.type).to.eql(
-          postExternalReferenceESReq.externalReferenceStorage.type
+        expect(response.errors[0].error).to.eql('Not Found');
+        expect(response.errors[0].status).to.eql(404);
+        expect(response.errors[0].savedObjectId).to.eql('does-not-exist');
+        // The not-found SO type depends on the attachments feature flag (legacy
+        // `cases-comments` when off, unified `cases-attachments` when on).
+        expect(response.errors[0].message).to.match(
+          /Saved object \[cases-(comments|attachments)\/does-not-exist\] not found/
         );
       });
     });
@@ -192,8 +112,8 @@ export default ({ getService }: FtrProviderContext): void => {
       describe('security and observability cases', () => {
         let secCase: Case;
         let obsCase: Case;
-        let secAttachmentId: string;
-        let obsAttachmentId: string;
+        let secSavedObjectId: string;
+        let obsSavedObjectId: string;
 
         beforeEach(async () => {
           [secCase, obsCase] = await Promise.all([
@@ -234,8 +154,8 @@ export default ({ getService }: FtrProviderContext): void => {
             }),
           ]);
 
-          secAttachmentId = secCase.comments![0].id;
-          obsAttachmentId = obsCase.comments![0].id;
+          secSavedObjectId = secCase.comments![0].id;
+          obsSavedObjectId = obsCase.comments![0].id;
         });
 
         it('should be able to read attachments', async () => {
@@ -244,78 +164,78 @@ export default ({ getService }: FtrProviderContext): void => {
               user: globalRead,
               owners: ['securitySolutionFixture'],
               caseId: secCase.id,
-              attachmentIds: [secAttachmentId],
+              savedObjectIds: [secSavedObjectId],
             },
             {
               user: globalRead,
               owners: ['observabilityFixture'],
               caseId: obsCase.id,
-              attachmentIds: [obsAttachmentId],
+              savedObjectIds: [obsSavedObjectId],
             },
             {
               user: superUser,
               owners: ['securitySolutionFixture'],
               caseId: secCase.id,
-              attachmentIds: [secAttachmentId],
+              savedObjectIds: [secSavedObjectId],
             },
             {
               user: superUser,
               owners: ['observabilityFixture'],
               caseId: obsCase.id,
-              attachmentIds: [obsAttachmentId],
+              savedObjectIds: [obsSavedObjectId],
             },
             {
               user: secOnlyRead,
               owners: ['securitySolutionFixture'],
               caseId: secCase.id,
-              attachmentIds: [secAttachmentId],
+              savedObjectIds: [secSavedObjectId],
             },
             {
               user: obsOnlyRead,
               owners: ['observabilityFixture'],
               caseId: obsCase.id,
-              attachmentIds: [obsAttachmentId],
+              savedObjectIds: [obsSavedObjectId],
             },
             {
               user: obsSecRead,
               owners: ['securitySolutionFixture'],
               caseId: secCase.id,
-              attachmentIds: [secAttachmentId],
+              savedObjectIds: [secSavedObjectId],
             },
             {
               user: obsSecRead,
               owners: ['observabilityFixture'],
               caseId: obsCase.id,
-              attachmentIds: [obsAttachmentId],
+              savedObjectIds: [obsSavedObjectId],
             },
             {
               user: obsSec,
               owners: ['securitySolutionFixture'],
               caseId: secCase.id,
-              attachmentIds: [secAttachmentId],
+              savedObjectIds: [secSavedObjectId],
             },
             {
               user: obsSec,
               owners: ['observabilityFixture'],
               caseId: obsCase.id,
-              attachmentIds: [obsAttachmentId],
+              savedObjectIds: [obsSavedObjectId],
             },
             {
               user: secOnly,
               owners: ['securitySolutionFixture'],
               caseId: secCase.id,
-              attachmentIds: [secAttachmentId],
+              savedObjectIds: [secSavedObjectId],
             },
             {
               user: obsOnly,
               owners: ['observabilityFixture'],
               caseId: obsCase.id,
-              attachmentIds: [obsAttachmentId],
+              savedObjectIds: [obsSavedObjectId],
             },
           ]) {
             const { attachments, errors } = await bulkGetAttachments({
               supertest: supertestWithoutAuth,
-              attachmentIds: scenario.attachmentIds,
+              savedObjectIds: scenario.savedObjectIds,
               caseId: scenario.caseId,
               auth: { user: scenario.user, space: 'space1' },
             });
@@ -334,7 +254,7 @@ export default ({ getService }: FtrProviderContext): void => {
         it('should return an association error when an observability attachment is requested for a security case', async () => {
           const { attachments, errors } = await bulkGetAttachments({
             supertest: supertestWithoutAuth,
-            attachmentIds: [secAttachmentId, obsAttachmentId],
+            savedObjectIds: [secSavedObjectId, obsSavedObjectId],
             caseId: secCase.id,
             auth: { user: secOnlyRead, space: 'space1' },
           });
@@ -343,7 +263,7 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(attachments[0].owner).to.be('securitySolutionFixture');
           expect(errors.length).to.be(1);
           expect(errors[0]).to.eql({
-            attachmentId: obsAttachmentId,
+            savedObjectId: obsSavedObjectId,
             error: 'Bad Request',
             message: `Attachment is not attached to case id=${secCase.id}`,
             status: 400,
@@ -353,7 +273,7 @@ export default ({ getService }: FtrProviderContext): void => {
         it('should return an authorization error when a security solution user is attempting to retrieve an observability attachment', async () => {
           await bulkGetAttachments({
             supertest: supertestWithoutAuth,
-            attachmentIds: [obsAttachmentId],
+            savedObjectIds: [obsSavedObjectId],
             caseId: obsCase.id,
             auth: { user: secOnlyRead, space: 'space1' },
             expectedHttpCode: 403,
@@ -363,7 +283,7 @@ export default ({ getService }: FtrProviderContext): void => {
         it('should return authorization error when a observability user requests a security attachment for a security case', async () => {
           await bulkGetAttachments({
             supertest: supertestWithoutAuth,
-            attachmentIds: [secAttachmentId],
+            savedObjectIds: [secSavedObjectId],
             caseId: secCase.id,
             auth: { user: obsOnlyRead, space: 'space1' },
             expectedHttpCode: 403,
@@ -373,21 +293,23 @@ export default ({ getService }: FtrProviderContext): void => {
         it('should return an error for the observability attachment that is not associated to the case, and an error for an unknown attachment', async () => {
           const { attachments, errors } = await bulkGetAttachments({
             supertest: supertestWithoutAuth,
-            attachmentIds: [obsAttachmentId, 'does-not-exist'],
+            savedObjectIds: [obsSavedObjectId, 'does-not-exist'],
             caseId: secCase.id,
             auth: { user: secOnly, space: 'space1' },
           });
 
           expect(attachments.length).to.be(0);
           expect(errors.length).to.be(2);
-          expect(errors[0]).to.eql({
-            error: 'Not Found',
-            message: 'Saved object [cases-comments/does-not-exist] not found',
-            status: 404,
-            attachmentId: 'does-not-exist',
-          });
+          expect(errors[0].error).to.eql('Not Found');
+          expect(errors[0].status).to.eql(404);
+          expect(errors[0].savedObjectId).to.eql('does-not-exist');
+          // The not-found SO type depends on the attachments feature flag (legacy
+          // `cases-comments` when off, unified `cases-attachments` when on).
+          expect(errors[0].message).to.match(
+            /Saved object \[cases-(comments|attachments)\/does-not-exist\] not found/
+          );
           expect(errors[1]).to.eql({
-            attachmentId: obsAttachmentId,
+            savedObjectId: obsSavedObjectId,
             error: 'Bad Request',
             message: `Attachment is not attached to case id=${secCase.id}`,
             status: 400,
@@ -422,7 +344,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
           await bulkGetAttachments({
             supertest: supertestWithoutAuth,
-            attachmentIds: [patchedCase.comments![0].id],
+            savedObjectIds: [patchedCase.comments![0].id],
             caseId: newCase.id,
             auth: {
               user: scenario.user,
@@ -437,7 +359,7 @@ export default ({ getService }: FtrProviderContext): void => {
     describe('errors', () => {
       it('400s when requesting more than 100 attachments', async () => {
         await bulkGetAttachments({
-          attachmentIds: Array(101).fill('foobar'),
+          savedObjectIds: Array(101).fill('foobar'),
           caseId: 'id',
           expectedHttpCode: 400,
           supertest,
@@ -446,7 +368,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('400s when requesting zero attachments', async () => {
         await bulkGetAttachments({
-          attachmentIds: [],
+          savedObjectIds: [],
           caseId: 'id',
           expectedHttpCode: 400,
           supertest,

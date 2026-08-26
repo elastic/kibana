@@ -118,7 +118,7 @@ export const createRenameActionDescriptor = (
   uiSession: UISession,
   core: CoreStart
 ): IClickActionDescriptor => ({
-  iconType: 'pencil',
+  icon: 'pencil',
   label: <FormattedMessage id="data.mgmt.searchSessions.actionRename" defaultMessage="Edit name" />,
   onClick: async () => {
     const ref = core.overlays.openModal(

@@ -87,6 +87,40 @@ describe('Azure Open AI Utils', () => {
       const sanitizedBodyString = sanitizeRequest('https://randostring.ai', bodyString);
       expect(sanitizedBodyString).toEqual(bodyString);
     });
+
+    it('injects defaultModel into body when body has no model and defaultModel is provided', () => {
+      const body = {
+        messages: [{ role: 'user', content: 'This is a test' }],
+      };
+      [chatUrl, completionUrl, completionExtensionsUrl].forEach((url: string) => {
+        const sanitizedBodyString = sanitizeRequest(url, JSON.stringify(body), 'gpt-4o');
+        const parsed = JSON.parse(sanitizedBodyString);
+        expect(parsed.model).toEqual('gpt-4o');
+      });
+    });
+
+    it('preserves existing model in body when defaultModel is provided', () => {
+      const body = {
+        model: 'gpt-4-turbo',
+        messages: [{ role: 'user', content: 'This is a test' }],
+      };
+      [chatUrl, completionUrl, completionExtensionsUrl].forEach((url: string) => {
+        const sanitizedBodyString = sanitizeRequest(url, JSON.stringify(body), 'gpt-4o');
+        const parsed = JSON.parse(sanitizedBodyString);
+        expect(parsed.model).toEqual('gpt-4-turbo');
+      });
+    });
+
+    it('does not inject model when defaultModel is not provided', () => {
+      const body = {
+        messages: [{ role: 'user', content: 'This is a test' }],
+      };
+      [chatUrl, completionUrl, completionExtensionsUrl].forEach((url: string) => {
+        const sanitizedBodyString = sanitizeRequest(url, JSON.stringify(body));
+        const parsed = JSON.parse(sanitizedBodyString);
+        expect(parsed.model).toBeUndefined();
+      });
+    });
   });
 
   describe('getRequestWithStreamOption', () => {
@@ -179,6 +213,50 @@ describe('Azure Open AI Utils', () => {
         true
       );
       expect(sanitizedBodyString).toEqual(bodyString);
+    });
+
+    it('injects defaultModel into body when body has no model and defaultModel is provided', () => {
+      const body = {
+        messages: [{ role: 'user', content: 'This is a test' }],
+      };
+      [chatUrl, completionUrl, completionExtensionsUrl].forEach((url: string) => {
+        const sanitizedBodyString = getRequestWithStreamOption(
+          url,
+          JSON.stringify(body),
+          false,
+          'gpt-4o'
+        );
+        const parsed = JSON.parse(sanitizedBodyString);
+        expect(parsed.model).toEqual('gpt-4o');
+      });
+    });
+
+    it('preserves existing model in body when defaultModel is provided', () => {
+      const body = {
+        model: 'gpt-4-turbo',
+        messages: [{ role: 'user', content: 'This is a test' }],
+      };
+      [chatUrl, completionUrl, completionExtensionsUrl].forEach((url: string) => {
+        const sanitizedBodyString = getRequestWithStreamOption(
+          url,
+          JSON.stringify(body),
+          false,
+          'gpt-4o'
+        );
+        const parsed = JSON.parse(sanitizedBodyString);
+        expect(parsed.model).toEqual('gpt-4-turbo');
+      });
+    });
+
+    it('does not inject model when defaultModel is not provided', () => {
+      const body = {
+        messages: [{ role: 'user', content: 'This is a test' }],
+      };
+      [chatUrl, completionUrl, completionExtensionsUrl].forEach((url: string) => {
+        const sanitizedBodyString = getRequestWithStreamOption(url, JSON.stringify(body), false);
+        const parsed = JSON.parse(sanitizedBodyString);
+        expect(parsed.model).toBeUndefined();
+      });
     });
   });
 

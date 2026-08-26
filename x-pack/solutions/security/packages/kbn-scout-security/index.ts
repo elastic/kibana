@@ -8,14 +8,34 @@
 // Security-specific test framework
 export { test, spaceTest } from './src/playwright';
 
+// Security-specific test constants
+export { CUSTOM_QUERY_RULE } from './src/playwright/constants/detection_rules';
+export { PREVALENCE_HOST_NAME } from './src/playwright/fixtures/worker/apis/prevalence';
+export { ANALYZER_ORIGIN_PROCESS_NAME } from './src/playwright/fixtures/worker/apis/analyzer';
+export { NETWORK_SOURCE_IP } from './src/playwright/fixtures/worker/apis/network';
+export { HOST_NAME } from './src/playwright/fixtures/worker/apis/host';
+export { USER_NAME } from './src/playwright/fixtures/worker/apis/user';
+export {
+  CURRENT_USER_PROFILE_API_PATH,
+  AlertWorkflowStatus,
+  ALERT_CLOSE_MENU_ITEM_TEST_SUBJ,
+  ClosingReasonOption,
+  closedAlertsToastText,
+} from './src/playwright/constants/alert_workflows';
+export { INVESTIGATE_IN_TIMELINE_MENU_ITEM_TEST_SUBJ } from './src/playwright/constants/take_action';
+export { FULL_KIBANA_SECURITY_ROLE } from './src/playwright/constants/roles';
+export { ES as SECURITY_ARCHIVES } from './src/playwright/constants/archives';
+
+// Security-specific test enums
+export { AddExceptionButtonType } from './src/playwright/fixtures/test/page_objects';
+
 // re-exported test framework from @kbn/scout
-export { expect, lighthouseTest, apiTest, globalSetupHook, tags } from '@kbn/scout';
+export { lighthouseTest, apiTest, globalSetupHook, globalTeardownHook, tags } from '@kbn/scout';
 
 // re-exported fixtures & configuration from @kbn/scout
 export {
   browserAuthFixture,
   apiServicesFixture,
-  synthtraceFixture,
   createPlaywrightConfig,
   createLazyPageObject,
 } from '@kbn/scout';
@@ -43,7 +63,10 @@ export type {
   SecurityParallelTestFixtures,
   SecurityParallelApiServicesFixture,
   SecurityParallelWorkerFixtures,
+  ThreatMatchRuleCreatePage,
 } from './src/playwright';
+
+export * from './src/playwright/fixtures/test';
 
 // Re-exported Scout core types
 export type {
@@ -58,12 +81,7 @@ export type {
 } from '@kbn/scout';
 
 // Re-exported fixture types
-export type {
-  ApiServicesFixture,
-  BrowserAuthFixture,
-  SamlAuth,
-  SynthtraceFixture,
-} from '@kbn/scout';
+export type { ApiServicesFixture, BrowserAuthFixture, SamlAuth } from '@kbn/scout';
 
 // Re-exported service & configuration types
 export type {

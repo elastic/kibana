@@ -6,26 +6,41 @@
  */
 
 import type { ScoutPage } from '@kbn/scout';
-import { EuiSuperSelectWrapper } from '@kbn/scout/src/playwright/eui_components/super_select';
-import {
-  AWS_PROVIDER_TEST_SUBJ,
-  AZURE_PROVIDER_TEST_SUBJ,
-  AWS_ORGANIZATION_ACCOUNT_TEST_SUBJ,
-  AWS_SINGLE_ACCOUNT_TEST_SUBJ,
-  AZURE_ORGANIZATION_ACCOUNT_TEST_SUBJ,
-  AZURE_SINGLE_ACCOUNT_TEST_SUBJ,
-  AWS_INPUT_TEST_SUBJECTS,
-  AZURE_INPUT_FIELDS_TEST_SUBJECTS,
-  AWS_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ,
-  AZURE_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ,
-  CLOUD_CONNECTOR_NAME_INPUT_TEST_SUBJ,
-} from '@kbn/cloud-security-posture-common';
+
+/**
+ * CSPM / Fleet UI `data-test-subj` values are duplicated here on purpose so
+ * `@kbn/scout-security` does not depend on `@kbn/cloud-security-posture-common` or
+ * `@kbn/fleet-plugin`. If selectors drift, update this file to match the sources:
+ * - Cloud Security Posture: `common/test_subjects.ts` in `@kbn/cloud-security-posture-common`
+ *   (cloud_security_posture integration UI).
+ * - Fleet cloud connector form: `common/services/cloud_connectors/test_subjects.ts` in
+ *   `@kbn/fleet-plugin`.
+ * Keeping these dependenices will inforce to run all tests depending on `@kbn/scout-security`even if some plugins don't depend on `@kbn/fleet-plugin` or `@kbn/cloud-security-posture-common`.
+ */
+const AWS_PROVIDER_TEST_SUBJ = 'cloudSetupAwsTestId';
+const AZURE_PROVIDER_TEST_SUBJ = 'cloudSetupAzureTestId';
+const AWS_ORGANIZATION_ACCOUNT_TEST_SUBJ = 'awsOrganizationTestId';
+const AWS_SINGLE_ACCOUNT_TEST_SUBJ = 'awsSingleTestId';
+const AZURE_ORGANIZATION_ACCOUNT_TEST_SUBJ = 'azureOrganizationAccountTestId';
+const AZURE_SINGLE_ACCOUNT_TEST_SUBJ = 'azureSingleAccountTestId';
+const AWS_INPUT_TEST_SUBJECTS = {
+  ROLE_ARN: 'awsRoleArnInput',
+  EXTERNAL_ID: 'passwordInput-external-id',
+} as const;
+const AZURE_INPUT_FIELDS_TEST_SUBJECTS = {
+  TENANT_ID: 'textInput-tenant-id',
+  CLIENT_ID: 'textInput-client-id',
+  CLOUD_CONNECTOR_ID: 'cloudSetupAzureCloudConnectorId',
+} as const;
+const AWS_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ = 'aws-cloud-connector-super-select';
+const AZURE_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ = 'azure-cloud-connector-super-select';
+const CLOUD_CONNECTOR_NAME_INPUT_TEST_SUBJ = 'cloudConnectorNameInput';
 
 export class CspmIntegrationPage {
   constructor(private readonly page: ScoutPage) {}
 
   async navigate() {
-    await this.page.gotoApp('fleet/integrations/cloud_security_posture/add-integration/cspm');
+    await this.page.gotoApp('integrations/detail/cloud_security_posture/add-integration/cspm');
     // Wait for the provider selector tabs to be visible before continuing
     await this.page
       .getByTestId(AWS_PROVIDER_TEST_SUBJ)
@@ -91,19 +106,8 @@ export class CspmIntegrationPage {
         ? AWS_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ
         : AZURE_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ;
 
-    // Use EUI wrapper for reliable super select interaction
-    const superSelect = new EuiSuperSelectWrapper(this.page, { dataTestSubj: selectTestSubj });
-
-    // Open the dropdown
-    await superSelect.toggleDropdown();
-
-    // Find and click the option by visible text (connector names are dynamic)
-    const dropdown = this.page.locator('[role="listbox"]');
-    await dropdown.waitFor({ state: 'visible' });
-    await dropdown.locator(`[role="option"]`).filter({ hasText: connectorName }).click();
-
-    // Wait for dropdown to close
-    await dropdown.waitFor({ state: 'detached' });
+    // Connector names are dynamic, so select by visible label.
+    await this.page.components.superSelect(selectTestSubj).selectOptionByLabel(connectorName);
   }
 
   async fillIntegrationName(name: string) {

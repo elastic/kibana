@@ -12,11 +12,13 @@ import type {
   PreconfiguredAgentPolicy,
   PreconfiguredPackage,
   PreconfiguredOutput,
+  PreconfiguredDownloadSource,
 } from './models/preconfiguration';
 
 export interface FleetConfigType {
   enabled: boolean;
   isAirGapped?: boolean;
+  productVersionsApiTimeoutMs?: number;
   registryUrl?: string;
   registryProxyUrl?: string;
   agents: {
@@ -48,6 +50,20 @@ export interface FleetConfigType {
     customIntegrations?: {
       enabled?: boolean;
     };
+    managedBulk?: {
+      enabled: boolean;
+    };
+  };
+  iacProvisioner?: {
+    enabled: boolean;
+    api?: {
+      url?: string;
+      tls?: {
+        certificate?: string;
+        key?: string;
+        ca?: string | string[];
+      };
+    };
   };
   spaceSettings?: Array<{
     space_id: string;
@@ -56,6 +72,7 @@ export interface FleetConfigType {
   agentPolicies?: PreconfiguredAgentPolicy[];
   packages?: PreconfiguredPackage[];
   outputs?: PreconfiguredOutput[];
+  binaryDownloadSource?: PreconfiguredDownloadSource[];
   agentIdVerificationEnabled?: boolean;
   eventIngestedEnabled?: boolean;
   enableExperimental?: string[];
@@ -72,6 +89,9 @@ export interface FleetConfigType {
     deferPackageBumpInstallVersion?: boolean;
     maxConcurrentPackageOperations?: number;
     packageUpgradeBatchSize?: number;
+  };
+  packageInstallation?: {
+    maxConcurrentDatastreamOperations?: number;
   };
   developer?: {
     maxAgentPoliciesWithInactivityTimeout?: number;
@@ -122,6 +142,13 @@ export interface FleetConfigType {
     maxRevisions: number;
     interval: string;
     maxPoliciesPerRun: number;
+  };
+  versionSpecificPolicyAssignment?: {
+    taskInterval?: string;
+  };
+  unenrollInactiveAgents?: {
+    taskInterval?: string;
+    gracePeriodMs?: number;
   };
 }
 

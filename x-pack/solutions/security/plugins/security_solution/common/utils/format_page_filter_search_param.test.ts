@@ -6,35 +6,37 @@
  */
 
 import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
+import { DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 import { formatPageFilterSearchParam } from './format_page_filter_search_param';
 
 describe('formatPageFilterSearchParam', () => {
   it('returns the same data when all values are provided', () => {
-    const filter: FilterControlConfig = {
+    const filter = {
       title: 'User',
-      fieldName: 'user.name',
-      selectedOptions: ['test_user'],
-      existsSelected: true,
+      field_name: 'user.name',
+      selected_options: ['test_user'],
+      exists_selected: true,
       exclude: true,
-      displaySettings: { hideActionBar: true },
-    };
+      display_settings: { hide_action_bar: true },
+    } as FilterControlConfig;
 
     expect(formatPageFilterSearchParam([filter])).toEqual([filter]);
   });
 
   it('it sets default values when they are undefined', () => {
     const filter: FilterControlConfig = {
-      fieldName: 'user.name',
+      field_name: 'user.name',
     };
 
+    const { exclude, exists_selected, selected_options } = DEFAULT_DSL_OPTIONS_LIST_STATE;
     expect(formatPageFilterSearchParam([filter])).toEqual([
       {
+        exclude,
+        exists_selected,
+        selected_options,
         title: 'user.name',
-        selectedOptions: [],
-        fieldName: 'user.name',
-        existsSelected: false,
-        exclude: false,
-        displaySettings: { hideActionBar: false },
+        field_name: 'user.name',
+        display_settings: { hide_action_bar: false },
       },
     ]);
   });

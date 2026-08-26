@@ -17,8 +17,8 @@ import * as kibanaLib from '../../../lib/kibana';
 jest.mock('../../../lib/kibana');
 
 const mockDispatch = jest.fn();
-jest.mock('react-redux', () => ({
-  ...jest.requireActual('react-redux'),
+jest.mock('react-redux-v7', () => ({
+  ...jest.requireActual('react-redux-v7'),
   useDispatch: () => mockDispatch,
 }));
 
@@ -70,7 +70,7 @@ jest.mock('./trailing_breadcrumbs', () => ({
 }));
 
 const landingBreadcrumb = {
-  href: 'get_started',
+  href: 'launchpad',
   text: 'Security',
   onClick: expect.any(Function),
 };
@@ -156,5 +156,16 @@ describe('useBreadcrumbsNav', () => {
     expect(event.preventDefault).toHaveBeenCalled();
     expect(mockDispatch).toHaveBeenCalled();
     expect(reportEventMock).toHaveBeenCalled();
+  });
+
+  it('should use SecurityPageName.launchpad', () => {
+    renderHook(useBreadcrumbsNav);
+
+    const calls = (mockSecuritySolutionUrl as jest.Mock).mock.calls;
+    const launchpadBreadcrumbCall = calls.find(
+      (call) => call[0].deepLinkId === SecurityPageName.launchpad
+    );
+
+    expect(launchpadBreadcrumbCall).toBeDefined();
   });
 });

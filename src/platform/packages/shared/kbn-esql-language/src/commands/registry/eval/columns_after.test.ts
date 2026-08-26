@@ -8,7 +8,7 @@
  */
 
 import { additionalFieldsMock } from '../../../__tests__/language/helpers';
-import { Parser, synth } from '../../../..';
+import { Parser, synth } from '@elastic/esql';
 import { UnmappedFieldsStrategy, type ESQLColumnData } from '../types';
 import { columnsAfter } from './columns_after';
 
@@ -25,7 +25,7 @@ describe('EVAL > columnsAfter', () => {
       baseColumns,
       '',
       additionalFieldsMock,
-      UnmappedFieldsStrategy.FAIL
+      UnmappedFieldsStrategy.DEFAULT
     );
 
     expect(result).toEqual([
@@ -46,7 +46,7 @@ describe('EVAL > columnsAfter', () => {
       baseColumns,
       '',
       additionalFieldsMock,
-      UnmappedFieldsStrategy.FAIL
+      UnmappedFieldsStrategy.DEFAULT
     );
 
     expect(result).toEqual([
@@ -82,7 +82,7 @@ describe('EVAL > columnsAfter', () => {
       baseColumns,
       queryString,
       additionalFieldsMock,
-      UnmappedFieldsStrategy.FAIL
+      UnmappedFieldsStrategy.DEFAULT
     );
 
     expect(result).toEqual([
@@ -112,7 +112,7 @@ describe('EVAL > columnsAfter', () => {
       baseColumns,
       queryString,
       additionalFieldsMock,
-      UnmappedFieldsStrategy.FAIL
+      UnmappedFieldsStrategy.DEFAULT
     );
 
     expect(result).toEqual([
@@ -139,7 +139,7 @@ describe('EVAL > columnsAfter', () => {
       baseColumns,
       '',
       additionalFieldsMock,
-      UnmappedFieldsStrategy.FAIL
+      UnmappedFieldsStrategy.DEFAULT
     );
 
     expect(result).toEqual(baseColumns);
@@ -152,7 +152,7 @@ describe('EVAL > columnsAfter', () => {
       baseColumns,
       '',
       additionalFieldsMock,
-      UnmappedFieldsStrategy.FAIL
+      UnmappedFieldsStrategy.DEFAULT
     );
 
     expect(result).toEqual([
@@ -179,6 +179,27 @@ describe('EVAL > columnsAfter', () => {
       '',
       additionalFieldsMock,
       UnmappedFieldsStrategy.LOAD
+    );
+
+    expect(result).toEqual([
+      {
+        name: 'newField',
+        type: 'keyword',
+        location: { min: 0, max: 0 },
+        userDefined: true,
+      },
+      ...baseColumns,
+    ]);
+  });
+
+  it('handles unmapped field with LOAD_ALL strategy', () => {
+    const command = synth.cmd`EVAL newField = unmappedField`;
+    const result = columnsAfter(
+      command,
+      baseColumns,
+      '',
+      additionalFieldsMock,
+      UnmappedFieldsStrategy.LOAD_ALL
     );
 
     expect(result).toEqual([

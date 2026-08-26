@@ -12,7 +12,7 @@ import type { RouteDependencies } from '../../../types';
 import { addBasePath } from '..';
 
 const bodySchema = schema.object({
-  dataStreams: schema.arrayOf(schema.string()),
+  dataStreams: schema.arrayOf(schema.string({ maxLength: 1000 }), { maxSize: 1000 }),
 });
 
 export function registerDeleteRoute({ router, lib: { handleEsError } }: RouteDependencies) {

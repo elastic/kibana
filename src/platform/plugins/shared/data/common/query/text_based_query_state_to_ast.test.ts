@@ -82,4 +82,20 @@ describe('textBasedQueryStateToExpressionAst', () => {
       })
     );
   });
+
+  it('forwards ignoreGlobalFilters to the esql expression for an ES|QL query', () => {
+    const actual = textBasedQueryStateToExpressionAst({
+      filters: [],
+      query: { esql: 'FROM foo' },
+      time: { from: 'now', to: 'now+7d' },
+      ignoreGlobalFilters: true,
+    });
+
+    expect(actual).toHaveProperty(
+      'chain.2.arguments',
+      expect.objectContaining({
+        ignoreGlobalFilters: [true],
+      })
+    );
+  });
 });

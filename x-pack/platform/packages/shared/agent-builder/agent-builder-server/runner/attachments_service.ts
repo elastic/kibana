@@ -17,6 +17,10 @@ export interface AttachmentsService {
    */
   getTypeDefinition(type: string): AttachmentTypeDefinition | undefined;
   /**
+   * Returns the IDs of all registered attachment types.
+   */
+  getRegisteredTypeIds(): string[];
+  /**
    * Convert an attachment-scoped tool to a generic executable tool
    */
   convertAttachmentTool(tool: AttachmentBoundedTool): ExecutableTool;

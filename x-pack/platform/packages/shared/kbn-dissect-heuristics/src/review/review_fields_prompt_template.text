@@ -32,7 +32,7 @@ For every field in the log:
 
 3. For **each final field** (combined or uncombined):
 
-   * Assign the **most appropriate ECS field name** (e.g., `@timestamp`, `log.level`, `log.logger`, `message`).  
+   * Assign the **most appropriate ECS field name** (e.g., `@timestamp`, `log.level`, `log.logger`, `message`).
      * **Important**: Avoid being overly specific with field names. When in doubt about what a field represents, map it to `message`. Try to make a choice for all the fields.
 
 4. **Infer the log source**  

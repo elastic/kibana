@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { parse as parseCookie } from 'tough-cookie';
 import url from 'url';
 
 import expect from '@kbn/expect';
+import { findSessionCookie } from '@kbn/security-api-integration-helpers';
 import { getStateAndNonce } from '@kbn/security-api-integration-helpers/oidc/oidc_tools';
 
 import type { FtrProviderContext } from '../../../ftr_provider_context';
@@ -25,9 +25,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(302);
 
         const handshakeCookies = handshakeResponse.headers['set-cookie'];
-        expect(handshakeCookies).to.have.length(1);
-
-        const handshakeCookie = parseCookie(handshakeCookies[0])!;
+        const handshakeCookie = findSessionCookie(handshakeCookies);
         expect(handshakeCookie.key).to.be('sid');
         expect(handshakeCookie.value).to.not.be.empty();
         expect(handshakeCookie.path).to.be('/');
@@ -60,9 +58,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('Cookie', handshakeCookie.cookieString())
           .expect(302);
         const authenticationResponseCookies = oidcAuthenticationResponse.headers['set-cookie'];
-        expect(authenticationResponseCookies).to.have.length(1);
-
-        const sessionCookie = parseCookie(authenticationResponseCookies[0])!;
+        const sessionCookie = findSessionCookie(authenticationResponseCookies);
         expect(sessionCookie.key).to.be('sid');
         expect(sessionCookie.value).to.not.be.empty();
         expect(sessionCookie.path).to.be('/');
@@ -100,9 +96,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(302);
 
         const handshakeCookies = handshakeResponse.headers['set-cookie'];
-        expect(handshakeCookies).to.have.length(1);
-
-        const handshakeCookie = parseCookie(handshakeCookies[0])!;
+        const handshakeCookie = findSessionCookie(handshakeCookies);
         expect(handshakeCookie.key).to.be('sid');
         expect(handshakeCookie.value).to.not.be.empty();
         expect(handshakeCookie.path).to.be('/');
@@ -135,9 +129,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('Cookie', handshakeCookie.cookieString())
           .expect(302);
         const authenticationResponseCookies = oidcAuthenticationResponse.headers['set-cookie'];
-        expect(authenticationResponseCookies).to.have.length(1);
-
-        const sessionCookie = parseCookie(authenticationResponseCookies[0])!;
+        const sessionCookie = findSessionCookie(authenticationResponseCookies);
         expect(sessionCookie.key).to.be('sid');
         expect(sessionCookie.value).to.not.be.empty();
         expect(sessionCookie.path).to.be('/');

@@ -7,6 +7,13 @@ paths:
   /api/security_ai_assistant/prompts/_find:
     get:
       x-codegen-enabled: true
+      x-codeSamples:
+        - lang: curl
+          label: Example request
+          source: |
+            curl \
+             --request GET 'http://localhost:5601/api/security_ai_assistant/prompts/_find?page=1&per_page=20' \
+             --header "Authorization: $API_KEY"
       x-labels: [ess, serverless]
       operationId: FindPrompts
       description: Get a list of all prompts based on optional filters, sorting, and pagination.
@@ -114,6 +121,31 @@ paths:
                         - username: "jdoe"
                           full_name: "John Doe"
                       namespace: "default"
+              examples:
+                FindPromptsResponse200Example:
+                  value:
+                    page: 1
+                    perPage: 20
+                    total: 142
+                    data:
+                      - id: "prompt-123"
+                        timestamp: "2025-04-30T22:30:00Z"
+                        name: "Error Troubleshooting Prompt"
+                        promptType: "standard"
+                        content: "If you encounter an error, check the logs and retry."
+                        categories: ["troubleshooting", "logging"]
+                        color: "#FF5733"
+                        isNewConversationDefault: false
+                        isDefault: true
+                        consumer: "security"
+                        updatedAt: "2025-04-30T22:45:00Z"
+                        updatedBy: "jdoe"
+                        createdAt: "2025-04-20T21:00:00Z"
+                        createdBy: "jdoe"
+                        users:
+                          - username: "jdoe"
+                            full_name: "John Doe"
+                        namespace: "default"
         400:
           description: Bad request due to invalid parameters or malformed query.
           content:
@@ -133,6 +165,12 @@ paths:
                     type: string
                     description: Detailed description of the error.
                     example: "Invalid sort order value provided."
+              examples:
+                FindPromptsResponse400Example:
+                  value:
+                    statusCode: 400
+                    error: "Bad Request"
+                    message: "Invalid sort order value provided."
 
 components:
   schemas:

@@ -56,7 +56,7 @@ const StatusFilterButtonComponent = <T,>({
   const triggerButton = (
     <EuiFilterButton
       grow
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       onClick={() => {
         setIsPopoverOpen(!isPopoverOpen);
       }}
@@ -79,6 +79,7 @@ const StatusFilterButtonComponent = <T,>({
       }}
       panelPaddingSize="none"
       repositionOnScroll
+      aria-label={i18n.STATUS_FILTER_ARIAL_LABEL}
     >
       <EuiSelectable
         aria-label={i18n.STATUS_FILTER_ARIAL_LABEL}

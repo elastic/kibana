@@ -67,7 +67,7 @@ export const EffectScope = memo<EffectScopeProps>(
         data-test-subj={dataTestSubj}
       >
         <EuiFlexItem grow={false}>
-          <EuiIcon type={icon} size="s" />
+          <EuiIcon type={icon} size="s" aria-hidden={true} />
         </EuiFlexItem>
         <EuiFlexItem grow={false} data-test-subj={getTestId('value')}>
           <TextValueDisplay size="xs">{label}</TextValueDisplay>
@@ -119,7 +119,7 @@ const WithContextMenu = memo<WithContextMenuProps>(
           ...policyMenuItem,
           hoverInfo:
             hasHref && canReadPolicies ? (
-              <StyledEuiButtonEmpty flush="right" size="s" iconSide="right" iconType="popout">
+              <StyledEuiButtonEmpty flush="right" size="s" iconSide="right" iconType="external">
                 <FormattedMessage
                   id="xpack.securitySolution.contextMenuItemByRouter.viewDetails"
                   defaultMessage="View details"

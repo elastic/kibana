@@ -91,6 +91,7 @@ export type ScopedRunInternalToolFn = <TParams = Record<string, unknown>>(
  * Context bound to a run execution.
  * Contains metadata associated with the run's current state.
  * Will be attached to errors thrown during a run.
+ * It is serializable.
  */
 export interface RunContext {
   /**
@@ -103,15 +104,27 @@ export interface RunContext {
   stack: RunContextStackEntry[];
 }
 
+export interface RunAgentStackEntry {
+  type: 'agent';
+  agentId: string;
+  conversationId?: string;
+  executionId?: string;
+}
+
+export interface RunToolStackEntry {
+  type: 'tool';
+  toolId: string;
+  toolCallId?: string;
+  source?: ToolCallSource;
+}
+
 /**
  * Represents an element in the run context's stack.
  * Used to follow nested / chained execution.
  */
-export type RunContextStackEntry =
-  /** tool invocation */
-  | { type: 'tool'; toolId: string }
-  /** agent invocation */
-  | { type: 'agent'; agentId: string };
+export type RunContextStackEntry = RunAgentStackEntry | RunToolStackEntry;
+
+export type ToolCallSource = 'agent' | 'user' | 'mcp' | 'unknown';
 
 /**
  * Params for {@link RunToolFn}
@@ -133,7 +146,7 @@ export interface RunToolParams<TParams = Record<string, unknown>> {
    * Optional source of the tool invocation.
    * Defaults to 'unknown'.
    */
-  source?: 'agent' | 'user' | 'mcp' | 'unknown';
+  source?: ToolCallSource;
   /**
    * Optional prompt storage state to use for tool invocation.
    */
@@ -152,6 +165,11 @@ export interface RunToolParams<TParams = Record<string, unknown>> {
    * (EIS if there, otherwise openAI, otherwise any GenAI)
    */
   defaultConnectorId?: string;
+  /**
+   * Optional abort signal for the run (e.g. from the request).
+   * Propagated to hooks so they can respect cancellation.
+   */
+  abortSignal?: AbortSignal;
 }
 
 export type RunInternalToolParams<TParams = Record<string, unknown>> = Omit<

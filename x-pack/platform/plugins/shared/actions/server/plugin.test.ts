@@ -9,7 +9,7 @@
 
 import moment from 'moment';
 import { ByteSizeValue } from '@kbn/config-schema';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { PluginInitializerContext, RequestHandlerContext } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
@@ -19,10 +19,16 @@ import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/s
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { eventLogMock } from '@kbn/event-log-plugin/server/mocks';
 import { serverlessPluginMock } from '@kbn/serverless/server/mocks';
-import type { ActionType, ActionsApiRequestHandlerContext } from './types';
+import { usageApiPluginMock } from '@kbn/usage-api-plugin/server/mocks';
+import type { ActionType, ActionsApiRequestHandlerContext, InMemoryConnector } from './types';
 import type { ActionsConfig } from './config';
 import { ActionTypeRegistry } from './action_type_registry';
-import type { ActionsPluginsSetup, ActionsPluginsStart, PluginSetupContract } from './plugin';
+import type {
+  ActionsPluginsSetup,
+  ActionsPluginsStart,
+  PluginSetupContract,
+  PluginStartContract,
+} from './plugin';
 import { ActionsPlugin } from './plugin';
 import {
   AlertHistoryEsIndexConnectorId,
@@ -32,6 +38,8 @@ import {
 } from '../common';
 import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
 import { getConnectorType } from './fixtures';
+import { USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE } from './constants/saved_objects';
+import { LeasePool } from './lib';
 
 function getConfig(overrides = {}) {
   return {
@@ -57,6 +65,19 @@ function getConfig(overrides = {}) {
     microsoftExchangeUrl: DEFAULT_MICROSOFT_EXCHANGE_URL,
     usage: {
       url: 'ca.path',
+    },
+    auth: {
+      oauth_authorization_code: {
+        rate_limits: {
+          authorize: { lookbackWindow: '1h', limit: 100 },
+          callback: { lookbackWindow: '1h', limit: 100 },
+        },
+      },
+    },
+    inboundEvents: {
+      enabled: false,
+      maxBodyBytes: new ByteSizeValue(1024 * 1024),
+      maxEmitted: 25,
     },
     ...overrides,
   };
@@ -108,6 +129,19 @@ describe('Actions Plugin', () => {
         usage: {
           url: 'ca.path',
         },
+        auth: {
+          oauth_authorization_code: {
+            rate_limits: {
+              authorize: { lookbackWindow: '1h', limit: 100 },
+              callback: { lookbackWindow: '1h', limit: 100 },
+            },
+          },
+        },
+        inboundEvents: {
+          enabled: false,
+          maxBodyBytes: new ByteSizeValue(1024 * 1024),
+          maxEmitted: 25,
+        },
       });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();
@@ -120,6 +154,7 @@ describe('Actions Plugin', () => {
         usageCollection: usageCollectionPluginMock.createSetupContract(),
         features: featuresPluginMock.createSetup(),
         cloud: cloudMock.createSetup(),
+        usageApi: usageApiPluginMock.createSetupContract(),
       };
       coreSetup.getStartServices.mockResolvedValue([
         coreMock.createStart(),
@@ -136,6 +171,34 @@ describe('Actions Plugin', () => {
       expect(pluginsSetup.encryptedSavedObjects.canEncrypt).toEqual(false);
       expect(context.logger.get().warn).toHaveBeenCalledWith(
         'APIs are disabled because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
+      );
+    });
+
+    it('should always register user_connector_token saved object type and encryption', async () => {
+      await plugin.setup(coreSetup, pluginsSetup);
+      expect(coreSetup.savedObjects.registerType).toHaveBeenCalledWith(
+        expect.objectContaining({ name: USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE })
+      );
+      expect(pluginsSetup.encryptedSavedObjects.registerType).toHaveBeenCalledWith(
+        expect.objectContaining({ type: USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE })
+      );
+    });
+
+    it('should expose the same client lease pool before start', async () => {
+      const setupContract = await plugin.setup(coreSetup, pluginsSetup);
+
+      const clientLeasePool = setupContract.getClientLeasePool();
+      expect(clientLeasePool).toBeInstanceOf(LeasePool);
+      expect(setupContract.getClientLeasePool()).toBe(clientLeasePool);
+    });
+
+    it('allows only one connector event emitter registration', async () => {
+      const setupContract = await plugin.setup(coreSetup, pluginsSetup);
+      const emitter = { emit: jest.fn() };
+
+      setupContract.registerConnectorEventEmitter(emitter);
+      expect(() => setupContract.registerConnectorEventEmitter({ emit: jest.fn() })).toThrow(
+        /only one emitter is supported/
       );
     });
 
@@ -501,6 +564,19 @@ describe('Actions Plugin', () => {
         usage: {
           url: 'ca.path',
         },
+        auth: {
+          oauth_authorization_code: {
+            rate_limits: {
+              authorize: { lookbackWindow: '1h', limit: 100 },
+              callback: { lookbackWindow: '1h', limit: 100 },
+            },
+          },
+        },
+        inboundEvents: {
+          enabled: false,
+          maxBodyBytes: new ByteSizeValue(1024 * 1024),
+          maxEmitted: 25,
+        },
       });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();
@@ -732,6 +808,241 @@ describe('Actions Plugin', () => {
           );
         });
       });
+
+      describe('detectPreconfiguredConflicts', () => {
+        it('should not modify inMemoryConnectors when there are no conflicts', async () => {
+          setup(getConfig());
+
+          const mockSearch = jest.fn().mockResolvedValue({
+            hits: { hits: [] },
+          });
+          coreStart.savedObjects.createInternalRepository.mockReturnValue({
+            search: mockSearch,
+          } as any);
+
+          const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
+          pluginSetup.registerType(serverLogConnectorType);
+
+          const pluginStart = await plugin.start(coreStart, pluginsStart);
+
+          await new Promise<void>((resolve) => setImmediate(resolve));
+
+          expect(pluginStart.inMemoryConnectors).toHaveLength(1);
+          expect(pluginStart.inMemoryConnectors[0].id).toBe('preconfiguredServerLog');
+        });
+
+        it('should remove conflicting preconfigured connector from inMemoryConnectors and log error', async () => {
+          setup(getConfig());
+
+          const mockSearch = jest.fn().mockResolvedValue({
+            hits: { hits: [{ _id: 'action:preconfiguredServerLog', _source: { type: 'action' } }] },
+          });
+          coreStart.savedObjects.createInternalRepository.mockReturnValue({
+            search: mockSearch,
+          } as any);
+
+          const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
+          pluginSetup.registerType(serverLogConnectorType);
+
+          const pluginStart = plugin.start(coreStart, pluginsStart);
+
+          await new Promise<void>((resolve) => setImmediate(resolve));
+
+          expect(context.logger.get().error).toHaveBeenCalledWith(
+            expect.stringContaining('preconfiguredServerLog')
+          );
+          const startResult = await pluginStart;
+          expect(
+            startResult.inMemoryConnectors.find((c) => c.id === 'preconfiguredServerLog')
+          ).toBeUndefined();
+        });
+
+        it('should log debug when savedObjects search throws', async () => {
+          setup(getConfig());
+
+          const mockSearch = jest.fn().mockRejectedValue(new Error('SO error'));
+          coreStart.savedObjects.createInternalRepository.mockReturnValue({
+            search: mockSearch,
+          } as any);
+
+          const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
+          pluginSetup.registerType(serverLogConnectorType);
+
+          plugin.start(coreStart, pluginsStart);
+
+          await new Promise<void>((resolve) => setImmediate(resolve));
+
+          expect(context.logger.get().debug).toHaveBeenCalledWith(
+            'Failed to check for preconfigured connector conflicts: SO error'
+          );
+        });
+      });
+
+      describe('Dynamic connectors', () => {
+        let pluginStart: PluginStartContract;
+        let pluginSetup: PluginSetupContract;
+        beforeEach(async () => {
+          setup(getConfig());
+          // coreMock.createSetup doesn't support Plugin generics
+
+          pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
+          pluginSetup.registerType(serverLogConnectorType);
+
+          pluginStart = await plugin.start(coreStart, pluginsStart);
+
+          expect(pluginStart.inMemoryConnectors.length).toEqual(1);
+        });
+
+        it('should allow adding a dynamic connector', () => {
+          const newDynamicConnector: InMemoryConnector = {
+            id: 'dynamic-connector-id',
+            actionTypeId: '.inference',
+            name: 'Inference Test',
+            config: {},
+            secrets: {},
+            isPreconfigured: true,
+            isDeprecated: false,
+            isSystemAction: false,
+            isConnectorTypeDeprecated: false,
+          };
+          expect(pluginStart.registerDynamicConnector(newDynamicConnector)).toEqual(true);
+
+          expect(pluginStart.inMemoryConnectors.length).toEqual(2);
+          expect(pluginStart.inMemoryConnectors[1]).toEqual({
+            ...newDynamicConnector,
+            isPreconfigured: true,
+            isDynamic: true,
+          });
+        });
+        it('should always add dynamic connector as isDynamic & isPreconfigured', () => {
+          const newDynamicConnector: InMemoryConnector = {
+            id: 'dynamic-connector-id',
+            actionTypeId: '.inference',
+            name: 'Inference Test',
+            config: {},
+            secrets: {},
+            isPreconfigured: false,
+            isDynamic: false,
+            isDeprecated: false,
+            isSystemAction: false,
+            isConnectorTypeDeprecated: false,
+          };
+          expect(pluginStart.registerDynamicConnector(newDynamicConnector)).toEqual(true);
+
+          expect(pluginStart.inMemoryConnectors.length).toEqual(2);
+          expect(pluginStart.inMemoryConnectors[1].id).toBe(newDynamicConnector.id);
+          expect(pluginStart.inMemoryConnectors[1].isPreconfigured).toBe(true);
+          expect(pluginStart.inMemoryConnectors[1].isDynamic).toBe(true);
+        });
+        it('should not allow adding a dynamic connector for an existing connector id', () => {
+          const existingConnector = pluginStart.inMemoryConnectors[0];
+
+          const newDynamicConnector: InMemoryConnector = {
+            id: existingConnector.id,
+            actionTypeId: '.inference',
+            name: 'Inference',
+            config: {},
+            secrets: {},
+            isPreconfigured: true,
+            isDeprecated: false,
+            isSystemAction: false,
+            isConnectorTypeDeprecated: false,
+          };
+          expect(pluginStart.registerDynamicConnector(newDynamicConnector)).toEqual(false);
+
+          expect(pluginStart.inMemoryConnectors.length).toEqual(1);
+          expect(pluginStart.inMemoryConnectors[0]).toEqual(existingConnector);
+        });
+
+        it('should allow removing a previously registered dynamic connector', () => {
+          const newDynamicConnector: InMemoryConnector = {
+            id: 'dynamic-connector-id',
+            actionTypeId: '.inference',
+            name: 'Inference Test',
+            config: {},
+            secrets: {},
+            isPreconfigured: true,
+            isDeprecated: false,
+            isSystemAction: false,
+            isConnectorTypeDeprecated: false,
+          };
+          pluginStart.registerDynamicConnector(newDynamicConnector);
+          expect(pluginStart.inMemoryConnectors.length).toEqual(2);
+
+          expect(pluginStart.unregisterDynamicConnector(newDynamicConnector.id)).toEqual(true);
+          expect(pluginStart.inMemoryConnectors.length).toEqual(1);
+          expect(
+            pluginStart.inMemoryConnectors.find((c) => c.id === newDynamicConnector.id)
+          ).toBeUndefined();
+        });
+
+        it('should evict pooled clients when removing a dynamic connector', async () => {
+          const newDynamicConnector: InMemoryConnector = {
+            id: 'dynamic-connector-id',
+            actionTypeId: '.inference',
+            name: 'Inference Test',
+            config: {},
+            secrets: {},
+            isPreconfigured: true,
+            isDeprecated: false,
+            isSystemAction: false,
+            isConnectorTypeDeprecated: false,
+          };
+          pluginStart.registerDynamicConnector(newDynamicConnector);
+
+          // A dynamic connector's ID can be re-registered with different config, and in-memory
+          // connectors share one revision sentinel, so the lease key alone cannot invalidate a
+          // stale client. Unregistering has to evict.
+          const pool = pluginSetup.getClientLeasePool();
+          const terminate = jest.fn().mockResolvedValue(undefined);
+          await pool.lease(
+            `${newDynamicConnector.id}:fake:shared:in-memory`,
+            async () => ({}),
+            terminate
+          );
+
+          pluginStart.unregisterDynamicConnector(newDynamicConnector.id);
+          await new Promise(process.nextTick);
+
+          expect(terminate).toHaveBeenCalledTimes(1);
+        });
+
+        it('should mutate the inMemoryConnectors array in place when removing a dynamic connector', () => {
+          const newDynamicConnector: InMemoryConnector = {
+            id: 'dynamic-connector-id',
+            actionTypeId: '.inference',
+            name: 'Inference Test',
+            config: {},
+            secrets: {},
+            isPreconfigured: true,
+            isDeprecated: false,
+            isSystemAction: false,
+            isConnectorTypeDeprecated: false,
+          };
+          pluginStart.registerDynamicConnector(newDynamicConnector);
+          const liveReference = pluginStart.inMemoryConnectors;
+
+          pluginStart.unregisterDynamicConnector(newDynamicConnector.id);
+
+          expect(pluginStart.inMemoryConnectors).toBe(liveReference);
+          expect(liveReference.length).toEqual(1);
+        });
+
+        it('should return false when removing a dynamic connector that does not exist', () => {
+          expect(pluginStart.unregisterDynamicConnector('non-existent-id')).toEqual(false);
+          expect(pluginStart.inMemoryConnectors.length).toEqual(1);
+        });
+
+        it('should not allow removing a non-dynamic preconfigured connector', () => {
+          const existingConnector = pluginStart.inMemoryConnectors[0];
+          expect(existingConnector.isDynamic).not.toEqual(true);
+
+          expect(pluginStart.unregisterDynamicConnector(existingConnector.id)).toEqual(false);
+
+          expect(pluginStart.inMemoryConnectors.length).toEqual(1);
+          expect(pluginStart.inMemoryConnectors[0]).toEqual(existingConnector);
+        });
+      });
     });
 
     describe('isActionTypeEnabled()', () => {
@@ -790,6 +1101,7 @@ describe('Actions Plugin', () => {
             validate: { params: expect.any(Object) },
             isDeprecated: false,
             source: 'stack',
+            isTestable: false,
           },
         ]);
 
@@ -800,15 +1112,14 @@ describe('Actions Plugin', () => {
           expect(err.message).toMatchInlineSnapshot(`
             "[
               {
+                \\"origin\\": \\"string\\",
                 \\"code\\": \\"too_small\\",
                 \\"minimum\\": 1,
-                \\"type\\": \\"string\\",
                 \\"inclusive\\": true,
-                \\"exact\\": false,
-                \\"message\\": \\"String must contain at least 1 character(s)\\",
                 \\"path\\": [
                   \\"text\\"
-                ]
+                ],
+                \\"message\\": \\"Too small: expected string to have >=1 characters\\"
               }
             ]"
           `);

@@ -5,16 +5,18 @@
  * 2.0.
  */
 
+import { Readable } from 'stream';
+import type { ReadableStream as WebReadableStream } from 'stream/web';
+
 import { createWriteStream, getSafePath } from '@kbn/fs';
 import { pipeline } from 'stream/promises';
-import fetch, { type Response } from 'node-fetch';
 import { validateMimeType, validateFileSignature, type MimeType } from './validators';
 
 export const download = async (
   fileUrl: string,
   filePathAtVolume: string,
   expectedMimeType: MimeType,
-  abortController?: AbortController
+  signal?: AbortSignal
 ): Promise<string> => {
   const writeStream = createWriteStream(filePathAtVolume);
 
@@ -22,7 +24,7 @@ export const download = async (
 
   try {
     res = await fetch(fileUrl, {
-      signal: abortController?.signal,
+      signal,
     });
   } catch (err: any) {
     if (err.name === 'AbortError') {
@@ -43,7 +45,7 @@ export const download = async (
   }
 
   try {
-    await pipeline(res.body, writeStream);
+    await pipeline(Readable.fromWeb(res.body as WebReadableStream), writeStream);
   } catch (err: any) {
     if (err.name === 'AbortError') {
       writeStream.destroy();

@@ -91,10 +91,21 @@ export async function startLiveDataUpload({
     );
   }
 
-  async function onMessage(message: any) {
-    if ('status' in message && message.status === 'done') {
-      const { workerId, indicesToRefresh }: { workerId: string; indicesToRefresh: string[] } =
-        message;
+  async function onMessage(message: unknown) {
+    if (
+      typeof message === 'object' &&
+      message !== null &&
+      'status' in message &&
+      message.status === 'done' &&
+      'workerId' in message &&
+      typeof (message as Record<string, unknown>).workerId === 'string' &&
+      'indicesToRefresh' in message &&
+      Array.isArray((message as Record<string, unknown>).indicesToRefresh)
+    ) {
+      const { workerId, indicesToRefresh } = message as {
+        workerId: string;
+        indicesToRefresh: string[];
+      };
 
       if (!workersWaitingRefresh.has(workerId)) {
         workersWaitingRefresh.set(workerId, indicesToRefresh.join(','));
@@ -111,7 +122,7 @@ export async function startLiveDataUpload({
         workersWaitingRefresh.clear();
       }
     } else {
-      logMessage(logger, message);
+      logMessage(logger, message as [import('../../lib/utils/create_logger').LogLevel, string]);
     }
   }
 

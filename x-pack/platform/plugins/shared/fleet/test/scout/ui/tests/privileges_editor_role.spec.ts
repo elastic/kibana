@@ -5,17 +5,23 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
+import { tags } from '@kbn/scout';
 
 import { test } from '../fixtures';
 
 // This role behaves like Fleet > All, Integrations > All
-test.describe('When the user has Editor built-in role', { tag: ['@ess'] }, () => {
+test.describe('When the user has Editor built-in role', { tag: tags.stateful.classic }, () => {
   test('It should not show a callout if fleet server is setup', async ({
     browserAuth,
     pageObjects,
     page,
+    config,
   }) => {
+    test.skip(
+      config.isCloud === true,
+      `This scenario is not working as expected on ECH for 'Editor' role`
+    );
     // Mock the fleet setup API to indicate fleet server is ready
     await page.route('**/api/fleet/agents/setup', (route) =>
       route.fulfill({
@@ -36,15 +42,24 @@ test.describe('When the user has Editor built-in role', { tag: ['@ess'] }, () =>
     await fleetHome.navigateTo();
     await fleetHome.waitForPageToLoad();
 
+    // When enableOpAMP is on, addAgentButton lives inside a popover — open it first.
+    await fleetHome.openAddAgentMenu();
+
     // Verify Add Agent button exists
     await expect(fleetHome.getAddAgentButton()).toBeVisible();
   });
 
+  // https://github.com/elastic/kibana/issues/251216
   test('It should show a callout with missing privileges if fleet server is not setup', async ({
     browserAuth,
     pageObjects,
     page,
+    config,
   }) => {
+    test.skip(
+      config.isCloud === true,
+      `This scenario is not working as expected on ECH for 'Editor' role`
+    );
     // Mock the fleet setup API to indicate fleet server is NOT ready
     await page.route('**/api/fleet/agents/setup', (route) =>
       route.fulfill({

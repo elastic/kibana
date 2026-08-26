@@ -8,44 +8,30 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { type Query, escapeQuotes } from '@kbn/es-query';
+import { type Filter, type Query } from '@kbn/es-query';
+import { convertFiltersToESQLExpression } from './convert_filters_to_esql';
+import { convertQueryToESQLExpression } from './convert_query_to_esql';
 
-const getFilterBySearchText = (query?: Query) => {
-  if (!query) {
+const getFinalWhereClause = (
+  timeFilter?: string,
+  queryFilter?: string,
+  filtersExpression?: string
+) => {
+  const parts = [timeFilter, queryFilter, filtersExpression].filter(Boolean);
+  if (parts.length === 0) {
     return '';
   }
-  const searchTextFunc =
-    query.language === 'kuery' ? 'KQL' : query.language === 'lucene' ? 'QSTR' : '';
-
-  if (searchTextFunc && query.query) {
-    const escapedQuery =
-      typeof query.query === 'string' && query.language === 'lucene'
-        ? escapeQuotes(query.query)
-        : query.query;
-    return `${searchTextFunc}("""${escapedQuery}""")`;
-  }
-  return '';
-};
-
-const getFinalWhereClause = (timeFilter?: string, queryFilter?: string) => {
-  if (timeFilter && queryFilter) {
-    return ` | WHERE ${timeFilter} AND ${queryFilter}`;
-  }
-  return timeFilter || queryFilter ? ` | WHERE ${timeFilter || queryFilter}` : '';
+  return ` | WHERE ${parts.join(' AND ')}`;
 };
 
 /**
- * Builds an ES|QL query for the provided dataView
- * If there is @timestamp field in the index, we don't add the WHERE clause
- * If there is no @timestamp and there is a dataView timeFieldName, we add the WHERE clause with the timeFieldName
- * If the index pattern contains TSDB fields, we add the TS command, otherwise we add the FROM command
- * @param dataView
+ * Builds an ES|QL query for the provided dataView.
+ * If there is @timestamp field in the index, we don't add the WHERE clause.
+ * If there is no @timestamp and there is a dataView timeFieldName, we add the WHERE clause with the timeFieldName.
+ * If the index pattern contains TSDB fields, we add the TS command, otherwise we add the FROM command.
+ * When a timeFieldName exists, a SORT DESC clause on the dataView timeFieldName is appended.
  */
-export function getInitialESQLQuery(
-  dataView: DataView,
-  removeLimit?: boolean,
-  query?: Query
-): string {
+export function getInitialESQLQuery(dataView: DataView, query?: Query, filters?: Filter[]): string {
   const hasAtTimestampField = dataView?.fields?.getByName?.('@timestamp')?.type === 'date';
   const timeFieldName = dataView?.timeFieldName;
   const filterByTimeParams =
@@ -53,12 +39,19 @@ export function getInitialESQLQuery(
       ? `${timeFieldName} >= ?_tstart AND ${timeFieldName} <= ?_tend`
       : '';
 
-  const filterBySearchText = getFilterBySearchText(query);
+  const filterBySearchText = convertQueryToESQLExpression(query);
 
-  const whereClause = getFinalWhereClause(filterByTimeParams, filterBySearchText);
+  const { esqlExpression: filtersExpression } = filters?.length
+    ? convertFiltersToESQLExpression(filters)
+    : { esqlExpression: '' };
+
+  const whereClause = getFinalWhereClause(
+    filterByTimeParams,
+    filterBySearchText,
+    filtersExpression || undefined
+  );
   const sourceCommand = dataView.isTSDBMode() ? 'TS' : 'FROM';
+  const sortClause = timeFieldName ? ` | SORT ${timeFieldName} DESC` : '';
 
-  return `${sourceCommand} ${dataView.getIndexPattern()}${whereClause}${
-    removeLimit ? '' : ' | LIMIT 10'
-  }`;
+  return `${sourceCommand} ${dataView.getIndexPattern()}${sortClause}${whereClause}`;
 }

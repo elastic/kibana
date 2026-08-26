@@ -14,6 +14,7 @@ import type {
   TaskManagerStartContract,
   TaskStatus,
 } from '@kbn/task-manager-plugin/server';
+import { TaskAlreadyRunningError } from '@kbn/task-manager-plugin/server/lib/errors';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
 import { getEntityAnalyticsEntityTypes } from '../../../../../common/entity_analytics/utils';
@@ -78,7 +79,7 @@ export const registerRiskScoringTask = ({
   }
 
   const getRiskScoreService: GetRiskScoreService = (namespace) =>
-    getStartServices().then(([coreStart, _]) => {
+    getStartServices().then(([coreStart, pluginsStart]) => {
       const esClient = coreStart.elasticsearch.client.asInternalUser;
       const soClient = buildScopedInternalSavedObjectsClientUnsafe({ coreStart, namespace });
 
@@ -122,6 +123,7 @@ export const registerRiskScoringTask = ({
         spaceId: namespace,
         experimentalFeatures,
         uiSettingsClient,
+        crudClient: pluginsStart.entityStore?.createCRUDClient(esClient, namespace),
       });
     });
 
@@ -397,6 +399,15 @@ export const runTask = async ({
     throw e;
   }
 };
+
+class RiskEngineAlreadyRunningError extends Error {
+  statusCode = 409;
+
+  constructor() {
+    super('The risk engine is already running');
+  }
+}
+
 export const scheduleNow = async ({
   logger,
   namespace,
@@ -414,6 +425,9 @@ export const scheduleNow = async ({
     await taskManager.runSoon(taskId);
   } catch (e) {
     logger.warn(`[task ${taskId}]: error scheduling task now, received ${e.message}`);
+    if (e instanceof TaskAlreadyRunningError) {
+      throw new RiskEngineAlreadyRunningError();
+    }
     throw e;
   }
 };

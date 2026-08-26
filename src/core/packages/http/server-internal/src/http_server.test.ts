@@ -28,6 +28,7 @@ import { createServer } from '@kbn/server-http-tools';
 import type { HttpConfig } from './http_config';
 import { HttpServer } from './http_server';
 import { Readable } from 'stream';
+import { gzipSync } from 'zlib';
 import { KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 import moment from 'moment';
 import type { Observable } from 'rxjs';
@@ -1418,6 +1419,44 @@ describe('body options', () => {
     });
   });
 
+  test('should reject a gzip-bomb that inflates beyond `maxBytes`', async () => {
+    const { registerRouter, server: innerServer } = await server.setup({ config$ });
+
+    const router = new Router('', logger, enhanceWithContext, routerOptions);
+    router.post(
+      {
+        path: '/',
+        validate: { body: schema.object({ test: schema.string() }) },
+        options: { body: { maxBytes: 64 } },
+        security: {
+          authz: {
+            requiredPrivileges: ['foo'],
+          },
+        },
+      },
+      (context, req, res) => res.ok({ body: req.route })
+    );
+    registerRouter(router);
+
+    await server.start();
+    await supertest(innerServer.listener)
+      .post('/')
+      .set('Content-Encoding', 'gzip')
+      .set('Content-Type', 'application/json')
+      .send(
+        gzipSync(
+          JSON.stringify({
+            test: '0'.repeat(1024),
+          })
+        )
+      )
+      .expect(413, {
+        statusCode: 413,
+        error: 'Request Entity Too Large',
+        message: 'Payload content length greater than maximum allowed: 64',
+      });
+  });
+
   test('should not parse the content in the request', async () => {
     const { registerRouter, server: innerServer } = await server.setup({ config$ });
 
@@ -2139,7 +2178,7 @@ test('exposes authentication details of incoming request to a route handler', as
       path: '/foo',
       validate: false,
       security: {
-        authc: { enabled: 'optional' },
+        authc: { enabled: 'optional', reason: 'test' },
         authz: { enabled: false, reason: 'test' },
       },
     },
@@ -2181,9 +2220,259 @@ test('exposes authentication details of incoming request to a route handler', as
         tags: [],
         timeout: {},
         security: {
-          authc: { enabled: 'optional' },
+          authc: { enabled: 'optional', reason: 'test' },
           authz: { enabled: false, reason: 'test' },
         },
       },
     });
+});
+
+test('properly treats minimal authentication as required', async () => {
+  const { registerRouter, registerAuth, server: innerServer } = await server.setup({ config$ });
+
+  const router = new Router('', logger, enhanceWithContext, routerOptions);
+  router.get(
+    {
+      path: '/',
+      validate: false,
+      security: {
+        authc: { enabled: 'minimal', reason: 'test' },
+        authz: { enabled: false, reason: 'test' },
+      },
+    },
+    (context, req, res) => res.ok({ body: req.route })
+  );
+
+  // mocking to have `authRegistered` filed set to true
+  registerAuth((req, res, auth) => auth.authenticated({ state: { alpha: 'beta' } }));
+  registerRouter(router);
+
+  await server.start();
+  await supertest(innerServer.listener)
+    .get('/')
+    .expect(200, {
+      method: 'get',
+      path: '/',
+      routePath: '/',
+      options: {
+        authRequired: true,
+        xsrfRequired: false,
+        access: 'internal',
+        tags: [],
+        timeout: {},
+        security: {
+          authc: { enabled: 'minimal', reason: 'test' },
+          authz: { enabled: false, reason: 'test' },
+        },
+      },
+    });
+});
+
+test('includes Server-Timing header with custom events', async () => {
+  const router = new Router('/foo', logger, enhanceWithContext, routerOptions);
+  router.get(
+    {
+      path: '/timing-test',
+      validate: false,
+      security: {
+        authz: {
+          requiredPrivileges: ['foo'],
+        },
+      },
+    },
+    (context, req, res) => {
+      // Use timing API
+      const timer = req.serverTiming.start('test-operation', 'Test operation');
+      timer.end();
+      req.serverTiming.measure('manual-metric', 42.5, 'Manual measurement');
+
+      return res.ok({ body: 'ok' });
+    }
+  );
+
+  const { registerRouter, server: innerServer } = await server.setup({
+    config$: of({ ...config, serverTiming: true }),
+  });
+  registerRouter(router);
+  await server.start();
+
+  const response = await supertest(innerServer.listener).get('/foo/timing-test').expect(200);
+
+  // Verify Server-Timing header exists and contains expected metrics
+  expect(response.headers['server-timing']).toBeDefined();
+  const headerValue = response.headers['server-timing'];
+  expect(headerValue).toMatch(
+    /app-total;dur=[\d.]+;desc="Application Server Processing Time \(Total\)"/
+  );
+  expect(headerValue).toMatch(/test-operation;dur=[\d.]+;desc="Test operation"/);
+  expect(headerValue).toContain('manual-metric;dur=42.50;desc="Manual measurement"');
+});
+
+test('does not set Server-Timing header when serverTiming is disabled', async () => {
+  const router = new Router('/foo', logger, enhanceWithContext, routerOptions);
+  router.get(
+    {
+      path: '/',
+      validate: false,
+      security: {
+        authz: {
+          requiredPrivileges: ['foo'],
+        },
+      },
+    },
+    (context, req, res) => {
+      return res.ok({ body: 'ok' });
+    }
+  );
+
+  const { registerRouter, server: innerServer } = await server.setup({
+    config$: of({ ...config, serverTiming: false }),
+  });
+  registerRouter(router);
+  await server.start();
+
+  const response = await supertest(innerServer.listener).get('/foo/').expect(200);
+
+  expect(response.headers['server-timing']).toBeUndefined();
+});
+
+describe('space extraction in onRequest', () => {
+  test('extracts spaceId and rewrites URL for explicit space requests', async () => {
+    const router = new Router('/', logger, enhanceWithContext, routerOptions);
+
+    router.get(
+      {
+        path: '/foo',
+        validate: false,
+        security: {
+          authz: {
+            requiredPrivileges: ['foo'],
+          },
+        },
+      },
+      (context, req, res) => {
+        return res.ok({
+          body: { basePath: req.basePath, spaceId: req.spaceId, url: req.url.pathname },
+        });
+      }
+    );
+
+    const { registerRouter, server: innerServer } = await server.setup({ config$ });
+    registerRouter(router);
+    await server.start();
+
+    const response = await supertest(innerServer.listener).get('/s/custom/foo').expect(200);
+
+    expect(response.body).toEqual({ basePath: '/s/custom', spaceId: 'custom', url: '/foo' });
+  });
+
+  test('extracts spaceId and rewrites URL when rewriteBasePath is true', async () => {
+    const rewriteConfig = {
+      ...config,
+      basePath: '/kibana',
+      rewriteBasePath: true,
+    } as any;
+    const rewriteConfig$ = of(rewriteConfig);
+    const rewriteServer = new HttpServer(coreContext, 'tests', of(config.shutdownTimeout));
+
+    const router = new Router('/', logger, enhanceWithContext, routerOptions);
+
+    router.get(
+      {
+        path: '/foo',
+        validate: false,
+        security: {
+          authz: {
+            requiredPrivileges: ['foo'],
+          },
+        },
+      },
+      (context, req, res) => {
+        return res.ok({
+          body: { basePath: req.basePath, spaceId: req.spaceId, url: req.url.pathname },
+        });
+      }
+    );
+
+    const { registerRouter, server: innerServer } = await rewriteServer.setup({
+      config$: rewriteConfig$,
+    });
+    registerRouter(router);
+    await rewriteServer.start();
+
+    const response = await supertest(innerServer.listener).get('/kibana/s/custom/foo').expect(200);
+
+    expect(response.body).toEqual({
+      basePath: '/kibana/s/custom',
+      spaceId: 'custom',
+      url: '/foo',
+    });
+
+    await rewriteServer.stop();
+  });
+
+  test('defaults to "default" spaceId for requests without /s/ prefix', async () => {
+    const router = new Router('/', logger, enhanceWithContext, routerOptions);
+
+    router.get(
+      {
+        path: '/foo',
+        validate: false,
+        security: {
+          authz: {
+            requiredPrivileges: ['foo'],
+          },
+        },
+      },
+      (context, req, res) => {
+        return res.ok({ body: { basePath: req.basePath, spaceId: req.spaceId } });
+      }
+    );
+
+    const { registerRouter, server: innerServer } = await server.setup({ config$ });
+    registerRouter(router);
+    await server.start();
+
+    const response = await supertest(innerServer.listener).get('/foo').expect(200);
+
+    expect(response.body).toEqual({ basePath: '', spaceId: 'default' });
+  });
+
+  for (const method of ['get', 'put', 'post', 'delete', 'patch'] as const) {
+    test(`${method.toUpperCase()} /s/default/... is served without redirect and keeps /s/default as request basePath`, async () => {
+      // API integrations and old bookmarks may send requests to /s/default/...
+      // They must be served without redirect so clients that do not follow
+      // redirects continue to work. The /s/default/ prefix is stripped from
+      // request.url for routing, but preserved as request.basePath.
+      const router = new Router('/', logger, enhanceWithContext, routerOptions);
+
+      router[method](
+        {
+          path: '/api/test',
+          validate: false,
+          security: { authz: { requiredPrivileges: ['foo'] } },
+        },
+        (context, req, res) => {
+          return res.ok({
+            body: { basePath: req.basePath, spaceId: req.spaceId, url: req.url.pathname },
+          });
+        }
+      );
+
+      const { registerRouter, server: innerServer } = await server.setup({ config$ });
+      registerRouter(router);
+      await server.start();
+
+      const response = await supertest(innerServer.listener)
+        [method]('/s/default/api/test')
+        .redirects(0)
+        .expect(200);
+
+      expect(response.body).toEqual({
+        basePath: '/s/default',
+        spaceId: 'default',
+        url: '/api/test',
+      });
+    });
+  }
 });

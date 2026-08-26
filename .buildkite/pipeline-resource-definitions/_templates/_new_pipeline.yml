@@ -34,9 +34,9 @@ spec:
     spec:
       # Environment variables that will be set for the pipeline
       env:
-        # Slack channel to send notifications to, if ELASTIC_SLACK_NOTIFICATIONS_ENABLED = 'true'
+        # Slack channel to send notifications to, if KIBANA_SLACK_NOTIFICATIONS_ENABLED = 'true'
         SLACK_NOTIFICATIONS_CHANNEL: '#team-slack-channel-name'
-        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
+        KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'true'
 
       allow_rebuilds: false
       branch_configuration: main

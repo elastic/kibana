@@ -7,7 +7,12 @@
 
 import React from 'react';
 import { Position } from '@elastic/charts';
-import type { FramePublicAPI, XYDataLayerConfig, XYState, SeriesType } from '@kbn/lens-common';
+import type {
+  FramePublicAPI,
+  XYDataLayerConfig,
+  XYVisualizationState,
+  SeriesType,
+} from '@kbn/lens-common';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { render, screen } from '@testing-library/react';
 
@@ -17,7 +22,7 @@ import { XyAppearanceSettings } from './appearance_settings';
 describe('Appearance settings', () => {
   let frame: FramePublicAPI;
 
-  function testState(): XYState {
+  function testState(): XYVisualizationState {
     return {
       legend: { isVisible: true, position: Position.Right },
       valueLabels: 'hide',
@@ -44,36 +49,50 @@ describe('Appearance settings', () => {
 
   const renderComponent = (
     overrideProps?: Partial<{
-      state: XYState;
-      setState: (newState: XYState) => void;
+      state: XYVisualizationState;
+      setState: (newState: XYVisualizationState) => void;
+      frame: FramePublicAPI;
     }>
   ) => {
     const state = testState();
-    return render(<XyAppearanceSettings setState={jest.fn()} state={state} {...overrideProps} />);
+    return render(
+      <XyAppearanceSettings setState={jest.fn()} state={state} frame={frame} {...overrideProps} />
+    );
   };
 
   it.each<{
     seriesType: string;
     showsMissingValues?: boolean;
     showsFillOpacity?: boolean;
+    showsAreaFillOption?: boolean;
     showsPointVisibility?: boolean;
   }>([
+    {
+      seriesType: 'area',
+      showsMissingValues: true,
+      showsFillOpacity: true,
+      showsAreaFillOption: true,
+      showsPointVisibility: true,
+    },
     {
       seriesType: 'area_percentage_stacked',
       showsMissingValues: false,
       showsFillOpacity: true,
+      showsAreaFillOption: true,
       showsPointVisibility: true,
     },
     {
       seriesType: 'bar_horizontal',
       showsMissingValues: false,
       showsFillOpacity: false,
+      showsAreaFillOption: false,
       showsPointVisibility: false,
     },
     {
       seriesType: 'line',
       showsMissingValues: true,
       showsFillOpacity: false,
+      showsAreaFillOption: false,
       showsPointVisibility: true,
     },
   ])(
@@ -82,6 +101,7 @@ describe('Appearance settings', () => {
       seriesType,
       showsMissingValues = false,
       showsFillOpacity = false,
+      showsAreaFillOption = false,
       showsPointVisibility = false,
     }) => {
       const state = testState();
@@ -98,6 +118,11 @@ describe('Appearance settings', () => {
       } else {
         expect(screen.queryAllByTestId('lnsFillOpacity')).toHaveLength(0);
       }
+      if (showsAreaFillOption) {
+        expect(screen.getByTestId('lnsAreaFillOption')).toBeInTheDocument();
+      } else {
+        expect(screen.queryByTestId('lnsAreaFillOption')).not.toBeInTheDocument();
+      }
       if (showsPointVisibility) {
         expect(screen.getAllByTestId('lnsPointVisibilityOption')).toHaveLength(1);
       } else {
@@ -105,4 +130,17 @@ describe('Appearance settings', () => {
       }
     }
   );
+
+  it('hides missing values fitting controls for text-based (ES|QL) datasource', () => {
+    frame.datasourceLayers = {
+      first: createMockDatasource('textBased', {
+        isTextBasedLanguage: jest.fn(() => true),
+      }).publicAPIMock,
+    };
+    const state = testState();
+    (state.layers[0] as XYDataLayerConfig).seriesType = 'line';
+    renderComponent({ state });
+
+    expect(screen.queryByText('Missing values')).not.toBeInTheDocument();
+  });
 });

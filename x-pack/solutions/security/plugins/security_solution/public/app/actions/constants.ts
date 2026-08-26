@@ -7,17 +7,6 @@
 
 import { FILTER_CELL_ACTION_TYPE, COPY_CELL_ACTION_TYPE } from '@kbn/cell-actions/constants';
 
-export enum SecurityCellActionsTrigger {
-  DEFAULT = 'security-default-cellActions',
-  DETAILS_FLYOUT = 'security-detailsFlyout-cellActions',
-  ALERTS_COUNT = 'security-alertsCount-cellActions',
-  CASE_EVENTS = 'security-case-events-cellActions',
-}
-
-export enum EsqlInTimelineTrigger {
-  HISTOGRAM_TRIGGER = 'security-discoverInTimeline-histogramTrigger',
-}
-
 export enum EsqlInTimelineAction {
   VIS_FILTER_ACTION = 'security-discoverInTimeline-visFilterAction',
 }

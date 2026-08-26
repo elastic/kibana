@@ -21,7 +21,7 @@ Unify all your team's content into a personalized search experience. https://www
 1. When developing locally, Enterprise Search should be running locally alongside Kibana on `localhost:3002`.
 2. Update `config/kibana.dev.yml` with `enterpriseSearch.host: 'http://localhost:3002'`
 
-Problems? If you're an Elastic Enterprise Search engineer, please reach out to @elastic/search-kibana for questions or our in-depth Getting Started developer guide.
+Problems? If you're an Elastic Enterprise Search engineer, please reach out to @elastic/search-ml-ux for questions or our in-depth Getting Started developer guide.
 
 Don't forget to read Kibana's [contributing documentation](https://github.com/elastic/kibana/#building-and-running-kibana-andor-contributing-code) and developer guides for more general info on the Kibana ecosystem.
 
@@ -78,7 +78,7 @@ sh jest.sh public/applications/shared/flash_messages/flash_messages_logic.test.t
 
 #### Kibana FTR tests
 
-FTR configs for stateful search solution are listed in `.buildkite/ftr_search_stateful_configs.yml`, the main set of functional tests for this plugin are in the [x-pack/solutions/search/test/functional_search](../../../../test/functional_search/) suite of tests.
+FTR configs for stateful search solution are listed in `.buildkite/ftr-manifests/ftr_search_stateful_configs.yml`, the main set of functional tests for this plugin are in the [x-pack/solutions/search/test/functional_search](../../../../test/functional_search/) suite of tests.
 
 These can be run from the root of the Kibana folder with the following command:
 

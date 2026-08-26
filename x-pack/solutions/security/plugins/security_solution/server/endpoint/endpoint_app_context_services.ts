@@ -8,13 +8,19 @@
 import type {
   AnalyticsServiceSetup,
   ElasticsearchClient,
-  HttpServiceSetup,
+  IClusterClient,
   KibanaRequest,
   LoggerFactory,
+  SavedObjectsClientContract,
   SavedObjectsServiceStart,
   SecurityServiceStart,
 } from '@kbn/core/server';
-import type { ExceptionListClient, ListsServerExtensionRegistrar } from '@kbn/lists-plugin/server';
+import type { IScopedSearchClient, PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
+import type {
+  ExceptionListClient,
+  ListPluginSetup,
+  ListsServerExtensionRegistrar,
+} from '@kbn/lists-plugin/server';
 import type { CasesClient, CasesServerStart } from '@kbn/cases-plugin/server';
 import type {
   FleetFromHostFileClientInterface,
@@ -22,12 +28,14 @@ import type {
   MessageSigningServiceInterface,
 } from '@kbn/fleet-plugin/server';
 import type { AlertingServerStart } from '@kbn/alerting-plugin/server';
+import type { RulesClient } from '@kbn/alerting-plugin/server/rules_client';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { FleetActionsClientInterface } from '@kbn/fleet-plugin/server/services/actions/types';
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import type { Space } from '@kbn/spaces-plugin/common';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import {
   ScriptsLibraryClient,
   type ScriptsLibraryClientInterface,
@@ -37,8 +45,8 @@ import {
   installScriptsLibraryIndexTemplates,
   SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE,
 } from './lib/scripts_library';
-import type { ReferenceDataClientInterface } from './lib/reference_data';
-import { ReferenceDataClient } from './lib/reference_data';
+import type { OptInStatusMetadata, ReferenceDataClientInterface } from './lib/reference_data';
+import { REF_DATA_KEYS, ReferenceDataClient } from './lib/reference_data';
 import type { TelemetryConfigProvider } from '../../common/telemetry_config/telemetry_config_provider';
 import { SavedObjectsClientFactory } from './services/saved_objects';
 import type { ResponseActionsClient } from './services';
@@ -74,13 +82,21 @@ import type { FeatureUsageService } from './services/feature_usage/service';
 import type { ExperimentalFeatures } from '../../common/experimental_features';
 import type { ProductFeaturesService } from '../lib/product_features_service/product_features_service';
 import type { ResponseActionAgentType } from '../../common/endpoint/service/response_actions/constants';
+import { ScopedEndpointArtifactListClient } from './services/scoped_endpoint_artifact_list_client';
+import { SimpleMemCache } from './lib/simple_mem_cache';
+import { hasConnectedRemoteClusters } from './utils/ccs_utils';
+import { setYaraLogger } from './lib/libyara';
+
+/** Time-to-live (seconds) for the cached connected-remote-clusters check backing `isCcsEnabled` */
+const CCS_CACHE_TTL_SECONDS = 60;
+/** Single cache key used by `isCcsEnabled` (the cache only ever holds this one entry) */
+const CCS_CACHE_KEY = 'hasConnectedRemoteClusters';
 
 export interface EndpointAppContextServiceSetupContract {
   securitySolutionRequestContextFactory: IRequestContextFactory;
   cloud: CloudSetup;
   loggerFactory: LoggerFactory;
   telemetry: AnalyticsServiceSetup;
-  httpServiceSetup: HttpServiceSetup;
 }
 
 export interface EndpointAppContextServiceStartContract {
@@ -97,11 +113,39 @@ export interface EndpointAppContextServiceStartContract {
   experimentalFeatures: ExperimentalFeatures;
   /** An internal ES client */
   esClient: ElasticsearchClient;
+  /** Used to build the request-scoped, project-routed client that CPS reads fan out on */
+  clusterClient: IClusterClient;
+  /** Used to build the project-routed search client that CPS search strategies fan out on */
+  dataStart: DataPluginStart;
+  /** CPS enabled on the deployment AND the `defendCrossProjectSearch` flag on */
+  cpsEnabled: boolean;
   productFeaturesService: ProductFeaturesService;
   savedObjectsServiceStart: SavedObjectsServiceStart;
   connectorActions: ActionsPluginStartContract;
   telemetryConfigProvider: TelemetryConfigProvider;
   spacesService: SpacesServiceStart | undefined;
+  agentBuilder?: AgentBuilderPluginStart;
+  getExceptionListClient?: ListPluginSetup['getExceptionListClient'];
+}
+
+/**
+ * The request-bound half of the CPS primitives, handed out by `EndpointAppContextService.asScoped()`.
+ *
+ * Services take this rather than a `KibanaRequest` so that they stay independent of the HTTP routing
+ * layer. Holding one means the caller had a request identity, which is the precondition for a read to
+ * fan out; a service that receives none reads origin-only, exactly as before CPS.
+ */
+export interface ScopedEndpointServices {
+  /** `true` when reads made through this instance fan out across linked projects */
+  isCpsRead: () => boolean;
+  /** The client for reads against Defend-owned indices. Fleet-owned ones stay on the internal client */
+  getEsClient: () => ElasticsearchClient;
+  /** The search client the Defend search strategies dispatch through */
+  getSearchClient: () => IScopedSearchClient;
+  /** The active space, which is also what bounds the set of projects a fanned-out read reaches */
+  getSpaceId: () => string;
+  /** Resolves the active space, rejecting when it does not exist on this project */
+  getSpace: () => Promise<Space>;
 }
 
 /**
@@ -113,6 +157,7 @@ export class EndpointAppContextService {
   private startDependencies: EndpointAppContextServiceStartContract | null = null;
   private fleetServicesFactory: EndpointFleetServicesFactoryInterface | null = null;
   private savedObjectsFactoryService: SavedObjectsClientFactory | null = null;
+  private readonly ccsCache = new SimpleMemCache({ ttl: CCS_CACHE_TTL_SECONDS });
 
   public security: SecurityServiceStart | undefined;
 
@@ -128,6 +173,8 @@ export class EndpointAppContextService {
     this.startDependencies = dependencies;
     this.security = dependencies.security;
 
+    setYaraLogger(this.createLogger('libyara'));
+
     const isScriptsLibraryEnabled =
       this.startDependencies.experimentalFeatures.responseActionsScriptLibraryManagement;
 
@@ -136,8 +183,7 @@ export class EndpointAppContextService {
     }
 
     const savedObjectsFactory = new SavedObjectsClientFactory(
-      dependencies.savedObjectsServiceStart,
-      this.setupDependencies.httpServiceSetup
+      dependencies.savedObjectsServiceStart
     );
 
     this.savedObjectsFactoryService = savedObjectsFactory;
@@ -163,6 +209,7 @@ export class EndpointAppContextService {
   }
 
   public stop() {
+    setYaraLogger(undefined);
     this.startDependencies = null;
     this.savedObjectsFactoryService = null;
   }
@@ -257,9 +304,44 @@ export class EndpointAppContextService {
       throw new EndpointAppContentServicesNotSetUpError();
     }
 
-    // TODO:PT check what this returns when running locally with kibana in serverless emulation
-
     return Boolean(this.setupDependencies.cloud.isServerlessEnabled);
+  }
+
+  /**
+   * Returns `true` when Cross-Cluster Search (CCS) for Elastic Defend should be applied — i.e. the
+   * `defendRemoteOutputCcs` feature flag is enabled AND the cluster currently has at least one
+   * connected remote cluster. The remote-cluster check is cached (see `CCS_CACHE_TTL_SECONDS`) so
+   * callers can derive this at every index-pattern build site without repeatedly hitting
+   * `_remote/info` — keeping CCS awareness transparent to the services that read endpoint indices.
+   *
+   * A transient `remoteInfo()` failure resolves to `false` but is NOT cached, so the next call
+   * retries instead of serving a stale `false` that would hide remote endpoints.
+   */
+  public async isCcsEnabled(): Promise<boolean> {
+    if (!this.experimentalFeatures.defendRemoteOutputCcs) {
+      return false;
+    }
+
+    const cached = this.ccsCache.get<boolean>(CCS_CACHE_KEY);
+    if (cached !== undefined) {
+      return cached;
+    }
+
+    try {
+      const hasRemoteClusters = await hasConnectedRemoteClusters(this.getInternalEsClient());
+      this.ccsCache.set(CCS_CACHE_KEY, hasRemoteClusters);
+      return hasRemoteClusters;
+    } catch (error) {
+      // Don't cache the failure (so a transient error retries next call), but leave a breadcrumb —
+      // otherwise a persistent `_remote/info` failure (e.g. missing privileges on the internal user)
+      // is indistinguishable from "no remotes connected" for an operator debugging missing endpoints.
+      this.createLogger('isCcsEnabled').debug(
+        `Failed to check connected remote clusters; treating CCS as disabled: ${
+          error?.stack ?? error
+        }`
+      );
+      return false;
+    }
   }
 
   public getInternalEsClient(): ElasticsearchClient {
@@ -268,6 +350,95 @@ export class EndpointAppContextService {
     }
 
     return this.startDependencies.esClient;
+  }
+
+  /** `true` when Defend reads should fan out across linked projects via Cross-Project Search */
+  public isCpsEnabled(): boolean {
+    if (this.startDependencies == null) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+
+    return this.startDependencies.cpsEnabled;
+  }
+
+  /**
+   * `true` when this particular read fans out. Background callers hold no request identity, so they
+   * stay origin-only even with CPS on, and must keep the pre-CPS space semantics along with it:
+   * client choice and space filtering have to agree on one answer or a local document can be
+   * filtered out of an origin-only read.
+   */
+  public isCpsRead(request?: KibanaRequest): boolean {
+    if (!this.isCpsEnabled()) {
+      return false;
+    }
+
+    if (!request) {
+      this.createLogger('isCpsRead').debug(
+        'CPS is enabled but this read was requested without a KibanaRequest, so it cannot fan out and will return origin data only'
+      );
+
+      return false;
+    }
+
+    return true;
+  }
+
+  /** The client for reads against Defend-owned indices. Fleet-owned ones keep `getInternalEsClient()` */
+  public getReadEsClient(request?: KibanaRequest): ElasticsearchClient {
+    if (!this.startDependencies?.clusterClient) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+
+    // `isCpsRead` first, so a caller with no request gets its breadcrumb; the second half narrows
+    if (!this.isCpsRead(request) || !request) {
+      return this.getInternalEsClient();
+    }
+
+    return this.startDependencies.clusterClient.asScoped(request, { projectRouting: 'space' })
+      .asCurrentUser;
+  }
+
+  /**
+   * The search client the Defend search strategies dispatch through. Carries the same routing as
+   * `getReadEsClient()` when CPS is on, so callers do not branch on the flag themselves.
+   */
+  public getScopedSearchClient(request: KibanaRequest): IScopedSearchClient {
+    if (!this.startDependencies?.dataStart) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+
+    const { dataStart } = this.startDependencies;
+
+    return this.isCpsEnabled()
+      ? dataStart.search.asScoped(request, { projectRouting: 'space' })
+      : dataStart.search.asScoped(request);
+  }
+
+  /**
+   * A request-bound view of the three CPS primitives above, so the services that need them do not
+   * have to take a `KibanaRequest` of their own. The server-side services are deliberately detached
+   * from the HTTP routing layer; handing them this instead keeps that separation while still making
+   * "this read can fan out" visible in their signatures. A service that receives no scoped instance
+   * cannot fan out, which is the same rule `isCpsRead` applies to a missing request.
+   *
+   * Modelled on `getScopedEndpointArtifactClient()`, which hands out a request-scoped service object
+   * in the same way.
+   */
+  public asScoped(request: KibanaRequest): ScopedEndpointServices {
+    return {
+      isCpsRead: () => this.isCpsRead(request),
+      getEsClient: () => this.getReadEsClient(request),
+      getSearchClient: () => this.getScopedSearchClient(request),
+      getSpaceId: () => this.getActiveSpaceId(request),
+      getSpace: () => this.getActiveSpace(request),
+    };
+  }
+
+  public getAgentBuilder(): AgentBuilderPluginStart {
+    if (this.startDependencies?.agentBuilder == null) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+    return this.startDependencies.agentBuilder;
   }
 
   private getFleetAuthzService(): FleetStartContract['authz'] {
@@ -296,6 +467,7 @@ export class EndpointAppContextService {
       this.getLicenseService(),
       fleetAuthz,
       userRoles,
+      this.isServerless(),
       this.startDependencies.productFeaturesService
     );
   }
@@ -305,12 +477,7 @@ export class EndpointAppContextService {
       throw new EndpointAppContentServicesNotStartedError();
     }
 
-    return new EndpointMetadataService(
-      this.startDependencies.esClient,
-      this.savedObjects.createInternalScopedSoClient({ readonly: false, spaceId }),
-      this.getInternalFleetServices(spaceId),
-      this.createLogger('endpointMetadata')
-    );
+    return new EndpointMetadataService(this, spaceId);
   }
 
   /**
@@ -368,6 +535,23 @@ export class EndpointAppContextService {
     }
 
     return this.startDependencies.exceptionListsClient;
+  }
+
+  public getScopedEndpointArtifactClient(
+    savedObjectsClient: SavedObjectsClientContract,
+    request: KibanaRequest,
+    username: string
+  ): ScopedEndpointArtifactListClient {
+    if (!this.startDependencies?.getExceptionListClient) {
+      throw new EndpointError('Endpoint artifact client unavailable: lists plugin is not enabled');
+    }
+
+    const client = this.startDependencies.getExceptionListClient(
+      savedObjectsClient,
+      username,
+      false
+    );
+    return new ScopedEndpointArtifactListClient(client, this, request);
   }
 
   public getMessageSigningService(): MessageSigningServiceInterface {
@@ -464,6 +648,23 @@ export class EndpointAppContextService {
     return this.startDependencies.spacesService.getActiveSpace(httpRequest);
   }
 
+  public getActiveSpaceId(httpRequest: KibanaRequest): string {
+    if (!this.startDependencies?.spacesService) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+
+    return this.startDependencies.spacesService.getSpaceId(httpRequest);
+  }
+
+  public getAccessibleSpaces(httpRequest: KibanaRequest): Promise<Space[]> {
+    if (!this.startDependencies?.spacesService) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+
+    const spacesClient = this.startDependencies.spacesService.createSpacesClient(httpRequest);
+    return spacesClient.getAll();
+  }
+
   public getReferenceDataClient(): ReferenceDataClientInterface {
     if (!this.startDependencies?.savedObjectsServiceStart) {
       throw new EndpointAppContentServicesNotStartedError();
@@ -471,8 +672,31 @@ export class EndpointAppContextService {
 
     return new ReferenceDataClient(
       this.savedObjects.createInternalScopedSoClient({ readonly: false }),
+      this.experimentalFeatures,
       this.createLogger('ReferenceDataClient')
     );
+  }
+
+  /**
+   * Returns true if Endpoint Exceptions move FF is enabled AND the user has opted in
+   * to per-policy Endpoint Exceptions.
+   */
+  public async isEndpointExceptionsPerPolicyEnabled(): Promise<boolean> {
+    if (!this.startDependencies) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+
+    if (!this.startDependencies.experimentalFeatures.endpointExceptionsMovedUnderManagement) {
+      return false;
+    }
+
+    const referenceDataClient = this.getReferenceDataClient();
+
+    const optInStatusMetadata = await referenceDataClient.get<OptInStatusMetadata>(
+      REF_DATA_KEYS.endpointExceptionsPerPolicyOptInStatus
+    );
+
+    return optInStatusMetadata.metadata.status;
   }
 
   public getServerConfigValue<TKey extends keyof ConfigType = keyof ConfigType>(
@@ -489,11 +713,16 @@ export class EndpointAppContextService {
     return this.startDependencies.config[key];
   }
 
-  getScriptsLibraryClient(spaceId: string, username: string): ScriptsLibraryClientInterface {
+  getScriptsLibraryClient(
+    spaceId: string,
+    username: string,
+    rulesClient?: RulesClient
+  ): ScriptsLibraryClientInterface {
     return new ScriptsLibraryClient({
       spaceId,
       username,
       endpointService: this,
+      rulesClient,
     });
   }
 }

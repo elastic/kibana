@@ -22,40 +22,23 @@ interface StreamsStateErrorProps {
   status_code: number;
 }
 
-interface StreamsSystemIdentificationIdentifiedProps {
-  count: number;
-  input_tokens_used: number;
-  output_tokens_used: number;
+interface StreamsProcessingPipelineSuggestedProps {
+  duration_ms: number;
+  steps_used: number;
+  success: boolean;
   stream_name: string;
   stream_type: StreamType;
 }
 
-interface StreamsDescriptionGeneratedProps {
-  input_tokens_used: number;
-  output_tokens_used: number;
-  stream_name: string;
-  stream_type: StreamType;
-}
-interface StreamsSignificantEventsQueriesGeneratedProps {
-  count: number;
-  systems_count: number;
-  input_tokens_used: number;
-  output_tokens_used: number;
-  stream_name: string;
-  stream_type: StreamType;
-}
-
-interface StreamsInsightsGeneratedProps {
-  input_tokens_used: number;
-  output_tokens_used: number;
-  cached_tokens_used?: number;
+interface StreamsAgentToolEventCreateProps {
+  success: boolean;
+  stream_names: string[];
+  error_message?: string;
 }
 
 export {
   type StreamEndpointLatencyProps,
   type StreamsStateErrorProps,
-  type StreamsSystemIdentificationIdentifiedProps,
-  type StreamsDescriptionGeneratedProps,
-  type StreamsSignificantEventsQueriesGeneratedProps,
-  type StreamsInsightsGeneratedProps,
+  type StreamsProcessingPipelineSuggestedProps,
+  type StreamsAgentToolEventCreateProps,
 };

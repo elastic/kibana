@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-export { createTagParser, findToolResult, type MutableNode } from './utils';
+export { findToolResult, type MutableNode } from './utils';
 export { visualizationTagParser, createVisualizationRenderer } from './visualization_plugin';
-export { dashboardTagParser, createDashboardRenderer } from './dashboard_plugin';
+export {
+  renderAttachmentTagParser,
+  createRenderAttachmentRenderer,
+} from './render_attachment_plugin';
+export { renderTagParser, createRenderRenderer } from './render_plugin';
 export { loadingCursorPlugin, Cursor } from './cursor_plugin';
 export { esqlLanguagePlugin } from './esql_plugin';

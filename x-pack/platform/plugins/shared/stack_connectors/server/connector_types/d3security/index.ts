@@ -12,6 +12,7 @@ import {
   AlertingConnectorFeatureId,
   SecurityConnectorFeatureId,
   WorkflowsConnectorFeatureId,
+  AgentBuilderConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
 import {
   CONNECTOR_ID,
@@ -34,6 +35,7 @@ export function getConnectorType(): D3SecurityConnectorType {
       AlertingConnectorFeatureId,
       SecurityConnectorFeatureId,
       WorkflowsConnectorFeatureId,
+      AgentBuilderConnectorFeatureId,
     ],
     schema: {
       config: D3SecurityConfigSchema,

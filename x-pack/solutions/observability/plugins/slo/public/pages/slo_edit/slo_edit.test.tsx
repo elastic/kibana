@@ -32,7 +32,6 @@ import { useUpdateSlo } from '../../hooks/use_update_slo';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { render } from '../../utils/test_helper';
 import { SloEditPage } from './slo_edit';
-
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useParams: jest.fn(),

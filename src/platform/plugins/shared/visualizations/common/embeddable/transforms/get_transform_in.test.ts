@@ -9,31 +9,46 @@
 
 import type { SerializedVis } from '../../types';
 import { getTransformIn } from './get_transform_in';
-import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
 
 describe('getTransformIn', () => {
-  const transformEnhancementsInMock = jest.fn().mockReturnValue({
-    state: { dynamiceActions: 'transformedInValue' },
-    references: [
-      {
-        id: '5678',
-        name: 'someRef',
-        type: 'testType',
+  const drilldown = {
+    dashboard_id: '5678',
+    type: 'dashboard_drilldown',
+    label: 'Go to dashboard',
+    trigger: 'some_action',
+  };
+  const transformDrilldownsIn = jest.fn((state) => {
+    const { dashboard_id, ...restOfDrilldown } = drilldown;
+    return {
+      state: {
+        ...state,
+        drilldowns: [
+          {
+            ...restOfDrilldown,
+            // hardcoding reference extraction
+            // production code would get id from reference matching dashboardRefName
+            dashboardRefName: 'someRef',
+          },
+        ],
       },
-    ],
+      references: [
+        {
+          id: '5678',
+          name: 'someRef',
+          type: 'dashboard',
+        },
+      ],
+    };
   });
 
-  const transformIn = getTransformIn(transformEnhancementsInMock);
+  const transformIn = getTransformIn(transformDrilldownsIn);
 
   describe('by reference', () => {
     test('should extract references', () => {
       expect(
         transformIn({
-          enhancements: {
-            dynamiceActions: 'originalValue',
-          } as unknown as DynamicActionsSerializedState['enhancements'],
+          drilldowns: [drilldown],
           savedObjectId: '1234',
-          timeRange: { from: '15-now', to: 'now' },
           title: 'custom title',
           uiState: 'someUiState',
         })
@@ -48,17 +63,18 @@ describe('getTransformIn', () => {
             Object {
               "id": "5678",
               "name": "someRef",
-              "type": "testType",
+              "type": "dashboard",
             },
           ],
           "state": Object {
-            "enhancements": Object {
-              "dynamiceActions": "transformedInValue",
-            },
-            "timeRange": Object {
-              "from": "15-now",
-              "to": "now",
-            },
+            "drilldowns": Array [
+              Object {
+                "dashboardRefName": "someRef",
+                "label": "Go to dashboard",
+                "trigger": "some_action",
+                "type": "dashboard_drilldown",
+              },
+            ],
             "title": "custom title",
             "uiState": "someUiState",
           },
@@ -71,9 +87,7 @@ describe('getTransformIn', () => {
     test('should extract references', () => {
       expect(
         transformIn({
-          enhancements: {
-            dynamiceActions: 'originalValue',
-          } as unknown as DynamicActionsSerializedState['enhancements'],
+          drilldowns: [drilldown],
           savedVis: {
             data: {
               searchSource: {
@@ -81,7 +95,6 @@ describe('getTransformIn', () => {
               },
             },
           } as SerializedVis,
-          timeRange: { from: '15-now', to: 'now' },
           title: 'custom title',
           uiState: 'someUiState',
         })
@@ -96,13 +109,18 @@ describe('getTransformIn', () => {
             Object {
               "id": "5678",
               "name": "someRef",
-              "type": "testType",
+              "type": "dashboard",
             },
           ],
           "state": Object {
-            "enhancements": Object {
-              "dynamiceActions": "transformedInValue",
-            },
+            "drilldowns": Array [
+              Object {
+                "dashboardRefName": "someRef",
+                "label": "Go to dashboard",
+                "trigger": "some_action",
+                "type": "dashboard_drilldown",
+              },
+            ],
             "savedVis": Object {
               "data": Object {
                 "searchSource": Object {
@@ -110,10 +128,6 @@ describe('getTransformIn', () => {
                   "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.index",
                 },
               },
-            },
-            "timeRange": Object {
-              "from": "15-now",
-              "to": "now",
             },
             "title": "custom title",
             "uiState": "someUiState",

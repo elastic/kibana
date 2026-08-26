@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/core-user-settings-server'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-security'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/core-user-settings-server'
+  title: '@kbn/core-user-settings-server'
   description: Moon project for @kbn/core-user-settings-server
   channel: ''
   owner: '@elastic/kibana-security'
-  metadata:
-    sourceRoot: src/core/packages/user-settings/server
+  sourceRoot: src/core/packages/user-settings/server
 dependsOn: []
 tags:
   - shared-server

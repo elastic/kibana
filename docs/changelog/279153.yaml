@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/279153
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-21
+- product: kibana
+  target: 9.5.0
+title: "Fix escape closing Timeline and the underlying flyout together"
+description: "Pressing Escape while Timeline is open over the alert flyout closes only the Timeline modal, so the investigation flyout stays open."

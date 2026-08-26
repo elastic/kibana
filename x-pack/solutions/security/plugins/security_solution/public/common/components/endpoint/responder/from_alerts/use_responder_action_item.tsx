@@ -32,7 +32,6 @@ export const useResponderActionItem = (
         'data-test-subj': 'endpointResponseActions-action-item',
         disabled: isDisabled,
         toolTipContent: tooltip,
-        size: 's',
         onClick: handleResponseActionsClick,
         name: (
           <FormattedMessage

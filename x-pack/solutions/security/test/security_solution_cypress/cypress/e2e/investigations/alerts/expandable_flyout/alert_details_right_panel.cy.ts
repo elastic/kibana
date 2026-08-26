@@ -58,6 +58,7 @@ import {
   selectTakeActionItem,
 } from '../../../../tasks/expandable_flyout/alert_details_right_panel';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
+import { disableNewFlyout } from '../../../../tasks/api_calls/kibana_advanced_settings';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
 import { createRule } from '../../../../tasks/api_calls/rules';
@@ -85,6 +86,7 @@ describe('Alert details expandable flyout right panel', { tags: ['@ess', '@serve
   const rule = getNewRule();
 
   beforeEach(() => {
+    disableNewFlyout();
     deleteAlertsAndRules();
     login(role);
     createRule(rule);

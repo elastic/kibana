@@ -68,7 +68,7 @@ describe('QualitySummaryCards', () => {
   };
 
   const defaultProps = {
-    selectedCard: 'degraded' as const,
+    selectedCard: 'failed' as const,
     setSelectedCard: jest.fn(),
   };
 
@@ -81,6 +81,8 @@ describe('QualitySummaryCards', () => {
   });
 
   it('renders degraded docs card correctly', () => {
+    // defaultProps has selectedCard: 'failed', so the degraded card renders as a button (not selected)
+    // and the failed card renders as a div (selected)
     renderWithI18n(<QualitySummaryCards {...defaultProps} />);
 
     expect(
@@ -92,7 +94,8 @@ describe('QualitySummaryCards', () => {
   });
 
   it('renders failed docs card when failure store is available and user has read permission', () => {
-    renderWithI18n(<QualitySummaryCards {...defaultProps} />);
+    // selectedCard: 'degraded' so the failed card renders as a button (not selected)
+    renderWithI18n(<QualitySummaryCards {...defaultProps} selectedCard="degraded" />);
 
     expect(screen.getByTestId('datasetQualityDetailsSummaryKpiCard-Failed documents')).toBeTruthy();
     expect(
@@ -142,7 +145,13 @@ describe('QualitySummaryCards', () => {
       handleDocsTrendChartChange,
     });
 
-    renderWithI18n(<QualitySummaryCards {...defaultProps} setSelectedCard={setSelectedCard} />);
+    renderWithI18n(
+      <QualitySummaryCards
+        {...defaultProps}
+        selectedCard="failed"
+        setSelectedCard={setSelectedCard}
+      />
+    );
 
     const degradedCard = screen.getByTestId(
       'datasetQualityDetailsSummaryKpiCard-Degraded documents'
@@ -161,7 +170,13 @@ describe('QualitySummaryCards', () => {
       handleDocsTrendChartChange,
     });
 
-    renderWithI18n(<QualitySummaryCards {...defaultProps} setSelectedCard={setSelectedCard} />);
+    renderWithI18n(
+      <QualitySummaryCards
+        {...defaultProps}
+        selectedCard="degraded"
+        setSelectedCard={setSelectedCard}
+      />
+    );
 
     const failedCard = screen.getByTestId('datasetQualityDetailsSummaryKpiCard-Failed documents');
     fireEvent.click(failedCard);
@@ -173,18 +188,38 @@ describe('QualitySummaryCards', () => {
   it('indicates when degraded card is selected', () => {
     renderWithI18n(<QualitySummaryCards {...defaultProps} selectedCard="degraded" />);
 
-    const degradedCard = screen.getByTestId(
+    expect(
+      screen.getByTestId('datasetQualityDetailsSummaryKpiCard-Degraded documents')
+    ).toHaveAttribute('aria-pressed', 'true');
+    expect(
+      screen.getByTestId('datasetQualityDetailsSummaryKpiCard-Failed documents')
+    ).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  it('does not call handleDocsTrendChartChange or setSelectedCard when the already-selected card is clicked', () => {
+    const setSelectedCard = jest.fn();
+    const handleDocsTrendChartChange = jest.fn();
+
+    mockUseQualityIssuesDocsChart.mockReturnValue({
+      handleDocsTrendChartChange,
+    });
+
+    // degraded card is selected — it renders without an onClick handler, so clicks do nothing
+    renderWithI18n(
+      <QualitySummaryCards
+        {...defaultProps}
+        selectedCard="degraded"
+        setSelectedCard={setSelectedCard}
+      />
+    );
+
+    const selectedDegradedCard = screen.getByTestId(
       'datasetQualityDetailsSummaryKpiCard-Degraded documents'
     );
-    const failedCard = screen.getByTestId('datasetQualityDetailsSummaryKpiCard-Failed documents');
+    fireEvent.click(selectedDegradedCard);
 
-    // The degraded card should be selected (has primary color class, not text)
-    expect(degradedCard.className.includes('primary')).toBe(true);
-    expect(degradedCard.className.includes('text')).toBe(false);
-
-    // The failed card should not be selected (no primary color class but text)
-    expect(failedCard.className.includes('primary')).toBe(false);
-    expect(failedCard.className.includes('text')).toBe(true);
+    expect(handleDocsTrendChartChange).not.toHaveBeenCalled();
+    expect(setSelectedCard).not.toHaveBeenCalled();
   });
 
   it('shows enable failure store button when user can manage failure store but no failure store exists', () => {

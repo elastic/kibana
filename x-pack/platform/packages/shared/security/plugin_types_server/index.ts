@@ -23,7 +23,12 @@ export type {
   UpdateRestAPIKeyWithKibanaPrivilegesParams,
   GrantUiamAPIKeyParams,
   InvalidateUiamAPIKeyParams,
+  ConvertUiamAPIKeyResult,
+  ConvertUiamAPIKeyResultSuccess,
+  ConvertUiamAPIKeyResultFailed,
+  ConvertUiamAPIKeysResponse,
   UiamAPIKeysType,
+  ClientAuthentication,
 } from './src/authentication';
 export type {
   PrivilegeDeprecationsService,
@@ -46,7 +51,9 @@ export type {
   CheckUserProfilesPrivilegesResponse,
   CasesActions,
   CheckPrivileges,
+  AiIndexActions,
   AlertingActions,
+  AlertsActions,
   AppActions,
   ApiActions,
   CheckPrivilegesDynamically,
@@ -60,6 +67,7 @@ export type {
   UserProfileServiceStart,
   UserProfileSuggestParams,
   UserProfileGetCurrentParams,
+  UserProfileGetCurrentProfileIdParams,
   UserProfileBulkGetParams,
   UserProfileRequiredPrivileges,
 } from './src/user_profile';
@@ -82,6 +90,8 @@ export type {
   CreateRestAPIKeyWithKibanaPrivilegesParams,
   CreateCrossClusterAPIKeyParams,
   GrantAPIKeyResult,
+  CloneAPIKeyParams,
+  CloneAPIKeyResult,
 } from '@kbn/core-security-server';
 export { isCreateRestAPIKeyParams } from '@kbn/core-security-server';
 

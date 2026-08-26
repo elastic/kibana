@@ -99,7 +99,12 @@ export function RegionKeyEditor(props: Props) {
   }, [emsFileLayers, props]);
 
   return isLoading ? (
-    <EuiSelect isLoading />
+    <EuiSelect
+      isLoading
+      aria-label={i18n.translate('xpack.maps.choropleth.loadingAriaLabel', {
+        defaultMessage: 'Loading region key options',
+      })}
+    />
   ) : (
     <div className="lnsIndexPatternDimensionEditor--padded">
       <EMSFileSelect

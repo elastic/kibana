@@ -10,6 +10,11 @@ import {
   FindActionConnectorResponseRt,
   GetCaseConnectorsResponseRt,
 } from './v1';
+import {
+  ConnectorMappingResponseSchema,
+  FindActionConnectorResponseSchema,
+  GetCaseConnectorsResponseSchema,
+} from '../../api_zod/connector/v1';
 
 describe('FindActionConnectorResponseRt', () => {
   const response = [
@@ -58,6 +63,18 @@ describe('FindActionConnectorResponseRt', () => {
       _tag: 'Right',
       right: [response[0]],
     });
+  });
+
+  it('zod: has expected attributes in request', () => {
+    const result = FindActionConnectorResponseSchema.safeParse(response);
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual(response);
+  });
+
+  it('zod: strips unknown fields', () => {
+    const result = FindActionConnectorResponseSchema.safeParse([{ ...response[0], foo: 'bar' }]);
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual([response[0]]);
   });
 });
 
@@ -140,6 +157,20 @@ describe('GetCaseConnectorsResponseRt', () => {
       right: defaultReq,
     });
   });
+
+  it('zod: has expected attributes in request', () => {
+    const result = GetCaseConnectorsResponseSchema.safeParse(defaultReq);
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual(defaultReq);
+  });
+
+  it('zod: strips unknown fields', () => {
+    const result = GetCaseConnectorsResponseSchema.safeParse({
+      'servicenow-1': { ...defaultReq['servicenow-1'], foo: 'bar' },
+    });
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual(defaultReq);
+  });
 });
 
 describe('ConnectorMappingResponseRt', () => {
@@ -200,6 +231,27 @@ describe('ConnectorMappingResponseRt', () => {
         _tag: 'Right',
         right: { id: 'test', version: 'test', mappings },
       });
+    });
+
+    it('zod: has expected attributes in response', () => {
+      const result = ConnectorMappingResponseSchema.safeParse({
+        id: 'test',
+        version: 'test',
+        mappings,
+      });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual({ id: 'test', version: 'test', mappings });
+    });
+
+    it('zod: strips unknown fields', () => {
+      const result = ConnectorMappingResponseSchema.safeParse({
+        id: 'test',
+        version: 'test',
+        mappings,
+        foo: 'bar',
+      });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual({ id: 'test', version: 'test', mappings });
     });
   });
 });

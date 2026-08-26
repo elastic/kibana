@@ -173,45 +173,13 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         description: 'Title content when the actions popover toggle is disabled',
       }
     ),
-    'euiCollapsibleNavBeta.ariaLabel': i18n.translate('core.euiCollapsibleNavBeta.ariaLabel', {
-      defaultMessage: 'Site menu',
-    }),
-    'euiCollapsedNavButton.ariaLabelButtonIcon': ({ title }: EuiValues) =>
-      i18n.translate('core.euiCollapsedNavButton.ariaLabelButtonIcon', {
-        defaultMessage: '{title}, quick navigation menu',
-        values: { title },
-      }),
-    'euiCollapsibleNavButton.ariaLabelExpand': i18n.translate(
-      'core.euiCollapsibleNavButton.ariaLabelExpand',
-      { defaultMessage: 'Expand navigation' }
-    ),
-    'euiCollapsibleNavButton.ariaLabelCollapse': i18n.translate(
-      'core.euiCollapsibleNavButton.ariaLabelCollapse',
-      { defaultMessage: 'Collapse navigation' }
-    ),
-    'euiCollapsibleNavButton.ariaLabelClose': i18n.translate(
-      'core.euiCollapsibleNavButton.ariaLabelClose',
-      { defaultMessage: 'Close navigation' }
-    ),
-    'euiCollapsibleNavButton.ariaLabelOpen': i18n.translate(
-      'core.euiCollapsibleNavButton.ariaLabelOpen',
-      { defaultMessage: 'Open navigation' }
-    ),
-    'euiCollapsibleNavKibanaSolution.switcherTitle': i18n.translate(
-      'core.euiCollapsibleNavKibanaSolution.switcherTitle',
-      { defaultMessage: 'Solution view' }
-    ),
-    'euiCollapsibleNavKibanaSolution.switcherAriaLabel': i18n.translate(
-      'core.euiCollapsibleNavKibanaSolution.switcherAriaLabel',
-      { defaultMessage: '- click to switch to another solution' }
-    ),
-    'euiCollapsibleNavKibanaSolution.groupLabel': i18n.translate(
-      'core.euiCollapsibleNavKibanaSolution.groupLabel',
-      { defaultMessage: 'Navigate to solution' }
-    ),
     'euiColorPicker.alphaLabel': i18n.translate('core.euiColorPicker.alphaLabel', {
       defaultMessage: 'Alpha channel (opacity) value',
       description: 'Label describing color alpha channel',
+    }),
+    'euiColorPicker.ariaLabel': i18n.translate('core.euiColorPicker.ariaLabel', {
+      defaultMessage: 'Select a color',
+      description: 'ARIA label for the color picker button',
     }),
     'euiColorPicker.colorLabel': i18n.translate('core.euiColorPicker.colorLabel', {
       defaultMessage: 'Color value',
@@ -776,10 +744,10 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       defaultMessage:
         'You are in a modal dialog. Press Escape or tap/click outside the dialog on the shadowed overlay to close.',
     }),
-    'euiFlyout.screenReaderNonModalDialog': i18n.translate(
-      'core.euiFlyout.screenReaderNonModalDialog',
+    'euiFlyout.screenReaderNoOverlayMaskDialog': i18n.translate(
+      'core.euiFlyout.screenReaderNoOverlayMaskDialog',
       {
-        defaultMessage: 'You are in a non-modal dialog. To close the dialog, press Escape.',
+        defaultMessage: 'You are in a modal dialog. To close the dialog, press Escape.',
       }
     ),
     'euiFlyout.screenReaderFocusTrapShards': i18n.translate(
@@ -793,6 +761,9 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     }),
     'euiFlyoutMenu.history': i18n.translate('core.euiFlyoutMenu.history', {
       defaultMessage: 'History',
+    }),
+    'euiFlyoutMenu.history.tooltip': i18n.translate('core.euiFlyoutMenu.history.tooltip', {
+      defaultMessage: 'Recently visited',
     }),
     'euiFlyoutManaged.defaultTitle': i18n.translate('core.euiFlyoutManaged.defaultTitle', {
       defaultMessage: 'Unknown Flyout',
@@ -1801,10 +1772,6 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiToast.newNotification': i18n.translate('core.euiToast.newNotification', {
       defaultMessage: 'A new notification appears',
     }),
-    'euiToast.notification': i18n.translate('core.euiToast.notification', {
-      defaultMessage: 'Notification',
-      description: 'ARIA label on an element containing a notification',
-    }),
     'euiTourFooter.endTour': i18n.translate('core.euiTourFooter.endTour', {
       defaultMessage: 'End tour',
     }),
@@ -1894,5 +1861,35 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiColorPicker.selectedColorLabel': i18n.translate('core.euiColorPicker.selectedColorLabel', {
       defaultMessage: 'Selected color',
     }),
+    'euiContextMenuPanelTitle.ariaLabel': i18n.translate(
+      'core.euiContextMenuPanelTitle.ariaLabel',
+      {
+        defaultMessage: 'Close current panel:',
+      }
+    ),
+    'euiBanner.dismissAriaLabel': ({ title }: EuiValues) =>
+      i18n.translate('core.euiBanner.dismissAriaLabel', {
+        defaultMessage: 'Dismiss "{title}" announcement',
+        values: {
+          title,
+        },
+      }),
+    'euiFlyoutMenu.pagination.first': i18n.translate('core.euiFlyoutMenu.pagination.first', {
+      defaultMessage: 'First',
+    }),
+    'euiFlyoutMenu.pagination.previous': i18n.translate('core.euiFlyoutMenu.pagination.previous', {
+      defaultMessage: 'Previous',
+    }),
+    'euiFlyoutMenu.pagination.next': i18n.translate('core.euiFlyoutMenu.pagination.next', {
+      defaultMessage: 'Next',
+    }),
+    'euiFlyoutMenu.pagination.last': i18n.translate('core.euiFlyoutMenu.pagination.last', {
+      defaultMessage: 'Last',
+    }),
+    'euiFlyoutMenu.pagination.counter': ({ position, total }: EuiValues) =>
+      i18n.translate('core.euiFlyoutMenu.pagination.counter', {
+        defaultMessage: '{position} of {total}',
+        values: { position, total },
+      }),
   };
 };

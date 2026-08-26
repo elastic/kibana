@@ -6,9 +6,10 @@
  */
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import { load } from 'js-yaml';
+import { parse } from 'yaml';
 import deepMerge from 'deepmerge';
 import { set } from '@kbn/safer-lodash-set';
+import { PrivilegeType } from '@kbn/apm-types';
 
 import {
   getDefaultPresetForEsOutput,
@@ -34,6 +35,7 @@ import type {
   PackageInfo,
 } from '../../../common/types';
 import { agentPolicyService } from '../agent_policy';
+
 import {
   dataTypes,
   kafkaCompressionType,
@@ -41,6 +43,7 @@ import {
   outputType,
   PACKAGE_POLICY_DEFAULT_INDEX_PRIVILEGES,
 } from '../../../common/constants';
+import { createManagedBulkOutputMatcher } from '../preconfiguration/outputs';
 import { getSettingsValuesForAgentPolicy } from '../form_settings';
 import { getPackageInfo } from '../epm/packages';
 import { pkgToPkgKey, splitPkgKey } from '../epm/registry';
@@ -77,7 +80,13 @@ async function fetchAgentPolicy(soClient: SavedObjectsClientContract, id: string
 export async function getFullAgentPolicy(
   soClient: SavedObjectsClientContract,
   id: string,
-  options?: { standalone?: boolean; agentPolicy?: AgentPolicy; agentVersion?: string }
+  options?: {
+    standalone?: boolean;
+    agentPolicy?: AgentPolicy;
+    agentVersion?: string;
+    /** When true, redact proxy_headers and ssl.key from all proxy references in the response */
+    redactProxySecrets?: boolean;
+  }
 ): Promise<FullAgentPolicy | null> {
   const logger = appContextService.getLogger().get('getFullAgentPolicy');
 
@@ -88,6 +97,7 @@ export async function getFullAgentPolicy(
   );
 
   const standalone = options?.standalone ?? false;
+  const redactProxySecrets = options?.redactProxySecrets ?? false;
 
   let agentPolicy: AgentPolicy | null;
   if (options?.agentPolicy?.package_policies) {
@@ -163,7 +173,31 @@ export async function getFullAgentPolicy(
 
   let otelcolConfig;
   if (experimentalFeature.enableOtelIntegrations) {
-    otelcolConfig = generateOtelcolConfig(agentInputs, dataOutput);
+    const dataOutputProxy = dataOutput?.proxy_id
+      ? proxies.find((p) => p.id === dataOutput.proxy_id)
+      : undefined;
+
+    const packageOutputs = new Map<string, Output>();
+    for (const pkgPolicy of (agentPolicy.package_policies ?? []) as PackagePolicy[]) {
+      if (!pkgPolicy.output_id) continue;
+      const override = outputs.find((o) => o.id === pkgPolicy.output_id);
+      if (override) {
+        packageOutputs.set(pkgPolicy.id, override);
+      } else {
+        logger.warn(
+          `Output override [${pkgPolicy.output_id}] for package policy [${pkgPolicy.id}] not found, falling back to data output`
+        );
+      }
+    }
+
+    otelcolConfig = generateOtelcolConfig({
+      inputs: agentInputs,
+      dataOutput,
+      packageOutputs,
+      packageInfoCache,
+      proxy: dataOutputProxy,
+      logger,
+    });
   }
 
   const inputs = agentInputs
@@ -214,7 +248,8 @@ export async function getFullAgentPolicy(
         acc[getOutputIdForAgentPolicy(output)] = transformOutputToFullPolicyOutput(
           output,
           output.proxy_id ? proxies.find((proxy) => output.proxy_id === proxy.id) : undefined,
-          standalone
+          standalone,
+          redactProxySecrets
         );
         return acc;
       }, {}),
@@ -229,7 +264,7 @@ export async function getFullAgentPolicy(
     ],
     revision: agentPolicy.revision,
     agent: {
-      download: getBinarySourceSettings(downloadSource, downloadSourceProxy),
+      download: getBinarySourceSettings(downloadSource, downloadSourceProxy, redactProxySecrets),
       monitoring: getFullMonitoringSettings(agentPolicy, monitoringOutput),
       features,
       protection: {
@@ -264,6 +299,11 @@ export async function getFullAgentPolicy(
         packagePolicy
       );
     } else {
+      if (packagePolicy.output_id) {
+        logger.warn(
+          `Output override [${packagePolicy.output_id}] for package policy [${packagePolicy.id}] not found, falling back to data output`
+        );
+      }
       packagePoliciesByOutputId[getOutputIdForAgentPolicy(dataOutput)].push(packagePolicy);
     }
   });
@@ -279,7 +319,8 @@ export async function getFullAgentPolicy(
     const dataPermissions = storedPackagePoliciesToAgentPermissions(
       packageInfoCache,
       agentPolicy.namespace,
-      packagePolicies
+      packagePolicies,
+      agentInputs
     );
     dataPermissionsByOutputId[outputId] = {
       _elastic_agent_checks: {
@@ -302,6 +343,8 @@ export async function getFullAgentPolicy(
     cluster: DEFAULT_CLUSTER_PERMISSIONS,
   };
 
+  const isManagedBulkOutput = createManagedBulkOutputMatcher(appContextService.getConfig());
+
   // Only add permissions if output.type is "elasticsearch"
   fullAgentPolicy.output_permissions = Object.keys(fullAgentPolicy.outputs).reduce<
     NonNullable<FullAgentPolicy['output_permissions']>
@@ -311,6 +354,19 @@ export async function getFullAgentPolicy(
       output &&
       (output.type === outputType.Elasticsearch || output.type === outputType.RemoteElasticsearch)
     ) {
+      const originalOutput = outputs.find((o) => getOutputIdForAgentPolicy(o) === outputId);
+
+      if (agentPolicy.supports_agentless && originalOutput && isManagedBulkOutput(originalOutput)) {
+        outputPermissions[outputId] = {
+          _managed_bulk_apm: {
+            applications: [
+              { application: 'apm', privileges: [PrivilegeType.EVENT], resources: ['*'] },
+            ],
+          },
+        };
+        return outputPermissions;
+      }
+
       const permissions: FullAgentPolicyOutputPermissions = {};
       if (outputId === getOutputIdForAgentPolicy(monitoringOutput)) {
         Object.assign(permissions, monitoringPermissions);
@@ -324,7 +380,6 @@ export async function getFullAgentPolicy(
       }
 
       // Add logs-* permissions for outputs with write_to_streams enabled
-      const originalOutput = outputs.find((o) => getOutputIdForAgentPolicy(o) === outputId);
       if (originalOutput?.write_to_logs_streams) {
         const streamsPermissions = {
           _write_to_logs_streams: {
@@ -346,7 +401,7 @@ export async function getFullAgentPolicy(
 
   // only add fleet server hosts if not in standalone
   if (!standalone && fleetServerHost) {
-    fullAgentPolicy.fleet = generateFleetConfig(fleetServerHost, proxies);
+    fullAgentPolicy.fleet = generateFleetConfig(fleetServerHost, proxies, redactProxySecrets);
   }
 
   const settingsValues = getSettingsValuesForAgentPolicy(
@@ -413,7 +468,8 @@ export async function getFullAgentPolicy(
 
 export function generateFleetConfig(
   fleetServerHost: FleetServerHost,
-  proxies: FleetProxy[]
+  proxies: FleetProxy[],
+  redactProxySecrets = false
 ): FullAgentPolicy['fleet'] {
   const config: FullAgentPolicy['fleet'] = {
     hosts: fleetServerHost.host_urls,
@@ -451,7 +507,7 @@ export function generateFleetConfig(
     : null;
   if (fleetServerHostproxy) {
     config.proxy_url = fleetServerHostproxy.url;
-    if (fleetServerHostproxy.proxy_headers) {
+    if (!redactProxySecrets && fleetServerHostproxy.proxy_headers) {
       config.proxy_headers = fleetServerHostproxy.proxy_headers;
     }
     if (
@@ -466,7 +522,8 @@ export function generateFleetConfig(
           certificate_authorities: [fleetServerHostproxy.certificate_authorities],
         }),
         ...(fleetServerHostproxy.certificate && { certificate: fleetServerHostproxy.certificate }),
-        ...(fleetServerHostproxy.certificate_key && { key: fleetServerHostproxy.certificate_key }),
+        ...(!redactProxySecrets &&
+          fleetServerHostproxy.certificate_key && { key: fleetServerHostproxy.certificate_key }),
       };
     }
   }
@@ -510,7 +567,8 @@ function generateSSLConfigForFleetServerInput(fleetServerHost: FleetServerHost) 
 export function transformOutputToFullPolicyOutput(
   output: Output,
   proxy?: FleetProxy,
-  standalone = false
+  standalone = false,
+  redactProxySecrets = false
 ): FullAgentPolicyOutput {
   const {
     config_yaml,
@@ -524,7 +582,7 @@ export function transformOutputToFullPolicyOutput(
     preset,
   } = output;
 
-  const configJs = config_yaml ? load(config_yaml) : {};
+  const configJs = config_yaml ? parse(config_yaml) : {};
 
   // build logic to read config_yaml and transform it with the new shipper data
   const isShipperDisabled = !configJs?.shipper || configJs?.shipper?.enabled === false;
@@ -635,9 +693,9 @@ export function transformOutputToFullPolicyOutput(
     };
   }
 
-  if (proxy) {
+  if (proxy && type !== outputType.Kafka) {
     newOutput.proxy_url = proxy.url;
-    if (proxy.proxy_headers) {
+    if (!redactProxySecrets && proxy.proxy_headers) {
       newOutput.proxy_headers = proxy.proxy_headers;
     }
 
@@ -656,7 +714,7 @@ export function transformOutputToFullPolicyOutput(
       }
       newOutput.ssl.certificate = proxy.certificate;
     }
-    if (proxy.certificate_key) {
+    if (!redactProxySecrets && proxy.certificate_key) {
       if (!newOutput.ssl) {
         newOutput.ssl = {};
       }
@@ -676,7 +734,7 @@ export function transformOutputToFullPolicyOutput(
   }
 
   if (outputTypeSupportPresets(output.type)) {
-    newOutput.preset = preset ?? getDefaultPresetForEsOutput(config_yaml ?? '', load);
+    newOutput.preset = preset ?? getDefaultPresetForEsOutput(config_yaml ?? '', parse);
   }
 
   return newOutput;
@@ -834,7 +892,8 @@ function buildShipperQueueData(shipper: ShipperOutput) {
 
 export function getBinarySourceSettings(
   downloadSource: DownloadSource,
-  downloadSourceProxy: FleetProxy | undefined
+  downloadSourceProxy: FleetProxy | undefined,
+  redactProxySecrets = false
 ) {
   const config: FullAgentPolicyDownload = {
     sourceURI: downloadSource.host,
@@ -854,22 +913,67 @@ export function getBinarySourceSettings(
         }),
     };
   }
-  // if both ssl.es_key and secrets.ssl.key are present, prefer the secrets'
+
+  if (downloadSource?.auth) {
+    const authConfig: FullAgentPolicyDownload['auth'] = {};
+    if (downloadSource.auth.username) {
+      authConfig.username = downloadSource.auth.username;
+    }
+    if (
+      downloadSource.auth.password &&
+      typeof downloadSource?.secrets?.auth?.password !== 'object'
+    ) {
+      authConfig.password = downloadSource.auth.password;
+    }
+    if (downloadSource.auth.api_key && typeof downloadSource?.secrets?.auth?.api_key !== 'object') {
+      authConfig.api_key = downloadSource.auth.api_key;
+    }
+    // Filter out empty headers (both key and value are empty)
+    if (downloadSource.auth.headers && downloadSource.auth.headers.length > 0) {
+      const filteredHeaders = downloadSource.auth.headers.filter(
+        (header) => header.key !== '' || header.value !== ''
+      );
+      if (filteredHeaders.length > 0) {
+        authConfig.headers = filteredHeaders;
+      }
+    }
+    if (Object.keys(authConfig).length > 0) {
+      config.auth = authConfig;
+    }
+  }
+
   if (downloadSource?.secrets) {
-    config.secrets = {
-      ssl: {
-        ...(downloadSource.secrets?.ssl?.key && {
-          key: downloadSource.secrets.ssl.key,
-        }),
-      },
-    };
+    const secretsConfig: FullAgentPolicyDownload['secrets'] = {};
+
+    if (downloadSource.secrets?.ssl?.key) {
+      secretsConfig.ssl = {
+        key: downloadSource.secrets.ssl.key,
+      };
+    }
+
+    if (downloadSource.secrets?.auth) {
+      const authSecretsConfig: NonNullable<FullAgentPolicyDownload['secrets']>['auth'] = {};
+      if (typeof downloadSource.secrets.auth.password === 'object') {
+        authSecretsConfig.password = downloadSource.secrets.auth.password;
+      }
+      if (typeof downloadSource.secrets.auth.api_key === 'object') {
+        authSecretsConfig.api_key = downloadSource.secrets.auth.api_key;
+      }
+      if (Object.keys(authSecretsConfig).length > 0) {
+        secretsConfig.auth = authSecretsConfig;
+      }
+    }
+
+    if (Object.keys(secretsConfig).length > 0) {
+      config.secrets = secretsConfig;
+    }
   }
 
   if (downloadSourceProxy) {
     if (downloadSourceProxy.url) {
       config.proxy_url = downloadSourceProxy.url;
     }
-    if (downloadSourceProxy.proxy_headers) {
+    if (!redactProxySecrets && downloadSourceProxy.proxy_headers) {
       config.proxy_headers = downloadSourceProxy.proxy_headers;
     }
     // if the proxy is configured, get the ssl settings from it
@@ -880,11 +984,61 @@ export function getBinarySourceSettings(
       ...(downloadSourceProxy?.certificate && {
         certificate: downloadSourceProxy.certificate,
       }),
-      ...(downloadSourceProxy?.certificate_key && {
-        key: downloadSourceProxy?.certificate_key,
-      }),
+      ...(!redactProxySecrets &&
+        downloadSourceProxy?.certificate_key && {
+          key: downloadSourceProxy?.certificate_key,
+        }),
     };
   }
 
   return config;
+}
+
+/**
+ * Strip proxy_headers and proxy-derived ssl.key from a FullAgentPolicy that was already
+ * composed (e.g. retrieved verbatim from the .fleet-policies index via ?revision=N).
+ * Mutates in place and returns the policy for convenience.
+ *
+ * proxyUrlsWithCertKey: URLs of proxies that have a certificate_key. When provided,
+ * ssl.key is redacted on fleet/agent.download sections only if their proxy_url is in this
+ * set — distinguishing proxy-derived keys from the entity's own TLS keys. Without this
+ * set, ssl.key on fleet/agent.download is left untouched (conservative: avoids
+ * over-redaction but may miss proxy keys).
+ */
+export function redactProxySecretsFromPolicy(
+  policy: FullAgentPolicy,
+  proxyUrlsWithCertKey?: Set<string>
+): FullAgentPolicy {
+  if (policy.outputs) {
+    for (const output of Object.values(policy.outputs)) {
+      delete output.proxy_headers;
+      // Output ssl.key is always proxy-derived; safe to redact whenever proxy_url is present
+      if (output.proxy_url && output.ssl) {
+        delete output.ssl.key;
+      }
+    }
+  }
+  if (policy.fleet && 'hosts' in policy.fleet) {
+    delete policy.fleet.proxy_headers;
+    // Only redact ssl.key if we can confirm it came from a proxy with a certificate_key
+    if (
+      policy.fleet.proxy_url &&
+      proxyUrlsWithCertKey?.has(policy.fleet.proxy_url) &&
+      policy.fleet.ssl
+    ) {
+      delete policy.fleet.ssl.key;
+    }
+  }
+  if (policy.agent?.download) {
+    delete policy.agent.download.proxy_headers;
+    // Only redact ssl.key if we can confirm it came from a proxy with a certificate_key
+    if (
+      policy.agent.download.proxy_url &&
+      proxyUrlsWithCertKey?.has(policy.agent.download.proxy_url) &&
+      policy.agent.download.ssl
+    ) {
+      delete (policy.agent.download.ssl as Record<string, unknown>).key;
+    }
+  }
+  return policy;
 }

@@ -9,7 +9,7 @@
 
 import { ToolingLog } from '@kbn/tooling-log';
 import fs from 'fs';
-import yaml from 'js-yaml';
+import { stringify } from 'yaml';
 import type { ModuleDiscoveryInfo } from './types';
 
 jest.mock('@kbn/repo-info', () => ({
@@ -18,7 +18,6 @@ jest.mock('@kbn/repo-info', () => ({
 
 jest.mock('fs');
 jest.mock('fast-glob');
-jest.mock('js-yaml');
 
 import { filterModulesByScoutCiConfig } from './search_configs';
 
@@ -38,8 +37,7 @@ describe('filterModulesByScoutCiConfig', () => {
   beforeEach(() => {
     mockLog = new ToolingLog({ level: 'verbose', writeTo: process.stdout });
     jest.spyOn(mockLog, 'warning').mockImplementation(jest.fn());
-    (fs.readFileSync as jest.Mock).mockReturnValue('mock yaml content');
-    (yaml.load as jest.Mock).mockReturnValue(mockScoutCiConfig);
+    (fs.readFileSync as jest.Mock).mockReturnValue(stringify(mockScoutCiConfig));
   });
 
   afterEach(() => {
@@ -56,8 +54,8 @@ describe('filterModulesByScoutCiConfig', () => {
           {
             path: 'pluginPathA',
             hasTests: true,
-            tags: ['@ess'],
-            serverRunFlags: ['--stateful'],
+            tags: ['stateful-classic'],
+            serverRunFlags: ['--arch stateful --domain classic'],
             usesParallelWorkers: true,
           },
         ],
@@ -70,15 +68,15 @@ describe('filterModulesByScoutCiConfig', () => {
           {
             path: 'pluginPathB',
             hasTests: true,
-            tags: ['@ess'],
-            serverRunFlags: ['--stateful'],
+            tags: ['stateful-classic'],
+            serverRunFlags: ['--arch stateful --domain classic'],
             usesParallelWorkers: false,
           },
           {
             path: 'pluginPathB2',
             hasTests: true,
-            tags: ['@svlOblt'],
-            serverRunFlags: ['--serverless=oblt'],
+            tags: ['serverless-observability_complete'],
+            serverRunFlags: ['--arch serverless --domain observability_complete'],
             usesParallelWorkers: false,
           },
         ],
@@ -91,8 +89,8 @@ describe('filterModulesByScoutCiConfig', () => {
           {
             path: 'pluginPathC',
             hasTests: true,
-            tags: ['@ess'],
-            serverRunFlags: ['--stateful'],
+            tags: ['stateful-classic'],
+            serverRunFlags: ['--arch stateful --domain classic'],
             usesParallelWorkers: true,
           },
         ],
@@ -105,8 +103,8 @@ describe('filterModulesByScoutCiConfig', () => {
           {
             path: 'packagePathA',
             hasTests: true,
-            tags: ['@ess'],
-            serverRunFlags: ['--stateful'],
+            tags: ['stateful-classic'],
+            serverRunFlags: ['--arch stateful --domain classic'],
             usesParallelWorkers: true,
           },
         ],
@@ -119,8 +117,8 @@ describe('filterModulesByScoutCiConfig', () => {
           {
             path: 'packagePathB',
             hasTests: true,
-            tags: ['@ess'],
-            serverRunFlags: ['--stateful'],
+            tags: ['stateful-classic'],
+            serverRunFlags: ['--arch stateful --domain classic'],
             usesParallelWorkers: false,
           },
         ],
@@ -146,8 +144,8 @@ describe('filterModulesByScoutCiConfig', () => {
           {
             path: 'pluginPathX',
             hasTests: true,
-            tags: ['@ess'],
-            serverRunFlags: ['--stateful'],
+            tags: ['stateful-classic'],
+            serverRunFlags: ['--arch stateful --domain classic'],
             usesParallelWorkers: true,
           },
         ],
@@ -160,8 +158,8 @@ describe('filterModulesByScoutCiConfig', () => {
           {
             path: 'packagePathX',
             hasTests: true,
-            tags: ['@ess'],
-            serverRunFlags: ['--stateful'],
+            tags: ['stateful-classic'],
+            serverRunFlags: ['--arch stateful --domain classic'],
             usesParallelWorkers: true,
           },
         ],
@@ -185,8 +183,8 @@ describe('filterModulesByScoutCiConfig', () => {
           {
             path: 'pluginPathC',
             hasTests: true,
-            tags: ['@ess'],
-            serverRunFlags: ['--stateful'],
+            tags: ['stateful-classic'],
+            serverRunFlags: ['--arch stateful --domain classic'],
             usesParallelWorkers: true,
           },
         ],
@@ -199,8 +197,8 @@ describe('filterModulesByScoutCiConfig', () => {
           {
             path: 'packagePathB',
             hasTests: true,
-            tags: ['@ess'],
-            serverRunFlags: ['--stateful'],
+            tags: ['stateful-classic'],
+            serverRunFlags: ['--arch stateful --domain classic'],
             usesParallelWorkers: false,
           },
         ],
@@ -228,15 +226,18 @@ describe('filterModulesByScoutCiConfig', () => {
           {
             path: 'pluginPathA',
             hasTests: true,
-            tags: ['@ess', '@svlOblt'],
-            serverRunFlags: ['--stateful', '--serverless=oblt'],
+            tags: ['stateful-classic', 'serverless-observability_complete'],
+            serverRunFlags: [
+              '--arch stateful --domain classic',
+              '--arch serverless --domain observability_complete',
+            ],
             usesParallelWorkers: true,
           },
           {
             path: 'pluginPathA2',
             hasTests: false,
-            tags: ['@svlSecurity'],
-            serverRunFlags: ['--serverless=security'],
+            tags: ['serverless-security_complete'],
+            serverRunFlags: ['--arch serverless --domain security_complete'],
             usesParallelWorkers: false,
           },
         ],
@@ -246,7 +247,10 @@ describe('filterModulesByScoutCiConfig', () => {
     const result = filterModulesByScoutCiConfig(mockLog, scoutConfigs);
     expect(result.length).toBe(1);
     expect(result[0]?.configs.length).toBe(2);
-    expect(result[0]?.configs[0]?.tags).toEqual(['@ess', '@svlOblt']);
-    expect(result[0]?.configs[1]?.tags).toEqual(['@svlSecurity']);
+    expect(result[0]?.configs[0]?.tags).toEqual([
+      'stateful-classic',
+      'serverless-observability_complete',
+    ]);
+    expect(result[0]?.configs[1]?.tags).toEqual(['serverless-security_complete']);
   });
 });

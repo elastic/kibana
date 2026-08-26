@@ -16,7 +16,6 @@
   "kbn_references": [
     "@kbn/data-plugin",
     "@kbn/visualization-ui-components",
-    "@kbn/ui-theme",
     "@kbn/i18n",
     "@kbn/content-management-table-list-view-common",
   ]

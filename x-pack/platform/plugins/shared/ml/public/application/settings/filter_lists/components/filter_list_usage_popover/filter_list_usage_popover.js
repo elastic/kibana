@@ -14,6 +14,8 @@ import React, { Component } from 'react';
 
 import { EuiButtonEmpty, EuiPopover } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+
 export class FilterListUsagePopover extends Component {
   constructor(props) {
     super(props);
@@ -57,6 +59,12 @@ export class FilterListUsagePopover extends Component {
           button={button}
           isOpen={this.state.isPopoverOpen}
           closePopover={this.closePopover}
+          aria-label={i18n.translate(
+            'xpack.ml.settings.filterLists.filterListUsagePopover.popoverAriaLabel',
+            {
+              defaultMessage: 'Filter list usage info',
+            }
+          )}
         >
           <ul>{listItems}</ul>
         </EuiPopover>

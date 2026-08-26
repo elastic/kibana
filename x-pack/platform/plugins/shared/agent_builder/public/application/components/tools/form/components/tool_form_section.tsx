@@ -8,6 +8,8 @@
 import type { IconType } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { isEqual } from 'lodash';
 import type { FC, PropsWithChildren, ReactNode } from 'react';
 import React, { memo } from 'react';
@@ -36,7 +38,7 @@ export const ToolFormSection: FC<PropsWithChildren<ToolFormSectionProps>> = memo
               <EuiFlexGroup direction="column" gutterSize="m">
                 <EuiFlexItem>
                   <EuiFlexGroup alignItems="center" gutterSize="s">
-                    {icon && <EuiIcon type={icon} />}
+                    {icon && <EuiIcon type={icon} aria-hidden={true} />}
                     <EuiText color={euiTheme.colors.textHeading}>
                       <h3>{title}</h3>
                     </EuiText>
@@ -52,7 +54,14 @@ export const ToolFormSection: FC<PropsWithChildren<ToolFormSectionProps>> = memo
             {content && <EuiFlexItem grow={0}>{content}</EuiFlexItem>}
             {documentation && (
               <EuiFlexItem>
-                <EuiLink href={documentation.href} target="_blank">
+                <EuiLink
+                  href={documentation.href}
+                  target="_blank"
+                  {...getEbtProps({
+                    element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                    action: AGENT_BUILDER_UI_EBT.action.globalManagement.LEARN_MORE_DOCS,
+                  })}
+                >
                   {i18nMessages.documentationLinkLabel} - {documentation.title}
                 </EuiLink>
               </EuiFlexItem>

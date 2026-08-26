@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/profiling-plugin'
-type: unknown
+layer: unknown
 owners:
-  defaultOwner: '@elastic/obs-presentation-team'
-toolchain:
+  defaultOwner: '@elastic/obs-signals-logs-team'
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/profiling-plugin'
+  title: '@kbn/profiling-plugin'
   description: Moon project for @kbn/profiling-plugin
   channel: ''
-  owner: '@elastic/obs-presentation-team'
-  metadata:
-    sourceRoot: x-pack/solutions/observability/plugins/profiling
+  owner: '@elastic/obs-signals-logs-team'
+  sourceRoot: x-pack/solutions/observability/plugins/profiling
 dependsOn:
   - '@kbn/core'
   - '@kbn/data-plugin'
@@ -66,6 +65,8 @@ dependsOn:
   - '@kbn/shared-ux-error-boundary'
   - '@kbn/licensing-types'
   - '@kbn/kql'
+  - '@kbn/core-spaces-common'
+  - '@kbn/app-header'
 tags:
   - plugin
   - prod
@@ -81,16 +82,6 @@ fileGroups:
     - public/**/*.tsx
     - server/**/*.ts
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

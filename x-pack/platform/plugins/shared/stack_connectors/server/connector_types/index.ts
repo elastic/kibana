@@ -34,6 +34,10 @@ import { getConnectorType as getTeamsConnectorType } from './teams';
 import { getConnectorType as getD3SecurityConnectorType } from './d3security';
 import { getConnectorType as getTheHiveConnectorType } from './thehive';
 import { getConnectorType as getXSOARConnectorType } from './xsoar';
+import {
+  getConnectorType as getHttpConnectorType,
+  getSystemConnectorType as getHttpSystemConnectorType,
+} from './http';
 import { getOpsgenieConnectorType } from './opsgenie';
 import { getSentinelOneConnectorType } from './sentinelone';
 import { getCrowdstrikeConnectorType } from './crowdstrike';
@@ -46,12 +50,14 @@ export function registerConnectorTypes({
   actions,
   publicBaseUrl,
   experimentalFeatures,
+  isElasticCloudTrial,
 }: {
   actions: ActionsPluginSetupContract;
   publicBaseUrl?: string;
   experimentalFeatures: ExperimentalFeatures;
+  isElasticCloudTrial?: () => Promise<boolean>;
 }) {
-  actions.registerType(getEmailConnectorType({ publicBaseUrl }));
+  actions.registerType(getEmailConnectorType({ publicBaseUrl, isElasticCloudTrial }));
   actions.registerType(getIndexConnectorType());
   actions.registerType(getPagerDutyConnectorType());
   actions.registerType(getSwimlaneConnectorType());
@@ -59,6 +65,8 @@ export function registerConnectorTypes({
   actions.registerType(getSlackWebhookConnectorType({}));
   actions.registerType(getSlackApiConnectorType());
   actions.registerType(getWebhookConnectorType());
+  actions.registerType(getHttpConnectorType());
+  actions.registerType(getHttpSystemConnectorType());
   actions.registerType(getCasesWebhookConnectorType());
   actions.registerType(getXmattersConnectorType());
   actions.registerType(getServiceNowITSMConnectorType());

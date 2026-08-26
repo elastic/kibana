@@ -35,7 +35,7 @@ interface QueryRuleDetailPanelProps {
   tourInfo?: {
     title: string;
     content: string;
-    tourTargetRef?: React.RefObject<HTMLDivElement>;
+    tourTargetRef?: React.Ref<HTMLDivElement>;
   };
   createMode?: boolean;
 }
@@ -106,7 +106,7 @@ export const QueryRuleDetailPanel: React.FC<QueryRuleDetailPanelProps> = ({
               <EuiFlexGroup alignItems="center">
                 <EuiFlexItem>
                   <EuiButton
-                    iconType="plusInCircle"
+                    iconType="plusCircle"
                     color="primary"
                     data-test-subj="queryRulesetDetailAddRuleButton"
                     onClick={() => {

@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isFunctionExpression, isOptionNode } from '../../ast/is';
-import { within } from '../../ast/location';
-import type { ESQLAst, ESQLAstAllCommands, ESQLSingleAstItem } from '../../types';
-import { Walker } from '../../ast/walker';
+import { isFunctionExpression, isOptionNode } from '@elastic/esql';
+import { within, Walker } from '@elastic/esql';
+import type { ESQLAstAllCommands, ESQLAstNode, ESQLSingleAstItem } from '@elastic/esql/types';
 import { Location } from './types';
 
 const commandOptionNameToLocation: Record<string, Location> = {
@@ -21,6 +20,8 @@ const commandOptionNameToLocation: Record<string, Location> = {
   stats: Location.STATS,
   'inline stats': Location.STATS,
   by: Location.STATS_BY,
+  'limit:by': Location.LIMIT_BY,
+  'change_point:by': Location.CHANGE_POINT_BY,
   enrich: Location.ENRICH,
   with: Location.ENRICH_WITH,
   dissect: Location.DISSECT,
@@ -28,9 +29,13 @@ const commandOptionNameToLocation: Record<string, Location> = {
   join: Location.JOIN,
   show: Location.SHOW,
   completion: Location.COMPLETION,
+  mmr: Location.MMR,
   rerank: Location.RERANK,
   'join:on': Location.JOIN,
+  'mmr:on': Location.MMR,
   'rerank:on': Location.RERANK,
+  // HIGHLIGHT command: the query expression slot allows full-text functions
+  highlight: Location.HIGHLIGHT_QUERY,
 };
 
 /**
@@ -64,17 +69,21 @@ export const getLocationFromCommandOrOptionName = (name: string) =>
 export function getLocationInfo(
   position: ESQLSingleAstItem | number,
   parentCommand: ESQLAstAllCommands,
-  ast: ESQLAst,
+  isTimeseriesSource: boolean,
   withinAggFunction: boolean
 ): { id: Location; displayName: string } {
-  if (withinAggFunction && ast[0].name === 'ts') {
+  if (withinAggFunction && isTimeseriesSource) {
     return {
       id: Location.STATS_TIMESERIES,
       displayName: 'agg_function_in_timeseries_context',
     };
   }
 
-  const option = Walker.find(parentCommand, (node) => isOptionNode(node) && within(position, node));
+  // Cast: WalkerProperNode now includes PromQL nodes; isOptionNode expects ESQLAstNode.
+  const option = Walker.find(
+    parentCommand,
+    (node) => isOptionNode(node as ESQLAstNode) && within(position, node)
+  );
 
   if (option) {
     const displayName = option.name;

@@ -13,12 +13,15 @@ import type {
   CoreStart,
 } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { ProjectRoutingAccess } from '@kbn/cps-utils';
 import { useAllLiveQueries } from './actions/use_all_live_queries';
 import { getLazyOsqueryResponseActionTypeForm } from './shared_components/lazy_osquery_action_params_form';
 import { useFetchStatus } from './fleet_integration/use_fetch_status';
 import { getLazyOsqueryResult } from './shared_components/lazy_osquery_result';
 import { getLazyOsqueryResults } from './shared_components/lazy_osquery_results';
+import { OsqueryIcon } from './components/osquery_icon';
 import type {
   OsqueryPluginSetup,
   OsqueryPluginStart,
@@ -36,11 +39,12 @@ import {
   getLazyOsqueryAction,
   getLazyLiveQueryField,
   useIsOsqueryAvailableSimple,
-  getExternalReferenceAttachmentRegular,
+  getOsqueryCaseAttachment,
 } from './shared_components';
 import type { ServicesWrapperProps } from './shared_components/services_wrapper';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import type { ExperimentalFeatures } from '../common/experimental_features';
+import { ExperimentalFeaturesService } from './common/experimental_features_service';
 
 export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginStart> {
   private kibanaVersion: string;
@@ -64,7 +68,6 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
   public setup(core: CoreSetup, plugins: SetupPlugins): OsqueryPluginSetup {
     const storage = this.storage;
     const kibanaVersion = this.kibanaVersion;
-    const experimentalFeatures = this.experimentalFeatures;
 
     // Register an application into the side navigation menu
     core.application.register({
@@ -85,28 +88,42 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
           depsStart as AppPluginStartDependencies,
           params,
           storage,
-          kibanaVersion,
-          experimentalFeatures
+          kibanaVersion
         );
       },
     });
 
-    core.getStartServices().then(([coreStart, depsStart]) => {
-      plugins.cases?.attachmentFramework.registerExternalReference(
-        getExternalReferenceAttachmentRegular({
-          ...coreStart,
-          ...depsStart,
-          storage,
-          kibanaVersion,
-        } as unknown as ServicesWrapperProps['services'])
-      );
-    });
+    core
+      .getStartServices()
+      .then(([coreStart, depsStart]) => {
+        plugins.cases?.attachmentFramework.registerAttachment(
+          getOsqueryCaseAttachment({
+            ...coreStart,
+            ...depsStart,
+            storage,
+            kibanaVersion,
+          } as unknown as ServicesWrapperProps['services'])
+        );
+      })
+      .catch((err) => {
+        core.notifications.toasts.addError(err, {
+          title: i18n.translate('xpack.osquery.cases.attachments.registerErrorTitle', {
+            defaultMessage: 'Failed to register osquery case attachment',
+          }),
+        });
+      });
 
     // Return methods that should be available to other plugins
     return {};
   }
 
   public start(core: CoreStart, plugins: StartPlugins): OsqueryPluginStart {
+    if (this.experimentalFeatures.crossProjectSearch && plugins.cps?.cpsManager) {
+      plugins.cps.cpsManager.registerAppAccess('osquery', () => ProjectRoutingAccess.READONLY);
+    }
+
+    ExperimentalFeaturesService.init({ experimentalFeatures: this.experimentalFeatures });
+
     if (plugins.fleet) {
       const { registerExtension } = plugins.fleet;
 
@@ -129,27 +146,26 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       });
     }
 
+    const services = {
+      ...core,
+      ...plugins,
+      security: { ...core.security, ...plugins.security },
+    };
+
     return {
-      OsqueryAction: getLazyOsqueryAction({
-        ...core,
-        ...plugins,
-      }),
-      LiveQueryField: getLazyLiveQueryField({
-        ...core,
-        ...plugins,
-      }),
+      OsqueryAction: getLazyOsqueryAction({ services }),
+      LiveQueryField: getLazyLiveQueryField({ services }),
       OsqueryResult: getLazyOsqueryResult({
-        ...core,
-        ...plugins,
+        ...services,
         storage: this.storage,
         kibanaVersion: this.kibanaVersion,
       }),
       OsqueryResults: getLazyOsqueryResults({
-        ...core,
-        ...plugins,
+        ...services,
         storage: this.storage,
         kibanaVersion: this.kibanaVersion,
       }),
+      OsqueryIcon,
       OsqueryResponseActionTypeForm: getLazyOsqueryResponseActionTypeForm(),
       fetchAllLiveQueries: useAllLiveQueries,
       fetchInstallationStatus: useFetchStatus,

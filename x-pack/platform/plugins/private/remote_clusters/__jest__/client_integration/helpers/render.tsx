@@ -7,14 +7,17 @@
 
 import React from 'react';
 import type { HttpSetup } from '@kbn/core/public';
+import { CoreScopedHistory } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import type { RenderResult } from '@testing-library/react';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryHistory } from 'history';
-import type { Store } from 'redux';
-import { Provider } from 'react-redux';
+import type { Store } from 'redux-v4';
+import { Provider } from 'react-redux-v7';
 
 import type { AppRouter } from '../../../public/application/services';
 import { registerRouter } from '../../../public/application/services';
@@ -45,8 +48,8 @@ export interface RenderRemoteClustersResult extends RenderResult {
   store: Store;
 }
 
-export function renderRemoteClustersRoute(
-  Component: React.ComponentType,
+export function renderRemoteClustersRoute<P extends object>(
+  Component: React.ComponentType<P>,
   {
     httpSetup,
     contextOverrides = {},
@@ -56,11 +59,11 @@ export function renderRemoteClustersRoute(
 ): RenderRemoteClustersResult {
   const store = createRemoteClustersStore();
   const history = createMemoryHistory({ initialEntries });
+  const scopedHistory = new CoreScopedHistory(history, '');
 
   const router: AppRouter = {
-    // ScopedHistory is structurally compatible with MemoryHistory for our usage in tests.
-    history: history as unknown as AppRouter['history'],
-    route: { location: history.location },
+    history: scopedHistory,
+    route: { location: scopedHistory.location },
   };
 
   registerRouter(router);
@@ -68,17 +71,20 @@ export function renderRemoteClustersRoute(
   const WrappedComponent = WithAppDependencies(Component, httpSetup, contextOverrides);
 
   const user = userEvent.setup();
+  const coreStart = coreMock.createStart();
 
   const result = render(
-    <I18nProvider>
-      <Provider store={store}>
-        <Router history={history}>
-          <Routes>
-            <Route path={routePath} component={WrappedComponent} />
-          </Routes>
-        </Router>
-      </Provider>
-    </I18nProvider>
+    <KibanaRenderContextProvider {...coreStart}>
+      <I18nProvider>
+        <Provider store={store}>
+          <Router history={scopedHistory}>
+            <Routes>
+              <Route path={routePath} component={WrappedComponent} />
+            </Routes>
+          </Router>
+        </Provider>
+      </I18nProvider>
+    </KibanaRenderContextProvider>
   );
 
   return { ...result, user, history, store };

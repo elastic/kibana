@@ -5,13 +5,24 @@
  * 2.0.
  */
 
-import type { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
+import type {
+  PluginSetupContract as ActionsPluginSetupContract,
+  ActionsClient,
+} from '@kbn/actions-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { CoreSetup, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  IUiSettingsClient,
+  Logger,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import { SECURITY_EXTENSION_ID } from '@kbn/core/server';
 import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ServerlessProjectType } from '../../common/constants/types';
 import type { CasesClient } from '../client';
+import { LicensingService } from '../services/licensing';
 import { getCasesConnectorAdapter, getCasesConnectorType } from './cases';
 
 export type * from './types';
@@ -23,16 +34,22 @@ export function registerConnectorTypes({
   core,
   logger,
   getCasesClient,
+  getActionsClient,
   getSpaceId,
   serverlessProjectType,
+  isCasesAttachmentsEnabled,
+  isTemplatesEnabled,
 }: {
   actions: ActionsPluginSetupContract;
   alerting: AlertingServerSetup;
   core: CoreSetup;
   logger: Logger;
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>;
+  getActionsClient: (request: KibanaRequest) => Promise<PublicMethodsOf<ActionsClient>>;
   getSpaceId: (request?: KibanaRequest) => string;
   serverlessProjectType?: ServerlessProjectType;
+  isCasesAttachmentsEnabled: boolean;
+  isTemplatesEnabled: boolean;
 }) {
   const getUnsecuredSavedObjectsClient = async (
     request: KibanaRequest,
@@ -57,12 +74,33 @@ export function registerConnectorTypes({
     return unsecuredSavedObjectsClient;
   };
 
+  const getUiSettingsClient = async (request: KibanaRequest): Promise<IUiSettingsClient> => {
+    const [coreStart] = await core.getStartServices();
+    const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
+
+    return coreStart.uiSettings.asScopedToClient(savedObjectsClient);
+  };
+
+  const isAtLeastPlatinum = async (): Promise<boolean> => {
+    const [, pluginsStart] = await core.getStartServices();
+    const { licensing } = pluginsStart as { licensing: LicensingPluginStart };
+    return new LicensingService(
+      licensing.license$,
+      licensing.featureUsage.notifyUsage
+    ).isAtLeastPlatinum();
+  };
+
   actions.registerSubActionConnectorType(
     getCasesConnectorType({
       getCasesClient,
+      getActionsClient,
       getSpaceId,
       getUnsecuredSavedObjectsClient,
+      getUiSettingsClient,
       serverlessProjectType,
+      isCasesAttachmentsEnabled,
+      isTemplatesEnabled,
+      isAtLeastPlatinum,
     })
   );
 

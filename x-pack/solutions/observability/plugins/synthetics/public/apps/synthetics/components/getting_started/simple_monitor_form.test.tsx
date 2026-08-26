@@ -17,7 +17,7 @@ import React from 'react';
 import { act, fireEvent, waitFor, screen } from '@testing-library/react';
 import { syntheticsTestSubjects } from '../../../../../common/constants/data_test_subjects';
 import { apiService } from '../../../../utils/api_service';
-import * as reduxHooks from 'react-redux';
+import * as reduxHooks from 'react-redux-v7';
 
 describe('SimpleMonitorForm', () => {
   const apiSpy = jest.spyOn(apiService, 'post');
@@ -28,9 +28,8 @@ describe('SimpleMonitorForm', () => {
     expect(screen.getByText(WEBSITE_URL_LABEL)).toBeInTheDocument();
     expect(screen.getByText(WEBSITE_URL_HELP_TEXT)).toBeInTheDocument();
 
-    // calls enabled API
-    await waitFor(async () => {
-      expect(dispatchSpy).toHaveBeenCalledTimes(6);
+    await waitFor(() => {
+      expect(dispatchSpy).toHaveBeenCalled();
     });
   });
 

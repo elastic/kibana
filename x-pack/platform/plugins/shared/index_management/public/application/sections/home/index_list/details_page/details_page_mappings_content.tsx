@@ -8,7 +8,6 @@
 import {
   EuiAccordion,
   EuiButton,
-  EuiCallOut,
   EuiCodeBlock,
   EuiFilterButton,
   EuiFilterGroup,
@@ -28,6 +27,7 @@ import type { FunctionComponent } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ILicense } from '@kbn/licensing-types';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import {
   getStateWithCopyToFields,
   hasSemanticTextField,
@@ -56,7 +56,6 @@ import { MappingsFilter } from './details_page_filter_fields';
 
 import { useMappingsStateListener } from '../../../../components/mappings_editor/use_state_listener';
 import { updateIndexMappings, useUserPrivileges } from '../../../../services/api';
-import { notificationService } from '../../../../services/notification';
 import { SemanticTextBanner } from './semantic_text_banner';
 import { TrainedModelsDeploymentModal } from './trained_models_deployment_modal';
 import { parseMappings } from '../../../../shared/parse_mappings';
@@ -81,6 +80,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
     config,
     overlays,
     history,
+    services: { notificationService },
   } = useAppContext();
   const { data: userPrivilege } = useUserPrivileges(index.name);
   const hasUpdateMappingsPrivilege = userPrivilege?.privileges?.canManageIndex === true;
@@ -344,23 +344,20 @@ export const DetailsPageMappingsContent: FunctionComponent<{
 
   const errorSavingMappings = saveMappingError && (
     <EuiFlexItem grow={false}>
-      <EuiCallOut
+      <KbnDangerCallout
         announceOnMount
-        color="danger"
         data-test-subj="indexDetailsSaveMappingsError"
-        iconType="error"
         title={i18n.translate('xpack.idxMgmt.indexDetails.mappings.error.title', {
           defaultMessage: 'Error saving mapping',
         })}
-      >
-        <EuiText>
+        text={
           <FormattedMessage
             id="xpack.idxMgmt.indexDetails.mappings.error.description"
             defaultMessage="Error saving mapping: {errorMessage}"
             values={{ errorMessage: saveMappingError }}
           />
-        </EuiText>
-      </EuiCallOut>
+        }
+      />
       <EuiSpacer />
     </EuiFlexItem>
   );
@@ -369,6 +366,15 @@ export const DetailsPageMappingsContent: FunctionComponent<{
     height: 100%;
     ${useEuiBreakpoint(['xl'])} {
       flex-wrap: nowrap;
+    }
+  `;
+
+  const mappingsListPanelStyles = css`
+    min-width: 0;
+    width: 100%;
+    height: 100%;
+    ${useEuiBreakpoint(['m', 'l', 'xl'])} {
+      min-width: 600px;
     }
   `;
 
@@ -562,13 +568,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
             </EuiFlexItem>
           )}
           {hasMappings && (
-            <EuiFlexItem
-              grow={false}
-              css={css`
-                min-width: 600px;
-                height: 100%;
-              `}
-            >
+            <EuiFlexItem grow={false} css={mappingsListPanelStyles}>
               <EuiPanel hasShadow={false} paddingSize="none">
                 {isJSONVisible ? jsonBlock : treeViewBlock}
               </EuiPanel>

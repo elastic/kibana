@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
-import { useSearchParams } from 'react-router-dom-v5-compat';
+import { z } from '@kbn/zod/v4';
+import { useSearchParams } from '@kbn/shared-ux-router';
 
 import { useCallback, useMemo } from 'react';
 

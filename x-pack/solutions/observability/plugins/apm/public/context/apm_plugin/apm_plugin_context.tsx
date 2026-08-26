@@ -18,11 +18,12 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
-import type { SharePluginSetup } from '@kbn/share-plugin/public';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
+import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ObservabilityAgentBuilderPluginPublicStart } from '@kbn/observability-agent-builder-plugin/public';
 import type { KqlPluginStart } from '@kbn/kql/public';
+import type { MetricsDataPluginStart } from '@kbn/metrics-data-access-plugin/public';
 import type { ApmPluginSetupDeps } from '../../plugin';
 import type { ConfigSchema } from '../..';
 import type { KibanaEnvContext } from '../kibana_environment_context/kibana_environment_context';
@@ -44,10 +45,11 @@ export interface ApmPluginContextValue {
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
   agentBuilder?: AgentBuilderPluginStart;
   observabilityAgentBuilder?: ObservabilityAgentBuilderPluginPublicStart;
-  share: SharePluginSetup;
+  share: SharePublicStart;
   kibanaEnvironment: KibanaEnvContext;
   lens: LensPublicStart;
   licensing: LicensingPluginStart;
+  metricsDataAccess?: MetricsDataPluginStart;
 }
 
 export const ApmPluginContext = createContext({} as ApmPluginContextValue);

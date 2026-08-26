@@ -14,6 +14,7 @@ describe('getHostRiskScoreColumns', () => {
   test('should render host score rounded', () => {
     const columns: HostRiskScoreColumns = getHostRiskScoreColumns({
       dispatchSeverityUpdate: jest.fn(),
+      openHostFlyout: jest.fn(),
     });
 
     const riskScore = 10.11111111;

@@ -20,7 +20,6 @@ import type { XYLegendValue } from '@kbn/chart-expressions-common';
 export type DataViewsCommon = Pick<DataViewsService, 'get' | 'create'>;
 
 export type LensAttributes = TypedLensByValueInput['attributes'];
-export const DEFAULT_LAYER_ID = 'layer_0';
 export type DeepWriteable<T> = { -readonly [P in keyof T]: DeepWriteable<T[P]> };
 
 type Identity<T> = T extends object
@@ -64,6 +63,7 @@ export type LensDataset = LensDataviewDataset | LensDatatableDataset | LensESQLD
 
 export interface LensBaseConfig {
   title: string;
+  description?: string;
   /** default data view id or index pattern to use, it can be overriden on each query */
   dataset?: LensDataset;
 }
@@ -151,6 +151,8 @@ export interface LensBreakdownTopValuesConfig {
   type: 'topValues';
   field: string;
   size?: number;
+  secondaryFields?: string[];
+  accuracyMode?: boolean;
   orderBy?: Pick<TermsIndexPatternColumn['params'], 'orderDirection' | 'orderBy' | 'orderAgg'>;
 }
 
@@ -292,7 +294,7 @@ export type LensAnnotationLayer = Identity<
 export type LensSeriesLayer = Identity<
   LensBaseXYLayer & {
     type: 'series';
-    breakdown?: LensBreakdownConfig;
+    breakdown?: LensBreakdownConfig | LensBreakdownConfig[];
     xAxis?: LensBreakdownConfig;
     seriesType: 'line' | 'bar' | 'area';
   }

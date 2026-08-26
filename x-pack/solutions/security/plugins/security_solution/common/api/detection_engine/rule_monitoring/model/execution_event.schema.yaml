@@ -36,6 +36,10 @@ components:
           minLength: 1
         message:
           type: string
+        details:
+          type: object
+          additionalProperties: true
+          description: Event details. The details vary per event type.
       required:
         - timestamp
         - sequence

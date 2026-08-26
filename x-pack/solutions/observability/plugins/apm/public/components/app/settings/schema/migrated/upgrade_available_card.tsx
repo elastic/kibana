@@ -21,7 +21,7 @@ export function UpgradeAvailableCard({
 
   return (
     <EuiCard
-      icon={<EuiIcon size="xxl" type="warning" color="warning" />}
+      icon={<EuiIcon size="xxl" type="warning" color="warning" aria-hidden={true} />}
       title={i18n.translate('xpack.apm.settings.schema.upgradeAvailable.title', {
         defaultMessage: 'APM integration upgrade available!',
       })}

@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import type { CoreSetup, IRouter, RequestHandlerContext } from '@kbn/core/server';
+import type { CoreSetup, IRouter, Logger, RequestHandlerContext } from '@kbn/core/server';
 import { getConnectorList } from '../util/get_connector_list';
 import type { InferenceServerStart, InferenceStartDependencies } from '../types';
 
 export function registerConnectorsRoute({
   coreSetup,
   router,
+  logger,
 }: {
   coreSetup: CoreSetup<InferenceStartDependencies, InferenceServerStart>;
   router: IRouter<RequestHandlerContext>;
+  logger: Logger;
 }) {
   router.get(
     {
@@ -28,10 +30,10 @@ export function registerConnectorsRoute({
       validate: {},
     },
     async (_context, request, response) => {
-      const actions = await coreSetup
-        .getStartServices()
-        .then(([_coreStart, pluginsStart]) => pluginsStart.actions);
-      const connectors = await getConnectorList({ actions, request });
+      const [coreStart, pluginsStart] = await coreSetup.getStartServices();
+      const actions = pluginsStart.actions;
+      const esClient = coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
+      const connectors = await getConnectorList({ actions, request, esClient, logger });
       return response.ok({ body: { connectors } });
     }
   );

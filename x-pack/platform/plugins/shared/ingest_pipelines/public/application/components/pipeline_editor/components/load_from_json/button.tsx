@@ -28,7 +28,7 @@ export const LoadFromJsonButton: FunctionComponent<Props> = ({ onDone }) => {
     <ModalProvider onDone={onDone}>
       {(openModal) => {
         return (
-          <EuiButtonEmpty size="s" onClick={openModal} iconType="importAction">
+          <EuiButtonEmpty size="s" onClick={openModal} iconType="download">
             {i18nTexts.buttonLabel}
           </EuiButtonEmpty>
         );

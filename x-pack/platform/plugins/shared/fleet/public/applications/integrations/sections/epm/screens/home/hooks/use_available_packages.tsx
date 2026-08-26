@@ -32,6 +32,8 @@ import {
   filterPolicyTemplatesTiles,
 } from '../../../../../../../../common/services';
 
+import { ExperimentalFeaturesService } from '../../../../../services';
+
 import {
   isOnlyAgentlessPolicyTemplate,
   isOnlyAgentlessIntegration,
@@ -46,12 +48,15 @@ import type { CategoryFacet } from '../category_facets';
 import { mergeCategoriesAndCount } from '../util';
 
 import { useBuildIntegrationsUrl } from './use_build_integrations_url';
+import { useOnboardingOverride } from './use_onboarding_override';
+import { applyGrouping } from './apply_grouping';
 
 export interface IntegrationsURLParameters {
   searchString?: string;
   categoryId?: string;
   subCategoryId?: string;
   onlyAgentless?: boolean;
+  showDeprecated?: boolean;
 }
 
 function getAllCategoriesFromIntegrations(pkg: PackageListItem) {
@@ -104,6 +109,7 @@ const packageListToIntegrationsList = (packages: PackageList): PackageList => {
             description,
             icons: icons || restOfPackage.icons,
             categories: uniq(allCategories),
+            ...(policyTemplate.deprecated ? { deprecated: policyTemplate.deprecated } : {}),
           };
         })
       : [];
@@ -144,12 +150,21 @@ export type AvailablePackagesHookType = typeof useAvailablePackages;
 
 export const useAvailablePackages = ({
   prereleaseIntegrationsEnabled,
+  disableCollectionGrouping = false,
 }: {
   prereleaseIntegrationsEnabled: boolean;
+  /**
+   * When true, skips collection grouping and returns all integrations as individual
+   * cards regardless of the `enableIntegrationCollectionTiles` feature flag.
+   * Use this in contexts where collection tiles are not appropriate (e.g. the
+   * agent policy add-integration flyout dropdown).
+   */
+  disableCollectionGrouping?: boolean;
 }) => {
   const [preference, setPreference] = useState<IntegrationPreferenceType>('agent');
 
   const { isAgentlessEnabled } = useAgentless();
+  const { applyOnboardingOverride } = useOnboardingOverride();
 
   const { packageVerificationKeyId } = useGetPackageVerificationKeyId();
 
@@ -208,39 +223,65 @@ export const useAvailablePackages = ({
       preference === 'agent' ? [] : replacementCustomIntegrations || []
     );
 
-  const cards: IntegrationCardItem[] = useMemo(() => {
+  const { enableIntegrationCollectionTiles } = ExperimentalFeaturesService.get();
+
+  // All cards before any filter (no agentless filter, no category filter).
+  // Used by useBrowseIntegrationHook which applies both filters from the live URL.
+  const allCards: IntegrationCardItem[] = useMemo(() => {
     const eprAndCustomPackages = [...mergedEprPackages, ...(appendCustomIntegrations || [])];
 
-    return (
-      eprAndCustomPackages
-        // If only showing agentless integrations, filter out non-agentless ones
-        .filter((item) => {
-          if (isAgentlessEnabled && onlyAgentlessFilter) {
-            return 'supportsAgentless' in item && item.supportsAgentless === true;
-          }
-          return true;
+    let itemsToMap: Array<PackageListItem | CustomIntegration>;
+    let extraCards: IntegrationCardItem[] = [];
+
+    if (enableIntegrationCollectionTiles && !disableCollectionGrouping) {
+      const { collectionCards, ungroupedItems } = applyGrouping({
+        items: eprAndCustomPackages,
+        getHref,
+        getAbsolutePath,
+        addBasePath,
+        packageVerificationKeyId,
+      });
+      itemsToMap = ungroupedItems;
+      extraCards = collectionCards;
+    } else {
+      itemsToMap = eprAndCustomPackages;
+    }
+
+    const mapped = [
+      ...extraCards,
+      ...itemsToMap.map((item) =>
+        mapToCard({
+          getAbsolutePath,
+          getHref,
+          item,
+          addBasePath,
+          packageVerificationKeyId,
         })
-        .map((item) => {
-          return mapToCard({
-            getAbsolutePath,
-            getHref,
-            item,
-            addBasePath,
-            packageVerificationKeyId,
-          });
-        })
-        .sort((a, b) => a.title.localeCompare(b.title))
-    );
+      ),
+    ].sort((a, b) => a.title.localeCompare(b.title));
+
+    return applyOnboardingOverride(mapped);
   }, [
     addBasePath,
     appendCustomIntegrations,
+    applyOnboardingOverride,
+    disableCollectionGrouping,
+    enableIntegrationCollectionTiles,
     getAbsolutePath,
     getHref,
     mergedEprPackages,
-    onlyAgentlessFilter,
-    isAgentlessEnabled,
     packageVerificationKeyId,
   ]);
+
+  // Cards with the agentless filter applied (used by the old home page and
+  // its category sidebar counts). Derived from allCards so the sort/map work
+  // is not duplicated.
+  const cards: IntegrationCardItem[] = useMemo(() => {
+    if (isAgentlessEnabled && onlyAgentlessFilter) {
+      return allCards.filter((item) => item.supportsAgentless === true);
+    }
+    return allCards;
+  }, [allCards, isAgentlessEnabled, onlyAgentlessFilter]);
 
   // Packages to show
   // Filters out based on selected category and subcategory (if any)
@@ -316,5 +357,6 @@ export const useAvailablePackages = ({
     eprPackageLoadingError,
     eprCategoryLoadingError,
     filteredCards,
+    allCards,
   };
 };

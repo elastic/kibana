@@ -6,7 +6,10 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { I18nProvider } from '@kbn/i18n-react';
 import SwimlaneParamsFields from './swimlane_params';
 import { SwimlaneConnectorType } from './types';
 import { mappings } from './mocks';
@@ -54,14 +57,14 @@ describe('SwimlaneParamsFields renders', () => {
   });
 
   test('all params fields are rendered', () => {
-    const wrapper = mountWithIntl(<SwimlaneParamsFields {...defaultProps} />);
+    renderWithI18n(<SwimlaneParamsFields {...defaultProps} />);
 
-    expect(wrapper.find('[data-test-subj="severity"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="comments"]').exists()).toBeTruthy();
+    expect(screen.getByTestId('severityInput')).toBeInTheDocument();
+    expect(screen.getByTestId('commentsTextArea')).toBeInTheDocument();
   });
 
   test('it set the correct default params', () => {
-    mountWithIntl(<SwimlaneParamsFields {...defaultProps} actionParams={{}} />);
+    renderWithI18n(<SwimlaneParamsFields {...defaultProps} actionParams={{}} />);
     expect(editAction).toHaveBeenCalledWith('subAction', 'pushToService', 0);
     expect(editAction).toHaveBeenCalledWith(
       'subActionParams',
@@ -74,10 +77,14 @@ describe('SwimlaneParamsFields renders', () => {
   });
 
   test('it reset the fields when connector changes', () => {
-    const wrapper = mountWithIntl(<SwimlaneParamsFields {...defaultProps} />);
+    const { rerender } = renderWithI18n(<SwimlaneParamsFields {...defaultProps} />);
     expect(editAction).not.toHaveBeenCalled();
 
-    wrapper.setProps({ actionConnector: { ...connector, id: '1234' } });
+    rerender(
+      <I18nProvider>
+        <SwimlaneParamsFields {...defaultProps} actionConnector={{ ...connector, id: '1234' }} />
+      </I18nProvider>
+    );
     expect(editAction).toHaveBeenCalledWith(
       'subActionParams',
       {
@@ -89,10 +96,14 @@ describe('SwimlaneParamsFields renders', () => {
   });
 
   test('it set the severity', () => {
-    const wrapper = mountWithIntl(<SwimlaneParamsFields {...defaultProps} />);
+    const { rerender } = renderWithI18n(<SwimlaneParamsFields {...defaultProps} />);
     expect(editAction).not.toHaveBeenCalled();
 
-    wrapper.setProps({ actionConnector: { ...connector, id: '1234' } });
+    rerender(
+      <I18nProvider>
+        <SwimlaneParamsFields {...defaultProps} actionConnector={{ ...connector, id: '1234' }} />
+      </I18nProvider>
+    );
     expect(editAction).toHaveBeenCalledWith(
       'subActionParams',
       {
@@ -104,25 +115,23 @@ describe('SwimlaneParamsFields renders', () => {
   });
 
   describe('UI updates', () => {
-    const changeEvent = { target: { value: 'Bug' } } as React.ChangeEvent<HTMLSelectElement>;
-    const simpleFields = [
-      { dataTestSubj: 'input[data-test-subj="severityInput"]', key: 'severity' },
-    ];
+    const simpleFields = [{ dataTestSubj: 'severityInput', key: 'severity' }];
 
     simpleFields.forEach((field) =>
-      test(`${field.key} update triggers editAction`, () => {
-        const wrapper = mountWithIntl(<SwimlaneParamsFields {...defaultProps} />);
-        const theField = wrapper.find(field.dataTestSubj).first();
-        theField.prop('onChange')!(changeEvent);
-        expect(editAction.mock.calls[0][1].incident[field.key]).toEqual(changeEvent.target.value);
+      test(`${field.key} update triggers editAction`, async () => {
+        renderWithI18n(<SwimlaneParamsFields {...defaultProps} />);
+        const theField = screen.getByTestId(field.dataTestSubj);
+        await userEvent.tripleClick(theField);
+        await userEvent.paste('Bug');
+        expect(editAction.mock.calls.at(-1)[1].incident[field.key]).toEqual('Bug');
       })
     );
 
-    test('A comment triggers editAction', () => {
-      const wrapper = mountWithIntl(<SwimlaneParamsFields {...defaultProps} />);
-      const comments = wrapper.find('textarea[data-test-subj="commentsTextArea"]');
-      expect(comments.simulate('change', changeEvent));
-      expect(editAction.mock.calls[0][1].comments.length).toEqual(1);
+    test('A comment triggers editAction', async () => {
+      renderWithI18n(<SwimlaneParamsFields {...defaultProps} />);
+      const commentsTextArea = screen.getByTestId('commentsTextArea');
+      await userEvent.type(commentsTextArea, 'Bug');
+      expect(editAction.mock.calls.at(-1)[1].comments.length).toEqual(1);
     });
   });
 });

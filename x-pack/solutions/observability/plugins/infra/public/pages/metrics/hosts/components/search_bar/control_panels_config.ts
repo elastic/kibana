@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
 import {
   CLOUD_PROVIDER,
   HOST_OS_NAME,
-  OS_NAME,
+  OS_TYPE,
   SERVICE_NAME,
   type DataSchemaFormat,
 } from '@kbn/metrics-data-access-plugin/common';
@@ -21,17 +22,17 @@ type ReplaceableControl = Record<
 const commonControlPanelConfig: ControlPanels = {
   [CLOUD_PROVIDER]: {
     order: 1,
-    width: 'medium',
-    grow: false,
-    type: 'optionsListControl',
+    width: 'small',
+    grow: true,
+    type: OPTIONS_LIST_CONTROL,
     fieldName: CLOUD_PROVIDER,
     title: 'Cloud Provider',
   },
   [SERVICE_NAME]: {
     order: 2,
-    width: 'medium',
-    grow: false,
-    type: 'optionsListControl',
+    width: 'small',
+    grow: true,
+    type: OPTIONS_LIST_CONTROL,
     fieldName: SERVICE_NAME,
     title: 'Service Name',
   },
@@ -41,20 +42,20 @@ const controlPanelConfig: Record<DataSchemaFormat, ControlPanels> = {
   ecs: {
     [HOST_OS_NAME]: {
       order: 0,
-      width: 'medium',
-      grow: false,
-      type: 'optionsListControl',
+      width: 'small',
+      grow: true,
+      type: OPTIONS_LIST_CONTROL,
       fieldName: HOST_OS_NAME,
       title: 'Operating System',
     },
   },
   semconv: {
-    [OS_NAME]: {
+    [OS_TYPE]: {
       order: 0,
-      width: 'medium',
-      grow: false,
-      type: 'optionsListControl',
-      fieldName: OS_NAME,
+      width: 'small',
+      grow: true,
+      type: OPTIONS_LIST_CONTROL,
+      fieldName: OS_TYPE,
       title: 'Operating System',
     },
   },
@@ -62,15 +63,15 @@ const controlPanelConfig: Record<DataSchemaFormat, ControlPanels> = {
 
 const replaceableControlPanels: Record<DataSchemaFormat, ReplaceableControl> = {
   ecs: {
-    [OS_NAME]: {
+    [OS_TYPE]: {
       key: HOST_OS_NAME,
       control: controlPanelConfig.ecs[HOST_OS_NAME],
     },
   },
   semconv: {
     [HOST_OS_NAME]: {
-      key: OS_NAME,
-      control: controlPanelConfig.semconv[OS_NAME],
+      key: OS_TYPE,
+      control: controlPanelConfig.semconv[OS_TYPE],
     },
   },
 };

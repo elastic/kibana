@@ -6,3 +6,4 @@
  */
 
 export * from './translation_results';
+export * from './is_migration_item_navigable_with_flyout';

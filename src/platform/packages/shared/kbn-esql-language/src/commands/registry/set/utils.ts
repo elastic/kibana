@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
+import type { ESQLAstItem } from '@elastic/esql/types';
+import { isMap } from '@elastic/esql';
 import { UnmappedFieldsStrategy, type ISuggestionItem } from '../types';
-import type { ESQLAstItem } from '../../../types';
-import { isMap, SuggestionCategory } from '../../../..';
+import { SuggestionCategory } from '../../../..';
 import type { MapParameters } from '../../definitions/utils/autocomplete/map_expression';
 import { getCommandMapExpressionSuggestions } from '../../definitions/utils/autocomplete/map_expression';
 import { settings } from '../../definitions/generated/settings';
@@ -29,7 +30,6 @@ const getProjectRoutingCommonCompletionItems = (): ISuggestionItem[] => {
           defaultMessage: 'Search only the current project',
         }
       ),
-      sortText: '1',
       category: SuggestionCategory.CONSTANT_VALUE,
     },
     {
@@ -42,7 +42,6 @@ const getProjectRoutingCommonCompletionItems = (): ISuggestionItem[] => {
           defaultMessage: 'Search all projects',
         }
       ),
-      sortText: '1',
       category: SuggestionCategory.CONSTANT_VALUE,
     },
   ];
@@ -51,8 +50,8 @@ const getProjectRoutingCommonCompletionItems = (): ISuggestionItem[] => {
 const getUnmappedFieldsCompletionItems = (): ISuggestionItem[] => {
   return [
     {
-      label: UnmappedFieldsStrategy.FAIL,
-      text: UnmappedFieldsStrategy.FAIL,
+      label: UnmappedFieldsStrategy.DEFAULT,
+      text: UnmappedFieldsStrategy.DEFAULT,
       kind: 'Value',
       detail: i18n.translate('kbn-esql-language.esql.autocomplete.set.unmappedFields.failDoc', {
         defaultMessage: 'Fails the query if unmapped fields are present',
@@ -68,15 +67,26 @@ const getUnmappedFieldsCompletionItems = (): ISuggestionItem[] => {
       }),
       category: SuggestionCategory.CONSTANT_VALUE,
     },
-    // Hiding LOAD option as it's partially supported at the moment.
+    {
+      label: UnmappedFieldsStrategy.LOAD,
+      text: UnmappedFieldsStrategy.LOAD,
+      kind: 'Value',
+      detail: i18n.translate('kbn-esql-language.esql.autocomplete.set.unmappedFields.loadDoc', {
+        defaultMessage:
+          'Attempts to load the fields from the source that are explicitly mentioned in the query',
+      }),
+      category: SuggestionCategory.CONSTANT_VALUE,
+    },
+    // Currently LOAD_ALL is only supported in snapshots.
     // {
-    //   label: UnmappedFieldsStrategy.LOAD,
-    //   text: UnmappedFieldsStrategy.LOAD,
+    //   label: UnmappedFieldsStrategy.LOAD_ALL,
+    //   text: UnmappedFieldsStrategy.LOAD_ALL,
     //   kind: 'Value',
-    //   detail: i18n.translate('kbn-esql-language.esql.autocomplete.set.unmappedFields.loadDoc', {
-    //     defaultMessage: 'Attempts to load the fields from the source',
+    //   detail: i18n.translate('kbn-esql-language.esql.autocomplete.set.unmappedFields.loadAllDoc', {
+    //     defaultMessage:
+    //       'Attempts to load all the fields from the source, even if they are not mentioned in the query',
     //   }),
-    //  category: SuggestionCategory.CONSTANT_VALUE,
+    //   category: SuggestionCategory.CONSTANT_VALUE,
     // },
   ];
 };
@@ -88,12 +98,12 @@ const getApproximateCompletionItems = (
 ): ISuggestionItem[] => {
   if (isMap(settingRightSide)) {
     const approximateSetting = settings.find(
-      (s) => s.name === Settings.APPROXIMATE
+      (s) => s.name === Settings.APPROXIMATION
     ) as ApproximateSetting;
     const parsedParameters = parseMapParams(approximateSetting?.mapParams || '');
     const availableParameters: MapParameters = { ...parsedParameters };
     availableParameters.confidence_level.suggestions = confidenceLevelValueItems;
-    availableParameters.num_rows.suggestions = numOfRowsValueItems;
+    availableParameters.rows.suggestions = numOfRowsValueItems;
     return getCommandMapExpressionSuggestions(innerText, availableParameters);
   }
 
@@ -145,7 +155,7 @@ const getApproximateCompletionItems = (
 const COMPLETIONS_BY_SETTING_NAME: Record<string, Function> = {
   [Settings.PROJECT_ROUTING]: getProjectRoutingCommonCompletionItems,
   [Settings.UNMAPPED_FIELDS]: getUnmappedFieldsCompletionItems,
-  [Settings.APPROXIMATE]: getApproximateCompletionItems,
+  [Settings.APPROXIMATION]: getApproximateCompletionItems,
 };
 
 export const getCompletionItemsBySettingName: (

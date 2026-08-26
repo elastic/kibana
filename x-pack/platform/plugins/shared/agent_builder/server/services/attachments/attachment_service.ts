@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import type { SavedObjectsServiceStart } from '@kbn/core/server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { isAllowedBuiltinAttachment } from '@kbn/agent-builder-server/allow_lists';
+import { getCurrentSpaceId } from '../../utils/spaces';
 import {
   createAttachmentTypeRegistry,
   type AttachmentTypeRegistry,
@@ -12,9 +16,14 @@ import {
 import type { AttachmentServiceSetup, AttachmentServiceStart } from './types';
 import { validateAttachment } from './validate_attachment';
 
+export interface AttachmentServiceStartDeps {
+  spaces?: SpacesPluginStart;
+  savedObjects: SavedObjectsServiceStart;
+}
+
 export interface AttachmentService {
   setup: () => AttachmentServiceSetup;
-  start: () => AttachmentServiceStart;
+  start: (deps: AttachmentServiceStartDeps) => AttachmentServiceStart;
 }
 
 export const createAttachmentService = (): AttachmentService => {
@@ -30,17 +39,37 @@ export class AttachmentServiceImpl implements AttachmentService {
 
   setup(): AttachmentServiceSetup {
     return {
-      registerType: (attachmentType) => this.attachmentTypeRegistry.register(attachmentType),
+      registerType: (attachmentType) => {
+        if (!isAllowedBuiltinAttachment(attachmentType.id)) {
+          throw new Error(
+            `Built-in attachment with id "${attachmentType.id}" is not in the list of allowed built-in attachments.
+             Please add it to the list of allowed built-in attachments in the "@kbn/agent-builder-server/allow_lists.ts" file.`
+          );
+        }
+        return this.attachmentTypeRegistry.register(attachmentType);
+      },
     };
   }
 
-  start(): AttachmentServiceStart {
+  start(deps: AttachmentServiceStartDeps): AttachmentServiceStart {
     return {
-      validate: (attachment) => {
-        return validateAttachment({ attachment, registry: this.attachmentTypeRegistry });
+      validate: (attachment, request) => {
+        const resolveContext = {
+          request,
+          spaceId: getCurrentSpaceId({ request, spaces: deps.spaces }),
+          savedObjectsClient: deps.savedObjects.getScopedClient(request),
+        };
+        return validateAttachment({
+          attachment,
+          registry: this.attachmentTypeRegistry,
+          resolveContext,
+        });
       },
       getTypeDefinition: (attachment) => {
         return this.attachmentTypeRegistry.get(attachment);
+      },
+      getRegisteredTypeIds: () => {
+        return this.attachmentTypeRegistry.list().map((def) => def.id);
       },
     };
   }

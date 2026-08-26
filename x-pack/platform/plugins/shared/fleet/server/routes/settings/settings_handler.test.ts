@@ -14,9 +14,10 @@ import { SettingsResponseSchema, SpaceSettingsResponseSchema } from '../../types
 import { getSettingsHandler, getSpaceSettingsHandler } from './settings_handler';
 
 jest.mock('../../services/spaces/space_settings', () => ({
-  getSpaceSettings: jest
-    .fn()
-    .mockResolvedValue({ allowed_namespace_prefixes: [], managed_by: 'kibana' }),
+  getSpaceSettings: jest.fn().mockResolvedValue({
+    allowed_namespace_prefixes: [],
+    managed_by: 'kibana',
+  }),
   saveSpaceSettings: jest.fn(),
 }));
 
@@ -57,7 +58,12 @@ describe('SettingsHandler', () => {
 
   it('should return valid space settings', async () => {
     await getSpaceSettingsHandler(context, {} as any, response);
-    const expectedResponse = { item: { allowed_namespace_prefixes: [], managed_by: 'kibana' } };
+    const expectedResponse = {
+      item: {
+        allowed_namespace_prefixes: [],
+        managed_by: 'kibana',
+      },
+    };
     expect(response.ok).toHaveBeenCalledWith({
       body: expectedResponse,
     });

@@ -9,7 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
-import type { FieldFormatConvertFunction } from '@kbn/field-formats-plugin/common';
+import type { TextContextTypeConvert } from '@kbn/field-formats-plugin/common';
 import { getColumnByAccessor } from '@kbn/chart-expressions-common';
 
 import type { DimensionsVisParam, MetricVisParam } from '../../common';
@@ -24,6 +24,7 @@ export interface TrendConfig {
   showIcon: boolean;
   showValue: boolean;
   palette: [string, string, string];
+  textPalette?: [string, string, string];
   baselineValue: number | undefined;
   borderColor?: string;
   compareToPrimary: boolean;
@@ -42,6 +43,7 @@ export interface SecondaryMetricInfo {
   value: string;
   label?: string;
   badgeColor?: string;
+  badgeTextColor?: string;
   description?: string;
   icon?: string;
 }
@@ -78,6 +80,7 @@ function getBadgeConfiguration(trendConfig: TrendConfig, deltaValue: number) {
       icon: undefined,
       iconLabel: notAvailable,
       color: trendConfig.palette[1],
+      textColor: trendConfig.textPalette?.[1],
     };
   }
 
@@ -88,6 +91,7 @@ function getBadgeConfiguration(trendConfig: TrendConfig, deltaValue: number) {
         defaultMessage: 'downward direction',
       }),
       color: trendConfig.palette[0],
+      textColor: trendConfig.textPalette?.[0],
     };
   }
 
@@ -98,6 +102,7 @@ function getBadgeConfiguration(trendConfig: TrendConfig, deltaValue: number) {
         defaultMessage: 'upward direction',
       }),
       color: trendConfig.palette[2],
+      textColor: trendConfig.textPalette?.[2],
     };
   }
 
@@ -107,13 +112,14 @@ function getBadgeConfiguration(trendConfig: TrendConfig, deltaValue: number) {
       defaultMessage: 'stable',
     }),
     color: trendConfig.palette[1],
+    textColor: trendConfig.textPalette?.[1],
   };
 }
 
 function getValueToShow(
   value: string,
   deltaValue: number,
-  formatter: FieldFormatConvertFunction | undefined,
+  formatter: TextContextTypeConvert | undefined,
   compareToPrimary: boolean
 ) {
   if (!compareToPrimary) {
@@ -158,12 +164,17 @@ function getDynamicColorInfo(
   trendConfig: TrendConfig,
   rawValue: number | undefined,
   safeFormattedValue: string,
-  metricFormatter: FieldFormatConvertFunction | undefined,
+  metricFormatter: TextContextTypeConvert | undefined,
   label: string
 ): SecondaryMetricInfo {
   const deltaFactor = trendConfig.compareToPrimary ? -1 : 1;
   const deltaValue = deltaFactor * getDeltaValue(rawValue, trendConfig.baselineValue);
-  const { icon, color: trendColor, iconLabel } = getBadgeConfiguration(trendConfig, deltaValue);
+  const {
+    icon,
+    color: trendColor,
+    textColor: trendTextColor,
+    iconLabel,
+  } = getBadgeConfiguration(trendConfig, deltaValue);
   const valueToShow = getValueToShow(
     safeFormattedValue,
     deltaValue,
@@ -182,6 +193,7 @@ function getDynamicColorInfo(
     value: trendConfig.showValue ? valueToShow : '',
     label,
     badgeColor: trendColor,
+    badgeTextColor: trendTextColor,
     description: trendDescription,
     icon: trendConfig.showIcon ? icon : undefined,
   };

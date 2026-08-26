@@ -317,8 +317,12 @@ export default function (providerContext: FtrProviderContext) {
       describe('when `search` query param is used', () => {
         let generatedManagedPolicyArray: AgentPolicy[];
         let generatedPolicyArray: AgentPolicy[];
-        const specialCharactersForNameAndId = `!@#$%^&*-=_+()[]{}:;'\`|/<>,.?~`.split('');
-        const specialCharactersForNameOnly = `"\\`.split('');
+        // Characters excluded from IDs because the Fleet ID validator rejects them:
+        // - '/' path separator, '..' traversal sequence → always rejected
+        // - '"', '\' → rejected (script-injection characters)
+        // - '(', ')', ';', "'" → rejected (script-injection characters)
+        const specialCharactersForNameAndId = `!@#$%^&*-=_+[]{}:\`|<>,?~`.split('');
+        const specialCharactersForNameOnly = `"\\/.;()'`.split('');
 
         before(async () => {
           generatedPolicyArray = [];

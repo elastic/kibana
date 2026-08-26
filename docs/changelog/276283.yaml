@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/276283
+issues:
+- https://github.com/elastic/kibana/issues/272483
+type: feature
+products:
+- product: cloud-serverless
+  target: 2026-07-14
+title: "Add selectable aggregations for the Metrics Experience grid"
+description: "The Metrics Experience grid in Discover now includes Grid Settings so you can choose the aggregation function for counter, gauge, and histogram metrics instead of using hardcoded defaults."

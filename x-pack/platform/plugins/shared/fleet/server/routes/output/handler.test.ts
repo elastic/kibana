@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { SERVERLESS_DEFAULT_OUTPUT_ID } from '../../constants';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+
+import { SERVERLESS_DEFAULT_OUTPUT_ID, SERVERLESS_PRIVATE_OUTPUT_ID } from '../../constants';
 import { agentPolicyService, appContextService, outputService } from '../../services';
 import { withDefaultErrorHandler } from '../../services/security/fleet_router';
 
@@ -29,7 +31,9 @@ describe('Outputs handler', () => {
   };
 
   beforeEach(() => {
-    jest.spyOn(appContextService, 'getLogger').mockReturnValue({ error: jest.fn() } as any);
+    jest
+      .spyOn(appContextService, 'getLogger')
+      .mockReturnValue({ error: jest.fn(), debug: jest.fn() } as any);
     jest.spyOn(outputService, 'create').mockResolvedValue({ id: 'output1' } as any);
     jest.spyOn(outputService, 'update').mockResolvedValue({ id: 'output1' } as any);
     jest.spyOn(outputService, 'get').mockImplementation((id: string) => {
@@ -40,21 +44,6 @@ describe('Outputs handler', () => {
       }
     });
     jest.spyOn(agentPolicyService, 'bumpAllAgentPoliciesForOutput').mockResolvedValue({} as any);
-  });
-
-  it('should return error on post output using remote_elasticsearch in serverless', async () => {
-    jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isServerlessEnabled: true } as any);
-
-    const res = await postOutputHandlerWithErrorHandler(
-      mockContext,
-      { body: { id: 'output1', type: 'remote_elasticsearch' } } as any,
-      mockResponse as any
-    );
-
-    expect(res).toEqual({
-      body: { message: 'Output type remote_elasticsearch not supported in serverless' },
-      statusCode: 400,
-    });
   });
 
   it('should return ok on post output using remote_elasticsearch in stateful', async () => {
@@ -71,8 +60,22 @@ describe('Outputs handler', () => {
     expect(res).toEqual({ body: { item: { id: 'output1' } } });
   });
 
-  it('should return error on put output using remote_elasticsearch in serverless', async () => {
+  it('should return ok on post output using remote_elasticsearch in serverless', async () => {
     jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isServerlessEnabled: true } as any);
+
+    const res = await postOutputHandlerWithErrorHandler(
+      mockContext,
+      { body: { type: 'remote_elasticsearch' } } as any,
+      mockResponse as any
+    );
+
+    expect(res).toEqual({ body: { item: { id: 'output1' } } });
+  });
+
+  it('should return ok on put output using remote_elasticsearch in stateful', async () => {
+    jest
+      .spyOn(appContextService, 'getCloud')
+      .mockReturnValue({ isServerlessEnabled: false } as any);
 
     const res = await putOutputHandlerWithErrorHandler(
       mockContext,
@@ -80,16 +83,11 @@ describe('Outputs handler', () => {
       mockResponse as any
     );
 
-    expect(res).toEqual({
-      body: { message: 'Output type remote_elasticsearch not supported in serverless' },
-      statusCode: 400,
-    });
+    expect(res).toEqual({ body: { item: { id: 'output1' } } });
   });
 
-  it('should return ok on put output using remote_elasticsearch in stateful', async () => {
-    jest
-      .spyOn(appContextService, 'getCloud')
-      .mockReturnValue({ isServerlessEnabled: false } as any);
+  it('should return ok on put output using remote_elasticsearch in serverless', async () => {
+    jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isServerlessEnabled: true } as any);
 
     const res = await putOutputHandlerWithErrorHandler(
       mockContext,
@@ -220,6 +218,169 @@ describe('Outputs handler', () => {
     );
 
     expect(res).toEqual({ body: { item: { id: 'output1' } } });
+  });
+
+  describe('private endpoint (PrivateLink) validation', () => {
+    const PRIVATE_URL = 'https://abc.es.private.us-east-1.aws.elastic.cloud';
+
+    it('should return ok on post elasticsearch output in serverless when hosts match private endpoint SO', async () => {
+      jest
+        .spyOn(appContextService, 'getCloud')
+        .mockReturnValue({ isServerlessEnabled: true } as any);
+      jest.spyOn(outputService, 'get').mockImplementation((id: string) => {
+        if (id === SERVERLESS_DEFAULT_OUTPUT_ID) {
+          return { hosts: ['http://elasticsearch:9200'] } as any;
+        }
+        if (id === SERVERLESS_PRIVATE_OUTPUT_ID) {
+          return { id: SERVERLESS_PRIVATE_OUTPUT_ID, hosts: [PRIVATE_URL] } as any;
+        }
+        return { id: 'output1' } as any;
+      });
+
+      const res = await postOutputHandlerWithErrorHandler(
+        mockContext,
+        { body: { id: 'output1', type: 'elasticsearch', hosts: [PRIVATE_URL] } } as any,
+        mockResponse as any
+      );
+
+      expect(res).toEqual({ body: { item: { id: 'output1' } } });
+    });
+
+    it('should return 400 on post elasticsearch output in serverless when hosts are arbitrary (not default or private)', async () => {
+      jest
+        .spyOn(appContextService, 'getCloud')
+        .mockReturnValue({ isServerlessEnabled: true } as any);
+      jest.spyOn(outputService, 'get').mockImplementation((id: string) => {
+        if (id === SERVERLESS_DEFAULT_OUTPUT_ID) {
+          return { hosts: ['http://elasticsearch:9200'] } as any;
+        }
+        if (id === SERVERLESS_PRIVATE_OUTPUT_ID) {
+          return { id: SERVERLESS_PRIVATE_OUTPUT_ID, hosts: [PRIVATE_URL] } as any;
+        }
+        return { id: 'output1' } as any;
+      });
+
+      const res = await postOutputHandlerWithErrorHandler(
+        mockContext,
+        {
+          body: { id: 'output1', type: 'elasticsearch', hosts: ['https://arbitrary.host.com'] },
+        } as any,
+        mockResponse as any
+      );
+
+      expect(res).toEqual({
+        body: {
+          message:
+            'Elasticsearch output host must have default URL in serverless: http://elasticsearch:9200',
+        },
+        statusCode: 400,
+      });
+    });
+
+    it('should return 400 on post elasticsearch output in serverless when private SO is absent and url is not the default', async () => {
+      jest
+        .spyOn(appContextService, 'getCloud')
+        .mockReturnValue({ isServerlessEnabled: true } as any);
+      jest.spyOn(outputService, 'get').mockImplementation((id: string) => {
+        if (id === SERVERLESS_DEFAULT_OUTPUT_ID) {
+          return { hosts: ['http://elasticsearch:9200'] } as any;
+        }
+        if (id === SERVERLESS_PRIVATE_OUTPUT_ID) {
+          throw SavedObjectsErrorHelpers.createGenericNotFoundError(
+            'output',
+            SERVERLESS_PRIVATE_OUTPUT_ID
+          );
+        }
+        return { id: 'output1' } as any;
+      });
+
+      const res = await postOutputHandlerWithErrorHandler(
+        mockContext,
+        { body: { id: 'output1', type: 'elasticsearch', hosts: [PRIVATE_URL] } } as any,
+        mockResponse as any
+      );
+
+      expect(res).toEqual({
+        body: {
+          message:
+            'Elasticsearch output host must have default URL in serverless: http://elasticsearch:9200',
+        },
+        statusCode: 400,
+      });
+    });
+
+    it('should return ok on put elasticsearch output in serverless when hosts match private endpoint SO', async () => {
+      jest
+        .spyOn(appContextService, 'getCloud')
+        .mockReturnValue({ isServerlessEnabled: true } as any);
+      jest.spyOn(outputService, 'get').mockImplementation((id: string) => {
+        if (id === SERVERLESS_DEFAULT_OUTPUT_ID) {
+          return { hosts: ['http://elasticsearch:9200'] } as any;
+        }
+        if (id === SERVERLESS_PRIVATE_OUTPUT_ID) {
+          return { id: SERVERLESS_PRIVATE_OUTPUT_ID, hosts: [PRIVATE_URL] } as any;
+        }
+        return { id: 'output1', type: 'elasticsearch' } as any;
+      });
+
+      const res = await putOutputHandlerWithErrorHandler(
+        mockContext,
+        { body: { hosts: [PRIVATE_URL] }, params: { outputId: 'output1' } } as any,
+        mockResponse as any
+      );
+
+      expect(res).toEqual({ body: { item: { id: 'output1', type: 'elasticsearch' } } });
+    });
+  });
+
+  it('should call bumpAllAgentPoliciesForOutput with isDefault flags on put', async () => {
+    jest
+      .spyOn(appContextService, 'getCloud')
+      .mockReturnValue({ isServerlessEnabled: false } as any);
+    jest.spyOn(outputService, 'get').mockImplementation((id: string) => {
+      if (id === SERVERLESS_DEFAULT_OUTPUT_ID) {
+        return { hosts: ['http://elasticsearch:9200'] } as any;
+      }
+      return { id: 'output1', is_default: true, is_default_monitoring: false } as any;
+    });
+
+    await putOutputHandlerWithErrorHandler(
+      mockContext,
+      {
+        body: { hosts: ['http://localhost:8080'] },
+        params: { outputId: 'output1' },
+      } as any,
+      mockResponse as any
+    );
+
+    expect(agentPolicyService.bumpAllAgentPoliciesForOutput).toHaveBeenLastCalledWith(
+      undefined,
+      'output1',
+      { isDefault: true, isDefaultMonitoring: false }
+    );
+  });
+
+  it('should call bumpAllAgentPoliciesForOutput with isDefault flags on post', async () => {
+    jest
+      .spyOn(appContextService, 'getCloud')
+      .mockReturnValue({ isServerlessEnabled: false } as any);
+    jest.spyOn(outputService, 'create').mockResolvedValue({
+      id: 'output1',
+      is_default: false,
+      is_default_monitoring: true,
+    } as any);
+
+    await postOutputHandlerWithErrorHandler(
+      mockContext,
+      { body: { type: 'elasticsearch' } } as any,
+      mockResponse as any
+    );
+
+    expect(agentPolicyService.bumpAllAgentPoliciesForOutput).toHaveBeenLastCalledWith(
+      undefined,
+      'output1',
+      { isDefault: false, isDefaultMonitoring: true }
+    );
   });
 
   it('should return error if both service_token and secrets.service_token is provided for remote_elasticsearch output', async () => {

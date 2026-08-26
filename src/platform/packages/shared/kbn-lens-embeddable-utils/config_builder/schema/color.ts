@@ -7,201 +7,346 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import { isNil } from 'lodash';
+
+import { z } from '@kbn/zod';
+
 import { serializedValueSchema } from './serializedValue';
 
-const colorByValueBase = schema.object({
-  type: schema.literal('dynamic'), // Specifies that the color assignment is dynamic (by value). Possible value: 'dynamic'
-
-  /**
-   * Array of color steps defining the mapping from values to colors.
-   * Each step can be:
-   *   - 'from': Color applies from a specified value upwards.
-   *   - 'to': Color applies up to a specified value.
-   *   - 'exact': Color applies to an exact value.
-   */
-  steps: schema.arrayOf(
-    schema.oneOf([
-      schema.object({
-        /**
-         * Step type indicating the color applies from a specific value upwards.
-         * Possible value: 'from'
-         */
-        type: schema.literal('from'),
-        /**
-         * The value from which this color applies (inclusive).
-         */
-        from: schema.number({
-          meta: { description: 'The value from which this color applies (inclusive).' },
-        }),
-        /**
-         * The color to use for this step.
-         */
-        color: schema.string({ meta: { description: 'The color to use for this step.' } }),
-      }),
-      schema.object({
-        /**
-         * Step type indicating the color applies up to a specific value.
-         * Possible value: 'to'
-         */
-        type: schema.literal('to'),
-        /**
-         * The value up to which this color applies (inclusive).
-         */
-        to: schema.number({
-          meta: { description: 'The value up to which this color applies (inclusive).' },
-        }),
-        /**
-         * The color to use for this step.
-         */
-        color: schema.string({ meta: { description: 'The color to use for this step.' } }),
-      }),
-      schema.object({
-        type: schema.literal('exact'), // Step type indicating the color applies to an exact value. Possible value: 'exact'
-        /**
-         * The exact value to which this color applies.
-         */
-        value: schema.number({
-          meta: { description: 'The exact value to which this color applies.' },
-        }),
-        /**
-         * The color to use for this exact value.
-         */
-        color: schema.string({ meta: { description: 'The color to use for this exact value.' } }),
-      }),
-    ]),
-    {
-      maxSize: 100,
-      validate(steps) {
-        if (
-          steps.some((step) => step.type === 'from') &&
-          steps.findIndex((step) => step.type === 'from') !== 0
-        ) {
-          return 'The "from" step must be the first step in the array.';
-        }
-        if (
-          steps.some((step) => step.type === 'to') &&
-          steps.findIndex((step) => step.type === 'to') !== steps.length - 1
-        ) {
-          return 'The "to" step must be the last step in the array.';
-        }
-        return undefined;
-      },
+const colorByValueStepSchema = z
+  .object({
+    /**
+     * The lower bound of range from which this color applies (inclusive).
+     */
+    gte: z.number().nullable().optional().meta({
+      description: 'The lower bound of range from which this color applies (inclusive).',
+    }),
+    /**
+     * The upper bound of range to which this color applies (exclusive).
+     */
+    lt: z.number().nullable().optional().meta({
+      description: 'The upper bound of range to which this color applies (exclusive).',
+    }),
+    /**
+     * The upper bound of range to which this color applies (inclusive).
+     */
+    lte: z.number().nullable().optional().meta({
+      description: 'The upper bound of range to which this color applies (inclusive).',
+    }),
+    /**
+     * The color to use for this step.
+     */
+    color: z.string().meta({ description: 'The color to use for this step.' }),
+  })
+  .strict()
+  .superRefine((step, ctx) => {
+    if (isNil(step.gte) && isNil(step.lt) && isNil(step.lte)) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'At least one of "gte", "lt", or "lte" must be provided.',
+      });
+      return;
     }
-  ),
-});
 
-export const colorByValueAbsolute = colorByValueBase.extends(
-  { range: schema.literal('absolute') },
-  { meta: { id: 'colorByValueAbsolute' } }
-);
+    if (!isNil(step.lt) && !isNil(step.lte)) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Cannot provide both "lt" and "lte" for the same step.',
+      });
+      return;
+    }
 
-export const colorByValueSchema = schema.oneOf(
-  [
-    colorByValueAbsolute,
-    colorByValueBase.extends(
-      {
-        /**
-         * The minimum value for the color range. Used as the lower bound for value-based color assignment.
-         */
-        min: schema.number({
-          meta: {
-            description:
-              'The minimum value for the color range. Used as the lower bound for value-based color assignment.',
-          },
-        }),
-        /**
-         * The maximum value for the color range. Used as the upper bound for value-based color assignment.
-         */
-        max: schema.number({
-          meta: {
-            description:
-              'The maximum value for the color range. Used as the upper bound for value-based color assignment.',
-          },
-        }),
-        /**
-         * Determines whether the range is interpreted as absolute or as a percentage of the data.
-         * Possible values: 'absolute', 'percentage'
-         */
-        range: schema.literal('percentage'), // Range is interpreted as percentage values. Possible value: 'percentage'
-      },
-      { meta: { id: 'colorByValueRelative' } }
-    ),
-  ],
-  { meta: { id: 'colorByValue' } }
-);
+    if (!isNil(step.gte) && !isNil(step.lt) && step.gte > step.lt) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Inverted range: "gte" value must be less than the "lt" value',
+      });
+      return;
+    }
 
-export const staticColorSchema = schema.object(
-  {
-    type: schema.literal('static'), // Specifies that the color assignment is static (single color for all values). Possible value: 'static'
+    if (!isNil(step.gte) && !isNil(step.lte) && step.gte > step.lte) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Inverted range: "gte" value must be less than the "lte" value',
+      });
+    }
+  });
+
+export const colorByValueStepsSchema = z
+  .array(colorByValueStepSchema)
+  .min(1)
+  .max(100)
+  .superRefine((steps, ctx) => {
+    let trackingValue = steps[0]?.gte ?? steps[0]?.lt ?? -Infinity;
+    for (const [i, step] of steps.entries()) {
+      if (isNil(step.gte)) {
+        if (i === 0) continue;
+        ctx.addIssue({
+          code: 'custom',
+          message: 'The "gte" value is required for all steps except the first.',
+        });
+        return;
+      }
+
+      if (isNil(step.lt)) {
+        if (i === steps.length - 1) continue;
+        ctx.addIssue({
+          code: 'custom',
+          message: 'The "lt" value is required for all steps except the last.',
+        });
+        return;
+      }
+
+      if (!isNil(step.lte) && i !== steps.length - 1) {
+        ctx.addIssue({
+          code: 'custom',
+          message: 'The "lte" value is only permitted on the last step.',
+        });
+        return;
+      }
+
+      if (step.gte !== trackingValue && i !== 0) {
+        ctx.addIssue({
+          code: 'custom',
+          message: `Step ranges must be continuous. "step[${i}].gte" and "step[${
+            i - 1
+          }].lt" must be equal.`,
+        });
+        return;
+      }
+
+      trackingValue = step.lt;
+    }
+  })
+  .meta({
+    description: 'Array of ordered color steps defining the range each color is applied.',
+  });
+
+const colorByValueBaseSchema = z
+  .object({
+    type: z.literal('dynamic'),
+
+    /**
+     * Determines whether the range is interpreted as absolute or as a percentage of the data.
+     */
+    range: z.enum(['absolute', 'percentage']).meta({
+      description:
+        'Determines whether the range is interpreted as absolute or as a percentage of the data.',
+    }),
+
+    /**
+     * Array of color steps defining the mapping from values to colors.
+     */
+    steps: colorByValueStepsSchema,
+  })
+  .strict();
+
+export const legacyColorByValueSchema = colorByValueBaseSchema
+  .extend({
+    type: z.literal('legacy_dynamic'),
+
+    palette: z.string().meta({
+      description: 'The legacy palette name.',
+    }),
+
+    shift: z.boolean().meta({
+      description:
+        'When `true`, shifts the palette colors so they start from a different offset. Defaults to `false`.',
+    }),
+  })
+  .meta({
+    id: 'legacyColorByValue',
+    title: 'Legacy color by value',
+    description: 'Legacy color by value configuration',
+    deprecated: true,
+  });
+
+export const legacyColorByValueAbsoluteSchema = legacyColorByValueSchema
+  .extend({
+    range: z.literal('absolute'),
+  })
+  .meta({
+    id: 'legacyColorByValueAbsolute',
+    title: 'Legacy color by value (absolute)',
+    description: 'Legacy color by absolute value configuration',
+    deprecated: true,
+  });
+
+export const colorByValueAbsoluteSchema = colorByValueBaseSchema
+  .extend({
+    range: z.literal('absolute'),
+  })
+  .meta({
+    id: 'colorByValueAbsolute',
+    title: 'Color By Value (Absolute)',
+    description: 'Color by absolute value configuration',
+  });
+
+export const colorByValuePercentageSchema = colorByValueBaseSchema
+  .extend({
+    range: z.literal('percentage'),
+  })
+  .meta({
+    id: 'colorByValuePercentage',
+    title: 'Color By Value (Percentage)',
+    description: 'Color by percentage value configuration',
+  });
+
+export const colorByValuePaletteSchema = z
+  .object({
+    type: z.literal('distributed_palette'),
+    palette: z
+      .union([
+        z.literal('status'),
+        z.literal('temperature'),
+        z.literal('complementary'),
+        z.literal('negative'),
+        z.literal('positive'),
+        z.literal('cool'),
+        z.literal('warm'),
+        z.literal('gray'),
+      ])
+      .meta({
+        description: 'The name of the palette to apply across the value range.',
+      }),
+  })
+  .meta({
+    id: 'colorByValuePalette',
+    title: 'Color By Value (Palette)',
+    description:
+      'Color by value using a palette, with colors distributed across the range of values.',
+  });
+
+export const colorByValueSchema = z
+  .union([
+    colorByValueAbsoluteSchema,
+    colorByValuePercentageSchema,
+    colorByValuePaletteSchema,
+    legacyColorByValueSchema,
+  ])
+  .meta({
+    id: 'colorByValue',
+    title: 'Color By Value',
+    description:
+      'Dynamic color mapping by numeric range, with support for absolute and percentage-based ranges and for named palettes.',
+  });
+
+export const staticColorSchema = z
+  .object({
+    type: z.literal('static'), // Specifies that the color assignment is static (single color for all values). Possible value: 'static'
     /**
      * The static color to be used for all values.
      */
-    color: schema.string({ meta: { description: 'The static color to be used for all values.' } }),
-  },
-  { meta: { id: 'staticColor' } }
-);
+    color: z.string().meta({ description: 'The static color to be used for all values.' }),
+  })
+  .strict()
+  .meta({
+    id: 'staticColor',
+    title: 'Static Color',
+    description: 'Fixed color for all values in the dimension.',
+  });
 
-const colorFromPaletteSchema = schema.object(
-  {
-    type: schema.literal('from_palette'),
-    index: schema.number({ meta: { description: 'The index of the color in the palette.' } }),
-    palette: schema.maybe(schema.string({ meta: { description: 'The palette name to use.' } })),
-  },
-  { meta: { id: 'colorFromPalette' } }
-);
-
-const colorCodeSchema = schema.object(
-  {
-    type: schema.literal('colorCode'),
-    value: schema.string({ meta: { description: 'The static color value to use.' } }),
-  },
-  { meta: { id: 'colorCode' } }
-);
-
-const colorDefSchema = schema.oneOf([colorFromPaletteSchema, colorCodeSchema]);
-
-const categoricalColorMappingSchema = schema.object(
-  {
-    mode: schema.literal('categorical'),
-    palette: schema.string({
-      meta: { description: 'The palette name to use for color assignment.' },
+const colorFromPaletteSchema = z
+  .object({
+    type: z.literal('from_palette'),
+    index: z.number().meta({ description: 'The index of the color in the palette.' }),
+    palette: z.string().optional().meta({
+      description:
+        "Color palette name. Accepted values: 'default', 'elastic_line_optimized', 'severity', 'eui_amsterdam', 'kibana_v7_legacy', 'elastic_brand_2023'. Defaults to `default`.",
     }),
-    mapping: schema.arrayOf(
-      schema.object({
-        values: schema.arrayOf(serializedValueSchema, { maxSize: 1000 }),
-        color: colorDefSchema,
-      }),
-      { maxSize: 1000 }
-    ),
-    unassignedColor: schema.maybe(colorCodeSchema),
-  },
-  { meta: { id: 'categoricalColorMapping' } }
-);
+  })
+  .strict()
+  .meta({
+    id: 'colorFromPalette',
+    title: 'Color From Palette',
+    description: 'Color at a fixed index position in a named palette.',
+  });
 
-const gradientColorMappingSchema = schema.object(
-  {
-    mode: schema.literal('gradient'),
-    palette: schema.string({
-      meta: { description: 'The palette name to use for color assignment.' },
+const colorCodeSchema = z
+  .object({
+    type: z.literal('color_code'),
+    value: z.string().meta({ description: 'The static color value to use.' }),
+  })
+  .strict()
+  .meta({
+    id: 'color_code',
+    title: 'Color Code',
+    description: 'A color specified as a hex or CSS color code string.',
+  });
+
+const colorDefSchema = z.union([colorFromPaletteSchema, colorCodeSchema]);
+
+const unassignedColorSchema = z.union([colorFromPaletteSchema, colorCodeSchema]).meta({
+  id: 'unassignedColorSchema',
+  description: 'The color to use for unassigned values.',
+});
+
+const categoricalColorMappingSchema = z
+  .object({
+    mode: z.literal('categorical'),
+    palette: z.string().meta({
+      description:
+        "Color palette name. Accepted values: 'default', 'elastic_line_optimized', 'severity', 'eui_amsterdam', 'kibana_v7_legacy', 'elastic_brand_2023'. Defaults to `default`.",
     }),
-    mapping: schema.maybe(
-      schema.arrayOf(
-        schema.object({
-          values: schema.arrayOf(serializedValueSchema, { maxSize: 100 }),
-        }),
-        { maxSize: 100 }
+    mapping: z
+      .array(
+        z
+          .object({
+            values: z.array(serializedValueSchema).max(1000),
+            color: colorDefSchema,
+          })
+          .strict()
       )
-    ),
-    gradient: schema.maybe(schema.arrayOf(colorDefSchema, { maxSize: 3 })),
-    unassignedColor: schema.maybe(colorCodeSchema),
-  },
-  { meta: { id: 'gradientColorMapping' } }
-);
+      .max(1000),
+    unassigned: unassignedColorSchema.optional(),
+  })
+  .strict()
+  .meta({
+    id: 'categoricalColorMapping',
+    title: 'Categorical Color Mapping',
+    description:
+      'Palette color assignment for specific categorical values. Unmapped values receive the unassigned color.',
+  });
 
-export const colorMappingSchema = schema.oneOf(
-  [
+const gradientColorMappingSchema = z
+  .object({
+    mode: z.literal('gradient'),
+    palette: z.string().meta({
+      description:
+        "Color palette name. Accepted values: 'default', 'elastic_line_optimized', 'severity', 'eui_amsterdam', 'kibana_v7_legacy', 'elastic_brand_2023'. Defaults to `default`.",
+    }),
+    sort: z
+      .union([z.literal('asc'), z.literal('desc')])
+      .optional()
+      .meta({ description: 'Sort direction' }),
+    mapping: z
+      .array(
+        z
+          .object({
+            values: z.array(serializedValueSchema).max(100),
+          })
+          .strict()
+      )
+      .max(100)
+      .optional(),
+    gradient: z.array(colorDefSchema).max(3).optional(),
+    unassigned: unassignedColorSchema.optional(),
+  })
+  .strict()
+  .meta({
+    id: 'gradientColorMapping',
+    title: 'Gradient Color Mapping',
+    description: 'Gradient color mapping across categorical values.',
+  });
+
+const DEFAULT_CATEGORICAL_COLOR_MAPPING_VALUE: z.output<typeof categoricalColorMappingSchema> = {
+  mode: 'categorical',
+  palette: 'default',
+  mapping: [],
+};
+
+export const colorMappingSchema = z
+  .union([
     /**
      * Categorical color mapping: assigns colors from a palette to specific values.
      */
@@ -210,30 +355,69 @@ export const colorMappingSchema = schema.oneOf(
      * Gradient color mapping: assigns a gradient of colors to a range of values.
      */
     gradientColorMappingSchema,
-  ],
-  { meta: { id: 'colorMapping' } }
-);
+  ])
+  .default(DEFAULT_CATEGORICAL_COLOR_MAPPING_VALUE)
+  .meta({
+    id: 'colorMapping',
+    title: 'Color Mapping',
+    description:
+      'Color mapping for dimension values, either categorical (for specific values) or as a gradient.',
+  });
 
-export const allColoringTypeSchema = schema.oneOf([
-  colorByValueSchema,
-  staticColorSchema,
-  colorMappingSchema,
-]);
+export const noColorSchema = z
+  .object({ type: z.literal('none') })
+  .strict()
+  .meta({ id: 'noColor', title: 'No Color', description: 'Explicitly disables coloring' });
 
-export type StaticColorType = TypeOf<typeof staticColorSchema>;
-export type ColorByValueType = TypeOf<typeof colorByValueSchema>;
-export type ColorByValueAbsoluteType = TypeOf<typeof colorByValueAbsolute>;
-export type ColorMappingType = TypeOf<typeof colorMappingSchema>;
-export type ColorMappingCategoricalType = TypeOf<typeof categoricalColorMappingSchema>;
-export type ColorMappingGradientType = TypeOf<typeof gradientColorMappingSchema>;
-export type ColorMappingColorDefType = TypeOf<typeof colorDefSchema>;
-export type AllColoringTypes = TypeOf<typeof allColoringTypeSchema>;
+export const autoColorSchema = z
+  .object({ type: z.literal('auto') })
+  .strict()
+  .meta({
+    id: 'autoColor',
+    title: 'Auto Color',
+    description: 'Coloring determined at runtime based on chart defaults',
+  });
+
+export const allColoringTypeSchema = z
+  .union([
+    colorByValueSchema,
+    staticColorSchema,
+    colorMappingSchema,
+    noColorSchema,
+    autoColorSchema,
+  ])
+  .meta({
+    id: 'allColoringType',
+    title: 'Color Configuration',
+    description:
+      'Color configuration for a dimension, with options for value-range coloring, static color, categorical or gradient color mapping, or no color.',
+  });
+
+export type StaticColorType = z.output<typeof staticColorSchema>;
+export type ColorByValueType = z.output<typeof colorByValueSchema>;
+export type ColorByValuePaletteType = z.output<typeof colorByValuePaletteSchema>;
+export type ColorByValueAbsolute =
+  | z.output<typeof colorByValueAbsoluteSchema>
+  | z.output<typeof legacyColorByValueAbsoluteSchema>;
+export type ColorByValueStep = z.output<typeof colorByValueStepSchema>;
+export type ColorMappingType = z.output<typeof colorMappingSchema>;
+export type ColorMappingCategoricalType = z.output<typeof categoricalColorMappingSchema>;
+export type ColorMappingGradientType = z.output<typeof gradientColorMappingSchema>;
+export type ColorMappingColorDefType = z.output<typeof colorDefSchema>;
+export type NoColorType = z.output<typeof noColorSchema>;
+export type AutoColorType = z.output<typeof autoColorSchema>;
+export type AllColoringTypes = z.output<typeof allColoringTypeSchema>;
+export type UnassignedColorType = z.output<typeof unassignedColorSchema>;
+
+export const NO_COLOR: NoColorType = { type: 'none' };
+export const AUTO_COLOR: AutoColorType = { type: 'auto' };
+export const DEFAULT_CATEGORICAL_COLOR_MAPPING: ColorMappingCategoricalType =
+  DEFAULT_CATEGORICAL_COLOR_MAPPING_VALUE;
+
 /**
  * Schema for where to apply the color (to value or background).
  */
-export const applyColorToSchema = schema.oneOf(
-  [schema.literal('value'), schema.literal('background')],
-  {
-    meta: { description: 'Where to apply the color' },
-  }
-);
+export const applyColorToSchema = z.enum(['value', 'background']).meta({
+  description:
+    'Color target: `value` colors the metric text, `background` colors the cell or panel background.',
+});

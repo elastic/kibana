@@ -49,10 +49,34 @@ export const AttackDiscoveryUpsellingPageLazy = lazy(() =>
   }))
 );
 
+export const AttacksUpsellingPageLazy = lazy(() =>
+  import('./pages/attacks').then(({ AttacksUpsellingPageESS }) => ({
+    default: AttacksUpsellingPageESS,
+  }))
+);
+
 export const AIValueUpsellingPageLazy = withSuspenseUpsell(
   lazy(() =>
     import('./pages/ai_value').then(({ AIValueUpsellingPageESS }) => ({
       default: AIValueUpsellingPageESS,
     }))
+  )
+);
+
+export const AlertAnalysisWorkflowUpsellingPageLazy = withSuspenseUpsell(
+  lazy(() =>
+    import('./pages/alert_analysis_workflow').then(({ AlertAnalysisWorkflowUpsellingPageESS }) => ({
+      default: AlertAnalysisWorkflowUpsellingPageESS,
+    }))
+  )
+);
+
+export const GraphVisualizationUpsellingSectionLazy = withSuspenseUpsell(
+  lazy(() =>
+    import('./sections/graph_visualization_upselling').then(
+      ({ GraphVisualizationUpsellingSectionESS }) => ({
+        default: GraphVisualizationUpsellingSectionESS,
+      })
+    )
   )
 );

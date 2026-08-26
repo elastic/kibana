@@ -15,7 +15,7 @@ import type {
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
 import React from 'react';
 import { MemoryDumpResponseActionOutputResult } from './memory_dump_response_action_output_result';
-import { RESPONSE_ACTION_STATUS } from '../../common/translations';
+import { RESPONSE_ACTION_STATUS, YES_LABEL, NO_LABEL } from '../../common/translations';
 
 describe('MemoryDumpResponseActionOutputResult component', () => {
   let appTestContext: AppContextTestRender;
@@ -49,6 +49,7 @@ describe('MemoryDumpResponseActionOutputResult component', () => {
     action.agentState['agent-2'] = {
       isCompleted: true,
       wasSuccessful: true,
+      wasCanceled: false,
       errors: undefined,
       completedAt: new Date().toISOString(),
     };
@@ -81,7 +82,7 @@ describe('MemoryDumpResponseActionOutputResult component', () => {
 
     expect(getByTestId('test').textContent).toEqual(
       'Memory dump file was created on host:' +
-        `File: /home/user/${agentId}/tmp/memory-dump.2025-11-03T16:22:05.365Z.zip` +
+        `File: /home/user/${agentId}/tmp/memory-dump.2025-11-03T16:22:05.365Z.zip ` +
         'Size: 22.79MB' +
         'Disk free space: 1.15GB'
     );
@@ -92,6 +93,7 @@ describe('MemoryDumpResponseActionOutputResult component', () => {
     action.agentState[agentId!] = {
       isCompleted: false,
       wasSuccessful: false,
+      wasCanceled: false,
       errors: undefined,
       completedAt: undefined,
     };
@@ -108,6 +110,7 @@ describe('MemoryDumpResponseActionOutputResult component', () => {
     action.agentState[agentId!] = {
       isCompleted: true,
       wasSuccessful: false,
+      wasCanceled: false,
       errors: ['Error info A'],
       completedAt: new Date().toISOString(),
     };
@@ -124,7 +127,7 @@ describe('MemoryDumpResponseActionOutputResult component', () => {
 
     expect(getByTestId('test').textContent).toEqual(
       'Memory dump file was created on host:' +
-        'File: /home/user/agent-2/tmp/memory-dump.2025-11-03T16:22:05.365Z.zip' +
+        'File: /home/user/agent-2/tmp/memory-dump.2025-11-03T16:22:05.365Z.zip ' +
         'Size: 22.26KB' +
         'Disk free space: 1.10MB'
     );
@@ -135,5 +138,94 @@ describe('MemoryDumpResponseActionOutputResult component', () => {
     const { getByTestId } = render();
 
     expect(getByTestId('test').textContent).toEqual('');
+  });
+
+  it('should render a copy button for the file path', () => {
+    const { getByRole } = render();
+
+    expect(getByRole('button', { name: 'Copy file path to clipboard' })).toBeTruthy();
+  });
+
+  it('should NOT render total memory size and total bytes captured when absent from output', () => {
+    const { getByTestId, queryByText } = render();
+
+    expect(getByTestId('test').textContent).not.toContain('Total memory size');
+    expect(queryByText('Total memory size', { exact: false })).toBeNull();
+    expect(queryByText('Total bytes captured', { exact: false })).toBeNull();
+  });
+
+  it('should render total memory size and total bytes captured for raw memory dumps', () => {
+    // @ts-expect-error
+    action.outputs[agentId!].content.total_memory_size = 53_000_000;
+    // @ts-expect-error
+    action.outputs[agentId!].content.total_bytes_captured = 52_000_000;
+
+    const { getByTestId } = render();
+
+    expect(getByTestId('test').textContent).toEqual(
+      'Memory dump file was created on host:' +
+        `File: /home/user/${agentId}/tmp/memory-dump.2025-11-03T16:22:05.365Z.zip ` +
+        'Size: 22.79MB' +
+        'Disk free space: 1.15GB' +
+        'Total memory size: 50.54MB' +
+        'Total bytes captured: 49.59MB'
+    );
+  });
+
+  it('should NOT render user space included when absent from output', () => {
+    const { queryByText } = render();
+
+    expect(queryByText('User space included', { exact: false })).toBeNull();
+  });
+
+  it('should render user space included as Yes when user_space_included is true', () => {
+    // @ts-expect-error
+    action.outputs[agentId!].content.user_space_included = true;
+
+    const { getByTestId } = render();
+
+    expect(getByTestId('test').textContent).toContain(`User space included: ${YES_LABEL}`);
+  });
+
+  it('should render user space included as No when user_space_included is false', () => {
+    // @ts-expect-error
+    action.outputs[agentId!].content.user_space_included = false;
+
+    const { getByTestId } = render();
+
+    expect(getByTestId('test').textContent).toContain(`User space included: ${NO_LABEL}`);
+  });
+
+  it('should NOT render driver warning when dump_executed_from_driver is absent', () => {
+    const { queryByText } = render();
+
+    expect(
+      queryByText(/This kernel memory dump was collected from user mode/, { exact: false })
+    ).toBeNull();
+  });
+
+  it('should NOT render driver warning when dump_executed_from_driver is true', () => {
+    // @ts-expect-error
+    action.outputs[agentId!].content.dump_executed_from_driver = true;
+
+    const { queryByText } = render();
+
+    expect(
+      queryByText(/This kernel memory dump was collected from user mode/, { exact: false })
+    ).toBeNull();
+  });
+
+  it('should render driver warning when dump_executed_from_driver is false', () => {
+    // @ts-expect-error
+    action.outputs[agentId!].content.dump_executed_from_driver = false;
+
+    const { getByText } = render();
+
+    expect(
+      getByText(
+        'This kernel memory dump was collected from user mode. It does not include user-mode memory and may be subject to OS restrictions that limit coverage on some systems. If a full process memory for forensics is needed execute a `memory-dump --raw` instead',
+        { exact: false }
+      )
+    ).toBeTruthy();
   });
 });

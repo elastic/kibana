@@ -5,17 +5,23 @@
  * 2.0.
  */
 
-import { isEqual, noop } from 'lodash';
+import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
+
+import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { useStore } from 'react-redux';
+import { useStore } from 'react-redux-v7';
 import type { TopNavMenuData, TopNavMenuProps } from '@kbn/navigation-plugin/public';
+import { TopNavMenuBadges, TopNavMenuItems } from '@kbn/navigation-plugin/public';
+import { MountPointPortal } from '@kbn/react-kibana-mount';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
+import { ChromeAppHeaderRegistration } from '@kbn/app-header';
+import type { AppHeaderBack, AppHeaderBadge } from '@kbn/app-header';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import moment from 'moment';
 import type { UseEuiTheme } from '@elastic/eui';
@@ -68,7 +74,7 @@ function getSaveButtonMeta({
             defaultMessage: 'Save and return',
           }),
       emphasize: true,
-      iconType: contextFromEmbeddable ? 'save' : 'checkInCircleFilled',
+      iconType: contextFromEmbeddable ? 'save' : 'checkCircleFill',
       testId: 'lnsApp_saveAndReturnButton',
       description: i18n.translate('xpack.lens.app.saveAndReturnButtonAriaLabel', {
         defaultMessage: 'Save the current lens visualization and return to the last app',
@@ -309,6 +315,7 @@ function getLensTopNavConfig(options: {
 export const LensTopNavMenu = ({
   setHeaderActionMenu,
   initialInput,
+  incomingState,
   indicateNoData,
   lensInspector,
   setIsSaveModalVisible,
@@ -319,7 +326,6 @@ export const LensTopNavMenu = ({
   title,
   goBackToOriginatingApp,
   contextOriginatingApp,
-  initialContextIsEmbedded,
   topNavMenuEntryGenerators,
   initialContext,
   indexPatternService,
@@ -331,20 +337,23 @@ export const LensTopNavMenu = ({
 }: LensTopNavMenuProps) => {
   const {
     data,
-    navigation,
     uiSettings,
     application,
+    chrome,
     share,
+    unifiedSearch,
     dataViewFieldEditor,
     dataViewEditor,
     dataViews: dataViewsService,
+    getOriginatingAppName,
   } = useKibana<LensAppServices>().services;
+
+  const isChromeNextAppHeader = chrome.next.isEnabled && chrome.getChromeStyle() === 'project';
 
   const { datasourceMap, visualizationMap } = useEditorFrameService();
 
   const {
     isSaveable,
-    isLinkedToOriginatingApp,
     query,
     activeData,
     savedQuery,
@@ -493,7 +502,7 @@ export const LensTopNavMenu = ({
     };
   }, []);
 
-  const { AggregateQueryTopNavMenu } = navigation.ui;
+  const { AggregateQuerySearchBar } = unifiedSearch.ui;
   const { from, to } = data.query.timefilter.timefilter.getTime();
 
   const savingToLibraryPermitted = Boolean(
@@ -572,17 +581,25 @@ export const LensTopNavMenu = ({
 
   const adHocDataViews = indexPatterns.filter((pattern) => !pattern.isPersisted());
 
+  // Opened from a container view (e.g. Dashboard "Edit visualization in Lens"), not from a library listing page.
+  const isComingFromDashboardView = Boolean(
+    incomingState?.originatingApp &&
+      incomingState.originatingApp !== 'visualize' &&
+      incomingState?.originatingPath &&
+      !incomingState.originatingPath.includes('/list/')
+  );
+
   const topNavConfig = useMemo(() => {
-    const showReplaceInDashboard =
-      initialContext?.originatingApp === 'dashboards' && !initialInput?.savedObjectId;
-    const showReplaceInCanvas =
-      initialContext?.originatingApp === 'canvas' && !initialInput?.savedObjectId;
     const contextFromEmbeddable =
       initialContext && 'isEmbeddable' in initialContext && initialContext.isEmbeddable;
+    const showReplaceInDashboard = Boolean(
+      !initialInput?.ref_id && contextFromEmbeddable && initialContext?.embeddableId
+    );
+    const showReplaceInCanvas =
+      initialContext?.originatingApp === 'canvas' && !initialInput?.ref_id;
 
     const showSaveAndReturn =
-      !(showReplaceInDashboard || showReplaceInCanvas) &&
-      (isLinkedToOriginatingApp || Boolean(initialContextIsEmbedded));
+      !(showReplaceInDashboard || showReplaceInCanvas) && isComingFromDashboardView;
 
     const hasData = Boolean(activeData && Object.keys(activeData).length);
     const csvEnabled = Boolean(isSaveable && hasData);
@@ -767,14 +784,12 @@ export const LensTopNavMenu = ({
                         })
                       : ''),
                   newCopyOnSave: false,
-                  isTitleDuplicateConfirmed: false,
                   returnToOrigin: true,
                   ...(contextFromEmbeddable && { newDescription: initialContext.description }),
                   panelTimeRange: contextFromEmbeddable ? initialContext.panelTimeRange : undefined,
-                  onTitleDuplicate: noop, // Title can never change from this action
                 },
                 {
-                  saveToLibrary: Boolean(initialInput?.savedObjectId),
+                  saveToLibrary: Boolean(initialInput?.ref_id),
                 }
               );
             }
@@ -798,7 +813,7 @@ export const LensTopNavMenu = ({
           },
         },
         cancel: {
-          visible: Boolean(isLinkedToOriginatingApp),
+          visible: Boolean(isComingFromDashboardView),
           execute: () => {
             if (redirectToOrigin) {
               redirectToOrigin();
@@ -853,9 +868,8 @@ export const LensTopNavMenu = ({
     return (additionalMenuEntries || []).concat(baseMenuEntries);
   }, [
     initialContext,
-    initialInput?.savedObjectId,
-    isLinkedToOriginatingApp,
-    initialContextIsEmbedded,
+    initialInput?.ref_id,
+    isComingFromDashboardView,
     activeData,
     isSaveable,
     application,
@@ -919,7 +933,7 @@ export const LensTopNavMenu = ({
           if (isOfAggregateQueryType(newQuery) && !isOnTextBasedMode) {
             dispatch(
               switchAndCleanDatasource({
-                newDatasourceId: 'textBased',
+                newDatasourceId: LENS_DATASOURCE_ID.TEXT_BASED,
                 visualizationId: visualization?.activeId,
                 currentIndexPatternId: currentIndexPattern?.id,
               })
@@ -1045,7 +1059,7 @@ export const LensTopNavMenu = ({
         if (isOnTextBasedMode) {
           dispatch(
             switchAndCleanDatasource({
-              newDatasourceId: 'formBased',
+              newDatasourceId: LENS_DATASOURCE_ID.FORM_BASED,
               visualizationId: visualization?.activeId,
               currentIndexPatternId: dataView?.id,
             })
@@ -1067,7 +1081,7 @@ export const LensTopNavMenu = ({
       if (isOnTextBasedMode) {
         dispatch(
           switchAndCleanDatasource({
-            newDatasourceId: 'formBased',
+            newDatasourceId: LENS_DATASOURCE_ID.FORM_BASED,
             visualizationId: visualization?.activeId,
             currentIndexPatternId: dataView?.id,
           })
@@ -1103,7 +1117,7 @@ export const LensTopNavMenu = ({
       if (isOnTextBasedMode) {
         dispatch(
           switchAndCleanDatasource({
-            newDatasourceId: 'formBased',
+            newDatasourceId: LENS_DATASOURCE_ID.FORM_BASED,
             visualizationId: visualization?.activeId,
             currentIndexPatternId: newIndexPatternId,
           })
@@ -1151,56 +1165,125 @@ export const LensTopNavMenu = ({
 
   const managed = useLensSelector(selectIsManaged);
 
+  const managedBadgeTooltip = i18n.translate('xpack.lens.managedBadgeTooltip', {
+    defaultMessage:
+      'This visualization is managed by Elastic. Changes made here must be saved in a new visualization.',
+  });
+
+  // AppHeader badges (Chrome Next project). Classic chrome keeps TopNavMenuBadges in the portal.
+  const appHeaderBadges = useMemo<AppHeaderBadge[] | undefined>(
+    () =>
+      isChromeNextAppHeader && managed
+        ? [
+            {
+              label: i18n.translate('xpack.lens.managedBadgeLabel', {
+                defaultMessage: 'Managed',
+              }),
+              color: 'primary',
+              tooltip: managedBadgeTooltip,
+              'data-test-subj': 'managedContentBadge',
+            },
+          ]
+        : undefined,
+    [isChromeNextAppHeader, managed, managedBadgeTooltip]
+  );
+
+  const legacyBadges = useMemo(
+    () =>
+      !isChromeNextAppHeader && managed ? [getManagedContentBadge(managedBadgeTooltip)] : undefined,
+    [isChromeNextAppHeader, managed, managedBadgeTooltip]
+  );
+
+  // Explicit back overrides breadcrumb fallback and mirrors Cancel → redirectToOrigin.
+  // When not coming from a dashboard, omit `back` so chrome can fall back to breadcrumbs.
+  const back = useMemo<AppHeaderBack | undefined>(() => {
+    if (!isComingFromDashboardView || !redirectToOrigin || !incomingState?.originatingApp) {
+      return undefined;
+    }
+
+    return {
+      href: application.getUrlForApp(incomingState.originatingApp, {
+        path: incomingState.originatingPath,
+      }),
+      onClick: (event) => {
+        event.preventDefault();
+        redirectToOrigin();
+      },
+      label: getOriginatingAppName() ?? incomingState.originatingApp,
+    };
+  }, [
+    isComingFromDashboardView,
+    redirectToOrigin,
+    incomingState?.originatingApp,
+    incomingState?.originatingPath,
+    application,
+    getOriginatingAppName,
+  ]);
+
   return (
-    <AggregateQueryTopNavMenu
-      setMenuMountPoint={setHeaderActionMenu}
-      popoverBreakpoints={['xs', 's', 'm']}
-      config={topNavConfig}
-      allowSavingQueries
-      badges={
-        managed
-          ? [
-              getManagedContentBadge(
-                i18n.translate('xpack.lens.managedBadgeTooltip', {
-                  defaultMessage:
-                    'This visualization is managed by Elastic. Changes made here must be saved in a new visualization.',
-                })
-              ),
-            ]
-          : undefined
-      }
-      savedQuery={savedQuery}
-      onQuerySubmit={onQuerySubmitWrapped}
-      onSaved={onSavedWrapped}
-      onSavedQueryUpdated={onSavedQueryUpdatedWrapped}
-      onClearSavedQuery={onClearSavedQueryWrapped}
-      indexPatterns={indexPatterns}
-      query={query}
-      dateRangeFrom={from}
-      dateRangeTo={to}
-      indicateNoData={indicateNoData}
-      showSearchBar={true}
-      dataViewPickerComponentProps={dataViewPickerProps}
-      showDatePicker={
-        indexPatterns.some((ip) => ip.isTimeBased()) ||
-        // always show the timepicker for text based languages
-        isOnTextBasedMode ||
-        Boolean(
-          allLoaded &&
-            activeDatasourceId &&
-            datasourceMap[activeDatasourceId].isTimeBased(
-              datasourceStates[activeDatasourceId].state,
-              dataViews.indexPatterns
+    <>
+      {/*
+        Chrome-owned registration so omitted `back` can fall back to project breadcrumbs.
+        Menu is omitted so setHeaderActionMenu keeps feeding the legacy slot.
+        Only active when Chrome Next + project style; classic keeps portal badges below.
+      */}
+      <ChromeAppHeaderRegistration
+        title={title}
+        back={back}
+        badges={appHeaderBadges}
+        spacing="compact"
+      />
+      <MountPointPortal setMountPoint={setHeaderActionMenu}>
+        <span
+          className="kbnTopNavMenu__wrapper hide-for-sharing"
+          css={css`
+            display: flex;
+            align-items: center;
+          `}
+        >
+          <TopNavMenuBadges badges={legacyBadges} />
+          <TopNavMenuItems config={topNavConfig} popoverBreakpoints={['xs', 's', 'm']} />
+        </span>
+      </MountPointPortal>
+      {/*
+        Do not pass dataTestSubj into SearchBar — that prop overrides the query input's
+        default `queryInput` test subject (used by FTR/Scout). Keep lnsApp_topNav on a wrapper.
+      */}
+      <div data-test-subj="lnsApp_topNav" className="hide-for-sharing">
+        <AggregateQuerySearchBar
+          allowSavingQueries
+          savedQuery={savedQuery}
+          onQuerySubmit={onQuerySubmitWrapped}
+          onSaved={onSavedWrapped}
+          onSavedQueryUpdated={onSavedQueryUpdatedWrapped}
+          onClearSavedQuery={onClearSavedQueryWrapped}
+          indexPatterns={indexPatterns}
+          query={query}
+          dateRangeFrom={from}
+          dateRangeTo={to}
+          indicateNoData={indicateNoData}
+          dataViewPickerComponentProps={dataViewPickerProps}
+          showQueryInput={true}
+          showDatePicker={
+            indexPatterns.some((ip) => ip.isTimeBased()) ||
+            // always show the timepicker for text based languages
+            isOnTextBasedMode ||
+            Boolean(
+              allLoaded &&
+                activeDatasourceId &&
+                datasourceMap[activeDatasourceId].isTimeBased(
+                  datasourceStates[activeDatasourceId].state,
+                  dataViews.indexPatterns
+                )
             )
-        )
-      }
-      textBasedLanguageModeErrors={textBasedLanguageModeErrors}
-      showFilterBar={true}
-      data-test-subj="lnsApp_topNav"
-      screenTitle={'lens'}
-      appName={LENS_APP_NAME}
-      displayStyle="detached"
-      className="hide-for-sharing"
-    />
+          }
+          showFilterBar={true}
+          textBasedLanguageModeErrors={textBasedLanguageModeErrors}
+          screenTitle="lens"
+          appName={LENS_APP_NAME}
+          displayStyle="detached"
+        />
+      </div>
+    </>
   );
 };

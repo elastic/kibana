@@ -23,6 +23,7 @@ export interface UseAllLiveQueriesConfig {
   kuery?: string;
   skip?: boolean;
   alertId?: string;
+  withResultCounts?: boolean;
 }
 
 // Make sure we keep this and ACTIONS_QUERY_KEY in osquery_flyout.tsx in sync.
@@ -36,6 +37,7 @@ export const useAllLiveQueries = ({
   kuery,
   skip = false,
   alertId,
+  withResultCounts = false,
 }: UseAllLiveQueriesConfig) => {
   const { http } = useKibana().services;
   const setErrorToast = useErrorToast();
@@ -43,7 +45,15 @@ export const useAllLiveQueries = ({
   return useQuery(
     [
       ACTIONS_QUERY_KEY,
-      { activePage, direction, limit, sortField, ...(alertId ? { alertId } : {}) },
+      {
+        activePage,
+        direction,
+        limit,
+        sortField,
+        kuery,
+        withResultCounts,
+        ...(alertId ? { alertId } : {}),
+      },
     ],
     () =>
       http.get<{ data: Omit<ActionsStrategyResponse, 'edges'> & { items: ActionEdges } }>(
@@ -56,6 +66,7 @@ export const useAllLiveQueries = ({
             pageSize: limit,
             sort: sortField,
             sortOrder: direction,
+            ...(withResultCounts ? { withResultCounts } : {}),
           },
         }
       ),

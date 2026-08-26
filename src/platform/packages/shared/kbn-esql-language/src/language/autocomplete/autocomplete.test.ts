@@ -13,6 +13,7 @@ import {
   withAutoSuggest,
   METADATA_FIELDS,
   ESQL_STRING_TYPES,
+  ESQL_COMMON_NUMERIC_TYPES,
 } from '../../..';
 import { getSafeInsertText } from '../../commands/definitions/utils';
 import { scalarFunctionDefinitions } from '../../commands/definitions/generated/scalar_functions';
@@ -34,8 +35,10 @@ import {
   TIME_PICKER_SUGGESTION,
 } from './__tests__/helpers';
 import { suggest } from './autocomplete';
-import { editorExtensions } from '../../__tests__/language/helpers';
+import { datasets, editorExtensions, views } from '../../__tests__/language/helpers';
 import { mapRecommendedQueriesFromExtensions } from './recommended_queries_helpers';
+import { EDITOR_MARKER } from '../../commands/definitions/constants';
+import { PARENTHESIZED_EXPRESSION_COMMA_AUTOCOMPLETE_ENABLED } from '../../commands/definitions/utils/autocomplete/expressions/positions/after_complete';
 
 const getRecommendedQueriesSuggestionsFromTemplates = (
   fromCommand: string,
@@ -124,6 +127,20 @@ describe('autocomplete', () => {
       .flat();
   };
 
+  /** Suggestion text for commands that are only available when source is TS (requiresTimeseriesSource) */
+  const getRequiresTimeseriesSourceSuggestionTexts = (): string[] =>
+    esqlCommandRegistry
+      .getAllCommands()
+      .filter((c) => c.metadata?.requiresTimeseriesSource === true)
+      .map((c) => c.name.toUpperCase() + ' ');
+
+  /** Suggestion text for commands that have hiddenAfterCommands (not suggested when any of those commands appear in the pipeline) */
+  const getCommandsWithHiddenAfterCommandsSuggestionTexts = (): string[] =>
+    esqlCommandRegistry
+      .getAllCommands()
+      .filter((c) => (c.metadata?.hiddenAfterCommands?.length ?? 0) > 0)
+      .map((c) => c.name.toUpperCase() + ' ');
+
   describe('New command', () => {
     const recommendedQuerySuggestions = getRecommendedQueriesSuggestionsFromTemplates(
       'FROM logs*',
@@ -137,11 +154,13 @@ describe('autocomplete', () => {
       ...recommendedQuerySuggestions.map((q) => q.queryString),
     ]);
     const commands = getNonSourceHeaderCommands();
+    const tsOnlySuggestionTexts = getRequiresTimeseriesSourceSuggestionTexts();
+    const commandsAfterNonTsSource = commands.filter((c) => !tsOnlySuggestionTexts.includes(c));
 
-    testSuggestions('from a | /', commands);
-    testSuggestions('from a metadata _id | /', commands);
-    testSuggestions('from a | eval col0 = a | /', commands);
-    testSuggestions('from a metadata _id | eval col0 = a | /', commands);
+    testSuggestions('from a | /', commandsAfterNonTsSource);
+    testSuggestions('from a metadata _id | /', commandsAfterNonTsSource);
+    testSuggestions('from a | eval col0 = a | /', commandsAfterNonTsSource);
+    testSuggestions('from a metadata _id | eval col0 = a | /', commandsAfterNonTsSource);
 
     const promqlPipedQueries = [
       'PROMQL index=metrics (sum by (instance) rate(http_requests_total[5m])) | /',
@@ -152,20 +171,69 @@ describe('autocomplete', () => {
     ];
 
     promqlPipedQueries.forEach((query) => {
-      testSuggestions(query, commands);
+      testSuggestions(query, commandsAfterNonTsSource);
+    });
+
+    it.each(['PROMQL index=metrics (sum(/', 'PROMQL index=metrics col0=(sum(/'])(
+      'does not treat parenthesized PromQL as an ES|QL subquery: %s',
+      async (query) => {
+        const { suggest: suggestFn } = await setup();
+
+        await expect(suggestFn(query)).resolves.toBeDefined();
+      }
+    );
+  });
+
+  describe('command filtering by metadata (requiresTimeseriesSource, hiddenAfterCommands)', () => {
+    const tsOnlySuggestionTexts = getRequiresTimeseriesSourceSuggestionTexts();
+    const hiddenAfterCommandsSuggestionTexts = getCommandsWithHiddenAfterCommandsSuggestionTexts();
+
+    it('does not suggest commands with requiresTimeseriesSource when source is not TS (e.g. after FROM)', async () => {
+      const { suggest: suggestFn } = await setup();
+      const suggestedTexts = (await suggestFn('FROM index | /')).map((s) => s.text);
+      for (const text of tsOnlySuggestionTexts) {
+        expect(suggestedTexts).not.toContain(text);
+      }
+    });
+
+    it('suggests commands with requiresTimeseriesSource when source is TS and cursor is after pipe', async () => {
+      const { suggest: suggestFn } = await setup();
+      const suggestedTexts = (await suggestFn('TS index | /')).map((s) => s.text);
+      for (const text of tsOnlySuggestionTexts) {
+        expect(suggestedTexts).toContain(text);
+      }
+    });
+
+    it('does not suggest commands with hiddenAfterCommands when a listed command is the previous command', async () => {
+      const { suggest: suggestFn } = await setup();
+      const suggestedTexts = (await suggestFn('TS index | STATS x = count(*) | /')).map(
+        (s) => s.text
+      );
+      for (const text of hiddenAfterCommandsSuggestionTexts) {
+        expect(suggestedTexts).not.toContain(text);
+      }
+    });
+
+    it('does not suggest commands with hiddenAfterCommands when a listed command appears anywhere in the pipeline', async () => {
+      const { suggest: suggestFn } = await setup();
+      const suggestedTexts = (
+        await suggestFn('TS index | STATS AVG(field1) | EVAL test = "hello" | /')
+      ).map((s) => s.text);
+      for (const text of hiddenAfterCommandsSuggestionTexts) {
+        expect(suggestedTexts).not.toContain(text);
+      }
     });
   });
 
   describe.each(['keep', 'drop'])('%s', (command) => {
-    testSuggestions(`from a | ${command} /`, getFieldNamesByType('any'));
-    testSuggestions(
-      `from a | ${command} keywordField, /`,
-      getFieldNamesByType('any').filter((name) => name !== 'keywordField')
-    );
+    testSuggestions(`from a | ${command} /`, [...getFieldNamesByType('any')]);
+    testSuggestions(`from a | ${command} keywordField, /`, [
+      ...getFieldNamesByType('any').filter((name) => name !== 'keywordField'),
+    ]);
 
     testSuggestions(
       `from a | ${command} keywordField,/`,
-      getFieldNamesByType('any').filter((name) => name !== 'keywordField'),
+      [...getFieldNamesByType('any').filter((name) => name !== 'keywordField')],
       ','
     );
 
@@ -206,6 +274,16 @@ describe('autocomplete', () => {
         'doubleField'
       );
     });
+
+    it('suggests generated STATS columns after inline WHERE filters', async () => {
+      const { suggest: suggestTest } = await setup();
+      const suggestions = await suggestTest(
+        `FROM index | STATS COUNT() WHERE integerField > 0 | ${command} /`
+      );
+      const suggestionTexts = suggestions.map((value) => value.text);
+
+      expect(suggestionTexts).toContain('`COUNT() WHERE integerField > 0`');
+    });
   });
 
   // @TODO: get updated eval block from main
@@ -243,6 +321,50 @@ describe('autocomplete', () => {
       await suggest(statement, triggerOffset + 1, callbackMocks);
       expect(callbackMocks.getColumnsFor).toHaveBeenCalledWith({ query: 'FROM index_d' });
     });
+    it('should send the columns query for the current subquery', async () => {
+      const callbackMocks = createCustomCallbackMocks(undefined, undefined, undefined);
+      const statement =
+        'from outer_index | sort dateField desc | where coalesce(keywordField in (from inner_index | keep ';
+
+      await suggest(statement, statement.length, callbackMocks);
+
+      expect(callbackMocks.getColumnsFor).toHaveBeenCalledWith({ query: 'FROM inner_index' });
+    });
+    it.each([
+      ['EVAL incomplete assignment', 'FROM marker_eval_assignment | EVAL foo = 1, bar = '],
+      ['EVAL function argument', 'FROM marker_eval_function | EVAL result = ROUND(doubleField, '],
+      ['WHERE list value', 'FROM marker_where_list | WHERE integerField IN (1, '],
+      ['STATS aggregation list', 'FROM marker_stats_agg | STATS total = SUM(integerField), '],
+      [
+        'STATS WHERE predicate',
+        'FROM marker_stats_where | STATS MIN(integerField) WHERE integerField > ',
+      ],
+      ['RERANK ON field list', 'FROM marker_rerank_list | RERANK "search query" ON keywordField, '],
+      [
+        'LOOKUP JOIN ON condition list',
+        'FROM marker_join_list | LOOKUP JOIN join_index ON textField, ',
+      ],
+    ])('should not send autocomplete markers in the columns query for %s', async (_, statement) => {
+      const callbackMocks = createCustomCallbackMocks(undefined, undefined, undefined);
+
+      await suggest(statement, statement.length, callbackMocks);
+
+      const { getColumnsFor } = callbackMocks;
+      if (!getColumnsFor) {
+        throw new Error('Expected getColumnsFor callback to be defined');
+      }
+      const getColumnsForMock = getColumnsFor as jest.MockedFunction<typeof getColumnsFor>;
+
+      expect(getColumnsForMock).toHaveBeenCalled();
+      for (const [params] of getColumnsForMock.mock.calls) {
+        if (!params) {
+          throw new Error('Expected getColumnsFor to be called with query params');
+        }
+
+        expect(params.query).toEqual(expect.any(String));
+        expect(params.query).not.toContain(EDITOR_MARKER);
+      }
+    });
   });
 
   /**
@@ -270,9 +392,11 @@ describe('autocomplete', () => {
     ]);
 
     const commands = getNonSourceHeaderCommands();
+    const tsOnlySuggestionTexts = getRequiresTimeseriesSourceSuggestionTexts();
+    const commandsAfterNonTsSource = commands.filter((c) => !tsOnlySuggestionTexts.includes(c));
 
     // pipe command
-    testSuggestions('FROM k | E/', commands);
+    testSuggestions('FROM k | E/', commandsAfterNonTsSource);
 
     describe('function arguments', () => {
       // function argument
@@ -306,13 +430,18 @@ describe('autocomplete', () => {
     });
 
     // FROM source
-    testSuggestions('FROM k/', ['index1', 'index2'], undefined, [
-      ,
+    testSuggestions(
+      'FROM k/',
+      ['k\n', 'index1', 'index2', ...views.map((v) => v.name), ...datasets.map((d) => d.name)],
+      undefined,
       [
-        { name: 'index1', hidden: false },
-        { name: 'index2', hidden: false },
-      ],
-    ]);
+        ,
+        [
+          { name: 'index1', hidden: false },
+          { name: 'index2', hidden: false },
+        ],
+      ]
+    );
 
     // FROM source METADATA
     recommendedQuerySuggestions = getRecommendedQueriesSuggestionsFromTemplates('', 'dateField');
@@ -323,6 +452,7 @@ describe('autocomplete', () => {
 
     // EVAL argument
     testSuggestions('FROM index1 | EVAL b/', [
+      '= ',
       'col0 = ',
       ...getFieldNamesByType('any').map((name) => `${name} `),
       ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }),
@@ -340,10 +470,10 @@ describe('autocomplete', () => {
     );
 
     // DROP (first field)
-    testSuggestions('FROM index1 | DROP f/', getFieldNamesByType('any'));
+    testSuggestions('FROM index1 | DROP f/', [...getFieldNamesByType('any')]);
 
     // DROP (subsequent field)
-    testSuggestions('FROM index1 | DROP field1, f/', getFieldNamesByType('any'));
+    testSuggestions('FROM index1 | DROP field1, f/', [...getFieldNamesByType('any')]);
 
     // ENRICH policy
     testSuggestions(
@@ -352,7 +482,7 @@ describe('autocomplete', () => {
     );
 
     // ENRICH policy ON
-    testSuggestions('FROM index1 | ENRICH policy O/', ['ON ', 'WITH ', '| ']);
+    testSuggestions('FROM index1 | ENRICH policy O/', ['\n', 'ON ', 'WITH ', '| ']);
 
     // ENRICH policy ON field
     testSuggestions(
@@ -379,13 +509,12 @@ describe('autocomplete', () => {
     );
 
     // KEEP (first field)
-    testSuggestions('FROM index1 | KEEP f/', getFieldNamesByType('any'));
+    testSuggestions('FROM index1 | KEEP f/', [...getFieldNamesByType('any')]);
 
     // KEEP (subsequent fields)
-    testSuggestions(
-      'FROM index1 | KEEP booleanField, f/',
-      getFieldNamesByType('any').filter((name) => name !== 'booleanField')
-    );
+    testSuggestions('FROM index1 | KEEP booleanField, f/', [
+      ...getFieldNamesByType('any').filter((name) => name !== 'booleanField'),
+    ]);
 
     // LIMIT argument
     testSuggestions('FROM a | LIMIT 1/', ['10 ', '100 ', '1000 ']);
@@ -418,6 +547,7 @@ describe('autocomplete', () => {
 
     // STATS argument BY
     testSuggestions('FROM index1 | STATS AVG(doubleField) B/', [
+      '\n',
       'WHERE ',
       'BY ',
       ', ',
@@ -445,9 +575,9 @@ describe('autocomplete', () => {
     ]);
 
     // WHERE argument comparison
-    testSuggestions(
-      'FROM index1 | WHERE keywordField i/',
-      getFunctionSignaturesByReturnType(
+    testSuggestions('FROM index1 | WHERE keywordField i/', [
+      ': $0',
+      ...getFunctionSignaturesByReturnType(
         Location.WHERE,
         'boolean',
         {
@@ -456,13 +586,13 @@ describe('autocomplete', () => {
         },
         ['keyword'],
         ['and', 'or', 'not']
-      )
-    );
+      ),
+    ]);
 
     // WHERE function <suggest>
-    testSuggestions(
-      'FROM index1 | WHERE ABS(integerField) i/',
-      getFunctionSignaturesByReturnType(
+    testSuggestions('FROM index1 | WHERE ABS(integerField) i/', [
+      ': $0',
+      ...getFunctionSignaturesByReturnType(
         Location.WHERE,
         'any',
         {
@@ -471,8 +601,8 @@ describe('autocomplete', () => {
         },
         ['integer'],
         ['and', 'or', 'not']
-      )
-    );
+      ),
+    ]);
   });
 
   describe('advancing the cursor and opening the suggestion menu automatically ✨', () => {
@@ -497,18 +627,19 @@ describe('autocomplete', () => {
     ]);
 
     const commands = getNonSourceHeaderCommands();
-
+    const tsOnlySuggestionTexts = getRequiresTimeseriesSourceSuggestionTexts();
+    const commandsAfterNonTsSource = commands.filter((c) => !tsOnlySuggestionTexts.includes(c));
     // Pipe command
     testSuggestions(
       'FROM a | E/',
-      commands.map((name) => attachTriggerCommand(name))
+      commandsAfterNonTsSource.map((name) => attachTriggerCommand(name))
     );
 
     describe('function arguments', () => {
       // literalSuggestions parameter
       const dateDiffFirstParamSuggestions =
         scalarFunctionDefinitions.find(({ name }) => name === 'date_diff')?.signatures[0]
-          .params?.[0].suggestedValues ?? [];
+          .params?.[0].hint?.allowedValues ?? [];
       testSuggestions(
         'FROM a | EVAL DATE_DIFF(/)',
         dateDiffFirstParamSuggestions.map((s) => `"${s}", `).map(attachTriggerCommand)
@@ -572,6 +703,7 @@ describe('autocomplete', () => {
 
     // PIPE (|)
     testSuggestions('FROM a /', [
+      '\n',
       attachTriggerCommand('| '),
       ',',
       attachTriggerCommand('METADATA '),
@@ -590,8 +722,12 @@ describe('autocomplete', () => {
         'FROM /',
         [
           withAutoSuggest({ text: '(FROM $0)' } as ISuggestionItem),
-          withAutoSuggest({ text: 'index1' } as ISuggestionItem),
-          withAutoSuggest({ text: 'index2' } as ISuggestionItem),
+          withAutoSuggest({ text: '(ROW $0)' } as ISuggestionItem),
+          withAutoSuggest({ text: '(TS $0)' } as ISuggestionItem),
+          'index1',
+          'index2',
+          ...views.map((v) => v.name),
+          ...datasets.map((d) => d.name),
         ],
         undefined,
         [
@@ -606,8 +742,11 @@ describe('autocomplete', () => {
       testSuggestions(
         'FROM index/',
         [
+          'index\n',
           withAutoSuggest({ text: 'index1' } as ISuggestionItem),
           withAutoSuggest({ text: 'index2' } as ISuggestionItem),
+          ...views.map((v) => withAutoSuggest({ text: v.name } as ISuggestionItem)),
+          ...datasets.map((d) => withAutoSuggest({ text: d.name } as ISuggestionItem)),
         ],
         undefined,
         [
@@ -627,6 +766,7 @@ describe('autocomplete', () => {
       testSuggestions(
         'FROM index1/',
         [
+          'index1\n',
           withAutoSuggest({
             text: 'index1 | ',
             filterText: 'index1',
@@ -659,19 +799,13 @@ describe('autocomplete', () => {
       testSuggestions(
         'FROM index1, index2/',
         [
+          'index2\n',
           withAutoSuggest({ text: '(FROM $0)' } as ISuggestionItem),
-          withAutoSuggest({
-            text: 'index2 | ',
-            filterText: 'index2',
-          } as ISuggestionItem),
-          withAutoSuggest({
-            text: 'index2, ',
-            filterText: 'index2',
-          } as ISuggestionItem),
-          withAutoSuggest({
-            text: 'index2 METADATA ',
-            filterText: 'index2',
-          } as ISuggestionItem),
+          withAutoSuggest({ text: '(ROW $0)' } as ISuggestionItem),
+          withAutoSuggest({ text: '(TS $0)' } as ISuggestionItem),
+          withAutoSuggest({ text: 'index2 | ', filterText: 'index2' } as ISuggestionItem),
+          withAutoSuggest({ text: 'index2, ', filterText: 'index2' } as ISuggestionItem),
+          withAutoSuggest({ text: 'index2 METADATA ', filterText: 'index2' } as ISuggestionItem),
           ...recommendedQuerySuggestions.map((q) => `index2${q.queryString}`),
         ],
         undefined,
@@ -696,6 +830,7 @@ describe('autocomplete', () => {
       testSuggestions(
         'FROM foo$bar/',
         [
+          'foo$bar\n',
           withAutoSuggest({
             text: 'foo$bar | ',
             filterText: 'foo$bar',
@@ -726,6 +861,7 @@ describe('autocomplete', () => {
       testSuggestions(
         'FROM i*/',
         [
+          'i*\n',
           withAutoSuggest({ text: 'i* | ', filterText: 'i*' } as ISuggestionItem),
           withAutoSuggest({ text: 'i*, ', filterText: 'i*' } as ISuggestionItem),
           withAutoSuggest({
@@ -763,9 +899,12 @@ describe('autocomplete', () => {
         policies
           .map((p) => `${getSafeInsertText(p.name)} `)
           .map(attachTriggerCommand)
-          .map((s) => ({ ...s, rangeToReplace: { start: 17, end: 20 } }))
+          .map((s) => ({ ...s, rangeToReplace: { start: 16, end: 19 } }))
       );
-      testSuggestions('FROM a | ENRICH policy /', ['ON ', 'WITH ', '| '].map(attachTriggerCommand));
+      testSuggestions('FROM a | ENRICH policy /', [
+        '\n',
+        ...['ON ', 'WITH ', '| '].map(attachTriggerCommand),
+      ]);
 
       testSuggestions(
         'FROM a | ENRICH policy ON /',
@@ -773,10 +912,10 @@ describe('autocomplete', () => {
           .map((name) => `${name} `)
           .map(attachTriggerCommand)
       );
-      testSuggestions(
-        'FROM a | ENRICH policy ON @timestamp /',
-        ['WITH ', '| '].map(attachTriggerCommand)
-      );
+      testSuggestions('FROM a | ENRICH policy ON @timestamp /', [
+        '\n',
+        ...['WITH ', '| '].map(attachTriggerCommand),
+      ]);
       // nothing fancy with this field list
       testSuggestions('FROM a | ENRICH policy ON @timestamp WITH /', [
         'col0 = ',
@@ -787,14 +926,14 @@ describe('autocomplete', () => {
           'col0 = ',
           ...getPolicyFields('policy').map((name) => ({
             text: name,
-            rangeToReplace: { start: 43, end: 47 },
+            rangeToReplace: { start: 42, end: 46 },
           })),
         ]);
         testSuggestions(
           'FROM a | ENRICH policy ON @timestamp WITH col0 = othe/',
           getPolicyFields('policy').map((name) => ({
             text: name,
-            rangeToReplace: { start: 50, end: 54 },
+            rangeToReplace: { start: 49, end: 53 },
           }))
         );
       });
@@ -821,6 +960,7 @@ describe('autocomplete', () => {
 
     // STATS argument BY
     testSuggestions('FROM a | STATS AVG(integerField) /', [
+      '\n',
       ', ',
       attachTriggerCommand('WHERE '),
       attachTriggerCommand('BY '),
@@ -873,9 +1013,9 @@ describe('autocomplete', () => {
     ]);
 
     // WHERE argument comparison (keyword fields get only string operators)
-    testSuggestions(
-      'FROM a | WHERE keywordField /',
-      getFunctionSignaturesByReturnType(
+    testSuggestions('FROM a | WHERE keywordField /', [
+      ': $0',
+      ...getFunctionSignaturesByReturnType(
         Location.WHERE,
         'boolean',
         {
@@ -883,8 +1023,8 @@ describe('autocomplete', () => {
           skipAssign: true,
         },
         ['keyword']
-      ).map((s) => (s.text.toLowerCase().includes('null') ? s : attachTriggerCommand(s)))
-    );
+      ).map((s) => (s.text.toLowerCase().includes('null') ? s : attachTriggerCommand(s))),
+    ]);
 
     describe('field lists', () => {
       describe('METADATA <field>', () => {
@@ -934,26 +1074,23 @@ describe('autocomplete', () => {
 
       describe.each(['KEEP', 'DROP'])('%s <field>', (commandName) => {
         // KEEP field
-        testSuggestions(
-          `FROM a | ${commandName} /`,
-          getFieldNamesByType('any').map(attachTriggerCommand)
-        );
-        testSuggestions(
-          `FROM a | ${commandName} d/`,
-          getFieldNamesByType('any')
+        testSuggestions(`FROM a | ${commandName} /`, [
+          ...getFieldNamesByType('any').map(attachTriggerCommand),
+        ]);
+        testSuggestions(`FROM a | ${commandName} d/`, [
+          ...getFieldNamesByType('any')
             .map<PartialSuggestionWithText>((text) => ({
               text,
               rangeToReplace: { start: 14, end: 15 },
             }))
-            .map(attachTriggerCommand)
-        );
-        testSuggestions(
-          `FROM a | ${commandName} doubleFiel/`,
-          getFieldNamesByType('any').map(attachTriggerCommand)
-        );
+            .map(attachTriggerCommand),
+        ]);
+        testSuggestions(`FROM a | ${commandName} doubleFiel/`, [
+          ...getFieldNamesByType('any').map(attachTriggerCommand),
+        ]);
         testSuggestions(
           `FROM a | ${commandName} doubleField/`,
-          ['doubleField, ', 'doubleField | ']
+          ['doubleField\n', 'doubleField, ', 'doubleField | ']
             .map((text) => ({
               text,
               filterText: 'doubleField',
@@ -1064,6 +1201,140 @@ describe('autocomplete', () => {
 
   describe('IN operator with lists', () => {
     testSuggestions('FROM a | WHERE integerField IN (doubleField /', [{ text: ',' }]);
+    testSuggestions('FROM index | WHERE integerField IN (1, 2) /', ['\n', 'AND $0', 'OR $0', '| ']);
+
+    it('suggests expressions inside an incomplete multi-column tuple', async () => {
+      const { suggest: suggestFn } = await setup();
+      const suggestions = await suggestFn('FROM index | WHERE (keywordField, /');
+      const labels = suggestions.map(({ label }) => label);
+
+      expect(suggestions.some(({ kind }) => kind === 'Variable')).toBe(true);
+      expect(suggestions.some(({ kind }) => kind === 'Function')).toBe(true);
+      sourceCommands.forEach((command) => expect(labels).not.toContain(command.toUpperCase()));
+    });
+
+    testSuggestions('FROM index | WHERE (keywordField, textField) /', ['IN $0', 'NOT IN $0']);
+
+    it('keeps standard operators after a parenthesized single-column expression', async () => {
+      const { suggest: suggestFn } = await setup();
+      const labels = (await suggestFn('FROM index | WHERE (keywordField) /')).map(
+        ({ label }) => label
+      );
+
+      expect(labels).toEqual(expect.arrayContaining(['==', 'IN']));
+      expect(labels).not.toContain(',');
+    });
+
+    (PARENTHESIZED_EXPRESSION_COMMA_AUTOCOMPLETE_ENABLED ? it : it.skip)(
+      'suggests a comma alongside operators inside a parenthesized expression',
+      async () => {
+        const { suggest: suggestFn } = await setup();
+        const suggestions = await suggestFn('FROM index | WHERE (keywordField /)');
+        const labels = suggestions.map(({ label }) => label);
+        const commaSuggestion = suggestions.find(({ label }) => label === ',');
+
+        expect(labels).toEqual(expect.arrayContaining([',', '==', 'IN']));
+        expect(commaSuggestion?.command?.id).toBe('editor.action.triggerSuggest');
+      }
+    );
+
+    it('suggests a comma after a complete tuple item', async () => {
+      const { suggest: suggestFn } = await setup();
+      const suggestions = await suggestFn('FROM index | WHERE (keywordField, textField /)');
+      const commaSuggestion = suggestions.find(({ label }) => label === ',');
+
+      expect(commaSuggestion?.command?.id).toBe('editor.action.triggerSuggest');
+    });
+
+    it('keeps tuple operators while typing their prefix', async () => {
+      const { suggest: suggestFn } = await setup();
+      const suggestions = await suggestFn('FROM index | WHERE (keywordField, textField) I/');
+      const labels = suggestions.map(({ label }) => label);
+
+      expect(labels).toContain('IN');
+      sourceCommands.forEach((command) => expect(labels).not.toContain(command.toUpperCase()));
+    });
+
+    it.each(['IN', 'NOT IN'])('suggests right-hand operands after tuple %s', async (operator) => {
+      const { suggest: suggestFn } = await setup();
+      const suggestions = await suggestFn(
+        `FROM index | WHERE (keywordField, textField, integerField) ${operator} /`
+      );
+
+      expect(suggestions.map(({ text }) => text).sort()).toEqual(
+        ['($0)', '(FROM $0)', '(ROW $0)', '(TS $0)'].sort()
+      );
+    });
+
+    testSuggestions('FROM index | WHERE (keywordField, textField) IN (/)', [
+      'FROM ',
+      'ROW ',
+      'TS ',
+    ]);
+
+    testSuggestions('FROM index | WHERE doubleField IN (ROW /)', [
+      'col0 = ',
+      ...getFunctionSignaturesByReturnType(Location.ROW, 'any', { scalar: true }),
+    ]);
+
+    testSuggestions(
+      'FROM kibana_sample_data_logs | WHERE agent NOT IN (FROM kibana_sample_data_logs)/',
+      ['\n', 'AND $0', 'OR $0', '| ']
+    );
+
+    it.each([
+      ['CASE', 'FROM index | WHERE CASE(doubleField IN /'],
+      ['COALESCE', 'FROM index | WHERE COALESCE(doubleField IN /'],
+    ])('suggests subqueries inside %s', async (_, query) => {
+      const { suggest: suggestFn } = await setup();
+      const suggestedTexts = (await suggestFn(query)).map(({ text }) => text);
+
+      expect(suggestedTexts).toEqual(expect.arrayContaining(['(FROM $0)', '(ROW $0)', '(TS $0)']));
+    });
+
+    it.each([
+      ['CASE', 'FROM index | WHERE CASE(doubleField IN (FROM /), true, false)'],
+      ['COALESCE', 'FROM index | WHERE COALESCE(doubleField IN (FROM /), false)'],
+      [
+        'nested CASE and COALESCE',
+        'FROM index | WHERE CASE(COALESCE(doubleField IN (FROM /), false), true, false)',
+      ],
+      [
+        'nested COALESCE calls',
+        'FROM index | WHERE COALESCE(COALESCE(doubleField IN (FROM /), false), false)',
+      ],
+      [
+        'a non-condition CASE argument',
+        'FROM index | WHERE CASE(booleanField, doubleField IN (FROM /), false)',
+      ],
+      [
+        'a non-first COALESCE argument',
+        'FROM index | WHERE COALESCE(false, doubleField IN (FROM /))',
+      ],
+      [
+        'COALESCE inside a FROM subquery',
+        'FROM index, (TS timeseries_index | WHERE COALESCE(doubleField IN (FROM /)))',
+      ],
+    ])('suggests sources inside an IN subquery nested in %s', async (_, query) => {
+      const { suggest: suggestFn } = await setup();
+      const suggestions = await suggestFn(query);
+      const suggestedTexts = suggestions.map(({ text }) => text);
+
+      expect(suggestedTexts).toEqual(expect.arrayContaining(['index', 'otherIndex']));
+      expect(suggestedTexts.some((text) => text.trim() === 'doubleField')).toBe(false);
+    });
+  });
+
+  describe('ROW operator expressions', () => {
+    testSuggestions('ROW col0 = ABS(/)', [
+      ...getFunctionSignaturesByReturnType(
+        Location.ROW,
+        [...ESQL_COMMON_NUMERIC_TYPES, 'unsigned_long'],
+        { scalar: true },
+        undefined,
+        ['abs']
+      ),
+    ]);
   });
 
   describe('Replacement ranges are attached when needed', () => {
@@ -1098,6 +1369,33 @@ describe('autocomplete', () => {
         [{ text: 'field.name.foo', rangeToReplace: { start: 20, end: 32 } }],
         undefined,
         [[{ name: 'field.name.foo', type: 'double', userDefined: false }]]
+      );
+      testSuggestions(
+        'FROM numeric_index | KEEP /',
+        [{ text: 'system.cpu.load_average.`1`' }],
+        undefined,
+        [
+          [{ name: 'system.cpu.load_average.1', type: 'double', userDefined: false }],
+          [{ name: 'numeric_index', hidden: false }],
+        ]
+      );
+      testSuggestions(
+        'FROM numeric_index | EVAL system.cpu.load_average.`1` < 0 | KEEP /',
+        [{ text: '`system.cpu.load_average.``1`` < 0`' }, { text: 'system.cpu.load_average.`1`' }],
+        undefined,
+        [
+          [{ name: 'system.cpu.load_average.1', type: 'double', userDefined: false }],
+          [{ name: 'numeric_index', hidden: false }],
+        ]
+      );
+      testSuggestions(
+        'FROM index_a | EVAL field.name > 0 | KEEP /',
+        [{ text: '`field.name > 0`' }, { text: 'field.name' }],
+        undefined,
+        [
+          [{ name: 'field.name', type: 'double', userDefined: false }],
+          [{ name: 'index_a', hidden: false }],
+        ]
       );
       // whitespace — we can't support this case yet because
       // we are relying on string checking instead of the AST :(

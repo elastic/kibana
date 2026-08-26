@@ -8,7 +8,7 @@
     "public/**/*",
     "server/**/*",
     "server/**/*.json",
-    "../../../../../typings/emotion.d.ts"
+    "test/scout/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -60,7 +60,9 @@
     "@kbn/autoops-promotion-callout",
     "@kbn/react-query",
     "@kbn/response-ops-rule-params",
-    "@kbn/kql"
+    "@kbn/kql",
+    "@kbn/cloud-connect-plugin",
+    "@kbn/scout"
   ],
   "exclude": ["target/**/*"]
 }

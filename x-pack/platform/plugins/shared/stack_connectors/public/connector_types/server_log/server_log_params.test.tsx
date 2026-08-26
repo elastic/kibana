@@ -6,7 +6,10 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { I18nProvider } from '@kbn/i18n-react';
 import { ServerLogLevelOptions } from '../types';
 import ServerLogParamsFields from './server_log_params';
 
@@ -17,7 +20,7 @@ describe('ServerLogParamsFields renders', () => {
       level: ServerLogLevelOptions.TRACE,
       message: 'test',
     };
-    const wrapper = mountWithIntl(
+    renderWithI18n(
       <ServerLogParamsFields
         actionParams={actionParams}
         errors={{ message: [] }}
@@ -27,11 +30,9 @@ describe('ServerLogParamsFields renders', () => {
       />
     );
     expect(editAction).not.toHaveBeenCalled();
-    expect(wrapper.find('[data-test-subj="loggingLevelSelect"]').length > 0).toBeTruthy();
-    expect(
-      wrapper.find('[data-test-subj="loggingLevelSelect"]').first().prop('value')
-    ).toStrictEqual('trace');
-    expect(wrapper.find('[data-test-subj="messageTextArea"]').length > 0).toBeTruthy();
+    expect(screen.getByTestId('loggingLevelSelect')).toBeInTheDocument();
+    expect(screen.getByTestId('loggingLevelSelect')).toHaveValue('trace');
+    expect(screen.getByTestId('messageTextArea')).toBeInTheDocument();
   });
 
   test('level param field is rendered with default value if not selected', () => {
@@ -40,7 +41,7 @@ describe('ServerLogParamsFields renders', () => {
     };
     const editAction = jest.fn();
 
-    mountWithIntl(
+    renderWithI18n(
       <ServerLogParamsFields
         actionParams={actionParams}
         errors={{ message: [] }}
@@ -59,7 +60,7 @@ describe('ServerLogParamsFields renders', () => {
 
     const editAction = jest.fn();
 
-    mountWithIntl(
+    renderWithI18n(
       <ServerLogParamsFields
         actionParams={actionParams}
         defaultMessage={'Some default message'}
@@ -78,7 +79,7 @@ describe('ServerLogParamsFields renders', () => {
     };
 
     const editAction = jest.fn();
-    const wrapper = mountWithIntl(
+    const { rerender } = renderWithI18n(
       <ServerLogParamsFields
         actionParams={actionParams}
         defaultMessage={'Some default message'}
@@ -90,20 +91,28 @@ describe('ServerLogParamsFields renders', () => {
 
     expect(editAction).toHaveBeenCalledWith('message', 'Some default message', 0);
 
-    wrapper.setProps({
-      defaultMessage: 'Some different default message',
-    });
+    rerender(
+      <I18nProvider>
+        <ServerLogParamsFields
+          actionParams={actionParams}
+          defaultMessage={'Some different default message'}
+          errors={{ message: [] }}
+          editAction={editAction}
+          index={0}
+        />
+      </I18nProvider>
+    );
 
     expect(editAction).toHaveBeenCalledWith('message', 'Some different default message', 0);
   });
 
-  test('when the default message changes, it doesnt change the underlying message if it wasnt set by a previous default', () => {
+  test('when the default message changes, it doesnt change the underlying message if it wasnt set by a previous default', async () => {
     const actionParams = {
       level: ServerLogLevelOptions.TRACE,
     };
 
     const editAction = jest.fn();
-    const wrapper = mountWithIntl(
+    const { rerender } = renderWithI18n(
       <ServerLogParamsFields
         actionParams={actionParams}
         defaultMessage={'Some default message'}
@@ -117,22 +126,34 @@ describe('ServerLogParamsFields renders', () => {
 
     // simulate value being updated
     const valueToSimulate = 'some new value';
-    wrapper
-      .find('[data-test-subj="messageTextArea"]')
-      .last()
-      .simulate('change', { target: { value: valueToSimulate } });
+    await userEvent.tripleClick(screen.getByTestId('messageTextArea'));
+    await userEvent.paste(valueToSimulate);
     expect(editAction).toHaveBeenCalledWith('message', valueToSimulate, 0);
-    wrapper.setProps({
-      actionParams: {
-        ...actionParams,
-        message: valueToSimulate,
-      },
-    });
+
+    rerender(
+      <I18nProvider>
+        <ServerLogParamsFields
+          actionParams={{ ...actionParams, message: valueToSimulate }}
+          defaultMessage={'Some default message'}
+          errors={{ message: [] }}
+          editAction={editAction}
+          index={0}
+        />
+      </I18nProvider>
+    );
 
     // simulate default changing
-    wrapper.setProps({
-      defaultMessage: 'Some different default message',
-    });
+    rerender(
+      <I18nProvider>
+        <ServerLogParamsFields
+          actionParams={{ ...actionParams, message: valueToSimulate }}
+          defaultMessage={'Some different default message'}
+          errors={{ message: [] }}
+          editAction={editAction}
+          index={0}
+        />
+      </I18nProvider>
+    );
 
     expect(editAction).not.toHaveBeenCalledWith('message', 'Some different default message', 0);
   });
@@ -143,7 +164,7 @@ describe('ServerLogParamsFields renders', () => {
     };
 
     const editAction = jest.fn();
-    const wrapper = mountWithIntl(
+    const { rerender } = renderWithI18n(
       <ServerLogParamsFields
         actionParams={{ ...actionParams, message: 'not the default message' }}
         errors={{ message: [] }}
@@ -152,13 +173,20 @@ describe('ServerLogParamsFields renders', () => {
         index={0}
       />
     );
-    const text = wrapper.find('[data-test-subj="messageTextArea"]').first().text();
-    expect(text).toEqual('not the default message');
+    expect(screen.getByTestId('messageTextArea')).toHaveValue('not the default message');
 
-    wrapper.setProps({
-      useDefaultMessage: true,
-      defaultMessage: 'Some different default message',
-    });
+    rerender(
+      <I18nProvider>
+        <ServerLogParamsFields
+          actionParams={{ ...actionParams, message: 'not the default message' }}
+          errors={{ message: [] }}
+          editAction={editAction}
+          defaultMessage={'Some different default message'}
+          useDefaultMessage={true}
+          index={0}
+        />
+      </I18nProvider>
+    );
 
     expect(editAction).toHaveBeenCalledWith('message', 'Some different default message', 0);
   });
@@ -169,7 +197,7 @@ describe('ServerLogParamsFields renders', () => {
     };
 
     const editAction = jest.fn();
-    const wrapper = mountWithIntl(
+    const { rerender } = renderWithI18n(
       <ServerLogParamsFields
         actionParams={{ ...actionParams, message: 'not the default message' }}
         errors={{ message: [] }}
@@ -178,13 +206,20 @@ describe('ServerLogParamsFields renders', () => {
         index={0}
       />
     );
-    const text = wrapper.find('[data-test-subj="messageTextArea"]').first().text();
-    expect(text).toEqual('not the default message');
+    expect(screen.getByTestId('messageTextArea')).toHaveValue('not the default message');
 
-    wrapper.setProps({
-      useDefaultMessage: false,
-      defaultMessage: 'Some different default message',
-    });
+    rerender(
+      <I18nProvider>
+        <ServerLogParamsFields
+          actionParams={{ ...actionParams, message: 'not the default message' }}
+          errors={{ message: [] }}
+          editAction={editAction}
+          defaultMessage={'Some different default message'}
+          useDefaultMessage={false}
+          index={0}
+        />
+      </I18nProvider>
+    );
 
     expect(editAction).not.toHaveBeenCalled();
   });

@@ -18,20 +18,25 @@ import {
   EuiRadioGroup,
 } from '@elastic/eui';
 import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
-import { getFields } from '@kbn/triggers-actions-ui-plugin/public';
 import { ESQLLangEditor } from '@kbn/esql/public';
-import { getESQLAdHocDataview, getESQLResults } from '@kbn/esql-utils';
+import {
+  getESQLAdHocDataview,
+  getESQLResults,
+  getProjectRoutingFromEsqlQuery,
+} from '@kbn/esql-utils';
 import { type AggregateQuery } from '@kbn/es-query';
 import { parseDuration } from '@kbn/alerting-plugin/common';
 import {
+  convertFieldSpecToFieldOption,
   firstFieldOption,
   getTimeFieldOptions,
   getTimeOptions,
   isPerRowAggregation,
   parseAggregationResults,
 } from '@kbn/triggers-actions-ui-plugin/public/common';
-import { EsqlQuery } from '@kbn/esql-language';
+import { EsqlQuery } from '@elastic/esql';
 import useDebounce from 'react-use/lib/useDebounce';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import type { EsQueryRuleParams, EsQueryRuleMetaData } from '../types';
 import { SearchType } from '../types';
 import { DEFAULT_VALUES, SERVERLESS_DEFAULT_VALUES } from '../constants';
@@ -111,8 +116,8 @@ const keepRecommendedWarning = i18n.translate(
 
 export const EsqlQueryExpression: React.FC<
   RuleTypeParamsExpressionProps<EsQueryRuleParams<SearchType.esqlQuery>, EsQueryRuleMetaData>
-> = ({ ruleParams, metadata, setRuleParams, setRuleProperty, errors, data }) => {
-  const { http, isServerless, dataViews } = useTriggerUiActionServices();
+> = ({ ruleParams, metadata, setRuleParams, setRuleProperty, errors, data, dataViews }) => {
+  const { http, isServerless, uiSettings } = useTriggerUiActionServices();
   const { esqlQuery, timeWindowSize, timeWindowUnit, timeField, groupBy } = ruleParams;
   const isEdit = !!metadata?.isEdit;
 
@@ -212,11 +217,14 @@ export const EsqlQueryExpression: React.FC<
     }
     setIsLoading(true);
     const { timeFilter, timeRange } = getTimeFilter(timeField, window);
+    const timezone = uiSettings?.get<'Browser' | string>(UI_SETTINGS.DATEFORMAT_TZ);
+
     const table = await getESQLResults({
       esqlQuery: esqlQuery.esql,
       search: data.search.search,
       dropNullColumns: true,
       timeRange,
+      timezone,
       filter: timeFilter,
     });
     if (table.response) {
@@ -254,6 +262,7 @@ export const EsqlQueryExpression: React.FC<
     currentRuleParams,
     esqlQuery,
     data.search.search,
+    uiSettings,
     timeField,
     isServerless,
     groupBy,
@@ -269,7 +278,16 @@ export const EsqlQueryExpression: React.FC<
             http,
           });
           const indexPattern: string = esqlDataView.getIndexPattern();
-          const currentEsFields = await getFields(http, [indexPattern]);
+
+          const projectRouting = getProjectRoutingFromEsqlQuery(queryObj.esql);
+          const fieldSpecs = await dataViews.getFieldsForWildcard({
+            pattern: indexPattern,
+            allowNoIndex: true,
+            ...(projectRouting ? { projectRouting } : {}),
+          });
+
+          const currentEsFields = convertFieldSpecToFieldOption(fieldSpecs, false);
+
           const newTimeFieldOptions = getTimeFieldOptions(currentEsFields);
           const timestampField = esqlDataView.timeFieldName;
           return { newTimeFieldOptions, timestampField };
@@ -303,7 +321,6 @@ export const EsqlQueryExpression: React.FC<
           }}
           warning={touched && keepWarning ? keepWarning : undefined}
           onTextLangQuerySubmit={async () => {}}
-          hideRunQueryText
           hideRunQueryButton
           isLoading={isLoading}
           editorIsInline
@@ -401,7 +418,12 @@ export const EsqlQueryExpression: React.FC<
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFormRow id="timeWindowUnit">
+          <EuiFormRow
+            id="timeWindowUnit"
+            aria-label={i18n.translate('xpack.stackAlerts.esQuery.ui.timeWindowUnitAriaLabel', {
+              defaultMessage: 'Time window unit',
+            })}
+          >
             <EuiSelect
               name="timeWindowUnit"
               data-test-subj="timeWindowUnitSelect"

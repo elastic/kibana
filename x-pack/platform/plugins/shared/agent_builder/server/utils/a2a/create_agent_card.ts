@@ -6,7 +6,7 @@
  */
 
 import type { AgentCard, AgentSkill } from '@a2a-js/sdk';
-import type { AgentDefinition } from '@kbn/agent-builder-common';
+import type { AgentConfiguration, AgentDefinition } from '@kbn/agent-builder-common';
 import { filterToolsBySelection } from '@kbn/agent-builder-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolsServiceStart } from '../../services/tools';
@@ -14,6 +14,8 @@ import { A2A_SERVER_PATH } from '../../routes/a2a';
 
 interface CreateAgentCardParams {
   agent: AgentDefinition;
+  /** The agent's resolved effective configuration (type base merged under the agent config). */
+  configuration: AgentConfiguration;
   baseUrl: string;
   toolsService: ToolsServiceStart;
   request: KibanaRequest;
@@ -21,6 +23,7 @@ interface CreateAgentCardParams {
 
 export async function createAgentCard({
   agent,
+  configuration,
   baseUrl,
   toolsService,
   request,
@@ -28,7 +31,7 @@ export async function createAgentCard({
   const registry = await toolsService.getRegistry({ request });
   const availableTools = await registry.list({});
 
-  const selectedTools = filterToolsBySelection(availableTools, agent.configuration.tools);
+  const selectedTools = filterToolsBySelection(availableTools, configuration.tools);
 
   const skills: AgentSkill[] = selectedTools.map((tool) => ({
     id: tool.id,

@@ -66,6 +66,7 @@ describe('TagsAddRemove', () => {
       'agent1',
       ['tag1', 'tag2'],
       expect.anything(),
+      expect.anything(),
       undefined,
       undefined
     );
@@ -83,6 +84,7 @@ describe('TagsAddRemove', () => {
     expect(mockUpdateTags).toHaveBeenCalledWith(
       'agent1',
       [],
+      expect.anything(),
       expect.anything(),
       undefined,
       undefined
@@ -103,6 +105,7 @@ describe('TagsAddRemove', () => {
       'agent1',
       ['tag1', 'tag'],
       expect.anything(),
+      undefined,
       'Tag created',
       'Tag creation failed'
     );
@@ -124,6 +127,7 @@ describe('TagsAddRemove', () => {
       'agent1',
       ['tag'],
       expect.anything(),
+      undefined,
       'Tag created',
       'Tag creation failed'
     );
@@ -143,6 +147,7 @@ describe('TagsAddRemove', () => {
       'agent1',
       ['tag1', 'newTag'],
       expect.anything(),
+      undefined,
       'Tag created',
       'Tag creation failed'
     );
@@ -162,6 +167,7 @@ describe('TagsAddRemove', () => {
       'agent1',
       ['tag1', 'Tag-123 _myTag'],
       expect.anything(),
+      undefined,
       'Tag created',
       'Tag creation failed'
     );
@@ -183,6 +189,7 @@ describe('TagsAddRemove', () => {
       'agent1',
       ['tag1', '01234567890123456789'],
       expect.anything(),
+      undefined,
       'Tag created',
       'Tag creation failed'
     );
@@ -202,6 +209,7 @@ describe('TagsAddRemove', () => {
       ['tag2'],
       [],
       expect.anything(),
+      expect.anything(),
       undefined,
       undefined
     );
@@ -220,6 +228,7 @@ describe('TagsAddRemove', () => {
       ['agent1', 'agent2'],
       [],
       ['tag1'],
+      expect.anything(),
       expect.anything(),
       undefined,
       undefined
@@ -250,6 +259,60 @@ describe('TagsAddRemove', () => {
     expect(result.getByTitle('tag1').getAttribute('aria-checked')).toEqual('false');
   });
 
+  it('should optimistically check tag when adding for single agent', async () => {
+    const result = renderComponent('agent1');
+    const getTag = (name: string) => result.getByText(name);
+
+    fireEvent.click(getTag('tag2'));
+
+    expect(result.getByTitle('tag2').getAttribute('aria-checked')).toEqual('true');
+  });
+
+  it('should optimistically uncheck tag when removing for single agent', async () => {
+    const result = renderComponent('agent1');
+    const getTag = (name: string) => result.getByText(name);
+
+    fireEvent.click(getTag('tag1'));
+
+    expect(result.getByTitle('tag1').getAttribute('aria-checked')).toEqual('false');
+  });
+
+  it('should rollback tag state on error when adding for single agent', async () => {
+    mockUpdateTags.mockImplementation((_agentId, _newTags, _onSuccess, onError) => {
+      onError?.();
+    });
+    const result = renderComponent('agent1');
+    const getTag = (name: string) => result.getByText(name);
+
+    fireEvent.click(getTag('tag2'));
+
+    expect(result.getByTitle('tag2').getAttribute('aria-checked')).toEqual('false');
+  });
+
+  it('should rollback tag state on error when removing for single agent', async () => {
+    mockUpdateTags.mockImplementation((_agentId, _newTags, _onSuccess, onError) => {
+      onError?.();
+    });
+    const result = renderComponent('agent1');
+    const getTag = (name: string) => result.getByText(name);
+
+    fireEvent.click(getTag('tag1'));
+
+    expect(result.getByTitle('tag1').getAttribute('aria-checked')).toEqual('true');
+  });
+
+  it('should rollback tag state on error for bulk selection', async () => {
+    mockBulkUpdateTags.mockImplementation((_agents, _toAdd, _toRemove, _onSuccess, onError) => {
+      onError?.();
+    });
+    const result = renderComponent(undefined, '');
+    const getTag = (name: string) => result.getByText(name);
+
+    fireEvent.click(getTag('tag2'));
+
+    expect(result.getByTitle('tag2').getAttribute('aria-checked')).toEqual('false');
+  });
+
   it('should add new tag when not found in search and button clicked - bulk selection', () => {
     const result = renderComponent(undefined, 'query');
     const searchInput = result.getByRole('combobox');
@@ -265,6 +328,7 @@ describe('TagsAddRemove', () => {
       ['newTag'],
       [],
       expect.anything(),
+      undefined,
       'Tag created',
       'Tag creation failed'
     );
@@ -295,6 +359,7 @@ describe('TagsAddRemove', () => {
       ['newTag'],
       [],
       expect.anything(),
+      undefined,
       'Tag created',
       'Tag creation failed'
     );
@@ -304,6 +369,7 @@ describe('TagsAddRemove', () => {
       ['newTag2'],
       [],
       expect.anything(),
+      undefined,
       'Tag created',
       'Tag creation failed'
     );
@@ -327,6 +393,7 @@ describe('TagsAddRemove', () => {
       [],
       ['tag1'],
       expect.anything(),
+      expect.anything(),
       undefined,
       undefined
     );
@@ -335,6 +402,7 @@ describe('TagsAddRemove', () => {
       '',
       [],
       ['tag2'],
+      expect.anything(),
       expect.anything(),
       undefined,
       undefined

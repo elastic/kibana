@@ -7,16 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ESQLFunction, ESQLSingleAstItem } from '@elastic/esql/types';
+import { within } from '@elastic/esql';
 import { suggestForExpression } from '../suggestion_engine';
-import type { ExpressionContext, FunctionParameterContext } from '../types';
-import { getFunctionDefinition } from '../../../functions';
+import type { ExpressionContext } from '../types';
 import type { ISuggestionItem } from '../../../../../registry/types';
-import type { ESQLFunction, ESQLSingleAstItem } from '../../../../../../types';
-import { SignatureAnalyzer } from '../signature_analyzer';
-import { within } from '../../../../../../ast/location';
-
-/** Matches comma followed by optional whitespace at end of text */
-const STARTING_NEW_PARAM_REGEX = /,\s*$/;
+import { buildExpressionFunctionParameterContext, getRightmostOperator } from '../utils';
+import { endsWithComma, endsWithOpenParen } from '../../../regex';
 
 /** Suggests completions when cursor is inside a function call (e.g., CONCAT(field1, /)) */
 export async function suggestInFunction(ctx: ExpressionContext): Promise<ISuggestionItem[]> {
@@ -32,20 +29,19 @@ export async function suggestInFunction(ctx: ExpressionContext): Promise<ISugges
     callbacks,
   } = ctx;
 
-  const functionExpression = expressionRoot as ESQLFunction;
-  const functionDefinition = getFunctionDefinition(functionExpression.name);
+  const functionExpression = getRightmostOperator(expressionRoot as ESQLFunction);
 
-  if (!functionDefinition || !context) {
+  const startingNewParam = endsWithComma(innerText);
+  const paramContext = buildExpressionFunctionParameterContext(
+    functionExpression,
+    context,
+    startingNewParam
+  );
+
+  if (!paramContext) {
     return [];
   }
 
-  const analyzer = SignatureAnalyzer.fromNode(functionExpression, context, functionDefinition);
-
-  if (!analyzer) {
-    return [];
-  }
-
-  const paramContext = buildInFunctionParameterContext(analyzer, functionDefinition);
   const targetExpression = determineTargetExpression(functionExpression, innerText);
 
   const existing = options.parentFunctionNames ?? [];
@@ -71,28 +67,13 @@ export async function suggestInFunction(ctx: ExpressionContext): Promise<ISugges
   return suggestions;
 }
 
-function buildInFunctionParameterContext(
-  analyzer: SignatureAnalyzer,
-  functionDefinition: ReturnType<typeof getFunctionDefinition>
-): FunctionParameterContext {
-  return {
-    paramDefinitions: analyzer.getCompatibleParamDefs(),
-    hasMoreMandatoryArgs: analyzer.getHasMoreMandatoryArgs(),
-    functionDefinition,
-    firstArgumentType: analyzer.getFirstArgumentType(),
-    firstValueType: analyzer.getFirstValueType(),
-    currentParameterIndex: analyzer.getCurrentParameterIndex(),
-    validSignatures: analyzer.getValidSignatures(),
-  };
-}
-
 /** Determines which expression to use as target for recursive suggestion */
 function determineTargetExpression(
   functionExpression: ESQLFunction,
   innerText: string
 ): ESQLSingleAstItem | undefined {
   const { args } = functionExpression;
-  const startingNewParam = STARTING_NEW_PARAM_REGEX.test(innerText);
+  const startingNewParam = endsWithComma(innerText);
   const firstArgEmpty = isFirstArgumentEmpty(args, innerText);
 
   const lastArg = args[args.length - 1];
@@ -119,5 +100,5 @@ function isFirstArgumentEmpty(args: ESQLFunction['args'], innerText: string): bo
 
   const firstArgIsEmpty = Array.isArray(args[0]) ? args[0].length === 0 : !args[0];
 
-  return firstArgIsEmpty && innerText.trimEnd().endsWith('(');
+  return firstArgIsEmpty && endsWithOpenParen(innerText);
 }

@@ -12,68 +12,90 @@ import { schema } from '@kbn/config-schema';
 const searchSessionRequestInfoSchema = schema.object({
   id: schema.string(),
   strategy: schema.string(),
+  status: schema.maybe(schema.string()),
+  startedAt: schema.maybe(schema.string()),
+  completedAt: schema.maybe(schema.string()),
+  error: schema.maybe(
+    schema.object({
+      code: schema.number(),
+      message: schema.maybe(schema.string()),
+    })
+  ),
 });
 
 const serializeableSchema = schema.mapOf(schema.string(), schema.any());
 
-const searchSessionAttrSchema = () =>
-  schema.object({
-    sessionId: schema.string(),
-    name: schema.maybe(schema.string()),
-    appId: schema.maybe(schema.string()),
-    created: schema.string(),
-    expires: schema.string(),
-    locatorId: schema.maybe(schema.string()),
-    initialState: schema.maybe(serializeableSchema),
-    restoreState: schema.maybe(serializeableSchema),
-    idMapping: schema.mapOf(schema.string(), searchSessionRequestInfoSchema),
-    realmType: schema.maybe(schema.string()),
-    realmName: schema.maybe(schema.string()),
-    username: schema.maybe(schema.string()),
-    version: schema.string(),
-    isCanceled: schema.maybe(schema.boolean()),
-  });
+const searchSessionAttrSchema = schema.object({
+  sessionId: schema.string(),
+  status: schema.maybe(schema.string()),
+  name: schema.maybe(schema.string()),
+  appId: schema.maybe(schema.string()),
+  created: schema.string(),
+  expires: schema.string(),
+  locatorId: schema.maybe(schema.string()),
+  initialState: schema.maybe(serializeableSchema),
+  restoreState: schema.maybe(serializeableSchema),
+  idMapping: schema.mapOf(schema.string(), searchSessionRequestInfoSchema),
+  realmType: schema.maybe(schema.string()),
+  realmName: schema.maybe(schema.string()),
+  username: schema.maybe(schema.string()),
+  version: schema.string(),
+  isCanceled: schema.maybe(schema.boolean()),
+});
 
-export const searchSessionSchema = () =>
-  schema.object({
-    id: schema.string(),
-    attributes: searchSessionAttrSchema(),
-  });
+export const searchSessionSchema = schema.object({
+  id: schema.string(),
+  attributes: searchSessionAttrSchema,
+});
 
-export const searchSessionStatusSchema = () =>
-  schema.object({
-    status: schema.oneOf([
-      schema.literal('in_progress'),
-      schema.literal('error'),
-      schema.literal('complete'),
-      schema.literal('cancelled'),
-      schema.literal('expired'),
-    ]),
-    errors: schema.maybe(schema.arrayOf(schema.string())),
-  });
+const status = schema.object({
+  status: schema.oneOf([
+    schema.literal('in_progress'),
+    schema.literal('error'),
+    schema.literal('complete'),
+    schema.literal('cancelled'),
+    schema.literal('expired'),
+  ]),
+  errors: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10000 })),
+});
 
-export const searchSessionsFindSchema = () =>
-  schema.object({
-    total: schema.number(),
-    saved_objects: schema.arrayOf(searchSessionSchema()),
-    statuses: schema.recordOf(schema.string(), searchSessionStatusSchema()),
-  });
+export const searchSessionStatusSchema = status;
+
+export const searchSessionStatusesSchema = schema.object({
+  sessions: schema.recordOf(
+    schema.string(),
+    schema.object({
+      name: schema.maybe(schema.string()),
+      restoreState: schema.maybe(serializeableSchema),
+      locatorId: schema.maybe(schema.string()),
+      appId: schema.maybe(schema.string()),
+    })
+  ),
+  statuses: schema.recordOf(schema.string(), status),
+});
+
+export const searchSessionsFindSchema = schema.object({
+  total: schema.number(),
+  saved_objects: schema.arrayOf(searchSessionSchema, { maxSize: 10000 }),
+  statuses: schema.recordOf(schema.string(), searchSessionStatusSchema),
+});
 
 const referencesSchema = schema.arrayOf(
-  schema.object({ id: schema.string(), type: schema.string(), name: schema.string() })
+  schema.object({ id: schema.string(), type: schema.string(), name: schema.string() }),
+  { maxSize: 10 }
 );
 
-export const searchSessionsUpdateSchema = () =>
-  schema.object({
-    id: schema.string(),
-    type: schema.string(),
-    updated_at: schema.maybe(schema.string()),
-    updated_by: schema.maybe(schema.string()),
-    version: schema.maybe(schema.string()),
-    namespaces: schema.maybe(schema.arrayOf(schema.string())),
-    references: schema.maybe(referencesSchema),
-    attributes: schema.object({
-      name: schema.maybe(schema.string()),
-      expires: schema.maybe(schema.string()),
-    }),
-  });
+export const searchSessionsUpdateSchema = schema.object({
+  id: schema.string(),
+  type: schema.string(),
+  updated_at: schema.maybe(schema.string()),
+  updated_by: schema.maybe(schema.string()),
+  version: schema.maybe(schema.string()),
+  // The search-sessions saved object definition specifies that the namespaces are 'single', that means only one space is allowed.
+  namespaces: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 1 })),
+  references: schema.maybe(referencesSchema),
+  attributes: schema.object({
+    name: schema.maybe(schema.string()),
+    expires: schema.maybe(schema.string()),
+  }),
+});

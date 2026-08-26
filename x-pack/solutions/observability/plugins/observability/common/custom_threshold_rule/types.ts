@@ -52,6 +52,8 @@ export enum AlertStates {
   ERROR,
 }
 
+export type NoDataBehavior = 'recover' | 'remainActive' | 'alertOnNoData';
+
 // Types for the executor
 export interface CustomThresholdSearchSourceFields extends SerializedSearchSourceFields {
   query?: Query;
@@ -64,6 +66,7 @@ export interface ThresholdParams {
   sourceId?: string;
   alertOnNoData?: boolean;
   alertOnGroupDisappear?: boolean;
+  noDataBehavior?: NoDataBehavior;
   searchConfiguration: CustomThresholdSearchSourceFields;
   groupBy?: string[];
 }
@@ -74,6 +77,8 @@ export interface BaseMetricExpressionParams {
   sourceId?: string;
   threshold: number[];
   comparator: COMPARATORS | LEGACY_COMPARATORS;
+  warningThreshold?: number[];
+  warningComparator?: COMPARATORS | LEGACY_COMPARATORS;
 }
 
 export interface CustomThresholdExpressionMetric {

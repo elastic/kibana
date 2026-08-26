@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { getFormattedFields } from './get_formatted_fields';
-import { formatFieldValue } from './format_value';
+import { formatFieldValueReact } from './format_value';
 import type { DataTableRecord } from '../types';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 
 jest.mock('./format_value', () => ({
-  formatFieldValue: jest.fn(),
+  formatFieldValueReact: jest.fn(),
 }));
 
 describe('getFormattedFields', () => {
@@ -41,7 +41,7 @@ describe('getFormattedFields', () => {
   });
 
   it('formats fields correctly when values exist', () => {
-    (formatFieldValue as jest.Mock).mockImplementation((value) => `formatted_${value}`);
+    (formatFieldValueReact as jest.Mock).mockImplementation(({ value }) => `formatted_${value}`);
 
     const result = getFormattedFields(mockDoc, ['field1', 'field2'], {
       dataView: mockDataView,
@@ -53,20 +53,20 @@ describe('getFormattedFields', () => {
       field2: 'formatted_123',
     });
 
-    expect(formatFieldValue).toHaveBeenCalledWith(
-      'value1',
-      mockDoc.raw,
-      mockFieldFormats,
-      mockDataView,
-      undefined
-    );
-    expect(formatFieldValue).toHaveBeenCalledWith(
-      123,
-      mockDoc.raw,
-      mockFieldFormats,
-      mockDataView,
-      undefined
-    );
+    expect(formatFieldValueReact).toHaveBeenCalledWith({
+      value: 'value1',
+      hit: mockDoc.raw,
+      fieldFormats: mockFieldFormats,
+      dataView: mockDataView,
+      field: undefined,
+    });
+    expect(formatFieldValueReact).toHaveBeenCalledWith({
+      value: 123,
+      hit: mockDoc.raw,
+      fieldFormats: mockFieldFormats,
+      dataView: mockDataView,
+      field: undefined,
+    });
   });
 
   it('returns undefined for fields with null or undefined values', () => {
@@ -80,7 +80,7 @@ describe('getFormattedFields', () => {
       field4: undefined,
     });
 
-    expect(formatFieldValue).not.toHaveBeenCalled();
+    expect(formatFieldValueReact).not.toHaveBeenCalled();
   });
 
   it('handles fields not present in the flattened object', () => {
@@ -93,7 +93,7 @@ describe('getFormattedFields', () => {
       nonExistentField: undefined,
     });
 
-    expect(formatFieldValue).not.toHaveBeenCalled();
+    expect(formatFieldValueReact).not.toHaveBeenCalled();
   });
 
   it('calls dataView.fields.getByName for each field', () => {

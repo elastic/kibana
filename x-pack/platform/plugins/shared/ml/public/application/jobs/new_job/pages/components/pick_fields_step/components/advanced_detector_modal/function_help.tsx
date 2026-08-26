@@ -9,13 +9,15 @@ import React, { useState, memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
+  EuiBasicTable,
   EuiButtonIcon,
+  EuiLink,
+  EuiPanel,
   EuiPopover,
   EuiPopoverTitle,
-  EuiBasicTable,
-  EuiPanel,
-  EuiLink,
   EuiText,
+  EuiToolTip,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { useMlKibana } from '../../../../../../../contexts/kibana';
 
@@ -24,21 +26,32 @@ export const FunctionHelpPopover = memo(() => {
     services: { docLinks },
   } = useMlKibana();
   const [isHelpOpen, setIsHelpOpen] = useState(false);
+  const popoverTitleId = useGeneratedHtmlId();
 
   const onHelpClick = () => setIsHelpOpen((prevIsHelpOpen) => !prevIsHelpOpen);
   const closeHelp = () => setIsHelpOpen(false);
 
   const helpButton = (
-    <EuiButtonIcon
-      onClick={onHelpClick}
-      iconType="question"
-      aria-label={i18n.translate(
+    <EuiToolTip
+      content={i18n.translate(
         'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.functionHelpAriaLabel',
         {
           defaultMessage: 'Show help',
         }
       )}
-    />
+      disableScreenReaderOutput
+    >
+      <EuiButtonIcon
+        onClick={onHelpClick}
+        iconType="question"
+        aria-label={i18n.translate(
+          'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.functionHelpAriaLabel',
+          {
+            defaultMessage: 'Show help',
+          }
+        )}
+      />
+    </EuiToolTip>
   );
 
   const columns = [
@@ -231,8 +244,9 @@ export const FunctionHelpPopover = memo(() => {
       panelPaddingSize="none"
       closePopover={closeHelp}
       initialFocus="#mlAdFunctionsHelpTableId"
+      aria-labelledby={popoverTitleId}
     >
-      <EuiPopoverTitle paddingSize="s">
+      <EuiPopoverTitle paddingSize="s" id={popoverTitleId}>
         <FormattedMessage
           id="xpack.ml.anomalyDetection.functions.popoverTitle"
           defaultMessage="Function reference"

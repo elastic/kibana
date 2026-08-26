@@ -25,6 +25,7 @@ interface ESQLDataGridAccordionProps {
   dataGridAttrs: ESQLDataGridAttrs;
   query: AggregateQuery;
   isTableView: boolean;
+  isApproximate: boolean;
   setIsAccordionOpen: (flag: boolean) => void;
   onAccordionToggleCb: (status: boolean) => void;
 }
@@ -34,6 +35,7 @@ export const ESQLDataGridAccordion = ({
   dataGridAttrs,
   query,
   isTableView,
+  isApproximate,
   setIsAccordionOpen,
   onAccordionToggleCb,
 }: ESQLDataGridAccordionProps) => {
@@ -64,6 +66,12 @@ export const ESQLDataGridAccordion = ({
             display: flex;
             flex-direction: column;
             height: 100%;
+          }
+          .euiDataGrid__virtualized {
+            /* Prevents the horizontal scrollbar from toggling on/off as the accordion's
+             * height-animating ancestor resizes, which otherwise feeds back into EUI's
+             * column-width/ResizeObserver calculation and can hang the tab. */
+            overflow-x: scroll !important;
           }
         `}
         buttonContent={
@@ -102,6 +110,7 @@ export const ESQLDataGridAccordion = ({
               query={query}
               flyoutType="overlay"
               isTableView={isTableView}
+              isApproximate={isApproximate}
               initialRowHeight={0}
               controlColumnIds={['openDetails']}
             />

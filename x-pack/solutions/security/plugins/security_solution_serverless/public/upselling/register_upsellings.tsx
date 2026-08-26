@@ -10,27 +10,32 @@ import type {
   PageUpsellings,
   SectionUpsellings,
 } from '@kbn/security-solution-upselling/service/types';
+import type { ProductFeatureKeyType } from '@kbn/security-solution-features';
+import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
 import type { SecurityProductTypes } from '../../common/config';
-import { getEnabledProductFeatures } from '../../common/pli/pli_features';
+import {
+  getEnabledProductFeatures,
+  getRequiredProductTypesForFeature,
+} from '../../common/pli/pli_features';
 import type { Services } from '../common/services';
 import { withServicesProvider } from '../common/services';
 import { upsellingPages, upsellingSections, upsellingMessages } from './upsellings';
 
 export const registerUpsellings = (productTypes: SecurityProductTypes, services: Services) => {
-  const upsellingService = registerSecuritySolutionUpsellings(productTypes, services);
-  configurePluginsUpsellings(upsellingService, services);
+  const enabledPLIsSet = new Set(getEnabledProductFeatures(productTypes));
+
+  const upsellingService = registerSecuritySolutionUpsellings(enabledPLIsSet, services);
+  configurePluginsUpsellings(enabledPLIsSet, upsellingService, services);
 };
 
 /**
  * Registers the upsellings for the security solution.
  */
 const registerSecuritySolutionUpsellings = (
-  productTypes: SecurityProductTypes,
+  enabledPLIsSet: Set<ProductFeatureKeyType>,
   services: Services
 ): UpsellingService => {
   const upsellingService = services.securitySolution.getUpselling();
-
-  const enabledPLIsSet = new Set(getEnabledProductFeatures(productTypes));
 
   const upsellingPagesToRegister = upsellingPages.reduce<PageUpsellings>(
     (pageUpsellings, { pageName, pli, component }) => {
@@ -72,11 +77,20 @@ const registerSecuritySolutionUpsellings = (
 /**
  * Configures the upsellings for other plugins.
  */
-const configurePluginsUpsellings = (upsellingService: UpsellingService, services: Services) => {
-  const { automaticImport } = services;
+const configurePluginsUpsellings = (
+  enabledPLIsSet: Set<ProductFeatureKeyType>,
+  upsellingService: UpsellingService,
+  services: Services
+) => {
+  const { automaticImport, workflowsManagement } = services;
+
+  if (workflowsManagement && !enabledPLIsSet.has(ProductFeatureKey.workflows)) {
+    workflowsManagement.setUnavailableInServerlessTier({
+      requiredProducts: getRequiredProductTypesForFeature(ProductFeatureKey.workflows),
+    });
+  }
 
   upsellingService.sections$.subscribe((sections) => {
-    // @ts-expect-error Type 'FunctionComponent<{}>' is not assignable to type 'ReactNode'.
     automaticImport?.renderUpselling(sections.get('automatic_import'));
   });
 };

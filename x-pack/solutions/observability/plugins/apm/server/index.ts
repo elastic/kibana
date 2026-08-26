@@ -73,7 +73,6 @@ const configSchema = schema.object({
     infrastructureTabAvailable: disabledOnServerless,
     infraUiAvailable: disabledOnServerless,
     migrationToFleetAvailable: disabledOnServerless,
-    serviceMapUseReactFlow: schema.boolean({ defaultValue: false }),
     sourcemapApiAvailable: disabledOnServerless,
     storageExplorerAvailable: disabledOnServerless,
     // to be removed in https://github.com/elastic/kibana/issues/221904
@@ -130,7 +129,6 @@ export const plugin = async (initContext: PluginInitializerContext) => {
 };
 
 export { APM_SERVER_FEATURE_ID } from '../common/rules/apm_rule_types';
-export { APMPlugin } from './plugin';
 export type { APMPluginSetup } from './types';
 export type {
   APMServerRouteRepository,

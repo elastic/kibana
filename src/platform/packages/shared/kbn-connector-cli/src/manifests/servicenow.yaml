@@ -1,0 +1,16 @@
+# TODO: get a long-lived servicenow instance
+enabled: false
+spec_id: .servicenow_search
+name: "ServiceNow (testing)"
+auth_type: oauth_authorization_code
+config:
+  instanceUrl: "TODO"
+secrets:
+  tokenUrl:
+    value: "TODO"
+  clientId:
+    vault: TODO
+    field: client-id
+  clientSecret:
+    vault: TODO
+    field: client-secret

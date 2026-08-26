@@ -6,6 +6,7 @@
   "include": [
     "public/**/*",
     "server/**/*",
+    "test/**/*",
   ],
   "kbn_references": [
     "@kbn/core",
@@ -29,7 +30,6 @@
     "@kbn/std",
     "@kbn/test-jest-helpers",
     "@kbn/shared-ux-prompt-no-data-views",
-    "@kbn/shared-ux-link-redirect-app",
     "@kbn/utility-types-jest",
     "@kbn/config-schema",
     "@kbn/shared-ux-router",
@@ -49,6 +49,12 @@
     "@kbn/shared-ux-table-persist",
     "@kbn/css-utils",
     "@kbn/saved-objects-tagging-oss-plugin",
+    "@kbn/cps-utils",
+    "@kbn/cps",
+    "@kbn/discover-utils",
+    "@kbn/scout",
+    "@kbn/ui-callout",
+    "@kbn/core-http-browser-mocks",
   ],
   "exclude": [
     "target/**/*",

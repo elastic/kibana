@@ -7,6 +7,7 @@ xpack.cloud.serverless.product_tier: complete
 xpack.infra.enabled: true
 xpack.slo.enabled: true
 xpack.uptime.enabled: true
+xpack.significantEvents.enabled: true
 
 xpack.features.overrides:
   infrastructure.name: 'Infrastructure'
@@ -18,11 +19,18 @@ xpack.features.overrides:
     order: 1200
   ### Stack alerts is hidden in Role management since it's not needed.
   stackAlerts.hidden: true
+  stackAlertsOnly.hidden: true
   ### By default, this feature named as `Synthetics and Uptime`, but should be renamed to `Synthetics` since `Uptime` is not available.
   uptime.name: 'Synthetics'
   ### Workflows Management should be moved from Analytics category to the Observability one.
   workflowsManagement.category: 'observability'
-
+  ### Agent Builder should be moved from Analytics category to the Observability one.
+  agentBuilder.category: 'observability'
+  ### Agent Builder SML should match Agent Builder for role management (avoid orphan Kibana category).
+  agentBuilderSml.category: 'observability'
+  ### Context Engine should match Agent Builder for role management (avoid orphan Kibana category).
+  contextEngine.category: 'observability'
+  
 # Elastic Managed LLMs
 xpack.actions.preconfigured:
   Anthropic-Claude-Sonnet-3-7:
@@ -55,6 +63,36 @@ xpack.actions.preconfigured:
       inferenceId: ".anthropic-claude-4.5-opus-chat_completion"
       providerConfig:
         model_id: "anthropic-claude-4.5-opus"
+  Anthropic-Claude-Opus-4-6:
+    name: Anthropic Claude Opus 4.6
+    actionTypeId: .inference
+    exposeConfig: true
+    config:
+      provider: "elastic"
+      taskType: "chat_completion"
+      inferenceId: ".anthropic-claude-4.6-opus-chat_completion"
+      providerConfig:
+        model_id: "anthropic-claude-4.6-opus"
+  Anthropic-Claude-Sonnet-4-6:
+    name: Anthropic Claude Sonnet 4.6
+    actionTypeId: .inference
+    exposeConfig: true
+    config:
+      provider: "elastic"
+      taskType: "chat_completion"
+      inferenceId: ".anthropic-claude-4.6-sonnet-chat_completion"
+      providerConfig:
+        model_id: "anthropic-claude-4.6-sonnet"
+  Anthropic-Claude-Haiku-4-5:
+    name: Anthropic Claude Haiku 4.5
+    actionTypeId: .inference
+    exposeConfig: true
+    config:
+      provider: "elastic"
+      taskType: "chat_completion"
+      inferenceId: ".anthropic-claude-4.5-haiku-chat_completion"
+      providerConfig:
+        model_id: "anthropic-claude-4.5-haiku"
   OpenAI-GPT-OSS-120B:
     name: OpenAI GPT-OSS 120B
     actionTypeId: .inference
@@ -145,6 +183,16 @@ xpack.actions.preconfigured:
       inferenceId: ".google-gemini-2.5-flash-chat_completion"
       providerConfig:
         model_id: "google-gemini-2.5-flash"
+  Google-Gemini-2-5-Flash-Lite:
+    name: Google Gemini 2.5 Flash Lite
+    actionTypeId: .inference
+    exposeConfig: true
+    config:
+      provider: "elastic"
+      taskType: "chat_completion"
+      inferenceId: ".google-gemini-2.5-flash-lite-chat_completion"
+      providerConfig:
+        model_id: "google-gemini-2.5-flash-lite"
   Google-Gemini-3-0-Pro:
     name: Google Gemini 3.0 Pro
     actionTypeId: .inference

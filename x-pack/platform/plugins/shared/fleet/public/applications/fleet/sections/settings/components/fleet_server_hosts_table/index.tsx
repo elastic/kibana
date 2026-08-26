@@ -9,18 +9,28 @@ import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
 import {
+  EuiBadge,
   EuiBasicTable,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
   EuiIcon,
   EuiButtonIcon,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import type { FleetServerHost } from '../../../../types';
 import { useAuthz, useLink } from '../../../../hooks';
+import { SERVERLESS_PRIVATE_FLEET_SERVER_HOST_ID } from '../../../../../../../common/constants';
+
+function getPrivateLinkProvider(urls: string[]): string {
+  const url = urls[0] ?? '';
+  if (url.includes('.azure.')) return 'Azure Private Link';
+  if (url.includes('.gcp.')) return 'GCP Private Service Connect';
+  return 'AWS PrivateLink';
+}
 
 export interface FleetServerHostsTableProps {
   fleetServerHosts: FleetServerHost[];
@@ -47,7 +57,7 @@ export const FleetServerHostsTable: React.FunctionComponent<FleetServerHostsTabl
     return [
       {
         render: (fleetServerHost: FleetServerHost) => (
-          <EuiFlexGroup alignItems="center" gutterSize="xs">
+          <EuiFlexGroup alignItems="center" gutterSize="xs" wrap={false}>
             <NameFlexItemWithMaxWidth grow={false}>
               <p title={fleetServerHost.name} className={`eui-textTruncate`}>
                 {fleetServerHost.name}
@@ -69,9 +79,29 @@ export const FleetServerHostsTable: React.FunctionComponent<FleetServerHostsTabl
                 />
               </EuiFlexItem>
             )}
+            {fleetServerHost.id === SERVERLESS_PRIVATE_FLEET_SERVER_HOST_ID && (
+              <EuiFlexItem grow={false}>
+                <EuiToolTip
+                  content={i18n.translate(
+                    'xpack.fleet.settings.fleetServerHostsTable.privateLinkBadgeTooltip',
+                    {
+                      defaultMessage:
+                        'This Fleet Server host uses {provider} for private network connectivity.',
+                      values: {
+                        provider: getPrivateLinkProvider(fleetServerHost.host_urls),
+                      },
+                    }
+                  )}
+                >
+                  <EuiBadge tabIndex={0}>
+                    {getPrivateLinkProvider(fleetServerHost.host_urls)}
+                  </EuiBadge>
+                </EuiToolTip>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         ),
-        width: '288px',
+        width: '380px',
         name: i18n.translate('xpack.fleet.settings.fleetServerHostsTable.nameColumnTitle', {
           defaultMessage: 'Name',
         }),
@@ -97,7 +127,16 @@ export const FleetServerHostsTable: React.FunctionComponent<FleetServerHostsTabl
       {
         render: (fleetServerHost: FleetServerHost) =>
           fleetServerHost.is_default ? (
-            <EuiIcon type="check" data-test-subj="fleetServerHostTable.defaultIcon" />
+            <EuiIcon
+              type="check"
+              data-test-subj="fleetServerHostTable.defaultIcon"
+              aria-label={i18n.translate(
+                'xpack.fleet.settings.fleetServerHostsTable.defaultIconLabel',
+                {
+                  defaultMessage: 'Default Fleet Server host',
+                }
+              )}
+            />
           ) : null,
         width: '200px',
         name: i18n.translate('xpack.fleet.settings.fleetServerHostsTable.defaultColumnTitle', {
@@ -116,47 +155,55 @@ export const FleetServerHostsTable: React.FunctionComponent<FleetServerHostsTabl
             <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
               <EuiFlexItem grow={false}>
                 {isDeleteVisible && (
-                  <EuiButtonIcon
-                    color="text"
-                    iconType="trash"
-                    onClick={() => deleteFleetServerHost(fleetServerHost)}
-                    title={i18n.translate(
+                  <EuiToolTip
+                    content={i18n.translate(
                       'xpack.fleet.settings.fleetServerHostsTable.deleteButtonTitle',
                       {
                         defaultMessage: 'Delete',
                       }
                     )}
-                    aria-label={i18n.translate(
-                      'xpack.fleet.settings.fleetServerHostsTable.deleteButtonAriaLabel',
-                      {
-                        defaultMessage: 'Delete host',
-                      }
-                    )}
-                    data-test-subj="fleetServerHostsTable.delete.btn"
-                  />
+                    disableScreenReaderOutput
+                  >
+                    <EuiButtonIcon
+                      color="text"
+                      iconType="trash"
+                      onClick={() => deleteFleetServerHost(fleetServerHost)}
+                      aria-label={i18n.translate(
+                        'xpack.fleet.settings.fleetServerHostsTable.deleteButtonAriaLabel',
+                        {
+                          defaultMessage: 'Delete host',
+                        }
+                      )}
+                      data-test-subj="fleetServerHostsTable.delete.btn"
+                    />
+                  </EuiToolTip>
                 )}
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  color="text"
-                  iconType="pencil"
-                  href={getHref('settings_edit_fleet_server_hosts', {
-                    itemId: fleetServerHost.id,
-                  })}
-                  title={i18n.translate(
+                <EuiToolTip
+                  content={i18n.translate(
                     'xpack.fleet.settings.fleetServerHostsTable.editButtonTitle',
                     {
                       defaultMessage: 'Edit',
                     }
                   )}
-                  aria-label={i18n.translate(
-                    'xpack.fleet.settings.fleetServerHostsTable.editButtonAriaLabel',
-                    {
-                      defaultMessage: 'Edit host',
-                    }
-                  )}
-                  data-test-subj="fleetServerHostsTable.edit.btn"
-                />
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    color="text"
+                    iconType="pencil"
+                    href={getHref('settings_edit_fleet_server_hosts', {
+                      itemId: fleetServerHost.id,
+                    })}
+                    aria-label={i18n.translate(
+                      'xpack.fleet.settings.fleetServerHostsTable.editButtonAriaLabel',
+                      {
+                        defaultMessage: 'Edit host',
+                      }
+                    )}
+                    data-test-subj="fleetServerHostsTable.edit.btn"
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
             </EuiFlexGroup>
           );

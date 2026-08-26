@@ -4,21 +4,21 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/fleet-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/fleet'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/fleet-plugin'
+  title: '@kbn/fleet-plugin'
   description: Moon project for @kbn/fleet-plugin
   channel: ''
   owner: '@elastic/fleet'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/shared/fleet
+  sourceRoot: x-pack/platform/plugins/shared/fleet
 dependsOn:
   - '@kbn/core'
+  - '@kbn/tracing-utils'
   - '@kbn/licensing-plugin'
   - '@kbn/data-plugin'
   - '@kbn/encrypted-saved-objects-plugin'
@@ -37,6 +37,8 @@ dependsOn:
   - '@kbn/share-plugin'
   - '@kbn/i18n-react'
   - '@kbn/custom-integrations-plugin'
+  - '@kbn/ui-callout'
+  - '@kbn/deeplinks-management'
   - '@kbn/core-application-common'
   - '@kbn/core-capabilities-common'
   - '@kbn/i18n'
@@ -65,6 +67,7 @@ dependsOn:
   - '@kbn/test'
   - '@kbn/stdio-dev-helpers'
   - '@kbn/tooling-log'
+  - '@kbn/apm-types'
   - '@kbn/apm-utils'
   - '@kbn/core-saved-objects-common'
   - '@kbn/core-http-server'
@@ -100,8 +103,6 @@ dependsOn:
   - '@kbn/core-security-server-mocks'
   - '@kbn/server-http-tools'
   - '@kbn/zod'
-  - '@kbn/reporting-public'
-  - '@kbn/field-formats-plugin'
   - '@kbn/core-security-server'
   - '@kbn/core-notifications-browser-mocks'
   - '@kbn/handlebars'
@@ -113,12 +114,27 @@ dependsOn:
   - '@kbn/core-di'
   - '@kbn/licensing-types'
   - '@kbn/alerting-plugin'
-  - '@kbn/spaces-utils'
+  - '@kbn/alerting-v2-utils'
+  - '@kbn/core-spaces-common'
   - '@kbn/setup-node-env'
   - '@kbn/react-query'
   - '@kbn/fs'
   - '@kbn/kql'
   - '@kbn/scout'
+  - '@kbn/reporting-common'
+  - '@kbn/reporting-plugin'
+  - '@kbn/user-profile-components'
+  - '@kbn/css-utils'
+  - '@kbn/rison'
+  - '@kbn/rule-data-utils'
+  - '@kbn/doc-links'
+  - '@kbn/yaml-loader'
+  - '@kbn/charts-theme'
+  - '@kbn/search-types'
+  - '@kbn/human-readable-id'
+  - '@kbn/elastic-agent-condition-language'
+  - '@kbn/app-header'
+  - '@kbn/core-http-browser'
 tags:
   - plugin
   - prod
@@ -135,5 +151,7 @@ fileGroups:
     - scripts/**/*
     - package.json
     - test/scout/**/*
+    - test/scout_automatic_import/**/*
+    - test/scout_iac_provisioner/**/*
     - '!target/**/*'
 tasks: {}

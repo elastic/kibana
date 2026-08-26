@@ -7,7 +7,7 @@
 
 import { tool } from '@langchain/core/tools';
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import type { ContentReference } from '@kbn/elastic-assistant-common';
 import { contentReferenceString } from '@kbn/elastic-assistant-common';
@@ -15,7 +15,7 @@ import {
   hrefReference,
   knowledgeBaseReference,
 } from '@kbn/elastic-assistant-common/impl/content_references/references';
-import { Document } from 'langchain/document';
+import { Document } from '@langchain/core/documents';
 import type { Require } from '@kbn/elastic-assistant-plugin/server/types';
 import { APP_UI_ID } from '../../../../common';
 

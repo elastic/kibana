@@ -69,6 +69,34 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     /**
+     * Navigate directly to the editor for a saved Lens visualization by id and
+     * wait for the rendered chart to settle. Prefer this over going through
+     * the visualize listing page (search + click) when the saved object id is
+     * known (e.g. fixture-loaded visualizations).
+     *
+     * @param id - the saved object id of the Lens visualization
+     * @param visDataTestSubj - the chart container `data-test-subj`.
+     *   example: `xyVisChart` (line/bar/area), `partitionVisChart`
+     *   (pie/treemap/donut), `mtrVis` (new metric), `legacyMtrVis` (legacy
+     *   metric), `heatmapChart`, `lnsVisualizationContainer` (datatable).
+     */
+    async openEditor(id: string, visDataTestSubj: string) {
+      await common.navigateToApp('lens', { hash: `#/edit/${id}` });
+      await this.waitForVisualization(visDataTestSubj);
+    },
+
+    /**
+     * Navigate directly to a new Lens editor, skipping the visualize
+     * listing page and the visualization-type selection modal. Prefer this
+     * over `visualize.navigateToNewVisualization() + visualize.clickVisType('lens')`
+     * when the test builds a chart from scratch.
+     */
+    async openNewEditor() {
+      await common.navigateToApp('lens');
+      await testSubjects.existOrFail('lnsApp', { timeout: 10000 });
+    },
+
+    /**
      * Move the date filter to the specified time range, defaults to
      * a range that has data in our dataset.
      */
@@ -113,13 +141,18 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     /**
-     * Clicks a visualize list item's title (in the visualize app).
+     * Clicks a visualize list item's title (visualize app or dashboard Visualizations tab).
      *
      * @param title - the title of the list item to be clicked
      */
     clickVisualizeListItemTitle(title: string) {
       return retry.try(async () => {
-        await testSubjects.click(`visListingTitleLink-${title}`);
+        const link = (await testSubjects.exists(`visualizationListingListingTitleLink-${title}`))
+          ? `visualizationListingListingTitleLink-${title}`
+          : (await testSubjects.exists(`visListingTitleLink-${title}`))
+          ? `visListingTitleLink-${title}`
+          : `visualizationListingTitleLink-${title}`;
+        await testSubjects.click(link);
         await this.isLensPageOrFail();
       });
     },
@@ -214,6 +247,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }
       if (opts.field) {
         await this.selectOptionFromComboBox('indexPattern-dimension-field', opts.field);
+        // Field must commit to Lens state before close, or close discards the transition.
+        await retry.waitFor('field selection to commit', async () => {
+          const fieldCombo = await testSubjects.find('indexPattern-dimension-field');
+          return await comboBox.isOptionSelected(fieldCombo, opts.field!);
+        });
       }
 
       if (opts.formula) {
@@ -387,7 +425,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       log.debug(`Press ${metaKey} with keyboard`);
       await retry.try(async () => {
         await browser.pressKeys(browserKey);
-        await find.existsByCssSelector(
+        await find.byCssSelector(
           `.domDroppable__extraTarget > [data-test-subj="domDragDrop-dropTarget-${metaToAction[metaKey]}"].domDroppable--hover`
         );
       });
@@ -492,12 +530,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async waitForLensDragDropToFinish() {
-      await retry.try(async () => {
-        const exists = await find.existsByCssSelector('.domDragDrop-isActiveGroup');
-        if (exists) {
-          throw new Error('UI still in drag/drop mode');
-        }
-      });
+      await find.waitForDeletedByCssSelector('.domDragDrop-isActiveGroup');
     },
 
     /**
@@ -589,6 +622,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         )[dimensionIndex];
         await dimensionEditor.click();
       });
+      await retry.waitFor('dimension editor flyout to open', async () =>
+        this.isDimensionEditorOpen()
+      );
     },
 
     /**
@@ -613,7 +649,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     // closes the dimension editor flyout
     async closeDimensionEditor() {
       await retry.try(async () => {
-        await testSubjects.click('lns-indexPattern-dimensionContainerClose');
+        await browser.execute(() => {
+          const btn = document.querySelector(
+            '[data-test-subj="lns-indexPattern-dimensionContainerClose"]'
+          ) as HTMLElement;
+          if (btn) btn.click();
+        });
         await testSubjects.missingOrFail('lns-indexPattern-dimensionContainerClose');
       });
     },
@@ -790,12 +831,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       });
 
       await testSubjects.click('confirmSaveSavedObjectButton');
-      await retry.waitForWithTimeout('Save modal to disappear', 5000, () =>
-        testSubjects
-          .missingOrFail('confirmSaveSavedObjectButton')
-          .then(() => true)
-          .catch(() => false)
-      );
+      await common.waitForSaveModalToClose();
     },
 
     /**
@@ -840,6 +876,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async editDimensionLabel(label: string) {
       await testSubjects.setValue('name-input', label, { clearWithKeyboard: true });
+      await retry.waitFor(`name-input value to be "${label}"`, async () => {
+        return (await testSubjects.getAttribute('name-input', 'value')) === label;
+      });
     },
     async editDimensionFormat(format: string, options?: { decimals?: number; prefix?: string }) {
       await this.selectOptionFromComboBox('indexPattern-dimension-format', format);
@@ -858,10 +897,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await common.sleep(1000); // give time for debounced components to rerender
     },
     async hasStyleToolbarButton() {
-      return find.existsByCssSelector('button[data-test-subj="style"][title="Style"]');
+      return find.existsByCssSelector('button[data-test-subj="style"]');
     },
     async hasLegendToolbarButton() {
-      return find.existsByCssSelector('button[data-test-subj="legend"][title="Legend"]');
+      return find.existsByCssSelector('button[data-test-subj="legend"]');
     },
     async openStyleSettingsFlyout() {
       // Close dimension editor flyout
@@ -869,13 +908,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         await this.closeDimensionEditor();
       }
 
-      await find.clickByCssSelector('button[data-test-subj="style"][title="Style"]');
+      await find.clickByCssSelector('button[data-test-subj="style"]');
       await retry.try(async () => {
-        const styleTitle = await find.byCssSelector('#lnsDimensionContainerTitle');
-        const titleText = await styleTitle.getVisibleText();
-        if (titleText !== 'Style') {
-          throw new Error(`Expected flyout title to be "Style", but got "${titleText}"`);
-        }
+        await find.byCssSelector('#lnsDimensionContainerTitle');
       });
     },
 
@@ -886,7 +921,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }
 
       if (await this.hasLegendToolbarButton()) {
-        const button = await find.byCssSelector('button[data-test-subj="legend"][title="Legend"]');
+        const button = await find.byCssSelector('button[data-test-subj="legend"]');
         await button.click();
       }
     },
@@ -993,16 +1028,23 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async getSelectedAxisSide() {
-      const axisSideGroups = await find.allByCssSelector(
-        `[data-test-subj^="lnsXY_axisSide_groups_"]`
-      );
-      for (const axisSideGroup of axisSideGroups) {
-        const ariaPressed = await axisSideGroup.getAttribute('aria-pressed');
-        const isSelected = ariaPressed === 'true';
-        if (isSelected) {
-          return axisSideGroup?.getVisibleText();
+      return retry.try(async () => {
+        const axisSideGroups = await find.allByCssSelector(
+          `[data-test-subj^="lnsXY_axisSide_groups_"]`
+        );
+        for (const axisSideGroup of axisSideGroups) {
+          const ariaPressed = await axisSideGroup.getAttribute('aria-pressed');
+          const isSelected = ariaPressed === 'true';
+          if (isSelected) {
+            const text = await axisSideGroup.getVisibleText();
+            if (!text) {
+              throw new Error('Axis side button text not yet rendered');
+            }
+            return text;
+          }
         }
-      }
+        throw new Error('No axis side button is selected');
+      });
     },
 
     async getDonutHoleSize() {
@@ -1359,8 +1401,21 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       });
     },
 
-    async setTableDynamicColoring(coloringType: 'none' | 'cell' | 'text') {
-      await testSubjects.click('lnsDatatable_dynamicColoring_groups_' + coloringType);
+    async setTableDynamicColoring(coloringType: 'none' | 'cell' | 'text' | 'badge' | 'progress') {
+      // The "Cell decoration" combo box label diverges from the stored value
+      // (the `cell` value is surfaced as "Background"), so map explicitly rather
+      // than title-casing the stored value.
+      const labelByColoringType: Record<typeof coloringType, string> = {
+        none: 'None',
+        cell: 'Background',
+        text: 'Text',
+        badge: 'Badge',
+        progress: 'Progress bar',
+      };
+      await this.selectOptionFromComboBox(
+        'lnsDatatable_dynamicColoring_groups',
+        labelByColoringType[coloringType]
+      );
     },
 
     async openPalettePanel() {
@@ -1578,7 +1633,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       if (inViewMode) {
         await dashboard.switchToEditMode();
       }
-      await dashboardAddPanel.clickCreateNewLink();
+      await dashboardAddPanel.clickAddLensPanel();
 
       if (!ignoreTimeFilter) {
         await this.goToTimeRange();
@@ -1712,8 +1767,52 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
           return;
         }
 
-        // Click to make it active
-        await tabs[index].click();
+        // Scroll tabs into view by clicking scroll buttons if needed.
+        // The tab may be hidden behind the scroll navigation buttons.
+        // Note: scroll buttons only exist when there are enough tabs to overflow.
+        // We try scrolling right first for higher indices, left for lower indices.
+        let scrollAttempts = 0;
+        const maxScrollAttempts = 10;
+
+        await retry.try(async () => {
+          // Try clicking the tab - if it fails due to scroll button overlap, scroll and retry
+          try {
+            await tabs[index].click();
+          } catch (e) {
+            if (e instanceof Error && e.message.includes('element click intercepted')) {
+              scrollAttempts++;
+              if (scrollAttempts > maxScrollAttempts) {
+                throw e; // Give up after max attempts
+              }
+
+              // Determine scroll direction based on tab index
+              // Lower indices are on the left, higher indices are on the right
+              const scrollRightBtnExists = await testSubjects.exists(
+                'unifiedTabs_tabsBar_scrollRightBtn',
+                { timeout: 500 }
+              );
+              const scrollLeftBtnExists = await testSubjects.exists(
+                'unifiedTabs_tabsBar_scrollLeftBtn',
+                { timeout: 500 }
+              );
+
+              // Try scrolling in the appropriate direction
+              if (index >= tabs.length / 2 && scrollRightBtnExists) {
+                // Tab is in the right half, try scrolling right
+                await testSubjects.click('unifiedTabs_tabsBar_scrollRightBtn');
+              } else if (scrollLeftBtnExists) {
+                // Tab is in the left half, try scrolling left
+                await testSubjects.click('unifiedTabs_tabsBar_scrollLeftBtn');
+              } else if (scrollRightBtnExists) {
+                // Fallback to scrolling right if left isn't available
+                await testSubjects.click('unifiedTabs_tabsBar_scrollRightBtn');
+              }
+
+              throw e; // Rethrow to retry
+            }
+            throw e;
+          }
+        });
 
         // Wait for the layer panel to render
         await retry.waitFor('layer panel to be visible', async () => {
@@ -1886,7 +1985,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
           await testSubjects.exists('confirmModalConfirmButton');
           await testSubjects.click('confirmModalConfirmButton');
         }
-        await testSubjects.existOrFail('visualizationLandingPage', { timeout: 3000 });
+        await retry.waitFor('dashboard visualizations list to load', async () => {
+          const url = await browser.getCurrentUrl();
+          return url.includes('#/list/visualizations');
+        });
       });
     },
 
@@ -2127,7 +2229,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async triggerCSVDownloadExport() {
       await this.clickExportButton();
       // simply clicking the export button is enough, to trigger the CSV download in lens
-      await exports.clickPopoverItem('CSV', this.clickExportButton);
+      await exports.clickPopoverItem('CSV', async () => {
+        await this.clickExportButton();
+        return true;
+      });
     },
 
     async setCSVDownloadDebugFlag(value: boolean = true) {

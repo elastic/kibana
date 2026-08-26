@@ -20,9 +20,11 @@ import type { CloudPostureEntityIdentifier } from '../components/entity_insight'
 export const useHasRiskScore = ({
   field,
   value,
+  skip = false,
 }: {
   field: CloudPostureEntityIdentifier;
   value: string;
+  skip?: boolean;
 }) => {
   const isHostNameField = field === 'host.name';
   const buildFilterQuery = useMemo(
@@ -34,6 +36,7 @@ export const useHasRiskScore = ({
     filterQuery: buildFilterQuery,
     onlyLatest: false,
     pagination: FIRST_RECORD_PAGINATION,
+    skip,
   });
 
   const riskData = data?.[0];

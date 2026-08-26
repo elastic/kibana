@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/observability-plugin",
-  "owner": ["@elastic/actionable-obs-team"],
+  "owner": ["@elastic/observability-ui"],
   "group": "observability",
   "visibility": "private",
   "plugin": {
@@ -20,7 +20,6 @@
       "embeddable",
       "fieldFormats",
       "uiActions",
-      "presentationUtil",
       "features",
       "files",
       "inspector",
@@ -51,12 +50,16 @@
       "discover",
       "exploratoryView",
       "home",
+      "globalSearch",
       "usageCollection",
       "cloud",
       "spaces",
       "serverless",
       "observabilityAIAssistant",
-      "investigate"
+      "investigate",
+      "cps",
+      "ingestHub",
+      "significantEvents"
     ],
     "requiredBundles": [
       "aiops",
@@ -67,8 +70,8 @@
       "logsShared",
       "kibanaReact",
       "kibanaUtils",
+      "significantEvents",
       "stackAlerts",
-      "spaces",
       "observabilityAgentBuilder"
     ],
     "extraPublicDirs": ["common"]

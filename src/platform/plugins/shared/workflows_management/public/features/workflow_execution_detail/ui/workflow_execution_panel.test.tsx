@@ -11,8 +11,18 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import type { WorkflowExecutionDto, WorkflowYaml } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
+import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
+import { createMockWorkflowsCapabilities } from '@kbn/workflows-ui/mocks';
 import { WorkflowExecutionPanel } from './workflow_execution_panel';
-import { TestWrapper } from '../../../shared/test_utils';
+import { createStartServicesMock } from '../../../mocks';
+import { getTestProvider } from '../../../shared/mocks/test_providers';
+
+const mockNavigateToApp = jest.fn();
+
+jest.mock('@kbn/workflows-ui', () => ({
+  ...jest.requireActual('@kbn/workflows-ui'),
+  useWorkflowsCapabilities: jest.fn(),
+}));
 
 // Mock child components
 jest.mock('./cancel_execution_button', () => ({
@@ -98,14 +108,16 @@ describe('WorkflowExecutionPanel', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockNavigateToApp.mockReset();
+    jest.mocked(useWorkflowsCapabilities).mockReturnValue(createMockWorkflowsCapabilities());
   });
 
-  const renderComponent = (props = {}) => {
-    return render(
-      <TestWrapper>
-        <WorkflowExecutionPanel {...defaultProps} {...props} />
-      </TestWrapper>
-    );
+  const renderComponent = (props = {}, services = createStartServicesMock()) => {
+    services.application.navigateToApp = mockNavigateToApp;
+
+    return render(<WorkflowExecutionPanel {...defaultProps} {...props} />, {
+      wrapper: getTestProvider({ services }),
+    });
   };
 
   describe('rendering', () => {
@@ -167,7 +179,7 @@ describe('WorkflowExecutionPanel', () => {
       expect(screen.getByTestId('cancel-execution-button')).toBeInTheDocument();
     });
 
-    it('should show cancel button for cancelable status (WAITING_FOR_INPUT)', () => {
+    it('should show cancel button for WAITING_FOR_INPUT (it is a cancelable status)', () => {
       renderComponent({
         execution: { ...mockExecution, status: ExecutionStatus.WAITING_FOR_INPUT },
       });
@@ -191,6 +203,17 @@ describe('WorkflowExecutionPanel', () => {
     it('should not show cancel button for terminal status (FAILED)', () => {
       renderComponent({
         execution: { ...mockExecution, status: ExecutionStatus.FAILED },
+      });
+      expect(screen.queryByTestId('cancel-execution-button')).not.toBeInTheDocument();
+    });
+
+    it('should not show cancel button when finishedAt is set even if status were stale', () => {
+      renderComponent({
+        execution: {
+          ...mockExecution,
+          status: ExecutionStatus.RUNNING,
+          finishedAt: '2025-08-05T20:01:00.000Z',
+        },
       });
       expect(screen.queryByTestId('cancel-execution-button')).not.toBeInTheDocument();
     });
@@ -275,6 +298,91 @@ describe('WorkflowExecutionPanel', () => {
     it('should pass null selectedId when not provided', () => {
       renderComponent({ selectedId: null });
       expect(screen.getByText('No Selection')).toBeInTheDocument();
+    });
+  });
+
+  describe('replay button', () => {
+    it('should show replay button when done button is visible', () => {
+      renderComponent({
+        showBackButton: false,
+        execution: { ...mockExecution, status: ExecutionStatus.COMPLETED },
+      });
+      expect(screen.getByTestId('replayExecutionButton')).toBeInTheDocument();
+    });
+
+    it('should not show replay button when execution is still running', () => {
+      renderComponent({
+        showBackButton: false,
+        execution: { ...mockExecution, status: ExecutionStatus.RUNNING },
+      });
+      expect(screen.queryByTestId('replayExecutionButton')).not.toBeInTheDocument();
+    });
+
+    it('should not show replay button when showBackButton is true', () => {
+      renderComponent({
+        showBackButton: true,
+        execution: { ...mockExecution, status: ExecutionStatus.COMPLETED },
+      });
+      expect(screen.queryByTestId('replayExecutionButton')).not.toBeInTheDocument();
+    });
+
+    it('should call onReRunExecution when provided', () => {
+      const onReRunExecution = jest.fn();
+      renderComponent({
+        showBackButton: false,
+        execution: {
+          ...mockExecution,
+          status: ExecutionStatus.COMPLETED,
+          context: { inputs: { foo: 'bar' } },
+        },
+        onReRunExecution,
+      });
+
+      fireEvent.click(screen.getByTestId('replayExecutionButton'));
+
+      expect(onReRunExecution).toHaveBeenCalledWith({
+        workflowId: 'workflow-123',
+        executionId: 'exec-123',
+        context: { inputs: { foo: 'bar' } },
+      });
+      expect(mockNavigateToApp).not.toHaveBeenCalled();
+    });
+
+    it('should navigate to workflow detail with replay execution id on click', () => {
+      renderComponent({
+        showBackButton: false,
+        execution: { ...mockExecution, status: ExecutionStatus.COMPLETED },
+      });
+
+      fireEvent.click(screen.getByTestId('replayExecutionButton'));
+
+      expect(mockNavigateToApp).toHaveBeenCalledWith('workflows', {
+        path: '/workflow-123?replayExecutionId=exec-123',
+      });
+    });
+
+    it('should disable replay button when user lacks execute capability', () => {
+      jest.mocked(useWorkflowsCapabilities).mockReturnValue({
+        ...createMockWorkflowsCapabilities(),
+        canExecuteWorkflow: false,
+      });
+
+      renderComponent({
+        showBackButton: false,
+        execution: { ...mockExecution, status: ExecutionStatus.COMPLETED },
+      });
+
+      const replayButton = screen.getByTestId('replayExecutionButton');
+      expect(replayButton).toBeDisabled();
+    });
+
+    it('should enable replay button when user can execute workflow', () => {
+      renderComponent({
+        showBackButton: false,
+        execution: { ...mockExecution, status: ExecutionStatus.COMPLETED },
+      });
+
+      expect(screen.getByTestId('replayExecutionButton')).toBeEnabled();
     });
   });
 

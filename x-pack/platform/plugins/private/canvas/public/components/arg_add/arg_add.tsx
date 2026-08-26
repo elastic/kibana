@@ -6,12 +6,13 @@
  */
 
 import type { FC, ReactEventHandler } from 'react';
-import React from 'react';
-import PropTypes from 'prop-types';
+import React, { useMemo } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiDescriptionList,
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
+  useEuiTheme,
 } from '@elastic/eui';
 
 interface Props {
@@ -21,8 +22,26 @@ interface Props {
 }
 
 export const ArgAdd: FC<Props> = ({ onValueAdd = () => {}, displayName, help }) => {
+  const { euiTheme } = useEuiTheme();
+  const styles = useMemo(
+    () => css`
+      &:not(:last-child) {
+        border-bottom: ${euiTheme.border.thin};
+      }
+
+      &:hover {
+        background-color: ${euiTheme.colors.lightestShade};
+
+        label {
+          color: ${euiTheme.colors.darkestShade};
+        }
+      }
+    `,
+    [euiTheme]
+  );
+
   return (
-    <button className="canvasArg__add" onClick={onValueAdd}>
+    <button className="canvasArg__add" css={styles} onClick={onValueAdd}>
       <EuiDescriptionList compressed>
         <EuiDescriptionListTitle>{displayName}</EuiDescriptionListTitle>
         <EuiDescriptionListDescription>
@@ -31,10 +50,4 @@ export const ArgAdd: FC<Props> = ({ onValueAdd = () => {}, displayName, help }) 
       </EuiDescriptionList>
     </button>
   );
-};
-
-ArgAdd.propTypes = {
-  displayName: PropTypes.string.isRequired,
-  help: PropTypes.string.isRequired,
-  onValueAdd: PropTypes.func,
 };

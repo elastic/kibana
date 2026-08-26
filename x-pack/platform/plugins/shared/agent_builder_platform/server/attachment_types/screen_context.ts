@@ -36,6 +36,9 @@ export const createScreenContextAttachmentType = (): AttachmentTypeDefinition<
         },
       };
     },
+    isReadonly: true,
+    getAgentDescription: () =>
+      `The user's current location in Kibana (app, URL, time range). Read it before answering questions about 'this page', 'here', or anything the user is currently viewing.`,
     getTools: () => [],
   };
 };
@@ -51,6 +54,9 @@ const formatScreenContext = (data: ScreenContextAttachmentData): string => {
   }
   if (data.description) {
     parts.push(`Description: ${data.description}`);
+  }
+  if (data.time_range) {
+    parts.push(`Time range: ${data.time_range.from} to ${data.time_range.to}`);
   }
   if (data.additional_data) {
     parts.push(`Additional data: ${JSON.stringify(data.additional_data)}`);

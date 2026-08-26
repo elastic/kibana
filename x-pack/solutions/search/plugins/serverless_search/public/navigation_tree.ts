@@ -5,15 +5,28 @@
  * 2.0.
  */
 
-import { lazy } from 'react';
+import type { Location } from 'history';
+
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
+import type { CoreStart } from '@kbn/core/public';
 import { DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
 import { i18n } from '@kbn/i18n';
+import { getAlertingV2ManagementNavPanel } from '@kbn/alerting-v2-utils';
+import { getWorkflowsNavPanel } from '@kbn/deeplinks-workflows';
 
-const LazyIconAgents = lazy(() =>
-  import('@kbn/search-shared-ui/src/v2_icons/robot').then((m) => ({ default: m.iconRobot }))
-);
+function isEditingFromDashboard(
+  location: Location,
+  pathNameSerialized: string,
+  prepend: (path: string) => string
+): boolean {
+  const vizApps = ['/app/visualize', '/app/maps', '/app/lens'];
+  const isVizApp = vizApps.some((app) => pathNameSerialized.startsWith(prepend(app)));
+  const hasOriginatingApp =
+    location.search.includes('originatingApp=dashboards') ||
+    location.hash.includes('originatingApp=dashboards');
+  return isVizApp && hasOriginatingApp;
+}
 
 const NAV_TITLE = i18n.translate('xpack.serverlessSearch.nav.title', {
   defaultMessage: 'Elasticsearch',
@@ -41,10 +54,22 @@ const AI_TITLE = i18n.translate('xpack.serverlessSearch.nav.adminAndSettings.ai.
   defaultMessage: 'AI',
 });
 
+const PROJECT_PERFORMANCE_TITLE = i18n.translate(
+  'xpack.serverlessSearch.nav.adminAndSettings.projectPerformance.title',
+  {
+    defaultMessage: 'Project performance',
+  }
+);
+
 export function createNavigationTree({
-  isAppRegistered,
+  core,
   showAiAssistant = true,
-}: ApplicationStart & { showAiAssistant?: boolean }): NavigationTreeDefinition {
+  showPerformanceLink = false,
+}: ApplicationStart & {
+  core: CoreStart;
+  showAiAssistant?: boolean;
+  showPerformanceLink?: boolean;
+}): NavigationTreeDefinition {
   return {
     body: [
       {
@@ -55,21 +80,25 @@ export function createNavigationTree({
         breadcrumbStatus: 'hidden',
       },
       {
-        link: 'discover',
-      },
-      {
-        link: 'dashboards',
-        getIsActive: ({ pathNameSerialized, prepend }) => {
-          return pathNameSerialized.startsWith(prepend('/app/dashboards'));
-        },
-      },
-      {
-        icon: LazyIconAgents, // Temp svg until we have icon in EUI
+        icon: 'productAgent',
         link: 'agent_builder',
       },
       {
-        link: 'workflows',
+        icon: 'sparkles',
+        link: 'context_engine',
       },
+      {
+        link: 'discover',
+        icon: 'productDiscover',
+      },
+      {
+        link: 'dashboards',
+        icon: 'productDashboard',
+        getIsActive: ({ pathNameSerialized, prepend, location }) =>
+          pathNameSerialized.startsWith(prepend('/app/dashboards')) ||
+          isEditingFromDashboard(location, pathNameSerialized, prepend),
+      },
+      ...getWorkflowsNavPanel(core),
       {
         children: [
           {
@@ -82,7 +111,6 @@ export function createNavigationTree({
               { link: 'ml:dataDriftPage', sideNavStatus: 'hidden' },
               { link: 'ml:fileUpload', sideNavStatus: 'hidden' },
               { link: 'ml:indexDataVisualizer', sideNavStatus: 'hidden' },
-              { link: 'ml:indexDataVisualizerPage', sideNavStatus: 'hidden' },
             ],
           },
           {
@@ -91,7 +119,19 @@ export function createNavigationTree({
               defaultMessage: 'Anomaly detection',
             }),
             breadcrumbStatus: 'hidden',
-            children: [{ link: 'ml:anomalyExplorer' }, { link: 'ml:singleMetricViewer' }],
+            children: [
+              {
+                link: 'management:anomaly_detection',
+                title: i18n.translate(
+                  'xpack.serverlessSearch.nav.machineLearning.anomalyDetection.manageJobs',
+                  {
+                    defaultMessage: 'Manage jobs',
+                  }
+                ),
+              },
+              { link: 'ml:anomalyExplorer' },
+              { link: 'ml:singleMetricViewer' },
+            ],
           },
           {
             id: 'category-data_frame analytics',
@@ -117,7 +157,7 @@ export function createNavigationTree({
             ],
           },
         ],
-        icon: 'machineLearningApp',
+        icon: 'productML',
         id: 'machine_learning',
         renderAs: 'panelOpener',
         title: MACHINE_LEARNING_TITLE,
@@ -126,22 +166,12 @@ export function createNavigationTree({
         children: [
           {
             children: [
-              {
-                getIsActive: ({ pathNameSerialized, prepend }) => {
-                  return (
-                    pathNameSerialized.startsWith(
-                      prepend('/app/elasticsearch/index_management/indices')
-                    ) ||
-                    pathNameSerialized.startsWith(prepend('/app/management/data/index_management'))
-                  );
-                },
-                link: 'management:index_management',
-                breadcrumbStatus: 'hidden',
-              },
+              { link: 'management:index_management', breadcrumbStatus: 'hidden' },
               { link: 'management:index_lifecycle_management', breadcrumbStatus: 'hidden' },
               { link: 'management:snapshot_restore', breadcrumbStatus: 'hidden' },
               { link: 'management:transform', breadcrumbStatus: 'hidden' },
               { link: 'management:rollup_jobs', breadcrumbStatus: 'hidden' },
+              { link: 'management:data_federation', breadcrumbStatus: 'hidden' },
               { link: 'management:data_quality', breadcrumbStatus: 'hidden' },
               { link: 'management:data_usage', breadcrumbStatus: 'hidden' },
             ],
@@ -160,12 +190,11 @@ export function createNavigationTree({
           },
           {
             children: [
-              { link: 'searchSynonyms:synonyms', breadcrumbStatus: 'hidden' },
+              { link: 'searchSynonyms:synonyms' },
               { link: 'searchQueryRules' },
               { link: 'searchPlayground' },
             ],
             id: 'search_relevance',
-            breadcrumbStatus: 'hidden',
             title: i18n.translate('xpack.serverlessSearch.nav.ingest.relevance.title', {
               defaultMessage: 'Relevance',
             }),
@@ -182,7 +211,7 @@ export function createNavigationTree({
     footer: [
       {
         id: 'search_getting_started',
-        icon: 'launch',
+        icon: 'rocket',
         link: 'searchGettingStarted',
       },
       {
@@ -210,6 +239,7 @@ export function createNavigationTree({
             title: ACCESS_TITLE,
             children: [
               { link: 'management:api_keys', breadcrumbStatus: 'hidden' },
+              { link: 'management:application_connections', breadcrumbStatus: 'hidden' },
               { link: 'management:roles', breadcrumbStatus: 'hidden' },
             ],
           },
@@ -223,16 +253,21 @@ export function createNavigationTree({
                 id: 'cloudLinkBilling',
                 cloudLink: 'billingAndSub',
               },
-              {
-                id: 'cloudLinkDeployment',
-                cloudLink: 'deployment',
-                title: PERFORMANCE_TITLE,
-              },
+              ...(showPerformanceLink
+                ? [
+                    {
+                      id: 'cloudLinkDeployment',
+                      cloudLink: 'deployment' as const,
+                      title: PERFORMANCE_TITLE,
+                    },
+                  ]
+                : []),
               {
                 cloudLink: 'userAndRoles',
               },
             ],
           },
+          ...getAlertingV2ManagementNavPanel(core),
           {
             id: 'settings_alerts',
             title: ALERTS_AND_INSIGHTS_TITLE,
@@ -244,17 +279,45 @@ export function createNavigationTree({
             ],
           },
           {
+            id: 'settings_project_performance',
+            title: PROJECT_PERFORMANCE_TITLE,
+            breadcrumbStatus: 'hidden',
+            children: [
+              {
+                link: 'management:queryActivity',
+                breadcrumbStatus: 'hidden',
+                badgeType: 'new',
+              },
+            ],
+          },
+          {
             id: 'settings_ml',
             title: MACHINE_LEARNING_TITLE,
             children: [
+              { link: 'management:overview', breadcrumbStatus: 'hidden' },
               { link: 'management:trained_models', breadcrumbStatus: 'hidden' },
-              {
-                id: 'searchInferenceEndpoints',
-                link: 'searchInferenceEndpoints',
-                breadcrumbStatus: 'hidden',
-              },
               { link: 'management:anomaly_detection' },
               { link: 'management:analytics' },
+            ],
+          },
+          {
+            id: 'settings_model_management',
+            title: i18n.translate('xpack.serverlessSearch.nav.adminAndSettings.modelManagement', {
+              defaultMessage: 'Model Management',
+            }),
+            children: [
+              {
+                id: 'searchInferenceEndpointsElasticInferenceService',
+                link: 'management:elastic_inference_service',
+              },
+              {
+                id: 'searchInferenceEndpoints',
+                link: 'management:inference_endpoints',
+              },
+              {
+                id: 'searchInferenceEndpointsModelSettings',
+                link: 'management:model_settings',
+              },
             ],
           },
           {
@@ -262,6 +325,7 @@ export function createNavigationTree({
             title: AI_TITLE,
             children: [
               { link: 'management:genAiSettings', breadcrumbStatus: 'hidden' },
+              { link: 'management:evals', breadcrumbStatus: 'hidden' },
               ...(showAiAssistant
                 ? [
                     {
@@ -278,7 +342,6 @@ export function createNavigationTree({
             children: [
               { link: 'management:dataViews', breadcrumbStatus: 'hidden' },
               { link: 'management:spaces', breadcrumbStatus: 'hidden' },
-              { link: 'visualize' },
               { link: 'management:objects', breadcrumbStatus: 'hidden' },
               { link: 'management:filesManagement', breadcrumbStatus: 'hidden' },
               { link: 'management:reporting', breadcrumbStatus: 'hidden' },
@@ -303,7 +366,3 @@ export function createNavigationTree({
     ],
   };
 }
-
-export const navigationTree = (application: ApplicationStart): NavigationTreeDefinition => {
-  return createNavigationTree(application);
-};

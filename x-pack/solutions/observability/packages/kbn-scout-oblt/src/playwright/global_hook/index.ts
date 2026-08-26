@@ -5,13 +5,24 @@
  * 2.0.
  */
 
-import { globalSetupHook as baseGlobalSetupHook, mergeTests } from '@kbn/scout';
+import {
+  globalSetupHook as baseGlobalSetupHook,
+  globalTeardownHook as baseGlobalTeardownHook,
+  mergeTests,
+} from '@kbn/scout';
 import { profilingSetupFixture } from '../fixtures/worker/profiling/profiling_setup_fixture';
 import { sloDataFixture } from '../fixtures/worker';
 
 // Create a custom global setup hook that includes profiling / slo setup
 export const globalSetupHook = mergeTests(
   baseGlobalSetupHook,
+  profilingSetupFixture,
+  sloDataFixture
+);
+
+// Mirror the setup hook for symmetry
+export const globalTeardownHook = mergeTests(
+  baseGlobalTeardownHook,
   profilingSetupFixture,
   sloDataFixture
 );

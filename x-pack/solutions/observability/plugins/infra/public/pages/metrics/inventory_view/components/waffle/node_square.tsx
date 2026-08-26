@@ -50,24 +50,6 @@ const NodeContainer = ({ children, ...props }: NodeProps<HTMLButtonElement>) => 
   </button>
 );
 
-const NodeContainerSmall = ({
-  children,
-  ...props
-}: NodeProps<HTMLButtonElement> & { color: string }) => (
-  <button
-    css={css`
-      cursor: pointer;
-      position: relative;
-      background-color: ${darken(0.1, props.color)};
-      border-radius: 3px;
-      margin: 2px;
-      box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
-    `}
-    {...props}
-  >
-    {children}
-  </button>
-);
 const ValueInner = ({ children, ...props }: NodeProps) => {
   const { euiTheme } = useEuiTheme();
 
@@ -101,23 +83,32 @@ const ValueInner = ({ children, ...props }: NodeProps) => {
     </div>
   );
 };
-const SquareOuter = ({ children, ...props }: NodeProps & { color: string }) => (
-  <div
-    css={css`
-      position: absolute;
-      top: 4px;
-      left: 4px;
-      bottom: 4px;
-      right: 4px;
-      background-color: ${darken(0.1, props.color)};
-      border-radius: 3px;
-      box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
-    `}
-    {...props}
-  >
-    {children}
-  </div>
-);
+const SquareOuter = ({
+  children,
+  isSmall,
+  ...props
+}: NodeProps & { color: string; isSmall?: boolean }) => {
+  const { euiTheme } = useEuiTheme();
+  const inset = isSmall ? 0 : euiTheme.size.xs;
+
+  return (
+    <div
+      css={css`
+        position: absolute;
+        top: ${inset};
+        left: ${inset};
+        bottom: ${inset};
+        right: ${inset};
+        background-color: ${darken(0.1, props.color)};
+        border-radius: 3px;
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+      `}
+      {...props}
+    >
+      {children}
+    </div>
+  );
+};
 const SquareInner = ({ children, ...props }: NodeProps & { color: string }) => (
   <div
     css={css`
@@ -183,14 +174,16 @@ export const NodeSquare = ({
   });
   const style: CSSProperties | undefined = showBorder ? { border: 'solid 4px #000' } : undefined;
 
-  return valueMode || ellipsisMode ? (
+  const isSmall = !valueMode && !ellipsisMode;
+
+  return (
     <NodeContainer
       data-test-subj="nodeContainer"
       style={{ width: squareSize || 0, height: squareSize || 0 }}
       onClick={togglePopover}
       className="buttonContainer"
     >
-      <SquareOuter color={color} style={style}>
+      <SquareOuter color={color} style={style} isSmall={isSmall}>
         <SquareInner color={color}>
           {valueMode ? (
             <ValueInner aria-label={nodeAriaLabel}>
@@ -201,25 +194,13 @@ export const NodeSquare = ({
                 {value}
               </Value>
             </ValueInner>
-          ) : (
-            ellipsisMode && (
-              <ValueInner aria-label={nodeAriaLabel}>
-                {}
-                <Label color={color}>{'...'}</Label>
-              </ValueInner>
-            )
-          )}
+          ) : ellipsisMode ? (
+            <ValueInner aria-label={nodeAriaLabel}>
+              <Label color={color}>{'...'}</Label>
+            </ValueInner>
+          ) : null}
         </SquareInner>
       </SquareOuter>
     </NodeContainer>
-  ) : (
-    <NodeContainerSmall
-      data-test-subj="nodeContainer"
-      style={{ width: squareSize || 0, height: squareSize || 0, ...style }}
-      onClick={togglePopover}
-      onKeyPress={togglePopover}
-      color={color}
-      tabIndex={0}
-    />
   );
 };

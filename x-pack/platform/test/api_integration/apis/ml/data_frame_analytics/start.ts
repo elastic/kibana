@@ -10,7 +10,7 @@ import {
   type DataFrameAnalyticsConfig,
   DATA_FRAME_TASK_STATE,
 } from '@kbn/ml-data-frame-analytics-utils';
-import type { DeepPartial } from '@kbn/ml-plugin/common/types/common';
+import type { DeepPartial } from '@kbn/ml-common-types/common';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../services/ml/security_common';
 import { getCommonRequestHeader } from '../../../services/ml/common_api';

@@ -17,7 +17,7 @@ export const BASIC_CELL_RENDERER_TRUNCATE_TEST_ID =
 
 export interface BasicCellRendererProps {
   /**
-   * Alert data passed from the renderCellValue callback via the AlertWithLegacyFormats interface
+   * Alert data passed from the renderCellValue callback
    */
   alert: Alert;
   /**

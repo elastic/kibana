@@ -6,6 +6,7 @@
  */
 
 import { StreamsAppLocatorDefinition } from './streams_locator';
+import type { StreamsAppLocatorDefinitionParams } from './streams_locator';
 
 describe('StreamsAppLocatorDefinition', () => {
   let locator: StreamsAppLocatorDefinition;
@@ -71,17 +72,17 @@ describe('StreamsAppLocatorDefinition', () => {
     describe('page state handling', () => {
       it('should include page state in URL for enrichment management tab', async () => {
         const pageState = {
-          v: 1,
+          v: 1 as const,
           dataSources: [
             {
-              type: 'kql-samples',
+              type: 'kql-samples' as const,
               name: 'Test',
               query: { language: 'kuery', query: '_id: test-id' },
               enabled: true,
             },
           ],
         };
-        const params = {
+        const params: StreamsAppLocatorDefinitionParams = {
           name: 'test-stream',
           managementTab: 'enrichment',
           pageState,

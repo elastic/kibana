@@ -16,7 +16,7 @@ import {
   CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX_OLD_VERSIONS,
   CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX_LEGACY_VERSIONS,
 } from '@kbn/cloud-security-posture-common';
-import type { KbnClientSavedObjects } from '@kbn/test/src/kbn_client/kbn_client_saved_objects';
+import type { KbnClientSavedObjects } from '@kbn/kbn-client';
 import { CLOUD_SECURITY_PLUGIN_VERSION } from '@kbn/cloud-security-posture-common';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
@@ -173,6 +173,9 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     });
 
     afterEach(async () => {
+      // Park the browser off CSP so its status polling stops recreating the CDR data views (via the onPostAuth hook) during the next test's delete-and-confirm loop.
+      await pageObjects.common.navigateToApp('home');
+
       await kibanaServer.savedObjects.clean({
         types: ['index-pattern'],
         space: 'default',

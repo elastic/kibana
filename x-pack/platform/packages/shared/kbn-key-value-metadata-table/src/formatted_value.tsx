@@ -5,13 +5,19 @@
  * 2.0.
  */
 
-import { isBoolean, isNumber, isObject } from 'lodash';
+import { isBoolean, isNumber, isObject, isString } from 'lodash';
+import moment from 'moment-timezone';
+import type { ReactNode } from 'react';
 import React from 'react';
 import styled from '@emotion/styled';
 import { i18n } from '@kbn/i18n';
 
+export type RenderKeyValue = (key: string, value: unknown) => ReactNode | undefined;
+
+const BARE_YEAR_ISO = /^\d{4}$/;
+
 const EmptyValue = styled.span`
-  color: ${({ theme }) => theme.euiTheme.colors.mediumShade};
+  color: ${({ theme }) => theme.euiTheme.colors.textSubdued};
   text-align: left;
 `;
 
@@ -23,11 +29,39 @@ export function FormattedKey({ k, value }: { k: string; value: unknown }): JSX.E
   return <React.Fragment>{k}</React.Fragment>;
 }
 
-export function FormattedValue({ value }: { value: any }): JSX.Element {
+export function FormattedValue({
+  value,
+  dateFormat,
+  dateTimezone,
+  fieldKey,
+  renderValue,
+}: {
+  value: unknown;
+  dateFormat: string;
+  dateTimezone: string;
+  fieldKey?: string;
+  renderValue?: RenderKeyValue;
+}): JSX.Element {
+  if (renderValue && fieldKey !== undefined) {
+    const customRendered = renderValue(fieldKey, value);
+    if (customRendered !== undefined) {
+      return <React.Fragment>{customRendered}</React.Fragment>;
+    }
+  }
+
+  const usableTimezone = dateTimezone === 'Browser' ? moment.tz.guess() : dateTimezone;
+
+  const valueAsDate =
+    isString(value) && !BARE_YEAR_ISO.test(value)
+      ? moment(value, moment.ISO_8601, true)
+      : undefined;
+
   if (isObject(value)) {
     return <pre>{JSON.stringify(value, null, 4)}</pre>;
   } else if (isBoolean(value) || isNumber(value)) {
     return <React.Fragment>{String(value)}</React.Fragment>;
+  } else if (isString(value) && valueAsDate?.isValid()) {
+    return <React.Fragment>{valueAsDate.tz(usableTimezone).format(dateFormat)}</React.Fragment>;
   } else if (!value) {
     return (
       <EmptyValue>
@@ -38,5 +72,5 @@ export function FormattedValue({ value }: { value: any }): JSX.Element {
     );
   }
 
-  return <React.Fragment>{value}</React.Fragment>;
+  return <React.Fragment>{String(value)}</React.Fragment>;
 }

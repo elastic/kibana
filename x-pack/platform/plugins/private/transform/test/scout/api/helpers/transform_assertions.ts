@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
 import { TRANSFORM_STATE, type TransformId } from '../../../../common';
 import type { TransformApiServicesFixture } from '../fixtures';

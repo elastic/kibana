@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isCCSRemoteIndexName } from '@kbn/es-query';
+import { isNonLocalIndexName } from '@kbn/es-query';
 import type { MonitoringConfig } from '../server/config';
 
 /**
@@ -68,7 +68,7 @@ export function prefixIndexPatternWithCcs(
  * @return {String} {@code null} if none. Otherwise the cluster prefix.
  */
 export function parseCrossClusterPrefix(indexName: string): string | null {
-  const isCcs = isCCSRemoteIndexName(indexName);
+  const isCcs = isNonLocalIndexName(indexName);
   if (!isCcs) {
     return null;
   }

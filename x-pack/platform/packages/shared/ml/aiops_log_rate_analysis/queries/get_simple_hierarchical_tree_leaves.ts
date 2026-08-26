@@ -10,14 +10,15 @@ import type { SignificantItemGroup } from '@kbn/ml-agg-utils';
 import { stringHash } from '@kbn/ml-string-hash';
 
 import type { SimpleHierarchicalTreeNode } from '../types';
+import { getUniquePairKeys } from './get_unique_pair_keys';
+import { isSubsetOfAcceptedLeaves } from './is_subset_of_accepted_leaves';
 
 /**
  * Get leaves from hierarchical tree.
  */
 export function getSimpleHierarchicalTreeLeaves(
   tree: SimpleHierarchicalTreeNode,
-  leaves: SignificantItemGroup[],
-  level = 1
+  leaves: SignificantItemGroup[]
 ) {
   if (tree.children.length === 0) {
     leaves.push({
@@ -28,7 +29,7 @@ export function getSimpleHierarchicalTreeLeaves(
     });
   } else {
     for (const child of tree.children) {
-      const newLeaves = getSimpleHierarchicalTreeLeaves(child, [], level + 1);
+      const newLeaves = getSimpleHierarchicalTreeLeaves(child, []);
       if (newLeaves.length > 0) {
         leaves.push(...newLeaves);
       }
@@ -43,19 +44,36 @@ export function getSimpleHierarchicalTreeLeaves(
   const sortedLeaves = orderBy(leaves, [(d) => d.group.length], ['desc']);
 
   // Checks if a group is a subset of items already present in a larger group.
-  const filteredLeaves = sortedLeaves.reduce<SignificantItemGroup[]>((p, c) => {
-    const isSubset = p.some((pG) =>
-      c.group.every((cGI) =>
-        pG.group.some((pGI) => pGI.fieldName === cGI.fieldName && pGI.fieldValue === cGI.fieldValue)
-      )
-    );
+  // `acceptedLeafIndexesByPairKey` lets us look up which accepted leaves contain
+  // each field/value pair, avoiding nested scans across all accepted groups.
+  const acceptedLeafIndexesByPairKey = new Map<string, number[]>();
+  const filteredLeaves = sortedLeaves.reduce<SignificantItemGroup[]>(
+    (acceptedLeaves, candidateLeaf) => {
+      const candidatePairKeys = getUniquePairKeys(candidateLeaf.group);
+      const isSubset = isSubsetOfAcceptedLeaves(
+        candidatePairKeys,
+        acceptedLeafIndexesByPairKey,
+        acceptedLeaves.length
+      );
 
-    if (!isSubset) {
-      p.push(c);
-    }
+      if (!isSubset) {
+        const acceptedLeafIndex = acceptedLeaves.length;
+        acceptedLeaves.push(candidateLeaf);
 
-    return p;
-  }, []);
+        for (const pairKey of candidatePairKeys) {
+          const postings = acceptedLeafIndexesByPairKey.get(pairKey);
+          if (postings === undefined) {
+            acceptedLeafIndexesByPairKey.set(pairKey, [acceptedLeafIndex]);
+          } else {
+            postings.push(acceptedLeafIndex);
+          }
+        }
+      }
+
+      return acceptedLeaves;
+    },
+    []
+  );
 
   return filteredLeaves;
 }

@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import { createMockConnector } from '@kbn/actions-plugin/server/application/connector/mocks';
-import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
+import type { InferenceConnector } from '@kbn/inference-common';
+import { InferenceConnectorType } from '@kbn/inference-common';
 
-export const mockExperimentConnector: Connector = createMockConnector({
+export const mockExperimentConnector: InferenceConnector = {
+  type: InferenceConnectorType.Gemini,
   name: 'Gemini 1.5 Pro 002',
-  actionTypeId: '.gemini',
+  connectorId: 'gemini-1-5-pro-002',
   config: {
     apiUrl: 'https://example.com',
     defaultModel: 'gemini-1.5-pro-002',
     gcpRegion: 'test-region',
     gcpProjectID: 'test-project-id',
   },
-  id: 'gemini-1-5-pro-002',
+  capabilities: {},
+  isInferenceEndpoint: false,
   isPreconfigured: true,
-});
+};

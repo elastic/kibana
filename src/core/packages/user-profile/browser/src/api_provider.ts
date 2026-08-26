@@ -13,8 +13,9 @@ import type { UserProfileService } from './service';
 
 export type CoreUserProfileDelegateContract = Omit<
   UserProfileService,
-  'getUserProfile$' | 'getEnabled$'
+  'getUserProfile$' | 'getEnabled$' | 'getDataUpdates$'
 > & {
   userProfile$: Observable<UserProfileData | null>;
   enabled$: Observable<boolean>;
+  dataUpdates$: Observable<UserProfileData>;
 };

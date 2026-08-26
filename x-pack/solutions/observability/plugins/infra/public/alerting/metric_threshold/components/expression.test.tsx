@@ -27,21 +27,41 @@ const mockDataView = {
   toSpec: () => ({}),
 } as jest.Mocked<DataView>;
 
+const mockRefetch = jest.fn();
+
+const mockMetricsView = {
+  indices: 'metricbeat-*',
+  timeFieldName: mockDataView.timeFieldName,
+  fields: mockDataView.fields,
+  dataViewReference: mockDataView,
+} as ResolvedDataView;
+
+const defaultUseMetricsViewWithSource: {
+  metricsView: ResolvedDataView | undefined;
+  source: { id: string } | undefined;
+  isLoading: boolean;
+  error: string | undefined;
+  refetch: jest.Mock;
+} = {
+  metricsView: mockMetricsView,
+  source: { id: 'default' },
+  isLoading: false,
+  error: undefined,
+  refetch: mockRefetch,
+};
+
+const mockUseMetricsViewWithSource = jest.fn(() => defaultUseMetricsViewWithSource);
+
+jest.mock('../hooks/use_metrics_view_with_source', () => ({
+  useMetricsViewWithSource: () => mockUseMetricsViewWithSource(),
+}));
+
+// `Expressions` renders child components (e.g. `UnifiedSearchBar`) that still read
+// `useMetricsDataViewContext`/`useSourceContext` directly from the container.
 jest.mock('../../../containers/metrics_source', () => ({
   withSourceProvider: () => jest.fn,
-  useSourceContext: () => ({
-    source: { id: 'default' },
-  }),
-  useMetricsDataViewContext: () => ({
-    metricsView: {
-      indices: 'metricbeat-*',
-      timeFieldName: mockDataView.timeFieldName,
-      fields: mockDataView.fields,
-      dataViewReference: mockDataView,
-    } as ResolvedDataView,
-    loading: false,
-    error: undefined,
-  }),
+  useSourceContext: () => ({ source: { id: 'default' } }),
+  useMetricsDataViewContext: () => ({ metricsView: mockMetricsView }),
 }));
 
 jest.mock('../../../hooks/use_kibana', () => ({
@@ -54,6 +74,11 @@ jest.mock('../../../hooks/use_kibana', () => ({
 }));
 
 describe('Expression', () => {
+  beforeEach(() => {
+    mockUseMetricsViewWithSource.mockReturnValue(defaultUseMetricsViewWithSource);
+    mockRefetch.mockClear();
+  });
+
   async function setup(currentOptions: {
     metrics?: MetricsExplorerMetric[];
     filterQuery?: string;
@@ -121,6 +146,49 @@ describe('Expression', () => {
         aggType: 'cardinality',
       },
     ]);
+  });
+
+  it('should show a loading indicator while the metrics view is being fetched', async () => {
+    mockUseMetricsViewWithSource.mockReturnValue({
+      ...defaultUseMetricsViewWithSource,
+      metricsView: undefined,
+      isLoading: true,
+    });
+
+    const { wrapper } = await setup({});
+
+    expect(wrapper.find('[data-test-subj="infraMetricThresholdConditionsLoading"]').exists()).toBe(
+      true
+    );
+    expect(wrapper.find('[data-test-subj="infraMetricThresholdConditionsError"]').exists()).toBe(
+      false
+    );
+  });
+
+  it('should show an error callout with a retry action when the metrics view fails to load', async () => {
+    mockUseMetricsViewWithSource.mockReturnValue({
+      ...defaultUseMetricsViewWithSource,
+      metricsView: undefined,
+      error: 'Internal Server Error',
+    });
+
+    const { wrapper } = await setup({});
+
+    expect(wrapper.find('[data-test-subj="infraMetricThresholdConditionsError"]').exists()).toBe(
+      true
+    );
+    expect(wrapper.find('[data-test-subj="infraMetricThresholdConditionsLoading"]').exists()).toBe(
+      false
+    );
+    expect(
+      wrapper.find('[data-test-subj="infraMetricThresholdConditionsError"]').first().text()
+    ).toContain('Internal Server Error');
+
+    wrapper
+      .find('button[data-test-subj="infraMetricThresholdConditionsErrorTryAgain"]')
+      .simulate('click');
+
+    expect(mockRefetch).toHaveBeenCalled();
   });
 });
 

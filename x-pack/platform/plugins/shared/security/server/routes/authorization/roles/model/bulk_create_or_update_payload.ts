@@ -12,9 +12,17 @@ import { getPutPayloadSchema } from './put_payload';
 export function getBulkCreateOrUpdatePayloadSchema(
   getBasePrivilegeNames: () => { global: string[]; space: string[] }
 ) {
-  return schema.object({
-    roles: schema.recordOf(schema.string(), getPutPayloadSchema(getBasePrivilegeNames)),
-  });
+  return schema.object(
+    {
+      roles: schema.recordOf(schema.string(), getPutPayloadSchema(getBasePrivilegeNames)),
+    },
+    {
+      meta: {
+        id: 'security_roles_bulk_create_or_update_payload',
+        description: 'The request body for bulk creating or updating roles.',
+      },
+    }
+  );
 }
 
 export type BulkCreateOrUpdateRolesPayloadSchemaType = TypeOf<

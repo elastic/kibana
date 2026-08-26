@@ -42,7 +42,7 @@ describe('options list type-specific search queries', () => {
       const optionsListRequestBodyMock: OptionsListRequestBody = {
         size: 10,
         fieldName: 'success',
-        allowExpensiveQueries: true,
+
         sort: { by: '_key', direction: 'desc' },
         fieldSpec: { type: 'boolean' } as unknown as FieldSpec,
       };
@@ -55,7 +55,7 @@ describe('options list type-specific search queries', () => {
         const optionsListRequestBodyMock: OptionsListRequestBody = {
           size: 10,
           searchString: 'cooool',
-          allowExpensiveQueries: true,
+
           fieldName: 'coolTestField.keyword',
           sort: { by: '_key', direction: 'desc' },
           fieldSpec: { type: 'string' } as unknown as FieldSpec,
@@ -66,31 +66,30 @@ describe('options list type-specific search queries', () => {
         expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
           .toMatchInlineSnapshot(`
           Object {
-            "filteredSuggestions": Object {
-              "aggs": Object {
-                "suggestions": Object {
-                  "terms": Object {
-                    "field": "coolTestField.keyword",
-                    "order": Object {
-                      "_key": "desc",
-                    },
-                    "shard_size": 10,
-                    "size": 10,
-                  },
+            "suggestions": Object {
+              "terms": Object {
+                "field": "coolTestField.keyword",
+                "order": Object {
+                  "_key": "desc",
                 },
-                "unique_terms": Object {
-                  "cardinality": Object {
-                    "field": "coolTestField.keyword",
-                  },
-                },
+                "shard_size": 10,
+                "size": 10,
               },
-              "filter": Object {
-                "prefix": Object {
-                  "coolTestField.keyword": Object {
-                    "case_insensitive": true,
-                    "value": "cooool",
-                  },
-                },
+            },
+            "unique_terms": Object {
+              "cardinality": Object {
+                "field": "coolTestField.keyword",
+              },
+            },
+          }
+        `);
+        expect(suggestionAggBuilder.buildSearchFilter!(optionsListRequestBodyMock))
+          .toMatchInlineSnapshot(`
+          Object {
+            "prefix": Object {
+              "coolTestField.keyword": Object {
+                "case_insensitive": true,
+                "value": "cooool",
               },
             },
           }
@@ -102,7 +101,7 @@ describe('options list type-specific search queries', () => {
           size: 10,
           searchString: 'c',
           searchTechnique: 'wildcard',
-          allowExpensiveQueries: true,
+
           fieldName: 'coolTestField.keyword',
           sort: { by: '_key', direction: 'desc' },
           fieldSpec: { type: 'string' } as unknown as FieldSpec,
@@ -113,31 +112,30 @@ describe('options list type-specific search queries', () => {
         expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
           .toMatchInlineSnapshot(`
           Object {
-            "filteredSuggestions": Object {
-              "aggs": Object {
-                "suggestions": Object {
-                  "terms": Object {
-                    "field": "coolTestField.keyword",
-                    "order": Object {
-                      "_key": "desc",
-                    },
-                    "shard_size": 10,
-                    "size": 10,
-                  },
+            "suggestions": Object {
+              "terms": Object {
+                "field": "coolTestField.keyword",
+                "order": Object {
+                  "_key": "desc",
                 },
-                "unique_terms": Object {
-                  "cardinality": Object {
-                    "field": "coolTestField.keyword",
-                  },
-                },
+                "shard_size": 10,
+                "size": 10,
               },
-              "filter": Object {
-                "wildcard": Object {
-                  "coolTestField.keyword": Object {
-                    "case_insensitive": true,
-                    "value": "*c*",
-                  },
-                },
+            },
+            "unique_terms": Object {
+              "cardinality": Object {
+                "field": "coolTestField.keyword",
+              },
+            },
+          }
+        `);
+        expect(suggestionAggBuilder.buildSearchFilter!(optionsListRequestBodyMock))
+          .toMatchInlineSnapshot(`
+          Object {
+            "wildcard": Object {
+              "coolTestField.keyword": Object {
+                "case_insensitive": true,
+                "value": "*c*",
               },
             },
           }
@@ -149,7 +147,7 @@ describe('options list type-specific search queries', () => {
           size: 10,
           searchString: '.c?o&o[l*',
           searchTechnique: 'wildcard',
-          allowExpensiveQueries: true,
+
           fieldName: 'coolTestField.keyword',
           sort: { by: '_key', direction: 'desc' },
           fieldSpec: { type: 'string' } as unknown as FieldSpec,
@@ -160,31 +158,30 @@ describe('options list type-specific search queries', () => {
         expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
           .toMatchInlineSnapshot(`
           Object {
-            "filteredSuggestions": Object {
-              "aggs": Object {
-                "suggestions": Object {
-                  "terms": Object {
-                    "field": "coolTestField.keyword",
-                    "order": Object {
-                      "_key": "desc",
-                    },
-                    "shard_size": 10,
-                    "size": 10,
-                  },
+            "suggestions": Object {
+              "terms": Object {
+                "field": "coolTestField.keyword",
+                "order": Object {
+                  "_key": "desc",
                 },
-                "unique_terms": Object {
-                  "cardinality": Object {
-                    "field": "coolTestField.keyword",
-                  },
-                },
+                "shard_size": 10,
+                "size": 10,
               },
-              "filter": Object {
-                "wildcard": Object {
-                  "coolTestField.keyword": Object {
-                    "case_insensitive": true,
-                    "value": "*.c\\\\?o&o[l\\\\**",
-                  },
-                },
+            },
+            "unique_terms": Object {
+              "cardinality": Object {
+                "field": "coolTestField.keyword",
+              },
+            },
+          }
+        `);
+        expect(suggestionAggBuilder.buildSearchFilter!(optionsListRequestBodyMock))
+          .toMatchInlineSnapshot(`
+          Object {
+            "wildcard": Object {
+              "coolTestField.keyword": Object {
+                "case_insensitive": true,
+                "value": "*.c\\\\?o&o[l\\\\**",
               },
             },
           }
@@ -195,7 +192,7 @@ describe('options list type-specific search queries', () => {
         const optionsListRequestBodyMock: OptionsListRequestBody = {
           size: 10,
           searchString: 'cooool',
-          allowExpensiveQueries: true,
+
           fieldName: 'coolNestedField',
           sort: { by: '_count', direction: 'asc' },
           fieldSpec: {
@@ -211,31 +208,19 @@ describe('options list type-specific search queries', () => {
           Object {
             "nestedSuggestions": Object {
               "aggs": Object {
-                "filteredSuggestions": Object {
-                  "aggs": Object {
-                    "suggestions": Object {
-                      "terms": Object {
-                        "field": "coolNestedField",
-                        "order": Object {
-                          "_count": "asc",
-                        },
-                        "shard_size": 10,
-                        "size": 10,
-                      },
+                "suggestions": Object {
+                  "terms": Object {
+                    "field": "coolNestedField",
+                    "order": Object {
+                      "_count": "asc",
                     },
-                    "unique_terms": Object {
-                      "cardinality": Object {
-                        "field": "coolNestedField",
-                      },
-                    },
+                    "shard_size": 10,
+                    "size": 10,
                   },
-                  "filter": Object {
-                    "prefix": Object {
-                      "coolNestedField": Object {
-                        "case_insensitive": true,
-                        "value": "cooool",
-                      },
-                    },
+                },
+                "unique_terms": Object {
+                  "cardinality": Object {
+                    "field": "coolNestedField",
                   },
                 },
               },
@@ -245,6 +230,17 @@ describe('options list type-specific search queries', () => {
             },
           }
           `);
+        expect(suggestionAggBuilder.buildSearchFilter!(optionsListRequestBodyMock))
+          .toMatchInlineSnapshot(`
+          Object {
+            "prefix": Object {
+              "coolNestedField": Object {
+                "case_insensitive": true,
+                "value": "cooool",
+              },
+            },
+          }
+        `);
       });
     });
 
@@ -253,7 +249,7 @@ describe('options list type-specific search queries', () => {
         const optionsListRequestBodyMock: OptionsListRequestBody = {
           size: 10,
           fieldName: 'clientip',
-          allowExpensiveQueries: true,
+
           sort: { by: '_key', direction: 'asc' },
           searchString: '1.a.2.b.3.z',
           fieldSpec: { type: 'ip' } as unknown as FieldSpec,
@@ -268,7 +264,7 @@ describe('options list type-specific search queries', () => {
         const optionsListRequestBodyMock: OptionsListRequestBody = {
           size: 10,
           fieldName: 'clientip',
-          allowExpensiveQueries: true,
+
           searchString: '41.77.243.255',
           sort: { by: '_count', direction: 'asc' },
           fieldSpec: { type: 'ip' } as unknown as FieldSpec,
@@ -316,7 +312,7 @@ describe('options list type-specific search queries', () => {
         const optionsListRequestBodyMock: OptionsListRequestBody = {
           size: 10,
           fieldName: 'clientip',
-          allowExpensiveQueries: true,
+
           sort: { by: '_key', direction: 'asc' },
           fieldSpec: { type: 'ip' } as unknown as FieldSpec,
           searchString: 'f688:fb50:6433:bba2:604:f2c:194a:d3c5',
@@ -365,7 +361,7 @@ describe('options list type-specific search queries', () => {
           size: 10,
           fieldName: 'clientip',
           searchString: '41.77',
-          allowExpensiveQueries: true,
+
           fieldSpec: { type: 'ip' } as unknown as FieldSpec,
         };
         const suggestionAggBuilder = getSearchSuggestionsAggregationBuilder(
@@ -413,7 +409,7 @@ describe('options list type-specific search queries', () => {
           size: 10,
           fieldName: 'clientip',
           searchString: 'cdb6:',
-          allowExpensiveQueries: true,
+
           sort: { by: '_count', direction: 'desc' },
           fieldSpec: { type: 'ip' } as unknown as FieldSpec,
         };
@@ -463,7 +459,7 @@ describe('options list type-specific search queries', () => {
         const optionsListRequestBodyMock: OptionsListRequestBody = {
           size: 10,
           fieldName: 'bytes',
-          allowExpensiveQueries: true,
+
           sort: { by: '_key', direction: 'asc' },
           searchString: '123a',
           fieldSpec: { type: 'number' } as unknown as FieldSpec,
@@ -483,7 +479,7 @@ describe('options list type-specific search queries', () => {
       const optionsListRequestBodyMock: OptionsListRequestBody = {
         size: 10,
         searchString: 'cool',
-        allowExpensiveQueries: true,
+
         fieldName: 'coolTestField.keyword',
         fieldSpec: { type: 'string' } as unknown as FieldSpec,
       };
@@ -491,7 +487,55 @@ describe('options list type-specific search queries', () => {
         optionsListRequestBodyMock
       );
       rawSearchResponseMock.aggregations = {
-        filteredSuggestions: {
+        suggestions: {
+          buckets: [
+            { doc_count: 5, key: 'cool1' },
+            { doc_count: 15, key: 'cool2' },
+            { doc_count: 10, key: 'cool3' },
+          ],
+        },
+        unique_terms: {
+          value: 3,
+        },
+      };
+      expect(suggestionAggBuilder.parse(rawSearchResponseMock, optionsListRequestBodyMock))
+        .toMatchInlineSnapshot(`
+        Object {
+          "suggestions": Array [
+            Object {
+              "docCount": 5,
+              "value": "cool1",
+            },
+            Object {
+              "docCount": 15,
+              "value": "cool2",
+            },
+            Object {
+              "docCount": 10,
+              "value": "cool3",
+            },
+          ],
+          "totalCardinality": 3,
+        }
+      `);
+    });
+
+    test('parses string nested result', () => {
+      const optionsListRequestBodyMock: OptionsListRequestBody = {
+        size: 10,
+        searchString: 'co',
+        fieldName: 'coolNestedField',
+
+        fieldSpec: {
+          type: 'string',
+          subType: { type: 'string', nested: { path: 'path.to.nested' } },
+        } as unknown as FieldSpec,
+      };
+      const suggestionAggBuilder = getSearchSuggestionsAggregationBuilder(
+        optionsListRequestBodyMock
+      );
+      rawSearchResponseMock.aggregations = {
+        nestedSuggestions: {
           suggestions: {
             buckets: [
               { doc_count: 5, key: 'cool1' },
@@ -526,64 +570,12 @@ describe('options list type-specific search queries', () => {
       `);
     });
 
-    test('parses string nested result', () => {
-      const optionsListRequestBodyMock: OptionsListRequestBody = {
-        size: 10,
-        searchString: 'co',
-        fieldName: 'coolNestedField',
-        allowExpensiveQueries: true,
-        fieldSpec: {
-          type: 'string',
-          subType: { type: 'string', nested: { path: 'path.to.nested' } },
-        } as unknown as FieldSpec,
-      };
-      const suggestionAggBuilder = getSearchSuggestionsAggregationBuilder(
-        optionsListRequestBodyMock
-      );
-      rawSearchResponseMock.aggregations = {
-        nestedSuggestions: {
-          filteredSuggestions: {
-            suggestions: {
-              buckets: [
-                { doc_count: 5, key: 'cool1' },
-                { doc_count: 15, key: 'cool2' },
-                { doc_count: 10, key: 'cool3' },
-              ],
-            },
-            unique_terms: {
-              value: 3,
-            },
-          },
-        },
-      };
-      expect(suggestionAggBuilder.parse(rawSearchResponseMock, optionsListRequestBodyMock))
-        .toMatchInlineSnapshot(`
-        Object {
-          "suggestions": Array [
-            Object {
-              "docCount": 5,
-              "value": "cool1",
-            },
-            Object {
-              "docCount": 15,
-              "value": "cool2",
-            },
-            Object {
-              "docCount": 10,
-              "value": "cool3",
-            },
-          ],
-          "totalCardinality": 3,
-        }
-      `);
-    });
-
     test('parses mixed IPv4 and IPv6 result', () => {
       const optionsListRequestBodyMock: OptionsListRequestBody = {
         size: 10,
         searchString: '21',
         fieldName: 'clientip',
-        allowExpensiveQueries: true,
+
         fieldSpec: { type: 'ip' } as unknown as FieldSpec,
       };
       const suggestionAggBuilder = getSearchSuggestionsAggregationBuilder(

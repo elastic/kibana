@@ -14,6 +14,7 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/repo-info"
+    "@kbn/repo-info",
+    "@kbn/zod"
   ]
 }

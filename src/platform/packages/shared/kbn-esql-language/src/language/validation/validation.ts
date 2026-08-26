@@ -7,21 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { LicenseType } from '@kbn/licensing-types';
-import type { ESQLCallbacks, ESQLFieldWithMetadata } from '@kbn/esql-types';
-import type { ESQLCommand, ESQLMessage } from '../../types';
-import { EsqlQuery } from '../../composer';
+import type { ESQLCallbacks } from '@kbn/esql-types';
+import type { ESQLCommand } from '@elastic/esql/types';
+import { EsqlQuery, isList, within } from '@elastic/esql';
+import type { ESQLAstAllCommands } from '@elastic/esql/types';
 import { esqlCommandRegistry } from '../../commands/registry';
-import { walk } from '../../ast';
 import type { ICommandCallbacks } from '../../commands/registry/types';
 import { UnmappedFieldsStrategy } from '../../commands/registry/types';
-import { getMessageFromId } from '../../commands/definitions/utils';
-import type { ESQLAstAllCommands } from '../../types';
+import { errors, getExpressionType, getMessageFromId } from '../../commands/definitions/utils';
+import { areCompatibleStringTypes } from '../../commands/definitions/utils/signatures';
 import { QueryColumns } from '../../query_columns_service';
 import { retrievePolicies, retrieveSources } from './resources';
 import type { ReferenceMaps, ValidationOptions, ValidationResult } from './types';
-import { getSubqueriesToValidate } from './subqueries';
+import { getInSubqueries, getSubqueriesToValidate, type InSubqueryReference } from './subqueries';
 import { getUnmappedFieldsStrategy } from '../../commands/definitions/utils/settings';
+import { isTimeseriesSourceCommand } from '../../commands/definitions/utils/timeseries_check';
 import { areNewUnmappedFieldsAllowed } from '../../query_columns_service/helpers';
+import type { ESQLMessage } from '../../commands';
+
+const UNRESOLVED_TYPES = new Set(['unknown', 'unsupported', 'param']);
 
 /**
  * ES|QL validation public API
@@ -69,40 +73,29 @@ async function validateAst(
 
   const rootCommands = parsingResult.ast.commands;
 
-  const [sources, availablePolicies, joinIndices, timeSeriesSources] = await Promise.all([
-    shouldValidateCallback(callbacks, 'getSources')
-      ? retrieveSources(rootCommands, callbacks)
-      : new Set<string>(),
-    shouldValidateCallback(callbacks, 'getPolicies')
-      ? retrievePolicies(rootCommands, callbacks)
-      : new Map(),
-    shouldValidateCallback(callbacks, 'getJoinIndices') ? callbacks?.getJoinIndices?.() : undefined,
-    shouldValidateCallback(callbacks, 'getTimeseriesIndices')
-      ? callbacks?.getTimeseriesIndices?.()
-      : undefined,
-  ]);
+  const [sources, availablePolicies, joinIndices, timeSeriesSources, views, datasets, license] =
+    await Promise.all([
+      shouldValidateCallback(callbacks, 'getSources')
+        ? retrieveSources(rootCommands, callbacks)
+        : new Set<string>(),
+      shouldValidateCallback(callbacks, 'getPolicies')
+        ? retrievePolicies(rootCommands, callbacks)
+        : new Map(),
+      shouldValidateCallback(callbacks, 'getJoinIndices')
+        ? callbacks?.getJoinIndices?.()
+        : undefined,
+      shouldValidateCallback(callbacks, 'getTimeseriesIndices')
+        ? callbacks?.getTimeseriesIndices?.()
+        : undefined,
+      shouldValidateCallback(callbacks, 'getViews') ? callbacks?.getViews?.() : undefined,
+      shouldValidateCallback(callbacks, 'getDatasets') ? callbacks?.getDatasets?.() : undefined,
+      callbacks?.getLicense?.(),
+    ]);
+  const hasMinimumLicenseRequired = license
+    ? (minimumLicenseRequired: LicenseType) => license.hasAtLeast(minimumLicenseRequired)
+    : undefined;
 
-  const sourceQuery = queryString.split('|')[0];
-  const sourceFields = shouldValidateCallback(callbacks, 'getColumnsFor')
-    ? await new QueryColumns(
-        EsqlQuery.fromSrc(sourceQuery).ast,
-        sourceQuery,
-        callbacks,
-        options
-      ).asMap()
-    : new Map();
-
-  if (shouldValidateCallback(callbacks, 'getColumnsFor') && sourceFields.size > 0) {
-    messages.push(
-      ...validateUnsupportedTypeFields(
-        sourceFields as Map<string, ESQLFieldWithMetadata>,
-        rootCommands
-      )
-    );
-  }
-
-  const license = await callbacks?.getLicense?.();
-  const hasMinimumLicenseRequired = license?.hasAtLeast;
+  const isRootTimeseries = isTimeseriesSourceCommand(rootCommands);
 
   // Validate the header commands
   for (const command of headerCommands) {
@@ -113,9 +106,11 @@ async function validateAst(
       query: queryString,
       joinIndices: joinIndices?.indices || [],
       timeSeriesSources: timeSeriesSources?.indices,
+      views: views?.views ?? [],
+      datasets: datasets?.datasets ?? [],
     };
 
-    const commandMessages = validateCommand(command, references, rootCommands, {
+    const commandMessages = validateCommand(command, references, rootCommands, isRootTimeseries, {
       ...callbacks,
       hasMinimumLicenseRequired,
     });
@@ -135,12 +130,17 @@ async function validateAst(
     const currentCommand = subquery.commands[subquery.commands.length - 1];
 
     const subqueryForColumns =
-      currentCommand.name === 'join'
+      currentCommand.name === 'join' || currentCommand.name === 'promql'
         ? subquery
         : { ...subquery, commands: subquery.commands.slice(0, -1) };
 
+    const queryForColumns =
+      currentCommand.name === 'promql'
+        ? queryString.slice(0, currentCommand.location.max + 1)
+        : queryString;
+
     const columns = shouldValidateCallback(callbacks, 'getColumnsFor')
-      ? await new QueryColumns(subqueryForColumns, queryString, callbacks, options).asMap()
+      ? await new QueryColumns(subqueryForColumns, queryForColumns, callbacks, options).asMap()
       : new Map();
 
     const references: ReferenceMaps = {
@@ -150,16 +150,19 @@ async function validateAst(
       query: queryString,
       joinIndices: joinIndices?.indices || [],
       timeSeriesSources: timeSeriesSources?.indices,
+      views: views?.views ?? [],
+      datasets: datasets?.datasets ?? [],
     };
 
     const unmappedFieldsStrategy = areNewUnmappedFieldsAllowed(subqueryForColumns.commands)
       ? unmappedFieldsStrategyFromHeader
-      : UnmappedFieldsStrategy.FAIL;
+      : UnmappedFieldsStrategy.DEFAULT;
 
     const commandMessages = validateCommand(
       currentCommand,
       references,
       rootCommands,
+      isTimeseriesSourceCommand(subquery.commands),
       {
         ...callbacks,
         hasMinimumLicenseRequired,
@@ -167,6 +170,30 @@ async function validateAst(
       unmappedFieldsStrategy
     );
     messages.push(...commandMessages);
+
+    // In `WHERE a IN (FROM index | KEEP b)`, the type of `a` must match the type of `b`.
+    // Comparing them requires the columns the subquery returns, so drop the subqueries
+    // that failed validation above: whatever columns they report would be misleading.
+    const inSubqueries = getInSubqueries(currentCommand).filter(
+      ({ query }) => !messages.some((message) => message.type === 'error' && within(message, query))
+    );
+
+    if (
+      !currentCommand.incomplete &&
+      inSubqueries.length > 0 &&
+      shouldValidateCallback(callbacks, 'getColumnsFor')
+    ) {
+      // We need the columns the subquery returns, which nothing has computed yet.
+      // Cheap anyway: its source columns were already cached earlier in this loop.
+      const rightColumns = await Promise.all(
+        inSubqueries.map(({ query }) =>
+          new QueryColumns(query, queryString, callbacks, options).asMap()
+        )
+      );
+      messages.push(
+        ...validateInSubqueries(inSubqueries, columns, rightColumns, unmappedFieldsStrategy)
+      );
+    }
   }
 
   const parserErrors = parsingResult.errors;
@@ -188,10 +215,67 @@ async function validateAst(
   };
 }
 
+function validateInSubqueries(
+  inSubqueries: InSubqueryReference[],
+  columns: ReferenceMaps['columns'],
+  rightColumns: Array<ReferenceMaps['columns']>,
+  unmappedFieldsStrategy?: UnmappedFieldsStrategy
+): ESQLMessage[] {
+  const messages: ESQLMessage[] = [];
+
+  for (let i = 0; i < inSubqueries.length; i++) {
+    const { left } = inSubqueries[i];
+    const leftExpressions = isList(left) && left.subtype === 'tuple' ? left.values : [left];
+    const rightExpressions = [...rightColumns[i].values()];
+
+    if (rightExpressions.length === 0) {
+      continue;
+    }
+
+    if (leftExpressions.length !== rightExpressions.length) {
+      messages.push(
+        errors.byId('inSubqueryColumnCountMismatch', left.location, {
+          expected: leftExpressions.length,
+          actual: rightExpressions.length,
+        })
+      );
+      continue;
+    }
+
+    for (let j = 0; j < leftExpressions.length; j++) {
+      const leftExpression = leftExpressions[j];
+      const rightExpression = rightExpressions[j];
+      const leftType = getExpressionType(leftExpression, columns, unmappedFieldsStrategy);
+      const rightType = rightExpression.type;
+
+      if (
+        UNRESOLVED_TYPES.has(leftType) ||
+        UNRESOLVED_TYPES.has(rightType) ||
+        leftType === rightType ||
+        areCompatibleStringTypes(leftType, rightType)
+      ) {
+        continue;
+      }
+
+      messages.push(
+        errors.byId('inSubqueryTypeMismatch', leftExpression.location, {
+          leftField: leftExpression.text,
+          leftType,
+          rightField: rightExpression.name,
+          rightType,
+        })
+      );
+    }
+  }
+
+  return messages;
+}
+
 function validateCommand(
   command: ESQLAstAllCommands,
   references: ReferenceMaps,
   rootCommands: ESQLCommand[],
+  isTimeseriesSource: boolean,
   callbacks?: ICommandCallbacks,
   unmappedFieldsStrategy?: UnmappedFieldsStrategy
 ): ESQLMessage[] {
@@ -227,10 +311,13 @@ function validateCommand(
   const context = {
     columns: references.columns,
     policies: references.policies,
-    sources: [...references.sources].map((source) => ({ name: source })),
+    sources: [...references.sources].map((source) => ({ name: source, hidden: false })),
     joinSources: references.joinIndices,
     timeSeriesSources: references.timeSeriesSources,
+    views: references.views,
+    datasets: references.datasets,
     unmappedFieldsStrategy,
+    isTimeseriesSource,
   };
 
   if (commandDefinition.methods.validate) {
@@ -250,31 +337,5 @@ function validateCommand(
 
   // no need to check for mandatory options passed
   // as they are already validated at syntax level
-  return messages;
-}
-
-function validateUnsupportedTypeFields(
-  fields: Map<string, ESQLFieldWithMetadata>,
-  commands: ESQLAstAllCommands[]
-) {
-  const usedColumnsInQuery: string[] = [];
-
-  walk(commands, {
-    visitColumn: (node) => usedColumnsInQuery.push(node.name),
-  });
-  const messages: ESQLMessage[] = [];
-  for (const column of usedColumnsInQuery) {
-    if (fields.has(column) && fields.get(column)!.type === 'unsupported') {
-      messages.push(
-        getMessageFromId({
-          messageId: 'unsupportedFieldType',
-          values: {
-            field: column,
-          },
-          locations: { min: 1, max: 1 },
-        })
-      );
-    }
-  }
   return messages;
 }

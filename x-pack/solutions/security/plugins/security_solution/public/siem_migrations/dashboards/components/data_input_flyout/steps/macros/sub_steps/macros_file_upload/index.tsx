@@ -7,6 +7,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import type { EuiStepProps, EuiStepStatus } from '@elastic/eui';
+import { ExperimentalFeaturesService } from '../../../../../../../../common/experimental_features_service';
 import { useAppToasts } from '../../../../../../../../common/hooks/use_app_toasts';
 import type { SiemMigrationResourceData } from '../../../../../../../../../common/siem_migrations/model/common.gen';
 import { DashboardResourceIdentifier } from '../../../../../../../../../common/siem_migrations/dashboards/resources';
@@ -36,7 +37,9 @@ export const useMacrosFileUploadStep = ({
       const macrosIndexed: Record<string, SiemMigrationResourceData> = Object.fromEntries(
         macrosFromFile.map((macro) => [macro.name, macro])
       );
-      const resourceIdentifier = new DashboardResourceIdentifier('splunk');
+      const resourceIdentifier = new DashboardResourceIdentifier('splunk', {
+        experimentalFeatures: ExperimentalFeaturesService.get(),
+      });
       const macrosToUpsert: SiemMigrationResourceData[] = [];
       let missingMacrosIt: string[] = missingMacros;
 

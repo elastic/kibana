@@ -8,10 +8,13 @@ import type { CoreStart, CoreTheme } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React, { useMemo } from 'react';
 import type { Observable } from 'rxjs';
 import type { AIAssistantAppService } from '@kbn/ai-assistant';
 import type { ObservabilityAIAssistantAppPluginStartDependencies } from '../types';
+
+const queryClient = new QueryClient();
 
 export function SharedProviders({
   children,
@@ -41,9 +44,11 @@ export function SharedProviders({
           },
         }}
       >
-        <RedirectAppLinks coreStart={coreStart}>
-          <coreStart.i18n.Context>{children}</coreStart.i18n.Context>
-        </RedirectAppLinks>
+        <QueryClientProvider client={queryClient}>
+          <RedirectAppLinks coreStart={coreStart}>
+            <coreStart.i18n.Context>{children}</coreStart.i18n.Context>
+          </RedirectAppLinks>
+        </QueryClientProvider>
       </KibanaContextProvider>
     </KibanaThemeProvider>
   );

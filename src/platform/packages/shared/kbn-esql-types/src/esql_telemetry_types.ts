@@ -25,6 +25,8 @@ export enum QuerySource {
   HELP = 'help',
   AUTOCOMPLETE = 'autocomplete',
   QUICK_SEARCH = 'quick_search',
+  SEARCH_BUTTON = 'search_button',
+  TIME_FILTER = 'time_filter',
 }
 
 export interface TelemetryQuerySubmittedProps {
@@ -49,4 +51,5 @@ export interface TelemetryLatencyProps {
   queryLines: number; // Query length in lines.
   sessionId: string; // Editor mount session id.
   isInitialLoad?: boolean; // True for the first sampled event of each metric.
+  callbacksDuration?: number; // Duration spent running callbacks during the execution.
 }

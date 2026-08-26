@@ -6,7 +6,7 @@
  */
 
 import type { ScoutPage } from '@kbn/scout-oblt';
-import { expect } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
 import { RULE_DETAILS_TEST_SUBJECTS, BIGGER_TIMEOUT, SHORTER_TIMEOUT } from '../constants';
 
 export class RuleDetailsPage {
@@ -16,7 +16,7 @@ export class RuleDetailsPage {
    * Navigates to the rule details page by rule ID
    */
   async gotoById(ruleId: string) {
-    await this.page.gotoApp(`observability/alerts/rules/${ruleId}`);
+    await this.page.gotoApp(`rules/rule/${ruleId}`);
     await this.page.testSubj.waitForSelector(RULE_DETAILS_TEST_SUBJECTS.RULE_DETAILS, {
       timeout: BIGGER_TIMEOUT,
     });
@@ -138,7 +138,9 @@ export class RuleDetailsPage {
   async openActionsMenu() {
     await expect(this.actionsButton).toBeVisible({ timeout: SHORTER_TIMEOUT });
     await this.actionsButton.click();
-    await expect(this.editRuleButton).toBeVisible({ timeout: SHORTER_TIMEOUT });
+    // `Edit rule` is a primary action rendered inline, so detect the open popover via an
+    // overflow-only action (`Delete rule`).
+    await expect(this.deleteRuleButton).toBeVisible({ timeout: SHORTER_TIMEOUT });
   }
 
   /**
@@ -146,7 +148,7 @@ export class RuleDetailsPage {
    */
   async closeActionsMenu() {
     await this.actionsButton.click();
-    await expect(this.editRuleButton).toBeHidden({ timeout: SHORTER_TIMEOUT });
+    await expect(this.deleteRuleButton).toBeHidden({ timeout: SHORTER_TIMEOUT });
   }
 
   /**
@@ -201,10 +203,30 @@ export class RuleDetailsPage {
   }
 
   /**
+   * Opens the dashboards combobox and returns the options locator
+   */
+  async getDashboardsOptionsLocator() {
+    // Click the dashboard selector to open the dropdown
+    await this.dashboardsSelector.click();
+
+    // Wait for the dropdown portal to be created
+    await expect(this.comboboxOptionsList).toBeAttached({ timeout: BIGGER_TIMEOUT });
+
+    // Wait for the loading spinner to disappear if present
+    const spinner = this.comboboxOptionsList.locator('.euiLoadingSpinner');
+    await spinner.waitFor({ state: 'hidden', timeout: SHORTER_TIMEOUT }).catch(() => {
+      // Spinner might not appear if data is cached or loads very quickly
+    });
+
+    return this.comboboxOptionsList.locator('[role="option"]');
+  }
+
+  /**
    * Opens the rule edit form
    */
   async openRuleEditForm() {
-    await this.openActionsMenu();
+    // `Edit rule` is a primary action rendered inline, so it can be clicked directly.
+    await expect(this.editRuleButton).toBeVisible({ timeout: SHORTER_TIMEOUT });
     await this.editRuleButton.click();
     await expect(this.ruleNameInput).toBeVisible({ timeout: BIGGER_TIMEOUT });
   }

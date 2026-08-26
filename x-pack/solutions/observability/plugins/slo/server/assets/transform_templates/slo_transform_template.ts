@@ -31,9 +31,10 @@ export const getSLOTransformTemplate = (
   groupBy: TransformPivot['group_by'] = {},
   aggregations: TransformPivot['aggregations'] = {},
   settings: TransformSettings,
-  slo: SLODefinition
+  slo: SLODefinition,
+  projectRouting?: string
 ): TransformPutTransformRequest => {
-  const formattedSource = buildSourceWithFilters(source, slo);
+  const formattedSource = buildSourceWithFilters(source, slo, projectRouting);
   return {
     transform_id: transformId,
     description,
@@ -59,6 +60,7 @@ export const getSLOTransformTemplate = (
       version: SLO_RESOURCES_VERSION,
       managed: true,
       managed_by: 'observability',
+      deletion_protected: true,
     },
   };
 };
@@ -69,17 +71,22 @@ const buildGroupingFilters = (slo: SLODefinition): QueryDslQueryContainer[] => {
   return groups.map((group) => ({ exists: { field: group } }));
 };
 
-const buildSourceWithFilters = (source: TransformSource, slo: SLODefinition): TransformSource => {
+const buildSourceWithFilters = (
+  source: TransformSource,
+  slo: SLODefinition,
+  projectRouting?: string
+): TransformSource => {
   const groupingFilters = buildGroupingFilters(slo);
-  const sourceFilters = [source.query?.bool?.filter].flat() || [];
+  const sourceFilters = [source.query?.bool?.filter].flat().filter(Boolean);
   return {
     ...source,
+    ...(projectRouting ? { project_routing: projectRouting } : {}),
     query: {
       ...source.query,
       bool: {
         ...source.query?.bool,
         filter: [...sourceFilters, ...groupingFilters] as QueryDslQueryContainer[],
       },
-    },
+    } as QueryDslQueryContainer,
   };
 };

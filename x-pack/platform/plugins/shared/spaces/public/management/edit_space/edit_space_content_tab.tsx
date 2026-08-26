@@ -19,12 +19,13 @@ import { capitalize } from 'lodash';
 import type { FC } from 'react';
 import React, { useEffect, useState } from 'react';
 
+import { addSpaceIdToPath } from '@kbn/core-spaces-common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { handleApiError } from './handle_api_error';
 import { useEditSpaceServices } from './provider';
-import { addSpaceIdToPath, ENTER_SPACE_PATH, type Space } from '../../../common';
+import { ENTER_SPACE_PATH, type Space } from '../../../common';
 import type { SpaceContentTypeSummaryItem } from '../../types';
 
 export const EditSpaceContentTab: FC<{ space: Space }> = ({ space }) => {
@@ -42,7 +43,7 @@ export const EditSpaceContentTab: FC<{ space: Space }> = ({ space }) => {
         return (
           <EuiFlexGroup gutterSize="m" alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiIcon type={icon ?? 'gear'} size="m" />
+              <EuiIcon type={icon ?? 'gear'} size="m" aria-hidden={true} />
             </EuiFlexItem>
             <EuiFlexItem grow={true}>{capitalize(displayName)}</EuiFlexItem>
           </EuiFlexGroup>

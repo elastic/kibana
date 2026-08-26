@@ -13,6 +13,7 @@
       "_ingest/processor/grok"
     ],
     "documentation": "https://www.elastic.co/docs/reference/enrich-processor/grok-processor",
+    "documentation_serverless": "https://www.elastic.co/docs/reference/enrich-processor/grok-processor",
     "availability": {
       "stack": true,
       "serverless": true

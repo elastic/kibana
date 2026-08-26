@@ -1,0 +1,9 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/core-theme-browser-internal-types",
+  "owner": [
+    "@elastic/kibana-core"
+  ],
+  "group": "platform",
+  "visibility": "private"
+}

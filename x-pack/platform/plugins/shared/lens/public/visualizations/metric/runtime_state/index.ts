@@ -5,29 +5,11 @@
  * 2.0.
  */
 
-import type { MetricVisualizationState } from '../types';
+import type { MetricVisualizationState } from '@kbn/lens-common';
+import { getRuntimeConverters } from './converters';
 
-export const convertToRunTimeState = (
+export const convertToRuntimeState = (
   state: MetricVisualizationState
 ): MetricVisualizationState => {
-  // Remove legacy state properties if they exist
-  const { secondaryPrefix, valuesTextAlign, ...restState } = state;
-  let newState = { ...restState };
-
-  if (valuesTextAlign) {
-    newState = {
-      ...newState,
-      primaryAlign: state.primaryAlign ?? valuesTextAlign,
-      secondaryAlign: state.secondaryAlign ?? valuesTextAlign,
-    };
-  }
-
-  if (secondaryPrefix && !newState.secondaryLabel) {
-    newState = {
-      ...newState,
-      secondaryLabel: secondaryPrefix,
-    };
-  }
-
-  return newState;
+  return getRuntimeConverters().reduce((newState, fn) => fn(newState), state);
 };

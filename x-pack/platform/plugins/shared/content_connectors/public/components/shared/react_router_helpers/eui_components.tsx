@@ -48,6 +48,7 @@ export const EuiLinkTo: React.FC<ReactRouterEuiLinkProps> = ({
   const history = useHistory();
   return (
     <EuiLink
+      data-test-subj="contentConnectorsEuiLinkToLink"
       {...rest}
       {...generateReactRouterProps({
         to,
@@ -72,6 +73,7 @@ export const EuiButtonTo: React.FC<ReactRouterEuiButtonProps> = ({
   const history = useHistory();
   return (
     <EuiButton
+      data-test-subj="contentConnectorsEuiButtonToButton"
       {...rest}
       {...generateReactRouterProps({
         to,
@@ -99,6 +101,7 @@ export const EuiButtonEmptyTo: React.FC<ReactRouterEuiButtonEmptyProps> = ({
   const history = useHistory();
   return (
     <EuiButtonEmpty
+      data-test-subj="contentConnectorsEuiButtonEmptyToButton"
       {...rest}
       {...generateReactRouterProps({
         to,
@@ -125,6 +128,7 @@ export const EuiButtonIconTo: React.FC<ReactRouterEuiButtonIconProps> = ({
   const history = useHistory();
   return (
     <EuiButtonIcon
+      data-test-subj="contentConnectorsEuiButtonIconToButton"
       {...rest}
       {...generateReactRouterProps({
         to,
@@ -248,8 +252,6 @@ export const EuiBadgeTo: React.FC<ReactRouterEuiBadgeProps> = ({
 
   const badgeProps: EuiBadgeProps = {
     ...rest,
-    iconOnClick: routerProps.onClick,
-    iconOnClickAriaLabel: label,
     onClick: routerProps.onClick,
     onClickAriaLabel: label,
   };

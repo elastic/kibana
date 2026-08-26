@@ -170,6 +170,9 @@ export function useFieldStatsSearchStrategy(
       samplingProbability,
       browserSessionSeed: searchStrategyParams.browserSessionSeed,
       samplingOption: searchStrategyParams.samplingOption,
+      ...(searchStrategyParams.projectRouting
+        ? { projectRouting: searchStrategyParams.projectRouting }
+        : {}),
     };
 
     const { sessionId, embeddableExecutionContext } = searchStrategyParams;

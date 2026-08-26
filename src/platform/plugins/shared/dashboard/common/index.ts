@@ -15,9 +15,10 @@ export type {
   DashboardPinnedPanel,
 } from './types';
 
+export { DASHBOARD_API_PATH } from './constants';
+
 export { getReferencesForPanelId, prefixReferencesFromPanel } from './reference_utils';
 
 export { migrateLegacyQuery } from './migrate_legacy_query';
-export { cleanFiltersForSerialize } from './clean_filters_for_serialize';
 export { isDashboardSection } from './is_dashboard_section';
 export { isDashboardPanel } from './is_dashboard_panel';

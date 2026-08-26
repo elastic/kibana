@@ -71,6 +71,22 @@ const getRequiredEnv = (name: string) => {
   return value;
 };
 
+const getTrackedBranch = (): string => {
+  let pkg;
+  try {
+    pkg = JSON.parse(fs.readFileSync(path.join(getKibanaDir(), 'package.json'), 'utf8'));
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    throw new Error(`unable to read kibana's package.json file: ${message}`);
+  }
+
+  if (typeof pkg.branch !== 'string') {
+    throw new Error('missing `branch` field from package.json file');
+  }
+
+  return pkg.branch;
+};
+
 function runBatchedPromises<T>(
   promiseCreators: Array<() => Promise<T>>,
   maxParallel: number
@@ -94,4 +110,4 @@ function runBatchedPromises<T>(
   return Promise.all(tasks).then(() => results);
 }
 
-export { getKibanaDir, getVersionsFile, getRequiredEnv, runBatchedPromises };
+export { getKibanaDir, getVersionsFile, getRequiredEnv, getTrackedBranch, runBatchedPromises };

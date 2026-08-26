@@ -20,6 +20,7 @@ export type {
   ListArtifactsProps,
   MessageSigningServiceInterface,
 } from './services';
+export type { PackageAsset } from './services/epm/archive/storage';
 export { getRegistryUrl } from './services';
 export { NamingCollisionError } from './services/epm/packages/custom_integrations/validation/check_naming_collision';
 
@@ -37,7 +38,7 @@ export { AgentNotFoundError, FleetUnauthorizedError } from './errors';
 export { config } from './config';
 export type { FleetConfigType } from './config';
 
-export type { PackagePolicyClient } from './services/package_policy_service';
+export type { PackagePolicyClient, PartialPackagePolicy } from './services/package_policy_service';
 
 export { relativeDownloadUrlFromArtifact } from './services/artifacts/mappings';
 

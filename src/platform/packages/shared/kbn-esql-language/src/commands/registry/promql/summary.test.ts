@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Parser } from '../../../..';
+import { Parser } from '@elastic/esql';
 import { summary } from './summary';
 
 const assertSummary = (query: string, { expectedNewColumns }: { expectedNewColumns: string[] }) => {
@@ -21,9 +21,9 @@ const assertSummary = (query: string, { expectedNewColumns }: { expectedNewColum
 };
 
 describe('PROMQL summary', () => {
-  it('returns labeled column', () => {
+  it('returns the step and labeled columns for a range query without explicit step params', () => {
     assertSummary('PROMQL index=metrics col0=(sum(bytes))', {
-      expectedNewColumns: ['col0'],
+      expectedNewColumns: ['step', 'col0'],
     });
   });
   it('returns the step column when step param is present', () => {
@@ -31,6 +31,31 @@ describe('PROMQL summary', () => {
       expectedNewColumns: ['step', 'col0'],
     });
   });
-  it.todo('returns query text as column name when no label is provided');
-  it.todo('collects columns derivated from grouping inside the query');
+  it('returns the step column when buckets param is used', () => {
+    assertSummary('PROMQL index=metrics buckets=6 col0=(sum(bytes))', {
+      expectedNewColumns: ['step', 'col0'],
+    });
+  });
+  it('returns the step column even when time param is used', () => {
+    assertSummary('PROMQL index=metrics time="2026-01-13T11:30:00.000Z" col0=(sum(bytes))', {
+      expectedNewColumns: ['step', 'col0'],
+    });
+  });
+  it('returns the query expression text as column name when no label is provided', () => {
+    const expression = 'rate(http_requests_total[5m])';
+    assertSummary(`PROMQL index=metrics ${expression}`, {
+      expectedNewColumns: ['step', expression],
+    });
+  });
+  it('collects columns derivated from grouping inside the query', () => {
+    const expression = 'sum by (job, instance) (rate(http_requests_total[5m]))';
+    assertSummary(`PROMQL index=metrics ${expression}`, {
+      expectedNewColumns: ['step', expression, 'job', 'instance'],
+    });
+  });
+  it('collects grouping columns together with a user-defined label', () => {
+    assertSummary('PROMQL index=metrics col0=(sum by (job) (rate(http_requests_total[5m])))', {
+      expectedNewColumns: ['step', 'col0', 'job'],
+    });
+  });
 });

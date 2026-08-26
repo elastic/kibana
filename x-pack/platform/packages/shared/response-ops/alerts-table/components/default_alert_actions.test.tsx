@@ -35,8 +35,18 @@ jest.mock('./view_alert_details_alert_action', () => {
   };
 });
 
-jest.mock('./mute_alert_action', () => {
-  return { MuteAlertAction: () => <div data-test-subj="muteAlertAction">{'MuteAlertAction'}</div> };
+jest.mock('./snooze_alert_action', () => {
+  return {
+    SnoozeAlertAction: () => <div data-test-subj="snoozeAlertAction">{'SnoozeAlertAction'}</div>,
+  };
+});
+
+jest.mock('./acknowledge_alert_action', () => {
+  return {
+    AcknowledgeAlertAction: () => (
+      <div data-test-subj="acknowledgeAlertAction">{'AcknowledgeAlertAction'}</div>
+    ),
+  };
 });
 
 jest.mock('./mark_as_untracked_alert_action', () => {
@@ -123,13 +133,14 @@ describe('DefaultAlertActions', () => {
         async (standardProps) => {
           render(<TestComponent {...standardProps} />);
 
-          expect(screen.queryByText('MuteAlertAction')).toBeInTheDocument();
+          expect(screen.queryByText('AcknowledgeAlertAction')).toBeInTheDocument();
+          expect(screen.queryByText('SnoozeAlertAction')).toBeInTheDocument();
           expect(screen.queryByText('MarkAsUntrackedAlertAction')).toBeInTheDocument();
           expect(screen.queryByText('EditTagsAction')).toBeInTheDocument();
         }
       );
 
-      it('should hide the Mute alert action when isMutedAlertsEnabled is false', async () => {
+      it('should hide the Snooze alert action when isMutedAlertsEnabled is false', async () => {
         const mutedAlertsDisabledProps = createPartialObjectMock<AlertActionsProps>({
           alert: {
             [ALERT_RULE_TYPE_ID]: 'apm.anomaly' as any,
@@ -140,7 +151,7 @@ describe('DefaultAlertActions', () => {
 
         render(<TestComponent {...mutedAlertsDisabledProps} />);
 
-        expect(screen.queryByText('MuteAlertAction')).not.toBeInTheDocument();
+        expect(screen.queryByText('SnoozeAlertAction')).not.toBeInTheDocument();
         expect(screen.queryByText('MarkAsUntrackedAlertAction')).toBeInTheDocument();
         expect(screen.queryByText('EditTagsAction')).toBeInTheDocument();
       });
@@ -159,7 +170,7 @@ describe('DefaultAlertActions', () => {
 
           render(<TestComponent {...securityProps} />);
 
-          expect(screen.queryByText('MuteAlertAction')).not.toBeInTheDocument();
+          expect(screen.queryByText('SnoozeAlertAction')).not.toBeInTheDocument();
           expect(screen.queryByText('MarkAsUntrackedAlertAction')).not.toBeInTheDocument();
           expect(screen.queryByText('EditTagsAction')).not.toBeInTheDocument();
         }
@@ -195,7 +206,7 @@ describe('DefaultAlertActions', () => {
       useGetRuleTypesPermissions.mockReturnValue({ authorizedToCreateAnyRules: false });
     });
 
-    it('should hide "Mute", "Marked as untracked", and "Edit tags" options for non-security rules', async () => {
+    it('should hide "Snooze", "Marked as untracked", and "Edit tags" options for non-security rules', async () => {
       const nonSecurityProps = createPartialObjectMock<AlertActionsProps>({
         alert: {
           [ALERT_RULE_TYPE_ID]: 'apm.anomaly' as any,
@@ -205,7 +216,7 @@ describe('DefaultAlertActions', () => {
 
       render(<TestComponent {...nonSecurityProps} />);
 
-      expect(screen.queryByText('MuteAlertAction')).not.toBeInTheDocument();
+      expect(screen.queryByText('SnoozeAlertAction')).not.toBeInTheDocument();
       expect(screen.queryByText('MarkAsUntrackedAlertAction')).not.toBeInTheDocument();
       expect(screen.queryByText('EditTagsAction')).not.toBeInTheDocument();
     });
@@ -220,7 +231,7 @@ describe('DefaultAlertActions', () => {
 
       render(<TestComponent {...siemProps} />);
 
-      expect(screen.queryByText('MuteAlertAction')).not.toBeInTheDocument();
+      expect(screen.queryByText('SnoozeAlertAction')).not.toBeInTheDocument();
       expect(screen.queryByText('MarkAsUntrackedAlertAction')).not.toBeInTheDocument();
       expect(screen.queryByText('EditTagsAction')).not.toBeInTheDocument();
     });
@@ -230,6 +241,58 @@ describe('DefaultAlertActions', () => {
 
       expect(await screen.findByText('ViewRuleDetailsAlertAction')).toBeInTheDocument();
       expect(await screen.findByText('ViewAlertDetailsAlertAction')).toBeInTheDocument();
+    });
+
+    describe('with canModifyAlerts override', () => {
+      it('should show all modify options for non-security rules when canModifyAlerts is true', async () => {
+        const nonSecurityProps = createPartialObjectMock<AlertActionsProps>({
+          alert: {
+            [ALERT_RULE_TYPE_ID]: 'apm.anomaly' as any,
+          },
+          refresh: jest.fn(),
+          canModifyAlerts: true,
+        });
+
+        render(<TestComponent {...nonSecurityProps} />);
+
+        expect(screen.queryByText('AcknowledgeAlertAction')).toBeInTheDocument();
+        expect(screen.queryByText('SnoozeAlertAction')).toBeInTheDocument();
+        expect(screen.queryByText('MarkAsUntrackedAlertAction')).toBeInTheDocument();
+        expect(screen.queryByText('EditTagsAction')).toBeInTheDocument();
+      });
+
+      it('should still hide all modify options for security rules even when canModifyAlerts is true', async () => {
+        const siemProps = createPartialObjectMock<AlertActionsProps>({
+          alert: {
+            [ALERT_RULE_TYPE_ID]: 'siem.queryRule' as any,
+          },
+          refresh: jest.fn(),
+          canModifyAlerts: true,
+        });
+
+        render(<TestComponent {...siemProps} />);
+
+        expect(screen.queryByText('AcknowledgeAlertAction')).not.toBeInTheDocument();
+        expect(screen.queryByText('SnoozeAlertAction')).not.toBeInTheDocument();
+        expect(screen.queryByText('MarkAsUntrackedAlertAction')).not.toBeInTheDocument();
+        expect(screen.queryByText('EditTagsAction')).not.toBeInTheDocument();
+      });
+
+      it('should keep modify options hidden for non-security rules when canModifyAlerts is false', async () => {
+        const nonSecurityProps = createPartialObjectMock<AlertActionsProps>({
+          alert: {
+            [ALERT_RULE_TYPE_ID]: 'apm.anomaly' as any,
+          },
+          refresh: jest.fn(),
+          canModifyAlerts: false,
+        });
+
+        render(<TestComponent {...nonSecurityProps} />);
+
+        expect(screen.queryByText('SnoozeAlertAction')).not.toBeInTheDocument();
+        expect(screen.queryByText('MarkAsUntrackedAlertAction')).not.toBeInTheDocument();
+        expect(screen.queryByText('EditTagsAction')).not.toBeInTheDocument();
+      });
     });
   });
 });

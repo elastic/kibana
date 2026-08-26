@@ -7,8 +7,10 @@
 
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { createMemoryHistory } from 'history';
 import React from 'react';
 
+import { CoreScopedHistory } from '@kbn/core/public';
 import {
   httpServiceMock,
   i18nServiceMock,
@@ -22,6 +24,7 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { KibanaFeature } from '@kbn/features-plugin/common';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 import { EditSpaceSettingsTab } from './edit_space_general_tab';
 import { EditSpaceProviderRoot } from './provider/edit_space_provider';
@@ -211,6 +214,50 @@ describe('EditSpaceSettings', () => {
     expect(navigateSpy).toHaveBeenCalledTimes(1);
   });
 
+  it('specifies a color when updating a space without a color or imageUrl', async () => {
+    const spaceToUpdate = {
+      id: 'existing-space',
+      name: 'Existing Space',
+      description: 'hey an existing space',
+      initials: 'AB',
+      disabledFeatures: [],
+      solution: 'es' as SolutionView,
+    };
+
+    render(
+      <TestComponent>
+        <EditSpaceSettingsTab
+          space={spaceToUpdate}
+          history={history}
+          features={[]}
+          allowFeatureVisibility={false}
+          allowSolutionVisibility={false}
+          reloadWindow={reloadWindow}
+        />
+      </TestComponent>
+    );
+
+    // update the space name
+    const nameInput = screen.getByTestId('addSpaceName');
+    fireEvent.change(nameInput, { target: { value: 'Updated Name Of Space' } });
+
+    expect(screen.queryByTestId('space-edit-page-user-impact-warning')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('confirmModalTitleText')).not.toBeInTheDocument();
+
+    const updateButton = await screen.findByTestId('save-space-button'); // appears via re-render
+    await userEvent.click(updateButton);
+
+    expect(updateSpaceSpy).toHaveBeenCalledWith({
+      ...spaceToUpdate,
+      name: 'Updated Name Of Space',
+      initials: 'UN',
+      imageUrl: '',
+      color: '#FFC7DB',
+    });
+
+    expect(navigateSpy).toHaveBeenCalledTimes(1);
+  });
+
   it('allows space to be deleted', async () => {
     const spaceToDelete = {
       id: 'delete-me-space',
@@ -339,6 +386,46 @@ describe('EditSpaceSettings', () => {
     expect(navigateSpy).toHaveBeenCalledTimes(1);
   });
 
+  it('navigates away when cancel is clicked after changing the solution view', async () => {
+    const spaceToUpdate = {
+      id: 'existing-space',
+      name: 'Existing Space',
+      description: 'hey an existing space',
+      color: '#aabbcc',
+      initials: 'AB',
+      disabledFeatures: [],
+      solution: undefined,
+    };
+
+    render(
+      <TestComponent>
+        <EditSpaceSettingsTab
+          space={spaceToUpdate}
+          history={history}
+          features={[]}
+          allowFeatureVisibility={false}
+          allowSolutionVisibility={true}
+          reloadWindow={reloadWindow}
+        />
+      </TestComponent>
+    );
+
+    // update the space solution view
+    const solutionViewPicker = screen.getByTestId('solutionViewSelect');
+    await userEvent.click(solutionViewPicker);
+
+    const esSolutionOption = await screen.findByTestId('solutionViewEsOption');
+    await userEvent.click(esSolutionOption);
+
+    expect(screen.getByTestId('space-edit-page-user-impact-warning')).toBeInTheDocument();
+
+    // click cancel - should navigate back to spaces list without saving
+    const cancelButton = screen.getByTestId('cancel-space-button');
+    await userEvent.click(cancelButton);
+
+    expect(navigateSpy).toHaveBeenCalledWith('/');
+  });
+
   it('warns when updating features in the active space', async () => {
     const features = [
       new KibanaFeature({
@@ -402,6 +489,132 @@ describe('EditSpaceSettings', () => {
     });
 
     expect(navigateSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('no longer considers the form dirty once a change has been reverted', async () => {
+    const features = [
+      new KibanaFeature({
+        id: 'feature-1',
+        name: 'feature 1',
+        app: [],
+        category: DEFAULT_APP_CATEGORIES.kibana,
+        privileges: null,
+      }),
+    ];
+
+    const spaceToUpdate = {
+      id: 'existing-space',
+      name: 'Existing Space',
+      description: 'hey an existing space',
+      color: '#aabbcc',
+      initials: 'AB',
+      disabledFeatures: [],
+      solution: SOLUTION_VIEW_CLASSIC,
+    };
+
+    render(
+      <TestComponent>
+        <EditSpaceSettingsTab
+          space={spaceToUpdate}
+          history={history}
+          features={features}
+          allowFeatureVisibility={true}
+          allowSolutionVisibility={true}
+          reloadWindow={reloadWindow}
+        />
+      </TestComponent>
+    );
+
+    // the "Apply changes" button is only rendered while the form has unsaved changes
+    expect(screen.queryByTestId('save-space-button')).not.toBeInTheDocument();
+
+    const feature1Checkbox = screen.getByTestId('featureCheckbox_feature-1');
+    await userEvent.click(feature1Checkbox);
+
+    expect(await screen.findByTestId('save-space-button')).toBeInTheDocument();
+
+    await userEvent.click(feature1Checkbox);
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('save-space-button')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('unsaved changes prompt', () => {
+    const spaceToUpdate = {
+      id: 'existing-space',
+      name: 'Existing Space',
+      description: 'hey an existing space',
+      color: '#aabbcc',
+      initials: 'AB',
+      disabledFeatures: [],
+      solution: SOLUTION_VIEW_CLASSIC,
+    };
+
+    // A real ScopedHistory, rather than `scopedHistoryMock`: the prompt works by installing a
+    // `history.block` handler, which the mock does not implement, so a mocked history cannot tell
+    // whether the user would have been asked to confirm.
+    let realHistory: CoreScopedHistory;
+
+    const renderDirtyTab = async () => {
+      realHistory = new CoreScopedHistory(
+        createMemoryHistory({ initialEntries: ['/mock/edit/existing-space'] }),
+        '/mock'
+      );
+      overlays.openConfirm.mockClear();
+
+      render(
+        <TestComponent>
+          <EditSpaceSettingsTab
+            space={spaceToUpdate}
+            history={realHistory}
+            features={[]}
+            allowFeatureVisibility={false}
+            allowSolutionVisibility={true}
+            reloadWindow={reloadWindow}
+          />
+        </TestComponent>
+      );
+
+      fireEvent.change(screen.getByTestId('descriptionSpaceText'), {
+        target: { value: 'a new description' },
+      });
+      expect(await screen.findByTestId('save-space-button')).toBeInTheDocument();
+    };
+
+    it('prompts when navigating away with unsaved changes', async () => {
+      await renderDirtyTab();
+
+      realHistory.push('/');
+
+      await waitFor(() => {
+        expect(overlays.openConfirm).toHaveBeenCalled();
+      });
+      // navigation stays blocked until the user confirms
+      expect(realHistory.location.pathname).toBe('/edit/existing-space');
+    });
+
+    it('does not prompt when the form is cancelled', async () => {
+      await renderDirtyTab();
+
+      await userEvent.click(screen.getByTestId('cancel-space-button'));
+
+      await waitFor(() => {
+        expect(realHistory.location.pathname).toBe('/');
+      });
+      expect(overlays.openConfirm).not.toHaveBeenCalled();
+    });
+
+    it('does not prompt when the changes are saved', async () => {
+      await renderDirtyTab();
+
+      await userEvent.click(screen.getByTestId('save-space-button'));
+
+      await waitFor(() => {
+        expect(realHistory.location.pathname).toBe('/');
+      });
+      expect(overlays.openConfirm).not.toHaveBeenCalled();
+    });
   });
 
   it('submits the disabled features list when the solution view is undefined', async () => {
@@ -540,5 +753,251 @@ describe('EditSpaceSettings', () => {
     });
 
     expect(navigateSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('hides CustomizeCps component when project_routing capability is not present', async () => {
+    render(
+      <TestComponent>
+        <EditSpaceSettingsTab
+          space={space}
+          history={history}
+          features={[]}
+          allowFeatureVisibility={false}
+          allowSolutionVisibility={false}
+          reloadWindow={reloadWindow}
+        />
+      </TestComponent>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('addSpaceName')).toBeInTheDocument();
+    });
+
+    expect(screen.queryByTestId('cpsDefaultScopePanel')).not.toBeInTheDocument();
+  });
+
+  const renderWithCapability = (
+    capability: { read_space_default?: boolean; manage_space_default?: boolean },
+    {
+      isTierEligible = false,
+      spaceForRender = space,
+      omitCps = false,
+    }: {
+      isTierEligible?: boolean;
+      spaceForRender?: {
+        id: string;
+        name: string;
+        disabledFeatures: string[];
+        projectRouting?: string;
+      };
+      /** When true, leave `cps` out of Kibana context (plugin not present). */
+      omitCps?: boolean;
+    } = {}
+  ) => {
+    const capabilities = {
+      navLinks: {},
+      management: {},
+      catalogue: {},
+      spaces: { manage: true },
+      project_routing: capability,
+    };
+
+    const TestComponentWithCapability: React.FC<React.PropsWithChildren> = ({ children }) => {
+      return (
+        <IntlProvider locale="en">
+          <KibanaContextProvider
+            services={{
+              application: { capabilities },
+              ...(omitCps ? {} : { cps: { isTierEligible } }),
+            }}
+          >
+            <EditSpaceProviderRoot
+              capabilities={capabilities}
+              getUrlForApp={getUrlForApp}
+              navigateToUrl={navigateToUrl}
+              serverBasePath=""
+              spacesManager={spacesManager}
+              getRolesAPIClient={getRolesAPIClient}
+              http={http}
+              notifications={notifications}
+              overlays={overlays}
+              getIsRoleManagementEnabled={() => Promise.resolve(() => undefined)}
+              getPrivilegesAPIClient={getPrivilegeAPIClient}
+              getSecurityLicense={getSecurityLicenseMock}
+              userProfile={userProfile}
+              theme={theme}
+              i18n={i18n}
+              logger={logger}
+              enableSecurityLink=""
+            >
+              {children}
+            </EditSpaceProviderRoot>
+          </KibanaContextProvider>
+        </IntlProvider>
+      );
+    };
+
+    return render(
+      <TestComponentWithCapability>
+        <EditSpaceSettingsTab
+          space={spaceForRender}
+          history={history}
+          features={[]}
+          allowFeatureVisibility={false}
+          allowSolutionVisibility={false}
+          reloadWindow={reloadWindow}
+        />
+      </TestComponentWithCapability>
+    );
+  };
+
+  it('shows CustomizeCps component when project_routing.read_space_default capability is true and project is on a CPS-eligible tier', async () => {
+    renderWithCapability(
+      { read_space_default: true, manage_space_default: true },
+      { isTierEligible: true }
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('addSpaceName')).toBeInTheDocument();
+    });
+    await waitFor(() => {
+      expect(screen.getByTestId('cpsDefaultScopePanel')).toBeInTheDocument();
+    });
+  });
+
+  it('hides CustomizeCps component when project_routing.read_space_default capability is true but tier is not eligible and space has default routing', async () => {
+    renderWithCapability(
+      { read_space_default: true, manage_space_default: true },
+      { isTierEligible: false }
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('addSpaceName')).toBeInTheDocument();
+    });
+
+    expect(screen.queryByTestId('cpsDefaultScopePanel')).not.toBeInTheDocument();
+  });
+
+  it('shows CustomizeCps component when tier is not eligible but the space already has a non-default project routing value', async () => {
+    renderWithCapability(
+      { read_space_default: true, manage_space_default: true },
+      {
+        isTierEligible: false,
+        spaceForRender: { ...space, projectRouting: '_alias:_origin' },
+      }
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('addSpaceName')).toBeInTheDocument();
+    });
+    await waitFor(() => {
+      expect(screen.getByTestId('cpsDefaultScopePanel')).toBeInTheDocument();
+    });
+  });
+
+  it('shows CustomizeCps component when the CPS plugin is absent from context but the space has non-default project routing', async () => {
+    // Defensive: cps?.isTierEligible is undefined when the plugin is not in
+    // Kibana context; custom routing alone should still surface the section.
+    renderWithCapability(
+      { read_space_default: true, manage_space_default: true },
+      {
+        omitCps: true,
+        spaceForRender: { ...space, projectRouting: '_alias:_origin' },
+      }
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('addSpaceName')).toBeInTheDocument();
+    });
+    await waitFor(() => {
+      expect(screen.getByTestId('cpsDefaultScopePanel')).toBeInTheDocument();
+    });
+  });
+
+  it('hides CustomizeCps component when tier is not eligible and the space has the default project routing value (_alias:*)', async () => {
+    renderWithCapability(
+      { read_space_default: true, manage_space_default: true },
+      {
+        isTierEligible: false,
+        spaceForRender: { ...space, projectRouting: '_alias:*' },
+      }
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('addSpaceName')).toBeInTheDocument();
+    });
+
+    expect(screen.queryByTestId('cpsDefaultScopePanel')).not.toBeInTheDocument();
+  });
+
+  it('hides CustomizeCps component when project_routing.read_space_default capability is false even if tier is eligible', async () => {
+    renderWithCapability(
+      { read_space_default: false, manage_space_default: true },
+      { isTierEligible: true }
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('addSpaceName')).toBeInTheDocument();
+    });
+
+    expect(screen.queryByTestId('cpsDefaultScopePanel')).not.toBeInTheDocument();
+  });
+
+  it('includes projectRouting in updateSpace request when space has projectRouting', async () => {
+    const spaceToUpdate = {
+      id: 'existing-space',
+      name: 'Existing Space',
+      description: 'hey an existing space',
+      color: '#aabbcc',
+      initials: 'AB',
+      disabledFeatures: [],
+      projectRouting: '_alias:_origin',
+    };
+
+    // Mock getActiveSpace to return the space being edited
+    const getActiveSpaceSpy = jest
+      .spyOn(spacesManager, 'getActiveSpace')
+      .mockResolvedValue(spaceToUpdate);
+
+    render(
+      <TestComponent>
+        <EditSpaceSettingsTab
+          space={spaceToUpdate}
+          history={history}
+          features={[]}
+          allowFeatureVisibility={false}
+          allowSolutionVisibility={false}
+          reloadWindow={reloadWindow}
+        />
+      </TestComponent>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('addSpaceName')).toBeInTheDocument();
+    });
+
+    // Update the space name to make the form dirty
+    const nameInput = screen.getByTestId('addSpaceName');
+    fireEvent.change(nameInput, { target: { value: 'Updated Space Name' } });
+
+    // Click save
+    const updateButton = await screen.findByTestId('save-space-button');
+    await userEvent.click(updateButton);
+
+    // Verify updateSpace was called with projectRouting included
+    await waitFor(() => {
+      expect(updateSpaceSpy).toHaveBeenCalled();
+      const callArgs = updateSpaceSpy.mock.calls[0][0];
+      expect(callArgs).toMatchObject({
+        id: 'existing-space',
+        name: 'Updated Space Name',
+        projectRouting: '_alias:_origin',
+      });
+    });
+
+    expect(navigateSpy).toHaveBeenCalledTimes(1);
+
+    // Clean up
+    getActiveSpaceSpy.mockRestore();
   });
 });

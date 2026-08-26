@@ -7,15 +7,64 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { JsonValue } from '@kbn/utility-types';
 import type { EsWorkflowExecution, EsWorkflowStepExecution, StackFrame } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
+import { KibanaApiCallError } from '@kbn/workflows-extensions/server';
 import { createMockWorkflowEventLogger } from '../../workflow_event_logger/mocks';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger/types';
 import { StepExecutionRuntime } from '../step_execution_runtime';
+import type { StepIoService } from '../step_io_service';
 import type { WorkflowContextManager } from '../workflow_context_manager';
 import type { WorkflowExecutionState } from '../workflow_execution_state';
+
+/**
+ * Builds a `StepIoService` test double that owns its own IO maps — mirrors
+ * the production split where state holds metadata only and the service is
+ * sovereign over `input` / `output`. Lifecycle writes still go through
+ * `state.upsertStep`; the runtime tests assert against those calls directly.
+ */
+function createPassthroughStepIoService(state: WorkflowExecutionState): StepIoService {
+  const inputs = new Map<string, JsonValue>();
+  const outputs = new Map<string, JsonValue | null>();
+  const sizes = new Map<string, number>();
+  return {
+    setStepInput: (id: string, input: JsonValue) => {
+      inputs.set(id, input);
+    },
+    setStepOutput: (id: string, output: JsonValue | null, sizeBytes?: number) => {
+      outputs.set(id, output);
+      if (sizeBytes !== undefined && Number.isFinite(sizeBytes) && sizeBytes >= 0) {
+        sizes.set(id, sizeBytes);
+      }
+    },
+    getStepInput: jest.fn((id: string) => inputs.get(id)),
+    getStepOutput: jest.fn((id: string) => outputs.get(id)),
+    getStepError: jest.fn((id: string) => state.getStepExecution(id)?.error),
+    getLatestStepIO: jest.fn((stepId: string) => {
+      const latest = state.getLatestStepExecution(stepId);
+      if (!latest) return undefined;
+      return {
+        input: inputs.get(latest.id),
+        output: outputs.get(latest.id),
+        error: latest.error,
+      };
+    }),
+    getDataSetVariables: jest.fn(() => ({} as Record<string, unknown>)),
+    getOutputSizeStats: jest.fn(() => {
+      let totalBytes = 0;
+      for (const bytes of sizes.values()) totalBytes += bytes;
+      return { totalBytes, stepCount: sizes.size };
+    }),
+    hasEvictedOutputs: jest.fn().mockReturnValue(false),
+    rehydrateOutputs: jest.fn().mockResolvedValue(undefined),
+    prepareForRead: jest.fn().mockResolvedValue(undefined),
+    releaseReadPins: jest.fn(),
+    releaseTransientlyRehydratedOutputs: jest.fn(),
+  } as unknown as StepIoService;
+}
 
 describe('StepExecutionRuntime', () => {
   let underTest: StepExecutionRuntime;
@@ -23,6 +72,7 @@ describe('StepExecutionRuntime', () => {
   let workflowExecutionGraph: WorkflowGraph;
   let workflowLogger: IWorkflowEventLogger;
   let workflowExecutionState: WorkflowExecutionState;
+  let stepIoService: StepIoService;
   let workflowContextManager: WorkflowContextManager;
   const fakeStepExecutionId = 'fake_step_execution_id';
   const fakeNode = {
@@ -30,7 +80,13 @@ describe('StepExecutionRuntime', () => {
     stepId: 'fakeStepId1',
     stepType: 'fakeStepType1',
   } as GraphNodeUnion;
-  const fakeStackFrames: StackFrame[] = [];
+  // Mirrors the scope the runtime is constructed with in production (the
+  // current node scope). Step executions record THIS, not the live global
+  // scope, so parallel branches each persist their own branch scope.
+  const fakeStackFrames: StackFrame[] = [
+    { stepId: 'firstScope', nestedScopes: [{ nodeId: 'node1', nodeType: 'enter-foreach' }] },
+    { stepId: 'secondScope', nestedScopes: [{ nodeId: 'node2', nodeType: 'enter-foreach' }] },
+  ];
   const originalDateCtor = global.Date;
   let mockDateNow: Date;
 
@@ -73,6 +129,10 @@ describe('StepExecutionRuntime', () => {
       load: jest.fn(),
       flush: jest.fn(),
       flushStepChanges: jest.fn(),
+      setLastFailedStepContext: jest.fn(),
+      getLastFailedStepContext: jest.fn(),
+      accumulateUsage: jest.fn(),
+      recordStepUsage: jest.fn(),
     } as unknown as WorkflowExecutionState;
 
     workflowExecutionGraph = {
@@ -102,6 +162,8 @@ describe('StepExecutionRuntime', () => {
       }
     });
 
+    stepIoService = createPassthroughStepIoService(workflowExecutionState);
+
     underTest = new StepExecutionRuntime({
       node: fakeNode,
       stackFrames: fakeStackFrames,
@@ -110,6 +172,7 @@ describe('StepExecutionRuntime', () => {
       workflowExecutionGraph,
       stepLogger: workflowLogger,
       workflowExecutionState,
+      stepIoService,
     });
   });
 
@@ -128,10 +191,12 @@ describe('StepExecutionRuntime', () => {
     it('should be able to retrieve the step result', () => {
       (workflowExecutionState.getStepExecution as jest.Mock).mockReturnValue({
         stepId: 'node1',
-        input: {},
-        output: { success: true, data: {} },
         error: { type: 'Error', message: 'Fake error' },
       } as Partial<EsWorkflowStepExecution>);
+      // IO lives in the service now — seed it through the passthrough mock.
+      stepIoService.setStepInput(fakeStepExecutionId, {});
+      stepIoService.setStepOutput(fakeStepExecutionId, { success: true, data: {} });
+
       const stepResult = underTest.getCurrentStepResult();
       expect(workflowExecutionState.getStepExecution).toHaveBeenCalledWith(
         `fake_step_execution_id`
@@ -199,13 +264,19 @@ describe('StepExecutionRuntime', () => {
       (workflowExecutionState.getStepExecutionsByStepId as jest.Mock).mockReturnValue([]);
       (workflowExecutionState.getWorkflowExecution as jest.Mock).mockReturnValue({
         id: 'testWorkflowExecutionId',
-        scopeStack: [
-          { stepId: 'firstScope', nestedScopes: [{ nodeId: 'node1' }] },
-          { stepId: 'secondScope', nestedScopes: [{ nodeId: 'node2' }] },
-        ] as StackFrame[],
         currentNodeId: 'node1',
       } as Partial<EsWorkflowExecution>);
       mockDateNow = new Date('2023-01-01T00:00:00.000Z');
+      underTest = new StepExecutionRuntime({
+        node: fakeNode,
+        stackFrames: fakeStackFrames,
+        stepExecutionId: fakeStepExecutionId,
+        contextManager: workflowContextManager,
+        workflowExecutionGraph,
+        stepLogger: workflowLogger,
+        workflowExecutionState,
+        stepIoService,
+      });
     });
 
     it('should upsertStep with the fake step execution id', () => {
@@ -249,13 +320,19 @@ describe('StepExecutionRuntime', () => {
       });
     });
 
-    it('should save step path from the workflow execution stack', () => {
+    it('should save the runtime own stack frames as the step scope', () => {
       underTest.startStep();
       expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
         expect.objectContaining({
           scopeStack: [
-            { stepId: 'firstScope', nestedScopes: [{ nodeId: 'node1' }] },
-            { stepId: 'secondScope', nestedScopes: [{ nodeId: 'node2' }] },
+            {
+              stepId: 'firstScope',
+              nestedScopes: [{ nodeId: 'node1', nodeType: 'enter-foreach' }],
+            },
+            {
+              stepId: 'secondScope',
+              nestedScopes: [{ nodeId: 'node2', nodeType: 'enter-foreach' }],
+            },
           ] as StackFrame[],
         })
       );
@@ -266,6 +343,24 @@ describe('StepExecutionRuntime', () => {
       expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
         expect.objectContaining({
           stepType: 'fakeStepType1',
+        })
+      );
+    });
+
+    it('should preserve startedAt when step execution already exists (e.g. poll resume)', () => {
+      const originalStartedAt = '2025-08-05T00:00:00.000Z';
+      (workflowExecutionState.getStepExecution as jest.Mock).mockReturnValue({
+        id: 'fake_step_execution_id',
+        stepId: 'fakeStepId1',
+        startedAt: originalStartedAt,
+      } as Partial<EsWorkflowStepExecution>);
+      mockDateNow = new Date('2025-08-06T00:00:00.000Z');
+
+      underTest.startStep();
+
+      expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
+        expect.objectContaining({
+          startedAt: originalStartedAt,
         })
       );
     });
@@ -313,7 +408,7 @@ describe('StepExecutionRuntime', () => {
           (stepExecutionId) => {
             if (stepExecutionId === 'fake_step_execution_id') {
               return {
-                stepId: 'node1',
+                stepId: 'fakeStepId1',
                 startedAt: '2025-08-05T00:00:00.000Z',
                 output: { success: true, data: {} },
                 error: undefined,
@@ -353,6 +448,75 @@ describe('StepExecutionRuntime', () => {
         );
       });
 
+      it('should extract token usage from output.metadata.usage and persist it on the step', () => {
+        underTest.finishStep({
+          message: 'hello',
+          metadata: {
+            usage: { inputTokens: 100, outputTokens: 50, cachedTokens: 25, totalTokens: 150 },
+          },
+        });
+
+        expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
+          expect.objectContaining({
+            usage: { inputTokens: 100, outputTokens: 50, cachedTokens: 25, totalTokens: 150 },
+          })
+        );
+        expect(workflowExecutionState.accumulateUsage).toHaveBeenCalledWith({
+          inputTokens: 100,
+          outputTokens: 50,
+          cachedTokens: 25,
+          totalTokens: 150,
+        });
+      });
+
+      it('records a per-step usage entry keyed by step id and reported connector', () => {
+        underTest.finishStep({
+          message: 'hello',
+          metadata: {
+            usage: {
+              connectorId: '.openai-gpt-5.2',
+              inputTokens: 100,
+              outputTokens: 50,
+              cachedTokens: 25,
+              totalTokens: 150,
+            },
+          },
+        });
+
+        expect(workflowExecutionState.recordStepUsage).toHaveBeenCalledWith({
+          stepId: 'fakeStepId1',
+          connectorId: '.openai-gpt-5.2',
+          inputTokens: 100,
+          outputTokens: 50,
+          cachedTokens: 25,
+          totalTokens: 150,
+        });
+      });
+
+      it('records a per-step usage entry without a connector when none is reported', () => {
+        underTest.finishStep({
+          message: 'hello',
+          metadata: { usage: { inputTokens: 100, outputTokens: 50, totalTokens: 150 } },
+        });
+
+        expect(workflowExecutionState.recordStepUsage).toHaveBeenCalledWith({
+          stepId: 'fakeStepId1',
+          inputTokens: 100,
+          outputTokens: 50,
+          totalTokens: 150,
+        });
+      });
+
+      it('should not tag usage on steps that do not report it', () => {
+        underTest.finishStep({ message: 'hello' });
+
+        expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
+          expect.not.objectContaining({ usage: expect.anything() })
+        );
+        expect(workflowExecutionState.accumulateUsage).toHaveBeenCalledWith(undefined);
+        expect(workflowExecutionState.recordStepUsage).not.toHaveBeenCalled();
+      });
+
       it('should log successful step execution', () => {
         underTest.finishStep();
         expect(workflowLogger.logInfo).toHaveBeenCalledWith(`Step 'fakeStepId1' completed`, {
@@ -374,6 +538,113 @@ describe('StepExecutionRuntime', () => {
             step_type: 'fakeStepType1',
           },
         });
+      });
+    });
+  });
+
+  describe('tryEnterWaitUntil', () => {
+    beforeEach(() => {
+      workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+        ...workflowExecution,
+        currentNodeId: 'node1',
+      });
+    });
+
+    describe('timer-based wait (resumeDate provided)', () => {
+      it('should enter wait state and store resumeAt on first call', () => {
+        (workflowExecutionState.getStepExecution as jest.Mock).mockReturnValue(undefined);
+
+        const resumeDate = new Date('2025-12-31T00:00:00.000Z');
+        const entered = underTest.tryEnterWaitUntil(resumeDate);
+
+        expect(entered).toBe(true);
+        expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
+          expect.objectContaining({
+            status: ExecutionStatus.WAITING,
+            state: expect.objectContaining({ resumeAt: resumeDate.toISOString() }),
+          })
+        );
+      });
+
+      it('should exit wait state and clear resumeAt when step already has resumeAt in state', () => {
+        (workflowExecutionState.getStepExecution as jest.Mock).mockReturnValue({
+          status: ExecutionStatus.WAITING,
+          state: { resumeAt: '2025-12-31T00:00:00.000Z' },
+        } as Partial<EsWorkflowStepExecution>);
+
+        const entered = underTest.tryEnterWaitUntil(new Date('2025-12-31T00:00:00.000Z'));
+
+        expect(entered).toBe(false);
+        expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
+          expect.objectContaining({ state: undefined })
+        );
+      });
+
+      it('should enter wait state even when status is WAITING but resumeAt is absent', () => {
+        // Guards against the broad-detection bug: status alone must not trigger exit
+        // for timer-based waits — only resumeAt is authoritative.
+        (workflowExecutionState.getStepExecution as jest.Mock).mockReturnValue({
+          status: ExecutionStatus.WAITING,
+          state: {},
+        } as Partial<EsWorkflowStepExecution>);
+
+        const entered = underTest.tryEnterWaitUntil(new Date('2025-12-31T00:00:00.000Z'));
+
+        expect(entered).toBe(true);
+      });
+    });
+
+    describe('indefinite wait (resumeDate omitted)', () => {
+      it('should enter wait state with WAITING_FOR_INPUT status on first call', () => {
+        (workflowExecutionState.getStepExecution as jest.Mock).mockReturnValue(undefined);
+
+        const entered = underTest.tryEnterWaitUntil(undefined, ExecutionStatus.WAITING_FOR_INPUT);
+
+        expect(entered).toBe(true);
+        expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
+          expect.objectContaining({ status: ExecutionStatus.WAITING_FOR_INPUT })
+        );
+      });
+
+      it('should exit wait state on resume call when step status is already WAITING_FOR_INPUT', () => {
+        // Simulates the resume run: stepExecution already has WAITING_FOR_INPUT status
+        // and no resumeAt in state. Without the status-based check this would return true
+        // (re-entering wait) instead of false (exiting wait) — the core bug being tested.
+        (workflowExecutionState.getStepExecution as jest.Mock).mockReturnValue({
+          status: ExecutionStatus.WAITING_FOR_INPUT,
+          state: {},
+        } as Partial<EsWorkflowStepExecution>);
+
+        const entered = underTest.tryEnterWaitUntil(undefined, ExecutionStatus.WAITING_FOR_INPUT);
+
+        expect(entered).toBe(false);
+      });
+
+      it('should not store resumeAt in state for indefinite waits', () => {
+        (workflowExecutionState.getStepExecution as jest.Mock).mockReturnValue(undefined);
+
+        underTest.tryEnterWaitUntil(undefined, ExecutionStatus.WAITING_FOR_INPUT);
+
+        expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
+          expect.not.objectContaining({
+            state: expect.objectContaining({ resumeAt: expect.anything() }),
+          })
+        );
+      });
+
+      it('should strip a residual resumeAt from prior state when entering an indefinite wait', () => {
+        // Guards against a prior timer-based run leaving a resumeAt that leaks into
+        // a subsequent indefinite wait record and confuses the scheduler.
+        (workflowExecutionState.getStepExecution as jest.Mock).mockReturnValue({
+          status: ExecutionStatus.RUNNING,
+          state: { resumeAt: '2025-12-31T00:00:00.000Z', otherKey: 'kept' },
+        } as Partial<EsWorkflowStepExecution>);
+
+        underTest.tryEnterWaitUntil(undefined, ExecutionStatus.WAITING_FOR_INPUT);
+
+        expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
+          expect.objectContaining({ state: { otherKey: 'kept' } })
+        );
       });
     });
   });
@@ -427,6 +698,76 @@ describe('StepExecutionRuntime', () => {
       }
     );
 
+    // Guardrail: errors thrown by custom steps may carry arbitrary, large, or sensitive
+    // payloads (e.g. `KibanaApiCallError` exposes the full parsed HTTP response on `.body`).
+    // `KibanaApiCallError` extends `ExecutionError`, so an uncaught instance persists a
+    // well-formed structured error — but only the safe scalar `status` is in `details`. The
+    // potentially large/sensitive `body` and `headers` live as instance fields outside
+    // `details`, so `toSerializableObject` never writes them to ES — neither on the step
+    // execution nor on the workflow execution. The recovered response body therefore only ever
+    // reaches ES through the (capped) `message`, not as a structured field.
+    it('persists status in details but never the body/headers of a KibanaApiCallError', () => {
+      const error = new KibanaApiCallError({
+        status: 500,
+        headers: { 'x-trace-id': 'trace-secret' },
+        body: { secret: 'do-not-persist', updated: [{ id: 'rule-1' }] },
+        message: 'HTTP 500: {"secret":"do-not-persist"}',
+      });
+
+      underTest.failStep(error);
+
+      const expectedSerializedError = {
+        type: 'KibanaApiCallError',
+        message: 'HTTP 500: {"secret":"do-not-persist"}',
+        details: { status: 500 },
+      };
+
+      // Persisted on the step execution: type + message + details:{status}; no body/headers.
+      const [persistedStep] = (workflowExecutionState.upsertStep as jest.Mock).mock.calls.at(
+        -1
+      ) as [EsWorkflowStepExecution];
+      expect(persistedStep.error).toEqual(expectedSerializedError);
+      expect(persistedStep.error?.details).toEqual({ status: 500 });
+      expect(persistedStep.error?.details).not.toHaveProperty('body');
+      expect(persistedStep.error?.details).not.toHaveProperty('headers');
+      // The raw body/headers must not leak into `details` (the only structured field persisted to ES).
+      // Note: the body text still appears inside the capped `message` string — that is the unchanged
+      // `HTTP <status>: <body>` OOTB behavior, not a structured field.
+      expect(JSON.stringify(persistedStep.error?.details)).not.toContain('do-not-persist');
+      expect(JSON.stringify(persistedStep.error?.details)).not.toContain('x-trace-id');
+
+      // The workflow-execution-level error is derived from this same serialized step error
+      // (via the runtime `error` getter, captured by the execution loop), so the guardrail
+      // holds transitively — `failStep` itself no longer writes the workflow execution.
+    });
+
+    it('should extract and accumulate partial token usage from partial output on failure', () => {
+      underTest.failStep(new Error('stream interrupted'), {
+        message: '',
+        metadata: {
+          usage: { inputTokens: 150, outputTokens: 60, cachedTokens: 30, totalTokens: 210 },
+        },
+      });
+
+      expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
+        expect.objectContaining({
+          status: ExecutionStatus.FAILED,
+          usage: { inputTokens: 150, outputTokens: 60, cachedTokens: 30, totalTokens: 210 },
+        })
+      );
+      expect(workflowExecutionState.accumulateUsage).toHaveBeenCalledWith({
+        inputTokens: 150,
+        outputTokens: 60,
+        cachedTokens: 30,
+        totalTokens: 210,
+      });
+    });
+
+    it('should not accumulate usage when failing without partial output', () => {
+      underTest.failStep(new Error('boom'));
+      expect(workflowExecutionState.accumulateUsage).toHaveBeenCalledWith(undefined);
+    });
+
     it('should log the failure of the step', () => {
       const error = new Error('Step execution failed');
       underTest.failStep(error);
@@ -449,6 +790,58 @@ describe('StepExecutionRuntime', () => {
           },
         }
       );
+    });
+
+    it('should use stepId as stepName for setLastFailedStepContext when configuration.name is not a string', () => {
+      const nodeWithNonStringName = {
+        ...fakeNode,
+        configuration: { name: 42 },
+      } as GraphNodeUnion;
+
+      const runtime = new StepExecutionRuntime({
+        node: nodeWithNonStringName,
+        stackFrames: fakeStackFrames,
+        stepExecutionId: fakeStepExecutionId,
+        contextManager: workflowContextManager,
+        workflowExecutionGraph,
+        stepLogger: workflowLogger,
+        workflowExecutionState,
+        stepIoService,
+      });
+
+      runtime.failStep(new Error('fail'));
+
+      expect(workflowExecutionState.setLastFailedStepContext).toHaveBeenCalledWith({
+        stepId: 'fakeStepId1',
+        stepName: 'fakeStepId1',
+        stepExecutionId: fakeStepExecutionId,
+      });
+    });
+
+    it('should use configuration.name for setLastFailedStepContext when it is a string', () => {
+      const nodeWithDisplayName = {
+        ...fakeNode,
+        configuration: { name: 'Display name' },
+      } as GraphNodeUnion;
+
+      const runtime = new StepExecutionRuntime({
+        node: nodeWithDisplayName,
+        stackFrames: fakeStackFrames,
+        stepExecutionId: fakeStepExecutionId,
+        contextManager: workflowContextManager,
+        workflowExecutionGraph,
+        stepLogger: workflowLogger,
+        workflowExecutionState,
+        stepIoService,
+      });
+
+      runtime.failStep(new Error('fail'));
+
+      expect(workflowExecutionState.setLastFailedStepContext).toHaveBeenCalledWith({
+        stepId: 'fakeStepId1',
+        stepName: 'Display name',
+        stepExecutionId: fakeStepExecutionId,
+      });
     });
   });
 });

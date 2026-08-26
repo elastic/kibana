@@ -10,7 +10,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiCodeBlock,
   EuiDescriptionList,
   EuiDescriptionListDescription,
@@ -29,6 +28,7 @@ import {
   EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 
 import { getIndexListUri } from '@kbn/index-management-plugin/public';
 import type { ApiStatus, FollowerIndexWithPausedStatus } from '../../../../../../../common/types';
@@ -170,7 +170,8 @@ const FollowerIndexDetails = ({ followerIndex, isPollingStatus }: FollowerIndexD
             <EuiSpacer size="s" />
 
             {isPaused ? (
-              <EuiCallOut
+              <KbnInfoCallout
+                announceOnMount
                 size="s"
                 title={
                   <FormattedMessage
@@ -405,10 +406,11 @@ const FollowerIndexDetails = ({ followerIndex, isPollingStatus }: FollowerIndexD
 
 export interface DetailPanelProps {
   apiStatus?: ApiStatus;
-  followerIndexId?: string;
-  followerIndex?: FollowerIndexWithPausedStatus;
+  followerIndexId?: string | null;
+  followerIndex?: FollowerIndexWithPausedStatus | null;
   closeDetailPanel: () => void;
   getFollowerIndex: (id: string) => void;
+  onActionComplete?: () => void;
 }
 
 export const DetailPanel = ({
@@ -417,6 +419,7 @@ export const DetailPanel = ({
   followerIndex,
   apiStatus,
   getFollowerIndex,
+  onActionComplete,
 }: DetailPanelProps) => {
   const [isInitialLoad, setInitialLoad] = useState(true);
   const { isPolling, startPolling, stopPolling } = usePolling();
@@ -507,7 +510,7 @@ export const DetailPanel = ({
         <EuiFlyoutBody>
           <EuiFlexGroup justifyContent="flexStart" alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
-              <EuiIcon size="m" type="warning" color="danger" />
+              <EuiIcon size="m" type="warning" color="danger" aria-hidden={true} />
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
@@ -553,7 +556,7 @@ export const DetailPanel = ({
             <EuiFlexGroup>
               <EuiFlexItem grow={false}>
                 <EuiButton
-                  href={routing._reactRouter.getUrlForApp('management', {
+                  href={routing.reactRouter?.getUrlForApp('management', {
                     path: `data/index_management${indexManagementUri}`,
                   })}
                   data-test-subj="viewIndexManagementButton"
@@ -569,7 +572,7 @@ export const DetailPanel = ({
                 <EuiFlexItem grow={false}>
                   <ContextMenu
                     iconSide="left"
-                    iconType="arrowUp"
+                    iconType="chevronSingleUp"
                     anchorPosition="upRight"
                     label={
                       <FormattedMessage
@@ -580,6 +583,7 @@ export const DetailPanel = ({
                     followerIndices={[followerIndex]}
                     testSubj="manageButton"
                     isPollingStatus={isPolling}
+                    onActionComplete={onActionComplete}
                   />
                 </EuiFlexItem>
               )}

@@ -7,15 +7,20 @@
 
 import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from './types';
 import { createMockedExecutableTool, createToolRegistryMock } from './test_utils/tools';
-import { createFormatContextMock } from './test_utils/attachments';
+import { createMockedAgentRegistry } from './test_utils/agents';
+import { createFormatContextMock, createResolveContextMock } from './test_utils/attachments';
 import { createToolHandlerContextMock } from './test_utils/runner';
+import { createModelProviderMock } from './test_utils/model_provider';
 
 export type { ToolHandlerContextMock } from './test_utils/runner';
 
-const createSetupContractMock = (): jest.Mocked<AgentBuilderPluginSetup> => {
+export type AgentBuilderPluginSetupMock = jest.MockedObjectDeep<AgentBuilderPluginSetup>;
+
+const createSetupContractMock = (): AgentBuilderPluginSetupMock => {
   return {
     agents: {
       register: jest.fn(),
+      registerType: jest.fn(),
     },
     tools: {
       register: jest.fn(),
@@ -23,17 +28,62 @@ const createSetupContractMock = (): jest.Mocked<AgentBuilderPluginSetup> => {
     attachments: {
       registerType: jest.fn(),
     },
+    renderers: {
+      register: jest.fn(),
+    },
+    skills: {
+      register: jest.fn(),
+    },
+    hooks: {
+      register: jest.fn(),
+    },
+    plugins: {
+      register: jest.fn(),
+    },
+    conversationTemplates: {
+      register: jest.fn(),
+    },
+    topSnippets: { numSnippets: 2, numWords: 750 },
   };
 };
 
-const createStartContractMock = (): jest.Mocked<AgentBuilderPluginStart> => {
+export type AgentBuilderPluginStartMock = jest.MockedObjectDeep<AgentBuilderPluginStart>;
+
+const createStartContractMock = (): AgentBuilderPluginStartMock => {
   return {
     agents: {
       runAgent: jest.fn(),
+      getRegistry: jest.fn().mockImplementation(() => createMockedAgentRegistry()),
+      ensure: jest.fn(),
     },
     tools: {
       execute: jest.fn(),
       getRegistry: jest.fn().mockImplementation(() => createToolRegistryMock()),
+    },
+    skills: {
+      getRegistry: jest.fn(),
+      register: jest.fn(),
+    },
+    plugins: {
+      getRegistry: jest.fn(),
+    },
+    execution: {
+      executeAgent: jest.fn(),
+      getExecution: jest.fn(),
+      findExecutions: jest.fn(),
+    },
+    runtime: {
+      createModelProvider: jest.fn(),
+    },
+    conversations: {
+      getScopedClient: jest.fn().mockResolvedValue({
+        get: jest.fn(),
+        list: jest.fn(),
+      }),
+    },
+    conversationTemplates: {
+      get: jest.fn(),
+      list: jest.fn(),
     },
   };
 };
@@ -44,8 +94,10 @@ export const agentBuilderMocks = {
   createTool: createMockedExecutableTool,
   attachments: {
     createFormatContextMock,
+    createResolveContextMock,
   },
   tools: {
     createHandlerContext: createToolHandlerContextMock,
   },
+  createModelProvider: createModelProviderMock,
 };

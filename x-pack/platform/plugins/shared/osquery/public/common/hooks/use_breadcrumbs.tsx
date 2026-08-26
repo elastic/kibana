@@ -67,6 +67,59 @@ const breadcrumbGetters: {
       text: liveQueryId,
     },
   ],
+  history: () => [
+    BASE_BREADCRUMB,
+    {
+      href: pagePathGetters.history(),
+      text: i18n.translate('xpack.osquery.breadcrumbs.historyPageTitle', {
+        defaultMessage: 'History',
+      }),
+    },
+  ],
+  new_query: () => [
+    BASE_BREADCRUMB,
+    {
+      href: pagePathGetters.history(),
+      text: i18n.translate('xpack.osquery.breadcrumbs.historyPageTitle', {
+        defaultMessage: 'History',
+      }),
+    },
+    {
+      text: i18n.translate('xpack.osquery.breadcrumbs.newQueryPageTitle', {
+        defaultMessage: 'New',
+      }),
+    },
+  ],
+  history_details: ({ liveQueryId }) => [
+    BASE_BREADCRUMB,
+    {
+      href: pagePathGetters.history(),
+      text: i18n.translate('xpack.osquery.breadcrumbs.historyPageTitle', {
+        defaultMessage: 'History',
+      }),
+    },
+    {
+      text: liveQueryId,
+    },
+  ],
+  history_scheduled_details: ({ scheduleId, executionCount }) => [
+    BASE_BREADCRUMB,
+    {
+      href: pagePathGetters.history(),
+      text: i18n.translate('xpack.osquery.breadcrumbs.historyPageTitle', {
+        defaultMessage: 'History',
+      }),
+    },
+    {
+      text: scheduleId,
+    },
+    {
+      text: i18n.translate('xpack.osquery.breadcrumbs.scheduledExecutionTitle', {
+        defaultMessage: 'Execution #{executionCount}',
+        values: { executionCount },
+      }),
+    },
+  ],
   saved_queries: () => [
     BASE_BREADCRUMB,
     {
@@ -123,7 +176,7 @@ const breadcrumbGetters: {
       }),
     },
   ],
-  pack_details: ({ packName }) => [
+  pack_edit: ({ packName }) => [
     BASE_BREADCRUMB,
     {
       href: pagePathGetters.packs(),
@@ -132,19 +185,6 @@ const breadcrumbGetters: {
       }),
     },
     {
-      text: packName,
-    },
-  ],
-  pack_edit: ({ packName, packId }) => [
-    BASE_BREADCRUMB,
-    {
-      href: pagePathGetters.packs(),
-      text: i18n.translate('xpack.osquery.breadcrumbs.packsPageTitle', {
-        defaultMessage: 'Packs',
-      }),
-    },
-    {
-      href: pagePathGetters.pack_details({ packId }),
       text: packName,
     },
     {

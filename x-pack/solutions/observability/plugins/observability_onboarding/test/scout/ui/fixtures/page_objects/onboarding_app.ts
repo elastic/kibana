@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { expect } from '@kbn/scout-oblt/ui';
 import type { ScoutPage } from '@kbn/scout-oblt';
 
 export class OnboardingApp {
@@ -12,7 +13,7 @@ export class OnboardingApp {
 
   async goto() {
     await this.page.gotoApp('observabilityOnboarding');
-    await this.useCaseGridByTestId.waitFor({ state: 'visible' });
+    await this.useCaseGridByTestId.waitFor({ state: 'visible', timeout: 20_000 });
   }
 
   public get hostUseCaseTile() {
@@ -37,10 +38,6 @@ export class OnboardingApp {
 
   public get otelLogsCard() {
     return this.page.getByTestId('integration-card:otel-logs');
-  }
-
-  public get kubernetesQuickStartCard() {
-    return this.page.getByTestId('integration-card:kubernetes-quick-start');
   }
 
   public get otelKubernetesCard() {
@@ -102,7 +99,7 @@ export class OnboardingApp {
         await this.autoDetectLogsCard.waitFor({ state: 'visible' });
         break;
       case 'kubernetes':
-        await this.kubernetesQuickStartCard.waitFor({ state: 'visible' });
+        await this.otelKubernetesCard.waitFor({ state: 'visible' });
         break;
       case 'cloud':
         await this.awsLogsVirtualCard.waitFor({ state: 'visible' });
@@ -119,9 +116,8 @@ export class OnboardingApp {
   }
 
   async selectKubernetesUseCase() {
-    const kubernetesRadio = this.kubernetesUseCaseTile.getByRole('radio');
-    await kubernetesRadio.click();
-    await this.kubernetesQuickStartCard.waitFor({ state: 'visible' });
+    await this.kubernetesUseCaseTile.getByRole('radio').click();
+    await this.page.waitForURL(/\/kubernetes(\?|$|#)/);
   }
 
   async selectCloudUseCase() {
@@ -138,14 +134,23 @@ export class OnboardingApp {
 
   async clickIntegrationCard(cardSelector: string) {
     const card = this.page.getByTestId(cardSelector);
-    await card.click();
 
     const nonRouting =
       /(aws-logs-virtual|azure-logs-virtual|gcp-logs-virtual|firehose-quick-start)/;
     if (!nonRouting.test(cardSelector)) {
-      await this.page.waitForURL(
-        /.*\/(auto-detect|kubernetes|otel-logs|otel-kubernetes|apm-virtual|otel-virtual|synthetics-virtual)/
-      );
+      const urlPattern =
+        /.*\/(auto-detect|kubernetes|otel-logs|apm-virtual|otel-virtual|synthetics-virtual)/;
+
+      // Retry click + URL check to handle race conditions where the card
+      // is rendered but React click handlers aren't yet attached after a re-render
+      await expect(async () => {
+        if (!urlPattern.test(this.page.url())) {
+          await card.click();
+        }
+        expect(this.page.url()).toMatch(urlPattern);
+      }).toPass({ timeout: 30_000 });
+    } else {
+      await card.click();
     }
   }
 
@@ -182,5 +187,13 @@ export class OnboardingApp {
     await this.hostUseCaseTile.waitFor({ state: 'visible' });
     await this.kubernetesUseCaseTile.waitFor({ state: 'visible' });
     await this.cloudUseCaseTile.waitFor({ state: 'visible' });
+  }
+
+  public get autoDetectCodeSnippet() {
+    return this.page.getByTestId('observabilityOnboardingAutoDetectPanelCodeSnippet');
+  }
+
+  async getAutoDetectCommandContent(): Promise<string> {
+    return (await this.autoDetectCodeSnippet.textContent()) ?? '';
   }
 }

@@ -91,6 +91,7 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
   ) : (
     <>
       <EuiBasicTable
+        tableCaption={i18n.TABLE_CAPTION}
         className={classnames({ isSelectorView })}
         columns={columns}
         rowHeader={rowHeader}
@@ -111,7 +112,7 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
                   size="s"
                   onClick={navigateToCreateCaseClick}
                   href={getCreateCaseUrl()}
-                  iconType="plusInCircle"
+                  iconType="plusCircle"
                   data-test-subj="cases-table-add-case"
                 >
                   {i18n.CREATE_CASE_TITLE}
@@ -126,6 +127,9 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
         rowProps={tableRowProps}
         selection={!isSelectorView ? selection : undefined}
         sorting={sorting}
+        tableLayout="auto"
+        scrollableInline
+        responsiveBreakpoint={false}
       />
     </>
   );

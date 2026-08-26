@@ -69,7 +69,7 @@ export function TransactionLink() {
   return (
     <CentralizedContainer>
       <EuiEmptyPrompt
-        iconType="apmTrace"
+        iconType="chartWaterfall"
         title={
           <h2>
             {i18n.translate('xpack.apm.transactionLink.h2.fetchingTransactionLabel', {

@@ -1,19 +1,745 @@
 {
-  "lastModified": "2026-01-30T09:08:24.451Z",
-  "sha1": "2cc21468fa435f3cd7e85ac37ecaed5a82ea602d",
+  "sha1": "4f572e84a3ba5e1fbf5f03888231295621a48e16",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "50b3a018a3d8e65-f2cd2d3cdc77643",
       "title": "Ingest data to Elasticsearch",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/global.setup.ts",
-        "line": 35,
-        "column": 16
+        "line": 5,
+        "column": 1
+      }
+    },
+    {
+      "id": "50b3a018a3d8e65-7ed984cc159f3e0",
+      "title": "Set up metrics anomalies ML jobs and results",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/global.setup.ts",
+        "line": 143,
+        "column": 2
+      }
+    },
+    {
+      "id": "50b3a018a3d8e65-41126f7f36a9339",
+      "title": "Load metrics_and_logs archive for Metrics Explorer",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/global.setup.ts",
+        "line": 153,
+        "column": 45
+      }
+    },
+    {
+      "id": "c5058ee96111448-76dd724bce0857d",
+      "title": "Infrastructure feature controls - security with infrastructure all privileges shows the nav link and no read-only badge",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/feature_controls/infrastructure_security.spec.ts",
+        "line": 55,
+        "column": 13
+      }
+    },
+    {
+      "id": "c5058ee96111448-17cfda90661e46e",
+      "title": "Infrastructure feature controls - security with infrastructure all privileges renders inventory data without a read-only badge",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/feature_controls/infrastructure_security.spec.ts",
+        "line": 72,
+        "column": 8
+      }
+    },
+    {
+      "id": "c5058ee96111448-d4cc372048d673d",
+      "title": "Infrastructure feature controls - security with infrastructure read privileges shows the nav link and a read-only badge",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/feature_controls/infrastructure_security.spec.ts",
+        "line": 79,
+        "column": 11
+      }
+    },
+    {
+      "id": "c5058ee96111448-0897dfcf892c423",
+      "title": "Infrastructure feature controls - security with infrastructure read privileges renders inventory data with a read-only badge",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/feature_controls/infrastructure_security.spec.ts",
+        "line": 100,
+        "column": 20
+      }
+    },
+    {
+      "id": "c5058ee96111448-17a94b47c44f242",
+      "title": "Infrastructure feature controls - security without infrastructure privileges hides the nav link and blocks the app",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/feature_controls/infrastructure_security.spec.ts",
+        "line": 108,
+        "column": 95
+      }
+    },
+    {
+      "id": "28085c405a6f93d-2fe071863170a32",
+      "title": "Infrastructure feature controls - spaces is available when no features are disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/feature_controls/infrastructure_spaces.spec.ts",
+        "line": 46,
+        "column": 5
+      }
+    },
+    {
+      "id": "28085c405a6f93d-30d89aa885dcf63",
+      "title": "Infrastructure feature controls - spaces is hidden and blocked when infrastructure is disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/feature_controls/infrastructure_spaces.spec.ts",
+        "line": 60,
+        "column": 13
+      }
+    },
+    {
+      "id": "28085c405a6f93d-946560bd33c568b",
+      "title": "Infrastructure feature controls - spaces remains accessible when an unrelated feature is disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/feature_controls/infrastructure_spaces.spec.ts",
+        "line": 69,
+        "column": 11
+      }
+    },
+    {
+      "id": "a2e3d47179e8c77-34c07e010635277",
+      "title": "Logs feature controls - security with logs all privileges shows the Logs nav link without a read-only badge",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/feature_controls/logs_security.spec.ts",
+        "line": 56,
+        "column": 13
+      }
+    },
+    {
+      "id": "a2e3d47179e8c77-6fddb989e0e225d",
+      "title": "Logs feature controls - security with logs read privileges shows the Logs nav link",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/feature_controls/logs_security.spec.ts",
+        "line": 73,
+        "column": 8
+      }
+    },
+    {
+      "id": "a2e3d47179e8c77-b246eef5cb32b36",
+      "title": "Logs feature controls - security without logs privileges hides the nav link and blocks the app",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/feature_controls/logs_security.spec.ts",
+        "line": 78,
+        "column": 23
+      }
+    },
+    {
+      "id": "536b7d7723ff5e8-261b708ff152fe4",
+      "title": "Logs feature controls - spaces shows the Logs nav link when no features are disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/feature_controls/logs_spaces.spec.ts",
+        "line": 31,
+        "column": 26
+      }
+    },
+    {
+      "id": "536b7d7723ff5e8-6d85cb1e8ec424e",
+      "title": "Logs feature controls - spaces is hidden and blocked when logs is disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/feature_controls/logs_spaces.spec.ts",
+        "line": 36,
+        "column": 41
+      }
+    },
+    {
+      "id": "ea06d464054f10f-a8952be5ce2dfb9",
+      "title": "Hosts Page - Alerts Tab should correctly load the Alerts tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_alerts.spec.ts",
+        "line": 55,
+        "column": 38
+      }
+    },
+    {
+      "id": "ea06d464054f10f-00c1ebb85914de7",
+      "title": "Hosts Page - Alerts Tab should display the correct active alerts count badge",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_alerts.spec.ts",
+        "line": 56,
+        "column": 41
+      }
+    },
+    {
+      "id": "ea06d464054f10f-f78f9bcec9bd2e1",
+      "title": "Hosts Page - Alerts Tab should filter alerts to show all statuses",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_alerts.spec.ts",
+        "line": 59,
+        "column": 72
+      }
+    },
+    {
+      "id": "ea06d464054f10f-525a63ab62000bc",
+      "title": "Hosts Page - Alerts Tab should filter alerts to show only active alerts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_alerts.spec.ts",
+        "line": 62,
+        "column": 7
+      }
+    },
+    {
+      "id": "ea06d464054f10f-805f3668b4d14c1",
+      "title": "Hosts Page - Alerts Tab should filter alerts to show only recovered alerts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_alerts.spec.ts",
+        "line": 68,
+        "column": 14
+      }
+    },
+    {
+      "id": "ea06d464054f10f-c7795a8abd6a88b",
+      "title": "Hosts Page - Alerts Tab should render the alerts table with cells",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_alerts.spec.ts",
+        "line": 72,
+        "column": 23
+      }
+    },
+    {
+      "id": "869e353ba67458c-a2bd0a115e9e812",
+      "title": "Hosts Page - Content should render the correct page title",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_content.spec.ts",
+        "line": 31,
+        "column": 13
+      }
+    },
+    {
+      "id": "869e353ba67458c-477363963c0583f",
+      "title": "Hosts Page - Content should maintain the selected date range when navigating to host details",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_content.spec.ts",
+        "line": 34,
+        "column": 9
+      }
+    },
+    {
+      "id": "869e353ba67458c-ec8e612353c61b5",
+      "title": "Hosts Page - Content should load 11 lens metric charts in the Metrics tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_content.spec.ts",
+        "line": 47,
+        "column": 15
+      }
+    },
+    {
+      "id": "869e353ba67458c-d5d847f64180e7c",
+      "title": "Hosts Page - Content should load the Logs tab with embedded saved search",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_content.spec.ts",
+        "line": 60,
+        "column": 22
+      }
+    },
+    {
+      "id": "dabc65f5da31ebe-fb23c5e0de6c6c5",
+      "title": "Hosts Page - Metadata Filter Add and remove metadata filter from host flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_metadata_filter.spec.ts",
+        "line": 26,
+        "column": 15
+      }
+    },
+    {
+      "id": "dabc65f5da31ebe-a99c866d6ac97cd",
+      "title": "Hosts Page - Metadata Filter Adding a metadata filter hides other hosts from the table",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_metadata_filter.spec.ts",
+        "line": 53,
+        "column": 22
+      }
+    },
+    {
+      "id": "003281d82ca0442-5cb55578e07a030",
+      "title": "Hosts Page - Search Query should filter the table content on a KQL search submit",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_search_query.spec.ts",
+        "line": 40,
+        "column": 7
+      }
+    },
+    {
+      "id": "003281d82ca0442-eb9dd626af6a329",
+      "title": "Hosts Page - Search Query should update the KPI tiles on a search submit",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_search_query.spec.ts",
+        "line": 63,
+        "column": 15
+      }
+    },
+    {
+      "id": "003281d82ca0442-9436e4f09d9246e",
+      "title": "Hosts Page - Search Query should show an error callout when an invalid KQL query is submitted",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_search_query.spec.ts",
+        "line": 91,
+        "column": 22
+      }
+    },
+    {
+      "id": "003281d82ca0442-d249c155c8a3a64",
+      "title": "Hosts Page - Search Query should show no data message when query matches no hosts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_search_query.spec.ts",
+        "line": 97,
+        "column": 22
+      }
+    },
+    {
+      "id": "e0dfab470c8cdf4-3df745974a5aa43",
+      "title": "Hosts Page - Search Search using the Hosts page search bar",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_search.spec.ts",
+        "line": 36,
+        "column": 67
+      }
+    },
+    {
+      "id": "e0dfab470c8cdf4-fbaa70a0ae45105",
+      "title": "Hosts Page - Search Search using the flyout search bar",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_search.spec.ts",
+        "line": 41,
+        "column": 86
+      }
+    },
+    {
+      "id": "e0dfab470c8cdf4-e9c2121846875ba",
+      "title": "Hosts Page - Search Filter hosts using the Cloud Provider control",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_search.spec.ts",
+        "line": 55,
+        "column": 13
+      }
+    },
+    {
+      "id": "e0dfab470c8cdf4-1bc13daa71111e7",
+      "title": "Hosts Page - Search Filter hosts using the Operating System control",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_search.spec.ts",
+        "line": 73,
+        "column": 10
+      }
+    },
+    {
+      "id": "2a28cf173721683-ca154041039d459",
+      "title": "Hosts Page - Table should render a table with the correct number of hosts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_table.spec.ts",
+        "line": 41,
+        "column": 13
+      }
+    },
+    {
+      "id": "2a28cf173721683-8eda4da125d5852",
+      "title": "Hosts Page - Table should render metric values for each host entry",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_table.spec.ts",
+        "line": 44,
+        "column": 9
+      }
+    },
+    {
+      "id": "2a28cf173721683-cd6ee75a8a910af",
+      "title": "Hosts Page - Table should select and filter hosts inside the table",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_table.spec.ts",
+        "line": 54,
+        "column": 20
+      }
+    },
+    {
+      "id": "2a28cf173721683-f53437f2837788b",
+      "title": "Hosts Page - Table should display correct KPI tile values",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_table.spec.ts",
+        "line": 75,
+        "column": 25
+      }
+    },
+    {
+      "id": "2a28cf173721683-aacaac19d0ad998",
+      "title": "Hosts Page - Table should paginate to 5 rows per page and navigate to the last page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_table.spec.ts",
+        "line": 94,
+        "column": 7
+      }
+    },
+    {
+      "id": "2a28cf173721683-ac6fdbb524d01ee",
+      "title": "Hosts Page - Table should show all hosts when page size is increased",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_table.spec.ts",
+        "line": 106,
+        "column": 23
+      }
+    },
+    {
+      "id": "2a28cf173721683-6e36e4ed3f8191b",
+      "title": "Hosts Page - Table should sort by CPU usage ascending",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_table.spec.ts",
+        "line": 119,
+        "column": 32
+      }
+    },
+    {
+      "id": "2a28cf173721683-bb28b5f24f22406",
+      "title": "Hosts Page - Table should sort by CPU usage descending",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_table.spec.ts",
+        "line": 133,
+        "column": 22
+      }
+    },
+    {
+      "id": "2a28cf173721683-44ef574e8bd4a56",
+      "title": "Hosts Page - Table should sort by title ascending",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_table.spec.ts",
+        "line": 146,
+        "column": 72
+      }
+    },
+    {
+      "id": "2a28cf173721683-1e2eea6b2f8c004",
+      "title": "Hosts Page - Table should sort by title descending",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_table.spec.ts",
+        "line": 159,
+        "column": 9
+      }
+    },
+    {
+      "id": "980bc31656c0913-8a36bba6cac15d0",
+      "title": "Hosts Page - Time Drift keeps KPIs consistent with the table (no N/A) when the clock drifts within range",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_time_drift.spec.ts",
+        "line": 29,
+        "column": 10
+      }
+    },
+    {
+      "id": "980bc31656c0913-150581c0817bba5",
+      "title": "Hosts Page - Time Drift keeps KPIs stable (no N/A) through incremental clock drift with repeated refreshes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/hosts/hosts_page_time_drift.spec.ts",
+        "line": 68,
+        "column": 25
       }
     },
     {
@@ -21,13 +747,31 @@
       "title": "Infrastructure Inventory - Alerts Flyout Should open inventory rule flyout",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/alerts_flyouts.spec.ts",
-        "line": 18,
-        "column": 7
+        "line": 14,
+        "column": 54
+      }
+    },
+    {
+      "id": "82828921c5db931-c7376d2da38fb80",
+      "title": "Infrastructure Inventory - Alerts Flyout Should show related dashboards on the inventory rule details step",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/alerts_flyouts.spec.ts",
+        "line": 22,
+        "column": 12
       }
     },
     {
@@ -35,12 +779,13 @@
       "title": "Infrastructure Inventory - Alerts Flyout Should open metrics threshold rule flyout",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/alerts_flyouts.spec.ts",
-        "line": 41,
-        "column": 7
+        "line": 35,
+        "column": 12
       }
     },
     {
@@ -48,13 +793,15 @@
       "title": "Infrastructure Inventory - Alerts Flyout Should not have option to create custom threshold rule",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/alerts_flyouts.spec.ts",
-        "line": 60,
-        "column": 7
+        "line": 38,
+        "column": 9
       }
     },
     {
@@ -62,13 +809,15 @@
       "title": "Infrastructure Inventory - Container Asset Details Flyout Overview Tab",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/container_asset_details_flyout.spec.ts",
-        "line": 60,
-        "column": 9
+        "line": 50,
+        "column": 26
       }
     },
     {
@@ -76,13 +825,15 @@
       "title": "Infrastructure Inventory - Container Asset Details Flyout Metadata Tab",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/container_asset_details_flyout.spec.ts",
-        "line": 182,
-        "column": 9
+        "line": 158,
+        "column": 15
       }
     },
     {
@@ -90,13 +841,15 @@
       "title": "Infrastructure Inventory - Container Asset Details Flyout Metadata Tab - Is accessible from overview tab section show all",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/container_asset_details_flyout.spec.ts",
-        "line": 223,
-        "column": 9
+        "line": 200,
+        "column": 15
       }
     },
     {
@@ -104,12 +857,14 @@
       "title": "Infrastructure Inventory - Container Asset Details Flyout Metrics Tab",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/container_asset_details_flyout.spec.ts",
-        "line": 230,
+        "line": 209,
         "column": 9
       }
     },
@@ -118,13 +873,15 @@
       "title": "Infrastructure Inventory - Container Asset Details Flyout Metrics Tab - Sections are accessible from overview tab section show all",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/container_asset_details_flyout.spec.ts",
-        "line": 279,
-        "column": 9
+        "line": 252,
+        "column": 15
       }
     },
     {
@@ -132,13 +889,15 @@
       "title": "Infrastructure Inventory - Container Asset Details Flyout Logs Tab",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/container_asset_details_flyout.spec.ts",
-        "line": 331,
-        "column": 9
+        "line": 307,
+        "column": 15
       }
     },
     {
@@ -146,12 +905,14 @@
       "title": "Infrastructure Inventory - Container Asset Details Flyout Open as page and return to flyout",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/container_asset_details_flyout.spec.ts",
-        "line": 365,
+        "line": 347,
         "column": 9
       }
     },
@@ -160,13 +921,15 @@
       "title": "Infrastructure Inventory - Host Asset Details Flyout Overview Tab",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/host_asset_details_flyout.spec.ts",
-        "line": 55,
-        "column": 9
+        "line": 45,
+        "column": 26
       }
     },
     {
@@ -174,13 +937,15 @@
       "title": "Infrastructure Inventory - Host Asset Details Flyout Metadata Tab",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/host_asset_details_flyout.spec.ts",
-        "line": 199,
-        "column": 9
+        "line": 176,
+        "column": 15
       }
     },
     {
@@ -188,13 +953,15 @@
       "title": "Infrastructure Inventory - Host Asset Details Flyout Metadata Tab - Is accessible from overview tab section show all",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/host_asset_details_flyout.spec.ts",
-        "line": 238,
-        "column": 9
+        "line": 214,
+        "column": 15
       }
     },
     {
@@ -202,13 +969,15 @@
       "title": "Infrastructure Inventory - Host Asset Details Flyout Metrics Tab",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/host_asset_details_flyout.spec.ts",
-        "line": 245,
-        "column": 9
+        "line": 219,
+        "column": 25
       }
     },
     {
@@ -216,13 +985,15 @@
       "title": "Infrastructure Inventory - Host Asset Details Flyout Metrics Tab - Sections are accessible from overview tab section show all",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/host_asset_details_flyout.spec.ts",
-        "line": 306,
-        "column": 9
+        "line": 276,
+        "column": 15
       }
     },
     {
@@ -230,13 +1001,15 @@
       "title": "Infrastructure Inventory - Host Asset Details Flyout Logs Tab",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/host_asset_details_flyout.spec.ts",
-        "line": 343,
-        "column": 9
+        "line": 317,
+        "column": 15
       }
     },
     {
@@ -244,13 +1017,15 @@
       "title": "Infrastructure Inventory - Host Asset Details Flyout Open as page and return to flyout",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/host_asset_details_flyout.spec.ts",
-        "line": 377,
-        "column": 9
+        "line": 344,
+        "column": 15
       }
     },
     {
@@ -258,13 +1033,15 @@
       "title": "Infrastructure Inventory - K8s Integration Links Navigation K8s integration link navigates to integrations detail page",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory_k8s_integration_links.spec.ts",
-        "line": 37,
-        "column": 9
+        "line": 28,
+        "column": 26
       }
     },
     {
@@ -272,13 +1049,15 @@
       "title": "Infrastructure Inventory - K8s Integration Links Navigation K8s dashboards link navigates to dashboards with tag filter",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory_k8s_integration_links.spec.ts",
-        "line": 57,
-        "column": 9
+        "line": 39,
+        "column": 37
       }
     },
     {
@@ -286,13 +1065,15 @@
       "title": "Infrastructure Inventory - K8s Tour Render and dismiss k8s tour",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory_k8s_tour.spec.ts",
-        "line": 19,
-        "column": 7
+        "line": 24,
+        "column": 29
       }
     },
     {
@@ -300,13 +1081,15 @@
       "title": "Infrastructure Inventory Render expected content",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory.spec.ts",
-        "line": 36,
-        "column": 7
+        "line": 38,
+        "column": 80
       }
     },
     {
@@ -314,13 +1097,15 @@
       "title": "Infrastructure Inventory Filter nodes by query bar",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory.spec.ts",
-        "line": 66,
-        "column": 7
+        "line": 58,
+        "column": 15
       }
     },
     {
@@ -328,13 +1113,15 @@
       "title": "Infrastructure Inventory Render empty data prompt for dates with no data",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory.spec.ts",
-        "line": 76,
-        "column": 7
+        "line": 66,
+        "column": 15
       }
     },
     {
@@ -342,13 +1129,15 @@
       "title": "Infrastructure Inventory Inventory switcher changes node types",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory.spec.ts",
-        "line": 96,
-        "column": 7
+        "line": 81,
+        "column": 20
       }
     },
     {
@@ -356,13 +1145,15 @@
       "title": "Infrastructure Inventory K8s pods waffle map node redirects to pod details page",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory.spec.ts",
-        "line": 131,
-        "column": 7
+        "line": 106,
+        "column": 25
       }
     },
     {
@@ -370,13 +1161,15 @@
       "title": "Infrastructure Inventory Change waffle map color palette",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory.spec.ts",
-        "line": 164,
-        "column": 7
+        "line": 130,
+        "column": 9
       }
     },
     {
@@ -384,13 +1177,63 @@
       "title": "Infrastructure Inventory Has no detectable a11y violations on load",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory.spec.ts",
-        "line": 204,
-        "column": 7
+        "line": 193,
+        "column": 38
+      }
+    },
+    {
+      "id": "d1550ceb9b2efd9-047a499a792d761",
+      "title": "Infrastructure Inventory OTel (semconv): loads OpenTelemetry schema, waffle map, and node metrics",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory.spec.ts",
+        "line": 196,
+        "column": 38
+      }
+    },
+    {
+      "id": "d1550ceb9b2efd9-a8898391a97c9fd",
+      "title": "Infrastructure Inventory OTel (semconv): table view lists hosts with metric values",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory.spec.ts",
+        "line": 219,
+        "column": 15
+      }
+    },
+    {
+      "id": "d1550ceb9b2efd9-70e1000bd5ee312",
+      "title": "Infrastructure Inventory OTel (semconv): filters waffle nodes by query bar",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory.spec.ts",
+        "line": 253,
+        "column": 22
       }
     },
     {
@@ -398,12 +1241,14 @@
       "title": "Infrastructure Inventory - Saved Views Load the 'Default view' when no saved view is selected",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/saved_views.spec.ts",
-        "line": 82,
+        "line": 80,
         "column": 7
       }
     },
@@ -412,13 +1257,15 @@
       "title": "Infrastructure Inventory - Saved Views Apply an existing saved view when it is selected in the URL",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/saved_views.spec.ts",
-        "line": 107,
-        "column": 7
+        "line": 90,
+        "column": 34
       }
     },
     {
@@ -426,13 +1273,15 @@
       "title": "Infrastructure Inventory - Saved Views Create a new saved view from the current inventory state without saving the time",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/saved_views.spec.ts",
-        "line": 119,
-        "column": 7
+        "line": 99,
+        "column": 15
       }
     },
     {
@@ -440,12 +1289,14 @@
       "title": "Infrastructure Inventory - Saved Views Create a new saved view from the current inventory state saving the time",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/saved_views.spec.ts",
-        "line": 145,
+        "line": 124,
         "column": 7
       }
     },
@@ -454,13 +1305,15 @@
       "title": "Infrastructure Inventory - Saved Views Select and load an existing saved view from the manage views flyout",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/saved_views.spec.ts",
-        "line": 171,
-        "column": 7
+        "line": 143,
+        "column": 15
       }
     },
     {
@@ -468,13 +1321,15 @@
       "title": "Infrastructure Inventory - Saved Views Can make a saved view the default view from the manage views flyout",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/saved_views.spec.ts",
-        "line": 205,
-        "column": 7
+        "line": 168,
+        "column": 15
       }
     },
     {
@@ -482,13 +1337,15 @@
       "title": "Infrastructure Inventory - Saved Views Delete a saved view from the manage views flyout",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/saved_views.spec.ts",
-        "line": 234,
-        "column": 7
+        "line": 187,
+        "column": 26
       }
     },
     {
@@ -496,13 +1353,211 @@
       "title": "Infrastructure Inventory - Saved Views Update a saved view from the manage views flyout",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/saved_views.spec.ts",
-        "line": 290,
-        "column": 7
+        "line": 243,
+        "column": 20
+      }
+    },
+    {
+      "id": "21ef73bd24a3fc1-be7d122491189e1",
+      "title": "Metrics UI Anomaly Flyout shows both the Hosts and Kubernetes job cards on the inventory page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/metrics_anomalies.spec.ts",
+        "line": 37,
+        "column": 5
+      }
+    },
+    {
+      "id": "21ef73bd24a3fc1-e783d2d999eb10b",
+      "title": "Metrics UI Anomaly Flyout shows only the Hosts job card on the hosts view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/metrics_anomalies.spec.ts",
+        "line": 41,
+        "column": 23
+      }
+    },
+    {
+      "id": "21ef73bd24a3fc1-6647f7596811728",
+      "title": "Metrics UI Anomaly Flyout shows no anomalies for the default (recent) time range",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/metrics_anomalies.spec.ts",
+        "line": 48,
+        "column": 11
+      }
+    },
+    {
+      "id": "21ef73bd24a3fc1-d5a8cc931af6045",
+      "title": "Metrics UI Anomaly Flyout lists the archived host and pod anomalies at the default threshold",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/metrics_anomalies.spec.ts",
+        "line": 58,
+        "column": 11
+      }
+    },
+    {
+      "id": "21ef73bd24a3fc1-ec58aaee4046adc",
+      "title": "Metrics UI Anomaly Flyout shows no anomalies once the start date is moved past the data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/metrics_anomalies.spec.ts",
+        "line": 69,
+        "column": 11
+      }
+    },
+    {
+      "id": "21ef73bd24a3fc1-fac8e006c89d1e9",
+      "title": "Metrics UI Anomaly Flyout lists more anomalies when the anomaly threshold is lowered",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/metrics_anomalies.spec.ts",
+        "line": 82,
+        "column": 53
+      }
+    },
+    {
+      "id": "21ef73bd24a3fc1-2a8185ba894046d",
+      "title": "Metrics UI Anomaly Flyout navigates to the affected hosts from an anomaly's action menu",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/metrics_anomalies.spec.ts",
+        "line": 98,
+        "column": 5
+      }
+    },
+    {
+      "id": "c2c7bfe4c7081db-0bb6704d0e2164d",
+      "title": "Metrics Explorer renders the page title and the default metrics",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/metrics_explorer.spec.ts",
+        "line": 89,
+        "column": 40
+      }
+    },
+    {
+      "id": "c2c7bfe4c7081db-9fa13c08cb5518d",
+      "title": "Metrics Explorer removes the default metrics and adds a new one",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/metrics_explorer.spec.ts",
+        "line": 97,
+        "column": 11
+      }
+    },
+    {
+      "id": "c2c7bfe4c7081db-0c77a514b2347b1",
+      "title": "Metrics Explorer renders a chart per host when grouping by host.name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/metrics_explorer.spec.ts",
+        "line": 115,
+        "column": 11
+      }
+    },
+    {
+      "id": "c2c7bfe4c7081db-a60606414ae2474",
+      "title": "Metrics Explorer renders area charts by default and can switch to bar charts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/metrics_explorer.spec.ts",
+        "line": 124,
+        "column": 20
+      }
+    },
+    {
+      "id": "c2c7bfe4c7081db-c736c0c8862d0f9",
+      "title": "Metrics Explorer does not allow selecting more than the maximum number of metrics",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/metrics_explorer.spec.ts",
+        "line": 139,
+        "column": 18
+      }
+    },
+    {
+      "id": "c2c7bfe4c7081db-9eec765b63252e6",
+      "title": "Metrics Explorer loads the default saved view and toggles the saved views popover",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/metrics_explorer.spec.ts",
+        "line": 153,
+        "column": 13
+      }
+    },
+    {
+      "id": "c2c7bfe4c7081db-7062c746ce89010",
+      "title": "Metrics Explorer creates, loads, and updates saved views",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/metrics_explorer.spec.ts",
+        "line": 163,
+        "column": 20
       }
     },
     {
@@ -510,12 +1565,14 @@
       "title": "Node Details: host with kubernetes section Overview Tab validates all KPIs and charts",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host_with_kubernetes.spec.ts",
-        "line": 30,
+        "line": 32,
         "column": 7
       }
     },
@@ -524,13 +1581,15 @@
       "title": "Node Details: host with kubernetes section Metrics Tab validates all charts and quick access",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host_with_kubernetes.spec.ts",
-        "line": 61,
-        "column": 7
+        "line": 64,
+        "column": 23
       }
     },
     {
@@ -538,13 +1597,15 @@
       "title": "Node Details: host without metrics Overview Tab - KPI tiles show N/A",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host_without_metrics.spec.ts",
         "line": 18,
-        "column": 7
+        "column": 25
       }
     },
     {
@@ -552,12 +1613,14 @@
       "title": "Node Details: host preserves selected tab between page reloads",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host.spec.ts",
-        "line": 32,
+        "line": 34,
         "column": 7
       }
     },
@@ -566,13 +1629,15 @@
       "title": "Node Details: host Date picker: host - preserves date range across tabs",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host.spec.ts",
-        "line": 50,
-        "column": 7
+        "line": 48,
+        "column": 13
       }
     },
     {
@@ -580,13 +1645,15 @@
       "title": "Node Details: host Date picker: host - preserves selected date range between page reloads",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host.spec.ts",
-        "line": 81,
-        "column": 7
+        "line": 77,
+        "column": 17
       }
     },
     {
@@ -594,13 +1661,15 @@
       "title": "Node Details: host Overview Tab - KPI tiles show correct values",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host.spec.ts",
-        "line": 97,
-        "column": 7
+        "line": 87,
+        "column": 11
       }
     },
     {
@@ -608,13 +1677,15 @@
       "title": "Node Details: host Overview Tab - renders metric charts",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host.spec.ts",
-        "line": 117,
-        "column": 7
+        "line": 110,
+        "column": 9
       }
     },
     {
@@ -622,13 +1693,15 @@
       "title": "Node Details: host Overview Tab - shows all sections as collapsible",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host.spec.ts",
-        "line": 148,
-        "column": 7
+        "line": 127,
+        "column": 13
       }
     },
     {
@@ -636,13 +1709,15 @@
       "title": "Node Details: host Overview Tab - shows alerts",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host.spec.ts",
-        "line": 160,
-        "column": 7
+        "line": 139,
+        "column": 13
       }
     },
     {
@@ -650,13 +1725,15 @@
       "title": "Node Details: host Overview Tab - shows / hides alerts section with no alerts",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host.spec.ts",
-        "line": 167,
-        "column": 7
+        "line": 147,
+        "column": 13
       }
     },
     {
@@ -664,13 +1741,15 @@
       "title": "Node Details: host Metadata Tab - shows metadata table",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host.spec.ts",
-        "line": 189,
-        "column": 7
+        "line": 159,
+        "column": 15
       }
     },
     {
@@ -678,13 +1757,15 @@
       "title": "Node Details: host Metadata Tab - pin and unpin table row",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host.spec.ts",
-        "line": 197,
-        "column": 7
+        "line": 164,
+        "column": 65
       }
     },
     {
@@ -692,13 +1773,15 @@
       "title": "Node Details: host Metadata Tab - preserves search term between page reloads",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host.spec.ts",
-        "line": 220,
-        "column": 7
+        "line": 180,
+        "column": 15
       }
     },
     {
@@ -706,12 +1789,14 @@
       "title": "Node Details: host Metrics Tab - renders quick access items",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host.spec.ts",
-        "line": 249,
+        "line": 203,
         "column": 7
       }
     },
@@ -720,13 +1805,15 @@
       "title": "Node Details: host Legacy alert metric callout - shows for cpu",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host.spec.ts",
-        "line": 262,
-        "column": 7
+        "line": 219,
+        "column": 15
       }
     },
     {
@@ -734,13 +1821,15 @@
       "title": "Node Details: host Legacy alert metric callout - shows for rx",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host.spec.ts",
-        "line": 278,
-        "column": 7
+        "line": 231,
+        "column": 26
       }
     },
     {
@@ -748,13 +1837,15 @@
       "title": "Node Details: host Legacy alert metric callout - shows for tx",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host.spec.ts",
-        "line": 294,
-        "column": 7
+        "line": 245,
+        "column": 16
       }
     },
     {
@@ -762,13 +1853,15 @@
       "title": "Node Details: host Legacy alert metric callout - does not show for cpuV2",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host.spec.ts",
-        "line": 310,
-        "column": 7
+        "line": 258,
+        "column": 24
       }
     },
     {
@@ -776,13 +1869,15 @@
       "title": "Node Details: host Legacy alert metric callout - does not show for rxV2",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host.spec.ts",
-        "line": 326,
-        "column": 7
+        "line": 271,
+        "column": 13
       }
     },
     {
@@ -790,13 +1885,15 @@
       "title": "Node Details: host Legacy alert metric callout - does not show for txV2",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.host.spec.ts",
-        "line": 342,
-        "column": 7
+        "line": 285,
+        "column": 20
       }
     },
     {
@@ -804,13 +1901,59 @@
       "title": "Node Details Serverless: Osquery tab should not render in serverless",
       "expectedStatus": "passed",
       "tags": [
-        "@svlOblt",
-        "@svlOblt"
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.spec.ts",
         "line": 13,
-        "column": 7
+        "column": 14
+      }
+    },
+    {
+      "id": "f9db2c0f703ede6-10a320ba15dd24a",
+      "title": "Clean up infra data after UI parallel tests",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/global.teardown.ts",
+        "line": 5,
+        "column": 1
+      }
+    },
+    {
+      "id": "f9db2c0f703ede6-8095e0336b0445d",
+      "title": "Clean up metrics anomalies ML jobs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/global.teardown.ts",
+        "line": 33,
+        "column": 14
+      }
+    },
+    {
+      "id": "f9db2c0f703ede6-2295ef712bc4c42",
+      "title": "Clean up metrics_and_logs archive",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/global.teardown.ts",
+        "line": 46,
+        "column": 33
       }
     }
   ]

@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { EuiLink, EuiEmptyPrompt } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -23,7 +23,7 @@ export const ActionsLogEmptyState = memo(
     return (
       <ManagementEmptyStateWrapper data-test-subj={dataTestSubj}>
         <EmptyPrompt
-          iconType="editorUnorderedList"
+          iconType="listBullet"
           title={
             <h2>
               {i18n.translate('xpack.securitySolution.responseActionsHistory.empty.title', {

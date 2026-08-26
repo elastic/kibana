@@ -17,6 +17,8 @@ import {
   getTotalHitsValue,
   mergeReturns,
   getSafeSortIds,
+  getSafeNanosSortIds,
+  getUnusableCursorWarning,
 } from './utils';
 import type {
   SearchAfterAndBulkCreateParams,
@@ -78,6 +80,8 @@ export const searchAfterAndBulkCreateFactory = async ({
     searchAfterSize: pageSize,
     primaryTimestamp,
     secondaryTimestamp,
+    dateNanosTimestampFields,
+    mixedTimestampFields,
     unprocessedExceptions: exceptionsList,
     tuple,
     ruleExecutionLogger,
@@ -87,20 +91,23 @@ export const searchAfterAndBulkCreateFactory = async ({
   return withSecuritySpan('searchAfterAndBulkCreate', async () => {
     let toReturn = createSearchAfterReturnType();
     let searchingIteration = 0;
+    let totalEventsFound = 0;
     const loggedRequests: RulePreviewLoggedRequest[] = [];
+    const hasDateNanosTimestampFields = dateNanosTimestampFields.length > 0;
 
     // sortId tells us where to start our next consecutive search_after query
     let sortIds: estypes.SortResults | undefined;
 
     const maxSignals = maxSignalsOverride ?? tuple.maxSignals;
+    const searchSize = Math.ceil(Math.min(maxSignals, pageSize));
 
     while (toReturn.createdSignalsCount <= maxSignals) {
       const cycleNum = `cycle ${searchingIteration++}`;
       try {
-        ruleExecutionLogger.debug(
-          `[${cycleNum}] Searching events${
-            sortIds ? ` after cursor ${JSON.stringify(sortIds)}` : ''
-          } in index pattern "${inputIndexPattern}"`
+        ruleExecutionLogger.trace(
+          `${cycleNum}: Searching events\nSearching events after cursor ${JSON.stringify(
+            sortIds
+          )} in index pattern "${inputIndexPattern}".`
         );
 
         const searchAfterQuery = buildEventsSearchQuery({
@@ -110,13 +117,15 @@ export const searchAfterAndBulkCreateFactory = async ({
           to: tuple.to.toISOString(),
           runtimeMappings,
           filter,
-          size: Math.ceil(Math.min(maxSignals, pageSize)),
+          size: searchSize,
           sortOrder,
           searchAfterSortIds: sortIds,
           primaryTimestamp,
           secondaryTimestamp,
           trackTotalHits,
           additionalFilters,
+          dateNanosTimestampFields,
+          mixedTimestampFields,
         });
         const {
           searchResult,
@@ -147,22 +156,26 @@ export const searchAfterAndBulkCreateFactory = async ({
         loggedRequests.push(...singleSearchLoggedRequests);
         // determine if there are any candidate signals to be processed
         const totalHits = getTotalHitsValue(searchResult.hits.total);
-        const lastSortIds = getSafeSortIds(
-          searchResult.hits.hits[searchResult.hits.hits.length - 1]?.sort
-        );
+        const lastHitSort = searchResult.hits.hits[searchResult.hits.hits.length - 1]?.sort;
+        // with date_nanos, sort values are formatted ISO strings which round-trip exactly;
+        // getSafeSortIds would corrupt them (its null branch produces an out-of-range cursor)
+        const lastSortIds = hasDateNanosTimestampFields
+          ? getSafeNanosSortIds(lastHitSort)
+          : getSafeSortIds(lastHitSort);
 
         if (totalHits === 0 || searchResult.hits.hits.length === 0) {
-          ruleExecutionLogger.debug(
-            `[${cycleNum}] Found 0 events ${
-              sortIds ? ` after cursor ${JSON.stringify(sortIds)}` : ''
-            }`
+          ruleExecutionLogger.trace(
+            `${cycleNum}: No results found\nFound 0 events after cursor ${JSON.stringify(sortIds)}.`
           );
           break;
         } else {
-          ruleExecutionLogger.debug(
-            `[${cycleNum}] Found ${searchResult.hits.hits.length} of total ${totalHits} events${
-              sortIds ? ` after cursor ${JSON.stringify(sortIds)}` : ''
-            }, last cursor ${JSON.stringify(lastSortIds)}`
+          totalEventsFound += searchResult.hits.hits.length;
+          ruleExecutionLogger.trace(
+            `${cycleNum}: Results found\nFound ${
+              searchResult.hits.hits.length
+            } of total ${totalHits} events after cursor ${JSON.stringify(
+              sortIds
+            )}. Last cursor: ${JSON.stringify(lastSortIds)}.`
           );
         }
 
@@ -187,8 +200,8 @@ export const searchAfterAndBulkCreateFactory = async ({
             toReturn,
           });
 
-          ruleExecutionLogger.debug(
-            `[${cycleNum}] Created ${bulkCreateResult.createdItemsCount} alerts from ${enrichedEvents.length} events`
+          ruleExecutionLogger.trace(
+            `${cycleNum}: Created alerts from enriched events\nCreated ${bulkCreateResult.createdItemsCount} alerts from ${enrichedEvents.length} events.`
           );
 
           sendAlertTelemetryEvents(
@@ -204,6 +217,22 @@ export const searchAfterAndBulkCreateFactory = async ({
           }
         }
 
+        if (hasDateNanosTimestampFields && searchResult.hits.hits.length < searchSize) {
+          ruleExecutionLogger.trace(
+            `${cycleNum}: Last page reached\nFound ${searchResult.hits.hits.length} of the ${searchSize} requested events, so no further pages exist.`
+          );
+          break;
+        }
+
+        const cursorWarning = hasDateNanosTimestampFields
+          ? getUnusableCursorWarning(lastSortIds, sortIds)
+          : undefined;
+        if (cursorWarning != null) {
+          toReturn.warningMessages.push(cursorWarning);
+          ruleExecutionLogger.warn(`${cycleNum}: ${cursorWarning}`);
+          break;
+        }
+
         // ES can return negative sort id for date field, when sort order set to desc
         // this could happen when event has empty sort field
         // https://github.com/elastic/kibana/issues/174573 (happens to IM rule only since it uses desc order for events search)
@@ -212,13 +241,14 @@ export const searchAfterAndBulkCreateFactory = async ({
         if (lastSortIds != null && lastSortIds.length !== 0 && !hasNegativeNumber) {
           sortIds = lastSortIds;
         } else {
-          ruleExecutionLogger.debug(`[${cycleNum}] Unable to fetch last event cursor`);
+          ruleExecutionLogger.trace(`${cycleNum}: Failed to fetch last event cursor`);
           break;
         }
       } catch (exc: unknown) {
         ruleExecutionLogger.error(
-          'Unable to extract/process events or create alerts',
-          JSON.stringify(exc)
+          `${cycleNum}: Error extracting/processing events or creating alerts\nError: ${JSON.stringify(
+            exc
+          )}`
         );
         return mergeReturns([
           toReturn,
@@ -229,7 +259,9 @@ export const searchAfterAndBulkCreateFactory = async ({
         ]);
       }
     }
-    ruleExecutionLogger.debug(`Completed bulk indexing of ${toReturn.createdSignalsCount} alert`);
+    ruleExecutionLogger.debug(`Alerts created: ${toReturn.createdSignalsCount}`);
+
+    toReturn.totalEventsFound = totalEventsFound;
 
     if (isLoggedRequestsEnabled) {
       toReturn.loggedRequests = loggedRequests;

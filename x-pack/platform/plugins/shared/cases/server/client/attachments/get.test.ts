@@ -8,6 +8,8 @@
 import { createCasesClientMockArgs } from '../mocks';
 import { find as findComment } from './get';
 
+const mode = 'legacy';
+
 describe('get', () => {
   describe('findComment', () => {
     const clientArgs = createCasesClientMockArgs();
@@ -18,7 +20,10 @@ describe('get', () => {
 
     it('Invalid total items results in error', async () => {
       await expect(() =>
-        findComment({ caseID: 'mock-id', findQueryParams: { page: 209, perPage: 100 } }, clientArgs)
+        findComment(
+          { caseID: 'mock-id', findQueryParams: { page: 209, perPage: 100 }, mode },
+          clientArgs
+        )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Failed to find comments case id: mock-id: Error: The number of documents is too high. Paginating through more than 10000 documents is not possible."`
       );
@@ -26,7 +31,10 @@ describe('get', () => {
 
     it('Invalid perPage items results in error', async () => {
       await expect(() =>
-        findComment({ caseID: 'mock-id', findQueryParams: { page: 2, perPage: 9001 } }, clientArgs)
+        findComment(
+          { caseID: 'mock-id', findQueryParams: { page: 2, perPage: 9001 }, mode },
+          clientArgs
+        )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Failed to find comments case id: mock-id: Error: The provided perPage value is too high. The maximum allowed perPage value is 100."`
       );
@@ -36,7 +44,7 @@ describe('get', () => {
       await expect(
         findComment(
           // @ts-expect-error: excess attribute
-          { caseID: 'mock-id', findQueryParams: { page: 2, perPage: 9, foo: 'bar' } },
+          { caseID: 'mock-id', findQueryParams: { page: 2, perPage: 9, foo: 'bar' }, mode },
           clientArgs
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(

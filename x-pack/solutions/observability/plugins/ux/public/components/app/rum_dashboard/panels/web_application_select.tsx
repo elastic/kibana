@@ -30,8 +30,11 @@ export function WebApplicationSelect() {
     { name: 'UxApplicationServices' }
   );
 
-  const rumServiceNames =
-    data?.aggregations?.services?.buckets.map(({ key }) => key as string) ?? [];
+  interface ServicesAggregation {
+    services?: { buckets?: Array<{ key: string }> };
+  }
+  const servicesAgg = (data?.aggregations as ServicesAggregation | undefined)?.services;
+  const rumServiceNames = servicesAgg?.buckets?.map((bucket: { key: string }) => bucket.key) ?? [];
 
   return <ServiceNameFilter loading={loading ?? true} serviceNames={rumServiceNames} />;
 }

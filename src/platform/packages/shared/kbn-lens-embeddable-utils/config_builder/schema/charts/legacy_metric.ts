@@ -7,113 +7,128 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
-import { esqlColumnOperationWithLabelAndFormatSchema } from '../metric_ops';
-import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
+import { z } from '@kbn/zod';
+import { esqlColumnWithFormatSchema } from '../metric_ops';
+import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
 import { layerSettingsSchema, sharedPanelInfoSchema, dslOnlyPanelInfoSchema } from '../shared';
-import { applyColorToSchema, colorByValueAbsolute } from '../color';
+import {
+  applyColorToSchema,
+  AUTO_COLOR,
+  colorByValueAbsoluteSchema,
+  colorByValuePaletteSchema,
+  legacyColorByValueAbsoluteSchema,
+  autoColorSchema,
+} from '../color';
 import { horizontalAlignmentSchema, verticalAlignmentSchema } from '../alignments';
-import { mergeAllMetricsWithChartDimensionSchema } from './shared';
+import { getMetricsWithChartDimensionSchema } from './shared';
 
-const legacyMetricStateMetricOptionsSchema = {
+const legacyMetricConfigMetricOptionsShape = {
   /**
-   * Size of the legacy metric label and value. Possible values:
-   * - 'xs': Extra small
-   * - 's': Small
-   * - 'm': Medium (default)
-   * - 'l': Large
-   * - 'xl': Extra large
-   * - 'xxl': Double extra large
+   * Font scale for the legacy metric label and value.
    */
-  size: schema.maybe(
-    schema.oneOf(
-      [
-        schema.literal('xs'),
-        schema.literal('s'),
-        schema.literal('m'),
-        schema.literal('l'),
-        schema.literal('xl'),
-        schema.literal('xxl'),
-      ],
-      { meta: { description: 'Font size for the label and value' }, defaultValue: 'm' }
-    )
-  ),
-  /**
-   * Alignment of the label and value for the legacy metric.
-   * For example, align the label to the bottom and the value to the right.
-   */
-  alignments: schema.maybe(
-    schema.object({
+  size: z
+    .union([
+      z.literal('xs'),
+      z.literal('s'),
+      z.literal('m'),
+      z.literal('l'),
+      z.literal('xl'),
+      z.literal('xxl'),
+    ])
+    .default('m')
+    .optional()
+    .meta({ description: 'Font size for the label and value' }),
+  labels: z
+    .object({
       /**
-       * Alignment for label. Possible values:
+       * Alignment for labels. Possible values:
        * - 'top': Align label to the top of the value (default)
        * - 'bottom': Align label to the bottom of the value
        */
-      labels: verticalAlignmentSchema({
-        meta: { description: 'Label alignment' },
-        defaultValue: 'top',
+      alignment: verticalAlignmentSchema.default('top').optional().meta({
+        description: 'Label alignment',
       }),
+    })
+    .strict()
+    .optional()
+    .meta({ description: 'Labels configuration' }),
+  values: z
+    .object({
       /**
-       * Alignment for value. Possible values:
+       * Alignment for values. Possible values:
        * - 'left': Align value to the left (default)
        * - 'center': Align value to the center
        * - 'right': Align value to the right
        */
-      value: horizontalAlignmentSchema({
-        meta: { description: 'Value alignment' },
-        defaultValue: 'left',
+      alignment: horizontalAlignmentSchema.default('left').optional().meta({
+        description: 'Value alignment',
       }),
     })
-  ),
+    .strict()
+    .optional()
+    .meta({ description: 'Values configuration' }),
   /**
    * Where to apply the color (background or value)
    */
-  apply_color_to: schema.maybe(applyColorToSchema),
+  apply_color_to: applyColorToSchema.optional(),
   /**
    * Color configuration
    */
-  color: schema.maybe(colorByValueAbsolute),
+  color: z
+    .union([
+      colorByValueAbsoluteSchema,
+      colorByValuePaletteSchema,
+      legacyColorByValueAbsoluteSchema,
+      autoColorSchema,
+    ])
+    .default(AUTO_COLOR)
+    .optional()
+    .meta({ description: 'Color configuration based on the metric value.' }),
 };
 
-export const legacyMetricStateSchemaNoESQL = schema.object(
-  {
-    type: schema.literal('legacy_metric'),
-    ...sharedPanelInfoSchema,
-    ...dslOnlyPanelInfoSchema,
-    ...layerSettingsSchema,
-    ...datasetSchema,
+export const legacyMetricConfigSchemaNoESQL = z
+  .object({
+    type: z.literal('legacy_metric'),
+    ...sharedPanelInfoSchema.shape,
+    ...dslOnlyPanelInfoSchema.shape,
+    ...layerSettingsSchema.shape,
+    ...dataSourceSchema.shape,
     /**
      * Metric configuration, must define operation.
      */
-    metric: mergeAllMetricsWithChartDimensionSchema(legacyMetricStateMetricOptionsSchema),
-  },
-  { meta: { id: 'legacyMetricNoESQL' } }
-);
-
-const esqlLegacyMetricState = schema.object(
-  {
-    type: schema.literal('legacy_metric'),
-    ...sharedPanelInfoSchema,
-    ...layerSettingsSchema,
-    ...datasetEsqlTableSchema,
-    /**
-     * Metric configuration, must define operation.
-     */
-    metric: esqlColumnOperationWithLabelAndFormatSchema.extends(
-      legacyMetricStateMetricOptionsSchema
+    metric: getMetricsWithChartDimensionSchema('legacyMetric').and(
+      z.object(legacyMetricConfigMetricOptionsShape)
     ),
-  },
-  { meta: { id: 'legacyMetricESQL' } }
-);
+  })
+  .meta({
+    id: 'legacyMetricNoESQL',
+    title: 'Legacy Metric Chart (DSL)',
+    description:
+      'Legacy Metric configuration using a data view. Superseded by the Metric chart type.',
+  });
 
-export const legacyMetricStateSchema = schema.oneOf(
-  [legacyMetricStateSchemaNoESQL, esqlLegacyMetricState],
-  {
-    meta: { id: 'legacyMetricChartSchema' },
-  }
-);
+const esqlLegacyMetricConfig = z
+  .object({
+    type: z.literal('legacy_metric'),
+    ...sharedPanelInfoSchema.shape,
+    ...layerSettingsSchema.shape,
+    ...dataSourceEsqlTableSchema.shape,
+    /**
+     * Metric configuration, must define operation.
+     */
+    metric: esqlColumnWithFormatSchema.extend(legacyMetricConfigMetricOptionsShape),
+  })
+  .strict()
+  .meta({ id: 'legacyMetricESQL', title: 'Legacy Metric Chart (ES|QL)' });
 
-export type LegacyMetricState = TypeOf<typeof legacyMetricStateSchema>;
-export type LegacyMetricStateNoESQL = TypeOf<typeof legacyMetricStateSchemaNoESQL>;
-export type LegacyMetricStateESQL = TypeOf<typeof esqlLegacyMetricState>;
+// Legacy metric is not currently supported for ES|QL datasets
+export const legacyMetricConfigSchema = legacyMetricConfigSchemaNoESQL.meta({
+  id: 'legacyMetricChart',
+  title: 'Legacy Metric Chart',
+  description:
+    'A single metric value with optional coloring and formatting. Superseded by the Metric chart type.',
+});
+
+export type LegacyMetricConfig = z.output<typeof legacyMetricConfigSchema>;
+export type LegacyMetricConfigNoESQL = z.output<typeof legacyMetricConfigSchemaNoESQL>;
+export type LegacyMetricConfigESQL = z.output<typeof esqlLegacyMetricConfig>;

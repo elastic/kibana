@@ -6,17 +6,16 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
+import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 
 import { BaseAuthenticationProvider } from './base';
 import { NEXT_URL_QUERY_STRING_PARAMETER } from '../../../common/constants';
 import { getDetailedErrorMessage } from '../../errors';
+import type { SessionValue } from '../../session_management';
 import { AuthenticationResult } from '../authentication_result';
 import { canRedirectRequest } from '../can_redirect_request';
 import { DeauthenticationResult } from '../deauthentication_result';
-import {
-  BasicHTTPAuthorizationHeaderCredentials,
-  HTTPAuthorizationHeader,
-} from '../http_authentication';
+import { BasicHTTPAuthorizationHeaderCredentials } from '../http_authentication';
 
 /**
  * Describes the parameters that are required by the provider to process the initial login request.
@@ -51,7 +50,7 @@ function canStartNewSession(request: KibanaRequest) {
 /**
  * Provider that supports request authentication via Basic HTTP Authentication.
  */
-export class BasicAuthenticationProvider extends BaseAuthenticationProvider {
+export class BasicAuthenticationProvider extends BaseAuthenticationProvider<ProviderState> {
   /**
    * Type of the provider.
    */
@@ -61,13 +60,8 @@ export class BasicAuthenticationProvider extends BaseAuthenticationProvider {
    * Performs initial login request using username and password.
    * @param request Request instance.
    * @param attempt User credentials.
-   * @param [state] Optional state object associated with the provider.
    */
-  public async login(
-    request: KibanaRequest,
-    { username, password }: ProviderLoginAttempt,
-    state?: ProviderState | null
-  ) {
+  public async login(request: KibanaRequest, { username, password }: ProviderLoginAttempt) {
     this.logger.debug('Trying to perform a login.');
 
     const authHeaders = {
@@ -95,9 +89,9 @@ export class BasicAuthenticationProvider extends BaseAuthenticationProvider {
   /**
    * Performs request authentication using Basic HTTP Authentication.
    * @param request Request instance.
-   * @param [state] Optional state object associated with the provider.
+   * @param [session] Optional session object associated with the provider.
    */
-  public async authenticate(request: KibanaRequest, state?: ProviderState | null) {
+  public async authenticate(request: KibanaRequest, session?: SessionValue<ProviderState> | null) {
     this.logger.debug(
       `Trying to authenticate user request to ${request.url.pathname}${request.url.search}.`
     );
@@ -107,11 +101,11 @@ export class BasicAuthenticationProvider extends BaseAuthenticationProvider {
       return AuthenticationResult.notHandled();
     }
 
-    if (state) {
-      return await this.authenticateViaState(request, state);
+    if (session) {
+      return await this.authenticateViaState(request, session);
     }
 
-    // If state isn't present let's redirect user to the login page.
+    // If session isn't present let's redirect user to the login page.
     if (canStartNewSession(request)) {
       this.logger.debug('Redirecting request to Login page.');
       const basePath = this.options.basePath.get(request);
@@ -128,14 +122,14 @@ export class BasicAuthenticationProvider extends BaseAuthenticationProvider {
   /**
    * Redirects user to the login page preserving query string parameters.
    * @param request Request instance.
-   * @param [state] Optional state object associated with the provider.
+   * @param [session] Optional session object associated with the provider.
    */
-  public async logout(request: KibanaRequest, state?: ProviderState | null) {
+  public async logout(request: KibanaRequest, session?: SessionValue<ProviderState> | null) {
     this.logger.debug(`Trying to log user out via ${request.url.pathname}${request.url.search}.`);
 
-    // Having a `null` state means that provider was specifically called to do a logout, but when
+    // Having a `null` session means that provider was specifically called to do a logout, but when
     // session isn't defined then provider is just being probed whether or not it can perform logout.
-    if (state === undefined) {
+    if (session === undefined) {
       return DeauthenticationResult.notHandled();
     }
 
@@ -154,19 +148,19 @@ export class BasicAuthenticationProvider extends BaseAuthenticationProvider {
    * Tries to extract authorization header from the state and adds it to the request before
    * it's forwarded to Elasticsearch backend.
    * @param request Request instance.
-   * @param state State value previously stored by the provider.
+   * @param session Session value previously created by the provider.
    */
-  private async authenticateViaState(request: KibanaRequest, { authorization }: ProviderState) {
+  private async authenticateViaState(request: KibanaRequest, session: SessionValue<ProviderState>) {
     this.logger.debug('Trying to authenticate via state.');
 
-    if (!authorization) {
+    if (!session.state.authorization) {
       this.logger.debug('Authorization header is not found in state.');
       return AuthenticationResult.notHandled();
     }
 
+    const authHeaders = { authorization: session.state.authorization };
     try {
-      const authHeaders = { authorization };
-      const user = await this.getUser(request, authHeaders);
+      const user = await this.getUser(request, authHeaders, session);
 
       this.logger.debug('Request has been authenticated via state.');
       return AuthenticationResult.succeeded(user, { authHeaders });

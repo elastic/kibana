@@ -1,0 +1,27 @@
+# INCREASE
+
+Calculates the absolute increase of a counter field within a specified time window.
+
+## Syntax
+
+`INCREASE(field, window)`
+
+### Parameters
+
+#### field
+
+The metric field for which to calculate the increase.
+
+#### window
+
+The time window over which to compute the increase.
+
+## Examples
+
+Calculates the total increase in `network.total_bytes_in` for each cluster and 10-minute interval, filtering for pods named "one".
+
+```esql
+TS k8s
+| WHERE pod == "one"
+| STATS increase_bytes_in = SUM(INCREASE(network.total_bytes_in)) BY cluster, time_bucket = TBUCKET(10minute)
+```

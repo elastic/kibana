@@ -12,12 +12,12 @@ import React, { useCallback } from 'react';
 import type { EuiTableFieldDataColumnType, EuiTableActionsColumnType } from '@elastic/eui';
 import { EuiButtonEmpty, EuiInMemoryTable } from '@elastic/eui';
 
-import { useMlKibana, useMlManagementLocator } from '../../contexts/kibana';
-import { ML_PAGES } from '../../../../common/constants/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import type {
   RecognizeModuleResult,
   RecognizeModuleResultDataView,
-} from '../../../../common/types/modules';
+} from '@kbn/ml-common-types/modules';
+import { useMlKibana, useMlManagementLocator } from '../../contexts/kibana';
 
 interface Props {
   matchingDataViews: RecognizeModuleResult;
@@ -29,18 +29,30 @@ export const DataViewsTable: FC<Props> = ({ matchingDataViews, moduleId, jobsLen
   const {
     services: {
       application: { navigateToUrl },
+      cps,
     },
   } = useMlKibana();
   const mlManagementLocator = useMlManagementLocator()!;
 
   const getUrl = useCallback(
     (id: string) => {
+      const projectRouting = cps?.cpsManager?.getProjectRouting();
+      const params = new URLSearchParams();
+      params.set('id', moduleId);
+      params.set('index', id);
+
+      if (projectRouting !== undefined && projectRouting !== '') {
+        params.set('project_routing', projectRouting);
+      }
+
       return mlManagementLocator.getRedirectUrl({
         sectionId: 'ml',
-        appId: `anomaly_detection/${ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_RECOGNIZER}?id=${moduleId}&index=${id}`,
+        appId: `anomaly_detection/${
+          ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_RECOGNIZER
+        }?${params.toString()}`,
       });
     },
-    [mlManagementLocator, moduleId]
+    [mlManagementLocator, moduleId, cps?.cpsManager]
   );
 
   const columns: Array<

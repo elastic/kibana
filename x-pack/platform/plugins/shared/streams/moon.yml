@@ -4,20 +4,21 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/streams-plugin'
-type: unknown
+layer: unknown
 owners:
-  defaultOwner: '@elastic/obs-onboarding-team @elastic/obs-sig-events-team'
-toolchain:
+  defaultOwner: '@elastic/streams-ui'
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/streams-plugin'
+  title: '@kbn/streams-plugin'
   description: Moon project for @kbn/streams-plugin
   channel: ''
-  owner: '@elastic/obs-onboarding-team @elastic/obs-sig-events-team'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/shared/streams
+  owner: '@elastic/streams-ui'
+  sourceRoot: x-pack/platform/plugins/shared/streams
 dependsOn:
+  - '@kbn/agent-builder-elastic-ai-index-ki-types'
+  - '@kbn/deeplinks-observability'
   - '@kbn/config-schema'
   - '@kbn/core-pricing-common'
   - '@kbn/core'
@@ -31,13 +32,13 @@ dependsOn:
   - '@kbn/storage-adapter'
   - '@kbn/object-utils'
   - '@kbn/alerting-plugin'
-  - '@kbn/alerts-as-data-utils'
+  - '@kbn/alerting-v2-plugin'
   - '@kbn/rule-registry-plugin'
   - '@kbn/es-types'
   - '@kbn/licensing-plugin'
-  - '@kbn/rule-data-utils'
   - '@kbn/zod'
   - '@kbn/streams-schema'
+  - '@kbn/significant-events-schema'
   - '@kbn/server-route-repository'
   - '@kbn/es-errors'
   - '@kbn/lock-manager'
@@ -46,7 +47,6 @@ dependsOn:
   - '@kbn/features-plugin'
   - '@kbn/server-route-repository-utils'
   - '@kbn/es-query'
-  - '@kbn/traced-es-client'
   - '@kbn/zod-helpers'
   - '@kbn/inference-common'
   - '@kbn/std'
@@ -55,13 +55,9 @@ dependsOn:
   - '@kbn/encrypted-saved-objects-plugin'
   - '@kbn/inference-plugin'
   - '@kbn/security-plugin'
-  - '@kbn/task-manager-plugin'
-  - '@kbn/ai-tools'
-  - '@kbn/logging-mocks'
   - '@kbn/grok-heuristics'
   - '@kbn/dissect-heuristics'
   - '@kbn/streamlang'
-  - '@kbn/licensing-types'
   - '@kbn/core-elasticsearch-server-utils'
   - '@kbn/safer-lodash-set'
   - '@kbn/sse-utils'
@@ -74,10 +70,27 @@ dependsOn:
   - '@kbn/utility-types'
   - '@kbn/console-plugin'
   - '@kbn/actions-plugin'
-  - '@kbn/apm-utils'
   - '@kbn/alerting-types'
   - '@kbn/core-http-common'
   - '@kbn/scout'
+  - '@kbn/esql-language'
+  - '@kbn/esql-types'
+  - '@kbn/esql'
+  - '@kbn/logging-mocks'
+  - '@kbn/search-inference-endpoints'
+  - '@kbn/agent-builder-server'
+  - '@kbn/agent-builder-common'
+  - '@kbn/datemath'
+  - '@kbn/setup-node-env'
+  - '@kbn/synthtrace'
+  - '@kbn/synthtrace-client'
+  - '@kbn/workflows-management-plugin'
+  - '@kbn/agent-builder-plugin'
+  - '@kbn/core-spaces-common'
+  - '@kbn/elastic-agent-utils'
+  - '@kbn/sample-log-parser'
+  - '@kbn/workflows-extensions'
+  - '@kbn/agent-builder-sml-plugin'
 tags:
   - plugin
   - prod
@@ -87,22 +100,12 @@ tags:
 fileGroups:
   src:
     - common/**/*
-    - scripts/**/*
+    - docs/**/*
     - server/**/*
     - public/**/*
     - types/**/*
     - test/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

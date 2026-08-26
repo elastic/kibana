@@ -15,6 +15,7 @@ import {
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
+import { ALL_PROJECT_ROUTING, LOCAL_PROJECT_ROUTING } from '../../common/project_routings';
 import { CreateSLO } from './create_slo';
 import { fiveMinute, oneMinute } from './fixtures/duration';
 import { createAPMTransactionErrorRateIndicator, createSLOParams } from './fixtures/slo';
@@ -169,6 +170,36 @@ describe('CreateSLO', () => {
           updatedAt: expect.any(Date),
         })
       );
+    });
+
+    it.each([
+      ['ALL routing', ALL_PROJECT_ROUTING],
+      ['LOCAL routing', LOCAL_PROJECT_ROUTING],
+      ['custom subset', '_id:p1 AND _id:p2'],
+    ])('preserves projectRoutings (%s) when provided', async (_label, projectRoutings) => {
+      const sloParams = createSLOParams({
+        indicator: createAPMTransactionErrorRateIndicator(),
+        settings: { projectRoutings },
+      });
+      mockTransformManager.install.mockResolvedValue('slo-transform-id');
+
+      await createSLO.execute(sloParams);
+
+      const createdSlo = mockRepository.create.mock.calls[0][0];
+      expect(createdSlo.settings.projectRoutings).toBe(projectRoutings);
+    });
+
+    it('does not inject preventCrossProjectSearch or projectRoutings when omitted', async () => {
+      const sloParams = createSLOParams({
+        indicator: createAPMTransactionErrorRateIndicator(),
+      });
+      mockTransformManager.install.mockResolvedValue('slo-transform-id');
+
+      await createSLO.execute(sloParams);
+
+      const createdSlo = mockRepository.create.mock.calls[0][0];
+      expect(createdSlo.settings.preventCrossProjectSearch).toBeUndefined();
+      expect(createdSlo.settings.projectRoutings).toBeUndefined();
     });
   });
 

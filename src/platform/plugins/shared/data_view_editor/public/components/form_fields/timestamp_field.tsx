@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
@@ -15,7 +15,7 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiFormRow, EuiComboBox, EuiFormHelpText } from '@elastic/eui';
 import { matchedIndiciesDefault } from '../../data_view_editor_service';
 
-import type { FieldConfig, ValidationConfig } from '../../shared_imports';
+import type { FieldConfig, FieldHook, ValidationConfig } from '../../shared_imports';
 import { UseField, getFieldValidityAndErrorMessage } from '../../shared_imports';
 
 import type { TimestampOption, MatchedIndicesSet } from '../../types';
@@ -97,77 +97,116 @@ export const TimestampField = ({
   return (
     <UseField<EuiComboBoxOptionOption<string>> config={timestampConfig} path="timestampField">
       {(field) => {
-        const { label, value, setValue } = field;
-
-        if (value === undefined) {
+        if (field.value === undefined) {
           return null;
         }
 
-        const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
-        const isDisabled = !optionsAsComboBoxOptions.length || isLoadingOptions || disabled;
-        // if the value isn't in the list then don't use it.
-        const valueInList = !!optionsAsComboBoxOptions.find(
-          (option) => option.value === value.value
-        );
-
-        if ((!value || !valueInList) && !isDisabled) {
-          const val = optionsAsComboBoxOptions.filter((el) => el.value === '@timestamp');
-          if (val.length) {
-            setValue(val[0]);
-          }
-        }
-
-        const isComboBoxInvalid = !isDisabled && isInvalid;
-
         return (
-          <>
-            <EuiFormRow
-              label={label}
-              error={isDisabled ? null : errorMessage}
-              isInvalid={isComboBoxInvalid}
-              fullWidth
-            >
-              <>
-                <EuiComboBox<string>
-                  isInvalid={isComboBoxInvalid}
-                  placeholder={i18n.translate(
-                    'indexPatternEditor.editor.form.runtimeType.placeholderLabel',
-                    {
-                      defaultMessage: 'Select a timestamp field',
-                    }
-                  )}
-                  singleSelection={{ asPlainText: true }}
-                  options={optionsAsComboBoxOptions}
-                  selectedOptions={value && valueInList ? [value] : undefined}
-                  onChange={(newValue) => {
-                    if (newValue.length === 0) {
-                      // Don't allow clearing the type. One must always be selected
-                      return;
-                    }
-                    //
-                    setValue(newValue[0]);
-                  }}
-                  isClearable={false}
-                  isDisabled={isDisabled}
-                  data-test-subj="timestampField"
-                  aria-label={i18n.translate(
-                    'indexPatternEditor.editor.form.timestampSelectAriaLabel',
-                    {
-                      defaultMessage: 'Timestamp field',
-                    }
-                  )}
-                  isLoading={isLoadingOptions}
-                  data-is-loading={isLoadingOptions ? '1' : '0'}
-                  fullWidth
-                />
-                <EuiFormHelpText>
-                  {timestampNoFieldsHelp || selectTimestampHelp || <>&nbsp;</>}
-                </EuiFormHelpText>
-              </>
-            </EuiFormRow>
-          </>
+          <TimestampFieldRenderer
+            field={field}
+            optionsAsComboBoxOptions={optionsAsComboBoxOptions}
+            isLoadingOptions={isLoadingOptions}
+            disabled={disabled}
+            timestampNoFieldsHelp={timestampNoFieldsHelp}
+            selectTimestampHelp={selectTimestampHelp}
+          />
         );
       }}
     </UseField>
+  );
+};
+
+interface TimestampFieldRendererProps {
+  field: FieldHook<EuiComboBoxOptionOption<string>>;
+  optionsAsComboBoxOptions: Array<EuiComboBoxOptionOption<string>>;
+  isLoadingOptions: boolean;
+  disabled?: boolean;
+  timestampNoFieldsHelp: string;
+  selectTimestampHelp: string;
+}
+
+const TimestampFieldRenderer = ({
+  field,
+  optionsAsComboBoxOptions,
+  isLoadingOptions,
+  disabled,
+  timestampNoFieldsHelp,
+  selectTimestampHelp,
+}: TimestampFieldRendererProps) => {
+  const { label, value, setValue, reset } = field;
+  const wasValueInTheListRef = useRef(false);
+
+  const isDisabled = !optionsAsComboBoxOptions.length || isLoadingOptions || disabled;
+  const valueInList = optionsAsComboBoxOptions.some((option) => option.value === value.value);
+
+  useEffect(() => {
+    if (valueInList) {
+      wasValueInTheListRef.current = true;
+      return;
+    }
+
+    // Auto-select @timestamp when no valid value is selected and the field is active
+    if ((!value || !valueInList) && !isDisabled) {
+      const timestampOption = optionsAsComboBoxOptions.find((el) => el.value === '@timestamp');
+      if (timestampOption) {
+        wasValueInTheListRef.current = true;
+        setValue(timestampOption);
+        return;
+      }
+    }
+
+    // Reset when options changed and the previously valid value is no longer available
+    if (!isLoadingOptions && value?.value && wasValueInTheListRef.current) {
+      wasValueInTheListRef.current = false;
+      reset();
+    }
+  }, [optionsAsComboBoxOptions, value, isDisabled, isLoadingOptions, setValue, reset, valueInList]);
+
+  const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
+  const isComboBoxInvalid = !isDisabled && isInvalid;
+
+  return (
+    <>
+      <EuiFormRow
+        label={label}
+        error={isDisabled ? null : errorMessage}
+        isInvalid={isComboBoxInvalid}
+        fullWidth
+      >
+        <>
+          <EuiComboBox<string>
+            isInvalid={isComboBoxInvalid}
+            placeholder={i18n.translate(
+              'indexPatternEditor.editor.form.runtimeType.placeholderLabel',
+              {
+                defaultMessage: 'Select a timestamp field',
+              }
+            )}
+            singleSelection={{ asPlainText: true }}
+            options={optionsAsComboBoxOptions}
+            selectedOptions={value && valueInList ? [value] : undefined}
+            onChange={(newValue) => {
+              if (newValue.length === 0) {
+                // Don't allow clearing the type. One must always be selected
+                return;
+              }
+              setValue(newValue[0]);
+            }}
+            isClearable={false}
+            isDisabled={isDisabled}
+            data-test-subj="timestampField"
+            aria-label={i18n.translate('indexPatternEditor.editor.form.timestampSelectAriaLabel', {
+              defaultMessage: 'Timestamp field',
+            })}
+            isLoading={isLoadingOptions}
+            data-is-loading={isLoadingOptions ? '1' : '0'}
+            fullWidth
+          />
+          <EuiFormHelpText>
+            {timestampNoFieldsHelp || selectTimestampHelp || <>&nbsp;</>}
+          </EuiFormHelpText>
+        </>
+      </EuiFormRow>
+    </>
   );
 };

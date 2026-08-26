@@ -6,43 +6,27 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  BehaviorSubject,
-  combineLatest,
-  from,
-  type Subscription,
-  timer,
-  firstValueFrom,
-} from 'rxjs';
-import { distinctUntilChanged, filter, retry, switchMap, tap } from 'rxjs';
+import { BehaviorSubject, firstValueFrom } from 'rxjs';
+import { distinctUntilChanged, filter } from 'rxjs';
 import { isEqual } from 'lodash';
 import useObservable from 'react-use/lib/useObservable';
 import { useMemo, useRef } from 'react';
+import {
+  getDefaultMlCapabilities,
+  type MlCapabilities,
+  type MlCapabilitiesKey,
+} from '@kbn/ml-common-types/capabilities';
 import { useMlKibana } from '../contexts/kibana';
 import { hasLicenseExpired } from '../license';
 
-import {
-  getDefaultCapabilities,
-  type MlCapabilities,
-  type MlCapabilitiesKey,
-} from '../../../common/types/capabilities';
 import { getCapabilities } from './get_capabilities';
 import type { MlApi } from '../services/ml_api_service';
 import type { MlGlobalServices } from '../app';
+import type { MlCoreSetup } from '../../plugin';
 
-let _capabilities: MlCapabilities = getDefaultCapabilities();
-
-const CAPABILITIES_REFRESH_INTERVAL = 5 * 60 * 1000; // 5min;
+let _capabilities: MlCapabilities = getDefaultMlCapabilities();
 
 export class MlCapabilitiesService {
-  private _isLoading$ = new BehaviorSubject<boolean>(true);
-
-  /**
-   * Updates on manual request, e.g. in the route resolver.
-   * @internal
-   */
-  private _updateRequested$ = new BehaviorSubject<number>(Date.now());
-
   private _capabilities$ = new BehaviorSubject<MlCapabilities | null>(null);
   private _capabilitiesObs$ = this._capabilities$.asObservable();
 
@@ -52,36 +36,22 @@ export class MlCapabilitiesService {
 
   public capabilities$ = this._capabilities$.pipe(distinctUntilChanged(isEqual));
 
-  private _subscription: Subscription | undefined;
-
   constructor(private readonly mlApi: MlApi) {
-    this.init();
+    this.loadCapabilities();
   }
 
-  private init() {
-    this._subscription = combineLatest([
-      this._updateRequested$,
-      timer(0, CAPABILITIES_REFRESH_INTERVAL),
-    ])
-      .pipe(
-        tap(() => {
-          this._isLoading$.next(true);
-        }),
-        switchMap(() => from(this.mlApi.checkMlCapabilities())),
-        retry({ delay: CAPABILITIES_REFRESH_INTERVAL })
-      )
-      .subscribe((results) => {
-        this._capabilities$.next(results.capabilities);
-        this._isPlatinumOrTrialLicense$.next(results.isPlatinumOrTrialLicense);
-        this._mlFeatureEnabledInSpace$.next(results.mlFeatureEnabledInSpace);
-        this._isUpgradeInProgress$.next(results.upgradeInProgress);
-        this._isLoading$.next(false);
+  private loadCapabilities() {
+    void this.mlApi.checkMlCapabilities().then((results) => {
+      this._capabilities$.next(results.capabilities);
+      this._isPlatinumOrTrialLicense$.next(results.isPlatinumOrTrialLicense);
+      this._mlFeatureEnabledInSpace$.next(results.mlFeatureEnabledInSpace);
+      this._isUpgradeInProgress$.next(results.upgradeInProgress);
 
-        /**
-         * To support legacy use of {@link checkPermission}
-         */
-        _capabilities = results.capabilities;
-      });
+      /**
+       * To support legacy use of {@link checkPermission}
+       */
+      _capabilities = results.capabilities;
+    });
   }
 
   public getCapabilities(): MlCapabilities | null {
@@ -109,13 +79,7 @@ export class MlCapabilitiesService {
   }
 
   public refreshCapabilities() {
-    this._updateRequested$.next(Date.now());
-  }
-
-  public destroy() {
-    if (this._subscription) {
-      this._subscription.unsubscribe();
-    }
+    this.loadCapabilities();
   }
 }
 
@@ -230,6 +194,20 @@ export function checkCreateJobsCapabilitiesResolver(
 export function checkPermission(capability: keyof MlCapabilities) {
   const licenseHasExpired = hasLicenseExpired();
   return _capabilities[capability] === true && licenseHasExpired !== true;
+}
+
+export async function checkPermissionAsync(
+  getStartServices: MlCoreSetup['getStartServices'],
+  capability: keyof MlCapabilities,
+  throwError: boolean = false
+) {
+  const [coreStart] = await getStartServices();
+  const hasPermission =
+    (coreStart.application.capabilities.ml as MlCapabilities)[capability] === true;
+  if (!hasPermission && throwError) {
+    throw new Error('You do not have permission to access this feature');
+  }
+  return hasPermission;
 }
 
 // create the text for the button's tooltips if the user's license has

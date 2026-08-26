@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/277259
+issues:
+- https://github.com/elastic/kibana/issues/277160
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-16
+areas:
+- Search and data
+title: Fix requests with comments failing when the request body contains triple-quote strings
+description: Console requests containing comments and triple-quote strings no longer fail with `x_content_e_o_f_exception`.

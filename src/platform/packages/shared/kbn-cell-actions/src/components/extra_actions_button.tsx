@@ -29,18 +29,20 @@ export const ExtraActionsButton: React.FC<ExtraActionsButtonProps> = ({
       <EuiButtonIcon
         data-test-subj="showExtraActionsButton"
         aria-label={SHOW_MORE_ACTIONS}
-        iconType={extraActionsIconType ?? 'boxesHorizontal'}
+        iconType={extraActionsIconType ?? 'boxesVertical'}
         color={extraActionsColor}
         onClick={onClick}
       />
     </EuiToolTip>
   ) : (
-    <EuiButtonIcon
-      data-test-subj="showExtraActionsButton"
-      aria-label={SHOW_MORE_ACTIONS}
-      iconType={extraActionsIconType ?? 'boxesHorizontal'}
-      color={extraActionsColor}
-      onClick={onClick}
-    />
+    <EuiToolTip content={SHOW_MORE_ACTIONS} disableScreenReaderOutput>
+      <EuiButtonIcon
+        data-test-subj="showExtraActionsButton"
+        aria-label={SHOW_MORE_ACTIONS}
+        iconType={extraActionsIconType ?? 'boxesVertical'}
+        color={extraActionsColor}
+        onClick={onClick}
+      />
+    </EuiToolTip>
   );
 };

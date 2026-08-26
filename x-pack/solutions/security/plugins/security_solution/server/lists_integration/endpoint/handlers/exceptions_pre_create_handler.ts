@@ -19,6 +19,7 @@ import {
   HostIsolationExceptionsValidator,
   TrustedAppValidator,
   TrustedDeviceValidator,
+  CustomYaraSignaturesValidator,
 } from '../validators';
 import {
   hasGlobalOrPerPolicyTag,
@@ -83,6 +84,18 @@ export const getExceptionsPreCreateItemHandler = (
       blocklistValidator.notifyFeatureUsage(data, 'BLOCKLIST_BY_POLICY');
     }
 
+    // Validate YARA signatures
+    if (CustomYaraSignaturesValidator.isCustomYaraSignature(data)) {
+      isEndpointArtifact = true;
+      const customYaraSignaturesValidator = new CustomYaraSignaturesValidator(
+        endpointAppContext,
+        request
+      );
+      validatedItem = await customYaraSignaturesValidator.validatePreCreateItem(data);
+      customYaraSignaturesValidator.notifyFeatureUsage(data, 'CUSTOM_YARA_SIGNATURE');
+      customYaraSignaturesValidator.notifyFeatureUsage(data, 'CUSTOM_YARA_SIGNATURE_BY_POLICY');
+    }
+
     // validate endpoint exceptions
     if (EndpointExceptionsValidator.isEndpointException(data)) {
       isEndpointArtifact = true;
@@ -92,11 +105,11 @@ export const getExceptionsPreCreateItemHandler = (
       );
       validatedItem = await endpointExceptionValidator.validatePreCreateItem(data);
 
-      if (!endpointAppContext.experimentalFeatures.endpointExceptionsMovedUnderManagement) {
+      if (!(await endpointAppContext.isEndpointExceptionsPerPolicyEnabled())) {
         // If artifact does not have an assignment tag, then add it now. This is in preparation for
         // adding per-policy support to Endpoint Exceptions as well as to support space awareness.
         //
-        // Only added when the FF is disabled, as its enabled state indicates per-policy support.
+        // Only added when the user has not opted in to per-policy Endpoint Exceptions.
         if (!hasGlobalOrPerPolicyTag(validatedItem)) {
           validatedItem.tags = validatedItem.tags ?? [];
           validatedItem.tags.push(GLOBAL_ARTIFACT_TAG);
@@ -111,7 +124,7 @@ export const getExceptionsPreCreateItemHandler = (
         throw new EndpointArtifactExceptionValidationError(`Missing HTTP Request object`);
       }
 
-      const spaceId = (await endpointAppContext.getActiveSpace(request)).id;
+      const spaceId = endpointAppContext.getActiveSpaceId(request);
       setArtifactOwnerSpaceId(validatedItem, spaceId);
 
       return validatedItem;

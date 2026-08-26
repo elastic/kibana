@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
 import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
-import { EuiComboBoxWrapper } from '@kbn/scout-oblt';
 import { EXTENDED_TIMEOUT } from '../constants';
 import { waitForApmMainContainer } from '../page_helpers';
 
@@ -35,14 +34,10 @@ export class AnomalyDetectionPage {
     await button.click();
   }
 
-  async clickEnvironmentComboBox() {
-    await this.page.getByPlaceholder('Select or add environments').click();
-  }
-
   async selectEnvironment(environmentName: string) {
-    const environmentComboBox = new EuiComboBoxWrapper(this.page, { locator: '.euiComboBox' });
-    await environmentComboBox.setCustomMultiOption(environmentName);
-    await this.page.keyboard.press('Escape');
+    await this.page.components
+      .comboBox('apmAnomalyDetectionEnvironmentsComboBox')
+      .setCustomSelectedOptions([environmentName]);
   }
 
   async clickCreateJobsButton() {
@@ -51,11 +46,12 @@ export class AnomalyDetectionPage {
 
   async createMlJobs(environmentName: string) {
     await this.clickCreateJobButton();
-    await this.clickEnvironmentComboBox();
     await this.selectEnvironment(environmentName);
     await this.clickCreateJobsButton();
 
-    this.page.getByText('Anomaly detection jobs created');
+    await this.page
+      .getByText('Anomaly detection jobs created')
+      .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
   }
 
   async deleteMlJob() {

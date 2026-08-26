@@ -6,8 +6,7 @@
       "jest",
       "node",
       "react",
-      "@emotion/react/types/css-prop",
-      "@kbn/ambient-ui-types"
+      "@kbn/ambient-ui-types",
     ]
   },
   "include": [
@@ -21,6 +20,7 @@
     "@kbn/i18n",
     "@kbn/core-http-browser",
     "@kbn/content-management-favorites-server",
+    "@kbn/ui-favorite-button",
     "@kbn/i18n-react",
     "@kbn/usage-collection-plugin",
     "@kbn/core-user-profile-browser",

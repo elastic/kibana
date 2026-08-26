@@ -5,27 +5,42 @@
  * 2.0.
  */
 
-import { useQuery } from '@kbn/react-query';
+import { useQuery, useQueryClient } from '@kbn/react-query';
 import { useMemo } from 'react';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { agentBuilderDefaultAgentId, ConversationRoundStatus } from '@kbn/agent-builder-common';
+import { ConversationRoundStatus, type Conversation } from '@kbn/agent-builder-common';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
+import type { ConversationPermissions } from '../../../common/http_api/conversations';
 import type { ErrorPromptType } from '../components/common/prompt/error_prompt';
 import { queryKeys } from '../query_keys';
-import { newConversationId, createNewRound } from '../utils/new_conversation';
+import { createNewRound } from '../utils/new_conversation';
 import { useConversationId } from '../context/conversation/use_conversation_id';
-import { useIsSendingMessage } from './use_is_sending_message';
 import { useAgentBuilderServices } from './use_agent_builder_service';
-import { storageKeys } from '../storage_keys';
-import { useSendMessage } from '../context/send_message/send_message_context';
-import { useValidateAgentId } from './agents/use_validate_agent_id';
+import { useStreamingContext, useStreamRecord } from '../context/streaming/streaming_context';
 import { useConversationContext } from '../context/conversation/conversation_context';
+import { useLastAgentId } from './use_last_agent_id';
 
 export const useConversation = () => {
   const conversationId = useConversationId();
   const { conversationsService } = useAgentBuilderServices();
-  const queryKey = queryKeys.conversations.byId(conversationId ?? newConversationId);
-  const isSendingMessage = useIsSendingMessage();
+  const queryClient = useQueryClient();
+  const queryKey = queryKeys.conversations.byId(conversationId ?? '');
+  const { activeStreams, byConversationId } = useStreamingContext();
+
+  // Disable the query when this conversation is being written to by a stream, OR when
+  // its cached state shows a HITL pause, OR when there's an unpersisted error in the
+  // per-conversation error map. The cache is authoritative in all three cases; a
+  // refetch would race with optimistic chunks (streaming), or with the resume mutation
+  // about to fire (HITL), or 404 a fresh conversation that errored before the backend
+  // persisted it (overriding the in-round error UI with "Conversation not found").
+  const isAwaitingPrompt =
+    queryClient.getQueryData<Conversation>(queryKey)?.rounds?.at(-1)?.status ===
+    ConversationRoundStatus.awaitingPrompt;
+
+  const isThisConversationStreaming = Boolean(conversationId && activeStreams.has(conversationId));
+
+  const hasUnpersistedError = conversationId
+    ? Boolean(byConversationId[conversationId]?.error)
+    : false;
 
   const {
     data: conversation,
@@ -36,9 +51,11 @@ export const useConversation = () => {
     error,
   } = useQuery({
     queryKey,
-    // Disable query if we are on a new conversation or if there is a message currently being sent
-    // Otherwise a refetch will overwrite our optimistic updates
-    enabled: Boolean(conversationId) && !isSendingMessage,
+    enabled:
+      Boolean(conversationId) &&
+      !isThisConversationStreaming &&
+      !isAwaitingPrompt &&
+      !hasUnpersistedError,
     queryFn: () => {
       if (!conversationId) {
         return Promise.reject(new Error('Invalid conversation id'));
@@ -52,9 +69,22 @@ export const useConversation = () => {
       }
       return failureCount < 3;
     },
+    // Refetching an errored query (no cached success) resets status `error` → `loading`,
+    // which would clear `errorType` and flip `Conversation`'s conditional rendering. Resulting in a loop of unmounts/remounts.
+    retryOnMount: false,
   });
 
   return { conversation, isLoading, isFetching, isFetched, isError, error };
+};
+
+export const useConversationPermissions = (): ConversationPermissions => {
+  const { conversation } = useConversation();
+
+  return {
+    rename: conversation?.permissions.rename ?? false,
+    delete: conversation?.permissions.delete ?? false,
+    update_access_control: conversation?.permissions.update_access_control ?? false,
+  };
 };
 
 export const useConversationStatus = () => {
@@ -84,42 +114,22 @@ export const useConversationError = () => {
   };
 };
 
-const useGetNewConversationAgentId = () => {
-  const [agentIdStorage] = useLocalStorage<string>(storageKeys.agentId);
-  const validateAgentId = useValidateAgentId();
-
-  // Ensure we always return a string
-  return (): string => {
-    const isAgentIdValid = validateAgentId(agentIdStorage);
-    if (isAgentIdValid) {
-      return agentIdStorage;
-    }
-    return agentBuilderDefaultAgentId;
-  };
-};
-
 export const useAgentId = () => {
   const { conversation } = useConversation();
   const context = useConversationContext();
-  const agentId = conversation?.agent_id;
   const conversationId = useConversationId();
   const isNewConversation = !conversationId;
-  const getNewConversationAgentId = useGetNewConversationAgentId();
+  const { agentId: lastAgentId } = useLastAgentId();
 
-  if (agentId) {
-    return agentId;
-  }
-
-  if (context.agentId) {
-    return context.agentId;
-  }
-
-  // For new conversations, agent id must be defined
   if (isNewConversation) {
-    return getNewConversationAgentId();
+    return context.agentId ?? lastAgentId;
   }
 
-  return undefined;
+  if (conversation?.agent_id) {
+    return conversation.agent_id;
+  }
+
+  return context.agentId;
 };
 
 export const useConversationTitle = () => {
@@ -129,7 +139,8 @@ export const useConversationTitle = () => {
 
 export const useConversationRounds = () => {
   const { conversation } = useConversation();
-  const { pendingMessage, error, errorSteps } = useSendMessage();
+  const conversationId = useConversationId();
+  const { pendingMessage, error, errorSteps } = useStreamRecord(conversationId);
 
   const conversationRounds = useMemo(() => {
     const rounds = conversation?.rounds ?? [];

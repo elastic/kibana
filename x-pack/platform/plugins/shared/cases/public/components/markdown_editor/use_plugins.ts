@@ -16,7 +16,13 @@ import { KibanaServices, useApplicationCapabilities } from '../../common/lib/kib
 import * as lensMarkdownPlugin from './plugins/lens';
 import { ID as LensPluginId } from './plugins/lens/constants';
 
-export const usePlugins = (disabledPlugins?: string[]) => {
+export const usePlugins = (
+  disabledPlugins?: string[]
+): {
+  uiPlugins: ReturnType<typeof getDefaultEuiMarkdownUiPlugins>;
+  parsingPlugins: ReturnType<typeof getDefaultEuiMarkdownParsingPlugins>;
+  processingPlugins: ReturnType<typeof getDefaultEuiMarkdownProcessingPlugins>;
+} => {
   const kibanaConfig = KibanaServices.getConfig();
   const timelinePlugins = useTimelineContext()?.editor_plugins;
   const appCapabilities = useApplicationCapabilities();

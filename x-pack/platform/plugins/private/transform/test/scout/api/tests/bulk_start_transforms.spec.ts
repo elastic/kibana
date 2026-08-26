@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { expect, tags } from '@kbn/scout';
+import { tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import type { CookieHeader } from '@kbn/scout';
 import type {
   StartTransformsRequestSchema,
@@ -15,7 +16,7 @@ import { generateTransformConfig } from '../helpers/transform_config';
 import { transformApiTest as apiTest } from '../fixtures';
 import { COMMON_HEADERS } from '../constants';
 
-apiTest.describe('/internal/transform/start_transforms', { tag: tags.ESS_ONLY }, () => {
+apiTest.describe('/internal/transform/start_transforms', { tag: tags.stateful.all }, () => {
   const transformIds = ['bulk_start_test_1', 'bulk_start_test_2'];
   let transformManagerCookieHeader: CookieHeader;
 

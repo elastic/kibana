@@ -18,8 +18,8 @@ import {
   EuiText,
   EuiButton,
   EuiSpacer,
-  EuiCallOut,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import { CLOUD_SNAPSHOT_REPOSITORY } from '../../../../../common/constants';
 import { useAppContext } from '../../../app_context';
@@ -73,24 +73,27 @@ export const CloudBackup: React.FunctionComponent<Props> = ({
 
   if (error) {
     return (
-      <EuiCallOut
+      <KbnDangerCallout
         announceOnMount={false}
         title={i18n.translate('xpack.upgradeAssistant.overview.cloudBackup.loadingError', {
           defaultMessage: 'An error occurred while retrieving the latest snapshot status',
         })}
-        color="danger"
-        iconType="warning"
         data-test-subj="cloudBackupErrorCallout"
-      >
-        <p>
-          {error.statusCode} - {error.message as string}
-        </p>
-        <EuiButton color="danger" onClick={resendRequest} data-test-subj="cloudBackupRetryButton">
-          {i18n.translate('xpack.upgradeAssistant.overview.cloudBackup.retryButton', {
-            defaultMessage: 'Try again',
-          })}
-        </EuiButton>
-      </EuiCallOut>
+        text={
+          <p>
+            {error.statusCode} - {error.message as string}
+          </p>
+        }
+        actionProps={{
+          primary: {
+            children: i18n.translate('xpack.upgradeAssistant.overview.cloudBackup.retryButton', {
+              defaultMessage: 'Try again',
+            }),
+            onClick: resendRequest,
+            'data-test-subj': 'cloudBackupRetryButton',
+          },
+        }}
+      />
     );
   }
 
@@ -99,7 +102,7 @@ export const CloudBackup: React.FunctionComponent<Props> = ({
   const statusMessage = data!.isBackedUp ? (
     <EuiFlexGroup alignItems="center" gutterSize="s" data-test-subj="dataBackedUpStatus">
       <EuiFlexItem grow={false}>
-        <EuiIcon type="check" color="success" />
+        <EuiIcon type="check" color="success" aria-hidden={true} />
       </EuiFlexItem>
 
       <EuiFlexItem>
@@ -129,7 +132,7 @@ export const CloudBackup: React.FunctionComponent<Props> = ({
   ) : (
     <EuiFlexGroup alignItems="center" gutterSize="s" data-test-subj="dataNotBackedUpStatus">
       <EuiFlexItem grow={false}>
-        <EuiIcon type="warning" color="danger" />
+        <EuiIcon type="warning" color="danger" aria-hidden={true} />
       </EuiFlexItem>
 
       <EuiFlexItem>
@@ -164,7 +167,7 @@ export const CloudBackup: React.FunctionComponent<Props> = ({
         }}
         data-test-subj="cloudSnapshotsLink"
         target="_blank"
-        iconType="popout"
+        iconType="external"
         iconSide="right"
       >
         <FormattedMessage

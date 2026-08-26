@@ -34,6 +34,7 @@ export class DataStreamSpacesAdapter extends IndexPatternAdapter {
         logger,
         totalFieldsLimit: this.totalFieldsLimit,
         writeIndexOnly: this.writeIndexOnly,
+        expandIndexPattern: this.expandIndexPattern,
       }),
       `update space data streams`
     );

@@ -1,0 +1,34 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { z } from '@kbn/zod/v4';
+import { optionalWithDescription as opt } from './common';
+import { ruleResponseSchema } from './rule_data_schema';
+
+export const RULE_ATTACHMENT_TYPE = 'platform.alerting.rule' as const;
+
+/**
+ * Data stored inside a rule attachment.
+ *
+ * Server-generated fields (id, enabled, created_by, created_at, updated_by, updated_at, metadata.version)
+ * are optional so that the same schema covers both:
+ *   - proposed rules (by-value, not yet saved — no id or audit fields)
+ *   - saved rules    (by-reference, linked via attachment.origin = rule saved object id)
+ */
+const { shape } = ruleResponseSchema;
+
+export const ruleAttachmentDataSchema = ruleResponseSchema.extend({
+  id: opt(shape.id),
+  enabled: opt(shape.enabled),
+  created_by: opt(shape.created_by),
+  created_at: opt(shape.created_at),
+  updated_by: opt(shape.updated_by),
+  updated_at: opt(shape.updated_at),
+  metadata: shape.metadata.extend({ version: opt(shape.metadata.shape.version) }),
+});
+
+export type RuleAttachmentData = z.infer<typeof ruleAttachmentDataSchema>;

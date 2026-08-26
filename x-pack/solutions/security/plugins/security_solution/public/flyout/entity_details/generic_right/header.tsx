@@ -17,7 +17,7 @@ import { ExpandableBadgeGroup } from './components/expandable_badge_group';
 import { EntityIconByType } from '../../../entity_analytics/components/entity_store/helpers';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
 import { FlyoutHeader } from '../../shared/components/flyout_header';
-import { FlyoutTitle } from '../../shared/components/flyout_title';
+import { FlyoutTitle } from '../../../flyout_v2/shared/components/flyout_title';
 
 const initialBadgeLimit = 3;
 const maxBadgeContainerHeight = 200;
@@ -83,6 +83,11 @@ const HeaderTags = ({
 interface GenericEntityFlyoutHeaderProps {
   entity: EntityEcs;
   source: GenericEntityRecord;
+  /**
+   * Overrides forwarded to the underlying {@link FlyoutHeader} (e.g. `css` / `panelProps` for
+   * compact spacing in the EUI system flyout). Legacy callers omit this and keep the default.
+   */
+  flyoutHeaderProps?: Omit<React.ComponentProps<typeof FlyoutHeader>, 'children'>;
 }
 
 // TODO: Asset Inventory - move this to a shared location, for now it's here as a mock since we dont have generic entities yet
@@ -97,7 +102,11 @@ export const GenericEntityIconByType: Record<GenericEntityType | EntityType, Ico
 
 const isDate = (value: unknown): value is Date => value instanceof Date;
 
-export const GenericEntityFlyoutHeader = ({ entity, source }: GenericEntityFlyoutHeaderProps) => {
+export const GenericEntityFlyoutHeader = ({
+  entity,
+  source,
+  flyoutHeaderProps,
+}: GenericEntityFlyoutHeaderProps) => {
   const { euiTheme } = useEuiTheme();
 
   const docTimestamp = source?.['@timestamp'];
@@ -105,7 +114,7 @@ export const GenericEntityFlyoutHeader = ({ entity, source }: GenericEntityFlyou
 
   return (
     <>
-      <FlyoutHeader data-test-subj="generic-panel-header">
+      <FlyoutHeader data-test-subj="generic-panel-header" {...flyoutHeaderProps}>
         <EuiFlexGroup gutterSize="s" responsive={false} direction="column">
           {timestamp && (
             <EuiFlexItem grow={false}>

@@ -10,7 +10,7 @@ import React from 'react';
 import 'jest-styled-components';
 import { renderWithRouter, shallowWithRouter } from '../../lib';
 import { CertStatus } from './cert_status';
-import * as redux from 'react-redux';
+import * as redux from 'react-redux-v7';
 import moment from 'moment';
 
 describe('CertStatus', () => {

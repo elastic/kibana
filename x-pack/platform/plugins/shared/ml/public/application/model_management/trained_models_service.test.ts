@@ -12,7 +12,7 @@ import { TrainedModelsService } from './trained_models_service';
 import type {
   StartTrainedModelDeploymentResponse,
   TrainedModelUIItem,
-} from '../../../common/types/trained_models';
+} from '@kbn/ml-common-types/trained_models';
 import { MODEL_STATE } from '@kbn/ml-trained-models-utils';
 import { i18n } from '@kbn/i18n';
 import type { MlTrainedModelConfig } from '@elastic/elasticsearch/lib/api/types';

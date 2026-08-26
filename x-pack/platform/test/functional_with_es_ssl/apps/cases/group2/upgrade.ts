@@ -73,8 +73,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     describe('Case view page', function () {
-      before(async () => {
+      before(async function () {
         await cases.navigation.navigateToSingleCase('cases', CASE_ID);
+        // These assertions validate the legacy case-view layout of a migrated 7.17.5 case; the
+        // redesigned case view restructures this UI and is covered by its own suites.
+        if (await cases.common.isRedesignEnabled()) {
+          this.skip();
+        }
       });
 
       it('does not show any error toasters', async () => {
@@ -114,7 +119,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       it('shows the first comment correctly', async () => {
         const comment = await find.byCssSelector(
-          '[data-test-subj^="comment-create-action"] [data-test-subj="scrollable-markdown"]'
+          '[data-test-subj^="comment-comment-"] [data-test-subj="scrollable-markdown"]'
         );
 
         expect(await comment.getVisibleText()).equal(`This is interesting. I am curious also.`);
@@ -129,7 +134,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       it('shows the second comment correctly', async () => {
         const comments = await find.allByCssSelector(
-          '[data-test-subj^="comment-create-action"] [data-test-subj="scrollable-markdown"]'
+          '[data-test-subj^="comment-comment-"] [data-test-subj="scrollable-markdown"]'
         );
         const secondComment = comments[1];
 
@@ -142,7 +147,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       it('shows the third comment correctly', async () => {
         const comments = await find.allByCssSelector(
-          '[data-test-subj^="comment-create-action"] [data-test-subj="scrollable-markdown"]'
+          '[data-test-subj^="comment-comment-"] [data-test-subj="scrollable-markdown"]'
         );
         const thirdComment = comments[2];
 
@@ -202,7 +207,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       it('shows the fourth comment correctly', async () => {
         const comments = await find.allByCssSelector(
-          '[data-test-subj^="comment-create-action"] [data-test-subj="scrollable-markdown"]'
+          '[data-test-subj^="comment-comment-"] [data-test-subj="scrollable-markdown"]'
         );
 
         const thirdComment = comments[3];
@@ -289,8 +294,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     describe('Cases table', function () {
-      before(async () => {
+      before(async function () {
         await cases.navigation.navigateToApp();
+        // These assertions validate the legacy all-cases table columns for a migrated 7.17.5 case;
+        // the redesigned list restructures this UI and is covered by its own suites.
+        if (await cases.common.isRedesignEnabled()) {
+          this.skip();
+        }
         await testSubjects.click('superDatePickerToggleQuickMenuButton');
         await testSubjects.click('show-all-cases-link');
       });

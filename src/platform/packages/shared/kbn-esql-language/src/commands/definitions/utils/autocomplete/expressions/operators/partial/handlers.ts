@@ -7,16 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ESQLSingleAstItem, ESQLFunction } from '@elastic/esql/types';
 import type { ISuggestionItem } from '../../../../../../registry/types';
 import type { ExpressionContext, PartialOperatorDetection } from '../../types';
-import type { ESQLSingleAstItem, ESQLFunction } from '../../../../../../../types';
 import { getFunctionDefinition } from '../../../../functions';
 import { createSyntheticListOperatorNode, createSyntheticLikeOperatorNode } from './utils';
 import { dispatchOperators } from '../dispatcher';
 import { inOperators, patternMatchOperators } from '../../../../../all_operators';
-
-const WHITESPACE_NORMALIZE_REGEX = /\s+/g;
-const TRAILING_WHITESPACE_REGEX = /\s+$/;
+import { normalizeWhitespace } from '../../../../regex';
 
 const NULL_CHECK_CANDIDATES = ['is null', 'is not null'] as const;
 
@@ -30,10 +28,7 @@ export async function handleNullCheckOperator(
   { innerText }: ExpressionContext
 ): Promise<ISuggestionItem[] | null> {
   const text = textBeforeCursor || innerText;
-  const queryNormalized = text
-    .toLowerCase()
-    .replace(WHITESPACE_NORMALIZE_REGEX, ' ')
-    .replace(TRAILING_WHITESPACE_REGEX, ' ');
+  const queryNormalized = normalizeWhitespace(text.toLowerCase());
 
   const suggestions: ISuggestionItem[] = [];
 
@@ -55,7 +50,6 @@ export async function handleNullCheckOperator(
         text: name.toUpperCase(),
         kind: 'Operator',
         detail: def.description,
-        sortText: 'D',
       });
     }
   }
@@ -115,9 +109,8 @@ async function handleInfixOperator(
   const leftOperand = expressionRoot?.type === 'column' ? expressionRoot : undefined;
   const syntheticNode = createSyntheticNode(operatorName, text, leftOperand);
 
-  return dispatchOperators({
-    ...context,
-    expressionRoot: syntheticNode,
-    innerText: text,
-  });
+  context.expressionRoot = syntheticNode;
+  context.innerText = text;
+
+  return dispatchOperators(context);
 }

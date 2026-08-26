@@ -1,0 +1,56 @@
+env:
+  FTR_GEN_AI: '1'
+  FTR_EIS_CCM: '1'
+  STACK_DOCS_VERSION: 'latest'
+steps:
+  - label: '👨‍🔧 Pre-Build'
+    command: .buildkite/scripts/lifecycle/pre_build.sh
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-2
+
+  - wait
+
+  # Always run this step: resolve_reusable_kibana_build.sh picks a recent
+  # kibana-on-merge distributable (≤36h) when KIBANA_BUILD_ID is unset, then
+  # build_kibana.sh short-circuits. Falls back to a full build if none found.
+  # Shared with gen_ai_security_labs.yml. Force a rebuild with KIBANA_REUSE_BUILD=false
+  # or pin a build by setting KIBANA_BUILD_ID on the Buildkite build.
+  - label: '🧑‍🏭 Build Kibana Distribution'
+    command: |
+      set -euo pipefail
+      source .buildkite/scripts/steps/gen_ai/resolve_reusable_kibana_build.sh
+      .buildkite/scripts/steps/build_kibana.sh
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-8
+    key: build
+
+  - wait
+
+  - label: AppEx AI-Infra Inference APIs FTR tests
+    key: ai-infra-gen-ai-inference-api
+    command: bash .buildkite/scripts/steps/gen_ai/run_ai_infra_inference_api_ftr.sh
+    env:
+      FTR_CONFIG: 'x-pack/platform/test/functional_gen_ai/inference/generate_artifacts.config.ts'
+      FTR_CONFIG_GROUP_KEY: 'ftr-ai-infra-gen-ai-inference-api'
+      FTR_GEN_AI: '1'
+      FTR_EIS_CCM: '1'
+    timeout_in_minutes: 180
+    parallelism: 1
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-4
+      preemptible: true
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 1
+        - exit_status: '*'
+          limit: 1

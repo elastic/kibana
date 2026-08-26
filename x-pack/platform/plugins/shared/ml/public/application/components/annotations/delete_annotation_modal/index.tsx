@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import PropTypes from 'prop-types';
 import React, { Fragment } from 'react';
 import { EUI_MODAL_CONFIRM_BUTTON, EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 
@@ -58,10 +57,4 @@ export const DeleteAnnotationModal: React.FC<Props> = ({
       )}
     </Fragment>
   );
-};
-
-DeleteAnnotationModal.propTypes = {
-  cancelAction: PropTypes.func.isRequired,
-  deleteAction: PropTypes.func.isRequired,
-  isVisible: PropTypes.bool.isRequired,
 };

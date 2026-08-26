@@ -1,0 +1,10 @@
+﻿prs:
+- https://github.com/elastic/kibana/pull/260835
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-05-06
+areas:
+- Kibana platform
+title: Change display language from settings
+description: 'Added per-user language selection to Kibana, as a Beta feature. Users can now choose their preferred display language from the User Profile page or from the Language option in the user menu. Kibana resolves the display language using the following priority: user profile setting, then the i18n.locale server configuration.'

@@ -5,29 +5,19 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
 import { maxSuggestions } from '@kbn/observability-plugin/common';
+import { routeDefinitions, type SuggestionsResponse } from '@kbn/apm-api-shared';
 import { getSuggestionsWithTermsEnum } from './get_suggestions_with_terms_enum';
 import { getSuggestionsWithTermsAggregation } from './get_suggestions_with_terms_aggregation';
 import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import { rangeRt } from '../default_api_types';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 
 const suggestionsRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/suggestions',
-  params: t.type({
-    query: t.intersection([
-      t.type({
-        fieldName: t.string,
-        fieldValue: t.string,
-      }),
-      rangeRt,
-      t.partial({ serviceName: t.string }),
-    ]),
-  }),
+  endpoint: routeDefinitions.suggestions.suggestions.endpoint,
+  params: routeDefinitions.suggestions.suggestions.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async (resources): Promise<{ terms: string[] }> => {
+  handler: async (resources): Promise<SuggestionsResponse> => {
     const apmEventClient = await getApmEventClient(resources);
     const { context, params, config } = resources;
     const { fieldName, fieldValue, serviceName, start, end } = params.query;

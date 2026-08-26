@@ -16,7 +16,7 @@ import {
 } from '@kbn/agent-builder-common/agents';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
-import { publicApiPath } from '../../../common/constants';
+import { publicApiPath, internalApiPath } from '../../../common/constants';
 import type { ChatRequestBodyPayload } from '../../../common/http_api/chat';
 import { unwrapAgentBuilderErrors } from '../utils/errors';
 import type { EventsService } from '../events';
@@ -26,9 +26,11 @@ interface BaseConverseParams {
   signal?: AbortSignal;
   agentId?: string;
   connectorId?: string;
-  conversationId?: string;
+  conversationId: string;
+  executionId: string;
   browserApiTools?: BrowserApiToolMetadata[];
   capabilities?: AgentCapabilities;
+  projectRouting?: string;
 }
 
 export type ChatParams = BaseConverseParams & {
@@ -37,8 +39,18 @@ export type ChatParams = BaseConverseParams & {
 };
 
 export type ResumeRoundParams = BaseConverseParams & {
-  conversationId: string;
   prompts: Record<string, PromptResponse>;
+};
+
+export type RegenerateParams = BaseConverseParams;
+
+/**
+ * Wire payload for `converse()` with `conversation_id` narrowed to required. Every
+ * Agent Builder UI caller passes a client-generated UUID before chat fires.
+ */
+type ConversePayload = ChatRequestBodyPayload & {
+  conversation_id: string;
+  execution_id: string;
 };
 
 export class ChatService {
@@ -55,10 +67,12 @@ export class ChatService {
       input: params.input,
       agent_id: params.agentId,
       conversation_id: params.conversationId,
+      execution_id: params.executionId,
       connector_id: params.connectorId,
       capabilities: params.capabilities ?? getKibanaDefaultAgentCapabilities(),
       attachments: params.attachments,
       browser_api_tools: params.browserApiTools ?? [],
+      project_routing: params.projectRouting,
     });
   }
 
@@ -69,14 +83,47 @@ export class ChatService {
     return this.converse(params.signal, {
       agent_id: params.agentId,
       conversation_id: params.conversationId,
+      execution_id: params.executionId,
       connector_id: params.connectorId,
       capabilities: params.capabilities ?? getKibanaDefaultAgentCapabilities(),
       prompts: params.prompts,
       browser_api_tools: params.browserApiTools ?? [],
+      project_routing: params.projectRouting,
     });
   }
 
-  private converse(signal: AbortSignal | undefined, payload: ChatRequestBodyPayload) {
+  regenerate(params: RegenerateParams): Observable<ChatEvent> {
+    return this.converse(params.signal, {
+      agent_id: params.agentId,
+      conversation_id: params.conversationId,
+      execution_id: params.executionId,
+      connector_id: params.connectorId,
+      capabilities: params.capabilities ?? getKibanaDefaultAgentCapabilities(),
+      browser_api_tools: params.browserApiTools ?? [],
+      action: 'regenerate',
+      project_routing: params.projectRouting,
+    });
+  }
+
+  followExecution(executionId: string, signal?: AbortSignal): Observable<ChatEvent> {
+    return defer(() => {
+      return this.http.get(`${internalApiPath}/executions/${executionId}/follow`, {
+        signal,
+        asResponse: true,
+        rawResponse: true,
+      });
+    }).pipe(
+      // @ts-expect-error SseEvent mixin issue
+      httpResponseIntoObservable<ChatEvent>(),
+      unwrapAgentBuilderErrors()
+    );
+  }
+
+  async abort(executionId: string): Promise<void> {
+    await this.http.post(`${internalApiPath}/executions/${executionId}/abort`);
+  }
+
+  private converse(signal: AbortSignal | undefined, payload: ConversePayload) {
     return defer(() => {
       return this.http.post(`${publicApiPath}/converse/async`, {
         signal,
@@ -88,7 +135,10 @@ export class ChatService {
       // @ts-expect-error SseEvent mixin issue
       httpResponseIntoObservable<ChatEvent>(),
       unwrapAgentBuilderErrors(),
-      propagateEvents({ eventsService: this.events })
+      propagateEvents({
+        eventsService: this.events,
+        conversationId: payload.conversation_id,
+      })
     );
   }
 }

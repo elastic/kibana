@@ -14,13 +14,14 @@
 import React, { useMemo, useState, useCallback, type KeyboardEvent } from 'react';
 import { css } from '@emotion/react';
 import {
+  EuiButtonIcon,
+  EuiFocusTrap,
+  EuiI18n,
+  EuiOverlayMask,
+  EuiToolTip,
+  keys,
   type UseEuiTheme,
   useEuiTheme,
-  EuiI18n,
-  EuiButtonIcon,
-  EuiOverlayMask,
-  EuiFocusTrap,
-  keys,
 } from '@elastic/eui';
 
 const getFullscreenStyles = (euiTheme: UseEuiTheme['euiTheme']) => {
@@ -68,13 +69,18 @@ export const useFullScreen = ({ allowFullScreen }: { allowFullScreen?: boolean }
         defaults={['Collapse', 'Expand']}
       >
         {([fullscreenCollapse, fullscreenExpand]: string[]) => (
-          <EuiButtonIcon
-            onClick={toggleFullScreen}
-            iconType={isFullScreen ? 'fullScreenExit' : 'fullScreen'}
-            color="text"
-            aria-label={isFullScreen ? fullscreenCollapse : fullscreenExpand}
-            size="xs"
-          />
+          <EuiToolTip
+            content={isFullScreen ? fullscreenCollapse : fullscreenExpand}
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              onClick={toggleFullScreen}
+              iconType={isFullScreen ? 'fullScreenExit' : 'fullScreen'}
+              color="text"
+              aria-label={isFullScreen ? fullscreenCollapse : fullscreenExpand}
+              size="xs"
+            />
+          </EuiToolTip>
         )}
       </EuiI18n>
     );

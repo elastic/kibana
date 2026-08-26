@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { act } from 'react-dom/test-utils';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
+import { screen, waitFor } from '@testing-library/react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { loadExecutionKPIAggregations } from '../../../lib/rule_api/load_execution_kpi_aggregations';
 import { loadGlobalExecutionKPIAggregations } from '../../../lib/rule_api/load_global_execution_kpi_aggregations';
 import { RuleEventLogListKPI } from './rule_event_log_list_kpi';
@@ -66,7 +66,7 @@ describe('rule_event_log_list_kpi', () => {
   });
 
   it('renders correctly', async () => {
-    const wrapper = mountWithIntl(
+    renderWithI18n(
       <RuleEventLogListKPI
         ruleId="123"
         dateStart="now-24h"
@@ -76,111 +76,61 @@ describe('rule_event_log_list_kpi', () => {
       />
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="ruleEventLogKpi-successOutcome"] .euiStat__title')
-        .first()
-        .text()
-    ).toEqual('--');
-    expect(
-      wrapper
-        .find('[data-test-subj="ruleEventLogKpi-warningOutcome"] .euiStat__title')
-        .first()
-        .text()
-    ).toEqual('--');
-    expect(
-      wrapper
-        .find('[data-test-subj="ruleEventLogKpi-failureOutcome"] .euiStat__title')
-        .first()
-        .text()
-    ).toEqual('--');
-    expect(
-      wrapper.find('[data-test-subj="ruleEventLogKpi-activeAlerts"] .euiStat__title').first().text()
-    ).toEqual('--');
-    expect(
-      wrapper.find('[data-test-subj="ruleEventLogKpi-newAlerts"] .euiStat__title').first().text()
-    ).toEqual('--');
-    expect(
-      wrapper
-        .find('[data-test-subj="ruleEventLogKpi-recoveredAlerts"] .euiStat__title')
-        .first()
-        .text()
-    ).toEqual('--');
-    expect(
-      wrapper
-        .find('[data-test-subj="ruleEventLogKpi-erroredActions"] .euiStat__title')
-        .first()
-        .text()
-    ).toEqual('--');
-    expect(
-      wrapper
-        .find('[data-test-subj="ruleEventLogKpi-triggeredActions"] .euiStat__title')
-        .first()
-        .text()
-    ).toEqual('--');
+    // NOTE: the component immediately enters loading state (isLoadingData = !kpi initially),
+    // so EuiStat renders a spinner rather than '--' headings. We skip the pre-load assertions
+    // and wait directly for the API call and resulting data.
 
-    // Let the load resolve
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
+    // Wait for data to load
+    await waitFor(() => {
+      expect(loadExecutionKPIAggregationsMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: '123',
+          message: undefined,
+          outcomeFilter: undefined,
+        })
+      );
     });
-
-    expect(loadExecutionKPIAggregationsMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        id: '123',
-        message: undefined,
-        outcomeFilter: undefined,
-      })
-    );
 
     expect(loadGlobalExecutionKPIAggregations).not.toHaveBeenCalled();
 
+    // EuiStat renders its title as a <p class="euiStat__title">, not a semantic heading
+    await waitFor(() => {
+      expect(
+        screen.getByTestId('ruleEventLogKpi-successOutcome').querySelector('.euiStat__title')
+          ?.textContent
+      ).toEqual(`${mockKpiResponse.success}`);
+    });
     expect(
-      wrapper
-        .find('[data-test-subj="ruleEventLogKpi-successOutcome"] .euiStat__title')
-        .first()
-        .text()
-    ).toEqual(`${mockKpiResponse.success}`);
-    expect(
-      wrapper
-        .find('[data-test-subj="ruleEventLogKpi-warningOutcome"] .euiStat__title')
-        .first()
-        .text()
+      screen.getByTestId('ruleEventLogKpi-warningOutcome').querySelector('.euiStat__title')
+        ?.textContent
     ).toEqual(`${mockKpiResponse.warning}`);
     expect(
-      wrapper
-        .find('[data-test-subj="ruleEventLogKpi-failureOutcome"] .euiStat__title')
-        .first()
-        .text()
+      screen.getByTestId('ruleEventLogKpi-failureOutcome').querySelector('.euiStat__title')
+        ?.textContent
     ).toEqual(`${mockKpiResponse.failure}`);
     expect(
-      wrapper.find('[data-test-subj="ruleEventLogKpi-activeAlerts"] .euiStat__title').first().text()
+      screen.getByTestId('ruleEventLogKpi-activeAlerts').querySelector('.euiStat__title')
+        ?.textContent
     ).toEqual(`${mockKpiResponse.activeAlerts}`);
     expect(
-      wrapper.find('[data-test-subj="ruleEventLogKpi-newAlerts"] .euiStat__title').first().text()
+      screen.getByTestId('ruleEventLogKpi-newAlerts').querySelector('.euiStat__title')?.textContent
     ).toEqual(`${mockKpiResponse.newAlerts}`);
     expect(
-      wrapper
-        .find('[data-test-subj="ruleEventLogKpi-recoveredAlerts"] .euiStat__title')
-        .first()
-        .text()
+      screen.getByTestId('ruleEventLogKpi-recoveredAlerts').querySelector('.euiStat__title')
+        ?.textContent
     ).toEqual(`${mockKpiResponse.recoveredAlerts}`);
     expect(
-      wrapper
-        .find('[data-test-subj="ruleEventLogKpi-erroredActions"] .euiStat__title')
-        .first()
-        .text()
+      screen.getByTestId('ruleEventLogKpi-erroredActions').querySelector('.euiStat__title')
+        ?.textContent
     ).toEqual(`${mockKpiResponse.erroredActions}`);
     expect(
-      wrapper
-        .find('[data-test-subj="ruleEventLogKpi-triggeredActions"] .euiStat__title')
-        .first()
-        .text()
+      screen.getByTestId('ruleEventLogKpi-triggeredActions').querySelector('.euiStat__title')
+        ?.textContent
     ).toEqual(`${mockKpiResponse.triggeredActions}`);
   });
 
   it('calls global KPI API if provided global rule id', async () => {
-    const wrapper = mountWithIntl(
+    renderWithI18n(
       <RuleEventLogListKPI
         ruleId="*"
         dateStart="now-24h"
@@ -189,25 +139,22 @@ describe('rule_event_log_list_kpi', () => {
         loadGlobalExecutionKPIAggregations={loadGlobalExecutionKPIAggregationsMock}
       />
     );
-    // Let the load resolve
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
 
-    expect(loadGlobalExecutionKPIAggregations).toHaveBeenCalledWith(
-      expect.objectContaining({
-        id: '*',
-        message: undefined,
-        outcomeFilter: undefined,
-      })
-    );
+    await waitFor(() => {
+      expect(loadGlobalExecutionKPIAggregations).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: '*',
+          message: undefined,
+          outcomeFilter: undefined,
+        })
+      );
+    });
 
     expect(loadExecutionKPIAggregationsMock).not.toHaveBeenCalled();
   });
 
   it('calls KPI API with filters', async () => {
-    const wrapper = mountWithIntl(
+    renderWithI18n(
       <RuleEventLogListKPI
         ruleId="123"
         dateStart="now-24h"
@@ -219,24 +166,20 @@ describe('rule_event_log_list_kpi', () => {
       />
     );
 
-    // Let the load resolve
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
+    await waitFor(() => {
+      expect(loadExecutionKPIAggregationsMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: '123',
+          message: 'test',
+          outcomeFilter: ['status: 123', 'test:456'],
+        })
+      );
     });
-
-    expect(loadExecutionKPIAggregationsMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        id: '123',
-        message: 'test',
-        outcomeFilter: ['status: 123', 'test:456'],
-      })
-    );
   });
 
   it('Should call addDanger function when an the API throw an error', async () => {
     loadGlobalExecutionKPIAggregationsMock.mockRejectedValue({ body: { statusCode: 400 } });
-    const wrapper = mountWithIntl(
+    renderWithI18n(
       <RuleEventLogListKPI
         ruleId="*"
         dateStart="now-24h"
@@ -245,18 +188,15 @@ describe('rule_event_log_list_kpi', () => {
         loadGlobalExecutionKPIAggregations={loadGlobalExecutionKPIAggregationsMock}
       />
     );
-    // Let the load resolve
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
 
-    expect(addDangerMock).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(addDangerMock).toHaveBeenCalled();
+    });
   });
 
   it('Should NOT call addDanger function when an the API throw a 413 error', async () => {
     loadGlobalExecutionKPIAggregationsMock.mockRejectedValue({ body: { statusCode: 413 } });
-    const wrapper = mountWithIntl(
+    renderWithI18n(
       <RuleEventLogListKPI
         ruleId="*"
         dateStart="now-24h"
@@ -265,10 +205,9 @@ describe('rule_event_log_list_kpi', () => {
         loadGlobalExecutionKPIAggregations={loadGlobalExecutionKPIAggregationsMock}
       />
     );
-    // Let the load resolve
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
+
+    await waitFor(() => {
+      expect(loadGlobalExecutionKPIAggregationsMock).toHaveBeenCalled();
     });
 
     expect(addDangerMock).not.toHaveBeenCalled();

@@ -9,6 +9,7 @@
 
 import type { FC } from 'react';
 import React, { memo, useMemo, useState, useCallback, useRef } from 'react';
+import moment from 'moment';
 import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
 import type {
   ElementClickListener,
@@ -22,21 +23,27 @@ import type {
   SettingsProps,
   SeriesIdentifier,
   TooltipValue,
+  PointerValue,
 } from '@elastic/charts';
 import { Chart, Heatmap, ScaleType, Settings, TooltipType, Tooltip } from '@elastic/charts';
 import type { CustomPaletteState } from '@kbn/charts-plugin/public';
 import { search } from '@kbn/data-plugin/public';
 import { LegendToggle, EmptyPlaceholder, useActiveCursor } from '@kbn/charts-plugin/public';
-import { getAccessorByDimension, getFormatByAccessor } from '@kbn/chart-expressions-common';
-import { i18n } from '@kbn/i18n';
-import type { DatatableColumn } from '@kbn/expressions-plugin/public';
-import { IconChartHeatmap } from '@kbn/chart-icons';
 import {
+  ChartTooltipFooterMessage,
+  getAccessorByDimension,
+  getFormatByAccessor,
+  getFilterDrilldownWarningMessage,
   getOverridesFor,
   DEFAULT_LEGEND_SIZE,
   LegendSizeToPixels,
 } from '@kbn/chart-expressions-common';
+import { i18n } from '@kbn/i18n';
+import type { DatatableColumn } from '@kbn/expressions-plugin/public';
+import { IconChartHeatmap } from '@kbn/chart-icons';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
+import type { CoreSetup } from '@kbn/core/public';
+
 import type { HeatmapRenderProps, FilterEvent, BrushEvent } from '../../common';
 import {
   applyPaletteParams,
@@ -97,6 +104,149 @@ function shiftAndNormalizeStops(
   );
 }
 
+/**
+ * Computes the minimum interval between adjacent x values in the data.
+ * Used for ES|QL queries without explicit interval metadata.
+ *
+ * @param data - The heatmap chart data (with timestamps already converted to numbers)
+ * @param xAccessor - The x-axis accessor key
+ * @returns The minimum interval in milliseconds, or undefined if cannot be computed
+ */
+export function computeMinIntervalFromData(
+  data: Array<Record<string, string | number>>,
+  xAccessor: string | undefined
+): number | undefined {
+  if (!xAccessor || data.length < 2) {
+    return undefined;
+  }
+
+  // Extract numeric timestamps (already converted from date strings)
+  const timestamps = data.reduce((acc, curr) => {
+    if (curr[xAccessor] !== null && typeof curr[xAccessor] === 'number') {
+      acc.add(curr[xAccessor]);
+    }
+    return acc;
+  }, new Set<number>());
+
+  const sortedTimestamps = Array.from(timestamps).sort((a, b) => a - b);
+
+  if (sortedTimestamps.length < 2) {
+    return undefined;
+  }
+
+  // Compute minimum interval between adjacent values
+  let minInterval = Number.MAX_SAFE_INTEGER;
+  for (let i = 1; i < sortedTimestamps.length; i++) {
+    const interval = Math.abs(sortedTimestamps[i] - sortedTimestamps[i - 1]);
+    if (interval > 0) {
+      minInterval = Math.min(minInterval, interval);
+    }
+  }
+
+  return minInterval < Number.MAX_SAFE_INTEGER ? minInterval : undefined;
+}
+
+/**
+ * Computes the appropriate x-axis scale for the heatmap.
+ * Handles traditional aggregations and ES|QL queries with computed intervals.
+ *
+ * @param xScaleType - The explicit scale type from grid config
+ * @param isTimeBasedSwimLane - Whether this is a time-based swimlane
+ * @param chartData - The heatmap chart data
+ * @param xAxisColumn - The x-axis column (used to infer an interval from data when meta is absent)
+ * @param dateHistogramMeta - Date histogram metadata (interval) from getDateHistogramMeta
+ * @param parseEsInterval - Parses an interval into a fixed/calendar ES interval (strict)
+ * @param parseInterval - Parses an interval into a moment Duration (lenient, moment-based)
+ * @returns The computed xScale configuration and the interval in milliseconds (when time-based)
+ */
+function computeXScale(
+  xScaleType: string | undefined,
+  isTimeBasedSwimLane: boolean,
+  chartData: Array<Record<string, string | number>>,
+  xAxisColumn: DatatableColumn | undefined,
+  dateHistogramMeta: { interval?: string } | undefined,
+  parseEsInterval: (interval: string) => { type: string; unit: string; value: number } | null,
+  parseInterval: (interval: string) => moment.Duration | null
+): { scale: HeatmapSpec['xScale']; intervalMs?: number } {
+  // Fallback to ordinal scale for single row or default
+  if (chartData.length <= 1) {
+    return { scale: { type: ScaleType.Ordinal } };
+  }
+
+  // Determine if we should use time scale
+  const shouldUseTimeScale = xScaleType === 'time' || (!xScaleType && isTimeBasedSwimLane);
+
+  if (shouldUseTimeScale) {
+    const dateInterval = dateHistogramMeta?.interval;
+    const intervalMs = dateInterval ? parseInterval(dateInterval)?.asMilliseconds() : undefined;
+
+    // parseEsInterval yields the fixed/calendar shape elastic-charts wants, but rejects some
+    // intervals ES|QL can produce, so guard against it and fall back to intervalMs below.
+    let esInterval: ReturnType<typeof parseEsInterval> | undefined;
+    try {
+      esInterval = dateInterval ? parseEsInterval(dateInterval) : undefined;
+    } catch {
+      esInterval = undefined;
+    }
+
+    if (esInterval) {
+      return {
+        scale: {
+          type: ScaleType.Time,
+          interval:
+            esInterval.type === 'fixed'
+              ? {
+                  type: 'fixed',
+                  unit: esInterval.unit as ESFixedIntervalUnit,
+                  value: esInterval.value,
+                }
+              : {
+                  type: 'calendar',
+                  unit: esInterval.unit as ESCalendarIntervalUnit,
+                  value: esInterval.value,
+                },
+        },
+        intervalMs,
+      };
+    }
+
+    // Any other interval we could only measure in milliseconds: fall back to a fixed millisecond
+    // interval derived from the same bucket metadata.
+    if (intervalMs) {
+      return {
+        scale: {
+          type: ScaleType.Time,
+          interval: {
+            type: 'fixed',
+            unit: 'ms',
+            value: intervalMs,
+          },
+        },
+        intervalMs,
+      };
+    }
+
+    // Last-resort fallback: infer the interval: from the actual data spacing so we can still render on a Time scale.
+    const computedInterval = computeMinIntervalFromData(chartData, xAxisColumn?.id);
+    if (computedInterval) {
+      return {
+        scale: {
+          type: ScaleType.Time,
+          interval: { type: 'fixed', unit: 'ms', value: computedInterval },
+        },
+        intervalMs: computedInterval,
+      };
+    }
+
+    // Fallback to Linear if we can't compute an interval
+    return { scale: { type: ScaleType.Linear } };
+  } else if (xScaleType === 'linear') {
+    return { scale: { type: ScaleType.Linear } };
+  }
+
+  return { scale: { type: ScaleType.Ordinal } };
+}
+
 function computeColorRanges(
   paletteService: HeatmapRenderProps['paletteService'],
   paletteParams: CustomPaletteState | undefined,
@@ -129,6 +279,38 @@ function computeColorRanges(
   return { colors, ranges };
 }
 
+/**
+ * Selects the appropriate date format pattern from dateFormat:scaled based on the interval.
+ * Follows the same logic as date_histogram operation in Lens.
+ * @param intervalMs - The interval in milliseconds
+ * @param uiSettings - The UI settings service
+ * @returns The date format pattern string, or undefined if no pattern can be determined
+ *
+ * (copied from x-pack/platform/plugins/shared/lens/public/datasources/form_based/operations/definitions/date_histogram.tsx)
+ */
+export function getDateFormatPattern(
+  intervalMs: number | undefined,
+  uiSettings: CoreSetup['uiSettings'] | undefined
+): string | undefined {
+  if (!intervalMs || !uiSettings) {
+    return undefined;
+  }
+
+  const rules = uiSettings.get('dateFormat:scaled');
+  // Iterate backwards through rules to find the first matching interval
+  for (let i = rules.length - 1; i >= 0; i--) {
+    const rule = rules[i];
+    if (!Array.isArray(rule) || rule.length !== 2) continue;
+    // Empty string means "any interval below the next threshold"
+    if (!rule[0] || intervalMs >= moment.duration(rule[0]).asMilliseconds()) {
+      return rule[1];
+    }
+  }
+
+  // Fallback to default date format
+  return uiSettings.get('dateFormat');
+}
+
 export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
   ({
     data: table,
@@ -148,6 +330,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
     syncCursor,
     renderComplete,
     overrides,
+    uiSettings,
   }) => {
     const chartRef = useRef<Chart>(null);
     const isDarkTheme = useKibanaIsDarkMode();
@@ -224,12 +407,16 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
       | DatatableColumn
       | undefined;
     const xAxisMeta = xAxisColumn?.meta;
-    const isTimeBasedSwimLane = xAxisMeta?.type === 'date';
+    const dateHistogramMeta = xAxisColumn
+      ? datatableUtilities.getDateHistogramMeta(xAxisColumn)
+      : undefined;
+    // Used as a last-resort xDomain when neither the precomputed domain nor the date histogram
+    // timeRange is available.
+    const appliedTimeRange = xAxisColumn
+      ? datatableUtilities.getColumnTimeRange(xAxisColumn)
+      : undefined;
+    const isTimeBasedSwimLane = xAxisMeta?.type === 'date' && Boolean(dateHistogramMeta?.interval);
 
-    const xValuesFormatter = useMemo(
-      () => formatFactory(xAxisMeta?.params),
-      [formatFactory, xAxisMeta?.params]
-    );
     const yValuesFormatter = useMemo(
       () => formatFactory(yAxisColumn?.meta.params),
       [formatFactory, yAxisColumn?.meta.params]
@@ -244,13 +431,92 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
       (v) => v[valueAccessor!] === null || typeof v[valueAccessor!] === 'number'
     );
 
+    // Convert date strings to timestamps for ES|QL time data
+    // This needs to happen before x scale logic so both interval computation and rendering work correctly
+    if (xAxisColumn?.id && xAxisMeta?.type === 'date') {
+      const firstXValue = chartData[0]?.[xAxisColumn.id];
+      if (typeof firstXValue === 'string') {
+        chartData = chartData.map((row) => {
+          const xValue = row[xAxisColumn.id];
+          if (typeof xValue === 'string') {
+            const timestamp = new Date(xValue).getTime();
+            return {
+              ...row,
+              [xAxisColumn.id]: isNaN(timestamp) ? xValue : timestamp,
+            };
+          }
+          return row;
+        });
+      }
+    }
+
+    const { scale: xScale, intervalMs: xIntervalMs } = computeXScale(
+      args.gridConfig.xScaleType,
+      isTimeBasedSwimLane,
+      chartData,
+      xAxisColumn,
+      dateHistogramMeta,
+      search.aggs.parseEsInterval,
+      search.aggs.parseInterval
+    );
+
+    const isTimeScaleXAxis = xAxisMeta?.type === 'date' && xScale.type === ScaleType.Time;
     const handleCursorUpdate = useActiveCursor(chartsActiveCursorService, chartRef, {
       datatables: [formattedTable.table],
     });
 
     const isEsqlMode = table?.meta?.type === ESQL_TABLE_TYPE;
 
+    const xValuesFormatter = useMemo(() => {
+      // For ES|QL time-based x-axis with computed interval, use scaled date format
+      // Traditional aggregations already handle this in the date histogram operator
+      if (
+        isEsqlMode &&
+        xAxisMeta?.type === 'date' &&
+        xScale.type === ScaleType.Time &&
+        xIntervalMs != null &&
+        uiSettings
+      ) {
+        const pattern = getDateFormatPattern(xIntervalMs, uiSettings);
+        if (pattern) {
+          return formatFactory({
+            id: 'date',
+            params: {
+              pattern,
+            },
+          });
+        }
+      }
+
+      return formatFactory(xAxisMeta?.params);
+    }, [
+      formatFactory,
+      xAxisMeta?.params,
+      xAxisMeta?.type,
+      xScale,
+      xIntervalMs,
+      uiSettings,
+      isEsqlMode,
+    ]);
+
     const hasTooltipActions = interactive && !isEsqlMode;
+
+    // Compute warning message for ES|QL computed columns that cannot be filtered.
+    const warningMessage = useMemo(
+      () => (isEsqlMode ? getFilterDrilldownWarningMessage([xAxisColumn, yAxisColumn]) : undefined),
+      [isEsqlMode, xAxisColumn, yAxisColumn]
+    );
+
+    const TooltipFooter = useMemo<
+      | React.ComponentType<{
+          items: Array<TooltipValue<Record<string, string | number>, SeriesIdentifier>>;
+          header: PointerValue<Record<string, string | number>> | null;
+        }>
+      | 'default'
+    >(() => {
+      if (!warningMessage) return 'default';
+      return () => <ChartTooltipFooterMessage message={warningMessage} />;
+    }, [warningMessage]);
 
     const onElementClick = useCallback(
       (e: HeatmapElementEvent[]) => {
@@ -263,7 +529,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
               if (!xAxisColumn) return false;
               if (formattedTable.formattedColumns[xAxisColumn.id]) {
                 // stringify the value to compare with the chart value
-                return xValuesFormatter.convert(r[xAxisColumn.id]) === x;
+                return xValuesFormatter.convertToText(r[xAxisColumn.id]) === x;
               }
               return r[xAxisColumn.id] === x;
             }),
@@ -277,7 +543,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
                   row: table.rows.findIndex((r) => {
                     if (formattedTable.formattedColumns[yAxisColumn.id]) {
                       // stringify the value to compare with the chart value
-                      return yValuesFormatter.convert(r[yAxisColumn.id]) === y;
+                      return yValuesFormatter.convertToText(r[yAxisColumn.id]) === y;
                     }
                     return r[yAxisColumn.id] === y;
                   }),
@@ -336,11 +602,15 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
       (e: HeatmapBrushEvent) => {
         const { x, y } = e;
 
-        if (isTimeBasedSwimLane) {
+        if (isTimeScaleXAxis) {
+          const isEsql = table.meta?.type === ESQL_TABLE_TYPE;
           const context: BrushEvent['data'] = {
             range: x as number[],
             table,
             column: xAxisColumnIndex,
+            ...(isEsql
+              ? { timeFieldName: xAxisColumn?.meta.sourceParams?.sourceField?.toString() }
+              : {}),
           };
           onSelectRange(context);
         } else {
@@ -352,7 +622,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
                 row: table.rows.findIndex((r) => {
                   if (formattedTable.formattedColumns[yAxisColumn.id]) {
                     // stringify the value to compare with the chart value
-                    return yValuesFormatter.convert(r[yAxisColumn.id]) === v;
+                    return yValuesFormatter.convertToText(r[yAxisColumn.id]) === v;
                   }
                   return r[yAxisColumn.id] === v;
                 }),
@@ -367,7 +637,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
                 row: table.rows.findIndex((r) => {
                   if (formattedTable.formattedColumns[xAxisColumn.id]) {
                     // stringify the value to compare with the chart value
-                    return xValuesFormatter.convert(r[xAxisColumn.id]) === v;
+                    return xValuesFormatter.convertToText(r[xAxisColumn.id]) === v;
                   }
                   return r[xAxisColumn.id] === v;
                 }),
@@ -390,7 +660,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
       },
       [
         formattedTable.formattedColumns,
-        isTimeBasedSwimLane,
+        isTimeScaleXAxis,
         onClickValue,
         onSelectRange,
         table,
@@ -426,39 +696,9 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
       });
     }
     const { min, max } = minMaxByColumnId[valueAccessor!];
-    // formatters
-    const dateHistogramMeta = xAxisColumn
-      ? datatableUtilities.getDateHistogramMeta(xAxisColumn)
-      : undefined;
-
     if (!valueColumn) {
       // Chart is not ready
       return null;
-    }
-
-    // Fallback to the ordinal scale type when a single row of data is provided.
-    // Related issue https://github.com/elastic/elastic-charts/issues/1184
-    let xScale: HeatmapSpec['xScale'] = { type: ScaleType.Ordinal };
-    if (isTimeBasedSwimLane && chartData.length > 1) {
-      const dateInterval = dateHistogramMeta?.interval;
-      const esInterval = dateInterval ? search.aggs.parseEsInterval(dateInterval) : undefined;
-      if (esInterval) {
-        xScale = {
-          type: ScaleType.Time,
-          interval:
-            esInterval.type === 'fixed'
-              ? {
-                  type: 'fixed',
-                  unit: esInterval.unit as ESFixedIntervalUnit,
-                  value: esInterval.value,
-                }
-              : {
-                  type: 'calendar',
-                  unit: esInterval.unit as ESCalendarIntervalUnit,
-                  value: esInterval.value,
-                },
-        };
-      }
     }
 
     const valueFormatter = (d: number) => {
@@ -468,7 +708,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
         const percentageNumber = (Math.abs(value - min) / (max - min)) * 100;
         value = parseInt(percentageNumber.toString(), 10) / 100;
       }
-      return `${metricFormatter.convert(value) ?? ''}`;
+      return `${metricFormatter.convertToText(value) ?? ''}`;
     };
 
     const { colors, ranges } = computeColorRanges(
@@ -608,7 +848,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
                   if (!xAxisColumn) return false;
                   if (formattedTable.formattedColumns[xAxisColumn.id]) {
                     // stringify the value to compare with the chart value
-                    return xValuesFormatter.convert(r[xAxisColumn.id]) === x;
+                    return xValuesFormatter.convertToText(r[xAxisColumn.id]) === x;
                   }
                   return r[xAxisColumn.id] === x;
                 }),
@@ -622,7 +862,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
                 row: table.rows.findIndex((r) => {
                   if (formattedTable.formattedColumns[yAxisColumn.id]) {
                     // stringify the value to compare with the chart value
-                    return yValuesFormatter.convert(r[yAxisColumn.id]) === y;
+                    return yValuesFormatter.convertToText(r[yAxisColumn.id]) === y;
                   }
                   return r[yAxisColumn.id] === y;
                 }),
@@ -642,6 +882,25 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
         });
       }
     };
+
+    const xDomain = (() => {
+      if (dateHistogramMeta?.domain) {
+        return dateHistogramMeta.domain;
+      }
+      if (dateHistogramMeta?.timeRange) {
+        return {
+          min: new Date(dateHistogramMeta.timeRange.from).getTime(),
+          max: new Date(dateHistogramMeta.timeRange.to).getTime(),
+        };
+      }
+      if (appliedTimeRange?.from && appliedTimeRange?.to) {
+        return {
+          min: new Date(appliedTimeRange.from).getTime(),
+          max: new Date(appliedTimeRange.to).getTime(),
+        };
+      }
+      return { min: NaN, max: NaN };
+    })();
 
     return (
       <>
@@ -688,6 +947,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
                   : undefined
               }
               type={args.showTooltip ? TooltipType.Follow : TooltipType.None}
+              footer={TooltipFooter}
             />
             <Settings
               onRenderChange={onRenderChange}
@@ -711,16 +971,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
                   : [settingsThemeOverrides]),
               ]}
               baseTheme={chartBaseTheme}
-              xDomain={{
-                min:
-                  dateHistogramMeta && dateHistogramMeta.timeRange
-                    ? new Date(dateHistogramMeta.timeRange.from).getTime()
-                    : NaN,
-                max:
-                  dateHistogramMeta && dateHistogramMeta.timeRange
-                    ? new Date(dateHistogramMeta.timeRange.to).getTime()
-                    : NaN,
-              }}
+              xDomain={xDomain}
               onBrushEnd={interactive ? (onBrushEnd as BrushEndListener) : undefined}
               ariaLabel={args.ariaLabel}
               ariaUseDefaultSummary={!args.ariaLabel}
@@ -741,8 +992,14 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
               valueAccessor={valueAccessor}
               valueFormatter={valueFormatter}
               xScale={xScale}
-              ySortPredicate={yAxisColumn ? getSortPredicate(yAxisColumn) : 'dataIndex'}
-              xSortPredicate={xAxisColumn ? getSortPredicate(xAxisColumn) : 'dataIndex'}
+              xSortPredicate={
+                !isTimeBasedSwimLane && xAxisColumn
+                  ? getSortPredicate(xAxisColumn, args.gridConfig.xSortPredicate)
+                  : undefined
+              }
+              ySortPredicate={
+                yAxisColumn && getSortPredicate(yAxisColumn, args.gridConfig.ySortPredicate)
+              }
               xAxisLabelName={xAxisColumn?.name || ''}
               yAxisLabelName={yAxisColumn?.name || ''}
               xAxisTitle={args.gridConfig.isXAxisTitleVisible ? xAxisTitle : undefined}
@@ -751,7 +1008,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
                 `${
                   xAccessor && formattedTable.formattedColumns[xAccessor]
                     ? v
-                    : xValuesFormatter.convert(v)
+                    : xValuesFormatter.convertToText(v)
                 }`
               }
               yAxisLabelFormatter={
@@ -760,7 +1017,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
                       `${
                         yAccessor && formattedTable.formattedColumns[yAccessor]
                           ? v
-                          : yValuesFormatter.convert(v) ?? ''
+                          : yValuesFormatter.convertToText(v) ?? ''
                       }`
                   : undefined
               }

@@ -5,20 +5,22 @@
  * 2.0.
  */
 
-import { useAssistantContext, useLoadConnectors } from '@kbn/elastic-assistant';
-import {
-  API_VERSIONS,
-  ATTACK_DISCOVERY_GENERATE,
-  PostAttackDiscoveryGenerateResponse,
-} from '@kbn/elastic-assistant-common';
+import { useAssistantContext } from '@kbn/elastic-assistant';
 import { isEmpty } from 'lodash/fp';
 import { useCallback, useState } from 'react';
 import { useFetchAnonymizationFields } from '@kbn/elastic-assistant/impl/assistant/api/anonymization_fields/use_fetch_anonymization_fields';
 
+import { ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING } from '../../../../common/constants';
 import { useKibana } from '../../../common/lib/kibana';
+import { AttackDiscoveryEventTypes } from '../../../common/lib/telemetry';
+import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { getErrorToastText } from '../helpers';
-import { getGenAiConfig, getRequestBody } from './helpers';
-import { CONNECTOR_ERROR, ERROR_GENERATING_ATTACK_DISCOVERIES } from '../translations';
+import { callInternalGenerateApi, callPublicGenerateApi, getRequestBody } from './helpers';
+import {
+  ALERTS_INDEX_PATTERN_ERROR,
+  CONNECTOR_ERROR,
+  ERROR_GENERATING_ATTACK_DISCOVERIES,
+} from '../translations';
 import * as i18n from './translations';
 import { useInvalidateGetAttackDiscoveryGenerations } from '../use_get_attack_discovery_generations';
 
@@ -26,12 +28,14 @@ interface FetchAttackDiscoveriesOptions {
   end?: string;
   filter?: Record<string, unknown>;
   overrideConnectorId?: string;
+  overrideConnectorName?: string;
   overrideEnd?: string;
   overrideFilter?: Record<string, unknown>;
   overrideSize?: number;
   overrideStart?: string;
   size?: number;
   start?: string;
+  trigger?: 'manual' | 'save_and_run';
 }
 
 export interface UseAttackDiscovery {
@@ -52,15 +56,15 @@ export const useAttackDiscovery = ({
 }): UseAttackDiscovery => {
   // get Kibana services and connectors
   const {
+    featureFlags,
     http,
     notifications: { toasts },
-    settings,
+    telemetry,
+    uiSettings,
   } = useKibana().services;
 
-  const { data: aiConnectors } = useLoadConnectors({
-    http,
-    settings,
-  });
+  // Get current space ID for workflow configuration
+  const spaceId = useSpaceId();
 
   // loading boilerplate:
   const [isLoading, setIsLoading] = useState(false);
@@ -83,53 +87,78 @@ export const useAttackDiscovery = ({
           options?.overrideFilter ?? (!isEmpty(options?.filter) ? options?.filter : undefined);
         const effectiveStart = options?.overrideStart ?? options?.start;
         const effectiveConnectorId = options?.overrideConnectorId ?? connectorId;
+        const effectiveTrigger = options?.trigger ?? 'manual';
 
-        // Get the request body with the effective connector ID
-        const effectiveConnector = aiConnectors?.find(
-          (connector) => connector.id === effectiveConnectorId
-        );
-        const effectiveGenAiConfig = getGenAiConfig(effectiveConnector);
+        if (!effectiveConnectorId) {
+          throw new Error(CONNECTOR_ERROR);
+        }
+
         const effectiveRequestBody = getRequestBody({
           alertsIndexPattern,
           anonymizationFields,
-          genAiConfig: effectiveGenAiConfig,
+          connectorId: effectiveConnectorId,
           size,
-          selectedConnector: effectiveConnector,
           traceOptions,
         });
 
         const bodyWithOverrides = {
           ...effectiveRequestBody,
-          connectorName: effectiveConnector?.name ?? connectorName,
+          connectorName,
           end: effectiveEnd,
           filter: effectiveFilter,
           size: effectiveSize,
           start: effectiveStart,
         };
-
-        if (
-          bodyWithOverrides.apiConfig.connectorId === '' ||
-          bodyWithOverrides.apiConfig.actionTypeId === ''
-        ) {
-          throw new Error(CONNECTOR_ERROR);
-        }
         setLoadingConnectorId?.(effectiveConnectorId ?? null);
 
-        // call the API to generate attack discoveries:
-        const rawResponse = await http.post(ATTACK_DISCOVERY_GENERATE, {
-          body: JSON.stringify(bodyWithOverrides),
-          version: API_VERSIONS.public.v1,
-        });
+        // Check if workflow integration feature flag is enabled AND the per-space uiSetting opt-in
+        const attackDiscoveryWorkflowsEnabled =
+          (await featureFlags.getBooleanValue(
+            'securitySolution.attackDiscoveryWorkflowsEnabled',
+            true
+          )) && uiSettings.get(ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING, false);
 
-        const parsedResponse = PostAttackDiscoveryGenerateResponse.safeParse(rawResponse);
+        // Call appropriate API based on feature flag + per-space setting
+        if (attackDiscoveryWorkflowsEnabled) {
+          if (!alertsIndexPattern) {
+            throw new Error(ALERTS_INDEX_PATTERN_ERROR);
+          }
 
-        if (!parsedResponse.success) {
-          throw new Error('Failed to parse the response');
+          telemetry.reportEvent(AttackDiscoveryEventTypes.GenerationStarted, {
+            execution_mode: 'workflow',
+            trigger: effectiveTrigger,
+          });
+
+          await callInternalGenerateApi({
+            alertsIndexPattern,
+            apiConfig: {
+              actionTypeId: bodyWithOverrides.apiConfig.actionTypeId,
+              connectorId: bodyWithOverrides.apiConfig.connectorId,
+              model: bodyWithOverrides.apiConfig.model,
+            },
+            end: effectiveEnd,
+            filter: effectiveFilter,
+            http,
+            size: effectiveSize,
+            spaceId: spaceId ?? null,
+            start: effectiveStart,
+          });
+        } else {
+          telemetry.reportEvent(AttackDiscoveryEventTypes.GenerationStarted, {
+            execution_mode: 'legacy',
+            trigger: effectiveTrigger,
+          });
+
+          await callPublicGenerateApi({
+            body: bodyWithOverrides,
+            http,
+          });
         }
 
+        // Show success toast
         toasts?.addSuccess({
+          text: i18n.GENERATION_STARTED_TEXT(options?.overrideConnectorName ?? connectorName),
           title: i18n.GENERATION_STARTED_TITLE,
-          text: i18n.GENERATION_STARTED_TEXT(effectiveConnector?.name ?? connectorName),
         });
       } catch (error) {
         setIsLoading(false);
@@ -142,17 +171,20 @@ export const useAttackDiscovery = ({
       }
     },
     [
-      aiConnectors,
       alertsIndexPattern,
       anonymizationFields,
       connectorId,
       connectorName,
+      featureFlags,
       http,
       invalidateGetAttackDiscoveryGenerations,
       setLoadingConnectorId,
       size,
+      spaceId,
+      telemetry,
       toasts,
       traceOptions,
+      uiSettings,
     ]
   );
 

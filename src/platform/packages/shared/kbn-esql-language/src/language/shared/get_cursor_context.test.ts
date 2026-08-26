@@ -8,10 +8,13 @@
  */
 
 import { EDITOR_MARKER } from '../../commands/definitions/constants';
-import { correctQuerySyntax, isMarkerNode } from '../../commands/definitions/utils/ast';
-import type { ESQLAstItem } from '../../types';
-import { Parser } from '../../parser';
-import { Walker } from '../../ast';
+import {
+  correctQuerySyntax,
+  isMarkerNode,
+  removeAutocompleteMarkers,
+} from '../../commands/definitions/utils/ast';
+import type { ESQLAstItem } from '@elastic/esql/types';
+import { Parser, Walker } from '@elastic/esql';
 import { getCursorContext } from './get_cursor_context';
 
 const assertMarkerRemoved = (_query: string) => {
@@ -21,7 +24,8 @@ const assertMarkerRemoved = (_query: string) => {
   }
 
   const { root } = Parser.parse(query);
-  const result = getCursorContext(query, root, _query.length);
+  const normalizedRoot = removeAutocompleteMarkers(root);
+  const result = getCursorContext(query, normalizedRoot, _query.length);
 
   if (!result.command) {
     throw new Error(`No command found in AST for query: ${query}`);
@@ -74,6 +78,7 @@ describe('it should remove marker nodes from the AST', () => {
     // EVAL command with binary operator and comma
     assertMarkerRemoved(`FROM employees | EVAL total = salary + `);
     assertMarkerRemoved(`FROM employees | EVAL total = salary + bonus, `);
+    assertMarkerRemoved(`FROM employees | EVAL total = ROUND(salary, `);
 
     // STATS command with binary operator and comma
     assertMarkerRemoved(`FROM employees | STATS avg(salary), `);
@@ -83,7 +88,13 @@ describe('it should remove marker nodes from the AST', () => {
 
     // SORT command with comma
     assertMarkerRemoved(`FROM employees | SORT age, `);
+
+    // WHERE tuple list with trailing comma
+    assertMarkerRemoved(`FROM employees | WHERE age IN (1, `);
   });
 
-  it.todo('removes marker from right-side of assignment'); // e.g. assertMarkerRemoved(`FROM employees | EVAL total = `);
+  it('removes marker from right-side of assignment', () => {
+    assertMarkerRemoved(`FROM employees | EVAL total = `);
+    assertMarkerRemoved(`ROW total = `);
+  });
 });

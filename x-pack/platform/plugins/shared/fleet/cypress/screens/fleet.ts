@@ -6,6 +6,7 @@
  */
 
 export const ADD_AGENT_BUTTON = 'addAgentButton';
+export const ADD_AGENT_MENU_BUTTON = 'addAgentMenuButton';
 export const ADD_AGENT_BUTTON_TOP = 'addAgentBtnTop';
 export const LANDING_PAGE_ADD_FLEET_SERVER_BUTTON = 'fleetServerLanding.addFleetServerButton';
 
@@ -53,7 +54,9 @@ export const ENROLLMENT_TOKENS = {
   CREATE_TOKEN_MODAL_NAME_FIELD: 'createEnrollmentTokenNameField',
   CREATE_TOKEN_MODAL_SELECT_FIELD: 'createEnrollmentTokenSelectField',
   LIST_TABLE: 'enrollmentTokenListTable',
+  TABLE_ACTIONS_MENU: 'enrollmentTokenTable.actionsMenu',
   TABLE_REVOKE_BTN: 'enrollmentTokenTable.revokeBtn',
+  FILTER_INACTIVE: 'enrollmentTokensList.filterInactive',
 };
 
 export const UNINSTALL_TOKENS = {

@@ -8,6 +8,7 @@
  */
 
 import Boom from '@hapi/boom';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { DataPluginStart } from '@kbn/data-plugin/server/plugin';
@@ -131,6 +132,7 @@ export class CsvV2ExportType extends ExportType<
       // this should be addressed here https://github.com/elastic/kibana/issues/151190
       // const columns = await locatorClient.columnsFromLocator(params);
       const columns = params.columns as string[] | undefined;
+      const esqlVariables = params.esqlVariables as ESQLControlVariable[] | undefined;
       const timeFieldName = await locatorClient.timeFieldNameFromLocator(params);
       const filters = await locatorClient.filtersFromLocator(params);
       const es = this.startDeps.esClient.asScoped(request);
@@ -140,6 +142,7 @@ export class CsvV2ExportType extends ExportType<
       const csv = new CsvESQLGenerator(
         {
           columns,
+          esqlVariables,
           query,
           filters,
           timeFieldName,

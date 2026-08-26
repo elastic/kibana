@@ -6,5 +6,22 @@
  */
 
 export { restoreSnapshot } from './src/restore';
-export { replaySnapshot } from './src/replay';
-export { type RestoreConfig, type ReplayConfig, type LoadResult } from './src/types';
+export { replaySnapshot, TEMP_INDEX_PREFIX } from './src/replay';
+export { createSnapshot } from './src/create';
+export {
+  type RestoreConfig,
+  type ReplayConfig,
+  type CreateConfig,
+  type LoadResult,
+  type CreateResult,
+} from './src/types';
+export {
+  createUrlRepository,
+  createGcsRepository,
+  createFsRepository,
+  type RepositoryType,
+  type RepositoryStrategy,
+  type GcsRepositoryConfig,
+  type FsRepositoryConfig,
+} from './src/repository';
+export { extractDataStreamName } from './src/utils';

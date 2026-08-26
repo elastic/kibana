@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/276502
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-09
+areas:
+- Dashboards and visualizations
+title: Fix unbounded row counts in Canvas `createTable` expressions
+description: "Adds a maximum `rowCount` of 10,000 to the Canvas `createTable` expression, matching the default Elasticsearch `index.max_result_window`."

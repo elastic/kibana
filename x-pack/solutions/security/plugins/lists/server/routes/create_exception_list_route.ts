@@ -8,7 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import {
   CreateExceptionListRequestBody,
   CreateExceptionListResponse,
@@ -49,6 +49,7 @@ export const createExceptionListRoute = (router: ListsPluginRouter): void => {
             namespace_type: namespaceType,
             description,
             list_id: listId = uuidv4(),
+            os_types: osTypes = [],
             type,
             version,
           } = request.body;
@@ -73,6 +74,7 @@ export const createExceptionListRoute = (router: ListsPluginRouter): void => {
             meta,
             name,
             namespaceType,
+            osTypes,
             tags,
             type,
             version,

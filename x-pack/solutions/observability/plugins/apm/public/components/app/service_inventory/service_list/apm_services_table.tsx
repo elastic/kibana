@@ -5,15 +5,9 @@
  * 2.0.
  */
 
-import {
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIconTip,
-  EuiText,
-  EuiToolTip,
-  RIGHT_ALIGNMENT,
-} from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText, EuiToolTip } from '@elastic/eui';
+import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
+import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { apmEnableServiceInventoryTableSearchBar } from '@kbn/observability-plugin/common';
@@ -23,9 +17,11 @@ import type { TypeOf } from '@kbn/typed-react-router-config';
 import { omit } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 import type { AgentName } from '@kbn/elastic-agent-utils';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import { EmptyCellValue } from '@kbn/shared-ux-column-presets';
+import type { APIReturnType } from '@kbn/apm-api-shared';
 import { AlertingFlyout } from '../../../alerting/ui_components/alerting_flyout';
 import type { ApmPluginStartDeps } from '../../../../plugin';
-import { ServiceHealthStatus } from '../../../../../common/service_health_status';
 import type { ServiceListItem } from '../../../../../common/service_inventory';
 import { ServiceInventoryFieldName } from '../../../../../common/service_inventory';
 import { isDefaultTransactionType } from '../../../../../common/transaction_types';
@@ -42,8 +38,6 @@ import { useBreakpoints } from '../../../../hooks/use_breakpoints';
 import { useFallbackToTransactionsFetcher } from '../../../../hooks/use_fallback_to_transactions_fetcher';
 import type { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { isFailure, isPending } from '../../../../hooks/use_fetcher';
-import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
-import { unit } from '../../../../utils/style';
 import type { ApmRoutes } from '../../../routing/apm_route_config';
 import { AggregatedTransactionsBadge } from '../../../shared/aggregated_transactions_badge';
 import { ChartType, getTimeSeriesColor } from '../../../shared/charts/helper/get_timeseries_color';
@@ -58,16 +52,19 @@ import type {
   VisibleItemsStartEnd,
 } from '../../../shared/managed_table';
 import { ManagedTable } from '../../../shared/managed_table';
-import { ColumnHeaderWithTooltip } from './column_header_with_tooltip';
-import { HealthBadge } from './health_badge';
+import { AnomaliesBadge } from './anomalies_badge';
 import { SloStatusBadge } from '../../../shared/slo_status_badge';
+import { getESQLQuery, type IndexType } from '../../../shared/links/discover_links/get_esql_query';
 import { useServiceActions } from './service_actions';
 import {
   APM_SLO_INDICATOR_TYPES,
   type ApmIndicatorType,
 } from '../../../../../common/slo_indicator_types';
-import { SloOverviewFlyout } from '../../../shared/slo_overview_flyout';
+import { SloOverviewFlyout, useSloOverviewFlyout } from '../../../shared/slo_overview_flyout';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
+import { SERVICE_INVENTORY_EBT_ELEMENTS } from '../../ebt_constants';
+import { useApmIndexSettingsContext } from '../../../../context/apm_index_settings/use_apm_index_settings_context';
+import { listMetricColumnPreset } from '../../../../utils/column_presets';
 
 type ServicesDetailedStatisticsAPIResponse =
   APIReturnType<'POST /internal/apm/services/detailed_statistics'>;
@@ -78,16 +75,17 @@ export function getServiceColumns({
   comparisonDataLoading,
   comparisonData,
   breakpoints,
-  showHealthStatusColumn,
+  showAnomaliesColumn,
   showAlertsColumn,
   showSlosColumn,
   link,
   serviceOverflowCount,
   onSloBadgeClick,
+  locators,
 }: {
   query: TypeOf<ApmRoutes, '/services'>['query'];
   showTransactionTypeColumn: boolean;
-  showHealthStatusColumn: boolean;
+  showAnomaliesColumn: boolean;
   showAlertsColumn: boolean;
   showSlosColumn: boolean;
   comparisonDataLoading: boolean;
@@ -96,6 +94,7 @@ export function getServiceColumns({
   link: any;
   serviceOverflowCount: number;
   onSloBadgeClick: (serviceName: string, agentName?: AgentName) => void;
+  locators: SharePluginStart['url']['locators'] | undefined;
 }): Array<ITableColumn<ServiceListItem>> {
   const { isSmall, isLarge, isXl } = breakpoints;
   const showWhenSmallOrGreaterThanLarge = isSmall || !isLarge;
@@ -106,32 +105,35 @@ export function getServiceColumns({
       ? [
           {
             field: ServiceInventoryFieldName.AlertsCount,
-            name: (
-              <ColumnHeaderWithTooltip
-                tooltipContent={i18n.translate('xpack.apm.servicesTable.tooltip.alertsCount', {
-                  defaultMessage: 'The count of the active alerts',
-                })}
-                label={i18n.translate('xpack.apm.servicesTable.alertsColumnLabel', {
-                  defaultMessage: 'Alerts',
-                })}
-              />
-            ),
-            width: `${unit * 6}px`,
+            name: i18n.translate('xpack.apm.servicesTable.alertsColumnLabel', {
+              defaultMessage: 'Alerts',
+            }),
+            nameTooltip: {
+              content: i18n.translate('xpack.apm.servicesTable.tooltip.alertsCount', {
+                defaultMessage: 'The count of the active alerts',
+              }),
+              icon: 'question',
+              iconProps: {
+                color: 'subdued',
+              },
+            },
+            width: '6.5em',
+            minWidth: '6.5em',
+            className: 'eui-textNoWrap',
             sortable: true,
             render: (_, { serviceName, alertsCount }) => {
               if (!alertsCount) {
-                return null;
+                return <EmptyCellValue />;
               }
 
               return (
                 <EuiToolTip
                   position="bottom"
-                  content={i18n.translate(
-                    'xpack.apm.home.servicesTable.tooltip.activeAlertsExplanation',
-                    {
-                      defaultMessage: 'Active alerts',
-                    }
-                  )}
+                  content={i18n.translate('xpack.apm.serviceHeader.alertsBadge.countLabel', {
+                    defaultMessage:
+                      '{count, plural, one {# active alert} other {# active alerts}}. Click to view more.',
+                    values: { count: alertsCount },
+                  })}
                 >
                   <EuiBadge
                     data-test-subj="serviceInventoryAlertsBadgeLink"
@@ -143,6 +145,10 @@ export function getServiceColumns({
                         ...query,
                         alertStatus: ALERT_STATUS_ACTIVE,
                       },
+                    })}
+                    {...getEbtProps({
+                      action: EBT_CLICK_ACTIONS.VIEW_ALERTS,
+                      element: SERVICE_INVENTORY_EBT_ELEMENTS.ALERTS_BADGE,
                     })}
                   >
                     {alertsCount}
@@ -157,61 +163,93 @@ export function getServiceColumns({
       ? [
           {
             field: ServiceInventoryFieldName.SloStatus,
-            name: (
-              <ColumnHeaderWithTooltip
-                tooltipContent={i18n.translate('xpack.apm.servicesTable.tooltip.slosStatus', {
-                  defaultMessage: 'The status of APM SLOs for this service',
-                })}
-                label={i18n.translate('xpack.apm.servicesTable.slosColumnLabel', {
-                  defaultMessage: 'SLOs',
-                })}
-              />
-            ),
-            width: `${unit * 8}px`,
+            name: i18n.translate('xpack.apm.servicesTable.slosColumnLabel', {
+              defaultMessage: 'SLOs',
+            }),
+            nameTooltip: {
+              content: i18n.translate('xpack.apm.servicesTable.tooltip.slosStatus', {
+                defaultMessage: 'The status of APM SLOs for this service',
+              }),
+              icon: 'question',
+              iconProps: {
+                color: 'subdued',
+              },
+            },
+            width: '8.5em',
+            minWidth: '8.5em',
+            className: 'eui-textNoWrap',
             sortable: true,
             render: (_, { serviceName, agentName, sloStatus, sloCount }) => {
-              if (!sloStatus) {
-                return null;
-              }
-
               return (
                 <SloStatusBadge
-                  sloStatus={sloStatus}
+                  sloStatus={sloStatus ?? 'noSLOs'}
                   sloCount={sloCount}
                   serviceName={serviceName}
                   onClick={() => onSloBadgeClick(serviceName, agentName)}
+                  ebt={{
+                    action: EBT_CLICK_ACTIONS.VIEW_SLOS,
+                    element: SERVICE_INVENTORY_EBT_ELEMENTS.SLO_BADGE,
+                  }}
                 />
               );
             },
           } as ITableColumn<ServiceListItem>,
         ]
       : []),
-    ...(showHealthStatusColumn
+    ...(showAnomaliesColumn
       ? [
           {
-            field: ServiceInventoryFieldName.HealthStatus,
-            name: (
-              <>
-                {i18n.translate('xpack.apm.servicesTable.healthColumnLabel', {
-                  defaultMessage: 'Health',
-                })}{' '}
-                <EuiIconTip
-                  iconProps={{
-                    className: 'eui-alignTop',
-                  }}
-                  position="right"
-                  color="subdued"
-                  content={i18n.translate('xpack.apm.servicesTable.healthColumnLabel.tooltip', {
-                    defaultMessage:
-                      'Health status is determined by the latency anomalies detected by the ML jobs specific to the selected service environment and the supported transaction types. These transaction types include "page-load", "request", and "mobile".',
-                  })}
-                />
-              </>
-            ),
-            width: `${unit * 6}px`,
+            field: ServiceInventoryFieldName.AnomalyScore,
+            name: i18n.translate('xpack.apm.servicesTable.anomaliesColumnLabel', {
+              defaultMessage: 'Anomalies',
+            }),
+            nameTooltip: {
+              content: i18n.translate('xpack.apm.servicesTable.anomaliesColumnLabel.tooltip', {
+                defaultMessage:
+                  'The anomaly score (max.) is the maximum ML anomaly score detected for the service in the selected time range.',
+              }),
+              icon: 'question',
+              iconProps: {
+                color: 'subdued',
+              },
+            },
+            width: '6.5em',
+            minWidth: '6.5em',
             sortable: true,
-            render: (_, { healthStatus }) => {
-              return <HealthBadge healthStatus={healthStatus ?? ServiceHealthStatus.unknown} />;
+            render: (
+              _,
+              {
+                serviceName,
+                transactionType,
+                anomalyScore,
+                detectorType,
+                agentName,
+                anomalyEnvironment,
+              }
+            ) => {
+              return (
+                <AnomaliesBadge
+                  score={anomalyScore}
+                  detectorType={detectorType}
+                  ebt={{
+                    action: EBT_CLICK_ACTIONS.VIEW_ANOMALIES,
+                    element: SERVICE_INVENTORY_EBT_ELEMENTS.ANOMALIES_BADGE,
+                  }}
+                  navigationProps={
+                    agentName && anomalyEnvironment && locators
+                      ? {
+                          serviceName,
+                          agentName,
+                          anomalyEnvironment,
+                          transactionType,
+                          rangeFrom: query.rangeFrom,
+                          rangeTo: query.rangeTo,
+                          locators,
+                        }
+                      : undefined
+                  }
+                />
+              );
             },
           } as ITableColumn<ServiceListItem>,
         ]
@@ -222,6 +260,8 @@ export function getServiceColumns({
         defaultMessage: 'Name',
       }),
       sortable: true,
+      minWidth: '14em',
+      maxWidth: '18em',
       render: (_, { serviceName, agentName, transactionType }) => (
         <ServiceLink
           agentName={agentName}
@@ -238,8 +278,12 @@ export function getServiceColumns({
             name: i18n.translate('xpack.apm.servicesTable.environmentColumnLabel', {
               defaultMessage: 'Environment',
             }),
-            width: `${unit * 9}px`,
+            width: '10em',
+            minWidth: '8em',
+            maxWidth: '14em',
             sortable: true,
+            truncateText: true,
+            textOnly: true,
             render: (_, { environments }) => <EnvironmentBadge environments={environments ?? []} />,
           } as ITableColumn<ServiceListItem>,
         ]
@@ -251,18 +295,18 @@ export function getServiceColumns({
             name: i18n.translate('xpack.apm.servicesTable.transactionColumnLabel', {
               defaultMessage: 'Transaction type',
             }),
-            width: `${unit * 6}px`,
+            width: `9.5em`,
             sortable: true,
           },
         ]
       : []),
     {
+      ...listMetricColumnPreset(),
       field: ServiceInventoryFieldName.Latency,
       name: i18n.translate('xpack.apm.servicesTable.latencyAvgColumnLabel', {
         defaultMessage: 'Latency (avg.)',
       }),
       sortable: true,
-      dataType: 'number',
       render: (_, { serviceName, latency }) => {
         const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
           ChartType.LATENCY_AVG
@@ -279,15 +323,14 @@ export function getServiceColumns({
           />
         );
       },
-      align: RIGHT_ALIGNMENT,
     },
     {
+      ...listMetricColumnPreset(),
       field: ServiceInventoryFieldName.Throughput,
       name: i18n.translate('xpack.apm.servicesTable.throughputColumnLabel', {
         defaultMessage: 'Throughput',
       }),
       sortable: true,
-      dataType: 'number',
       render: (_, { serviceName, throughput }) => {
         const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
           ChartType.THROUGHPUT
@@ -305,15 +348,14 @@ export function getServiceColumns({
           />
         );
       },
-      align: RIGHT_ALIGNMENT,
     },
     {
+      ...listMetricColumnPreset(),
       field: ServiceInventoryFieldName.TransactionErrorRate,
       name: i18n.translate('xpack.apm.servicesTable.transactionErrorRate', {
         defaultMessage: 'Failed transaction rate',
       }),
       sortable: true,
-      dataType: 'number',
       render: (_, { serviceName, transactionErrorRate }) => {
         const valueLabel = asPercent(transactionErrorRate, 1);
         const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
@@ -331,7 +373,6 @@ export function getServiceColumns({
           />
         );
       },
-      align: RIGHT_ALIGNMENT,
     },
   ];
 }
@@ -342,7 +383,7 @@ interface Props {
   comparisonDataLoading: boolean;
   comparisonData?: ServicesDetailedStatisticsAPIResponse;
   noItemsMessage?: React.ReactNode;
-  displayHealthStatus: boolean;
+  displayAnomalies: boolean;
   displayAlerts: boolean;
   displaySlos: boolean;
   initialSortField: ServiceInventoryFieldName;
@@ -362,7 +403,7 @@ export function ApmServicesTable({
   noItemsMessage,
   comparisonDataLoading,
   comparisonData,
-  displayHealthStatus,
+  displayAnomalies,
   displayAlerts,
   displaySlos,
   initialSortField,
@@ -376,14 +417,18 @@ export function ApmServicesTable({
   onChangeItemIndices,
 }: Props) {
   const breakpoints = useBreakpoints();
-  const { core } = useApmPluginContext();
+  const { core, share } = useApmPluginContext();
+  const discoverLocator = share?.url?.locators?.get(DISCOVER_APP_LOCATOR);
+  const locators = share?.url?.locators;
   const { slo } = useKibana<ApmPluginStartDeps>().services;
+  const { indexSettings = [] } = useApmIndexSettingsContext();
   const { link } = useApmRouter();
   const showTransactionTypeColumn = items.some(
     ({ transactionType }) => transactionType && !isDefaultTransactionType(transactionType)
   );
   const { query } = useApmParams('/services');
   const { kuery, environment } = query;
+
   const { fallbackToTransactions } = useFallbackToTransactionsFetcher({
     kuery,
   });
@@ -440,18 +485,8 @@ export function ApmServicesTable({
     });
   }, []);
 
-  const [sloOverviewFlyout, setSloOverviewFlyout] = useState<{
-    serviceName: string;
-    agentName?: AgentName;
-  } | null>(null);
-
-  const openSloOverviewFlyout = useCallback((serviceName: string, agentName?: AgentName) => {
-    setSloOverviewFlyout({ serviceName, agentName });
-  }, []);
-
-  const closeSloOverviewFlyout = useCallback(() => {
-    setSloOverviewFlyout(null);
-  }, []);
+  const { sloOverviewFlyout, openSloOverviewFlyout, closeSloOverviewFlyout } =
+    useSloOverviewFlyout();
 
   const CreateSloFlyout =
     sloFlyoutState.isOpen && sloFlyoutState.indicatorType && sloFlyoutState.serviceName
@@ -481,12 +516,13 @@ export function ApmServicesTable({
       comparisonDataLoading,
       comparisonData,
       breakpoints,
-      showHealthStatusColumn: displayHealthStatus,
+      showAnomaliesColumn: displayAnomalies,
       showAlertsColumn: displayAlerts,
       showSlosColumn: displaySlos,
       link,
       serviceOverflowCount,
       onSloBadgeClick: openSloOverviewFlyout,
+      locators,
     });
   }, [
     query,
@@ -494,15 +530,16 @@ export function ApmServicesTable({
     comparisonDataLoading,
     comparisonData,
     breakpoints,
-    displayHealthStatus,
+    displayAnomalies,
     displayAlerts,
     displaySlos,
     link,
     serviceOverflowCount,
     openSloOverviewFlyout,
+    locators,
   ]);
 
-  const isTableSearchBarEnabled = core.uiSettings.get<boolean>(
+  const isTableSearchBarEnabled = core?.uiSettings?.get<boolean>(
     apmEnableServiceInventoryTableSearchBar,
     true
   );
@@ -520,9 +557,34 @@ export function ApmServicesTable({
     };
   }, [isTableSearchBarEnabled, maxCountExceeded, onChangeSearchQuery]);
 
-  const { actions: serviceActions, showActionsColumn } = useServiceActions({
+  const getDiscoverHref = useCallback(
+    (item: ServiceListItem, indexType: IndexType) => {
+      const esqlQuery = getESQLQuery({
+        indexType,
+        params: {
+          kuery,
+          serviceName: item.serviceName,
+          transactionType: indexType === 'traces' ? item.transactionType : undefined,
+          environment,
+          sortDirection: 'DESC',
+        },
+        indexSettings,
+      });
+
+      if (!esqlQuery) return undefined;
+
+      return discoverLocator?.getRedirectUrl({
+        timeRange: { from: query.rangeFrom, to: query.rangeTo },
+        query: { esql: esqlQuery },
+      });
+    },
+    [kuery, environment, indexSettings, query.rangeFrom, query.rangeTo, discoverLocator]
+  );
+
+  const serviceActions = useServiceActions({
     openAlertFlyout,
     openSloFlyout,
+    getDiscoverHref,
   });
 
   return (
@@ -581,10 +643,9 @@ export function ApmServicesTable({
           onChangeRenderedItems={onChangeRenderedItems}
           onChangeItemIndices={onChangeItemIndices}
           tableSearchBar={tableSearchBar}
-          {...(showActionsColumn && {
-            actions: serviceActions,
-            isActionsDisabled: (item: ServiceListItem) => item.serviceName === OTHER_SERVICE_NAME,
-          })}
+          actions={serviceActions}
+          isActionsDisabled={(item: ServiceListItem) => item.serviceName === OTHER_SERVICE_NAME}
+          tableLayout="auto"
         />
       </EuiFlexItem>
       <AlertingFlyout

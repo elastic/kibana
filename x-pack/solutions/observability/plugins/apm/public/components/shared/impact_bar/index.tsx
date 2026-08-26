@@ -7,7 +7,7 @@
 
 import { EuiProgress } from '@elastic/eui';
 import React from 'react';
-import { unit } from '../../../utils/style';
+import { unit } from '@kbn/apm-common';
 
 // TODO: extend from EUI's EuiProgress prop interface
 export interface ImpactBarProps extends Record<string, unknown> {

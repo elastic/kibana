@@ -26,18 +26,17 @@ export const extendSearchParamsWithRuntimeFields = async (
   indexPatternString?: string
 ) => {
   if (indexPatternString) {
-    let runtimeMappings = requestParams.runtime_mappings;
-
-    if (!runtimeMappings) {
-      const indexPattern = (await indexPatterns.find(indexPatternString, 1)).find(
-        (index) => index.title === indexPatternString
-      );
-      runtimeMappings = indexPattern?.getRuntimeMappings();
+    if (requestParams.runtime_mappings) {
+      return requestParams;
     }
+
+    const indexPattern = (await indexPatterns.find(indexPatternString, 1)).find(
+      (index) => index.title === indexPatternString
+    );
 
     return {
       ...requestParams,
-      runtime_mappings: runtimeMappings,
+      runtime_mappings: indexPattern?.getRuntimeMappings(),
     };
   }
 
@@ -57,7 +56,9 @@ export class SearchAPI {
     public readonly inspectorAdapters?: VegaInspectorAdapters,
     private readonly searchSessionId?: string,
     private readonly executionContext?: KibanaExecutionContext,
-    public readonly projectRouting?: ProjectRouting
+    public readonly projectRouting?: ProjectRouting,
+    /** Only applies to ES|QL requests, see {@link searchEsql} */
+    private readonly isApproximate: boolean = false
   ) {}
 
   search(searchRequests: SearchRequest[]) {
@@ -66,11 +67,17 @@ export class SearchAPI {
 
     return combineLatest(
       searchRequests.map((request) => {
-        const { name: requestId, ...restRequest } = request;
+        const { name: requestId, body, ...restRequest } = request;
 
-        const requestParams = getSearchParamsFromRequest(restRequest, {
-          getConfig: this.dependencies.uiSettings.get.bind(this.dependencies.uiSettings),
-        });
+        const requestParams = getSearchParamsFromRequest(
+          {
+            ...body,
+            ...restRequest,
+          },
+          {
+            getConfig: this.dependencies.uiSettings.get.bind(this.dependencies.uiSettings),
+          }
+        );
 
         return from(
           extendSearchParamsWithRuntimeFields(indexPatterns, requestParams, `${request.index}`)
@@ -148,7 +155,11 @@ export class SearchAPI {
                 ...request,
                 searchSessionId: this.searchSessionId,
               });
-              requestResponders[requestId].json(restRequest);
+              requestResponders[requestId].json({
+                ...restRequest,
+                projectRouting: this.projectRouting,
+                approximation: this.isApproximate,
+              });
             }
           }),
           switchMap(() => {
@@ -161,6 +172,7 @@ export class SearchAPI {
                   sessionId: this.searchSessionId,
                   executionContext: this.executionContext,
                   projectRouting: this.projectRouting,
+                  approximation: this.isApproximate,
                 }
               )
               .pipe(

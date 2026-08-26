@@ -9,19 +9,26 @@ import type { IRouter } from '@kbn/core/server';
 import { ApiPrivileges } from '@kbn/core-security-server';
 import { schema } from '@kbn/config-schema';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
-import { ResourceTypes, type ResourceType } from '@kbn/product-doc-common';
+import {
+  resolveDefaultInferenceIdFromInferenceGet,
+  ResourceTypes,
+  type ResourceType,
+} from '@kbn/product-doc-common';
 import type {
   InstallationStatusResponse,
   PerformInstallResponse,
   PerformUpdateResponse,
   UninstallResponse,
   SecurityLabsInstallStatusResponse,
+  OpenAPISpecInstallStatusResponse,
+  DefaultInferenceIdResponse,
 } from '../../common/http_api/installation';
 import {
   INSTALLATION_STATUS_API_PATH,
   INSTALL_ALL_API_PATH,
   UNINSTALL_ALL_API_PATH,
   UPDATE_ALL_API_PATH,
+  GET_DEFAULT_INFERENCE_ID_API_PATH,
 } from '../../common/http_api/installation';
 import type { InternalServices } from '../types';
 
@@ -29,7 +36,11 @@ import type { InternalServices } from '../types';
  * Schema for resourceType parameter validation.
  */
 const resourceTypeSchema = schema.oneOf(
-  [schema.literal(ResourceTypes.productDoc), schema.literal(ResourceTypes.securityLabs)],
+  [
+    schema.literal(ResourceTypes.productDoc),
+    schema.literal(ResourceTypes.securityLabs),
+    schema.literal(ResourceTypes.openapiSpec),
+  ],
   { defaultValue: ResourceTypes.productDoc }
 );
 
@@ -40,6 +51,36 @@ export const registerInstallationRoutes = ({
   router: IRouter;
   getServices: () => InternalServices;
 }) => {
+  router.get(
+    {
+      path: GET_DEFAULT_INFERENCE_ID_API_PATH,
+      validate: {
+        query: schema.object({
+          resourceType: resourceTypeSchema,
+        }),
+      },
+      options: {
+        access: 'internal',
+      },
+      security: {
+        authz: {
+          requiredPrivileges: [ApiPrivileges.manage('llm_product_doc')],
+        },
+      },
+    },
+    async (ctx, req, res) => {
+      const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
+      const resourceType = req.query?.resourceType as ResourceType;
+
+      const inferenceId = await resolveDefaultInferenceIdFromInferenceGet(
+        () => esClient.inference.get({}),
+        { resourceType }
+      );
+
+      return res.ok<DefaultInferenceIdResponse>({ body: { inferenceId } });
+    }
+  );
+
   router.get(
     {
       path: INSTALLATION_STATUS_API_PATH,
@@ -80,11 +121,27 @@ export const registerInstallationRoutes = ({
           },
         });
       }
+      const openApiSpecStatus = await documentationManager.getOpenApiSpecStatus({
+        inferenceId,
+      });
+      const openApiSpecStatusResponse: OpenAPISpecInstallStatusResponse = {
+        inferenceId,
+        resourceType: ResourceTypes.openapiSpec,
+        status: openApiSpecStatus.status,
+        version: openApiSpecStatus.version,
+        latestVersion: openApiSpecStatus.latestVersion,
+        isUpdateAvailable: openApiSpecStatus.isUpdateAvailable,
+        failureReason: openApiSpecStatus.failureReason,
+      };
+      if (resourceType === ResourceTypes.openapiSpec) {
+        return res.ok({ body: openApiSpecStatusResponse });
+      }
 
       // Default: product documentation status
       const installStatus = await installClient.getInstallationStatus({
         inferenceId,
       });
+      // installStatus[ResourceTypes.openapiSpec] = openApiSpecStatus;
       const { status: overallStatus } = await documentationManager.getStatus({
         inferenceId,
       });
@@ -95,6 +152,7 @@ export const registerInstallationRoutes = ({
           perProducts: installStatus,
           overall: overallStatus,
           resourceType: ResourceTypes.productDoc,
+          openApiStatus: openApiSpecStatusResponse,
         },
       });
     }
@@ -147,6 +205,28 @@ export const registerInstallationRoutes = ({
         });
       }
 
+      // Handle OpenAPI Spec installation
+      if (resourceType === ResourceTypes.openapiSpec) {
+        await documentationManager.installOpenApiSpec({
+          request: req,
+          wait: true,
+          inferenceId,
+        });
+
+        const openApiSpecStatus = await documentationManager.getOpenApiSpecStatus({
+          inferenceId,
+        });
+
+        return res.ok<PerformInstallResponse>({
+          body: {
+            installed: openApiSpecStatus.status === 'installed',
+            ...(openApiSpecStatus.failureReason
+              ? { failureReason: openApiSpecStatus.failureReason }
+              : {}),
+          },
+        });
+      }
+
       // Default: product documentation installation
       await documentationManager.install({
         request: req,
@@ -182,7 +262,7 @@ export const registerInstallationRoutes = ({
       validate: {
         body: schema.object({
           forceUpdate: schema.boolean({ defaultValue: false }),
-          inferenceIds: schema.maybe(schema.arrayOf(schema.string())),
+          inferenceIds: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10000 })),
         }),
       },
       options: {
@@ -252,12 +332,25 @@ export const registerInstallationRoutes = ({
           },
         });
       }
+      if (resourceType === ResourceTypes.openapiSpec) {
+        await documentationManager.uninstallOpenAPISpec({
+          request: req,
+          wait: true,
+          inferenceId: req.body?.inferenceId,
+        });
 
+        return res.ok<UninstallResponse>({
+          body: {
+            success: true,
+          },
+        });
+      }
       // Default: product documentation uninstallation
       await documentationManager.uninstall({
         request: req,
         wait: true,
         inferenceId: req.body?.inferenceId,
+        resourceType: req.body?.resourceType,
       });
 
       return res.ok<UninstallResponse>({

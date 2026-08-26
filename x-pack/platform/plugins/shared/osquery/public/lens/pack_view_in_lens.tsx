@@ -6,33 +6,39 @@
  */
 
 import React from 'react';
-import moment from 'moment-timezone';
 import { usePackQueryLastResults } from '../packs/use_pack_query_last_results';
+import type { PackQueryStatusItem } from '../live_queries/form/pack_queries_status_table';
 import { ViewResultsActionButtonType } from '../live_queries/form/pack_queries_status_table';
 import { ViewResultsInLensAction } from './view_results_in_lens';
+import { getPackViewDateWindow } from '../common/pack_view_date_window';
 
 interface PackViewInActionProps {
-  item: {
-    id: string;
-    interval: number;
-    action_id?: string;
-    agents: string[];
-  };
+  item: Pick<PackQueryStatusItem, 'action_id' | 'interval'>;
   actionId?: string;
+  scheduleId?: string;
+  executionCount?: number;
+  timestamp?: string;
 }
-const PackViewInLensActionComponent: React.FC<PackViewInActionProps> = ({ item }) => {
+const PackViewInLensActionComponent: React.FC<PackViewInActionProps> = ({
+  item,
+  scheduleId,
+  executionCount,
+  timestamp,
+}) => {
+  const isScheduled = !!scheduleId;
   const { action_id: actionId, interval } = item;
   const { data: lastResultsData } = usePackQueryLastResults({
     actionId,
     interval,
+    skip: isScheduled,
   });
 
-  const startDate = lastResultsData?.['@timestamp']
-    ? moment(lastResultsData?.['@timestamp'][0]).subtract(interval, 'seconds').toISOString()
-    : `now-${interval}s`;
-  const endDate = lastResultsData?.['@timestamp']
-    ? moment(lastResultsData?.['@timestamp'][0]).toISOString()
-    : 'now';
+  const { startDate, endDate, mode } = getPackViewDateWindow({
+    isScheduled,
+    timestamp,
+    lastResultTime: lastResultsData?.lastResultTime,
+    interval,
+  });
 
   return (
     <ViewResultsInLensAction
@@ -40,7 +46,9 @@ const PackViewInLensActionComponent: React.FC<PackViewInActionProps> = ({ item }
       buttonType={ViewResultsActionButtonType.icon}
       startDate={startDate}
       endDate={endDate}
-      mode={lastResultsData?.['@timestamp'][0] ? 'absolute' : 'relative'}
+      mode={mode}
+      scheduleId={scheduleId}
+      executionCount={executionCount}
     />
   );
 };

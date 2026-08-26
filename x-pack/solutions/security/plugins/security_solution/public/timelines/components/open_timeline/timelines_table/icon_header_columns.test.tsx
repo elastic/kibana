@@ -8,6 +8,7 @@
 import { cloneDeep, omit } from 'lodash/fp';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
+import { render } from '@testing-library/react';
 
 import { mockTimelineResults } from '../../../../common/mock/timeline_results';
 import type { TimelinesTableProps } from '.';
@@ -15,6 +16,7 @@ import { TimelinesTable } from '.';
 import type { OpenTimelineResult } from '../types';
 import { getMockTimelinesTableProps } from './mocks';
 import { TestProvidersComponent } from '../../../../common/mock';
+import { getSuperTimelineQueryTypeColumn } from './icon_header_columns';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -94,7 +96,7 @@ describe('#getActionsColumns', () => {
       </TestProvidersComponent>
     );
 
-    expect(wrapper.find('[data-test-subj="favorite-starEmpty-star"]').exists()).toBe(true);
+    expect(wrapper.find('[data-test-subj="favorite-star-star"]').exists()).toBe(true);
   });
 
   test('it renders an empty star when favorite is null', () => {
@@ -108,7 +110,7 @@ describe('#getActionsColumns', () => {
       </TestProvidersComponent>
     );
 
-    expect(wrapper.find('[data-test-subj="favorite-starEmpty-star"]').exists()).toBe(true);
+    expect(wrapper.find('[data-test-subj="favorite-star-star"]').exists()).toBe(true);
   });
 
   test('it renders an empty star when favorite is empty', () => {
@@ -122,7 +124,7 @@ describe('#getActionsColumns', () => {
       </TestProvidersComponent>
     );
 
-    expect(wrapper.find('[data-test-subj="favorite-starEmpty-star"]').exists()).toBe(true);
+    expect(wrapper.find('[data-test-subj="favorite-star-star"]').exists()).toBe(true);
   });
 
   test('it renders an filled star when favorite has one entry', () => {
@@ -147,7 +149,7 @@ describe('#getActionsColumns', () => {
       </TestProvidersComponent>
     );
 
-    expect(wrapper.find('[data-test-subj="favorite-starFilled-star"]').exists()).toBe(true);
+    expect(wrapper.find('[data-test-subj="favorite-starFill-star"]').exists()).toBe(true);
   });
 
   test('it renders an filled star when favorite has more than one entry', () => {
@@ -176,6 +178,53 @@ describe('#getActionsColumns', () => {
       </TestProvidersComponent>
     );
 
-    expect(wrapper.find('[data-test-subj="favorite-starFilled-star"]').exists()).toBe(true);
+    expect(wrapper.find('[data-test-subj="favorite-starFill-star"]').exists()).toBe(true);
+  });
+});
+
+describe('getSuperTimelineQueryTypeColumn', () => {
+  // Tests call the render function directly — no full component tree needed.
+  const column = getSuperTimelineQueryTypeColumn();
+  const renderCell = (savedSearchId: string | null | undefined, row: Partial<OpenTimelineResult>) =>
+    column.render!(savedSearchId, row as OpenTimelineResult);
+
+  it('renders the ES|QL info icon when savedSearchId is set', () => {
+    const node = renderCell('some-saved-search-id', { savedSearchId: 'some-saved-search-id' });
+    const { container } = render(<>{node}</>);
+    expect(
+      container.querySelector('[data-test-subj="super-timeline-esql-query-not-merged-icon"]')
+    ).toBeInTheDocument();
+  });
+
+  it('renders the EQL info icon when queryType.hasEql is true', () => {
+    const node = renderCell(null, { queryType: { hasEql: true, hasQuery: false } });
+    const { container } = render(<>{node}</>);
+    expect(
+      container.querySelector('[data-test-subj="super-timeline-eql-query-not-merged-icon"]')
+    ).toBeInTheDocument();
+  });
+
+  it('renders nothing for a plain KQL timeline (no savedSearchId, no EQL)', () => {
+    const node = renderCell(null, { queryType: { hasEql: false, hasQuery: true } });
+    expect(node).toBeNull();
+  });
+
+  it('renders nothing when queryType is undefined (defensive — list response may omit it)', () => {
+    const node = renderCell(null, { queryType: undefined });
+    expect(node).toBeNull();
+  });
+
+  it('ES|QL takes precedence when savedSearchId is set even if queryType.hasEql is also true', () => {
+    const node = renderCell('ss-id', {
+      savedSearchId: 'ss-id',
+      queryType: { hasEql: true, hasQuery: false },
+    });
+    const { container } = render(<>{node}</>);
+    expect(
+      container.querySelector('[data-test-subj="super-timeline-esql-query-not-merged-icon"]')
+    ).toBeInTheDocument();
+    expect(
+      container.querySelector('[data-test-subj="super-timeline-eql-query-not-merged-icon"]')
+    ).not.toBeInTheDocument();
   });
 });

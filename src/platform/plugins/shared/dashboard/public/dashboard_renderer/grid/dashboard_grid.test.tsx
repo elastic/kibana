@@ -12,7 +12,7 @@ import React from 'react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { useBatchedPublishingSubjects as mockUseBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import type { RenderResult } from '@testing-library/react';
-import { act, getByLabelText, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, getByLabelText, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import type { DashboardState } from '../../../common';
@@ -110,6 +110,9 @@ const createAndMountDashboardGrid = async (overrides?: Partial<DashboardState>) 
 };
 
 describe('DashboardGrid', () => {
+  beforeAll(() => {
+    Element.prototype.scrollIntoView = jest.fn();
+  });
   test('renders', async () => {
     await createAndMountDashboardGrid();
   });
@@ -237,7 +240,10 @@ describe('DashboardGrid', () => {
 
       const headerButton = screen.getByTestId(`kbnGridSectionTitle-section2`);
       expect(headerButton.nodeName.toLowerCase()).toBe('button');
-      userEvent.click(headerButton);
+      act(() => {
+        fireEvent.mouseDown(headerButton);
+        fireEvent.mouseUp(headerButton);
+      });
       await waitFor(() => {
         expect(dashboardApi.layout$.getValue().sections.section2.collapsed).toBe(true);
       });
@@ -252,7 +258,7 @@ describe('DashboardGrid', () => {
             title: 'Empty section',
             collapsed: false,
             grid: { y: 8 },
-            uid: 'emptySection',
+            id: 'emptySection',
             panels: [],
           },
         ],

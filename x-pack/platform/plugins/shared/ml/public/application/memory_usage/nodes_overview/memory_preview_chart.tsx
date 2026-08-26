@@ -23,7 +23,7 @@ import {
 } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
-import type { NodeDeploymentStatsResponse } from '../../../../common/types/trained_models';
+import type { NodeDeploymentStatsResponse } from '@kbn/ml-common-types/trained_models';
 import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
 import { getMemoryItemColor } from '../memory_item_colors';
 import { useMlKibana } from '../../contexts/kibana';
@@ -150,7 +150,7 @@ export const MemoryPreviewChart: FC<MemoryPreviewChartProps> = ({ memoryOverview
         ]}
         marker={
           <EuiIcon
-            type="arrowDown"
+            type="chevronSingleDown"
             aria-label={i18n.translate('xpack.ml.trainedModels.nodesList.mlMaxMemoryAriaLabel', {
               defaultMessage: 'Maximum memory permitted for ML native processes {bytes}',
               values: { bytes: bytesFormatter(memoryOverview.ml_max_in_bytes) },

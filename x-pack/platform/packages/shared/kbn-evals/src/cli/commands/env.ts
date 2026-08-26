@@ -9,29 +9,26 @@ import type { Command } from '@kbn/dev-cli-runner';
 
 const ENV_DOCS = [
   {
-    name: 'EVALUATION_CONNECTOR_ID',
+    name: 'TEST_RUN_ID',
+    description:
+      'CI build identifier used as a seed for generating deterministic per-task experiment IDs and stored as execution_id in score documents. In CI, typically set to bk-${BUILDKITE_BUILD_ID}. Optional for local runs.',
+    example: 'TEST_RUN_ID=bk-abc123',
+  },
+  {
+    name: 'EVAL_CONNECTOR_ID',
     description: 'Connector used for LLM-as-a-judge evaluators (required).',
-    example: 'EVALUATION_CONNECTOR_ID=bedrock-claude',
+    example: 'EVAL_CONNECTOR_ID=bedrock-claude',
   },
   {
-    name: 'EVALUATION_REPETITIONS',
+    name: 'EVAL_REPETITIONS',
     description: 'Overrides configured repetition count for evals.',
-    example: 'EVALUATION_REPETITIONS=3',
+    example: 'EVAL_REPETITIONS=3',
   },
   {
-    name: 'KBN_EVALS_EXECUTOR',
-    description: 'Switch to the Phoenix-backed executor.',
-    example: 'KBN_EVALS_EXECUTOR=phoenix',
-  },
-  {
-    name: 'PHOENIX_BASE_URL',
-    description: 'Phoenix base URL used when KBN_EVALS_EXECUTOR=phoenix.',
-    example: 'PHOENIX_BASE_URL=http://localhost:6006',
-  },
-  {
-    name: 'PHOENIX_API_KEY',
-    description: 'Phoenix API key used when KBN_EVALS_EXECUTOR=phoenix.',
-    example: 'PHOENIX_API_KEY=...',
+    name: 'KBN_EVALS_SKIP_CONNECTOR_SETUP',
+    description:
+      'Skip automatic connector setup/teardown. Use this option when evaluating with pre-defined connectors.',
+    example: 'KBN_EVALS_SKIP_CONNECTOR_SETUP=true',
   },
   {
     name: 'TRACING_ES_URL',
@@ -39,19 +36,38 @@ const ENV_DOCS = [
     example: 'TRACING_ES_URL=http://elastic:changeme@localhost:9200',
   },
   {
-    name: 'EVALUATIONS_ES_URL',
-    description: 'Elasticsearch URL where evaluation results are exported.',
-    example: 'EVALUATIONS_ES_URL=http://elastic:changeme@localhost:9200',
+    name: 'TRACING_ES_API_KEY',
+    description: 'API key for authenticating with the tracing Elasticsearch cluster.',
+    example: 'TRACING_ES_API_KEY=...',
+  },
+  {
+    name: 'TRACING_EXPORTERS',
+    description:
+      'JSON array of trace exporter configs (http/grpc/phoenix/langfuse). Overrides kibana.dev.yml tracing exporters when set.',
+    example: 'TRACING_EXPORTERS=\'[{"http":{"url":"https://ingest.example.com/v1/traces"}}]\'',
+  },
+  {
+    name: 'EVAL_KBN_URL',
+    description:
+      'Kibana URL used for eval score ingestion and dataset operations when targeting a non-local cluster.',
+    example: 'EVAL_KBN_URL=http://elastic:changeme@localhost:5601',
+  },
+  {
+    name: 'EVAL_KBN_API_KEY',
+    description: 'API key for authenticating to EVAL_KBN_URL.',
+    example: 'EVAL_KBN_API_KEY=...',
   },
   {
     name: 'SELECTED_EVALUATORS',
-    description: 'Comma-separated list of evaluator names to run.',
-    example: 'SELECTED_EVALUATORS="Factuality,Relevance"',
+    description:
+      'Comma-separated list of evaluator names to run. Supports patterns: Precision@K, Recall@K, F1@K match all K-specific evaluators.',
+    example: 'SELECTED_EVALUATORS="Precision@K,Recall@K,F1@K,Factuality"',
   },
   {
     name: 'RAG_EVAL_K',
-    description: 'Overrides default k used by RAG evaluators.',
-    example: 'RAG_EVAL_K=5',
+    description:
+      'Overrides default k used by RAG evaluators. Supports comma-separated values for multi-K evaluation.',
+    example: 'RAG_EVAL_K=5,10,20',
   },
   {
     name: 'INDEX_FOCUSED_RAG_EVAL',

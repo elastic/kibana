@@ -6,26 +6,26 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils/src/types';
-import { transformTitlesOut } from '@kbn/presentation-publishing';
-import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import { transformTimeRangeOut, transformTitlesOut } from '@kbn/presentation-publishing';
+import { flow } from 'lodash';
+import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { MAP_SAVED_OBJECT_TYPE } from '../../constants';
 import { transformMapAttributesOut } from '../../content_management/transform_map_attributes_out';
-import type { MapByValueState } from '../types';
 import { MAP_SAVED_OBJECT_REF_NAME } from './get_transform_in';
 import type { StoredMapEmbeddableState } from './types';
 
-export function getTransformOut(
-  transformEnhancementsOut: EmbeddableSetup['transformEnhancementsOut']
-) {
+export function getTransformOut(transformDrilldownsOut: DrilldownTransforms['transformOut']) {
   function transformOut(
     storedState: StoredMapEmbeddableState,
     panelReferences?: Reference[],
     containerReferences?: Reference[]
   ) {
-    const state = transformTitlesOut(storedState);
-    const enhancementsState = state.enhancements
-      ? transformEnhancementsOut(state.enhancements, panelReferences ?? [])
-      : undefined;
+    const transformsFlow = flow(
+      transformTitlesOut<StoredMapEmbeddableState>,
+      transformTimeRangeOut<StoredMapEmbeddableState>,
+      (state: StoredMapEmbeddableState) => transformDrilldownsOut(state, panelReferences)
+    );
+    const state = transformsFlow(storedState);
 
     // by ref
     const savedObjectRef = (panelReferences ?? []).find(
@@ -34,32 +34,24 @@ export function getTransformOut(
     if (savedObjectRef) {
       return {
         ...state,
-        ...(enhancementsState ? { enhancements: enhancementsState } : {}),
         savedObjectId: savedObjectRef.id,
       };
     }
 
     // by value
-    if ((state as MapByValueState).attributes) {
+    if ('attributes' in state && state.attributes) {
       return {
         ...state,
-        ...(enhancementsState ? { enhancements: enhancementsState } : {}),
-        attributes: transformMapAttributesOut(
-          (state as MapByValueState).attributes,
-          (targetName: string) => {
-            const panelRef = (panelReferences ?? []).find(({ name }) => name === targetName);
-            if (panelRef) return panelRef;
+        attributes: transformMapAttributesOut(state.attributes, (targetName: string) => {
+          const panelRef = (panelReferences ?? []).find(({ name }) => name === targetName);
+          if (panelRef) return panelRef;
 
-            return (containerReferences ?? []).find(({ name }) => name === targetName);
-          }
-        ),
+          return (containerReferences ?? []).find(({ name }) => name === targetName);
+        }),
       };
     }
 
-    return {
-      ...state,
-      ...(enhancementsState ? { enhancements: enhancementsState } : {}),
-    };
+    return state;
   }
   return transformOut;
 }

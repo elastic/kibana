@@ -12,6 +12,7 @@ export enum SecurityPageName {
   alerts = 'alerts',
   attacks = 'attacks',
   aiValue = 'ai_value',
+  artifacts = 'artifacts',
   assetInventory = 'asset_inventory',
   attackDiscovery = 'attack_discovery',
   blocklist = 'blocklist',
@@ -27,6 +28,7 @@ export enum SecurityPageName {
   case = 'cases', // must match `CasesDeepLinkId.cases`
   caseConfigure = 'cases_configure', // must match `CasesDeepLinkId.casesConfigure`
   caseCreate = 'cases_create', // must match `CasesDeepLinkId.casesCreate`
+  caseTemplates = 'cases_templates', // must match `CasesDeepLinkId.casesTemplates`
   /*
    * Warning: Computed values are not permitted in an enum with string valued members
    * All cloud security posture page names must match `CloudSecurityPosturePageId` in x-pack/solutions/security/plugins/cloud_security_posture/public/common/navigation/types.ts
@@ -57,6 +59,7 @@ export enum SecurityPageName {
   hostsUncommonProcesses = 'hosts-uncommon_processes',
   kubernetes = 'kubernetes',
   landing = 'get_started',
+  launchpad = 'launchpad',
   network = 'network',
   networkAnomalies = 'network-anomalies',
   networkDns = 'network-dns',
@@ -70,14 +73,16 @@ export enum SecurityPageName {
   responseActionsHistory = 'response_actions_history',
   rules = 'rules',
   rulesAdd = 'rules-add',
+  rulesChangesHistory = 'rules-changes-history',
   rulesCreate = 'rules-create',
   rulesLanding = 'rules-landing',
   rulesManagement = 'rules-management',
-  scriptsLibrary = 'scripts_library',
+  scriptLibrary = 'script_library',
   siemReadiness = 'siem_readiness',
   siemMigrationsLanding = 'siem_migrations',
   siemMigrationsRules = 'siem_migrations-rules',
   siemMigrationsDashboards = 'siem_migrations-dashboards',
+  siemMigrationsManage = 'siem_migrations-manage',
   /*
    * Warning: Computed values are not permitted in an enum with string valued members
    * All threat intelligence page names must match `TIPageId` in x-pack/solutions/security/plugins/threat_intelligence/public/common/navigation/types.ts
@@ -98,13 +103,52 @@ export enum SecurityPageName {
   entityAnalyticsLanding = 'entity_analytics-landing',
   entityAnalyticsPrivilegedUserMonitoring = 'entity_analytics-privileged_user_monitoring',
   entityAnalyticsOverview = 'entity_analytics-overview',
-  entityAnalyticsThreatHunting = 'entity_analytics-threat_hunting',
+  entityAnalyticsHomePage = 'entity_analytics-home_page',
   entityAnalyticsEntityStoreManagement = 'entity_analytics-entity_store_management',
   coverageOverview = 'coverage-overview',
   notes = 'notes',
   alertSummary = 'alert_summary',
+  alertAnalysisWorkflow = 'alert_analysis_workflow',
   configurations = 'configurations',
   configurationsIntegrations = 'configurations-integrations',
   configurationsAiSettings = 'configurations-ai_settings',
   configurationsBasicRules = 'configurations-basic_rules',
+
+  /**
+   * Detection Engine Health UI Pages
+   */
+  spaceRulesHealth = 'space-rules-health',
+  ruleHealth = 'rule-health',
+
+  /**
+   * external links
+   */
+  externalLinkAgentBuilder = 'external_link-agent_builder',
+  externalLinkDiscover = 'external_link-discover',
+  externalLinkWorkflows = 'external_link-workflows',
+
+  /**
+   * Ingest Hub Onboarding
+   */
+  onboarding = 'onboarding',
+
+  /**
+   * PND pages.
+   *
+   * These live on the `pnd` plugin rather than `securitySolutionUI`, so their link ids are built with
+   * `pndLink()` instead of `securityLink()`. `alerts` and `attacks` are reused from above — the page
+   * name is the same concept, and the app prefix is what distinguishes the two links.
+   */
+  pndChats = 'chats',
+  pndRecords = 'records',
+  pndThreatHunt = 'threat_hunt',
+  pndStreams = 'streams',
+  pndWatches = 'watches',
+  pndWatchesWorkers = 'watches_workers',
+  pndWatchesSkills = 'watches_skills',
+  pndWatchFloor = 'watch_floor',
+  pndWatchOfficer = 'watch_officer',
+  pndWatchDark = 'watch_dark',
+  pndWatchDeep = 'watch_deep',
+  pndWatchDetection = 'watch_detection',
 }

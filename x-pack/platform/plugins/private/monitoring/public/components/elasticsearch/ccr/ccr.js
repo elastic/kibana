@@ -230,7 +230,11 @@ export const Ccr = (props) => {
                 <EuiLink onClick={() => toggleShards(index, shards)}>
                   {index}
                   &nbsp;
-                  {expanded ? <EuiIcon type="arrowUp" /> : <EuiIcon type="arrowDown" />}
+                  {expanded ? (
+                    <EuiIcon type="chevronSingleUp" aria-hidden={true} />
+                  ) : (
+                    <EuiIcon type="chevronSingleDown" aria-hidden={true} />
+                  )}
                 </EuiLink>
               );
             },

@@ -13,6 +13,7 @@ import type {
   ContentManagementPublicSetup,
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
 import type { DataViewsServicePublicMethods } from './data_views';
 import type { HasDataService } from '../common';
 
@@ -20,6 +21,14 @@ export enum INDEX_PATTERN_TYPE {
   ROLLUP = 'rollup',
   DEFAULT = 'default',
 }
+
+/**
+ * Discriminator for the entries returned by `dataViews.getIndices()` (backed
+ * by the Elasticsearch `_resolve/index` endpoint). Written to each
+ * `MatchedItem.tags[].key`. Exported as a type-only union so consumers can
+ * narrow against it without forcing a runtime dependency on `dataViews`.
+ */
+export type IndexKind = 'index' | 'alias' | 'data_stream' | 'frozen' | 'rollup';
 
 export enum IndicesResponseItemIndexAttrs {
   OPEN = 'open',
@@ -105,6 +114,10 @@ export interface DataViewsPublicStartDependencies {
    * Content management
    */
   contentManagement: ContentManagementPublicStart;
+  /**
+   * CPS plugin (optional)
+   */
+  cps?: CPSPluginStart;
 }
 
 /**
@@ -121,6 +134,7 @@ export interface DataViewsServicePublic extends DataViewsServicePublicMethods {
     pattern: string;
     showAllIndices?: boolean;
     isRollupIndex: (indexName: string) => boolean;
+    projectRouting?: string;
   }) => Promise<MatchedItem[]>;
   getRollupsEnabled: () => boolean;
   scriptedFieldsEnabled: boolean;
@@ -180,9 +194,14 @@ export interface ResolveIndexResponseItemIndex extends ResolveIndexResponseItem 
   data_stream?: string;
 }
 
+/**
+ * UI tag attached to each entry returned by `dataViews.getIndices()`.
+ *
+ * @see IndexKind for the discriminator written to `key`.
+ */
 export interface Tag {
   name: string;
-  key: string;
+  key: IndexKind;
   color: string;
 }
 export enum ResolveIndexResponseItemIndexAttrs {

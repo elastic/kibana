@@ -7,25 +7,20 @@
 
 import { uniqBy } from 'lodash';
 import { CASE_COMMENT_SAVED_OBJECT } from '../../../../common/constants';
-import { extractPersistableStateReferencesFromSO } from '../../../attachment_framework/so_references';
 import type { CommentUserAction } from '../../../../common/types/domain';
 import { UserActionActions, UserActionTypes } from '../../../../common/types/domain';
 import { UserActionBuilder } from '../abstract_builder';
 import type { EventDetails, UserActionParameters, UserActionEvent } from '../types';
-import { getAttachmentSOExtractor } from '../../so_references';
+import { buildUnifiedAttachmentSORefs, getAttachmentSOExtractor } from '../../so_references';
 import { getPastTenseVerb } from './audit_logger_utils';
 
 export class CommentUserActionBuilder extends UserActionBuilder {
   build(args: UserActionParameters<'comment'>): UserActionEvent {
+    const savedObjectType = args.savedObjectType ?? CASE_COMMENT_SAVED_OBJECT;
     const soExtractor = getAttachmentSOExtractor(args.payload.attachment);
     const { transformedFields, references: refsWithExternalRefId } =
       soExtractor.extractFieldsToReferences<CommentUserAction['payload']['comment']>({
         data: args.payload.attachment,
-      });
-
-    const { attributes: extractedAttributes, references: extractedReferences } =
-      extractPersistableStateReferencesFromSO(transformedFields, {
-        persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
       });
 
     const action = args.action ?? UserActionActions.update;
@@ -34,14 +29,15 @@ export class CommentUserActionBuilder extends UserActionBuilder {
       ...args,
       action,
       valueKey: 'comment',
-      value: { ...transformedFields, ...extractedAttributes },
+      value: transformedFields,
       type: UserActionTypes.comment,
     });
+    const unifiedReferences = buildUnifiedAttachmentSORefs(args.payload.attachment);
 
     const parameters = {
       ...commentUserAction,
       references: uniqBy(
-        [...commentUserAction.references, ...refsWithExternalRefId, ...extractedReferences],
+        [...commentUserAction.references, ...refsWithExternalRefId, ...unifiedReferences],
         'id'
       ),
     };
@@ -49,7 +45,7 @@ export class CommentUserActionBuilder extends UserActionBuilder {
     const verb = getPastTenseVerb(action);
 
     const getMessage = (id?: string) =>
-      `User ${verb} comment id: ${commentId(args.attachmentId)} for case id: ${
+      `User ${verb} comment id: ${commentId(args.savedObjectId)} for case id: ${
         args.caseId
       } - user action id: ${id}`;
 
@@ -57,8 +53,8 @@ export class CommentUserActionBuilder extends UserActionBuilder {
       getMessage,
       action,
       descriptiveAction: `case_user_action_${action}_comment`,
-      savedObjectId: args.attachmentId ?? args.caseId,
-      savedObjectType: CASE_COMMENT_SAVED_OBJECT,
+      savedObjectId: args.savedObjectId ?? args.caseId,
+      savedObjectType,
     };
 
     return {

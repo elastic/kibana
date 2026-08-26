@@ -8,7 +8,7 @@
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { CreatePrivilegesImportIndexRequestBody } from '../../../../../common/api/entity_analytics';
 import { API_VERSIONS, APP_ID, PRIVMON_INDICES_URL } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
@@ -19,7 +19,9 @@ import { withMinimumLicense } from '../../utils/with_minimum_license';
 
 export const createPrivilegeMonitoringIndicesRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
-  logger: Logger
+  logger: Logger,
+  { experimentalFeatures }: EntityAnalyticsRoutesDeps['config'],
+  docLinks: EntityAnalyticsRoutesDeps['docLinks']
 ) => {
   router.versioned
     .put({
@@ -39,6 +41,17 @@ export const createPrivilegeMonitoringIndicesRoute = (
             body: buildRouteValidationWithZod(CreatePrivilegesImportIndexRequestBody),
           },
         },
+        ...(experimentalFeatures.entityAnalyticsEntityStoreV2
+          ? {
+              options: {
+                deprecated: {
+                  documentationUrl: docLinks.links.securitySolution.entityAnalytics.api,
+                  severity: 'warning',
+                  reason: { type: 'remove' },
+                },
+              },
+            }
+          : {}),
       },
 
       withMinimumLicense(async (context, request, response): Promise<IKibanaResponse<{}>> => {

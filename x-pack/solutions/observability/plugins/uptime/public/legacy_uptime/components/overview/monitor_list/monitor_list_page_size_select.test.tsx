@@ -22,6 +22,7 @@ describe('MonitorListPageSizeSelect', () => {
       .simulate('click');
     wrapper
       .find('[data-test-subj="xpack.uptime.monitorList.pageSizeSelect.sizeSelectItem25"]')
+      .hostNodes()
       .first()
       .simulate('click');
     expect(setSize).toHaveBeenCalledTimes(1);

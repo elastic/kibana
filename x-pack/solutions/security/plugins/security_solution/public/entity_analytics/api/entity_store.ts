@@ -5,79 +5,90 @@
  * 2.0.
  */
 import { useMemo } from 'react';
-import type { GetEntityStoreStatusResponse } from '../../../common/api/entity_analytics/entity_store/status.gen';
+import { ENTITY_STORE_ROUTES } from '@kbn/entity-store/public';
 import type {
-  InitEntityStoreRequestBodyInput,
+  GetEntityStoreStatusResponse,
   InitEntityStoreResponse,
-} from '../../../common/api/entity_analytics/entity_store/enable.gen';
+} from '@kbn/entity-store/common';
 import type {
-  DeleteEntityEngineResponse,
-  EntityType,
-  InitEntityEngineResponse,
-  ListEntityEnginesResponse,
+  StartEntityEngineResponse,
   StopEntityEngineResponse,
 } from '../../../common/api/entity_analytics';
 import { API_VERSIONS } from '../../../common/entity_analytics/constants';
+import { WATCHLISTS_PREBUILT_INSTALL_URL } from '../../../common/entity_analytics/watchlists/constants';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
+import * as entityAnalyticsI18n from '../translations';
+
+const WATCHLIST_TOAST_LIFETIME_MS = 8000;
 
 export const useEntityStoreRoutes = () => {
-  const http = useKibana().services.http;
+  const { http, notifications } = useKibana().services;
 
   return useMemo(() => {
-    const enableEntityStore = async (options: InitEntityStoreRequestBodyInput = {}) => {
-      return http.fetch<InitEntityStoreResponse>('/api/entity_store/enable', {
+    const installPrebuiltWatchlists = async () =>
+      http.fetch<{ acknowledged: boolean }>(WATCHLISTS_PREBUILT_INSTALL_URL, {
         method: 'POST',
         version: API_VERSIONS.public.v1,
-        body: JSON.stringify(options),
       });
+
+    // This is here while waiting for unified installs https://github.com/elastic/security-team/issues/16607
+    const tryInstallPrebuiltWatchlistsWithToast = async () => {
+      try {
+        await installPrebuiltWatchlists();
+      } catch {
+        notifications?.toasts?.addWarning({
+          title: entityAnalyticsI18n.ENTITY_STORE_PREBUILT_WATCHLISTS_WARNING_TITLE,
+          text: entityAnalyticsI18n.ENTITY_STORE_PREBUILT_WATCHLISTS_WARNING_TEXT,
+          toastLifeTimeMs: WATCHLIST_TOAST_LIFETIME_MS,
+        });
+      }
     };
 
-    const getEntityStoreStatus = async (withComponents = false) => {
-      return http.fetch<GetEntityStoreStatusResponse>('/api/entity_store/status', {
+    const getEntityStoreStatus = async (withComponents = false) =>
+      http.fetch<GetEntityStoreStatusResponse>(ENTITY_STORE_ROUTES.public.STATUS, {
         method: 'GET',
         version: API_VERSIONS.public.v1,
         query: { include_components: withComponents },
       });
-    };
 
-    const initEntityEngine = async (entityType: EntityType) => {
-      return http.fetch<InitEntityEngineResponse>(`/api/entity_store/engines/${entityType}/init`, {
+    const installEntityStore = async () => {
+      await tryInstallPrebuiltWatchlistsWithToast();
+      return http.fetch<InitEntityStoreResponse>(ENTITY_STORE_ROUTES.public.INSTALL, {
         method: 'POST',
         version: API_VERSIONS.public.v1,
         body: JSON.stringify({}),
       });
     };
 
-    const stopEntityEngine = async (entityType: EntityType) => {
-      return http.fetch<StopEntityEngineResponse>(`/api/entity_store/engines/${entityType}/stop`, {
-        method: 'POST',
+    const startEntityStore = async () => {
+      await tryInstallPrebuiltWatchlistsWithToast();
+      return http.fetch<StartEntityEngineResponse>(ENTITY_STORE_ROUTES.public.START, {
+        method: 'PUT',
         version: API_VERSIONS.public.v1,
         body: JSON.stringify({}),
       });
     };
 
-    const deleteEntityEngine = async (entityType: EntityType, deleteData: boolean) => {
-      return http.fetch<DeleteEntityEngineResponse>(`/api/entity_store/engines/${entityType}`, {
-        method: 'DELETE',
-        query: { data: deleteData },
+    const stopEntityStore = async () =>
+      http.fetch<StopEntityEngineResponse>(ENTITY_STORE_ROUTES.public.STOP, {
+        method: 'PUT',
         version: API_VERSIONS.public.v1,
+        body: JSON.stringify({}),
       });
-    };
 
-    const listEntityEngines = async () => {
-      return http.fetch<ListEntityEnginesResponse>(`/api/entity_store/engines`, {
-        method: 'GET',
+    const deleteEntityStore = async () =>
+      http.fetch(ENTITY_STORE_ROUTES.public.UNINSTALL, {
+        method: 'POST',
         version: API_VERSIONS.public.v1,
+        body: JSON.stringify({}),
       });
-    };
 
     return {
-      enableEntityStore,
       getEntityStoreStatus,
-      initEntityEngine,
-      stopEntityEngine,
-      deleteEntityEngine,
-      listEntityEngines,
+      installEntityStore,
+      startEntityStore,
+      stopEntityStore,
+      deleteEntityStore,
     };
-  }, [http]);
+  }, [http, notifications]);
 };

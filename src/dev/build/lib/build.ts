@@ -28,27 +28,25 @@ export class Build {
     return this.config.resolveFromRepo(
       'build',
       'default',
-      `kibana${dashSuffix(platform.getVariant())}${dashSuffix(
-        platform.getSolutionArtifact()
+      `kibana${dashSuffix(
+        platform.getVariant()
       )}-${this.config.getBuildVersion()}-${platform.getBuildName()}`,
       ...args
     );
   }
 
   getPlatformArchivePath(platform: Platform) {
-    const ext = platform.isWindows() ? 'zip' : 'tar.gz';
+    const ext = platform.isWindows() ? 'zip' : this.config.getTarZstd() ? 'tar.zst' : 'tar.gz';
     return this.config.resolveFromRepo(
       'target',
-      `${this.name}${dashSuffix(platform.getVariant())}${dashSuffix(
-        platform.getSolutionArtifact()
+      `${this.name}${dashSuffix(
+        platform.getVariant()
       )}-${this.config.getBuildVersion()}-${platform.getBuildName()}.${ext}`
     );
   }
 
   getRootDirectory(platform: Platform) {
-    return `${this.name}${dashSuffix(platform.getVariant())}${dashSuffix(
-      platform.getSolutionArtifact()
-    )}-${this.config.getBuildVersion()}`;
+    return `${this.name}${dashSuffix(platform.getVariant())}-${this.config.getBuildVersion()}`;
   }
 
   getName() {

@@ -19,13 +19,18 @@ spec:
       description: 'Run scripts and trigger CI for Kibana Renovate PRs'
     spec:
       env:
-        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'false'
+        KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'false'
 
       allow_rebuilds: true
       branch_configuration: main
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/renovate_helper.yml
+      initial_step_plugins:
+        - sparse-checkout#v1.6.0:
+            paths:
+              - .buildkite/pipelines/renovate_helper.yml
+            cleanup_sparse_state: true
       cancel_intermediate_builds: true
       provider_settings:
         build_pull_requests: true

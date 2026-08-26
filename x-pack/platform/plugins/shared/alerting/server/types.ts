@@ -16,7 +16,7 @@ import type {
   IUiSettingsClient,
   KibanaRequest,
 } from '@kbn/core/server';
-import type { z } from '@kbn/zod';
+import type { z } from '@kbn/zod/v4';
 import type { DataViewsContract } from '@kbn/data-views-plugin/common';
 import type {
   ENHANCED_ES_SEARCH_STRATEGY,
@@ -26,6 +26,7 @@ import type {
   ISearchStartSearchSource,
 } from '@kbn/data-plugin/common';
 import type { LicenseType } from '@kbn/licensing-types';
+import type { SpaceId } from '@kbn/core-spaces-common';
 import type {
   IScopedClusterClient,
   SavedObjectAttributes,
@@ -43,6 +44,7 @@ import type { TaskPriority } from '@kbn/task-manager-plugin/server';
 import type { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import type { AlertingServerSetup, AlertingServerStart } from './plugin';
 import type { RulesClient } from './rules_client';
+import type { RuleQueryInspectorFn } from './rule_query_inspector/types';
 import type {
   RulesSettingsClient,
   RulesSettingsFlappingClient,
@@ -62,6 +64,7 @@ import type {
   SanitizedRule,
   RuleAlertData,
   Artifacts,
+  GapReason,
 } from '../common';
 import type { PublicAlertFactory } from './alert/create_alert_factory';
 import type { RulesSettingsFlappingProperties } from '../common/rules_settings';
@@ -165,7 +168,7 @@ export interface RuleExecutorOptions<
   previousStartedAt: Date | null;
   rule: SanitizedRuleConfig;
   services: RuleExecutorServices<InstanceState, InstanceContext, ActionGroupIds, AlertData>;
-  spaceId: string;
+  spaceId: SpaceId;
   startedAt: Date;
   startedAtOverridden: boolean;
   state: State;
@@ -174,6 +177,7 @@ export interface RuleExecutorOptions<
   getTimeRange: (timeWindow?: string) => GetTimeRangeResult;
   isServerless: boolean;
   ruleExecutionTimeout?: string;
+  cpsData?: CpsData;
 }
 
 export interface RuleParamsAndRefs<Params extends RuleTypeParams> {
@@ -202,6 +206,28 @@ export type ExecutorType<
 export interface RuleTypeParamsValidator<Params extends RuleTypeParams> {
   validate: (object: Partial<Params>) => Params;
   validateMutatedParams?: (mutatedOject: Params, origObject?: Params) => Params;
+}
+
+/**
+ * Context passed to a rule type's params authorizer. Provides the request that
+ * initiated the write (so authorization can be resolved against the acting
+ * user's privileges) and, on updates, the rule's previous params (so the
+ * authorizer can restrict its checks to params that actually changed).
+ */
+export interface RuleTypeParamsAuthorizerContext<Params extends RuleTypeParams> {
+  request: KibanaRequest;
+  previousParams?: Params;
+}
+
+/**
+ * Optional, rule-type-defined authorization gate for privileged params.
+ *
+ * An async guard that authorizes the params against the acting user's privileges
+ * and throws when the user is not allowed to set them. It is invoked on rule write paths
+ * (create/update/bulk) after params have been validated.
+ */
+export interface RuleTypeParamsAuthorizer<Params extends RuleTypeParams> {
+  authorize: (params: Params, context: RuleTypeParamsAuthorizerContext<Params>) => Promise<void>;
 }
 
 export type AlertHit = Alert & {
@@ -327,6 +353,15 @@ export interface RuleType<
   validate: {
     params: RuleTypeParamsValidator<Params>;
   };
+  /**
+   * Optional, rule-type-defined authorization for privileged params. When
+   * provided, `authorize.params` is invoked on rule write paths after the
+   * params validator runs, and may throw to reject the write. Rule types with
+   * no privileged params simply omit this.
+   */
+  authorize?: {
+    params?: RuleTypeParamsAuthorizer<Params>;
+  };
   schemas?: {
     params?:
       | {
@@ -371,6 +406,13 @@ export interface RuleType<
   ruleTaskTimeout?: string;
   cancelAlertsOnRuleTimeout?: boolean;
   doesSetRecoveryContext?: boolean;
+  /**
+   * When true, the alerting framework records change history events for this
+   * rule type via the registered `IChangeTrackingService`. Rule types must
+   * opt in (typically gated behind a config setting) before any history is
+   * tracked.
+   */
+  trackChanges?: boolean;
   alerts?: IRuleTypeAlerts<AlertData>;
   /**
    * Determines whether framework should
@@ -388,6 +430,12 @@ export interface RuleType<
    * Alerts of internally managed rule types are not returned by the APIs and thus not shown in the alerts table.
    */
   internallyManaged?: boolean;
+  /**
+   * Optional function that returns the Elasticsearch query this rule type executes.
+   * When provided, the query inspector API exposes the query (and optionally its response)
+   * for debugging and investigation purposes.
+   */
+  queryInspector?: RuleQueryInspectorFn;
 }
 export type UntypedRuleType = RuleType<
   RuleTypeParams,
@@ -451,13 +499,42 @@ export type RulesSettingsClientApi = PublicMethodsOf<RulesSettingsClient>;
 export type RulesSettingsFlappingClientApi = PublicMethodsOf<RulesSettingsFlappingClient>;
 export type RulesSettingsQueryDelayClientApi = PublicMethodsOf<RulesSettingsQueryDelayClient>;
 
-export interface PublicMetricsSetters {
-  setLastRunMetricsTotalSearchDurationMs: (totalSearchDurationMs: number) => void;
-  setLastRunMetricsTotalIndexingDurationMs: (totalIndexingDurationMs: number) => void;
-  setLastRunMetricsTotalAlertsDetected: (totalAlertDetected: number) => void;
-  setLastRunMetricsTotalAlertsCreated: (totalAlertCreated: number) => void;
-  setLastRunMetricsGapDurationS: (gapDurationS: number) => void;
-  setLastRunMetricsGapRange: (gapRange: { lte: string; gte: string } | null) => void;
+export interface CpsLinkedProject {
+  id: string;
+  alias: string;
+  type: string;
+  organization: string;
+}
+
+export interface CpsData {
+  resolvedExpression?: string;
+  /**
+   * Linked projects visible to the rule's execution principal. `undefined` means resolution
+   * failed (unknown scope), while an empty array means the resolved scope genuinely contains
+   * no linked projects.
+   */
+  linkedProjects?: CpsLinkedProject[];
+}
+
+export interface ConsumerExecutionMetrics {
+  total_indexing_duration_ms: number;
+  total_enrichment_duration_ms: number;
+  gap_duration_s: number;
+  gap_range: { lte: string; gte: string };
+  matched_indices_count: number;
+  alerts_candidate_count: number;
+  alerts_suppressed_count: number;
+  frozen_indices_queried_count: number;
+  gap_reason?: GapReason;
+}
+
+export interface PublicRuleMonitoringService {
+  setMetric: <MetricName extends keyof ConsumerExecutionMetrics>(
+    metricName: MetricName,
+    value: ConsumerExecutionMetrics[MetricName]
+  ) => void;
+  setMetrics: (metrics: Partial<ConsumerExecutionMetrics>) => void;
+  clearGap: () => void;
 }
 
 export interface PublicLastRunSetters {
@@ -465,8 +542,6 @@ export interface PublicLastRunSetters {
   addLastRunWarning: (outcomeMsg: string) => void;
   setLastRunOutcomeMessage: (warning: string) => void;
 }
-
-export type PublicRuleMonitoringService = PublicMetricsSetters;
 
 export type PublicRuleResultService = PublicLastRunSetters;
 
@@ -479,6 +554,10 @@ export type {
   RawRuleMonitoring,
 } from './saved_objects/schemas/raw_rule';
 
-export type { RawRuleTemplate } from './saved_objects/schemas/raw_rule_template';
+export type {
+  RawRuleTemplate,
+  AlertingV1RawRuleTemplate,
+  AlertingV2RawRuleTemplate,
+} from './saved_objects/schemas/raw_rule_template';
 
 export type { DataStreamAdapter } from './alerts_service/lib/data_stream_adapter';

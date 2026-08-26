@@ -13,8 +13,9 @@ import { TRANSFORM_STATE } from '../../../common/constants';
 
 export const transformIdsSchema = schema.arrayOf(
   schema.object({
-    id: schema.string(),
-  })
+    id: schema.string({ maxLength: 1000 }),
+  }),
+  { maxSize: 1000 }
 );
 
 export type TransformIdsSchema = TypeOf<typeof transformIdsSchema>;
@@ -32,13 +33,13 @@ export const transformStateSchema = schema.oneOf([
 
 export const dataViewTitleSchema = schema.object({
   /** Title of the data view for which to return stats. */
-  dataViewTitle: schema.string(),
+  dataViewTitle: schema.string({ maxLength: 1000 }),
 });
 
 export type DataViewTitleSchema = TypeOf<typeof dataViewTitleSchema>;
 
 export const transformIdParamSchema = schema.object({
-  transformId: schema.string(),
+  transformId: schema.string({ maxLength: 1000 }),
 });
 
 export type TransformIdParamSchema = TypeOf<typeof transformIdParamSchema>;

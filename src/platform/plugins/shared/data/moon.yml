@@ -4,21 +4,23 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/data-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-visualizations'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/data-plugin'
+  title: '@kbn/data-plugin'
   description: Moon project for @kbn/data-plugin
   channel: ''
   owner: '@elastic/kibana-visualizations'
-  metadata:
-    sourceRoot: src/platform/plugins/shared/data
+  sourceRoot: src/platform/plugins/shared/data
 dependsOn:
+  - '@kbn/scout'
+  - '@kbn/core-http-common'
   - '@kbn/core'
+  - '@kbn/core-user-storage-common'
   - '@kbn/ui-actions-plugin'
   - '@kbn/share-plugin'
   - '@kbn/inspector-plugin'
@@ -50,7 +52,6 @@ dependsOn:
   - '@kbn/react-kibana-context-render'
   - '@kbn/search-errors'
   - '@kbn/search-response-warnings'
-  - '@kbn/shared-ux-link-redirect-app'
   - '@kbn/es-types'
   - '@kbn/code-editor'
   - '@kbn/core-test-helpers-model-versions'
@@ -68,6 +69,14 @@ dependsOn:
   - '@kbn/core-application-browser-mocks'
   - '@kbn/cps'
   - '@kbn/cps-utils'
+  - '@kbn/apm-utils'
+  - '@kbn/std'
+  - '@kbn/core-elasticsearch-server'
+  - '@kbn/css-utils'
+  - '@kbn/shared-ux-utility'
+  - '@kbn/date-range-picker-presets-common'
+  - '@kbn/zod'
+  - '@kbn/licensing-plugin'
 tags:
   - plugin
   - prod
@@ -82,17 +91,10 @@ fileGroups:
     - config.mock.ts
     - common/**/*.json
     - public/**/*.json
+    - test/scout/**/*
+    - test/scout_http2/**/*
+    - test/scout_search_sessions/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

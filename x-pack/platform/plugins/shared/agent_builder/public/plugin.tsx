@@ -10,26 +10,42 @@ import {
   type CoreStart,
   type Plugin,
   type PluginInitializerContext,
+  type AppUpdater,
 } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
+import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import { BehaviorSubject, distinctUntilChanged, type Subscription } from 'rxjs';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { ProjectRoutingAccess } from '@kbn/cps-utils';
 import { registerLocators } from './locator/register_locators';
-import { registerAnalytics, registerApp } from './register';
+import { buildAgentBuilderDeepLinks, registerAnalytics, registerApp } from './register';
 import { AgentBuilderNavControlInitiator } from './components/nav_control/lazy_agent_builder_nav_control';
 import {
   AgentBuilderAccessChecker,
   AgentService,
   AttachmentsService,
+  RenderersService,
   ChatService,
   ConversationsService,
+  ConversationTemplatesService,
   DocLinksService,
   NavigationService,
   ToolsService,
+  SkillsService,
+  SmlService,
+  OAuthClientsService,
+  PluginsService,
   EventsService,
+  SpaceSettingsService,
   type AgentBuilderInternalService,
 } from './services';
+import { createPublicEmbeddableChatAccess } from './services/access';
 import { createPublicAttachmentContract } from './services/attachments';
+import { createPublicConversationTemplatesContract } from './services/conversation_templates';
+import { createPublicRenderersContract } from './services/renderers';
 import { createPublicToolContract } from './services/tools';
 import { createPublicAgentsContract } from './services/agents';
 import { createPublicEventsContract } from './services/events';
@@ -40,11 +56,22 @@ import type {
   AgentBuilderPluginStart,
   AgentBuilderSetupDependencies,
   AgentBuilderStartDependencies,
-  ConversationFlyoutRef,
+  ConversationSidebarRef,
 } from './types';
-import { openConversationFlyout } from './flyout/open_conversation_flyout';
 import type { EmbeddableConversationProps } from './embeddable/types';
-import type { OpenConversationFlyoutOptions } from './flyout/types';
+import type {
+  PublicEmbeddableConversationProps,
+  PublicEmbeddableConversationInputProps,
+  EmbeddableConversationInputRef,
+} from './types';
+import type { OpenConversationSidebarOptions, OpenSidebarInternalOptions } from './sidebar/types';
+import {
+  setSidebarServices,
+  setSidebarRuntimeContext,
+  clearSidebarRuntimeContext,
+} from './sidebar';
+import { storageKeys } from './application/storage_keys';
+import { AGENTBUILDER_APP_ID } from '../common/features';
 
 export class AgentBuilderPlugin
   implements
@@ -56,16 +83,23 @@ export class AgentBuilderPlugin
     >
 {
   logger: Logger;
-  private conversationFlyoutActiveConfig: EmbeddableConversationProps = {};
+  private conversationActiveConfig: EmbeddableConversationProps = {};
   private internalServices?: AgentBuilderInternalService;
   private setupServices?: {
     navigationService: NavigationService;
+    usageCollection?: UsageCollectionSetup;
   };
-  private activeFlyoutRef: ConversationFlyoutRef | null = null;
-  private flyoutCallbacks: {
+  private activeSidebarRef: ConversationSidebarRef | null = null;
+  private sidebarCallbacks: {
     updateProps: (props: EmbeddableConversationProps) => void;
     resetBrowserApiTools: () => void;
+    addAttachment: (attachment: AttachmentInput) => void;
+    removeAttachmentById: (attachmentId: string) => void;
   } | null = null;
+  private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
+  private isEarsEnabled = false;
+  private isEarsExperimentalEnabled = false;
+  private experimentalDeepLinksSubscription?: Subscription;
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {
     this.logger = context.logger.get();
@@ -79,7 +113,9 @@ export class AgentBuilderPlugin
       licenseManagement: deps.licenseManagement?.locator,
     });
 
-    this.setupServices = { navigationService };
+    this.setupServices = { navigationService, usageCollection: deps.usageCollection };
+    this.isEarsEnabled = deps.actions.isEarsEnabled;
+    this.isEarsExperimentalEnabled = deps.actions.isEarsExperimentalEnabled;
 
     registerApp({
       core,
@@ -89,12 +125,22 @@ export class AgentBuilderPlugin
         }
         return this.internalServices;
       },
+      appUpdater$: this.appUpdater$,
     });
 
     registerAnalytics({ analytics: core.analytics });
     registerLocators(deps.share);
 
-    registerWorkflowSteps(deps.workflowsExtensions);
+    registerWorkflowSteps(deps.workflowsExtensions, core);
+
+    core.chrome.sidebar.registerApp({
+      appId: 'agentBuilder',
+      restoreOnReload: false,
+      loadComponent: async () => {
+        const { SidebarConversation } = await import('./sidebar/sidebar_conversation');
+        return SidebarConversation;
+      },
+    });
 
     return {};
   }
@@ -106,102 +152,229 @@ export class AgentBuilderPlugin
     const { http } = core;
     const { licensing, inference } = startDependencies;
 
+    startDependencies.cps?.cpsManager?.registerAppAccess(
+      AGENTBUILDER_APP_ID,
+      () => ProjectRoutingAccess.EDITABLE
+    );
+
     const agentService = new AgentService({ http });
-    const attachmentsService = new AttachmentsService();
+    const attachmentsService = new AttachmentsService({ http });
+    const renderersService = new RenderersService();
+
     const eventsService = new EventsService();
     const chatService = new ChatService({ http, events: eventsService });
     const conversationsService = new ConversationsService({ http });
+    const conversationTemplatesService = new ConversationTemplatesService();
     const docLinksService = new DocLinksService(core.docLinks.links);
     const toolsService = new ToolsService({ http });
+    const skillsService = new SkillsService({ http });
+    const smlService = new SmlService({ http });
+    const pluginsService = new PluginsService({ http });
+    const oauthClientsService = new OAuthClientsService({ http });
+    const spaceSettingsService = new SpaceSettingsService({ http });
     const accessChecker = new AgentBuilderAccessChecker({ licensing, inference });
 
     if (!this.setupServices) {
       throw new Error('plugin start called before plugin setup');
     }
 
-    const { navigationService } = this.setupServices;
+    const { navigationService, usageCollection } = this.setupServices;
+
+    const hasAgentBuilder = core.application.capabilities.agentBuilder?.show === true;
+    const sidebar = core.chrome.sidebar.getApp('agentBuilder');
+
+    const openSidebarInternal = (options?: OpenSidebarInternalOptions) => {
+      const { conversationId, ...openOptions } = options ?? {};
+      const config =
+        Object.keys(openOptions).length > 0 ? openOptions : this.conversationActiveConfig;
+
+      if (conversationId) {
+        const storageKey = storageKeys.getLastConversationKey(config.sessionTag, config.agentId);
+        window?.localStorage?.setItem(storageKey, JSON.stringify(conversationId));
+      }
+
+      // If already open, update props instead of creating new
+      if (this.activeSidebarRef && this.sidebarCallbacks) {
+        this.sidebarCallbacks.updateProps(config);
+        return { chatRef: this.activeSidebarRef };
+      }
+
+      // Set runtime context before opening
+      setSidebarRuntimeContext({
+        options: config,
+        onRegisterCallbacks: (callbacks) => {
+          this.sidebarCallbacks = callbacks;
+        },
+        onClose: () => {
+          this.activeSidebarRef = null;
+          this.sidebarCallbacks = null;
+          clearSidebarRuntimeContext();
+        },
+      });
+
+      sidebar.open();
+
+      const sidebarRef: ConversationSidebarRef = {
+        close: () => {
+          sidebar.close();
+          this.activeSidebarRef = null;
+          this.sidebarCallbacks = null;
+          clearSidebarRuntimeContext();
+        },
+      };
+
+      this.activeSidebarRef = sidebarRef;
+      return { chatRef: sidebarRef };
+    };
 
     const internalServices: AgentBuilderInternalService = {
       agentService,
       attachmentsService,
+      renderersService,
       chatService,
       conversationsService,
+      conversationTemplatesService,
       docLinksService,
       navigationService,
       toolsService,
+      skillsService,
+      smlService,
+      pluginsService,
+      oauthClientsService,
+      spaceSettingsService,
       startDependencies,
+      usageCollection,
       accessChecker,
       eventsService,
+      isEarsEnabled: this.isEarsEnabled,
+      isEarsExperimentalEnabled: this.isEarsExperimentalEnabled,
+      openSidebarConversation: (options?: OpenSidebarInternalOptions) => {
+        return openSidebarInternal(options);
+      },
     };
 
     this.internalServices = internalServices;
 
-    const hasAgentBuilder = core.application.capabilities.agentBuilder?.show === true;
+    setSidebarServices(core, internalServices);
 
-    const openFlyoutInternal = (options?: OpenConversationFlyoutOptions) => {
-      const config = options ?? this.conversationFlyoutActiveConfig;
+    const LazyConfiguredEmbeddableConversation = React.lazy(async () => {
+      const { createEmbeddableConversation } = await import(
+        './embeddable/create_embeddable_conversation'
+      );
 
-      // If a flyout is already open, update its props instead of creating a new one
-      if (this.activeFlyoutRef && this.flyoutCallbacks) {
-        this.flyoutCallbacks.updateProps(config);
-        return { flyoutRef: this.activeFlyoutRef };
-      }
+      return {
+        default: createEmbeddableConversation({
+          services: internalServices,
+          coreStart: core,
+        }),
+      };
+    });
 
-      // Create new flyout and set up prop updates
-      const { flyoutRef } = openConversationFlyout(config, {
-        coreStart: core,
-        services: internalServices,
-        onRegisterCallbacks: (callbacks) => {
-          this.flyoutCallbacks = callbacks;
-        },
-        onClose: () => {
-          this.activeFlyoutRef = null;
-          this.flyoutCallbacks = null;
-        },
+    const PublicEmbeddableConversation: React.FC<PublicEmbeddableConversationProps> = ({
+      onClose,
+      ariaLabelledBy,
+      ...rest
+    }) => (
+      <React.Suspense fallback={null}>
+        <LazyConfiguredEmbeddableConversation
+          {...rest}
+          onClose={onClose}
+          ariaLabelledBy={ariaLabelledBy ?? 'agent-builder-embeddable-conversation'}
+        />
+      </React.Suspense>
+    );
+
+    const LazyConfiguredEmbeddableConversationInput = React.lazy(async () => {
+      const { createEmbeddableConversationInput } = await import(
+        './embeddable/create_embeddable_conversation_input'
+      );
+
+      return {
+        default: createEmbeddableConversationInput({
+          services: internalServices,
+          coreStart: core,
+        }),
+      };
+    });
+
+    const PublicEmbeddableConversationInput = React.forwardRef<
+      EmbeddableConversationInputRef,
+      PublicEmbeddableConversationInputProps
+    >((props, ref) => (
+      <React.Suspense fallback={null}>
+        <LazyConfiguredEmbeddableConversationInput {...props} ref={ref} />
+      </React.Suspense>
+    ));
+
+    this.experimentalDeepLinksSubscription = core.uiSettings
+      .get$<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID)
+      .pipe(distinctUntilChanged())
+      .subscribe((experimentalFeaturesEnabled) => {
+        this.appUpdater$.next(() => ({
+          deepLinks: buildAgentBuilderDeepLinks(experimentalFeaturesEnabled),
+        }));
       });
-
-      this.activeFlyoutRef = flyoutRef;
-
-      return { flyoutRef };
-    };
 
     const agentBuilderService: AgentBuilderPluginStart = {
       agents: createPublicAgentsContract({ agentService }),
       attachments: createPublicAttachmentContract({ attachmentsService }),
+      conversationTemplates: createPublicConversationTemplatesContract({
+        conversationTemplatesService,
+      }),
+      renderers: createPublicRenderersContract({ renderersService }),
       tools: createPublicToolContract({ toolsService }),
       events: createPublicEventsContract({ eventsService }),
-      setConversationFlyoutActiveConfig: (config: EmbeddableConversationProps) => {
-        // set config until flyout is next opened
-        this.conversationFlyoutActiveConfig = config;
-        // if there is already an active flyout, update its props
-        if (this.activeFlyoutRef && this.flyoutCallbacks) {
-          this.flyoutCallbacks.updateProps(config);
-          return { flyoutRef: this.activeFlyoutRef };
+      getAgentBuilderAccess: createPublicEmbeddableChatAccess({
+        accessChecker,
+        application: core.application,
+      }),
+      addAttachment: (attachment: AttachmentInput) => {
+        if (this.sidebarCallbacks) {
+          this.sidebarCallbacks.addAttachment(attachment);
         }
       },
-      clearConversationFlyoutActiveConfig: () => {
-        this.conversationFlyoutActiveConfig = {};
-        if (this.activeFlyoutRef && this.flyoutCallbacks) {
-          // Removes stale browserApiTools from the flyout
-          this.flyoutCallbacks.resetBrowserApiTools();
+      removeAttachment: (attachmentId: string) => {
+        if (this.sidebarCallbacks) {
+          this.sidebarCallbacks.removeAttachmentById(attachmentId);
         }
       },
-      openConversationFlyout: (options?: OpenConversationFlyoutOptions) => {
-        return openFlyoutInternal(options);
+      setChatConfig: (config: EmbeddableConversationProps) => {
+        // Set config until sidebar is next opened
+        this.conversationActiveConfig = config;
+        // If there is already an active sidebar, update its props
+        if (this.activeSidebarRef && this.sidebarCallbacks) {
+          this.sidebarCallbacks.updateProps(config);
+          return { chatRef: this.activeSidebarRef };
+        }
       },
-      toggleConversationFlyout: (options?: OpenConversationFlyoutOptions) => {
-        if (this.activeFlyoutRef) {
-          const flyoutRef = this.activeFlyoutRef;
-          // Be defensive: clear local references immediately in case the underlying overlay doesn't
+      clearChatConfig: () => {
+        this.conversationActiveConfig = {};
+        if (this.activeSidebarRef && this.sidebarCallbacks) {
+          // Removes stale browserApiTools from the sidebar
+          this.sidebarCallbacks.resetBrowserApiTools();
+        }
+      },
+      openChat: (options?: OpenConversationSidebarOptions) => {
+        return openSidebarInternal(options);
+      },
+      toggleChat: (options?: OpenConversationSidebarOptions) => {
+        if (this.activeSidebarRef) {
+          const sidebarRef = this.activeSidebarRef;
+          // Be defensive: clear local references immediately in case the sidebar doesn't
           // synchronously invoke our onClose callback.
-          this.activeFlyoutRef = null;
-          this.flyoutCallbacks = null;
-          flyoutRef.close();
+          this.activeSidebarRef = null;
+          this.sidebarCallbacks = null;
+          sidebarRef.close();
           return;
         }
 
-        openFlyoutInternal(options);
+        openSidebarInternal(options);
       },
+      updateAttachmentOrigin: (conversationId: string, attachmentId: string, origin: string) => {
+        return attachmentsService.updateOrigin(conversationId, attachmentId, origin);
+      },
+      EmbeddableConversation: PublicEmbeddableConversation,
+      EmbeddableConversationInput: PublicEmbeddableConversationInput,
     };
 
     if (hasAgentBuilder) {
@@ -224,8 +397,27 @@ export class AgentBuilderPlugin
         // right before the user profile
         order: 1001,
       });
+
+      // Chrome Next transition: also expose this control as an AI button so it renders in the
+      // Chrome Next global header (behind the `core.chrome.next` feature flag). Chrome Next does
+      // not render HeaderNavControls (`registerRight` mount points), so we dual-register for now.
+      // Remove the `registerRight` registration once Chrome Next is the only chrome.
+      // See https://github.com/elastic/kibana/issues/260010
+      core.chrome.next.aiButton.register({
+        content: (
+          <AgentBuilderNavControlInitiator
+            coreStart={core}
+            pluginsStart={startDependencies}
+            agentBuilderService={agentBuilderService}
+          />
+        ),
+      });
     }
 
     return agentBuilderService;
+  }
+
+  stop() {
+    this.experimentalDeepLinksSubscription?.unsubscribe();
   }
 }

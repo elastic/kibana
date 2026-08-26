@@ -22,8 +22,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { SpacesContextProps } from '@kbn/spaces-plugin/public';
-import { ALL_SPACES_ID } from '@kbn/security-plugin/public';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { NoPermissionsTooltip } from '../../common/components/permissions';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { useFormWrapped } from '../../../../../hooks/use_form_wrapped';
@@ -58,7 +57,7 @@ export const AddOrEditLocationFlyout = ({
         lat: 0,
         lon: 0,
       },
-      spaces: [ALL_SPACES_ID],
+      spaces: [],
     },
   });
 

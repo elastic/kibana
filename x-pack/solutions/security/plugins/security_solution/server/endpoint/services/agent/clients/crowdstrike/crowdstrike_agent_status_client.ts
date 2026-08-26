@@ -20,7 +20,6 @@ import { getPendingActionsSummary, NormalizedExternalConnectorClient } from '../
 import { type AgentStatusRecords, HostStatus } from '../../../../../../common/endpoint/types';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { AgentStatusClient } from '../lib/base_agent_status_client';
-import { AgentStatusClientError } from '../errors';
 
 const CROWDSTRIKE_AGENT_INDEX_PATTERN = `logs-crowdstrike.host-*`;
 
@@ -160,13 +159,7 @@ export class CrowdstrikeAgentStatusClient extends AgentStatusClient {
         return acc;
       }, {});
     } catch (err) {
-      const error = new AgentStatusClientError(
-        `Failed to fetch crowdstrike agent status for agentIds: [${agentIds}], failed with: ${err.message}`,
-        500,
-        err
-      );
-      this.log.error(error);
-      throw error;
+      return this.handleUnexpectedFailureAndReturnDefaultResponse(agentIds, err);
     }
   }
 }

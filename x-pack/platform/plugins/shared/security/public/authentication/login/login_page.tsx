@@ -35,7 +35,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { LoginFormProps } from './components';
-import { DisabledLoginForm, LoginForm, LoginFormMessageType } from './components';
+import { DisabledLoginForm, LoginForm } from './components';
 import type { StartServices } from '../..';
 import {
   AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
@@ -44,6 +44,7 @@ import {
 import type { LoginState } from '../../../common/login_state';
 import type { LogoutReason } from '../../../common/types';
 import type { ConfigType } from '../../config';
+import { MessageType } from '../components';
 
 interface Props {
   http: HttpStart;
@@ -61,31 +62,44 @@ interface State {
 
 const loginFormMessages: Record<LogoutReason, NonNullable<LoginFormProps['message']>> = {
   SESSION_EXPIRED: {
-    type: LoginFormMessageType.Info,
+    type: MessageType.Info,
     content: i18n.translate('xpack.security.login.sessionExpiredDescription', {
       defaultMessage: 'Your session has timed out. Please log in again.',
     }),
   },
+  SESSION_IDLE_TIMEOUT: {
+    type: MessageType.Info,
+    content: i18n.translate('xpack.security.login.sessionIdleTimeoutDescription', {
+      defaultMessage: 'Your session has timed out due to inactivity. Please log in again.',
+    }),
+  },
+  SESSION_LIFESPAN_TIMEOUT: {
+    type: MessageType.Info,
+    content: i18n.translate('xpack.security.login.sessionLifespanTimeoutDescription', {
+      defaultMessage:
+        'Your session has expired because it reached the maximum lifespan. Please log in again.',
+    }),
+  },
   CONCURRENCY_LIMIT: {
-    type: LoginFormMessageType.Info,
+    type: MessageType.Info,
     content: i18n.translate('xpack.security.login.concurrencyLimitDescription', {
       defaultMessage: 'You have logged in on another device. Please log in again.',
     }),
   },
   AUTHENTICATION_ERROR: {
-    type: LoginFormMessageType.Info,
+    type: MessageType.Info,
     content: i18n.translate('xpack.security.login.authenticationErrorDescription', {
       defaultMessage: 'An unexpected authentication error occurred. Please log in again.',
     }),
   },
   LOGGED_OUT: {
-    type: LoginFormMessageType.Info,
+    type: MessageType.Info,
     content: i18n.translate('xpack.security.login.loggedOutDescription', {
       defaultMessage: 'You have logged out of Elastic.',
     }),
   },
   UNAUTHENTICATED: {
-    type: LoginFormMessageType.Danger,
+    type: MessageType.Danger,
     content: i18n.translate('xpack.security.unauthenticated.errorDescription', {
       defaultMessage:
         'Try logging in again, and if the problem persists, contact your system administrator.',
@@ -160,7 +174,7 @@ export class LoginPage extends Component<Props, State> {
     const logo = customLogo ? (
       <EuiImage src={customLogo} size={40} alt="logo" />
     ) : (
-      <EuiIcon type="logoElastic" size="xxl" />
+      <EuiIcon type="logoElastic" size="xxl" aria-hidden={true} />
     );
     // custom logo needs to be centered
     const logoStyle = customLogo ? { padding: 0 } : {};
@@ -276,7 +290,7 @@ export class LoginPage extends Component<Props, State> {
             <EuiButton
               href={window.location.href}
               target="_blank"
-              iconType="popout"
+              iconType="external"
               iconSide="right"
               fill
             >

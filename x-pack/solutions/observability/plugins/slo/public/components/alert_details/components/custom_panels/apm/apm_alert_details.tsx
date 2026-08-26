@@ -6,6 +6,11 @@
  */
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
+import {
+  APM_ALERTING_FAILED_TRANSACTIONS_CHART_EMBEDDABLE,
+  APM_ALERTING_LATENCY_CHART_EMBEDDABLE,
+  APM_ALERTING_THROUGHPUT_CHART_EMBEDDABLE,
+} from '@kbn/apm-embeddable-common';
 import type { APMTransactionDurationSLOResponse, APMErrorRateSLOResponse } from './embeddable_root';
 import { APMEmbeddableRoot } from './embeddable_root';
 import type { BurnRateRule, BurnRateAlert, TimeRange } from '../../../types';
@@ -28,7 +33,7 @@ export function APMLatencyAlertDetails({
       <APMEmbeddableRoot
         slo={slo}
         dataTimeRange={dataTimeRange}
-        embeddableId={'APM_ALERTING_LATENCY_CHART_EMBEDDABLE'}
+        embeddableId={APM_ALERTING_LATENCY_CHART_EMBEDDABLE}
         alert={alert}
         rule={rule}
       />
@@ -37,7 +42,7 @@ export function APMLatencyAlertDetails({
           <APMEmbeddableRoot
             slo={slo}
             dataTimeRange={dataTimeRange}
-            embeddableId={'APM_ALERTING_THROUGHPUT_CHART_EMBEDDABLE'}
+            embeddableId={APM_ALERTING_THROUGHPUT_CHART_EMBEDDABLE}
             alert={alert}
             rule={rule}
           />
@@ -46,7 +51,7 @@ export function APMLatencyAlertDetails({
           <APMEmbeddableRoot
             slo={slo}
             dataTimeRange={dataTimeRange}
-            embeddableId={'APM_ALERTING_FAILED_TRANSACTIONS_CHART_EMBEDDABLE'}
+            embeddableId={APM_ALERTING_FAILED_TRANSACTIONS_CHART_EMBEDDABLE}
             alert={alert}
             rule={rule}
           />
@@ -67,7 +72,7 @@ export function APMAvailabilityAlertDetails({
       <APMEmbeddableRoot
         slo={slo}
         dataTimeRange={dataTimeRange}
-        embeddableId={'APM_ALERTING_FAILED_TRANSACTIONS_CHART_EMBEDDABLE'}
+        embeddableId={APM_ALERTING_FAILED_TRANSACTIONS_CHART_EMBEDDABLE}
         alert={alert}
         rule={rule}
       />
@@ -76,7 +81,7 @@ export function APMAvailabilityAlertDetails({
           <APMEmbeddableRoot
             slo={slo}
             dataTimeRange={dataTimeRange}
-            embeddableId={'APM_ALERTING_THROUGHPUT_CHART_EMBEDDABLE'}
+            embeddableId={APM_ALERTING_THROUGHPUT_CHART_EMBEDDABLE}
             alert={alert}
             rule={rule}
           />
@@ -85,7 +90,7 @@ export function APMAvailabilityAlertDetails({
           <APMEmbeddableRoot
             slo={slo}
             dataTimeRange={dataTimeRange}
-            embeddableId={'APM_ALERTING_LATENCY_CHART_EMBEDDABLE'}
+            embeddableId={APM_ALERTING_LATENCY_CHART_EMBEDDABLE}
             alert={alert}
             rule={rule}
           />

@@ -8,6 +8,7 @@
     "public/**/*",
     "public/**/*.json",
     "server/**/*",
+    "test/**/*",
     "test_helpers/**/*",
     "storybook/**/*",
     "../../../../../typings/**/*"
@@ -28,7 +29,8 @@
     "@kbn/core-notifications-browser",
     "@kbn/core-http-browser",
     "@kbn/logging-mocks",
-    "@kbn/core-notifications-browser-internal"
+    "@kbn/core-notifications-browser-internal",
+    "@kbn/scout"
   ],
   "exclude": ["target/**/*"]
 }

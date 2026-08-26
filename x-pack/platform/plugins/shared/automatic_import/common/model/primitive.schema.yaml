@@ -1,0 +1,41 @@
+openapi: 3.0.3
+info:
+  title: Shared Primitives Schema
+  version: 'not applicable'
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    NonEmptyString:
+      type: string
+      format: nonempty
+      minLength: 1
+      maxLength: 100000
+      description: A string that does not contain only whitespace characters
+
+    NonEmptyIngestPipeline:
+      type: string
+      format: nonempty
+      minLength: 1
+      maxLength: 10485760
+      description: A JSON string that contains a valid ingest pipeline up to 10MiB
+
+    SafeIdentifier:
+      type: string
+      minLength: 1
+      maxLength: 255
+      pattern: '^[a-zA-Z0-9_]+$'
+      description: An identifier containing only alphanumeric characters and underscores
+
+    SemVer:
+      type: string
+      minLength: 5
+      maxLength: 20
+      pattern: '^\d+\.\d+\.\d+(-[a-zA-Z0-9]+(\.[a-zA-Z0-9]+)*)?$'
+      description: A semantic version string (e.g. 1.0.0 or 1.0.0-beta).
+
+    UUID:
+      type: string
+      format: uuid
+      maxLength: 36
+      description: A universally unique identifier

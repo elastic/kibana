@@ -15,6 +15,7 @@
     "@kbn/zod",
     "@kbn/es-errors",
     "@kbn/core-http-server",
+    "@kbn/core-spaces-common",
     "@kbn/hapi-mocks",
     "@kbn/core-logging-server-mocks",
     "@kbn/logging",
@@ -22,7 +23,8 @@
     "@kbn/logging-mocks",
     "@kbn/config-mocks",
     "@kbn/config",
-    "@kbn/core-security-server"
+    "@kbn/core-security-server",
+    "@kbn/tracing-utils"
   ],
   "exclude": [
     "target/**/*",

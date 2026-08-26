@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { certificatesSelector } from '../../state/certificates/certificates';
 
 export const CertificateTitle = () => {

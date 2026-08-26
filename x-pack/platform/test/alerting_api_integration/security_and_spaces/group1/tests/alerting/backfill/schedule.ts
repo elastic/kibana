@@ -175,7 +175,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: `Unauthorized to find rules for any rule types`,
+                message: `Unauthorized to find rules for any rule types.`,
                 statusCode: 403,
               });
               break;
@@ -370,7 +370,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: `Unauthorized to find rules for any rule types`,
+                message: `Unauthorized to find rules for any rule types.`,
                 statusCode: 403,
               });
               break;
@@ -789,7 +789,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: `Unauthorized to find rules for any rule types`,
+                message: `Unauthorized to find rules for any rule types.`,
                 statusCode: 403,
               });
               break;
@@ -894,7 +894,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: `Unauthorized to find rules for any rule types`,
+                message: `Unauthorized to find rules for any rule types.`,
                 statusCode: 403,
               });
               break;
@@ -903,7 +903,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
               expect(response.statusCode).to.eql(403);
               expect(response.body.error).to.eql('Forbidden');
               expect(response.body.message).to.match(
-                /Unauthorized by "alertsFixture" to scheduleBackfill "[^"]+" rule/
+                /Unauthorized by "alertsFixture, alertsFixture" to scheduleBackfill/
               );
               break;
             // User doesn't have access to actions but that doesn't matter for backfill jobs
@@ -1226,7 +1226,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: `Unauthorized to find rules for any rule types`,
+                message: `Unauthorized to find rules for any rule types.`,
                 statusCode: 403,
               });
               break;

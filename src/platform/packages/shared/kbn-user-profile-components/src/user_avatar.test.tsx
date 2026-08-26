@@ -7,20 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { shallow } from 'enzyme';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 
 import { UserAvatar } from './user_avatar';
 
+const delightedNightingale = {
+  username: 'delighted_nightingale',
+  email: 'delighted_nightingale@elastic.co',
+  full_name: 'Delighted Nightingale',
+};
+
+const displayLabel = 'Delighted Nightingale (delighted_nightingale@elastic.co)';
+
 describe('UserAvatar', () => {
-  it('should render `EuiAvatar` correctly with image avatar', () => {
-    const wrapper = shallow(
+  it('renders an image avatar with a built-in tooltip on hover', async () => {
+    render(
       <UserAvatar
-        user={{
-          username: 'delighted_nightingale',
-          email: 'delighted_nightingale@elastic.co',
-          full_name: 'Delighted Nightingale',
-        }}
+        user={delightedNightingale}
         avatar={{
           color: '#09e8ca',
           initials: 'DN',
@@ -28,23 +33,17 @@ describe('UserAvatar', () => {
         }}
       />
     );
-    expect(wrapper).toMatchInlineSnapshot(`
-      <EuiAvatar
-        color="plain"
-        imageUrl="https://source.unsplash.com/64x64/?cat"
-        name="Delighted Nightingale (delighted_nightingale@elastic.co)"
-      />
-    `);
+
+    await userEvent.hover(screen.getByRole('img'));
+    await waitFor(() => {
+      expect(screen.getByRole('tooltip')).toHaveTextContent(displayLabel);
+    });
   });
 
-  it('should render `EuiAvatar` correctly with initials avatar', () => {
-    const wrapper = shallow(
+  it('renders an initials avatar with a built-in tooltip on hover', async () => {
+    render(
       <UserAvatar
-        user={{
-          username: 'delighted_nightingale',
-          email: 'delighted_nightingale@elastic.co',
-          full_name: 'Delighted Nightingale',
-        }}
+        user={delightedNightingale}
         avatar={{
           color: '#09e8ca',
           initials: 'DN',
@@ -52,44 +51,30 @@ describe('UserAvatar', () => {
         }}
       />
     );
-    expect(wrapper).toMatchInlineSnapshot(`
-      <EuiAvatar
-        color="#09e8ca"
-        initials="DN"
-        initialsLength={2}
-        name="Delighted Nightingale (delighted_nightingale@elastic.co)"
-      />
-    `);
+
+    expect(screen.getByText('DN')).toBeInTheDocument();
+
+    await userEvent.hover(screen.getByRole('img'));
+    await waitFor(() => {
+      expect(screen.getByRole('tooltip')).toHaveTextContent(displayLabel);
+    });
   });
 
-  it('should render `EuiAvatar` correctly without avatar data', () => {
-    const wrapper = shallow(
-      <UserAvatar
-        user={{
-          username: 'delighted_nightingale',
-          email: 'delighted_nightingale@elastic.co',
-          full_name: 'Delighted Nightingale',
-        }}
-      />
-    );
-    expect(wrapper).toMatchInlineSnapshot(`
-      <EuiAvatar
-        color="#EAAE01"
-        initials="DN"
-        initialsLength={2}
-        name="Delighted Nightingale (delighted_nightingale@elastic.co)"
-      />
-    `);
+  it('renders initials when avatar data is missing', async () => {
+    render(<UserAvatar user={delightedNightingale} />);
+
+    expect(screen.getByText('DN')).toBeInTheDocument();
+
+    await userEvent.hover(screen.getByRole('img'));
+    await waitFor(() => {
+      expect(screen.getByRole('tooltip')).toHaveTextContent(displayLabel);
+    });
   });
 
-  it('should render `EuiAvatar` correctly without user data', () => {
-    const wrapper = shallow(<UserAvatar />);
-    expect(wrapper).toMatchInlineSnapshot(`
-      <EuiAvatar
-        color="#ECF1F9"
-        initials="?"
-        name=""
-      />
-    `);
+  it('renders a placeholder avatar when user data is missing', () => {
+    render(<UserAvatar />);
+
+    expect(screen.getByRole('img')).toHaveTextContent('?');
+    expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
   });
 });

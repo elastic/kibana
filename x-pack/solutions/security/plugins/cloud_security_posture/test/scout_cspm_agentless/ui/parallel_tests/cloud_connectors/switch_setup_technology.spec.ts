@@ -13,7 +13,8 @@ import {
 } from '@kbn/cloud-security-posture-common';
 
 import type { CreateAgentlessPolicyRequest } from '@kbn/fleet-plugin/common/types/rest_spec/agentless_policy';
-import { expect, spaceTest } from '@kbn/scout-security';
+import { spaceTest, tags } from '@kbn/scout-security';
+import { expect } from '@kbn/scout-security/ui';
 import {
   mockAgentPoliciesCreate,
   mockAgentlessPoliciesWithCapture,
@@ -26,7 +27,7 @@ type AgentlessPolicyRequestBody = CreateAgentlessPolicyRequest['body'];
 
 spaceTest.describe(
   'Cloud Connectors - Switch Setup Technology',
-  { tag: ['@ess', '@svlSecurity'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
     spaceTest.beforeEach(async ({ browserAuth }) => {
       // Use admin for stateful tests (has all permissions including fleet-cloud-connector)
@@ -190,7 +191,7 @@ spaceTest.describe(
         // Set up ALL mocks BEFORE navigation (order preserved)
         await Promise.all([
           // 1. Intercept agentless (should NOT be called)
-          page.route(/\/api\/fleet\/agentless_policies/, async (route, request) => {
+          page.route(/\/api\/fleet\/managed_integrations/, async (route, request) => {
             if (request.method() === 'POST') agentlessPolicyRequestCaptured = true;
             await route.continue();
           }),
@@ -268,7 +269,7 @@ spaceTest.describe(
         // Set up ALL mocks BEFORE navigation (order preserved)
         await Promise.all([
           // 1. Intercept agentless (should NOT be called)
-          page.route(/\/api\/fleet\/agentless_policies/, async (route, request) => {
+          page.route(/\/api\/fleet\/managed_integrations/, async (route, request) => {
             if (request.method() === 'POST') agentlessPolicyRequestCaptured = true;
             await route.continue();
           }),

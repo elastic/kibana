@@ -8,11 +8,18 @@
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import type { ScopedModel } from '@kbn/agent-builder-server';
-import type { PerformMatchSearchResponse } from './steps';
+import type { PerformMatchSearchResponse, TopSnippetsConfig } from './steps';
 import { performMatchSearch } from './steps';
 import { resolveResource } from './utils/resources';
 
 export type RelevanceSearchResponse = PerformMatchSearchResponse;
+
+const SEARCHABLE_TEXT_FIELD_TYPES = new Set([
+  'match_only_text',
+  'pattern_text',
+  'semantic_text',
+  'text',
+]);
 
 export const relevanceSearch = async ({
   term,
@@ -21,6 +28,7 @@ export const relevanceSearch = async ({
   model,
   esClient,
   logger,
+  topSnippetsConfig,
 }: {
   term: string;
   target: string;
@@ -28,15 +36,17 @@ export const relevanceSearch = async ({
   model: ScopedModel;
   esClient: ElasticsearchClient;
   logger: Logger;
+  /** When provided, uses ES|QL TOP_SNIPPETS instead of ES highlighting. */
+  topSnippetsConfig?: TopSnippetsConfig;
 }): Promise<RelevanceSearchResponse> => {
   const { fields } = await resolveResource({ resourceName: target, esClient });
 
   const selectedFields = fields.filter(
-    (field) => field.type === 'text' || field.type === 'semantic_text'
+    (field) => SEARCHABLE_TEXT_FIELD_TYPES.has(field.type) && field.searchable !== false
   );
 
   if (selectedFields.length === 0) {
-    throw new Error('No text or semantic_text fields found, aborting search.');
+    throw new Error('No searchable text fields found, aborting search.');
   }
 
   return performMatchSearch({
@@ -46,5 +56,6 @@ export const relevanceSearch = async ({
     size,
     esClient,
     logger,
+    topSnippetsConfig,
   });
 };

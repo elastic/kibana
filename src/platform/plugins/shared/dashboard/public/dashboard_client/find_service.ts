@@ -31,8 +31,8 @@ export const findService = {
     });
   },
   findByTitle: async (title: string) => {
-    const { dashboards } = await dashboardClient.search({
-      search: title,
+    const { data: dashboards } = await dashboardClient.search({
+      query: title,
       per_page: 10,
     });
 

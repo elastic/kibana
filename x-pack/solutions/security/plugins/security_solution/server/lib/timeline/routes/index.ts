@@ -15,6 +15,7 @@ import {
   exportTimelinesRoute,
   getTimelineRoute,
   getTimelinesRoute,
+  getTimelinesByIdsRoute,
   importTimelinesRoute,
   patchTimelinesRoute,
   persistFavoriteRoute,
@@ -43,6 +44,7 @@ export function registerTimelineRoutes(
   getTimelineRoute(router);
   resolveTimelineRoute(router);
   getTimelinesRoute(router);
+  getTimelinesByIdsRoute(router);
   cleanDraftTimelinesRoute(router);
   deleteTimelinesRoute(router);
   persistFavoriteRoute(router);

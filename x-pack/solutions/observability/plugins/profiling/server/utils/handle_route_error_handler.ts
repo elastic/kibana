@@ -36,6 +36,12 @@ export function handleRouteHandlerError({
 
   return response.customError({
     statusCode: error.statusCode ?? 500,
-    body: { message },
+    body: {
+      message,
+      attributes: {
+        cause: error?.message ?? String(error),
+        name: error?.name,
+      },
+    },
   });
 }

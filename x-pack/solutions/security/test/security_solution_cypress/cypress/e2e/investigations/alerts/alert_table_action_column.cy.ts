@@ -19,6 +19,7 @@ import {
   DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_GRAPH_ANALYZER_BUTTON,
   DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_GRAPH_ANALYZER_CONTENT,
 } from '../../../screens/expandable_flyout/alert_details_left_panel_analyzer_graph_tab';
+import { disableNewFlyout } from '../../../tasks/api_calls/kibana_advanced_settings';
 
 describe('Alerts Table Action column', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
@@ -30,6 +31,7 @@ describe('Alerts Table Action column', { tags: ['@ess', '@serverless'] }, () => 
   });
 
   beforeEach(() => {
+    disableNewFlyout();
     login();
     visitWithTimeRange(ALERTS_URL);
     waitForAlertsToPopulate();

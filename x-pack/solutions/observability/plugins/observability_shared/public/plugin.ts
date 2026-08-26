@@ -13,11 +13,12 @@ import type {
   SharePluginStart,
 } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import { BehaviorSubject } from 'rxjs';
 import { createLazyObservabilityPageTemplate } from './components/page_template';
 import { createNavigationRegistry } from './components/page_template/helpers/navigation_registry';
 import { registerProfilingComponent } from './components/profiling/helpers/component_registry';
-export { updateGlobalNavigation } from './services/update_global_navigation';
+import { updateGlobalNavigation } from './services/update_global_navigation';
 import {
   AssetDetailsFlyoutLocatorDefinition,
   AssetDetailsLocatorDefinition,
@@ -30,6 +31,8 @@ import {
   ServiceOverviewLocatorDefinition,
   TransactionDetailsByNameLocatorDefinition,
   TransactionDetailsByTraceIdLocatorDefinition,
+  ServiceTransactionsLocatorDefinition,
+  ServiceAlertsLocatorDefinition,
   type AssetDetailsFlyoutLocator,
   type AssetDetailsLocator,
   type InventoryLocator,
@@ -39,12 +42,14 @@ import {
   type TopNFunctionsLocator,
   type ServiceOverviewLocator,
   type TransactionDetailsByNameLocator,
+  type ServiceTransactionsLocator,
+  type ServiceAlertsLocator,
   type MetricsExplorerLocator,
   type TransactionDetailsByTraceIdLocator,
 } from '../common';
-import { updateGlobalNavigation } from './services/update_global_navigation';
 import type { DependencyOverviewLocator } from '../common/locators/apm/dependency_overview_locator';
 import { DependencyOverviewLocatorDefinition } from '../common/locators/apm/dependency_overview_locator';
+
 export interface ObservabilitySharedSetup {
   share: SharePluginSetup;
 }
@@ -53,6 +58,7 @@ export interface ObservabilitySharedStart {
   spaces?: SpacesPluginStart;
   embeddable: EmbeddableStart;
   share: SharePluginStart;
+  agentBuilder?: AgentBuilderPluginStart;
 }
 
 export type ObservabilitySharedPluginSetup = ReturnType<ObservabilitySharedPlugin['setup']>;
@@ -77,6 +83,8 @@ interface ObservabilitySharedLocators {
     dependencyOverview: DependencyOverviewLocator;
     transactionDetailsByName: TransactionDetailsByNameLocator;
     transactionDetailsByTraceId: TransactionDetailsByTraceIdLocator;
+    serviceTransactions: ServiceTransactionsLocator;
+    serviceAlerts: ServiceAlertsLocator;
   };
 }
 
@@ -153,6 +161,8 @@ export class ObservabilitySharedPlugin implements Plugin {
         transactionDetailsByTraceId: urlService.locators.create(
           new TransactionDetailsByTraceIdLocatorDefinition()
         ),
+        serviceTransactions: urlService.locators.create(new ServiceTransactionsLocatorDefinition()),
+        serviceAlerts: urlService.locators.create(new ServiceAlertsLocatorDefinition()),
       },
     };
   }

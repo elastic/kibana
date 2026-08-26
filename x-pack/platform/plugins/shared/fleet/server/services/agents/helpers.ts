@@ -10,6 +10,7 @@ import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type { SearchHit } from '@kbn/es-types';
 
 import type { FleetServerAgentComponent, OutputMap } from '../../../common/types';
+import { removeVersionSuffixFromPolicyId } from '../../../common/services/version_specific_policies_utils';
 
 import { appContextService } from '..';
 
@@ -23,7 +24,7 @@ type FleetServerAgentESResponse =
 export function searchHitToAgent(
   hit: FleetServerAgentESResponse & {
     sort?: SortResults;
-    fields?: { status?: AgentStatus[] };
+    fields?: { status?: AgentStatus[]; pipeline_config?: string[]; signals?: string[] };
   }
 ): Agent {
   const outputs: OutputMap | undefined = hit._source?.outputs
@@ -73,6 +74,13 @@ export function searchHitToAgent(
     access_api_key_id: hit._source?.access_api_key_id,
     default_api_key_id: hit._source?.default_api_key_id,
     policy_id: hit._source?.policy_id,
+    // Always resolved to the base policy id, so consumers indexing base-id-keyed collections can
+    // read this field directly instead of stripping the suffix off `policy_id` themselves. The
+    // fallback covers documents that pre-date `policy_base_id` (agents enrolled via an older
+    // fleet-server during a mixed-version rollout, before the startup backfill catches them).
+    policy_base_id:
+      hit._source?.policy_base_id ??
+      (hit._source?.policy_id ? removeVersionSuffixFromPolicyId(hit._source.policy_id) : undefined),
     last_checkin: hit._source?.last_checkin,
     last_checkin_status:
       hit._source?.last_checkin_status?.toLowerCase() as Agent['last_checkin_status'],
@@ -90,7 +98,11 @@ export function searchHitToAgent(
         }))
       : undefined,
     agent: hit._source?.agent
-      ? { id: hit._source?.agent.id, version: hit._source?.agent.version }
+      ? {
+          id: hit._source?.agent.id,
+          version: hit._source?.agent.version,
+          type: hit._source?.agent.type,
+        }
       : undefined,
 
     // key-value pairs
@@ -99,6 +111,11 @@ export function searchHitToAgent(
     unhealthy_reason: hit._source?.unhealthy_reason,
     last_known_status: hit._source?.last_known_status,
     upgrade: hit._source?.upgrade,
+    identifying_attributes: hit._source?.identifying_attributes,
+    non_identifying_attributes: hit._source?.non_identifying_attributes,
+    sequence_num: hit._source?.sequence_num,
+    capabilities: hit._source?.capabilities,
+    health: hit._source?.health,
   };
 
   if (!hit.fields?.status?.length) {
@@ -109,6 +126,12 @@ export function searchHitToAgent(
       );
   } else {
     agent.status = hit.fields.status[0];
+  }
+  if (hit.fields?.pipeline_config?.length) {
+    agent.pipeline_config = hit.fields.pipeline_config[0];
+  }
+  if (hit.fields?.signals?.length) {
+    agent.signals = hit.fields.signals;
   }
   return agent;
 }

@@ -60,9 +60,6 @@ fi
 
 if [[ -z "$EMAIL" ]]; then
   case "$BUCKET_NAME" in
-    "elastic-kibana-coverage-live")
-      EMAIL="kibana-ci-access-coverage@$GCLOUD_EMAIL_POSTFIX"
-      ;;
     "kibana-ci-es-snapshots-daily")
       EMAIL="kibana-ci-access-es-daily@$GCLOUD_EMAIL_POSTFIX"
       ;;
@@ -81,8 +78,14 @@ if [[ -z "$EMAIL" ]]; then
     "ci-typescript-archives")
       EMAIL="kibana-ci-access-ts-archives@$GCLOUD_EMAIL_POSTFIX"
       ;;
+    "kibana-ai-assistant-kb-artifacts-dev" | "kibana-ai-assistant-kb-artifacts")
+      EMAIL="kibana-ci-access-ai-buckets@$GCLOUD_EMAIL_POSTFIX"
+      ;;
     "kibana-ci-access-chromium-blds")
       EMAIL="kibana-ci-access-chromium-blds@$GCLOUD_EMAIL_POSTFIX"
+      ;;
+    "kibana-ci-artifacts-"*)
+      EMAIL="kibana-ci-access-artifacts@$GCLOUD_EMAIL_POSTFIX"
       ;;
     *)
       EMAIL="$BUCKET_NAME@$GCLOUD_EMAIL_POSTFIX"

@@ -6,15 +6,37 @@
  */
 
 import { useMemo } from 'react';
-import type { SelectedDataView } from '../../../../sourcerer/store/model';
+import type { DataViewSpec } from '@kbn/data-views-plugin/public';
+import type { BrowserFields as DataViewBrowserFields } from '@kbn/timelines-plugin/common';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 import { useBrowserFields } from '../../../../data_view_manager/hooks/use_browser_fields';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { RawIndicatorFieldId } from '../../../../../common/threat_intelligence/types/indicator';
 import { DESCRIPTION } from './translations';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import type { BrowserFields } from '../../../types';
+
+/**
+ * Combined data from a Kibana data view and its selected patterns to create
+ * selected data view state.
+ */
+export interface SelectedDataView {
+  /**
+   * @deprecated use EcsFlat or fields / indexFields from data view
+   */
+  browserFields: DataViewBrowserFields;
+  dataViewId: string | null; // null if legacy pre-8.0 timeline
+  /** do the selected indices exist */
+  indicesExist: boolean;
+  /** is an update being made to the data view */
+  loading: boolean;
+  /** all selected patterns */
+  selectedPatterns: string[];
+  /**
+   * Easier to add this additional data rather than
+   * try to extend the SelectedDataView type from DataView.
+   */
+  sourcererDataView: DataViewSpec;
+}
 
 /**
  * Inline definition for a runtime field "threat.indicator.name" we are adding for indicators grid
@@ -30,20 +52,15 @@ const indicatorNameField = {
 } as const;
 
 export const useTIDataView = (): SelectedDataView => {
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const oldDataView = useSourcererDataView();
   const { dataView, status } = useDataView();
+  const browserFields = useBrowserFields(dataView);
+  const selectedPatterns = useSelectedPatterns(dataView);
 
-  const experimentalBrowserFields = useBrowserFields();
-  const experimentalSelectedPatterns = useSelectedPatterns();
-
-  const browserFields = useMemo(() => {
-    const { threat = { fields: {} } } = newDataViewPickerEnabled
-      ? experimentalBrowserFields
-      : oldDataView.browserFields;
+  const tiBrowserFields = useMemo(() => {
+    const { threat = { fields: {} } } = browserFields;
 
     return {
-      ...(newDataViewPickerEnabled ? experimentalBrowserFields : oldDataView.browserFields),
+      ...browserFields,
       threat: {
         fields: {
           ...threat.fields,
@@ -51,35 +68,24 @@ export const useTIDataView = (): SelectedDataView => {
         },
       },
     } as BrowserFields;
-  }, [experimentalBrowserFields, newDataViewPickerEnabled, oldDataView.browserFields]);
+  }, [browserFields]);
 
   return useMemo(
     () =>
       ({
-        ...(newDataViewPickerEnabled
-          ? {
-              sourcererDataView: {
-                fields: dataView.fields.toSpec(),
-                title: dataView.title,
-                id: dataView.id,
-              },
-              loading: status !== 'ready',
-              dataViewId: dataView.id,
-              indicesExist: dataView.hasMatchedIndices(),
-            }
-          : oldDataView),
-        browserFields,
-        selectedPatterns: newDataViewPickerEnabled
-          ? experimentalSelectedPatterns
-          : oldDataView.selectedPatterns,
+        ...{
+          sourcererDataView: {
+            fields: dataView.fields.toSpec(),
+            title: dataView.title,
+            id: dataView.id,
+          },
+          loading: status !== 'ready',
+          dataViewId: dataView.id,
+          indicesExist: dataView.hasMatchedIndices(),
+        },
+        browserFields: tiBrowserFields,
+        selectedPatterns,
       } as SelectedDataView),
-    [
-      browserFields,
-      dataView,
-      experimentalSelectedPatterns,
-      newDataViewPickerEnabled,
-      oldDataView,
-      status,
-    ]
+    [tiBrowserFields, dataView, selectedPatterns, status]
   );
 };

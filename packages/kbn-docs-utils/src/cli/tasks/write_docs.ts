@@ -45,24 +45,51 @@ export async function writeDocs(
 ): Promise<void> {
   const { log, transaction, outputFolder } = context;
   const { initialDocIds } = setupResult;
-  const { plugins } = setupResult;
+  const { plugins, allPlugins } = setupResult;
   const { pluginApiMap, referencedDeprecations, unreferencedDeprecations } = apiMapResult;
 
-  if (!options.stats) {
+  // Only write aggregate docs (plugin directory, deprecation summaries) for full builds.
+  // Filtered builds skip these because:
+  // 1. Aggregate docs require complete data from all plugins to be accurate.
+  // 2. Writing partial deprecation data would be misleading (e.g., "deprecation by team").
+  // 3. Single-plugin builds focus on validating that plugin's docs only.
+  const hasFilter = options.pluginFilter?.length || options.packageFilter?.length;
+  if (!options.stats && !hasFilter) {
     const spanWritePluginDirectoryDoc = transaction.startSpan(
       'build_api_docs.writePluginDirectoryDoc',
       'write'
     );
-
     await writePluginDirectoryDoc(outputFolder, pluginApiMap, allPluginStats, log);
-
     spanWritePluginDirectoryDoc?.end();
+
+    const spanWriteDeprecationDocByPlugin = transaction.startSpan(
+      'build_api_docs.writeDeprecationDocByPlugin',
+      'write'
+    );
+    await writeDeprecationDocByPlugin(outputFolder, referencedDeprecations, log);
+    spanWriteDeprecationDocByPlugin?.end();
+
+    const spanWriteDeprecationDueByTeam = transaction.startSpan(
+      'build_api_docs.writeDeprecationDueByTeam',
+      'write'
+    );
+    await writeDeprecationDueByTeam(outputFolder, referencedDeprecations, allPlugins, log);
+    spanWriteDeprecationDueByTeam?.end();
+
+    const spanWriteDeprecationDocByApi = transaction.startSpan(
+      'build_api_docs.writeDeprecationDocByApi',
+      'write'
+    );
+    await writeDeprecationDocByApi(
+      outputFolder,
+      referencedDeprecations,
+      unreferencedDeprecations,
+      log
+    );
+    spanWriteDeprecationDocByApi?.end();
   }
 
   for (const plugin of plugins) {
-    // Note that the filtering is done in this task, and not during plugin discovery, because the entire
-    // public plugin API has to be parsed in order to correctly determine reference links, and ensure that
-    // `removeBrokenLinks` doesn't remove more links than necessary.
     if (options.pluginFilter && !options.pluginFilter.includes(plugin.id)) {
       continue;
     }
@@ -73,7 +100,7 @@ export async function writeDocs(
 
     if (!options.stats) {
       if (pluginStats.apiCount > 0) {
-        log.info(`Writing public API doc for plugin ${pluginApi.id}.`);
+        log.info(`Writing public API doc for ${pluginApi.id}.`);
 
         const spanWritePluginDocs = transaction.startSpan(
           'build_api_docs.writePluginDocs',
@@ -84,40 +111,8 @@ export async function writeDocs(
 
         spanWritePluginDocs?.end();
       } else {
-        log.info(`Plugin ${pluginApi.id} has no public API.`);
+        log.info(`${pluginApi.id} has no public API.`);
       }
-
-      const spanWriteDeprecationDocByPlugin = transaction.startSpan(
-        'build_api_docs.writeDeprecationDocByPlugin',
-        'write'
-      );
-
-      await writeDeprecationDocByPlugin(outputFolder, referencedDeprecations, log);
-
-      spanWriteDeprecationDocByPlugin?.end();
-
-      const spanWriteDeprecationDueByTeam = transaction.startSpan(
-        'build_api_docs.writeDeprecationDueByTeam',
-        'write'
-      );
-
-      await writeDeprecationDueByTeam(outputFolder, referencedDeprecations, plugins, log);
-
-      spanWriteDeprecationDueByTeam?.end();
-
-      const spanWriteDeprecationDocByApi = transaction.startSpan(
-        'build_api_docs.writeDeprecationDocByApi',
-        'write'
-      );
-
-      await writeDeprecationDocByApi(
-        outputFolder,
-        referencedDeprecations,
-        unreferencedDeprecations,
-        log
-      );
-
-      spanWriteDeprecationDocByApi?.end();
     }
   }
 

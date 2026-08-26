@@ -20,15 +20,14 @@ import { KibanaContextProvider } from './common/lib/kibana';
 import { queryClient } from './query_client';
 import { KibanaRenderContextProvider } from './shared_imports';
 import { ExperimentalFeaturesProvider } from './common/experimental_features_context';
-import type { ExperimentalFeatures } from '../common/experimental_features';
+import { ExperimentalFeaturesService } from './common/experimental_features_service';
 
 export const renderApp = (
   core: CoreStart,
   services: AppPluginStartDependencies,
   { element, history }: AppMountParameters,
   storage: Storage,
-  kibanaVersion: string,
-  experimentalFeatures: ExperimentalFeatures
+  kibanaVersion: string
 ) => {
   ReactDOM.render(
     <KibanaRenderContextProvider {...core}>
@@ -42,7 +41,7 @@ export const renderApp = (
           storage,
         }}
       >
-        <ExperimentalFeaturesProvider value={experimentalFeatures}>
+        <ExperimentalFeaturesProvider value={ExperimentalFeaturesService.get()}>
           <Router history={history}>
             <QueryClientProvider client={queryClient}>
               <OsqueryApp />

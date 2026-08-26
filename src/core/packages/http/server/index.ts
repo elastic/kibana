@@ -85,6 +85,9 @@ export type {
   RouteConfigOptionsBody,
   RouteContentType,
   SafeRouteMethod,
+  OnRequestValidationError,
+  RequestValidationError,
+  RequestValidationErrorHandler,
   RouteValidationFunction,
   RouteValidationResultFactory,
   RouteValidationSpec,
@@ -117,8 +120,11 @@ export type {
   RouteAuthc,
   AuthcDisabled,
   AuthcEnabled,
+  AuthcMinimal,
+  AuthcOptional,
   Privilege,
   PrivilegeSet,
+  Privileges,
   AllRequiredCondition,
   AnyRequiredCondition,
   RouteSecurity,
@@ -127,6 +133,10 @@ export type {
   RouteDeprecationInfo,
   PostValidationMetadata,
   AnyKibanaRequest,
+  RequestTiming,
+  Timer,
+  TimingEvent,
+  RequestTimingState,
 } from './src/router';
 export {
   validBodyOutput,
@@ -151,6 +161,7 @@ export type {
   SessionStorageFactory,
   SessionCookieValidationResult,
   SessionStorageCookieOptions,
+  SessionStorageSetOptions,
 } from './src/session_storage';
 
 export type { GetAuthState, IsAuthenticated } from './src/auth_state';
@@ -164,6 +175,12 @@ export type {
   HttpServicePreboot,
   HttpServiceSetup,
   HttpServiceStart,
+  HttpSelfFetchHeaders,
+  HttpSelfFetchOptions,
+  HttpSelfFetchQuery,
+  HttpSelfResponse,
+  HttpSelfScopedClient,
+  HttpSelfService,
   HttpProtocol,
 } from './src/http_contract';
 

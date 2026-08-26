@@ -157,6 +157,7 @@ export const JobsTableComponent = ({
   return (
     <EuiBasicTable
       data-test-subj="jobs-table"
+      tableCaption={i18n.JOBS_TABLE_CAPTION}
       columns={getJobsTableColumns(isLoading, onJobStateChange)}
       items={getPaginatedItems(
         jobs.map((j) => ({ ...j, isCompatible: mlNodesAvailable ? j.isCompatible : false })),
@@ -196,7 +197,7 @@ export const NoItemsMessage = React.memo(() => {
       actions={
         <EuiButton
           href={createNewAnomalyDetectionJobUrl}
-          iconType="popout"
+          iconType="external"
           iconSide="right"
           size="s"
           target="_blank"

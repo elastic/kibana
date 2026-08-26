@@ -97,10 +97,10 @@ export const EXCEPTION_DELETE_ERROR = i18n.translate(
   }
 );
 
-export const exceptionDeleteSuccessMessage = (listId: string) =>
+export const exceptionDeleteSuccessMessage = (listName: string) =>
   i18n.translate('xpack.securitySolution.exceptions.referenceModalSuccessDescription', {
-    defaultMessage: 'Exception list - {listId} - deleted successfully.',
-    values: { listId },
+    defaultMessage: 'Exception list "{listName}" deleted successfully.',
+    values: { listName },
   });
 
 export const REFERENCE_MODAL_TITLE = i18n.translate(
@@ -210,6 +210,14 @@ export const IMPORT_EXCEPTION_LIST_AS_NEW_LIST = i18n.translate(
   'xpack.securitySolution.exceptionsTable.importExceptionListAsNewList',
   {
     defaultMessage: 'Create new list',
+  }
+);
+
+export const IMPORT_ENDPOINT_ARTIFACTS_ERROR_TEXT = i18n.translate(
+  'xpack.securitySolution.exceptionsTable.importEndpointArtifactsErrorText',
+  {
+    defaultMessage:
+      'You can only import shared exception lists here, but at least one of the imported files contains endpoint artifacts. Import endpoint artifacts from their dedicated pages instead.',
   }
 );
 

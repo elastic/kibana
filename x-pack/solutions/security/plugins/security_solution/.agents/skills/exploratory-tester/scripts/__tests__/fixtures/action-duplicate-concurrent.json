@@ -1,0 +1,25 @@
+{
+  "network": [
+    {
+      "method": "POST",
+      "url": "https://kibana.example/internal/entity_analytics/monitoring/entity_source/init",
+      "status": 200,
+      "ok": true,
+      "failure": null,
+      "requestedAt": 0,
+      "respondedAt": 90,
+      "resourceType": "fetch"
+    },
+    {
+      "method": "POST",
+      "url": "https://kibana.example/internal/entity_analytics/monitoring/entity_source/init",
+      "status": 200,
+      "ok": true,
+      "failure": null,
+      "requestedAt": 80,
+      "respondedAt": 160,
+      "resourceType": "fetch"
+    }
+  ],
+  "console": []
+}

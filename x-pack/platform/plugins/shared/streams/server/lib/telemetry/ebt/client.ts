@@ -8,19 +8,15 @@
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import type {
   StreamEndpointLatencyProps,
-  StreamsDescriptionGeneratedProps,
-  StreamsInsightsGeneratedProps,
-  StreamsSignificantEventsQueriesGeneratedProps,
   StreamsStateErrorProps,
-  StreamsSystemIdentificationIdentifiedProps,
+  StreamsProcessingPipelineSuggestedProps,
+  StreamsAgentToolEventCreateProps,
 } from './types';
 import {
   STREAMS_ENDPOINT_LATENCY_EVENT,
-  STREAMS_DESCRIPTION_GENERATED_EVENT_TYPE,
-  STREAMS_SIGNIFICANT_EVENTS_QUERIES_GENERATED_EVENT_TYPE,
   STREAMS_STATE_ERROR_EVENT,
-  STREAMS_SYSTEM_IDENTIFICATION_IDENTIFIED_EVENT_TYPE,
-  STREAMS_INSIGHTS_GENERATED_EVENT_TYPE,
+  STREAMS_PROCESSING_PIPELINE_SUGGESTED_EVENT_TYPE,
+  STREAMS_AGENT_TOOL_EVENT_CREATE_EVENT_TYPE,
 } from './constants';
 
 const LATENCY_TRACKING_ENDPOINT_ALLOW_LIST = [
@@ -67,21 +63,11 @@ export class EbtTelemetryClient {
     this.analytics.reportEvent(STREAMS_STATE_ERROR_EVENT, errorData);
   }
 
-  public trackSystemsIdentified(params: StreamsSystemIdentificationIdentifiedProps) {
-    this.analytics.reportEvent(STREAMS_SYSTEM_IDENTIFICATION_IDENTIFIED_EVENT_TYPE, params);
+  public trackProcessingPipelineSuggested(params: StreamsProcessingPipelineSuggestedProps) {
+    this.analytics.reportEvent(STREAMS_PROCESSING_PIPELINE_SUGGESTED_EVENT_TYPE, params);
   }
 
-  public trackDescriptionGenerated(params: StreamsDescriptionGeneratedProps) {
-    this.analytics.reportEvent(STREAMS_DESCRIPTION_GENERATED_EVENT_TYPE, params);
-  }
-
-  public trackSignificantEventsQueriesGenerated(
-    params: StreamsSignificantEventsQueriesGeneratedProps
-  ) {
-    this.analytics.reportEvent(STREAMS_SIGNIFICANT_EVENTS_QUERIES_GENERATED_EVENT_TYPE, params);
-  }
-
-  public trackInsightsGenerated(params: StreamsInsightsGeneratedProps) {
-    this.analytics.reportEvent(STREAMS_INSIGHTS_GENERATED_EVENT_TYPE, params);
+  public trackAgentToolEventCreate(params: StreamsAgentToolEventCreateProps) {
+    this.analytics.reportEvent(STREAMS_AGENT_TOOL_EVENT_CREATE_EVENT_TYPE, params);
   }
 }

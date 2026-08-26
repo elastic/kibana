@@ -8,6 +8,7 @@
 import type { AggregationsAggregateOrder } from '@elastic/elasticsearch/lib/api/types';
 import { kqlQuery, rangeQuery, termQuery, wildcardQuery } from '@kbn/observability-plugin/server';
 import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import type { ErrorGroupMainStatisticsResponse } from '@kbn/apm-api-shared';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import {
   AT_TIMESTAMP,
@@ -18,6 +19,8 @@ import {
   ERROR_GROUP_ID,
   ERROR_GROUP_NAME,
   ERROR_LOG_MESSAGE,
+  ERROR_MESSAGE,
+  ERROR_TYPE,
   SERVICE_NAME,
   TRACE_ID,
   TRANSACTION_NAME,
@@ -28,20 +31,6 @@ import type { APMEventClient } from '../../../lib/helpers/create_es_client/creat
 import { ApmDocumentType } from '../../../../common/document_type';
 import { RollupInterval } from '../../../../common/rollup';
 import { getErrorName } from '../../../lib/helpers/get_error_name';
-
-export interface ErrorGroupMainStatisticsResponse {
-  errorGroups: Array<{
-    groupId: string;
-    name: string;
-    lastSeen: number;
-    occurrences: number;
-    culprit: string | undefined;
-    handled: boolean | undefined;
-    type: string | undefined;
-    traceId: string | undefined;
-  }>;
-  maxCountExceeded: boolean;
-}
 
 export async function getErrorGroupMainStatistics({
   kuery,
@@ -105,6 +94,8 @@ export async function getErrorGroupMainStatistics({
     ERROR_EXC_MESSAGE,
     ERROR_EXC_HANDLED,
     ERROR_EXC_TYPE,
+    ERROR_MESSAGE,
+    ERROR_TYPE,
   ] as const);
 
   const response = await apmEventClient.search('get_error_group_main_statistics', {
@@ -185,7 +176,7 @@ export async function getErrorGroupMainStatistics({
         occurrences: bucket.doc_count,
         culprit: event[ERROR_CULPRIT],
         handled: exception.handled,
-        type: exception.type,
+        type: exception.type || event[ERROR_TYPE],
         traceId: event[TRACE_ID],
       };
     }) ?? [];

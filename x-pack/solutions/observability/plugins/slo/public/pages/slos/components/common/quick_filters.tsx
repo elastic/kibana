@@ -57,6 +57,7 @@ export function QuickFilters({
   return (
     <div
       css={css`
+        min-width: 460px;
         .controlsWrapper {
           align-items: flex-start;
           min-height: initial;
@@ -66,6 +67,7 @@ export function QuickFilters({
         }
         .controlGroup {
           min-height: initial;
+          flex-wrap: nowrap;
         }
       `}
     >
@@ -75,30 +77,30 @@ export function QuickFilters({
           builder.addOptionsListControl(
             initialState,
             {
-              dataViewId: dataView.id!,
-              fieldName: 'status',
+              data_view_id: dataView.id!,
+              field_name: 'status',
               width: 'small',
               grow: true,
               title: STATUS_LABEL,
               exclude: statusFilter?.meta?.negate,
-              selectedOptions: getSelectedOptions(statusFilter),
-              existsSelected: Boolean(statusFilter?.query?.exists?.field === 'status'),
-              displaySettings: { placeholder: ALL_LABEL },
+              selected_options: getSelectedOptions(statusFilter),
+              exists_selected: Boolean(statusFilter?.query?.exists?.field === 'status'),
+              display_settings: { placeholder: ALL_LABEL },
             },
             'slo-status-filter'
           );
           builder.addOptionsListControl(
             initialState,
             {
-              dataViewId: dataView.id!,
+              data_view_id: dataView.id!,
               title: TAGS_LABEL,
-              fieldName: 'slo.tags',
+              field_name: 'slo.tags',
               width: 'small',
               grow: false,
-              selectedOptions: getSelectedOptions(tagsFilter),
+              selected_options: getSelectedOptions(tagsFilter),
               exclude: statusFilter?.meta?.negate,
-              existsSelected: Boolean(tagsFilter?.query?.exists?.field === 'slo.tags'),
-              displaySettings: { placeholder: ALL_LABEL },
+              exists_selected: Boolean(tagsFilter?.query?.exists?.field === 'slo.tags'),
+              display_settings: { placeholder: ALL_LABEL },
             },
             'slo-tags-filter'
           );

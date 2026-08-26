@@ -7,8 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
+import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
+import type {
+  EuiDataGridCellValueElementProps,
+  EuiDataGridCustomBodyProps,
+  EuiDataGridProps,
+} from '@elastic/eui';
+import type { EuiDataGridRefProps } from '@elastic/eui';
+import type { RestorableStateProviderApi } from '@kbn/restorable-state';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { UnifiedDataTableProps } from './data_table';
 import React, { useCallback, useState } from 'react';
-import type { ReactWrapper } from 'enzyme';
+import userEvent, { PointerEventsCheckLevel } from '@testing-library/user-event';
+import { buildDataTableRecord, getDocId } from '@kbn/discover-utils';
+import {
+  buildDataViewMock,
+  deepMockedFields,
+  esHitsMock,
+  generateEsHits,
+} from '@kbn/discover-utils/src/__mocks__';
 import {
   BUTTON_NEXT_TEST_SUBJ,
   BUTTON_TEST_SUBJ,
@@ -16,66 +34,71 @@ import {
   HIGHLIGHT_CLASS_NAME,
   INPUT_TEST_SUBJ,
 } from '@kbn/data-grid-in-table-search';
-import type { EuiDataGridCellValueElementProps, EuiDataGridCustomBodyProps } from '@elastic/eui';
-import { EuiButton, EuiDataGrid, EuiThemeProvider } from '@elastic/eui';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
-import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import { act } from 'react-dom/test-utils';
-import { findTestSubject } from '@elastic/eui/lib/test';
-import {
-  buildDataViewMock,
-  deepMockedFields,
-  esHitsMock,
-  generateEsHits,
-} from '@kbn/discover-utils/src/__mocks__';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import type { UnifiedDataTableProps } from './data_table';
+import { capabilitiesServiceMock } from '@kbn/core-capabilities-browser-mocks';
+import { CELL_CLASS } from '../utils/get_render_cell_value';
 import { DataLoadingState, UnifiedDataTable } from './data_table';
+import { ColumnControlWithSummary } from './column_control_with_summary';
+import { renderCustomToolbar } from './custom_toolbar/render_custom_toolbar';
+import { dataViewsMock } from '../../__mocks__/data_views';
+import { defaultTimeColumnWidth } from '../constants';
+import { EuiButton, EuiThemeProvider } from '@elastic/eui';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { servicesMock } from '../../__mocks__/services';
-import { buildDataTableRecord, getDocId } from '@kbn/discover-utils';
-import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import {
   mockRowAdditionalLeadingControls,
   testLeadingControlColumn,
   testTrailingControlColumns,
 } from '../../__mocks__/external_control_columns';
-import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { CELL_CLASS } from '../utils/get_render_cell_value';
-import { defaultTimeColumnWidth } from '../constants';
+import { render, screen, waitFor } from '@testing-library/react';
+import { servicesMock } from '../../__mocks__/services';
 import { useColumns } from '../hooks/use_data_grid_columns';
-import { capabilitiesServiceMock } from '@kbn/core-capabilities-browser-mocks';
-import { dataViewsMock } from '../../__mocks__/data_views';
-import type { EuiDataGridRefProps } from '@elastic/eui';
-import type { RestorableStateProviderApi } from '@kbn/restorable-state';
+import { waitForEuiPopoverClose, waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
-const mockUseDataGridColumnsCellActions = jest.fn((prop: unknown) => []);
+const mockUseDataGridColumnsCellActions = jest.fn((_prop: unknown) => []);
+
 jest.mock('@kbn/cell-actions', () => ({
   ...jest.requireActual('@kbn/cell-actions'),
   useDataGridColumnsCellActions: (prop: unknown) => mockUseDataGridColumnsCellActions(prop),
 }));
 
+const mockEuiDataGrid = jest.fn();
+
+jest.mock('@elastic/eui', () => {
+  const actual = jest.requireActual('@elastic/eui');
+  const ReactActual = jest.requireActual('react');
+
+  return {
+    ...actual,
+    EuiDataGrid: ReactActual.forwardRef((props: EuiDataGridProps, ref: React.Ref<unknown>) => {
+      mockEuiDataGrid(props);
+      return <actual.EuiDataGrid {...props} ref={ref} />;
+    }),
+  };
+});
+
 const EXTENDED_JEST_TIMEOUT = 10000;
 
+const capabilities = capabilitiesServiceMock.createStartContract().capabilities;
+
 const dataViewMock = buildDataViewMock({
-  name: 'the-data-view',
   fields: deepMockedFields,
+  name: 'the-data-view',
   timeFieldName: '@timestamp',
 });
 
-function getProps(): UnifiedDataTableProps {
+const getProps = (): UnifiedDataTableProps => {
   const services = servicesMock;
   services.dataViewFieldEditor.userPermissions.editIndexPattern = jest.fn().mockReturnValue(true);
 
   return {
     ariaLabelledBy: '',
+    cellActionsMetadata: {
+      someKey: 'someValue',
+    },
     columns: [],
     dataView: dataViewMock,
-    loadingState: DataLoadingState.loaded,
     expandedDoc: undefined,
+    loadingState: DataLoadingState.loaded,
     onFilter: jest.fn(),
     onResize: jest.fn(),
     onSetColumns: jest.fn(),
@@ -84,10 +107,6 @@ function getProps(): UnifiedDataTableProps {
     sampleSizeState: 30,
     searchDescription: '',
     searchTitle: '',
-    setExpandedDoc: jest.fn(),
-    settings: {},
-    showTimeCol: true,
-    sort: [],
     services: {
       fieldFormats: services.fieldFormats,
       uiSettings: services.uiSettings,
@@ -97,11 +116,12 @@ function getProps(): UnifiedDataTableProps {
       data: services.data,
       theme: services.theme,
     },
-    cellActionsMetadata: {
-      someKey: 'someValue',
-    },
+    setExpandedDoc: jest.fn(),
+    settings: {},
+    showTimeCol: true,
+    sort: [],
   };
-}
+};
 
 const DataTable = (props: Partial<UnifiedDataTableProps>) => (
   <KibanaContextProvider services={servicesMock}>
@@ -109,7 +129,51 @@ const DataTable = (props: Partial<UnifiedDataTableProps>) => (
   </KibanaContextProvider>
 );
 
-const capabilities = capabilitiesServiceMock.createStartContract().capabilities;
+const DataTableWithI18n = (props: UnifiedDataTableProps) => (
+  <IntlProvider locale="en">
+    <DataTable {...props} />
+  </IntlProvider>
+);
+
+const clickSelectedDocumentsMenuAction = async (testSubj: string) => {
+  await userEvent.click(screen.getByTestId(testSubj), {
+    pointerEventsCheck: PointerEventsCheckLevel.Never,
+  });
+  await waitForEuiPopoverClose();
+};
+
+const getDisplayedDocNr = () => {
+  const gridSelectionBtn = screen.queryByTestId('discoverDocTable');
+
+  if (!gridSelectionBtn) return 0;
+
+  const selectedNr = gridSelectionBtn.getAttribute('data-document-number');
+
+  return Number(selectedNr);
+};
+
+const getLastEuiDataGridProps = () => mockEuiDataGrid.mock.calls.at(-1)?.[0] as EuiDataGridProps;
+
+const getSelectedDocNr = () => {
+  const gridSelectionBtn = screen.queryByTestId('unifiedDataTableSelectionBtn');
+
+  if (!gridSelectionBtn) return 0;
+
+  const selectedNr = gridSelectionBtn.getAttribute('data-selected-documents');
+
+  return Number(selectedNr);
+};
+
+const openSelectedDocumentsMenu = async () => {
+  await userEvent.click(screen.getByTestId('unifiedDataTableSelectionBtn'));
+  await waitForEuiPopoverOpen();
+};
+
+const renderComponent = async (props: UnifiedDataTableProps = getProps()) => {
+  const renderResult = render(<DataTableWithI18n {...props} />);
+  await waitForDataGridRender();
+  return renderResult;
+};
 
 const renderDataTable = async (props: Partial<UnifiedDataTableProps>) => {
   const DataTableWrapped = () => {
@@ -119,17 +183,13 @@ const renderDataTable = async (props: Partial<UnifiedDataTableProps>) => {
 
     const { onSetColumns } = useColumns({
       capabilities,
+      columns,
       dataView: dataViewMock,
       dataViews: dataViewsMock,
       setAppState: useCallback((state) => {
-        if (state.columns) {
-          setColumns(state.columns);
-        }
-        if (state.settings) {
-          setSettings(state.settings);
-        }
+        if (state.columns) setColumns(state.columns);
+        if (state.settings) setSettings(state.settings);
       }, []),
-      columns,
       settings,
     });
 
@@ -139,8 +199,6 @@ const renderDataTable = async (props: Partial<UnifiedDataTableProps>) => {
           <DataTable
             {...props}
             columns={columns}
-            onSetColumns={onSetColumns}
-            settings={settings}
             onResize={({ columnId, width }) => {
               setSettings({
                 ...settings,
@@ -152,60 +210,29 @@ const renderDataTable = async (props: Partial<UnifiedDataTableProps>) => {
                 },
               });
             }}
-            sort={sort}
+            onSetColumns={onSetColumns}
             onSort={setSort as UnifiedDataTableProps['onSort']}
+            settings={settings}
+            sort={sort}
           />
         </IntlProvider>
       </EuiThemeProvider>
     );
   };
 
-  render(<DataTableWrapped />);
+  const renderResult = render(<DataTableWrapped />);
+  await waitForDataGridRender();
 
-  // EuiDataGrid makes state updates after calling requestAnimationFrame, which can lead
-  // to "Can't perform a React state update on an unmounted component." warnings in tests,
-  // so we need to wait for the next animation frame to avoid this
-  await screen.findByTestId('discoverDocTable');
-  await act(() => new Promise((resolve) => requestAnimationFrame(() => resolve(void 0))));
+  return renderResult;
 };
 
-async function getComponent(props: UnifiedDataTableProps = getProps()) {
-  const component = mountWithIntl(<DataTable {...props} />);
-  await act(async () => {
-    // needed by cell actions to complete async loading and avoid act warning
-    component.update();
-  });
-  return component;
-}
+const toggleDocSelection = async (document: EsHitRecord) => {
+  await userEvent.click(screen.getByTestId(`dscGridSelectDoc-${getDocId(document)}`));
+};
 
-function getSelectedDocNr(component: ReactWrapper<UnifiedDataTableProps>) {
-  const gridSelectionBtn = findTestSubject(component, 'unifiedDataTableSelectionBtn');
-  if (!gridSelectionBtn.length) {
-    return 0;
-  }
-  const selectedNr = gridSelectionBtn.getDOMNode().getAttribute('data-selected-documents');
-  return Number(selectedNr);
-}
-
-function getDisplayedDocNr(component: ReactWrapper<UnifiedDataTableProps>) {
-  const gridSelectionBtn = findTestSubject(component, 'discoverDocTable');
-  if (!gridSelectionBtn.length) {
-    return 0;
-  }
-  const selectedNr = gridSelectionBtn.getDOMNode().getAttribute('data-document-number');
-  return Number(selectedNr);
-}
-
-async function toggleDocSelection(
-  component: ReactWrapper<UnifiedDataTableProps>,
-  document: EsHitRecord
-) {
-  act(() => {
-    const docId = getDocId(document);
-    findTestSubject(component, `dscGridSelectDoc-${docId}`).simulate('change');
-  });
-  component.update();
-}
+const waitForDataGridRender = async () => {
+  await screen.findByTestId('discoverDocTable');
+};
 
 describe('UnifiedDataTable', () => {
   const originalClipboard = global.window.navigator.clipboard;
@@ -225,179 +252,206 @@ describe('UnifiedDataTable', () => {
     });
   });
 
-  afterEach(async () => {
+  afterEach(() => {
     jest.clearAllMocks();
   });
 
   describe('Document selection', () => {
-    let component: ReactWrapper<UnifiedDataTableProps>;
-    beforeEach(async () => {
-      component = await getComponent();
-    });
-
-    test(
+    it(
       'no documents are selected initially',
       async () => {
-        expect(getSelectedDocNr(component)).toBe(0);
-        expect(getDisplayedDocNr(component)).toBe(5);
+        await renderComponent();
+
+        expect(getSelectedDocNr()).toBe(0);
+        expect(getDisplayedDocNr()).toBe(5);
       },
       EXTENDED_JEST_TIMEOUT
     );
 
-    test(
+    it(
       'Allows selection/deselection of multiple documents',
       async () => {
-        await toggleDocSelection(component, esHitsMock[0]);
-        expect(getSelectedDocNr(component)).toBe(1);
-        await toggleDocSelection(component, esHitsMock[1]);
-        expect(getSelectedDocNr(component)).toBe(2);
-        await toggleDocSelection(component, esHitsMock[1]);
-        expect(getSelectedDocNr(component)).toBe(1);
+        await renderComponent();
+
+        await toggleDocSelection(esHitsMock[0]);
+        expect(getSelectedDocNr()).toBe(1);
+
+        await toggleDocSelection(esHitsMock[1]);
+        expect(getSelectedDocNr()).toBe(2);
+
+        await toggleDocSelection(esHitsMock[1]);
+        expect(getSelectedDocNr()).toBe(1);
       },
       EXTENDED_JEST_TIMEOUT
     );
 
-    test(
+    it(
       'deselection of all selected documents',
       async () => {
-        await toggleDocSelection(component, esHitsMock[0]);
-        await toggleDocSelection(component, esHitsMock[1]);
-        expect(getSelectedDocNr(component)).toBe(2);
-        findTestSubject(component, 'unifiedDataTableSelectionBtn').simulate('click');
-        findTestSubject(component, 'dscGridClearSelectedDocuments').simulate('click');
-        expect(getSelectedDocNr(component)).toBe(0);
+        await renderComponent();
+
+        await toggleDocSelection(esHitsMock[0]);
+        await toggleDocSelection(esHitsMock[1]);
+        expect(getSelectedDocNr()).toBe(2);
+
+        await openSelectedDocumentsMenu();
+        await clickSelectedDocumentsMenuAction('dscGridClearSelectedDocuments');
+        expect(getSelectedDocNr()).toBe(0);
       },
       EXTENDED_JEST_TIMEOUT
     );
 
-    test(
+    it(
       'showing only selected documents and undo selection',
       async () => {
-        await toggleDocSelection(component, esHitsMock[0]);
-        await toggleDocSelection(component, esHitsMock[1]);
-        expect(getSelectedDocNr(component)).toBe(2);
-        findTestSubject(component, 'unifiedDataTableSelectionBtn').simulate('click');
-        findTestSubject(component, 'dscGridShowSelectedDocuments').simulate('click');
-        expect(getDisplayedDocNr(component)).toBe(2);
-        findTestSubject(component, 'unifiedDataTableSelectionBtn').simulate('click');
-        component.update();
-        findTestSubject(component, 'dscGridShowAllDocuments').simulate('click');
-        expect(getDisplayedDocNr(component)).toBe(5);
+        await renderComponent();
+
+        await toggleDocSelection(esHitsMock[0]);
+        await toggleDocSelection(esHitsMock[1]);
+        expect(getSelectedDocNr()).toBe(2);
+
+        await openSelectedDocumentsMenu();
+        await clickSelectedDocumentsMenuAction('dscGridShowSelectedDocuments');
+        expect(getDisplayedDocNr()).toBe(2);
+
+        await openSelectedDocumentsMenu();
+        await clickSelectedDocumentsMenuAction('dscGridShowAllDocuments');
+        expect(getDisplayedDocNr()).toBe(5);
       },
       EXTENDED_JEST_TIMEOUT
     );
 
-    test(
+    it(
       'showing selected documents, underlying data changes, all documents are displayed, selection is gone',
       async () => {
-        await toggleDocSelection(component, esHitsMock[0]);
-        await toggleDocSelection(component, esHitsMock[1]);
-        expect(getSelectedDocNr(component)).toBe(2);
-        findTestSubject(component, 'unifiedDataTableSelectionBtn').simulate('click');
-        findTestSubject(component, 'dscGridShowSelectedDocuments').simulate('click');
-        expect(getDisplayedDocNr(component)).toBe(2);
-        component.setProps({
-          rows: [
-            {
-              _index: 'i',
-              _id: '6',
-              _score: 1,
-              _source: {
-                date: '2020-20-02T12:12:12.128',
-                name: 'test6',
-                extension: 'doc',
-                bytes: 50,
+        const { rerender } = await renderComponent();
+
+        await toggleDocSelection(esHitsMock[0]);
+        await toggleDocSelection(esHitsMock[1]);
+        expect(getSelectedDocNr()).toBe(2);
+
+        await openSelectedDocumentsMenu();
+        await clickSelectedDocumentsMenuAction('dscGridShowSelectedDocuments');
+        expect(getDisplayedDocNr()).toBe(2);
+
+        rerender(
+          <DataTableWithI18n
+            {...getProps()}
+            rows={[
+              {
+                _index: 'i',
+                _id: '6',
+                _score: 1,
+                _source: {
+                  date: '2020-20-02T12:12:12.128',
+                  name: 'test6',
+                  extension: 'doc',
+                  bytes: 50,
+                },
               },
-            },
-          ].map((row) => buildDataTableRecord(row, dataViewMock)),
-        });
-        expect(getDisplayedDocNr(component)).toBe(1);
-        expect(getSelectedDocNr(component)).toBe(0);
+            ].map((row) => buildDataTableRecord(row, dataViewMock))}
+          />
+        );
+
+        expect(getDisplayedDocNr()).toBe(1);
+        expect(getSelectedDocNr()).toBe(0);
       },
       EXTENDED_JEST_TIMEOUT
     );
 
-    test(
+    it(
       'showing only selected documents and remove filter deselecting each doc manually',
       async () => {
-        await toggleDocSelection(component, esHitsMock[0]);
-        findTestSubject(component, 'unifiedDataTableSelectionBtn').simulate('click');
-        findTestSubject(component, 'dscGridShowSelectedDocuments').simulate('click');
-        expect(getDisplayedDocNr(component)).toBe(1);
-        await toggleDocSelection(component, esHitsMock[0]);
-        expect(getDisplayedDocNr(component)).toBe(5);
-        await toggleDocSelection(component, esHitsMock[0]);
-        expect(getDisplayedDocNr(component)).toBe(5);
+        await renderComponent();
+
+        await toggleDocSelection(esHitsMock[0]);
+        await openSelectedDocumentsMenu();
+        await clickSelectedDocumentsMenuAction('dscGridShowSelectedDocuments');
+        expect(getDisplayedDocNr()).toBe(1);
+
+        await toggleDocSelection(esHitsMock[0]);
+        expect(getDisplayedDocNr()).toBe(5);
+
+        await toggleDocSelection(esHitsMock[0]);
+        expect(getDisplayedDocNr()).toBe(5);
       },
       EXTENDED_JEST_TIMEOUT
     );
 
-    test(
+    it(
       'copying selected documents to clipboard as JSON',
       async () => {
-        await toggleDocSelection(component, esHitsMock[0]);
-        findTestSubject(component, 'unifiedDataTableSelectionBtn').simulate('click');
-        findTestSubject(component, 'dscGridCopySelectedDocumentsJSON').simulate('click');
-        // wait for async copy action to avoid act warning
-        await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
-        expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
-          '[{"_index":"i","_id":"1","_score":1,"_type":"_doc","_source":{"date":"2020-20-01T12:12:12.123","message":"test1","bytes":20}}]'
-        );
+        await renderComponent();
+
+        await toggleDocSelection(esHitsMock[0]);
+        await openSelectedDocumentsMenu();
+        await clickSelectedDocumentsMenuAction('dscGridCopySelectedDocumentsJSON');
+
+        await waitFor(() => {
+          expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
+            '[{"_index":"i","_id":"1","_score":1,"_type":"_doc","_source":{"date":"2020-20-01T12:12:12.123","message":"test1","bytes":20}}]'
+          );
+        });
       },
       EXTENDED_JEST_TIMEOUT
     );
 
-    test(
+    it(
       'copying selected documents to clipboard as text',
       async () => {
-        await toggleDocSelection(component, esHitsMock[2]);
-        await toggleDocSelection(component, esHitsMock[1]);
-        findTestSubject(component, 'unifiedDataTableSelectionBtn').simulate('click');
-        findTestSubject(component, 'unifiedDataTableCopyRowsAsText').simulate('click');
-        // wait for async copy action to avoid act warning
-        await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
-        expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
-          '"\'@timestamp"\t"_index"\t"_score"\tbytesDisplayName\tdate\textension\tmessage\tname\n-\ti\t1\t-\t"2020-20-01T12:12:12.124"\tjpg\t-\ttest2\n-\ti\t1\t50\t"2020-20-01T12:12:12.124"\tgif\t-\ttest3'
-        );
+        await renderComponent();
+
+        await toggleDocSelection(esHitsMock[2]);
+        await toggleDocSelection(esHitsMock[1]);
+        await openSelectedDocumentsMenu();
+        await clickSelectedDocumentsMenuAction('unifiedDataTableCopyRowsAsText');
+
+        await waitFor(() => {
+          expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
+            '"\'@timestamp"\t"_index"\t"_score"\tbytesDisplayName\tdate\textension\tmessage\tname\n-\ti\t1\t-\t"2020-20-01T12:12:12.124"\tjpg\t-\ttest2\n-\ti\t1\t50\t"2020-20-01T12:12:12.124"\tgif\t-\ttest3'
+          );
+        });
       },
       EXTENDED_JEST_TIMEOUT
     );
 
-    test(
+    it(
       'copying selected columns to clipboard as text',
       async () => {
-        component = await getComponent({
-          ...getProps(),
-          columns: ['date', 'extension', 'name'],
+        await renderComponent({ ...getProps(), columns: ['date', 'extension', 'name'] });
+
+        await toggleDocSelection(esHitsMock[2]);
+        await toggleDocSelection(esHitsMock[1]);
+        await openSelectedDocumentsMenu();
+        await clickSelectedDocumentsMenuAction('unifiedDataTableCopyRowsAsText');
+
+        await waitFor(() => {
+          expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
+            '"\'@timestamp"\tdate\textension\tname\n-\t"2020-20-01T12:12:12.124"\tjpg\ttest2\n-\t"2020-20-01T12:12:12.124"\tgif\ttest3'
+          );
         });
-        await toggleDocSelection(component, esHitsMock[2]);
-        await toggleDocSelection(component, esHitsMock[1]);
-        findTestSubject(component, 'unifiedDataTableSelectionBtn').simulate('click');
-        findTestSubject(component, 'unifiedDataTableCopyRowsAsText').simulate('click');
-        // wait for async copy action to avoid act warning
-        await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
-        expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
-          '"\'@timestamp"\tdate\textension\tname\n-\t"2020-20-01T12:12:12.124"\tjpg\ttest2\n-\t"2020-20-01T12:12:12.124"\tgif\ttest3'
-        );
       },
       EXTENDED_JEST_TIMEOUT
     );
 
-    test(
+    it(
       'copying selected documents to clipboard as markdown',
       async () => {
-        await toggleDocSelection(component, esHitsMock[2]);
-        await toggleDocSelection(component, esHitsMock[1]);
-        findTestSubject(component, 'unifiedDataTableSelectionBtn').simulate('click');
-        findTestSubject(component, 'unifiedDataTableCopyRowsAsMarkdown').simulate('click');
-        // wait for async copy action to avoid act warning
-        await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
-        expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
-          `| @timestamp | _index | _score | bytesDisplayName | date | extension | message | name |
+        await renderComponent();
+
+        await toggleDocSelection(esHitsMock[2]);
+        await toggleDocSelection(esHitsMock[1]);
+        await openSelectedDocumentsMenu();
+        await clickSelectedDocumentsMenuAction('unifiedDataTableCopyRowsAsMarkdown');
+
+        await waitFor(() => {
+          expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
+            `| @timestamp | _index | _score | bytesDisplayName | date | extension | message | name |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | - | i | 1 | - | 2020-20-01T12:12:12.124 | jpg | - | test2 |
 | - | i | 1 | 50 | 2020-20-01T12:12:12.124 | gif | - | test3 |`
-        );
+          );
+        });
       },
       EXTENDED_JEST_TIMEOUT
     );
@@ -408,12 +462,15 @@ describe('UnifiedDataTable', () => {
       'should render the edit field button if onFieldEdited is provided',
       async () => {
         await renderDataTable({ columns: ['message'], onFieldEdited: jest.fn() });
+
         expect(
           screen.queryByTestId('dataGridHeaderCellActionGroup-message')
         ).not.toBeInTheDocument();
+
         await userEvent.click(screen.getByTestId('dataGridHeaderCellActionButton-message'));
-        expect(screen.getByTestId('dataGridHeaderCellActionGroup-message')).toBeInTheDocument();
-        expect(screen.getByTestId('gridEditFieldButton')).toBeInTheDocument();
+
+        expect(screen.getByTestId('dataGridHeaderCellActionGroup-message')).toBeVisible();
+        expect(screen.getByTestId('gridEditFieldButton')).toBeVisible();
       },
       EXTENDED_JEST_TIMEOUT
     );
@@ -422,11 +479,14 @@ describe('UnifiedDataTable', () => {
       'should not render the edit field button if onFieldEdited is not provided',
       async () => {
         await renderDataTable({ columns: ['message'] });
+
         expect(
           screen.queryByTestId('dataGridHeaderCellActionGroup-message')
         ).not.toBeInTheDocument();
+
         await userEvent.click(screen.getByTestId('dataGridHeaderCellActionButton-message'));
-        expect(screen.getByTestId('dataGridHeaderCellActionGroup-message')).toBeInTheDocument();
+
+        expect(screen.getByTestId('dataGridHeaderCellActionGroup-message')).toBeVisible();
         expect(screen.queryByTestId('gridEditFieldButton')).not.toBeInTheDocument();
       },
       EXTENDED_JEST_TIMEOUT
@@ -437,21 +497,22 @@ describe('UnifiedDataTable', () => {
     it(
       'should call useDataGridColumnsCellActions with empty params when no cellActionsTriggerId is provided',
       async () => {
-        await getComponent({
+        await renderComponent({
           ...getProps(),
           columns: ['message'],
           onFieldEdited: jest.fn(),
         });
+
         expect(mockUseDataGridColumnsCellActions).toHaveBeenCalledWith({
-          triggerId: undefined,
-          getCellValue: expect.any(Function),
-          fields: undefined,
           dataGridRef: expect.any(Object),
+          disableCellActions: false,
+          fields: undefined,
+          getCellValue: expect.any(Function),
           metadata: {
             dataViewId: 'the-data-view-id',
             someKey: 'someValue',
           },
-          disableCellActions: false,
+          triggerId: undefined,
         });
       },
       EXTENDED_JEST_TIMEOUT
@@ -460,25 +521,26 @@ describe('UnifiedDataTable', () => {
     it(
       'should call useDataGridColumnsCellActions properly when cellActionsTriggerId defined',
       async () => {
-        await getComponent({
+        await renderComponent({
           ...getProps(),
+          cellActionsTriggerId: 'test',
           columns: ['message'],
           onFieldEdited: jest.fn(),
-          cellActionsTriggerId: 'test',
         });
+
         expect(mockUseDataGridColumnsCellActions).toHaveBeenCalledWith({
-          triggerId: 'test',
-          getCellValue: expect.any(Function),
+          dataGridRef: expect.any(Object),
+          disableCellActions: false,
           fields: [
             dataViewMock.getFieldByName('@timestamp')?.toSpec(),
             dataViewMock.getFieldByName('message')?.toSpec(),
           ],
-          dataGridRef: expect.any(Object),
+          getCellValue: expect.any(Function),
           metadata: {
             dataViewId: 'the-data-view-id',
             someKey: 'someValue',
           },
-          disableCellActions: false,
+          triggerId: 'test',
         });
       },
       EXTENDED_JEST_TIMEOUT
@@ -488,32 +550,63 @@ describe('UnifiedDataTable', () => {
   describe('sorting', () => {
     const getColumnActions = (name: string) =>
       screen.getByTestId(`dataGridHeaderCellActionButton-${name}`);
+
     const getCellValuesByColumn = () => {
       const columns = screen
-        .getAllByRole('columnheader')
-        .map((header) => header.dataset.gridcellColumnId!);
+        .getAllByTestId(/^dataGridHeaderCell-/)
+        .map((header) => header.dataset.gridcellColumnId!)
+        .filter(Boolean);
+
       const values = screen
-        .getAllByRole('gridcell')
+        .getAllByTestId('dataGridRowCell')
         .map((cell) => cell.querySelector('.unifiedDataTable__cellValue')?.textContent ?? '');
+
       return values.reduce<Record<string, string[]>>((acc, value, i) => {
         const column = columns[i % columns.length];
+
         acc[column] = acc[column] ?? [];
         acc[column].push(value);
+
         return acc;
       }, {});
+    };
+
+    const sortByColumn = async (name: string) => {
+      await userEvent.click(getColumnActions(name));
+      await waitForEuiPopoverOpen();
+      await userEvent.click(screen.getByTitle(/Sort\s+Z-A/im).closest('button')!);
+    };
+
+    const copySelectedDocsAsText = async () => {
+      await waitFor(() => {
+        expect(
+          screen.queryByTestId('dataGridHeaderCellActionGroup-message')
+        ).not.toBeInTheDocument();
+      });
+
+      await userEvent.click(screen.getByTestId('unifiedDataTableSelectionBtn'));
+      await waitForEuiPopoverOpen();
+      await userEvent.click(screen.getByTestId('unifiedDataTableCopyRowsAsText'), {
+        pointerEventsCheck: PointerEventsCheckLevel.Never,
+      });
+      await waitForEuiPopoverClose();
+
+      return (navigator.clipboard.writeText as jest.Mock).mock.calls.at(-1)![0] as string;
     };
 
     it(
       'should apply client side sorting in ES|QL mode',
       async () => {
         await renderDataTable({
-          isPlainRecord: true,
           columns: ['message'],
+          isPlainRecord: true,
           rows: generateEsHits(dataViewMock, 10).map((hit) =>
             buildDataTableRecord(hit, dataViewMock)
           ),
         });
+
         let values = getCellValuesByColumn();
+
         expect(values.message).toEqual([
           'message_0',
           'message_1',
@@ -526,13 +619,12 @@ describe('UnifiedDataTable', () => {
           'message_8',
           'message_9',
         ]);
-        await userEvent.click(getColumnActions('message'));
-        await waitForEuiPopoverOpen();
-        // Column sort button incorrectly renders as "Sort " instead
-        // of "Sort Z-A" in Jest tests, so we need to find it by index
-        await userEvent.click(screen.getAllByRole('button', { name: /Sort/ })[2]);
+
+        await sortByColumn('message');
+
         await waitFor(() => {
           values = getCellValuesByColumn();
+
           expect(values.message).toEqual([
             'message_9',
             'message_8',
@@ -551,6 +643,47 @@ describe('UnifiedDataTable', () => {
     );
 
     it(
+      'should not apply client side sorting in ES|QL mode when isInMemorySortEnabled is false',
+      async () => {
+        await renderDataTable({
+          columns: ['message'],
+          isPlainRecord: true,
+          isInMemorySortEnabled: false,
+          rows: generateEsHits(dataViewMock, 10).map((hit) =>
+            buildDataTableRecord(hit, dataViewMock)
+          ),
+        });
+
+        let values = getCellValuesByColumn();
+
+        const initialOrder = [
+          'message_0',
+          'message_1',
+          'message_2',
+          'message_3',
+          'message_4',
+          'message_5',
+          'message_6',
+          'message_7',
+          'message_8',
+          'message_9',
+        ];
+
+        expect(values.message).toEqual(initialOrder);
+
+        await sortByColumn('message');
+
+        // Rows keep their original (server) order; the table does not re-sort them in memory.
+        await waitFor(() => {
+          values = getCellValuesByColumn();
+
+          expect(values.message).toEqual(initialOrder);
+        });
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
+
+    it(
       'should not apply client side sorting if not in ES|QL mode',
       async () => {
         await renderDataTable({
@@ -559,7 +692,9 @@ describe('UnifiedDataTable', () => {
             buildDataTableRecord(hit, dataViewMock)
           ),
         });
+
         let values = getCellValuesByColumn();
+
         expect(values.message).toEqual([
           'message_0',
           'message_1',
@@ -572,13 +707,12 @@ describe('UnifiedDataTable', () => {
           'message_8',
           'message_9',
         ]);
-        await userEvent.click(getColumnActions('message'));
-        await waitForEuiPopoverOpen();
-        // Column sort button incorrectly renders as "Sort " instead
-        // of "Sort Z-A" in Jest tests, so we need to find it by index
-        await userEvent.click(screen.getAllByRole('button', { name: /Sort/ })[2]);
+
+        await sortByColumn('message');
+
         await waitFor(() => {
           values = getCellValuesByColumn();
+
           expect(values.message).toEqual([
             'message_0',
             'message_1',
@@ -599,23 +733,16 @@ describe('UnifiedDataTable', () => {
     it(
       'should apply sorting',
       async () => {
-        const component = await getComponent({
+        await renderComponent({
           ...getProps(),
-          sort: [['message', 'desc']],
           columns: ['message'],
+          sort: [['message', 'desc']],
         });
 
-        expect(component.find(EuiDataGrid).last().prop('sorting')).toMatchInlineSnapshot(`
-                  Object {
-                    "columns": Array [
-                      Object {
-                        "direction": "desc",
-                        "id": "message",
-                      },
-                    ],
-                    "onSort": [Function],
-                  }
-              `);
+        expect(getLastEuiDataGridProps().sorting).toEqual({
+          onSort: expect.any(Function),
+          columns: [{ direction: 'desc', id: 'message' }],
+        });
       },
       EXTENDED_JEST_TIMEOUT
     );
@@ -623,31 +750,55 @@ describe('UnifiedDataTable', () => {
     it(
       'should not apply unknown sorting',
       async () => {
-        const component = await getComponent({
+        await renderComponent({
           ...getProps(),
+          columns: ['bytes', 'message'],
           sort: [
             ['bytes', 'desc'],
             ['unknown', 'asc'],
             ['message', 'desc'],
           ],
-          columns: ['bytes', 'message'],
         });
 
-        expect(component.find(EuiDataGrid).last().prop('sorting')).toMatchInlineSnapshot(`
-                  Object {
-                    "columns": Array [
-                      Object {
-                        "direction": "desc",
-                        "id": "bytes",
-                      },
-                      Object {
-                        "direction": "desc",
-                        "id": "message",
-                      },
-                    ],
-                    "onSort": [Function],
-                  }
-              `);
+        expect(getLastEuiDataGridProps().sorting).toEqual({
+          columns: [
+            { direction: 'desc', id: 'bytes' },
+            { direction: 'desc', id: 'message' },
+          ],
+          onSort: expect.any(Function),
+        });
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
+
+    it(
+      'sorting should preserve the selected documents when copying them to clipboard',
+      async () => {
+        const hits = generateEsHits(dataViewMock, 10);
+
+        await renderDataTable({
+          columns: ['message'],
+          isPlainRecord: true,
+          rows: hits.map((hit) => buildDataTableRecord(hit, dataViewMock)),
+        });
+
+        await waitFor(() => {
+          expect(getCellValuesByColumn().message?.[0]).toBe('message_0');
+        });
+
+        await userEvent.click(screen.getByTestId(`dscGridSelectDoc-${getDocId(hits[0])}`));
+
+        const clipboardTextBeforeSorting = await copySelectedDocsAsText();
+
+        await sortByColumn('message');
+
+        await waitFor(() => {
+          expect(getCellValuesByColumn().message?.[0]).toBe('message_9');
+        });
+
+        const clipboardTextAfterSorting = await copySelectedDocsAsText();
+
+        expect(clipboardTextAfterSorting).toBe(clipboardTextBeforeSorting);
       },
       EXTENDED_JEST_TIMEOUT
     );
@@ -657,27 +808,27 @@ describe('UnifiedDataTable', () => {
     it(
       'should set allowRowHeight to true if onUpdateRowHeight is provided',
       async () => {
-        const component = await getComponent({
+        await renderComponent({
           ...getProps(),
           onUpdateRowHeight: jest.fn(),
         });
 
-        expect(component.find(EuiDataGrid).first().prop('toolbarVisibility'))
-          .toMatchInlineSnapshot(`
-          Object {
-            "additionalControls": null,
-            "showColumnSelector": false,
-            "showDisplaySelector": Object {
-              "allowDensity": false,
-              "allowResetButton": false,
-              "allowRowHeight": true,
-              "customRender": [Function],
-            },
-            "showFullScreenSelector": true,
-            "showKeyboardShortcuts": true,
-            "showSortSelector": true,
-          }
-        `);
+        expect(getLastEuiDataGridProps().toolbarVisibility).toMatchObject({
+          additionalControls: null,
+          showColumnSelector: {
+            allowHide: false,
+            allowReorder: true,
+          },
+          showDisplaySelector: {
+            allowDensity: false,
+            allowResetButton: false,
+            allowRowHeight: true,
+            customRender: expect.any(Function),
+          },
+          showFullScreenSelector: true,
+          showKeyboardShortcuts: true,
+          showSortSelector: true,
+        });
       },
       EXTENDED_JEST_TIMEOUT
     );
@@ -685,28 +836,28 @@ describe('UnifiedDataTable', () => {
     it(
       'should set allowRowHeight to false if onUpdateRowHeight is not provided',
       async () => {
-        const component = await getComponent({
+        await renderComponent({
           ...getProps(),
-          onUpdateSampleSize: jest.fn(),
           onUpdateRowHeight: undefined,
+          onUpdateSampleSize: jest.fn(),
         });
 
-        expect(component.find(EuiDataGrid).first().prop('toolbarVisibility'))
-          .toMatchInlineSnapshot(`
-          Object {
-            "additionalControls": null,
-            "showColumnSelector": false,
-            "showDisplaySelector": Object {
-              "allowDensity": false,
-              "allowResetButton": false,
-              "allowRowHeight": false,
-              "customRender": [Function],
-            },
-            "showFullScreenSelector": true,
-            "showKeyboardShortcuts": true,
-            "showSortSelector": true,
-          }
-        `);
+        expect(getLastEuiDataGridProps().toolbarVisibility).toMatchObject({
+          additionalControls: null,
+          showColumnSelector: {
+            allowHide: false,
+            allowReorder: true,
+          },
+          showDisplaySelector: {
+            allowDensity: false,
+            allowResetButton: false,
+            allowRowHeight: false,
+            customRender: expect.any(Function),
+          },
+          showFullScreenSelector: true,
+          showKeyboardShortcuts: true,
+          showSortSelector: true,
+        });
       },
       EXTENDED_JEST_TIMEOUT
     );
@@ -714,28 +865,28 @@ describe('UnifiedDataTable', () => {
     it(
       'should set allowDensity to true if onUpdateDataGridDensity is provided',
       async () => {
-        const component = await getComponent({
+        await renderComponent({
           ...getProps(),
-          onUpdateRowHeight: jest.fn(),
           onUpdateDataGridDensity: jest.fn(),
+          onUpdateRowHeight: jest.fn(),
         });
 
-        expect(component.find(EuiDataGrid).first().prop('toolbarVisibility'))
-          .toMatchInlineSnapshot(`
-          Object {
-            "additionalControls": null,
-            "showColumnSelector": false,
-            "showDisplaySelector": Object {
-              "allowDensity": true,
-              "allowResetButton": false,
-              "allowRowHeight": true,
-              "customRender": [Function],
-            },
-            "showFullScreenSelector": true,
-            "showKeyboardShortcuts": true,
-            "showSortSelector": true,
-          }
-        `);
+        expect(getLastEuiDataGridProps().toolbarVisibility).toMatchObject({
+          additionalControls: null,
+          showColumnSelector: {
+            allowHide: false,
+            allowReorder: true,
+          },
+          showDisplaySelector: {
+            allowDensity: true,
+            allowResetButton: false,
+            allowRowHeight: true,
+            customRender: expect.any(Function),
+          },
+          showFullScreenSelector: true,
+          showKeyboardShortcuts: true,
+          showSortSelector: true,
+        });
       },
       EXTENDED_JEST_TIMEOUT
     );
@@ -743,29 +894,29 @@ describe('UnifiedDataTable', () => {
     it(
       'should set allowDensity to false if onUpdateDataGridDensity is not provided',
       async () => {
-        const component = await getComponent({
+        await renderComponent({
           ...getProps(),
-          onUpdateSampleSize: jest.fn(),
-          onUpdateRowHeight: jest.fn(),
           onUpdateDataGridDensity: undefined,
+          onUpdateRowHeight: jest.fn(),
+          onUpdateSampleSize: jest.fn(),
         });
 
-        expect(component.find(EuiDataGrid).first().prop('toolbarVisibility'))
-          .toMatchInlineSnapshot(`
-          Object {
-            "additionalControls": null,
-            "showColumnSelector": false,
-            "showDisplaySelector": Object {
-              "allowDensity": false,
-              "allowResetButton": false,
-              "allowRowHeight": true,
-              "customRender": [Function],
-            },
-            "showFullScreenSelector": true,
-            "showKeyboardShortcuts": true,
-            "showSortSelector": true,
-          }
-        `);
+        expect(getLastEuiDataGridProps().toolbarVisibility).toMatchObject({
+          additionalControls: null,
+          showColumnSelector: {
+            allowHide: false,
+            allowReorder: true,
+          },
+          showDisplaySelector: {
+            allowDensity: false,
+            allowResetButton: false,
+            allowRowHeight: true,
+            customRender: expect.any(Function),
+          },
+          showFullScreenSelector: true,
+          showKeyboardShortcuts: true,
+          showSortSelector: true,
+        });
       },
       EXTENDED_JEST_TIMEOUT
     );
@@ -773,23 +924,41 @@ describe('UnifiedDataTable', () => {
     it(
       'should hide display settings if no handlers provided',
       async () => {
-        const component = await getComponent({
+        await renderComponent({
           ...getProps(),
           onUpdateRowHeight: undefined,
           onUpdateSampleSize: undefined,
         });
 
-        expect(component.find(EuiDataGrid).first().prop('toolbarVisibility'))
-          .toMatchInlineSnapshot(`
-                  Object {
-                    "additionalControls": null,
-                    "showColumnSelector": false,
-                    "showDisplaySelector": undefined,
-                    "showFullScreenSelector": true,
-                    "showKeyboardShortcuts": true,
-                    "showSortSelector": true,
-                  }
-              `);
+        expect(getLastEuiDataGridProps().toolbarVisibility).toMatchObject({
+          additionalControls: null,
+          showColumnSelector: {
+            allowHide: false,
+            allowReorder: true,
+          },
+          showDisplaySelector: undefined,
+          showFullScreenSelector: true,
+          showKeyboardShortcuts: true,
+          showSortSelector: true,
+        });
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
+
+    it(
+      'should keep Columns selector available in summary-only mode',
+      async () => {
+        await renderComponent({
+          ...getProps(),
+          columns: [],
+        });
+
+        expect(getLastEuiDataGridProps().toolbarVisibility).toMatchObject({
+          showColumnSelector: {
+            allowHide: false,
+            allowReorder: true,
+          },
+        });
       },
       EXTENDED_JEST_TIMEOUT
     );
@@ -799,7 +968,7 @@ describe('UnifiedDataTable', () => {
     it(
       'should be able to customise the leading controls',
       async () => {
-        const component = await getComponent({
+        await renderComponent({
           ...getProps(),
           expandedDoc: {
             id: 'test',
@@ -809,23 +978,22 @@ describe('UnifiedDataTable', () => {
             },
             flattened: { test: jest.fn() },
           },
-          setExpandedDoc: jest.fn(),
-          renderDocumentView: jest.fn(),
           externalControlColumns: [testLeadingControlColumn],
+          renderDocumentView: jest.fn(),
           rowAdditionalLeadingControls: mockRowAdditionalLeadingControls,
+          setExpandedDoc: jest.fn(),
         });
 
-        expect(findTestSubject(component, 'test-body-control-column-cell').exists()).toBeTruthy();
-        expect(
-          findTestSubject(component, 'exampleRowControl-visBarVerticalStacked').exists()
-        ).toBeTruthy();
+        expect(screen.getAllByTestId('test-body-control-column-cell')[0]).toBeVisible();
+        expect(screen.getAllByTestId('exampleRowControl-chartBarVerticalStack')[0]).toBeVisible();
 
         // The other actions are within the popover
-        findTestSubject(component, 'unifiedDataTable_additionalRowControl_actionsMenu')
-          .first()
-          .simulate('click');
-        expect(findTestSubject(component, 'exampleRowControl-heart').exists()).toBeTruthy();
-        expect(findTestSubject(component, 'exampleRowControl-inspect').exists()).toBeTruthy();
+        await userEvent.click(
+          screen.getAllByTestId('unifiedDataTable_additionalRowControl_actionsMenu')[0]
+        );
+        await waitForEuiPopoverOpen();
+        expect(screen.getByTestId('exampleRowControl-heart')).toBeVisible();
+        expect(screen.getByTestId('exampleRowControl-inspect')).toBeVisible();
       },
       EXTENDED_JEST_TIMEOUT
     );
@@ -833,26 +1001,24 @@ describe('UnifiedDataTable', () => {
     it(
       'should be able to customise the trailing controls',
       async () => {
-        const component = await getComponent({
+        await renderComponent({
           ...getProps(),
           expandedDoc: {
             id: 'test',
+            flattened: { test: jest.fn() },
             raw: {
               _index: 'test_i',
               _id: 'test',
             },
-            flattened: { test: jest.fn() },
           },
-          setExpandedDoc: jest.fn(),
-          renderDocumentView: jest.fn(),
           externalControlColumns: [testLeadingControlColumn],
+          renderDocumentView: jest.fn(),
+          setExpandedDoc: jest.fn(),
           trailingControlColumns: testTrailingControlColumns,
         });
 
-        expect(findTestSubject(component, 'test-body-control-column-cell').exists()).toBeTruthy();
-        expect(
-          findTestSubject(component, 'test-trailing-column-popover-button').exists()
-        ).toBeTruthy();
+        expect(screen.getAllByTestId('test-body-control-column-cell')[0]).toBeVisible();
+        expect(screen.getAllByTestId('test-trailing-column-popover-button')[0]).toBeVisible();
       },
       EXTENDED_JEST_TIMEOUT
     );
@@ -862,23 +1028,23 @@ describe('UnifiedDataTable', () => {
     it(
       'should render external leading control columns',
       async () => {
-        const component = await getComponent({
+        await renderComponent({
           ...getProps(),
           expandedDoc: {
             id: 'test',
+            flattened: { test: jest.fn() },
             raw: {
               _index: 'test_i',
               _id: 'test',
             },
-            flattened: { test: jest.fn() },
           },
-          setExpandedDoc: jest.fn(),
-          renderDocumentView: jest.fn(),
           externalControlColumns: [testLeadingControlColumn],
+          renderDocumentView: jest.fn(),
+          setExpandedDoc: jest.fn(),
         });
 
-        expect(findTestSubject(component, 'docTableExpandToggleColumn').exists()).toBeTruthy();
-        expect(findTestSubject(component, 'test-body-control-column-cell').exists()).toBeTruthy();
+        expect(screen.getAllByTestId('docTableExpandToggleColumn')[0]).toBeVisible();
+        expect(screen.getAllByTestId('test-body-control-column-cell')[0]).toBeVisible();
       },
       EXTENDED_JEST_TIMEOUT
     );
@@ -889,37 +1055,86 @@ describe('UnifiedDataTable', () => {
     async () => {
       const expandedDoc = {
         id: 'test',
+        flattened: { test: jest.fn() },
         raw: {
           _index: 'test_i',
           _id: 'test',
         },
-        flattened: { test: jest.fn() },
       };
+
       const columnsMetaOverride = { testField: { type: 'number' as DatatableColumnType } };
+
       const renderDocumentViewMock = jest.fn((hit: DataTableRecord) => (
         <div data-test-subj="test-document-view">{hit.id}</div>
       ));
 
       const setExpandedDocMock = jest.fn();
 
-      const component = await getComponent({
+      await renderComponent({
         ...getProps(),
-        expandedDoc,
-        setExpandedDoc: setExpandedDocMock,
         columnsMeta: columnsMetaOverride,
-        renderDocumentView: renderDocumentViewMock,
+        expandedDoc,
         externalControlColumns: [testLeadingControlColumn],
+        renderDocumentView: renderDocumentViewMock,
+        setExpandedDoc: setExpandedDocMock,
       });
 
-      findTestSubject(component, 'docTableExpandToggleColumn').first().simulate('click');
-      expect(findTestSubject(component, 'test-document-view').exists()).toBeTruthy();
+      await userEvent.click(screen.getAllByTestId('docTableExpandToggleColumn')[0]);
+
+      expect(screen.getByTestId('test-document-view')).toBeVisible();
       expect(renderDocumentViewMock).toHaveBeenLastCalledWith(
         expandedDoc,
         getProps().rows,
         ['_source'],
-        setExpandedDocMock,
         columnsMetaOverride
       );
+    },
+    EXTENDED_JEST_TIMEOUT
+  );
+
+  it(
+    'should provide, clear, and re-provide document view metadata when rendered externally',
+    async () => {
+      const rows = esHitsMock.map((hit) => buildDataTableRecord(hit, dataViewMock));
+      const [expandedDoc] = rows;
+      const setRenderDocumentViewMeta = jest.fn();
+
+      const props = {
+        ...getProps(),
+        expandedDoc,
+        renderDocumentView: 'external',
+        rows,
+        setExpandedDoc: jest.fn(),
+        setRenderDocumentViewMeta,
+      } satisfies UnifiedDataTableProps;
+
+      const { rerender } = await renderComponent(props);
+
+      await waitFor(() => {
+        expect(setRenderDocumentViewMeta).toHaveBeenLastCalledWith({
+          displayedColumns: ['_source'],
+          displayedRows: rows,
+        });
+      });
+
+      setRenderDocumentViewMeta.mockClear();
+
+      rerender(<DataTableWithI18n {...props} expandedDoc={undefined} />);
+
+      await waitFor(() => {
+        expect(setRenderDocumentViewMeta).toHaveBeenLastCalledWith(undefined);
+      });
+
+      setRenderDocumentViewMeta.mockClear();
+
+      rerender(<DataTableWithI18n {...props} expandedDoc={expandedDoc} />);
+
+      await waitFor(() => {
+        expect(setRenderDocumentViewMeta).toHaveBeenLastCalledWith({
+          displayedColumns: ['_source'],
+          displayedRows: rows,
+        });
+      });
     },
     EXTENDED_JEST_TIMEOUT
   );
@@ -928,14 +1143,14 @@ describe('UnifiedDataTable', () => {
     it(
       'should render external additional toolbar controls',
       async () => {
-        const component = await getComponent({
+        await renderComponent({
           ...getProps(),
           columns: ['message'],
           externalAdditionalControls: <EuiButton data-test-subj="test-additional-control" />,
         });
 
-        expect(findTestSubject(component, 'test-additional-control').exists()).toBeTruthy();
-        expect(findTestSubject(component, 'dataGridColumnSelectorButton').exists()).toBeTruthy();
+        expect(screen.getByTestId('test-additional-control')).toBeVisible();
+        expect(screen.getByTestId('dataGridColumnSelectorButton')).toBeVisible();
       },
       EXTENDED_JEST_TIMEOUT
     );
@@ -945,7 +1160,7 @@ describe('UnifiedDataTable', () => {
     it(
       'should render only host column with the custom renderer, message should be rendered with the default cell renderer',
       async () => {
-        const component = await getComponent({
+        await renderComponent({
           ...getProps(),
           columns: ['message', 'host'],
           externalCustomRenderers: {
@@ -955,8 +1170,8 @@ describe('UnifiedDataTable', () => {
           },
         });
 
-        expect(findTestSubject(component, 'test-renderer-host').exists()).toBeTruthy();
-        expect(findTestSubject(component, 'test-renderer-message').exists()).toBeFalsy();
+        expect(screen.getAllByTestId('test-renderer-host')[0]).toBeVisible();
+        expect(screen.queryByTestId('test-renderer-message')).not.toBeInTheDocument();
       },
       EXTENDED_JEST_TIMEOUT
     );
@@ -966,7 +1181,7 @@ describe('UnifiedDataTable', () => {
     it(
       'should render custom grid body for each row',
       async () => {
-        const component = await getComponent({
+        await renderComponent({
           ...getProps(),
           columns: ['message', 'host'],
           trailingControlColumns: [
@@ -993,7 +1208,7 @@ describe('UnifiedDataTable', () => {
           ),
         });
 
-        expect(findTestSubject(component, 'test-renderer-custom-grid-body').exists()).toBeTruthy();
+        expect(screen.getByTestId('test-renderer-custom-grid-body')).toBeVisible();
       },
       EXTENDED_JEST_TIMEOUT
     );
@@ -1003,24 +1218,25 @@ describe('UnifiedDataTable', () => {
     it(
       'should render tour step for the first row of leading control column expandButton',
       async () => {
-        const component = await getComponent({
+        await renderComponent({
           ...getProps(),
+          componentsTourSteps: { expandButton: 'test-expand' },
           expandedDoc: {
             id: 'test',
+            flattened: { test: jest.fn() },
             raw: {
               _index: 'test_i',
               _id: 'test',
             },
-            flattened: { test: jest.fn() },
           },
-          setExpandedDoc: jest.fn(),
           renderDocumentView: jest.fn(),
-          componentsTourSteps: { expandButton: 'test-expand' },
+          setExpandedDoc: jest.fn(),
         });
 
-        const gridExpandBtn = findTestSubject(component, 'docTableExpandToggleColumn').first();
-        const tourStep = gridExpandBtn.getDOMNode().getAttribute('id');
-        expect(tourStep).toEqual('test-expand');
+        expect(screen.getAllByTestId('docTableExpandToggleColumn')[0]).toHaveAttribute(
+          'id',
+          'test-expand'
+        );
       },
       EXTENDED_JEST_TIMEOUT
     );
@@ -1032,26 +1248,26 @@ describe('UnifiedDataTable', () => {
       async () => {
         let toolbarParams: Record<string, unknown> = {};
         let gridParams: Record<string, unknown> = {};
+
         const renderCustomToolbarMock = jest.fn((props) => {
           toolbarParams = props.toolbarProps;
           gridParams = props.gridProps;
+
           return <div data-test-subj="custom-toolbar">Custom layout</div>;
         });
-        const component = await getComponent({
+
+        await renderComponent({
           ...getProps(),
           renderCustomToolbar: renderCustomToolbarMock,
         });
 
         // custom toolbar should be rendered
-        expect(findTestSubject(component, 'custom-toolbar').exists()).toBe(true);
+        expect(screen.getByTestId('custom-toolbar')).toBeVisible();
 
         expect(renderCustomToolbarMock).toHaveBeenLastCalledWith(
           expect.objectContaining({
             toolbarProps: expect.objectContaining({
               hasRoomForGridControls: true,
-            }),
-            gridProps: expect.objectContaining({
-              additionalControls: null,
             }),
           })
         );
@@ -1059,15 +1275,14 @@ describe('UnifiedDataTable', () => {
         // the default eui controls should be available for custom rendering
         expect(toolbarParams?.columnSortingControl).toBeTruthy();
         expect(toolbarParams?.keyboardShortcutsControl).toBeTruthy();
-        expect(gridParams?.additionalControls).toBe(null);
+        expect(React.isValidElement(toolbarParams?.columnControl)).toBe(true);
+        expect((toolbarParams.columnControl as React.ReactElement).type).not.toBe(
+          ColumnControlWithSummary
+        );
+        expect(gridParams?.additionalControls).toBeFalsy();
 
-        // additional controls become available after selecting a document
-        act(() => {
-          component
-            .find('.euiDataGridRowCell[data-gridcell-column-id="select"] .euiCheckbox__input')
-            .first()
-            .simulate('change');
-        });
+        // selection controls become available after selecting a document
+        await userEvent.click(screen.getByTestId(`dscGridSelectDoc-${getDocId(esHitsMock[0])}`));
 
         expect(toolbarParams?.keyboardShortcutsControl).toBeTruthy();
         expect(gridParams?.additionalControls).toBeTruthy();
@@ -1080,18 +1295,18 @@ describe('UnifiedDataTable', () => {
     it(
       'should render the grid with the default style if no gridStyleOverride is provided',
       async () => {
-        const component = await getComponent({
+        await renderComponent({
           ...getProps(),
         });
 
-        const grid = findTestSubject(component, 'docTable');
+        const grid = screen.getByTestId('docTable');
 
-        expect(grid.hasClass('euiDataGrid--bordersHorizontal')).toBeTruthy();
-        expect(grid.hasClass('euiDataGrid--fontSizeSmall')).toBeTruthy();
-        expect(grid.hasClass('euiDataGrid--paddingSmall')).toBeTruthy();
-        expect(grid.hasClass('euiDataGrid--rowHoverHighlight')).toBeTruthy();
-        expect(grid.hasClass('euiDataGrid--headerUnderline')).toBeTruthy();
-        expect(grid.hasClass('euiDataGrid--stripes')).toBeTruthy();
+        expect(grid).toHaveClass('euiDataGrid--bordersHorizontal');
+        expect(grid).toHaveClass('euiDataGrid--fontSizeSmall');
+        expect(grid).toHaveClass('euiDataGrid--paddingSmall');
+        expect(grid).toHaveClass('euiDataGrid--rowHoverHighlight');
+        expect(grid).toHaveClass('euiDataGrid--headerUnderline');
+        expect(grid).toHaveClass('euiDataGrid--stripes');
       },
       EXTENDED_JEST_TIMEOUT
     );
@@ -1099,20 +1314,20 @@ describe('UnifiedDataTable', () => {
     it(
       'should render the grid with style override if gridStyleOverride is provided',
       async () => {
-        const component = await getComponent({
+        await renderComponent({
           ...getProps(),
           gridStyleOverride: {
-            stripes: false,
-            rowHover: 'none',
             border: 'none',
+            rowHover: 'none',
+            stripes: false,
           },
         });
 
-        const grid = findTestSubject(component, 'docTable');
+        const grid = screen.getByTestId('docTable');
 
-        expect(grid.hasClass('euiDataGrid--stripes')).toBeFalsy();
-        expect(grid.hasClass('euiDataGrid--rowHoverHighlight')).toBeFalsy();
-        expect(grid.hasClass('euiDataGrid--bordersNone')).toBeTruthy();
+        expect(grid).not.toHaveClass('euiDataGrid--stripes');
+        expect(grid).not.toHaveClass('euiDataGrid--rowHoverHighlight');
+        expect(grid).toHaveClass('euiDataGrid--bordersNone');
       },
       EXTENDED_JEST_TIMEOUT
     );
@@ -1122,12 +1337,11 @@ describe('UnifiedDataTable', () => {
     it(
       'should render the grid with the default row line height if no rowLineHeightOverride is provided',
       async () => {
-        const component = await getComponent({
+        await renderComponent({
           ...getProps(),
         });
 
-        const gridRowCell = findTestSubject(component, 'dataGridRowCell').first();
-        expect(gridRowCell.prop('style')).toMatchObject({
+        expect(screen.getAllByTestId('dataGridRowCell')[0]).toHaveStyle({
           lineHeight: '1.6em',
         });
       },
@@ -1137,13 +1351,12 @@ describe('UnifiedDataTable', () => {
     it(
       'should render the grid with row line height override if rowLineHeightOverride is provided',
       async () => {
-        const component = await getComponent({
+        await renderComponent({
           ...getProps(),
           rowLineHeightOverride: '24px',
         });
 
-        const gridRowCell = findTestSubject(component, 'dataGridRowCell').first();
-        expect(gridRowCell.prop('style')).toMatchObject({
+        expect(screen.getAllByTestId('dataGridRowCell')[0]).toHaveStyle({
           lineHeight: '24px',
         });
       },
@@ -1151,68 +1364,141 @@ describe('UnifiedDataTable', () => {
     );
   });
 
+  describe('body cell row height in JSON source mode', () => {
+    it(
+      'forces the body cell height to auto in JSON mode, overriding the configured line count',
+      async () => {
+        await renderComponent({
+          ...getProps(),
+          sourceDisplayMode: 'json',
+          rowHeightState: 2,
+        });
+
+        expect(getLastEuiDataGridProps().rowHeightsOptions?.defaultHeight).toBe('auto');
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
+
+    it(
+      'respects the configured body cell line count in summary mode',
+      async () => {
+        await renderComponent({
+          ...getProps(),
+          sourceDisplayMode: 'summary',
+          rowHeightState: 2,
+        });
+
+        expect(getLastEuiDataGridProps().rowHeightsOptions?.defaultHeight).toEqual({
+          lineCount: 2,
+        });
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
+
+    it(
+      'hides the "Body cell lines" display setting in JSON mode, leaving the header control',
+      async () => {
+        await renderComponent({
+          ...getProps(),
+          onUpdateRowHeight: jest.fn(),
+          onUpdateHeaderRowHeight: jest.fn(),
+          sourceDisplayMode: 'json',
+        });
+
+        await userEvent.click(screen.getByTestId('dataGridDisplaySelectorButton'));
+        await waitForEuiPopoverOpen();
+
+        expect(screen.queryByTestId('unifiedDataTableRowHeightSettings')).not.toBeInTheDocument();
+        expect(screen.getByTestId('unifiedDataTableHeaderRowHeightSettings')).toBeVisible();
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
+
+    it(
+      'shows the "Body cell lines" display setting in summary mode',
+      async () => {
+        await renderComponent({
+          ...getProps(),
+          onUpdateRowHeight: jest.fn(),
+          onUpdateHeaderRowHeight: jest.fn(),
+          sourceDisplayMode: 'summary',
+        });
+
+        await userEvent.click(screen.getByTestId('dataGridDisplaySelectorButton'));
+        await waitForEuiPopoverOpen();
+
+        expect(screen.getByTestId('unifiedDataTableRowHeightSettings')).toBeVisible();
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
+  });
+
   describe('document comparison', () => {
-    const getSelectedDocumentsButton = () => screen.queryByTestId('unifiedDataTableSelectionBtn');
-
-    const selectDocument = async (document: EsHitRecord) =>
-      await userEvent.click(screen.getByTestId(`dscGridSelectDoc-${getDocId(document)}`));
-
-    const openSelectedRowsMenu = async () => {
-      await userEvent.click(await screen.findByTestId('unifiedDataTableSelectionBtn'));
-      await screen.findAllByText('Clear selection');
-    };
-
     const closeSelectedRowsMenu = async () => {
       await userEvent.click(await screen.findByTestId('unifiedDataTableSelectionBtn'));
+      await waitForEuiPopoverClose();
     };
+
+    const getCellValues = () =>
+      Array.from(document.querySelectorAll(`.${CELL_CLASS}`)).map(({ textContent }) => textContent);
+
+    const getColumnHeaders = () =>
+      screen
+        .getAllByTestId(/^dataGridHeaderCell-/)
+        .map((header) => header.querySelector('.euiDataGridHeaderCell__content')?.textContent);
 
     const getCompareDocumentsButton = () =>
       screen.queryByTestId('unifiedDataTableCompareSelectedDocuments');
-
-    const goToComparisonMode = async () => {
-      await selectDocument(esHitsMock[0]);
-      await selectDocument(esHitsMock[1]);
-      await openSelectedRowsMenu();
-      await waitForEuiPopoverOpen();
-      await userEvent.click(await screen.findByTestId('unifiedDataTableCompareSelectedDocuments'));
-      await screen.findByText('Comparing 2 documents');
-      // EuiDataGrid makes state updates after calling requestAnimationFrame, which can lead
-      // to "Can't perform a React state update on an unmounted component." warnings in tests,
-      // so we need to wait for the next animation frame to avoid this
-      await screen.findByTestId('unifiedDataTableCompareDocuments');
-      await act(() => new Promise((resolve) => requestAnimationFrame(() => resolve(void 0))));
-    };
-
-    const getFullScreenButton = () => screen.queryByTestId('dataGridFullScreenButton');
 
     const getFieldColumns = () =>
       screen
         .queryAllByTestId('unifiedDataTableComparisonFieldName')
         .map(({ textContent }) => textContent);
 
-    const getColumnHeaders = () =>
-      screen
-        .getAllByRole('columnheader')
-        .map((header) => header.querySelector('.euiDataGridHeaderCell__content')?.textContent);
+    const getFullScreenButton = () => screen.queryByTestId('dataGridFullScreenButton');
 
-    const getCellValues = () =>
-      Array.from(document.querySelectorAll(`.${CELL_CLASS}`)).map(({ textContent }) => textContent);
+    const getSelectedDocumentsButton = () => screen.queryByTestId('unifiedDataTableSelectionBtn');
+
+    const goToComparisonMode = async () => {
+      await selectDocument(esHitsMock[0]);
+      await selectDocument(esHitsMock[1]);
+      await openSelectedRowsMenu();
+
+      await userEvent.click(await screen.findByTestId('unifiedDataTableCompareSelectedDocuments'));
+      await waitForEuiPopoverClose();
+      await screen.findByText('Comparing 2 documents');
+      await screen.findByTestId('unifiedDataTableCompareDocuments');
+    };
+
+    const openSelectedRowsMenu = async () => {
+      await userEvent.click(await screen.findByTestId('unifiedDataTableSelectionBtn'));
+      await waitForEuiPopoverOpen();
+      await screen.findAllByText('Clear selection');
+    };
+
+    const selectDocument = async (document: EsHitRecord) =>
+      await userEvent.click(screen.getByTestId(`dscGridSelectDoc-${getDocId(document)}`));
 
     it(
       'should not allow comparison if less than 2 documents are selected',
       async () => {
         await renderDataTable({ enableComparisonMode: true });
+
         expect(getSelectedDocumentsButton()).not.toBeInTheDocument();
+
         await selectDocument(esHitsMock[0]);
-        expect(getSelectedDocumentsButton()).toBeInTheDocument();
+        expect(getSelectedDocumentsButton()).toBeVisible();
+
         await openSelectedRowsMenu();
         expect(getCompareDocumentsButton()).not.toBeInTheDocument();
         await closeSelectedRowsMenu();
+
         await selectDocument(esHitsMock[1]);
-        expect(getSelectedDocumentsButton()).toBeInTheDocument();
+        expect(getSelectedDocumentsButton()).toBeVisible();
+
         await openSelectedRowsMenu();
-        waitFor(() => {
-          expect(getCompareDocumentsButton()).toBeInTheDocument();
+        await waitFor(() => {
+          expect(getCompareDocumentsButton()).toBeVisible();
         });
         await closeSelectedRowsMenu();
       },
@@ -1223,8 +1509,10 @@ describe('UnifiedDataTable', () => {
       'should not allow comparison if comparison mode is disabled',
       async () => {
         await renderDataTable({ enableComparisonMode: false });
+
         await selectDocument(esHitsMock[0]);
         await selectDocument(esHitsMock[1]);
+
         await openSelectedRowsMenu();
         expect(getCompareDocumentsButton()).not.toBeInTheDocument();
         await closeSelectedRowsMenu();
@@ -1236,7 +1524,9 @@ describe('UnifiedDataTable', () => {
       'should allow comparison if 2 or more documents are selected and comparison mode is enabled',
       async () => {
         await renderDataTable({ enableComparisonMode: true });
+
         await goToComparisonMode();
+
         expect(getColumnHeaders()).toEqual(['Field', '1', '2']);
         expect(getCellValues()).toEqual(['', '', 'i', 'i', '20', '', '', 'jpg', 'test1', '']);
       },
@@ -1247,8 +1537,10 @@ describe('UnifiedDataTable', () => {
       'should show full screen button if showFullScreenButton is true',
       async () => {
         await renderDataTable({ enableComparisonMode: true, showFullScreenButton: true });
+
         await goToComparisonMode();
-        expect(getFullScreenButton()).toBeInTheDocument();
+
+        expect(getFullScreenButton()).toBeVisible();
       },
       EXTENDED_JEST_TIMEOUT
     );
@@ -1257,7 +1549,9 @@ describe('UnifiedDataTable', () => {
       'should hide full screen button if showFullScreenButton is false',
       async () => {
         await renderDataTable({ enableComparisonMode: true, showFullScreenButton: false });
+
         await goToComparisonMode();
+
         expect(getFullScreenButton()).not.toBeInTheDocument();
       },
       EXTENDED_JEST_TIMEOUT
@@ -1267,7 +1561,9 @@ describe('UnifiedDataTable', () => {
       'should render selected fields',
       async () => {
         await renderDataTable({ enableComparisonMode: true, columns: ['bytes', 'message'] });
+
         await goToComparisonMode();
+
         expect(getFieldColumns()).toEqual(['@timestamp', 'bytesDisplayName', 'message']);
       },
       EXTENDED_JEST_TIMEOUT
@@ -1277,7 +1573,9 @@ describe('UnifiedDataTable', () => {
       'should render all available fields if no fields are selected',
       async () => {
         await renderDataTable({ enableComparisonMode: true });
+
         await goToComparisonMode();
+
         expect(getFieldColumns()).toEqual([
           '@timestamp',
           '_index',
@@ -1294,17 +1592,16 @@ describe('UnifiedDataTable', () => {
     it(
       'should render the color indicator control',
       async () => {
-        const component = await getComponent({
+        await renderComponent({
           ...getProps(),
           getRowIndicator: jest.fn(() => ({ color: 'blue', label: 'test' })),
         });
 
-        expect(
-          findTestSubject(component, 'dataGridHeaderCell-colorIndicator').exists()
-        ).toBeTruthy();
-        expect(
-          findTestSubject(component, 'unifiedDataTableRowColorIndicatorCell').first().prop('title')
-        ).toEqual('test');
+        expect(screen.getByTestId('dataGridHeaderCell-colorIndicator')).toBeVisible();
+        expect(screen.getAllByTestId('unifiedDataTableRowColorIndicatorCell')[0]).toHaveAttribute(
+          'title',
+          'test'
+        );
       },
       EXTENDED_JEST_TIMEOUT
     );
@@ -1312,14 +1609,12 @@ describe('UnifiedDataTable', () => {
     it(
       'should not render the color indicator control by default',
       async () => {
-        const component = await getComponent({
+        await renderComponent({
           ...getProps(),
           getRowIndicator: undefined,
         });
 
-        expect(
-          findTestSubject(component, 'dataGridHeaderCell-colorIndicator').exists()
-        ).toBeFalsy();
+        expect(screen.queryByTestId('dataGridHeaderCell-colorIndicator')).not.toBeInTheDocument();
       },
       EXTENDED_JEST_TIMEOUT
     );
@@ -1328,13 +1623,16 @@ describe('UnifiedDataTable', () => {
   describe('columns', () => {
     // Default column width in EUI is hardcoded to 100px for Jest envs
     const EUI_DEFAULT_COLUMN_WIDTH = '100px';
+
     const getColumnHeader = (name: string) => screen.getByTestId(`dataGridHeaderCell-${name}`);
-    const queryColumnHeader = (name: string) => screen.queryByTestId(`dataGridHeaderCell-${name}`);
+
     const openColumnActions = async (name: string) => {
       const actionsButton = screen.getByTestId(`dataGridHeaderCellActionButton-${name}`);
       await userEvent.click(actionsButton);
       await waitForEuiPopoverOpen();
     };
+
+    const queryColumnHeader = (name: string) => screen.queryByTestId(`dataGridHeaderCell-${name}`);
 
     it(
       'should reset the last column to auto width if only absolute width columns remain',
@@ -1348,14 +1646,17 @@ describe('UnifiedDataTable', () => {
             },
           },
         });
+
         expect(getColumnHeader('message')).toHaveStyle({ width: EUI_DEFAULT_COLUMN_WIDTH });
         expect(getColumnHeader('extension')).toHaveStyle({ width: '50px' });
         expect(getColumnHeader('bytes')).toHaveStyle({ width: '50px' });
+
         await openColumnActions('message');
         await userEvent.click(screen.getByTestId('unifiedDataTableRemoveColumn'));
         await waitFor(() => {
           expect(queryColumnHeader('message')).not.toBeInTheDocument();
         });
+
         expect(getColumnHeader('extension')).toHaveStyle({ width: '50px' });
         expect(getColumnHeader('bytes')).toHaveStyle({ width: EUI_DEFAULT_COLUMN_WIDTH });
       },
@@ -1373,14 +1674,17 @@ describe('UnifiedDataTable', () => {
             },
           },
         });
+
         expect(getColumnHeader('message')).toHaveStyle({ width: EUI_DEFAULT_COLUMN_WIDTH });
         expect(getColumnHeader('extension')).toHaveStyle({ width: EUI_DEFAULT_COLUMN_WIDTH });
         expect(getColumnHeader('bytes')).toHaveStyle({ width: '50px' });
+
         await openColumnActions('message');
         await userEvent.click(screen.getByTestId('unifiedDataTableRemoveColumn'));
         await waitFor(() => {
           expect(queryColumnHeader('message')).not.toBeInTheDocument();
         });
+
         expect(getColumnHeader('extension')).toHaveStyle({ width: EUI_DEFAULT_COLUMN_WIDTH });
         expect(getColumnHeader('bytes')).toHaveStyle({ width: '50px' });
       },
@@ -1400,8 +1704,10 @@ describe('UnifiedDataTable', () => {
           });
 
           expect(getColumnHeader('@timestamp')).toHaveStyle({ width: '50px' });
+
           await openColumnActions('@timestamp');
           await userEvent.click(screen.getByTestId('unifiedDataTableResetColumnWidth'));
+
           expect(getColumnHeader('@timestamp')).toHaveStyle({
             width: `${defaultTimeColumnWidth}px`,
           });
@@ -1420,8 +1726,10 @@ describe('UnifiedDataTable', () => {
           });
 
           expect(getColumnHeader('extension')).toHaveStyle({ width: '50px' });
+
           await openColumnActions('extension');
           await userEvent.click(screen.getByTestId('unifiedDataTableResetColumnWidth'));
+
           expect(getColumnHeader('extension')).toHaveStyle({
             width: EUI_DEFAULT_COLUMN_WIDTH,
           });
@@ -1432,8 +1740,10 @@ describe('UnifiedDataTable', () => {
     describe('given a column without absolute width', () => {
       it('should not show the reset width button', async () => {
         await renderDataTable({ columns: ['message'] });
+
         expect(getColumnHeader('message')).toHaveStyle({ width: EUI_DEFAULT_COLUMN_WIDTH });
         await openColumnActions('message');
+
         expect(screen.queryByTestId('unifiedDataTableResetColumnWidth')).not.toBeInTheDocument();
       });
     });
@@ -1441,21 +1751,17 @@ describe('UnifiedDataTable', () => {
     it(
       'should have columnVisibility configuration',
       async () => {
-        const component = await getComponent({
+        await renderComponent({
           ...getProps(),
-          columns: ['message'],
           canDragAndDropColumns: true,
+          columns: ['message'],
         });
-        expect(component.find(EuiDataGrid).last().prop('columnVisibility')).toMatchInlineSnapshot(`
-          Object {
-            "canDragAndDropColumns": true,
-            "setVisibleColumns": [Function],
-            "visibleColumns": Array [
-              "@timestamp",
-              "message",
-            ],
-          }
-        `);
+
+        expect(getLastEuiDataGridProps().columnVisibility).toEqual({
+          canDragAndDropColumns: true,
+          setVisibleColumns: expect.any(Function),
+          visibleColumns: ['@timestamp', 'message'],
+        });
       },
       EXTENDED_JEST_TIMEOUT
     );
@@ -1463,21 +1769,17 @@ describe('UnifiedDataTable', () => {
     it(
       'should disable drag&drop if Summary is present',
       async () => {
-        const component = await getComponent({
+        await renderComponent({
           ...getProps(),
-          columns: [],
           canDragAndDropColumns: true,
+          columns: [],
         });
-        expect(component.find(EuiDataGrid).last().prop('columnVisibility')).toMatchInlineSnapshot(`
-          Object {
-            "canDragAndDropColumns": false,
-            "setVisibleColumns": [Function],
-            "visibleColumns": Array [
-              "@timestamp",
-              "_source",
-            ],
-          }
-        `);
+
+        expect(getLastEuiDataGridProps().columnVisibility).toEqual({
+          canDragAndDropColumns: false,
+          setVisibleColumns: expect.any(Function),
+          visibleColumns: ['@timestamp', '_source'],
+        });
       },
       EXTENDED_JEST_TIMEOUT
     );
@@ -1485,24 +1787,28 @@ describe('UnifiedDataTable', () => {
 
   describe('pagination', () => {
     const onChangePageMock = jest.fn();
+
     beforeEach(() => {
       jest.clearAllMocks();
     });
-    test('should effect pageIndex change', async () => {
-      const component = await getComponent({
+
+    it('should effect pageIndex change', async () => {
+      await renderComponent({
         ...getProps(),
-        onUpdatePageIndex: onChangePageMock,
-        rowsPerPageState: 1,
         rowsPerPageOptions: [1, 5],
+        rowsPerPageState: 1,
+        onUpdatePageIndex: onChangePageMock,
       });
 
-      expect(findTestSubject(component, 'pagination-button-1').exists()).toBeTruthy();
+      expect(screen.getByTestId('pagination-button-1')).toBeVisible();
+
       onChangePageMock.mockClear();
-      findTestSubject(component, 'pagination-button-1').simulate('click');
+
+      await userEvent.click(screen.getByTestId('pagination-button-1'));
       expect(onChangePageMock).toHaveBeenNthCalledWith(1, 1);
     });
 
-    test('should effect pageIndex change when itemsPerPage has been changed', async () => {
+    it('should effect pageIndex change when itemsPerPage has been changed', async () => {
       /*
        * Use Case:
        *
@@ -1510,31 +1816,35 @@ describe('UnifiedDataTable', () => {
        * Now if we change items per page to 4, it should automatically change the pageIndex to 0.
        *
        * */
-      const component = await getComponent({
+      const props = {
         ...getProps(),
-        onUpdatePageIndex: onChangePageMock,
-        rowsPerPageState: 1,
         rowsPerPageOptions: [1, 4],
-      });
+        rowsPerPageState: 1,
+        onUpdatePageIndex: onChangePageMock,
+      };
 
-      expect(findTestSubject(component, 'pagination-button-4').exists()).toBeTruthy();
+      const { rerender } = await renderComponent(props);
+
+      expect(screen.getByTestId('pagination-button-4')).toBeVisible();
+
       onChangePageMock.mockClear();
+
       // go to last page
-      findTestSubject(component, 'pagination-button-4').simulate('click');
+      await userEvent.click(screen.getByTestId('pagination-button-4'));
       expect(onChangePageMock).toHaveBeenNthCalledWith(1, 4);
+
       onChangePageMock.mockClear();
 
-      // Change items per Page so that pageIndex autoamtically changes.
-      expect(findTestSubject(component, 'tablePaginationPopoverButton').text()).toBe(
+      // Change items per Page so that pageIndex automatically changes.
+      expect(screen.getByTestId('tablePaginationPopoverButton')).toHaveTextContent(
         'Rows per page: 1'
       );
-      findTestSubject(component, 'tablePaginationPopoverButton').simulate('click');
-      component.setProps({
-        rowsPerPageState: 5,
-      });
+
+      await userEvent.click(screen.getByTestId('tablePaginationPopoverButton'));
+      rerender(<DataTableWithI18n {...props} rowsPerPageState={5} />);
 
       await waitFor(() => {
-        expect(findTestSubject(component, 'tablePaginationPopoverButton').text()).toBe(
+        expect(screen.getByTestId('tablePaginationPopoverButton')).toHaveTextContent(
           'Rows per page: 5'
         );
       });
@@ -1543,13 +1853,140 @@ describe('UnifiedDataTable', () => {
     });
   });
 
+  // Covers `useScrollToExpandedDoc` through the real grid rather than in isolation, since it
+  // depends on the grid's pagination and imperative API. These assert the paging half only:
+  // jsdom exposes grid pagination but not EUI's imperative virtualized scrolling API,
+  // so scrolling and retry behavior are covered by the focused hook tests instead.
+  describe('scrolling to the expanded document', () => {
+    const rows = esHitsMock.map((hit) => buildDataTableRecord(hit, dataViewMock));
+    const onChangePageMock = jest.fn();
+
+    beforeEach(() => {
+      onChangePageMock.mockClear();
+    });
+
+    const getPagedProps = (): UnifiedDataTableProps => ({
+      ...getProps(),
+      rows,
+      rowsPerPageOptions: [1, 5],
+      rowsPerPageState: 1,
+      onUpdatePageIndex: onChangePageMock,
+      setExpandedDoc: jest.fn(),
+      renderDocumentView: jest.fn(),
+    });
+
+    it('should page to the expanded document when it is not on the current page', async () => {
+      const props = getPagedProps();
+      const { rerender } = await renderComponent(props);
+
+      onChangePageMock.mockClear();
+
+      rerender(<DataTableWithI18n {...props} expandedDoc={rows[2]} />);
+
+      await waitFor(() => {
+        expect(onChangePageMock).toHaveBeenCalledWith(2);
+      });
+
+      // Scrolling retries must not repeat the page change.
+      expect(onChangePageMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('should page to the expanded document once it arrives in the results', async () => {
+      const props = { ...getPagedProps(), rows: rows.slice(0, 1), expandedDoc: rows[2] };
+      const { rerender } = await renderComponent(props);
+
+      expect(onChangePageMock).not.toHaveBeenCalled();
+
+      rerender(<DataTableWithI18n {...props} rows={rows} />);
+
+      await waitFor(() => {
+        expect(onChangePageMock).toHaveBeenCalledWith(2);
+      });
+    });
+
+    it('should not page when the expanded document is already on the current page', async () => {
+      const props = getPagedProps();
+      const { rerender } = await renderComponent(props);
+
+      onChangePageMock.mockClear();
+
+      rerender(<DataTableWithI18n {...props} expandedDoc={rows[0]} />);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('docTable')).toBeVisible();
+      });
+
+      expect(onChangePageMock).not.toHaveBeenCalled();
+    });
+
+    it('should not page again while the same document stays expanded', async () => {
+      const props = { ...getPagedProps(), expandedDoc: rows[2] };
+      const { rerender } = await renderComponent(props);
+
+      await waitFor(() => {
+        expect(onChangePageMock).toHaveBeenCalledWith(2);
+      });
+
+      onChangePageMock.mockClear();
+
+      // A background refetch must not pull the grid from the user's scroll position.
+      rerender(<DataTableWithI18n {...props} rows={[...rows]} />);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('docTable')).toBeVisible();
+      });
+
+      expect(onChangePageMock).not.toHaveBeenCalled();
+    });
+
+    it('should not page to an expanded document again after restoring the table state', async () => {
+      const expandedDoc = rows[2];
+      const props = {
+        ...getPagedProps(),
+        expandedDoc,
+        initialState: {
+          pageIndex: 1,
+          scrolledToExpandedDocId: expandedDoc.id,
+        },
+      };
+
+      await renderComponent(props);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('docTable')).toBeVisible();
+      });
+
+      expect(onChangePageMock).not.toHaveBeenCalled();
+    });
+
+    it('should not page when the expanded document is not part of the results', async () => {
+      const props = getPagedProps();
+      const { rerender } = await renderComponent(props);
+
+      onChangePageMock.mockClear();
+
+      rerender(
+        <DataTableWithI18n
+          {...props}
+          expandedDoc={buildDataTableRecord({ _index: 'i', _id: 'not-in-results' }, dataViewMock)}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId('docTable')).toBeVisible();
+      });
+
+      expect(onChangePageMock).not.toHaveBeenCalled();
+    });
+  });
+
   describe('enableInTableSearch', () => {
     it(
       'should render find-button if enableInTableSearch is true and no custom toolbar specified',
       async () => {
-        await renderDataTable({ enableInTableSearch: true, columns: ['bytes'] });
+        await renderDataTable({ columns: ['bytes'], enableInTableSearch: true });
 
-        expect(screen.getByTestId(BUTTON_TEST_SUBJ)).toBeInTheDocument();
+        expect(screen.getByTestId(BUTTON_TEST_SUBJ)).toBeVisible();
       },
       EXTENDED_JEST_TIMEOUT
     );
@@ -1566,13 +2003,13 @@ describe('UnifiedDataTable', () => {
         });
 
         await renderDataTable({
-          enableInTableSearch: true,
           columns: ['bytes'],
+          enableInTableSearch: true,
           renderCustomToolbar: renderCustomToolbarMock,
         });
 
-        expect(screen.getByTestId('custom-toolbar')).toBeInTheDocument();
-        expect(screen.getByTestId(BUTTON_TEST_SUBJ)).toBeInTheDocument();
+        expect(screen.getByTestId('custom-toolbar')).toBeVisible();
+        expect(screen.getByTestId(BUTTON_TEST_SUBJ)).toBeVisible();
       },
       EXTENDED_JEST_TIMEOUT
     );
@@ -1580,7 +2017,7 @@ describe('UnifiedDataTable', () => {
     it(
       'should not render find-button if enableInTableSearch is false',
       async () => {
-        await renderDataTable({ enableInTableSearch: false, columns: ['bytes'] });
+        await renderDataTable({ columns: ['bytes'], enableInTableSearch: false });
 
         expect(screen.queryByTestId(BUTTON_TEST_SUBJ)).not.toBeInTheDocument();
       },
@@ -1590,17 +2027,19 @@ describe('UnifiedDataTable', () => {
     it(
       'should find the search term in the table',
       async () => {
-        await renderDataTable({ enableInTableSearch: true, columns: ['bytes'] });
+        await renderDataTable({ columns: ['bytes'], enableInTableSearch: true });
 
-        expect(screen.getByTestId(BUTTON_TEST_SUBJ)).toBeInTheDocument();
+        expect(screen.getByTestId(BUTTON_TEST_SUBJ)).toBeVisible();
 
         await userEvent.click(screen.getByTestId(BUTTON_TEST_SUBJ));
 
-        expect(screen.getByTestId(INPUT_TEST_SUBJ)).toBeInTheDocument();
+        expect(screen.getByTestId(INPUT_TEST_SUBJ)).toBeVisible();
 
         const searchTerm = '50';
+
         const input = screen.getByTestId(INPUT_TEST_SUBJ);
-        fireEvent.change(input, { target: { value: searchTerm } });
+        await userEvent.click(input);
+        await userEvent.paste(searchTerm);
         expect(input).toHaveValue(searchTerm);
 
         await waitFor(() => {
@@ -1610,6 +2049,7 @@ describe('UnifiedDataTable', () => {
 
         await waitFor(() => {
           const highlights = screen.getAllByText(searchTerm);
+
           expect(highlights.length).toBeGreaterThan(0);
           expect(
             highlights.every(
@@ -1619,16 +2059,15 @@ describe('UnifiedDataTable', () => {
           ).toBe(true);
         });
 
-        screen.getByTestId(BUTTON_NEXT_TEST_SUBJ).click();
+        await userEvent.click(screen.getByTestId(BUTTON_NEXT_TEST_SUBJ));
 
         await waitFor(() => {
           expect(screen.getByTestId(COUNTER_TEST_SUBJ)).toHaveTextContent('2/3');
         });
 
         const anotherSearchTerm = 'random';
-        fireEvent.change(screen.getByTestId(INPUT_TEST_SUBJ), {
-          target: { value: anotherSearchTerm },
-        });
+        await userEvent.clear(input);
+        await userEvent.paste(anotherSearchTerm);
         expect(screen.getByTestId(INPUT_TEST_SUBJ)).toHaveValue(anotherSearchTerm);
 
         await waitFor(() => {
@@ -1647,5 +2086,89 @@ describe('UnifiedDataTable', () => {
 
       expect(ref.current?.setFocusedCell).toBeDefined();
     });
+  });
+
+  describe('Summary column toggle', () => {
+    it(
+      'should show the Columns popover toggle as checked and disabled in summary-only mode',
+      async () => {
+        await renderDataTable({
+          columns: [],
+          showTimeCol: false,
+          renderCustomToolbar,
+          showSummaryColumnToggle: true,
+        });
+
+        expect(screen.getByTestId('dataGridColumnSelectorButton')).toBeVisible();
+        await userEvent.click(screen.getByTestId('dataGridColumnSelectorButton'));
+        await waitForEuiPopoverOpen();
+
+        const toggle = screen.getByTestId('columnSelectorShowSummaryColumn');
+        expect(toggle).toBeChecked();
+        expect(toggle).toBeDisabled();
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
+
+    it(
+      'should append and remove the Summary column via the Columns popover toggle',
+      async () => {
+        await renderDataTable({
+          columns: ['message'],
+          showTimeCol: false,
+          renderCustomToolbar,
+          showSummaryColumnToggle: true,
+        });
+
+        expect(screen.getByTestId('dataGridColumnSelectorButton')).toBeVisible();
+        await userEvent.click(screen.getByTestId('dataGridColumnSelectorButton'));
+        await waitForEuiPopoverOpen();
+
+        const toggle = screen.getByTestId('columnSelectorShowSummaryColumn');
+        expect(toggle).not.toBeChecked();
+
+        await userEvent.click(toggle);
+
+        expect(toggle).toBeChecked();
+        expect(screen.getByTestId('dataGridHeaderCell-_source')).toBeVisible();
+
+        await userEvent.click(toggle);
+
+        expect(toggle).not.toBeChecked();
+        expect(screen.queryByTestId('dataGridHeaderCell-_source')).not.toBeInTheDocument();
+        expect(screen.getByTestId('dataGridHeaderCell-message')).toBeVisible();
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
+
+    it(
+      'should preserve the time column width when toggling the Summary column',
+      async () => {
+        await renderDataTable({
+          columns: ['message'],
+          settings: {
+            columns: {
+              '@timestamp': { width: 50 },
+            },
+          },
+          renderCustomToolbar,
+          showSummaryColumnToggle: true,
+        });
+
+        const getTimeColumnHeader = () => screen.getByTestId('dataGridHeaderCell-@timestamp');
+        expect(getTimeColumnHeader()).toHaveStyle({ width: '50px' });
+
+        await userEvent.click(screen.getByTestId('dataGridColumnSelectorButton'));
+        await waitForEuiPopoverOpen();
+
+        const toggle = screen.getByTestId('columnSelectorShowSummaryColumn');
+        await userEvent.click(toggle);
+        expect(getTimeColumnHeader()).toHaveStyle({ width: '50px' });
+
+        await userEvent.click(toggle);
+        expect(getTimeColumnHeader()).toHaveStyle({ width: '50px' });
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
   });
 });

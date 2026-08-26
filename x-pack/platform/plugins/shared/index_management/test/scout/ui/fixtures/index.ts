@@ -82,3 +82,5 @@ export const createTest = function <PageObjectsExtensions = Record<string, Abstr
 export const test = createTest<{ indexManagement: IndexManagement }>({
   indexManagement: IndexManagement,
 });
+
+export { CUSTOM_ROLES } from './custom_roles';

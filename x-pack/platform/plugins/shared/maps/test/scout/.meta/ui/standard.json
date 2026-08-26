@@ -1,24 +1,40 @@
 {
-  "lastModified": "2025-12-03T19:03:28.200Z",
-  "sha1": "74c880ce84b4ba381b42e9aebef24466a1523e54",
+  "sha1": "41ec40a4f41a33fe96c28536d03a656c12c9a8ca",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
+    {
+      "id": "f6a280d8279d22c-f971711f1dbaf1d",
+      "title": "Maps embedded in dashboard - request cancellation cancels search when navigating away from the dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/embedded_map_search_cancellation.spec.ts",
+        "line": 46,
+        "column": 7
+      }
+    },
     {
       "id": "0d46d86b877f63c-caca4780f786cad",
       "title": "Maps Full screen mode",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlSecurity",
-        "@svlSecurityEssentials",
-        "@svlSecurityEase",
-        "@svlOblt",
-        "@svlLogsEssentials",
-        "@svlSearch"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/full_screen_mode.spec.ts",
-        "line": 28,
-        "column": 9
+        "line": 23,
+        "column": 43
       }
     }
   ]

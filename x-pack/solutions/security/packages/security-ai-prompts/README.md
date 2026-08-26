@@ -65,7 +65,6 @@ When updating Security AI Prompts saved objects in the `elastic/integrations` re
 
    ```bash
    cd $INTEGRATIONS_HOME/packages/security_ai_prompts/kibana/security_ai_prompt
-   rm ./*.json
    cp $KIBANA_HOME/target/security_ai_prompts/*.json .
    ```
 

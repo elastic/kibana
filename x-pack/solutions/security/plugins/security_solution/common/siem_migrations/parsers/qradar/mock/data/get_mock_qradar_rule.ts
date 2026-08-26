@@ -7,10 +7,11 @@
 
 const getRandomNumberId = () => Math.floor(Math.random() * 1000000);
 
-const getMockQRadarRuleDataXml = (ruleName: string) => {
+const getMockQRadarRuleDataXml = (ruleName: string, isBuildingBlock: boolean = false) => {
   const id = getRandomNumberId();
+  const name = isBuildingBlock ? `BB:${ruleName}` : ruleName;
   return {
-    normal: `<rule buildingBlock="true" enabled="true" id="${id}" name="BB:CategoryDefinition: Authentication Success" origin="SYSTEM" owner="admin" roleDefinition="false" scope="LOCAL" type="EVENT">
+    normal: `<rule buildingBlock="${isBuildingBlock}" enabled="true" id="${id}" name="${name}" origin="SYSTEM" owner="admin" roleDefinition="false" scope="LOCAL" type="EVENT">
   <name>${ruleName}</name>
   <notes>Edit this BB to include all events that indicate successful attempts to access the network.</notes>
   <testDefinitions>
@@ -32,7 +33,7 @@ const getMockQRadarRuleDataXml = (ruleName: string) => {
   </responses>
 </rule>
 `,
-    sanitized: `<rule buildingBlock="true" enabled="true" id="${id}" name="BB:CategoryDefinition: Authentication Success" origin="SYSTEM" owner="admin" roleDefinition="false" scope="LOCAL" type="EVENT">
+    sanitized: `<rule buildingBlock="${isBuildingBlock}" enabled="true" id="${id}" name="${name}" origin="SYSTEM" owner="admin" roleDefinition="false" scope="LOCAL" type="EVENT">
   <name>${ruleName}</name>
   <notes>Edit this BB to include all events that indicate successful attempts to access the network.</notes>
   <testDefinitions>
@@ -57,8 +58,10 @@ const getMockQRadarRuleDataXml = (ruleName: string) => {
   };
 };
 
-export const getMockQRadarXml = (ruleNames: string[]) => {
-  const mockRuleDataXmls = ruleNames.map((ruleName) => getMockQRadarRuleDataXml(ruleName));
+export const getMockQRadarXml = (ruleNames: string[], isBuildingBlock: boolean = false) => {
+  const mockRuleDataXmls = ruleNames.map((ruleName) =>
+    getMockQRadarRuleDataXml(ruleName, isBuildingBlock)
+  );
   const mockRuleDataBase64s = mockRuleDataXmls.map((mockRuleDataXml) =>
     Buffer.from(mockRuleDataXml.normal).toString('base64')
   );

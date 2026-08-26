@@ -7,31 +7,32 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReactNode } from 'react';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataTableRecord } from '../types';
-import { formatFieldValue } from './format_value';
+import { formatFieldValueReact } from './format_value';
 
 export function getFormattedFields<T>(
   doc: DataTableRecord,
   fields: Array<keyof T>,
   { dataView, fieldFormats }: { dataView: DataView; fieldFormats: FieldFormatsStart }
-): T {
-  const formatField = <K extends keyof T>(field: K) => {
+): { [K in keyof T]?: ReactNode } {
+  const formatField = (field: keyof T): ReactNode => {
     const fieldStr = field as string;
     return doc.flattened[fieldStr] !== undefined && doc.flattened[fieldStr] !== null
-      ? (formatFieldValue(
-          doc.flattened[fieldStr],
-          doc.raw,
+      ? formatFieldValueReact({
+          value: doc.flattened[fieldStr],
+          hit: doc.raw,
           fieldFormats,
           dataView,
-          dataView.fields.getByName(fieldStr)
-        ) as T[K])
+          field: dataView.fields.getByName(fieldStr),
+        })
       : undefined;
   };
 
-  return fields.reduce<{ [ket in keyof T]?: string | number }>((acc, field) => {
-    acc[field] = formatField(field) as string | number | undefined;
+  return fields.reduce<{ [K in keyof T]?: ReactNode }>((acc, field) => {
+    acc[field] = formatField(field);
     return acc;
-  }, {}) as T;
+  }, {});
 }

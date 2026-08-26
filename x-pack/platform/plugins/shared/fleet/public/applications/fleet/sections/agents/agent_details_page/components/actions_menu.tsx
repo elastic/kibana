@@ -12,6 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { Agent, AgentPolicy } from '../../../../types';
 import {
   AgentUnenrollAgentModal,
+  AgentRemoveCollectorModal,
   AgentReassignAgentPolicyModal,
   AgentUpgradeAgentModal,
   HierarchicalActionsMenu,
@@ -20,6 +21,7 @@ import { useSingleAgentMenuItems } from '../../hooks/use_single_agent_menu_items
 import type { SingleAgentMenuCallbacks } from '../../hooks/use_single_agent_menu_items';
 import { useAgentRefresh } from '../hooks';
 import { policyHasFleetServer } from '../../../../services';
+import { removeVersionSuffixFromPolicyId } from '../../../../../../../common/services/version_specific_policies_utils';
 import { AgentRequestDiagnosticsModal } from '../../components/agent_request_diagnostics_modal';
 import {
   AgentMigrateFlyout,
@@ -27,6 +29,7 @@ import {
 } from '../../agent_list_page/components';
 import { UninstallCommandFlyout } from '../../../../components';
 import { AgentRollbackModal } from '../../components/agent_rollback_modal';
+import { AgentPolicyYamlFlyout } from '../../../../components';
 
 import { AgentDetailsJsonFlyout } from './agent_details_json_flyout';
 
@@ -52,10 +55,12 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
     const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
     const [isRequestDiagnosticsModalOpen, setIsRequestDiagnosticsModalOpen] = useState(false);
     const [isAgentDetailsJsonFlyoutOpen, setIsAgentDetailsJsonFlyoutOpen] = useState(false);
+    const [isAgentPolicyYamlFlyoutOpen, setIsAgentPolicyYamlFlyoutOpen] = useState(false);
     const [isAgentMigrateFlyoutOpen, setIsAgentMigrateFlyoutOpen] = useState(false);
     const [isChangePrivilegeLevelFlyoutOpen, setIsChangePrivilegeLevelFlyoutOpen] = useState(false);
     const [isUninstallCommandFlyoutOpen, setIsUninstallCommandFlyoutOpen] = useState(false);
     const [isRollbackModalOpen, setIsRollbackModalOpen] = useState(false);
+    const [isRemoveCollectorModalOpen, setIsRemoveCollectorModalOpen] = useState(false);
 
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const onMenuToggle = useCallback((open: boolean) => {
@@ -81,12 +86,14 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
         onReassignClick: () => setIsReassignFlyoutOpen(true),
         onUpgradeClick: () => setIsUpgradeModalOpen(true),
         onViewAgentJsonClick: () => setIsAgentDetailsJsonFlyoutOpen(true),
+        onViewAgentPolicyClick: () => setIsAgentPolicyYamlFlyoutOpen(true),
         onMigrateAgentClick: () => setIsAgentMigrateFlyoutOpen(true),
         onRequestDiagnosticsClick: () => setIsRequestDiagnosticsModalOpen(true),
         onChangeAgentPrivilegeLevelClick: () => setIsChangePrivilegeLevelFlyoutOpen(true),
         onUnenrollClick: () => setIsUnenrollModalOpen(true),
         onUninstallClick: () => setIsUninstallCommandFlyoutOpen(true),
         onRollbackClick: () => setIsRollbackModalOpen(true),
+        onRemoveCollectorClick: () => setIsRemoveCollectorModalOpen(true),
       }),
       [onAddRemoveTagsClick]
     );
@@ -102,7 +109,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
       <>
         {isReassignFlyoutOpen && (
           <EuiPortal>
-            <AgentReassignAgentPolicyModal agents={[agent]} onClose={onClose} />
+            <AgentReassignAgentPolicyModal agents={[agent]} agentCount={1} onClose={onClose} />
           </EuiPortal>
         )}
         {isUnenrollModalOpen && (
@@ -150,6 +157,17 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
             />
           </EuiPortal>
         )}
+        {isAgentPolicyYamlFlyoutOpen && agent.policy_id && (
+          <EuiPortal>
+            {/* Do NOT strip the suffix here: AgentPolicyYamlFlyout needs the raw variant id
+                to render the `- v9.x` label and to fetch the correct `.fleet-policies` doc. */}
+            <AgentPolicyYamlFlyout
+              policyId={agent.policy_id}
+              revision={agent.policy_revision}
+              onClose={() => setIsAgentPolicyYamlFlyoutOpen(false)}
+            />
+          </EuiPortal>
+        )}
         {isAgentMigrateFlyoutOpen && (
           <EuiPortal>
             <AgentMigrateFlyout
@@ -184,7 +202,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
           <EuiPortal>
             <UninstallCommandFlyout
               target="agent"
-              policyId={agent.policy_id}
+              policyId={removeVersionSuffixFromPolicyId(agent.policy_id)}
               onClose={() => {
                 setIsUninstallCommandFlyoutOpen(false);
               }}
@@ -200,6 +218,18 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
             />
           </EuiPortal>
         )}
+        {isRemoveCollectorModalOpen && (
+          <EuiPortal>
+            <AgentRemoveCollectorModal
+              agents={[agent]}
+              agentCount={1}
+              onClose={() => {
+                setIsRemoveCollectorModalOpen(false);
+                refreshAgent();
+              }}
+            />
+          </EuiPortal>
+        )}
         <HierarchicalActionsMenu
           items={menuItems}
           isOpen={isMenuOpen}
@@ -207,7 +237,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
           anchorPosition="downLeft"
           button={{
             props: {
-              iconType: 'arrowDown',
+              iconType: 'chevronSingleDown',
               iconSide: 'right',
               color: 'primary',
             },

@@ -6,30 +6,30 @@
  */
 
 import Boom from '@hapi/boom';
-import * as t from 'io-ts';
 import { pick } from 'lodash';
+import {
+  routeDefinitions,
+  type ListCustomLinksResponse,
+  type DeleteCustomLinkResponse,
+  type CustomLinkTransactionResponse,
+} from '@kbn/apm-api-shared';
+import { FILTER_OPTIONS } from '@kbn/apm-types';
 import { isActiveGoldLicense } from '../../../../common/license_check';
 import { INVALID_LICENSE } from '../../../../common/custom_link';
-import { FILTER_OPTIONS } from '../../../../common/custom_link/custom_link_filter_options';
 import { notifyFeatureUsage } from '../../../feature';
 import { createOrUpdateCustomLink } from './create_or_update_custom_link';
-import { filterOptionsRt, payloadRt } from './custom_link_types';
 import { deleteCustomLink } from './delete_custom_link';
 import { getTransaction } from './get_transaction';
 import { listCustomLinks } from './list_custom_links';
 import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
 import { getApmEventClient } from '../../../lib/helpers/get_apm_event_client';
 import { createInternalESClientWithResources } from '../../../lib/helpers/create_es_client/create_internal_es_client';
-import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
-import type { CustomLink } from '../../../../common/custom_link/custom_link_types';
 
 const customLinkTransactionRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/settings/custom_links/transaction',
+  endpoint: routeDefinitions.customLinks.transaction.endpoint,
+  params: routeDefinitions.customLinks.transaction.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
-  params: t.partial({
-    query: filterOptionsRt,
-  }),
-  handler: async (resources): Promise<Transaction> => {
+  handler: async (resources): Promise<CustomLinkTransactionResponse> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
     const { query } = params;
@@ -40,16 +40,10 @@ const customLinkTransactionRoute = createApmServerRoute({
 });
 
 const listCustomLinksRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/settings/custom_links',
+  endpoint: routeDefinitions.customLinks.list.endpoint,
+  params: routeDefinitions.customLinks.list.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
-  params: t.partial({
-    query: filterOptionsRt,
-  }),
-  handler: async (
-    resources
-  ): Promise<{
-    customLinks: CustomLink[];
-  }> => {
+  handler: async (resources): Promise<ListCustomLinksResponse> => {
     const { context, params } = resources;
     const licensingContext = await context.licensing;
 
@@ -71,10 +65,8 @@ const listCustomLinksRoute = createApmServerRoute({
 });
 
 const createCustomLinkRoute = createApmServerRoute({
-  endpoint: 'POST /internal/apm/settings/custom_links',
-  params: t.type({
-    body: payloadRt,
-  }),
+  endpoint: routeDefinitions.customLinks.create.endpoint,
+  params: routeDefinitions.customLinks.create.params,
   security: {
     authz: {
       requiredPrivileges: ['apm', 'apm_settings_write'],
@@ -101,13 +93,8 @@ const createCustomLinkRoute = createApmServerRoute({
 });
 
 const updateCustomLinkRoute = createApmServerRoute({
-  endpoint: 'PUT /internal/apm/settings/custom_links/{id}',
-  params: t.type({
-    path: t.type({
-      id: t.string,
-    }),
-    body: payloadRt,
-  }),
+  endpoint: routeDefinitions.customLinks.update.endpoint,
+  params: routeDefinitions.customLinks.update.params,
   security: {
     authz: {
       requiredPrivileges: ['apm', 'apm_settings_write'],
@@ -135,18 +122,14 @@ const updateCustomLinkRoute = createApmServerRoute({
 });
 
 const deleteCustomLinkRoute = createApmServerRoute({
-  endpoint: 'DELETE /internal/apm/settings/custom_links/{id}',
-  params: t.type({
-    path: t.type({
-      id: t.string,
-    }),
-  }),
+  endpoint: routeDefinitions.customLinks.delete.endpoint,
+  params: routeDefinitions.customLinks.delete.params,
   security: {
     authz: {
       requiredPrivileges: ['apm', 'apm_settings_write'],
     },
   },
-  handler: async (resources): Promise<{ result: string }> => {
+  handler: async (resources): Promise<DeleteCustomLinkResponse> => {
     const { context, params } = resources;
     const licensingContext = await context.licensing;
 

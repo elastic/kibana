@@ -12,7 +12,11 @@ import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.moc
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { CasesConnector } from './cases_connector';
 import { CasesConnectorExecutor } from './cases_connector_executor';
-import { CASES_CONNECTOR_ID } from '../../../common/constants';
+import {
+  CASES_CONNECTOR_ID,
+  MAX_OPEN_CASES_ADVANCED_SETTING,
+  MAX_OPEN_CASES_DEFAULT_MAXIMUM,
+} from '../../../common/constants';
 import { CasesOracleService } from './cases_oracle_service';
 import { CasesService } from './cases_service';
 import { CasesConnectorError } from './cases_connector_error';
@@ -46,12 +50,17 @@ describe('CasesConnector', () => {
   const reopenClosedCases = false;
   const maximumCasesToOpen = 5;
   const templateId = null;
+  const templateVersion = null;
   const autoPushCase = null;
 
   const mockExecute = jest.fn();
   const getCasesClient = jest.fn().mockResolvedValue({ foo: 'bar' });
   const getSpaceId = jest.fn().mockReturnValue('default');
   const getUnsecuredSavedObjectsClient = jest.fn();
+  const mockUiSettingsGet = jest.fn().mockResolvedValue(20);
+  const getUiSettingsClient = jest.fn().mockResolvedValue({
+    get: mockUiSettingsGet,
+  });
   // 1ms delay before retrying
   const nextBackOff = jest.fn().mockReturnValue(1);
 
@@ -59,7 +68,16 @@ describe('CasesConnector', () => {
     create: () => ({ nextBackOff }),
   };
 
-  const casesParams = { getCasesClient, getSpaceId, getUnsecuredSavedObjectsClient };
+  const casesParams = {
+    getCasesClient,
+    getActionsClient: jest.fn().mockResolvedValue({}),
+    getSpaceId,
+    getUnsecuredSavedObjectsClient,
+    getUiSettingsClient,
+    isCasesAttachmentsEnabled: false,
+    isTemplatesEnabled: false,
+    isAtLeastPlatinum: jest.fn().mockResolvedValue(true),
+  };
   const connectorParams = {
     configurationUtilities: actionsConfigMock.create(),
     config: {},
@@ -77,6 +95,7 @@ describe('CasesConnector', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockExecute.mockResolvedValue({});
+    mockUiSettingsGet.mockResolvedValue(20);
 
     CasesConnectorExecutorMock.mockImplementation(() => {
       return {
@@ -104,16 +123,73 @@ describe('CasesConnector', () => {
       reopenClosedCases,
       maximumCasesToOpen,
       templateId,
+      templateVersion,
       autoPushCase,
     });
 
     expect(CasesConnectorExecutorMock).toBeCalledWith({
       logger,
       casesClient: { foo: 'bar' },
+      actionsClient: {},
       casesOracleService: expect.any(CasesOracleService),
       casesService: expect.any(CasesService),
       spaceId: 'default',
+      isTemplatesEnabled: false,
+      isAtLeastPlatinum: casesParams.isAtLeastPlatinum,
     });
+  });
+
+  it('threads isTemplatesEnabled through to the CasesConnectorExecutor', async () => {
+    const connectorWithTemplatesEnabled = new CasesConnector({
+      casesParams: { ...casesParams, isTemplatesEnabled: true },
+      connectorParams,
+    });
+
+    await connectorWithTemplatesEnabled.run({
+      alerts: [{ _id: 'alert-id-0', _index: 'alert-index-0' }],
+      groupedAlerts,
+      groupingBy,
+      owner,
+      rule,
+      timeWindow,
+      internallyManagedAlerts,
+      reopenClosedCases,
+      maximumCasesToOpen,
+      templateId,
+      templateVersion,
+      autoPushCase,
+    });
+
+    expect(CasesConnectorExecutorMock).toBeCalledWith(
+      expect.objectContaining({ isTemplatesEnabled: true })
+    );
+  });
+
+  it('threads isAtLeastPlatinum through to the CasesConnectorExecutor', async () => {
+    const isAtLeastPlatinum = jest.fn().mockResolvedValue(false);
+    const connectorWithLicenseCheck = new CasesConnector({
+      casesParams: { ...casesParams, isAtLeastPlatinum },
+      connectorParams,
+    });
+
+    await connectorWithLicenseCheck.run({
+      alerts: [{ _id: 'alert-id-0', _index: 'alert-index-0' }],
+      groupedAlerts,
+      groupingBy,
+      owner,
+      rule,
+      timeWindow,
+      internallyManagedAlerts,
+      reopenClosedCases,
+      maximumCasesToOpen,
+      templateId,
+      templateVersion,
+      autoPushCase,
+    });
+
+    expect(CasesConnectorExecutorMock).toBeCalledWith(
+      expect.objectContaining({ isAtLeastPlatinum })
+    );
   });
 
   it('executes the CasesConnectorExecutor correctly', async () => {
@@ -128,6 +204,7 @@ describe('CasesConnector', () => {
       reopenClosedCases,
       maximumCasesToOpen,
       templateId,
+      templateVersion,
       autoPushCase,
     });
 
@@ -142,7 +219,104 @@ describe('CasesConnector', () => {
       reopenClosedCases,
       maximumCasesToOpen,
       templateId,
+      templateVersion,
       autoPushCase,
+    });
+  });
+
+  it('reads the configured maximum from ui settings', async () => {
+    await connector.run({
+      alerts: [{ _id: 'alert-id-0', _index: 'alert-index-0' }],
+      groupedAlerts,
+      groupingBy,
+      owner,
+      rule,
+      timeWindow,
+      internallyManagedAlerts,
+      reopenClosedCases,
+      maximumCasesToOpen,
+      templateId,
+      templateVersion,
+      autoPushCase,
+    });
+
+    expect(mockUiSettingsGet).toHaveBeenCalledWith(MAX_OPEN_CASES_ADVANCED_SETTING);
+  });
+
+  it('throws when maximumCasesToOpen exceeds the configured maximum', async () => {
+    mockUiSettingsGet.mockResolvedValue(10);
+
+    await expect(() =>
+      connector.run({
+        alerts: [{ _id: 'alert-id-0', _index: 'alert-index-0' }],
+        groupedAlerts,
+        groupingBy,
+        owner,
+        rule,
+        timeWindow,
+        internallyManagedAlerts,
+        reopenClosedCases,
+        maximumCasesToOpen: 11,
+        templateId,
+        templateVersion,
+        autoPushCase,
+      })
+    ).rejects.toMatchObject({
+      message: 'Maximum cases to open must be between 1 and 10.',
+    });
+  });
+
+  it('overrides maximumCasesToOpen to MAX_OPEN_CASES_DEFAULT_MAXIMUM for internally managed alerts, regardless of the setting', async () => {
+    mockUiSettingsGet.mockResolvedValue(500);
+
+    await connector.run({
+      alerts: [{ _id: 'alert-id-0', _index: 'alert-index-0' }],
+      groupedAlerts: [
+        {
+          alerts: [{ _id: 'alert-id-0', _index: 'alert-index-0' }],
+          grouping: { attack_discovery: 'attack-discovery-id' },
+        },
+      ],
+      groupingBy: [],
+      owner,
+      rule,
+      timeWindow,
+      internallyManagedAlerts: true,
+      reopenClosedCases,
+      maximumCasesToOpen,
+      templateId,
+      templateVersion,
+      autoPushCase,
+    });
+
+    expect(mockExecute).toBeCalledWith(
+      expect.objectContaining({
+        internallyManagedAlerts: true,
+        maximumCasesToOpen: MAX_OPEN_CASES_DEFAULT_MAXIMUM,
+      })
+    );
+  });
+
+  it('throws when maximumCasesToOpen exceeds a lowered configured maximum', async () => {
+    mockUiSettingsGet.mockResolvedValue(5);
+
+    await expect(() =>
+      connector.run({
+        alerts: [{ _id: 'alert-id-0', _index: 'alert-index-0' }],
+        groupedAlerts,
+        groupingBy,
+        owner,
+        rule,
+        timeWindow,
+        internallyManagedAlerts,
+        reopenClosedCases,
+        maximumCasesToOpen: 10,
+        templateId,
+        templateVersion,
+        autoPushCase,
+      })
+    ).rejects.toMatchObject({
+      message: 'Maximum cases to open must be between 1 and 5.',
     });
   });
 
@@ -158,6 +332,7 @@ describe('CasesConnector', () => {
       reopenClosedCases,
       maximumCasesToOpen,
       templateId,
+      templateVersion,
       autoPushCase,
     });
 
@@ -178,6 +353,7 @@ describe('CasesConnector', () => {
         reopenClosedCases,
         maximumCasesToOpen,
         templateId,
+        templateVersion,
         autoPushCase,
       });
     } catch (error) {
@@ -206,6 +382,7 @@ describe('CasesConnector', () => {
         reopenClosedCases,
         maximumCasesToOpen,
         templateId,
+        templateVersion,
         autoPushCase,
       });
     } catch (error) {
@@ -234,6 +411,7 @@ describe('CasesConnector', () => {
         reopenClosedCases,
         maximumCasesToOpen,
         templateId,
+        templateVersion,
         autoPushCase,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Server error"`);
@@ -260,6 +438,7 @@ describe('CasesConnector', () => {
         reopenClosedCases,
         maximumCasesToOpen,
         templateId,
+        templateVersion,
         autoPushCase,
       });
     } catch (err) {
@@ -291,6 +470,7 @@ describe('CasesConnector', () => {
       reopenClosedCases,
       maximumCasesToOpen,
       templateId,
+      templateVersion,
       autoPushCase,
     });
 
@@ -315,6 +495,7 @@ describe('CasesConnector', () => {
         reopenClosedCases,
         maximumCasesToOpen,
         templateId,
+        templateVersion,
         autoPushCase,
       });
     } catch (err) {
@@ -344,6 +525,7 @@ describe('CasesConnector', () => {
       reopenClosedCases,
       maximumCasesToOpen,
       templateId,
+      templateVersion,
       autoPushCase,
     });
 

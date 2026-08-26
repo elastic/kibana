@@ -7,7 +7,7 @@
 
 import { TaskCost } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { ActionTypeRegistryOpts } from './action_type_registry';
 import { ActionTypeRegistry } from './action_type_registry';
 import type { ActionType } from './types';
@@ -89,6 +89,7 @@ describe('actionTypeRegistry', () => {
               createTaskRunner: expect.any(Function),
               maxAttempts: 3,
               cost: TaskCost.Tiny,
+              taskTypeGroup: 'actions',
               title: 'My connector type',
             },
           },
@@ -141,6 +142,19 @@ describe('actionTypeRegistry', () => {
         )
       ).toThrowErrorMatchingInlineSnapshot(
         `"Invalid feature ids \\"foo\\" for connector type \\"my-connector-type\\"."`
+      );
+    });
+
+    test('throws if a supported feature id exceeds the max length', () => {
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      expect(() =>
+        actionTypeRegistry.register(
+          getConnectorType({
+            supportedFeatureIds: ['a'.repeat(101)],
+          })
+        )
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Feature IDs for connector type \\"my-connector-type\\" must not exceed 100 characters."`
       );
     });
 
@@ -236,6 +250,7 @@ describe('actionTypeRegistry', () => {
           isSystemActionType: false,
           isDeprecated: false,
           source: 'stack',
+          isTestable: false,
         },
       ]);
       expect(mockedActionsConfig.isActionTypeEnabled).toHaveBeenCalled();
@@ -294,6 +309,7 @@ describe('actionTypeRegistry', () => {
           validate: { params: expect.any(Object) },
           isDeprecated: false,
           source: 'stack',
+          isTestable: false,
         },
         {
           id: 'my-connector-type-with-subaction',
@@ -307,6 +323,7 @@ describe('actionTypeRegistry', () => {
           validate: { params: expect.any(Object) },
           isDeprecated: false,
           source: 'stack',
+          isTestable: false,
         },
       ]);
 
@@ -317,15 +334,14 @@ describe('actionTypeRegistry', () => {
         expect(err.message).toMatchInlineSnapshot(`
           "[
             {
+              \\"origin\\": \\"string\\",
               \\"code\\": \\"too_small\\",
               \\"minimum\\": 1,
-              \\"type\\": \\"string\\",
               \\"inclusive\\": true,
-              \\"exact\\": false,
-              \\"message\\": \\"String must contain at least 1 character(s)\\",
               \\"path\\": [
                 \\"text\\"
-              ]
+              ],
+              \\"message\\": \\"Too small: expected string to have >=1 characters\\"
             }
           ]"
         `);
@@ -336,13 +352,12 @@ describe('actionTypeRegistry', () => {
         expect(err.message).toMatchInlineSnapshot(`
           "[
             {
-              \\"code\\": \\"invalid_type\\",
               \\"expected\\": \\"string\\",
-              \\"received\\": \\"undefined\\",
+              \\"code\\": \\"invalid_type\\",
               \\"path\\": [
                 \\"text\\"
               ],
-              \\"message\\": \\"Required\\"
+              \\"message\\": \\"Invalid input: expected string, received undefined\\"
             }
           ]"
         `);
@@ -356,16 +371,15 @@ describe('actionTypeRegistry', () => {
         expect(err.message).toMatchInlineSnapshot(`
           "[
             {
+              \\"origin\\": \\"number\\",
               \\"code\\": \\"too_small\\",
               \\"minimum\\": 5,
-              \\"type\\": \\"number\\",
               \\"inclusive\\": true,
-              \\"exact\\": false,
-              \\"message\\": \\"Number must be greater than or equal to 5\\",
               \\"path\\": [
                 \\"subActionParams\\",
                 \\"value\\"
-              ]
+              ],
+              \\"message\\": \\"Too small: expected number to be >=5\\"
             }
           ]"
         `);
@@ -380,45 +394,40 @@ describe('actionTypeRegistry', () => {
           "[
             {
               \\"code\\": \\"invalid_union\\",
-              \\"unionErrors\\": [
-                {
-                  \\"issues\\": [
-                    {
-                      \\"received\\": \\"subaction4\\",
-                      \\"code\\": \\"invalid_literal\\",
-                      \\"expected\\": \\"subaction1\\",
-                      \\"path\\": [
-                        \\"subAction\\"
-                      ],
-                      \\"message\\": \\"Invalid literal value, expected \\\\\\"subaction1\\\\\\"\\"
-                    }
-                  ],
-                  \\"name\\": \\"ZodError\\"
-                },
-                {
-                  \\"issues\\": [
-                    {
-                      \\"received\\": \\"subaction4\\",
-                      \\"code\\": \\"invalid_literal\\",
-                      \\"expected\\": \\"subaction2\\",
-                      \\"path\\": [
-                        \\"subAction\\"
-                      ],
-                      \\"message\\": \\"Invalid literal value, expected \\\\\\"subaction2\\\\\\"\\"
-                    },
-                    {
-                      \\"code\\": \\"invalid_type\\",
-                      \\"expected\\": \\"string\\",
-                      \\"received\\": \\"undefined\\",
-                      \\"path\\": [
-                        \\"subActionParams\\",
-                        \\"message\\"
-                      ],
-                      \\"message\\": \\"Required\\"
-                    }
-                  ],
-                  \\"name\\": \\"ZodError\\"
-                }
+              \\"errors\\": [
+                [
+                  {
+                    \\"code\\": \\"invalid_value\\",
+                    \\"values\\": [
+                      \\"subaction1\\"
+                    ],
+                    \\"path\\": [
+                      \\"subAction\\"
+                    ],
+                    \\"message\\": \\"Invalid input: expected \\\\\\"subaction1\\\\\\"\\"
+                  }
+                ],
+                [
+                  {
+                    \\"code\\": \\"invalid_value\\",
+                    \\"values\\": [
+                      \\"subaction2\\"
+                    ],
+                    \\"path\\": [
+                      \\"subAction\\"
+                    ],
+                    \\"message\\": \\"Invalid input: expected \\\\\\"subaction2\\\\\\"\\"
+                  },
+                  {
+                    \\"expected\\": \\"string\\",
+                    \\"code\\": \\"invalid_type\\",
+                    \\"path\\": [
+                      \\"subActionParams\\",
+                      \\"message\\"
+                    ],
+                    \\"message\\": \\"Invalid input: expected string, received undefined\\"
+                  }
+                ]
               ],
               \\"path\\": [],
               \\"message\\": \\"Invalid input\\"
@@ -453,6 +462,7 @@ describe('actionTypeRegistry', () => {
           isSystemActionType: false,
           isDeprecated: false,
           source: 'stack',
+          isTestable: false,
         },
       ]);
       expect(mockedActionsConfig.isActionTypeEnabled).toHaveBeenCalled();
@@ -486,6 +496,7 @@ describe('actionTypeRegistry', () => {
           isSystemActionType: true,
           isDeprecated: false,
           source: 'stack',
+          isTestable: false,
         },
       ]);
     });
@@ -520,6 +531,7 @@ describe('actionTypeRegistry', () => {
           supportedFeatureIds: ['siem'],
           isDeprecated: false,
           source: 'stack',
+          isTestable: false,
         },
       ]);
     });

@@ -48,7 +48,6 @@ export type {
 export type { DslQuery, KueryNode, KueryParseOptions, KueryQueryOptions } from './src/kuery';
 
 export type { ProjectRouting } from './src/project_routing';
-export { sanitizeProjectRoutingForES } from './src/project_routing';
 
 export {
   buildEsQuery,
@@ -142,7 +141,8 @@ export {
   getDataViewFieldSubtypeNested,
   isDataViewFieldSubtypeMulti,
   isDataViewFieldSubtypeNested,
-  isCCSRemoteIndexName,
+  isNonLocalIndexName,
+  getTimeZoneFromSettings,
 } from './src/utils';
 
 export type { ExecutionContextSearch } from './src/expressions/types';

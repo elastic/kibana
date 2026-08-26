@@ -1,6 +1,8 @@
 {
-  "lastModified": "2026-01-30T09:08:05.605Z",
-  "sha1": "a60c695e4332c62e80396a5f69dfad45e788cbcc",
+  "sha1": "701a14d6c939596237c62ae2e16dfd5a2c9d0997",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "240c93906b590cc-8ac2f2b8727a7d1",
@@ -9,8 +11,8 @@
       "tags": [],
       "location": {
         "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/global.setup.ts",
-        "line": 10,
-        "column": 16
+        "line": 5,
+        "column": 1
       }
     },
     {
@@ -18,12 +20,13 @@
       "title": "bulk delete should delete multiple transforms by transformIds",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/bulk_delete_transforms.spec.ts",
-        "line": 48,
-        "column": 10
+        "line": 41,
+        "column": 66
       }
     },
     {
@@ -31,12 +34,13 @@
       "title": "bulk delete should delete multiple transforms by transformIds, even if one of the transformIds is invalid",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/bulk_delete_transforms.spec.ts",
-        "line": 71,
-        "column": 10
+        "line": 56,
+        "column": 12
       }
     },
     {
@@ -44,12 +48,13 @@
       "title": "/internal/transform/reauthorize_transforms bulk should reauthorize multiple transforms for transform manager, even if one of the transformIds is invalid",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/bulk_reauthorize_transforms.spec.ts",
-        "line": 70,
-        "column": 10
+        "line": 67,
+        "column": 35
       }
     },
     {
@@ -57,12 +62,13 @@
       "title": "bulk reset should reset multiple transforms by transformIds",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/bulk_reset_transforms.spec.ts",
-        "line": 52,
-        "column": 10
+        "line": 45,
+        "column": 77
       }
     },
     {
@@ -70,12 +76,13 @@
       "title": "bulk reset should reset multiple transforms by transformIds, even if one of the transformIds is invalid",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/bulk_reset_transforms.spec.ts",
-        "line": 72,
-        "column": 10
+        "line": 58,
+        "column": 16
       }
     },
     {
@@ -83,12 +90,13 @@
       "title": "bulk schedule_now_transforms should schedule multiple transforms by transformIds",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/bulk_schedule_now_transforms.spec.ts",
-        "line": 39,
-        "column": 10
+        "line": 33,
+        "column": 5
       }
     },
     {
@@ -96,12 +104,13 @@
       "title": "bulk schedule_now_transforms should schedule multiple transforms by transformIds, even if one of the transformIds is invalid",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/bulk_schedule_now_transforms.spec.ts",
-        "line": 60,
-        "column": 10
+        "line": 46,
+        "column": 14
       }
     },
     {
@@ -109,12 +118,13 @@
       "title": "/internal/transform/start_transforms should start multiple transforms by transformIds",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/bulk_start_transforms.spec.ts",
-        "line": 38,
-        "column": 10
+        "line": 33,
+        "column": 5
       }
     },
     {
@@ -122,12 +132,13 @@
       "title": "/internal/transform/start_transforms should start multiple transforms by transformIds, even if one of the transformIds is invalid",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/bulk_start_transforms.spec.ts",
-        "line": 57,
-        "column": 10
+        "line": 44,
+        "column": 12
       }
     },
     {
@@ -135,12 +146,13 @@
       "title": "/internal/transform/stop_transforms should stop multiple transforms by transformIds",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/bulk_stop_transforms.spec.ts",
-        "line": 49,
-        "column": 10
+        "line": 43,
+        "column": 5
       }
     },
     {
@@ -148,12 +160,13 @@
       "title": "/internal/transform/stop_transforms should stop multiple transforms by transformIds, even if one of the transformIds is invalid",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/bulk_stop_transforms.spec.ts",
-        "line": 71,
-        "column": 10
+        "line": 57,
+        "column": 12
       }
     },
     {
@@ -161,12 +174,13 @@
       "title": "/internal/transform/delete_transforms should delete transform by transformId",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/delete_transforms.spec.ts",
-        "line": 42,
-        "column": 10
+        "line": 34,
+        "column": 33
       }
     },
     {
@@ -174,12 +188,13 @@
       "title": "/internal/transform/delete_transforms should return 403 for unauthorized user",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/delete_transforms.spec.ts",
-        "line": 65,
-        "column": 10
+        "line": 49,
+        "column": 11
       }
     },
     {
@@ -187,12 +202,13 @@
       "title": "/internal/transform/delete_transforms should return 200 with error in response if invalid transformId",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/delete_transforms.spec.ts",
-        "line": 83,
-        "column": 10
+        "line": 66,
+        "column": 74
       }
     },
     {
@@ -200,12 +216,13 @@
       "title": "/internal/transform/delete_transforms should delete transform and destination index with deleteDestIndex setting",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/delete_transforms.spec.ts",
-        "line": 107,
-        "column": 10
+        "line": 85,
+        "column": 5
       }
     },
     {
@@ -213,12 +230,13 @@
       "title": "/internal/transform/reauthorize_transforms should not reauthorize transform created by transform viewer for transform unauthorized",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/reauthorize_transforms.spec.ts",
-        "line": 55,
-        "column": 10
+        "line": 48,
+        "column": 11
       }
     },
     {
@@ -226,12 +244,13 @@
       "title": "/internal/transform/reauthorize_transforms should not reauthorize transform created by transform viewer for transform viewer",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/reauthorize_transforms.spec.ts",
-        "line": 87,
-        "column": 10
+        "line": 64,
+        "column": 25
       }
     },
     {
@@ -239,12 +258,13 @@
       "title": "/internal/transform/reauthorize_transforms should reauthorize transform created by transform viewer with new api key of transform manager and start the transform",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/reauthorize_transforms.spec.ts",
-        "line": 120,
-        "column": 10
+        "line": 91,
+        "column": 60
       }
     },
     {
@@ -252,12 +272,13 @@
       "title": "/internal/transform/reauthorize_transforms should return 200 with error in response if invalid transformId",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/reauthorize_transforms.spec.ts",
-        "line": 152,
-        "column": 10
+        "line": 122,
+        "column": 5
       }
     },
     {
@@ -265,12 +286,13 @@
       "title": "/internal/transform/reset_transforms should reset transform by transformId",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/reset_transforms.spec.ts",
-        "line": 37,
-        "column": 10
+        "line": 30,
+        "column": 28
       }
     },
     {
@@ -278,12 +300,13 @@
       "title": "/internal/transform/reset_transforms should return 403 for unauthorized user",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/reset_transforms.spec.ts",
-        "line": 58,
-        "column": 10
+        "line": 45,
+        "column": 11
       }
     },
     {
@@ -291,12 +314,13 @@
       "title": "/internal/transform/reset_transforms should return 200 with error in response if invalid transformId",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/reset_transforms.spec.ts",
-        "line": 77,
-        "column": 10
+        "line": 60,
+        "column": 45
       }
     },
     {
@@ -304,12 +328,13 @@
       "title": "/internal/transform/schedule_now_transforms should schedule the transform by transformId",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/schedule_now_transforms.spec.ts",
-        "line": 30,
-        "column": 10
+        "line": 24,
+        "column": 61
       }
     },
     {
@@ -317,12 +342,13 @@
       "title": "/internal/transform/schedule_now_transforms should return 200 with success:false for unauthorized user",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/schedule_now_transforms.spec.ts",
-        "line": 52,
-        "column": 10
+        "line": 35,
+        "column": 25
       }
     },
     {
@@ -330,12 +356,13 @@
       "title": "/internal/transform/schedule_now_transforms should return 200 with error in response if invalid transformId",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/schedule_now_transforms.spec.ts",
-        "line": 78,
-        "column": 10
+        "line": 58,
+        "column": 60
       }
     },
     {
@@ -343,12 +370,13 @@
       "title": "/internal/transform/start_transforms should start the transform by transformId",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/start_transforms.spec.ts",
-        "line": 29,
-        "column": 10
+        "line": 23,
+        "column": 90
       }
     },
     {
@@ -356,12 +384,13 @@
       "title": "/internal/transform/start_transforms should return 200 with success:false for unauthorized user",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/start_transforms.spec.ts",
-        "line": 49,
-        "column": 10
+        "line": 34,
+        "column": 55
       }
     },
     {
@@ -369,12 +398,13 @@
       "title": "/internal/transform/start_transforms should return 200 with error in response if invalid transformId",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/start_transforms.spec.ts",
-        "line": 73,
-        "column": 10
+        "line": 55,
+        "column": 60
       }
     },
     {
@@ -382,12 +412,13 @@
       "title": "/internal/transform/stop_transforms should stop the transform by transformId",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/stop_transforms.spec.ts",
-        "line": 39,
-        "column": 10
+        "line": 33,
+        "column": 61
       }
     },
     {
@@ -395,12 +426,13 @@
       "title": "/internal/transform/stop_transforms should return 200 with success:false for unauthorized user",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/stop_transforms.spec.ts",
-        "line": 61,
-        "column": 10
+        "line": 46,
+        "column": 25
       }
     },
     {
@@ -408,12 +440,13 @@
       "title": "/internal/transform/transforms/{transformId} create should create a transform",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/transforms_create.spec.ts",
-        "line": 36,
-        "column": 12
+        "line": 28,
+        "column": 50
       }
     },
     {
@@ -421,12 +454,13 @@
       "title": "/internal/transform/transforms/{transformId} create should create a transform with data view",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/transforms_create.spec.ts",
-        "line": 66,
-        "column": 12
+        "line": 53,
+        "column": 26
       }
     },
     {
@@ -434,12 +468,13 @@
       "title": "/internal/transform/transforms/{transformId} create should create a transform with data view and time field",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/transforms_create.spec.ts",
-        "line": 101,
-        "column": 12
+        "line": 84,
+        "column": 26
       }
     },
     {
@@ -447,12 +482,27 @@
       "title": "/internal/transform/transforms/{transformId} create should not allow pivot and latest configs in same transform",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/transforms_create.spec.ts",
-        "line": 136,
+        "line": 112,
         "column": 12
+      }
+    },
+    {
+      "id": "e6a0524edc0480b-41a5caa263fb528",
+      "title": "/internal/transform/transforms/{transformId} create should create a transform with deferValidation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/transforms_create.spec.ts",
+        "line": 139,
+        "column": 32
       }
     },
     {
@@ -460,12 +510,13 @@
       "title": "/internal/transform/transforms/{transformId} create should ensure if pivot or latest is provided",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/transforms_create.spec.ts",
-        "line": 165,
-        "column": 12
+        "line": 166,
+        "column": 72
       }
     },
     {
@@ -473,12 +524,13 @@
       "title": "/internal/transform/transforms/_nodes should return the number of available transform nodes for a transform manager",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/transforms_nodes.spec.ts",
         "line": 14,
-        "column": 10
+        "column": 17
       }
     },
     {
@@ -486,12 +538,13 @@
       "title": "/internal/transform/transforms/_nodes should return the number of available transform nodes for a viewer user",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/transforms_nodes.spec.ts",
-        "line": 34,
-        "column": 10
+        "line": 20,
+        "column": 56
       }
     },
     {
@@ -499,12 +552,13 @@
       "title": "/internal/transform/transforms/_nodes should not return the number of available transform nodes for an unauthorized user",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/transforms_nodes.spec.ts",
-        "line": 54,
-        "column": 10
+        "line": 37,
+        "column": 25
       }
     },
     {
@@ -512,12 +566,13 @@
       "title": "/internal/transform/transforms/_preview should return a transform preview",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/transforms_preview.spec.ts",
-        "line": 25,
-        "column": 10
+        "line": 22,
+        "column": 20
       }
     },
     {
@@ -525,12 +580,13 @@
       "title": "/internal/transform/transforms/_preview should return a correct error for transform preview",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/transforms_preview.spec.ts",
-        "line": 43,
-        "column": 10
+        "line": 29,
+        "column": 25
       }
     },
     {
@@ -538,12 +594,13 @@
       "title": "/internal/transform/transforms/_preview should return 403 for transform viewer user",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/transforms_preview.spec.ts",
-        "line": 71,
-        "column": 10
+        "line": 56,
+        "column": 18
       }
     },
     {
@@ -551,12 +608,13 @@
       "title": "/internal/transform/transforms/_stats should return a list of transforms statistics for transform manager",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/transforms_stats.spec.ts",
-        "line": 31,
-        "column": 10
+        "line": 25,
+        "column": 94
       }
     },
     {
@@ -564,12 +622,13 @@
       "title": "/internal/transform/transforms/_stats should return statistics for a single transform for transform manager",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/transforms_stats.spec.ts",
-        "line": 68,
-        "column": 10
+        "line": 61,
+        "column": 36
       }
     },
     {
@@ -577,12 +636,13 @@
       "title": "/internal/transform/transforms/_stats should return a list of transforms statistics for transform viewer",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/transforms_stats.spec.ts",
-        "line": 98,
-        "column": 10
+        "line": 71,
+        "column": 25
       }
     },
     {
@@ -590,12 +650,13 @@
       "title": "/internal/transform/transforms/_stats should return statistics for a single transform for transform viewer",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/transforms_stats.spec.ts",
-        "line": 127,
-        "column": 10
+        "line": 93,
+        "column": 28
       }
     },
     {
@@ -603,12 +664,13 @@
       "title": "/internal/transform/transforms/{transformId}/_update should update a transform",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/transforms_update.spec.ts",
-        "line": 52,
-        "column": 12
+        "line": 46,
+        "column": 93
       }
     },
     {
@@ -616,12 +678,13 @@
       "title": "/internal/transform/transforms/{transformId}/_update should return 403 for transform view-only user",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/transforms_update.spec.ts",
-        "line": 131,
-        "column": 12
+        "line": 123,
+        "column": 28
       }
     },
     {
@@ -629,12 +692,13 @@
       "title": "/internal/transform/transforms should return a list of transforms for transform manager",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/transforms.spec.ts",
-        "line": 30,
-        "column": 10
+        "line": 24,
+        "column": 94
       }
     },
     {
@@ -642,12 +706,13 @@
       "title": "/internal/transform/transforms should return a list of transforms for transform viewer",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/transforms.spec.ts",
-        "line": 67,
-        "column": 10
+        "line": 60,
+        "column": 36
       }
     },
     {
@@ -655,12 +720,13 @@
       "title": "/internal/transform/transforms should return a specific transform configuration for transform manager",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/transforms.spec.ts",
-        "line": 94,
-        "column": 10
+        "line": 70,
+        "column": 25
       }
     },
     {
@@ -668,12 +734,13 @@
       "title": "/internal/transform/transforms should return a specific transform configuration for transform viewer",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/transforms.spec.ts",
-        "line": 124,
-        "column": 10
+        "line": 98,
+        "column": 36
       }
     },
     {
@@ -681,12 +748,13 @@
       "title": "/internal/transform/transforms should report 404 for a non-existing transform",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/transforms.spec.ts",
-        "line": 152,
-        "column": 10
+        "line": 101,
+        "column": 9
       }
     }
   ]

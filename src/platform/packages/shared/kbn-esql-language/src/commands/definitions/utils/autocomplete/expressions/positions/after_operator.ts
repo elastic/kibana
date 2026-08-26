@@ -7,102 +7,66 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ESQLAstItem, ESQLFunction } from '@elastic/esql/types';
 import type { ISuggestionItem } from '../../../../../registry/types';
 import { listCompleteItem } from '../../../../../registry/complete_items';
-import type { ESQLAstItem, ESQLFunction } from '../../../../../../types';
 import type { FunctionDefinition, SupportedDataType } from '../../../../types';
 import { FunctionDefinitionTypes, isArrayType } from '../../../../types';
-import { SignatureAnalyzer } from '../signature_analyzer';
-import { getExpressionType, getMatchingSignatures } from '../../../expressions';
+import { getExpressionType } from '../../../expressions';
+import {
+  hasArbitraryExpressionSignature,
+  doesParamAcceptType,
+  canAcceptMoreArgs,
+  hasVariadicSignature,
+} from '../../../signatures';
 import { getFunctionDefinition } from '../../../functions';
-import { removeFinalUnknownIdentiferArg, getOverlapRange } from '../../../shared';
 import { logicalOperators } from '../../../../all_operators';
 import { dispatchOperators } from '../operators/dispatcher';
-import { isLiteral } from '../../../../../../ast/is';
 import type { ExpressionContext } from '../types';
 import { SuggestionBuilder } from '../suggestion_builder';
 import { shouldSuggestOperators } from './after_complete/should_suggest_operators';
+import {
+  getIncompleteOperatorReason,
+  getRightmostOperator,
+  normalizePreferredExpressionTypes,
+  removeFinalUnknownIdentiferArg,
+  type IncompleteOperatorReason,
+} from '../utils';
 
 /**
  * Suggests completions after an operator (e.g., field = |, field IN |)
  * Handles special cases (IN, IS NULL) or delegates to generic operator logic
  */
 export async function suggestAfterOperator(ctx: ExpressionContext): Promise<ISuggestionItem[]> {
-  const { expressionRoot, context } = ctx;
+  const { expressionRoot, context, parenthesizedExpressionPosition } = ctx;
 
   if (!expressionRoot) {
     return [];
   }
 
-  const rightmostOperator = getRightmostOperatorInFunctionTree(expressionRoot as ESQLFunction);
-  // If we don't pass rightmostOperator, for "field IN (x) AND field NOT IN (y"
-  // dispatchOperators sees AND (no handler) instead of NOT IN, failing to suggest comma.
-  const ctxWithRightmostOperator = { ...ctx, expressionRoot: rightmostOperator };
-
-  const specialSuggestions = await dispatchOperators(ctxWithRightmostOperator);
-
-  if (specialSuggestions) {
-    return specialSuggestions;
-  }
+  const rightmostOperator = getRightmostOperator(expressionRoot as ESQLFunction);
   const getExprType = (expression: ESQLAstItem) =>
     getExpressionType(expression, context?.columns, context?.unmappedFieldsStrategy);
+  const reason = getIncompleteOperatorReason(rightmostOperator, getExprType);
+  const shouldDispatchSpecialOperator =
+    reason !== undefined || parenthesizedExpressionPosition !== 'after';
 
-  const { complete, reason } = isOperatorComplete(rightmostOperator, getExprType);
+  if (shouldDispatchSpecialOperator) {
+    // If we don't pass rightmostOperator, for "field IN (x) AND field NOT IN (y"
+    // dispatchOperators sees AND (no handler) instead of NOT IN, failing to suggest comma.
+    const ctxWithRightmostOperator = { ...ctx, expressionRoot: rightmostOperator };
+    const specialSuggestions = await dispatchOperators(ctxWithRightmostOperator);
 
-  if (complete) {
-    return handleCompleteOperator(ctx, rightmostOperator, getExprType);
-  }
-
-  return handleIncompleteOperator(ctx, rightmostOperator, getExprType, reason);
-}
-
-/** Checks if an operator invocation is complete and correctly typed */
-function isOperatorComplete(
-  func: ESQLFunction,
-  getExprType: (expression: ESQLAstItem) => SupportedDataType | 'unknown'
-): {
-  complete: boolean;
-  reason?: 'tooFewArgs' | 'wrongTypes';
-} {
-  const fnDefinition = getFunctionDefinition(func.name);
-
-  if (!fnDefinition) {
-    return { complete: false };
-  }
-
-  const cleanedArgs = removeFinalUnknownIdentiferArg(func.args, getExprType);
-
-  const argLengthCheck = fnDefinition.signatures.some(({ minParams, params }) => {
-    if (minParams && cleanedArgs.length >= minParams) {
-      return true;
+    if (specialSuggestions) {
+      return specialSuggestions;
     }
-
-    if (cleanedArgs.length === params.length) {
-      return true;
-    }
-
-    return cleanedArgs.length >= params.filter(({ optional }) => !optional).length;
-  });
-
-  if (!argLengthCheck) {
-    return { complete: false, reason: 'tooFewArgs' };
   }
 
-  const givenTypes = func.args.map((arg) => getExprType(arg));
-  const literalMask = func.args.map((arg) => isLiteral(Array.isArray(arg) ? arg[0] : arg));
-
-  const hasCorrectTypes = !!getMatchingSignatures(
-    fnDefinition.signatures,
-    givenTypes,
-    literalMask,
-    true
-  ).length;
-
-  if (!hasCorrectTypes) {
-    return { complete: false, reason: 'wrongTypes' };
+  if (reason !== undefined) {
+    return handleIncompleteOperator(ctx, rightmostOperator, getExprType, reason);
   }
 
-  return { complete: true };
+  return handleCompleteOperator(ctx, rightmostOperator, getExprType);
 }
 
 /** Returns supported right-side types for binary operators matching the left-side type */
@@ -129,7 +93,7 @@ function handleCompleteOperator(
   operator: ESQLFunction,
   getExprType: (expression: ESQLAstItem) => SupportedDataType | 'unknown'
 ): ISuggestionItem[] {
-  const { innerText, location, options } = ctx;
+  const { location, options } = ctx;
 
   const operatorReturnType = getExprType(operator);
   const builder = new SuggestionBuilder(ctx);
@@ -161,34 +125,24 @@ function handleCompleteOperator(
 
   // Add comma using decision engine for all operators in function context
   if (options.functionParameterContext) {
-    const analyzer = SignatureAnalyzer.from(options.functionParameterContext);
+    const fnParamCtx = options.functionParameterContext;
+    const typeMatches = doesParamAcceptType(fnParamCtx, operatorReturnType, false);
 
-    if (analyzer) {
-      const typeMatches = analyzer.typeMatches(operatorReturnType, false);
-
-      builder.addCommaIfNeeded({
-        position: 'after_complete',
-        typeMatches,
-        isLiteral: false,
-        hasMoreParams: analyzer.hasMoreParams,
-        isVariadic: analyzer.isVariadic,
-        hasMoreMandatoryArgs: analyzer.getHasMoreMandatoryArgs(),
-        functionSignatures: analyzer.getValidSignatures(),
-        isCursorFollowedByComma: false,
-      });
-    }
+    builder.addCommaIfNeeded({
+      position: 'after_complete',
+      typeMatches,
+      isLiteral: false,
+      hasMoreParams: canAcceptMoreArgs(fnParamCtx),
+      isVariadic: hasVariadicSignature(fnParamCtx.signatures),
+      hasMoreMandatoryArgs: fnParamCtx.hasMoreMandatoryArgs,
+      isExpressionHeavy: hasArbitraryExpressionSignature(
+        fnParamCtx.functionDefinition?.signatures ?? []
+      ),
+      isCursorFollowedByComma: false,
+    });
   }
 
-  const suggestions = builder.build();
-
-  return suggestions.map<ISuggestionItem>((suggestion) => {
-    const overlap = getOverlapRange(innerText, suggestion.text);
-
-    return {
-      ...suggestion,
-      rangeToReplace: overlap,
-    };
-  });
+  return builder.build();
 }
 
 /**
@@ -199,9 +153,9 @@ async function handleIncompleteOperator(
   ctx: ExpressionContext,
   operator: ESQLFunction,
   getExprType: (expression: ESQLAstItem) => SupportedDataType | 'unknown',
-  reason?: 'tooFewArgs' | 'wrongTypes'
+  reason?: IncompleteOperatorReason
 ): Promise<ISuggestionItem[]> {
-  const { innerText, options } = ctx;
+  const { options } = ctx;
   const builder = new SuggestionBuilder(ctx);
 
   const cleanedArgs = removeFinalUnknownIdentiferArg(operator.args, getExprType);
@@ -232,7 +186,6 @@ async function handleIncompleteOperator(
         values: useValueType,
         addSpaceAfterField: options.addSpaceAfterOperator ?? false,
         openSuggestions: options.openSuggestions ?? false,
-        promoteToTop: true,
       })
       .then((b) =>
         b
@@ -251,48 +204,21 @@ async function handleIncompleteOperator(
   }
 
   if (reason === 'wrongTypes') {
-    if (leftArgType && options.preferredExpressionType) {
+    const preferredTypes = normalizePreferredExpressionTypes(options.preferredExpressionType);
+
+    if (leftArgType && preferredTypes.length) {
       if (
-        leftArgType !== options.preferredExpressionType &&
+        !preferredTypes.includes(leftArgType) &&
         leftArgType !== 'unknown' &&
         leftArgType !== 'unsupported'
       ) {
         builder.addOperators({
           leftParamType: leftArgType,
-          returnTypes: [options.preferredExpressionType],
+          returnTypes: preferredTypes,
         });
       }
     }
   }
 
-  return builder.build().map<ISuggestionItem>((suggestion) => {
-    const overlap = getOverlapRange(innerText, suggestion.text);
-
-    return {
-      ...suggestion,
-      rangeToReplace: overlap,
-    };
-  });
-}
-
-/**
- * Finds the deepest binary operator in the right branch of an expression tree.
- *
- * Uses structural right-first traversal instead of position-based detection
- * to avoid ANTLR error recovery issues where incomplete expressions get
- * positions that corrupt location.min values.
- */
-function getRightmostOperatorInFunctionTree(fn: ESQLFunction): ESQLFunction {
-  const rightArg = fn.args[1];
-
-  if (
-    fn.subtype === 'binary-expression' &&
-    rightArg &&
-    !Array.isArray(rightArg) &&
-    rightArg.type === 'function'
-  ) {
-    return getRightmostOperatorInFunctionTree(rightArg as ESQLFunction);
-  }
-
-  return fn;
+  return builder.build();
 }

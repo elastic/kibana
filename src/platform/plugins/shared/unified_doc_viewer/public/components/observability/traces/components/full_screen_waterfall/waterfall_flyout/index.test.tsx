@@ -12,6 +12,14 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { WaterfallFlyout, type Props } from '.';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { buildDataTableRecord } from '@kbn/discover-utils';
+import { FlyoutContentId } from '../../../common/constants';
+import { setUnifiedDocViewerServices } from '../../../../../../plugin';
+import { mockUnifiedDocViewerServices } from '../../../../../../__mocks__';
+import { OriginDocTypeContext } from '../../../../../doc_viewer_flyout/origin_doc_type_context';
+import { GENAI_EBT_CLICK_ACTIONS, GENAI_TAB_IMPRESSION_EVENT_TYPE } from '@kbn/apm-ui-shared';
+import { TRACES_DOC_VIEWER_EBT_ELEMENTS } from '../../../ebt_constants';
+
+setUnifiedDocViewerServices(mockUnifiedDocViewerServices);
 
 jest.mock('../../../../../doc_viewer_table', () => ({
   __esModule: true,
@@ -29,6 +37,16 @@ jest.mock('../../../../../doc_viewer_source', () => ({
       Doc Viewer Source Mock
     </div>
   ),
+}));
+
+jest.mock('../../../doc_viewer_genai', () => ({
+  __esModule: true,
+  DocViewerObsTracesGenAi: ({ hit }: any) => (
+    <div data-test-subj="docViewerGenAi" data-hit-id={hit?.id}>
+      Doc Viewer GenAI Mock
+    </div>
+  ),
+  default: () => null,
 }));
 
 describe('WaterfallFlyout', () => {
@@ -50,6 +68,7 @@ describe('WaterfallFlyout', () => {
     hit: mockHit,
     loading: false,
     dataView: dataViewMock,
+    flyoutContentId: FlyoutContentId.SPAN_DETAIL,
     children: <div data-test-subj="customChildren">Custom Children Content</div>,
   };
 
@@ -63,13 +82,44 @@ describe('WaterfallFlyout', () => {
 
       expect(screen.getAllByRole('progressbar').length).toBeGreaterThan(0);
       expect(screen.queryByTestId('customChildren')).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('unifiedDocViewerWaterfallFlyoutNotFound')
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  describe('not found state', () => {
+    it('should display the not found empty prompt when the fetch finishes with no hit', () => {
+      render(<WaterfallFlyout {...defaultProps} hit={null} loading={false} />);
+
+      expect(screen.getByTestId('unifiedDocViewerWaterfallFlyoutNotFound')).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('unifiedDocViewerWaterfallFlyoutFetchError')
+      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId('customChildren')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('fetch error state', () => {
+    it('should display the fetch error empty prompt with the error message when no hit and an error is set', () => {
+      render(
+        <WaterfallFlyout {...defaultProps} hit={null} loading={false} error="Boom: timeout" />
+      );
+
+      expect(screen.getByTestId('unifiedDocViewerWaterfallFlyoutFetchError')).toBeInTheDocument();
+      expect(screen.getByText('Boom: timeout')).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('unifiedDocViewerWaterfallFlyoutNotFound')
+      ).not.toBeInTheDocument();
     });
 
-    it('should display skeleton when hit is unavailable', () => {
-      render(<WaterfallFlyout {...defaultProps} hit={null} />);
+    it('should still render the tabs when a hit is present even if error is set', () => {
+      render(<WaterfallFlyout {...defaultProps} loading={false} error="Refetch failed" />);
 
-      expect(screen.getAllByRole('progressbar').length).toBeGreaterThan(0);
-      expect(screen.queryByTestId('customChildren')).not.toBeInTheDocument();
+      expect(screen.getByTestId('customChildren')).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('unifiedDocViewerWaterfallFlyoutFetchError')
+      ).not.toBeInTheDocument();
     });
   });
 
@@ -108,11 +158,104 @@ describe('WaterfallFlyout', () => {
     });
   });
 
+  describe('GenAI tab', () => {
+    const genAiHit = buildDataTableRecord(
+      {
+        _id: 'genai-doc-id',
+        _index: 'test-index',
+        _source: {
+          '@timestamp': '2023-01-01T00:00:00.000Z',
+          attributes: { 'gen_ai.request.model': 'gpt-4o' },
+        },
+      },
+      dataViewMock
+    );
+
+    it('does not show the GenAI tab for documents without gen_ai fields', () => {
+      render(<WaterfallFlyout {...defaultProps} />);
+
+      expect(screen.queryByTestId('unifiedDocViewerTracesGenAiTab')).not.toBeInTheDocument();
+    });
+
+    it('shows the GenAI tab and renders its content for documents with gen_ai fields', async () => {
+      render(<WaterfallFlyout {...defaultProps} hit={genAiHit} />);
+
+      const genAiTab = screen.getByTestId('unifiedDocViewerTracesGenAiTab');
+      expect(genAiTab).toBeInTheDocument();
+
+      fireEvent.click(genAiTab);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('docViewerGenAi')).toHaveAttribute('data-hit-id', genAiHit.id);
+      });
+      expect(screen.queryByTestId('customChildren')).not.toBeInTheDocument();
+    });
+
+    it('adds the viewGenAi EBT click attributes to the GenAI tab', () => {
+      render(<WaterfallFlyout {...defaultProps} hit={genAiHit} />);
+
+      const genAiTab = screen.getByTestId('unifiedDocViewerTracesGenAiTab');
+      expect(genAiTab).toHaveAttribute('data-ebt-action', GENAI_EBT_CLICK_ACTIONS.VIEW_GENAI);
+      expect(genAiTab).toHaveAttribute(
+        'data-ebt-element',
+        TRACES_DOC_VIEWER_EBT_ELEMENTS.FLYOUT_TABS
+      );
+    });
+
+    it('reports a genai_tab_impression event when the GenAI tab is rendered', () => {
+      const reportEvent = mockUnifiedDocViewerServices.analytics.reportEvent as jest.Mock;
+      reportEvent.mockClear();
+
+      render(<WaterfallFlyout {...defaultProps} hit={genAiHit} />);
+
+      expect(reportEvent).toHaveBeenCalledWith(GENAI_TAB_IMPRESSION_EVENT_TYPE, {
+        element: TRACES_DOC_VIEWER_EBT_ELEMENTS.FLYOUT_TABS,
+      });
+    });
+
+    it('does not report a genai_tab_impression event for documents without gen_ai fields', () => {
+      const reportEvent = mockUnifiedDocViewerServices.analytics.reportEvent as jest.Mock;
+      reportEvent.mockClear();
+
+      render(<WaterfallFlyout {...defaultProps} />);
+
+      expect(reportEvent).not.toHaveBeenCalledWith(
+        GENAI_TAB_IMPRESSION_EVENT_TYPE,
+        expect.anything()
+      );
+    });
+
+    it('falls back to the Overview tab when switching to a document without gen_ai fields', async () => {
+      const { rerender } = render(<WaterfallFlyout {...defaultProps} hit={genAiHit} />);
+
+      fireEvent.click(screen.getByTestId('unifiedDocViewerTracesGenAiTab'));
+      await waitFor(() => {
+        expect(screen.getByTestId('docViewerGenAi')).toBeInTheDocument();
+      });
+
+      rerender(<WaterfallFlyout {...defaultProps} hit={mockHit} />);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('customChildren')).toBeInTheDocument();
+      });
+      expect(screen.queryByTestId('unifiedDocViewerTracesGenAiTab')).not.toBeInTheDocument();
+    });
+  });
+
   describe('flyout header', () => {
     it('should display the title in the header', () => {
       render(<WaterfallFlyout {...defaultProps} title="Custom Title" />);
 
       expect(screen.getByRole('heading', { name: 'Custom Title' })).toBeInTheDocument();
+    });
+
+    it('should apply the provided flyout data-test-subj', () => {
+      render(<WaterfallFlyout {...defaultProps} dataTestSubj="traceWaterfallDocumentFlyout" />);
+
+      expect(screen.getByTestId('traceWaterfallDocumentFlyout')).toHaveAttribute(
+        'data-test-subj',
+        'traceWaterfallDocumentFlyout'
+      );
     });
   });
 
@@ -125,6 +268,27 @@ describe('WaterfallFlyout', () => {
       fireEvent.click(closeButton);
 
       expect(onCloseFlyout).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('originDocType telemetry', () => {
+    it('forwards the parent OriginDocTypeContext value into the unified_doc_viewer_viewed event', () => {
+      const reportEvent = mockUnifiedDocViewerServices.analytics.reportEvent as jest.Mock;
+      reportEvent.mockClear();
+
+      render(
+        <OriginDocTypeContext.Provider value="log">
+          <WaterfallFlyout {...defaultProps} flyoutContentId={FlyoutContentId.SPAN_DETAIL} />
+        </OriginDocTypeContext.Provider>
+      );
+
+      expect(reportEvent).toHaveBeenCalledWith(
+        'unified_doc_viewer_viewed',
+        expect.objectContaining({
+          originDocType: 'log',
+          contentId: FlyoutContentId.SPAN_DETAIL,
+        })
+      );
     });
   });
 });

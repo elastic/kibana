@@ -10,7 +10,7 @@ import type { RunContext, TaskDefinition } from './task';
 import { TaskCost, TaskPriority } from './task';
 import { mockLogger } from './test_utils';
 import type { TaskDefinitionRegistry } from './task_type_dictionary';
-import { sanitizeTaskDefinitions, TaskTypeDictionary } from './task_type_dictionary';
+import { REMOVED_TYPES, sanitizeTaskDefinitions, TaskTypeDictionary } from './task_type_dictionary';
 
 jest.mock('./constants', () => ({
   CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: [
@@ -59,39 +59,41 @@ describe('taskTypeDictionary', () => {
     definitions = new TaskTypeDictionary(logger);
   });
 
+  it('recognizes the retired Significant Events v1 rule task type', () => {
+    expect(REMOVED_TYPES).toContain('alerting:streams.rules.esql');
+  });
+
   describe('sanitizeTaskDefinitions', () => {
     it('provides tasks with defaults', () => {
       const taskDefinitions = getMockTaskDefinitions({ numTasks: 3 });
       const result = sanitizeTaskDefinitions(taskDefinitions);
 
-      expect(result).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "cost": 2,
-          "createTaskRunner": [Function],
-          "description": "one super cool task",
-          "timeout": "5m",
-          "title": "Test",
-          "type": "test_task_type_0",
+      expect(result).toEqual([
+        {
+          cost: 2,
+          createTaskRunner: expect.any(Function),
+          description: 'one super cool task',
+          timeout: '5m',
+          title: 'Test',
+          type: 'test_task_type_0',
         },
-        Object {
-          "cost": 2,
-          "createTaskRunner": [Function],
-          "description": "one super cool task",
-          "timeout": "5m",
-          "title": "Test",
-          "type": "test_task_type_1",
+        {
+          cost: 2,
+          createTaskRunner: expect.any(Function),
+          description: 'one super cool task',
+          timeout: '5m',
+          title: 'Test',
+          type: 'test_task_type_1',
         },
-        Object {
-          "cost": 2,
-          "createTaskRunner": [Function],
-          "description": "one super cool task",
-          "timeout": "5m",
-          "title": "Test",
-          "type": "test_task_type_2",
+        {
+          cost: 2,
+          createTaskRunner: expect.any(Function),
+          description: 'one super cool task',
+          timeout: '5m',
+          title: 'Test',
+          type: 'test_task_type_2',
         },
-      ]
-    `);
+      ]);
     });
 
     it('throws a validation exception for invalid task definition', () => {
@@ -119,7 +121,7 @@ describe('taskTypeDictionary', () => {
       };
 
       expect(runsanitize).toThrowErrorMatchingInlineSnapshot(
-        `"[fail]: definition for this key is missing"`
+        `"[fail]: Additional properties are not allowed ('fail' was unexpected)"`
       );
     });
 
@@ -284,7 +286,7 @@ describe('taskTypeDictionary', () => {
         },
       });
       expect(logger.error).toHaveBeenCalledWith(
-        `Could not sanitize task definitions: Invalid cost \"23\". Cost must be one of Tiny => 1,Normal => 2,ExtraLarge => 10`
+        `Could not sanitize task definitions: Invalid cost \"23\". Cost must be one of Tiny => 1,Normal => 2,Large => 4,ExtraLarge => 10`
       );
       expect(definitions.get('foo')).toEqual(undefined);
     });

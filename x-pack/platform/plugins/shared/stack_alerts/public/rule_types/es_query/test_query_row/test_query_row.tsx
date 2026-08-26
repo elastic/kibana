@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { ReactNode } from 'react';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   copyToClipboard,
   EuiButton,
@@ -17,8 +17,10 @@ import {
   EuiText,
   EuiToolTip,
   EuiCallOut,
+  EuiLiveAnnouncer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import type { ParsedAggregationResults } from '@kbn/triggers-actions-ui-plugin/common';
 import { useTestQuery } from './use_test_query';
 import { TestQueryRowTable } from './test_query_row_table';
@@ -42,6 +44,7 @@ export const TestQueryRow: React.FC<TestQueryRowProps> = ({
 }) => {
   const {
     onTestQuery,
+    resetTestQueryResponse,
     testQueryResult,
     testQueryError,
     testQueryWarning,
@@ -50,6 +53,11 @@ export const TestQueryRow: React.FC<TestQueryRowProps> = ({
   } = useTestQuery(fetch);
 
   const [copiedMessage, setCopiedMessage] = useState<ReactNode | null>(null);
+  const [copyQueryError, setCopyQueryError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setCopyQueryError(null);
+  }, [fetch]);
 
   return (
     <>
@@ -60,8 +68,9 @@ export const TestQueryRow: React.FC<TestQueryRowProps> = ({
               data-test-subj="testQuery"
               color="primary"
               iconSide="left"
-              iconType="playFilled"
+              iconType="play"
               onClick={() => {
+                setCopyQueryError(null);
                 onTestQuery();
               }}
               disabled={hasValidationErrors}
@@ -86,15 +95,26 @@ export const TestQueryRow: React.FC<TestQueryRowProps> = ({
                   data-test-subj="copyQuery"
                   color="primary"
                   iconSide="left"
-                  iconType="copyClipboard"
+                  iconType="copy"
                   onClick={() => {
-                    const copied = copyToClipboard(copyQuery());
-                    if (copied) {
-                      setCopiedMessage(
-                        <FormattedMessage
-                          id="xpack.stackAlerts.esQuery.ui.queryCopiedToClipboard"
-                          defaultMessage="Copied"
-                        />
+                    setCopyQueryError(null);
+                    resetTestQueryResponse();
+                    try {
+                      const copied = copyToClipboard(copyQuery());
+                      if (copied) {
+                        setCopiedMessage(
+                          <FormattedMessage
+                            id="xpack.stackAlerts.esQuery.ui.queryCopiedToClipboard"
+                            defaultMessage="Copied"
+                          />
+                        );
+                      }
+                    } catch (err) {
+                      setCopyQueryError(
+                        i18n.translate('xpack.stackAlerts.esQuery.ui.copyQueryError', {
+                          defaultMessage: 'Error copying query: {message}',
+                          values: { message: err.message },
+                        })
                       );
                     }
                   }}
@@ -125,16 +145,37 @@ export const TestQueryRow: React.FC<TestQueryRowProps> = ({
         </EuiFormRow>
       )}
       {testQueryResult && (
-        <EuiFormRow>
-          <EuiText data-test-subj="testQuerySuccess" color="subdued" size="s">
-            <p>{testQueryResult}</p>
-          </EuiText>
-        </EuiFormRow>
+        <>
+          <EuiFormRow>
+            <EuiText data-test-subj="testQuerySuccess" color="subdued" size="s">
+              <p>{testQueryResult}</p>
+            </EuiText>
+          </EuiFormRow>
+          <EuiLiveAnnouncer data-test-subj="testQuerySuccessAnnouncement" isActive>
+            {testQueryResult}
+          </EuiLiveAnnouncer>
+        </>
       )}
       {testQueryError && (
+        <>
+          <EuiFormRow>
+            <EuiText data-test-subj="testQueryError" color="danger" size="s">
+              <p>{testQueryError}</p>
+            </EuiText>
+          </EuiFormRow>
+          <EuiLiveAnnouncer
+            aria-live="assertive"
+            data-test-subj="testQueryErrorAnnouncement"
+            isActive
+          >
+            {testQueryError}
+          </EuiLiveAnnouncer>
+        </>
+      )}
+      {copyQueryError && (
         <EuiFormRow>
-          <EuiText data-test-subj="testQueryError" color="danger" size="s">
-            <p>{testQueryError}</p>
+          <EuiText data-test-subj="copyQueryError" color="danger" size="s">
+            <p>{copyQueryError}</p>
           </EuiText>
         </EuiFormRow>
       )}

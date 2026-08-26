@@ -6,6 +6,7 @@
  */
 
 import { ExternalServiceRt } from './v1';
+import { ExternalServiceSchema } from '../../domain_zod/external_service/v1';
 
 describe('ExternalServiceRt', () => {
   const defaultRequest = {
@@ -21,6 +22,7 @@ describe('ExternalServiceRt', () => {
       email: 'leslie.knope@elastic.co',
     },
   };
+
   it('has expected attributes in request', () => {
     const query = ExternalServiceRt.decode(defaultRequest);
 
@@ -49,5 +51,26 @@ describe('ExternalServiceRt', () => {
       _tag: 'Right',
       right: defaultRequest,
     });
+  });
+
+  it('zod: has expected attributes in request', () => {
+    const result = ExternalServiceSchema.safeParse(defaultRequest);
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual(defaultRequest);
+  });
+
+  it('zod: strips unknown fields', () => {
+    const result = ExternalServiceSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual(defaultRequest);
+  });
+
+  it('zod: strips unknown fields from pushed_by', () => {
+    const result = ExternalServiceSchema.safeParse({
+      ...defaultRequest,
+      pushed_by: { ...defaultRequest.pushed_by, foo: 'bar' },
+    });
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual(defaultRequest);
   });
 });

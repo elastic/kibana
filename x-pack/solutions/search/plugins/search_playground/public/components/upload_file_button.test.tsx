@@ -34,9 +34,7 @@ const Wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => {
 
 describe('UploadFileButton', () => {
   const mockUiActions = {
-    getTrigger: jest.fn().mockReturnValue({
-      exec: jest.fn(),
-    }),
+    executeTriggerActions: jest.fn(),
   };
 
   const mockSetSelectedIndices = jest.fn();
@@ -74,8 +72,10 @@ describe('UploadFileButton', () => {
     fireEvent.click(button);
 
     // Check if the flyout trigger was executed
-    expect(mockUiActions.getTrigger).toHaveBeenCalledWith('OPEN_FILE_UPLOAD_LITE_TRIGGER');
-    expect(mockUiActions.getTrigger().exec).toHaveBeenCalled();
+    expect(mockUiActions.executeTriggerActions).toHaveBeenCalledWith(
+      'OPEN_FILE_UPLOAD_LITE_TRIGGER',
+      expect.anything()
+    );
   });
 
   it('renders EuiButton when isSetup is false', () => {
@@ -95,7 +95,9 @@ describe('UploadFileButton', () => {
     fireEvent.click(button);
 
     // Check if the flyout trigger was executed
-    expect(mockUiActions.getTrigger).toHaveBeenCalledWith('OPEN_FILE_UPLOAD_LITE_TRIGGER');
-    expect(mockUiActions.getTrigger().exec).toHaveBeenCalled();
+    expect(mockUiActions.executeTriggerActions).toHaveBeenCalledWith(
+      'OPEN_FILE_UPLOAD_LITE_TRIGGER',
+      expect.anything()
+    );
   });
 });

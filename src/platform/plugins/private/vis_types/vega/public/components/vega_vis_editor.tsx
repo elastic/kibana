@@ -12,7 +12,7 @@ import useMount from 'react-use/lib/useMount';
 import hjson from 'hjson';
 
 import React, { useCallback, useState } from 'react';
-import compactStringify from 'json-stringify-pretty-compact';
+import { prettyCompactStringify } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
 
 import type { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
@@ -27,7 +27,7 @@ import { VegaActionsMenu } from './vega_actions_menu';
 
 function format(
   value: string,
-  stringify: typeof hjson.stringify | typeof compactStringify,
+  stringify: typeof hjson.stringify | typeof prettyCompactStringify,
   options?: any
 ) {
   try {
@@ -83,7 +83,13 @@ const monacoOverride = {
     }),
 };
 
-function VegaVisEditor({ stateParams, setValue }: VisEditorOptionsProps<VisParams>) {
+export function VegaSpecEditor({
+  editorValue,
+  onChange,
+}: {
+  editorValue: string;
+  onChange: (value: string) => void;
+}) {
   const styles = useMemoCss(vegaVisStyles);
   const monacoStyles = useMemoCss(monacoOverride);
   const [languageId, setLanguageId] = useState<string>();
@@ -91,7 +97,7 @@ function VegaVisEditor({ stateParams, setValue }: VisEditorOptionsProps<VisParam
   useMount(() => {
     let specLang = XJsonLang.ID;
     try {
-      JSON.parse(stateParams.spec);
+      JSON.parse(editorValue);
     } catch {
       specLang = HJSON_LANG_ID;
     }
@@ -100,34 +106,34 @@ function VegaVisEditor({ stateParams, setValue }: VisEditorOptionsProps<VisParam
 
   const setSpec = useCallback(
     (value: string, specLang?: string) => {
-      setValue('spec', value);
+      onChange(value);
       if (specLang) {
         setLanguageId(specLang);
       }
     },
-    [setValue]
+    [onChange]
   );
 
-  const onChange = useCallback((value: string) => setSpec(value), [setSpec]);
+  const handleChange = useCallback((value: string) => setSpec(value), [setSpec]);
 
   const formatJson = useCallback(() => {
-    const { value, isValid } = format(stateParams.spec, compactStringify);
+    const { value: formattedValue, isValid } = format(editorValue, prettyCompactStringify);
 
     if (isValid) {
-      setSpec(value, XJsonLang.ID);
+      setSpec(formattedValue, XJsonLang.ID);
     }
-  }, [setSpec, stateParams.spec]);
+  }, [editorValue, setSpec]);
 
   const formatHJson = useCallback(() => {
-    const { value, isValid } = format(stateParams.spec, hjson.stringify, {
+    const { value: formattedValue, isValid } = format(editorValue, hjson.stringify, {
       bracesSameLine: true,
       keepWsc: true,
     });
 
     if (isValid) {
-      setSpec(value, HJSON_LANG_ID);
+      setSpec(formattedValue, HJSON_LANG_ID);
     }
-  }, [setSpec, stateParams.spec]);
+  }, [editorValue, setSpec]);
 
   if (!languageId) {
     return null;
@@ -144,8 +150,8 @@ function VegaVisEditor({ stateParams, setValue }: VisEditorOptionsProps<VisParam
         width="100%"
         height="100%"
         languageId={languageId}
-        value={stateParams.spec}
-        onChange={onChange}
+        value={editorValue}
+        onChange={handleChange}
         options={{
           lineNumbers: 'on',
           fontSize: 12,
@@ -159,6 +165,12 @@ function VegaVisEditor({ stateParams, setValue }: VisEditorOptionsProps<VisParam
         }}
       />
     </div>
+  );
+}
+
+function VegaVisEditor({ stateParams, setValue }: VisEditorOptionsProps<VisParams>) {
+  return (
+    <VegaSpecEditor editorValue={stateParams.spec} onChange={(value) => setValue('spec', value)} />
   );
 }
 

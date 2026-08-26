@@ -8,7 +8,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useKibana } from './use_kibana';
 
-export const useManagementLink = (connectorId: string) => {
+export const useManagementLink = () => {
   const {
     services: { share },
   } = useKibana();
@@ -20,13 +20,13 @@ export const useManagementLink = (connectorId: string) => {
   useEffect(() => {
     const getLink = async () => {
       const link = await managementLocator?.getUrl({
-        sectionId: 'insightsAndAlerting',
-        appId: `triggersActionsConnectors/connectors/${connectorId}`,
+        sectionId: 'modelManagement',
+        appId: 'model_settings',
       });
       setManagementLink(link || '');
     };
     getLink();
-  }, [managementLocator, connectorId]);
+  }, [managementLocator]);
 
   return managementLink;
 };

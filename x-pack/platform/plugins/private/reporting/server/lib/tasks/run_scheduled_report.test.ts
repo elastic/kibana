@@ -8,12 +8,17 @@
 import { Transform } from 'stream';
 import type { estypes } from '@elastic/elasticsearch';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
+import { isExternalUiamCredential, markExternalUiamCredential } from '@kbn/core-security-server';
 import type { MockedLogger } from '@kbn/logging-mocks';
-import { JOB_STATUS, KibanaShuttingDownError } from '@kbn/reporting-common';
-import type { ReportDocument } from '@kbn/reporting-common/types';
+import type { CancellationToken } from '@kbn/reporting-common';
+import { JOB_STATUS, KibanaShuttingDownError, QueueTimeoutError } from '@kbn/reporting-common';
+import type { ReportDocument, TaskRunResult } from '@kbn/reporting-common/types';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { type ExportType, type ReportingConfigType } from '@kbn/reporting-server';
 import type { RunContext } from '@kbn/task-manager-plugin/server';
+import { TaskErrorSource } from '@kbn/task-manager-plugin/server';
+import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { notificationsMock } from '@kbn/notifications-plugin/server/mocks';
 import { EventTracker } from '../../usage';
@@ -32,6 +37,7 @@ import { SavedReport } from '../store';
 import type { ScheduledReportType } from '../../types';
 import { EmailNotificationService } from '../../services/notifications/email_notification_service';
 import { eventTrackerMock } from '../../usage/event_tracker.mock';
+import { MAX_DELAY_SECONDS } from '../retry_on_error';
 
 interface StreamMock {
   getSeqNo: () => number;
@@ -39,18 +45,24 @@ interface StreamMock {
   write: (data: string) => void;
   fail: () => void;
   end: () => void;
+  destroy: jest.Mock;
   transform: Transform;
+  on: (event: string, listener: (...args: unknown[]) => void) => StreamMock;
+  once: (event: string, listener: (...args: unknown[]) => void) => StreamMock;
+  removeListener: (event: string, listener: (...args: unknown[]) => void) => StreamMock;
 }
 
 const coreSetupMock = coreMock.createSetup();
 const mockEventTracker = eventTrackerMock.create();
 
-function createStreamMock(): StreamMock {
+function createStreamMock({
+  seqNo = 10,
+  primaryTerm = 20,
+}: Partial<Record<'seqNo' | 'primaryTerm', number>> = {}): StreamMock {
   const transform: Transform = new Transform({});
-
-  return {
-    getSeqNo: () => 10,
-    getPrimaryTerm: () => 20,
+  const mock = {
+    getSeqNo: () => seqNo,
+    getPrimaryTerm: () => primaryTerm,
     write: (data: string) => {
       transform.push(`${data}\n`);
     },
@@ -62,12 +74,27 @@ function createStreamMock(): StreamMock {
     end: () => {
       transform.end();
     },
+    destroy: jest.fn(),
+    on: (event: string, listener: (...args: unknown[]) => void) => {
+      transform.on(event, listener);
+      return mock;
+    },
+    once: (event: string, listener: (...args: unknown[]) => void) => {
+      transform.once(event, listener);
+      return mock;
+    },
+    removeListener: (event: string, listener: (...args: unknown[]) => void) => {
+      transform.removeListener(event, listener);
+      return mock;
+    },
   };
+  return mock as StreamMock;
 }
 
-const mockStream = createStreamMock();
+let mockStream = createStreamMock();
+const mockGetContentStream = jest.fn();
 jest.mock('../content_stream', () => ({
-  getContentStream: () => mockStream,
+  getContentStream: (...args: unknown[]) => mockGetContentStream(...args),
   finishedWithNoPendingCallbacks: () => Promise.resolve(),
 }));
 
@@ -77,7 +104,6 @@ const fakeRawRequest: FakeRawRequest = {
   headers: {
     authorization: `ApiKey skdjtq4u543yt3rhewrh`,
   },
-  path: '/',
 };
 
 const payload = {
@@ -172,6 +198,7 @@ describe('Run Scheduled Report Task', () => {
 
   beforeEach(async () => {
     jest.clearAllMocks();
+    mockGetContentStream.mockImplementation(() => mockStream);
     logger = loggingSystemMock.createLogger();
     soClient.get = jest.fn().mockImplementation(async () => {
       return scheduledReport;
@@ -198,6 +225,11 @@ describe('Run Scheduled Report Task', () => {
     emailNotificationService = new EmailNotificationService({
       notifications,
     });
+  });
+
+  afterEach(() => {
+    // some tests enable fake timers; restore real timers even if they fail mid-test
+    jest.useRealTimers();
   });
 
   it('Instance setup', () => {
@@ -398,6 +430,86 @@ describe('Run Scheduled Report Task', () => {
     });
   });
 
+  it('re-marks the rebuilt request when the task manager fake request carries an external UIAM credential', async () => {
+    const task = new RunScheduledReportTask({
+      reporting: mockReporting,
+      config: configType,
+      logger,
+    });
+    jest
+      // @ts-expect-error TS compilation fails: this overrides a private method of the RunScheduledReportTask instance
+      .spyOn(task, 'completeJob')
+      .mockResolvedValueOnce({ _id: 'test', jobtype: 'test1', status: 'pending' } as never);
+    const mockTaskManager = taskManagerMock.createStart();
+    await task.init(mockTaskManager, emailNotificationService);
+
+    // The real thing Task Manager hands to the runner: a fake KibanaRequest whose
+    // external-credential verdict is bound to the request object, not its headers.
+    const markedRequestFromTask = kibanaRequestFactory(fakeRawRequest);
+    markExternalUiamCredential(markedRequestFromTask);
+
+    const taskDef = task.getTaskDefinition();
+    const taskRunner = taskDef.createTaskRunner({
+      taskInstance: {
+        id: 'report-so-id',
+        runAt: new Date('2023-10-01T00:00:00Z'),
+        params: {
+          id: 'report-so-id',
+          jobtype: 'test1',
+          schedule: {
+            rrule: { freq: Frequency.DAILY, interval: 2, tzid: 'UTC' },
+          },
+        },
+      },
+      fakeRequest: markedRequestFromTask,
+    } as unknown as RunContext);
+
+    await taskRunner.run();
+
+    const rebuiltRequest = runTaskFn.mock.calls[0][0].request;
+    expect(rebuiltRequest).not.toBe(markedRequestFromTask);
+    expect(rebuiltRequest.headers).toEqual({
+      authorization: 'ApiKey skdjtq4u543yt3rhewrh',
+    });
+    expect(isExternalUiamCredential(rebuiltRequest)).toBe(true);
+  });
+
+  it('does not mark the rebuilt request when the task manager fake request is not marked', async () => {
+    const task = new RunScheduledReportTask({
+      reporting: mockReporting,
+      config: configType,
+      logger,
+    });
+    jest
+      // @ts-expect-error TS compilation fails: this overrides a private method of the RunScheduledReportTask instance
+      .spyOn(task, 'completeJob')
+      .mockResolvedValueOnce({ _id: 'test', jobtype: 'test1', status: 'pending' } as never);
+    const mockTaskManager = taskManagerMock.createStart();
+    await task.init(mockTaskManager, emailNotificationService);
+
+    const unmarkedRequestFromTask = kibanaRequestFactory(fakeRawRequest);
+
+    const taskDef = task.getTaskDefinition();
+    const taskRunner = taskDef.createTaskRunner({
+      taskInstance: {
+        id: 'report-so-id',
+        runAt: new Date('2023-10-01T00:00:00Z'),
+        params: {
+          id: 'report-so-id',
+          jobtype: 'test1',
+          schedule: {
+            rrule: { freq: Frequency.DAILY, interval: 2, tzid: 'UTC' },
+          },
+        },
+      },
+      fakeRequest: unmarkedRequestFromTask,
+    } as unknown as RunContext);
+
+    await taskRunner.run();
+
+    expect(isExternalUiamCredential(runTaskFn.mock.calls[0][0].request)).toBe(false);
+  });
+
   it('sends telemetry event when job is claimed', async () => {
     const store = await mockReporting.getStore();
     store.addReport = jest.fn().mockImplementation(
@@ -571,6 +683,98 @@ describe('Run Scheduled Report Task', () => {
     );
   });
 
+  it('catches stream error during performJob and rejects the operation', async () => {
+    const streamFailRunTaskFn = jest.fn().mockImplementation((opts: { stream: StreamMock }) => {
+      const { stream } = opts;
+      setImmediate(() => stream.fail());
+      return new Promise(() => {}); // never resolve so the stream error throws
+    });
+    mockReporting.getExportTypesRegistry().register({
+      id: 'noop',
+      name: 'Noop',
+      setup: jest.fn(),
+      start: jest.fn(),
+      createJob: () => new Promise(() => {}),
+      runTask: streamFailRunTaskFn,
+      shouldNotifyUsage: () => true,
+      getFeatureUsageName: () => 'Reporting: pdf scheduled export',
+      notifyUsage: jest.fn(),
+      jobContentExtension: 'pdf',
+      jobType: 'noop',
+      validLicenses: [],
+    } as unknown as ExportType);
+    const store = await mockReporting.getStore();
+    store.setReportError = jest.fn(() =>
+      Promise.resolve({
+        _id: 'test',
+        jobtype: 'noop',
+        status: 'processing',
+      } as unknown as estypes.UpdateUpdateWriteResponseBase<ReportDocument>)
+    );
+
+    store.setReportFailed = jest.fn();
+    logger.error = jest.fn();
+    mockReporting.getEventTracker = jest.fn().mockReturnValue(mockEventTracker);
+
+    const task = new RunScheduledReportTask({
+      reporting: mockReporting,
+      config: configType,
+      logger,
+    });
+
+    jest
+      // @ts-expect-error TS compilation fails: this overrides a private method of the RunScheduledReportTask instance
+      .spyOn(task, 'prepareJob')
+      .mockResolvedValueOnce({
+        isLastAttempt: false,
+        jobId: '290357209345723095',
+        report: { _id: '290357209345723095', jobtype: 'noop' },
+        task: {
+          id: '290357209345723095',
+          index: '.reporting-fantastic',
+          jobtype: 'noop',
+          payload,
+        },
+      } as never);
+
+    jest
+      // @ts-expect-error TS compilation fails: this overrides a protected method of the RunSingleReportTask instance
+      .spyOn(task, 'getEventTracker')
+      // @ts-ignore
+      .mockReturnValue(new EventTracker(coreSetupMock.analytics, 'jobId', 'exportTypeId', 'appId'));
+
+    const mockTaskManager = taskManagerMock.createStart();
+    await task.init(mockTaskManager, emailNotificationService);
+
+    const taskDef = task.getTaskDefinition();
+    const taskRunner = taskDef.createTaskRunner({
+      taskInstance: {
+        id: 'report-so-id',
+        params: {
+          id: 'report-so-id',
+          jobtype: 'noop',
+          schedule: {
+            rrule: { freq: Frequency.DAILY, interval: 2, tzid: 'UTC' },
+          },
+        },
+      },
+      fakeRequest: fakeRawRequest,
+    } as unknown as RunContext);
+
+    await taskRunner.run().catch(() => {});
+
+    expect(reportStore.setReportFailed).toHaveBeenCalledWith(
+      expect.objectContaining({
+        _id: '290357209345723095',
+      }),
+      expect.objectContaining({
+        error: expect.objectContaining({
+          message: 'Stream failed',
+        }),
+      })
+    );
+  });
+
   it('updates report with error message and failed status if error occurs during task run', async () => {
     const runAt = new Date('2023-10-01T00:00:00Z');
 
@@ -651,6 +855,7 @@ describe('Run Scheduled Report Task', () => {
   });
 
   it('should retry up to maxRetries', async () => {
+    jest.useFakeTimers();
     const runAt = new Date('2023-10-01T00:00:00Z');
     configType = createMockConfigSchema({ capture: { maxAttempts: 2 } });
     mockReporting = await createMockReportingCore(configType);
@@ -706,7 +911,13 @@ describe('Run Scheduled Report Task', () => {
       fakeRequest: fakeRawRequest,
     } as unknown as RunContext);
 
-    await expect(() => taskRunner.run()).rejects.toThrowError('failure generating report');
+    const runPromise = taskRunner.run();
+    const expectPromise = expect(runPromise).rejects.toThrowError('failure generating report');
+    // Advance past all retry delays
+    for (let i = 0; i < 10; i++) {
+      await jest.advanceTimersByTimeAsync(MAX_DELAY_SECONDS * 2 * 1000);
+    }
+    await expectPromise;
 
     expect(runThisTaskFn).toHaveBeenCalledTimes(2); // should retry 2 times
     expect(logger.error).toHaveBeenCalledWith(
@@ -726,6 +937,317 @@ describe('Run Scheduled Report Task', () => {
       completed_at: expect.any(String),
       error: expect.objectContaining({ name: 'Error', message: 'failure generating report' }),
     });
+    jest.useRealTimers();
+  });
+
+  describe('timeout classification', () => {
+    // Runs a scheduled report whose runTask resolves (with the given result) only once the
+    // internal queue timeout cancels it - mirroring how the CSV searchsource path returns
+    // partial data on timeout - and exhausts every retry attempt. Returns the rejected error
+    // and the runTask mock so callers can assert the retry count.
+    const runTimedOutScheduledTask = async (
+      result: Partial<TaskRunResult>,
+      { maxAttempts }: { maxAttempts: number }
+    ): Promise<{ error: Error | undefined; runTaskMock: jest.Mock }> => {
+      jest.useFakeTimers();
+      // A 1ms queue timeout ensures the internal timer cancels each attempt promptly.
+      configType = createMockConfigSchema({ capture: { maxAttempts }, queue: { timeout: 1 } });
+      mockReporting = await createMockReportingCore(configType);
+      mockStream = createStreamMock();
+
+      const timedOutRunTaskFn = jest.fn().mockImplementation(
+        ({ cancellationToken }: { cancellationToken: CancellationToken }) =>
+          new Promise<TaskRunResult>((resolve) => {
+            cancellationToken.on(() => resolve(result as TaskRunResult));
+          })
+      );
+      mockReporting.getExportTypesRegistry().register({
+        id: 'test2',
+        name: 'Test2',
+        setup: jest.fn(),
+        start: jest.fn(),
+        createJob: () => new Promise(() => {}),
+        runTask: timedOutRunTaskFn,
+        shouldNotifyUsage: () => true,
+        getFeatureUsageName: () => 'Reporting: test2 scheduled export',
+        notifyUsage: jest.fn(),
+        jobContentEncoding: 'base64',
+        jobType: 'test2',
+        validLicenses: [],
+      } as unknown as ExportType);
+
+      const store = await mockReporting.getStore();
+      const thisSavedReport = new SavedReport({ ...savedReportData, jobtype: 'test2' });
+      store.addReport = jest.fn().mockImplementation(async () => thisSavedReport);
+      store.setReportFailed = jest.fn(() =>
+        Promise.resolve({
+          _id: 'test',
+          jobtype: 'test1',
+          status: 'processing',
+        } as unknown as estypes.UpdateUpdateWriteResponseBase<ReportDocument>)
+      );
+      store.setReportError = jest.fn();
+
+      const task = new RunScheduledReportTask({
+        reporting: mockReporting,
+        config: configType,
+        logger,
+      });
+      const mockTaskManager = taskManagerMock.createStart();
+      await task.init(mockTaskManager, emailNotificationService);
+
+      const taskDef = task.getTaskDefinition();
+      const taskRunner = taskDef.createTaskRunner({
+        taskInstance: {
+          id: 'report-so-id',
+          runAt: new Date('2023-10-01T00:00:00Z'),
+          params: {
+            id: 'report-so-id',
+            jobtype: 'test2',
+            schedule: {
+              rrule: { freq: Frequency.DAILY, interval: 2, tzid: 'UTC' },
+            },
+          },
+        },
+        fakeRequest: fakeRawRequest,
+      } as unknown as RunContext);
+
+      let error: Error | undefined;
+      const runPromise = taskRunner.run().catch((err) => {
+        error = err;
+      });
+      // Advance past the internal queue timeout(s) and all retry delays.
+      for (let i = 0; i < 10; i++) {
+        await jest.advanceTimersByTimeAsync(MAX_DELAY_SECONDS * 2 * 1000);
+      }
+      await runPromise;
+      jest.useRealTimers();
+
+      return { error, runTaskMock: timedOutRunTaskFn };
+    };
+
+    it('classifies a timed-out run as a user error after exhausting retries', async () => {
+      const { error, runTaskMock } = await runTimedOutScheduledTask(
+        { content_type: 'text/csv', warnings: ['row count mismatch'], user_error: true },
+        { maxAttempts: 2 }
+      );
+
+      expect(runTaskMock).toHaveBeenCalledTimes(2); // times out on every retry
+      expect(error).toBeInstanceOf(QueueTimeoutError);
+      expect(getErrorSource(error!)).toEqual(TaskErrorSource.USER);
+    });
+
+    it('does not classify a timed-out run as a user error when user_error is falsy', async () => {
+      const { error, runTaskMock } = await runTimedOutScheduledTask(
+        { content_type: 'text/csv', warnings: [] },
+        { maxAttempts: 2 }
+      );
+
+      expect(runTaskMock).toHaveBeenCalledTimes(2);
+      expect(error).toBeInstanceOf(QueueTimeoutError);
+      expect(getErrorSource(error!)).not.toEqual(TaskErrorSource.USER);
+    });
+
+    it('force-fails a run whose runTask never honors the cancellation token', async () => {
+      jest.useFakeTimers();
+      configType = createMockConfigSchema({ capture: { maxAttempts: 1 }, queue: { timeout: 1 } });
+      mockReporting = await createMockReportingCore(configType);
+      mockStream = createStreamMock();
+
+      // Never resolves, and ignores the cancellation token entirely.
+      const hangingRunTaskFn = jest
+        .fn()
+        .mockImplementation(() => new Promise<TaskRunResult>(() => {}));
+      mockReporting.getExportTypesRegistry().register({
+        id: 'test3',
+        name: 'Test3',
+        setup: jest.fn(),
+        start: jest.fn(),
+        createJob: () => new Promise(() => {}),
+        runTask: hangingRunTaskFn,
+        shouldNotifyUsage: () => true,
+        getFeatureUsageName: () => 'Reporting: test3 scheduled export',
+        notifyUsage: jest.fn(),
+        jobContentEncoding: 'base64',
+        jobType: 'test3',
+        validLicenses: [],
+      } as unknown as ExportType);
+
+      const store = await mockReporting.getStore();
+      const thisSavedReport = new SavedReport({ ...savedReportData, jobtype: 'test3' });
+      store.addReport = jest.fn().mockImplementation(async () => thisSavedReport);
+      store.setReportFailed = jest.fn(() =>
+        Promise.resolve({
+          _id: 'test',
+          jobtype: 'test3',
+          status: 'processing',
+        } as unknown as estypes.UpdateUpdateWriteResponseBase<ReportDocument>)
+      );
+      store.setReportError = jest.fn();
+
+      const task = new RunScheduledReportTask({
+        reporting: mockReporting,
+        config: configType,
+        logger,
+      });
+      const mockTaskManager = taskManagerMock.createStart();
+      await task.init(mockTaskManager, emailNotificationService);
+
+      const taskDef = task.getTaskDefinition();
+      const taskRunner = taskDef.createTaskRunner({
+        taskInstance: {
+          id: 'report-so-id',
+          runAt: new Date('2023-10-01T00:00:00Z'),
+          params: {
+            id: 'report-so-id',
+            jobtype: 'test3',
+            schedule: { rrule: { freq: Frequency.DAILY, interval: 2, tzid: 'UTC' } },
+          },
+        },
+        fakeRequest: fakeRawRequest,
+      } as unknown as RunContext);
+
+      let error: Error | undefined;
+      const runPromise = taskRunner.run().catch((err) => {
+        error = err;
+      });
+      // Advance past the internal queue timeout, the hard-timeout grace period, and all retry delays.
+      for (let i = 0; i < 10; i++) {
+        await jest.advanceTimersByTimeAsync(MAX_DELAY_SECONDS * 2 * 1000);
+      }
+      await runPromise;
+      jest.useRealTimers();
+
+      expect(hangingRunTaskFn).toHaveBeenCalled();
+      expect(error).toBeInstanceOf(QueueTimeoutError);
+    });
+  });
+  // Regression test for https://github.com/elastic/kibana/issues/255230: after an attempt advances
+  // the doc's seq_no, the retry must refresh the OCC values instead of reusing the stale ones.
+  it('retries with fresh seq_no/primary_term and tears down the failed stream', async () => {
+    jest.useFakeTimers();
+    configType = createMockConfigSchema({ capture: { maxAttempts: 2 } });
+    mockReporting = await createMockReportingCore(configType);
+
+    // the doc's actual seq_no/primary_term after attempt 1's writeHead advanced it
+    const freshSeqNo = 42;
+    const freshPrimaryTerm = 354001;
+
+    // attempt 1 fails, attempt 2 succeeds
+    const runThisTaskFn = jest
+      .fn()
+      .mockImplementationOnce(() => {
+        throw new Error('failure generating report');
+      })
+      .mockResolvedValueOnce({ content_type: 'text/csv' });
+    mockReporting.getExportTypesRegistry().register({
+      id: 'test2',
+      name: 'Test2',
+      setup: jest.fn(),
+      start: jest.fn(),
+      createJob: () => new Promise(() => {}),
+      runTask: runThisTaskFn,
+      shouldNotifyUsage: () => true,
+      getFeatureUsageName: () => 'Reporting: test2 scheduled export',
+      notifyUsage: jest.fn(),
+      jobContentEncoding: 'base64',
+      jobContentExtension: 'csv',
+      jobType: 'test2',
+      validLicenses: [],
+    } as unknown as ExportType);
+
+    const streamAttempt1 = createStreamMock({ seqNo: freshSeqNo, primaryTerm: freshPrimaryTerm });
+    const streamAttempt2 = createStreamMock({ seqNo: 43, primaryTerm: freshPrimaryTerm });
+    mockGetContentStream
+      .mockImplementationOnce(() => streamAttempt1)
+      .mockImplementationOnce(() => streamAttempt2);
+
+    // refreshReportSeqNo re-fetches the doc; return the advanced values
+    const { asInternalUser: esClient } = await mockReporting.getEsClient();
+    (esClient.get as unknown as jest.Mock).mockResolvedValue({
+      _id: savedReportData._id,
+      _index: savedReportData._index,
+      _seq_no: freshSeqNo,
+      _primary_term: freshPrimaryTerm,
+      found: true,
+      _source: { ...savedReportData, jobtype: 'test2' },
+    });
+
+    const store = await mockReporting.getStore();
+    const thisSavedReport = new SavedReport({ ...savedReportData, jobtype: 'test2' });
+    store.addReport = jest.fn().mockImplementation(async () => thisSavedReport);
+    store.setReportError = jest.fn(() =>
+      Promise.resolve({
+        _id: savedReportData._id,
+        jobtype: 'test2',
+        status: 'processing',
+      } as unknown as estypes.UpdateUpdateWriteResponseBase<ReportDocument>)
+    );
+    mockReporting.getEventTracker = jest.fn().mockReturnValue(mockEventTracker);
+
+    const task = new RunScheduledReportTask({
+      reporting: mockReporting,
+      config: configType,
+      logger,
+    });
+    jest
+      // @ts-expect-error TS compilation fails: this overrides a private method of the RunScheduledReportTask instance
+      .spyOn(task, 'completeJob')
+      .mockResolvedValue({
+        _id: savedReportData._id,
+        jobtype: 'test2',
+        status: 'completed',
+      } as never);
+
+    const mockTaskManager = taskManagerMock.createStart();
+    await task.init(mockTaskManager, emailNotificationService);
+
+    const taskDef = task.getTaskDefinition();
+    const taskRunner = taskDef.createTaskRunner({
+      taskInstance: {
+        id: 'report-so-id',
+        runAt: new Date('2023-10-01T00:00:00Z'),
+        params: {
+          id: 'report-so-id',
+          jobtype: 'test2',
+          schedule: {
+            rrule: { freq: Frequency.DAILY, interval: 2, tzid: 'UTC' },
+          },
+        },
+      },
+      fakeRequest: fakeRawRequest,
+    } as unknown as RunContext);
+
+    const runPromise = taskRunner.run();
+    // Advance past all retry delays
+    for (let i = 0; i < 10; i++) {
+      await jest.advanceTimersByTimeAsync(MAX_DELAY_SECONDS * 2 * 1000);
+    }
+    await runPromise;
+
+    expect(runThisTaskFn).toHaveBeenCalledTimes(2);
+    expect(mockGetContentStream).toHaveBeenCalledTimes(2);
+
+    // attempt 1 uses the OCC values from claim time
+    expect(mockGetContentStream.mock.calls[0][1]).toEqual(
+      expect.objectContaining({
+        if_seq_no: savedReportData._seq_no,
+        if_primary_term: savedReportData._primary_term,
+      })
+    );
+
+    // the retry must use the doc's current (refreshed) values, not the stale ones
+    expect(mockGetContentStream.mock.calls[1][1]).toEqual(
+      expect.objectContaining({
+        if_seq_no: freshSeqNo,
+        if_primary_term: freshPrimaryTerm,
+      })
+    );
+
+    // the failed attempt's stream must be torn down so it can't keep writing
+    expect(streamAttempt1.destroy).toHaveBeenCalled();
+
+    jest.useRealTimers();
   });
 
   describe('notify', () => {
@@ -876,7 +1398,7 @@ describe('Run Scheduled Report Task', () => {
       await task.init(mockTaskManager, emailNotificationService);
       const taskInstance = {
         id: 'task-id',
-        runAt: new Date('2025-06-04T00:00:00Z'),
+        runAt: new Date('2025-06-04T10:00:00Z'),
         params: { id: 'report-so-id', jobtype: 'test1' },
       };
       const byteSize = 2097152; // 2MB
@@ -931,17 +1453,17 @@ describe('Run Scheduled Report Task', () => {
           cc: undefined,
           spaceId: 'default',
           to: ['test1@test.com'],
-          subject: 'Scheduled Report: Test Report - 2025-06-04T00:00:00.000Z',
+          subject: 'Scheduled Report: Test Report - 2025-06-04T10:00:00.000Z',
           message: `
                 # Your report is ready
 
                 - title: Test Report
-                - filename: Test Report\\-2025\\-06\\-04T00:00:00\\.000Z\\.pdf
+                - filename: Test Report\\-2025\\-06\\-04T10:00:00\\.000Z\\.pdf
                 - objectType: test
-                - date: 2025\\-06\\-04T00:00:00\\.000Z
+                - date: 2025\\-06\\-04T10:00:00\\.000Z
                 `,
         },
-        filename: 'Test Report-2025-06-04T00:00:00.000Z.pdf',
+        filename: 'Test Report-2025-06-04T10:00:00.000Z.pdf',
         id: '290357209345723095',
         index: '.reporting-fantastic',
         relatedObject: {

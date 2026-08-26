@@ -54,6 +54,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
         connector_type_id: '.slack_api',
         config: {},
         is_connector_type_deprecated: false,
+        auth_mode: 'shared',
       });
     });
 
@@ -71,7 +72,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
           expect(resp.body).to.eql({
             statusCode: 400,
             error: 'Bad Request',
-            message: `error validating connector type secrets: Field \"token\": Required`,
+            message: `error validating connector type secrets: ✖ Invalid input: expected string, received undefined\n  → at token`,
           });
         });
     });
@@ -123,7 +124,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
             statusCode: 400,
             error: 'Bad Request',
             message:
-              'error validating connector type config: Field "allowedChannels.0.name": Required',
+              'error validating connector type config: ✖ Invalid input: expected string, received undefined\n  → at allowedChannels[0].name',
           });
         });
     });

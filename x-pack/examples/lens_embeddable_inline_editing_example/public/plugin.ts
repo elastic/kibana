@@ -43,7 +43,6 @@ export class LensInlineEditingPlugin
           label: 'README',
           href: 'https://github.com/elastic/kibana/tree/main/x-pack/examples/lens_embeddable_inline_editing_example',
           iconType: 'logoGithub',
-          size: 's',
           target: '_blank',
         },
       ],

@@ -71,9 +71,9 @@ export const LogAnalysisModuleListCard: React.FC<{
 
   const moduleIcon =
     moduleStatus.type === 'required' ? (
-      <EuiIcon size="xxl" type="machineLearningApp" />
+      <EuiIcon size="xxl" type="machineLearningApp" aria-hidden={true} />
     ) : (
-      <EuiIcon color="success" size="xxl" type="check" />
+      <EuiIcon color="success" size="xxl" type="check" aria-hidden={true} />
     );
 
   const moduleSetupButton =

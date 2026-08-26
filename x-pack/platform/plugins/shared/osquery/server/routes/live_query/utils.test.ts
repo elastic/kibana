@@ -9,6 +9,7 @@ import { of } from 'rxjs';
 import { lastValueFrom } from 'rxjs';
 import type { IScopedSearchClient } from '@kbn/data-plugin/server';
 import { Direction, OsqueryQueries } from '../../../common/search_strategy';
+import { OSQUERY_SEARCH_STRATEGY } from '../../search_strategy/constants';
 import { getActionResponses } from './utils';
 
 describe('getActionResponses', () => {
@@ -36,7 +37,9 @@ describe('getActionResponses', () => {
       ),
     } as unknown as IScopedSearchClient;
 
-    const response = await lastValueFrom(getActionResponses(search, 'action-1', 5));
+    const response = await lastValueFrom(
+      getActionResponses(search, 'action-1', 5, undefined, 'default')
+    );
 
     expect(search.search).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -44,8 +47,9 @@ describe('getActionResponses', () => {
         factoryQueryType: OsqueryQueries.actionResults,
         kuery: '',
         sort: { direction: Direction.desc, field: '@timestamp' },
+        spaceId: 'default',
       }),
-      { strategy: 'osquerySearchStrategy' }
+      { strategy: OSQUERY_SEARCH_STRATEGY }
     );
     expect(response).toEqual({
       action_id: 'action-1',

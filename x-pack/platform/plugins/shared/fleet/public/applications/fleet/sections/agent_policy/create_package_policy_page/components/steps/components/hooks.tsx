@@ -9,7 +9,7 @@ import { useMemo, useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 
 import { LICENCE_FOR_OUTPUT_PER_INTEGRATION } from '../../../../../../../../../common/constants';
-import type { PackagePolicy } from '../../../../../../../../../common/types';
+import type { NewPackagePolicy } from '../../../../../../../../../common/types';
 import type { RegistryVarGroup } from '../../../../../../types';
 import { getAllowedOutputTypesForPackagePolicy } from '../../../../../../../../../common/services/output_helpers';
 import { useGetOutputs, useLicense } from '../../../../../../hooks';
@@ -18,6 +18,7 @@ import {
   computeDefaultVarGroupSelections,
   type VarGroupSelection,
 } from '../../../services/var_group_helpers';
+import { buildVarGroupPolicyUpdates } from '../../../services/var_group_policy_effects';
 
 export function useDataStreamId() {
   const history = useHistory();
@@ -29,7 +30,9 @@ export function useDataStreamId() {
 }
 
 export function useOutputs(
-  packagePolicy: Pick<PackagePolicy, 'supports_agentless'>,
+  packagePolicy: Pick<NewPackagePolicy, 'supports_agentless'> & {
+    inputs?: Array<{ type: string; enabled: boolean }>;
+  },
   packageName: string
 ) {
   const licenseService = useLicense();
@@ -53,50 +56,93 @@ export function useOutputs(
   };
 }
 
+/**
+ * Update type for var group selection changes.
+ * Includes var_group_selections plus any additional policy effects.
+ */
+interface VarGroupSelectionsUpdate {
+  var_group_selections: VarGroupSelection;
+  [key: string]: unknown;
+}
+
 interface UseVarGroupSelectionsParams {
   varGroups: RegistryVarGroup[] | undefined;
   savedSelections: VarGroupSelection | undefined;
   isAgentlessEnabled: boolean;
-  onSelectionsChange: (update: { var_group_selections: VarGroupSelection }) => void;
+  /**
+   * Callback for selection changes. Receives var_group_selections and any
+   * computed policy effects (when packagePolicy is provided).
+   */
+  onSelectionsChange: (update: VarGroupSelectionsUpdate) => void;
+  /**
+   * Optional: current package policy for computing policy effects.
+   * When provided along with varGroups, selection changes will compute
+   * and include policy effects (e.g., supports_cloud_connector) in the update.
+   * If not provided, only var_group_selections will be included in updates.
+   */
+  packagePolicy?: NewPackagePolicy;
+  /**
+   * Optional: options to hide per var group (e.g. options unsupported by the
+   * policy template the form is scoped to). Hidden options are excluded when
+   * computing default selections.
+   */
+  hideInVarGroupOptions?: Record<string, string[]>;
 }
 
 /**
  * Hook for managing var group selections state.
- * Handles deriving current selections, initializing defaults, and selection changes.
+ * Handles deriving current selections, initializing defaults, selection changes,
+ * and computing policy effects based on selected options.
  */
 export function useVarGroupSelections({
   varGroups,
   savedSelections,
   isAgentlessEnabled,
   onSelectionsChange,
+  packagePolicy,
+  hideInVarGroupOptions,
 }: UseVarGroupSelectionsParams) {
   // Derive current selections from saved or compute defaults
   const selections = useMemo((): VarGroupSelection => {
     if (savedSelections) return savedSelections;
-    return computeDefaultVarGroupSelections(varGroups, isAgentlessEnabled);
-  }, [savedSelections, varGroups, isAgentlessEnabled]);
+    return computeDefaultVarGroupSelections(varGroups, isAgentlessEnabled, hideInVarGroupOptions);
+  }, [savedSelections, varGroups, isAgentlessEnabled, hideInVarGroupOptions]);
 
   // Initialize with defaults on mount if not already set
   useEffect(() => {
     if (varGroups && varGroups.length > 0 && !savedSelections) {
-      const defaults = computeDefaultVarGroupSelections(varGroups, isAgentlessEnabled);
+      const defaults = computeDefaultVarGroupSelections(
+        varGroups,
+        isAgentlessEnabled,
+        hideInVarGroupOptions
+      );
       if (Object.keys(defaults).length > 0) {
         onSelectionsChange({ var_group_selections: defaults });
       }
     }
-  }, [varGroups, isAgentlessEnabled, savedSelections, onSelectionsChange]);
+  }, [varGroups, isAgentlessEnabled, savedSelections, onSelectionsChange, hideInVarGroupOptions]);
 
-  // Handle selection change
+  // Handle selection change with policy effects computation
   const handleSelectionChange = useCallback(
     (groupName: string, optionName: string) => {
+      const newSelections: VarGroupSelection = {
+        ...savedSelections,
+        [groupName]: optionName,
+      };
+
+      // Compute policy effects (e.g., supports_cloud_connector) if packagePolicy is provided
+      const policyEffects =
+        packagePolicy && varGroups
+          ? buildVarGroupPolicyUpdates(packagePolicy, newSelections, varGroups)
+          : null;
+
+      // Apply selections and any policy effects together
       onSelectionsChange({
-        var_group_selections: {
-          ...savedSelections,
-          [groupName]: optionName,
-        },
+        var_group_selections: newSelections,
+        ...(policyEffects || {}),
       });
     },
-    [savedSelections, onSelectionsChange]
+    [savedSelections, onSelectionsChange, packagePolicy, varGroups]
   );
 
   return { selections, handleSelectionChange };

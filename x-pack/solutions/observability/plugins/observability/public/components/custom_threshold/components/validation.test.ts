@@ -6,6 +6,7 @@
  */
 
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import { COMPARATORS } from '@kbn/alerting-comparators';
 import type {
   CustomMetricExpressionParams,
   CustomThresholdExpressionMetric,
@@ -87,5 +88,69 @@ describe('Metric Threshold Validation', () => {
       } as unknown as CustomMetricExpressionParams[],
     });
     expect(res.errors.filterQuery[0]).toBe(`Filter query is invalid. ${errorReason}`);
+  });
+
+  describe('warning threshold', () => {
+    const baseCriterion = {
+      comparator: COMPARATORS.GREATER_THAN,
+      threshold: [10],
+      timeSize: 1,
+      timeUnit: 'm',
+      metrics: [
+        {
+          name: 'A',
+          aggType: 'avg',
+          field: 'system.cpu.user.pct',
+        },
+      ],
+    } as unknown as CustomMetricExpressionParams;
+
+    it('requires a warning threshold value once warningThreshold is set but empty', () => {
+      const res = validateCustomThreshold({
+        uiSettings: {} as IUiSettingsClient,
+        searchConfiguration: {},
+        criteria: [
+          {
+            ...baseCriterion,
+            warningComparator: COMPARATORS.GREATER_THAN,
+            warningThreshold: [] as number[],
+          },
+        ],
+      });
+      expect(res.errors['0'].warning.threshold0).toContain('Threshold is required.');
+    });
+
+    it('requires warning threshold values to be numbers', () => {
+      const res = validateCustomThreshold({
+        uiSettings: {} as IUiSettingsClient,
+        searchConfiguration: {},
+        criteria: [
+          {
+            ...baseCriterion,
+            warningComparator: COMPARATORS.GREATER_THAN,
+            warningThreshold: [undefined] as unknown as number[],
+          },
+        ],
+      });
+      expect(res.errors['0'].warning.threshold0).toContain(
+        'Thresholds must contain a valid number.'
+      );
+    });
+
+    it('produces no warning errors for a valid warning threshold', () => {
+      const res = validateCustomThreshold({
+        uiSettings: {} as IUiSettingsClient,
+        searchConfiguration: {},
+        criteria: [
+          {
+            ...baseCriterion,
+            warningComparator: COMPARATORS.GREATER_THAN,
+            warningThreshold: [5],
+          },
+        ],
+      });
+      expect(res.errors['0'].warning.threshold0).toHaveLength(0);
+      expect(res.errors['0'].warning.threshold1).toHaveLength(0);
+    });
   });
 });

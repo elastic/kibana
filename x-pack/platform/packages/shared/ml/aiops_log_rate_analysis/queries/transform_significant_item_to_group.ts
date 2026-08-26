@@ -9,16 +9,40 @@ import { stringHash } from '@kbn/ml-string-hash';
 import type { SignificantItem, SignificantItemGroup } from '@kbn/ml-agg-utils';
 
 import type { SignificantItemDuplicateGroup } from '../types';
+import { getFieldValuePairKey } from './get_field_value_pair_key';
+
+export function getGroupedSignificantItemsByPairKey(
+  groupedSignificantItems: SignificantItemDuplicateGroup[]
+): Map<string, SignificantItemDuplicateGroup> {
+  const groupedSignificantItemsByPairKey = new Map<string, SignificantItemDuplicateGroup>();
+
+  for (const groupedSignificantItem of groupedSignificantItems) {
+    for (const duplicateSignificantItem of groupedSignificantItem.group) {
+      groupedSignificantItemsByPairKey.set(
+        getFieldValuePairKey(
+          duplicateSignificantItem.fieldName,
+          duplicateSignificantItem.fieldValue
+        ),
+        groupedSignificantItem
+      );
+    }
+  }
+
+  return groupedSignificantItemsByPairKey;
+}
 
 export function transformSignificantItemToGroup(
   significantItem: SignificantItem,
-  groupedSignificantItems: SignificantItemDuplicateGroup[]
+  groupedSignificantItems: SignificantItemDuplicateGroup[],
+  groupedSignificantItemsByPairKey?: Map<string, SignificantItemDuplicateGroup>
 ): SignificantItemGroup {
   const { key, type, fieldName, fieldValue, doc_count: docCount, pValue } = significantItem;
 
-  const duplicates = groupedSignificantItems.find((d) =>
-    d.group.some((dg) => dg.fieldName === fieldName && dg.fieldValue === fieldValue)
-  );
+  const duplicates =
+    groupedSignificantItemsByPairKey?.get(getFieldValuePairKey(fieldName, fieldValue)) ??
+    groupedSignificantItems.find((d) =>
+      d.group.some((dg) => dg.fieldName === fieldName && dg.fieldValue === fieldValue)
+    );
 
   if (duplicates !== undefined) {
     return {

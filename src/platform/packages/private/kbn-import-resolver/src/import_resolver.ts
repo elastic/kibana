@@ -34,7 +34,7 @@ export class ImportResolver {
     isFile: (path: string) => !!this.safeStat(path)?.isFile(),
     isDirectory: (path: string) => !!this.safeStat(path)?.isDirectory(),
     readFileSync: memoize(readFileSync),
-    packageFilter(pkg: Record<string, unknown>) {
+    packageFilter(pkg) {
       if (!pkg.main && pkg.types) {
         // for the purpose of resolving files, a "types" file is adequate
         return {
@@ -45,7 +45,7 @@ export class ImportResolver {
 
       return pkg;
     },
-  };
+  } satisfies Resolve.SyncOpts;
 
   constructor(
     /**
@@ -159,12 +159,8 @@ export class ImportResolver {
       return Path.resolve(REPO_ROOT, `node_modules/@typescript-eslint/parser/dist/index.js`);
     }
 
-    // zod migration from v3 to v4
-    if (req.startsWith('zod/v4')) {
+    if (req === 'zod' || req.startsWith('zod/v4')) {
       return Path.resolve(REPO_ROOT, `node_modules/zod/v4/index.cjs`);
-    }
-    if (req.startsWith('zod') || req.startsWith('zod/v3')) {
-      return Path.resolve(REPO_ROOT, `node_modules/zod/v3/index.cjs`);
     }
 
     if (req.startsWith('vega-lite')) {

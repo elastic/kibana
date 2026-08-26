@@ -29,6 +29,7 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
 
   const aceEditor = getService('aceEditor');
   const comboBox = getService('comboBox');
+  const find = getService('find');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
 
@@ -559,7 +560,9 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     },
 
     async assertAllValidationCalloutsPresent(expectedNumCallouts: number) {
-      const validationCallouts = await testSubjects.findAll('~mlValidationCallout');
+      const validationCallouts = await find.allByCssSelector(
+        '.euiCallOut[data-test-subj~="mlValidationCallout"]'
+      );
       expect(validationCallouts.length).to.eql(expectedNumCallouts);
     },
 
@@ -722,11 +725,11 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     },
 
     async getHeaderText() {
-      return await testSubjects.getVisibleText('mlDataFrameAnalyticsWizardHeaderTitle');
+      return await testSubjects.getVisibleText('appHeaderTitle');
     },
 
     async assertInitialCloneJobConfigStep(job: DataFrameAnalyticsConfig) {
-      const jobType = Object.keys(job.analysis)[0];
+      const jobType = Object.keys(job.analysis!)[0];
       const jobTypeAttribute = `mlAnalyticsCreation-${jobType}-option`;
       await this.assertJobTypeSelection(jobTypeAttribute);
       if (isClassificationAnalysis(job.analysis) || isRegressionAnalysis(job.analysis)) {
@@ -741,7 +744,7 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     async assertInitialCloneJobAdditionalOptionsStep(
       analysis: DataFrameAnalyticsConfig['analysis']
     ) {
-      const jobType = Object.keys(analysis)[0];
+      const jobType = Object.keys(analysis!)[0];
       if (isClassificationAnalysis(analysis) || isRegressionAnalysis(analysis)) {
         // @ts-ignore
         await this.assertPredictionFieldNameValue(analysis[jobType].prediction_field_name);

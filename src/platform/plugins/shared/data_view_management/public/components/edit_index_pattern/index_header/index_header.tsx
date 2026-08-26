@@ -20,6 +20,7 @@ import {
   EuiPageHeader,
   EuiPopover,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
@@ -77,7 +78,7 @@ export const IndexHeader: FC<PropsWithChildren<IndexHeaderProps>> = ({
           setIsOpen(false);
           deleteIndexPatternClick();
         }}
-        icon={<EuiIcon color="danger" type="trash" />}
+        icon={<EuiIcon color="danger" type="trash" aria-hidden={true} />}
         aria-label={removeAriaLabel}
         data-test-subj="deleteIndexPatternButton"
       >
@@ -94,20 +95,33 @@ export const IndexHeader: FC<PropsWithChildren<IndexHeaderProps>> = ({
         isOpen={isOpen}
         closePopover={() => setIsOpen(false)}
         panelPaddingSize="none"
+        aria-label={i18n.translate(
+          'indexPatternManagement.editDataView.moreActionsPopoverAriaLabel',
+          {
+            defaultMessage: 'More actions',
+          }
+        )}
         button={
-          <EuiButtonIcon
-            iconType="boxesVertical"
-            onClick={() => setIsOpen((prevIsOpen) => !prevIsOpen)}
-            size="m"
-            data-test-subj="moreActionsButton"
-            aria-label={i18n.translate(
-              'indexPatternManagement.editDataView.moreActionsButtonAria',
-              {
-                defaultMessage: 'More Actions',
-              }
-            )}
-            color="text"
-          />
+          <EuiToolTip
+            content={i18n.translate('indexPatternManagement.editDataView.moreActionsButtonAria', {
+              defaultMessage: 'More Actions',
+            })}
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              iconType="boxesVertical"
+              onClick={() => setIsOpen((prevIsOpen) => !prevIsOpen)}
+              size="m"
+              data-test-subj="moreActionsButton"
+              aria-label={i18n.translate(
+                'indexPatternManagement.editDataView.moreActionsButtonAria',
+                {
+                  defaultMessage: 'More Actions',
+                }
+              )}
+              color="text"
+            />
+          </EuiToolTip>
         }
       >
         <EuiContextMenuPanel items={contextMenuItems} />
@@ -135,7 +149,7 @@ export const IndexHeader: FC<PropsWithChildren<IndexHeaderProps>> = ({
         defaultIndex !== indexPattern.id && setDefault && canSave && indexPattern.isPersisted() && (
           <EuiButtonEmpty
             onClick={setDefault}
-            iconType="starEmpty"
+            iconType="star"
             aria-label={setDefaultAriaLabel}
             data-test-subj="setDefaultIndexPatternButton"
             color="text"

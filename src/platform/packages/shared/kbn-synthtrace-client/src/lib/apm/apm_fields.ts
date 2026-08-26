@@ -19,8 +19,12 @@ export type ApmApplicationMetricFields = Partial<{
   'system.process.memory.rss.bytes': number;
   'system.process.cpu.total.norm.pct': number;
   'jvm.memory.heap.used': number;
+  'jvm.memory.heap.max': number;
   'jvm.memory.non_heap.used': number;
+  'jvm.memory.non_heap.max': number;
   'jvm.thread.count': number;
+  'jvm.gc.time': number;
+  'jvm.gc.count': number;
   'faas.billed_duration': number;
   'faas.timeout': number;
   'faas.coldstart_duration': number;
@@ -38,6 +42,8 @@ export type ApmUserAgentFields = Partial<{
 
 export interface ApmException {
   message: string;
+  type?: string;
+  stacktrace?: APMStacktrace[];
 }
 
 export interface Observer {
@@ -125,6 +131,7 @@ export type ApmFields = Fields<{
     'error.id': string;
     'error.type': string;
     'error.culprit': string;
+    'error.stack_trace': string;
     'event.ingested': string;
     'event.name': string;
     'event.action': string;

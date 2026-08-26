@@ -28,7 +28,7 @@ describe('ebtSpanFilter', () => {
   });
 
   it('does not throw if payload is empty', () => {
-    const payload: Payload = {};
+    const payload: Payload = {} as Partial<Payload> as Payload;
     expect(() => ebtSpanFilter(payload)).not.toThrow();
     expect(ebtSpanFilter(payload)).toEqual({});
   });

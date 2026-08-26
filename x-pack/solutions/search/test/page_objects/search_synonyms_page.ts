@@ -9,7 +9,6 @@ import type { FtrProviderContext } from './ftr_provider_context';
 
 export function SearchSynonymsPageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
-  const find = getService('find');
   const retry = getService('retry');
   const browser = getService('browser');
 
@@ -23,10 +22,11 @@ export function SearchSynonymsPageProvider({ getService }: FtrProviderContext) {
           'searchSynonymsCreateSynonymsSetModalForceWrite',
       },
       async expectSynonymsGetStartedPageComponentsToExist() {
-        // check if exists, refresh and check again for 10 seconds
         await retry.tryForTime(10000, async () => {
-          await testSubjects.exists(this.TEST_IDS.GET_STARTED_BUTTON, { timeout: 2000 });
-          await browser.refresh();
+          if (!(await testSubjects.exists(this.TEST_IDS.GET_STARTED_BUTTON, { timeout: 2000 }))) {
+            await browser.refresh();
+            throw new Error(`${this.TEST_IDS.GET_STARTED_BUTTON} not visible`);
+          }
         });
       },
       async clickCreateSynonymsSetButton() {
@@ -114,8 +114,7 @@ export function SearchSynonymsPageProvider({ getService }: FtrProviderContext) {
       },
       async expectSynonymsSetDetailPageNavigated(name: string) {
         await retry.tryForTime(5000, async () => {
-          const h1Element = await find.byCssSelector('main header h1');
-          const text = await h1Element.getVisibleText();
+          const text = await testSubjects.getVisibleText('appHeaderTitle');
           if (text !== name) {
             throw new Error(`Expected page title to be "${name}" but got "${text}"`);
           }
@@ -199,13 +198,22 @@ export function SearchSynonymsPageProvider({ getService }: FtrProviderContext) {
         await testSubjects.click(this.TEST_IDS.FLYOUT_SAVE_BUTTON);
       },
       async removeSynonym(index: number) {
-        // get the badges and click on the one with the index
-        const badges = await testSubjects.findAll(this.TEST_IDS.FLYOUT_FROM_BADGE);
-        if (index >= badges.length) {
+        const initialBadges = await testSubjects.findAll(this.TEST_IDS.FLYOUT_FROM_BADGE);
+        if (index >= initialBadges.length) {
           throw new Error(`Badge with index ${index} not found`);
         }
-        const deleteButton = await badges[index].findByTagName('button');
-        await deleteButton.click();
+        const expectedCount = initialBadges.length - 1;
+        await retry.try(async () => {
+          const badges = await testSubjects.findAll(this.TEST_IDS.FLYOUT_FROM_BADGE);
+          if (badges.length === expectedCount) {
+            return;
+          }
+          const deleteButton = await badges[index].findByTagName('button');
+          await deleteButton.click();
+          throw new Error(
+            `Clicked remove on badge ${index}, waiting for badge count to drop to ${expectedCount}`
+          );
+        });
       },
     },
   };

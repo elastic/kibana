@@ -59,7 +59,7 @@ export const NewsfeedNavButton = ({ newsfeedApi, hasCustomBranding$, isServerles
       <>
         <EuiHeaderSectionItemButton
           ref={setButtonRef}
-          data-test-subj="newsfeed"
+          data-test-subj={hasNew ? 'newsfeedHasUnread' : 'newsfeedAllRead'}
           aria-controls="keyPadMenu"
           aria-expanded={flyoutVisible}
           aria-haspopup="true"
@@ -75,10 +75,11 @@ export const NewsfeedNavButton = ({ newsfeedApi, hasCustomBranding$, isServerles
           notification={hasNew ? true : null}
           onClick={showFlyout}
         >
-          <EuiIcon type="cheer" size="m" />
+          <EuiIcon type="popper" size="m" aria-hidden={true} />
         </EuiHeaderSectionItemButton>
         {flyoutVisible ? (
           <NewsfeedFlyout
+            newsfeedApi={newsfeedApi}
             isServerless={isServerless}
             focusTrapProps={{ shards: [buttonRef] }}
             showPlainSpinner={hasCustomBranding}

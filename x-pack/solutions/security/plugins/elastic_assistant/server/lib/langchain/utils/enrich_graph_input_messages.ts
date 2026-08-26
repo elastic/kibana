@@ -8,8 +8,7 @@
 import type { BaseMessage } from '@langchain/core/messages';
 import { HumanMessage } from '@langchain/core/messages';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { ActionsClient } from '@kbn/actions-plugin/server';
+import type { InferenceConnector } from '@kbn/inference-common';
 import { promptGroupId } from '../../prompt/local_prompt_object';
 import { getPrompt, promptDictionary } from '../../prompt';
 
@@ -17,7 +16,7 @@ interface Params {
   llmType?: string;
   connectorId: string;
   savedObjectsClient: SavedObjectsClientContract;
-  actionsClient: PublicMethodsOf<ActionsClient>;
+  getInferenceConnectorById: (id: string) => Promise<InferenceConnector>;
   messages: BaseMessage[];
 }
 
@@ -33,13 +32,16 @@ export const enrichConversation = (params: Params) => {
  * Prepends the user prompt to the last message if the last message is a human message.
  */
 const getUserPrompt = (
-  params: Pick<Params, 'actionsClient' | 'savedObjectsClient' | 'connectorId' | 'llmType'>
+  params: Pick<
+    Params,
+    'getInferenceConnectorById' | 'savedObjectsClient' | 'connectorId' | 'llmType'
+  >
 ) => {
   return async (messages: BaseMessage[]): Promise<BaseMessage[]> => {
     const userPrompt =
       params.llmType === 'gemini'
         ? await getPrompt({
-            actionsClient: params.actionsClient,
+            getInferenceConnectorById: params.getInferenceConnectorById,
             connectorId: params.connectorId,
             promptId: promptDictionary.userPrompt,
             promptGroupId: promptGroupId.aiAssistant,
@@ -55,10 +57,10 @@ const getUserPrompt = (
     const messagesCopy = [...messages]; // Create a copy to avoid mutating the original messages
     const lastMessage = messagesCopy[messagesCopy.length - 1];
     if (lastMessage instanceof HumanMessage) {
-      messagesCopy[messagesCopy.length - 1] = new HumanMessage(
-        `${userPrompt} ${lastMessage.content}`.trim(),
-        lastMessage.additional_kwargs
-      );
+      messagesCopy[messagesCopy.length - 1] = new HumanMessage({
+        content: `${userPrompt} ${lastMessage.content}`.trim(),
+        ...lastMessage.additional_kwargs,
+      });
     }
     return messagesCopy;
   };

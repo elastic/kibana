@@ -7,43 +7,86 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLFunction } from '../../../../../types';
+import {
+  isBinaryExpression,
+  isFunctionExpression,
+  isList,
+  isLiteral,
+  isUnaryExpression,
+} from '@elastic/esql';
+import type { ESQLAstItem, ESQLFunction, ESQLList, ESQLSingleAstItem } from '@elastic/esql/types';
 import { nullCheckOperators, inOperators } from '../../../all_operators';
-import type { ExpressionContext, FunctionParameterContext } from './types';
+import type {
+  ExpressionContext,
+  FunctionParameterContext,
+  ParenthesizedExpressionPosition,
+} from './types';
 import type { ICommandContext, ISuggestionItem } from '../../../../registry/types';
-import { getFunctionDefinition } from '../..';
-import { SignatureAnalyzer } from './signature_analyzer';
-import type { Signature } from '../../../types';
+import { getFunctionDefinition } from '../../functions';
+import { getBinaryExpressionOperand, resolveArgumentTypes } from '../../expressions';
+import type { SupportedDataType } from '../../../types';
+import {
+  getMatchingSignatures,
+  getMaxMinNumberOfParams,
+  getParamAtPosition,
+  getParamDefsAtPosition,
+} from '../../signatures';
+import type { PreferredExpressionType } from './types';
 
 export type SpecialFunctionName = 'case' | 'count' | 'bucket';
+export type IncompleteOperatorReason = 'tooFewArgs' | 'wrongTypes';
+
+export const isTupleExpression = (
+  expression: ESQLSingleAstItem | undefined
+): expression is ESQLList =>
+  Boolean(expression && isList(expression) && expression.subtype === 'tuple');
+
+/** Checks whether the source text wraps an AST expression in closed parentheses. */
+export const isExpressionParenthesized = (
+  innerText: string,
+  expressionRoot?: ESQLSingleAstItem
+): boolean => {
+  if (!expressionRoot) {
+    return false;
+  }
+
+  const beforeExpression = innerText.slice(0, expressionRoot.location.min).trimEnd();
+  const afterExpression = innerText.slice(expressionRoot.location.max + 1).trimStart();
+
+  return beforeExpression.endsWith('(') && afterExpression.startsWith(')');
+};
+
+/** Returns the cursor position relative to parentheses wrapping the expression. */
+export const getParenthesizedExpressionPosition = (
+  query: string,
+  innerText: string,
+  expressionRoot?: ESQLSingleAstItem
+): ParenthesizedExpressionPosition | undefined => {
+  if (!isExpressionParenthesized(query, expressionRoot)) {
+    return;
+  }
+
+  return isExpressionParenthesized(innerText, expressionRoot) ? 'after' : 'inside';
+};
 
 /** IN, NOT IN, IS NULL, IS NOT NULL operators requiring special autocomplete handling */
 export const specialOperators = [...inOperators, ...nullCheckOperators];
 
-/**
- * Detects if function signatures accept arbitrary/complex expressions in parameters.
- *
- * This pattern indicates functions where parameters can contain complex expressions
- * (not just simple values), characterized by:
- * - Variadic with multiple parameters (minParams >= 2)
- * - Unknown return type (depends on arguments)
- * - Mixed parameter types (boolean + any)
- *
- * Examples: CASE(condition1, value1, condition2, value2, ..., default)
- */
-export function acceptsArbitraryExpressions(signatures: Signature[]): boolean {
-  if (!signatures || signatures.length === 0) {
-    return false;
+/** Returns the deepest function expression along the rightmost binary or prefix-unary path. */
+export function getRightmostOperator(expression: ESQLFunction): ESQLFunction {
+  let operator = expression;
+
+  while (isBinaryExpression(operator) || isUnaryExpression(operator)) {
+    const rightOperand = isBinaryExpression(operator) ? operator.args[1] : operator.args[0];
+
+    if (!isFunctionExpression(rightOperand)) {
+      break;
+    }
+
+    operator = rightOperand;
   }
 
-  return signatures.some((sig) => {
-    const isVariadicWithMultipleParams = sig.minParams != null && sig.minParams >= 2;
-    const hasUnknownReturn = sig.returnType === 'unknown';
-    const hasMixedBooleanAndAny =
-      sig.params.some(({ type }) => type === 'boolean') && sig.params.some((p) => p.type === 'any');
-
-    return isVariadicWithMultipleParams && hasUnknownReturn && hasMixedBooleanAndAny;
-  });
+  return operator;
 }
 
 /** Checks if operator is a NULL check (IS NULL, IS NOT NULL) */
@@ -57,7 +100,7 @@ export function isNullCheckOperator(name: string) {
 export function isInOperator(name: string) {
   const lowerName = name.toLowerCase();
 
-  return lowerName === 'in' || lowerName === 'not in';
+  return inOperators.some((operator) => operator.name.toLowerCase() === lowerName);
 }
 
 /** Checks if operator requires special handling */
@@ -78,7 +121,8 @@ export function matchesSpecialFunction(name: string, expected: SpecialFunctionNa
  */
 export function buildExpressionFunctionParameterContext(
   fn: ESQLFunction,
-  context?: ICommandContext
+  context?: ICommandContext,
+  shouldGetNextArgument = false
 ): FunctionParameterContext | null {
   const fnDefinition = getFunctionDefinition(fn.name);
 
@@ -86,21 +130,119 @@ export function buildExpressionFunctionParameterContext(
     return null;
   }
 
-  const analyzer = SignatureAnalyzer.fromNode(fn, context, fnDefinition);
+  const { argTypes, literalMask } = resolveArgumentTypes(fn.args, {
+    columns: context?.columns,
+    unmappedFieldsStrategy: context?.unmappedFieldsStrategy,
+  });
 
-  if (!analyzer) {
-    return null;
+  let argIndex = Math.max(fn.args.length, 0);
+  if (!shouldGetNextArgument && argIndex) {
+    argIndex -= 1;
   }
 
+  const isVariadicFn = fnDefinition.signatures.some((sig) => sig.minParams != null);
+  const hasMultipleSignatures = fnDefinition.signatures.length > 1;
+  const argsToCheckForFiltering =
+    isVariadicFn || shouldGetNextArgument || !hasMultipleSignatures ? argIndex : fn.args.length;
+
+  const validSignatures = getMatchingSignatures(
+    fnDefinition.signatures,
+    argTypes.slice(0, argsToCheckForFiltering),
+    literalMask.slice(0, argsToCheckForFiltering),
+    true,
+    true
+  );
+
+  const compatibleParamDefs = getParamDefsAtPosition(
+    getMatchingSignatures(
+      fnDefinition.signatures,
+      argTypes.slice(0, argIndex),
+      literalMask.slice(0, argIndex),
+      true,
+      true
+    ),
+    argIndex
+  );
+
+  const hasMoreMandatoryArgs = !validSignatures.some((signature) => {
+    const nextParam = getParamAtPosition(signature, argIndex + 1);
+
+    return nextParam === null || nextParam?.optional === true;
+  });
+
+  const firstArgumentType = argTypes[0];
+  const hasRepeating = fnDefinition.signatures.some((sig) => sig.isSignatureRepeating);
+  const firstValueType = hasRepeating ? argTypes[1] : undefined;
+
+  const signatures = validSignatures.length ? validSignatures : fnDefinition.signatures;
+
   return {
-    paramDefinitions: analyzer.getCompatibleParamDefs(),
-    hasMoreMandatoryArgs: analyzer.getHasMoreMandatoryArgs(),
+    signatures,
+    paramDefinitions: compatibleParamDefs,
+    hasMoreMandatoryArgs,
     functionDefinition: fnDefinition,
-    firstArgumentType: analyzer.getFirstArgumentType(),
-    firstValueType: analyzer.getFirstValueType(),
-    currentParameterIndex: analyzer.getCurrentParameterIndex(),
-    validSignatures: analyzer.getValidSignatures(),
+    firstArgumentType,
+    firstValueType,
+    currentParameterIndex: argIndex,
+    validSignatures,
   };
+}
+
+/** Removes a partially typed unknown identifier from an operator's arguments. */
+export function removeFinalUnknownIdentiferArg(
+  args: ESQLAstItem[],
+  getExpressionType: (expression: ESQLAstItem) => SupportedDataType | 'unknown'
+): ESQLAstItem[] {
+  return getExpressionType(args[args.length - 1]) === 'unknown'
+    ? args.slice(0, args.length - 1)
+    : args;
+}
+
+/**
+ * Explains why an operator invocation is not yet complete for autocomplete purposes.
+ */
+export function getIncompleteOperatorReason(
+  operator: ESQLFunction,
+  getExpressionType: (expression: ESQLAstItem) => SupportedDataType | 'unknown'
+): IncompleteOperatorReason | undefined {
+  const fnDefinition = getFunctionDefinition(operator.name);
+
+  if (!fnDefinition) {
+    return 'tooFewArgs';
+  }
+
+  // We need this flag because subquery pipeline types are unknown even when the operator type is known.
+  const hasResolvedType = getExpressionType(operator) !== 'unknown';
+  const argsForArityCheck = hasResolvedType
+    ? operator.args
+    : removeFinalUnknownIdentiferArg(operator.args, getExpressionType);
+  const { min, max } = getMaxMinNumberOfParams(fnDefinition.signatures);
+  const hasValidArity = argsForArityCheck.length >= min && argsForArityCheck.length <= max;
+
+  if (!hasValidArity) {
+    return 'tooFewArgs';
+  }
+
+  if (operator.incomplete && isNullCheckOperator(fnDefinition.name)) {
+    return 'tooFewArgs';
+  }
+
+  const rightOperand = getBinaryExpressionOperand(operator, 'right');
+
+  if (isInOperator(fnDefinition.name) && Array.isArray(rightOperand) && !rightOperand.length) {
+    return 'tooFewArgs';
+  }
+
+  const givenTypes = operator.args.map((arg) => getExpressionType(arg));
+  const literalMask = operator.args.map((arg) => isLiteral(Array.isArray(arg) ? arg[0] : arg));
+  const hasCorrectTypes =
+    getMatchingSignatures(fnDefinition.signatures, givenTypes, literalMask, true).length > 0;
+
+  if (!hasCorrectTypes) {
+    return 'wrongTypes';
+  }
+
+  return undefined;
 }
 
 /**
@@ -133,15 +275,37 @@ export async function getKqlSuggestionsIfApplicable(
   const cursorPositionInKql = kqlQuery.length;
 
   try {
-    // Get KQL suggestions from the autocomplete service
     const suggestions = await getKqlSuggestions(kqlQuery, cursorPositionInKql);
 
     if (!suggestions || suggestions.length === 0) {
       return null;
     }
 
-    return suggestions;
+    const startOffset = innerText.length - kqlQuery.length;
+
+    return suggestions.map(({ range, ...suggestion }) => ({
+      ...suggestion,
+      // Exception to the standard attachReplacementRanges path (no strategy / prefix resolver):
+      // KQL provider already owns the replace range; we shift to ES|QL coords — lexer sees """…""" as one token.
+      rangeToReplace: {
+        start: startOffset + range.start,
+        end: startOffset + range.end,
+      },
+    }));
   } catch (error) {
     return null;
   }
+}
+
+/** Normalizes preferred expression type option into an array form for downstream checks. */
+export function normalizePreferredExpressionTypes(
+  preferredExpressionType?: PreferredExpressionType | PreferredExpressionType[]
+): PreferredExpressionType[] {
+  if (!preferredExpressionType) {
+    return [];
+  }
+
+  return Array.isArray(preferredExpressionType)
+    ? preferredExpressionType
+    : [preferredExpressionType];
 }

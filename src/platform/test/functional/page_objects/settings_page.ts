@@ -20,6 +20,7 @@ export class SettingsPageObject extends FtrService {
   private readonly header = this.ctx.getPageObject('header');
   private readonly common = this.ctx.getPageObject('common');
   private readonly savedObjects = this.ctx.getPageObject('savedObjects');
+  private readonly toasts = this.ctx.getService('toasts');
   private readonly monacoEditor = this.ctx.getService('monacoEditor');
 
   async clickLinkText(text: string) {
@@ -148,6 +149,26 @@ export class SettingsPageObject extends FtrService {
     await this.common.navigateToApp('settings');
   }
 
+  async navigateToDataViewById(id: string) {
+    await this.common.navigateToApp(`management/kibana/dataViews/dataView/${id}`);
+    await this.testSubjects.existOrFail('editIndexPattern');
+  }
+
+  async navigateToDataViews() {
+    await this.common.navigateToApp('management/kibana/dataViews');
+    await this.testSubjects.existOrFail('createDataViewButton');
+  }
+
+  async navigateToSavedObjects() {
+    await this.common.navigateToApp('management/kibana/objects');
+    await this.testSubjects.existOrFail('importObjects');
+  }
+
+  async navigateToAdvancedSettings() {
+    await this.common.navigateToApp('management/kibana/settings');
+    await this.testSubjects.existOrFail('settingsSearchBar');
+  }
+
   async getIndexPatternField() {
     return this.testSubjects.find('createIndexPatternTitleInput');
   }
@@ -204,16 +225,13 @@ export class SettingsPageObject extends FtrService {
   }
 
   async getSaveDataViewButtonActive() {
+    // EuiButton renders its disabled state as the native `disabled` attribute rather than a
+    // class, and a disabled button never fires its onClick, so the element has to be probed
+    // directly: a click sent to it is dropped without throwing.
     await this.retry.waitFor('active save button', async () => {
-      return (
-        (
-          await this.find.allByCssSelector(
-            '[data-test-subj="saveIndexPatternButton"]:not(.euiButton-isDisabled)'
-          )
-        ).length === 1
-      );
+      return await (await this.getSaveIndexPatternButton()).isEnabled();
     });
-    return await this.testSubjects.find('saveIndexPatternButton');
+    return await this.getSaveIndexPatternButton();
   }
 
   async clickEditIndexButton() {
@@ -338,8 +356,14 @@ export class SettingsPageObject extends FtrService {
     });
 
     expect(await this.isOptionChecked(option)).to.be(true);
-    await this.testSubjects.click(`selectable-option-${option}`);
-    expect(await this.isOptionChecked(option)).to.be(false);
+    // Center the option in the popover's scroll list so the click clears an edge-pinned option.
+    const optionToClear = await this.testSubjects.find(`selectable-option-${option}`);
+    await optionToClear.scrollIntoView({ block: 'center' });
+    await optionToClear.click();
+    await this.retry.waitFor(
+      'option to be unchecked',
+      async () => !(await this.isOptionChecked(option))
+    );
     await this.browser.pressKeys(this.browser.keys.ESCAPE);
   }
 
@@ -350,8 +374,11 @@ export class SettingsPageObject extends FtrService {
     });
 
     expect(await this.isOptionChecked(option)).to.be(false);
-    await this.testSubjects.click(`selectable-option-${option}`);
-    expect(await this.isOptionChecked(option)).to.be(true);
+    // Center the option in the popover's scroll list so the click toggles an edge-pinned option.
+    const optionToSelect = await this.testSubjects.find(`selectable-option-${option}`);
+    await optionToSelect.scrollIntoView({ block: 'center' });
+    await optionToSelect.click();
+    await this.retry.waitFor('option to be checked', async () => this.isOptionChecked(option));
 
     await this.browser.pressKeys(this.browser.keys.ESCAPE);
   }
@@ -480,11 +507,22 @@ export class SettingsPageObject extends FtrService {
     }
   }
 
-  async addCustomDataViewId(value: string) {
+  // `toggleAdvancedSetting` flips the section between shown and hidden, so calling it
+  // unconditionally would collapse the section again when the form is filled a second time.
+  async showAdvancedSettings() {
+    if (await this.testSubjects.exists('advancedSettings')) {
+      return;
+    }
     await this.testSubjects.click('toggleAdvancedSetting');
+    await this.testSubjects.existOrFail('advancedSettings');
+  }
+
+  async addCustomDataViewId(value: string) {
+    await this.showAdvancedSettings();
     const customDataViewIdInput = await (
       await this.testSubjects.find('savedObjectIdField')
     ).findByTagName('input');
+    await customDataViewIdInput.clearValueWithKeyboard();
     await customDataViewIdInput.type(value);
   }
 
@@ -517,9 +555,14 @@ export class SettingsPageObject extends FtrService {
   }
 
   async allowHiddenClick() {
-    await this.testSubjects.click('toggleAdvancedSetting');
+    await this.showAdvancedSettings();
     const allowHiddenField = await this.testSubjects.find('allowHiddenField');
-    await (await allowHiddenField.findByTagName('button')).click();
+    const allowHiddenToggle = await allowHiddenField.findByTagName('button');
+    // The toggle is a switch, so re-clicking it on a second fill would turn allow-hidden back off.
+    if ((await allowHiddenToggle.getAttribute('aria-checked')) === 'true') {
+      return;
+    }
+    await allowHiddenToggle.click();
   }
 
   async createIndexPattern(
@@ -531,7 +574,12 @@ export class SettingsPageObject extends FtrService {
     dataViewName?: string,
     allowHidden?: boolean
   ) {
+    let hasSubmittedTheForm = false;
     await this.retry.try(async () => {
+      if (hasSubmittedTheForm && !(await this.testSubjects.exists('indexPatternEditorFlyout'))) {
+        // The save was accepted and the editor flyout closed: the data view was created.
+        return;
+      }
       await this.header.waitUntilLoadingHasFinished();
       await this.clickKibanaIndexPatterns();
 
@@ -539,7 +587,9 @@ export class SettingsPageObject extends FtrService {
       const flyOut = await this.testSubjects.exists('createAnyway');
       if (flyOut) {
         await this.testSubjects.click('createAnyway');
-      } else {
+      } else if (!(await this.testSubjects.exists('indexPatternEditorFlyout'))) {
+        // On a retry the flyout may already be open; re-clicking the list-page
+        // button here would be intercepted by the flyout's success callout.
         await this.clickAddNewIndexPatternButton();
       }
 
@@ -577,7 +627,14 @@ export class SettingsPageObject extends FtrService {
         }
       );
 
-      await (await this.getSaveIndexPatternButton()).click();
+      await (await this.getSaveDataViewButtonActive()).click();
+      hasSubmittedTheForm = true;
+
+      // The Save click can be swallowed when it races the async CCS source
+      // resolution re-render, leaving the flyout open with nothing submitted.
+      // Confirm the flyout closed inside this retry.try so a swallowed click
+      // re-runs fill→save, rather than the URL loop below dead-polling forever.
+      await this.testSubjects.missingOrFail('indexPatternEditorFlyout', { timeout: 30000 });
     });
     await this.header.waitUntilLoadingHasFinished();
     await this.retry.try(async () => {
@@ -668,9 +725,16 @@ export class SettingsPageObject extends FtrService {
 
   async getIndexPatternIdFromUrl() {
     const currentUrl = await this.browser.getCurrentUrl();
-    const indexPatternId = currentUrl.match(/.*\/(.*)/)![1];
+    // The edit data view page syncs its app state into a hash fragment
+    // (e.g. `/dataView/<id>#/?_a=(tab:indexedFields)`), so we must extract the
+    // id from the `/dataView/<id>` path segment and stop at any `/`, `?` or `#`.
+    const indexPatternId = currentUrl.match(/\/dataView\/([^/?#]+)/)?.[1];
 
     this.log.debug('index pattern ID: ', indexPatternId);
+
+    if (!indexPatternId) {
+      throw new Error(`Unable to extract data view id from URL: ${currentUrl}`);
+    }
 
     return indexPatternId;
   }
@@ -717,9 +781,13 @@ export class SettingsPageObject extends FtrService {
     await this.retry.try(async () => {
       this.log.debug('getAlertText');
       alertText = await this.testSubjects.getVisibleText('deleteDataViewFlyoutHeader');
+      // getVisibleText returns '' while the flyout is still animating in, and the retry accepts
+      // that empty read; wait for the static title to actually paint before returning it.
+      if (!alertText) throw new Error('delete data view flyout title has not rendered yet');
     });
     await this.retry.try(async () => {
       this.log.debug('acceptConfirmation');
+      await this.toasts.dismissAllWithChecks();
       await this.testSubjects.click('confirmFlyoutConfirmButton');
     });
     await this.retry.try(async () => {
@@ -977,6 +1045,7 @@ export class SettingsPageObject extends FtrService {
     this.log.debug('toggling tow = ' + rowTestSubj);
     const row = await this.testSubjects.find(rowTestSubj);
     const rowToggle = (await row.findAllByCssSelector('[data-test-subj="toggle"]'))[0];
+    await rowToggle.scrollIntoViewIfNecessary();
     await rowToggle.click();
     return row;
   }
@@ -1056,8 +1125,27 @@ export class SettingsPageObject extends FtrService {
     }
 
     if (activeTab) {
+      // The flyout slides in with an entrance animation; a tab click issued before it settles can
+      // miss the moving target and leave the default Syntax tab selected, so wait for it to stop.
+      await this.waitForScriptedFieldHelpFlyoutToSettle();
       await this.testSubjects.click(activeTab);
+      await this.testSubjects.existOrFail('runScriptButton');
     }
+  }
+
+  private async waitForScriptedFieldHelpFlyoutToSettle() {
+    let previousPosition = await (
+      await this.testSubjects.find('scriptedFieldsHelpFlyout')
+    ).getPosition();
+    await this.retry.waitFor('scripted fields help flyout to stop animating', async () => {
+      const currentPosition = await (
+        await this.testSubjects.find('scriptedFieldsHelpFlyout')
+      ).getPosition();
+      const settled =
+        currentPosition.x === previousPosition.x && currentPosition.y === previousPosition.y;
+      previousPosition = currentPosition;
+      return settled;
+    });
   }
 
   async closeScriptedFieldHelp() {
@@ -1106,7 +1194,9 @@ export class SettingsPageObject extends FtrService {
     await this.setFieldTypeFilter(fieldType);
     await this.testSubjects.click('editFieldFormat');
 
-    expect(await this.testSubjects.getVisibleText('flyoutTitle')).to.eql(`Edit field '${name}'`);
+    await this.retry.try(async () => {
+      expect(await this.testSubjects.getVisibleText('flyoutTitle')).to.eql(`Edit field '${name}'`);
+    });
 
     await this.retry.tryForTime(5000, async () => {
       const previewText = await this.testSubjects.getVisibleText('fieldPreviewItem > value');

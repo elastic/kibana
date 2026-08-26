@@ -29,6 +29,7 @@ Array [
           tabindex="0"
         >
           <span
+            aria-hidden="true"
             color="success"
             data-euiicon-type="lock"
           />

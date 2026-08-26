@@ -5,23 +5,22 @@
  * 2.0.
  */
 
-import React, { type FC, type MouseEventHandler, useCallback, useMemo, useState } from 'react';
+import React, { type FC, useCallback, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import type { EuiSearchBarProps } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
   EuiPageTemplate,
   EuiPopover,
   EuiSearchBar,
-  EuiTitle,
 } from '@elastic/eui';
 import type { ListingPageUrlState } from '@kbn/ml-url-state';
+import type { TransformFunction } from '../../../../../../common/constants';
 import {
   isReauthorizeActionDisabled,
   ReauthorizeActionModal,
@@ -59,6 +58,13 @@ import {
   useScheduleNowAction,
 } from '../action_schedule_now';
 import { isStopActionDisabled, StopActionName, useStopAction } from '../action_stop';
+import {
+  isProjectScopeActionDisabled,
+  ProjectScopeActionFlyout,
+  ProjectScopeActionModal,
+  ProjectScopeActionName,
+  useProjectScopeAction,
+} from '../action_project_scope';
 import { useColumns } from './use_columns';
 import { ExpandedRow } from './expanded_row';
 import { filterTransforms, transformFilters } from './transform_search_bar_filters';
@@ -86,7 +92,7 @@ function getItemIdToExpandedRowMap(
 
 interface TransformListProps {
   isLoading: boolean;
-  onCreateTransform: MouseEventHandler<HTMLButtonElement>;
+  onCreateTransform: (transformFunction: TransformFunction) => void;
   pageState: ListingPageUrlState;
   transformNodes: number;
   transforms: TransformListRow[];
@@ -126,12 +132,9 @@ export const TransformList: FC<TransformListProps> = ({
   const bulkResetAction = useResetAction(false);
   const bulkStopAction = useStopAction(false);
   const bulkScheduleNowAction = useScheduleNowAction(false, transformNodes);
+  const bulkProjectScopeAction = useProjectScopeAction();
 
   const capabilities = useTransformCapabilities();
-  const disabled =
-    !capabilities.canCreateTransform ||
-    !capabilities.canPreviewTransform ||
-    !capabilities.canStartStopTransform;
 
   const { sorting, pagination, onTableChange } = useTableSettings<TransformListRow>(
     TRANSFORM_LIST_COLUMN.ID,
@@ -166,17 +169,13 @@ export const TransformList: FC<TransformListProps> = ({
           </h2>
         }
         actions={[
-          <EuiButton
-            color="primary"
-            fill
-            onClick={onCreateTransform}
-            isDisabled={disabled}
-            data-test-subj="transformCreateFirstButton"
-          >
-            {i18n.translate('xpack.transform.list.emptyPromptButtonText', {
+          <CreateTransformButton
+            label={i18n.translate('xpack.transform.list.emptyPromptButtonText', {
               defaultMessage: 'Create your first transform',
             })}
-          </EuiButton>,
+            onClick={onCreateTransform}
+            transformNodes={transformNodes}
+          />,
         ]}
         data-test-subj="transformNoTransformsFound"
       />
@@ -245,6 +244,36 @@ export const TransformList: FC<TransformListProps> = ({
         <ReauthorizeActionName items={transformSelection} transformNodes={transformNodes} />
       </EuiButtonEmpty>
     </div>,
+    <div key="projectScopeAction" className="transform__BulkActionItem">
+      <EuiButtonEmpty
+        onClick={() => {
+          setIsActionsMenuOpen(false);
+          bulkProjectScopeAction.openFlyout(transformSelection);
+        }}
+        disabled={isProjectScopeActionDisabled({
+          canCreateTransform: bulkProjectScopeAction.canCreateTransform,
+          hasLinkedProjects: bulkProjectScopeAction.hasLinkedProjects,
+          isCpsEnabled: bulkProjectScopeAction.isCpsEnabled,
+          isLoading: bulkProjectScopeAction.isLoading,
+          items: transformSelection,
+        })}
+      >
+        <ProjectScopeActionName
+          canCreateTransform={bulkProjectScopeAction.canCreateTransform}
+          disabled={isProjectScopeActionDisabled({
+            canCreateTransform: bulkProjectScopeAction.canCreateTransform,
+            hasLinkedProjects: bulkProjectScopeAction.hasLinkedProjects,
+            isCpsEnabled: bulkProjectScopeAction.isCpsEnabled,
+            isLoading: bulkProjectScopeAction.isLoading,
+            items: transformSelection,
+          })}
+          hasLinkedProjects={bulkProjectScopeAction.hasLinkedProjects}
+          isCpsEnabled={bulkProjectScopeAction.isCpsEnabled}
+          isLoading={bulkProjectScopeAction.isLoading}
+          items={transformSelection}
+        />
+      </EuiButtonEmpty>
+    </div>,
     <div key="resetAction" className="transform__BulkActionItem">
       <EuiButtonEmpty
         onClick={() => {
@@ -277,28 +306,32 @@ export const TransformList: FC<TransformListProps> = ({
   ];
 
   const renderToolsLeft = () => {
-    const buttonIcon = (
-      <EuiButtonIcon
-        size="s"
-        iconType="gear"
-        color="text"
+    const bulkActionButton = (
+      <EuiButton
+        color="primary"
+        data-test-subj="transformBulkActionsMenuButton"
+        iconSide="right"
+        iconType="chevronSingleDown"
         onClick={() => {
           setIsActionsMenuOpen(true);
         }}
-        aria-label={i18n.translate(
-          'xpack.transform.multiTransformActionsMenu.managementActionsAriaLabel',
-          {
-            defaultMessage: 'Management actions',
-          }
-        )}
-      />
+      >
+        {i18n.translate('xpack.transform.multiTransformActionsMenu.transformsCount', {
+          defaultMessage: '{count} selected',
+          values: { count: transformSelection.length },
+        })}
+      </EuiButton>
     );
 
     const bulkActionIcon = (
       <EuiPopover
         key="bulkActionIcon"
         id="transformBulkActionsMenu"
-        button={buttonIcon}
+        aria-label={i18n.translate(
+          'xpack.transform.multiTransformActionsMenu.bulkActionsPopoverAriaLabel',
+          { defaultMessage: 'Bulk actions' }
+        )}
+        button={bulkActionButton}
         isOpen={isActionsMenuOpen}
         closePopover={() => setIsActionsMenuOpen(false)}
         panelPaddingSize="s"
@@ -308,18 +341,7 @@ export const TransformList: FC<TransformListProps> = ({
       </EuiPopover>
     );
 
-    return [
-      <EuiTitle key="selectedText" size="s">
-        <h3>
-          {i18n.translate('xpack.transform.multiTransformActionsMenu.transformsCount', {
-            defaultMessage: '{count} {count, plural, one {transform} other {transforms}} selected',
-            values: { count: transformSelection.length },
-          })}
-        </h3>
-      </EuiTitle>,
-      <div key="bulkActionsBorder" className="transform__BulkActionsBorder" />,
-      bulkActionIcon,
-    ];
+    return [bulkActionIcon];
   };
 
   const toolsRight = (
@@ -368,6 +390,12 @@ export const TransformList: FC<TransformListProps> = ({
       )}
       {bulkResetAction.isModalVisible && <ResetActionModal {...bulkResetAction} />}
       {bulkStopAction.isModalVisible && <StopActionModal {...bulkStopAction} />}
+      {bulkProjectScopeAction.isFlyoutVisible && (
+        <ProjectScopeActionFlyout {...bulkProjectScopeAction} />
+      )}
+      {bulkProjectScopeAction.isModalVisible && (
+        <ProjectScopeActionModal {...bulkProjectScopeAction} />
+      )}
 
       {/* Single Action Modals */}
       {singleActionModals}

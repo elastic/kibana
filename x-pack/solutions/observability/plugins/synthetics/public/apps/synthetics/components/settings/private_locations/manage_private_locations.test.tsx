@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { render } from '../../../utils/testing/rtl_helpers';
 import * as permissionsHooks from '../../../hooks';
 import * as locationHooks from './hooks/use_locations_api';
@@ -18,11 +19,14 @@ jest.mock('../../../hooks');
 jest.mock('./hooks/use_locations_api');
 jest.mock('../../../contexts/synthetics_settings_context');
 
+const queryClient = new QueryClient();
+
 describe('<ManagePrivateLocations />', () => {
   beforeEach(() => {
     jest.spyOn(permissionsHooks, 'useCanManagePrivateLocation').mockReturnValue(true);
     jest.spyOn(permissionsHooks, 'useFleetPermissions').mockReturnValue({
       canReadAgentPolicies: true,
+      canReadAgents: true,
       canSaveIntegrations: false,
       canCreateAgentPolicies: false,
     });
@@ -53,18 +57,23 @@ describe('<ManagePrivateLocations />', () => {
       jest.spyOn(settingsHooks, 'useSyntheticsSettingsContext').mockReturnValue({
         canSave,
       } as SyntheticsSettingsContextValues);
-      const { getByText, getByRole, findByText } = render(<ManagePrivateLocations />, {
-        state: {
-          agentPolicies: {
-            data: [],
-            loading: false,
-            error: null,
+      const { getByText, getByRole, findByText } = render(
+        <QueryClientProvider client={queryClient}>
+          <ManagePrivateLocations />
+        </QueryClientProvider>,
+        {
+          state: {
+            agentPolicies: {
+              data: [],
+              loading: false,
+              error: null,
+            },
+            privateLocations: {
+              isPrivateLocationFlyoutVisible: false,
+            },
           },
-          privateLocations: {
-            isPrivateLocationFlyoutVisible: false,
-          },
-        },
-      });
+        }
+      );
       expect(getByText('No agent policies found')).toBeInTheDocument();
 
       if (canSave) {
@@ -88,18 +97,23 @@ describe('<ManagePrivateLocations />', () => {
       jest.spyOn(settingsHooks, 'useSyntheticsSettingsContext').mockReturnValue({
         canSave,
       } as SyntheticsSettingsContextValues);
-      const { getByText, getByRole, findByText } = render(<ManagePrivateLocations />, {
-        state: {
-          agentPolicies: {
-            data: [{}],
-            loading: false,
-            error: null,
+      const { getByText, getByRole, findByText } = render(
+        <QueryClientProvider client={queryClient}>
+          <ManagePrivateLocations />
+        </QueryClientProvider>,
+        {
+          state: {
+            agentPolicies: {
+              data: [{}],
+              loading: false,
+              error: null,
+            },
+            privateLocations: {
+              isPrivateLocationFlyoutVisible: false,
+            },
           },
-          privateLocations: {
-            isPrivateLocationFlyoutVisible: false,
-          },
-        },
-      });
+        }
+      );
       expect(getByText('Create your first private location')).toBeInTheDocument();
       const button = getByRole('button', { name: 'Create location' });
 
@@ -140,18 +154,23 @@ describe('<ManagePrivateLocations />', () => {
         deleteLoading: false,
         createLoading: false,
       });
-      const { getByText, getByRole, findByText } = render(<ManagePrivateLocations />, {
-        state: {
-          agentPolicies: {
-            data: [{}],
-            loading: false,
-            error: null,
+      const { getByText, getByRole, findByText } = render(
+        <QueryClientProvider client={queryClient}>
+          <ManagePrivateLocations />
+        </QueryClientProvider>,
+        {
+          state: {
+            agentPolicies: {
+              data: [{}],
+              loading: false,
+              error: null,
+            },
+            privateLocations: {
+              isPrivateLocationFlyoutVisible: false,
+            },
           },
-          privateLocations: {
-            isPrivateLocationFlyoutVisible: false,
-          },
-        },
-      });
+        }
+      );
       expect(getByText(privateLocationName)).toBeInTheDocument();
       const button = getByRole('button', { name: 'Create location' });
 

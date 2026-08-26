@@ -62,6 +62,24 @@ describe('telemetry', () => {
         scheduleInfo: { id: 'fake-id-1', interval: '21d', actions: ['.slack', '.jest'] },
       });
     });
+
+    it('should report error event with trigger and execution_mode', () => {
+      reportAttackDiscoveryGenerationFailure({
+        apiConfig: mockApiConfig,
+        errorMessage: 'Epic fail!',
+        execution_mode: 'legacy',
+        telemetry: mockTelemetry,
+        trigger: 'schedule',
+      });
+
+      expect(mockTelemetry.reportEvent).toHaveBeenCalledWith('attack_discovery_error', {
+        actionTypeId: '.gen-ai',
+        errorMessage: 'Epic fail!',
+        execution_mode: 'legacy',
+        model: 'gpt-4',
+        trigger: 'schedule',
+      });
+    });
   });
 
   describe('reportAttackDiscoveryGenerationSuccess', () => {
@@ -129,6 +147,66 @@ describe('telemetry', () => {
         isDefaultDateRange: true,
         model: 'gpt-4',
         scheduleInfo: { id: 'fake-id-2', interval: '32m', actions: ['.slack', '.jest'] },
+      });
+    });
+
+    it('should report success event with trigger and execution_mode', async () => {
+      reportAttackDiscoveryGenerationSuccess({
+        alertsContextCount: 2,
+        apiConfig: mockApiConfig,
+        attackDiscoveries: mockAttackDiscoveries,
+        durationMs: 123000,
+        end: 'now',
+        execution_mode: 'legacy',
+        hasFilter: false,
+        size: 10,
+        start: 'now-24h',
+        telemetry: mockTelemetry,
+        trigger: 'schedule',
+      });
+
+      expect(mockTelemetry.reportEvent).toHaveBeenCalledWith('attack_discovery_success', {
+        actionTypeId: '.gen-ai',
+        alertsContextCount: 2,
+        alertsCount: 18,
+        configuredAlertsCount: 10,
+        dateRangeDuration: 24,
+        discoveriesGenerated: 2,
+        durationMs: 123000,
+        execution_mode: 'legacy',
+        hasFilter: false,
+        isDefaultDateRange: true,
+        model: 'gpt-4',
+        trigger: 'schedule',
+      });
+    });
+
+    it('should report success event with duplicatesDroppedCount when provided', () => {
+      reportAttackDiscoveryGenerationSuccess({
+        alertsContextCount: 2,
+        apiConfig: mockApiConfig,
+        attackDiscoveries: mockAttackDiscoveries,
+        duplicatesDroppedCount: 3,
+        durationMs: 123000,
+        end: 'now',
+        hasFilter: false,
+        size: 10,
+        start: 'now-24h',
+        telemetry: mockTelemetry,
+      });
+
+      expect(mockTelemetry.reportEvent).toHaveBeenCalledWith('attack_discovery_success', {
+        actionTypeId: '.gen-ai',
+        alertsContextCount: 2,
+        alertsCount: 18,
+        configuredAlertsCount: 10,
+        dateRangeDuration: 24,
+        discoveriesGenerated: 2,
+        duplicatesDroppedCount: 3,
+        durationMs: 123000,
+        hasFilter: false,
+        isDefaultDateRange: true,
+        model: 'gpt-4',
       });
     });
   });

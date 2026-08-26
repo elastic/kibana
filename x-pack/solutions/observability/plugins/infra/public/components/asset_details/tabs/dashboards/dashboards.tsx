@@ -92,7 +92,7 @@ export function Dashboards() {
   useEffect(() => {
     const allAvailableDashboardsMap = new Map<
       string,
-      DashboardSearchResponseBody['dashboards'][number]
+      DashboardSearchResponseBody['data'][number]
     >();
     allAvailableDashboards.forEach((availableDashboard) => {
       allAvailableDashboardsMap.set(availableDashboard.id, availableDashboard);
@@ -168,8 +168,8 @@ export function Dashboards() {
 
       return {
         assetDetails: { ...urlState, dashboardId: params.dashboardId },
-        assetType: entity.type,
-        assetId: entity.id,
+        entityType: entity.type,
+        entityId: entity.id,
         ...flyoutParams,
       };
     },

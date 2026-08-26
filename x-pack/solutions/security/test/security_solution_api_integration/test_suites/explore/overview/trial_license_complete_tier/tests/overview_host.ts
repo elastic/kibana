@@ -17,8 +17,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
   const esArchiver = getService('esArchiver');
   const utils = getService('securitySolutionUtils');
 
-  // Failing: See https://github.com/elastic/kibana/issues/218282
-  describe.skip('Overview Host', () => {
+  describe('Overview Host', () => {
     let supertest: TestAgent;
     let search: SearchService;
     describe('With auditbeat', () => {

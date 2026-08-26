@@ -76,7 +76,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: `Unauthorized to find rules for any rule types`,
+                message: `Unauthorized to find rules for any rule types.`,
                 statusCode: 403,
               });
               break;
@@ -89,7 +89,11 @@ export default function createFindTests({ getService }: FtrProviderContext) {
               expect(response.body.page).to.equal(1);
               expect(response.body.per_page).to.be.greaterThan(0);
               expect(response.body.total).to.be.greaterThan(0);
-              const match = response.body.data.find((obj: any) => obj.id === createdAlert.id);
+
+              const { monitoring, ...match } = response.body.data.find(
+                (obj: any) => obj.id === createdAlert.id
+              );
+
               expect(match).to.eql({
                 id: createdAlert.id,
                 name: 'abc',
@@ -190,7 +194,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: `Unauthorized to find rules for any rule types`,
+                message: `Unauthorized to find rules for any rule types.`,
                 statusCode: 403,
               });
               break;
@@ -286,7 +290,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: `Unauthorized to find rules for any rule types`,
+                message: `Unauthorized to find rules for any rule types.`,
                 statusCode: 403,
               });
               break;
@@ -299,7 +303,11 @@ export default function createFindTests({ getService }: FtrProviderContext) {
               expect(response.body.page).to.equal(1);
               expect(response.body.per_page).to.be.greaterThan(0);
               expect(response.body.total).to.be.greaterThan(0);
-              const match = response.body.data.find((obj: any) => obj.id === createdAlert.id);
+
+              const { monitoring, ...match } = response.body.data.find(
+                (obj: any) => obj.id === createdAlert.id
+              );
+
               expect(match).to.eql({
                 id: createdAlert.id,
                 name: 'abc',
@@ -386,7 +394,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: `Unauthorized to find rules for any rule types`,
+                message: `Unauthorized to find rules for any rule types.`,
                 statusCode: 403,
               });
               break;
@@ -463,7 +471,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: `Unauthorized to find rules for any rule types`,
+                message: `Unauthorized to find rules for any rule types.`,
                 statusCode: 403,
               });
               break;
@@ -523,7 +531,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: `Unauthorized to find rules for any rule types`,
+                message: `Unauthorized to find rules for any rule types.`,
                 statusCode: 403,
               });
               break;

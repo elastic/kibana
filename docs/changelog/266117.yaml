@@ -1,0 +1,7 @@
+﻿prs:
+- https://github.com/elastic/kibana/pull/266117
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-05-06
+title: 'Fix blinking integration icons in Attack Discovery schedules'

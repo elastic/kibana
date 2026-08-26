@@ -14,7 +14,7 @@ import { useGetCasesMockState } from '../../containers/mock';
 import { connectors, useCaseConfigureResponse } from '../configure_cases/__mock__';
 
 import { readCasesPermissions, renderWithTestingProviders, TestProviders } from '../../common/mock';
-import { renderHook, screen } from '@testing-library/react';
+import { fireEvent, renderHook, screen } from '@testing-library/react';
 import { CaseStatuses, CustomFieldTypes } from '../../../common/types/domain';
 import { userProfilesMap } from '../../containers/user_profiles/api.mock';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
@@ -78,89 +78,105 @@ describe('useCasesColumns ', () => {
         "columns": Array [
           Object {
             "field": "title",
+            "minWidth": "16em",
             "name": "Name",
             "render": [Function],
             "sortable": true,
-            "width": "17%",
           },
           Object {
             "field": "assignees",
+            "minWidth": "2em",
             "name": "Assignees",
             "render": [Function],
-            "width": "10%",
+            "width": "6em",
           },
           Object {
             "field": "tags",
+            "minWidth": "4em",
             "name": "Tags",
             "render": [Function],
-            "width": "12%",
+            "width": "10em",
           },
           Object {
             "align": "right",
             "field": "totalAlerts",
+            "minWidth": "4em",
             "name": "Alerts",
             "render": [Function],
-            "width": "70px",
+            "width": "4em",
           },
           Object {
             "align": "right",
             "field": "totalComment",
+            "minWidth": "6em",
             "name": "Comments",
             "render": [Function],
-            "width": "75px",
+            "width": "6em",
           },
           Object {
             "field": "category",
+            "minWidth": "6.5em",
             "name": "Category",
             "render": [Function],
             "sortable": true,
-            "width": "12%",
+            "width": "10em",
           },
           Object {
+            "data-test-subj": "case-table-column-createdAt",
             "field": "createdAt",
+            "minWidth": "9em",
             "name": "Created on",
             "render": [Function],
             "sortable": true,
-            "width": "15%",
+            "width": "9em",
           },
           Object {
+            "data-test-subj": "case-table-column-updatedAt",
             "field": "updatedAt",
+            "minWidth": "9em",
             "name": "Updated on",
             "render": [Function],
             "sortable": true,
-            "width": "15%",
+            "width": "9em",
           },
           Object {
+            "data-test-subj": "case-table-column-closedAt",
             "field": "closedAt",
+            "minWidth": "9.5em",
             "name": "Closed on",
             "render": [Function],
             "sortable": true,
-            "width": "10%",
+            "width": "9.5em",
           },
           Object {
             "name": "External incident",
             "render": [Function],
-            "width": "10%",
+            "width": "8.5em",
           },
           Object {
+            "className": "eui-textNoWrap",
             "field": "status",
+            "minWidth": "6.5em",
             "name": "Status",
             "render": [Function],
             "sortable": true,
-            "width": "100px",
+            "width": "6.5em",
           },
           Object {
+            "className": "eui-textNoWrap",
             "field": "severity",
+            "minWidth": "6em",
             "name": "Severity",
             "render": [Function],
             "sortable": true,
-            "width": "90px",
+            "width": "6em",
           },
           Object {
             "align": "right",
+            "minWidth": "4.5em",
             "name": "Actions",
             "render": [Function],
-            "width": "100px",
+            "width": "4.5em",
           },
         ],
         "isLoadingColumns": false,
@@ -183,82 +199,96 @@ describe('useCasesColumns ', () => {
         "columns": Array [
           Object {
             "field": "title",
+            "minWidth": "16em",
             "name": "Name",
             "render": [Function],
             "sortable": true,
-            "width": "17%",
           },
           Object {
             "field": "assignees",
+            "minWidth": "2em",
             "name": "Assignees",
             "render": [Function],
-            "width": "10%",
+            "width": "6em",
           },
           Object {
             "field": "tags",
+            "minWidth": "4em",
             "name": "Tags",
             "render": [Function],
-            "width": "12%",
+            "width": "10em",
           },
           Object {
             "align": "right",
             "field": "totalAlerts",
+            "minWidth": "4em",
             "name": "Alerts",
             "render": [Function],
-            "width": "70px",
+            "width": "4em",
           },
           Object {
             "align": "right",
             "field": "totalComment",
+            "minWidth": "6em",
             "name": "Comments",
             "render": [Function],
-            "width": "75px",
+            "width": "6em",
           },
           Object {
             "field": "category",
+            "minWidth": "6.5em",
             "name": "Category",
             "render": [Function],
             "sortable": true,
-            "width": "12%",
+            "width": "10em",
           },
           Object {
+            "data-test-subj": "case-table-column-createdAt",
             "field": "createdAt",
+            "minWidth": "9em",
             "name": "Created on",
             "render": [Function],
             "sortable": true,
-            "width": "15%",
+            "width": "9em",
           },
           Object {
+            "data-test-subj": "case-table-column-updatedAt",
             "field": "updatedAt",
+            "minWidth": "9em",
             "name": "Updated on",
             "render": [Function],
             "sortable": true,
-            "width": "15%",
+            "width": "9em",
           },
           Object {
             "name": "External incident",
             "render": [Function],
-            "width": "10%",
+            "width": "8.5em",
           },
           Object {
+            "className": "eui-textNoWrap",
             "field": "status",
+            "minWidth": "6.5em",
             "name": "Status",
             "render": [Function],
             "sortable": true,
-            "width": "100px",
+            "width": "6.5em",
           },
           Object {
+            "className": "eui-textNoWrap",
             "field": "severity",
+            "minWidth": "6em",
             "name": "Severity",
             "render": [Function],
             "sortable": true,
-            "width": "90px",
+            "width": "6em",
           },
           Object {
             "align": "right",
+            "minWidth": "4.5em",
             "name": "Actions",
             "render": [Function],
-            "width": "100px",
+            "width": "4.5em",
           },
         ],
         "isLoadingColumns": false,
@@ -284,36 +314,50 @@ describe('useCasesColumns ', () => {
         "columns": Array [
           Object {
             "field": "title",
+            "minWidth": "16em",
             "name": "Name",
             "render": [Function],
             "sortable": true,
-            "width": "55%",
           },
           Object {
             "field": "category",
+            "minWidth": "6.5em",
             "name": "Category",
             "render": [Function],
             "sortable": true,
-            "width": "12%",
+            "width": "10em",
           },
           Object {
+            "data-test-subj": "case-table-column-createdAt",
             "field": "createdAt",
+            "minWidth": "9em",
             "name": "Created on",
             "render": [Function],
             "sortable": true,
-            "width": "15%",
+            "width": "9em",
           },
           Object {
+            "className": "eui-textNoWrap",
+            "field": "status",
+            "minWidth": "6.5em",
+            "name": "Status",
+            "render": [Function],
+            "sortable": true,
+            "width": "6.5em",
+          },
+          Object {
+            "className": "eui-textNoWrap",
             "field": "severity",
+            "minWidth": "6em",
             "name": "Severity",
             "render": [Function],
             "sortable": true,
-            "width": "90px",
+            "width": "6em",
           },
           Object {
             "align": "right",
             "render": [Function],
-            "width": "120px",
+            "width": "8em",
           },
         ],
         "isLoadingColumns": false,
@@ -335,36 +379,50 @@ describe('useCasesColumns ', () => {
         "columns": Array [
           Object {
             "field": "title",
+            "minWidth": "16em",
             "name": "Name",
             "render": [Function],
             "sortable": true,
-            "width": "55%",
           },
           Object {
             "field": "category",
+            "minWidth": "6.5em",
             "name": "Category",
             "render": [Function],
             "sortable": true,
-            "width": "12%",
+            "width": "10em",
           },
           Object {
+            "data-test-subj": "case-table-column-createdAt",
             "field": "createdAt",
+            "minWidth": "9em",
             "name": "Created on",
             "render": [Function],
             "sortable": true,
-            "width": "15%",
+            "width": "9em",
           },
           Object {
+            "className": "eui-textNoWrap",
+            "field": "status",
+            "minWidth": "6.5em",
+            "name": "Status",
+            "render": [Function],
+            "sortable": true,
+            "width": "6.5em",
+          },
+          Object {
+            "className": "eui-textNoWrap",
             "field": "severity",
+            "minWidth": "6em",
             "name": "Severity",
             "render": [Function],
             "sortable": true,
-            "width": "90px",
+            "width": "6em",
           },
           Object {
             "align": "right",
             "render": [Function],
-            "width": "120px",
+            "width": "8em",
           },
         ],
         "isLoadingColumns": false,
@@ -386,42 +444,139 @@ describe('useCasesColumns ', () => {
         "columns": Array [
           Object {
             "field": "title",
+            "minWidth": "16em",
             "name": "Name",
             "render": [Function],
             "sortable": true,
-            "width": "55%",
           },
           Object {
             "field": "category",
+            "minWidth": "6.5em",
             "name": "Category",
             "render": [Function],
             "sortable": true,
-            "width": "12%",
+            "width": "10em",
           },
           Object {
+            "data-test-subj": "case-table-column-createdAt",
             "field": "createdAt",
+            "minWidth": "9em",
             "name": "Created on",
             "render": [Function],
             "sortable": true,
-            "width": "15%",
+            "width": "9em",
           },
           Object {
+            "className": "eui-textNoWrap",
+            "field": "status",
+            "minWidth": "6.5em",
+            "name": "Status",
+            "render": [Function],
+            "sortable": true,
+            "width": "6.5em",
+          },
+          Object {
+            "className": "eui-textNoWrap",
             "field": "severity",
+            "minWidth": "6em",
             "name": "Severity",
             "render": [Function],
             "sortable": true,
-            "width": "90px",
+            "width": "6em",
           },
           Object {
             "align": "right",
             "render": [Function],
-            "width": "120px",
+            "width": "8em",
           },
         ],
         "isLoadingColumns": false,
         "rowHeader": "title",
       }
     `);
+  });
+
+  it('keeps the selector action column for closed status filtering', async () => {
+    const { result } = renderHook(
+      () =>
+        useCasesColumns({
+          ...useCasesColumnsProps,
+          isSelectorView: true,
+          filterStatus: [CaseStatuses.closed],
+        }),
+      {
+        wrapper: TestProviders,
+      }
+    );
+
+    const assignActionColumn = result.current.columns[result.current.columns.length - 1];
+    expect(assignActionColumn).toMatchInlineSnapshot(`
+      Object {
+        "align": "right",
+        "render": [Function],
+        "width": "8em",
+      }
+    `);
+  });
+
+  it('disables the select button and shows a tooltip when the case is already attached', async () => {
+    const theCase = useGetCasesMockState.data.cases[0];
+    const { result } = renderHook(
+      () =>
+        useCasesColumns({
+          ...useCasesColumnsProps,
+          isSelectorView: true,
+          disabledCases: new Set([theCase.id]),
+        }),
+      {
+        wrapper: TestProviders,
+      }
+    );
+
+    const assignActionColumn = result.current.columns[
+      result.current.columns.length - 1
+    ] as unknown as {
+      render: (theCase: (typeof useGetCasesMockState.data.cases)[number]) => JSX.Element;
+    };
+
+    renderWithTestingProviders(assignActionColumn.render(theCase));
+
+    const button = screen.getByTestId(`cases-table-row-select-${theCase.id}`);
+    expect(button).toBeDisabled();
+    expect(button).toHaveTextContent('Added');
+
+    // EuiToolTip renders its content lazily on hover; the disabled button is
+    // wrapped in a span so the tooltip anchor still receives the pointer event.
+    fireEvent.mouseOver(screen.getByTestId(`cases-table-row-select-tooltip-${theCase.id}`));
+    expect(await screen.findByText('This item is already added to this case')).toBeInTheDocument();
+  });
+
+  it('shows an enabled select button without a tooltip when the case is not attached', async () => {
+    const theCase = useGetCasesMockState.data.cases[0];
+    const { result } = renderHook(
+      () =>
+        useCasesColumns({
+          ...useCasesColumnsProps,
+          isSelectorView: true,
+          disabledCases: new Set<string>(),
+        }),
+      {
+        wrapper: TestProviders,
+      }
+    );
+
+    const assignActionColumn = result.current.columns[
+      result.current.columns.length - 1
+    ] as unknown as {
+      render: (theCase: (typeof useGetCasesMockState.data.cases)[number]) => JSX.Element;
+    };
+
+    renderWithTestingProviders(assignActionColumn.render(theCase));
+
+    const button = screen.getByTestId(`cases-table-row-select-${theCase.id}`);
+    expect(button).toBeEnabled();
+    expect(button).toHaveTextContent('Select');
+    expect(screen.queryByText('This item is already added to this case')).not.toBeInTheDocument();
   });
 
   it('does not shows the actions if the user does not have the right permissions', async () => {
@@ -434,70 +589,82 @@ describe('useCasesColumns ', () => {
         "columns": Array [
           Object {
             "field": "title",
+            "minWidth": "16em",
             "name": "Name",
             "render": [Function],
             "sortable": true,
-            "width": "17%",
           },
           Object {
             "field": "tags",
+            "minWidth": "4em",
             "name": "Tags",
             "render": [Function],
-            "width": "12%",
+            "width": "10em",
           },
           Object {
             "align": "right",
             "field": "totalAlerts",
+            "minWidth": "4em",
             "name": "Alerts",
             "render": [Function],
-            "width": "70px",
+            "width": "4em",
           },
           Object {
             "align": "right",
             "field": "totalComment",
+            "minWidth": "6em",
             "name": "Comments",
             "render": [Function],
-            "width": "75px",
+            "width": "6em",
           },
           Object {
             "field": "category",
+            "minWidth": "6.5em",
             "name": "Category",
             "render": [Function],
             "sortable": true,
-            "width": "12%",
+            "width": "10em",
           },
           Object {
+            "data-test-subj": "case-table-column-createdAt",
             "field": "createdAt",
+            "minWidth": "9em",
             "name": "Created on",
             "render": [Function],
             "sortable": true,
-            "width": "15%",
+            "width": "9em",
           },
           Object {
+            "data-test-subj": "case-table-column-updatedAt",
             "field": "updatedAt",
+            "minWidth": "9em",
             "name": "Updated on",
             "render": [Function],
             "sortable": true,
-            "width": "15%",
+            "width": "9em",
           },
           Object {
             "name": "External incident",
             "render": [Function],
-            "width": "10%",
+            "width": "8.5em",
           },
           Object {
+            "className": "eui-textNoWrap",
             "field": "status",
+            "minWidth": "6.5em",
             "name": "Status",
             "render": [Function],
             "sortable": true,
-            "width": "100px",
+            "width": "6.5em",
           },
           Object {
+            "className": "eui-textNoWrap",
             "field": "severity",
+            "minWidth": "6em",
             "name": "Severity",
             "render": [Function],
             "sortable": true,
-            "width": "90px",
+            "width": "6em",
           },
         ],
         "isLoadingColumns": false,
@@ -544,82 +711,97 @@ describe('useCasesColumns ', () => {
         "columns": Array [
           Object {
             "field": "title",
+            "minWidth": "16em",
             "name": "Name",
             "render": [Function],
             "sortable": true,
-            "width": "17%",
           },
           Object {
             "field": "tags",
+            "minWidth": "4em",
             "name": "Tags",
             "render": [Function],
-            "width": "12%",
+            "width": "10em",
           },
           Object {
             "align": "right",
             "field": "totalAlerts",
+            "minWidth": "4em",
             "name": "Alerts",
             "render": [Function],
-            "width": "70px",
+            "width": "4em",
           },
           Object {
             "align": "right",
             "field": "totalComment",
+            "minWidth": "6em",
             "name": "Comments",
             "render": [Function],
-            "width": "75px",
+            "width": "6em",
           },
           Object {
             "field": "category",
+            "minWidth": "6.5em",
             "name": "Category",
             "render": [Function],
             "sortable": true,
-            "width": "12%",
+            "width": "10em",
           },
           Object {
+            "data-test-subj": "case-table-column-createdAt",
             "field": "createdAt",
+            "minWidth": "9em",
             "name": "Created on",
             "render": [Function],
             "sortable": true,
-            "width": "15%",
+            "width": "9em",
           },
           Object {
+            "data-test-subj": "case-table-column-updatedAt",
             "field": "updatedAt",
+            "minWidth": "9em",
             "name": "Updated on",
             "render": [Function],
             "sortable": true,
-            "width": "15%",
+            "width": "9em",
           },
           Object {
             "name": "External incident",
             "render": [Function],
-            "width": "10%",
+            "width": "8.5em",
           },
           Object {
+            "className": "eui-textNoWrap",
             "field": "status",
+            "minWidth": "6.5em",
             "name": "Status",
             "render": [Function],
             "sortable": true,
-            "width": "100px",
+            "width": "6.5em",
           },
           Object {
+            "className": "eui-textNoWrap",
             "field": "severity",
+            "minWidth": "6em",
             "name": "Severity",
             "render": [Function],
             "sortable": true,
-            "width": "90px",
+            "width": "6em",
           },
           Object {
             "data-test-subj": "text-custom-field-column",
+            "maxWidth": "18em",
+            "minWidth": "6em",
             "name": "Text Label",
             "render": [Function],
-            "width": "250px",
           },
           Object {
+            "align": "center",
             "data-test-subj": "toggle-custom-field-column",
+            "maxWidth": "7em",
+            "minWidth": "2.5em",
             "name": "Toggle Label",
             "render": [Function],
-            "width": "100px",
           },
         ],
         "isLoadingColumns": false,

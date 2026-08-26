@@ -190,7 +190,7 @@ describe('ServiceCard', () => {
       await userEvent.click(moreActionsButton);
 
       // Find the button within the popover that has the "Disable service" text
-      const disableMenuItem = await screen.findByRole('button', { name: /disable service/i });
+      const disableMenuItem = await screen.findByRole('menuitem', { name: /disable service/i });
       await userEvent.click(disableMenuItem);
 
       expect(onDisable).toHaveBeenCalledTimes(1);
@@ -198,6 +198,31 @@ describe('ServiceCard', () => {
       // Popover should close after clicking
       await waitFor(() => {
         expect(screen.queryByText(/disable service/i)).not.toBeInTheDocument();
+      });
+    });
+
+    it('should call onRotateApiKey when Rotate API key is clicked in popover', async () => {
+      const onRotateApiKey = jest.fn();
+      renderWithIntl(
+        <ServiceCard
+          {...defaultProps}
+          enabled={true}
+          serviceUrl="https://example.com"
+          onRotateApiKey={onRotateApiKey}
+        />
+      );
+
+      const moreActionsButton = screen.getByRole('button', { name: /more actions/i });
+      await userEvent.click(moreActionsButton);
+
+      const rotateMenuItem = await screen.findByRole('menuitem', { name: /rotate api key/i });
+      await userEvent.click(rotateMenuItem);
+
+      expect(onRotateApiKey).toHaveBeenCalledTimes(1);
+
+      // Popover should close after clicking
+      await waitFor(() => {
+        expect(screen.queryByText(/rotate api key/i)).not.toBeInTheDocument();
       });
     });
 

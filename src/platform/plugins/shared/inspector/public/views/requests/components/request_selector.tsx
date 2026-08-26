@@ -9,7 +9,6 @@
 
 import React, { Component } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
@@ -32,12 +31,6 @@ interface RequestSelectorProps {
 }
 
 export class RequestSelector extends Component<RequestSelectorProps> {
-  static propTypes = {
-    requests: PropTypes.array.isRequired,
-    selectedRequest: PropTypes.object.isRequired,
-    onRequestChanged: PropTypes.func,
-  };
-
   handleSelected = (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
     const selectedOption = this.props.requests.find(
       (request) => request.id === selectedOptions[0].value

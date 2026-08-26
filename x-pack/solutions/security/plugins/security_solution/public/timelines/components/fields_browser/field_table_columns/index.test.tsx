@@ -53,14 +53,18 @@ describe('useFieldTableColumns', () => {
       onHide: mockOnHide,
     });
 
-    const { getAllByRole, getByTestId } = render(
-      <EuiInMemoryTable items={[fieldItem]} columns={columns} />,
+    const { container, getByTestId } = render(
+      <EuiInMemoryTable
+        tableCaption="Fields browser table"
+        items={[fieldItem]}
+        columns={columns}
+      />,
       {
         wrapper: TestProviders,
       }
     );
 
-    expect(getAllByRole('columnheader').length).toBe(5);
+    expect(container.querySelectorAll('[role="columnheader"]').length).toBe(5);
     expect(getByTestId('actionEditRuntimeField')).toBeInTheDocument();
     expect(getByTestId('actionDeleteRuntimeField')).toBeInTheDocument();
   });
@@ -73,14 +77,18 @@ describe('useFieldTableColumns', () => {
       onHide: mockOnHide,
     });
 
-    const { getAllByRole, queryByTestId } = render(
-      <EuiInMemoryTable items={[fieldItem]} columns={columns} />,
+    const { container, queryByTestId } = render(
+      <EuiInMemoryTable
+        tableCaption="Fields browser table"
+        items={[fieldItem]}
+        columns={columns}
+      />,
       {
         wrapper: TestProviders,
       }
     );
 
-    expect(getAllByRole('columnheader').length).toBe(4);
+    expect(container.querySelectorAll('[role="columnheader"]').length).toBe(4);
     expect(queryByTestId('actionEditRuntimeField')).toBeNull();
     expect(queryByTestId('actionDeleteRuntimeField')).toBeNull();
   });
@@ -93,14 +101,18 @@ describe('useFieldTableColumns', () => {
       onHide: mockOnHide,
     });
 
-    const { getAllByRole, queryByTestId } = render(
-      <EuiInMemoryTable items={[{ ...fieldItem, isRuntime: false }]} columns={columns} />,
+    const { container, queryByTestId } = render(
+      <EuiInMemoryTable
+        tableCaption="Fields browser table"
+        items={[{ ...fieldItem, isRuntime: false }]}
+        columns={columns}
+      />,
       {
         wrapper: TestProviders,
       }
     );
 
-    expect(getAllByRole('columnheader').length).toBe(5);
+    expect(container.querySelectorAll('[role="columnheader"]').length).toBe(5);
     expect(queryByTestId('actionEditRuntimeField')).toBeNull();
     expect(queryByTestId('actionDeleteRuntimeField')).toBeNull();
   });
@@ -113,9 +125,16 @@ describe('useFieldTableColumns', () => {
       onHide: mockOnHide,
     });
 
-    const { getByTestId } = render(<EuiInMemoryTable items={[fieldItem]} columns={columns} />, {
-      wrapper: TestProviders,
-    });
+    const { getByTestId } = render(
+      <EuiInMemoryTable
+        tableCaption="Fields browser table"
+        items={[fieldItem]}
+        columns={columns}
+      />,
+      {
+        wrapper: TestProviders,
+      }
+    );
 
     getByTestId('actionEditRuntimeField').click();
     expect(mockOnHide).toHaveBeenCalledTimes(1);
@@ -131,9 +150,16 @@ describe('useFieldTableColumns', () => {
       onHide: mockOnHide,
     });
 
-    const { getByTestId } = render(<EuiInMemoryTable items={[fieldItem]} columns={columns} />, {
-      wrapper: TestProviders,
-    });
+    const { getByTestId } = render(
+      <EuiInMemoryTable
+        tableCaption="Fields browser table"
+        items={[fieldItem]}
+        columns={columns}
+      />,
+      {
+        wrapper: TestProviders,
+      }
+    );
 
     getByTestId('actionEditRuntimeField').click();
     expect(mockOpenFieldEditor).toHaveBeenCalledTimes(1);
@@ -148,9 +174,16 @@ describe('useFieldTableColumns', () => {
       onHide: mockOnHide,
     });
 
-    const { getByTestId } = render(<EuiInMemoryTable items={[fieldItem]} columns={columns} />, {
-      wrapper: TestProviders,
-    });
+    const { getByTestId } = render(
+      <EuiInMemoryTable
+        tableCaption="Fields browser table"
+        items={[fieldItem]}
+        columns={columns}
+      />,
+      {
+        wrapper: TestProviders,
+      }
+    );
 
     getByTestId('actionDeleteRuntimeField').click();
     expect(mockOpenDeleteFieldModal).toHaveBeenCalledTimes(1);

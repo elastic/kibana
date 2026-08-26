@@ -6,7 +6,7 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { TIMELINE_EXPORT_URL } from '../../../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import type { ConfigType } from '../../../../../config';
@@ -49,8 +49,10 @@ export const exportTimelinesRoute = (router: SecuritySolutionPluginRouter, confi
           const frameworkRequest = await buildFrameworkRequest(context, request);
 
           const exportSizeLimit = config.maxTimelineImportExportSize;
+          const normalizedIds =
+            request.body?.ids != null ? [...new Set(request.body.ids)] : request.body?.ids;
 
-          if (request.body?.ids != null && request.body.ids.length > exportSizeLimit) {
+          if (normalizedIds != null && normalizedIds.length > exportSizeLimit) {
             return siemResponse.error({
               statusCode: 400,
               body: `Can't export more than ${exportSizeLimit} timelines`,
@@ -59,7 +61,7 @@ export const exportTimelinesRoute = (router: SecuritySolutionPluginRouter, confi
 
           const responseBody = await getExportTimelineByObjectIds({
             frameworkRequest,
-            ids: request.body?.ids,
+            ids: normalizedIds,
           });
 
           return response.ok({

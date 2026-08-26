@@ -27,7 +27,7 @@ export const deleteAlertsForQuery = async (
   context: AlertDeletionContext,
   indices: string[],
   query: QueryDslQueryContainer,
-  abortController: AbortController
+  signal: AbortSignal
 ) => {
   const esClient = await context.elasticsearchClientPromise;
 
@@ -59,8 +59,9 @@ export const deleteAlertsForQuery = async (
           _source: [ALERT_RULE_UUID, SPACE_IDS, ALERT_INSTANCE_ID, TIMESTAMP],
           ...(searchAfter ? { search_after: searchAfter } : {}),
         },
-        { signal: abortController.signal }
+        { signal }
       );
+      pitId = searchResponse.pit_id ?? pitId;
 
       if (searchResponse.hits.hits.length === 0) {
         searchAfter = null;
@@ -75,7 +76,7 @@ export const deleteAlertsForQuery = async (
         }
         const bulkDeleteResponse = await esClient.bulk(
           { operations: bulkDeleteRequest },
-          { signal: abortController.signal }
+          { signal }
         );
 
         // iterate and audit log each alert by ID

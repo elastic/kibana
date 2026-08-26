@@ -7,6 +7,7 @@
 
 import {
   DocumentationProduct,
+  getSecurityLabsArtifactName,
   parseArtifactName,
   parseSecurityLabsArtifactName,
   type ProductName,
@@ -16,13 +17,21 @@ import Path from 'path';
 import { URL } from 'url';
 import { parseString } from 'xml2js';
 import { resolveLocalArtifactsPath } from '../utils/local_artifacts';
+import { getFetchOptions } from '../../proxy';
+import { LATEST_PRODUCT_VERSION } from '../../../../common/consts';
+type ArtifactAvailableVersions = Record<ProductName | 'openapi', string[]>;
 
-type ArtifactAvailableVersions = Record<ProductName, string[]>;
+const normalizeArtifactKey = (artifactName: string): string => {
+  const withExtension = artifactName.endsWith('.zip') ? artifactName : `${artifactName}.zip`;
+  return withExtension.toLowerCase();
+};
 
 export const fetchArtifactVersions = async ({
   artifactRepositoryUrl,
+  artifactRepositoryProxyUrl,
 }: {
   artifactRepositoryUrl: string;
+  artifactRepositoryProxyUrl?: string;
 }): Promise<ArtifactAvailableVersions> => {
   const parsedUrl = new URL(artifactRepositoryUrl);
 
@@ -31,7 +40,9 @@ export const fetchArtifactVersions = async ({
     const file = await fetchLocalFile(parsedUrl);
     xml = file.toString();
   } else {
-    const res = await fetch(`${artifactRepositoryUrl}?max-keys=1000`);
+    const fetchUrl = `${artifactRepositoryUrl}?max-keys=1000`;
+    const fetchOptions = getFetchOptions(fetchUrl, artifactRepositoryProxyUrl);
+    const res = await fetch(fetchUrl, fetchOptions as RequestInit);
     xml = await res.text();
   }
 
@@ -46,19 +57,28 @@ export const fetchArtifactVersions = async ({
         throw new Error('bucket content is truncated, cannot retrieve all versions');
       }
 
-      const allowedProductNames: ProductName[] = Object.values(DocumentationProduct);
+      const allowedProductNames: (ProductName | 'openapi')[] = Object.values(DocumentationProduct);
+      allowedProductNames.push('openapi');
 
       const record: ArtifactAvailableVersions = {} as ArtifactAvailableVersions;
       allowedProductNames.forEach((product) => {
-        record[product] = [];
+        record[product as ProductName] = [];
       });
 
       result.ListBucketResult.Contents?.forEach((contentEntry) => {
         const artifactName = contentEntry.Key[0];
+        const dateModified = contentEntry.LastModified?.[0];
         const parsed = parseArtifactName(artifactName);
         if (parsed) {
           const { productName, productVersion } = parsed;
-          record[productName]!.push(productVersion);
+          record[productName]!.push(
+            // If productVersion is `latest`, we want to keep track of the date the artifact was uploaded to bucket
+            // as that's our versioning for latest updated
+            productVersion === LATEST_PRODUCT_VERSION
+              ? // so "latest" ->  "latest-2026-01-27T23:25:54.727Z"
+                `${productVersion}-${dateModified}`
+              : productVersion
+          );
         }
       });
 
@@ -86,17 +106,25 @@ interface ListBucketResponse {
   ListBucketResult: {
     Name?: string[];
     IsTruncated?: string[];
-    Contents?: Array<{ Key: string[] }>;
+    Contents?: Array<{ Key: string[]; LastModified: string[] }>;
   };
 }
 
 /**
- * Fetches available Security Labs artifact versions from the repository.
+ * Fetches available Security Labs artifact versions for a specific inference ID.
+ *
+ * Only versions whose exact downloadable filename matches
+ * `getSecurityLabsArtifactName({ version, inferenceId })` are returned, so a newer
+ * Jina-only publish cannot poison ELSER "latest" selection (and vice versa).
  */
 export const fetchSecurityLabsVersions = async ({
   artifactRepositoryUrl,
+  artifactRepositoryProxyUrl,
+  inferenceId,
 }: {
   artifactRepositoryUrl: string;
+  artifactRepositoryProxyUrl?: string;
+  inferenceId: string;
 }): Promise<string[]> => {
   const parsedUrl = new URL(artifactRepositoryUrl);
 
@@ -105,7 +133,9 @@ export const fetchSecurityLabsVersions = async ({
     const file = await fetchLocalFile(parsedUrl);
     xml = file.toString();
   } else {
-    const res = await fetch(`${artifactRepositoryUrl}?max-keys=1000`);
+    const fetchUrl = `${artifactRepositoryUrl}?max-keys=1000`;
+    const fetchOptions = getFetchOptions(fetchUrl, artifactRepositoryProxyUrl);
+    const res = await fetch(fetchUrl, fetchOptions as RequestInit);
     xml = await res.text();
   }
 
@@ -125,7 +155,15 @@ export const fetchSecurityLabsVersions = async ({
       result.ListBucketResult.Contents?.forEach((contentEntry) => {
         const artifactName = contentEntry.Key[0];
         const parsed = parseSecurityLabsArtifactName(artifactName);
-        if (parsed) {
+        if (!parsed) {
+          return;
+        }
+
+        const expectedName = getSecurityLabsArtifactName({
+          version: parsed.version,
+          inferenceId,
+        });
+        if (normalizeArtifactKey(artifactName) === expectedName) {
           versions.push(parsed.version);
         }
       });

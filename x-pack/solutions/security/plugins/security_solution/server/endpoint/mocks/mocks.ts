@@ -17,9 +17,9 @@ import {
   savedObjectsClientMock,
   savedObjectsServiceMock,
   securityServiceMock,
-  coreMock,
 } from '@kbn/core/server/mocks';
 import type {
+  IClusterClient,
   IRouter,
   KibanaRequest,
   RequestHandler,
@@ -50,7 +50,10 @@ import type { PluginStartContract as ActionPluginStartContract } from '@kbn/acti
 import type { Mutable } from 'utility-types';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
+import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { ScriptsLibraryMock } from '../services/scripts_library/mocks';
 import { referenceDataMocks } from '../lib/reference_data/mocks';
 import { createTelemetryConfigProviderMock } from '../../../common/telemetry_config/mocks';
@@ -105,15 +108,25 @@ export const createMockEndpointAppContext = (
 export const createMockEndpointAppContextService = (
   mockManifestManager?: ManifestManager
 ): jest.Mocked<EndpointAppContextService> => {
-  const { esClient, fleetStartServices, savedObjectsServiceStart, exceptionListsClient } =
-    createMockEndpointAppContextServiceStartContract();
+  const {
+    esClient,
+    dataStart,
+    fleetStartServices,
+    savedObjectsServiceStart,
+    exceptionListsClient,
+  } = createMockEndpointAppContextServiceStartContract();
   const fleetServices = createEndpointFleetServicesFactoryMock({
     fleetDependencies: fleetStartServices,
   }).service.asInternalUser();
   const endpointMetadataService = new EndpointMetadataService(
-    esClient,
-    savedObjectsClientMock.create(),
-    fleetServices
+    {
+      getInternalEsClient: () => esClient,
+      getInternalFleetServices: () => fleetServices,
+      savedObjects: { createInternalScopedSoClient: () => savedObjectsClientMock.create() },
+      createLogger: () => loggingSystemMock.create().get(),
+      isCcsEnabled: jest.fn().mockResolvedValue(false),
+    } as unknown as EndpointAppContextService,
+    DEFAULT_SPACE_ID
   );
   const casesClientMock = createCasesClientMock();
   const fleetFromHostFilesClientMock = createFleetFromHostFilesClientMock();
@@ -125,6 +138,14 @@ export const createMockEndpointAppContextService = (
   const licenseServiceMock = createLicenseServiceMock();
   const telemetryServiceMock = analyticsServiceMock.createAnalyticsServiceSetup();
   const scriptsClient = ScriptsLibraryMock.getMockedClient();
+  const isCpsEnabled = jest.fn().mockReturnValue(false);
+  // Hoisted so `asScoped` can delegate to the same mocks the service exposes directly. A test that
+  // overrides one of these changes what the scoped instance answers too, so the two cannot disagree.
+  const getReadEsClient = jest.fn().mockReturnValue(esClient);
+  const getScopedSearchClient = jest.fn((request: KibanaRequest) =>
+    dataStart.search.asScoped(request)
+  );
+  const getActiveSpaceId = jest.fn().mockReturnValue(DEFAULT_SPACE_ID);
 
   return {
     start: jest.fn(),
@@ -146,24 +167,56 @@ export const createMockEndpointAppContextService = (
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     getExceptionListsClient: jest.fn().mockReturnValue(exceptionListsClient!),
     getMessageSigningService: jest.fn().mockReturnValue(messageSigningService),
-    getFleetActionsClient: jest.fn(async (_) => fleetActionsClientMock),
+    getFleetActionsClient: jest.fn(async () => fleetActionsClientMock),
     getTelemetryService: jest.fn().mockReturnValue(telemetryServiceMock),
-    getInternalResponseActionsClient: jest.fn(() => {
+    getInternalResponseActionsClient: jest.fn((_) => {
       return responseActionsClientMock.create();
     }),
     savedObjects: createSavedObjectsClientFactoryMock({ savedObjectsServiceStart }).service,
     isServerless: jest.fn().mockReturnValue(false),
+    isCcsEnabled: jest.fn().mockResolvedValue(false),
+    isCpsEnabled,
+    // Mirrors production: a read with no request identity cannot fan out, whatever the flag says
+    isCpsRead: jest.fn((request?: KibanaRequest) => isCpsEnabled() && request != null),
     getInternalEsClient: jest.fn().mockReturnValue(esClient),
-    getActiveSpace: jest.fn(async () => ({
+    // Matches the flag-off branch; fan-out tests override this along with `isCpsEnabled`
+    getReadEsClient,
+    getScopedSearchClient,
+    asScoped: jest.fn((request: KibanaRequest) => ({
+      isCpsRead: () => isCpsEnabled() && request != null,
+      getEsClient: () => getReadEsClient(request),
+      getSearchClient: () => getScopedSearchClient(request),
+      getSpaceId: () => getActiveSpaceId(request),
+      getSpace: () =>
+        Promise.resolve({ id: DEFAULT_SPACE_ID, name: 'default', disabledFeatures: [] }),
+    })),
+    getActiveSpace: jest.fn(async (_) => ({
       id: DEFAULT_SPACE_ID,
       name: 'default',
       disabledFeatures: [],
     })),
-    getSpaceId: jest.fn().mockReturnValue('default'),
+    getActiveSpaceId,
+    getAccessibleSpaces: jest.fn(async (_) => [
+      {
+        id: DEFAULT_SPACE_ID,
+        name: 'default',
+        disabledFeatures: [],
+      },
+    ]),
     getReferenceDataClient: jest.fn().mockReturnValue(referenceDataMocks.createClient()),
     getServerConfigValue: jest.fn(),
     getScriptsLibraryClient: jest.fn().mockReturnValue(scriptsClient),
-  } as unknown as jest.Mocked<EndpointAppContextService>;
+    getAgentBuilder: jest.fn(),
+    getScopedEndpointArtifactClient: jest.fn(),
+    isEndpointExceptionsPerPolicyEnabled: jest.fn().mockResolvedValue(true),
+  } as Omit<
+    jest.Mocked<EndpointAppContextService>,
+    | 'config'
+    | 'security'
+    | 'fleetStartServices'
+    | 'savedObjectsServiceStart'
+    | 'exceptionListsClient'
+  > as jest.Mocked<EndpointAppContextService>;
 };
 
 /**
@@ -176,7 +229,6 @@ export const createMockEndpointAppContextServiceSetupContract =
       cloud: cloudMock.createSetup(),
       loggerFactory: loggingSystemMock.create(),
       telemetry: analyticsServiceMock.createAnalyticsServiceSetup(),
-      httpServiceSetup: coreMock.createSetup().http,
     };
   };
 
@@ -266,12 +318,19 @@ export const createMockEndpointAppContextServiceStartContract =
       exceptionListsClient: listMock.getExceptionListClient(),
       featureUsageService: createFeatureUsageServiceMock(),
       esClient: esClientMock,
+      clusterClient:
+        elasticsearchServiceMock.createClusterClient() as unknown as DeeplyMockedKeys<IClusterClient>,
+      dataStart:
+        dataPluginMock.createStartContract() as unknown as DeeplyMockedKeys<DataPluginStart>,
+      cpsEnabled: false,
       savedObjectsServiceStart: savedObjectsServiceMock.createStartContract(),
       connectorActions: {
         getUnsecuredActionsClient: jest.fn().mockReturnValue(unsecuredActionsClientMock.create()),
       } as unknown as jest.Mocked<ActionPluginStartContract>,
       telemetryConfigProvider: createTelemetryConfigProviderMock(),
       spacesService,
+      agentBuilder: agentBuilderMocks.createStart(),
+      getExceptionListClient: jest.fn().mockReturnValue(listMock.getExceptionListClient()),
     };
 
     return startContract;

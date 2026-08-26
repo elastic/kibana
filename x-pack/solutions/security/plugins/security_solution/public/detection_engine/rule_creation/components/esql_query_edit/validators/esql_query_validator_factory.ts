@@ -6,20 +6,28 @@
  */
 
 import type { QueryClient } from '@kbn/react-query';
-import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import { parseEsqlQuery } from '@kbn/securitysolution-utils';
+import { isCancelledError } from '@kbn/react-query';
+import { parseEsqlQuery, injectMetadataId } from '@kbn/securitysolution-utils';
 import type { FormData, ValidationError, ValidationFunc } from '../../../../../shared_imports';
 import type { FieldValueQueryBar } from '../../../../rule_creation_ui/components/query_bar_field';
 import { fetchEsqlQueryColumns } from '../../../logic/esql_query_columns';
 import { ESQL_ERROR_CODES } from './error_codes';
 import * as i18n from './translations';
 
+interface AbortControllerRef {
+  current: AbortController | null;
+}
+
 interface EsqlQueryValidatorFactoryParams {
   queryClient: QueryClient;
+  abortControllerRef?: AbortControllerRef;
+  isUnmountedRef?: { current: boolean };
 }
 
 export function esqlQueryValidatorFactory({
   queryClient,
+  abortControllerRef,
+  isUnmountedRef,
 }: EsqlQueryValidatorFactoryParams): ValidationFunc<FormData, string, FieldValueQueryBar> {
   return async (...args) => {
     const [{ value }] = args;
@@ -30,41 +38,50 @@ export function esqlQueryValidatorFactory({
     }
 
     try {
-      const { isEsqlQueryAggregating, hasMetadataOperator, errors } = parseEsqlQuery(esqlQuery);
+      const { errors, isEsqlQueryAggregating } = parseEsqlQuery(esqlQuery);
 
-      // Check if there are any syntax errors
       if (errors.length) {
         return constructSyntaxError(new Error(errors[0].message));
       }
 
-      // non-aggregating query which does not have metadata, is not a valid one
-      if (!isEsqlQueryAggregating && !hasMetadataOperator) {
-        return {
-          code: ESQL_ERROR_CODES.ERR_MISSING_ID_FIELD_FROM_RESULT,
-          message: i18n.ESQL_VALIDATION_MISSING_METADATA_OPERATOR_IN_QUERY_ERROR,
-        };
+      if (isEsqlQueryAggregating) {
+        return;
+      }
+
+      if (isUnmountedRef?.current) return;
+
+      abortControllerRef?.current?.abort();
+      const abortController = new AbortController();
+      if (abortControllerRef) {
+        abortControllerRef.current = abortController;
+      }
+
+      let queryToValidate = esqlQuery;
+      try {
+        queryToValidate = injectMetadataId(esqlQuery);
+      } catch {
+        // injection failed — validate with original query
       }
 
       const columns = await fetchEsqlQueryColumns({
-        esqlQuery,
+        esqlQuery: queryToValidate,
         queryClient,
+        signal: abortController.signal,
       });
 
-      // for non-aggregating query, we want to disable queries w/o _id property returned in response
-      if (!isEsqlQueryAggregating && !hasIdColumn(columns)) {
-        return {
-          code: ESQL_ERROR_CODES.ERR_MISSING_ID_FIELD_FROM_RESULT,
-          message: i18n.ESQL_VALIDATION_MISSING_ID_FIELD_IN_QUERY_ERROR,
-        };
+      const hasIdColumn = columns.some((col) => col.id === '_id');
+      if (!hasIdColumn) {
+        return constructMissingIdFieldWarning();
       }
     } catch (error) {
+      // Ignore errors caused by request cancellation (navigating away or a newer
+      // validation superseding this one). These are not user-facing problems.
+      if (isCancelledError(error) || error?.name === 'AbortError') {
+        return;
+      }
       return constructValidationError(error);
     }
   };
-}
-
-function hasIdColumn(columns: DatatableColumn[]): boolean {
-  return columns.some(({ id }) => '_id' === id);
 }
 
 function constructSyntaxError(error: Error): ValidationError {
@@ -84,5 +101,12 @@ function constructValidationError(error: Error): ValidationError {
       ? i18n.esqlValidationErrorMessage(error.message)
       : i18n.ESQL_VALIDATION_UNKNOWN_ERROR,
     error,
+  };
+}
+
+function constructMissingIdFieldWarning(): ValidationError {
+  return {
+    code: ESQL_ERROR_CODES.MISSING_ID_FIELD,
+    message: i18n.ESQL_MISSING_ID_FIELD_WARNING,
   };
 }

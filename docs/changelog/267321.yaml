@@ -1,0 +1,7 @@
+prs:
+- https://github.com/elastic/kibana/pull/267321
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-05-12
+title: Fix bug where enhanced security flyout was not rendering header, content, and footer when Discover is embedded in a Dashboard

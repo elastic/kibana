@@ -26,26 +26,48 @@ Array [
         }
       />
     </Memo(UserActionContentToolbar)>,
-    "children": <React.Suspense
-      fallback={<EuiLoadingSpinner />}
-    >
-      <UNDEFINED
-        attachmentId="basic-comment-id"
-        caseData={
-          Object {
-            "id": "basic-case-id",
-            "title": "Another horrible breach!!",
+    "children": <AttachmentRenderErrorBoundary>
+      <React.Suspense
+        fallback={<EuiLoadingSpinner />}
+      >
+        <UNDEFINED
+          attachmentId="event-id-123"
+          caseData={
+            Object {
+              "id": "basic-case-id",
+              "title": "Another horrible breach!!",
+            }
           }
-        }
-        foo="bar"
-      />
-    </React.Suspense>,
+          foo="bar"
+          permissions={
+            Object {
+              "all": true,
+              "assign": true,
+              "connectors": true,
+              "create": true,
+              "createComment": true,
+              "delete": true,
+              "manageTemplates": true,
+              "push": true,
+              "read": true,
+              "reopenCase": true,
+              "settings": true,
+              "update": true,
+            }
+          }
+          savedObjectId="basic-comment-id"
+        />
+      </React.Suspense>
+    </AttachmentRenderErrorBoundary>,
     "className": "comment-user-attachment-test",
+    "css": undefined,
     "data-test-subj": "comment-user-test",
     "event": <React.Fragment>
       My event
     </React.Fragment>,
-    "timelineAvatar": "casesApp",
+    "eventColor": undefined,
+    "timelineAvatar": "test-icon",
+    "timelineAvatarAriaLabel": "Test",
     "timestamp": <Memo(UserActionTimestamp)
       createdAt="2020-02-19T23:06:33.798Z"
     />,
@@ -122,26 +144,48 @@ Array [
         }
       />
     </Memo(UserActionContentToolbar)>,
-    "children": <React.Suspense
-      fallback={<EuiLoadingSpinner />}
-    >
-      <UNDEFINED
-        attachmentId="basic-comment-id"
-        caseData={
-          Object {
-            "id": "basic-case-id",
-            "title": "Another horrible breach!!",
+    "children": <AttachmentRenderErrorBoundary>
+      <React.Suspense
+        fallback={<EuiLoadingSpinner />}
+      >
+        <UNDEFINED
+          attachmentId="event-id-123"
+          caseData={
+            Object {
+              "id": "basic-case-id",
+              "title": "Another horrible breach!!",
+            }
           }
-        }
-        foo="bar"
-      />
-    </React.Suspense>,
+          foo="bar"
+          permissions={
+            Object {
+              "all": true,
+              "assign": true,
+              "connectors": true,
+              "create": true,
+              "createComment": true,
+              "delete": true,
+              "manageTemplates": true,
+              "push": true,
+              "read": true,
+              "reopenCase": true,
+              "settings": true,
+              "update": true,
+            }
+          }
+          savedObjectId="basic-comment-id"
+        />
+      </React.Suspense>
+    </AttachmentRenderErrorBoundary>,
     "className": "comment-user-attachment-test",
+    "css": undefined,
     "data-test-subj": "comment-user-test",
     "event": <React.Fragment>
       My event
     </React.Fragment>,
-    "timelineAvatar": "casesApp",
+    "eventColor": undefined,
+    "timelineAvatar": "test-icon",
+    "timelineAvatarAriaLabel": "Test",
     "timestamp": <Memo(UserActionTimestamp)
       createdAt="2020-02-19T23:06:33.798Z"
     />,
@@ -205,26 +249,47 @@ Array [
         registeredAttachmentActions={Array []}
       />
     </Memo(UserActionContentToolbar)>,
-    "children": <React.Suspense
-      fallback={<EuiLoadingSpinner />}
-    >
-      <UNDEFINED
-        attachmentId="basic-comment-id"
-        caseData={
-          Object {
-            "id": "basic-case-id",
-            "title": "Another horrible breach!!",
+    "children": <AttachmentRenderErrorBoundary>
+      <React.Suspense
+        fallback={<EuiLoadingSpinner />}
+      >
+        <UNDEFINED
+          caseData={
+            Object {
+              "id": "basic-case-id",
+              "title": "Another horrible breach!!",
+            }
           }
-        }
-        foo="bar"
-      />
-    </React.Suspense>,
+          foo="bar"
+          permissions={
+            Object {
+              "all": true,
+              "assign": true,
+              "connectors": true,
+              "create": true,
+              "createComment": true,
+              "delete": true,
+              "manageTemplates": true,
+              "push": true,
+              "read": true,
+              "reopenCase": true,
+              "settings": true,
+              "update": true,
+            }
+          }
+          savedObjectId="basic-comment-id"
+        />
+      </React.Suspense>
+    </AttachmentRenderErrorBoundary>,
     "className": "comment-user-attachment-test",
+    "css": undefined,
     "data-test-subj": "comment-user-test",
     "event": <React.Fragment>
       My event
     </React.Fragment>,
-    "timelineAvatar": "casesApp",
+    "eventColor": undefined,
+    "timelineAvatar": "test-icon",
+    "timelineAvatarAriaLabel": "Test",
     "timestamp": <Memo(UserActionTimestamp)
       createdAt="2020-02-19T23:06:33.798Z"
     />,
@@ -278,10 +343,7 @@ Array [
 exports[`createRegisteredAttachmentUserActionBuilder returns an unknown user action if the attachment type is not registered 1`] = `
 Array [
   Object {
-    "children": <EuiCallOut
-      announceOnMount={false}
-      color="danger"
-      iconType="warning"
+    "children": <Memo(AttachmentErrorCallout)
       title="Attachment type is not registered"
     />,
     "className": "comment-user-not-found",

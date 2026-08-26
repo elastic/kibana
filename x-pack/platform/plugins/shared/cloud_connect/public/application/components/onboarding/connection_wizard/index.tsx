@@ -15,8 +15,8 @@ import {
   EuiFlexItem,
   EuiButton,
   EuiFieldText,
-  EuiCallOut,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { useCloudConnectedAppContext } from '../../../app_context';
 import {
   STEP_1_TITLE,
@@ -107,7 +107,7 @@ export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect })
               fill
               href={`${cloudUrl}/registration?onboarding_service_type=ccm${signupParams}`}
               target="_blank"
-              iconType="popout"
+              iconType="external"
               iconSide="right"
               onClick={handleSignUpClick}
               data-test-subj="connectionWizardSignUpButton"
@@ -119,7 +119,7 @@ export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect })
             <EuiButton
               href={`${cloudUrl}/login?redirectTo=${encodedRedirectUrl}`}
               target="_blank"
-              iconType="popout"
+              iconType="external"
               iconSide="right"
               onClick={handleLoginClick}
               data-test-subj="connectionWizardLoginButton"
@@ -179,14 +179,12 @@ export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect })
         {error && (
           <>
             <EuiSpacer size="m" />
-            <EuiCallOut
+            <KbnDangerCallout
+              announceOnMount
               title="Authentication failed"
-              color="danger"
-              iconType="error"
               data-test-subj="connectionWizardError"
-            >
-              <p>{error}</p>
-            </EuiCallOut>
+              text={error}
+            />
           </>
         )}
       </>

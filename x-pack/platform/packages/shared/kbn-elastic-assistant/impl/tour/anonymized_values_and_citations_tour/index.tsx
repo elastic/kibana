@@ -9,6 +9,7 @@ import { EuiTourStep } from '@elastic/eui';
 import React, { useCallback, useEffect, useState } from 'react';
 import { throttle } from 'lodash';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { Conversation } from '../../assistant_context/types';
 import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../const';
 import { anonymizedValuesAndCitationsTourStep1 } from './step_config';
@@ -44,8 +45,11 @@ export const AnonymizedValuesAndCitationsTour: React.FC<Props> = ({ conversation
 
   const [showTour, setShowTour] = useState(false);
 
+  const { notifications } = useKibana().services;
+  const isTourEnabled = notifications?.tours.isEnabled() ?? true;
+
   useEffect(() => {
-    if (showTour || !conversation || tourCompleted) {
+    if (showTour || !conversation || tourCompleted || !isTourEnabled) {
       return;
     }
 
@@ -68,7 +72,7 @@ export const AnonymizedValuesAndCitationsTour: React.FC<Props> = ({ conversation
         clearTimeout(timer);
       };
     }
-  }, [conversation, tourCompleted, showTour, kbTourStorageKey]);
+  }, [conversation, tourCompleted, showTour, kbTourStorageKey, isTourEnabled]);
 
   const finishTour = useCallback(() => {
     setTourCompleted(true);

@@ -17,6 +17,22 @@
         "0"
       ]
     },
+    "data_autocomplete_rules": {
+      "script": {
+        "lang": {
+          "__one_of": [
+            "painless",
+            "expression",
+            "mustache",
+            "java"
+          ]
+        },
+        "options": {
+          "*": ""
+        },
+        "source": ""
+      }
+    },
     "methods": [
       "PUT",
       "POST"
@@ -26,6 +42,7 @@
       "_scripts/{id}/{context}"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-put-script",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-put-script",
     "availability": {
       "stack": true,
       "serverless": true

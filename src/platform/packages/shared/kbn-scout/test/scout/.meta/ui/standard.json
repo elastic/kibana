@@ -1,19 +1,23 @@
 {
-  "lastModified": "2026-01-30T09:09:08.844Z",
-  "sha1": "5d4b92e47f9b4ddfce3618769852aefc5a296489",
+  "sha1": "00842f1b0efbe1a2eb72c71375f2c3fa953089e0",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "c6ec4a747994e21-5b82e5b7ac2b08c",
       "title": "runA11yScan returns violations array (empty for basic accessible markup)",
       "expectedStatus": "passed",
       "tags": [
-        "@svlSecurity",
-        "@ess"
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/ui/tests/axe.spec.ts",
-        "line": 13,
-        "column": 7
+        "line": 16,
+        "column": 10
       }
     },
     {
@@ -21,111 +25,53 @@
       "title": "runA11yScan returns violations related to the CSS \"include\" selector only",
       "expectedStatus": "passed",
       "tags": [
-        "@svlSecurity",
-        "@ess"
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/packages/shared/kbn-scout/test/scout/ui/tests/axe.spec.ts",
-        "line": 38,
+        "line": 35,
         "column": 7
       }
     },
     {
-      "id": "cfef694ab86356f-79526e55b73e4e5",
-      "title": "EUI testing wrapper: EuiCheckBox checkbox",
-      "expectedStatus": "skipped",
+      "id": "da0a20cc4229212-735f7785c6b4e10",
+      "title": "Serverless project should successfully load home page",
+      "expectedStatus": "passed",
       "tags": [
-        "@svlSecurity",
-        "@ess"
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-security_essentials",
+        "@cloud-serverless-security_essentials",
+        "@local-serverless-security_ease",
+        "@cloud-serverless-security_ease",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
-        "file": "src/platform/packages/shared/kbn-scout/test/scout/ui/tests/eui_wrappers/check_box.spec.ts",
-        "line": 20,
-        "column": 7
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/ui/tests/sanity_check/home_serverless.spec.ts",
+        "line": 23,
+        "column": 68
       }
     },
     {
-      "id": "017789e0b431bee-3428dc06d0d6721",
-      "title": "EUI testing wrapper: EuiComboBox with multiple selections (pills)",
-      "expectedStatus": "skipped",
+      "id": "31538f49b81b123-000d9e84f929c5d",
+      "title": "Stateful deployment should successfully load home page",
+      "expectedStatus": "passed",
       "tags": [
-        "@svlSecurity",
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "src/platform/packages/shared/kbn-scout/test/scout/ui/tests/eui_wrappers/combo_box.spec.ts",
-        "line": 16,
-        "column": 7
-      }
-    },
-    {
-      "id": "017789e0b431bee-5331af19c193bbb",
-      "title": "EUI testing wrapper: EuiComboBox with the single selection",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@svlSecurity",
-        "@ess"
-      ],
-      "location": {
-        "file": "src/platform/packages/shared/kbn-scout/test/scout/ui/tests/eui_wrappers/combo_box.spec.ts",
-        "line": 61,
-        "column": 7
-      }
-    },
-    {
-      "id": "971167b9a56711d-061f9fed6becd0d",
-      "title": "EUI testing wrapper: EuiDataGrid data grid, run",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@svlSecurity",
-        "@ess"
-      ],
-      "location": {
-        "file": "src/platform/packages/shared/kbn-scout/test/scout/ui/tests/eui_wrappers/data_grid.spec.ts",
-        "line": 16,
-        "column": 7
-      }
-    },
-    {
-      "id": "185afa2a6726770-da531fcc62a90e7",
-      "title": "EUI testing wrapper: EuiFieldText fieldText",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@svlSecurity",
-        "@ess"
-      ],
-      "location": {
-        "file": "src/platform/packages/shared/kbn-scout/test/scout/ui/tests/eui_wrappers/field_text.spec.ts",
-        "line": 16,
-        "column": 7
-      }
-    },
-    {
-      "id": "61a2eae02548a18-ecfb93690a45e0e",
-      "title": "EUI testing wrapper: EuiSelectable selectable with search field",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@svlSecurity",
-        "@ess"
-      ],
-      "location": {
-        "file": "src/platform/packages/shared/kbn-scout/test/scout/ui/tests/eui_wrappers/selectable.spec.ts",
-        "line": 16,
-        "column": 7
-      }
-    },
-    {
-      "id": "eb199ae3cbbe1c6-2dd52577680db76",
-      "title": "EUI testing wrapper: EuiToast toast",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@svlSecurity",
-        "@ess"
-      ],
-      "location": {
-        "file": "src/platform/packages/shared/kbn-scout/test/scout/ui/tests/eui_wrappers/toast.spec.ts",
-        "line": 16,
-        "column": 7
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/ui/tests/sanity_check/home_stateful.spec.ts",
+        "line": 18,
+        "column": 9
       }
     }
   ]

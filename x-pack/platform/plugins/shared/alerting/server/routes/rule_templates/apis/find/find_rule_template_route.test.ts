@@ -26,6 +26,7 @@ describe('findInternalRuleTemplatesRoute', () => {
   const mockedTemplate1: RuleTemplate = {
     id: '1',
     name: 'My rule template 1',
+    description: 'My rule template description 1',
     ruleTypeId: 'test.rule.type',
     schedule: { interval: '10s' },
     params: {
@@ -37,6 +38,7 @@ describe('findInternalRuleTemplatesRoute', () => {
   const mockedTemplate2: RuleTemplate = {
     id: '2',
     name: 'My rule template 2',
+    description: 'My rule template description 2',
     ruleTypeId: 'test.rule.type',
     schedule: { interval: '5m' },
     params: {
@@ -96,6 +98,7 @@ describe('findInternalRuleTemplatesRoute', () => {
           {
             id: '1',
             name: 'My rule template 1',
+            description: 'My rule template description 1',
             rule_type_id: 'test.rule.type',
             schedule: { interval: '10s' },
             params: { bar: true },
@@ -104,6 +107,7 @@ describe('findInternalRuleTemplatesRoute', () => {
           {
             id: '2',
             name: 'My rule template 2',
+            description: 'My rule template description 2',
             rule_type_id: 'test.rule.type',
             schedule: { interval: '5m' },
             params: { baz: 123 },

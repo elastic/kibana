@@ -9,7 +9,10 @@
     "@kbn/core",
     "@kbn/core-plugins-browser",
     "@kbn/developer-toolbar",
-    "@kbn/core-chrome-layout-components",
+    "@kbn/core-chrome-layout",
     "@kbn/config-schema",
+    "@kbn/core-chrome-browser-internal-types",
+    "@kbn/core-theme-browser-internal-types",
+    "@kbn/design-tools",
   ]
 }

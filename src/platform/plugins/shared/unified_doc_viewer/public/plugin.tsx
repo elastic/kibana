@@ -10,7 +10,7 @@
 import React from 'react';
 import type { CoreSetup, Plugin } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
+import { DocViewsRegistry, registerDocViewerAnalyticsEvents } from '@kbn/unified-doc-viewer';
 import { EuiDelayRender, EuiSkeletonText } from '@elastic/eui';
 import { createGetterSetter, Storage } from '@kbn/kibana-utils-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -20,6 +20,7 @@ import { dynamic } from '@kbn/shared-ux-utility';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
+import type { ApmSharedPluginStart } from '@kbn/apm-shared/public';
 import type { UnifiedDocViewerServices } from './types';
 
 export const [getUnifiedDocViewerServices, setUnifiedDocViewerServices] =
@@ -48,6 +49,7 @@ export interface UnifiedDocViewerStartDeps {
   fieldsMetadata: FieldsMetadataPublicStart;
   share: SharePluginStart;
   discoverShared: DiscoverSharedPublicStart;
+  apmShared: ApmSharedPluginStart;
 }
 
 export class UnifiedDocViewerPublicPlugin
@@ -56,6 +58,8 @@ export class UnifiedDocViewerPublicPlugin
   private docViewsRegistry = new DocViewsRegistry();
 
   public setup(core: CoreSetup<UnifiedDocViewerStartDeps, UnifiedDocViewerStart>) {
+    registerDocViewerAnalyticsEvents(core.analytics);
+
     this.docViewsRegistry.add({
       id: 'doc_view_table',
       title: i18n.translate('unifiedDocViewer.docViews.table.tableTitle', {
@@ -73,7 +77,14 @@ export class UnifiedDocViewerPublicPlugin
         defaultMessage: 'JSON',
       }),
       order: 20,
-      render: ({ hit, dataView, textBasedHits, decreaseAvailableHeightBy }) => {
+      render: ({
+        hit,
+        dataView,
+        textBasedHits,
+        decreaseAvailableHeightBy,
+        initialState,
+        onInitialStateChange,
+      }) => {
         return (
           <LazySourceViewer
             index={hit.raw._index}
@@ -85,6 +96,8 @@ export class UnifiedDocViewerPublicPlugin
             esqlHit={Array.isArray(textBasedHits) ? hit : undefined}
             decreaseAvailableHeightBy={decreaseAvailableHeightBy}
             onRefresh={() => {}}
+            initialState={initialState}
+            onInitialStateChange={onInitialStateChange}
           />
         );
       },
@@ -101,11 +114,12 @@ export class UnifiedDocViewerPublicPlugin
       uiSettings,
       notifications: { toasts },
     } = core;
-    const { data, fieldFormats, fieldsMetadata, share, discoverShared } = deps;
+    const { data, fieldFormats, fieldsMetadata, share, discoverShared, apmShared } = deps;
     const storage = new Storage(localStorage);
     const unifiedDocViewer = {
       registry: this.docViewsRegistry,
     };
+
     const services = {
       analytics,
       data,
@@ -118,6 +132,7 @@ export class UnifiedDocViewerPublicPlugin
       share,
       core,
       discoverShared,
+      apmShared,
     };
     setUnifiedDocViewerServices(services);
     return unifiedDocViewer;

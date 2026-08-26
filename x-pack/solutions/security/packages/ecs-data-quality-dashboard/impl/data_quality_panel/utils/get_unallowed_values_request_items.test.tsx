@@ -78,77 +78,82 @@ describe('getValidValues', () => {
 
 describe('getUnallowedValueRequestItems', () => {
   test('it returns the expected request items', () => {
-    expect(
-      getUnallowedValueRequestItems({
-        ecsMetadata: EcsFlatTyped,
-        indexName: 'auditbeat-*',
-      })
-    ).toEqual([
-      {
-        indexName: 'auditbeat-*',
-        indexFieldName: 'event.category',
-        allowedValues: expect.arrayContaining([
-          'authentication',
-          'configuration',
-          'database',
-          'driver',
-          'email',
-          'file',
-          'host',
-          'iam',
-          'intrusion_detection',
-          'malware',
-          'network',
-          'package',
-          'process',
-          'registry',
-          'session',
-          'threat',
-          'vulnerability',
-          'web',
-        ]),
-      },
-      {
-        indexName: 'auditbeat-*',
-        indexFieldName: 'event.kind',
-        allowedValues: expect.arrayContaining([
-          'alert',
-          'enrichment',
-          'event',
-          'metric',
-          'state',
-          'pipeline_error',
-          'signal',
-        ]),
-      },
-      {
-        indexName: 'auditbeat-*',
-        indexFieldName: 'event.outcome',
-        allowedValues: expect.arrayContaining(['failure', 'success', 'unknown']),
-      },
-      {
-        indexName: 'auditbeat-*',
-        indexFieldName: 'event.type',
-        allowedValues: expect.arrayContaining([
-          'access',
-          'admin',
-          'allowed',
-          'change',
-          'connection',
-          'creation',
-          'deletion',
-          'denied',
-          'end',
-          'error',
-          'group',
-          'indicator',
-          'info',
-          'installation',
-          'protocol',
-          'start',
-          'user',
-        ]),
-      },
-    ]);
+    const result = getUnallowedValueRequestItems({
+      ecsMetadata: EcsFlatTyped,
+      indexName: 'auditbeat-*',
+    });
+
+    // ECS 9.2.0 added many new fields with allowed_values (entity types, etc.)
+    // We use arrayContaining to verify core fields are present without
+    // hardcoding the exact list which changes with ECS versions
+    expect(result).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          indexName: 'auditbeat-*',
+          indexFieldName: 'event.category',
+          allowedValues: expect.arrayContaining([
+            'authentication',
+            'configuration',
+            'database',
+            'driver',
+            'email',
+            'file',
+            'host',
+            'iam',
+            'intrusion_detection',
+            'malware',
+            'network',
+            'package',
+            'process',
+            'registry',
+            'session',
+            'threat',
+            'vulnerability',
+            'web',
+          ]),
+        }),
+        expect.objectContaining({
+          indexName: 'auditbeat-*',
+          indexFieldName: 'event.kind',
+          allowedValues: expect.arrayContaining([
+            'alert',
+            'enrichment',
+            'event',
+            'metric',
+            'state',
+            'pipeline_error',
+            'signal',
+          ]),
+        }),
+        expect.objectContaining({
+          indexName: 'auditbeat-*',
+          indexFieldName: 'event.outcome',
+          allowedValues: expect.arrayContaining(['failure', 'success', 'unknown']),
+        }),
+        expect.objectContaining({
+          indexName: 'auditbeat-*',
+          indexFieldName: 'event.type',
+          allowedValues: expect.arrayContaining([
+            'access',
+            'admin',
+            'allowed',
+            'change',
+            'connection',
+            'creation',
+            'deletion',
+            'denied',
+            'end',
+            'error',
+            'group',
+            'indicator',
+            'info',
+            'installation',
+            'protocol',
+            'start',
+            'user',
+          ]),
+        }),
+      ])
+    );
   });
 });

@@ -14,13 +14,12 @@ export class OnboardingHomePage {
   private readonly useCaseKubernetes: Locator;
   readonly useCaseCloud: Locator;
 
-  private readonly otelKubernetesQuickStartCard: Locator;
-  private readonly kubernetesQuickStartCard: Locator;
   private readonly autoDetectElasticAgent: Locator;
   private readonly otelHostCard: Locator;
   readonly awsCollectionCard: Locator;
   readonly firehoseQuickstartCard: Locator;
   readonly cloudforwarderQuickstartCard: Locator;
+  readonly introducingAIAgentModalContinueBtn: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -37,18 +36,15 @@ export class OnboardingHomePage {
       .getByTestId('observabilityOnboardingUseCaseCard-cloud')
       .getByRole('radio');
 
-    this.otelKubernetesQuickStartCard = this.page.getByTestId('integration-card:otel-kubernetes');
-
-    this.kubernetesQuickStartCard = this.page.getByTestId(
-      'integration-card:kubernetes-quick-start'
-    );
-
     this.autoDetectElasticAgent = this.page.getByTestId('integration-card:auto-detect-logs');
     this.otelHostCard = this.page.getByTestId('integration-card:otel-logs');
     this.awsCollectionCard = this.page.getByTestId('integration-card:aws-logs-virtual');
     this.firehoseQuickstartCard = this.page.getByTestId('integration-card:firehose-quick-start');
     this.cloudforwarderQuickstartCard = this.page.getByTestId(
       'integration-card:cloudforwarder-quick-start'
+    );
+    this.introducingAIAgentModalContinueBtn = this.page.getByTestId(
+      'agentBuilderAnnouncementContinueButton'
     );
   }
 
@@ -58,21 +54,30 @@ export class OnboardingHomePage {
 
   public async selectKubernetesUseCase() {
     await this.useCaseKubernetes.click();
+    await this.page.waitForURL(/\/kubernetes(\?|$|#)/);
   }
 
   public async selectAutoDetectWithElasticAgent() {
     await this.autoDetectElasticAgent.click();
   }
 
-  public async selectKubernetesQuickstart() {
-    await this.kubernetesQuickStartCard.click();
-  }
-
-  public async selectOtelKubernetesQuickstart() {
-    await this.otelKubernetesQuickStartCard.click();
+  public async gotoKubernetesElasticAgentFlow() {
+    await this.page.goto(
+      `${process.env.KIBANA_BASE_URL}/app/observabilityOnboarding/kubernetes/elastic-agent`
+    );
   }
 
   public async selectOtelHostQuickstart() {
     await this.otelHostCard.click();
+  }
+
+  public async maybeClickIntroducingAIAgentModalContinueBtn() {
+    await this.page.addLocatorHandler(
+      this.introducingAIAgentModalContinueBtn,
+      async (btn) => {
+        await btn.click();
+      },
+      { times: 1 }
+    );
   }
 }

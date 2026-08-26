@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { getWidgetComponent } from './registry';
 import { WidgetType } from './types';
-import { addMeta, getMeta } from '../schema_connector_metadata';
+import { getMeta, addMeta } from '../schema_connector_metadata';
 import { TextWidget } from './components/text_widget';
 import { PasswordWidget } from './components/password_widget';
 import { HiddenWidget } from './components/hidden_widget';
@@ -74,6 +74,14 @@ describe('Widget Registry', () => {
     it('should prioritize hidden: true over sensitive: true', () => {
       const schema = z.string();
       addMeta(schema, { sensitive: true, hidden: true });
+      const component = getWidgetComponent(schema);
+
+      expect(component).toBe(HiddenWidget);
+    });
+
+    it('should prioritize hidden: true over an explicit widget value', () => {
+      const schema = z.url();
+      addMeta(schema, { widget: WidgetType.Text, hidden: true });
       const component = getWidgetComponent(schema);
 
       expect(component).toBe(HiddenWidget);

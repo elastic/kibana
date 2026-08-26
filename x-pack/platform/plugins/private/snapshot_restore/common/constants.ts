@@ -56,6 +56,12 @@ export const APP_REQUIRED_CLUSTER_PRIVILEGES = [
   'cluster:admin/snapshot',
   'cluster:admin/repository',
 ];
+/**
+ * Privilege required to update the default repository, which is stored in cluster settings.
+ * This is intentionally not part of `APP_REQUIRED_CLUSTER_PRIVILEGES` so the repositories UI
+ * can remain accessible even when users can't change the default.
+ */
+export const APP_SET_DEFAULT_REPOSITORY_CLUSTER_PRIVILEGE = 'cluster:admin/settings/update';
 export const APP_RESTORE_INDEX_PRIVILEGES = ['monitor'];
 export const APP_SLM_CLUSTER_PRIVILEGES = ['manage_slm', 'cluster:monitor/state'];
 

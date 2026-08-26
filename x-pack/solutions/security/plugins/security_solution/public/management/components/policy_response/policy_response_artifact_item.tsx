@@ -95,7 +95,8 @@ export const PolicyResponseArtifactItem = memo(({ artifact }: PolicyResponseArti
                 <EuiIcon
                   size="m"
                   color="primary"
-                  type="copyClipboard"
+                  type="copy"
+                  aria-hidden={true}
                   onClick={copy}
                   data-test-subj="endpointPolicyResponseArtifactCopyButton"
                 />

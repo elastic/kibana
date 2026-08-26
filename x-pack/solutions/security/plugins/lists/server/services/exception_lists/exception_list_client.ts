@@ -33,6 +33,7 @@ import type {
 } from '../extension_points';
 
 import type {
+  BulkDeleteExceptionListItemsOptions,
   ClosePointInTimeOptions,
   ConstructorOptions,
   CreateEndpointListItemOptions,
@@ -100,6 +101,7 @@ import { findValueListExceptionListItemsPointInTimeFinder } from './find_value_l
 import { findExceptionListItemPointInTimeFinder } from './find_exception_list_item_point_in_time_finder';
 import { duplicateExceptionListAndItems } from './duplicate_exception_list';
 import { updateOverwriteExceptionListItem } from './update_overwrite_exception_list_item';
+import { bulkDeleteExceptionListItems } from './bulk_delete_exception_list_items';
 
 /**
  * Class for use for exceptions that are with trusted applications or
@@ -450,6 +452,7 @@ export class ExceptionListClient {
    * Create an exception list container
    * @param options
    * @param options.description a description of the exception list
+   * @param options.osTypes item os types to apply
    * @param options.immutable True if it's a immutable list, otherwise false
    * @param options.listId the "list_id" of the exception list
    * @param options.meta Optional meta data to add to the exception list
@@ -462,6 +465,7 @@ export class ExceptionListClient {
    */
   public createExceptionList = async ({
     description,
+    osTypes,
     immutable,
     listId,
     meta,
@@ -479,6 +483,7 @@ export class ExceptionListClient {
       meta,
       name,
       namespaceType,
+      osTypes,
       savedObjectsClient,
       tags,
       type,
@@ -829,6 +834,33 @@ export class ExceptionListClient {
   };
 
   /**
+   * Bulk delete exception list items by an `id` array
+   * @param options
+   * @param options.ids the array of ids of exception list items to delete
+   * @param options.namespaceType saved object namespace (single | agnostic)
+   */
+  public bulkDeleteExceptionListItems = async ({
+    ids,
+    namespaceType,
+  }: BulkDeleteExceptionListItemsOptions): Promise<void> => {
+    const { savedObjectsClient } = this;
+
+    if (this.enableServerExtensionPoints) {
+      // todo: this is not ideal, items will be checked one-by-one. we'd need an `exceptionsListPreBulkDeleteItems`
+      // callback, but then that also needs a bulkGet function in exceptionListClient, which we don't have yet.
+      for (const id of ids) {
+        await this.serverExtensionsClient.pipeRun(
+          'exceptionsListPreDeleteItem',
+          { id, itemId: undefined, namespaceType },
+          this.getServerExtensionCallbackContext()
+        );
+      }
+    }
+
+    return bulkDeleteExceptionListItems({ ids, namespaceType, savedObjectsClient });
+  };
+
+  /**
    * This is the same as "deleteExceptionListItem" except it applies specifically to the endpoint list.
    * Either id or itemId has to be defined to delete but not both is required. If both are provided, the id
    * is preferred.
@@ -1165,18 +1197,21 @@ export class ExceptionListClient {
       ...readStream,
     ]);
 
+    let shouldListApiPerformOverwrite = overwrite;
     if (this.enableServerExtensionPoints) {
-      await this.serverExtensionsClient.pipeRun(
+      const result = await this.serverExtensionsClient.pipeRun(
         'exceptionsListPreImport',
-        parsedObjects,
+        { data: parsedObjects, overwrite },
         this.getServerExtensionCallbackContext()
       );
+
+      shouldListApiPerformOverwrite = result.overwrite;
     }
 
     return importExceptions({
       exceptions: parsedObjects,
       generateNewListId,
-      overwrite,
+      overwrite: shouldListApiPerformOverwrite,
       savedObjectsClient,
       user,
     });
@@ -1200,18 +1235,21 @@ export class ExceptionListClient {
     // validation of import and sorting of lists and items
     const parsedObjects = exceptionsChecksFromArray(exceptionsToImport, maxExceptionsImportSize);
 
+    let shouldListApiPerformOverwrite = overwrite;
     if (this.enableServerExtensionPoints) {
-      await this.serverExtensionsClient.pipeRun(
+      const result = await this.serverExtensionsClient.pipeRun(
         'exceptionsListPreImport',
-        parsedObjects,
+        { data: parsedObjects, overwrite },
         this.getServerExtensionCallbackContext()
       );
+
+      shouldListApiPerformOverwrite = result.overwrite;
     }
 
     return importExceptions({
       exceptions: parsedObjects,
       generateNewListId: false,
-      overwrite,
+      overwrite: shouldListApiPerformOverwrite,
       savedObjectsClient,
       user,
     });

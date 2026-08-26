@@ -7,9 +7,15 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import * as t from 'io-ts';
+import { z } from '@kbn/zod/v4';
 import Boom from '@hapi/boom';
 import { termQuery } from '@kbn/observability-plugin/server';
 import type { estypes } from '@elastic/elasticsearch';
+import {
+  isNoShardsAvailableError,
+  throwHasDataSearchError,
+} from '../../lib/handle_has_data_search_error';
+import { resolveProbe } from './resolve_has_data_probes';
 import type { ElasticAgentVersionInfo } from '../../../common/types';
 import { getFallbackESUrl } from '../../lib/get_fallback_urls';
 import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
@@ -19,6 +25,7 @@ import { createShipperApiKey } from '../../lib/api_key/create_shipper_api_key';
 import { getAgentVersionInfo } from '../../lib/get_agent_version';
 import { createManagedOtlpServiceApiKey } from '../../lib/api_key/create_managed_otlp_service_api_key';
 import { getManagedOtlpServiceUrl } from '../../lib/get_managed_otlp_service_url';
+import { IS_MANAGED_OTLP_SERVICE_ENABLED } from '../../../common/feature_flags';
 
 export interface CreateKubernetesOnboardingFlowRouteResponse {
   apiKeyEncoded: string;
@@ -30,6 +37,8 @@ export interface CreateKubernetesOnboardingFlowRouteResponse {
 
 export interface HasKubernetesDataRouteResponse {
   hasData: boolean;
+  hasLogs?: boolean;
+  hasMetrics?: boolean;
 }
 
 const createKubernetesOnboardingFlowRoute = createObservabilityOnboardingServerRoute({
@@ -45,9 +54,10 @@ const createKubernetesOnboardingFlowRoute = createObservabilityOnboardingServerR
     },
   },
   async handler(resources): Promise<CreateKubernetesOnboardingFlowRouteResponse> {
-    const { context, request, params, plugins, services, kibanaVersion, config } = resources;
+    const { context, request, plugins, services, kibanaVersion, config, params } = resources;
     const {
       elasticsearch: { client },
+      featureFlags,
     } = await context.core;
 
     const hasPrivileges = await hasLogMonitoringPrivileges(client.asCurrentUser, true);
@@ -70,23 +80,26 @@ const createKubernetesOnboardingFlowRoute = createObservabilityOnboardingServerR
     }
 
     const packageClient = fleetPluginStart.packageService.asScoped(request);
+    const managedOtlpServiceUrl = getManagedOtlpServiceUrl(plugins);
+    const isManagedOtlpServiceAvailable =
+      config.serverless.enabled ||
+      ((await featureFlags.getBooleanValue(IS_MANAGED_OTLP_SERVICE_ENABLED, false)) &&
+        Boolean(managedOtlpServiceUrl));
+
     const apiKeyPromise =
-      config.serverless.enabled && params.body.pkgName === 'kubernetes_otel'
+      params.body.pkgName === 'kubernetes'
+        ? createShipperApiKey(client.asCurrentUser, 'kubernetes_onboarding', true)
+        : isManagedOtlpServiceAvailable
         ? createManagedOtlpServiceApiKey(client.asCurrentUser, `ingest-otel-k8s`)
-        : createShipperApiKey(
-            client.asCurrentUser,
-            params.body.pkgName === 'kubernetes_otel' ? 'otel-kubernetes' : 'kubernetes',
-            true
-          );
+        : createShipperApiKey(client.asCurrentUser, 'otel-kubernetes', true);
 
     const [{ encoded: apiKeyEncoded }, elasticAgentVersionInfo] = await Promise.all([
       apiKeyPromise,
       getAgentVersionInfo(fleetPluginStart, kibanaVersion),
       // System package is always required
       packageClient.ensureInstalledPackage({ pkgName: 'system' }),
-      // Kubernetes package is required for both classic kubernetes and otel
+      // The EA flow uses this package directly; EDOT stack values also reference its assets.
       packageClient.ensureInstalledPackage({ pkgName: 'kubernetes' }),
-      // Kubernetes otel package is required only for otel
       params.body.pkgName === 'kubernetes_otel'
         ? packageClient.ensureInstalledPackage({ pkgName: 'kubernetes_otel' })
         : undefined,
@@ -108,9 +121,9 @@ const createKubernetesOnboardingFlowRoute = createObservabilityOnboardingServerR
 
 const hasKubernetesDataRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'GET /internal/observability_onboarding/kubernetes/{onboardingId}/has-data',
-  params: t.type({
-    path: t.type({
-      onboardingId: t.string,
+  params: z.object({
+    path: z.object({
+      onboardingId: z.string().max(36),
     }),
   }),
   security: {
@@ -124,25 +137,65 @@ const hasKubernetesDataRoute = createObservabilityOnboardingServerRoute({
     const { elasticsearch } = await resources.context.core;
 
     try {
-      const result = await elasticsearch.client.asCurrentUser.search({
-        index: ['logs-*', 'metrics-*'],
+      const commonSearchParams = {
         ignore_unavailable: true,
         allow_partial_search_results: true,
-        size: 0,
+        size: 0 as const,
         terminate_after: 1,
-        query: {
-          bool: {
-            filter: termQuery('fields.onboarding_id', onboardingId),
-          },
+      };
+
+      // Classic data streams: use indexed onboarding ID fields (fast inverted-index lookups).
+      const indexedQuery: estypes.QueryDslQueryContainer = {
+        bool: {
+          filter: [
+            {
+              bool: {
+                should: [
+                  ...termQuery('fields.onboarding_id', onboardingId),
+                  ...termQuery('resource.attributes.onboarding.id', onboardingId),
+                  ...termQuery('labels.onboarding_id', onboardingId),
+                ],
+                minimum_should_match: 1,
+              },
+            },
+          ],
         },
-      });
-      const { value } = result.hits.total as estypes.SearchTotalHits;
+      };
+
+      const searches: Array<Promise<estypes.SearchResponse>> = [
+        elasticsearch.client.asCurrentUser.search({
+          index: ['logs-*'],
+          ...commonSearchParams,
+          query: indexedQuery,
+        }),
+        elasticsearch.client.asCurrentUser.search({
+          index: ['metrics-*'],
+          ...commonSearchParams,
+          query: indexedQuery,
+        }),
+      ];
+
+      const results = await Promise.allSettled(searches);
+      const [logsResult, metricsResult] = results;
+
+      const hasLogs = resolveProbe(logsResult);
+      const hasMetrics = resolveProbe(metricsResult);
 
       return {
-        hasData: value > 0,
+        hasData: hasLogs || hasMetrics,
+        hasLogs,
+        hasMetrics,
       };
     } catch (error) {
-      throw Boom.internal(`Elasticsearch responses with an error. ${error.message}`);
+      if (isNoShardsAvailableError(error)) {
+        return {
+          hasData: false,
+          hasLogs: false,
+          hasMetrics: false,
+        };
+      }
+
+      throwHasDataSearchError(error);
     }
   },
 });

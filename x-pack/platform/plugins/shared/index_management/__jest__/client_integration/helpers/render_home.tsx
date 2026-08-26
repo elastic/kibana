@@ -9,7 +9,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import type { HttpSetup } from '@kbn/core/public';
-import { Provider } from 'react-redux';
+import { Provider } from 'react-redux-v7';
 import { merge } from 'lodash';
 
 import { AppWithoutRouter } from '../../../public/application/app';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { z } from '@kbn/zod';
+import type { z } from '@kbn/zod/v4';
 import type { Assign } from 'utility-types';
 import type { ChatCompleteOptions, Message } from '../chat_complete';
 import type {
@@ -23,7 +23,7 @@ type PromptChatCompleteOptions = Omit<ChatCompleteOptions, 'messages' | 'system'
  */
 export interface PromptOptions<TPrompt extends Prompt = Prompt> extends PromptChatCompleteOptions {
   prompt: TPrompt;
-  input: z.input<TPrompt['input']>;
+  input: z.output<TPrompt['input']>;
   prevMessages?: Message[];
 }
 

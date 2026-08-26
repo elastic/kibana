@@ -115,6 +115,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.waitUntilSearchingHasFinished();
     });
 
+    afterEach(async function () {
+      await discover.resetQueryMode();
+    });
+
     it('should show histogram by default', async () => {
       await checkHistogramVis(defaultTimespan, defaultTotalCount);
 

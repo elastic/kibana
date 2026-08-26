@@ -1,0 +1,127 @@
+get:
+  summary: Compute an SLO instance summary at a point in time
+  operationId: getSnapshotOp
+  x-state: 'Generally available; added in 9.6.0'
+  description: >
+    Compute the summary of an SLO at a given point in time.
+    When `instanceId` is provided, returns that instance.
+    When `instanceId` is omitted or set to `'*'`, returns all matching instances (up to 1000).
+    The endpoint is synchronous and returns results directly.
+    You must have the `read` privileges for the **SLOs** feature in the
+    **Observability** section of the Kibana feature privileges.
+  tags:
+    - slo
+  parameters:
+    - $ref: ../components/headers/kbn_xsrf.yaml
+    - $ref: ../components/parameters/space_id.yaml
+    - $ref: ../components/parameters/slo_id.yaml
+    - name: at
+      in: query
+      description: The point in time at which to compute the SLO instance summary (ISO 8601 date-time)
+      required: true
+      schema:
+        type: string
+        format: date-time
+        example: '2025-01-12T10:00:00.000Z'
+    - name: instanceId
+      in: query
+      description: >
+        The SLO instance ID.
+        Omit this parameter or set it to `'*'` to return all instances for the SLO (up to 1000).
+        Set a specific value (for example `host.name:web-01`) to return that instance only.
+      required: false
+      schema:
+        type: string
+        example: '*'
+  responses:
+    '200':
+      description: Successful response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/snapshot_response.yaml'
+          examples:
+            getSnapshotResponse:
+              summary: Snapshot result for a healthy SLO instance
+              value:
+                at: '2025-01-12T10:00:00.000Z'
+                results:
+                  - id: 8853df00-ae2e-11ed-90af-09bb6422b258
+                    instanceId: '*'
+                    summary:
+                      status: HEALTHY
+                      sliValue: 0.9976
+                      errorBudget:
+                        initial: 0.01
+                        consumed: 0.24
+                        remaining: 0.76
+                      good: 9976
+                      total: 10000
+            getSnapshotResponseViolated:
+              summary: Snapshot result for a violated SLO instance
+              value:
+                at: '2025-01-12T10:00:00.000Z'
+                results:
+                  - id: 8853df00-ae2e-11ed-90af-09bb6422b258
+                    instanceId: 'host.name:web-01'
+                    summary:
+                      status: VIOLATED
+                      sliValue: 0.95
+                      errorBudget:
+                        initial: 0.01
+                        consumed: 5.0
+                        remaining: -4.0
+                      good: 9500
+                      total: 10000
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/400_response.yaml'
+          examples:
+            badRequestExample:
+              summary: Bad request
+              value:
+                statusCode: 400
+                error: Bad Request
+                message: "Invalid value 'foo' supplied to: at"
+    '401':
+      description: Unauthorized response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/401_response.yaml'
+          examples:
+            unauthorizedExample:
+              summary: Unauthorized
+              value:
+                statusCode: 401
+                error: Unauthorized
+                message: "security_exception: unable to authenticate user for REST request [/api/observability/slos]"
+    '403':
+      description: Forbidden response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/403_response.yaml'
+          examples:
+            forbiddenExample:
+              summary: Forbidden
+              value:
+                statusCode: 403
+                error: Forbidden
+                message: "security_exception: action [slo_read] is unauthorized for user"
+    '404':
+      description: Not found response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/404_response.yaml'
+          examples:
+            notFoundExample:
+              summary: Not found
+              value:
+                statusCode: 404
+                error: Not Found
+                message: 'SLO [8853df00-ae2e-11ed-90af-09bb6422b258] not found'

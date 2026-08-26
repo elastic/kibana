@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import { some } from 'lodash';
-import { API_VERSIONS } from '@kbn/osquery-plugin/common/constants';
-import type { UsePacksResponse } from '@kbn/osquery-plugin/public/packs/use_packs';
-import { request } from './common';
+import { recurse } from 'cypress-recurse';
 import { closeModalIfVisible, closeToastIfVisible } from './integrations';
-import { cleanupPack } from './api_fixtures';
+import { navigateTo } from './navigation';
 
 export const preparePack = (packName: string) => {
   cy.contains('Packs').click();
@@ -18,6 +15,45 @@ export const preparePack = (packName: string) => {
   cy.getBySel('tablePagination-50-rows').click();
   const createdPack = cy.contains(packName);
   createdPack.click();
+};
+
+/**
+ * The read-only "Pack details" page was removed. The per-query scheduled
+ * results (docs counts, "View in Lens"/"View in Discover" actions) that used to
+ * live there now surface on the scheduled-execution details page, reached from
+ * the History tab. This polls History until the scheduled execution for the
+ * given pack is indexed, then opens its details page.
+ */
+export const openScheduledPackExecutionDetails = (packName: string) => {
+  navigateTo('/app/osquery');
+
+  // Scheduled results take a while to be indexed by ES, so we reload between
+  // attempts (same approach as the legacy details poll).
+  recurse<number>(
+    () =>
+      cy
+        .getBySel('unifiedHistoryTable')
+        .then(($table) => $table.find('tr:contains("' + packName + '")').length),
+    (rowCount) => rowCount > 0,
+    {
+      timeout: 300000,
+      post: () => {
+        cy.reload();
+      },
+    }
+  );
+
+  // Open the scheduled execution's details page via the row's "Details" action
+  // button (EuiButtonIcon with aria-label "Details" from HistoryDetailsButton
+  // in unified_history_table.tsx).
+  cy.contains('.euiTableRow', packName)
+    .find('[aria-label="Details"]')
+    .first()
+    .should('be.visible')
+    .click();
+
+  // ScheduledExecutionDetailsPage renders the "View history" back button.
+  cy.contains('View history').should('exist');
 };
 
 export const changePackActiveStatus = (packName: string) => {
@@ -30,20 +66,4 @@ export const changePackActiveStatus = (packName: string) => {
   cy.contains(regex).should('exist');
   closeToastIfVisible();
   cy.contains(regex).should('not.exist');
-};
-
-export const cleanupAllPrebuiltPacks = () => {
-  request<UsePacksResponse>({
-    method: 'GET',
-    url: '/api/osquery/packs',
-    headers: {
-      'Elastic-Api-Version': API_VERSIONS.public.v1,
-    },
-  }).then((response) => {
-    const prebuiltPacks = response.body.data?.filter((pack) =>
-      some(pack.references, { type: 'osquery-pack-asset' })
-    );
-
-    return Promise.all(prebuiltPacks?.map((pack) => cleanupPack(pack.saved_object_id)));
-  });
 };

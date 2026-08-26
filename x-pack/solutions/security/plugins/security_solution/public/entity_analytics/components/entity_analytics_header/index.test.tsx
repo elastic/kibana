@@ -31,13 +31,35 @@ jest.mock('../../../common/components/ml/hooks/use_ml_capabilities', () => ({
 
 jest.mock('../../api/hooks/use_risk_score_kpi', () => {
   return {
-    useRiskScoreKpi: () => ({ severityCount: mockSeverityCount }),
+    useRiskScoreKpi: () => ({
+      severityCount: mockSeverityCount,
+      loading: false,
+      inspect: { dsl: [], response: [] },
+      refetch: jest.fn(),
+    }),
+  };
+});
+
+jest.mock('../../api/hooks/use_entity_store_risk_score_kpi', () => ({
+  useEntityStoreRiskScoreKpi: () => ({
+    severityCount: mockSeverityCount,
+    loading: false,
+    inspect: { dsl: [], response: [] },
+    refetch: jest.fn(),
+  }),
+}));
+
+jest.mock('../../../common/lib/kibana', () => {
+  const actual = jest.requireActual('../../../common/lib/kibana');
+  return {
+    ...actual,
+    useUiSetting: jest.fn(() => false),
   };
 });
 
 const mockDispatch = jest.fn();
-jest.mock('react-redux', () => {
-  const original = jest.requireActual('react-redux');
+jest.mock('react-redux-v7', () => {
+  const original = jest.requireActual('react-redux-v7');
   return {
     ...original,
     useDispatch: () => mockDispatch,

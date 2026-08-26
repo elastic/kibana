@@ -8,7 +8,7 @@
  */
 
 import type { OpenAPIV3 } from 'openapi-types';
-import type { DeepPartial } from '@kbn/utility-types';
+import type { DeepPartial, MaybePromise } from '@kbn/utility-types';
 import type { RouteValidator } from './route_validator';
 
 /**
@@ -34,6 +34,32 @@ export type SafeRouteMethod = 'get' | 'options';
  * @public
  */
 export type RouteMethod = SafeRouteMethod | DestructiveRouteMethod;
+
+/**
+ * Code sample metadata rendered by the public API docs.
+ * @public
+ */
+export interface OASCodeSample {
+  lang: string;
+  label?: string;
+  source: string;
+}
+
+/**
+ * Partial OpenAPI operation object merged into generated route docs.
+ * @public
+ */
+export type OASOperationObject = DeepPartial<
+  OpenAPIV3.OperationObject & {
+    'x-codeSamples': OASCodeSample[];
+  }
+>;
+
+/**
+ * Lazily provides route-specific OpenAPI operation metadata.
+ * @public
+ */
+export type OASOperationObjectProvider = () => string | MaybePromise<OASOperationObject>;
 
 /**
  * The set of supported parseable Content-Types
@@ -225,9 +251,13 @@ export type Privileges = Array<Privilege | PrivilegeSet>;
  * Describes the authorization requirements when authorization is enabled.
  *
  * - `requiredPrivileges`: An array of privileges or privilege sets that are required for the route.
+ * - `extendedPrivileges`: A flat list of privilege name strings checked and surfaced in
+ *   `request.authzResult` but not enforced. Missing extended privileges never produce a 403.
+ *   Privilege sets (`anyRequired` / `allRequired`) are not supported here — only string names.
  */
 export interface AuthzEnabled {
   requiredPrivileges: Privileges;
+  extendedPrivileges?: Privilege[];
 }
 
 /**
@@ -242,12 +272,28 @@ export interface AuthzDisabled {
 }
 
 /**
- * Describes the authentication status when authentication is enabled.
- *
- * - `enabled`: A boolean or string indicating the authentication status. Can be `true` (authentication required) or `'optional'` (authentication is optional).
+ * Describes the authentication status when authentication is enabled (default).
  */
 export interface AuthcEnabled {
-  enabled: true | 'optional';
+  enabled: true;
+}
+
+/**
+ * Describes the authentication status when authentication is switched to a minimal mode (only existence of credentials
+ * is checked). Requires an explicit reason explaining why full authentication can be deferred to Elasticsearch.
+ */
+export interface AuthcMinimal {
+  enabled: 'minimal';
+  reason: string;
+}
+
+/**
+ * Describes the authentication status when authentication is optional. Requires an explicit reason explaining why
+ * authentication is optional.
+ */
+export interface AuthcOptional {
+  enabled: 'optional';
+  reason: string;
 }
 
 /**
@@ -262,9 +308,10 @@ export interface AuthcDisabled {
 }
 
 /**
- * Represents the authentication status for a route. It can either be enabled (`AuthcEnabled`) or disabled (`AuthcDisabled`).
+ * Represents the authentication status for a route. It can either be enabled (`AuthcEnabled`), minimal (`AuthcMinimal`),
+ * optional (`AuthcOptional`), or disabled (`AuthcDisabled`).
  */
-export type RouteAuthc = AuthcEnabled | AuthcDisabled;
+export type RouteAuthc = AuthcEnabled | AuthcMinimal | AuthcOptional | AuthcDisabled;
 
 /**
  * Represents the authorization status for a route. It can either be enabled (`AuthzEnabled`) or disabled (`AuthzDisabled`).
@@ -292,19 +339,6 @@ export enum ReservedPrivilegesSet {
  * @public
  */
 export interface RouteConfigOptions<Method extends RouteMethod> {
-  /**
-   * Defines authentication mode for a route:
-   * - true. A user has to have valid credentials to access a resource
-   * - false. A user can access a resource without any credentials.
-   * - 'optional'. A user can access a resource, and will be authenticated if provided credentials are valid.
-   *               Can be useful when we grant access to a resource but want to identify a user if possible.
-   *
-   * Defaults to `true` if an auth mechanism is registered.
-   *
-   * @deprecated Use `security.authc.enabled` instead
-   */
-  authRequired?: boolean | 'optional';
-
   /**
    * Defines xsrf protection requirements for a route:
    * - true. Requires an incoming POST/PUT/DELETE request to contain `kbn-xsrf` header.
@@ -419,9 +453,7 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
    *      },
    *  })
    */
-  oasOperationObject?: () =>
-    | string
-    | DeepPartial<Pick<OpenAPIV3.OperationObject, 'requestBody' | 'responses'>>;
+  oasOperationObject?: OASOperationObjectProvider;
 
   /**
    * Whether this route should be treated as "invisible" and excluded from router
@@ -462,6 +494,13 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
   httpResource?: boolean;
 
   /**
+   * When set to `info`, core emits a slim HTTP response log at info for this
+   * route (`status`, `path`, `http.request.id`). The full access-log record
+   * remains at debug.
+   */
+  httpResponseLogLevel?: 'info';
+
+  /**
    * Based on the the ES API specification (see https://github.com/elastic/elasticsearch-specification)
    * Kibana APIs can also specify some metadata about API availability.
    *
@@ -471,7 +510,7 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
    */
   availability?: {
     /** @default stable */
-    stability?: 'experimental' | 'beta' | 'stable';
+    stability?: 'experimental' | 'stable' | 'tech_preview';
     /**
      * The stack version in which the route was introduced (eg: 8.15.0).
      */

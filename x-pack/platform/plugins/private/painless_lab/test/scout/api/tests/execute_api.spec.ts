@@ -6,12 +6,19 @@
  */
 
 import type { RoleApiCredentials } from '@kbn/scout';
-import { apiTest, expect } from '@kbn/scout';
+import { apiTest, tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import { COMMON_HEADERS, TEST_INPUT } from '../fixtures/constants';
 
 apiTest.describe(
   'POST api/painless_lab/execute',
-  { tag: ['@ess', '@svlSecurity', '@svlOblt'] },
+  {
+    tag: [
+      ...tags.stateful.classic,
+      ...tags.serverless.security.complete,
+      ...tags.serverless.observability.complete,
+    ],
+  },
   () => {
     let adminApiCredentials: RoleApiCredentials;
     apiTest.beforeAll(async ({ requestAuth }) => {
@@ -29,7 +36,7 @@ apiTest.describe(
           responseType: 'json',
           body: TEST_INPUT.script,
         });
-        expect(response.statusCode).toBe(200);
+        expect(response).toHaveStatusCode(200);
         expect(response.body).toStrictEqual({
           result: 'true',
         });
@@ -46,7 +53,7 @@ apiTest.describe(
         body: TEST_INPUT.invalid_script,
       });
 
-      expect(response.statusCode).toBe(200);
+      expect(response).toHaveStatusCode(200);
       expect(response.body.error.reason).toBe('compile error');
     });
   }

@@ -71,6 +71,8 @@ export function getSignature(
       );
   }
 
+  signature = normalizeVerboseSignatures(signature);
+
   // Don't return the signature if it's the same as the type (string, string)
   if (getTypeKind(node).toString() === signature) return undefined;
 
@@ -86,15 +88,68 @@ export function getSignature(
     return undefined;
   }
 
+  // This post-reference-extraction hack catches a *different* verbose `ReactElement` expansion
+  // than {@link signatureNormalizations}. After `extractImportReferences` splits the signature
+  // into reference link segments, the second generic appears as a separate string chunk using
+  // `React.Component` (not `React.JSXElementConstructor`). Both mechanisms are needed until
+  // this legacy hack can be replaced by a pre-extraction normalization rule.
   return referenceLinks.map((link) => {
-    // This is such a terrible hack, but the docs look really terrible with it, and I'm not sure of a better way to solve it.
-    // See for context. This is what the second default generic type of `ReactElement` expands to. Blech!
     if (
       link ===
       ', string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)>'
-      //   ', string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, a'
     ) {
       return '>';
     } else return link;
   });
+}
+
+/**
+ * Signature normalization rules. Each entry maps a verbose expanded generic
+ * default back to the concise form that developers actually write.
+ *
+ * New entries can be added here as more verbose patterns are discovered.
+ */
+const signatureNormalizations: Array<{ pattern: RegExp; replacement: string }> = [
+  // Order matters: `ReactNode` must be collapsed before `ReactElement` because the
+  // `ReactNode` expansion contains a full `ReactElement<any, ...>` that would otherwise
+  // be shortened first, preventing the `ReactNode` pattern from matching.
+
+  // `React.ReactNode` expands to a long union of primitive types, `ReactElement`, `Iterable`,
+  // `ReactPortal`, `null`, and `undefined`. Collapse it back to the alias.
+  // NOTE: This pattern is coupled to `@types/react@18`. If Kibana upgrades to React 19 types
+  // (which adds `bigint` and changes the union shape), this regex must be updated to match.
+  {
+    pattern:
+      /string \| number \| boolean \| React\.ReactElement<any, string \| React\.JSXElementConstructor<any>> \| Iterable<React\.ReactNode> \| React\.ReactPortal \| null \| undefined/g,
+    replacement: 'React.ReactNode',
+  },
+  // `ReactElement` has a second generic default (`string | React.JSXElementConstructor<any>`)
+  // that expands into verbose output; strip it while keeping the first generic.
+  {
+    pattern:
+      /React(?:\.ReactElement|Element)<([^,>]+),\s*string \|\s*React\.JSXElementConstructor<any>>/g,
+    replacement: 'React.ReactElement<$1>',
+  },
+  // `React.ComponentClass<{}, any> | React.FunctionComponent<{}>` is the expansion of
+  // `React.ComponentType<{}>`. Collapse it back.
+  {
+    pattern: /React\.ComponentClass<\{\}, any> \| React\.FunctionComponent<\{\}>/g,
+    replacement: 'React.ComponentType',
+  },
+  // `React.ComponentType<{}>` uses an empty props default; strip it for readability.
+  {
+    pattern: /React\.ComponentType<\{\}>/g,
+    replacement: 'React.ComponentType',
+  },
+];
+
+/**
+ * Applies all {@link signatureNormalizations} to collapse verbose expanded
+ * generic defaults back to their concise aliases.
+ */
+export function normalizeVerboseSignatures(signature: string): string {
+  return signatureNormalizations.reduce(
+    (sig, { pattern, replacement }) => sig.replace(pattern, replacement),
+    signature
+  );
 }

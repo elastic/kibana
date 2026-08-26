@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type * as t from 'io-ts';
+import type { z } from '@kbn/zod/v4';
 import type { ReactNode } from 'react';
 import type { PackagePolicyConfigRecordEntry } from '@kbn/fleet-plugin/common';
 
@@ -21,7 +21,7 @@ export type {
 
 export type PackagePolicyVars = Record<string, PackagePolicyConfigRecordEntry>;
 
-export type SettingValidation = t.Type<any, string, unknown>;
+export type SettingValidation = z.ZodTypeAny;
 
 interface AdvancedSettingRow {
   type: 'advanced_setting';

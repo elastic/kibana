@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useEffect, useRef } from 'react';
+import { i18n } from '@kbn/i18n';
 import type { RouteComponentProps } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
-import { EuiButtonEmpty, EuiPageHeader, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
+import { AppHeader, type AppHeaderTab } from '@kbn/app-header';
 
 import type { Section } from '../../constants';
-import { BASE_PATH } from '../../constants';
-import { useConfig, useCore } from '../../app_context';
+import { BASE_PATH, UIM_REPOSITORY_SET_DEFAULT_PRIVILEGE_MISSING } from '../../constants';
+import { useCanSetDefaultRepository } from '../../services/authorization';
+import { useConfig, useCore, useServices } from '../../app_context';
 import { breadcrumbService, docTitleService } from '../../services/navigation';
 
 import { RepositoryList } from './repository_list';
@@ -34,55 +36,55 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
 }) => {
   const { slm_ui: slmUi } = useConfig();
   const { docLinks } = useCore();
+  const { uiMetricService } = useServices();
+  const canSetDefaultRepository = useCanSetDefaultRepository();
+  const hasReportedMissingSetDefaultPrivilege = useRef(false);
 
-  const tabs: Array<{
-    id: Section;
-    name: React.ReactNode;
-  }> = [
+  const onSectionChange = (newSection: Section) => {
+    history.push(encodeURI(`${BASE_PATH}/${encodeURIComponent(newSection)}`));
+  };
+
+  const tabs: AppHeaderTab[] = [
     {
       id: 'snapshots',
-      name: (
-        <FormattedMessage
-          id="xpack.snapshotRestore.home.snapshotsTabTitle"
-          defaultMessage="Snapshots"
-        />
-      ),
+      label: i18n.translate('xpack.snapshotRestore.home.snapshotsTabTitle', {
+        defaultMessage: 'Snapshots',
+      }),
+      isSelected: section === 'snapshots',
+      onClick: () => onSectionChange('snapshots'),
+      'data-test-subj': 'snapshots_tab',
     },
     {
       id: 'repositories',
-      name: (
-        <FormattedMessage
-          id="xpack.snapshotRestore.home.repositoriesTabTitle"
-          defaultMessage="Repositories"
-        />
-      ),
+      label: i18n.translate('xpack.snapshotRestore.home.repositoriesTabTitle', {
+        defaultMessage: 'Repositories',
+      }),
+      isSelected: section === 'repositories',
+      onClick: () => onSectionChange('repositories'),
+      'data-test-subj': 'repositories_tab',
     },
     {
       id: 'restore_status',
-      name: (
-        <FormattedMessage
-          id="xpack.snapshotRestore.home.restoreTabTitle"
-          defaultMessage="Restore Status"
-        />
-      ),
+      label: i18n.translate('xpack.snapshotRestore.home.restoreTabTitle', {
+        defaultMessage: 'Restore Status',
+      }),
+      isSelected: section === 'restore_status',
+      onClick: () => onSectionChange('restore_status'),
+      'data-test-subj': 'restore_status_tab',
     },
   ];
 
   if (slmUi.enabled) {
     tabs.splice(2, 0, {
       id: 'policies',
-      name: (
-        <FormattedMessage
-          id="xpack.snapshotRestore.home.policiesTabTitle"
-          defaultMessage="Policies"
-        />
-      ),
+      label: i18n.translate('xpack.snapshotRestore.home.policiesTabTitle', {
+        defaultMessage: 'Policies',
+      }),
+      isSelected: section === 'policies',
+      onClick: () => onSectionChange('policies'),
+      'data-test-subj': 'policies_tab',
     });
   }
-
-  const onSectionChange = (newSection: Section) => {
-    history.push(encodeURI(`${BASE_PATH}/${encodeURIComponent(newSection)}`));
-  };
 
   // Set breadcrumb and page title
   useEffect(() => {
@@ -90,44 +92,27 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
     docTitleService.setTitle(section || 'home');
   }, [section]);
 
+  useEffect(() => {
+    if (canSetDefaultRepository || hasReportedMissingSetDefaultPrivilege.current) {
+      return;
+    }
+    uiMetricService.trackUiMetric(UIM_REPOSITORY_SET_DEFAULT_PRIVILEGE_MISSING);
+    hasReportedMissingSetDefaultPrivilege.current = true;
+  }, [canSetDefaultRepository, uiMetricService]);
+
   return (
     <>
-      <EuiPageHeader
-        bottomBorder
-        pageTitle={
-          <span data-test-subj="appTitle">
-            <FormattedMessage
-              id="xpack.snapshotRestore.home.snapshotRestoreTitle"
-              defaultMessage="Snapshot and Restore"
-            />
-          </span>
-        }
-        rightSideItems={[
-          <EuiButtonEmpty
-            href={docLinks.links.snapshotRestore.guide}
-            target="_blank"
-            iconType="question"
-            data-test-subj="documentationLink"
-          >
-            <FormattedMessage
-              id="xpack.snapshotRestore.home.snapshotRestoreDocsLinkText"
-              defaultMessage="Snapshot and Restore docs"
-            />
-          </EuiButtonEmpty>,
-        ]}
-        description={
-          <FormattedMessage
-            id="xpack.snapshotRestore.home.snapshotRestoreDescription"
-            defaultMessage="Use repositories to store and recover backups of your Elasticsearch indices and clusters."
-          />
-        }
-        tabs={tabs.map((tab) => ({
-          onClick: () => onSectionChange(tab.id),
-          isSelected: tab.id === section,
-          key: tab.id,
-          'data-test-subj': tab.id.toLowerCase() + '_tab',
-          label: tab.name,
-        }))}
+      <AppHeader
+        title={i18n.translate('xpack.snapshotRestore.home.snapshotRestoreTitle', {
+          defaultMessage: 'Snapshot and Restore',
+        })}
+        description={i18n.translate('xpack.snapshotRestore.home.snapshotRestoreDescription', {
+          defaultMessage:
+            'Use repositories to store and recover backups of your Elasticsearch indices and clusters.',
+        })}
+        tabs={tabs}
+        docLink={docLinks.links.snapshotRestore.guide}
+        spacing="bleed"
       />
 
       <EuiSpacer size="l" />

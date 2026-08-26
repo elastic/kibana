@@ -17,6 +17,18 @@
         },
         {
           "names": [
+            ".alerts-security.attack.discovery.alerts*",
+            ".adhoc.alerts-security.attack.discovery.alerts*"
+          ],
+          "privileges": [
+            "read",
+            "write",
+            "maintenance",
+            "view_index_metadata"
+          ]
+        },
+        {
+          "names": [
             "apm-*-transaction*",
             "traces-apm*",
             "auditbeat-*",
@@ -47,14 +59,14 @@
           "siemV5": [
             "read"
           ],
-          "securitySolutionRulesV1": [
+          "securitySolutionRulesV2": [
             "read"
           ],
           "securitySolutionAssistant": [
             "all"
           ],
           "securitySolutionAttackDiscovery": [
-            "all"
+            "minimal_all"
           ],
           "securitySolutionCasesV2": [
             "read"
@@ -97,6 +109,18 @@
         },
         {
           "names": [
+            ".alerts-security.attack.discovery.alerts*",
+            ".adhoc.alerts-security.attack.discovery.alerts*"
+          ],
+          "privileges": [
+            "read",
+            "write",
+            "maintenance",
+            "view_index_metadata"
+          ]
+        },
+        {
+          "names": [
             ".lists*",
             ".items*",
             "apm-*-transaction*",
@@ -129,14 +153,14 @@
           "siemV5": [
             "read"
           ],
-          "securitySolutionRulesV1": [
+          "securitySolutionRulesV2": [
             "read"
           ],
           "securitySolutionAssistant": [
             "all"
           ],
           "securitySolutionAttackDiscovery": [
-            "all"
+            "minimal_all"
           ],
           "securitySolutionCasesV2": [
             "read"
@@ -197,6 +221,18 @@
         },
         {
           "names": [
+            ".alerts-security.attack.discovery.alerts*",
+            ".adhoc.alerts-security.attack.discovery.alerts*"
+          ],
+          "privileges": [
+            "read",
+            "write",
+            "maintenance",
+            "view_index_metadata"
+          ]
+        },
+        {
+          "names": [
             ".lists*",
             ".items*"
           ],
@@ -215,6 +251,8 @@
             ".entities.v1.history.*.security_*",
             ".entities.v1.reset*",
             ".entities.v1.updates.security_*",
+            ".entities.v2.*",
+            "entities-latest-*",
             ".entity_analytics.monitoring*"
           ],
           "privileges": [
@@ -244,7 +282,7 @@
             "actions_log_management_all",
             "file_operations_all"
           ],
-          "securitySolutionRulesV1": [
+          "securitySolutionRulesV2": [
             "all"
           ],
           "securitySolutionCasesV2": [
@@ -323,9 +361,10 @@
             ".alerts-security*",
             ".preview.alerts-security*",
             ".internal.preview.alerts-security*",
-            ".adhoc.alerts-security*",
-            ".internal.adhoc.alerts-security*",
-            ".siem-signals-*"
+            ".siem-signals-*",
+            ".alerts-security.attack.discovery.alerts*",
+            ".adhoc.alerts-security.attack.discovery.alerts*",
+            ".internal.adhoc.alerts-security.attack.discovery.alerts*"
           ],
           "privileges": [
             "read",
@@ -358,7 +397,7 @@
             "all",
             "endpoint_exceptions_all"
           ],
-          "securitySolutionRulesV1": [
+          "securitySolutionRulesV2": [
             "all"
           ],
           "securitySolutionAssistant": [
@@ -419,9 +458,10 @@
             ".alerts-security*",
             ".preview.alerts-security*",
             ".internal.preview.alerts-security*",
-            ".adhoc.alerts-security*",
-            ".internal.adhoc.alerts-security*",
-            ".siem-signals-*"
+            ".siem-signals-*",
+            ".alerts-security.attack.discovery.alerts*",
+            ".adhoc.alerts-security.attack.discovery.alerts*",
+            ".internal.adhoc.alerts-security.attack.discovery.alerts*"
           ],
           "privileges": [
             "read",
@@ -453,7 +493,7 @@
             "all",
             "endpoint_exceptions_all"
           ],
-          "securitySolutionRulesV1": [
+          "securitySolutionRulesV2": [
             "all"
           ],
           "securitySolutionAssistant": [
@@ -498,8 +538,9 @@
             ".alerts-security*",
             ".preview.alerts-security*",
             ".internal.preview.alerts-security*",
-            ".adhoc.alerts-security*",
-            ".internal.adhoc.alerts-security*",
+            ".alerts-security.attack.discovery.alerts*",
+            ".adhoc.alerts-security.attack.discovery.alerts*",
+            ".internal.adhoc.alerts-security.attack.discovery.alerts*",
             ".lists*",
             ".items*",
             "apm-*-transaction*",
@@ -542,7 +583,7 @@
             "all",
             "endpoint_exceptions_all"
           ],
-          "securitySolutionRulesV1": [
+          "securitySolutionRulesV2": [
             "all"
           ],
           "securitySolutionAssistant": [
@@ -617,9 +658,10 @@
             ".alerts-security*",
             ".preview.alerts-security*",
             ".internal.preview.alerts-security*",
-            ".adhoc.alerts-security*",
-            ".internal.adhoc.alerts-security*",
-            ".siem-signals-*"
+            ".siem-signals-*",
+            ".alerts-security.attack.discovery.alerts*",
+            ".adhoc.alerts-security.attack.discovery.alerts*",
+            ".internal.adhoc.alerts-security.attack.discovery.alerts*"
           ],
           "privileges": [
             "all"
@@ -646,7 +688,7 @@
             "all",
             "endpoint_exceptions_all"
           ],
-          "securitySolutionRulesV1": [
+          "securitySolutionRulesV2": [
             "all"
           ],
           "securitySolutionAssistant": [

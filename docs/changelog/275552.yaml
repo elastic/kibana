@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/275552
+issues:
+- https://github.com/elastic/kibana/issues/272232
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-07
+areas:
+- Search and data
+title: Fix Fleet package installs blocked by ambiguous saved object conflicts
+description: "Fixes package installs and upgrades that failed permanently with ambiguous saved object conflicts when orphaned multiple-isolated assets accumulated in a namespace."

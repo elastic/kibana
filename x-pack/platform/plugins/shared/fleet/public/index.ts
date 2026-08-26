@@ -55,8 +55,9 @@ export type {
   PackagePolicyCreateExtension,
   PackagePolicyCreateExtensionComponent,
   PackagePolicyCreateExtensionComponentProps,
-  PackagePolicyCreateMultiStepExtension,
-  PackagePolicyCreateMultiStepExtensionComponent,
+  PackagePolicyCreateBottomExtension,
+  PackagePolicyCreateBottomExtensionComponent,
+  PackagePolicyCreateBottomExtensionComponentProps,
   PackagePolicyEditExtension,
   PackagePolicyEditExtensionComponent,
   PackagePolicyEditExtensionComponentProps,
@@ -86,6 +87,10 @@ export type { DynamicPagePathValues } from './constants';
 // This Type export is added to prevent error TS4023
 export type { InputFieldProps } from './applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/package_policy_input_var_field';
 
+// Fleet status — required by PackagePolicyInputVarField when rendered outside Fleet's app
+export { FleetStatusProvider } from './hooks/use_fleet_status';
+export type { FleetStatusProviderProps } from './hooks/use_fleet_status';
+
 export const LazyPackagePolicyInputVarField = lazy(() =>
   import(
     './applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/package_policy_input_var_field'
@@ -104,6 +109,10 @@ export const AvailablePackagesHook = () => {
     './applications/integrations/sections/epm/screens/home/hooks/use_available_packages'
   );
 };
+export const LocalSearchHook = () => {
+  return import('./applications/integrations/hooks/use_local_search');
+};
+export type { UseLocalSearchType } from './applications/integrations/hooks/use_local_search';
 
 export const LazyPackageCard = lazy(() =>
   import('./applications/integrations/sections/epm/components/package_card').then((module) => ({
@@ -114,5 +123,54 @@ export const LazyPackageCard = lazy(() =>
 export { useGetDataStreams } from './hooks/use_request/data_stream';
 export { useGetPackagesQuery, useGetPackageInfoByKeyQuery } from './hooks/use_request/epm';
 export { useGetSettingsQuery } from './hooks/use_request/settings';
+export { sendCreateAgentlessPolicy } from './hooks/use_request/agentless_policy';
+export { sendGetPackageInfoByKey } from './hooks/use_request/epm';
 export { useLink } from './hooks/use_link';
 export { NamespaceComboBox } from './components/namespace_combo_box';
+
+// Cloud Connector Setup - lazy loaded component for external plugins
+export const LazyCloudConnectorSetup = lazy(() =>
+  import('./components/cloud_connector').then((module) => ({
+    default: module.CloudConnectorSetup,
+  }))
+);
+export type { CloudConnectorSetupProps } from './components/cloud_connector';
+export { CLOUD_CONNECTOR_GCP_ASSET_INVENTORY_REUSABLE_MIN_VERSION } from './components/cloud_connector/constants';
+
+// AWS Connect Setup - auth method picker (Identity Federation + Static keys + Temporary keys) for external plugins
+export const LazyAwsConnectSetup = lazy(() =>
+  import('./components/cloud_connector').then((module) => ({
+    default: module.AwsConnectSetup,
+  }))
+);
+export type {
+  AwsConnectSetupProps,
+  AwsAuthType,
+  AwsStaticKeyCredentials,
+  AwsTemporaryKeyCredentials,
+  CloudSetupForCloudConnector,
+} from './components/cloud_connector';
+export {
+  AWS_AUTH_TYPE_SELECTOR_TEST_SUBJ,
+  AWS_AUTH_TYPE_IF_CARD_TEST_SUBJ,
+  AWS_AUTH_TYPE_STATIC_KEYS_CARD_TEST_SUBJ,
+  AWS_AUTH_TYPE_TEMPORARY_KEYS_CARD_TEST_SUBJ,
+} from './components/cloud_connector/aws_connect_setup/test_subjects';
+
+// AWS Static Keys Form — standalone credential form for cross-plugin use
+export const LazyAwsStaticKeysForm = lazy(() =>
+  import('./components/cloud_connector/aws_connect_setup/aws_static_keys_form').then((module) => ({
+    default: module.AwsStaticKeysForm,
+  }))
+);
+export type { AwsStaticKeysFormProps } from './components/cloud_connector/aws_connect_setup/aws_static_keys_form';
+
+// AWS Identity Federation Setup — connector creation/selection for cross-plugin use
+export const LazyAwsIdentityFederationSetup = lazy(() =>
+  import('./components/cloud_connector/aws_connect_setup/aws_identity_federation_setup').then(
+    (module) => ({ default: module.AwsIdentityFederationSetup })
+  )
+);
+export type { AwsIdentityFederationSetupProps } from './components/cloud_connector/aws_connect_setup/aws_identity_federation_setup';
+
+export { getAnyCloudConnectorIacTemplateUrl } from './components/cloud_connector/utils';

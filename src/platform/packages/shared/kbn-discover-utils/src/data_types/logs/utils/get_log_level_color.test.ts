@@ -20,10 +20,10 @@ const euiTheme = {
 describe('getLogLevelColor', () => {
   test('should work correctly', () => {
     expect(getLogLevelColor(LogLevelCoalescedValue.debug, euiTheme as EuiThemeComputed)).toBe(
-      '#e8f1ff'
+      '#f1f6ff'
     );
     expect(getLogLevelColor(LogLevelCoalescedValue.info, euiTheme as EuiThemeComputed)).toBe(
-      '#a8caff'
+      '#adccff'
     );
     expect(getLogLevelColor(LogLevelCoalescedValue.notice, euiTheme as EuiThemeComputed)).toBe(
       '#61a2ff'

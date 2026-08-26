@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useCallback } from 'react';
-import type { LensConfig } from '@kbn/lens-embeddable-utils/config_builder';
+import type { LensConfig } from '@kbn/lens-embeddable-utils';
 import type { TimeRange } from '@kbn/es-query';
 import useAsync from 'react-use/lib/useAsync';
 import type { DataView } from '@kbn/data-views-plugin/public';

@@ -8,8 +8,10 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import { shallow } from 'enzyme';
+import { screen } from '@testing-library/react';
 import React from 'react';
+
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 import { SubmitErrorCallout } from './submit_error_callout';
 import {
@@ -25,22 +27,50 @@ import { interactiveSetupMock } from '../server/mocks';
 
 describe('SubmitErrorCallout', () => {
   it('renders unknown errors correctly', async () => {
-    const wrapper = shallow(
+    const { container } = renderWithI18n(
       <SubmitErrorCallout error={new Error('Unknown error')} defaultTitle="Something went wrong" />
     );
 
-    expect(wrapper).toMatchInlineSnapshot(`
-      <EuiCallOut
-        color="danger"
-        title="Something went wrong"
+    expect(screen.getByText('Something went wrong')).toBeInTheDocument();
+    expect(screen.getByText('Unknown error')).toBeInTheDocument();
+    expect(container.children[0]).toMatchInlineSnapshot(`
+      <div
+        class="euiPanel euiPanel--danger euiCallOut euiCallOut--danger emotion-euiPanel-none-danger-euiCallOut-danger"
+        data-size="m"
+        style="--euiCallOutTypeColor: #C61E25;"
       >
-        Unknown error
-      </EuiCallOut>
+        <div
+          class="css-1slkmya-wrapper"
+        >
+          <div
+            class="css-wlziyu-body"
+          >
+            <span
+              class="css-1qkppnb-icon"
+              data-euiicon-type="errorFill"
+            />
+            <div
+              class="css-ak2bmi-content"
+            >
+              <p
+                class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader"
+              >
+                Something went wrong
+              </p>
+              <div
+                class="euiText euiCallOut__additionalContent emotion-euiText-s-euiTextColor-default"
+              >
+                Unknown error
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     `);
   });
 
   it('renders 403 errors correctly', async () => {
-    const wrapper = shallow(
+    const { container } = renderWithI18n(
       <SubmitErrorCallout
         error={
           new errors.ResponseError(
@@ -55,26 +85,46 @@ describe('SubmitErrorCallout', () => {
       />
     );
 
-    expect(wrapper).toMatchInlineSnapshot(`
-      <EuiCallOut
-        color="danger"
-        title={
-          <Memo(MemoizedFormattedMessage)
-            defaultMessage="Verification required"
-            id="interactiveSetup.submitErrorCallout.forbiddenErrorTitle"
-          />
-        }
+    expect(screen.getByText('Verification required')).toBeInTheDocument();
+    expect(screen.getByText('Retry to configure Elastic.')).toBeInTheDocument();
+    expect(container.children[0]).toMatchInlineSnapshot(`
+      <div
+        class="euiPanel euiPanel--danger euiCallOut euiCallOut--danger emotion-euiPanel-none-danger-euiCallOut-danger"
+        data-size="m"
+        style="--euiCallOutTypeColor: #C61E25;"
       >
-        <MemoizedFormattedMessage
-          defaultMessage="Retry to configure Elastic."
-          id="interactiveSetup.submitErrorCallout.forbiddenErrorDescription"
-        />
-      </EuiCallOut>
+        <div
+          class="css-1slkmya-wrapper"
+        >
+          <div
+            class="css-wlziyu-body"
+          >
+            <span
+              class="css-1qkppnb-icon"
+              data-euiicon-type="errorFill"
+            />
+            <div
+              class="css-ak2bmi-content"
+            >
+              <p
+                class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader"
+              >
+                Verification required
+              </p>
+              <div
+                class="euiText euiCallOut__additionalContent emotion-euiText-s-euiTextColor-default"
+              >
+                Retry to configure Elastic.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     `);
   });
 
   it('renders 404 errors correctly', async () => {
-    const wrapper = shallow(
+    const { container } = renderWithI18n(
       <SubmitErrorCallout
         error={
           new errors.ResponseError(
@@ -89,31 +139,61 @@ describe('SubmitErrorCallout', () => {
       />
     );
 
-    expect(wrapper).toMatchInlineSnapshot(`
-      <EuiCallOut
-        announceOnMount={true}
-        color="primary"
-        title={
-          <Memo(MemoizedFormattedMessage)
-            defaultMessage="Elastic is already configured"
-            id="interactiveSetup.submitErrorCallout.elasticsearchConnectionConfiguredErrorTitle"
-          />
-        }
+    expect(screen.getByText('Elastic is already configured')).toBeInTheDocument();
+    expect(screen.getByText('Continue to Kibana')).toBeInTheDocument();
+    expect(container.children[0]).toMatchInlineSnapshot(`
+      <div
+        class="euiPanel euiPanel--primary euiCallOut euiCallOut--primary emotion-euiPanel-none-primary-euiCallOut-primary"
+        data-size="m"
+        style="--euiCallOutTypeColor: #0B64DD;"
       >
-        <EuiButton
-          onClick={[Function]}
+        <div
+          class="css-1slkmya-wrapper"
         >
-          <MemoizedFormattedMessage
-            defaultMessage="Continue to Kibana"
-            id="interactiveSetup.submitErrorCallout.elasticsearchConnectionConfiguredSubmitButton"
+          <div
+            class="css-wlziyu-body"
+          >
+            <span
+              class="css-1qkppnb-icon"
+              data-euiicon-type="infoFill"
+            />
+            <div
+              class="css-ak2bmi-content"
+            >
+              <p
+                class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader"
+              >
+                Elastic is already configured
+              </p>
+              <div
+                class="euiText euiCallOut__additionalContent emotion-euiText-s-euiTextColor-default"
+              >
+                <button
+                  class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-primary"
+                  type="button"
+                >
+                  <span
+                    class="emotion-euiButtonDisplayContent"
+                  >
+                    Continue to Kibana
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div
+            aria-atomic="true"
+            aria-live="polite"
+            class="emotion-euiScreenReaderOnly"
+            role="status"
           />
-        </EuiButton>
-      </EuiCallOut>
+        </div>
+      </div>
     `);
   });
 
   it('renders ERROR_CONFIGURE_FAILURE errors correctly', async () => {
-    const wrapper = shallow(
+    const { container } = renderWithI18n(
       <SubmitErrorCallout
         error={
           new errors.ResponseError(
@@ -129,28 +209,51 @@ describe('SubmitErrorCallout', () => {
       />
     );
 
-    expect(wrapper).toMatchInlineSnapshot(`
-      <EuiCallOut
-        color="danger"
-        title="Something went wrong"
+    expect(screen.getByText('Something went wrong')).toBeInTheDocument();
+    expect(screen.getByText(/Retry or update the/)).toBeInTheDocument();
+    expect(screen.getByText('kibana.yml')).toBeInTheDocument();
+    expect(container.children[0]).toMatchInlineSnapshot(`
+      <div
+        class="euiPanel euiPanel--danger euiCallOut euiCallOut--danger emotion-euiPanel-none-danger-euiCallOut-danger"
+        data-size="m"
+        style="--euiCallOutTypeColor: #C61E25;"
       >
-        <MemoizedFormattedMessage
-          defaultMessage="Retry or update the {config} file manually."
-          id="interactiveSetup.submitErrorCallout.kibanaConfigFailureErrorDescription"
-          values={
-            Object {
-              "config": <strong>
-                kibana.yml
-              </strong>,
-            }
-          }
-        />
-      </EuiCallOut>
+        <div
+          class="css-1slkmya-wrapper"
+        >
+          <div
+            class="css-wlziyu-body"
+          >
+            <span
+              class="css-1qkppnb-icon"
+              data-euiicon-type="errorFill"
+            />
+            <div
+              class="css-ak2bmi-content"
+            >
+              <p
+                class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader"
+              >
+                Something went wrong
+              </p>
+              <div
+                class="euiText euiCallOut__additionalContent emotion-euiText-s-euiTextColor-default"
+              >
+                Retry or update the 
+                <strong>
+                  kibana.yml
+                </strong>
+                 file manually.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     `);
   });
 
   it('renders ERROR_ELASTICSEARCH_CONNECTION_CONFIGURED errors correctly', async () => {
-    const wrapper = shallow(
+    const { container } = renderWithI18n(
       <SubmitErrorCallout
         error={
           new errors.ResponseError(
@@ -166,31 +269,61 @@ describe('SubmitErrorCallout', () => {
       />
     );
 
-    expect(wrapper).toMatchInlineSnapshot(`
-      <EuiCallOut
-        announceOnMount={true}
-        color="primary"
-        title={
-          <Memo(MemoizedFormattedMessage)
-            defaultMessage="Elastic is already configured"
-            id="interactiveSetup.submitErrorCallout.elasticsearchConnectionConfiguredErrorTitle"
-          />
-        }
+    expect(screen.getByText('Elastic is already configured')).toBeInTheDocument();
+    expect(screen.getByText('Continue to Kibana')).toBeInTheDocument();
+    expect(container.children[0]).toMatchInlineSnapshot(`
+      <div
+        class="euiPanel euiPanel--primary euiCallOut euiCallOut--primary emotion-euiPanel-none-primary-euiCallOut-primary"
+        data-size="m"
+        style="--euiCallOutTypeColor: #0B64DD;"
       >
-        <EuiButton
-          onClick={[Function]}
+        <div
+          class="css-1slkmya-wrapper"
         >
-          <MemoizedFormattedMessage
-            defaultMessage="Continue to Kibana"
-            id="interactiveSetup.submitErrorCallout.elasticsearchConnectionConfiguredSubmitButton"
+          <div
+            class="css-wlziyu-body"
+          >
+            <span
+              class="css-1qkppnb-icon"
+              data-euiicon-type="infoFill"
+            />
+            <div
+              class="css-ak2bmi-content"
+            >
+              <p
+                class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader"
+              >
+                Elastic is already configured
+              </p>
+              <div
+                class="euiText euiCallOut__additionalContent emotion-euiText-s-euiTextColor-default"
+              >
+                <button
+                  class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-primary"
+                  type="button"
+                >
+                  <span
+                    class="emotion-euiButtonDisplayContent"
+                  >
+                    Continue to Kibana
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div
+            aria-atomic="true"
+            aria-live="polite"
+            class="emotion-euiScreenReaderOnly"
+            role="status"
           />
-        </EuiButton>
-      </EuiCallOut>
+        </div>
+      </div>
     `);
   });
 
   it('renders ERROR_ENROLL_FAILURE errors correctly', async () => {
-    const wrapper = shallow(
+    const { container } = renderWithI18n(
       <SubmitErrorCallout
         error={
           new errors.ResponseError(
@@ -206,21 +339,48 @@ describe('SubmitErrorCallout', () => {
       />
     );
 
-    expect(wrapper).toMatchInlineSnapshot(`
-      <EuiCallOut
-        color="danger"
-        title="Something went wrong"
+    expect(screen.getByText('Something went wrong')).toBeInTheDocument();
+    expect(
+      screen.getByText('Generate a new enrollment token or configure manually.')
+    ).toBeInTheDocument();
+    expect(container.children[0]).toMatchInlineSnapshot(`
+      <div
+        class="euiPanel euiPanel--danger euiCallOut euiCallOut--danger emotion-euiPanel-none-danger-euiCallOut-danger"
+        data-size="m"
+        style="--euiCallOutTypeColor: #C61E25;"
       >
-        <MemoizedFormattedMessage
-          defaultMessage="Generate a new enrollment token or configure manually."
-          id="interactiveSetup.submitErrorCallout.EnrollFailureErrorDescription"
-        />
-      </EuiCallOut>
+        <div
+          class="css-1slkmya-wrapper"
+        >
+          <div
+            class="css-wlziyu-body"
+          >
+            <span
+              class="css-1qkppnb-icon"
+              data-euiicon-type="errorFill"
+            />
+            <div
+              class="css-ak2bmi-content"
+            >
+              <p
+                class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader"
+              >
+                Something went wrong
+              </p>
+              <div
+                class="euiText euiCallOut__additionalContent emotion-euiText-s-euiTextColor-default"
+              >
+                Generate a new enrollment token or configure manually.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     `);
   });
 
   it('renders ERROR_KIBANA_CONFIG_FAILURE errors correctly', async () => {
-    const wrapper = shallow(
+    const { container } = renderWithI18n(
       <SubmitErrorCallout
         error={
           new errors.ResponseError(
@@ -236,33 +396,50 @@ describe('SubmitErrorCallout', () => {
       />
     );
 
-    expect(wrapper).toMatchInlineSnapshot(`
-      <EuiCallOut
-        color="danger"
-        title={
-          <Memo(MemoizedFormattedMessage)
-            defaultMessage="Couldn't write to config file"
-            id="interactiveSetup.submitErrorCallout.kibanaConfigNotWritableErrorTitle"
-          />
-        }
+    expect(screen.getByText("Couldn't write to config file")).toBeInTheDocument();
+    expect(screen.getByText(/Retry or update the/)).toBeInTheDocument();
+    expect(container.children[0]).toMatchInlineSnapshot(`
+      <div
+        class="euiPanel euiPanel--danger euiCallOut euiCallOut--danger emotion-euiPanel-none-danger-euiCallOut-danger"
+        data-size="m"
+        style="--euiCallOutTypeColor: #C61E25;"
       >
-        <MemoizedFormattedMessage
-          defaultMessage="Retry or update the {config} file manually."
-          id="interactiveSetup.submitErrorCallout.kibanaConfigFailureErrorDescription"
-          values={
-            Object {
-              "config": <strong>
-                kibana.yml
-              </strong>,
-            }
-          }
-        />
-      </EuiCallOut>
+        <div
+          class="css-1slkmya-wrapper"
+        >
+          <div
+            class="css-wlziyu-body"
+          >
+            <span
+              class="css-1qkppnb-icon"
+              data-euiicon-type="errorFill"
+            />
+            <div
+              class="css-ak2bmi-content"
+            >
+              <p
+                class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader"
+              >
+                Couldn't write to config file
+              </p>
+              <div
+                class="euiText euiCallOut__additionalContent emotion-euiText-s-euiTextColor-default"
+              >
+                Retry or update the 
+                <strong>
+                  kibana.yml
+                </strong>
+                 file manually.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     `);
   });
 
   it('renders ERROR_KIBANA_CONFIG_NOT_WRITABLE errors correctly', async () => {
-    const wrapper = shallow(
+    const { container } = renderWithI18n(
       <SubmitErrorCallout
         error={
           new errors.ResponseError(
@@ -278,33 +455,50 @@ describe('SubmitErrorCallout', () => {
       />
     );
 
-    expect(wrapper).toMatchInlineSnapshot(`
-      <EuiCallOut
-        color="danger"
-        title={
-          <Memo(MemoizedFormattedMessage)
-            defaultMessage="Couldn't write to config file"
-            id="interactiveSetup.submitErrorCallout.kibanaConfigNotWritableErrorTitle"
-          />
-        }
+    expect(screen.getByText("Couldn't write to config file")).toBeInTheDocument();
+    expect(screen.getByText(/Check the file permissions/)).toBeInTheDocument();
+    expect(container.children[0]).toMatchInlineSnapshot(`
+      <div
+        class="euiPanel euiPanel--danger euiCallOut euiCallOut--danger emotion-euiPanel-none-danger-euiCallOut-danger"
+        data-size="m"
+        style="--euiCallOutTypeColor: #C61E25;"
       >
-        <MemoizedFormattedMessage
-          defaultMessage="Check the file permissions and ensure {config} is writable by the Kibana process."
-          id="interactiveSetup.submitErrorCallout.kibanaConfigNotWritableErrorDescription"
-          values={
-            Object {
-              "config": <strong>
-                kibana.yml
-              </strong>,
-            }
-          }
-        />
-      </EuiCallOut>
+        <div
+          class="css-1slkmya-wrapper"
+        >
+          <div
+            class="css-wlziyu-body"
+          >
+            <span
+              class="css-1qkppnb-icon"
+              data-euiicon-type="errorFill"
+            />
+            <div
+              class="css-ak2bmi-content"
+            >
+              <p
+                class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader"
+              >
+                Couldn't write to config file
+              </p>
+              <div
+                class="euiText euiCallOut__additionalContent emotion-euiText-s-euiTextColor-default"
+              >
+                Check the file permissions and ensure 
+                <strong>
+                  kibana.yml
+                </strong>
+                 is writable by the Kibana process.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     `);
   });
 
   it('renders ERROR_OUTSIDE_PREBOOT_STAGE errors correctly', async () => {
-    const wrapper = shallow(
+    const { container } = renderWithI18n(
       <SubmitErrorCallout
         error={
           new errors.ResponseError(
@@ -320,31 +514,61 @@ describe('SubmitErrorCallout', () => {
       />
     );
 
-    expect(wrapper).toMatchInlineSnapshot(`
-      <EuiCallOut
-        announceOnMount={true}
-        color="primary"
-        title={
-          <Memo(MemoizedFormattedMessage)
-            defaultMessage="Elastic is already configured"
-            id="interactiveSetup.submitErrorCallout.elasticsearchConnectionConfiguredErrorTitle"
-          />
-        }
+    expect(screen.getByText('Elastic is already configured')).toBeInTheDocument();
+    expect(screen.getByText('Continue to Kibana')).toBeInTheDocument();
+    expect(container.children[0]).toMatchInlineSnapshot(`
+      <div
+        class="euiPanel euiPanel--primary euiCallOut euiCallOut--primary emotion-euiPanel-none-primary-euiCallOut-primary"
+        data-size="m"
+        style="--euiCallOutTypeColor: #0B64DD;"
       >
-        <EuiButton
-          onClick={[Function]}
+        <div
+          class="css-1slkmya-wrapper"
         >
-          <MemoizedFormattedMessage
-            defaultMessage="Continue to Kibana"
-            id="interactiveSetup.submitErrorCallout.elasticsearchConnectionConfiguredSubmitButton"
+          <div
+            class="css-wlziyu-body"
+          >
+            <span
+              class="css-1qkppnb-icon"
+              data-euiicon-type="infoFill"
+            />
+            <div
+              class="css-ak2bmi-content"
+            >
+              <p
+                class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader"
+              >
+                Elastic is already configured
+              </p>
+              <div
+                class="euiText euiCallOut__additionalContent emotion-euiText-s-euiTextColor-default"
+              >
+                <button
+                  class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-primary"
+                  type="button"
+                >
+                  <span
+                    class="emotion-euiButtonDisplayContent"
+                  >
+                    Continue to Kibana
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div
+            aria-atomic="true"
+            aria-live="polite"
+            class="emotion-euiScreenReaderOnly"
+            role="status"
           />
-        </EuiButton>
-      </EuiCallOut>
+        </div>
+      </div>
     `);
   });
 
   it('renders ERROR_PING_FAILURE errors correctly', async () => {
-    const wrapper = shallow(
+    const { container } = renderWithI18n(
       <SubmitErrorCallout
         error={
           new errors.ResponseError(
@@ -360,21 +584,41 @@ describe('SubmitErrorCallout', () => {
       />
     );
 
-    expect(wrapper).toMatchInlineSnapshot(`
-      <EuiCallOut
-        color="danger"
-        title={
-          <Memo(MemoizedFormattedMessage)
-            defaultMessage="Couldn't connect to cluster"
-            id="interactiveSetup.submitErrorCallout.pingFailureErrorTitle"
-          />
-        }
+    expect(screen.getByText("Couldn't connect to cluster")).toBeInTheDocument();
+    expect(screen.getByText('Check the address and retry.')).toBeInTheDocument();
+    expect(container.children[0]).toMatchInlineSnapshot(`
+      <div
+        class="euiPanel euiPanel--danger euiCallOut euiCallOut--danger emotion-euiPanel-none-danger-euiCallOut-danger"
+        data-size="m"
+        style="--euiCallOutTypeColor: #C61E25;"
       >
-        <MemoizedFormattedMessage
-          defaultMessage="Check the address and retry."
-          id="interactiveSetup.submitErrorCallout.pingFailureErrorDescription"
-        />
-      </EuiCallOut>
+        <div
+          class="css-1slkmya-wrapper"
+        >
+          <div
+            class="css-wlziyu-body"
+          >
+            <span
+              class="css-1qkppnb-icon"
+              data-euiicon-type="errorFill"
+            />
+            <div
+              class="css-ak2bmi-content"
+            >
+              <p
+                class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader"
+              >
+                Couldn't connect to cluster
+              </p>
+              <div
+                class="euiText euiCallOut__additionalContent emotion-euiText-s-euiTextColor-default"
+              >
+                Check the address and retry.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     `);
   });
 });

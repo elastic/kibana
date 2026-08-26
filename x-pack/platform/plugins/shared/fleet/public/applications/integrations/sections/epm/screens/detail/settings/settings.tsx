@@ -18,23 +18,27 @@ import {
   EuiSpacer,
   EuiLink,
   EuiPortal,
-  EuiCallOut,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { i18n } from '@kbn/i18n';
 
 import type { FleetStartServices } from '../../../../../../../plugin';
-import type { PackageInfo, PackageMetadata } from '../../../../../types';
+import type { PackageInfo, PackageMetadata, RegistryPolicyTemplate } from '../../../../../types';
 import { InstallStatus } from '../../../../../types';
 import {
+  useBulkGetAgentPoliciesQuery,
   useGetPackagePoliciesQuery,
   useGetPackageInstallStatus,
   useLink,
   useStartServices,
   useUpgradePackagePolicyDryRunQuery,
+  useUpgradeAgentlessPoliciesDryRunQuery,
   useUpdatePackageMutation,
+  useNamespacePreflightCheckMutation,
   useAuthz,
 } from '../../../../../hooks';
+import type { NamespaceConflictWarning } from '../../../../../../../../common/types/rest_spec/epm';
 import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   KEEP_POLICIES_UP_TO_DATE_PACKAGES,
@@ -43,16 +47,23 @@ import {
 } from '../../../../../constants';
 import { SideBarColumn } from '../../../components/side_bar_column';
 import { BulkActionContextProvider } from '../../installed_integrations/hooks/use_bulk_actions_context';
-import { KeepPoliciesUpToDateSwitch } from '../components';
+import { useSpaceSettingsContext } from '../../../../../../../hooks/use_space_settings_context';
+
+import { KeepPoliciesUpToDateSwitch, NamespaceCustomizationSection } from '../components';
 import { useChangelog } from '../hooks';
 
-import { ExperimentalFeaturesService } from '../../../../../services';
+import { ExperimentalFeaturesService, isAgentlessPoliciesUIEnabled } from '../../../../../services';
+
+import { DeprecationCallout, DeprecatedFeaturesCallout } from '../overview/deprecation_callout';
+
+import { wrapTitleWithDeprecated } from '../../../components/utils';
 
 import { InstallButton } from './install_button';
 import { ReinstallButton } from './reinstall_button';
 import { UpdateButton } from './update_button';
 import { UninstallButton } from './uninstall_button';
 import { ChangelogModal } from './changelog_modal';
+import { NamespaceConflictModal } from './namespace_conflict_modal';
 import { UpdateAvailableCallout } from './update_available_callout';
 import { BreakingChangesFlyout } from './breaking_changes_flyout';
 import { RollbackButton } from './rollback_button';
@@ -86,15 +97,31 @@ const LatestVersionLink = ({ name, version }: { name: string; version: string })
   );
 };
 
+const InstalledVersionLink = ({ name, version }: { name: string; version: string }) => {
+  const { getHref } = useLink();
+  const settingsPath = getHref('integration_details_settings', {
+    pkgkey: `${name}-${version}`,
+  });
+  return (
+    <EuiLink href={settingsPath}>
+      <FormattedMessage
+        id="xpack.fleet.integrations.settings.packageInstalledVersionLink"
+        defaultMessage="installed version"
+      />
+    </EuiLink>
+  );
+};
+
 interface Props {
   packageInfo: PackageInfo;
   packageMetadata?: PackageMetadata;
   startServices: Pick<FleetStartServices, 'analytics' | 'i18n' | 'theme'>;
   isCustomPackage: boolean;
+  integrationInfo?: RegistryPolicyTemplate;
 }
 
 export const SettingsPage: React.FC<Props> = memo(
-  ({ packageInfo, packageMetadata, startServices, isCustomPackage }: Props) => {
+  ({ packageInfo, packageMetadata, startServices, isCustomPackage, integrationInfo }: Props) => {
     const authz = useAuthz();
     const canInstallPackages = authz.integrations.installPackages;
     const { name, title, latestVersion, version, keepPoliciesUpToDate } = packageInfo;
@@ -121,27 +148,206 @@ export const SettingsPage: React.FC<Props> = memo(
       error: changelogError,
     } = useChangelog(name, latestVersion, version);
 
-    const packagePolicyIds = useMemo(
-      () => packagePoliciesData?.items.map(({ id }) => id),
-      [packagePoliciesData]
-    );
+    // Agentless package policies must upgrade through the agentless API, not the
+    // (deprecated-for-agentless) package-policy API. Partition by whether each policy is
+    // effectively agentless so each set goes to its own upgrade + dry-run endpoint. When the
+    // agentless policies UI kill switch is off, everything stays on the legacy package-policy
+    // upgrade path (the agentless partition is empty, so its dry-run and upgrade calls never fire).
+    const agentlessUIEnabled = isAgentlessPoliciesUIEnabled();
 
     const agentPolicyIds = useMemo(
       () => packagePoliciesData?.items.flatMap((packagePolicy) => packagePolicy.policy_ids) ?? [],
       [packagePoliciesData]
     );
 
+    // The server's legacy-API block treats a policy as agentless if its own `supports_agentless`
+    // flag is set OR its parent agent policy is agentless (older policies predate the per-policy
+    // flag). Mirror that fallback so such a policy is routed to the agentless upgrade path instead
+    // of poisoning the legacy batch — otherwise, with `disableAgentlessLegacyAPI` on, the whole
+    // legacy dry-run/upgrade 400s and takes the user's regular policies down with it. Only needed
+    // when the agentless UI is enabled; the query stays disabled otherwise.
+    const { data: agentPoliciesData, isLoading: isAgentPoliciesLoading } =
+      useBulkGetAgentPoliciesQuery(agentPolicyIds, {
+        ignoreMissing: true,
+        enabled: agentlessUIEnabled && agentPolicyIds.length > 0,
+      });
+    const agentlessParentPolicyIds = useMemo(
+      () =>
+        new Set(
+          (agentPoliciesData?.items ?? [])
+            .filter((agentPolicy) => agentPolicy.supports_agentless)
+            .map(({ id }) => id)
+        ),
+      [agentPoliciesData]
+    );
+    const isEffectivelyAgentless = useCallback(
+      (packagePolicy: { supports_agentless?: boolean | null; policy_ids?: string[] }) =>
+        packagePolicy.supports_agentless === true ||
+        (packagePolicy.policy_ids ?? []).some((id) => agentlessParentPolicyIds.has(id)),
+      [agentlessParentPolicyIds]
+    );
+    // While the parent lookup is still resolving, an older (parent-only) agentless policy would be
+    // mis-classified as legacy; hold the legacy dry-run until it settles so we never fire it with a
+    // still-hidden agentless policy in the batch. The guard short-circuits before reading the
+    // loading state when the query is disabled (a disabled react-query reports `isLoading` forever).
+    const isAgentlessDetectionPending =
+      agentlessUIEnabled && agentPolicyIds.length > 0 && isAgentPoliciesLoading;
+
+    const agentlessPolicyIds = useMemo(
+      () =>
+        agentlessUIEnabled
+          ? packagePoliciesData?.items
+              .filter((packagePolicy) => isEffectivelyAgentless(packagePolicy))
+              .map(({ id }) => id) ?? []
+          : [],
+      [packagePoliciesData, agentlessUIEnabled, isEffectivelyAgentless]
+    );
+
+    const packagePolicyIds = useMemo(
+      () =>
+        packagePoliciesData?.items
+          .filter((packagePolicy) => !agentlessUIEnabled || !isEffectivelyAgentless(packagePolicy))
+          .map(({ id }) => id) ?? [],
+      [packagePoliciesData, agentlessUIEnabled, isEffectivelyAgentless]
+    );
+
     const { data: dryRunData } = useUpgradePackagePolicyDryRunQuery(
-      packagePolicyIds ?? [],
+      packagePolicyIds,
       latestVersion,
       {
-        enabled: packagePolicyIds && packagePolicyIds.length > 0,
+        enabled: packagePolicyIds.length > 0 && !isAgentlessDetectionPending,
+      }
+    );
+
+    const { data: agentlessDryRunData } = useUpgradeAgentlessPoliciesDryRunQuery(
+      agentlessPolicyIds,
+      latestVersion,
+      {
+        enabled: agentlessPolicyIds.length > 0,
       }
     );
 
     const updatePackageMutation = useUpdatePackageMutation();
+    const updateNamespaceCustomizationMutation = useUpdatePackageMutation();
+    const namespacePreflight = useNamespacePreflightCheckMutation();
 
     const { notifications } = useStartServices();
+    const { allowedNamespacePrefixes } = useSpaceSettingsContext();
+
+    const installationInfo =
+      'installationInfo' in packageInfo ? packageInfo.installationInfo : undefined;
+
+    const namespaceCustomizationEnabledFor = useMemo(
+      () => installationInfo?.namespace_customization_enabled_for ?? [],
+      [installationInfo?.namespace_customization_enabled_for]
+    );
+
+    const namespaceCustomizationSettings = installationInfo?.namespace_customization_settings;
+
+    // State for the pre-flight conflict confirmation modal.
+    const [preflightModal, setPreflightModal] = useState<{
+      pendingNamespaces: string[];
+      conflicts: NamespaceConflictWarning[];
+    } | null>(null);
+
+    const saveNamespaceCustomization = useCallback(
+      (next: string[]) => {
+        updateNamespaceCustomizationMutation.mutate(
+          {
+            pkgName: packageInfo.name,
+            pkgVersion: packageInfo.version,
+            body: {
+              namespace_customization_enabled_for: next,
+            },
+          },
+          {
+            onSuccess: () => {
+              notifications.toasts.addSuccess({
+                title: i18n.translate('xpack.fleet.integrations.integrationSaved', {
+                  defaultMessage: 'Integration settings saved',
+                }),
+                text: i18n.translate(
+                  'xpack.fleet.integrations.namespaceCustomizationSavedSuccess',
+                  {
+                    defaultMessage: 'Applying changes to namespace index templates for {title}.',
+                    values: { title },
+                  }
+                ),
+              });
+            },
+            onError: (error) => {
+              notifications.toasts.addError(error, {
+                title: i18n.translate('xpack.fleet.integrations.integrationSavedError', {
+                  defaultMessage: 'Error saving integration settings',
+                }),
+                toastMessage: i18n.translate(
+                  'xpack.fleet.integrations.namespaceCustomizationError',
+                  {
+                    defaultMessage: 'Error updating namespace index templates for {title}',
+                    values: { title },
+                  }
+                ),
+              });
+            },
+          }
+        );
+      },
+      [
+        notifications.toasts,
+        packageInfo.name,
+        packageInfo.version,
+        title,
+        updateNamespaceCustomizationMutation,
+      ]
+    );
+
+    const handleNamespaceCustomizationChange = useCallback(
+      async (next: string[]) => {
+        const addedNamespaces = next.filter((ns) => !namespaceCustomizationEnabledFor.includes(ns));
+        if (addedNamespaces.length > 0) {
+          try {
+            const result = await namespacePreflight.mutateAsync({
+              pkgName: packageInfo.name,
+              namespaces: addedNamespaces,
+            });
+            if (result.warnings.length > 0) {
+              setPreflightModal({ pendingNamespaces: next, conflicts: result.warnings });
+              return;
+            }
+          } catch {
+            // Fail open: if the check itself errors, proceed with the save.
+            notifications.toasts.addWarning(
+              i18n.translate(
+                'xpack.fleet.integrations.namespaceCustomization.conflictCheckFailed',
+                {
+                  defaultMessage:
+                    'Could not check for index template conflicts. Proceeding without the check.',
+                }
+              )
+            );
+          }
+        }
+        saveNamespaceCustomization(next);
+      },
+      [
+        namespaceCustomizationEnabledFor,
+        namespacePreflight,
+        notifications,
+        packageInfo.name,
+        saveNamespaceCustomization,
+      ]
+    );
+
+    const handleConflictConfirm = useCallback(() => {
+      if (preflightModal !== null) {
+        saveNamespaceCustomization(preflightModal.pendingNamespaces);
+      }
+      setPreflightModal(null);
+    }, [preflightModal, saveNamespaceCustomization]);
+
+    const handleConflictCancel = useCallback(() => {
+      setPreflightModal(null);
+    }, []);
 
     const shouldShowKeepPoliciesUpToDateSwitch = useMemo(() => {
       return KEEP_POLICIES_UP_TO_DATE_PACKAGES.some((pkg) => pkg.name === name);
@@ -157,6 +363,10 @@ export const SettingsPage: React.FC<Props> = memo(
     const [keepPoliciesUpToDateSwitchValue, setKeepPoliciesUpToDateSwitchValue] = useState<boolean>(
       keepPoliciesUpToDate ?? false
     );
+
+    useEffect(() => {
+      setKeepPoliciesUpToDateSwitchValue(keepPoliciesUpToDate ?? false);
+    }, [keepPoliciesUpToDate]);
 
     const handleKeepPoliciesUpToDateSwitchChange = useCallback(() => {
       setKeepPoliciesUpToDateSwitchValue((prev) => !prev);
@@ -215,7 +425,7 @@ export const SettingsPage: React.FC<Props> = memo(
     const updateAvailable =
       installedVersion && semverLt(installedVersion, latestVersion) ? true : false;
 
-    const isViewingOldPackage = version < latestVersion;
+    const isViewingOldPackage = semverLt(version, latestVersion);
     // hide install/remove options if the user has version of the package is installed
     // and this package is out of date or if they do have a version installed but it's not this one
     const hideInstallOptions =
@@ -240,15 +450,9 @@ export const SettingsPage: React.FC<Props> = memo(
           <SideBarColumn grow={1} />
           <EuiFlexItem grow={7}>
             <EuiText>
-              <EuiTitle>
-                <h3>
-                  <FormattedMessage
-                    id="xpack.fleet.integrations.settings.packageSettingsTitle"
-                    defaultMessage="Settings"
-                  />
-                </h3>
-              </EuiTitle>
               <EuiSpacer size="s" />
+              <DeprecationCallout packageInfo={packageInfo} integrationInfo={integrationInfo} />
+              <DeprecatedFeaturesCallout packageInfo={packageInfo} />
               {installedVersion !== null && (
                 <div>
                   <EuiTitle>
@@ -304,6 +508,23 @@ export const SettingsPage: React.FC<Props> = memo(
                     </>
                   )}
 
+                  {installationInfo && (
+                    <>
+                      <NamespaceCustomizationSection
+                        savedNamespaces={namespaceCustomizationEnabledFor}
+                        allowedNamespacePrefixes={allowedNamespacePrefixes}
+                        namespaceCustomizationSettings={namespaceCustomizationSettings}
+                        disabled={!authz.integrations.writePackageSettings}
+                        isSubmitting={
+                          updateNamespaceCustomizationMutation.isLoading ||
+                          namespacePreflight.isLoading
+                        }
+                        onSave={handleNamespaceCustomizationChange}
+                      />
+                      <EuiSpacer size="l" />
+                    </>
+                  )}
+
                   {(updateAvailable || isUpgradingPackagePolicies) && (
                     <>
                       <UpdateAvailableCallout
@@ -325,10 +546,14 @@ export const SettingsPage: React.FC<Props> = memo(
                       <p>
                         <UpdateButton
                           {...packageInfo}
+                          name={packageInfo.name}
+                          title={wrapTitleWithDeprecated({ packageInfo })}
                           version={latestVersion}
                           agentPolicyIds={agentPolicyIds}
                           packagePolicyIds={packagePolicyIds}
+                          agentlessPolicyIds={agentlessPolicyIds}
                           dryRunData={dryRunData}
+                          agentlessDryRunData={agentlessDryRunData}
                           isUpgradingPackagePolicies={isUpgradingPackagePolicies}
                           setIsUpgradingPackagePolicies={setIsUpgradingPackagePolicies}
                           startServices={startServices}
@@ -380,10 +605,8 @@ export const SettingsPage: React.FC<Props> = memo(
                           </EuiFlexGroup>
                         </>
                       ) : (
-                        <EuiCallOut
+                        <KbnWarningCallout
                           announceOnMount
-                          color="warning"
-                          iconType="lock"
                           data-test-subj="installPermissionCallout"
                           title={
                             <FormattedMessage
@@ -391,12 +614,13 @@ export const SettingsPage: React.FC<Props> = memo(
                               defaultMessage="Permission required"
                             />
                           }
-                        >
-                          <FormattedMessage
-                            id="xpack.fleet.integrations.settings.installPermissionRequired"
-                            defaultMessage="You do not have permission to install this integration. Contact your administrator."
-                          />
-                        </EuiCallOut>
+                          text={
+                            <FormattedMessage
+                              id="xpack.fleet.integrations.settings.installPermissionRequired"
+                              defaultMessage="You do not have permission to install this integration. Contact your administrator."
+                            />
+                          }
+                        />
                       )}
                     </div>
                   ) : (
@@ -513,34 +737,57 @@ export const SettingsPage: React.FC<Props> = memo(
                   )}
                 </div>
               )}
-              {hideInstallOptions && isViewingOldPackage && !isUpdating && (
+              {hideInstallOptions && !isUpdating && (
                 <div>
                   <EuiSpacer size="s" />
                   <div>
                     <EuiTitle>
                       <h4>
-                        <FormattedMessage
-                          id="xpack.fleet.integrations.settings.packageInstallTitle"
-                          defaultMessage="Install {title}"
-                          values={{
-                            title,
-                          }}
-                        />
+                        {installedVersion ? (
+                          <FormattedMessage
+                            id="xpack.fleet.integrations.settings.packageManageTitle"
+                            defaultMessage="Manage {title}"
+                            values={{
+                              title,
+                            }}
+                          />
+                        ) : (
+                          <FormattedMessage
+                            id="xpack.fleet.integrations.settings.packageInstallTitle"
+                            defaultMessage="Install {title}"
+                            values={{
+                              title,
+                            }}
+                          />
+                        )}
                       </h4>
                     </EuiTitle>
                     <EuiSpacer size="s" />
                     <p>
                       <EuiText color="subdued">
-                        <FormattedMessage
-                          id="xpack.fleet.integrations.settings.packageSettingsOldVersionMessage"
-                          defaultMessage="Version {version} is out of date. The {latestVersion} of this integration is available to be installed."
-                          values={{
-                            version,
-                            latestVersion: (
-                              <LatestVersionLink name={name} version={latestVersion} />
-                            ),
-                          }}
-                        />
+                        {installedVersion ? (
+                          <FormattedMessage
+                            id="xpack.fleet.integrations.settings.packageSettingsDifferentVersionMessage"
+                            defaultMessage="Version {version} is different from the currently installed version. Navigate to the {installedVersionLink} to add or manage this integration."
+                            values={{
+                              version,
+                              installedVersionLink: (
+                                <InstalledVersionLink name={name} version={installedVersion} />
+                              ),
+                            }}
+                          />
+                        ) : (
+                          <FormattedMessage
+                            id="xpack.fleet.integrations.settings.packageSettingsOldVersionMessage"
+                            defaultMessage="Version {version} is out of date. The {latestVersion} of this integration is available to be installed."
+                            values={{
+                              version,
+                              latestVersion: (
+                                <LatestVersionLink name={name} version={latestVersion} />
+                              ),
+                            }}
+                          />
+                        )}
                       </EuiText>
                     </p>
                   </div>
@@ -562,6 +809,13 @@ export const SettingsPage: React.FC<Props> = memo(
           <BreakingChangesFlyout
             breakingChanges={breakingChanges}
             onClose={() => setIsBreakingChangesFlyoutOpen(false)}
+          />
+        )}
+        {preflightModal && preflightModal.conflicts.length > 0 && (
+          <NamespaceConflictModal
+            conflicts={preflightModal.conflicts}
+            onConfirm={handleConflictConfirm}
+            onCancel={handleConflictCancel}
           />
         )}
       </>

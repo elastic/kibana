@@ -73,6 +73,7 @@ async function expectRerenderOnDataLoader(
         query$: BehaviorSubject<Query | AggregateQuery | undefined>;
         timeRange$: BehaviorSubject<TimeRange | undefined>;
         esqlVariables$: BehaviorSubject<ESQLControlVariable[] | undefined>;
+        isApproximate$: BehaviorSubject<boolean | undefined>;
       } & LensOverrides
     >;
     internalApiOverrides?: Partial<LensInternalApi>;
@@ -102,7 +103,7 @@ async function expectRerenderOnDataLoader(
   const services = {
     ...makeEmbeddableServices(new BehaviorSubject<string>(''), undefined, {
       visOverrides: { id: 'lnsXY' },
-      dataOverrides: { id: 'form_based' },
+      dataOverrides: { id: 'formBased' },
     }),
     documentToExpression: jest.fn().mockResolvedValue({ ast: 'expression_string' }),
     ...servicesOverrides,
@@ -190,22 +191,17 @@ describe('Data Loader', () => {
     });
   });
 
-  it('should re-render when dashboard view/edit mode changes if dynamic actions are set', async () => {
+  it('should re-render when dashboard view/edit mode changes if drilldowns are set', async () => {
     await expectRerenderOnDataLoader(async ({ api, getState }) => {
       getState.mockReturnValue({
         attributes: getLensAttributesMock(),
-        enhancements: {
-          dynamicActions: {
-            events: [
-              // make sure there's at least one event
-              {
-                eventId: 'test',
-                triggers: [],
-                action: { factoryId: 'test', name: 'testAction', config: {} },
-              },
-            ],
+        drilldowns: [
+          {
+            label: 'Go to',
+            type: 'test',
+            trigger: 'on_click',
           },
-        },
+        ],
       });
       // trigger a change by changing the title in the attributes
       (api.viewMode$ as BehaviorSubject<ViewMode | undefined>).next('view');
@@ -214,16 +210,11 @@ describe('Data Loader', () => {
     });
   });
 
-  it('should not re-render when dashboard view/edit mode changes if dynamic actions are not set', async () => {
+  it('should not re-render when dashboard view/edit mode changes if there are no drilldowns', async () => {
     await expectRerenderOnDataLoader(async ({ api, getState }) => {
       getState.mockReturnValue({
         attributes: getLensAttributesMock(),
-        enhancements: {
-          dynamicActions: {
-            // empty list should not trigger
-            events: [],
-          },
-        },
+        drilldowns: [],
       });
       // trigger a change by changing the title in the attributes
       (api.viewMode$ as BehaviorSubject<ViewMode | undefined>).next('view');
@@ -285,8 +276,8 @@ describe('Data Loader', () => {
       { meta: { alias: 'external filter', negate: false, disabled: false } },
     ];
 
-    const vizQuery: Query = { language: 'kquery', query: 'saved filter' };
-    const vizFilters: Filter[] = [
+    const visQuery: Query = { language: 'kquery', query: 'saved filter' };
+    const visFilters: Filter[] = [
       { meta: { alias: 'test', negate: false, disabled: false, index: 'filter-0' } },
     ];
 
@@ -295,11 +286,11 @@ describe('Data Loader', () => {
       ...attributes,
       state: {
         ...attributes.state,
-        query: vizQuery,
-        filters: vizFilters,
+        query: visQuery,
+        filters: visFilters,
       },
       references: [
-        { type: 'index-pattern', name: vizFilters[0].meta.index!, id: 'my-index-pattern-id' },
+        { type: 'index-pattern', name: visFilters[0].meta.index!, id: 'my-index-pattern-id' },
       ],
     };
 
@@ -313,10 +304,10 @@ describe('Data Loader', () => {
         const params = internalApi.expressionParams$.getValue()!;
         expect(params.searchContext).toEqual(
           expect.objectContaining({
-            query: [parentApiQuery, vizQuery],
+            query: [parentApiQuery, visQuery],
             filters: [
               ...parentApiFilters,
-              ...vizFilters.map(({ meta }) => ({ meta: { ...meta, index: 'injected!' } })),
+              ...visFilters.map(({ meta }) => ({ meta: { ...meta, index: 'injected!' } })),
             ],
           })
         );
@@ -394,6 +385,57 @@ describe('Data Loader', () => {
     );
   });
 
+  it('should propagate isApproximate from parent API to search context', async () => {
+    await expectRerenderOnDataLoader(
+      async ({ internalApi }) => {
+        await waitForValue(
+          internalApi.expressionParams$,
+          (v: unknown) => isObject(v) && 'searchContext' in v
+        );
+
+        const params = internalApi.expressionParams$.getValue()!;
+        expect(params.searchContext).toEqual(
+          expect.objectContaining({
+            isApproximate: true,
+          })
+        );
+
+        return false;
+      },
+      undefined,
+      {
+        parentApiOverrides: { isApproximate$: new BehaviorSubject<boolean | undefined>(true) },
+      }
+    );
+  });
+
+  it('should default isApproximate to false when parent API does not publish it', async () => {
+    await expectRerenderOnDataLoader(
+      async ({ internalApi }) => {
+        await waitForValue(
+          internalApi.expressionParams$,
+          (v: unknown) => isObject(v) && 'searchContext' in v
+        );
+
+        const params = internalApi.expressionParams$.getValue()!;
+        expect(params.searchContext).toEqual(
+          expect.objectContaining({
+            isApproximate: false,
+          })
+        );
+
+        return false;
+      },
+      undefined,
+      {
+        parentApiOverrides: createUnifiedSearchApi({ query: '', language: 'kuery' }, [], {
+          from: 'now-7d',
+          to: 'now',
+        }),
+      }
+    );
+  });
+
   it('should call onload after rerender and onData$ call', async () => {
     await expectRerenderOnDataLoader(async ({ parentApi, internalApi, api }) => {
       expect(parentApi.onLoad).toHaveBeenLastCalledWith(true);
@@ -461,8 +503,8 @@ describe('Data Loader', () => {
         ...internalApi.attributes$.getValue(),
         title: faker.lorem.word(),
       });
-      (api.savedObjectId$ as BehaviorSubject<string | undefined>).next('newSavedObjectId');
-      return 'savedObjectId';
+      (api.savedObjectId$ as BehaviorSubject<string | undefined>).next('newRefId');
+      return 'refId';
     });
   });
 
@@ -516,8 +558,8 @@ describe('Data Loader', () => {
         // Mock the testing datasource to return an error when asked for checkIntegrity
         servicesOverrides: {
           datasourceMap: {
-            form_based: {
-              ...createMockDatasource('form_based'),
+            formBased: {
+              ...createMockDatasource('formBased'),
               checkIntegrity: jest.fn().mockReturnValue(['90943e30-9a47-11e8-b64d-95841ca0b247']),
             },
           },
@@ -528,7 +570,7 @@ describe('Data Loader', () => {
             activeAttributes: {
               ...defaultDoc,
               visualizationType: 'lnsXY',
-              state: { ...defaultDoc.state, datasourceStates: { form_based: {} } },
+              state: { ...defaultDoc.state, datasourceStates: { formBased: {} } },
             },
             mergedSearchContext: {
               now: Date.now(),

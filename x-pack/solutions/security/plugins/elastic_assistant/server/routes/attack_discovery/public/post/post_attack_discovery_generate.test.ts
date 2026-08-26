@@ -70,6 +70,7 @@ const mockUser = {
   roles: ['superuser'],
   full_name: 'Test User',
   email: 'test@example.com',
+  http_authentication_scheme: null,
 };
 
 const mockApiConfig = {
@@ -104,6 +105,15 @@ describe('postAttackDiscoveryGenerateRoute', () => {
     context.elasticAssistant.getCurrentUser.mockResolvedValue(mockUser);
     context.elasticAssistant.getAttackDiscoveryDataClient.mockResolvedValue(mockDataClient);
     context.elasticAssistant.actions = actionsMock.createStart();
+    (context.elasticAssistant.inference.getConnectorById as jest.Mock).mockResolvedValue({
+      type: mockApiConfig.actionTypeId,
+      connectorId: mockApiConfig.connectorId,
+      name: 'test connector',
+      config: {},
+      capabilities: {},
+      isInferenceEndpoint: false,
+      isPreconfigured: false,
+    });
     context.core.featureFlags.getBooleanValue = jest.fn().mockResolvedValue(false);
     postAttackDiscoveryGenerateRoute(server.router);
 

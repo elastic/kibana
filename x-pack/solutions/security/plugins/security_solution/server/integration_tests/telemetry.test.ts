@@ -377,15 +377,15 @@ describe('telemetry tasks', () => {
 
     it('should manage runtime errors searching fleet agents', async () => {
       const receiver: TelemetryReceiver = telemetryReceiver as TelemetryReceiver;
-      const agentClient = receiver['agentClient']!;
-      const listAgents = agentClient.listAgents;
+      const fleetServices = receiver['fleetServices']!;
+      const listAgents = fleetServices.fetchAgentList;
       deferred.push(() => {
-        agentClient.listAgents = listAgents;
+        fleetServices.fetchAgentList = listAgents;
       });
 
       const errorMessage = 'Error searching for fleet agents';
 
-      agentClient.listAgents = jest.fn((_) => Promise.reject(Error(errorMessage)));
+      fleetServices.fetchAgentList = jest.fn((_) => Promise.reject(Error(errorMessage)));
 
       const [task, started] = await mockAndScheduleEndpointTask();
 
@@ -411,13 +411,13 @@ describe('telemetry tasks', () => {
 
     it('should work without fleet agents', async () => {
       const receiver: TelemetryReceiver = telemetryReceiver as TelemetryReceiver;
-      const agentClient = receiver['agentClient']!;
-      const listAgents = agentClient.listAgents;
+      const fleetServices = receiver['fleetServices']!;
+      const listAgents = fleetServices.fetchAgentList;
       deferred.push(() => {
-        agentClient.listAgents = listAgents;
+        fleetServices.fetchAgentList = listAgents;
       });
 
-      agentClient.listAgents = jest.fn((_) =>
+      fleetServices.fetchAgentList = jest.fn((_) =>
         Promise.resolve({
           agents: [],
           total: 0,

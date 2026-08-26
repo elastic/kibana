@@ -10,6 +10,7 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { runLogRateAnalysis } from '@kbn/aiops-log-rate-analysis/queries/fetch_log_rate_analysis_for_alert';
 import type { WindowParameters } from '@kbn/aiops-log-rate-analysis/window_parameters';
 import { parseDatemath } from '../../utils/time';
+import { kqlFilter as kqlFilterToDsl } from '../../utils/dsl_filters';
 
 export async function getToolHandler({
   esClient,
@@ -18,7 +19,7 @@ export async function getToolHandler({
   timeFieldName,
   baseline,
   deviation,
-  searchQuery,
+  kqlFilter,
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
@@ -26,7 +27,7 @@ export async function getToolHandler({
   timeFieldName: string;
   baseline: { start: string; end: string };
   deviation: { start: string; end: string };
-  searchQuery?: Record<string, any>;
+  kqlFilter?: string;
 }) {
   const windowParameters: WindowParameters = {
     baselineMin: parseDatemath(baseline.start),
@@ -35,13 +36,16 @@ export async function getToolHandler({
     deviationMax: parseDatemath(deviation.end, { roundUp: true }),
   };
 
+  const filters = kqlFilterToDsl(kqlFilter);
+  const searchQuery = filters.length > 0 ? { bool: { filter: filters } } : { match_all: {} };
+
   const response = await runLogRateAnalysis({
     esClient,
     arguments: {
       index,
       windowParameters,
       timefield: timeFieldName,
-      searchQuery: searchQuery ?? { match_all: {} },
+      searchQuery,
     },
   });
   logger.debug(

@@ -7,23 +7,47 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type ReactWrapper, mount } from 'enzyme';
-import { act } from 'react-dom/test-utils';
-import { waitFor } from '@testing-library/react';
 import type { ReactElement } from 'react';
 import React from 'react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import { PanelsResizable } from './panels_resizable';
-import { ResizableLayoutOrder } from '../types';
 import { ResizableLayoutDirection } from '../types';
+import { ResizableLayoutOrder } from '../types';
 
 const containerHeight = 1000;
+
 const containerWidth = 500;
+
 const fixedPanelId = 'fixedPanel';
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  useGeneratedHtmlId: jest.fn(() => fixedPanelId),
-}));
+interface ResizableContainerCallbacks {
+  direction?: ResizableLayoutDirection;
+  onPanelWidthChange?: (sizes: Record<string, number>) => void;
+  onResizeEnd?: () => void;
+  onResizeStart?: (trigger: string) => void;
+}
+
+let resizableContainerCallbacks: ResizableContainerCallbacks = {};
+
+jest.mock('@elastic/eui', () => {
+  const actual = jest.requireActual('@elastic/eui');
+  const ActualEuiResizableContainer = actual.EuiResizableContainer;
+
+  return {
+    ...actual,
+    useGeneratedHtmlId: jest.fn(() => fixedPanelId),
+    EuiResizableContainer: (props: React.ComponentProps<typeof ActualEuiResizableContainer>) => {
+      resizableContainerCallbacks = {
+        direction: props.direction,
+        onPanelWidthChange: props.onPanelWidthChange,
+        onResizeEnd: props.onResizeEnd,
+        onResizeStart: props.onResizeStart,
+      };
+
+      return <ActualEuiResizableContainer {...props} />;
+    },
+  };
+});
 
 let resizeObserverCallback: (height: number, width: number) => void = jest.fn();
 
@@ -42,66 +66,96 @@ window.ResizeObserver = class ResizeObserver {
 };
 
 describe('Panels resizable', () => {
-  const mountComponent = ({
-    className = '',
-    direction = ResizableLayoutDirection.Vertical,
-    initialFixedPanelSize = 0,
-    minFixedPanelSize = 0,
-    minFlexPanelSize = 0,
-    fixedPanel = <></>,
-    flexPanel = <></>,
-    fixedPanelOrder,
-    attachTo,
-    onFixedPanelSizeChange = jest.fn(),
-  }: {
-    className?: string;
-    direction?: ResizableLayoutDirection;
-    initialFixedPanelSize?: number | 'max-content';
-    minFixedPanelSize?: number;
-    minFlexPanelSize?: number;
-    fixedPanel?: ReactElement;
-    flexPanel?: ReactElement;
-    fixedPanelOrder?: ResizableLayoutOrder;
-    attachTo?: HTMLElement;
-    onFixedPanelSizeChange?: (fixedPanelSize: number) => void;
-  }) => {
-    const PanelsWrapper = ({ fixedPanelSize }: { fixedPanelSize?: number }) => (
-      <PanelsResizable
-        className={className}
-        direction={direction}
-        fixedPanelSize={fixedPanelSize ?? initialFixedPanelSize}
-        minFixedPanelSize={minFixedPanelSize}
-        minFlexPanelSize={minFlexPanelSize}
-        fixedPanel={fixedPanel}
-        flexPanel={flexPanel}
-        fixedPanelOrder={fixedPanelOrder}
-        onFixedPanelSizeChange={onFixedPanelSizeChange}
-      />
-    );
+  const getPanelSizePct = (testSubj: string, direction: ResizableLayoutDirection) => {
+    const panelWrapper = screen.getByTestId(testSubj).closest('.euiResizablePanel');
 
-    return mount(<PanelsWrapper />, attachTo ? { attachTo } : undefined);
+    if (!panelWrapper) throw new Error(`Could not find resizable panel wrapper for ${testSubj}`);
+
+    const { style } = panelWrapper as HTMLElement;
+
+    const sizeValue =
+      direction === ResizableLayoutDirection.Horizontal
+        ? style.inlineSize || style.width
+        : style.blockSize || style.height;
+
+    return parseFloat(sizeValue);
   };
 
   const expectCorrectPanelSizes = (
-    component: ReactWrapper,
+    direction: ResizableLayoutDirection,
     currentContainerSize: number,
     fixedPanelSize: number
   ) => {
     const fixedPanelSizePct = (fixedPanelSize / currentContainerSize) * 100;
-    expect(
-      component.find('[data-test-subj="resizableLayoutResizablePanelFixed"]').at(0).prop('size')
-    ).toBe(fixedPanelSizePct);
-    expect(
-      component.find('[data-test-subj="resizableLayoutResizablePanelFlex"]').at(0).prop('size')
-    ).toBe(100 - fixedPanelSizePct);
+
+    expect(getPanelSizePct('resizableLayoutResizablePanelFixed', direction)).toBe(
+      fixedPanelSizePct
+    );
+    expect(getPanelSizePct('resizableLayoutResizablePanelFlex', direction)).toBe(
+      100 - fixedPanelSizePct
+    );
   };
 
-  const forceRender = (component: ReactWrapper) => {
-    component.setProps({}).update();
+  const renderPanelsResizable = (
+    props: React.ComponentProps<typeof PanelsResizable>,
+    options?: { container?: HTMLElement }
+  ) =>
+    render(
+      <PanelsResizable {...props} />,
+      options?.container ? { container: options.container } : undefined
+    );
+
+  const renderComponent = ({
+    className = '',
+    container,
+    direction = ResizableLayoutDirection.Vertical,
+    fixedPanel = <div>Fixed panel</div>,
+    fixedPanelOrder,
+    flexPanel = <div>Flex panel</div>,
+    initialFixedPanelSize = 0,
+    minFixedPanelSize = 0,
+    minFlexPanelSize = 0,
+    onFixedPanelSizeChange = jest.fn(),
+  }: {
+    className?: string;
+    container?: HTMLElement;
+    direction?: ResizableLayoutDirection;
+    fixedPanel?: ReactElement;
+    fixedPanelOrder?: ResizableLayoutOrder;
+    flexPanel?: ReactElement;
+    initialFixedPanelSize?: number | 'max-content';
+    minFixedPanelSize?: number;
+    minFlexPanelSize?: number;
+    onFixedPanelSizeChange?: (fixedPanelSize: number) => void;
+  } = {}) => {
+    return renderPanelsResizable(
+      {
+        className,
+        direction,
+        fixedPanel,
+        fixedPanelOrder,
+        fixedPanelSize: initialFixedPanelSize,
+        flexPanel,
+        minFixedPanelSize,
+        minFlexPanelSize,
+        onFixedPanelSizeChange,
+      },
+      { container }
+    );
+  };
+
+  const expectPanelOrder = (firstPanelText: string, secondPanelText: string) => {
+    const firstPanel = screen.getByText(firstPanelText);
+    const secondPanel = screen.getByText(secondPanelText);
+
+    expect(firstPanel.compareDocumentPosition(secondPanel)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
   };
 
   beforeEach(() => {
+    resizableContainerCallbacks = {};
+
     resizeObserverCallback = jest.fn();
+
     window.HTMLElement.prototype.getBoundingClientRect = jest.fn(() => {
       return {
         height: containerHeight,
@@ -111,152 +165,256 @@ describe('Panels resizable', () => {
   });
 
   it('should render both panels', () => {
-    const fixedPanel = <div data-test-subj="fixedPanel" />;
-    const flexPanel = <div data-test-subj="flexPanel" />;
-    const component = mountComponent({ fixedPanel, flexPanel });
-    expect(component.contains(fixedPanel)).toBe(true);
-    expect(component.contains(flexPanel)).toBe(true);
+    renderComponent();
+
+    expect(screen.getByText('Fixed panel')).toBeVisible();
+    expect(screen.getByText('Flex panel')).toBeVisible();
   });
 
   it('should set the initial sizes of both panels', () => {
     const initialFixedPanelSize = 200;
-    const component = mountComponent({ initialFixedPanelSize });
-    expectCorrectPanelSizes(component, containerHeight, initialFixedPanelSize);
+
+    renderComponent({ initialFixedPanelSize });
+
+    expectCorrectPanelSizes(
+      ResizableLayoutDirection.Vertical,
+      containerHeight,
+      initialFixedPanelSize
+    );
   });
 
   it('should set the correct sizes of both panels when the panels are resized', () => {
     const initialFixedPanelSize = 200;
-    const onFixedPanelSizeChange = jest.fn((fixedPanelSize) => {
-      component.setProps({ fixedPanelSize }).update();
-    });
-    const component = mountComponent({ initialFixedPanelSize, onFixedPanelSizeChange });
-    expectCorrectPanelSizes(component, containerHeight, initialFixedPanelSize);
+    let fixedPanelSize: number | 'max-content' = initialFixedPanelSize;
+    const onFixedPanelSizeChange = jest.fn();
+
+    let rerenderPanels: ReturnType<typeof renderPanelsResizable>['rerender'] = () => undefined;
+
+    const handleFixedPanelSizeChange = (size: number) => {
+      onFixedPanelSizeChange(size);
+      fixedPanelSize = size;
+      rerenderPanels(
+        <PanelsResizable
+          direction={ResizableLayoutDirection.Vertical}
+          fixedPanel={<></>}
+          fixedPanelSize={fixedPanelSize}
+          flexPanel={<></>}
+          minFixedPanelSize={0}
+          minFlexPanelSize={0}
+          onFixedPanelSizeChange={handleFixedPanelSizeChange}
+        />
+      );
+    };
+
+    ({ rerender: rerenderPanels } = renderPanelsResizable({
+      direction: ResizableLayoutDirection.Vertical,
+      fixedPanel: <></>,
+      fixedPanelSize,
+      flexPanel: <></>,
+      minFixedPanelSize: 0,
+      minFlexPanelSize: 0,
+      onFixedPanelSizeChange: handleFixedPanelSizeChange,
+    }));
+
+    expectCorrectPanelSizes(
+      ResizableLayoutDirection.Vertical,
+      containerHeight,
+      initialFixedPanelSize
+    );
+
     const newFixedPanelSizePct = 30;
-    const onPanelSizeChange = component
-      .find('[data-test-subj="resizableLayoutResizableContainer"]')
-      .at(0)
-      .prop('onPanelWidthChange') as Function;
+
     act(() => {
-      onPanelSizeChange({ [fixedPanelId]: newFixedPanelSizePct });
+      resizableContainerCallbacks.onPanelWidthChange?.({ [fixedPanelId]: newFixedPanelSizePct });
     });
-    forceRender(component);
+
     const newFixedPanelSize = (newFixedPanelSizePct / 100) * containerHeight;
+
     expect(onFixedPanelSizeChange).toHaveBeenCalledWith(newFixedPanelSize);
-    expectCorrectPanelSizes(component, containerHeight, newFixedPanelSize);
+    expectCorrectPanelSizes(ResizableLayoutDirection.Vertical, containerHeight, newFixedPanelSize);
   });
 
   it('should maintain the size of the fixed panel and resize the flex panel when the container size changes', () => {
     const initialFixedPanelSize = 200;
-    const component = mountComponent({ initialFixedPanelSize });
-    expectCorrectPanelSizes(component, containerHeight, initialFixedPanelSize);
+
+    renderComponent({ initialFixedPanelSize });
+
+    expectCorrectPanelSizes(
+      ResizableLayoutDirection.Vertical,
+      containerHeight,
+      initialFixedPanelSize
+    );
+
     const newContainerSize = 2000;
-    resizeObserverCallback(newContainerSize, 0);
-    forceRender(component);
-    expectCorrectPanelSizes(component, newContainerSize, initialFixedPanelSize);
+
+    act(() => {
+      resizeObserverCallback(newContainerSize, 0);
+    });
+
+    expectCorrectPanelSizes(
+      ResizableLayoutDirection.Vertical,
+      newContainerSize,
+      initialFixedPanelSize
+    );
   });
 
   it('should resize the fixed panel once the flex panel is at its minimum size', () => {
     const initialFixedPanelSize = 500;
     const minFixedPanelSize = 100;
     const minFlexPanelSize = 100;
-    const component = mountComponent({
+
+    renderComponent({
       initialFixedPanelSize,
       minFixedPanelSize,
       minFlexPanelSize,
     });
-    expectCorrectPanelSizes(component, containerHeight, initialFixedPanelSize);
+
+    expectCorrectPanelSizes(
+      ResizableLayoutDirection.Vertical,
+      containerHeight,
+      initialFixedPanelSize
+    );
+
     const newContainerSize = 400;
-    resizeObserverCallback(newContainerSize, 0);
-    forceRender(component);
-    expectCorrectPanelSizes(component, newContainerSize, newContainerSize - minFlexPanelSize);
-    resizeObserverCallback(containerHeight, 0);
-    forceRender(component);
-    expectCorrectPanelSizes(component, containerHeight, initialFixedPanelSize);
+
+    act(() => {
+      resizeObserverCallback(newContainerSize, 0);
+    });
+
+    expectCorrectPanelSizes(
+      ResizableLayoutDirection.Vertical,
+      newContainerSize,
+      newContainerSize - minFlexPanelSize
+    );
+
+    act(() => {
+      resizeObserverCallback(containerHeight, 0);
+    });
+
+    expectCorrectPanelSizes(
+      ResizableLayoutDirection.Vertical,
+      containerHeight,
+      initialFixedPanelSize
+    );
   });
 
   it('should maintain the minimum sizes of both panels when the container is too small to fit them', () => {
     const initialFixedPanelSize = 500;
     const minFixedPanelSize = 100;
     const minFlexPanelSize = 150;
-    const component = mountComponent({
+
+    renderComponent({
       initialFixedPanelSize,
       minFixedPanelSize,
       minFlexPanelSize,
     });
-    expectCorrectPanelSizes(component, containerHeight, initialFixedPanelSize);
+
+    expectCorrectPanelSizes(
+      ResizableLayoutDirection.Vertical,
+      containerHeight,
+      initialFixedPanelSize
+    );
+
     const newContainerSize = 200;
-    resizeObserverCallback(newContainerSize, 0);
-    forceRender(component);
+
+    act(() => {
+      resizeObserverCallback(newContainerSize, 0);
+    });
+
     expect(
-      component.find('[data-test-subj="resizableLayoutResizablePanelFixed"]').at(0).prop('size')
+      getPanelSizePct('resizableLayoutResizablePanelFixed', ResizableLayoutDirection.Vertical)
     ).toBe((minFixedPanelSize / newContainerSize) * 100);
+
     expect(
-      component.find('[data-test-subj="resizableLayoutResizablePanelFlex"]').at(0).prop('size')
+      getPanelSizePct('resizableLayoutResizablePanelFlex', ResizableLayoutDirection.Vertical)
     ).toBe((minFlexPanelSize / newContainerSize) * 100);
-    resizeObserverCallback(containerHeight, 0);
-    forceRender(component);
-    expectCorrectPanelSizes(component, containerHeight, initialFixedPanelSize);
+
+    act(() => {
+      resizeObserverCallback(containerHeight, 0);
+    });
+
+    expectCorrectPanelSizes(
+      ResizableLayoutDirection.Vertical,
+      containerHeight,
+      initialFixedPanelSize
+    );
   });
 
   it('should blur the resize button after a resize', async () => {
     const attachTo = document.createElement('div');
     document.body.appendChild(attachTo);
-    const component = mountComponent({ attachTo });
-    const getContainer = () =>
-      component.find('[data-test-subj="resizableLayoutResizableContainer"]').at(0);
-    const resizeButton = component.find('button[data-test-subj="resizableLayoutResizableButton"]');
+
+    renderComponent({ container: attachTo });
+
+    const resizeButton = screen.getByTestId('resizableLayoutResizableButton');
+
     act(() => {
-      const onResizeStart = getContainer().prop('onResizeStart') as Function;
-      onResizeStart('pointer');
+      resizableContainerCallbacks.onResizeStart?.('pointer');
     });
-    (resizeButton.getDOMNode() as HTMLElement).focus();
-    forceRender(component);
+
     act(() => {
-      const onResizeEnd = getContainer().prop('onResizeEnd') as Function;
-      onResizeEnd();
+      resizeButton.focus();
     });
-    expect(resizeButton.getDOMNode()).toHaveFocus();
+
+    act(() => {
+      resizableContainerCallbacks.onResizeEnd?.();
+    });
+
+    expect(resizeButton).toHaveFocus();
+
     await waitFor(() => {
-      expect(resizeButton.getDOMNode()).not.toHaveFocus();
+      expect(resizeButton).not.toHaveFocus();
     });
+
+    document.body.removeChild(attachTo);
   });
 
   it('should pass direction "vertical" to EuiResizableContainer when direction is ResizableLayoutDirection.Vertical', () => {
-    const component = mountComponent({ direction: ResizableLayoutDirection.Vertical });
-    expect(
-      component.find('[data-test-subj="resizableLayoutResizableContainer"]').at(0).prop('direction')
-    ).toBe('vertical');
+    renderComponent({ direction: ResizableLayoutDirection.Vertical });
+
+    expect(resizableContainerCallbacks.direction).toBe('vertical');
   });
 
   it('should pass direction "horizontal" to EuiResizableContainer when direction is ResizableLayoutDirection.Horizontal', () => {
-    const component = mountComponent({ direction: ResizableLayoutDirection.Horizontal });
-    expect(
-      component.find('[data-test-subj="resizableLayoutResizableContainer"]').at(0).prop('direction')
-    ).toBe('horizontal');
+    renderComponent({ direction: ResizableLayoutDirection.Horizontal });
+
+    expect(resizableContainerCallbacks.direction).toBe('horizontal');
   });
 
   it('should use containerHeight when direction is ResizableLayoutDirection.Vertical', () => {
     const initialFixedPanelSize = 200;
-    const component = mountComponent({
+
+    renderComponent({
       direction: ResizableLayoutDirection.Vertical,
       initialFixedPanelSize,
     });
-    expectCorrectPanelSizes(component, containerHeight, initialFixedPanelSize);
+
+    expectCorrectPanelSizes(
+      ResizableLayoutDirection.Vertical,
+      containerHeight,
+      initialFixedPanelSize
+    );
   });
 
   it('should use containerWidth when direction is ResizableLayoutDirection.Horizontal', () => {
     const initialFixedPanelSize = 200;
-    const component = mountComponent({
+
+    renderComponent({
       direction: ResizableLayoutDirection.Horizontal,
       initialFixedPanelSize,
     });
-    expectCorrectPanelSizes(component, containerWidth, initialFixedPanelSize);
+
+    expectCorrectPanelSizes(
+      ResizableLayoutDirection.Horizontal,
+      containerWidth,
+      initialFixedPanelSize
+    );
   });
 
   it('should set the initial fixed panel size to max-content', () => {
     const minFlexPanelSize = 200;
 
-    const component = mountComponent({
+    renderComponent({
       minFlexPanelSize,
       initialFixedPanelSize: 'max-content',
     });
@@ -264,49 +422,29 @@ describe('Panels resizable', () => {
     const flexPanelSizePct = (minFlexPanelSize / containerHeight) * 100;
 
     expect(
-      component.find('[data-test-subj="resizableLayoutResizablePanelFixed"]').at(0).prop('size')
+      getPanelSizePct('resizableLayoutResizablePanelFixed', ResizableLayoutDirection.Vertical)
     ).toBe(100 - flexPanelSizePct);
 
     expect(
-      component.find('[data-test-subj="resizableLayoutResizablePanelFlex"]').at(0).prop('size')
+      getPanelSizePct('resizableLayoutResizablePanelFlex', ResizableLayoutDirection.Vertical)
     ).toBe(flexPanelSizePct);
   });
 
   it('should render the panels in the correct order when no fixedPanelOrder is set', () => {
-    const component = mountComponent({
-      fixedPanel: <div className="testPanelOrder" data-test-subj="testFixedPanel" />,
-      flexPanel: <div className="testPanelOrder" data-test-subj="testFlexPanel" />,
-    });
+    renderComponent();
 
-    const panels = component.find('.testPanelOrder');
-
-    expect(panels.at(0).prop('data-test-subj')).toBe('testFixedPanel');
-    expect(panels.at(1).prop('data-test-subj')).toBe('testFlexPanel');
+    expectPanelOrder('Fixed panel', 'Flex panel');
   });
 
   it('should render the panels in the correct order when fixedPanelOrder is start', () => {
-    const component = mountComponent({
-      fixedPanelOrder: ResizableLayoutOrder.Start,
-      fixedPanel: <div className="testPanelOrder" data-test-subj="testFixedPanel" />,
-      flexPanel: <div className="testPanelOrder" data-test-subj="testFlexPanel" />,
-    });
+    renderComponent({ fixedPanelOrder: ResizableLayoutOrder.Start });
 
-    const panels = component.find('.testPanelOrder');
-
-    expect(panels.at(0).prop('data-test-subj')).toBe('testFixedPanel');
-    expect(panels.at(1).prop('data-test-subj')).toBe('testFlexPanel');
+    expectPanelOrder('Fixed panel', 'Flex panel');
   });
 
   it('should render the panels in the correct order when fixedPanelOrder is end', () => {
-    const component = mountComponent({
-      fixedPanelOrder: ResizableLayoutOrder.End,
-      fixedPanel: <div className="testPanelOrder" data-test-subj="testFixedPanel" />,
-      flexPanel: <div className="testPanelOrder" data-test-subj="testFlexPanel" />,
-    });
+    renderComponent({ fixedPanelOrder: ResizableLayoutOrder.End });
 
-    const panels = component.find('.testPanelOrder');
-
-    expect(panels.at(0).prop('data-test-subj')).toBe('testFlexPanel');
-    expect(panels.at(1).prop('data-test-subj')).toBe('testFixedPanel');
+    expectPanelOrder('Flex panel', 'Fixed panel');
   });
 });

@@ -38,9 +38,11 @@ export const AppearanceSelector = ({ security, core, closePopover, isServerless 
 };
 
 function AppearanceSelectorUI({ security, core, closePopover, isServerless }: Props) {
+  // Only `isVisible` is consumed here, so `defaultColorMode` has no effect; kept consistent with
+  // the appearance modal default to avoid confusion.
   const { isVisible } = useAppearance({
     uiSettingsClient: core.uiSettings,
-    defaultColorMode: 'space_default',
+    defaultColorMode: 'system',
     defaultContrastMode: 'standard',
   });
 
@@ -74,7 +76,6 @@ function AppearanceSelectorUI({ security, core, closePopover, isServerless }: Pr
   return (
     <EuiContextMenuItem
       icon="brush"
-      size="s"
       onClick={() => {
         openModal();
         closePopover();

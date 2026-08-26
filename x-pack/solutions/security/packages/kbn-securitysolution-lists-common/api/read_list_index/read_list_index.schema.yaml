@@ -23,6 +23,11 @@ paths:
                   list_item_index:
                     type: boolean
                 required: [list_index, list_item_index]
+              examples:
+                bothExist:
+                  value:
+                    list_index: true
+                    list_item_index: true
         400:
           description: Invalid input data response
           content:
@@ -31,6 +36,11 @@ paths:
                 oneOf:
                   - $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
                   - $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                badRequest:
+                  value:
+                    message: "Unable to read value list data stream status for this space"
+                    status_code: 400
         401:
           description: Unsuccessful authentication response
           content:
@@ -49,12 +59,23 @@ paths:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+              examples:
+                forbidden:
+                  value:
+                    statusCode: 403
+                    error: Forbidden
+                    message: "API [GET /api/lists/index] is not authorized; list read permissions are required"
         404:
           description: List data stream(s) not found response
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                notFound:
+                  value:
+                    message: "Value list backing indices were not found for this space"
+                    status_code: 404
         500:
           description: Internal server error response
           content:

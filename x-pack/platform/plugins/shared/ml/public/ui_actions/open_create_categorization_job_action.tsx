@@ -6,23 +6,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { Trigger, UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
+import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import {
   CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_ACTION,
-  CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER,
   type CreateCategorizationADJobContext,
 } from '@kbn/ml-ui-actions';
 import type { MlCoreSetup } from '../plugin';
-
-export const createCategorizationADJobTrigger: Trigger = {
-  id: CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER,
-  title: i18n.translate('xpack.ml.actions.createADJobFromPatternAnalysis', {
-    defaultMessage: 'Create categorization anomaly detection job',
-  }),
-  description: i18n.translate('xpack.ml.actions.createADJobFromPatternAnalysis', {
-    defaultMessage: 'Create categorization anomaly detection job',
-  }),
-};
+import { checkPermissionAsync } from '../application/capabilities/check_capabilities';
 
 export function createCategorizationADJobAction(
   getStartServices: MlCoreSetup['getStartServices']
@@ -43,7 +33,7 @@ export function createCategorizationADJobAction(
       }
 
       try {
-        const [{ showPatternAnalysisToADJobFlyout }, [coreStart, { share, data, dashboard }]] =
+        const [{ showPatternAnalysisToADJobFlyout }, [coreStart, { share, data, dashboard, cps }]] =
           await Promise.all([import('../embeddables/job_creation/aiops'), getStartServices()]);
 
         await showPatternAnalysisToADJobFlyout(
@@ -54,13 +44,16 @@ export function createCategorizationADJobAction(
           coreStart,
           share,
           data,
-          dashboard
+          dashboard,
+          undefined,
+          cps
         );
       } catch (e) {
         return Promise.reject();
       }
     },
     async isCompatible({ dataView, field }: CreateCategorizationADJobContext) {
+      if (!(await checkPermissionAsync(getStartServices, 'canCreateJob'))) return false;
       return (
         dataView.timeFieldName !== undefined &&
         dataView.fields.find((f) => f.name === field.name) !== undefined

@@ -41,9 +41,6 @@ Array [
         "name": <React.Fragment>
           <EuiToolTip
             content="triggered:0"
-            delay="regular"
-            disableScreenReaderOutput={false}
-            display="inlineBlock"
             position="top"
           >
             <EuiText
@@ -182,9 +179,6 @@ Array [
         "name": <React.Fragment>
           <EuiToolTip
             content="triggered:1"
-            delay="regular"
-            disableScreenReaderOutput={false}
-            display="inlineBlock"
             position="top"
           >
             <EuiText
@@ -209,9 +203,6 @@ Array [
         "name": <React.Fragment>
           <EuiToolTip
             content="triggered:0"
-            delay="regular"
-            disableScreenReaderOutput={false}
-            display="inlineBlock"
             position="top"
           >
             <EuiText
@@ -453,9 +444,6 @@ Array [
         "name": <React.Fragment>
           <EuiToolTip
             content="triggered:1"
-            delay="regular"
-            disableScreenReaderOutput={false}
-            display="inlineBlock"
             position="top"
           >
             <EuiText
@@ -480,9 +468,6 @@ Array [
         "name": <React.Fragment>
           <EuiToolTip
             content="triggered:0"
-            delay="regular"
-            disableScreenReaderOutput={false}
-            display="inlineBlock"
             position="top"
           >
             <EuiText
@@ -513,9 +498,6 @@ Array [
         "name": <React.Fragment>
           <EuiToolTip
             content="triggered:0"
-            delay="regular"
-            disableScreenReaderOutput={false}
-            display="inlineBlock"
             position="top"
           >
             <EuiText
@@ -546,9 +528,6 @@ Array [
         "name": <React.Fragment>
           <EuiToolTip
             content="triggered:1"
-            delay="regular"
-            disableScreenReaderOutput={false}
-            display="inlineBlock"
             position="top"
           >
             <EuiText
@@ -573,9 +552,6 @@ Array [
         "name": <React.Fragment>
           <EuiToolTip
             content="triggered:0"
-            delay="regular"
-            disableScreenReaderOutput={false}
-            display="inlineBlock"
             position="top"
           >
             <EuiText

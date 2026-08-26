@@ -44,7 +44,7 @@ export type VisContextUnmapped =
     }
   | {}; // cleared value
 
-/** @internal **/
+/** @deprecated Use DiscoverSessionAttributes instead **/
 export interface SavedSearchAttributes {
   title: string;
   sort: SortOrder[];
@@ -52,6 +52,7 @@ export interface SavedSearchAttributes {
   description: string;
   grid: DiscoverGridSettings;
   hideChart: boolean;
+  hideTable: boolean;
   isTextBasedQuery: boolean;
   usesAdHocDataView?: boolean;
   kibanaSavedObjectMeta: {
@@ -72,12 +73,13 @@ export interface SavedSearchAttributes {
   chartInterval?: string;
   density?: DataGridDensity;
   visContext?: VisContextUnmapped;
-  controlGroupJson?: string; // JSON string of ControlPanelsState<ESQLControlState>
+  controlGroupJson?: string; // JSON string of ControlPanelsState<OptionsListESQLControlState>
   tabs: DiscoverSessionTabSchema[];
 }
 
 export type SavedSearchByValueAttributes = SavedSearchAttributes & {
-  references: Reference[];
+  /** @deprecated References are now extracted/injected by server transforms */
+  references?: Reference[];
 };
 
 /** @internal **/
@@ -112,6 +114,7 @@ export interface DiscoverSessionTab {
   columns: string[];
   grid: DiscoverGridSettings;
   hideChart: boolean;
+  hideTable: boolean;
   isTextBasedQuery: boolean;
   usesAdHocDataView?: boolean;
   serializedSearchSource: SerializedSearchSourceFields;
@@ -119,6 +122,7 @@ export interface DiscoverSessionTab {
   hideAggregatedPreview?: boolean;
   rowHeight?: number;
   headerRowHeight?: number;
+  esqlApproximation?: boolean;
   timeRestore?: boolean;
   timeRange?: Pick<TimeRange, 'from' | 'to'>;
   refreshInterval?: RefreshInterval;
@@ -128,7 +132,7 @@ export interface DiscoverSessionTab {
   chartInterval?: string;
   density?: DataGridDensity;
   visContext?: VisContextUnmapped;
-  controlGroupJson?: string; // JSON string of ControlPanelsState<ESQLControlState>
+  controlGroupJson?: string; // JSON string of ControlPanelsState<OptionsListESQLControlState>
 }
 
 export interface DiscoverSession {

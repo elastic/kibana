@@ -6,9 +6,15 @@
  */
 
 import * as fs from 'fs';
-import { fetchArtifactVersions } from './fetch_artifact_versions';
+import { ProxyAgent } from 'undici';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
+import { fetchArtifactVersions, fetchSecurityLabsVersions } from './fetch_artifact_versions';
 import type { ProductName } from '@kbn/product-doc-common';
-import { getArtifactName, DocumentationProduct } from '@kbn/product-doc-common';
+import {
+  DocumentationProduct,
+  getArtifactName,
+  getSecurityLabsArtifactName,
+} from '@kbn/product-doc-common';
 
 jest.mock('fs');
 
@@ -46,12 +52,13 @@ const artifactRepositoryUrl = 'https://lost.com';
 const localArtifactRepositoryUrl = 'file://usr/local/local_artifacts';
 
 const expectVersions = (
-  versions: Partial<Record<ProductName, string[]>>
-): Record<ProductName, string[]> => {
-  const response = {} as Record<ProductName, string[]>;
+  versions: Partial<Record<ProductName | 'openapi', string[]>>
+): Record<ProductName | 'openapi', string[]> => {
+  const response = {} as Record<ProductName | 'openapi', string[]>;
   Object.values(DocumentationProduct).forEach((productName) => {
     response[productName] = [];
   });
+  response.openapi = [];
   return {
     ...response,
     ...versions,
@@ -84,7 +91,18 @@ describe('fetchArtifactVersions', () => {
     await fetchArtifactVersions({ artifactRepositoryUrl });
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(fetchMock).toHaveBeenCalledWith(`${artifactRepositoryUrl}?max-keys=1000`);
+    expect(fetchMock).toHaveBeenCalledWith(`${artifactRepositoryUrl}?max-keys=1000`, {});
+  });
+
+  it('passes a proxy dispatcher to fetch when a proxy URL is configured', async () => {
+    mockResponse(createResponse({ artifactNames: [] }));
+    const artifactRepositoryProxyUrl = 'http://proxy.example.com:3128';
+
+    await fetchArtifactVersions({ artifactRepositoryUrl, artifactRepositoryProxyUrl });
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const fetchOptions = fetchMock.mock.calls[0][1] as { dispatcher?: ProxyAgent };
+    expect(fetchOptions.dispatcher).toBeInstanceOf(ProxyAgent);
   });
 
   it('parses the local file', async () => {
@@ -107,6 +125,7 @@ describe('fetchArtifactVersions', () => {
       elasticsearch: ['8.16'],
       kibana: ['8.16'],
       observability: [],
+      openapi: [],
       security: [],
     });
   });
@@ -150,6 +169,7 @@ describe('fetchArtifactVersions', () => {
       expectVersions({
         kibana: ['8.16'],
         elasticsearch: ['8.16'],
+        openapi: [],
       })
     );
   });
@@ -170,6 +190,7 @@ describe('fetchArtifactVersions', () => {
       expectVersions({
         kibana: ['8.15', '8.16', '8.17'],
         elasticsearch: ['8.16', '9.0'],
+        openapi: [],
       })
     );
   });
@@ -186,5 +207,93 @@ describe('fetchArtifactVersions', () => {
     mockResponse('some plain text');
 
     await expect(fetchArtifactVersions({ artifactRepositoryUrl })).rejects.toThrowError();
+  });
+});
+
+describe('fetchSecurityLabsVersions', () => {
+  beforeEach(() => {
+    fetchMock.mockReset();
+    jest.clearAllMocks();
+  });
+
+  const mockResponse = (responseText: string) => {
+    const response = {
+      text: () => Promise.resolve(responseText),
+    };
+    fetchMock.mockResolvedValue(response as unknown as Response);
+  };
+
+  const ELSER_VERSION = '2026.07.15-231202';
+  const JINA_VERSION = '2026.07.15-231254';
+  const OLDER_ELSER_VERSION = '2026.07.10-120000';
+
+  it('returns only versions with an exact artifact for the requested inference ID', async () => {
+    mockResponse(
+      createResponse({
+        artifactNames: [
+          getSecurityLabsArtifactName({ version: ELSER_VERSION }),
+          getSecurityLabsArtifactName({
+            version: JINA_VERSION,
+            inferenceId: defaultInferenceEndpoints.JINAv5,
+          }),
+        ],
+      })
+    );
+
+    await expect(
+      fetchSecurityLabsVersions({
+        artifactRepositoryUrl,
+        inferenceId: defaultInferenceEndpoints.ELSER,
+      })
+    ).resolves.toEqual([ELSER_VERSION]);
+
+    await expect(
+      fetchSecurityLabsVersions({
+        artifactRepositoryUrl,
+        inferenceId: defaultInferenceEndpoints.JINAv5,
+      })
+    ).resolves.toEqual([JINA_VERSION]);
+  });
+
+  it('returns all unsuffixed ELSER versions when multiple exist', async () => {
+    mockResponse(
+      createResponse({
+        artifactNames: [
+          getSecurityLabsArtifactName({ version: OLDER_ELSER_VERSION }),
+          getSecurityLabsArtifactName({ version: ELSER_VERSION }),
+          getSecurityLabsArtifactName({
+            version: JINA_VERSION,
+            inferenceId: defaultInferenceEndpoints.JINAv5,
+          }),
+        ],
+      })
+    );
+
+    await expect(
+      fetchSecurityLabsVersions({
+        artifactRepositoryUrl,
+        inferenceId: defaultInferenceEndpoints.ELSER,
+      })
+    ).resolves.toEqual([OLDER_ELSER_VERSION, ELSER_VERSION]);
+  });
+
+  it('returns an empty list when no artifact matches the inference ID', async () => {
+    mockResponse(
+      createResponse({
+        artifactNames: [
+          getSecurityLabsArtifactName({
+            version: JINA_VERSION,
+            inferenceId: defaultInferenceEndpoints.JINAv5,
+          }),
+        ],
+      })
+    );
+
+    await expect(
+      fetchSecurityLabsVersions({
+        artifactRepositoryUrl,
+        inferenceId: defaultInferenceEndpoints.ELSER,
+      })
+    ).resolves.toEqual([]);
   });
 });

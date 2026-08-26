@@ -1,0 +1,35 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { getSloRouteRepository } from '../route';
+import type { createCompositeSLORoute } from '../composite_slo/create_composite_slo';
+import type { getCompositeSLORoute } from '../composite_slo/get_composite_slo';
+import type { getCompositeSLOSuggestionsRoute } from '../composite_slo/get_composite_slo_suggestions';
+import type { findCompositeSLORoute } from '../composite_slo/find_composite_slo';
+import type { updateCompositeSLORoute } from '../composite_slo/update_composite_slo';
+import type { deleteCompositeSLORoute } from '../composite_slo/delete_composite_slo';
+import type { fetchCompositeHistoricalSummaryRoute } from '../composite_slo/fetch_composite_historical_summary';
+import type { postCompositeSloSummaryRefreshRoute } from '../composite_slo/post_composite_slo_summary_refresh';
+
+interface RouteRepositoryOptions {
+  isServerless?: boolean;
+}
+
+export function getSloServerRouteRepository({ isServerless }: RouteRepositoryOptions = {}) {
+  return getSloRouteRepository({ isServerless });
+}
+
+type CompositeRoutes = typeof createCompositeSLORoute &
+  typeof getCompositeSLORoute &
+  typeof getCompositeSLOSuggestionsRoute &
+  typeof findCompositeSLORoute &
+  typeof updateCompositeSLORoute &
+  typeof deleteCompositeSLORoute &
+  typeof fetchCompositeHistoricalSummaryRoute &
+  typeof postCompositeSloSummaryRefreshRoute;
+
+export type SLORouteRepository = ReturnType<typeof getSloServerRouteRepository> & CompositeRoutes;

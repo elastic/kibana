@@ -7,7 +7,7 @@
 import { unzip as unzipAsyncCallback } from 'zlib';
 import type { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import type { ApmSourceMap } from '@kbn/apm-plugin/server/routes/source_maps/create_apm_source_map_index_template';
-import type { SourceMap } from '@kbn/apm-plugin/server/routes/source_maps/route';
+import type { SourceMap } from '@kbn/apm-api-shared';
 import expect from '@kbn/expect';
 import { first, last, times } from 'lodash';
 import { promisify } from 'util';

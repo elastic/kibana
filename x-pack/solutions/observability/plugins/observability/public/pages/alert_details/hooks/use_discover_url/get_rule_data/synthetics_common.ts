@@ -27,7 +27,13 @@ const supportedAlertParams = Array.from(
           s.path[0] !== 'condition' &&
           s.path[0] !== 'certAgeThreshold' &&
           s.path[0] !== 'certExpirationThreshold' &&
-          s.path[0] !== 'search'
+          s.path[0] !== 'search' &&
+          // Browser-certificate params have no monitor-document field mapping, so
+          // they are excluded from the related-documents Discover query.
+          s.path[0] !== 'includeBrowserCerts' &&
+          s.path[0] !== 'certOrigin' &&
+          s.path[0] !== 'browserResourceTypes' &&
+          s.path[0] !== 'issuers'
       )
       .map((s) => s.path[0])
       .sort()

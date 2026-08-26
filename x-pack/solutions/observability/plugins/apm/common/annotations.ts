@@ -5,13 +5,4 @@
  * 2.0.
  */
 
-export enum AnnotationType {
-  VERSION = 'version',
-}
-
-export interface Annotation {
-  type: AnnotationType;
-  id: string;
-  '@timestamp': number;
-  text: string;
-}
+export { AnnotationType, type Annotation } from '@kbn/apm-types';

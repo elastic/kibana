@@ -130,7 +130,6 @@ describe('updateRuleRoute', () => {
         alerts_filter: {
           query: {
             kql: 'name:test',
-            dsl: '{"must": {"term": { "name": "test" }}}',
             filters: [],
           },
         },

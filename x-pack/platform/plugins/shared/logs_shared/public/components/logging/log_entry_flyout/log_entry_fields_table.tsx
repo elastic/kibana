@@ -89,6 +89,9 @@ export const LogEntryFieldsTable: React.FC<{
       items={logEntry.fields}
       search={searchOptions}
       sorting={initialSortingOptions}
+      tableCaption={i18n.translate('xpack.logsShared.logFlyout.fieldsTableCaption', {
+        defaultMessage: 'Log entry fields',
+      })}
     />
   );
 };

@@ -29,9 +29,12 @@ import type { Services } from '../common/services';
 import { withServicesProvider } from '../common/services';
 import {
   AttackDiscoveryUpsellingPageLazy,
+  AttacksUpsellingPageLazy,
   AIValueUpsellingPageLazy,
+  AlertAnalysisWorkflowUpsellingPageLazy,
   EntityAnalyticsUpsellingPageLazy,
   EntityAnalyticsUpsellingSectionLazy,
+  GraphVisualizationUpsellingSectionLazy,
   SiemMigrationsStartUpsellSectionLazy,
   SiemMigrationsTranslatedRulesUpsellPageLazy,
 } from './lazy_upselling';
@@ -105,9 +108,19 @@ export const upsellingPages: UpsellingPages = [
     component: AttackDiscoveryUpsellingPageLazy,
   },
   {
+    pageName: SecurityPageName.attacks,
+    minimumLicenseRequired: 'enterprise',
+    component: AttacksUpsellingPageLazy,
+  },
+  {
     pageName: SecurityPageName.aiValue,
     minimumLicenseRequired: 'enterprise',
     component: AIValueUpsellingPageLazy,
+  },
+  {
+    pageName: SecurityPageName.alertAnalysisWorkflow,
+    minimumLicenseRequired: 'enterprise',
+    component: AlertAnalysisWorkflowUpsellingPageLazy,
   },
 
   {
@@ -129,6 +142,11 @@ export const upsellingSections: UpsellingSections = [
     id: 'siem_migrations_start',
     minimumLicenseRequired: 'enterprise',
     component: SiemMigrationsStartUpsellSectionLazy,
+  },
+  {
+    id: 'graph_visualization',
+    minimumLicenseRequired: 'platinum',
+    component: GraphVisualizationUpsellingSectionLazy,
   },
 ];
 

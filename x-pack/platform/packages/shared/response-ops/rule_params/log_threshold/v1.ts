@@ -60,7 +60,8 @@ const criterionSchema = schema.object(
 );
 
 const countCriteriaSchema = schema.arrayOf(criterionSchema);
-const ratioCriteriaSchema = schema.arrayOf(countCriteriaSchema);
+// Ratio rules require exactly two criterion groups (numerator and denominator).
+const ratioCriteriaSchema = schema.arrayOf(countCriteriaSchema, { minSize: 2, maxSize: 2 });
 
 const timeUnitSchema = schema.oneOf([
   schema.literal('s'),
@@ -100,10 +101,16 @@ const ratioRuleParamsSchema = schema.object(
   { unknowns: 'ignore' }
 );
 
-export const logThresholdParamsSchema = schema.oneOf([
-  countRuleParamsSchema,
-  ratioRuleParamsSchema,
-]);
+export const logThresholdParamsSchema = schema.oneOf(
+  [countRuleParamsSchema, ratioRuleParamsSchema],
+  {
+    meta: {
+      title: 'Log Threshold Rule Params',
+      description:
+        'The parameters for the log threshold rule. These parameters are appropriate when `rule_type_id` is `logs.alert.document.count`.',
+    },
+  }
+);
 
 // Export types for TypeScript
 export type LogThresholdParams = ReturnType<typeof logThresholdParamsSchema.validate>;

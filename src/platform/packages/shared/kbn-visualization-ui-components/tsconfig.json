@@ -5,7 +5,7 @@
     "types": [
       "jest",
       "node",
-      "@emotion/react/types/css-prop",
+      "@kbn/ambient-ui-types",
       "@testing-library/jest-dom"
     ]
   },
@@ -34,6 +34,7 @@
     "@kbn/calculate-width-from-char-count",
     "@kbn/visualization-utils",
     "@kbn/shared-ux-button-toolbar",
-    "@kbn/kql"
+    "@kbn/kql",
+    "@kbn/chart-icons"
   ],
 }

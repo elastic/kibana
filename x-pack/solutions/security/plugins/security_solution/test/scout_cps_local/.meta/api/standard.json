@@ -1,0 +1,92 @@
+{
+  "sha1": "d104add6542dc4af323e3ceef6df6de1c5b5d329",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "9bce89873e5159b-49a387e65cecf33",
+      "title": "Analyzer resolver entity to tree for linked-cluster events entity lookup finds a linked-cluster process and tree returns parent and child",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/tests/cps/analyzer_resolver_linked_events.spec.ts",
+        "line": 189,
+        "column": 7
+      }
+    },
+    {
+      "id": "db410a9fb4d7600-bff7379b6ed22e0",
+      "title": "CPS routing with a non-existent NPRE `_alias:_origin` resolves the origin project only",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/tests/cps/missing_npre_routing.spec.ts",
+        "line": 146,
+        "column": 41
+      }
+    },
+    {
+      "id": "db410a9fb4d7600-34a9e9c8f94d4a6",
+      "title": "CPS routing with a non-existent NPRE `_alias:*` fans out to flat world (origin + linked)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/tests/cps/missing_npre_routing.spec.ts",
+        "line": 147,
+        "column": 75
+      }
+    },
+    {
+      "id": "db410a9fb4d7600-562285c973fc5e6",
+      "title": "CPS routing with a non-existent NPRE a non-existent NPRE fans out to flat world (same as `_alias:*`)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/tests/cps/missing_npre_routing.spec.ts",
+        "line": 152,
+        "column": 5
+      }
+    },
+    {
+      "id": "d50399edb526a93-e1ab797843d3103",
+      "title": "CPS relationship maintainer — accesses from linked serverless project writes accesses_frequently relationship to origin entity when 5 SSH events ingested on linked project",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/tests/maintainers/accesses.spec.ts",
+        "line": 83,
+        "column": 68
+      }
+    },
+    {
+      "id": "dd1d9b329962437-f244caf87571b20",
+      "title": "CPS relationship maintainer — communicates_with from linked serverless project writes communicates_with relationship to origin entity when a CloudTrail event is ingested on linked project",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/tests/maintainers/communicates_with.spec.ts",
+        "line": 85,
+        "column": 65
+      }
+    }
+  ]
+}

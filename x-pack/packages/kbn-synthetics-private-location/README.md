@@ -53,6 +53,7 @@ xpack.fleet.outputs:
     is_default: true
     is_default_monitoring: true
     hosts: ['http://host.docker.internal:9200'] # For enrolling dockerized agents
+    # hosts: [YOUR_REMOTE_ES_URL] # For remote setup, use your ES url from oblt-cli 
 
 xpack.fleet.packages:
   - name: fleet_server

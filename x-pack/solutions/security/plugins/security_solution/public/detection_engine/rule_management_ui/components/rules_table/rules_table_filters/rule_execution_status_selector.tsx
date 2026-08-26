@@ -71,7 +71,7 @@ const RuleExecutionStatusSelectorComponent = ({
   const triggerButton = (
     <EuiFilterButton
       grow
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       onClick={() => {
         setIsExecutionStatusPopoverOpen(!isExecutionStatusPopoverOpen);
       }}
@@ -93,8 +93,9 @@ const RuleExecutionStatusSelectorComponent = ({
       closePopover={() => {
         setIsExecutionStatusPopoverOpen(!isExecutionStatusPopoverOpen);
       }}
-      panelPaddingSize="none"
+      panelPaddingSize="s"
       repositionOnScroll
+      aria-label={i18n.RULE_EXECUTION_STATUS_FILTER}
     >
       <EuiSelectable
         aria-label={i18n.RULE_EXECUTION_STATUS_FILTER}
@@ -109,7 +110,7 @@ const RuleExecutionStatusSelectorComponent = ({
           return (
             <div
               css={css`
-                margin-top: 4px; // aligns the badge within the option
+                display: inline-flex; // ensures styles to align the badge within the option are properly applied
               `}
               data-test-subj="executionStatusFilterOption"
             >

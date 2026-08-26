@@ -67,7 +67,6 @@ const ActionIconItemComponent: React.FC<ActionIconItemProps> = ({
         disabled={isDisabled}
         onClick={onClick}
         color="text"
-        size="s"
       >
         <EuiText data-test-subj={`${dataTestSubj}-button`} size="m">
           {content}

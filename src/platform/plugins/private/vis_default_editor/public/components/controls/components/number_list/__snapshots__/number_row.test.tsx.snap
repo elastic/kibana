@@ -24,14 +24,18 @@ exports[`NumberRow should be rendered with default set of props 1`] = `
   <EuiFlexItem
     grow={false}
   >
-    <EuiButtonIcon
-      aria-label="Remove the rank value of 1"
-      color="danger"
-      disabled={false}
-      iconType="trash"
-      onClick={[Function]}
-      title="Remove the rank value of 1"
-    />
+    <EuiToolTip
+      content="Remove the rank value of 1"
+      disableScreenReaderOutput={true}
+    >
+      <EuiButtonIcon
+        aria-label="Remove the rank value of 1"
+        color="danger"
+        disabled={false}
+        iconType="trash"
+        onClick={[Function]}
+      />
+    </EuiToolTip>
   </EuiFlexItem>
 </EuiFlexGroup>
 `;

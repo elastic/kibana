@@ -10,11 +10,29 @@ export type { RoleDescriptorsFixture } from './roles_descriptors';
 
 export {
   getDetectionRuleApiService,
+  getDetectionAlertsApiService,
   getEntityAnalyticsApiService,
   getCloudConnectorApiService,
+  getTimelineApiService,
+  getAttackDiscoveryApiService,
+  getCorrelationsApiService,
+  getPrevalenceApiService,
+  getAnalyzerApiService,
+  getNetworkApiService,
+  getHostApiService,
+  getUserApiService,
 } from './apis';
 export type {
   DetectionRuleApiService,
+  DetectionAlertsApiService,
   EntityAnalyticsApiService,
   CloudConnectorApiService,
+  TimelineApiService,
+  AttackDiscoveryApiService,
+  CorrelationsApiService,
+  PrevalenceApiService,
+  AnalyzerApiService,
+  NetworkApiService,
+  HostApiService,
+  UserApiService,
 } from './apis';

@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/277701
+issues:
+- https://github.com/elastic/kibana/issues/243891
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-21
+- product: kibana
+  target: 9.5.0
+title: "Fix Synthetics ignoring `retest_on_failure: false` on monitor update"
+description: "Updating a Synthetics monitor with `retest_on_failure: false` now disables retests. Previously the setting was ignored on update and only took effect when creating a monitor."

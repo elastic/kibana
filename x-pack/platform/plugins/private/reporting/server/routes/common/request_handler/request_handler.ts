@@ -31,11 +31,11 @@ export const handleUnavailable = (res: KibanaResponseFactory) => {
   return res.custom({ statusCode: 503, body: 'Not Available' });
 };
 
-const ParamsValidation = schema.recordOf(schema.string(), schema.string());
-const QueryValidation = schema.nullable(
+export const ParamsValidation = schema.recordOf(schema.string(), schema.string());
+export const QueryValidation = schema.nullable(
   schema.recordOf(schema.string(), schema.maybe(schema.string()))
 );
-const BodyValidation = schema.nullable(
+export const BodyValidation = schema.nullable(
   schema.recordOf(schema.string(), schema.maybe(schema.any()))
 );
 
@@ -148,7 +148,11 @@ export abstract class RequestHandler<
     }
 
     // 1. Ensure the incoming params have a version field (should be set by the UI)
-    const version = checkParamsVersion(jobParams, this.opts.logger);
+    const version = checkParamsVersion(
+      jobParams,
+      this.opts.logger,
+      this.opts.reporting.getKibanaPackageInfo().version
+    );
 
     // 2. Create a payload object by calling exportType.createJob(), and adding some automatic parameters
     const job = await exportType.createJob(jobParams, this.opts.context, this.opts.req);

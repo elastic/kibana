@@ -37,6 +37,8 @@
     "@kbn/core-pricing-server",
     "@kbn/core-di",
     "@kbn/core-data-streams-server",
+    "@kbn/core-user-activity-server",
+    "@kbn/core-user-storage-server",
   ],
   "exclude": [
     "target/**/*",

@@ -33,6 +33,9 @@ const canManageRules: SubFeaturePrivilegeGroupConfig = {
       alerting: {
         rule: {
           all: [degradedDocsAlertingFeatures],
+          enable: [degradedDocsAlertingFeatures],
+          manual_run: [degradedDocsAlertingFeatures],
+          manage_rule_settings: [degradedDocsAlertingFeatures],
         },
       },
       savedObject: {
@@ -74,7 +77,7 @@ export const KIBANA_FEATURE: KibanaFeatureConfig = {
   app: [PLUGIN_ID],
   alerting: [degradedDocsAlertingFeatures],
   management: {
-    insightsAndAlerting: ['triggersActions'],
+    insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
   },
   privileges: {
     all: {
@@ -93,7 +96,7 @@ export const KIBANA_FEATURE: KibanaFeatureConfig = {
         },
       },
       management: {
-        insightsAndAlerting: ['triggersActions'],
+        insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
       },
     },
     read: {

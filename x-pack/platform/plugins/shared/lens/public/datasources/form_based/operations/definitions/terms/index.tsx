@@ -44,6 +44,7 @@ import {
   FieldInput as FieldInputBase,
   getErrorMessage,
 } from '../../../dimension_panel/field_input';
+import { getFirstValue } from '../../../pure_utils';
 import {
   getDisallowedTermsMessage,
   getMultiTermsScriptedFieldErrorMessage,
@@ -493,20 +494,21 @@ export const termsOperation: OperationDefinition<
           const possibleOperations = operationSupportMatrix.operationByField.get(sourcefield);
           const termsSupported = possibleOperations?.has('terms');
           if (!termsSupported) {
-            const newFieldOp = possibleOperations?.values().next().value;
-            return updateLayer(
-              insertOrReplaceColumn({
-                layer,
-                columnId,
-                indexPattern,
-                // @ts-expect-error upgrade typescript v5.9.3
-                op: newFieldOp,
-                field: mainField,
-                visualizationGroups: dimensionGroups,
-                targetGroup: groupId,
-                incompleteParams,
-              })
-            );
+            const newFieldOp = getFirstValue(possibleOperations);
+            if (newFieldOp) {
+              return updateLayer(
+                insertOrReplaceColumn({
+                  layer,
+                  columnId,
+                  indexPattern,
+                  op: newFieldOp,
+                  field: mainField,
+                  visualizationGroups: dimensionGroups,
+                  targetGroup: groupId,
+                  incompleteParams,
+                })
+              );
+            }
           }
         }
         updateLayer({
@@ -654,12 +656,27 @@ The top values of a specified field ranked by the chosen metric.
       };
     }
 
+    const getEffectiveLabel = (column: GenericIndexPatternColumn): string => {
+      if (column.customLabel) {
+        return column.label;
+      }
+      return (
+        (column.label ||
+          operationDefinitionMap[column.operationType]?.getDefaultLabel(
+            column,
+            layer.columns,
+            indexPattern
+          )) ??
+        ''
+      );
+    };
+
     const orderOptions = Object.entries(layer.columns)
       .filter(([sortId]) => isSortableByColumn(layer, sortId))
       .map(([sortId, column]) => {
         return {
           value: toValue({ type: 'column', columnId: sortId }),
-          text: column.label,
+          text: getEffectiveLabel(column),
         };
       });
     orderOptions.push({

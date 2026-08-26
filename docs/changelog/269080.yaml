@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/269080
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-05-19
+areas:
+- Search and data
+title: Parse top-level Elasticsearch fields on package upgrade or reinstall

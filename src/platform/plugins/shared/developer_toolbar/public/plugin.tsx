@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Suspense } from 'react';
+import React, { Suspense, lazy } from 'react';
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal-types';
+import type { InternalThemeServiceStart } from '@kbn/core-theme-browser-internal-types';
 
 import { BehaviorSubject } from 'rxjs';
-import type { DeveloperToolbarItemProps } from '@kbn/developer-toolbar';
+import { type DeveloperToolbarItemProps } from '@kbn/developer-toolbar';
 
 export type UnregisterItemFn = () => void;
 export interface DeveloperToolbarItemRegistry {
@@ -21,6 +23,24 @@ export interface DeveloperToolbarItemRegistry {
 
 export type DeveloperToolbarSetup = DeveloperToolbarItemRegistry;
 export type DeveloperToolbarStart = DeveloperToolbarItemRegistry;
+
+const LazyColorThemeToggle = lazy(() =>
+  import('@kbn/developer-toolbar').then(({ LiveColorThemeToggle }) => ({
+    default: LiveColorThemeToggle,
+  }))
+);
+
+const LazyMeasureButton = lazy(() =>
+  import('@kbn/design-tools').then(({ MeasureButton }) => ({
+    default: MeasureButton,
+  }))
+);
+
+const LazyDesignToolsButton = lazy(() =>
+  import('@kbn/design-tools').then(({ DesignToolsButton }) => ({
+    default: DesignToolsButton,
+  }))
+);
 
 export class DeveloperToolbarPlugin
   implements Plugin<DeveloperToolbarSetup, DeveloperToolbarStart>
@@ -37,11 +57,38 @@ export class DeveloperToolbarPlugin
 
   public start(core: CoreStart): DeveloperToolbarStart {
     const LazyToolbar = React.lazy(() => import('./toolbar'));
-    core.chrome.setGlobalFooter(
+    (core.chrome as InternalChromeStart).setGlobalFooter(
       <Suspense>
         <LazyToolbar items$={this.items$} envInfo={this.context.env} />
       </Suspense>
     );
+
+    this.registerItem({
+      id: 'Color Theme',
+      children: (
+        <Suspense fallback={null}>
+          <LazyColorThemeToggle theme={core.theme as InternalThemeServiceStart} />
+        </Suspense>
+      ),
+    });
+
+    this.registerItem({
+      id: 'Measure Component',
+      children: (
+        <Suspense fallback={null}>
+          <LazyMeasureButton />
+        </Suspense>
+      ),
+    });
+
+    this.registerItem({
+      id: 'Design Tools',
+      children: (
+        <Suspense fallback={null}>
+          <LazyDesignToolsButton />
+        </Suspense>
+      ),
+    });
 
     return {
       registerItem: this.registerItem.bind(this),

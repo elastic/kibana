@@ -14,7 +14,23 @@ import {
   taskSchemaV5,
   taskSchemaV6,
   taskSchemaV7,
+  taskSchemaV8,
+  taskSchemaV9,
+  taskSchemaV10,
+  taskSchemaV11,
+  taskSchemaV12,
+  taskSchemaV13,
 } from '../schemas/task';
+
+import { InstanceTaskCost } from '../../task';
+
+// the valid task costs baked into the v8 schema
+const V9Costs = new Set([
+  undefined, // to handle case of cost not set
+  `${InstanceTaskCost.Tiny}`,
+  `${InstanceTaskCost.Normal}`,
+  `${InstanceTaskCost.ExtraLarge}`,
+]);
 
 // IMPORTANT!!!
 // When adding new model versions, make sure to manually test
@@ -98,6 +114,75 @@ export const taskModelVersions: SavedObjectsModelVersionMap = {
     schemas: {
       forwardCompatibility: taskSchemaV7.extends({}, { unknowns: 'ignore' }),
       create: taskSchemaV7,
+    },
+  },
+  '8': {
+    changes: [
+      {
+        type: 'mappings_addition',
+        addedMappings: {
+          cost: { type: 'keyword' },
+        },
+      },
+    ],
+    schemas: {
+      forwardCompatibility: taskSchemaV8.extends({}, { unknowns: 'ignore' }),
+      create: taskSchemaV8,
+    },
+  },
+  '9': {
+    changes: [
+      {
+        type: 'mappings_addition',
+        addedMappings: {
+          userScope: {
+            properties: {
+              uiamApiKeyId: { type: 'keyword' },
+            },
+          },
+        },
+      },
+    ],
+    schemas: {
+      forwardCompatibility: taskSchemaV9.extends({}, { unknowns: 'ignore' }),
+      create: taskSchemaV9,
+    },
+  },
+  '10': {
+    changes: [],
+    schemas: {
+      // set cost to normal if it is not in the version 8 costs literals
+      forwardCompatibility: (attributes) => {
+        const costable = attributes as { cost?: string };
+        if (V9Costs.has(costable.cost)) return attributes;
+
+        return {
+          ...(attributes as unknown as Record<string, unknown>),
+          cost: InstanceTaskCost.Normal,
+        };
+      },
+      create: taskSchemaV10,
+    },
+  },
+  '11': {
+    changes: [],
+    schemas: {
+      forwardCompatibility: taskSchemaV11.extends({}, { unknowns: 'ignore' }),
+      create: taskSchemaV11,
+    },
+  },
+  '12': {
+    changes: [],
+    schemas: {
+      forwardCompatibility: taskSchemaV12.extends({}, { unknowns: 'ignore' }),
+      create: taskSchemaV12,
+    },
+  },
+  '13': {
+    changes: [],
+    schemas: {
+      forwardCompatibility: taskSchemaV13.extends({}, { unknowns: 'ignore' }),
+      create: taskSchemaV13,
     },
   },
 };

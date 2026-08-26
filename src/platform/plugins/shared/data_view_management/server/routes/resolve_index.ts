@@ -35,16 +35,21 @@ export function registerResolveIndexRoute(router: IRouter): void {
               schema.literal('none'),
             ])
           ),
+          project_routing: schema.maybe(schema.string()),
         }),
       },
     },
     async (context, req, res) => {
       const esClient = (await context.core).elasticsearch.client;
       try {
-        const body = await esClient.asCurrentUser.indices.resolveIndex({
+        const params = {
           name: req.params.query,
           expand_wildcards: req.query.expand_wildcards || 'open',
-        });
+          ...(req.query.project_routing ? { project_routing: req.query.project_routing } : {}),
+        };
+
+        // @ts-ignore because the types for resolveIndex do not yet include body param
+        const body = await esClient.asCurrentUser.indices.resolveIndex(params);
         return res.ok({ body });
       } catch (e) {
         // 403: no_such_remote_cluster_exception

@@ -1,0 +1,7 @@
+{
+  "indices.put_mapping": {
+    "data_autocomplete_rules": {
+      "__scope_link": "put_mapping"
+    }
+  }
+}

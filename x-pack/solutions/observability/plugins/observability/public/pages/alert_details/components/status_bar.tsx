@@ -19,6 +19,7 @@ import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { asDuration } from '../../../../common/utils/formatters';
 import type { TopAlert } from '../../../typings/alerts';
 import { CaseLinks } from './case_links';
+import { AlertSnoozeStatus } from './alert_snooze_status';
 
 export interface StatusBarProps {
   alert: TopAlert | null;
@@ -45,25 +46,30 @@ export function StatusBar({ alert, alertStatus }: StatusBarProps) {
       wrap
     >
       <EuiFlexItem grow={false}>
-        {alertStatus && (
-          <AlertLifecycleStatusBadge
-            alertStatus={alertStatus}
-            flapping={alert.fields[ALERT_FLAPPING]}
-          />
-        )}
-      </EuiFlexItem>
-      <CaseLinks alert={alert} />
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="xs">
-          <EuiText size="s" color="subdued">
-            <FormattedMessage
-              id="xpack.observability.pages.alertDetails.pageTitle.tags"
-              defaultMessage="Tags:"
+        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+          {alertStatus && (
+            <AlertLifecycleStatusBadge
+              alertStatus={alertStatus}
+              flapping={alert.fields[ALERT_FLAPPING]}
             />
-          </EuiText>
-          <TagsList tags={tags} ignoreEmpty color="default" />
+          )}
+          <AlertSnoozeStatus alert={alert} />
         </EuiFlexGroup>
       </EuiFlexItem>
+      <CaseLinks alert={alert} />
+      {tags && tags.length > 0 && (
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="xs">
+            <EuiText size="s" color="subdued">
+              <FormattedMessage
+                id="xpack.observability.pages.alertDetails.pageTitle.tags"
+                defaultMessage="Tags:"
+              />
+            </EuiText>
+            <TagsList tags={tags} ignoreEmpty color="default" />
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      )}
       {workflowTags && workflowTags.length > 0 && (
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="xs">

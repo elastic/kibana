@@ -8,7 +8,7 @@
  */
 
 import { Stream } from 'stream';
-import { isZod } from '@kbn/zod';
+import { isZod } from '@kbn/zod/v4';
 import { ValidationError, schema, isConfigSchema } from '@kbn/config-schema';
 import type {
   RouteValidationSpec,
@@ -38,7 +38,7 @@ export class RouteValidator<P = {}, Q = {}, B = {}> {
 
   private static ResultFactory: RouteValidationResultFactory = {
     ok: <T>(value: T) => ({ value }),
-    badRequest: (error: Error | string, path?: string[]) => ({
+    badRequest: (error: unknown, path?: string[]) => ({
       error: new RouteValidationError(error, path),
     }),
   };

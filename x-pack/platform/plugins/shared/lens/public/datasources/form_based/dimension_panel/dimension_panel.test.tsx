@@ -9,7 +9,7 @@ import type { ShallowWrapper } from 'enzyme';
 import { ReactWrapper } from 'enzyme';
 import type { ChangeEvent } from 'react';
 import React from 'react';
-import { screen, act, within } from '@testing-library/react';
+import { screen, act, within, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import type { EuiListGroupItemProps, EuiComboBoxProps } from '@elastic/eui';
@@ -142,7 +142,7 @@ const expectedIndexPatterns = {
     hasRestrictions: false,
     fields,
     getFieldByName: getFieldByNameFactory(fields),
-    getFormatterForField: () => ({ convert: (v: unknown) => v }),
+    getFormatterForField: () => ({ convertToText: (v: unknown) => v }),
     isPersisted: true,
     spec: {},
   },
@@ -158,6 +158,17 @@ const bytesColumn: GenericIndexPatternColumn = {
   sourceField: 'bytes',
   params: { format: { id: 'bytes' } },
 };
+
+const lastValueColumn = (
+  dataType: GenericIndexPatternColumn['dataType']
+): GenericIndexPatternColumn => ({
+  label: 'Last value of source',
+  dataType,
+  isBucketed: false,
+  operationType: 'last_value',
+  sourceField: 'source',
+  params: {},
+});
 
 /**
  * The datasource exposes four main pieces of code which are tested at
@@ -244,7 +255,7 @@ describe('FormBasedDimensionEditor', () => {
             title: 'Bytes',
           }),
           deserialize: jest.fn().mockReturnValue({
-            convert: () => 'formatted',
+            convertToText: () => 'formatted',
           }),
         },
         search: {
@@ -270,12 +281,10 @@ describe('FormBasedDimensionEditor', () => {
       <FormBasedDimensionEditorComponent {...defaultProps} {...propsOverrides} />
     );
 
-    const getVisibleFieldSelectOptions = () => {
-      const optionsList = screen.getByRole('dialog');
-      return within(optionsList)
-        .getAllByRole('option')
-        .map((option) => within(option).getByTestId('fullText').textContent);
-    };
+    const getVisibleFieldSelectOptions = () =>
+      within(screen.getByTestId('comboBoxOptionsList indexPattern-dimension-field-optionsList'))
+        .getAllByTestId('fullText')
+        .map((option) => option.textContent);
 
     return { ...rtlRender, getVisibleFieldSelectOptions };
   };
@@ -285,6 +294,7 @@ describe('FormBasedDimensionEditor', () => {
   afterEach(() => {
     if (wrapper) {
       wrapper.unmount();
+      wrapper = undefined as unknown as ReactWrapper | ShallowWrapper;
     }
   });
 
@@ -325,12 +335,12 @@ describe('FormBasedDimensionEditor', () => {
     await userEvent.click(screen.getByRole('button', { name: /open list of options/i }));
     expect(screen.getByText(/There aren't any options available/)).toBeInTheDocument();
   });
-  test('should list all field names and document as a whole in prioritized order', async () => {
+  it('should list all field names and document as a whole in prioritized order', async () => {
     const { getVisibleFieldSelectOptions } = renderDimensionPanel();
 
-    const comboBoxButton = screen.getAllByRole('button', { name: /open list of options/i })[0];
+    const comboBoxButton = screen.getAllByTestId('comboBoxToggleListButton')[0];
     const comboBoxInput = screen.getAllByTestId('comboBoxSearchInput')[0];
-    await userEvent.click(comboBoxButton);
+    fireEvent.click(comboBoxButton);
 
     const allOptions = [
       'Records',
@@ -343,10 +353,13 @@ describe('FormBasedDimensionEditor', () => {
     ];
     expect(allOptions.slice(0, 7)).toEqual(getVisibleFieldSelectOptions());
 
-    // // press arrow up to go back to the beginning
-    await userEvent.type(comboBoxInput, '{ArrowUp}{ArrowUp}');
+    // press arrow up (x2) to go back to the beginning
+    fireEvent.keyDown(comboBoxInput, { key: 'ArrowUp', code: 'ArrowUp' });
+    fireEvent.keyUp(comboBoxInput, { key: 'ArrowUp', code: 'ArrowUp' });
+    fireEvent.keyDown(comboBoxInput, { key: 'ArrowUp', code: 'ArrowUp' });
+    fireEvent.keyUp(comboBoxInput, { key: 'ArrowUp', code: 'ArrowUp' });
     expect(getVisibleFieldSelectOptions()).toEqual(allOptions.slice(8));
-  }, 10000); // this test can be long running due to a big tree we're rendering and userEvent.type function that is slow
+  }, 10000);
 
   it('should hide fields that have no data', () => {
     (useExistingFieldsReader as jest.Mock).mockImplementationOnce(() => {
@@ -2350,7 +2363,7 @@ describe('FormBasedDimensionEditor', () => {
                 searchable: true,
               },
             ]),
-            getFormatterForField: () => ({ convert: (v: unknown) => v }),
+            getFormatterForField: () => ({ convertToText: (v: unknown) => v }),
             isPersisted: true,
             spec: {},
           },
@@ -2511,5 +2524,53 @@ describe('FormBasedDimensionEditor', () => {
     );
 
     expect(wrapper.find('[data-test-subj="lens-dimensionTabs"]').exists()).toBeFalsy();
+  });
+
+  describe('FormatSelector numeric column detection', () => {
+    it('should show FormatSelector when activeData reports the column as numeric', () => {
+      renderDimensionPanel({
+        state: getStateWithColumns({ col1: lastValueColumn('string') }),
+        activeData: {
+          first: {
+            type: 'datatable',
+            columns: [{ id: 'col1', name: 'source', meta: { type: 'number' } }],
+            rows: [],
+          },
+        },
+      });
+
+      expect(screen.getByTestId('indexPattern-dimension-format')).toBeInTheDocument();
+    });
+
+    it('should hide FormatSelector when activeData reports the column as non-numeric', () => {
+      renderDimensionPanel({
+        state: getStateWithColumns({ col1: lastValueColumn('number') }),
+        activeData: {
+          first: {
+            type: 'datatable',
+            columns: [{ id: 'col1', name: 'source', meta: { type: 'string' } }],
+            rows: [],
+          },
+        },
+      });
+
+      expect(screen.queryByTestId('indexPattern-dimension-format')).not.toBeInTheDocument();
+    });
+
+    it('should show FormatSelector when selectedColumn dataType is numeric and activeData is not available', () => {
+      renderDimensionPanel({
+        state: getStateWithColumns({ col1: lastValueColumn('number') }),
+      });
+
+      expect(screen.getByTestId('indexPattern-dimension-format')).toBeInTheDocument();
+    });
+
+    it('should hide FormatSelector selectedColumn dataType is non numeric and activeData is not available', () => {
+      renderDimensionPanel({
+        state: getStateWithColumns({ col1: lastValueColumn('string') }),
+      });
+
+      expect(screen.queryByTestId('indexPattern-dimension-format')).not.toBeInTheDocument();
+    });
   });
 });

@@ -6,6 +6,7 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
+import { schema } from '@kbn/config-schema';
 import type { GetRuleTypesInternalResponseBodyV1 } from '../../../../../../common/routes/rule/apis/list_types/internal';
 import { getRuleTypesInternalResponseSchemaV1 } from '../../../../../../common/routes/rule/apis/list_types/internal';
 import type { ILicenseState } from '../../../../../lib';
@@ -14,6 +15,14 @@ import type { AlertingRequestHandlerContext } from '../../../../../types';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../../../../types';
 import { transformRuleTypesInternalResponseV1 } from './transforms';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../../constants';
+
+/**
+ * When `true`, the response also includes rule types the user can read as alerts
+ * (not only as rules). Alert views opt in so alerts-only users can receive a list
+ * of rule types for which they can read alerts. */
+const querySchema = schema.object({
+  include_alert_viewable_types: schema.boolean({ defaultValue: false }),
+});
 
 export const getRuleTypesInternalRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -27,7 +36,9 @@ export const getRuleTypesInternalRoute = (
         access: 'internal',
       },
       validate: {
-        request: {},
+        request: {
+          query: querySchema,
+        },
         response: {
           200: {
             body: () => getRuleTypesInternalResponseSchemaV1,
@@ -42,7 +53,9 @@ export const getRuleTypesInternalRoute = (
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const rulesClient = await (await context.alerting).getRulesClient();
-        const ruleTypes = await rulesClient.listRuleTypes();
+        const ruleTypes = await rulesClient.listRuleTypes({
+          includeAlertViewableTypes: req.query.include_alert_viewable_types,
+        });
 
         const responseBody: GetRuleTypesInternalResponseBodyV1 =
           transformRuleTypesInternalResponseV1(ruleTypes);

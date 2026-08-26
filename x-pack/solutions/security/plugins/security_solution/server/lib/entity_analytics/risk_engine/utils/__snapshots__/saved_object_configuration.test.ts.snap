@@ -37,6 +37,11 @@ Object {
     "required": false,
     "type": "float",
   },
+  "host.risk.calculation_run_id": Object {
+    "array": false,
+    "required": false,
+    "type": "keyword",
+  },
   "host.risk.category_1_count": Object {
     "array": false,
     "required": false,
@@ -127,6 +132,26 @@ Object {
     "required": false,
     "type": "keyword",
   },
+  "host.risk.related_entities": Object {
+    "array": true,
+    "required": false,
+    "type": "object",
+  },
+  "host.risk.related_entities.entity_id": Object {
+    "array": false,
+    "required": false,
+    "type": "keyword",
+  },
+  "host.risk.related_entities.relationship_type": Object {
+    "array": false,
+    "required": false,
+    "type": "keyword",
+  },
+  "host.risk.score_type": Object {
+    "array": false,
+    "required": false,
+    "type": "keyword",
+  },
   "service.name": Object {
     "array": false,
     "required": false,
@@ -151,6 +176,11 @@ Object {
     "array": false,
     "required": false,
     "type": "float",
+  },
+  "service.risk.calculation_run_id": Object {
+    "array": false,
+    "required": false,
+    "type": "keyword",
   },
   "service.risk.category_1_count": Object {
     "array": false,
@@ -242,6 +272,26 @@ Object {
     "required": false,
     "type": "keyword",
   },
+  "service.risk.related_entities": Object {
+    "array": true,
+    "required": false,
+    "type": "object",
+  },
+  "service.risk.related_entities.entity_id": Object {
+    "array": false,
+    "required": false,
+    "type": "keyword",
+  },
+  "service.risk.related_entities.relationship_type": Object {
+    "array": false,
+    "required": false,
+    "type": "keyword",
+  },
+  "service.risk.score_type": Object {
+    "array": false,
+    "required": false,
+    "type": "keyword",
+  },
   "user.name": Object {
     "array": false,
     "required": false,
@@ -266,6 +316,11 @@ Object {
     "array": false,
     "required": false,
     "type": "float",
+  },
+  "user.risk.calculation_run_id": Object {
+    "array": false,
+    "required": false,
+    "type": "keyword",
   },
   "user.risk.category_1_count": Object {
     "array": false,
@@ -353,6 +408,26 @@ Object {
     "type": "keyword",
   },
   "user.risk.notes": Object {
+    "array": false,
+    "required": false,
+    "type": "keyword",
+  },
+  "user.risk.related_entities": Object {
+    "array": true,
+    "required": false,
+    "type": "object",
+  },
+  "user.risk.related_entities.entity_id": Object {
+    "array": false,
+    "required": false,
+    "type": "keyword",
+  },
+  "user.risk.related_entities.relationship_type": Object {
+    "array": false,
+    "required": false,
+    "type": "keyword",
+  },
+  "user.risk.score_type": Object {
     "array": false,
     "required": false,
     "type": "keyword",

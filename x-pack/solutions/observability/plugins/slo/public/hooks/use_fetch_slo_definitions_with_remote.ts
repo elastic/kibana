@@ -37,21 +37,17 @@ export function useFetchSloDefinitionsWithRemote({
   const { isLoading, isError, isSuccess, data, refetch } = useQuery({
     queryKey: sloKeys.searchDefinitions({ search: searchTerm, size, searchAfter, remoteName }),
     queryFn: async ({ signal }) => {
-      try {
-        return await sloClient.fetch('GET /internal/observability/slos/_search_definitions', {
-          params: {
-            query: {
-              ...(searchTerm !== undefined && { search: searchTerm }),
-              ...(size !== undefined && { size }),
-              ...(searchAfter !== undefined && { searchAfter }),
-              ...(remoteName !== undefined && { remoteName }),
-            },
+      return await sloClient.fetch('GET /internal/observability/slos/_search_definitions', {
+        params: {
+          query: {
+            ...(searchTerm !== undefined && { search: searchTerm }),
+            ...(size !== undefined && { size }),
+            ...(searchAfter !== undefined && { searchAfter }),
+            ...(remoteName !== undefined && { remoteName }),
           },
-          signal,
-        });
-      } catch (error) {
-        throw new Error(`Something went wrong. Error: ${error}`);
-      }
+        },
+        signal,
+      });
     },
     retry: false,
     refetchOnWindowFocus: false,

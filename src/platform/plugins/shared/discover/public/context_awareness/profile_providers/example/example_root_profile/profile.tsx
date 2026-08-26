@@ -7,41 +7,50 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  EuiBadge,
-  EuiCodeBlock,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiBadge, EuiFlyout } from '@elastic/eui';
 import { getFieldValue } from '@kbn/discover-utils';
-import React, { useState } from 'react';
+import { useObservable } from '@kbn/use-observable';
+import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
+import React from 'react';
 import type { RootProfileProvider } from '../../../profiles';
 import { SolutionType } from '../../../profiles';
-import { ExampleContextProvider } from '../example_context';
+import { EXAMPLE_PROFILE_STATE_DEF } from '../../../../../common/context_awareness';
 
 export const createExampleRootProfileProvider = (): RootProfileProvider => ({
   profileId: 'example-root-profile',
   isExperimental: true,
   profile: {
-    getRenderAppWrapper,
     getDefaultAdHocDataViews,
-    getCellRenderers: (prev) => (params) => ({
-      ...prev(params),
-      '@timestamp': (props) => {
+    getDefaultEsqlQuery,
+    getCellRenderers: (prev, { toolkit }) => {
+      const stateAdapter = toolkit.getStateAdapter(EXAMPLE_PROFILE_STATE_DEF);
+      const profileState$ = stateAdapter.getState$();
+
+      const Timestamp = (props: DataGridCellValueElementProps) => {
         const timestamp = getFieldValue(props.row, '@timestamp') as string;
+        const profileState = useObservable(profileState$, stateAdapter.getState());
+        const timestampColor = profileState.timestampColor;
 
         return (
-          <EuiBadge color="hollow" title={timestamp} data-test-subj="exampleRootProfileTimestamp">
+          <EuiBadge
+            color={timestampColor}
+            title={timestamp}
+            data-color={timestampColor}
+            data-test-subj="exampleRootProfileTimestamp"
+          >
             {timestamp}
           </EuiBadge>
         );
-      },
-    }),
+      };
+
+      return (params) => ({
+        ...prev(params),
+        '@timestamp': (props) => <Timestamp {...props} />,
+      });
+    },
     /**
-     * The `getAppMenu` extension point gives access to AppMenuRegistry with methods `registerCustomItem` and
-     * `registerCustomPopoverItem`.
+     * The `getAppMenu` extension point gives access to AppMenuRegistry with methods like `registerCustomItem` and
+     * `registerPopoverItem`.
      * The extension also provides the essential params like current dataView, adHocDataViews etc when defining a custom action implementation.
      * And it supports opening custom flyouts and any other modals on the click.
      * `getAppMenu` can be configured in both root and data source profiles.
@@ -78,11 +87,12 @@ export const createExampleRootProfileProvider = (): RootProfileProvider => ({
                 order: 2,
                 label: 'Custom action 12 (from Root profile)',
                 testId: 'example-custom-root-action12',
-                run: ({ context: { onFinishAction } }) => {
+                render: ({ context: { onFinishAction } }) => {
                   // This is an example of a custom action that opens a flyout or any other custom modal.
                   // To do so, simply return a React element and call onFinishAction when you're done.
                   return (
                     <EuiFlyout
+                      aria-label="Example custom action flyout"
                       onClose={onFinishAction}
                       data-test-subj="example-custom-root-action12-flyout"
                     >
@@ -111,45 +121,12 @@ export const createExampleRootProfileProvider = (): RootProfileProvider => ({
 export const createExampleSolutionViewRootProfileProvider = (): RootProfileProvider => ({
   profileId: 'example-solution-view-root-profile',
   isExperimental: true,
-  profile: { getRenderAppWrapper, getDefaultAdHocDataViews },
+  profile: { getDefaultAdHocDataViews },
   resolve: (params) => ({
     isMatch: true,
     context: { solutionType: params.solutionNavId as SolutionType },
   }),
 });
-
-const getRenderAppWrapper: RootProfileProvider['profile']['getRenderAppWrapper'] =
-  (PrevWrapper) =>
-  ({ children }) => {
-    const [currentMessage, setCurrentMessage] = useState<string | undefined>(undefined);
-
-    return (
-      <PrevWrapper>
-        <ExampleContextProvider value={{ currentMessage, setCurrentMessage }}>
-          {children}
-          {currentMessage && (
-            <EuiFlyout
-              type="push"
-              maxWidth={500}
-              onClose={() => setCurrentMessage(undefined)}
-              data-test-subj="exampleRootProfileFlyout"
-            >
-              <EuiFlyoutHeader hasBorder>
-                <EuiTitle size="m">
-                  <h2>Inspect message</h2>
-                </EuiTitle>
-              </EuiFlyoutHeader>
-              <EuiFlyoutBody>
-                <EuiCodeBlock isCopyable data-test-subj="exampleRootProfileCurrentMessage">
-                  {currentMessage}
-                </EuiCodeBlock>
-              </EuiFlyoutBody>
-            </EuiFlyout>
-          )}
-        </ExampleContextProvider>
-      </PrevWrapper>
-    );
-  };
 
 const getDefaultAdHocDataViews: RootProfileProvider['profile']['getDefaultAdHocDataViews'] =
   (prev) => () =>
@@ -162,3 +139,9 @@ const getDefaultAdHocDataViews: RootProfileProvider['profile']['getDefaultAdHocD
         timeFieldName: '@timestamp',
       },
     ];
+
+const getDefaultEsqlQuery: RootProfileProvider['profile']['getDefaultEsqlQuery'] =
+  (prev) => () => ({
+    ...prev(),
+    query: 'FROM my-example-* | LIMIT 10',
+  });

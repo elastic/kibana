@@ -192,7 +192,7 @@ export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
       contentProps={{ 'aria-label': actionAriaLabel }}
       onClick={togglePopover}
       size="s"
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="right"
     >
       {actionLabel}
@@ -207,6 +207,7 @@ export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
         button={button}
         isOpen={isPopoverOpen}
         panelPaddingSize="none"
+        aria-label={actionAriaLabel}
       >
         <EuiContextMenu initialPanelId={0} panels={panels} />
         <AlertFlyout

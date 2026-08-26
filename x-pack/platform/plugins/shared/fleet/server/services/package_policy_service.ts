@@ -27,10 +27,12 @@ import type {
   ListResult,
   UpgradePackagePolicyDryRunResponseItem,
 } from '../../common';
+import type { PackagePolicyAssetsMap } from '../../common/types';
 import type { DeletePackagePoliciesResponse } from '../../common/types';
 import type {
   NewPackagePolicy,
   UpdatePackagePolicy,
+  UpdatePackagePolicyWithId,
   PackagePolicy,
   PackagePolicySOAttributes,
 } from '../types';
@@ -53,7 +55,7 @@ export type RunExternalCallbacksPackagePolicyArgument<A extends ExternalCallback
     : A extends 'packagePolicyPostCreate'
     ? PackagePolicy
     : A extends 'packagePolicyUpdate'
-    ? UpdatePackagePolicy
+    ? UpdatePackagePolicyWithId
     : A extends 'packagePolicyPostUpdate'
     ? PackagePolicy
     : never;
@@ -88,6 +90,7 @@ export interface PackagePolicyClient {
       skipUniqueNameVerification?: boolean;
       overwrite?: boolean;
       packageInfo?: PackageInfo;
+      createDatasetTemplates?: boolean;
     },
     context?: RequestHandlerContext,
     request?: KibanaRequest
@@ -117,7 +120,7 @@ export interface PackagePolicyClient {
   bulkUpdate(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
-    packagePolicyUpdates: UpdatePackagePolicy[],
+    packagePolicyUpdates: UpdatePackagePolicyWithId[],
     options?: PackagePolicyClientBulkUpdateOptions,
     currentVersion?: string
   ): Promise<{
@@ -148,11 +151,24 @@ export interface PackagePolicyClient {
     options?: PackagePolicyClientFindAllForAgentPolicyOptions
   ): Promise<PackagePolicy[]>;
 
+  compilePackagePolicyForVersions(
+    soClient: SavedObjectsClientContract,
+    packageInfo: PackageInfo,
+    assetsMap: PackagePolicyAssetsMap,
+    packagePolicy: PackagePolicy,
+    agentVersions?: string[]
+  ): Promise<void>;
+
   getByIDs(
     soClient: SavedObjectsClientContract,
     ids: string[],
-    options?: PackagePolicyClientGetByIdsOptions
+    options?: Omit<PackagePolicyClientGetByIdsOptions, 'fields'>
   ): Promise<PackagePolicy[]>;
+  getByIDs(
+    soClient: SavedObjectsClientContract,
+    ids: string[],
+    options: PackagePolicyClientGetByIdsOptions & { fields: string[] }
+  ): Promise<PartialPackagePolicy[]>;
 
   list(
     soClient: SavedObjectsClientContract,
@@ -175,7 +191,8 @@ export interface PackagePolicyClient {
       skipUniqueNameVerification?: boolean;
       bumpRevision?: boolean;
     },
-    currentVersion?: string
+    /** Request context so update callbacks can use the caller's Elasticsearch client. */
+    context?: RequestHandlerContext
   ): Promise<PackagePolicy>;
 
   delete(
@@ -278,7 +295,8 @@ export interface PackagePolicyClient {
 
   rollback(
     soClient: SavedObjectsClientContract,
-    packagePolicies: Array<SavedObjectsFindResult<PackagePolicySOAttributes>>
+    packagePolicies: Array<SavedObjectsFindResult<PackagePolicySOAttributes>>,
+    previousVersion: string
   ): Promise<RollbackResult>;
 
   restoreRollback(
@@ -322,20 +340,28 @@ export type PackagePolicyClientFetchAllItemsOptions = Pick<
 > &
   WithSpaceIdsOption;
 
+export type PartialPackagePolicy = Pick<PackagePolicy, 'id'> & Partial<PackagePolicy>;
+
 export interface PackagePolicyClientGetByIdsOptions extends WithSpaceIdsOption {
   ignoreMissing?: boolean;
+  fields?: string[];
 }
 
 export interface PackagePolicyClientDeleteOptions extends WithSpaceIdsOption {
   user?: AuthenticatedUser;
   skipUnassignFromAgentPolicies?: boolean;
+  /** Skip the agent policy revision bump when the caller will perform it separately. */
+  bumpRevision?: boolean;
   force?: boolean;
   asyncDeploy?: boolean;
+  ignoreMissing?: boolean;
 }
 
 export interface PackagePolicyClientBulkUpdateOptions {
   user?: AuthenticatedUser;
   force?: boolean;
+  /** Skip the agent policy revision bump when the caller will perform it separately. */
+  bumpRevision?: boolean;
   asyncDeploy?: boolean;
   fromBulkUpgrade?: boolean;
   oldPackagePolicies?: PackagePolicy[];

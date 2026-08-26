@@ -179,6 +179,7 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
                         <EuiPopover
+                          aria-label={i18n.BULK_ACTIONS}
                           isOpen={isPopoverOpen}
                           closePopover={closePopover}
                           panelPaddingSize="none"
@@ -188,7 +189,7 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
                               onClick={togglePopover}
                               size="xs"
                               iconSide="right"
-                              iconType="arrowDown"
+                              iconType="chevronSingleDown"
                               flush="left"
                               data-test-subj="case-table-bulk-actions-link-icon"
                             >

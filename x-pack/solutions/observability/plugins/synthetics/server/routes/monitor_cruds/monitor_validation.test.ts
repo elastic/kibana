@@ -279,9 +279,48 @@ describe('validateMonitor', () => {
         details: 'Invalid value "invalid-location" supplied to "locations"',
       });
     });
+
+    it('when browser timeout is less than 30 seconds with private locations', () => {
+      const testMonitor = {
+        ...testBrowserFields,
+        [ConfigKey.SOURCE_INLINE]: 'step()',
+        [ConfigKey.TIMEOUT]: '29',
+        [ConfigKey.LOCATIONS]: [
+          {
+            id: 'private-1',
+            label: 'Private Location',
+            geo: { lat: 0, lon: 0 },
+            isServiceManaged: false,
+          },
+        ],
+      } as MonitorFields;
+      const result = validateMonitor(testMonitor, 'default');
+      expect(result).toMatchObject({
+        valid: false,
+        reason: 'Browser monitor timeout for private locations is invalid',
+        details:
+          'Timeout of 29 seconds is too low. Browser monitors on private locations require a minimum timeout of 30 seconds.',
+        payload: testMonitor,
+      });
+    });
   });
 
   describe('should validate', () => {
+    it('when browser timeout is less than 30 seconds with only public locations', () => {
+      const testMonitor = {
+        ...testBrowserFields,
+        [ConfigKey.SOURCE_INLINE]: 'step()',
+        [ConfigKey.TIMEOUT]: '10',
+      } as MonitorFields;
+      const result = validateMonitor(testMonitor, 'default');
+      expect(result).toMatchObject({
+        valid: true,
+        reason: '',
+        details: '',
+        payload: testMonitor,
+      });
+    });
+
     it('when payload is a correct ICMP monitor', () => {
       const testMonitor = testICMPFields as MonitorFields;
       const result = validateMonitor(testMonitor, 'default');
@@ -455,6 +494,46 @@ describe('validateMonitor', () => {
         details: '',
         payload: testMonitor,
       });
+    });
+  });
+
+  // Partial updates validate the *merged* monitor (previous + patch), not the patch alone.
+  describe('merged partial-update gate', () => {
+    const mergedWith = (patch: Record<string, unknown>) =>
+      ({ ...testHTTPFields, ...patch } as unknown as MonitorFields);
+
+    it('accepts a valid partial patch on a known field', () => {
+      const result = validateMonitor(mergedWith({ [ConfigKey.ENABLED]: false }), 'default');
+      expect(result.valid).toBe(true);
+    });
+
+    it('rejects an out-of-range value on a known field (schedule)', () => {
+      const result = validateMonitor(
+        mergedWith({ [ConfigKey.SCHEDULE]: { number: '4', unit: ScheduleUnit.MINUTES } }),
+        'default'
+      );
+      expect(result).toMatchObject({ valid: false, reason: 'Monitor schedule is invalid' });
+    });
+
+    it('rejects a wrong-typed value on a known field (timeout)', () => {
+      const result = validateMonitor(mergedWith({ [ConfigKey.TIMEOUT]: '3m' }), 'default');
+      expect(result).toMatchObject({
+        valid: false,
+        reason: `Monitor is not a valid monitor of type ${MonitorTypeEnum.HTTP}`,
+      });
+    });
+
+    it('strips unknown/foreign fields rather than rejecting (io-ts t.exact)', () => {
+      const result = validateMonitor(
+        mergedWith({ notAMonitorField: 'nope', anotherBogusKey: 123 }),
+        'default'
+      );
+      // foreign keys do not fail validation...
+      expect(result.valid).toBe(true);
+      // ...but they are dropped from what actually gets persisted.
+      expect(result.decodedMonitor).toBeDefined();
+      expect(result.decodedMonitor).not.toHaveProperty('notAMonitorField');
+      expect(result.decodedMonitor).not.toHaveProperty('anotherBogusKey');
     });
   });
 

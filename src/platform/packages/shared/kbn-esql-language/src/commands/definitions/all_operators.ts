@@ -35,6 +35,10 @@ export const patternMatchOperators: FunctionDefinition[] = operatorFunctionDefin
   ({ name }) => name === 'like' || name === 'not like' || name === 'rlike' || name === 'not rlike'
 );
 
+export const matchOperators: FunctionDefinition[] = operatorFunctionDefinitions.filter(
+  ({ name }) => name === ':'
+);
+
 export const logicalOperators: FunctionDefinition[] = [
   {
     name: 'and',
@@ -59,9 +63,12 @@ export const logicalOperators: FunctionDefinition[] = [
     Location.SORT,
     Location.STATS,
     Location.STATS_BY,
+    Location.LIMIT_BY,
+    Location.CHANGE_POINT_BY,
     Location.STATS_WHERE,
     Location.RERANK,
     Location.JOIN,
+    Location.HIGHLIGHT_QUERY,
   ],
   signatures: [
     {
@@ -87,9 +94,12 @@ const otherDefinitions: FunctionDefinition[] = [
       Location.ROW,
       Location.SORT,
       Location.STATS_BY,
+      Location.LIMIT_BY,
+      Location.CHANGE_POINT_BY,
       Location.STATS_WHERE,
       Location.RERANK,
       Location.JOIN,
+      Location.HIGHLIGHT_QUERY,
     ],
     signatures: [
       {
@@ -108,6 +118,8 @@ const otherDefinitions: FunctionDefinition[] = [
       Location.EVAL,
       Location.STATS,
       Location.STATS_BY,
+      Location.LIMIT_BY,
+      Location.CHANGE_POINT_BY,
       Location.ROW,
       Location.WHERE,
       Location.ENRICH,
@@ -117,6 +129,8 @@ const otherDefinitions: FunctionDefinition[] = [
       Location.RENAME,
       Location.RERANK,
       Location.JOIN,
+      // HIGHLIGHT's optional `prefix = "..."` modifier, like RERANK's `target = "query"`
+      Location.HIGHLIGHT_QUERY,
     ],
     signatures: [
       {

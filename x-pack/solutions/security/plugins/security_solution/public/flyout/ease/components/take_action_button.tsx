@@ -51,7 +51,7 @@ export const TakeActionButton = memo(() => {
         data-test-subj={TAKE_ACTION_BUTTON_TEST_ID}
         fill
         iconSide="right"
-        iconType="arrowDown"
+        iconType="chevronSingleDown"
         onClick={togglePopover}
       >
         {TAKE_ACTION_BUTTON}
@@ -93,12 +93,13 @@ export const TakeActionButton = memo(() => {
 
   return (
     <EuiPopover
+      aria-label={TAKE_ACTION_BUTTON}
       button={button}
       closePopover={togglePopover}
       isOpen={isPopoverOpen}
       panelPaddingSize="none"
     >
-      <EuiContextMenu initialPanelId={0} panels={panels} size="s" />
+      <EuiContextMenu initialPanelId={0} panels={panels} />
     </EuiPopover>
   );
 });

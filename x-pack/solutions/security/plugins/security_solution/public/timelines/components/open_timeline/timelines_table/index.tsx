@@ -7,10 +7,11 @@
 
 import { EuiBasicTable } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
+import { i18n as kibanaI18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { DeleteConfirmModal } from '../../../../notes/components/delete_confirm_modal';
 import * as i18n from '../translations';
 import type {
@@ -28,7 +29,7 @@ import type {
 import { getActionsColumns } from './actions_columns';
 import { getCommonColumns } from './common_columns';
 import { getExtendedColumns } from './extended_columns';
-import { getIconHeaderColumns } from './icon_header_columns';
+import { getIconHeaderColumns, getSuperTimelineQueryTypeColumn } from './icon_header_columns';
 import {
   TimelineStatusEnum,
   type TimelineType,
@@ -81,7 +82,8 @@ export const getTimelinesTableColumns = ({
     }),
     ...getExtendedColumns(showExtendedColumns),
     ...getIconHeaderColumns({ timelineType }),
-    ...(actionTimelineToShow.length
+    ...(timelineType !== TimelineTypeEnum.template ? [getSuperTimelineQueryTypeColumn()] : []),
+    ...(actionTimelineToShow.some((a) => a !== 'selectable')
       ? getActionsColumns({
           onCreateRule,
           onCreateRuleFromEql,
@@ -231,7 +233,9 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
       <>
         {pendingDeleteIds.length > 0 && <DeleteConfirmModal />}
         <EuiBasicTable
-          tableCaption={i18n.TIMELINE_TABLE_CAPTION}
+          tableCaption={kibanaI18n.translate('xpack.securitySolution.timeline.timelinesCaption', {
+            defaultMessage: 'Timelines',
+          })}
           columns={columns}
           data-test-subj="timelines-table"
           itemId="savedObjectId"

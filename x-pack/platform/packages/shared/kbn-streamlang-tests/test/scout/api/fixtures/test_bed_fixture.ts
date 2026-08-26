@@ -6,8 +6,23 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import type { ErrorCause, IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  ErrorCause,
+  IngestFieldAccessPattern,
+  IngestProcessorContainer,
+} from '@elastic/elasticsearch/lib/api/types';
 import { apiTest } from '@kbn/scout';
+
+/**
+ * Optional pipeline settings applied when a pipeline is created for an ingest call.
+ */
+export interface TestBedPipelineOptions {
+  field_access_pattern?: IngestFieldAccessPattern;
+}
+
+export interface TestBedIngestOptions {
+  pipeline?: TestBedPipelineOptions;
+}
 
 export interface TestBedFixture {
   testBed: {
@@ -17,36 +32,38 @@ export interface TestBedFixture {
      * @param indexName The name of the index.
      * @param documents An array of documents to ingest.
      * @param processors An optional array of ingest processors to create a pipeline.
+     * @param options Optional ingest options, e.g. pipeline settings like `field_access_pattern`.
      * @returns An object containing the number of ingested documents and an array of errors.
      */
     ingest: (
       indexName: string,
-      documents: Array<Record<string, any>>,
-      processors?: IngestProcessorContainer[]
+      documents: Array<Record<string, unknown>>,
+      processors?: IngestProcessorContainer[],
+      options?: TestBedIngestOptions
     ) => Promise<{ errors: ErrorCause[]; docs: number }>;
     /**
      * Gets all documents from an index in their natural, non-deterministic order.
      * @param indexName The name of the index.
      * @returns An array of documents.
      */
-    getDocs: (indexName: string) => Promise<Array<Record<string, any>>>;
+    getDocs: (indexName: string) => Promise<Array<Record<string, unknown>>>;
     /**
      * Gets all documents from an index, sorted deterministically by the internal `order_id`.
      * @param indexName The name of the index.
      * @returns A sorted array of documents.
      */
-    getDocsOrdered: (indexName: string) => Promise<Array<Record<string, any>>>;
+    getDocsOrdered: (indexName: string) => Promise<Array<Record<string, unknown>>>;
     /**
      * Serializes documents with each nested field represented in dot notation.
      * Helpful to compare documents returned by ES|QL queries. Returns in non-deterministic order.
      * @param indexName
      */
-    getFlattenedDocs: (indexName: string) => Promise<Array<Record<string, any>>>;
+    getFlattenedDocs: (indexName: string) => Promise<Array<Record<string, unknown>>>;
     /**
      * Serializes documents with each nested field represented in dot notation, sorted deterministically by `order_id`.
      * @param indexName
      */
-    getFlattenedDocsOrdered: (indexName: string) => Promise<Array<Record<string, any>>>;
+    getFlattenedDocsOrdered: (indexName: string) => Promise<Array<Record<string, unknown>>>;
     /**
      * Deletes an index.
      * @param indexName The name of the index to delete.
@@ -61,11 +78,15 @@ export const testBedFixture = apiTest.extend<TestBedFixture>({
       const createdPipelines = new Set<string>();
       const createdIndexes = new Set<string>();
 
-      const createPipeline = async (processors: IngestProcessorContainer[]) => {
+      const createPipeline = async (
+        processors: IngestProcessorContainer[],
+        pipelineOptions?: TestBedPipelineOptions
+      ) => {
         const pipelineId = `test-bed-pipeline-${Date.now()}`;
         await esClient.ingest.putPipeline({
           id: pipelineId,
           processors,
+          ...pipelineOptions,
         });
         createdPipelines.add(pipelineId);
         return pipelineId;
@@ -73,12 +94,13 @@ export const testBedFixture = apiTest.extend<TestBedFixture>({
 
       const ingest = async (
         indexName: string,
-        documents: Array<Record<string, any>>,
-        processors?: IngestProcessorContainer[]
+        documents: Array<Record<string, unknown>>,
+        processors?: IngestProcessorContainer[],
+        options?: TestBedIngestOptions
       ) => {
         let pipelineId: string | undefined;
         if (processors && processors.length > 0) {
-          pipelineId = await createPipeline(processors);
+          pipelineId = await createPipeline(processors, options?.pipeline);
         }
 
         await ensureIndexCreated(indexName, esClient);
@@ -92,7 +114,7 @@ export const testBedFixture = apiTest.extend<TestBedFixture>({
           .map((doc, idx) => ({ ...doc, order_id: idx })) // Add order_id for deterministic sorting
           .flatMap((doc) => [{ index: { _index: indexName } }, doc]);
 
-        const bulkRequest: Record<string, any> = {
+        const bulkRequest: Record<string, unknown> = {
           refresh: true,
           body,
         };
@@ -122,25 +144,25 @@ export const testBedFixture = apiTest.extend<TestBedFixture>({
           size: 1000,
         });
 
-        return response.hits.hits.map((hit) => hit._source as Record<string, any>);
+        return response.hits.hits.map((hit) => hit._source as Record<string, unknown>);
       };
 
       const getDocsOrdered = async (indexName: string) => {
         const docs = await getDocs(indexName);
-        return docs.sort((a, b) => a.order_id - b.order_id);
+        return docs.sort((a, b) => (a.order_id as number) - (b.order_id as number));
       };
 
       const getFlattenedDocs = async (indexName: string) => {
         const docs = await getDocs(indexName);
 
         const docsWithDottedNames = docs.map((doc) => {
-          const result: Record<string, any> = {};
+          const result: Record<string, unknown> = {};
 
-          const flatten = (obj: Record<string, any>, prefix = '') => {
+          const flatten = (obj: Record<string, unknown>, prefix = '') => {
             for (const [key, value] of Object.entries(obj)) {
               const prefixedKey = prefix ? `${prefix}.${key}` : key;
               if (value && typeof value === 'object' && !Array.isArray(value)) {
-                flatten(value, prefixedKey);
+                flatten(value as Record<string, unknown>, prefixedKey);
               } else {
                 result[prefixedKey] = value;
               }
@@ -156,7 +178,7 @@ export const testBedFixture = apiTest.extend<TestBedFixture>({
 
       const getFlattenedDocsOrdered = async (indexName: string) => {
         const docs = await getFlattenedDocs(indexName);
-        return docs.sort((a, b) => a.order_id - b.order_id);
+        return docs.sort((a, b) => (a.order_id as number) - (b.order_id as number));
       };
 
       const clean = async (indexName: string) => {

@@ -5,8 +5,12 @@
  * 2.0.
  */
 
+import { ApiKeyType } from '../task_runner/types';
 import type { RawAlertInstance } from '../../common';
 import type { AlertingConfig } from '../config';
+
+export { getRulesClientMockParams } from './rules_client_mock';
+export type { RulesClientMock } from './rules_client_mock';
 
 interface Resolvable<T> {
   resolve: (arg: T) => void;
@@ -54,6 +58,13 @@ export function generateAlertingConfig(overwrites: Partial<AlertingConfig> = {})
       interval: '5m',
     },
     enableFrameworkAlerts: false,
+    alertsService: {
+      totalFieldsLimit: 2800,
+    },
+    ruleChangeTracking: {
+      enabled: false,
+      scope: ['security'],
+    },
     invalidateApiKeysTask: {
       interval: '5m',
       removalDelay: '1h',
@@ -70,6 +81,7 @@ export function generateAlertingConfig(overwrites: Partial<AlertingConfig> = {})
           max: 1000,
         },
       },
+      apiKeyType: ApiKeyType.ES,
     },
     rulesSettings: { enabled: true, cacheInterval: 60000 },
     ...overwrites,

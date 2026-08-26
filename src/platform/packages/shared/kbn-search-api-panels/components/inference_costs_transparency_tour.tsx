@@ -20,6 +20,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import * as i18n from '../translations';
 import { useShowEisPromotionalContent } from '../hooks/use_show_eis_promotional_content';
+import { useKibana } from '../hooks/use_kibana';
 
 /**
  * Props for the InferenceCostsTransparencyTour component.
@@ -67,8 +68,12 @@ export const InferenceCostsTransparencyTour = ({
     promoId: `${promoId}InferenceCostsTransparencyTour`,
   });
   const dataId = `${promoId}-inference-costs-tour`;
+  const {
+    services: { notifications },
+  } = useKibana();
+  const isTourEnabled = notifications?.tours?.isEnabled() ?? true;
 
-  if (!isPromoVisible || !isReady || !isCloudEnabled) {
+  if (!isPromoVisible || !isReady || !isCloudEnabled || !isTourEnabled) {
     return children;
   }
 
@@ -116,7 +121,7 @@ export const InferenceCostsTransparencyTour = ({
                 data-telemetry-id={`${dataId}-learnMore-btn`}
                 target="_blank"
                 iconSide="right"
-                iconType="popout"
+                iconType="external"
               >
                 {i18n.TOUR_CTA}
               </EuiButton>,

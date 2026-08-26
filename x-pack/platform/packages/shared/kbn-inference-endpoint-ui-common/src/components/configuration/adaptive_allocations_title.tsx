@@ -16,12 +16,19 @@ import {
   EuiSpacer,
   EuiTitle,
   EuiText,
+  EuiToolTip,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 export const AdaptiveAllocationsTitle: FC = () => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const popoverTitleId = useGeneratedHtmlId();
+  const adaptiveResourcesLabel = i18n.translate(
+    'xpack.inferenceEndpointUICommon.components.adaptiveResourcesAriaLabel',
+    { defaultMessage: 'Open adaptive resources information popover' }
+  );
 
   return (
     <>
@@ -39,24 +46,22 @@ export const AdaptiveAllocationsTitle: FC = () => {
         <EuiFlexItem grow={false}>
           <EuiPopover
             anchorPosition="upCenter"
+            aria-labelledby={popoverTitleId}
             button={
-              <EuiButtonIcon
-                color="text"
-                size="xs"
-                onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-                iconType="info"
-                aria-label={i18n.translate(
-                  'xpack.inferenceEndpointUICommon.components.adaptiveResourcesAriaLabel',
-                  {
-                    defaultMessage: 'Open adaptive resources information popover',
-                  }
-                )}
-              />
+              <EuiToolTip content={adaptiveResourcesLabel} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  color="text"
+                  size="xs"
+                  onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+                  iconType="info"
+                  aria-label={adaptiveResourcesLabel}
+                />
+              </EuiToolTip>
             }
             isOpen={isPopoverOpen}
             closePopover={() => setIsPopoverOpen(false)}
           >
-            <EuiPopoverTitle>
+            <EuiPopoverTitle id={popoverTitleId}>
               <FormattedMessage
                 id="xpack.inferenceEndpointUICommon.components.sectionPopoverTitle"
                 defaultMessage="Adaptive resources"

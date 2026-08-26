@@ -14,9 +14,10 @@
  *   version: 2023-10-31
  */
 
-import type { z } from '@kbn/zod';
+import type { z } from '@kbn/zod/v4';
+import { lazySchema } from '@kbn/zod/v4';
 
 import { EndpointList } from '../model/endpoint_list_common.gen';
 
+export const CreateEndpointListResponse = lazySchema(() => EndpointList);
 export type CreateEndpointListResponse = z.infer<typeof CreateEndpointListResponse>;
-export const CreateEndpointListResponse = EndpointList;

@@ -17,9 +17,9 @@ import {
 } from '../../errors';
 
 import { SO_SEARCH_LIMIT } from '../../constants';
-
-import { agentsKueryNamespaceFilter } from '../spaces/agent_namespaces';
+import { agentsKueryNamespaceFilter, buildFilterWithNamespace } from '../spaces/agent_namespaces';
 import { getCurrentNamespace } from '../spaces/get_current_namespace';
+import { removeVersionSuffixFromPolicyId } from '../../../common/services/version_specific_policies_utils';
 
 import {
   getAgentsById,
@@ -77,6 +77,7 @@ export async function reassignAgent(
 
   await updateAgent(esClient, agentId, {
     policy_id: newAgentPolicyId,
+    policy_base_id: removeVersionSuffixFromPolicyId(newAgentPolicyId),
     policy_revision: null,
     ...(newAgentPolicy?.space_ids ? { namespaces: newAgentPolicy.space_ids } : {}),
   });
@@ -100,17 +101,25 @@ export async function reassignAgents(
   options: ({ agents: Agent[] } | GetAgentsOptions) & {
     force?: boolean;
     batchSize?: number;
+    dryRun?: boolean;
   },
   newAgentPolicyId: string
-): Promise<{ actionId: string }> {
+): Promise<{ actionId: string } | { count: number }> {
   await verifyNewAgentPolicy(soClient, newAgentPolicyId);
 
   const currentSpaceId = getCurrentNamespace(soClient);
   const outgoingErrors: Record<Agent['id'], Error> = {};
   let givenAgents: Agent[] = [];
   if ('agents' in options) {
+    if (options.dryRun) {
+      return { count: options.agents.length };
+    }
     givenAgents = options.agents;
   } else if ('agentIds' in options) {
+    if (options.dryRun) {
+      const maybeAgents = await getAgentsById(esClient, soClient, options.agentIds);
+      return { count: maybeAgents.filter((a) => !('notFound' in a)).length };
+    }
     const maybeAgents = await getAgentsById(esClient, soClient, options.agentIds);
     for (const maybeAgent of maybeAgents) {
       if ('notFound' in maybeAgent) {
@@ -124,16 +133,27 @@ export async function reassignAgents(
   } else if ('kuery' in options) {
     const batchSize = options.batchSize ?? SO_SEARCH_LIMIT;
     const namespaceFilter = await agentsKueryNamespaceFilter(currentSpaceId);
-    const kuery = namespaceFilter ? `${namespaceFilter} AND ${options.kuery}` : options.kuery;
-    const res = await getAgentsByKuery(esClient, soClient, {
+    const kuery = buildFilterWithNamespace(namespaceFilter, options.kuery);
+    // cheap count — avoids hydrating up to batchSize agent documents just to read the total
+    const { total } = await getAgentsByKuery(esClient, soClient, {
       kuery,
       showAgentless: options.showAgentless,
       showInactive: options.showInactive ?? false,
       page: 1,
-      perPage: batchSize,
+      perPage: 0,
     });
+    if (options.dryRun) {
+      return { count: total };
+    }
     // running action in async mode for >10k agents (or actions > batchSize for testing purposes)
-    if (res.total <= batchSize) {
+    if (total <= batchSize) {
+      const res = await getAgentsByKuery(esClient, soClient, {
+        kuery,
+        showAgentless: options.showAgentless,
+        showInactive: options.showInactive ?? false,
+        page: 1,
+        perPage: batchSize,
+      });
       givenAgents = res.agents;
     } else {
       return await new ReassignActionRunner(
@@ -143,7 +163,7 @@ export async function reassignAgents(
           ...options,
           spaceId: currentSpaceId,
           batchSize,
-          total: res.total,
+          total,
           newAgentPolicyId,
         },
         { pitId: await openPointInTime(esClient) }

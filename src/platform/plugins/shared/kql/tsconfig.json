@@ -26,6 +26,7 @@
     "@kbn/utility-types-jest",
     "@kbn/config-schema",
     "@kbn/css-utils",
+    "@kbn/config",
   ],
   "exclude": [
     "target/**/*",

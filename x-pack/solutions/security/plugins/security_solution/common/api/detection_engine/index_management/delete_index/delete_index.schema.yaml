@@ -9,6 +9,10 @@ paths:
       operationId: DeleteAlertsIndex
       x-codegen-enabled: true
       summary: Delete an alerts index
+      description: |
+        Permanently deletes the Elastic Security alerts backing index in the current space, including the alerts
+        stored in it. Use with caution; prefer lifecycle policies or the UI when available.
+        Call `GET /api/detection_engine/index` first to confirm the index that will be removed.
       tags:
         - Alert index API
       responses:
@@ -22,27 +26,52 @@ paths:
                   acknowledged:
                     type: boolean
                 required: [acknowledged]
+              examples:
+                acknowledged:
+                  value:
+                    acknowledged: true
         401:
           description: Unsuccessful authentication response
           content:
             application/json:
               schema:
                 $ref: '../../../model/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+              examples:
+                unauthorized:
+                  value:
+                    statusCode: 401
+                    error: Unauthorized
+                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
         403:
           description: Not enough permissions response
           content:
             application/json:
               schema:
                 $ref: '../../../model/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                forbidden:
+                  value:
+                    message: "API [DELETE /api/detection_engine/index] is unauthorized for the current user. The user needs alerts management permissions for the space."
+                    status_code: 403
         404:
           description: Index does not exist response
           content:
             application/json:
               schema:
-                type: string
+                $ref: '../../../model/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                notFound:
+                  value:
+                    message: "The Elastic Security alerts index to delete was not found."
+                    status_code: 404
         500:
           description: Internal server error response
           content:
             application/json:
               schema:
                 $ref: '../../../model/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500

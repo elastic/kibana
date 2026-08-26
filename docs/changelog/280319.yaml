@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/280319
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-28
+- product: kibana
+areas:
+- AI and machine Learning
+title: Fix Agent Builder trace guidance to use span attributes instead of trace events
+description: Agent Builder tracing guidance, assistant queries, and the Gen AI Settings UI now point to chat span attributes instead of removed trace events and the empty logs index.

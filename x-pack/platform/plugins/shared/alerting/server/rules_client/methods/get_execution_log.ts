@@ -49,7 +49,7 @@ export async function getExecutionLogForRule(
   { id, dateStart, dateEnd, filter, page, perPage, sort }: GetExecutionLogByIdParams
 ): Promise<IExecutionLogResult> {
   context.logger.debug(`getExecutionLogForRule(): getting execution log for rule ${id}`);
-  const rule = (await getRule(context, { id, includeLegacyId: true })) as SanitizedRuleWithLegacyId;
+  const rule = (await getRule(context, { id })) as SanitizedRuleWithLegacyId;
 
   try {
     // Make sure user has access to this rule
@@ -126,6 +126,7 @@ export async function getGlobalExecutionLogWithAuth(
           ruleTypeId: 'kibana.alert.rule.rule_type_id',
           consumer: 'kibana.alert.rule.consumer',
         },
+        namespaces,
       },
     });
   } catch (error) {

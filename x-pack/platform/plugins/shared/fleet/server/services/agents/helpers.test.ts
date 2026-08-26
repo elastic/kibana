@@ -96,6 +96,7 @@ describe('searchHitToAgent', () => {
       enrolled_at: '2023-06-07T07:45:30Z',
       access_api_key_id: 'EH_RlIgBn_WkCEINY-qh',
       policy_id: '76c5b020-0486-11ee-97a3-c3856dd800f7',
+      policy_base_id: '76c5b020-0486-11ee-97a3-c3856dd800f7',
       last_checkin: '2023-06-07T08:39:03Z',
       last_checkin_status: 'online',
       last_checkin_message: 'Running',
@@ -252,6 +253,7 @@ describe('searchHitToAgent', () => {
       enrolled_at: '2023-06-07T07:45:30Z',
       access_api_key_id: 'EH_RlIgBn_WkCEINY-qh',
       policy_id: '76c5b020-0486-11ee-97a3-c3856dd800f7',
+      policy_base_id: '76c5b020-0486-11ee-97a3-c3856dd800f7',
       last_checkin: '2023-06-07T08:39:03Z',
       last_checkin_status: 'degraded',
       last_checkin_message: 'Running',
@@ -391,6 +393,7 @@ describe('searchHitToAgent', () => {
       enrolled_at: '2023-06-07T07:45:30Z',
       access_api_key_id: 'EH_RlIgBn_WkCEINY-qh',
       policy_id: '76c5b020-0486-11ee-97a3-c3856dd800f7',
+      policy_base_id: '76c5b020-0486-11ee-97a3-c3856dd800f7',
       last_checkin: '2023-06-07T08:39:03Z',
       last_checkin_status: 'online',
       last_checkin_message: 'Running',
@@ -442,5 +445,25 @@ describe('searchHitToAgent', () => {
         version: '8.9.0',
       },
     });
+  });
+
+  it('maps pipeline_config from fields to agent', () => {
+    const hit = {
+      _source: { type: 'OPAMP', active: true, enrolled_at: '2023-01-01T00:00:00Z' },
+      fields: { status: ['online'], pipeline_config: ['logs[otlpreceiver|batch|otlpexporter]'] },
+      _id: 'agent-1',
+    };
+    const agent = searchHitToAgent(hit as any);
+    expect(agent.pipeline_config).toBe('logs[otlpreceiver|batch|otlpexporter]');
+  });
+
+  it('leaves pipeline_config undefined when not present in fields', () => {
+    const hit = {
+      _source: { type: 'PERMANENT', active: true, enrolled_at: '2023-01-01T00:00:00Z' },
+      fields: { status: ['online'] },
+      _id: 'agent-2',
+    };
+    const agent = searchHitToAgent(hit as any);
+    expect(agent.pipeline_config).toBeUndefined();
   });
 });

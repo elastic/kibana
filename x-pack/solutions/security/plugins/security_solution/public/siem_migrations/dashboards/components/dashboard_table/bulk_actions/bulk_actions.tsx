@@ -16,6 +16,8 @@ import {
   InstallTranslatedButton,
   ReprocessFailedItemsButton,
 } from '../../../../common/components/bulk_actions';
+import { MigrationTranslationResult } from '../../../../../../common/siem_migrations/constants';
+import type { BulkActionsItem } from '../../../../common/components/bulk_actions/types';
 
 const ReprocessFailedDashboardsButton = WithMissingPrivilegesTooltip(
   ReprocessFailedItemsButton,
@@ -57,6 +59,12 @@ export const BulkActions: React.FC<BulkActionsProps> = memo(
     const installSelectedDashboardsCallback = useCallback(() => {
       installSelectedDashboards?.();
     }, [installSelectedDashboards]);
+    const isDashboardInstallable = useCallback(
+      (item: BulkActionsItem) =>
+        item.translation_result === MigrationTranslationResult.FULL ||
+        item.translation_result === MigrationTranslationResult.PARTIAL,
+      []
+    );
     return (
       <EuiFlexGroup
         alignItems="center"
@@ -85,6 +93,7 @@ export const BulkActions: React.FC<BulkActionsProps> = memo(
               isLoading={isTableLoading}
               numberOfTranslatedItems={numberOfTranslatedDashboards}
               selectedItems={selectedDashboards}
+              isInstallable={isDashboardInstallable}
             />
           </EuiFlexItem>
         )}

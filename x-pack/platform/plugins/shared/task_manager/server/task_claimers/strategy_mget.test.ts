@@ -28,6 +28,8 @@ import type { OwnershipClaimingOpts, TaskClaimingOpts } from '../queries/task_cl
 import { TaskClaiming, TASK_MANAGER_MARK_AS_CLAIMED } from '../queries/task_claiming';
 import { taskStoreMock } from '../task_store.mock';
 import apm from 'elastic-apm-node';
+import { SpanStatusCode, trace } from '@opentelemetry/api';
+import { tracing } from '@elastic/opentelemetry-node/sdk';
 import { TASK_MANAGER_TRANSACTION_TYPE } from '../task_running';
 import type { ClaimOwnershipResult } from '.';
 import type { FillPoolResult } from '../lib/fill_pool';
@@ -118,6 +120,21 @@ const taskPartitioner = new TaskPartitioner({
 });
 
 // needs more tests in the similar to the `strategy_default.test.ts` test suite
+let otelExporter: tracing.InMemorySpanExporter;
+let otelProvider: tracing.BasicTracerProvider;
+
+beforeAll(() => {
+  otelExporter = new tracing.InMemorySpanExporter();
+  otelProvider = new tracing.BasicTracerProvider({
+    spanProcessors: [new tracing.SimpleSpanProcessor(otelExporter)],
+  });
+  trace.setGlobalTracerProvider(otelProvider);
+});
+
+afterAll(async () => {
+  await otelProvider.shutdown();
+});
+
 describe('TaskClaiming', () => {
   beforeAll(() => {
     jest.useFakeTimers();
@@ -128,6 +145,7 @@ describe('TaskClaiming', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    otelExporter?.reset();
     jest
       .spyOn(apm, 'startTransaction')
 
@@ -244,6 +262,12 @@ describe('TaskClaiming', () => {
       );
       expect(mockApmTrans.end).toHaveBeenCalledWith('success');
 
+      const spans = otelExporter.getFinishedSpans();
+      const span = spans.find((s) => s.name === 'mark-task-as-claimed');
+      expect(span).toBeDefined();
+      expect(span!.attributes['transaction.type']).toBe(TASK_MANAGER_TRANSACTION_TYPE);
+      expect(span!.status.code).not.toBe(SpanStatusCode.ERROR);
+
       expect(store.msearch.mock.calls).toMatchObject({});
       expect(store.getDocVersions.mock.calls).toMatchObject({});
       return {
@@ -255,6 +279,51 @@ describe('TaskClaiming', () => {
         },
       };
     }
+
+    test('does not claim and returns NoTasksClaimed when execution is paused', async () => {
+      const { taskClaiming, store } = initialiseTestClaiming({
+        storeOpts: {},
+        taskClaimingOpts: {
+          getExecutionControlState: () => ({ paused: true, pausedTaskTypes: [] }),
+        },
+      });
+
+      const resultOrErr = await taskClaiming.claimAvailableTasksIfCapacityIsAvailable({
+        claimOwnershipUntil: new Date(),
+      });
+
+      expect(isOk(resultOrErr)).toBe(false);
+      expect(unwrap(resultOrErr)).toEqual('NoTasksClaimed');
+      expect(store.msearch).not.toHaveBeenCalled();
+    });
+
+    test('merges runtime paused task types into the excluded task types', async () => {
+      const definitions = new TaskTypeDictionary(mockLogger());
+      definitions.registerTaskDefinitions({
+        foo: { title: 'foo', createTaskRunner: jest.fn() },
+        bar: { title: 'bar', createTaskRunner: jest.fn() },
+      });
+
+      const { taskClaiming, store } = initialiseTestClaiming({
+        storeOpts: { definitions },
+        taskClaimingOpts: {
+          getExecutionControlState: () => ({ paused: false, pausedTaskTypes: ['bar'] }),
+        },
+        excludedTaskTypes: ['foobar'],
+        hits: [generateFakeTasks(1)],
+      });
+
+      await taskClaiming.claimAvailableTasksIfCapacityIsAvailable({
+        claimOwnershipUntil: new Date(),
+      });
+
+      // 'bar' is excluded at claim time, so only 'foo' is queried for.
+      const queriedTypes = store.msearch.mock.calls
+        .flatMap(([searches]) => searches ?? [])
+        .flatMap((search) => JSON.stringify(search));
+      expect(queriedTypes.some((s) => s.includes('"foo"'))).toBe(true);
+      expect(queriedTypes.some((s) => s.includes('"bar"'))).toBe(false);
+    });
 
     test('makes calls to APM as expected when markAvailableTasksAsClaimed throws error', async () => {
       const maxAttempts = _.random(2, 43);
@@ -296,6 +365,11 @@ describe('TaskClaiming', () => {
         TASK_MANAGER_TRANSACTION_TYPE
       );
       expect(mockApmTrans.end).toHaveBeenCalledWith('failure');
+
+      const spans = otelExporter.getFinishedSpans();
+      const span = spans.find((s) => s.name === 'mark-task-as-claimed');
+      expect(span).toBeDefined();
+      expect(span!.status.code).toBe(SpanStatusCode.ERROR);
     });
 
     test('it filters claimed tasks down by supported types, maxAttempts, status, and runAt', async () => {

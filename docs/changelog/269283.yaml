@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/269283
+issues:
+- https://github.com/elastic/kibana/issues/257865
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-05-19
+title: Add "Explore traces" Discover entry points on the Traces page

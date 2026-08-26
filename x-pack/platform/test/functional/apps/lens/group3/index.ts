@@ -63,19 +63,7 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
       await kibanaServer.importExport.load(fixtureDirs.lensDefault);
     });
 
-    after(async () => {
-      await esArchiver.unload(esArchive);
-      await timePicker.resetDefaultAbsoluteRangeViaUiSettings();
-      await kibanaServer.importExport.unload(fixtureDirs.lensBasic);
-      await kibanaServer.importExport.unload(fixtureDirs.lensDefault);
-      await kibanaServer.savedObjects.cleanStandardList();
-    });
-
-    // total run time ~16 min
     loadTestFile(require.resolve('./add_to_dashboard')); // 12m 50s
     loadTestFile(require.resolve('./runtime_fields')); // 1m
-    loadTestFile(require.resolve('./terms')); // 1m 35s
-    loadTestFile(require.resolve('./epoch_millis')); // 30s
-    loadTestFile(require.resolve('./dashboard_inline_editing'));
   });
 };

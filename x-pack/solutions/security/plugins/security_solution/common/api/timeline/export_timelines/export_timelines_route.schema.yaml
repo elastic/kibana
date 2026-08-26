@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  title: Elastic Security - Timeline - Import Timelines API
+  title: Elastic Security - Timeline - Export Timelines API
   version: '2023-10-31'
 externalDocs:
   url: https://www.elastic.co/guide/en/security/current/timeline-api-import.html
@@ -33,18 +33,30 @@ paths:
                 ids:
                   nullable: true
                   type: array
+                  minItems: 1
+                  maxItems: 1000
                   items:
                     type: string
+            examples:
+              exportIds:
+                summary: Export by timeline ids
+                value:
+                  ids:
+                    - 15c1929b-0af7-42bd-85a8-56e234cc7c4e
       responses:
         '200':
-          description: Indicates the Timelines were successfully exported.
+          description: Indicates a successful call.
           content:
             application/ndjson:
               schema:
                 type: string
                 description: NDJSON of the exported Timelines
+              examples:
+                ndjsonLine:
+                  summary: Single NDJSON line
+                  value: '{"savedObjectId":"15c1929b-0af7-42bd-85a8-56e234cc7c4e","version":"WzE0LDFd","title":"Investigation","timelineType":"default"}'
         '400':
-          description: Indicates that the export size limit was exceeded.
+          description: Bad Request response.
           content:
             application/ndjson:
               schema:
@@ -54,3 +66,9 @@ paths:
                     type: string
                   statusCode:
                     type: number
+              examples:
+                badRequest:
+                  summary: Export error
+                  value:
+                    body: Export limit exceeded
+                    statusCode: 400

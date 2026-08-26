@@ -7,6 +7,7 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
+    "test/scout/**/*",
     "../../../../../typings/**/*"
   ],
   "kbn_references": [
@@ -33,6 +34,7 @@
     "@kbn/deeplinks-observability",
     "@kbn/discover-plugin",
     "@kbn/ebt-tools",
+    "@kbn/es-errors",
     "@kbn/es-query",
     "@kbn/es-types",
     "@kbn/field-formats-plugin",
@@ -72,7 +74,12 @@
     "@kbn/core-http-server-mocks",
     "@kbn/test-jest-helpers",
     "@kbn/streams-schema",
-    "@kbn/streams-plugin"
+    "@kbn/streams-plugin",
+    "@kbn/licensing-plugin",
+    "@kbn/ui-callout",
+    "@kbn/scout",
+    "@kbn/scout-synthtrace",
+    "@kbn/synthtrace-client"
   ],
   "exclude": [
     "target/**/*"

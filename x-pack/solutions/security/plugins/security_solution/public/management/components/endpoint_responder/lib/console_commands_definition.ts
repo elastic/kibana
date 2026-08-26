@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { getMemoryDumpHelpUsage } from './get_memory_dump_help_usage';
 import { MemoryDumpActionResult } from '../command_render_components/memory_dump_action';
 import { CancelActionResult } from '../command_render_components/cancel_action';
 import { isActionSupportedByAgentType } from '../../../../../common/endpoint/service/response_actions/is_response_action_supported';
@@ -15,7 +14,7 @@ import type { SupportedHostOsType } from '../../../../../common/endpoint/constan
 import type { EndpointCommandDefinitionMeta } from '../types';
 import type { CustomScriptSelectorState } from '../../console_argument_selectors/custom_scripts_selector/custom_script_selector';
 import { CustomScriptSelector } from '../../console_argument_selectors/custom_scripts_selector/custom_script_selector';
-import { PendingActionsSelector } from '../../console_argument_selectors/pending_actions_selector/pending_actions_selector';
+import { CancelablePendingActionsSelector } from '../../console_argument_selectors/cancelable_pending_actions_selector/cancelable_pending_actions_selector';
 import type {
   EndpointRunScriptActionParameters,
   SentinelOneRunScriptActionParameters,
@@ -188,6 +187,8 @@ export interface GetEndpointConsoleCommandsOptions {
   platform: SupportedHostOsType;
 }
 
+// A refactor of response action command definition will be done in the near(ish) future
+// eslint-disable-next-line complexity
 export const getEndpointConsoleCommands = ({
   endpointAgentId,
   agentType,
@@ -200,8 +201,11 @@ export const getEndpointConsoleCommands = ({
     crowdstrikeRunScriptEnabled,
     microsoftDefenderEndpointRunScriptEnabled,
     microsoftDefenderEndpointCancelEnabled,
+    responseActionsEndpointCancel,
     responseActionsEndpointMemoryDump,
+    responseActionsEndpointMemoryDumpRaw,
     responseActionsEndpointRunScript,
+    responseActionsEndpointKillProcessDescendants,
   } = featureFlags;
   const commandMeta: EndpointCommandDefinitionMeta = {
     agentType,
@@ -231,6 +235,35 @@ export const getEndpointConsoleCommands = ({
   const canCancelForCurrentContext = () => {
     return isCancelFeatureAvailable(endpointPrivileges, featureFlags, agentType);
   };
+
+  // `kill-process --kill-descendants` applies only to the Elastic Defend Endpoint, is gated behind
+  // a feature flag and requires that the host's Endpoint version supports it (reported via the
+  // `kill_process_descendents` capability).
+  const isKillDescendantsSupportedByEndpoint = (
+    endpointCapabilities as EndpointCapabilities[]
+  ).includes('kill_process_descendents');
+  const killDescendantsArg: Record<string, CommandArgDefinition> =
+    agentType === 'endpoint' && responseActionsEndpointKillProcessDescendants
+      ? {
+          'kill-descendants': {
+            required: false,
+            allowMultiples: false,
+            mustHaveValue: false,
+            about:
+              CONSOLE_COMMANDS.killProcess.args.killDescendants.about +
+              (isKillDescendantsSupportedByEndpoint
+                ? ''
+                : ` (${CONSOLE_COMMANDS.killProcess.args.killDescendants.notSupported})`),
+            validate: () => {
+              if (!isKillDescendantsSupportedByEndpoint) {
+                return CONSOLE_COMMANDS.killProcess.args.killDescendants.notSupported;
+              }
+
+              return true;
+            },
+          },
+        }
+      : {};
 
   let consoleCommands: CommandDefinition[] = [
     {
@@ -287,21 +320,22 @@ export const getEndpointConsoleCommands = ({
       validate: capabilitiesAndPrivilegesValidator(agentType),
       mustHaveArgs: true,
       args: {
-        ...commandCommentArgument(),
         entityId: {
           required: false,
           allowMultiples: false,
-          exclusiveOr: true,
+          exclusiveOrGroupId: 'processValue',
           about: CONSOLE_COMMANDS.killProcess.args.entityId.about,
           validate: emptyArgumentValidator,
         },
         pid: {
           required: false,
           allowMultiples: false,
-          exclusiveOr: true,
+          exclusiveOrGroupId: 'processValue',
           about: CONSOLE_COMMANDS.killProcess.args.pid.about,
           validate: pidValidator,
         },
+        ...killDescendantsArg,
+        ...commandCommentArgument(),
       },
       helpGroupLabel: HELP_GROUPS.responseActions.label,
       helpGroupPosition: HELP_GROUPS.responseActions.position,
@@ -322,21 +356,21 @@ export const getEndpointConsoleCommands = ({
       validate: capabilitiesAndPrivilegesValidator(agentType),
       mustHaveArgs: true,
       args: {
-        ...commandCommentArgument(),
         entityId: {
           required: false,
           allowMultiples: false,
-          exclusiveOr: true,
+          exclusiveOrGroupId: 'processValue',
           about: CONSOLE_COMMANDS.suspendProcess.args.entityId.about,
           validate: emptyArgumentValidator,
         },
         pid: {
           required: false,
           allowMultiples: false,
-          exclusiveOr: true,
+          exclusiveOrGroupId: 'processValue',
           about: CONSOLE_COMMANDS.suspendProcess.args.pid.about,
           validate: pidValidator,
         },
+        ...commandCommentArgument(),
       },
       helpGroupLabel: HELP_GROUPS.responseActions.label,
       helpGroupPosition: HELP_GROUPS.responseActions.position,
@@ -503,7 +537,7 @@ export const getEndpointConsoleCommands = ({
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const runscriptCommand = consoleCommands.find((command) => command.name === 'runscript')!;
 
-    runscriptCommand.helpDisabled = false;
+    runscriptCommand.helpDisabled = !doesEndpointSupportCommand('runscript');
     runscriptCommand.mustHaveArgs = true;
     runscriptCommand.exampleUsage = (
       enteredCommand?: Command<
@@ -660,13 +694,14 @@ export const getEndpointConsoleCommands = ({
     }),
   });
 
-  if (microsoftDefenderEndpointCancelEnabled) {
+  if (microsoftDefenderEndpointCancelEnabled || responseActionsEndpointCancel) {
     const isSupported = canCancelForCurrentContext();
+
     consoleCommands.push({
       name: 'cancel',
       about: getCommandAboutInfo({
         aboutInfo: CONSOLE_COMMANDS.cancel.about,
-        isSupported,
+        isSupported: isSupported && doesEndpointSupportCommand('cancel'),
       }),
       RenderComponent: CancelActionResult,
       meta: commandMeta,
@@ -677,33 +712,35 @@ export const getEndpointConsoleCommands = ({
       ),
       mustHaveArgs: true,
       args: {
-        ...(isSupported
+        action: {
+          required: true,
+          allowMultiples: false,
+          about: i18n.translate(
+            'xpack.securitySolution.endpointConsoleCommands.cancel.action.about',
+            {
+              defaultMessage:
+                'The response action to cancel (selected from a popup that displays the list of pending actions for this host that can be canceled).',
+            }
+          ),
+          mustHaveValue: 'truthy',
+          SelectorComponent: CancelablePendingActionsSelector,
+        },
+        ...(agentType === 'endpoint'
           ? {
-              action: {
-                required: true,
+              force: {
+                required: false,
                 allowMultiples: false,
-                about: i18n.translate(
-                  'xpack.securitySolution.endpointConsoleCommands.cancel.action.about',
-                  {
-                    defaultMessage: 'The response action to cancel',
-                  }
-                ),
-                mustHaveValue: 'truthy',
-                SelectorComponent: PendingActionsSelector,
+                about: CONSOLE_COMMANDS.cancel.forceArgInfo,
+                mustHaveValue: false,
               },
             }
           : {}),
-        comment: {
-          required: false,
-          allowMultiples: false,
-          mustHaveValue: 'non-empty-string',
-          about: COMMENT_ARG_ABOUT,
-        },
+        ...commandCommentArgument(),
       },
       helpGroupLabel: HELP_GROUPS.responseActions.label,
       helpGroupPosition: HELP_GROUPS.responseActions.position,
       helpCommandPosition: 10,
-      helpDisabled: !isSupported,
+      helpDisabled: !isSupported || !doesEndpointSupportCommand('cancel'),
       helpHidden: !isSupported,
       validate: capabilitiesAndPrivilegesValidator(agentType),
     });
@@ -715,6 +752,9 @@ export const getEndpointConsoleCommands = ({
     );
     const endpointSupportsProcessDump = (endpointCapabilities as EndpointCapabilities[]).includes(
       'memdump_process'
+    );
+    const endpointSupportsRawDump = (endpointCapabilities as EndpointCapabilities[]).includes(
+      'memdump_raw'
     );
     const getMemoryDumpTypeNotSupportedMessage = (type: 'process' | 'kernel') =>
       i18n.translate(
@@ -750,18 +790,23 @@ export const getEndpointConsoleCommands = ({
           return true;
         }
 
-        const memoryDumpType = argsInterface.hasArg('kernel') ? 'kernel' : 'process';
+        const memoryDumpType = argsInterface.hasArg('kernel')
+          ? 'kernel'
+          : argsInterface.hasArg('raw')
+          ? 'raw'
+          : 'process';
 
         // PID and Entity ID are only supported for process memory dumps
         if (
-          memoryDumpType === 'kernel' &&
+          (memoryDumpType === 'kernel' || memoryDumpType === 'raw') &&
           (argsInterface.hasArg('pid') || argsInterface.hasArg('entityId'))
         ) {
           return i18n.translate(
             'xpack.securitySolution.consoleCommandsDefinition.memoryDump.pidAndEntityIdNotSupportedForKernel',
             {
               defaultMessage:
-                '"pid" and "entityId" arguments are not supported for "kernel" memory dumps',
+                '"pid" and "entityId" arguments are not supported for "{type}" memory dumps',
+              values: { type: memoryDumpType },
             }
           );
         }
@@ -785,11 +830,13 @@ export const getEndpointConsoleCommands = ({
       mustHaveArgs: true,
       args: {
         process: {
-          about: CONSOLE_COMMANDS.memoryDump.processArgAbout,
+          about:
+            CONSOLE_COMMANDS.memoryDump.processArgAbout +
+            (endpointSupportsProcessDump ? '' : ` ${CONSOLE_COMMANDS.memoryDump.argNotSupported}`),
           required: false,
           allowMultiples: false,
           mustHaveValue: false,
-          exclusiveOr: true,
+          exclusiveOrGroupId: 'memoryDumpType',
           validate: () => {
             if (!endpointSupportsProcessDump) {
               return getMemoryDumpTypeNotSupportedMessage('process');
@@ -799,11 +846,13 @@ export const getEndpointConsoleCommands = ({
           },
         },
         kernel: {
-          about: CONSOLE_COMMANDS.memoryDump.kernelArgAbout,
+          about:
+            CONSOLE_COMMANDS.memoryDump.kernelArgAbout +
+            (endpointSupportsKernelDump ? '' : ` ${CONSOLE_COMMANDS.memoryDump.argNotSupported}`),
           required: false,
           allowMultiples: false,
           mustHaveValue: false,
-          exclusiveOr: true,
+          exclusiveOrGroupId: 'memoryDumpType',
           validate: () => {
             if (!endpointSupportsKernelDump) {
               return getMemoryDumpTypeNotSupportedMessage('kernel');
@@ -812,14 +861,31 @@ export const getEndpointConsoleCommands = ({
             return true;
           },
         },
+        ...(agentType === 'endpoint' &&
+        responseActionsEndpointMemoryDumpRaw &&
+        endpointSupportsRawDump
+          ? {
+              raw: {
+                about: CONSOLE_COMMANDS.memoryDump.rawArgAbout,
+                required: false,
+                allowMultiples: false,
+                mustHaveValue: false,
+                exclusiveOrGroupId: 'memoryDumpType',
+              },
+            }
+          : {}),
         entityId: {
           required: false,
+          conditionallyRequired: ['process'],
+          exclusiveOrGroupId: 'processIdentifier',
           allowMultiples: false,
           mustHaveValue: 'non-empty-string',
           about: CONSOLE_COMMANDS.memoryDump.entityIdArgAbout,
         },
         pid: {
           required: false,
+          conditionallyRequired: ['process'],
+          exclusiveOrGroupId: 'processIdentifier',
           allowMultiples: false,
           mustHaveValue: 'number-greater-than-zero',
           about: CONSOLE_COMMANDS.memoryDump.pidArgAbout,
@@ -831,7 +897,6 @@ export const getEndpointConsoleCommands = ({
       helpCommandPosition: 6,
       helpDisabled: !doesEndpointSupportCommand('memory-dump'),
       helpHidden: !getRbacControl({ commandName: 'execute', privileges: endpointPrivileges }),
-      helpUsage: getMemoryDumpHelpUsage(),
     });
   }
 
@@ -1073,14 +1138,14 @@ const adjustCommandsForCrowdstrike = ({
               allowMultiples: false,
               about: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.args.raw.about,
               mustHaveValue: 'non-empty-string',
-              exclusiveOr: true,
+              exclusiveOrGroupId: 'execType',
             },
             CloudFile: {
               required: false,
               allowMultiples: false,
               about: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.args.cloudFile.about,
               mustHaveValue: 'truthy',
-              exclusiveOr: true,
+              exclusiveOrGroupId: 'execType',
               SelectorComponent: CustomScriptSelector,
             },
             CommandLine: {
@@ -1095,7 +1160,7 @@ const adjustCommandsForCrowdstrike = ({
               allowMultiples: false,
               about: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.args.hostPath.about,
               mustHaveValue: 'non-empty-string',
-              exclusiveOr: true,
+              exclusiveOrGroupId: 'execType',
             },
             Timeout: {
               required: false,

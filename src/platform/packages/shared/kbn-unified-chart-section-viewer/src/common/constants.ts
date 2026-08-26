@@ -11,22 +11,30 @@ import { ES_FIELD_TYPES } from '@kbn/field-types';
 
 // Full screen classes
 export const METRICS_GRID_CLASS = 'metricsGrid';
-export const METRICS_GRID_WRAPPER_FULL_SCREEN_CLASS = 'metricsGridWrapper--fullScreen';
 export const METRICS_GRID_FULL_SCREEN_CLASS = `${METRICS_GRID_CLASS}--fullScreen`;
 export const METRICS_GRID_RESTRICT_BODY_CLASS = `${METRICS_GRID_CLASS}--restrictBody`;
 
 // data-test-subj
 export const METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ = 'metricsExperienceBreakdownSelector';
+export const METRICS_GRID_PAGINATION_DATA_TEST_SUBJ = 'metricsExperienceGridPagination';
+export const METRICS_TOOLBAR_SEARCH_BUTTON_DATA_TEST_SUBJ = 'metricsExperienceToolbarSearch';
+export const METRICS_TOOLBAR_SEARCH_INPUT_DATA_TEST_SUBJ = 'metricsExperienceGridToolbarSearch';
 
 // Selection limits
-export const MAX_DIMENSIONS_SELECTIONS = 1;
+export const MAX_DIMENSIONS_SELECTIONS = 5;
 export const PAGE_SIZE = 20;
+
+// Debounce time for dimensions selector
+export const DEBOUNCE_TIME = 300;
 
 // Lens extra actions
 export const ACTION_COPY_TO_DASHBOARD = 'ACTION_METRICS_EXPERIENCE_COPY_TO_DASHBOARD';
 export const ACTION_VIEW_DETAILS = 'ACTION_METRICS_EXPERIENCE_VIEW_DETAILS';
 export const ACTION_EXPLORE_IN_DISCOVER_TAB = 'ACTION_METRICS_EXPERIENCE_EXPLORE_IN_DISCOVER_TAB';
 export const ACTION_OPEN_IN_DISCOVER = 'ACTION_OPEN_IN_DISCOVER';
+// Note: `ACTION_INSPECT_PANEL` is the canonical inspect-panel action ID and is owned
+// by the embeddable plugin. Consumers should import it directly from
+// `@kbn/embeddable-plugin/public` rather than re-exporting it from here.
 /** Set of numeric field types used for metrics */
 export const NUMERIC_TYPES = [
   ES_FIELD_TYPES.LONG,
@@ -55,3 +63,31 @@ export const DIMENSION_TYPES = [
   ES_FIELD_TYPES.BYTE,
   ES_FIELD_TYPES.UNSIGNED_LONG,
 ];
+
+// Metric instrument types allowed in the Metrics experience.
+export const ALLOWED_METRIC_TYPES = ['gauge', 'counter', 'histogram'];
+
+export const FEATURE_FLAGS = {
+  IS_EDIT_GRID_SETTINGS_ENABLED: 'discover.metricsExperienceEditGridSettingsEnabled',
+  IS_SORTING_ENABLED: 'discover.metricsExperienceSortEnabled',
+} as const;
+
+export type FeatureFlag = (typeof FEATURE_FLAGS)[keyof typeof FEATURE_FLAGS];
+
+// Fallback values used when a feature flag is not configured externally
+export const FEATURE_FLAG_DEFAULTS: Record<FeatureFlag, boolean> = {
+  [FEATURE_FLAGS.IS_EDIT_GRID_SETTINGS_ENABLED]: false,
+  [FEATURE_FLAGS.IS_SORTING_ENABLED]: false,
+};
+
+// Metrics grid sort options
+export const METRICS_SORT_BY = {
+  alphabetically: 'alphabetically',
+  recency: 'recency',
+} as const;
+
+// Metrics grid sort directions
+export const METRICS_SORT_DIRECTION = {
+  asc: 'asc',
+  desc: 'desc',
+} as const;

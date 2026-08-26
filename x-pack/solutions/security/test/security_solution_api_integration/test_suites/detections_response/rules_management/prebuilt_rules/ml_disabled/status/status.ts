@@ -12,6 +12,7 @@ import {
   createPrebuiltRuleAssetSavedObjects,
   createRuleAssetSavedObjectOfType,
   deleteAllPrebuiltRuleAssets,
+  getPrebuiltRulesAndTimelinesStatus,
   getPrebuiltRulesStatus,
 } from '../../../../utils';
 import { createMlRuleThroughAlertingEndpoint } from '../utils';
@@ -63,6 +64,35 @@ export default ({ getService }: FtrProviderContext): void => {
           num_prebuilt_rules_installed: 1,
           num_prebuilt_rules_total_in_package: 1,
         },
+      });
+    });
+
+    describe('legacy (GET /api/detection_engine/rules/prepackaged/_status)', () => {
+      it('ML rules are not counted towards installable rules', async () => {
+        const mlRuleAsset = createRuleAssetSavedObjectOfType('machine_learning', { version: 1 });
+        await createPrebuiltRuleAssetSavedObjects(es, [mlRuleAsset]);
+
+        const statusResponse = await getPrebuiltRulesAndTimelinesStatus(es, supertest);
+
+        expect(statusResponse.rules_not_installed).toBe(0);
+      });
+
+      it('ML rules are not counted towards upgradable rules', async () => {
+        await createMlRuleThroughAlertingEndpoint(supertest, {
+          ruleId: 'ml-rule',
+          version: 1,
+        });
+
+        const targetMlRuleAsset = createRuleAssetSavedObjectOfType('machine_learning', {
+          rule_id: 'ml-rule',
+          version: 2,
+        });
+        await createPrebuiltRuleAssetSavedObjects(es, [targetMlRuleAsset]);
+
+        const statusResponse = await getPrebuiltRulesAndTimelinesStatus(es, supertest);
+
+        expect(statusResponse.rules_not_updated).toBe(0);
+        expect(statusResponse.rules_installed).toBe(1);
       });
     });
   });

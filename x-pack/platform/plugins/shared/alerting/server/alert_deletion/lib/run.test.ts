@@ -163,7 +163,7 @@ describe('runTask', () => {
     getAlertIndicesAliasMock.mockReturnValueOnce(['index1', 'index2', 'alert-index-3']);
 
     // @ts-ignore - accessing private function for testing
-    await alertDeletionClient.runTask(alertDeletionTaskInstance, new AbortController());
+    await alertDeletionClient.runTask(alertDeletionTaskInstance, new AbortController().signal);
 
     expect(ruleTypeRegistry.getAllTypes).toHaveBeenCalledTimes(0);
     expect(ruleTypeRegistry.getFilteredTypes).toHaveBeenCalledTimes(3);
@@ -332,6 +332,7 @@ describe('runTask', () => {
       took: 10,
       timed_out: false,
       _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+      pit_id: 'pit1-1',
       hits: {
         total: { relation: 'eq', value: 2 },
         hits: [
@@ -344,6 +345,7 @@ describe('runTask', () => {
       took: 10,
       timed_out: false,
       _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+      pit_id: 'pit1-2',
       hits: {
         total: { relation: 'eq', value: 2 },
         hits: [
@@ -356,6 +358,7 @@ describe('runTask', () => {
       took: 10,
       timed_out: false,
       _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+      pit_id: 'pit1-3',
       hits: {
         total: { relation: 'eq', value: 2 },
         hits: [getMockAlert({ id: 'mno', searchAfter: ['555'] })],
@@ -365,6 +368,7 @@ describe('runTask', () => {
       took: 10,
       timed_out: false,
       _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+      pit_id: 'pit1-4',
       hits: {
         total: { relation: 'eq', value: 0 },
         hits: [],
@@ -403,7 +407,7 @@ describe('runTask', () => {
           spaceIds: ['default'],
         },
       },
-      new AbortController()
+      new AbortController().signal
     );
 
     expect(ruleTypeRegistry.getFilteredTypes).toHaveBeenCalledTimes(1);
@@ -436,7 +440,7 @@ describe('runTask', () => {
         query: inactiveAlertsQuery(30, 'default'),
         size: 1000,
         sort: [{ [TIMESTAMP]: 'asc' }],
-        pit: { id: 'pit1', keep_alive: '1m' },
+        pit: { id: 'pit1-1', keep_alive: '1m' },
         search_after: ['222'],
         _source: [ALERT_RULE_UUID, SPACE_IDS, ALERT_INSTANCE_ID, TIMESTAMP],
       },
@@ -448,7 +452,7 @@ describe('runTask', () => {
         query: inactiveAlertsQuery(30, 'default'),
         size: 1000,
         sort: [{ [TIMESTAMP]: 'asc' }],
-        pit: { id: 'pit1', keep_alive: '1m' },
+        pit: { id: 'pit1-2', keep_alive: '1m' },
         search_after: ['444'],
         _source: [ALERT_RULE_UUID, SPACE_IDS, ALERT_INSTANCE_ID, TIMESTAMP],
       },
@@ -460,7 +464,7 @@ describe('runTask', () => {
         query: inactiveAlertsQuery(30, 'default'),
         size: 1000,
         sort: [{ [TIMESTAMP]: 'asc' }],
-        pit: { id: 'pit1', keep_alive: '1m' },
+        pit: { id: 'pit1-3', keep_alive: '1m' },
         search_after: ['555'],
         _source: [ALERT_RULE_UUID, SPACE_IDS, ALERT_INSTANCE_ID, TIMESTAMP],
       },
@@ -513,6 +517,7 @@ describe('runTask', () => {
     });
 
     expect(esClient.closePointInTime).toHaveBeenCalledTimes(1);
+    expect(esClient.closePointInTime).toHaveBeenCalledWith({ id: 'pit1-4' });
 
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
@@ -588,7 +593,7 @@ describe('runTask', () => {
           spaceIds: ['default'],
         },
       },
-      new AbortController()
+      new AbortController().signal
     );
 
     expect(ruleTypeRegistry.getFilteredTypes).toHaveBeenCalledTimes(1);
@@ -710,7 +715,7 @@ describe('runTask', () => {
             spaceIds: ['default'],
           },
         },
-        new AbortController()
+        new AbortController().signal
       );
 
       expect(esClient.deleteByQuery).not.toHaveBeenCalled();
@@ -744,7 +749,7 @@ describe('runTask', () => {
             spaceIds: ['default'],
           },
         },
-        new AbortController()
+        new AbortController().signal
       );
 
       expect(esClient.deleteByQuery).not.toHaveBeenCalled();
@@ -783,7 +788,7 @@ describe('runTask', () => {
             },
           },
         },
-        new AbortController()
+        new AbortController().signal
       );
 
       expect(esClient.deleteByQuery).not.toHaveBeenCalled();
@@ -852,7 +857,7 @@ describe('runTask', () => {
             spaceIds: ['default'],
           },
         },
-        new AbortController()
+        new AbortController().signal
       );
 
       // active alerts search failures should not prevent inactive alerts from being deleted
@@ -966,7 +971,7 @@ describe('runTask', () => {
             spaceIds: ['default'],
           },
         },
-        new AbortController()
+        new AbortController().signal
       );
 
       expect(esClient.openPointInTime).toHaveBeenCalledTimes(1);

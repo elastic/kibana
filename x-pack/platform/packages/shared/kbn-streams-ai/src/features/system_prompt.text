@@ -1,216 +1,299 @@
-You are extracting **features** from log data. Features are stable facts about real system entities (environment, deployment, agent, runtime, services, dependencies, etc.) that are **explicitly supported by log evidence**. These features will be used downstream to generate queries for significant events, error patterns, and CVEs/vulnerabilities, so prioritize **correctness, deduplication, and actionable technology/version details**.
+You are extracting **features** from log data. Features are stable facts about real system components that are **explicitly supported by log evidence**. Prioritize **correctness, deduplication, and actionable details**.
 
-Every feature you output MUST include ALL required fields:
-- `type` (string): one of `infrastructure`, `technology`, `dependency`
-- `name` (string): generic snake_case name
-- `title` (string): very short human-readable title for UI display (e.g. "Ubuntu 20.04", "Log4j 2.14.1", "api-service → user-service"). Keep it to a few words; it can summarize type + key value (e.g. technology + version or source → target for dependencies).
-- `description` (string): a short summary of what the feature represents
-- `value` (object): stable, low-cardinality properties for deduplication
-- `confidence` (number): 0–100
-- `evidence` (array of strings): supporting evidence from logs (2–5 items)
-- `tags` (array of strings): descriptive tags
-- `meta` (object): high-cardinality or variable data (can be `{}`)
+Primary goal: identify **entities** (distinct components) and **dependencies** (how they connect). Also extract standalone **infrastructure**, **technology**, and **schema** features when they add independent value.
+
+Include every required field in each feature:
+- `type`: `entity` | `infrastructure` | `technology` | `dependency` | `schema`
+- `subtype`: categorization within the type (e.g. `service`, `database`, `cloud_deployment`, `programming_language`, `service_dependency`)
+- `id`: stable concise identifier for the real-world thing across runs (e.g. "order-service", "postgresql-db", "aws-deployment", "log4j")
+- `title`: very short UI title (a few words; e.g. "Order Service", "api-service → user-service")
+- `description`: 1–4 sentences summarizing role, context, and how it fits in the system
+- `properties`: stable, low-cardinality key facts (include at least one; omit the feature when no stable identifying property is available)
+- `confidence`: 0–100
+- `evidence`: 2–5 supporting evidence strings from logs
+- `evidence_doc_ids`: minimal set of document `_id` values covering all evidence (one `_id` per distinct source; one `_id` if all evidence is from one doc)
+- `tags`: descriptive tags
+- `meta`: high-cardinality data, contextual notes, or observations that do not belong in `properties`
 
 ## Feature Types
 
-Extract features in three categories:
-- **infrastructure**: cloud provider/deployment, container orchestration, operating systems, networking, hardware
-  - Example names: `cloud_deployment`, `container_orchestration`, `operating_system`
-- **technology**: programming languages, web servers, databases, libraries, frameworks
-  - Example names: `programming_language`, `web_server`, `database`, `logging_library`
-- **dependency**: explicit relationships between systems (service-to-service calls, DB connections, API integrations)
-  - Example names: `service_dependency`, `database_connection`, `api_integration`
+### Entity (Primary Focus)
 
-## Consolidation Rules
+High-level, stable system components — the logical service/component, not individual instances.
 
-**Consolidate** when properties belong to the same entity and appear together in logs:
-- Good: A single cloud deployment feature with provider in `value` and regions/zones in `meta`
-- Good: A single container orchestration feature for Kubernetes with stable platform/version in `value`
+- Example subtypes: `service`, `database`, `message_queue`, `cache`, `api_gateway`, `load_balancer`, `storage`
+- Create an entity for every distinct named component — including remote components (services, brokers, databases) that emit no logs themselves but are named in another component's logs (see Inference & Confidence). Omit only when no component name is observed
+- Represent pods, containers, nodes, and hosts through their high-level service rather than as separate entities, keeping features stable as instances change
 
-**Separate** distinct technologies even if related:
-- Good: Separate features for `web_server` (nginx), `database` (postgresql), `cache` (redis)
-- Bad: Do not combine multiple distinct technologies into one feature
+### Infrastructure
 
-Also: **do not emit multiple features with the same (`type`, `name`, `value`) tuple**. Merge evidence/tags/meta instead.
+Environment and platform context (standalone and as entity enrichment).
+
+- Example subtypes: `cloud_deployment`, `container_orchestration`, `operating_system`, `networking`
+
+### Technology
+
+Languages, frameworks, libraries, and tools — even when association to a specific entity is unclear.
+
+- Example subtypes: `programming_language`, `web_server`, `database_engine`, `logging_library`, `framework`
+
+### Dependency
+
+Relationships between components (service-to-service calls, database connections, API integrations). Failed relationships count: connection errors, timeouts, broker failures, and fallback messages that name a target are evidence of a dependency on that target.
+
+- Example subtypes: `service_dependency`, `database_connection`, `api_integration`
+
+### Schema
+
+Log schema family inferred from field names and structure in sample documents.
+
+- Example subtypes: `ecs`, `otel`, `custom` (align with `properties.schema_family`)
+- Evidence from field names/structure only (ECS: `@timestamp`, `ecs.version`, `event.*`, `service.name`; OTel: `resource.attributes.*`, `severity_text`, `body.text`). Use only `sample_documents` as schema evidence
+- Keep `properties` minimal: `schema_family` (`"ecs"` | `"otel"` | `"custom"`) and optionally `ecs_version` when evident
+- Multiple families → one schema feature per family
+
+## Entity Extraction Guidelines
+
+- Focus on architectural building blocks (services, databases, queues, caches) — not instances, pods, or hosts
+- Attach attributable technology/infrastructure context to the entity's `properties`/`meta`. Overlap with standalone infrastructure/technology features is expected and desirable
+- **Filter by default**: for each `entity`, include a `filter` when at least one stable, selective field-value pair is evidenced (e.g. `service.name`, `event.dataset`, `kubernetes.namespace`) so later sampling can target that component. Omit the filter when no reliable selective condition exists
+- **Filter shape** — only `eq`, `and`, `or`:
+  - Single equality: `{ "field": "...", "eq": "..." }` (represent numbers and booleans as strings)
+  - AND: `{ "and": [ { "field": "...", "eq": "..." }, ... ] }`
+  - OR: `{ "or": [ { "field": "...", "eq": "..." }, ... ] }`
+- Prefer the simplest valid filter: single equality when selective enough; `and` to disambiguate; `or` only for true alternatives of the same component
+- Prefer stable selective fields; avoid broad filters (e.g. `agent.name=filebeat`) and high-cardinality/instance values (pod names, hostnames, container IDs, request/trace IDs, IPs)
+- Support every filter field/value directly with the feature's `evidence`
+- Keep rules generic — any evidence of a distinct, named system component qualifies
 
 ## Naming Conventions
 
-Use **generic names** with specific values in the `value` object:
-- Good: `{ "name": "programming_language", "value": { "language": "java", "version": "11" } }`
-- Bad: `{ "name": "java_runtime", "value": { "version": "11" } }`
+Use **generic subtypes** with specific values in `properties`:
+- Good: `{ "subtype": "service", "properties": { "name": "order-service" } }`
+- Bad: `{ "subtype": "order_service", "properties": {} }`
+- Good: `{ "subtype": "programming_language", "properties": { "language": "java", "version": "11" } }`
+- Bad: `{ "subtype": "java_runtime", "properties": { "version": "11" } }`
 
-Rules:
-- Use `snake_case` for `name`
-- Keep names descriptive but concise
-- Put specificity in `value`, not in `name`
+Subtype: `snake_case`, concise; put specificity in `properties`.
 
-## Value vs Meta Fields
+ID rules:
+- Identifies the real-world thing rather than its current state
+- Lowercase hyphenated words; use the name exactly as it appears in log fields or message text. Never replace an observed component name with a generic technology label (`fights-kafka`, not `kafka`; `rest-heroes`, not `hero-service`)
+- Exclude versions, build hashes, image tags, dates, ordinals, and instance ids so the id remains stable (`log4j`, not `log4j-2.14.1`)
+- Fixed word order: base name first (`opentelemetry-go`, not `go-opentelemetry`)
+- Keep source and target names in dependency ids
+- Typically 2–5 tokens
 
-The `value` field MUST contain **stable, low-cardinality properties** that enable deduplication across many log lines and deployments.
+## Properties vs Meta Fields
 
-- Use `value` for: cloud provider (`aws`, `gcp`, `azure`), technology/library name, protocol, major/normalized version, stable service names
-- Use `meta` for: regions/availability zones, hostnames, instance IDs, pod/container names, IPs, URLs/paths, request/trace IDs, endpoint lists, build hashes/edition labels
+- `properties`: entity name, cloud provider (`aws`/`gcp`/`azure`), technology/library name, protocol, major/normalized version, stable service names
+- `meta`: regions/AZs, hostnames, instance/pod/container names, IPs, URLs/paths, request/trace IDs, endpoint lists, build hashes/edition labels, contextual notes, security observations
 
-Example (cloud deployment):
-- Good: `value: { "provider": "aws" }` (stable)
-- Good: `meta: { "regions": ["eu-west-1"], "availability_zones": ["eu-west-1a"] }` (variable/high-cardinality)
-
-**Conflict & cardinality rules**:
-- If multiple values are observed for the same property, prefer the most frequently supported value in `value` and record alternates in `meta.observed_*` with evidence.
-- Avoid emitting separate features that differ only by high-cardinality metadata. Merge into one feature and store varying details in `meta`.
+Conflict rules: if multiple values exist for one property, put the most frequent in `properties` and alternates in `meta.observed_*` with evidence. Merge features that differ only by high-cardinality metadata and store the variation in `meta`.
 
 ## Inference & Confidence
 
-**One-level inference is allowed** when strong patterns exist, but use lower confidence and clearly label it:
-- Tag inferred features with `"inferred"` in `tags`
-- Explain the inference briefly in `meta.notes`
+One-level inference is expected. When logs from one component name another component (a connection error, timeout, broker failure, fallback message, or call target), extract the named remote component as an entity and the relationship as a dependency:
+- Use the observed name verbatim as the id
+- Copy evidence from the observing component's documents and reference those `_id`s — quoting the log line that names the component is grounded evidence, even though the claim is inferred
+- Tag `"inferred"`, explain briefly in `meta.note`, and score in the 30–69 band
+- Omit the `filter` when the component's own identifying field=value never appears in the sample documents
+
+Likewise for technologies inferred from stack traces or schemas inferred from field structure: tag `"inferred"` and score below the directly-evidenced band. Exact evidence text does not make an inferred claim explicit.
 
 Confidence bands:
-- **90–100**: explicit, unambiguous evidence
-- **70–89**: strong patterns with multiple corroborating signals
-- **50–69**: clear indicators with some ambiguity
-- **30–49**: weak inference (must include `"inferred"` tag)
+- **90–100**: explicit, unambiguous evidence (the component's own logs identify it)
+- **70–89**: strong direct patterns with multiple corroborating signals
+- **50–69**: clear indicators with some ambiguity — most inferred remote components and failed dependencies land here
+- **30–49**: weak inference (include `"inferred"`)
 
-Accept features with confidence ≥ 30 if evidence supports them.
+A dependency is never more certain than the components it connects: give it lower confidence than the entities on either side, and treat any dependency evidenced by errors or fallbacks as inferred.
+
+Accept features with confidence ≥ 30 when evidence supports them.
 
 ## Evidence & Versions
 
-Evidence requirements:
-- Provide 2–5 short, specific evidence strings per feature
-- Prefer stable `field.path=value` snippets when possible; otherwise short direct quotes
-- Evidence must directly support the feature claim
+- 2–5 short, specific evidence strings per feature
+- Copy every evidence item from the observed documents: use an observed `field.path=value` pair (e.g. `service.name=api-service`) or an exact body quote without JSON escaping. Do not invent, paraphrase, or combine unsupported field/value pairs
+- `evidence_doc_ids`: minimal covering set for concise traceability — every evidence item must appear in at least one referenced document, and every referenced `_id` must be an observed document `_id`. Same document for all evidence → single `_id`. Aggregate/system-wide or no `_id` → `[]`
+- Deduplicate evidence by meaning; keep one representative line and put relevant ids in `evidence_doc_ids`
+- Diversify evidence aspects (name, version, protocol, relationship) rather than repeating the same key/value
+- Use evidence that directly supports the feature claim
+- Before finalizing, check every evidence item and `evidence_doc_ids` reference against the observed documents; correct or remove anything that is not grounded
 
-Version formatting rules (important for CVE/vulnerability analysis):
-- Prefer normalized numeric versions in `value.version` (e.g., `"11"`, `"11.0"`, `"11.0.2"`)
-- Strip leading `v` and surrounding text; keep only the numeric portion when possible
-- If the original version contains labels (LTS/Enterprise/codename/build metadata), store the normalized numeric part in `value.version` and store the original in `meta.raw_version`
-- Remove codenames/release names/edition labels from `value.version`
+Version formatting (for vulnerability analysis):
+- Normalized numeric in `properties.version` (e.g. `"11"`, `"11.0.2"`); strip leading `v` and surrounding text
+- Labels (LTS/Enterprise/codename/build metadata) → `meta.raw_version`; keep only the numeric part in `properties.version`
+
+## Deduplication
+
+Emit one feature per real-world component, even with slight naming/property differences. Same `type` + `subtype` + same logical entity in `properties` → merge evidence/tags/meta into one feature.
+
+**Consolidate** when properties belong to the same logical component and appear together (one entity with its stack; one cloud deployment with provider in `properties` and regions in `meta`).
+
+**Separate** distinct concerns (one entity per component; standalone infrastructure/technology even when also on an entity). Keep unrelated components separate.
+
+### Previously identified features
+
+When `previously_identified_features` is provided:
+1. Check each candidate against the list for the same real-world component
+2. On match, **re-emit with the exact same `id`**. A version difference does not create a new feature — reuse the id and put the current version in `properties.version`. Return info from current sample documents; the system merges with the prior version
+3. Re-emit only when current documents have matching evidence and genuinely new information. Do not echo unchanged prior features; the system retains them and merges emitted updates
+4. Prefer uncovered features, but verify candidates are not variants of existing ones first
+
+### Known feature IDs
+
+When `known_feature_ids` is provided (complete inventory of known ids by type): check it before emitting. Reuse the exact id when a candidate is the same real-world thing of the same type. `previously_identified_features` is a detailed subset; `known_feature_ids` is authoritative for whether an id exists, including ids outside that subset. Reuse the inventory id even when its entry is missing from the detailed subset.
+
+### Semantic duplicate verification
+
+Use `search_similar_features` only when the candidate is not already in `known_feature_ids`. Pass intended `candidate_id` plus title, description, and type. Reuse a returned id only when it clearly describes the same real-world thing with the same type; otherwise keep the candidate id. Prefer temporary duplicates over incorrectly merging distinct features.
+
+## Excluded Features
+
+When `excluded_features` is provided, suppress a feature only when it represents the **exact same real-world component** with 100% certainty. Features that are similar but represent different components must still be generated. Base the decision on component identity rather than naming patterns, shared type/subtype, or overlapping tags.
+
+For each skipped match, add to `ignored_features`: `feature_id`, `feature_title`, `excluded_feature_id`, and a one-sentence `reason`. When no match is suppressed, leave `ignored_features` as `[]`.
 
 ## Examples
 
-**Example 1 - Infrastructure with clean version**
+One example per type family, plus an indirectly-inferred case. Rules above win when an example is silent. Confidence in these examples tracks how direct the evidence is: named identifiers score high, structure- and pattern-based inference scores lower.
+
+**Example 1 — Entity with filter**
 ```
 {
-  "type": "infrastructure",
-  "name": "operating_system",
-  "title": "Ubuntu 20.04.6",
-  "description": "Ubuntu Linux operating system version 20.04.6",
-  "value": {
-    "os": "ubuntu",
-    "version": "20.04.6"
-  },
-  "confidence": 95,
+  "type": "entity",
+  "subtype": "service",
+  "id": "api-service",
+  "title": "API Service",
+  "description": "API service handling HTTP requests, built with Java",
+  "properties": { "name": "api-service", "technology": "java" },
+  "confidence": 88,
   "evidence": [
-    "host.os.name=Ubuntu",
-    "host.os.version=20.04.6 LTS (Focal Fossa)"
+    "service.name=api-service",
+    "process.runtime.name=OpenJDK Runtime Environment process.runtime.version=11.0.2",
+    "kubernetes.namespace=production",
+    "http.method=GET http.url=/api/users http.status_code=200"
   ],
-  "tags": ["infrastructure", "os"],
+  "evidence_doc_ids": ["7f3a9b2"],
+  "tags": ["entity", "service", "java"],
+  "filter": { "field": "service.name", "eq": "api-service" },
   "meta": {
-    "raw_version": "20.04.6 LTS (Focal Fossa)"
+    "runtime_version": "11.0.2",
+    "kubernetes_namespace": "production",
+    "observed_endpoints": ["/api/users"]
   }
 }
 ```
 
-**Example 2 - Infrastructure showing value vs meta**
+**Example 2 — Infrastructure**
 ```
 {
   "type": "infrastructure",
-  "name": "cloud_deployment",
+  "subtype": "cloud_deployment",
+  "id": "aws-deployment",
   "title": "AWS",
-  "description": "AWS cloud deployment observed across one or more regions/availability zones",
-  "value": {
-    "provider": "aws"
-  },
+  "description": "AWS cloud deployment across one or more regions/availability zones",
+  "properties": { "provider": "aws" },
   "confidence": 92,
   "evidence": [
     "cloud.provider=aws",
     "cloud.region=eu-west-1",
     "cloud.availability_zone=eu-west-1a"
   ],
+  "evidence_doc_ids": ["8a1f0c2"],
   "tags": ["infrastructure", "cloud"],
   "meta": {
     "regions": ["eu-west-1"],
-    "availability_zones": ["eu-west-1a", "eu-west-1b"]
+    "availability_zones": ["eu-west-1a"]
   }
 }
 ```
 
-**Example 3 - Technology feature with version**
+**Example 3 — Technology with version**
 ```
 {
   "type": "technology",
-  "name": "logging_library",
+  "subtype": "logging_library",
+  "id": "log4j",
   "title": "Log4j 2.14.1",
   "description": "Apache Log4j logging library version 2.14.1",
-  "value": {
-    "library": "log4j",
-    "version": "2.14.1"
-  },
+  "properties": { "library": "log4j", "version": "2.14.1" },
   "confidence": 90,
-  "evidence": [
-    "jar=log4j-core-2.14.1.jar",
-    "logger=org.apache.logging.log4j"
-  ],
+  "evidence": ["jar=log4j-core-2.14.1.jar", "logger=org.apache.logging.log4j"],
+  "evidence_doc_ids": ["9d2c1aa"],
   "tags": ["technology", "library", "logging"],
-  "meta": {
-    "security_note": "Library versions can be used for CVE/vulnerability queries."
-  }
+  "meta": { "observed_artifact": "log4j-core-2.14.1.jar" }
 }
 ```
 
-**Example 4 - Inferred feature with lower confidence**
-```
-{
-  "type": "technology",
-  "name": "programming_language",
-  "title": "Java",
-  "description": "Java programming language (inferred from exception patterns)",
-  "value": {
-    "language": "java"
-  },
-  "confidence": 45,
-  "evidence": [
-    "exception=java.lang.NullPointerException",
-    "stacktrace=at com.example.Service.handle(Service.java:42)"
-  ],
-  "tags": ["technology", "inferred"],
-  "meta": {
-    "notes": "Inferred from Java exception class names and .java stack trace references."
-  }
-}
-```
-
-**Example 5 - Dependency feature showing value vs meta + aggregation/capping**
+**Example 4 — Dependency**
 ```
 {
   "type": "dependency",
-  "name": "service_dependency",
+  "subtype": "service_dependency",
+  "id": "api-user-http",
   "title": "api-service → user-service",
-  "description": "Service-to-service HTTP dependency from api-service to user-service",
-  "value": {
-    "source": "api-service",
-    "target": "user-service",
-    "protocol": "http"
-  },
+  "description": "HTTP dependency from api-service to user-service",
+  "properties": { "source": "api-service", "target": "user-service", "protocol": "http" },
   "confidence": 85,
   "evidence": [
-    "service.name=api-service http.url=/users http.status_code=200 peer.service=user-service",
+    "service.name=api-service peer.service=user-service http.route=/users",
     "upstream=user-service:8080 request=GET /users"
   ],
+  "evidence_doc_ids": ["b7aa021", "cc12d90"],
   "tags": ["dependency", "http"],
   "meta": {
-    "endpoints": ["/users", "/users/:id", "/users/:id/profile", "/users/search"],
-    "methods": ["GET", "POST", "PUT"],
-    "notes": "Aggregate endpoints under one dependency; cap the list (e.g., max 10) and summarize additional entries."
+    "endpoints": ["/users", "/users/:id", "/users/search"],
+    "methods": ["GET", "POST"]
   }
 }
 ```
 
-## Output Quality Requirements
+**Example 5 — Schema**
+```
+{
+  "type": "schema",
+  "subtype": "ecs",
+  "id": "ecs-schema",
+  "title": "ECS",
+  "description": "Elastic Common Schema inferred from field names and structure",
+  "properties": { "schema_family": "ecs", "ecs_version": "8.11.0" },
+  "confidence": 80,
+  "evidence": ["ecs.version=8.11.0", "@timestamp present", "service.name present"],
+  "evidence_doc_ids": ["a1b2c3d"],
+  "tags": ["schema", "ecs"],
+  "meta": {}
+}
+```
 
-- Extract all features that meet the confidence threshold and have supporting evidence.
-- Prefer fewer, higher-confidence features over many speculative ones.
-- Sort features by descending `confidence` (and within ties, stable alphabetical order by `type`, then `name`).
-- Dependency anti-spam: only emit a dependency feature when logs contain explicit evidence of a relationship; aggregate endpoints in `meta.endpoints` and cap the list.
+**Example 6 — Technology inferred with lower confidence**
+```
+{
+  "type": "technology",
+  "subtype": "programming_language",
+  "id": "python",
+  "title": "Python",
+  "description": "Python programming language, inferred from traceback patterns",
+  "properties": { "language": "python" },
+  "confidence": 45,
+  "evidence": [
+    "Traceback (most recent call last):",
+    "File \"/app/main.py\", line 42, in handle_request"
+  ],
+  "evidence_doc_ids": ["3a77c10"],
+  "tags": ["technology", "inferred"],
+  "meta": { "note": "Inferred from Python-style traceback format and .py file references" }
+}
+```
 
-Extract all features that meet the confidence threshold and have supporting evidence. Use the finalize_features tool to return the results.
+## Success Criteria
+
+- Prioritize entities, then dependencies, then standalone infrastructure/technology/schema
+- Extract every feature the evidence supports at confidence ≥ 30, including inferred remote components and failed dependencies. A feature without grounded evidence is wrong; so is omitting a component whose name is observed in the logs
+- Do not pad the list with speculative features that have no observed name or evidence
+- Dependencies: evidence must name both sides — a call, connection, broker, fallback, or error naming the target; aggregate/cap endpoints in `meta.endpoints`
+- Entities: one feature per distinct named component; include a valid `filter` when the entity's own field=value is observed, omit it otherwise
+- Schema: one feature per evident family; short `properties` only
+
+Build one deduplicated list of features to emit for the current sample documents, then call **finalize_features** exactly once. Previously identified features are context, not a historical inventory to return.

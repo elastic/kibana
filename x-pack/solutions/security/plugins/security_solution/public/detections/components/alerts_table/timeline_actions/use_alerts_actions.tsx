@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 
 import type { AlertWorkflowStatus } from '../../../../common/types';
 import { useBulkActionItems } from '../../../../common/components/toolbar/bulk_actions/use_bulk_action_items';
@@ -30,7 +30,7 @@ export const useAlertsActions = ({
   refetch,
 }: Props) => {
   const dispatch = useDispatch();
-  const { hasIndexWrite } = useAlertsPrivileges();
+  const { hasAlertsUpdate } = useAlertsPrivileges();
 
   const onStatusUpdate = useCallback(() => {
     closePopover();
@@ -68,12 +68,21 @@ export const useAlertsActions = ({
       setEventsDeleted,
       onUpdateSuccess: onStatusUpdate,
       onUpdateFailure: onStatusUpdate,
+      closePopover,
+      showRunWorkflowActions: false,
     };
-  }, [alertStatus, eventIds, localSetEventsLoading, onStatusUpdate, setEventsDeleted]);
+  }, [
+    alertStatus,
+    closePopover,
+    eventIds,
+    localSetEventsLoading,
+    onStatusUpdate,
+    setEventsDeleted,
+  ]);
 
   const { items: actionItems, panels } = useBulkActionItems(actionItemArgs);
 
   return useMemo(() => {
-    return hasIndexWrite ? { actionItems, panels } : { actionItems: [], panels: [] };
-  }, [actionItems, hasIndexWrite, panels]);
+    return hasAlertsUpdate ? { actionItems, panels } : { actionItems: [], panels: [] };
+  }, [actionItems, hasAlertsUpdate, panels]);
 };

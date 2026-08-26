@@ -15,6 +15,10 @@ export class CopyIntegrationPage {
   }
 
   async waitForPageToLoad() {
+    await this.page.testSubj.waitForSelector('fleetSetupLoading', {
+      state: 'hidden',
+      timeout: 30_000,
+    });
     await this.page.testSubj.waitForSelector('createPackagePolicy_page', {
       state: 'visible',
       timeout: 20_000,
@@ -35,6 +39,10 @@ export class CopyIntegrationPage {
 
   getAgentPolicySelectIsLoading() {
     return this.getAgentPolicySelect().getByRole('progressbar');
+  }
+
+  getAgentPolicyAgentsDescription() {
+    return this.page.testSubj.locator('agentPolicyAgentsDescription');
   }
 
   async fillPackagePolicyName(name: string) {

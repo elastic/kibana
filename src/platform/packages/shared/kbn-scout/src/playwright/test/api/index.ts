@@ -12,6 +12,7 @@ import { test as base, mergeTests } from 'playwright/test';
 import {
   coreWorkerFixtures,
   esArchiverFixture,
+  linkedEsFixtures,
   apiClientFixture,
   apiServicesFixture,
   defaultRolesFixture,
@@ -20,6 +21,7 @@ import {
 import type {
   CoreWorkerFixtures,
   EsArchiverFixture,
+  LinkedProjectFixture,
   RequestAuthFixture,
   ApiClientFixture,
   DefaultRolesFixture,
@@ -35,6 +37,7 @@ export interface ApiWorkerFixtures extends CoreWorkerFixtures {
   defaultRolesFixture: DefaultRolesFixture;
   requestAuth: RequestAuthFixture;
   esArchiver: EsArchiverFixture;
+  linkedProject: LinkedProjectFixture;
 }
 
 // This disables browser-related fixtures by overriding them with undefined
@@ -76,5 +79,6 @@ export const apiTest = mergeTests(
   apiServicesFixture,
   defaultRolesFixture,
   requestAuthFixture,
-  esArchiverFixture
+  esArchiverFixture,
+  linkedEsFixtures
 ) as unknown as TestType<{}, ApiWorkerFixtures>;

@@ -22,12 +22,14 @@ import type {
   DeletePackageResponse,
   UpdatePackageRequest,
   UpdatePackageResponse,
+  ReviewUpgradeResponse,
   GetBulkAssetsRequest,
   GetBulkAssetsResponse,
   GetVerificationKeyIdResponse,
   GetInputsTemplatesRequest,
   GetInputsTemplatesResponse,
 } from '../../types';
+import type { NamespaceConflictWarning } from '../../../common/types/rest_spec/epm';
 import type {
   BulkUpgradePackagesRequest,
   BulkOperationPackagesResponse,
@@ -35,12 +37,15 @@ import type {
   GetEpmDataStreamsResponse,
   GetOneBulkOperationPackagesResponse,
   GetStatsResponse,
+  GetDependenciesResponse,
   BulkUninstallPackagesRequest,
   DeletePackageDatastreamAssetsRequest,
   DeletePackageDatastreamAssetsResponse,
   BulkRollbackPackagesRequest,
   RollbackAvailableCheckResponse,
   BulkRollbackAvailableCheckResponse,
+  GetIlmPoliciesResponse,
+  SimpleSOAssetType,
 } from '../../../common/types';
 import { API_VERSIONS } from '../../../common/constants';
 
@@ -165,6 +170,7 @@ export const useGetPackageInfoByKeyQuery = (
     enabled?: boolean;
     suspense?: boolean;
     refetchOnMount?: boolean | 'always';
+    staleTime?: number;
   } = {
     enabled: true,
   }
@@ -190,6 +196,7 @@ export const useGetPackageInfoByKeyQuery = (
       suspense: queryOptions.suspense,
       enabled: queryOptions.enabled,
       refetchOnMount: queryOptions.refetchOnMount,
+      staleTime: queryOptions.staleTime,
       retry: (_, error) => !isUserError(error) && !isRegistryConnectionError(error),
       refetchOnWindowFocus: false,
     }
@@ -216,6 +223,23 @@ export const useGetPackageStats = (pkgName: string) => {
     method: 'get',
     version: API_VERSIONS.public.v1,
   });
+};
+
+export const useGetPackageDependencies = (
+  pkgName: string,
+  pkgVersion: string,
+  { enabled = true }: { enabled?: boolean } = {}
+) => {
+  return useQuery<GetDependenciesResponse, RequestError>(
+    ['package-dependencies', pkgName, pkgVersion],
+    () =>
+      sendRequestForRq<GetDependenciesResponse>({
+        path: epmRouteService.getDependenciesPath(pkgName, pkgVersion),
+        method: 'get',
+        version: API_VERSIONS.public.v1,
+      }),
+    { enabled, refetchOnWindowFocus: false }
+  );
 };
 
 export const useGetPackageVerificationKeyId = () => {
@@ -298,6 +322,20 @@ export const useGetEpmDatastreams = () => {
       version: API_VERSIONS.public.v1,
     })
   );
+};
+
+export const useGetIlmPoliciesQuery = (options?: { enabled?: boolean }) => {
+  return useQuery<GetIlmPoliciesResponse, RequestError>({
+    queryKey: ['get-ilm-policies'],
+    queryFn: () =>
+      sendRequestForRq<GetIlmPoliciesResponse>({
+        path: epmRouteService.getIlmPoliciesPath(),
+        method: 'get',
+        version: API_VERSIONS.internal.v1,
+      }),
+    enabled: options?.enabled,
+    refetchOnWindowFocus: false,
+  });
 };
 
 export const sendGetFileByPath = (filePath: string) => {
@@ -470,15 +508,66 @@ interface InstallKibanaAssetsArgs {
 }
 
 export const useUpdatePackageMutation = () => {
-  return useMutation<UpdatePackageResponse, RequestError, UpdatePackageArgs>(
-    ({ pkgName, pkgVersion, body }: UpdatePackageArgs) =>
+  const queryClient = useQueryClient();
+
+  return useMutation<UpdatePackageResponse, RequestError, UpdatePackageArgs>({
+    mutationFn: ({ pkgName, pkgVersion, body }: UpdatePackageArgs) =>
       sendRequestForRq<UpdatePackageResponse>({
         path: epmRouteService.getUpdatePath(pkgName, pkgVersion),
         method: 'put',
         version: API_VERSIONS.public.v1,
         body,
-      })
-  );
+      }),
+    onSuccess: (_data, { pkgName }) => {
+      queryClient.invalidateQueries([pkgName]);
+      queryClient.invalidateQueries(['get-packages']);
+    },
+  });
+};
+
+interface NamespacePreflightCheckArgs {
+  pkgName: string;
+  namespaces: string[];
+}
+
+interface NamespacePreflightCheckResponse {
+  warnings: NamespaceConflictWarning[];
+}
+
+export const useNamespacePreflightCheckMutation = () => {
+  return useMutation<NamespacePreflightCheckResponse, RequestError, NamespacePreflightCheckArgs>({
+    mutationFn: ({ pkgName, namespaces }: NamespacePreflightCheckArgs) =>
+      sendRequestForRq<NamespacePreflightCheckResponse>({
+        path: epmRouteService.getNamespacePreflightCheckPath(pkgName),
+        method: 'post',
+        version: API_VERSIONS.internal.v1,
+        body: { namespaces },
+      }),
+  });
+};
+
+interface ReviewUpgradeArgs {
+  pkgName: string;
+  action: 'accept' | 'decline' | 'pending';
+  targetVersion: string;
+}
+
+export const useReviewUpgradeMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<ReviewUpgradeResponse, RequestError, ReviewUpgradeArgs>({
+    mutationFn: ({ pkgName, action, targetVersion }: ReviewUpgradeArgs) =>
+      sendRequestForRq<ReviewUpgradeResponse>({
+        path: epmRouteService.getReviewUpgradePath(pkgName),
+        method: 'post',
+        version: API_VERSIONS.public.v1,
+        body: { action, target_version: targetVersion },
+      }),
+    onSuccess: (_data, { pkgName }) => {
+      queryClient.invalidateQueries(['get-packages']);
+      queryClient.invalidateQueries([pkgName]);
+    },
+  });
 };
 
 export const useInstallKibanaAssetsMutation = () => {
@@ -518,8 +607,10 @@ export const sendUpdatePackage = (
   });
 };
 
-export const sendGetBulkAssets = (body: GetBulkAssetsRequest['body']) => {
-  return sendRequest<GetBulkAssetsResponse>({
+export const sendGetBulkAssets = <TAsset extends SimpleSOAssetType = SimpleSOAssetType>(
+  body: GetBulkAssetsRequest['body']
+) => {
+  return sendRequest<GetBulkAssetsResponse<TAsset>>({
     path: epmRouteService.getBulkAssetsPath(),
     method: 'post',
     version: API_VERSIONS.public.v1,

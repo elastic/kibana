@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/271284
+issues:
+- https://github.com/elastic/kibana/issues/269658
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-06-01
+areas:
+- Discover and ES|QL
+title: Integrate KQL search in Lookup Index Editor

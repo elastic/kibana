@@ -8,12 +8,22 @@
 import Boom from '@hapi/boom';
 import { isEqual, omit } from 'lodash';
 import type { SavedObject } from '@kbn/core/server';
+import type { RuleChangeTracking } from '@kbn/alerting-types';
+import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import type { SanitizedRule, RawRule } from '../../../../types';
-import { validateRuleTypeParams, getRuleNotifyWhenType } from '../../../../lib';
+import {
+  validateRuleTypeParams,
+  authorizeRuleTypeParams,
+  getRuleNotifyWhenType,
+} from '../../../../lib';
 import { validateAndAuthorizeSystemActions } from '../../../../lib/validate_authorize_system_actions';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import { parseDuration, getRuleCircuitBreakerErrorMessage } from '../../../../../common';
-import { getMappedParams } from '../../../../rules_client/common/mapped_params_utils';
+import {
+  getMappedParams,
+  addMissingUiamKeyTagIfNeeded,
+  API_KEY_ATTRIBUTES_TO_STRIP,
+} from '../../../../rules_client/common';
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
@@ -29,6 +39,7 @@ import {
   createNewAPIKeySet,
   updateMetaAttributes,
   bulkMigrateLegacyActions,
+  migrateLegacyLastRunOutcomeMsg,
 } from '../../../../rules_client/lib';
 import type { RuleParams } from '../../types';
 import type { UpdateRuleData } from './types';
@@ -40,6 +51,7 @@ import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { updateRuleDataSchema } from './schemas';
 import { transformRuleAttributesToRuleDomain, transformRuleDomainToRule } from '../../transforms';
 import { ruleDomainSchema } from '../../schemas';
+import { logRuleChanges } from '../common_utils/log_rule_changes';
 
 type ShouldIncrementRevision = (params?: RuleParams) => boolean;
 
@@ -48,6 +60,7 @@ export interface UpdateRuleParams<Params extends RuleParams = never> {
   data: UpdateRuleData<Params>;
   allowMissingConnectorSecrets?: boolean;
   shouldIncrementRevision?: ShouldIncrementRevision;
+  changeTracking?: RuleChangeTracking;
 }
 
 export async function updateRule<Params extends RuleParams = never>(
@@ -71,6 +84,7 @@ async function updateWithOCC<Params extends RuleParams = never>(
     allowMissingConnectorSecrets,
     id,
     shouldIncrementRevision = () => true,
+    changeTracking,
   } = updateParams;
 
   // Validate update rule data schema
@@ -114,8 +128,16 @@ async function updateWithOCC<Params extends RuleParams = never>(
     systemActions: genSystemActions,
   };
 
-  const { alertTypeId, consumer, enabled, schedule, name, apiKey, apiKeyCreatedByUser } =
-    originalRuleSavedObject.attributes;
+  const {
+    alertTypeId,
+    consumer,
+    enabled,
+    schedule,
+    name,
+    apiKey,
+    uiamApiKey,
+    apiKeyCreatedByUser,
+  } = originalRuleSavedObject.attributes;
 
   let validationPayload: ValidateScheduleLimitResult = null;
   if (enabled && schedule.interval !== data.schedule.interval) {
@@ -170,6 +192,10 @@ async function updateWithOCC<Params extends RuleParams = never>(
   const actionsClient = await context.getActionsClient();
 
   const validatedRuleTypeParams = validateRuleTypeParams(data.params, ruleType.validate.params);
+  await authorizeRuleTypeParams(validatedRuleTypeParams, ruleType.authorize?.params, {
+    request: context.request,
+    previousParams: originalRuleSavedObject.attributes.params,
+  });
   await validateActions(context, ruleType, data, allowMissingConnectorSecrets);
   await validateAndAuthorizeSystemActions({
     actionsClient,
@@ -197,6 +223,7 @@ async function updateWithOCC<Params extends RuleParams = never>(
     originalRuleSavedObject,
     shouldIncrementRevision,
     isSystemAction: (connectorId: string) => actionsClient.isSystemAction(connectorId),
+    changeTracking,
   });
 
   // Log warning if schedule interval is less than the minimum but we're not enforcing it
@@ -209,10 +236,20 @@ async function updateWithOCC<Params extends RuleParams = never>(
     );
   }
 
+  const apiKeysToInvalidate = [];
+  if (apiKey && !apiKeyCreatedByUser) {
+    apiKeysToInvalidate.push(apiKey);
+  }
+  if (uiamApiKey && !apiKeyCreatedByUser) {
+    apiKeysToInvalidate.push(uiamApiKey);
+  }
+
   await Promise.all([
-    apiKey && !apiKeyCreatedByUser
+    apiKeysToInvalidate.length > 0
       ? bulkMarkApiKeysForInvalidation(
-          { apiKeys: [apiKey] },
+          {
+            apiKeys: apiKeysToInvalidate,
+          },
           context.logger,
           context.unsecuredSavedObjectsClient
         )
@@ -251,6 +288,7 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
   originalRuleSavedObject,
   shouldIncrementRevision,
   isSystemAction,
+  changeTracking,
 }: {
   context: RulesClientContext;
   updateRuleData: UpdateRuleData<Params>;
@@ -258,6 +296,7 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
   validatedRuleTypeParams: Params;
   shouldIncrementRevision: (params?: Params) => boolean;
   isSystemAction: (connectorId: string) => boolean;
+  changeTracking?: RuleChangeTracking;
   // TODO (http-versioning): This should be of type Rule, change this when all rule types are fixed
 }): Promise<SanitizedRule<Params>> {
   await bulkMigrateLegacyActions({ context, rules: [originalRuleSavedObject] });
@@ -298,7 +337,16 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
     username,
     shouldUpdateApiKey: originalRule.enabled,
     errorMessage: 'Error updating rule: could not create API key',
+    apiKeyOwnership: { apiKeyCreatedByUser: originalRule.apiKeyCreatedByUser },
   });
+
+  const tagsWithUiamCheck = await addMissingUiamKeyTagIfNeeded(
+    updateRuleData.tags,
+    apiKeyAttributes.uiamApiKey,
+    apiKeyAttributes.apiKeyCreatedByUser,
+    context.isServerless,
+    context.featureFlags
+  );
 
   const notifyWhen = getRuleNotifyWhenType(
     updateRuleData.notifyWhen ?? null,
@@ -306,9 +354,10 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
   );
 
   const updatedRuleAttributes = updateMetaAttributes(context, {
-    ...originalRule,
+    ...omit(originalRule, API_KEY_ATTRIBUTES_TO_STRIP),
     ...omit(updateRuleData, 'actions', 'systemActions', 'artifacts'),
     ...apiKeyAttributes,
+    tags: tagsWithUiamCheck,
     params: updatedParams as RawRule['params'],
     actions: actionsWithRefs,
     notifyWhen,
@@ -316,6 +365,9 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
     updatedBy: username,
     updatedAt: new Date().toISOString(),
     artifacts: artifactsWithRefs,
+    ...(originalRule.lastRun
+      ? { lastRun: migrateLegacyLastRunOutcomeMsg(originalRule.lastRun) }
+      : {}),
   });
 
   const mappedParams = getMappedParams(updatedParams);
@@ -327,6 +379,7 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
   let updatedRuleSavedObject: SavedObject<RawRule>;
 
   const { id, version } = originalRuleSavedObject;
+
   try {
     updatedRuleSavedObject = await createRuleSo({
       savedObjectsClient: context.unsecuredSavedObjectsClient,
@@ -338,15 +391,39 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
         references: extractedReferences,
       },
     });
+
+    await logRuleChanges({
+      ruleSOs: [updatedRuleSavedObject],
+      encryptedFieldsMap: new Map([
+        [
+          id,
+          {
+            apiKey: updatedRuleAttributes.apiKey,
+            uiamApiKey: updatedRuleAttributes.uiamApiKey ?? null,
+          },
+        ],
+      ]),
+      rulesClientContext: context,
+      changesContext: {
+        action: changeTracking?.action ?? RuleChangeTrackingAction.ruleUpdate,
+        metadata: changeTracking?.metadata,
+        refresh: changeTracking?.refresh,
+      },
+    });
   } catch (e) {
+    const { apiKey, apiKeyCreatedByUser, uiamApiKey } = updatedRuleAttributes;
+
+    const apiKeysToInvalidate = [];
+    if (apiKey && !apiKeyCreatedByUser) {
+      apiKeysToInvalidate.push(apiKey);
+    }
+    if (uiamApiKey && !apiKeyCreatedByUser) {
+      apiKeysToInvalidate.push(uiamApiKey);
+    }
+
     // Avoid unused API key
     await bulkMarkApiKeysForInvalidation(
-      {
-        apiKeys:
-          updatedRuleAttributes.apiKey && !updatedRuleAttributes.apiKeyCreatedByUser
-            ? [updatedRuleAttributes.apiKey]
-            : [],
-      },
+      { apiKeys: apiKeysToInvalidate },
       context.logger,
       context.unsecuredSavedObjectsClient
     );
@@ -373,7 +450,7 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
   }
 
   // Convert domain rule to rule (Remove certain properties)
-  const rule = transformRuleDomainToRule<Params>(ruleDomain, { isPublic: true });
+  const rule = transformRuleDomainToRule<Params>(ruleDomain);
 
   // TODO (http-versioning): Remove this cast, this enables us to move forward
   // without fixing all of other solution types

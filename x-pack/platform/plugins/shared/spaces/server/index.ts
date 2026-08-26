@@ -14,11 +14,12 @@ import { ConfigSchema } from './config';
 // reduce number of such exports to zero and provide everything we want to expose via Setup/Start
 // run-time contracts.
 
-export { addSpaceIdToPath } from '../common';
-
 // end public contract exports
 
-export type { SpacesPluginSetup, SpacesPluginStart } from './plugin';
+export type {
+  SpacesPluginSetupApi as SpacesPluginSetup,
+  SpacesPluginStartApi as SpacesPluginStart,
+} from './plugin';
 export type { SpacesServiceSetup, SpacesServiceStart } from './spaces_service';
 export type {
   ISpacesClient,

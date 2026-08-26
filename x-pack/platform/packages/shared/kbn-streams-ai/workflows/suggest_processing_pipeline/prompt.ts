@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { createPrompt } from '@kbn/inference-common';
 import { Streams } from '@kbn/streams-schema';
 import systemPromptTemplate from './system_prompt.text';
@@ -18,8 +18,17 @@ export const SuggestIngestPipelinePrompt = createPrompt({
     stream: Streams.all.Definition.right,
     pipeline_schema: z.string(),
     fields_schema: z.string(),
-    parsing_processor: z.string().optional(),
+    content_field: z.string(),
+    severity_field: z.string(),
+    /** JSON summary of sample document structure (fields, example values, schema hints) */
     initial_dataset_analysis: z.string(),
+    /**
+     * When set, explains an upstream grok/dissect step already applied before these samples.
+     * Empty when the agent may propose grok/dissect (full pipeline schema).
+     */
+    upstream_extraction_context: z.string(),
+    /** Conditional field examples for ECS or OTel, injected into system prompt based on stream type */
+    field_examples: z.string(),
   }),
 })
   .version({
@@ -42,8 +51,16 @@ export const SuggestIngestPipelinePrompt = createPrompt({
           properties: {
             pipeline: {
               type: 'object',
-              description: 'The pipeline definition object containing processing steps',
-              properties: {},
+              description:
+                'The pipeline definition object containing processing steps. Always include `steps` (array of processors). For a first candidate with no processors yet, use { "steps": [] }; never send {}.',
+              properties: {
+                steps: {
+                  type: 'array',
+                  description:
+                    'Ordered list of processors that transform documents. Shapes must match the Pipeline schema in the system prompt.',
+                },
+              },
+              required: ['steps'],
             },
           },
           required: ['pipeline'],
@@ -51,14 +68,22 @@ export const SuggestIngestPipelinePrompt = createPrompt({
       },
       commit_pipeline: {
         description:
-          'Finalize the pipeline after simulate_pipeline passes with acceptable metrics. Only call this when your eval/dev loop is complete.',
+          'Finalize the pipeline after simulation passes (valid: true) and all temporary fields are cleaned up. Only commit { "steps": [] } after verifying the Inspection checklist in the system prompt—all five checks must pass.',
         schema: {
           type: 'object',
           properties: {
             pipeline: {
               type: 'object',
-              description: 'The pipeline definition object containing processing steps',
-              properties: {},
+              description:
+                'The pipeline definition object containing processing steps. Use { "steps": [] } if no processing is needed.',
+              properties: {
+                steps: {
+                  type: 'array',
+                  description:
+                    'Ordered list of processors that transform documents. Shapes must match the Pipeline schema in the system prompt.',
+                },
+              },
+              required: ['steps'],
             },
           },
           required: ['pipeline'],

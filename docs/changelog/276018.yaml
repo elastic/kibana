@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/276018
+issues:
+- https://github.com/elastic/search-team/issues/15112
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-07
+title: Fix stray delimiter in Agent Builder attachment headers

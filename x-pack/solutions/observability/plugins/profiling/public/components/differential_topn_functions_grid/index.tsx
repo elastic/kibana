@@ -16,6 +16,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiScreenReaderOnly,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -288,16 +289,24 @@ export function DifferentialTopNFunctionsGrid({
                   });
                 }
                 return (
-                  <EuiButtonIcon
-                    data-test-subj="profilingTopNFunctionsGridButton"
-                    aria-label={i18n.translate(
+                  <EuiToolTip
+                    content={i18n.translate(
                       'xpack.profiling.topNFunctionsGrid.euiButtonIcon.showActionsLabel',
                       { defaultMessage: 'Show actions' }
                     )}
-                    iconType="expand"
-                    color="text"
-                    onClick={handleOnClick}
-                  />
+                    disableScreenReaderOutput
+                  >
+                    <EuiButtonIcon
+                      data-test-subj="profilingTopNFunctionsGridButton"
+                      aria-label={i18n.translate(
+                        'xpack.profiling.topNFunctionsGrid.euiButtonIcon.showActionsLabel',
+                        { defaultMessage: 'Show actions' }
+                      )}
+                      iconType="maximize"
+                      color="text"
+                      onClick={handleOnClick}
+                    />
+                  </EuiToolTip>
                 );
               },
             },

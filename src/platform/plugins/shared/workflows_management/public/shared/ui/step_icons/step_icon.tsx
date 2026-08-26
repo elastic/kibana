@@ -8,24 +8,44 @@
  */
 
 import type { EuiIconProps, IconType } from '@elastic/eui';
-import { EuiBeacon, EuiIcon, EuiLoadingSpinner, EuiToken, useEuiTheme } from '@elastic/eui';
+import { EuiIcon, EuiLoadingSpinner, EuiToken, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { Suspense } from 'react';
-import type { TypeRegistry } from '@kbn/alerts-ui-shared/lib';
-import type { ActionTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import { ExecutionStatus } from '@kbn/workflows';
-import { getStepIconType } from './get_step_icon_type';
+import {
+  getMaskableIconUrl,
+  getStepIconType,
+  getTriggerTypeIconType,
+  HardcodedIcons,
+  resolveRegisteredStepIcon,
+} from '@kbn/workflows-ui';
 import { useKibana } from '../../../hooks/use_kibana';
 import { getExecutionStatusColors, getExecutionStatusIcon } from '../status_badge';
+import { withTooltip } from '../with_tooltip';
+
+// Category icons for bare base types (e.g. `ai.prompt` + `ai.agent` → `ai`) applied
+// before extension-family inheritance, so the aggregated row icon stays stable
+// regardless of which family members are registered or what icon they picked.
+const BASE_TYPE_AGGREGATE_ICONS: Record<string, IconType> = {
+  ai: 'productAgent',
+  workflow: HardcodedIcons['workflow.execute'],
+};
 
 interface StepIconProps extends Omit<EuiIconProps, 'type'> {
   stepType: string;
   executionStatus: ExecutionStatus | null | undefined;
   onClick?: React.MouseEventHandler;
+  /**
+   * Explicit tint for mask-based (data-URI) icons, e.g. the graph node paints
+   * the trigger icon accent/pink to match its border. Only affects masked icons;
+   * multi-color logos are untouched. When omitted, masked icons use the neutral
+   * text tone so the shared default stays consistent across all consumers.
+   */
+  iconColor?: string;
 }
 
 export const StepIcon = React.memo(
-  ({ stepType, executionStatus, onClick, ...rest }: StepIconProps) => {
+  ({ stepType, executionStatus, onClick, title, iconColor, ...rest }: StepIconProps) => {
     const { euiTheme } = useEuiTheme();
     const { triggersActionsUi, workflowsExtensions } = useKibana().services;
     const { actionTypeRegistry } = triggersActionsUi;
@@ -39,31 +59,72 @@ export const StepIcon = React.memo(
     if (executionStatus === ExecutionStatus.RUNNING) {
       return <EuiLoadingSpinner size="m" />;
     }
-    if (executionStatus === ExecutionStatus.WAITING_FOR_INPUT) {
-      return <EuiBeacon size={14} color="warning" />;
-    }
-
-    const actionTypeIcon = getActionTypeIcon(stepType, actionTypeRegistry);
-    if (actionTypeIcon) {
+    if (
+      executionStatus === ExecutionStatus.WAITING_FOR_INPUT ||
+      executionStatus === ExecutionStatus.WAITING_FOR_CHILD
+    ) {
       return (
-        <Suspense fallback={<EuiLoadingSpinner size="s" />}>
-          <EuiIcon type={actionTypeIcon} size="m" />
-        </Suspense>
+        <EuiIcon
+          type="hourglass"
+          size="m"
+          color={getExecutionStatusColors(euiTheme, executionStatus).color}
+          aria-hidden={true}
+        />
       );
     }
 
-    const stepDefinition = workflowsExtensions.getStepDefinition(stepType);
-    if (stepDefinition?.icon) {
-      return (
-        <Suspense fallback={<EuiLoadingSpinner size="s" />}>
-          <EuiIcon type={stepDefinition.icon} size="m" />
-        </Suspense>
+    let iconType: IconType;
+    if (stepType.startsWith('trigger_')) {
+      iconType = getTriggerTypeIconType(stepType);
+    } else if (BASE_TYPE_AGGREGATE_ICONS[stepType]) {
+      iconType = BASE_TYPE_AGGREGATE_ICONS[stepType];
+    } else {
+      const registeredIcon = resolveRegisteredStepIcon(stepType, {
+        workflowsExtensions,
+        actionTypeRegistry,
+      });
+      if (registeredIcon) {
+        return withTooltip(
+          <Suspense fallback={<EuiLoadingSpinner size="s" />}>
+            <EuiIcon type={registeredIcon} size="m" {...rest} aria-hidden={true} />
+          </Suspense>,
+          title
+        );
+      }
+
+      iconType = getStepIconType(stepType);
+    }
+
+    const maskUrl = getMaskableIconUrl(iconType);
+    if (maskUrl) {
+      const statusColor = shouldApplyColorToIcon
+        ? getExecutionStatusColors(euiTheme, executionStatus).color
+        : undefined;
+      return withTooltip(
+        <span
+          css={css`
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            mask-image: url('${maskUrl}');
+            mask-size: contain;
+            mask-repeat: no-repeat;
+            mask-position: center;
+            // Tint precedence: execution-status color, then an explicit
+            // caller-provided tint (e.g. the graph node's accent/pink), then a
+            // neutral text tone so the shared default is consistent everywhere
+            // StepIcon is used.
+            background-color: ${statusColor ?? iconColor ?? euiTheme.colors.textParagraph};
+          `}
+          onClick={onClick}
+          aria-hidden={true}
+        />,
+        title
       );
     }
 
-    const iconType = getStepIconType(stepType);
-    if (iconType.startsWith('token')) {
-      return (
+    if (typeof iconType === 'string' && iconType.startsWith('token')) {
+      return withTooltip(
         <EuiToken
           iconType={iconType}
           size="s"
@@ -74,11 +135,12 @@ export const StepIcon = React.memo(
           }
           fill="light"
           onClick={onClick}
-        />
+        />,
+        title
       );
     }
 
-    return (
+    return withTooltip(
       <EuiIcon
         type={iconType}
         size="m"
@@ -100,22 +162,10 @@ export const StepIcon = React.memo(
         }
         onClick={onClick}
         {...rest}
-      />
+        aria-hidden={true}
+      />,
+      title
     );
   }
 );
 StepIcon.displayName = 'StepIcon';
-
-// stepType is in the format of `.actionTypeId.actionTypeSubtype`
-function getActionTypeIcon(
-  stepType: string,
-  actionTypeRegistry: TypeRegistry<ActionTypeModel>
-): IconType | undefined {
-  const action = stepType.startsWith('.') ? stepType.slice(1) : stepType;
-  const [actionTypeId] = action.split('.');
-  if (actionTypeRegistry.has(`.${actionTypeId}`)) {
-    const actionType = actionTypeRegistry.get(`.${actionTypeId}`);
-    return actionType.iconClass;
-  }
-  return undefined;
-}

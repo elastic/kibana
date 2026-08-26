@@ -5,13 +5,8 @@
  * 2.0.
  */
 import { defaultMonitoringUsersIndex } from '../../../../../common/entity_analytics/privileged_user_monitoring/utils';
-import {
-  getMatchersFor,
-  getStreamPatternFor,
-  INTEGRATION_MATCHERS_DETAILED,
-  integrationsSourceIndex,
-  STREAM_INDEX_PATTERNS,
-} from './constants';
+import { getStreamPatternFor, integrationsSourceIndex, STREAM_INDEX_PATTERNS } from './constants';
+import { getMatchersFor, INTEGRATION_MATCHERS_DETAILED } from './matchers';
 
 describe('constants', () => {
   const baseIndex = `entity_analytics.privileged_monitoring`;

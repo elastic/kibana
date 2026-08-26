@@ -9,12 +9,13 @@ import React from 'react';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiCallOut, EuiLink, useEuiTheme } from '@elastic/eui';
+import { EuiLink, useEuiTheme } from '@elastic/eui';
 import {
-  getConnectorsManagementHref,
+  getModelManagementHref,
   useElasticLlmCalloutDismissed,
   ElasticLlmCalloutKey,
 } from '@kbn/observability-ai-assistant-plugin/public';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { useKibana } from '../hooks/use_kibana';
 
 export const ElasticLlmConversationCallout = () => {
@@ -42,19 +43,17 @@ export const ElasticLlmConversationCallout = () => {
   `;
 
   return (
-    <EuiCallOut
+    <KbnInfoCallout
       onDismiss={onDismiss}
-      iconType="info"
       title={i18n.translate('xpack.aiAssistant.elasticLlmCallout.title', {
-        defaultMessage: `You're using the Elastic Managed LLM connector`,
+        defaultMessage: `You're using an Elastic managed LLM`,
       })}
       size="s"
       className={elasticLlmCalloutClassName}
-    >
-      <p>
+      text={
         <FormattedMessage
           id="xpack.aiAssistant.tour.elasticLlmDescription"
-          defaultMessage="Elastic AI Assistant and other AI features are powered by an LLM. The Elastic Managed LLM connector is used by default (<costLink>additional costs incur</costLink>) when no custom connectors are available. You can configure a <connectorLink>custom connector</connectorLink> if you prefer."
+          defaultMessage="Elastic AI Assistant and other AI features are powered by an LLM. An Elastic managed LLM is used by default (<costLink>additional costs incur</costLink>) when no custom model connections are available. You can configure a <connectorLink>custom connection</connectorLink> if you prefer."
           values={{
             costLink: (...chunks: React.ReactNode[]) => (
               <EuiLink
@@ -68,7 +67,7 @@ export const ElasticLlmConversationCallout = () => {
             ),
             connectorLink: (...chunks: React.ReactNode[]) => (
               <EuiLink
-                href={getConnectorsManagementHref(http!)}
+                href={getModelManagementHref(http!)}
                 target="_blank"
                 rel="noopener noreferrer"
                 external
@@ -78,7 +77,7 @@ export const ElasticLlmConversationCallout = () => {
             ),
           }}
         />
-      </p>
-    </EuiCallOut>
+      }
+    />
   );
 };

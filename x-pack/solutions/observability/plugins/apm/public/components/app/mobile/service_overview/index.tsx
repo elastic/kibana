@@ -29,11 +29,10 @@ import { getKueryWithMobileFilters } from '../../../../../common/utils/get_kuery
 import { MobileStats } from './stats/stats';
 import { MobileLocationStats } from './stats/location_stats';
 import { useAdHocApmDataView } from '../../../../hooks/use_adhoc_apm_data_view';
-/**
- * The height a chart should be if it's next to a table with 5 rows and a title.
- * Add the height of the pagination row.
- */
-export const chartHeight = 288;
+import { AnomaliesAutomaticEnvironmentSelectionCallout } from '../../../shared/anomalies_automatic_environment_selection_callout';
+import { MobileServiceOverviewServiceMapSection } from './mobile_service_overview_service_map_section';
+
+const latencyChartHeight = 200;
 
 export function MobileServiceOverview() {
   const { serviceName, agentName } = useApmServiceContext();
@@ -72,7 +71,7 @@ export function MobileServiceOverview() {
   });
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-  const dependenciesLink = router.link('/services/{serviceName}/dependencies', {
+  const dependenciesLink = router.link('/mobile-services/{serviceName}/dependencies', {
     path: {
       serviceName,
     },
@@ -83,10 +82,6 @@ export function MobileServiceOverview() {
   // observe the window width and set the flex directions of rows accordingly
   const { isLarge } = useBreakpoints();
   const isSingleColumn = isLarge;
-
-  const latencyChartHeight = 200;
-  const nonLatencyChartHeight = isSingleColumn ? latencyChartHeight : chartHeight;
-
   const rowDirection: EuiFlexGroupProps['direction'] = isSingleColumn ? 'column' : 'row';
 
   return (
@@ -159,19 +154,40 @@ export function MobileServiceOverview() {
           </EuiFlexItem>
 
           <EuiFlexItem>
-            <EuiPanel hasBorder={true}>
-              <LatencyChart height={latencyChartHeight} kuery={kueryWithMobileFilters} />
-            </EuiPanel>
+            <AnomaliesAutomaticEnvironmentSelectionCallout />
           </EuiFlexItem>
+
           <EuiFlexItem>
             <EuiFlexGroup direction={rowDirection} gutterSize="s" responsive={false}>
-              <EuiFlexItem grow={3}>
+              <EuiFlexItem grow={1}>
+                <EuiPanel hasBorder={true}>
+                  <LatencyChart height={latencyChartHeight} kuery={kueryWithMobileFilters} />
+                </EuiPanel>
+              </EuiFlexItem>
+              <EuiFlexItem grow={1}>
                 <ServiceOverviewThroughputChart
-                  height={nonLatencyChartHeight}
+                  height={latencyChartHeight}
                   kuery={kueryWithMobileFilters}
                 />
               </EuiFlexItem>
-              <EuiFlexItem grow={7}>
+              {!isAndroidAgent && (
+                <EuiFlexItem grow={1}>
+                  <FailedTransactionRateChart
+                    height={latencyChartHeight}
+                    showAnnotations={false}
+                    kuery={kueryWithMobileFilters}
+                  />
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+
+          <EuiFlexItem>
+            <EuiFlexGroup direction={rowDirection} gutterSize="s" responsive={false}>
+              <EuiFlexItem grow={3}>
+                <MobileServiceOverviewServiceMapSection />
+              </EuiFlexItem>
+              <EuiFlexItem grow={7} style={{ minWidth: 0 }}>
                 <EuiPanel hasBorder={true}>
                   <TransactionsTable
                     kuery={kueryWithMobileFilters}
@@ -180,6 +196,8 @@ export function MobileServiceOverview() {
                     start={start}
                     end={end}
                     showPerPageOptions={false}
+                    numberOfTransactionsPerPage={5}
+                    showSparkPlots={!isSingleColumn}
                   />
                 </EuiPanel>
               </EuiFlexItem>
@@ -187,36 +205,22 @@ export function MobileServiceOverview() {
           </EuiFlexItem>
 
           <EuiFlexItem>
-            <EuiFlexGroup direction={rowDirection} gutterSize="s" responsive={false}>
-              {!isAndroidAgent && (
-                <EuiFlexItem grow={3}>
-                  <FailedTransactionRateChart
-                    height={nonLatencyChartHeight}
-                    showAnnotations={false}
-                    kuery={kueryWithMobileFilters}
-                  />
-                </EuiFlexItem>
-              )}
-
-              <EuiFlexItem grow={7}>
-                <EuiPanel hasBorder={true}>
-                  <ServiceOverviewDependenciesTable
-                    fixedHeight={true}
-                    showPerPageOptions={false}
-                    link={
-                      <EuiLink
-                        data-test-subj="apmMobileServiceOverviewViewDependenciesLink"
-                        href={dependenciesLink}
-                      >
-                        {i18n.translate('xpack.apm.serviceOverview.dependenciesTableTabLink', {
-                          defaultMessage: 'View dependencies',
-                        })}
-                      </EuiLink>
-                    }
-                  />
-                </EuiPanel>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <EuiPanel hasBorder={true}>
+              <ServiceOverviewDependenciesTable
+                fixedHeight={true}
+                showPerPageOptions={false}
+                link={
+                  <EuiLink
+                    data-test-subj="apmMobileServiceOverviewViewDependenciesLink"
+                    href={dependenciesLink}
+                  >
+                    {i18n.translate('xpack.apm.serviceOverview.dependenciesTableTabLink', {
+                      defaultMessage: 'View dependencies',
+                    })}
+                  </EuiLink>
+                }
+              />
+            </EuiPanel>
           </EuiFlexItem>
         </EuiFlexGroup>
       </ChartPointerEventContextProvider>

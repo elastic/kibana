@@ -18,6 +18,7 @@ import {
   CASES_SETTINGS_SUB_PRIVILEGE_ID,
   CASES_CREATE_COMMENT_SUB_PRIVILEGE_ID,
   CASES_REOPEN_SUB_PRIVILEGE_ID,
+  CASES_MANAGE_TEMPLATES_SUB_PRIVILEGE_ID,
 } from './constants';
 
 /**
@@ -63,6 +64,7 @@ export const getV2 = (): KibanaFeatureConfig => {
           update: [APP_ID],
           push: [APP_ID],
           assign: [APP_ID],
+          manageTemplates: [APP_ID],
         },
         management: {
           insightsAndAlerting: [APP_ID],
@@ -71,13 +73,13 @@ export const getV2 = (): KibanaFeatureConfig => {
           all: [...filesSavedObjectTypes],
           read: [...filesSavedObjectTypes],
         },
-        ui: [...capabilities.all, ...capabilities.assignCase],
+        ui: [...capabilities.all, ...capabilities.assignCase, ...capabilities.manageTemplates],
         replacedBy: {
           default: [{ feature: FEATURE_ID_V3, privileges: ['all'] }],
           minimal: [
             {
               feature: FEATURE_ID_V3,
-              privileges: ['minimal_all', 'cases_assign'],
+              privileges: ['minimal_all', 'cases_assign', CASES_MANAGE_TEMPLATES_SUB_PRIVILEGE_ID],
             },
           ],
         },
@@ -218,6 +220,39 @@ export const getV2 = (): KibanaFeatureConfig => {
                 ui: capabilities.reopenCase,
                 replacedBy: [
                   { feature: FEATURE_ID_V3, privileges: [CASES_REOPEN_SUB_PRIVILEGE_ID] },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      {
+        name: i18n.translate('xpack.cases.features.manageTemplatesSubFeatureName', {
+          defaultMessage: 'Manage templates',
+        }),
+        privilegeGroups: [
+          {
+            groupType: 'independent',
+            privileges: [
+              {
+                id: CASES_MANAGE_TEMPLATES_SUB_PRIVILEGE_ID,
+                name: i18n.translate('xpack.cases.features.manageTemplatesSubFeatureDetails', {
+                  defaultMessage: 'Manage case templates',
+                }),
+                includeIn: 'all',
+                savedObject: {
+                  all: [],
+                  read: [],
+                },
+                cases: {
+                  manageTemplates: [APP_ID],
+                },
+                ui: capabilities.manageTemplates,
+                replacedBy: [
+                  {
+                    feature: FEATURE_ID_V3,
+                    privileges: [CASES_MANAGE_TEMPLATES_SUB_PRIVILEGE_ID],
+                  },
                 ],
               },
             ],

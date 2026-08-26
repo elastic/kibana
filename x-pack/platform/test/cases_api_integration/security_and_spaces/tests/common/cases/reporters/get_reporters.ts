@@ -22,6 +22,7 @@ import {
   obsSec,
 } from '../../../../../common/lib/authentication/users';
 import { getUserInfo } from '../../../../../common/lib/authentication';
+import { secOnlyUserWithProfileId } from '../get_case';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
@@ -70,20 +71,25 @@ export default ({ getService }: FtrProviderContext): void => {
           }
         );
 
+        const obsOnlyUserWithProfileId = {
+          ...getUserInfo(obsOnly),
+          profile_uid: 'u_kpgtQw15fFoPrDevkTCq5IKvOoyCpASwS3H8Aodsn28_0',
+        };
+
         for (const scenario of [
           {
             user: globalRead,
-            expectedReporters: [getUserInfo(obsOnly), getUserInfo(secOnly)],
+            expectedReporters: [obsOnlyUserWithProfileId, secOnlyUserWithProfileId],
           },
           {
             user: superUser,
-            expectedReporters: [getUserInfo(obsOnly), getUserInfo(secOnly)],
+            expectedReporters: [obsOnlyUserWithProfileId, secOnlyUserWithProfileId],
           },
-          { user: secOnlyRead, expectedReporters: [getUserInfo(secOnly)] },
-          { user: obsOnlyRead, expectedReporters: [getUserInfo(obsOnly)] },
+          { user: secOnlyRead, expectedReporters: [secOnlyUserWithProfileId] },
+          { user: obsOnlyRead, expectedReporters: [obsOnlyUserWithProfileId] },
           {
             user: obsSecRead,
-            expectedReporters: [getUserInfo(obsOnly), getUserInfo(secOnly)],
+            expectedReporters: [obsOnlyUserWithProfileId, secOnlyUserWithProfileId],
           },
         ]) {
           const reporters = await getReporters({
@@ -157,7 +163,7 @@ export default ({ getService }: FtrProviderContext): void => {
           query: { owner: 'securitySolutionFixture' },
         });
 
-        expect(reporters).to.eql([getUserInfo(secOnly)]);
+        expect(reporters).to.eql([secOnlyUserWithProfileId]);
       });
 
       it('should return the correct cases when trying to exploit RBAC through the owner query parameter', async () => {
@@ -193,7 +199,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         // Only security solution reporters are being returned
-        expect(reporters).to.eql([getUserInfo(secOnly)]);
+        expect(reporters).to.eql([secOnlyUserWithProfileId]);
       });
     });
   });

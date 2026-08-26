@@ -25,17 +25,22 @@ const OBSERVABILITY_TRACES_SPAN_DOCUMENT_PROFILE_ID = 'observability-traces-docu
 export const createObservabilityTracesDocumentProfileProvider = ({
   apmContextService,
   logsContextService,
+  analytics,
 }: ProfileProviderServices): DocumentProfileProvider => ({
   profileId: OBSERVABILITY_TRACES_SPAN_DOCUMENT_PROFILE_ID,
   restrictedToProductFeature: TRACES_PRODUCT_FEATURE_ID,
   profile: {
-    getDocViewer: createGetDocViewer({
-      apm: {
-        errors: apmContextService.errorsService.getErrorsIndexPattern(),
-        traces: apmContextService.tracesService.getAllTracesIndexPattern(),
+    getDocViewer: createGetDocViewer(
+      {
+        apm: {
+          errors: apmContextService.errorsService.getErrorsIndexPattern(),
+          traces: apmContextService.tracesService.getAllTracesIndexPattern(),
+        },
+        logs: logsContextService.getAllLogsIndexPattern(),
       },
-      logs: logsContextService.getAllLogsIndexPattern(),
-    }),
+      OBSERVABILITY_TRACES_SPAN_DOCUMENT_PROFILE_ID,
+      analytics.reportEvent
+    ),
   },
   resolve: ({ record, rootContext }) => {
     const isObservabilitySolutionView = rootContext.solutionType === SolutionType.Observability;

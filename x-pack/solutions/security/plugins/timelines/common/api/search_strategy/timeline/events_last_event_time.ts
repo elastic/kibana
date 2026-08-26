@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { TimelineEventsQueries } from '../model/timeline_events_queries';
 import { timelineRequestBasicOptionsSchema } from './request_basic';
 

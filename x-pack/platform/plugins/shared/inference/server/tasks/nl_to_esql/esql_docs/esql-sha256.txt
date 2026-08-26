@@ -1,0 +1,24 @@
+# SHA256
+
+The SHA256 command computes the SHA256 hash of the input value.
+
+## Syntax
+
+`SHA256(input)`
+
+### Parameters
+
+#### input
+
+The value to hash.
+
+## Examples
+
+Calculates the SHA256 hash of the `message` column for all rows where the message is not "Connection error", and displays both the original message and its hash.
+
+```esql
+FROM sample_data
+| WHERE message != "Connection error"
+| EVAL sha256 = sha256(message)
+| KEEP message, sha256
+```

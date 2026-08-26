@@ -7,15 +7,17 @@
 
 import type { FC } from 'react';
 import React, { useState } from 'react';
-import { EuiCallOut, EuiPageBody, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiPageBody, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { getNestedProperty } from '@kbn/ml-nested-property';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import type { FinderAttributes, SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
+import { isEsqlSavedSearch, type DiscoverSessionFinderAttributes } from '@kbn/discover-utils';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { CreateDataViewButton } from '../../../../../components/create_data_view_button';
 import { useMlKibana, useMlManagementLocator } from '../../../../../contexts/kibana';
 import { useToastNotificationService } from '../../../../../services/toast_notification_service';
-import { ML_PAGES } from '../../../../../../../common/constants/locator';
 import {
   getDataViewAndSavedSearchCallback,
   isCcsIndexPattern,
@@ -23,7 +25,7 @@ import {
 
 const fixedPageSize: number = 20;
 
-type SavedObject = SavedObjectCommon<FinderAttributes & { isTextBasedQuery?: boolean }>;
+type SavedObject = SavedObjectCommon<FinderAttributes & DiscoverSessionFinderAttributes>;
 
 export const SourceSelection: FC = () => {
   const {
@@ -111,7 +113,7 @@ export const SourceSelection: FC = () => {
         <EuiPanel hasShadow={false} hasBorder>
           {isCcsCallOut && (
             <>
-              <EuiCallOut
+              <KbnDangerCallout
                 announceOnMount
                 data-test-subj="analyticsCreateSourceIndexModalCcsErrorCallOut"
                 title={i18n.translate(
@@ -120,10 +122,8 @@ export const SourceSelection: FC = () => {
                     defaultMessage: 'Data views using cross-cluster search are not supported.',
                   }
                 )}
-                color="danger"
-              >
-                {typeof ccsCallOutBodyText === 'string' && <p>{ccsCallOutBodyText}</p>}
-              </EuiCallOut>
+                text={typeof ccsCallOutBodyText === 'string' ? ccsCallOutBodyText : undefined}
+              />
               <EuiSpacer size="m" />
             </>
           )}
@@ -150,7 +150,7 @@ export const SourceSelection: FC = () => {
                 ),
                 showSavedObject: (savedObject: SavedObject) =>
                   // ES|QL Based saved searches are not supported in DFA, filter them out
-                  savedObject.attributes.isTextBasedQuery !== true,
+                  !isEsqlSavedSearch(savedObject),
               },
               {
                 type: 'index-pattern',

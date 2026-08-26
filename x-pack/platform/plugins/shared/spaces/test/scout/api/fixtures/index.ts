@@ -16,11 +16,9 @@ export interface SpacesRequestAuthFixture extends RequestAuthFixture {
   getSavedObjectsManagementApiKey: () => Promise<RoleApiCredentials>;
 }
 
-export interface SpacesApiFixtures {
+export const apiTest = base.extend<{
   requestAuth: SpacesRequestAuthFixture;
-}
-
-export const apiTest = base.extend<SpacesApiFixtures>({
+}>({
   requestAuth: async ({ requestAuth }, use) => {
     const getSavedObjectsManagementApiKey = async (): Promise<RoleApiCredentials> => {
       return await requestAuth.getApiKeyForCustomRole({
@@ -34,17 +32,13 @@ export const apiTest = base.extend<SpacesApiFixtures>({
             feature: {
               savedObjectsManagement: ['all'],
             },
-            spaces: ['*'], // Access to all spaces
+            spaces: ['*'],
           },
         ],
       });
     };
 
-    const extendedRequestAuth: SpacesRequestAuthFixture = {
-      ...requestAuth,
-      getSavedObjectsManagementApiKey,
-    };
-
-    await use(extendedRequestAuth);
+    const extended: SpacesRequestAuthFixture = { ...requestAuth, getSavedObjectsManagementApiKey };
+    await use(extended);
   },
 });

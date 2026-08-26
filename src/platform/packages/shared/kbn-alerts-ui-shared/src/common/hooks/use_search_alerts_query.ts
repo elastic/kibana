@@ -49,6 +49,7 @@ export const useSearchAlertsQuery = ({
     pageSize = DEFAULT_ALERTS_PAGE_SIZE,
     minScore,
     trackScores,
+    projectRouting,
   } = params;
   return useQuery({
     queryKey: queryKeyPrefix.concat(JSON.stringify(params)),
@@ -66,6 +67,7 @@ export const useSearchAlertsQuery = ({
         pageSize,
         minScore,
         trackScores,
+        projectRouting,
       }),
     refetchOnWindowFocus: false,
     context: skipAlertsQueryContext ? undefined : AlertsQueryContext,
@@ -75,8 +77,6 @@ export const useSearchAlertsQuery = ({
     placeholderData: {
       total: -1,
       alerts: [],
-      oldAlertsData: [],
-      ecsAlertsData: [],
     },
   });
 };

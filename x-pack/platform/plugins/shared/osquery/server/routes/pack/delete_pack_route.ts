@@ -5,21 +5,22 @@
  * 2.0.
  */
 
-import { has, filter, unset } from 'lodash';
-import { produce } from 'immer';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
-import type { IRouter } from '@kbn/core/server';
+import { filter, unset } from 'lodash';
+import { produce } from 'immer-v9';
+import { type IRouter, SavedObjectsErrorHelpers } from '@kbn/core/server';
 
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { DeletePacksRequestParamsSchema } from '../../../common/api';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import { API_VERSIONS } from '../../../common/constants';
-import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { PLUGIN_ID } from '../../../common';
 
 import { packSavedObjectType } from '../../../common/types';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { deletePacksRequestParamsSchema } from '../../../common/api';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
+import { fetchAllPackagePolicies, policyHasPack, removePackFromPolicy } from './utils';
+import { deletePackResponseSchema } from './response_schemas';
 
 export const deletePackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned
@@ -42,6 +43,11 @@ export const deletePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
               DeletePacksRequestParamsSchema
             >(deletePacksRequestParamsSchema),
           },
+          response: {
+            200: {
+              body: () => deletePackResponseSchema,
+            },
+          },
         },
       },
       async (context, request, response) => {
@@ -54,25 +60,39 @@ export const deletePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
         const packagePolicyService = osqueryContext.service.getPackagePolicyService();
 
-        const currentPackSO = await spaceScopedClient.get<{ name: string }>(
-          packSavedObjectType,
-          request.params.id
-        );
+        const spaceId = osqueryContext?.service?.getActiveSpace
+          ? (await osqueryContext.service.getActiveSpace(request))?.id || DEFAULT_SPACE_ID
+          : DEFAULT_SPACE_ID;
+
+        let currentPackSO;
+        try {
+          currentPackSO = await spaceScopedClient.get<{ name: string }>(
+            packSavedObjectType,
+            request.params.id
+          );
+        } catch (err) {
+          if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+            return response.notFound({
+              body: { message: `Pack ${request.params.id} not found` },
+            });
+          }
+
+          throw err;
+        }
 
         await spaceScopedClient.delete(packSavedObjectType, request.params.id, {
           refresh: 'wait_for',
         });
 
-        const { items: packagePolicies } = (await packagePolicyService?.list(spaceScopedClient, {
-          kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
-          perPage: 1000,
-          page: 1,
-        })) ?? { items: [] };
+        // Drain ALL policies via keyset `fetchAllItems`; an offset-capped
+        // `list({ perPage: 1000 })` would leave the pack block on policies past
+        // 1000, orphaning it on the wire after the SO is deleted.
+        const packagePolicies = await fetchAllPackagePolicies(
+          packagePolicyService,
+          spaceScopedClient
+        );
         const currentPackagePolicies = filter(packagePolicies, (packagePolicy) =>
-          has(
-            packagePolicy,
-            `inputs[0].config.osquery.value.packs.${currentPackSO.attributes.name}`
-          )
+          policyHasPack(packagePolicy, currentPackSO.attributes.name, spaceId)
         );
 
         await Promise.all(
@@ -83,10 +103,7 @@ export const deletePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
               packagePolicy.id,
               produce(packagePolicy, (draft) => {
                 unset(draft, 'id');
-                unset(
-                  draft,
-                  `inputs[0].config.osquery.value.packs.${[currentPackSO.attributes.name]}`
-                );
+                removePackFromPolicy(draft, currentPackSO.attributes.name, spaceId);
 
                 return draft;
               })

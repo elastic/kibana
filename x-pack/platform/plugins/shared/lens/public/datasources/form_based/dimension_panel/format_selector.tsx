@@ -373,6 +373,7 @@ export function FormatSelector(props: FormatSelectorProps) {
           <EuiFormRow
             display="columnCompressed"
             hasEmptyLabelSpace
+            fullWidth
             helpText={
               <EuiLink
                 href={docLinks.links.indexPatterns.fieldFormattersNumber}
@@ -388,6 +389,7 @@ export function FormatSelector(props: FormatSelectorProps) {
             <EuiFieldText
               data-test-subj={'numberEditorFormatPattern'}
               compressed
+              fullWidth
               prepend={
                 <Prepend>
                   {i18n.translate('xpack.lens.indexPattern.custom.patternLabel', {

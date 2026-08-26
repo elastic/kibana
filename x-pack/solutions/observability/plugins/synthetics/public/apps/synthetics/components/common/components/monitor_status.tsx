@@ -7,18 +7,26 @@
 import React from 'react';
 import { EuiBadge, EuiDescriptionList, EuiSkeletonText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { EncryptedSyntheticsMonitor } from '../../../../../../common/runtime_types';
+import { MONITOR_STATUS_ENUM } from '../../../../../../common/constants/monitor_management';
+import type {
+  EncryptedSyntheticsMonitor,
+  OverviewStatusMetaData,
+  SelectedSyntheticsMonitor,
+} from '../../../../../../common/runtime_types';
 
 export const BadgeStatus = ({
   status,
   isBrowserType,
   onClickBadge,
+  monitor,
 }: {
+  monitor?: OverviewStatusMetaData;
   status?: string;
   isBrowserType: boolean;
   onClickBadge?: () => void;
 }) => {
-  const { color, dataTestSubj, labels } = badgeMapping[status || 'unknown'];
+  const monStatus = status ? status : monitor?.overallStatus;
+  const { color, dataTestSubj, labels } = badgeMapping[monStatus || MONITOR_STATUS_ENUM.PENDING];
   const label = isBrowserType && labels.browser ? labels.browser : labels.default;
 
   return (
@@ -43,7 +51,7 @@ export const MonitorStatus = ({
 }: {
   loading?: boolean;
   compressed?: boolean;
-  monitor: EncryptedSyntheticsMonitor;
+  monitor: EncryptedSyntheticsMonitor | SelectedSyntheticsMonitor;
   status?: string;
 }) => {
   const isBrowserType = monitor.type === 'browser';
@@ -79,6 +87,10 @@ const PENDING_LABEL = i18n.translate('xpack.synthetics.monitorStatus.pendingLabe
   defaultMessage: 'Pending',
 });
 
+const STALE_LABEL = i18n.translate('xpack.synthetics.monitorStatus.staleLabel', {
+  defaultMessage: 'Stale',
+});
+
 const SUCCESS_LABEL = i18n.translate('xpack.synthetics.monitorStatus.succeededLabel', {
   defaultMessage: 'Succeeded',
 });
@@ -109,10 +121,15 @@ interface BadgeData {
 }
 
 const badgeMapping: Record<string, BadgeData> = {
-  unknown: {
+  pending: {
     color: 'default',
     dataTestSubj: 'monitorLatestStatusPending',
     labels: { default: PENDING_LABEL },
+  },
+  stale: {
+    color: 'warning',
+    dataTestSubj: 'monitorLatestStatusStale',
+    labels: { default: STALE_LABEL },
   },
   up: {
     color: 'success',

@@ -19,6 +19,9 @@ import type { Message, ToolOptions, InferenceConnector } from '@kbn/inference-co
 import { MessageRole } from '@kbn/inference-common';
 import { OpenAiProviderType } from './types';
 
+/** Non-empty stand-in when an assistant turn has no text and no tool calls. */
+const EMPTY_ASSISTANT_CONTENT_PLACEHOLDER = '...';
+
 /**
  * Recursively processes a schema to ensure all array types have an `items` property.
  * OpenAI requires `items` to be present for array types.
@@ -129,17 +132,17 @@ export function messagesToOpenAI({
     ? { role: 'system', content: system }
     : undefined;
 
-  return [
-    ...(systemMessage ? [systemMessage] : []),
-    ...messages.map((message): ChatCompletionMessageParam => {
-      const role = message.role;
+  // Anthropic (via external inference) rejects empty text content blocks.
+  // - Tool-call assistants: omit `content` entirely (not null — ES rejects null; not "" — Anthropic rejects "").
+  // - Empty assistants without tool calls: keep the turn with a placeholder so Agent Builder
+  //   empty-response retries are not collapsed by consecutive-user merging.
+  const converted = messages.map((message): ChatCompletionMessageParam => {
+    const role = message.role;
 
-      switch (role) {
-        case MessageRole.Assistant:
-          const assistantMessage: ChatCompletionAssistantMessageParam = {
-            role: 'assistant',
-            content: message.content ?? '',
-            tool_calls: message.toolCalls?.map((toolCall) => {
+    switch (role) {
+      case MessageRole.Assistant: {
+        const toolCalls = message.toolCalls?.length
+          ? message.toolCalls.map((toolCall) => {
               return {
                 function: {
                   name: toolCall.function.name,
@@ -149,43 +152,121 @@ export function messagesToOpenAI({
                       : '{}',
                 },
                 id: toolCall.toolCallId,
-                type: 'function',
+                type: 'function' as const,
               };
-            }),
-          };
-          return assistantMessage;
-
-        case MessageRole.User:
-          const userMessage: ChatCompletionUserMessageParam = {
-            role: 'user',
-            content:
-              typeof message.content === 'string'
-                ? message.content
-                : message.content.map((contentPart) => {
-                    if (contentPart.type === 'image') {
-                      return {
-                        type: 'image_url',
-                        image_url: {
-                          url: contentPart.source.data,
-                        },
-                      } satisfies ChatCompletionContentPartImage;
-                    }
-                    return {
-                      text: contentPart.text,
-                      type: 'text',
-                    } satisfies ChatCompletionContentPartText;
-                  }),
-          };
-          return userMessage;
-
-        case MessageRole.Tool:
-          const toolMessage: ChatCompletionToolMessageParam = {
-            role: 'tool',
-            content: JSON.stringify(message.response),
-            tool_call_id: message.toolCallId,
-          };
-          return toolMessage;
+            })
+          : undefined;
+        const rawContent = message.content ?? '';
+        const contentIsEmpty = typeof rawContent !== 'string' || rawContent.trim().length === 0;
+        const assistantMessage: ChatCompletionAssistantMessageParam = {
+          role: 'assistant',
+          ...(contentIsEmpty
+            ? toolCalls
+              ? {} // omit content when tool calls are present
+              : { content: EMPTY_ASSISTANT_CONTENT_PLACEHOLDER }
+            : { content: rawContent }),
+          ...(toolCalls ? { tool_calls: toolCalls } : {}),
+        };
+        return assistantMessage;
       }
-    }),
-  ];
+
+      case MessageRole.User:
+        const userMessage: ChatCompletionUserMessageParam = {
+          role: 'user',
+          content:
+            typeof message.content === 'string'
+              ? message.content
+              : message.content.map((contentPart) => {
+                  if (contentPart.type === 'image') {
+                    return {
+                      type: 'image_url',
+                      image_url: {
+                        url: contentPart.source.data,
+                      },
+                    } satisfies ChatCompletionContentPartImage;
+                  }
+                  return {
+                    text: contentPart.text,
+                    type: 'text',
+                  } satisfies ChatCompletionContentPartText;
+                }),
+        };
+        return userMessage;
+
+      case MessageRole.Tool:
+        const toolMessage: ChatCompletionToolMessageParam = {
+          role: 'tool',
+          content: JSON.stringify(message.response),
+          tool_call_id: message.toolCallId,
+        };
+        return toolMessage;
+    }
+  });
+
+  return [...(systemMessage ? [systemMessage] : []), ...mergeConsecutiveMessages(converted)];
+}
+
+/**
+ * Merges consecutive messages with the same role into a single message.
+ * - User messages: content is normalized to array format and parts are concatenated.
+ * - Assistant messages: content strings are joined with newline, tool_calls are combined.
+ * - Tool messages are never merged (each is tied to a specific tool_call_id).
+ * - System messages are not affected (prepended separately).
+ */
+function mergeConsecutiveMessages(
+  messages: ChatCompletionMessageParam[]
+): ChatCompletionMessageParam[] {
+  return messages.reduce<ChatCompletionMessageParam[]>((output, message) => {
+    const previous = output.length ? output[output.length - 1] : undefined;
+
+    if (
+      previous &&
+      previous.role === message.role &&
+      message.role !== 'tool' &&
+      message.role !== 'system'
+    ) {
+      if (message.role === 'user' && previous.role === 'user') {
+        const previousParts = normalizeUserContent(previous.content);
+        const currentParts = normalizeUserContent(message.content);
+        previous.content = [...previousParts, ...currentParts];
+      } else if (message.role === 'assistant' && previous.role === 'assistant') {
+        const prevContent = (previous as ChatCompletionAssistantMessageParam).content ?? '';
+        const curContent = (message as ChatCompletionAssistantMessageParam).content ?? '';
+        const joined = [prevContent, curContent].filter(Boolean).join('\n');
+        const prevCalls = (previous as ChatCompletionAssistantMessageParam).tool_calls;
+        const curCalls = (message as ChatCompletionAssistantMessageParam).tool_calls;
+        const mergedCalls =
+          curCalls?.length || prevCalls?.length
+            ? [...(prevCalls ?? []), ...(curCalls ?? [])]
+            : undefined;
+
+        if (joined) {
+          (previous as ChatCompletionAssistantMessageParam).content = joined;
+        } else if (mergedCalls?.length) {
+          // Tool-call-only merged message: omit empty content (do not set null/"").
+          delete (previous as ChatCompletionAssistantMessageParam).content;
+        } else {
+          (previous as ChatCompletionAssistantMessageParam).content =
+            EMPTY_ASSISTANT_CONTENT_PLACEHOLDER;
+        }
+
+        if (mergedCalls?.length) {
+          (previous as ChatCompletionAssistantMessageParam).tool_calls = mergedCalls;
+        }
+      }
+    } else {
+      output.push(message);
+    }
+
+    return output;
+  }, []);
+}
+
+function normalizeUserContent(
+  content: ChatCompletionUserMessageParam['content']
+): Array<ChatCompletionContentPartText | ChatCompletionContentPartImage> {
+  if (typeof content === 'string') {
+    return [{ type: 'text', text: content }];
+  }
+  return content as Array<ChatCompletionContentPartText | ChatCompletionContentPartImage>;
 }

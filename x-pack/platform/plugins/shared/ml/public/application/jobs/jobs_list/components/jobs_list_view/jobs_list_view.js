@@ -9,7 +9,8 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
-import { withKibana } from '@kbn/kibana-react-plugin/public';
+import { withKibana, context } from '@kbn/kibana-react-plugin/public';
+// import { CpsProjectRoutingCallout } from '@kbn/ml-cps';
 
 import { filterJobs, loadFullJob } from '../utils';
 import { JobsList } from '../jobs_list';
@@ -38,13 +39,15 @@ import { CloseJobsConfirmModal } from '../confirm_modals/close_jobs_confirm_moda
 import { AnomalyDetectionEmptyState } from '../anomaly_detection_empty_state';
 import { removeNodeInfo } from '../../../../../../common/util/job_utils';
 import { jobCloningService } from '../../../../services/job_cloning_service';
-import { ANOMALY_DETECTOR_SAVED_OBJECT_TYPE } from '../../../../../../common/types/saved_objects';
+import { ANOMALY_DETECTOR_SAVED_OBJECT_TYPE } from '@kbn/ml-common-types/saved_objects';
 import { SpaceManagementContextWrapper } from '../../../../components/space_management_context_wrapper';
 import { DatePicker } from '../../../../components/ml_page/date_picker';
 
 let blockingJobsRefreshTimeout = null;
 
 export class JobsListViewUI extends Component {
+  static contextType = context;
+
   constructor(props) {
     super(props);
 

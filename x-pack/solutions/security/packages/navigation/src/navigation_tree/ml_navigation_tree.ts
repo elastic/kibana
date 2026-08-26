@@ -12,7 +12,7 @@ import { i18nStrings } from '../i18n_strings';
 
 export const createMachineLearningNavigationTree = (): NodeDefinition => ({
   id: SecurityGroupName.machineLearning,
-  icon: 'machineLearningApp',
+  icon: 'productML',
   title: SecurityLinkGroup[SecurityGroupName.machineLearning].title,
   renderAs: 'panelOpener',
   children: [
@@ -42,16 +42,16 @@ export const createMachineLearningNavigationTree = (): NodeDefinition => ({
           link: 'ml:indexDataVisualizer',
           sideNavStatus: 'hidden',
         },
-        {
-          link: 'ml:indexDataVisualizerPage',
-          sideNavStatus: 'hidden',
-        },
       ],
     },
     {
       title: i18nStrings.ml.anomalyDetection.title,
       breadcrumbStatus: 'hidden',
       children: [
+        {
+          link: 'management:anomaly_detection',
+          title: i18nStrings.ml.anomalyDetection.manageJobs,
+        },
         {
           link: 'ml:anomalyExplorer',
           title: i18nStrings.ml.anomalyDetection.anomalyExplorer,

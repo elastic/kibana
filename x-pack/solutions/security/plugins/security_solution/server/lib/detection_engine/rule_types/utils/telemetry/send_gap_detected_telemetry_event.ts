@@ -6,6 +6,7 @@
  */
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import moment from 'moment';
+import type { GapReasonType } from '@kbn/alerting-plugin/common';
 import { GAP_DETECTED_EVENT } from '../../../../telemetry/event_based/events';
 import { parseInterval } from '../utils';
 import type { RuleParams } from '../../../rule_schema';
@@ -17,6 +18,7 @@ export const sendGapDetectedTelemetryEvent = ({
   originalFrom,
   originalTo,
   ruleParams,
+  gapReasonType,
 }: {
   analytics: AnalyticsServiceSetup;
   interval: string;
@@ -24,6 +26,7 @@ export const sendGapDetectedTelemetryEvent = ({
   originalFrom: moment.Moment;
   originalTo: moment.Moment;
   ruleParams: RuleParams;
+  gapReasonType?: GapReasonType;
 }) => {
   const intervalDuration = parseInterval(interval);
 
@@ -42,5 +45,6 @@ export const sendGapDetectedTelemetryEvent = ({
     ruleType,
     ruleSource: ruleSource?.type,
     isCustomized,
+    gapReasonType,
   });
 };

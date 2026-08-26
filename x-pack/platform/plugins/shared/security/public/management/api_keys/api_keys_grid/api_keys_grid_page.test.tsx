@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
+import { fireEvent, render, waitFor } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import React from 'react';
 
@@ -271,6 +271,302 @@ describe('APIKeysGridPage', () => {
       expect(await findByText(/Loading API keys/)).not.toBeInTheDocument();
       expect(await findByText('You do not have permission to create API keys')).toBeInTheDocument();
       expect(queryByText('Create API key')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Auto-select type filter', () => {
+    const crossClusterOnlyResponse = {
+      apiKeys: [],
+      canManageCrossClusterApiKeys: true,
+      canManageApiKeys: true,
+      canManageOwnApiKeys: true,
+      total: 0,
+      aggregationTotal: 2,
+      aggregations: {
+        usernames: {
+          doc_count_error_upper_bound: 0,
+          sum_other_doc_count: 0,
+          buckets: [{ key: 'elastic', doc_count: 2 }],
+        },
+        types: {
+          doc_count_error_upper_bound: 0,
+          sum_other_doc_count: 0,
+          buckets: [{ key: 'cross_cluster', doc_count: 2 }],
+        },
+        expired: { doc_count: 0 },
+        managed: {
+          buckets: { metadataBased: { doc_count: 0 }, namePrefixBased: { doc_count: 0 } },
+        },
+      },
+    };
+
+    it('switches to cross-cluster tab on first load when the account has no REST keys', async () => {
+      const history = createMemoryHistory({ initialEntries: ['/'] });
+      coreStart.application.capabilities = {
+        ...coreStart.application.capabilities,
+        api_keys: { save: true },
+      };
+      coreStart.http.post.mockResolvedValue(crossClusterOnlyResponse);
+
+      render(
+        coreStart.rendering.addContext(
+          <Providers services={coreStart} authc={authc} history={history}>
+            <APIKeysGridPage />
+          </Providers>
+        )
+      );
+
+      // Initial load returns 0 REST keys → auto-select fires → second query with cross-cluster filter
+      await waitFor(() => expect(coreStart.http.post).toHaveBeenCalledTimes(2));
+      const secondCallOptions = (
+        coreStart.http.post.mock.calls[1] as unknown as [string, { body: string }]
+      )[1];
+      expect(JSON.parse(secondCallOptions.body).filters.type).toBe('cross_cluster');
+    });
+
+    it('stays on REST tab when the account already has REST keys', async () => {
+      const history = createMemoryHistory({ initialEntries: ['/'] });
+      coreStart.application.capabilities = {
+        ...coreStart.application.capabilities,
+        api_keys: { save: true },
+      };
+      // beforeEach mock returns two REST keys — no override needed
+
+      const { findByText } = render(
+        coreStart.rendering.addContext(
+          <Providers services={coreStart} authc={authc} history={history}>
+            <APIKeysGridPage />
+          </Providers>
+        )
+      );
+
+      await findByText(/first-api-key/);
+      // Only the initial query; auto-select guard exits early because loadedApiKeys.length > 0
+      expect(coreStart.http.post).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('Post-create tab switch', () => {
+    it('re-queries with the created key type so the new key is immediately visible', async () => {
+      const history = createMemoryHistory({ initialEntries: ['/'] });
+      coreStart.application.capabilities = {
+        ...coreStart.application.capabilities,
+        api_keys: { save: true },
+      };
+
+      // The flyout calls http.get('/api/security/role') on mount via useAsyncFn, which requires a
+      // thenable return value. Without this, useAsyncFn throws `undefined.then is not a function`.
+      coreStart.http.get.mockResolvedValue([]);
+
+      // Intercept the create call; pass everything else through to the query mock from beforeEach
+      (coreStart.http.post as jest.Mock).mockImplementation(async (url: string) => {
+        if (url === '/internal/security/api_key') {
+          return { id: 'new-id', name: 'my-new-key', api_key: 'test-key', encoded: 'dGVzdA==' };
+        }
+        return {
+          apiKeys: [
+            {
+              type: 'rest',
+              creation: 1571322182082,
+              expiration: 1571408582082,
+              id: '0QQZ2m0BO2XZwgJFuWTT',
+              invalidated: false,
+              name: 'first-api-key',
+              realm: 'reserved',
+              username: 'elastic',
+              metadata: {},
+              role_descriptors: {},
+            },
+          ],
+          canManageCrossClusterApiKeys: true,
+          canManageApiKeys: true,
+          canManageOwnApiKeys: true,
+          total: 1,
+          aggregationTotal: 1,
+          aggregations: {
+            usernames: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [{ key: 'elastic', doc_count: 1 }],
+            },
+            types: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [{ key: 'rest', doc_count: 1 }],
+            },
+            expired: { doc_count: 0 },
+            managed: {
+              buckets: { metadataBased: { doc_count: 0 }, namePrefixBased: { doc_count: 0 } },
+            },
+          },
+        };
+      });
+
+      const { findByTestId, findByText } = render(
+        coreStart.rendering.addContext(
+          <Providers services={coreStart} authc={authc} history={history}>
+            <APIKeysGridPage />
+          </Providers>
+        )
+      );
+
+      // Wait for initial load so state.value is set before the flyout can render
+      await findByText(/first-api-key/);
+
+      // Navigate to the create route — the flyout only renders after state.value is defined
+      history.push('/create');
+
+      fireEvent.change(await findByTestId('apiKeyNameInput'), {
+        target: { value: 'my-new-key' },
+      });
+      fireEvent.click(await findByTestId('formFlyoutSubmitButton'));
+
+      await waitFor(() => {
+        const queryCalls = (
+          coreStart.http.post.mock.calls as unknown as Array<[string, { body: string }]>
+        ).filter(([url]) => url === '/internal/security/api_key/_query');
+        expect(queryCalls.length).toBeGreaterThanOrEqual(2);
+        const postCreateBody = JSON.parse(queryCalls.at(-1)![1].body);
+        expect(postCreateBody.filters.type).toBe('rest');
+      });
+    });
+  });
+
+  describe('Pagination', () => {
+    it('should show disabled Previous button on first page', async () => {
+      const history = createMemoryHistory({ initialEntries: ['/'] });
+
+      coreStart.application.capabilities = {
+        ...coreStart.application.capabilities,
+        api_keys: {
+          save: true,
+        },
+      };
+
+      const { findByTestId } = render(
+        coreStart.rendering.addContext(
+          <Providers services={coreStart} authc={authc} history={history}>
+            <APIKeysGridPage />
+          </Providers>
+        )
+      );
+
+      const previousButton = await findByTestId('apiKeysTablePreviousPageButton');
+      expect(previousButton).toBeDisabled();
+    });
+
+    it('should show disabled Next button when results are less than page size', async () => {
+      const history = createMemoryHistory({ initialEntries: ['/'] });
+
+      coreStart.application.capabilities = {
+        ...coreStart.application.capabilities,
+        api_keys: {
+          save: true,
+        },
+      };
+
+      // Mock returns 2 items which is less than page size (25)
+      const { findByTestId } = render(
+        coreStart.rendering.addContext(
+          <Providers services={coreStart} authc={authc} history={history}>
+            <APIKeysGridPage />
+          </Providers>
+        )
+      );
+
+      const nextButton = await findByTestId('apiKeysTableNextPageButton');
+      expect(nextButton).toBeDisabled();
+    });
+
+    it('should enable Next button when page is full and searchAfter cursor exists', async () => {
+      const history = createMemoryHistory({ initialEntries: ['/'] });
+
+      coreStart.application.capabilities = {
+        ...coreStart.application.capabilities,
+        api_keys: {
+          save: true,
+        },
+      };
+
+      // Create 25 API keys to fill the page
+      const apiKeys = Array.from({ length: 25 }, (_, i) => ({
+        type: 'rest',
+        creation: 1571322182082,
+        expiration: 1571408582082,
+        id: `key-${i}`,
+        invalidated: false,
+        name: `api-key-${i}`,
+        realm: 'reserved',
+        username: 'elastic',
+        metadata: {},
+        role_descriptors: {},
+      }));
+
+      coreStart.http.post.mockResolvedValue({
+        apiKeys,
+        canManageCrossClusterApiKeys: true,
+        canManageApiKeys: true,
+        canManageOwnApiKeys: true,
+        total: 100,
+        aggregationTotal: 100,
+        searchAfter: [1571322182082, 'key-24'],
+        aggregations: {
+          usernames: { buckets: [{ key: 'elastic', doc_count: 100 }] },
+          types: { buckets: [{ key: 'rest', doc_count: 100 }] },
+          expired: { doc_count: 0 },
+          managed: {
+            buckets: { metadataBased: { doc_count: 0 }, namePrefixBased: { doc_count: 0 } },
+          },
+        },
+      });
+
+      const { findByTestId } = render(
+        coreStart.rendering.addContext(
+          <Providers services={coreStart} authc={authc} history={history}>
+            <APIKeysGridPage />
+          </Providers>
+        )
+      );
+
+      const nextButton = await findByTestId('apiKeysTableNextPageButton');
+      expect(nextButton).not.toBeDisabled();
+    });
+
+    it('should refresh data when clicking Refresh button', async () => {
+      const history = createMemoryHistory({ initialEntries: ['/'] });
+
+      coreStart.application.capabilities = {
+        ...coreStart.application.capabilities,
+        api_keys: {
+          save: true,
+        },
+      };
+
+      const { findByTestId } = render(
+        coreStart.rendering.addContext(
+          <Providers services={coreStart} authc={authc} history={history}>
+            <APIKeysGridPage />
+          </Providers>
+        )
+      );
+
+      // Wait for initial load
+      await findByTestId('apiKeysTableRefreshButton');
+
+      // Clear mock call count
+      coreStart.http.post.mockClear();
+
+      // Click refresh button
+      const refreshButton = await findByTestId('apiKeysTableRefreshButton');
+      fireEvent.click(refreshButton);
+
+      // Verify that the API was called again
+      await waitFor(() => {
+        expect(coreStart.http.post).toHaveBeenCalledWith(
+          '/internal/security/api_key/_query',
+          expect.any(Object)
+        );
+      });
     });
   });
 });

@@ -26,6 +26,8 @@ describe('AttachmentLimitChecker', () => {
       };
     });
 
+    mockAttachmentService.countAlertsWithinCase.mockResolvedValue(5);
+
     mockFileService.find.mockImplementation(async () => {
       return {
         files: [],

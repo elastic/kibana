@@ -6,22 +6,22 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
+import type { LogRateAnalysisEmbeddableState } from '@kbn/aiops-server-schemas/embeddables/log_rate_analysis';
 import type { LogRateAnalysisComponentApi } from './types';
-import type { LogRateAnalysisEmbeddableState } from '../../../common/embeddables/log_rate_analysis/types';
 
 export const initializeLogRateAnalysisControls = (initialState: LogRateAnalysisEmbeddableState) => {
-  const dataViewId = new BehaviorSubject(initialState.dataViewId);
+  const dataViewId = new BehaviorSubject<string>(initialState.data_view_id);
 
-  const updateUserInput = (update: Pick<LogRateAnalysisEmbeddableState, 'dataViewId'>) => {
-    dataViewId.next(update.dataViewId);
+  const updateUserInput = (update: Pick<LogRateAnalysisEmbeddableState, 'data_view_id'>) => {
+    dataViewId.next(update.data_view_id);
   };
 
   const serializeLogRateAnalysisChartState = (): Pick<
     LogRateAnalysisEmbeddableState,
-    'dataViewId'
+    'data_view_id'
   > => {
     return {
-      dataViewId: dataViewId.getValue(),
+      data_view_id: dataViewId.getValue(),
     };
   };
 

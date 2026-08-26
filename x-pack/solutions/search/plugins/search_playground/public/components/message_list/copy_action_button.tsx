@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 
 interface CopyActionButtonProps {
   copyText: string;
@@ -20,11 +20,14 @@ export const CopyActionButton: React.FC<CopyActionButtonProps> = ({ copyText, ar
   };
 
   return (
-    <EuiButtonIcon
-      aria-label={ariaLabel}
-      color="text"
-      iconType="copyClipboard"
-      onClick={handleCopy}
-    />
+    <EuiToolTip content={ariaLabel} disableScreenReaderOutput>
+      <EuiButtonIcon
+        data-test-subj="searchPlaygroundCopyActionButtonButton"
+        aria-label={ariaLabel}
+        color="text"
+        iconType="copy"
+        onClick={handleCopy}
+      />
+    </EuiToolTip>
   );
 };

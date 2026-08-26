@@ -15,7 +15,7 @@ import type {
   MultiContextEvaluationContext,
 } from '@kbn/core-feature-flags-server';
 import type { Logger } from '@kbn/logging';
-import apm from 'elastic-apm-node';
+import { addSpanLabels } from '@kbn/apm-utils';
 import { getFlattenedObject } from '@kbn/std';
 import {
   type Client,
@@ -24,12 +24,25 @@ import {
   NOOP_PROVIDER,
 } from '@openfeature/server-sdk';
 import deepMerge from 'deepmerge';
-import { filter, switchMap, startWith, Subject, BehaviorSubject, pairwise, takeUntil } from 'rxjs';
+import {
+  filter,
+  switchMap,
+  startWith,
+  Subject,
+  BehaviorSubject,
+  pairwise,
+  takeUntil,
+  merge,
+  map,
+} from 'rxjs';
 import { get } from 'lodash';
 import type { InitialFeatureFlagsGetter } from '@kbn/core-feature-flags-server/src/contracts';
+import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
+import { schema } from '@kbn/config-schema';
 import { createOpenFeatureLogger } from './create_open_feature_logger';
 import { setProviderWithRetries } from './set_provider_with_retries';
 import { type FeatureFlagsConfig, featureFlagsConfig } from './feature_flags_config';
+import { incrementCounter } from './increment_counter';
 
 /**
  * Core-internal contract for the setup lifecycle step.
@@ -47,6 +60,10 @@ export interface InternalFeatureFlagsSetup extends FeatureFlagsSetup {
   getInitialFeatureFlags: () => Promise<Record<string, unknown>>;
 }
 
+export interface FeatureFlagsSetupDeps {
+  http: InternalHttpServiceSetup;
+}
+
 /**
  * The server-side Feature Flags Service
  * @internal
@@ -56,6 +73,7 @@ export class FeatureFlagsService {
   private readonly logger: Logger;
   private readonly stop$ = new Subject<void>();
   private readonly overrides$ = new BehaviorSubject<Record<string, unknown>>({});
+  private readonly contextChanged$ = new Subject<void>();
   private context: MultiContextEvaluationContext = { kind: 'multi' };
   private initialFeatureFlagsGetter: InitialFeatureFlagsGetter = async () => ({});
 
@@ -72,7 +90,7 @@ export class FeatureFlagsService {
   /**
    * Setup lifecycle method
    */
-  public setup(): InternalFeatureFlagsSetup {
+  public setup({ http }: FeatureFlagsSetupDeps): InternalFeatureFlagsSetup {
     // Register "overrides" to be changed via the dynamic config endpoint (enabled in test environments only)
     this.core.configService.addDynamicConfigPaths(featureFlagsConfig.path, ['overrides']);
 
@@ -81,6 +99,8 @@ export class FeatureFlagsService {
       .subscribe(({ overrides = {} }) => {
         this.overrides$.next(getFlattenedObject(overrides));
       });
+
+    this.registerCounterRoute(http);
 
     return {
       getOverrides: () => this.overrides$.value,
@@ -117,7 +137,12 @@ export class FeatureFlagsService {
       featureFlagsChanged$.next(keys);
     });
     const observeFeatureFlag$ = (flagName: string) =>
-      featureFlagsChanged$.pipe(
+      merge(
+        // Flag changes
+        featureFlagsChanged$,
+        // Context changes (we need to reevaluate)
+        this.contextChanged$.pipe(map(() => [flagName]))
+      ).pipe(
         filter((flagNames) => flagNames.includes(flagName)),
         startWith([flagName]), // only to emit on the first call
         takeUntil(this.stop$) // stop the observable when the service stops
@@ -199,8 +224,11 @@ export class FeatureFlagsService {
         ? (override as T)
         : // We have to bind the evaluation or the client will lose its internal context
           await evaluationFn.bind(this.featureFlagsClient)(flagName, fallbackValue);
-    apm.addLabels({ [`flag_${flagName.replaceAll('.', '_')}`]: value });
-    // TODO: increment usage counter
+    addSpanLabels({ [`flag_${flagName.replaceAll('.', '_')}`]: value });
+
+    // Report the counter for the flag evaluation.
+    incrementCounter(flagName, value);
+
     return value;
   }
 
@@ -221,5 +249,44 @@ export class FeatureFlagsService {
     // Merge the formatted context to append to the global context, and set it in the OpenFeature client.
     this.context = deepMerge(this.context, formattedContextToAppend);
     OpenFeature.setContext(this.context);
+    this.contextChanged$.next();
+  }
+
+  private registerCounterRoute(http: InternalHttpServiceSetup): void {
+    http.createRouter('').post(
+      {
+        path: '/internal/feature-flags/{flagName}/counter',
+        validate: {
+          params: schema.object({
+            flagName: schema.string({ minLength: 1, maxLength: 255 }),
+          }),
+          body: schema.object({
+            value: schema.oneOf([
+              schema.boolean(),
+              schema.number(),
+              schema.string({ maxLength: 5000 }),
+            ]),
+          }),
+        },
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'Any authenticated user should have access to the configuration',
+          },
+          authc: {
+            enabled: true,
+          },
+        },
+        options: {
+          access: 'internal',
+        },
+      },
+      (context, request, response) => {
+        const { flagName } = request.params;
+        const { value } = request.body;
+        incrementCounter(flagName, value);
+        return response.accepted();
+      }
+    );
   }
 }

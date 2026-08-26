@@ -24,6 +24,8 @@ interface PackFieldWrapperProps {
     }>;
     action_id?: string;
     agents?: string[];
+    '@timestamp'?: string;
+    expiration?: string;
   };
   submitButtonContent?: React.ReactNode;
   showResultsHeader?: boolean;
@@ -59,11 +61,13 @@ export const PackFieldWrapper = ({
       {submitButtonContent}
       <EuiSpacer />
 
-      {liveQueryDetails?.queries?.length || selectedPackData?.queries?.length ? (
+      {(actionId && liveQueryDetails?.queries?.length) || selectedPackData?.queries?.length ? (
         <EuiFlexItem>
           <PackQueriesStatusTable
             actionId={actionId}
             agentIds={agentIds}
+            startDate={liveQueryDetails?.['@timestamp']}
+            expirationDate={liveQueryDetails?.expiration}
             // @ts-expect-error update types
             data={liveQueryDetails?.queries ?? selectedPackData?.queries}
             showResultsHeader={showResultsHeader}

@@ -67,4 +67,68 @@ describe('translater', () => {
       expect(result).toEqual('[]');
     });
   });
+
+  describe('round-trip with namespace', () => {
+    const entriesWithNamespace: RouteEntry[] = [
+      { dataId: 'criblSource1', datastream: 'logs-destination1.cloud', namespace: 'production' },
+      { dataId: 'criblSource2', datastream: 'logs-destination2' },
+    ];
+
+    const configWithNamespace = {
+      route_entries: {
+        value:
+          '[{"dataId":"criblSource1","datastream":"logs-destination1.cloud","namespace":"production"},{"dataId":"criblSource2","datastream":"logs-destination2"}]',
+        type: 'textarea',
+      },
+    } as PackagePolicyConfigRecord;
+
+    it('serializes namespace in route entries', () => {
+      const result = getPolicyConfigValueFromRouteEntries(entriesWithNamespace);
+      expect(result).toContain('"namespace":"production"');
+    });
+
+    it('omits namespace key when namespace is empty string', () => {
+      const result = getPolicyConfigValueFromRouteEntries([
+        { dataId: 'criblSource1', datastream: 'logs-destination1.cloud', namespace: '' },
+      ]);
+      expect(result).not.toContain('"namespace"');
+    });
+
+    it('omits namespace key when namespace is undefined', () => {
+      const result = getPolicyConfigValueFromRouteEntries([
+        { dataId: 'criblSource1', datastream: 'logs-destination1.cloud' },
+      ]);
+      expect(result).not.toContain('"namespace"');
+    });
+
+    it('deserializes namespace from policy config', () => {
+      const result = getRouteEntriesFromPolicyConfig(configWithNamespace);
+      expect(result[0].namespace).toEqual('production');
+      expect(result[1].namespace).toBeUndefined();
+    });
+
+    it('normalizes empty namespace to undefined when deserializing', () => {
+      const configWithEmptyNamespace = {
+        route_entries: {
+          value:
+            '[{"dataId":"criblSource1","datastream":"logs-destination1.cloud","namespace":""}]',
+          type: 'textarea',
+        },
+      } as PackagePolicyConfigRecord;
+      const result = getRouteEntriesFromPolicyConfig(configWithEmptyNamespace);
+      expect(result[0].namespace).toBeUndefined();
+    });
+
+    it('normalizes whitespace-only namespace to undefined when deserializing', () => {
+      const configWithWhitespaceNamespace = {
+        route_entries: {
+          value:
+            '[{"dataId":"criblSource1","datastream":"logs-destination1.cloud","namespace":"   "}]',
+          type: 'textarea',
+        },
+      } as PackagePolicyConfigRecord;
+      const result = getRouteEntriesFromPolicyConfig(configWithWhitespaceNamespace);
+      expect(result[0].namespace).toBeUndefined();
+    });
+  });
 });

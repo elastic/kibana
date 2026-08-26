@@ -9,11 +9,9 @@ import type { DataViewsContract, DataView, DataViewSpec } from '@kbn/data-views-
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { ActionExecutionContext, UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import {
-  UPDATE_FILTER_REFERENCES_ACTION,
-  UPDATE_FILTER_REFERENCES_TRIGGER,
-} from '@kbn/unified-search-plugin/public';
+import { UPDATE_FILTER_REFERENCES_ACTION } from '@kbn/unified-search-plugin/public';
 import type { IndexPattern, IndexPatternMap, DataViewsState } from '@kbn/lens-common';
+import { UPDATE_FILTER_REFERENCES_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { ensureIndexPattern, loadIndexPatterns } from './loader';
 import { generateId } from '../id_generator';
 

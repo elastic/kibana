@@ -19,12 +19,15 @@ export const cpuV2: SchemaBasedAggregations = {
     cpu_idle: {
       terms: {
         field: 'state',
-        include: ['idle', 'wait'],
+        // `wait` is optional in OTel datasets and can null the computed value.
+        include: ['idle'],
       },
       aggs: {
         avg: {
           avg: {
-            field: 'system.cpu.utilization',
+            // OTel lands this gauge under the `metrics.*` prefix; the unprefixed
+            // field returned null and coerced to `1 - 0 = 100%`.
+            field: 'metrics.system.cpu.utilization',
           },
         },
       },

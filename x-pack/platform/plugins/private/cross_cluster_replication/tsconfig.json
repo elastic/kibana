@@ -33,6 +33,8 @@
     "@kbn/licensing-types",
     "@kbn/data-views-plugin",
     "@kbn/index-management-shared-types",
+    "@kbn/core-http-browser",
+    "@kbn/ui-callout"
   ],
   "exclude": [
     "target/**/*",

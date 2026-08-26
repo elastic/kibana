@@ -1,0 +1,9 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/aiops-change-point-detection",
+  "owner": [
+    "@elastic/search-ml-ux"
+  ],
+  "group": "platform",
+  "visibility": "shared"
+}

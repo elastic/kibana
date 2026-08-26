@@ -8,7 +8,8 @@
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from '@emotion/styled';
-
+import { FF_ENABLE_ENTITY_STORE_V2 } from '@kbn/entity-store/public';
+import { useUiSetting } from '../../../common/lib/kibana';
 import { useUpsellingComponent } from '../../../common/hooks/use_upselling';
 import { EnableRiskScore } from '../enable_risk_score';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
@@ -23,6 +24,7 @@ import type { UsersComponentsQueryProps } from '../../../explore/users/pages/nav
 import type { HostsComponentsQueryProps } from '../../../explore/hosts/pages/navigation/types';
 import { HostRiskScoreQueryId, UserRiskScoreQueryId } from '../../common/utils';
 import { useRiskScore } from '../../api/hooks/use_risk_score';
+import { useEntityRiskScores } from '../../api/hooks/use_entity_risk_scores';
 import { useMissingRiskEnginePrivileges } from '../../hooks/use_missing_risk_engine_privileges';
 import { RiskEnginePrivilegesCallOut } from '../risk_engine_privileges_callout';
 import { RiskScoresNoDataDetected } from '../risk_score_no_data_detected';
@@ -36,9 +38,11 @@ type ComponentsQueryProps = HostsComponentsQueryProps | UsersComponentsQueryProp
 const RiskDetailsTabBodyComponent: React.FC<
   Pick<ComponentsQueryProps, 'startDate' | 'endDate' | 'setQuery' | 'deleteQuery'> & {
     entityName: string;
+    entityId?: string;
     riskEntity: EntityType;
   }
-> = ({ entityName, startDate, endDate, setQuery, deleteQuery, riskEntity }) => {
+> = ({ entityName, startDate, endDate, setQuery, deleteQuery, riskEntity, entityId }) => {
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
   const queryId = useMemo(
     () =>
       riskEntity === EntityType.host
@@ -64,18 +68,33 @@ const RiskDetailsTabBodyComponent: React.FC<
   const { toggleStatus: contributorsToggleStatus, setToggleStatus: setContributorsToggleStatus } =
     useQueryToggle(`${queryId} contributors`);
 
+  // Legacy (non-V2) read: query the risk-score index by entity name within the page's
+  // time range. In V2 the documents are keyed by EUID and stamped with the calculation
+  // time, so this query does not match them. The V2 read below is used instead.
   const filterQuery = useMemo(
     () => (entityName ? buildEntityNameFilter(riskEntity, [entityName]) : {}),
     [entityName, riskEntity]
   );
 
-  const { data, loading, refetch, inspect, hasEngineBeenInstalled } = useRiskScore({
+  const legacyRiskScore = useRiskScore({
     filterQuery,
     onlyLatest: false,
     riskEntity,
-    skip: !contributorsToggleStatus,
+    skip: entityStoreV2Enabled || !contributorsToggleStatus,
     timerange,
   });
+
+  // V2 read: same path the entity flyout uses. Filters by `<entity>.risk.id_value` (the
+  // EUID) and returns full records including `risk.inputs`, which the contributors panel
+  // needs. Passing `undefined` as the id skips the query (when V2 is off or toggled shut).
+  const { base: entityStoreRiskScore } = useEntityRiskScores(
+    riskEntity,
+    entityStoreV2Enabled && contributorsToggleStatus ? entityId : undefined
+  );
+
+  const { data, loading, refetch, inspect, hasEngineBeenInstalled } = entityStoreV2Enabled
+    ? entityStoreRiskScore
+    : legacyRiskScore;
 
   useQueryInspector({
     queryId,

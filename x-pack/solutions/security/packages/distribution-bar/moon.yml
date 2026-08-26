@@ -4,20 +4,20 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/security-solution-distribution-bar'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/contextual-security-apps'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/security-solution-distribution-bar'
+  title: '@kbn/security-solution-distribution-bar'
   description: Moon project for @kbn/security-solution-distribution-bar
   channel: ''
   owner: '@elastic/contextual-security-apps'
-  metadata:
-    sourceRoot: x-pack/solutions/security/packages/distribution-bar
-dependsOn: []
+  sourceRoot: x-pack/solutions/security/packages/distribution-bar
+dependsOn:
+  - '@kbn/i18n'
 tags:
   - shared-browser
   - package
@@ -30,16 +30,6 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

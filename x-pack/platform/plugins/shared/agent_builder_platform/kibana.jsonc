@@ -9,9 +9,15 @@
     "server": true,
     "browser": true,
     "configPath": ["xpack", "agentBuilderPlatform"],
-    "requiredPlugins": ["agentBuilder"],
+    "requiredPlugins": [
+      "actions",
+      "agentBuilder",
+      "agentBuilderSml",
+      "share",
+      "triggersActionsUi"
+    ],
     "requiredBundles": [],
-    "optionalPlugins": ["cases", "llmTasks", "workflowsManagement"],
+    "optionalPlugins": ["cases", "cloud", "esql", "llmTasks"],
     "extraPublicDirs": []
   }
 }

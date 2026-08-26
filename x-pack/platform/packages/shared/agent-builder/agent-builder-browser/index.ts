@@ -6,7 +6,51 @@
  */
 
 export { formatAgentBuilderErrorMessage } from './base/errors';
-export type { ToolServiceStartContract, ExecuteToolParams, ExecuteToolReturn } from './tools';
+export type {
+  ToolServiceStartContract,
+  ExecuteToolParams,
+  ExecuteToolReturn,
+  ListWorkflowsParams,
+  ListWorkflowsResponse,
+  WorkflowListItem,
+} from './tools';
 export type { AgentsServiceStartContract } from './agents';
 export type { AttachmentUIDefinition, AttachmentServiceStartContract } from './attachments';
-export type { EventsServiceStartContract, BrowserChatEvent } from './events';
+export type { RendererUIDefinition, RendererServiceStartContract } from './renderers';
+export type {
+  ConversationTemplateTabRenderProps,
+  ConversationTemplateTabDefinition,
+  ConversationTemplateUIDefinition,
+  ConversationTemplateServiceStartContract,
+} from './templates';
+export { ATTACHMENTS_TAB_ID, TIMELINE_TAB_ID, BUILTIN_TAB_IDS } from './templates';
+export type {
+  EventsServiceStartContract,
+  ChatUiEventsContract,
+  BrowserChatEvent,
+  ActiveConversation,
+} from './events';
+export { WorkflowComboBox } from './workflow_combo_box';
+export type { WorkflowComboBoxProps, WorkflowComboBoxOption } from './workflow_combo_box';
+export { ConversationInputShell } from './conversation_input_shell';
+export type { ConversationInputShellProps } from './conversation_input_shell';
+export type {
+  AgentBuilderPluginSetup,
+  AgentBuilderPluginStart,
+  EmbeddableChatAccess,
+  EmbeddableConversationProps,
+  PublicEmbeddableConversationProps,
+  PublicEmbeddableConversationInputProps,
+  EmbeddableConversationInputRef,
+  OpenConversationSidebarOptions,
+  ConversationSidebarRef,
+  OpenConversationSidebarReturn,
+} from './plugin_contract';
+export { McpClientDetails, McpClientDetailsContent, McpClientLogo } from './oauth_clients';
+export type {
+  McpClientDetailsProps,
+  McpClientDetailsContentProps,
+  McpClientDetailsData,
+  McpClientDetailsPresentation,
+  McpClientLogoProps,
+} from './oauth_clients';

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// Serverless test (remove during Scout migration): x-pack/platform/test/serverless/functional/test_suites/discover/context_awareness/_framework.ts
+
 import kbnRison from '@kbn/rison';
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
@@ -62,7 +64,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await common.navigateToActualUrl('discover', undefined, {
             ensureCurrentUrl: false,
           });
-          await dataViews.switchTo('my-example-logs');
+          await discover.waitUntilSearchingHasFinished();
+          await dataViews.switchToAndValidate('my-example-logs');
           await discover.waitUntilSearchingHasFinished();
           await dataGrid.clickRowToggle({ rowIndex: 0, defaultTabId: 'doc_view_example' });
           await retry.try(async () => {

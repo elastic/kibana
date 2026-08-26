@@ -45,6 +45,7 @@ import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_SIGNALS_STATUS_URL as DETECTION_ENGINE_ALERTS_STATUS_URL,
+  INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION,
 } from '@kbn/security-solution-plugin/common/constants';
 import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import {
@@ -71,16 +72,22 @@ import {
   scheduleRuleRun,
   stopAllManualRuns,
   waitForBackfillExecuted,
+  setAdvancedSettings,
 } from '../../../../utils';
 
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
+import { EntityStoreV2EnrichmentSetup } from '../../entity_store_v2_enrichment_setup';
 
 /**
  * Specific _id to use for some of the tests. If the archiver changes and you see errors
  * here, update this to a new value of a chosen auditbeat record and update the tests values.
  */
 const ID = 'BhbXBmkBR346wHgn4PeZ';
+// Entity fields for the auditbeat record with _id = ID.
+const ENRICHMENT_HOST_ID = '8cc95778cce5407c809480e8e32ad76b';
+const ENRICHMENT_HOST_NAME = 'suricata-zeek-sensor-toronto';
+const ENRICHMENT_HOST_EUID = `host:${ENRICHMENT_HOST_ID}`;
 
 /**
  * Test coverage:
@@ -95,6 +102,7 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const log = getService('log');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
+  const entityStoreV2 = EntityStoreV2EnrichmentSetup(getService);
   // TODO: add a new service for loading archiver files similar to "getService('es')"
   const config = getService('config');
   const isServerless = config.get('serverless');
@@ -274,16 +282,33 @@ export default ({ getService }: FtrProviderContext) => {
       expect(previewAlerts[0]?._source?.user?.risk).toEqual(undefined);
     });
 
-    describe('with host and user risk indices', () => {
+    describe('with host risk indices', () => {
       before(async () => {
-        await esArchiver.load('x-pack/solutions/security/test/fixtures/es_archives/entity/risks');
+        // Auditbeat host records carry host.id so the EUID is id-based (host:<host.id>).
+        // Note: user.name for this auditbeat record is 'root', which is in LOCAL_NAMESPACE_EXCLUDED_USER_NAMES.
+        // This means entity.namespace falls back to 'unknown' for root, and the postAggFilter in
+        // getEuidFromObject() also fails (entity.id not in source, namespace ≠ 'local', not IDP).
+        // getEuidFromObject() therefore returns undefined for root — user enrichment is skipped
+        // by the detection engine for system accounts. Only host enrichment is tested here.
+        await entityStoreV2.setup({
+          hosts: [
+            {
+              host: { name: ENRICHMENT_HOST_NAME, id: [ENRICHMENT_HOST_ID] },
+              entity: {
+                id: ENRICHMENT_HOST_EUID,
+                type: 'host',
+                risk: { calculated_level: 'Critical', calculated_score_norm: 96 },
+              },
+            },
+          ],
+        });
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/solutions/security/test/fixtures/es_archives/entity/risks');
+        await entityStoreV2.teardown();
       });
 
-      it('should have host and user risk score fields', async () => {
+      it('should have host risk score fields', async () => {
         const rule: QueryRuleCreateProps = {
           ...getRuleForAlertTesting(['auditbeat-*']),
           query: `_id:${ID}`,
@@ -293,11 +318,9 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(previewAlerts[0]?._source?.host?.risk?.calculated_level).toEqual('Critical');
         expect(previewAlerts[0]?._source?.host?.risk?.calculated_score_norm).toEqual(96);
-        expect(previewAlerts[0]?._source?.user?.risk?.calculated_level).toEqual('Low');
-        expect(previewAlerts[0]?._source?.user?.risk?.calculated_score_norm).toEqual(11);
       });
 
-      it('should have host and user risk score fields when suppression enabled on interval', async () => {
+      it('should have host risk score fields when suppression enabled on interval', async () => {
         const rule: QueryRuleCreateProps = {
           ...getRuleForAlertTesting(['auditbeat-*']),
           query: `_id:${ID}`,
@@ -314,11 +337,9 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(previewAlerts[0]?._source?.host?.risk?.calculated_level).toEqual('Critical');
         expect(previewAlerts[0]?._source?.host?.risk?.calculated_score_norm).toEqual(96);
-        expect(previewAlerts[0]?._source?.user?.risk?.calculated_level).toEqual('Low');
-        expect(previewAlerts[0]?._source?.user?.risk?.calculated_score_norm).toEqual(11);
       });
 
-      it('should have host and user risk score fields when suppression enabled on rule execution only', async () => {
+      it('should have host risk score fields when suppression enabled on rule execution only', async () => {
         const rule: QueryRuleCreateProps = {
           ...getRuleForAlertTesting(['auditbeat-*']),
           query: `_id:${ID}`,
@@ -331,22 +352,26 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(previewAlerts[0]?._source?.host?.risk?.calculated_level).toEqual('Critical');
         expect(previewAlerts[0]?._source?.host?.risk?.calculated_score_norm).toEqual(96);
-        expect(previewAlerts[0]?._source?.user?.risk?.calculated_level).toEqual('Low');
-        expect(previewAlerts[0]?._source?.user?.risk?.calculated_score_norm).toEqual(11);
       });
     });
 
     describe('with asset criticality', () => {
       before(async () => {
-        await esArchiver.load(
-          'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
-        );
+        // User enrichment is omitted — 'root' is in LOCAL_NAMESPACE_EXCLUDED_USER_NAMES, so
+        // getEuidFromObject() returns undefined for this alert and user enrichment is skipped.
+        await entityStoreV2.setup({
+          hosts: [
+            {
+              host: { name: ENRICHMENT_HOST_NAME, id: [ENRICHMENT_HOST_ID] },
+              entity: { id: ENRICHMENT_HOST_EUID, type: 'host' },
+              asset: { criticality: 'high_impact' },
+            },
+          ],
+        });
       });
 
       after(async () => {
-        await esArchiver.unload(
-          'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
-        );
+        await entityStoreV2.teardown();
       });
 
       it('should be enriched alert with criticality_level', async () => {
@@ -357,7 +382,6 @@ export default ({ getService }: FtrProviderContext) => {
         const { previewId } = await previewRule({ supertest, rule });
         const previewAlerts = await getPreviewAlerts({ es, previewId });
         expect(previewAlerts[0]?._source?.['host.asset.criticality']).toEqual('high_impact');
-        expect(previewAlerts[0]?._source?.['user.asset.criticality']).toEqual('extreme_impact');
       });
 
       it('should be enriched alert with criticality_level when suppression enabled', async () => {
@@ -375,7 +399,6 @@ export default ({ getService }: FtrProviderContext) => {
         const { previewId } = await previewRule({ supertest, rule });
         const previewAlerts = await getPreviewAlerts({ es, previewId });
         expect(previewAlerts[0]?._source?.['host.asset.criticality']).toEqual('high_impact');
-        expect(previewAlerts[0]?._source?.['user.asset.criticality']).toEqual('extreme_impact');
       });
     });
 
@@ -2349,7 +2372,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     // TODO: Ask YARA
-    describe('@skipInServerless legacy investigation_fields', () => {
+    describe('legacy investigation_fields', () => {
       let ruleWithLegacyInvestigationField: Rule<BaseRuleParams>;
 
       beforeEach(async () => {
@@ -2867,6 +2890,164 @@ export default ({ getService }: FtrProviderContext) => {
         expect(requests![0].description).toBe('Find events');
         expect(requests![0].request_type).toBe('findDocuments');
         expect(requests![0].request).toContain('POST /ecs_compliant/_search?allow_no_indices=true');
+      });
+    });
+
+    describe('with data stream namespace filter', () => {
+      const { indexListOfDocuments } = dataGeneratorFactory({
+        es,
+        index: 'ecs_compliant',
+        log,
+      });
+
+      before(async () => {
+        await esArchiver.load(
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
+        );
+      });
+
+      after(async () => {
+        await esArchiver.unload(
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
+        );
+        // Clean up UI setting
+        await setAdvancedSettings(supertest, {
+          [INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION]: [],
+        });
+      });
+
+      it('should only include documents from specified namespaces when filter is configured', async () => {
+        const id = uuidv4();
+        const timestamp = new Date().toISOString();
+
+        // Create documents with different namespaces
+        const docNamespace1 = {
+          id,
+          '@timestamp': timestamp,
+          data_stream: {
+            namespace: 'namespace1',
+          },
+          agent: {
+            name: 'agent-namespace1',
+          },
+        };
+        const docNamespace2 = {
+          id,
+          '@timestamp': timestamp,
+          data_stream: { namespace: 'namespace2' },
+          agent: {
+            name: 'agent-namespace2',
+          },
+        };
+        const docNamespace3 = {
+          id,
+          '@timestamp': timestamp,
+          data_stream: { namespace: 'namespace3' },
+          agent: {
+            name: 'agent-namespace3',
+          },
+        };
+
+        await indexListOfDocuments([docNamespace1, docNamespace2, docNamespace3]);
+
+        // Set UI setting to include only namespace1 and namespace2
+        await setAdvancedSettings(supertest, {
+          [INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION]: ['namespace1', 'namespace2'],
+        });
+
+        const rule: QueryRuleCreateProps = {
+          ...getRuleForAlertTesting(['ecs_compliant']),
+          query: `id:${id}`,
+          from: 'now-1h',
+          interval: '1h',
+        };
+
+        const { previewId } = await previewRule({
+          supertest,
+          rule,
+        });
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          size: 10,
+        });
+
+        // Should only get alerts from namespace1 and namespace2, not namespace3
+        expect(previewAlerts.length).toEqual(2);
+        // @ts-expect-error namespace does not exist
+        const namespaces = previewAlerts.map((alert) => alert._source?.data_stream?.namespace);
+        expect(namespaces).toContain('namespace1');
+        expect(namespaces).toContain('namespace2');
+        expect(namespaces).not.toContain('namespace3');
+      });
+
+      it('should include all documents when filter is not configured', async () => {
+        const id = uuidv4();
+        const timestamp = new Date().toISOString();
+
+        // Create documents with different namespaces
+        const docNamespace1 = {
+          id,
+          '@timestamp': timestamp,
+          data_stream: {
+            namespace: 'namespace1',
+          },
+          agent: {
+            name: 'agent-namespace1',
+          },
+        };
+        const docNamespace2 = {
+          id,
+          '@timestamp': timestamp,
+          data_stream: {
+            namespace: 'namespace2',
+          },
+          agent: {
+            name: 'agent-namespace2',
+          },
+        };
+        const docNamespace3 = {
+          id,
+          '@timestamp': timestamp,
+          data_stream: {
+            namespace: 'namespace3',
+          },
+          agent: {
+            name: 'agent-namespace3',
+          },
+        };
+
+        await indexListOfDocuments([docNamespace1, docNamespace2, docNamespace3]);
+
+        // Ensure UI setting is empty (not configured)
+        await setAdvancedSettings(supertest, {
+          [INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION]: [],
+        });
+
+        const rule: QueryRuleCreateProps = {
+          ...getRuleForAlertTesting(['ecs_compliant']),
+          query: `id:${id}`,
+          from: 'now-1h',
+          interval: '1h',
+        };
+
+        const { previewId } = await previewRule({
+          supertest,
+          rule,
+        });
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          size: 10,
+        });
+
+        // Should get alerts from all namespaces when filter is not configured
+        expect(previewAlerts.length).toEqual(3);
+        // @ts-expect-error namespace does not exist on type
+        const namespaces = previewAlerts.map((alert) => alert._source?.data_stream?.namespace);
+        expect(namespaces).toContain('namespace1');
+        expect(namespaces).toContain('namespace2');
+        expect(namespaces).toContain('namespace3');
       });
     });
   });

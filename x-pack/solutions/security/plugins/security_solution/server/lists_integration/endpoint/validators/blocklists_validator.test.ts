@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import { BlocklistValidator } from './blocklist_validator';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
+import type { CreateExceptionListItemOptions } from '@kbn/lists-plugin/server';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
+import { BlocklistValidator } from './blocklist_validator';
 import { createMockEndpointAppContextService } from '../../../endpoint/mocks';
+import { GLOBAL_ARTIFACT_TAG } from '../../../../common/endpoint/service/artifacts/constants';
+import { EndpointArtifactExceptionValidationError } from './errors';
 
 describe('Blocklists API validations', () => {
   it('should initialize', () => {
@@ -17,6 +21,114 @@ describe('Blocklists API validations', () => {
         httpServerMock.createKibanaRequest()
       )
     ).not.toBeUndefined();
+  });
+
+  describe('entry value length bounds', () => {
+    let validator: BlocklistValidator;
+
+    beforeEach(() => {
+      validator = new BlocklistValidator(
+        createMockEndpointAppContextService(),
+        httpServerMock.createKibanaRequest()
+      );
+    });
+
+    const buildItem = (
+      entries: CreateExceptionListItemOptions['entries']
+    ): CreateExceptionListItemOptions =>
+      ({
+        listId: ENDPOINT_ARTIFACT_LISTS.blocklists.id,
+        name: 'Test blocklist',
+        description: '',
+        namespaceType: 'agnostic',
+        osTypes: ['windows'],
+        tags: [GLOBAL_ARTIFACT_TAG],
+        entries,
+      } as unknown as CreateExceptionListItemOptions);
+
+    const filePathEntry = (value: string[]): CreateExceptionListItemOptions['entries'] => [
+      { field: 'file.path', type: 'match_any', operator: 'included', value },
+    ];
+
+    const hashEntry = (value: string[]): CreateExceptionListItemOptions['entries'] => [
+      { field: 'file.hash.sha256', type: 'match_any', operator: 'included', value },
+    ];
+
+    const signerEntry = (value: string[]): CreateExceptionListItemOptions['entries'] => [
+      {
+        field: 'file.Ext.code_signature',
+        type: 'nested',
+        entries: [{ field: 'subject_name', type: 'match_any', operator: 'included', value }],
+      },
+    ];
+
+    const signerMatchEntry = (value: string): CreateExceptionListItemOptions['entries'] => [
+      {
+        field: 'file.Ext.code_signature',
+        type: 'nested',
+        entries: [{ field: 'subject_name', type: 'match', operator: 'included', value }],
+      },
+    ];
+
+    it('accepts a file path value at the 4096 character limit', async () => {
+      await expect(
+        validator.validatePreCreateItem(buildItem(filePathEntry(['a'.repeat(4096)])))
+      ).resolves.toBeDefined();
+    });
+
+    it('rejects a file path value over the 4096 character limit', async () => {
+      await expect(
+        validator.validatePreCreateItem(buildItem(filePathEntry(['a'.repeat(4097)])))
+      ).rejects.toThrow(EndpointArtifactExceptionValidationError);
+      await expect(
+        validator.validatePreCreateItem(buildItem(filePathEntry(['a'.repeat(4097)])))
+      ).rejects.toThrow(/maximum length of \[4096\]/);
+    });
+
+    it('accepts a valid hash value', async () => {
+      await expect(
+        validator.validatePreCreateItem(buildItem(hashEntry(['a'.repeat(64)])))
+      ).resolves.toBeDefined();
+    });
+
+    it('rejects a hash value over the 4096 character limit', async () => {
+      await expect(
+        validator.validatePreCreateItem(buildItem(hashEntry(['a'.repeat(4097)])))
+      ).rejects.toThrow(EndpointArtifactExceptionValidationError);
+      await expect(
+        validator.validatePreCreateItem(buildItem(hashEntry(['a'.repeat(4097)])))
+      ).rejects.toThrow(/maximum length of \[4096\]/);
+    });
+
+    it('accepts a signer subject_name match_any value at the 4096 character limit', async () => {
+      await expect(
+        validator.validatePreCreateItem(buildItem(signerEntry(['a'.repeat(4096)])))
+      ).resolves.toBeDefined();
+    });
+
+    it('rejects a signer subject_name match_any value over the 4096 character limit', async () => {
+      await expect(
+        validator.validatePreCreateItem(buildItem(signerEntry(['a'.repeat(4097)])))
+      ).rejects.toThrow(EndpointArtifactExceptionValidationError);
+      await expect(
+        validator.validatePreCreateItem(buildItem(signerEntry(['a'.repeat(4097)])))
+      ).rejects.toThrow(/maximum length of \[4096\]/);
+    });
+
+    it('accepts a signer subject_name match value at the 4096 character limit', async () => {
+      await expect(
+        validator.validatePreCreateItem(buildItem(signerMatchEntry('a'.repeat(4096))))
+      ).resolves.toBeDefined();
+    });
+
+    it('rejects a signer subject_name match value over the 4096 character limit', async () => {
+      await expect(
+        validator.validatePreCreateItem(buildItem(signerMatchEntry('a'.repeat(4097))))
+      ).rejects.toThrow(EndpointArtifactExceptionValidationError);
+      await expect(
+        validator.validatePreCreateItem(buildItem(signerMatchEntry('a'.repeat(4097))))
+      ).rejects.toThrow(/maximum length of \[4096\]/);
+    });
   });
   // -----------------------------------------------------------------------------
   //

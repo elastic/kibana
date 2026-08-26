@@ -1,0 +1,77 @@
+{
+  "sha1": "fa6168c55f224d688925dbf8e634eeabe8e095d7",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "5d0d5fb99025df3-3053911fdf65397",
+      "title": "CPS brownout — alerts page degraded state alerts page shows a warning callout (not a hard error) when a linked project is unresponsive",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/ui/tests/detection_engine/cps/alerts_page_brownout.spec.ts",
+        "line": 31,
+        "column": 1
+      }
+    },
+    {
+      "id": "96992190a6b747c-923a699644bffc2",
+      "title": "CPS field dropdown scoping - threat match mapping fields origin-only space: threat field dropdown shows origin fields but not linked fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/ui/tests/detection_engine/cps/field_dropdown_scoping.spec.ts",
+        "line": 26,
+        "column": 1
+      }
+    },
+    {
+      "id": "96992190a6b747c-e13885d07095f7a",
+      "title": "CPS field dropdown scoping - threat match mapping fields all-projects space: threat field dropdown shows fields from both origin and linked clusters",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/ui/tests/detection_engine/cps/field_dropdown_scoping.spec.ts",
+        "line": 46,
+        "column": 14
+      }
+    },
+    {
+      "id": "1c810e715177a2c-970d67f49640173",
+      "title": "Graph Visualization CPS projectRouting search-all space forwards projectRouting=_alias:* to the Graph API",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/ui/tests/graph_visualization/cps/project_routing.spec.ts",
+        "line": 182,
+        "column": 14
+      }
+    },
+    {
+      "id": "1c810e715177a2c-b3150da24b2522c",
+      "title": "Graph Visualization CPS projectRouting origin-only space forwards projectRouting=_alias:_origin to the Graph API",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/ui/tests/graph_visualization/cps/project_routing.spec.ts",
+        "line": 204,
+        "column": 14
+      }
+    }
+  ]
+}

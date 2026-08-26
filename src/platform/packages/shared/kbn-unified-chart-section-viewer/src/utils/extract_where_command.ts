@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLCommand } from '@kbn/esql-language';
-import { BasicPrettyPrinter, isProperNode, Parser, Walker } from '@kbn/esql-language';
+import type { ESQLCommand } from '@elastic/esql/types';
+import { BasicPrettyPrinter, isProperNode, Parser, Walker } from '@elastic/esql';
 
 export const extractWhereCommand = (esqlQuery?: string): string[] => {
   if (!esqlQuery) {

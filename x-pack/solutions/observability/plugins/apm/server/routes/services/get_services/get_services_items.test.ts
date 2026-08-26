@@ -7,11 +7,10 @@
 
 import { getServicesItems } from './get_services_items';
 import { getServiceTransactionStats } from './get_service_transaction_stats';
-import { getHealthStatuses } from './get_health_statuses';
+import { getServiceAnomalyScores } from './get_service_anomaly_scores';
 import { getServicesAlerts } from './get_service_alerts';
 import { getServicesSloStats } from './get_services_slo_stats';
 import { mergeServiceStats } from './merge_service_stats';
-import { ServiceHealthStatus } from '../../../../common/service_health_status';
 import type { Logger } from '@kbn/logging';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import type { ApmAlertsClient } from '../../../lib/helpers/get_apm_alerts_client';
@@ -21,13 +20,13 @@ import type { ApmServiceTransactionDocumentType } from '../../../../common/docum
 import type { RollupInterval } from '../../../../common/rollup';
 
 jest.mock('./get_service_transaction_stats');
-jest.mock('./get_health_statuses');
+jest.mock('./get_service_anomaly_scores');
 jest.mock('./get_service_alerts');
 jest.mock('./get_services_slo_stats');
 jest.mock('./merge_service_stats');
 
 const mockGetServiceTransactionStats = getServiceTransactionStats as jest.Mock;
-const mockGetHealthStatuses = getHealthStatuses as jest.Mock;
+const mockGetServiceAnomalyScores = getServiceAnomalyScores as jest.Mock;
 const mockGetServicesAlerts = getServicesAlerts as jest.Mock;
 const mockGetServicesSloStats = getServicesSloStats as jest.Mock;
 const mockMergeServiceStats = mergeServiceStats as jest.Mock;
@@ -62,9 +61,7 @@ describe('getServicesItems', () => {
     maxCountExceeded: false,
   };
 
-  const mockHealthStatuses = [
-    { serviceName: 'service-a', healthStatus: ServiceHealthStatus.healthy },
-  ];
+  const mockAnomalyScores = [{ serviceName: 'service-a', anomalyScore: 75 }];
 
   const mockAlertCounts = [{ serviceName: 'service-a', alertsCount: 2 }];
 
@@ -78,7 +75,7 @@ describe('getServicesItems', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockGetServiceTransactionStats.mockResolvedValue(mockServiceStats);
-    mockGetHealthStatuses.mockResolvedValue(mockHealthStatuses);
+    mockGetServiceAnomalyScores.mockResolvedValue(mockAnomalyScores);
     mockGetServicesAlerts.mockResolvedValue(mockAlertCounts);
     mockGetServicesSloStats.mockResolvedValue(mockSloCounts);
     mockMergeServiceStats.mockReturnValue(mockMergedItems);
@@ -91,7 +88,7 @@ describe('getServicesItems', () => {
       });
 
       expect(mockGetServiceTransactionStats).toHaveBeenCalled();
-      expect(mockGetHealthStatuses).toHaveBeenCalled();
+      expect(mockGetServiceAnomalyScores).toHaveBeenCalled();
       expect(mockGetServicesAlerts).toHaveBeenCalled();
       expect(mockGetServicesSloStats).toHaveBeenCalled();
       expect(result.items).toEqual(mockMergedItems);
@@ -99,9 +96,9 @@ describe('getServicesItems', () => {
   });
 
   describe('error handling', () => {
-    it('returns empty array and logs debug when getHealthStatuses fails', async () => {
-      const error = new Error('Health status error');
-      mockGetHealthStatuses.mockRejectedValue(error);
+    it('returns empty array and logs debug when getServiceAnomalyScores fails', async () => {
+      const error = new Error('Anomaly scores error');
+      mockGetServiceAnomalyScores.mockRejectedValue(error);
 
       const result = await getServicesItems({
         ...baseParams,
@@ -110,7 +107,7 @@ describe('getServicesItems', () => {
       expect(mockLogger.debug).toHaveBeenCalledWith(error);
       expect(mockMergeServiceStats).toHaveBeenCalledWith(
         expect.objectContaining({
-          healthStatuses: [],
+          anomalyScores: [],
         })
       );
       expect(result.items).toEqual(mockMergedItems);

@@ -65,6 +65,7 @@ export enum ES_FIELD_TYPES {
   HISTOGRAM = 'histogram',
   EXPONENTIAL_HISTOGRAM = 'exponential_histogram',
   TDIGEST = 'tdigest',
+  FLATTENED = 'flattened',
 
   NULL = 'null',
 }
@@ -91,6 +92,7 @@ export enum KBN_FIELD_TYPES {
   HISTOGRAM = 'histogram',
   EXPONENTIAL_HISTOGRAM = 'exponential_histogram',
   TDIGEST = 'tdigest',
+  FLATTENED = 'flattened',
   MISSING = 'missing',
   NULL = 'null',
 }

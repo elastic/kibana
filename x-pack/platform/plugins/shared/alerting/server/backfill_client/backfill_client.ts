@@ -8,13 +8,13 @@ import pMap from 'p-map';
 import type {
   ISavedObjectsRepository,
   Logger,
-  SavedObject,
+  SavedObjectBulkResult,
   SavedObjectReference,
   SavedObjectsBulkCreateObject,
   SavedObjectsClientContract,
   SavedObjectsFindResult,
 } from '@kbn/core/server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { isSavedObjectErrorResult, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { AuditLogger } from '@kbn/security-plugin/server';
 import type {
   RunContext,
@@ -27,6 +27,7 @@ import type { IEventLogger, IEventLogClient } from '@kbn/event-log-plugin/server
 import { isNumber, chunk } from 'lodash';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { withSpan } from '@kbn/apm-utils';
+import { TaskTypeGroup } from '@kbn/task-manager-plugin/server/task';
 import type {
   ScheduleBackfillError,
   ScheduleBackfillParams,
@@ -45,6 +46,7 @@ import { AD_HOC_RUN_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../saved_o
 import type { TaskRunnerFactory } from '../task_runner';
 import type { RuleTypeRegistry } from '../types';
 import { createBackfillError } from './lib';
+import { SCHEDULE_TRUNCATED_WARNING } from './lib/calculate_schedule';
 import { updateGaps } from '../lib/rule_gaps/update/update_gaps';
 import { denormalizeActions } from '../rules_client/lib/denormalize_actions';
 import type { DenormalizedAction, NormalizedAlertActionWithGeneratedValues } from '../rules_client';
@@ -107,6 +109,7 @@ export class BackfillClient {
       [BACKFILL_TASK_TYPE]: {
         title: 'Alerting Backfill Rule Run',
         priority: TaskPriority.Low,
+        taskTypeGroup: TaskTypeGroup.Alerting,
         createTaskRunner: (context: RunContext) => opts.taskRunnerFactory.createAdHoc(context),
       },
     });
@@ -250,6 +253,7 @@ export class BackfillClient {
 
     const soToCreateIndexOrErrorMap: Map<number, number | ScheduleBackfillError> = new Map();
     const rulesWithUnsupportedActions = new Set<number>();
+    const truncatedScheduleSOs = new Set<number>();
 
     for (let ndx = 0; ndx < params.length; ndx++) {
       const param = params[ndx];
@@ -278,9 +282,20 @@ export class BackfillClient {
           rulesWithUnsupportedActions.add(ndx);
         }
 
+        const { adHocRunSO, truncated } = transformBackfillParamToAdHocRun(
+          param,
+          rule,
+          actions,
+          spaceId
+        );
+
+        if (truncated) {
+          truncatedScheduleSOs.add(ndx);
+        }
+
         adHocSOsToCreate.push({
           type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
-          attributes: transformBackfillParamToAdHocRun(param, rule, actions, spaceId),
+          attributes: adHocRunSO,
           references: [reference, ...references],
         });
       } else if (error) {
@@ -300,8 +315,9 @@ export class BackfillClient {
       );
     }
 
-    // Bulk create the saved objects in chunks of 10 to manage resource usage
-    const chunkSize = 10;
+    // Bulk create the saved objects in small chunks; each SO is capped at ~10k schedule
+    // entries by calculateSchedule, so a chunk of 3 stays well within memory limits.
+    const chunkSize = 3;
 
     const chunks: Array<{
       startIndex: number;
@@ -318,11 +334,11 @@ export class BackfillClient {
     }
 
     // Pre-size result array to preserve original order regardless of parallel completion order
-    const orderedResults: Array<SavedObject<AdHocRunSO> | BulkCreateError> = new Array(
+    const orderedResults: Array<SavedObjectBulkResult<AdHocRunSO> | BulkCreateError> = new Array(
       adHocSOsToCreate.length
     );
 
-    const chunkConcurrency = 10;
+    const chunkConcurrency = 2;
     await pMap(
       chunks,
       async ({ startIndex, items }, idx) => {
@@ -340,6 +356,7 @@ export class BackfillClient {
             })`
           );
         } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : String(error);
           items.forEach((item, i) => {
             const ruleId = item.references?.[0]?.id;
             if (!ruleId) {
@@ -348,13 +365,13 @@ export class BackfillClient {
             orderedResults[startIndex + i] = {
               ruleId,
               ruleName: item.attributes.rule.name,
-              bulkCreateError: new Error(error.message),
+              bulkCreateError: new Error(errorMessage),
             };
-            this.logger.warn(`Error to schedule backfill for ruleId ${ruleId} - ${error.message}`);
+            this.logger.warn(`Error to schedule backfill for ruleId ${ruleId} - ${errorMessage}`);
             auditLogger?.log(
               adHocRunAuditEvent({
                 action: AdHocRunAuditAction.CREATE,
-                error: new Error(error.message),
+                error: new Error(errorMessage),
               })
             );
           });
@@ -368,17 +385,17 @@ export class BackfillClient {
     );
 
     const isBulkCreateError = (
-      result: SavedObject<AdHocRunSO> | BulkCreateError
+      result: SavedObjectBulkResult<AdHocRunSO> | BulkCreateError
     ): result is BulkCreateError => {
       return 'bulkCreateError' in result && result.bulkCreateError !== undefined;
     };
 
     const transformedResponse: ScheduleBackfillResults = orderedResults.map(
-      (so: SavedObject<AdHocRunSO> | BulkCreateError, index: number) => {
+      (so: SavedObjectBulkResult<AdHocRunSO> | BulkCreateError, index: number) => {
         if (isBulkCreateError(so)) {
           return createBackfillError(so.bulkCreateError.message, so.ruleId, so.ruleName);
         }
-        if (so.error) {
+        if (isSavedObjectErrorResult(so)) {
           auditLogger?.log(
             adHocRunAuditEvent({
               action: AdHocRunAuditAction.CREATE,
@@ -425,13 +442,17 @@ export class BackfillClient {
       if (isNumber(indexOrError)) {
         // This number is the index of the response from the savedObjects bulkCreate function
         const response = transformedResponse[indexOrError];
-        if (rulesWithUnsupportedActions.has(indexOrError)) {
-          return {
-            ...response,
-            warnings: [
-              `Rule has actions that are not supported for backfill. Those actions will be skipped.`,
-            ],
-          };
+        const warnings: string[] = [];
+        if (rulesWithUnsupportedActions.has(ndx)) {
+          warnings.push(
+            'Rule has actions that are not supported for backfill. Those actions will be skipped.'
+          );
+        }
+        if (truncatedScheduleSOs.has(ndx)) {
+          warnings.push(SCHEDULE_TRUNCATED_WARNING);
+        }
+        if (warnings.length) {
+          return { ...response, warnings };
         }
         return response;
       } else {

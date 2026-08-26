@@ -7,14 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
-import type { EsWorkflowStepExecution } from '@kbn/workflows';
-import { WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
+import type { EsWorkflowStepExecution, SerializedError } from '@kbn/workflows';
+import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
+import type { StepExecutionsDataClient } from './data_access_layer';
+import { getStepExecutionsByWorkflowExecution as getStepExecutionsByWorkflowExecutionShared } from './data_access_layer/lib/get_step_executions_by_workflow_execution';
+
+export type StepExecutionField = keyof EsWorkflowStepExecution;
+
+/**
+ * Step documents share the workflow-execution document's concurrent-writer problem: the run's own
+ * periodic flush and `markNonTerminalStepsFailed` (cancel / task-recovery paths) can update the
+ * same step doc at once. See the matching note in `workflow_execution_repository.ts`.
+ */
+const UPDATE_RETRY_ON_CONFLICT = 3;
 
 export class StepExecutionRepository {
-  private indexName = WORKFLOWS_STEP_EXECUTIONS_INDEX;
-
-  constructor(private esClient: ElasticsearchClient) {}
+  constructor(private stepExecutionsDataClient: StepExecutionsDataClient) {}
 
   /**
    * Searches for step executions by workflow execution ID.
@@ -25,8 +33,7 @@ export class StepExecutionRepository {
   public async searchStepExecutionsByExecutionId(
     executionId: string
   ): Promise<EsWorkflowStepExecution[]> {
-    const response = await this.esClient.search<EsWorkflowStepExecution>({
-      index: this.indexName,
+    const response = await this.stepExecutionsDataClient.search({
       query: {
         match: { workflowRunId: executionId },
       },
@@ -35,6 +42,80 @@ export class StepExecutionRepository {
     });
 
     return response.hits.hits.map((hit) => hit._source as EsWorkflowStepExecution);
+  }
+
+  /**
+   * Fetches all step executions for a workflow execution.
+   * Uses mget (real-time, O(1)) when stepExecutionIds are available,
+   * falls back to search for backward compatibility with older executions.
+   */
+  public async getStepExecutionsByWorkflowExecution(
+    workflowExecutionId: string,
+    stepExecutionIds?: string[]
+  ): Promise<EsWorkflowStepExecution[]> {
+    return getStepExecutionsByWorkflowExecutionShared({
+      stepExecutionsDataClient: this.stepExecutionsDataClient,
+      workflowExecutionId,
+      stepExecutionIds,
+    });
+  }
+
+  /*
+   * Retrieves step executions by their IDs using mget (O(1) operation).
+   * This is real-time (reads from translog) and doesn't require index refresh.
+   *
+   * Boundary normalisation: ES collapses `undefined` to "missing", but the
+   * engine relies on the `null` (FAILED) vs `undefined` (evicted) distinction
+   * for `output`. When the caller explicitly asked for `output` via
+   * `sourceIncludes` and ES returns the doc without that field, normalise to
+   * `null` so downstream code sees `JsonValue | null` instead of having to
+   * coerce. Open-projection calls (no `sourceIncludes`) preserve ES's exact
+   * shape so existing consumers are not affected.
+   *
+   * @param stepExecutionIds - The IDs of the step executions to retrieve.
+   * @returns A promise that resolves to an array of step executions.
+   */
+  public async getStepExecutionsByIds(
+    stepExecutionIds: string[],
+    sourceIncludes?: StepExecutionField[],
+    sourceExcludes?: StepExecutionField[]
+  ): Promise<EsWorkflowStepExecution[]> {
+    const { items } = await this.stepExecutionsDataClient.getByIds(stepExecutionIds, {
+      sourceIncludes,
+      sourceExcludes,
+    });
+    const shouldNormalizeOutput = sourceIncludes?.includes('output');
+    return items.map(({ document }) => {
+      if (shouldNormalizeOutput && document.output === undefined) {
+        return { ...document, output: null };
+      }
+      return document;
+    });
+  }
+
+  /**
+   * Marks non-terminal step executions for a workflow run as FAILED (e.g. after interrupt recovery).
+   */
+  public async markNonTerminalStepsFailed(
+    workflowExecutionId: string,
+    error: SerializedError
+  ): Promise<void> {
+    const stepExecutions = await this.searchStepExecutionsByExecutionId(workflowExecutionId);
+    const nonTerminalSteps = stepExecutions.filter((step) => !isTerminalStatus(step.status));
+
+    if (nonTerminalSteps.length === 0) {
+      return;
+    }
+
+    const finishedAt = new Date().toISOString();
+    await this.bulkUpsert(
+      nonTerminalSteps.map((step) => ({
+        id: step.id,
+        status: ExecutionStatus.FAILED,
+        error,
+        finishedAt,
+      }))
+    );
   }
 
   public async bulkUpsert(stepExecutions: Array<Partial<EsWorkflowStepExecution>>): Promise<void> {
@@ -48,28 +129,22 @@ export class StepExecutionRepository {
       }
     });
 
-    const bulkResponse = await this.esClient.bulk({
+    const bulkResponse = await this.stepExecutionsDataClient.bulk({
+      items: stepExecutions.map((stepExecution) => ({
+        operation: 'upsert',
+        document: stepExecution as Partial<EsWorkflowStepExecution> & { id: string },
+        retryOnConflict: UPDATE_RETRY_ON_CONFLICT,
+      })),
       refresh: false, // Performance optimization: documents become searchable after next refresh (~1s)
-      index: this.indexName,
-      body: stepExecutions.flatMap((stepExecution) => [
-        { update: { _id: stepExecution.id } },
-        { doc: stepExecution, doc_as_upsert: true },
-      ]),
     });
 
     if (bulkResponse.errors) {
-      const erroredDocuments = bulkResponse.items
-        .filter((item) => item.update?.error)
-        .map((item) => ({
-          id: item.update?._id,
-          error: item.update?.error,
-          status: item.update?.status,
-        }));
+      const failed = bulkResponse.items
+        .filter((item) => item.error)
+        .map((item) => ({ id: item.id, error: item.error }));
 
       throw new Error(
-        `Failed to upsert ${erroredDocuments.length} step executions: ${JSON.stringify(
-          erroredDocuments
-        )}`
+        `Failed to upsert ${failed.length} step executions: ${JSON.stringify(failed)}`
       );
     }
   }

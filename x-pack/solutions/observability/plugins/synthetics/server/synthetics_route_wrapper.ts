@@ -5,14 +5,15 @@
  * 2.0.
  */
 import { withApmSpan } from '@kbn/apm-data-access-plugin/server/utils/with_apm_span';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { isEmpty } from 'lodash';
 import { isKibanaResponse } from '@kbn/core-http-server';
 import { MonitorConfigRepository } from './services/monitor_config_repository';
+import { MonitorIntegrationHealthApi } from './services/monitor_integration_health_api';
 import { syntheticsServiceApiKey } from './saved_objects/service_api_key';
 import { isTestUser, SyntheticsEsClient } from './lib';
-import { SYNTHETICS_INDEX_PATTERN } from '../common/constants';
 import { checkIndicesReadPrivileges } from './synthetics_service/authentication/check_has_privilege';
+import { resolveHeartbeatIndices } from './services/resolve_heartbeat_indices';
 import type { SyntheticsRouteWrapper } from './routes/types';
 
 export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
@@ -45,6 +46,15 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
       // specifically needed for the synthetics service api key generation
       server.authSavedObjectsClient = savedObjectsClient;
 
+      const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+
+      const heartbeatIndices = await resolveHeartbeatIndices({
+        server,
+        spaceId,
+        savedObjectsClient,
+        esClient: esClient.asCurrentUser,
+      });
+
       const syntheticsEsClient = new SyntheticsEsClient(
         savedObjectsClient,
         esClient.asCurrentUser,
@@ -52,7 +62,7 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
           request,
           uiSettings,
           isDev: Boolean(server.isDev) && !isTestUser(server),
-          heartbeatIndices: SYNTHETICS_INDEX_PATTERN,
+          heartbeatIndices,
         }
       );
 
@@ -63,7 +73,12 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
         encryptedSavedObjectsClient
       );
 
-      const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+      const monitorIntegrationHealthApi = new MonitorIntegrationHealthApi(
+        server,
+        savedObjectsClient,
+        monitorConfigRepository,
+        spaceId
+      );
 
       try {
         const data = {
@@ -76,6 +91,7 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
           spaceId,
           syntheticsMonitorClient,
           monitorConfigRepository,
+          monitorIntegrationHealthApi,
         };
 
         const res = await server.fleet.runWithCache(() => syntheticsRoute.handler(data));

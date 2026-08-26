@@ -10,11 +10,13 @@ export type {
   ChatCompleteAPI,
   ChatCompleteAPIResponse,
   ChatCompleteOptions,
+  ChatCompleteCacheControl,
   FunctionCallingMode,
   ChatCompleteStreamResponse,
   ChatCompleteResponse,
   ChatCompleteRetryConfiguration,
 } from './api';
+export type { ChatCompletionReasoning, ChatCompletionReasoningEffort } from './reasoning';
 export type { BoundChatCompleteAPI, UnboundChatCompleteOptions } from './bound_api';
 export {
   ChatCompletionEventType,
@@ -62,7 +64,12 @@ export type {
   ToolCallsOfToolOptions,
 } from './tools_of';
 
-export type { ChatCompleteMetadata, ConnectorTelemetryMetadata } from './metadata';
+export type {
+  ChatCompleteMetadata,
+  ConnectorTelemetryMetadata,
+  ChatCompleteAnonymizationMetadata,
+  ChatCompleteAnonymizationTarget,
+} from './metadata';
 export {
   isChatCompletionChunkEvent,
   isChatCompletionEvent,
@@ -84,6 +91,7 @@ export {
 export type {
   AnonymizationRule,
   AnonymizationEntity,
+  AnonymizationEntityClass,
   Anonymization,
   Deanonymization,
   AnonymizationOutput,
@@ -92,6 +100,8 @@ export type {
   RegexAnonymizationRule,
   NamedEntityRecognitionRule,
   AnonymizationSettings,
+  AnonymizationResponseMetadata,
+  DeanonymizedMessageData,
 } from './anonymization';
 
 export type {

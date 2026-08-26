@@ -97,7 +97,7 @@ export const defineGetComplianceDashboardRoute = (router: CspRouter) =>
         try {
           const esClient = cspContext.esClient.asCurrentUser;
 
-          const { id: pitId } = await esClient.openPointInTime({
+          const pit = await esClient.openPointInTime({
             index: CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
             keep_alive: '30s',
           });
@@ -113,17 +113,26 @@ export const defineGetComplianceDashboardRoute = (router: CspRouter) =>
             },
           };
 
-          const [stats, groupedFindingsEvaluation, clustersWithoutTrends, trends] =
-            await Promise.all([
-              getStats(esClient, query, pitId, runtimeMappings, logger),
-              getGroupedFindingsEvaluation(esClient, query, pitId, runtimeMappings, logger),
-              getClusters(esClient, query, pitId, runtimeMappings, logger),
-              getTrends(esClient, policyTemplate, logger),
-            ]);
+          const stats = await getStats(esClient, query, pit, runtimeMappings, logger);
+          const groupedFindingsEvaluation = await getGroupedFindingsEvaluation(
+            esClient,
+            query,
+            pit,
+            runtimeMappings,
+            logger
+          );
+          const clustersWithoutTrends = await getClusters(
+            esClient,
+            query,
+            pit,
+            runtimeMappings,
+            logger
+          );
+          const trends = await getTrends(esClient, policyTemplate, logger);
 
           // Try closing the PIT, if it fails we can safely ignore the error since it closes itself after the keep alive
           //   ends. Not waiting on the promise returned from the `closePointInTime` call to avoid delaying the request
-          esClient.closePointInTime({ id: pitId }).catch((err) => {
+          esClient.closePointInTime(pit).catch((err) => {
             logger.warn(`Could not close PIT for stats endpoint: ${err}`);
           });
 
@@ -171,7 +180,7 @@ export const defineGetComplianceDashboardRoute = (router: CspRouter) =>
           const encryptedSoClient = cspContext.encryptedSavedObjects;
           const filteredRules = await getMutedRulesFilterQuery(encryptedSoClient);
 
-          const { id: pitId } = await esClient.openPointInTime({
+          const pit = await esClient.openPointInTime({
             index: CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
             keep_alive: '30s',
           });
@@ -197,17 +206,26 @@ export const defineGetComplianceDashboardRoute = (router: CspRouter) =>
             },
           };
 
-          const [stats, groupedFindingsEvaluation, benchmarksWithoutTrends, trendDetails] =
-            await Promise.all([
-              getStats(esClient, query, pitId, runtimeMappings, logger),
-              getGroupedFindingsEvaluation(esClient, query, pitId, runtimeMappings, logger),
-              getBenchmarks(esClient, query, pitId, runtimeMappings, logger),
-              getTrends(esClient, policyTemplate, logger, namespace),
-            ]);
+          const stats = await getStats(esClient, query, pit, runtimeMappings, logger);
+          const groupedFindingsEvaluation = await getGroupedFindingsEvaluation(
+            esClient,
+            query,
+            pit,
+            runtimeMappings,
+            logger
+          );
+          const benchmarksWithoutTrends = await getBenchmarks(
+            esClient,
+            query,
+            pit,
+            runtimeMappings,
+            logger
+          );
+          const trendDetails = await getTrends(esClient, policyTemplate, logger, namespace);
 
           // Try closing the PIT, if it fails we can safely ignore the error since it closes itself after the keep alive
           //   ends. Not waiting on the promise returned from the `closePointInTime` call to avoid delaying the request
-          esClient.closePointInTime({ id: pitId }).catch((err) => {
+          esClient.closePointInTime(pit).catch((err) => {
             logger.warn(`Could not close PIT for stats endpoint: ${err}`);
           });
 

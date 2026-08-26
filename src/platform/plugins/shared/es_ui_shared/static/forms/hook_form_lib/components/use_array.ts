@@ -15,6 +15,10 @@ import { useFormContext } from '../form_context';
 import type { InternalFieldConfig } from '../hooks';
 import { useField } from '../hooks';
 
+/**
+ * @deprecated `hook_form_lib` is deprecated and will no longer be supported. Consider using
+ * `react-hook-form` for new and existing forms.
+ */
 export interface Props {
   path: string;
   initialNumberOfItems?: number;
@@ -23,12 +27,20 @@ export interface Props {
   children: (formFieldArray: FormArrayField) => JSX.Element;
 }
 
+/**
+ * @deprecated `hook_form_lib` is deprecated and will no longer be supported. Consider using
+ * `react-hook-form` for new and existing forms.
+ */
 export interface ArrayItem {
   id: number;
   path: string;
   isNew: boolean;
 }
 
+/**
+ * @deprecated `hook_form_lib` is deprecated and will no longer be supported. Consider using
+ * `react-hook-form` for new and existing forms.
+ */
 export interface FormArrayField {
   items: ArrayItem[];
   error: string | null;
@@ -40,6 +52,10 @@ export interface FormArrayField {
 
 let uniqueId = 0;
 
+/**
+ * @deprecated `hook_form_lib` is deprecated and will no longer be supported. Consider using
+ * `react-hook-form` for new and existing forms.
+ */
 export const createArrayItem = (path: string, index: number, isNew = true): ArrayItem => ({
   id: uniqueId++,
   path: `${path}[${index}]`,
@@ -54,11 +70,17 @@ export const createArrayItem = (path: string, index: number, isNew = true): Arra
  *
  * @param path The array path in the form data
  * @returns The internal array field path
+ *
+ * @deprecated `hook_form_lib` is deprecated and will no longer be supported. Consider using
+ * `react-hook-form` for new and existing forms.
  */
 export const getInternalArrayFieldPath = (path: string): string => `${path}__array__`;
 
 /**
  * Use UseArray to dynamically add fields to your form.
+ *
+ * @deprecated `hook_form_lib` is deprecated and will no longer be supported. Consider using
+ * `react-hook-form` for new and existing forms.
  *
  * example:
  * If your form data looks like this:

@@ -8,6 +8,7 @@
  */
 
 import {
+  EuiEmptyPrompt,
   EuiErrorBoundary,
   EuiFlyout,
   EuiFlyoutBody,
@@ -18,22 +19,54 @@ import {
   EuiTabs,
   EuiTitle,
   useGeneratedHtmlId,
+  type EuiFlyoutProps,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import {
+  GenAiTabImpression,
+  GenAiTechnicalPreviewBadge,
+  GENAI_EBT_CLICK_ACTIONS,
+  hasGenAiData,
+} from '@kbn/apm-ui-shared';
+import type { AnalyticsServiceStart } from '@kbn/core/public';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useDocViewerSpanLogViewedEvent } from '@kbn/unified-doc-viewer';
+import { getEbtProps, type EbtClickAttrs } from '@kbn/ebt-click';
 import DocViewerSource from '../../../../../doc_viewer_source';
 import DocViewerTable from '../../../../../doc_viewer_table';
+import { getUnifiedDocViewerServices } from '../../../../../../plugin';
+import { useOriginDocType } from '../../../../../doc_viewer_flyout/origin_doc_type_context';
+import type { FlyoutContentId } from '../../../common/constants';
+import { DocViewerObsTracesGenAi } from '../../../doc_viewer_genai';
+import { TRACES_DOC_VIEWER_EBT_ELEMENTS } from '../../../ebt_constants';
 
 const tabIds = {
-  OVERVIEW: 'unifiedDocViewerTracesSpanFlyoutOverview',
-  TABLE: 'unifiedDocViewerTracesSpanFlyoutTable',
-  JSON: 'unifiedDocViewerTracesSpanFlyoutJson',
+  OVERVIEW: 'unifiedDocViewerTracesDocDetailFlyoutOverview',
+  GENAI: 'unifiedDocViewerTracesDocDetailFlyoutGenAi',
+  TABLE: 'unifiedDocViewerTracesDocDetailFlyoutTable',
+  JSON: 'unifiedDocViewerTracesDocDetailFlyoutJson',
 };
 
-const tabs = [
+interface FlyoutTab {
+  id: string;
+  name: string;
+  prepend?: React.ReactElement;
+  'data-test-subj'?: string;
+  ebt?: EbtClickAttrs;
+}
+
+const getTabs = ({
+  showGenAi,
+  reportEvent,
+  resourceId,
+}: {
+  showGenAi: boolean;
+  reportEvent: AnalyticsServiceStart['reportEvent'];
+  resourceId?: string;
+}): FlyoutTab[] => [
   {
     id: tabIds.OVERVIEW,
     name: i18n.translate(
@@ -43,6 +76,34 @@ const tabs = [
       }
     ),
   },
+  ...(showGenAi
+    ? [
+        {
+          id: tabIds.GENAI,
+          name: i18n.translate(
+            'unifiedDocViewer.observability.traces.fullScreenWaterfall.tabs.genAi',
+            {
+              defaultMessage: 'GenAI',
+            }
+          ),
+          prepend: (
+            <>
+              <GenAiTabImpression
+                reportEvent={reportEvent}
+                element={TRACES_DOC_VIEWER_EBT_ELEMENTS.FLYOUT_TABS}
+                resourceId={resourceId}
+              />
+              <GenAiTechnicalPreviewBadge />
+            </>
+          ),
+          'data-test-subj': 'unifiedDocViewerTracesGenAiTab',
+          ebt: {
+            action: GENAI_EBT_CLICK_ACTIONS.VIEW_GENAI,
+            element: TRACES_DOC_VIEWER_EBT_ELEMENTS.FLYOUT_TABS,
+          },
+        },
+      ]
+    : []),
   {
     id: tabIds.TABLE,
     name: i18n.translate('unifiedDocViewer.observability.traces.fullScreenWaterfall.tabs.table', {
@@ -58,38 +119,138 @@ const tabs = [
 ];
 
 interface FlyoutTabsProps {
+  tabs: FlyoutTab[];
   onClick: (id: string) => void;
   selectedTabId: string;
 }
-const FlyoutTabs = ({ onClick, selectedTabId }: FlyoutTabsProps) => {
+const FlyoutTabs = ({ tabs, onClick, selectedTabId }: FlyoutTabsProps) => {
   return tabs.map((tab) => (
-    <EuiTab key={tab.id} onClick={() => onClick(tab.id)} isSelected={tab.id === selectedTabId}>
+    <EuiTab
+      key={tab.id}
+      onClick={() => onClick(tab.id)}
+      isSelected={tab.id === selectedTabId}
+      prepend={tab.prepend}
+      data-test-subj={tab['data-test-subj']}
+      {...(tab.ebt ? getEbtProps(tab.ebt) : {})}
+    >
       {tab.name}
     </EuiTab>
   ));
 };
 
+const NotFoundPrompt = () => (
+  <EuiEmptyPrompt
+    data-test-subj="unifiedDocViewerWaterfallFlyoutNotFound"
+    iconType="magnify"
+    titleSize="s"
+    title={
+      <h2>
+        {i18n.translate(
+          'unifiedDocViewer.observability.traces.fullScreenWaterfall.flyout.notFound.title',
+          { defaultMessage: 'Document not found' }
+        )}
+      </h2>
+    }
+    body={
+      <p>
+        {i18n.translate(
+          'unifiedDocViewer.observability.traces.fullScreenWaterfall.flyout.notFound.body',
+          { defaultMessage: 'The document could not be found. It may no longer be available.' }
+        )}
+      </p>
+    }
+  />
+);
+
+const FetchErrorPrompt = ({ error }: { error: string }) => (
+  <EuiEmptyPrompt
+    data-test-subj="unifiedDocViewerWaterfallFlyoutFetchError"
+    iconType="warning"
+    iconColor="danger"
+    titleSize="s"
+    title={
+      <h2>
+        {i18n.translate(
+          'unifiedDocViewer.observability.traces.fullScreenWaterfall.flyout.fetchError.title',
+          { defaultMessage: 'Unable to load document' }
+        )}
+      </h2>
+    }
+    body={<p>{error}</p>}
+  />
+);
+
 export interface Props {
   title: string;
-  onCloseFlyout: () => void;
+  onCloseFlyout: EuiFlyoutProps['onClose'];
   hit: DataTableRecord | null;
   loading: boolean;
+  error?: string | null;
   dataView: DocViewRenderProps['dataView'];
+  dataTestSubj?: string;
+  hasAnimation?: boolean;
+  flyoutContentId: FlyoutContentId;
   children: React.ReactNode;
+  skipNextEventReport?: boolean;
+  size?: EuiFlyoutProps['size'];
 }
 
-export function WaterfallFlyout({ onCloseFlyout, dataView, hit, loading, children, title }: Props) {
+export function WaterfallFlyout({
+  onCloseFlyout,
+  dataView,
+  hit,
+  loading,
+  error,
+  children,
+  title,
+  dataTestSubj,
+  hasAnimation,
+  flyoutContentId,
+  skipNextEventReport,
+  size = 's',
+}: Props) {
+  const { analytics } = getUnifiedDocViewerServices();
   const [selectedTabId, setSelectedTabId] = useState(tabIds.OVERVIEW);
   const flyoutTitleId = useGeneratedHtmlId();
   const flyoutId = useGeneratedHtmlId({ prefix: 'documentDetailFlyout' });
+  const originDocType = useOriginDocType();
+
+  const tabs = useMemo(
+    () =>
+      getTabs({
+        showGenAi: hit != null && hasGenAiData(hit.flattened),
+        reportEvent: analytics.reportEvent,
+        resourceId: hit?.id,
+      }),
+    [hit, analytics.reportEvent]
+  );
+
+  // The GenAI tab is conditional: when switching to a document without GenAI
+  // data while it is selected, fall back to the Overview tab.
+  useEffect(() => {
+    if (!tabs.some((tab) => tab.id === selectedTabId)) {
+      setSelectedTabId(tabIds.OVERVIEW);
+    }
+  }, [tabs, selectedTabId]);
+
+  useDocViewerSpanLogViewedEvent({
+    reportEvent: analytics.reportEvent,
+    originDocType,
+    contentId: flyoutContentId,
+    tabId: selectedTabId,
+    hit,
+    skipNextReport: skipNextEventReport,
+  });
 
   return (
     <EuiFlyout
-      size="s"
+      data-test-subj={dataTestSubj}
+      size={size}
       includeFixedHeadersInFocusTrap={false}
       onClose={onCloseFlyout}
       aria-labelledby={flyoutTitleId}
       id={flyoutId}
+      hasAnimation={hasAnimation}
     >
       <EuiFlyoutHeader>
         <EuiSkeletonTitle isLoading={loading}>
@@ -105,23 +266,33 @@ export function WaterfallFlyout({ onCloseFlyout, dataView, hit, loading, childre
           }
         `}
       >
-        {loading || !hit ? (
+        {loading ? (
           <EuiSkeletonText lines={5} />
+        ) : !hit && error ? (
+          <FetchErrorPrompt error={error} />
+        ) : !hit ? (
+          <NotFoundPrompt />
         ) : (
           <>
             <EuiTabs size="s">
-              <FlyoutTabs onClick={setSelectedTabId} selectedTabId={selectedTabId} />
+              <FlyoutTabs tabs={tabs} onClick={setSelectedTabId} selectedTabId={selectedTabId} />
             </EuiTabs>
             <EuiSkeletonText isLoading={loading}>
-              {selectedTabId === tabIds.OVERVIEW && hit ? (
+              {selectedTabId === tabIds.OVERVIEW ? (
                 <EuiErrorBoundary>{children}</EuiErrorBoundary>
               ) : null}
 
-              {selectedTabId === tabIds.TABLE && hit ? (
+              {selectedTabId === tabIds.GENAI ? (
+                <EuiErrorBoundary>
+                  <DocViewerObsTracesGenAi hit={hit} dataView={dataView} />
+                </EuiErrorBoundary>
+              ) : null}
+
+              {selectedTabId === tabIds.TABLE ? (
                 <DocViewerTable hit={hit} dataView={dataView} />
               ) : null}
 
-              {selectedTabId === tabIds.JSON && hit ? (
+              {selectedTabId === tabIds.JSON ? (
                 <DocViewerSource
                   id={hit.id}
                   index={hit.raw._index}

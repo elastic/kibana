@@ -1,0 +1,10 @@
+type: feature
+prs:
+- https://github.com/elastic/docs-content/pull/7338
+issues:
+ - https://github.com/elastic/roadmap/issues/285
+products:
+- product: cloud-serverless
+  target: 2026-07-13
+title: The Dashboards and Visualizations APIs are now generally available
+description: "This introduces breaking changes to their request and response schemas. Refer to [Breaking changes](https://www.elastic.co/docs/release-notes/cloud-serverless/breaking-changes) for details and the actions you might need to take."

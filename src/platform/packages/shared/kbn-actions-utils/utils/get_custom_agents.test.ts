@@ -52,6 +52,50 @@ describe('getCustomAgents', () => {
     expect(httpsAgent instanceof HttpsProxyAgent).toBeTruthy();
   });
 
+  test('passes target SSL overrides to the CONNECT-upgraded TLS request', async () => {
+    const connectSpy = jest
+      .spyOn(HttpsProxyAgent.prototype, 'connect')
+      .mockResolvedValue({} as Awaited<ReturnType<HttpsProxyAgent<string>['connect']>>);
+    const proxySettings = {
+      proxyUrl: 'http://someproxyhost',
+      proxySSLSettings: {
+        verificationMode: 'full',
+      },
+      proxyBypassHosts: undefined,
+      proxyOnlyHosts: undefined,
+    } as ProxySettings;
+
+    const { httpsAgent } = getCustomAgents({
+      logger,
+      proxySettings,
+      sslOverrides: {
+        verificationMode: 'none',
+      },
+      sslSettings: defaultSSLSettings,
+      url: targetUrl,
+    });
+
+    try {
+      await (httpsAgent as unknown as HttpsProxyAgent<string>).connect(
+        {} as Parameters<HttpsProxyAgent<string>['connect']>[0],
+        {
+          host: targetHost,
+          port: 443,
+          secureEndpoint: true,
+        } as Parameters<HttpsProxyAgent<string>['connect']>[1]
+      );
+
+      expect(connectSpy).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          rejectUnauthorized: false,
+        })
+      );
+    } finally {
+      connectSpy.mockRestore();
+    }
+  });
+
   test('return default agents for invalid proxy URL', () => {
     const proxySettings = {
       proxyUrl: ':nope: not a valid URL',
@@ -208,6 +252,46 @@ describe('getCustomAgents', () => {
 
     expect(httpsAgent?.options.ca).toBe('ca data here');
     expect(httpsAgent?.options.rejectUnauthorized).toBe(false);
+  });
+
+  test('sets auth on HttpsProxyAgent when proxy URL contains credentials', () => {
+    const proxySettings = {
+      proxyUrl: 'https://proxyuser:proxypass@someproxyhost:8080',
+      proxySSLSettings: {
+        verificationMode: 'none',
+      },
+      proxyBypassHosts: undefined,
+      proxyOnlyHosts: undefined,
+    } as ProxySettings;
+    const { httpsAgent } = getCustomAgents({
+      logger,
+      proxySettings,
+      sslSettings: defaultSSLSettings,
+      url: targetUrl,
+    });
+    expect(httpsAgent instanceof HttpsProxyAgent).toBeTruthy();
+    expect((httpsAgent as HttpsProxyAgent<string>).proxy.username).toBe('proxyuser');
+    expect((httpsAgent as HttpsProxyAgent<string>).proxy.password).toBe('proxypass');
+  });
+
+  test('does not set auth on HttpsProxyAgent when proxy URL has no credentials', () => {
+    const proxySettings = {
+      proxyUrl: 'https://someproxyhost:8080',
+      proxySSLSettings: {
+        verificationMode: 'none',
+      },
+      proxyBypassHosts: undefined,
+      proxyOnlyHosts: undefined,
+    } as ProxySettings;
+    const { httpsAgent } = getCustomAgents({
+      logger,
+      proxySettings,
+      sslSettings: defaultSSLSettings,
+      url: targetUrl,
+    });
+    expect(httpsAgent instanceof HttpsProxyAgent).toBeTruthy();
+    expect((httpsAgent as HttpsProxyAgent<string>).proxy.username).toBe('');
+    expect((httpsAgent as HttpsProxyAgent<string>).proxy.password).toBe('');
   });
 
   test('handles overriding global verificationMode "none"', () => {

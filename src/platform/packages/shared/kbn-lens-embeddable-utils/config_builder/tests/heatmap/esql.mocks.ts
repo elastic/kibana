@@ -9,6 +9,7 @@
 
 import type { HeatmapVisualizationState } from '@kbn/lens-common';
 
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 import type { LensAttributes } from '../../types';
 
 export const simple: LensAttributes = {
@@ -100,12 +101,12 @@ export const simple: LensAttributes = {
     },
     needsRefresh: false,
   },
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   visualizationType: 'lnsHeatmap',
   references: [],
 } satisfies LensAttributes;
 
-export const withXAndYAxes: LensAttributes = {
+export const withXAndYAxes = {
   title: 'Lens Heatmap - ESQL - With X and Y Axes',
   description: 'Count of records with timestamp on x-axis',
   state: {
@@ -205,7 +206,24 @@ export const withXAndYAxes: LensAttributes = {
     },
     needsRefresh: false,
   },
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   visualizationType: 'lnsHeatmap',
   references: [],
+} satisfies LensAttributes;
+
+export const withSortPredicates: LensAttributes = {
+  ...withXAndYAxes,
+  title: 'Lens Heatmap - ESQL - With Sort Predicates',
+  description: 'Heatmap with x-axis ascending and y-axis descending sort',
+  state: {
+    ...withXAndYAxes.state,
+    visualization: {
+      ...withXAndYAxes.state.visualization,
+      gridConfig: {
+        ...(withXAndYAxes.state.visualization as HeatmapVisualizationState).gridConfig,
+        xSortPredicate: 'asc',
+        ySortPredicate: 'desc',
+      },
+    },
+  },
 } satisfies LensAttributes;

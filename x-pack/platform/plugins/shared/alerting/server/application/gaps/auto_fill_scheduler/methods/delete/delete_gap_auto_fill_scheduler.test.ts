@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -30,6 +31,7 @@ import { GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE } from '../../../../../saved_
 import type { GapAutoFillSchedulerSO } from '../../../../../data/gap_auto_fill_scheduler/types/gap_auto_fill_scheduler';
 import { backfillClientMock } from '../../../../../backfill_client/backfill_client.mock';
 import type { GetGapAutoFillSchedulerParams } from '../types';
+import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
 
 describe('deleteGapAutoFillScheduler()', () => {
   const kibanaVersion = 'v8.0.0';
@@ -48,6 +50,7 @@ describe('deleteGapAutoFillScheduler()', () => {
   const eventLogClient = eventLogClientMock.create();
 
   const rulesClientParamsBase: jest.Mocked<ConstructorOptions> = {
+    request: httpServerMock.createKibanaRequest(),
     taskManager,
     ruleTypeRegistry,
     unsecuredSavedObjectsClient,
@@ -57,6 +60,7 @@ describe('deleteGapAutoFillScheduler()', () => {
     namespace: 'default',
     getUserName: jest.fn().mockResolvedValue('elastic'),
     createAPIKey: jest.fn(),
+    cloneAPIKey: jest.fn(),
     logger,
     internalSavedObjectsRepository,
     encryptedSavedObjectsClient: encryptedSavedObjects,
@@ -75,6 +79,8 @@ describe('deleteGapAutoFillScheduler()', () => {
     connectorAdapterRegistry: new ConnectorAdapterRegistry(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
     eventLogger,
+    featureFlags: coreFeatureFlagsMock.createStart(),
+    isServerless: false,
   };
 
   function setupSchedulerSo(attrs?: Partial<GapAutoFillSchedulerSO>) {
@@ -184,7 +190,7 @@ describe('deleteGapAutoFillScheduler()', () => {
     });
 
     setupSchedulerSo();
-    (authorization.ensureAuthorized as jest.Mock).mockImplementationOnce(() => {
+    (authorization.bulkEnsureAuthorized as jest.Mock).mockImplementationOnce(() => {
       throw new Error('no access');
     });
 

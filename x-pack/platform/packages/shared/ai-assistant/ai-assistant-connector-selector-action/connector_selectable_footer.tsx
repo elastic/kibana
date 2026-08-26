@@ -12,6 +12,7 @@ import {
   EuiButton,
   EuiIcon,
   EuiButtonIcon,
+  EuiToolTip,
 } from '@elastic/eui';
 import React from 'react';
 import { translations as i8n } from './connector_selector.translations';
@@ -40,21 +41,23 @@ export const ConnectorSelectableFooter: React.FC<ConnectorSelectableFooterProps>
               aria-label={i8n.addConnectorAriaLabel}
               data-test-subj="aiAssistantAddConnectorButton"
             >
-              <EuiIcon type="plus" />
+              <EuiIcon type="plus" aria-hidden={true} />
               {i8n.addConnectorLabel}
             </EuiButton>
           </EuiFlexItem>
         )}
         {props.onManageConnectorsClick && (
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              data-test-subj="aiAssistantManageConnectorsButton"
-              size="s"
-              display="base"
-              iconType={'gear'}
-              onClick={props.onManageConnectorsClick}
-              aria-label={i8n.manageConnectorAriaLabel}
-            />
+            <EuiToolTip content={i8n.manageConnectorAriaLabel} disableScreenReaderOutput>
+              <EuiButtonIcon
+                data-test-subj="aiAssistantManageConnectorsButton"
+                size="s"
+                display="base"
+                iconType={'gear'}
+                onClick={props.onManageConnectorsClick}
+                aria-label={i8n.manageConnectorAriaLabel}
+              />
+            </EuiToolTip>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>

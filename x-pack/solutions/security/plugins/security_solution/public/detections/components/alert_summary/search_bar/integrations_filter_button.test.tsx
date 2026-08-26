@@ -39,16 +39,22 @@ describe('<IntegrationFilterButton />', () => {
       services: { data: { query: { filterManager: jest.fn() } } },
     });
 
-    const { getByTestId } = render(<IntegrationFilterButton integrations={integrations} />);
+    const { getByTestId, findByTestId } = render(
+      <IntegrationFilterButton integrations={integrations} />
+    );
 
     const button = getByTestId(INTEGRATION_BUTTON_TEST_ID);
     expect(button).toBeInTheDocument();
     await userEvent.click(button);
 
-    expect(getByTestId(INTEGRATIONS_LIST_TEST_ID)).toBeInTheDocument();
+    // The popover and its EuiSelectable mount asynchronously after the click,
+    // so wait for the list (and its options) to appear before asserting on them.
+    expect(await findByTestId(INTEGRATIONS_LIST_TEST_ID)).toBeInTheDocument();
 
-    expect(getByTestId('first')).toHaveTextContent('firstLabel');
-    expect(getByTestId('second')).toHaveTextContent('secondLabel');
+    await waitFor(() => {
+      expect(getByTestId('first')).toHaveTextContent('firstLabel');
+      expect(getByTestId('second')).toHaveTextContent('secondLabel');
+    });
   });
 
   it('should add a negated filter to filterManager', async () => {

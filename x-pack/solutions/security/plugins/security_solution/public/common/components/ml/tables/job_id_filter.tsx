@@ -49,7 +49,7 @@ export const JobIdFilter: React.FC<{
         disabled={jobIds.length === 0}
         data-test-subj="job-id-filter-button"
         hasActiveFilters={selectedJobIds.length > 0}
-        iconType="arrowDown"
+        iconType="chevronSingleDown"
         isSelected={isPopoverOpen}
         numActiveFilters={selectedJobIds.length}
         onClick={onButtonClick}
@@ -64,6 +64,7 @@ export const JobIdFilter: React.FC<{
   return (
     <EuiFilterGroup>
       <EuiPopover
+        aria-label={title}
         button={button}
         isOpen={isPopoverOpen}
         closePopover={closePopover}

@@ -98,7 +98,7 @@ export const IndexSearchPattern: React.FC = () => {
               defaultMessage: 'Use this value as the pattern',
             }
           ),
-          icon: 'plusInCircle',
+          icon: 'plusCircle',
           type: 'icon',
           onClick: async (item: { name: string }) => {
             setValue('pattern', item.name, { shouldDirty: true, shouldValidate: true });
@@ -146,6 +146,9 @@ export const IndexSearchPattern: React.FC = () => {
       <EuiSpacer size="s" />
 
       <EuiBasicTable
+        tableCaption={i18n.translate('xpack.agentBuilder.tools.indexPattern.tableCaption', {
+          defaultMessage: 'Index patterns',
+        })}
         items={pageOfItems}
         columns={columns}
         loading={hasQuery ? isLoading : false}

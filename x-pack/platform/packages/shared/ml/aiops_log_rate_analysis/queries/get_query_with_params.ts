@@ -28,13 +28,13 @@ export const getQueryWithParams = ({
   termFilters,
   filter,
   skipRangeQuery = false,
-}: QueryParams): estypes.QueryDslQueryContainer => {
+}: QueryParams): NonNullable<estypes.QueryDslQueryContainer> => {
   const searchQuery = JSON.parse(params.searchQuery) as estypes.QueryDslQueryContainer;
   return {
     bool: {
       filter: [
         // Add `searchQuery` if it's not a `match_all` query
-        ...(searchQuery.match_all === undefined ? [searchQuery] : []),
+        ...(searchQuery?.match_all === undefined ? [searchQuery] : []),
 
         // Add a range query based on `start/end` for the `timeFieldName`, check for skip flag.
         ...(!skipRangeQuery ? [getRangeQuery(params.start, params.end, params.timeFieldName)] : []),

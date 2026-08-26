@@ -5,29 +5,140 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React, { useMemo } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { useDocumentDetailsContext } from '../../shared/context';
-import { getField } from '../../shared/utils';
+import type { IdentityFields } from '../../shared/utils';
+import {
+  getField,
+  resolveHostNameForEntityInsightsWithFallback,
+  resolveUserNameForEntityInsightsWithFallback,
+} from '../../shared/utils';
 import { UserDetails } from './user_details';
 import { HostDetails } from './host_details';
 import { ENTITIES_DETAILS_TEST_ID } from './test_ids';
+import { useEntityFromStore } from '../../../entity_details/shared/hooks/use_entity_from_store';
+import type { GetFieldsData } from '../../shared/hooks/use_get_fields_data';
+import type { CspInsightLeftPanelSubTab } from '../../../entity_details/shared/components/left_panel/left_panel_header';
+import type { EntityTableLinkRenderer } from '../../../entity_details/shared/components/entity_table/types';
 
 export const ENTITIES_TAB_ID = 'entity';
+
+export interface EntitySectionOverrides {
+  /** Called when the user clicks to preview the entity in a side panel instead of navigating away. */
+  onPreviewEntity?: () => void;
+  /** Called when the user clicks a tab that opens a CSP insight sub-panel. */
+  onShowDetailsPanel?: (subTab: CspInsightLeftPanelSubTab) => void;
+  /** Custom renderer for entity link fields; receives the field name, raw value, and optional children. */
+  linkRenderer?: EntityTableLinkRenderer;
+}
+
+export interface EntitySectionOverrideBuilders {
+  buildUserOverrides?: (entity: { name: string; entityId?: string }) => EntitySectionOverrides;
+  buildHostOverrides?: (entity: { name: string; entityId?: string }) => EntitySectionOverrides;
+}
+
+const resolveUserDisplayForEntities = (
+  identityFields: IdentityFields | undefined,
+  getFieldsData: GetFieldsData
+): string | undefined =>
+  resolveUserNameForEntityInsightsWithFallback(identityFields, getFieldsData);
 
 /**
  * Entities displayed in the document details expandable flyout left section under the Insights tab
  */
-export const EntitiesDetails: React.FC = () => {
-  const { getFieldsData, scopeId } = useDocumentDetailsContext();
-  const hostName = getField(getFieldsData('host.name'));
-  const userName = getField(getFieldsData('user.name'));
+export const EntitiesDetails: React.FC<EntitySectionOverrideBuilders> = ({
+  buildUserOverrides,
+  buildHostOverrides,
+}) => {
+  const { getFieldsData, scopeId, dataAsNestedObject } = useDocumentDetailsContext();
   const timestamp = getField(getFieldsData('@timestamp'));
 
-  const showDetails = timestamp && (hostName || userName);
-  const showUserDetails = userName && timestamp;
-  const showHostDetails = hostName && timestamp;
+  const euidApi = useEntityStoreEuidApi();
+  const userEntityIdentifiers = euidApi?.euid.getEntityIdentifiersFromDocument(
+    'user',
+    dataAsNestedObject
+  ) as IdentityFields;
+  const hostEntityIdentifiers = euidApi?.euid.getEntityIdentifiersFromDocument(
+    'host',
+    dataAsNestedObject
+  ) as IdentityFields;
+
+  /**
+   * User EUID extraction applies postAggFilter (e.g. non-IDP path needs host.id), so many ECS docs
+   * with user.name + host.name still get no identifiers while host extraction succeeds. Resolve the
+   * display name from the document and use it for store lookup when EUID returns nothing.
+   */
+  const resolvedUserName = resolveUserDisplayForEntities(userEntityIdentifiers, getFieldsData);
+  const legacyUserIdentityForStore =
+    resolvedUserName != null && resolvedUserName !== ''
+      ? ({ 'user.name': resolvedUserName } as IdentityFields)
+      : undefined;
+
+  const userEntityId = euidApi?.euid.getEuidFromObject('user', dataAsNestedObject);
+  const userEntityFromStore = useEntityFromStore({
+    entityId: userEntityId,
+    identityFields: userEntityIdentifiers ?? legacyUserIdentityForStore,
+    entityType: 'user',
+    skip: userEntityIdentifiers == null && legacyUserIdentityForStore == null,
+  });
+
+  /**
+   * Host EUID extraction can return nothing when the entity store EUID API is still loading
+   * (it is imported lazily) or when the document is not fully populated. Mirror the user
+   * handling: resolve the display name from the document and use it for store lookup when
+   * EUID returns nothing.
+   */
+  const resolvedHostNameFromDocument = resolveHostNameForEntityInsightsWithFallback(
+    hostEntityIdentifiers,
+    getFieldsData
+  );
+  const legacyHostIdentityForStore =
+    resolvedHostNameFromDocument != null && resolvedHostNameFromDocument !== ''
+      ? ({ 'host.name': resolvedHostNameFromDocument } as IdentityFields)
+      : undefined;
+
+  const hostEntityId = euidApi?.euid.getEuidFromObject('host', dataAsNestedObject);
+  const hostEntityFromStore = useEntityFromStore({
+    entityId: hostEntityId,
+    identityFields: hostEntityIdentifiers ?? legacyHostIdentityForStore,
+    entityType: 'host',
+    skip: hostEntityIdentifiers == null && legacyHostIdentityForStore == null,
+  });
+
+  const hostRecord = hostEntityFromStore.entityRecord;
+  const hostNameFromStore =
+    hostRecord != null && 'host' in hostRecord ? hostRecord.host?.name : undefined;
+
+  const resolvedHostName = resolvedHostNameFromDocument ?? hostNameFromStore;
+
+  const userDisplayName = userEntityFromStore.entityRecord?.entity?.name ?? resolvedUserName;
+  const hostDisplayName = hostEntityFromStore.entityRecord?.entity?.name ?? resolvedHostName;
+
+  const userStoreEntityId = userEntityFromStore?.entityRecord?.entity?.id;
+  const hostStoreEntityId = hostEntityFromStore?.entityRecord?.entity?.id;
+
+  const userOverrides = useMemo(
+    () =>
+      userDisplayName != null
+        ? buildUserOverrides?.({ name: userDisplayName, entityId: userStoreEntityId })
+        : undefined,
+    [buildUserOverrides, userDisplayName, userStoreEntityId]
+  );
+
+  const hostOverrides = useMemo(
+    () =>
+      hostDisplayName != null
+        ? buildHostOverrides?.({ name: hostDisplayName, entityId: hostStoreEntityId })
+        : undefined,
+    [buildHostOverrides, hostDisplayName, hostStoreEntityId]
+  );
+
+  const showUserDetails = timestamp != null && userDisplayName != null;
+  const showHostDetails = timestamp != null && hostDisplayName != null;
+  const showDetails = showUserDetails || showHostDetails;
 
   return (
     <>
@@ -35,12 +146,44 @@ export const EntitiesDetails: React.FC = () => {
         <EuiFlexGroup direction="column" gutterSize="m" data-test-subj={ENTITIES_DETAILS_TEST_ID}>
           {showUserDetails && (
             <EuiFlexItem>
-              <UserDetails userName={userName} timestamp={timestamp} scopeId={scopeId} />
+              <EuiTitle size="xs">
+                <h3>
+                  <FormattedMessage
+                    id="xpack.securitySolution.flyout.left.insights.entities.userDetailsTitle"
+                    defaultMessage="User"
+                  />
+                </h3>
+              </EuiTitle>
+              <EuiSpacer size="s" />
+              <UserDetails
+                userName={userDisplayName}
+                entityId={userStoreEntityId}
+                timestamp={timestamp}
+                scopeId={scopeId}
+                {...userOverrides}
+              />
             </EuiFlexItem>
           )}
           {showHostDetails && (
             <EuiFlexItem>
-              <HostDetails hostName={hostName} timestamp={timestamp} scopeId={scopeId} />
+              <EuiTitle size="xs">
+                <h3>
+                  <FormattedMessage
+                    id="xpack.securitySolution.flyout.left.insights.entities.hostDetailsTitle"
+                    defaultMessage="Host"
+                  />
+                </h3>
+              </EuiTitle>
+              <EuiSpacer size="s" />
+
+              <HostDetails
+                hostName={hostDisplayName}
+                entityId={hostStoreEntityId}
+                timestamp={timestamp}
+                scopeId={scopeId}
+                hostEntityFromStoreResult={hostEntityFromStore}
+                {...hostOverrides}
+              />
             </EuiFlexItem>
           )}
         </EuiFlexGroup>

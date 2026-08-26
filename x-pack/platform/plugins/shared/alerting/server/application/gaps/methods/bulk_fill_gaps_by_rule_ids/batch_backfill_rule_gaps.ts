@@ -12,12 +12,14 @@ import type { BulkGapFillError } from './utils';
 import { logProcessedAsAuditEvent, toBulkGapFillError } from './utils';
 import type { RulesClientContext } from '../../../../rules_client';
 import { processGapsBatch } from './process_gaps_batch';
+import type { GapReasonType } from '../../../../../common/constants';
 import { backfillInitiator } from '../../../../../common/constants';
 
 interface BatchBackfillRuleGapsParams {
   rule: { id: string; name: string };
   range: BulkFillGapsByRuleIdsParams['range'];
   maxGapCountPerRule: number;
+  excludedReasons?: GapReasonType[];
 }
 
 type BatchBackfillScheduleRuleGapsResult =
@@ -27,7 +29,7 @@ type BatchBackfillScheduleRuleGapsResult =
 
 export const batchBackfillRuleGaps = async (
   context: RulesClientContext,
-  { rule, range, maxGapCountPerRule }: BatchBackfillRuleGapsParams
+  { rule, range, maxGapCountPerRule, excludedReasons }: BatchBackfillRuleGapsParams
 ): Promise<BatchBackfillScheduleRuleGapsResult> => {
   const logger = context.logger.get('gaps');
   const { start, end } = range;
@@ -41,24 +43,35 @@ export const batchBackfillRuleGaps = async (
       ruleIds: [rule.id],
       start,
       end,
+      excludedReasons,
       eventLogClient,
       logger,
       processGapsBatch: async (
         gapsBatch: Gap[],
         processingLimitsByRuleId: Record<string, number>
       ) => {
-        const { processedGapsCount, hasErrors, results } = await processGapsBatch(context, {
-          range,
-          gapsBatch,
-          maxGapsCountToProcess: processingLimitsByRuleId[rule.id],
-          initiator: backfillInitiator.USER,
-        });
+        const { processedGapsCount, hasErrors, results, truncatedRuleIds } = await processGapsBatch(
+          context,
+          {
+            range,
+            gapsBatch,
+            maxGapsCountToProcess: processingLimitsByRuleId[rule.id],
+            initiator: backfillInitiator.USER,
+          }
+        );
         if (processedGapsCount > 0) {
           hasBeenBackfilled = true;
         }
         if (hasErrors) {
           const errorMessage = results[0]?.error;
           throw new Error(errorMessage ?? "Can't schedule gap fill");
+        }
+
+        // When the schedule entry cap was hit, report the full limit so
+        // processAllRuleGaps stops paginating -- the remaining gaps will
+        // be picked up on the next user-triggered run.
+        if (truncatedRuleIds.length > 0) {
+          return { [rule.id]: maxGapCountPerRule };
         }
 
         return { [rule.id]: processedGapsCount };

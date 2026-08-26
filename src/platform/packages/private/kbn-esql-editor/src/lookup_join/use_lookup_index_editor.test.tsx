@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { renderHook } from '@testing-library/react';
-import { monaco } from '@kbn/monaco';
+import { monaco } from '@kbn/code-editor';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { of } from 'rxjs';
 import {
@@ -20,12 +20,12 @@ import {
 import { useLookupIndexPrivileges } from './use_lookup_index_privileges';
 import { coreMock } from '@kbn/core/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
-import type { TriggerContract } from '@kbn/ui-actions-plugin/public/triggers';
 import { getLookupIndicesFromQuery } from '@kbn/esql-utils';
 import {
   appendIndexToJoinCommandByName,
   appendIndexToJoinCommandByPosition,
 } from './append_index_to_join_command';
+import type { Trigger } from '@kbn/ui-actions-plugin/public';
 
 // Mock dependencies
 jest.mock('@kbn/esql-utils', () => ({
@@ -104,6 +104,38 @@ describe('getMonacoCommandString', () => {
       canEditIndex: false,
     });
     expect(result).toBeUndefined();
+  });
+
+  it('should return a non-clickable warning message for a closed index', () => {
+    const result = getMonacoCommandString(
+      'test-index',
+      true,
+      {
+        canCreateIndex: true,
+        canEditIndex: true,
+        canReadIndex: true,
+      },
+      true
+    );
+    expect(result).toContain('⚠');
+    expect(result).toContain('closed');
+    expect(result).not.toContain('command:');
+  });
+
+  it('should return closed warning regardless of permissions when index is closed', () => {
+    const result = getMonacoCommandString(
+      'test-index',
+      false,
+      {
+        canCreateIndex: true,
+        canEditIndex: false,
+        canReadIndex: false,
+      },
+      true
+    );
+    expect(result).toContain('⚠');
+    expect(result).toContain('closed');
+    expect(result).not.toContain('Create lookup index');
   });
 });
 
@@ -208,7 +240,7 @@ describe('useLookupIndexCommand', () => {
 
     const mockTrigger = {
       exec: jest.fn(),
-    } as unknown as jest.Mocked<TriggerContract>;
+    } as unknown as jest.Mocked<Trigger>;
     mockServices.uiActions.getTrigger.mockReturnValue(mockTrigger);
   });
 
@@ -270,6 +302,46 @@ describe('useLookupIndexCommand', () => {
     );
   });
 
+  it('should show closed warning decoration for a closed lookup index', async () => {
+    mockGetLookupIndices.mockResolvedValue({
+      indices: [{ name: 'test-index', isClosed: true }],
+    });
+
+    const { result } = renderHook(
+      () =>
+        useLookupIndexCommand(
+          mockEditorRef,
+          mockEditorModel,
+          mockGetLookupIndices,
+          mockQuery,
+          mockOnIndexCreated
+        ),
+      { wrapper: createWrapper }
+    );
+
+    result.current.addLookupIndicesDecorator();
+
+    await jest.advanceTimersByTimeAsync(600);
+
+    expect(mockModel.deltaDecorations).toHaveBeenCalledWith(
+      [],
+      expect.arrayContaining([
+        expect.objectContaining({
+          options: expect.objectContaining({
+            inlineClassName: expect.stringContaining('lookupIndexClosedBadge'),
+            hoverMessage: expect.objectContaining({
+              value: expect.stringContaining('closed'),
+            }),
+          }),
+        }),
+      ])
+    );
+
+    const call = (mockModel.deltaDecorations as jest.Mock).mock.calls[0];
+    const decoration = call[1][0];
+    expect(decoration.options.hoverMessage.value).not.toContain('command:');
+  });
+
   it('should handle flyout close with index creation', async () => {
     (appendIndexToJoinCommandByName as jest.Mock).mockReturnValue(
       'FROM logs | JOIN new-index ON field'
@@ -288,13 +360,14 @@ describe('useLookupIndexCommand', () => {
     );
 
     // Access the private onFlyoutClose function through the openFlyout mechanism
-    const trigger = mockServices.uiActions.getTrigger('EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID');
-    (trigger.exec as jest.Mock).mockImplementation(async (context) => {
-      await context.onClose({
-        indexName: 'new-index',
-        indexCreatedDuringFlyout: true,
-      });
-    });
+    (mockServices.uiActions.executeTriggerActions as jest.Mock).mockImplementation(
+      async (_, context) => {
+        await context.onClose({
+          indexName: 'new-index',
+          indexCreatedDuringFlyout: true,
+        });
+      }
+    );
 
     // Trigger the command
     const registerCommandCall = jest.mocked(monaco.editor.registerCommand).mock.calls[0];
@@ -331,13 +404,14 @@ describe('useLookupIndexCommand', () => {
       { wrapper: createWrapper }
     );
 
-    const trigger = mockServices.uiActions.getTrigger('EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID');
-    (trigger.exec as jest.Mock).mockImplementation(async (context) => {
-      await context.onClose({
-        indexName: 'cursor-index',
-        indexCreatedDuringFlyout: true,
-      });
-    });
+    (mockServices.uiActions.executeTriggerActions as jest.Mock).mockImplementation(
+      async (_, context) => {
+        await context.onClose({
+          indexName: 'cursor-index',
+          indexCreatedDuringFlyout: true,
+        });
+      }
+    );
 
     const registerCommandCall = jest.mocked(monaco.editor.registerCommand).mock.calls[0];
     const commandHandler = registerCommandCall[1];
@@ -370,15 +444,15 @@ describe('useLookupIndexCommand', () => {
       { wrapper: createWrapper }
     );
 
-    const trigger = mockServices.uiActions.getTrigger('EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID');
-
     await expect(async () => {
-      (trigger.exec as jest.Mock).mockImplementation(async (context) => {
-        await context.onClose({
-          indexName: 'new-index',
-          indexCreatedDuringFlyout: true,
-        });
-      });
+      (mockServices.uiActions.executeTriggerActions as jest.Mock).mockImplementation(
+        async (_, context) => {
+          await context.onClose({
+            indexName: 'new-index',
+            indexCreatedDuringFlyout: true,
+          });
+        }
+      );
 
       const registerCommandCall = jest.mocked(monaco.editor.registerCommand).mock.calls[0];
       const commandHandler = registerCommandCall[1];
@@ -404,13 +478,14 @@ describe('useLookupIndexCommand', () => {
       { wrapper: createWrapper }
     );
 
-    const trigger = mockServices.uiActions.getTrigger('EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID');
-    (trigger.exec as jest.Mock).mockImplementation(async (context) => {
-      await context.onClose({
-        indexName: null,
-        indexCreatedDuringFlyout: false,
-      });
-    });
+    (mockServices.uiActions.executeTriggerActions as jest.Mock).mockImplementation(
+      async (_, context) => {
+        await context.onClose({
+          indexName: null,
+          indexCreatedDuringFlyout: false,
+        });
+      }
+    );
 
     const registerCommandCall = jest.mocked(monaco.editor.registerCommand).mock.calls[0];
     const commandHandler = registerCommandCall[1];
@@ -461,14 +536,15 @@ describe('useLookupIndexCommand', () => {
     );
 
     // Access the onFlyoutClose function through the openFlyout mechanism
-    const trigger = mockServices.uiActions.getTrigger('EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID');
-    (trigger.exec as jest.Mock).mockImplementation(async (context) => {
-      await context.onClose({
-        indexName: 'test-index',
-        indexCreatedDuringFlyout: false,
-        indexHasNewFields: true,
-      });
-    });
+    (mockServices.uiActions.executeTriggerActions as jest.Mock).mockImplementation(
+      async (_, context) => {
+        await context.onClose({
+          indexName: 'test-index',
+          indexCreatedDuringFlyout: false,
+          indexHasNewFields: true,
+        });
+      }
+    );
 
     // Trigger the command
     const registerCommandCall = jest.mocked(monaco.editor.registerCommand).mock.calls[0];
@@ -500,14 +576,15 @@ describe('useLookupIndexCommand', () => {
     );
 
     // Access the onFlyoutClose function through the openFlyout mechanism
-    const trigger = mockServices.uiActions.getTrigger('EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID');
-    (trigger.exec as jest.Mock).mockImplementation(async (context) => {
-      await context.onClose({
-        indexName: 'test-index',
-        indexCreatedDuringFlyout: false,
-        indexHasNewFields: false,
-      });
-    });
+    (mockServices.uiActions.executeTriggerActions as jest.Mock).mockImplementation(
+      async (_, context) => {
+        await context.onClose({
+          indexName: 'test-index',
+          indexCreatedDuringFlyout: false,
+          indexHasNewFields: false,
+        });
+      }
+    );
 
     // Trigger the command
     const registerCommandCall = jest.mocked(monaco.editor.registerCommand).mock.calls[0];

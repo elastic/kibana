@@ -1,0 +1,91 @@
+{
+  "sha1": "d06a7cd1f0725db162cc2635bcdd8bf4e8b335ba",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "70a0a35dd08286e-9bea428d7c47a33",
+      "title": "Cross-Cluster Replication shows both tabs and their primary action buttons for a user with CCR privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/cross_cluster_replication/test/scout/ui/tests/cross_cluster_replication_home.spec.ts",
+        "line": 14,
+        "column": 24
+      }
+    },
+    {
+      "id": "70a0a35dd08286e-621a9fb067f67c1",
+      "title": "Cross-Cluster Replication create follower index form has no accessibility violations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/cross_cluster_replication/test/scout/ui/tests/cross_cluster_replication_home.spec.ts",
+        "line": 52,
+        "column": 13
+      }
+    },
+    {
+      "id": "70a0a35dd08286e-5e72ba3bc127a82",
+      "title": "Cross-Cluster Replication create auto-follow pattern form has no accessibility violations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/cross_cluster_replication/test/scout/ui/tests/cross_cluster_replication_home.spec.ts",
+        "line": 64,
+        "column": 11
+      }
+    },
+    {
+      "id": "e82de54e0a3076d-99e0e3a477f766c",
+      "title": "Cross-Cluster Replication - with data follower index and auto-follow pattern data views are accessible",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/cross_cluster_replication/test/scout/ui/tests/cross_cluster_replication_with_data.spec.ts",
+        "line": 122,
+        "column": 23
+      }
+    },
+    {
+      "id": "972c493f6365e45-bc947e64b1d9331",
+      "title": "Cross-Cluster Replication - Feature Controls kibana_admin can access Stack Management but not CCR",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/cross_cluster_replication/test/scout/ui/tests/feature_controls.spec.ts",
+        "line": 14,
+        "column": 24
+      }
+    },
+    {
+      "id": "972c493f6365e45-5b1b1d6e4439d07",
+      "title": "Cross-Cluster Replication - Feature Controls ccr_user with dashboard read can access CCR in Stack Management",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/cross_cluster_replication/test/scout/ui/tests/feature_controls.spec.ts",
+        "line": 24,
+        "column": 15
+      }
+    }
+  ]
+}

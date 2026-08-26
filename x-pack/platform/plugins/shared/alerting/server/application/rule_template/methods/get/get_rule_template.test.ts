@@ -5,26 +5,11 @@
  * 2.0.
  */
 
-import type { ConstructorOptions } from '../../../../rules_client/rules_client';
+import Boom from '@hapi/boom';
 import { RulesClient } from '../../../../rules_client/rules_client';
-import {
-  savedObjectsClientMock,
-  loggingSystemMock,
-  savedObjectsRepositoryMock,
-  uiSettingsServiceMock,
-} from '@kbn/core/server/mocks';
-import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
-import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
-import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import type { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
-import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
-import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
-import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 import { RULE_TEMPLATE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
+import { getRulesClientMockParams } from '../../../../test_utils';
 
 jest.mock('../../../../rules_client/lib/siem_legacy_actions/format_legacy_actions', () => {
   return {
@@ -32,43 +17,14 @@ jest.mock('../../../../rules_client/lib/siem_legacy_actions/format_legacy_action
   };
 });
 
-const taskManager = taskManagerMock.createStart();
-const ruleTypeRegistry = ruleTypeRegistryMock.create();
-const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
-const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
-const authorization = alertingAuthorizationMock.create();
-const actionsAuthorization = actionsAuthorizationMock.create();
-const auditLogger = auditLoggerMock.create();
-const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
-
-const kibanaVersion = 'v7.10.0';
-const rulesClientParams: jest.Mocked<ConstructorOptions> = {
+const {
+  rulesClientParams,
   taskManager,
   ruleTypeRegistry,
   unsecuredSavedObjectsClient,
-  authorization: authorization as unknown as AlertingAuthorization,
-  actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
-  spaceId: 'default',
-  namespace: 'default',
-  maxScheduledPerMinute: 10000,
-  minimumScheduleInterval: { value: '1m', enforce: false },
-  getUserName: jest.fn(),
-  createAPIKey: jest.fn(),
-  logger: loggingSystemMock.create().get(),
-  internalSavedObjectsRepository,
-  encryptedSavedObjectsClient: encryptedSavedObjects,
-  getActionsClient: jest.fn(),
-  getEventLogClient: jest.fn(),
-  kibanaVersion,
-  isAuthenticationTypeAPIKey: jest.fn(),
-  getAuthenticationAPIKey: jest.fn(),
-  connectorAdapterRegistry: new ConnectorAdapterRegistry(),
-  getAlertIndicesAlias: jest.fn(),
-  alertsService: null,
-  backfillClient: backfillClientMock.create(),
-  uiSettings: uiSettingsServiceMock.createStartContract(),
-  isSystemAction: jest.fn(),
-};
+  authorization,
+  auditLogger,
+} = getRulesClientMockParams();
 
 beforeEach(() => {
   getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry);
@@ -77,7 +33,7 @@ beforeEach(() => {
 
 setGlobalDate();
 
-describe('get()', () => {
+describe('getTemplate()', () => {
   it('calls saved objects client with given params', async () => {
     const rulesClient = new RulesClient(rulesClientParams);
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
@@ -86,6 +42,7 @@ describe('get()', () => {
       attributes: {
         ruleTypeId: '123',
         name: 'test template',
+        description: 'test template',
         tags: ['foo'],
         schedule: { interval: '10s' },
         params: {
@@ -95,16 +52,13 @@ describe('get()', () => {
       references: [],
     });
 
-    authorization.getAllAuthorizedRuleTypes.mockResolvedValue({
-      hasAllRequested: true,
-      authorizedRuleTypes: new Map([
-        ['123', { authorizedConsumers: { consumer1: { read: true, all: true } } }],
-      ]),
-    });
     const result = await rulesClient.getTemplate({ id: '1' });
     expect(result).toMatchInlineSnapshot(`
       Object {
         "alertDelay": undefined,
+        "artifacts": undefined,
+        "description": "test template",
+        "engine": undefined,
         "flapping": undefined,
         "id": "1",
         "name": "test template",
@@ -150,37 +104,114 @@ describe('get()', () => {
 
     it('ensures user is authorised to get this type of rule template', async () => {
       const rulesClient = new RulesClient(rulesClientParams);
-      authorization.getAllAuthorizedRuleTypes.mockResolvedValue({
-        hasAllRequested: true,
-        authorizedRuleTypes: new Map([
-          ['myType', { authorizedConsumers: { consumer1: { read: true, all: true } } }],
-        ]),
-      });
       await rulesClient.getTemplate({ id: '1' });
 
-      expect(authorization.getAllAuthorizedRuleTypes).toHaveBeenCalledWith({
-        authorizationEntity: 'rule',
-        operations: ['get'],
+      expect(authorization.ensureAuthorizedByRuleType).toHaveBeenCalledWith({
+        ruleTypeId: 'myType',
+        operation: 'get',
+        entity: 'rule',
+        consumerRequiredPrivilege: 'read',
       });
     });
 
-    it('throws when user is not authorised to get this type of alert', async () => {
+    it('throws when user is not authorised to get this type of rule template', async () => {
       const rulesClient = new RulesClient(rulesClientParams);
-      authorization.getAllAuthorizedRuleTypes.mockResolvedValue({
-        hasAllRequested: true,
-        authorizedRuleTypes: new Map([
-          ['myType', { authorizedConsumers: { consumer1: { read: false, all: false } } }],
-        ]),
-      });
-
-      await expect(rulesClient.getTemplate({ id: '1' })).rejects.toMatchInlineSnapshot(
-        `[Error: Unauthorized to get "myType" RuleTemplate]`
+      authorization.ensureAuthorizedByRuleType.mockRejectedValueOnce(
+        Boom.forbidden('Unauthorized to get "myType" rule')
       );
 
-      expect(authorization.getAllAuthorizedRuleTypes).toHaveBeenCalledWith({
-        authorizationEntity: 'rule',
-        operations: ['get'],
+      await expect(rulesClient.getTemplate({ id: '1' })).rejects.toMatchInlineSnapshot(
+        `[Error: Unauthorized to get "myType" rule]`
+      );
+
+      expect(authorization.ensureAuthorizedByRuleType).toHaveBeenCalledWith({
+        ruleTypeId: 'myType',
+        operation: 'get',
+        entity: 'rule',
+        consumerRequiredPrivilege: 'read',
       });
+    });
+  });
+
+  describe('audit logging', () => {
+    it('logs audit event on successful get', async () => {
+      const rulesClient = new RulesClient({
+        ...rulesClientParams,
+        auditLogger,
+      });
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+        id: '1',
+        type: RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+        attributes: {
+          ruleTypeId: 'myType',
+          name: 'test template',
+          tags: ['foo'],
+          schedule: { interval: '10s' },
+          params: {},
+        },
+        references: [],
+      });
+
+      await rulesClient.getTemplate({ id: '1' });
+
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({
+            action: 'rule_template_get',
+            outcome: 'success',
+          }),
+          kibana: {
+            saved_object: {
+              type: RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+              id: '1',
+              name: 'test template',
+            },
+          },
+        })
+      );
+    });
+
+    it('logs audit event on authorization failure', async () => {
+      const rulesClient = new RulesClient({
+        ...rulesClientParams,
+        auditLogger,
+      });
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+        id: '1',
+        type: RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+        attributes: {
+          ruleTypeId: 'myType',
+          name: 'test template',
+          tags: ['foo'],
+          schedule: { interval: '10s' },
+          params: {},
+        },
+        references: [],
+      });
+      authorization.ensureAuthorizedByRuleType.mockRejectedValueOnce(
+        Boom.forbidden('Unauthorized to get "myType" rule')
+      );
+
+      await expect(rulesClient.getTemplate({ id: '1' })).rejects.toThrow();
+
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({
+            action: 'rule_template_get',
+            outcome: 'failure',
+          }),
+          error: expect.objectContaining({
+            message: 'Unauthorized to get "myType" rule',
+          }),
+          kibana: {
+            saved_object: {
+              type: RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+              id: '1',
+              name: 'test template',
+            },
+          },
+        })
+      );
     });
   });
 });

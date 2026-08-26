@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+// Original test (remove during Scout migration): src/platform/test/functional/apps/discover/context_awareness/extensions/_get_doc_viewer.ts
+
 import kbnRison from '@kbn/rison';
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
@@ -56,7 +58,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.existOrFail('docViewerTab-doc_view_table');
         await testSubjects.existOrFail('docViewerTab-doc_view_source');
         await testSubjects.existOrFail('docViewerTab-doc_view_example');
-        expect(await testSubjects.getVisibleText('docViewerRowDetailsTitle')).to.be('Record #0');
+        expect(await testSubjects.getVisibleText('docViewerRowDetailsTitle')).to.contain(
+          'Record #1'
+        );
       });
 
       it('should update the ES|QL query when clicking custom "Update ES|QL query" button', async () => {

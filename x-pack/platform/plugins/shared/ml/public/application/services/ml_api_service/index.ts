@@ -12,31 +12,30 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 
 import { chunk, isNumber } from 'lodash';
-import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
 import type {
   MlServerDefaults,
   MlServerLimits,
   MlNodeCount,
-} from '../../../../common/types/ml_server_info';
-import type { MlCapabilitiesResponse } from '../../../../common/types/capabilities';
-import type { RecognizeModuleResult } from '../../../../common/types/modules';
-import type { MlCalendar, MlCalendarId, UpdateCalendar } from '../../../../common/types/calendars';
-import type { BucketSpanEstimatorData } from '../../../../common/types/job_service';
+} from '@kbn/ml-common-types/ml_server_info';
+import type { MlCapabilitiesResponse } from '@kbn/ml-common-types/capabilities';
+import type { RecognizeModuleResult } from '@kbn/ml-common-types/modules';
+import type { MlCalendar, MlCalendarId, UpdateCalendar } from '@kbn/ml-common-types/calendars';
+import type { BucketSpanEstimatorData } from '@kbn/ml-common-types/job_service';
+import type { Job, AnalysisConfig } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type { JobStats } from '@kbn/ml-common-types/anomaly_detection_jobs/job_stats';
 import type {
-  Job,
-  JobStats,
   Datafeed,
-  CombinedJob,
-  AnalysisConfig,
-  ModelSnapshot,
   IndicesOptions,
-} from '../../../../common/types/anomaly_detection_jobs';
+} from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
+import type { ModelSnapshot } from '@kbn/ml-common-types/anomaly_detection_jobs/model_snapshot';
 import type {
   DataRecognizerConfigResponse,
   Module,
   RecognizeResult,
-} from '../../../../common/types/modules';
-import type { DatafeedValidationResponse } from '../../../../common/types/job_validation';
+} from '@kbn/ml-common-types/modules';
+import type { DatafeedValidationResponse } from '@kbn/ml-common-types/job_validation';
+import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
 
 import type { FieldHistogramRequestConfig } from '../../datavisualizer/index_based/common/request';
 
@@ -523,6 +522,7 @@ export function mlApiProvider(httpService: HttpService) {
       end,
       jobOverrides,
       estimateModelMemory,
+      projectRouting,
     }: {
       moduleId: string;
       prefix?: string;
@@ -535,6 +535,7 @@ export function mlApiProvider(httpService: HttpService) {
       end?: number;
       jobOverrides?: Array<Partial<Job>>;
       estimateModelMemory?: boolean;
+      projectRouting?: string;
     }) {
       const body = JSON.stringify({
         prefix,
@@ -547,6 +548,7 @@ export function mlApiProvider(httpService: HttpService) {
         end,
         jobOverrides,
         estimateModelMemory,
+        projectRouting,
       });
 
       return httpService.http<DataRecognizerConfigResponse>({
@@ -563,18 +565,21 @@ export function mlApiProvider(httpService: HttpService) {
       fields,
       samplerShardSize,
       runtimeMappings,
+      projectRouting,
     }: {
       indexPattern: string;
       query: any;
       fields: FieldHistogramRequestConfig[];
       samplerShardSize?: number;
       runtimeMappings?: RuntimeMappings;
+      projectRouting?: string;
     }) {
       const body = JSON.stringify({
         query,
         fields,
         samplerShardSize,
         runtimeMappings,
+        projectRouting,
       });
 
       return httpService.http<any>({
@@ -692,6 +697,7 @@ export function mlApiProvider(httpService: HttpService) {
       timeFieldName,
       earliestMs,
       latestMs,
+      datafeed,
     }: {
       index: string;
       fieldNames: string[];
@@ -699,6 +705,7 @@ export function mlApiProvider(httpService: HttpService) {
       timeFieldName: string;
       earliestMs: number;
       latestMs: number;
+      datafeed?: Datafeed;
     }) {
       const body = JSON.stringify({
         index,
@@ -707,6 +714,7 @@ export function mlApiProvider(httpService: HttpService) {
         timeFieldName,
         earliestMs,
         latestMs,
+        datafeed,
       });
 
       return httpService.http<any>({
@@ -724,6 +732,7 @@ export function mlApiProvider(httpService: HttpService) {
       runtimeMappings,
       indicesOptions,
       allowFutureTime,
+      projectRouting,
     }: {
       index: string;
       timeFieldName?: string;
@@ -731,6 +740,7 @@ export function mlApiProvider(httpService: HttpService) {
       runtimeMappings?: RuntimeMappings;
       indicesOptions?: IndicesOptions;
       allowFutureTime?: boolean;
+      projectRouting?: string;
     }) {
       const body = JSON.stringify({
         index,
@@ -739,6 +749,7 @@ export function mlApiProvider(httpService: HttpService) {
         runtimeMappings,
         indicesOptions,
         allowFutureTime,
+        projectRouting,
       });
 
       return httpService.http<GetTimeFieldRangeResponse>({

@@ -51,6 +51,11 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     logsDensity,
   } = query;
 
+  // Service inventory no longer supports sorting by `healthStatus`. If old saved URLs still
+  // include `sortField=healthStatus`, drop it so tables fall back to their current defaults.
+  const normalizedSortField =
+    location.pathname.endsWith('/services') && sortField === 'healthStatus' ? undefined : sortField;
+
   return removeUndefinedProps({
     // date params
     ...getDateRange({ state, rangeFrom, rangeTo }),
@@ -62,7 +67,7 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     // query params
     environment: toString(environment) || ENVIRONMENT_ALL.value,
     sortDirection,
-    sortField,
+    sortField: normalizedSortField,
     page: toNumber(page) || 0,
     pageSize: pageSize ? toNumber(pageSize) : undefined,
     transactionId: toString(transactionId),

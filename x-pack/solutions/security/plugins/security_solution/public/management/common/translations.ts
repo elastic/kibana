@@ -8,6 +8,14 @@
 import { i18n } from '@kbn/i18n';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 
+export const YES_LABEL = i18n.translate('xpack.securitySolution.translations.yesLabel', {
+  defaultMessage: 'Yes',
+});
+
+export const NO_LABEL = i18n.translate('xpack.securitySolution.translations.noLabel', {
+  defaultMessage: 'No',
+});
+
 export const ENDPOINTS_TAB = i18n.translate('xpack.securitySolution.endpointsTab', {
   defaultMessage: 'Endpoints',
 });
@@ -31,6 +39,15 @@ export const TRUSTED_DEVICES_TAB = i18n.translate('xpack.securitySolution.truste
 
 export const EVENT_FILTERS_TAB = i18n.translate('xpack.securitySolution.eventFiltersTab', {
   defaultMessage: 'Event filters',
+});
+
+export const HOST_ISOLATION_EXCEPTIONS_TAB = i18n.translate(
+  'xpack.securitySolution.artifacts.tabs.hostIsolationExceptions',
+  { defaultMessage: 'Host isolation exceptions' }
+);
+
+export const BLOCKLIST_TAB = i18n.translate('xpack.securitySolution.artifacts.tabs.blocklist', {
+  defaultMessage: 'Blocklist',
 });
 
 export const OS_TITLES: Readonly<{ [K in OperatingSystem]: string }> = {
@@ -175,6 +192,21 @@ export const CONSOLE_COMMANDS = {
           { defaultMessage: 'The process name to kill' }
         ),
       },
+      killDescendants: {
+        about: i18n.translate(
+          'xpack.securitySolution.endpointConsoleCommands.killProcess.killDescendants.arg.comment',
+          {
+            defaultMessage: 'Also terminate all descendant (child) processes of the target process',
+          }
+        ),
+        notSupported: i18n.translate(
+          'xpack.securitySolution.endpointConsoleCommands.killProcess.killDescendants.notSupported',
+          {
+            defaultMessage:
+              'This version of the Endpoint does not support killing process descendants. Upgrade your Agent in Fleet to use this parameter.',
+          }
+        ),
+      },
     },
   },
   suspendProcess: {
@@ -287,16 +319,38 @@ export const CONSOLE_COMMANDS = {
     about: i18n.translate('xpack.securitySolution.endpointConsoleCommands.runscript.about', {
       defaultMessage: 'Run a script on the host',
     }),
+    title: i18n.translate('xpack.securitySolution.endpointConsoleCommands.runscript.title', {
+      defaultMessage: 'Run script',
+    }),
+    privileges: i18n.translate(
+      'xpack.securitySolution.endpointConsoleCommands.runscript.privileges',
+      {
+        defaultMessage:
+          'Insufficient privileges to create runscript actions. Contact your Kibana administrator if you think you should have this permission.',
+      }
+    ),
   },
   cancel: {
     about: i18n.translate('xpack.securitySolution.endpointConsoleCommands.cancel.about', {
       defaultMessage: 'Cancel a pending action on the host',
     }),
+    forceArgInfo: i18n.translate(
+      'xpack.securitySolution.endpointConsoleCommands.cancel.forceArgInfo',
+      {
+        defaultMessage: 'Forcefully cancel the action, even if it is already in progress',
+      }
+    ),
   },
   memoryDump: {
     about: i18n.translate('xpack.securitySolution.endpointConsoleCommands.memoryDump.about', {
       defaultMessage: 'Generate a memory dump on the host',
     }),
+    argNotSupported: i18n.translate(
+      'xpack.securitySolution.translations.memoryDump.argNotSupported',
+      {
+        defaultMessage: '(NOTE: not currently supported for this host type)',
+      }
+    ),
     kernelArgAbout: i18n.translate(
       'xpack.securitySolution.translations.memoryDump.kernelArgAbout',
       {
@@ -320,6 +374,9 @@ export const CONSOLE_COMMANDS = {
           'Process Entity ID to generate a memory dump for. Valid only when "--process" is used',
       }
     ),
+    rawArgAbout: i18n.translate('xpack.securitySolution.translations.memoryDump.rawArgAbout', {
+      defaultMessage: 'Generates a raw memory dump',
+    }),
     agentResultMissing: i18n.translate(
       'xpack.securitySolution.translations.memoryDump.agentResultMissing',
       { defaultMessage: 'Agent result missing' }
@@ -336,6 +393,21 @@ export const CONSOLE_COMMANDS = {
       'xpack.securitySolution.translations.memoryDump.resultRemainingFreeDiskSpaceLabel',
       { defaultMessage: 'Disk free space' }
     ),
+    resultUserSpaceIncludedLabel: i18n.translate(
+      'xpack.securitySolution.translations.memoryDump.resultUserSpaceIncludedLabel',
+      { defaultMessage: 'User space included' }
+    ),
+    resultTotalMemorySizeLabel: i18n.translate(
+      'xpack.securitySolution.translations.memoryDump.resultTotalMemorySizeLabel',
+      { defaultMessage: 'Total memory size' }
+    ),
+    resultTotalBytesCapturedLabel: i18n.translate(
+      'xpack.securitySolution.translations.memoryDump.resultTotalBytesCapturedLabel',
+      { defaultMessage: 'Total bytes captured' }
+    ),
+    bytesValue: i18n.translate('xpack.securitySolution.translations.memoryDump.bytesValue', {
+      defaultMessage: 'bytes',
+    }),
   },
 };
 
@@ -457,31 +529,6 @@ export const MS_DEFENDER_ENDPOINT_CONSOLE_COMMANDS = {
       }
     ),
   },
-};
-
-export const CONFIRM_WARNING_MODAL_LABELS = (entryType: string) => {
-  return {
-    title: i18n.translate('xpack.securitySolution.artifacts.confirmWarningModal.title', {
-      defaultMessage: `Confirm {type}`,
-      values: { type: entryType },
-    }),
-    body: i18n.translate('xpack.securitySolution.artifacts.confirmWarningModal.body', {
-      defaultMessage:
-        'Using a "*" or a "?" in the value with the "is" operator can make the entry ineffective. Change the operator to "matches" to ensure wildcards run properly. Select “Cancel” to revise your entry, or "Add" to continue with the entry in its current state.',
-    }),
-    confirmButton: i18n.translate(
-      'xpack.securitySolution.artifacts.confirmWarningModal.confirmButtonText',
-      {
-        defaultMessage: 'Add',
-      }
-    ),
-    cancelButton: i18n.translate(
-      'xpack.securitySolution.trustedapps.confirmWarningModal.cancelButtonText',
-      {
-        defaultMessage: 'Cancel',
-      }
-    ),
-  };
 };
 
 export const NO_PRIVILEGE_FOR_MANAGEMENT_OF_GLOBAL_ARTIFACT_MESSAGE = i18n.translate(

@@ -7,10 +7,16 @@
 
 import type { FunctionComponent } from 'react';
 import React, { Fragment } from 'react';
-import PropTypes from 'prop-types';
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiButtonIcon, EuiText } from '@elastic/eui';
-import { set, del } from 'object-path-immutable';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiText,
+  EuiToolTip,
+} from '@elastic/eui';
 import { get } from 'lodash';
+import { set, del } from '../../../../common/lib/object_path_immutable';
 import type { ResolvedArgProps, ResolvedLabels } from '../../arg';
 import { ColorPickerPopover } from '../../../components/color_picker_popover';
 import { TooltipIcon, IconType } from '../../../components/tooltip_icon';
@@ -87,12 +93,14 @@ export const SimpleTemplate: FunctionComponent<Props> = (props) => {
             />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiButtonIcon
-              iconType="cross"
-              color="danger"
-              onClick={() => handleChange('color', '')}
-              aria-label={strings.getRemoveAriaLabel()}
-            />
+            <EuiToolTip content={strings.getRemoveAriaLabel()} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType="cross"
+                color="danger"
+                onClick={() => handleChange('color', '')}
+                aria-label={strings.getRemoveAriaLabel()}
+              />
+            </EuiToolTip>
           </EuiFlexItem>
         </Fragment>
       )}
@@ -110,15 +118,3 @@ export const SimpleTemplate: FunctionComponent<Props> = (props) => {
 };
 
 SimpleTemplate.displayName = 'SeriesStyleArgSimpleInput';
-
-SimpleTemplate.propTypes = {
-  argValue: PropTypes.any.isRequired,
-  resolved: PropTypes.shape({
-    labels: PropTypes.array.isRequired,
-  }).isRequired,
-  onValueChange: PropTypes.func.isRequired,
-  // @ts-expect-error upgrade typescript v5.9.3
-  workpad: PropTypes.shape({
-    colors: PropTypes.array.isRequired,
-  }).isRequired,
-};

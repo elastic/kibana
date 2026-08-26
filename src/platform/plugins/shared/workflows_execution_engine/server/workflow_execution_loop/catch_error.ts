@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import { ExecutionError } from '@kbn/workflows/server';
 import type { WorkflowExecutionLoopParams } from './types';
 import type { NodeWithErrorCatching } from '../step/node_implementation';
@@ -58,6 +59,19 @@ export async function catchError(
   params: WorkflowExecutionLoopParams,
   failedStepExecutionRuntime: StepExecutionRuntime
 ) {
+  const { workflowExecutionCursor, workflowLogger, stepExecutionRuntimeFactory, nodesFactory } =
+    params;
+
+  // Workflow-level timeout is finalized in EnterWorkflowTimeoutZoneNodeImpl.monitor()
+  // (TIMED_OUT on the workflow, cursor error cleared). run_node still invokes catch_error
+  // in finally; without this guard we would re-capture the timed-out step's error and run
+  // generic error bubbling (navigateToNode + commitPendingNavigation), which wrongly clears
+  // scopeStack and can override the timeout outcome. Interrupted steps are FAILED today;
+  // CANCELLED is the better fit and will likely replace FAILED for those steps later.
+  if (params.workflowRuntime.getWorkflowExecution().status === ExecutionStatus.TIMED_OUT) {
+    return;
+  }
+
   try {
     // Loop through nested scopes in reverse order to handle errors at each level.
     // The loop continues while:
@@ -65,77 +79,91 @@ export async function catchError(
     // 2. There are items in the execution stack
     // 3. The top stack entry has nested scopes to process
     // This allows error handling to bubble up through the scope hierarchy.
+    if (failedStepExecutionRuntime.stepExecutionExists() && failedStepExecutionRuntime.error) {
+      workflowExecutionCursor.captureError(failedStepExecutionRuntime.error);
+    } else if (failedStepExecutionRuntime.stepExecutionExists()) {
+      const stepExecution = failedStepExecutionRuntime.stepExecution;
+      // Only finalize the step here if it has NOT already reached a terminal state
+      // on its own. A step that already settled itself (e.g. a parallel step that
+      // called failStep with its aggregate output under fail-fast, workflow.output/
+      // workflow.fail that COMPLETED before setting the error, or a streaming step
+      // that failed with partial output) must be left as-is — re-calling failStep
+      // here would overwrite its status/output (clobbering the persisted output to
+      // null) even though the step already recorded its own terminal disposition.
+      if (
+        workflowExecutionCursor.error &&
+        (!stepExecution?.status || !isTerminalStatus(stepExecution.status))
+      ) {
+        failedStepExecutionRuntime.failStep(
+          ExecutionError.fromError(workflowExecutionCursor.error)
+        );
+      }
+    }
 
-    if (!params.workflowExecutionState.getWorkflowExecution().error) {
+    if (!workflowExecutionCursor.error) {
       return;
     }
 
-    if (failedStepExecutionRuntime.stepExecutionExists()) {
-      failedStepExecutionRuntime.failStep(
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        new ExecutionError(params.workflowExecutionState.getWorkflowExecution().error!)
-      );
-    }
-
-    while (
-      params.workflowExecutionState.getWorkflowExecution().error &&
-      params.workflowExecutionState.getWorkflowExecution().scopeStack.length
-    ) {
-      const workflowScopeStack = WorkflowScopeStack.fromStackFrames(
-        params.workflowExecutionState.getWorkflowExecution().scopeStack
-      );
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const scopeEntry = workflowScopeStack.getCurrentScope()!;
+    let workflowScopeStack = WorkflowScopeStack.fromStackFrames(
+      workflowExecutionCursor.currentStackFrames
+    );
+    while (workflowExecutionCursor.error && !workflowScopeStack.isEmpty()) {
+      const scopeEntry = workflowScopeStack.getCurrentScope();
       const newWorkflowScopeStack = workflowScopeStack.exitScope();
-      const currentNodeId = params.workflowExecutionState.getWorkflowExecution().currentNodeId;
+      const currentNode = workflowExecutionCursor.currentNode;
 
-      if (!currentNodeId) {
+      if (!currentNode) {
         throw new Error('No current node ID in workflow execution state. This should not happen.');
       }
 
-      params.workflowExecutionState.updateWorkflowExecution({
-        currentNodeId: scopeEntry.nodeId,
-        scopeStack: newWorkflowScopeStack.stackFrames,
-      });
-      params.workflowRuntime.navigateToNode(scopeEntry.nodeId);
+      workflowExecutionCursor.navigateToNode(scopeEntry.nodeId);
 
-      const stepExecutionRuntime = params.stepExecutionRuntimeFactory.createStepExecutionRuntime({
+      const stepExecutionRuntime = stepExecutionRuntimeFactory.createStepExecutionRuntime({
         nodeId: scopeEntry.nodeId,
         stackFrames: newWorkflowScopeStack.stackFrames,
       });
-      const stepImplementation = params.nodesFactory.create(stepExecutionRuntime);
+      const stepImplementation = nodesFactory.create(stepExecutionRuntime);
 
       if ((stepImplementation as unknown as NodeWithErrorCatching).catchError) {
         const stepErrorCatcher = stepImplementation as unknown as NodeWithErrorCatching;
-        const failedContext = params.stepExecutionRuntimeFactory.createStepExecutionRuntime({
-          nodeId: currentNodeId,
+        const failedContext = stepExecutionRuntimeFactory.createStepExecutionRuntime({
+          nodeId: currentNode.id,
           stackFrames: workflowScopeStack.stackFrames,
         });
 
         try {
           await Promise.resolve(stepErrorCatcher.catchError(failedContext));
         } catch (error) {
-          params.workflowExecutionState.updateWorkflowExecution({
-            error,
-          });
+          workflowExecutionCursor.captureError(error);
         }
       }
 
-      if (params.workflowExecutionState.getWorkflowExecution().error) {
+      workflowExecutionCursor.commitPendingNavigation();
+
+      workflowScopeStack = WorkflowScopeStack.fromStackFrames(
+        workflowExecutionCursor.currentStackFrames
+      );
+
+      if (workflowExecutionCursor.error) {
         if (stepExecutionRuntime.stepExecutionExists()) {
-          stepExecutionRuntime.failStep(
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            new ExecutionError(params.workflowExecutionState.getWorkflowExecution().error!)
-          );
+          // Same rule as above: don't clobber a scope that already settled itself
+          // (e.g. a parallel step that failed with its aggregate output). Only
+          // finalize scopes still non-terminal while the error bubbles up.
+          const scopeStatus = stepExecutionRuntime.stepExecution?.status;
+          if (!scopeStatus || !isTerminalStatus(scopeStatus)) {
+            stepExecutionRuntime.failStep(ExecutionError.fromError(workflowExecutionCursor.error));
+          }
         }
       }
     }
   } catch (error) {
-    params.workflowExecutionState.updateWorkflowExecution({
-      error,
-    });
-    params.workflowLogger.logError(
+    workflowExecutionCursor.captureError(error);
+    workflowLogger.logError(
       `Error in catchError: ${error.message}. Workflow execution may be in an inconsistent state.`
     );
+  }
+
+  if (workflowExecutionCursor.error) {
+    workflowExecutionCursor.stop();
   }
 }

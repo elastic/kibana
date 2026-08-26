@@ -26,10 +26,13 @@ export interface ConnectorIdItem extends BaseItem {
 
 export interface VariableItem extends BaseItem {
   type: 'regexp' | 'foreach';
+  offset?: number;
 }
 
-export interface CustomPropertyItem extends BaseItem {
-  type: 'custom-property';
+export interface StepPropertyItem extends BaseItem {
+  type: 'step-property';
+  /** Stable step instance id from the workflow lookup (used for validation-outcome caching). */
+  stepId: string;
   scope: 'config' | 'input';
   stepType: string;
   propertyKey: string;
@@ -92,8 +95,8 @@ interface YamlValidationResultLiquidTemplate extends YamlValidationResultBase {
   owner: 'liquid-template-validation';
 }
 interface YamlValidationResultConnectorIdValid extends YamlValidationResultBase {
-  severity: null;
-  message: null;
+  severity: YamlValidationErrorSeverity;
+  message: string | null;
   owner: 'connector-id-validation';
 }
 
@@ -109,21 +112,75 @@ interface YamlValidationResultJsonSchemaDefault extends YamlValidationResultBase
   owner: 'json-schema-default-validation';
 }
 
-interface YamlValidationResultCustomPropertyError extends YamlValidationResultBase {
+interface YamlValidationResultStepPropertyError extends YamlValidationResultBase {
   severity: YamlValidationErrorSeverity;
   message: string;
-  owner: 'custom-property-validation';
+  owner: 'step-property-validation';
 }
 
-interface YamlValidationResultCustomPropertyValid extends YamlValidationResultBase {
+interface YamlValidationResultStepPropertyValid extends YamlValidationResultBase {
   severity: null;
   message: null;
-  owner: 'custom-property-validation';
+  owner: 'step-property-validation';
 }
 
-export type CustomPropertyValidationResult =
-  | YamlValidationResultCustomPropertyError
-  | YamlValidationResultCustomPropertyValid;
+interface YamlValidationResultTriggerConditionError extends YamlValidationResultBase {
+  severity: YamlValidationErrorSeverity;
+  message: string;
+  owner: 'trigger-condition-validation';
+}
+
+interface YamlValidationResultWorkflowOutput extends YamlValidationResultBase {
+  severity: YamlValidationErrorSeverity;
+  message: string;
+  owner: 'workflow-output-validation';
+}
+
+interface YamlValidationResultIfConditionError extends YamlValidationResultBase {
+  severity: YamlValidationErrorSeverity;
+  message: string;
+  owner: 'if-condition-validation';
+}
+
+interface YamlValidationResultDeprecatedStep extends YamlValidationResultBase {
+  severity: YamlValidationErrorSeverity;
+  message: string;
+  owner: 'deprecated-step-validation';
+}
+
+interface YamlValidationResultEsql extends YamlValidationResultBase {
+  severity: YamlValidationErrorSeverity;
+  message: string;
+  owner: 'esql-validation';
+}
+
+interface YamlValidationResultParallelFanOut extends YamlValidationResultBase {
+  severity: YamlValidationErrorSeverity;
+  message: string;
+  owner: 'parallel-fan-out-validation';
+}
+
+interface YamlValidationResultParallelMode extends YamlValidationResultBase {
+  severity: YamlValidationErrorSeverity;
+  message: string;
+  owner: 'parallel-mode-validation';
+}
+
+interface YamlValidationResultGraphBuild extends YamlValidationResultBase {
+  severity: YamlValidationErrorSeverity;
+  message: string;
+  owner: 'graph-build-validation';
+}
+
+export type StepPropertyValidationResult =
+  | YamlValidationResultStepPropertyError
+  | YamlValidationResultStepPropertyValid;
+
+interface YamlValidationResultWorkflowInputsError extends YamlValidationResultBase {
+  severity: YamlValidationErrorSeverity;
+  message: string;
+  owner: 'workflow-inputs-validation';
+}
 
 export const CUSTOM_YAML_VALIDATION_MARKER_OWNERS = [
   'step-name-validation',
@@ -131,12 +188,25 @@ export const CUSTOM_YAML_VALIDATION_MARKER_OWNERS = [
   'liquid-template-validation',
   'connector-id-validation',
   'json-schema-default-validation',
-  'custom-property-validation',
+  'step-property-validation',
+  'workflow-inputs-validation',
+  'trigger-condition-validation',
+  'workflow-output-validation',
+  'if-condition-validation',
+  'deprecated-step-validation',
+  'esql-validation',
+  'parallel-fan-out-validation',
+  'parallel-mode-validation',
+  'graph-build-validation',
 ] as const;
 
+export const BATCHED_CUSTOM_MARKER_OWNER = 'custom-yaml-validation';
+
 export function isYamlValidationMarkerOwner(owner: string): owner is YamlValidationResult['owner'] {
-  return [...CUSTOM_YAML_VALIDATION_MARKER_OWNERS, 'yaml'].includes(
-    owner as YamlValidationResult['owner']
+  return (
+    [...CUSTOM_YAML_VALIDATION_MARKER_OWNERS, 'yaml'].includes(
+      owner as YamlValidationResult['owner']
+    ) || owner === BATCHED_CUSTOM_MARKER_OWNER
   );
 }
 
@@ -149,5 +219,30 @@ export type YamlValidationResult =
   | YamlValidationResultConnectorIdError
   | YamlValidationResultConnectorIdValid
   | YamlValidationResultJsonSchemaDefault
-  | YamlValidationResultCustomPropertyError
-  | YamlValidationResultCustomPropertyValid;
+  | YamlValidationResultStepPropertyError
+  | YamlValidationResultStepPropertyValid
+  | YamlValidationResultWorkflowInputsError
+  | YamlValidationResultTriggerConditionError
+  | YamlValidationResultWorkflowOutput
+  | YamlValidationResultIfConditionError
+  | YamlValidationResultDeprecatedStep
+  | YamlValidationResultEsql
+  | YamlValidationResultParallelFanOut
+  | YamlValidationResultParallelMode
+  | YamlValidationResultGraphBuild;
+
+export function validationResultFingerprint(r: YamlValidationResult): string {
+  return `${r.owner}\0${r.severity}\0${r.startLineNumber}:${r.startColumn}\0${r.endLineNumber}:${r.endColumn}\0${r.message}`;
+}
+
+export function validationResultsFingerprint(results: YamlValidationResult[]): string {
+  return results.map(validationResultFingerprint).sort().join('\n');
+}
+
+export function filterHighlightableValidationResults(
+  validationResults: YamlValidationResult[]
+): YamlValidationResult[] {
+  return validationResults.filter(
+    (result) => result.severity === 'error' || result.severity === 'warning'
+  );
+}

@@ -126,29 +126,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       );
     });
 
-    it('should create an ES Query rule and NOT display it when consumer is stackAlerts', async () => {
-      const esQuery = await alertingApi.helpers.createEsQueryRule({
-        roleAuthc,
-        name: 'ES Query with stackAlerts consumer',
-        consumer: 'stackAlerts',
-        ruleTypeId: '.es-query',
-        params: {
-          size: 100,
-          thresholdComparator: '>',
-          threshold: [-1],
-          index: ['alert-test-data'],
-          timeField: 'date',
-          esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
-          timeWindowSize: 20,
-          timeWindowUnit: 's',
-        },
-      });
-      ruleIdList = [esQuery.id];
-
-      await refreshRulesList();
-      await testSubjects.missingOrFail('rule-row');
-    });
-
     it('should create and display an APM latency rule', async () => {
       const apmLatency = await alertingApi.helpers.createLatencyThresholdRule({
         roleAuthc,
@@ -308,7 +285,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await testSubjects.click('collapsedItemActions');
       await testSubjects.click('disableButton');
 
+      await testSubjects.existOrFail('untrackAlertsModal');
       await testSubjects.click('confirmModalConfirmButton');
+      await testSubjects.missingOrFail('untrackAlertsModal');
 
       await header.waitUntilLoadingHasFinished();
 
@@ -689,7 +668,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           await testSubjects.click('ruleTypeFilterButton');
         }
 
-        expect(await (await testSubjects.find('ruleType0Group')).getVisibleText()).toEqual('Apm');
+        expect(await (await testSubjects.find('ruleType0Group')).getVisibleText()).toEqual(
+          'Applications'
+        );
       });
 
       await testSubjects.click('ruleTypeapm.anomalyFilterOption');

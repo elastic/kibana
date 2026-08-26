@@ -8,7 +8,7 @@
 import React from 'react';
 import type { ReactWrapper, ShallowWrapper } from 'enzyme';
 import { mount, shallow } from 'enzyme';
-import { render, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import type { EntriesArray, EntryMatch } from '@kbn/securitysolution-io-ts-list-types';
@@ -21,6 +21,7 @@ import { useFetchIndex } from '../../../../common/containers/source';
 import { useCreateOrUpdateException } from '../../logic/use_create_update_exception';
 import { useFetchIndexPatterns } from '../../logic/use_exception_flyout_data';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
+import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import * as helpers from '../../utils/helpers';
 import type { Rule } from '../../../rule_management/logic/types';
 
@@ -38,6 +39,7 @@ jest.mock('../../../../common/containers/source');
 jest.mock('../../logic/use_create_update_exception');
 jest.mock('../../logic/use_exception_flyout_data');
 jest.mock('@kbn/lists-plugin/public');
+jest.mock('../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
 jest.mock('../../../rule_management/api/hooks/use_fetch_rule_by_id_query');
 
 const mockGetExceptionBuilderComponentLazy = getExceptionBuilderComponentLazy as jest.Mock<
@@ -51,6 +53,7 @@ const mockFetchIndexPatterns = useFetchIndexPatterns as jest.Mock<
 >;
 const mockUseSignalIndex = useSignalIndex as jest.Mock<Partial<ReturnType<typeof useSignalIndex>>>;
 const mockUseFetchIndex = useFetchIndex as jest.Mock;
+const mockUseAlertsPrivileges = useAlertsPrivileges as jest.Mock;
 
 const alertDataMock: AlertData = {
   '@timestamp': '1234567890',
@@ -74,6 +77,14 @@ describe('When the add exception modal is opened', () => {
       loading: false,
       signalIndexName: 'mock-siem-signals-index',
     }));
+    // The flyout resolves runtime fields for bulk close on every render, so
+    // the alerts-index fields fetch needs a default. A non-null `dataView`
+    // marks the fetch as completed.
+    mockUseFetchIndex.mockImplementation(() => [
+      false,
+      { indexPatterns: stubIndexPattern, dataView: { id: 'stub-alerts-data-view' } },
+    ]);
+    mockUseAlertsPrivileges.mockReturnValue({ hasAlertsUpdate: true });
   });
 
   afterEach(() => {
@@ -84,9 +95,10 @@ describe('When the add exception modal is opened', () => {
     let wrapper: ShallowWrapper;
     beforeEach(() => {
       // Mocks one of the hooks as loading
+      const indexPatterns = { fields: [], title: 'foo' };
       mockFetchIndexPatterns.mockImplementation(() => ({
         isLoading: true,
-        indexPatterns: { fields: [], title: 'foo' },
+        indexPatterns,
         getExtendedFields: () => Promise.resolve([]),
       }));
 
@@ -342,49 +354,54 @@ describe('When the add exception modal is opened', () => {
     describe('bulk closeable alert data is passed in', () => {
       let wrapper: ReactWrapper;
       beforeEach(async () => {
-        mockUseFetchIndex.mockImplementation(() => [
-          false,
-          {
-            indexPatterns: createStubIndexPattern({
-              spec: {
-                id: '1234',
-                title: 'filebeat-*',
-                fields: {
-                  'event.code': {
-                    name: 'event.code',
-                    type: 'string',
-                    aggregatable: true,
-                    searchable: true,
-                  },
-                  'file.path.caseless': {
-                    name: 'file.path.caseless',
-                    type: 'string',
-                    aggregatable: true,
-                    searchable: true,
-                  },
-                  subject_name: {
-                    name: 'subject_name',
-                    type: 'string',
-                    aggregatable: true,
-                    searchable: true,
-                  },
-                  trusted: {
-                    name: 'trusted',
-                    type: 'string',
-                    aggregatable: true,
-                    searchable: true,
-                  },
-                  'file.hash.sha256': {
-                    name: 'file.hash.sha256',
-                    type: 'string',
-                    aggregatable: true,
-                    searchable: true,
-                  },
-                },
+        const stubFields = createStubIndexPattern({
+          spec: {
+            id: '1234',
+            title: 'filebeat-*',
+            fields: {
+              'event.code': {
+                name: 'event.code',
+                type: 'string',
+                aggregatable: true,
+                searchable: true,
               },
-            }),
+              'file.path.caseless': {
+                name: 'file.path.caseless',
+                type: 'string',
+                aggregatable: true,
+                searchable: true,
+              },
+              subject_name: {
+                name: 'subject_name',
+                type: 'string',
+                aggregatable: true,
+                searchable: true,
+              },
+              trusted: {
+                name: 'trusted',
+                type: 'string',
+                aggregatable: true,
+                searchable: true,
+              },
+              'file.hash.sha256': {
+                name: 'file.hash.sha256',
+                type: 'string',
+                aggregatable: true,
+                searchable: true,
+              },
+            },
           },
-        ]);
+        });
+        mockUseFetchIndex.mockImplementation(() => [false, { indexPatterns: stubFields }]);
+        // After elastic/kibana#253666 the bulk-close gate sources its fields
+        // from `useFetchIndexPatterns` (the same data view backing the
+        // exception field picker) instead of the alerts wildcard. Surface the
+        // same set of fields here so the gate can recognise `file.hash.sha256`.
+        mockFetchIndexPatterns.mockImplementation(() => ({
+          isLoading: false,
+          indexPatterns: stubFields,
+          getExtendedFields: () => Promise.resolve([]),
+        }));
         wrapper = mount(
           <TestProviders>
             <AddExceptionFlyout
@@ -1029,6 +1046,129 @@ describe('When the add exception modal is opened', () => {
           warningExists: true,
         })
       ).toEqual({ ...exceptionItemsInitialState, partialCodeSignatureWarningExists: true });
+    });
+  });
+
+  describe('when the user does not have permissions to write alerts', () => {
+    let wrapper: ReactWrapper;
+    beforeAll(async () => {
+      mockUseAlertsPrivileges.mockReturnValue({ hasAlertsUpdate: false });
+      mockUseFetchIndex.mockImplementation(() => [
+        false,
+        {
+          indexPatterns: stubIndexPattern,
+        },
+      ]);
+
+      wrapper = mount(
+        <TestProviders>
+          <AddExceptionFlyout
+            rules={[
+              {
+                ...getRulesSchemaMock(),
+                index: ['filebeat-*'],
+                exceptions_list: [
+                  {
+                    id: 'endpoint_list',
+                    list_id: 'endpoint_list',
+                    namespace_type: 'agnostic',
+                    type: 'endpoint',
+                  },
+                ],
+              } as Rule,
+            ]}
+            isBulkAction={false}
+            alertData={alertDataMock}
+            isAlertDataLoading={false}
+            alertStatus="open"
+            isEndpointItem
+            showAlertCloseOptions
+            onCancel={jest.fn()}
+            onConfirm={jest.fn()}
+          />
+        </TestProviders>
+      );
+      const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
+      await waitFor(() =>
+        callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] })
+      );
+    });
+
+    afterAll(() => {
+      mockUseAlertsPrivileges.mockReturnValue({ hasAlertsUpdate: true });
+    });
+
+    it('should not render the close single alert checkbox', () => {
+      expect(
+        wrapper.find('[data-test-subj="closeAlertOnAddExceptionCheckbox"]').exists()
+      ).toBeFalsy();
+    });
+
+    it('should not render the bulk close alerts checkbox', () => {
+      expect(
+        wrapper.find('[data-test-subj="bulkCloseAlertOnAddExceptionCheckbox"]').exists()
+      ).toBeFalsy();
+    });
+  });
+
+  describe('bulk close and runtime-field resolution', () => {
+    const renderFlyout = () => {
+      render(
+        <TestProviders>
+          <AddExceptionFlyout
+            rules={[{ ...getRulesSchemaMock(), index: ['filebeat-*'] } as Rule]}
+            isBulkAction={false}
+            alertData={alertDataMock}
+            isAlertDataLoading={false}
+            alertStatus="open"
+            isEndpointItem={false}
+            showAlertCloseOptions
+            onCancel={jest.fn()}
+            onConfirm={jest.fn()}
+          />
+        </TestProviders>
+      );
+    };
+
+    const fillRequiredFields = async () => {
+      const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
+      await waitFor(() =>
+        callProps.onChange({ exceptionItems: [getExceptionListItemSchemaMock()] })
+      );
+      fireEvent.change(screen.getByTestId('exceptionFlyoutNameInput'), {
+        target: { value: 'Exception name' },
+      });
+    };
+
+    beforeEach(() => {
+      mockFetchIndexPatterns.mockImplementation(() => ({
+        isLoading: false,
+        indexPatterns: stubIndexPattern,
+        getExtendedFields: () => Promise.resolve([]),
+      }));
+    });
+
+    it('disables submit while the alerts-index fields are loading and bulk close is checked', async () => {
+      mockUseFetchIndex.mockImplementation(() => [true, { indexPatterns: stubIndexPattern }]);
+      renderFlyout();
+      await fillRequiredFields();
+
+      fireEvent.click(screen.getByTestId('bulkCloseAlertOnAddExceptionCheckbox'));
+
+      expect(screen.getByTestId('addExceptionConfirmButton')).toBeDisabled();
+    });
+
+    it('enables submit once the runtime-field map is resolved', async () => {
+      mockUseFetchIndex.mockImplementation(() => [
+        false,
+        { indexPatterns: stubIndexPattern, dataView: { id: 'stub-alerts-data-view' } },
+      ]);
+      renderFlyout();
+      await fillRequiredFields();
+
+      fireEvent.click(screen.getByTestId('bulkCloseAlertOnAddExceptionCheckbox'));
+
+      expect(screen.getByTestId('addExceptionConfirmButton')).not.toBeDisabled();
     });
   });
 });

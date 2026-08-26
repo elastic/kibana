@@ -10,6 +10,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { AggregationsCompositeAggregateKey } from '@elastic/elasticsearch/lib/api/types';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { getSummaryIndices } from './utils/get_summary_indices';
+import { decodeSearchAfter, encodeSearchAfter } from './utils/search_after';
 import type { SLOSettings } from '../domain/models';
 
 interface SLOSourceDocument {
@@ -58,16 +59,15 @@ export class SearchSLODefinitions {
 
   public async execute(params: SearchSLODefinitionsParams): Promise<SearchSLODefinitionResponse> {
     const { search, size = 10, searchAfter } = params ?? {};
+    if (size < 1 || size > 100) {
+      throw new Error('Size must be between 1 and 100');
+    }
     const { indices } = await getSummaryIndices(this.esClient, this.settings);
 
     try {
       let afterObj: AggregationsCompositeAggregateKey | undefined;
       if (searchAfter) {
-        try {
-          afterObj = JSON.parse(searchAfter) as AggregationsCompositeAggregateKey;
-        } catch (e) {
-          // ignore parse errors, treat as no after
-        }
+        afterObj = decodeSearchAfter(searchAfter);
       }
 
       const response = await this.esClient.search<SLOSourceDocument, SLOSearchAggregations>({
@@ -159,8 +159,8 @@ export class SearchSLODefinitions {
           groupBy,
         };
 
-        if (remoteName || kibanaUrl) {
-          item.remote = { remoteName: remoteName ?? '', kibanaUrl: kibanaUrl ?? '' };
+        if (remoteName) {
+          item.remote = { remoteName, kibanaUrl: kibanaUrl ?? '' };
         }
 
         return item;
@@ -170,7 +170,7 @@ export class SearchSLODefinitions {
 
       return {
         results,
-        searchAfter: afterKey ? JSON.stringify(afterKey) : undefined,
+        searchAfter: afterKey ? encodeSearchAfter(afterKey) : undefined,
       };
     } catch (error) {
       this.logger.error(`Error searching SLO Definitions: ${error}`);

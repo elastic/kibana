@@ -10,15 +10,26 @@
 import React, { useCallback, useEffect } from 'react';
 import { keys } from '@elastic/eui';
 import { usePerformanceContext } from '@kbn/ebt-tools';
+import { i18n } from '@kbn/i18n';
+import useToggle from 'react-use/lib/useToggle';
+import { useFetchMetricsData } from './hooks/use_fetch_metrics_data';
 import { METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ } from '../../../common/constants';
 import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
 import { ChartsGrid } from '../../charts_grid';
 import { EmptyState } from '../../empty_state/empty_state';
 import { useToolbarActions } from '../../toolbar/hooks/use_toolbar_actions';
-import { SearchButton } from '../../toolbar/right_side_actions/search_button';
-import { useMetricFields } from './hooks';
 import { MetricsExperienceGridContent } from './metrics_experience_grid_content';
-import type { UnifiedMetricsGridProps } from '../../../types';
+import { ChartSectionSearchError } from '../../chart_section_search_error/chart_section_search_error';
+import { GridSettingsFlyout } from '../../flyout';
+import type { Dimension, UnifiedMetricsGridProps } from '../../../types';
+import {
+  useDimensionsWipe,
+  useDiscoverFieldForBreakdown,
+  useMetricFieldsFilter,
+  useMetricsSort,
+  useResetPageOnDimensionsChange,
+} from './hooks';
+import { isSuppressedFetchError } from '../../chart/utils/is_suppressed_fetch_error';
 
 export const MetricsExperienceGrid = ({
   renderToggleActions,
@@ -30,17 +41,82 @@ export const MetricsExperienceGrid = ({
   services,
   fetch$: discoverFetch$,
   fetchParams,
-  isChartLoading: isDiscoverLoading,
   isComponentVisible,
+  isTabSelected,
+  breakdownField,
+  onBreakdownFieldChange,
 }: UnifiedMetricsGridProps) => {
-  const { searchTerm, isFullscreen, onSearchTermChange, onToggleFullscreen } =
-    useMetricsExperienceState();
+  const {
+    searchTerm,
+    isFullscreen,
+    onToggleFullscreen,
+    selectedDimensions,
+    onDimensionsChange,
+    onPageChange,
+    metricsSort,
+    profileId,
+    gridSettings,
+    onGridSettingsChange,
+    recentlyExploredMetrics,
+  } = useMetricsExperienceState();
+  const [isGridSettingsFlyoutOpen, toggleGridSettingsFlyout] = useToggle(false);
+  const {
+    metricItems,
+    allDimensions,
+    activeDimensions,
+    loading: isDiscoverLoading,
+    error: metricsInfoError,
+  } = useFetchMetricsData({
+    fetchParams,
+    services,
+    isComponentVisible,
+    selectedDimensionNames: selectedDimensions,
+    profileId,
+  });
 
-  const { allMetricFields, visibleMetricFields, dimensions } = useMetricFields();
+  const { filteredMetricItems } = useMetricFieldsFilter({
+    metricItems,
+    searchTerm,
+  });
+
+  const { sortField: sortBy, sortDirection: direction } = metricsSort;
+  const { sortedMetricItems } = useMetricsSort({
+    metricItems: filteredMetricItems,
+    sortBy,
+    direction,
+    recentlyExploredMetrics,
+  });
+
+  useDiscoverFieldForBreakdown(
+    breakdownField,
+    allDimensions,
+    selectedDimensions,
+    onDimensionsChange
+  );
+
+  useResetPageOnDimensionsChange(selectedDimensions, onPageChange);
+
+  const onToolbarDimensionsChange = useCallback(
+    (nextSelectedDimensions: Dimension[]) => {
+      onDimensionsChange(nextSelectedDimensions);
+      onBreakdownFieldChange?.(nextSelectedDimensions[0]?.name);
+    },
+    [onDimensionsChange, onBreakdownFieldChange]
+  );
+
+  useDimensionsWipe({
+    selectedDimensions,
+    allDimensions,
+    isLoading: isDiscoverLoading,
+    hasError: metricsInfoError != null,
+    breakdownField,
+    onSelectedDimensionsChange: onDimensionsChange,
+    onBreakdownFieldChange,
+  });
 
   const { onPageReady } = usePerformanceContext();
   useEffect(() => {
-    if (!isDiscoverLoading && allMetricFields.length > 0) {
+    if (!isDiscoverLoading && metricItems.length > 0) {
       onPageReady({
         meta: {
           rangeFrom: fetchParams.timeRange?.from,
@@ -48,23 +124,25 @@ export const MetricsExperienceGrid = ({
         },
         customMetrics: {
           key1: 'metric_experience_fields_count',
-          value1: allMetricFields.length,
+          value1: metricItems.length,
         },
       });
     }
   }, [
-    allMetricFields.length,
+    metricItems.length,
     onPageReady,
     fetchParams.timeRange?.from,
     fetchParams.timeRange?.to,
     isDiscoverLoading,
   ]);
 
-  const { toggleActions, leftSideActions, rightSideActions } = useToolbarActions({
-    allMetricFields,
-    dimensions,
+  const { toggleActions, leftSideActions, rightSideActions, searchInput } = useToolbarActions({
+    allDimensions,
+    metricItems,
     renderToggleActions,
+    onDimensionsChange: onToolbarDimensionsChange,
     isLoading: isDiscoverLoading,
+    onOpenGridSettings: toggleGridSettingsFlyout,
   });
 
   const onKeyDown = useCallback(
@@ -77,47 +155,62 @@ export const MetricsExperienceGrid = ({
     [isFullscreen, onToggleFullscreen]
   );
 
-  if (allMetricFields.length === 0) {
+  if (metricItems.length === 0 && isDiscoverLoading) {
     return <EmptyState isLoading={isDiscoverLoading} />;
   }
 
-  return (
-    <ChartsGrid
-      id="metricsExperienceGrid"
-      toolbarCss={chartToolbarCss}
-      toolbar={{
-        toggleActions,
-        leftSide: leftSideActions,
-        rightSide: rightSideActions,
-        additionalControls: {
-          prependRight: (
-            <SearchButton
-              isFullscreen={isFullscreen}
-              value={searchTerm}
-              onSearchTermChange={onSearchTermChange}
-              onKeyDown={onKeyDown}
-              data-test-subj="metricsExperienceGridToolbarSearch"
-            />
-          ),
-        },
-      }}
-      toolbarWrapAt={isFullscreen ? 'l' : 'xl'}
-      isComponentVisible={isComponentVisible}
-      isFullscreen={isFullscreen}
-      onKeyDown={onKeyDown}
-    >
-      <MetricsExperienceGridContent
-        fields={visibleMetricFields}
-        services={services}
-        discoverFetch$={discoverFetch$}
-        fetchParams={fetchParams}
-        onBrushEnd={onBrushEnd}
-        onFilter={onFilter}
-        actions={actions}
-        histogramCss={histogramCss}
-        isDiscoverLoading={isDiscoverLoading}
+  const showChartSectionSearchError =
+    metricsInfoError != null && !isDiscoverLoading && !isSuppressedFetchError(metricsInfoError);
+
+  if (showChartSectionSearchError) {
+    return (
+      <ChartSectionSearchError
+        error={metricsInfoError}
+        title={i18n.translate('metricsExperience.chartSectionError.title', {
+          defaultMessage: 'Unable to retrieve search results',
+        })}
       />
-    </ChartsGrid>
+    );
+  }
+
+  return (
+    <>
+      <ChartsGrid
+        id="metricsExperienceGrid"
+        toolbarCss={chartToolbarCss}
+        toolbar={{
+          toggleActions,
+          leftSide: leftSideActions,
+          rightSide: rightSideActions,
+          additionalControls: { prependRight: searchInput },
+        }}
+        toolbarWrapAt={isFullscreen ? 'l' : 'xl'}
+        isComponentVisible={isComponentVisible}
+        isFullscreen={isFullscreen}
+        onKeyDown={onKeyDown}
+      >
+        <MetricsExperienceGridContent
+          metricItems={sortedMetricItems}
+          activeDimensions={activeDimensions}
+          services={services}
+          discoverFetch$={discoverFetch$}
+          fetchParams={fetchParams}
+          onBrushEnd={onBrushEnd}
+          onFilter={onFilter}
+          actions={actions}
+          histogramCss={histogramCss}
+          isDiscoverLoading={isDiscoverLoading}
+          isTabSelected={isTabSelected}
+        />
+      </ChartsGrid>
+      {isGridSettingsFlyoutOpen && (
+        <GridSettingsFlyout
+          gridSettings={gridSettings}
+          onGridSettingsChange={onGridSettingsChange}
+          onClose={toggleGridSettingsFlyout}
+        />
+      )}
+    </>
   );
 };
 

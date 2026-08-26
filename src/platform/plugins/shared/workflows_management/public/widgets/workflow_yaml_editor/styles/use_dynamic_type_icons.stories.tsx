@@ -7,16 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexGrid, EuiFlexItem, EuiText } from '@elastic/eui';
+import type { Decorator } from '@storybook/react';
 import React from 'react';
+import { TypeRegistry } from '@kbn/alerts-ui-shared/lib';
+import { connectorsSpecs } from '@kbn/connector-specs';
+import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
+import { I18nProvider } from '@kbn/i18n-react';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import type { ActionTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import type { ConnectorTypeInfo } from '@kbn/workflows';
+import { HardcodedIcons } from '@kbn/workflows-ui';
 import { GlobalWorkflowEditorStyles } from './global_workflow_editor_styles';
 import { predefinedStepTypes, useDynamicTypeIcons } from './use_dynamic_type_icons';
 import type { ConnectorsResponse } from '../../../entities/connectors/model/types';
-
-export default {
-  title: 'Use Dynamic Type Icons',
-};
+import { mockUiSettingsService } from '../../../shared/mocks/mock_ui_settings_service';
 
 type MockConnectorTypeInfo = Pick<ConnectorTypeInfo, 'actionTypeId' | 'displayName'>;
 
@@ -26,96 +31,133 @@ interface MockConnectorsResponse {
   };
 }
 
+// Every connector spec, with the icon resolved exactly as `transformSpecToActionTypeModel`
+// does it in Kibana — no placeholders, so a blank chip here is a real broken icon.
+//
+// Legacy connector types (.slack, .jira, .torq, …) are absent: their icons live in
+// stack_connectors, which this plugin's type graph doesn't reference, and reaching into
+// it emits declaration files across that plugin's source tree. Showing them as plugs
+// would say nothing, so they're left out rather than faked.
+const connectorTypeRegistry = new TypeRegistry<ActionTypeModel>();
+
+for (const { metadata } of Object.values(connectorsSpecs)) {
+  const { id, displayName, icon } = metadata;
+  connectorTypeRegistry.register({
+    id,
+    actionTypeTitle: displayName,
+    iconClass: icon ?? ConnectorIconsMap.get(id) ?? 'plugs',
+  } as unknown as ActionTypeModel);
+}
+
+const CONNECTOR_TYPES: MockConnectorTypeInfo[] = connectorTypeRegistry
+  .list()
+  .map(({ id, actionTypeTitle }) => ({ actionTypeId: id, displayName: actionTypeTitle ?? id }))
+  .sort((a, b) => a.actionTypeId.localeCompare(b.actionTypeId));
+
 const mockConnectorsResponse: MockConnectorsResponse = {
-  connectorTypes: {
-    slack: {
-      actionTypeId: '.slack',
-      displayName: 'Slack',
-    },
-    genAi: {
-      actionTypeId: '.gen-ai',
-      displayName: 'Gen AI',
-    },
-    bedrock: {
-      actionTypeId: '.bedrock',
-      displayName: 'Bedrock',
-    },
-    gemini: {
-      actionTypeId: '.gemini',
-      displayName: 'Gemini',
-    },
-    serviceNow: {
-      actionTypeId: '.servicenow',
-      displayName: 'Service Now',
-    },
-    serviceNowSir: {
-      actionTypeId: '.servicenow-sir',
-      displayName: 'Service Now SecOps',
-    },
-    serviceNowItom: {
-      actionTypeId: '.servicenow-itom',
-      displayName: 'Service Now ITOM',
-    },
-    jira: {
-      actionTypeId: '.jira',
-      displayName: 'Jira',
-    },
-    teams: {
-      actionTypeId: '.teams',
-      displayName: 'Teams',
-    },
-    torq: {
-      actionTypeId: '.torq',
-      displayName: 'Torq',
-    },
-    opsgenie: {
-      actionTypeId: '.opsgenie',
-      displayName: 'Opsgenie',
-    },
-    jiraServiceManagement: {
-      actionTypeId: '.jira-service-management',
-      displayName: 'Jira Service Management',
-    },
-    tines: {
-      actionTypeId: '.tines',
-      displayName: 'Tines',
-    },
-    xmatters: {
-      actionTypeId: '.xmatters',
-      displayName: 'Xmatters',
-    },
-    swimlane: {
-      actionTypeId: '.swimlane',
-      displayName: 'Swimlane',
-    },
-    email: {
-      actionTypeId: '.email',
-      displayName: 'Email',
-    },
-  },
+  connectorTypes: Object.fromEntries(CONNECTOR_TYPES.map((c) => [c.actionTypeId, c])),
+};
+
+const decorator: Decorator = (story) => {
+  return (
+    <I18nProvider>
+      <KibanaContextProvider
+        services={
+          {
+            application: {
+              capabilities: { workflowsManagement: {} },
+              getUrlForApp: () => '',
+            },
+            settings: { client: mockUiSettingsService() },
+            storage: {
+              storage: {},
+              set: () => {},
+              remove: () => {},
+              clear: () => {},
+              get: () => {},
+            },
+            triggersActionsUi: {
+              actionTypeRegistry: connectorTypeRegistry,
+              ruleTypeRegistry: new TypeRegistry(),
+            },
+            workflowsExtensions: {
+              getStepDefinition: () => undefined,
+              getAllStepDefinitions: () => [],
+            },
+          } as unknown as Parameters<typeof KibanaContextProvider>[0]['services']
+        }
+      >
+        {story()}
+      </KibanaContextProvider>
+    </I18nProvider>
+  );
+};
+
+export default {
+  title: 'Workflows Icons/Editor',
+  decorators: [decorator],
 };
 
 const allTypes = [
   ...predefinedStepTypes,
-  ...Object.values(mockConnectorsResponse.connectorTypes).map((connector) => ({
-    actionTypeId: connector.actionTypeId.slice(1),
-    displayName: connector.displayName,
+  ...CONNECTOR_TYPES.map(({ actionTypeId, displayName }) => ({
+    actionTypeId: actionTypeId.slice(1),
+    displayName,
   })),
 ];
 
-export const Default = () => {
+const hasHardcodedIcon = (actionTypeId: string): boolean =>
+  actionTypeId in HardcodedIcons || `.${actionTypeId}` in HardcodedIcons;
+
+const withHardcodedIcons = allTypes.filter((t) => hasHardcodedIcon(t.actionTypeId));
+const withConnectorIcons = allTypes.filter((t) => !hasHardcodedIcon(t.actionTypeId));
+
+const SectionHeading = ({ children, first }: { children: string; first?: boolean }) => (
+  <EuiText size="xs" color="subdued" style={{ margin: first ? '0 0 12px' : '16px 0 12px' }}>
+    <strong>{children}</strong>
+  </EuiText>
+);
+
+const TypeChip = ({ actionTypeId }: { actionTypeId: string }) => (
+  <span className={`type-inline-highlight type-${actionTypeId.replaceAll('.', '-')}`}>
+    {actionTypeId}
+  </span>
+);
+
+const DynamicTypeIconsDemo = () => {
   useDynamicTypeIcons(mockConnectorsResponse as ConnectorsResponse);
   return (
-    <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
+    <div className="monaco-editor" style={{ fontFamily: 'monospace', fontSize: 13 }}>
       <GlobalWorkflowEditorStyles />
-      {allTypes.map((connector) => (
-        <div
-          key={connector.actionTypeId}
-          className={`type-inline-highlight type-${connector.actionTypeId}`}
-        >
-          {connector.displayName}
-        </div>
-      ))}
-    </EuiFlexGroup>
+      <SectionHeading first>{'Hardcoded icons (bundled SVGs)'}</SectionHeading>
+      <EuiFlexGrid columns={3} gutterSize="s">
+        {withHardcodedIcons.map((t) => (
+          <EuiFlexItem key={t.actionTypeId}>
+            <div css={{ position: 'relative', height: '20px' }}>
+              <div className="view-line">
+                <TypeChip actionTypeId={t.actionTypeId} />
+              </div>
+            </div>
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGrid>
+
+      <SectionHeading>
+        {`Connector icons from the action type registry (${withConnectorIcons.length})`}
+      </SectionHeading>
+      <EuiFlexGrid columns={3} gutterSize="s">
+        {withConnectorIcons.map((t) => (
+          <EuiFlexItem key={t.actionTypeId}>
+            <div css={{ position: 'relative', height: '20px' }}>
+              <div className="view-line">
+                <TypeChip actionTypeId={t.actionTypeId} />
+              </div>
+            </div>
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGrid>
+    </div>
   );
 };
+
+export const Default = () => <DynamicTypeIconsDemo />;

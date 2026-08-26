@@ -8,20 +8,42 @@
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react';
 import { DOCUMENT_TYPE_ENTITY } from '@kbn/cloud-security-posture-common/schema/graph/v1';
-import { groupedItemClick$, __resetGroupedItemClickDedupe } from '../../../events';
 import {
   GROUPED_ITEM_TITLE_TEST_ID_LINK,
   GROUPED_ITEM_TITLE_TEST_ID_TEXT,
   GROUPED_ITEM_TITLE_TOOLTIP_TEST_ID,
 } from '../../../test_ids';
-import { HeaderRow } from './header_row';
+import { HeaderRow as BaseHeaderRow } from './header_row';
 import type { EntityItem } from '../types';
+import { getOrCreateFilterStore, destroyFilterStore } from '../../../../filters/filter_store';
+
+const mockOnShowDocument = jest.fn();
+const mockOnShowEntity = jest.fn();
+
+// HeaderRow delegates both event/alert and entity previews to the consumer via props, so the test
+// wrapper supplies default handlers and cases assert against these mocks.
+const HeaderRow = (
+  props: Omit<React.ComponentProps<typeof BaseHeaderRow>, 'onShowDocument' | 'onShowEntity'>
+) => (
+  <BaseHeaderRow {...props} onShowDocument={mockOnShowDocument} onShowEntity={mockOnShowEntity} />
+);
 
 const flushMicrotasks = () => new Promise((r) => setTimeout(r, 0));
 
+// Use unique scopeId per test run to prevent cross-test pollution
+let TEST_SCOPE_ID: string;
+
 describe('<HeaderRow />', () => {
   beforeEach(() => {
-    __resetGroupedItemClickDedupe();
+    // Generate unique scopeId for each test
+    TEST_SCOPE_ID = `test-scope-${Math.random().toString(36).substring(7)}`;
+    getOrCreateFilterStore(TEST_SCOPE_ID);
+    mockOnShowDocument.mockClear();
+    mockOnShowEntity.mockClear();
+  });
+
+  afterEach(() => {
+    destroyFilterStore(TEST_SCOPE_ID);
   });
 
   describe('enriched entities', () => {
@@ -30,52 +52,48 @@ describe('<HeaderRow />', () => {
         itemType: DOCUMENT_TYPE_ENTITY,
         id: 'entity-1',
         label: 'Entity One',
-        availableInEntityStore: true,
+        entity: { availableInEntityStore: true },
       };
 
-      const { getByTestId } = render(<HeaderRow item={item} />);
+      const { getByTestId } = render(<HeaderRow scopeId={TEST_SCOPE_ID} item={item} />);
       const element = getByTestId(GROUPED_ITEM_TITLE_TEST_ID_LINK);
       expect(element).toBeInTheDocument();
     });
 
-    it('emits click event once for a single click on enriched entity', async () => {
+    it('calls onShowEntity for a single click on enriched entity', async () => {
       const item: EntityItem = {
         itemType: DOCUMENT_TYPE_ENTITY,
         id: 'entity-1',
         label: 'Entity One',
-        availableInEntityStore: true,
+        entity: { availableInEntityStore: true },
       };
-      const next = jest.fn();
-      const sub = groupedItemClick$.subscribe(next);
 
-      const { getByTestId } = render(<HeaderRow item={item} />);
+      const { getByTestId } = render(<HeaderRow scopeId={TEST_SCOPE_ID} item={item} />);
 
       fireEvent.click(getByTestId(GROUPED_ITEM_TITLE_TEST_ID_LINK));
       await flushMicrotasks();
 
-      expect(next).toHaveBeenCalledTimes(1);
-      expect(next.mock.calls[0][0]).toMatchObject({ id: 'entity-1' });
-      sub.unsubscribe();
+      expect(mockOnShowEntity).toHaveBeenCalledTimes(1);
+      expect(mockOnShowEntity).toHaveBeenCalledWith(
+        expect.objectContaining({ entityId: 'entity-1' })
+      );
     });
 
-    it('suppresses rapid duplicate clicks within dedupe window for enriched entity', async () => {
+    it('calls onShowEntity for each click on enriched entity', async () => {
       const item: EntityItem = {
         itemType: DOCUMENT_TYPE_ENTITY,
         id: 'entity-dup',
         label: 'Dup',
-        availableInEntityStore: true,
+        entity: { availableInEntityStore: true },
       };
-      const next = jest.fn();
-      const sub = groupedItemClick$.subscribe(next);
 
-      const { getByTestId } = render(<HeaderRow item={item} />);
+      const { getByTestId } = render(<HeaderRow scopeId={TEST_SCOPE_ID} item={item} />);
 
       const link = getByTestId(GROUPED_ITEM_TITLE_TEST_ID_LINK);
       Array.from({ length: 3 }).forEach(() => fireEvent.click(link));
       await flushMicrotasks();
 
-      expect(next).toHaveBeenCalledTimes(1);
-      sub.unsubscribe();
+      expect(mockOnShowEntity).toHaveBeenCalledTimes(3);
     });
   });
 
@@ -85,10 +103,12 @@ describe('<HeaderRow />', () => {
         itemType: DOCUMENT_TYPE_ENTITY,
         id: 'entity-2',
         label: 'Entity Two',
-        availableInEntityStore: false,
+        entity: { availableInEntityStore: false },
       };
 
-      const { getByTestId, queryByTestId } = render(<HeaderRow item={item} />);
+      const { getByTestId, queryByTestId } = render(
+        <HeaderRow scopeId={TEST_SCOPE_ID} item={item} />
+      );
       const element = getByTestId(GROUPED_ITEM_TITLE_TEST_ID_TEXT);
       expect(element).toBeInTheDocument();
 
@@ -103,23 +123,20 @@ describe('<HeaderRow />', () => {
       });
     });
 
-    it('does not emit click event for non-enriched entity', async () => {
+    it('does not call onShowEntity for non-enriched entity', async () => {
       const item: EntityItem = {
         itemType: DOCUMENT_TYPE_ENTITY,
         id: 'entity-2',
         label: 'Entity Two',
-        availableInEntityStore: false,
+        entity: { availableInEntityStore: false },
       };
-      const next = jest.fn();
-      const sub = groupedItemClick$.subscribe(next);
 
-      const { getByTestId } = render(<HeaderRow item={item} />);
+      const { getByTestId } = render(<HeaderRow scopeId={TEST_SCOPE_ID} item={item} />);
 
       fireEvent.click(getByTestId(GROUPED_ITEM_TITLE_TEST_ID_TEXT));
       await flushMicrotasks();
 
-      expect(next).not.toHaveBeenCalled();
-      sub.unsubscribe();
+      expect(mockOnShowEntity).not.toHaveBeenCalled();
     });
 
     it('renders EuiText when availableInEntityStore is undefined', () => {
@@ -127,9 +144,10 @@ describe('<HeaderRow />', () => {
         itemType: DOCUMENT_TYPE_ENTITY,
         id: 'entity-3',
         label: 'Entity Three',
+        entity: {},
       };
 
-      const { getByTestId } = render(<HeaderRow item={item} />);
+      const { getByTestId } = render(<HeaderRow scopeId={TEST_SCOPE_ID} item={item} />);
       const element = getByTestId(GROUPED_ITEM_TITLE_TEST_ID_TEXT);
       expect(element).toBeInTheDocument();
     });

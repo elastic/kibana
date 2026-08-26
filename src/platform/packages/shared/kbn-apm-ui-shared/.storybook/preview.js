@@ -9,6 +9,7 @@
 
 import { EuiThemeProviderDecorator } from '@kbn/kibana-react-plugin/common';
 import * as jest from 'jest-mock';
+import '@elastic/charts/dist/theme_only_light.css';
 
 window.jest = jest;
 export const decorators = [EuiThemeProviderDecorator];

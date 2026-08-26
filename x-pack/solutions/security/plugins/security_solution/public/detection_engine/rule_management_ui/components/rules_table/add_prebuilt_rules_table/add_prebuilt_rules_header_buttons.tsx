@@ -14,6 +14,7 @@ import {
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiPopover,
+  EuiToolTip,
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import useBoolean from 'react-use/lib/useBoolean';
@@ -26,7 +27,7 @@ export const AddPrebuiltRulesHeaderButtons = () => {
     state: {
       selectedRules,
       isRefetching,
-      isUpgradingSecurityPackages,
+      isInitializingPrebuiltRulesPackage,
       isAnyRuleInstalling,
       hasRulesToInstall,
     },
@@ -37,7 +38,8 @@ export const AddPrebuiltRulesHeaderButtons = () => {
   const numberOfSelectedRules = selectedRules.length ?? 0;
   const shouldDisplayInstallSelectedRulesButton = numberOfSelectedRules > 0;
 
-  const isRequestInProgress = isAnyRuleInstalling || isRefetching || isUpgradingSecurityPackages;
+  const isRequestInProgress =
+    isAnyRuleInstalling || isRefetching || isInitializingPrebuiltRulesPackage;
 
   const [isOverflowPopoverOpen, setOverflowPopover] = useBoolean(false);
 
@@ -84,21 +86,27 @@ export const AddPrebuiltRulesHeaderButtons = () => {
           <EuiFlexItem grow={false}>
             <EuiPopover
               button={
-                <EuiButtonIcon
-                  display="base"
-                  size="m"
-                  iconType="boxesVertical"
-                  aria-label={i18n.INSTALL_RULES_OVERFLOW_BUTTON_ARIA_LABEL}
-                  onClick={onOverflowButtonClick}
-                  disabled={!canEditRules || isRequestInProgress}
-                />
+                <EuiToolTip
+                  content={i18n.INSTALL_RULES_OVERFLOW_BUTTON_ARIA_LABEL}
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    display="base"
+                    size="m"
+                    iconType="boxesVertical"
+                    aria-label={i18n.INSTALL_RULES_OVERFLOW_BUTTON_ARIA_LABEL}
+                    onClick={onOverflowButtonClick}
+                    disabled={!canEditRules || isRequestInProgress}
+                  />
+                </EuiToolTip>
               }
               isOpen={isOverflowPopoverOpen}
               closePopover={closeOverflowPopover}
               panelPaddingSize="s"
               anchorPosition="downRight"
+              aria-label={i18n.INSTALL_RULES_OVERFLOW_BUTTON_ARIA_LABEL}
             >
-              <EuiContextMenuPanel size="s" items={overflowItems} />
+              <EuiContextMenuPanel items={overflowItems} />
             </EuiPopover>
           </EuiFlexItem>
         </>
@@ -106,7 +114,7 @@ export const AddPrebuiltRulesHeaderButtons = () => {
       <EuiFlexItem grow={false}>
         <EuiButton
           fill
-          iconType="plusInCircle"
+          iconType="plusCircle"
           data-test-subj="installAllRulesButton"
           onClick={installAllRules}
           disabled={!canEditRules || !hasRulesToInstall || isRequestInProgress}

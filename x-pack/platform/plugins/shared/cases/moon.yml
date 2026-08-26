@@ -4,24 +4,25 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/cases-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-cases'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/cases-plugin'
+  title: '@kbn/cases-plugin'
   description: Moon project for @kbn/cases-plugin
   channel: ''
   owner: '@elastic/kibana-cases'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/shared/cases
+  sourceRoot: x-pack/platform/plugins/shared/cases
 dependsOn:
   - '@kbn/core'
   - '@kbn/lens-plugin'
+  - '@kbn/lens-common'
   - '@kbn/security-plugin'
   - '@kbn/spaces-plugin'
+  - '@kbn/data-views-plugin'
   - '@kbn/actions-plugin'
   - '@kbn/rule-registry-plugin'
   - '@kbn/triggers-actions-ui-plugin'
@@ -57,6 +58,7 @@ dependsOn:
   - '@kbn/core-saved-objects-base-server-mocks'
   - '@kbn/core-saved-objects-utils-server'
   - '@kbn/shared-ux-router'
+  - '@kbn/shared-ux-utility'
   - '@kbn/files-plugin'
   - '@kbn/shared-ux-file-types'
   - '@kbn/shared-ux-file-context'
@@ -78,9 +80,9 @@ dependsOn:
   - '@kbn/core-logging-server-mocks'
   - '@kbn/core-logging-browser-mocks'
   - '@kbn/presentation-publishing'
-  - '@kbn/securitysolution-rules'
   - '@kbn/alerts-ui-shared'
   - '@kbn/cloud-plugin'
+  - '@kbn/response-ops-detections-close-reason'
   - '@kbn/response-ops-alerts-table'
   - '@kbn/field-formats-plugin'
   - '@kbn/core-http-server-mocks'
@@ -90,7 +92,6 @@ dependsOn:
   - '@kbn/code-editor'
   - '@kbn/logging'
   - '@kbn/core-test-helpers-model-versions'
-  - '@kbn/alerting-types'
   - '@kbn/elastic-assistant-common'
   - '@kbn/test'
   - '@kbn/dev-utils'
@@ -105,6 +106,28 @@ dependsOn:
   - '@kbn/zod'
   - '@kbn/securitysolution-es-utils'
   - '@kbn/response-ops-retry-service'
+  - '@kbn/openapi-generator'
+  - '@kbn/workflows-extensions'
+  - '@kbn/workflows'
+  - '@kbn/agent-builder-plugin'
+  - '@kbn/agent-builder-common'
+  - '@kbn/agent-builder-server'
+  - '@kbn/agent-builder-browser'
+  - '@kbn/lens-embeddable-utils'
+  - '@kbn/resizable-layout'
+  - '@kbn/css-utils'
+  - '@kbn/shared-ux-column-presets'
+  - '@kbn/core-ui-settings-browser'
+  - '@kbn/dashboard-plugin'
+  - '@kbn/maps-plugin'
+  - '@kbn/agent-builder-dashboards-common'
+  - '@kbn/saved-objects-tagging-oss-plugin'
+  - '@kbn/core-spaces-common'
+  - '@kbn/app-header'
+  - '@kbn/core-chrome-app-menu-components'
+  - '@kbn/ai-assistant-common'
+  - '@kbn/management-settings-ids'
+  - '@kbn/core-http-common'
 tags:
   - plugin
   - prod
@@ -118,16 +141,6 @@ fileGroups:
     - server/**/*
     - scripts/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

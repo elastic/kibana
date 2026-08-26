@@ -89,6 +89,88 @@ describe('transformBulkActionsToContextMenuItems', () => {
     expect(result.items[0].onClick).toBeUndefined();
   });
 
+  it('should close the popover before invoking the item onClick (direct-action item)', () => {
+    const callOrder: string[] = [];
+    mockClosePopover.mockImplementation(() => callOrder.push('closePopover'));
+    const onClick = jest.fn(() => callOrder.push('itemOnClick'));
+
+    const bulkActionItems: BulkAttackActionItems = {
+      items: [
+        {
+          key: 'test-item',
+          label: 'Test Item',
+          'data-test-subj': 'test-item',
+          onClick,
+          disableOnQuery: true,
+        },
+      ],
+      panels: [],
+    };
+
+    const result = transformBulkActionsToContextMenuItems({
+      bulkActionItems,
+      alertItems: mockAlertItems,
+      closePopover: mockClosePopover,
+      setIsLoading: mockSetIsLoading,
+    });
+
+    (result.items[0].onClick as () => void)();
+
+    expect(mockClosePopover).toHaveBeenCalledTimes(1);
+    expect(onClick).toHaveBeenCalledTimes(1);
+    expect(callOrder).toEqual(['closePopover', 'itemOnClick']);
+  });
+
+  it('does not throw when closePopover is not provided', () => {
+    const onClick = jest.fn();
+    const bulkActionItems: BulkAttackActionItems = {
+      items: [
+        {
+          key: 'test-item',
+          label: 'Test Item',
+          'data-test-subj': 'test-item',
+          onClick,
+          disableOnQuery: true,
+        },
+      ],
+      panels: [],
+    };
+
+    const result = transformBulkActionsToContextMenuItems({
+      bulkActionItems,
+      alertItems: mockAlertItems,
+      setIsLoading: mockSetIsLoading,
+    });
+
+    expect(() => (result.items[0].onClick as () => void)()).not.toThrow();
+    expect(onClick).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not close the popover for sub-panel-navigating items', () => {
+    const bulkActionItems: BulkAttackActionItems = {
+      items: [
+        {
+          key: 'test-item',
+          label: 'Test Item',
+          'data-test-subj': 'test-item',
+          panel: 2,
+          disableOnQuery: true,
+        },
+      ],
+      panels: [],
+    };
+
+    const result = transformBulkActionsToContextMenuItems({
+      bulkActionItems,
+      alertItems: mockAlertItems,
+      closePopover: mockClosePopover,
+      setIsLoading: mockSetIsLoading,
+    });
+
+    expect(result.items[0].onClick).toBeUndefined();
+    expect(mockClosePopover).not.toHaveBeenCalled();
+  });
+
   it('should transform bulk action panels to context menu panels', () => {
     const mockRenderContent = jest.fn(() => React.createElement('div', null, 'Panel Content'));
 

@@ -6,11 +6,21 @@
  */
 
 import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
-import { waitForApmSettingsHeaderLink } from '../page_helpers';
+import { expect } from '@kbn/scout-oblt/ui';
+import {
+  dismissGlobalToastsIfPresent,
+  waitForApmAppMenuReady,
+  waitForSearchBarReady,
+} from '../page_helpers';
 import { EXTENDED_TIMEOUT } from '../constants';
+import { type TraceWaterfallFlyout, createTraceWaterfallFlyout } from './trace_waterfall_flyout';
 
 export class TransactionDetailsPage {
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
+  public readonly traceWaterfallFlyout: TraceWaterfallFlyout;
+
+  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+    this.traceWaterfallFlyout = createTraceWaterfallFlyout(page);
+  }
 
   async goToTransactionDetails(params: {
     serviceName: string;
@@ -28,9 +38,63 @@ export class TransactionDetailsPage {
           rangeFrom: start,
           rangeTo: end,
         }
-      )}`
+      )}`,
+      { waitUntil: 'commit' }
     );
-    await waitForApmSettingsHeaderLink(this.page);
+    await waitForApmAppMenuReady(this.page);
+  }
+
+  /**
+   * Navigate to transaction view URL without transactionName (invalid URL).
+   */
+  async goToTransactionViewWithoutTransactionName(params: {
+    serviceName: string;
+    start: string;
+    end: string;
+  }) {
+    const { serviceName, start, end } = params;
+    const urlServiceName = encodeURIComponent(serviceName);
+
+    await this.page.goto(
+      `${this.kbnUrl.app('apm')}/services/${urlServiceName}/transactions/view?${new URLSearchParams(
+        {
+          rangeFrom: start,
+          rangeTo: end,
+          comparisonEnabled: 'false',
+          showCriticalPath: '',
+          environment: 'ENVIRONMENT_ALL',
+          kuery: '',
+          serviceGroup: '',
+        }
+      )}`,
+      { waitUntil: 'commit' }
+    );
+    await waitForApmAppMenuReady(this.page);
+  }
+
+  /**
+   * From the current page URL (must be transaction details view), remove the
+   * transactionName query param and navigate to that URL. Used to simulate
+   * a user editing the URL or following a bad link. The app should redirect
+   * to the transaction list instead of showing 404.
+   */
+  async removeTransactionNameFromUrlAndNavigate() {
+    const url = new URL(this.page.url());
+    url.searchParams.delete('transactionName');
+    await this.page.goto(url.toString(), { waitUntil: 'commit' });
+    await waitForApmAppMenuReady(this.page);
+  }
+
+  /**
+   * Assert the current page is the transaction list (not 404, not view).
+   * Use after removeTransactionNameFromUrlAndNavigate to verify redirect.
+   */
+  async expectTransactionListPageLoaded(serviceName: string) {
+    await this.page
+      .getByRole('heading', { name: 'Transactions', exact: true })
+      .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+    await expect(this.page.getByTestId('appHeaderTitle')).toHaveText(serviceName);
+    await expect(this.page.getByTestId('appNotFoundPageContent')).toBeHidden();
   }
 
   /**
@@ -52,20 +116,25 @@ export class TransactionDetailsPage {
         transactionType: 'request',
         comparisonEnabled: 'true',
         offset: '1d',
-      })}`
+      })}`,
+      { waitUntil: 'commit' }
     );
-    await waitForApmSettingsHeaderLink(this.page);
+    await this.waitForPageToLoad(this.page);
   }
 
   async reload() {
     await this.page.reload();
-    await waitForApmSettingsHeaderLink(this.page);
+    await waitForApmAppMenuReady(this.page);
   }
 
   async fillApmUnifiedSearchBar(query: string) {
     const searchBar = this.page.getByTestId('apmUnifiedSearchBar');
     await searchBar.fill(query);
     await searchBar.press('Enter');
+  }
+
+  async waitForPageToLoad(page: ScoutPage) {
+    await waitForSearchBarReady(page);
   }
 
   // Span links methods
@@ -108,6 +177,7 @@ export class TransactionDetailsPage {
    * Open the transaction action menu by clicking the "Investigate" button
    */
   async openActionMenu() {
+    await dismissGlobalToastsIfPresent(this.page);
     const investigateButton = this.page.getByTestId('apmActionMenuButtonInvestigateButton');
     await investigateButton.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
     await investigateButton.scrollIntoViewIfNeeded();
@@ -118,10 +188,32 @@ export class TransactionDetailsPage {
   }
 
   /**
+   * Locate a custom link by its label, expanding the "Show all" overflow when the link
+   * sits past the first few entries the Investigate menu renders directly (on a shared
+   * deployment sibling suites can push a link into the collapsed overflow).
+   */
+  async revealCustomLink(label: string) {
+    const link = this.page.getByRole('link', { name: label });
+    const showAllButton = this.page.getByTestId('apmBottomSectionButton');
+    // Wait for either the target link or the overflow toggle — whichever appears first
+    // once the custom-links API responds. Using separate locators (instead of .or() which
+    // would require .first() and trigger the no-nth-methods lint rule) avoids strict-mode
+    // violations while still short-circuiting as soon as either element is visible.
+    await Promise.race([
+      link.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT }),
+      showAllButton.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT }),
+    ]);
+    if (!(await link.isVisible()) && (await showAllButton.isVisible())) {
+      await showAllButton.click();
+    }
+    return link;
+  }
+
+  /**
    * Get the href attribute of a custom link by its label
    */
   async getCustomLinkHref(label: string): Promise<string | null> {
-    const link = this.page.getByRole('link', { name: label });
+    const link = await this.revealCustomLink(label);
     await link.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
     return await link.getAttribute('href');
   }

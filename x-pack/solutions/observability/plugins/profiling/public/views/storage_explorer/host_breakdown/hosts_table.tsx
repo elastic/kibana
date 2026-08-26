@@ -199,6 +199,9 @@ export function HostsTable({ data = [], hasDistinctProbabilisticValues }: Props)
       sorting={sorting}
       pagination={{ pageSize: 10, showPerPageOptions: false, ...pagination }}
       onTableChange={onTableChange}
+      tableCaption={i18n.translate('xpack.profiling.storageExplorer.hostsTable.caption', {
+        defaultMessage: 'Host storage usage',
+      })}
     />
   );
 }

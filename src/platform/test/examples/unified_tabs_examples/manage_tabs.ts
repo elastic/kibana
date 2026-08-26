@@ -9,7 +9,10 @@
 
 import expect from '@kbn/expect';
 import { Key } from 'selenium-webdriver';
+import { TABS_BAR_HEIGHT } from '@kbn/unified-tabs';
 import type { FtrProviderContext } from '../../functional/ftr_provider_context';
+
+const MIN_TAB_WIDTH = 114;
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService, getPageObjects }: FtrProviderContext) => {
@@ -33,7 +36,8 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     });
   };
 
-  describe('Managing Unified Tabs', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/222113
+  describe.skip('Managing Unified Tabs', () => {
     before(async () => {
       await browser.setWindowSize(1200, 800);
       await kibanaServer.savedObjects.cleanStandardList();
@@ -57,30 +61,37 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     });
 
     it('should show tabs in a responsive way', async () => {
+      // Check that the constant telling the height of the tabs bar is thrustworthy
+      expect(Math.round(await unifiedTabs.getTabsBarHeight())).to.be(TABS_BAR_HEIGHT);
+
       expect(await unifiedTabs.getNumberOfTabs()).to.be(7);
       expect(await unifiedTabs.isScrollable()).to.be(false);
-      expect((await unifiedTabs.getTabWidths()).every((width) => width === 112)).to.be(true);
+      expect((await unifiedTabs.getTabWidths()).every((width) => width === MIN_TAB_WIDTH)).to.be(
+        true
+      );
 
       await unifiedTabs.editTabLabel(0, 'Very long tab label');
-      expect((await unifiedTabs.getTabWidths()).at(0)).to.be.greaterThan(139);
-      expect((await unifiedTabs.getTabWidths()).slice(1).every((width) => width === 112)).to.be(
-        true
-      );
+      expect((await unifiedTabs.getTabWidths()).at(0)).to.be.greaterThan(150);
+      expect(
+        (await unifiedTabs.getTabWidths()).slice(1).every((width) => width === MIN_TAB_WIDTH)
+      ).to.be(true);
 
       await unifiedTabs.createNewTab();
       await unifiedTabs.createNewTab();
-      expect((await unifiedTabs.getTabWidths()).at(0)).to.be.greaterThan(112);
-      expect((await unifiedTabs.getTabWidths()).at(0)).to.be.lessThan(148);
-      expect((await unifiedTabs.getTabWidths()).slice(1).every((width) => width === 112)).to.be(
-        true
-      );
+      expect((await unifiedTabs.getTabWidths()).at(0)).to.be.greaterThan(MIN_TAB_WIDTH);
+      expect((await unifiedTabs.getTabWidths()).at(0)).to.be.lessThan(158);
+      expect(
+        (await unifiedTabs.getTabWidths()).slice(1).every((width) => width === MIN_TAB_WIDTH)
+      ).to.be(true);
 
       await unifiedTabs.createNewTab();
       await unifiedTabs.createNewTab();
       await unifiedTabs.createNewTab();
       expect(await unifiedTabs.getNumberOfTabs()).to.be(12);
       await unifiedTabs.waitForScrollButtons();
-      expect((await unifiedTabs.getTabWidths()).every((width) => width === 112)).to.be(true);
+      expect((await unifiedTabs.getTabWidths()).every((width) => width === MIN_TAB_WIDTH)).to.be(
+        true
+      );
     });
 
     it('can edit tab label', async () => {

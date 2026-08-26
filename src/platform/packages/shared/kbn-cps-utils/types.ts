@@ -9,6 +9,7 @@
 
 import type { ProjectRouting } from '@kbn/es-query';
 import type { Observable } from 'rxjs';
+import type { HeaderContextMenuItemProps } from './components/project_picker_update';
 
 /**
  * Access levels for project routing picker
@@ -21,6 +22,13 @@ export enum ProjectRoutingAccess {
   /** Full functionality - can change project scope */
   EDITABLE = 'editable',
 }
+
+/**
+ * Function that determines the project picker access level for a given location.
+ * Apps register one of these via `registerAppAccess` to control picker behavior
+ * based on runtime conditions (feature flags, config values, route patterns, etc.).
+ */
+export type CPSAppAccessResolver = (location: string) => ProjectRoutingAccess;
 
 export interface CPSProject {
   _id: string;
@@ -41,14 +49,26 @@ export interface ProjectsData {
   origin: CPSProject | null;
   linkedProjects: CPSProject[];
 }
+export interface CPSConfigurationLinks {
+  currentSpace: HeaderContextMenuItemProps;
+  manageCrossProjectSearch?: HeaderContextMenuItemProps;
+}
 
 export interface ICPSManager {
-  fetchProjects(): Promise<ProjectsData | null>;
-  refresh(): Promise<ProjectsData | null>;
+  whenReady(): Promise<void>;
+  fetchProjects(projectRouting?: ProjectRouting): Promise<ProjectsData | null>;
+  getTotalProjectCount(): number;
+  hasLinkedProjects(): boolean;
   getProjectRouting$(): Observable<ProjectRouting | undefined>;
   setProjectRouting(projectRouting: ProjectRouting | undefined): void;
-  getProjectRouting(): ProjectRouting | undefined;
+  /**
+   * Returns an explicit override value when provided, regardless of picker access mode.
+   * Otherwise resolves routing based on current picker access and CPS state.
+   */
+  getProjectRouting(overrideValue?: ProjectRouting): ProjectRouting | undefined;
   getDefaultProjectRouting(): ProjectRouting;
+  updateDefaultProjectRouting(projectRouting?: ProjectRouting): void;
   getProjectPickerAccess$(): Observable<ProjectRoutingAccess>;
-  getProjectPickerAccess(): ProjectRoutingAccess;
+  registerAppAccess(appId: string, resolver: CPSAppAccessResolver): void;
+  getConfigurationLinks(): CPSConfigurationLinks;
 }

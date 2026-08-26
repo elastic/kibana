@@ -5,70 +5,113 @@
  * 2.0.
  */
 
-import { lensApiStateSchema, type LensConfigBuilder } from '@kbn/lens-embeddable-utils';
-import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
-import type { LensSerializedAPIConfig } from '@kbn/lens-common-2';
-
-import { schema } from '@kbn/config-schema';
-import { getLensTransforms } from '../common/transforms';
+import { z } from '@kbn/zod';
+import { lensApiConfigSchema, type LensConfigBuilder } from '@kbn/lens-embeddable-utils';
+import type { LensByRefSerializedAPIConfig } from '@kbn/lens-common-2';
+import type { EmbeddableSetup, GetDrilldownsSchemaFnType } from '@kbn/embeddable-plugin/server';
+import {
+  serializedTimeRangeSchema,
+  serializedTitlesSchema,
+} from '@kbn/presentation-publishing-schemas';
+import { referencesSchema } from '@kbn/content-management-utils/zod';
+import {
+  ON_CLICK_VALUE,
+  ON_SELECT_RANGE,
+  ON_CLICK_ROW,
+  ON_APPLY_FILTER,
+  ON_OPEN_PANEL_MENU,
+} from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { BY_REF_SCHEMA_META, BY_VALUE_SCHEMA_META } from '@kbn/presentation-publishing-schemas';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
+import { getTransformIn } from '../common/transforms/transform_in';
+import { getTransformOut } from '../common/transforms/transform_out';
 import type { LensTransforms } from '../common/transforms/types';
-import { isByRefLensConfig } from '../common/transforms/utils';
-import { lensItemDataSchemaV2 } from './content_management';
+import { isByRefLensConfig, unflattenAPIConfig } from '../common/transforms/utils';
+import type { FlattenedLensByValuePanelSchema } from './types';
 
-export const getLensServerTransforms = (
-  builder: LensConfigBuilder,
-  { transformEnhancementsIn, transformEnhancementsOut }: EmbeddableSetup
-): LensTransforms => {
-  return {
-    ...getLensTransforms({
-      builder,
-      transformEnhancementsIn,
-      transformEnhancementsOut,
-    }),
-    ...getExtraServerTransformProps(builder),
-  };
-};
+/**
+ * Triggers that Lens visualizations support, derived from visualization definitions:
+ * - ON_CLICK_VALUE: VIS_EVENT_TO_TRIGGER.filter (all visualizations)
+ * - ON_SELECT_RANGE: VIS_EVENT_TO_TRIGGER.brush (xy, heatmap)
+ * - ON_CLICK_ROW: VIS_EVENT_TO_TRIGGER.tableRowContextMenuClick (datatable)
+ * - ON_APPLY_FILTER: VIS_EVENT_TO_TRIGGER.applyFilter (all visualizations)
+ * - ON_OPEN_PANEL_MENU: VIS_EVENT_TO_TRIGGER.openPanelMenu (all visualizations)
+ */
+const LENS_SUPPORTED_DRILLDOWN_TRIGGERS = [
+  ON_CLICK_VALUE,
+  ON_SELECT_RANGE,
+  ON_CLICK_ROW,
+  ON_APPLY_FILTER,
+  ON_OPEN_PANEL_MENU,
+];
 
-const legacyPanelAttributesSchema = lensItemDataSchemaV2.extends({
-  // Why are these added to the panel attributes?
-  // See https://github.com/elastic/kibana/issues/250115
-  id: schema.maybe(schema.string()),
-  type: schema.maybe(schema.literal('lens')),
-});
-
-const lensByValuePanelSchema = schema.object(
-  {
-    // TODO: add missing config properties
-    attributes: schema.oneOf([lensApiStateSchema, legacyPanelAttributesSchema]),
-  },
-  { unknowns: 'allow' }
-);
-
-const lensByRefPanelSchema = schema.object(
-  {
-    // TODO: add missing config properties
-    savedObjectId: schema.string(),
-  },
-  { unknowns: 'allow' }
-);
-
-const lensPanelSchema = schema.oneOf([lensByValuePanelSchema, lensByRefPanelSchema]);
-
-function getExtraServerTransformProps(
+export function registerLensEmbeddableTransforms(
+  embeddableSetup: EmbeddableSetup,
   builder: LensConfigBuilder
-): Pick<LensTransforms, 'getSchema' | 'throwOnUnmappedPanel'> {
-  return {
-    getSchema: () => {
-      return builder.isEnabled ? lensPanelSchema : undefined;
+) {
+  embeddableSetup.registerEmbeddableServerDefinition(LENS_EMBEDDABLE_TYPE, {
+    title: 'Visualization',
+    getTransforms: (drilldownTransforms) =>
+      ({
+        transformIn: getTransformIn(builder, drilldownTransforms.transformIn, false),
+        transformOut: getTransformOut(builder, drilldownTransforms.transformOut, false),
+      } satisfies LensTransforms),
+    getSchema: (getDrilldownsSchema) => {
+      return getLensPanelSchema(getDrilldownsSchema);
     },
-    throwOnUnmappedPanel: (config: LensSerializedAPIConfig) => {
+    throwOnUnmappedPanel: (
+      config: FlattenedLensByValuePanelSchema | LensByRefSerializedAPIConfig
+    ) => {
       if (isByRefLensConfig(config)) return;
 
-      const chartType = builder.getType(config.attributes);
+      const { attributes } = unflattenAPIConfig(config);
+      const chartType = builder.getType(attributes);
 
       if (builder.isEnabled && !builder.isSupported(chartType)) {
         throw new Error(`Lens "${chartType}" chart type is not supported`);
       }
     },
-  };
+  });
 }
+
+const getSharedPanelSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) =>
+  z
+    .object({
+      references: referencesSchema.optional(),
+      ...serializedTimeRangeSchema.shape,
+      ...serializedTitlesSchema.shape,
+      ...getDrilldownsSchema(LENS_SUPPORTED_DRILLDOWN_TRIGGERS).shape,
+    })
+    .strip();
+
+export const getLensByValuePanelSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) => {
+  return lensApiConfigSchema
+    .and(getSharedPanelSchema(getDrilldownsSchema))
+    .meta(BY_VALUE_SCHEMA_META);
+};
+
+const getLensByRefPanelSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) =>
+  z
+    .object({
+      ref_id: z.string(),
+    })
+    .extend(getSharedPanelSchema(getDrilldownsSchema).shape)
+    .strip()
+    .meta(BY_REF_SCHEMA_META);
+
+export const getLensPanelSchema = (
+  getDrilldownsSchema: GetDrilldownsSchemaFnType
+): z.ZodUnion<
+  readonly [
+    ReturnType<typeof getLensByValuePanelSchema>,
+    ReturnType<typeof getLensByRefPanelSchema>
+  ]
+> =>
+  z
+    .union([
+      getLensByValuePanelSchema(getDrilldownsSchema),
+      getLensByRefPanelSchema(getDrilldownsSchema),
+    ])
+    .meta({
+      description: 'Lens embeddable schema',
+    });

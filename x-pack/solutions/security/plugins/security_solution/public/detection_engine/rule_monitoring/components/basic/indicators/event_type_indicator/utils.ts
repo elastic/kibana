@@ -15,11 +15,11 @@ import * as i18n from './translations';
 export const getBadgeIcon = (type: RuleExecutionEventType): IconType => {
   switch (type) {
     case RuleExecutionEventTypeEnum.message:
-      return 'console';
+      return 'comment';
     case RuleExecutionEventTypeEnum['status-change']:
       return 'dot';
     case RuleExecutionEventTypeEnum['execution-metrics']:
-      return 'gear';
+      return 'stats';
     default:
       return assertUnreachable(type, 'Unknown rule execution event type');
   }

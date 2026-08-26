@@ -8,8 +8,8 @@
 import type { api } from '@elastic/opentelemetry-node/sdk';
 import { tracing } from '@elastic/opentelemetry-node/sdk';
 import type { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
-import { isInInferenceContext } from './is_in_inference_context';
 import { IS_ROOT_INFERENCE_SPAN_ATTRIBUTE_NAME } from './root_inference_span';
+import { isInferenceSpan } from './is_inference_span';
 
 export abstract class BaseInferenceSpanProcessor implements tracing.SpanProcessor {
   private delegate: tracing.SpanProcessor;
@@ -23,11 +23,7 @@ export abstract class BaseInferenceSpanProcessor implements tracing.SpanProcesso
   abstract processInferenceSpan(span: tracing.ReadableSpan): tracing.ReadableSpan;
 
   onStart(span: tracing.Span, parentContext: api.Context): void {
-    const shouldTrack =
-      (isInInferenceContext(parentContext) || span.instrumentationScope.name === 'inference') &&
-      span.instrumentationScope.name !== '@elastic/transport';
-
-    if (shouldTrack) {
+    if (isInferenceSpan(span, parentContext)) {
       span.setAttribute('_should_track', true);
       this.delegate.onStart(span, parentContext);
     }

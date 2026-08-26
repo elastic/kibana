@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { platformCoreTools } from '@kbn/agent-builder-common';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import { attachmentTools } from '@kbn/agent-builder-common';
+import type { InternalBuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createAttachmentReadTool } from './attachment_read';
 import { createAttachmentUpdateTool } from './attachment_update';
 import { createAttachmentAddTool } from './attachment_add';
@@ -20,11 +20,11 @@ export type { AttachmentToolsOptions } from './types';
  * All attachment tool IDs.
  */
 export const attachmentToolIds = [
-  platformCoreTools.attachmentRead,
-  platformCoreTools.attachmentUpdate,
-  platformCoreTools.attachmentAdd,
-  platformCoreTools.attachmentList,
-  platformCoreTools.attachmentDiff,
+  attachmentTools.read,
+  attachmentTools.update,
+  attachmentTools.add,
+  attachmentTools.list,
+  attachmentTools.diff,
 ] as const;
 
 /**
@@ -32,7 +32,7 @@ export const attachmentToolIds = [
  */
 export const createAttachmentTools = (
   options: AttachmentToolsOptions
-): BuiltinToolDefinition<any>[] => {
+): InternalBuiltinToolDefinition<any>[] => {
   return [
     createAttachmentReadTool(options),
     createAttachmentUpdateTool(options),

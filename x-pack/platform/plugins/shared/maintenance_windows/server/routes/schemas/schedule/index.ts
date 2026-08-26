@@ -5,17 +5,25 @@
  * 2.0.
  */
 
-export { scheduleRequestSchema, scheduleResponseSchema } from './schema/latest';
-export { transformCustomScheduleToRRule } from './transforms/custom_to_rrule/latest';
-export { transformRRuleToCustomSchedule } from './transforms/rrule_to_custom/latest';
-export type { ScheduleRequest } from './types/latest';
+import type { TypeOf } from '@kbn/config-schema';
+import {
+  getScheduleRequestSchema,
+  getScheduleResponseSchema,
+} from '@kbn/response-ops-schedule-schema';
 
-export {
-  scheduleRequestSchema as scheduleRequestSchemaV1,
-  scheduleResponseSchema as scheduleResponseSchemaV1,
-} from './schema/v1';
-export { transformCustomScheduleToRRule as transformCustomScheduleToRRuleV1 } from './transforms/custom_to_rrule/v1';
-export { transformRRuleToCustomSchedule as transformRRuleToCustomScheduleV1 } from './transforms/rrule_to_custom/v1';
-export type { ScheduleRequest as ScheduleRequestV1 } from './types/v1';
+export const scheduleRequestSchema = getScheduleRequestSchema({
+  metaId: 'maintenance_window_schedule_request',
+  recurringMetaId: 'maintenance_window_schedule_recurring_request',
+});
+export const scheduleResponseSchema = getScheduleResponseSchema({
+  metaId: 'maintenance_window_schedule_response',
+  recurringMetaId: 'maintenance_window_schedule_recurring_response',
+});
 
-export { getDurationInMilliseconds } from './transforms/custom_to_rrule/util';
+export const scheduleRequestSchemaV1 = scheduleRequestSchema;
+export const scheduleResponseSchemaV1 = scheduleResponseSchema;
+
+export type ScheduleRequest = TypeOf<typeof scheduleRequestSchema>;
+export type ScheduleResponse = TypeOf<typeof scheduleResponseSchema>;
+export type ScheduleRequestV1 = ScheduleRequest;
+export type ScheduleResponseV1 = ScheduleResponse;

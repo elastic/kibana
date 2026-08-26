@@ -10,28 +10,27 @@ import { OTEL_KUBE_STACK_VERSION, OTEL_STACK_NAMESPACE } from './constants';
 import { buildInstallStackCommand } from './build_install_stack_command';
 import { buildValuesFileUrl } from './build_values_file_url';
 
-describe('buildValuesFileUrl()', () => {
-  const isMetricsOnboardingEnabled = true;
+const TEST_ONBOARDING_ID = 'test-onboarding-id';
 
+const defaultArgs = {
+  isMetricsOnboardingEnabled: true,
+  isManagedOtlpServiceAvailable: false,
+  managedOtlpEndpointUrl: 'https://example.com/otlp',
+  elasticsearchUrl: 'https://example.com/elasticsearch',
+  apiKeyEncoded: 'encoded_api_key',
+  agentVersion: '9.4.2',
+  onboardingId: TEST_ONBOARDING_ID,
+} as const;
+
+describe('buildInstallStackCommand()', () => {
   it('builds command with Elasticsearch endpoint when OTLP service is not available', () => {
-    const isManagedOtlpServiceAvailable = false;
-    const managedOtlpEndpointUrl = 'https://example.com/otlp';
-    const elasticsearchUrl = 'https://example.com/elasticsearch';
-    const apiKeyEncoded = 'encoded_api_key';
-    const agentVersion = '9.1.0';
+    const { elasticsearchUrl, apiKeyEncoded, agentVersion } = defaultArgs;
     const otelKubeStackValuesFileUrl = buildValuesFileUrl({
-      isMetricsOnboardingEnabled,
-      isManagedOtlpServiceAvailable,
+      isMetricsOnboardingEnabled: true,
+      isManagedOtlpServiceAvailable: false,
       agentVersion,
     });
-    const command = buildInstallStackCommand({
-      isMetricsOnboardingEnabled,
-      isManagedOtlpServiceAvailable,
-      managedOtlpEndpointUrl,
-      elasticsearchUrl,
-      apiKeyEncoded,
-      agentVersion,
-    });
+    const command = buildInstallStackCommand(defaultArgs);
 
     expect(command).toEqual(`kubectl create namespace ${OTEL_STACK_NAMESPACE}
 kubectl create secret generic elastic-secret-otel \\
@@ -41,27 +40,26 @@ kubectl create secret generic elastic-secret-otel \\
 helm upgrade --install opentelemetry-kube-stack open-telemetry/opentelemetry-kube-stack \\
   --namespace ${OTEL_STACK_NAMESPACE} \\
   --values '${otelKubeStackValuesFileUrl}' \\
-  --version '${OTEL_KUBE_STACK_VERSION}'`);
+  --version '${OTEL_KUBE_STACK_VERSION}' \\
+  --set 'collectors.daemon.config.processors.resource\\/onboarding_id.attributes[0].action=upsert' \\
+  --set 'collectors.daemon.config.processors.resource\\/onboarding_id.attributes[0].key=onboarding.id' \\
+  --set 'collectors.daemon.config.processors.resource\\/onboarding_id.attributes[0].value=${TEST_ONBOARDING_ID}' \\
+  --set 'collectors.daemon.config.service.pipelines.logs\\/node.processors[9]=resource/onboarding_id' \\
+  --set 'collectors.daemon.config.service.pipelines.metrics\\/node\\/otel.processors[9]=resource/onboarding_id'`);
   });
 
-  it('builds command with OTLP endpoint when OTLP service is available', () => {
-    const isManagedOtlpServiceAvailable = true;
-    const managedOtlpEndpointUrl = 'https://example.com/otlp';
-    const elasticsearchUrl = 'https://example.com/elasticsearch';
-    const apiKeyEncoded = 'encoded_api_key';
-    const agentVersion = '9.1.0';
+  it('builds managed OTLP command with onboarding_id at processor index 9', () => {
+    const { managedOtlpEndpointUrl, apiKeyEncoded } = defaultArgs;
+    const { agentVersion } = defaultArgs;
     const otelKubeStackValuesFileUrl = buildValuesFileUrl({
-      isMetricsOnboardingEnabled,
-      isManagedOtlpServiceAvailable,
+      isMetricsOnboardingEnabled: true,
+      isManagedOtlpServiceAvailable: true,
       agentVersion,
     });
     const command = buildInstallStackCommand({
-      isMetricsOnboardingEnabled,
-      isManagedOtlpServiceAvailable,
-      managedOtlpEndpointUrl,
-      elasticsearchUrl,
-      apiKeyEncoded,
+      ...defaultArgs,
       agentVersion,
+      isManagedOtlpServiceAvailable: true,
     });
 
     expect(command).toEqual(`kubectl create namespace ${OTEL_STACK_NAMESPACE}
@@ -72,6 +70,76 @@ kubectl create secret generic elastic-secret-otel \\
 helm upgrade --install opentelemetry-kube-stack open-telemetry/opentelemetry-kube-stack \\
   --namespace ${OTEL_STACK_NAMESPACE} \\
   --values '${otelKubeStackValuesFileUrl}' \\
-  --version '${OTEL_KUBE_STACK_VERSION}'`);
+  --version '${OTEL_KUBE_STACK_VERSION}' \\
+  --set 'collectors.daemon.config.processors.resource\\/onboarding_id.attributes[0].action=upsert' \\
+  --set 'collectors.daemon.config.processors.resource\\/onboarding_id.attributes[0].key=onboarding.id' \\
+  --set 'collectors.daemon.config.processors.resource\\/onboarding_id.attributes[0].value=${TEST_ONBOARDING_ID}' \\
+  --set 'collectors.daemon.config.service.pipelines.logs\\/node.processors[9]=resource/onboarding_id' \\
+  --set 'collectors.daemon.config.service.pipelines.metrics\\/node\\/otel.processors[9]=resource/onboarding_id'`);
+  });
+
+  it('builds managed OTLP logs-only command with onboarding_id at processor index 9', () => {
+    const command = buildInstallStackCommand({
+      ...defaultArgs,
+      isManagedOtlpServiceAvailable: true,
+      isMetricsOnboardingEnabled: false,
+    });
+
+    expect(command).toContain(
+      'collectors.daemon.config.service.pipelines.logs\\/node.processors[9]=resource/onboarding_id'
+    );
+    expect(command).not.toContain('logs\\/node.processors[8]=resource/onboarding_id');
+    expect(command).not.toContain('metrics\\/node\\/otel');
+  });
+
+  describe('onboarding_id processor', () => {
+    it('injects resource/onboarding_id into direct logs-only pipeline', () => {
+      const command = buildInstallStackCommand({
+        ...defaultArgs,
+        isMetricsOnboardingEnabled: false,
+      });
+
+      expect(command).toContain('resource\\/onboarding_id');
+      expect(command).toContain(`onboarding_id.attributes[0].value=${TEST_ONBOARDING_ID}`);
+      expect(command).toContain(
+        'collectors.daemon.config.service.pipelines.logs\\/node.processors[9]=resource/onboarding_id'
+      );
+    });
+
+    it('injects resource/onboarding_id into metrics pipeline when metrics enabled', () => {
+      const command = buildInstallStackCommand(defaultArgs);
+
+      expect(command).toContain(
+        'collectors.daemon.config.service.pipelines.metrics\\/node\\/otel.processors[9]=resource/onboarding_id'
+      );
+    });
+
+    it('uses the current daemon processor index regardless of agentVersion', () => {
+      const command = buildInstallStackCommand({
+        ...defaultArgs,
+        agentVersion: '9.4.1',
+      });
+
+      expect(command).toContain('logs\\/node.processors[9]=resource/onboarding_id');
+      expect(command).not.toContain('logs\\/node.processors[8]=resource/onboarding_id');
+    });
+
+    it('does not inject resource/onboarding_id into metrics pipeline when metrics disabled', () => {
+      const command = buildInstallStackCommand({
+        ...defaultArgs,
+        isMetricsOnboardingEnabled: false,
+      });
+
+      expect(command).not.toContain('metrics\\/node\\/otel');
+    });
+  });
+
+  describe('wired streams', () => {
+    it('never emits a wired streams processor', () => {
+      const command = buildInstallStackCommand(defaultArgs);
+
+      expect(command).not.toContain('resource\\/wired_streams');
+      expect(command).not.toContain('elasticsearch.index');
+    });
   });
 });

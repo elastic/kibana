@@ -69,6 +69,10 @@ export enum ProductFeatureSecurityKey {
    */
   endpointHostIsolationExceptions = 'endpoint_host_isolation_exceptions',
   /**
+   * Enables custom YARA signature management for Elastic Defend.
+   */
+  endpointCustomYaraSignatures = 'endpoint_custom_yara_signatures',
+  /**
    * Enables all of endpoint's supported response actions - like host isolation, file operations,
    * process operations, command execution, etc.
    */
@@ -186,6 +190,19 @@ export enum ProductFeatureRulesKey {
   exceptions = 'exceptions',
 }
 
+export enum ProductFeatureAlertsKey {
+  /** Elastic endpoint detections, includes alerts, rules, investigations */
+  detections = 'detections',
+
+  /** Enables external detections for AI SOC, includes alerts_summary, basic_rules*/
+  externalDetections = 'external_detections',
+}
+
+export enum ProductFeatureWorkflowsKey {
+  /** Enables Workflows feature in a general sense */
+  workflows = 'workflows',
+}
+
 // Merges the two enums.
 export const ProductFeatureKey = {
   ...ProductFeatureSecurityKey,
@@ -196,6 +213,8 @@ export const ProductFeatureKey = {
   ...ProductFeatureTimelineKey,
   ...ProductFeatureNotesKey,
   ...ProductFeatureRulesKey,
+  ...ProductFeatureAlertsKey,
+  ...ProductFeatureWorkflowsKey,
 };
 // We need to merge the value and the type and export both to replicate how enum works.
 export type ProductFeatureKeyType =
@@ -206,7 +225,9 @@ export type ProductFeatureKeyType =
   | ProductFeatureSiemMigrationsKey
   | ProductFeatureTimelineKey
   | ProductFeatureNotesKey
-  | ProductFeatureRulesKey;
+  | ProductFeatureRulesKey
+  | ProductFeatureAlertsKey
+  | ProductFeatureWorkflowsKey;
 
 export const ALL_PRODUCT_FEATURE_KEYS = Object.freeze(Object.values(ProductFeatureKey));
 
@@ -219,6 +240,7 @@ export enum SecuritySubFeatureId {
   hostIsolationExceptionsBasic = 'hostIsolationExceptionsBasicSubFeature',
   blocklist = 'blocklistSubFeature',
   eventFilters = 'eventFiltersSubFeature',
+  customYaraSignatures = 'customYaraSignaturesSubFeature',
   globalArtifactManagement = 'globalArtifactManagementSubFeature',
   policyManagement = 'policyManagementSubFeature',
   scriptsManagement = 'scriptsManagementSubFeature',
@@ -239,6 +261,7 @@ export enum CasesSubFeatureId {
   createComment = 'createCommentSubFeature',
   reopenCase = 'reopenCaseSubFeature',
   assignUsers = 'assignUsersSubFeature',
+  manageTemplates = 'manageTemplatesSubFeature',
 }
 
 /** Sub-features IDs for Security Assistant */
@@ -255,4 +278,9 @@ export enum AttackDiscoverySubFeatureId {
 /** Sub-features IDs for Security Rules */
 export enum RulesSubFeatureId {
   exceptions = 'exceptionsSubFeature',
+  investigationGuide = 'investigationGuideSubFeature',
+  customHighlightedFields = 'customHighlightedFieldsSubFeature',
+  enableDisableRules = 'enableDisableRulesSubFeature',
+  manualRunRules = 'manualRunRulesSubFeature',
+  rulesManagementSettings = 'rulesManagementSettingsSubFeature',
 }

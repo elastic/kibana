@@ -12,14 +12,14 @@
  *
  * This file is auto-generated. Do not edit manually.
  * Sources: resolved-semconv.yaml + hardcoded OTLP mappings
- * Registry groups: 142
- * Metric groups: 497
+ * Registry groups: 145
+ * Metric groups: 561
  * Hardcoded fields: 34
- * Total fields: 1191
+ * Total fields: 1232
  *
  * @internal
  *
- * WARNING: This object contains 1191+ field definitions (~50KB+ minified).
+ * WARNING: This object contains 1232+ field definitions (~50KB+ minified).
  * Direct import will significantly increase client bundle size.
  *
  * RECOMMENDED USAGE:
@@ -45,7 +45,7 @@ export const semconvFlat = {
   'android.os.api_level': {
     name: 'android.os.api_level',
     description:
-      'Uniquely identifies the framework API revision offered by a version (`os.version`) of the android operating system. More information can be found in the [Android API levels documentation](https://developer.android.com/guide/topics/manifest/uses-sdk-element#ApiLevels).',
+      'Uniquely identifies the framework API revision offered by a version (`os.version`) of the Android operating system. More information can be found in the [Android API levels documentation](https://developer.android.com/guide/topics/manifest/uses-sdk-element#ApiLevels).',
     type: 'keyword',
     example: '33',
   },
@@ -54,6 +54,12 @@ export const semconvFlat = {
     description: 'Unique identifier for a particular build or compilation of the application.',
     type: 'keyword',
     example: '6cff0a7e-cefc-4668-96f5-1273d8b334d0',
+  },
+  'app.crash.id': {
+    name: 'app.crash.id',
+    description: 'A unique identifier representing an instance of an end user facing app crash.',
+    type: 'keyword',
+    example: '083d3d2d-9a0e-47f8-be3d-bc3c5538ba38',
   },
   'app.installation.id': {
     name: 'app.installation.id',
@@ -134,14 +140,14 @@ export const semconvFlat = {
   },
   'artifact.attestation.id': {
     name: 'artifact.attestation.id',
-    description: 'The id of the build [software attestation](https://slsa.dev/attestation-model).',
+    description: 'The ID of the build [software attestation](https://slsa.dev/attestation-model).',
     type: 'keyword',
     example: '123',
   },
   'artifact.filename': {
     name: 'artifact.filename',
     description:
-      'The human readable file name of the artifact, typically generated during build and release processes. Often includes the package name and version in the file name.',
+      'The human readable filename of the artifact, typically generated during build and release processes. Often includes the package name and version in the filename.',
     type: 'keyword',
     example: 'golang-binary-amd64-v0.1.0',
   },
@@ -532,7 +538,7 @@ export const semconvFlat = {
   'aws.lambda.resource_mapping.id': {
     name: 'aws.lambda.resource_mapping.id',
     description:
-      "The UUID of the [AWS Lambda EvenSource Mapping](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-lambda-eventsourcemapping.html). An event source is mapped to a lambda function. It's contents are read by Lambda and used to trigger a function. This isn't available in the lambda execution context or the lambda runtime environtment. This is going to be populated by the AWS SDK for each language when that UUID is present. Some of these operations are Create/Delete/Get/List/Update EventSourceMapping.",
+      "The UUID of the [AWS Lambda EvenSource Mapping](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-lambda-eventsourcemapping.html). An event source is mapped to a lambda function. It's contents are read by Lambda and used to trigger a function. This isn't available in the lambda execution context or the lambda runtime environment. This is going to be populated by the AWS SDK for each language when that UUID is present. Some of these operations are Create/Delete/Get/List/Update EventSourceMapping.",
     type: 'keyword',
     example: '587ad24b-03b9-4413-8202-bbd56b36e5b7',
   },
@@ -609,7 +615,7 @@ export const semconvFlat = {
   },
   'aws.secretsmanager.secret.arn': {
     name: 'aws.secretsmanager.secret.arn',
-    description: 'The ARN of the Secret stored in the Secrets Mangger',
+    description: 'The ARN of the Secret stored in the Secrets Manager',
     type: 'keyword',
     example: 'arn:aws:secretsmanager:us-east-1:123456789012:secret:SecretName-6RandomCharacters',
   },
@@ -681,6 +687,13 @@ export const semconvFlat = {
     type: 'long',
     example: '1000',
   },
+  'azure.resource_group.name': {
+    name: 'azure.resource_group.name',
+    description:
+      'The name of the Azure [resource group](https://learn.microsoft.com/azure/azure-resource-manager/management/manage-resource-groups-portal) the resource belongs to.',
+    type: 'keyword',
+    example: 'my-resource-group',
+  },
   'azure.resource_provider.namespace': {
     name: 'azure.resource_provider.namespace',
     description:
@@ -711,6 +724,13 @@ export const semconvFlat = {
     type: 'keyword',
     example: 'Not A;Brand 99,Chromium 99,Chrome 99',
   },
+  'browser.document.url.full': {
+    name: 'browser.document.url.full',
+    description:
+      'Absolute URL of the current browser document according to [RFC3986](https://www.rfc-editor.org/rfc/rfc3986).',
+    type: 'keyword',
+    example: 'https://www.example.com/search?q=OpenTelemetry#SemConv',
+  },
   'browser.language': {
     name: 'browser.language',
     description: 'Preferred language of the user using the browser',
@@ -727,6 +747,45 @@ export const semconvFlat = {
     description: 'The platform on which the browser is running',
     type: 'keyword',
     example: 'Windows',
+  },
+  'browser.web_vital.delta': {
+    name: 'browser.web_vital.delta',
+    description:
+      'The delta between the current value and the last-reported value. See [delta](https://github.com/GoogleChrome/web-vitals?tab=readme-ov-file#report-only-the-delta-of-changes).',
+    type: 'double',
+    example: '0.2',
+  },
+  'browser.web_vital.id': {
+    name: 'browser.web_vital.id',
+    description: 'A unique ID representing this particular metric instance.',
+    type: 'keyword',
+    example: 'v3-1677874579383-6381583661209',
+  },
+  'browser.web_vital.name': {
+    name: 'browser.web_vital.name',
+    description: 'Name of the web vital.',
+    type: 'keyword',
+    example: 'cls',
+  },
+  'browser.web_vital.navigation_type': {
+    name: 'browser.web_vital.navigation_type',
+    description:
+      'The type of navigation, as reported by the [Navigation Timing API](https://developer.mozilla.org/docs/Web/API/PerformanceNavigationTiming/type), with additional values reported by the web-vitals library.',
+    type: 'keyword',
+    example: 'navigate',
+  },
+  'browser.web_vital.rating': {
+    name: 'browser.web_vital.rating',
+    description:
+      'The rating of the web vital value against the "good", "needs improvement", and "poor" thresholds defined for the metric.',
+    type: 'keyword',
+    example: 'good',
+  },
+  'browser.web_vital.value': {
+    name: 'browser.web_vital.value',
+    description: 'Value of the web vital.',
+    type: 'double',
+    example: '1',
   },
   'cassandra.consistency.level': {
     name: 'cassandra.consistency.level',
@@ -837,27 +896,27 @@ export const semconvFlat = {
   },
   'cicd.system.component': {
     name: 'cicd.system.component',
-    description: 'The name of a component of the CICD system.',
+    description: 'The name of a component of the CI/CD system.',
     type: 'keyword',
     example: 'controller',
   },
   'cicd.worker.id': {
     name: 'cicd.worker.id',
-    description: 'The unique identifier of a worker within a CICD system.',
+    description: 'The unique identifier of a worker within a CI/CD system.',
     type: 'keyword',
     example: 'abc123',
   },
   'cicd.worker.name': {
     name: 'cicd.worker.name',
-    description: 'The name of a worker within a CICD system.',
+    description: 'The name of a worker within a CI/CD system.',
     type: 'keyword',
     example: 'agent-abc',
   },
   'cicd.worker.state': {
     name: 'cicd.worker.state',
-    description: 'The state of a CICD worker / agent.',
+    description: 'The state of a CI/CD worker / agent.',
     type: 'keyword',
-    example: 'idle',
+    example: 'available',
   },
   'cicd.worker.url.full': {
     name: 'cicd.worker.url.full',
@@ -869,7 +928,7 @@ export const semconvFlat = {
   'client.address': {
     name: 'client.address',
     description:
-      'Client address - domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.',
+      'Client address - domain name if available without reverse DNS lookup; otherwise, IP address or UNIX domain socket name.',
     type: 'keyword',
     example: 'client.example.com',
   },
@@ -1026,7 +1085,7 @@ export const semconvFlat = {
   'code.file.path': {
     name: 'code.file.path',
     description:
-      "The source code file name that identifies the code unit as uniquely as possible (preferably an absolute file path). This attribute MUST NOT be used on the Profile signal since the data is already captured in 'message Function'. This constraint is imposed to prevent redundancy and maintain data integrity.",
+      "The source code filename that identifies the code unit as uniquely as possible (preferably an absolute file path). This attribute MUST NOT be used on the Profile signal since the data is already captured in 'message Function'. This constraint is imposed to prevent redundancy and maintain data integrity.",
     type: 'keyword',
     example: '/',
   },
@@ -1105,7 +1164,7 @@ export const semconvFlat = {
   },
   'container.image.repo_digests': {
     name: 'container.image.repo_digests',
-    description: 'Repo digests of the container image as provided by the container runtime.',
+    description: 'Repository digests of the container image as provided by the container runtime.',
     type: 'keyword',
     example:
       'example@sha256:afcc7f1ac1b49db317a7196c902e61c6c3c4607d63599ee1a82d702d249a0ccb,internal.registry.example.com:5000/example@sha256:b69959407d21e8a062e0416bf13405bb2b71ed7a84dde4158ebafacfa06f5578',
@@ -1132,7 +1191,7 @@ export const semconvFlat = {
   'container.runtime.description': {
     name: 'container.runtime.description',
     description:
-      'A description about the runtime which could include, for example details about the CRI/API version being used or other customisations.',
+      'A description about the runtime which could include, for example details about the CRI/API version being used or other customizations.',
     type: 'keyword',
     example: 'docker://19.3.1 - CRI: 1.22.0',
   },
@@ -1194,7 +1253,7 @@ export const semconvFlat = {
   },
   'db.operation.batch.size': {
     name: 'db.operation.batch.size',
-    description: 'The number of queries included in a batch operation.',
+    description: 'The number of database operations included in a batch operation.',
     type: 'long',
     example: '2',
   },
@@ -1263,7 +1322,7 @@ export const semconvFlat = {
   },
   'deployment.id': {
     name: 'deployment.id',
-    description: 'The id of the deployment.',
+    description: 'The ID of the deployment.',
     type: 'keyword',
     example: '1208',
   },
@@ -1281,7 +1340,7 @@ export const semconvFlat = {
   'destination.address': {
     name: 'destination.address',
     description:
-      'Destination address - domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.',
+      'Destination address - domain name if available without reverse DNS lookup; otherwise, IP address or UNIX domain socket name.',
     type: 'keyword',
     example: 'destination.example.com',
   },
@@ -1380,12 +1439,6 @@ export const semconvFlat = {
     type: 'keyword',
     example: 'QdH5CAWJgqVT4rOr0qtumf',
   },
-  'error.message': {
-    name: 'error.message',
-    description: 'A message providing more detail about an error in human-readable form.',
-    type: 'keyword',
-    example: 'Unexpected input type: string',
-  },
   'error.type': {
     name: 'error.type',
     description: 'Describes a class of error the operation ended with.',
@@ -1454,6 +1507,7 @@ export const semconvFlat = {
     description:
       'A string containing the time when the data was accessed in the [ISO 8601](https://www.iso.org/iso-8601-date-and-time-format.html) format expressed in [UTC](https://www.w3.org/TR/NOTE-datetime).',
     type: 'keyword',
+    example: '2',
   },
   'faas.instance': {
     name: 'faas.instance',
@@ -1501,6 +1555,7 @@ export const semconvFlat = {
     description:
       'A string containing the function invocation time in the [ISO 8601](https://www.iso.org/iso-8601-date-and-time-format.html) format expressed in [UTC](https://www.w3.org/TR/NOTE-datetime).',
     type: 'keyword',
+    example: '2',
   },
   'faas.trigger': {
     name: 'faas.trigger',
@@ -1519,6 +1574,13 @@ export const semconvFlat = {
       'The unique identifier for the flag evaluation context. For example, the targeting key.',
     type: 'keyword',
     example: '5157782b-2203-4c80-a857-dbbd5e7761db',
+  },
+  'feature_flag.error.message': {
+    name: 'feature_flag.error.message',
+    description:
+      'A message providing more detail about an error that occurred during feature flag evaluation in human-readable form.',
+    type: 'keyword',
+    example: 'Unexpected input type: string',
   },
   'feature_flag.key': {
     name: 'feature_flag.key',
@@ -1568,7 +1630,7 @@ export const semconvFlat = {
     name: 'file.accessed',
     description: 'Time when the file was last accessed, in ISO 8601 format.',
     type: 'keyword',
-    example: 'Fri Jan 01 2021 12:00:00 GMT+0000 (Coordinated Universal Time)',
+    example: '2021-01-01T12:00:00Z',
   },
   'file.attributes': {
     name: 'file.attributes',
@@ -1580,13 +1642,13 @@ export const semconvFlat = {
     name: 'file.changed',
     description: 'Time when the file attributes or metadata was last changed, in ISO 8601 format.',
     type: 'keyword',
-    example: 'Fri Jan 01 2021 12:00:00 GMT+0000 (Coordinated Universal Time)',
+    example: '2021-01-01T12:00:00Z',
   },
   'file.created': {
     name: 'file.created',
     description: 'Time when the file was created, in ISO 8601 format.',
     type: 'keyword',
-    example: 'Fri Jan 01 2021 12:00:00 GMT+0000 (Coordinated Universal Time)',
+    example: '2021-01-01T12:00:00Z',
   },
   'file.directory': {
     name: 'file.directory',
@@ -1625,6 +1687,27 @@ export const semconvFlat = {
     type: 'keyword',
     example: '256383',
   },
+  'file.lock.mechanism': {
+    name: 'file.lock.mechanism',
+    description:
+      'The lock mechanism such as noted by [POSIX](https://pubs.opengroup.org/onlinepubs/9699919799/functions/fcntl.html)',
+    type: 'keyword',
+    example: 'POSIX',
+  },
+  'file.lock.mode': {
+    name: 'file.lock.mode',
+    description:
+      'Mode of lock or operation such as documented by [POSIX](https://pubs.opengroup.org/onlinepubs/9699919799/functions/fcntl.html)',
+    type: 'keyword',
+    example: 'ADVISORY',
+  },
+  'file.lock.type': {
+    name: 'file.lock.type',
+    description:
+      "The lock type as represented by i.e. [POSIX](https://pubs.opengroup.org/onlinepubs/9699919799/functions/fcntl.html)'s l_type.",
+    type: 'keyword',
+    example: 'read',
+  },
   'file.mode': {
     name: 'file.mode',
     description: 'Mode of the file in octal representation.',
@@ -1635,7 +1718,7 @@ export const semconvFlat = {
     name: 'file.modified',
     description: 'Time when the file content was last modified, in ISO 8601 format.',
     type: 'keyword',
-    example: 'Fri Jan 01 2021 12:00:00 GMT+0000 (Coordinated Universal Time)',
+    example: '2021-01-01T12:00:00Z',
   },
   'file.name': {
     name: 'file.name',
@@ -1658,7 +1741,7 @@ export const semconvFlat = {
   'file.path': {
     name: 'file.path',
     description:
-      'Full path to the file, including the file name. It should include the drive letter, when appropriate.',
+      'Full path to the file, including the filename. It should include the drive letter, when appropriate.',
     type: 'keyword',
     example: '/home/alice/example.png',
   },
@@ -1805,6 +1888,13 @@ export const semconvFlat = {
     type: 'keyword',
     example: 'my-host1234.example.com',
   },
+  'gcp.gce.instance.labels': {
+    name: 'gcp.gce.instance.labels',
+    description:
+      'GCE instance labels, `<key>` being the label name and the value being the label value.',
+    type: 'keyword',
+    example: 'observability',
+  },
   'gcp.gce.instance.name': {
     name: 'gcp.gce.instance.name',
     description:
@@ -1812,273 +1902,25 @@ export const semconvFlat = {
     type: 'keyword',
     example: 'instance-1',
   },
-  'gen_ai.agent.description': {
-    name: 'gen_ai.agent.description',
-    description: 'Free-form description of the GenAI agent provided by the application.',
+  'gcp.gce.instance_group_manager.name': {
+    name: 'gcp.gce.instance_group_manager.name',
+    description: 'The name of the Instance Group Manager (IGM) that manages this VM, if any.',
     type: 'keyword',
-    example: 'Helps with math problems',
+    example: 'web-igm',
   },
-  'gen_ai.agent.id': {
-    name: 'gen_ai.agent.id',
-    description: 'The unique identifier of the GenAI agent.',
-    type: 'keyword',
-    example: 'asst_5j66UpCpwteGg4YSxUnt7lPY',
-  },
-  'gen_ai.agent.name': {
-    name: 'gen_ai.agent.name',
-    description: 'Human-readable name of the GenAI agent provided by the application.',
-    type: 'keyword',
-    example: 'Math Tutor',
-  },
-  'gen_ai.conversation.id': {
-    name: 'gen_ai.conversation.id',
+  'gcp.gce.instance_group_manager.region': {
+    name: 'gcp.gce.instance_group_manager.region',
     description:
-      'The unique identifier for a conversation (session, thread), used to store and correlate messages within this conversation.',
+      'The region of a **regional** Instance Group Manager (e.g., `us-central1`). Set this **only** when the IGM is regional.',
     type: 'keyword',
-    example: 'conv_5j66UpCpwteGg4YSxUnt7lPY',
+    example: 'us-central1',
   },
-  'gen_ai.data_source.id': {
-    name: 'gen_ai.data_source.id',
-    description: 'The data source identifier.',
-    type: 'keyword',
-    example: 'H7STPQYOND',
-  },
-  'gen_ai.embeddings.dimension.count': {
-    name: 'gen_ai.embeddings.dimension.count',
-    description: 'The number of dimensions the resulting output embeddings should have.',
-    type: 'long',
-    example: '512',
-  },
-  'gen_ai.evaluation.explanation': {
-    name: 'gen_ai.evaluation.explanation',
-    description: 'A free-form explanation for the assigned score provided by the evaluator.',
-    type: 'keyword',
-    example:
-      'The response is factually accurate but lacks sufficient detail to fully address the question.',
-  },
-  'gen_ai.evaluation.name': {
-    name: 'gen_ai.evaluation.name',
-    description: 'The name of the evaluation metric used for the GenAI response.',
-    type: 'keyword',
-    example: 'Relevance',
-  },
-  'gen_ai.evaluation.score.label': {
-    name: 'gen_ai.evaluation.score.label',
-    description: 'Human readable label for evaluation.',
-    type: 'keyword',
-    example: 'relevant',
-  },
-  'gen_ai.evaluation.score.value': {
-    name: 'gen_ai.evaluation.score.value',
-    description: 'The evaluation score returned by the evaluator.',
-    type: 'double',
-    example: '4',
-  },
-  'gen_ai.input.messages': {
-    name: 'gen_ai.input.messages',
-    description: 'The chat history provided to the model as an input.',
-    type: 'keyword',
-    example:
-      '[{"role":"user","parts":[{"type":"text","content":"Weather in Paris?"}]},{"role":"assistant","parts":[{"type":"tool_call","id":"call_VSPygqKTWdrhaFErNvMV18Yl","name":"get_weather","arguments":{"location":"Paris"}}]},{"role":"tool","parts":[{"type":"tool_call_response","id":" call_VSPygqKTWdrhaFErNvMV18Yl","result":"rainy, 57°F"}]}]',
-  },
-  'gen_ai.operation.name': {
-    name: 'gen_ai.operation.name',
-    description: 'The name of the GenAI operation being performed.',
-    type: 'keyword',
-    example: 'execute_tool',
-  },
-  'gen_ai.output.messages': {
-    name: 'gen_ai.output.messages',
+  'gcp.gce.instance_group_manager.zone': {
+    name: 'gcp.gce.instance_group_manager.zone',
     description:
-      'Messages returned by the model where each message represents a specific model response (choice, candidate).',
+      'The zone of a **zonal** Instance Group Manager (e.g., `us-central1-a`). Set this **only** when the IGM is zonal.',
     type: 'keyword',
-    example:
-      '[{"role":"assistant","parts":[{"type":"text","content":"The weather in Paris is currently rainy with a temperature of 57°F."}],"finish_reason":"stop"}]',
-  },
-  'gen_ai.output.type': {
-    name: 'gen_ai.output.type',
-    description: 'Represents the content type requested by the client.',
-    type: 'keyword',
-  },
-  'gen_ai.prompt.name': {
-    name: 'gen_ai.prompt.name',
-    description: 'The name of the prompt or prompt template provided in the request or response.',
-    type: 'keyword',
-    example: 'analyze-code',
-  },
-  'gen_ai.provider.name': {
-    name: 'gen_ai.provider.name',
-    description:
-      'The Generative AI provider as identified by the client or server instrumentation.',
-    type: 'keyword',
-  },
-  'gen_ai.request.choice.count': {
-    name: 'gen_ai.request.choice.count',
-    description: 'The target number of candidate completions to return.',
-    type: 'long',
-    example: '3',
-  },
-  'gen_ai.request.encoding_formats': {
-    name: 'gen_ai.request.encoding_formats',
-    description: 'The encoding formats requested in an embeddings operation, if specified.',
-    type: 'keyword',
-    example: 'base64',
-  },
-  'gen_ai.request.frequency_penalty': {
-    name: 'gen_ai.request.frequency_penalty',
-    description: 'The frequency penalty setting for the GenAI request.',
-    type: 'double',
-    example: '0.1',
-  },
-  'gen_ai.request.max_tokens': {
-    name: 'gen_ai.request.max_tokens',
-    description: 'The maximum number of tokens the model generates for a request.',
-    type: 'long',
-    example: '100',
-  },
-  'gen_ai.request.model': {
-    name: 'gen_ai.request.model',
-    description: 'The name of the GenAI model a request is being made to.',
-    type: 'keyword',
-    example: 'g',
-  },
-  'gen_ai.request.presence_penalty': {
-    name: 'gen_ai.request.presence_penalty',
-    description: 'The presence penalty setting for the GenAI request.',
-    type: 'double',
-    example: '0.1',
-  },
-  'gen_ai.request.seed': {
-    name: 'gen_ai.request.seed',
-    description: 'Requests with same seed value more likely to return same result.',
-    type: 'long',
-    example: '100',
-  },
-  'gen_ai.request.stop_sequences': {
-    name: 'gen_ai.request.stop_sequences',
-    description: 'List of sequences that the model will use to stop generating further tokens.',
-    type: 'keyword',
-    example: 'forest,lived',
-  },
-  'gen_ai.request.temperature': {
-    name: 'gen_ai.request.temperature',
-    description: 'The temperature setting for the GenAI request.',
-    type: 'double',
-    example: '0',
-  },
-  'gen_ai.request.top_k': {
-    name: 'gen_ai.request.top_k',
-    description: 'The top_k sampling setting for the GenAI request.',
-    type: 'double',
-    example: '1',
-  },
-  'gen_ai.request.top_p': {
-    name: 'gen_ai.request.top_p',
-    description: 'The top_p sampling setting for the GenAI request.',
-    type: 'double',
-    example: '1',
-  },
-  'gen_ai.response.finish_reasons': {
-    name: 'gen_ai.response.finish_reasons',
-    description:
-      'Array of reasons the model stopped generating tokens, corresponding to each generation received.',
-    type: 'keyword',
-    example: 'stop',
-  },
-  'gen_ai.response.id': {
-    name: 'gen_ai.response.id',
-    description: 'The unique identifier for the completion.',
-    type: 'keyword',
-    example: 'chatcmpl-123',
-  },
-  'gen_ai.response.model': {
-    name: 'gen_ai.response.model',
-    description: 'The name of the model that generated the response.',
-    type: 'keyword',
-    example: 'gpt-4-0613',
-  },
-  'gen_ai.retrieval.documents': {
-    name: 'gen_ai.retrieval.documents',
-    description: 'The documents retrieved.',
-    type: 'keyword',
-    example:
-      '[{"id":"doc_123","score":0.95},{"id":"doc_456","score":0.87},{"id":"doc_789","score":0.82}]',
-  },
-  'gen_ai.retrieval.query.text': {
-    name: 'gen_ai.retrieval.query.text',
-    description: 'The query text used for retrieval.',
-    type: 'keyword',
-    example: 'What is the capital of France?',
-  },
-  'gen_ai.system_instructions': {
-    name: 'gen_ai.system_instructions',
-    description:
-      'The system message or instructions provided to the GenAI model separately from the chat history.',
-    type: 'keyword',
-    example:
-      '[{"type":"text","content":"You are an Agent that greet users, always use greetings tool to respond"}]',
-  },
-  'gen_ai.token.type': {
-    name: 'gen_ai.token.type',
-    description: 'The type of token being counted.',
-    type: 'keyword',
-    example: 'input',
-  },
-  'gen_ai.tool.call.arguments': {
-    name: 'gen_ai.tool.call.arguments',
-    description: 'Parameters passed to the tool call.',
-    type: 'keyword',
-    example: '{"location":"San Francisco?","date":"2025-10-01"}',
-  },
-  'gen_ai.tool.call.id': {
-    name: 'gen_ai.tool.call.id',
-    description: 'The tool call identifier.',
-    type: 'keyword',
-    example: 'call_mszuSIzqtI65i1wAUOE8w5H4',
-  },
-  'gen_ai.tool.call.result': {
-    name: 'gen_ai.tool.call.result',
-    description: 'The result returned by the tool call (if any and if execution was successful).',
-    type: 'keyword',
-    example: '{"temperature_range":{"high":75,"low":60},"conditions":"sunny"}',
-  },
-  'gen_ai.tool.definitions': {
-    name: 'gen_ai.tool.definitions',
-    description:
-      'The list of source system tool definitions available to the GenAI agent or model.',
-    type: 'keyword',
-    example:
-      '[{"type":"function","name":"get_current_weather","description":"Get the current weather in a given location","parameters":{"type":"object","properties":{"location":{"type":"string","description":"The city and state, e.g. San Francisco, CA"},"unit":{"type":"string","enum":["celsius","fahrenheit"]}},"required":["location","unit"]}}]',
-  },
-  'gen_ai.tool.description': {
-    name: 'gen_ai.tool.description',
-    description: 'The tool description.',
-    type: 'keyword',
-    example: 'Multiply two numbers',
-  },
-  'gen_ai.tool.name': {
-    name: 'gen_ai.tool.name',
-    description: 'Name of the tool utilized by the agent.',
-    type: 'keyword',
-    example: 'Flights',
-  },
-  'gen_ai.tool.type': {
-    name: 'gen_ai.tool.type',
-    description: 'Type of the tool utilized by the agent',
-    type: 'keyword',
-    example: 'function',
-  },
-  'gen_ai.usage.input_tokens': {
-    name: 'gen_ai.usage.input_tokens',
-    description: 'The number of tokens used in the GenAI input (prompt).',
-    type: 'long',
-    example: '100',
-  },
-  'gen_ai.usage.output_tokens': {
-    name: 'gen_ai.usage.output_tokens',
-    description: 'The number of tokens used in the GenAI response (completion).',
-    type: 'long',
-    example: '180',
+    example: 'us-central1-a',
   },
   'geo.continent.code': {
     name: 'geo.continent.code',
@@ -2126,6 +1968,24 @@ export const semconvFlat = {
     type: 'keyword',
     example: 'CA-QC',
   },
+  'go.cpu.detailed_state': {
+    name: 'go.cpu.detailed_state',
+    description: 'The detailed state of the CPU.',
+    type: 'keyword',
+    example: 'gc/pause',
+  },
+  'go.cpu.state': {
+    name: 'go.cpu.state',
+    description: 'The state of the CPU.',
+    type: 'keyword',
+    example: 'user',
+  },
+  'go.memory.detailed_type': {
+    name: 'go.memory.detailed_type',
+    description: 'The detailed type of memory.',
+    type: 'keyword',
+    example: 'heap/objects',
+  },
   'go.memory.type': {
     name: 'go.memory.type',
     description: 'The type of memory.',
@@ -2166,7 +2026,7 @@ export const semconvFlat = {
     name: 'heroku.release.creation_timestamp',
     description: 'Time and date the release was created',
     type: 'keyword',
-    example: 'Sun Oct 23 2022 18:00:42 GMT+0000 (Coordinated Universal Time)',
+    example: '2022-10-23T18:00:42Z',
   },
   'host.arch': {
     name: 'host.arch',
@@ -2251,7 +2111,7 @@ export const semconvFlat = {
   'host.name': {
     name: 'host.name',
     description:
-      'Name of the host. On Unix systems, it may contain what the hostname command returns, or the fully qualified hostname, or another name specified by the user.',
+      'Name of the host. On UNIX systems, it may contain what the hostname command returns, or the fully qualified hostname, or another name specified by the user.',
     type: 'keyword',
     example: 'opentelemetry-test',
   },
@@ -2339,7 +2199,7 @@ export const semconvFlat = {
   },
   'hw.battery.capacity': {
     name: 'hw.battery.capacity',
-    description: 'Design capacity in Watts-hours or Amper-hours',
+    description: 'Design capacity in Watts-hours or Ampere-hours',
     type: 'keyword',
     example: '9.3Ah',
   },
@@ -2481,6 +2341,7 @@ export const semconvFlat = {
     name: 'hw.state',
     description: 'The current state of the component',
     type: 'keyword',
+    example: 'ok',
   },
   'hw.tape_drive.operation_type': {
     name: 'hw.tape_drive.operation_type',
@@ -2492,6 +2353,7 @@ export const semconvFlat = {
     name: 'hw.type',
     description: 'Type of the component',
     type: 'keyword',
+    example: 'voltage',
   },
   'hw.vendor': {
     name: 'hw.vendor',
@@ -2577,6 +2439,12 @@ export const semconvFlat = {
     type: 'keyword',
     example: '218fc5a9-a5f1-4b54-aa05-46717d0ab26d',
   },
+  'k8s.container.ephemeral_storage.fs_type': {
+    name: 'k8s.container.ephemeral_storage.fs_type',
+    description: 'The type of file system component for ephemeral storage.',
+    type: 'keyword',
+    example: 'rootfs',
+  },
   'k8s.container.name': {
     name: 'k8s.container.name',
     description:
@@ -2599,14 +2467,14 @@ export const semconvFlat = {
   'k8s.container.status.reason': {
     name: 'k8s.container.status.reason',
     description:
-      'The reason for the container state. Corresponds to the `reason` field of the: [K8s ContainerStateWaiting](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#containerstatewaiting-v1-core) or [K8s ContainerStateTerminated](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#containerstateterminated-v1-core)',
+      'The reason for the container state. Corresponds to the `reason` field of the: [K8s ContainerStateWaiting](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#containerstatewaiting-v1-core) or [K8s ContainerStateTerminated](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#containerstateterminated-v1-core)',
     type: 'keyword',
     example: 'ContainerCreating',
   },
   'k8s.container.status.state': {
     name: 'k8s.container.status.state',
     description:
-      'The state of the container. [K8s ContainerState](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#containerstate-v1-core)',
+      'The state of the container. [K8s ContainerState](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#containerstate-v1-core)',
     type: 'keyword',
     example: 'terminated',
   },
@@ -2814,11 +2682,87 @@ export const semconvFlat = {
     type: 'keyword',
     example: 'node-1',
   },
+  'k8s.node.system_container.name': {
+    name: 'k8s.node.system_container.name',
+    description: 'The name of the system container running on the K8s Node.',
+    type: 'keyword',
+    example: 'kubelet',
+  },
   'k8s.node.uid': {
     name: 'k8s.node.uid',
     description: 'The UID of the Node.',
     type: 'keyword',
     example: '1eb3a0c6-0477-4080-a9cb-0cb7db65c6a2',
+  },
+  'k8s.persistentvolume.annotation': {
+    name: 'k8s.persistentvolume.annotation',
+    description:
+      'The annotation placed on the PersistentVolume, the `<key>` being the annotation name, the value being the annotation value, even if the value is empty.',
+    type: 'keyword',
+    example: 'kubernetes.io/aws-ebs',
+  },
+  'k8s.persistentvolume.label': {
+    name: 'k8s.persistentvolume.label',
+    description:
+      'The label placed on the PersistentVolume, the `<key>` being the label name, the value being the label value, even if the value is empty.',
+    type: 'keyword',
+    example: 'ssd',
+  },
+  'k8s.persistentvolume.name': {
+    name: 'k8s.persistentvolume.name',
+    description: 'The name of the PersistentVolume.',
+    type: 'keyword',
+    example: 'pv-data-01',
+  },
+  'k8s.persistentvolume.reclaim_policy': {
+    name: 'k8s.persistentvolume.reclaim_policy',
+    description: 'The reclaim policy of the PersistentVolume.',
+    type: 'keyword',
+    example: 'Delete',
+  },
+  'k8s.persistentvolume.status.phase': {
+    name: 'k8s.persistentvolume.status.phase',
+    description: 'The phase of the PersistentVolume.',
+    type: 'keyword',
+    example: 'Pending',
+  },
+  'k8s.persistentvolume.uid': {
+    name: 'k8s.persistentvolume.uid',
+    description: 'The UID of the PersistentVolume.',
+    type: 'keyword',
+    example: '275ecb36-5aa8-4c2a-9c47-d8bb681b9aff',
+  },
+  'k8s.persistentvolumeclaim.annotation': {
+    name: 'k8s.persistentvolumeclaim.annotation',
+    description:
+      'The annotation placed on the PersistentVolumeClaim, the `<key>` being the annotation name, the value being the annotation value, even if the value is empty.',
+    type: 'keyword',
+    example: 'kubernetes.io/aws-ebs',
+  },
+  'k8s.persistentvolumeclaim.label': {
+    name: 'k8s.persistentvolumeclaim.label',
+    description:
+      'The label placed on the PersistentVolumeClaim, the `<key>` being the label name, the value being the label value, even if the value is empty.',
+    type: 'keyword',
+    example: 'my-app',
+  },
+  'k8s.persistentvolumeclaim.name': {
+    name: 'k8s.persistentvolumeclaim.name',
+    description: 'The name of the PersistentVolumeClaim.',
+    type: 'keyword',
+    example: 'pvc-data-01',
+  },
+  'k8s.persistentvolumeclaim.status.phase': {
+    name: 'k8s.persistentvolumeclaim.status.phase',
+    description: 'The phase of the PersistentVolumeClaim.',
+    type: 'keyword',
+    example: 'Pending',
+  },
+  'k8s.persistentvolumeclaim.uid': {
+    name: 'k8s.persistentvolumeclaim.uid',
+    description: 'The UID of the PersistentVolumeClaim.',
+    type: 'keyword',
+    example: '275ecb36-5aa8-4c2a-9c47-d8bb681b9aff',
   },
   'k8s.pod.annotation': {
     name: 'k8s.pod.annotation',
@@ -2856,7 +2800,7 @@ export const semconvFlat = {
     name: 'k8s.pod.start_time',
     description: 'The start timestamp of the Pod.',
     type: 'keyword',
-    example: 'Thu Dec 04 2025 08:41:03 GMT+0000 (Coordinated Universal Time)',
+    example: '2025-12-04T08:41:03Z',
   },
   'k8s.pod.status.phase': {
     name: 'k8s.pod.status.phase',
@@ -2934,6 +2878,75 @@ export const semconvFlat = {
     type: 'keyword',
     example: '275ecb36-5aa8-4c2a-9c47-d8bb681b9aff',
   },
+  'k8s.service.annotation': {
+    name: 'k8s.service.annotation',
+    description:
+      'The annotation placed on the Service, the `<key>` being the annotation name, the value being the annotation value, even if the value is empty.',
+    type: 'keyword',
+    example: 'true',
+  },
+  'k8s.service.endpoint.address_type': {
+    name: 'k8s.service.endpoint.address_type',
+    description: 'The address type of the service endpoint.',
+    type: 'keyword',
+    example: 'IPv4',
+  },
+  'k8s.service.endpoint.condition': {
+    name: 'k8s.service.endpoint.condition',
+    description: 'The condition of the service endpoint.',
+    type: 'keyword',
+    example: 'ready',
+  },
+  'k8s.service.endpoint.zone': {
+    name: 'k8s.service.endpoint.zone',
+    description: 'The zone of the service endpoint.',
+    type: 'keyword',
+    example: 'us-east-1a',
+  },
+  'k8s.service.label': {
+    name: 'k8s.service.label',
+    description:
+      'The label placed on the Service, the `<key>` being the label name, the value being the label value, even if the value is empty.',
+    type: 'keyword',
+    example: 'my-service',
+  },
+  'k8s.service.name': {
+    name: 'k8s.service.name',
+    description: 'The name of the Service.',
+    type: 'keyword',
+    example: 'my-service',
+  },
+  'k8s.service.publish_not_ready_addresses': {
+    name: 'k8s.service.publish_not_ready_addresses',
+    description: 'Whether the Service publishes not-ready endpoints.',
+    type: 'boolean',
+    example: 'true',
+  },
+  'k8s.service.selector': {
+    name: 'k8s.service.selector',
+    description:
+      'The selector key-value pair placed on the Service, the `<key>` being the selector key, the value being the selector value.',
+    type: 'keyword',
+    example: 'my-app',
+  },
+  'k8s.service.traffic_distribution': {
+    name: 'k8s.service.traffic_distribution',
+    description: 'The traffic distribution policy for the Service.',
+    type: 'keyword',
+    example: 'PreferSameZone',
+  },
+  'k8s.service.type': {
+    name: 'k8s.service.type',
+    description: 'The type of the Kubernetes Service.',
+    type: 'keyword',
+    example: 'ClusterIP',
+  },
+  'k8s.service.uid': {
+    name: 'k8s.service.uid',
+    description: 'The UID of the Service.',
+    type: 'keyword',
+    example: '275ecb36-5aa8-4c2a-9c47-d8bb681b9aff',
+  },
   'k8s.statefulset.annotation': {
     name: 'k8s.statefulset.annotation',
     description:
@@ -2963,7 +2976,7 @@ export const semconvFlat = {
   'k8s.storageclass.name': {
     name: 'k8s.storageclass.name',
     description:
-      'The name of K8s [StorageClass](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#storageclass-v1-storage-k8s-io) object.',
+      'The name of K8s [StorageClass](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#storageclass-v1-storage-k8s-io) object.',
     type: 'keyword',
     example: 'gold.storageclass.storage.k8s.io',
   },
@@ -3062,31 +3075,6 @@ export const semconvFlat = {
     type: 'keyword',
     example: 'LPAR01',
   },
-  'mcp.method.name': {
-    name: 'mcp.method.name',
-    description: 'The name of the request or notification method.',
-    type: 'keyword',
-  },
-  'mcp.protocol.version': {
-    name: 'mcp.protocol.version',
-    description:
-      'The [version](https://modelcontextprotocol.io/specification/versioning) of the Model Context Protocol used.',
-    type: 'keyword',
-    example: 'Wed Jun 18 2025 00:00:00 GMT+0000 (Coordinated Universal Time)',
-  },
-  'mcp.resource.uri': {
-    name: 'mcp.resource.uri',
-    description: 'The value of the resource uri.',
-    type: 'keyword',
-    example: 'postgres://database/customers/schema',
-  },
-  'mcp.session.id': {
-    name: 'mcp.session.id',
-    description:
-      'Identifies [MCP session](https://modelcontextprotocol.io/specification/2025-06-18/basic/transports#session-management).',
-    type: 'keyword',
-    example: '191c4850af6c49e08843a3f6c80e5046',
-  },
   'messaging.batch.message_count': {
     name: 'messaging.batch.message_count',
     description:
@@ -3156,7 +3144,7 @@ export const semconvFlat = {
   },
   'messaging.gcp_pubsub.message.ack_id': {
     name: 'messaging.gcp_pubsub.message.ack_id',
-    description: 'The ack id for a given message.',
+    description: 'The ack ID for a given message.',
     type: 'keyword',
     example: 'a',
   },
@@ -3171,6 +3159,13 @@ export const semconvFlat = {
       'The ordering key for a given message. If the attribute is not present, the message does not have an ordering key.',
     type: 'keyword',
     example: 'o',
+  },
+  'messaging.kafka.cluster.id': {
+    name: 'messaging.kafka.cluster.id',
+    description:
+      'The Kafka cluster ID, obtained from the broker metadata exposed through the Kafka client (or AdminClient) API.',
+    type: 'keyword',
+    example: 'MkU3OEVBNTcwNTJENDM2Qk',
   },
   'messaging.kafka.message.key': {
     name: 'messaging.kafka.message.key',
@@ -3260,7 +3255,7 @@ export const semconvFlat = {
   },
   'messaging.rocketmq.message.keys': {
     name: 'messaging.rocketmq.message.keys',
-    description: 'Key(s) of message, another way to mark message besides message id.',
+    description: 'Key(s) of message, another way to mark message besides message ID.',
     type: 'keyword',
     example: 'keyA,keyB',
   },
@@ -3486,12 +3481,12 @@ export const semconvFlat = {
   'metrics.cicd.system.errors': {
     name: 'metrics.cicd.system.errors',
     description:
-      'The number of errors in a component of the CICD system (eg. controller, scheduler, agent).',
+      'The number of errors in a component of the CI/CD system (eg. controller, scheduler, agent).',
     type: 'double',
   },
   'metrics.cicd.worker.count': {
     name: 'metrics.cicd.worker.count',
-    description: 'The number of workers on the CICD system by state.',
+    description: 'The number of workers on the CI/CD system by state.',
     type: 'double',
   },
   'metrics.container.cpu.time': {
@@ -3502,7 +3497,7 @@ export const semconvFlat = {
   'metrics.container.cpu.usage': {
     name: 'metrics.container.cpu.usage',
     description:
-      "Container's CPU usage, measured in cpus. Range from 0 to the number of allocatable CPUs.",
+      "Container's CPU usage, measured in CPUs. Range from 0 to the number of allocatable CPUs.",
     type: 'double',
   },
   'metrics.container.disk.io': {
@@ -3530,11 +3525,6 @@ export const semconvFlat = {
     description: 'Container memory available.',
     type: 'double',
   },
-  'metrics.container.memory.paging.faults': {
-    name: 'metrics.container.memory.paging.faults',
-    description: 'Container memory paging faults.',
-    type: 'double',
-  },
   'metrics.container.memory.rss': {
     name: 'metrics.container.memory.rss',
     description: 'Container memory RSS.',
@@ -3553,6 +3543,11 @@ export const semconvFlat = {
   'metrics.container.network.io': {
     name: 'metrics.container.network.io',
     description: 'Network bytes for the container.',
+    type: 'double',
+  },
+  'metrics.container.paging.faults': {
+    name: 'metrics.container.paging.faults',
+    description: 'Container memory paging faults.',
     type: 'double',
   },
   'metrics.container.uptime': {
@@ -3789,35 +3784,14 @@ export const semconvFlat = {
     description: 'Number of invocation timeouts.',
     type: 'double',
   },
-  'metrics.gen_ai.client.operation.duration': {
-    name: 'metrics.gen_ai.client.operation.duration',
-    description: 'GenAI operation duration.',
-    type: 'double',
-  },
-  'metrics.gen_ai.client.token.usage': {
-    name: 'metrics.gen_ai.client.token.usage',
-    description: 'Number of input and output tokens used.',
-    type: 'double',
-  },
-  'metrics.gen_ai.server.request.duration': {
-    name: 'metrics.gen_ai.server.request.duration',
-    description:
-      'Generative AI server request duration such as time-to-last byte or last output token.',
-    type: 'double',
-  },
-  'metrics.gen_ai.server.time_per_output_token': {
-    name: 'metrics.gen_ai.server.time_per_output_token',
-    description: 'Time per output token generated after the first token for successful responses.',
-    type: 'double',
-  },
-  'metrics.gen_ai.server.time_to_first_token': {
-    name: 'metrics.gen_ai.server.time_to_first_token',
-    description: 'Time to generate first token for successful responses.',
-    type: 'double',
-  },
   'metrics.go.config.gogc': {
     name: 'metrics.go.config.gogc',
     description: 'Heap size target percentage configured by the user, otherwise 100.',
+    type: 'double',
+  },
+  'metrics.go.cpu.time': {
+    name: 'metrics.go.cpu.time',
+    description: 'Estimated CPU time spent by the Go runtime.',
     type: 'double',
   },
   'metrics.go.goroutine.count': {
@@ -3835,9 +3809,20 @@ export const semconvFlat = {
     description: 'Count of allocations to the heap by the application.',
     type: 'double',
   },
+  'metrics.go.memory.gc.cycles': {
+    name: 'metrics.go.memory.gc.cycles',
+    description: 'Number of completed GC cycles.',
+    type: 'double',
+  },
   'metrics.go.memory.gc.goal': {
     name: 'metrics.go.memory.gc.goal',
     description: 'Heap size target for the end of the GC cycle.',
+    type: 'double',
+  },
+  'metrics.go.memory.gc.pause.duration': {
+    name: 'metrics.go.memory.gc.pause.duration',
+    description:
+      'Distribution of individual GC-related stop-the-world pause latencies. This is the time from deciding to stop the world until the world is started again.',
     type: 'double',
   },
   'metrics.go.memory.limit': {
@@ -3922,9 +3907,19 @@ export const semconvFlat = {
     description: 'Lower limit of battery charge fraction to ensure proper operation.',
     type: 'double',
   },
+  'metrics.hw.battery.status': {
+    name: 'metrics.hw.battery.status',
+    description: 'Operational status: `1` (true) or `0` (false) for each of the possible states.',
+    type: 'double',
+  },
   'metrics.hw.battery.time_left': {
     name: 'metrics.hw.battery.time_left',
     description: 'Time left before battery is completely charged or discharged.',
+    type: 'double',
+  },
+  'metrics.hw.cpu.errors': {
+    name: 'metrics.hw.cpu.errors',
+    description: 'Total number of errors encountered and corrected by the CPU.',
     type: 'double',
   },
   'metrics.hw.cpu.speed': {
@@ -3935,6 +3930,21 @@ export const semconvFlat = {
   'metrics.hw.cpu.speed.limit': {
     name: 'metrics.hw.cpu.speed.limit',
     description: 'CPU maximum frequency.',
+    type: 'double',
+  },
+  'metrics.hw.cpu.status': {
+    name: 'metrics.hw.cpu.status',
+    description: 'Operational status: `1` (true) or `0` (false) for each of the possible states.',
+    type: 'double',
+  },
+  'metrics.hw.disk_controller.status': {
+    name: 'metrics.hw.disk_controller.status',
+    description: 'Operational status: `1` (true) or `0` (false) for each of the possible states.',
+    type: 'double',
+  },
+  'metrics.hw.enclosure.status': {
+    name: 'metrics.hw.enclosure.status',
+    description: 'Operational status: `1` (true) or `0` (false) for each of the possible states.',
     type: 'double',
   },
   'metrics.hw.energy': {
@@ -3962,6 +3972,16 @@ export const semconvFlat = {
     description: 'Fan speed expressed as a fraction of its maximum speed.',
     type: 'double',
   },
+  'metrics.hw.fan.status': {
+    name: 'metrics.hw.fan.status',
+    description: 'Operational status: `1` (true) or `0` (false) for each of the possible states.',
+    type: 'double',
+  },
+  'metrics.hw.gpu.errors': {
+    name: 'metrics.hw.gpu.errors',
+    description: 'Number of errors encountered by the GPU.',
+    type: 'double',
+  },
   'metrics.hw.gpu.io': {
     name: 'metrics.hw.gpu.io',
     description: 'Received and transmitted bytes by the GPU.',
@@ -3980,6 +4000,11 @@ export const semconvFlat = {
   'metrics.hw.gpu.memory.utilization': {
     name: 'metrics.hw.gpu.memory.utilization',
     description: 'Fraction of GPU memory used.',
+    type: 'double',
+  },
+  'metrics.hw.gpu.status': {
+    name: 'metrics.hw.gpu.status',
+    description: 'Operational status: `1` (true) or `0` (false) for each of the possible states.',
     type: 'double',
   },
   'metrics.hw.gpu.utilization': {
@@ -4009,9 +4034,19 @@ export const semconvFlat = {
       'Instantaneous power consumed by the entire physical host in Watts (`hw.host.energy` is preferred).',
     type: 'double',
   },
+  'metrics.hw.logical_disk.errors': {
+    name: 'metrics.hw.logical_disk.errors',
+    description: 'Number of errors encountered on this logical disk.',
+    type: 'double',
+  },
   'metrics.hw.logical_disk.limit': {
     name: 'metrics.hw.logical_disk.limit',
     description: 'Size of the logical disk.',
+    type: 'double',
+  },
+  'metrics.hw.logical_disk.status': {
+    name: 'metrics.hw.logical_disk.status',
+    description: 'Operational status: `1` (true) or `0` (false) for each of the possible states.',
     type: 'double',
   },
   'metrics.hw.logical_disk.usage': {
@@ -4024,9 +4059,19 @@ export const semconvFlat = {
     description: 'Logical disk space utilization as a fraction.',
     type: 'double',
   },
+  'metrics.hw.memory.errors': {
+    name: 'metrics.hw.memory.errors',
+    description: 'Number of errors encountered on this memory module.',
+    type: 'double',
+  },
   'metrics.hw.memory.size': {
     name: 'metrics.hw.memory.size',
     description: 'Size of the memory module.',
+    type: 'double',
+  },
+  'metrics.hw.memory.status': {
+    name: 'metrics.hw.memory.status',
+    description: 'Operational status: `1` (true) or `0` (false) for each of the possible states.',
     type: 'double',
   },
   'metrics.hw.network.bandwidth.limit': {
@@ -4039,6 +4084,11 @@ export const semconvFlat = {
     description: 'Utilization of the network bandwidth as a fraction.',
     type: 'double',
   },
+  'metrics.hw.network.errors': {
+    name: 'metrics.hw.network.errors',
+    description: 'Number of errors encountered by the network adapter.',
+    type: 'double',
+  },
   'metrics.hw.network.io': {
     name: 'metrics.hw.network.io',
     description: 'Received and transmitted network traffic in bytes.',
@@ -4049,6 +4099,11 @@ export const semconvFlat = {
     description: 'Received and transmitted network traffic in packets (or frames).',
     type: 'double',
   },
+  'metrics.hw.network.status': {
+    name: 'metrics.hw.network.status',
+    description: 'Operational status: `1` (true) or `0` (false) for each of the possible states.',
+    type: 'double',
+  },
   'metrics.hw.network.up': {
     name: 'metrics.hw.network.up',
     description: 'Link status: `1` (up) or `0` (down).',
@@ -4057,6 +4112,11 @@ export const semconvFlat = {
   'metrics.hw.physical_disk.endurance_utilization': {
     name: 'metrics.hw.physical_disk.endurance_utilization',
     description: 'Endurance remaining for this SSD disk.',
+    type: 'double',
+  },
+  'metrics.hw.physical_disk.errors': {
+    name: 'metrics.hw.physical_disk.errors',
+    description: 'Number of errors encountered on this disk.',
     type: 'double',
   },
   'metrics.hw.physical_disk.size': {
@@ -4070,6 +4130,11 @@ export const semconvFlat = {
       'Value of the corresponding [S.M.A.R.T.](https://wikipedia.org/wiki/S.M.A.R.T.) (Self-Monitoring, Analysis, and Reporting Technology) attribute.',
     type: 'double',
   },
+  'metrics.hw.physical_disk.status': {
+    name: 'metrics.hw.physical_disk.status',
+    description: 'Operational status: `1` (true) or `0` (false) for each of the possible states.',
+    type: 'double',
+  },
   'metrics.hw.power': {
     name: 'metrics.hw.power',
     description: 'Instantaneous power consumed by the component.',
@@ -4078,6 +4143,11 @@ export const semconvFlat = {
   'metrics.hw.power_supply.limit': {
     name: 'metrics.hw.power_supply.limit',
     description: 'Maximum power output of the power supply.',
+    type: 'double',
+  },
+  'metrics.hw.power_supply.status': {
+    name: 'metrics.hw.power_supply.status',
+    description: 'Operational status: `1` (true) or `0` (false) for each of the possible states.',
     type: 'double',
   },
   'metrics.hw.power_supply.usage': {
@@ -4095,9 +4165,19 @@ export const semconvFlat = {
     description: 'Operational status: `1` (true) or `0` (false) for each of the possible states.',
     type: 'double',
   },
+  'metrics.hw.tape_drive.errors': {
+    name: 'metrics.hw.tape_drive.errors',
+    description: 'Number of errors encountered by the tape drive.',
+    type: 'double',
+  },
   'metrics.hw.tape_drive.operations': {
     name: 'metrics.hw.tape_drive.operations',
     description: 'Operations performed by the tape drive.',
+    type: 'double',
+  },
+  'metrics.hw.tape_drive.status': {
+    name: 'metrics.hw.tape_drive.status',
+    description: 'Operational status: `1` (true) or `0` (false) for each of the possible states.',
     type: 'double',
   },
   'metrics.hw.temperature': {
@@ -4108,6 +4188,11 @@ export const semconvFlat = {
   'metrics.hw.temperature.limit': {
     name: 'metrics.hw.temperature.limit',
     description: 'Temperature limit in degrees Celsius.',
+    type: 'double',
+  },
+  'metrics.hw.temperature.status': {
+    name: 'metrics.hw.temperature.status',
+    description: 'Operational status: `1` (true) or `0` (false) for each of the possible states.',
     type: 'double',
   },
   'metrics.hw.voltage': {
@@ -4123,6 +4208,11 @@ export const semconvFlat = {
   'metrics.hw.voltage.nominal': {
     name: 'metrics.hw.voltage.nominal',
     description: 'Nominal (expected) voltage.',
+    type: 'double',
+  },
+  'metrics.hw.voltage.status': {
+    name: 'metrics.hw.voltage.status',
+    description: 'Operational status: `1` (true) or `0` (false) for each of the possible states.',
     type: 'double',
   },
   'metrics.jvm.buffer.count': {
@@ -4175,6 +4265,11 @@ export const semconvFlat = {
     description: 'Number of open file descriptors as reported by the JVM.',
     type: 'double',
   },
+  'metrics.jvm.file_descriptor.limit': {
+    name: 'metrics.jvm.file_descriptor.limit',
+    description: 'Measure of max open file descriptors as reported by the JVM.',
+    type: 'double',
+  },
   'metrics.jvm.gc.duration': {
     name: 'metrics.jvm.gc.duration',
     description: 'Duration of JVM garbage collection actions.',
@@ -4221,24 +4316,34 @@ export const semconvFlat = {
     description: 'Number of executing platform threads.',
     type: 'double',
   },
-  'metrics.k8s.container.cpu.limit': {
-    name: 'metrics.k8s.container.cpu.limit',
-    description: 'Maximum CPU resource limit set for the container.',
+  'metrics.k8s.container.cpu.limit.current': {
+    name: 'metrics.k8s.container.cpu.limit.current',
+    description: 'Maximum CPU resource limit currently configured for a running container.',
     type: 'double',
   },
-  'metrics.k8s.container.cpu.limit_utilization': {
-    name: 'metrics.k8s.container.cpu.limit_utilization',
-    description: 'The ratio of container CPU usage to its CPU limit.',
+  'metrics.k8s.container.cpu.limit.desired': {
+    name: 'metrics.k8s.container.cpu.limit.desired',
+    description: 'Maximum CPU resource limit as defined by the container spec.',
     type: 'double',
   },
-  'metrics.k8s.container.cpu.request': {
-    name: 'metrics.k8s.container.cpu.request',
-    description: 'CPU resource requested for the container.',
+  'metrics.k8s.container.cpu.limit.utilization': {
+    name: 'metrics.k8s.container.cpu.limit.utilization',
+    description: 'The ratio of container CPU usage to its current CPU limit.',
     type: 'double',
   },
-  'metrics.k8s.container.cpu.request_utilization': {
-    name: 'metrics.k8s.container.cpu.request_utilization',
-    description: 'The ratio of container CPU usage to its CPU request.',
+  'metrics.k8s.container.cpu.request.current': {
+    name: 'metrics.k8s.container.cpu.request.current',
+    description: 'CPU resource requested currently configured for a running container.',
+    type: 'double',
+  },
+  'metrics.k8s.container.cpu.request.desired': {
+    name: 'metrics.k8s.container.cpu.request.desired',
+    description: 'CPU resource requested as defined by the container spec.',
+    type: 'double',
+  },
+  'metrics.k8s.container.cpu.request.utilization': {
+    name: 'metrics.k8s.container.cpu.request.utilization',
+    description: 'The ratio of container CPU usage to its current CPU request.',
     type: 'double',
   },
   'metrics.k8s.container.ephemeral_storage.limit': {
@@ -4251,14 +4356,29 @@ export const semconvFlat = {
     description: 'Ephemeral storage resource requested for the container.',
     type: 'double',
   },
-  'metrics.k8s.container.memory.limit': {
-    name: 'metrics.k8s.container.memory.limit',
-    description: 'Maximum memory resource limit set for the container.',
+  'metrics.k8s.container.ephemeral_storage.usage': {
+    name: 'metrics.k8s.container.ephemeral_storage.usage',
+    description: 'The ephemeral storage used by a container.',
     type: 'double',
   },
-  'metrics.k8s.container.memory.request': {
-    name: 'metrics.k8s.container.memory.request',
-    description: 'Memory resource requested for the container.',
+  'metrics.k8s.container.memory.limit.current': {
+    name: 'metrics.k8s.container.memory.limit.current',
+    description: 'Maximum memory resource limit currently configured for a running container.',
+    type: 'double',
+  },
+  'metrics.k8s.container.memory.limit.desired': {
+    name: 'metrics.k8s.container.memory.limit.desired',
+    description: 'Maximum memory resource limit as defined by the container spec.',
+    type: 'double',
+  },
+  'metrics.k8s.container.memory.request.current': {
+    name: 'metrics.k8s.container.memory.request.current',
+    description: 'Memory resource request currently configured for a running container.',
+    type: 'double',
+  },
+  'metrics.k8s.container.memory.request.desired': {
+    name: 'metrics.k8s.container.memory.request.desired',
+    description: 'Memory resource requested as defined by the container spec.',
     type: 'double',
   },
   'metrics.k8s.container.ready': {
@@ -4410,7 +4530,7 @@ export const semconvFlat = {
   },
   'metrics.k8s.node.cpu.allocatable': {
     name: 'metrics.k8s.node.cpu.allocatable',
-    description: 'Amount of cpu allocatable on the node.',
+    description: 'Amount of CPU allocatable on the node.',
     type: 'double',
   },
   'metrics.k8s.node.cpu.time': {
@@ -4421,7 +4541,7 @@ export const semconvFlat = {
   'metrics.k8s.node.cpu.usage': {
     name: 'metrics.k8s.node.cpu.usage',
     description:
-      "Node's CPU usage, measured in cpus. Range from 0 to the number of allocatable CPUs.",
+      "Node's CPU usage, measured in CPUs. Range from 0 to the number of allocatable CPUs.",
     type: 'double',
   },
   'metrics.k8s.node.ephemeral_storage.allocatable': {
@@ -4439,6 +4559,16 @@ export const semconvFlat = {
     description: 'Node filesystem capacity.',
     type: 'double',
   },
+  'metrics.k8s.node.filesystem.inode.count': {
+    name: 'metrics.k8s.node.filesystem.inode.count',
+    description: "The total inodes in the node's root filesystem.",
+    type: 'double',
+  },
+  'metrics.k8s.node.filesystem.inode.free': {
+    name: 'metrics.k8s.node.filesystem.inode.free',
+    description: "The free inodes in the node's root filesystem.",
+    type: 'double',
+  },
   'metrics.k8s.node.filesystem.usage': {
     name: 'metrics.k8s.node.filesystem.usage',
     description: 'Node filesystem usage.',
@@ -4452,11 +4582,6 @@ export const semconvFlat = {
   'metrics.k8s.node.memory.available': {
     name: 'metrics.k8s.node.memory.available',
     description: 'Node memory available.',
-    type: 'double',
-  },
-  'metrics.k8s.node.memory.paging.faults': {
-    name: 'metrics.k8s.node.memory.paging.faults',
-    description: 'Node memory paging faults.',
     type: 'double',
   },
   'metrics.k8s.node.memory.rss': {
@@ -4484,14 +4609,64 @@ export const semconvFlat = {
     description: 'Network bytes for the Node.',
     type: 'double',
   },
+  'metrics.k8s.node.paging.faults': {
+    name: 'metrics.k8s.node.paging.faults',
+    description: 'Node memory paging faults.',
+    type: 'double',
+  },
   'metrics.k8s.node.pod.allocatable': {
     name: 'metrics.k8s.node.pod.allocatable',
     description: 'Amount of pods allocatable on the node.',
     type: 'double',
   },
+  'metrics.k8s.node.system_container.cpu.time': {
+    name: 'metrics.k8s.node.system_container.cpu.time',
+    description: "Node's system container CPU time.",
+    type: 'double',
+  },
+  'metrics.k8s.node.system_container.cpu.usage': {
+    name: 'metrics.k8s.node.system_container.cpu.usage',
+    description: "Node's system container CPU usage, measured in CPUs.",
+    type: 'double',
+  },
+  'metrics.k8s.node.system_container.memory.usage': {
+    name: 'metrics.k8s.node.system_container.memory.usage',
+    description: "Node's system container memory usage.",
+    type: 'double',
+  },
+  'metrics.k8s.node.system_container.memory.working_set': {
+    name: 'metrics.k8s.node.system_container.memory.working_set',
+    description: 'The amount of working set memory.',
+    type: 'double',
+  },
   'metrics.k8s.node.uptime': {
     name: 'metrics.k8s.node.uptime',
     description: 'The time the Node has been running.',
+    type: 'double',
+  },
+  'metrics.k8s.persistentvolume.status.phase': {
+    name: 'metrics.k8s.persistentvolume.status.phase',
+    description: 'Number of PersistentVolumes in a given phase.',
+    type: 'double',
+  },
+  'metrics.k8s.persistentvolume.storage.capacity': {
+    name: 'metrics.k8s.persistentvolume.storage.capacity',
+    description: 'The storage capacity of the PersistentVolume.',
+    type: 'double',
+  },
+  'metrics.k8s.persistentvolumeclaim.status.phase': {
+    name: 'metrics.k8s.persistentvolumeclaim.status.phase',
+    description: 'Number of PersistentVolumeClaims in a given phase.',
+    type: 'double',
+  },
+  'metrics.k8s.persistentvolumeclaim.storage.capacity': {
+    name: 'metrics.k8s.persistentvolumeclaim.storage.capacity',
+    description: 'The actual storage capacity provisioned for the PersistentVolumeClaim.',
+    type: 'double',
+  },
+  'metrics.k8s.persistentvolumeclaim.storage.request': {
+    name: 'metrics.k8s.persistentvolumeclaim.storage.request',
+    description: 'The storage requested by the PersistentVolumeClaim.',
     type: 'double',
   },
   'metrics.k8s.pod.cpu.time': {
@@ -4502,7 +4677,7 @@ export const semconvFlat = {
   'metrics.k8s.pod.cpu.usage': {
     name: 'metrics.k8s.pod.cpu.usage',
     description:
-      "Pod's CPU usage, measured in cpus. Range from 0 to the number of allocatable CPUs.",
+      "Pod's CPU usage, measured in CPUs. Range from 0 to the number of allocatable CPUs.",
     type: 'double',
   },
   'metrics.k8s.pod.filesystem.available': {
@@ -4523,11 +4698,6 @@ export const semconvFlat = {
   'metrics.k8s.pod.memory.available': {
     name: 'metrics.k8s.pod.memory.available',
     description: 'Pod memory available.',
-    type: 'double',
-  },
-  'metrics.k8s.pod.memory.paging.faults': {
-    name: 'metrics.k8s.pod.memory.paging.faults',
-    description: 'Pod memory paging faults.',
     type: 'double',
   },
   'metrics.k8s.pod.memory.rss': {
@@ -4553,6 +4723,11 @@ export const semconvFlat = {
   'metrics.k8s.pod.network.io': {
     name: 'metrics.k8s.pod.network.io',
     description: 'Network bytes for the Pod.',
+    type: 'double',
+  },
+  'metrics.k8s.pod.paging.faults': {
+    name: 'metrics.k8s.pod.paging.faults',
+    description: 'Pod memory paging faults.',
     type: 'double',
   },
   'metrics.k8s.pod.status.phase': {
@@ -4743,6 +4918,17 @@ export const semconvFlat = {
       'The storage requests in a specific namespace. The value represents the current observed total usage of the resource in the namespace.',
     type: 'double',
   },
+  'metrics.k8s.service.endpoint.count': {
+    name: 'metrics.k8s.service.endpoint.count',
+    description: 'Number of endpoints for a service by condition and address type.',
+    type: 'double',
+  },
+  'metrics.k8s.service.load_balancer.ingress.count': {
+    name: 'metrics.k8s.service.load_balancer.ingress.count',
+    description:
+      'Number of load balancer ingress points (external IPs/hostnames) assigned to the service.',
+    type: 'double',
+  },
   'metrics.k8s.statefulset.pod.current': {
     name: 'metrics.k8s.statefulset.pod.current',
     description:
@@ -4804,28 +4990,6 @@ export const semconvFlat = {
   'metrics.kestrel.upgraded_connections': {
     name: 'metrics.kestrel.upgraded_connections',
     description: 'Number of connections that are currently upgraded (WebSockets). .',
-    type: 'double',
-  },
-  'metrics.mcp.client.operation.duration': {
-    name: 'metrics.mcp.client.operation.duration',
-    description:
-      'The duration of the MCP request or notification as observed on the sender from the time it was sent until the response or ack is received.',
-    type: 'double',
-  },
-  'metrics.mcp.client.session.duration': {
-    name: 'metrics.mcp.client.session.duration',
-    description: 'The duration of the MCP session as observed on the MCP client.',
-    type: 'double',
-  },
-  'metrics.mcp.server.operation.duration': {
-    name: 'metrics.mcp.server.operation.duration',
-    description:
-      'MCP request or notification duration as observed on the receiver from the time it was received until the result or ack is sent.',
-    type: 'double',
-  },
-  'metrics.mcp.server.session.duration': {
-    name: 'metrics.mcp.server.session.duration',
-    description: 'The duration of the MCP session as observed on the MCP server.',
     type: 'double',
   },
   'metrics.messaging.attributes': {
@@ -5189,7 +5353,7 @@ export const semconvFlat = {
   },
   'metrics.process.cpu.time': {
     name: 'metrics.process.cpu.time',
-    description: 'Total CPU seconds broken down by different states.',
+    description: 'Total CPU seconds broken down by different CPU modes.',
     type: 'double',
   },
   'metrics.process.cpu.utilization': {
@@ -5230,7 +5394,7 @@ export const semconvFlat = {
   },
   'metrics.process.unix.file_descriptor.count': {
     name: 'metrics.process.unix.file_descriptor.count',
-    description: 'Number of unix file descriptors in use by the process.',
+    description: 'Number of UNIX file descriptors in use by the process.',
     type: 'double',
   },
   'metrics.process.uptime': {
@@ -5245,12 +5409,12 @@ export const semconvFlat = {
   },
   'metrics.rpc.client.call.duration': {
     name: 'metrics.rpc.client.call.duration',
-    description: 'Measures the duration of outbound remote procedure calls (RPC).',
+    description: 'Measures the duration of an outgoing Remote Procedure Call (RPC).',
     type: 'double',
   },
   'metrics.rpc.server.call.duration': {
     name: 'metrics.rpc.server.call.duration',
-    description: 'Measures the duration of inbound remote procedure calls (RPC).',
+    description: 'Measures the duration of an incoming Remote Procedure Call (RPC).',
     type: 'double',
   },
   'metrics.signalr.server.active_connections': {
@@ -5326,6 +5490,11 @@ export const semconvFlat = {
     description: 'The total storage capacity of the filesystem.',
     type: 'double',
   },
+  'metrics.system.filesystem.lock.count': {
+    name: 'metrics.system.filesystem.lock.count',
+    description: 'Filesystem lock counts.',
+    type: 'double',
+  },
   'metrics.system.filesystem.usage': {
     name: 'metrics.system.filesystem.usage',
     description: "Reports a filesystem's space usage across different states.",
@@ -5345,6 +5514,36 @@ export const semconvFlat = {
     name: 'metrics.system.memory.linux.available',
     description:
       'An estimate of how much memory is available for starting new applications, without causing swapping.',
+    type: 'double',
+  },
+  'metrics.system.memory.linux.hugepages.limit': {
+    name: 'metrics.system.memory.linux.hugepages.limit',
+    description: 'Total number of hugepages available.',
+    type: 'double',
+  },
+  'metrics.system.memory.linux.hugepages.page_size': {
+    name: 'metrics.system.memory.linux.hugepages.page_size',
+    description: 'System hugepage size in bytes.',
+    type: 'double',
+  },
+  'metrics.system.memory.linux.hugepages.reserved': {
+    name: 'metrics.system.memory.linux.hugepages.reserved',
+    description: 'Number of reserved hugepages.',
+    type: 'double',
+  },
+  'metrics.system.memory.linux.hugepages.surplus': {
+    name: 'metrics.system.memory.linux.hugepages.surplus',
+    description: 'Number of surplus hugepages.',
+    type: 'double',
+  },
+  'metrics.system.memory.linux.hugepages.usage': {
+    name: 'metrics.system.memory.linux.hugepages.usage',
+    description: 'Number of hugepages in use by state.',
+    type: 'double',
+  },
+  'metrics.system.memory.linux.hugepages.utilization': {
+    name: 'metrics.system.memory.linux.hugepages.utilization',
+    description: 'Percentage of hugepages in use by state.',
     type: 'double',
   },
   'metrics.system.memory.linux.shared': {
@@ -5405,12 +5604,12 @@ export const semconvFlat = {
   },
   'metrics.system.paging.usage': {
     name: 'metrics.system.paging.usage',
-    description: 'Unix swap or windows pagefile usage.',
+    description: 'UNIX swap or windows pagefile usage.',
     type: 'double',
   },
   'metrics.system.paging.utilization': {
     name: 'metrics.system.paging.utilization',
-    description: 'Swap (unix) or pagefile (windows) utilization.',
+    description: 'Swap (UNIX) or pagefile (windows) utilization.',
     type: 'double',
   },
   'metrics.system.process.count': {
@@ -5423,6 +5622,12 @@ export const semconvFlat = {
     description: 'Total number of processes created over uptime of the host.',
     type: 'double',
   },
+  'metrics.system.process.limit': {
+    name: 'metrics.system.process.limit',
+    description:
+      'The maximum number of concurrent processes/tasks allowed by the operating system.',
+    type: 'double',
+  },
   'metrics.system.uptime': {
     name: 'metrics.system.uptime',
     description: 'The time the system has been running.',
@@ -5431,11 +5636,6 @@ export const semconvFlat = {
   'metrics.v8js.gc.duration': {
     name: 'metrics.v8js.gc.duration',
     description: 'Garbage collection duration.',
-    type: 'double',
-  },
-  'metrics.v8js.memory.heap.limit': {
-    name: 'metrics.v8js.memory.heap.limit',
-    description: 'Total heap memory size pre-allocated.',
     type: 'double',
   },
   'metrics.v8js.memory.heap.space.available_size': {
@@ -5448,9 +5648,19 @@ export const semconvFlat = {
     description: 'Committed size of a heap space.',
     type: 'double',
   },
+  'metrics.v8js.memory.heap.space.size': {
+    name: 'metrics.v8js.memory.heap.space.size',
+    description: 'Total heap memory size pre-allocated for a heap space.',
+    type: 'double',
+  },
   'metrics.v8js.memory.heap.used': {
     name: 'metrics.v8js.memory.heap.used',
     description: 'Heap Memory size allocated.',
+    type: 'double',
+  },
+  'metrics.v8js.resource.active': {
+    name: 'metrics.v8js.resource.active',
+    description: 'Gauge of the active resources that are currently keeping the event loop alive.',
     type: 'double',
   },
   'metrics.vcs.change.count': {
@@ -5549,7 +5759,7 @@ export const semconvFlat = {
   'network.connection.subtype': {
     name: 'network.connection.subtype',
     description:
-      'This describes more details regarding the connection.type. It may be the type of cell technology connection, but it could be used for describing details about a wifi connection.',
+      'This describes more details regarding the connection.type. It may be the type of cell technology connection, but it could be used for describing details about a Wi-Fi connection.',
     type: 'keyword',
     example: 'L',
   },
@@ -5567,13 +5777,14 @@ export const semconvFlat = {
   },
   'network.io.direction': {
     name: 'network.io.direction',
-    description: 'The network IO operation direction.',
+    description:
+      "The direction of traffic from the perspective of the observing host's physical or virtual network interface. It should not be used to represent the logical direction of a stateful connection or network flow.",
     type: 'keyword',
     example: 'transmit',
   },
   'network.local.address': {
     name: 'network.local.address',
-    description: 'Local address of the network connection - IP address or Unix domain socket name.',
+    description: 'Local address of the network connection - IP address or UNIX domain socket name.',
     type: 'keyword',
     example: '10.1.2.80',
   },
@@ -5585,7 +5796,7 @@ export const semconvFlat = {
   },
   'network.peer.address': {
     name: 'network.peer.address',
-    description: 'Peer address of the network connection - IP address or Unix domain socket name.',
+    description: 'Peer address of the network connection - IP address or UNIX domain socket name.',
     type: 'keyword',
     example: '10.1.2.80',
   },
@@ -5673,24 +5884,6 @@ export const semconvFlat = {
     name: 'onc_rpc.version',
     description: 'ONC/Sun RPC program version.',
     type: 'long',
-  },
-  'openai.request.service_tier': {
-    name: 'openai.request.service_tier',
-    description: 'The service tier requested. May be a specific tier, default, or auto.',
-    type: 'keyword',
-    example: 'auto',
-  },
-  'openai.response.service_tier': {
-    name: 'openai.response.service_tier',
-    description: 'The service tier used for the response.',
-    type: 'keyword',
-    example: 'scale',
-  },
-  'openai.response.system_fingerprint': {
-    name: 'openai.response.system_fingerprint',
-    description: 'A fingerprint to track any eventual change in the Generative AI environment.',
-    type: 'keyword',
-    example: 'fp_44709d6fcb',
   },
   'openshift.clusterquota.name': {
     name: 'openshift.clusterquota.name',
@@ -5886,16 +6079,29 @@ export const semconvFlat = {
   'pprof.profile.drop_frames': {
     name: 'pprof.profile.drop_frames',
     description:
-      'Frames with Function.function_name fully matching the regexp will be dropped from the samples, along with their successors.',
+      'Frames with Function.function_name fully matching the regular expression will be dropped from the samples, along with their successors.',
     type: 'keyword',
     example: '/foobar/',
   },
   'pprof.profile.keep_frames': {
     name: 'pprof.profile.keep_frames',
     description:
-      'Frames with Function.function_name fully matching the regexp will be kept, even if it matches drop_frames.',
+      'Frames with Function.function_name fully matching the regular expression will be kept, even if it matches drop_frames.',
     type: 'keyword',
     example: '/bazinga/',
+  },
+  'pprof.scope.default_sample_type': {
+    name: 'pprof.scope.default_sample_type',
+    description:
+      "Records the pprof's default_sample_type in the original profile. Not set if the default sample type was missing.",
+    type: 'keyword',
+    example: 'cpu',
+  },
+  'pprof.scope.sample_type_order': {
+    name: 'pprof.scope.sample_type_order',
+    description: 'Records the indexes of the sample types in the original profile.',
+    type: 'long',
+    example: '3,0,1,2',
   },
   'process.args_count': {
     name: 'process.args_count',
@@ -5934,7 +6140,7 @@ export const semconvFlat = {
     name: 'process.creation.time',
     description: 'The date and time the process was created, in ISO 8601 format.',
     type: 'keyword',
-    example: 'Tue Nov 21 2023 09:25:34 GMT+0000 (Coordinated Universal Time)',
+    example: '2023-11-21T09:25:34.853Z',
   },
   'process.environment_variable': {
     name: 'process.environment_variable',
@@ -5957,8 +6163,7 @@ export const semconvFlat = {
   },
   'process.executable.build_id.htlhash': {
     name: 'process.executable.build_id.htlhash',
-    description:
-      'Profiling specific build ID for executables. See the OTel specification for Profiles for more information.',
+    description: 'Deterministic build ID for executables.',
     type: 'keyword',
     example: '600DCAFE4A110000F2BF38C493F5FB92',
   },
@@ -5986,7 +6191,7 @@ export const semconvFlat = {
     name: 'process.exit.time',
     description: 'The date and time the process exited, in ISO 8601 format.',
     type: 'keyword',
-    example: 'Tue Nov 21 2023 09:26:12 GMT+0000 (Coordinated Universal Time)',
+    example: '2023-11-21T09:26:12.315Z',
   },
   'process.group_leader.pid': {
     name: 'process.group_leader.pid',
@@ -6241,7 +6446,7 @@ export const semconvFlat = {
   },
   'server.address': {
     name: 'server.address',
-    description: 'RPC server [host name](https://grpc.github.io/grpc/core/md_doc_naming.html).',
+    description: 'A string identifying a group of RPC server instances request is sent to.',
     type: 'keyword',
     example: 'example.com',
   },
@@ -6298,7 +6503,7 @@ export const semconvFlat = {
   },
   'session.id': {
     name: 'session.id',
-    description: 'A unique id to identify a session.',
+    description: 'A unique ID to identify a session.',
     type: 'keyword',
     example: '0',
   },
@@ -6334,7 +6539,7 @@ export const semconvFlat = {
   'source.address': {
     name: 'source.address',
     description:
-      'Source address - domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.',
+      'Source address - domain name if available without reverse DNS lookup; otherwise, IP address or UNIX domain socket name.',
     type: 'keyword',
     example: 'source.example.com',
   },
@@ -6398,6 +6603,12 @@ export const semconvFlat = {
     description: 'The filesystem type',
     type: 'keyword',
     example: 'ext4',
+  },
+  'system.memory.linux.hugepages.state': {
+    name: 'system.memory.linux.hugepages.state',
+    description: 'The Linux HugePages memory state',
+    type: 'keyword',
+    example: 'free',
   },
   'system.memory.linux.slab.state': {
     name: 'system.memory.linux.slab.state',
@@ -6554,13 +6765,13 @@ export const semconvFlat = {
     name: 'tls.client.not_after',
     description: 'Date/Time indicating when client certificate is no longer considered valid.',
     type: 'keyword',
-    example: 'Fri Jan 01 2021 00:00:00 GMT+0000 (Coordinated Universal Time)',
+    example: '2021-01-01T00:00:00.000Z',
   },
   'tls.client.not_before': {
     name: 'tls.client.not_before',
     description: 'Date/Time indicating when client certificate is first considered valid.',
     type: 'keyword',
-    example: 'Thu Jan 01 1970 00:00:00 GMT+0000 (Coordinated Universal Time)',
+    example: '1970-01-01T00:00:00.000Z',
   },
   'tls.client.subject': {
     name: 'tls.client.subject',
@@ -6666,13 +6877,13 @@ export const semconvFlat = {
     name: 'tls.server.not_after',
     description: 'Date/Time indicating when server certificate is no longer considered valid.',
     type: 'keyword',
-    example: 'Fri Jan 01 2021 00:00:00 GMT+0000 (Coordinated Universal Time)',
+    example: '2021-01-01T00:00:00.000Z',
   },
   'tls.server.not_before': {
     name: 'tls.server.not_before',
     description: 'Date/Time indicating when server certificate is first considered valid.',
     type: 'keyword',
-    example: 'Thu Jan 01 1970 00:00:00 GMT+0000 (Coordinated Universal Time)',
+    example: '1970-01-01T00:00:00.000Z',
   },
   'tls.server.subject': {
     name: 'tls.server.subject',
@@ -6747,7 +6958,7 @@ export const semconvFlat = {
   },
   'url.registered_domain': {
     name: 'url.registered_domain',
-    description: 'The highest registered url domain, stripped of the subdomain.',
+    description: 'The highest registered URL domain, stripped of the subdomain.',
     type: 'keyword',
     example: 'example.com',
   },
@@ -6761,7 +6972,7 @@ export const semconvFlat = {
   'url.subdomain': {
     name: 'url.subdomain',
     description:
-      'The subdomain portion of a fully qualified domain name includes all of the names except the host name under the registered_domain. In a partially qualified domain, or if the qualification level of the full name cannot be determined, subdomain contains all of the names below the registered domain.',
+      'The subdomain portion of a fully qualified domain name includes all of the names except the hostname under the registered_domain. In a partially qualified domain, or if the qualification level of the full name cannot be determined, subdomain contains all of the names below the registered domain.',
     type: 'keyword',
     example: 'east',
   },
@@ -6862,6 +7073,11 @@ export const semconvFlat = {
   'v8js.heap.space.name': {
     name: 'v8js.heap.space.name',
     description: 'The name of the space type of heap memory.',
+    type: 'keyword',
+  },
+  'v8js.resource.type': {
+    name: 'v8js.resource.type',
+    description: 'The type of resource keeping the event loop active.',
     type: 'keyword',
   },
   'vcs.change.id': {

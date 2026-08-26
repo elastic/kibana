@@ -12,7 +12,7 @@ import type { Logger } from '@kbn/core/server';
 
 import { appContextService } from '../..';
 
-import { compileTemplate } from './agent';
+import { compileTemplate, mergeCompiledTemplates } from './agent';
 
 jest.mock('../../app_context');
 
@@ -96,6 +96,16 @@ multi_text_field:
       some_text_field: 'textvalue',
       multi_text_field: ['1234', 'foo', 'bar'],
     });
+  });
+
+  it('should preserve date-like text values as strings instead of coercing to a Date', () => {
+    // https://github.com/elastic/kibana/issues/273220
+    const streamTemplate = `api_version: {{api_version}}\n`;
+    const vars = {
+      api_version: { type: 'text', value: '2024-03-02' },
+    };
+    const output = compileTemplate(vars, getMockedMetaVariable(), streamTemplate);
+    expect(output).toEqual({ api_version: '2024-03-02' });
   });
 
   it('should support yaml values', () => {
@@ -266,6 +276,29 @@ text_var: {{escape_string text_var}}
       });
     });
 
+    it('should preserve double quotes inside escape_string values without corrupting surrounding YAML', () => {
+      // Regression: https://github.com/elastic/kibana/issues/279388
+      // escape_string wraps single-line values in YAML single quotes: 'user"name'
+      // The newline-collapse regex was incorrectly treating the `"` inside the
+      // single-quoted scalar as a double-quote delimiter, matching across lines
+      // and collapsing subsequent YAML keys onto one line.
+      const template = `
+username: {{escape_string username}}
+password: {{escape_string password}}
+interval: 24h
+`;
+      const vars = {
+        username: { type: 'text', value: 'user"name' },
+        password: { type: 'password', value: 'p@ss"word' },
+      };
+      const output = compileTemplate(vars, getMockedMetaVariable(), template);
+      expect(output).toEqual({
+        username: 'user"name',
+        password: 'p@ss"word',
+        interval: '24h',
+      });
+    });
+
     it('should respect new lines and literal escapes', () => {
       const vars = {
         text_var: {
@@ -428,6 +461,100 @@ input: logs
     });
   });
 
+  const rerouteConfigVars = {
+    reroute_config: {
+      type: 'yaml',
+      value: `
+- if:
+    and:
+      - not.has_fields: _conf.dataset
+      - regexp.message: "devid=\\"?FG"
+  then:
+    - add_fields:
+        target: ''
+        fields:
+          _conf.dataset: "fortinet_fortigate.log"
+- if:
+    and:
+      - not.has_fields: _conf.dataset
+      - regexp.message: " CheckPoint [0-9]+ - "
+  then:
+    - add_fields:
+        target: ''
+        fields:
+          _conf.dataset: "checkpoint.firewall"
+          _conf.tz_offset: "UTC"
+      `,
+    },
+  };
+
+  it('should handle deeply nested yaml values without producing compact mappings', () => {
+    const streamTemplate = `
+input: udp
+host: "0.0.0.0:9515"
+reroute_config: {{reroute_config}}
+    `;
+
+    const output = compileTemplate(rerouteConfigVars, getMockedMetaVariable(), streamTemplate);
+    expect(output).toEqual({
+      input: 'udp',
+      host: '0.0.0.0:9515',
+      reroute_config: [
+        {
+          if: {
+            and: [{ 'not.has_fields': '_conf.dataset' }, { 'regexp.message': 'devid="?FG' }],
+          },
+          then: [
+            {
+              add_fields: {
+                target: '',
+                fields: { '_conf.dataset': 'fortinet_fortigate.log' },
+              },
+            },
+          ],
+        },
+        {
+          if: {
+            and: [
+              { 'not.has_fields': '_conf.dataset' },
+              { 'regexp.message': ' CheckPoint [0-9]+ - ' },
+            ],
+          },
+          then: [
+            {
+              add_fields: {
+                target: '',
+                fields: {
+                  '_conf.dataset': 'checkpoint.firewall',
+                  '_conf.tz_offset': 'UTC',
+                },
+              },
+            },
+          ],
+        },
+      ],
+    });
+  });
+
+  it('should handle root-level yaml variables with values containing double quotes (syslog_router pattern)', () => {
+    const streamTemplate = `
+input: udp
+host: "0.0.0.0:9515"
+processors:
+- add_locale: ~
+{{#if reroute_config}}
+{{reroute_config}}
+{{/if}}
+    `;
+
+    const output = compileTemplate(rerouteConfigVars, getMockedMetaVariable(), streamTemplate);
+    expect(output.processors).toBeDefined();
+    expect(output.processors).toHaveLength(3);
+    expect(output.processors[0]).toEqual({ add_locale: null });
+    expect(output.processors[1].if.and[1]['regexp.message']).toBe('devid="?FG');
+    expect(output.processors[2].if.and[1]['regexp.message']).toBe(' CheckPoint [0-9]+ - ');
+  });
+
   it('should support $$$$ yaml values at root level', () => {
     const streamTemplate = `
 input: logs
@@ -545,6 +672,16 @@ type: {{_meta.stream.data_stream.type}}
       type: 'logs',
     });
   });
+
+  it('should fold single newlines to a space in double-quoted YAML scalars', () => {
+    // Regression: https://github.com/elastic/sdh-beats/issues/7456
+    // Multi-line double-quoted SQL in stream templates (e.g. Oracle tablespace) had
+    // tokens concatenated because a single \n was deleted instead of folded to a space.
+    const template = `sql: "SUM(bytes) AS TOTAL_BYTES\nFROM details"\n`;
+
+    const output = compileTemplate({}, getMockedMetaVariable(), template);
+    expect(output).toEqual({ sql: 'SUM(bytes) AS TOTAL_BYTES FROM details' });
+  });
 });
 
 describe('encode', () => {
@@ -659,6 +796,98 @@ describe('semverSatisfies', () => {
     );
     expect(output).toEqual({
       field: 'value',
+    });
+  });
+});
+
+describe('mergeCompiledTemplates', () => {
+  it('returns the override when base is empty', () => {
+    expect(mergeCompiledTemplates({}, { key: 'value' })).toEqual({ key: 'value' });
+  });
+
+  it('returns the base when override is empty', () => {
+    expect(mergeCompiledTemplates({ key: 'value' }, {})).toEqual({ key: 'value' });
+  });
+
+  it('scalar in override replaces scalar in base', () => {
+    expect(mergeCompiledTemplates({ key: 'base' }, { key: 'override' })).toEqual({
+      key: 'override',
+    });
+  });
+
+  it('key only in base is preserved', () => {
+    expect(mergeCompiledTemplates({ a: 1, b: 2 }, { b: 99 })).toEqual({ a: 1, b: 99 });
+  });
+
+  it('key only in override is added', () => {
+    expect(mergeCompiledTemplates({ a: 1 }, { b: 2 })).toEqual({ a: 1, b: 2 });
+  });
+
+  it('arrays are concatenated (base elements first, override appended)', () => {
+    expect(mergeCompiledTemplates({ items: [1, 2] }, { items: [3, 4] })).toEqual({
+      items: [1, 2, 3, 4],
+    });
+  });
+
+  it('nested objects are deep-merged', () => {
+    expect(mergeCompiledTemplates({ config: { a: 1, b: 2 } }, { config: { b: 99, c: 3 } })).toEqual(
+      { config: { a: 1, b: 99, c: 3 } }
+    );
+  });
+
+  it('deeply nested objects are recursively merged', () => {
+    expect(
+      mergeCompiledTemplates(
+        { level1: { level2: { x: 1, y: 2 } } },
+        { level1: { level2: { y: 99, z: 3 } } }
+      )
+    ).toEqual({ level1: { level2: { x: 1, y: 99, z: 3 } } });
+  });
+
+  it('override scalar replaces base object (type mismatch)', () => {
+    expect(mergeCompiledTemplates({ key: { nested: true } }, { key: 'scalar' })).toEqual({
+      key: 'scalar',
+    });
+  });
+
+  it('override object replaces base scalar (type mismatch)', () => {
+    expect(mergeCompiledTemplates({ key: 'scalar' }, { key: { nested: true } })).toEqual({
+      key: { nested: true },
+    });
+  });
+
+  it('override array replaces base scalar (type mismatch)', () => {
+    expect(mergeCompiledTemplates({ key: 'scalar' }, { key: [1, 2] })).toEqual({
+      key: [1, 2],
+    });
+  });
+
+  it('handles mixed keys (scalars, objects, arrays) in the same object', () => {
+    expect(
+      mergeCompiledTemplates(
+        { scalar: 'base', obj: { a: 1 }, list: ['x'] },
+        { scalar: 'override', obj: { b: 2 }, list: ['y'] }
+      )
+    ).toEqual({ scalar: 'override', obj: { a: 1, b: 2 }, list: ['x', 'y'] });
+  });
+
+  it('does not mutate the base or override objects', () => {
+    const base = { arr: [1, 2], obj: { a: 1 } };
+    const override = { arr: [3], obj: { b: 2 } };
+    mergeCompiledTemplates(base, override);
+    expect(base).toEqual({ arr: [1, 2], obj: { a: 1 } });
+    expect(override).toEqual({ arr: [3], obj: { b: 2 } });
+  });
+
+  it('null in base is replaced by override object', () => {
+    expect(mergeCompiledTemplates({ key: null }, { key: { nested: true } })).toEqual({
+      key: { nested: true },
+    });
+  });
+
+  it('override null replaces base value', () => {
+    expect(mergeCompiledTemplates({ key: { nested: true } }, { key: null })).toEqual({
+      key: null,
     });
   });
 });

@@ -37,6 +37,6 @@ describe('IfVertex', () => {
 
   it('should use the correct icon', () => {
     const ifVertex = new IfVertex(graph, vertexJson);
-    expect(ifVertex.iconType).to.be('logstashIf');
+    expect(ifVertex.iconType).to.be('if');
   });
 });

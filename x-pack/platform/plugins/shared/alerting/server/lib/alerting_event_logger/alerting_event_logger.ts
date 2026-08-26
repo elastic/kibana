@@ -6,6 +6,7 @@
  */
 
 import * as uuid from 'uuid';
+import { set } from '@kbn/safer-lodash-set';
 import type { IEvent, IEventLogger, InternalFields } from '@kbn/event-log-plugin/server';
 import { millisToNanos, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
@@ -13,21 +14,31 @@ import { EVENT_LOG_ACTIONS } from '../../plugin';
 import type { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import type { TaskRunnerTimings } from '../../task_runner/task_runner_timer';
-import type { AlertInstanceState, RuleExecutionStatus } from '../../types';
-import { createAlertEventLogRecordObject } from '../create_alert_event_log_record_object';
+import type {
+  AlertInstanceState,
+  ConsumerExecutionMetrics,
+  RuleExecutionStatus,
+} from '../../types';
+import {
+  createAlertEventLogRecordObject,
+  type Event,
+} from '../create_alert_event_log_record_object';
 import type { RuleRunMetrics } from '../rule_run_metrics_store';
 import { Gap } from '../rule_gaps/gap';
 import type { GapBase } from '../../application/gaps/types';
+import type { GapReason } from '../../../common/constants';
 
 // 1,000,000 nanoseconds in 1 millisecond
 const Millis2Nanos = 1000 * 1000;
 
 export interface RuleContext {
   id: string;
+  uuid?: string;
   type: UntypedNormalizedRuleType;
   consumer?: string;
   name?: string;
   revision?: number;
+  tags?: string[];
 }
 export interface ContextOpts {
   savedObjectId: string;
@@ -58,6 +69,7 @@ interface DoneOpts {
   timings?: TaskRunnerTimings;
   status?: RuleExecutionStatus;
   metrics?: RuleRunMetrics | null;
+  consumerMetrics?: Partial<ConsumerExecutionMetrics> | null;
   backfill?: BackfillOpts;
 }
 
@@ -214,15 +226,19 @@ export class AlertingEventLogger {
   public addOrUpdateRuleData({
     name,
     id,
+    uuid: ruleUuid,
     consumer,
     type,
     revision,
+    tags,
   }: {
     name?: string;
     id?: string;
+    uuid?: string;
     consumer?: string;
     revision?: number;
     type?: UntypedNormalizedRuleType;
+    tags?: string[];
   }) {
     if (!this.isInitialized) {
       throw new Error(`AlertingEventLogger not initialized`);
@@ -236,6 +252,10 @@ export class AlertingEventLogger {
       };
     }
 
+    if (ruleUuid) {
+      this.ruleData.uuid = ruleUuid;
+    }
+
     if (name) {
       this.ruleData.name = name;
     }
@@ -246,6 +266,10 @@ export class AlertingEventLogger {
 
     if (revision) {
       this.ruleData.revision = revision;
+    }
+
+    if (tags) {
+      this.ruleData.tags = tags;
     }
 
     let updatedRelatedSavedObjects = false;
@@ -266,7 +290,9 @@ export class AlertingEventLogger {
     updateEventWithRuleData(this.event, {
       ruleName: name,
       ruleId: id,
+      ruleUuid,
       ruleType: type,
+      ruleTags: tags,
       consumer,
       revision,
       savedObjects: updatedRelatedSavedObjects ? this.relatedSavedObjects : undefined,
@@ -345,7 +371,7 @@ export class AlertingEventLogger {
     );
   }
 
-  public done({ status, metrics, timings, backfill }: DoneOpts) {
+  public done({ status, metrics, consumerMetrics, timings, backfill }: DoneOpts) {
     if (!this.isInitialized || !this.event || !this.context) {
       throw new Error('AlertingEventLogger not initialized');
     }
@@ -385,6 +411,10 @@ export class AlertingEventLogger {
       updateEvent(this.event, { metrics });
     }
 
+    if (consumerMetrics) {
+      updateEvent(this.event, { consumerMetrics });
+    }
+
     if (timings) {
       updateEvent(this.event, { timings });
     }
@@ -398,11 +428,13 @@ export class AlertingEventLogger {
 
   public reportGap({
     gap,
+    reason,
   }: {
     gap: {
       lte: string;
       gte: string;
     };
+    reason?: GapReason;
   }): void {
     if (!this.isInitialized || !this.context || !this.ruleData) {
       throw new Error('AlertingEventLogger not initialized');
@@ -411,6 +443,7 @@ export class AlertingEventLogger {
     const gapToReport = new Gap({
       ruleId: this.ruleData.id,
       range: gap,
+      reason,
     });
 
     this.logEventWithFixedUuid(
@@ -450,7 +483,7 @@ export function createAlertRecord(
   ruleData: RuleContext,
   savedObjects: SavedObjects[],
   alert: AlertOpts
-) {
+): Event {
   return createAlertEventLogRecordObject({
     ruleId: ruleData.id,
     ruleType: ruleData.type,
@@ -469,6 +502,7 @@ export function createAlertRecord(
     flapping: alert.flapping,
     maintenanceWindowIds: alert.maintenanceWindowIds,
     ruleRevision: ruleData.revision,
+    ruleTags: ruleData.tags,
   });
 }
 
@@ -477,7 +511,7 @@ export function createActionExecuteRecord(
   ruleData: RuleContext,
   savedObjects: SavedObjects[],
   action: ActionOpts
-) {
+): Event {
   return createAlertEventLogRecordObject({
     ruleId: ruleData.id,
     ruleType: ruleData.type,
@@ -500,6 +534,7 @@ export function createActionExecuteRecord(
     ruleName: ruleData.name,
     alertSummary: action.alertSummary,
     ruleRevision: ruleData.revision,
+    ruleTags: ruleData.tags,
   });
 }
 
@@ -508,7 +543,7 @@ export function createExecuteTimeoutRecord(
   savedObjects: SavedObjects[],
   type: ExecutionType,
   ruleData?: RuleContext
-) {
+): Event {
   let message = '';
   switch (type) {
     case executionType.BACKFILL:
@@ -533,6 +568,7 @@ export function createExecuteTimeoutRecord(
     savedObjects,
     ruleName: ruleData?.name,
     ruleRevision: ruleData?.revision,
+    ruleTags: ruleData?.tags,
   });
 }
 
@@ -546,8 +582,9 @@ export function createGapRecord(
       gte: string;
       lte: string;
     };
+    reason?: GapReason;
   }
-) {
+): Event {
   return createAlertEventLogRecordObject({
     ruleId: ruleData?.id,
     ruleType: ruleData?.type,
@@ -559,6 +596,7 @@ export function createGapRecord(
     savedObjects,
     ruleName: ruleData?.name,
     ruleRevision: ruleData?.revision,
+    ruleTags: ruleData?.tags,
     gap,
   });
 }
@@ -567,12 +605,13 @@ export function initializeExecuteRecord(
   context: Context,
   ruleData: RuleContext,
   so: SavedObjects[]
-) {
+): Event {
   return createAlertEventLogRecordObject({
     ruleId: ruleData.id,
     ruleType: ruleData.type,
     consumer: ruleData.consumer,
     ruleRevision: ruleData.revision,
+    ruleTags: ruleData.tags,
     namespace: context.namespace,
     spaceId: context.spaceId,
     executionId: context.executionId,
@@ -585,7 +624,7 @@ export function initializeExecuteRecord(
   });
 }
 
-export function initializeExecuteBackfillRecord(context: Context, so: SavedObjects[]) {
+export function initializeExecuteBackfillRecord(context: Context, so: SavedObjects[]): Event {
   return createAlertEventLogRecordObject({
     namespace: context.namespace,
     spaceId: context.spaceId,
@@ -607,6 +646,7 @@ interface UpdateEventOpts {
   status?: string;
   reason?: string;
   metrics?: RuleRunMetrics;
+  consumerMetrics?: Partial<ConsumerExecutionMetrics>;
   timings?: TaskRunnerTimings;
   backfill?: BackfillOpts;
   maintenanceWindowIds?: string[];
@@ -615,6 +655,8 @@ interface UpdateEventOpts {
 interface UpdateRuleOpts {
   ruleName?: string;
   ruleId?: string;
+  ruleUuid?: string;
+  ruleTags?: string[];
   consumer?: string;
   ruleType?: UntypedNormalizedRuleType;
   revision?: number;
@@ -622,7 +664,7 @@ interface UpdateRuleOpts {
 }
 
 export function updateEventWithRuleData(event: IEvent, opts: UpdateRuleOpts) {
-  const { ruleName, ruleId, consumer, ruleType, revision, savedObjects } = opts;
+  const { ruleName, ruleId, ruleUuid, consumer, ruleType, revision, ruleTags, savedObjects } = opts;
   if (!event) {
     throw new Error('Cannot update event because it is not initialized.');
   }
@@ -639,6 +681,17 @@ export function updateEventWithRuleData(event: IEvent, opts: UpdateRuleOpts) {
       ...event.rule,
       id: ruleId,
     };
+  }
+
+  if (ruleUuid) {
+    event.rule = {
+      ...event.rule,
+      uuid: ruleUuid,
+    };
+  }
+
+  if (ruleTags && ruleTags.length > 0) {
+    event.tags = ruleTags;
   }
 
   if (consumer) {
@@ -673,7 +726,8 @@ export function updateEventWithRuleData(event: IEvent, opts: UpdateRuleOpts) {
     }
   }
 
-  if (revision) {
+  // revision is a non-negative integer. We'd like to capture 0 as well.
+  if (revision !== undefined) {
     event.kibana = event.kibana || {};
     event.kibana.alert = event.kibana.alert || {};
     event.kibana.alert.rule = event.kibana.alert.rule || {};
@@ -700,6 +754,7 @@ export function updateEvent(event: IEvent, opts: UpdateEventOpts) {
     status,
     reason,
     metrics,
+    consumerMetrics,
     timings,
     alertingOutcome,
     backfill,
@@ -762,6 +817,20 @@ export function updateEvent(event: IEvent, opts: UpdateEventOpts) {
       es_search_duration_ms: metrics.esSearchDurationMs ? metrics.esSearchDurationMs : 0,
       total_search_duration_ms: metrics.totalSearchDurationMs ? metrics.totalSearchDurationMs : 0,
     };
+  }
+
+  if (consumerMetrics) {
+    set(event, 'kibana.alert.rule.execution.metrics', {
+      ...event.kibana?.alert?.rule?.execution?.metrics,
+      matched_indices_count: consumerMetrics.matched_indices_count,
+      alerts_candidate_count: consumerMetrics.alerts_candidate_count,
+      alerts_suppressed_count: consumerMetrics.alerts_suppressed_count,
+      frozen_indices_queried_count: consumerMetrics.frozen_indices_queried_count,
+      total_indexing_duration_ms: consumerMetrics.total_indexing_duration_ms,
+      total_enrichment_duration_ms: consumerMetrics.total_enrichment_duration_ms,
+      execution_gap_duration_s: consumerMetrics.gap_duration_s,
+      gap_range: consumerMetrics.gap_range,
+    });
   }
 
   if (backfill) {

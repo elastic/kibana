@@ -12,6 +12,26 @@ function shouldReadKeys(value: unknown): value is Record<string, any> {
 }
 
 /**
+ * Flattens a deeply nested object to a map of dot-separated
+ * paths pointing to all primitive values **and arrays**
+ * from `object`.
+ *
+ * @param prefix - The prefix to use for the path.
+ * @param object - The object to flatten.
+ * @param result - The result object to store the flattened values. Note: this object is mutated in place.
+ */
+function flatten(prefix: string, object: Record<string, unknown>, result: Record<string, unknown>) {
+  for (const [key, value] of Object.entries(object)) {
+    const path = prefix ? `${prefix}.${key}` : key;
+    if (shouldReadKeys(value)) {
+      flatten(path, value, result);
+    } else {
+      result[path] = value;
+    }
+  }
+}
+
+/**
  *  Flattens a deeply nested object to a map of dot-separated
  *  paths pointing to all primitive values **and arrays**
  *  from `rootValue`.
@@ -28,15 +48,6 @@ export function getFlattenedObject(rootValue: Record<string, any>) {
   }
 
   const result: { [key: string]: any } = {};
-  (function flatten(prefix, object) {
-    for (const [key, value] of Object.entries(object)) {
-      const path = prefix ? `${prefix}.${key}` : key;
-      if (shouldReadKeys(value)) {
-        flatten(path, value);
-      } else {
-        result[path] = value;
-      }
-    }
-  })('', rootValue);
+  flatten('', rootValue, result);
   return result;
 }

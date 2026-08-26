@@ -9,7 +9,6 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { ComponentOpts } from './rule_status_dropdown';
 import { RuleStatusDropdown } from './rule_status_dropdown';
 
@@ -82,56 +81,47 @@ describe('RuleStatusDropdown', () => {
   });
 
   test('renders status control', () => {
-    const wrapper = mountWithIntl(<RuleStatusDropdown {...props} />);
-    expect(wrapper.find('[data-test-subj="statusDropdown"]').first().props().title).toBe('Enabled');
+    render(<RuleStatusDropdown {...props} />);
+    // The EuiPopover uses the title prop which maps to the DOM title attribute
+    expect(screen.getByTestId('statusDropdown')).toHaveAttribute('title', 'Enabled');
   });
 
   test('renders status control as disabled when rule is disabled', () => {
-    const wrapper = mountWithIntl(
-      <RuleStatusDropdown {...{ ...props, rule: { ...props.rule, enabled: false } }} />
-    );
-    expect(wrapper.find('[data-test-subj="statusDropdown"]').first().props().title).toBe(
-      'Disabled'
-    );
+    render(<RuleStatusDropdown {...{ ...props, rule: { ...props.rule, enabled: false } }} />);
+    expect(screen.getByTestId('statusDropdown')).toHaveAttribute('title', 'Disabled');
   });
 
   test('renders status control as snoozed when rule is snoozed', () => {
     jest.spyOn(global.Date, 'now').mockImplementation(() => new Date(NOW_STRING).valueOf());
 
-    const wrapper = mountWithIntl(
+    render(
       <RuleStatusDropdown
         {...{ ...props, rule: { ...props.rule, isSnoozedUntil: SNOOZE_UNTIL } }}
       />
     );
-    expect(wrapper.find('[data-test-subj="statusDropdown"]').first().props().title).toBe('Snoozed');
-    expect(wrapper.find('[data-test-subj="remainingSnoozeTime"]').first().text()).toBe('3 days');
+    expect(screen.getByTestId('statusDropdown')).toHaveAttribute('title', 'Snoozed');
+    expect(screen.getByTestId('remainingSnoozeTime')).toHaveTextContent('3 days');
   });
 
   test('renders status control as snoozed when rule has muteAll set to true', () => {
     jest.spyOn(global.Date, 'now').mockImplementation(() => new Date(NOW_STRING).valueOf());
 
-    const wrapper = mountWithIntl(
-      <RuleStatusDropdown {...{ ...props, rule: { ...props.rule, muteAll: true } }} />
-    );
-    expect(wrapper.find('[data-test-subj="statusDropdown"]').first().props().title).toBe('Snoozed');
-    expect(wrapper.find('[data-test-subj="remainingSnoozeTime"]').first().text()).toBe(
-      'Indefinitely'
-    );
+    render(<RuleStatusDropdown {...{ ...props, rule: { ...props.rule, muteAll: true } }} />);
+    expect(screen.getByTestId('statusDropdown')).toHaveAttribute('title', 'Snoozed');
+    expect(screen.getByTestId('remainingSnoozeTime')).toHaveTextContent('Indefinitely');
   });
 
   test('renders status control as disabled when rule is snoozed but also disabled', () => {
-    const wrapper = mountWithIntl(
+    render(
       <RuleStatusDropdown
         {...{ ...props, rule: { ...props.rule, enabled: false, isSnoozedUntil: SNOOZE_UNTIL } }}
       />
     );
-    expect(wrapper.find('[data-test-subj="statusDropdown"]').first().props().title).toBe(
-      'Disabled'
-    );
+    expect(screen.getByTestId('statusDropdown')).toHaveAttribute('title', 'Disabled');
   });
 
   test('renders read-only status control when isEditable is false', () => {
-    const wrapper = mountWithIntl(
+    render(
       <RuleStatusDropdown
         {...{
           ...props,
@@ -140,9 +130,7 @@ describe('RuleStatusDropdown', () => {
         isEditable={false}
       />
     );
-    expect(wrapper.find('[data-test-subj="statusDropdownReadonly"]').first().props().children).toBe(
-      'Enabled'
-    );
+    expect(screen.getByTestId('statusDropdownReadonly')).toHaveTextContent('Enabled');
   });
 
   describe('autoRecoverAlerts', () => {

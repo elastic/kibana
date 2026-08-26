@@ -24,7 +24,6 @@
       "screenshotMode",
       "uiActions",
       "urlForwarding",
-      "presentationUtil",
       "unifiedSearch"
     ],
     "optionalPlugins": [
@@ -46,7 +45,6 @@
       "kibanaReact",
       "kibanaUtils",
       "presentationUtil",
-      "presentationPanel",
       "savedObjects"
     ]
   }

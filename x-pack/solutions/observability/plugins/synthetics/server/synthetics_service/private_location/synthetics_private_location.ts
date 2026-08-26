@@ -4,18 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
+import type { NewPackagePolicy, UpdatePackagePolicyWithId } from '@kbn/fleet-plugin/common';
 import type { NewPackagePolicyWithId } from '@kbn/fleet-plugin/server/services/package_policy';
 import { cloneDeep } from 'lodash';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
-import { DEFAULT_NAMESPACE_STRING } from '../../../common/constants/monitor_defaults';
+import { escapeQuotes } from '@kbn/es-query';
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
+import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
+import { getAgentPoliciesAsInternalUser } from '../../routes/settings/private_locations/get_agent_policies';
+import {
+  syntheticsMonitorSOTypes,
+  syntheticsMonitorSavedObjectType,
+  legacySyntheticsMonitorTypeSingle,
+} from '../../../common/types/saved_objects';
 import {
   BROWSER_TEST_NOW_RUN,
   LIGHTWEIGHT_TEST_NOW_RUN,
 } from '../synthetics_monitor/synthetics_monitor_client';
 import { scheduleCleanUpTask } from './clean_up_task';
-import { getAgentPoliciesAsInternalUser } from '../../routes/settings/private_locations/get_agent_policies';
 import type { SyntheticsServerSetup } from '../../types';
 import { formatSyntheticsPolicy } from '../formatters/private_formatters/format_synthetics_policy';
 import type {
@@ -30,10 +37,24 @@ import {
 } from '../../../common/runtime_types';
 import { stringifyString } from '../formatters/private_formatters/formatting_utils';
 import type { PrivateLocationAttributes } from '../../runtime_types/private_locations';
+import { PackagePolicyService } from './package_policy_service';
+import { rebalanceByCost } from './assign_shards';
+import { toConditionUpdates, toMonitorPlacements } from './rebalance_writes';
+import {
+  agentIdFromCondition,
+  assignAgentById,
+  isConditionShardedLocation,
+  isEqlSafeLiteral,
+  UNASSIGNED_CONDITION,
+} from './assign_by_condition';
 
 export interface PrivateConfig {
   config: HeartbeatConfig;
   globalParams: Record<string, string>;
+}
+
+interface EnrolledAgents {
+  agentIds: string[];
 }
 
 export interface FailedPolicyUpdate {
@@ -44,19 +65,15 @@ export interface FailedPolicyUpdate {
 
 export class SyntheticsPrivateLocation {
   private readonly server: SyntheticsServerSetup;
+  private readonly packagePolicyService: PackagePolicyService;
 
   constructor(_server: SyntheticsServerSetup) {
     this.server = _server;
+    this.packagePolicyService = new PackagePolicyService(_server);
   }
 
-  async buildNewPolicy(): Promise<NewPackagePolicy> {
-    const soClient = this.server.coreStart.savedObjects.createInternalRepository();
-
-    const newPolicy = await this.server.fleet.packagePolicyService.buildPackagePolicyFromPackage(
-      soClient,
-      'synthetics',
-      { logger: this.server.logger, installMissingPackage: true }
-    );
+  async buildNewPolicy(spaceId: string): Promise<NewPackagePolicy> {
+    const newPolicy = await this.packagePolicyService.buildPackagePolicyFromPackage({ spaceId });
 
     if (!newPolicy) {
       throw new Error(`Unable to create Synthetics package policy template for private location`);
@@ -65,11 +82,124 @@ export class SyntheticsPrivateLocation {
     return newPolicy;
   }
 
-  getPolicyId(config: { origin?: string; id: string }, locId: string, spaceId: string) {
-    if (config[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT) {
-      return `${config.id}-${locId}`;
+  /**
+   * Returns the new (space-agnostic) policy ID format.
+   * Format: `${configId}-${locationId}`
+   * This removes the spaceId dependency to support multispace monitors.
+   */
+  getPolicyId(config: { origin?: string; id: string }, locId: string) {
+    return `${config.id}-${locId}`;
+  }
+
+  getPolicyName(config: { id: string; origin?: string; name: string }, locName: string) {
+    if (config.origin === SourceType.PROJECT) {
+      return `${config.id}-${locName}`;
     }
-    return `${config.id}-${locId}-${spaceId}`;
+    return `${config.name}-${locName}`;
+  }
+
+  async getPolicyNamespace(configNamespace: string) {
+    if (configNamespace && configNamespace !== DEFAULT_NAMESPACE_STRING) {
+      return configNamespace;
+    }
+    return undefined;
+  }
+
+  /**
+   * Checks whether new-format or legacy-format policy IDs exist for a given monitor + location.
+   *
+   * Finds legacy IDs (`{configId}-{locationId}-{spaceId}`) via prefix match + suffix
+   * validation against known spaces. Suffix validation uses O(1) Set lookup, keeping
+   * performance identical to plain prefix matching regardless of space count.
+   *
+   * This prevents most false positives — e.g. monitor "monitor-a" / location "loc-b"
+   * won't match policies for monitor "monitor-a-loc-b", because the suffix after
+   * "monitor-a-loc-b-" won't be a known space. A residual ambiguity remains when space IDs contain dashes (inherent to
+   * the dash-separated legacy format), but is unlikely in practice since it
+   * requires monitor IDs, location IDs, and space names to overlap in a specific way.
+   */
+  getPolicyIdFormatInfo(
+    config: { id: string },
+    locationId: string,
+    existingPolicies: Array<{ id: string }> | undefined,
+    allSpaces: Set<string>
+  ): { hasNewFormatPolicyId: boolean; hasAnyLegacyPolicyId: boolean; legacyPolicyIds: string[] } {
+    const newId = this.getPolicyId(config, locationId);
+    const hasNewFormatPolicyId = existingPolicies?.some((policy) => policy.id === newId) ?? false;
+
+    const legacyIdPrefix = `${config.id}-${locationId}-`;
+    const legacyPolicyIds =
+      existingPolicies
+        ?.filter((policy) => {
+          if (!policy.id.startsWith(legacyIdPrefix)) return false;
+          const spaceId = policy.id.slice(legacyIdPrefix.length);
+          return allSpaces.has(spaceId);
+        })
+        .map((policy) => policy.id) ?? [];
+    const hasAnyLegacyPolicyId = legacyPolicyIds.length > 0;
+
+    return { hasNewFormatPolicyId, hasAnyLegacyPolicyId, legacyPolicyIds };
+  }
+
+  /**
+   * Returns the legacy policy ID format that included spaceId.
+   * Format: `${configId}-${locationId}-${spaceId}`
+   * Used for backward compatibility when looking up existing policies.
+   */
+  getLegacyPolicyId(configId: string, locId: string, spaceId: string) {
+    return `${configId}-${locId}-${spaceId}`;
+  }
+
+  getLegacyPolicyIdsForAllSpaces(configId: string, locId: string, allSpaces: Set<string>) {
+    return [...allSpaces].map((space) => this.getLegacyPolicyId(configId, locId, space));
+  }
+
+  /**
+   * Gets all unique spaces that have any synthetics monitors.
+   */
+  async getAllSpacesWithMonitors(): Promise<string[]> {
+    const soClient = this.server.coreStart.savedObjects.createInternalRepository();
+    const spaces = new Set<string>();
+
+    try {
+      const result = await soClient.find<
+        unknown,
+        {
+          namespaces: {
+            buckets: Array<{ key: string; doc_count: number }>;
+          };
+          legacyNamespaces: {
+            buckets: Array<{ key: string; doc_count: number }>;
+          };
+        }
+      >({
+        type: syntheticsMonitorSOTypes,
+        perPage: 0,
+        namespaces: [ALL_SPACES_ID],
+        fields: [],
+        aggs: {
+          namespaces: {
+            terms: { field: `${syntheticsMonitorSavedObjectType}.namespaces`, size: 1000 },
+          },
+          legacyNamespaces: {
+            terms: { field: `${legacySyntheticsMonitorTypeSingle}.namespaces`, size: 1000 },
+          },
+        },
+      });
+
+      result.aggregations?.namespaces?.buckets?.forEach((bucket) => {
+        spaces.add(bucket.key);
+      });
+      result.aggregations?.legacyNamespaces?.buckets?.forEach((bucket) => {
+        spaces.add(bucket.key);
+      });
+    } catch (e) {
+      this.server.logger.error(
+        `Error fetching spaces with monitors. Legacy package policies will not be removed: ${e.message}`
+      );
+    }
+
+    return [...spaces];
   }
 
   async generateNewPolicy(
@@ -80,7 +210,9 @@ export class SyntheticsPrivateLocation {
     globalParams: Record<string, string>,
     maintenanceWindows: MaintenanceWindow[],
     testRunId?: string,
-    runOnce?: boolean
+    runOnce?: boolean,
+    conditionHosts?: EnrolledAgents,
+    existingCondition?: string | null
   ): Promise<NewPackagePolicy | null> {
     const { label: locName } = privateLocation;
 
@@ -90,15 +222,36 @@ export class SyntheticsPrivateLocation {
       newPolicy.is_managed = true;
       newPolicy.policy_id = privateLocation.agentPolicyId;
       newPolicy.policy_ids = [privateLocation.agentPolicyId];
+      if (isConditionShardedLocation(privateLocation)) {
+        const agentIds = conditionHosts?.agentIds ?? [];
+        const existingAgentId = agentIdFromCondition(existingCondition);
+
+        if (existingAgentId && agentIds.includes(existingAgentId)) {
+          // Keep a valid existing pin during edits. Health and balancing moves
+          // belong to the rebalance task, not the monitor CRUD path.
+          newPolicy.condition = existingCondition;
+        } else if (agentIds.length > 0) {
+          newPolicy.condition =
+            assignAgentById(config.id, agentIds)?.condition ?? UNASSIGNED_CONDITION;
+        } else {
+          // An absent condition runs on every agent. Explicitly disable the
+          // monitor until an enrolled agent is available to own it.
+          newPolicy.condition = UNASSIGNED_CONDITION;
+        }
+      } else {
+        // Preserve the classic payload exactly as it was unless this edit is
+        // explicitly turning off a previously stamped scalable-location pin.
+        // In particular, package-policy creation must omit `condition`; an
+        // explicit `null` changes the Fleet policy and breaks classic callers.
+        if (existingCondition !== undefined) {
+          newPolicy.condition = null;
+        }
+      }
       if (testRunId) {
         newPolicy.name =
           config.type === 'browser' ? BROWSER_TEST_NOW_RUN : LIGHTWEIGHT_TEST_NOW_RUN;
       } else {
-        if (config[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT) {
-          newPolicy.name = `${config.id}-${locName}`;
-        } else {
-          newPolicy.name = `${config[ConfigKey.NAME]}-${locName}-${spaceId}`;
-        }
+        newPolicy.name = this.getPolicyName(config, locName);
       }
       const configNamespace = config[ConfigKey.NAMESPACE];
 
@@ -125,6 +278,7 @@ export class SyntheticsPrivateLocation {
               }
             : {}),
           ...(runOnce ? { run_once: runOnce } : {}),
+          ...(config.fields?.kibanaUrl ? { kibanaUrl: config.fields.kibanaUrl } : {}),
         },
         globalParams,
         maintenanceWindows
@@ -135,6 +289,75 @@ export class SyntheticsPrivateLocation {
       this.server.logger.error(e);
       return null;
     }
+  }
+
+  /**
+   * Resolves enrolled Fleet agents for one scalable location policy. This is
+   * deliberately paginated: a large policy must not silently ignore agents
+   * beyond Fleet's first result page. Pagination stops on a short page
+   * (fewer than `perPage` results) rather than trusting `total`, which some
+   * callers may not populate.
+   */
+  private async getEnrolledAgents(agentPolicyId: string): Promise<EnrolledAgents> {
+    const agentIds = new Set<string>();
+    const perPage = 1000;
+    let page = 1;
+
+    while (true) {
+      const { agents } = await this.server.fleet.agentService.asInternalUser.listAgents({
+        showInactive: false,
+        perPage,
+        page,
+        kuery: `policy_id:"${escapeQuotes(agentPolicyId)}"`,
+      });
+
+      for (const agent of agents) {
+        if (agent.id && isEqlSafeLiteral(agent.id)) {
+          agentIds.add(agent.id);
+        }
+      }
+
+      if (agents.length < perPage) {
+        break;
+      }
+      page += 1;
+    }
+
+    return { agentIds: [...agentIds] };
+  }
+
+  /** Resolves each touched scalable location at most once per monitor batch. */
+  private async getScalableAgentsByLocation(
+    locations: Array<{ id: string; agentPolicyId: string; isAgentSharding?: boolean }>
+  ): Promise<Map<string, EnrolledAgents>> {
+    const conditionLocations = [
+      ...new Map(
+        locations
+          .filter((location) => isConditionShardedLocation(location))
+          .map((location) => [location.id, location])
+      ).values(),
+    ];
+    const entries = await Promise.all(
+      conditionLocations.map(
+        async (location) =>
+          [location.id, await this.getEnrolledAgents(location.agentPolicyId)] as const
+      )
+    );
+
+    return new Map(entries);
+  }
+
+  private getReferencedPrivateLocations(
+    configs: Array<{ config: Pick<HeartbeatConfig, ConfigKey.LOCATIONS> }>,
+    privateLocations: SyntheticsPrivateLocations
+  ): SyntheticsPrivateLocations {
+    const locationIds = new Set(
+      configs.flatMap(({ config }) =>
+        config.locations.filter((location) => !location.isServiceManaged).map(({ id }) => id)
+      )
+    );
+
+    return privateLocations.filter((location) => locationIds.has(location.id));
   }
 
   async createPackagePolicies(
@@ -149,7 +372,14 @@ export class SyntheticsPrivateLocation {
       return { created: [], failed: [] };
     }
     const newPolicies: NewPackagePolicyWithId[] = [];
-    const newPolicyTemplate = await this.buildNewPolicy();
+    const newPolicyTemplate = await this.buildNewPolicy(spaceId);
+    const referencedPrivateLocations = this.getReferencedPrivateLocations(
+      configs,
+      privateLocations
+    );
+    const scalableAgentsByLocation = await this.getScalableAgentsByLocation(
+      referencedPrivateLocations
+    );
 
     for (const { config, globalParams } of configs) {
       try {
@@ -172,7 +402,8 @@ export class SyntheticsPrivateLocation {
             globalParams,
             maintenanceWindows,
             testRunId,
-            runOnce
+            runOnce,
+            scalableAgentsByLocation.get(location.id)
           );
 
           if (!newPolicy) {
@@ -188,7 +419,7 @@ export class SyntheticsPrivateLocation {
             } else {
               newPolicies.push({
                 ...newPolicy,
-                id: this.getPolicyId(config, location.id, spaceId),
+                id: this.getPolicyId(config, location.id),
               });
             }
           }
@@ -204,7 +435,10 @@ export class SyntheticsPrivateLocation {
     }
 
     try {
-      const result = await this.createPolicyBulk(newPolicies);
+      const result = await this.packagePolicyService.bulkCreate({
+        newPolicies,
+        spaceId,
+      });
       if (result?.created && result?.created?.length > 0 && testRunId) {
         // ignore await here, we don't want to wait for this to finish
         void scheduleCleanUpTask(this.server);
@@ -230,8 +464,7 @@ export class SyntheticsPrivateLocation {
     if (!privateConfig) {
       return null;
     }
-    const newPolicyTemplate = await this.buildNewPolicy();
-    const soClient = this.server.coreStart.savedObjects.createInternalRepository();
+    const newPolicyTemplate = await this.buildNewPolicy(spaceId);
 
     const { config, globalParams } = privateConfig;
     try {
@@ -240,6 +473,9 @@ export class SyntheticsPrivateLocation {
       const privateLocation = locations.find((loc) => !loc.isServiceManaged);
 
       const location = allPrivateLocations?.find((loc) => loc.id === privateLocation?.id)!;
+      const conditionHosts = isConditionShardedLocation(location)
+        ? await this.getEnrolledAgents(location.agentPolicyId)
+        : undefined;
 
       const newPolicy = await this.generateNewPolicy(
         config,
@@ -247,15 +483,21 @@ export class SyntheticsPrivateLocation {
         newPolicyTemplate,
         spaceId,
         globalParams,
-        maintenanceWindows
+        maintenanceWindows,
+        undefined,
+        undefined,
+        conditionHosts
       );
 
       const pkgPolicy = {
         ...newPolicy,
-        id: this.getPolicyId(config, location.id, spaceId),
+        id: this.getPolicyId(config, location.id),
       } as NewPackagePolicyWithId;
 
-      return await this.server.fleet.packagePolicyService.inspect(soClient, pkgPolicy);
+      return await this.packagePolicyService.inspect({
+        spaceId,
+        packagePolicy: pkgPolicy,
+      });
     } catch (e) {
       this.server.logger.error(e);
       return null;
@@ -274,8 +516,8 @@ export class SyntheticsPrivateLocation {
       };
     }
 
-    const [newPolicyTemplate, existingPolicies] = await Promise.all([
-      this.buildNewPolicy(),
+    const [newPolicyTemplate, { policies: existingPolicies, allSpaces }] = await Promise.all([
+      this.buildNewPolicy(spaceId),
       this.getExistingPolicies(
         configs.map(({ config }) => config),
         allPrivateLocations,
@@ -283,9 +525,17 @@ export class SyntheticsPrivateLocation {
       ),
     ]);
 
-    const policiesToUpdate: NewPackagePolicyWithId[] = [];
+    const policiesToUpdate: UpdatePackagePolicyWithId[] = [];
     const policiesToCreate: NewPackagePolicyWithId[] = [];
     const policiesToDelete: string[] = [];
+    const referencedPrivateLocations = this.getReferencedPrivateLocations(
+      configs,
+      allPrivateLocations
+    );
+    const scalableAgentsByLocation = await this.getScalableAgentsByLocation(
+      referencedPrivateLocations
+    );
+    const existingPolicyById = new Map(existingPolicies.map((policy) => [policy.id, policy]));
 
     for (const { config, globalParams } of configs) {
       const { locations } = config;
@@ -294,30 +544,56 @@ export class SyntheticsPrivateLocation {
 
       for (const privateLocation of allPrivateLocations) {
         const hasLocation = monitorPrivateLocations?.some((loc) => loc.id === privateLocation.id);
-        const currId = this.getPolicyId(config, privateLocation.id, spaceId);
-        const hasPolicy = existingPolicies?.some((policy) => policy.id === currId);
+        const newId = this.getPolicyId(config, privateLocation.id);
+        const { hasNewFormatPolicyId, hasAnyLegacyPolicyId, legacyPolicyIds } =
+          this.getPolicyIdFormatInfo(config, privateLocation.id, existingPolicies, allSpaces);
+        const hasPolicy = hasNewFormatPolicyId || hasAnyLegacyPolicyId;
+
         try {
           if (hasLocation) {
+            // Prefer the new-format policy's condition verbatim, including an
+            // explicit `null` left by a location that reverted to classic —
+            // falling back to `??` here would treat that `null` as absent and
+            // resurrect a stale legacy condition. Legacy ids predate condition
+            // sharding, so more than one holding a condition is unexpected; if
+            // it happens, we arbitrarily keep the first one found.
+            const newIdPolicy = existingPolicyById.get(newId);
+            const existingCondition = newIdPolicy
+              ? newIdPolicy.condition
+              : legacyPolicyIds
+                  .map((id) => existingPolicyById.get(id)?.condition)
+                  .find((condition) => condition != null);
             const newPolicy = await this.generateNewPolicy(
               config,
               privateLocation,
               newPolicyTemplate,
               spaceId,
               globalParams,
-              maintenanceWindows
+              maintenanceWindows,
+              undefined,
+              undefined,
+              scalableAgentsByLocation.get(privateLocation.id),
+              existingCondition
             );
 
             if (!newPolicy) {
               throwAddEditError(hasPolicy, privateLocation.label);
             }
 
-            if (hasPolicy) {
-              policiesToUpdate.push({ ...newPolicy, id: currId } as NewPackagePolicyWithId);
+            if (hasNewFormatPolicyId) {
+              policiesToUpdate.push({ ...newPolicy, id: newId } as UpdatePackagePolicyWithId);
+              policiesToDelete.push(...legacyPolicyIds);
+            } else if (hasAnyLegacyPolicyId) {
+              policiesToDelete.push(...legacyPolicyIds);
+              policiesToCreate.push({ ...newPolicy, id: newId } as NewPackagePolicyWithId);
             } else {
-              policiesToCreate.push({ ...newPolicy, id: currId } as NewPackagePolicyWithId);
+              policiesToCreate.push({ ...newPolicy, id: newId } as NewPackagePolicyWithId);
             }
-          } else if (hasPolicy) {
-            policiesToDelete.push(currId);
+          } else {
+            if (hasNewFormatPolicyId) {
+              policiesToDelete.push(newId);
+            }
+            policiesToDelete.push(...legacyPolicyIds);
           }
         } catch (e) {
           this.server.logger.error(e);
@@ -326,14 +602,43 @@ export class SyntheticsPrivateLocation {
       }
     }
 
+    const uniqueToDelete = [...new Set(policiesToDelete)];
+
     this.server.logger.debug(
-      `[editingMonitors] Creating ${policiesToCreate.length} policies, updating ${policiesToUpdate.length} policies, and deleting ${policiesToDelete.length} policies`
+      `[editingMonitors] Creating ${policiesToCreate.length} policies (${policiesToCreate
+        .map((p) => p.id)
+        .join(', ')}), updating ${policiesToUpdate.length} policies, deleting ${
+        uniqueToDelete.length
+      } policies (${uniqueToDelete.join(', ')})`
     );
 
-    const [_createResponse, failedUpdatesRes, _deleteResponse] = await Promise.all([
-      this.createPolicyBulk(policiesToCreate),
-      this.updatePolicyBulk(policiesToUpdate),
-      this.deletePolicyBulk(policiesToDelete),
+    const createResponse = await this.packagePolicyService.bulkCreate({
+      newPolicies: policiesToCreate,
+      spaceId,
+    });
+
+    if (createResponse.failed.length > 0) {
+      this.server.logger.error(
+        `[editingMonitors] Failed to create ${
+          createResponse.failed.length
+        } package policies: ${JSON.stringify(
+          createResponse.failed.map(({ packagePolicy, error }) => ({
+            id: (packagePolicy as NewPackagePolicyWithId).id,
+            error: error?.message ?? error,
+          }))
+        )}`
+      );
+    }
+
+    const [failedUpdatesRes] = await Promise.all([
+      this.packagePolicyService.bulkUpdate({
+        policiesToUpdate,
+        spaceId,
+      }),
+      this.packagePolicyService.bulkDelete({
+        policyIdsToDelete: uniqueToDelete,
+        spaceId,
+      }),
     ]);
 
     const failedUpdates = failedUpdatesRes?.map(({ packagePolicy, error }) => {
@@ -342,7 +647,7 @@ export class SyntheticsPrivateLocation {
 
         const monitorPrivateLocations = locations.filter((loc) => !loc.isServiceManaged);
         for (const privateLocation of monitorPrivateLocations) {
-          const currId = this.getPolicyId(config, privateLocation.id, spaceId);
+          const currId = this.getPolicyId(config, privateLocation.id);
           return currId === packagePolicy.id;
         }
       });
@@ -355,110 +660,89 @@ export class SyntheticsPrivateLocation {
 
     return {
       failedUpdates,
+      failedCreates: createResponse.failed,
     };
   }
 
+  /**
+   * Fetches existing package policies for the given configs and locations.
+   * Looks for new (space-agnostic) format and legacy format for all spaces
+   * that have any synthetics monitors.
+   */
   async getExistingPolicies(
     configs: HeartbeatConfig[],
     allPrivateLocations: SyntheticsPrivateLocations,
     spaceId: string
   ) {
-    const soClient = this.server.coreStart.savedObjects.createInternalRepository();
+    const allSpacesWithMonitors = await this.getAllSpacesWithMonitors();
+    const allSpaces = new Set([spaceId, ...allSpacesWithMonitors]);
+    const policyIdsToFetch = new Set<string>();
 
-    const listOfPolicies: string[] = [];
     for (const config of configs) {
       for (const privateLocation of allPrivateLocations) {
-        const currId = this.getPolicyId(config, privateLocation.id, spaceId);
-        listOfPolicies.push(currId);
-      }
-    }
-    return (
-      (await this.server.fleet.packagePolicyService.getByIDs(soClient, listOfPolicies, {
-        ignoreMissing: true,
-      })) ?? []
-    );
-  }
-
-  async createPolicyBulk(newPolicies: NewPackagePolicyWithId[]) {
-    const soClient = this.server.coreStart.savedObjects.createInternalRepository();
-    const esClient = this.server.coreStart.elasticsearch.client.asInternalUser;
-    if (esClient && newPolicies.length > 0) {
-      return await this.server.fleet.packagePolicyService.bulkCreate(
-        soClient,
-        esClient,
-        newPolicies,
-        {
-          asyncDeploy: true,
-        }
-      );
-    }
-  }
-
-  async updatePolicyBulk(policiesToUpdate: NewPackagePolicyWithId[]) {
-    const soClient = this.server.coreStart.savedObjects.createInternalRepository();
-    const esClient = this.server.coreStart.elasticsearch.client.asInternalUser;
-    if (policiesToUpdate.length > 0) {
-      const { failedPolicies } = await this.server.fleet.packagePolicyService.bulkUpdate(
-        soClient,
-        esClient,
-        policiesToUpdate,
-        {
-          force: true,
-          asyncDeploy: true,
-        }
-      );
-      return failedPolicies;
-    }
-  }
-
-  async deletePolicyBulk(policyIdsToDelete: string[]) {
-    const soClient = this.server.coreStart.savedObjects.createInternalRepository();
-    const esClient = this.server.coreStart.elasticsearch.client.asInternalUser;
-    if (policyIdsToDelete.length > 0) {
-      try {
-        return await this.server.fleet.packagePolicyService.delete(
-          soClient,
-          esClient,
-          policyIdsToDelete,
-          {
-            force: true,
-            asyncDeploy: true,
-          }
+        policyIdsToFetch.add(this.getPolicyId(config, privateLocation.id));
+        this.getLegacyPolicyIdsForAllSpaces(config.id, privateLocation.id, allSpaces).forEach(
+          (id) => policyIdsToFetch.add(id)
         );
-      } catch (e) {
-        this.server.logger.error(e);
       }
     }
+
+    const policies = await this.packagePolicyService.getByIds({
+      spaceId,
+      packagePolicyIds: Array.from(policyIdsToFetch),
+      fields: ['name', 'condition'],
+    });
+
+    return { policies, allSpaces };
   }
 
   async deleteMonitors(configs: HeartbeatConfig[], spaceId: string) {
-    const soClient = this.server.coreStart.savedObjects.createInternalRepository();
-    const esClient = this.server.coreStart.elasticsearch.client.asInternalUser;
+    const allSpacesWithMonitors = await this.getAllSpacesWithMonitors();
+    const allSpaces = new Set([spaceId, ...allSpacesWithMonitors]);
 
-    const policyIdsToDelete = [];
+    const policyIdsToFetch = new Set<string>();
     for (const config of configs) {
-      const { locations } = config;
-
-      const monitorPrivateLocations = locations.filter((loc) => !loc.isServiceManaged);
-
+      const monitorPrivateLocations = config.locations.filter((loc) => !loc.isServiceManaged);
       for (const privateLocation of monitorPrivateLocations) {
-        policyIdsToDelete.push(this.getPolicyId(config, privateLocation.id, spaceId));
+        policyIdsToFetch.add(this.getPolicyId(config, privateLocation.id));
+        this.getLegacyPolicyIdsForAllSpaces(config.id, privateLocation.id, allSpaces).forEach(
+          (id) => policyIdsToFetch.add(id)
+        );
       }
     }
-    if (policyIdsToDelete.length > 0) {
-      const result = await this.server.fleet.packagePolicyService.delete(
-        soClient,
-        esClient,
-        policyIdsToDelete,
-        {
-          force: true,
-          asyncDeploy: true,
+
+    const existingPolicies = await this.packagePolicyService.getByIds({
+      spaceId,
+      packagePolicyIds: Array.from(policyIdsToFetch),
+      fields: ['name'],
+    });
+
+    const policyIdsToDelete = new Set<string>();
+    for (const config of configs) {
+      const monitorPrivateLocations = config.locations.filter((loc) => !loc.isServiceManaged);
+      for (const privateLocation of monitorPrivateLocations) {
+        const { hasNewFormatPolicyId, legacyPolicyIds } = this.getPolicyIdFormatInfo(
+          config,
+          privateLocation.id,
+          existingPolicies,
+          allSpaces
+        );
+        if (hasNewFormatPolicyId) {
+          policyIdsToDelete.add(this.getPolicyId(config, privateLocation.id));
         }
-      );
-      const failedPolicies = result?.filter((policy) => {
-        return !policy.success && policy?.statusCode !== 404;
+        legacyPolicyIds.forEach((id) => policyIdsToDelete.add(id));
+      }
+    }
+
+    if (policyIdsToDelete.size > 0) {
+      const result = await this.packagePolicyService.bulkDelete({
+        policyIdsToDelete: Array.from(policyIdsToDelete),
+        spaceId,
       });
-      if (failedPolicies?.length === policyIdsToDelete.length) {
+      const failedPolicies = result?.filter((policy) => {
+        return policy && !policy.success && policy?.statusCode !== 404;
+      });
+      if (failedPolicies?.length === policyIdsToDelete.size) {
         throw new Error(deletePolicyError(configs[0][ConfigKey.NAME]));
       }
       return result;
@@ -466,14 +750,82 @@ export class SyntheticsPrivateLocation {
   }
 
   async getAgentPolicies() {
-    return await getAgentPoliciesAsInternalUser({ server: this.server });
+    return getAgentPoliciesAsInternalUser({ server: this.server, spaceId: ALL_SPACES_ID });
   }
 
-  async getPolicyNamespace(configNamespace: string) {
-    if (configNamespace && configNamespace !== DEFAULT_NAMESPACE_STRING) {
-      return configNamespace;
+  /**
+   * Idempotent, minimal-churn rebalance for a scalable (condition-sharded)
+   * private location. Every monitor is pinned to the location's single agent
+   * policy; distribution is expressed as a per-monitor `${agent.id}` condition.
+   * This reads each monitor's current pin, runs the {@link rebalanceByCost}
+   * placement pass (failover of stale monitors + cost load-balancing onto
+   * stability-gated recovery agents, moving nothing else), and rewrites only the
+   * conditions of monitors whose agent actually changed — reusing the existing
+   * package-policy content and flipping only `condition`, never decrypting or
+   * regenerating monitor configs like {@link editMonitors}. Steady state
+   * performs zero writes.
+   *
+   * The two agent sets serve opposite goals. `recoveryAgentIds` (a
+   * stability-gated subset of `healthyAgentIds`) are the only agents eligible to
+   * *receive* load-balancing moves, so a freshly-recovered ("flapping") agent
+   * can't pull healthy monitors onto itself only to shed them on its next
+   * bounce. Failover is independent of that gate: a dead agent's monitors are
+   * placed on any of the full `healthyAgentIds`, so they evacuate immediately
+   * even when the only currently-live agents aren't stable yet.
+   */
+  async rebalanceShards({
+    location,
+    healthyAgentIds,
+    recoveryAgentIds,
+    capacities,
+    signal,
+  }: {
+    location: { id: string; label?: string; agentPolicyId: string };
+    healthyAgentIds: string[];
+    recoveryAgentIds?: string[];
+    capacities?: ReadonlyMap<string, number>;
+    signal: AbortSignal;
+  }): Promise<{ total: number; moved: number }> {
+    if (healthyAgentIds.length === 0) {
+      return { total: 0, moved: 0 };
     }
-    return undefined;
+    signal.throwIfAborted();
+    const pkgPolicies = await this.packagePolicyService.listByAgentPolicy({
+      agentPolicyId: location.agentPolicyId,
+      signal,
+    });
+    if (pkgPolicies.length === 0) {
+      return { total: 0, moved: 0 };
+    }
+
+    const monitors = toMonitorPlacements(pkgPolicies, location.id);
+    const assignment = rebalanceByCost(monitors, healthyAgentIds, { capacities, recoveryAgentIds });
+    const updatesBySpace = toConditionUpdates(pkgPolicies, assignment, location.id);
+
+    let moved = 0;
+    for (const [spaceId, policiesToUpdate] of updatesBySpace) {
+      signal.throwIfAborted();
+      // Update in the policy's own recorded space (grouped in toConditionUpdates),
+      // not via the agent-policy-derived routing — see bulkUpdateInSpace.
+      const failed = await this.packagePolicyService.bulkUpdateInSpace({
+        policiesToUpdate,
+        spaceId,
+      });
+      // Count only successful moves (a failed bulkUpdate leaves the old pin).
+      moved += policiesToUpdate.length - failed.length;
+      if (failed.length > 0) {
+        // Not terminal: the rebalance is idempotent and retried every cycle, so
+        // the next run re-attempts these same moves. warn (not error) — no
+        // operator action is needed unless it persists across cycles.
+        this.server.logger.warn(
+          `[rebalanceShards] Failed to move ${failed.length} monitors for location ${
+            location.label ?? location.id
+          }`
+        );
+      }
+    }
+
+    return { total: pkgPolicies.length, moved };
   }
 }
 

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { pipe } from 'fp-ts/function';
+import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { StreamlangResolverOptions } from '../../../types/resolvers';
 import type { StreamlangDSL } from '../../../types/streamlang';
 import { streamlangDSLSchema } from '../../../types/streamlang';
 import { flattenSteps } from '../shared/flatten_steps';
@@ -17,16 +18,24 @@ export interface IngestPipelineTranspilationOptions {
   traceCustomIdentifiers?: boolean;
 }
 
-export const transpile = (
+export interface IngestPipelineTranspilationResult {
+  processors: IngestProcessorContainer[];
+}
+
+export const transpile = async (
   streamlang: StreamlangDSL,
-  transpilationOptions?: IngestPipelineTranspilationOptions
-) => {
+  transpilationOptions?: IngestPipelineTranspilationOptions,
+  resolverOptions?: StreamlangResolverOptions
+): Promise<IngestPipelineTranspilationResult> => {
   const validatedStreamlang = streamlangDSLSchema.parse(streamlang);
 
-  const processors = pipe(
-    flattenSteps(validatedStreamlang.steps),
-    (steps) => convertStreamlangDSLActionsToIngestPipelineProcessors(steps, transpilationOptions),
-    applyPostProcessing
+  const steps = flattenSteps(validatedStreamlang.steps);
+  const processors = applyPostProcessing(
+    await convertStreamlangDSLActionsToIngestPipelineProcessors(
+      steps,
+      transpilationOptions,
+      resolverOptions
+    )
   );
 
   return {

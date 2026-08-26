@@ -8,7 +8,8 @@
  */
 
 import { isPromise } from '@kbn/std';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import type { DependencyList } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 interface State<T> {
   error?: Error;
@@ -20,7 +21,7 @@ export type AbortableAsyncState<T> = (T extends Promise<infer TReturn>
   ? State<TReturn>
   : State<T>) & { refresh: () => void };
 
-export type AbortableAsyncStateOf<T extends AbortableAsyncState<any>> =
+export type AbortableAsyncStateOf<T extends AbortableAsyncState<unknown>> =
   T extends AbortableAsyncState<infer TResponse> ? Awaited<TResponse> : never;
 
 export interface UseAbortableAsyncOptions<T> {
@@ -31,17 +32,17 @@ export interface UseAbortableAsyncOptions<T> {
 }
 
 export type UseAbortableAsync<
-  TAdditionalParameters extends Record<string, any> = {},
-  TAdditionalOptions extends Record<string, any> = {}
+  TAdditionalParameters extends Record<string, unknown> = Record<string, never>,
+  TAdditionalOptions extends Record<string, unknown> = Record<string, never>
 > = <T>(
   fn: ({}: { signal: AbortSignal } & TAdditionalParameters) => T | Promise<T>,
-  deps: any[],
+  deps: DependencyList,
   options?: UseAbortableAsyncOptions<T> & TAdditionalOptions
 ) => AbortableAsyncState<T>;
 
 export function useAbortableAsync<T>(
   fn: ({}: { signal: AbortSignal }) => T | Promise<T>,
-  deps: any[],
+  deps: DependencyList,
   options?: UseAbortableAsyncOptions<T>
 ): AbortableAsyncState<T> {
   const clearValueOnNext = options?.clearValueOnNext;
@@ -110,14 +111,16 @@ export function useAbortableAsync<T>(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps.concat(refreshId, clearValueOnNext));
 
+  const refresh = useCallback(() => {
+    setRefreshId((id) => id + 1);
+  }, []);
+
   return useMemo<AbortableAsyncState<T>>(() => {
     return {
       error,
       loading,
       value,
-      refresh: () => {
-        setRefreshId((id) => id + 1);
-      },
+      refresh,
     } as unknown as AbortableAsyncState<T>;
-  }, [error, value, loading]);
+  }, [error, value, loading, refresh]);
 }

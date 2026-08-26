@@ -14,8 +14,12 @@ import ServicesWrapper from './services_wrapper';
 
 const LiveQueryField = lazy(() => import('../live_queries/form/live_query_query_field'));
 
+interface LazyLiveQueryFieldServices {
+  services: ServicesWrapperProps['services'];
+}
+
 export const getLazyLiveQueryField =
-  (services: ServicesWrapperProps['services']) =>
+  ({ services }: LazyLiveQueryFieldServices) =>
   // eslint-disable-next-line react/display-name
   ({
     formMethods,

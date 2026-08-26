@@ -529,24 +529,71 @@ describe('When entering data into the Console input', () => {
     });
   });
 
+  describe('and keyboard shortcut ALT+SPACE is pressed', () => {
+    it('should open the command selector popover', async () => {
+      render();
+
+      await triggerConsoleCommandInputEvent(renderResult, {
+        key: ' ',
+        code: 'Space',
+        altKey: true,
+      });
+
+      await waitFor(() => {
+        expect(renderResult.getByText('Available commands')).not.toBeNull();
+      });
+    });
+  });
+
+  describe('and TAB is pressed while a suggestion is being displayed', () => {
+    beforeEach(async () => {
+      render();
+      // Typing a partial command name triggers auto-complete. 'cmd' matches the first command
+      // definition (cmd1 via Array.find()), producing a suggestion of '1'
+      await enterCommand('cmd', { inputOnly: true });
+    });
+
+    it('should display an auto-complete suggestion for the partial command name', async () => {
+      await waitFor(() => {
+        const suggestionEl = renderResult.getByTestId('test-cmdInput-suggestion');
+        expect(suggestionEl).not.toBeNull();
+        expect(suggestionEl.textContent).toContain('1');
+      });
+    });
+
+    it('should apply the suggestion to the input when TAB is pressed', async () => {
+      await waitFor(() => {
+        expect(renderResult.getByTestId('test-cmdInput-suggestion')).not.toBeNull();
+      });
+
+      await triggerConsoleCommandInputEvent(renderResult, { key: 'Tab', code: 'Tab' });
+
+      expect(getLeftOfCursorText()).toEqual('cmd1');
+
+      await waitFor(() => {
+        expect(renderResult.queryByTestId('test-cmdInput-suggestion')).toBeNull();
+      });
+    });
+  });
+
   describe('and a command argument has a value SelectorComponent defined', () => {
     it('should insert Selector component when argument name is used', async () => {
       render();
       await enterCommand('cmd7 --foo', { inputOnly: true });
 
-      expect(getLeftOfCursorText()).toEqual('cmd7 --foo=foo[0]: foo selected');
+      expect(getLeftOfCursorText()).toEqual('cmd7 --foo=foo[0]: foo selected ');
     });
 
     it('should not insert Selector component if argument name is not a whole word', async () => {
       render();
-      await enterCommand('cmd7 --foobar', { inputOnly: true });
+      await enterCommand('cmd7 --foobar', { inputOnly: true, paste: true });
 
       expect(getLeftOfCursorText()).toEqual('cmd7 --foobar');
     });
 
     it('should not insert Selector component if argument name is not a whole word while cursor is between the argument name', async () => {
       render();
-      await enterCommand('cmd7 --fooX', { inputOnly: true });
+      await enterCommand('cmd7 --fooX', { inputOnly: true, paste: true });
       await typeKeyboardKey('{ArrowLeft}');
 
       expect(getLeftOfCursorText()).toEqual('cmd7 --foo');
@@ -558,7 +605,7 @@ describe('When entering data into the Console input', () => {
       await enterCommand('cmd7 --foo --foo', { inputOnly: true });
 
       expect(getLeftOfCursorText()).toEqual(
-        'cmd7 --foo=foo[0]: foo selected --foo=foo[1]: foo selected'
+        'cmd7 --foo=foo[0]: foo selected  --foo=foo[1]: foo selected '
       );
     });
 
@@ -573,6 +620,7 @@ describe('When entering data into the Console input', () => {
     it(`should remove entire argument if DELETE key is pressed`, async () => {
       render();
       await enterCommand('cmd7 --foo', { inputOnly: true });
+      await typeKeyboardKey('{ArrowLeft}');
       await typeKeyboardKey('{ArrowLeft}');
       await typeKeyboardKey('{Delete}');
 

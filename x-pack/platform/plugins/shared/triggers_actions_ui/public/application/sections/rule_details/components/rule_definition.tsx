@@ -227,7 +227,11 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = memo
     ];
 
     return (
-      <EuiFlexItem data-test-subj="ruleSummaryRuleDefinition" grow={3}>
+      <EuiFlexItem
+        data-test-subj="ruleSummaryRuleDefinition"
+        grow={3}
+        css={{ minWidth: 'min(100%, 500px)' }}
+      >
         <EuiPanel color="subdued" hasBorder={false} paddingSize="m">
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiTitle size="s">
@@ -259,9 +263,12 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = memo
           <EuiSpacer size="m" />
           <EuiDescriptionList
             compressed={true}
-            type="column"
+            type="responsiveColumn"
+            columnWidths={[1, 3]}
             listItems={ruleDefinitionList}
             css={{ alignItems: 'start' }}
+            titleProps={{ css: { minWidth: 0 } }}
+            descriptionProps={{ css: { minWidth: 0, overflowWrap: 'break-word' } }}
           />
         </EuiPanel>
       </EuiFlexItem>

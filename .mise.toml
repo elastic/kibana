@@ -1,0 +1,14 @@
+[settings]
+idiomatic_version_file_enable_tools = ["node"]
+
+[tools]
+yarn = "1.22.22"
+
+[tasks.bootstrap]
+description = "Install and link Kibana dependencies"
+run = "yarn kbn bootstrap"
+
+[tasks."river:prebuild"]
+description = "Prebuild River sandbox image"
+depends = ["bootstrap"]
+run = "bash .river/warm.sh"

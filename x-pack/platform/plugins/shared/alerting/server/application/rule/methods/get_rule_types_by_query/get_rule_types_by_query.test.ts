@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
 import type { AlertingAuthorization } from '../../../../authorization';
@@ -25,6 +26,7 @@ import { backfillClientMock } from '../../../../backfill_client/backfill_client.
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 import type { ConstructorOptions } from '../../../../rules_client';
 import { RulesClient } from '../../../../rules_client';
+import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
 
 describe('getRuleTypesByQuery', () => {
   let rulesClient: RulesClient;
@@ -64,6 +66,7 @@ describe('getRuleTypesByQuery', () => {
     ruleTypeRegistry.getAllTypes.mockReturnValue(['rule-type-1', 'rule-type-2']);
 
     rulesClientParams = {
+      request: httpServerMock.createKibanaRequest(),
       taskManager,
       ruleTypeRegistry,
       unsecuredSavedObjectsClient,
@@ -73,6 +76,7 @@ describe('getRuleTypesByQuery', () => {
       namespace: 'default',
       getUserName: jest.fn(),
       createAPIKey: jest.fn(),
+      cloneAPIKey: jest.fn(),
       logger,
       internalSavedObjectsRepository,
       encryptedSavedObjectsClient: encryptedSavedObjects,
@@ -91,6 +95,8 @@ describe('getRuleTypesByQuery', () => {
       connectorAdapterRegistry: new ConnectorAdapterRegistry(),
       uiSettings: uiSettingsServiceMock.createStartContract(),
       eventLogger,
+      featureFlags: coreFeatureFlagsMock.createStart(),
+      isServerless: false,
     } as jest.Mocked<ConstructorOptions>;
 
     jest.clearAllMocks();

@@ -17,6 +17,27 @@ describe('config validation', () => {
               "enabled": false,
             },
           },
+          "analyticsV2": Object {
+            "enableAdminRoutes": false,
+            "enabled": true,
+            "reconciliationIntervalMinutes": 30,
+            "resetPageDelayMs": 0,
+            "resetTaskTimeoutMinutes": 60,
+          },
+          "assigneeIdentity": Object {
+            "enabled": true,
+          },
+          "attachments": Object {
+            "enabled": true,
+          },
+          "casesRedesign": Object {
+            "details": true,
+            "list": true,
+            "settings": true,
+          },
+          "chat": Object {
+            "enabled": true,
+          },
           "enabled": true,
           "files": Object {
             "allowedMimeTypes": Array [
@@ -101,6 +122,7 @@ describe('config validation', () => {
               "text/json",
               "application/json",
               "application/zip",
+              "application/x-zip-compressed",
               "application/gzip",
               "application/x-bzip",
               "application/x-bzip2",
@@ -117,11 +139,77 @@ describe('config validation', () => {
           "markdownPlugins": Object {
             "lens": true,
           },
+          "runWorkflows": Object {
+            "enabled": false,
+          },
           "stack": Object {
+            "enabled": true,
+          },
+          "templates": Object {
             "enabled": true,
           },
         }
       `);
+    });
+
+    it('sets attachments.enabled default to true', () => {
+      const config = ConfigSchema.validate({});
+      expect(config.attachments.enabled).toBe(true);
+    });
+
+    it('allows attachments.enabled to be set to true', () => {
+      const config = ConfigSchema.validate({ attachments: { enabled: true } });
+      expect(config.attachments.enabled).toBe(true);
+    });
+
+    it('allows attachments.enabled to be set to false explicitly', () => {
+      const config = ConfigSchema.validate({ attachments: { enabled: false } });
+      expect(config.attachments.enabled).toBe(false);
+    });
+
+    it('sets chat.enabled default to true', () => {
+      const config = ConfigSchema.validate({});
+      expect(config.chat.enabled).toBe(true);
+    });
+
+    it('allows chat.enabled to be set to false', () => {
+      const config = ConfigSchema.validate({ chat: { enabled: false } });
+      expect(config.chat.enabled).toBe(false);
+    });
+
+    it('sets analyticsV2.enabled default to true', () => {
+      const config = ConfigSchema.validate({});
+      expect(config.analyticsV2.enabled).toBe(true);
+    });
+
+    it('allows analyticsV2.enabled to be set to true', () => {
+      const config = ConfigSchema.validate({ analyticsV2: { enabled: true } });
+      expect(config.analyticsV2.enabled).toBe(true);
+    });
+
+    it('allows analyticsV2.enabled to be set to false explicitly', () => {
+      const config = ConfigSchema.validate({ analyticsV2: { enabled: false } });
+      expect(config.analyticsV2.enabled).toBe(false);
+    });
+
+    it('sets templates.enabled default to true', () => {
+      const config = ConfigSchema.validate({});
+      expect(config.templates.enabled).toBe(true);
+    });
+
+    it('allows templates.enabled to be set to false explicitly', () => {
+      const config = ConfigSchema.validate({ templates: { enabled: false } });
+      expect(config.templates.enabled).toBe(false);
+    });
+
+    it('sets runWorkflows.enabled default to false', () => {
+      const config = ConfigSchema.validate({});
+      expect(config.runWorkflows.enabled).toBe(false);
+    });
+
+    it('allows runWorkflows.enabled to be set to true explicitly', () => {
+      const config = ConfigSchema.validate({ runWorkflows: { enabled: true } });
+      expect(config.runWorkflows.enabled).toBe(true);
     });
   });
 });

@@ -12,7 +12,7 @@ import type { SerializedAction, SerializedEvent } from './types';
 
 export const EMBEDDABLE_TO_DASHBOARD_DRILLDOWN = 'DASHBOARD_TO_DASHBOARD_DRILLDOWN';
 
-const generateRefName = (eventId: string) =>
+export const generateRefName = (eventId: string) =>
   `drilldown:${EMBEDDABLE_TO_DASHBOARD_DRILLDOWN}:${eventId}:dashboardId`;
 
 export const dashboardDrilldownPersistableState = {

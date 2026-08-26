@@ -31,7 +31,9 @@ export const registerAgentStatusRoute = (
           requiredPrivileges: ['securitySolution'],
         },
       },
-      options: { authRequired: true },
+      options: {
+        httpResponseLogLevel: 'info',
+      },
     })
     .addVersion(
       {
@@ -78,12 +80,14 @@ export const getAgentStatusRouteHandler = (
         spaceId,
       });
       const connectorActionsClient = actionsPlugin.getActionsClient();
+      const scoped = endpointContext.service.asScoped(request);
       const agentStatusClient = getAgentStatusClient(agentType, {
         esClient,
         soClient,
         spaceId,
         connectorActionsClient,
         endpointService: endpointContext.service,
+        scoped,
       });
       const data = await agentStatusClient.getAgentStatuses(agentIds);
 

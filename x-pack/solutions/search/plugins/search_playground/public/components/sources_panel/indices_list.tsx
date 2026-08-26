@@ -31,7 +31,6 @@ export const IndicesList: React.FC<IndicesListProps> = ({ indices, onRemoveClick
             wrapText
             color="primary"
             label={index}
-            size="s"
             data-test-subj="indicesInAccordian"
             extraAction={{
               alwaysShow: true,
@@ -39,7 +38,7 @@ export const IndicesList: React.FC<IndicesListProps> = ({ indices, onRemoveClick
                 defaultMessage: 'Remove index from sources',
               }),
               color: 'text',
-              iconType: 'minusInCircle',
+              iconType: 'minusCircle',
               onClick: () => onRemoveClick(index),
               disabled: indices.length === 1,
               'data-test-subj': `removeIndexButton`,

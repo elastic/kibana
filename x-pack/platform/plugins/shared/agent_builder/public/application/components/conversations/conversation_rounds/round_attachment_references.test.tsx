@@ -6,11 +6,12 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render as rtlRender, screen } from '@testing-library/react';
+import { EuiThemeProvider } from '@elastic/eui';
 import type {
+  VersionedAttachment,
   Attachment,
   AttachmentVersionRef,
-  VersionedAttachment,
 } from '@kbn/agent-builder-common/attachments';
 import {
   ATTACHMENT_REF_ACTOR,
@@ -18,192 +19,249 @@ import {
 } from '@kbn/agent-builder-common/attachments';
 import { RoundAttachmentReferences } from './round_attachment_references';
 
-jest.mock('./round_attachment_reference_pill', () => ({
-  AttachmentReferencePill: ({ attachment, version, operation }: any) => (
-    <span data-test-subj="attachment-pill">{`${attachment.id}:${version}:${operation}`}</span>
-  ),
+// The pill styles read the theme from Emotion context, so renders need a provider.
+const render = (ui: React.ReactElement) => rtlRender(<EuiThemeProvider>{ui}</EuiThemeProvider>);
+
+const mockGetAttachmentUiDefinition = jest.fn();
+jest.mock('../../../hooks/use_agent_builder_service', () => ({
+  useAgentBuilderServices: () => ({
+    attachmentsService: { getAttachmentUiDefinition: mockGetAttachmentUiDefinition },
+  }),
 }));
 
-const createVersionedAttachment = (id: string): VersionedAttachment => ({
+const makeVersioned = (
+  id: string,
+  description?: string,
+  group_id?: string
+): VersionedAttachment => ({
   id,
   type: 'text',
-  versions: [
-    {
-      version: 1,
-      data: 'content',
-      created_at: '2024-01-01T00:00:00.000Z',
-      content_hash: `hash-${id}`,
-    },
-  ],
+  versions: [{ version: 1, data: {}, created_at: '2024-01-01T00:00:00Z', content_hash: 'x' }],
   current_version: 1,
   active: true,
+  ...(description !== undefined ? { description } : {}),
+  ...(group_id !== undefined ? { group_id } : {}),
+});
+
+const makeRef = (
+  id: string,
+  actor: (typeof ATTACHMENT_REF_ACTOR)[keyof typeof ATTACHMENT_REF_ACTOR] = ATTACHMENT_REF_ACTOR.user,
+  operation?: (typeof ATTACHMENT_REF_OPERATION)[keyof typeof ATTACHMENT_REF_OPERATION]
+): AttachmentVersionRef => ({
+  attachment_id: id,
+  version: 1,
+  actor,
+  operation,
+});
+
+const makeFallback = (id: string, description?: string, groupId?: string): Attachment => ({
+  id,
+  type: 'text',
+  data: {},
+  ...(description !== undefined ? { description } : {}),
+  ...(groupId !== undefined ? { groupId } : {}),
 });
 
 describe('RoundAttachmentReferences', () => {
-  it('uses conversationAttachments when provided', () => {
-    const conversationAttachments = [createVersionedAttachment('conv-1')];
-    const fallbackAttachments: Attachment[] = [
-      { id: 'fallback-1', type: 'text', data: { data: 'fallback' } },
-    ];
-    const attachmentRefs: AttachmentVersionRef[] = [
-      {
-        attachment_id: 'conv-1',
-        version: 1,
-        operation: ATTACHMENT_REF_OPERATION.created,
-        actor: ATTACHMENT_REF_ACTOR.user,
-      },
-    ];
+  beforeEach(() => {
+    mockGetAttachmentUiDefinition.mockReset();
+    mockGetAttachmentUiDefinition.mockReturnValue(undefined);
+  });
 
+  it('renders nothing when there are no refs or attachments', () => {
+    const { container } = render(<RoundAttachmentReferences />);
+    expect(container.firstChild).toBeNull();
+  });
+
+  it('renders nothing when refs are empty', () => {
+    const { container } = render(
+      <RoundAttachmentReferences
+        attachmentRefs={[]}
+        conversationAttachments={[makeVersioned('a', 'Label A')]}
+      />
+    );
+    expect(container.firstChild).toBeNull();
+  });
+
+  it('renders the "Added" heading and one pill per resolved attachment', () => {
     render(
       <RoundAttachmentReferences
-        attachmentRefs={attachmentRefs}
-        conversationAttachments={conversationAttachments}
-        fallbackAttachments={fallbackAttachments}
+        attachmentRefs={[makeRef('a'), makeRef('b')]}
+        conversationAttachments={[makeVersioned('a', 'First'), makeVersioned('b', 'Second')]}
       />
     );
 
-    expect(screen.getAllByTestId('attachment-pill')).toHaveLength(1);
-    expect(screen.getByText('conv-1:1:created')).toBeInTheDocument();
+    expect(screen.getByText('Added')).toBeInTheDocument();
+    expect(screen.getByText('First')).toBeInTheDocument();
+    expect(screen.getByText('Second')).toBeInTheDocument();
+    expect(screen.getAllByTestId('agentBuilderRoundAttachmentReferencePill')).toHaveLength(2);
   });
 
-  it('falls back to optimistic attachments when conversationAttachments are missing', () => {
-    const fallbackAttachments: Attachment[] = [
-      { id: 'fallback-1', type: 'text', data: { prop: 'fallback-1' } },
-      { id: 'fallback-2', type: 'text', data: { prop: 'fallback-2' } },
-    ];
-
-    render(<RoundAttachmentReferences fallbackAttachments={fallbackAttachments} />);
-
-    const pills = screen.getAllByTestId('attachment-pill');
-    expect(pills).toHaveLength(2);
-    expect(screen.getByText('fallback-1:1:created')).toBeInTheDocument();
-    expect(screen.getByText('fallback-2:1:created')).toBeInTheDocument();
-  });
-
-  it('filters by actor when actorFilter is provided', () => {
-    const conversationAttachments = [
-      createVersionedAttachment('att-user'),
-      createVersionedAttachment('att-agent'),
-    ];
-    const attachmentRefs: AttachmentVersionRef[] = [
-      {
-        attachment_id: 'att-user',
-        version: 1,
-        operation: ATTACHMENT_REF_OPERATION.created,
-        actor: ATTACHMENT_REF_ACTOR.user,
-      },
-      {
-        attachment_id: 'att-agent',
-        version: 1,
-        operation: ATTACHMENT_REF_OPERATION.read,
-        actor: ATTACHMENT_REF_ACTOR.agent,
-      },
-    ];
+  it('uses the UI definition getLabel for the pill title when available', () => {
+    mockGetAttachmentUiDefinition.mockReturnValue({
+      getLabel: () => 'Registry Label',
+      getIcon: () => 'code',
+    });
 
     render(
       <RoundAttachmentReferences
-        attachmentRefs={attachmentRefs}
-        conversationAttachments={conversationAttachments}
+        attachmentRefs={[makeRef('a')]}
+        conversationAttachments={[makeVersioned('a', 'Description Label')]}
+      />
+    );
+
+    expect(screen.getByText('Registry Label')).toBeInTheDocument();
+    expect(screen.queryByText('Description Label')).not.toBeInTheDocument();
+  });
+
+  it('falls back to the description, then the type, when there is no UI definition', () => {
+    render(
+      <RoundAttachmentReferences
+        attachmentRefs={[makeRef('a'), makeRef('b')]}
+        conversationAttachments={[makeVersioned('a', 'Description Label'), makeVersioned('b')]}
+      />
+    );
+
+    expect(screen.getByText('Description Label')).toBeInTheDocument();
+    expect(screen.getByText('text')).toBeInTheDocument();
+  });
+
+  it('renders the UI definition icon, defaulting to document when absent', () => {
+    mockGetAttachmentUiDefinition
+      .mockReturnValueOnce({ getLabel: () => 'With Icon', getIcon: () => 'code' })
+      .mockReturnValueOnce(undefined);
+
+    const { container } = render(
+      <RoundAttachmentReferences
+        attachmentRefs={[makeRef('a'), makeRef('b')]}
+        conversationAttachments={[makeVersioned('a'), makeVersioned('b', 'No Definition')]}
+      />
+    );
+
+    expect(container.querySelector('[data-euiicon-type="code"]')).toBeInTheDocument();
+    expect(container.querySelector('[data-euiicon-type="document"]')).toBeInTheDocument();
+  });
+
+  it('falls back to description, then type, when the referenced version cannot be resolved', () => {
+    mockGetAttachmentUiDefinition.mockReturnValue({
+      getLabel: () => 'Registry Label',
+      getIcon: () => 'code',
+    });
+
+    render(
+      <RoundAttachmentReferences
+        attachmentRefs={[
+          { attachment_id: 'a', version: 2, actor: ATTACHMENT_REF_ACTOR.user },
+          { attachment_id: 'b', version: 2, actor: ATTACHMENT_REF_ACTOR.user },
+        ]}
+        conversationAttachments={[makeVersioned('a', 'Description Label'), makeVersioned('b')]}
+      />
+    );
+
+    // With description: uses description (skips getLabel since version is wrong)
+    expect(screen.getByText('Description Label')).toBeInTheDocument();
+    // Without description: falls back to type
+    expect(screen.getByText('text')).toBeInTheDocument();
+    // getLabel is never used when the version can't be resolved
+    expect(screen.queryByText('Registry Label')).not.toBeInTheDocument();
+  });
+
+  it('keeps the full title in the DOM (truncation is CSS-only)', () => {
+    const longTitle = 'A very long attachment title that definitely exceeds the pill width';
+    render(
+      <RoundAttachmentReferences
+        attachmentRefs={[makeRef('a')]}
+        conversationAttachments={[makeVersioned('a', longTitle)]}
+      />
+    );
+
+    expect(screen.getByText(longTitle)).toBeInTheDocument();
+  });
+
+  it('deduplicates by group_id — renders only one pill for a group', () => {
+    render(
+      <RoundAttachmentReferences
+        attachmentRefs={[makeRef('a1'), makeRef('a2')]}
+        conversationAttachments={[
+          makeVersioned('a1', '27 Alerts', 'group-1'),
+          makeVersioned('a2', '27 Alerts', 'group-1'),
+        ]}
+      />
+    );
+
+    const pills = screen.getAllByText(/27 Alerts/);
+    expect(pills).toHaveLength(1);
+  });
+
+  it('actor filter applied before group dedup — matching actor ref renders even when preceded by non-matching actor ref for the same group', () => {
+    // Regression for: system ref consumed group slot before actor filter, so user ref was never rendered.
+    render(
+      <RoundAttachmentReferences
+        attachmentRefs={[
+          makeRef('a1', ATTACHMENT_REF_ACTOR.system), // non-matching — must NOT consume slot
+          makeRef('a2', ATTACHMENT_REF_ACTOR.user), // matching — must render
+        ]}
+        conversationAttachments={[
+          makeVersioned('a1', '27 Alerts', 'group-1'),
+          makeVersioned('a2', '27 Alerts', 'group-1'),
+        ]}
         actorFilter={[ATTACHMENT_REF_ACTOR.user]}
       />
     );
 
-    const pills = screen.getAllByTestId('attachment-pill');
-    expect(pills).toHaveLength(1);
-    expect(screen.getByText('att-user:1:created')).toBeInTheDocument();
+    expect(screen.getByText(/27 Alerts/)).toBeInTheDocument();
   });
 
-  it('skips hidden attachments from conversationAttachments', () => {
-    const conversationAttachments: VersionedAttachment[] = [
-      createVersionedAttachment('visible'),
-      { ...createVersionedAttachment('hidden'), hidden: true },
-    ];
-    const attachmentRefs: AttachmentVersionRef[] = [
-      {
-        attachment_id: 'visible',
-        version: 1,
-        operation: ATTACHMENT_REF_OPERATION.created,
-        actor: ATTACHMENT_REF_ACTOR.user,
-      },
-      {
-        attachment_id: 'hidden',
-        version: 1,
-        operation: ATTACHMENT_REF_OPERATION.created,
-        actor: ATTACHMENT_REF_ACTOR.user,
-      },
-    ];
-
-    render(
-      <RoundAttachmentReferences
-        attachmentRefs={attachmentRefs}
-        conversationAttachments={conversationAttachments}
-      />
-    );
-
-    const pills = screen.getAllByTestId('attachment-pill');
-    expect(pills).toHaveLength(1);
-    expect(screen.getByText('visible:1:created')).toBeInTheDocument();
-  });
-
-  it('infers operation from version when operation is missing', () => {
-    const conversationAttachments: VersionedAttachment[] = [
-      {
-        id: 'att-v2',
-        type: 'text',
-        versions: [
-          {
-            version: 1,
-            data: 'v1',
-            created_at: '2024-01-01T00:00:00.000Z',
-            content_hash: 'hash-1',
-          },
-          {
-            version: 2,
-            data: 'v2',
-            created_at: '2024-01-02T00:00:00.000Z',
-            content_hash: 'hash-2',
-          },
-        ],
-        current_version: 2,
-        active: true,
-      },
-    ];
-    const attachmentRefs: AttachmentVersionRef[] = [
-      {
-        attachment_id: 'att-v2',
-        version: 2,
-        actor: ATTACHMENT_REF_ACTOR.user,
-      },
-    ];
-
-    render(
-      <RoundAttachmentReferences
-        attachmentRefs={attachmentRefs}
-        conversationAttachments={conversationAttachments}
-      />
-    );
-
-    expect(screen.getByText('att-v2:2:updated')).toBeInTheDocument();
-  });
-
-  it('returns null when refs do not match available attachments', () => {
-    const conversationAttachments = [createVersionedAttachment('att-1')];
-    const attachmentRefs: AttachmentVersionRef[] = [
-      {
-        attachment_id: 'missing',
-        version: 1,
-        operation: ATTACHMENT_REF_OPERATION.created,
-        actor: ATTACHMENT_REF_ACTOR.user,
-      },
-    ];
-
+  it('renders nothing when all refs are filtered out by actorFilter', () => {
     const { container } = render(
       <RoundAttachmentReferences
-        attachmentRefs={attachmentRefs}
-        conversationAttachments={conversationAttachments}
+        attachmentRefs={[makeRef('a', ATTACHMENT_REF_ACTOR.system)]}
+        conversationAttachments={[makeVersioned('a', 'Label')]}
+        actorFilter={[ATTACHMENT_REF_ACTOR.user]}
+      />
+    );
+    expect(container.firstChild).toBeNull();
+  });
+
+  it('skips hidden attachments', () => {
+    const hidden: VersionedAttachment = { ...makeVersioned('h', 'Hidden Label'), hidden: true };
+    const { container } = render(
+      <RoundAttachmentReferences
+        attachmentRefs={[makeRef('h')]}
+        conversationAttachments={[hidden]}
+      />
+    );
+    expect(container.firstChild).toBeNull();
+  });
+
+  it('skips refs with operation=read', () => {
+    const { container } = render(
+      <RoundAttachmentReferences
+        attachmentRefs={[makeRef('a', ATTACHMENT_REF_ACTOR.user, ATTACHMENT_REF_OPERATION.read)]}
+        conversationAttachments={[makeVersioned('a', 'Label')]}
+      />
+    );
+    expect(container.firstChild).toBeNull();
+  });
+
+  it('uses fallbackAttachments when no attachmentRefs are provided', () => {
+    render(
+      <RoundAttachmentReferences fallbackAttachments={[makeFallback('f1', 'Fallback Label')]} />
+    );
+    expect(screen.getByText(/Fallback Label/)).toBeInTheDocument();
+  });
+
+  it('deduplicates fallback attachments by group_id', () => {
+    render(
+      <RoundAttachmentReferences
+        fallbackAttachments={[
+          makeFallback('f1', '27 Alerts', 'group-1'),
+          makeFallback('f2', '27 Alerts', 'group-1'),
+        ]}
       />
     );
 
-    expect(container).toBeEmptyDOMElement();
+    const pills = screen.getAllByText(/27 Alerts/);
+    expect(pills).toHaveLength(1);
   });
 });

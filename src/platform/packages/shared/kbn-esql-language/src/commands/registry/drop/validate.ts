@@ -6,11 +6,12 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { isColumn } from '@elastic/esql';
+import type { ESQLAst, ESQLColumn, ESQLAstAllCommands } from '@elastic/esql/types';
 import { errors } from '../../definitions/utils';
-import { isColumn } from '../../../ast/is';
-import type { ESQLAst, ESQLColumn, ESQLAstAllCommands, ESQLMessage } from '../../../types';
 import { validateCommandArguments } from '../../definitions/utils/validation';
 import type { ICommandContext, ICommandCallbacks } from '../types';
+import type { ESQLMessage } from '../../definitions/types';
 
 export const validate = (
   command: ESQLAstAllCommands,

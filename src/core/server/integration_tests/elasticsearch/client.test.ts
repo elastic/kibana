@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { esTestConfig } from '@kbn/test';
 import * as http from 'http';
+import type { AddressInfo } from 'net';
 import { ReplaySubject, firstValueFrom } from 'rxjs';
 
 import type { Root } from '@kbn/core-root-server-internal';
@@ -60,15 +60,16 @@ describe('elasticsearch clients', () => {
   });
 });
 
-function createFakeElasticsearchServer() {
-  const server = http.createServer((req, res) => {
-    // Reply with a 200 and empty response by default (intentionally malformed response)
-    res.writeHead(200);
-    res.end();
+function createFakeElasticsearchServer(): Promise<http.Server> {
+  return new Promise((resolve, reject) => {
+    const server = http.createServer((req, res) => {
+      // Reply with a 200 and empty response by default (intentionally malformed response)
+      res.writeHead(200);
+      res.end();
+    });
+    server.on('error', reject);
+    server.listen(0, '127.0.0.1', () => resolve(server));
   });
-  server.listen(esTestConfig.getPort());
-
-  return server;
 }
 
 describe('fake elasticsearch', () => {
@@ -77,13 +78,14 @@ describe('fake elasticsearch', () => {
   let esStatus$: ReplaySubject<ServiceStatus<ElasticsearchStatusMeta>>;
 
   beforeAll(async () => {
+    esServer = await createFakeElasticsearchServer();
     kibanaServer = createRootWithCorePlugins({
       elasticsearch: {
+        hosts: [`http://127.0.0.1:${(esServer.address() as AddressInfo).port}`],
         healthCheck: { retry: 1 },
       },
       status: { allowAnonymous: true },
     });
-    esServer = createFakeElasticsearchServer();
 
     await kibanaServer.preboot();
     const { elasticsearch } = await kibanaServer.setup();

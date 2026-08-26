@@ -8,7 +8,6 @@
 import React, { useCallback, useEffect } from 'react';
 
 import {
-  EuiTitle,
   EuiLink,
   EuiSpacer,
   EuiButton,
@@ -28,8 +27,9 @@ import {
   useMigrateSpaceAwarenessMutation,
   usePutSettingsMutation,
   useStartServices,
-  useAgentlessResources,
 } from '../../../../hooks';
+
+import { SettingsSectionPanel } from './settings_section_panel';
 
 export const AdvancedSection: React.FunctionComponent<{}> = ({}) => {
   const authz = useAuthz();
@@ -42,9 +42,6 @@ export const AdvancedSection: React.FunctionComponent<{}> = ({}) => {
   const [deleteUnenrolledAgentsChecked, setDeleteUnenrolledAgentsChecked] =
     React.useState<boolean>(deleteUnenrolledAgents);
   const { mutateAsync: mutateSettingsAsync } = usePutSettingsMutation();
-
-  // Agentless resources toggle state
-  const { showAgentless, setShowAgentless } = useAgentlessResources();
 
   const { mutateAsync: mutateSpaceAwarenessAsync, isLoading: mutateSpaceAwarenessIsLoading } =
     useMigrateSpaceAwarenessMutation();
@@ -125,19 +122,18 @@ export const AdvancedSection: React.FunctionComponent<{}> = ({}) => {
   }, [mutateSpaceAwarenessAsync, notifications.toasts, overlays]);
 
   return (
-    <>
-      <EuiTitle size="s">
-        <h4 data-test-subj="advancedHeader">
-          <FormattedMessage
-            id="xpack.fleet.settings.advancedSectionTitle"
-            defaultMessage="Advanced Settings"
-          />
-        </h4>
-      </EuiTitle>
+    <SettingsSectionPanel
+      color="subdued"
+      data-test-subj="advancedHeader"
+      title={
+        <FormattedMessage
+          id="xpack.fleet.settings.advancedSectionTitle"
+          defaultMessage="Advanced Settings"
+        />
+      }
+    >
       {fleetStatus.isSpaceAwarenessEnabled ? null : (
         <>
-          <EuiSpacer size="m" />
-
           <EuiDescribedFormGroup
             title={
               <h3>
@@ -147,6 +143,7 @@ export const AdvancedSection: React.FunctionComponent<{}> = ({}) => {
                 />
               </h3>
             }
+            titleSize="xxs"
             description={
               <p>
                 <FormattedMessage
@@ -168,10 +165,9 @@ export const AdvancedSection: React.FunctionComponent<{}> = ({}) => {
               </EuiButton>
             </EuiFormRow>
           </EuiDescribedFormGroup>
+          <EuiSpacer />
         </>
       )}
-
-      <EuiSpacer size="m" />
 
       <EuiDescribedFormGroup
         title={
@@ -182,6 +178,7 @@ export const AdvancedSection: React.FunctionComponent<{}> = ({}) => {
             />
           </h3>
         }
+        titleSize="xxs"
         description={
           <p>
             <FormattedMessage
@@ -225,46 +222,6 @@ export const AdvancedSection: React.FunctionComponent<{}> = ({}) => {
           </EuiToolTip>
         </EuiFormRow>
       </EuiDescribedFormGroup>
-
-      <EuiSpacer size="m" />
-
-      <EuiDescribedFormGroup
-        title={
-          <h3>
-            <FormattedMessage
-              id="xpack.fleet.settings.showAgentlessResourcesLabel"
-              defaultMessage="Show agentless resources"
-            />
-          </h3>
-        }
-        description={
-          <p>
-            <FormattedMessage
-              id="xpack.fleet.settings.showAgentlessResourcesDescription"
-              defaultMessage="Enable this toggle to display agentless agents and policies in Fleet for debugging and diagnostics purposes. This setting is stored locally and is only visible to you."
-            />
-          </p>
-        }
-      >
-        <EuiFormRow>
-          <EuiSwitch
-            label={
-              <FormattedMessage
-                id="xpack.fleet.settings.showAgentlessResourcesLabel"
-                defaultMessage="Show agentless resources"
-              />
-            }
-            checked={showAgentless}
-            onChange={(e) => {
-              setShowAgentless(e.target.checked);
-              setShowAgentless(e.target.checked);
-            }}
-            data-test-subj="showAgentlessResourcesSwitch"
-          />
-        </EuiFormRow>
-      </EuiDescribedFormGroup>
-
-      <EuiSpacer size="m" />
-    </>
+    </SettingsSectionPanel>
   );
 };

@@ -8,14 +8,22 @@
 import {
   isAgentBuilderError,
   createInternalError,
+  createBadRequestError,
   createToolNotFoundError,
   isInternalError,
   isToolNotFoundError,
   AgentBuilderErrorCode,
   createAgentBuilderError,
   isAgentNotFoundError,
+  isAgentUnavailableError,
+  createAgentUnavailableError,
   createAgentNotFoundError,
+  createHooksExecutionError,
+  createWorkflowExecutionError,
+  isHooksExecutionError,
+  isWorkflowExecutionError,
 } from './errors';
+import { HookLifecycle, HookExecutionMode } from '../hooks/lifecycle';
 
 describe('AgentBuilder errors', () => {
   describe('isAgentBuilderError', () => {
@@ -156,6 +164,31 @@ describe('AgentBuilder errors', () => {
     });
   });
 
+  describe('isAgentUnavailableError', () => {
+    it('should return true for an agent unavailable error regardless of message', () => {
+      const error = createAgentUnavailableError({
+        agentId: 'test-agent',
+        customMessage: 'Custom unavailable message',
+      });
+
+      expect(isAgentUnavailableError(error, 'test-agent')).toBe(true);
+    });
+
+    it('should return false for a bad request with the legacy agent unavailable message', () => {
+      const error = createBadRequestError('Agent test-agent is not available');
+
+      expect(isAgentUnavailableError(error, 'test-agent')).toBe(false);
+    });
+
+    it('should return false for an agent not found error', () => {
+      const error = createAgentNotFoundError({
+        agentId: 'test-agent',
+      });
+
+      expect(isAgentUnavailableError(error, 'test-agent')).toBe(false);
+    });
+  });
+
   describe('createAgentNotFoundError', () => {
     it('should create an error with the correct code and default message', () => {
       const error = createAgentNotFoundError({
@@ -192,6 +225,107 @@ describe('AgentBuilder errors', () => {
         statusCode: 404,
         foo: 'bar',
       });
+    });
+  });
+
+  describe('isHooksExecutionError', () => {
+    it('should return true for a hooks execution error', () => {
+      const error = createHooksExecutionError(
+        'hook failed',
+        HookLifecycle.beforeToolCall,
+        'my-hook',
+        HookExecutionMode.blocking
+      );
+      expect(isHooksExecutionError(error)).toBe(true);
+    });
+
+    it('should return false for an internal error', () => {
+      const error = createInternalError('test error');
+      expect(isHooksExecutionError(error)).toBe(false);
+    });
+
+    it('should return false for a regular Error', () => {
+      const error = new Error('test error');
+      expect(isHooksExecutionError(error)).toBe(false);
+    });
+  });
+
+  describe('createHooksExecutionError', () => {
+    it('should create an error with the correct code, message and hook metadata', () => {
+      const error = createHooksExecutionError(
+        'hook failed',
+        HookLifecycle.beforeToolCall,
+        'my-hook',
+        HookExecutionMode.blocking
+      );
+      expect(error.code).toBe(AgentBuilderErrorCode.hookExecutionError);
+      expect(error.message).toBe('hook failed');
+      expect(error.meta).toEqual({
+        hookLifecycle: HookLifecycle.beforeToolCall,
+        hookId: 'my-hook',
+        hookMode: HookExecutionMode.blocking,
+      });
+    });
+
+    it('should merge optional meta with hook metadata', () => {
+      const meta = { foo: 'bar' };
+      const error = createHooksExecutionError(
+        'hook failed',
+        HookLifecycle.afterToolCall,
+        'my-hook',
+        HookExecutionMode.nonBlocking,
+        meta
+      );
+      expect(error.meta).toEqual({
+        foo: 'bar',
+        hookLifecycle: HookLifecycle.afterToolCall,
+        hookId: 'my-hook',
+        hookMode: HookExecutionMode.nonBlocking,
+      });
+    });
+
+    it('should use empty object as default metadata when meta is omitted', () => {
+      const error = createHooksExecutionError(
+        'hook failed',
+        HookLifecycle.beforeAgent,
+        'my-hook',
+        HookExecutionMode.blocking
+      );
+      expect(error.meta).toEqual({
+        hookLifecycle: HookLifecycle.beforeAgent,
+        hookId: 'my-hook',
+        hookMode: HookExecutionMode.blocking,
+      });
+    });
+  });
+
+  describe('isWorkflowExecutionError', () => {
+    it('should return true for a workflow execution error', () => {
+      const error = createWorkflowExecutionError('workflow failed', {
+        workflow: 'workflow-1',
+      });
+      expect(isWorkflowExecutionError(error)).toBe(true);
+    });
+
+    it('should return false for a hooks execution error', () => {
+      const error = createHooksExecutionError(
+        'hook failed',
+        HookLifecycle.beforeToolCall,
+        'my-hook',
+        HookExecutionMode.blocking
+      );
+      expect(isWorkflowExecutionError(error)).toBe(false);
+    });
+  });
+
+  describe('createWorkflowExecutionError', () => {
+    it('should create an error with the correct code and message', () => {
+      const error = createWorkflowExecutionError('workflow failed', {
+        workflow: 'workflow-1',
+      });
+      expect(error.code).toBe(AgentBuilderErrorCode.workflowExecutionFailed);
+      expect(error.message).toBe('workflow failed');
+      expect(error.meta).toEqual({ workflow: 'workflow-1' });
     });
   });
 });

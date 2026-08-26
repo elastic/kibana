@@ -72,7 +72,7 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
         onClick={handlePopover}
         onKeyDown={handleKeyboardOpen}
         value={timelineTitle ?? i18n.DEFAULT_TIMELINE_TITLE}
-        icon={!isDisabled ? { type: 'arrowDown', side: 'right' } : undefined}
+        icon={!isDisabled ? { type: 'chevronSingleDown', side: 'right' } : undefined}
         aria-label={ariaLabel}
         aria-controls={popoverId}
         aria-expanded={isPopoverOpen}
@@ -123,6 +123,7 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
       isOpen={isPopoverOpen}
       closePopover={handleClosePopover}
       className="rightArrowIcon"
+      ownFocus={true}
     >
       <SelectableTimeline
         hideUntitled={hideUntitled}

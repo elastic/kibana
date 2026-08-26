@@ -19,12 +19,15 @@ import {
   ALERT_STATUS_UNTRACKED,
   ALERT_TIME_RANGE,
   ALERT_UUID,
+  SPACE_IDS,
 } from '@kbn/rule-data-utils';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { RulesClientContext } from '../../rules_client';
 import { AlertingAuthorizationEntity } from '../../authorization/types';
 
-type EnsureAuthorized = (opts: { ruleTypeId: string; consumer: string }) => Promise<unknown>;
+export type BulkEnsureAuthorizedForUntrack = (opts: {
+  ruleTypeIdConsumersPairs: Array<{ ruleTypeId: string; consumers: string[] }>;
+}) => Promise<unknown>;
 
 export interface SetAlertsToUntrackedParams {
   indices?: string[];
@@ -36,7 +39,7 @@ export interface SetAlertsToUntrackedParams {
   isUsingQuery?: boolean;
   getAllAuthorizedRuleTypesFindOperation?: RulesClientContext['authorization']['getAllAuthorizedRuleTypesFindOperation'];
   getAlertIndicesAlias?: RulesClientContext['getAlertIndicesAlias'];
-  ensureAuthorized?: EnsureAuthorized;
+  bulkEnsureAuthorized?: BulkEnsureAuthorizedForUntrack;
 }
 
 interface SetAlertsToUntrackedParamsWithDep extends SetAlertsToUntrackedParams {
@@ -61,6 +64,8 @@ const getUntrackQuery = (
   params: SetAlertsToUntrackedParamsWithDep,
   alertStatus: AlertStatus
 ): QueryDslQueryContainer => {
+  const { spaceId } = params;
+
   const statusTerms: Array<{ term: Record<string, { value: string }> }> = [
     {
       term: {
@@ -69,12 +74,26 @@ const getUntrackQuery = (
     },
   ];
 
+  // Restrict untracking to alerts that belong to the active space only.
+  //
+  // Note we intentionally do NOT include the all-spaces wildcard ('*') here, unlike the
+  // read-side `getSpacesFilter` in rule_registry. Reading globally visible alerts across
+  // spaces is legitimate, but mutating them is not: the only rule types that write '*'
+  // alerts are internally managed (e.g. Streams "Significant Events"), whose alerts are
+  // point-in-time occurrence records that back an internal feature and are never meant to
+  // be untracked by users. Matching '*' here would let a caller in one space mutate a
+  // document shared by every space. Please keep this divergence from the read path.
+  //
+  // When spaceId is absent (internal cleanup calls), no space filter is applied.
+  const spaceFilter = spaceId ? { terms: { [SPACE_IDS]: [spaceId] } } : undefined;
+
   if (params.isUsingQuery) {
     const { query } = params;
+    const filterClauses = [...(spaceFilter ? [spaceFilter] : []), ...(query ?? [])];
     return {
       bool: {
         must: statusTerms,
-        ...(query ? { filter: query } : {}),
+        ...(filterClauses.length > 0 ? { filter: filterClauses } : {}),
       },
     };
   } else {
@@ -110,18 +129,19 @@ const getUntrackQuery = (
             },
           },
         ],
+        ...(spaceFilter ? { filter: [spaceFilter] } : {}),
       },
     };
   }
 };
 
-const ensureAuthorizedToUntrack = async (params: SetAlertsToUntrackedParamsWithDep) => {
-  const { esClient, indices, ensureAuthorized } = params;
+const bulkEnsureAuthorizedToUntrack = async (params: SetAlertsToUntrackedParamsWithDep) => {
+  const { esClient, indices, bulkEnsureAuthorized } = params;
 
-  if (!ensureAuthorized) {
+  if (!bulkEnsureAuthorized) {
     return;
   }
-  // Fetch all rule type IDs and rule consumers, then run the provided ensureAuthorized check for each of them
+  // Fetch all rule type IDs and rule consumers, then run the provided bulkEnsureAuthorized check once
   const response = await esClient.search<never, ConsumersAndRuleTypesAggregation>({
     index: indices,
     allow_no_indices: true,
@@ -139,18 +159,21 @@ const ensureAuthorizedToUntrack = async (params: SetAlertsToUntrackedParamsWithD
   if (!ruleTypeIdBuckets) {
     throw new Error('Unable to fetch ruleTypeIds for authorization');
   }
-  for (const {
-    key: ruleTypeId,
-    consumers: { buckets: consumerBuckets },
-  } of ruleTypeIdBuckets) {
-    const consumers = consumerBuckets.map((b) => b.key);
-    for (const consumer of consumers) {
-      if (consumer === 'siem') {
-        throw new Error('Untracking Security alerts is not permitted');
-      }
-      await ensureAuthorized({ ruleTypeId, consumer });
+
+  const ruleTypeIdConsumersPairs = ruleTypeIdBuckets.map(
+    ({ key: ruleTypeId, consumers: { buckets: consumerBuckets } }) => ({
+      ruleTypeId,
+      consumers: consumerBuckets.map((b) => b.key),
+    })
+  );
+
+  for (const pair of ruleTypeIdConsumersPairs) {
+    if (pair.consumers.includes('siem')) {
+      throw new Error('Untracking Security alerts is not permitted');
     }
   }
+
+  await bulkEnsureAuthorized({ ruleTypeIdConsumersPairs });
 };
 
 const getAuthorizedAlertsIndices = async ({
@@ -189,7 +212,7 @@ export async function setAlertsToUntracked(
     esClient,
     ruleIds = [],
     alertUuids = [], // OPTIONAL - If no alertUuids are passed, untrack ALL ids by default,
-    ensureAuthorized,
+    bulkEnsureAuthorized,
     isUsingQuery,
   } = params;
 
@@ -204,8 +227,8 @@ export async function setAlertsToUntracked(
     indices = params.indices || [];
   }
 
-  if (ensureAuthorized) {
-    await ensureAuthorizedToUntrack(params);
+  if (bulkEnsureAuthorized) {
+    await bulkEnsureAuthorizedToUntrack(params);
   }
 
   try {

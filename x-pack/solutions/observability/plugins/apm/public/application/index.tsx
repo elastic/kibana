@@ -62,9 +62,10 @@ export const renderApp = ({
     observabilityAIAssistant: pluginsStart.observabilityAIAssistant,
     agentBuilder: pluginsStart.agentBuilder,
     observabilityAgentBuilder: pluginsStart.observabilityAgentBuilder,
-    share: pluginsSetup.share,
+    share: pluginsStart.share,
     kibanaEnvironment,
     licensing: pluginsStart.licensing,
+    metricsDataAccess: pluginsStart.metricsDataAccess,
   };
   const queryClient = new QueryClient();
 

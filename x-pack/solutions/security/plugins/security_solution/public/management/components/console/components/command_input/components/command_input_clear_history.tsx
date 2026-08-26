@@ -70,7 +70,6 @@ export const CommandInputClearHistory = memo(() => {
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             size="xs"
-            tabIndex={-1}
             onClick={handleClearInputHistory}
             disabled={showConfirmModal}
             data-test-subj={getTestId('clearInputHistoryButton')}

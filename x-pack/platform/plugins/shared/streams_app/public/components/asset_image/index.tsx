@@ -33,25 +33,11 @@ const imageSets = {
       defaultMessage: 'No documents image for the streams app',
     }),
   },
-  significantEventsEmptyState: {
-    light: () => import('./sig_events_empty_state_light.svg'),
-    dark: () => import('./sig_events_empty_state_dark.svg'),
-    alt: i18n.translate('xpack.streams.significantEvents.emptyStateImage', {
-      defaultMessage: 'Empty state illustration for the Significant events view',
-    }),
-  },
   addStreams: {
     light: () => import('./add_streams_light.svg'),
     dark: () => import('./add_streams_dark.svg'),
     alt: i18n.translate('xpack.streams.streamDetailView.addStreamsImage', {
       defaultMessage: 'Add streams image for the streams app',
-    }),
-  },
-  quickLinksEmpty: {
-    light: () => import('./quick_links_empty_light.svg'),
-    dark: () => import('./quick_links_empty_dark.svg'),
-    alt: i18n.translate('xpack.streams.streamDetailView.quickLinksEmptyImage', {
-      defaultMessage: 'Quick links empty image for the streams app',
     }),
   },
   unableToGeneratePreview: {
@@ -85,20 +71,6 @@ const imageSets = {
       defaultMessage: 'Extract fields image for the streams app',
     }),
   },
-  barChart: {
-    light: () => import('./bar_chart.svg'),
-    dark: () => import('./bar_chart.svg'),
-    alt: i18n.translate('xpack.streams.barChartImage', {
-      defaultMessage: 'Bar chart sample',
-    }),
-  },
-  checklist: {
-    light: () => import('./checklist.svg'),
-    dark: () => import('./checklist.svg'),
-    alt: i18n.translate('xpack.streams.checklistImage', {
-      defaultMessage: 'Checklist',
-    }),
-  },
   attachmentsEmpty: {
     light: () => import('./attachments_empty_light.svg'),
     dark: () => import('./attachments_empty_dark.svg'),
@@ -107,17 +79,24 @@ const imageSets = {
     }),
   },
   suggestPipeline: {
-    light: () => import('./suggest_pipeline.svg'),
+    light: () => import('./suggest_pipeline_light.svg'),
     dark: () => import('./suggest_pipeline_dark.svg'),
     alt: i18n.translate('xpack.streams.suggestPipelineImage', {
       defaultMessage: 'Suggest pipeline',
     }),
   },
   routingSuggestionEmptyState: {
-    light: () => import('./routing_suggestion_empty_state.svg'),
-    dark: () => import('./routing_suggestion_empty_state.svg'),
+    light: () => import('./routing_suggestion_empty_state_light.svg'),
+    dark: () => import('./routing_suggestion_empty_state_dark.svg'),
     alt: i18n.translate('xpack.streams.streamDetailView.routingTab.noDataEmptyPrompt.image', {
       defaultMessage: 'Suggest AI partitioning image for the streams app',
+    }),
+  },
+  queryStreamsEmptyState: {
+    light: () => import('./query_streams_empty_state_light.svg'),
+    dark: () => import('./query_streams_empty_state_dark.svg'),
+    alt: i18n.translate('xpack.streams.queryStreams.emptyStateImage', {
+      defaultMessage: 'Empty state illustration for query streams',
     }),
   },
 };

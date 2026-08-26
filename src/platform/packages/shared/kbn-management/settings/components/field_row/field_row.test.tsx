@@ -365,6 +365,42 @@ describe('Field', () => {
         expect(queryByText('Technical preview')).not.toBeInTheDocument();
       });
 
+      it('should render experimental badge if it is experimental', () => {
+        const { getByText } = render(
+          wrap(
+            <FieldRow
+              field={getFieldDefinition({
+                id,
+                setting: { ...setting, experimental: true },
+                params: { isCustom: true },
+              })}
+              onFieldChange={handleChange}
+              isSavingEnabled={true}
+            />
+          )
+        );
+
+        expect(getByText('Experimental')).toBeInTheDocument();
+      });
+
+      it('should NOT render experimental badge if experimental is false or unspecified', () => {
+        const { queryByText } = render(
+          wrap(
+            <FieldRow
+              field={getFieldDefinition({
+                id,
+                setting,
+                params: { isCustom: true },
+              })}
+              onFieldChange={handleChange}
+              isSavingEnabled={true}
+            />
+          )
+        );
+
+        expect(queryByText('Experimental')).not.toBeInTheDocument();
+      });
+
       it('should render unsaved value if there are unsaved changes', () => {
         const { getByTestId, getByAltText } = render(
           wrap(
@@ -445,7 +481,7 @@ describe('Field', () => {
     });
   });
 
-  it('should fire onFieldChange when input changes', () => {
+  it('should fire onFieldChange when input changes', async () => {
     const setting = settings.string;
     const field = getFieldDefinition({ id: setting.name || setting.type, setting });
 
@@ -455,10 +491,13 @@ describe('Field', () => {
 
     const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${field.id}`);
     fireEvent.change(input, { target: { value: 'new value' } });
-    expect(handleChange).toHaveBeenCalledWith(field.id, {
-      type: 'string',
-      unsavedValue: 'new value',
-    });
+
+    await waitFor(() =>
+      expect(handleChange).toHaveBeenCalledWith(field.id, {
+        type: 'string',
+        unsavedValue: 'new value',
+      })
+    );
   });
 
   it('should fire onFieldChange with an error when input changes with invalid value', () => {
@@ -511,7 +550,7 @@ describe('Field', () => {
     );
   });
 
-  it('should clear the unsaved value if the new value matches the saved value', () => {
+  it('should clear the unsaved value if the new value matches the saved value', async () => {
     const setting = settings.string;
     const field = getFieldDefinition({
       id: setting.name || setting.type,
@@ -538,7 +577,8 @@ describe('Field', () => {
 
     const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${field.id}`);
     fireEvent.change(input, { target: { value: field.savedValue } });
-    expect(handleChange).toHaveBeenCalledWith(field.id, undefined);
+
+    await waitFor(() => expect(handleChange).toHaveBeenCalledWith(field.id, undefined));
   });
 
   it('should clear the current image when Change Image is clicked', () => {

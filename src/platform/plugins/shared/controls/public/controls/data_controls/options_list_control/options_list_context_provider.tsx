@@ -8,8 +8,11 @@
  */
 
 import React, { useContext } from 'react';
+
 import type { OptionsListDisplaySettings } from '@kbn/controls-schemas';
-import type { OptionsListComponentApi, OptionsListCustomStrings } from './types';
+
+import type { OptionsListComponentApi } from '../../types';
+import type { OptionsListCustomStrings } from './types';
 
 interface Context {
   componentApi: OptionsListComponentApi;

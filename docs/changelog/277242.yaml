@@ -1,0 +1,14 @@
+prs:
+- https://github.com/elastic/kibana/pull/277242
+issues:
+- https://github.com/elastic/kibana/issues/276356
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-21
+- product: kibana
+  target: 9.5.0
+areas:
+- Discover and ES|QL
+title: "Fix Discover staying blocked after canceling a long-running query"
+description: "Canceling an ES|QL query no longer leaves Discover unresponsive when stopping the async query exceeds the request timeout."

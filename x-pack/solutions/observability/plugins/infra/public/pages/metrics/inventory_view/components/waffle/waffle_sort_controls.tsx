@@ -56,8 +56,7 @@ export const WaffleSortControls = ({ sort, onChange }: Props) => {
       ...sort,
       direction: sort.direction === 'asc' ? 'desc' : 'asc',
     });
-    closePopover();
-  }, [closePopover, sort, onChange]);
+  }, [sort, onChange]);
 
   const panels = useMemo<EuiContextMenuPanelDescriptor[]>(
     () => [
@@ -91,6 +90,9 @@ export const WaffleSortControls = ({ sort, onChange }: Props) => {
       anchorPosition="downLeft"
       panelPaddingSize="none"
       closePopover={closePopover}
+      aria-label={i18n.translate('xpack.infra.waffle.sortControls.ariaLabel', {
+        defaultMessage: 'Sort',
+      })}
     >
       <EuiContextMenu initialPanelId={0} panels={panels} />
       <SwitchContainer>

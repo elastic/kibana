@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { expect, tags } from '@kbn/scout';
+import { tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import type { CookieHeader } from '@kbn/scout';
 import type { PutTransformsResponseSchema } from '../../../../common';
 import { generateTransformConfig, generateDestIndex } from '../helpers/transform_config';
@@ -14,7 +15,7 @@ import { COMMON_HEADERS } from '../constants';
 
 apiTest.describe(
   '/internal/transform/transforms/{transformId} create',
-  { tag: tags.ESS_ONLY },
+  { tag: tags.stateful.all },
   () => {
     let dataViewToBeDeletedTitle: string | undefined;
     let transformManagerCookieHeader: CookieHeader;
@@ -161,6 +162,36 @@ apiTest.describe(
         expect(body.message).toBe('[request body]: pivot and latest are not allowed together');
       }
     );
+
+    apiTest('should create a transform with deferValidation', async ({ apiClient }) => {
+      const transformId = 'test_transform_id_create_defer_validation';
+
+      const { statusCode, body } = await apiClient.put(
+        `internal/transform/transforms/${transformId}?deferValidation=true`,
+        {
+          headers: {
+            ...COMMON_HEADERS,
+            ...transformManagerCookieHeader,
+          },
+          body: generateTransformConfig(transformId),
+          responseType: 'json',
+        }
+      );
+      const createResponse = body as PutTransformsResponseSchema;
+
+      expect(statusCode).toBe(200);
+
+      expect(createResponse).toMatchObject({
+        dataViewsCreated: [],
+        dataViewsErrors: [],
+        errors: [],
+        transformsCreated: [
+          {
+            transform: transformId,
+          },
+        ],
+      });
+    });
 
     apiTest('should ensure if pivot or latest is provided', async ({ apiClient }) => {
       const transformId = 'test_transform_id_fail';

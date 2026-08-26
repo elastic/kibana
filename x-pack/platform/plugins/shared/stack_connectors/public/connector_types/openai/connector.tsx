@@ -6,7 +6,10 @@
  */
 
 import React, { useMemo } from 'react';
-import type { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
+import type {
+  ActionConnectorFieldsProps,
+  ConnectorFormSchema,
+} from '@kbn/triggers-actions-ui-plugin/public';
 import { SimpleConnectorForm } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   FilePickerField,
@@ -21,6 +24,7 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiTitle,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import {
@@ -34,6 +38,7 @@ import { OpenAiProviderType } from '@kbn/connector-schemas/openai/constants';
 import * as i18nAuth from '../../common/auth/translations';
 import DashboardLink from './dashboard_link';
 import * as i18n from './translations';
+import type { Config, Secrets } from './types';
 import {
   azureAiConfig,
   azureAiSecrets,
@@ -45,12 +50,19 @@ import {
 } from './constants';
 import { CRT_REQUIRED, KEY_REQUIRED } from '../../common/auth/translations';
 
+interface OpenAIConnectorFormData extends ConnectorFormSchema<Config, Secrets> {
+  __internal__?: {
+    hasHeaders?: boolean;
+    hasPKI?: boolean;
+  };
+}
+
 const { emptyField } = fieldValidators;
 
 const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdit }) => {
   const { euiTheme } = useEuiTheme();
   const { getFieldDefaultValue } = useFormContext();
-  const [{ config, __internal__, id, name }] = useFormData({
+  const [{ config, __internal__, id, name }] = useFormData<OpenAIConnectorFormData>({
     watch: ['config.apiProvider', '__internal__.hasHeaders', '__internal__.hasPKI'],
   });
   const hasHeaders = __internal__ != null ? __internal__.hasHeaders : false;
@@ -65,7 +77,6 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
       getFieldDefaultValue<OpenAiProviderType>('config.apiProvider') ?? OpenAiProviderType.OpenAi,
     [getFieldDefaultValue]
   );
-
   const verificationModeOptions = [
     { value: 'full', text: i18n.VERIFICATION_MODE_FULL },
     { value: 'certificate', text: i18n.VERIFICATION_MODE_CERTIFICATE },
@@ -305,19 +316,21 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
                       />
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
-                      <EuiButtonIcon
-                        color="danger"
-                        onClick={() => removeItem(item.id)}
-                        iconType="minusInCircle"
-                        aria-label={i18nAuth.DELETE_BUTTON}
-                        css={{ marginTop: '28px' }}
-                      />
+                      <EuiToolTip content={i18nAuth.DELETE_BUTTON} disableScreenReaderOutput>
+                        <EuiButtonIcon
+                          color="danger"
+                          onClick={() => removeItem(item.id)}
+                          iconType="minusCircle"
+                          aria-label={i18nAuth.DELETE_BUTTON}
+                          css={{ marginTop: '28px' }}
+                        />
+                      </EuiToolTip>
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 ))}
                 <EuiSpacer size="m" />
                 <EuiButtonEmpty
-                  iconType="plusInCircle"
+                  iconType="plusCircle"
                   onClick={addItem}
                   data-test-subj="openAIAddHeaderButton"
                 >
@@ -329,7 +342,7 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
           }}
         </UseArray>
       )}
-      {isEdit && (
+      {isEdit && id && name && (
         <DashboardLink
           connectorId={id}
           connectorName={name}

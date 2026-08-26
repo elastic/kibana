@@ -37,7 +37,6 @@ export const registerActionDetailsRoutes = (
           requiredPrivileges: ['securitySolution'],
         },
       },
-      options: { authRequired: true },
     })
     .addVersion(
       {
@@ -47,7 +46,7 @@ export const registerActionDetailsRoutes = (
         },
       },
       withEndpointAuthz(
-        { all: ['canReadSecuritySolution'] },
+        { all: ['canAccessEndpointActionsLogManagement'] },
         endpointContext.logFactory.get('hostIsolationDetails'),
         getActionDetailsRequestHandler(endpointContext)
       )
@@ -65,12 +64,15 @@ export const getActionDetailsRequestHandler = (
   return async (context, req, res) => {
     try {
       const activeSpaceId = (await context.securitySolution).getSpaceId();
+      const scoped = endpointContext.service.asScoped(req);
+
       return res.ok({
         body: {
           data: await getActionDetailsById(
             endpointContext.service,
             activeSpaceId,
-            req.params.action_id
+            req.params.action_id,
+            { scoped }
           ),
         },
       });

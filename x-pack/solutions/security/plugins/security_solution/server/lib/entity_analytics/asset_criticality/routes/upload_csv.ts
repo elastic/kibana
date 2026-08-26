@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { IKibanaResponse, Logger } from '@kbn/core/server';
+import type { IKibanaResponse } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { schema } from '@kbn/config-schema';
 import Papa from 'papaparse';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { UploadAssetCriticalityRecordsResponse } from '../../../../../common/api/entity_analytics';
 import { CRITICALITY_CSV_MAX_SIZE_BYTES_WITH_TOLERANCE } from '../../../../../common/entity_analytics/asset_criticality';
-import type { ConfigType } from '../../../../config';
 import type { HapiReadableStream } from '../../../../types';
 import {
   ASSET_CRITICALITY_PUBLIC_CSV_UPLOAD_URL,
@@ -25,12 +24,13 @@ import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { AssetCriticalityAuditActions } from '../audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
 
-export const assetCriticalityPublicCSVUploadRoute = (
-  router: EntityAnalyticsRoutesDeps['router'],
-  logger: Logger,
-  config: ConfigType,
-  getStartServices: EntityAnalyticsRoutesDeps['getStartServices']
-) => {
+export const assetCriticalityPublicCSVUploadRoute = ({
+  router,
+  logger,
+  config,
+  docLinks,
+  getStartServices,
+}: EntityAnalyticsRoutesDeps) => {
   router.versioned
     .post({
       access: 'public',
@@ -58,6 +58,17 @@ export const assetCriticalityPublicCSVUploadRoute = (
             }),
           },
         },
+        ...(config.experimentalFeatures.entityAnalyticsEntityStoreV2
+          ? {
+              options: {
+                deprecated: {
+                  documentationUrl: docLinks.links.securitySolution.entityAnalytics.api,
+                  severity: 'warning',
+                  reason: { type: 'remove' },
+                },
+              },
+            }
+          : {}),
       },
       async (
         context,

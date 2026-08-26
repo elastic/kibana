@@ -7,11 +7,12 @@
 
 import { schema } from '@kbn/config-schema';
 import Boom from '@hapi/boom';
+import * as rt from 'io-ts';
 import { get } from 'lodash';
 import { pipe } from 'fp-ts/pipeable';
 import { fold } from 'fp-ts/Either';
 import { identity } from 'fp-ts/function';
-import { throwErrors } from '@kbn/io-ts-utils';
+import { createRouteValidationFunction, jsonRt, throwErrors } from '@kbn/io-ts-utils';
 import type { InfraMetadataFeature } from '../../../common/http_api/metadata_api';
 import { InfraMetadataRequestRT, InfraMetadataRT } from '../../../common/http_api/metadata_api';
 import type { InfraBackendLibs } from '../../lib/infra_types';
@@ -20,8 +21,10 @@ import { pickFeatureName } from './lib/pick_feature_name';
 import { getCloudMetricsMetadata } from './lib/get_cloud_metric_metadata';
 import { getNodeInfo } from './lib/get_node_info';
 import { getInfraMetricsClient } from '../../lib/helpers/get_infra_metrics_client';
+import { withInspect } from '../../lib/helpers/with_inspect';
 
 const escapeHatch = schema.object({}, { unknowns: 'allow' });
+const InspectQueryRT = rt.exact(rt.partial({ _inspect: jsonRt.pipe(rt.boolean) }));
 
 export const initMetadataRoute = (libs: InfraBackendLibs) => {
   const { framework } = libs;
@@ -32,9 +35,10 @@ export const initMetadataRoute = (libs: InfraBackendLibs) => {
       path: '/api/infra/metadata',
       validate: {
         body: escapeHatch,
+        query: createRouteValidationFunction(InspectQueryRT),
       },
     },
-    async (requestContext, request, response) => {
+    withInspect(async (requestContext, request) => {
       const { nodeId, nodeType, sourceId, timeRange } = pipe(
         InfraMetadataRequestRT.decode(request.body),
         fold(throwErrors(Boom.badRequest), identity)
@@ -94,11 +98,11 @@ export const initMetadataRoute = (libs: InfraBackendLibs) => {
       });
       if (nodeType === 'host') {
         const hasSystemIntegration = metricsMetadata?.hasSystemIntegration;
-        return response.ok({ body: { ...responseBody, hasSystemIntegration } });
+        return { ...responseBody, hasSystemIntegration };
       }
 
-      return response.ok({ body: responseBody });
-    }
+      return responseBody;
+    })
   );
 };
 

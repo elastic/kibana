@@ -56,6 +56,8 @@ export const createRuleTypeMocks = (
     registerSubActionConnectorType: jest.fn(),
 
     getAxiosInstanceWithAuth: jest.fn(),
+    getCredential: jest.fn(),
+    getClientLeasePool: jest.fn(),
 
     isPreconfiguredConnector: (connectorId: string) => false,
 
@@ -63,8 +65,11 @@ export const createRuleTypeMocks = (
     getCaseConnectorClass: jest.fn(),
     getActionsHealth: jest.fn(),
     getActionsConfigurationUtilities: jest.fn(),
+    getRelayClient: jest.fn(),
     setEnabledConnectorTypes: jest.fn(),
     isActionTypeEnabled: () => true,
+    registerConnectorLifecycleListener: jest.fn(),
+    registerConnectorEventEmitter: jest.fn(),
   } as ActionsPluginSetupContract;
 
   const scheduleActions = jest.fn();
@@ -139,7 +144,13 @@ export const createRuleTypeMocks = (
     },
     services,
     scheduleActions,
-    executor: async ({ params }: { params: Record<string, unknown> }) => {
+    executor: async ({
+      params,
+      previousStartedAt,
+    }: {
+      params: Record<string, unknown>;
+      previousStartedAt?: Date | null;
+    }) => {
       return alertExecutor({
         ...createDefaultAlertExecutorOptions({
           params,
@@ -147,6 +158,7 @@ export const createRuleTypeMocks = (
           state: {},
           logger: loggerMock,
         }),
+        ...(previousStartedAt !== undefined ? { previousStartedAt } : {}),
         runOpts: {
           completeRule: getCompleteRuleMock(params as QueryRuleParams),
         },

@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
+import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import {
   ALERT_INSTANCE_ID,
   ALERT_RULE_UUID,
@@ -23,6 +23,7 @@ export default function bulkMuteUnmuteTests({ getService }: FtrProviderContext) 
   const es = getService('es');
   const retry = getService('retry');
   const supertest = getService('supertest');
+  const esTestIndexTool = new ESTestIndexTool(es, retry);
 
   describe('bulkMuteUnmute', () => {
     const objectRemover = new ObjectRemover(supertest);
@@ -63,11 +64,11 @@ export default function bulkMuteUnmuteTests({ getService }: FtrProviderContext) 
       return alerts;
     };
 
-    const waitForAlerts = async (ruleId: string): Promise<any[]> => {
+    const waitForAlerts = async (ruleId: string, minimumAlertCount = 1): Promise<any[]> => {
       let alerts: any[] = [];
       await retry.try(async () => {
         alerts = await getActiveAlertsByRuleId(ruleId);
-        expect(alerts.length).greaterThan(0);
+        expect(alerts.length).greaterThan(minimumAlertCount - 1);
       });
       return alerts;
     };
@@ -92,7 +93,11 @@ export default function bulkMuteUnmuteTests({ getService }: FtrProviderContext) 
         .set('kbn-xsrf', 'foo')
         .send({ rules });
 
-    afterEach(async () => {
+    before(async () => {
+      await esTestIndexTool.setup();
+    });
+
+    after(async () => {
       await es.deleteByQuery({
         index: alertAsDataIndex,
         query: { match_all: {} },
@@ -100,6 +105,7 @@ export default function bulkMuteUnmuteTests({ getService }: FtrProviderContext) 
         ignore_unavailable: true,
       });
       await objectRemover.removeAll();
+      await esTestIndexTool.destroy();
     });
 
     describe('bulk mute', () => {
@@ -161,7 +167,7 @@ export default function bulkMuteUnmuteTests({ getService }: FtrProviderContext) 
 
       it('should mute multiple alert instances for a single rule', async () => {
         const ruleId = await createRule();
-        const alerts = await waitForAlerts(ruleId);
+        const alerts = await waitForAlerts(ruleId, 2);
 
         expect(alerts.length).greaterThan(1);
 

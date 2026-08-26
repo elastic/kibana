@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import { v4 as uuidv4 } from 'uuid';
 import type { Logger } from '@kbn/logging';
 import type { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
@@ -190,6 +191,48 @@ function getCumulativeFiringRuleType() {
     },
     validate: {
       params: schema.any(),
+    },
+  };
+  return result;
+}
+
+function getConsumerMetricsRuleType() {
+  const paramsSchema = schema.object({
+    index: schema.string(),
+    reference: schema.string(),
+  });
+  type ParamsType = TypeOf<typeof paramsSchema>;
+  const result: RuleType<ParamsType, never, {}, {}, {}, 'default'> = {
+    id: 'test.consumer-metrics',
+    name: 'Test: Consumer metrics',
+    actionGroups: [{ id: 'default', name: 'Default' }],
+    category: 'kibana',
+    producer: 'alertsFixture',
+    solution: 'stack',
+    defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
+    isExportable: true,
+    autoRecoverAlerts: false,
+    async executor({ services, params }) {
+      services.ruleMonitoringService?.setMetrics({
+        alerts_candidate_count: 90357,
+        alerts_suppressed_count: 42,
+        total_indexing_duration_ms: 987,
+        total_enrichment_duration_ms: 654,
+        frozen_indices_queried_count: 3,
+      });
+      await services.scopedClusterClient.asCurrentUser.index({
+        index: params.index,
+        refresh: 'wait_for',
+        document: {
+          reference: params.reference,
+          source: 'alert:test.consumer-metrics',
+        },
+      });
+      return { state: {} };
+    },
+    validate: {
+      params: paramsSchema,
     },
   };
   return result;
@@ -441,6 +484,7 @@ function getAuthorizationRuleType(core: CoreSetup<FixtureStartDeps>) {
 function getValidationRuleType() {
   const paramsSchema = schema.object({
     param1: schema.string(),
+    param2: schema.maybe(schema.boolean()),
   });
   type ParamsType = TypeOf<typeof paramsSchema>;
   const result: RuleType<ParamsType, never, {}, {}, {}, 'default'> = {
@@ -460,6 +504,17 @@ function getValidationRuleType() {
     defaultActionGroupId: 'default',
     validate: {
       params: paramsSchema,
+    },
+    authorize: {
+      params: {
+        // Exercises the framework's params authorization hook: schema validation
+        // passes, but setting `param2` makes authorization throw.
+        authorize: async (params) => {
+          if (params.param2) {
+            throw Boom.forbidden('Not authorized to set param2');
+          }
+        },
+      },
     },
     async executor() {
       return { state: {} };
@@ -552,6 +607,16 @@ function getPatternFiringAlertsAsDataRuleType() {
       schema.string(),
       schema.arrayOf(schema.oneOf([schema.boolean(), schema.string()]))
     ),
+    // Per-instance severity values indexed by run number (patternIndex).
+    // When provided, the value at position [patternIndex] is emitted as
+    // `kibana.alert.severity` in the alert payload for that run.
+    severityPattern: schema.maybe(
+      schema.recordOf(schema.string(), schema.arrayOf(schema.maybe(schema.string())))
+    ),
+    // Tests that need an empty `cleanedPayload` on the run that recovers an
+    // alert (e.g. to assert the alert builder falls back to the predecessor
+    // doc) can opt out of the default recovery payload.
+    setRecoveryPayload: schema.maybe(schema.boolean()),
   });
   type ParamsType = TypeOf<typeof paramsSchema>;
   interface State extends RuleTypeState {
@@ -565,7 +630,7 @@ function getPatternFiringAlertsAsDataRuleType() {
     {},
     'default',
     'recovered',
-    { patternIndex: number; instancePattern: boolean[] }
+    { patternIndex: number; instancePattern: boolean[]; 'kibana.alert.severity'?: string }
   > = {
     id: 'test.patternFiringAad',
     name: 'Test: Firing on a Pattern and writing Alerts as Data',
@@ -606,29 +671,38 @@ function getPatternFiringAlertsAsDataRuleType() {
       // fire if pattern says to
       for (const [instanceId, instancePattern] of Object.entries(pattern)) {
         const scheduleByPattern = instancePattern[patternIndex];
+        const severity = params.severityPattern?.[instanceId]?.[patternIndex];
+        const severityField: { 'kibana.alert.severity'?: string } =
+          severity !== undefined && severity !== null ? { 'kibana.alert.severity': severity } : {};
         if (scheduleByPattern === true) {
           alertsClient.report({
             id: instanceId,
             actionGroup: 'default',
             state: { patternIndex },
-            payload: { patternIndex, instancePattern: instancePattern as boolean[] },
+            payload: {
+              patternIndex,
+              instancePattern: instancePattern as boolean[],
+              ...severityField,
+            },
           });
         } else if (typeof scheduleByPattern === 'string') {
           alertsClient.report({
             id: instanceId,
             actionGroup: 'default',
             state: { patternIndex },
-            payload: { patternIndex, instancePattern: [true] },
+            payload: { patternIndex, instancePattern: [true], ...severityField },
           });
         }
       }
 
       // set recovery payload
-      for (const recoveredAlert of alertsClient.getRecoveredAlerts()) {
-        alertsClient.setAlertData({
-          id: recoveredAlert.alert.getId(),
-          payload: { patternIndex: -1, instancePattern: [] },
-        });
+      if (params.setRecoveryPayload !== false) {
+        for (const recoveredAlert of alertsClient.getRecoveredAlerts()) {
+          alertsClient.setAlertData({
+            id: recoveredAlert.alert.getId(),
+            payload: { patternIndex: -1, instancePattern: [] },
+          });
+        }
       }
 
       return {
@@ -1750,6 +1824,7 @@ export function defineRuleTypes(
 
   alerting.registerType(getAlwaysFiringRuleType());
   alerting.registerType(getCumulativeFiringRuleType());
+  alerting.registerType(getConsumerMetricsRuleType());
   alerting.registerType(getNeverFiringRuleType());
   alerting.registerType(getFailingRuleType());
   alerting.registerType(getValidationRuleType());

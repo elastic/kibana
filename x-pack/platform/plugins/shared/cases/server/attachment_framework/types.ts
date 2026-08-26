@@ -6,37 +6,46 @@
  */
 
 import type { PersistableState, PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
-import type { PersistableStateAttachmentPayload } from '../../common/types/domain';
+import type { z } from '@kbn/zod/v4';
+import type {
+  UnifiedAttachmentPayload,
+  UnifiedReferenceAttachmentPayload,
+  UnifiedValueAttachmentPayload,
+} from '../../common/types/domain/attachment/v2';
 
-export type PersistableStateAttachmentState = Pick<
-  PersistableStateAttachmentPayload,
-  'persistableStateAttachmentTypeId' | 'persistableStateAttachmentState'
->;
+/**
+ * Unified attachment state for server-side persistence
+ * Can be either reference-based (has attachmentId) or value-based (has data)
+ */
+export type UnifiedAttachmentState = Pick<UnifiedAttachmentPayload, 'type' | 'metadata'> &
+  (
+    | Pick<UnifiedReferenceAttachmentPayload, 'attachmentId'>
+    | Pick<UnifiedValueAttachmentPayload, 'data'>
+  );
 
-export interface PersistableStateAttachmentType
-  extends Omit<PersistableState<PersistableStateAttachmentState>, 'migrations'> {
+export interface UnifiedAttachmentType
+  extends Omit<PersistableState<UnifiedAttachmentState>, 'migrations' | 'inject' | 'extract'> {
   id: string;
-}
-
-export interface PersistableStateAttachmentTypeSetup
-  extends Omit<PersistableStateDefinition<PersistableStateAttachmentState>, 'migrations'> {
-  id: string;
-}
-
-export interface ExternalReferenceAttachmentType {
-  id: string;
+  /** Full-payload zod schema. Sole validation source for unified attachments. */
+  schema: z.ZodType;
   /**
-   * A function to validate data stored with the attachment type. This function should throw an error
-   * if the data is not in the form it expects.
+   * Schema exposed to workflow authors. When unset, workflow steps fall back to
+   * `schema` if it is a Zod object; when `false`, the type is excluded.
    */
-  schemaValidator?: (data: unknown) => void;
+  workflowSchema?: z.ZodObject | false;
+}
+
+export interface UnifiedAttachmentTypeSetup
+  extends Omit<
+    PersistableStateDefinition<UnifiedAttachmentState>,
+    'migrations' | 'inject' | 'extract'
+  > {
+  id: string;
+  /** Full-payload zod schema. Sole validation source for unified attachments. */
+  schema: z.ZodType;
+  workflowSchema?: z.ZodObject | false;
 }
 
 export interface AttachmentFramework {
-  registerExternalReference: (
-    externalReferenceAttachmentType: ExternalReferenceAttachmentType
-  ) => void;
-  registerPersistableState: (
-    persistableStateAttachmentType: PersistableStateAttachmentTypeSetup
-  ) => void;
+  registerAttachment: (attachmentType: UnifiedAttachmentTypeSetup) => void;
 }

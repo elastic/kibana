@@ -8,6 +8,7 @@
 import React, { type FC, useState, useCallback, useMemo } from 'react';
 import { uniqBy } from 'lodash';
 import { EuiFilterButton, EuiPanel, EuiPopover } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CustomComponentProps } from '@elastic/eui/src/components/search_bar/filters/custom_component_filter';
 import { MlEntitySelector, type MlEntitySelectorProps } from '../../components/ml_entity_selector';
@@ -57,7 +58,7 @@ export const EntityFilter: FC<CustomComponentProps> = React.memo(({ query, onCha
 
   const button = (
     <EuiFilterButton
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="right"
       onClick={setIsOpen.bind(null, (prev) => !prev)}
       isSelected={isOpen}
@@ -76,6 +77,9 @@ export const EntityFilter: FC<CustomComponentProps> = React.memo(({ query, onCha
       closePopover={closePopover}
       panelPaddingSize="none"
       anchorPosition="downCenter"
+      aria-label={i18n.translate('xpack.ml.notifications.entityFilter.popoverAriaLabel', {
+        defaultMessage: 'Entity filter',
+      })}
     >
       <EuiPanel paddingSize="s" css={{ width: '300px' }}>
         <MlEntitySelector

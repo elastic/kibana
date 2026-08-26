@@ -6,18 +6,13 @@
  */
 
 import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
-import type { IBasePath, Logger } from '@kbn/core/server';
-import type { IRuleDataService } from '@kbn/rule-registry-plugin/server';
-import type { CustomThresholdLocators } from '@kbn/observability-plugin/server';
+import type { IBasePath } from '@kbn/core/server';
 import { sloBurnRateRuleType } from './slo_burn_rate';
 
 export function registerBurnRateRule(
   alertingPlugin: AlertingServerSetup,
   basePath: IBasePath,
-  logger: Logger,
-  ruleDataService: IRuleDataService,
-  locators: CustomThresholdLocators // TODO move this somewhere else, or use only alertsLocator
+  isCpsEnabled: boolean = false
 ) {
-  // SLO RULE
-  alertingPlugin.registerType(sloBurnRateRuleType(basePath, locators.alertsLocator));
+  alertingPlugin.registerType(sloBurnRateRuleType(basePath, isCpsEnabled));
 }

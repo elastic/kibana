@@ -10,9 +10,11 @@ import type { IRouter, Logger, StartServicesAccessor } from '@kbn/core/server';
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import { i18n } from '@kbn/i18n';
 import axios from 'axios';
+import { API_BASE_PATH } from '../../common/constants';
 import { CloudConnectClient } from '../services/cloud_connect_client';
 import { createStorageService } from '../lib/create_storage_service';
 import { enableInferenceCCM, disableInferenceCCM } from '../services/inference_ccm';
+import { CLOUD_CONNECT_READ_SECURITY, CLOUD_CONNECT_MANAGE_SECURITY } from './route_security';
 
 interface CloudConnectedStartDeps {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
@@ -34,14 +36,8 @@ export const registerClustersRoute = ({
 }: ClustersRouteOptions) => {
   router.get(
     {
-      path: '/internal/cloud_connect/cluster_details',
-      security: {
-        authz: {
-          enabled: false,
-          reason:
-            'This route delegates to the Cloud Connect API for authentication and authorization.',
-        },
-      },
+      path: `${API_BASE_PATH}/cluster_details`,
+      security: CLOUD_CONNECT_READ_SECURITY,
       validate: false,
       options: {
         access: 'internal',
@@ -139,14 +135,8 @@ export const registerClustersRoute = ({
 
   router.delete(
     {
-      path: '/internal/cloud_connect/cluster',
-      security: {
-        authz: {
-          enabled: false,
-          reason:
-            'This route delegates to the Cloud Connect API for authentication and authorization.',
-        },
-      },
+      path: `${API_BASE_PATH}/cluster`,
+      security: CLOUD_CONNECT_MANAGE_SECURITY,
       validate: false,
       options: {
         access: 'internal',
@@ -213,18 +203,12 @@ export const registerClustersRoute = ({
 
   router.put(
     {
-      path: '/internal/cloud_connect/cluster_details',
-      security: {
-        authz: {
-          enabled: false,
-          reason:
-            'This route delegates to the Cloud Connect API for authentication and authorization.',
-        },
-      },
+      path: `${API_BASE_PATH}/cluster_details`,
+      security: CLOUD_CONNECT_MANAGE_SECURITY,
       validate: {
         body: schema.object({
           services: schema.recordOf(
-            schema.string(),
+            schema.string({ maxLength: 256 }),
             schema.object({
               enabled: schema.boolean(),
             })

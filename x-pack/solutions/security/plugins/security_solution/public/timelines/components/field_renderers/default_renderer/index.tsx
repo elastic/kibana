@@ -7,6 +7,7 @@
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPopover } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Spacer } from '../../../../common/components/page';
 import { CellActionsRenderer } from '../../../../common/components/cell_actions/cell_actions_renderer';
@@ -27,6 +28,10 @@ interface DefaultFieldRendererProps {
 /** The default max-height of the popover used to show "+n More" items (e.g. `+9 More`) */
 export const DEFAULT_MORE_MAX_HEIGHT = '200px';
 
+/** Normalizes a value to string[] for use as rowItems (ES fields can be single value or array). */
+export const toFieldRendererItems = (value: string | string[] | null | undefined): string[] =>
+  Array.isArray(value) ? value : value != null ? [value] : [];
+
 export const DefaultFieldRendererComponent: React.FC<DefaultFieldRendererProps> = ({
   attrName,
   displayCount = 1,
@@ -36,8 +41,9 @@ export const DefaultFieldRendererComponent: React.FC<DefaultFieldRendererProps> 
   rowItems,
   scopeId,
 }) => {
-  if (rowItems != null && rowItems.length > 0) {
-    const draggables = rowItems.slice(0, displayCount).map((rowItem, index) => {
+  const items = Array.isArray(rowItems) ? rowItems : rowItems != null ? [rowItems] : [];
+  if (items.length > 0) {
+    const draggables = items.slice(0, displayCount).map((rowItem, index) => {
       const id = escapeDataProviderId(
         `default-field-renderer-default-draggable-${idPrefix}-${attrName}-${rowItem}`
       );
@@ -74,7 +80,7 @@ export const DefaultFieldRendererComponent: React.FC<DefaultFieldRendererProps> 
             moreMaxHeight={moreMaxHeight}
             overflowIndexStart={displayCount}
             render={render}
-            rowItems={rowItems}
+            rowItems={items}
             scopeId={scopeId}
           />
         </EuiFlexItem>
@@ -130,6 +136,12 @@ export const DefaultFieldRendererOverflow = React.memo<DefaultFieldRendererOverf
         {rowItems.length > overflowIndexStart && (
           <EuiPopover
             id="popover"
+            aria-label={i18n.translate(
+              'xpack.securitySolution.fieldRenderers.moreValuesPopoverAriaLabel',
+              {
+                defaultMessage: 'Additional field values',
+              }
+            )}
             button={button}
             isOpen={isOpen}
             closePopover={togglePopover}

@@ -71,6 +71,22 @@ describe('useViewInAiAssistant', () => {
     expect(result.current.disabled).toBe(true);
   });
 
+  it('returns isAssistantVisible: false when the assistant is not visible', () => {
+    (useAssistantAvailability as jest.Mock).mockReturnValue({
+      hasAssistantPrivilege: true,
+      isAssistantEnabled: true,
+      isAssistantVisible: false,
+    });
+
+    const { result } = renderHook(() =>
+      useViewInAiAssistant({
+        attackDiscovery: mockAttackDiscovery,
+      })
+    );
+
+    expect(result.current.isAssistantVisible).toBe(false);
+  });
+
   it('returns disabled: true when promptContextId is null', () => {
     (useAssistantOverlay as jest.Mock).mockReturnValue({
       promptContextId: null, // <-- promptContextId is null
