@@ -26,7 +26,11 @@ import {
   type KIFeatureExclusionScenario,
 } from '../../src/datasets';
 import { createExcludeSemanticEvaluator } from '../../src/evaluators/ki_feature_exclusion/evaluators';
-import { initialFeatureCountEvaluator } from '../../src/evaluators/ki_feature_exclusion/initial_feature_count';
+import {
+  initialFeatureCountEvaluator,
+  followUpReturnedCountEvaluator,
+  followUpRetainedCountEvaluator,
+} from '../../src/evaluators/ki_feature_exclusion/feature_counts';
 import { createReportedTokenEvaluators } from '../../src/evaluators/reported_tokens';
 import { buildAvailableSnapshotsBySource } from '../shared';
 import { runExcludeExperiment } from './run_exclude_experiment';
@@ -151,6 +155,8 @@ evaluate.describe(
               [
                 createExcludeSemanticEvaluator({ inferenceClient: evaluatorInferenceClient }),
                 initialFeatureCountEvaluator,
+                followUpReturnedCountEvaluator,
+                followUpRetainedCountEvaluator,
                 ...createReportedTokenEvaluators(),
                 evaluators.traceBasedEvaluators.inputTokens,
                 evaluators.traceBasedEvaluators.outputTokens,

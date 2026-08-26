@@ -13,12 +13,14 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiLoadingSpinner,
+  EuiSpacer,
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { InvestigationHypothesis } from '@kbn/significant-events-schema';
+import { EvidenceList, type EvidenceListProps } from './evidence_list';
 
 const HYPOTHESIS_STATUS_ICON: Record<InvestigationHypothesis['status'], string> = {
   investigating: 'clock',
@@ -26,10 +28,11 @@ const HYPOTHESIS_STATUS_ICON: Record<InvestigationHypothesis['status'], string> 
   confirmed: 'checkCircle',
 };
 
-export const HypothesisRow: React.FC<{ hypothesis: InvestigationHypothesis }> = ({
-  hypothesis,
-}) => {
-  const { candidate, confidence, status, reason } = hypothesis;
+export const HypothesisRow: React.FC<{
+  hypothesis: InvestigationHypothesis;
+  getQueryHref?: EvidenceListProps['getQueryHref'];
+}> = ({ hypothesis, getQueryHref }) => {
+  const { candidate, confidence, status, reason, evidence } = hypothesis;
   const accordionId = useGeneratedHtmlId({ prefix: 'investigationHypothesis' });
 
   return (
@@ -84,6 +87,13 @@ export const HypothesisRow: React.FC<{ hypothesis: InvestigationHypothesis }> = 
             })}
         </p>
       </EuiText>
+
+      {evidence?.length ? (
+        <>
+          <EuiSpacer size="s" />
+          <EvidenceList evidence={evidence} getQueryHref={getQueryHref} />
+        </>
+      ) : null}
     </EuiAccordion>
   );
 };

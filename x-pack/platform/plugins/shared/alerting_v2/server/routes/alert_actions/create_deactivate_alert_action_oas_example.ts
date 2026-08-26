@@ -7,7 +7,7 @@
 
 import type { CreateDeactivateAlertActionBody } from '@kbn/alerting-v2-schemas';
 import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
-import { ALERTING_V2_ERROR_CODES } from '../../lib/errors/error_codes';
+import { ALERTING_ERROR_CODES } from '../../lib/errors/error_codes';
 import { getCannotDeactivateEpisodeMessage } from '../../lib/errors/alert_error_messages';
 import { buildOasOperation, invalidResponseExample } from '../oas_utils';
 import type { AlertingOasOperationObject } from '../oas_types';
@@ -23,7 +23,7 @@ export const CREATE_DEACTIVATE_ALERT_ACTION_REQUEST: CreateDeactivateAlertAction
 
 const INVALID_DEACTIVATE_STATE_TRANSITION_RESPONSE = invalidResponseExample({
   summary: 'Cannot deactivate an already-inactive episode',
-  code: ALERTING_V2_ERROR_CODES.INVALID_EPISODE_STATE_TRANSITION,
+  code: ALERTING_ERROR_CODES.INVALID_EPISODE_STATE_TRANSITION,
   message: getCannotDeactivateEpisodeMessage(SAMPLE_EPISODE_ID),
   details: {
     group_hash: SAMPLE_GROUP_HASH,

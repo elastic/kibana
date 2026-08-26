@@ -8,6 +8,7 @@
 import type { BaseMessageLike } from '@langchain/core/messages';
 import type { ResolvedAgentCapabilities } from '@kbn/agent-builder-common';
 import type { ToolManager } from '@kbn/agent-builder-server/runner';
+import type { ConversationTemplatesService } from '@kbn/agent-builder-server/runner/conversation_templates_service';
 import type { ExperimentalFeatures } from '@kbn/agent-builder-server';
 import type { RendererTypeDefinition } from '@kbn/agent-builder-server/renderers';
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
@@ -15,10 +16,16 @@ import type { ResolvedConfiguration } from '../types';
 import type { ProcessedConversation } from '../utils/prepare_conversation';
 import type { ToolCallResultTransformer } from '../utils/tool_summarization';
 import type { ResearchAgentAction, AnswerAgentAction } from '../actions';
+import type { RelevantSkillSelection } from '../utils/relevant_skills/select_relevant_skills';
 
 export interface PromptFactoryParams {
   configuration: ResolvedConfiguration;
   capabilities: ResolvedAgentCapabilities;
+  /**
+   * Kibana space the conversation runs in. It never changes mid-conversation, so naming it in the
+   * system prompt does not break prompt caching.
+   */
+  spaceId: string;
   processedConversation: ProcessedConversation;
   skills: InternalSkillDefinition[];
   /**
@@ -34,6 +41,15 @@ export interface PromptFactoryParams {
   conversationTimestamp: string;
   experimentalFeatures: ExperimentalFeatures;
   renderers: RendererTypeDefinition[];
+  /**
+   * Effective on/off for context-aware skill filtering this run: the `relevantSkills` flag AND a
+   * dedicated fast model being configured. Gates the SKILLS section (static pointer vs full list) and
+   * the `<relevant_skills>` notification — distinct from `experimentalFeatures.relevantSkills`, which
+   * is only the flag.
+   */
+  relevantSkillsEnabled: boolean;
+  relevantSkills?: RelevantSkillSelection;
+  conversationTemplates: ConversationTemplatesService;
 }
 
 export interface ResearchAgentPromptRuntimeParams {

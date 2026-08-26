@@ -17,6 +17,12 @@ import { markExecutionFailedTaskRecovery, taskRecoveryMessages } from '../lib/ta
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 
+export interface CheckAndSkipScheduledExecutionResult {
+  skipped: boolean;
+  /** Present when this tick skipped (HITL wait or newly created SKIPPED execution). */
+  workflowExecutionId?: string;
+}
+
 export interface CheckExistingScheduledExecutionOptions {
   /**
    * When true (default), create a SKIPPED execution if another scheduled run
@@ -59,7 +65,7 @@ export interface CheckExistingScheduledExecutionOptions {
  *
  * - If execution's `taskRunAt` differs from current task's `runAt` (in-flight work):
  *   → When `createSkippedForInFlightDuplicates` is true: skip current run (create SKIPPED)
- *   → When false: return false so the concurrency check governs overlap
+ *   → When false: return not-skipped so the concurrency check governs overlap
  *
  * Note: Retries of the same scheduled run will have the same `runAt` but different `startedAt`.
  * This is why we use `runAt` instead of `startedAt` for comparison.
@@ -73,7 +79,7 @@ export async function checkAndSkipIfExistingScheduledExecution(
   currentTaskInstance: ConcreteTaskInstance,
   logger: Logger,
   options: CheckExistingScheduledExecutionOptions = {}
-): Promise<boolean> {
+): Promise<CheckAndSkipScheduledExecutionResult> {
   const { createSkippedForInFlightDuplicates = true, hasActiveTaskForExecution } = options;
 
   // Check if there's already a scheduled workflow execution in non-terminal state
@@ -86,7 +92,7 @@ export async function checkAndSkipIfExistingScheduledExecution(
   if (runningExecutions.length > 0) {
     const existingExecution = runningExecutions[0]?._source;
     if (!existingExecution) {
-      return false;
+      return { skipped: false };
     }
 
     const currentTaskRunAt = currentTaskInstance.runAt
@@ -111,7 +117,7 @@ export async function checkAndSkipIfExistingScheduledExecution(
         logger.warn(
           `Stale scheduled retry for execution ${existingExecution.id} (taskRunAt: ${executionTaskRunAt}) is waiting_for_input - skipping duplicate scheduled invocation (human resume only)`
         );
-        return true;
+        return { skipped: true, workflowExecutionId: existingExecution.id };
       }
 
       logger.warn(
@@ -125,7 +131,7 @@ export async function checkAndSkipIfExistingScheduledExecution(
           message: taskRecoveryMessages.scheduledStale,
         }
       );
-      return false;
+      return { skipped: false };
     }
 
     // Never-started orphan from a prior schedule claim - free the slot and proceed
@@ -164,7 +170,7 @@ export async function checkAndSkipIfExistingScheduledExecution(
           },
           { refresh: 'wait_for' }
         );
-        return false;
+        return { skipped: false };
       }
     }
 
@@ -173,15 +179,16 @@ export async function checkAndSkipIfExistingScheduledExecution(
         `Deferring in-flight scheduled overlap for workflow ${workflow.id} to concurrency check ` +
           `(existing execution ${existingExecution.id}, taskRunAt: ${executionTaskRunAt}, current taskRunAt: ${currentTaskRunAt})`
       );
-      return false;
+      return { skipped: false };
     }
 
     logger.debug(
       `Skipping scheduled workflow ${workflow.id} execution - found existing non-terminal scheduled execution ${existingExecution.id} (taskRunAt: ${executionTaskRunAt}, current taskRunAt: ${currentTaskRunAt})`
     );
     const workflowCreatedAt = new Date();
+    const skippedExecutionId = generateUuid();
     const skippedExecution: Partial<EsWorkflowExecution> = {
-      id: generateUuid(),
+      id: skippedExecutionId,
       spaceId,
       workflowId: workflow.id,
       ...pickManagedWorkflowFields(workflow),
@@ -209,8 +216,8 @@ export async function checkAndSkipIfExistingScheduledExecution(
       cancelledBy: 'system',
     };
     await workflowExecutionRepository.createWorkflowExecution(skippedExecution);
-    return true;
+    return { skipped: true, workflowExecutionId: skippedExecutionId };
   }
 
-  return false;
+  return { skipped: false };
 }

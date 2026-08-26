@@ -368,6 +368,7 @@ export const ConversationSettingsMenu: React.FC<Params> = React.memo(
     return (
       <>
         <EuiPopover
+          aria-label={i18n.CONVO_ASSISTANT_MENU}
           button={
             <EuiToolTip content={i18n.CONVO_ASSISTANT_MENU} disableScreenReaderOutput>
               <EuiButtonIcon

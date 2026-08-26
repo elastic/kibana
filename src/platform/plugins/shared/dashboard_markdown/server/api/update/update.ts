@@ -40,7 +40,7 @@ export async function update(
 
   // Create path
   if (isNewLibraryItem) {
-    asCodeIdSchema.validate(id);
+    asCodeIdSchema.parse(id);
     const body = await create(requestCtx, updateBody, id);
     return { body, operation: 'create' };
   }

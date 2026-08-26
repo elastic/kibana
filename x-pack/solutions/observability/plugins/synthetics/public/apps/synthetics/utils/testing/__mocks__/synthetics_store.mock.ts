@@ -116,6 +116,11 @@ export const mockState: SyntheticsAppState = {
     error: null,
     data: null,
   },
+  agentStats: {
+    loading: false,
+    error: null,
+    data: null,
+  },
   privateLocations: {
     isPrivateLocationFlyoutVisible: false,
     loading: false,
@@ -165,7 +170,6 @@ export const mockState: SyntheticsAppState = {
     loading: false,
     error: null,
   },
-  maintenanceWindows: {},
   monitorHealth: {
     data: null,
     loading: false,

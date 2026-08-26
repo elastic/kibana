@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils';
 import type { ResultEdges } from '../../common/search_strategy';
-import { getAgentIdFromFields } from '../../common/utils/agent_fields';
+import { getAgentIdFromFields, getAgentNameFromFields } from '../../common/utils/agent_fields';
 
 interface TransformStatusEdgesOptions {
   edges: ResultEdges;
@@ -53,7 +53,9 @@ export function transformStatusEdgesToRecords({
 }: TransformStatusEdgesOptions): DataTableRecord[] {
   return edges.map((edge, index) => {
     const agentId = getAgentIdFromFields(edge.fields) ?? '';
-    const agentName = agentNameMap.get(agentId) || agentId;
+    // Fleet only knows agents enrolled in this project, so a response fanned in
+    // from a linked project falls back to the hostname on the response doc.
+    const agentName = agentNameMap.get(agentId) || getAgentNameFromFields(edge.fields) || agentId;
     const status = computeStatus(edge, expired, error);
 
     const source = (edge._source ?? {}) as Record<string, unknown>;

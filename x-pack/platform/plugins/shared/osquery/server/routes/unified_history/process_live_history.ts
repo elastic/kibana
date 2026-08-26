@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { Logger, KibanaRequest } from '@kbn/core/server';
 import type { LiveHistoryRow } from '../../../common/api/unified_history/types';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { getResultCountsForActions } from '../../lib/get_result_counts_for_actions';
+import { getReadEsClient } from '../../utils/get_read_es_client';
 import { mapLiveHitToRow } from './map_live_hit_to_row';
 import type { LiveActionHit } from './map_live_hit_to_row';
 import type { SortValues } from './query_live_actions_dsl';
@@ -16,6 +17,7 @@ import type { SortValues } from './query_live_actions_dsl';
 export interface ProcessLiveHistoryParams {
   liveHits: LiveActionHit[];
   osqueryContext: OsqueryAppContext;
+  request: KibanaRequest;
   spaceId: string;
   integrationNamespaces?: readonly string[];
   ccsEnabled?: boolean;
@@ -37,6 +39,7 @@ const collectSubActionIds = (hit: LiveActionHit): string[] => {
 export const processLiveHistory = async ({
   liveHits,
   osqueryContext,
+  request,
   spaceId,
   integrationNamespaces,
   ccsEnabled = false,
@@ -61,6 +64,7 @@ export const processLiveHistory = async ({
         liveHits,
         liveRows,
         osqueryContext,
+        request,
         spaceId,
         integrationNamespaces,
         ccsEnabled
@@ -77,6 +81,7 @@ const enrichWithResultCounts = async (
   liveHits: LiveActionHit[],
   liveRows: LiveHistoryRow[],
   osqueryContext: OsqueryAppContext,
+  request: KibanaRequest,
   spaceId: string,
   integrationNamespaces: readonly string[] | undefined,
   ccsEnabled: boolean
@@ -87,9 +92,13 @@ const enrichWithResultCounts = async (
   if (uniqueActionIds.length === 0) return;
 
   const [coreStart] = await osqueryContext.getStartServices();
-  const internalEsClient = coreStart.elasticsearch.client.asInternalUser;
+  const readEsClient = getReadEsClient(
+    coreStart.elasticsearch.client,
+    request,
+    osqueryContext.cpsEnabled
+  );
   const resultCountsMap = await getResultCountsForActions(
-    internalEsClient,
+    readEsClient,
     uniqueActionIds,
     spaceId,
     integrationNamespaces,

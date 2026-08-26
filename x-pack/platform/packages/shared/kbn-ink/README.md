@@ -24,9 +24,3 @@ async function renderApp() {
 ## `Menu`
 
 A simple menu component that renders a list of options, and can be navigated with the keyboard. Can be imported from `@kbn/ink/menu`.
-
-## `@kbn/ink/router`
-
-Exports an `ink`-compatible router, and a `RouteMenu` component, that can be used to create hierarchical menus and deeplinking. Can be imported from `@kbn/ink/router`.
-
-[@kbn/ink/router README.md](./src/router/README.md) for more.

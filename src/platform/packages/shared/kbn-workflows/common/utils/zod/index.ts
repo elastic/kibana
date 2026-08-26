@@ -10,6 +10,7 @@
 export { getZodSchemaKeys } from './get_zod_schema_keys';
 export { getZodSchemaType } from './get_zod_schema_type';
 export { getShape } from './get_shape';
+export { unwrapSchema } from './unwrap_schema';
 export { getZodObjectProperty } from './get_zod_object_property';
 export { getZodObjectFromProperty } from './get_zod_object_from_property';
 export { getZodLooseObjectFromProperty } from './get_zod_loose_object_from_property';

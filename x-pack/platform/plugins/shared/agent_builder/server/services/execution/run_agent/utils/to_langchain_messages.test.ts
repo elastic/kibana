@@ -36,7 +36,9 @@ describe('convertPreviousRounds', () => {
   const makeRoundInput = (
     message: string,
     attachments: ProcessedAttachment[] = [],
-    overrides: Partial<Pick<ProcessedRoundInput, 'attachment_refs' | 'attachment_context'>> = {}
+    overrides: Partial<
+      Pick<ProcessedRoundInput, 'attachment_refs' | 'attachment_context' | 'author'>
+    > = {}
   ): ProcessedRoundInput => ({
     message,
     attachments,
@@ -141,6 +143,89 @@ describe('convertPreviousRounds', () => {
     expect(result).toHaveLength(1);
     expect(isHumanMessage(result[0])).toBe(true);
     expect(result[0].content).toBe(`[Sent: ${formatDate(now)}]\n\nhello`);
+  });
+
+  it('includes the author in the next-input prefix when provided', async () => {
+    const nextInput = makeRoundInput('hello', [], { author: { id: 'u1', username: 'alice' } });
+    const result = await convertPreviousRounds({
+      conversation: createConversation({ nextInput }),
+      conversationTimestamp: now,
+    });
+    expect(result).toHaveLength(1);
+    expect(isHumanMessage(result[0])).toBe(true);
+    expect(result[0].content).toBe(`[User: alice — Sent: ${formatDate(now)}]\n\nhello`);
+  });
+
+  it('emits a user-only prefix when the author is provided without a timestamp', async () => {
+    const nextInput = makeRoundInput('hello', [], { author: { id: 'u1', username: 'alice' } });
+    const result = await convertPreviousRounds({
+      conversation: createConversation({ nextInput }),
+    });
+    expect(result).toHaveLength(1);
+    expect(result[0].content).toBe(`[User: alice]\n\nhello`);
+  });
+
+  it('falls back to full_name then id when username is missing', async () => {
+    const nameOnlyInput = makeRoundInput('hello', [], {
+      author: { id: 'u1', full_name: 'Alice Smith' },
+    });
+    const nameOnlyResult = await convertPreviousRounds({
+      conversation: createConversation({ nextInput: nameOnlyInput }),
+    });
+    expect(nameOnlyResult[0].content).toBe(`[User: Alice Smith]\n\nhello`);
+
+    const idOnlyInput = makeRoundInput('hello', [], { author: { id: 'u1' } });
+    const idOnlyResult = await convertPreviousRounds({
+      conversation: createConversation({ nextInput: idOnlyInput }),
+    });
+    expect(idOnlyResult[0].content).toBe(`[User: u1]\n\nhello`);
+  });
+
+  it('emits the author carried by a previous round input', async () => {
+    const previousRounds = [
+      createRound({
+        id: 'round-1',
+        input: makeRoundInput('hi', [], { author: { id: 'u1', username: 'alice' } }),
+        response: makeAssistantResponse('hello!'),
+        started_at: now,
+      }),
+    ];
+    const nextInput = makeRoundInput('how are you?');
+    const result = await convertPreviousRounds({
+      conversation: createConversation({ previousRounds, nextInput }),
+    });
+
+    expect(result).toHaveLength(3);
+    expect(result[0].content).toBe(`[User: alice — Sent: ${formatDate(now)}]\n\nhi`);
+    expect(result[2].content).toBe('how are you?');
+  });
+
+  it('uses the pending round input (with its author) when an awaiting-prompt round is promoted to next input', async () => {
+    const pendingStartedAt = '2026-06-30T12:34:56.000Z';
+    const previousRounds = [
+      createRound({
+        id: 'round-1',
+        status: ConversationRoundStatus.awaitingPrompt,
+        input: makeRoundInput('original user request', [], {
+          author: { id: 'u1', username: 'alice' },
+        }),
+        started_at: pendingStartedAt,
+      }),
+    ];
+
+    const result = await convertPreviousRounds({
+      conversation: createConversation({
+        previousRounds,
+        nextInput: makeRoundInput('prompt answer', [], {
+          author: { id: 'u2', username: 'bob' },
+        }),
+      }),
+    });
+
+    expect(result).toHaveLength(1);
+    expect(result[0].content).toBe(
+      `[User: alice — Sent: ${formatDate(pendingStartedAt)}]\n\noriginal user request`
+    );
   });
 
   it('places the next-input date prefix above attachment XML', async () => {
@@ -1314,5 +1399,93 @@ describe('groupToolCallSteps', () => {
     expect(groups).toHaveLength(2);
     expect(groups[0]).toHaveLength(2);
     expect(groups[1]).toHaveLength(2);
+  });
+});
+
+describe('convertPreviousRounds — relevant_skills replay', () => {
+  const conversationWith = (steps: ConversationRoundStep[]): ProcessedConversation =>
+    ({
+      nextInput: { message: 'current', attachments: [] },
+      previousRounds: [
+        {
+          id: 'round-1',
+          status: ConversationRoundStatus.completed,
+          input: { message: 'user q', attachments: [] },
+          steps,
+          response: { message: 'assistant a' },
+          started_at: new Date().toISOString(),
+          time_to_first_token: 0,
+          time_to_last_token: 0,
+          model_usage: { connector_id: 'x', llm_calls: 1, input_tokens: 1, output_tokens: 1 },
+        },
+      ],
+      attachments: [],
+      attachmentTypes: [],
+      attachmentStateManager: createAttachmentStateManager([], {
+        getTypeDefinition: (type: string) =>
+          ({
+            id: type,
+            validate: (input: unknown) => ({ valid: true, data: input }),
+            format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
+          } as any),
+      }),
+    } as ProcessedConversation);
+
+  const relevantSkillsStep = (skills: Array<Record<string, unknown>>): ConversationRoundStep =>
+    ({
+      type: ConversationRoundStepType.relevantSkills,
+      source: 'implicit',
+      skills,
+    } as unknown as ConversationRoundStep);
+
+  it('replays a relevant_skills step as a <relevant_skills> user notification', async () => {
+    const result = await convertPreviousRounds({
+      conversation: conversationWith([
+        relevantSkillsStep([
+          {
+            id: 'a.b',
+            name: 'alpha',
+            path: '/skills/a/alpha/SKILL.md',
+            description: 'Alpha skill',
+            relevance_note: 'why alpha',
+          },
+        ]),
+      ]),
+    });
+
+    const noticeMessage = result
+      .filter(isHumanMessage)
+      .find((m) => (m.content as string).includes('<relevant_skills>'));
+    expect(noticeMessage).toBeDefined();
+    expect(noticeMessage?.name).toBe('relevant_skills');
+    const notice = noticeMessage?.content as string;
+    expect(notice).toContain('- alpha (/skills/a/alpha/SKILL.md): Alpha skill');
+    expect(notice).toContain('why alpha');
+  });
+
+  it('renders the notice between the round input and the assistant response', async () => {
+    const result = await convertPreviousRounds({
+      conversation: conversationWith([
+        relevantSkillsStep([
+          { id: 'a.b', name: 'alpha', path: '/p/SKILL.md', description: 'Alpha' },
+        ]),
+      ]),
+    });
+    const contents = result.map((m) => m.content as string);
+    const inputIdx = contents.findIndex((c) => c.includes('user q'));
+    const noticeIdx = contents.findIndex((c) => c.includes('<relevant_skills>'));
+    const responseIdx = contents.findIndex((c) => c.includes('assistant a'));
+    expect(inputIdx).toBeLessThan(noticeIdx);
+    expect(noticeIdx).toBeLessThan(responseIdx);
+  });
+
+  it('emits no notice for an empty relevant_skills step', async () => {
+    const result = await convertPreviousRounds({
+      conversation: conversationWith([relevantSkillsStep([])]),
+    });
+    const hasNotice = result
+      .filter(isHumanMessage)
+      .some((m) => (m.content as string).includes('<relevant_skills>'));
+    expect(hasNotice).toBe(false);
   });
 });

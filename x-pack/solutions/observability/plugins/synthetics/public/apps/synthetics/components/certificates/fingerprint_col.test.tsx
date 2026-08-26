@@ -28,18 +28,18 @@ describe('FingerprintCol', () => {
     configId: '123',
   } as Cert;
 
-  it('renders expected elements for valid props', async () => {
+  it('renders expected elements for valid props', () => {
     cert.not_after = moment().add('4', 'months').toISOString();
-    const { findByText, findByTestId } = render(
+    const { getByText, getByTestId } = render(
       <EuiThemeProvider>
         <FingerprintCol cert={cert} />
       </EuiThemeProvider>
     );
 
-    expect(await findByText('SHA 1')).toBeInTheDocument();
-    expect(await findByText('SHA 256')).toBeInTheDocument();
+    expect(getByText('SHA 1')).toBeInTheDocument();
+    expect(getByText('SHA 256')).toBeInTheDocument();
 
-    expect(await findByTestId(sha1)).toBeInTheDocument();
-    expect(await findByTestId(sha256)).toBeInTheDocument();
+    expect(getByTestId(sha1)).toBeInTheDocument();
+    expect(getByTestId(sha256)).toBeInTheDocument();
   });
 });

@@ -55,13 +55,17 @@ describe('dev/mocha/junit report generation', () => {
     const [testsuite] = report.testsuites.testsuite;
     expect(testsuite.$.time).toMatch(DURATION_REGEX);
     expect(testsuite.$.timestamp).toMatch(ISO_DATE_SEC_REGEX);
-    const expectedCommandLineMulitple =
+    const expectedCommandLineMultiple =
       'node scripts/jest --config src/platform/packages/shared/kbn-test/jest.config.js --runInBand --coverage=false --passWithNoTests';
+    const expectedMoonCommandLine =
+      'node scripts/jest.js --passWithNoTests --config src/platform/packages/shared/kbn-test/jest.config.js --maxWorkers=2 --json --passWithNoTests';
     const expectedCommandLineSingle = 'node node_modules/jest-worker/build/workers/processChild.js';
 
     expect(testsuite.$).toMatchObject({
       'command-line': expect.stringMatching(
-        new RegExp(`(${expectedCommandLineMulitple}|${expectedCommandLineSingle})`)
+        new RegExp(
+          `(${expectedCommandLineMultiple}|${expectedMoonCommandLine}|${expectedCommandLineSingle})`
+        )
       ),
       failures: '2',
       name: 'test',
@@ -129,5 +133,31 @@ describe('dev/mocha/junit report generation', () => {
       'system-out': ['-- logs are only reported for failed tests --'],
       skipped: [''],
     });
+  });
+
+  it('marks failures trailing a mocha timeout as cascading', async () => {
+    const xmlPath = getUniqueJunitReportPath(PROJECT_DIR, 'timeout');
+    const mocha = new Mocha({
+      reporter: function Runner(runner) {
+        setupJUnitReportGeneration(runner, {
+          reportName: 'timeout',
+          rootDirectory: PROJECT_DIR,
+        });
+      },
+    });
+
+    mocha.addFile(resolve(PROJECT_DIR, 'timeout.js'));
+    await new Promise((resolve) => mocha.run(resolve));
+    const report = await parseStringAsync(await readFile(xmlPath));
+
+    const [rootCause, cascading] = report.testsuites.testsuite[0].testcase;
+
+    expect(rootCause.failure[0]).toMatch(/Timeout of 1ms exceeded/);
+    expect(rootCause.$.name).toBe('TIMEOUT_SUITE "before all" hook: root cause for "never runs"');
+    expect(rootCause.$['cascading-failure']).toBeUndefined();
+
+    expect(cascading.failure[0]).toMatch(/Timeout of 1ms exceeded/);
+    expect(cascading.$.name).toBe('TIMEOUT_SUITE "after all" hook: cascading for "never runs"');
+    expect(cascading.$['cascading-failure']).toBe('true');
   });
 });

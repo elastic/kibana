@@ -245,6 +245,10 @@ Constraints this creates:
   limitation note below.
 - ❌ **Step-level `timeout`** on a branch step → rejected (wraps the step in a
   timeout-zone subgraph). Use the parallel step's `branch-timeout` instead.
+- ❌ **Step-level `if`** on a branch step → rejected for the same reason: it wraps
+  the step in an if-zone subgraph (`/unsupported flow-control \("enter-then-branch"\)/`).
+  Put the condition on the parallel step itself, or branch before the fan-out.
+  Note `if` **on the parallel step** is supported — the whole block is then gated.
 - Graph-build failures surface as a **precise editor marker** anchored to the
   offending step's `type:` line (`validate_graph_build.ts`,
   owner `graph-build-validation`); `performComputation` is non-fatal on

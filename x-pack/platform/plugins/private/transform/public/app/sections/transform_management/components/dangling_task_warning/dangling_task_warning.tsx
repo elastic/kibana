@@ -8,8 +8,6 @@
 import type { FC } from 'react';
 import React, { useState } from 'react';
 import {
-  EuiCallOut,
-  EuiButton,
   EuiConfirmModal,
   EUI_MODAL_CONFIRM_BUTTON,
   EuiSpacer,
@@ -17,6 +15,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { useDeleteTransforms } from '../../../../hooks';
 import { TRANSFORM_STATE } from '../../../../../../common/constants';
 
@@ -71,8 +70,8 @@ export const DanglingTasksWarning: FC<{
 
   return (
     <>
-      <EuiCallOut color="warning">
-        <p>
+      <KbnWarningCallout
+        title={
           <FormattedMessage
             id="xpack.transform.danglingTasksError"
             defaultMessage="{count} {count, plural, one {transform is} other {transforms are}} missing configuration details: [{transformIds}] {count, plural, one {It} other {They}} cannot be recovered and should be deleted."
@@ -81,17 +80,22 @@ export const DanglingTasksWarning: FC<{
               transformIds: transformIdsWithoutConfig.join(', '),
             }}
           />
-        </p>
-        <EuiButton color="warning" size="s" onClick={openModal}>
-          <FormattedMessage
-            id="xpack.transform.forceDeleteTransformMessage"
-            defaultMessage="Delete {count} {count, plural, one {transform} other {transforms}}"
-            values={{
-              count: transformIdsWithoutConfig.length,
-            }}
-          />
-        </EuiButton>
-      </EuiCallOut>
+        }
+        actionProps={{
+          primary: {
+            onClick: openModal,
+            children: (
+              <FormattedMessage
+                id="xpack.transform.forceDeleteTransformMessage"
+                defaultMessage="Delete {count} {count, plural, one {transform} other {transforms}}"
+                values={{
+                  count: transformIdsWithoutConfig.length,
+                }}
+              />
+            ),
+          },
+        }}
+      />
       <EuiSpacer />
       {isModalVisible && (
         <EuiConfirmModal

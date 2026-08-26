@@ -81,5 +81,16 @@ describe('Transform actions V1', () => {
         }
       `);
     });
+
+    it('should not include template_id in the transformed data', async () => {
+      const result = transformCreateBody({
+        createBody: { ...rule, template_id: 'my-template' },
+        actions: [defaultAction],
+        systemActions: [systemAction],
+      });
+
+      expect(result).not.toHaveProperty('template_id');
+      expect(result).not.toHaveProperty('templateId');
+    });
   });
 });

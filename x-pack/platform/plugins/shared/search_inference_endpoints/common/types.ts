@@ -122,6 +122,16 @@ export interface RegionPolicyResponse {
   updated_by?: string;
 }
 
+export type RegionPolicyConflictRef = string | string[];
+
+export interface RegionPolicyConflictAttributes {
+  denied_endpoint_ids: RegionPolicyConflictRef;
+  referencing_pipelines?: RegionPolicyConflictRef;
+  referencing_indexes?: RegionPolicyConflictRef;
+}
+
+export type ReasoningEffortLevel = 'none' | 'minimal' | 'low' | 'medium' | 'high' | 'xhigh';
+
 export enum EisModelStatus {
   Preview = 'preview',
   GA = 'ga',

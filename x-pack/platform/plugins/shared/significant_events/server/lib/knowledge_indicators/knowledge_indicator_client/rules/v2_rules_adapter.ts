@@ -6,7 +6,7 @@
  */
 
 import { isBoom } from '@hapi/boom';
-import { ALERTING_V2_ERROR_CODES, type RulesClientApi } from '@kbn/alerting-v2-plugin/server';
+import { ALERTING_ERROR_CODES, type RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import { compileMatchCountBreachQuery } from '../../../significant_events/rules/match_count_query_compiler';
 import {
   METRIC_SERIES_GROUPING_FIELDS,
@@ -22,6 +22,12 @@ import {
 } from './rules_management_client';
 
 const FIND_PAGE_SIZE = 500;
+
+/**
+ * Internal getTags size for ownership-tag enumeration. The HTTP tags route stays
+ * capped at 20 for typeahead; server-side consumers may request up to 10000.
+ */
+const OWNED_STREAM_TAGS_SIZE = 10000;
 
 /**
  * Wraps alerting_v2 `RulesClientApi` to implement IRulesManagementClient.
@@ -58,7 +64,7 @@ export class RulesAdapterV2 implements IRulesManagementClient {
   async bulkDeleteRules(ids: string[]): Promise<void> {
     if (ids.length === 0) return;
     const { errors } = await this.rulesClient.bulkDeleteRules({ ids });
-    const fatal = errors.filter((e) => e.error.code !== ALERTING_V2_ERROR_CODES.RULE_NOT_FOUND);
+    const fatal = errors.filter((e) => e.error.code !== ALERTING_ERROR_CODES.RULE_NOT_FOUND);
     if (fatal.length > 0) {
       const detail = fatal.map((e) => `${e.id}: ${e.error.message}`).join('; ');
       throw new Error(`V2 bulk delete failed for ${fatal.length} rule(s): ${detail}`);
@@ -84,9 +90,13 @@ export class RulesAdapterV2 implements IRulesManagementClient {
   }
 
   async findStreamNamesWithOwnedRules(): Promise<string[]> {
-    // Filters rules, not tags: matched rules return all their tags, so drop non-ownership ones below.
-    const escapedPrefix = STREAMS_RULE_STREAM_TAG_PREFIX.replace(/[\\:]/g, '\\$&');
-    const tags = await this.rulesClient.getTags({ filter: `metadata.tags: ${escapedPrefix}*` });
+    // Prefix-search returns matching tag buckets (not rule documents). Non-ownership
+    // tags are still filtered client-side in case the include pattern is broadened.
+    const tags = await this.rulesClient.getTags({
+      search: STREAMS_RULE_STREAM_TAG_PREFIX,
+      kind: 'signal',
+      size: OWNED_STREAM_TAGS_SIZE,
+    });
     const streamNames = new Set<string>();
     for (const tag of tags) {
       const streamName = streamNameFromTag(tag);

@@ -1,5 +1,5 @@
 {
-  "sha1": "774165739bf554ab6df8ecf24cef7fa860e3f6e0",
+  "sha1": "48cf66f9dfb0b92ce612030bb92685e95ce46aad",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -15,13 +15,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/parallel_tests/uiam_oauth_client_credentials_mcp.spec.ts",
-        "line": 37,
-        "column": 12
+        "line": 36,
+        "column": 9
       }
     },
     {
-      "id": "f6d065371af5227-8e2fb993048f286",
-      "title": "[NON-MKI] UIAM OAuth client CRUD via Kibana proxy creates, reads, lists, patches (incl. redirect_uris), and revokes a client",
+      "id": "f6d065371af5227-6880a7ca3362288",
+      "title": "[NON-MKI] UIAM OAuth client CRUD via Kibana proxy creates, reads, lists, patches (incl. redirect_uris), and deletes a client",
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-security_complete",
@@ -29,8 +29,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/parallel_tests/uiam_oauth_clients_crud.spec.ts",
-        "line": 44,
-        "column": 12
+        "line": 41,
+        "column": 21
       }
     },
     {
@@ -43,8 +43,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/parallel_tests/uiam_oauth_clients_crud.spec.ts",
-        "line": 130,
-        "column": 12
+        "line": 146,
+        "column": 32
       }
     },
     {
@@ -57,8 +57,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/parallel_tests/uiam_oauth_mcp_flow.spec.ts",
-        "line": 51,
-        "column": 12
+        "line": 45,
+        "column": 25
       }
     },
     {
@@ -71,8 +71,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/parallel_tests/uiam_oauth_mcp_flow.spec.ts",
-        "line": 72,
-        "column": 12
+        "line": 58,
+        "column": 24
       }
     },
     {
@@ -85,8 +85,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/parallel_tests/uiam_oauth_mcp_flow.spec.ts",
-        "line": 98,
-        "column": 12
+        "line": 84,
+        "column": 11
       }
     },
     {
@@ -99,8 +99,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/parallel_tests/uiam_oauth_mcp_flow.spec.ts",
-        "line": 148,
-        "column": 12
+        "line": 133,
+        "column": 17
       }
     },
     {
@@ -113,8 +113,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/parallel_tests/uiam_oauth_token_exchange.spec.ts",
-        "line": 35,
-        "column": 12
+        "line": 29,
+        "column": 25
       }
     },
     {
@@ -127,8 +127,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/parallel_tests/uiam_oauth_token_exchange.spec.ts",
-        "line": 63,
-        "column": 12
+        "line": 53,
+        "column": 67
       }
     },
     {
@@ -141,8 +141,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/parallel_tests/uiam_oauth_token_exchange.spec.ts",
-        "line": 77,
-        "column": 12
+        "line": 66,
+        "column": 24
       }
     },
     {
@@ -155,8 +155,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/parallel_tests/uiam_oauth_token_exchange.spec.ts",
-        "line": 103,
-        "column": 12
+        "line": 93,
+        "column": 25
       }
     },
     {
@@ -169,8 +169,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/parallel_tests/uiam_oauth_token_exchange.spec.ts",
-        "line": 137,
-        "column": 12
+        "line": 122,
+        "column": 27
       }
     }
   ]

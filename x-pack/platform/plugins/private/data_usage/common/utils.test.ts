@@ -8,6 +8,17 @@
 import { isDateRangeValid } from './utils';
 
 describe('isDateRangeValid', () => {
+  // Freeze the clock so every `now` in the inputs, `minDate`, and `maxDate` resolves to the same
+  // instant; otherwise second-granularity comparisons race at second boundaries (e.g. `now+2s` vs
+  // `now+1s`).
+  beforeAll(() => {
+    jest.useFakeTimers().setSystemTime(new Date('2024-06-15T12:00:00.000Z'));
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   describe('Valid ranges', () => {
     it.each([
       ['start date is `now-10s` and end date is `now`', { start: 'now-10s', end: 'now' }],

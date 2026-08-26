@@ -40,7 +40,12 @@ const MANAGED_INPUTS_DOCS_LINK = 'https://ela.st/managed-inputs';
 const API_ENDPOINTS_SECTION_ID = 'apiEndpoints';
 const TITLE_ID = `${API_ENDPOINTS_SECTION_ID}Title`;
 
-export const ApiEndpoints = () => {
+export interface ApiEndpointsProps {
+  /** Heading tag for the section title. Defaults to `h3`, V2 passes `h2`. */
+  titleTag?: 'h2' | 'h3';
+}
+
+export const ApiEndpoints = ({ titleTag: TitleTag = 'h3' }: ApiEndpointsProps) => {
   const {
     services: { share, application },
   } = useKibana<ObservabilityOnboardingAppServices>();
@@ -91,11 +96,11 @@ export const ApiEndpoints = () => {
       <EuiHorizontalRule margin="xl" />
       <section id={API_ENDPOINTS_SECTION_ID} aria-labelledby={TITLE_ID}>
         <EuiTitle size="s">
-          <h3 id={TITLE_ID}>
+          <TitleTag id={TITLE_ID}>
             {i18n.translate('xpack.observability_onboarding.apiEndpoints.title', {
               defaultMessage: 'Connect directly to the endpoint',
             })}
-          </h3>
+          </TitleTag>
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiText size="s" color="subdued">

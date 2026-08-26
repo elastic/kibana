@@ -86,7 +86,13 @@ describe('createVisPanelResolver', () => {
 
   it('creates panel content when the authoring note is missing', async () => {
     mockedBuildLensConfig.mockResolvedValue({
-      validatedConfig: { type: 'metric' },
+      validatedConfig: {
+        type: 'metric',
+        metrics: [{ column: 'count', type: 'primary' }],
+        data_source: { type: 'esql', query: 'FROM logs-* | STATS count = COUNT(*)' },
+        ignore_global_filters: false,
+        sampling: 100,
+      },
       selectedChartType: SupportedChartType.Metric,
       esqlQuery: 'FROM logs-* | STATS count = COUNT(*)',
     });
@@ -109,7 +115,7 @@ describe('createVisPanelResolver', () => {
       type: 'success',
       panelContent: {
         type: LENS_EMBEDDABLE_TYPE,
-        config: { type: 'metric' },
+        config: expect.objectContaining({ type: 'metric' }),
       },
     });
   });

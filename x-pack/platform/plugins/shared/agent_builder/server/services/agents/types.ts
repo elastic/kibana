@@ -6,7 +6,12 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import type { BuiltInAgentDefinition, AgentTypeDefinition } from '@kbn/agent-builder-server/agents';
+import type {
+  BuiltInAgentDefinition,
+  AgentTypeDefinition,
+  AgentAvailabilityConfig,
+  AgentBaseConfiguration,
+} from '@kbn/agent-builder-server/agents';
 import type {
   AgentConfiguration,
   AgentCreateRequest,
@@ -38,11 +43,19 @@ export interface SkillRefsParams {
 
 export interface AgentsServiceStart {
   getRegistry: (opts: { request: KibanaRequest }) => Promise<AgentRegistry>;
-  ensure: (opts: { spaceId: string; agent: AgentCreateRequest }) => Promise<void>;
+  ensure: (opts: {
+    spaceId: string;
+    agent: AgentCreateRequest;
+    availability?: AgentAvailabilityConfig;
+  }) => Promise<void>;
   resolveAgentConfiguration: (opts: {
     agent: AgentDefinition;
     request: KibanaRequest;
   }) => Promise<AgentConfiguration>;
+  resolveAgentBaseConfiguration: (opts: {
+    agentType: string;
+    request: KibanaRequest;
+  }) => Promise<AgentBaseConfiguration | undefined>;
   removeToolRefsFromAgents: (params: ToolRefsParams) => Promise<AgentsUsingToolsResult>;
   getAgentsUsingTools: (params: ToolRefsParams) => Promise<AgentsUsingToolsResult>;
   removePluginRefsFromAgents: (params: PluginRefsParams) => Promise<AgentsUsingToolsResult>;

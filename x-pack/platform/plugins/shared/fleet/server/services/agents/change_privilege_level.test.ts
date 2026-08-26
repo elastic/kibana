@@ -181,6 +181,7 @@ describe('bulkChangeAgentsPrivilegeLevel', () => {
   const mockedAgent: Agent = {
     id: 'agent-123',
     policy_id: 'policy-0001',
+    policy_base_id: 'policy-0001',
     last_checkin: new Date().toISOString(),
     components: [],
     local_metadata: {

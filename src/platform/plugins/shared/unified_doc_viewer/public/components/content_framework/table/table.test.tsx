@@ -34,12 +34,16 @@ jest.mock('../../../plugin', () => ({
       useFieldsMetadata: () => ({
         fieldsMetadata: {
           fieldA: { short: 'Short desc A' },
-          fieldB: { short: 'Short desc B' },
+          fieldB: { short: 'Short desc B', type: 'keyword' },
         },
       }),
     },
     fieldFormats: {},
   }),
+}));
+
+jest.mock('@kbn/field-utils/src/components/field_icon', () => ({
+  FieldIcon: () => <span data-test-subj="fieldIcon" />,
 }));
 
 jest.mock('@kbn/discover-utils/src/utils/get_formatted_fields', () => ({
@@ -151,5 +155,16 @@ describe('ContentFrameworkTable', () => {
     await userEvent.click(expandPopoverButton);
 
     expect(screen.getByText('Short desc B')).toBeInTheDocument();
+  });
+
+  it('renders field type icon from metadata', async () => {
+    render(<ContentFrameworkTable {...defaultProps} />);
+
+    const tableCell = screen.getByText('Field B Title');
+    await userEvent.hover(tableCell);
+    const expandPopoverButton = screen.getByTestId('euiDataGridCellExpandButton');
+    await userEvent.click(expandPopoverButton);
+
+    expect(screen.getByTestId('fieldIcon')).toBeInTheDocument();
   });
 });

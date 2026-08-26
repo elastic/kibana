@@ -93,6 +93,17 @@ describe('buildScheduledResponsesQuery', () => {
 
       expect(subAggs.max_timestamp).toEqual({ max: { field: '@timestamp' } });
     });
+
+    test('includes label sub-aggregations so rows without a local pack can be named', () => {
+      const result = buildScheduledResponsesQuery({ spaceId: defaultSpaceId });
+      const aggs = result.body.aggs as Record<string, unknown>;
+      const scheduledExec = aggs.scheduled_executions as Record<string, unknown>;
+      const subAggs = scheduledExec.aggs as Record<string, unknown>;
+
+      expect(subAggs.pack_id).toEqual({ terms: { field: 'pack_id', size: 1 } });
+      expect(subAggs.pack_name).toEqual({ terms: { field: 'pack_name', size: 1 } });
+      expect(subAggs.query_name).toEqual({ terms: { field: 'query_name', size: 1 } });
+    });
   });
 
   describe('base filters', () => {
@@ -123,6 +134,31 @@ describe('buildScheduledResponsesQuery', () => {
 
     test('uses simple term filter for non-default space', () => {
       const result = buildScheduledResponsesQuery({ spaceId: 'security' });
+      const query = result.body.query as Record<string, unknown>;
+      const filters = (query.bool as Record<string, unknown>).filter as unknown[];
+
+      expect(filters).toContainEqual({ term: { space_id: 'security' } });
+    });
+
+    test('requires an exact default space_id when CPS is enabled', () => {
+      const result = buildScheduledResponsesQuery({ spaceId: defaultSpaceId, cpsEnabled: true });
+      const query = result.body.query as Record<string, unknown>;
+      const filters = (query.bool as Record<string, unknown>).filter as unknown[];
+
+      expect(filters).toContainEqual({ term: { space_id: 'default' } });
+      expect(filters).not.toContainEqual(
+        expect.objectContaining({
+          bool: expect.objectContaining({
+            should: expect.arrayContaining([
+              { bool: { must_not: { exists: { field: 'space_id' } } } },
+            ]),
+          }),
+        })
+      );
+    });
+
+    test('leaves the non-default space filter unchanged when CPS is enabled', () => {
+      const result = buildScheduledResponsesQuery({ spaceId: 'security', cpsEnabled: true });
       const query = result.body.query as Record<string, unknown>;
       const filters = (query.bool as Record<string, unknown>).filter as unknown[];
 

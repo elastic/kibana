@@ -60,7 +60,7 @@ export const typeAssertionsEvaluator = {
         issues.length > 0
           ? `Type assertion failures: ${issues.join('; ')}`
           : 'All type assertions passed',
-      details: { presentTypes: [...presentTypes], required_types, forbidden_types, issues },
+      metadata: { presentTypes: [...presentTypes], required_types, forbidden_types, issues },
     };
   },
 } satisfies KIFeatureExtractionEvaluator;

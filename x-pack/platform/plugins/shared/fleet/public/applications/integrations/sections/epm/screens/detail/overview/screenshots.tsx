@@ -160,7 +160,7 @@ export const Screenshots: React.FC<ScreenshotProps> = memo(({ images, packageNam
           <EuiButtonEmpty
             size="xs"
             flush="left"
-            iconType={isExpanded ? 'arrowUp' : 'arrowDown'}
+            iconType={isExpanded ? 'chevronSingleUp' : 'chevronSingleDown'}
             onClick={() => setIsExpanded((prev) => !prev)}
           >
             {isExpanded ? (

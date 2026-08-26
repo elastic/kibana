@@ -38,4 +38,8 @@ export const MonochromeIcons = new Set([
   '.email',
   '.gen-ai',
   '.bedrock',
+  // Marks drawn with `fill="currentColor"`, which resolves in the DOM but not inside a
+  // data URL — as a background-image they fall back to black in both modes.
+  '.greynoise',
+  '.tavily_mcp',
 ]);

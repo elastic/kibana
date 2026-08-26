@@ -121,7 +121,7 @@ export const useFooterLinks = ({
     }
 
     // "Connection details" link
-    if (isServerless === true && cloud?.isCloudEnabled === true) {
+    if (cloud?.isCloudEnabled === true) {
       items.push({
         id: 'connectionDetails',
         label: i18n.translate('xpack.spaces.contextSwitcher.footerLinks.connectionDetailsLabel', {

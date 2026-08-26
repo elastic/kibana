@@ -6,11 +6,10 @@ paths: {}
 components:
   x-codegen-enabled: true
   schemas:
-    AutonomyLevel:
-      type: integer
-      minimum: 1
-      maximum: 5
-      description: Throughline UI-facing autonomy level (1 Suggest only through 5 Acts · trusted)
+    Lifecycle:
+      type: string
+      enum: [ga, beta, pilot]
+      description: Release maturity shown as a badge next to a watch, worker, or skill
 
     ScheduleMode:
       type: string
@@ -213,7 +212,6 @@ components:
         - scopeSummary
         - scopes
         - callables
-        - autonomyLevel
         - metrics
         - recentRuns
       properties:
@@ -247,6 +245,9 @@ components:
           description: Short mandate shown on cards
         description:
           type: string
+        lifecycle:
+          $ref: '#/components/schemas/Lifecycle'
+          description: Omitted for generally available watches; badge shown otherwise
         schedule:
           $ref: '#/components/schemas/WatchSchedule'
         triggers:
@@ -272,8 +273,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/WatchCallableRef'
-        autonomyLevel:
-          $ref: '#/components/schemas/AutonomyLevel'
         metrics:
           $ref: '#/components/schemas/WatchMetrics'
         recentRuns:

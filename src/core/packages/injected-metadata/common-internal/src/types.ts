@@ -97,6 +97,7 @@ export interface InjectedMetadata {
   };
   customBranding: Pick<CustomBranding, 'logo' | 'customizedLogo' | 'pageTitle'>;
   userStorage: {
+    available: boolean;
     values: Record<string, unknown>;
   };
 }

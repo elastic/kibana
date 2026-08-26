@@ -1,0 +1,20 @@
+// Scout fixtures shared by every triggers_actions_ui UI namespace (connectors,
+// rules, alerts, maintenance_windows): the merged `test` fixture, constants,
+// rule/connector helpers, and page objects. Each namespace's `ui/tsconfig.json`
+// references this project so none of them has to reach across into another.
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": ["node"],
+    "isolatedModules": false
+  },
+  "include": ["**/*"],
+  "exclude": ["target/**/*"],
+  "kbn_references": [
+    "@kbn/scout",
+    "@kbn/rule-data-utils",
+    "@kbn/rison",
+    "@kbn/global-search-plugin"
+  ]
+}

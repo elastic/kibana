@@ -264,7 +264,7 @@ const ActionsComponent: React.FC<ActionsComponentProps> = ({
           key="alert-context-menu"
           ecsRowData={ecsData}
           scopeId={timelineId}
-          disabled={isRemoteDocument}
+          isRemoteDocument={isRemoteDocument}
           onRuleChange={onRuleChange}
           refetch={refetch}
         />

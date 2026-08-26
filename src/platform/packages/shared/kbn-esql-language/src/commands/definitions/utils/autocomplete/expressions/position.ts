@@ -10,7 +10,7 @@
 import { isColumn, isFunctionExpression, isInlineCast, isLiteral, within } from '@elastic/esql';
 import type { ESQLSingleAstItem, ESQLFunction } from '@elastic/esql/types';
 import type { ESQLColumnData } from '../../../../registry/types';
-import { getIncompleteOperatorReason, isNullCheckOperator } from './utils';
+import { getIncompleteOperatorReason, getRightmostOperator, isNullCheckOperator } from './utils';
 import { getExpressionType } from '../../expressions';
 import { escapeRegExp } from '../../regex';
 
@@ -68,10 +68,17 @@ export function getPosition(
 
   // Function expression (operators or variadic functions like CONCAT)
   if (isFunctionExpression(expressionRoot)) {
-    if (expressionRoot.subtype === 'variadic-call') {
-      const cursorIsInside = within(innerText.length, expressionRoot);
+    const rightmostExpression = getRightmostOperator(expressionRoot);
 
-      return cursorIsInside ? 'in_function' : 'after_complete';
+    if (
+      rightmostExpression.subtype === 'variadic-call' &&
+      within(innerText.length, rightmostExpression)
+    ) {
+      return 'in_function';
+    }
+
+    if (expressionRoot.subtype === 'variadic-call') {
+      return 'after_complete';
     }
 
     // Postfix unary operators (IS NULL, IS NOT NULL) are complete when not marked incomplete

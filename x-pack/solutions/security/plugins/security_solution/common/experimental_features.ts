@@ -72,7 +72,7 @@ export const allowedExperimentalValues = Object.freeze({
    * `cancel` response action for Elastic Defend Endpoint
    * Release: 9.5
    */
-  responseActionsEndpointCancel: false,
+  responseActionsEndpointCancel: true,
 
   /**
    * `kill_descendants` parameter option for the `kill-process` response action for Elastic Defend Endpoint
@@ -82,10 +82,17 @@ export const allowedExperimentalValues = Object.freeze({
 
   /**
    * Enables CCS prefixing of endpoint indices so a Defend agent shipping to a remote ES output
-   * (Fleet remote output) is visible from the managing cluster's Kibana. Off by default while
-   * we test impact on other features.
+   * (Fleet remote output) is visible from the managing cluster's Kibana.
+   * Release: 9.5
    */
-  defendRemoteOutputCcs: false,
+  defendRemoteOutputCcs: true,
+
+  /**
+   * Enables Cross-Project Search fan-out for Elastic Defend read paths on serverless, moving the reads
+   * it covers from the internal user to a project-routed current-user client. Off until the request
+   * user holds index privileges on the Defend indices: a missing grant drops rows silently.
+   */
+  defendCrossProjectSearch: false,
 
   /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
@@ -259,6 +266,12 @@ export const allowedExperimentalValues = Object.freeze({
   pciComplianceAgentBuilder: true,
 
   /**
+   * Enables the Endpoint Forensic Analysis Agent Builder skill (DFIR / patient zero / timeline).
+   * Shipped dark by default; enable per environment via config.
+   */
+  endpointForensicAnalysisSkill: false,
+
+  /**
    * Enables the investigate-rule Agent Builder skill.
    * Gates skill registration so the feature can ship dark and be enabled per environment.
    */
@@ -327,6 +340,11 @@ export const allowedExperimentalValues = Object.freeze({
    * from the locally stored kibana mappings after a MITRE version bump.
    */
   mitreAttackUpdatesUIEnabled: true,
+
+  /**
+   * Enables the SIEM Rule Migrations Agent Builder tools.
+   */
+  siemRuleMigrationsAgentBuilderEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

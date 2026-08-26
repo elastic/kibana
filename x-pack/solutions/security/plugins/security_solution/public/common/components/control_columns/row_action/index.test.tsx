@@ -6,6 +6,7 @@
  */
 
 import { TableId } from '@kbn/securitysolution-data-table';
+import { SECURITY_CELL_ACTIONS_DETAILS_FLYOUT } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import type { RowActionProps } from '.';
@@ -28,6 +29,9 @@ import { createFlyoutApiMock } from '../../../../flyout_v2/use_flyout_api.mock';
 
 jest.mock('../../../hooks/use_is_new_flyout_enabled');
 jest.mock('../../../../flyout_v2/use_flyout_api');
+jest.mock('../../../hooks/use_space_id', () => ({
+  useSpaceId: () => 'default',
+}));
 const mockDispatch = jest.fn();
 jest.mock('react-redux-v7', () => {
   const original = jest.requireActual('react-redux-v7');
@@ -193,6 +197,79 @@ describe('RowAction', () => {
     const { onAlertUpdated } = flyoutApi.openDocumentFlyoutFromIndex.mock.calls[0][0];
     onAlertUpdated?.();
     expect(refetch).toHaveBeenCalledTimes(1);
+  });
+
+  test('binds the new document flyout cell actions to the table scope and details-flyout trigger', () => {
+    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
+
+    const wrapper = render(
+      <TestProviders>
+        <RowAction {...defaultProps} tableId={TableId.hostsPageEvents} />
+      </TestProviders>
+    );
+
+    fireEvent.click(wrapper.getByTestId('expand-event'));
+
+    const { renderCellActions } = flyoutApi.openDocumentFlyoutFromIndex.mock.calls[0][0];
+
+    // Event tables (e.g. Explore host/user pages) have no alerts table ref, but the renderer must
+    // still bind the table scope and use the details-flyout trigger so the "Toggle column in table"
+    // action is available and dispatches against the correct data table store.
+    const cellAction = renderCellActions?.({
+      field: 'host.name',
+      value: ['host-1'],
+      scopeId: '',
+      children: null,
+    }) as React.ReactElement;
+
+    expect(cellAction.props.triggerId).toEqual(SECURITY_CELL_ACTIONS_DETAILS_FLYOUT);
+    expect(cellAction.props.visibleCellActions).toEqual(6);
+    expect(cellAction.props.metadata).toEqual({
+      scopeId: TableId.hostsPageEvents,
+      alertsTableRef: undefined,
+    });
+  });
+
+  test('should open the pattern-based flyout for rule preview alerts, converting the backing index to its alias', () => {
+    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
+    const backingIndex = '.internal.preview.alerts-security.alerts-default';
+    const aliasIndex = '.preview.alerts-security.alerts-default';
+
+    const rulePreviewProps: RowActionProps = {
+      ...defaultProps,
+      tableId: TableId.rulePreview,
+      data: {
+        _id: '1',
+        _index: backingIndex,
+        data: [],
+        ecs: { _id: '1' },
+      },
+      esHitRecord: {
+        _id: '1',
+        _index: backingIndex,
+        _source: {},
+      },
+    };
+
+    const wrapper = render(
+      <TestProviders>
+        <RowAction {...rulePreviewProps} />
+      </TestProviders>
+    );
+
+    fireEvent.click(wrapper.getByTestId('expand-event'));
+
+    // Rule preview must NOT use the index-based wrapper (which searches via a data view
+    // pattern and cannot find preview backing indices); it must use the pattern-based
+    // wrapper, which resolves the document via useTimelineEventsDetails directly.
+    expect(mockOpenFlyout).not.toHaveBeenCalled();
+    expect(flyoutApi.openDocumentFlyoutFromIndex).not.toHaveBeenCalled();
+    expect(flyoutApi.openDocumentFlyoutFromPattern).toHaveBeenCalledWith(
+      expect.objectContaining({
+        documentId: '1',
+        indexName: aliasIndex,
+      })
+    );
   });
 
   describe('notes', () => {

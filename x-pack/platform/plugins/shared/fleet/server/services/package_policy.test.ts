@@ -89,6 +89,7 @@ import { agentPolicyService } from './agent_policy';
 import { isSpaceAwarenessEnabled } from './spaces/helpers';
 import { licenseService } from './license';
 import { cloudConnectorService } from './cloud_connector';
+import { outputService } from './output';
 import * as secretsModule from './secrets';
 import { recompileInputsWithAgentVersion } from './agent_policies/package_policies_to_agent_inputs';
 import { getAgentVersionsForVersionSpecificPolicies } from './utils/version_specific_policies';
@@ -2142,6 +2143,49 @@ describe('Package policy service', () => {
   });
 
   describe('getByIDs', () => {
+    it('should request only the specified package policy fields', async () => {
+      const soClient = createSavedObjectClientMock();
+      soClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'test-package-policy',
+            version: 'WzEsMV0=',
+            attributes: {
+              condition: "'agent.id' == 'agent-1'",
+              policy_ids: ['agent-policy-1'],
+              revision: 2,
+            },
+            references: [],
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          },
+        ],
+      });
+
+      const fields = ['condition', 'policy_ids', 'revision'];
+      const result = await packagePolicyService.getByIDs(soClient, ['test-package-policy'], {
+        fields,
+      });
+
+      expect(soClient.bulkGet).toHaveBeenCalledWith([
+        {
+          id: 'test-package-policy',
+          type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          fields,
+          namespaces: undefined,
+        },
+      ]);
+      expect(result).toEqual([
+        expect.objectContaining({
+          id: 'test-package-policy',
+          version: 'WzEsMV0=',
+          condition: "'agent.id' == 'agent-1'",
+          policy_ids: ['agent-policy-1'],
+          revision: 2,
+        }),
+      ]);
+      expect(result[0]).not.toHaveProperty('name');
+    });
+
     it('should call audit logger', async () => {
       const soClient = createSavedObjectClientMock();
       soClient.bulkGet.mockResolvedValueOnce({
@@ -4183,6 +4227,96 @@ describe('Package policy service', () => {
       );
     });
 
+    it('should forward request context to packagePolicyUpdate external callbacks', async () => {
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const mockPackagePolicy = createPackagePolicyMock();
+      const attributes = {
+        ...mockPackagePolicy,
+        inputs: [],
+      };
+      const context = coreMock.createCustomRequestHandlerContext(
+        xpackMocks.createRequestHandlerContext()
+      );
+      const updateCallback = jest.fn(async (policy) => policy);
+
+      appContextService.addExternalCallback('packagePolicyUpdate', updateCallback);
+
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'test-package-policy',
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            references: [],
+            attributes,
+          },
+        ],
+      });
+
+      soClient.update.mockResolvedValue({
+        id: 'test-package-policy',
+        type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        references: [],
+        attributes,
+      });
+
+      await packagePolicyService.update(
+        soClient,
+        esClient,
+        'test-package-policy',
+        {
+          ...mockPackagePolicy,
+          inputs: [],
+        },
+        undefined,
+        context
+      );
+
+      expect(updateCallback).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'test-package-policy' }),
+        soClient,
+        esClient,
+        context,
+        undefined
+      );
+    });
+
+    it('should rethrow packagePolicyUpdate callback errors with apiPassThrough', async () => {
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const mockPackagePolicy = createPackagePolicyMock();
+      const attributes = {
+        ...mockPackagePolicy,
+        inputs: [],
+      };
+      const callbackError = Object.assign(new Error('validation failed'), {
+        apiPassThrough: true,
+      });
+      const updateCallback = jest.fn(async () => {
+        throw callbackError;
+      });
+
+      appContextService.addExternalCallback('packagePolicyUpdate', updateCallback);
+
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'test-package-policy',
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            references: [],
+            attributes,
+          },
+        ],
+      });
+
+      await expect(
+        packagePolicyService.update(soClient, esClient, 'test-package-policy', {
+          ...mockPackagePolicy,
+          inputs: [],
+        })
+      ).rejects.toThrow('validation failed');
+    });
+
     describe('remove protections', () => {
       beforeEach(() => {
         mockAgentPolicyService.bumpRevision.mockReset();
@@ -5683,6 +5817,21 @@ describe('Package policy service', () => {
         });
       });
 
+      it('does not bump associated agent policies when bumpRevision is false', async () => {
+        const savedObjectsClient = createSavedObjectClientMock();
+        setupSOClientMocks(savedObjectsClient);
+        const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+        await packagePolicyService.bulkUpdate(
+          savedObjectsClient,
+          elasticsearchClient,
+          testedPackagePolicies,
+          { force: true, bumpRevision: false }
+        );
+
+        expect(mockAgentPolicyService.bumpRevision).not.toHaveBeenCalled();
+      });
+
       it('should remove protections if policy_ids is changed, only affected policies', async () => {
         const savedObjectsClient = createSavedObjectClientMock();
 
@@ -5929,6 +6078,80 @@ describe('Package policy service', () => {
         { force: true }
       );
     });
+
+    it('should forward asyncDeploy to the agent policy revision bump', async () => {
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes: createPackagePolicyMock(),
+          },
+        ],
+      });
+
+      soClient.get.mockResolvedValueOnce({
+        ...mockPackagePolicy,
+      });
+
+      mockAgentPolicyGet();
+      mockAgentPolicyService.bumpRevision.mockClear();
+
+      const idToDelete = 'c6d16e42-c32d-4dce-8a88-113cfe276ad1';
+      soClient.bulkDelete.mockResolvedValue({
+        statuses: [
+          { id: idToDelete, type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE, success: true },
+        ],
+      });
+
+      await packagePolicyService.delete(soClient, esClient, [idToDelete], { asyncDeploy: true });
+
+      expect(mockAgentPolicyService.bumpRevision).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.any(String),
+        expect.objectContaining({ asyncDeploy: true })
+      );
+    });
+
+    it('should not bump associated agent policies when bumpRevision is false', async () => {
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes: createPackagePolicyMock(),
+          },
+        ],
+      });
+      soClient.get.mockResolvedValueOnce({ ...mockPackagePolicy });
+      mockAgentPolicyGet();
+      mockAgentPolicyService.bumpRevision.mockClear();
+
+      const idToDelete = 'c6d16e42-c32d-4dce-8a88-113cfe276ad1';
+      soClient.bulkDelete.mockResolvedValue({
+        statuses: [
+          { id: idToDelete, type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE, success: true },
+        ],
+      });
+
+      await packagePolicyService.delete(soClient, esClient, [idToDelete], {
+        bumpRevision: false,
+      });
+
+      expect(mockAgentPolicyService.bumpRevision).not.toHaveBeenCalled();
+    });
+
     it('should allow to delete orphaned package policies from ES index', async () => {
       const soClient = createSavedObjectClientMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -6277,6 +6500,114 @@ describe('Package policy service', () => {
         soClient,
         ids: ['regular-secret-1'],
       });
+    });
+
+    it('should call agentPolicyService.delete() for agentless agent policies when their package policies are deleted', async () => {
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      const packagePolicyMock = createPackagePolicyMock();
+      const idToDelete = packagePolicyMock.id;
+      const agentPolicyId = packagePolicyMock.policy_ids[0];
+
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: idToDelete,
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            references: [],
+            version: 'test',
+            attributes: packagePolicyMock,
+          },
+        ],
+      });
+
+      mockAgentPolicyGet(undefined, { supports_agentless: true });
+      mockAgentPolicyService.delete.mockResolvedValue({ id: agentPolicyId } as any);
+
+      soClient.bulkDelete.mockResolvedValue({
+        statuses: [
+          { id: idToDelete, type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE, success: true },
+        ],
+      });
+
+      await packagePolicyService.delete(soClient, esClient, [idToDelete]);
+
+      expect(mockAgentPolicyService.delete).toHaveBeenCalledWith(
+        soClient,
+        esClient,
+        agentPolicyId,
+        expect.objectContaining({ force: undefined })
+      );
+    });
+
+    it('should NOT call agentPolicyService.delete() for agentless agent policies when skipUnassignFromAgentPolicies is true', async () => {
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      const packagePolicyMock = createPackagePolicyMock();
+      const idToDelete = packagePolicyMock.id;
+
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: idToDelete,
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            references: [],
+            version: 'test',
+            attributes: packagePolicyMock,
+          },
+        ],
+      });
+
+      mockAgentPolicyGet(undefined, { supports_agentless: true });
+      mockAgentPolicyService.delete.mockClear();
+
+      soClient.bulkDelete.mockResolvedValue({
+        statuses: [
+          { id: idToDelete, type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE, success: true },
+        ],
+      });
+
+      await packagePolicyService.delete(soClient, esClient, [idToDelete], {
+        skipUnassignFromAgentPolicies: true,
+      });
+
+      expect(mockAgentPolicyService.delete).not.toHaveBeenCalled();
+    });
+
+    it('should NOT call agentPolicyService.delete() for non-agentless agent policies', async () => {
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      const packagePolicyMock = createPackagePolicyMock();
+      const idToDelete = packagePolicyMock.id;
+
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: idToDelete,
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            references: [],
+            version: 'test',
+            attributes: packagePolicyMock,
+          },
+        ],
+      });
+
+      // Regular (non-agentless) agent policy
+      mockAgentPolicyGet();
+      mockAgentPolicyService.delete.mockClear();
+
+      soClient.bulkDelete.mockResolvedValue({
+        statuses: [
+          { id: idToDelete, type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE, success: true },
+        ],
+      });
+
+      await packagePolicyService.delete(soClient, esClient, [idToDelete]);
+
+      expect(mockAgentPolicyService.delete).not.toHaveBeenCalled();
     });
   });
 
@@ -7666,6 +7997,92 @@ describe('Package policy service', () => {
         );
         expect(result.inputs[0]?.vars?.path.value).toEqual(['/var/log/logfile.log']);
         expect(result.inputs[0]?.vars?.is_value_enabled.value).toEqual(false);
+      });
+    });
+
+    describe('when the package is synthetics', () => {
+      // Synthetics persists only the single active input and drops the disabled ones. It is a
+      // keep_policies_up_to_date package, so a package bump auto-upgrades every policy through
+      // updatePackageInputs; without the guard the dropped inputs are re-added and the policy
+      // re-bloats (and, historically, resurrected an enabled synthetics/browser — the #229595
+      // regression reverted in #236104).
+      it('does not re-add inputs that were stripped from the stored policy', () => {
+        const basePackagePolicy: NewPackagePolicy = {
+          name: 'synthetics-http-monitor',
+          description: '',
+          namespace: 'default',
+          enabled: true,
+          policy_id: 'xxxx',
+          policy_ids: ['xxxx'],
+          package: {
+            name: 'synthetics',
+            title: 'Elastic Synthetics',
+            version: '1.0.0',
+          },
+          inputs: [
+            {
+              type: 'synthetics/http',
+              policy_template: 'synthetics',
+              enabled: true,
+              streams: [],
+              vars: {
+                type: { type: 'text', value: 'http' },
+              },
+            },
+          ],
+        };
+
+        const packageInfo: PackageInfo = {
+          name: 'synthetics',
+          description: 'Elastic Synthetics',
+          title: 'Elastic Synthetics',
+          version: '1.1.0',
+          latestVersion: '1.1.0',
+          release: 'ga',
+          format_version: '1.0.0',
+          owner: { github: 'elastic/obs-ux-management-team' },
+          policy_templates: [
+            {
+              name: 'synthetics',
+              title: 'Synthetics',
+              description: 'Synthetics',
+              inputs: [
+                { type: 'synthetics/http', title: 'HTTP', description: 'HTTP' },
+                { type: 'synthetics/tcp', title: 'TCP', description: 'TCP' },
+                { type: 'synthetics/icmp', title: 'ICMP', description: 'ICMP' },
+                { type: 'synthetics/browser', title: 'Browser', description: 'Browser' },
+              ],
+            },
+          ],
+          // @ts-ignore
+          assets: {},
+        };
+
+        // Mirrors packageToPackagePolicyInputs(packageInfo): every input is present. The synthetics
+        // package now defaults every input to disabled.
+        const inputsOverride: NewPackagePolicyInput[] = [
+          { type: 'synthetics/http', policy_template: 'synthetics', enabled: false, streams: [] },
+          { type: 'synthetics/tcp', policy_template: 'synthetics', enabled: false, streams: [] },
+          { type: 'synthetics/icmp', policy_template: 'synthetics', enabled: false, streams: [] },
+          {
+            type: 'synthetics/browser',
+            policy_template: 'synthetics',
+            enabled: false,
+            streams: [],
+          },
+        ];
+
+        const result = updatePackageInputs(
+          basePackagePolicy,
+          packageInfo,
+          inputsOverride as InputsOverride[],
+          false
+        );
+
+        expect(result.inputs).toHaveLength(1);
+        expect(result.inputs[0].type).toEqual('synthetics/http');
+        expect(result.inputs[0].enabled).toBe(true);
+        expect(result.inputs.some((input) => input.type === 'synthetics/browser')).toBe(false);
       });
     });
 
@@ -12832,7 +13249,8 @@ describe('Package policy service', () => {
     it('should update policies using deleted output', async () => {
       const soClient = createSavedObjectClientMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      const updateSpy = jest.spyOn(packagePolicyService, 'update');
+      const updateSpy = jest.spyOn(packagePolicyService, 'update').mockResolvedValue({} as any);
+      jest.spyOn(outputService, 'getDefaultDataOutputId').mockResolvedValue(null);
 
       mockAgentPolicyGet();
       soClient.find.mockResolvedValue({
@@ -12901,7 +13319,6 @@ describe('Package policy service', () => {
         {
           name: 'policy1',
           enabled: true,
-          policy_id: 'agent-policy-1',
           policy_ids: ['agent-policy-1'],
           output_id: null,
           inputs: [],

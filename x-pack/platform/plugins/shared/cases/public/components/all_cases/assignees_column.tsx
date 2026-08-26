@@ -21,12 +21,16 @@ export interface AssigneesColumnProps {
   assignees: CaseUI['assignees'];
   userProfiles: Map<string, UserProfileWithAvatar>;
   compressedDisplayLimit?: number;
+  /** Distinguishes this column's test subjects when reused for a non-assignee field (e.g. a
+   * user-picker global field) so they don't collide with the assignees column or each other. */
+  testSubjPrefix?: string;
 }
 
 const AssigneesColumnComponent: React.FC<AssigneesColumnProps> = ({
   assignees,
   userProfiles,
   compressedDisplayLimit = COMPRESSED_AVATAR_LIMIT,
+  testSubjPrefix = 'assignee',
 }) => {
   const [isAvatarListExpanded, setIsAvatarListExpanded] = useState<boolean>(false);
 
@@ -61,14 +65,14 @@ const AssigneesColumnComponent: React.FC<AssigneesColumnProps> = ({
   }
 
   return (
-    <EuiFlexGroup gutterSize="xs" data-test-subj="case-table-column-assignee" wrap>
+    <EuiFlexGroup gutterSize="xs" data-test-subj={`case-table-column-${testSubjPrefix}`} wrap>
       {avatarsToDisplay.map((assignee) => {
         const dataTestSubjName = getUsernameDataTestSubj(assignee);
         return (
           <EuiFlexItem
             grow={false}
             key={assignee.uid}
-            data-test-subj={`case-table-column-assignee-${dataTestSubjName}`}
+            data-test-subj={`case-table-column-${testSubjPrefix}-${dataTestSubjName}`}
           >
             <CaseUserAvatar size="s" userInfo={assignee.profile} />
           </EuiFlexItem>
@@ -78,7 +82,7 @@ const AssigneesColumnComponent: React.FC<AssigneesColumnProps> = ({
       {shouldShowExpandListButton ? (
         <EuiButtonEmpty
           size="xs"
-          data-test-subj="case-table-column-expand-button"
+          data-test-subj={`case-table-column-${testSubjPrefix}-expand-button`}
           onClick={toggleExpandedAvatars}
           style={{ alignSelf: 'center' }}
         >

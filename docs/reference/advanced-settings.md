@@ -41,7 +41,7 @@ For more information on granting access to {{product.kibana}}, refer to [Grantin
 ## Change the global settings [kibana-global-settings-reference]
 ```{applies_to}
 stack: ga
-serverless: unavailable
+serverless: ga
 ```
 
 :::{settings} /reference/advanced-settings-global.yml

@@ -24,7 +24,6 @@ import {
   EuiCopy,
   EuiButtonIcon,
   EuiConfirmModal,
-  EuiCallOut,
   EuiToolTip,
   useGeneratedHtmlId,
   type EuiBasicTableColumn,
@@ -33,6 +32,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import { pagePathGetters } from '../../../constants';
 import type {
@@ -501,19 +501,25 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
           isLoading={isDeleting}
           data-test-subj={CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.DELETE_CONFIRM_MODAL}
         >
-          <EuiCallOut
-            color="danger"
+          <KbnDangerCallout
             announceOnMount={false}
             data-test-subj={CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.DELETE_MODAL_CALLOUT}
-          >
-            <FormattedMessage
-              id="xpack.fleet.cloudConnector.policiesFlyout.deleteModalCallout"
-              defaultMessage="Deleting {connectorName} will stop data ingestion and it cannot be re-used in other integrations."
-              values={{
-                connectorName: <strong>{cloudConnectorName}</strong>,
-              }}
-            />
-          </EuiCallOut>
+            title={i18n.translate(
+              'xpack.fleet.cloudConnector.policiesFlyout.deleteModalCalloutTitle',
+              {
+                defaultMessage: 'Deleting this identity will stop data ingestion',
+              }
+            )}
+            text={
+              <FormattedMessage
+                id="xpack.fleet.cloudConnector.policiesFlyout.deleteModalCallout"
+                defaultMessage="Deleting {connectorName} will stop data ingestion and it cannot be re-used in other integrations."
+                values={{
+                  connectorName: <strong>{cloudConnectorName}</strong>,
+                }}
+              />
+            }
+          />
           <EuiSpacer size="m" />
           <EuiText size="s">
             <FormattedMessage

@@ -31,7 +31,7 @@ jest.mock('../../field_library/hooks/use_resolved_fields', () => ({
 }));
 
 jest.mock('../../cases_context/use_cases_context', () => ({
-  useCasesContext: () => ({ owner: ['cases'] }),
+  useCasesContext: () => ({ owner: ['cases'], permissions: { update: true } }),
 }));
 
 /**
@@ -433,5 +433,49 @@ fields:
     const closeField = within(screen.getByTestId('template-field-close_field'));
     expect(closeField.getByTestId('form-required-on-close-field-label')).toBeInTheDocument();
     expect(closeField.queryByTestId('form-optional-field-label')).not.toBeInTheDocument();
+  });
+});
+
+describe('FieldsRenderer — case details view mode', () => {
+  it('shows the saved value until the user selects Edit', async () => {
+    const field: InlineField = {
+      name: 'investigation_notes',
+      label: 'Investigation notes',
+      type: 'keyword',
+      control: FieldType.INPUT_TEXT,
+    };
+    const CaseDetailsFields = () => {
+      const form = useForm({
+        defaultValues: {
+          [CASE_EXTENDED_FIELDS]: {
+            investigation_notes_as_keyword:
+              'A detailed note that should be readable before the field enters edit mode.',
+          },
+        },
+      });
+
+      return (
+        <FormProvider {...form}>
+          <FieldsRenderer resolvedFields={[field]} onFieldConfirm={jest.fn()} viewMode />
+        </FormProvider>
+      );
+    };
+
+    render(<CaseDetailsFields />);
+
+    expect(
+      screen.getByText('A detailed note that should be readable before the field enters edit mode.')
+    ).toBeInTheDocument();
+    expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Edit Investigation notes' }));
+
+    expect(screen.getByRole('textbox', { name: 'Investigation notes' })).toHaveValue(
+      'A detailed note that should be readable before the field enters edit mode.'
+    );
+
+    await userEvent.click(screen.getByRole('button', { name: 'Cancel field edit' }));
+
+    expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
   });
 });
