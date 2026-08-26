@@ -44,6 +44,9 @@ interface DurationChartAttribute {
     from: string;
     to: string;
   };
+  reportDefinitions: {
+    'monitor.id': string[];
+  };
 }
 
 interface ExploratoryViewEmbeddableProps {
