@@ -65,12 +65,15 @@ describe('VisTypeVegaPlugin (server)', () => {
     const schema = serverDefinition.getSchema(mockGetDrilldownsSchema);
     expect(schema).toBeDefined();
 
-    const parsed = schema!.parse({ spec: '{ mark: point }', unknown_key: 'ignored' });
-    expect(parsed.spec).toEqual('{ mark: point }');
+    const validSpec = { format: 'hjson', value: '{ mark: point }' };
+    const parsed = schema!.parse({ spec: validSpec, unknown_key: 'ignored' });
+    expect(parsed.spec).toEqual(validSpec);
     expect(parsed).not.toHaveProperty('unknown_key');
 
     expect(() => schema!.parse({})).toThrow();
     expect(() => schema!.parse({ spec: 123 })).toThrow();
     expect(() => schema!.parse({ spec: '' })).toThrow();
+    expect(() => schema!.parse({ spec: { format: 'hjson', value: '' } })).toThrow();
+    expect(() => schema!.parse({ spec: { format: 'json', value: 'not-an-object' } })).toThrow();
   });
 });

@@ -26,9 +26,20 @@ export const getVegaEmbeddableSchema = (getDrilldownsSchema: GetDrilldownsSchema
         ...serializedTimeRangeSchema.shape,
         ...getDrilldownsSchema([ON_APPLY_FILTER, ON_OPEN_PANEL_MENU]).shape,
         spec: z
-          .string()
-          .min(1)
-          .meta({ description: 'The Vega or Vega-Lite specification as an HJSON or JSON string.' }),
+          .discriminatedUnion('format', [
+            z.object({
+              format: z.literal('hjson'),
+              value: z.string().min(1),
+            }),
+            z.object({
+              format: z.literal('json'),
+              value: z.looseObject({ $schema: z.string().min(1) }),
+            }),
+          ])
+          .meta({
+            description:
+              'The Vega or Vega-Lite specification. Use `{ "format": "hjson", "value": "<hjson-string>" }` for HJSON (comments and unquoted keys are preserved) or `{ "format": "json", "value": { "$schema": "..." } }` for a JSON object.',
+          }),
       })
       // Strip unknown keys for forward-compatible additive changes in this public contract.
       .strip()

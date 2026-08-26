@@ -124,9 +124,10 @@ export const vegaEmbeddableFactory = (
     // of `tap` for dataViews$ because `extractIndexPatternsFromSpec` is async.
     const specSubscription = spec$
       .pipe(
-        map((specString) => {
+        map((spec) => {
+          if (spec.format === 'json') return spec.value;
           try {
-            return parse(specString, { legacyRoot: false, keepWsc: true });
+            return parse(spec.value, { legacyRoot: false, keepWsc: true });
           } catch {
             return undefined;
           }
@@ -289,7 +290,10 @@ export const vegaEmbeddableFactory = (
               timeRange,
               query: data.query as Query,
               filters: data.filters,
-              visParams: { spec },
+              visParams: {
+                spec:
+                  spec.format === 'json' ? JSON.stringify(spec.value) : spec.value,
+              },
               searchSessionId: data.searchSessionId,
               executionContext: {
                 ...(apiHasExecutionContext(parentApi) ? parentApi.executionContext : {}),

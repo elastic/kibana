@@ -23,6 +23,7 @@ import { VEGA_EMBEDDABLE_TYPE, VEGA_STANDALONE_EMBEDDABLE_FLAG } from '../../com
 import { VEGA_EVENT_APPLY_FILTER } from '../constants';
 import type { VegaEvent, VegaEventHandler } from '../types';
 import { reportVegaRender } from '../lib/vega_render_telemetry';
+import type { VegaByValueState } from '../../server';
 import { vegaEmbeddableFactory } from './vega_embeddable';
 
 jest.mock('@kbn/presentation-util', () => ({ openLazyFlyout: jest.fn() }));
@@ -119,7 +120,7 @@ describe('vegaEmbeddableFactory', () => {
 
     return factory.buildEmbeddable({
       initializeDrilldownsManager,
-      initialState: { spec: '{ mark: point }', title: 'Initial title' },
+      initialState: { spec: { format: 'hjson', value: '{ mark: point }' }, title: 'Initial title' },
       finalizeApi: (api) => ({
         ...api,
         uuid,
@@ -151,7 +152,7 @@ describe('vegaEmbeddableFactory', () => {
     const { api } = await buildEmbeddable();
 
     api.applySerializedState({
-      spec: '{ mark: bar }',
+      spec: { format: 'hjson', value: '{ mark: bar }' },
       title: 'Updated title',
       time_range: {
         from: '2025-01-01T00:00:00.000Z',
@@ -162,7 +163,7 @@ describe('vegaEmbeddableFactory', () => {
 
     expect(api.serializeState()).toEqual(
       expect.objectContaining({
-        spec: '{ mark: bar }',
+        spec: { format: 'hjson', value: '{ mark: bar }' },
         title: 'Updated title',
         time_range: {
           from: '2025-01-01T00:00:00.000Z',
@@ -391,13 +392,13 @@ describe('vegaEmbeddableFactory', () => {
       closeFlyout,
     })) as React.ReactElement<{
       onRevert: () => void;
-      onPreview: (spec: string) => void;
+      onPreview: (spec: VegaByValueState['spec']) => void;
     }>;
 
-    content.props.onPreview('{ mark: bar }');
-    expect(api.serializeState().spec).toBe('{ mark: bar }');
+    content.props.onPreview({ format: 'hjson', value: '{ mark: bar }' });
+    expect(api.serializeState().spec).toEqual({ format: 'hjson', value: '{ mark: bar }' });
     content.props.onRevert();
-    expect(api.serializeState().spec).toBe('{ mark: point }');
+    expect(api.serializeState().spec).toEqual({ format: 'hjson', value: '{ mark: point }' });
     expect(jest.mocked(parentApi.removePanel)).not.toHaveBeenCalled();
   });
 
@@ -426,10 +427,10 @@ describe('vegaEmbeddableFactory', () => {
     const content = (await flyout.loadContent({
       ariaLabelledBy: 'vega-flyout-title',
       closeFlyout,
-    })) as React.ReactElement<{ onSave: (spec: string) => void }>;
+    })) as React.ReactElement<{ onSave: (spec: VegaByValueState['spec']) => void }>;
 
-    content.props.onSave('{ mark: bar }');
+    content.props.onSave({ format: 'hjson', value: '{ mark: bar }' });
 
-    expect(api.serializeState().spec).toBe('{ mark: bar }');
+    expect(api.serializeState().spec).toEqual({ format: 'hjson', value: '{ mark: bar }' });
   });
 });
