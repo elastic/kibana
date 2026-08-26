@@ -2282,5 +2282,6 @@
     "yaml-language-server": "1.23.0",
     "yarn-deduplicate": "6.0.2"
   },
-  "packageManager": "yarn@1.22.22"
+  "packageManager": "yarn@1.22.22",
+  "dummy": "dummy"
 }
