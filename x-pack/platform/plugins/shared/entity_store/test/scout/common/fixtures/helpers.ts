@@ -91,6 +91,7 @@ interface SeedUserEntityOptions {
   namespace: string;
   email: string | string[];
   userName?: string;
+  userId?: string | string[];
   timestamp?: string;
 }
 
@@ -105,7 +106,7 @@ interface SeedUserEntityOptions {
  */
 export const seedUserEntity = async (
   esClient: EsClient,
-  { entityId, namespace, email, userName, timestamp }: SeedUserEntityOptions
+  { entityId, namespace, email, userName, userId, timestamp }: SeedUserEntityOptions
 ) => {
   const ts = timestamp ?? new Date().toISOString();
   await esClient.index({
@@ -127,6 +128,7 @@ export const seedUserEntity = async (
       user: {
         email,
         name: userName ?? entityId,
+        ...(userId !== undefined ? { id: userId } : {}),
       },
       '@timestamp': ts,
     },
