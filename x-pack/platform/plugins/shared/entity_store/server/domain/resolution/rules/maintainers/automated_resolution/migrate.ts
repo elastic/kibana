@@ -8,7 +8,12 @@
 import { isPlainObject } from 'lodash';
 import type { Logger } from '@kbn/logging';
 import { RESOLUTION_RULE_IDS } from '../../../../../../common/domain/resolution_rules/constants';
-import type { AutomatedResolutionState, PerRuleLastRunStats, PerRuleState } from './types';
+import {
+  AUTOMATED_RESOLUTION_STATE_VERSION,
+  type AutomatedResolutionState,
+  type PerRuleLastRunStats,
+  type PerRuleState,
+} from './types';
 
 const isRecord = (value: unknown): value is Record<string, unknown> => isPlainObject(value);
 
@@ -34,6 +39,11 @@ const toLastRun = (value: unknown): PerRuleLastRunStats | null => {
     return {
       resolutionsCreated: value.resolutionsCreated,
       skippedAmbiguousBuckets: value.skippedAmbiguousBuckets,
+      skippedOversizedBuckets:
+        typeof value.skippedOversizedBuckets === 'number' ? value.skippedOversizedBuckets : 0,
+      skippedNoopBuckets: typeof value.skippedNoopBuckets === 'number' ? value.skippedNoopBuckets : 0,
+      cascadeRetargeted: typeof value.cascadeRetargeted === 'number' ? value.cascadeRetargeted : 0,
+      cascadesBlocked: typeof value.cascadesBlocked === 'number' ? value.cascadesBlocked : 0,
     };
   }
   return null;
@@ -43,12 +53,13 @@ const toLastRun = (value: unknown): PerRuleLastRunStats | null => {
  * Reshapes the persisted automated-resolution task state into the per-rule map.
  * Runs every cycle, so it must never throw and must be idempotent.
  *
- * In practice there are only two real inputs:
- *  - the current `{ rules }` shape — passed through untouched, which also preserves
- *    rule ids this version may not know yet (e.g. written by a newer node during a
- *    rolling upgrade);
- *  - the original flat `{ lastProcessedTimestamp, lastRun }` — the email rule's
- *    watermark, moved into `rules[email_exact_match]`.
+ * In practice there are three real inputs:
+ *  - the current `{ version, rules }` shape — passed through when version is current,
+ *    which also preserves rule ids this version may not know yet;
+ *  - `{ rules }` without `version` — email watermark is reset so case-insensitive
+ *    matching can heal pre-existing case-split groups (one-time);
+ *  - the original flat `{ lastProcessedTimestamp, lastRun }` — moved into
+ *    `rules[email_exact_match]`, then the same email reset applies.
  *
  * Anything else (empty / null / garbage) yields an empty map; a rule with no entry
  * backfills on its first run.
@@ -72,5 +83,16 @@ export function migrate(input: unknown, logger: Logger): AutomatedResolutionStat
     };
   }
 
-  return { rules };
+  const version = typeof source.version === 'number' ? source.version : 0;
+  if (version < AUTOMATED_RESOLUTION_STATE_VERSION && Object.hasOwn(rules, emailRuleId)) {
+    const emailState = isRecord(rules[emailRuleId])
+      ? (rules[emailRuleId] as PerRuleState)
+      : undefined;
+    rules[emailRuleId] = {
+      lastProcessedTimestamp: null,
+      lastRun: emailState ? toLastRun(emailState.lastRun) ?? emailState.lastRun ?? null : null,
+    };
+  }
+
+  return { version: AUTOMATED_RESOLUTION_STATE_VERSION, rules };
 }
