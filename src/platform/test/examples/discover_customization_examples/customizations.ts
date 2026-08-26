@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// Serverless test (remove during Scout migration): x-pack/platform/test/serverless/functional/test_suites/examples/discover_customization_examples/customizations.ts
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../functional/ftr_provider_context';
 
@@ -40,6 +39,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         currentUrl.substring(0, currentUrl.indexOf('/app/home')) +
         '/app/discoverCustomizationExamples';
       await browser.get(customizationUrl);
+      await timePicker.waitForTimePickerEnabled();
       await timePicker.setAbsoluteRange(TEST_START_TIME, TEST_END_TIME);
       await header.waitUntilLoadingHasFinished();
     });

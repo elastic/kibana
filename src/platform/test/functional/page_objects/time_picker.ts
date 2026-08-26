@@ -25,6 +25,8 @@ export type CommonlyUsed =
 
 export class TimePickerPageObject extends FtrService {
   private static readonly LEGACY_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
+  private static readonly NEW_PICKER_CONTROL = 'dateRangePickerControlButton';
+  private static readonly LEGACY_PICKER_CONTROL = 'superDatePickerToggleQuickMenuButton';
 
   private readonly log = this.ctx.getService('log');
   private readonly find = this.ctx.getService('find');
@@ -56,21 +58,46 @@ export class TimePickerPageObject extends FtrService {
   }
 
   /**
-   * Detects whether the page is using the new DateRangePicker or the legacy
-   * EuiSuperDatePicker. Not cached because different apps may use different
-   * picker variants within the same test suite.
+   * Waits for either picker variant to render and returns its current state.
+   * Not cached because different apps may use different picker variants within
+   * the same test suite.
    */
-  private async isNewDateRangePicker(): Promise<boolean> {
+  private async getRenderedTimePicker(): Promise<{
+    controlTestSubject: string;
+    isEnabled: boolean;
+    isNew: boolean;
+  }> {
     // Wait for the page to settle before detecting, otherwise a stale picker
     // from a previous app may briefly appear during navigation.
     await this.header.awaitGlobalLoadingIndicatorHidden();
-    const isNew = await this.testSubjects.exists('dateRangePickerControlButton', {
-      timeout: 5000,
-    });
-    this.log.debug(
-      `Detected date picker variant: ${isNew ? 'DateRangePicker' : 'EuiSuperDatePicker'}`
+
+    const newPickerSelector = this.testSubjects.getCssSelector(
+      TimePickerPageObject.NEW_PICKER_CONTROL
     );
-    return isNew;
+    const legacyPickerSelector = this.testSubjects.getCssSelector(
+      TimePickerPageObject.LEGACY_PICKER_CONTROL
+    );
+    const control = await this.find.displayedByCssSelector(
+      `${newPickerSelector}, ${legacyPickerSelector}`,
+      this.testSubjects.TRY_TIME
+    );
+    const controlTestSubjects = (await control.getAttribute('data-test-subj'))?.split(/\s+/) ?? [];
+    const isNew = controlTestSubjects.includes(TimePickerPageObject.NEW_PICKER_CONTROL);
+    const controlTestSubject = isNew
+      ? TimePickerPageObject.NEW_PICKER_CONTROL
+      : TimePickerPageObject.LEGACY_PICKER_CONTROL;
+    const isEnabled = await control.isEnabled();
+
+    this.log.debug(
+      `Detected date picker variant: ${isNew ? 'DateRangePicker' : 'EuiSuperDatePicker'} (${
+        isEnabled ? 'enabled' : 'disabled'
+      })`
+    );
+    return { controlTestSubject, isEnabled, isNew };
+  }
+
+  private async isNewDateRangePicker(): Promise<boolean> {
+    return (await this.getRenderedTimePicker()).isNew;
   }
 
   public readonly defaultStartTime = 'Sep 19, 2015 @ 06:31:44.000';
@@ -119,11 +146,20 @@ export class TimePickerPageObject extends FtrService {
     await this.find.waitForElementStale(panelElement);
   }
 
-  public async timePickerExists() {
-    if (await this.isNewDateRangePicker()) {
-      return await this.testSubjects.exists('dateRangePickerControlButton');
+  public async waitForTimePickerEnabled(): Promise<void> {
+    const { controlTestSubject, isEnabled } = await this.getRenderedTimePicker();
+    if (!isEnabled) {
+      this.log.debug(`Waiting for ${controlTestSubject} to be enabled`);
+      await this.testSubjects.waitForEnabled(controlTestSubject);
     }
-    return await this.testSubjects.exists('superDatePickerToggleQuickMenuButton');
+  }
+
+  public async timePickerExists(): Promise<boolean> {
+    const [newExists, legacyExists] = await Promise.all([
+      this.testSubjects.exists(TimePickerPageObject.NEW_PICKER_CONTROL, { timeout: 1000 }),
+      this.testSubjects.exists(TimePickerPageObject.LEGACY_PICKER_CONTROL, { timeout: 1000 }),
+    ]);
+    return newExists || legacyExists;
   }
 
   /**
