@@ -18,7 +18,6 @@ import type {
 import { EuiDataGrid, EuiSpacer, EuiText, euiFontSize } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { usePager } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { KbnWarningCallout } from '@kbn/ui-callout';
@@ -68,10 +67,6 @@ export interface TableGridProps {
   columns?: string[];
   onFindSearchTermMatch?: UseTableFiltersCallbacksReturn['onFindSearchTermMatch'];
   searchTerm?: string;
-  initialPageSize: number;
-  onChangePageSize?: (newPageSize: number) => void;
-  initialPageIndex?: number;
-  onChangePageIndex?: (newPageIndex: number) => void;
   pinnedFields?: string[];
   onTogglePinned?: (field: string) => void;
   hidePinColumn?: boolean;
@@ -84,7 +79,6 @@ export interface TableGridProps {
 
 const MIN_NAME_COLUMN_WIDTH = 150;
 const MAX_NAME_COLUMN_WIDTH = 350;
-export const PAGE_SIZE_OPTIONS = [25, 50, 100, 250, 500];
 
 export const GRID_COLUMN_FIELD_NAME = 'name';
 export const GRID_COLUMN_FIELD_VALUE = 'value';
@@ -100,10 +94,6 @@ export function TableGrid({
   columns,
   onFindSearchTermMatch,
   searchTerm,
-  initialPageSize,
-  onChangePageSize,
-  initialPageIndex = 0,
-  onChangePageIndex,
   onTogglePinned,
   hidePinColumn = false,
   customRenderCellValue,
@@ -151,42 +141,6 @@ export function TableGrid({
       }),
     [rows, isEsqlMode, toasts, filter, hideFilteringOnComputedColumns]
   );
-
-  const { curPageIndex, pageSize, totalPages, changePageIndex, changePageSize } = usePager({
-    initialPageSize,
-    initialPageIndex,
-    totalItems: rows.length,
-  });
-
-  const handleChangePageIndex = useCallback(
-    (newPageIndex: number) => {
-      onChangePageIndex?.(newPageIndex);
-      changePageIndex(newPageIndex);
-    },
-    [changePageIndex, onChangePageIndex]
-  );
-
-  const handleChangePageSize = useCallback(
-    (newPageSize: number) => {
-      onChangePageSize?.(newPageSize);
-      changePageSize(newPageSize);
-    },
-    [changePageSize, onChangePageSize]
-  );
-
-  const showPagination = totalPages !== 0;
-
-  const pagination = useMemo(() => {
-    return showPagination
-      ? {
-          onChangeItemsPerPage: handleChangePageSize,
-          onChangePage: handleChangePageIndex,
-          pageIndex: curPageIndex,
-          pageSize,
-          pageSizeOptions: PAGE_SIZE_OPTIONS,
-        }
-      : undefined;
-  }, [showPagination, handleChangePageSize, handleChangePageIndex, curPageIndex, pageSize]);
 
   const gridColumns: EuiDataGridProps['columns'] = useMemo(
     () => [
@@ -307,7 +261,6 @@ export function TableGrid({
       rowCount={rows.length}
       renderCellValue={customRenderCellValue ? customRenderCellValue : renderCellValue}
       renderCellPopover={customRenderCellPopover ? customRenderCellPopover : renderCellPopover}
-      pagination={pagination}
       leadingControlColumns={leadingControlColumns}
       virtualizationOptions={virtualizationOptions}
     />

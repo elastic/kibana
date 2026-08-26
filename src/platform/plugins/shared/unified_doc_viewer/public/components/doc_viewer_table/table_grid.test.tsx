@@ -17,10 +17,23 @@ import { buildHitMock } from '../../__mocks__';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import userEvent from '@testing-library/user-event';
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  euiFontSize: () => ({ fontSize: '12px' }),
-}));
+const mockEuiDataGrid = jest.fn();
+
+jest.mock('@elastic/eui', () => {
+  const actual = jest.requireActual('@elastic/eui');
+  // jest.requireActual (not the top-level `React` import) since jest.mock factories
+  // cannot reference out-of-scope variables.
+  const ReactLib = jest.requireActual('react');
+  return {
+    ...actual,
+    euiFontSize: () => ({ fontSize: '12px' }),
+    // Records the props EuiDataGrid receives without changing its rendered output.
+    EuiDataGrid: ReactLib.forwardRef((props: Record<string, unknown>, ref: unknown) => {
+      mockEuiDataGrid(props);
+      return ReactLib.createElement(actual.EuiDataGrid, { ...props, ref });
+    }),
+  };
+});
 
 jest.mock('../../plugin', () => ({
   getUnifiedDocViewerServices: () => ({
@@ -76,7 +89,6 @@ describe('TableGrid', () => {
     columns: [GRID_COLUMN_FIELD_NAME, GRID_COLUMN_FIELD_VALUE],
     onFindSearchTermMatch: jest.fn(),
     searchTerm: '',
-    initialPageSize: 0,
   };
 
   it('renders the grid and displays field names and values', () => {
@@ -123,5 +135,15 @@ describe('TableGrid', () => {
       '[data-test-subj*="unifiedDocViewer_pinControl"]'
     );
     expect(pinControls.length).toBe(0);
+  });
+
+  it('never renders pagination controls, regardless of row count', () => {
+    const manyRows: FieldRow[] = Array.from({ length: 30 }, (_, i) =>
+      buildFieldRow(`field${i}`, `value${i}`)
+    );
+    render(<TableGrid {...defaultProps} rows={manyRows} />);
+    const gridProps = mockEuiDataGrid.mock.calls.at(-1)?.[0] as Record<string, unknown>;
+    expect(gridProps.pagination).toBeUndefined();
+    expect(gridProps.rowCount).toBe(manyRows.length);
   });
 });

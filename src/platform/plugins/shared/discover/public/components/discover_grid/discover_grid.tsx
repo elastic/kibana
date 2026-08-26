@@ -15,6 +15,7 @@ import {
   UnifiedDataTable,
   type UnifiedDataTableProps,
 } from '@kbn/unified-data-table';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import { useProfileAccessor } from '../../context_awareness';
 import type { DiscoverAppState } from '../../application/main/state_management/redux';
 import type { CascadedDocumentsContext } from '../../application/main/components/layout/cascaded_documents';
@@ -23,10 +24,15 @@ import {
   LazyCascadedDocumentsLayout,
   CascadedDocumentsProvider,
 } from '../../application/main/components/layout/cascaded_documents';
+import { TanStackDataGrid } from './tanstack_data_grid';
+import { DiscoverGridImplementationSwitch } from './discover_grid_implementation_switch';
+import { useDiscoverGridImplementation } from './use_discover_grid_implementation';
 
 export interface DiscoverGridProps extends UnifiedDataTableProps {
   query?: DiscoverAppState['query'];
   cascadedDocumentsContext?: CascadedDocumentsContext;
+  tanStackToolbarLeftSide?: ReactNode;
+  tanStackToolbarTrailingControl?: ReactNode;
 }
 
 /**
@@ -40,9 +46,15 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
     externalAdditionalControls: customExternalAdditionalControls,
     rowAdditionalLeadingControls: customRowAdditionalLeadingControls,
     onFullScreenChange,
+    tanStackToolbarLeftSide,
+    tanStackToolbarTrailingControl,
     ...props
   }) => {
-    const { dataView } = props;
+    const { dataView, services } = props;
+    const { usesUnifiedDataTable, toggleImplementation } = useDiscoverGridImplementation(
+      services.storage
+    );
+
     const getRowIndicatorProvider = useProfileAccessor('getRowIndicatorProvider');
     const getRowIndicator = useMemo(() => {
       return getRowIndicatorProvider(() => undefined)({ dataView: props.dataView });
@@ -114,20 +126,84 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
       isCascadedDocumentsAvailable,
     ]);
 
-    return isCascadedDocumentsAvailable && cascadedDocumentsContext.selectedCascadeGroups.length ? (
-      <CascadedDocumentsProvider value={cascadedDocumentsContext}>
-        <LazyCascadedDocumentsLayout
-          rows={props.rows}
+    const gridImplementationSwitch = (
+      <DiscoverGridImplementationSwitch
+        usesUnifiedDataTable={usesUnifiedDataTable}
+        onSwitch={toggleImplementation}
+      />
+    );
+
+    if (isCascadedDocumentsAvailable && cascadedDocumentsContext.selectedCascadeGroups.length) {
+      return (
+        <CascadedDocumentsProvider value={cascadedDocumentsContext}>
+          <LazyCascadedDocumentsLayout
+            rows={props.rows}
+            columns={props.columns}
+            dataGridDensityState={props.dataGridDensityState}
+            showTimeCol={props.showTimeCol}
+            dataView={props.dataView}
+            showKeyboardShortcuts={props.showKeyboardShortcuts}
+            externalCustomRenderers={props.externalCustomRenderers}
+            onUpdateDataGridDensity={props.onUpdateDataGridDensity}
+          />
+        </CascadedDocumentsProvider>
+      );
+    }
+
+    if (!usesUnifiedDataTable) {
+      return (
+        <TanStackDataGrid
+          rows={props.rows ?? []}
           columns={props.columns}
-          dataGridDensityState={props.dataGridDensityState}
-          showTimeCol={props.showTimeCol}
+          columnsMeta={props.columnsMeta}
           dataView={props.dataView}
-          showKeyboardShortcuts={props.showKeyboardShortcuts}
-          externalCustomRenderers={props.externalCustomRenderers}
+          query={isOfAggregateQueryType(query) ? query : undefined}
+          showTimeCol={props.showTimeCol}
+          isPlainRecord={props.isPlainRecord}
+          showColumnTokens
+          sort={props.sort}
+          onSort={props.onSort}
+          isSortEnabled={props.isSortEnabled}
+          settings={props.settings}
+          onResize={props.onResize}
+          onSetColumns={props.onSetColumns}
+          expandedDoc={props.expandedDoc}
+          setExpandedDoc={props.setExpandedDoc}
+          renderDocumentView={props.renderDocumentView}
+          setRenderDocumentViewMeta={props.setRenderDocumentViewMeta}
+          loadingState={props.loadingState}
+          onFilter={props.onFilter}
+          onFieldEdited={props.onFieldEdited}
+          shouldKeepAdHocDataViewImmutable={props.shouldKeepAdHocDataViewImmutable}
+          getRowIndicator={getRowIndicator}
+          rowAdditionalLeadingControls={rowAdditionalLeadingControls}
+          dataGridDensityState={props.dataGridDensityState}
           onUpdateDataGridDensity={props.onUpdateDataGridDensity}
+          rowHeightState={props.rowHeightState}
+          onUpdateRowHeight={props.onUpdateRowHeight}
+          configRowHeight={props.configRowHeight}
+          headerRowHeightState={props.headerRowHeightState}
+          onUpdateHeaderRowHeight={props.onUpdateHeaderRowHeight}
+          configHeaderRowHeight={props.configHeaderRowHeight}
+          maxAllowedSampleSize={props.maxAllowedSampleSize}
+          sampleSizeState={props.sampleSizeState}
+          onUpdateSampleSize={props.onUpdateSampleSize}
+          onFullScreenChange={onFullScreenChange}
+          services={services}
+          externalAdditionalControls={externalAdditionalControls}
+          gridImplementationSwitch={gridImplementationSwitch}
+          toolbarLeftSide={tanStackToolbarLeftSide}
+          toolbarTrailingControl={tanStackToolbarTrailingControl}
+          showKeyboardShortcuts={props.showKeyboardShortcuts}
+          showSummaryColumnToggle
+          enableComparisonMode
+          ariaLabelledBy={props.ariaLabelledBy}
+          showFullScreenButton={props.showFullScreenButton}
         />
-      </CascadedDocumentsProvider>
-    ) : (
+      );
+    }
+
+    return (
       <UnifiedDataTable
         showColumnTokens
         canDragAndDropColumns
@@ -144,6 +220,7 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
         externalAdditionalControls={externalAdditionalControls}
         onFullScreenChange={onFullScreenChange}
         {...props}
+        additionalDisplaySettingsContent={gridImplementationSwitch}
       />
     );
   }

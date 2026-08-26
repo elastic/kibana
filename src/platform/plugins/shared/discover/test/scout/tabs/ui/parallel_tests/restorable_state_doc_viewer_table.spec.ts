@@ -131,40 +131,5 @@ spaceTest.describe(
         });
       }
     );
-
-    spaceTest(
-      'restores DocViewer rows per page and page number per tab',
-      async ({ pageObjects }) => {
-        const { dataGrid, discover, docViewer, unifiedTabs } = pageObjects;
-
-        await spaceTest.step('tab 0: set the DocViewer table to 50 rows per page', async () => {
-          await openTableDocViewer(pageObjects);
-          await dataGrid.changeRowsPerPageTo(50, 'docViewer');
-          expect(await dataGrid.getCurrentRowsPerPage('docViewer')).toBe(50);
-          expect(await dataGrid.getCurrentPageNumber('docViewer')).toBe('1');
-        });
-
-        await spaceTest.step('tab 1: set the DocViewer table to 25 rows and page 2', async () => {
-          await unifiedTabs.createNewTab();
-          await discover.waitUntilTabIsLoaded();
-          await openTableDocViewer(pageObjects);
-          await dataGrid.changeRowsPerPageTo(25, 'docViewer');
-          expect(await dataGrid.getCurrentRowsPerPage('docViewer')).toBe(25);
-          await dataGrid.getPageButton(1, 'docViewer').click();
-          await expect(dataGrid.getCurrentPageButton('docViewer')).toHaveText('2');
-        });
-
-        await spaceTest.step(
-          'return to tab 0 and restore its DocViewer table pagination',
-          async () => {
-            await unifiedTabs.selectTab(0);
-            await discover.waitUntilTabIsLoaded();
-            await expect(docViewer.getFlyout()).toBeVisible();
-            expect(await dataGrid.getCurrentRowsPerPage('docViewer')).toBe(50);
-            expect(await dataGrid.getCurrentPageNumber('docViewer')).toBe('1');
-          }
-        );
-      }
-    );
   }
 );

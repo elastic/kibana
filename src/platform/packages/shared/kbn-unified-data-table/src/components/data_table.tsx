@@ -538,6 +538,11 @@ interface InternalUnifiedDataTableProps {
   hideFilteringOnComputedColumns?: boolean;
 
   /**
+   * Optional content rendered at the bottom of the grid display settings popover.
+   */
+  additionalDisplaySettingsContent?: React.ReactNode;
+
+  /**
    * Set to 'json' to display a JSON representation of the source document
    * instead of the Summary column. Defualt is summary.
    */
@@ -633,6 +638,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       shouldKeepAdHocDataViewImmutable,
       onFullScreenChange,
       hideFilteringOnComputedColumns,
+      additionalDisplaySettingsContent,
       sourceDisplayMode = 'summary',
     },
     ref
@@ -1374,6 +1380,7 @@ const InternalUnifiedDataTable = React.forwardRef<
               lineCountInput={lineCountInput}
               headerLineCountInput={headerLineCountInput}
               densityControl={densityControl}
+              additionalContent={additionalDisplaySettingsContent}
             />
           </>
         ),
@@ -1393,6 +1400,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       onUpdateDataGridDensity,
       lineCountInput,
       headerLineCountInput,
+      additionalDisplaySettingsContent,
     ]);
 
     const toolbarVisibility = useMemo(
