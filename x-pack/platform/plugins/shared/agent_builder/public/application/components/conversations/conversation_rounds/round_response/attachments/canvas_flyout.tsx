@@ -137,6 +137,14 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
   const title = uiDefinition?.getLabel?.(attachment) ?? attachment.type.toUpperCase();
   const header = uiDefinition?.getHeader?.({ attachment });
 
+  // Resolved independently of `canvasViewSpec`, which is undefined whenever the
+  // type renders its own canvas body — the share control is available either way.
+  const shareSlot = attachmentsService.getShareProvider()?.({
+    attachment,
+    spec: uiDefinition.getViewSpec?.(attachment),
+    isCanvas: true,
+  });
+
   const flyoutType = isSidebar || isNarrowViewport ? 'overlay' : 'push';
   const width = uiDefinition.canvasWidth ?? DEFAULT_CANVAS_WIDTH;
   const flyoutSize = isSidebar || isNarrowViewport ? 'full' : width;
@@ -173,6 +181,7 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
         subtitle={header?.subtitle}
         badges={header?.badges}
         actionButtons={canvasHeaderActionButtons}
+        {...{ shareSlot }}
         onClose={closeCanvas}
         previewBadgeState="preview_available"
         isCanvas

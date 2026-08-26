@@ -18,5 +18,7 @@ export type {
   ActionButton,
   AttachmentPreviewState,
   AttachmentLifecycleParams,
+  AttachmentShareProvider,
+  AttachmentShareProviderParams,
 } from './contract';
 export { ActionButtonType } from './contract';

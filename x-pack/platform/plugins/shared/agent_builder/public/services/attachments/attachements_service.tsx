@@ -10,7 +10,7 @@ import type {
   UnknownAttachment,
   UpdateOriginResponse,
 } from '@kbn/agent-builder-common/attachments';
-import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser';
+import type { AttachmentShareProvider, AttachmentUIDefinition } from '@kbn/agent-builder-browser';
 import { publicApiPath } from '../../../common/constants';
 import type { CheckStaleAttachmentsResponse } from '../../../common/http_api/attachments';
 
@@ -22,6 +22,7 @@ import type { CheckStaleAttachmentsResponse } from '../../../common/http_api/att
 export class AttachmentsService {
   private readonly registry: Map<string, AttachmentUIDefinition> = new Map();
   private readonly http: HttpSetup;
+  private shareProvider?: AttachmentShareProvider;
 
   constructor({ http }: { http: HttpSetup }) {
     this.http = http;
@@ -54,6 +55,25 @@ export class AttachmentsService {
     attachmentType: string
   ): AttachmentUIDefinition<TAttachment> | undefined {
     return this.registry.get(attachmentType) as AttachmentUIDefinition<TAttachment> | undefined;
+  }
+
+  /**
+   * Registers the provider for the attachment header's share control.
+   *
+   * @throws Error if a provider is already registered
+   */
+  registerShareProvider(provider: AttachmentShareProvider): void {
+    if (this.shareProvider) {
+      throw new Error('An attachment share provider is already registered.');
+    }
+    this.shareProvider = provider;
+  }
+
+  /**
+   * Retrieves the registered share provider, if any.
+   */
+  getShareProvider(): AttachmentShareProvider | undefined {
+    return this.shareProvider;
   }
 
   /**

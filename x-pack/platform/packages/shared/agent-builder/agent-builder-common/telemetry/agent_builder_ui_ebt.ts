@@ -188,6 +188,7 @@ const ebtAction = {
     EMBEDDABLE_AGENT_DETAILS: 'embeddable_agent_details',
     REMOVE_ATTACHMENT: 'remove_attachment',
     ATTACHMENT_CLOSE: 'attachment_close',
+    ATTACHMENT_SHARE: 'attachment_share',
     CONFIRM_PROMPT_CONFIRM: 'confirm_prompt_confirm',
     CONFIRM_PROMPT_CANCEL: 'confirm_prompt_cancel',
     AUTH_PROMPT_AUTHORIZE: 'auth_prompt_authorize',

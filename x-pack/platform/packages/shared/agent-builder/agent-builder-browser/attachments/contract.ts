@@ -242,6 +242,26 @@ export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = 
 }
 
 /**
+ * Parameters passed to the registered {@link AttachmentShareProvider}.
+ */
+export interface AttachmentShareProviderParams<
+  TAttachment extends UnknownAttachment = UnknownAttachment
+> {
+  /** The attachment whose header hosts the control. */
+  attachment: TAttachment;
+  /** The attachment's `getViewSpec` result, when it has one. */
+  spec?: ViewSpec;
+  /** Whether the attachment is being rendered in canvas mode (expanded flyout view). */
+  isCanvas: boolean;
+}
+
+/**
+ * Renders a control in the attachment header, right of the action buttons.
+ * Invoked for every attachment; return `null` for those it cannot serve.
+ */
+export type AttachmentShareProvider = (params: AttachmentShareProviderParams) => ReactNode;
+
+/**
  * Public-facing contract for the attachment service.
  */
 export interface AttachmentServiceStartContract {
@@ -265,4 +285,10 @@ export interface AttachmentServiceStartContract {
   getAttachmentUiDefinition: <TAttachment extends UnknownAttachment = UnknownAttachment>(
     attachmentType: string
   ) => AttachmentUIDefinition<TAttachment> | undefined;
+
+  /**
+   * Registers the provider for the attachment header's share control. A single
+   * slot: registering twice throws.
+   */
+  registerShareProvider: (provider: AttachmentShareProvider) => void;
 }
