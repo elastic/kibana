@@ -229,6 +229,5 @@ describe('getExpressionRendererProps', () => {
         })
       );
     });
-
   });
 });
