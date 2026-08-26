@@ -17,8 +17,8 @@ import { STACK_MANAGEMENT_NAV_ID, DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-
 import { AGENT_BUILDER_NAV_AT_TOP_FLAG } from '@kbn/navigation-plugin/public';
 import { getAlertingV2ManagementNavPanel } from '@kbn/alerting-v2-utils';
 import { getWorkflowsNavPanel } from '@kbn/deeplinks-workflows';
+import { i18n } from '@kbn/i18n';
 import { type Services } from '../common/services';
-import { SOLUTION_NAME } from './translations';
 
 export const createNavigationTree = (
   services: Services,
@@ -43,10 +43,11 @@ export const createNavigationTree = (
     body: [
       {
         id: 'security_solution_home',
-        icon: 'logoSecurity',
+        icon: 'home',
         link: securityLink(SecurityPageName.landing),
-        renderAs: 'home',
-        title: SOLUTION_NAME,
+        title: i18n.translate('xpack.securitySolutionEss.nav.home', {
+          defaultMessage: 'Home',
+        }),
       },
       ...(showAgentBuilder && agentBuilderNavAtTop ? [agentBuilderLink] : []),
       contextEngineLink,

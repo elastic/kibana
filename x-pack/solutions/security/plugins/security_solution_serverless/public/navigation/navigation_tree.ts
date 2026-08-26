@@ -21,11 +21,6 @@ import { getWorkflowsNavPanel } from '@kbn/deeplinks-workflows';
 import { type Services } from '../common/services';
 import { createManagementFooterItemsTree } from './management_footer_items';
 
-const SOLUTION_NAME = i18n.translate(
-  'xpack.securitySolutionServerless.navLinks.projectType.title',
-  { defaultMessage: 'Security' }
-);
-
 export const createNavigationTree = async (
   services: Services,
   chatExperience: AIChatExperience = AIChatExperience.Classic
@@ -49,9 +44,10 @@ export const createNavigationTree = async (
       {
         id: 'security_solution_home',
         link: securityLink(SecurityPageName.landing),
-        title: SOLUTION_NAME,
-        icon: 'logoSecurity',
-        renderAs: 'home',
+        title: i18n.translate('xpack.securitySolutionServerless.nav.home', {
+          defaultMessage: 'Home',
+        }),
+        icon: 'home',
       },
       ...(showAgentBuilder && agentBuilderNavAtTop ? [agentBuilderLink] : []),
       contextEngineLink,
