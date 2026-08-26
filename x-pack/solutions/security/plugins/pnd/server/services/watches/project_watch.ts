@@ -7,15 +7,10 @@
 
 import type { WorkflowListItemDto, WorkflowYaml } from '@kbn/workflows';
 import type {
-  ScheduleCadence,
-  ScheduleHandoff,
-  ScheduleMode,
-  ScopeAccess,
   Watch,
   WatchCallableRef,
   WatchRecentRun,
   WatchSchedule,
-  WatchScope,
   WatchTriggerProjection,
   WorkflowTriggerType,
 } from '@kbn/pnd-common';
@@ -24,26 +19,14 @@ import { coverageFromSchedule } from '@kbn/pnd-common';
 /** Static watch policy bag from `consts.watch_policy`. */
 interface WatchPolicyAttrs {
   mandate?: string;
-  handoff?: ScheduleHandoff;
-  scopes?: WatchScope[];
-  onDemand?: boolean;
-  draft?: boolean;
-  from?: number;
-  to?: number;
-  mode?: ScheduleMode;
-  cadence?: ScheduleCadence;
-  every?: number;
-  scopeSummary?: string;
   ui?: {
     color?: string;
-    icon?: string;
     order?: number;
   };
   callables?: WatchCallableRef[];
 }
 
 const DEFAULT_COLOR = '#6b7280';
-const DEFAULT_ICON = 'email';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -56,29 +39,6 @@ const asNumber = (value: unknown, fallback: number): number =>
 
 const asBoolean = (value: unknown, fallback: boolean): boolean =>
   typeof value === 'boolean' ? value : fallback;
-
-const asScopeAccess = (value: unknown): ScopeAccess => {
-  if (value === 'full' || value === 'masked' || value === 'denied') return value;
-  return 'full';
-};
-
-const asHandoff = (value: unknown): ScheduleHandoff => {
-  if (
-    value === 'officer' ||
-    value === 'oncall' ||
-    value === 'brief' ||
-    value === 'records' ||
-    value === 'none'
-  ) {
-    return value;
-  }
-  return 'none';
-};
-
-const asMode = (value: unknown): ScheduleMode => {
-  if (value === 'always' || value === 'window' || value === 'demand') return value;
-  return 'demand';
-};
 
 export const extractWatchPolicy = (
   definition: WorkflowYaml | null | undefined
@@ -114,44 +74,22 @@ export const projectTriggers = (
   });
 };
 
-export const projectSchedule = (
-  triggers: WatchTriggerProjection[],
-  policy: WatchPolicyAttrs | undefined
-): WatchSchedule => {
+export const projectSchedule = (triggers: WatchTriggerProjection[]): WatchSchedule => {
   const hasSchedule = triggers.some((t) => t.type === 'schedule');
   const hasEvent = triggers.some((t) => t.type === 'event');
   const hasManual = triggers.some((t) => t.type === 'manual');
-  const manualOnly = hasManual && !hasSchedule && !hasEvent;
-  const onDemand = manualOnly || (policy?.onDemand ?? false);
-
-  let mode: ScheduleMode = 'demand';
-  if (hasSchedule) {
-    mode = policy?.mode ? asMode(policy.mode) : 'window';
-  } else if (hasEvent) {
-    mode = 'always';
-  }
-
-  const set = !asBoolean(policy?.draft, false) && mode !== 'demand';
+  const set = hasSchedule || hasEvent;
 
   return {
     set,
-    mode,
-    from: asNumber(policy?.from, 8),
-    to: asNumber(policy?.to, 18),
-    onDemand,
+    mode: set ? 'always' : 'demand',
+    from: 0,
+    to: 23,
+    onDemand: hasManual,
     cadence: hasSchedule ? 'sweep' : hasEvent ? 'stream' : 'manual',
-    every: asNumber(policy?.every, 60),
-    handoff: asHandoff(policy?.handoff),
+    every: 60,
+    handoff: 'none',
   };
-};
-
-const projectScopes = (policy: WatchPolicyAttrs | undefined): WatchScope[] => {
-  if (!policy?.scopes || !Array.isArray(policy.scopes)) return [];
-  return policy.scopes.map((scope) => ({
-    name: asString(scope.name, 'Scope'),
-    access: asScopeAccess(scope.access),
-    label: asString(scope.label, 'Read'),
-  }));
 };
 
 const SKILL_URI_RE = /skill:\/\/([a-zA-Z0-9._-]+)/g;
@@ -289,7 +227,7 @@ export const projectWorkflowToWatch = (item: WorkflowListItemDto): Watch => {
   const definition = item.definition;
   const policy = extractWatchPolicy(definition);
   const triggers = projectTriggers(definition);
-  const schedule = projectSchedule(triggers, policy);
+  const schedule = projectSchedule(triggers);
   const coverage = coverageFromSchedule(schedule);
   const recentRuns = projectRecentRunsFromHistory(item.history);
   const lastRun = recentRuns[0]?.startedAt ?? null;
@@ -302,9 +240,8 @@ export const projectWorkflowToWatch = (item: WorkflowListItemDto): Watch => {
     name: item.name,
     tags,
     color: asString(policy?.ui?.color, DEFAULT_COLOR),
-    icon: asString(policy?.ui?.icon, DEFAULT_ICON),
     enabled: item.enabled,
-    draft: asBoolean(policy?.draft, !item.enabled),
+    draft: false,
     managed: item.managed === true,
     sortOrder,
     mandate: asString(policy?.mandate, item.description || 'Watch'),
@@ -312,46 +249,12 @@ export const projectWorkflowToWatch = (item: WorkflowListItemDto): Watch => {
     schedule,
     triggers,
     coverage,
-    scopeSummary: asString(policy?.scopeSummary, '—'),
-    scopes: projectScopes(policy),
+    scopeSummary: '',
+    scopes: [],
     callables: projectCallablesFromDefinition(definition, policy),
     metrics: {
-      // Real 7-day run counts are not available from the list/history projection yet.
-      runs7d: null,
-      acceptedPct: null,
-      timeSaved: null,
       lastRun,
     },
     recentRuns,
   };
 };
-
-export const buildCustomWatchYaml = (name: string, description: string): string => `version: "1"
-name: ${JSON.stringify(name)}
-description: ${JSON.stringify(description)}
-enabled: true
-tags:
-  - watch
-  - watch-custom
-triggers:
-  - type: manual
-consts:
-  watch_policy:
-    mandate: ${JSON.stringify(name)}
-    handoff: none
-    onDemand: true
-    draft: false
-    cadence: manual
-    mode: demand
-    ui:
-      color: "#6b7280"
-      icon: sparkles
-    scopeSummary: Custom
-    scopes: []
-    callables: []
-steps:
-  - name: run_watch
-    type: console
-    with:
-      message: "Custom watch skeleton — add agent skills next"
-`;
