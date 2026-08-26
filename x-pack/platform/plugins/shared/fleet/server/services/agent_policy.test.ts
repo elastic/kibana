@@ -1091,6 +1091,21 @@ describe('Agent policy', () => {
         })
       );
     });
+
+    it('should not fetch full package policies when deploying asynchronously', async () => {
+      const soClient = getSavedObjectMock({ revision: 1, monitoring_enabled: [] });
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      await agentPolicyService.bumpRevision(soClient, esClient, 'agent-policy', {
+        asyncDeploy: true,
+      });
+
+      // computeMinAgentVersionData always fetches package policies once, but `_update`'s eager
+      // full fetch (for the deploy event it never triggers on this branch) should now be skipped,
+      // so the total should stay at 1 instead of the 2 it would be if `_update` also fetched.
+      expect(mockedPackagePolicyService.findAllForAgentPolicy).toHaveBeenCalledTimes(1);
+      expect(scheduleDeployAgentPoliciesTask).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('bumpAllAgentPoliciesForOutput', () => {
@@ -3611,6 +3626,34 @@ describe('Agent policy', () => {
         type: 'password',
         value: 'ext-id-secret',
       });
+    });
+
+    it('should omit credentials_external_id when the AWS connector has no external_id', async () => {
+      const connectorWithoutExternalId = {
+        ...baseConnector,
+        attributes: {
+          ...baseConnector.attributes,
+          vars: {
+            role_arn: { type: 'text' as const, value: 'arn:aws:iam::123456:role/test' },
+          },
+        },
+      };
+
+      await agentPolicyService.createVerifierPolicy(
+        soClient,
+        esClient,
+        connectorWithoutExternalId as any,
+        baseVerificationInfo
+      );
+
+      const { streams: awsStreams } = mockedPackagePolicyService.create.mock.calls[0][2].inputs[0];
+      const vars = awsStreams[0].vars!;
+
+      expect(vars.credentials_role_arn).toEqual({
+        type: 'text',
+        value: 'arn:aws:iam::123456:role/test',
+      });
+      expect(vars.credentials_external_id).toBeUndefined();
     });
 
     it('should include Azure credential vars for azure provider', async () => {

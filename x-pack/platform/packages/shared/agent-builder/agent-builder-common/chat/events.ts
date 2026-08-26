@@ -12,6 +12,7 @@ import type {
   ConversationInternalState,
   ConversationRound,
   BackgroundExecutionState,
+  SubagentRosterEntry,
   TodoItem,
 } from './conversation';
 import type {
@@ -42,6 +43,7 @@ export enum ChatEventType {
   compactionStarted = 'compaction_started',
   compactionCompleted = 'compaction_completed',
   backgroundAgentComplete = 'background_agent_complete',
+  subagentRosterUpdated = 'subagent_roster_updated',
   userQuestionAsked = 'user_question_asked',
   userQuestionAnswered = 'user_question_answered',
 }
@@ -422,6 +424,29 @@ export const isBackgroundAgentCompleteEvent = (
   return event.type === ChatEventType.backgroundAgentComplete;
 };
 
+export interface SubagentRosterUpdatedEventData {
+  /** Full active roster at time of emission. */
+  roster: SubagentRosterEntry[];
+}
+
+export type SubagentRosterUpdatedEvent = ChatEventBase<
+  ChatEventType.subagentRosterUpdated,
+  SubagentRosterUpdatedEventData
+>;
+
+export const createSubagentRosterUpdatedEvent = (
+  roster: SubagentRosterEntry[]
+): SubagentRosterUpdatedEvent => ({
+  type: ChatEventType.subagentRosterUpdated,
+  data: { roster },
+});
+
+export const isSubagentRosterUpdatedEvent = (
+  event: AgentBuilderEvent<string, any>
+): event is SubagentRosterUpdatedEvent => {
+  return event.type === ChatEventType.subagentRosterUpdated;
+};
+
 export const TODOS_UPDATED_UI_EVENT = 'todos_updated' as const;
 
 export interface TodosUpdatedUiEventData {
@@ -453,6 +478,7 @@ export type ChatAgentEvent =
   | CompactionStartedEvent
   | CompactionCompletedEvent
   | BackgroundAgentCompleteEvent
+  | SubagentRosterUpdatedEvent
   | UserQuestionAskedEvent
   | UserQuestionAnsweredEvent;
 

@@ -49,14 +49,17 @@ jest.mock('./gcp_input_var_fields', () => ({
     disabled,
     onChange,
     isOrganization,
+    isEditPage,
   }: {
     disabled: boolean;
     onChange: (key: string, value: string) => void;
     isOrganization: boolean;
+    isEditPage?: boolean;
   }) => (
     <div data-test-subj="gcp-input-var-fields">
       <span data-test-subj="disabled-state">{disabled ? 'true' : 'false'}</span>
       <span data-test-subj="organization-state">{isOrganization ? 'true' : 'false'}</span>
+      <span data-test-subj="edit-page-state">{isEditPage ? 'true' : 'false'}</span>
       <button
         data-test-subj="agentless-field-change"
         type="button"
@@ -266,6 +269,12 @@ describe('GcpCredentialsFormAgentless', () => {
       renderWithIntl(<GcpCredentialsFormAgentless {...defaultProps} disabled={true} />);
 
       expect(screen.getByTestId('disabled-state')).toHaveTextContent('true');
+    });
+
+    it('passes isEditPage to GcpInputVarFields so secret credentials use the Replace UI', () => {
+      renderWithIntl(<GcpCredentialsFormAgentless {...defaultProps} isEditPage={true} />);
+
+      expect(screen.getByTestId('edit-page-state')).toHaveTextContent('true');
     });
   });
 

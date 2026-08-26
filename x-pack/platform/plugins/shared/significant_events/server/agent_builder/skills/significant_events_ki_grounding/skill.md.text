@@ -163,10 +163,12 @@ Build one topology graph for the batch. `query.features[]` seeds the graph; it n
    Example: a confirming signal identifies `service-a` as unable to connect to a database; a fetched dependency has `source: service-a`, `target: sql`, and connection-timeout evidence; and one fetched entity has `name: orders-db`, `technology: sql`, with metadata attributing it to `service-a`. Activate the path, select `orders-db` as causal, and retain the dependency as blast radius. If multiple entities match `sql` without attribution, select no target and use `service-a` as the causal fallback.
 2. **Build `causal_features`.** Add the entity or infrastructure that a confirming signal's found row identifies as failed. Otherwise, for an activated dependency path with a confirmed source match, add the uniquely attributed fetched target. If no target entity or infrastructure KI resolves, add the activated path's fetched source instead. Do not invent missing targets.
 3. **Build `blast_radius`.** Add every dependency edge in an active path. Add the confirmed source entity when the active path's signal shows that source is affected and it is not already in `causal_features`, and add any other affected entity or infrastructure component only when a confirming signal's found row shows that impact. A `causal_features` entry cannot also appear in `blast_radius`. Use:
-   - cause: `{ feature_id, name, stream_name? }`
-   - dependency: `{ type: "dependency", feature_id, source, target, protocol?, stream_name? }`
-   - entity: `{ type: "entity", feature_id, name, stream_name? }`
-   - infrastructure: `{ type: "infrastructure", feature_id, title?, workloads, stream_name? }`
+   - cause: `{ feature_id, type, subtype, name, stream_name? }`
+   - dependency: `{ type: "dependency", subtype, feature_id, source, target, protocol?, stream_name? }`
+   - entity: `{ type: "entity", subtype, feature_id, name, stream_name? }`
+   - infrastructure: `{ type: "infrastructure", subtype, feature_id, title?, workloads, stream_name? }`
+
+   Copy classification verbatim from each fetched KI: `subtype` on every entry and `type` on cause entries. Blast-radius `type` remains the row-shape label shown above.
 4. **Close the ledger.** Deduplicate all entries and assign each fetched candidate exactly one disposition: causal, blast radius, or excluded. `off_topic`, `refutes`, `inconclusive`, and `not_checked` may inform narrative assessment but cannot establish active topology.
 
 </procedure>

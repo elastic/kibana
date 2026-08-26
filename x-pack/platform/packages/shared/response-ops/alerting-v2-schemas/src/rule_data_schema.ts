@@ -46,12 +46,12 @@ export const ruleKindSchema = z
     z
       .literal('alert')
       .describe(
-        'Default. Tracks each problem as an alert episode across state changes — lifecycle, recovery detection, and notification dispatch via workflows. Use when the user wants to be notified, needs lifecycle tracking, or wants recovery detection.'
+        'Default. Tracks each problem as an alert episode and its lifecycle, link it to workflows to notify your team. Use when the user wants to detect and respond.'
       ),
     z
       .literal('signal')
       .describe(
-        'Records each match as a queryable event with no alerts, lifecycle tracking, or notifications — just data. Use for logging or detection without automated action.'
+        'Matches are stored as queryable events. No alerts, no notifications - just data. Use when the user wants to collect evidence.'
       ),
   ])
   .describe('The kind of the rule.');
@@ -144,7 +144,7 @@ export const noDataStrategySchema = z.union([
     .describe(
       'Emits a `no_data` alert event when no_data query returns no rows for the group. "emit" is not currently accepted by the create/update API.'
     ),
-  z.literal('recover').describe('Forces recovery when no data is present.'),
+  z.literal('recover').describe('Resolves the alert episode to inactive on the first no-data run.'),
   z.literal('none').describe('No-data situations are ignored (default).'),
 ]);
 export const noDataStrategy = {
@@ -173,7 +173,7 @@ export const esqlQuerySegmentSchema = z
 const composedBreachSchema = z
   .object({
     segment: esqlQuerySegmentSchema.describe(
-      'Appendable ES|QL segment for breach detection (required).'
+      "A clause appended to the end of the rule's ES|QL query. Required in breach blocks."
     ),
   })
   .strict();
@@ -213,23 +213,27 @@ export const composedQuerySchema = z
     base: esqlQuerySchema.describe(
       'Base ES|QL query. Time filters are applied automatically via the lookback window.'
     ),
-    breach: composedBreachSchema.describe('Breach detection configuration (required).'),
+    breach: composedBreachSchema
+      .optional()
+      .describe('Breach detection configuration. Omit to treat every base row as a breach.'),
     recovery: composedRecoverySchema
       .optional()
       .describe('Recovery query segment. Required when recovery_strategy is "query".'),
   })
   .strict()
   .check((ctx) => {
-    const breachError = validateEsqlQuery(
-      composeEsqlQuery(ctx.value.base, ctx.value.breach.segment)
-    );
-    if (breachError) {
-      ctx.issues.push({
-        code: 'custom',
-        path: ['breach', 'segment'],
-        message: breachError,
-        input: ctx.value.breach.segment,
-      });
+    if (ctx.value.breach) {
+      const breachError = validateEsqlQuery(
+        composeEsqlQuery(ctx.value.base, ctx.value.breach.segment)
+      );
+      if (breachError) {
+        ctx.issues.push({
+          code: 'custom',
+          path: ['breach', 'segment'],
+          message: breachError,
+          input: ctx.value.breach.segment,
+        });
+      }
     }
     if (ctx.value.recovery) {
       const recoveryError = validateEsqlQuery(
@@ -273,12 +277,20 @@ export type Query = z.infer<typeof querySchema>;
 /**
  * Returns the effective breach ES|QL query — what the executor actually runs
  * to detect breaches. For composed queries this is `base` concatenated with
- * `breach.segment`; for standalone it's `breach.query` verbatim.
+ * `breach.segment`, or just `base` when there is no segment to append. For
+ * standalone it's `breach.query` verbatim.
+ *
+ * A blank segment is treated the same as an omitted `breach` block: storage
+ * persists conditionless composed rules as an empty segment, so both shapes
+ * reach this function and must produce `base` without a trailing pipe.
  */
-export const getBreachEsqlQuery = (query: Query): string =>
-  query.format === 'composed'
-    ? composeEsqlQuery(query.base, query.breach.segment)
-    : query.breach.query;
+export const getBreachEsqlQuery = (query: Query): string => {
+  if (query.format === 'standalone') {
+    return query.breach.query;
+  }
+  const segment = query.breach?.segment;
+  return segment?.trim() ? composeEsqlQuery(query.base, segment) : query.base;
+};
 
 /**
  * Returns the recovery ES|QL query when `recoveryStrategy` is `'query'`,

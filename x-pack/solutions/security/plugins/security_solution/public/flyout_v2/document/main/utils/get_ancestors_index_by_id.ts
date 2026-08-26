@@ -7,6 +7,7 @@
 
 import { ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import { getNonLocalQualifiedIndex } from '../../../shared/utils/non_local_index';
 import {
   EVENT_SOURCE_FIELD_NAME,
   LEGACY_EVENT_SOURCE_FIELD_NAME,
@@ -34,7 +35,8 @@ const ANCESTOR_ID_INDEX_FIELD_PAIRS: ReadonlyArray<readonly [idField: string, in
  * map for those keeps the values rendered as plain text.
  */
 export const getAncestorsIndexById = (
-  dataFormattedForFieldBrowser: TimelineEventsDetailsItem[]
+  dataFormattedForFieldBrowser: TimelineEventsDetailsItem[],
+  documentIndex: string
 ): Record<string, string> => {
   const ruleType = dataFormattedForFieldBrowser.find((item) => item.field === ALERT_RULE_TYPE)
     ?.values?.[0];
@@ -52,7 +54,7 @@ export const getAncestorsIndexById = (
       ids.forEach((id, i) => {
         const indexName = indices[i];
         if (id && indexName) {
-          acc[id] = indexName;
+          acc[id] = getNonLocalQualifiedIndex(indexName, documentIndex);
         }
       });
       return acc;

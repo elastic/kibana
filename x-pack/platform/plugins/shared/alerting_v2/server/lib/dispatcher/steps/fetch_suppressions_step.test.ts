@@ -12,8 +12,11 @@ import {
   createAlertEpisode,
   createAlertEpisodeSuppression,
   createDispatcherPipelineState,
+  createStepLogger,
 } from '../fixtures/test_utils';
 import type { AlertEpisodeSuppression } from '../types';
+
+const logger = createStepLogger();
 
 describe('FetchSuppressionsStep', () => {
   it('fetches suppressions for provided episodes', async () => {
@@ -35,7 +38,7 @@ describe('FetchSuppressionsStep', () => {
       episodes: [createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', episode_id: 'e1' })],
     });
 
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
@@ -48,7 +51,7 @@ describe('FetchSuppressionsStep', () => {
     const step = new FetchSuppressionsStep(queryService);
 
     const state = createDispatcherPipelineState({ episodes: [] });
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
@@ -60,7 +63,7 @@ describe('FetchSuppressionsStep', () => {
     const step = new FetchSuppressionsStep(queryService);
 
     const state = createDispatcherPipelineState();
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
@@ -95,7 +98,7 @@ describe('FetchSuppressionsStep', () => {
       ],
     });
 
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
@@ -147,7 +150,7 @@ describe('FetchSuppressionsStep', () => {
     });
 
     const state = createDispatcherPipelineState({ episodes });
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
     expect(mockEsClient.esql.query.mock.calls.length).toBeGreaterThanOrEqual(2);
     for (const [args] of mockEsClient.esql.query.mock.calls) {

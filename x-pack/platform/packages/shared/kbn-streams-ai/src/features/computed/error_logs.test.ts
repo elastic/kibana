@@ -13,7 +13,6 @@ import { errorLogsGenerator } from './error_logs';
 
 jest.mock('@kbn/ai-tools', () => ({
   getSampleDocumentsEsql: jest.fn(),
-  DEFAULT_ESQL_QUERY_TIMEOUT_MS: 30_000,
 }));
 
 const getSampleDocumentsEsqlMock = jest.mocked(getSampleDocumentsEsql);
@@ -21,6 +20,7 @@ const getSampleDocumentsEsqlMock = jest.mocked(getSampleDocumentsEsql);
 const stream = { name: 'logs.test-default' } as Streams.all.Definition;
 const esClient = {} as ElasticsearchClient;
 const logger = {} as Logger;
+const signal = new AbortController().signal;
 
 describe('errorLogsGenerator', () => {
   beforeEach(() => {
@@ -48,6 +48,7 @@ describe('errorLogsGenerator', () => {
       end: 200,
       esClient,
       logger,
+      signal,
     });
 
     expect(getSampleDocumentsEsqlMock).toHaveBeenCalledWith(
@@ -58,6 +59,7 @@ describe('errorLogsGenerator', () => {
         end: 200,
         sampleSize: 5,
         whereCondition: expect.anything(),
+        abortSignal: signal,
       })
     );
     expect(result).toEqual({
@@ -68,7 +70,7 @@ describe('errorLogsGenerator', () => {
   it('filters with a single QSTR predicate so union-typed log.level stays pushable', async () => {
     getSampleDocumentsEsqlMock.mockResolvedValueOnce({ hits: [], total: 0 });
 
-    await errorLogsGenerator.generate({ stream, start: 100, end: 200, esClient, logger });
+    await errorLogsGenerator.generate({ stream, start: 100, end: 200, esClient, logger, signal });
 
     const { whereCondition } = getSampleDocumentsEsqlMock.mock.calls[0][0];
     if (!whereCondition) throw new Error('expected whereCondition to be defined');
@@ -106,6 +108,7 @@ describe('errorLogsGenerator', () => {
       end: 200,
       esClient,
       logger,
+      signal,
     });
 
     expect(result).toEqual({
@@ -158,6 +161,7 @@ describe('errorLogsGenerator', () => {
       end: 200,
       esClient,
       logger,
+      signal,
     });
 
     expect(result).toEqual({

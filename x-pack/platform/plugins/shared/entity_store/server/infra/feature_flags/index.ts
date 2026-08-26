@@ -8,6 +8,8 @@
 import type { IUiSettingsClient } from '@kbn/core/server';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../common';
 
+export { isLegacySecurityAssetsMigrationEnabled } from './legacy_security_assets_migration';
+
 export class FeatureFlags {
   constructor(private uiSettingsClient: IUiSettingsClient) {}
 

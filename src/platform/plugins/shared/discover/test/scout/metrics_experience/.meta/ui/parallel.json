@@ -1,21 +1,9 @@
 {
-  "sha1": "47ab5c13bb4d2fef4ee0d9b2ba3ddfec3e2a825b",
+  "sha1": "e3adb35a63b70ca80ddb205d8564e9308b13cc94",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
-    {
-      "id": "52c78078719bb17-1ee8b379c33773f",
-      "title": "Teardown metrics experience tests data",
-      "expectedStatus": "passed",
-      "tags": [],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/global.teardown.ts",
-        "line": 7,
-        "column": 1
-      }
-    },
     {
       "id": "0f64951867b1265-04ed931b557bf1b",
       "title": "Setup metrics experience tests data",
@@ -906,6 +894,42 @@
       }
     },
     {
+      "id": "8932175b6997324-fdfb836f616907a",
+      "title": "Metrics in Discover - Sorting reflects a non-default sort in the URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/sort.spec.ts",
+        "line": 86,
+        "column": 22
+      }
+    },
+    {
+      "id": "8932175b6997324-7bc7c0246d70eb9",
+      "title": "Metrics in Discover - Sorting applies a sort supplied by the URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/sort.spec.ts",
+        "line": 108,
+        "column": 9
+      }
+    },
+    {
       "id": "cf6e48e94eaa59e-49fe70160a5ca0f",
       "title": "Metrics in Discover - Tab Duplication State preserves currentPage and breakdown dimension when a tab is duplicated",
       "expectedStatus": "passed",
@@ -975,6 +999,17 @@
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/tab_duplication_state.spec.ts",
         "line": 96,
         "column": 50
+      }
+    },
+    {
+      "id": "52c78078719bb17-1ee8b379c33773f",
+      "title": "Teardown metrics experience tests data",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/global.teardown.ts",
+        "line": 7,
+        "column": 1
       }
     }
   ]
