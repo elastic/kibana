@@ -70,8 +70,6 @@ export class BrowseIntegrationPage {
   }
 
   async expectCollectionCardToBeVisible(groupId: string) {
-    return expect(
-      this.page.getByTestId(`integration-card:collection:${groupId}`)
-    ).toBeVisible();
+    return expect(this.page.getByTestId(`integration-card:collection:${groupId}`)).toBeVisible();
   }
 }
