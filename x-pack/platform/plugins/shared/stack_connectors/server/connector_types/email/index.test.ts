@@ -1202,9 +1202,13 @@ describe('execute()', () => {
   test('ensure fixed subject and message using HTTP_REQUEST', async () => {
     sendEmailMock.mockReset();
 
-    const executorOptionsWithHTTP = {
+    const executorOptionsWithHTTP: EmailConnectorTypeExecutorOptions = {
       ...executorOptions,
       source: { type: ActionExecutionSourceType.HTTP_REQUEST, source: null },
+      config: {
+        ...executorOptions.config,
+        service: 'other',
+      },
     };
 
     await connectorType.executor(executorOptionsWithHTTP);
