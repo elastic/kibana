@@ -1637,7 +1637,6 @@
     "core.ui.chrome.appearanceChange.requiresPageReloadButtonLabel": "Seite neu laden",
     "core.ui.chrome.appearanceChange.successNotificationText": "Laden Sie die Seite neu, um die Änderungen zu sehen",
     "core.ui.chrome.appearanceChange.successNotificationTitle": "Systemfarbmodus aktualisiert",
-    "core.ui.chrome.breadcrumbs.ariaLabel": "Breadcrumbs",
     "core.ui.chrome.globalHeader.logoAriaLabel": "Elastic Startseite",
     "core.ui.chrome.globalHeader.searchButton.ariaLabel": "Search",
     "core.ui.chrome.globalHeader.searchButton.placeholder": "Inhalt finden...",
