@@ -118,18 +118,17 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
   const { initializeProfileDataViews } = useDefaultAdHocDataViews();
   const [mainRouteInitializationState, initializeMainRoute] = useAsyncFunction<InitializeMainRoute>(
     async (loadedRootProfileState) => {
-      const [hasESData, hasDataView, defaultDataViewExists, hasESQLDatasets] =
-        await Promise.all([
-          dataViews.hasData.hasESData().catch(() => false),
-          dataViews.hasData.hasDataView().catch(() => false),
-          dataViews.defaultDataViewExists().catch(() => false),
-          core.http
-            .get<EsqlDatasetsResult>(DATASETS_ROUTE)
-            .then((res) => res.datasets.length > 0)
-            .catch(() => false),
-          dispatch(internalStateActions.loadDataViewList()).catch(() => {}),
-          initializeProfileDataViews(loadedRootProfileState).catch(() => {}),
-        ]);
+      const [hasESData, hasDataView, defaultDataViewExists, hasESQLDatasets] = await Promise.all([
+        dataViews.hasData.hasESData().catch(() => false),
+        dataViews.hasData.hasDataView().catch(() => false),
+        dataViews.defaultDataViewExists().catch(() => false),
+        core.http
+          .get<EsqlDatasetsResult>(DATASETS_ROUTE)
+          .then((res) => res.datasets.length > 0)
+          .catch(() => false),
+        dispatch(internalStateActions.loadDataViewList()).catch(() => {}),
+        initializeProfileDataViews(loadedRootProfileState).catch(() => {}),
+      ]);
       const initializationState: DiscoverInternalState['initializationState'] = {
         hasESData: hasESData || hasESQLDatasets,
         hasDataView: (hasDataView && defaultDataViewExists) || hasESQLDatasets,
