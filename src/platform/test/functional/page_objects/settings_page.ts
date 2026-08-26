@@ -772,6 +772,9 @@ export class SettingsPageObject extends FtrService {
     await this.retry.try(async () => {
       this.log.debug('getAlertText');
       alertText = await this.testSubjects.getVisibleText('deleteDataViewFlyoutHeader');
+      // getVisibleText returns '' while the flyout is still animating in, and the retry accepts
+      // that empty read; wait for the static title to actually paint before returning it.
+      if (!alertText) throw new Error('delete data view flyout title has not rendered yet');
     });
     await this.retry.try(async () => {
       this.log.debug('acceptConfirmation');
