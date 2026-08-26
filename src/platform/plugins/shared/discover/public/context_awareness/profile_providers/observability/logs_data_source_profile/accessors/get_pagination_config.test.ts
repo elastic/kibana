@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { DEFAULT_PAGINATION_MODE } from '@kbn/unified-data-table';
 import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../../..';
 import { DataSourceCategory } from '../../../../profiles';
 import { getPaginationConfig } from './get_pagination_config';
@@ -19,7 +20,10 @@ const params = {
 describe('getPaginationConfig (logs)', () => {
   it('enforces singlePage over the mode a preceding profile set', () => {
     // Non-null assertion: accessors are optional on the profile type, this one is implemented here.
-    const result = getPaginationConfig!(() => ({ paginationMode: 'multiPage' as const }), params)();
+    const result = getPaginationConfig!(
+      () => ({ paginationMode: DEFAULT_PAGINATION_MODE }),
+      params
+    )();
 
     expect(result.paginationMode).toBe('singlePage');
   });
