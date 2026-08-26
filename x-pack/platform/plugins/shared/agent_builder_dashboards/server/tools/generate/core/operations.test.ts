@@ -74,17 +74,6 @@ describe('executeDashboardOperations', () => {
     grid,
   });
 
-  const createCustomContentPanel = (
-    id: string,
-    prompt: string,
-    grid: AttachmentPanel['grid'] = { x: 0, y: 0, w: 24, h: 6 }
-  ): AttachmentPanel => ({
-    id,
-    type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
-    config: { prompt },
-    grid,
-  });
-
   const createSection = (
     id: string,
     title: string,
@@ -1737,17 +1726,27 @@ describe('executeDashboardOperations', () => {
       );
     });
 
-    it('edits a custom_content panel in place by panelId', async () => {
+    it('edits a custom_content panel in place by panelId, passing the existing template to the resolver', async () => {
       const resolvePanelContent = jest.fn<
         ReturnType<ResolvePanelContent>,
         Parameters<ResolvePanelContent>
       >();
+      const resolveCustomContentTemplate = jest
+        .fn()
+        .mockResolvedValue('<div>Server generated</div>');
+
+      const existingPanel: AttachmentPanel = {
+        id: 'cc-1',
+        type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
+        config: { prompt: 'old prompt', template: '<div>Old template</div>' },
+        grid: { x: 0, y: 0, w: 24, h: 6 },
+      };
 
       const result = await executeDashboardOperations({
         dashboardData: {
           title: 'Test',
           description: 'Desc',
-          panels: [createCustomContentPanel('cc-1', 'old prompt')],
+          panels: [existingPanel],
         },
         operations: [
           {
@@ -1759,7 +1758,6 @@ describe('executeDashboardOperations', () => {
                 panelId: 'cc-1',
                 config: {
                   prompt: 'updated prompt',
-                  template: '<div>Updated</div>',
                 },
               },
             ],
@@ -1767,9 +1765,15 @@ describe('executeDashboardOperations', () => {
         ],
         logger,
         resolvePanelContent,
+        resolveCustomContentTemplate,
       });
 
       expect(resolvePanelContent).not.toHaveBeenCalled();
+      expect(resolveCustomContentTemplate).toHaveBeenCalledWith({
+        prompt: 'updated prompt',
+        esqlQuery: undefined,
+        existingTemplate: '<div>Old template</div>',
+      });
       expect(result.failures).toEqual([]);
 
       const topLevelPanels = getPanelsOnly(result.dashboardData.panels);
@@ -1777,10 +1781,57 @@ describe('executeDashboardOperations', () => {
         expect.objectContaining({
           id: 'cc-1',
           type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
-          config: { prompt: 'updated prompt', template: '<div>Updated</div>' },
+          config: {
+            prompt: 'updated prompt',
+            esqlQuery: undefined,
+            template: '<div>Server generated</div>',
+          },
           grid: { x: 0, y: 0, w: 24, h: 6 },
         })
       );
+    });
+
+    it('removes esqlQuery when null is passed in a custom_content config-source edit', async () => {
+      const resolveCustomContentTemplate = jest
+        .fn()
+        .mockResolvedValue('<div>Server generated</div>');
+
+      const existingPanel: AttachmentPanel = {
+        id: 'cc-1',
+        type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
+        config: {
+          prompt: 'old prompt',
+          esqlQuery: 'FROM logs | STATS count = COUNT(*)',
+          template: '<div>Old</div>',
+        },
+        grid: { x: 0, y: 0, w: 24, h: 6 },
+      };
+
+      const result = await executeDashboardOperations({
+        dashboardData: { title: 'Test', description: 'Desc', panels: [existingPanel] },
+        operations: [
+          {
+            operation: 'edit_panels',
+            panels: [
+              {
+                source: 'config',
+                type: 'custom_content',
+                panelId: 'cc-1',
+                config: { esqlQuery: null },
+              },
+            ],
+          },
+        ],
+        logger,
+        resolvePanelContent: jest.fn(),
+        resolveCustomContentTemplate,
+      });
+
+      expect(resolveCustomContentTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({ esqlQuery: undefined })
+      );
+      const topLevelPanels = getPanelsOnly(result.dashboardData.panels);
+      expect(topLevelPanels[0].config).toMatchObject({ esqlQuery: undefined });
     });
 
     it('records a failure when a custom_content config-source edit targets a non-custom_content panel', async () => {
@@ -1829,6 +1880,42 @@ describe('executeDashboardOperations', () => {
           config: { type: 'metric' },
         })
       );
+    });
+
+    it('preserves the existing template when resolveCustomContentTemplate is absent', async () => {
+      const existingPanel: AttachmentPanel = {
+        id: 'cc-1',
+        type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
+        config: { prompt: 'old prompt', template: '<div>Existing</div>' },
+        grid: { x: 0, y: 0, w: 24, h: 6 },
+      };
+
+      const result = await executeDashboardOperations({
+        dashboardData: { title: 'Test', description: 'Desc', panels: [existingPanel] },
+        operations: [
+          {
+            operation: 'edit_panels',
+            panels: [
+              {
+                source: 'config',
+                type: 'custom_content',
+                panelId: 'cc-1',
+                config: { prompt: 'updated prompt' },
+              },
+            ],
+          },
+        ],
+        logger,
+        resolvePanelContent: jest.fn(),
+        // resolveCustomContentTemplate intentionally absent
+      });
+
+      expect(result.failures).toEqual([]);
+      const topLevelPanels = getPanelsOnly(result.dashboardData.panels);
+      expect(topLevelPanels[0].config).toEqual({
+        prompt: 'updated prompt',
+        template: '<div>Existing</div>',
+      });
     });
 
     it('mixes markdown and visualization edits in one op, parallelizing only the visualization resolves', async () => {

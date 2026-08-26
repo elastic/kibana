@@ -13,7 +13,12 @@ import {
   reverseMap,
   type ToolIdMapping,
 } from '@kbn/agent-builder-genai-utils/langchain';
-import type { BrowserApiToolMetadata, ChatAgentEvent, RoundInput } from '@kbn/agent-builder-common';
+import type {
+  BrowserApiToolMetadata,
+  ChatAgentEvent,
+  RoundInput,
+  SerializedMetadataValue,
+} from '@kbn/agent-builder-common';
 import { ToolOrigin } from '@kbn/agent-builder-common';
 import {
   ConversationRoundStatus,
@@ -57,7 +62,10 @@ import type { RunAgentParams, RunAgentResponse } from './run_agent';
 import { steps } from './constants';
 import { createPromptFactory } from './prompts';
 import { BackgroundExecutionService } from './background_execution_service';
+import { SubagentTracker } from './subagent_tracker';
 import type { StateType } from './state';
+import { conversationIndexName } from '../../conversation/client/storage';
+import { roundsForContext } from '../../conversation';
 
 const chatAgentGraphName = 'default-agent-builder-agent';
 
@@ -116,6 +124,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     experimentalFeatures,
     todoStateManager,
     renderers,
+    conversationClient,
   } = context;
 
   ensureValidInput({ input: nextInput, conversation, action });
@@ -137,6 +146,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     subAgentExecutor: context.subAgentExecutor,
     initialState: conversation?.state?.background_executions,
   });
+
+  const subagentTracker = new SubagentTracker(conversation?.state?.subagents);
 
   const model = await modelProvider.getDefaultModel();
   const resolvedCapabilities = resolveCapabilities(capabilities);
@@ -172,12 +183,17 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   toolManager.setEventEmitter(eventEmitter);
   toolManager.setMaxToolResultTokens(DEFAULT_MAX_TOOL_RESULT_TOKENS);
 
+  const previousRounds = conversation ? roundsForContext(conversation) : [];
+
   // Pass action so regenerate uses the last round's original input instead of request input
   let processedConversation = await prepareConversation({
     nextInput,
-    previousRounds: conversation?.rounds ?? [],
+    previousRounds,
+    nextInputAuthor: pendingRound?.author ?? author,
     context,
     action,
+    metadata: conversation?.metadata,
+    templateId: conversation?.template_id,
   });
 
   const beforeHookResult = await context.hooks.run(HookLifecycle.beforeAgent, {
@@ -228,6 +244,30 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     }),
   ]);
 
+  const conversationId = conversation?.id;
+  const updateConversationMetadata =
+    conversationId && conversation?.template_id
+      ? async (updates: Record<string, SerializedMetadataValue>) => {
+          // Painless script merge — preserves any metadata keys written by concurrent tool
+          // calls in the same run that a doc-replace update would silently discard.
+          await context.esClient.asInternalUser.update({
+            index: conversationIndexName,
+            id: conversationId,
+            script: {
+              lang: 'painless',
+              source:
+                'if (ctx._source.metadata == null) { ctx._source.metadata = params.updates; } else { ctx._source.metadata.putAll(params.updates); }',
+              params: { updates },
+            },
+            retry_on_conflict: 3,
+          });
+        }
+      : undefined;
+
+  const conversationTemplate = conversation?.template_id
+    ? await context.conversationTemplates.get(conversation.template_id)
+    : undefined;
+
   await registerInternalTools({
     context,
     agentId,
@@ -235,8 +275,13 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     capabilities,
     abortSignal,
     backgroundExecutionService,
+    updateConversationMetadata,
+    conversationTemplate,
     filteredSkills,
     relevantSkillsEnabled,
+    parentConversationId: conversation?.id,
+    subagentTracker,
+    conversationExists: (id: string) => conversationClient.exists(id),
   });
 
   // Then add dynamic tools
@@ -284,8 +329,14 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     eventEmitter: events.emit,
   });
 
-  // Reassign to the (possibly compacted) conversation for prompt construction
-  processedConversation = compactionResult.processedConversation;
+  // Reassign to the (possibly compacted) conversation for prompt construction.
+  // Re-propagate conversation-level fields that compaction does not touch.
+  processedConversation = {
+    ...compactionResult.processedConversation,
+    metadata: conversation?.metadata,
+    template_id: conversation?.template_id,
+  };
+  processedConversation.subagentRosterFallback = subagentTracker.snapshot();
 
   let relevantSkillsSelection: RelevantSkillSelection | undefined;
   if (relevantSkillsEnabled) {
@@ -300,6 +351,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const promptFactory = createPromptFactory({
     configuration: resolvedConfiguration,
     capabilities: resolvedCapabilities,
+    spaceId: context.spaceId,
     skills: filteredSkills,
     processedConversation,
     toolManager,
@@ -310,6 +362,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     relevantSkillsEnabled,
     relevantSkills: relevantSkillsSelection,
     renderers: renderers?.getRegisteredRenderers() ?? [],
+    conversationTemplates: context.conversationTemplates,
   });
 
   const agentGraph = createAgentGraph({
@@ -324,7 +377,10 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     processedConversation,
     promptFactory,
     backgroundExecutionService,
+    subagentTracker,
     roundId,
+    sessionId: conversation?.id ?? executionId,
+    cacheControl: { type: 'ephemeral', ttl: '5m' },
   });
 
   logger.debug(`Running chat agent with graph: ${chatAgentGraphName}, runId: ${runId}`);
@@ -390,10 +446,12 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
           compactionSummary: compactionResult.summary,
           backgroundExecutionService,
           todoStateManager,
+          subagents: subagentTracker.snapshot(),
         }),
       pendingRound,
       startTime,
       modelProvider,
+      mainConnectorId: model.connector.connectorId,
       stateManager,
       attachmentStateManager: context.attachmentStateManager,
       configurationOverrides: effectiveOverrides,
@@ -433,12 +491,14 @@ const getConversationState = ({
   backgroundExecutionService,
   compactionSummary,
   todoStateManager,
+  subagents,
 }: {
   promptManager: PromptManager;
   toolManager: ToolManager;
   backgroundExecutionService: BackgroundExecutionService;
   compactionSummary?: CompactionSummary;
   todoStateManager: TodoStateManager;
+  subagents?: Record<string, string>;
 }): ConversationInternalState => {
   const bgState = backgroundExecutionService.getPendingState();
   const todos = todoStateManager.get();
@@ -448,6 +508,7 @@ const getConversationState = ({
     ...(compactionSummary ? { compaction_summary: compactionSummary } : {}),
     ...(Object.keys(bgState).length > 0 ? { background_executions: bgState } : {}),
     ...(todos !== undefined ? { todos } : {}),
+    ...(subagents && Object.keys(subagents).length > 0 ? { subagents } : {}),
   };
 };
 

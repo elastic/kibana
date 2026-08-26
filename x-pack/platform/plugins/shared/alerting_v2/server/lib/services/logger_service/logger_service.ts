@@ -11,6 +11,7 @@ import type { Logger, LogMessageSource } from '@kbn/logging';
 import { createToken, Logger as BaseLogger } from '@kbn/core-di';
 import type { EcsError } from '@elastic/ecs';
 import type {
+  AlertingLabels,
   AlertingSubsystemName,
   DebugParams,
   ErrorParams,
@@ -26,6 +27,12 @@ export interface LoggerServiceContract {
 
   /** Return a child logger scoped to a subsystem name. */
   forSubsystem(name: AlertingSubsystemName): LoggerServiceContract;
+
+  /**
+   * Return a child logger that merges the given labels into every subsequent
+   * log record. Bind once per execution (or tick); do not rebuild per call.
+   */
+  withLabels(labels: AlertingLabels): LoggerServiceContract;
 }
 
 export const LoggerServiceToken = createToken<LoggerServiceContract>('alerting_v2.LoggerService');
@@ -45,30 +52,38 @@ const buildEcsError = (error: Error, message?: string): EcsError => ({
 @injectable()
 export class LoggerService implements LoggerServiceContract {
   private readonly subsystems = new Map<AlertingSubsystemName, LoggerServiceContract>();
+  private readonly boundLabels: AlertingLabels;
 
-  constructor(@inject(BaseLogger) private readonly logger: Logger) {}
+  constructor(
+    @inject(BaseLogger) private readonly logger: Logger,
+    boundLabels: AlertingLabels = {}
+  ) {
+    this.boundLabels = boundLabels;
+  }
 
   public debug({ message, labels }: DebugParams): void {
-    if (isEmpty(labels)) {
+    const mergedLabels = this.resolveLabels(labels);
+    if (mergedLabels === undefined) {
       this.logger.debug(message);
       return;
     }
 
-    this.logger.debug(message, { labels });
+    this.logger.debug(message, { labels: mergedLabels });
   }
 
   public info({ message, labels }: InfoParams): void {
-    if (isEmpty(labels)) {
+    const mergedLabels = this.resolveLabels(labels);
+    if (mergedLabels === undefined) {
       this.logger.info(message);
       return;
     }
 
-    this.logger.info(message, { labels });
+    this.logger.info(message, { labels: mergedLabels });
   }
 
   public warn({ message, code, labels, error }: WarnParams): void {
     this.logger.warn(message, {
-      labels: { ...labels, code },
+      labels: { ...this.resolveLabels(labels), code },
       ...(error === undefined ? {} : { error: buildEcsError(normalizeError(error)) }),
     });
   }
@@ -79,15 +94,25 @@ export class LoggerService implements LoggerServiceContract {
       message === undefined ? normalizedError.message : resolveMessage(message);
 
     this.logger.error(resolvedMessage, {
-      labels: { ...labels, code },
+      labels: { ...this.resolveLabels(labels), code },
       error: buildEcsError(normalizedError, resolvedMessage),
     });
   }
 
   public forSubsystem(name: AlertingSubsystemName): LoggerServiceContract {
-    const subsystem = this.subsystems.get(name) ?? new LoggerService(this.logger.get(name));
+    const subsystem =
+      this.subsystems.get(name) ?? new LoggerService(this.logger.get(name), this.boundLabels);
     this.subsystems.set(name, subsystem);
 
     return subsystem;
+  }
+
+  public withLabels(labels: AlertingLabels): LoggerServiceContract {
+    return new LoggerService(this.logger, { ...this.boundLabels, ...labels });
+  }
+
+  private resolveLabels(labels?: AlertingLabels): AlertingLabels | undefined {
+    const merged = { ...this.boundLabels, ...labels };
+    return isEmpty(merged) ? undefined : merged;
   }
 }

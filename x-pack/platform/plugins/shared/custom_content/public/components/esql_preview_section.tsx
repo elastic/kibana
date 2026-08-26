@@ -31,10 +31,10 @@ import type { EsqlDataResult } from '../utils/fetch_esql_data';
 interface EsqlPreviewSectionProps {
   esqlQuery: string;
   onEsqlQueryChange: (q: string) => void;
-  isPreviewLoading: boolean;
-  previewData: EsqlDataResult | null;
-  previewError: string | null;
-  onPreview: () => void;
+  isDataLoading: boolean;
+  esqlData: EsqlDataResult | null;
+  esqlDataError: string | null;
+  onFetchData: () => void;
 }
 
 const MAX_PREVIEW_ROWS = 5;
@@ -59,13 +59,13 @@ const detectTimeField = (
 export const EsqlPreviewSection = ({
   esqlQuery,
   onEsqlQueryChange,
-  isPreviewLoading,
-  previewData,
-  previewError,
-  onPreview,
+  isDataLoading,
+  esqlData,
+  esqlDataError,
+  onFetchData,
 }: EsqlPreviewSectionProps) => {
-  const previewRows = previewData?.values?.slice(0, MAX_PREVIEW_ROWS) ?? [];
-  const columns = previewData?.columns ?? [];
+  const previewRows = esqlData?.values?.slice(0, MAX_PREVIEW_ROWS) ?? [];
+  const columns = esqlData?.columns ?? [];
 
   const [detectedTimeField, setDetectedTimeField] = useState<string | undefined>(undefined);
   const initialQueryRef = useRef(esqlQuery);
@@ -75,9 +75,9 @@ export const EsqlPreviewSection = ({
     return query.trim() ? detectTimeField(query, setDetectedTimeField) : undefined;
   }, []);
 
-  const handlePreview = () => {
+  const handleFetchData = () => {
     if (esqlQuery.trim()) detectTimeField(esqlQuery, setDetectedTimeField);
-    onPreview();
+    onFetchData();
   };
 
   return (
@@ -142,8 +142,8 @@ export const EsqlPreviewSection = ({
       <EuiSpacer size="s" />
       <EuiButton
         size="s"
-        isLoading={isPreviewLoading}
-        onClick={handlePreview}
+        isLoading={isDataLoading}
+        onClick={handleFetchData}
         disabled={!esqlQuery.trim()}
         iconType="play"
       >
@@ -152,7 +152,7 @@ export const EsqlPreviewSection = ({
         })}
       </EuiButton>
 
-      {previewError && (
+      {esqlDataError && (
         <>
           <EuiSpacer size="s" />
           <KbnDangerCallout
@@ -160,12 +160,12 @@ export const EsqlPreviewSection = ({
               defaultMessage: 'Preview failed',
             })}
           >
-            {previewError}
+            {esqlDataError}
           </KbnDangerCallout>
         </>
       )}
 
-      {previewData && columns.length > 0 && (
+      {esqlData && columns.length > 0 && (
         <>
           <EuiSpacer size="s" />
           <EuiTable tableLayout="auto" compressed>

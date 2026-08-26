@@ -6,41 +6,46 @@
  */
 
 import React from 'react';
-import { EuiPanel, EuiSpacer, EuiText, EuiTitle, useGeneratedHtmlId } from '@elastic/eui';
+import { EuiSpacer, EuiText, EuiTitle, useGeneratedHtmlId } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { AddDataSearchBar, CuratedGrid, MiniTilesRow } from '../add_data_grid';
+import { CuratedGrid, MiniTilesRow } from '../add_data_grid';
 import { BrowseAllIntegrationsTile } from './browse_all_integrations_tile';
 import {
   useObservabilityCuratedCategories,
   useObservabilityMiniTiles,
 } from './observability_flavor';
-import { ObservabilitySearchResults } from './observability_search_results';
-
-interface Props {
-  searchValue: string;
-  onSearchChange: (value: string) => void;
-}
 
 /**
- * The o11y host composition of the Add Data grid, in the current Variant B
- * layout (results replace the curated grid inside the panel).
+ * The o11y host composition of the curated Add Data grid in the Variant A
+ * layout: a flat section that stays visible whatever the search state is.
  */
-export const ObservabilityIntegrationsSection = ({ searchValue, onSearchChange }: Props) => {
+export const ObservabilityIntegrationsSection = ({
+  onOpenCollection,
+}: {
+  /** Names the chooser the page should open, by Fleet's group id. */
+  onOpenCollection: (groupId: string) => void;
+}) => {
   const titleId = useGeneratedHtmlId({ prefix: 'integrationsGridTitle' });
-  const categories = useObservabilityCuratedCategories();
-  const miniTiles = useObservabilityMiniTiles();
-  const searchTerm = searchValue.trim();
+  const categories = useObservabilityCuratedCategories({ onOpenCollection });
+  const miniTiles = useObservabilityMiniTiles({ onOpenCollection });
 
   return (
     <section aria-labelledby={titleId}>
       <EuiTitle size="s">
-        <h3 id={titleId}>
+        <h2 id={titleId}>
           {i18n.translate('xpack.observability_onboarding.integrationsGrid.title', {
-            defaultMessage: 'Integrations',
+            defaultMessage: 'All integrations',
           })}
-        </h3>
+        </h2>
       </EuiTitle>
-      <EuiSpacer size="s" />
+      {/* Design spec calls for 12px here, between EuiSpacer's 8px ("s") and 16px ("m") steps. */}
+      <EuiSpacer
+        size="s"
+        css={css`
+          block-size: 12px;
+        `}
+      />
       <EuiText size="s" color="subdued">
         <p>
           {i18n.translate('xpack.observability_onboarding.integrationsGrid.subtitle', {
@@ -50,32 +55,16 @@ export const ObservabilityIntegrationsSection = ({ searchValue, onSearchChange }
         </p>
       </EuiText>
       <EuiSpacer size="l" />
-      <EuiPanel color="subdued" hasShadow={false} paddingSize="l">
-        <AddDataSearchBar
-          value={searchValue}
-          onChange={onSearchChange}
-          placeholder={i18n.translate(
-            'xpack.observability_onboarding.integrationsGrid.search.placeholder',
-            { defaultMessage: 'Search integrations' }
+      <CuratedGrid categories={categories}>
+        <MiniTilesRow
+          label={i18n.translate(
+            'xpack.observability_onboarding.integrationsGrid.moreIntegrationsSection.title',
+            { defaultMessage: 'More integrations' }
           )}
-          data-test-subj="observabilityOnboardingIntegrationsSearchFieldSearch"
+          tiles={miniTiles}
+          browseAllTile={<BrowseAllIntegrationsTile />}
         />
-        <EuiSpacer size="l" />
-        {searchTerm === '' ? (
-          <CuratedGrid categories={categories}>
-            <MiniTilesRow
-              label={i18n.translate(
-                'xpack.observability_onboarding.integrationsGrid.moreIntegrationsSection.title',
-                { defaultMessage: 'More integrations' }
-              )}
-              tiles={miniTiles}
-              browseAllTile={<BrowseAllIntegrationsTile />}
-            />
-          </CuratedGrid>
-        ) : (
-          <ObservabilitySearchResults searchTerm={searchTerm} />
-        )}
-      </EuiPanel>
+      </CuratedGrid>
     </section>
   );
 };

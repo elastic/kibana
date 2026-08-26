@@ -96,6 +96,9 @@ export interface CasesUiConfigType {
   templates: {
     enabled: boolean;
   };
+  runWorkflows: {
+    enabled: boolean;
+  };
   casesRedesign: {
     list: boolean;
     details: boolean;

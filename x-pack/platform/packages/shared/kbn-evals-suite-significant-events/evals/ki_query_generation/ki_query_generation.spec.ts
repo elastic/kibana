@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { identifyKIQueries, QUERY_GENERATION_EXCLUDED_FEATURE_TYPES } from '@kbn/streams-ai';
+import {
+  identifyKIQueries,
+  QUERY_GENERATION_EXCLUDED_FEATURE_TYPES,
+  type ExistingQuerySummary,
+} from '@kbn/streams-ai';
 import { significantEventsPrompt } from '@kbn/streams-ai/src/significant_events/prompt';
 import {
   createMemoryDiscoveryTools,
@@ -14,9 +18,19 @@ import {
 import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
 import { tags } from '@kbn/scout';
 
-import { getCurrentTraceId, createSpanLatencyEvaluator } from '@kbn/evals';
+import {
+  getCurrentTraceId,
+  createSpanLatencyEvaluator,
+  createChatCallsEvaluator,
+} from '@kbn/evals';
 import type { Streams } from '@kbn/streams-schema';
 import type { Feature } from '@kbn/significant-events-schema';
+import { createReportedTokenEvaluators } from '../../src/evaluators/reported_tokens';
+import {
+  assertRerunRequiresCanonicalKIs,
+  buildQueryGenerationExamples,
+  type CollectedQueryGenExample,
+} from './build_query_gen_examples';
 import type { GcsConfig } from '../../src/data_generators/replay';
 import {
   canonicalKIFeaturesFromExpectedGroundTruth,
@@ -54,13 +68,6 @@ import {
 } from './grounding_tools';
 
 const TRUST_UPSTREAM = process.env.SIGEVENTS_TRUST_UPSTREAM === 'true';
-
-interface CollectedQueryGenExample {
-  scenario: KIQueryGenerationScenario;
-  kis: Feature[];
-  sampleLogs: string[];
-  sampleDocs: Array<Record<string, unknown>>;
-}
 
 evaluate.describe('KI query generation', { tag: tags.serverless.observability.complete }, () => {
   const activeDatasets = getActiveDatasets();
@@ -137,6 +144,8 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                     expectedGroundTruth: extractionScenario.output.expected_ground_truth,
                   })
                 : [];
+
+            assertRerunRequiresCanonicalKIs(scenario, canonicalKIs);
 
             const shouldUseCanonicalKIs =
               kiSource === 'canonical' || (kiSource === 'auto' && canonicalKIs.length > 0);
@@ -263,22 +272,10 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
             const groundingModes = resolveGroundingModes();
             const codeIndex = resolveCodeIndexForDataset(dataset.id);
 
-            const examples = collectedExamples.map(({ scenario }) => ({
-              id: scenario.input.scenario_id,
-              input: {
-                ...scenario.input,
-                snapshot_source: scenario.snapshot_source,
-              },
-              output: {
-                ...scenario.output,
-                criteria: scenario.output.criteria,
-                expected: scenario.output.expected_ground_truth,
-              },
-              metadata: {
-                ...scenario.metadata,
-                test_index: MANAGED_STREAM_SEARCH_PATTERN,
-              },
-            }));
+            const examples = buildQueryGenerationExamples(
+              collectedExamples,
+              MANAGED_STREAM_SEARCH_PATTERN
+            );
 
             const evaluatorsList = [
               ...createKIQueryGenerationEvaluators(
@@ -288,10 +285,12 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                 },
                 logger
               ),
+              ...createReportedTokenEvaluators(),
               evaluators.traceBasedEvaluators.inputTokens,
               evaluators.traceBasedEvaluators.outputTokens,
               evaluators.traceBasedEvaluators.cachedTokens,
               evaluators.traceBasedEvaluators.toolCalls,
+              createChatCallsEvaluator({ traceEsClient, log }),
               createSpanLatencyEvaluator({ traceEsClient, log, operationName: 'chat' }),
             ];
 
@@ -310,7 +309,13 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                     })
                   : undefined;
 
-              return async ({ input }: { input: KIQueryGenerationScenario['input'] }) => {
+              return async ({
+                input,
+              }: {
+                input: KIQueryGenerationScenario['input'] & {
+                  existing_queries?: ExistingQuerySummary[];
+                };
+              }) => {
                 const heavy = heavyDataByScenario.get(input.scenario_id);
                 if (!heavy) {
                   throw new Error(`No pre-collected data for scenario "${input.scenario_id}"`);
@@ -365,7 +370,7 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                   .filter(Boolean)
                   .join('\n');
 
-                const { queries, toolUsage } = await identifyKIQueries({
+                const { queries, toolUsage, tokensUsed, queryAttempts } = await identifyKIQueries({
                   stream,
                   esClient,
                   inferenceClient,
@@ -392,6 +397,12 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                     ...groundingTools?.additionalToolCallbacks,
                   },
                   maxSteps: groundingTools ? 12 : 8,
+                  requireQueryIntent: true,
+                  collectQueryAttempts: true,
+                  existingQueries: input.existing_queries?.map((q) => ({
+                    ...q,
+                    description: q.description.slice(0, 200),
+                  })),
                 });
 
                 logger.info(
@@ -401,6 +412,9 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                 return {
                   queries,
                   toolUsage,
+                  tokens_used: tokensUsed,
+                  query_attempts: queryAttempts,
+                  evaluation_arm: input.existing_queries ? ('rerun' as const) : ('clean' as const),
                   traceId: getCurrentTraceId(),
                   sample_logs: sampleLogs,
                   sample_docs: sampleDocs,

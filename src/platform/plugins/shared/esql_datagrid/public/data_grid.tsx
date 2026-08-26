@@ -156,7 +156,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
         timeRange: props.data.query.timefilter.timefilter.getTime(),
         query: props.query,
         columns: activeColumns,
-        isApproximate: props.isApproximate,
+        esqlApproximation: props.isApproximate,
       });
       return renderCustomToolbar({
         ...customToolbarProps,

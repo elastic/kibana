@@ -17,7 +17,12 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 import { ArrayFromString } from '@kbn/zod-helpers/v4';
 
-import { DatasetMaturity, DatasetFacets, DatasetTags } from '../common_attributes.gen';
+import {
+  DatasetMaturity,
+  DatasetFacets,
+  DatasetTags,
+  RedactedSpaceIds,
+} from '../common_attributes.gen';
 
 export const DatasetSummary = lazySchema(() =>
   z.object({
@@ -26,6 +31,7 @@ export const DatasetSummary = lazySchema(() =>
     description: z.string(),
     tags: DatasetTags.optional(),
     maturity: DatasetMaturity.optional(),
+    space_ids: RedactedSpaceIds.optional(),
     examples_count: z.number().int(),
     created_at: z.string(),
     updated_at: z.string(),

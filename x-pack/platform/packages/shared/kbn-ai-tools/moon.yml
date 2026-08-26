@@ -28,7 +28,6 @@ dependsOn:
   - '@kbn/std'
   - '@kbn/traced-es-client'
   - '@kbn/zod'
-  - '@kbn/logging'
 tags:
   - shared-server
   - package

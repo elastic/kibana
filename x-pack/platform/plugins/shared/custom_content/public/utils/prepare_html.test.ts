@@ -5,13 +5,19 @@
  * 2.0.
  */
 
-import {
-  stripMarkdownFences,
-  containsScript,
-  injectCsp,
-  sanitizeHtml,
-  isValidTemplate,
-} from './prepare_html';
+import { injectCsp, injectStyleTag, sanitizeHtml } from './prepare_html';
+
+describe('injectStyleTag', () => {
+  it('injects a <style> tag after <head>', () => {
+    const result = injectStyleTag('<html><head></head><body></body></html>', ':root{--x:red}');
+    expect(result).toContain('<head><style>:root{--x:red}</style>');
+  });
+
+  it('prepends when there is no <head>', () => {
+    const result = injectStyleTag('<p>hello</p>', ':root{--x:red}');
+    expect(result.startsWith('<style>:root{--x:red}</style>')).toBe(true);
+  });
+});
 
 describe('injectCsp', () => {
   it('injects CSP and color-scheme meta into an existing <head>', () => {
@@ -34,55 +40,6 @@ describe('injectCsp', () => {
     const once = injectCsp('<p>hello</p>');
     const twice = injectCsp(once);
     expect(twice.split('Content-Security-Policy').length).toBe(2);
-  });
-});
-
-describe('stripMarkdownFences', () => {
-  it('strips leading ```html and trailing ```', () => {
-    expect(stripMarkdownFences('```html\n<p>hi</p>\n```')).toBe('<p>hi</p>');
-  });
-
-  it('strips fences embedded inside an HTML shell', () => {
-    const raw = '<html><body>```html\n<p>hi</p>\n```</body></html>';
-    expect(stripMarkdownFences(raw)).not.toContain('```');
-  });
-
-  it('leaves plain HTML unchanged', () => {
-    expect(stripMarkdownFences('<p>hello</p>')).toBe('<p>hello</p>');
-  });
-
-  it('leaves a fenced code example deep in the body untouched', () => {
-    const filler = '<p>content</p>'.repeat(30);
-    const raw = `<html><body>${filler}<pre>Use \`\`\`bash\necho hi\n\`\`\` in your terminal</pre>${filler}</body></html>`;
-    const result = stripMarkdownFences(raw);
-    expect(result).toContain('```bash');
-    expect(result).toContain('echo hi');
-  });
-});
-
-describe('containsScript', () => {
-  it('detects a script tag regardless of case or attributes', () => {
-    expect(containsScript('<div></div><script>doStuff()</script>')).toBe(true);
-    expect(containsScript('<SCRIPT type="application/json">{}</SCRIPT>')).toBe(true);
-    expect(containsScript('<script/>')).toBe(true);
-  });
-
-  it('returns false for markup with no script tag', () => {
-    expect(containsScript('<div class="script-like">no actual script here</div>')).toBe(false);
-  });
-});
-
-describe('isValidTemplate', () => {
-  it('returns true for strings containing an HTML tag', () => {
-    expect(isValidTemplate('<div>hello</div>')).toBe(true);
-    expect(isValidTemplate('{% for row in rows %}<p>{{ row["x"].value }}</p>{% endfor %}')).toBe(
-      true
-    );
-  });
-
-  it('returns false for plain text with no HTML tag', () => {
-    expect(isValidTemplate('just some text')).toBe(false);
-    expect(isValidTemplate('')).toBe(false);
   });
 });
 

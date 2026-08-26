@@ -127,7 +127,7 @@ const baseRule: RuleApiResponse = {
   kind: 'signal',
   enabled: true,
   metadata: {
-    name: 'Test Signal Rule',
+    name: 'Test Events Rule',
     version: 1,
     description: 'Test rule description',
     tags: ['prod', 'infra'],
@@ -138,10 +138,10 @@ const baseRule: RuleApiResponse = {
     format: 'standalone',
     breach: { query: 'FROM logs-* | STATS count() BY host.name' },
   },
-  createdBy: 'alice@example.com',
-  createdAt: '2026-03-01T12:00:00.000Z',
-  updatedBy: 'bob@example.com',
-  updatedAt: '2026-03-04T12:00:00.000Z',
+  created_by: 'alice@example.com',
+  created_at: '2026-03-01T12:00:00.000Z',
+  updated_by: 'bob@example.com',
+  updated_at: '2026-03-04T12:00:00.000Z',
 };
 
 const renderPage = (rule: RuleApiResponse) =>
@@ -173,14 +173,14 @@ describe('RuleDetailPage', () => {
   it('wires breadcrumbs with the rule name', () => {
     renderPage(baseRule);
     expect(mockUseBreadcrumbs).toHaveBeenCalledWith('rule_details', {
-      ruleName: 'Test Signal Rule',
+      ruleName: 'Test Events Rule',
     });
   });
 
   it('renders the app header title and sidebar sections', async () => {
     renderPage(baseRule);
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
-      'Test Signal Rule'
+      'Test Events Rule'
     );
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.metadata)).toBeInTheDocument();
     expect(screen.queryByTestId('ruleTags')).not.toBeInTheDocument();
@@ -222,8 +222,8 @@ describe('RuleDetailPage', () => {
   it('renders native kind, status, and tag badges in the app header', () => {
     renderPage(baseRule);
     const kindBadge = screen.getByTestId('kindBadge');
-    expect(kindBadge).toHaveTextContent('Signal');
-    expect(kindBadge.querySelector('[data-euiicon-type="radar"]')).toBeInTheDocument();
+    expect(kindBadge).toHaveTextContent('Events');
+    expect(kindBadge.querySelector('[data-euiicon-type="chartBarVertical"]')).toBeInTheDocument();
     expect(screen.getByTestId('enabledBadge')).toHaveTextContent('Enabled');
     expect(screen.queryByTestId('disabledBadge')).not.toBeInTheDocument();
     fireEvent.click(screen.getByText('+2'));
@@ -231,10 +231,10 @@ describe('RuleDetailPage', () => {
     expect(screen.getByText('infra')).toBeInTheDocument();
   });
 
-  it('renders alert kind badge with its icon and disabled status badge', () => {
+  it('renders Alerts kind badge with its icon and disabled status badge', () => {
     renderPage({ ...baseRule, kind: 'alert', enabled: false });
     const kindBadge = screen.getByTestId('kindBadge');
-    expect(kindBadge).toHaveTextContent('Alert');
+    expect(kindBadge).toHaveTextContent('Alerts');
     expect(kindBadge.querySelector('[data-euiicon-type="bell"]')).toBeInTheDocument();
     expect(screen.getByTestId('disabledBadge')).toHaveTextContent('Disabled');
     expect(screen.queryByTestId('enabledBadge')).not.toBeInTheDocument();
@@ -310,7 +310,7 @@ describe('RuleDetailPage', () => {
     fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
 
     expect(mockDeleteRule).toHaveBeenCalledWith(
-      { id: 'rule-1', name: 'Test Signal Rule' },
+      { id: 'rule-1', name: 'Test Events Rule' },
       expect.objectContaining({
         onSuccess: expect.any(Function),
       })
@@ -383,6 +383,16 @@ describe('RuleDetailPage', () => {
       expect(screen.queryByTestId('ruleDetailsEnabledSwitch')).not.toBeInTheDocument();
       expect(screen.queryByTestId('ruleDetailsCloneButton')).not.toBeInTheDocument();
       expect(screen.queryByTestId('ruleDetailsUpdateApiKeyButton')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('ruleDetailsDeleteButton')).not.toBeInTheDocument();
+    });
+
+    it('still shows View change history (a read action) in the overflow menu', async () => {
+      renderPage(baseRule);
+      await openAppMenuOverflow();
+
+      expect(await screen.findByTestId('ruleDetailsViewChangeHistoryButton')).toBeInTheDocument();
+      expect(screen.queryByTestId('ruleDetailsRunButton')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('ruleDetailsCloneButton')).not.toBeInTheDocument();
       expect(screen.queryByTestId('ruleDetailsDeleteButton')).not.toBeInTheDocument();
     });
 

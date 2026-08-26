@@ -58,7 +58,7 @@ export const AttachmentTypeFilter = React.memo<AttachmentTypeFilterProps>(
         .list()
         .reduce<Array<MultiSelectFilterOption<string>>>((acc, item) => {
           if (availableTypes.has(item.id) && !excluded.has(item.id)) {
-            acc.push({ key: item.id, label: item.displayName });
+            acc.push({ key: item.id, label: item.getLabel() });
           }
           return acc;
         }, []);
