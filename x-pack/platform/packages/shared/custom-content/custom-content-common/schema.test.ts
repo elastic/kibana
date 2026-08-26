@@ -16,6 +16,7 @@ import {
   customContentPanelUpdateSchema,
   readEsqlQuery,
   toEsqlQueryState,
+  resolveEsqlQueryEdit,
 } from './schema';
 
 describe('customContentStateSchema', () => {
@@ -138,5 +139,32 @@ describe('esql_query accessors', () => {
   it('reads undefined from a panel with no query', () => {
     expect(readEsqlQuery({})).toBeUndefined();
     expect(readEsqlQuery({ esql_query: [] })).toBeUndefined();
+  });
+});
+
+describe('resolveEsqlQueryEdit', () => {
+  it('keeps the existing query when the edit omits it', () => {
+    expect(resolveEsqlQueryEdit(undefined, 'FROM logs')).toEqual({
+      query: 'FROM logs',
+      isChanging: false,
+    });
+  });
+
+  it('clears the query on null', () => {
+    expect(resolveEsqlQueryEdit(null, 'FROM logs')).toEqual({ query: undefined, isChanging: true });
+  });
+
+  it('replaces the query with a supplied one', () => {
+    expect(resolveEsqlQueryEdit('FROM metrics', 'FROM logs')).toEqual({
+      query: 'FROM metrics',
+      isChanging: true,
+    });
+  });
+
+  // Distinguishing these two is the point of `isChanging`: both end with no query, but only the
+  // second should make the resolver re-sample.
+  it('distinguishes an omitted edit on a query-less panel from an explicit clear', () => {
+    expect(resolveEsqlQueryEdit(undefined, undefined).isChanging).toBe(false);
+    expect(resolveEsqlQueryEdit(null, undefined).isChanging).toBe(true);
   });
 });

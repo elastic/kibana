@@ -8,6 +8,7 @@
 import {
   CUSTOM_CONTENT_EMBEDDABLE_TYPE,
   readEsqlQuery,
+  resolveEsqlQueryEdit,
   toEsqlQueryState,
   type CustomContentState,
 } from '@kbn/custom-content-common';
@@ -265,14 +266,10 @@ export const mergeAndResolveCustomContentEdit = async (
   existing: CustomContentState,
   resolveTemplate: ResolveCustomContentTemplate
 ): Promise<CustomContentState> => {
-  const isQueryChanging = editConfig.esqlQuery !== undefined;
-  const mergedEsqlQuery = !isQueryChanging
-    ? readEsqlQuery(existing)
-    : editConfig.esqlQuery === null
-    ? undefined
-    : editConfig.esqlQuery;
-  // An unchanged query is passed as `hasExistingQuery` rather than `esqlQuery` so the resolver
-  // refines the existing template instead of re-sampling data that did not change.
+  const { query: mergedEsqlQuery, isChanging: isQueryChanging } = resolveEsqlQueryEdit(
+    editConfig.esqlQuery,
+    readEsqlQuery(existing)
+  );
   const template = await resolveTemplate({
     prompt: editConfig.prompt ?? '',
     esqlQuery: isQueryChanging ? mergedEsqlQuery : undefined,

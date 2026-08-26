@@ -59,6 +59,29 @@ const customContentUpdateFields = {
     ),
 } as const;
 
+export interface ResolvedEsqlQueryEdit {
+  /** The query the panel should end up with. */
+  query: string | undefined;
+  /** True when the edit set or cleared the query; false when it left the existing one alone. */
+  isChanging: boolean;
+}
+
+/**
+ * Applies an edit's `esqlQuery` to a panel's current query, resolving the tri-state the field
+ * documents: omitted keeps the existing query, `null` clears it, a string replaces it.
+ *
+ * `isChanging` distinguishes "no query" from "query untouched", which callers need because an
+ * unchanged query is passed to the template resolver as `hasExistingQuery` so it refines the
+ * existing template instead of re-sampling data that did not change.
+ */
+export const resolveEsqlQueryEdit = (
+  edit: string | null | undefined,
+  current: string | undefined
+): ResolvedEsqlQueryEdit =>
+  edit === undefined
+    ? { query: current, isChanging: false }
+    : { query: edit ?? undefined, isChanging: true };
+
 const hasSomethingToChange = ({
   prompt,
   esqlQuery,

@@ -8,14 +8,15 @@
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId } from '@kbn/agent-builder-server';
-import { ATTACHMENT_REF_ACTOR, getLatestVersion } from '@kbn/agent-builder-common/attachments';
+import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools/builtin';
-import { customContentPanelUpdateSchema } from '@kbn/custom-content-common';
+import { customContentPanelUpdateSchema, resolveEsqlQueryEdit } from '@kbn/custom-content-common';
 import { createCustomContentTemplateResolver } from '@kbn/custom-content-server';
 import {
   CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE,
   type CustomContentContextAttachmentData,
 } from '../../common/panel_context_attachment';
+import { readPanelContextData } from '../../common/read_panel_context_data';
 
 const updateCustomContentSchema = customContentPanelUpdateSchema;
 
@@ -69,9 +70,7 @@ On success this returns \`attachment_id\` and \`version\`. You MUST render the u
       .getAll()
       .filter((a) => a.type === CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE);
     const contextAttachment = panelAttachments.find(
-      (a) =>
-        (getLatestVersion(a)?.data as CustomContentContextAttachmentData | undefined)
-          ?.embeddable_id === embeddable_id
+      (a) => readPanelContextData(a)?.embeddable_id === embeddable_id
     );
 
     if (!contextAttachment) {
@@ -79,11 +78,7 @@ On success this returns \`attachment_id\` and \`version\`. You MUST render the u
         `custom_content_update_panel: no custom_content_context attachment found for embeddable_id "${embeddable_id}"`
       );
       const availableIds = panelAttachments
-        .map(
-          (a) =>
-            (getLatestVersion(a)?.data as CustomContentContextAttachmentData | undefined)
-              ?.embeddable_id
-        )
+        .map((a) => readPanelContextData(a)?.embeddable_id)
         .filter(Boolean);
       return {
         results: [
@@ -102,12 +97,12 @@ On success this returns \`attachment_id\` and \`version\`. You MUST render the u
       };
     }
 
-    const currentData = getLatestVersion(contextAttachment)?.data as
-      | CustomContentContextAttachmentData
-      | undefined;
+    const currentData = readPanelContextData(contextAttachment);
 
-    const isQueryChanging = esqlQuery !== undefined;
-    const resolvedQuery = esqlQuery === null ? undefined : esqlQuery ?? currentData?.esql_query;
+    const { query: resolvedQuery, isChanging: isQueryChanging } = resolveEsqlQueryEdit(
+      esqlQuery,
+      currentData?.esql_query
+    );
 
     let resolvedTemplate: string = currentData?.panel_template ?? '';
     if (prompt !== undefined) {

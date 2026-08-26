@@ -10,10 +10,10 @@ A `custom_content` panel stores two pieces of state (both optional) alongside th
 
 | Field | Type | Purpose |
 |-------|------|---------|
-| `esqlQuery` | `string \| undefined` | Optional ES\|QL query whose results are injected into the template at render time |
+| `esql_query` | `string[] \| undefined` | Optional ES\|QL query whose results are injected into the template at render time. An array so the shape can hold several queries later without a migration, capped at one for now — read and write it via `readEsqlQuery` / `toEsqlQueryState` |
 | `template` | `string \| undefined` | LiquidJS HTML template — the actual rendered content |
 
-Panels are saved as part of the dashboard's serialized state (standard embeddable contract, `server/embeddable/schemas.ts`). No separate saved object is created. Both `template` and `esqlQuery` participate in unsaved-change detection.
+Panels are saved as part of the dashboard's serialized state (standard embeddable contract, `server/embeddable/schemas.ts`). No separate saved object is created. Both `template` and `esql_query` participate in unsaved-change detection (`esql_query` compares with `deepEquality`, since a fresh array would otherwise look changed on every serialize).
 
 The template is the source of truth for what renders. It is either generated server-side (agent builder, or "Generate with chat" from the flyout) or hand-authored in the flyout's editor. Nothing is regenerated at render time.
 

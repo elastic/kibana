@@ -42,7 +42,7 @@ import {
   switchMap,
 } from 'rxjs';
 import { isRoundCompleteEvent } from '@kbn/agent-builder-common';
-import { ATTACHMENT_REF_ACTOR, getLatestVersion } from '@kbn/agent-builder-common/attachments';
+import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import {
   CUSTOM_CONTENT_EMBEDDABLE_TYPE,
   readEsqlQuery,
@@ -51,12 +51,10 @@ import {
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import { getServices } from './services';
-import {
-  CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE,
-  type CustomContentContextAttachmentData,
-} from '../common/panel_context_attachment';
+import { CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE } from '../common/panel_context_attachment';
 import { buildCustomContentContextAttachment } from './utils/chat_integration';
 import { registerPanelPreviewHandler } from './utils/panel_preview_registry';
+import { readPanelContextData } from '../common/read_panel_context_data';
 import type { CustomContentEmbeddableState } from '../server';
 import { CustomContentComponent } from './components/custom_content_component';
 
@@ -360,9 +358,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
                 );
                 if (!updatedAttachment) continue;
 
-                const data = getLatestVersion(updatedAttachment)?.data as
-                  | CustomContentContextAttachmentData
-                  | undefined;
+                const data = readPanelContextData(updatedAttachment);
                 if (!data || data.embeddable_id !== uuid) continue;
 
                 template$.next(data.panel_template);

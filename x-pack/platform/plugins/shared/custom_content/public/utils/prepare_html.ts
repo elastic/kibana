@@ -68,5 +68,5 @@ export function sanitizeHtml(html: string): string {
     FORBID_TAGS: ['a'],
     WHOLE_DOCUMENT: true,
     FORCE_BODY: false,
-  }) as string;
+  });
 }
