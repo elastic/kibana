@@ -91,7 +91,14 @@ export const useCasesLocalStorage = <T,>(
 
   if (lsKeyPrefix != null && !isStorageInitialized.current) {
     isStorageInitialized.current = true;
-    setItem(getStorageItem(lsKey, initialValue));
+    // Inline the write so we can skip notifySyncListeners: this runs during
+    // render, and siblings already read the same value from storage at their
+    // own init time. Calling setValue on a sibling during render would trigger
+    // the "Cannot update a component while rendering a different component" warning.
+    const stored = getStorageItem(lsKey, initialValue);
+    valueRef.current = stored;
+    setValue(stored);
+    saveItemToStorage(lsKey, stored);
   }
 
   return [value, setItem];
