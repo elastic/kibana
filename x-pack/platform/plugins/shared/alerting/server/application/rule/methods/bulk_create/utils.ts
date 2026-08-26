@@ -25,11 +25,10 @@ import {
   addMissingUiamKeyTagIfNeeded,
   apiKeyAsRuleDomainProperties,
 } from '../../../../rules_client/common';
-import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
-import type { BulkOperationError, RulesClientContext } from '../../../../rules_client/types';
+import type { BulkOperationError } from '../../../../rules_client/types';
 import type { RuleParams } from '../../types';
 import { transformRuleDomainToRuleAttributes } from '../../transforms';
-import type { PreparedRule, PrepareRuleArgs, ApiKeyEntry } from './types';
+import type { PreparedRule, PrepareRuleArgs } from './types';
 
 export const prepareRule = async <Params extends RuleParams>({
   context,
@@ -169,22 +168,4 @@ export const prepareRule = async <Params extends RuleParams>({
     };
     return { error };
   }
-};
-
-export const invalidateKeys = async (
-  entries: Iterable<ApiKeyEntry>,
-  context: RulesClientContext
-): Promise<void> => {
-  const keys: string[] = [];
-  for (const { apiKey, uiamApiKey, apiKeyCreatedByUser } of entries) {
-    if (apiKey && !apiKeyCreatedByUser) keys.push(apiKey);
-    if (uiamApiKey && !apiKeyCreatedByUser) keys.push(uiamApiKey);
-  }
-  if (keys.length === 0) return;
-  // Writes pending-invalidation SOs; logs errors internally, never throws.
-  await bulkMarkApiKeysForInvalidation(
-    { apiKeys: [...new Set(keys)] },
-    context.logger,
-    context.unsecuredSavedObjectsClient
-  );
 };

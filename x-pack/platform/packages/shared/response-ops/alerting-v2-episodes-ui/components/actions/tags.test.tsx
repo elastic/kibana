@@ -47,6 +47,29 @@ describe('AlertEpisodeTags', () => {
     expect(await screen.findByText('d')).toBeInTheDocument();
   });
 
+  describe('inline', () => {
+    it('renders every tag as its own badge, ignoring size', () => {
+      render(
+        <IntlProvider locale="en">
+          <AlertEpisodeTags tags={['a', 'b', 'c', 'd', 'e']} size={2} inline />
+        </IntlProvider>
+      );
+
+      ['a', 'b', 'c', 'd', 'e'].forEach((tag) => expect(screen.getByText(tag)).toBeInTheDocument());
+      expect(screen.queryByText('+3')).not.toBeInTheDocument();
+    });
+
+    it('separates the badges with a real space so the line can break between them', () => {
+      const { container } = render(
+        <IntlProvider locale="en">
+          <AlertEpisodeTags tags={['a', 'b']} inline />
+        </IntlProvider>
+      );
+
+      expect(container.firstChild).toHaveTextContent('a b');
+    });
+  });
+
   it('renders nothing when tags is omitted', () => {
     const { container } = render(
       <IntlProvider locale="en">
