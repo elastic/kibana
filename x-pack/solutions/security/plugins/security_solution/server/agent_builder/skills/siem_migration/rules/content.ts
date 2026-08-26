@@ -9,7 +9,7 @@ import {
   SIEM_MIGRATION_GET_ALL_RULE_MIGRATION_STATS_TOOL_ID,
   SIEM_MIGRATION_GET_MIGRATION_RULES_TOOL_ID,
   SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID,
-} from '../../tools/siem_migrations';
+} from '../../../tools/siem_migrations';
 
 /**
  * Shared content blocks for the Automatic Migration sibling skills.
