@@ -652,10 +652,9 @@ export class AssetManagerClient {
       return false;
     }
 
-    const missing = [
-      !latestExists && latestIndex,
-      !metadataExists && metadataDataStream,
-    ].filter(Boolean);
+    const missing = [!latestExists && latestIndex, !metadataExists && metadataDataStream].filter(
+      Boolean
+    );
     this.logger.warn(
       `Recreating missing entity store assets in ${this.namespace}: ${missing.join(', ')}`
     );
