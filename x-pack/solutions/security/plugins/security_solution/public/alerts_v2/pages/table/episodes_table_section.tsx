@@ -5,27 +5,33 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
-  EuiBadge,
   EuiCallOut,
-  EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingSpinner,
+  EuiLoadingChart,
   EuiPanel,
   EuiSpacer,
-  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { AggregateQuery, TimeRange } from '@kbn/es-query';
+import { UnifiedDataTable, DataLoadingState, type SortOrder } from '@kbn/unified-data-table';
+import { useKibana } from '../../../common/lib/kibana';
 import { EsqlInspectButton } from '../kpis/esql_inspect_button';
 import { useEpisodesTableData } from './use_episodes_table_data';
 
 const TITLE = i18n.translate('xpack.securitySolution.alertsV2.episodesTable.title', {
   defaultMessage: 'Episodes',
 });
+const TITLE_ID = 'alertsV2EpisodesTableTitle';
+
+/** Columns the view provides; tags/assignee (action-derived) come in a later step. */
+const DEFAULT_COLUMNS = ['@timestamp', 'episode.status', 'severity', 'rule.id', 'duration'];
+const SAMPLE_SIZE = 100;
+const GRID_HEIGHT = 500;
+const NO_SORT: SortOrder[] = [];
 
 export interface EpisodesTableSectionProps {
   /** The page's ES|QL query — the table lists episodes from it. */
@@ -34,24 +40,38 @@ export interface EpisodesTableSectionProps {
 }
 
 /**
- * Episodes table below the KPI section. Step 1: a temporary readout verifying the
- * data hook (rows + ad-hoc DataView + flattened mapping). The UnifiedDataTable
- * grid replaces this readout in the next step.
+ * Episodes table below the KPI section. Step 2: a bar-driven `UnifiedDataTable`
+ * with a fixed column set and default cell rendering (RnA cell renderers and
+ * sorting/column management come in later steps).
  */
 export const EpisodesTableSection = ({ query, timeRange }: EpisodesTableSectionProps) => {
-  const { rows, columns, dataView, isLoading, error, inspect } = useEpisodesTableData(
+  const { services } = useKibana();
+  const { rows, columnsMeta, dataView, isLoading, error, inspect } = useEpisodesTableData(
     query,
     timeRange
   );
 
-  const firstRow = rows[0]?.flattened;
+  const [columns, setColumns] = useState<string[]>(DEFAULT_COLUMNS);
+  const onSetColumns = useCallback((nextColumns: string[]) => setColumns(nextColumns), []);
+
+  const tableServices = useMemo(
+    () => ({
+      theme: services.theme,
+      fieldFormats: services.data.fieldFormats,
+      uiSettings: services.uiSettings,
+      toastNotifications: services.notifications.toasts,
+      storage: services.storage,
+      data: services.data,
+    }),
+    [services]
+  );
 
   return (
     <EuiPanel hasBorder paddingSize="m" data-test-subj="alertsV2EpisodesTableSection">
       <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
         <EuiFlexItem>
           <EuiTitle size="xs">
-            <h3>{TITLE}</h3>
+            <h3 id={TITLE_ID}>{TITLE}</h3>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -61,42 +81,43 @@ export const EpisodesTableSection = ({ query, timeRange }: EpisodesTableSectionP
       <EuiSpacer size="s" />
 
       {error ? (
-        <EuiCallOut announceOnMount color="danger" iconType="error" size="s" title="Unable to load episodes">
+        <EuiCallOut
+          announceOnMount
+          color="danger"
+          iconType="error"
+          size="s"
+          title={i18n.translate('xpack.securitySolution.alertsV2.episodesTable.error', {
+            defaultMessage: 'Unable to load episodes',
+          })}
+        >
           {error.message}
         </EuiCallOut>
-      ) : isLoading ? (
-        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+      ) : !dataView ? (
+        <EuiFlexGroup justifyContent="center" alignItems="center" style={{ height: GRID_HEIGHT }}>
           <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="m" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="s" color="subdued">
-              {'Loading episodes…'}
-            </EuiText>
+            <EuiLoadingChart size="l" />
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : (
-        <EuiText size="s">
-          {/* Temporary Step-1 verification readout. */}
-          <p>
-            <EuiBadge color="hollow">{rows.length}</EuiBadge> {'episodes fetched · '}
-            <EuiBadge color="hollow">{columns.length}</EuiBadge> {'columns · DataView '}
-            <EuiCode>{dataView?.getIndexPattern() ?? '—'}</EuiCode> {' (time field '}
-            <EuiCode>{dataView?.timeFieldName ?? '—'}</EuiCode>
-            {')'}
-          </p>
-          {firstRow ? (
-            <p>
-              {'First row → '}
-              <EuiCode>{`episode.status=${firstRow['episode.status'] ?? '∅'}`}</EuiCode>{' '}
-              <EuiCode>{`severity=${firstRow.severity ?? '∅'}`}</EuiCode>{' '}
-              <EuiCode>{`rule.id=${firstRow['rule.id'] ?? '∅'}`}</EuiCode>{' '}
-              <EuiCode>{`duration=${firstRow.duration ?? '∅'}`}</EuiCode>
-            </p>
-          ) : (
-            <p>{'No episodes in this time range.'}</p>
-          )}
-        </EuiText>
+        <div style={{ height: GRID_HEIGHT }}>
+          <UnifiedDataTable
+            ariaLabelledBy={TITLE_ID}
+            columns={columns}
+            columnsMeta={columnsMeta}
+            dataView={dataView}
+            rows={rows}
+            loadingState={isLoading ? DataLoadingState.loading : DataLoadingState.loaded}
+            onSetColumns={onSetColumns}
+            sort={NO_SORT}
+            sampleSizeState={SAMPLE_SIZE}
+            showTimeCol={false}
+            isPlainRecord
+            isSortEnabled={false}
+            isInMemorySortEnabled={false}
+            controlColumnIds={[]}
+            services={tableServices}
+          />
+        </div>
       )}
     </EuiPanel>
   );

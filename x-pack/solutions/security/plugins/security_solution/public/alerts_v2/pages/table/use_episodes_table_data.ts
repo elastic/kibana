@@ -9,22 +9,19 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { AggregateQuery, TimeRange } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { getESQLResults, getESQLAdHocDataview } from '@kbn/esql-utils';
+import { getESQLResults, getESQLAdHocDataview, formatESQLColumns } from '@kbn/esql-utils';
+import { getTextBasedColumnsMeta } from '@kbn/unified-data-table';
 import { useKibana } from '../../../common/lib/kibana';
 import { composeEsqlQuery, TIME_RANGE_ESQL_FILTER } from '../compose_esql_query';
 import type { EsqlInspect } from '../kpis/esql_inspect_button';
 
-/** One ES|QL result column, `{ name, type }`, as returned by the _query response. */
-export interface EsqlColumn {
-  name: string;
-  type: string;
-}
+type ColumnsMeta = ReturnType<typeof getTextBasedColumnsMeta>;
 
 export interface UseEpisodesTableDataResult {
   /** Episode rows shaped for UnifiedDataTable (cell renderers read `row.flattened[field]`). */
   rows: DataTableRecord[];
-  /** Raw ES|QL result columns — used to build `columnsMeta` for the grid (next step). */
-  columns: EsqlColumn[];
+  /** Column type metadata for the grid, derived from the ES|QL result columns. */
+  columnsMeta: ColumnsMeta;
   /** Ad-hoc DataView derived from the query (container for the grid; columns come from ES|QL). */
   dataView: DataView | undefined;
   isLoading: boolean;
@@ -41,7 +38,7 @@ const buildEpisodesTableQuery = (baseEsql: string): string =>
 
 const INITIAL_STATE: UseEpisodesTableDataResult = {
   rows: [],
-  columns: [],
+  columnsMeta: {},
   dataView: undefined,
   isLoading: false,
   error: null,
@@ -50,9 +47,9 @@ const INITIAL_STATE: UseEpisodesTableDataResult = {
 
 /**
  * Fetches episode rows for the table via the page's ES|QL query (bar-driven,
- * over `$.alert-episodes`), and builds the ad-hoc DataView the grid needs. Maps
- * the flat ES|QL result into `DataTableRecord[]` so the RnA cell renderers can
- * read fields off `row.flattened`.
+ * over `$.alert-episodes`), and builds the ad-hoc DataView + column metadata the
+ * grid needs. Maps the flat ES|QL result into `DataTableRecord[]` so the RnA cell
+ * renderers can read fields off `row.flattened`.
  */
 export const useEpisodesTableData = (
   query: AggregateQuery,
@@ -86,11 +83,9 @@ export const useEpisodesTableData = (
           return;
         }
 
-        const columns: EsqlColumn[] = response.columns.map((column) => ({
-          name: column.name,
-          type: String(column.type),
-        }));
-        const columnNames = columns.map((column) => column.name);
+        const datatableColumns = formatESQLColumns(response.columns);
+        const columnsMeta = getTextBasedColumnsMeta(datatableColumns);
+        const columnNames = response.columns.map((column) => column.name);
 
         const rows: DataTableRecord[] = response.values.map((row, index) => {
           const record: Record<string, unknown> = {};
@@ -103,7 +98,7 @@ export const useEpisodesTableData = (
 
         setState({
           rows,
-          columns,
+          columnsMeta,
           dataView,
           isLoading: false,
           error: null,
