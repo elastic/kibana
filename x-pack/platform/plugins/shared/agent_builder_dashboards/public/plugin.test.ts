@@ -30,12 +30,24 @@ describe('AgentBuilderDashboardsPlugin', () => {
         },
       },
       chrome: {},
+      notifications: {
+        toasts: { addDanger: jest.fn() },
+      },
     } as unknown as CoreStart);
 
   const createStartDependencies = () =>
     ({
       agentBuilder: { openChat },
       dashboard: {},
+      files: {
+        filesClientFactory: {
+          asScoped: jest.fn(() => ({
+            create: jest.fn(),
+            upload: jest.fn(),
+            delete: jest.fn(),
+          })),
+        },
+      },
       share: {
         url: {
           locators: {

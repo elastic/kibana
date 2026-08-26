@@ -13,7 +13,7 @@ import { EuiThemeProvider } from '@elastic/eui';
 import { Subject } from 'rxjs';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
-import type { DashboardApi } from '../../dashboard_api/types';
+import type { DashboardApi, DashboardInternalApi } from '../../dashboard_api/types';
 import { uiActionsService } from '../../services/kibana_services';
 import { OPEN_DASHBOARD_PRETTIFY_ACTION_ID } from './dashboard_prettify_action';
 import { DashboardPrettifyFab } from './dashboard_prettify_fab';
@@ -29,6 +29,18 @@ const createDashboardApi = (viewMode: ViewMode = 'edit'): DashboardApi & { anySt
     anyStateChange$,
   } as unknown as DashboardApi & { anyStateChange$: Subject<void> };
 };
+
+const createInternalApi = () => ({}) as DashboardInternalApi;
+
+const renderFab = (dashboardApi = createDashboardApi(), dashboardInternalApi = createInternalApi()) =>
+  render(
+    <EuiThemeProvider>
+      <DashboardPrettifyFab
+        dashboardApi={dashboardApi}
+        dashboardInternalApi={dashboardInternalApi}
+      />
+    </EuiThemeProvider>
+  );
 
 describe('DashboardPrettifyFab', () => {
   beforeEach(() => {
@@ -46,11 +58,7 @@ describe('DashboardPrettifyFab', () => {
 
   it('does not render when the Prettify action is not registered', async () => {
     mockHasAction = false;
-    render(
-      <EuiThemeProvider>
-        <DashboardPrettifyFab dashboardApi={createDashboardApi()} />
-      </EuiThemeProvider>
-    );
+    renderFab(createDashboardApi());
 
     await waitFor(() => {
       expect(screen.queryByTestId('dashboardPrettifyButton')).not.toBeInTheDocument();
@@ -60,11 +68,7 @@ describe('DashboardPrettifyFab', () => {
 
   it('does not render when the action is incompatible', async () => {
     mockIsCompatible.mockResolvedValue(false);
-    render(
-      <EuiThemeProvider>
-        <DashboardPrettifyFab dashboardApi={createDashboardApi()} />
-      </EuiThemeProvider>
-    );
+    renderFab(createDashboardApi());
 
     await waitFor(() => {
       expect(mockIsCompatible).toHaveBeenCalled();
@@ -73,11 +77,7 @@ describe('DashboardPrettifyFab', () => {
   });
 
   it('renders the Prettify button when the action is compatible', async () => {
-    render(
-      <EuiThemeProvider>
-        <DashboardPrettifyFab dashboardApi={createDashboardApi()} />
-      </EuiThemeProvider>
-    );
+    renderFab(createDashboardApi());
 
     expect(await screen.findByTestId('dashboardPrettifyButton')).toBeInTheDocument();
     expect(screen.getByText('Prettify')).toBeInTheDocument();
@@ -85,11 +85,7 @@ describe('DashboardPrettifyFab', () => {
 
   it('hides the button when dashboard state becomes incompatible', async () => {
     const dashboardApi = createDashboardApi();
-    render(
-      <EuiThemeProvider>
-        <DashboardPrettifyFab dashboardApi={dashboardApi} />
-      </EuiThemeProvider>
-    );
+    renderFab(dashboardApi);
 
     expect(await screen.findByTestId('dashboardPrettifyButton')).toBeInTheDocument();
 
@@ -101,21 +97,42 @@ describe('DashboardPrettifyFab', () => {
     });
   });
 
-  it('executes the Prettify action with the dashboard API on click', async () => {
+  it('executes the Prettify action with the dashboard APIs on click', async () => {
     const dashboardApi = createDashboardApi();
-    render(
-      <EuiThemeProvider>
-        <DashboardPrettifyFab dashboardApi={dashboardApi} />
-      </EuiThemeProvider>
-    );
+    const dashboardInternalApi = createInternalApi();
+    renderFab(dashboardApi, dashboardInternalApi);
 
     fireEvent.click(await screen.findByTestId('dashboardPrettifyButton'));
 
     await waitFor(() => {
       expect(mockExecute).toHaveBeenCalledWith({
         dashboardApi,
+        dashboardInternalApi,
         trigger: { id: OPEN_DASHBOARD_PRETTIFY_ACTION_ID },
       });
+    });
+  });
+
+  it('shows loading while Prettify capture is running', async () => {
+    let resolveExecute: (() => void) | undefined;
+    mockExecute.mockImplementation(
+      () =>
+        new Promise<void>((resolve) => {
+          resolveExecute = resolve;
+        })
+    );
+    renderFab();
+
+    fireEvent.click(await screen.findByTestId('dashboardPrettifyButton'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('dashboardPrettifyButton')).toBeDisabled();
+    });
+
+    resolveExecute?.();
+
+    await waitFor(() => {
+      expect(screen.getByTestId('dashboardPrettifyButton')).not.toBeDisabled();
     });
   });
 });

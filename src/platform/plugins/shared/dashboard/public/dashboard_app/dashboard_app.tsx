@@ -220,7 +220,12 @@ export function DashboardApp({
         showPlainSpinner={showPlainSpinner}
         getCreationOptions={getCreationOptions}
       />
-      {dashboardApi && !embedSettings && <DashboardPrettifyFab dashboardApi={dashboardApi} />}
+      {dashboardApi && dashboardInternalApi && !embedSettings && (
+        <DashboardPrettifyFab
+          dashboardApi={dashboardApi}
+          dashboardInternalApi={dashboardInternalApi}
+        />
+      )}
     </>
   );
 }

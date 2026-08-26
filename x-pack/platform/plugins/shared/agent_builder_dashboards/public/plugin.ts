@@ -67,10 +67,20 @@ export class AgentBuilderDashboardsPlugin
         const { createPrettifyDashboardAction } = await import(
           './prettify/prettify_dashboard_action'
         );
+        const { captureDashboardElementPng } = await import(
+          './prettify/capture_dashboard_element'
+        );
+        const { createChatImageFilesClient, uploadChatImage } = await import(
+          './prettify/upload_chat_image'
+        );
+        const filesClient = createChatImageFilesClient(plugins.files.filesClientFactory);
         return createPrettifyDashboardAction({
           openChat: plugins.agentBuilder.openChat,
           canWriteDashboards:
             core.application.capabilities.dashboard_v2?.showWriteControls === true,
+          captureDashboardImage: captureDashboardElementPng,
+          uploadImage: (blob) => uploadChatImage({ filesClient, blob }),
+          toasts: core.notifications.toasts,
         });
       });
     }

@@ -15,7 +15,7 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { debounceTime } from 'rxjs';
-import type { DashboardApi } from '../../dashboard_api/types';
+import type { DashboardApi, DashboardInternalApi } from '../../dashboard_api/types';
 import { uiActionsService } from '../../services/kibana_services';
 import {
   OPEN_DASHBOARD_PRETTIFY_ACTION_ID,
@@ -26,9 +26,16 @@ const prettifyButtonLabel = i18n.translate('dashboard.prettifyFab.buttonLabel', 
   defaultMessage: 'Prettify',
 });
 
-export const DashboardPrettifyFab = ({ dashboardApi }: { dashboardApi: DashboardApi }) => {
+export const DashboardPrettifyFab = ({
+  dashboardApi,
+  dashboardInternalApi,
+}: {
+  dashboardApi: DashboardApi;
+  dashboardInternalApi: DashboardInternalApi;
+}) => {
   const viewMode = useStateFromPublishingSubject(dashboardApi.viewMode$);
   const [isVisible, setIsVisible] = useState(false);
+  const [isCapturing, setIsCapturing] = useState(false);
   const styles = useMemoCss(fabStyles);
 
   useEffect(() => {
@@ -45,6 +52,7 @@ export const DashboardPrettifyFab = ({ dashboardApi }: { dashboardApi: Dashboard
           await uiActionsService.getAction(OPEN_DASHBOARD_PRETTIFY_ACTION_ID);
         const compatible = await action.isCompatible({
           dashboardApi,
+          dashboardInternalApi,
           trigger: { id: OPEN_DASHBOARD_PRETTIFY_ACTION_ID },
         });
         if (!cancelled) {
@@ -66,7 +74,7 @@ export const DashboardPrettifyFab = ({ dashboardApi }: { dashboardApi: Dashboard
       cancelled = true;
       subscription.unsubscribe();
     };
-  }, [dashboardApi, viewMode]);
+  }, [dashboardApi, dashboardInternalApi, viewMode]);
 
   if (!isVisible) {
     return null;
@@ -77,13 +85,21 @@ export const DashboardPrettifyFab = ({ dashboardApi }: { dashboardApi: Dashboard
       <EuiButton
         fill
         iconType="sparkles"
+        isLoading={isCapturing}
+        disabled={isCapturing}
         onClick={async () => {
-          const action: Action<OpenDashboardPrettifyActionContext> =
-            await uiActionsService.getAction(OPEN_DASHBOARD_PRETTIFY_ACTION_ID);
-          await action.execute({
-            dashboardApi,
-            trigger: { id: OPEN_DASHBOARD_PRETTIFY_ACTION_ID },
-          });
+          setIsCapturing(true);
+          try {
+            const action: Action<OpenDashboardPrettifyActionContext> =
+              await uiActionsService.getAction(OPEN_DASHBOARD_PRETTIFY_ACTION_ID);
+            await action.execute({
+              dashboardApi,
+              dashboardInternalApi,
+              trigger: { id: OPEN_DASHBOARD_PRETTIFY_ACTION_ID },
+            });
+          } finally {
+            setIsCapturing(false);
+          }
         }}
         data-test-subj="dashboardPrettifyButton"
       >

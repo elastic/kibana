@@ -7,10 +7,12 @@
 
 import { BehaviorSubject } from 'rxjs';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
+import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/agent-builder-dashboards-common';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import {
   OPEN_DASHBOARD_PRETTIFY_ACTION_ID,
+  type DashboardInternalApi,
   type OpenDashboardPrettifyActionContext,
 } from '@kbn/dashboard-plugin/public';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
@@ -29,6 +31,12 @@ const lensPanel = {
   },
 };
 
+const imageData = {
+  file_id: 'file-1',
+  name: 'dashboard-prettify.png',
+  mime_type: 'image/png' as const,
+};
+
 const createDashboardApi = ({
   viewMode = 'edit',
   isEditableByUser = true,
@@ -44,6 +52,12 @@ const createDashboardApi = ({
     viewMode$: new BehaviorSubject<ViewMode>(viewMode),
     isEditableByUser,
     savedObjectId$: new BehaviorSubject<string | undefined>(savedObjectId),
+    dataLoading$: new BehaviorSubject<boolean | undefined>(false),
+    layout$: new BehaviorSubject({
+      panels: {},
+      pinnedPanels: {},
+      sections: {},
+    }),
     getSerializedState: () => ({
       attributes: {
         title: 'Metrics',
@@ -52,20 +66,45 @@ const createDashboardApi = ({
     }),
   } as unknown as DashboardApi);
 
-const context = (dashboardApi: DashboardApi): OpenDashboardPrettifyActionContext => ({
+const createInternalApi = (element: HTMLElement | null = document.createElement('div')) =>
+  ({
+    dashboardContainerRef$: new BehaviorSubject(element),
+  } as unknown as DashboardInternalApi);
+
+const context = (
+  dashboardApi: DashboardApi,
+  dashboardInternalApi: DashboardInternalApi = createInternalApi()
+): OpenDashboardPrettifyActionContext => ({
   dashboardApi,
+  dashboardInternalApi,
   trigger: { id: OPEN_DASHBOARD_PRETTIFY_ACTION_ID },
 });
 
 describe('createPrettifyDashboardAction', () => {
   const openChat = jest.fn() as jest.MockedFunction<AgentBuilderPluginStart['openChat']>;
+  const captureDashboardImage = jest.fn();
+  const uploadImage = jest.fn();
+  const toasts = { addDanger: jest.fn() };
+
+  const createAction = (canWriteDashboards = true) =>
+    createPrettifyDashboardAction({
+      openChat,
+      canWriteDashboards,
+      captureDashboardImage,
+      uploadImage,
+      toasts,
+      waitForPaint: async () => undefined,
+    });
 
   beforeEach(() => {
     openChat.mockClear();
+    captureDashboardImage.mockReset().mockResolvedValue(new Blob(['png'], { type: 'image/png' }));
+    uploadImage.mockReset().mockResolvedValue(imageData);
+    toasts.addDanger.mockClear();
   });
 
   it('uses the sparkles icon and Prettify label', () => {
-    const action = createPrettifyDashboardAction({ openChat, canWriteDashboards: true });
+    const action = createAction();
     const ctx = context(createDashboardApi());
 
     expect(action.getIconType?.(ctx)).toBe('sparkles');
@@ -73,19 +112,19 @@ describe('createPrettifyDashboardAction', () => {
   });
 
   it('is compatible in edit mode when the user can write and the dashboard has a visualization', async () => {
-    const action = createPrettifyDashboardAction({ openChat, canWriteDashboards: true });
+    const action = createAction();
 
     await expect(action.isCompatible?.(context(createDashboardApi()))).resolves.toBe(true);
   });
 
   it('is not compatible without write access', async () => {
-    const action = createPrettifyDashboardAction({ openChat, canWriteDashboards: false });
+    const action = createAction(false);
 
     await expect(action.isCompatible?.(context(createDashboardApi()))).resolves.toBe(false);
   });
 
   it('is not compatible when the dashboard is not editable by the user', async () => {
-    const action = createPrettifyDashboardAction({ openChat, canWriteDashboards: true });
+    const action = createAction();
 
     await expect(
       action.isCompatible?.(context(createDashboardApi({ isEditableByUser: false })))
@@ -93,19 +132,22 @@ describe('createPrettifyDashboardAction', () => {
   });
 
   it('is not compatible in view mode', async () => {
-    const action = createPrettifyDashboardAction({ openChat, canWriteDashboards: true });
+    const action = createAction();
 
     await expect(
       action.isCompatible?.(context(createDashboardApi({ viewMode: 'view' })))
     ).resolves.toBe(false);
   });
 
-  it('opens a new dashboard chat, attaches the live dashboard, and auto-sends the Prettify prompt', async () => {
-    const action = createPrettifyDashboardAction({ openChat, canWriteDashboards: true });
+  it('opens a new dashboard chat with the live dashboard and captured image, then auto-sends Prettify', async () => {
+    const action = createAction();
     const dashboardApi = createDashboardApi();
+    const element = document.createElement('div');
 
-    await action.execute(context(dashboardApi));
+    await action.execute(context(dashboardApi, createInternalApi(element)));
 
+    expect(captureDashboardImage).toHaveBeenCalledWith(element);
+    expect(uploadImage).toHaveBeenCalled();
     expect(openChat).toHaveBeenCalledWith({
       newConversation: true,
       initialMessage: '/dashboard-management prettify this dashboard',
@@ -120,7 +162,60 @@ describe('createPrettifyDashboardAction', () => {
             panels: [expect.objectContaining({ id: 'lens-1', type: LENS_EMBEDDABLE_TYPE })],
           }),
         }),
+        {
+          type: AttachmentType.image,
+          data: imageData,
+        },
       ],
     });
+  });
+
+  it('does not start Prettify when capture fails', async () => {
+    captureDashboardImage.mockRejectedValue(new Error('blank png'));
+    const action = createAction();
+
+    await action.execute(context(createDashboardApi()));
+
+    expect(openChat).not.toHaveBeenCalled();
+    expect(toasts.addDanger).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'Could not capture this dashboard',
+        text: 'blank png',
+      })
+    );
+  });
+
+  it('does not start Prettify when the dashboard is not rendered', async () => {
+    const action = createAction();
+
+    await action.execute(context(createDashboardApi(), createInternalApi(null)));
+
+    expect(captureDashboardImage).not.toHaveBeenCalled();
+    expect(openChat).not.toHaveBeenCalled();
+    expect(toasts.addDanger).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'Could not capture this dashboard',
+      })
+    );
+  });
+
+  it('restores collapsed sections after a failed capture', async () => {
+    const layout$ = new BehaviorSubject({
+      panels: {},
+      pinnedPanels: {},
+      sections: {
+        s1: { collapsed: true, title: 'One', grid: { y: 0 } },
+      },
+    });
+    const dashboardApi = {
+      ...createDashboardApi(),
+      layout$,
+    } as DashboardApi;
+    captureDashboardImage.mockRejectedValue(new Error('blank png'));
+    const action = createAction();
+
+    await action.execute(context(dashboardApi));
+
+    expect(layout$.value.sections.s1.collapsed).toBe(true);
   });
 });

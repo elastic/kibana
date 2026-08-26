@@ -27,6 +27,7 @@
     "@kbn/core-elasticsearch-server",
     "@kbn/lens-common",
     "@kbn/esql-utils",
+    "@kbn/files-plugin",
     "@kbn/core-saved-objects-api-server",
     "@kbn/es-query",
     "@kbn/data-plugin",
