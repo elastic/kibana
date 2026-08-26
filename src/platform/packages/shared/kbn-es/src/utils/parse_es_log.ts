@@ -18,13 +18,29 @@ export function parseEsLog(data: string) {
   let capture = regex.exec(data);
 
   if (!capture) {
-    return [
-      {
-        formattedMessage: data.trim(),
-        message: data.trim(),
-        level: 'warn',
-      },
-    ];
+    // Serverless ES containers emit ECS-formatted JSON. Extract just the message.
+    const jsonLines = data
+      .split('\n')
+      .map((line) => {
+        const trimmed = line.trim();
+        if (!trimmed) return null;
+        try {
+          const parsed = JSON.parse(trimmed);
+          if (parsed.message) {
+            return {
+              formattedMessage: parsed.message as string,
+              message: parsed.message as string,
+              level: ((parsed['log.level'] as string | undefined) ?? 'info').toLowerCase(),
+            };
+          }
+        } catch {
+          // not JSON — fall through
+        }
+        return { formattedMessage: trimmed, message: trimmed, level: 'warn' };
+      })
+      .filter((l): l is NonNullable<typeof l> => l !== null);
+
+    return jsonLines.length ? jsonLines : [{ formattedMessage: data.trim(), message: data.trim(), level: 'warn' }];
   }
 
   do {
