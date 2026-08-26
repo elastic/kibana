@@ -67,19 +67,14 @@ export const ConversationShareButton: React.FC = () => {
     return null;
   }
 
-  return (
-    <ConversationSharePopover
-      conversation={conversation}
-      canUpdateAccessControl={canUpdateAccessControl}
-    />
-  );
+  return <ConversationSharePopover conversation={conversation} />;
 };
 
 const ConversationSharePopover: React.FC<{
   conversation: Conversation;
-  canUpdateAccessControl: boolean;
-}> = ({ conversation, canUpdateAccessControl }) => {
+}> = ({ conversation }) => {
   const { euiTheme } = useEuiTheme();
+  const { update_access_control: canUpdateAccessControl } = useConversationPermissions();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [accessMode, setAccessMode] = useState(ConversationAccessControlMode.Private);
   const [memberIds, setMemberIds] = useState<string[]>([]);
@@ -198,10 +193,7 @@ const ConversationSharePopover: React.FC<{
   return (
     <EuiPopover
       button={
-        <ConversationSharePopoverButton
-          canUpdateAccessControl={canUpdateAccessControl}
-          onClick={() => setIsPopoverOpen((isOpen) => !isOpen)}
-        />
+        <ConversationSharePopoverButton onClick={() => setIsPopoverOpen((isOpen) => !isOpen)} />
       }
       isOpen={isPopoverOpen}
       closePopover={() => setIsPopoverOpen(false)}
@@ -271,7 +263,6 @@ const ConversationSharePopover: React.FC<{
             <ConversationParticipantsList
               ownerProfile={ownerProfile}
               memberProfiles={memberProfiles}
-              canUpdateAccessControl={false}
               isSaving={isSaving}
               onRemoveUser={onRemoveUser}
             />

@@ -18,6 +18,7 @@ import {
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { UserAvatar, type UserProfileWithAvatar } from '@kbn/user-profile-components';
+import { useConversationPermissions } from '../../../../hooks/use_conversation';
 import { useInviteMembersSummary } from '../../../../hooks/use_conversation_access_control';
 import { inviteLabel, sharingLabel } from './conversation_share_i18n';
 
@@ -130,9 +131,9 @@ const InviteMembersSummaryButton: React.FC<{
 };
 
 export const ConversationSharePopoverButton: React.FC<{
-  canUpdateAccessControl: boolean;
   onClick: () => void;
-}> = ({ canUpdateAccessControl, onClick }) => {
+}> = ({ onClick }) => {
+  const { update_access_control: canUpdateAccessControl } = useConversationPermissions();
   const { profiles, extraCount, shouldShowSummary } = useInviteMembersSummary();
 
   if (!shouldShowSummary) {

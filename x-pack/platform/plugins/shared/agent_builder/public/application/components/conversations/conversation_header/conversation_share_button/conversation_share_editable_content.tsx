@@ -146,7 +146,6 @@ export const ConversationShareEditableContent: React.FC<{
       <ConversationParticipantsList
         ownerProfile={ownerProfile}
         memberProfiles={memberProfiles}
-        canUpdateAccessControl={true}
         isSaving={isSaving}
         onRemoveUser={onRemoveUser}
       />

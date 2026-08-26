@@ -21,6 +21,7 @@ import {
   UserAvatar,
   type UserProfileWithAvatar,
 } from '@kbn/user-profile-components';
+import { useConversationPermissions } from '../../../../hooks/use_conversation';
 import { authorLabel, removeMemberLabel } from './conversation_share_i18n';
 
 const UserAccessRow: React.FC<{
@@ -87,10 +88,11 @@ const UserAccessRow: React.FC<{
 export const ConversationParticipantsList: React.FC<{
   ownerProfile?: UserProfileWithAvatar;
   memberProfiles: UserProfileWithAvatar[];
-  canUpdateAccessControl: boolean;
   isSaving: boolean;
   onRemoveUser: (id: string) => void;
-}> = ({ ownerProfile, memberProfiles, canUpdateAccessControl, isSaving, onRemoveUser }) => {
+}> = ({ ownerProfile, memberProfiles, isSaving, onRemoveUser }) => {
+  const { update_access_control: canUpdateAccessControl } = useConversationPermissions();
+
   return (
     <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
       {ownerProfile ? (
