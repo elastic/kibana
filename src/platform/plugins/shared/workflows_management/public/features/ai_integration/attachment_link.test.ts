@@ -65,6 +65,26 @@ describe('findLinkedWorkflowAttachment', () => {
     ).toBe('draft-uuid');
   });
 
+  it('matches the sole unowned legacy create-session attachment', () => {
+    expect(
+      findLinkedWorkflowAttachment({
+        attachments: [workflowAttachment('legacy-draft-uuid')],
+        attachmentId: WORKFLOW_EDITOR_ATTACHMENT_ID,
+        workflowId: 'workflow-a',
+      })?.id
+    ).toBe('legacy-draft-uuid');
+  });
+
+  it('does not guess between multiple unowned legacy attachments', () => {
+    expect(
+      findLinkedWorkflowAttachment({
+        attachments: [workflowAttachment('legacy-a'), workflowAttachment('legacy-b')],
+        attachmentId: WORKFLOW_EDITOR_ATTACHMENT_ID,
+        workflowId: 'workflow-a',
+      })
+    ).toBeUndefined();
+  });
+
   it('ignores a workflow attachment linked to a different workflow', () => {
     expect(
       findLinkedWorkflowAttachment({

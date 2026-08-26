@@ -29,8 +29,10 @@ export interface FindLinkedWorkflowAttachmentParams {
 /**
  * Returns the workflow attachment this session must keep writing into, or
  * `undefined` when the conversation holds none. Once set, the origin identifies
- * the owning workflow; before the first save, the fixed editor id identifies
- * the unowned draft attachment.
+ * the owning workflow. For unowned attachments, the fixed editor id identifies
+ * a draft created by the current integration. Legacy sessions may instead have
+ * the saved workflow id or an arbitrary create-session id; the latter is safe
+ * to reuse only when it is the sole unowned workflow attachment.
  */
 export const findLinkedWorkflowAttachment = ({
   attachments,
@@ -42,9 +44,23 @@ export const findLinkedWorkflowAttachment = ({
       attachment.type === WORKFLOW_YAML_ATTACHMENT_TYPE && isAttachmentActive(attachment)
   );
 
-  return candidates.find((attachment) =>
-    attachment.origin !== undefined
-      ? attachment.origin === workflowId
-      : attachment.id === attachmentId
+  const linkedByOrigin = candidates.find(
+    ({ origin }) => workflowId !== undefined && origin === workflowId
   );
+  if (linkedByOrigin) return linkedByOrigin;
+
+  const linkedByAttachmentId = candidates.find(
+    ({ id, origin }) => origin === undefined && id === attachmentId
+  );
+  if (linkedByAttachmentId) return linkedByAttachmentId;
+
+  if (workflowId === undefined) return undefined;
+
+  const legacySavedWorkflowAttachment = candidates.find(
+    ({ id, origin }) => origin === undefined && id === workflowId
+  );
+  if (legacySavedWorkflowAttachment) return legacySavedWorkflowAttachment;
+
+  const unownedCandidates = candidates.filter(({ origin }) => origin === undefined);
+  return unownedCandidates.length === 1 ? unownedCandidates[0] : undefined;
 };

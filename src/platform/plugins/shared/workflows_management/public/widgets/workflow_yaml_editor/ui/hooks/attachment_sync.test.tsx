@@ -129,8 +129,12 @@ const createFakeAgentBuilder = () => {
       const restoredId = stored ? (JSON.parse(stored) as string) : undefined;
       boundConversations.push(restoredId);
 
-      // The chat UI publishes the binding as it renders, before its attachment
-      // callbacks are registered and before the conversation fetch lands.
+      // The real provider renders once before its local-storage hook hydrates.
+      // A restored chat therefore briefly looks like a new conversation.
+      activeConversation$.next({ id: undefined });
+
+      // It then publishes the binding before its attachment callbacks are
+      // registered and before the conversation fetch lands.
       activeConversation$.next({ id: restoredId });
       acceptsAttachments = true;
       if (restoredId) {
@@ -319,6 +323,27 @@ describe('workflow attachment sync', () => {
       act(() => fake.submitRound('conv-2'));
 
       expect(fake.workflowAttachmentIds('conv-2')).toEqual(['draft-from-before-reload']);
+    });
+
+    it('reuses a legacy create-session attachment with an arbitrary id', async () => {
+      const fake = createFakeAgentBuilder();
+      setupKibana(fake.contract);
+      fake.seedConversation('conv-legacy', 'workflow-editor:workflow-legacy', [
+        // Before the fixed editor id and origin link existed, a conversation
+        // started on /create kept its generated UUID after the workflow saved.
+        { id: 'legacy-draft-uuid' },
+      ]);
+
+      const session = await renderEditor('workflow-legacy');
+      act(() => session.result.current.openAgentChat());
+      act(() => fake.submitRound('conv-legacy'));
+
+      expect(fake.workflowAttachmentIds('conv-legacy')).toEqual(['legacy-draft-uuid']);
+      expect(fake.contract.updateAttachmentOrigin).toHaveBeenCalledWith(
+        'conv-legacy',
+        'legacy-draft-uuid',
+        'workflow-legacy'
+      );
     });
 
     it('reuses the attachment even when its origin was never linked', async () => {
