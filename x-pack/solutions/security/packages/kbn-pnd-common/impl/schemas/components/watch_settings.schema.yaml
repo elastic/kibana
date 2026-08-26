@@ -231,11 +231,6 @@ components:
       enum: [on_hits, always]
       description: When Dark Watch runs Tier 2 LLM corroboration.
 
-    DarkWatchTargetTechnology:
-      type: string
-      enum: [aws_iam, fortigate]
-      description: Technology preference for environment-resolved hunt index scope.
-
     DarkWatchScope:
       type: object
       required:
@@ -264,7 +259,6 @@ components:
         - candidateLimit
         - fanOutMax
         - huntCooldownMinutes
-        - targetTechnology
         - scheduleId
         - allowManualRun
         - scopes
@@ -291,8 +285,6 @@ components:
           maximum: 10080
           description: >-
             How long a report is skipped after a hunt pass, as a lookback on last_hunted_at.
-        targetTechnology:
-          $ref: '#/components/schemas/DarkWatchTargetTechnology'
         scheduleId:
           type: string
           minLength: 1

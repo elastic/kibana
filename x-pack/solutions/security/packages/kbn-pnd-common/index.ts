@@ -92,7 +92,6 @@ export {
   WatchSettings,
   DarkWatchScope,
   DarkWatchSettings,
-  DarkWatchTargetTechnology,
   DarkWatchTier2When,
   WatchSkill,
   WatchSkillAttachment,

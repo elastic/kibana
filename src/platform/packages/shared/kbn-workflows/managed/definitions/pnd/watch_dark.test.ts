@@ -24,7 +24,6 @@ const values: DarkWatchTemplateValues = {
   candidateLimit: 10,
   fanOutMax: 10,
   huntCooldownMinutes: 240,
-  targetTechnology: 'aws_iam',
 };
 
 describe('PND_WATCH_DARK_WORKFLOW', () => {
@@ -70,7 +69,6 @@ describe('PND_WATCH_DARK_WORKFLOW', () => {
     expect(huntStep?.with?.inputs).toMatchObject({
       inference_endpoint_id: '{{ consts.watch_settings.inferenceEndpointId }}',
       tier2_when: '{{ consts.watch_settings.tier2When }}',
-      target_technology: '{{ consts.watch_settings.targetTechnology }}',
     });
   });
 

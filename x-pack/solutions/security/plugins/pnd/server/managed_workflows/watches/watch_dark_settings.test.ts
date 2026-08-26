@@ -27,7 +27,6 @@ describe('createDarkWatchSettingsRegistration', () => {
       candidateLimit: 10,
       fanOutMax: 10,
       huntCooldownMinutes: 240,
-      targetTechnology: 'aws_iam',
     });
   });
 
@@ -75,7 +74,6 @@ describe('createDarkWatchSettingsRegistration', () => {
         candidateLimit: 10,
         fanOutMax: 10,
         huntCooldownMinutes: 240,
-        targetTechnology: 'aws_iam',
         scheduleId: 'dark-overnight-sweep',
         allowManualRun: true,
         scopes: [

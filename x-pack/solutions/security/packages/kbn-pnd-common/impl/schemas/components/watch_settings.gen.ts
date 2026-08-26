@@ -224,14 +224,6 @@ export type DarkWatchTier2When = z.infer<typeof DarkWatchTier2When>;
 export type DarkWatchTier2WhenEnum = typeof DarkWatchTier2When.enum;
 export const DarkWatchTier2WhenEnum = DarkWatchTier2When.enum;
 
-/**
- * Technology preference for environment-resolved hunt index scope.
- */
-export const DarkWatchTargetTechnology = lazySchema(() => z.enum(['aws_iam', 'fortigate']));
-export type DarkWatchTargetTechnology = z.infer<typeof DarkWatchTargetTechnology>;
-export type DarkWatchTargetTechnologyEnum = typeof DarkWatchTargetTechnology.enum;
-export const DarkWatchTargetTechnologyEnum = DarkWatchTargetTechnology.enum;
-
 export const DarkWatchScope = lazySchema(() =>
   z.object({
     name: z.string().max(128),
@@ -263,7 +255,6 @@ export const DarkWatchSettings = lazySchema(() =>
      * How long a report is skipped after a hunt pass, as a lookback on last_hunted_at.
      */
     huntCooldownMinutes: z.number().int().min(1).max(10080),
-    targetTechnology: DarkWatchTargetTechnology,
     scheduleId: z.string().min(1).max(128),
     allowManualRun: z.boolean(),
     scopes: z.array(DarkWatchScope).max(32),

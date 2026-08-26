@@ -36,5 +36,4 @@ export interface DarkWatchTemplateValues extends CommonWatchTemplateValues {
   candidateLimit: number;
   fanOutMax: number;
   huntCooldownMinutes: number;
-  targetTechnology: 'aws_iam' | 'fortigate';
 }

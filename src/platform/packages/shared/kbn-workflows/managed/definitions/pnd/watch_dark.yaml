@@ -41,7 +41,6 @@ consts:
     candidateLimit: __WATCH_CANDIDATE_LIMIT__
     fanOutMax: __WATCH_FAN_OUT_MAX__
     huntCooldownMinutes: __WATCH_HUNT_COOLDOWN_MINUTES__
-    targetTechnology: "__WATCH_TARGET_TECHNOLOGY__"
   watch_policy:
     settingsVersion: __WATCH_SETTINGS_VERSION__
     # Persisted plumbing only; runtime autonomy semantics are defined separately.
@@ -137,7 +136,6 @@ steps:
             investigation_id: "{{ steps.find_or_create_investigation.output.investigation_id }}"
             inference_endpoint_id: "{{ consts.watch_settings.inferenceEndpointId }}"
             tier2_when: "{{ consts.watch_settings.tier2When }}"
-            target_technology: "{{ consts.watch_settings.targetTechnology }}"
 
       - name: correlation
         type: workflow.execute

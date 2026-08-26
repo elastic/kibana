@@ -25,7 +25,6 @@ const renderPndWatchDarkYaml = ({
   candidateLimit,
   fanOutMax,
   huntCooldownMinutes,
-  targetTechnology,
 }: DarkWatchTemplateValues): string =>
   WATCH_DARK_YAML.replaceAll('__WATCH_SETTINGS_VERSION__', String(settingsVersion))
     .replaceAll('__WATCH_AUTONOMY_LEVEL__', autonomyLevel)
@@ -36,8 +35,7 @@ const renderPndWatchDarkYaml = ({
     .replaceAll('__WATCH_TIER2_WHEN__', tier2When)
     .replaceAll('__WATCH_CANDIDATE_LIMIT__', String(candidateLimit))
     .replaceAll('__WATCH_FAN_OUT_MAX__', String(fanOutMax))
-    .replaceAll('__WATCH_HUNT_COOLDOWN_MINUTES__', String(huntCooldownMinutes))
-    .replaceAll('__WATCH_TARGET_TECHNOLOGY__', targetTechnology);
+    .replaceAll('__WATCH_HUNT_COOLDOWN_MINUTES__', String(huntCooldownMinutes));
 
 export const PND_WATCH_DARK_WORKFLOW = {
   billable: false,

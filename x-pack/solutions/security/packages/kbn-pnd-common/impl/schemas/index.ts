@@ -27,7 +27,6 @@ export {
   ApprovalRequirement,
   DarkWatchScope,
   DarkWatchSettings,
-  DarkWatchTargetTechnology,
   DarkWatchTier2When,
   WatchApprovalGate,
   WatchAutonomyLevel,

@@ -20,7 +20,6 @@ import {
   WatchAutonomyLevel,
   ApprovalRequirement,
   DarkWatchTier2When,
-  DarkWatchTargetTechnology,
   DarkWatchScope,
   WatchSettings,
 } from '../components/watch_settings.gen';
@@ -99,7 +98,6 @@ export const UpdateWatchRequestBody = lazySchema(() =>
         candidateLimit: z.number().int().min(1).max(100).optional(),
         fanOutMax: z.number().int().min(1).max(20).optional(),
         huntCooldownMinutes: z.number().int().min(1).max(10080).optional(),
-        targetTechnology: DarkWatchTargetTechnology.optional(),
         scheduleId: z.string().min(1).max(128).optional(),
         allowManualRun: z.boolean().optional(),
         scopes: z.array(DarkWatchScope).max(32).optional(),

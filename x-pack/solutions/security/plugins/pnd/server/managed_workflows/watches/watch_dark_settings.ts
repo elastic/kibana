@@ -18,10 +18,6 @@ const DEFAULT_SCOPES: DarkWatchTemplateValues['scopes'] = [
 ];
 
 const TIER2_WHEN: ReadonlyArray<DarkWatchTemplateValues['tier2When']> = ['on_hits', 'always'];
-const TARGET_TECHNOLOGY: ReadonlyArray<DarkWatchTemplateValues['targetTechnology']> = [
-  'aws_iam',
-  'fortigate',
-];
 
 // Concurrent report branches cannot exceed the workflow engine's parallel
 // concurrency ceiling, and one sweep cannot select more reports than the
@@ -81,7 +77,6 @@ const parseDarkWatchValues = (raw: Record<string, unknown>): DarkWatchTemplateVa
     candidateLimit,
     fanOutMax,
     huntCooldownMinutes,
-    targetTechnology,
   } = raw;
 
   if (settingsVersion !== undefined && settingsVersion !== WATCH_SETTINGS_VERSION) {
@@ -120,12 +115,6 @@ const parseDarkWatchValues = (raw: Record<string, unknown>): DarkWatchTemplateVa
       `PND watch "${SYSTEM_SECURITY_WATCH_DARK_ID}" settings contain an invalid tier2When`
     );
   }
-  const parsedTargetTechnology = TARGET_TECHNOLOGY.find((value) => value === targetTechnology);
-  if (!parsedTargetTechnology) {
-    throw new Error(
-      `PND watch "${SYSTEM_SECURITY_WATCH_DARK_ID}" settings contain an invalid targetTechnology`
-    );
-  }
   return {
     settingsVersion: WATCH_SETTINGS_VERSION,
     autonomyLevel: parsedAutonomyLevel.data,
@@ -141,7 +130,6 @@ const parseDarkWatchValues = (raw: Record<string, unknown>): DarkWatchTemplateVa
       'huntCooldownMinutes',
       MAX_INTERVAL_MINUTES
     ),
-    targetTechnology: parsedTargetTechnology,
   };
 };
 
@@ -156,7 +144,6 @@ const DEFAULT_DARK_WATCH_VALUES: DarkWatchTemplateValues = {
   candidateLimit: 10,
   fanOutMax: 10,
   huntCooldownMinutes: 240,
-  targetTechnology: 'aws_iam',
 };
 
 const createDefaultDarkWatchValues = (): DarkWatchTemplateValues => ({
@@ -202,7 +189,6 @@ export const createDarkWatchSettingsRegistration = (): WatchSettingsRegistration
       candidateLimit: patch.dark?.candidateLimit ?? values.candidateLimit,
       fanOutMax: patch.dark?.fanOutMax ?? values.fanOutMax,
       huntCooldownMinutes: patch.dark?.huntCooldownMinutes ?? values.huntCooldownMinutes,
-      targetTechnology: patch.dark?.targetTechnology ?? values.targetTechnology,
       scopes: patch.dark?.scopes ?? values.scopes,
     };
 
@@ -219,7 +205,6 @@ export const createDarkWatchSettingsRegistration = (): WatchSettingsRegistration
         candidateLimit: values.candidateLimit,
         fanOutMax: values.fanOutMax,
         huntCooldownMinutes: values.huntCooldownMinutes,
-        targetTechnology: values.targetTechnology,
         scheduleId: values.scheduleId,
         allowManualRun: values.allowManualRun,
         scopes: values.scopes,

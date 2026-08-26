@@ -30,9 +30,6 @@ inputs:
     tier2_when:
       description: When to run Tier 2 (on_hits | always), from orchestrator settings.
       type: string
-    target_technology:
-      description: Technology preference for env-resolved index scope (aws_iam | fortigate).
-      type: string
   required:
     - report_id
     - investigation_id
@@ -48,7 +45,6 @@ steps:
           report_id: "{{ inputs.report_id }}"
           inference_endpoint_id: "{{ inputs.inference_endpoint_id }}"
           tier2_when: "{{ inputs.tier2_when }}"
-          target_technology: "{{ inputs.target_technology }}"
 
   # Tier 1 event = whole hunt_for_threat result bundle, one per run (not per
   # IOC hit). Tier 2 event = corroboration output, when present. Always
