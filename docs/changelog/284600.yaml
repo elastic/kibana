@@ -1,9 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/284600
-type: feature
-products:
-- product: cloud-serverless
-  target: 2026-08-25
-- product: kibana
-title: Add Agent Builder tools and skills for Automatic Rule Migration
-description: Enables the Elastic AI Agent to inspect, summarize, and start SIEM rule migrations via conversational skills.

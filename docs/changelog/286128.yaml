@@ -7,4 +7,4 @@ products:
 - product: cloud-serverless
   target: 2026-08-25
 - product: kibana
-title: Fix event flyout deep links in in Nightshift to open the correct event
+title: Fix event flyout deep links in Nightshift to open the correct event
