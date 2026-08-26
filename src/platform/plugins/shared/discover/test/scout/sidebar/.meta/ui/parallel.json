@@ -1,5 +1,5 @@
 {
-  "sha1": "3323a819159fcb5d11ac32a770fc5450c68743fc",
+  "sha1": "a1d72db7ca50d9c5a01957af9b3b55ce5504560c",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -321,8 +321,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/sidebar/ui/parallel_tests/sidebar_runtime_fields.spec.ts",
-        "line": 58,
-        "column": 44
+        "line": 65,
+        "column": 13
       }
     },
     {
@@ -341,8 +341,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/sidebar/ui/parallel_tests/sidebar_runtime_fields.spec.ts",
-        "line": 86,
-        "column": 30
+        "line": 91,
+        "column": 9
       }
     },
     {
@@ -361,8 +361,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/sidebar/ui/parallel_tests/sidebar_runtime_fields.spec.ts",
-        "line": 110,
-        "column": 28
+        "line": 117,
+        "column": 25
       }
     }
   ]

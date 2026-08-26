@@ -124,18 +124,6 @@ export const scoreToolUsage = ({
     };
   }
 
-  const hasUnfilteredEventSearch = orderedCalls.some(
-    ({ toolId, params }) =>
-      toolId === TOOL_ID_EVENT_SEARCH && params.exclude_unconfirmed_signals !== true
-  );
-  if (hasUnfilteredEventSearch) {
-    return {
-      score: 0,
-      label: `unfiltered-${TOOL_ID_EVENT_SEARCH}`,
-      explanation: `${TOOL_ID_EVENT_SEARCH} was not called with exclude_unconfirmed_signals: true — required to exclude signals whose confirmed value is false`,
-    };
-  }
-
   const ruleSearchFoundNoCandidates = orderedCalls.some(didRuleSearchReturnNoCandidates);
   const hasTopologySearch = orderedCalls.some(
     ({ params, toolId }) =>

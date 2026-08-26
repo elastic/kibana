@@ -42,6 +42,7 @@ import { get, resolve, getCasesByAlertID, getReporters, getTags, getCategories }
 import type { PushParams } from './push';
 import { push } from './push';
 import { bulkUpdate } from './bulk_update';
+import type { BulkCreateCasesClientOptions } from './bulk_create';
 import { bulkCreate } from './bulk_create';
 import type { ReplaceCustomFieldArgs } from './replace_custom_field';
 import { replaceCustomField } from './replace_custom_field';
@@ -66,9 +67,13 @@ export interface CasesSubClient {
    */
   create(data: CasePostRequest): Promise<Case>;
   /**
-   * Bulk create cases.
+   * Bulk create cases. `options` is internal-only (bulkCreate has no HTTP route) — see
+   * {@link BulkCreateCasesClientOptions}.
    */
-  bulkCreate(data: BulkCreateCasesRequest): Promise<BulkCreateCasesResponse>;
+  bulkCreate(
+    data: BulkCreateCasesRequest,
+    options?: BulkCreateCasesClientOptions
+  ): Promise<BulkCreateCasesResponse>;
   /**
    * Returns cases using Saved Objects find API (uses Kuery queries).
    *
@@ -202,7 +207,8 @@ export const createCasesSubClient = (
     bulkCreate: withUsageCounter(
       usageCounterByMethod.bulkCreate,
       clientArgs,
-      (data: BulkCreateCasesRequest) => bulkCreate(data, clientArgs, casesClient)
+      (data: BulkCreateCasesRequest, options?: BulkCreateCasesClientOptions) =>
+        bulkCreate(data, clientArgs, casesClient, options)
     ),
     find: (params: CasesFindRequestWithCustomFields) => find(params, clientArgs, casesClient),
     search: (params: CasesSearchRequest) => search(params, clientArgs, casesClient),

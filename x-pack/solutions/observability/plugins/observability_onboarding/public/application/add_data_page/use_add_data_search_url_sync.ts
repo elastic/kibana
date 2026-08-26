@@ -6,11 +6,12 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom-v5-compat';
+import { useSearchParams } from '@kbn/shared-ux-router';
 
 /**
  * Owns the raw search input value and mirrors the trimmed value into the
- * `?search=` param (replace-style, dropped when empty, other params kept).
+ * `?search=` param (replace-style, dropped when empty, other params kept apart
+ * from the collection chooser, which belongs to the term it was opened from).
  */
 export function useAddDataSearchUrlSync(): [string, (value: string) => void] {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -33,11 +34,16 @@ export function useAddDataSearchUrlSync(): [string, (value: string) => void] {
       } else {
         next.delete('search');
       }
+      // A different term means different results, so a chooser still queued for
+      // the old ones must not surface on top of them later.
+      if (term !== urlTerm) {
+        next.delete('collection');
+      }
       if (next.toString() !== searchParams.toString()) {
         setSearchParams(next, { replace: true });
       }
     },
-    [searchParams, setSearchParams]
+    [searchParams, setSearchParams, urlTerm]
   );
 
   return [searchValue, onChange];

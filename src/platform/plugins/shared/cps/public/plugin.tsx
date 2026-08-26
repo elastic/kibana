@@ -10,12 +10,74 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import { type ICPSManager, type CPSAppAccessResolver } from '@kbn/cps-utils';
+import type { CloudStart } from '@kbn/cloud-plugin/public';
+import {
+  type ICPSManager,
+  type CPSAppAccessResolver,
+  type HeaderContextMenuItemProps,
+} from '@kbn/cps-utils';
 import { CPS_TIER_ELIGIBLE_FEATURE_ID } from '@kbn/cps-common';
-import type { CPSPluginSetup, CPSPluginStart, CPSConfigType } from './types';
+import { i18n } from '@kbn/i18n';
+import type {
+  CPSPluginSetup,
+  CPSPluginStart,
+  CPSPluginStartDependencies,
+  CPSConfigType,
+} from './types';
 import { CPSManager } from './services/cps_manager';
 
-export class CpsPlugin implements Plugin<CPSPluginSetup, CPSPluginStart> {
+/** Builds the Cloud console URL for managing cross-project search links. */
+export const getManageCrossProjectSearchUrl = (cloud?: CloudStart): string | undefined => {
+  const { baseUrl } = cloud ?? {};
+  const { projectId, projectType } = cloud?.serverless ?? {};
+  if (!baseUrl || !projectId || !projectType) {
+    return undefined;
+  }
+
+  try {
+    return new URL(
+      `projects/${projectType}/${projectId}/cross-project-search`,
+      baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`
+    ).toString();
+  } catch {
+    return undefined;
+  }
+};
+
+export const getCustomHeaderContextMenuItems = (
+  core: CoreStart,
+  cloud?: CloudStart
+): HeaderContextMenuItemProps[] => {
+  const items: HeaderContextMenuItemProps[] = [
+    {
+      icon: 'controls',
+      label: i18n.translate('cps.projectPicker.header.adjustSpaceDefaultsLinkText', {
+        defaultMessage: 'Adjust space defaults',
+      }),
+      href: core.application.getUrlForApp('management', {
+        path: `kibana/spaces/edit/${core.http.spaceId}`,
+      }),
+    },
+  ];
+
+  const manageCrossProjectSearchUrl = getManageCrossProjectSearchUrl(cloud);
+  if (manageCrossProjectSearchUrl) {
+    items.push({
+      icon: 'gear',
+      label: i18n.translate('cps.projectPicker.header.manageCrossProjectSearchLinkText', {
+        defaultMessage: 'Manage cross-project search',
+      }),
+      href: manageCrossProjectSearchUrl,
+      external: true,
+    });
+  }
+
+  return items;
+};
+
+export class CpsPlugin
+  implements Plugin<CPSPluginSetup, CPSPluginStart, {}, CPSPluginStartDependencies>
+{
   private readonly initializerContext: PluginInitializerContext<CPSConfigType>;
   private readonly appAccessResolvers = new Map<string, CPSAppAccessResolver>();
 
@@ -34,7 +96,7 @@ export class CpsPlugin implements Plugin<CPSPluginSetup, CPSPluginStart> {
     };
   }
 
-  public start(core: CoreStart): CPSPluginStart {
+  public start(core: CoreStart, { cloud }: CPSPluginStartDependencies = {}): CPSPluginStart {
     const { cpsEnabled } = this.initializerContext.config.get();
     let cpsManager: ICPSManager | undefined;
 
@@ -49,14 +111,26 @@ export class CpsPlugin implements Plugin<CPSPluginSetup, CPSPluginStart> {
       // Register project picker only after the default project routing is known
       manager.whenReady().then(() =>
         import('@kbn/cps-utils').then(({ ProjectPickerContainer }) => {
+          const customHeaderContextMenuItems = getCustomHeaderContextMenuItems(core, cloud);
+
           // register into solution-view chrome next header
-          core.chrome.next.projectPicker.set(<ProjectPickerContainer cpsManager={manager} />);
+          core.chrome.next.projectPicker.set(
+            <ProjectPickerContainer
+              cpsManager={manager}
+              customHeaderContextMenuItems={customHeaderContextMenuItems}
+            />
+          );
 
           // register into legacy chrome header
           core.chrome.navControls.registerLeft({
             mount: (element) => {
               ReactDOM.render(
-                core.rendering.addContext(<ProjectPickerContainer cpsManager={manager} />),
+                core.rendering.addContext(
+                  <ProjectPickerContainer
+                    cpsManager={manager}
+                    customHeaderContextMenuItems={customHeaderContextMenuItems}
+                  />
+                ),
                 element,
                 () => {}
               );

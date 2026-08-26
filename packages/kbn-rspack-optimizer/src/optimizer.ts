@@ -23,6 +23,10 @@ export interface RspackOptimizerOptions {
   dist?: boolean;
   examples?: boolean;
   themeTags?: ThemeTag[];
+  /** Explicit plugin paths passed via --plugin-path */
+  pluginPaths?: string[];
+  /** Directories scanned for plugins */
+  pluginScanDirs?: string[];
   /** Enable HMR in watch mode (undefined = auto-detect) */
   hmr?: boolean;
   /** Dev server base path (e.g. "/abc") for HMR auto-reload on server restart */
@@ -129,6 +133,8 @@ export class RspackOptimizer {
                 examples: this.options.examples,
                 themeTags: this.options.themeTags ?? [...DEFAULT_THEME_TAGS],
                 hmr: this.options.hmr,
+                pluginPaths: this.options.pluginPaths,
+                pluginScanDirs: this.options.pluginScanDirs,
                 basePath: this.options.basePath,
               },
             });

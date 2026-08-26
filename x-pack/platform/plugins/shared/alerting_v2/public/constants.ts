@@ -32,13 +32,18 @@ export const MANAGEMENT_APP_ID = 'management';
 /** Stable Content List `id` / query-key scope for the rules list page. */
 export const RULES_CONTENT_LIST_ID = 'alerting-v2-rules';
 
+/** Stable Content List `id` / query-key scope for the rule library page. */
+export const RULE_TEMPLATES_CONTENT_LIST_ID = 'alerting-v2-rule-templates';
+
 export {
   ALERTING_V2_RULE_API_PATH,
+  ALERTING_V2_RULE_CHANGE_HISTORY_API_PATH,
   ALERTING_V2_ACTION_POLICY_API_PATH,
   ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH,
   ALERTING_V2_EXECUTION_HISTORY_RULES_API_PATH,
   ALERTING_V2_INTERNAL_RULE_TEMPLATE_API_PATH,
   CREATE_WITH_AGENT_INITIAL_PROMPT,
+  CREATE_ACTION_POLICY_WITH_AGENT_INITIAL_PROMPT,
 } from '@kbn/alerting-v2-constants';
 
 export interface AlertEpisodesListLinkOptions {

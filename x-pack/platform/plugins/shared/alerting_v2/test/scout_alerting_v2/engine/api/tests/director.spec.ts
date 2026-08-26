@@ -1482,7 +1482,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
   );
 
   apiTest(
-    "no_data_strategy 'recover' transitions the episode toward recovery via a no_data event",
+    "no_data_strategy 'recover' resolves the episode to inactive via a no_data event",
     async ({ apiServices }) => {
       const HOST = 'host-director-no-data-recover';
 
@@ -1535,9 +1535,9 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       });
 
       expect(noDataEvents.length).toBeGreaterThanOrEqual(1);
-      // The director applies the recovered FSM transition: active → recovering.
+      // The director resolves the episode directly to inactive, ignoring recovering_count.
       for (const event of noDataEvents) {
-        expect(event.episode?.status).toBe('recovering');
+        expect(event.episode?.status).toBe('inactive');
       }
     }
   );

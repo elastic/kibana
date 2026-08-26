@@ -94,7 +94,11 @@ describe('RelatedEpisodesGroupSubsection', () => {
       </I18nProvider>
     );
 
-    expect(screen.getByTestId('alertingV2RelatedEpisodesGroupLoading')).toBeInTheDocument();
+    expect(
+      screen
+        .getByTestId('alertingV2RelatedEpisodesGroupLoading')
+        .querySelector('.euiSkeletonRectangle')
+    ).not.toBeNull();
   });
 
   it('shows the empty state when there are no episodes', () => {

@@ -1,12 +1,12 @@
 {
-  "sha1": "dfe48ee6d64518ec5d1261fe7b99f0169c956a0c",
+  "sha1": "887c7d13dbe84bb22b48aec7bcf745cec645dca0",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
   ],
   "tests": [
     {
-      "id": "6ca7a841c6c0566-0d07bebba1374b5",
+      "id": "b9f50ac95f08e82-0d07bebba1374b5",
       "title": "Entity Store check privileges API Should return full privileges for admin user",
       "expectedStatus": "passed",
       "tags": [
@@ -22,7 +22,7 @@
       }
     },
     {
-      "id": "6ca7a841c6c0566-791197e69b48c0e",
+      "id": "b9f50ac95f08e82-791197e69b48c0e",
       "title": "Entity Store check privileges API Should deny access for user without securitySolution privilege",
       "expectedStatus": "passed",
       "tags": [
@@ -34,11 +34,11 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/check_privileges.spec.ts",
         "line": 50,
-        "column": 27
+        "column": 7
       }
     },
     {
-      "id": "6ca7a841c6c0566-830cd1dd91a4340",
+      "id": "b9f50ac95f08e82-830cd1dd91a4340",
       "title": "Entity Store check privileges API Should return no index permissions for user with securitySolution privilege but no index access",
       "expectedStatus": "passed",
       "tags": [
@@ -50,11 +50,11 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/check_privileges.spec.ts",
         "line": 69,
-        "column": 30
+        "column": 24
       }
     },
     {
-      "id": "6ca7a841c6c0566-34f8999fb069dee",
+      "id": "b9f50ac95f08e82-34f8999fb069dee",
       "title": "Entity Store check privileges API Should return has_read_permissions: false when user has read access to only one of the required indices",
       "expectedStatus": "passed",
       "tags": [
@@ -66,11 +66,11 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/check_privileges.spec.ts",
         "line": 97,
-        "column": 24
+        "column": 14
       }
     },
     {
-      "id": "6ca7a841c6c0566-550cdaf8582b4e8",
+      "id": "b9f50ac95f08e82-550cdaf8582b4e8",
       "title": "Entity Store check privileges API Should return limited privileges for user with read-only access to entities index",
       "expectedStatus": "passed",
       "tags": [
@@ -86,7 +86,7 @@
       }
     },
     {
-      "id": "6ca7a841c6c0566-04a7168fd3eea1d",
+      "id": "b9f50ac95f08e82-04a7168fd3eea1d",
       "title": "Entity Store check privileges API Should report has_read_permissions: true but has_all_required: false when metadata read is missing",
       "expectedStatus": "passed",
       "tags": [
@@ -98,11 +98,11 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/check_privileges.spec.ts",
         "line": 193,
-        "column": 38
+        "column": 33
       }
     },
     {
-      "id": "6ca7a841c6c0566-dc06de8b6f27199",
+      "id": "b9f50ac95f08e82-dc06de8b6f27199",
       "title": "Entity Store check privileges API Should report has_write_permissions: true but has_all_required: false when only metadata read is missing",
       "expectedStatus": "passed",
       "tags": [
@@ -114,11 +114,11 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/check_privileges.spec.ts",
         "line": 239,
-        "column": 24
+        "column": 14
       }
     },
     {
-      "id": "cef497bed1ff11f-f431fa95054f66d",
+      "id": "2315ac585ff7ce5-f431fa95054f66d",
       "title": "Entity Store CRUD API - not installed Should return 400 when creating an entity without Entity Store installed",
       "expectedStatus": "passed",
       "tags": [
@@ -134,7 +134,7 @@
       }
     },
     {
-      "id": "cef497bed1ff11f-888e02aee89e133",
+      "id": "2315ac585ff7ce5-888e02aee89e133",
       "title": "Entity Store CRUD API - not installed Should return 400 when updating an entity without Entity Store installed",
       "expectedStatus": "passed",
       "tags": [
@@ -150,7 +150,7 @@
       }
     },
     {
-      "id": "cef497bed1ff11f-a38b5a4568cd545",
+      "id": "2315ac585ff7ce5-a38b5a4568cd545",
       "title": "Entity Store CRUD API - not installed Should return 400 when bulk updating entities without Entity Store installed",
       "expectedStatus": "passed",
       "tags": [
@@ -162,11 +162,11 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/crud_not_installed.spec.ts",
         "line": 53,
-        "column": 29
+        "column": 23
       }
     },
     {
-      "id": "cad2427c9a6bdef-98adb7d54946bea",
+      "id": "49ffef8e2339e90-98adb7d54946bea",
       "title": "Entity Store - privilege checks install - Should fail when user lacks permissions for source index patterns",
       "expectedStatus": "passed",
       "tags": [
@@ -177,12 +177,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/entity_store_privileges.spec.ts",
-        "line": 121,
-        "column": 13
+        "line": 127,
+        "column": 64
       }
     },
     {
-      "id": "cad2427c9a6bdef-8544ac7d13fa2a1",
+      "id": "49ffef8e2339e90-8544ac7d13fa2a1",
       "title": "Entity Store - privilege checks install - Should fail when user lacks permissions for target index patterns",
       "expectedStatus": "passed",
       "tags": [
@@ -193,12 +193,28 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/entity_store_privileges.spec.ts",
-        "line": 147,
-        "column": 42
+        "line": 155,
+        "column": 23
       }
     },
     {
-      "id": "cad2427c9a6bdef-616e10db6ba79eb",
+      "id": "49ffef8e2339e90-9941b94d0d29d96",
+      "title": "Entity Store - privilege checks install - Should fail when user lacks write privilege on target index patterns",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/entity_store_privileges.spec.ts",
+        "line": 180,
+        "column": 38
+      }
+    },
+    {
+      "id": "49ffef8e2339e90-616e10db6ba79eb",
       "title": "Entity Store - privilege checks install - Should fail when user lacks permissions for entity store saved object descriptor",
       "expectedStatus": "passed",
       "tags": [
@@ -209,12 +225,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/entity_store_privileges.spec.ts",
-        "line": 176,
-        "column": 30
+        "line": 208,
+        "column": 15
       }
     },
     {
-      "id": "cad2427c9a6bdef-3324666d8642cf5",
+      "id": "49ffef8e2339e90-3324666d8642cf5",
       "title": "Entity Store - privilege checks update - Should fail when user lacks permissions for source index patterns",
       "expectedStatus": "passed",
       "tags": [
@@ -225,12 +241,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/entity_store_privileges.spec.ts",
-        "line": 193,
-        "column": 33
+        "line": 228,
+        "column": 5
       }
     },
     {
-      "id": "cad2427c9a6bdef-993c06b666a022e",
+      "id": "49ffef8e2339e90-993c06b666a022e",
       "title": "Entity Store - privilege checks update - Should fail when user lacks permissions for target index patterns",
       "expectedStatus": "passed",
       "tags": [
@@ -241,12 +257,28 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/entity_store_privileges.spec.ts",
-        "line": 219,
-        "column": 25
+        "line": 254,
+        "column": 5
       }
     },
     {
-      "id": "cad2427c9a6bdef-1d08b2e42819f2d",
+      "id": "49ffef8e2339e90-0403b3e66417e66",
+      "title": "Entity Store - privilege checks update - Should fail when user lacks write privilege on target index patterns",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/entity_store_privileges.spec.ts",
+        "line": 278,
+        "column": 9
+      }
+    },
+    {
+      "id": "49ffef8e2339e90-1d08b2e42819f2d",
       "title": "Entity Store - privilege checks update - Should fail when user lacks permissions for entity store saved object descriptor",
       "expectedStatus": "passed",
       "tags": [
@@ -257,12 +289,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/entity_store_privileges.spec.ts",
-        "line": 245,
-        "column": 4
+        "line": 305,
+        "column": 12
       }
     },
     {
-      "id": "cad2427c9a6bdef-e8f814791067649",
+      "id": "49ffef8e2339e90-e8f814791067649",
       "title": "Entity Store - privilege checks maintainers stop - Should fail when user lacks management privileges",
       "expectedStatus": "passed",
       "tags": [
@@ -273,12 +305,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/entity_store_privileges.spec.ts",
-        "line": 265,
-        "column": 4
+        "line": 325,
+        "column": 14
       }
     },
     {
-      "id": "cad2427c9a6bdef-75def91c035c039",
+      "id": "49ffef8e2339e90-75def91c035c039",
       "title": "Entity Store - privilege checks maintainers start - Should fail when user lacks management privileges",
       "expectedStatus": "passed",
       "tags": [
@@ -289,12 +321,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/entity_store_privileges.spec.ts",
-        "line": 281,
-        "column": 46
+        "line": 342,
+        "column": 24
       }
     },
     {
-      "id": "cad2427c9a6bdef-fe5666139dbf577",
+      "id": "49ffef8e2339e90-fe5666139dbf577",
       "title": "Entity Store - privilege checks maintainers run - Should fail when user lacks management privileges",
       "expectedStatus": "passed",
       "tags": [
@@ -305,12 +337,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/entity_store_privileges.spec.ts",
-        "line": 300,
-        "column": 30
+        "line": 360,
+        "column": 13
       }
     },
     {
-      "id": "d8e6318e9df42ad-c18f4e661235e05",
+      "id": "d1ac35cbfabb8dd-c18f4e661235e05",
       "title": "Entity Store install / update API tests Should install the entity store happy path with feature flag enabled",
       "expectedStatus": "passed",
       "tags": [
@@ -326,7 +358,7 @@
       }
     },
     {
-      "id": "d8e6318e9df42ad-79b9321af5a6eda",
+      "id": "d1ac35cbfabb8dd-79b9321af5a6eda",
       "title": "Entity Store install / update API tests Should fail with feature flag disabled",
       "expectedStatus": "passed",
       "tags": [
@@ -342,7 +374,7 @@
       }
     },
     {
-      "id": "d8e6318e9df42ad-a600fdc9000f15c",
+      "id": "d1ac35cbfabb8dd-a600fdc9000f15c",
       "title": "Entity Store install / update API tests logExtraction is not mandatory on install",
       "expectedStatus": "passed",
       "tags": [
@@ -358,7 +390,7 @@
       }
     },
     {
-      "id": "d8e6318e9df42ad-a0ba708820e1b70",
+      "id": "d1ac35cbfabb8dd-a0ba708820e1b70",
       "title": "Entity Store install / update API tests Update on uninstalled store should return 404",
       "expectedStatus": "passed",
       "tags": [
@@ -374,7 +406,7 @@
       }
     },
     {
-      "id": "d8e6318e9df42ad-1e886910e4426bc",
+      "id": "d1ac35cbfabb8dd-1e886910e4426bc",
       "title": "Entity Store install / update API tests logExtraction is mandatory on update",
       "expectedStatus": "passed",
       "tags": [
@@ -390,7 +422,7 @@
       }
     },
     {
-      "id": "d8e6318e9df42ad-c42368a614ad4b9",
+      "id": "d1ac35cbfabb8dd-c42368a614ad4b9",
       "title": "Entity Store install / update API tests Update should change installed logExtraction params",
       "expectedStatus": "passed",
       "tags": [
@@ -406,7 +438,7 @@
       }
     },
     {
-      "id": "d8e6318e9df42ad-96e718a66e0f3df",
+      "id": "d1ac35cbfabb8dd-96e718a66e0f3df",
       "title": "Entity Store install / update API tests install rejects unknown body keys",
       "expectedStatus": "passed",
       "tags": [
@@ -418,11 +450,11 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
         "line": 145,
-        "column": 27
+        "column": 21
       }
     },
     {
-      "id": "d8e6318e9df42ad-e1c3c58630a074b",
+      "id": "d1ac35cbfabb8dd-e1c3c58630a074b",
       "title": "Entity Store install / update API tests update rejects unknown body keys",
       "expectedStatus": "passed",
       "tags": [
@@ -438,7 +470,7 @@
       }
     },
     {
-      "id": "d8e6318e9df42ad-c25fba38ab357c5",
+      "id": "d1ac35cbfabb8dd-c25fba38ab357c5",
       "title": "Entity Store install / update API tests uninstall rejects unknown body keys",
       "expectedStatus": "passed",
       "tags": [
@@ -454,7 +486,7 @@
       }
     },
     {
-      "id": "d8e6318e9df42ad-0d7bd05437a88c9",
+      "id": "d1ac35cbfabb8dd-0d7bd05437a88c9",
       "title": "Entity Store install / update API tests Update should not change logExtraction properties that were not included in the update",
       "expectedStatus": "passed",
       "tags": [
@@ -470,8 +502,8 @@
       }
     },
     {
-      "id": "8a61b4d224df434-fbbfd087056a8ba",
-      "title": "metadata datastream is installed by entity store init creates the .entities.v2.metadata.security_default datastream on install",
+      "id": "4163c23089fa3c6-4e14c5487174112",
+      "title": "metadata datastream is installed by entity store init creates the .entities.v2.metadata.default datastream on install",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -482,11 +514,11 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/metadata_data_stream.spec.ts",
         "line": 43,
-        "column": 30
+        "column": 22
       }
     },
     {
-      "id": "8a61b4d224df434-3ad24e91d8ddddc",
+      "id": "4163c23089fa3c6-3ad24e91d8ddddc",
       "title": "metadata datastream is installed by entity store init installs an ingest pipeline that auto-populates event.ingested on indexed docs",
       "expectedStatus": "passed",
       "tags": [
@@ -502,7 +534,7 @@
       }
     },
     {
-      "id": "ee76a6a550f71bc-c83e24790d7389e",
+      "id": "dc00679a204bc19-c83e24790d7389e",
       "title": "Entity Store remove_v1 SO cleanup install removes legacy entity-definition SO documents from .kibana",
       "expectedStatus": "passed",
       "tags": [
@@ -518,7 +550,7 @@
       }
     },
     {
-      "id": "ee76a6a550f71bc-434909608e0054f",
+      "id": "dc00679a204bc19-434909608e0054f",
       "title": "Entity Store remove_v1 SO cleanup install succeeds with no legacy entity-definition SOs present",
       "expectedStatus": "passed",
       "tags": [
@@ -534,7 +566,7 @@
       }
     },
     {
-      "id": "ee76a6a550f71bc-89fbd7f6c3fd445",
+      "id": "dc00679a204bc19-89fbd7f6c3fd445",
       "title": "Entity Store remove_v1 SO cleanup install removes legacy entity-engine-status SO descriptors",
       "expectedStatus": "passed",
       "tags": [
@@ -550,7 +582,7 @@
       }
     },
     {
-      "id": "4a6d043d6f98fae-e81f4ab7b544efb",
+      "id": "33a520df437154e-e81f4ab7b544efb",
       "title": "Entity Store stop/start API tests Should stop and start the extract entity task after install",
       "expectedStatus": "passed",
       "tags": [
@@ -562,11 +594,11 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/start_stop.spec.ts",
         "line": 29,
-        "column": 31
+        "column": 22
       }
     },
     {
-      "id": "9db6a74ef1eb70d-0f0bd8bfed24691",
+      "id": "3d35e7daa44903e-0f0bd8bfed24691",
       "title": "Entity Store Start API tests Should start all engines after stop",
       "expectedStatus": "passed",
       "tags": [
@@ -582,7 +614,7 @@
       }
     },
     {
-      "id": "9db6a74ef1eb70d-426cd734cd9962b",
+      "id": "3d35e7daa44903e-426cd734cd9962b",
       "title": "Entity Store Start API tests Should start a single stopped entity type",
       "expectedStatus": "passed",
       "tags": [
@@ -598,7 +630,7 @@
       }
     },
     {
-      "id": "9db6a74ef1eb70d-0208d1db2a24a7a",
+      "id": "3d35e7daa44903e-0208d1db2a24a7a",
       "title": "Entity Store Start API tests Should return 200 when starting an entity type that is already started",
       "expectedStatus": "passed",
       "tags": [
@@ -610,11 +642,11 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/start.spec.ts",
         "line": 72,
-        "column": 21
+        "column": 14
       }
     },
     {
-      "id": "9db6a74ef1eb70d-70e4199e65e14f4",
+      "id": "3d35e7daa44903e-70e4199e65e14f4",
       "title": "Entity Store Start API tests Should return 200 when starting on an uninstalled store",
       "expectedStatus": "passed",
       "tags": [
@@ -626,11 +658,11 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/start.spec.ts",
         "line": 87,
-        "column": 33
+        "column": 26
       }
     },
     {
-      "id": "08ba6f8243f5d12-c5bc8c37cddfe39",
+      "id": "43741b84d42a6a0-c5bc8c37cddfe39",
       "title": "Entity Store Status API tests Should return status \"running\" with all 4 engine types \"started\" after a full install",
       "expectedStatus": "passed",
       "tags": [
@@ -646,7 +678,7 @@
       }
     },
     {
-      "id": "08ba6f8243f5d12-1d1c1e9c8f31ccc",
+      "id": "43741b84d42a6a0-1d1c1e9c8f31ccc",
       "title": "Entity Store Status API tests Should return status \"not_installed\" and an empty engines array when the store is uninstalled",
       "expectedStatus": "passed",
       "tags": [
@@ -658,11 +690,11 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/status.spec.ts",
         "line": 57,
-        "column": 23
+        "column": 16
       }
     },
     {
-      "id": "08ba6f8243f5d12-0ad307183e734d5",
+      "id": "43741b84d42a6a0-0ad307183e734d5",
       "title": "Entity Store Status API tests Should return overall status \"running\" when 3 engines are \"started\" and 1 is \"stopped\"",
       "expectedStatus": "passed",
       "tags": [
@@ -678,7 +710,7 @@
       }
     },
     {
-      "id": "08ba6f8243f5d12-d7d0ca0ad16f60f",
+      "id": "43741b84d42a6a0-d7d0ca0ad16f60f",
       "title": "Entity Store Status API tests Should return overall status \"stopped\" when all 4 engines are stopped",
       "expectedStatus": "passed",
       "tags": [
@@ -690,11 +722,11 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/status.spec.ts",
         "line": 85,
-        "column": 33
+        "column": 26
       }
     },
     {
-      "id": "28fbeec3b028f79-28713530a997c3b",
+      "id": "6c326ba16f476de-28713530a997c3b",
       "title": "Entity Store Stop API tests Should stop all engines when entityTypes is omitted",
       "expectedStatus": "passed",
       "tags": [
@@ -710,7 +742,7 @@
       }
     },
     {
-      "id": "28fbeec3b028f79-aa33d601f385a4b",
+      "id": "6c326ba16f476de-aa33d601f385a4b",
       "title": "Entity Store Stop API tests Should stop a single entity type",
       "expectedStatus": "passed",
       "tags": [
@@ -726,7 +758,7 @@
       }
     },
     {
-      "id": "28fbeec3b028f79-a0aa63d27758325",
+      "id": "6c326ba16f476de-a0aa63d27758325",
       "title": "Entity Store Stop API tests Should return 200 when stopping an entity type that is already stopped",
       "expectedStatus": "passed",
       "tags": [
@@ -738,11 +770,11 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/stop.spec.ts",
         "line": 70,
-        "column": 22
+        "column": 12
       }
     },
     {
-      "id": "28fbeec3b028f79-ab6423bd19e4ff9",
+      "id": "6c326ba16f476de-ab6423bd19e4ff9",
       "title": "Entity Store Stop API tests Should return 200 when stopping on an uninstalled store",
       "expectedStatus": "passed",
       "tags": [
@@ -758,7 +790,7 @@
       }
     },
     {
-      "id": "af04c4a12274a13-aa14b0695a8f884",
+      "id": "f109a4783758adc-aa14b0695a8f884",
       "title": "Entity Store uninstall stops the history snapshot task on uninstall",
       "expectedStatus": "passed",
       "tags": [
@@ -770,11 +802,11 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/uninstall.spec.ts",
         "line": 70,
-        "column": 26
+        "column": 23
       }
     },
     {
-      "id": "af04c4a12274a13-9d0bf9163b755de",
+      "id": "f109a4783758adc-9d0bf9163b755de",
       "title": "Entity Store uninstall stops the status report task on uninstall",
       "expectedStatus": "passed",
       "tags": [
@@ -790,7 +822,7 @@
       }
     },
     {
-      "id": "af04c4a12274a13-f8f7e592f8450da",
+      "id": "f109a4783758adc-f8f7e592f8450da",
       "title": "Entity Store uninstall stops extract entity tasks on uninstall",
       "expectedStatus": "passed",
       "tags": [
@@ -806,7 +838,7 @@
       }
     },
     {
-      "id": "af04c4a12274a13-0d93e1080290d46",
+      "id": "f109a4783758adc-0d93e1080290d46",
       "title": "Entity Store uninstall deletes the latest entities index on uninstall",
       "expectedStatus": "passed",
       "tags": [
@@ -822,7 +854,7 @@
       }
     },
     {
-      "id": "af04c4a12274a13-f1853024c4df85a",
+      "id": "f109a4783758adc-f1853024c4df85a",
       "title": "Entity Store uninstall keeps shared assets when only one of several engines is uninstalled",
       "expectedStatus": "passed",
       "tags": [
@@ -834,11 +866,11 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/uninstall.spec.ts",
         "line": 122,
-        "column": 32
+        "column": 23
       }
     },
     {
-      "id": "af04c4a12274a13-aa98491a6bca9fd",
+      "id": "f109a4783758adc-aa98491a6bca9fd",
       "title": "Entity Store uninstall uninstall is a no-op when entity store is not installed",
       "expectedStatus": "passed",
       "tags": [
@@ -850,7 +882,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/uninstall.spec.ts",
         "line": 166,
-        "column": 32
+        "column": 24
       }
     }
   ]

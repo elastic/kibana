@@ -26,10 +26,14 @@ const mockSignalMetadata = {
   p_value: 0.01,
 };
 
-const mockSignal = (overrides: Partial<SignalEntry> = {}): SignalEntry => ({
+const mockSignal = ({
+  verdict = 'confirms',
+  ...overrides
+}: Partial<SignalEntry> = {}): SignalEntry => ({
   type: 'detection',
   stream_name: 'logs.web-frontend',
   description: 'Latency spike detected',
+  verdict,
   evidence: { esql_query: 'FROM logs | LIMIT 1', result: 'found' },
   metadata: mockSignalMetadata,
   ...overrides,

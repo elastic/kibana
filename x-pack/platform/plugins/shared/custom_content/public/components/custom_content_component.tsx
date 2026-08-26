@@ -6,12 +6,14 @@
  */
 
 import { EuiProgress, useEuiTheme } from '@elastic/eui';
-import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { AggregateQuery, Filter, Query, TimeRange, ProjectRouting } from '@kbn/es-query';
 import React, { useEffect, useMemo } from 'react';
 import { useCustomContentHtml } from '../hooks/use_custom_content_html';
+import { getServices } from '../services';
+import { CustomContentEmptyPrompt } from './custom_content_empty_prompt';
 
 interface CustomContentComponentProps {
   embeddableId: string;
@@ -25,6 +27,7 @@ interface CustomContentComponentProps {
   filters: Filter[] | undefined;
   onErrorChange?: (error: string | undefined) => void;
   previewHtml: string | null;
+  onGenerateWithChat?: () => void;
 }
 
 const iframeContainerCss = css({
@@ -54,6 +57,7 @@ export const CustomContentComponent = ({
   filters,
   onErrorChange,
   previewHtml,
+  onGenerateWithChat,
 }: CustomContentComponentProps) => {
   const { euiTheme, colorMode } = useEuiTheme();
   const { html, isLoading, error, noContent } = useCustomContentHtml({
@@ -69,6 +73,9 @@ export const CustomContentComponent = ({
     query,
     filters,
   });
+
+  const { agentBuilder } = getServices();
+  const isAiAvailable = Boolean(agentBuilder);
 
   useEffect(() => {
     onErrorChange?.(error);
@@ -101,18 +108,10 @@ export const CustomContentComponent = ({
         </KbnDangerCallout>
       )}
       {!error && noContent && !isLoading && previewHtml == null && (
-        <KbnWarningCallout
-          announceOnMount
-          title={i18n.translate('xpack.customContent.noContent.title', {
-            defaultMessage: 'Content not yet generated',
-          })}
-          style={{ margin: euiTheme.size.base }}
-        >
-          {i18n.translate('xpack.customContent.noContent.body', {
-            defaultMessage:
-              'This panel has no content. Use the AI chat to refine it, or edit the panel to generate content.',
-          })}
-        </KbnWarningCallout>
+        <CustomContentEmptyPrompt
+          isAiAvailable={isAiAvailable}
+          onGenerateWithChat={onGenerateWithChat}
+        />
       )}
       {previewHtml != null ? (
         <div css={iframeContainerCss}>

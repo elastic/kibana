@@ -24,6 +24,9 @@ export const PLUGIN_NAME = 'Entity Store';
 
 export const FF_ENABLE_ENTITY_STORE_V2 = 'securitySolution:entityStoreEnableV2';
 
+/** Cloud feature flag: when true, legacy `.entities.v2.*.security_{ns}` assets may be migrated. */
+export const FF_MIGRATE_LEGACY_SECURITY_ASSETS = 'entityStore.migrateLegacySecurityAssets';
+
 export {
   ENTITY_STORE_SOURCE_INDICES_PRIVILEGES,
   ENTITY_STORE_TARGET_INDICES_PRIVILEGES,

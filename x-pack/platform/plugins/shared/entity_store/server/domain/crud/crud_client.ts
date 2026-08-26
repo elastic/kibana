@@ -19,7 +19,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Entity } from '../../../common/domain/definitions/entity.gen';
 import type { EntityType } from '../../../common';
 import { hashEuid, getEuidFromObject } from '../../../common/domain/euid';
-import { getLatestEntitiesIndexName } from '../../../common/domain/entity_index';
+import { resolveLatestEntitiesIndexName } from '../asset_manager/resolve_entity_store_indices';
 import {
   BadCRUDRequestError,
   EntityNotFoundError,
@@ -231,8 +231,12 @@ export class CRUDClient {
     });
   }
 
+  private async latestIndexName(): Promise<string> {
+    return resolveLatestEntitiesIndexName(this.esClient, this.namespace);
+  }
+
   private async assertInstalled(): Promise<void> {
-    const indexName = getLatestEntitiesIndexName(this.namespace);
+    const indexName = await this.latestIndexName();
     const exists = await this.esClient.indices.exists({ index: indexName });
     if (!exists) {
       throw new EntityStoreNotInstalledError();
@@ -246,7 +250,7 @@ export class CRUDClient {
     if (ids.length === 0) return new Map();
     try {
       const { docs } = await this.esClient.mget<Entity>({
-        index: getLatestEntitiesIndexName(this.namespace),
+        index: await this.latestIndexName(),
         ids: ids.map(hashEuid),
         ...(sourceFields ? { _source: [...sourceFields] } : {}),
       });
@@ -298,7 +302,7 @@ export class CRUDClient {
 
     try {
       const { result } = await this.esClient.update({
-        index: getLatestEntitiesIndexName(this.namespace),
+        index: await this.latestIndexName(),
         id: hashEuid(valid.id),
         doc: valid.doc,
         retry_on_conflict: RETRY_ON_CONFLICT,
@@ -359,7 +363,7 @@ export class CRUDClient {
 
     this.logger.debug(`Bulk updating ${objects.length} entities`);
     const resp = await this.esClient.bulk({
-      index: getLatestEntitiesIndexName(this.namespace),
+      index: await this.latestIndexName(),
       operations,
       refresh: 'wait_for',
     });
@@ -406,7 +410,7 @@ export class CRUDClient {
     const valid = validateAndTransformDoc('create', entityType, this.namespace, doc, id, true);
     try {
       const { result } = await this.esClient.create({
-        index: getLatestEntitiesIndexName(this.namespace),
+        index: await this.latestIndexName(),
         id: hashEuid(valid.id),
         document: valid.doc,
         refresh: 'wait_for',
@@ -426,7 +430,7 @@ export class CRUDClient {
     try {
       this.logger.debug(`Deleting Entity ID ${id}`);
       await this.esClient.delete({
-        index: getLatestEntitiesIndexName(this.namespace),
+        index: await this.latestIndexName(),
         id: hashEuid(id),
       });
     } catch (error) {
@@ -486,7 +490,7 @@ export class CRUDClient {
     const resp = await this.esClient.search<Entity>({
       allow_no_indices: true,
       ignore_unavailable: true,
-      index: getLatestEntitiesIndexName(this.namespace),
+      index: await this.latestIndexName(),
       query,
       size,
       sort: [{ '@timestamp': 'desc' }, { _shard_doc: 'desc' }],

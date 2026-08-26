@@ -286,6 +286,10 @@ export function getApmMlDetectorLabel(type: AnomalyDetectorType) {
       return i18n.translate('xpack.apm.alerts.anomalyDetector.failedTransactionRateLabel', {
         defaultMessage: 'failed transaction rate',
       });
+    case AnomalyDetectorType.txLowCount:
+      return i18n.translate('xpack.apm.alerts.anomalyDetector.lowTransactionCountLabel', {
+        defaultMessage: 'low transaction count',
+      });
   }
 }
 

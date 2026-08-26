@@ -386,6 +386,16 @@ describe('RuleDetailPage', () => {
       expect(screen.queryByTestId('ruleDetailsDeleteButton')).not.toBeInTheDocument();
     });
 
+    it('still shows View change history (a read action) in the overflow menu', async () => {
+      renderPage(baseRule);
+      await openAppMenuOverflow();
+
+      expect(await screen.findByTestId('ruleDetailsViewChangeHistoryButton')).toBeInTheDocument();
+      expect(screen.queryByTestId('ruleDetailsRunButton')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('ruleDetailsCloneButton')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('ruleDetailsDeleteButton')).not.toBeInTheDocument();
+    });
+
     it('still shows the read-only enabled status badge', () => {
       renderPage(baseRule);
 

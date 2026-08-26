@@ -372,11 +372,11 @@ src/core/packages/user-storage/server-mocks @elastic/appex-sharedux
 src/core/test-helpers/kbn-server @elastic/kibana-core
 src/core/test-helpers/model-versions @elastic/kibana-core
 src/dev @elastic/kibana-operations
+src/platform/kbn-ui/app-header @elastic/appex-sharedux
 src/platform/kbn-ui/app-menu @elastic/appex-sharedux
 src/platform/kbn-ui/callout @elastic/appex-sharedux
 src/platform/kbn-ui/chrome-layout @elastic/appex-sharedux
-src/platform/kbn-ui/chrome-layout-constants @elastic/appex-sharedux
-src/platform/kbn-ui/chrome-layout-utils @elastic/appex-sharedux
+src/platform/kbn-ui/favorite-button @elastic/appex-sharedux
 src/platform/kbn-ui/feedback @elastic/appex-sharedux
 src/platform/kbn-ui/react-assembly @elastic/appex-sharedux
 src/platform/kbn-ui/side-navigation @elastic/appex-sharedux
@@ -646,7 +646,6 @@ src/platform/packages/shared/kbn-management/settings/setting_ids @elastic/appex-
 src/platform/packages/shared/kbn-management/settings/types @elastic/kibana-management
 src/platform/packages/shared/kbn-management/settings/utilities @elastic/kibana-management
 src/platform/packages/shared/kbn-management/storybook/config @elastic/kibana-management
-src/platform/packages/shared/kbn-mcp-dev-server @elastic/search-ml-ux
 src/platform/packages/shared/kbn-monaco @elastic/appex-sharedux
 src/platform/packages/shared/kbn-object-utils @elastic/kibana-core
 src/platform/packages/shared/kbn-object-versioning @elastic/appex-sharedux
@@ -800,6 +799,8 @@ src/platform/packages/shared/shared-ux/file/types @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/file/util @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/flyout/info-blocks @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/flyout/meta-blocks @elastic/appex-sharedux
+src/platform/packages/shared/shared-ux/flyout/sections @elastic/appex-sharedux
+src/platform/packages/shared/shared-ux/flyout/template @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/label_formatter @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/link/redirect_app/impl @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/markdown/impl @elastic/appex-sharedux
@@ -1032,6 +1033,7 @@ x-pack/platform/packages/shared/agent-builder-dashboards/agent-builder-dashboard
 x-pack/platform/packages/shared/agent-builder-dashboards/kbn-evals-suite-agent-builder-dashboards @elastic/kibana-presentation
 x-pack/platform/packages/shared/agent-builder/agent-builder-browser @elastic/workchat-eng
 x-pack/platform/packages/shared/agent-builder/agent-builder-common @elastic/workchat-eng
+x-pack/platform/packages/shared/agent-builder/agent-builder-elastic-ai-index-ki-types @elastic/context-eng
 x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils @elastic/workchat-eng
 x-pack/platform/packages/shared/agent-builder/agent-builder-server @elastic/workchat-eng
 x-pack/platform/packages/shared/agent-builder/agent-builder-skill-loader @elastic/workchat-eng
@@ -1050,6 +1052,7 @@ x-pack/platform/packages/shared/ai-infra/kbn-evals-suite-llm-tasks @elastic/sear
 x-pack/platform/packages/shared/ai-infra/product-doc-common @elastic/search-ml-ux
 x-pack/platform/packages/shared/alerting-rule-utils @elastic/actionable-obs-team
 x-pack/platform/packages/shared/custom-content/custom-content-common @elastic/kibana-presentation
+x-pack/platform/packages/shared/custom-content/custom-content-server @elastic/kibana-visualizations @elastic/kibana-presentation
 x-pack/platform/packages/shared/file-upload @elastic/search-ml-ux
 x-pack/platform/packages/shared/file-upload-common @elastic/search-ml-ux
 x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared @elastic/kibana-management
@@ -1062,7 +1065,7 @@ x-pack/platform/packages/shared/kbn-alerting-comparators @elastic/response-ops
 x-pack/platform/packages/shared/kbn-apm-api-shared @elastic/obs-signals-traces-team
 x-pack/platform/packages/shared/kbn-apm-common @elastic/obs-signals-traces-team
 x-pack/platform/packages/shared/kbn-apm-types @elastic/obs-signals-traces-team
-x-pack/platform/packages/shared/kbn-change-history @elastic/security-detection-engineering
+x-pack/platform/packages/shared/kbn-change-history @elastic/kibana-core
 x-pack/platform/packages/shared/kbn-change-history-ui @elastic/workflows-eng
 x-pack/platform/packages/shared/kbn-classic-stream-flyout @elastic/kibana-management
 x-pack/platform/packages/shared/kbn-content-packs-schema @elastic/streams-ui
@@ -1132,6 +1135,7 @@ x-pack/platform/packages/shared/ml/runtime_field_utils @elastic/search-ml-ux
 x-pack/platform/packages/shared/ml/server-schemas @elastic/search-ml-ux
 x-pack/platform/packages/shared/ml/trained_models_utils @elastic/search-ml-ux
 x-pack/platform/packages/shared/response-ops/alert-snooze @elastic/response-ops
+x-pack/platform/packages/shared/response-ops/alerting-v2-browser-shared @elastic/rna-project-team
 x-pack/platform/packages/shared/response-ops/alerting-v2-common-queries @elastic/rna-project-team
 x-pack/platform/packages/shared/response-ops/alerting-v2-constants @elastic/rna-project-team
 x-pack/platform/packages/shared/response-ops/alerting-v2-episodes-ui @elastic/rna-project-team
@@ -1217,13 +1221,14 @@ x-pack/platform/plugins/shared/alerting @elastic/response-ops
 x-pack/platform/plugins/shared/alerting_v2 @elastic/rna-project-team
 x-pack/platform/plugins/shared/anonymization @elastic/workchat-eng @elastic/security-threat-hunting
 x-pack/platform/plugins/shared/apm_sources_access @elastic/obs-signals-traces-team
-x-pack/platform/plugins/shared/automatic_import @elastic/cloud-services
+x-pack/platform/plugins/shared/automatic_import @elastic/siem-conduit
 x-pack/platform/plugins/shared/cases @elastic/kibana-cases
 x-pack/platform/plugins/shared/cloud @elastic/kibana-core
 x-pack/platform/plugins/shared/cloud_connect @elastic/kibana-management
 x-pack/platform/plugins/shared/connector_events_bridge @elastic/workflows-eng
 x-pack/platform/plugins/shared/content_connectors @elastic/search-ml-ux
 x-pack/platform/plugins/shared/context_engine @elastic/context-eng
+x-pack/platform/plugins/shared/context_engine_agent_builder @elastic/context-eng
 x-pack/platform/plugins/shared/custom_content @elastic/kibana-visualizations @elastic/kibana-presentation
 x-pack/platform/plugins/shared/data_quality @elastic/kibana-management
 x-pack/platform/plugins/shared/dataset_quality @elastic/kibana-management
@@ -1255,6 +1260,7 @@ x-pack/platform/plugins/shared/maintenance_windows @elastic/response-ops
 x-pack/platform/plugins/shared/maps @elastic/kibana-presentation
 x-pack/platform/plugins/shared/ml @elastic/search-ml-ux
 x-pack/platform/plugins/shared/ml/evals @elastic/search-ml-ux
+x-pack/platform/plugins/shared/nightshift_investigations @elastic/nightshift-context-and-research-team @elastic/nightshift-sre-agent-team
 x-pack/platform/plugins/shared/notification_center @elastic/search-ml-ux
 x-pack/platform/plugins/shared/notifications @elastic/appex-sharedux
 x-pack/platform/plugins/shared/observability_ai_assistant @elastic/nightshift-context-and-research-team
@@ -1353,7 +1359,7 @@ x-pack/solutions/observability/plugins/profiling @elastic/obs-signals-logs-team
 x-pack/solutions/observability/plugins/profiling_data_access @elastic/obs-signals-logs-team
 x-pack/solutions/observability/plugins/serverless_observability @elastic/observability-ui
 x-pack/solutions/observability/plugins/slo @elastic/actionable-obs-team
-x-pack/solutions/observability/plugins/synthetics @elastic/actionable-obs-team
+x-pack/solutions/observability/plugins/synthetics @elastic/actionable-obs-team @elastic/obs-signals-logs-team
 x-pack/solutions/observability/plugins/uptime @elastic/actionable-obs-team
 x-pack/solutions/observability/plugins/ux @elastic/actionable-obs-team
 x-pack/solutions/observability/test
@@ -1428,13 +1434,13 @@ x-pack/solutions/security/packages/siem-readiness @elastic/contextual-security-a
 x-pack/solutions/security/packages/storybook/config @elastic/security-threat-hunting
 x-pack/solutions/security/packages/test-api-clients @elastic/security-detection-engineering
 x-pack/solutions/security/packages/upselling @elastic/security-threat-hunting
-x-pack/solutions/security/plugins/cloud_defend @elastic/kibana-cloud-security-posture
+x-pack/solutions/security/plugins/cloud_defend @elastic/contextual-security-apps
 x-pack/solutions/security/plugins/cloud_security_posture @elastic/contextual-security-apps
 x-pack/solutions/security/plugins/discoveries @elastic/security-threat-hunting
 x-pack/solutions/security/plugins/ecs_data_quality_dashboard @elastic/security-threat-hunting
 x-pack/solutions/security/plugins/elastic_assistant @elastic/security-threat-hunting
 x-pack/solutions/security/plugins/elastic_assistant_shared_state @elastic/security-threat-hunting
-x-pack/solutions/security/plugins/kubernetes_security @elastic/kibana-cloud-security-posture
+x-pack/solutions/security/plugins/kubernetes_security @elastic/contextual-security-apps
 x-pack/solutions/security/plugins/lists @elastic/security-detection-engineering
 x-pack/solutions/security/plugins/pnd @elastic/security-solution
 x-pack/solutions/security/plugins/security_solution @elastic/security-solution
@@ -1490,7 +1496,7 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/config @elastic/appex-sharedux
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/connector_token @elastic/response-ops
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/data_connector @elastic/kibana-core
-/packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/data_stream-config @elastic/cloud-services
+/packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/data_stream-config @elastic/siem-conduit
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/entity-analytics-monitoring-entity-source @elastic/security-entity-analytics
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/entity-engine-descriptor-v2 @elastic/core-analysis
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/entity-store-global-state @elastic/core-analysis
@@ -1503,7 +1509,7 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/ingest-outputs @elastic/streams-ui
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/ingest-package-policies @elastic/streams-ui
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/ingest_manager_settings @elastic/streams-ui
-/packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/integration-config @elastic/cloud-services
+/packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/integration-config @elastic/siem-conduit
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/maintenance-window @elastic/response-ops
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/markdown @elastic/kibana-presentation
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/old-type-no-migrations @elastic/kibana-core
@@ -1847,15 +1853,17 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 
 ## infra/{common,docs,public,server}/{sub-folders}/ -> @elastic/obs-signals-metrics-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/apm/ @elastic/obs-signals-traces-team
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.apm.index.ts @elastic/obs-signals-traces-team
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.apm.serverless.config.ts @elastic/obs-signals-traces-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.apm.group1.index.ts @elastic/obs-signals-traces-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.apm.group1.serverless.config.ts @elastic/obs-signals-traces-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.apm.group2.index.ts @elastic/obs-signals-traces-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.apm.group2.serverless.config.ts @elastic/obs-signals-traces-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.apm.index.ts @elastic/obs-signals-traces-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.apm.stateful.config.ts @elastic/obs-signals-traces-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/infra/ @elastic/obs-signals-metrics-team
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.index.ts @elastic/obs-signals-metrics-team @elastic/actionable-obs-team @elastic/kibana-management # Shared config: loads infra, alerting and dataset_quality tests
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.serverless.config.ts @elastic/obs-signals-metrics-team @elastic/actionable-obs-team @elastic/kibana-management # Shared config: loads infra, alerting and dataset_quality tests
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.index.ts @elastic/obs-signals-metrics-team @elastic/actionable-obs-team @elastic/kibana-management # Shared config: loads infra, alerting and dataset_quality tests
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.stateful.config.ts @elastic/obs-signals-metrics-team @elastic/actionable-obs-team @elastic/kibana-management # Shared config: loads infra, alerting and dataset_quality tests
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.index.ts @elastic/obs-signals-metrics-team @elastic/actionable-obs-team # Shared config: loads alerting tests
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.serverless.config.ts @elastic/obs-signals-metrics-team @elastic/actionable-obs-team # Shared config: loads alerting tests
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.index.ts @elastic/obs-signals-metrics-team @elastic/actionable-obs-team # Shared config: loads alerting tests
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.stateful.config.ts @elastic/obs-signals-metrics-team @elastic/actionable-obs-team # Shared config: loads alerting tests
 /x-pack/solutions/observability/test/functional/page_objects/asset_details.ts @elastic/obs-signals-metrics-team # Assigned per https://github.com/elastic/kibana/pull/200157/files/c83fae62151fe634342c498aca69b686b739fe45#r1842202022
 /x-pack/solutions/observability/test/functional/page_objects/infra_* @elastic/obs-signals-metrics-team
 /x-pack/solutions/observability/test/fixtures/es_archives/infra @elastic/obs-signals-metrics-team
@@ -1887,6 +1895,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /src/platform/plugins/shared/unified_doc_viewer/public/components/observability/generic @elastic/obs-signals-traces-team @elastic/obs-signals-logs-team @elastic/obs-signals-metrics-team
 /src/platform/plugins/shared/unified_doc_viewer/public/components/observability/attributes @elastic/obs-signals-traces-team @elastic/obs-signals-logs-team @elastic/obs-signals-metrics-team
 /src/platform/plugins/shared/unified_doc_viewer/public/components/content_framework @elastic/obs-signals-traces-team @elastic/obs-signals-logs-team @elastic/obs-signals-metrics-team
+/src/platform/plugins/shared/unified_doc_viewer/public/utils @elastic/obs-signals-traces-team @elastic/obs-signals-logs-team
 
 /x-pack/solutions/observability/test/functional/services/logs_ui @elastic/obs-signals-logs-team
 /x-pack/solutions/observability/test/functional/page_objects/observability_logs_explorer.ts @elastic/obs-signals-logs-team
@@ -2041,10 +2050,10 @@ x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/significa
 /src/platform/test/functional/apps/discover/observability/logs/ @elastic/obs-signals-logs-team
 /src/platform/plugins/shared/discover/test/scout/metrics_experience/ @elastic/obs-signals-metrics-team
 /src/platform/plugins/shared/discover/test/scout/traces_experience/ @elastic/obs-signals-traces-team
+/src/platform/plugins/shared/discover/test/scout/logs_experience/ @elastic/obs-signals-logs-team
 /x-pack/performance/journeys_e2e/metrics_* @elastic/obs-signals-metrics-team
 /x-pack/performance/utils/metrics_experience_setup.ts @elastic/obs-signals-metrics-team
  # streams-ui
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/dataset_quality @elastic/kibana-management
 /x-pack/solutions/observability/test/serverless/functional/configs/config.* @elastic/streams-ui
 /x-pack/solutions/observability/test/serverless/functional/test_suites/navigation.ts @elastic/obs-signals-logs-team
 /x-pack/solutions/observability/test/functional/page_objects/dataset_quality.ts @elastic/kibana-management
@@ -2153,6 +2162,7 @@ x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/significa
 /x-pack/platform/test/api_integration/apis/ml/ @elastic/search-ml-ux
 /x-pack/platform/test/functional/apps/ml/  @elastic/search-ml-ux
 /x-pack/platform/test/fixtures/es_archives/ml/  @elastic/search-ml-ux
+/x-pack/platform/test/fixtures/ml/  @elastic/search-ml-ux
 /x-pack/platform/test/functional/services/ml @elastic/search-ml-ux
 /x-pack/platform/test/functional_basic/apps/ml/ @elastic/search-ml-ux
 /x-pack/platform/test/functional_with_es_ssl/apps/discover_ml/config.ts @elastic/search-ml-ux
@@ -2296,7 +2306,6 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/platform/test/serverless/functional/page_objects/svl_common_page.ts @elastic/appex-qa
 /x-pack/platform/test/README.md @elastic/appex-qa
 /x-pack/platform/test/serverless/README.md @elastic/appex-qa
-/src/dev/code_coverage @elastic/appex-qa
 /src/platform/test/functional/services/common @elastic/appex-qa
 /src/platform/test/functional/services/lib @elastic/appex-qa
 /src/platform/packages/shared/kbn-test/src/functional_test_runner @elastic/appex-qa
@@ -2633,6 +2642,12 @@ src/platform/packages/shared/kbn-connector-specs/src/lib/generate_secrets_schema
 src/platform/packages/shared/kbn-connector-specs/src/lib/generate_secrets_schema_from_spec.test.ts @elastic/workchat-eng @elastic/response-ops
 
 ## Inbound connector events hub
+# Public OAS schemas
+x-pack/platform/plugins/shared/actions/common/routes/events/ @elastic/workflows-eng @elastic/response-ops
+# HTTP / OAS shell only
+x-pack/platform/plugins/shared/actions/server/routes/inbound_events/ @elastic/workflows-eng @elastic/response-ops
+# Hub domain (token auth, load, emit orchestration)
+x-pack/platform/plugins/shared/actions/server/inbound/ @elastic/workflows-eng @elastic/response-ops
 x-pack/platform/plugins/shared/connector_events_bridge/ @elastic/workflows-eng
 
 ## Relay
@@ -3005,10 +3020,10 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/sou
 ## NOTE: It's important to keep this above other teams' sections because test automation doesn't process
 ## the CODEOWNERS file correctly. See https://github.com/elastic/kibana/issues/173307#issuecomment-1855858929
 /x-pack/solutions/security/test/security_solution_cypress/.cursor/rules/flaky_test_doctor.mdc @elastic/security-engineering-productivity
-/x-pack/solutions/security/plugins/security_solution/.agents/skills/cypress-to-scout-migration @elastic/security-engineering-productivity
+/x-pack/solutions/security/plugins/security_solution/.agents/skills/security-cypress-to-scout-migration @elastic/security-engineering-productivity
 /x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester @elastic/security-engineering-productivity
 /x-pack/solutions/security/plugins/security_solution/.agents/skills/flaky-test-doctor @elastic/security-engineering-productivity
-/x-pack/solutions/security/plugins/security_solution/.agents/skills/scout-best-practices-reviewer @elastic/security-engineering-productivity
+/x-pack/solutions/security/plugins/security_solution/.agents/skills/security-scout-best-practices-reviewer @elastic/security-engineering-productivity
 /x-pack/solutions/security/plugins/security_solution/.agents/skills/test-plan-generator @elastic/security-engineering-productivity
 /x-pack/solutions/security/plugins/security_solution/.agents/skills/test-plan-generator/references/critical-workflows-security-solution.md @elastic/security-engineering-productivity @elastic/security-solution
 /x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-fixer @elastic/security-engineering-productivity
@@ -3181,6 +3196,9 @@ x-pack/platform/plugins/shared/entity_store @elastic/security-entity-analytics
 /x-pack/solutions/security/plugins/security_solution/common/workflows/step_types/set_attack_tags_step @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/common/workflows/step_types/set_attack_status_step @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/common/workflows/step_types/create_note_step @elastic/security-threat-hunting
+/x-pack/solutions/security/plugins/security_solution/common/workflows/step_types/delete_note_step @elastic/security-threat-hunting
+/x-pack/solutions/security/plugins/security_solution/common/workflows/step_types/get_notes_step @elastic/security-threat-hunting
+/x-pack/solutions/security/plugins/security_solution/common/workflows/step_types/update_note_step @elastic/security-threat-hunting
 
 # Public step types
 x-pack/solutions/security/plugins/security_solution/public/workflows/step_types/assign_alert_step @elastic/security-threat-hunting
@@ -3190,6 +3208,9 @@ x-pack/solutions/security/plugins/security_solution/public/workflows/step_types/
 x-pack/solutions/security/plugins/security_solution/public/workflows/step_types/set_attack_tags_step @elastic/security-threat-hunting
 x-pack/solutions/security/plugins/security_solution/public/workflows/step_types/set_attack_status_step @elastic/security-threat-hunting
 x-pack/solutions/security/plugins/security_solution/public/workflows/step_types/create_note_step @elastic/security-threat-hunting
+x-pack/solutions/security/plugins/security_solution/public/workflows/step_types/delete_note_step @elastic/security-threat-hunting
+x-pack/solutions/security/plugins/security_solution/public/workflows/step_types/get_notes_step @elastic/security-threat-hunting
+x-pack/solutions/security/plugins/security_solution/public/workflows/step_types/update_note_step @elastic/security-threat-hunting
 
 # Server step types
 x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/assign_alert_step @elastic/security-threat-hunting
@@ -3199,12 +3220,23 @@ x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/
 x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/set_attack_tags_step @elastic/security-threat-hunting
 x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/set_attack_status_step @elastic/security-threat-hunting
 x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/create_note_step @elastic/security-threat-hunting
+x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/delete_note_step @elastic/security-threat-hunting
+x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/get_notes_step @elastic/security-threat-hunting
+x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/update_note_step @elastic/security-threat-hunting
 
 # Significant Events managed workflows
 src/platform/packages/shared/kbn-workflows/managed/definitions/significant_events @elastic/obs-sig-events-team
 
 # Alert analysis workflow
 src/platform/packages/shared/kbn-workflows/managed/definitions/alert_analysis @elastic/security-threat-hunting
+
+# Threat intel supply pipeline
+src/platform/packages/shared/kbn-workflows/managed/definitions/threat_intel @elastic/security-threat-hunting
+/x-pack/solutions/security/plugins/security_solution/server/threat_intel @elastic/security-threat-hunting
+/x-pack/solutions/security/plugins/security_solution/common/threat_intel @elastic/security-threat-hunting
+/x-pack/solutions/security/plugins/security_solution/public/threat_intel @elastic/security-threat-hunting
+/x-pack/solutions/security/plugins/security_solution/server/agent_builder/skills/threat_intel @elastic/security-threat-hunting
+/x-pack/solutions/security/plugins/security_solution/server/agent_builder/tools/threat_intel @elastic/security-threat-hunting
 x-pack/solutions/security/plugins/security_solution/common/workflows/alert_analysis_workflow.ts @elastic/security-threat-hunting
 x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management_ui/pages/alert_analysis_workflow @elastic/security-threat-hunting
 x-pack/solutions/security/plugins/security_solution/server/workflows/alert_analysis_workflow @elastic/security-threat-hunting
@@ -3415,6 +3447,17 @@ x-pack/platform/plugins/shared/actions/server/lib/token_tracking @elastic/securi
 /x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/enable_rule_step @elastic/security-detection-engineering
 /x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/disable_rule_step @elastic/security-detection-engineering
 /x-pack/solutions/security/plugins/security_solution/server/workflows/utils/bulk_rule_action* @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/common/workflows/step_types/create_rule_exception_step @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/common/workflows/step_types/create_exception_list_item_step @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/public/workflows/step_types/create_rule_exception_step @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/public/workflows/step_types/create_exception_list_item_step @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/create_rule_exception_step @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/create_exception_list_item_step @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/server/workflows/utils/exception_item* @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/test/scout/workflows/ui/common/exception_step_test_api.ts @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/test/scout/workflows/ui/common/exception_workflow_step_role.ts @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/test/scout/workflows/ui/parallel_tests/create_rule_exception.spec.ts @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/test/scout/workflows/ui/parallel_tests/create_exception_list_item.spec.ts @elastic/security-detection-engineering
 
 /x-pack/solutions/security/plugins/security_solution/scripts/openapi @elastic/security-detection-engineering
 
@@ -3512,9 +3555,9 @@ x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/to
 /x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/resolver.ts @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/resolver/ @elastic/security-threat-hunting
 
-## Security Solution sub teams - security-telemetry (Data Engineering)
-x-pack/solutions/security/plugins/security_solution/server/usage/ @elastic/security-data-analytics
-x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/ @elastic/security-data-analytics
+## Security Solution sub teams - security-telemetry (Security Data Engineering)
+x-pack/solutions/security/plugins/security_solution/server/usage/ @elastic/security-data-engineering
+x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/ @elastic/security-data-engineering
 
 ## Security Solution sub teams - Entity Analytics
 x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics @elastic/security-entity-analytics
@@ -3524,6 +3567,8 @@ x-pack/solutions/security/plugins/security_solution/common/search_strategy/secur
 x-pack/solutions/security/plugins/security_solution/common/search_strategy/security_solution/risk_score @elastic/security-entity-analytics
 x-pack/solutions/security/plugins/security_solution/public/common/components/matrix_histogram @elastic/security-entity-analytics
 x-pack/solutions/security/plugins/security_solution/public/entity_analytics @elastic/security-entity-analytics
+x-pack/solutions/security/plugins/security_solution/public/common/hooks/use_resolved_latest_entities_index_name.ts @elastic/security-entity-analytics
+x-pack/solutions/security/plugins/security_solution/public/common/hooks/use_resolved_latest_entities_index_name.test.ts @elastic/security-entity-analytics
 x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ @elastic/security-entity-analytics
 x-pack/solutions/security/plugins/security_solution/public/explore @elastic/security-entity-analytics
 x-pack/solutions/security/plugins/security_solution/public/flyout/entity_details @elastic/security-entity-analytics
@@ -3588,7 +3633,7 @@ x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/entity_an
 x-pack/solutions/security/test/security_solution_api_integration/test_suites/genai @elastic/security-threat-hunting
 
 ## Security Solution sub teams - Automatic Import
-x-pack/platform/test/automatic_import_api_integration @elastic/cloud-services
+x-pack/platform/test/automatic_import_api_integration @elastic/siem-conduit
 
 
 # Security Defend Workflows - OSQuery Ownership
@@ -3617,10 +3662,10 @@ x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/to
 
 ## Fleet plugin (co-owned with Fleet team)
 x-pack/platform/plugins/shared/fleet/public/components/cloud_security_posture @elastic/streams-ui @elastic/contextual-security-apps
-x-pack/platform/plugins/shared/fleet/public/components/cloud_connector @elastic/streams-ui @elastic/cloud-services
-x-pack/platform/plugins/shared/fleet/common/services/cloud_connectors @elastic/streams-ui @elastic/cloud-services
-x-pack/platform/plugins/shared/fleet/server/routes/cloud_connector @elastic/streams-ui @elastic/cloud-services
-x-pack/platform/plugins/shared/fleet/server/services/cloud_connectors @elastic/streams-ui @elastic/cloud-services
+x-pack/platform/plugins/shared/fleet/public/components/cloud_connector @elastic/streams-ui @elastic/siem-conduit
+x-pack/platform/plugins/shared/fleet/common/services/cloud_connectors @elastic/streams-ui @elastic/siem-conduit
+x-pack/platform/plugins/shared/fleet/server/routes/cloud_connector @elastic/streams-ui @elastic/siem-conduit
+x-pack/platform/plugins/shared/fleet/server/services/cloud_connectors @elastic/streams-ui @elastic/siem-conduit
 x-pack/platform/plugins/shared/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/single_page_layout/components/cloud_security_posture @elastic/streams-ui @elastic/contextual-security-apps
 x-pack/platform/plugins/shared/fleet/public/applications/integrations/sections/epm/screens/detail/components/cloud_posture_third_party_support_callout.* @elastic/streams-ui @elastic/contextual-security-apps
 ## SessionView tests
@@ -3646,11 +3691,11 @@ x-pack/solutions/security/test/security_solution_cypress/cypress/screens/asset_i
 x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/asset_inventory @elastic/security-entity-analytics
 
 # Security integrations
-x-pack/solutions/security/plugins/security_solution/common/security_integrations @elastic/cloud-services
-x-pack/solutions/security/plugins/security_solution/public/security_integrations @elastic/cloud-services
-x-pack/solutions/security/plugins/security_solution/server/security_integrations @elastic/cloud-services
-x-pack/solutions/security/plugins/security_solution/server/lib/security_integrations @elastic/cloud-services
-x-pack/solutions/security/plugins/security_solution/test/scout/security_integrations/ @elastic/cloud-services
+x-pack/solutions/security/plugins/security_solution/common/security_integrations @elastic/siem-conduit
+x-pack/solutions/security/plugins/security_solution/public/security_integrations @elastic/siem-conduit
+x-pack/solutions/security/plugins/security_solution/server/security_integrations @elastic/siem-conduit
+x-pack/solutions/security/plugins/security_solution/server/lib/security_integrations @elastic/siem-conduit
+x-pack/solutions/security/plugins/security_solution/test/scout/security_integrations/ @elastic/siem-conduit
 
 # Kibana design
 # scss overrides should be below this line for specificity
@@ -3686,10 +3731,10 @@ x-pack/solutions/observability/plugins/observability_shared/public/components/pr
 # Shared UX
 /src/core/packages/chrome @elastic/appex-sharedux
 /src/platform/kbn-ui/_tooling @elastic/appex-sharedux
+/src/platform/kbn-ui/app-header @elastic/appex-sharedux
 /src/platform/kbn-ui/app-menu @elastic/appex-sharedux
 /src/platform/kbn-ui/chrome-layout @elastic/appex-sharedux
-/src/platform/kbn-ui/chrome-layout-constants @elastic/appex-sharedux
-/src/platform/kbn-ui/chrome-layout-utils @elastic/appex-sharedux
+/src/platform/kbn-ui/favorite-button @elastic/appex-sharedux
 /src/platform/kbn-ui/side-navigation @elastic/appex-sharedux
 /x-pack/platform/test/serverless/api_integration/test_suites/favorites @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/200985
 /src/platform/test/api_integration/apis/short_url/**/*.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/200209/files#r1846654156
@@ -3768,9 +3813,9 @@ x-pack/platform/plugins/shared/actions/server/saved_objects/index.ts @elastic/re
 x-pack/platform/plugins/shared/alerting/server/saved_objects/index.ts @elastic/response-ops @elastic/kibana-security
 x-pack/platform/plugins/shared/anonymization/server/saved_objects/register_anonymization_salt_saved_object_type.ts @elastic/workchat-eng @elastic/security-threat-hunting @elastic/kibana-security
 x-pack/platform/plugins/shared/fleet/server/saved_objects/index.ts @elastic/streams-ui @elastic/kibana-security
-x-pack/solutions/observability/plugins/synthetics/server/saved_objects/saved_objects.ts @elastic/actionable-obs-team @elastic/kibana-security
-x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetics_monitor/legacy_synthetics_monitor.ts @elastic/actionable-obs-team @elastic/kibana-security
-x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetics_param.ts @elastic/actionable-obs-team @elastic/kibana-security
+x-pack/solutions/observability/plugins/synthetics/server/saved_objects/saved_objects.ts @elastic/actionable-obs-team @elastic/obs-signals-logs-team @elastic/kibana-security
+x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetics_monitor/legacy_synthetics_monitor.ts @elastic/actionable-obs-team @elastic/obs-signals-logs-team @elastic/kibana-security
+x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetics_param.ts @elastic/actionable-obs-team @elastic/obs-signals-logs-team @elastic/kibana-security
 
 # OpenTelemetry semantic conventions Buildkite pipeline and scripts
 /scripts/generate_otel_semconv.js @elastic/streams-ui
@@ -3801,6 +3846,7 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 /.claude/ @elastic/kibana-tech-leads
 /.agents/skills/ @elastic/kibana-tech-leads
 /.github/agents/ @elastic/kibana-tech-leads @elastic/kibana-operations
+/.libra/ @elastic/kibana-tech-leads @elastic/kibana-operations
 
 # Delegate day-to-day edits of currently-existing skills to the QA team without requiring tech lead
 # codeowner review. Any new skill directory will fall back to the `/.agent/skills/` rule above.
@@ -3841,6 +3887,9 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 /.github/workflows/failed-test-investigator.* @elastic/kibana-operations @elastic/appex-qa
 /.github/workflows/flaky-test-fixer.* @elastic/kibana-operations @elastic/appex-qa
 /.github/workflows/flaky-fix-verifier.* @elastic/kibana-operations @elastic/appex-qa
+/.github/workflows/shared/flaky-test-fix-guardrails.md @elastic/kibana-operations @elastic/appex-qa
+/.github/workflows/flaky-fix-review-reminder.yml @elastic/appex-qa
+/.github/scripts/flaky_fix_review_reminder* @elastic/appex-qa
 /.github/aw/ @elastic/kibana-operations
 /.buildkite/ @elastic/kibana-operations
 /moon.yml @elastic/kibana-operations
@@ -3850,6 +3899,7 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 /.github/agents/scout-reviewer.md @elastic/appex-qa
 /.github/workflows/reviewer-scout.md @elastic/appex-qa
 /.github/workflows/reviewer-scout.lock.yml @elastic/appex-qa
+/.libra/specialists/scout.md @elastic/appex-qa
 /.github/workflows/label-scout-prs.yml @elastic/appex-qa
 /.github/labeler-scout.yml @elastic/appex-qa
 
