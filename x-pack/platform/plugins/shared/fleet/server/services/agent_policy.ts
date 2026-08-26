@@ -1812,20 +1812,41 @@ class AgentPolicyService {
         );
     }
 
-    await soClient
-      .delete(savedObjectType, id, {
+    // cleanup .fleet-policies docs BEFORE deleting the saved object so that if Elasticsearch is
+    // temporarily unavailable the saved object is preserved and the caller can retry the delete.
+    await this.deleteFleetServerPoliciesForPolicyId(esClient, id);
+
+    try {
+      await soClient.delete(savedObjectType, id, {
         force: true, // need to delete through multiple space
-      })
-      .catch(catchAndSetErrorStackTrace.withMessage(`Failed to delete agent policy [${id}]`));
+      });
+    } catch (deleteErr: unknown) {
+      // .fleet-policies docs were already removed above. Redeploy them so fleet-server can
+      // continue delivering the policy to its agents while the caller retries the delete.
+      logger.error(
+        `[AgentPolicyService] Failed to delete saved object for agent policy [${id}]; ` +
+          `attempting to redeploy .fleet-policies documents to restore fleet-server delivery`
+      );
+      try {
+        await this.deployPolicy(soClient, id);
+      } catch (redeployErr) {
+        logger.error(
+          `[AgentPolicyService] Failed to redeploy agent policy [${id}] after saved object ` +
+            `delete failure — fleet-server may not be able to deliver this policy until it is ` +
+            `manually redeployed: ${redeployErr}`
+        );
+      }
+      return catchAndSetErrorStackTrace(
+        deleteErr as Error,
+        `Failed to delete agent policy [${id}]`
+      );
+    }
 
     if (!agentPolicy?.supports_agentless) {
       await this.triggerAgentPolicyUpdatedEvent(esClient, 'deleted', id, {
         spaceId: soClient.getCurrentNamespace(),
       });
     }
-
-    // cleanup .fleet-policies docs on delete
-    await this.deleteFleetServerPoliciesForPolicyId(esClient, id);
 
     logger.debug(`Deleted agent policy ${id}`);
     return {
