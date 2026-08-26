@@ -378,6 +378,7 @@ export const JiraConnector: ConnectorSpec = {
 
     getTransitions: {
       isTool: true,
+      scope: 'read',
       description:
         'List the workflow transitions available for a Jira issue. ' +
         'Use before transitionIssue — Jira requires a transition ID, not a status name. ' +
@@ -394,6 +395,7 @@ export const JiraConnector: ConnectorSpec = {
 
     getIssueTypes: {
       isTool: true,
+      scope: 'read',
       description:
         'List the issue types available in a Jira project (e.g. Bug, Task, Story, Epic). ' +
         'Use before createIssue to discover valid issue type names and IDs for the project.',
@@ -411,6 +413,7 @@ export const JiraConnector: ConnectorSpec = {
 
     getCreateMetadata: {
       isTool: true,
+      scope: 'read',
       description:
         'Get the required and optional fields for creating a Jira issue of a specific type. ' +
         'Use after getIssueTypes to build a valid createIssue payload, especially when the ' +
@@ -472,6 +475,7 @@ export const JiraConnector: ConnectorSpec = {
 
     getAttachment: {
       isTool: true,
+      scope: 'read',
       description:
         'Download the content of a Jira attachment by its ID. ' +
         'Returns the file as a base64-encoded string along with its MIME type. ' +

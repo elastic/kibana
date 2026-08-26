@@ -348,6 +348,7 @@ export const GmailConnector: ConnectorSpec = {
 
     listLabels: {
       isTool: true,
+      scope: 'read',
       description:
         'List all Gmail labels (system and user-created) with their IDs and names. Call this before modifyLabels to resolve a label name (e.g. "Quarantine") to its ID.',
       input: ListLabelsInputSchema,
