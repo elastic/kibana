@@ -887,7 +887,14 @@ describe('updateAlertsStatus — event bus', () => {
     const listener = jest.fn();
     bus.onAlertStatusChanged(listener);
 
-    esClient.mget.mockResolvedValueOnce({ docs: [] } as never);
+    // a1 has previous status 'acknowledged' → target 'closed': actual change
+    // a2 has previous status 'closed' → target 'open': actual change
+    esClient.mget.mockResolvedValueOnce({
+      docs: [
+        { found: true, _id: 'a1', _source: { 'kibana.alert.workflow_status': 'acknowledged' } },
+        { found: true, _id: 'a2', _source: { 'kibana.alert.workflow_status': 'closed' } },
+      ],
+    } as never);
 
     const alertService = new AlertService(esClient, logger, alertsClient, bus, request);
     await alertService.updateAlertsStatus([
@@ -898,6 +905,46 @@ describe('updateAlertsStatus — event bus', () => {
     // 'closed' maps to 'closed', 'open' maps to 'open' — two distinct target statuses
     expect(listener).toHaveBeenCalledTimes(2);
 
+    bus.removeAllListeners();
+  });
+
+  it('does not emit when all alerts already have the target status', async () => {
+    const bus = new CasesEventBus();
+    const listener = jest.fn();
+    bus.onAlertStatusChanged(listener);
+
+    // Both alerts already at 'closed' (the target)
+    esClient.mget.mockResolvedValueOnce({
+      docs: [
+        { found: true, _id: 'a1', _source: { 'kibana.alert.workflow_status': 'closed' } },
+        { found: true, _id: 'a2', _source: { 'kibana.alert.workflow_status': 'closed' } },
+      ],
+    } as never);
+
+    const alertService = new AlertService(esClient, logger, alertsClient, bus, request);
+    await alertService.updateAlertsStatus([
+      { id: 'a1', index: '.siem-signals', status: CaseStatuses.closed },
+      { id: 'a2', index: '.siem-signals', status: CaseStatuses.closed },
+    ]);
+
+    expect(listener).not.toHaveBeenCalled();
+    bus.removeAllListeners();
+  });
+
+  it('does not emit for alerts not found by the prefetch', async () => {
+    const bus = new CasesEventBus();
+    const listener = jest.fn();
+    bus.onAlertStatusChanged(listener);
+
+    // Neither alert found by mget
+    esClient.mget.mockResolvedValueOnce({ docs: [] } as never);
+
+    const alertService = new AlertService(esClient, logger, alertsClient, bus, request);
+    await alertService.updateAlertsStatus([
+      { id: 'a1', index: '.siem-signals', status: CaseStatuses.closed },
+    ]);
+
+    expect(listener).not.toHaveBeenCalled();
     bus.removeAllListeners();
   });
 
@@ -945,7 +992,7 @@ describe('updateAlertsStatus — event bus', () => {
     bus.removeAllListeners();
   });
 
-  it('omits previousStatus entry when source has an unrecognised status value (no fabricated open)', async () => {
+  it('does not emit when the only alert has an unrecognised previous status value', async () => {
     const bus = new CasesEventBus();
     const listener = jest.fn();
     bus.onAlertStatusChanged(listener);
@@ -959,8 +1006,7 @@ describe('updateAlertsStatus — event bus', () => {
       { id: 'a1', index: '.siem-signals', status: CaseStatuses.closed },
     ]);
 
-    const { payload } = listener.mock.calls[0][0];
-    expect(payload.previousStatuses).toEqual([]);
+    expect(listener).not.toHaveBeenCalled();
 
     bus.removeAllListeners();
   });

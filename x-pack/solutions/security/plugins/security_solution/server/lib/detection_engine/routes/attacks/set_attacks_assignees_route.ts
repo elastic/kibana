@@ -20,6 +20,7 @@ import type { ITelemetryEventsSender } from '../../../telemetry/sender';
 import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
 import {
   MAX_ALERTS_PER_TRIGGER,
+  MAX_ASSIGNEE_UID_LENGTH,
   MAX_ASSIGNEES_PER_OPERATION,
 } from '../../../../../common/workflows/triggers';
 import { updateAlertsAssignees } from '../common/operations/update_alerts_assignees';
@@ -98,8 +99,12 @@ export const setAttacksAssigneesRoute = (
               });
               void eventBus?.emitAttackAssigneesChanged(request, {
                 attackIds: ids.slice(0, MAX_ALERTS_PER_TRIGGER),
-                assigneesToAdd: assignees.add.slice(0, MAX_ASSIGNEES_PER_OPERATION),
-                assigneesToRemove: assignees.remove.slice(0, MAX_ASSIGNEES_PER_OPERATION),
+                assigneesToAdd: assignees.add
+                  .filter((uid) => uid.length <= MAX_ASSIGNEE_UID_LENGTH)
+                  .slice(0, MAX_ASSIGNEES_PER_OPERATION),
+                assigneesToRemove: assignees.remove
+                  .filter((uid) => uid.length <= MAX_ASSIGNEE_UID_LENGTH)
+                  .slice(0, MAX_ASSIGNEES_PER_OPERATION),
                 truncated: ids.length > MAX_ALERTS_PER_TRIGGER,
               });
               return result;
@@ -150,17 +155,23 @@ export const setAttacksAssigneesRoute = (
               ids: combinedIds,
               assignees,
             });
+            const validAssigneesToAdd = assignees.add
+              .filter((uid) => uid.length <= MAX_ASSIGNEE_UID_LENGTH)
+              .slice(0, MAX_ASSIGNEES_PER_OPERATION);
+            const validAssigneesToRemove = assignees.remove
+              .filter((uid) => uid.length <= MAX_ASSIGNEE_UID_LENGTH)
+              .slice(0, MAX_ASSIGNEES_PER_OPERATION);
             void eventBus?.emitAttackAssigneesChanged(request, {
               attackIds: verifiedAttackIds.slice(0, MAX_ALERTS_PER_TRIGGER),
-              assigneesToAdd: assignees.add.slice(0, MAX_ASSIGNEES_PER_OPERATION),
-              assigneesToRemove: assignees.remove.slice(0, MAX_ASSIGNEES_PER_OPERATION),
+              assigneesToAdd: validAssigneesToAdd,
+              assigneesToRemove: validAssigneesToRemove,
               truncated: verifiedAttackIds.length > MAX_ALERTS_PER_TRIGGER,
             });
             if (relatedAlertIds.length > 0) {
               void eventBus?.emitAlertAssigneesChanged(request, {
                 alertIds: relatedAlertIds.slice(0, MAX_ALERTS_PER_TRIGGER),
-                assigneesToAdd: assignees.add.slice(0, MAX_ASSIGNEES_PER_OPERATION),
-                assigneesToRemove: assignees.remove.slice(0, MAX_ASSIGNEES_PER_OPERATION),
+                assigneesToAdd: validAssigneesToAdd,
+                assigneesToRemove: validAssigneesToRemove,
                 truncated: relatedAlertIds.length > MAX_ALERTS_PER_TRIGGER,
               });
             }

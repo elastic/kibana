@@ -115,7 +115,8 @@ export const setAttacksStatusRoute = (
         const attackIndex = await getAttackAlertsIndex({ context });
 
         if (!updateRelatedAlerts) {
-          const attackPreviousStatuses: PreviousStatus[] = [];
+          let filteredAttackIds: string[] = [];
+          let filteredPreviousStatuses: PreviousStatus[] = [];
           if (eventBus) {
             try {
               const esClient = core.elasticsearch.client.asCurrentUser;
@@ -124,7 +125,10 @@ export const setAttacksStatusRoute = (
                 attackIndex,
                 ids
               );
-              attackPreviousStatuses.push(...fetched);
+              // Only emit for attacks confirmed by prefetch whose status is actually changing
+              const changing = fetched.filter((ps) => ps.previousStatus !== status);
+              filteredAttackIds = changing.map((ps) => ps.id);
+              filteredPreviousStatuses = changing;
             } catch (err) {
               logger?.warn(
                 `Failed to pre-fetch previous statuses for workflow trigger (attacks status): ${err}`
@@ -143,12 +147,14 @@ export const setAttacksStatusRoute = (
                 status,
                 reason: closingReason.reason,
               });
-              void eventBus?.emitAttackStatusChanged(request, {
-                attackIds: ids.slice(0, MAX_ALERTS_PER_TRIGGER),
-                status,
-                previousStatuses: attackPreviousStatuses.slice(0, MAX_ALERTS_PER_TRIGGER),
-                truncated: ids.length > MAX_ALERTS_PER_TRIGGER,
-              });
+              if (filteredAttackIds.length > 0) {
+                void eventBus?.emitAttackStatusChanged(request, {
+                  attackIds: filteredAttackIds.slice(0, MAX_ALERTS_PER_TRIGGER),
+                  status,
+                  previousStatuses: filteredPreviousStatuses.slice(0, MAX_ALERTS_PER_TRIGGER),
+                  truncated: filteredAttackIds.length > MAX_ALERTS_PER_TRIGGER,
+                });
+              }
               return result;
             }
           );

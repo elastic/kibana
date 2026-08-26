@@ -179,13 +179,18 @@ export class AlertService {
     const byStatus = new Map<STATUS_VALUES, string[]>();
     for (const alert of alerts) {
       if (!AlertService.isEmptyAlert(alert)) {
-        idToIndex.set(alert.id, alert.index);
-        const status = this.translateStatus(alert);
-        const bucket = byStatus.get(status);
-        if (bucket !== undefined) {
-          bucket.push(alert.id);
-        } else {
-          byStatus.set(status, [alert.id]);
+        const translatedStatus = this.translateStatus(alert);
+        const previousStatus = previousStatusMap.get(alert.id);
+        // Only emit for alerts the prefetch confirmed exist and whose status is actually changing
+        const isActualChange = previousStatus !== undefined && previousStatus !== translatedStatus;
+        if (isActualChange) {
+          idToIndex.set(alert.id, alert.index);
+          const bucket = byStatus.get(translatedStatus);
+          if (bucket !== undefined) {
+            bucket.push(alert.id);
+          } else {
+            byStatus.set(translatedStatus, [alert.id]);
+          }
         }
       }
     }

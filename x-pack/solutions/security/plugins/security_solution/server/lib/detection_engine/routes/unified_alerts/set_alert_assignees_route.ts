@@ -24,6 +24,7 @@ import { withSiemErrorHandling } from '../with_siem_error_handling';
 import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
 import {
   MAX_ALERTS_PER_TRIGGER,
+  MAX_ASSIGNEE_UID_LENGTH,
   MAX_ASSIGNEES_PER_OPERATION,
 } from '../../../../../common/workflows/triggers';
 import { fetchAlertIdToIndex } from '../common/operations/prefetch_previous_statuses';
@@ -91,20 +92,27 @@ export const setUnifiedAlertsAssigneesRoute = (
         return withSiemErrorHandling(response, async () => {
           const result = await updateAlertsAssignees({ context, index, ids, assignees });
           if (eventBus) {
+            const validAssigneesToAdd = assignees.add
+              .filter((uid) => uid.length <= MAX_ASSIGNEE_UID_LENGTH)
+              .slice(0, MAX_ASSIGNEES_PER_OPERATION);
+            const validAssigneesToRemove = assignees.remove
+              .filter((uid) => uid.length <= MAX_ASSIGNEE_UID_LENGTH)
+              .slice(0, MAX_ASSIGNEES_PER_OPERATION);
+            const truncated = ids.length > MAX_ALERTS_PER_TRIGGER;
             if (attackIds.length > 0) {
               void eventBus.emitAttackAssigneesChanged(request, {
                 attackIds: attackIds.slice(0, MAX_ALERTS_PER_TRIGGER),
-                assigneesToAdd: assignees.add.slice(0, MAX_ASSIGNEES_PER_OPERATION),
-                assigneesToRemove: assignees.remove.slice(0, MAX_ASSIGNEES_PER_OPERATION),
-                truncated: ids.length > MAX_ALERTS_PER_TRIGGER,
+                assigneesToAdd: validAssigneesToAdd,
+                assigneesToRemove: validAssigneesToRemove,
+                truncated,
               });
             }
             if (alertIds.length > 0) {
               void eventBus.emitAlertAssigneesChanged(request, {
                 alertIds: alertIds.slice(0, MAX_ALERTS_PER_TRIGGER),
-                assigneesToAdd: assignees.add.slice(0, MAX_ASSIGNEES_PER_OPERATION),
-                assigneesToRemove: assignees.remove.slice(0, MAX_ASSIGNEES_PER_OPERATION),
-                truncated: ids.length > MAX_ALERTS_PER_TRIGGER,
+                assigneesToAdd: validAssigneesToAdd,
+                assigneesToRemove: validAssigneesToRemove,
+                truncated,
               });
             }
           }
