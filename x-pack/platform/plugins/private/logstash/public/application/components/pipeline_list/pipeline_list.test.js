@@ -35,6 +35,11 @@ describe('PipelineList component', () => {
         isClusterInfoAvailable: getIsClusterInfoAvailable(true),
         deleteSelectedPipelines: getDeleteSelectedPipelines(true),
       },
+      history: {
+        createHref: ({ pathname }) => pathname,
+        push: jest.fn(),
+      },
+      createPipeline: jest.fn(),
       isServerless: false,
       isReadOnly: false,
       licenseService: {
