@@ -97,9 +97,12 @@ export const InitialSolutionSetup = ({ spacesManager, serverBasePath }: Props) =
                       }
                     )}
                   >
-                    {i18n.translate('xpack.spaces.spaceSelector.initialSolutionSetup.nextButton', {
-                      defaultMessage: 'Next',
-                    })}
+                    {i18n.translate(
+                      'xpack.spaces.spaceSelector.initialSolutionSetup.selectButton',
+                      {
+                        defaultMessage: 'Select',
+                      }
+                    )}
                   </EuiButton>
                 }
               />
