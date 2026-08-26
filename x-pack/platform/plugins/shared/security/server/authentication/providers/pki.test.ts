@@ -497,11 +497,9 @@ describe('PKIAuthenticationProvider', () => {
       // trigger token invalidation. A plain net.Socket (not TLSSocket) produces the same
       // KibanaSocket behaviour as the destroyed-stream proxy and is used here as a test double.
       const request = httpServerMock.createKibanaRequest({ socket: new Socket() });
-      const sessionValue = sessionMock.createValue({
-        state: { accessToken: 'token', peerCertificateFingerprint256: '2A:7A:C2:DD' },
-      });
+      const state = { accessToken: 'token', peerCertificateFingerprint256: '2A:7A:C2:DD' };
 
-      await expect(provider.authenticate(request, sessionValue)).resolves.toEqual(
+      await expect(provider.authenticate(request, state)).resolves.toEqual(
         AuthenticationResult.failed(new Error('Peer certificate is not available'))
       );
 
