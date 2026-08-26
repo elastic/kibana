@@ -22,7 +22,6 @@ import { BehaviorSubject, combineLatest, EMPTY, map, merge, skip, switchMap, tap
 import type { Query } from '@kbn/es-query';
 import { parse } from 'hjson';
 import { ON_APPLY_FILTER } from '@kbn/ui-actions-plugin/common/trigger_ids';
-import { VEGA_SUPPORTED_TRIGGERS } from '../../common/constants';
 import {
   apiHasExecutionContext,
   apiIsPresentationContainer,
@@ -49,6 +48,7 @@ import {
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { openLazyFlyout } from '@kbn/presentation-util';
+import { VEGA_SUPPORTED_TRIGGERS } from '../../common/constants';
 import { VEGA_EMBEDDABLE_TYPE, VEGA_STANDALONE_EMBEDDABLE_FLAG } from '../../common/constants';
 import { VEGA_EVENT_APPLY_FILTER } from '../constants';
 import type { VegaEvent } from '../types';
