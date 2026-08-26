@@ -21,7 +21,10 @@ import {
   syntheticsMonitorAttributes,
   syntheticsMonitorSOTypes,
 } from '../../common/types/saved_objects';
-import { DeployPrivateLocationMonitors } from './deploy_private_location_monitors';
+import {
+  DeployPrivateLocationMonitors,
+  formatFailedCreates,
+} from './deploy_private_location_monitors';
 import { cleanUpDuplicatedPackagePolicies } from './clean_up_duplicate_policies';
 import type { HeartbeatConfig } from '../../common/runtime_types';
 import { MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL } from '../../common/constants';
@@ -120,12 +123,22 @@ export class SyncPrivateLocationMonitorsTask {
         } as SyncTaskState;
 
         try {
-          await this.deployPackagePolicies.syncAllPackagePolicies({
+          const { failedCreatesBySpace } = await this.deployPackagePolicies.syncAllPackagePolicies({
             allPrivateLocations,
             encryptedSavedObjects,
             privateLocationId,
             soClient: savedObjects.createInternalRepository(),
           });
+
+          if (failedCreatesBySpace.length > 0) {
+            // surface it as a task failure so the next cleanup run re-attempts
+            // the recreate instead of treating it as already done
+            const error = new Error(formatFailedCreates(failedCreatesBySpace));
+            logger.error(
+              `Sync of private location monitors failed for location ${privateLocationId}: ${error.message}`
+            );
+            return { error, state };
+          }
         } catch (error) {
           logger.error(
             `Sync of private location monitors failed for location ${privateLocationId}: ${error.message}`
@@ -225,7 +238,9 @@ export class SyncPrivateLocationMonitorsTask {
     return {
       lastStartedAt: startedAt.toISOString(),
       hasAlreadyDoneCleanup: taskInstance.state.hasAlreadyDoneCleanup || false,
-      maxCleanUpRetries: taskInstance.state.maxCleanUpRetries || 3,
+      // `??`, not `||`: a persisted 0 means the budget is spent, and `||` would
+      // silently hand back a fresh 3 and re-run cleanup on every interval forever
+      maxCleanUpRetries: taskInstance.state.maxCleanUpRetries ?? 3,
       disableAutoSync: taskInstance.state.disableAutoSync ?? false,
     };
   }

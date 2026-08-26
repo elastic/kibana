@@ -285,7 +285,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
 
       const syncSpy = jest
         .spyOn(task.deployPackagePolicies, 'syncAllPackagePolicies')
-        .mockResolvedValue(undefined);
+        .mockResolvedValue({ failedCreatesBySpace: [] });
 
       const result = await task.runTask({ taskInstance });
 
@@ -346,7 +346,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       ]);
       const syncSpy = jest
         .spyOn(task.deployPackagePolicies, 'syncAllPackagePolicies')
-        .mockResolvedValue(undefined);
+        .mockResolvedValue({ failedCreatesBySpace: [] });
 
       const result = await task.runTask({ taskInstance });
 
@@ -431,6 +431,84 @@ describe('SyncPrivateLocationMonitorsTask', () => {
 
       expect(result.error).toBeUndefined();
       expect(result.state.hasAlreadyDoneCleanup).toBe(true);
+    });
+
+    it('should fail the per-location run when the sync reports failed creates', async () => {
+      const taskInstance = getMockTaskInstance({ privateLocationId: 'pl-1' });
+      (mockServerSetup.coreStart.savedObjects as any).createInternalRepository = jest
+        .fn()
+        .mockReturnValue(mockSoClient as any);
+
+      jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
+        {
+          id: 'pl-1',
+          label: 'Private Location 1',
+          isServiceManaged: false,
+          agentPolicyId: 'policy-1',
+        },
+      ]);
+      jest.spyOn(task.deployPackagePolicies, 'syncAllPackagePolicies').mockResolvedValue({
+        failedCreatesBySpace: [{ spaceId: 'space1', count: 2 }],
+      });
+
+      const result = await task.runTask({ taskInstance });
+
+      // the recreate did not fully succeed, so cleanup must be able to re-attempt it
+      expect(result.error).toBeDefined();
+      expect(result.schedule).toBeUndefined();
+    });
+
+    it('should stop re-running cleanup once the retry budget is exhausted across task runs', async () => {
+      // a monitor whose expected package policy never shows up in Fleet: every
+      // cleanup pass wants a follow-up sync, and the recreate never succeeds
+      (mockServerSetup.coreStart.savedObjects as any).createInternalRepository = jest
+        .fn()
+        .mockReturnValue(mockSoClient as any);
+      mockSoClient.createPointInTimeFinder = jest.fn().mockImplementation(() => ({
+        async *find() {
+          yield {
+            saved_objects: [
+              {
+                id: 'monitor1',
+                attributes: {
+                  origin: 'ui',
+                  locations: [{ id: 'loc1', isServiceManaged: false }],
+                  id: 'monitor1',
+                },
+                namespaces: ['space1'],
+              },
+            ],
+          };
+        },
+        close: jest.fn().mockResolvedValue(undefined),
+      }));
+      mockFleet.packagePolicyService.fetchAllItemIds.mockImplementation(async () =>
+        (async function* () {
+          yield [];
+        })()
+      );
+      jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
+        {
+          id: 'pl-1',
+          label: 'Private Location 1',
+          isServiceManaged: false,
+          agentPolicyId: 'policy-1',
+        },
+      ]);
+      jest.spyOn(task, 'fetchMonitorMwsIds').mockResolvedValue([]);
+
+      let state: Record<string, any> = {};
+      for (let run = 0; run < 6; run++) {
+        const result = await task.runTask({
+          taskInstance: { ...getMockTaskInstance(), state } as CustomTaskInstance,
+        });
+        state = result.state;
+      }
+
+      // maxCleanUpRetries must actually run out, otherwise the task re-scans every
+      // monitor and re-schedules a full per-location sync on every interval forever
+      expect(state.hasAlreadyDoneCleanup).toBe(true);
+      expect(mockTaskManagerStart.ensureScheduled).toHaveBeenCalledTimes(3);
     });
   });
 

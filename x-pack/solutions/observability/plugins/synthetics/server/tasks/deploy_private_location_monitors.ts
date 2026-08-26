@@ -39,6 +39,17 @@ interface SyncConfig {
   globalParams: Record<string, string>;
 }
 
+/** Per-space count of package policies `editMonitors` could not create. */
+export interface FailedCreatesBySpace {
+  spaceId: string;
+  count: number;
+}
+
+export const formatFailedCreates = (failedCreatesBySpace: FailedCreatesBySpace[]) =>
+  `[DeployPrivateLocationMonitors] Failed to create policies during sync for spaces: [${failedCreatesBySpace
+    .map(({ spaceId, count }) => `${spaceId} (${count})`)
+    .join(', ')}]`;
+
 export class DeployPrivateLocationMonitors {
   constructor(
     public serverSetup: SyntheticsServerSetup,
@@ -130,43 +141,47 @@ export class DeployPrivateLocationMonitors {
         }
       );
 
-    for await (const result of finder.find()) {
-      const monitors = result.saved_objects.filter((monitor) => {
-        // Avoid processing the same config multiple times, updating it once will update all mws on it
-        if (listOfUpdatedConfigs.includes(monitor.id)) {
-          this.debugLog(
-            `Skipping monitor id: ${monitor.id} as it has already been processed for another maintenance window`
-          );
-          return false;
-        }
-        listOfUpdatedConfigs.push(monitor.id);
-        return true;
-      });
-      this.debugLog(`Processing mw id: ${mwId}, monitors count: ${monitors?.length ?? 0}`);
-
-      const { configsBySpaces, monitorSpaceIds } = this.mixParamsWithMonitors(
-        monitors,
-        paramsBySpace
-      );
-
-      await this.deployEditMonitors({
-        allPrivateLocations,
-        configsBySpaces,
-        monitorSpaceIds,
-        paramsBySpace,
-        maintenanceWindows,
-      });
-
-      if (isMissingMw) {
-        await this.removeMwsFromMonitorConfigs({
-          mwId,
-          monitors,
-          soClient,
+    try {
+      for await (const result of finder.find()) {
+        const monitors = result.saved_objects.filter((monitor) => {
+          // Avoid processing the same config multiple times, updating it once will update all mws on it
+          if (listOfUpdatedConfigs.includes(monitor.id)) {
+            this.debugLog(
+              `Skipping monitor id: ${monitor.id} as it has already been processed for another maintenance window`
+            );
+            return false;
+          }
+          listOfUpdatedConfigs.push(monitor.id);
+          return true;
         });
-      }
-    }
+        this.debugLog(`Processing mw id: ${mwId}, monitors count: ${monitors?.length ?? 0}`);
 
-    finder.close().catch(() => {});
+        const { configsBySpaces, monitorSpaceIds } = this.mixParamsWithMonitors(
+          monitors,
+          paramsBySpace
+        );
+
+        await this.deployEditMonitors({
+          allPrivateLocations,
+          configsBySpaces,
+          monitorSpaceIds,
+          paramsBySpace,
+          maintenanceWindows,
+        });
+
+        if (isMissingMw) {
+          await this.removeMwsFromMonitorConfigs({
+            mwId,
+            monitors,
+            soClient,
+          });
+        }
+      }
+    } finally {
+      // close in a finally: the SO point-in-time generator has no cleanup of its
+      // own, so an early exit would leak the PIT until its keep-alive expires
+      finder.close().catch(() => {});
+    }
 
     this.debugLog(`Syncing package policies for updated maintenance window id: ${mwId}`);
   }
@@ -185,10 +200,10 @@ export class DeployPrivateLocationMonitors {
     allPrivateLocations: PrivateLocationAttributes[];
     encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
     modifiedParamKeys?: string[];
-  }) {
+  }): Promise<{ failedCreatesBySpace: FailedCreatesBySpace[] }> {
     if (allPrivateLocations.length === 0) {
       this.debugLog('No private locations found, skipping sync of private location monitors');
-      return;
+      return { failedCreatesBySpace: [] };
     }
 
     const { configsBySpaces, paramsBySpace, monitorSpaceIds, maintenanceWindows } =
@@ -206,7 +221,7 @@ export class DeployPrivateLocationMonitors {
           ? 'No monitors found that use the modified parameters, skipping sync of private location monitors'
           : 'No monitors found, skipping sync of private location monitors'
       );
-      return;
+      return { failedCreatesBySpace: [] };
     }
 
     return this.serverSetup.fleet.runWithCache(async () => {
@@ -215,7 +230,7 @@ export class DeployPrivateLocationMonitors {
           ', '
         )}`
       );
-      await this.deployEditMonitors({
+      const failedCreatesBySpace = await this.deployEditMonitors({
         allPrivateLocations: allPrivateLocations.filter(
           (loc) => loc.id === privateLocationId || !privateLocationId
         ),
@@ -225,6 +240,7 @@ export class DeployPrivateLocationMonitors {
         maintenanceWindows,
       });
       this.debugLog('Completed sync of private location monitors');
+      return { failedCreatesBySpace };
     });
   }
 
@@ -242,7 +258,7 @@ export class DeployPrivateLocationMonitors {
     maintenanceWindows: MaintenanceWindow[];
   }) {
     const { privateLocationAPI } = this.syntheticsMonitorClient;
-    const failedCreatesBySpace: string[] = [];
+    const failedCreatesBySpace: FailedCreatesBySpace[] = [];
 
     for (const spaceId of monitorSpaceIds) {
       const privateConfigs: Array<SyncConfig> = [];
@@ -272,22 +288,22 @@ export class DeployPrivateLocationMonitors {
         );
 
         if (result?.failedCreates && result.failedCreates.length > 0) {
-          failedCreatesBySpace.push(`${spaceId} (${result.failedCreates.length})`);
+          failedCreatesBySpace.push({ spaceId, count: result.failedCreates.length });
         }
       } else {
         this.debugLog(`No privateConfigs to sync for spaceId: ${spaceId}`);
       }
     }
 
-    // Throw only after every space was attempted, so one bad space doesn't
-    // block the rest. Callers need the failure to retry the recreate.
+    // Report rather than throw: this method is shared by the maintenance-window
+    // and global-params sync paths, where aborting would silently skip the
+    // monitors that come after the failure. Callers that need to retry the
+    // recreate (the post-cleanup per-location sync) act on the returned list.
     if (failedCreatesBySpace.length > 0) {
-      const message = `[DeployPrivateLocationMonitors] Failed to create policies during sync for spaces: [${failedCreatesBySpace.join(
-        ', '
-      )}]`;
-      this.serverSetup.logger.error(message);
-      throw new Error(message);
+      this.serverSetup.logger.error(formatFailedCreates(failedCreatesBySpace));
     }
+
+    return failedCreatesBySpace;
   }
 
   async getAllMonitorConfigs({
