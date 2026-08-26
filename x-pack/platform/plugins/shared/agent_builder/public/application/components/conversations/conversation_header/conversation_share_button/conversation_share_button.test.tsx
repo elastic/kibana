@@ -12,33 +12,33 @@ import {
   ConversationAccessControlMode,
   ConversationAccessControlRole,
 } from '@kbn/agent-builder-common';
-import type { ConversationWithPermissions } from '../../../../../common/http_api/conversations';
+import type { ConversationWithPermissions } from '../../../../../../common/http_api/conversations';
 import {
   useConversation,
   useConversationPermissions,
   useHasPersistedConversation,
-} from '../../../hooks/use_conversation';
-import { useSuggestUsers } from '../../../hooks/use_suggest_users';
+} from '../../../../hooks/use_conversation';
+import { useSuggestUsers } from '../../../../hooks/use_suggest_users';
 import {
   useConversationAccessControlProfiles,
   useInviteMembersSummary,
   useUpdateConversationAccessControl,
-} from '../../../hooks/use_conversation_access_control';
-import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
+} from '../../../../hooks/use_conversation_access_control';
+import { useExperimentalFeatures } from '../../../../hooks/use_experimental_features';
 import { ConversationShareButton } from './conversation_share_button';
 
-jest.mock('../../../hooks/use_conversation', () => ({
+jest.mock('../../../../hooks/use_conversation', () => ({
   useConversation: jest.fn(),
   useConversationPermissions: jest.fn(),
   useHasPersistedConversation: jest.fn(),
 }));
 
-jest.mock('../../../hooks/use_suggest_users', () => ({
+jest.mock('../../../../hooks/use_suggest_users', () => ({
   useSuggestUsers: jest.fn(),
 }));
 
-jest.mock('../../../hooks/use_conversation_access_control', () => {
-  const actual = jest.requireActual('../../../hooks/use_conversation_access_control');
+jest.mock('../../../../hooks/use_conversation_access_control', () => {
+  const actual = jest.requireActual('../../../../hooks/use_conversation_access_control');
 
   return {
     hasInviteMembersSummary: actual.hasInviteMembersSummary,
@@ -48,7 +48,7 @@ jest.mock('../../../hooks/use_conversation_access_control', () => {
   };
 });
 
-jest.mock('../../../hooks/use_experimental_features', () => ({
+jest.mock('../../../../hooks/use_experimental_features', () => ({
   useExperimentalFeatures: jest.fn(),
 }));
 
