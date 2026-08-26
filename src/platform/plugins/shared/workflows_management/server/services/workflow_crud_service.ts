@@ -1003,9 +1003,13 @@ export class WorkflowCrudService {
   }
 
   private async getEsWorkflowForScheduler(id: string, spaceId: string): Promise<EsWorkflow | null> {
+    // Include global (`*`) workflows: managed workflows (e.g. PND watches) are installed once at the
+    // global space, so a scheduler sync triggered from a concrete space must still resolve them.
+    // Without this the re-read misses the global doc and silently skips scheduling ("not found after
+    // save"), so a global scheduled workflow never gets a Task Manager task.
     const { must } = buildWorkflowFilters({
       ids: [id],
-      space: { id: spaceId },
+      space: { id: spaceId, includeGlobal: true },
     });
     const response = await this.deps.workflowStorage.getClient().search({
       query: { bool: { must } },

@@ -28,6 +28,7 @@ export {
   PND_SKILLS_URL,
   PND_SKILL_URL_TEMPLATE,
   PND_WATCHES_URL,
+  PND_WATCH_SCHEDULE_URL_TEMPLATE,
   PND_WATCH_URL_TEMPLATE,
   PND_WORKERS_URL,
   PND_WORKER_URL_TEMPLATE,
@@ -56,6 +57,7 @@ export {
   buildInvestigationProposalsUrl,
   buildInvestigationUrl,
   buildSkillUrl,
+  buildWatchScheduleUrl,
   buildWatchUrl,
   buildWorkerUrl,
 } from './constants';

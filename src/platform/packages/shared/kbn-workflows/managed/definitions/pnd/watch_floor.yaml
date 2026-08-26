@@ -1,8 +1,9 @@
 version: "1"
 name: Watch Floor
 description: >
-  Tier-1 Security Watch Floor. Triages alerts via the alert-analysis skill.
-  Full Alert Analysis managed-workflow wrap (workflow.execute) is the next Floor spike.
+  Tier-1 Security Watch Floor. On an alert it triages via the alert-analysis
+  skill; on a schedule it runs the Attack Discovery worker to generate
+  discoveries and draft an investigation. Steps are routed by execution.triggeredBy.
 enabled: true
 tags:
   - watch
@@ -10,6 +11,11 @@ tags:
 triggers:
   - type: alert
   - type: manual
+  # The orchestrator owns the Attack Discovery cadence: each scheduled tick runs
+  # only the AD worker (step routing below keys off execution.triggeredBy).
+  - type: scheduled
+    with:
+      every: "15m"
 consts:
   watch_policy:
     mandate: Frontline triage
@@ -34,6 +40,11 @@ consts:
       - name: Finance PII
         access: masked
         label: Masked
+    # Attack Discovery worker config passed as inputs on each scheduled tick.
+    # No durable user-editable home yet (security-team#18717), so it lives here.
+    config:
+      adAlertSize: 100
+      adLookback: now-24h
     # Display overrides only — capabilities are projected from steps below.
     callables:
       - id: alert-analysis
@@ -42,9 +53,19 @@ consts:
         summary: On alert · classifies FP / TP / inconclusive
         gated: false
         enabled: true
+      - id: system-security-watch-attack-discovery
+        name: Attack Discovery Worker
+        kind: workflow
+        summary: On schedule · generates attack discoveries and drafts an investigation
+        gated: false
+        enabled: true
 steps:
+  # Alert triage runs only on the alert trigger. A scheduled tick has no `event`
+  # to classify, so this step (and record_reasoning) are gated off and only the
+  # AD worker runs.
   - name: triage_alerts
     type: ai.agent
+    if: "${{ execution.triggeredBy == 'alert' }}"
     timeout: "10m"
     create-conversation: true
     with:
@@ -79,6 +100,7 @@ steps:
           - rationale
   - name: record_reasoning
     type: data.set
+    if: "${{ execution.triggeredBy == 'alert' }}"
     with:
       reasoning:
         summary: >-
@@ -92,3 +114,16 @@ steps:
               (confidence
               {{ steps.triage_alerts.output.structured_output.confidence_score
               | default: "n/a" }})
+
+  # On a scheduled tick, hand off to the AD worker (workflow.execute, same
+  # pluginId so no cross-owner concern). The worker generates discoveries,
+  # persists them to the shared ad-hoc AD index, and drafts an investigation.
+  - name: run_attack_discovery
+    type: workflow.execute
+    if: "${{ execution.triggeredBy == 'scheduled' }}"
+    with:
+      workflow-id: system-security-watch-attack-discovery
+      inputs:
+        size: "${{ consts.watch_policy.config.adAlertSize }}"
+        start: "{{ consts.watch_policy.config.adLookback }}"
+        end: now

@@ -113,6 +113,35 @@ describe('WatchesService', () => {
     });
   });
 
+  describe('ensureSchedule — registers the space-scoped Task Manager schedule', () => {
+    it('re-asserts enabled=true so the scheduled trigger is programmed for the space', async () => {
+      const { client, updateWorkflow } = createFakeClient();
+      // The managed doc exists; static install left it unscheduled.
+      (client.getWorkflow as jest.Mock).mockResolvedValue({ id: FLOOR, enabled: true });
+
+      const result = await createService(client).ensureSchedule(FLOOR, SPACE, request);
+
+      expect(result).toEqual({ outcome: 'scheduled' });
+      expect(updateWorkflow).toHaveBeenCalledWith(FLOOR, { enabled: true }, SPACE, request);
+    });
+
+    it('reports not-found when the workflow does not exist', async () => {
+      const { client, updateWorkflow } = createFakeClient();
+      (client.getWorkflow as jest.Mock).mockResolvedValue(null);
+
+      const result = await createService(client).ensureSchedule(FLOOR, SPACE, request);
+
+      expect(result).toEqual({ outcome: 'not-found' });
+      expect(updateWorkflow).not.toHaveBeenCalled();
+    });
+
+    it('reports unavailable when Workflows management is not wired', async () => {
+      const result = await createService(undefined).ensureSchedule(FLOOR, SPACE, request);
+
+      expect(result).toEqual({ outcome: 'unavailable' });
+    });
+  });
+
   describe('settings — written to the store', () => {
     it('returns the updated settings alongside the watch', async () => {
       const service = createService(createFakeClient().client);
