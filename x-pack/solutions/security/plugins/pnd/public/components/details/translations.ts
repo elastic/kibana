@@ -24,10 +24,10 @@ export const DETAILS_FLYOUT_LABELS = Object.freeze({
     }),
   },
   header: {
-    since: (time: string, minutesAgo: number) =>
+    since: (time: string) =>
       i18n.translate('xpack.pnd.detailsFlyout.header.since', {
-        defaultMessage: 'Since {time} ({minutesAgo} min)',
-        values: { time, minutesAgo },
+        defaultMessage: 'Since {time} ',
+        values: { time },
       }),
     flyoutMenuAriaLabel: i18n.translate('xpack.pnd.detailsFlyout.header.flyoutMenuAriaLabel', {
       defaultMessage: 'Share',

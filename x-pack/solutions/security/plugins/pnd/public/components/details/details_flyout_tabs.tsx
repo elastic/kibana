@@ -6,6 +6,8 @@
  */
 
 import React, { memo } from 'react';
+import { FormattedRelative } from '@kbn/i18n-react';
+import moment from 'moment';
 import { EuiTextTruncate } from '@elastic/eui';
 import {
   EuiFlexGroup,
@@ -34,10 +36,7 @@ const TABS: Array<{ id: FlyoutTab; label: string }> = [
 ];
 
 const formatSince = (isoTimestamp: string): string => {
-  const date = new Date(isoTimestamp);
-  const time = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  const minutesAgo = Math.round((Date.now() - date.getTime()) / 60000);
-  return DETAILS_FLYOUT_LABELS.header.since(time, minutesAgo);
+  return DETAILS_FLYOUT_LABELS.header.since(moment(isoTimestamp).format('HH:mm'));
 };
 
 export const ConversationDetailsFlyoutTabs = memo<ConversationDetailsFlyoutHeaderProps>(
@@ -62,6 +61,9 @@ export const ConversationDetailsFlyoutTabs = memo<ConversationDetailsFlyoutHeade
               <EuiFlexItem grow={false}>
                 <EuiText size="xs" color="subdued">
                   <span>{formatSince(createdAt)}</span>
+                  {'('}
+                  <FormattedRelative value={createdAt} />
+                  {')'}
                 </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
