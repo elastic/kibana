@@ -1661,7 +1661,7 @@
   },
   "devDependencies": {
     "@apidevtools/swagger-parser": "12.1.0",
-    "@axe-core/playwright": "4.12.1",
+    "@axe-core/playwright": "4.13.0",
     "@babel/core": "7.29.7",
     "@babel/eslint-parser": "7.29.7",
     "@babel/generator": "7.29.8",
