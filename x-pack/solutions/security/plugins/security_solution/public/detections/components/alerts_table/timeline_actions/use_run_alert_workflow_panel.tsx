@@ -9,17 +9,30 @@ import React, { useMemo } from 'react';
 
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { useWorkflowsCapabilities, useWorkflowsUIEnabledSetting } from '@kbn/workflows-ui';
+import {
+  RunWorkflowPanel,
+  useWorkflowsCapabilities,
+  useWorkflowsUIEnabledSetting,
+} from '@kbn/workflows-ui';
+import type { WorkflowListItemDto } from '@kbn/workflows';
 import type { WorkflowSelectorVisibility } from '@kbn/workflows-ui';
 import type { AlertTableContextMenuItem } from '../types';
 import { useAlertsPrivileges } from '../../../containers/detection_engine/alerts/use_alerts_privileges';
 import * as i18n from '../translations';
-import { RunWorkflowPanel } from './run_workflow_panel';
 
-// Managed workflows surfaced as rule actions (e.g. the alert analysis workflow) carry the
-// `rule_action` selector visibility context; requesting it here includes them in the list alongside
-// user-created workflows. Module-scoped so the reference stays stable across renders.
+// Server-side: include managed workflows tagged for the rule_action selector (e.g. the alert
+// analysis workflow). Module-scoped so the object reference is stable across renders.
 const ALERT_WORKFLOW_VISIBILITY: WorkflowSelectorVisibility = { selectors: ['rule_action'] };
+
+// Client-side: of the server-returned set, further narrow to unmanaged workflows (always shown)
+// and managed workflows that declare an alert trigger. Module-scoped for stable reference.
+const isAlertWorkflow = (w: WorkflowListItemDto) =>
+  !w.managed || (w.definition?.triggers ?? []).some((t) => t.type === 'alert');
+
+// Sort alert-trigger workflows to the top. Module-scoped so the reference is stable across renders.
+const sortAlertWorkflow = (a: WorkflowListItemDto, b: WorkflowListItemDto) =>
+  Number((b.definition?.triggers ?? []).some((t) => t.type === 'alert')) -
+  Number((a.definition?.triggers ?? []).some((t) => t.type === 'alert'));
 
 export interface AlertWorkflowsPanelProps {
   /** Array of alert ids and their respective indices */
@@ -47,9 +60,9 @@ export const AlertWorkflowsPanel = ({ alertIds, onClose, onExecute }: AlertWorkf
   return (
     <RunWorkflowPanel
       inputs={inputs}
-      sortTriggerType="alert"
       visibility={ALERT_WORKFLOW_VISIBILITY}
-      executeButtonTestSubj="execute-alert-workflow-button"
+      sortWorkflow={sortAlertWorkflow}
+      filterWorkflow={isAlertWorkflow}
       onClose={onClose}
       onExecute={onExecute}
     />

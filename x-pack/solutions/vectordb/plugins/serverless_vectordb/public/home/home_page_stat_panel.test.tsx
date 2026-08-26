@@ -23,7 +23,7 @@ const metric = (overrides: Partial<HomePageStatPanelMetric> = {}): HomePageStatP
 
 const action = (overrides: Partial<HomePageStatPanelAction> = {}): HomePageStatPanelAction => ({
   key: 'create',
-  iconType: 'plusInCircle',
+  iconType: 'plusCircle',
   label: 'Create a dashboard',
   onClick: jest.fn(),
   testSubj: 'createDashboardAction',

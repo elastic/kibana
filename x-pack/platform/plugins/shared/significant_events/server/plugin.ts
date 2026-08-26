@@ -19,7 +19,6 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { RulesClientCreateOptions } from '@kbn/alerting-plugin/server';
 import { combineLatest, distinctUntilChanged, filter, skip, switchMap } from 'rxjs';
 import type { Subscription } from 'rxjs';
-import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import { PROJECT_ROUTING_ALL } from '@kbn/cps-server-utils';
 import {
   getRelayAppConnectionSavedObjectType,
@@ -48,6 +47,7 @@ import type { GetScopedClients, RouteHandlerScopedClients } from './routes/types
 import type {
   SignificantEventsPluginSetupDependencies,
   SignificantEventsPluginStartDependencies,
+  SignificantEventsServer,
 } from './types';
 import {
   type KnowledgeIndicatorClient,
@@ -76,8 +76,6 @@ import {
 import { createWorkflowClients } from './lib/workflows/create_workflow_clients';
 import { registerSignificantEventsWorkflowTriggers } from './workflows/triggers/register_triggers';
 import { createTriggerEmitter } from './workflows/triggers/emit';
-import { installInvestigationAgent } from './memory_and_investigation/lib/investigation/install_investigation_agent';
-import { registerInvestigationAgentType } from './memory_and_investigation/agents/investigation';
 import {
   installDiscoveryAgents,
   registerSignificantEventsDiscoveryAgentTypes,
@@ -100,7 +98,7 @@ export class SignificantEventsPlugin
     >
 {
   public logger: Logger;
-  public server?: StreamsServer;
+  public server?: SignificantEventsServer;
   private isDev: boolean;
   private ebtTelemetryService = new EbtTelemetryService();
   private getScopedClients?: GetScopedClients;
@@ -125,7 +123,7 @@ export class SignificantEventsPlugin
       workflowsManagement: plugins.workflowsManagement,
       cloud: plugins.cloud,
       kibanaVersion: this.kibanaVersion,
-    } as StreamsServer;
+    } as SignificantEventsServer;
     this.server.workflowsManagement = plugins.workflowsManagement;
 
     core.savedObjects.registerType(getRelayAppConnectionSavedObjectType());
@@ -277,7 +275,6 @@ export class SignificantEventsPlugin
     }
 
     if (plugins.agentBuilder) {
-      registerInvestigationAgentType(plugins.agentBuilder);
       registerSignificantEventsDiscoveryAgentTypes({ agentBuilder: plugins.agentBuilder });
       void core
         .getStartServices()
@@ -387,6 +384,7 @@ export class SignificantEventsPlugin
       this.server.spaces = plugins.spaces;
       this.server.workflowsExtensions = plugins.workflowsExtensions;
       this.server.agentBuilder = plugins.agentBuilder;
+      this.server.nightshiftInvestigations = plugins.nightshiftInvestigations;
 
       this.server.relayClient = plugins.actions.getRelayClient();
 
@@ -458,11 +456,10 @@ export class SignificantEventsPlugin
       })
     );
 
-    // Editable investigation + discovery agents: installed via agents.ensure when
-    // significant events is available. skip(1) on availabilityEnabled$ drops the initial
-    // emission, so catch up at startup as well. Per-space installs also happen just-in-time
-    // from triggerInvestigationWorkflow (investigation), scheduled discovery enablement,
-    // and manual discovery execute (discovery).
+    // Editable discovery agents: installed via agents.ensure when significant events is
+    // available. skip(1) on availabilityEnabled$ drops the initial emission, so catch up at
+    // startup as well. Per-space installs also happen just-in-time from scheduled discovery
+    // enablement and manual discovery execute.
     // Pause re-assert runs inside ensureSignificantEventsInstalled after every install.
     if (plugins.agentBuilder && this.server) {
       const agentBuilder = plugins.agentBuilder;
@@ -470,12 +467,11 @@ export class SignificantEventsPlugin
         server: this.server,
         logger: this.logger,
       });
-      void Promise.all([
-        installInvestigationAgent({ agentBuilder, spaceId: DEFAULT_SPACE_ID, availability }),
-        installDiscoveryAgents({ agentBuilder, spaceId: DEFAULT_SPACE_ID, availability }),
-      ]).catch((error: unknown) => {
-        this.logManagedResourceError('significant events agents', error);
-      });
+      void installDiscoveryAgents({ agentBuilder, spaceId: DEFAULT_SPACE_ID, availability }).catch(
+        (error: unknown) => {
+          this.logManagedResourceError('significant events agents', error);
+        }
+      );
     }
 
     if (plugins.agentBuilder && this.server && this.getScopedClients) {
