@@ -139,8 +139,6 @@ export {
   type AgentConfiguration,
   type AgentConfigurationOverrides,
   type RuntimeAgentConfigurationOverrides,
-  type AgentCapabilities,
-  type ResolvedAgentCapabilities,
   agentIdRegexp,
   AgentExecutionMode,
   SubagentExecutionMode,
