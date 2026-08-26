@@ -26,6 +26,15 @@ import { isIacProvisionerEnabled } from './utils/iac_provisioner';
 const RENDER_ENDPOINT = '/api/v1/render';
 const RENDER_TIMEOUT_MS = 30_000;
 
+/** undici reports TLS failures as `TypeError: fetch failed` with the OpenSSL reason on `cause`. */
+const formatIacProvisionerNetworkError = (error: unknown): string => {
+  if (!(error instanceof Error)) {
+    return String(error);
+  }
+  const causeMessage = error.cause instanceof Error ? error.cause.message : undefined;
+  return causeMessage ? `${error.message}: ${causeMessage}` : error.message;
+};
+
 export interface IacProvisionerRenderPolicyTemplate {
   name: string;
   enabledInputs: string[];
@@ -168,10 +177,11 @@ class IacProvisionerServiceImpl implements IacProvisionerService {
       // stalled or wasn't JSON. Logged distinctly from HTTP errors:
       // availability signal, not contract.
       const latencyMs = Date.now() - startTime;
+      const detail = formatIacProvisionerNetworkError(error);
       logger.error(
-        `[IaC Provisioner] No response from provider after ${latencyMs}ms (${error.message}) [Request Id: ${traceId}]`
+        `[IaC Provisioner] No response from provider after ${latencyMs}ms (${detail}) [Request Id: ${traceId}]`
       );
-      throw new IacProvisionerUnavailableError(`no response from provider (${error.message})`);
+      throw new IacProvisionerUnavailableError(`no response from provider (${detail})`);
     } finally {
       clearTimeout(timeout);
     }
@@ -253,6 +263,9 @@ class IacProvisionerServiceImpl implements IacProvisionerService {
         enabled: Boolean(tls?.certificate && tls?.key),
         certificate: tls?.certificate,
         key: tls?.key,
+        // Pass through as configured (string or string[]). Serverless needs
+        // both cluster-internal-cas and the MKI intermediate (http-certs/ca.crt);
+        // kibana-controller injects that list. Unset keeps Mozilla roots (ECH).
         certificateAuthorities: tls?.ca,
       })
     );
