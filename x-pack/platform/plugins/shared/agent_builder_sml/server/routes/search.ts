@@ -16,7 +16,7 @@ import {
   SmlAuthzEnumerationIncompleteError,
   SmlCorpusTooLargeError,
 } from '../services/sml/sml_errors';
-import { READ_SECURITY, withSmlFeatureFlag } from './common';
+import { READ_SECURITY } from './common';
 
 const SML_SEARCH_SIZE_MAX = 1000;
 const SML_SEARCH_FILTER_ARRAY_MAX = 100;
@@ -88,7 +88,7 @@ export const registerSearchRoute = ({
       options: { access: 'internal' },
       security: READ_SECURITY,
     },
-    withSmlFeatureFlag(async (ctx, request, response) => {
+    async (ctx, request, response) => {
       try {
         const sml = getSmlService();
         const coreContext = await ctx.core;
@@ -144,6 +144,6 @@ export const registerSearchRoute = ({
         logger.error(`SML search route error: ${(error as Error).message}`);
         throw error;
       }
-    })
+    }
   );
 };
