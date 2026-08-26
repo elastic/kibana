@@ -57,6 +57,10 @@ describe('isNonRoutableIPv6', () => {
     ['IPv4-mapped dotted', '::ffff:169.254.169.254'],
     ['IPv4-mapped hex groups', '::ffff:a9fe:a9fe'],
     ['IPv4-compatible dotted', '::169.254.169.254'],
+    // The Azure platform /32 has to be caught through the mapped form too, or the
+    // literal-only fix would be bypassable with an IPv6 spelling.
+    ['Azure platform VIP via IPv4-mapped hex', '::ffff:a83f:8110'],
+    ['Azure platform VIP via IPv4-mapped dotted', '::ffff:168.63.129.16'],
     ['site-local fec0::/10', 'fec0::1'],
     ['site-local top of range', 'feff::1'],
     ['multicast ff00::/8', 'ff02::1'],
