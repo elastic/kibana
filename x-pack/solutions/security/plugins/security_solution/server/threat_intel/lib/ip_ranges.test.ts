@@ -63,7 +63,8 @@ describe('isNonRoutableIPv6', () => {
     ['NAT64 local-use prefix', '64:ff9b:1::a9fe:a9fe'],
     ['discard-only 100::/64', '100::1'],
     ['documentation 2001:db8::/32', '2001:db8::1'],
-    ['benchmarking 2001:2::/48', '2001:2::1'],
+    ['benchmarking 2001:2::/48, third group compressed', '2001:2::1'],
+    ['benchmarking 2001:2::/48, third group explicit', '2001:2:0:0:0:0:0:1'],
   ])('treats %s as non-routable', (_label, ip) => {
     expect(isNonRoutableIPv6(ip)).toBe(true);
   });
@@ -74,6 +75,7 @@ describe('isNonRoutableIPv6', () => {
     ['2003::1 sits outside 6to4 2002::/16', '2003::1'],
     ['65:ff9b::1 sits outside the NAT64 prefix', '65:ff9b::1'],
     ['fe7f::1 sits below link-local fe80::/10', 'fe7f::1'],
+    ['routable: 2001:2:1::1 is outside benchmarking /48', '2001:2:1::1'],
   ])('%s', (_label, ip) => {
     expect(isNonRoutableIPv6(ip)).toBe(false);
   });

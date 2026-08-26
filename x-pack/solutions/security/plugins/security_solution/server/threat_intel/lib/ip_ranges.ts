@@ -93,6 +93,10 @@ export const isNonRoutableIPv6 = (ip: string): boolean => {
   //   64:ff9b::/96   NAT64 well-known prefix, encodes it in the low 32 bits
   //   64:ff9b:1::/48 NAT64 local-use prefix (RFC 8215)
   //
+  // The NAT64 test matches 64:ff9b::/32, which is wider than either prefix. That is
+  // deliberate: it covers both assignments in one check, and the rest of the /32 is
+  // unassigned, so over-blocking it costs nothing and fails closed.
+  //
   // These are blocked wholesale rather than parsed for the embedded address.
   // Parsing means getting the compressed-zero cases right (`2002::` is a valid
   // way to write an embedded 0.0.0.0), and there is no upside: 6to4 is
@@ -104,7 +108,10 @@ export const isNonRoutableIPv6 = (ip: string): boolean => {
   // discard-only 100::/64, documentation 2001:db8::/32, benchmarking 2001:2::/48
   if (/^100::/i.test(lower)) return true;
   if (/^2001:db8:/i.test(lower)) return true;
-  if (/^2001:2:/i.test(lower)) return true;
+  // /48, so the third group must be zero. It appears either swallowed by `::` or
+  // written out explicitly; `/^2001:2:/` alone would match the whole /32 and
+  // wrongly classify e.g. 2001:2:1::1.
+  if (/^2001:2:(?:0:|:)/i.test(lower)) return true;
 
   // IPv4-mapped  ::ffff:<ipv4>  and IPv4-compatible  ::<ipv4>
   // Forms seen in the wild:
