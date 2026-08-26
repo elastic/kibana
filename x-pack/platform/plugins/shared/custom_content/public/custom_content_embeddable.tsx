@@ -25,10 +25,10 @@ import {
   apiIsPresentationContainer,
   fetch$,
 } from '@kbn/presentation-publishing';
-import { tracksOverlays } from '@kbn/presentation-util';
+import { openLazyFlyout, tracksOverlays } from '@kbn/presentation-util';
 import { i18n } from '@kbn/i18n';
 import type { AggregateQuery, Filter, Query, TimeRange, ProjectRouting } from '@kbn/es-query';
-import React, { lazy, Suspense, useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   BehaviorSubject,
   catchError,
@@ -42,8 +42,7 @@ import {
   switchMap,
 } from 'rxjs';
 import { isRoundCompleteEvent } from '@kbn/agent-builder-common';
-import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
-import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
+import { ATTACHMENT_REF_ACTOR, getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import { CUSTOM_CONTENT_EMBEDDABLE_TYPE } from '@kbn/custom-content-common';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
@@ -56,12 +55,6 @@ import { buildCustomContentContextAttachment } from './utils/chat_integration';
 import { CUSTOM_CONTENT_REFINE_SESSION_TAG } from '../common/constants';
 import type { CustomContentEmbeddableState } from '../server';
 import { CustomContentComponent } from './components/custom_content_component';
-
-const EditCustomContentFlyout = lazy(() =>
-  import('./components/edit_custom_content_flyout').then((m) => ({
-    default: m.EditCustomContentFlyout,
-  }))
-);
 
 export type CustomContentApi = DefaultEmbeddableApi<CustomContentEmbeddableState> &
   HasTypeDisplayName &
@@ -76,12 +69,10 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
   type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
   buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
     const titleManager = initializeTitleManager(initialState);
+    let isRetained = false;
     let storedPrompt = initialState.prompt ?? '';
-    let storedReturnFocus: (() => void) | undefined;
     const esqlQuery$ = new BehaviorSubject<string | undefined>(initialState.esqlQuery);
     const template$ = new BehaviorSubject<string | undefined>(initialState.template);
-    const isFlyoutOpen$ = new BehaviorSubject<boolean>(false);
-    const isNewPanel$ = new BehaviorSubject<boolean>(false);
     const previewHtml$ = new BehaviorSubject<string | null>(null);
     const usesEsql$ = new BehaviorSubject<boolean>(Boolean(initialState.esqlQuery));
     const isApproximate$ = new BehaviorSubject<boolean>(false);
@@ -142,10 +133,109 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           defaultMessage: 'Custom content',
         }),
       onEdit: async ({ isNewPanel, returnFocus } = {}) => {
-        if (tracksOverlays(parentApi)) parentApi.clearOverlays();
-        storedReturnFocus = returnFocus;
-        isNewPanel$.next(isNewPanel ?? false);
-        isFlyoutOpen$.next(true);
+        const { core } = getServices();
+        let hasSaved = false;
+        const flyoutRef = openLazyFlyout({
+          core,
+          parentApi,
+          returnFocus,
+          loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
+            const { EditCustomContentFlyout } = await import(
+              './components/edit_custom_content_flyout'
+            );
+
+            const handleSave = (
+              newEsqlQuery: string | undefined,
+              newTemplate: string | undefined
+            ) => {
+              hasSaved = true;
+              applyConfigUpdate({ esqlQuery: newEsqlQuery, template: newTemplate });
+              closeFlyout();
+            };
+
+            const handleClose = () => {
+              closeFlyout();
+            };
+
+            const handleGenerateWithChatFromFlyout = (
+              draftTemplate: string,
+              draftEsqlQuery: string | undefined
+            ) => {
+              const { agentBuilder } = getServices();
+              if (!agentBuilder) return;
+              hasSaved = true;
+              closeFlyout();
+              agentBuilder.openChat({
+                attachments: [
+                  buildCustomContentContextAttachment(
+                    draftTemplate,
+                    draftEsqlQuery,
+                    uuid,
+                    titleManager.api.title$.getValue() ?? undefined
+                  ),
+                ],
+                sessionTag: `${CUSTOM_CONTENT_REFINE_SESSION_TAG}-${uuid}`,
+              });
+            };
+
+            function FlyoutWithReactiveState() {
+              const [timeRange, setTimeRange] = useState<TimeRange | undefined>(
+                apiPublishesTimeRange(parentApi)
+                  ? parentApi.timeRange$.getValue() ?? undefined
+                  : undefined
+              );
+              const [isApproximate, setIsApproximate] = useState(isApproximate$.getValue());
+              const [projectRouting, setProjectRouting] = useState(projectRouting$.getValue());
+              const [query, setQuery] = useState(query$.getValue());
+              const [filters, setFilters] = useState(filters$.getValue());
+
+              useEffect(() => {
+                const subs = [
+                  ...(apiPublishesTimeRange(parentApi)
+                    ? [parentApi.timeRange$.subscribe((tr) => setTimeRange(tr ?? undefined))]
+                    : []),
+                  isApproximate$.subscribe(setIsApproximate),
+                  projectRouting$.subscribe(setProjectRouting),
+                  query$.subscribe(setQuery),
+                  filters$.subscribe(setFilters),
+                ];
+                return () => subs.forEach((s) => s.unsubscribe());
+              }, []);
+
+              return (
+                <EditCustomContentFlyout
+                  esqlQuery={esqlQuery$.getValue()}
+                  template={template$.getValue()}
+                  timeRange={timeRange}
+                  isApproximate={isApproximate}
+                  projectRouting={projectRouting}
+                  query={query}
+                  filters={filters}
+                  isNewPanel={isNewPanel ?? false}
+                  ariaLabelledBy={ariaLabelledBy}
+                  onSave={handleSave}
+                  onClose={handleClose}
+                  onRunPreview={(html) => previewHtml$.next(html)}
+                  onGenerateWithChat={handleGenerateWithChatFromFlyout}
+                />
+              );
+            }
+
+            return <FlyoutWithReactiveState />;
+          },
+          flyoutProps: {
+            focusedPanelId: uuid,
+            size: 600,
+            minWidth: 320,
+          },
+        });
+        flyoutRef.onClose.then(() => {
+          if (!hasSaved && !isRetained && isNewPanel && apiIsPresentationContainer(parentApi)) {
+            parentApi.removePanel(uuid);
+          }
+          isRetained = false;
+          previewHtml$.next(null);
+        });
       },
       isEditingEnabled: () => true,
     });
@@ -188,8 +278,6 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
         const [
           esqlQuery,
           savedTemplate,
-          isFlyoutOpen,
-          isNewPanel,
           panelTitle,
           isApproximate,
           projectRouting,
@@ -199,8 +287,6 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
         ] = useBatchedPublishingSubjects(
           esqlQuery$,
           template$,
-          isFlyoutOpen$,
-          isNewPanel$,
           titleManager.api.title$,
           isApproximate$,
           projectRouting$,
@@ -234,18 +320,6 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           const sub = parentApi.timeRange$.subscribe((tr) => setTimeRange(tr ?? undefined));
           return () => sub.unsubscribe();
         }, []);
-
-        const handleFlyoutSave = useCallback(
-          (newEsqlQuery: string | undefined, newTemplate: string | undefined) => {
-            isNewPanel$.next(false);
-            previewHtml$.next(null);
-            applyConfigUpdate({ esqlQuery: newEsqlQuery, template: newTemplate });
-            setGenerationVersion((v) => v + 1);
-            storedReturnFocus?.();
-            storedReturnFocus = undefined;
-          },
-          []
-        );
 
         useEffect(() => {
           const { agentBuilder } = getServices();
@@ -281,83 +355,38 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
 
               template$.next(data.panel_template);
               esqlQuery$.next(data.esql_query);
-              setGenerationVersion((v) => v + 1);
             });
 
           return () => sub.unsubscribe();
         }, []);
 
-        const handleFlyoutClose = useCallback(() => {
-          if (isNewPanel$.getValue() && apiIsPresentationContainer(parentApi)) {
-            parentApi.removePanel(uuid);
-          }
-          isNewPanel$.next(false);
-          previewHtml$.next(null);
-          isFlyoutOpen$.next(false);
-          storedReturnFocus?.();
-          storedReturnFocus = undefined;
-        }, []);
-
-        const handleGenerateWithChat = useCallback(
-          (draftTemplate: string, draftEsqlQuery: string | undefined) => {
-            const { agentBuilder } = getServices();
-            if (!agentBuilder) return;
-            isNewPanel$.next(false);
-            isFlyoutOpen$.next(false);
-            previewHtml$.next(null);
-            agentBuilder.openChat({
-              attachments: [
-                buildCustomContentContextAttachment(
-                  draftTemplate,
-                  draftEsqlQuery,
-                  uuid,
-                  panelTitle ?? undefined
-                ),
-              ],
-              sessionTag: `${CUSTOM_CONTENT_REFINE_SESSION_TAG}-${uuid}`,
-            });
-          },
-          [panelTitle]
-        );
-
-        const handleRunPreview = useCallback((html: string) => previewHtml$.next(html), []);
+        const handleGenerateWithChat = useCallback(() => {
+          const { agentBuilder } = getServices();
+          if (!agentBuilder) return;
+          isRetained = true;
+          if (tracksOverlays(parentApi)) parentApi.clearOverlays();
+          agentBuilder.openChat({
+            attachments: [
+              buildCustomContentContextAttachment('', undefined, uuid, panelTitle ?? undefined),
+            ],
+            sessionTag: `${CUSTOM_CONTENT_REFINE_SESSION_TAG}-${uuid}`,
+          });
+        }, [panelTitle]);
 
         return (
-          <>
-            <CustomContentComponent
-              embeddableId={uuid}
-              esqlQuery={esqlQuery}
-              timeRange={timeRange}
-              generationVersion={generationVersion}
-              savedTemplate={savedTemplate}
-              isApproximate={isApproximate}
-              projectRouting={projectRouting}
-              query={query}
-              filters={filters}
-              previewHtml={previewHtml}
-              onGenerateWithChat={() => handleGenerateWithChat('', undefined)}
-            />
-            {isFlyoutOpen && (
-              <Suspense fallback={null}>
-                <EditCustomContentFlyout
-                  embeddableId={uuid}
-                  esqlQuery={esqlQuery}
-                  template={savedTemplate}
-                  timeRange={timeRange}
-                  isApproximate={isApproximate}
-                  projectRouting={projectRouting}
-                  query={query}
-                  filters={filters}
-                  panelTitle={panelTitle ?? undefined}
-                  isNewPanel={isNewPanel}
-                  onSave={handleFlyoutSave}
-                  onClose={handleFlyoutClose}
-                  onRunPreview={handleRunPreview}
-                  onGenerateWithChat={handleGenerateWithChat}
-                />
-              </Suspense>
-            )}
-          </>
+          <CustomContentComponent
+            embeddableId={uuid}
+            esqlQuery={esqlQuery}
+            timeRange={timeRange}
+            generationVersion={generationVersion}
+            savedTemplate={savedTemplate}
+            isApproximate={isApproximate}
+            projectRouting={projectRouting}
+            query={query}
+            filters={filters}
+            previewHtml={previewHtml}
+            onGenerateWithChat={handleGenerateWithChat}
+          />
         );
       },
     };

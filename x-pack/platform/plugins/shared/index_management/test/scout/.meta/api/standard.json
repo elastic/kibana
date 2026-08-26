@@ -1,5 +1,5 @@
 {
-  "sha1": "429fdb656cabb7fd382b0c8862e55c88d6b63f4e",
+  "sha1": "1fbd8237e9b1615fbf7672ce963504c28b31aca2",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -1992,31 +1992,55 @@
       }
     },
     {
-      "id": "88c84fd03a5b09f-785bc08408d1873",
-      "title": "Snapshot repositories API reports no default repository when none is configured",
+      "id": "c79682d37967bab-049ea69364d9e2b",
+      "title": "Snapshot repositories API (Cloud) reports no default repository when none is configured",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/snapshot_repositories.spec.ts",
-        "line": 29,
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/snapshot_repositories_cloud.spec.ts",
+        "line": 28,
         "column": 5
       }
     },
     {
-      "id": "88c84fd03a5b09f-f0c58092b98020c",
-      "title": "Snapshot repositories API reports the configured default repository",
+      "id": "c79682d37967bab-7e4ca5b47630031",
+      "title": "Snapshot repositories API (Cloud) reports the configured default repository",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/snapshot_repositories.spec.ts",
-        "line": 42,
-        "column": 21
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/snapshot_repositories_cloud.spec.ts",
+        "line": 39,
+        "column": 22
+      }
+    },
+    {
+      "id": "ba15523bdf4e006-c7dc783b449b6df",
+      "title": "Snapshot repositories API (local) reports no default repository when none is configured",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/snapshot_repositories_local.spec.ts",
+        "line": 32,
+        "column": 31
+      }
+    },
+    {
+      "id": "ba15523bdf4e006-80d971c4441c5bc",
+      "title": "Snapshot repositories API (local) reports the configured default repository",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/snapshot_repositories_local.spec.ts",
+        "line": 43,
+        "column": 22
       }
     },
     {

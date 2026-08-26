@@ -191,9 +191,6 @@ enabled:
   - x-pack/platform/test/fleet_tasks/config.ts
   - x-pack/platform/test/ftr_apis/security_and_spaces/config.ts
   - x-pack/platform/test/functional_basic/apps/ml/permissions/config.ts
-  - x-pack/platform/test/functional_basic/apps/ml/data_visualizer/group1/config.ts
-  - x-pack/platform/test/functional_basic/apps/ml/data_visualizer/group2/config.ts
-  - x-pack/platform/test/functional_basic/apps/ml/data_visualizer/group3/config.ts
   - x-pack/platform/test/functional_basic/apps/transform/creation/index_pattern/config.ts
   - x-pack/platform/test/functional_basic/apps/transform/actions/config.ts
   - x-pack/platform/test/functional_basic/apps/transform/edit_clone/config.ts
@@ -247,9 +244,6 @@ enabled:
   - x-pack/platform/test/functional/apps/ml/anomaly_detection_result_views/config.ts
   - x-pack/platform/test/functional/apps/ml/data_frame_analytics/group1/config.ts
   - x-pack/platform/test/functional/apps/ml/data_frame_analytics/group2/config.ts
-  - x-pack/platform/test/functional/apps/ml/data_visualizer/group1/config.ts
-  - x-pack/platform/test/functional/apps/ml/data_visualizer/group2/config.ts
-  - x-pack/platform/test/functional/apps/ml/data_visualizer/group3/config.ts
   - x-pack/platform/test/functional/apps/ml/permissions/config.ts
   - x-pack/platform/test/functional/apps/ml/short_tests/config.ts
   - x-pack/platform/test/functional/apps/ml/stack_management_jobs/config.ts

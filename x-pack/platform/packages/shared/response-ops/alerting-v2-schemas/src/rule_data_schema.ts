@@ -173,7 +173,7 @@ export const esqlQuerySegmentSchema = z
 const composedBreachSchema = z
   .object({
     segment: esqlQuerySegmentSchema.describe(
-      'Appendable ES|QL segment for breach detection (required).'
+      "A clause appended to the end of the rule's ES|QL query. Required in breach blocks."
     ),
   })
   .strict();
@@ -213,23 +213,27 @@ export const composedQuerySchema = z
     base: esqlQuerySchema.describe(
       'Base ES|QL query. Time filters are applied automatically via the lookback window.'
     ),
-    breach: composedBreachSchema.describe('Breach detection configuration (required).'),
+    breach: composedBreachSchema
+      .optional()
+      .describe('Breach detection configuration. Omit to treat every base row as a breach.'),
     recovery: composedRecoverySchema
       .optional()
       .describe('Recovery query segment. Required when recovery_strategy is "query".'),
   })
   .strict()
   .check((ctx) => {
-    const breachError = validateEsqlQuery(
-      composeEsqlQuery(ctx.value.base, ctx.value.breach.segment)
-    );
-    if (breachError) {
-      ctx.issues.push({
-        code: 'custom',
-        path: ['breach', 'segment'],
-        message: breachError,
-        input: ctx.value.breach.segment,
-      });
+    if (ctx.value.breach) {
+      const breachError = validateEsqlQuery(
+        composeEsqlQuery(ctx.value.base, ctx.value.breach.segment)
+      );
+      if (breachError) {
+        ctx.issues.push({
+          code: 'custom',
+          path: ['breach', 'segment'],
+          message: breachError,
+          input: ctx.value.breach.segment,
+        });
+      }
     }
     if (ctx.value.recovery) {
       const recoveryError = validateEsqlQuery(
@@ -273,12 +277,20 @@ export type Query = z.infer<typeof querySchema>;
 /**
  * Returns the effective breach ES|QL query — what the executor actually runs
  * to detect breaches. For composed queries this is `base` concatenated with
- * `breach.segment`; for standalone it's `breach.query` verbatim.
+ * `breach.segment`, or just `base` when there is no segment to append. For
+ * standalone it's `breach.query` verbatim.
+ *
+ * A blank segment is treated the same as an omitted `breach` block: storage
+ * persists conditionless composed rules as an empty segment, so both shapes
+ * reach this function and must produce `base` without a trailing pipe.
  */
-export const getBreachEsqlQuery = (query: Query): string =>
-  query.format === 'composed'
-    ? composeEsqlQuery(query.base, query.breach.segment)
-    : query.breach.query;
+export const getBreachEsqlQuery = (query: Query): string => {
+  if (query.format === 'standalone') {
+    return query.breach.query;
+  }
+  const segment = query.breach?.segment;
+  return segment?.trim() ? composeEsqlQuery(query.base, segment) : query.base;
+};
 
 /**
  * Returns the recovery ES|QL query when `recoveryStrategy` is `'query'`,

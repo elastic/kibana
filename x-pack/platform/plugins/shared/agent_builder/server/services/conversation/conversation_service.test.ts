@@ -8,7 +8,7 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { ConversationOriginType } from '@kbn/agent-builder-common';
-import { getUserFromRequest, isAdminFromRequest } from '../utils';
+import { getUserFromRequest } from '../utils';
 import { createClient } from './client';
 import { ConversationServiceImpl } from './conversation_service';
 
@@ -16,7 +16,6 @@ jest.mock('../utils');
 jest.mock('./client');
 
 const getUserFromRequestMock = getUserFromRequest as jest.MockedFunction<typeof getUserFromRequest>;
-const isAdminFromRequestMock = isAdminFromRequest as jest.MockedFunction<typeof isAdminFromRequest>;
 const createClientMock = createClient as jest.MockedFunction<typeof createClient>;
 
 const request = { headers: {} } as unknown as KibanaRequest;
@@ -42,7 +41,6 @@ describe('ConversationServiceImpl', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     getUserFromRequestMock.mockResolvedValue({ id: 'profile-1', username: 'jane', isAdmin: false });
-    isAdminFromRequestMock.mockResolvedValue(false);
   });
 
   describe('getScopedClient', () => {

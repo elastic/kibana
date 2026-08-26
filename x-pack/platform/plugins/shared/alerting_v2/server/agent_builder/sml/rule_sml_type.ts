@@ -9,10 +9,10 @@ import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server
 import type { SmlTypeDefinition } from '@kbn/agent-builder-sml-plugin/server';
 import {
   RULE_ATTACHMENT_TYPE,
-  RULE_SML_TYPE,
   ruleAttachmentDataSchema,
   getBreachEsqlQuery,
 } from '@kbn/alerting-v2-schemas';
+import { RULE_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
@@ -30,7 +30,7 @@ export const createRuleSmlType = ({
   getInternalRepository,
   getIsAlertingV2Enabled,
 }: CreateRuleSmlTypeOptions): SmlTypeDefinition => ({
-  id: RULE_SML_TYPE,
+  id: RULE_KI_TYPE,
   fetchFrequency: () => '1m',
 
   async *list() {
@@ -77,7 +77,7 @@ export const createRuleSmlType = ({
       const contentParts = [name, description, kind, tags, query].filter(Boolean);
 
       return {
-        type: RULE_SML_TYPE,
+        type: RULE_KI_TYPE,
         title: name,
         content: contentParts.join('\n'),
       };

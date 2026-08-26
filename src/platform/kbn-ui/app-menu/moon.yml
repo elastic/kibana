@@ -18,7 +18,7 @@ project:
   sourceRoot: src/platform/kbn-ui/app-menu
 dependsOn:
   - '@kbn/i18n'
-  - '@kbn/ui-chrome-layout-utils'
+  - '@kbn/ui-chrome-layout'
 tags:
   - shared-browser
   - package

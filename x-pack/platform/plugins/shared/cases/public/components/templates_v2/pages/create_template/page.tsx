@@ -17,6 +17,7 @@ import { useCasesFeatures } from '../../../../common/use_cases_features';
 import { useAvailableCasesOwners } from '../../../app/use_available_owners';
 import { getOwnerDefaultValue } from '../../../create/utils';
 import { useCasesEditTemplateNavigation } from '../../../../common/navigation';
+import { useTemplateCreatedEBT } from '../../../../analytics/templates';
 import { LOCAL_STORAGE_KEYS, SECURITY_SOLUTION_OWNER } from '../../../../../common/constants';
 import { useCasesTemplatesBreadcrumbs } from '../../../use_breadcrumbs';
 import type { TemplateMetadata } from '../../utils/template_metadata';
@@ -46,6 +47,7 @@ export const CreateTemplatePage: FC<CreateTemplatePageProps> = () => {
   const defaultOwnerValue = owner[0] ?? getOwnerDefaultValue(availableOwners);
   const { navigateToCasesEditTemplate } = useCasesEditTemplateNavigation();
   const { isExtractObservablesEnabled } = useCasesFeatures();
+  const reportTemplateCreated = useTemplateCreatedEBT();
 
   // Defaults for a new template mirror toggle visibility: extract observables on only where the
   // solution enables it, sync alerts on only for Security (the toggles are hidden otherwise).
@@ -71,11 +73,14 @@ export const CreateTemplatePage: FC<CreateTemplatePageProps> = () => {
           isEnabled,
         },
       });
+      // Reported after the write resolves, so a rejected save stays silent, and before navigating,
+      // so the report is not racing this component's unmount.
+      reportTemplateCreated({ entryPoint: 'template_editor', creationMode: 'blank' });
       // Stay in the editor after the first save: switch to edit mode for the new template so a
       // subsequent Save updates it instead of creating a duplicate.
       navigateToCasesEditTemplate({ templateId: created.templateId });
     },
-    [defaultOwnerValue, mutateAsync, navigateToCasesEditTemplate]
+    [defaultOwnerValue, mutateAsync, navigateToCasesEditTemplate, reportTemplateCreated]
   );
 
   return (

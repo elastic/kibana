@@ -8,6 +8,7 @@
 import type { BaseMessageLike } from '@langchain/core/messages';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
 import type { SerializedMetadataValue } from '@kbn/agent-builder-common';
+import type { ConversationTemplatesService } from '@kbn/agent-builder-server/runner/conversation_templates_service';
 import {
   getSkillsInstructions,
   getRelevantSkillsPointerInstructions,
@@ -18,10 +19,10 @@ import { attachmentToolsInstructions, renderAttachmentPrompt } from './utils/att
 import { structuredOutputDescription } from './utils/custom_instructions';
 import { formatResearcherActionHistory } from './utils/actions';
 import { getFileSystemInstructions } from './utils/filestore';
+import { getAiIndicesInstructions } from './utils/ai_indices';
 import type { PromptFactoryParams, ResearchAgentPromptRuntimeParams } from './types';
 import { renderVisualizationPrompt } from './utils/visualizations';
 import { renderRenderersPrompt } from './utils/renderers';
-import { getTemplate } from '../../../conversation/templates/registry';
 
 type ResearchAgentPromptParams = PromptFactoryParams & ResearchAgentPromptRuntimeParams;
 
@@ -74,11 +75,12 @@ const renderFieldValue = (value: SerializedMetadataValue | undefined): string =>
   return `**${value}**`;
 };
 
-const getConversationMetadataSection = (
+const getConversationMetadataSection = async (
   templateId: string | undefined,
-  metadata: Record<string, SerializedMetadataValue> | undefined
-): string => {
-  const template = templateId ? getTemplate(templateId) : undefined;
+  metadata: Record<string, SerializedMetadataValue> | undefined,
+  conversationTemplates: ConversationTemplatesService
+): Promise<string> => {
+  const template = templateId ? await conversationTemplates.get(templateId) : undefined;
   if (!template) return '';
 
   const fieldEntries = Object.entries(template.fields);
@@ -108,20 +110,28 @@ ${fieldLines}
 };
 
 const getAgentSystemMessage = async ({
-  configuration: { instructions: customInstructions },
+  configuration: { instructions: customInstructions, aiIndices },
   outputSchema,
   skills,
+  spaceId,
   experimentalFeatures,
   relevantSkillsEnabled,
   capabilities,
   renderers,
   processedConversation,
+  conversationTemplates,
 }: ResearchAgentPromptParams): Promise<string> => {
   const conversationTemplateId = processedConversation.template_id;
   const conversationMetadata = processedConversation.metadata as
     | Record<string, SerializedMetadataValue>
     | undefined;
   const visEnabled = capabilities.visualizations;
+
+  const conversationMetadataSection = await getConversationMetadataSection(
+    conversationTemplateId,
+    conversationMetadata,
+    conversationTemplates
+  );
 
   return cleanPrompt(`You are an expert enterprise AI assistant from Elastic, the company behind Elasticsearch.
 
@@ -187,7 +197,10 @@ ${
     : ''
 }
 
-${getConversationMetadataSection(conversationTemplateId, conversationMetadata)}
+${conversationMetadataSection}
+
+${getAiIndicesInstructions({ enabled: experimentalFeatures.aiIndices, aiIndices, spaceId })}
+
 ## INSTRUCTIONS
 
 ${customInstructions}

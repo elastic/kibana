@@ -89,6 +89,7 @@ function buildScorePayload(event: EvaluationCompleteEvent): IngestScore {
     },
     evaluator: {
       name: evaluationRun.name,
+      ...(evaluationRun.version !== undefined && { version: evaluationRun.version }),
       ...(result?.score !== undefined && { score: result.score }),
       ...(result?.label !== undefined && { label: result.label }),
       ...(result?.explanation !== undefined && { explanation: result.explanation }),
