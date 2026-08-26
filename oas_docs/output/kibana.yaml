@@ -698,7 +698,7 @@ paths:
                   $ref: '#/components/examples/create_webhook_connector_response'
                 createXmattersConnectorResponse:
                   $ref: '#/components/examples/get_connector_response'
-          description: Indicates a successful call.
+          description: Indicates a successful call. Inbound event connectors may include a one-time secrets.ingest_token when credentials are minted.
         '403':
           description: Indicates that this call is forbidden.
       summary: Create a connector
@@ -743,7 +743,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_connector_response'
-          description: Indicates a successful call.
+          description: Indicates a successful call. Inbound event connectors may include a one-time secrets.ingest_token when credentials are minted.
         '403':
           description: Indicates that this call is forbidden.
       summary: Update a connector
