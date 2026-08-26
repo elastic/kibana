@@ -127,7 +127,6 @@ describe('useCaseAttachmentsTotal', () => {
     const { result } = renderHook(() => useCaseAttachmentsTotal({ caseData: basicCase }), {
       wrapper: ({ children }) => (
         <TestProviders
-          features={{ observables: { enabled: true } }}
           license={platinumLicense}
           unifiedAttachmentTypeRegistry={unifiedAttachmentTypeRegistry}
         >
@@ -150,7 +149,6 @@ describe('useCaseAttachmentsTotal', () => {
     const { result } = renderHook(() => useCaseAttachmentsTotal({ caseData: basicCase }), {
       wrapper: ({ children }) => (
         <TestProviders
-          features={{ observables: { enabled: true } }}
           license={basicLicense}
           unifiedAttachmentTypeRegistry={unifiedAttachmentTypeRegistry}
         >
