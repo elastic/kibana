@@ -7,6 +7,7 @@
 
 import type { Entity } from '@kbn/entity-store/common';
 import { MAX_LEADS_PER_RUN } from '../../../../common/entity_analytics/lead_generation/constants';
+import type { LeadOrigin } from '../../../../common/entity_analytics/lead_generation/types';
 
 /**
  * Entity representation flowing through the lead generation pipeline.
@@ -65,12 +66,18 @@ export interface Observation {
   readonly metadata: Record<string, unknown>;
 }
 
+export type PromotionConfidence = 'low' | 'medium' | 'high';
+
 export interface ScoredEntity {
   readonly entity: LeadEntity;
   readonly priority: number;
   readonly observations: Observation[];
   readonly topRelatedEntities: RelatedEntity[];
   readonly relatedEntityCounts: Record<string, number>;
+  readonly origin?: LeadOrigin;
+  // Set only for exploratory candidates surfaced by the promotion LLM call rather than their own score
+  readonly promotionReason?: string;
+  readonly promotionConfidence?: PromotionConfidence;
 }
 
 /** Configuration for an observation module registration. */
@@ -135,6 +142,7 @@ export interface Lead {
   readonly observations: Observation[];
   readonly topRelatedEntities: RelatedEntity[];
   readonly relatedEntityCounts: Record<string, number>;
+  readonly origin: LeadOrigin;
 }
 
 /** Engine configuration. */

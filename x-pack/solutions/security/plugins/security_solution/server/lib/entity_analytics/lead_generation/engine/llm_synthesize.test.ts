@@ -33,7 +33,8 @@ const { llmSynthesizeBatch, __testables } = jest.requireActual('./llm_synthesize
   llmSynthesizeBatch: typeof import('./llm_synthesize').llmSynthesizeBatch;
   __testables: typeof import('./llm_synthesize').__testables;
 };
-const { formatLeadsPayload, formatRiskEscalation, formatRelatedEntities } = __testables;
+const { formatLeadsPayload, formatRiskEscalation, formatRelatedEntities, formatPromotionReason } =
+  __testables;
 
 const createMockEntity = (name: string, type = 'user'): LeadEntity => {
   const id = `${type}:${name}`;
@@ -394,6 +395,46 @@ describe('formatLeadsPayload', () => {
 
     expect(payload).toContain('Related entities:');
     expect(payload).toContain('administers host "web-01"');
+  });
+
+  it('includes the Promotion reason line when the candidate was promoted', () => {
+    const entity: ScoredEntity = {
+      ...createScoredEntity('alice', 2),
+      promotionReason: 'administers a Critical-risk host',
+      promotionConfidence: 'high',
+    };
+
+    const payload = formatLeadsPayload([entity]);
+
+    expect(payload).toContain(
+      'Promotion reason (confidence: high): administers a Critical-risk host'
+    );
+  });
+
+  it('omits the Promotion reason line for a normally-scored candidate', () => {
+    const entities = [createScoredEntity('alice', 8)];
+
+    const payload = formatLeadsPayload(entities);
+
+    expect(payload).not.toContain('Promotion reason');
+  });
+});
+
+describe('formatPromotionReason', () => {
+  it('returns an empty string when the candidate has no promotion reason', () => {
+    expect(formatPromotionReason(createScoredEntity('alice', 8))).toBe('');
+  });
+
+  it('renders the reason with confidence when present', () => {
+    const entity: ScoredEntity = {
+      ...createScoredEntity('alice', 2),
+      promotionReason: 'owns a high-criticality database',
+      promotionConfidence: 'medium',
+    };
+
+    expect(formatPromotionReason(entity)).toBe(
+      '  Promotion reason (confidence: medium): owns a high-criticality database'
+    );
   });
 });
 

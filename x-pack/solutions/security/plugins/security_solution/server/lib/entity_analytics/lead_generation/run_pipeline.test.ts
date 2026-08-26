@@ -44,6 +44,11 @@ jest.mock('./lead_data_client', () => ({
   }),
 }));
 
+const mockBuildExploratoryLeads = jest.fn();
+jest.mock('./exploratory_leads', () => ({
+  buildExploratoryLeads: (...args: unknown[]) => mockBuildExploratoryLeads(...args),
+}));
+
 import { riskScoreDataClientMock } from '../risk_score/risk_score_data_client.mock';
 import { runLeadGenerationPipeline } from './run_pipeline';
 
@@ -77,6 +82,7 @@ describe('runLeadGenerationPipeline', () => {
     mockAttachRelatedEntities.mockImplementation(
       async ({ candidates }: { candidates: unknown[] }) => candidates
     );
+    mockBuildExploratoryLeads.mockResolvedValue([]);
   });
 
   it('returns early when no entities are found', async () => {
@@ -112,7 +118,7 @@ describe('runLeadGenerationPipeline', () => {
       relatedEntityCounts: {},
       contentHash: 'hash-fallback',
     };
-    mockPrepareLeadCandidates.mockResolvedValueOnce([candidate]);
+    mockPrepareLeadCandidates.mockResolvedValueOnce({ confident: [candidate], exploratory: [] });
     mockClassifyLeadCandidates.mockResolvedValueOnce([{ candidate, decision: { type: 'skip' } }]);
 
     await runLeadGenerationPipeline({
@@ -148,7 +154,7 @@ describe('runLeadGenerationPipeline', () => {
       relatedEntityCounts: {},
       contentHash: 'hash-attach-fallback',
     };
-    mockPrepareLeadCandidates.mockResolvedValueOnce([candidate]);
+    mockPrepareLeadCandidates.mockResolvedValueOnce({ confident: [candidate], exploratory: [] });
     mockClassifyLeadCandidates.mockResolvedValueOnce([{ candidate, decision: { type: 'skip' } }]);
 
     await runLeadGenerationPipeline({
@@ -198,7 +204,7 @@ describe('runLeadGenerationPipeline', () => {
       relatedEntityCounts: { communicates_with: 3 },
       contentHash: 'hash-1',
     };
-    mockPrepareLeadCandidates.mockResolvedValueOnce([candidate]);
+    mockPrepareLeadCandidates.mockResolvedValueOnce({ confident: [candidate], exploratory: [] });
     mockClassifyLeadCandidates.mockResolvedValueOnce([
       { candidate, decision: { type: 'refresh', existingId: 'existing-lead' } },
     ]);
@@ -252,7 +258,7 @@ describe('runLeadGenerationPipeline', () => {
       relatedEntityCounts: {},
       contentHash: 'hash-create',
     };
-    mockPrepareLeadCandidates.mockResolvedValueOnce([candidate]);
+    mockPrepareLeadCandidates.mockResolvedValueOnce({ confident: [candidate], exploratory: [] });
     mockClassifyLeadCandidates.mockResolvedValueOnce([{ candidate, decision: { type: 'create' } }]);
 
     const mockLead = {
@@ -338,7 +344,7 @@ describe('runLeadGenerationPipeline', () => {
       relatedEntityCounts: {},
       contentHash: 'hash-new',
     };
-    mockPrepareLeadCandidates.mockResolvedValueOnce([candidate]);
+    mockPrepareLeadCandidates.mockResolvedValueOnce({ confident: [candidate], exploratory: [] });
     mockClassifyLeadCandidates.mockResolvedValueOnce([
       {
         candidate,
@@ -402,7 +408,7 @@ describe('runLeadGenerationPipeline', () => {
       relatedEntityCounts: {},
       contentHash: 'hash-d',
     };
-    mockPrepareLeadCandidates.mockResolvedValueOnce([candidate]);
+    mockPrepareLeadCandidates.mockResolvedValueOnce({ confident: [candidate], exploratory: [] });
     mockClassifyLeadCandidates.mockResolvedValueOnce([{ candidate, decision: { type: 'skip' } }]);
 
     await runLeadGenerationPipeline({
@@ -451,11 +457,10 @@ describe('runLeadGenerationPipeline', () => {
       contentHash: 'hash-resurface',
     };
 
-    mockPrepareLeadCandidates.mockResolvedValueOnce([
-      createCandidate,
-      skipCandidate,
-      resurfaceCandidate,
-    ]);
+    mockPrepareLeadCandidates.mockResolvedValueOnce({
+      confident: [createCandidate, skipCandidate, resurfaceCandidate],
+      exploratory: [],
+    });
     mockClassifyLeadCandidates.mockResolvedValueOnce([
       { candidate: createCandidate, decision: { type: 'create' } },
       { candidate: skipCandidate, decision: { type: 'skip' } },
@@ -498,5 +503,127 @@ describe('runLeadGenerationPipeline', () => {
       failedLeads: 0,
       sourceType: 'scheduled',
     });
+  });
+
+  it('merges an exploratory lead into classify/synthesize alongside confident ones', async () => {
+    const confidentEntity = {
+      record: { entity: { type: 'user', name: 'confident-user', id: 'euid-confident' } },
+      type: 'user',
+      name: 'confident-user',
+      id: 'user:confident',
+    };
+    const exploratoryEntity = {
+      record: { entity: { type: 'host', name: 'exploratory-host', id: 'euid-exploratory' } },
+      type: 'host',
+      name: 'exploratory-host',
+      id: 'host:exploratory',
+    };
+    mockListEntities.mockResolvedValueOnce([confidentEntity, exploratoryEntity]);
+
+    const confidentCandidate = {
+      entity: confidentEntity,
+      priority: 5,
+      observations: [],
+      leadId: hashEuid(confidentEntity.id),
+      topRelatedEntities: [],
+      relatedEntityCounts: {},
+    };
+    const exploratoryCandidate = {
+      entity: exploratoryEntity,
+      priority: 1,
+      observations: [],
+      leadId: hashEuid(exploratoryEntity.id),
+      topRelatedEntities: [],
+      relatedEntityCounts: {},
+    };
+    mockPrepareLeadCandidates.mockResolvedValueOnce({
+      confident: [confidentCandidate],
+      exploratory: [exploratoryCandidate],
+    });
+    mockBuildExploratoryLeads.mockResolvedValueOnce([
+      {
+        ...exploratoryCandidate,
+        promotionReason: 'administers a critical host',
+        promotionConfidence: 'high',
+      },
+    ]);
+    mockClassifyLeadCandidates.mockResolvedValueOnce([
+      { candidate: confidentCandidate, decision: { type: 'create' } },
+      {
+        candidate: {
+          ...exploratoryCandidate,
+          promotionReason: 'administers a critical host',
+          promotionConfidence: 'high',
+        },
+        decision: { type: 'create' },
+      },
+    ]);
+
+    await runLeadGenerationPipeline({
+      ...pipelineParams,
+      sourceType: 'adhoc',
+    });
+
+    expect(mockBuildExploratoryLeads).toHaveBeenCalledWith(
+      [exploratoryCandidate],
+      expect.objectContaining({ chatModel: fakeChatModel })
+    );
+    expect(mockClassifyLeadCandidates).toHaveBeenCalledWith([
+      confidentCandidate,
+      expect.objectContaining({
+        entity: exploratoryEntity,
+        promotionReason: 'administers a critical host',
+        promotionConfidence: 'high',
+      }),
+    ]);
+  });
+
+  it('persists confident leads unaffected when buildExploratoryLeads returns nothing', async () => {
+    const mockEntity = {
+      record: { entity: { type: 'user', name: 'testuser', id: 'euid-testuser' } },
+      type: 'user',
+      name: 'testuser',
+      id: 'user:testuser',
+    };
+    mockListEntities.mockResolvedValueOnce([mockEntity]);
+
+    const candidate = {
+      entity: mockEntity,
+      priority: 5,
+      observations: [],
+      leadId: hashEuid(mockEntity.id),
+      topRelatedEntities: [],
+      relatedEntityCounts: {},
+    };
+    mockPrepareLeadCandidates.mockResolvedValueOnce({ confident: [candidate], exploratory: [] });
+    mockBuildExploratoryLeads.mockResolvedValueOnce([]);
+    mockClassifyLeadCandidates.mockResolvedValueOnce([{ candidate, decision: { type: 'create' } }]);
+    mockSynthesizeLeads.mockResolvedValueOnce([
+      {
+        id: 'lead-1',
+        title: 'Test Lead',
+        byline: '',
+        description: '',
+        entity: mockEntity,
+        tags: [],
+        priority: 5,
+        chatRecommendations: [],
+        timestamp: '2026-03-10T00:00:00.000Z',
+        staleness: 'fresh',
+        observations: [],
+      },
+    ]);
+
+    await runLeadGenerationPipeline({
+      ...pipelineParams,
+      sourceType: 'adhoc',
+    });
+
+    expect(mockClassifyLeadCandidates).toHaveBeenCalledWith([candidate]);
+    expect(mockPersistLeads).toHaveBeenCalledWith(
+      expect.objectContaining({
+        creates: [expect.objectContaining({ id: 'lead-1' })],
+      })
+    );
   });
 });

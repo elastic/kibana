@@ -21,6 +21,11 @@ export type LeadStaleness = z.infer<typeof LeadStalenessEnum>;
 export const LeadSourceTypeEnum = z.enum(['adhoc', 'scheduled']);
 export type LeadSourceType = z.infer<typeof LeadSourceTypeEnum>;
 
+/** Whether a lead qualified from its own observations ('observations') or was
+ *  surfaced by the exploratory-lead LLM promotion call ('exploratory'). */
+export const LeadOriginEnum = z.enum(['observations', 'exploratory']);
+export type LeadOrigin = z.infer<typeof LeadOriginEnum>;
+
 export const ObservationSeverityEnum = z.enum(['low', 'medium', 'high', 'critical']);
 export type ObservationSeverity = z.infer<typeof ObservationSeverityEnum>;
 
@@ -92,6 +97,7 @@ export const leadSchema = z.object({
   relatedEntityCounts: z.record(z.string(), z.number()).default({}),
   executionUuid: z.string().uuid(),
   sourceType: LeadSourceTypeEnum,
+  origin: LeadOriginEnum.default('observations'),
   createdAt: z.string(),
   /**
    * When lead content or status last changed (create, evidence update, dismiss).

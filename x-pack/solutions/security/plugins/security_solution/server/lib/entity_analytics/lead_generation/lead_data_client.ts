@@ -188,6 +188,7 @@ interface EsLeadDoc {
   related_entity_counts: EsRelatedEntityCountDoc[];
   execution_uuid: string;
   source_type: string;
+  origin: string;
   version: number;
   content_hash: string;
 }
@@ -265,6 +266,7 @@ const leadToEsDoc = (
     related_entity_counts: toEsRelatedEntityCounts(lead.relatedEntityCounts),
     execution_uuid: executionId,
     source_type: sourceType,
+    origin: lead.origin,
     version: 1,
     content_hash: computeContentHash({ observations: lead.observations }),
   };
@@ -304,6 +306,7 @@ const esDocToLead = (doc: Record<string, unknown>): Lead => {
     ),
     executionUuid: (doc.execution_uuid as string) ?? '',
     sourceType: (doc.source_type as Lead['sourceType']) ?? 'adhoc',
+    origin: (doc.origin as Lead['origin']) ?? 'observations',
     createdAt: (doc.created_at as string) ?? timestamp,
     changedAt: (doc.changed_at as string) ?? timestamp,
     version: (doc.version as number) ?? 1,
@@ -342,6 +345,7 @@ if (ctx.op == 'create') {
   ctx._source.content_hash = params.content_hash;
   ctx._source.execution_uuid = params.execution_uuid;
   ctx._source.source_type = params.source_type;
+  ctx._source.origin = params.origin;
   ctx._source.status = params.status;
   ctx._source.version = 1;
   ctx._source.timestamp = params.timestamp;
@@ -373,6 +377,7 @@ if (ctx.op == 'create') {
   ctx._source.content_hash = params.content_hash;
   ctx._source.execution_uuid = params.execution_uuid;
   ctx._source.source_type = params.source_type;
+  ctx._source.origin = params.origin;
   ctx._source.status = params.allow_reopen ? params.status : ctx._source.status;
   ctx._source.version = (ctx._source.containsKey('version') ? (int) ctx._source.version : 0) + 1;
   ctx._source.changed_at = now;
