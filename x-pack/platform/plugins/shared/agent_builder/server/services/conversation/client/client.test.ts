@@ -1955,7 +1955,6 @@ describe('ConversationClient', () => {
       expect(onMetadataPatched).not.toHaveBeenCalled();
     });
 
-
     it('does not fire onMetadataPatched when the update throws', async () => {
       const onMetadataPatched = jest.fn();
       mockEsClient.search.mockResolvedValue({
