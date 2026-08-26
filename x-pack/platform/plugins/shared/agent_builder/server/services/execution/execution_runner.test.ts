@@ -16,6 +16,7 @@ import {
   createBadRequestError,
   type ChatEvent,
   type RoundCompleteEvent,
+  type RoundStartedEvent,
 } from '@kbn/agent-builder-common';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { UserAttributes } from '@kbn/inference-tracing';
@@ -359,13 +360,21 @@ describe('handleAgentExecution', () => {
       });
       const conversationClient = createConversationClientMock();
       conversationClient.create.mockResolvedValue(createdConversation);
+      conversationClient.appendEvents.mockResolvedValue(createdConversation);
 
-      executeAgentMock.mockReturnValue(
-        of({
-          type: ChatEventType.roundComplete,
-          data: { round: createRound({}) },
-        } as RoundCompleteEvent)
-      );
+      const roundStartedEvent = {
+        type: ChatEventType.roundStarted,
+        data: {
+          round_id: 'round-1',
+          input: { message: 'Hello' },
+          started_at: '2024-01-01T00:00:00.000Z',
+        },
+      } as RoundStartedEvent;
+      const roundCompleteEvent = {
+        type: ChatEventType.roundComplete,
+        data: { round: createRound({}) },
+      } as RoundCompleteEvent;
+      executeAgentMock.mockReturnValue(of(roundStartedEvent, roundCompleteEvent));
       resolveServicesMock.mockResolvedValue({
         conversationClient,
         selectedConnectorId: 'connector-1',
@@ -396,16 +405,26 @@ describe('handleAgentExecution', () => {
 
     it('persists readOnly on the conversation it creates', async () => {
       const conversationClient = createConversationClientMock();
-      conversationClient.create.mockResolvedValue(
-        createEmptyConversation({ id: 'new-conversation', read_only: true })
-      );
+      const createdConversation = createEmptyConversation({
+        id: 'new-conversation',
+        read_only: true,
+      });
+      conversationClient.create.mockResolvedValue(createdConversation);
+      conversationClient.appendEvents.mockResolvedValue(createdConversation);
 
-      executeAgentMock.mockReturnValue(
-        of({
-          type: ChatEventType.roundComplete,
-          data: { round: createRound({}) },
-        } as RoundCompleteEvent)
-      );
+      const roundStartedEvent = {
+        type: ChatEventType.roundStarted,
+        data: {
+          round_id: 'round-1',
+          input: { message: 'Hello' },
+          started_at: '2024-01-01T00:00:00.000Z',
+        },
+      } as RoundStartedEvent;
+      const roundCompleteEvent = {
+        type: ChatEventType.roundComplete,
+        data: { round: createRound({}) },
+      } as RoundCompleteEvent;
+      executeAgentMock.mockReturnValue(of(roundStartedEvent, roundCompleteEvent));
       resolveServicesMock.mockResolvedValue({
         conversationClient,
         selectedConnectorId: 'connector-1',

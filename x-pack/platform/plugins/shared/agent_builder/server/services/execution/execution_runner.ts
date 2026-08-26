@@ -15,6 +15,9 @@ import {
   EMPTY,
   shareReplay,
   ignoreElements,
+  concat,
+  concatMap,
+  take,
 } from 'rxjs';
 import type { Observable } from 'rxjs';
 import type { Logger } from '@kbn/logging';
@@ -27,10 +30,12 @@ import type { ChatEvent, ConversationAction } from '@kbn/agent-builder-common';
 import {
   agentBuilderDefaultAgentId,
   isRoundCompleteEvent,
+  isRoundStartedEvent,
   isConversationCreatedEvent,
   isAgentBuilderError,
   AgentBuilderErrorCode,
   AgentExecutionMode,
+  ConversationRoundStatus,
   createInternalError,
   normalizeInteractive,
   DEFAULT_CONVERSATION_TITLE,
@@ -56,6 +61,8 @@ import {
   getConversation,
   updateConversation$,
   createConversation$,
+  startConversation$,
+  appendRoundTerminated$,
   resolveServices,
   convertErrors,
   type ConversationWithOperation,
@@ -309,6 +316,7 @@ const handleConversationExecution = async ({
         : EMPTY;
 
       return merge(conversationIdEvent$, agentEvents$, persistenceEvents$, titleAttr$).pipe(
+        filter((event) => !isRoundStartedEvent(event)),
         handleCancellation(abortSignal),
         tap((event) => {
           if (isConversationCreatedEvent(event) && !author) {
@@ -482,6 +490,11 @@ const getHttpStatusFromError = (error: unknown): number | undefined => {
 const conversationNeedsTitle = (conversation: { title?: string }): boolean =>
   !conversation.title || conversation.title === DEFAULT_CONVERSATION_TITLE;
 
+const isPendingResumeConversation = (conversation: ConversationWithOperation): boolean => {
+  const lastRound = conversation.rounds[conversation.rounds.length - 1];
+  return lastRound?.status === ConversationRoundStatus.awaitingPrompt;
+};
+
 const buildPersistenceEvents = ({
   conversation,
   conversationClient,
@@ -496,6 +509,36 @@ const buildPersistenceEvents = ({
   action?: ConversationAction;
 }): Observable<ChatEvent> => {
   const roundCompletedEvents$ = agentEvents$.pipe(filter(isRoundCompleteEvent));
+
+  const isRegenerate = action === 'regenerate';
+  const isResume = isPendingResumeConversation(conversation);
+  const useTwoPhase = !isRegenerate && !isResume;
+
+  if (useTwoPhase) {
+    const roundStartedEvents$ = agentEvents$.pipe(filter(isRoundStartedEvent));
+    const endTitle$ =
+      conversation.operation === 'CREATE' || conversationNeedsTitle(conversation)
+        ? title$
+        : undefined;
+
+    return roundStartedEvents$.pipe(
+      concatMap((startEvent) =>
+        concat(
+          startConversation$({
+            conversation,
+            conversationClient,
+            roundStartedEvents$: of(startEvent),
+          }),
+          appendRoundTerminated$({
+            conversation,
+            conversationClient,
+            roundCompletedEvents$: roundCompletedEvents$.pipe(take(1)),
+            title$: endTitle$,
+          })
+        )
+      )
+    );
+  }
 
   if (conversation.operation === 'CREATE') {
     return createConversation$({
@@ -563,6 +606,7 @@ const handleStandaloneExecution = async ({
   });
 
   return agentEvents$.pipe(
+    filter((event) => !isRoundStartedEvent(event)),
     handleCancellation(abortSignal),
     catchError((err) => {
       logger.error(`Error executing standalone agent: ${err.stack ?? err.message}`);

@@ -21,6 +21,7 @@ import type {
 } from '@kbn/agent-builder-common';
 import { ToolOrigin } from '@kbn/agent-builder-common';
 import {
+  ChatEventType,
   ConversationRoundStatus,
   AgentExecutionMode,
   isToolCallStep,
@@ -430,6 +431,18 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     attachments: [], // legacy attachments are always stripped in `prepare_conversation` and replaced with refs
     attachment_refs: processedConversation.nextInput.attachment_refs,
   };
+
+  manualEvents$.next({
+    type: ChatEventType.roundStarted,
+    data: {
+      round_id: roundId,
+      input: processedInput,
+      started_at: startTime.toISOString(),
+      ...(author ? { author } : {}),
+      ...(origin ? { origin: { type: origin.type } } : {}),
+      ...(pendingRound ? { resumed: true } : {}),
+    },
+  });
 
   // Use provided overrides, or fall back to pending round's overrides (for HITL resume)
   const effectiveOverrides = configurationOverrides ?? pendingRound?.configuration_overrides;

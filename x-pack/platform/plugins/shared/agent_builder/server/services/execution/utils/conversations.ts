@@ -7,21 +7,25 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { Observable } from 'rxjs';
-import { of, forkJoin, switchMap } from 'rxjs';
+import { of, forkJoin, switchMap, from, ignoreElements, firstValueFrom } from 'rxjs';
 import type {
   Conversation,
   ConversationAccessControl,
   ConversationOrigin,
   RoundCompleteEvent,
+  RoundStartedEvent,
   ConversationAction,
   UserIdAndName,
+  ChatEvent,
 } from '@kbn/agent-builder-common';
 import {
   ConversationParentRelation,
+  isConversationAlreadyExistsError,
   normalizeConversationAccessControl,
   DEFAULT_CONVERSATION_TITLE,
 } from '@kbn/agent-builder-common';
 import type { ConversationClient } from '../../conversation';
+import { roundStartEvents, roundTerminatedEvent } from '../../conversation/client/rounds_to_events';
 import { createConversationUpdatedEvent, createConversationCreatedEvent } from './events';
 
 /**
@@ -142,6 +146,144 @@ export const updateConversation$ = ({
     switchMap((updatedConversation) => {
       return of(createConversationUpdatedEvent(updatedConversation));
     })
+  );
+};
+
+export const startConversation$ = ({
+  conversation,
+  conversationClient,
+  roundStartedEvents$,
+}: {
+  conversation: ConversationWithOperation;
+  conversationClient: ConversationClient;
+  roundStartedEvents$: Observable<RoundStartedEvent>;
+}): Observable<ChatEvent> => {
+  return roundStartedEvents$.pipe(
+    switchMap((roundStartedEvent) => {
+      const ensureCreated = async (): Promise<void> => {
+        if (conversation.operation !== 'CREATE') {
+          return;
+        }
+        const isPersistentSubagentCreate = Boolean(conversation.parent_conversation);
+        const hasResolvedParentUser =
+          Boolean(conversation.user) && !isPlaceholderUser(conversation.user);
+        try {
+          await conversationClient.create({
+            id: conversation.id,
+            title: DEFAULT_CONVERSATION_TITLE,
+            agent_id: conversation.agent_id,
+            access_control: conversation.access_control,
+            origin: conversation.origin,
+            read_only: conversation.read_only,
+            rounds: [],
+            ...(isPersistentSubagentCreate && hasResolvedParentUser
+              ? { user: conversation.user }
+              : {}),
+            ...(conversation.parent_conversation
+              ? { parent_conversation: conversation.parent_conversation }
+              : {}),
+          });
+        } catch (error) {
+          // Someone else won the eager-create race; the doc exists, keep going.
+          if (!isConversationAlreadyExistsError(error)) {
+            throw error;
+          }
+        }
+      };
+
+      const appendStart = async (): Promise<void> => {
+        const {
+          round_id: id,
+          input,
+          started_at: startedAt,
+          author: eventAuthor,
+          origin: eventOrigin,
+        } = roundStartedEvent.data;
+        const events = roundStartEvents(
+          {
+            id,
+            input,
+            started_at: startedAt,
+            ...(eventAuthor ? { author: eventAuthor } : {}),
+            ...(eventOrigin ? { origin: eventOrigin } : {}),
+          },
+          conversation
+        );
+        await conversationClient.appendEvents(
+          { id: conversation.id, events },
+          { access: 'converse' }
+        );
+      };
+
+      return from(
+        (async () => {
+          await ensureCreated();
+          await appendStart();
+        })()
+      );
+    }),
+    // Side-effect only; the conversationCreated/Updated event fires at END.
+    ignoreElements()
+  );
+};
+
+export const appendRoundTerminated$ = ({
+  conversation,
+  conversationClient,
+  roundCompletedEvents$,
+  title$,
+}: {
+  conversation: ConversationWithOperation;
+  conversationClient: ConversationClient;
+  roundCompletedEvents$: Observable<RoundCompleteEvent>;
+  /** When provided, its resolved value is persisted as the title alongside the END append. */
+  title$?: Observable<string>;
+}): Observable<ChatEvent> => {
+  return roundCompletedEvents$.pipe(
+    switchMap((roundCompletedEvent) => {
+      return from(
+        (async () => {
+          const {
+            round,
+            conversation_state: conversationState,
+            attachments,
+            workspace_id: workspaceId,
+          } = roundCompletedEvent.data;
+
+          const terminated = roundTerminatedEvent(round, conversation);
+          const events = terminated ? [terminated] : [];
+
+          const resolvedTitle = title$ ? await firstValueFrom(title$) : undefined;
+
+          return conversationClient.appendEvents(
+            {
+              id: conversation.id,
+              events,
+              ...(resolvedTitle !== undefined ? { title: resolvedTitle } : {}),
+              status: round.status,
+              ...(conversationState ? { state: conversationState } : {}),
+              ...(attachments
+                ? {
+                    attachments: {
+                      snapshot: conversation.attachments ?? [],
+                      produced: attachments,
+                    },
+                  }
+                : {}),
+              ...(workspaceId ? { workspaceId } : {}),
+            },
+            { access: 'converse' }
+          );
+        })()
+      );
+    }),
+    switchMap((persistedConversation) =>
+      of(
+        conversation.operation === 'CREATE'
+          ? createConversationCreatedEvent(persistedConversation)
+          : createConversationUpdatedEvent(persistedConversation)
+      )
+    )
   );
 };
 

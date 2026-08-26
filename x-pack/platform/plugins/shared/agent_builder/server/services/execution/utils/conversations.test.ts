@@ -5,19 +5,35 @@
  * 2.0.
  */
 
-import { of } from 'rxjs';
-import type { Conversation, RoundCompleteEvent } from '@kbn/agent-builder-common';
+import { lastValueFrom, of, toArray } from 'rxjs';
+import type { Observable } from 'rxjs';
+import type {
+  ChatEvent,
+  Conversation,
+  ConversationRoundAuthor,
+  RoundCompleteEvent,
+  RoundStartedEvent,
+} from '@kbn/agent-builder-common';
 import {
   ChatEventType,
   ConversationAccessControlMode,
+  ConversationRoundStatus,
+  createConversationAlreadyExistsError,
   createConversationNotFoundError,
+  DEFAULT_CONVERSATION_TITLE,
 } from '@kbn/agent-builder-common';
 import {
   createEmptyConversation,
   createRound,
   createConversationClientMock,
 } from '../../../test_utils';
-import { getConversation, updateConversation$ } from './conversations';
+import type { ConversationWithOperation } from './conversations';
+import {
+  appendRoundTerminated$,
+  getConversation,
+  startConversation$,
+  updateConversation$,
+} from './conversations';
 
 describe('conversations utils', () => {
   describe('getConversation', () => {
@@ -361,6 +377,274 @@ describe('conversations utils', () => {
       const [request] = conversationClient.upsertRound.mock.calls[0];
       expect(request).not.toHaveProperty('rounds');
       expect(request).not.toHaveProperty('title');
+    });
+  });
+
+  describe('startConversation$', () => {
+    /** Minimal factory that mirrors what `run_chat_agent` emits at roundStart. */
+    const makeStartEvent = (parts: Partial<RoundStartedEvent['data']> = {}): RoundStartedEvent => ({
+      type: ChatEventType.roundStarted,
+      data: {
+        round_id: 'round-1',
+        input: { message: 'hi' },
+        started_at: '2024-01-01T00:00:00.000Z',
+        ...parts,
+      },
+    });
+
+    const withOperation = (
+      conversation: Conversation,
+      operation: 'CREATE' | 'UPDATE'
+    ): ConversationWithOperation => ({ ...conversation, operation });
+
+    const runStart = async ({
+      conversation,
+      conversationClient,
+      startEvent,
+    }: {
+      conversation: ConversationWithOperation;
+      conversationClient: ReturnType<typeof createConversationClientMock>;
+      startEvent: RoundStartedEvent;
+    }) => {
+      conversationClient.appendEvents.mockResolvedValue(conversation);
+      const events$ = startConversation$({
+        conversation,
+        conversationClient,
+        roundStartedEvents$: of(startEvent),
+      });
+      await lastValueFrom(events$, { defaultValue: undefined });
+    };
+
+    it('creates the doc with a placeholder title then appends the two start events for a CREATE', async () => {
+      const conversationClient = createConversationClientMock();
+      const conversation = withOperation(
+        createEmptyConversation({ id: 'conv-1', agent_id: 'agent-1' }),
+        'CREATE'
+      );
+      const author: ConversationRoundAuthor = { id: 'u1', username: 'u1' };
+
+      await runStart({
+        conversation,
+        conversationClient,
+        startEvent: makeStartEvent({
+          round_id: 'round-1',
+          input: { message: 'hi' },
+          started_at: '2024-01-01T00:00:00.000Z',
+          author,
+        }),
+      });
+
+      expect(conversationClient.create).toHaveBeenCalledTimes(1);
+      const [createArgs] = conversationClient.create.mock.calls[0];
+      expect(createArgs.id).toBe('conv-1');
+      expect(createArgs.title).toBe(DEFAULT_CONVERSATION_TITLE);
+      expect(createArgs.rounds).toEqual([]);
+
+      expect(conversationClient.appendEvents).toHaveBeenCalledTimes(1);
+      const [appendArgs] = conversationClient.appendEvents.mock.calls[0];
+      expect(appendArgs.id).toBe('conv-1');
+      const startEvents = appendArgs.events;
+      expect(startEvents).toHaveLength(2);
+      expect(startEvents[0]).toMatchObject({
+        id: 'round-1::user_message',
+        type: 'user_message',
+      });
+      expect(startEvents[1]).toMatchObject({
+        id: 'round-1::execution_started',
+        type: 'execution_started',
+        execution_id: 'round-1::execution',
+      });
+    });
+
+    it('skips create for UPDATE but still appends the start events', async () => {
+      const conversationClient = createConversationClientMock();
+      const conversation = withOperation(createEmptyConversation({ id: 'conv-1' }), 'UPDATE');
+
+      await runStart({
+        conversation,
+        conversationClient,
+        startEvent: makeStartEvent(),
+      });
+
+      expect(conversationClient.create).not.toHaveBeenCalled();
+      expect(conversationClient.appendEvents).toHaveBeenCalledTimes(1);
+    });
+
+    it('swallows conversationAlreadyExists on CREATE (race with another writer) and still appends', async () => {
+      const conversationClient = createConversationClientMock();
+      const conversation = withOperation(createEmptyConversation({ id: 'conv-1' }), 'CREATE');
+      conversationClient.create.mockRejectedValueOnce(
+        createConversationAlreadyExistsError({ conversationId: 'conv-1' })
+      );
+
+      await runStart({
+        conversation,
+        conversationClient,
+        startEvent: makeStartEvent(),
+      });
+
+      expect(conversationClient.appendEvents).toHaveBeenCalledTimes(1);
+    });
+
+    it('propagates unexpected create errors', async () => {
+      const conversationClient = createConversationClientMock();
+      const conversation = withOperation(createEmptyConversation({ id: 'conv-1' }), 'CREATE');
+      const boom = new Error('boom');
+      conversationClient.create.mockRejectedValueOnce(boom);
+
+      const events$ = startConversation$({
+        conversation,
+        conversationClient,
+        roundStartedEvents$: of(makeStartEvent()),
+      });
+      await expect(lastValueFrom(events$, { defaultValue: undefined })).rejects.toBe(boom);
+      expect(conversationClient.appendEvents).not.toHaveBeenCalled();
+    });
+
+    it('emits no chat events itself (side effects only)', async () => {
+      const conversationClient = createConversationClientMock();
+      const conversation = withOperation(createEmptyConversation({ id: 'c' }), 'UPDATE');
+      conversationClient.appendEvents.mockResolvedValue(conversation);
+
+      const emitted = await lastValueFrom(
+        startConversation$({
+          conversation,
+          conversationClient,
+          roundStartedEvents$: of(makeStartEvent()),
+        }).pipe(toArray())
+      );
+      expect(emitted).toEqual([]);
+    });
+  });
+
+  describe('appendRoundTerminated$', () => {
+    const withOperation = (
+      conversation: Conversation,
+      operation: 'CREATE' | 'UPDATE'
+    ): ConversationWithOperation => ({ ...conversation, operation });
+
+    const runEnd = async ({
+      conversation,
+      conversationClient,
+      roundCompleteEvent,
+      title$,
+    }: {
+      conversation: ConversationWithOperation;
+      conversationClient: ReturnType<typeof createConversationClientMock>;
+      roundCompleteEvent: RoundCompleteEvent;
+      title$?: Observable<string>;
+    }): Promise<ChatEvent[]> => {
+      conversationClient.appendEvents.mockResolvedValue(conversation);
+      return lastValueFrom(
+        appendRoundTerminated$({
+          conversation,
+          conversationClient,
+          roundCompletedEvents$: of(roundCompleteEvent),
+          ...(title$ ? { title$ } : {}),
+        }).pipe(toArray())
+      );
+    };
+
+    it('appends the execution_terminated event and folds title + status into the same write for CREATE', async () => {
+      const conversationClient = createConversationClientMock();
+      const conversation = withOperation(createEmptyConversation({ id: 'conv-1' }), 'CREATE');
+      const round = createRound({
+        id: 'round-1',
+        status: ConversationRoundStatus.completed,
+        started_at: '2024-01-01T00:00:00.000Z',
+        time_to_last_token: 1000,
+      });
+
+      const emitted = await runEnd({
+        conversation,
+        conversationClient,
+        roundCompleteEvent: {
+          type: ChatEventType.roundComplete,
+          data: { round, resumed: false },
+        },
+        title$: of('Generated title'),
+      });
+
+      expect(conversationClient.appendEvents).toHaveBeenCalledTimes(1);
+      const [args] = conversationClient.appendEvents.mock.calls[0];
+      expect(args.id).toBe('conv-1');
+      expect(args.title).toBe('Generated title');
+      expect(args.status).toBe(ConversationRoundStatus.completed);
+      expect(args.events).toHaveLength(1);
+      expect(args.events[0]).toMatchObject({
+        id: 'round-1::execution_terminated',
+        type: 'execution_terminated',
+        execution_id: 'round-1::execution',
+      });
+
+      expect(emitted).toHaveLength(1);
+      expect(emitted[0].type).toBe(ChatEventType.conversationCreated);
+    });
+
+    it('emits conversationUpdated for UPDATE', async () => {
+      const conversationClient = createConversationClientMock();
+      const conversation = withOperation(createEmptyConversation({ id: 'c' }), 'UPDATE');
+      const round = createRound({ id: 'r', status: ConversationRoundStatus.completed });
+
+      const emitted = await runEnd({
+        conversation,
+        conversationClient,
+        roundCompleteEvent: {
+          type: ChatEventType.roundComplete,
+          data: { round, resumed: false },
+        },
+      });
+
+      expect(emitted).toHaveLength(1);
+      expect(emitted[0].type).toBe(ChatEventType.conversationUpdated);
+    });
+
+    it('omits title when no title$ is provided', async () => {
+      const conversationClient = createConversationClientMock();
+      const conversation = withOperation(createEmptyConversation({ id: 'c' }), 'UPDATE');
+      const round = createRound({ id: 'r', status: ConversationRoundStatus.completed });
+
+      await runEnd({
+        conversation,
+        conversationClient,
+        roundCompleteEvent: {
+          type: ChatEventType.roundComplete,
+          data: { round, resumed: false },
+        },
+      });
+
+      const [args] = conversationClient.appendEvents.mock.calls[0];
+      expect(args).not.toHaveProperty('title');
+    });
+
+    it('reconciles attachments against the stored snapshot when the round produced attachments', async () => {
+      const conversationClient = createConversationClientMock();
+      const existingAttachment = { id: 'a', version: 1 } as any;
+      const producedAttachment = { id: 'b', version: 1 } as any;
+      const conversation = withOperation(
+        createEmptyConversation({ id: 'c', attachments: [existingAttachment] }),
+        'UPDATE'
+      );
+      const round = createRound({ id: 'r', status: ConversationRoundStatus.completed });
+
+      await runEnd({
+        conversation,
+        conversationClient,
+        roundCompleteEvent: {
+          type: ChatEventType.roundComplete,
+          data: {
+            round,
+            resumed: false,
+            attachments: [producedAttachment],
+          },
+        },
+      });
+
+      const [args] = conversationClient.appendEvents.mock.calls[0];
+      expect(args.attachments).toEqual({
+        snapshot: [existingAttachment],
+        produced: [producedAttachment],
+      });
     });
   });
 });
