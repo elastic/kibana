@@ -260,6 +260,79 @@ describe('AgentExecutionService', () => {
       expect(mockExecutionClient.create).not.toHaveBeenCalled();
     });
 
+    // #region experimental-image-attachments
+    describe('image attachment feature flag', () => {
+      const imageAttachment = {
+        type: 'image',
+        data: { file_id: 'f1', name: 'a.png', mime_type: 'image/png' },
+      };
+
+      const mockExperimentalFeaturesSetting = (enabled: boolean) => {
+        (uiSettings.asScopedToClient as jest.Mock).mockReturnValue({
+          get: jest.fn().mockResolvedValue(enabled),
+        });
+      };
+
+      it('rejects image attachments when the experimental features setting is off', async () => {
+        mockExperimentalFeaturesSetting(false);
+        const request = httpServerMock.createKibanaRequest();
+
+        await expect(
+          service.executeAgent({
+            mode: AgentExecutionMode.conversation,
+            request,
+            params: {
+              agentId: 'agent-1',
+              nextInput: { message: 'hello', attachments: [imageAttachment] },
+            },
+          })
+        ).rejects.toThrow(/Image attachments are disabled/);
+
+        expect(attachmentsService.validate).not.toHaveBeenCalled();
+        expect(mockExecutionClient.create).not.toHaveBeenCalled();
+      });
+
+      it('accepts image attachments when the experimental features setting is on', async () => {
+        mockExperimentalFeaturesSetting(true);
+        (attachmentsService.validate as jest.Mock).mockResolvedValue({
+          valid: true,
+          attachment: { ...imageAttachment, id: 'att-1' },
+        });
+        const request = httpServerMock.createKibanaRequest();
+
+        await service.executeAgent({
+          mode: AgentExecutionMode.conversation,
+          request,
+          params: {
+            agentId: 'agent-1',
+            nextInput: { message: 'hello', attachments: [imageAttachment] },
+          },
+        });
+
+        expect(attachmentsService.validate).toHaveBeenCalledTimes(1);
+        expect(mockExecutionClient.create).toHaveBeenCalled();
+      });
+
+      it('does not read the experimental setting when no image attachments are present', async () => {
+        const request = httpServerMock.createKibanaRequest();
+
+        await service.executeAgent({
+          mode: AgentExecutionMode.conversation,
+          request,
+          params: {
+            agentId: 'agent-1',
+            nextInput: {
+              message: 'hello',
+              attachments: [{ type: 'some_type', data: { foo: 'bar' } }],
+            },
+          },
+        });
+
+        expect(uiSettings.asScopedToClient).not.toHaveBeenCalled();
+      });
+    });
+    // #endregion experimental-image-attachments
+
     it('should return a live observable that emits events from the agent stream', async () => {
       const request = httpServerMock.createKibanaRequest();
       const eventsSubject = new Subject<ChatEvent>();

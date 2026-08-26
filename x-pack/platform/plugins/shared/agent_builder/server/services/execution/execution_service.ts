@@ -20,6 +20,10 @@ import {
   normalizeInteractive,
 } from '@kbn/agent-builder-common';
 import type { Attachment, AttachmentInput } from '@kbn/agent-builder-common/attachments';
+// #region experimental-image-attachments
+import { AttachmentType } from '@kbn/agent-builder-common/attachments';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+// #endregion experimental-image-attachments
 import type {
   AgentExecutionService,
   AgentExecution,
@@ -394,6 +398,26 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     });
   }
 
+  // #region experimental-image-attachments
+  private async assertImageAttachmentsEnabled(
+    attachments: AttachmentInput[],
+    request: KibanaRequest
+  ): Promise<void> {
+    if (!attachments.some((a) => a.type === AttachmentType.image)) {
+      return;
+    }
+    const enabled = await this.deps.uiSettings
+      .asScopedToClient(this.deps.savedObjects.getScopedClient(request))
+      .get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID)
+      .catch(() => false);
+    if (!enabled) {
+      throw createBadRequestError(
+        'Image attachments are an experimental feature. Turn on experimental features for Agent Builder to use them.'
+      );
+    }
+  }
+  // #endregion experimental-image-attachments
+
   private async validateAttachmentsIfProvided(
     attachments: AttachmentInput[] | undefined,
     request: KibanaRequest
@@ -401,6 +425,10 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     if (!attachments || attachments.length === 0) {
       return undefined;
     }
+
+    // #region experimental-image-attachments
+    await this.assertImageAttachmentsEnabled(attachments, request);
+    // #endregion experimental-image-attachments
 
     const validated: AttachmentInput[] = [];
     for (const attachment of attachments) {
