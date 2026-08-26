@@ -1,0 +1,5 @@
+{
+  "name": "@langchain/aws",
+  "reason": "@langchain/aws is scheduled for removal. Do not add new imports at this time.",
+  "allowed": ["x-pack/platform/packages/shared/kbn-langchain/**"]
+}

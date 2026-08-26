@@ -1121,6 +1121,8 @@
       "@kbn/dependency-injection-example-plugin/*": ["./examples/dependency_injection/*"],
       "@kbn/dependency-ownership": ["./packages/kbn-dependency-ownership"],
       "@kbn/dependency-ownership/*": ["./packages/kbn-dependency-ownership/*"],
+      "@kbn/dependency-quarantine": ["./packages/kbn-dependency-quarantine"],
+      "@kbn/dependency-quarantine/*": ["./packages/kbn-dependency-quarantine/*"],
       "@kbn/dependency-usage": ["./packages/kbn-dependency-usage"],
       "@kbn/dependency-usage/*": ["./packages/kbn-dependency-usage/*"],
       "@kbn/design-tools": ["./src/platform/packages/shared/kbn-design-tools"],

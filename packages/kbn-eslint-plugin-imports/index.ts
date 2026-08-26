@@ -20,6 +20,7 @@ import { NoDirectHandlebarsImportRule } from './src/rules/no_direct_handlebars_i
 import { NoDirectMonacoImportRule } from './src/rules/no_direct_monaco_import';
 import { NoUndeclaredPluginTargetRule } from './src/rules/no_undeclared_plugin_target';
 import { NoReduxToolkitV2ImportsRule } from './src/rules/no_redux_toolkit_v2_imports';
+import { NoQuarantinedImportsRule } from './src/rules/no_quarantined_imports';
 
 /**
  * Custom ESLint rules, add `'@kbn/eslint-plugin-imports'` to your eslint config to use them
@@ -38,4 +39,5 @@ export const rules = {
   no_direct_monaco_import: NoDirectMonacoImportRule,
   no_undeclared_plugin_target: NoUndeclaredPluginTargetRule,
   no_redux_toolkit_v2_imports: NoReduxToolkitV2ImportsRule,
+  no_quarantined_imports: NoQuarantinedImportsRule,
 };

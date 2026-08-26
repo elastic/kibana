@@ -132,6 +132,16 @@ Status: [approved/rejected]
 Using an existing dependency is typically preferred over adding a new one.
 Please consult with the owning team before using an existing dependency, as they may have specific guidelines or concerns about its use.
 
+## Quarantining existing dependencies
+
+Some dependencies are **quarantined**: existing usage can remain, but new imports are forbidden while we work toward removal.
+
+Allowlists live in [`packages/kbn-dependency-quarantine/configs/`](https://github.com/elastic/kibana/tree/main/packages/kbn-dependency-quarantine/configs). Each file lists a package name, a reason, and glob paths that can still import it (including subpaths). Empty `allowed` means fully banned.
+
+Enforcement is the ESLint rule `@kbn/imports/no_quarantined_imports` (`eslint-disable` comments do not apply to this rule).
+
+To add a new use of a quarantined package, add a file or glob to the relevant config and request review from `@elastic/kibana-security`. Internal `@kbn/*` packages can be quarantined the same way as npm packages.
+
 ## Dependency ownership
 
 All dependencies must be owned by at least one team. This team is responsible for ensuring the dependency is kept up to date, and for addressing any issues that arise with the dependency.

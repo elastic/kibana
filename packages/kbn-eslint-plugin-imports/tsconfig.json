@@ -16,6 +16,7 @@
     "@kbn/repo-info",
     "@kbn/repo-packages",
     "@kbn/projects-solutions-groups",
+    "@kbn/dependency-quarantine",
   ],
   "exclude": [
     "target/**/*",
