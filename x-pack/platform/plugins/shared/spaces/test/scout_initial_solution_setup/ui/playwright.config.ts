@@ -7,7 +7,12 @@
 
 import { createPlaywrightConfig } from '@kbn/scout';
 
-export default createPlaywrightConfig({
+const config = createPlaywrightConfig({
   testDir: './tests',
   workers: 1,
 });
+
+// Setup is a one-way server mutation, so retries cannot start from the required fresh state.
+config.retries = 0;
+
+export default config;

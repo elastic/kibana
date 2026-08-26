@@ -14,6 +14,9 @@ const GET_SETUP_PATH = 'internal/spaces/_initial_solution_setup';
 const COMPLETE_SETUP_PATH = 'internal/spaces/_complete_initial_solution_setup';
 
 apiTest.describe('Initial solution setup API', { tag: tags.stateful.classic }, () => {
+  // Setup is a one-way, cluster-wide transition. The API and UI suites use separate Scout
+  // config sets to get fresh servers; a retry cannot restore state after completion.
+
   let adminCookieHeader: Record<string, string>;
   let viewerCookieHeader: Record<string, string>;
 

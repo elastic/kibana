@@ -101,6 +101,7 @@ fileGroups:
     - test/scout/**/*
     - test/scout_cps_local/**/*
     - test/scout_initial_solution_setup/**/*
+    - test/scout_initial_solution_setup_api/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js
