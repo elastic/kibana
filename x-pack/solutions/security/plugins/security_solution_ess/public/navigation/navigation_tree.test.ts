@@ -35,32 +35,30 @@ describe('createNavigationTree', () => {
     return services;
   };
 
-  it('always includes context engine below the home link in classic chat experience', () => {
+  it('always includes context engine first in classic chat experience', () => {
     const { body } = createNavigationTree(
       createServices(),
       AIChatExperience.Classic
     ) as NavigationTreeDefinition;
 
-    const homeIndex = body.findIndex((item) => item.id === 'security_solution_home');
     const contextEngineIndex = body.findIndex((item) => item.link === 'context_engine');
     const agentBuilderNode = body.find((item) => item.link === 'agent_builder');
 
     expect(body[contextEngineIndex]).toMatchObject({ icon: 'sparkles', link: 'context_engine' });
-    expect(contextEngineIndex).toBe(homeIndex + 1);
+    expect(contextEngineIndex).toBe(0);
     expect(agentBuilderNode).toBeUndefined();
   });
 
-  it('keeps context engine in a static position when agent builder nav is in the middle', () => {
+  it('keeps context engine first when agent builder nav is in the middle', () => {
     const { body } = createNavigationTree(
       createServices({ agentBuilderNavAtTop: false }),
       AIChatExperience.Agent
     ) as NavigationTreeDefinition;
 
-    const homeIndex = body.findIndex((item) => item.id === 'security_solution_home');
     const contextEngineIndex = body.findIndex((item) => item.link === 'context_engine');
     const agentBuilderIndex = body.findIndex((item) => item.link === 'agent_builder');
 
-    expect(contextEngineIndex).toBe(homeIndex + 1);
+    expect(contextEngineIndex).toBe(0);
     expect(agentBuilderIndex).toBeGreaterThan(contextEngineIndex);
   });
 
@@ -70,11 +68,10 @@ describe('createNavigationTree', () => {
       AIChatExperience.Agent
     ) as NavigationTreeDefinition;
 
-    const homeIndex = body.findIndex((item) => item.id === 'security_solution_home');
     const agentBuilderIndex = body.findIndex((item) => item.link === 'agent_builder');
     const contextEngineIndex = body.findIndex((item) => item.link === 'context_engine');
 
-    expect(agentBuilderIndex).toBe(homeIndex + 1);
-    expect(contextEngineIndex).toBe(agentBuilderIndex + 1);
+    expect(agentBuilderIndex).toBe(0);
+    expect(contextEngineIndex).toBe(1);
   });
 });

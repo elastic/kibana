@@ -38,7 +38,7 @@ describe('Navigation Tree', () => {
     expect(body.length).toBeGreaterThan(0);
     const homeNode = body[0];
     expect(homeNode).toMatchObject({
-      title: 'Home',
+      title: 'Overview',
       icon: 'home',
       link: 'observability-overview',
     });
@@ -93,6 +93,11 @@ describe('Navigation Tree', () => {
         },
       ])
     );
+    expect(navigation.body[0]).toMatchObject({
+      title: 'Get started',
+      icon: 'rocket',
+      link: 'observabilityOnboarding',
+    });
   });
 
   it('shows AI Assistant and hides Agents when AI Assistant is enabled', () => {
