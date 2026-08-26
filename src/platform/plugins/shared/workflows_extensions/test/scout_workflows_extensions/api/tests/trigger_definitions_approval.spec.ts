@@ -13,6 +13,17 @@ import { expect } from '@kbn/scout/api';
 import { APPROVED_TRIGGER_DEFINITIONS } from '../fixtures/approved_trigger_definitions';
 import { COMMON_HEADERS } from '../fixtures/constants';
 
+const EXPECTED_SECURITY_TRIGGER_IDS = [
+  'security.alertAssigneesChanged',
+  'security.alertStatusChanged',
+  'security.alertTagsChanged',
+  'security.attackAssigneesChanged',
+  'security.attackStatusChanged',
+  'security.attackTagsChanged',
+  'security.noteCreated',
+  'security.noteUpdated',
+];
+
 apiTest.describe(
   'Workflows Extensions - Event-Driven Trigger Definitions Approval',
   {
@@ -52,6 +63,16 @@ apiTest.describe(
           expect(approvedTrigger?.schemaHash, {
             message: `Trigger "${trigger.id}" has an invalid schema hash`,
           }).toBe(trigger.schemaHash);
+        }
+
+        // Reverse direction: every expected Security trigger must be registered.
+        const registeredIds = new Set(
+          (response.body.triggers as Array<{ id: string }>).map((t) => t.id)
+        );
+        for (const expectedId of EXPECTED_SECURITY_TRIGGER_IDS) {
+          expect(registeredIds.has(expectedId), {
+            message: `Security trigger "${expectedId}" is missing from the registered list`,
+          }).toBe(true);
         }
       }
     );

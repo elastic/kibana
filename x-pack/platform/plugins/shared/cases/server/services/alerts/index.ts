@@ -131,16 +131,31 @@ export class AlertService {
   }
 
   private static parseWorkflowStatus(source: unknown): STATUS_VALUES | undefined {
-    const rawStatus =
-      typeof source === 'object' && source !== null
-        ? (source as Record<string, unknown>)[ALERT_WORKFLOW_STATUS]
-        : undefined;
-    return rawStatus === 'open' ||
-      rawStatus === 'acknowledged' ||
-      rawStatus === 'in-progress' ||
-      rawStatus === 'closed'
-      ? rawStatus
-      : undefined;
+    if (typeof source !== 'object' || source === null) return undefined;
+    const s = source as Record<string, unknown>;
+    const modern = s[ALERT_WORKFLOW_STATUS];
+    if (
+      modern === 'open' ||
+      modern === 'acknowledged' ||
+      modern === 'in-progress' ||
+      modern === 'closed'
+    ) {
+      return modern;
+    }
+    // Legacy .siem-signals documents only have signal.status; use it as a fallback.
+    const signal = s.signal;
+    if (typeof signal === 'object' && signal !== null) {
+      const legacy = (signal as Record<string, unknown>).status;
+      if (
+        legacy === 'open' ||
+        legacy === 'acknowledged' ||
+        legacy === 'in-progress' ||
+        legacy === 'closed'
+      ) {
+        return legacy as STATUS_VALUES;
+      }
+    }
+    return undefined;
   }
 
   private async prefetchPreviousStatuses(
@@ -155,7 +170,7 @@ export class AlertService {
     if (docs.length === 0) return new Map();
     const response = await this.scopedClusterClient.mget({
       docs,
-      _source_includes: [ALERT_WORKFLOW_STATUS],
+      _source_includes: [ALERT_WORKFLOW_STATUS, 'signal.status'],
     });
     const result = new Map<string, STATUS_VALUES>();
     for (const doc of response.docs) {

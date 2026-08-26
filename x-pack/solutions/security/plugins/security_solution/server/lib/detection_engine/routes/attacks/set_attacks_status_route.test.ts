@@ -39,7 +39,7 @@ const ADHOC_INDEX = `${ATTACK_DISCOVERY_ADHOC_ALERTS_COMMON_INDEX_PREFIX}-defaul
 const DETECTION_ALERTS_INDEX = '.alerts-security.alerts-default';
 
 const getSearchResponse = (
-  hits: Array<{ _id: string; alertIds?: string[] }>
+  hits: Array<{ _id: string; alertIds?: string[]; workflowStatus?: string }>
 ): estypes.SearchResponse<unknown> => ({
   took: 1,
   timed_out: false,
@@ -47,10 +47,13 @@ const getSearchResponse = (
   hits: {
     total: { value: hits.length, relation: 'eq' },
     max_score: 0,
-    hits: hits.map(({ _id, alertIds }) => ({
+    hits: hits.map(({ _id, alertIds, workflowStatus }) => ({
       _id,
       _index: SCHEDULED_INDEX,
-      _source: alertIds === undefined ? {} : { [ALERT_ATTACK_DISCOVERY_ALERT_IDS]: alertIds },
+      _source: {
+        ...(alertIds !== undefined ? { [ALERT_ATTACK_DISCOVERY_ALERT_IDS]: alertIds } : {}),
+        ...(workflowStatus !== undefined ? { [ALERT_WORKFLOW_STATUS]: workflowStatus } : {}),
+      },
     })),
   },
 });
@@ -429,6 +432,17 @@ describe('set attacks workflow status', () => {
     });
 
     describe('non-cascade', () => {
+      beforeEach(() => {
+        // prefetchPreviousStatusesByIds uses esClient.search; provide previous statuses
+        // that differ from the target 'acknowledged' so the emit fires.
+        context.core.elasticsearch.client.asCurrentUser.search.mockResponseOnce(
+          getSearchResponse([
+            { _id: 'attack1', workflowStatus: 'open' },
+            { _id: 'attack2', workflowStatus: 'open' },
+          ])
+        );
+      });
+
       test('emits attackStatusChanged after updating attack status', async () => {
         await server.inject(getRequest(defaultBody), requestContextMock.convertContext(context));
         await new Promise((r) => setTimeout(r, 0));
@@ -446,8 +460,18 @@ describe('set attacks workflow status', () => {
 
     describe('cascade', () => {
       beforeEach(() => {
-        context.core.elasticsearch.client.asCurrentUser.search.mockResponse(
-          getSearchResponse([{ _id: 'attack1', alertIds: ['alertA', 'alertB'] }])
+        // First search: searchAlerts — returns attack doc with related alert IDs and previous status
+        context.core.elasticsearch.client.asCurrentUser.search.mockResponseOnce(
+          getSearchResponse([
+            { _id: 'attack1', alertIds: ['alertA', 'alertB'], workflowStatus: 'open' },
+          ])
+        );
+        // Second search: prefetchPreviousStatusesByIds for related alerts
+        context.core.elasticsearch.client.asCurrentUser.search.mockResponseOnce(
+          getSearchResponse([
+            { _id: 'alertA', workflowStatus: 'open' },
+            { _id: 'alertB', workflowStatus: 'open' },
+          ])
         );
       });
 

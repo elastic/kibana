@@ -26,8 +26,17 @@ const isWorkflowStatus = (v: unknown): v is WorkflowStatus =>
   typeof v === 'string' && (WORKFLOW_STATUS_VALUES as readonly string[]).includes(v);
 
 export const extractWorkflowStatus = (source: unknown): WorkflowStatus | undefined => {
-  const v = (source as Record<string, unknown> | null | undefined)?.[ALERT_WORKFLOW_STATUS];
-  return isWorkflowStatus(v) ? v : undefined;
+  if (typeof source !== 'object' || source === null) return undefined;
+  const s = source as Record<string, unknown>;
+  const modern = s[ALERT_WORKFLOW_STATUS];
+  if (isWorkflowStatus(modern)) return modern;
+  // Legacy .siem-signals documents only have signal.status; use it as a fallback.
+  const signal = s.signal;
+  if (typeof signal === 'object' && signal !== null) {
+    const legacy = (signal as Record<string, unknown>).status;
+    if (isWorkflowStatus(legacy)) return legacy;
+  }
+  return undefined;
 };
 
 export const prefetchPreviousStatusesByIds = async (
@@ -42,7 +51,7 @@ export const prefetchPreviousStatusesByIds = async (
   const searchResponse = await esClient.search({
     index: resolveIndex(index),
     query: { ids: { values: cappedIds } },
-    _source_includes: [ALERT_WORKFLOW_STATUS],
+    _source_includes: [ALERT_WORKFLOW_STATUS, 'signal.status'],
     size: cappedIds.length,
     ignore_unavailable: true,
   });
@@ -98,7 +107,7 @@ export const prefetchPreviousStatusesByQuery = async (
   const searchResponse = await esClient.search({
     index: resolveIndex(index),
     query: { bool: { filter: query } },
-    _source_includes: [ALERT_WORKFLOW_STATUS],
+    _source_includes: [ALERT_WORKFLOW_STATUS, 'signal.status'],
     size: MAX_ALERTS_PER_TRIGGER,
     track_total_hits: MAX_ALERTS_PER_TRIGGER + 1,
     ignore_unavailable: true,

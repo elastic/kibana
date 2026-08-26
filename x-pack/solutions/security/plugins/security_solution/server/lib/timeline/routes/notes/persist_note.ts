@@ -61,7 +61,10 @@ export const persistNoteRoute = (
             overrideOwner: true,
           });
 
-          if (eventBus && note.eventId) {
+          // For updates, the request body may omit eventId; fall back to the persisted value.
+          const documentId =
+            note.eventId ?? (!isCreate ? res.note.eventId ?? undefined : undefined);
+          if (eventBus && documentId) {
             const { noteId } = res.note;
             if (!noteId) {
               logger.warn('Skipping workflow trigger: noteId missing after note persist');
@@ -73,7 +76,7 @@ export const persistNoteRoute = (
                 void eventBus.emitNoteCreated(request, {
                   noteId,
                   createdBy,
-                  documentId: note.eventId,
+                  documentId,
                 });
               }
             } else {
@@ -84,7 +87,7 @@ export const persistNoteRoute = (
                 void eventBus.emitNoteUpdated(request, {
                   noteId,
                   updatedBy,
-                  documentId: note.eventId,
+                  documentId,
                 });
               }
             }

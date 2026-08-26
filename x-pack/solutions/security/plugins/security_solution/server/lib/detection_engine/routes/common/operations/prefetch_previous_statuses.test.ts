@@ -188,11 +188,11 @@ describe('prefetchPreviousStatusesByIds', () => {
     );
   });
 
-  it('includes ALERT_WORKFLOW_STATUS in _source_includes', async () => {
+  it('includes ALERT_WORKFLOW_STATUS and signal.status in _source_includes', async () => {
     await prefetchPreviousStatusesByIds(esClient, 'index', ['id1']);
 
     expect(esClient.search).toHaveBeenCalledWith(
-      expect.objectContaining({ _source_includes: [ALERT_WORKFLOW_STATUS] })
+      expect.objectContaining({ _source_includes: [ALERT_WORKFLOW_STATUS, 'signal.status'] })
     );
   });
 
