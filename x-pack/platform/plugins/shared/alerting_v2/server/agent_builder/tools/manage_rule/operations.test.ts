@@ -585,6 +585,24 @@ describe('executeRuleOperations', () => {
         'recovery_strategy "query" requires a recovery block'
       );
     });
+
+    it('rejects set_recovery_strategy on a signal rule', async () => {
+      const ops: RuleOperation[] = [
+        { operation: 'set_kind', kind: 'signal' },
+        {
+          operation: 'set_query',
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM logs-* | WHERE event.outcome == "failure"' },
+          },
+        },
+        { operation: 'set_recovery_strategy', recovery_strategy: 'no_breach' },
+      ];
+
+      await expect(executeRuleOperations({}, ops)).rejects.toThrow(
+        'Signal rules cannot set recovery_strategy or no_data_strategy'
+      );
+    });
   });
 
   describe('set_no_data_strategy', () => {
@@ -641,6 +659,24 @@ describe('executeRuleOperations', () => {
 
       await expect(executeRuleOperations({}, ops)).rejects.toThrow(
         'requires a no_data block in the query'
+      );
+    });
+
+    it('rejects set_no_data_strategy on a signal rule', async () => {
+      const ops: RuleOperation[] = [
+        { operation: 'set_kind', kind: 'signal' },
+        {
+          operation: 'set_query',
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM logs-* | WHERE event.outcome == "failure"' },
+          },
+        },
+        { operation: 'set_no_data_strategy', no_data_strategy: 'last_known_status' },
+      ];
+
+      await expect(executeRuleOperations({}, ops)).rejects.toThrow(
+        'Signal rules cannot set recovery_strategy or no_data_strategy'
       );
     });
   });
