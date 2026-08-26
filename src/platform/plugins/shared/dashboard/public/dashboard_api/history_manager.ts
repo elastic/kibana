@@ -68,7 +68,7 @@ export function initializeHistoryManager({
 
   const onAnyStateChangeSubscription = combineLatest([anyStateChange$, dataLoading$])
     .pipe(
-      debounceTime(0), // flatten anyStateChange + dataLoading event updates
+      debounceTime(1), // flatten anyStateChange + dataLoading event updates
       withLatestFrom(hasOverlays$),
       // do not push to history while a child is loading or an editor is open
       filter(([[, loading], hasOverlays]) => !loading && !hasOverlays)
