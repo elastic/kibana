@@ -381,7 +381,12 @@ describe('TaskStore', () => {
         }
       );
 
-      expect(getApiKeyAndUserScope).toHaveBeenCalledWith([task], request, coreStart.security, {});
+      expect(getApiKeyAndUserScope).toHaveBeenCalledWith(
+        [task],
+        request,
+        coreStart.security,
+        expect.objectContaining({ onApiKeyCreated: expect.any(Function) })
+      );
 
       expect(savedObjectsClient.create).not.toHaveBeenCalled();
 
@@ -1921,7 +1926,7 @@ describe('TaskStore', () => {
         [{ ...bulkUpdateTask, apiKey: mockApiKey, userScope: mockUserScope }],
         mockRequest,
         coreStart.security,
-        {}
+        expect.objectContaining({ onApiKeyCreated: expect.any(Function) })
       );
 
       expect(mockScopedClient.bulkUpdate).toHaveBeenCalledWith(
@@ -2022,7 +2027,7 @@ describe('TaskStore', () => {
         ],
         mockRequest,
         coreStart.security,
-        {}
+        expect.objectContaining({ onApiKeyCreated: expect.any(Function) })
       );
 
       expect(mockScopedClient.bulkUpdate).toHaveBeenCalledWith(
@@ -2137,7 +2142,7 @@ describe('TaskStore', () => {
         ],
         mockRequest,
         coreStart.security,
-        {}
+        expect.objectContaining({ onApiKeyCreated: expect.any(Function) })
       );
 
       expect(mockScopedClient.bulkUpdate).toHaveBeenCalledWith(
@@ -4028,7 +4033,7 @@ describe('TaskStore', () => {
         [task1, task2],
         request,
         coreStart.security,
-        {}
+        expect.objectContaining({ onApiKeyCreated: expect.any(Function) })
       );
 
       expect(savedObjectsClient.create).not.toHaveBeenCalled();
@@ -4108,6 +4113,31 @@ describe('TaskStore', () => {
       ]);
     });
 
+    test('invalidates API keys created before a later grant fails', async () => {
+      const task1 = { id: 'task1', params: {}, state: { foo: 'bar' }, taskType: 'report' };
+      const task2 = { id: 'task2', params: {}, state: { foo: 'bar' }, taskType: 'yawn' };
+      (getApiKeyAndUserScope as jest.Mock).mockImplementationOnce(
+        async (_tasks, _request, _security, options) => {
+          options.onApiKeyCreated({ apiKeyId: 'partially-granted-key-id' });
+          throw new Error('second grant failed');
+        }
+      );
+      coreStart.savedObjects.getUnsafeInternalClient.mockReturnValue(invalidationSoClientMock);
+
+      const request = httpServerMock.createKibanaRequest();
+      await expect(store.bulkSchedule([task1, task2], { request })).rejects.toThrow(
+        'second grant failed'
+      );
+
+      expect(scopedSavedObjectsClient.bulkCreate).not.toHaveBeenCalled();
+      expect(invalidationSoClientMock.bulkCreate).toHaveBeenCalledWith([
+        {
+          attributes: { apiKeyId: 'partially-granted-key-id', createdAt: expect.any(String) },
+          type: 'api_key_to_invalidate',
+        },
+      ]);
+    });
+
     test('invalidates the granted API key of a task that failed to be created', async () => {
       const task1 = { id: 'task1', params: {}, state: { foo: 'bar' }, taskType: 'report' };
       const task2 = { id: 'task2', params: {}, state: { foo: 'bar' }, taskType: 'yawn' };
@@ -4172,6 +4202,59 @@ describe('TaskStore', () => {
       expect(invalidationSoClientMock.bulkCreate).toHaveBeenCalledWith([
         {
           attributes: { apiKeyId: 'yawnApiKeyId', createdAt: expect.any(String) },
+          type: 'api_key_to_invalidate',
+        },
+      ]);
+    });
+
+    test('invalidates the granted API key when an id-less task fails to be created', async () => {
+      const task = { params: {}, state: { foo: 'bar' }, taskType: 'report' };
+      let generatedTaskId: string | undefined;
+      (getApiKeyAndUserScope as jest.Mock).mockImplementationOnce(async ([taskWithId]) => {
+        generatedTaskId = taskWithId.id;
+        return new Map([
+          [
+            generatedTaskId,
+            {
+              apiKey: Buffer.from('generatedApiKeyId:apiKey').toString('base64'),
+              userScope: { apiKeyId: 'generatedApiKeyId', apiKeyCreatedByUser: false },
+            },
+          ],
+        ]);
+      });
+      coreStart.savedObjects.getScopedClient.mockReturnValueOnce(scopedSavedObjectsClient);
+      coreStart.savedObjects.getUnsafeInternalClient.mockReturnValue(invalidationSoClientMock);
+      scopedSavedObjectsClient.bulkCreate.mockImplementationOnce(async (objects) => {
+        const createdId = objects[0].id;
+        if (!createdId) {
+          throw new Error('Expected TaskStore to assign an id before bulk create');
+        }
+        return {
+          saved_objects: [
+            {
+              id: createdId,
+              type: 'task',
+              attributes: {},
+              references: [],
+              error: {
+                error: 'Conflict',
+                message: 'Saved object conflict',
+                statusCode: 409,
+              },
+            },
+          ],
+        };
+      });
+
+      const request = httpServerMock.createKibanaRequest();
+      await expect(store.bulkSchedule([task], { request })).rejects.toMatchObject({
+        statusCode: 409,
+      });
+
+      expect(generatedTaskId).toEqual(expect.any(String));
+      expect(invalidationSoClientMock.bulkCreate).toHaveBeenCalledWith([
+        {
+          attributes: { apiKeyId: 'generatedApiKeyId', createdAt: expect.any(String) },
           type: 'api_key_to_invalidate',
         },
       ]);

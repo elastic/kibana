@@ -37,6 +37,17 @@ const ALL_TASK_IDS = [
 const OMITTED_TASK_TYPE = 'task_manager:mark_removed_tasks_as_unrecognized';
 const UNSUPPORTED_TASK_TYPE = 'scout_bulk_schedule_unsupported_type';
 
+interface ScheduledTaskWithApiKeys {
+  id: string;
+  taskType: string;
+  apiKey?: string;
+  uiamApiKey?: string;
+  userScope?: {
+    apiKeyId: string;
+    uiamApiKeyId?: string;
+  };
+}
+
 /**
  * The keys granted for the tasks under test never land on a task document, so their ids can only
  * be captured by diffing the type-scoped key listing across the scheduling call.
@@ -71,6 +82,8 @@ apiTest.describe(
   'Task Manager bulkSchedule API keys',
   { tag: tags.serverless.observability.complete },
   () => {
+    const idlessTasksToCleanup: ScheduledTaskWithApiKeys[] = [];
+
     // Defensive cleanup on both sides: a prior crashed run may have left task docs behind. The
     // deletes enqueue invalidation markers for the deleted tasks' keys; those are left for the
     // invalidation task to consume (their designed lifecycle) rather than cleaned type-wide,
@@ -80,6 +93,52 @@ apiTest.describe(
       for (const taskId of ALL_TASK_IDS) {
         await deleteTaskManagerTaskSilently(apiClient, cookieHeader, taskId);
       }
+    });
+
+    apiTest.afterEach(async ({ apiClient, esClient, samlAuth }) => {
+      if (idlessTasksToCleanup.length === 0) {
+        return;
+      }
+
+      // Revoke both credentials immediately through the test-only endpoints, then remove the
+      // disabled task documents directly. Task Manager's delete route would enqueue invalidation
+      // markers that may not be processed before the suite's server stops.
+      const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
+      const esApiKeyIds = idlessTasksToCleanup.flatMap(({ apiKey, userScope }) =>
+        apiKey && userScope?.apiKeyId ? [userScope.apiKeyId] : []
+      );
+      if (esApiKeyIds.length > 0) {
+        const response = await apiClient.post('test_endpoints/api_keys/_invalidate', {
+          headers: { ...COMMON_HEADERS, ...cookieHeader },
+          body: { ids: esApiKeyIds },
+          responseType: 'json',
+        });
+        expect(response).toHaveStatusCode(200);
+        expect(response.body.error_count).toBe(0);
+      }
+
+      for (const { uiamApiKey, userScope } of idlessTasksToCleanup) {
+        if (uiamApiKey && userScope?.uiamApiKeyId) {
+          const response = await apiClient.post('test_endpoints/uiam/api_keys/_invalidate', {
+            headers: { ...COMMON_HEADERS, ...cookieHeader },
+            body: {
+              id: userScope.uiamApiKeyId,
+              authcScheme: 'ApiKey',
+              credential: uiamApiKey,
+            },
+            responseType: 'json',
+          });
+          expect(response).toHaveStatusCode(200);
+          expect(response.body.error_count).toBe(0);
+        }
+      }
+
+      await Promise.all(
+        idlessTasksToCleanup.map(({ id }) =>
+          esClient.delete({ index: TASK_MANAGER_INDEX, id: taskDocId(id), refresh: true })
+        )
+      );
+      idlessTasksToCleanup.length = 0;
     });
 
     apiTest.afterAll(async ({ apiClient, samlAuth }) => {
@@ -242,6 +301,72 @@ apiTest.describe(
           UNSUPPORTED_TASK_TYPE,
           grantedForUnsupported[0].id
         );
+      }
+    );
+
+    apiTest(
+      'keeps separately granted keys correlated with id-less tasks',
+      async ({ apiClient, esClient, samlAuth }) => {
+        const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
+        const firstTypeKeysBefore = await queryTaskManagerEsApiKeysByType(esClient, TEST_TASK_TYPE);
+        const secondTypeKeysBefore = await queryTaskManagerEsApiKeysByType(
+          esClient,
+          OMITTED_TASK_TYPE
+        );
+
+        const response = await apiClient.post('internal/task_manager/bulk_schedule', {
+          headers: { ...COMMON_HEADERS, ...cookieHeader },
+          body: {
+            tasks: [
+              {
+                taskType: TEST_TASK_TYPE,
+                params: {},
+                state: {},
+                schedule: { interval: '1h' },
+                enabled: false,
+              },
+              {
+                taskType: OMITTED_TASK_TYPE,
+                params: {},
+                state: {},
+                schedule: { interval: '1h' },
+                enabled: false,
+              },
+            ],
+          },
+          responseType: 'json',
+        });
+        expect(response).toHaveStatusCode(200);
+
+        const scheduled = response.body as ScheduledTaskWithApiKeys[];
+        expect(scheduled).toHaveLength(2);
+        idlessTasksToCleanup.push(...scheduled);
+
+        const [firstTask, secondTask] = scheduled;
+        expect(firstTask.id).not.toBe('');
+        expect(secondTask.id).not.toBe('');
+        expect(firstTask.id).not.toBe(secondTask.id);
+        expect(firstTask.taskType).toBe(TEST_TASK_TYPE);
+        expect(secondTask.taskType).toBe(OMITTED_TASK_TYPE);
+        expect(firstTask.apiKey).toBeDefined();
+        expect(secondTask.apiKey).toBeDefined();
+        expect(firstTask.uiamApiKey).toBeDefined();
+        expect(secondTask.uiamApiKey).toBeDefined();
+        expect(firstTask.userScope?.apiKeyId).not.toBe(secondTask.userScope?.apiKeyId);
+        expect(firstTask.userScope?.uiamApiKeyId).not.toBe(secondTask.userScope?.uiamApiKeyId);
+
+        const grantedForFirstType = diffGrantedKeys(
+          firstTypeKeysBefore,
+          await queryTaskManagerEsApiKeysByType(esClient, TEST_TASK_TYPE)
+        );
+        const grantedForSecondType = diffGrantedKeys(
+          secondTypeKeysBefore,
+          await queryTaskManagerEsApiKeysByType(esClient, OMITTED_TASK_TYPE)
+        );
+        expect(grantedForFirstType).toHaveLength(1);
+        expect(grantedForSecondType).toHaveLength(1);
+        expect(firstTask.userScope?.apiKeyId).toBe(grantedForFirstType[0].id);
+        expect(secondTask.userScope?.apiKeyId).toBe(grantedForSecondType[0].id);
       }
     );
   }

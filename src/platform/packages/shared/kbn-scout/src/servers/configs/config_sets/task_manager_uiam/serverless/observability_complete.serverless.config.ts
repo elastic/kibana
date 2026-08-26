@@ -7,8 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { resolve } from 'path';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { servers as defaultConfig } from '../../default/serverless/observability_complete.serverless.config';
 import type { ScoutServerConfig } from '../../../../../types';
+
+const testEndpointsPluginPath = `--plugin-path=${resolve(
+  REPO_ROOT,
+  'x-pack/platform/test/security_functional/plugins/test_endpoints'
+)}`;
 
 // Enables Task Manager UIAM rollout flags so the EsAndUiamApiKeyStrategy and
 // background provisioning task are exercised. Flags are not yet enabled on MKI,
@@ -19,6 +26,7 @@ export const servers: ScoutServerConfig = {
     ...defaultConfig.kbnTestServer,
     serverArgs: [
       ...defaultConfig.kbnTestServer.serverArgs,
+      testEndpointsPluginPath,
       '--xpack.task_manager.grant_uiam_api_keys=true',
       // Schedules task_manager:uiam_api_key_provisioning so background conversion can run in Scout.
       '--feature_flags.overrides.taskManager.provisionUiamApiKeys=true',

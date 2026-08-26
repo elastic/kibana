@@ -37,6 +37,11 @@ export interface GrantApiKeysOpts {
    * See {@link ApiKeyOptions.cloneApiKey}.
    */
   cloneApiKey?: boolean;
+  /**
+   * Called as soon as Task Manager creates a credential, before the complete grant operation
+   * resolves. This lets callers clean up partial successes when a later grant fails.
+   */
+  onApiKeyCreated?: (target: InvalidationTarget) => void;
 }
 
 export interface InvalidationTarget {

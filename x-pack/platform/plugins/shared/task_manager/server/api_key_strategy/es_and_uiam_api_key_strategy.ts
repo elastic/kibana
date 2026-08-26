@@ -118,7 +118,8 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
         request,
         user,
         apiKeyCreatedByUser,
-        isUiamRequest
+        isUiamRequest,
+        opts?.onApiKeyCreated
       );
 
       const uiamOnlyResult = new Map<string, ApiKeySOFields>();
@@ -177,7 +178,8 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
             request,
             user,
             apiKeyCreatedByUser,
-            isUiamRequest
+            isUiamRequest,
+            opts?.onApiKeyCreated
           );
 
     const result = new Map<string, ApiKeySOFields>();
@@ -201,7 +203,8 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
     request: KibanaRequest,
     user: AuthenticatedUser | null,
     apiKeyCreatedByUser: boolean,
-    isUiamRequest: boolean
+    isUiamRequest: boolean,
+    onApiKeyCreated?: GrantApiKeysOpts['onApiKeyCreated']
   ): Promise<Map<string, UiamApiKeyResult>> {
     const uiam = this.security.authc.apiKeys.uiam;
     const uiamKeyByTaskIdMap = new Map<string, UiamApiKeyResult>();
@@ -247,6 +250,7 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
         });
 
         if (uiamResult) {
+          onApiKeyCreated?.({ apiKeyId: uiamResult.id, uiamApiKey: uiamResult.api_key });
           uiamKeyByTaskTypeMap.set(taskType, {
             apiKey: uiamResult.api_key,
             apiKeyId: uiamResult.id,

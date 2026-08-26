@@ -113,10 +113,12 @@ const grantApiKeysForTaskTypes = async ({
   taskInstances,
   user,
   createKey,
+  onApiKeyCreated,
 }: {
   taskInstances: TaskInstance[];
   user: AuthenticatedUser | null;
   createKey: (params: { name: string }) => Promise<{ id: string; api_key: string } | null>;
+  onApiKeyCreated?: GrantApiKeysOpts['onApiKeyCreated'];
 }) => {
   const taskTypes = [...new Set(taskInstances.map((task) => task.taskType))];
   const apiKeyByTaskTypeMap = new Map<string, EncodedApiKeyResult>();
@@ -133,6 +135,7 @@ const grantApiKeysForTaskTypes = async ({
     }
 
     const { id, api_key: apiKey } = apiKeyCreateResult;
+    onApiKeyCreated?.({ apiKeyId: id });
 
     apiKeyByTaskTypeMap.set(taskType, {
       apiKey: Buffer.from(`${id}:${apiKey}`).toString('base64'),
@@ -176,6 +179,7 @@ export const createApiKey = async (
     return grantApiKeysForTaskTypes({
       taskInstances,
       user,
+      onApiKeyCreated: options?.onApiKeyCreated,
       createKey: ({ name }) =>
         security.authc.apiKeys.cloneAsInternalUser(request, {
           name,
@@ -217,6 +221,7 @@ export const createApiKey = async (
   return grantApiKeysForTaskTypes({
     taskInstances,
     user,
+    onApiKeyCreated: options?.onApiKeyCreated,
     createKey: async ({ name }) =>
       security.authc.apiKeys.grantAsInternalUser(request, {
         name,

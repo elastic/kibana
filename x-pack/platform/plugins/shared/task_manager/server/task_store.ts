@@ -295,14 +295,36 @@ export class TaskStore {
       return null;
     }
 
+    const createdTargets: InvalidationTarget[] = [];
     try {
       return await this.apiKeyStrategy.grantApiKeys(taskInstances, request, this.security, {
         ...(options?.onEsKey === true ? { onEsKey: true } : {}),
         ...(options?.cloneApiKey === true ? { cloneApiKey: true } : {}),
+        onApiKeyCreated: (target) => createdTargets.push(target),
       });
     } catch (e) {
+      await this.markApiKeysForInvalidation(createdTargets);
       this.errors$.next(e);
       throw e;
+    }
+  }
+
+  private async markApiKeysForInvalidation(targets: InvalidationTarget[]) {
+    if (!targets.length) {
+      return;
+    }
+
+    // Best effort, so cleanup can never mask the failure that made it necessary.
+    try {
+      await this.apiKeyStrategy.markForInvalidation(
+        targets,
+        this.logger,
+        this.invalidationSoClient
+      );
+    } catch (e) {
+      this.logger.error(
+        `Failed to mark ${targets.length} unused API keys for invalidation: ${e.message}`
+      );
     }
   }
 
@@ -320,22 +342,7 @@ export class TaskStore {
       fields ? this.apiKeyStrategy.getApiKeyIdsForInvalidation(fields) : []
     );
 
-    if (!targets.length) {
-      return;
-    }
-
-    // Best effort, so that it can never mask the error that prevented the write.
-    try {
-      await this.apiKeyStrategy.markForInvalidation(
-        targets,
-        this.logger,
-        this.invalidationSoClient
-      );
-    } catch (e) {
-      this.logger.error(
-        `Failed to mark ${targets.length} unused API keys for invalidation: ${e.message}`
-      );
-    }
+    await this.markApiKeysForInvalidation(targets);
   }
 
   private async bulkGetDecryptedTaskApiKeys(
@@ -542,8 +549,14 @@ export class TaskStore {
       this.errors$.next(e);
       throw e;
     }
+    // Assign generated ids before granting so every credential remains correlated with the saved
+    // object request and response, including per-item failures.
+    const taskInstancesWithIds = taskInstances.map((taskInstance) => ({
+      ...taskInstance,
+      id: taskInstance.id ?? v4(),
+    }));
     const apiKeySOFieldsMap =
-      (await this.grantApiKeysFromRequest(taskInstances, options)) || new Map();
+      (await this.grantApiKeysFromRequest(taskInstancesWithIds, options)) || new Map();
 
     const soClient = this.getSoClientForCreate(options || {});
 
@@ -552,13 +565,13 @@ export class TaskStore {
     const omittedTaskApiKeys: Array<ApiKeySOFields | undefined> = [];
     let savedObjects;
     try {
-      const objects = taskInstances.reduce(
+      const objects = taskInstancesWithIds.reduce(
         (
           acc: Array<SavedObjectsBulkCreateObject<SerializedConcreteTaskInstance>>,
           taskInstance
         ) => {
           const apiKeySOFields = apiKeySOFieldsMap.get(taskInstance.id) || {};
-          const id = taskInstance.id || v4();
+          const { id } = taskInstance;
           this.definitions.ensureHas(taskInstance.taskType);
 
           try {
@@ -596,7 +609,7 @@ export class TaskStore {
         overwrite: true,
       });
       this.adHocTaskCounter.increment(
-        taskInstances.filter((task) => {
+        taskInstancesWithIds.filter((task) => {
           return get(task, 'schedule.interval', null) == null;
         }).length
       );
