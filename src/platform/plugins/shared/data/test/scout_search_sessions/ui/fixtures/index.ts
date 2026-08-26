@@ -61,4 +61,4 @@ export {
   STALLING_DSL_FILTER,
 } from './constants';
 export { BACKGROUND_SEARCH_FLYOUT_ENTRYPOINT } from './page_objects/background_search_page';
-export { analystRole, deleteAllBackgroundSearches, findLoadedDashboardId } from './helpers';
+export { deleteAllBackgroundSearches, findLoadedDashboardId } from './helpers';

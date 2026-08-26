@@ -14,9 +14,9 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import type { KibanaRole } from '@kbn/scout';
 import {
   spaceTest,
-  analystRole,
   deleteAllBackgroundSearches,
   findLoadedDashboardId,
   LOGSTASH_MONTH_TIME_RANGE,
@@ -26,8 +26,38 @@ import {
 const DELAYED_DASHBOARD_TITLE = 'A Dashboard in another space + Delay 5s';
 const PLAIN_DASHBOARD_TITLE = 'A Dashboard in another space';
 
+/** Role with dashboard:minimal_read + store_search_session in one space, scoped to `logstash-*`. */
+const dashboardWithBackgroundSearchRole = (spaceId: string): KibanaRole => ({
+  elasticsearch: {
+    cluster: [],
+    indices: [{ names: ['logstash-*'], privileges: ['all'] }],
+  },
+  kibana: [
+    {
+      base: [],
+      feature: { dashboard: ['minimal_read', 'store_search_session'] },
+      spaces: [spaceId],
+    },
+  ],
+});
+
+/** Role with dashboard:minimal_read only — no background search management privilege. */
+const dashboardReadOnlyRole = (spaceId: string): KibanaRole => ({
+  elasticsearch: {
+    cluster: [],
+    indices: [{ names: ['logstash-*'], privileges: ['all'] }],
+  },
+  kibana: [
+    {
+      base: [],
+      feature: { dashboard: ['minimal_read'] },
+      spaces: [spaceId],
+    },
+  ],
+});
+
 spaceTest.describe(
-  'Dashboard background search in a space',
+  'Dashboard background search privilege gating',
   { tag: '@local-stateful-classic' },
   () => {
     let delayedDashboardId: string;
@@ -55,9 +85,7 @@ spaceTest.describe(
     spaceTest(
       'saves and restores a background search with store_search_session',
       async ({ browserAuth, page, pageObjects, scoutSpace }) => {
-        await browserAuth.loginWithCustomRole(
-          analystRole(scoutSpace.id, { dashboard: ['minimal_read', 'store_search_session'] })
-        );
+        await browserAuth.loginWithCustomRole(dashboardWithBackgroundSearchRole(scoutSpace.id));
 
         await pageObjects.dashboard.openDashboardWithId(delayedDashboardId);
         await pageObjects.dashboard.waitForRenderComplete();
@@ -74,9 +102,7 @@ spaceTest.describe(
     spaceTest(
       'does not offer background search without the store_search_session privilege',
       async ({ browserAuth, pageObjects, scoutSpace }) => {
-        await browserAuth.loginWithCustomRole(
-          analystRole(scoutSpace.id, { dashboard: ['minimal_read'] })
-        );
+        await browserAuth.loginWithCustomRole(dashboardReadOnlyRole(scoutSpace.id));
 
         await pageObjects.dashboard.openDashboardWithId(plainDashboardId);
         // Wait for the dashboard to finish rendering before asserting on an absence, so a

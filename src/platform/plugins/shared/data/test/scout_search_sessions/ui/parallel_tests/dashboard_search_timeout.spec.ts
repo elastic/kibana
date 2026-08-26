@@ -60,7 +60,6 @@ spaceTest.describe('Dashboard search timeout', { tag: '@local-stateful-classic' 
         waitForRender: false,
       });
 
-      // Raised above the default: the error only surfaces once `search:timeout` has elapsed.
       await expect(page.testSubj.locator('searchTimeoutError')).toBeVisible({ timeout: 30_000 });
     }
   );
@@ -75,7 +74,6 @@ spaceTest.describe('Dashboard search timeout', { tag: '@local-stateful-classic' 
       const timeoutError = page.testSubj.locator('searchTimeoutError');
 
       await spaceTest.step('two panels time out but only one error is reported', async () => {
-        // Raised above the default: the error only surfaces once `search:timeout` has elapsed.
         await expect(timeoutError).toBeVisible({ timeout: 30_000 });
         await expect(timeoutError).toHaveCount(1);
       });

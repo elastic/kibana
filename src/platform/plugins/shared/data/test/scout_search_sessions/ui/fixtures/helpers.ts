@@ -8,7 +8,7 @@
  */
 
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import type { KibanaRole, KibanaUrl, ScoutPage } from '@kbn/scout';
+import type { KibanaUrl, ScoutPage } from '@kbn/scout';
 import { SESSION_API_PATH } from './constants';
 
 /** The subset of `scoutSpace.savedObjects.load()`'s result these specs read. */
@@ -36,27 +36,6 @@ export const findLoadedDashboardId = (
   }
   return dashboard.id;
 };
-
-/**
- * Role for an analyst with full access to `logstash-*` in a single space. Each spec passes the
- * Kibana features whose privileges it is exercising.
- */
-export const analystRole = (
-  spaceId: string,
-  feature: { discover?: string[]; dashboard?: string[] }
-): KibanaRole => ({
-  elasticsearch: {
-    cluster: [],
-    indices: [{ names: ['logstash-*'], privileges: ['all'] }],
-  },
-  kibana: [
-    {
-      base: [],
-      feature,
-      spaces: [spaceId],
-    },
-  ],
-});
 
 // Version header required by the background search internal API.
 const SESSION_VERSION = '1';

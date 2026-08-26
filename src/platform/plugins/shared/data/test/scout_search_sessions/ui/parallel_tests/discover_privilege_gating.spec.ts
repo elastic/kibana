@@ -19,17 +19,35 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import type { KibanaRole } from '@kbn/scout';
 import {
   spaceTest,
-  analystRole,
   deleteAllBackgroundSearches,
   LOGSTASH_MONTH_TIME_RANGE,
   SESSION_IN_ANOTHER_SPACE_KBN_ARCHIVE,
   STALLING_DSL_FILTER,
 } from '../fixtures';
 
+/** Role with full Discover access in one space, scoped to `logstash-*`. */
+const discoverAllRole = (spaceId: string): KibanaRole => ({
+  elasticsearch: {
+    cluster: [],
+    indices: [{ names: ['logstash-*'], privileges: ['all'] }],
+  },
+  kibana: [{ base: [], feature: { discover: ['all'] }, spaces: [spaceId] }],
+});
+
+/** Role with read-only Discover access in one space, scoped to `logstash-*`. */
+const discoverReadRole = (spaceId: string): KibanaRole => ({
+  elasticsearch: {
+    cluster: [],
+    indices: [{ names: ['logstash-*'], privileges: ['all'] }],
+  },
+  kibana: [{ base: [], feature: { discover: ['read'] }, spaces: [spaceId] }],
+});
+
 spaceTest.describe(
-  'Discover background search in a space',
+  'Discover background search privilege gating',
   { tag: '@local-stateful-classic' },
   () => {
     spaceTest.beforeAll(async ({ scoutSpace }) => {
@@ -51,7 +69,7 @@ spaceTest.describe(
     spaceTest(
       'saves and restores a background search with the full Discover privilege',
       async ({ browserAuth, pageObjects, scoutSpace }) => {
-        await browserAuth.loginWithCustomRole(analystRole(scoutSpace.id, { discover: ['all'] }));
+        await browserAuth.loginWithCustomRole(discoverAllRole(scoutSpace.id));
 
         await pageObjects.discover.goto({ queryMode: 'classic' });
         // Fail loudly if the space archive did not provide the data view, rather than
@@ -71,7 +89,7 @@ spaceTest.describe(
     spaceTest(
       'does not offer background search with read-only Discover privilege',
       async ({ browserAuth, pageObjects, scoutSpace }) => {
-        await browserAuth.loginWithCustomRole(analystRole(scoutSpace.id, { discover: ['read'] }));
+        await browserAuth.loginWithCustomRole(discoverReadRole(scoutSpace.id));
 
         await pageObjects.discover.goto({ queryMode: 'classic' });
         await pageObjects.discover.selectDataView('logstash-*', { createAdHocIfMissing: false });

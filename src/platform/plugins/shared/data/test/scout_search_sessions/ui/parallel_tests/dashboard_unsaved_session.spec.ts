@@ -28,13 +28,10 @@ spaceTest.describe(
     });
 
     spaceTest.beforeEach(async ({ apiServices, browserAuth, pageObjects, scoutSpace }) => {
-      // Installed per test, not in `beforeAll`: the `cleanStandardList()` in `afterEach` also
-      // deletes the data view the sample data ships, leaving the next dashboard without one.
       await apiServices.sampleData.install(FLIGHTS_SAMPLE_DATA_SET, scoutSpace.id);
 
       await browserAuth.loginAsPrivilegedUser();
 
-      // Every test needs the same Discover session on an unsaved dashboard, so build it here.
       await pageObjects.discover.goto({ queryMode: 'esql' });
       await pageObjects.discover.waitUntilTabIsLoaded();
       await pageObjects.discover.codeEditor.setCodeEditorValue(SLOW_ESQL_QUERY);
