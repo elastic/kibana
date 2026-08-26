@@ -11,6 +11,7 @@
     "target/**/*"
   ],
   "kbn_references": [
+    "@kbn/shared-ux-error-boundary",
     "@kbn/ui-react-assembly",
   ]
 }

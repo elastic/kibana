@@ -74,6 +74,7 @@ export const createExecuteConnectorSubActionTool = ({
     'Connectors reference: https://www.elastic.co/docs/reference/kibana/connectors-kibana',
   schema: executeConnectorSubActionArgsSchema,
   tags: ['connector', 'sub-action'],
+  excludeFromMcp: true,
   annotations: {
     title: 'Execute Connector Sub-Action',
     readOnlyHint: false,

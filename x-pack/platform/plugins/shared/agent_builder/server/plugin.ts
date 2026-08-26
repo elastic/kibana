@@ -21,6 +21,7 @@ import type {
 } from './types';
 import { registerFeatures } from './features';
 import { registerRoutes } from './routes';
+import { agentBuilderSpaceSettingsType } from './saved_objects';
 import { registerUISettings } from './ui_settings';
 import { getRunAgentStepDefinition, rerankStepDefinition } from './step_types';
 import type { AgentBuilderHandlerContext } from './request_handler_context';
@@ -38,6 +39,7 @@ import { createSmlTools } from './services/tools/builtin/sml';
 import { createConnectorTools } from './services/tools/builtin/connectors';
 import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_switcher';
 import { registerInferenceFeatures } from './inference_features';
+import { runToolIdBackfill } from './backfills/tool_id_backfill';
 
 export class AgentBuilderPlugin
   implements
@@ -111,6 +113,8 @@ export class AgentBuilderPlugin
     });
 
     registerFeatures({ features: setupDeps.features });
+
+    coreSetup.savedObjects.registerType(agentBuilderSpaceSettingsType);
 
     // Phantom capability: not a registered feature privilege. Used as an admin check
     // (e.g. superuser / wildcard roles get true). Resolved in the switcher via ES hasPrivileges.
@@ -246,6 +250,10 @@ export class AgentBuilderPlugin
       this.logger.warn(`Failed to clean up legacy SML tasks: ${(error as Error).message}`);
     });
 
+    this.runBackfill(elasticsearch).catch((error) => {
+      this.logger.error(`Backfill failed: ${(error as Error).message}`);
+    });
+
     const startServices = this.serviceManager.startServices({
       logger: this.logger.get('services'),
       security,
@@ -329,6 +337,16 @@ export class AgentBuilderPlugin
   async stop() {
     await this.teardownTracing?.();
   }
+
+  /**
+   * Applies all registered tool ID backfills.
+   */
+  private async runBackfill(elasticsearch: CoreStart['elasticsearch']): Promise<void> {
+    const logger = this.logger.get('backfill');
+    const esClient = elasticsearch.client.asInternalUser;
+    await runToolIdBackfill(logger, esClient);
+  }
+
   /**
    * Remove orphaned SML crawler task instances from older scheduled-task id prefixes.
    * Safe on every start — uses a single `bulkRemove` for the known legacy instance ids.
