@@ -45,9 +45,9 @@ export type AlertingLabels = Partial<{
  */
 export type AlertingSubsystemName =
   | 'routes'
-  | 'rulesClient'
-  | 'ruleTemplateClient'
-  | 'actionPolicyClient'
+  | 'rules'
+  | 'ruleTemplates'
+  | 'actionPolicies'
   | 'ruleExecutor'
   | 'director'
   | 'dispatcher'

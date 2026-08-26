@@ -71,7 +71,7 @@ describe('TelemetryTaskRunner', () => {
     const { state } = await runner.run(createRunParams({ ...emptyState, runs: 4 }));
 
     expect(state.has_errors).toBe(true);
-    expect(state.error_messages).toEqual(['One or more telemetry stats failed']);
+    expect(state.error_messages).toEqual(['Telemetry stat collection failed: action_policy_stats']);
     expect(state.runs).toBe(5);
 
     // Successful stats are still persisted.

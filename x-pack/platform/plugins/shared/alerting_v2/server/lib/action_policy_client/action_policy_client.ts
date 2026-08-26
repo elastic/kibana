@@ -149,7 +149,7 @@ export class ActionPolicyClient {
     private readonly namespace: string | undefined,
     @inject(LoggerServiceToken) loggerService: LoggerServiceContract
   ) {
-    this.logger = loggerService.forSubsystem('actionPolicyClient');
+    this.logger = loggerService.forSubsystem('actionPolicies');
   }
 
   /**

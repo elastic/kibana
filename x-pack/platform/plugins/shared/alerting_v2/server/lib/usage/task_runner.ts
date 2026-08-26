@@ -64,15 +64,21 @@ export class TelemetryTaskRunner implements AlertingTaskRunner {
       runStat('alert_stats', logger, () => getAlertStats(this.esClient)),
     ]);
 
-    const hasErrors =
-      stats === undefined ||
-      executionStats === undefined ||
-      actionPolicyStats === undefined ||
-      alertStats === undefined;
+    const statResults: Array<[string, unknown]> = [
+      ['rule_stats', stats],
+      ['execution_stats', executionStats],
+      ['action_policy_stats', actionPolicyStats],
+      ['alert_stats', alertStats],
+    ];
+    const failedStats = statResults
+      .filter(([, result]) => result === undefined)
+      .map(([name]) => name);
 
     const updatedState: LatestTaskStateSchema = {
-      has_errors: hasErrors,
-      error_messages: hasErrors ? ['One or more telemetry stats failed'] : undefined,
+      has_errors: failedStats.length > 0,
+      error_messages: failedStats.length
+        ? failedStats.map((name) => `Telemetry stat collection failed: ${name}`)
+        : undefined,
       runs: (state.runs ?? 0) + 1,
       ...(stats ?? {}),
       ...(executionStats ?? {}),

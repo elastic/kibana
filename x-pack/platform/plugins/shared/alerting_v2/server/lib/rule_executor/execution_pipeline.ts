@@ -94,12 +94,10 @@ export class RuleExecutionPipeline implements RuleExecutionPipelineContract {
         pipelineState = result.state;
 
         if (result.type === 'halt') {
-          if (result.reason !== 'state_not_ready') {
-            pipelineState.logger.debug({
-              message: 'Pipeline halted',
-              labels: { resource: result.reason },
-            });
-          }
+          pipelineState.logger.debug({
+            message: 'Pipeline halted',
+            labels: { resource: result.reason },
+          });
 
           return {
             completed: false,

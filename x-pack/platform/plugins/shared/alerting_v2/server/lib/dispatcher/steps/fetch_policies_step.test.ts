@@ -85,7 +85,12 @@ describe('FetchPoliciesStep', () => {
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
     expect(result.data?.policies?.size).toBe(0);
-    expect(mockLogger.warn).toHaveBeenCalled();
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      'Action policy lookup failed',
+      expect.objectContaining({
+        error: expect.objectContaining({ message: 'Decryption failed' }),
+      })
+    );
   });
 
   it('surfaces the matcher used to scope a policy to a rule', async () => {

@@ -48,7 +48,7 @@ export class RuleTemplatesClient {
     private readonly savedObjectsClient: SavedObjectsClientContract,
     @inject(LoggerServiceToken) logger: LoggerServiceContract
   ) {
-    this.logger = logger.forSubsystem('ruleTemplateClient');
+    this.logger = logger.forSubsystem('ruleTemplates');
   }
 
   public async findRuleTemplates(
