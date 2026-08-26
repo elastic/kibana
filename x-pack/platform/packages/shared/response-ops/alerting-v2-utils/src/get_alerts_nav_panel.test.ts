@@ -33,7 +33,15 @@ describe('getAlertingV2AlertsNavPanel', () => {
         icon: 'warning',
         renderAs: 'panelOpener',
         children: [
-          { link: 'observability-overview:alerts' },
+          {
+            breadcrumbStatus: 'hidden',
+            children: [
+              {
+                link: 'observability-overview:alerts',
+                title: 'Alerts',
+              },
+            ],
+          },
           {
             title: 'Rule Management',
             breadcrumbStatus: 'hidden',
@@ -67,8 +75,14 @@ describe('getAlertingV2AlertsNavPanel', () => {
     const [panel] = getAlertingV2AlertsNavPanel(core, { ...alertsNode, getIsActive });
 
     expect(panel.children?.[0]).toEqual({
-      link: 'observability-overview:alerts',
-      getIsActive,
+      breadcrumbStatus: 'hidden',
+      children: [
+        {
+          link: 'observability-overview:alerts',
+          title: 'Alerts',
+          getIsActive,
+        },
+      ],
     });
   });
 });

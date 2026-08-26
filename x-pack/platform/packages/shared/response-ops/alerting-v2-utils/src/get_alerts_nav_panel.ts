@@ -17,8 +17,8 @@ const PANEL_ID = 'alerting';
  *
  * When `alerting:v2:enabled` is false, returns `alertsNode` unchanged (a
  * direct link). When true, returns a panel opener whose flyout contains the
- * original Alerts page, Rule Management (Rules, Rule library), and
- * Notifications and Suppressions (Action Policies).
+ * original Alerts page as a flyout link, Rule Management (Rules, Rule library),
+ * and Notifications and Suppressions (Action Policies).
  *
  * Spread into a navigation tree `body`:
  *
@@ -48,8 +48,16 @@ export const getAlertingV2AlertsNavPanel = (
         ...(alertsNode.link
           ? [
               {
-                link: alertsNode.link,
-                ...(alertsNode.getIsActive ? { getIsActive: alertsNode.getIsActive } : {}),
+                breadcrumbStatus: 'hidden' as const,
+                children: [
+                  {
+                    link: alertsNode.link,
+                    title: i18n.translate('xpack.alertingV2.nav.alerts', {
+                      defaultMessage: 'Alerts',
+                    }),
+                    ...(alertsNode.getIsActive ? { getIsActive: alertsNode.getIsActive } : {}),
+                  },
+                ],
               },
             ]
           : []),

@@ -180,9 +180,15 @@ describe('Navigation Tree', () => {
         icon: 'warning',
         renderAs: 'panelOpener',
         children: [
-          expect.objectContaining({
-            link: 'observability-overview:alerts',
-          }),
+          {
+            breadcrumbStatus: 'hidden',
+            children: [
+              expect.objectContaining({
+                link: 'observability-overview:alerts',
+                title: 'Alerts',
+              }),
+            ],
+          },
           {
             title: 'Rule Management',
             breadcrumbStatus: 'hidden',
