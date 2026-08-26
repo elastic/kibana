@@ -51,12 +51,20 @@ export class NewsfeedPublicPlugin
         core.getStartServices(),
       ]);
 
-      // getStartServices() resolves only after start() returns, so the API is assigned by now.
-      const newsfeedApi = this.newsfeedApi!;
+      const newsfeedApi = this.newsfeedApi;
+      if (!newsfeedApi) {
+        throw new Error(
+          'Newsfeed API is not initialized. Ensure NewsfeedPublicPlugin.start() runs before loading the newsfeed sidebar.'
+        );
+      }
       const { hasCustomBranding$ } = coreStart.customBranding;
 
       return (props: SidebarComponentProps) => (
-        <NewsfeedSidebar {...props} newsfeedApi={newsfeedApi} hasCustomBranding$={hasCustomBranding$} />
+        <NewsfeedSidebar
+          {...props}
+          newsfeedApi={newsfeedApi}
+          hasCustomBranding$={hasCustomBranding$}
+        />
       );
     };
 
