@@ -160,7 +160,7 @@ export const indexFleetEndpointPolicy = usageTracker.track(
             }
           }
 
-          catchHttpErrorFormatAndThrow(error);
+          return catchHttpErrorFormatAndThrow(error);
         });
 
     const started = new Date();
