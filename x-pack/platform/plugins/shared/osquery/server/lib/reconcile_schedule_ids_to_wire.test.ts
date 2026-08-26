@@ -598,6 +598,222 @@ describe('reconcileScheduleIdsToWire', () => {
     expect(packagePolicyUpdate.mock.calls[0][3]).not.toHaveProperty('spaceIds');
     expect(packagePolicyUpdate.mock.calls[0][3]).not.toHaveProperty('id');
   });
+  test('same pack NAME in two spaces resolves to each space own SO (no cross-wiring)', async () => {
+    // Wire-first groups by the policy's space, so two policies in different
+    // spaces carrying an identically-named pack must each look their SO up
+    // through their OWN space client and get their OWN schedule_id.
+    const policyA = {
+      ...buildPackagePolicy('space-a--reconcile-pack'),
+      id: 'pp-a',
+      spaceIds: ['space-a'],
+    };
+    const policyB = {
+      ...buildPackagePolicy('space-b--reconcile-pack'),
+      id: 'pp-b',
+      spaceIds: ['space-b'],
+    };
+
+    const clientsBySpace: Record<string, ReturnType<typeof createMockScopedClient>> = {
+      'space-a': createMockScopedClient({
+        'reconcile-pack': {
+          id: 'pack-a',
+          attrs: {
+            name: 'reconcile-pack',
+            enabled: true,
+            created_at: '2026-01-01T00:00:00.000Z',
+            queries: [
+              { id: 'q1', query: 'SELECT 1', interval: 60, name: 'q1', schedule_id: 'sched-A' },
+            ],
+          },
+        },
+      }),
+      'space-b': createMockScopedClient({
+        'reconcile-pack': {
+          id: 'pack-b',
+          attrs: {
+            name: 'reconcile-pack',
+            enabled: true,
+            created_at: '2026-01-01T00:00:00.000Z',
+            queries: [
+              { id: 'q1', query: 'SELECT 1', interval: 60, name: 'q1', schedule_id: 'sched-B' },
+            ],
+          },
+        },
+      }),
+    };
+
+    const core = createMockCoreStart(clientsBySpace['space-a']);
+    (core.savedObjects.getScopedClient as jest.Mock) = jest
+      .fn()
+      .mockImplementation((req: { spaceId?: unknown }) => clientsBySpace[String(req.spaceId)]);
+
+    const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+    await reconcileScheduleIdsToWire({
+      coreStart: core,
+      osqueryContext: createMockOsqueryContext({
+        fetchAllItems: mockFetchAllItems([policyA, policyB]),
+        update: packagePolicyUpdate,
+      }),
+      logger: createMockLogger() as unknown as Parameters<
+        typeof reconcileScheduleIdsToWire
+      >[0]['logger'],
+    });
+
+    expect(packagePolicyUpdate).toHaveBeenCalledTimes(2);
+    const byPolicyId = Object.fromEntries(
+      packagePolicyUpdate.mock.calls.map((call) => [call[2], call[3]])
+    );
+    // Each policy gets its OWN space's pack, keyed for its own space.
+    expect(
+      byPolicyId['pp-a'].inputs[0].config.osquery.value.packs['space-a--reconcile-pack'].queries.q1
+        .schedule_id
+    ).toBe('sched-A');
+    expect(
+      byPolicyId['pp-b'].inputs[0].config.osquery.value.packs['space-b--reconcile-pack'].queries.q1
+        .schedule_id
+    ).toBe('sched-B');
+  });
+
+  test('a policy with no spaceIds falls back to the default space', async () => {
+    // Space awareness disabled (or a pre-migration policy) leaves `spaceIds`
+    // undefined; the block must still resolve rather than land in a space
+    // whose scoped client would 404 the write.
+    const { spaceIds: _omit, ...policyWithoutSpaceIds } = {
+      ...buildPackagePolicy(),
+      spaceIds: undefined,
+    } as Record<string, unknown>;
+    const scopedClient = createMockScopedClient({ 'reconcile-pack': DEFAULT_PACK_ENTRY });
+    const getScopedClient = jest.fn().mockReturnValue(scopedClient);
+    const core = createMockCoreStart(scopedClient);
+    (core.savedObjects.getScopedClient as jest.Mock) = getScopedClient;
+
+    const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+    const result = await reconcileScheduleIdsToWire({
+      coreStart: core,
+      osqueryContext: createMockOsqueryContext({
+        fetchAllItems: mockFetchAllItems([policyWithoutSpaceIds]),
+        update: packagePolicyUpdate,
+      }),
+      logger: createMockLogger() as unknown as Parameters<
+        typeof reconcileScheduleIdsToWire
+      >[0]['logger'],
+    });
+
+    expect(result.hadFailures).toBe(false);
+    expect(String(getScopedClient.mock.calls[0][0].spaceId)).toBe('default');
+    expect(
+      packagePolicyUpdate.mock.calls[0][3].inputs[0].config.osquery.value.packs[
+        'default--reconcile-pack'
+      ].queries.q1.schedule_id
+    ).toBe('sched-q1');
+  });
+
+  test('a policy shared across multiple spaces is written through its first space', async () => {
+    // Fleet can list several spaceIds on one policy. We must pick one
+    // deterministically — writing through a space the policy is not in 404s.
+    const policy = {
+      ...buildPackagePolicy('space-a--reconcile-pack'),
+      spaceIds: ['space-a', 'space-b'],
+    };
+    const scopedClient = createMockScopedClient({ 'reconcile-pack': DEFAULT_PACK_ENTRY });
+    const getScopedClient = jest.fn().mockReturnValue(scopedClient);
+    const core = createMockCoreStart(scopedClient);
+    (core.savedObjects.getScopedClient as jest.Mock) = getScopedClient;
+
+    const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+    const result = await reconcileScheduleIdsToWire({
+      coreStart: core,
+      osqueryContext: createMockOsqueryContext({
+        fetchAllItems: mockFetchAllItems([policy]),
+        update: packagePolicyUpdate,
+      }),
+      logger: createMockLogger() as unknown as Parameters<
+        typeof reconcileScheduleIdsToWire
+      >[0]['logger'],
+    });
+
+    expect(result.hadFailures).toBe(false);
+    // Exactly one write, through space-a, keyed for space-a — not once per space.
+    expect(packagePolicyUpdate).toHaveBeenCalledTimes(1);
+    expect(String(getScopedClient.mock.calls[0][0].spaceId)).toBe('space-a');
+    expect(
+      Object.keys(packagePolicyUpdate.mock.calls[0][3].inputs[0].config.osquery.value.packs)
+    ).toEqual(['space-a--reconcile-pack']);
+  });
+
+  test('a block whose key space disagrees with the policy space is skipped, not mis-written', async () => {
+    // e.g. a `default--`-keyed block sitting on a space-a policy. We trust
+    // `spaceIds`, so the SO is looked up in space-a and legitimately not found:
+    // warn and skip. It must NOT fall back to the key's space and write a block
+    // built from another space's pack.
+    const policy = { ...buildPackagePolicy(), spaceIds: ['space-a'] };
+    const scopedClient = createMockScopedClient({ 'reconcile-pack': DEFAULT_PACK_ENTRY });
+    // Only the default-space client knows this pack; space-a's find returns none.
+    scopedClient.find = jest.fn().mockResolvedValue({
+      saved_objects: [],
+      total: 0,
+      page: 1,
+      per_page: 1,
+    });
+    const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+    const logger = createMockLogger();
+
+    const result = await reconcileScheduleIdsToWire({
+      coreStart: createMockCoreStart(scopedClient),
+      osqueryContext: createMockOsqueryContext({
+        fetchAllItems: mockFetchAllItems([policy]),
+        update: packagePolicyUpdate,
+      }),
+      logger: logger as unknown as Parameters<typeof reconcileScheduleIdsToWire>[0]['logger'],
+    });
+
+    expect(packagePolicyUpdate).not.toHaveBeenCalled();
+    // An absent SO is not a transient fault, so the one-shot still completes.
+    expect(result.hadFailures).toBe(false);
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('no pack SO found for key'));
+  });
+
+  test('a legacy bare-key block whose name itself contains "--" is not truncated', async () => {
+    // Legacy blocks predate `pack_name`, so the key IS the name. Stripping a
+    // `${spaceId}--` prefix must not also eat the `--` inside the name.
+    const policy = {
+      ...buildPackagePolicy('my--pack', 'pack-1'),
+      spaceIds: ['default'],
+    };
+    const scopedClient = createMockScopedClient({
+      'my--pack': {
+        id: 'pack-1',
+        attrs: {
+          name: 'my--pack',
+          enabled: true,
+          created_at: '2026-01-01T00:00:00.000Z',
+          queries: [
+            { id: 'q1', query: 'SELECT 1', interval: 60, name: 'q1', schedule_id: 'sched-q1' },
+          ],
+        },
+      },
+    });
+    const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+
+    const result = await reconcileScheduleIdsToWire({
+      coreStart: createMockCoreStart(scopedClient),
+      osqueryContext: createMockOsqueryContext({
+        fetchAllItems: mockFetchAllItems([policy]),
+        update: packagePolicyUpdate,
+      }),
+      logger: createMockLogger() as unknown as Parameters<
+        typeof reconcileScheduleIdsToWire
+      >[0]['logger'],
+    });
+
+    expect(result.hadFailures).toBe(false);
+    expect(scopedClient.find).toHaveBeenCalledWith(
+      expect.objectContaining({ filter: expect.stringContaining('"my--pack"') })
+    );
+    // Migrated to the canonical key, legacy key dropped.
+    const writtenPacks = packagePolicyUpdate.mock.calls[0][3].inputs[0].config.osquery.value.packs;
+    expect(Object.keys(writtenPacks)).toEqual(['default--my--pack']);
+  });
 
   test('mints nothing on the Saved Object (no SO update call)', async () => {
     const scopedClient = createMockScopedClient({ 'reconcile-pack': DEFAULT_PACK_ENTRY });
