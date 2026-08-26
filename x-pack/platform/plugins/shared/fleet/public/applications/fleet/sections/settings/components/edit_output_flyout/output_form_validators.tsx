@@ -21,15 +21,7 @@ const toSecretValidator =
     return validator(value ?? '');
   };
 
-const getAllIndices = (str: string, substring: string): number[] => {
-  const indices = [];
-  let index = str.indexOf(substring);
-  while (index !== -1) {
-    indices.push(index);
-    index = str.indexOf(substring, index + 1);
-  }
-  return indices;
-};
+const validKafkaTopicToken = /%\{\[[^\]]+\](?::[^}]*)?\}/g;
 
 export function validateKafkaHosts(value: string[]) {
   const res: Array<{ message: string; index?: number }> = [];
@@ -386,10 +378,8 @@ export function validateDynamicKafkaTopics(value: Array<EuiComboBoxOptionOption<
       );
     } else {
       const topic = val.value;
-      const openingBrackets = getAllIndices(topic, '{[');
-      const closingBracketCount =
-        getAllIndices(topic, ']}').length + getAllIndices(topic, ']:').length;
-      if (openingBrackets.length !== closingBracketCount) {
+      const stripped = topic.replace(validKafkaTopicToken, '');
+      if (stripped.includes('%{') || (!stripped.includes('{[') && stripped.includes(']}'))) {
         res.push(
           i18n.translate('xpack.fleet.settings.outputForm.kafkaTopicBracketsError', {
             defaultMessage:
@@ -397,8 +387,7 @@ export function validateDynamicKafkaTopics(value: Array<EuiComboBoxOptionOption<
           })
         );
       }
-      // check for preceding percent sign
-      if (!openingBrackets.every((item) => topic[item - 1] === '%')) {
+      if (/(?<!%)\{\[/.test(stripped)) {
         res.push(
           i18n.translate('xpack.fleet.settings.outputForm.kafkaTopicPercentError', {
             defaultMessage: 'Opening brackets should be preceded by a percent sign',

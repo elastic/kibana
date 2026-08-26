@@ -128,55 +128,9 @@ export const DismissedEventInResolvedSection: Story = {
   },
 };
 
-export const ImpactedServicesUnavailable: Story = {
+export const ImpactedServicesFilterActive: Story = {
   args: {
-    scenario: 'populated',
-    streamFeaturesScenario: 'error',
-  },
-  parameters: {
-    docs: {
-      description: {
-        story:
-          'Every stream refuses its knowledge indicators, so nothing resolves and the panel shows only the error and a retry.',
-      },
-    },
-  },
-};
-
-export const ImpactedServicesPartiallyUnavailable: Story = {
-  args: {
-    scenario: 'populated',
-    streamFeaturesScenario: 'partialError',
-  },
-  parameters: {
-    docs: {
-      description: {
-        story:
-          'One stream is unreachable while the others resolve. The chips that did resolve stay on the page and the callout names the stream that did not, rather than presenting a short list as a complete one.',
-      },
-    },
-  },
-};
-
-export const EventFlyoutImpactedServicesPartiallyUnavailable: Story = {
-  args: {
-    initialEntry: `/?eventId=${checkoutEvent.event_id}`,
-    scenario: 'populated',
-    streamFeaturesScenario: 'partialError',
-  },
-  parameters: {
-    docs: {
-      description: {
-        story:
-          'The same partial failure inside a detection. Select the detection card to see the impacted services section keep its resolved chips alongside the callout.',
-      },
-    },
-  },
-};
-
-export const BlastRadiusFilterActive: Story = {
-  args: {
-    initialEntry: '/?impactedServices=entity%3Acheckout-api%3Acheckout-api',
+    initialEntry: '/?impactedServices=entity%3Acheckout-api',
     scenario: 'populated',
   },
 };

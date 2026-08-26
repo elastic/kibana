@@ -367,7 +367,7 @@ export function registerInternalToolsRoutes({
       }
 
       const { results } = await workflowsManagement.management.getWorkflows(
-        { page: request.query.page, size: request.query.limit, enabled: [true] },
+        { page: request.query.page, size: request.query.limit },
         currentSpace
       );
 
@@ -377,6 +377,7 @@ export function registerInternalToolsRoutes({
             id: workflow.id,
             name: workflow.name,
             description: workflow.description,
+            enabled: workflow.enabled,
           })),
         },
       });
