@@ -140,11 +140,21 @@ describe('Transform: Transform List Expanded Row <ExpandedRowDetailsPane />', ()
   });
 
   test('hides project routing when there are no linked projects', async () => {
+    const fetchProjects = jest.fn().mockResolvedValue({
+      origin: {
+        _id: 'origin-id',
+        _alias: 'local_project',
+        _organisation: 'org',
+        _type: 'security',
+      },
+      linkedProjects: [],
+    });
     appDependencies.useAppDependencies().cps = {
       isTierEligible: true,
       cpsManager: {
         whenReady: jest.fn().mockResolvedValue(undefined),
         hasLinkedProjects: jest.fn(() => false),
+        fetchProjects,
       },
     } as any;
     mockUseGetTransformStats.mockReturnValue({
@@ -167,10 +177,46 @@ describe('Transform: Transform List Expanded Row <ExpandedRowDetailsPane />', ()
     renderWithI18n(<ExpandedRowDetailsPane item={item} onAlertEdit={onAlertEdit} />);
 
     await waitFor(() => {
-      expect(appDependencies.useAppDependencies().cps?.cpsManager?.whenReady).toHaveBeenCalled();
+      expect(fetchProjects).toHaveBeenCalled();
     });
     expect(screen.queryByText('Project routing')).not.toBeInTheDocument();
     expect(screen.queryByText('_alias:*')).not.toBeInTheDocument();
+  });
+
+  test('keeps project routing visible when linked project discovery fails', async () => {
+    const fetchProjects = jest.fn().mockRejectedValue(new Error('Project fetch failed'));
+    appDependencies.useAppDependencies().cps = {
+      isTierEligible: true,
+      cpsManager: {
+        whenReady: jest.fn().mockResolvedValue(undefined),
+        hasLinkedProjects: jest.fn(() => false),
+        fetchProjects,
+      },
+    } as any;
+    mockUseGetTransformStats.mockReturnValue({
+      data: undefined,
+      isError: false,
+      isLoading: false,
+    } as unknown as ReturnType<typeof useGetTransformStats>);
+
+    const item = {
+      ...transformListRow,
+      config: {
+        ...transformListRow.config,
+        source: {
+          ...transformListRow.config.source,
+          project_routing: '_alias:*',
+        },
+      },
+    } as unknown as TransformListRow;
+
+    renderWithI18n(<ExpandedRowDetailsPane item={item} onAlertEdit={onAlertEdit} />);
+
+    await waitFor(() => {
+      expect(fetchProjects).toHaveBeenCalled();
+    });
+    expect(screen.getByText('Project routing')).toBeInTheDocument();
+    expect(screen.getByText('_alias:*')).toBeInTheDocument();
   });
 
   test('displays source_index when index is an array', () => {

@@ -240,13 +240,21 @@ describe('Transform: <Wizard />', () => {
   test('does not render project scope or inject default routing when there are no linked projects', async () => {
     const appDeps = appDependencies.useAppDependencies();
     const getDefaultProjectRouting = jest.fn(() => PROJECT_ROUTING.ALL);
-    const whenReady = jest.fn().mockResolvedValue(undefined);
+    const fetchProjects = jest.fn().mockResolvedValue({
+      origin: {
+        _id: 'origin-id',
+        _alias: 'local_project',
+        _organisation: 'org',
+        _type: 'security',
+      },
+      linkedProjects: [],
+    });
     appDeps.cps = {
       isTierEligible: true,
       cpsManager: {
-        whenReady,
+        whenReady: jest.fn().mockResolvedValue(undefined),
         hasLinkedProjects: jest.fn(() => false),
-        fetchProjects: jest.fn(),
+        fetchProjects,
         getDefaultProjectRouting,
       },
     } as any;
@@ -258,27 +266,28 @@ describe('Transform: <Wizard />', () => {
     });
 
     await waitFor(() => {
-      expect(whenReady).toHaveBeenCalled();
+      expect(fetchProjects).toHaveBeenCalledWith(PROJECT_ROUTING.ALL);
     });
     expect(screen.queryByTestId('transformProjectScopePicker')).not.toBeInTheDocument();
     expect(mockStepDefineFormProps.overrides.projectRouting).toBeUndefined();
-    expect(getDefaultProjectRouting).not.toHaveBeenCalled();
   });
 
   test('shows a visible project scope error when project fetch fails', async () => {
     const appDeps = appDependencies.useAppDependencies();
+    const getDefaultProjectRouting = jest.fn(() => PROJECT_ROUTING.ALL);
     appDeps.cps = {
       isTierEligible: true,
       cpsManager: {
         whenReady: jest.fn().mockResolvedValue(undefined),
-        hasLinkedProjects: jest.fn(() => true),
+        hasLinkedProjects: jest.fn(() => false),
         fetchProjects: jest.fn().mockRejectedValue(new Error('Project fetch failed')),
-        getDefaultProjectRouting: jest.fn(() => PROJECT_ROUTING.ALL),
+        getDefaultProjectRouting,
       },
     } as any;
 
     renderWizard({
       initialTransformFunction: TRANSFORM_FUNCTION.LATEST,
+      searchItems: createSearchItems('current-data-view-id', 'current-data-view'),
       setSavedObjectId: jest.fn(),
     });
 
@@ -286,6 +295,8 @@ describe('Transform: <Wizard />', () => {
       expect(screen.getByText('Project scope unavailable')).toBeInTheDocument();
     });
     expect(screen.getByTestId('transformProjectScopePicker')).toBeDisabled();
+    expect(mockStepDefineFormProps.overrides.projectRouting).toBe(PROJECT_ROUTING.ALL);
+    expect(getDefaultProjectRouting).toHaveBeenCalled();
   });
 
   test('shows confirmation before changing an existing data view', async () => {
