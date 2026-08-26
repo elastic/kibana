@@ -842,13 +842,19 @@ class OutputService {
   }
 
   public async listPreconfigured() {
+    // Use the plain (non-decrypting) soClient to avoid the cost of decrypting every output.
+    // is_preconfigured is mapped with index:false so it cannot be used in a KQL filter;
+    // filter client-side instead.
     const outputs = await this.soClient.find<OutputSOAttributes>({
       type: SAVED_OBJECT_TYPE,
       perPage: SO_SEARCH_LIMIT,
-      filter: `${SAVED_OBJECT_TYPE}.attributes.is_preconfigured: true`,
     });
 
-    for (const output of outputs.saved_objects) {
+    const preconfigured = outputs.saved_objects.filter(
+      (so) => so.attributes.is_preconfigured === true
+    );
+
+    for (const output of preconfigured) {
       auditLoggingService.writeCustomSoAuditLog({
         action: 'get',
         id: output.id,
@@ -858,7 +864,7 @@ class OutputService {
     }
 
     return {
-      items: outputs.saved_objects.map<Output>((so) =>
+      items: preconfigured.map<Output>((so) =>
         outputSavedObjectToOutput({
           ...so,
           attributes: omit(so.attributes, [
@@ -868,7 +874,7 @@ class OutputService {
           ]) as OutputSOAttributes,
         })
       ),
-      total: outputs.total,
+      total: preconfigured.length,
       page: outputs.page,
       perPage: outputs.per_page,
     };
