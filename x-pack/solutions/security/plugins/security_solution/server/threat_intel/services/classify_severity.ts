@@ -20,9 +20,20 @@ const SEVERITY_BODY_CHAR_LIMIT = 30_000;
 
 const severityLevelSchema = z.enum(['low', 'medium', 'high', 'critical']);
 
+/**
+ * Caps a free-text field from the model. Truncates rather than rejecting, matching
+ * `enrich_taxonomy`: one over-long field should not throw away an otherwise good
+ * enrichment. A7 requires LLM output to be bounded before it is stored, and nothing
+ * else in the pipeline constrains how much prose a model returns.
+ */
+const boundedText = (max: number) => z.string().transform((v) => v.slice(0, max));
+
+/** A sentence or two justifying the level, not an essay. */
+const SEVERITY_RATIONALE_CHAR_LIMIT = 2_000;
+
 export const classifySeverityLlmOutputSchema = z.object({
   level: severityLevelSchema,
-  rationale: z.string().optional(),
+  rationale: boundedText(SEVERITY_RATIONALE_CHAR_LIMIT).optional(),
 });
 
 export type ClassifySeverityLlmOutput = z.infer<typeof classifySeverityLlmOutputSchema>;

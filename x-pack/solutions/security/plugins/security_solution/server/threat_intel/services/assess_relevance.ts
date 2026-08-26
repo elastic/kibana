@@ -9,17 +9,33 @@ import type { Logger } from '@kbn/core/server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import { z } from '@kbn/zod/v4';
 import { logStageUsage } from '../lib/cost_tracker';
+import { MAX_URL_LENGTH } from '../../../common/threat_intel';
 
 const RELEVANCE_BODY_CHAR_LIMIT = 30_000;
+
+/**
+ * Caps a free-text field from the model. Truncates rather than rejecting, matching
+ * `enrich_taxonomy`: one over-long field should not throw away an otherwise good
+ * enrichment. A7 requires LLM output to be bounded before it is stored, and nothing
+ * else in the pipeline constrains how much prose a model returns.
+ */
+const boundedText = (max: number) => z.string().transform((v) => v.slice(0, max));
+
+/** Roughly a paragraph. `reason` is an explanation, not a document. */
+const RELEVANCE_REASON_CHAR_LIMIT = 2_000;
+/** A handful of links; the model is asked for the primary sources, not a crawl. */
+const MAX_PRIMARY_LINKS = 20;
 
 export const relevanceOutputSchema = z.object({
   is_intelligence: z.boolean(),
   quality_class: z.enum(['intel', 'marketing', 'rollup', 'thought_leadership']),
   evidence_tier: z.enum(['primary', 'pointer', 'mixed']),
   needs_render: z.boolean(),
-  primary_links: z.array(z.string()),
+  primary_links: z
+    .array(z.string())
+    .transform((v) => v.slice(0, MAX_PRIMARY_LINKS).map((link) => link.slice(0, MAX_URL_LENGTH))),
   has_original_commentary: z.boolean(),
-  reason: z.string(),
+  reason: boundedText(RELEVANCE_REASON_CHAR_LIMIT),
 });
 
 export type RelevanceOutput = z.infer<typeof relevanceOutputSchema>;

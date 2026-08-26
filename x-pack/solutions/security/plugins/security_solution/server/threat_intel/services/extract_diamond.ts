@@ -217,9 +217,23 @@ Source:
 ${text}`;
 };
 
+/**
+ * Caps a free-text field from the model. Truncates rather than rejecting, matching
+ * `enrich_taxonomy`: one over-long field should not throw away an otherwise good
+ * enrichment. A7 requires LLM output to be bounded before it is stored, and nothing
+ * else in the pipeline constrains how much prose a model returns.
+ */
+const boundedText = (max: number) => z.string().transform((v) => v.slice(0, max));
+
+/**
+ * Each vertex summary is mapped `semantic_text`, so its length is an embedding cost
+ * paid per report per vertex, not just storage. Four vertices multiply it.
+ */
+const DIAMOND_SUMMARY_CHAR_LIMIT = 4_000;
+
 const diamondVertexSchema = z.object({
   signal: z.enum(['HIGH', 'PARTIAL', 'NONE']),
-  summary: z.string(),
+  summary: boundedText(DIAMOND_SUMMARY_CHAR_LIMIT),
 });
 
 export const extractDiamondLlmOutputSchema = z.object({
