@@ -105,7 +105,7 @@ export const AgentInstallSection = () => {
               <AgentInstallPanel
                 icon="code"
                 title={i18n.translate('xpack.searchGettingStarted.agentInstall.ide.title', {
-                  defaultMessage: 'Build in your IDE',
+                  defaultMessage: 'Prompt your agent',
                 })}
                 description={i18n.translate(
                   'xpack.searchGettingStarted.agentInstall.ide.description',
@@ -119,11 +119,10 @@ export const AgentInstallSection = () => {
                     <EuiButton
                       onClick={handleOpenInClaudeCli}
                       data-test-subj="agentInstallLaunchBtn"
-                      color="primary"
-                      fill
+                      color="text"
                     >
                       {i18n.translate('xpack.searchGettingStarted.agentInstall.userLLM.cta', {
-                        defaultMessage: 'Copy prompt',
+                        defaultMessage: 'View prompt',
                       })}
                     </EuiButton>
                   </EuiFlexItem>
@@ -183,7 +182,7 @@ export const AgentInstallSection = () => {
                     {i18n.translate('xpack.searchGettingStarted.agentInstall.cli.title', {
                       defaultMessage: 'Build from your terminal ',
                     })}
-                    <EuiBadge css={{ marginLeft: 8 }}>
+                    <EuiBadge css={{ marginLeft: 8 }} color="primary">
                       {i18n.translate('xpack.searchGettingStarted.agentInstall.cli.newBadge', {
                         defaultMessage: 'NEW',
                       })}
@@ -198,8 +197,7 @@ export const AgentInstallSection = () => {
                 )}
               >
                 <EuiButton
-                  fill
-                  iconType="commandLine"
+                  color="text"
                   onClick={handleInstallCli}
                   data-test-subj="agentInstallInstallCli"
                 >
