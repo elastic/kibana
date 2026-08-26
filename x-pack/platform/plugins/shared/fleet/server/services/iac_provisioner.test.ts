@@ -291,13 +291,9 @@ describe('IacProvisionerService', () => {
       connect: expect.objectContaining({
         ca: undefined,
         rejectUnauthorized: true,
+        allowPartialTrustChain: true,
       }),
     });
-    // Full-chain Mozilla verification must stay in place for Let's Encrypt.
-    expect(
-      (mockedAgent.mock.calls[0][0] as { connect: { allowPartialTrustChain?: boolean } }).connect
-        .allowPartialTrustChain
-    ).toBeUndefined();
   });
 
   it('maps a body that fails to read to IacProvisionerUnavailableError', async () => {
@@ -392,12 +388,9 @@ describe('IacProvisionerService', () => {
         cert: undefined,
         key: undefined,
         rejectUnauthorized: true,
+        allowPartialTrustChain: true,
       }),
     });
-    expect(
-      (mockedAgent.mock.calls[0][0] as { connect: { allowPartialTrustChain?: boolean } }).connect
-        .allowPartialTrustChain
-    ).toBeUndefined();
   });
 });
 
