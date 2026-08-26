@@ -30,6 +30,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useKibanaSpace } from '../../../../../../hooks/use_kibana_space';
@@ -77,10 +78,32 @@ interface Props {
   onLocationChange: (params: FlyoutParamProps) => void;
 }
 
-const DEFAULT_DURATION_CHART_FROM = 'now-12h';
+const DURATION_CHART_LOOKBACK_HOURS = 12;
+const DEFAULT_DURATION_CHART_FROM = `now-${DURATION_CHART_LOOKBACK_HOURS}h`;
 const DEFAULT_CURRENT_DURATION_CHART_TO = 'now';
-const DEFAULT_PREVIOUS_DURATION_CHART_FROM = 'now-24h';
-const DEFAULT_PREVIOUS_DURATION_CHART_TO = 'now-12h';
+const DEFAULT_PREVIOUS_DURATION_CHART_FROM = `now-${DURATION_CHART_LOOKBACK_HOURS * 2}h`;
+const DEFAULT_PREVIOUS_DURATION_CHART_TO = DEFAULT_DURATION_CHART_FROM;
+
+/**
+ * For monitors younger than the 12h window, anchor the lower bound at creation
+ * time and drop the previous-period comparison — otherwise the mostly-empty
+ * window collapses each series to a single point and the chart looks empty (#221399).
+ */
+export const getDurationChartTimeRange = (
+  createdAt?: string,
+  now: moment.Moment = moment()
+): { from: string; showPreviousPeriod: boolean } => {
+  if (createdAt) {
+    const created = moment(createdAt);
+    if (
+      created.isValid() &&
+      created.isAfter(now.clone().subtract(DURATION_CHART_LOOKBACK_HOURS, 'hours'))
+    ) {
+      return { from: created.toISOString(), showPreviousPeriod: false };
+    }
+  }
+  return { from: DEFAULT_DURATION_CHART_FROM, showPreviousPeriod: true };
+};
 
 const VIS_COLORS = [
   'euiColorVis0',
@@ -100,11 +123,13 @@ function DetailFlyoutDurationChart({
   location,
   allLocations,
   remoteName,
+  createdAt,
 }: {
   id: string;
   location: string;
   allLocations: Array<{ id: string; label: string }>;
   remoteName?: string;
+  createdAt?: string;
 }) {
   const { euiTheme } = useEuiTheme();
   const [showAllLocations, setShowAllLocations] = useState(false);
@@ -113,13 +138,18 @@ function DetailFlyoutDurationChart({
     exploratoryView: { ExploratoryViewEmbeddable },
   } = useKibana<ClientPluginsStart>().services;
 
+  const { from: chartFrom, showPreviousPeriod } = useMemo(
+    () => getDurationChartTimeRange(createdAt),
+    [createdAt]
+  );
+
   const attributes = useMemo(() => {
     if (showAllLocations) {
       return allLocations.map((loc, idx) => ({
         seriesType: 'line' as const,
         color: euiTheme.colors.vis[VIS_COLORS[idx % VIS_COLORS.length]],
         time: {
-          from: DEFAULT_DURATION_CHART_FROM,
+          from: chartFrom,
           to: DEFAULT_CURRENT_DURATION_CHART_TO,
         },
         reportDefinitions: {
@@ -138,7 +168,7 @@ function DetailFlyoutDurationChart({
         seriesType: 'area' as const,
         color: euiTheme.colors.vis.euiColorVis1,
         time: {
-          from: DEFAULT_DURATION_CHART_FROM,
+          from: chartFrom,
           to: DEFAULT_CURRENT_DURATION_CHART_TO,
         },
         reportDefinitions: {
@@ -151,25 +181,37 @@ function DetailFlyoutDurationChart({
         name: DURATION_SERIES_NAME,
         operationType: 'average' as const,
       },
-      {
-        seriesType: 'line' as const,
-        color: euiTheme.colors.vis.euiColorVis7,
-        time: {
-          from: DEFAULT_PREVIOUS_DURATION_CHART_FROM,
-          to: DEFAULT_PREVIOUS_DURATION_CHART_TO,
-        },
-        reportDefinitions: {
-          'monitor.id': [id],
-          'observer.geo.name': [location],
-        },
-        filters: [{ field: 'observer.geo.name', values: [location] }],
-        dataType: 'synthetics' as const,
-        selectedMetricField: 'monitor.duration.us',
-        name: PREVIOUS_PERIOD_SERIES_NAME,
-        operationType: 'average' as const,
-      },
+      ...(showPreviousPeriod
+        ? [
+            {
+              seriesType: 'line' as const,
+              color: euiTheme.colors.vis.euiColorVis7,
+              time: {
+                from: DEFAULT_PREVIOUS_DURATION_CHART_FROM,
+                to: DEFAULT_PREVIOUS_DURATION_CHART_TO,
+              },
+              reportDefinitions: {
+                'monitor.id': [id],
+                'observer.geo.name': [location],
+              },
+              filters: [{ field: 'observer.geo.name', values: [location] }],
+              dataType: 'synthetics' as const,
+              selectedMetricField: 'monitor.duration.us',
+              name: PREVIOUS_PERIOD_SERIES_NAME,
+              operationType: 'average' as const,
+            },
+          ]
+        : []),
     ];
-  }, [showAllLocations, allLocations, id, location, euiTheme.colors.vis]);
+  }, [
+    showAllLocations,
+    allLocations,
+    id,
+    location,
+    euiTheme.colors.vis,
+    chartFrom,
+    showPreviousPeriod,
+  ]);
 
   const dataTypesIndexPatterns = useMemo(
     () => (remoteName ? { synthetics: getSyntheticsCcsIndex(remoteName) } : undefined),
@@ -220,11 +262,11 @@ export function LoadingState() {
 }
 
 function DetailFlyoutStatusHistory({
-  configId,
+  monitorId,
   location,
   remoteName,
 }: {
-  configId: string;
+  monitorId: string;
   location: string;
   remoteName?: string;
 }) {
@@ -239,7 +281,7 @@ function DetailFlyoutStatusHistory({
         to="now"
         brushable={false}
         periodCaption={LAST_24H_TEXT}
-        monitorId={configId}
+        monitorId={monitorId}
         locationLabel={location}
         remoteName={remoteName}
       />
@@ -263,12 +305,22 @@ export function MonitorDetailFlyout(props: Props) {
     return allConfigs.find((ov) => ov.configId === configId);
   }, [overviewStatus, configId]);
 
+  // Ping-backed charts query `monitor.id`. For project monitors that is
+  // `custom_heartbeat_id` (`monitorQueryId`), not the saved-object UUID.
+  const monitorQueryId = monitor?.monitorQueryId ?? id;
+
   const isRemote = Boolean(monitor?.remote);
 
   const setLocation = useCallback(
     (locId: string, locLabel: string) =>
-      onLocationChange({ id, configId, location: locLabel, locationId: locId, spaces }),
-    [onLocationChange, id, configId, spaces]
+      onLocationChange({
+        id: monitorQueryId,
+        configId,
+        location: locLabel,
+        locationId: locId,
+        spaces,
+      }),
+    [onLocationChange, monitorQueryId, configId, spaces]
   );
 
   const detailLink = useMonitorDetailLocator({
@@ -324,6 +376,14 @@ export function MonitorDetailFlyout(props: Props) {
   const monitorObject = useSelector(selectSyntheticsMonitor);
   const isLoading = useSelector(selectSyntheticsMonitorLoading);
   const error = useSelector(selectSyntheticsMonitorError);
+  const currentMonitorObject =
+    monitorObject?.[ConfigKey.CONFIG_ID] === configId ? monitorObject : null;
+  // Duration chart reads pings by monitor.id, not the saved object. Wait for
+  // the matching SO so we don't apply a stale `created_at`, but still render
+  // (default 12h window) when the SO 404s — e.g. cross-space monitors whose
+  // overview metadata is already on `monitor`.
+  const canRenderDurationChart =
+    isRemote || Boolean(currentMonitorObject) || Boolean(monitor && error && !isLoading);
 
   const upsertSuccess = upsertStatus?.status === 'success';
 
@@ -352,10 +412,10 @@ export function MonitorDetailFlyout(props: Props) {
   const getColor = useMonitorHealthColor();
 
   useMonitorAttachmentConfigWithMonitor(
-    !isRemote && monitorObject
+    !isRemote && currentMonitorObject
       ? {
-          ...monitorObject,
-          [ConfigKey.CONFIG_ID]: monitorObject[ConfigKey.CONFIG_ID] ?? configId,
+          ...currentMonitorObject,
+          [ConfigKey.CONFIG_ID]: currentMonitorObject[ConfigKey.CONFIG_ID] ?? configId,
         }
       : null,
     isLoading
@@ -371,7 +431,7 @@ export function MonitorDetailFlyout(props: Props) {
     });
   }, []);
 
-  const displayName = monitor?.name ?? monitorObject?.[ConfigKey.NAME] ?? configId;
+  const displayName = monitor?.name ?? currentMonitorObject?.[ConfigKey.NAME] ?? configId;
 
   const [selectedTab, setSelectedTab] = useState<FlyoutTabId>('overview');
 
@@ -500,7 +560,7 @@ export function MonitorDetailFlyout(props: Props) {
               spaceId={crossSpaceId}
             />
             <FlyoutSummaryKPIs
-              monitorId={id}
+              monitorId={monitorQueryId}
               locationLabel={props.location}
               from="now-30d"
               to="now"
@@ -508,31 +568,35 @@ export function MonitorDetailFlyout(props: Props) {
               remoteName={monitor?.remote?.remoteName}
             />
             <DetailFlyoutStatusHistory
-              configId={configId}
+              monitorId={monitorQueryId}
               location={props.location}
               remoteName={monitor?.remote?.remoteName}
             />
           </>
         )}
-        {selectedTab === 'performance' && (
-          <DetailFlyoutDurationChart
-            id={id}
-            location={props.location}
-            allLocations={monitor?.locations ?? []}
-            remoteName={monitor?.remote?.remoteName}
-          />
-        )}
+        {selectedTab === 'performance' &&
+          (canRenderDurationChart ? (
+            <DetailFlyoutDurationChart
+              id={monitorQueryId}
+              location={props.location}
+              allLocations={monitor?.locations ?? []}
+              remoteName={monitor?.remote?.remoteName}
+              createdAt={currentMonitorObject?.created_at}
+            />
+          ) : (
+            <LoadingState />
+          ))}
         {selectedTab === 'details' &&
           (isRemote && monitor ? (
             <RemoteMonitorDetailsPanel monitor={monitor} latestPing={monitorDetail.data} />
-          ) : monitorObject ? (
+          ) : currentMonitorObject ? (
             <MonitorDetailsPanel
               hasBorder={false}
               latestPing={monitorDetail.data}
               configId={configId}
               monitor={{
-                ...monitorObject,
-                id,
+                ...currentMonitorObject,
+                id: monitorQueryId,
               }}
               loading={Boolean(isLoading)}
             />
