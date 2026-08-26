@@ -91,7 +91,12 @@ jest.mock('../step_define', () => {
     },
     StepDefineForm: (props: Record<string, any>) => {
       mockStepDefineFormProps = props;
-      return <div data-test-subj="mockStepDefineForm" />;
+      return (
+        <div data-test-subj="mockStepDefineForm">
+          <span>Source data</span>
+          {props.dataViewPicker}
+        </div>
+      );
     },
     StepDefineSummary: () => <div data-test-subj="mockStepDefineSummary" />,
   };

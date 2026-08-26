@@ -31,7 +31,7 @@ describe('Transform: Transform List <CreateTransformButton />', () => {
         <CreateTransformButton onClick={jest.fn()} transformNodes={1} />
       </QueryClientProvider>
     );
-    expect(container.textContent).toBe('Create a transform');
+    expect(container.textContent).toBe('Create transform');
   });
 
   test('opens transform function picker and calls onClick with selection', async () => {

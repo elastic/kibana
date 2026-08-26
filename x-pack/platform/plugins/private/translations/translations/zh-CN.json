@@ -58308,7 +58308,6 @@
     "xpack.transform.transformSettingValidations.retentionPolicyMaxAgeInvalidMessage": "最大存在时间格式无效。至少需要 60s。",
     "xpack.transform.transformsTitle": "转换",
     "xpack.transform.transformsWizard.cloneTransformTitle": "克隆转换",
-    "xpack.transform.transformsWizard.createTransformTitle": "创建转换",
     "xpack.transform.transformsWizard.stepConfigurationTitle": "配置",
     "xpack.transform.transformsWizard.stepCreateTitle": "创建",
     "xpack.transform.transformsWizard.stepDetailsTitle": "作业详情",

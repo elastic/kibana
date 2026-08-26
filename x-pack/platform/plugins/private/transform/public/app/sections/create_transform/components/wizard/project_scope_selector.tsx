@@ -182,6 +182,7 @@ export const ProjectScopeSelector = ({
         closePopover={() => setIsPopoverOpen(false)}
         isOpen={isPopoverOpen}
         panelPaddingSize="none"
+        panelProps={{ css: { width: 560 } }}
       >
         {error ? (
           <EuiText color="danger" size="s">

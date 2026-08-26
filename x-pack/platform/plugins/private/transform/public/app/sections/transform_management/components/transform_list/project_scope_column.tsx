@@ -185,6 +185,7 @@ export const ProjectScopeColumn = ({ cpsManager, projectRouting }: ProjectScopeC
       isOpen={isPopoverOpen}
       closePopover={() => setIsPopoverOpen(false)}
       panelPaddingSize="none"
+      panelProps={{ css: { width: 320 } }}
       anchorPosition="downLeft"
       repositionOnScroll
     >

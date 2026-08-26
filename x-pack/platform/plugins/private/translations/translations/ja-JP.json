@@ -58305,7 +58305,6 @@
     "xpack.transform.transformSettingValidations.retentionPolicyMaxAgeInvalidMessage": "無効な最大年齢形式です。60秒以上が必要です。",
     "xpack.transform.transformsTitle": "変換",
     "xpack.transform.transformsWizard.cloneTransformTitle": "クローントランスフォーム",
-    "xpack.transform.transformsWizard.createTransformTitle": "トランスフォームの作成",
     "xpack.transform.transformsWizard.stepConfigurationTitle": "構成",
     "xpack.transform.transformsWizard.stepCreateTitle": "作成",
     "xpack.transform.transformsWizard.stepDetailsTitle": "ジョブの詳細",

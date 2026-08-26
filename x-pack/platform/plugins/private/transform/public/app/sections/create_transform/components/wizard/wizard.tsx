@@ -265,6 +265,8 @@ export const Wizard: FC<WizardProps> = React.memo(
       <DataViewPicker
         compressed={false}
         currentDataViewId={dataView?.id}
+        showDataViewLabel={false}
+        showDropdownIcon={false}
         savedDataViews={savedDataViews}
         isDisabled={isDataViewPickerDisabled}
         onChangeDataView={requestDataViewChange}
@@ -279,6 +281,8 @@ export const Wizard: FC<WizardProps> = React.memo(
             : undefined
         }
         trigger={{
+          iconSide: 'right',
+          iconType: 'chevronSingleDown',
           label:
             dataView?.getName() ??
             i18n.translate('xpack.transform.stepDefineForm.selectDataViewLabel', {
@@ -318,7 +322,7 @@ export const Wizard: FC<WizardProps> = React.memo(
       </EuiFormRow>
     );
     const dataViewPicker = (
-      <EuiFlexGroup alignItems="flexStart" gutterSize="m">
+      <EuiFlexGroup alignItems="flexStart" gutterSize="s">
         {projectScopeSelector}
         <EuiFlexItem grow>{dataViewPickerRow}</EuiFlexItem>
       </EuiFlexGroup>

@@ -57868,7 +57868,6 @@
     "xpack.transform.transformSettingValidations.retentionPolicyMaxAgeInvalidMessage": "Format d'âge maximal non valide. Le minimum requis est de 60 s.",
     "xpack.transform.transformsTitle": "Transformations",
     "xpack.transform.transformsWizard.cloneTransformTitle": "Cloner la transformation",
-    "xpack.transform.transformsWizard.createTransformTitle": "Créer une transformation",
     "xpack.transform.transformsWizard.stepConfigurationTitle": "Configuration",
     "xpack.transform.transformsWizard.stepCreateTitle": "Créer",
     "xpack.transform.transformsWizard.stepDetailsTitle": "Détails de transformation",
