@@ -35,11 +35,15 @@ export const setYaraLogger = (nextLogger: Logger | undefined): void => {
  */
 export const validateYaraRule = async (source: string): Promise<YaraValidateResult> => {
   const started = performance.now();
-  const mod = await loadModule();
+  const mod = await loadYaraValidateModule();
   let ptr = 0;
 
   try {
     ptr = mod.ccall<number>('validate_yara', 'number', ['string'], [source]);
+    if (ptr === 0) {
+      // calloc/malloc failure in WASM. Not a trap — the module remains usable.
+      throw new Error('libyara WASM validate_yara returned null (allocation failed)');
+    }
     const json = mod.UTF8ToString(ptr);
     const result = parseResult(json);
     const durationMs = Math.round(performance.now() - started);
@@ -87,7 +91,7 @@ export const validateYaraRule = async (source: string): Promise<YaraValidateResu
  * (e.g. `"4.3.2"`). See `wasm/dist/ENGINE.md`.
  */
 export const getYaraEngineVersion = async (): Promise<string> => {
-  const mod = await loadModule();
+  const mod = await loadYaraValidateModule();
   try {
     return mod.ccall<string>('yara_engine_version', 'string', [], []);
   } catch (error) {
@@ -126,7 +130,8 @@ const isWasmTrap = (error: unknown): boolean =>
     (/memory access out of bounds|function signature mismatch|Aborted\(/i.test(error.message) ||
       error.name === 'RuntimeError'));
 
-const loadModule = async (): Promise<YaraValidateModule> => {
+/** @internal Exported so tests can stub WASM `ccall` on the loaded module. */
+export const loadYaraValidateModule = async (): Promise<YaraValidateModule> => {
   if (!modulePromise) {
     modulePromise = (async () => {
       const started = performance.now();

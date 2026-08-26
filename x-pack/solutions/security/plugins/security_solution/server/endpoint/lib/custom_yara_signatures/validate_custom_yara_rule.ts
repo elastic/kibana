@@ -6,7 +6,7 @@
  */
 
 import type { OsTypeArray } from '@kbn/securitysolution-io-ts-list-types';
-import type { YaraCompiledRule, YaraValidateResult } from '../libyara';
+import type { YaraCompiledRule, YaraMetaKeyOfInterest, YaraValidateResult } from '../libyara';
 import { validateYaraRule } from '../libyara';
 import { MAX_YARA_RULE_CONTENT_BYTE_LENGTH, MAXIMUM_RULE_IDENTIFIER_LENGTH } from './constants';
 
@@ -82,7 +82,7 @@ const getRuleIdentifierLineNumber = (textLines: string[], identifier: string) =>
 
 const findFirstOccurrenceLineNumberAfterLineNumber = (
   textLines: string[],
-  searchString: string,
+  searchString: YaraMetaKeyOfInterest,
   startLineNumber: number
 ) => {
   const lineIndex = textLines.findIndex(

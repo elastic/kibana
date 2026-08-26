@@ -25,7 +25,7 @@ jest.mock('../../../endpoint/lib/libyara', () => ({
     warnings: [],
     errorCount: 0,
     warningCount: 0,
-    rules: [],
+    rules: [{ identifier: 'test', meta: {}, duplicateMeta: [] }],
   })),
   getYaraEngineVersion: jest.fn(async () => 'MOCKED_VERSION'),
 }));
@@ -51,7 +51,7 @@ describe('YARA Signatures API validations', () => {
       warnings: [],
       errorCount: 0,
       warningCount: 0,
-      rules: [],
+      rules: [{ identifier: 'test', meta: {}, duplicateMeta: [] }],
     });
   });
 

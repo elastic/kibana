@@ -6,7 +6,12 @@
  */
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { getYaraEngineVersion, setYaraLogger, validateYaraRule } from './validate_yara_rule';
+import {
+  getYaraEngineVersion,
+  loadYaraValidateModule,
+  setYaraLogger,
+  validateYaraRule,
+} from './validate_yara_rule';
 
 /**
  * Smoke test against the real libyara WASM artifact.
@@ -19,6 +24,46 @@ describe('validateYaraRule (libyara WASM)', () => {
 
   it('reports the pinned engine version', async () => {
     await expect(getYaraEngineVersion()).resolves.toBe('4.3.2');
+  });
+
+  it('throws a clear error when validate_yara returns a null pointer', async () => {
+    const mockLogger = loggingSystemMock.createLogger();
+    setYaraLogger(mockLogger);
+
+    const mod = await loadYaraValidateModule();
+    const originalCcall = mod.ccall;
+    const utf8ToString = jest.spyOn(mod, 'UTF8ToString');
+
+    mod.ccall = ((
+      ident: string,
+      returnType: string | null,
+      argTypes: string[],
+      args: unknown[]
+    ) => {
+      if (ident === 'validate_yara') {
+        return 0;
+      }
+      if (ident === 'validate_yara_free') {
+        throw new Error('validate_yara_free should not be called for a null pointer');
+      }
+      return originalCcall(ident, returnType, argTypes, args);
+    }) as typeof mod.ccall;
+
+    try {
+      await expect(validateYaraRule('rule X { condition: true }')).rejects.toThrow(
+        'libyara WASM validate_yara returned null (allocation failed)'
+      );
+      expect(utf8ToString).not.toHaveBeenCalled();
+      expect(
+        mockLogger.error.mock.calls.some(
+          (call) => typeof call[0] === 'string' && call[0].includes('WASM trap')
+        )
+      ).toBe(false);
+      await expect(getYaraEngineVersion()).resolves.toBe('4.3.2');
+    } finally {
+      mod.ccall = originalCcall;
+      utf8ToString.mockRestore();
+    }
   });
 
   it('accepts a minimal valid rule', async () => {
