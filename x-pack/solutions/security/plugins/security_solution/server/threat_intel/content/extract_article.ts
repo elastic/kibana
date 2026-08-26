@@ -6,6 +6,7 @@
  */
 
 import * as cheerio from 'cheerio';
+import { MAX_PARSE_BYTES } from './text';
 
 /**
  * Strip known page chrome (nav/header/footer/sidebar) from raw vendor HTML,
@@ -69,16 +70,41 @@ const CHROME_SELECTORS = [
 export const extractArticleHtml = (rawHtml: string): string => {
   if (!rawHtml) return rawHtml;
 
-  const $ = cheerio.load(rawHtml);
+  // Fetched pages are attacker-influenced and unbounded, and cheerio builds a full
+  // DOM. Truncating keeps a very fat page degraded rather than failed, since the
+  // article body is nearly always near the top.
+  const html = rawHtml.length > MAX_PARSE_BYTES ? rawHtml.slice(0, MAX_PARSE_BYTES) : rawHtml;
 
-  // Find the article container.
+  const $ = cheerio.load(html);
+
+  /**
+   * Pick the container with the most text across *all* selectors, rather than the
+   * first match of the first selector that hits.
+   *
+   * First-match-wins had two failure modes and they compound. `ARTICLE_SELECTORS`
+   * puts `article` ahead of `main`, so any `<article>` on the page beat a `<main>`
+   * holding the real report; and `.first()` then took the earliest of those. A page
+   * with an `<article>` teaser card above a `<main>` body returned the teaser, and
+   * every IOC in the report was missed.
+   *
+   * Text length is a blunt proxy for "the substantive one", but it is the signal that
+   * actually separates a card from a body, and it is what the reviewer asked for.
+   * Selector order survives only as a tie-break, so a precise `article` still beats a
+   * `main` of identical length.
+   */
+  const candidates = ARTICLE_SELECTORS.flatMap((selector, priority) =>
+    $(selector)
+      .toArray()
+      .map((el) => ({ el, priority, length: $(el).text().trim().length }))
+  );
+
   let $container: ReturnType<typeof $> | null = null;
-  for (const selector of ARTICLE_SELECTORS) {
-    const $el = $(selector).first();
-    if ($el.length > 0) {
-      $container = $el;
-      break;
-    }
+  if (candidates.length > 0) {
+    const best = candidates.reduce((a, b) => {
+      if (b.length !== a.length) return b.length > a.length ? b : a;
+      return b.priority < a.priority ? b : a;
+    });
+    $container = $(best.el);
   }
 
   // Fall back to <body> — never return nothing.

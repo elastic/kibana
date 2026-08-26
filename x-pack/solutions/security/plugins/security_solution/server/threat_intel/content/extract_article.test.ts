@@ -185,3 +185,35 @@ describe('extractArticleHtml', () => {
     expect(result).toContain('attacker[.]net');
   });
 });
+
+describe('extractArticleHtml — candidate selection', () => {
+  // Taking .first() meant any earlier ancillary element won: a page with an <article>
+  // teaser card plus a <main> holding the actual report returned the teaser, and
+  // every IOC in the report was missed.
+  it('prefers the substantive container over an earlier teaser', () => {
+    const html = `
+      <body>
+        <article class="teaser">Read more about ransomware</article>
+        <main><p>The actor used ${'detail '.repeat(40)} and the C2 was evil.test</p></main>
+      </body>`;
+
+    const out = extractArticleHtml(html);
+
+    expect(out).toContain('evil.test');
+  });
+
+  it('picks the largest of several same-selector candidates', () => {
+    const html = `
+      <body>
+        <article>short</article>
+        <article>${'the real body '.repeat(40)} c2.evil.test</article>
+      </body>`;
+
+    expect(extractArticleHtml(html)).toContain('c2.evil.test');
+  });
+
+  it('still falls back to body when no candidate matches', () => {
+    const html = '<body><div><p>plain page with evil.test</p></div></body>';
+    expect(extractArticleHtml(html)).toContain('evil.test');
+  });
+});

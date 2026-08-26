@@ -156,3 +156,38 @@ describe('canonicalizeUrl', () => {
     expect(unique.size).toBe(1);
   });
 });
+
+describe('canonicalizeUrl — review fixes', () => {
+  // GitHub and GitLab use ?ref= for branch and commit references, and threat reports
+  // link to repos constantly. Stripping it universally produced wrong canonical keys
+  // for exactly the URLs this pipeline sees most and broke their dedup.
+  it('keeps a GitHub branch ref', () => {
+    expect(canonicalizeUrl('https://github.com/org/repo/tree/main?ref=main')).toContain('ref=main');
+  });
+
+  it('keeps an arbitrary ref value', () => {
+    expect(canonicalizeUrl('https://docs.example.com/page?ref=v2.1')).toContain('ref=v2.1');
+  });
+
+  it.each(['newsletter', 'email', 'twitter', 'rss', 'social'])(
+    'still strips ref=%s as campaign tracking',
+    (value) => {
+      expect(canonicalizeUrl(`https://blog.example.com/post?ref=${value}`)).not.toContain('ref=');
+    }
+  );
+
+  it('still strips the unambiguous trackers', () => {
+    const out = canonicalizeUrl('https://blog.example.com/p?utm_source=x&fbclid=y&gclid=z');
+    expect(out).toBe('https://blog.example.com/p');
+  });
+
+  // www.com is a registered domain, and slicing blindly produced the bare TLD as a
+  // canonical key, which would collide with anything else that normalized to `com`.
+  it('does not strip www from www.com', () => {
+    expect(canonicalizeUrl('https://www.com/path')).toBe('https://www.com/path');
+  });
+
+  it('still strips www from a normal host', () => {
+    expect(canonicalizeUrl('https://www.example.com/path')).toBe('https://example.com/path');
+  });
+});

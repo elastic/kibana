@@ -21,11 +21,28 @@ import { classifyHeader, type SectionKind } from './section_headers';
  * The original HTML is preserved as `content.body_html` (mapped
  * `index: false`) so consumers can render formatted HTML when needed.
  */
+/**
+ * Largest input the parsers will touch.
+ *
+ * These entry points take fetched web pages, so the input is attacker-influenced
+ * and unbounded. An ad-heavy page is realistically several megabytes, and this runs
+ * inside a task worker: cheerio builds a full DOM and the regex passes each walk the
+ * whole string. Truncating rather than throwing keeps a fat page degraded instead of
+ * failed, since the article body is nearly always near the top.
+ *
+ * 10MB matches the `body_html` bound the report API already enforces.
+ */
+export const MAX_PARSE_BYTES = 10 * 1024 * 1024;
+
+const capInput = (html: string): string =>
+  html.length > MAX_PARSE_BYTES ? html.slice(0, MAX_PARSE_BYTES) : html;
+
 export const stripHtml = (html: string | undefined | null): string => {
   if (!html) return '';
+  const capped = capInput(html);
   // Drop the most expensive substrings up front (script/style bodies)
   // before falling through to the generic tag stripper.
-  const withoutScripts = html
+  const withoutScripts = capped
     .replace(/<script[\s\S]*?<\/script\b[^>]*>/gi, ' ')
     .replace(/<style[\s\S]*?<\/style\b[^>]*>/gi, ' ');
   const withoutTags = withoutScripts.replace(/<[^>]+>/g, ' ');
@@ -97,9 +114,12 @@ export const truncate = (input: string, maxLength: number): string => {
  * their section kind. Each chunk carries the raw HTML for that segment
  * (including the heading tag itself for non-prose chunks).
  */
-const _splitHtmlBySections = (html: string): Array<{ kind: SectionKind; html: string }> => {
+const splitHtmlBySections = (html: string): Array<{ kind: SectionKind; html: string }> => {
   const chunks: Array<{ kind: SectionKind; html: string }> = [];
   let currentKind: SectionKind = 'prose';
+  // Depth of the heading that established `currentKind`, so a deeper unclassified
+  // subsection can inherit it.
+  let currentDepth = 0;
   let currentHtml = '';
 
   const headingRe = /<h([1-6])[^>]*>([\s\S]*?)<\/h\1>/gi;
@@ -115,8 +135,27 @@ const _splitHtmlBySections = (html: string): Array<{ kind: SectionKind; html: st
     if (currentHtml) {
       chunks.push({ kind: currentKind, html: currentHtml });
     }
-    const headingText = m[2].replace(/<[^>]+>/g, ' ').trim();
-    currentKind = classifyHeader(headingText);
+    const depth = Number(m[1]);
+    // Decode entities before classifying: `Indicators&nbsp;of&nbsp;Compromise` is a
+    // completely ordinary heading, and classifying the raw form read it as prose, so
+    // its anchor hrefs were dropped instead of lifted.
+    const headingText = collapseWhitespace(decodeEntities(m[2].replace(/<[^>]+>/g, ' ')));
+    const classified = classifyHeader(headingText);
+
+    if (classified !== 'prose') {
+      // An explicitly classified heading always wins and becomes the new anchor.
+      currentKind = classified;
+      currentDepth = depth;
+    } else if (currentKind !== 'prose' && depth > currentDepth) {
+      // A deeper unclassified heading is a subsection of the section we are in, so
+      // keep it. `<h2>Indicators of Compromise</h2><h3>Domains</h3>` used to fall
+      // back to prose at `Domains` and drop every href under it.
+      // currentKind and currentDepth are unchanged.
+    } else {
+      currentKind = 'prose';
+      currentDepth = depth;
+    }
+
     currentHtml = m[0]; // include the heading tag in this chunk
     lastIndex = m.index + m[0].length;
   }
@@ -161,17 +200,18 @@ const _splitHtmlBySections = (html: string): Array<{ kind: SectionKind; html: st
  */
 export const htmlToStructured = (html: string | undefined | null): string => {
   if (!html) return '';
+  const capped = capInput(html);
 
   // 1. Drop script/style bodies (same pre-pass as stripHtml). The end tag
   //    matches attributes/junk too (`</script foo>`, `</script\t\n bar>`) so a
   //    crafted close tag cannot smuggle a body past the stripper.
-  const cleaned = html
+  const cleaned = capped
     .replace(/<script[\s\S]*?<\/script\b[^>]*>/gi, ' ')
     .replace(/<style[\s\S]*?<\/style\b[^>]*>/gi, ' ');
 
   // 2. Split at heading boundaries so each chunk knows its section kind.
   //    Href-lifting is applied only to ioc and references chunks (step 3 below).
-  const sectionChunks = _splitHtmlBySections(cleaned);
+  const sectionChunks = splitHtmlBySections(cleaned);
 
   const processedParts: string[] = [];
 
@@ -183,9 +223,13 @@ export const htmlToStructured = (html: string | undefined | null): string => {
     if (kind === 'ioc' || kind === 'references') {
       // Lift hrefs into plain text FIRST, before container transforms, so URLs
       // inside <li>/<td> survive. Produces "anchortext URL" as a bare token.
+      // Both quoted and unquoted href forms. Unquoted is valid HTML, and without
+      // the second alternative the generic tag stripper removed the attribute and
+      // an href-only IOC was lost entirely.
       s = s.replace(
-        /<a\s[^>]*href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi,
-        (_m, href: string, inner: string) => {
+        /<a\s[^>]*href=(?:["']([^"']+)["']|([^\s"'>]+))[^>]*>([\s\S]*?)<\/a>/gi,
+        (_m, quotedHref: string | undefined, bareHref: string | undefined, inner: string) => {
+          const href = quotedHref ?? bareHref ?? '';
           const text = inner.replace(/<[^>]+>/g, ' ').trim();
           return `${text} ${href} `;
         }
@@ -258,6 +302,15 @@ export interface ReportContentDocument {
   body_text: string;
   body_html?: string;
   language: string;
+  /**
+   * Set when `body_text` is the title rather than a real body.
+   *
+   * Without it the document is indistinguishable from one that genuinely repeats its
+   * title, so enrichment runs inference over the same string twice at full cost and
+   * has no way to know the input is a headline. Present only when true, so it does
+   * not clutter every report.
+   */
+  body_is_title_fallback?: true;
 }
 
 /**
@@ -283,9 +336,15 @@ export const buildReportContent = ({
   bodyText: string;
   bodyHtml?: string;
   language?: string;
-}): ReportContentDocument => ({
-  title,
-  body_text: bodyText.trim().length > 0 ? bodyText : title,
-  ...(bodyHtml !== undefined ? { body_html: bodyHtml } : {}),
-  language,
-});
+}): ReportContentDocument => {
+  const isTitleFallback = bodyText.trim().length === 0;
+  return {
+    title,
+    body_text: isTitleFallback ? title : bodyText,
+    ...(bodyHtml !== undefined ? { body_html: bodyHtml } : {}),
+    language,
+    // Observable rather than silent: a consumer can skip or cheapen enrichment
+    // instead of paying to run inference over the title twice.
+    ...(isTitleFallback ? { body_is_title_fallback: true as const } : {}),
+  };
+};

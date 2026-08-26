@@ -11,6 +11,7 @@ import {
   htmlToStructured,
   stripHtml,
   truncate,
+  MAX_PARSE_BYTES,
 } from './text';
 
 describe('stripHtml', () => {
@@ -265,5 +266,83 @@ describe('buildReportContent — empty body fallback', () => {
   it('leaves a real body alone', () => {
     const content = buildReportContent({ title: 'Title', bodyText: 'Real body text.' });
     expect(content.body_text).toBe('Real body text.');
+  });
+});
+
+// ── Review fixes ─────────────────────────────────────────────────────────────
+
+describe('htmlToStructured — heading classification', () => {
+  // `Indicators&nbsp;of&nbsp;Compromise` is an entirely ordinary heading. Classifying
+  // the raw form read it as prose, so anchor hrefs under it were dropped rather than
+  // lifted, losing href-only indicators.
+  it('classifies a heading whose words are separated by entities', () => {
+    const html =
+      '<h2>Indicators&nbsp;of&nbsp;Compromise</h2><ul><li><a href="https://c2.evil.test/b">beacon</a></li></ul>';
+    expect(htmlToStructured(html)).toContain('https://c2.evil.test/b');
+  });
+
+  // `<h2>IOC</h2><h3>Domains</h3>` used to fall back to prose at `Domains`, dropping
+  // every href in the subsection that actually holds the indicators.
+  it('keeps an IOC section through an unclassified deeper subsection', () => {
+    const html =
+      '<h2>Indicators of Compromise</h2><h3>Domains</h3><ul><li><a href="https://evil.test/x">x</a></li></ul>';
+    expect(htmlToStructured(html)).toContain('https://evil.test/x');
+  });
+
+  it('ends the IOC section at a same-level heading', () => {
+    const html =
+      '<h2>Indicators of Compromise</h2><h2>Attribution</h2><ul><li><a href="https://blog.test/p">p</a></li></ul>';
+    expect(htmlToStructured(html)).not.toContain('https://blog.test/p');
+  });
+
+  it('ends the IOC section at an explicit terminator, even a deeper one', () => {
+    const html =
+      '<h2>Indicators of Compromise</h2><h3>References</h3><ul><li><a href="https://vendor.test/r">r</a></li></ul>';
+    // References is classified, so it wins over subsection inheritance. The href is
+    // still lifted (references sections lift too) but as a reference, not an IOC.
+    expect(htmlToStructured(html)).toContain('https://vendor.test/r');
+  });
+
+  // Unquoted href is valid HTML, and without support the generic tag stripper
+  // removed the attribute so an href-only IOC vanished entirely.
+  it('lifts an unquoted href', () => {
+    const html =
+      '<h2>Indicators of Compromise</h2><p><a href=https://c2.evil.test/beacon>indicator</a></p>';
+    expect(htmlToStructured(html)).toContain('https://c2.evil.test/beacon');
+  });
+
+  it('still lifts a quoted href', () => {
+    const html = '<h2>IOCs</h2><p><a href="https://c2.evil.test/q">indicator</a></p>';
+    expect(htmlToStructured(html)).toContain('https://c2.evil.test/q');
+  });
+});
+
+describe('parser input bounds', () => {
+  // These take fetched pages, so the input is attacker-influenced and unbounded, and
+  // this runs in a task worker. Truncating degrades a fat page instead of failing it.
+  it('caps a huge input rather than parsing all of it', () => {
+    const huge = `<p>${'a'.repeat(MAX_PARSE_BYTES + 5000)}</p>`;
+    const out = stripHtml(huge);
+    expect(out.length).toBeLessThanOrEqual(MAX_PARSE_BYTES);
+  });
+
+  it('leaves a normal document untouched', () => {
+    expect(stripHtml('<p>hello</p>')).toBe('hello');
+  });
+});
+
+describe('buildReportContent — title fallback is observable', () => {
+  // Without the flag the document is indistinguishable from one that genuinely
+  // repeats its title, so enrichment pays to run inference over the same string
+  // twice with no way to know the input is only a headline.
+  it('flags a title fallback', () => {
+    const content = buildReportContent({ title: 'Ransomware advisory', bodyText: '' });
+    expect(content.body_text).toBe('Ransomware advisory');
+    expect(content.body_is_title_fallback).toBe(true);
+  });
+
+  it('omits the flag when the body is real', () => {
+    const content = buildReportContent({ title: 'T', bodyText: 'Real body.' });
+    expect(content.body_is_title_fallback).toBeUndefined();
   });
 });

@@ -18,10 +18,19 @@ const TRACKING_PARAMS = new Set([
   'utm_id',
   'fbclid',
   'gclid',
-  'ref',
   'mc_cid',
   'mc_eid',
 ]);
+
+/**
+ * `ref` is deliberately not in the set above. It is a tracking param on some
+ * marketing sites, but GitHub and GitLab use it for branch and commit references
+ * (`/tree/main?ref=main`) and technical docs use it for anchors. Threat reports link
+ * to repos, CVEs, and vendor docs constantly, so stripping it universally produced
+ * wrong canonical keys for exactly the URLs this pipeline sees most and broke their
+ * dedup. Strip only the values that are unambiguously campaign tracking.
+ */
+const TRACKING_REF_VALUES = new Set(['newsletter', 'email', 'twitter', 'rss', 'social']);
 
 /**
  * Produce a stable match key for a URL, suitable for reconciling the same URL
@@ -58,7 +67,11 @@ export const canonicalizeUrl = (rawUrl: string): string | undefined => {
 
   // Normalize host: lowercase + strip leading www.
   let host = parsed.hostname.toLowerCase();
-  if (host.startsWith('www.')) {
+  // Only strip `www.` when something is left that still looks like a domain.
+  // `www.com` is a registered domain, and slicing it blindly produced the bare TLD
+  // `com` as a canonical key. Requiring a dot after position 4 means at least three
+  // labels are present.
+  if (host.startsWith('www.') && host.indexOf('.', 4) !== -1) {
     host = host.slice(4);
   }
 
@@ -74,7 +87,9 @@ export const canonicalizeUrl = (rawUrl: string): string | undefined => {
   // Normalize query: remove tracking params, sort remainder for stability
   const params = new URLSearchParams();
   for (const [key, value] of parsed.searchParams.entries()) {
-    if (!TRACKING_PARAMS.has(key)) {
+    const isTracking =
+      TRACKING_PARAMS.has(key) || (key === 'ref' && TRACKING_REF_VALUES.has(value.toLowerCase()));
+    if (!isTracking) {
       params.append(key, value);
     }
   }
