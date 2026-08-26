@@ -20,6 +20,7 @@ import {
 import { isAbValidated } from './ab_model_compatibility';
 
 const DEFAULT_POLLING_INTERVAL_MS = 24 * 60 * 60 * 1000; // 24 hours
+const DEFAULT_ERROR_RETRY_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
 
 const MAIN_CAPABILITIES = ['capable', 'balanced'];
 const FAST_CAPABILITIES = ['efficient'];
@@ -95,8 +96,6 @@ const pickBestPerFamily = (
  *
  * Returns null when EIS capability/family fields are not yet deployed (safe no-op),
  * or when the AB validation gate would produce an empty list.
- *
- * Exported for unit testing.
  */
 export const deriveRecommendations = (
   endpoints: InferenceInferenceEndpointInfo[]
@@ -140,6 +139,7 @@ export class RecommendedEndpointsPoller {
     'updateRecommendedEndpoints'
   >;
   private readonly pollingIntervalMs: number;
+  private readonly errorRetryIntervalMs: number;
   private readonly polling$: Observable<unknown>;
   private subscription: Subscription | undefined;
 
@@ -148,16 +148,19 @@ export class RecommendedEndpointsPoller {
     esClient,
     features,
     pollingIntervalMs = DEFAULT_POLLING_INTERVAL_MS,
+    errorRetryIntervalMs = DEFAULT_ERROR_RETRY_INTERVAL_MS,
   }: {
     logger: Logger;
     esClient: ElasticsearchClient;
     features: Pick<InferenceFeatureRegistryStartContract, 'updateRecommendedEndpoints'>;
     pollingIntervalMs?: number;
+    errorRetryIntervalMs?: number;
   }) {
     this.logger = logger;
     this.esClient = esClient;
     this.features = features;
     this.pollingIntervalMs = pollingIntervalMs;
+    this.errorRetryIntervalMs = errorRetryIntervalMs;
     this.polling$ = this.createPollingObservable();
   }
 
@@ -188,7 +191,7 @@ export class RecommendedEndpointsPoller {
       Rx.delay(this.pollingIntervalMs),
       Rx.repeat(),
       Rx.catchError(this.handleError.bind(this)),
-      Rx.retry({ delay: this.pollingIntervalMs })
+      Rx.retry({ delay: this.errorRetryIntervalMs })
     );
   }
 

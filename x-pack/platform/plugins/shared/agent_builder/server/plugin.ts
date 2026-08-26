@@ -59,6 +59,7 @@ export class AgentBuilderPlugin
   private home: HomeServerPluginSetup | null = null;
   private teardownTracing?: () => Promise<void>;
   private startDeps?: AgentBuilderStartDependencies;
+  private pollerStartTimer?: ReturnType<typeof setTimeout>;
   private recommendedEndpointsPoller?: RecommendedEndpointsPoller;
   constructor(context: PluginInitializerContext<AgentBuilderConfig>) {
     this.logger = context.logger.get();
@@ -300,7 +301,10 @@ export class AgentBuilderPlugin
       esClient: elasticsearch.client.asInternalUser,
       features: searchInferenceEndpoints.features,
     });
-    setTimeout(() => this.recommendedEndpointsPoller?.start(), 5_000);
+    this.pollerStartTimer = setTimeout(() => {
+      this.pollerStartTimer = undefined;
+      this.recommendedEndpointsPoller?.start();
+    }, 5_000);
 
     return {
       agents: {
@@ -339,6 +343,10 @@ export class AgentBuilderPlugin
   }
 
   async stop() {
+    if (this.pollerStartTimer !== undefined) {
+      clearTimeout(this.pollerStartTimer);
+      this.pollerStartTimer = undefined;
+    }
     this.recommendedEndpointsPoller?.stop();
     await this.teardownTracing?.();
   }
