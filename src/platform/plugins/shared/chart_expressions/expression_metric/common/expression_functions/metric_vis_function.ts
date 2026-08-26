@@ -62,6 +62,14 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
         defaultMessage: 'The subtitle for a single metric. Overridden if breakdownBy is supplied.',
       }),
     },
+    secondaryLabel: {
+      types: ['string'],
+      help: i18n.translate('expressionMetricVis.function.secondaryLabel.help', {
+        defaultMessage:
+          'Legacy custom label for the Secondary Metric, used as a runtime fallback until a future migration copies it onto the column',
+      }),
+      required: false,
+    },
     progressDirection: {
       types: ['string'],
       options: [ChartLayoutDirection.Vertical, ChartLayoutDirection.Horizontal],
@@ -189,14 +197,6 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       multi: true,
       required: false,
     },
-    secondaryLabel: {
-      types: ['string'],
-      help: i18n.translate('expressionMetricVis.function.secondaryLabel.help', {
-        defaultMessage:
-          'Legacy custom label for the Secondary Metric, used as a runtime fallback until a future migration copies it onto the column',
-      }),
-      required: false,
-    },
     secondaryNameVisibility: {
       types: ['string'],
       help: i18n.translate('expressionMetricVis.function.secondaryNameVisibility.help', {
@@ -280,6 +280,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
         visConfig: {
           metric: {
             subtitle: args.subtitle,
+            secondaryLabel: args.secondaryLabel,
             color: args.color,
             icon: args.icon,
             palette: args.palette,
@@ -301,7 +302,6 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
               palette: args.secondaryTrendPalette,
               textPalette: args.secondaryTrendTextPalette,
             },
-            secondaryLabel: args.secondaryLabel,
             secondaryNameVisibility: args.secondaryNameVisibility,
             applyColorTo: args.applyColorTo,
           },

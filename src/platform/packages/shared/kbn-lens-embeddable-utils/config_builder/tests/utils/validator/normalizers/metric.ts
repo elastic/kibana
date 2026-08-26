@@ -147,23 +147,19 @@ const alignVisualizationDefaults: NormalizerConfig<MetricAttributes> = {
     viz.primaryAlign = viz.primaryAlign ?? viz.valuesTextAlign ?? DEFAULT_PRIMARY_VALUE_ALIGNMENT;
     viz.primaryPosition = viz.primaryPosition ?? DEFAULT_PRIMARY_POSITION;
 
-    // Without a secondary metric, the transform resets secondary styling to its defaults.
+    // Predict the API round-trip: empty legacy label is hidden; otherwise keep
+    // visibility, defaulting old charts to `before`.
     if (viz.secondaryMetricAccessor) {
-      const legacySecondaryLabelPosition =
-        viz.secondaryLabelPosition ?? DEFAULT_SECONDARY_LABEL_PLACEMENT;
-      const legacyLabel = viz.secondaryLabel ?? viz.secondaryPrefix;
-      const secondaryNameVisibility =
-        legacyLabel === '' ? 'hidden' : viz.secondaryNameVisibility ?? legacySecondaryLabelPosition;
-
       viz.secondaryAlign = viz.secondaryAlign ?? DEFAULT_SECONDARY_VALUE_ALIGNMENT;
-      viz.secondaryNameVisibility = secondaryNameVisibility;
+      viz.secondaryNameVisibility =
+        viz.secondaryLabel === ''
+          ? 'hidden'
+          : viz.secondaryNameVisibility ?? DEFAULT_SECONDARY_LABEL_PLACEMENT;
     } else {
+      // Comparison fill only; the transform does not persist these without a secondary metric.
       viz.secondaryAlign = DEFAULT_SECONDARY_VALUE_ALIGNMENT;
       viz.secondaryNameVisibility = DEFAULT_SECONDARY_LABEL_PLACEMENT;
     }
-    delete viz.secondaryLabel;
-    delete viz.secondaryPrefix;
-    delete legacyViz.secondaryLabelPosition;
 
     // Absent sizing round-trips through the API as `auto`, which maps back to `valueFontMode: 'default'`.
     viz.valueFontMode = viz.valueFontMode ?? 'default';
@@ -183,15 +179,18 @@ const alignVisualizationDefaults: NormalizerConfig<MetricAttributes> = {
       delete viz.subtitle;
     }
 
-    // Deprecated / legacy TSVB-era styling keys are not produced by the transform.
+    // Keys the API transform does not emit (TSVB leftovers and pre-rename metric fields).
     delete viz.valuesTextAlign;
     delete viz.titleWeight;
+    delete viz.secondaryPrefix;
+    delete viz.secondaryLabel;
     delete legacyViz.textAlign;
     delete legacyViz.size;
     delete legacyViz.titlePosition;
     delete legacyViz.colorMode;
     delete legacyViz.valuesTextSize;
     delete legacyViz.titlesTextSize;
+    delete legacyViz.secondaryLabelPosition;
 
     return attributes;
   },

@@ -290,7 +290,8 @@ export interface OperationDescriptor extends Operation {
   hasTimeShift: boolean;
   hasReducedTimeRange: boolean;
   inMetricDimension?: boolean;
-  customLabel?: boolean; // Is this needed?
+  /** True when the user set a custom name on this column, as opposed to the default operation label. */
+  customLabel?: boolean;
 }
 
 export interface DataSourceInfo {

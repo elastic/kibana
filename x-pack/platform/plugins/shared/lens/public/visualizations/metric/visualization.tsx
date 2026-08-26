@@ -358,9 +358,9 @@ const removeMetricDimension = (state: MetricVisualizationState) => {
 
 const removeSecondaryMetricDimension = (state: MetricVisualizationState) => {
   delete state.secondaryMetricAccessor;
+  delete state.secondaryLabel;
   delete state.secondaryTrend;
   delete state.secondaryNameVisibility;
-  delete state.secondaryLabel;
 };
 
 const removeMaxDimension = (state: MetricVisualizationState) => {

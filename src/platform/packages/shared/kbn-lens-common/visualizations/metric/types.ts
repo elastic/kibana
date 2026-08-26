@@ -52,7 +52,12 @@ export interface MetricVisualizationState {
    * @deprecated
    */
   secondaryPrefix?: string;
-  /** @deprecated */
+  /**
+   * Custom text from the removed secondary Metric Label control. An empty string is
+   * the legacy None choice. A non-empty value is a runtime render fallback until
+   * the text lives on the secondary column (`customLabel`).
+   * @deprecated Use the secondary column name and `secondaryNameVisibility`.
+   */
   secondaryLabel?: string;
   secondaryTrend?: SecondaryTrend;
   progressDirection?: LayoutDirection;

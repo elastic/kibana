@@ -22,12 +22,10 @@ const baseState: MetricVisualizationState = {
 const secondaryNameState = ({
   secondaryLabel,
   secondaryNameVisibility,
-  secondaryPrefix,
   secondaryLabelPosition,
 }: MetricVisualizationState) => ({
   secondaryLabel,
   secondaryNameVisibility,
-  secondaryPrefix,
   secondaryLabelPosition,
 });
 
@@ -38,15 +36,6 @@ describe('convertToRuntimeState - secondary name visibility', () => {
   it('keeps a custom secondaryLabel as a render fallback and shows the name before the value', () => {
     expect(
       secondaryNameState(convertToRuntimeState({ ...baseState, secondaryLabel: 'custom-text' }))
-    ).toEqual({
-      secondaryLabel: 'custom-text',
-      secondaryNameVisibility: 'before',
-    });
-  });
-
-  it('promotes a pre-rename secondaryPrefix to secondaryLabel through the v1 transform', () => {
-    expect(
-      secondaryNameState(convertToRuntimeState({ ...baseState, secondaryPrefix: 'custom-text' }))
     ).toEqual({
       secondaryLabel: 'custom-text',
       secondaryNameVisibility: 'before',

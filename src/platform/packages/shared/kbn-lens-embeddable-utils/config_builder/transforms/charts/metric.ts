@@ -166,6 +166,10 @@ function getSecondaryNameVisibility(
   return label?.placement ?? DEFAULT_SECONDARY_LABEL_PLACEMENT;
 }
 
+function isSecondaryLabelHidden(visualization: MetricVisualizationState): boolean {
+  return visualization.secondaryNameVisibility === 'hidden' || visualization.secondaryLabel === '';
+}
+
 function convertStylingToStateFormat(
   styling: MetricStyling | undefined,
   hasSecondary: boolean
@@ -234,11 +238,7 @@ function convertStylingToAPIFormat(
     }),
     secondary: hasSecondary
       ? {
-          // `secondaryLabel`/`secondaryPrefix` are legacy state kept as a runtime fallback
-          // until a future CM version copies the custom label onto the secondary column
-          ...(visualization.secondaryNameVisibility === 'hidden' ||
-          visualization.secondaryLabel === '' ||
-          visualization.secondaryPrefix === ''
+          ...(isSecondaryLabelHidden(visualization)
             ? {
                 label: {
                   visible: false,
