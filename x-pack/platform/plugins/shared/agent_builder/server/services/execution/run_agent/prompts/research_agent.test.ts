@@ -181,7 +181,7 @@ describe('getResearchAgentPrompt', () => {
     const system = asText(messages[0]);
 
     expect(system).toContain('## AI INDICES');
-    expect(system).toContain('"spaces":"marketing"');
+    expect(system).toContain('This conversation runs in the space `marketing`');
     expect(system.indexOf('## AI INDICES')).toBeLessThan(system.indexOf('## INSTRUCTIONS'));
   });
 
