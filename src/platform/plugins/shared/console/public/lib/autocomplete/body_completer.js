@@ -196,8 +196,16 @@ function compileDescription(description, compilingContext) {
     }
   } else if (_.isString(description) && /^\{.*\}$/.test(description)) {
     return [compileParametrizedValue(description, compilingContext)];
+  } else if (typeof description === 'boolean' || typeof description === 'number') {
+    return [
+      new ConstantComponent(String(description), null, [
+        {
+          name: description,
+        },
+      ]),
+    ];
   } else {
-    return [new ConstantComponent(description)];
+    return [new ConstantComponent(String(description))];
   }
 }
 
