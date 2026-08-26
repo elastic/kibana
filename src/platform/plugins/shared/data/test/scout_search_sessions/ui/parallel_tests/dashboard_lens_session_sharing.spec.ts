@@ -12,15 +12,22 @@
  * Lens editor and back hits the search cache. By-reference panels do not share the session.
  * See https://github.com/elastic/kibana/issues/99310.
  *
- * This asserts on the search session id rather than on an actual cache hit, so it does not
- * prove the cache-hit improvement works — but if it fails, we know for sure that it doesn't.
- *
+ * Both halves of that are asserted directly: the session id the panel reports, and the number of
+ * search requests the browser puts on the wire when it comes back from the editor. A cache hit is
+ * the absence of a request, so the by-value step counts zero.
  */
 
 import { expect } from '@kbn/scout/ui';
 import { spaceTest, LENS_BASIC_KBN_ARCHIVE, LOGSTASH_TIME_RANGE } from '../fixtures';
 
 const LENS_TITLE = 'Artistpreviouslyknownaslens';
+
+// The async search endpoint every dashboard panel goes through.
+const SEARCH_REQUEST = { endpoint: '/internal/search/ese', method: 'POST' };
+
+// A cache hit shows up as nothing happening, so the by-value step has to give a late request a
+// window to arrive before it can conclude none did.
+const SETTLE_MS = 3_000;
 
 spaceTest.describe(
   'Dashboard search session sharing with Lens',
@@ -44,7 +51,17 @@ spaceTest.describe(
 
     spaceTest(
       'shares the search session with a by-value Lens panel but not with a by-reference one',
-      async ({ pageObjects }) => {
+      async ({ network, page, pageObjects }) => {
+        // Counts the searches issued between leaving the Lens editor and the dashboard settling.
+        // Scoped to that leg on purpose: the editor issues its own searches while it is open, and
+        // those say nothing about whether the dashboard re-used the session.
+        const countSearchesOnReturnFromEditor = () =>
+          network.countMatchingRequests(SEARCH_REQUEST, async () => {
+            await pageObjects.lens.saveAndReturn();
+            await pageObjects.dashboard.waitForRenderComplete();
+            await page.waitForTimeout(SETTLE_MS);
+          });
+
         await spaceTest.step('add a by-reference Lens panel to a new dashboard', async () => {
           await pageObjects.dashboard.openNewDashboard();
           await pageObjects.dashboard.addPanelFromLibrary(LENS_TITLE);
@@ -58,12 +75,13 @@ spaceTest.describe(
             const byRefSessionId = await pageObjects.inspector.getSearchSessionId();
 
             await pageObjects.dashboard.navigateToLensEditorFromPanel(LENS_TITLE);
-            await pageObjects.lens.saveAndReturn();
-            await pageObjects.dashboard.waitForRenderComplete();
+            const searchCount = await countSearchesOnReturnFromEditor();
 
             await pageObjects.dashboard.openInspector(LENS_TITLE);
             const newByRefSessionId = await pageObjects.inspector.getSearchSessionId();
             expect(newByRefSessionId).not.toBe(byRefSessionId);
+            // A new session means nothing is cached under it, so the panel has to search again.
+            expect(searchCount).toBeGreaterThan(0);
           }
         );
 
@@ -77,12 +95,14 @@ spaceTest.describe(
             const byValueSessionId = await pageObjects.inspector.getSearchSessionId();
 
             await pageObjects.dashboard.navigateToLensEditorFromPanel(LENS_TITLE);
-            await pageObjects.lens.saveAndReturn();
-            await pageObjects.dashboard.waitForRenderComplete();
+            const searchCount = await countSearchesOnReturnFromEditor();
 
             await pageObjects.dashboard.openInspector(LENS_TITLE);
             const newByValueSessionId = await pageObjects.inspector.getSearchSessionId();
             expect(newByValueSessionId).toBe(byValueSessionId);
+            // The session was kept, so the panel's request is served from the client-side cache
+            // and never reaches the server. This is the cache hit issue #99310 asked for.
+            expect(searchCount).toBe(0);
           }
         );
       }

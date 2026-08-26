@@ -18,6 +18,9 @@ import type { Locator, ScoutPage } from '@kbn/scout';
 export const BACKGROUND_SEARCH_FLYOUT_ENTRYPOINT = 'openBackgroundSearchFlyoutButton';
 
 const FLYOUT_CLOSE_BUTTON = 'euiFlyoutCloseButton';
+// Where the entrypoint hides when the app menu is too narrow to show it outright.
+const APP_MENU_OVERFLOW_BUTTON = 'app-menu-overflow-button';
+const ROW_RESTORE_LINK = 'sessionManagementNameLink';
 const SUBMIT_BUTTON = 'querySubmitButton';
 const CANCEL_BUTTON = 'queryCancelButton';
 // While a search is in flight the split button switches from `querySubmitButton-*` to
@@ -108,19 +111,41 @@ export class BackgroundSearchPage {
     await this.managementTable.waitFor({ state: 'hidden' });
   }
 
-  /** Open the flyout via the link in the "Background search saved" toast. */
-  async openFlyoutFromToast() {
-    await this.savedToastLink.click();
+  /**
+   * Open the flyout from the app menu. Apps that cannot fit the entrypoint in the menu collapse
+   * it into the overflow popover, so both placements are handled.
+   */
+  async openFlyout() {
+    if (!(await this.flyoutEntrypoint.isVisible())) {
+      await this.page.testSubj.click(APP_MENU_OVERFLOW_BUTTON);
+    }
+    await this.flyoutEntrypoint.click();
     await this.waitForFlyout();
   }
 
   /**
-   * Restore the completed background search via the link in the completion toast. The wait is
-   * raised above the default because the toast only appears once Elasticsearch has finished the
-   * async search behind the 5s stalling filter these specs use.
+   * Restore the background search listed in the open flyout.
+   *
+   * Only call this once the search has completed: the flyout renders the management table with
+   * `hideRefreshButton` and auto-refresh is off by default, so it shows whatever the status was
+   * when it mounted and restoring a still-running search warns instead of restoring.
    */
-  async openCompletedSearchFromToast() {
+  async restoreFromFlyout() {
+    await this.managementTable.getByTestId(ROW_RESTORE_LINK).click();
+  }
+
+  /**
+   * Wait for the background search to finish, without acting on it. The wait is raised above the
+   * default because the toast only appears once Elasticsearch has finished the async search
+   * behind the delays these specs use.
+   */
+  async waitForCompletion() {
     await this.completedToastLink.waitFor({ state: 'visible', timeout: 30_000 });
+  }
+
+  /** Restore the completed background search via the link in the completion toast. */
+  async openCompletedSearchFromToast() {
+    await this.waitForCompletion();
     await this.completedToastLink.click();
   }
 }

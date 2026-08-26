@@ -8,8 +8,9 @@
  */
 
 /**
- * A background search saved from a dashboard that was never saved must restore both while the
- * draft is still live and after the draft has been discarded.
+ * A background search saved from a dashboard that was never saved must restore the draft, from
+ * every surface that offers to restore it: the in-app flyout and the completion toast while the
+ * draft is still live, and the management app after the draft has been discarded.
  */
 
 import { expect } from '@kbn/scout/ui';
@@ -72,16 +73,28 @@ spaceTest.describe(
     });
 
     spaceTest(
-      'restores the unsaved dashboard from the background search toast',
+      'restores the unsaved dashboard from the background search flyout',
       async ({ page, pageObjects }) => {
-        // The in-app flyout has no refresh button and does not auto-refresh, so completion is
-        // polled from the management page instead.
-        await pageObjects.backgroundSearch.openFlyoutFromToast();
-        await pageObjects.backgroundSearch.closeFlyout();
+        // The flyout shows whatever the status was when it mounted, so the search has to be
+        // finished before it is opened. Waiting on the completion toast is the readiness signal;
+        // the toast itself is not what restores here.
+        await pageObjects.backgroundSearch.waitForCompletion();
 
-        await pageObjects.backgroundSearchManagement.goTo();
-        await pageObjects.backgroundSearchManagement.waitForRowStatus('complete');
-        await pageObjects.backgroundSearchManagement.viewRow();
+        await pageObjects.backgroundSearch.openFlyout();
+        await pageObjects.backgroundSearch.restoreFromFlyout();
+
+        await pageObjects.dashboard.waitForRenderComplete();
+        await expect(page.testSubj.locator('embeddableError')).toHaveCount(0);
+        await expect(pageObjects.backgroundSearch.errorOrWarningToasts).toHaveCount(0);
+      }
+    );
+
+    spaceTest(
+      'restores the unsaved dashboard from the background search completion toast',
+      async ({ page, pageObjects }) => {
+        // The dashboard is still mounted, so the completion toast fires in place and restores the
+        // draft without going through any listing.
+        await pageObjects.backgroundSearch.openCompletedSearchFromToast();
 
         await pageObjects.dashboard.waitForRenderComplete();
         await expect(page.testSubj.locator('embeddableError')).toHaveCount(0);
@@ -95,6 +108,10 @@ spaceTest.describe(
         await pageObjects.dashboard.waitForRenderComplete();
         await pageObjects.dashboard.discardUnsavedDashboard();
 
+        // Discarding the draft navigates away and takes the in-app surfaces with it, so this one
+        // restores from the management app. It is also the only listing that can be polled for
+        // completion: the flyout renders the same table with `hideRefreshButton`, and auto-refresh
+        // is off by default (`data.search.sessions.management.refreshInterval` is `0s`).
         await pageObjects.backgroundSearchManagement.goTo();
         await pageObjects.backgroundSearchManagement.waitForRowStatus('complete');
         await pageObjects.backgroundSearchManagement.viewRow();
