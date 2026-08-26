@@ -21,6 +21,34 @@ import {
 } from '@kbn/agent-builder-common';
 
 /**
+ * Suffixes used to build the ids of every round-derived timeline event.
+ */
+export const ROUND_DERIVED_EVENT_ID_SUFFIXES = {
+  userMessage: '::user_message',
+  executionStarted: '::execution_started',
+  executionTerminated: '::execution_terminated',
+  execution: '::execution',
+} as const;
+
+const ROUND_DERIVED_EVENT_ID_SUFFIX_VALUES: readonly string[] = Object.values(
+  ROUND_DERIVED_EVENT_ID_SUFFIXES
+);
+
+/**
+ * True when `id` was produced by {@link roundToEvents}
+ */
+export const isRoundDerivedEventId = (id: string): boolean =>
+  ROUND_DERIVED_EVENT_ID_SUFFIX_VALUES.some((suffix) => id.endsWith(suffix));
+
+/** Round-derived event ids for a given round, keyed for readability. */
+const roundDerivedEventIds = (roundId: string) => ({
+  userMessage: `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.userMessage}`,
+  executionStarted: `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.executionStarted}`,
+  executionTerminated: `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.executionTerminated}`,
+  execution: `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.execution}`,
+});
+
+/**
  * Converts a single round into its coarse timeline events: `user_message`, `execution_started`,
  * and a terminal `execution_terminated` whose `outcome` is `responded` (completed round) or
  * `prompt_requested` (awaiting-prompt round).
@@ -29,8 +57,7 @@ export const roundToEvents = (
   round: ConversationRound,
   conversation: Conversation
 ): TimelineEvent[] => {
-  const userMessageId = `${round.id}::user_message`;
-  const executionId = `${round.id}::execution`;
+  const ids = roundDerivedEventIds(round.id);
   const agent = agentActor(conversation);
   const endedAt = new Date(
     new Date(round.started_at).getTime() + round.time_to_last_token
@@ -38,30 +65,30 @@ export const roundToEvents = (
 
   const events: TimelineEvent[] = [
     {
-      id: userMessageId,
+      id: ids.userMessage,
       type: TimelineEventType.userMessage,
       created_at: round.started_at,
       actor: userMessageActor(conversation, round),
       data: round.input,
     },
     {
-      id: `${round.id}::execution_started`,
+      id: ids.executionStarted,
       type: TimelineEventType.executionStarted,
       created_at: round.started_at,
       actor: agent,
-      execution_id: executionId,
-      trigger_event_id: userMessageId,
+      execution_id: ids.execution,
+      trigger_event_id: ids.userMessage,
       data: { trigger_type: TimelineTriggerType.userMessage },
     },
   ];
 
   const terminated = (outcome: ExecutionOutcome): TimelineEvent => ({
-    id: `${round.id}::execution_terminated`,
+    id: ids.executionTerminated,
     type: TimelineEventType.executionTerminated,
     created_at: endedAt,
     actor: agent,
-    execution_id: executionId,
-    trigger_event_id: userMessageId,
+    execution_id: ids.execution,
+    trigger_event_id: ids.userMessage,
     data: { ...executionRunSummary(round), outcome },
   });
 
