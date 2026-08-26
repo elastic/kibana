@@ -211,7 +211,9 @@ export const setSignalsStatusRoute = (
             );
 
             const changingByQuery = previousStatuses.filter((ps) => ps.previousStatus !== status);
-            if (changingByQuery.length > 0) {
+            // Emit when known changes exist OR when the prefetch was truncated: docs beyond
+            // the cap may still be transitioning even if the sampled page was all no-ops.
+            if (changingByQuery.length > 0 || truncated) {
               void eventBus?.emitAlertStatusChanged(request, {
                 alertIds: changingByQuery.map((ps) => ps.id),
                 status,

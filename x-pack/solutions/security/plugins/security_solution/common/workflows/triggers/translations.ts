@@ -130,7 +130,10 @@ export const NOTE_CREATED_SCHEMA_NOTE_ID_DESCRIPTION = i18n.translate(
 
 export const NOTE_CREATED_SCHEMA_CREATED_BY_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.workflows.triggers.noteCreated.schema.createdBy',
-  { defaultMessage: 'The username of the note author.' }
+  {
+    defaultMessage:
+      'The display name of the note author (full name if configured, otherwise username).',
+  }
 );
 
 export const NOTE_CREATED_SCHEMA_DOCUMENT_ID_DESCRIPTION = i18n.translate(
@@ -147,7 +150,10 @@ export const NOTE_UPDATED_SCHEMA_NOTE_ID_DESCRIPTION = i18n.translate(
 
 export const NOTE_UPDATED_SCHEMA_UPDATED_BY_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.workflows.triggers.noteUpdated.schema.updatedBy',
-  { defaultMessage: 'The username who updated the note.' }
+  {
+    defaultMessage:
+      'The display name of the user who updated the note (full name if configured, otherwise username).',
+  }
 );
 
 export const NOTE_UPDATED_SCHEMA_DOCUMENT_ID_DESCRIPTION = i18n.translate(

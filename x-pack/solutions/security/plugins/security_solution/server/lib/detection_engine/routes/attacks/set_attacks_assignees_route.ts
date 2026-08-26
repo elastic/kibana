@@ -180,12 +180,14 @@ export const setAttacksAssigneesRoute = (
             const validAssigneesToRemove = assignees.remove
               .filter((uid) => uid.length <= MAX_ASSIGNEE_UID_LENGTH)
               .slice(0, MAX_ASSIGNEES_PER_OPERATION);
-            void eventBus?.emitAttackAssigneesChanged(request, {
-              attackIds: verifiedAttackIds.slice(0, MAX_ALERTS_PER_TRIGGER),
-              assigneesToAdd: validAssigneesToAdd,
-              assigneesToRemove: validAssigneesToRemove,
-              truncated: verifiedAttackIds.length > MAX_ALERTS_PER_TRIGGER,
-            });
+            if (verifiedAttackIds.length > 0) {
+              void eventBus?.emitAttackAssigneesChanged(request, {
+                attackIds: verifiedAttackIds.slice(0, MAX_ALERTS_PER_TRIGGER),
+                assigneesToAdd: validAssigneesToAdd,
+                assigneesToRemove: validAssigneesToRemove,
+                truncated: verifiedAttackIds.length > MAX_ALERTS_PER_TRIGGER,
+              });
+            }
             if (relatedAlertIds.length > 0) {
               void eventBus?.emitAlertAssigneesChanged(request, {
                 alertIds: relatedAlertIds.slice(0, MAX_ALERTS_PER_TRIGGER),

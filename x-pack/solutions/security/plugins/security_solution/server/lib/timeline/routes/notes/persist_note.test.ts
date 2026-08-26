@@ -111,6 +111,30 @@ describe('persistNoteRoute', () => {
       expect(mockEventBus.emitNoteCreated).not.toHaveBeenCalled();
     });
 
+    test('emits noteUpdated using persisted eventId when update request omits eventId', async () => {
+      // Simulates a text-only patch: the client sends noteId + note text but no eventId.
+      // The route must fall back to res.note.eventId so the trigger still fires.
+      (persistNote as jest.Mock).mockResolvedValue(makePersistNoteResponse('existing-note-id'));
+      const request = requestMock.create({
+        method: 'patch',
+        path: NOTE_URL,
+        body: {
+          noteId: 'existing-note-id',
+          note: { note: 'updated text', timelineId: 'timeline-1' }, // no eventId
+        },
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitNoteUpdated).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          noteId: 'existing-note-id',
+          documentId: 'event-1', // from res.note.eventId, not the request body
+        })
+      );
+      expect(mockEventBus.emitNoteCreated).not.toHaveBeenCalled();
+    });
+
     test('skips emit and logs warn when noteId is missing after persist', async () => {
       (persistNote as jest.Mock).mockResolvedValue({ note: { createdBy: 'test-user' } });
       const request = requestMock.create({
