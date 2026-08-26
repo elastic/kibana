@@ -77,7 +77,15 @@ export function formatPairedTTestReport({
     (result) => result.pValue !== null && result.pValue < significanceThreshold
   ).length;
 
-  const tableHeaders = ['Evaluator', 'N', 'Mean A', 'Mean B', 'Diff', 'p-value', 'Significant'];
+  const tableHeaders = [
+    'Evaluator',
+    'N',
+    'Mean (target)',
+    'Mean (baseline)',
+    'Diff',
+    'p-value',
+    'Significant',
+  ];
   const rowsByDataset = new Map<string, string[][]>();
 
   sortedResults.forEach((result) => {
@@ -104,8 +112,8 @@ export function formatPairedTTestReport({
   });
 
   const header = [
-    `Baseline: ${experimentIdA}`,
-    `Target: ${experimentIdB}`,
+    `Target: ${experimentIdA}`,
+    `Baseline: ${experimentIdB}`,
     `Significance threshold: p < ${significanceThreshold}`,
   ];
   const summary = `Significant differences: ${significantCount}/${sortedResults.length}`;

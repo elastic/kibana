@@ -151,8 +151,8 @@ export const registerCompareExperimentsRoute = ({
           const filteredB = scoresB.filter((s) => overlappingSet.has(s.example.dataset.id));
 
           const { pairs, skippedMissingPairs, skippedNullScores } = pairScores(
-            filteredA,
-            filteredB
+            filteredB,
+            filteredA
           );
           const results = computePairedTTestResults(pairs);
 

@@ -10,8 +10,8 @@ import { computeCompareDiff, isImproved } from './compare_diff';
 describe('compare_diff', () => {
   describe('computeCompareDiff', () => {
     it('returns target minus baseline', () => {
-      expect(computeCompareDiff(0.4, 0.7)).toBeCloseTo(0.3);
-      expect(computeCompareDiff(0.8, 0.5)).toBeCloseTo(-0.3);
+      expect(computeCompareDiff(0.7, 0.4)).toBeCloseTo(0.3);
+      expect(computeCompareDiff(0.5, 0.8)).toBeCloseTo(-0.3);
       expect(computeCompareDiff(1, 1)).toBe(0);
     });
   });
@@ -19,7 +19,7 @@ describe('compare_diff', () => {
   describe('isImproved', () => {
     it('treats positive diff as improvement when direction is maximize', () => {
       // Quality metric: target mean 0.9 vs baseline 0.7 → green / improved
-      const diff = computeCompareDiff(0.7, 0.9);
+      const diff = computeCompareDiff(0.9, 0.7);
       expect(diff).toBeGreaterThan(0);
       expect(isImproved(diff, 'maximize')).toBe(true);
       expect(isImproved(-diff, 'maximize')).toBe(false);
@@ -27,7 +27,7 @@ describe('compare_diff', () => {
 
     it('treats negative diff as improvement when direction is minimize', () => {
       // Latency metric: target mean 100 vs baseline 150 → green / improved
-      const diff = computeCompareDiff(150, 100);
+      const diff = computeCompareDiff(100, 150);
       expect(diff).toBeLessThan(0);
       expect(isImproved(diff, 'minimize')).toBe(true);
       expect(isImproved(-diff, 'minimize')).toBe(false);

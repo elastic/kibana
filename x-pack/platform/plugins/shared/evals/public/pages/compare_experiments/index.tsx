@@ -422,7 +422,7 @@ const ExampleDrilldownFlyout: React.FC<{
           ) {
             return '-';
           }
-          const diff = computeCompareDiff(item.scoreA, item.scoreB);
+          const diff = computeCompareDiff(item.scoreB, item.scoreA);
           return <DiffValue diff={diff} direction={direction} />;
         },
       },
@@ -661,8 +661,8 @@ export const CompareExperimentsPage: React.FC = () => {
       'Dataset',
       'Evaluator',
       'N',
-      'Mean baseline',
       'Mean target',
+      'Mean baseline',
       'Diff',
       'p-value',
       'Significant',

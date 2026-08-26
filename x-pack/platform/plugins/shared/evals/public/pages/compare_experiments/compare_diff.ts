@@ -10,7 +10,7 @@ import type { Direction } from '@kbn/evals-common';
 /**
  * Diff as target − baseline so positive values mean the target scored higher.
  */
-export const computeCompareDiff = (meanBaseline: number, meanTarget: number): number =>
+export const computeCompareDiff = (meanTarget: number, meanBaseline: number): number =>
   meanTarget - meanBaseline;
 
 /**
