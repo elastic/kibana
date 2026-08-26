@@ -14,7 +14,6 @@ import {
   EuiFormRow,
   EuiHorizontalRule,
   EuiLoadingSpinner,
-  EuiRadioGroup,
   EuiSpacer,
   EuiSwitch,
   EuiText,
@@ -22,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { LazyPackagePolicyInputVarField } from '@kbn/fleet-plugin/public';
+import { DataStreamTypeSelector, LazyPackagePolicyInputVarField } from '@kbn/fleet-plugin/public';
 import { KibanaStyledComponentsThemeProvider } from '@kbn/react-kibana-context-styled';
 
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
@@ -76,14 +75,6 @@ export interface ServiceFieldsFormProps {
 // this UI. Strip the manifest description so the misleading help text isn't shown.
 const ECF_TRIGGER_VARS = new Set(['bucket_arn', 'log_group_arn']);
 
-// TODO: extract a shared DataStreamTypeSelector component usable by both Fleet's
-// package_policy_input_stream.tsx and this flyout, so the options and labels are not duplicated.
-const DATA_STREAM_TYPE_OPTIONS = [
-  { id: 'logs', label: 'Logs' },
-  { id: 'metrics', label: 'Metrics' },
-  { id: 'traces', label: 'Traces' },
-];
-
 function VarField({
   service,
   activeInput,
@@ -104,18 +95,13 @@ function VarField({
   if (!meta) return null;
   const value = toTyped(draft[activeInput]?.[fieldName], meta);
 
-  // Render data_stream.type as radio buttons, mirroring Fleet's package_policy_input_stream.tsx.
   if (fieldName === 'data_stream.type') {
     const selected = typeof value === 'string' ? value : (meta.def.default as string) ?? 'logs';
     return (
       <div data-test-subj={`serviceSettingsFlyout-${activeInput}-field-${fieldName}`}>
-        <EuiFormRow
-          label={
-            meta.def.title ??
-            i18n.translate('xpack.ingestHub.serviceSettingsStep.flyout.dataStreamType.label', {
-              defaultMessage: 'Data Stream Type',
-            })
-          }
+        <DataStreamTypeSelector
+          value={selected}
+          onChange={(id) => onFieldChange(activeInput, fieldName, id)}
           helpText={i18n.translate(
             'xpack.ingestHub.serviceSettingsStep.flyout.dataStreamType.help',
             {
@@ -123,14 +109,7 @@ function VarField({
                 "Select a data stream type for this policy. This setting changes the name of the integration's data stream.",
             }
           )}
-        >
-          <EuiRadioGroup
-            options={DATA_STREAM_TYPE_OPTIONS}
-            idSelected={selected}
-            onChange={(id) => onFieldChange(activeInput, fieldName, id)}
-            name={`${activeInput}-data_stream.type`}
-          />
-        </EuiFormRow>
+        />
       </div>
     );
   }
