@@ -617,9 +617,11 @@ export function transformOutputToFullPolicyOutput(
   standalone = false,
   redactProxySecrets = false
 ): FullAgentPolicyOutput {
-  // TODO: OTLP policy compilation is handled in a separate task
   if (isOtlpOutput(output)) {
-    return { type: output.type };
+    // OTLP policy compilation is not yet implemented — tracked separately.
+    throw new Error(
+      `OTLP output "${output.id}" cannot be compiled into an agent policy output: compilation is not yet implemented`
+    );
   }
 
   const {
