@@ -32,8 +32,7 @@ export function useHelpLinks$(): Observable<HelpLinks> {
   const chromeStyle = useChromeStyle();
   const docLinks = useChromeComponentsDeps().docLinks;
   const isServerless = useIsServerless();
-  const isProject = chromeStyle === 'project';
-  const showNewsfeed = isProject && !isServerless;
+  const showNewsfeed = !isServerless;
 
   return useMemo(
     () =>
@@ -71,7 +70,7 @@ export function useHelpLinks$(): Observable<HelpLinks> {
                 supportUrl,
                 globalExtensionMenuLinks,
                 docLinks,
-                feedbackHandler: isProject ? feedbackHandler : undefined,
+                feedbackHandler,
                 newsfeedHandler: showNewsfeed ? newsfeedInfo?.open : undefined,
                 newsfeedHasNew: showNewsfeed ? newsfeedInfo?.hasNew : undefined,
               },
@@ -79,7 +78,7 @@ export function useHelpLinks$(): Observable<HelpLinks> {
         ),
         distinctUntilChanged(equal)
       ),
-    [chrome, chromeStyle, docLinks, isProject, showNewsfeed]
+    [chrome, chromeStyle, docLinks, showNewsfeed]
   );
 }
 
