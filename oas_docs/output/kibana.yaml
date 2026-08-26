@@ -106805,6 +106805,7 @@ components:
                     aiops_log_rate_analysis: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_log_rate_analysis'
                     aiops_pattern_analysis: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_pattern_analysis'
                     apm_service_map: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-apm_service_map'
+                    custom_content: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-custom_content'
                     discover_session: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-discover_session'
                     esql_control: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-esql_control'
                     field_stats_table: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-field_stats_table'
@@ -106830,6 +106831,7 @@ components:
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-ml_anomaly_swimlane'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-apm_service_map'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_change_point_chart'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-custom_content'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-discover_session'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-esql_control'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-field_stats_table'
@@ -107093,6 +107095,49 @@ components:
         - grid
         - config
       title: APM Service map
+      type: object
+    Kibana_HTTP_APIs_kbn-dashboard-panel-type-custom_content:
+      additionalProperties: false
+      properties:
+        config:
+          additionalProperties: false
+          type: object
+          properties:
+            description:
+              description: A short description of the panel.
+              type: string
+            esql_query:
+              items:
+                maxLength: 1000000
+                type: string
+              maxItems: 1
+              type: array
+            hide_border:
+              description: When true, the panel border is hidden. Defaults to false.
+              type: boolean
+            hide_title:
+              description: When true, the panel title is hidden. Defaults to false.
+              type: boolean
+            template:
+              maxLength: 510000
+              type: string
+            title:
+              description: The panel title.
+              type: string
+        grid:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-grid'
+        id:
+          description: The unique ID of the panel.
+          type: string
+        type:
+          enum:
+            - custom_content
+          type: string
+      required:
+        - type
+        - grid
+        - config
+      title: Custom content
       type: object
     Kibana_HTTP_APIs_kbn-dashboard-panel-type-discover_session:
       additionalProperties: false
@@ -108783,6 +108828,7 @@ components:
                 aiops_log_rate_analysis: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_log_rate_analysis'
                 aiops_pattern_analysis: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_pattern_analysis'
                 apm_service_map: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-apm_service_map'
+                custom_content: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-custom_content'
                 discover_session: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-discover_session'
                 esql_control: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-esql_control'
                 field_stats_table: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-field_stats_table'
@@ -108808,6 +108854,7 @@ components:
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-ml_anomaly_swimlane'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-apm_service_map'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_change_point_chart'
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-custom_content'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-discover_session'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-esql_control'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-field_stats_table'
