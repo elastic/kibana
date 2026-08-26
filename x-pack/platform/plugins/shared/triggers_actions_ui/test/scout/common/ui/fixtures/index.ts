@@ -60,7 +60,6 @@ export {
   findRuleIdByName,
   deleteRuleById,
   deleteRulesByPrefix,
-  resetRulesListPersistedFilters,
   searchRulesList,
   openRulesListAndSearch,
 } from './helpers';

@@ -84,18 +84,6 @@ export const deleteRulesByPrefix = async (kbnClient: KbnClient, prefix: string) 
 
 export const THRESHOLD_TEST_INDEX = 'scout-threshold-rule-test';
 
-const RULES_LIST_FILTERS_STORAGE_KEY = 'triggersActionsUi_rulesList_filters';
-
-/**
- * Drops persisted rules-list filters so leftover type/status/search from a
- * previous test cannot hide the rules this test owns.
- */
-export const resetRulesListPersistedFilters = async (page: ScoutPage) => {
-  await page.evaluate((key) => {
-    window.localStorage.removeItem(key);
-  }, RULES_LIST_FILTERS_STORAGE_KEY);
-};
-
 /**
  * Filters the rules table by name. Search is applied on Enter, not on fill.
  * The table pages at 10 rows and shared environments include preinstalled
@@ -109,7 +97,6 @@ export const searchRulesList = async (page: ScoutPage, searchText: string) => {
 };
 
 export const openRulesListAndSearch = async (page: ScoutPage, searchText: string) => {
-  await resetRulesListPersistedFilters(page);
   await page.gotoApp('rules');
   await page.testSubj.click('rulesTab');
   await expect(page.testSubj.locator('rulesList')).toBeVisible();
