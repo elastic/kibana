@@ -6,7 +6,17 @@
  */
 
 import Boom from '@hapi/boom';
-import { concat, lastValueFrom, mergeMap, of, shareReplay, throwError, timer, toArray } from 'rxjs';
+import {
+  concat,
+  lastValueFrom,
+  mergeMap,
+  of,
+  shareReplay,
+  throwError,
+  timer,
+  toArray,
+  type Observable,
+} from 'rxjs';
 import {
   AgentExecutionMode,
   AgentBuilderErrorCode,
@@ -44,6 +54,16 @@ jest.mock('./utils', () => {
     executeAgent$: jest.fn(),
     resolveServices: jest.fn(),
     generateTitle: jest.fn(),
+  };
+});
+
+// The execution runner mints a round id at request receipt. Freeze it so tests can assert
+// which id gets threaded through, discarded, or persisted.
+jest.mock('uuid', () => {
+  const actual = jest.requireActual('uuid');
+  return {
+    ...actual,
+    v4: jest.fn(() => 'round-1'),
   };
 });
 
@@ -455,6 +475,70 @@ describe('handleAgentExecution', () => {
         expect.objectContaining({ read_only: true })
       );
       expect(conversationClient.discardRoundEvents).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('receipt-time input persistence (two-phase)', () => {
+    it('appends the raw user_message before any agent event flows through the persistence stream', async () => {
+      const conversation = createEmptyConversation({
+        id: 'conversation-1',
+        agent_id: 'test-agent',
+      });
+      const conversationClient = createConversationClientMock();
+      conversationClient.get.mockResolvedValue(conversation);
+      conversationClient.appendEvents.mockResolvedValue(conversation);
+
+      // The agent starts and completes normally; the mocked run only emits AFTER a tick,
+      // so the receipt-time append must land first.
+      const roundStartedEvent = {
+        type: ChatEventType.roundStarted,
+        data: {
+          round_id: 'round-1',
+          input: { message: 'Hello' },
+          started_at: '2024-01-01T00:00:00.000Z',
+        },
+      } as RoundStartedEvent;
+      const roundCompleteEvent = {
+        type: ChatEventType.roundComplete,
+        data: { round: createRound({ id: 'round-1' }) },
+      } as RoundCompleteEvent;
+      executeAgentMock.mockReturnValue(
+        timer(0).pipe(
+          mergeMap(() => of(roundStartedEvent, roundCompleteEvent) as Observable<ChatAgentEvent>),
+          shareReplay()
+        )
+      );
+      resolveServicesMock.mockResolvedValue({
+        conversationClient,
+        selectedConnectorId: 'connector-1',
+        modelProvider: createModelProviderMock(),
+      } as never);
+
+      const events$ = await handleAgentExecution({
+        execution: {
+          executionId: 'execution-1',
+          executionMode: AgentExecutionMode.conversation,
+          agentParams: {
+            agentId: 'test-agent',
+            conversationId: 'conversation-1',
+            nextInput: { message: 'raw input' },
+          },
+        } as never,
+        deps: createDeps({ conversationClient }),
+        request: { headers: {} } as never,
+        abortSignal: new AbortController().signal,
+      });
+
+      await lastValueFrom(events$.pipe(toArray()));
+
+      // The first appendEvents call is the receipt-time raw user_message.
+      const [firstAppendCall] = conversationClient.appendEvents.mock.calls;
+      expect(firstAppendCall[0].events).toHaveLength(1);
+      expect(firstAppendCall[0].events[0]).toMatchObject({
+        id: 'round-1::user_message',
+        data: { message: 'raw input' },
+      });
+      expect(firstAppendCall[0].overwrite).toBeFalsy();
     });
   });
 

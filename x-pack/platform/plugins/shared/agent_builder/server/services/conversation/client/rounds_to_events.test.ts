@@ -18,7 +18,12 @@ import {
   EventActorType,
   TimelineEventType,
 } from '@kbn/agent-builder-common';
-import { isRoundDerivedEventId, roundsToEvents } from './rounds_to_events';
+import {
+  executionStartedEvent,
+  isRoundDerivedEventId,
+  roundsToEvents,
+  userMessageEvent,
+} from './rounds_to_events';
 
 const baseRound = (overrides: Partial<ConversationRound> = {}): ConversationRound => ({
   id: 'round-1',
@@ -215,6 +220,42 @@ describe('roundsToEvents', () => {
     expect(events[4]).toMatchObject({ type: TimelineEventType.executionTerminated });
     const terminatedData = events[4].data as { steps?: unknown };
     expect(terminatedData.steps).toBeUndefined();
+  });
+});
+
+describe('userMessageEvent (split builder)', () => {
+  it('produces exactly one user_message event with the round input and actor', () => {
+    const round = baseRound();
+    const conversation = baseConversation([round]);
+    const event = userMessageEvent(round, conversation);
+
+    expect(event).toMatchObject({
+      id: 'round-1::user_message',
+      type: TimelineEventType.userMessage,
+      created_at: round.started_at,
+      actor: { type: EventActorType.user, id: 'user-1', username: 'alice' },
+      data: { message: 'hello' },
+    });
+    // No `execution_id` / `trigger_event_id` fields belong on the user_message.
+    expect(event).not.toHaveProperty('execution_id');
+    expect(event).not.toHaveProperty('trigger_event_id');
+  });
+});
+
+describe('executionStartedEvent (split builder)', () => {
+  it('produces exactly one execution_started event that references the round input event', () => {
+    const round = baseRound();
+    const conversation = baseConversation([round]);
+    const event = executionStartedEvent(round, conversation);
+
+    expect(event).toMatchObject({
+      id: 'round-1::execution_started',
+      type: TimelineEventType.executionStarted,
+      created_at: round.started_at,
+      actor: { type: EventActorType.agent, id: 'agent-1' },
+      execution_id: 'round-1::execution',
+      trigger_event_id: 'round-1::user_message',
+    });
   });
 });
 

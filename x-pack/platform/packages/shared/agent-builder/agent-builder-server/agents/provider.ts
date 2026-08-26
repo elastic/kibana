@@ -343,6 +343,16 @@ export interface AgentParams {
    */
   conversation?: Conversation;
   /**
+   * Pre-minted id for the round the agent is about to run.
+   *
+   * Callers (the execution runner) mint the round id at request receipt so that the
+   * `user_message` event can be persisted before the agent run starts, then thread the
+   * same id into the run so every downstream event (`round_started`, `execution_step`,
+   * `execution_terminated`) shares that id. Optional for backwards-compatibility with
+   * callers that still let the run generate its own id.
+   */
+  roundId?: string;
+  /**
    * The input triggering this round.
    */
   nextInput: ConverseInput;

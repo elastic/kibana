@@ -108,6 +108,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     configurationOverrides,
     action,
     executionId,
+    roundId: providedRoundId,
   },
   context
 ) => {
@@ -142,7 +143,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     context.attachmentStateManager.clearAccessTracking();
   }
 
-  const roundId = uuidv4();
+  const roundId = providedRoundId ?? uuidv4();
 
   // Create background execution service from conversation state
   const backgroundExecutionService = new BackgroundExecutionService({

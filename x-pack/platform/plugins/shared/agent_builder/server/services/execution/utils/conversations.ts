@@ -25,6 +25,9 @@ import type {
   Conversation,
   ConversationAccessControl,
   ConversationOrigin,
+  ConversationRoundAuthor,
+  ConversationRoundOrigin,
+  ConverseInput,
   RoundCompleteEvent,
   RoundStartedEvent,
   RoundStepEvent,
@@ -43,10 +46,10 @@ import {
 import type { ConversationClient } from '../../conversation';
 import {
   agentActor,
-  roundStartEvents,
+  executionStartedEvent,
   roundStepEventId,
-  roundStepEvents,
-  roundTerminatedEvent,
+  roundToEvents,
+  userMessageEvent,
 } from '../../conversation/client/rounds_to_events';
 import { createConversationUpdatedEvent, createConversationCreatedEvent } from './events';
 
@@ -205,7 +208,117 @@ export const updateConversation$ = ({
   );
 };
 
-export const startConversation$ = ({
+/**
+ * Ensures the conversation document exists, creating it with a placeholder title if the caller
+ * is on the CREATE branch. Swallows the "already exists" race so eager creates don't fail when
+ * another writer wins.
+ */
+const ensureConversationCreated = async ({
+  conversation,
+  conversationClient,
+}: {
+  conversation: ConversationWithOperation;
+  conversationClient: ConversationClient;
+}): Promise<void> => {
+  if (conversation.operation !== 'CREATE') {
+    return;
+  }
+  const isPersistentSubagentCreate = Boolean(conversation.parent_conversation);
+  const hasResolvedParentUser = Boolean(conversation.user) && !isPlaceholderUser(conversation.user);
+  try {
+    await conversationClient.create({
+      id: conversation.id,
+      title: DEFAULT_CONVERSATION_TITLE,
+      agent_id: conversation.agent_id,
+      access_control: conversation.access_control,
+      origin: conversation.origin,
+      read_only: conversation.read_only,
+      rounds: [],
+      ...(isPersistentSubagentCreate && hasResolvedParentUser ? { user: conversation.user } : {}),
+      ...(conversation.parent_conversation
+        ? { parent_conversation: conversation.parent_conversation }
+        : {}),
+    });
+  } catch (error) {
+    // Someone else won the eager-create race; the doc exists, keep going.
+    if (!isConversationAlreadyExistsError(error)) {
+      throw error;
+    }
+  }
+};
+
+/**
+ * Receipt-time input write.
+ *
+ * Ensures the conversation document exists and appends a single `user_message` timeline event
+ * for the round about to run. This is the first write in the two-phase persistence path — it
+ * runs before the agent execution starts, so the input is persisted regardless of the run's
+ * fate (failure, abort, or completion).
+ *
+ * Emits nothing on the outward chat stream (side-effect only). The final `conversationCreated`
+ * / `conversationUpdated` event still fires at round-end via {@link appendRoundTerminated$}.
+ */
+export const persistRoundInput$ = ({
+  conversation,
+  conversationClient,
+  roundId,
+  receivedAt,
+  input,
+  author,
+  origin,
+  inFlightWrites,
+}: {
+  conversation: ConversationWithOperation;
+  conversationClient: ConversationClient;
+  roundId: string;
+  receivedAt: Date;
+  /**
+   * Raw wire input. Only the message + attachment refs are persisted at receipt time; the
+   * canonical projection (with `attachment_context` and processed attachment refs) lands at
+   * round-end via the overwrite append.
+   */
+  input: ConverseInput;
+  author?: ConversationRoundAuthor;
+  origin?: ConversationRoundOrigin;
+  /** Registers the write so teardown cleanup can wait for it before discarding. */
+  inFlightWrites: InFlightWrites;
+}): Observable<ChatEvent> => {
+  return from(
+    inFlightWrites.track(
+      (async () => {
+        await ensureConversationCreated({ conversation, conversationClient });
+        // `ConverseInput.message` is optional but `RoundInput.message` is required —
+        // default to an empty string for the receipt-time snapshot. The overwrite at
+        // round-end replaces this with the processed input which always has a message.
+        const event = userMessageEvent(
+          {
+            id: roundId,
+            input: {
+              message: input.message ?? '',
+              ...(input.attachment_refs ? { attachment_refs: input.attachment_refs } : {}),
+            },
+            started_at: receivedAt.toISOString(),
+            ...(author ? { author } : {}),
+            ...(origin ? { origin } : {}),
+          },
+          conversation
+        );
+        await conversationClient.appendEvents(
+          { id: conversation.id, events: [event] },
+          { access: 'converse' }
+        );
+      })()
+    )
+  ).pipe(ignoreElements());
+};
+
+/**
+ * Appends the `execution_started` timeline event as its own write, in response to the
+ * `round_started` chat event from the agent run. Split from the receipt-time input write
+ * so the two lifecycle events can succeed/fail independently: a failed run leaves the input
+ * on the timeline but rolls back only the execution-derived events.
+ */
+export const appendExecutionStarted$ = ({
   conversation,
   conversationClient,
   roundStartedEvents$,
@@ -214,71 +327,22 @@ export const startConversation$ = ({
   conversation: ConversationWithOperation;
   conversationClient: ConversationClient;
   roundStartedEvents$: Observable<RoundStartedEvent>;
-  inFlightWrites?: InFlightWrites;
+  inFlightWrites: InFlightWrites;
 }): Observable<ChatEvent> => {
   return roundStartedEvents$.pipe(
     switchMap((roundStartedEvent) => {
-      const ensureCreated = async (): Promise<void> => {
-        if (conversation.operation !== 'CREATE') {
-          return;
-        }
-        const isPersistentSubagentCreate = Boolean(conversation.parent_conversation);
-        const hasResolvedParentUser =
-          Boolean(conversation.user) && !isPlaceholderUser(conversation.user);
-        try {
-          await conversationClient.create({
-            id: conversation.id,
-            title: DEFAULT_CONVERSATION_TITLE,
-            agent_id: conversation.agent_id,
-            access_control: conversation.access_control,
-            origin: conversation.origin,
-            read_only: conversation.read_only,
-            rounds: [],
-            ...(isPersistentSubagentCreate && hasResolvedParentUser
-              ? { user: conversation.user }
-              : {}),
-            ...(conversation.parent_conversation
-              ? { parent_conversation: conversation.parent_conversation }
-              : {}),
-          });
-        } catch (error) {
-          // Someone else won the eager-create race; the doc exists, keep going.
-          if (!isConversationAlreadyExistsError(error)) {
-            throw error;
-          }
-        }
-      };
-
-      const appendStart = async (): Promise<void> => {
-        const {
-          round_id: id,
-          input,
-          started_at: startedAt,
-          author: eventAuthor,
-          origin: eventOrigin,
-        } = roundStartedEvent.data;
-        const events = roundStartEvents(
-          {
-            id,
-            input,
-            started_at: startedAt,
-            ...(eventAuthor ? { author: eventAuthor } : {}),
-            ...(eventOrigin ? { origin: eventOrigin } : {}),
-          },
-          conversation
-        );
-        await conversationClient.appendEvents(
-          { id: conversation.id, events },
-          { access: 'converse' }
-        );
-      };
-
-      const startWrite = (async () => {
-        await ensureCreated();
-        await appendStart();
-      })();
-
-      return from(inFlightWrites ? inFlightWrites.track(startWrite) : startWrite);
+      const { round_id: id, started_at: startedAt } = roundStartedEvent.data;
+      return from(
+        inFlightWrites.track(
+          conversationClient.appendEvents(
+            {
+              id: conversation.id,
+              events: [executionStartedEvent({ id, started_at: startedAt }, conversation)],
+            },
+            { access: 'converse' }
+          )
+        )
+      );
     }),
     // Side-effect only; the conversationCreated/Updated event fires at END.
     ignoreElements()
@@ -367,9 +431,16 @@ export const appendRoundTerminated$ = ({
             workspace_id: workspaceId,
           } = roundCompletedEvent.data;
 
-          const stepEvents = roundStepEvents(round, conversation);
-          const terminated = roundTerminatedEvent(round, conversation);
-          const events: TimelineEvent[] = [...stepEvents, ...(terminated ? [terminated] : [])];
+          // Write the full canonical projection for the round in one append.
+          //   - `user_message` overwrites the receipt-time raw input with the processed one
+          //     (attachment_refs, attachment_context populated).
+          //   - `execution_started` overwrites the mid-run event with its final timestamps.
+          //   - step events overwrite any live-streamed ones with the same id.
+          //   - the terminal event is appended fresh.
+          // `overwrite: true` guarantees canonical projections replace the earlier snapshots
+          // by id (position preserved). `roundTerminatedEvent` only emits for
+          // completed/awaitingPrompt statuses, which is the round-complete contract.
+          const events: TimelineEvent[] = roundToEvents(round, conversation);
 
           const resolvedTitle = title$ ? await firstValueFrom(title$) : undefined;
 
@@ -377,6 +448,7 @@ export const appendRoundTerminated$ = ({
             {
               id: conversation.id,
               events,
+              overwrite: true,
               ...(resolvedTitle !== undefined ? { title: resolvedTitle } : {}),
               status: round.status,
               ...(conversationState ? { state: conversationState } : {}),

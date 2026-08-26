@@ -35,10 +35,11 @@ import {
 import type { ConversationWithOperation } from './conversations';
 import {
   STEP_FLUSH_MS,
+  appendExecutionStarted$,
   appendRoundTerminated$,
   createInFlightWrites,
   getConversation,
-  startConversation$,
+  persistRoundInput$,
   streamRoundSteps$,
   updateConversation$,
 } from './conversations';
@@ -388,8 +389,143 @@ describe('conversations utils', () => {
     });
   });
 
-  describe('startConversation$', () => {
-    /** Minimal factory that mirrors what `run_chat_agent` emits at roundStart. */
+  describe('persistRoundInput$ (receipt-time input write)', () => {
+    const withOperation = (
+      conversation: Conversation,
+      operation: 'CREATE' | 'UPDATE'
+    ): ConversationWithOperation => ({ ...conversation, operation });
+
+    const runReceipt = async ({
+      conversation,
+      conversationClient,
+      roundId = 'round-1',
+      receivedAt = new Date('2024-01-01T00:00:00.000Z'),
+      input = { message: 'hi' },
+      author,
+    }: {
+      conversation: ConversationWithOperation;
+      conversationClient: ReturnType<typeof createConversationClientMock>;
+      roundId?: string;
+      receivedAt?: Date;
+      input?: { message?: string };
+      author?: ConversationRoundAuthor;
+    }) => {
+      conversationClient.appendEvents.mockResolvedValue(conversation);
+      const inFlightWrites = createInFlightWrites();
+      const events$ = persistRoundInput$({
+        conversation,
+        conversationClient,
+        roundId,
+        receivedAt,
+        input,
+        author,
+        inFlightWrites,
+      });
+      await lastValueFrom(events$, { defaultValue: undefined });
+      await inFlightWrites.settled();
+    };
+
+    it('creates the conversation doc and appends a single user_message on CREATE', async () => {
+      const conversationClient = createConversationClientMock();
+      const conversation = withOperation(
+        createEmptyConversation({ id: 'conv-1', agent_id: 'agent-1' }),
+        'CREATE'
+      );
+
+      await runReceipt({
+        conversation,
+        conversationClient,
+        input: { message: 'raw input' },
+        author: { id: 'u1', username: 'u1' },
+      });
+
+      expect(conversationClient.create).toHaveBeenCalledTimes(1);
+      const [createArgs] = conversationClient.create.mock.calls[0];
+      expect(createArgs.id).toBe('conv-1');
+      expect(createArgs.title).toBe(DEFAULT_CONVERSATION_TITLE);
+
+      // Only the user_message is appended — no execution_started at receipt time.
+      expect(conversationClient.appendEvents).toHaveBeenCalledTimes(1);
+      const [appendArgs] = conversationClient.appendEvents.mock.calls[0];
+      expect(appendArgs.events).toHaveLength(1);
+      expect(appendArgs.events[0]).toMatchObject({
+        id: 'round-1::user_message',
+        type: TimelineEventType.userMessage,
+        data: { message: 'raw input' },
+      });
+    });
+
+    it('skips create for UPDATE but still appends the user_message', async () => {
+      const conversationClient = createConversationClientMock();
+      const conversation = withOperation(createEmptyConversation({ id: 'conv-1' }), 'UPDATE');
+
+      await runReceipt({ conversation, conversationClient });
+
+      expect(conversationClient.create).not.toHaveBeenCalled();
+      expect(conversationClient.appendEvents).toHaveBeenCalledTimes(1);
+    });
+
+    it('swallows conversationAlreadyExists on CREATE (race with another writer) and still appends', async () => {
+      const conversationClient = createConversationClientMock();
+      const conversation = withOperation(createEmptyConversation({ id: 'conv-1' }), 'CREATE');
+      conversationClient.create.mockRejectedValueOnce(
+        createConversationAlreadyExistsError({ conversationId: 'conv-1' })
+      );
+
+      await runReceipt({ conversation, conversationClient });
+
+      expect(conversationClient.appendEvents).toHaveBeenCalledTimes(1);
+    });
+
+    it('propagates unexpected create errors', async () => {
+      const conversationClient = createConversationClientMock();
+      const conversation = withOperation(createEmptyConversation({ id: 'conv-1' }), 'CREATE');
+      const boom = new Error('boom');
+      conversationClient.create.mockRejectedValueOnce(boom);
+
+      const events$ = persistRoundInput$({
+        conversation,
+        conversationClient,
+        roundId: 'round-1',
+        receivedAt: new Date(),
+        input: { message: 'hi' },
+        inFlightWrites: createInFlightWrites(),
+      });
+      await expect(lastValueFrom(events$, { defaultValue: undefined })).rejects.toBe(boom);
+      expect(conversationClient.appendEvents).not.toHaveBeenCalled();
+    });
+
+    it('defaults an undefined message to an empty string so the receipt-time snapshot is a valid RoundInput', async () => {
+      const conversationClient = createConversationClientMock();
+      const conversation = withOperation(createEmptyConversation({ id: 'c' }), 'UPDATE');
+      conversationClient.appendEvents.mockResolvedValue(conversation);
+
+      await runReceipt({ conversation, conversationClient, input: {} });
+
+      const [appendArgs] = conversationClient.appendEvents.mock.calls[0];
+      expect((appendArgs.events[0].data as { message: string }).message).toBe('');
+    });
+
+    it('emits no chat events itself (side effects only)', async () => {
+      const conversationClient = createConversationClientMock();
+      const conversation = withOperation(createEmptyConversation({ id: 'c' }), 'UPDATE');
+      conversationClient.appendEvents.mockResolvedValue(conversation);
+
+      const emitted = await lastValueFrom(
+        persistRoundInput$({
+          conversation,
+          conversationClient,
+          roundId: 'round-1',
+          receivedAt: new Date(),
+          input: { message: 'hi' },
+          inFlightWrites: createInFlightWrites(),
+        }).pipe(toArray())
+      );
+      expect(emitted).toEqual([]);
+    });
+  });
+
+  describe('appendExecutionStarted$ (run-start write)', () => {
     const makeStartEvent = (parts: Partial<RoundStartedEvent['data']> = {}): RoundStartedEvent => ({
       type: ChatEventType.roundStarted,
       data: {
@@ -405,123 +541,31 @@ describe('conversations utils', () => {
       operation: 'CREATE' | 'UPDATE'
     ): ConversationWithOperation => ({ ...conversation, operation });
 
-    const runStart = async ({
-      conversation,
-      conversationClient,
-      startEvent,
-    }: {
-      conversation: ConversationWithOperation;
-      conversationClient: ReturnType<typeof createConversationClientMock>;
-      startEvent: RoundStartedEvent;
-    }) => {
-      conversationClient.appendEvents.mockResolvedValue(conversation);
-      const events$ = startConversation$({
-        conversation,
-        conversationClient,
-        roundStartedEvents$: of(startEvent),
-      });
-      await lastValueFrom(events$, { defaultValue: undefined });
-    };
-
-    it('creates the doc with a placeholder title then appends the two start events for a CREATE', async () => {
-      const conversationClient = createConversationClientMock();
-      const conversation = withOperation(
-        createEmptyConversation({ id: 'conv-1', agent_id: 'agent-1' }),
-        'CREATE'
-      );
-      const author: ConversationRoundAuthor = { id: 'u1', username: 'u1' };
-
-      await runStart({
-        conversation,
-        conversationClient,
-        startEvent: makeStartEvent({
-          round_id: 'round-1',
-          input: { message: 'hi' },
-          started_at: '2024-01-01T00:00:00.000Z',
-          author,
-        }),
-      });
-
-      expect(conversationClient.create).toHaveBeenCalledTimes(1);
-      const [createArgs] = conversationClient.create.mock.calls[0];
-      expect(createArgs.id).toBe('conv-1');
-      expect(createArgs.title).toBe(DEFAULT_CONVERSATION_TITLE);
-      expect(createArgs.rounds).toEqual([]);
-
-      expect(conversationClient.appendEvents).toHaveBeenCalledTimes(1);
-      const [appendArgs] = conversationClient.appendEvents.mock.calls[0];
-      expect(appendArgs.id).toBe('conv-1');
-      const startEvents = appendArgs.events;
-      expect(startEvents).toHaveLength(2);
-      expect(startEvents[0]).toMatchObject({
-        id: 'round-1::user_message',
-        type: 'user_message',
-      });
-      expect(startEvents[1]).toMatchObject({
-        id: 'round-1::execution_started',
-        type: 'execution_started',
-        execution_id: 'round-1::execution',
-      });
-    });
-
-    it('skips create for UPDATE but still appends the start events', async () => {
+    it('appends a single execution_started event (no user_message, no create call)', async () => {
       const conversationClient = createConversationClientMock();
       const conversation = withOperation(createEmptyConversation({ id: 'conv-1' }), 'UPDATE');
+      conversationClient.appendEvents.mockResolvedValue(conversation);
+      const inFlightWrites = createInFlightWrites();
 
-      await runStart({
-        conversation,
-        conversationClient,
-        startEvent: makeStartEvent(),
-      });
-
-      expect(conversationClient.create).not.toHaveBeenCalled();
-      expect(conversationClient.appendEvents).toHaveBeenCalledTimes(1);
-    });
-
-    it('swallows conversationAlreadyExists on CREATE (race with another writer) and still appends', async () => {
-      const conversationClient = createConversationClientMock();
-      const conversation = withOperation(createEmptyConversation({ id: 'conv-1' }), 'CREATE');
-      conversationClient.create.mockRejectedValueOnce(
-        createConversationAlreadyExistsError({ conversationId: 'conv-1' })
-      );
-
-      await runStart({
-        conversation,
-        conversationClient,
-        startEvent: makeStartEvent(),
-      });
-
-      expect(conversationClient.appendEvents).toHaveBeenCalledTimes(1);
-    });
-
-    it('propagates unexpected create errors', async () => {
-      const conversationClient = createConversationClientMock();
-      const conversation = withOperation(createEmptyConversation({ id: 'conv-1' }), 'CREATE');
-      const boom = new Error('boom');
-      conversationClient.create.mockRejectedValueOnce(boom);
-
-      const events$ = startConversation$({
+      const events$ = appendExecutionStarted$({
         conversation,
         conversationClient,
         roundStartedEvents$: of(makeStartEvent()),
+        inFlightWrites,
       });
-      await expect(lastValueFrom(events$, { defaultValue: undefined })).rejects.toBe(boom);
-      expect(conversationClient.appendEvents).not.toHaveBeenCalled();
-    });
+      await lastValueFrom(events$, { defaultValue: undefined });
+      await inFlightWrites.settled();
 
-    it('emits no chat events itself (side effects only)', async () => {
-      const conversationClient = createConversationClientMock();
-      const conversation = withOperation(createEmptyConversation({ id: 'c' }), 'UPDATE');
-      conversationClient.appendEvents.mockResolvedValue(conversation);
-
-      const emitted = await lastValueFrom(
-        startConversation$({
-          conversation,
-          conversationClient,
-          roundStartedEvents$: of(makeStartEvent()),
-        }).pipe(toArray())
-      );
-      expect(emitted).toEqual([]);
+      expect(conversationClient.create).not.toHaveBeenCalled();
+      expect(conversationClient.appendEvents).toHaveBeenCalledTimes(1);
+      const [appendArgs] = conversationClient.appendEvents.mock.calls[0];
+      expect(appendArgs.events).toHaveLength(1);
+      expect(appendArgs.events[0]).toMatchObject({
+        id: 'round-1::execution_started',
+        type: TimelineEventType.executionStarted,
+        execution_id: 'round-1::execution',
+        trigger_event_id: 'round-1::user_message',
+      });
     });
   });
 
@@ -553,7 +597,7 @@ describe('conversations utils', () => {
       );
     };
 
-    it('appends the execution_terminated event and folds title + status into the same write for CREATE', async () => {
+    it('overwrites the full canonical projection (user_message + execution_started + terminated) and folds title + status into the same write for CREATE', async () => {
       const conversationClient = createConversationClientMock();
       const conversation = withOperation(createEmptyConversation({ id: 'conv-1' }), 'CREATE');
       const round = createRound({
@@ -578,12 +622,14 @@ describe('conversations utils', () => {
       expect(args.id).toBe('conv-1');
       expect(args.title).toBe('Generated title');
       expect(args.status).toBe(ConversationRoundStatus.completed);
-      expect(args.events).toHaveLength(1);
-      expect(args.events[0]).toMatchObject({
-        id: 'round-1::execution_terminated',
-        type: 'execution_terminated',
-        execution_id: 'round-1::execution',
-      });
+      expect(args.overwrite).toBe(true);
+      // Round-end write is a full canonical projection: the receipt-time raw user_message
+      // and mid-run execution_started are replaced in place with the canonical events.
+      expect(args.events.map((event: { id: string }) => event.id)).toEqual([
+        'round-1::user_message',
+        'round-1::execution_started',
+        'round-1::execution_terminated',
+      ]);
 
       expect(emitted).toHaveLength(1);
       expect(emitted[0].type).toBe(ChatEventType.conversationCreated);
@@ -655,7 +701,7 @@ describe('conversations utils', () => {
       });
     });
 
-    it('appends the full projected step events for the round alongside the terminated event', async () => {
+    it('appends the full projected round events (user_message + execution_started + steps + terminated) at round-end', async () => {
       const conversationClient = createConversationClientMock();
       const conversation = withOperation(createEmptyConversation({ id: 'conv-steps' }), 'UPDATE');
       const steps: ConversationRoundStep[] = [
@@ -684,12 +730,17 @@ describe('conversations utils', () => {
       });
 
       const [args] = conversationClient.appendEvents.mock.calls[0];
+      expect(args.overwrite).toBe(true);
       expect(args.events.map((event: { type: string; id: string }) => event.type)).toEqual([
+        TimelineEventType.userMessage,
+        TimelineEventType.executionStarted,
         TimelineEventType.executionStep,
         TimelineEventType.executionStep,
         TimelineEventType.executionTerminated,
       ]);
       expect(args.events.map((event: { id: string }) => event.id)).toEqual([
+        'round-x::user_message',
+        'round-x::execution_started',
         'round-x::step::0',
         'round-x::step::1',
         'round-x::execution_terminated',

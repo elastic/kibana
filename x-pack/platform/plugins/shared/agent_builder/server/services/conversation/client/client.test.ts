@@ -2523,7 +2523,99 @@ describe('ConversationClient', () => {
       expect(terminalDoc.conversation_rounds[0].response.message).toBe('projected');
     });
 
-    it('discardRoundEvents removes only the failed round-derived events, keeping other rounds and additive events', async () => {
+    it('overwrite=true replaces events with matching ids in place, appends new ids, and preserves timeline order', async () => {
+      // Stored events look like a partially live round: raw user_message + execution_started
+      // + one streamed step event; plus an unrelated additive event that must be untouched.
+      const storedUserMessage = {
+        id: 'round-1::user_message',
+        type: TimelineEventType.userMessage,
+        created_at: '2025-08-04T07:42:00.000Z',
+        actor: { type: EventActorType.user, id: 'user-1', username: 'test-user' },
+        data: { message: 'raw input' },
+      } as TimelineEvent;
+      const storedExecutionStarted = {
+        id: 'round-1::execution_started',
+        type: TimelineEventType.executionStarted,
+        created_at: '2025-08-04T07:42:01.000Z',
+        actor: { type: EventActorType.agent, id: 'agent-1' },
+        execution_id: 'round-1::execution',
+        trigger_event_id: 'round-1::user_message',
+        data: { trigger_type: 'user_message' },
+      } as TimelineEvent;
+      const storedStep0 = stepTimelineEvent('round-1', 0);
+      const additiveEvent = {
+        id: 'additive-error-1',
+        type: TimelineEventType.executionTerminated,
+        created_at: '2025-08-04T07:42:02.000Z',
+        actor: { type: EventActorType.agent, id: 'agent-1' },
+        data: {},
+      } as TimelineEvent;
+
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createConversationDocument({
+              schemaVersion: 1,
+              events: [storedUserMessage, storedExecutionStarted, storedStep0, additiveEvent],
+            }),
+          ],
+        },
+      });
+      mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
+
+      // Round-end overwrite: canonical user_message replaces the raw one; step::0 keeps
+      // its position; step::1 is new; the terminal event is also new.
+      const canonicalUserMessage = {
+        ...storedUserMessage,
+        data: { message: 'processed input', attachment_refs: [] },
+      } as TimelineEvent;
+      const canonicalStep0: TimelineEvent = { ...storedStep0, created_at: 'CANONICAL_TS_0' };
+      const step1 = stepTimelineEvent('round-1', 1);
+      const terminated = {
+        id: 'round-1::execution_terminated',
+        type: TimelineEventType.executionTerminated,
+        created_at: '2025-08-04T07:42:10.000Z',
+        actor: { type: EventActorType.agent, id: 'agent-1' },
+        execution_id: 'round-1::execution',
+        trigger_event_id: 'round-1::user_message',
+        data: {
+          outcome: { type: 'responded', response: { message: 'done' } },
+          model_usage: { connector_id: 'c', llm_calls: 1, input_tokens: 1, output_tokens: 1 },
+          time_to_first_token: 1,
+          time_to_last_token: 2,
+        },
+      } as TimelineEvent;
+
+      await client.appendEvents({
+        id: 'conversation-1',
+        events: [canonicalUserMessage, canonicalStep0, step1, terminated],
+        overwrite: true,
+      });
+
+      const { document: indexed } = mockEsClient.index.mock.calls[0][0] as {
+        document: {
+          events?: Array<{ id: string; created_at?: string; data?: { message?: string } }>;
+        };
+      };
+      // Positions preserved for overwritten ids; additive event untouched; new ids appended.
+      expect(indexed.events?.map((event) => event.id)).toEqual([
+        'round-1::user_message',
+        'round-1::execution_started',
+        'round-1::step::0',
+        'additive-error-1',
+        'round-1::step::1',
+        'round-1::execution_terminated',
+      ]);
+      // Overwritten user_message carries the canonical data now.
+      const overwrittenUserMessage = indexed.events?.find(
+        (event) => event.id === 'round-1::user_message'
+      );
+      expect(overwrittenUserMessage?.data?.message).toBe('processed input');
+      const overwrittenStep0 = indexed.events?.find((event) => event.id === 'round-1::step::0');
+      expect(overwrittenStep0?.created_at).toBe('CANONICAL_TS_0');
+    });
+
+    it('discardRoundEvents removes execution-derived events for the failed round but keeps its user_message and every other event', async () => {
       const completedRound = createRound({
         id: 'round-1',
         status: ConversationRoundStatus.completed,
@@ -2576,11 +2668,14 @@ describe('ConversationClient', () => {
       const { document: indexed } = mockEsClient.index.mock.calls[0][0] as {
         document: { events?: Array<{ id: string }> };
       };
+      // Round-2's `execution_started` and step are gone; its `user_message` is kept so the
+      // user's raw input survives the failed run as an orphan on the timeline.
       expect(indexed.events?.map((event) => event.id)).toEqual([
         'round-1::user_message',
         'round-1::execution_started',
         'round-1::execution_terminated',
         'additive-error-1',
+        'round-2::user_message',
       ]);
     });
 

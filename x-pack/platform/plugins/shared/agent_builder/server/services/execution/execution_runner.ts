@@ -21,13 +21,19 @@ import {
   take,
 } from 'rxjs';
 import type { Observable } from 'rxjs';
+import { v4 as uuidv4 } from 'uuid';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { RunAgentFn } from '@kbn/agent-builder-server';
-import type { ChatEvent, ConversationAction } from '@kbn/agent-builder-common';
+import type {
+  ChatEvent,
+  ConversationAction,
+  ConversationRoundAuthor,
+  ConverseInput,
+} from '@kbn/agent-builder-common';
 import {
   agentBuilderDefaultAgentId,
   isRoundCompleteEvent,
@@ -49,6 +55,7 @@ import type { SerializedExecutionError } from '@kbn/agent-builder-common';
 import type {
   AgentExecution,
   ConversationAgentExecution,
+  ExecutionConversationOrigin,
   StandaloneAgentExecution,
 } from '@kbn/agent-builder-server/execution';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
@@ -63,7 +70,8 @@ import {
   getConversation,
   updateConversation$,
   createConversation$,
-  startConversation$,
+  persistRoundInput$,
+  appendExecutionStarted$,
   appendRoundTerminated$,
   streamRoundSteps$,
   createInFlightWrites,
@@ -220,6 +228,13 @@ const handleConversationExecution = async ({
     origin,
   });
 
+  // Mint the round id and capture the receipt timestamp here, at the execution runner boundary.
+  // - Threaded into the run so `round_started`, `execution_step`, `execution_terminated` share it.
+  // - Used by the two-phase persistence path to write the raw `user_message` event immediately,
+  //   before the agent run starts (decoupling input persistence from execution).
+  const roundId = uuidv4();
+  const receivedAt = new Date();
+
   // Emit conversation ID for new conversations (only when persisting)
   const conversationIdEvent$ =
     storeConversation && conversation.operation === 'CREATE'
@@ -249,6 +264,7 @@ const handleConversationExecution = async ({
     interactivity,
     parentExecutionId: execution.parentExecutionId,
     projectRouting,
+    roundId,
   });
 
   // Generate title when creating a new conversation
@@ -275,6 +291,11 @@ const handleConversationExecution = async ({
         agentEvents$,
         action,
         logger,
+        roundId,
+        receivedAt,
+        nextInput,
+        author,
+        origin,
       })
     : EMPTY;
 
@@ -507,6 +528,11 @@ const buildPersistenceEvents = ({
   agentEvents$,
   action,
   logger,
+  roundId,
+  receivedAt,
+  nextInput,
+  author,
+  origin,
 }: {
   conversation: ConversationWithOperation;
   conversationClient: ConversationClient;
@@ -514,6 +540,19 @@ const buildPersistenceEvents = ({
   agentEvents$: Observable<ChatEvent>;
   action?: ConversationAction;
   logger: Logger;
+  /** Round id minted at receipt time and threaded into the run. */
+  roundId: string;
+  /** Request receipt timestamp; used to timestamp the raw `user_message` write. */
+  receivedAt: Date;
+  /** Raw input as received on the wire; persisted immediately, before the run starts. */
+  nextInput: ConverseInput;
+  /** Resolved author for the round input (external system or Kibana user). */
+  author?: ConversationRoundAuthor;
+  /**
+   * Full execution origin (from the caller). Only the round-origin slice is stamped on
+   * the timeline event; the conversation-level origin is already on the conversation.
+   */
+  origin?: ExecutionConversationOrigin;
 }): Observable<ChatEvent> => {
   const roundCompletedEvents$ = agentEvents$.pipe(filter(isRoundCompleteEvent));
 
@@ -529,10 +568,27 @@ const buildPersistenceEvents = ({
         ? title$
         : undefined;
 
-    let startedRoundId: string | undefined;
     let roundReachedTerminal = false;
 
     const inFlightWrites = createInFlightWrites();
+
+    // Extract the round-origin slice (type only) from the full execution origin. The
+    // conversation-level origin already lives on the conversation itself.
+    const roundOrigin = origin ? { type: origin.type } : undefined;
+
+    // Receipt-time input write. Runs first — no step flush or execution_started append
+    // can race doc creation because the two-phase merge only subscribes after this
+    // observable completes (concat).
+    const input$ = persistRoundInput$({
+      conversation,
+      conversationClient,
+      roundId,
+      receivedAt,
+      input: nextInput,
+      author,
+      origin: roundOrigin,
+      inFlightWrites,
+    });
 
     const stepStream$ = streamRoundSteps$({
       conversation,
@@ -543,10 +599,9 @@ const buildPersistenceEvents = ({
     });
 
     const twoPhase$ = roundStartedEvents$.pipe(
-      concatMap((startEvent) => {
-        startedRoundId = startEvent.data.round_id;
-        return concat(
-          startConversation$({
+      concatMap((startEvent) =>
+        concat(
+          appendExecutionStarted$({
             conversation,
             conversationClient,
             roundStartedEvents$: of(startEvent),
@@ -564,16 +619,24 @@ const buildPersistenceEvents = ({
             ),
             title$: endTitle$,
           })
-        );
-      })
+        )
+      )
     );
 
-    return merge(stepStream$, twoPhase$).pipe(
+    // concat: receipt-time input write completes before any step flush or run-start
+    // append is allowed to run. If the input write fails, the whole persistence stream
+    // errors — matching today's start-failure behavior.
+    return concat(input$, merge(stepStream$, twoPhase$)).pipe(
       finalize(() => {
-        if (startedRoundId === undefined || roundReachedTerminal) {
+        // Fires on completion, error, and unsubscription (cancel/abort).
+        // If the round never reached a terminal event, clean up its execution-derived
+        // events (execution_started + steps). The receipt-time `user_message` is kept
+        // intentionally — the input is on the timeline as an orphan and `eventsToRounds`
+        // drops it from the rounds projection until a paired execution_started + terminal
+        // event lands.
+        if (roundReachedTerminal) {
           return;
         }
-        const roundId = startedRoundId;
         inFlightWrites
           .settled()
           .then(() => conversationClient.discardRoundEvents(conversation.id, roundId))

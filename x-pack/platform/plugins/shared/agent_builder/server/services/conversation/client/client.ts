@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import { OccWriter, isElasticsearchWriteConflict } from '@kbn/occ';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
-import type { ConversationOrigin } from '@kbn/agent-builder-common';
+import type { ConversationOrigin, TimelineEvent } from '@kbn/agent-builder-common';
 import {
   type CurrentUser,
   type Conversation,
@@ -68,6 +68,7 @@ import { serializeMetadataValue, buildMetadataFromTemplate } from '../templates/
 import { reconcileAttachments, upsertRound as upsertRoundInList } from './round_writes';
 import { applyAttachmentRefsToRounds } from './migrate_attachments';
 import { updateReadBy } from './read_by';
+import { ROUND_DERIVED_EVENT_ID_SUFFIXES } from './rounds_to_events';
 import {
   fromEs,
   fromEsWithoutRounds,
@@ -460,19 +461,50 @@ class ConversationClientImpl implements ConversationClient {
     request: AppendEventsRequest,
     options: { access: ConversationAccess } = { access: 'converse' }
   ): Promise<Conversation> {
-    const { id: conversationId, events, title, status, state, attachments, workspaceId } = request;
+    const {
+      id: conversationId,
+      events,
+      title,
+      status,
+      state,
+      attachments,
+      workspaceId,
+      overwrite = false,
+    } = request;
     const { access } = options;
 
     return this.writeConversation({
       conversationId,
       access,
       fields: (current) => {
-        const existingIds = new Set((current.events ?? []).map((event) => event.id));
-        const newEvents = events.filter((event) => !existingIds.has(event.id));
-        const appended = [...(current.events ?? []), ...newEvents];
-        const isStepOnlyBatch = newEvents.every(
-          (event) => event.type === TimelineEventType.executionStep
-        );
+        const currentEvents = current.events ?? [];
+        // Two paths, single output shape:
+        //  - overwrite=false (default): skip-dedup append. Repeated flushes of the same
+        //    step id are a no-op; new ids append in order. This is what live step flushes
+        //    and the receipt-time input write want.
+        //  - overwrite=true: id-keyed replace-in-place. Incoming events with a matching
+        //    stored id replace that entry (position preserved); new ids append in order.
+        //    This is what the round-end append wants so the canonical projection replaces
+        //    the earlier live snapshots (raw user_message, mid-run execution_started,
+        //    streamed steps) without shuffling the timeline.
+        let appended: TimelineEvent[];
+        if (overwrite) {
+          const incomingById = new Map(events.map((event) => [event.id, event]));
+          const replaced = currentEvents.map((event) => incomingById.get(event.id) ?? event);
+          const replacedIds = new Set(currentEvents.map((event) => event.id));
+          const additions = events.filter((event) => !replacedIds.has(event.id));
+          appended = [...replaced, ...additions];
+        } else {
+          const existingIds = new Set(currentEvents.map((event) => event.id));
+          const newEvents = events.filter((event) => !existingIds.has(event.id));
+          appended = [...currentEvents, ...newEvents];
+        }
+        // A step-only append can skip the rounds rebuild: a mid-run step flush is not
+        // authoritative for the round's shape (it lacks the terminal event), and the
+        // round-end overwrite will re-project rounds anyway. The overwrite path is
+        // always authoritative — let `updateConversation` re-derive rounds from events.
+        const isStepOnlyBatch =
+          !overwrite && events.every((event) => event.type === TimelineEventType.executionStep);
         return {
           events: appended,
           ...(isStepOnlyBatch ? { rounds: current.rounds } : {}),
@@ -496,13 +528,26 @@ class ConversationClientImpl implements ConversationClient {
       },
     });
   }
+  /**
+   * Discards the execution-derived timeline events of a round (execution_started + steps),
+   * leaving the `user_message` in place. Used by the two-phase persistence path when a
+   * round starts but never terminates (failure, abort, cancel).
+   *
+   * Keeping `user_message` means the input the user typed is preserved on the timeline
+   * even if the run fails. `eventsToRounds` drops it from the rounds projection until it
+   * has a paired execution_started + terminal event, so it appears as an orphan input.
+   */
   async discardRoundEvents(conversationId: string, roundId: string): Promise<void> {
     await this.writeConversation({
       conversationId,
       access: 'converse',
       fields: (current) => {
         const events = current.events ?? [];
-        const remaining = events.filter((event) => !event.id.startsWith(`${roundId}::`));
+        const userMessageId = `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.userMessage}`;
+        // Drop everything id-prefixed with `${roundId}::` except the input event.
+        const remaining = events.filter(
+          (event) => event.id === userMessageId || !event.id.startsWith(`${roundId}::`)
+        );
         // Nothing to discard: return no fields, so a legacy (rounds-only) document is not
         // promoted to events-native by writing its read-derived timeline back.
         return remaining.length === events.length ? {} : { events: remaining };

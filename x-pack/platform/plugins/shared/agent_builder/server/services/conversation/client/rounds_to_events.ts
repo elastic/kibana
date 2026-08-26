@@ -59,33 +59,60 @@ const roundDerivedEventIds = (roundId: string) => ({
 export const roundStepEventId = (roundId: string, sequence: number): string =>
   `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.stepPrefix}${sequence}`;
 
-/** The fields of a round needed to build its `user_message` + `execution_started` start events. */
+/** The fields of a round needed to build its `user_message` start event. */
 type RoundStart = Pick<ConversationRound, 'id' | 'input' | 'started_at' | 'author' | 'origin'>;
 
+/**
+ * Builds only the `user_message` timeline event for a round.
+ *
+ * Split out from {@link roundStartEvents} so the execution runner can persist the input
+ * as soon as the request is received — independent of, and prior to, the run starting.
+ */
+export const userMessageEvent = (round: RoundStart, conversation: Conversation): TimelineEvent => ({
+  id: `${round.id}${ROUND_DERIVED_EVENT_ID_SUFFIXES.userMessage}`,
+  type: TimelineEventType.userMessage,
+  created_at: round.started_at,
+  actor: userMessageActor(conversation, round),
+  data: round.input,
+});
+
+/**
+ * Builds only the `execution_started` timeline event for a round.
+ *
+ * Kept separate from {@link userMessageEvent} so the run-start persistence write can
+ * land after the receipt-time input write, and can be rolled back independently on
+ * failure or abort while the input event stays on the timeline.
+ */
+export const executionStartedEvent = (
+  round: Pick<ConversationRound, 'id' | 'started_at'>,
+  conversation: Conversation
+): TimelineEvent => {
+  const ids = roundDerivedEventIds(round.id);
+  return {
+    id: ids.executionStarted,
+    type: TimelineEventType.executionStarted,
+    created_at: round.started_at,
+    actor: agentActor(conversation),
+    execution_id: ids.execution,
+    trigger_event_id: ids.userMessage,
+    data: { trigger_type: TimelineTriggerType.userMessage },
+  };
+};
+
+/**
+ * The two start-of-round timeline events (`user_message` + `execution_started`).
+ *
+ * Kept for the read-derive path (`roundsToEvents`) which needs both projected from a
+ * round in one call. The write path uses the split builders above so each event has
+ * its own persistence lifecycle.
+ */
 export const roundStartEvents = (
   round: RoundStart,
   conversation: Conversation
-): TimelineEvent[] => {
-  const ids = roundDerivedEventIds(round.id);
-  return [
-    {
-      id: ids.userMessage,
-      type: TimelineEventType.userMessage,
-      created_at: round.started_at,
-      actor: userMessageActor(conversation, round),
-      data: round.input,
-    },
-    {
-      id: ids.executionStarted,
-      type: TimelineEventType.executionStarted,
-      created_at: round.started_at,
-      actor: agentActor(conversation),
-      execution_id: ids.execution,
-      trigger_event_id: ids.userMessage,
-      data: { trigger_type: TimelineTriggerType.userMessage },
-    },
-  ];
-};
+): TimelineEvent[] => [
+  userMessageEvent(round, conversation),
+  executionStartedEvent(round, conversation),
+];
 
 export const roundStepEvents = (
   round: Pick<ConversationRound, 'id' | 'started_at' | 'steps'>,
