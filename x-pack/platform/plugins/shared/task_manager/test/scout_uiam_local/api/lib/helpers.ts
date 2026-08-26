@@ -141,12 +141,13 @@ export const deleteTaskManagerTasksWithoutInvalidationQueue = async ({
     expect(response.body.error_count).toBe(0);
   }
 
-  for (const { userScope } of tasks) {
+  for (const { id: taskId, userScope } of tasks) {
     if (userScope?.uiamApiKeyId) {
       const response = await apiClient.post('test_endpoints/uiam/api_keys/_invalidate', {
         headers: { ...COMMON_HEADERS, ...cookieHeader },
         body: {
           id: userScope.uiamApiKeyId,
+          taskId,
         },
         responseType: 'json',
       });
