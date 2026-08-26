@@ -8,7 +8,11 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
-import { getPlaywrightProject, hasTestsInPlaywrightConfig } from './run_tests';
+import {
+  buildPlaywrightGrepArg,
+  getPlaywrightProject,
+  hasTestsInPlaywrightConfig,
+} from './run_tests';
 import { execPromise } from '../utils';
 import { ScoutTestTarget } from '@kbn/scout-info';
 
@@ -21,6 +25,34 @@ jest.mock('../utils', () => ({
       .join(' '),
   })),
 }));
+
+describe('buildPlaywrightGrepArg', () => {
+  it('returns the mode tag unchanged when no user grep is provided', () => {
+    expect(buildPlaywrightGrepArg('@svlSearch')).toBe('@svlSearch');
+  });
+
+  it('returns the mode tag unchanged when user grep is an empty/whitespace string', () => {
+    expect(buildPlaywrightGrepArg('@svlSearch', '')).toBe('@svlSearch');
+    expect(buildPlaywrightGrepArg('@svlSearch', '   ')).toBe('@svlSearch');
+  });
+
+  it('AND-combines the mode tag and the user grep with lookaheads', () => {
+    expect(buildPlaywrightGrepArg('@svlSearch', 'my test')).toBe('(?=.*@svlSearch)(?=.*my test)');
+  });
+
+  it('trims the user grep before combining', () => {
+    expect(buildPlaywrightGrepArg('@svlSearch', '  my test  ')).toBe(
+      '(?=.*@svlSearch)(?=.*my test)'
+    );
+  });
+
+  it('produces a regex that matches only titles containing both the tag and the pattern', () => {
+    const regex = new RegExp(buildPlaywrightGrepArg('@svlSearch', 'login'));
+    expect(regex.test('user can login @svlSearch')).toBe(true);
+    expect(regex.test('user can login @svlOblt')).toBe(false);
+    expect(regex.test('user can logout @svlSearch')).toBe(false);
+  });
+});
 
 describe('getPlaywrightProject', () => {
   it('returns "local" for testTarget with location "local"', () => {
@@ -73,12 +105,12 @@ describe('hasTestsInPlaywrightConfig', () => {
     const exitCode = await hasTestsInPlaywrightConfig(
       mockLog,
       'playwright',
-      ['test pwArgs'],
+      ['test', 'pwArgs'],
       'configPath/playwright.config.ts'
     );
 
     expect(execPromiseMock).toHaveBeenCalledWith(
-      'playwright test pwArgs --list',
+      `'playwright' 'test' 'pwArgs' '--list'`,
       expect.objectContaining({
         env: expect.objectContaining({
           SCOUT_REPORTER_ENABLED: 'false',
@@ -90,6 +122,27 @@ describe('hasTestsInPlaywrightConfig', () => {
     expect(mockLog.info).toHaveBeenNthCalledWith(1, 'scout: Validate Playwright config has tests');
     expect(mockLog.info).toHaveBeenNthCalledWith(2, 'scout: Total: 1 test in 1 file');
     expect(exitCode).toEqual(0);
+  });
+
+  it(`should shell-quote args so a --grep lookahead regex does not break the shell`, async () => {
+    execPromiseMock.mockImplementationOnce(() =>
+      Promise.resolve({
+        stdout: 'Listing tests:\nTotal: 1 test in 1 file\n',
+        stderr: '',
+      })
+    );
+
+    await hasTestsInPlaywrightConfig(
+      mockLog,
+      'playwright',
+      ['test', '--grep=(?=.*@local-stateful-classic)(?=.*Kubernetes)'],
+      'configPath/playwright.config.ts'
+    );
+
+    expect(execPromiseMock).toHaveBeenCalledWith(
+      `'playwright' 'test' '--grep=(?=.*@local-stateful-classic)(?=.*Kubernetes)' '--list'`,
+      expect.anything()
+    );
   });
 
   it(`should log an error and return '2' when no tests are found`, async () => {

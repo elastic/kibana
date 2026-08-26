@@ -23,6 +23,8 @@ export interface ScoutFlakyRequest {
   type: 'scoutConfig';
   scoutConfig: string;
   count: number;
+  /** Forwarded to `scout run-tests` as `--grep` to narrow the config to matching test titles. */
+  grep?: string;
 }
 
 export interface PickScoutFlakyRunOrderOptions {
@@ -79,6 +81,11 @@ const buildSteps = (
     if (typeof req.count !== 'number' || req.count <= 0) {
       throw new Error(`Request 'count' must be a positive number: ${JSON.stringify(req)}`);
     }
+    if (req.grep !== undefined && (typeof req.grep !== 'string' || req.grep.trim().length === 0)) {
+      throw new Error(
+        `Request 'grep' must be a non-empty string when provided: ${JSON.stringify(req)}`
+      );
+    }
 
     const normalized = normalizeConfigPath(req.scoutConfig);
     const entry = configIndex.get(normalized);
@@ -114,10 +121,11 @@ const buildSteps = (
           SCOUT_CONFIG: normalized,
           SCOUT_SERVER_RUN_FLAGS: mode,
           SCOUT_REPORTER_ENABLED: 'true',
+          ...(req.grep ? { SCOUT_GREP: req.grep } : {}),
           ...options.extraEnv,
         },
         key: `${FLAKY_SUITE_KEY_PREFIX}-${suiteIndex++}`,
-        label: `${normalized} (${mode})`,
+        label: req.grep ? `${normalized} (${mode}) [grep: ${req.grep}]` : `${normalized} (${mode})`,
         parallelism: req.count,
         concurrency: options.concurrency,
         concurrency_group: options.concurrencyGroup,
