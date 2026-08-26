@@ -1,0 +1,6 @@
+# Build intermediates and source tarball (download at build time)
+.build/
+yara-*.tar.gz
+
+# Keep committed WASM artifacts under dist/
+!dist/

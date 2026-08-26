@@ -12,6 +12,7 @@ import React from 'react';
 import type { WorkflowListDto } from '@kbn/workflows';
 import {
   getSelectedWorkflowDisabledError,
+  getWorkflowsListQueryParams,
   processWorkflowsToOptions,
   type WorkflowSelectorConfig,
 } from './workflow_utils';
@@ -42,6 +43,36 @@ const createMockWorkflow = (
 });
 
 describe('workflow_utils', () => {
+  describe('getWorkflowsListQueryParams', () => {
+    it('returns the shared base query without managed workflow access', () => {
+      expect(
+        getWorkflowsListQueryParams({
+          visibility: { selectors: ['rule_action'] },
+          canReadManagedWorkflow: false,
+        })
+      ).toEqual({
+        size: 1000,
+        page: 1,
+        query: '',
+      });
+    });
+
+    it('includes the visibility context when managed workflows can be read', () => {
+      expect(
+        getWorkflowsListQueryParams({
+          visibility: { selectors: ['rule_action'] },
+          canReadManagedWorkflow: true,
+        })
+      ).toEqual({
+        size: 1000,
+        page: 1,
+        query: '',
+        managed: 'all',
+        visibilityContext: ['selector:rule_action'],
+      });
+    });
+  });
+
   describe('processWorkflowsToOptions', () => {
     it('converts workflows to options with correct structure', () => {
       const workflows = [

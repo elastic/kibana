@@ -41,7 +41,11 @@ export function BackLink({ queryParams, integrationsPath, collectionTitle }: Pro
 
   const returnCollectionTitle = useMemo(() => {
     if (!returnPath) return undefined;
-    const groupId = new URLSearchParams(returnPath).get('collection');
+    // returnPath may be a full path ("/browse?collection=nginx") or just a query
+    // string ("?collection=nginx") — extract only the search portion before parsing.
+    const qIndex = returnPath.indexOf('?');
+    const qs = qIndex !== -1 ? returnPath.slice(qIndex) : returnPath;
+    const groupId = new URLSearchParams(qs).get('collection');
     return groupId ? INTEGRATION_GROUPS[groupId]?.title : undefined;
   }, [returnPath]);
   const resolvedCollectionTitle =

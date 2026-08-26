@@ -6,6 +6,7 @@
   "include": ["../../../../../typings/**/*", "common/**/*", "public/**/*", "server/**/*"],
   "exclude": ["target/**/*", ".storybook/**/*.js"],
   "kbn_references": [
+    "@kbn/agent-builder-elastic-ai-index-ki-types",
     "@kbn/core",
     "@kbn/logging",
     "@kbn/config-schema",
@@ -37,5 +38,6 @@
     "@kbn/logging-mocks",
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/agent-builder-plugin",
+    "@kbn/cloud-plugin",
   ]
 }

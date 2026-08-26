@@ -176,13 +176,32 @@ const LEDGER_DB_CASCADE_EVENT: Partial<SignificantEvent> = {
     },
   ],
   causal_features: [
-    { feature_id: 'transactionhistory', name: 'transactionhistory', stream_name: 'logs' },
-    { feature_id: 'balancereader', name: 'balancereader', stream_name: 'logs' },
-    { feature_id: 'ledgerwriter', name: 'ledgerwriter', stream_name: 'logs' },
+    {
+      feature_id: 'transactionhistory',
+      type: 'entity',
+      subtype: 'service',
+      name: 'transactionhistory',
+      stream_name: 'logs',
+    },
+    {
+      feature_id: 'balancereader',
+      type: 'entity',
+      subtype: 'service',
+      name: 'balancereader',
+      stream_name: 'logs',
+    },
+    {
+      feature_id: 'ledgerwriter',
+      type: 'entity',
+      subtype: 'service',
+      name: 'ledgerwriter',
+      stream_name: 'logs',
+    },
   ],
   blast_radius: [
     {
       type: 'dependency',
+      subtype: 'http',
       feature_id: 'frontend-balancereader-http',
       source: 'frontend',
       target: 'balancereader',
@@ -191,6 +210,7 @@ const LEDGER_DB_CASCADE_EVENT: Partial<SignificantEvent> = {
     },
     {
       type: 'dependency',
+      subtype: 'http',
       feature_id: 'frontend-transactionhistory-http',
       source: 'frontend',
       target: 'transactionhistory',
@@ -199,6 +219,7 @@ const LEDGER_DB_CASCADE_EVENT: Partial<SignificantEvent> = {
     },
     {
       type: 'dependency',
+      subtype: 'http',
       feature_id: 'frontend-ledgerwriter-http',
       source: 'frontend',
       target: 'ledgerwriter',
@@ -207,6 +228,7 @@ const LEDGER_DB_CASCADE_EVENT: Partial<SignificantEvent> = {
     },
     {
       type: 'dependency',
+      subtype: 'http',
       feature_id: 'ledgerwriter-balancereader-http',
       source: 'ledgerwriter',
       target: 'balancereader',
@@ -316,10 +338,19 @@ const BALANCE_READER_ISOLATED_EVENT: Partial<SignificantEvent> = {
       },
     },
   ],
-  causal_features: [{ feature_id: 'balancereader', name: 'balancereader', stream_name: 'logs' }],
+  causal_features: [
+    {
+      feature_id: 'balancereader',
+      type: 'entity',
+      subtype: 'service',
+      name: 'balancereader',
+      stream_name: 'logs',
+    },
+  ],
   blast_radius: [
     {
       type: 'dependency',
+      subtype: 'http',
       feature_id: 'frontend-balancereader-http',
       source: 'frontend',
       target: 'balancereader',

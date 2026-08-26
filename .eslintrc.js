@@ -3104,7 +3104,14 @@ module.exports = {
         'no-restricted-imports': [
           'error',
           {
-            patterns: ['@kbn/*', '!@kbn/i18n', '!@kbn/i18n-react', '!@kbn/ui-chrome-layout'],
+            patterns: [
+              '@kbn/*',
+              '!@kbn/i18n',
+              '!@kbn/i18n-react',
+              '!@kbn/ui-chrome-layout',
+              '!@kbn/ui-app-menu',
+              '!@kbn/ui-favorite-button',
+            ],
           },
         ],
       },

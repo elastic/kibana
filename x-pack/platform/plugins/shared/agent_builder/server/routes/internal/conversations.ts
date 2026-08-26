@@ -173,13 +173,7 @@ export function registerInternalConversationRoutes({
       const { read } = request.body;
 
       const client = await conversationsService.getScopedClient({ request });
-      const updatedConversation = await client.update(
-        {
-          id: conversationId,
-          read,
-        },
-        { access: 'converse', retryOnConflict: true }
-      );
+      const updatedConversation = await client.markRead(conversationId, read);
 
       return response.ok<MarkReadConversationResponse>({
         body: {

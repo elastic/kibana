@@ -13,6 +13,7 @@ import { CORRELATIONS_RELATED_ALERTS_BY_ANCESTRY_TEST_ID } from './test_ids';
 import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
 import { useKibana } from '../../../../common/lib/kibana';
 import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';
+import { withDocumentIndex } from '../../../shared/utils/non_local_index';
 
 const DEFAULT_FROM = 'now-1d';
 const DEFAULT_TO = 'now';
@@ -22,6 +23,12 @@ export interface RelatedAlertsByAncestryProps {
    * Id of the document
    */
   documentId: string;
+  /**
+   * Project-qualified index of the ancestry document, prepended to the search indices so entity
+   * lookup can disambiguate the same `_id` across linked projects (CPS). `undefined` when the
+   * document has no index; required so every render site consciously threads it.
+   */
+  documentIndex: string | undefined;
   /**
    * Callback to navigate to correlations details
    */
@@ -33,6 +40,7 @@ export interface RelatedAlertsByAncestryProps {
  */
 export const RelatedAlertsByAncestry: React.VFC<RelatedAlertsByAncestryProps> = ({
   documentId,
+  documentIndex,
   onShowCorrelationsDetails,
 }) => {
   const { storage } = useKibana().services;
@@ -43,9 +51,14 @@ export const RelatedAlertsByAncestry: React.VFC<RelatedAlertsByAncestryProps> = 
   // so this summary row stays bounded without rendering its own picker.
   const timeSavedInLocalStorage = storage.get(FLYOUT_STORAGE_KEYS.ANCESTRY_ALERTS_TIME_RANGE);
 
+  const indices = useMemo(
+    () => withDocumentIndex(indexPatterns, documentIndex),
+    [indexPatterns, documentIndex]
+  );
+
   const { loading, error, dataCount } = useFetchRelatedAlertsByAncestry({
     documentId,
-    indices: indexPatterns,
+    indices,
     interval: {
       from: timeSavedInLocalStorage?.start || DEFAULT_FROM,
       to: timeSavedInLocalStorage?.end || DEFAULT_TO,
