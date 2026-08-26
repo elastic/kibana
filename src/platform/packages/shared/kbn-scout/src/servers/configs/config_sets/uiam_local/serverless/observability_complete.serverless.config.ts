@@ -28,6 +28,7 @@ export const servers: ScoutServerConfig = {
       ...defaultConfig.kbnTestServer.serverArgs,
       pluginPath,
       '--xpack.task_manager.grant_uiam_api_keys=true',
+      '--feature_flags.overrides.taskManager.provisionUiamApiKeys=true',
     ],
   },
 };
