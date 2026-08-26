@@ -165,4 +165,58 @@ steps:
       );
     });
   });
+
+  describe('atomic step reading variables', () => {
+    beforeAll(async () => {
+      await workflowRunFixture.runSingleStep({
+        workflowYaml: `
+steps:
+  - name: setChannelStep
+    type: data.set
+    with:
+      channel: '#one-workflow'
+
+  - name: printChannelStep
+    type: ${FakeConnectors.slack1.actionTypeId}
+    connector-id: ${FakeConnectors.slack1.name}
+    with:
+      message: 'Channel: {{variables.channel}}'
+          `,
+        stepId: 'printChannelStep',
+        contextOverride: {
+          variables: {
+            channel: '#one-workflow',
+          },
+        },
+      });
+    });
+
+    it('should run atomic step successfully', () => {
+      const workflowExecutionDoc =
+        workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+          'fake_workflow_execution_id'
+        );
+      expect(workflowExecutionDoc?.status).toBe(ExecutionStatus.COMPLETED);
+      expect(workflowExecutionDoc?.error).toBe(undefined);
+    });
+
+    it('should execute only the requested step', () => {
+      const stepExecutions = Array.from(
+        workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+      );
+      expect(stepExecutions.length).toBe(1);
+      expect(stepExecutions[0].stepId).toBe('printChannelStep');
+    });
+
+    it('should call the connector with variables from the overriden context', () => {
+      expect(workflowRunFixture.unsecuredActionsClientMock.execute).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: FakeConnectors.slack1.id,
+          params: {
+            message: `Channel: #one-workflow`,
+          },
+        })
+      );
+    });
+  });
 });
