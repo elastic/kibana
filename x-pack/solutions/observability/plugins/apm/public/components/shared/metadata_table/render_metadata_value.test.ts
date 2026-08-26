@@ -9,7 +9,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { renderMetadataFieldValue } from './render_metadata_value';
 
 const createDataView = (
-  fields: Record<string, { convertToReact: (value: unknown) => string }>
+  fields: Record<string, { convert: (value: unknown) => string }>
 ): DataView =>
   ({
     getFieldByName: (name: string) => (fields[name] ? { name } : undefined),
@@ -19,7 +19,7 @@ const createDataView = (
 describe('renderMetadataFieldValue', () => {
   it('uses the data view formatter when the field is mapped', () => {
     const dataView = createDataView({
-      '@timestamp': { convertToReact: (value) => `date:${String(value)}` },
+      '@timestamp': { convert: (value) => `date:${String(value)}` },
     });
 
     expect(renderMetadataFieldValue(dataView, '@timestamp', '2024-06-15T14:30:45.123Z')).toBe(

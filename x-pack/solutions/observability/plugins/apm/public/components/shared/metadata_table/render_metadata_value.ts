@@ -22,7 +22,7 @@ export function renderMetadataFieldValue(
 
   const field = dataView?.getFieldByName(fieldName);
   if (dataView && field) {
-    return dataView.getFormatterForField(field).convertToReact(value);
+    return dataView.getFormatterForField(field).convert(value);
   }
 
   if (typeof value === 'string') {
