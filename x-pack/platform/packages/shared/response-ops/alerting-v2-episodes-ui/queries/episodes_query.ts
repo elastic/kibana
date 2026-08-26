@@ -62,7 +62,7 @@ export const buildEpisodesKpisQuery = (
   currentUserUid?: string,
   filterState?: EpisodesFilterState
 ): string => {
-  const query = buildEpisodesBaseQuery(spaceId, filterState?.queryString?.trim());
+  const query = buildEpisodesBaseQuery(spaceId, filterState);
 
   if (filterState) {
     applyFilterState(query, filterState);
@@ -103,7 +103,7 @@ export const buildEpisodesHistogramQuery = (
   filterState?: EpisodesFilterState,
   breakdownField?: string
 ): ComposerQuery => {
-  const query = buildEpisodesBaseQuery(spaceId, filterState?.queryString?.trim());
+  const query = buildEpisodesBaseQuery(spaceId, filterState);
 
   if (filterState) {
     applyFilterState(query, filterState);

@@ -19,15 +19,13 @@ import {
 import { useHistory, useParams } from 'react-router-dom';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
-import type { AppHeaderBadge, AppHeaderMenu } from '@kbn/app-header';
+import type { AppHeaderMenu } from '@kbn/app-header';
 import type { ApprovalRequirement } from '@kbn/pnd-common';
 import { usePndDocTitle } from '../../hooks/use_pnd_doc_title';
 import { useUpdateWatch, useWatch } from '../../hooks/use_watches_api';
 import { ApprovalGatesTable } from './components/approval_gates_table';
 import { AutonomySlider } from './components/autonomy_slider';
 import { SettingsSection } from './components/settings_section';
-import { WatchGeneralSection } from './components/watch_general_section';
-import { WatchMetricsStrip } from './components/watch_metrics_strip';
 import { WatchRunsLedger } from './components/watch_runs_ledger';
 import { WatchScopeRoutingSection } from './components/watch_scope_routing_section';
 import { WatchSkillsTable } from './components/watch_skills_table';
@@ -68,20 +66,6 @@ export const WatchDetailPage: React.FC = () => {
       updateWatch({ approvalGate: { gateId, approverRoleId } }),
     [updateWatch]
   );
-
-  const badges = useMemo<AppHeaderBadge[]>(() => {
-    if (!watch) {
-      return [];
-    }
-    return [
-      {
-        label: watch.enabled ? settingsI18n.ENABLED_BADGE : settingsI18n.DISABLED_BADGE,
-        color: watch.enabled ? 'success' : 'default',
-        'data-test-subj': 'pndWatchEnabledBadge',
-      },
-      { label: watch.mandate, color: 'hollow', 'data-test-subj': 'pndWatchMandateBadge' },
-    ];
-  }, [watch]);
 
   const headerSwitch = useMemo<AppHeaderMenu['switch']>(() => {
     if (!watch) {
@@ -162,13 +146,6 @@ export const WatchDetailPage: React.FC = () => {
         </SettingsSection>
       ),
     });
-
-    if (settings.general) {
-      sections.push({
-        key: 'general',
-        node: <WatchGeneralSection general={settings.general} />,
-      });
-    }
 
     if (settings.triggers) {
       sections.push({
@@ -278,12 +255,7 @@ export const WatchDetailPage: React.FC = () => {
   }
 
   return (
-    <WatchesSectionLayout
-      active={watchId}
-      title={watch.name}
-      badges={badges}
-      headerSwitch={headerSwitch}
-    >
+    <WatchesSectionLayout active={watchId} title={watch.name} headerSwitch={headerSwitch}>
       <EuiFlexGroup direction="column" gutterSize="xl" responsive={false}>
         {intro ? (
           <EuiFlexItem grow={false}>
@@ -292,10 +264,6 @@ export const WatchDetailPage: React.FC = () => {
             </EuiText>
           </EuiFlexItem>
         ) : null}
-
-        <EuiFlexItem grow={false}>
-          <WatchMetricsStrip watch={watch} />
-        </EuiFlexItem>
 
         {sections.map(({ key, node }) => (
           <EuiFlexItem key={key} grow={false}>
