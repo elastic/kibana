@@ -33,6 +33,7 @@ import {
   GetTimesliceMetricIndicatorAggregation,
 } from './aggregations';
 import { getElasticsearchQueryOrThrow } from './transform_generators';
+import { getSloProjectRouting } from './utils';
 import { buildParamValues } from './transform_generators/synthetics_availability';
 
 interface Options {
@@ -44,16 +45,27 @@ interface Options {
   remoteName?: string;
   groupings?: Groupings;
   groupBy?: string[];
+  projectRouting?: string;
 }
 
 const RANGE_DURATION_24HOURS_LIMIT = 24 * 60 * 60 * 1000 + 60 * 1000; // 24 hours and 1min in milliseconds
 
 export class GetPreviewData {
+  private readonly isServerless: boolean;
+  private readonly isCpsAvailable: boolean;
+
   constructor(
     private esClient: ElasticsearchClient,
     private spaceId: string,
-    private dataViewService: DataViewsService
-  ) {}
+    private dataViewService: DataViewsService,
+    {
+      isServerless = false,
+      isCpsAvailable = false,
+    }: { isServerless?: boolean; isCpsAvailable?: boolean } = {}
+  ) {
+    this.isServerless = isServerless;
+    this.isCpsAvailable = isCpsAvailable;
+  }
 
   private async getDataView(dataViewId?: string): Promise<DataView | undefined> {
     if (!dataViewId) {
@@ -139,6 +151,7 @@ export class GetPreviewData {
 
     const response = await typedSearch(this.esClient, {
       index,
+      ...(options.projectRouting ? { project_routing: options.projectRouting } : {}),
       runtime_mappings: await this.buildRuntimeMappings({
         dataViewId: indicator.params.dataViewId,
       }),
@@ -264,6 +277,7 @@ export class GetPreviewData {
 
     const response = await typedSearch(this.esClient, {
       index,
+      ...(options.projectRouting ? { project_routing: options.projectRouting } : {}),
       runtime_mappings: await this.buildRuntimeMappings({
         dataViewId: indicator.params.dataViewId,
       }),
@@ -376,6 +390,7 @@ export class GetPreviewData {
 
     const response = await this.esClient.search({
       index,
+      ...(options.projectRouting ? { project_routing: options.projectRouting } : {}),
       runtime_mappings: await this.buildRuntimeMappings({
         dataViewId: indicator.params.dataViewId,
       }),
@@ -483,6 +498,7 @@ export class GetPreviewData {
 
     const response = await this.esClient.search({
       index,
+      ...(options.projectRouting ? { project_routing: options.projectRouting } : {}),
       runtime_mappings: await this.buildRuntimeMappings({
         dataViewId: indicator.params.dataViewId,
       }),
@@ -589,6 +605,7 @@ export class GetPreviewData {
 
     const response = await this.esClient.search({
       index,
+      ...(options.projectRouting ? { project_routing: options.projectRouting } : {}),
       runtime_mappings: await this.buildRuntimeMappings({
         dataViewId: indicator.params.dataViewId,
       }),
@@ -669,6 +686,7 @@ export class GetPreviewData {
 
     const response = await typedSearch(this.esClient, {
       index,
+      ...(options.projectRouting ? { project_routing: options.projectRouting } : {}),
       runtime_mappings: await this.buildRuntimeMappings({
         dataViewId: indicator.params.dataViewId,
       }),
@@ -772,6 +790,7 @@ export class GetPreviewData {
 
     const response = await typedSearch(this.esClient, {
       index,
+      ...(options.projectRouting ? { project_routing: options.projectRouting } : {}),
       runtime_mappings: await this.buildRuntimeMappings({
         dataViewId: indicator.params.dataViewId,
       }),
@@ -874,6 +893,10 @@ export class GetPreviewData {
         groupings: params.groupings,
         interval: `${bucketSize}m`,
         groupBy: params.groupBy?.filter((value) => value !== ALL_VALUE),
+        projectRouting: getSloProjectRouting(
+          { projectRoutings: params.projectRoutings },
+          { isServerless: this.isServerless, isCpsAvailable: this.isCpsAvailable }
+        ),
       };
 
       const type = params.indicator.type;
