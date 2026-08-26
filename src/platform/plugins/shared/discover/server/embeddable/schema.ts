@@ -72,6 +72,10 @@ const jsonModeSettingsSchema = z
       description:
         'When false, long values are truncated to a single line instead of wrapping while in JSON mode.',
     }),
+    expanded_levels: z.number().min(0).max(5).optional().meta({
+      description:
+        'How many nested levels of each JSON cell are expanded by default while in JSON mode (0 = fully collapsed).',
+    }),
   })
   .strict()
   .optional()

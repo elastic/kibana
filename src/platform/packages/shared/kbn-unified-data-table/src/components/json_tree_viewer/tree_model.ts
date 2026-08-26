@@ -315,25 +315,34 @@ export const getNodeId = (path: readonly string[]): string =>
  * Collects the ids of collections to expand, breadth-first, until expanding one more would exceed
  * the rendered-row budget. Empty collections can't be expanded. Breadth-first so the first levels
  * expand first; deeper nodes stay collapsed and can be expanded on demand.
+ *
+ * When `maxDepth` is set, only collections shallower than it are expanded (roots are at depth 0), so
+ * the result opens exactly `maxDepth` nested levels; leaving it undefined expands every level the
+ * budget allows.
  */
 export const collectExpandableIds = (
   roots: JsonNode[],
-  budget: number = MAX_EXPANDED_ROWS
+  budget: number = MAX_EXPANDED_ROWS,
+  maxDepth?: number
 ): string[] => {
   const ids: string[] = [];
   let remaining = budget;
-  const queue: CollectionNode[] = [];
-  const enqueue = (nodes: JsonNode[]) => {
+  const queue: Array<{ node: CollectionNode; depth: number }> = [];
+  const enqueue = (nodes: JsonNode[], depth: number) => {
     for (const node of nodes) {
       if (node.kind === 'collection' && node.children.length > 0) {
-        queue.push(node);
+        queue.push({ node, depth });
       }
     }
   };
 
-  enqueue(roots);
+  enqueue(roots, 0);
   for (let head = 0; head < queue.length; head++) {
-    const node = queue[head];
+    const { node, depth } = queue[head];
+    // Past the requested depth: leave this collection (and everything below it) collapsed.
+    if (maxDepth !== undefined && depth >= maxDepth) {
+      continue;
+    }
     // Expanding a collection reveals up to INITIAL_CHILDREN child rows (the pager caps the rest).
     const cost = Math.min(node.children.length, INITIAL_CHILDREN);
     if (cost > remaining) {
@@ -342,7 +351,7 @@ export const collectExpandableIds = (
     }
     ids.push(node.id);
     remaining -= cost;
-    enqueue(node.children);
+    enqueue(node.children, depth + 1);
   }
 
   return ids;

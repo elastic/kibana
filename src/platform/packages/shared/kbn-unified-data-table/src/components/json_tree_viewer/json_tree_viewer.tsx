@@ -14,6 +14,7 @@ import {
   buildNodes,
   buildRows,
   collectExpandableIds,
+  MAX_EXPANDED_ROWS,
   rootToJsonString,
   type FormatValue,
   type GetLeafActions,
@@ -58,6 +59,8 @@ export interface JsonTreeViewerProps {
   extraHeaderContent?: ReactNode;
   /** When false, leaf values render on a single truncated line instead of wrapping. Defaults to true. */
   wrapLines?: boolean;
+  /** Nested levels opened when a fresh cell is seeded (0 = fully collapsed). Defaults to 0. */
+  defaultExpandedLevels?: number;
 }
 
 export const JsonTreeViewer = memo(function JsonTreeViewer({
@@ -69,6 +72,7 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
   getLeafActions,
   extraHeaderContent,
   wrapLines = true,
+  defaultExpandedLevels = 0,
 }: JsonTreeViewerProps) {
   const styles = useEuiMemoizedStyles(treeStyles);
 
@@ -76,6 +80,12 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
   // Bulk expansion (Expand all + isAllExpanded) is budgeted so a deeply nested document can't
   // explode the DOM.
   const expandableIds = useMemo(() => collectExpandableIds(nodes), [nodes]);
+  // The subset opened when seeding a fresh cell: the same budgeted, breadth-first set capped to
+  // `defaultExpandedLevels` nested levels.
+  const seedExpandedIds = useMemo(
+    () => collectExpandableIds(nodes, MAX_EXPANDED_ROWS, defaultExpandedLevels),
+    [nodes, defaultExpandedLevels]
+  );
 
   const searchTermLower = expandNodesContainingTerm?.trim().toLowerCase() ?? '';
   const searchMatches = useMemo(
@@ -88,6 +98,8 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
     onStateChange,
     expandedBySearchNodes: searchMatches.containers,
     expandableIds,
+    seedExpandedIds,
+    defaultExpandedLevels,
   });
 
   const rootType = useMemo(() => (Array.isArray(json) ? 'array' : 'object'), [json]);

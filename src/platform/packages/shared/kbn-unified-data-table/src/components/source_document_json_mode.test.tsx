@@ -145,6 +145,27 @@ describe('SourceDocumentJsonMode', () => {
     expect(container.textContent).not.toContain('empty');
   });
 
+  describe('expandedLevels setting', () => {
+    const nestedHit: EsHitRecord = {
+      _id: '1',
+      _index: 'test',
+      _source: { user: { name: 'Alice' } },
+    };
+
+    it('seeds the tree expanded to the configured number of levels', () => {
+      renderCell(nestedHit, { jsonModeSettings: { expandedLevels: 1 } });
+
+      expect(screen.getByTestId(rowTestId('user.name'))).toHaveTextContent('"Alice"');
+    });
+
+    it('leaves nested collections collapsed when the setting is unset', () => {
+      renderCell(nestedHit);
+
+      expect(screen.getByTestId(rowTestId('user'))).toBeVisible();
+      expect(screen.queryByTestId(rowTestId('user.name'))).not.toBeInTheDocument();
+    });
+  });
+
   describe('filter for / filter out leaf actions', () => {
     it('renders filter buttons on a filterable leaf and calls onFilter with the field, value and mode', async () => {
       const onFilter = jest.fn();

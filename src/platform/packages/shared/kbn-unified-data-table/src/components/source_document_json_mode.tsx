@@ -62,6 +62,7 @@ export const SourceDocumentJsonMode = ({
 
   const hideNulls = jsonModeSettings?.hideNulls ?? false;
   const wrapLines = jsonModeSettings?.wrapLines ?? true;
+  const expandedLevels = jsonModeSettings?.expandedLevels ?? 0;
 
   // Filter for / filter out actions per leaf.
   const getLeafActions = useCallback<GetLeafActions>(
@@ -193,6 +194,7 @@ export const SourceDocumentJsonMode = ({
         formatValue={formatTreeValue}
         getLeafActions={getLeafActions}
         wrapLines={wrapLines}
+        defaultExpandedLevels={expandedLevels}
       />
     </span>
   );

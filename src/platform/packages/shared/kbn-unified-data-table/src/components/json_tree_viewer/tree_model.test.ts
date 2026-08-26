@@ -67,4 +67,37 @@ describe('collectExpandableIds', () => {
     // The budget fits the two shallow collections; their nested children do not.
     expect(collectExpandableIds(nodes, 2)).toEqual([getNodeId(['a']), getNodeId(['b'])]);
   });
+
+  describe('with a maxDepth', () => {
+    const nested = () => buildNodes({ a: { b: { c: 1 } }, d: { e: 2 } });
+
+    it('expands nothing at depth 0', () => {
+      expect(collectExpandableIds(nested(), undefined, 0)).toEqual([]);
+    });
+
+    it('expands only the top-level collections at depth 1', () => {
+      expect(collectExpandableIds(nested(), undefined, 1)).toEqual([
+        getNodeId(['a']),
+        getNodeId(['d']),
+      ]);
+    });
+
+    it('expands two nested levels at depth 2', () => {
+      expect(collectExpandableIds(nested(), undefined, 2)).toEqual([
+        getNodeId(['a']),
+        getNodeId(['d']),
+        getNodeId(['a', 'b']),
+      ]);
+    });
+
+    it('expands every level when maxDepth exceeds the tree depth', () => {
+      expect(collectExpandableIds(nested(), undefined, 5)).toEqual(collectExpandableIds(nested()));
+    });
+
+    it('still respects the budget within the requested depth', () => {
+      const nodes = buildNodes({ a: { x: 1 }, b: { y: 1 }, c: { z: 1 } });
+
+      expect(collectExpandableIds(nodes, 2, 1)).toEqual([getNodeId(['a']), getNodeId(['b'])]);
+    });
+  });
 });

@@ -521,4 +521,89 @@ describe('JsonTreeViewer', () => {
       expect(noWrapClassName).not.toEqual(wrappingClassName);
     });
   });
+
+  describe('defaultExpandedLevels', () => {
+    const nested = { user: { address: { city: 'Berlin' } } };
+
+    it('leaves everything collapsed by default', () => {
+      render(<JsonTreeViewer json={nested} />);
+
+      expect(screen.queryByTestId(rowTestId('user.address'))).not.toBeInTheDocument();
+    });
+
+    it('seeds a fresh cell opened to the requested number of levels', () => {
+      render(<JsonTreeViewer json={nested} defaultExpandedLevels={1} />);
+
+      // Level 1 opens the top-level `user`, revealing `address` — which itself stays collapsed.
+      expect(screen.getByTestId(rowTestId('user.address'))).toBeVisible();
+      expect(screen.queryByTestId(rowTestId('user.address.city'))).not.toBeInTheDocument();
+    });
+
+    it('opens deeper nesting as the level increases', () => {
+      render(<JsonTreeViewer json={nested} defaultExpandedLevels={2} />);
+
+      expect(screen.getByTestId(rowTestId('user.address.city'))).toHaveTextContent('"Berlin"');
+    });
+
+    it('re-seeds an already-rendered cell when the level changes', () => {
+      const { rerender } = render(<JsonTreeViewer json={nested} defaultExpandedLevels={0} />);
+      expect(screen.queryByTestId(rowTestId('user.address'))).not.toBeInTheDocument();
+
+      rerender(<JsonTreeViewer json={nested} defaultExpandedLevels={2} />);
+      expect(screen.getByTestId(rowTestId('user.address.city'))).toHaveTextContent('"Berlin"');
+    });
+
+    it('tags the mirrored state with the level it was seeded at', () => {
+      let lastState: TreeExpansionState | undefined;
+      render(
+        <JsonTreeViewer
+          json={nested}
+          defaultExpandedLevels={1}
+          onStateChange={(state) => (lastState = state)}
+        />
+      );
+
+      expect(lastState?.seedLevel).toBe(1);
+    });
+
+    it('restores the user’s expansions on remount when the seed level is unchanged', async () => {
+      const doc = { user: { name: 'Alice' }, org: { name: 'Acme' } };
+      let lastState: TreeExpansionState | undefined;
+      const { unmount } = render(
+        <JsonTreeViewer
+          json={doc}
+          defaultExpandedLevels={0}
+          onStateChange={(state) => (lastState = state)}
+        />
+      );
+
+      // The level-0 seed leaves `org` closed; the user opens it manually.
+      await userEvent.click(screen.getByTestId(rowTestId('org')));
+      expect(lastState?.seedLevel).toBe(0);
+
+      // A fresh instance at the same level restores that manual expansion.
+      unmount();
+      render(<JsonTreeViewer json={doc} defaultExpandedLevels={0} initialState={lastState} />);
+      expect(screen.getByTestId(rowTestId('org.name'))).toHaveTextContent('"Acme"');
+    });
+
+    it('ignores stored state seeded at a different level and re-seeds', () => {
+      const staleState: TreeExpansionState = {
+        expanded: new Set(),
+        revealed: new Map(),
+        seedLevel: 0,
+      };
+
+      render(
+        <JsonTreeViewer
+          json={{ user: { name: 'Alice' } }}
+          defaultExpandedLevels={1}
+          initialState={staleState}
+        />
+      );
+
+      // The level-1 seed wins over the stale (collapsed) state.
+      expect(screen.getByTestId(rowTestId('user.name'))).toHaveTextContent('"Alice"');
+    });
+  });
 });

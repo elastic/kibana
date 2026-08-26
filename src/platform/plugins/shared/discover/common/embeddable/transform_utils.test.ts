@@ -352,7 +352,7 @@ describe('search embeddable transform utils', () => {
         headerRowHeight: 3,
         density: DataGridDensity.COMPACT,
         sourceDisplayMode: 'json',
-        jsonModeSettings: { hideNulls: true, wrapLines: false },
+        jsonModeSettings: { hideNulls: true, wrapLines: false, expandedLevels: 2 },
         grid: {
           columns: {
             message: { width: 100 },
@@ -379,7 +379,7 @@ describe('search embeddable transform utils', () => {
           header_row_height: 3,
           density: DataGridDensity.COMPACT,
           source_display_mode: 'json',
-          json_mode_settings: { hide_nulls: true, wrap_lines: false },
+          json_mode_settings: { hide_nulls: true, wrap_lines: false, expanded_levels: 2 },
         },
       });
       expect(result).not.toHaveProperty('sort');
@@ -742,7 +742,7 @@ describe('search embeddable transform utils', () => {
         headerRowHeight: 3,
         density: DataGridDensity.COMPACT,
         sourceDisplayMode: 'json',
-        jsonModeSettings: { hideNulls: true, wrapLines: false },
+        jsonModeSettings: { hideNulls: true, wrapLines: false, expandedLevels: 2 },
         grid: {
           columns: {
             message: { width: 100 },
@@ -764,7 +764,7 @@ describe('search embeddable transform utils', () => {
         header_row_height: 3,
         density: DataGridDensity.COMPACT,
         source_display_mode: 'json',
-        json_mode_settings: { hide_nulls: true, wrap_lines: false },
+        json_mode_settings: { hide_nulls: true, wrap_lines: false, expanded_levels: 2 },
       });
     });
 
@@ -820,6 +820,7 @@ describe('search embeddable transform utils', () => {
         rows_per_page: 100 as const,
         header_row_height: 3,
         density: DataGridDensity.COMPACT,
+        json_mode_settings: { hide_nulls: true, wrap_lines: false, expanded_levels: 2 },
       };
       const result = fromDiscoverSessionPanelOverrides(apiState);
       expect(result).toEqual({
@@ -830,6 +831,7 @@ describe('search embeddable transform utils', () => {
         rowsPerPage: 100,
         headerRowHeight: 3,
         density: DataGridDensity.COMPACT,
+        jsonModeSettings: { hideNulls: true, wrapLines: false, expandedLevels: 2 },
         grid: {
           columns: {
             '@timestamp': { width: 200 },
