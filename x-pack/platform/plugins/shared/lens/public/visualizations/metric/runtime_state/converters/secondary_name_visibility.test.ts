@@ -6,7 +6,7 @@
  */
 
 import type { MetricVisualizationState } from '@kbn/lens-common';
-import { convertSecondaryNameVisibility } from './secondary_name_visibility';
+import { convertToRuntimeState } from '..';
 
 const baseState: MetricVisualizationState = {
   layerId: 'layer-1',
@@ -15,103 +15,97 @@ const baseState: MetricVisualizationState = {
   secondaryMetricAccessor: 'secondary-id',
 };
 
-describe('convertSecondaryNameVisibility', () => {
-  it('hides the name when secondaryPrefix was explicitly emptied', () => {
-    expect(convertSecondaryNameVisibility({ ...baseState, secondaryPrefix: '' })).toEqual({
-      ...baseState,
-      secondaryNameVisibility: 'hidden',
+/**
+ * Only the fields this conversion owns. Keys left `undefined` are ignored by `toEqual`,
+ * so asserting on this slice also asserts that the legacy keys were consumed.
+ */
+const secondaryNameState = ({
+  secondaryLabel,
+  secondaryNameVisibility,
+  secondaryPrefix,
+  secondaryLabelPosition,
+}: MetricVisualizationState) => ({
+  secondaryLabel,
+  secondaryNameVisibility,
+  secondaryPrefix,
+  secondaryLabelPosition,
+});
+
+// Asserted through the whole chain rather than against the converter alone: the v1
+// content management transform runs first and rewrites the legacy fields this
+// conversion reads, so a converter-only assertion does not describe real saved objects.
+describe('convertToRuntimeState - secondary name visibility', () => {
+  it('keeps a custom secondaryLabel as a render fallback and shows the name before the value', () => {
+    expect(
+      secondaryNameState(convertToRuntimeState({ ...baseState, secondaryLabel: 'custom-text' }))
+    ).toEqual({
+      secondaryLabel: 'custom-text',
+      secondaryNameVisibility: 'before',
     });
   });
 
-  it('keeps a custom secondaryLabel as a runtime fallback and shows the name before the value', () => {
-    expect(convertSecondaryNameVisibility({ ...baseState, secondaryLabel: 'custom-text' })).toEqual(
+  it('promotes a pre-rename secondaryPrefix to secondaryLabel through the v1 transform', () => {
+    expect(
+      secondaryNameState(convertToRuntimeState({ ...baseState, secondaryPrefix: 'custom-text' }))
+    ).toEqual({
+      secondaryLabel: 'custom-text',
+      secondaryNameVisibility: 'before',
+    });
+  });
+
+  it('hides the name when secondaryLabel was explicitly emptied', () => {
+    expect(secondaryNameState(convertToRuntimeState({ ...baseState, secondaryLabel: '' }))).toEqual(
       {
-        ...baseState,
-        secondaryLabel: 'custom-text',
-        secondaryNameVisibility: 'before',
+        secondaryNameVisibility: 'hidden',
       }
     );
   });
 
-  it('promotes secondaryPrefix to secondaryLabel when secondaryLabel is unset', () => {
-    expect(
-      convertSecondaryNameVisibility({ ...baseState, secondaryPrefix: 'custom-text' })
-    ).toEqual({
-      ...baseState,
-      secondaryLabel: 'custom-text',
-      secondaryNameVisibility: 'before',
-    });
-  });
-
   it('shows the name before the value when no legacy label was persisted', () => {
-    expect(convertSecondaryNameVisibility(baseState)).toEqual({
-      ...baseState,
+    expect(secondaryNameState(convertToRuntimeState(baseState))).toEqual({
       secondaryNameVisibility: 'before',
-    });
-  });
-
-  it('preserves an explicit secondaryNameVisibility over the legacy label', () => {
-    expect(
-      convertSecondaryNameVisibility({
-        ...baseState,
-        secondaryNameVisibility: 'after',
-        secondaryLabel: 'ignored',
-      })
-    ).toEqual({
-      ...baseState,
-      secondaryLabel: 'ignored',
-      secondaryNameVisibility: 'after',
     });
   });
 
   it('migrates the pre-rename secondaryLabelPosition key', () => {
-    const legacyState = {
-      ...baseState,
-      secondaryLabelPosition: 'after',
-    } as MetricVisualizationState;
-
-    expect(convertSecondaryNameVisibility(legacyState)).toEqual({
-      ...baseState,
+    expect(
+      secondaryNameState(convertToRuntimeState({ ...baseState, secondaryLabelPosition: 'after' }))
+    ).toEqual({
       secondaryNameVisibility: 'after',
     });
   });
 
-  it('leaves the position unset without a secondary metric', () => {
-    const { secondaryMetricAccessor, ...rest } = baseState;
-    expect(convertSecondaryNameVisibility({ ...rest, secondaryLabel: '' })).toEqual(rest);
-  });
-
-  it('moves valuesTextAlign onto primaryAlign and secondaryAlign', () => {
-    expect(convertSecondaryNameVisibility({ ...baseState, valuesTextAlign: 'right' })).toEqual({
-      ...baseState,
-      primaryAlign: 'right',
-      secondaryAlign: 'right',
-      secondaryNameVisibility: 'before',
-    });
-  });
-
-  it('does not overwrite primaryAlign or secondaryAlign when already set', () => {
+  it('preserves an explicit secondaryNameVisibility over the legacy position', () => {
     expect(
-      convertSecondaryNameVisibility({
-        ...baseState,
-        valuesTextAlign: 'center',
-        primaryAlign: 'right',
-        secondaryAlign: 'right',
-      })
+      secondaryNameState(
+        convertToRuntimeState({
+          ...baseState,
+          secondaryNameVisibility: 'after',
+          secondaryLabelPosition: 'before',
+          secondaryLabel: 'custom-text',
+        })
+      )
     ).toEqual({
-      ...baseState,
-      primaryAlign: 'right',
-      secondaryAlign: 'right',
-      secondaryNameVisibility: 'before',
+      secondaryLabel: 'custom-text',
+      secondaryNameVisibility: 'after',
     });
+  });
+
+  it('leaves the name visibility and the legacy label unset without a secondary metric', () => {
+    const { secondaryMetricAccessor, ...stateWithoutSecondary } = baseState;
+    expect(
+      secondaryNameState(
+        convertToRuntimeState({ ...stateWithoutSecondary, secondaryLabel: 'custom-text' })
+      )
+    ).toEqual({});
   });
 
   it('is idempotent', () => {
-    const once = convertSecondaryNameVisibility({
+    const once = convertToRuntimeState({
       ...baseState,
       secondaryLabel: 'custom-text',
       secondaryLabelPosition: 'after',
-    } as MetricVisualizationState);
-    expect(convertSecondaryNameVisibility(once)).toEqual(once);
+    });
+    expect(convertToRuntimeState(once)).toEqual(once);
   });
 });

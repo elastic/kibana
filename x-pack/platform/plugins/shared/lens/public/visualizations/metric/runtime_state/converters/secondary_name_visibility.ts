@@ -8,57 +8,30 @@
 import type { MetricVisualizationState } from '@kbn/lens-common';
 
 /**
- * Pre-rename shape of `secondaryNameVisibility`. Real saved objects created between
- * `#261247` (which introduced this field as `'before' | 'after'`) and the rename to
- * `secondaryNameVisibility` still persist it under this legacy key.
- */
-interface LegacyMetricVisualizationState {
-  secondaryLabelPosition?: MetricVisualizationState['secondaryNameVisibility'];
-}
-
-/**
- * Runtime conversion for metric Name display.
+ * Resolves the metric Name display setting from the legacy secondary label state.
  *
- * - Move `valuesTextAlign` to `primaryAlign` and `secondaryAlign`
- * - Map `secondaryPrefix` / `secondaryLabel` / `secondaryLabelPosition` onto
- *   `secondaryNameVisibility`
- * - Keep a non-empty `secondaryLabel` as a render fallback until a future CM
- *   version copies it onto the secondary column and deletes the field
- */
-
-/**
- * This converter:
- * - maps `secondaryLabelPosition` → `secondaryNameVisibility`
- * - treats `''` as **hidden**
- * - keeps a non-empty `secondaryLabel` / `secondaryPrefix` as a **render fallback**
- * - defaults old charts with no position to **before**
+ * - `secondaryLabelPosition` is the pre-rename key for `secondaryNameVisibility`, still
+ *   persisted by saved objects created after #261247
+ * - an empty `secondaryLabel` is the legacy `None` choice, which now means hidden
+ * - a non-empty `secondaryLabel` is kept as a render fallback: its replacement is the
+ *   secondary column's custom label, which this converter cannot write, so the text has
+ *   to survive until a content management version copies it onto the column
  */
 export const convertSecondaryNameVisibility = (
   state: MetricVisualizationState
 ): MetricVisualizationState => {
-  const legacyState = state as MetricVisualizationState & LegacyMetricVisualizationState;
-  const { secondaryPrefix, secondaryLabel, secondaryLabelPosition, valuesTextAlign, ...restState } =
-    legacyState;
+  const { secondaryLabel, secondaryLabelPosition, ...restState } = state;
   let newState: MetricVisualizationState = { ...restState };
-
-  if (valuesTextAlign) {
-    newState = {
-      ...newState,
-      primaryAlign: state.primaryAlign ?? valuesTextAlign,
-      secondaryAlign: state.secondaryAlign ?? valuesTextAlign,
-    };
-  }
 
   if (!newState.secondaryMetricAccessor) {
     return newState;
   }
 
-  const legacyLabel = secondaryLabel ?? secondaryPrefix;
   newState = {
     ...newState,
-    ...(legacyLabel ? { secondaryLabel: legacyLabel } : {}),
+    ...(secondaryLabel ? { secondaryLabel } : {}),
     secondaryNameVisibility:
-      legacyLabel === ''
+      secondaryLabel === ''
         ? 'hidden'
         : newState.secondaryNameVisibility ?? secondaryLabelPosition ?? 'before',
   };

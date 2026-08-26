@@ -162,7 +162,7 @@ const alignVisualizationDefaults: NormalizerConfig<MetricAttributes> = {
       viz.secondaryNameVisibility = DEFAULT_SECONDARY_LABEL_PLACEMENT;
     }
     delete viz.secondaryLabel;
-    // delete viz.secondaryPrefix; // ??
+    delete viz.secondaryPrefix;
     delete legacyViz.secondaryLabelPosition;
 
     // Absent sizing round-trips through the API as `auto`, which maps back to `valueFontMode: 'default'`.

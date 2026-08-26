@@ -203,7 +203,8 @@ export const toExpression = (
   const metricFn = buildExpressionFunction<MetricVisExpressionFunctionDefinition>('metricVis', {
     metric: state.metricAccessor,
     secondaryMetric: state.secondaryMetricAccessor,
-    secondaryLabel: state.secondaryLabel ?? undefined, // TODO: investigate if this is fine
+    // Legacy custom name; the renderer falls back to the column name when it is absent
+    secondaryLabel: state.secondaryLabel ?? undefined,
     secondaryColor: secondaryTrendConfig.type === 'static' ? secondaryTrendConfig.color : undefined,
     secondaryTrendVisuals:
       secondaryTrendConfig.type === 'dynamic' ? secondaryTrendConfig.visuals : undefined,

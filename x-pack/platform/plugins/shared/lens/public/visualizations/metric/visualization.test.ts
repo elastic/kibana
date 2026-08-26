@@ -236,7 +236,7 @@ describe('metric visualization', () => {
 
     describe('secondary label migration', () => {
       const getStateWithLegacyLabel = (
-        legacy: Pick<MetricVisualizationState, 'secondaryLabel' | 'secondaryPrefix'>
+        legacy: Pick<MetricVisualizationState, 'secondaryLabel'>
       ): MetricVisualizationState => {
         const { secondaryNameVisibility, ...restFullState } = fullState;
         return { ...restFullState, ...legacy };
@@ -245,26 +245,20 @@ describe('metric visualization', () => {
       const initialize = (state: MetricVisualizationState) =>
         visualization.initialize(() => state.layerId, state);
 
-      test.each(['secondaryLabel', 'secondaryPrefix'] as const)(
-        'hides the name when %s was explicitly emptied',
-        (property) => {
-          expect(initialize(getStateWithLegacyLabel({ [property]: '' }))).toEqual({
-            ...fullState,
-            secondaryNameVisibility: 'hidden',
-          });
-        }
-      );
+      test('hides the name when secondaryLabel was explicitly emptied', () => {
+        expect(initialize(getStateWithLegacyLabel({ secondaryLabel: '' }))).toEqual({
+          ...fullState,
+          secondaryNameVisibility: 'hidden',
+        });
+      });
 
-      test.each(['secondaryLabel', 'secondaryPrefix'] as const)(
-        'keeps the custom %s as a runtime fallback and keeps the name visible',
-        (property) => {
-          expect(initialize(getStateWithLegacyLabel({ [property]: 'custom-text' }))).toEqual({
-            ...fullState,
-            secondaryLabel: 'custom-text',
-            secondaryNameVisibility: 'before',
-          });
-        }
-      );
+      test('keeps the custom secondaryLabel as a runtime fallback and keeps the name visible', () => {
+        expect(initialize(getStateWithLegacyLabel({ secondaryLabel: 'custom-text' }))).toEqual({
+          ...fullState,
+          secondaryLabel: 'custom-text',
+          secondaryNameVisibility: 'before',
+        });
+      });
 
       test('shows the name before the value when no legacy label was persisted', () => {
         expect(initialize(getStateWithLegacyLabel({}))).toEqual({
@@ -1307,6 +1301,45 @@ describe('metric visualization', () => {
         fail('Expression is not an object');
       }
     });
+
+    const expressionArgumentsFromLegacyState = (
+      legacy: Pick<MetricVisualizationState, 'secondaryLabel' | 'secondaryPrefix'>
+    ) => {
+      const { secondaryNameVisibility, ...restFullState } = fullState;
+      const runtimeState = visualization.initialize(() => fullState.layerId, {
+        ...restFullState,
+        ...legacy,
+        collapseFn: undefined,
+      });
+      const expression = visualization.toExpression(runtimeState, datasourceLayers);
+      if (!expression || typeof expression !== 'object') {
+        throw new Error('Expression is not an object');
+      }
+      return expression.chain[0].arguments;
+    };
+
+    // Guards the fallback end to end. The assertions above call `toExpression` directly, so
+    // they stay green even when the runtime conversion drops the legacy label entirely.
+    it.each(['secondaryLabel', 'secondaryPrefix'] as const)(
+      'forwards a legacy %s through initialization into the expression',
+      (property) => {
+        expect(expressionArgumentsFromLegacyState({ [property]: 'custom-text' })).toEqual(
+          expect.objectContaining({
+            secondaryLabel: ['custom-text'],
+            secondaryNameVisibility: ['before'],
+          })
+        );
+      }
+    );
+
+    it.each(['secondaryLabel', 'secondaryPrefix'] as const)(
+      'hides the name in the expression when a legacy %s was explicitly emptied',
+      (property) => {
+        expect(expressionArgumentsFromLegacyState({ [property]: '' })).toEqual(
+          expect.objectContaining({ secondaryNameVisibility: ['hidden'] })
+        );
+      }
+    );
 
     it.each(['hidden', 'before', 'after'] as const)(
       'forwards the %s name visibility',

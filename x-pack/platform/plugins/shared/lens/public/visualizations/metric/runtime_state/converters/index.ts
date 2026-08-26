@@ -17,6 +17,5 @@ export const getRuntimeConverters = () => [
   removeLegacyTitleWeight,
   convertApplyColorTo,
   convertDensity,
-  // Future v3
   convertSecondaryNameVisibility,
 ];
