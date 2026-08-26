@@ -517,7 +517,7 @@ describe('Create Lifecycle', () => {
             id: 'backToAwesome',
             name: 'Back To Awesome',
           },
-          priority: TaskPriority.NormalLongRunning,
+          priority: TaskPriority.Deferrable,
           executor: jest.fn(),
           category: 'test',
           producer: 'alerts',
@@ -530,13 +530,13 @@ describe('Create Lifecycle', () => {
         };
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
       registry.register(ruleType);
-      expect(registry.get('test').priority).toEqual(TaskPriority.NormalLongRunning);
+      expect(registry.get('test').priority).toEqual(TaskPriority.Deferrable);
 
       expect(taskManager.registerTaskDefinitions).toHaveBeenCalledTimes(1);
       expect(taskManager.registerTaskDefinitions.mock.calls[0][0]).toMatchObject({
         'alerting:test': {
           title: 'Test',
-          priority: TaskPriority.NormalLongRunning,
+          priority: TaskPriority.Deferrable,
           taskTypeGroup: 'alerting',
         },
       });
@@ -558,7 +558,7 @@ describe('Create Lifecycle', () => {
             id: 'backToAwesome',
             name: 'Back To Awesome',
           },
-          priority: TaskPriority.Low as TaskPriority.Normal, // Have to cast to force this error case
+          priority: TaskPriority.Maintenance as TaskPriority.Standard, // Have to cast to force this error case
           executor: jest.fn(),
           category: 'test',
           producer: 'alerts',

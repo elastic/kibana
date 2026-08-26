@@ -773,7 +773,7 @@ describe('Ad Hoc Task Runner', () => {
         foo: true,
         consumer: 'siem',
         uuid: '123abc',
-        priority: TaskPriority.Low,
+        priority: TaskPriority.Maintenance,
         apiKeyId: 'apiKeyId',
       })
     );

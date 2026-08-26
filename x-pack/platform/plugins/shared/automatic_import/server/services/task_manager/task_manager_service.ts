@@ -96,7 +96,7 @@ export class TaskManagerService {
         timeout: TASK_TIMEOUT_DURATION,
         maxAttempts: MAX_ATTEMPTS_AI_WORKFLOWS,
         cost: TaskCost.Normal,
-        priority: TaskPriority.Normal,
+        priority: TaskPriority.Standard,
         createTaskRunner: ({ taskInstance, fakeRequest, signal }: RunContext) => ({
           run: async () => {
             assert(
