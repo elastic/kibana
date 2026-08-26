@@ -108,6 +108,14 @@ export const getAnomalySwimLaneEmbeddableFactory = (
       const interval = new BehaviorSubject<number | undefined>(undefined);
 
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
+      const rendered$ = new BehaviorSubject<boolean>(false);
+      subscriptions.add(
+        dataLoading$.subscribe((isLoading) => {
+          if (isLoading) {
+            rendered$.next(false);
+          }
+        })
+      );
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
       const query$ = ((parentApi as Partial<PublishesUnifiedSearch>)?.query$ ??
         new BehaviorSubject(undefined)) as PublishesUnifiedSearch['query$'];
@@ -194,6 +202,7 @@ export const getAnomalySwimLaneEmbeddableFactory = (
           subscriptions
         ),
         dataLoading$,
+        rendered$,
       });
       const { swimLaneData$, onDestroy } = initializeSwimLaneDataFetcher(
         api,
@@ -332,6 +341,11 @@ export const getAnomalySwimLaneEmbeddableFactory = (
                         />
                       }
                       chartsService={pluginsStartServices.charts}
+                      onRenderComplete={() => {
+                        if (!isLoading) {
+                          rendered$.next(true);
+                        }
+                      }}
                     />
                   )}
                 </div>
