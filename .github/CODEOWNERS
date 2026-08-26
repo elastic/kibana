@@ -3226,6 +3226,20 @@ x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/
 # Significant Events managed workflows
 src/platform/packages/shared/kbn-workflows/managed/definitions/significant_events @elastic/obs-sig-events-team
 
+# PND managed workflows (shared files: index, constants, template values, rule workflows)
+src/platform/packages/shared/kbn-workflows/managed/definitions/pnd @elastic/security-solution
+# Per-watch definitions. Keep @elastic/security-solution until product-team ownership is settled.
+src/platform/packages/shared/kbn-workflows/managed/definitions/pnd/watch_floor.ts @elastic/security-solution
+src/platform/packages/shared/kbn-workflows/managed/definitions/pnd/watch_floor.yaml @elastic/security-solution
+src/platform/packages/shared/kbn-workflows/managed/definitions/pnd/watch_officer.ts @elastic/security-solution
+src/platform/packages/shared/kbn-workflows/managed/definitions/pnd/watch_officer.yaml @elastic/security-solution
+src/platform/packages/shared/kbn-workflows/managed/definitions/pnd/watch_dark.ts @elastic/security-solution
+src/platform/packages/shared/kbn-workflows/managed/definitions/pnd/watch_dark.yaml @elastic/security-solution
+src/platform/packages/shared/kbn-workflows/managed/definitions/pnd/watch_deep.ts @elastic/security-solution
+src/platform/packages/shared/kbn-workflows/managed/definitions/pnd/watch_deep.yaml @elastic/security-solution
+src/platform/packages/shared/kbn-workflows/managed/definitions/pnd/watch_detection.ts @elastic/security-solution
+src/platform/packages/shared/kbn-workflows/managed/definitions/pnd/watch_detection.yaml @elastic/security-solution
+
 # Alert analysis workflow
 src/platform/packages/shared/kbn-workflows/managed/definitions/alert_analysis @elastic/security-threat-hunting
 
