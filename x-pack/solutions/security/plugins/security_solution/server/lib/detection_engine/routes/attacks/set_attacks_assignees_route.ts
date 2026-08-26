@@ -91,22 +91,41 @@ export const setAttacksAssigneesRoute = (
             telemetrySender,
             telemetryFields,
             async () => {
+              // Verify which IDs actually exist in the attack index before emitting,
+              // so the event payload never includes unknown/non-attack IDs.
+              let verifiedAttackIds: string[] = [];
+              if (eventBus) {
+                const attackDocs = await searchAlerts({
+                  context,
+                  index: attackIndex,
+                  params: {
+                    query: { bool: { filter: { terms: { _id: ids } } } },
+                    _source: false,
+                    size: Math.min(ids.length, MAX_ALERTS_PER_TRIGGER),
+                  },
+                });
+                verifiedAttackIds = attackDocs.hits.hits
+                  .map((hit) => hit._id)
+                  .filter((id): id is string => id != null);
+              }
               const result = await updateAlertsAssignees({
                 context,
                 index: attackIndex,
                 ids,
                 assignees,
               });
-              void eventBus?.emitAttackAssigneesChanged(request, {
-                attackIds: ids.slice(0, MAX_ALERTS_PER_TRIGGER),
-                assigneesToAdd: assignees.add
-                  .filter((uid) => uid.length <= MAX_ASSIGNEE_UID_LENGTH)
-                  .slice(0, MAX_ASSIGNEES_PER_OPERATION),
-                assigneesToRemove: assignees.remove
-                  .filter((uid) => uid.length <= MAX_ASSIGNEE_UID_LENGTH)
-                  .slice(0, MAX_ASSIGNEES_PER_OPERATION),
-                truncated: ids.length > MAX_ALERTS_PER_TRIGGER,
-              });
+              if (eventBus && verifiedAttackIds.length > 0) {
+                void eventBus.emitAttackAssigneesChanged(request, {
+                  attackIds: verifiedAttackIds,
+                  assigneesToAdd: assignees.add
+                    .filter((uid) => uid.length <= MAX_ASSIGNEE_UID_LENGTH)
+                    .slice(0, MAX_ASSIGNEES_PER_OPERATION),
+                  assigneesToRemove: assignees.remove
+                    .filter((uid) => uid.length <= MAX_ASSIGNEE_UID_LENGTH)
+                    .slice(0, MAX_ASSIGNEES_PER_OPERATION),
+                  truncated: ids.length > MAX_ALERTS_PER_TRIGGER,
+                });
+              }
               return result;
             }
           );

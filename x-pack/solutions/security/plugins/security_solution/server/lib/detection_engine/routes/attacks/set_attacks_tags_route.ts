@@ -87,17 +87,36 @@ export const setAttacksTagsRoute = (
             telemetrySender,
             telemetryFields,
             async () => {
+              // Verify which IDs actually exist in the attack index before emitting,
+              // so the event payload never includes unknown/non-attack IDs.
+              let verifiedAttackIds: string[] = [];
+              if (eventBus) {
+                const attackDocs = await searchAlerts({
+                  context,
+                  index: attackIndex,
+                  params: {
+                    query: { bool: { filter: { terms: { _id: ids } } } },
+                    _source: false,
+                    size: Math.min(ids.length, MAX_ALERTS_PER_TRIGGER),
+                  },
+                });
+                verifiedAttackIds = attackDocs.hits.hits
+                  .map((hit) => hit._id)
+                  .filter((id): id is string => id != null);
+              }
               const result = await updateAlertsTags({ context, index: attackIndex, ids, tags });
-              void eventBus?.emitAttackTagsChanged(request, {
-                attackIds: ids.slice(0, MAX_ALERTS_PER_TRIGGER),
-                tagsToAdd: tags.tags_to_add
-                  .filter((t) => t.length <= MAX_TAG_LENGTH)
-                  .slice(0, MAX_TAGS_PER_OPERATION),
-                tagsToRemove: tags.tags_to_remove
-                  .filter((t) => t.length <= MAX_TAG_LENGTH)
-                  .slice(0, MAX_TAGS_PER_OPERATION),
-                truncated: ids.length > MAX_ALERTS_PER_TRIGGER,
-              });
+              if (eventBus && verifiedAttackIds.length > 0) {
+                void eventBus.emitAttackTagsChanged(request, {
+                  attackIds: verifiedAttackIds,
+                  tagsToAdd: tags.tags_to_add
+                    .filter((t) => t.length <= MAX_TAG_LENGTH)
+                    .slice(0, MAX_TAGS_PER_OPERATION),
+                  tagsToRemove: tags.tags_to_remove
+                    .filter((t) => t.length <= MAX_TAG_LENGTH)
+                    .slice(0, MAX_TAGS_PER_OPERATION),
+                  truncated: ids.length > MAX_ALERTS_PER_TRIGGER,
+                });
+              }
               return result;
             }
           );

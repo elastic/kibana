@@ -338,19 +338,50 @@ describe('set attacks tags', () => {
       );
     });
 
-    test('emits attackTagsChanged for non-cascade update', async () => {
-      await server.inject(getRequest(defaultBody), requestContextMock.convertContext(context));
-      await new Promise((r) => setTimeout(r, 0));
-      expect(mockEventBus.emitAttackTagsChanged).toHaveBeenCalledWith(
-        expect.anything(),
-        expect.objectContaining({
-          attackIds: ['attack1', 'attack2'],
-          tagsToAdd: defaultTags.tags_to_add,
-          tagsToRemove: defaultTags.tags_to_remove,
-          truncated: false,
-        })
-      );
-      expect(mockEventBus.emitAlertTagsChanged).not.toHaveBeenCalled();
+    describe('non-cascade', () => {
+      beforeEach(() => {
+        context.core.elasticsearch.client.asCurrentUser.search.mockResponseOnce(
+          getSearchResponse([{ _id: 'attack1' }, { _id: 'attack2' }])
+        );
+      });
+
+      test('emits attackTagsChanged for non-cascade update', async () => {
+        await server.inject(getRequest(defaultBody), requestContextMock.convertContext(context));
+        await new Promise((r) => setTimeout(r, 0));
+        expect(mockEventBus.emitAttackTagsChanged).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.objectContaining({
+            attackIds: ['attack1', 'attack2'],
+            tagsToAdd: defaultTags.tags_to_add,
+            tagsToRemove: defaultTags.tags_to_remove,
+            truncated: false,
+          })
+        );
+        expect(mockEventBus.emitAlertTagsChanged).not.toHaveBeenCalled();
+      });
+
+      test('does not emit when no requested IDs match the attack index (all-unknown)', async () => {
+        context.core.elasticsearch.client.asCurrentUser.search.mockReset();
+        context.core.elasticsearch.client.asCurrentUser.search.mockResponseOnce(
+          getSearchResponse([])
+        );
+        await server.inject(getRequest(defaultBody), requestContextMock.convertContext(context));
+        await new Promise((r) => setTimeout(r, 0));
+        expect(mockEventBus.emitAttackTagsChanged).not.toHaveBeenCalled();
+      });
+
+      test('emits only confirmed IDs when the request contains unknown IDs (partial match)', async () => {
+        context.core.elasticsearch.client.asCurrentUser.search.mockReset();
+        context.core.elasticsearch.client.asCurrentUser.search.mockResponseOnce(
+          getSearchResponse([{ _id: 'attack1' }])
+        );
+        await server.inject(getRequest(defaultBody), requestContextMock.convertContext(context));
+        await new Promise((r) => setTimeout(r, 0));
+        expect(mockEventBus.emitAttackTagsChanged).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.objectContaining({ attackIds: ['attack1'] })
+        );
+      });
     });
 
     test('emits attackTagsChanged and alertTagsChanged for cascade update', async () => {
