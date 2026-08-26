@@ -14,7 +14,7 @@
 import { expect } from '@kbn/scout/ui';
 import {
   spaceTest,
-  deleteAllBackgroundSearches,
+  getSessionCookieHeader,
   BACKGROUND_SEARCH_FLYOUT_ENTRYPOINT,
   FLIGHTS_SAMPLE_DATA_SET,
 } from '../fixtures';
@@ -37,8 +37,11 @@ spaceTest.describe(
       await browserAuth.loginAsPrivilegedUser();
     });
 
-    spaceTest.afterEach(async ({ page, kbnUrl, scoutSpace }) => {
-      await deleteAllBackgroundSearches({ page, kbnUrl, spaceId: scoutSpace.id });
+    spaceTest.afterEach(async ({ apiServices, page, scoutSpace }) => {
+      await apiServices.backgroundSearch.cleanup.deleteAll({
+        cookieHeader: await getSessionCookieHeader(page),
+        spaceId: scoutSpace.id,
+      });
     });
 
     spaceTest.afterAll(async ({ scoutSpace }) => {

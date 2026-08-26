@@ -22,7 +22,7 @@ import { expect } from '@kbn/scout/ui';
 import type { KibanaRole } from '@kbn/scout';
 import {
   spaceTest,
-  deleteAllBackgroundSearches,
+  getSessionCookieHeader,
   LOGSTASH_MONTH_TIME_RANGE,
   SESSION_IN_ANOTHER_SPACE_KBN_ARCHIVE,
   STALLING_DSL_FILTER,
@@ -57,8 +57,11 @@ spaceTest.describe(
       await scoutSpace.uiSettings.setDefaultTime(LOGSTASH_MONTH_TIME_RANGE);
     });
 
-    spaceTest.afterEach(async ({ page, kbnUrl, scoutSpace }) => {
-      await deleteAllBackgroundSearches({ page, kbnUrl, spaceId: scoutSpace.id });
+    spaceTest.afterEach(async ({ apiServices, page, scoutSpace }) => {
+      await apiServices.backgroundSearch.cleanup.deleteAll({
+        cookieHeader: await getSessionCookieHeader(page),
+        spaceId: scoutSpace.id,
+      });
     });
 
     spaceTest.afterAll(async ({ scoutSpace }) => {

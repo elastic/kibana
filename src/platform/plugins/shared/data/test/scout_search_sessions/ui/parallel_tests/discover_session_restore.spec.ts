@@ -17,7 +17,7 @@
 import { expect } from '@kbn/scout/ui';
 import {
   spaceTest,
-  deleteAllBackgroundSearches,
+  getSessionCookieHeader,
   DISCOVER_DEFAULT_KBN_ARCHIVE,
   LOGSTASH_TIME_RANGE,
   STALLING_DSL_FILTER,
@@ -37,8 +37,11 @@ spaceTest.describe('Discover background search restore', { tag: '@local-stateful
     await pageObjects.discover.waitUntilSearchingHasFinished();
   });
 
-  spaceTest.afterEach(async ({ page, kbnUrl, scoutSpace }) => {
-    await deleteAllBackgroundSearches({ page, kbnUrl, spaceId: scoutSpace.id });
+  spaceTest.afterEach(async ({ apiServices, page, scoutSpace }) => {
+    await apiServices.backgroundSearch.cleanup.deleteAll({
+      cookieHeader: await getSessionCookieHeader(page),
+      spaceId: scoutSpace.id,
+    });
   });
 
   spaceTest.afterAll(async ({ scoutSpace }) => {

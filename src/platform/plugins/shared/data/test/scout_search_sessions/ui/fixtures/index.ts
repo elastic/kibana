@@ -50,7 +50,6 @@ export const spaceTest = spaceBaseTest.extend<
 });
 
 export {
-  SESSION_API_PATH,
   DASHBOARD_ASYNC_SEARCH_KBN_ARCHIVE,
   DISCOVER_DEFAULT_KBN_ARCHIVE,
   FLIGHTS_SAMPLE_DATA_SET,
@@ -61,4 +60,4 @@ export {
   STALLING_DSL_FILTER,
 } from './constants';
 export { BACKGROUND_SEARCH_FLYOUT_ENTRYPOINT } from './page_objects/background_search_page';
-export { deleteAllBackgroundSearches, findLoadedDashboardId } from './helpers';
+export { findLoadedDashboardId, getSessionCookieHeader } from './helpers';

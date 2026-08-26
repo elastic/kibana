@@ -13,7 +13,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { spaceTest, deleteAllBackgroundSearches, FLIGHTS_SAMPLE_DATA_SET } from '../fixtures';
+import { spaceTest, getSessionCookieHeader, FLIGHTS_SAMPLE_DATA_SET } from '../fixtures';
 
 const SAVED_SEARCH_TITLE = 'Unsaved dashboard slow query';
 const SLOW_ESQL_QUERY = 'FROM kibana_sample_data_flights | LIMIT 1 | WHERE DELAY(1500ms)';
@@ -54,8 +54,11 @@ spaceTest.describe(
       await pageObjects.backgroundSearch.sendToBackground({ isSubmitButton: true });
     });
 
-    spaceTest.afterEach(async ({ page, kbnUrl, pageObjects, scoutSpace }) => {
-      await deleteAllBackgroundSearches({ page, kbnUrl, spaceId: scoutSpace.id });
+    spaceTest.afterEach(async ({ apiServices, page, pageObjects, scoutSpace }) => {
+      await apiServices.backgroundSearch.cleanup.deleteAll({
+        cookieHeader: await getSessionCookieHeader(page),
+        spaceId: scoutSpace.id,
+      });
       await scoutSpace.savedObjects.cleanStandardList();
       // The leftover "New Dashboard" draft would be restored by the next openNewDashboard(). It
       // has to be discarded from the listing: while the dashboard is mounted its unsaved-changes

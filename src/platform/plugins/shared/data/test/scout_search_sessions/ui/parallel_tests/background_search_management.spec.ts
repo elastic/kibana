@@ -19,7 +19,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { expect } from '@kbn/scout/ui';
 import {
   spaceTest,
-  deleteAllBackgroundSearches,
+  getSessionCookieHeader,
   findLoadedDashboardId,
   DASHBOARD_ASYNC_SEARCH_KBN_ARCHIVE,
 } from '../fixtures';
@@ -40,8 +40,11 @@ spaceTest.describe('Background Search management UI', { tag: '@local-stateful-cl
     await browserAuth.loginAsPrivilegedUser();
   });
 
-  spaceTest.afterEach(async ({ page, kbnUrl, scoutSpace }) => {
-    await deleteAllBackgroundSearches({ page, kbnUrl, spaceId: scoutSpace.id });
+  spaceTest.afterEach(async ({ apiServices, page, scoutSpace }) => {
+    await apiServices.backgroundSearch.cleanup.deleteAll({
+      cookieHeader: await getSessionCookieHeader(page),
+      spaceId: scoutSpace.id,
+    });
   });
 
   spaceTest.afterAll(async ({ scoutSpace }) => {

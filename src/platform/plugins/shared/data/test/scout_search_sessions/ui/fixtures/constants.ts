@@ -21,9 +21,6 @@ export const LENS_BASIC_KBN_ARCHIVE =
 export const DISCOVER_DEFAULT_KBN_ARCHIVE =
   'x-pack/platform/test/functional/fixtures/kbn_archives/discover/default';
 
-// Internal session management API path.
-export const SESSION_API_PATH = '/internal/session';
-
 // Sample data set installed via `apiServices.sampleData` for the ES|QL specs.
 export const FLIGHTS_SAMPLE_DATA_SET = 'flights';
 
