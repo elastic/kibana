@@ -44,6 +44,7 @@ const STEPS = Number(process.env.STEPS || 20);
 const STABILIZE_MS = Number(process.env.STABILIZE_MS || 30000);
 const SETTLE_MS = Number(process.env.SETTLE_MS || 2000);
 const INDEX_PREFIX = process.env.INDEX_PREFIX || 'heaplab';
+const UNIQUE_FIELDS = /^(1|true|yes)$/i.test(process.env.UNIQUE_FIELDS || '');
 const OUT = process.env.OUT || path.resolve(process.cwd(), 'heaplab_results.csv');
 
 const authHeader = KBN_API_KEY
@@ -78,6 +79,7 @@ const generate = (numIndices) =>
     numFields: NUM_FIELDS,
     numDocs: DOCS_PER_INDEX,
     indexPrefix: INDEX_PREFIX,
+    uniqueFieldsPerIndex: UNIQUE_FIELDS,
   });
 
 const stats = () => call('GET', '/internal/storage_adapter_heap_lab/stats');
@@ -185,7 +187,7 @@ async function main() {
   // eslint-disable-next-line no-console
   console.log(
     `heap-lab experiment -> ${KIBANA_URL}\n` +
-      `  fields/index=${NUM_FIELDS} docs/index=${DOCS_PER_INDEX} step=${STEP_INDICES} steps=${STEPS} stabilize=${STABILIZE_MS}ms\n` +
+      `  fields/index=${NUM_FIELDS} docs/index=${DOCS_PER_INDEX} step=${STEP_INDICES} steps=${STEPS} stabilize=${STABILIZE_MS}ms uniqueFields=${UNIQUE_FIELDS}\n` +
       `  output=${OUT}`
   );
 

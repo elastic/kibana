@@ -42,8 +42,8 @@ export const createRng = (seed: number): (() => number) => {
   };
 };
 
-const fieldName = (index: number, type: SyntheticFieldType): string =>
-  `f_${String(index).padStart(5, '0')}_${type}`;
+const fieldName = (index: number, type: SyntheticFieldType, prefix: string): string =>
+  `${prefix}f_${String(index).padStart(5, '0')}_${type}`;
 
 const propertyFor = (type: SyntheticFieldType) => {
   switch (type) {
@@ -69,11 +69,11 @@ const propertyFor = (type: SyntheticFieldType) => {
  * cycling through {@link FIELD_TYPE_CYCLE} so the field-count is precise and the
  * type mix is realistic.
  */
-export const buildSchema = (numFields: number): StorageSchema => {
+export const buildSchema = (numFields: number, fieldPrefix = ''): StorageSchema => {
   const properties: StorageSchema['properties'] = {};
   for (let i = 0; i < numFields; i++) {
     const type = FIELD_TYPE_CYCLE[i % FIELD_TYPE_CYCLE.length];
-    properties[fieldName(i, type)] = propertyFor(type);
+    properties[fieldName(i, type, fieldPrefix)] = propertyFor(type);
   }
   return { properties };
 };
@@ -113,11 +113,15 @@ const valueFor = (type: SyntheticFieldType, rng: () => number): string | number 
 export type SyntheticDocument = Record<string, string | number | boolean>;
 
 /** Builds a single synthetic document matching a schema of `numFields` fields. */
-export const buildDocument = (numFields: number, rng: () => number): SyntheticDocument => {
+export const buildDocument = (
+  numFields: number,
+  rng: () => number,
+  fieldPrefix = ''
+): SyntheticDocument => {
   const doc: SyntheticDocument = {};
   for (let i = 0; i < numFields; i++) {
     const type = FIELD_TYPE_CYCLE[i % FIELD_TYPE_CYCLE.length];
-    doc[fieldName(i, type)] = valueFor(type, rng);
+    doc[fieldName(i, type, fieldPrefix)] = valueFor(type, rng);
   }
   return doc;
 };

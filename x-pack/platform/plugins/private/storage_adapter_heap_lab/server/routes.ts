@@ -32,6 +32,13 @@ const generateBodySchema = schema.object({
   batchSize: schema.number({ min: 1, max: 10_000, defaultValue: 500 }),
   /** Seed for the deterministic document generator. */
   seed: schema.number({ min: 0, max: 2 ** 31, defaultValue: 42 }),
+  /**
+   * When true, each index gets a distinct set of field names (salted per index),
+   * so mappings are NOT deduplicated in cluster state — the "hundreds of distinct
+   * types" worst case. When false (default), all indices share one mapping, which
+   * ES deduplicates — the "per-space indices of one type" case.
+   */
+  uniqueFieldsPerIndex: schema.boolean({ defaultValue: false }),
 });
 
 const padIndex = (n: number): string => String(n).padStart(6, '0');
@@ -45,12 +52,17 @@ export const registerRoutes = (router: IRouter, logger: Logger): void => {
       validate: { body: generateBodySchema },
     },
     async (ctx, req, res) => {
-      const { numIndices, numFields, numDocs, indexPrefix, batchSize, seed } = req.body;
+      const { numIndices, numFields, numDocs, indexPrefix, batchSize, seed, uniqueFieldsPerIndex } =
+        req.body;
       const runId = `${Date.now().toString(36)}${Math.floor(Math.random() * 1e6).toString(36)}`;
       const startedAt = Date.now();
-      logger.info(`[heap-lab] generate called runId=${runId} numIndices=${numIndices}`);
+      logger.info(
+        `[heap-lab] generate called runId=${runId} numIndices=${numIndices} uniqueFields=${uniqueFieldsPerIndex}`
+      );
 
-      const schemaDefinition = buildSchema(numFields);
+      // Shared schema (deduplicated by ES) unless unique fields are requested, in
+      // which case each index gets its own salted schema below.
+      const sharedSchema = uniqueFieldsPerIndex ? undefined : buildSchema(numFields);
       const createdIndices: string[] = [];
       let totalDocs = 0;
 
@@ -64,6 +76,8 @@ export const registerRoutes = (router: IRouter, logger: Logger): void => {
 
         for (let i = 0; i < numIndices; i++) {
           const name = `${indexPrefix}-${runId}-${padIndex(i)}`;
+          const fieldPrefix = uniqueFieldsPerIndex ? `${runId}_${padIndex(i)}_` : '';
+          const schemaDefinition = sharedSchema ?? buildSchema(numFields, fieldPrefix);
           const storageSettings: IndexStorageSettings = { name, schema: schemaDefinition };
           const adapter = new StorageIndexAdapter<IndexStorageSettings, SyntheticDocument>(
             esClient,
@@ -78,7 +92,7 @@ export const registerRoutes = (router: IRouter, logger: Logger): void => {
             while (inserted < numDocs) {
               const batch = Math.min(batchSize, numDocs - inserted);
               const operations = Array.from({ length: batch }, () => ({
-                index: { document: buildDocument(numFields, rng) },
+                index: { document: buildDocument(numFields, rng, fieldPrefix) },
               }));
               await client.bulk({ operations, refresh: false, throwOnFail: true });
               inserted += batch;
@@ -86,7 +100,10 @@ export const registerRoutes = (router: IRouter, logger: Logger): void => {
             totalDocs += inserted;
           } else {
             // A single index() bootstraps the template + backing index + alias.
-            await client.index({ document: buildDocument(numFields, rng), refresh: false });
+            await client.index({
+              document: buildDocument(numFields, rng, fieldPrefix),
+              refresh: false,
+            });
           }
 
           createdIndices.push(name);
