@@ -383,7 +383,8 @@ describe('buildPackageInputs', () => {
       'us-west-2'
     );
     expect(inputs['ec2-aws/metrics']).toBeDefined();
-    expect(inputs['ec2-aws/metrics'].vars).toBeUndefined();
+    // PackageInputEntry has no top-level vars — cast to verify no accidental addition at runtime.
+    expect((inputs['ec2-aws/metrics'] as any).vars).toBeUndefined();
   });
 
   it('creates separate input entries for services with different policy templates', () => {
