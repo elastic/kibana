@@ -9,13 +9,11 @@ import type { CoreSetup } from '@kbn/core/public';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { conversationMetadataUpdatedTriggerCommonDefinition } from '../../common/workflows/triggers';
-import { getConversationMetadataStepCommonDefinition } from '../../common/workflows/steps/get_conversation_metadata';
-import { updateConversationMetadataStepCommonDefinition } from '../../common/workflows/steps/update_conversation_metadata';
 
-export function registerWorkflowSteps(
+export async function registerWorkflowSteps(
   workflowsExtensions: WorkflowsExtensionsPublicPluginSetup,
   core: CoreSetup
-): void {
+) {
   workflowsExtensions.registerStepDefinition(() =>
     import('./run_agent_step').then((m) => m.createRunAgentStepDefinition(core))
   );
@@ -23,26 +21,21 @@ export function registerWorkflowSteps(
     import('./rerank_step').then((m) => m.createRerankStepDefinition(core))
   );
 
-  // Returns undefined when the flag is off so the step registry skips registration.
-  const ifExperimental = async <T>(definition: T): Promise<T | undefined> => {
-    const [coreStart] = await core.getStartServices();
-    const isEnabled = coreStart.uiSettings.get<boolean>(
-      AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
+  const [coreStart] = await core.getStartServices();
+  const isExperimentalEnabled = coreStart.uiSettings.get<boolean>(
+    AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
+  );
+
+  if (isExperimentalEnabled) {
+    workflowsExtensions.registerStepDefinition(() =>
+      import('./conversation_metadata').then((m) => m.getConversationMetadataStepDefinition)
     );
-    return isEnabled ? definition : undefined;
-  };
+    workflowsExtensions.registerStepDefinition(() =>
+      import('./conversation_metadata').then((m) => m.updateConversationMetadataStepDefinition)
+    );
 
-  workflowsExtensions.registerStepDefinition(() =>
-    ifExperimental(getConversationMetadataStepCommonDefinition)
-  );
-  workflowsExtensions.registerStepDefinition(() =>
-    ifExperimental(updateConversationMetadataStepCommonDefinition)
-  );
-
-  // The trigger registry does not support skipping registration via undefined (it throws),
-  // so the trigger is always registered on the public side. Actual event emission is already
-  // gated by the feature flag in the server-side event bridge.
-  workflowsExtensions.registerTriggerDefinition(
-    conversationMetadataUpdatedTriggerCommonDefinition
-  );
+    workflowsExtensions.registerTriggerDefinition(
+      conversationMetadataUpdatedTriggerCommonDefinition
+    );
+  }
 }
