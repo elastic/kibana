@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
+import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
 import { flyoutAssembly } from '../assembly';
 import { resolveZoneTestSubj, useFlyoutTemplateConfig } from '../context';
 import { renderTitleIcon, renderTitleWithIcon } from '../title_adornments';
@@ -93,27 +94,31 @@ export const HeaderZone = ({
   const hasDescription = Boolean(description);
 
   return (
-    <EuiFlyoutHeader
-      hasBorder={false}
-      data-test-subj={resolveZoneTestSubj(dataTestSubj, rootTestSubj, 'Header')}
-    >
-      {renderTitleWithIcon(
-        <EuiTitle size="m">
-          <h3 id={flyoutTitleId}>{title}</h3>
-        </EuiTitle>,
-        renderTitleIcon(titleIcon, titleTooltip)
-      )}
-      {hasDescription && (
-        <>
-          <EuiSpacer size="xs" />
-          {/* No `<p>` wrapper: `description` accepts block content, which cannot nest in a paragraph. */}
-          <EuiText size="s" color="subdued">
-            {description}
-          </EuiText>
-        </>
-      )}
-      <EuiSpacer size="m" />
-      <FullBleedDivider horizontalPadding={horizontalPadding} />
-    </EuiFlyoutHeader>
+    <KibanaErrorBoundaryProvider>
+      <EuiFlyoutHeader
+        hasBorder={false}
+        data-test-subj={resolveZoneTestSubj(dataTestSubj, rootTestSubj, 'Header')}
+      >
+        <KibanaErrorBoundary>
+          {renderTitleWithIcon(
+            <EuiTitle size="m">
+              <h3 id={flyoutTitleId}>{title}</h3>
+            </EuiTitle>,
+            renderTitleIcon(titleIcon, titleTooltip)
+          )}
+          {hasDescription && (
+            <>
+              <EuiSpacer size="xs" />
+              {/* No `<p>` wrapper: `description` accepts block content, which cannot nest in a paragraph. */}
+              <EuiText size="s" color="subdued">
+                {description}
+              </EuiText>
+            </>
+          )}
+          <EuiSpacer size="m" />
+          <FullBleedDivider horizontalPadding={horizontalPadding} />
+        </KibanaErrorBoundary>
+      </EuiFlyoutHeader>
+    </KibanaErrorBoundaryProvider>
   );
 };
