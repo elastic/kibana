@@ -50,8 +50,7 @@ spaceTest.describe(
       await pageObjects.dashboard.openNewDashboard();
       await pageObjects.dashboard.addPanelFromLibrary(SAVED_SEARCH_TITLE);
       // Re-submit so a search is genuinely in flight when we send it to the background.
-      // Nothing is awaited after this: the "saved" toast auto-dismisses, and the first test
-      // needs to still find its link. Each test waits for the render itself.
+      // The render is not awaited here: each test decides which surface it waits on.
       await pageObjects.backgroundSearch.sendToBackground({ isSubmitButton: true });
     });
 
