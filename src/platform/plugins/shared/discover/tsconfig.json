@@ -55,6 +55,7 @@
     "@kbn/shared-ux-router",
     "@kbn/dom-drag-drop",
     "@kbn/ebt-tools",
+    "@kbn/ebt-click",
     "@kbn/unified-field-list",
     "@kbn/cell-actions",
     "@kbn/shared-ux-utility",
@@ -160,7 +161,7 @@
     "@kbn/use-observable",
     "@kbn/core-security-server",
     "@kbn/core-http-server",
-    "@kbn/ui-callout",
+    "@kbn/ui-callout"
   ],
   "exclude": ["target/**/*"]
 }
