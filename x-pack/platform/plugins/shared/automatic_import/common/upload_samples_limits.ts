@@ -11,7 +11,7 @@
 export const UPLOAD_SAMPLES_MAX_LINES = 1000;
 
 /**
- * Maximum characters per sample. Matches the upload API schema `samples` item maxLength.
+ * Maximum characters per sample. Longer lines are omitted. Matches the upload API schema.
  */
 export const UPLOAD_SAMPLES_MAX_LINE_LENGTH = 100_000;
 
@@ -60,22 +60,21 @@ export function normalizeLogLinesForUpload(lines: readonly string[]): NormalizeL
   for (const line of lines) {
     const trimmed = line.trim();
     if (trimmed.length > 0) {
-      const sample =
-        trimmed.length > UPLOAD_SAMPLES_MAX_LINE_LENGTH
-          ? trimmed.slice(0, UPLOAD_SAMPLES_MAX_LINE_LENGTH)
-          : trimmed;
-
-      const encodedSampleBytes = utf8ByteLength(JSON.stringify(sample));
-      const extraBytes = (samples.length === 0 ? 0 : 1) + encodedSampleBytes;
-
-      if (
-        samples.length >= UPLOAD_SAMPLES_MAX_LINES ||
-        samplesJsonBytes + extraBytes > maxSamplesJsonBytes
-      ) {
+      if (trimmed.length > UPLOAD_SAMPLES_MAX_LINE_LENGTH) {
         linesOmittedOverLimit++;
       } else {
-        samplesJsonBytes += extraBytes;
-        samples.push(sample);
+        const encodedSampleBytes = utf8ByteLength(JSON.stringify(trimmed));
+        const extraBytes = (samples.length === 0 ? 0 : 1) + encodedSampleBytes;
+
+        if (
+          samples.length >= UPLOAD_SAMPLES_MAX_LINES ||
+          samplesJsonBytes + extraBytes > maxSamplesJsonBytes
+        ) {
+          linesOmittedOverLimit++;
+        } else {
+          samplesJsonBytes += extraBytes;
+          samples.push(trimmed);
+        }
       }
     }
   }

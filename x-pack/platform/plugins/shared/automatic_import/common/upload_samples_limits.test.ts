@@ -138,12 +138,17 @@ describe('normalizeLogSamplesFromFileContent', () => {
     expect(linesOmittedOverLimit).toBe(5);
   });
 
-  it('truncates individual samples to UPLOAD_SAMPLES_MAX_LINE_LENGTH', () => {
+  it('omits samples longer than UPLOAD_SAMPLES_MAX_LINE_LENGTH and keeps later valid ones', () => {
     const tooLong = `prefix-${'x'.repeat(UPLOAD_SAMPLES_MAX_LINE_LENGTH)}`;
     const { samples, linesOmittedOverLimit } = normalizeLogLinesForUpload([tooLong, 'ok']);
-    expect(samples).toHaveLength(2);
-    expect(samples[0]).toHaveLength(UPLOAD_SAMPLES_MAX_LINE_LENGTH);
-    expect(samples[1]).toBe('ok');
+    expect(samples).toEqual(['ok']);
+    expect(linesOmittedOverLimit).toBe(1);
+  });
+
+  it('keeps samples of exactly UPLOAD_SAMPLES_MAX_LINE_LENGTH', () => {
+    const atLimit = 'x'.repeat(UPLOAD_SAMPLES_MAX_LINE_LENGTH);
+    const { samples, linesOmittedOverLimit } = normalizeLogLinesForUpload([atLimit]);
+    expect(samples).toEqual([atLimit]);
     expect(linesOmittedOverLimit).toBe(0);
   });
 
