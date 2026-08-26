@@ -6,11 +6,29 @@
  */
 
 import { modelVersion1 } from './model_version_1';
+import { modelVersion2 } from './model_version_2';
 
 describe('cases-user-actions model versions', () => {
   describe('version 1', () => {
     it('is the model-version baseline (no mapping changes)', () => {
       expect(modelVersion1.changes).toEqual([]);
+    });
+  });
+
+  describe('version 2', () => {
+    it('adds the source mapping', () => {
+      expect(modelVersion2.changes).toEqual([
+        {
+          type: 'mappings_addition',
+          addedMappings: {
+            source: {
+              properties: {
+                type: { type: 'keyword', ignore_above: 1024 },
+              },
+            },
+          },
+        },
+      ]);
     });
   });
 });
