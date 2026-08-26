@@ -36,14 +36,19 @@ const RENDER_TIMEOUT_MS = 30_000;
  * On Serverless the configured file is cluster-internal-cas — the ECP cluster
  * CA — which is issued by MKI, not a root. The MKI intermediate sits next to
  * the Kibana client cert at `dirname(certificate)/ca.crt`. Include it when
- * present so `rejectUnauthorized: true` can complete the chain. Agentless
- * skips this because it leaves rejectUnauthorized false.
+ * present so `rejectUnauthorized: true` can complete the chain.
+ *
+ * This extra CA is Serverless-only and only when `tls.ca` is already set.
+ * Otherwise Node keeps the default Mozilla roots. ECH talks to a public
+ * Let's Encrypt hostname; inventing a custom CA store from http-certs/ca.crt
+ * would replace those roots and fail the handshake.
  */
 const resolveIacProvisionerCertificateAuthorities = (
-  tls: { certificate?: string; ca?: string | string[] } | undefined
+  tls: { certificate?: string; ca?: string | string[] } | undefined,
+  { isServerless }: { isServerless: boolean }
 ): string | string[] | undefined => {
   const configured = tls?.ca == null ? [] : Array.isArray(tls.ca) ? [...tls.ca] : [tls.ca];
-  if (tls?.certificate) {
+  if (isServerless && configured.length > 0 && tls?.certificate) {
     const siblingCa = path.join(path.dirname(tls.certificate), 'ca.crt');
     if (!configured.includes(siblingCa) && existsSync(siblingCa)) {
       configured.push(siblingCa);
@@ -292,7 +297,9 @@ class IacProvisionerServiceImpl implements IacProvisionerService {
         enabled: Boolean(tls?.certificate && tls?.key),
         certificate: tls?.certificate,
         key: tls?.key,
-        certificateAuthorities: resolveIacProvisionerCertificateAuthorities(tls),
+        certificateAuthorities: resolveIacProvisionerCertificateAuthorities(tls, {
+          isServerless: Boolean(appContextService.getCloud()?.isServerlessEnabled),
+        }),
       })
     );
     return new Agent({
