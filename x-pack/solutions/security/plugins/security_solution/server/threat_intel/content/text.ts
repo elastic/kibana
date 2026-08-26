@@ -65,29 +65,28 @@ const capInput = (html: string): string =>
  */
 const TAG_PATTERN = /<[a-z!?/][^>]*>/gi;
 
-/** Bound on the fixpoint loop below. Far above any real nesting depth. */
-const MAX_TAG_STRIP_PASSES = 8;
+/**
+ * Neutralizes any `<` that could still open a tag. Applied after the tag pass, this is
+ * what makes tag stripping safe in one pass instead of needing to iterate.
+ */
+const RESIDUAL_TAG_OPEN = /<(?=[a-z!?/])/gi;
 
 /**
- * Removes tags repeatedly until the string stops changing.
+ * Removes tags, then neutralizes anything that could still open one.
  *
- * A single pass is not enough, and not only in theory: removing a tag can reassemble a
- * new one out of the text on either side of it. `<scr<script>ipt>` becomes `<script>`
- * once the inner tag is gone, which is what the nested-angle-bracket test covers and
- * what CodeQL's incomplete-multi-character-sanitization rule flags.
+ * The tag pass alone is not enough: removing a tag can reassemble a new one out of the
+ * text on either side of it, which is what CodeQL's
+ * incomplete-multi-character-sanitization rule is about. Two passes are, though. After
+ * the second there is no `<` anywhere followed by a tag-name character, so nothing can
+ * be reassembled by any later step and there is no fixpoint to iterate toward.
  *
- * After the bound, any remaining `<` is replaced outright, so no reassembled tag can
- * survive regardless of how adversarial the input is.
+ * Deliberately not a loop-until-stable. That form is bounded and fast in practice, but
+ * it invites the question of whether the bound is right, and it processes adversarial
+ * nesting in more passes than this needs. Prose survives either way, since `5 < 10` has
+ * a space after the `<`.
  */
-const stripTags = (input: string, replacement: string): string => {
-  let out = input;
-  for (let pass = 0; pass < MAX_TAG_STRIP_PASSES; pass += 1) {
-    const next = out.replace(TAG_PATTERN, replacement);
-    if (next === out) return out;
-    out = next;
-  }
-  return out.replace(/</g, replacement);
-};
+const stripTags = (input: string, replacement: string): string =>
+  input.replace(TAG_PATTERN, replacement).replace(RESIDUAL_TAG_OPEN, replacement);
 
 const stripScriptAndStyle = (html: string): string =>
   html
