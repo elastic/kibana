@@ -7,15 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { ProjectPickerFrame } from './frame';
+export { ProjectPicker, type ProjectPickerProps } from './project_picker';
+export { ProjectPickerFlyout, type ProjectPickerFlyoutProps } from './project_picker_flyout';
 
+export { ProjectPickerStateProvider, type ProjectPickerStateProviderProps } from './state';
 export {
+  ProjectPickerFrame,
   ProjectPickerFrameHeader,
   type HeaderContextMenuItemProps,
   ProjectPickerFrameHeaderActions,
   type ProjectPickerFrameHeaderActionsProps,
   ProjectPickerFrameBody,
-  type ProjectPickerFrameBodyProps,
   ProjectPickerFrameBodyHeader,
   ProjectPickerFrameFooter,
-} from './partials';
+  ProjectPickerList,
+} from './blocks';
