@@ -49,7 +49,7 @@ const getShareExportMenuItemProps = (integrationId: string) => {
   if (integrationId === 'csvReports') {
     return {
       label: i18n.translate('discover.localMenu.export.csvLabel', {
-        defaultMessage: 'Export tab in CSV',
+        defaultMessage: 'Tab results as CSV',
       }),
       testId: 'exportMenuItem-CSV',
       iconType: 'table',
@@ -60,7 +60,7 @@ const getShareExportMenuItemProps = (integrationId: string) => {
   if (integrationId === 'scheduledReports') {
     return {
       label: i18n.translate('discover.localMenu.export.scheduleExportLabel', {
-        defaultMessage: 'Schedule CSV export',
+        defaultMessage: 'Schedule export',
       }),
       testId: 'exportMenuItem-scheduledReports',
       iconType: 'calendar',
@@ -129,7 +129,7 @@ export const getExportAppMenuItem = ({
   const exportJsonItem: DiscoverAppMenuPopoverItem = {
     id: 'exportJson',
     label: i18n.translate('discover.localMenu.export.jsonConfigLabel', {
-      defaultMessage: 'Export JSON config',
+      defaultMessage: 'Export JSON',
     }),
     testId: 'exportMenuItem-JSON',
     iconType: 'code',

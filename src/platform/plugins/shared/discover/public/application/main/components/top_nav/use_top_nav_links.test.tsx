@@ -227,7 +227,7 @@ describe('useTopNavLinks', () => {
       expect(exportJsonItems).toHaveLength(1);
       expect(exportJsonItems?.[0]).toEqual(
         expect.objectContaining({
-          label: 'Export JSON config',
+          label: 'Export JSON',
           testId: 'exportMenuItem-JSON',
           iconType: 'code',
           order: 3,

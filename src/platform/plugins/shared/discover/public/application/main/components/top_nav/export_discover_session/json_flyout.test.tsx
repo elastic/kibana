@@ -80,7 +80,7 @@ describe('Discover export JSON flyout', () => {
     expect(props).toEqual(
       expect.objectContaining({
         title: 'Discover session',
-        objectType: 'Discover session',
+        objectType: 'Discover Session',
         getExportJson: expect.any(Function),
         dataTestSubjPrefix: 'discover',
         isTechnicalPreview: true,

@@ -81,7 +81,7 @@ export const ExportDiscoverSessionJsonFlyout = ({
         }
         isTechnicalPreview
         objectType={i18n.translate('discover.exportJson.objectTypeLabel', {
-          defaultMessage: 'Discover session',
+          defaultMessage: 'Discover Session',
         })}
         openInConsole={{
           canShow: canShowDevTools,
