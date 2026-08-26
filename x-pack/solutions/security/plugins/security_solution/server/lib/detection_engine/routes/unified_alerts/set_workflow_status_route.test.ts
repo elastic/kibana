@@ -506,6 +506,41 @@ describe('set unified alerts workflow status', () => {
       );
     });
 
+    test('caps previousStatuses alongside alertIds when the batch overflows MAX_ALERTS_PER_TRIGGER', async () => {
+      // First chunk: MAX_ALERTS_PER_TRIGGER hits all changing status (open → closed).
+      // Second chunk: 1 more hit also changing status.
+      // After accumulation alertPreviousStatuses has MAX_ALERTS_PER_TRIGGER+1 entries;
+      // the fix must slice it to MAX_ALERTS_PER_TRIGGER before emitting.
+      const firstChunkHits = Array.from({ length: MAX_ALERTS_PER_TRIGGER }, (_, i) => ({
+        _id: `id-${i}`,
+        _index: '.alerts-security.alerts-default',
+        _source: { 'kibana.alert.workflow_status': 'open' },
+      }));
+      context.core.elasticsearch.client.asCurrentUser.search
+        .mockResolvedValueOnce(makeSearchResponse(firstChunkHits))
+        .mockResolvedValueOnce(
+          makeSearchResponse([
+            {
+              _id: `id-${MAX_ALERTS_PER_TRIGGER}`,
+              _index: '.alerts-security.alerts-default',
+              _source: { 'kibana.alert.workflow_status': 'open' },
+            },
+          ])
+        );
+      const oversizedIds = Array.from({ length: MAX_ALERTS_PER_TRIGGER + 1 }, (_, i) => `id-${i}`);
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_WORKFLOW_STATUS_URL,
+        body: { signal_ids: oversizedIds, status: 'closed' },
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+      await new Promise((r) => setTimeout(r, 0));
+      const emitCall = mockEventBus.emitAlertStatusChanged.mock.calls[0][1];
+      expect(emitCall.truncated).toBe(true);
+      expect(emitCall.alertIds).toHaveLength(MAX_ALERTS_PER_TRIGGER);
+      expect(emitCall.previousStatuses).toHaveLength(MAX_ALERTS_PER_TRIGGER);
+    });
+
     test('does not emit when all IDs are already at the target status across multiple chunks', async () => {
       const oversizedIds = Array.from({ length: MAX_ALERTS_PER_TRIGGER + 1 }, (_, i) => `id-${i}`);
       // First chunk: id-0 already at target; second chunk returns nothing.

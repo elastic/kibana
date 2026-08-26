@@ -120,7 +120,7 @@ export const setUnifiedAlertsWorkflowStatusRoute = (
               void eventBus?.emitAttackStatusChanged(request, {
                 attackIds: attackIds.slice(0, MAX_ALERTS_PER_TRIGGER),
                 status,
-                previousStatuses: attackPreviousStatuses,
+                previousStatuses: attackPreviousStatuses.slice(0, MAX_ALERTS_PER_TRIGGER),
                 truncated: attackTruncated,
               });
             }
@@ -128,7 +128,7 @@ export const setUnifiedAlertsWorkflowStatusRoute = (
               void eventBus?.emitAlertStatusChanged(request, {
                 alertIds: alertIds.slice(0, MAX_ALERTS_PER_TRIGGER),
                 status,
-                previousStatuses: alertPreviousStatuses,
+                previousStatuses: alertPreviousStatuses.slice(0, MAX_ALERTS_PER_TRIGGER),
                 truncated: alertTruncated,
               });
             }
