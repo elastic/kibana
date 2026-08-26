@@ -81,6 +81,12 @@ export const removeMemberLabel = i18n.translate(
   }
 );
 
+export const extraMembersLabel = (count: number) =>
+  i18n.translate('xpack.agentBuilder.conversationSharing.extraMembersLabel', {
+    defaultMessage: '{count, plural, one {# more member} other {# more members}}',
+    values: { count },
+  });
+
 export const saveErrorLabel = i18n.translate('xpack.agentBuilder.conversationSharing.saveError', {
   defaultMessage: 'Failed to update sharing settings',
 });

@@ -20,7 +20,7 @@ import { getEbtProps } from '@kbn/ebt-click';
 import { UserAvatar, type UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { useConversationPermissions } from '../../../../hooks/use_conversation';
 import { useInviteMembersSummary } from '../../../../hooks/use_conversation_access_control';
-import { inviteLabel, sharingLabel } from './conversation_share_i18n';
+import { extraMembersLabel, inviteLabel, sharingLabel } from './conversation_share_i18n';
 
 const ConversationShareTriggerButton: React.FC<{
   ariaLabel: string;
@@ -116,7 +116,7 @@ const InviteMembersSummaryButton: React.FC<{
             `}
           >
             <EuiAvatar
-              name={`${extraCount} more members`}
+              name={extraMembersLabel(extraCount)}
               initials={`+${extraCount}`}
               size="s"
               color={euiTheme.colors.primary}

@@ -356,6 +356,9 @@ describe('ConversationShareButton', () => {
     expect(screen.getByTestId('agentBuilderConversationInviteMembersExtraCount')).toHaveTextContent(
       '+1'
     );
+    expect(
+      screen.getByTestId('agentBuilderConversationInviteMembersExtraCount')
+    ).toHaveAccessibleName('1 more member');
     expect(visibleMemberAvatars.map((avatar) => avatar.getAttribute('data-test-subj'))).toEqual([
       'agentBuilderConversationInviteMemberAvatar-member-3',
       'agentBuilderConversationInviteMemberAvatar-member-2',
