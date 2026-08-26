@@ -67,11 +67,12 @@ export const fetchAlertIdToIndex = async (
   index: string | string[],
   ids: string[]
 ): Promise<Map<string, string>> => {
+  const cappedIds = ids.slice(0, MAX_ALERTS_PER_TRIGGER);
   const searchResponse = await esClient.search({
     index: resolveIndex(index),
-    query: { terms: { _id: ids } },
+    query: { terms: { _id: cappedIds } },
     _source: false,
-    size: Math.min(ids.length, MAX_ALERTS_PER_TRIGGER),
+    size: cappedIds.length,
     ignore_unavailable: true,
   });
   const idToIndex = new Map<string, string>();

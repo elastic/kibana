@@ -465,6 +465,21 @@ describe('fetchAlertIdToIndex', () => {
     );
   });
 
+  it('caps query ids and size to MAX_ALERTS_PER_TRIGGER and preserves input order', async () => {
+    const oversizedIds = Array.from({ length: MAX_ALERTS_PER_TRIGGER + 5 }, (_, i) => `id-${i}`);
+    await fetchAlertIdToIndex(esClient, 'my-index', oversizedIds);
+
+    const call = esClient.search.mock.calls[0][0] as {
+      query: { terms: { _id: string[] } };
+      size: number;
+    };
+    const queriedIds = call.query.terms._id;
+    expect(queriedIds).toHaveLength(MAX_ALERTS_PER_TRIGGER);
+    expect(call.size).toBe(MAX_ALERTS_PER_TRIGGER);
+    // first MAX_ALERTS_PER_TRIGGER input IDs in original order — not the tail
+    expect(queriedIds).toEqual(oversizedIds.slice(0, MAX_ALERTS_PER_TRIGGER));
+  });
+
   it('joins an array index with commas before calling search', async () => {
     await fetchAlertIdToIndex(esClient, ['idx-a', 'idx-b'], ['id-1']);
     expect(esClient.search).toHaveBeenCalledWith(expect.objectContaining({ index: 'idx-a,idx-b' }));
