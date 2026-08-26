@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React, { memo, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPagination, EuiSpacer, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPagination, EuiSpacer } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
@@ -95,7 +95,6 @@ export const Header: FC<HeaderProps> = memo(
     onShowNotes,
     isPaginationLoading = false,
   }) => {
-    const { euiTheme } = useEuiTheme();
     const canReadRules = useUserPrivileges().rulesPrivileges.rules.read;
     const isAlert = useMemo(
       () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
@@ -113,16 +112,6 @@ export const Header: FC<HeaderProps> = memo(
     const showPagination =
       totalDocumentCount > 1 && flyoutDocumentIndex != null && flyoutDocumentIndex >= 0;
 
-    // When pagination is rendered on the right side of the row it would sit
-    // underneath the absolutely-positioned EuiFlyout close button (top: 8px,
-    // ~32px tall). Pushing the whole row down by size.l (24px) tucks the
-    // pagination just below the close button while keeping the severity
-    // badge vertically aligned with it.
-    const headerRowCss = useMemo(
-      () => (showPagination ? { marginTop: euiTheme.size.l } : undefined),
-      [showPagination, euiTheme.size.l]
-    );
-
     return (
       <>
         <div css={shareButtonStyles}>
@@ -138,7 +127,6 @@ export const Header: FC<HeaderProps> = memo(
           justifyContent="spaceBetween"
           alignItems="center"
           responsive={false}
-          css={headerRowCss}
         >
           <EuiFlexItem grow={false}>
             <DocumentSeverity hit={hit} />
