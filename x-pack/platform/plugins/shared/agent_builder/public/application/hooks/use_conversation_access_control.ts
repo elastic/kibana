@@ -83,7 +83,7 @@ export const useInviteMembersSummary = () => {
 
   return {
     profiles,
-    extraCount: Math.max(accessControl.entries.length - 2, 0),
+    extraCount: Math.max(accessControl.entries.length - profiles.length, 0),
     shouldShowSummary: hasSummary && profiles.length > 0,
   };
 };

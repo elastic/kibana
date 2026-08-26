@@ -128,4 +128,17 @@ describe('useInviteMembersSummary', () => {
     expect(result.current.profiles).toEqual([thirdMemberProfile, secondMemberProfile]);
     expect(result.current.extraCount).toBe(1);
   });
+
+  it('counts members without rendered profiles as extra members', async () => {
+    mockBulkGet.mockResolvedValue([thirdMemberProfile]);
+
+    const { result } = renderHook(() => useInviteMembersSummary(), { wrapper: createWrapper() });
+
+    await waitFor(() => {
+      expect(result.current.shouldShowSummary).toBe(true);
+    });
+
+    expect(result.current.profiles).toEqual([thirdMemberProfile]);
+    expect(result.current.extraCount).toBe(2);
+  });
 });
