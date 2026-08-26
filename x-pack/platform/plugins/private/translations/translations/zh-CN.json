@@ -50788,8 +50788,6 @@
     "xpack.significantEvents.agentBuilder.tools.eventSearch.schema.query": "事件标题中的可选文本搜索。",
     "xpack.significantEvents.agentBuilder.tools.eventStatusUpdate.description": "更新现有重大事件的状态。",
     "xpack.significantEvents.agentBuilder.tools.eventStatusUpdate.errorMessage": "更新重要事件状态失败：{message}",
-    "xpack.significantEvents.agentBuilder.tools.investigationProgressReport.description": "报告调查的完整当前状态，以便用户在调查结束前查看实时进展。这是快照，而非差异对比：每次调用都必须包括迄今为止考虑的所有假设，每个假设都有自己的置信度和状态——而不仅仅是自上次调用以来发生的变化。",
-    "xpack.significantEvents.agentBuilder.tools.investigationProgressReport.description.rules": "每当添加假设，或假设的置信度或状态（调查中、已驳回、已确认）发生变化时，请调用此方法。请保持“摘要”简短，用一两句话描述当前情况。此工具不会结束调查；调用后请继续工作。",
     "xpack.significantEvents.continuousKiExtractionEnabledDescription": "启用后，知识指标提取会自动在托管数据流上运行。",
     "xpack.significantEvents.continuousKiExtractionEnabledName": "连续 KI 提取已启用",
     "xpack.significantEvents.continuousKiExtractionIntervalHoursDescription": "每个数据流多久运行一次知识指标提取，以小时为单位。",
