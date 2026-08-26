@@ -79,6 +79,17 @@ module.exports = {
       ],
     },
 
+    '@kbn/ui-app-header': {
+      alternative: 'Import from @kbn/app-header instead.',
+      overrides: [
+        {
+          path: 'src/core/packages/chrome/',
+          reason:
+            'Core chrome re-exports presentation types and owns the connected app-header facade.',
+        },
+      ],
+    },
+
     '@kbn/ui-storybook-config': {
       alternative: 'Storybook-only config; do not import from Kibana runtime code.',
     },

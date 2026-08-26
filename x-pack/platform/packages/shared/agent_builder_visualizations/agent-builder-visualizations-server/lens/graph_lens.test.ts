@@ -26,10 +26,7 @@ jest.mock('./chart_type_registry', () => ({
           parse: (config: unknown) => config,
         },
         prompt: {
-          selection: {
-            description: 'Mock chart description',
-            guideline: 'Mock chart guideline',
-          },
+          selection: 'Mock chart description',
         },
       }),
     }

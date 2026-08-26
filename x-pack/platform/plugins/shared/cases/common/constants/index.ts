@@ -500,6 +500,18 @@ export const CASE_MARKDOWN_EDITOR_PLUGIN_CLICKED_EVENT_TYPE =
   'case_markdown_editor_plugin_clicked' as const;
 
 /**
+ * Template management events. Each one reports a single confirmed user action on the template
+ * management pages — not a count of templates written. A bulk delete reports one event whatever the
+ * number of removed templates, and the YAML import flow reports nothing. Use the server-side
+ * template counters for write totals; they count every caller.
+ */
+export const CASES_TEMPLATE_CREATED_EVENT_TYPE = 'cases_template_created' as const;
+
+export const CASES_TEMPLATE_UPDATED_EVENT_TYPE = 'cases_template_updated' as const;
+
+export const CASES_TEMPLATE_DELETED_EVENT_TYPE = 'cases_template_deleted' as const;
+
+/**
  * Cases list view toggle. Defined in `common` (rather than the redesign UI package) so that
  * non-UI consumers, such as the analytics/EBT layer, can depend on it without reaching into a
  * specific UI feature's implementation.

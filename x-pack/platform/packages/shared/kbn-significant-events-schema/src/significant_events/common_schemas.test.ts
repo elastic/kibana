@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { signalEntrySchema } from './common_schemas';
+import { blastRadiusEntrySchema, causalFeatureSchema, signalEntrySchema } from './common_schemas';
 
 const metadata = {
   detection_id: 'det-1',
@@ -80,5 +80,40 @@ describe('signalEntrySchema verdict/evidence consistency', () => {
 
   it('accepts not_checked when evidence is omitted', () => {
     expect(parseSignal({ verdict: 'not_checked' }).success).toBe(true);
+  });
+});
+
+describe('topology classification compatibility', () => {
+  it.each([
+    {
+      type: 'dependency',
+      feature_id: 'orders-db',
+      source: 'orders-api',
+      target: 'postgres',
+      stream_name: 'logs.orders',
+    },
+    {
+      type: 'infrastructure',
+      feature_id: 'orders-cluster',
+      stream_name: 'logs.orders',
+    },
+    {
+      type: 'entity',
+      feature_id: 'orders-api',
+      name: 'orders-api',
+      stream_name: 'logs.orders',
+    },
+  ])('accepts legacy $type blast-radius rows without subtype', (entry) => {
+    expect(blastRadiusEntrySchema.safeParse(entry).success).toBe(true);
+  });
+
+  it('accepts legacy causal features without classification', () => {
+    expect(
+      causalFeatureSchema.safeParse({
+        feature_id: 'orders-api',
+        name: 'orders-api',
+        stream_name: 'logs.orders',
+      }).success
+    ).toBe(true);
   });
 });

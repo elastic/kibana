@@ -22,6 +22,7 @@ export const updateRiskScoreMappings = async ({
   logger,
   getStartServices,
   kibanaVersion,
+  spaceId,
 }: EntityAnalyticsMigrationsParams) => {
   const [coreStart] = await getStartServices();
   const soClientKibanaUser = coreStart.savedObjects.createInternalRepository();
@@ -30,7 +31,7 @@ export const updateRiskScoreMappings = async ({
   const savedObjectsResponse = await soClientKibanaUser.find<RiskEngineConfiguration>({
     type: riskEngineConfigurationTypeName,
     perPage: MAX_PER_PAGE,
-    namespaces: ['*'],
+    namespaces: spaceId ? [spaceId] : ['*'],
   });
 
   await asyncForEach(savedObjectsResponse.saved_objects, async (savedObject) => {
