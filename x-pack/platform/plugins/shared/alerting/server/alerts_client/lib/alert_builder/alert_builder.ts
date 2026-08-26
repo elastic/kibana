@@ -289,6 +289,12 @@ export class AlertBuilder<
                 rule: this.rule,
               })
         );
+      } else {
+        const uuid = get(rawRecoveredAlerts[id], 'meta.uuid');
+        this.logger.error(
+          `Error writing recovered alert(${id}) to ${this.indexTemplateAndPattern.alias} - no tracked document found for uuid ${uuid} ${this.ruleInfoMessage}. Recovery was not written.`,
+          this.logTags
+        );
       }
     }
     return recoveredAlertsToIndex;

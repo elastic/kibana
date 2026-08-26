@@ -10,20 +10,19 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import type { AlertStatus } from '@kbn/rule-data-utils';
 import {
-  ALERT_END,
   ALERT_RULE_CONSUMER,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_UNTRACKED,
-  ALERT_TIME_RANGE,
   ALERT_UUID,
   SPACE_IDS,
 } from '@kbn/rule-data-utils';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { RulesClientContext } from '../../rules_client';
 import { AlertingAuthorizationEntity } from '../../authorization/types';
+import { getUntrackUpdatePainlessScript } from '../../lib/untrack_alert_script';
 
 export type BulkEnsureAuthorizedForUntrack = (opts: {
   ruleTypeIdConsumersPairs: Array<{ ruleTypeId: string; consumers: string[] }>;
@@ -294,15 +293,3 @@ export async function setAlertsToUntracked(
     throw err;
   }
 }
-
-// Certain rule types don't flatten their AAD values, apply the ALERT_STATUS key to them directly
-const getUntrackUpdatePainlessScript = (now: Date) => `
-if (!ctx._source.containsKey('${ALERT_STATUS}') || ctx._source['${ALERT_STATUS}'].empty) {
-  ctx._source.${ALERT_STATUS} = '${ALERT_STATUS_UNTRACKED}';
-  ctx._source.${ALERT_END} = '${now.toISOString()}';
-  ctx._source.${ALERT_TIME_RANGE}.lte = '${now.toISOString()}';
-} else {
-  ctx._source['${ALERT_STATUS}'] = '${ALERT_STATUS_UNTRACKED}';
-  ctx._source['${ALERT_END}'] = '${now.toISOString()}';
-  ctx._source['${ALERT_TIME_RANGE}'].lte = '${now.toISOString()}';
-}`;

@@ -57,6 +57,19 @@ export async function getTrackedAlerts<AlertData extends RuleAlertData>({
 
   populateTrackedAlerts(trackedAlerts, hits);
 
+  // The execution-uuid collapse above only reaches back `lookBackWindow` executions, so a
+  // document that stops being updated (e.g. task state was rewound by an error, see
+  // get_state.ts) ages out of it and becomes invisible forever. Fetch active/delayed
+  // documents for this rule directly so a stuck document can always be seen and, if it is
+  // an orphan, reconciled below.
+  const activeAndDelayedHits = await fetchActiveAndDelayedAlerts({
+    ruleId,
+    maxAlertLimit,
+    search,
+  });
+
+  populateTrackedAlerts(trackedAlerts, activeAndDelayedHits);
+
   const alertUuidsFromState = getAlertUuidsFromState(
     activeAlertsFromState,
     recoveredAlertsFromState
@@ -85,6 +98,21 @@ export async function getTrackedAlerts<AlertData extends RuleAlertData>({
     }
   }
 
+  const orphanedAlertUuids = reconcileOrphanedAlerts(trackedAlerts, alertUuidsFromState);
+
+  if (orphanedAlertUuids.length > 0) {
+    logger.warn(
+      `Found ${
+        orphanedAlertUuids.length
+      } active or delayed alert documents ${ruleInfoMessage} whose uuid is not tracked in task state - treating as orphaned and untracking: ${orphanedAlertUuids.join(
+        ', '
+      )}`,
+      logTags
+    );
+  }
+
+  trackedAlerts.orphanedAlertUuids = orphanedAlertUuids;
+
   return trackedAlerts;
 }
 
@@ -99,6 +127,7 @@ export function createEmptyTrackedAlerts<
     all: {},
     seqNo: {},
     primaryTerm: {},
+    orphanedAlertUuids: [],
     get(uuid: string) {
       return this.all[uuid];
     },
@@ -161,6 +190,31 @@ async function fetchTrackedAlertsByExecution<AlertData extends RuleAlertData>({
   return alerts.hits;
 }
 
+async function fetchActiveAndDelayedAlerts<AlertData extends RuleAlertData>({
+  ruleId,
+  maxAlertLimit,
+  search,
+}: {
+  ruleId: string;
+  maxAlertLimit: number;
+  search: (queryBody: Record<string, unknown>) => Promise<SearchResult<AlertData>>;
+}) {
+  const result = await search({
+    size: maxAlertLimit * 2,
+    seq_no_primary_term: true,
+    query: {
+      bool: {
+        must: [
+          { term: { [ALERT_RULE_UUID]: ruleId } },
+          { terms: { [ALERT_STATUS]: [ALERT_STATUS_ACTIVE, ALERT_STATUS_DELAYED] } },
+        ],
+      },
+    },
+  });
+
+  return result.hits;
+}
+
 async function fetchAlertsByIds<AlertData extends RuleAlertData>({
   ruleId,
   alertUuids,
@@ -216,6 +270,33 @@ export function findMissingAlertUuids<AlertData extends RuleAlertData>(
   trackedAlerts: TrackedAADAlerts<AlertData>
 ): string[] {
   return alertUuidsFromState.filter((uuid) => !trackedAlerts.all[uuid]);
+}
+
+// A document claiming active/delayed for this rule is only legitimate if the framework is
+// currently tracking its uuid. Anything else is an orphan left behind by a prior divergence
+// between AAD and task state (see get_state.ts returning stale state on error, or a rule
+// disable/enable cycle). Strip orphans out so getById/buildActiveAlerts never target them,
+// and return their uuids so the caller can drive them to `untracked`.
+export function reconcileOrphanedAlerts<AlertData extends RuleAlertData>(
+  trackedAlerts: TrackedAADAlerts<AlertData>,
+  alertUuidsFromState: string[]
+): string[] {
+  const trackedUuids = new Set(alertUuidsFromState);
+  const orphanedAlertUuids = [
+    ...Object.keys(trackedAlerts.active),
+    ...Object.keys(trackedAlerts.delayed),
+  ].filter((uuid) => !trackedUuids.has(uuid));
+
+  for (const uuid of orphanedAlertUuids) {
+    delete trackedAlerts.active[uuid];
+    delete trackedAlerts.delayed[uuid];
+    delete trackedAlerts.all[uuid];
+    delete trackedAlerts.indices[uuid];
+    delete trackedAlerts.seqNo[uuid];
+    delete trackedAlerts.primaryTerm[uuid];
+  }
+
+  return orphanedAlertUuids;
 }
 
 export function getAlertUuidsFromState(

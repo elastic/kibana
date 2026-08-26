@@ -24,6 +24,7 @@ import {
   populateTrackedAlerts,
   findMissingAlertUuids,
   getAlertUuidsFromState,
+  reconcileOrphanedAlerts,
 } from './get_tracked_alerts';
 import type { RawAlertInstance, RuleAlertData } from '../../types';
 import type { SearchResult, TrackedAADAlerts } from '../types';
@@ -90,6 +91,8 @@ const makeExecutionHit = (executionUuid: string) => ({
   },
 });
 
+const emptyHits = { hits: [] };
+
 describe('get_tracked_alerts', () => {
   beforeEach(() => {
     jest.resetAllMocks();
@@ -105,6 +108,7 @@ describe('get_tracked_alerts', () => {
       expect(tracked.all).toEqual({});
       expect(tracked.seqNo).toEqual({});
       expect(tracked.primaryTerm).toEqual({});
+      expect(tracked.orphanedAlertUuids).toEqual([]);
     });
 
     it('get returns alert by uuid', () => {
@@ -285,6 +289,94 @@ describe('get_tracked_alerts', () => {
     });
   });
 
+  describe('reconcileOrphanedAlerts', () => {
+    it('leaves active alerts alone when their uuid is tracked in state', () => {
+      const tracked = createEmptyTrackedAlerts<{}>();
+      const activeAlert = { [ALERT_UUID]: 'uuid-1' } as unknown as TestAlertDoc;
+      tracked.all['uuid-1'] = activeAlert;
+      tracked.active['uuid-1'] = activeAlert;
+
+      const orphaned = reconcileOrphanedAlerts(tracked, ['uuid-1']);
+
+      expect(orphaned).toEqual([]);
+      expect(tracked.active['uuid-1']).toBe(activeAlert);
+      expect(tracked.all['uuid-1']).toBe(activeAlert);
+    });
+
+    it('strips an active alert whose uuid is absent from state and returns it as orphaned', () => {
+      const tracked = createEmptyTrackedAlerts<{}>();
+      const orphanAlert = { [ALERT_UUID]: 'uuid-orphan' } as unknown as TestAlertDoc;
+      tracked.all['uuid-orphan'] = orphanAlert;
+      tracked.active['uuid-orphan'] = orphanAlert;
+      tracked.indices['uuid-orphan'] = '.alerts-test-000001';
+      tracked.seqNo['uuid-orphan'] = 1;
+      tracked.primaryTerm['uuid-orphan'] = 1;
+
+      const orphaned = reconcileOrphanedAlerts(tracked, ['uuid-other']);
+
+      expect(orphaned).toEqual(['uuid-orphan']);
+      expect(tracked.active['uuid-orphan']).toBeUndefined();
+      expect(tracked.all['uuid-orphan']).toBeUndefined();
+      expect(tracked.indices['uuid-orphan']).toBeUndefined();
+      expect(tracked.seqNo['uuid-orphan']).toBeUndefined();
+      expect(tracked.primaryTerm['uuid-orphan']).toBeUndefined();
+    });
+
+    it('strips a delayed alert whose uuid is absent from state', () => {
+      const tracked = createEmptyTrackedAlerts<{}>();
+      const orphanAlert = { [ALERT_UUID]: 'uuid-delayed-orphan' } as unknown as TestAlertDoc;
+      tracked.all['uuid-delayed-orphan'] = orphanAlert;
+      tracked.delayed['uuid-delayed-orphan'] = orphanAlert;
+
+      const orphaned = reconcileOrphanedAlerts(tracked, []);
+
+      expect(orphaned).toEqual(['uuid-delayed-orphan']);
+      expect(tracked.delayed['uuid-delayed-orphan']).toBeUndefined();
+    });
+
+    it('does not treat recovered alerts as orphans', () => {
+      const tracked = createEmptyTrackedAlerts<{}>();
+      const recoveredAlert = { [ALERT_UUID]: 'uuid-recovered' } as unknown as TestAlertDoc;
+      tracked.all['uuid-recovered'] = recoveredAlert;
+      tracked.recovered['uuid-recovered'] = recoveredAlert;
+
+      const orphaned = reconcileOrphanedAlerts(tracked, []);
+
+      expect(orphaned).toEqual([]);
+      expect(tracked.recovered['uuid-recovered']).toBe(recoveredAlert);
+    });
+
+    it('does not orphan an active alert held open by the alert limit (uuid present, not re-reported)', () => {
+      // processAlertsLimitReached keeps existing alerts open by carrying their uuid forward
+      // in task state without the executor re-reporting them, so their uuid is still tracked.
+      const tracked = createEmptyTrackedAlerts<{}>();
+      const heldOpenAlert = { [ALERT_UUID]: 'uuid-held-open' } as unknown as TestAlertDoc;
+      tracked.all['uuid-held-open'] = heldOpenAlert;
+      tracked.active['uuid-held-open'] = heldOpenAlert;
+
+      const orphaned = reconcileOrphanedAlerts(tracked, ['uuid-held-open']);
+
+      expect(orphaned).toEqual([]);
+      expect(tracked.active['uuid-held-open']).toBe(heldOpenAlert);
+    });
+
+    it('resolves a duplicate pair by keeping only the uuid present in state', () => {
+      const tracked = createEmptyTrackedAlerts<{}>();
+      const liveAlert = { [ALERT_UUID]: 'uuid-live' } as unknown as TestAlertDoc;
+      const staleAlert = { [ALERT_UUID]: 'uuid-stale' } as unknown as TestAlertDoc;
+      tracked.all['uuid-live'] = liveAlert;
+      tracked.active['uuid-live'] = liveAlert;
+      tracked.all['uuid-stale'] = staleAlert;
+      tracked.active['uuid-stale'] = staleAlert;
+
+      const orphaned = reconcileOrphanedAlerts(tracked, ['uuid-live']);
+
+      expect(orphaned).toEqual(['uuid-stale']);
+      expect(tracked.active['uuid-live']).toBe(liveAlert);
+      expect(tracked.active['uuid-stale']).toBeUndefined();
+    });
+  });
+
   describe('getAlertUuidsFromState', () => {
     it('extracts uuids from active and recovered alerts', () => {
       const uuids = getAlertUuidsFromState(
@@ -319,7 +411,7 @@ describe('get_tracked_alerts', () => {
   });
 
   describe('getTrackedAlerts', () => {
-    it('fetches tracked alerts via execution uuid query', async () => {
+    it('fetches tracked alerts via execution uuid query and the additive active/delayed query', async () => {
       const search = jest
         .fn()
         .mockResolvedValueOnce({
@@ -334,7 +426,8 @@ describe('get_tracked_alerts', () => {
               executionUuid: 'exec-1',
             }),
           ],
-        });
+        })
+        .mockResolvedValueOnce(emptyHits);
 
       const result = await getTrackedAlerts({
         ruleId,
@@ -347,10 +440,85 @@ describe('get_tracked_alerts', () => {
         logTags,
       });
 
-      expect(search).toHaveBeenCalledTimes(2);
+      expect(search).toHaveBeenCalledTimes(3);
       expect(result.all['uuid-1']).toBeDefined();
       expect(result.active['uuid-1']).toBeDefined();
+      expect(result.orphanedAlertUuids).toEqual([]);
       expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    it('sees a stuck active document via the additive query even when it has no matching execution uuid', async () => {
+      const search = jest
+        .fn()
+        .mockResolvedValueOnce({
+          hits: [makeExecutionHit('exec-1')],
+        })
+        .mockResolvedValueOnce(emptyHits)
+        .mockResolvedValueOnce({
+          hits: [
+            makeHit({
+              uuid: 'uuid-stuck',
+              instanceId: 'alert-stuck',
+              status: ALERT_STATUS_ACTIVE,
+              executionUuid: 'exec-very-old',
+            }),
+          ],
+        });
+
+      const result = await getTrackedAlerts({
+        ruleId,
+        lookBackWindow: 20,
+        maxAlertLimit: 1000,
+        ...makeStateFromUuids(['uuid-stuck']),
+        search,
+        logger,
+        ruleInfoMessage,
+        logTags,
+      });
+
+      expect(search).toHaveBeenCalledTimes(3);
+      expect(result.all['uuid-stuck']).toBeDefined();
+      expect(result.active['uuid-stuck']).toBeDefined();
+      expect(result.orphanedAlertUuids).toEqual([]);
+    });
+
+    it('reconciles an orphaned active document whose uuid is absent from task state', async () => {
+      const search = jest
+        .fn()
+        .mockResolvedValueOnce({
+          hits: [makeExecutionHit('exec-1')],
+        })
+        .mockResolvedValueOnce(emptyHits)
+        .mockResolvedValueOnce({
+          hits: [
+            makeHit({
+              uuid: 'uuid-orphan',
+              instanceId: 'alert-orphan',
+              status: ALERT_STATUS_ACTIVE,
+              executionUuid: 'exec-old',
+            }),
+          ],
+        });
+
+      const result = await getTrackedAlerts({
+        ruleId,
+        lookBackWindow: 20,
+        maxAlertLimit: 1000,
+        activeAlertsFromState: {},
+        recoveredAlertsFromState: {},
+        search,
+        logger,
+        ruleInfoMessage,
+        logTags,
+      });
+
+      expect(result.active['uuid-orphan']).toBeUndefined();
+      expect(result.all['uuid-orphan']).toBeUndefined();
+      expect(result.orphanedAlertUuids).toEqual(['uuid-orphan']);
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('whose uuid is not tracked in task state'),
+        logTags
+      );
     });
 
     it('fetches missing alerts by id when state has extra uuids', async () => {
@@ -369,6 +537,7 @@ describe('get_tracked_alerts', () => {
             }),
           ],
         })
+        .mockResolvedValueOnce(emptyHits)
         .mockResolvedValueOnce({
           hits: [
             makeHit({
@@ -393,10 +562,10 @@ describe('get_tracked_alerts', () => {
         logTags,
       });
 
-      expect(search).toHaveBeenCalledTimes(3);
+      expect(search).toHaveBeenCalledTimes(4);
 
-      // Verify the reconciliation query filters by ids
-      expect(search.mock.calls[2][0]).toEqual(
+      // Verify the missing-alerts-by-id query filters by ids (now the 4th call)
+      expect(search.mock.calls[3][0]).toEqual(
         expect.objectContaining({
           size: 1,
           seq_no_primary_term: true,
@@ -412,6 +581,7 @@ describe('get_tracked_alerts', () => {
       expect(result.all['uuid-2']).toBeDefined();
       expect(result.seqNo['uuid-2']).toBe(5);
       expect(result.primaryTerm['uuid-2']).toBe(2);
+      expect(result.orphanedAlertUuids).toEqual([]);
 
       expect(logger.warn).toHaveBeenCalledWith(
         expect.stringContaining(
@@ -436,7 +606,8 @@ describe('get_tracked_alerts', () => {
               executionUuid: 'exec-1',
             }),
           ],
-        });
+        })
+        .mockResolvedValueOnce(emptyHits);
 
       await getTrackedAlerts({
         ruleId,
@@ -449,7 +620,7 @@ describe('get_tracked_alerts', () => {
         logTags,
       });
 
-      expect(search).toHaveBeenCalledTimes(2);
+      expect(search).toHaveBeenCalledTimes(3);
       expect(logger.warn).not.toHaveBeenCalled();
     });
 
@@ -468,7 +639,29 @@ describe('get_tracked_alerts', () => {
               executionUuid: 'exec-1',
             }),
           ],
-        });
+        })
+        .mockResolvedValueOnce(emptyHits);
+
+      const result = await getTrackedAlerts({
+        ruleId,
+        lookBackWindow: 20,
+        maxAlertLimit: 1000,
+        activeAlertsFromState: {},
+        recoveredAlertsFromState: {},
+        search,
+        logger,
+        ruleInfoMessage,
+        logTags,
+      });
+
+      expect(search).toHaveBeenCalledTimes(3);
+      // uuid-1 has no state entry, so it is treated as an orphan and stripped
+      expect(result.all['uuid-1']).toBeUndefined();
+      expect(result.orphanedAlertUuids).toEqual(['uuid-1']);
+    });
+
+    it('handles no execution uuids found with no state alerts', async () => {
+      const search = jest.fn().mockResolvedValueOnce({ hits: [] }).mockResolvedValueOnce(emptyHits);
 
       const result = await getTrackedAlerts({
         ruleId,
@@ -483,29 +676,8 @@ describe('get_tracked_alerts', () => {
       });
 
       expect(search).toHaveBeenCalledTimes(2);
-      expect(result.all['uuid-1']).toBeDefined();
-      expect(logger.warn).not.toHaveBeenCalled();
-    });
-
-    it('handles no execution uuids found with no state alerts', async () => {
-      const search = jest.fn().mockResolvedValueOnce({
-        hits: [],
-      });
-
-      const result = await getTrackedAlerts({
-        ruleId,
-        lookBackWindow: 20,
-        maxAlertLimit: 1000,
-        activeAlertsFromState: {},
-        recoveredAlertsFromState: {},
-        search,
-        logger,
-        ruleInfoMessage,
-        logTags,
-      });
-
-      expect(search).toHaveBeenCalledTimes(1);
       expect(Object.keys(result.all)).toHaveLength(0);
+      expect(result.orphanedAlertUuids).toEqual([]);
       expect(logger.warn).not.toHaveBeenCalled();
     });
 
@@ -515,6 +687,7 @@ describe('get_tracked_alerts', () => {
         .mockResolvedValueOnce({
           hits: [],
         })
+        .mockResolvedValueOnce(emptyHits)
         .mockResolvedValueOnce({
           hits: [
             makeHit({
@@ -539,13 +712,14 @@ describe('get_tracked_alerts', () => {
         logTags,
       });
 
-      expect(search).toHaveBeenCalledTimes(2);
+      expect(search).toHaveBeenCalledTimes(3);
       expect(result.all['uuid-1']).toBeDefined();
       expect(result.seqNo['uuid-1']).toBe(3);
+      expect(result.orphanedAlertUuids).toEqual([]);
       expect(logger.warn).toHaveBeenCalled();
     });
 
-    it('correctly passes query parameters for execution query', async () => {
+    it('correctly passes query parameters for the execution query and the additive active/delayed query', async () => {
       const search = jest
         .fn()
         .mockResolvedValueOnce({
@@ -553,7 +727,8 @@ describe('get_tracked_alerts', () => {
         })
         .mockResolvedValueOnce({
           hits: [],
-        });
+        })
+        .mockResolvedValueOnce(emptyHits);
 
       await getTrackedAlerts({
         ruleId,
@@ -592,6 +767,19 @@ describe('get_tracked_alerts', () => {
           },
         },
       });
+
+      expect(search.mock.calls[2][0]).toEqual({
+        size: 1000,
+        seq_no_primary_term: true,
+        query: {
+          bool: {
+            must: [
+              { term: { [ALERT_RULE_UUID]: ruleId } },
+              { terms: { [ALERT_STATUS]: [ALERT_STATUS_ACTIVE, ALERT_STATUS_DELAYED] } },
+            ],
+          },
+        },
+      });
     });
 
     it('logs error and returns partial results when fetchAlertsByIds fails', async () => {
@@ -604,6 +792,7 @@ describe('get_tracked_alerts', () => {
         .mockResolvedValueOnce({
           hits: [],
         })
+        .mockResolvedValueOnce(emptyHits)
         .mockRejectedValueOnce(searchError);
 
       const result = await getTrackedAlerts({
@@ -641,6 +830,7 @@ describe('get_tracked_alerts', () => {
         .mockResolvedValueOnce({
           hits: [],
         })
+        .mockResolvedValueOnce(emptyHits)
         .mockResolvedValueOnce({
           hits: [
             makeHit({
@@ -669,14 +859,15 @@ describe('get_tracked_alerts', () => {
         logTags,
       });
 
-      expect(search).toHaveBeenCalledTimes(3);
+      expect(search).toHaveBeenCalledTimes(4);
 
-      expect(search.mock.calls[2][0].size).toBe(3);
+      expect(search.mock.calls[3][0].size).toBe(3);
 
       expect(result.active['uuid-1']).toBeDefined();
       expect(result.recovered['uuid-2']).toBeDefined();
       // uuid-3 was not found in ES either — just not in tracked
       expect(result.all['uuid-3']).toBeUndefined();
+      expect(result.orphanedAlertUuids).toEqual([]);
 
       expect(logger.warn).toHaveBeenCalledWith(
         expect.stringContaining('Found 3 alerts in task state'),

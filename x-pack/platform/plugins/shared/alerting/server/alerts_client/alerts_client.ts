@@ -11,6 +11,7 @@ import {
   ALERT_UUID,
   ALERT_INSTANCE_ID,
   ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_RULE_UUID,
   ALERT_SCHEDULED_ACTION_GROUP,
   ALERT_SCHEDULED_ACTION_DATE,
   ALERT_SCHEDULED_ACTION_THROTTLING,
@@ -75,6 +76,7 @@ import {
   filterMaintenanceWindowsIds,
 } from '../task_runner/maintenance_windows';
 import { ErrorWithType } from '../lib/error_with_type';
+import { getUntrackUpdatePainlessScript } from '../lib/untrack_alert_script';
 import { DEFAULT_MAX_ALERTS } from '../config';
 import { RUNTIME_MAINTENANCE_WINDOW_ID_FIELD } from './lib/get_summarized_alerts_query';
 import { retryTransientEsErrors } from '../lib/retry_transient_es_errors';
@@ -181,6 +183,50 @@ export class AlertsClient<
         );
         throw err;
       }
+
+      await this.untrackOrphanedAlerts(this.trackedAlerts.orphanedAlertUuids);
+    }
+  }
+
+  // Documents whose uuid getTrackedAlerts could not match to task state are orphans left
+  // behind by a prior AAD/task-state divergence. Untracking them here means the framework
+  // does not have to guess which document is live for an instance id (#283590), and it makes
+  // untracked documents self-cleaning: once untracked they drop out of every tracked-alerts
+  // query and can never be re-selected. Best-effort - a failure here should not block the run.
+  private async untrackOrphanedAlerts(orphanedAlertUuids: string[]): Promise<void> {
+    if (orphanedAlertUuids.length === 0) {
+      return;
+    }
+
+    try {
+      const esClient = await this.options.elasticsearchClientPromise;
+      // Must match the index expression `search` reads from, otherwise an orphan living in an
+      // index the alias no longer covers would be re-detected and re-logged on every run
+      // without ever being updated.
+      const index = this.isUsingDataStreams()
+        ? this.indexTemplateAndPattern.alias
+        : this.indexTemplateAndPattern.pattern;
+      await esClient.updateByQuery({
+        index,
+        allow_no_indices: true,
+        ignore_unavailable: true,
+        conflicts: 'proceed',
+        script: {
+          source: getUntrackUpdatePainlessScript(new Date()),
+          lang: 'painless',
+        },
+        query: {
+          bool: {
+            must: [{ term: { [ALERT_RULE_UUID]: this.options.rule.id } }],
+            filter: [{ ids: { values: orphanedAlertUuids } }],
+          },
+        },
+      });
+    } catch (err) {
+      this.options.logger.error(
+        `Error untracking ${orphanedAlertUuids.length} orphaned alerts ${this.ruleInfoMessage} - ${err.message}`,
+        this.logTags
+      );
     }
   }
 
