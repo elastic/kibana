@@ -22,6 +22,7 @@ import {
   getLayerListRaw,
   getMapBuffer,
   getMapCenter,
+  getMapInitError,
   getMapReady,
   getMapZoom,
   isMapLoading,
@@ -110,6 +111,7 @@ export function initializeReduxSync({
     state.openTOCDetails ?? getOpenTOCDetails(store.getState())
   );
   const dataLoading$ = new BehaviorSubject<boolean | undefined>(undefined);
+  const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
 
   const unsubscribeFromStore = store.subscribe(() => {
     if (!getMapReady(store.getState())) {
@@ -138,6 +140,13 @@ export function initializeReduxSync({
     const nextIsMapLoading = isMapLoading(store.getState());
     if (nextIsMapLoading !== dataLoading$.value) {
       dataLoading$.next(nextIsMapLoading);
+    }
+
+    const nextMapInitError = getMapInitError(store.getState());
+    if (nextMapInitError && !blockingError$.value) {
+      blockingError$.next(new Error(nextMapInitError));
+    } else if (!nextMapInitError && !blockingError$.value) {
+      blockingError$.next(undefined);
     }
   });
 
@@ -203,6 +212,7 @@ export function initializeReduxSync({
       unsubscribeFromStore();
     },
     api: {
+      blockingError$,
       dataLoading$,
       filters$,
       getInspectorAdapters: () => {
