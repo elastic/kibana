@@ -193,7 +193,7 @@ export const ALERT_TAGS_CHANGED_TRIGGER_DOCUMENTATION_DETAILS = i18n.translate(
   'xpack.securitySolution.workflows.triggers.alertTagsChanged.documentation.details',
   {
     defaultMessage:
-      'Emitted after tags are added or removed from a batch of detection alerts. The payload includes event.alertIds, event.tagsToAdd, and event.tagsToRemove.',
+      'Emitted after tags are added or removed from a batch of detection alerts. The payload includes event.alertIds, event.tagsToAdd, event.tagsToRemove, and event.truncated (true when more than 10,000 alerts were affected).',
   }
 );
 
@@ -213,7 +213,7 @@ export const ALERT_ASSIGNEES_CHANGED_TRIGGER_DOCUMENTATION_DETAILS = i18n.transl
   'xpack.securitySolution.workflows.triggers.alertAssigneesChanged.documentation.details',
   {
     defaultMessage:
-      'Emitted after assignees are added or removed from a batch of detection alerts. The payload includes event.alertIds, event.assigneesToAdd, and event.assigneesToRemove.',
+      'Emitted after assignees are added or removed from a batch of detection alerts. The payload includes event.alertIds, event.assigneesToAdd, event.assigneesToRemove, and event.truncated (true when more than 10,000 alerts were affected).',
   }
 );
 
@@ -255,7 +255,7 @@ export const ATTACK_TAGS_CHANGED_TRIGGER_DOCUMENTATION_DETAILS = i18n.translate(
   'xpack.securitySolution.workflows.triggers.attackTagsChanged.documentation.details',
   {
     defaultMessage:
-      'Emitted after tags are added or removed from a batch of attack discoveries. The payload includes event.attackIds, event.tagsToAdd, and event.tagsToRemove.',
+      'Emitted after tags are added or removed from a batch of attack discoveries. The payload includes event.attackIds, event.tagsToAdd, event.tagsToRemove, and event.truncated (true when more than 10,000 attack discoveries were affected).',
   }
 );
 
@@ -275,7 +275,7 @@ export const ATTACK_ASSIGNEES_CHANGED_TRIGGER_DOCUMENTATION_DETAILS = i18n.trans
   'xpack.securitySolution.workflows.triggers.attackAssigneesChanged.documentation.details',
   {
     defaultMessage:
-      'Emitted after assignees are added or removed from a batch of attack discoveries. The payload includes event.attackIds, event.assigneesToAdd, and event.assigneesToRemove.',
+      'Emitted after assignees are added or removed from a batch of attack discoveries. The payload includes event.attackIds, event.assigneesToAdd, event.assigneesToRemove, and event.truncated (true when more than 10,000 attack discoveries were affected).',
   }
 );
 

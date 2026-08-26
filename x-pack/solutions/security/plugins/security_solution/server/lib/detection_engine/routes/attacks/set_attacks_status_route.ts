@@ -152,7 +152,7 @@ export const setAttacksStatusRoute = (
                   attackIds: filteredAttackIds.slice(0, MAX_ALERTS_PER_TRIGGER),
                   status,
                   previousStatuses: filteredPreviousStatuses.slice(0, MAX_ALERTS_PER_TRIGGER),
-                  truncated: filteredAttackIds.length > MAX_ALERTS_PER_TRIGGER,
+                  truncated: ids.length > MAX_ALERTS_PER_TRIGGER,
                 });
               }
               return result;
@@ -173,7 +173,7 @@ export const setAttacksStatusRoute = (
               params: {
                 query: { bool: { filter: { terms: { _id: ids } } } },
                 _source: [ALERT_ATTACK_DISCOVERY_ALERT_IDS, ALERT_WORKFLOW_STATUS],
-                size: ids.length,
+                size: Math.min(ids.length, MAX_ALERTS_PER_TRIGGER),
               },
             });
 
@@ -224,17 +224,27 @@ export const setAttacksStatusRoute = (
               reason: closingReason.reason,
             });
 
-            void eventBus?.emitAttackStatusChanged(request, {
-              attackIds: verifiedAttackIds.slice(0, MAX_ALERTS_PER_TRIGGER),
-              status,
-              previousStatuses: attackPreviousStatuses.slice(0, MAX_ALERTS_PER_TRIGGER),
-              truncated: verifiedAttackIds.length > MAX_ALERTS_PER_TRIGGER,
-            });
-            if (relatedAlertIds.length > 0) {
-              void eventBus?.emitAlertStatusChanged(request, {
-                alertIds: relatedAlertIds.slice(0, MAX_ALERTS_PER_TRIGGER),
+            const changingAttacks = attackPreviousStatuses.filter(
+              (ps) => ps.previousStatus !== status
+            );
+            const changingAttackIds = changingAttacks.map((ps) => ps.id);
+            if (changingAttackIds.length > 0) {
+              void eventBus?.emitAttackStatusChanged(request, {
+                attackIds: changingAttackIds.slice(0, MAX_ALERTS_PER_TRIGGER),
                 status,
-                previousStatuses: relatedAlertPreviousStatuses.slice(0, MAX_ALERTS_PER_TRIGGER),
+                previousStatuses: changingAttacks.slice(0, MAX_ALERTS_PER_TRIGGER),
+                truncated: verifiedAttackIds.length > MAX_ALERTS_PER_TRIGGER,
+              });
+            }
+            const changingRelated = relatedAlertPreviousStatuses.filter(
+              (ps) => ps.previousStatus !== status
+            );
+            const changingRelatedIds = changingRelated.map((ps) => ps.id);
+            if (changingRelatedIds.length > 0) {
+              void eventBus?.emitAlertStatusChanged(request, {
+                alertIds: changingRelatedIds.slice(0, MAX_ALERTS_PER_TRIGGER),
+                status,
+                previousStatuses: changingRelated.slice(0, MAX_ALERTS_PER_TRIGGER),
                 truncated: relatedAlertIds.length > MAX_ALERTS_PER_TRIGGER,
               });
             }

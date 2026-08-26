@@ -116,7 +116,7 @@ export const setAttacksTagsRoute = (
               params: {
                 query: { bool: { filter: { terms: { _id: ids } } } },
                 _source: [ALERT_ATTACK_DISCOVERY_ALERT_IDS],
-                size: ids.length,
+                size: Math.min(ids.length, MAX_ALERTS_PER_TRIGGER),
               },
             });
 

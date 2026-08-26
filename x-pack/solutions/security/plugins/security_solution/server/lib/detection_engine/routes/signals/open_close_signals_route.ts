@@ -144,12 +144,15 @@ export const setSignalsStatusRoute = (
               reason,
             });
 
-            void eventBus?.emitAlertStatusChanged(request, {
-              alertIds: signalIds.slice(0, MAX_ALERTS_PER_TRIGGER),
-              status,
-              previousStatuses: previousStatuses.slice(0, MAX_ALERTS_PER_TRIGGER),
-              truncated: signalIds.length > MAX_ALERTS_PER_TRIGGER,
-            });
+            const changingSignals = previousStatuses.filter((ps) => ps.previousStatus !== status);
+            if (changingSignals.length > 0) {
+              void eventBus?.emitAlertStatusChanged(request, {
+                alertIds: changingSignals.map((ps) => ps.id).slice(0, MAX_ALERTS_PER_TRIGGER),
+                status,
+                previousStatuses: changingSignals.slice(0, MAX_ALERTS_PER_TRIGGER),
+                truncated: signalIds.length > MAX_ALERTS_PER_TRIGGER,
+              });
+            }
 
             return response.ok({ body });
           } else {
@@ -181,16 +184,11 @@ export const setSignalsStatusRoute = (
             // result to the underlying `_update_by_query`.
             const runtimeMappings = buildRuntimeMappingsFromFieldTypes(runtimeFields);
 
-            let prefetchedAlertIds: string[] = [];
             let previousStatuses: PreviousStatus[] = [];
             let truncated = false;
             if (eventBus) {
               try {
-                ({
-                  ids: prefetchedAlertIds,
-                  previousStatuses,
-                  truncated,
-                } = await prefetchPreviousStatusesByQuery(
+                ({ previousStatuses, truncated } = await prefetchPreviousStatusesByQuery(
                   esClient,
                   alertsIndex,
                   query,
@@ -212,11 +210,12 @@ export const setSignalsStatusRoute = (
               runtimeMappings
             );
 
-            if (prefetchedAlertIds.length > 0) {
+            const changingByQuery = previousStatuses.filter((ps) => ps.previousStatus !== status);
+            if (changingByQuery.length > 0) {
               void eventBus?.emitAlertStatusChanged(request, {
-                alertIds: prefetchedAlertIds,
+                alertIds: changingByQuery.map((ps) => ps.id),
                 status,
-                previousStatuses,
+                previousStatuses: changingByQuery,
                 truncated,
               });
             }

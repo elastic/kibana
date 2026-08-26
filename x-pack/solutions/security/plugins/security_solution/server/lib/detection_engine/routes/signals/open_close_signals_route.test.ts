@@ -309,6 +309,31 @@ describe('set signal status', () => {
     });
 
     describe('by-ids path', () => {
+      beforeEach(() => {
+        // prefetchPreviousStatusesByIds uses esClient.search internally
+        context.core.elasticsearch.client.asCurrentUser.search.mockResponse({
+          took: 1,
+          timed_out: false,
+          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+          hits: {
+            hits: [
+              {
+                _id: 'somefakeid1',
+                _index: '.siem-signals-default',
+                _source: { 'kibana.alert.workflow_status': 'open' },
+              },
+              {
+                _id: 'somefakeid2',
+                _index: '.siem-signals-default',
+                _source: { 'kibana.alert.workflow_status': 'open' },
+              },
+            ],
+            total: { value: 2, relation: 'eq' },
+            max_score: 0,
+          },
+        });
+      });
+
       test('emits alertStatusChanged with the updated ids and status', async () => {
         await server.inject(
           getSetSignalStatusByIdsRequest(),
@@ -323,6 +348,36 @@ describe('set signal status', () => {
             truncated: false,
           })
         );
+      });
+
+      test('does not emit when all signal ids already have the target status', async () => {
+        context.core.elasticsearch.client.asCurrentUser.search.mockResponse({
+          took: 1,
+          timed_out: false,
+          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+          hits: {
+            hits: [
+              {
+                _id: 'somefakeid1',
+                _index: '.siem-signals-default',
+                _source: { 'kibana.alert.workflow_status': 'closed' },
+              },
+              {
+                _id: 'somefakeid2',
+                _index: '.siem-signals-default',
+                _source: { 'kibana.alert.workflow_status': 'closed' },
+              },
+            ],
+            total: { value: 2, relation: 'eq' },
+            max_score: 0,
+          },
+        });
+        await server.inject(
+          getSetSignalStatusByIdsRequest(),
+          requestContextMock.convertContext(context)
+        );
+        await new Promise((r) => setTimeout(r, 0));
+        expect(mockEventBus.emitAlertStatusChanged).not.toHaveBeenCalled();
       });
     });
 
@@ -359,6 +414,31 @@ describe('set signal status', () => {
             status: 'closed',
           })
         );
+      });
+
+      test('does not emit when all query matches already have the target status', async () => {
+        context.core.elasticsearch.client.asCurrentUser.search.mockResponse({
+          took: 1,
+          timed_out: false,
+          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+          hits: {
+            hits: [
+              {
+                _id: 'query-alert-1',
+                _index: '.siem-signals-default',
+                _source: { 'kibana.alert.workflow_status': 'closed' },
+              },
+            ],
+            total: { value: 1, relation: 'eq' },
+            max_score: 0,
+          },
+        });
+        await server.inject(
+          getSetSignalStatusByQueryRequest(),
+          requestContextMock.convertContext(context)
+        );
+        await new Promise((r) => setTimeout(r, 0));
+        expect(mockEventBus.emitAlertStatusChanged).not.toHaveBeenCalled();
       });
 
       test('does not emit when prefetch fails', async () => {
