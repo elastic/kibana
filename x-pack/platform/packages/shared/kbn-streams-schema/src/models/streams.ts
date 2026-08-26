@@ -40,10 +40,13 @@ export namespace Streams {
 
 // Second, merged declaration holding the only runtime member, kept apart from the
 // `export import` aliases above so Babel does not mis-compile them (see note there).
+// Reference the imported bindings directly rather than the `ingest`/`GroupStream`
+// aliases: the aliases emit no runtime code, so inside this block's compiled IIFE
+// they are undefined, whereas the module imports are always in scope.
 export namespace Streams {
   export const all: ModelValidation<BaseStream.Model, all.Model> = joinValidation(BaseStream, [
-    ingest.all,
-    GroupStream,
+    IngestStream.all,
+    nGroupStream,
   ]);
 }
 
