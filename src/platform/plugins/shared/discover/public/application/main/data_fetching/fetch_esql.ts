@@ -29,7 +29,11 @@ import { getDocId, type DataTableRecord } from '@kbn/discover-utils';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import moment from 'moment';
 import type { ESQLColumnsWithHighlights } from '@kbn/esql-utils';
-import { getColumnsWithHighlights } from '@kbn/esql-utils';
+import {
+  getColumnsWithHighlights,
+  getMultiplierFromESQLQuery,
+  MAX_MULTIPLIED_ROWS,
+} from '@kbn/esql-utils';
 import type { RecordsFetchResponse } from '../../types';
 import type { ScopedProfilesManager } from '../../../context_awareness';
 
@@ -118,6 +122,32 @@ export function fetchEsql({
             const responseTime = moment().format('YYYY-MM-DD_HH_mm_ss');
             esqlQueryColumns = table?.columns ?? undefined;
             esqlHeaderWarning = table.warning ?? undefined;
+
+            const esqlString = 'esql' in query ? query.esql : '';
+            const multiplier = getMultiplierFromESQLQuery(esqlString);
+            const effectiveMultiplier =
+              multiplier > 1
+                ? Math.min(multiplier, Math.ceil(MAX_MULTIPLIED_ROWS / Math.max(rows.length, 1)))
+                : 1;
+            const expandedRows =
+              effectiveMultiplier > 1
+                ? Array.from({ length: effectiveMultiplier }, () =>
+                    rows.map((row) => structuredClone(row))
+                  ).flat()
+                : rows;
+
+            if (effectiveMultiplier > 1) {
+              expandedRows.forEach((row, idx) => {
+                row['@nr'] = idx + 1;
+              });
+              if (esqlQueryColumns && !esqlQueryColumns.some((c) => c.id === '@nr')) {
+                esqlQueryColumns = [
+                  { id: '@nr', name: '@nr', meta: { type: 'number' } },
+                  ...esqlQueryColumns,
+                ];
+              }
+            }
+
             let inlineHighlights: ESQLColumnsWithHighlights | undefined;
             if (isOfAggregateQueryType(query)) {
               try {
@@ -126,12 +156,17 @@ export function fetchEsql({
                 inlineHighlights = undefined;
               }
             }
-            finalData = rows.map((row, idx) => {
+            finalData = expandedRows.map((row, idx) => {
               const raw = Object.keys(inlineHighlights ?? {}).length
                 ? { ...row, inline_highlights: inlineHighlights }
                 : row;
               const record: DataTableRecord = {
-                id: row._index && row._id ? getDocId(row) : `${idx + 1}@${responseTime}`,
+                id:
+                  effectiveMultiplier > 1
+                    ? String(idx)
+                    : row._index && row._id
+                    ? getDocId(row)
+                    : `${idx + 1}@${responseTime}`,
                 raw,
                 flattened: row,
               };

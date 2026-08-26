@@ -166,6 +166,7 @@ export function DiscoverLayout() {
     columns: currentColumns,
     onAddColumn,
     onRemoveColumn,
+    onMoveColumn,
   } = useColumns({
     capabilities,
     defaultOrder: uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
@@ -425,6 +426,7 @@ export function DiscoverLayout() {
                 onChangeDataView={onChangeDataView}
                 onDataViewCreated={onDataViewCreated}
                 onFieldEdited={onFieldEdited}
+                onMoveField={onMoveColumn}
                 onRemoveField={onRemoveColumnWithTracking}
                 selectedDataView={dataView}
                 sidebarToggleState$={sidebarToggleState$}

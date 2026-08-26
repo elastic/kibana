@@ -33,6 +33,7 @@ export interface UnifiedDataTableAdditionalDisplaySettingsProps {
   lineCountInput: number | undefined;
   headerLineCountInput: number | undefined;
   densityControl?: React.ReactNode;
+  additionalContent?: React.ReactNode;
 }
 
 const defaultOnChangeSampleSize = () => {};
@@ -52,6 +53,7 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
   lineCountInput,
   headerLineCountInput,
   densityControl,
+  additionalContent,
 }) => {
   const [activeSampleSize, setActiveSampleSize] = useState<number | ''>(sampleSize);
   const minRangeSampleSize = Math.max(
@@ -161,6 +163,10 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
         lineCountInput={lineCountInput}
       />
     );
+  }
+
+  if (additionalContent) {
+    settings.push(additionalContent);
   }
 
   // We want horizontal line after "Sample size" only if there are more controls below

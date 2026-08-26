@@ -1,0 +1,83 @@
+{
+  "generatedAt": "2026-08-11T15:38:33.851Z",
+  "environment": {
+    "kibanaUrl": "http://localhost:5601",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "dataset": "ROW ... // 200x (1600 synthetic rows)"
+  },
+  "runs": [
+    {
+      "grid": "TanStackDataGrid",
+      "query": "ROW a=1,b=\"hello\",c=3.14,d=\"x\",e=\"y\",f=42,g=\"more\",h=\"data\" // 200x // TanStackGrid",
+      "renderMs": 8443,
+      "afterRender": {
+        "timestamp": 1786462697626,
+        "nodesCount": 7059,
+        "jsHeapUsedSize": 362357332,
+        "jsHeapTotalSize": 470708224,
+        "layoutCount": 321,
+        "styleRecalcCount": 334,
+        "scriptDuration": 2.935802,
+        "layoutDuration": 0.050964,
+        "taskDuration": 4.949958
+      },
+      "scroll": {
+        "nodesDelta": 5492,
+        "layoutDelta": 3,
+        "styleDelta": 3,
+        "heapDeltaBytes": 8233048,
+        "durationMs": 1242
+      },
+      "domInitial": {
+        "totalNodes": 964,
+        "rowCount": 29,
+        "cellCount": 87
+      },
+      "domAfterScroll": {
+        "totalNodes": 964,
+        "rowCount": 29,
+        "cellCount": 87
+      },
+      "longTasksRapidScroll": 38,
+      "heapUsedMb": 345.5708808898926
+    },
+    {
+      "grid": "UnifiedDataTable",
+      "query": "ROW a=1,b=\"hello\",c=3.14,d=\"x\",e=\"y\",f=42,g=\"more\",h=\"data\" // 200x // UnifiedDataTable",
+      "renderMs": 10452,
+      "afterRender": {
+        "timestamp": 1786462712070,
+        "nodesCount": 9518,
+        "jsHeapUsedSize": 386500716,
+        "jsHeapTotalSize": 458293248,
+        "layoutCount": 324,
+        "styleRecalcCount": 368,
+        "scriptDuration": 3.207068,
+        "layoutDuration": 0.052324,
+        "taskDuration": 6.275539
+      },
+      "scroll": {
+        "nodesDelta": 0,
+        "layoutDelta": 0,
+        "styleDelta": 0,
+        "heapDeltaBytes": 204676,
+        "durationMs": 1229
+      },
+      "domInitial": {
+        "totalNodes": 563,
+        "rowCount": 11,
+        "cellCount": 33
+      },
+      "domAfterScroll": {
+        "totalNodes": 563,
+        "rowCount": 11,
+        "cellCount": 33
+      },
+      "longTasksRapidScroll": 49,
+      "heapUsedMb": 368.5958061218262
+    }
+  ]
+}

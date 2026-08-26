@@ -160,7 +160,8 @@
     "@kbn/use-observable",
     "@kbn/core-security-server",
     "@kbn/core-http-server",
-    "@kbn/ui-callout"
+    "@kbn/ui-callout",
+    "@kbn/field-utils"
   ],
   "exclude": ["target/**/*"]
 }

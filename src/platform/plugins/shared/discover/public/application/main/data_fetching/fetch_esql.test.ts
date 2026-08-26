@@ -230,6 +230,55 @@ describe('fetchEsql', () => {
     );
   });
 
+  it('clones rows when query contains a multiplier comment', async () => {
+    const hits = [
+      { _id: '1', foo: 'bar' },
+      { _id: '2', foo: 'baz' },
+    ] as unknown as EsHitRecord[];
+    const expressionsExecuteSpy = jest.spyOn(discoverServiceMock.expressions, 'execute');
+    expressionsExecuteSpy.mockReturnValueOnce({
+      cancel: jest.fn(),
+      getData: jest.fn(() =>
+        of({
+          result: {
+            columns: ['_id', 'foo'],
+            rows: hits,
+          },
+        })
+      ),
+    } as unknown as ExecutionContract);
+    const result = await fetchEsql({
+      ...fetchEsqlMockProps,
+      query: { esql: 'FROM * | LIMIT 2 // 3x' },
+    });
+    expect(result.records).toHaveLength(6);
+    expect(result.records.map((r) => r.id)).toEqual(['0', '1', '2', '3', '4', '5']);
+    expect(result.records[0].raw).toEqual({ ...hits[0], '@nr': 1 });
+    expect(result.records[2].raw).toEqual({ ...hits[0], '@nr': 3 });
+    expect(result.records[4].raw).toEqual({ ...hits[0], '@nr': 5 });
+  });
+
+  it('does not clone rows when no multiplier comment is present', async () => {
+    const hits = [
+      { _id: '1', foo: 'bar' },
+      { _id: '2', foo: 'baz' },
+    ] as unknown as EsHitRecord[];
+    const expressionsExecuteSpy = jest.spyOn(discoverServiceMock.expressions, 'execute');
+    expressionsExecuteSpy.mockReturnValueOnce({
+      cancel: jest.fn(),
+      getData: jest.fn(() =>
+        of({
+          result: {
+            columns: ['_id', 'foo'],
+            rows: hits,
+          },
+        })
+      ),
+    } as unknown as ExecutionContract);
+    const result = await fetchEsql(fetchEsqlMockProps);
+    expect(result.records).toHaveLength(2);
+  });
+
   it('should add inline_highlights to the raw record when inline highlights are present', async () => {
     const hits = [
       { _index: 'i', _id: '1', snippets: '<em>bar</em>' },
