@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { errors } from '@elastic/elasticsearch';
-import type { DiagnosticResult } from '@elastic/elasticsearch';
 import { actionsClientMock, actionsMock } from '@kbn/actions-plugin/server/mocks';
 import type { ActionResult, ConnectorType } from '@kbn/actions-plugin/server';
 import type { Type } from '@kbn/config-schema';
@@ -86,21 +84,6 @@ const aiIndexItem: AiIndexHttpItem = {
 };
 
 const kiBackingIndex = '.ds-ai-index-ds-customer_support-2026.01.01-000001';
-
-const createNotFoundResponseError = () =>
-  new errors.ResponseError({
-    meta: {
-      aborted: false,
-      attempts: 1,
-      connection: null,
-      context: null,
-      name: 'document_missing_exception',
-      request: {} as unknown as DiagnosticResult['meta']['request'],
-    },
-    warnings: [],
-    body: 'document_missing_exception',
-    statusCode: 404,
-  });
 
 describe('ai indices routes', () => {
   let routes: Record<string, RegisteredRoute>;
