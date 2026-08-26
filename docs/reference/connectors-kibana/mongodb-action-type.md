@@ -20,7 +20,7 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 MongoDB connectors have the following configuration properties:
 
 Connection URI
-:   The MongoDB connection URI, without credentials. Supports `mongodb://` and `mongodb+srv://` schemes. Include the database name in the path (for example, `mongodb://hostname:27017/mydb`) to use it as the default for actions that omit a `database` input. Credentials are authenticated against the `admin` database by default; append `?authSource=<db>` to the URI to override.
+:   The MongoDB connection URI, without credentials. Supports `mongodb://` and `mongodb+srv://` schemes. Include the database name in the path (for example, `mongodb://hostname:27017/mydb`) to use it as the default for actions that omit a `database` input. Credentials are authenticated against the `admin` database by default; append `?authSource=yourDbName` to the URI to override.
 
 Username
 :   The username for MongoDB Basic authentication.

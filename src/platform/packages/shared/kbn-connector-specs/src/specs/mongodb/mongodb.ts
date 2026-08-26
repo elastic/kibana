@@ -218,7 +218,7 @@ export const MongoDBConnector: ConnectorSpec = {
               'Full MongoDB connection string. Supports mongodb:// and mongodb+srv:// schemes. ' +
               'Include the database name in the path (e.g. /mydb) to use it as the default for actions. ' +
               'Credentials are authenticated against the admin database by default; append ' +
-              '?authSource=<db> to override.',
+              '?authSource=yourDbName to override.',
           }),
           placeholder: 'mongodb://hostname:27017/mydb',
         }),
