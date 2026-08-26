@@ -12,7 +12,10 @@ import { STACK_MANAGEMENT_NAV_ID, DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-
 import { combineLatest, map, of } from 'rxjs';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
-import { getAlertingV2ManagementNavPanel } from '@kbn/alerting-v2-utils';
+import {
+  getAlertingV2AlertsNavPanel,
+  getAlertingV2ManagementNavPanel,
+} from '@kbn/alerting-v2-utils';
 import { getWorkflowsNavPanel } from '@kbn/deeplinks-workflows';
 import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
 import type { Location } from 'history';
@@ -91,10 +94,10 @@ function createNavTree({
           isEditingFromDashboard(location, pathNameSerialized, prepend),
       },
       ...getWorkflowsNavPanel(coreStart),
-      {
+      ...getAlertingV2AlertsNavPanel(coreStart, {
         link: 'observability-overview:alerts',
         icon: 'warning',
-      },
+      }),
       {
         link: 'observability-overview:cases',
         children: [
