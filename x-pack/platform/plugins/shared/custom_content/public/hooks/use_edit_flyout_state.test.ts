@@ -177,42 +177,6 @@ describe('useEditFlyoutState', () => {
       expect(mockOnRunPreview).toHaveBeenCalledWith('<html>prepared</html>');
     });
 
-    it('sets hasPreviewedCurrentDraft to true on success', async () => {
-      const { result } = renderHook(() => useEditFlyoutState(baseParams));
-      expect(result.current.hasPreviewedCurrentDraft).toBe(false);
-
-      await act(async () => {
-        await result.current.handleRender();
-      });
-
-      expect(result.current.hasPreviewedCurrentDraft).toBe(true);
-    });
-
-    it('resets hasPreviewedCurrentDraft when query is edited', async () => {
-      const { result } = renderHook(() => useEditFlyoutState(baseParams));
-
-      await act(async () => {
-        await result.current.handleRender();
-      });
-      expect(result.current.hasPreviewedCurrentDraft).toBe(true);
-
-      act(() => {
-        result.current.setDraftEsqlQuery('FROM other');
-      });
-      expect(result.current.hasPreviewedCurrentDraft).toBe(false);
-    });
-
-    it('does not set hasPreviewedCurrentDraft on render failure', async () => {
-      mockFetchEsqlData.mockRejectedValue(new Error('fetch failed'));
-      const { result } = renderHook(() => useEditFlyoutState(baseParams));
-
-      await act(async () => {
-        await result.current.handleRender();
-      });
-
-      expect(result.current.hasPreviewedCurrentDraft).toBe(false);
-    });
-
     it('skips fetch and uses draft template directly when no esql query', async () => {
       const { result } = renderHook(() =>
         useEditFlyoutState({ ...baseParams, esqlQuery: undefined })
@@ -260,7 +224,7 @@ describe('useEditFlyoutState', () => {
       expect(mockOnRunPreview).toHaveBeenCalledTimes(1);
     });
 
-    it('does not set hasPreviewedCurrentDraft or call onRunPreview when the draft changed mid-flight', async () => {
+    it('does not call onRunPreview when the draft changed mid-flight', async () => {
       let resolveRender!: () => void;
       mockFetchEsqlData.mockReturnValue(
         new Promise((resolve) => {
@@ -278,14 +242,12 @@ describe('useEditFlyoutState', () => {
       act(() => {
         result.current.setDraftEsqlQuery('FROM logs | LIMIT 5');
       });
-      expect(result.current.hasPreviewedCurrentDraft).toBe(false);
 
       await act(async () => {
         resolveRender();
       });
 
       expect(result.current.isRenderLoading).toBe(false);
-      expect(result.current.hasPreviewedCurrentDraft).toBe(false);
       expect(mockOnRunPreview).not.toHaveBeenCalled();
     });
 

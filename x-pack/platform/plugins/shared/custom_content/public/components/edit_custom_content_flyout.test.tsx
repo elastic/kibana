@@ -50,7 +50,6 @@ const baseFlyoutState = {
   esqlDataError: null,
   handleFetchData: jest.fn(),
   isRenderLoading: false,
-  hasPreviewedCurrentDraft: false,
   handleRender: jest.fn(),
 };
 
@@ -140,7 +139,13 @@ describe('EditCustomContentFlyout', () => {
   });
 
   describe('Run Preview', () => {
-    it('is disabled when nothing has been edited', () => {
+    it('is disabled when the template is empty', () => {
+      mockUseEditFlyoutState.mockReturnValue({ ...baseFlyoutState, draftTemplate: '   ' });
+      render(<EditCustomContentFlyout {...defaultProps} />);
+      expect(screen.getByRole('button', { name: 'Run preview' })).toBeDisabled();
+    });
+
+    it('is enabled whenever there is a template, even with no unsaved edits', () => {
       mockUseEditFlyoutState.mockReturnValue({
         ...baseFlyoutState,
         draftEsqlQuery: 'FROM logs',
@@ -149,32 +154,16 @@ describe('EditCustomContentFlyout', () => {
       render(
         <EditCustomContentFlyout {...defaultProps} esqlQuery="FROM logs" template="<p>hi</p>" />
       );
-      expect(screen.getByRole('button', { name: 'Run Preview' })).toBeDisabled();
+      expect(screen.getByRole('button', { name: 'Run preview' })).not.toBeDisabled();
     });
 
-    it('is enabled when the query differs from the saved value', () => {
-      mockUseEditFlyoutState.mockReturnValue({ ...baseFlyoutState, draftEsqlQuery: 'FROM other' });
-      render(<EditCustomContentFlyout {...defaultProps} esqlQuery="FROM logs" />);
-      expect(screen.getByRole('button', { name: 'Run Preview' })).not.toBeDisabled();
-    });
-
-    it('is enabled when the template differs from the saved value', () => {
+    it('is enabled when the draft differs from the saved value', () => {
       mockUseEditFlyoutState.mockReturnValue({
         ...baseFlyoutState,
         draftTemplate: '<p>edited</p>',
       });
       render(<EditCustomContentFlyout {...defaultProps} template="<p>hi</p>" />);
-      expect(screen.getByRole('button', { name: 'Run Preview' })).not.toBeDisabled();
-    });
-
-    it('is disabled after preview has been applied to the current draft', () => {
-      mockUseEditFlyoutState.mockReturnValue({
-        ...baseFlyoutState,
-        draftEsqlQuery: 'FROM other',
-        hasPreviewedCurrentDraft: true,
-      });
-      render(<EditCustomContentFlyout {...defaultProps} esqlQuery="FROM logs" />);
-      expect(screen.getByRole('button', { name: 'Run Preview' })).toBeDisabled();
+      expect(screen.getByRole('button', { name: 'Run preview' })).not.toBeDisabled();
     });
 
     it('calls handleRender when clicked', async () => {
@@ -182,11 +171,12 @@ describe('EditCustomContentFlyout', () => {
       mockUseEditFlyoutState.mockReturnValue({
         ...baseFlyoutState,
         draftEsqlQuery: 'FROM logs',
+        draftTemplate: '<p>hi</p>',
         handleRender,
       });
       render(<EditCustomContentFlyout {...defaultProps} esqlQuery="FROM other" />);
 
-      await userEvent.click(screen.getByRole('button', { name: 'Run Preview' }));
+      await userEvent.click(screen.getByRole('button', { name: 'Run preview' }));
 
       expect(handleRender).toHaveBeenCalled();
     });

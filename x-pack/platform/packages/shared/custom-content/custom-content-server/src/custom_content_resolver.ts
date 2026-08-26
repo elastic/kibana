@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import { MessageRole } from '@kbn/inference-common';
 import type { ModelProvider } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
@@ -45,6 +46,38 @@ LIQUID SYNTAX:
 import { sanitizeCellValue } from './sanitize_cell_value';
 
 const SAMPLE_ROW_COUNT = 3;
+
+const getEsErrorReason = (error: unknown): string => {
+  const reason = (error as { body?: { error?: { reason?: string } } })?.body?.error?.reason;
+  return reason ?? (error instanceof Error ? error.message : String(error));
+};
+
+/**
+ * Turns a failed schema sample into the message reported back to the caller.
+ *
+ * Sampling is the only source of the real column names, so a template generated after it fails is
+ * built on invented columns no matter why it failed. Persisting that produces a panel that renders
+ * broken with no explanation, which is worse than a reported failure the caller can retry — so
+ * every cause fails, and the message distinguishes them so the agent does not act on the wrong one.
+ *
+ * ES|QL reports a missing index as `verification_exception` rather than a 404, so that type covers
+ * both bad syntax and unknown indices.
+ */
+const describeSamplingFailure = (error: unknown): string => {
+  const reason = getEsErrorReason(error);
+  const type =
+    error instanceof errors.ResponseError
+      ? (error.body as { error?: { type?: string } } | undefined)?.error?.type
+      : undefined;
+
+  if (type === 'verification_exception' || type === 'parsing_exception') {
+    return `ES|QL query is invalid: ${reason}. Build the query with the generate_esql tool instead of writing it directly, then retry.`;
+  }
+  if (type === 'security_exception') {
+    return `No access to the index targeted by this ES|QL query: ${reason}. Use an index the current user can read.`;
+  }
+  return `Could not sample the ES|QL query schema: ${reason}. This is likely transient — retry the operation.`;
+};
 
 function formatSampleTable(columns: Array<{ name: string }>, rows: unknown[][]): string {
   const header = columns.map((c) => sanitizeCellValue(c.name)).join(' | ');
@@ -136,7 +169,8 @@ export const createCustomContentTemplateResolver = ({
         columns = (result.columns ?? []) as Array<{ name: string; type: string }>;
         values = (result.values ?? []) as unknown[][];
       } catch (err) {
-        logger.debug(`custom_content template resolver: ES|QL sample fetch failed — ${err}`);
+        logger.warn(`custom_content template resolver: ES|QL sample fetch failed — ${err}`);
+        throw new Error(describeSamplingFailure(err));
       }
     }
 

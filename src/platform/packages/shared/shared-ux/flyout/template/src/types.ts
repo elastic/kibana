@@ -77,6 +77,11 @@ export type FlyoutTemplateProps = Pick<
   | 'historyKey'
   | 'onActive'
   | 'flyoutMenuProps'
+  | 'id'
+  | 'hasChildBackground'
+  | 'outsideClickCloses'
+  | 'focusTrapProps'
+  | 'closeButtonProps'
 > & {
   'aria-label'?: EuiFlyoutProps['aria-label'];
   'aria-labelledby'?: EuiFlyoutProps['aria-labelledby'];
