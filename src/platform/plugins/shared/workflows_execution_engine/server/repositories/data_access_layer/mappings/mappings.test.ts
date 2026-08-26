@@ -7,10 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
-  WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,
-} from './mappings';
+import { WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS } from './step_executions_mappings';
+import { WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS } from './workflow_executions_mappings';
 
 // The workflow index mappings are read by the engine, the inbox
 // provider, telemetry, and any cross-workflow listing. Pinning them
@@ -32,7 +30,7 @@ describe('WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS', () => {
     // against this index. A `text` mapping or a sub-property would
     // break that — pin field type and position.
     const stepType = WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS.properties?.stepType;
-    expect(stepType).toEqual({ type: 'keyword' });
+    expect(stepType).toEqual({ type: 'keyword', ignore_above: 1024 });
   });
 
   it('nests the HITL audit envelope under `hitl` with the documented field types', () => {
@@ -48,9 +46,9 @@ describe('WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS', () => {
     expect(hitl).toBeDefined();
     expect(hitl?.type).toBe('object');
     expect(hitl?.properties).toEqual({
-      respondedBy: { type: 'keyword' },
+      respondedBy: { type: 'keyword', ignore_above: 1024 },
       respondedAt: { type: 'date' },
-      channel: { type: 'keyword' },
+      channel: { type: 'keyword', ignore_above: 1024 },
     });
   });
 
@@ -59,12 +57,12 @@ describe('WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS', () => {
     // expectations deliberately when a core field's type or presence
     // is intentionally changed.
     const properties = WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS.properties ?? {};
-    expect(properties.spaceId).toEqual({ type: 'keyword' });
-    expect(properties.id).toEqual({ type: 'keyword' });
-    expect(properties.stepId).toEqual({ type: 'keyword' });
-    expect(properties.workflowRunId).toEqual({ type: 'keyword' });
-    expect(properties.workflowId).toEqual({ type: 'keyword' });
-    expect(properties.status).toEqual({ type: 'keyword' });
+    expect(properties.spaceId).toEqual({ type: 'keyword', ignore_above: 1024 });
+    expect(properties.id).toEqual({ type: 'keyword', ignore_above: 1024 });
+    expect(properties.stepId).toEqual({ type: 'keyword', ignore_above: 1024 });
+    expect(properties.workflowRunId).toEqual({ type: 'keyword', ignore_above: 1024 });
+    expect(properties.workflowId).toEqual({ type: 'keyword', ignore_above: 1024 });
+    expect(properties.status).toEqual({ type: 'keyword', ignore_above: 1024 });
     expect(properties.isTestRun).toEqual({ type: 'boolean' });
     expect(properties.startedAt).toEqual({ type: 'date' });
     expect(properties.finishedAt).toEqual({ type: 'date' });
@@ -75,6 +73,7 @@ describe('WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS', () => {
     const properties = WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS.properties ?? {};
     expect(properties.usage).toEqual({
       type: 'object',
+      dynamic: false,
       properties: {
         inputTokens: { type: 'long' },
         outputTokens: { type: 'long' },
@@ -92,13 +91,18 @@ describe('WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS', () => {
     // edits that would otherwise pass through this file's review.
     expect(WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS.dynamic).toBe(false);
     const properties = WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS.properties ?? {};
-    expect(properties.spaceId).toEqual({ type: 'keyword' });
-    expect(properties.workflowId).toEqual({ type: 'keyword' });
-    expect(properties.status).toEqual({ type: 'keyword' });
-    expect(properties.createdBy).toEqual({ type: 'keyword' });
-    expect(properties.executedBy).toEqual({ type: 'keyword' });
-    expect(properties.triggeredBy).toEqual({ type: 'keyword' });
-    expect(properties.workflowDefinition).toEqual({ type: 'object', enabled: false });
+    expect(properties.spaceId).toEqual({ type: 'keyword', ignore_above: 1024 });
+    expect(properties.workflowId).toEqual({ type: 'keyword', ignore_above: 1024 });
+    expect(properties.status).toEqual({ type: 'keyword', ignore_above: 1024 });
+    expect(properties.createdBy).toEqual({ type: 'keyword', ignore_above: 1024 });
+    expect(properties.executedBy).toEqual({ type: 'keyword', ignore_above: 1024 });
+    expect(properties.triggeredBy).toEqual({ type: 'keyword', ignore_above: 1024 });
+    expect(properties.workflowDefinition).toEqual({
+      type: 'object',
+      dynamic: false,
+      enabled: false,
+      properties: {},
+    });
     expect(properties.version).toEqual({ type: 'long' });
   });
 
@@ -109,13 +113,14 @@ describe('WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS', () => {
     // pins that decision so a future contributor doesn't accidentally
     // duplicate the envelope here.
     const properties = WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS.properties ?? {};
-    expect(properties.hitl).toBeUndefined();
+    expect((properties as Record<string, unknown>).hitl).toBeUndefined();
   });
 
   it('indexes aggregate and per-step token usage fields', () => {
     const properties = WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS.properties ?? {};
     expect(properties.usage).toEqual({
       type: 'object',
+      dynamic: false,
       properties: {
         inputTokens: { type: 'long' },
         outputTokens: { type: 'long' },
@@ -126,8 +131,8 @@ describe('WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS', () => {
     expect(properties.stepUsage).toEqual({
       type: 'nested',
       properties: {
-        stepId: { type: 'keyword' },
-        connectorId: { type: 'keyword' },
+        stepId: { type: 'keyword', ignore_above: 1024 },
+        connectorId: { type: 'keyword', ignore_above: 1024 },
         inputTokens: { type: 'long' },
         outputTokens: { type: 'long' },
         cachedTokens: { type: 'long' },
