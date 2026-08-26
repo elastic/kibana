@@ -45,24 +45,86 @@ describe('Schema', () => {
   });
 
   describe('settingsSchema', () => {
-    it('requires preventCrossProjectSearch', () => {
-      const result = settingsSchema.decode({
-        syncDelay: '1m',
-        frequency: '1m',
-        preventInitialBackfill: false,
-        // preventCrossProjectSearch intentionally absent
-      });
-      expect(isLeft(result)).toBe(true);
+    const requiredSettings = {
+      syncDelay: '1m',
+      frequency: '1m',
+      preventInitialBackfill: false,
+    };
+
+    it('decodes when preventCrossProjectSearch is absent', () => {
+      const result = settingsSchema.decode(requiredSettings);
+      expect(isRight(result)).toBe(true);
     });
 
     it('decodes when preventCrossProjectSearch is present', () => {
       const result = settingsSchema.decode({
-        syncDelay: '1m',
-        frequency: '1m',
-        preventInitialBackfill: false,
+        ...requiredSettings,
         preventCrossProjectSearch: false,
       });
       expect(isRight(result)).toBe(true);
+    });
+
+    it('decodes a valid projectRoutings string', () => {
+      const result = settingsSchema.decode({
+        ...requiredSettings,
+        projectRoutings: '_alias:_origin',
+      });
+      expect(isRight(result)).toBe(true);
+      if (isRight(result)) {
+        expect(result.right.projectRoutings).toBe('_alias:_origin');
+      }
+    });
+
+    it('decodes when projectRoutings is omitted', () => {
+      const result = settingsSchema.decode(requiredSettings);
+      expect(isRight(result)).toBe(true);
+      if (isRight(result)) {
+        expect(result.right.projectRoutings).toBeUndefined();
+      }
+    });
+
+    it('decodes when projectRoutings is null', () => {
+      const result = settingsSchema.decode({
+        ...requiredSettings,
+        projectRoutings: null,
+      });
+      expect(isRight(result)).toBe(true);
+      if (isRight(result)) {
+        expect(result.right.projectRoutings).toBeNull();
+      }
+    });
+
+    it('decodes projectRoutings of exactly 8192 characters', () => {
+      const result = settingsSchema.decode({
+        ...requiredSettings,
+        projectRoutings: 'x'.repeat(8192),
+      });
+      expect(isRight(result)).toBe(true);
+    });
+
+    it('rejects projectRoutings longer than 8192 characters', () => {
+      const result = settingsSchema.decode({
+        ...requiredSettings,
+        preventCrossProjectSearch: false,
+        projectRoutings: 'x'.repeat(8193),
+      });
+      expect(isLeft(result)).toBe(true);
+    });
+
+    it('rejects empty string projectRoutings', () => {
+      const result = settingsSchema.decode({
+        ...requiredSettings,
+        projectRoutings: '',
+      });
+      expect(isLeft(result)).toBe(true);
+    });
+
+    it('rejects whitespace-only projectRoutings', () => {
+      const result = settingsSchema.decode({
+        ...requiredSettings,
+        projectRoutings: '   ',
+      });
+      expect(isLeft(result)).toBe(true);
     });
   });
 
@@ -78,6 +140,50 @@ describe('Schema', () => {
     it('decodes when preventCrossProjectSearch is present', () => {
       const result = optionalSettingsSchema.decode({ preventCrossProjectSearch: true });
       expect(isRight(result)).toBe(true);
+    });
+
+    it('decodes a valid projectRoutings string', () => {
+      const result = optionalSettingsSchema.decode({ projectRoutings: '_alias:*' });
+      expect(isRight(result)).toBe(true);
+      if (isRight(result)) {
+        expect(result.right.projectRoutings).toBe('_alias:*');
+      }
+    });
+
+    it('decodes when projectRoutings is omitted', () => {
+      const result = optionalSettingsSchema.decode({});
+      expect(isRight(result)).toBe(true);
+      if (isRight(result)) {
+        expect(result.right.projectRoutings).toBeUndefined();
+      }
+    });
+
+    it('decodes when projectRoutings is null', () => {
+      const result = optionalSettingsSchema.decode({ projectRoutings: null });
+      expect(isRight(result)).toBe(true);
+      if (isRight(result)) {
+        expect(result.right.projectRoutings).toBeNull();
+      }
+    });
+
+    it('decodes projectRoutings of exactly 8192 characters', () => {
+      const result = optionalSettingsSchema.decode({ projectRoutings: 'x'.repeat(8192) });
+      expect(isRight(result)).toBe(true);
+    });
+
+    it('rejects projectRoutings longer than 8192 characters', () => {
+      const result = optionalSettingsSchema.decode({ projectRoutings: 'x'.repeat(8193) });
+      expect(isLeft(result)).toBe(true);
+    });
+
+    it('rejects empty string projectRoutings', () => {
+      const result = optionalSettingsSchema.decode({ projectRoutings: '' });
+      expect(isLeft(result)).toBe(true);
+    });
+
+    it('rejects whitespace-only projectRoutings', () => {
+      const result = optionalSettingsSchema.decode({ projectRoutings: '   ' });
+      expect(isLeft(result)).toBe(true);
     });
   });
 });

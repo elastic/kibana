@@ -20,6 +20,8 @@ This is a **custom connector** that talks to the UniFi Network and UniFi Protect
 
 You configure the console URL and an API key when creating the connector; every action then runs under that key's account and permissions.
 
+All [UniFi actions](#unifi-available-actions), across both UniFi Network and UniFi Protect, are available as a tool for Agent Builder agents and as a sub-action on a UniFi workflow step.
+
 The two APIs do not share conventions beyond authentication and host. UniFi Network is site-scoped and paginated: list actions accept `offset`, `limit`, and `filter`, and return an envelope of `offset`, `limit`, `count`, `totalCount`, and `data`. UniFi Protect is console-scoped and unpaginated: list actions return a plain array.
 
 ## Create connectors in {{kib}} [define-unifi-ui]
