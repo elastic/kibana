@@ -23,6 +23,8 @@ interface NpreExpressionResponse {
 export interface INpreClient {
   /**
    * Retrieves a project routing expression by name.
+   * Reads are performed as the Kibana internal user so that users without the
+   * `read_project_routing` cluster privilege can still resolve NPREs.
    * @param expressionName the name of the expression to retrieve.
    */
   getNpre(expressionName: string): Promise<ProjectRouting | undefined>;
@@ -65,7 +67,7 @@ export class NpreClient implements INpreClient {
     this.logger.debug(`Getting NPRE for expression: ${expressionName}`);
 
     return this.getClient()
-      .asCurrentUser.transport.request<NpreExpressionResponse>({
+      .asInternalUser.transport.request<NpreExpressionResponse>({
         method: 'GET',
         path: `/_project_routing/${expressionName}`,
       })

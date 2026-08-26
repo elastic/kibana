@@ -17,12 +17,16 @@ jest.mock('../../application/breadcrumb_context', () => ({
 
 jest.mock('@kbn/core-di-browser', () => ({
   useService: (token: unknown) => {
-    if (token === 'chrome') {
-      return { docTitle: { change: jest.fn() } };
-    }
-    return {};
+    const services: Record<string, unknown> = {
+      chrome: { docTitle: { change: jest.fn() } },
+    };
+    return services[token as string] ?? {};
   },
   CoreStart: (key: string) => key,
+}));
+
+jest.mock('./rule_library_list', () => ({
+  RuleLibraryList: () => <div data-test-subj="mockedRuleLibraryList" />,
 }));
 
 const renderPage = () =>
@@ -40,10 +44,9 @@ describe('RuleLibraryPage', () => {
     expect(screen.getByTestId('alertingV2ExperimentalBadge')).toBeInTheDocument();
   });
 
-  it('renders the empty-state placeholder', () => {
+  it('renders the rule library list', () => {
     renderPage();
 
-    expect(screen.getByTestId('ruleLibraryEmptyPrompt')).toBeInTheDocument();
-    expect(screen.getByText('No rule templates')).toBeInTheDocument();
+    expect(screen.getByTestId('mockedRuleLibraryList')).toBeInTheDocument();
   });
 });

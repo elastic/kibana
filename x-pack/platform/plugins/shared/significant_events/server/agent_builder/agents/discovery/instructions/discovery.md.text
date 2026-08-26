@@ -130,7 +130,7 @@ Example: platform_core_execute_esql (onset verification during grounding)
 
 Example: platform_sig_events_events_write — new event (omit `event_id`; handler deduplicates), continuation (include `event_id`)
 
-Valid (new event omits `event_id`; continuation includes it):
+Request:
 ```json
 {
   "items": [
@@ -148,10 +148,10 @@ Valid (new event omits `event_id`; continuation includes it):
         ...
       ],
       "blast_radius": [
-        { "type": "dependency", "feature_id": "...", "source": "...", "target": "...", "protocol": "...", "stream_name": "..." },
+        { "type": "dependency", "subtype": "http", "feature_id": "...", "source": "...", "target": "...", "protocol": "...", "stream_name": "..." },
         ...
       ],
-      "causal_features": [{ "feature_id": "..", "name": "...", "stream_name": "..." }, ...]
+      "causal_features": [{ "feature_id": "..", "type": "entity", "subtype": "service", "name": "...", "stream_name": "..." }, ...]
     }
   ]
 }
@@ -160,7 +160,7 @@ Same failure class as a prior `80-critical` open event: emit `80-critical`. The 
 
 Invalid (schema rejects; send the valid form instead): `{}`, `{ "items": [] }`.
 
-Response: `{ "results": [{ "index": 0, "event_id": "...", "written": true }] }`. A deduplicated entry returns `written: false, skipped: true, reason: "existing_active_event", existing_event_id: "..."`; a no-op continuation returns `written: false, skipped: true, reason: "unchanged_outcome", event_id: "..."`; an ES item failure returns `written: false, reason: "bulk_error"`.
+Response: `{ "results": [{ "index": 0, "event_id": "...", "written": true }] }`. A deduplicated entry returns `written: false, skipped: true, reason: "existing_active_event", existing_event_id: "..."`; a no-op continuation returns `written: false, skipped: true, reason: "unchanged_outcome", event_id: "..."`; an ES item failure returns `written: false, reason: "bulk_error"`. `unchanged_outcome` is a successful no-op, not a failure: the stored event already has the submitted status and severity, so no new version is written and the stored title and symptom hypothesis remain authoritative. Do not retry it.
 
 </tool_examples>
 
@@ -230,7 +230,7 @@ Example:
 
 <procedure>
 
-**Mandatory sequencing gate:** Complete grounding, routing, grouping, and status/severity decisions before emit output. Do not skip routing, grouping, status/severity decisions, or payload assembly. `platform_sig_events_events_write` is forbidden until the payload is complete; never invoke it to inspect the schema. If any required phase or field is incomplete, stop and do not invoke `platform_sig_events_events_write`.
+**Mandatory sequencing gate:** Complete grounding, routing, grouping, and status/severity decisions before emit output. Do not skip routing, grouping, status/severity decisions, or payload assembly. `platform_sig_events_events_write` is forbidden until validation passes; an empty or placeholder payload is invalid. Do not invoke it to inspect the schema — assemble a complete payload offline, then call once. If any required phase or field is incomplete, stop and do not invoke `platform_sig_events_events_write`.
 
 ### Step 1: Ground and verify
 
@@ -336,7 +336,7 @@ For each event candidate, decide from all signals that will appear in the final 
 4. **Calibrate `severity`** — read and apply the `severity` field description on `platform_sig_events_events_write` at emit time. Severity is a function of **confirmed grounding impact**, with rule `severity_score` as a supporting input when grounding confirms a matching failure class:
    - **Change-point metadata is not severity** — see `<critical_rules>` rule 7.
    - **Rule `severity_score` supports, never replaces, grounding** — when grounding confirms the rule's failure class, a high `severity_score` supports selecting the higher applicable tier from the field description; it cannot override absent, healthy, or contradictory grounding.
-   - **Confirmed impact sets the tier** — apply the ordered `severity` field decision on `platform_sig_events_events_write`. When grounding confirms the operation fails or is blocked on the verified path, take the matching tier from that field. Treat a blocked primary function with no fallback as `80-critical`; use `60-high` for a single scoped path only when other paths still serve the same operation. Unknown population reach adjusts `confidence` only — it does not lower the tier when the path is already confirmed failing. Do not default to a lower tier because topology is sparse, the component is internal, or the rule hypothesis was refuted.
+   - **Confirmed impact sets the tier** — apply the ordered `severity` field decision on `platform_sig_events_events_write`. When grounding confirms the operation fails or is blocked on the verified path, take the matching tier from that field (typically `60-high` for a single scoped path; `80-critical` only when a critical criterion there holds). New events follow that field-description decision. Same-class open continuations follow `<chronic_and_recurring>`: keep prior severity unless grounding shows reduced impact. Unknown population reach adjusts `confidence` only — it does not lower the tier when the path is already confirmed failing. Do not default to a lower tier because topology is sparse, the component is internal, or the rule hypothesis was refuted.
    - **Narrative hedging does not downgrade severity** — cautious wording in `summary` or signal descriptions ("some", "may", "possible", "not established") records uncertainty in `confidence` and `assessment_note`; it does not justify a lower `severity` when grounding already confirms the failure.
    - **Off-topic observed errors** — when a found row refutes the authored rule but contains a concrete non-benign error, `severity`, `title`, `symptom_hypothesis`, and `summary` must describe that observed error's mechanism and impact, not the refuted rule's symptom.
    - **Narrative must match the tier** — the assigned tier must be reflected in `symptom_hypothesis` and `summary`; do not use low-impact phrasing for a high-tier event.
@@ -363,13 +363,16 @@ Only after grounding, routing, grouping, and status/severity decisions:
    - Preserve each matched query KI's grounding `evidence` object. Emit verified healthy, positive, or non-confirming detections with `verdict: "refutes"`, and unrelated detections with `verdict: "off_topic"`.
 3. **Check before write.** Narratives, signals, status, severity, and topology must agree — a narrative may only claim what its signals and topology support. Off-topic errors get their own item with the source rule `verdict: "off_topic"` — never on two items. If any rule would appear twice, return to grouping and merge.
    For each `open` continuation: empty `blast_radius` with populated `causal_features` is invalid when grounding surfaced dependency paths — repair before calling the tool. Repair any other gap between the finalized topology and the payload before calling the tool.
-4. **Persist once.** Invoke `platform_sig_events_events_write` only after every item passes. Do not retry schema-validation failures. Retry only `bulk_error` items, once.
+4. **Persist once.** Invoke `platform_sig_events_events_write` only after every item passes. Do not retry schema-validation failures. Retry strategy by reason:
+   - `bulk_error`: retry the item once, unchanged.
+   - `unchanged_outcome`: treat the item as successfully processed. Copy the reason and `event_id`, do not retry, and include its detection rules in `written_rule_uuids`.
+   - All other failures: do not retry.
 
 Apply `<field_rules>`.
 
-Build structured `significant_events` from tool results — copy `event_uuid`, `event_id`, `status`, and `written` exactly.
+Build structured `significant_events` from tool results — copy `event_uuid`, `event_id`, `status`, `written`, and `reason` exactly. Include `narrative_preserved: true` when the tool result carries it (the server preserved the stored title and symptom_hypothesis because no new rules were introduced).
 
-Set `written_rule_uuids` from final results: include `rule_uuid` of every detection across all events where the outcome is `written: true` or `reason` is `"existing_active_event"` or `"unchanged_outcome"`. Exclude unresolved `bulk_error` items so their detections remain in the workflow queue.
+Set `written_rule_uuids` from final results: include `rule_uuid` of every detection across all events where the outcome is `written: true` or `reason` is `"existing_active_event"` or `"unchanged_outcome"`. Exclude `bulk_error` and `duplicate_in_batch` items that were not successfully retried.
 
 </procedure>
 

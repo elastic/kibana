@@ -179,7 +179,7 @@ node scripts/evals start \
 
 `evals start` detects the `eis-` prefix and enables EIS CCM on Scout automatically. If Scout is already running with a different `KIBANA_TESTING_AI_CONNECTORS` payload it is detected as stale and restarted with the new one.
 
-### 3) Run with a non-EIS connector (LiteLLM / kibana.dev.yml entries)
+### 3) Run with a non-EIS connector (OpenRouter / kibana.dev.yml entries)
 
 ```bash
 nvm use && EVAL_CONNECTOR_ID=<connector-id> \

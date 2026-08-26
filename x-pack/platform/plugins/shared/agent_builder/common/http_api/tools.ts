@@ -89,6 +89,7 @@ export interface WorkflowItem {
   id: string;
   name: string;
   description: string;
+  enabled: boolean;
 }
 
 export interface GetWorkflowResponse {
