@@ -1,7 +1,7 @@
 ---
 navigation_title: "Gmail"
 type: reference
-description: "Use the Gmail connector to search and read emails from Gmail."
+description: "Use the Gmail connector to search, read, label, and send emails in Gmail."
 applies_to:
   stack: preview 9.4
   serverless: preview
@@ -9,7 +9,7 @@ applies_to:
 
 # Gmail connector [gmail-action-type]
 
-The Gmail connector connects to the Gmail API and enables federated search of email. You configure a Bearer token (Google OAuth 2.0 access token) when creating the connector.
+The Gmail connector connects to the Gmail API and enables search, read, label, quarantine, and send operations on Gmail mailboxes.
 
 ## Create connectors in {{kib}} [define-gmail-ui]
 
@@ -17,10 +17,13 @@ You can create a Gmail connector in **{{stack-manage-app}} > {{connectors-ui}}**
 
 ### Connector configuration [gmail-connector-configuration]
 
-Gmail connectors use the following configuration:
+Gmail connectors support the following authentication types:
 
-Bearer Token
-:   A Google OAuth 2.0 access token with Gmail API scopes. See [Get API credentials](#gmail-api-credentials) for instructions.
+Elastic-managed authentication (recommended, read-only)
+:   Uses Elastic's managed Google OAuth integration. Grants `gmail.readonly` access only. **Write actions are not available** with this authentication type.
+
+OAuth 2.0 authorization code (required for write actions)
+:   Uses your own Google OAuth 2.0 app. Grants `gmail.modify` access, which covers reads, label changes, trash, and send. Required for `modifyLabels`, `trashMessage`, `untrashMessage`, `sendMessage`, `replyMessage`, `markAsRead`, and `markAsUnread`. See [Get API credentials](#gmail-api-credentials) for setup instructions.
 
 ## Test connectors [gmail-action-configuration]
 
@@ -28,16 +31,152 @@ You can test connectors when creating or editing the connector in {{kib}}. The t
 
 ## Available actions [gmail-available-actions]
 
-| Action | Description |
-|--------|-------------|
-| Search messages | Search for messages using Gmail search syntax. Parameters: `query` (optional), `maxResults` (optional, default 10, max 100), `pageToken` (optional). |
-| List messages | List message IDs, optionally filtered by label. Parameters: `maxResults` (optional, default 10, max 100), `pageToken` (optional), `labelIds` (optional, for example: INBOX, SENT). |
-| Get message | Retrieve a single message by ID. Parameters: `messageId` (required), `format` (optional: `minimal` for headers only, `full` for body and attachment metadata, `raw` for RFC 2822; default `minimal`). Use `full` to get attachment IDs in `payload.parts[].body.attachmentId`. |
-| Get attachment | Retrieve one attachment's content by message ID and attachment ID. Parameters: `messageId` (required), `attachmentId` (required). Get attachment IDs from get message with format `full`. Returns `data` (base64url-encoded content). |
+### Read
 
-**Search messages** supports Gmail search operators such as `from:`, `to:`, `subject:`, `is:unread`, `is:read`, `after:YYYY/MM/DD`, `newer_than:Nd`, and `has:attachment`. Prefer narrow queries to keep responses small.
+#### Search messages
 
-**Attachments:** Call get message with format `full` to receive `payload.parts` with `body.attachmentId` and `filename` for each attachment. Then call get attachment with that message ID and attachment ID to fetch the attachment content (base64url-encoded).
+Search for messages using Gmail search syntax.
+
+`query`
+:   (Optional) Gmail search query using operators such as `from:`, `to:`, `subject:`, `is:unread`, `after:YYYY/MM/DD`, `newer_than:Nd`. Prefer narrow queries to keep responses small.
+
+`maxResults`
+:   (Optional) Number of message IDs to return. Default 10, capped at 100.
+
+`pageToken`
+:   (Optional) Pagination cursor from a previous response.
+
+#### List messages
+
+List message IDs, optionally filtered by label.
+
+`maxResults`
+:   (Optional) Number of message IDs to return. Default 10, capped at 100.
+
+`pageToken`
+:   (Optional) Pagination cursor from a previous response.
+
+`labelIds`
+:   (Optional) Filter by label IDs, for example `["INBOX"]` or `["SENT"]`.
+
+#### Get message
+
+Retrieve a single message by ID.
+
+`messageId`
+:   (Required) Gmail message ID from `searchMessages` or `listMessages`.
+
+`format`
+:   (Optional) `minimal` for headers only (default), `full` for body and attachment metadata, `raw` for RFC 2822 format.
+
+#### Get attachment
+
+Retrieve an attachment by message ID and attachment ID. Call `getMessage` with `format: "full"` first to get attachment IDs from `payload.parts[].body.attachmentId`.
+
+`messageId`
+:   (Required) Gmail message ID.
+
+`attachmentId`
+:   (Required) Attachment ID from the message's `payload.parts[].body.attachmentId`.
+
+### Labels and read state
+
+#### List labels
+
+List all Gmail labels (system and user-created) with their IDs and names. Call this before `modifyLabels` to resolve a label name (for example, "Quarantine") to its ID.
+
+#### Mark as read
+
+Remove the `UNREAD` label from a message. Reversible with `markAsUnread`. Requires OAuth 2.0 authorization code auth.
+
+`messageId`
+:   (Required) Gmail message ID.
+
+#### Mark as unread
+
+Add the `UNREAD` label to a message. Reversible with `markAsRead`. Requires OAuth 2.0 authorization code auth.
+
+`messageId`
+:   (Required) Gmail message ID.
+
+#### Modify labels
+
+Add or remove labels on a message. The quarantine primitive: pass the quarantine label ID in `addLabelIds` and `["INBOX"]` in `removeLabelIds` to move a message out of the inbox. Requires OAuth 2.0 authorization code auth.
+
+`messageId`
+:   (Required) Gmail message ID.
+
+`addLabelIds`
+:   (Optional) Label IDs to add. Call `listLabels` to resolve a name to an ID.
+
+`removeLabelIds`
+:   (Optional) Label IDs to remove. At least one of `addLabelIds` or `removeLabelIds` is required.
+
+### Quarantine and rollback
+
+#### Trash message
+
+Move a message to Trash. Reversible with `untrashMessage` within 30 days. Requires OAuth 2.0 authorization code auth.
+
+`messageId`
+:   (Required) Gmail message ID.
+
+#### Untrash message
+
+Restore a message from Trash. Rolls back a `trashMessage` call. Only effective within 30 days of trashing. Requires OAuth 2.0 authorization code auth.
+
+`messageId`
+:   (Required) Gmail message ID.
+
+### Compose
+
+#### Send message
+
+Send an email from the authenticated user's Gmail account. Irreversible once accepted by the receiving mail server. Supports plain-text and HTML bodies, bare addr-spec recipients only, and no attachments in v1. Available in Workflows only. Requires OAuth 2.0 authorization code auth.
+
+`to`
+:   (Required) Recipient email addresses (bare addr-spec, for example `["user@example.com"]`).
+
+`subject`
+:   (Required) Email subject line.
+
+`body`
+:   (Required) Email body content.
+
+`bodyType`
+:   (Optional) `"text"` (default) or `"html"`.
+
+`cc`
+:   (Optional) CC recipient addresses.
+
+`bcc`
+:   (Optional) BCC recipient addresses.
+
+#### Reply message
+
+Send a reply to an existing message, preserving the thread. The connector fetches the original message to set threading headers and determine the default recipient from `Reply-To` or `From`. Available in Workflows only. Requires OAuth 2.0 authorization code auth.
+
+`messageId`
+:   (Required) Gmail message ID to reply to.
+
+`body`
+:   (Required) Reply body content.
+
+`bodyType`
+:   (Optional) `"text"` (default) or `"html"`.
+
+`subject`
+:   (Optional) Override the reply subject. Defaults to `Re: <original subject>`.
+
+`to`
+:   (Optional) Override recipient addresses. Defaults to the `Reply-To` or `From` address of the original message.
+
+## Limitations [gmail-limitations]
+
+- **Write actions require OAuth 2.0 authorization code auth.** Elastic-managed authentication is limited to `gmail.readonly`. The `modifyLabels`, `trashMessage`, `untrashMessage`, `sendMessage`, `replyMessage`, `markAsRead`, and `markAsUnread` actions are not available with Elastic-managed authentication.
+- **Existing connectors must be re-authorized.** Google does not re-prompt for consent when the requested scope changes. If you created a Gmail connector before write action support was added, edit the connector and re-authorize it so Google issues a token that includes `gmail.modify`.
+- **Permanent deletion is not supported.** Use `trashMessage` (reversible with `untrashMessage`). Gmail permanently removes trashed mail after 30 days.
+- **No attachments in `sendMessage` v1.** Attachment support is planned for a future release.
 
 ## Connector networking configuration [gmail-connector-networking-configuration]
 
@@ -45,14 +184,14 @@ Use the [Action configuration settings](/reference/configuration-reference/alert
 
 ## Get API credentials [gmail-api-credentials]
 
-To use the Gmail connector, you need a Google OAuth 2.0 access token with Gmail API scopes. You can obtain one using the [Google OAuth 2.0 Playground](https://developers.google.com/oauthplayground/):
+To use write actions, create a Google OAuth 2.0 app and authorize it with the `gmail.modify` scope:
 
-1. Open the OAuth 2.0 Playground and ensure **Use your own OAuth credentials** is checked if you have a project.
-2. In **Step 1 - Select & authorize APIs**, select the Gmail API v1 scope: `https://www.googleapis.com/auth/gmail.readonly` (or `https://www.googleapis.com/auth/gmail.metadata` for metadata only; use `https://mail.google.com/` for full access).
-3. Click **Authorize APIs** and sign in with your Google account.
-4. In **Step 2 - Exchange authorization code for tokens**, click **Exchange authorization code for tokens**.
-5. Copy the **Access token** and use it as the Bearer token when creating or activating the Gmail data source in Kibana.
+1. Go to the [Google Cloud Console](https://console.cloud.google.com/) and create or select a project.
+2. Enable the **Gmail API** for the project.
+3. Under **APIs & Services → Credentials**, create an OAuth 2.0 client ID of type **Web application**. Add your Kibana instance URL as an authorized redirect URI.
+4. Note the **Client ID** and **Client Secret**.
+5. When creating the Gmail connector in Kibana, select **OAuth 2.0 authorization code**, enter the client ID and secret, and authorize the connector. Google will prompt you to grant `gmail.modify` access.
 
 ::::{note}
-OAuth 2.0 Playground tokens expire after a short time (for example, one hour). For long-lived access, use a refresh token flow or re-authorize as needed. Refer to the [Google Identity documentation](https://developers.google.com/identity/protocols/oauth2) for details.
+The `gmail.modify` scope covers reading, labeling, trashing, and sending email. Permanent deletion of messages is not available without the broader `https://mail.google.com/` scope, which is not requested by this connector.
 ::::
