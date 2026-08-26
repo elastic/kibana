@@ -51,7 +51,7 @@ export class QueryService implements QueryServiceContract {
     maxResponseSize,
   }: ExecuteQueryParams): Promise<EsqlQueryResponse> {
     this.logger.debug({
-      message: () => `QueryService: Executing query - ${JSON.stringify({ query, filter, params })}`,
+      message: 'QueryService: Executing query',
     });
 
     try {
