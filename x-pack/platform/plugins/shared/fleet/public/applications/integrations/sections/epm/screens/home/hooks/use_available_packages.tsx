@@ -150,8 +150,16 @@ export type AvailablePackagesHookType = typeof useAvailablePackages;
 
 export const useAvailablePackages = ({
   prereleaseIntegrationsEnabled,
+  disableCollectionGrouping = false,
 }: {
   prereleaseIntegrationsEnabled: boolean;
+  /**
+   * When true, skips collection grouping and returns all integrations as individual
+   * cards regardless of the `enableIntegrationCollectionTiles` feature flag.
+   * Use this in contexts where collection tiles are not appropriate (e.g. the
+   * agent policy add-integration flyout dropdown).
+   */
+  disableCollectionGrouping?: boolean;
 }) => {
   const [preference, setPreference] = useState<IntegrationPreferenceType>('agent');
 
@@ -225,7 +233,7 @@ export const useAvailablePackages = ({
     let itemsToMap: Array<PackageListItem | CustomIntegration>;
     let extraCards: IntegrationCardItem[] = [];
 
-    if (enableIntegrationCollectionTiles) {
+    if (enableIntegrationCollectionTiles && !disableCollectionGrouping) {
       const { collectionCards, ungroupedItems } = applyGrouping({
         items: eprAndCustomPackages,
         getHref,
@@ -257,6 +265,7 @@ export const useAvailablePackages = ({
     addBasePath,
     appendCustomIntegrations,
     applyOnboardingOverride,
+    disableCollectionGrouping,
     enableIntegrationCollectionTiles,
     getAbsolutePath,
     getHref,
