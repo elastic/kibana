@@ -10,6 +10,7 @@ import type { MatchedActionPolicy } from '@kbn/alerting-v2-schemas';
 import {
   useLinkedActionPolicies,
   LINKED_ACTION_POLICIES_FETCH_LIMIT,
+  sortMatchedActionPolicies,
 } from './use_linked_action_policies';
 
 const mockUseMatchedActionPolicies = jest.fn();
@@ -37,19 +38,37 @@ const buildItem = (
     enabled: true,
     destinations: [{ type: 'workflow', id: 'workflow-1' }],
     matcher: null,
-    groupBy: null,
+    group_by: null,
     tags: null,
-    groupingMode: 'per_episode',
+    grouping_mode: 'per_episode',
     throttle: null,
-    snoozedUntil: null,
-    auth: { owner: 'user', createdByUser: true },
-    createdBy: 'user',
-    createdAt: '2026-01-01T00:00:00.000Z',
-    updatedBy: 'user',
-    updatedAt: '2026-01-01T00:00:00.000Z',
+    snoozed_until: null,
+    auth: { owner: 'user', created_by_user: true },
+    created_by: 'user',
+    created_at: '2026-01-01T00:00:00.000Z',
+    updated_by: 'user',
+    updated_at: '2026-01-01T00:00:00.000Z',
     ...overrides,
-  } as MatchedActionPolicy['actionPolicy'],
+  },
   category,
+});
+
+describe('sortMatchedActionPolicies', () => {
+  it('orders matching-criteria before catch-all, then by name', () => {
+    const sorted = sortMatchedActionPolicies([
+      buildItem('global', { id: 'catch-z', name: 'Z catch-all' }),
+      buildItem('global-filtered', { id: 'match-b', name: 'B matching' }),
+      buildItem('global', { id: 'catch-a', name: 'A catch-all' }),
+      buildItem('global-filtered', { id: 'match-a', name: 'A matching' }),
+    ]);
+
+    expect(sorted.map((item) => item.actionPolicy.id)).toEqual([
+      'match-a',
+      'match-b',
+      'catch-a',
+      'catch-z',
+    ]);
+  });
 });
 
 describe('useLinkedActionPolicies', () => {
@@ -69,26 +88,42 @@ describe('useLinkedActionPolicies', () => {
     expect(mockUseMatchedActionPolicies).toHaveBeenCalledWith({ http: mockHttp, ruleId: RULE_ID });
   });
 
-  it('counts items with category "global" as catch-all and "global-filtered" as matching criteria', () => {
+  it('returns matched items with loading and error flags', () => {
     mockUseMatchedActionPolicies.mockReturnValue({
       isLoading: false,
       error: null,
       items: [
         buildItem('global', { id: 'catch-all-1' }),
         buildItem('global-filtered', { id: 'filtered-1' }),
-        buildItem('global-filtered', { id: 'filtered-2' }),
       ],
-      total: 3,
+      total: 2,
     });
 
     const { result } = renderHook(() => useLinkedActionPolicies(RULE_ID));
 
-    expect(result.current.totalCount).toBe(3);
-    expect(result.current.catchAllCount).toBe(1);
-    expect(result.current.matchingCriteriaCount).toBe(2);
-    expect(result.current.isCountTruncated).toBe(false);
+    expect(result.current.items).toHaveLength(2);
+    expect(result.current.isMatchTruncated).toBe(false);
     expect(result.current.isError).toBe(false);
     expect(result.current.error).toBeNull();
+  });
+
+  it('returns matched items sorted matching-criteria first', () => {
+    mockUseMatchedActionPolicies.mockReturnValue({
+      isLoading: false,
+      error: null,
+      items: [
+        buildItem('global', { id: 'catch-all-1', name: 'Catch-all' }),
+        buildItem('global-filtered', { id: 'filtered-1', name: 'Matching' }),
+      ],
+      total: 2,
+    });
+
+    const { result } = renderHook(() => useLinkedActionPolicies(RULE_ID));
+
+    expect(result.current.items.map((item) => item.actionPolicy.id)).toEqual([
+      'filtered-1',
+      'catch-all-1',
+    ]);
   });
 
   it('flags truncated counts when the space has more policies than the evaluation limit', () => {
@@ -101,8 +136,8 @@ describe('useLinkedActionPolicies', () => {
 
     const { result } = renderHook(() => useLinkedActionPolicies(RULE_ID));
 
-    expect(result.current.totalCount).toBe(1);
-    expect(result.current.isCountTruncated).toBe(true);
+    expect(result.current.items).toHaveLength(1);
+    expect(result.current.isMatchTruncated).toBe(true);
   });
 
   it('passes through the loading state', () => {
@@ -130,6 +165,6 @@ describe('useLinkedActionPolicies', () => {
 
     expect(result.current.isError).toBe(true);
     expect(result.current.error?.message).toBe('network error');
-    expect(result.current.totalCount).toBe(0);
+    expect(result.current.items).toEqual([]);
   });
 });
