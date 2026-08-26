@@ -319,7 +319,7 @@ test.describe(
       });
 
       await test.step('click ES|QL switch button', async () => {
-        await page.testSubj.locator('composeDiscoverSwitchToEsql').click();
+        await page.testSubj.locator('composeDiscoverSwitchToEsql_esql').click();
       });
 
       await test.step('confirmation modal appears', async () => {
