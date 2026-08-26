@@ -17,10 +17,9 @@ import {
   EuiSpacer,
   EuiPortal,
   EuiSkeletonText,
-  EuiCallOut,
-  EuiButton,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import { useLoadNodeDetails } from '../../../../../../../services/api';
 
@@ -39,7 +38,7 @@ export const NodeAttrsDetails: React.FunctionComponent<Props> = ({ close, select
   } else if (error) {
     const { statusCode, message } = error;
     content = (
-      <EuiCallOut
+      <KbnDangerCallout
         announceOnMount
         title={
           <FormattedMessage
@@ -47,18 +46,24 @@ export const NodeAttrsDetails: React.FunctionComponent<Props> = ({ close, select
             defaultMessage="Unable to load node attribute details"
           />
         }
-        color="danger"
-      >
-        <p>
-          {message} ({statusCode})
-        </p>
-        <EuiButton onClick={resendRequest} iconType="refresh" color="danger">
-          <FormattedMessage
-            id="xpack.indexLifecycleMgmt.editPolicy.nodeDetailsReloadButton"
-            defaultMessage="Try again"
-          />
-        </EuiButton>
-      </EuiCallOut>
+        text={
+          <p>
+            {message} ({statusCode})
+          </p>
+        }
+        actionProps={{
+          primary: {
+            onClick: resendRequest,
+            iconType: 'refresh',
+            children: (
+              <FormattedMessage
+                id="xpack.indexLifecycleMgmt.editPolicy.nodeDetailsReloadButton"
+                defaultMessage="Try again"
+              />
+            ),
+          },
+        }}
+      />
     );
   } else {
     content = (

@@ -1,5 +1,5 @@
 {
-  "sha1": "dc09bc460987149fc38480269c9f932924f7c0b9",
+  "sha1": "4548a64dd686cbd321a57ac07170dc78607c15f9",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -36,7 +36,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/controls.spec.ts",
-        "line": 66,
+        "line": 37,
         "column": 23
       }
     },
@@ -49,7 +49,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/controls.spec.ts",
-        "line": 76,
+        "line": 47,
         "column": 18
       }
     },
@@ -62,8 +62,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/controls.spec.ts",
-        "line": 101,
-        "column": 22
+        "line": 74,
+        "column": 20
       }
     },
     {
@@ -75,8 +75,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/controls.spec.ts",
-        "line": 129,
-        "column": 33
+        "line": 101,
+        "column": 13
       }
     },
     {
@@ -88,7 +88,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/controls.spec.ts",
-        "line": 147,
+        "line": 121,
         "column": 22
       }
     },
@@ -244,7 +244,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/new_search_clears_tabs.spec.ts",
-        "line": 26,
+        "line": 27,
         "column": 25
       }
     },
@@ -413,7 +413,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/refresh_uninitialized_tabs.spec.ts",
-        "line": 28,
+        "line": 29,
         "column": 25
       }
     },
@@ -660,7 +660,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/save_and_load_sessions.spec.ts",
-        "line": 46,
+        "line": 47,
         "column": 25
       }
     },
@@ -673,7 +673,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/save_and_load_sessions.spec.ts",
-        "line": 91,
+        "line": 92,
         "column": 11
       }
     },
@@ -842,7 +842,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/unsaved_local_state.spec.ts",
-        "line": 54,
+        "line": 55,
         "column": 25
       }
     }

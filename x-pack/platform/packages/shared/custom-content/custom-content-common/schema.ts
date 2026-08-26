@@ -20,3 +20,31 @@ export const customContentStateSchema = z.object({
 });
 
 export type CustomContentState = z.output<typeof customContentStateSchema>;
+
+/**
+ * Shared schema for custom content panel update operations (create-panel tool and
+ * update-panel tool). Omits `template` — the server generates it from `prompt`.
+ */
+export const customContentUpdateSchema = customContentStateSchema
+  .omit({ template: true })
+  .extend({
+    prompt: z
+      .string()
+      .min(1)
+      .max(CUSTOM_CONTENT_MAX_PROMPT_LENGTH)
+      .optional()
+      .describe(
+        'Natural language instruction for what to create or change. The server generates the HTML template from this prompt.'
+      ),
+    esqlQuery: z
+      .string()
+      .max(CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH)
+      .nullable()
+      .optional()
+      .describe('ES|QL query. Omit to keep the existing query. Pass null to remove it entirely.'),
+  })
+  .refine(({ prompt, esqlQuery }) => prompt !== undefined || esqlQuery !== undefined, {
+    message: 'At least one of prompt or esqlQuery must be provided.',
+  });
+
+export type CustomContentUpdate = z.output<typeof customContentUpdateSchema>;

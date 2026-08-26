@@ -225,10 +225,16 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
     spaceIds,
   ]);
 
+  const labelFor = useCallback(
+    (options: Array<EuiComboBoxOptionOption<string>>, id: string): string =>
+      options.find((option) => option.value === id)?.label ?? id,
+    []
+  );
+
   const labelsFor = useCallback(
     (options: Array<EuiComboBoxOptionOption<string>>, ids: string[]): string[] =>
-      ids.map((id) => options.find((option) => option.value === id)?.label ?? id),
-    []
+      ids.map((id) => labelFor(options, id)),
+    [labelFor]
   );
 
   const buildLaunchedConfig = useCallback(
@@ -240,6 +246,16 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
       connector_names: labelsFor(connectorOptions, connectorIds),
       dataset_names: labelsFor(datasetOptions, datasetIds),
       evaluator_names: evaluators.map((evaluator) => evaluator.name),
+      evaluator_judges: evaluators.flatMap((evaluator) =>
+        evaluator.kind === 'llm' && evaluator.connectorId
+          ? [
+              {
+                evaluator_name: evaluator.name,
+                judge_label: labelFor(connectorOptions, evaluator.connectorId),
+              },
+            ]
+          : []
+      ),
       repetitions,
       concurrency,
     }),
@@ -248,6 +264,7 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
       taskTargetOptions,
       taskTarget,
       agentId,
+      labelFor,
       labelsFor,
       connectorOptions,
       connectorIds,

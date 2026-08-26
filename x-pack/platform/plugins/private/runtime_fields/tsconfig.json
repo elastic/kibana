@@ -14,7 +14,8 @@
     "@kbn/code-editor",
     "@kbn/code-editor-mock",
     "@kbn/react-kibana-mount",
-    "@kbn/core-doc-links-browser-mocks"
+    "@kbn/core-doc-links-browser-mocks",
+    "@kbn/ui-callout"
   ],
   "exclude": ["target/**/*"]
 }

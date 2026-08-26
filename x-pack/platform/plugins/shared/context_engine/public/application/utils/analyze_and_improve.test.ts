@@ -19,11 +19,7 @@ describe('analyzeAndImprove', () => {
     expect(opener).toHaveBeenCalledWith(context);
   });
 
-  it('is a no-op when the getter resolves to no opener', () => {
-    expect(() => analyzeAndImprove(() => undefined, context)).not.toThrow();
-  });
-
-  it('is a no-op when no getter is provided', () => {
+  it('is a no-op when no opener is registered', () => {
     expect(() => analyzeAndImprove(undefined, context)).not.toThrow();
   });
 });
