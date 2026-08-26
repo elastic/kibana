@@ -98,7 +98,7 @@ export class AlertService {
       const indexBuckets = Array.from(bucketedAlerts.entries());
 
       let previousStatusMap: Map<string, STATUS_VALUES> | undefined;
-      if (this.casesEventBus && this.request) {
+      if (this.casesEventBus?.hasAlertStatusChangedListeners() && this.request) {
         try {
           previousStatusMap = await pRetry(() => this.prefetchPreviousStatuses(alerts), {
             retries: 3,

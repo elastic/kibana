@@ -409,7 +409,7 @@ describe('prefetchPreviousStatusesByQuery', () => {
     expect(call).not.toHaveProperty('runtime_mappings');
   });
 
-  it('adds must_not term filter when excludeStatus is provided', async () => {
+  it('adds must_not terms for both modern and legacy status fields when excludeStatus is provided', async () => {
     const query = { term: { 'some.field': 'value' } };
 
     await prefetchPreviousStatusesByQuery(esClient, 'index', query, undefined, 'closed');
@@ -419,7 +419,10 @@ describe('prefetchPreviousStatusesByQuery', () => {
         query: {
           bool: {
             filter: query,
-            must_not: { term: { [ALERT_WORKFLOW_STATUS]: 'closed' } },
+            must_not: [
+              { term: { [ALERT_WORKFLOW_STATUS]: 'closed' } },
+              { term: { 'signal.status': 'closed' } },
+            ],
           },
         },
       })

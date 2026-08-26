@@ -107,7 +107,12 @@ export const prefetchPreviousStatusesByQuery = async (
 }> => {
   const boolQuery: estypes.QueryDslBoolQuery = { filter: query };
   if (excludeStatus !== undefined) {
-    boolQuery.must_not = { term: { [ALERT_WORKFLOW_STATUS]: excludeStatus } };
+    // Exclude both modern and legacy status fields so no-op transitions are
+    // pre-filtered at the ES level, keeping the 10k cap reserved for actual changes.
+    boolQuery.must_not = [
+      { term: { [ALERT_WORKFLOW_STATUS]: excludeStatus } },
+      { term: { 'signal.status': excludeStatus } },
+    ];
   }
   const searchResponse = await esClient.search({
     index: resolveIndex(index),

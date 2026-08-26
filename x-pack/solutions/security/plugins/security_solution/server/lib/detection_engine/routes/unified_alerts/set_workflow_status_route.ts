@@ -120,7 +120,10 @@ export const setUnifiedAlertsWorkflowStatusRoute = (
           });
           if (prefetchSucceeded) {
             const truncated = ids.length > MAX_ALERTS_PER_TRIGGER;
-            if (attackIds.length > 0) {
+            // When truncated, IDs beyond the cap were not prefetched; we cannot
+            // determine their types, so conservatively emit both events so
+            // consumers are notified even when all sampled IDs were no-ops.
+            if (attackIds.length > 0 || truncated) {
               void eventBus?.emitAttackStatusChanged(request, {
                 attackIds,
                 status,
@@ -128,7 +131,7 @@ export const setUnifiedAlertsWorkflowStatusRoute = (
                 truncated,
               });
             }
-            if (alertIds.length > 0) {
+            if (alertIds.length > 0 || truncated) {
               void eventBus?.emitAlertStatusChanged(request, {
                 alertIds,
                 status,

@@ -80,6 +80,17 @@ export class CasesEventBus extends EventEmitter {
   }
 
   onAlertStatusChanged(listener: CasesEventBusListener<'alertStatusChanged'>) {
-    this.on(ALERT_STATUS_CHANGED_EVENT, listener);
+    this.on(ALERT_STATUS_CHANGED_EVENT, (event: CasesEventPayload<'alertStatusChanged'>) => {
+      const result = listener(event);
+      if (result instanceof Promise) {
+        // Prevent async listener rejections from becoming unhandled rejections.
+        // The Cases mutation has already completed at this point.
+        result.catch(() => {});
+      }
+    });
+  }
+
+  hasAlertStatusChangedListeners(): boolean {
+    return this.listenerCount(ALERT_STATUS_CHANGED_EVENT) > 0;
   }
 }

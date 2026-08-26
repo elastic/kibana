@@ -977,6 +977,8 @@ describe('updateAlertsStatus — event bus', () => {
 
   it('logs warn and still completes update when mget prefetch fails', async () => {
     const bus = new CasesEventBus();
+    // Listener must be registered so prefetch is attempted (hasAlertStatusChangedListeners() === true).
+    bus.onAlertStatusChanged(jest.fn());
     esClient.mget.mockRejectedValue(new Error('mget failure'));
 
     const alertService = new AlertService(esClient, logger, alertsClient, bus, request);
@@ -1126,5 +1128,45 @@ describe('updateAlertsStatus — event bus', () => {
     ]);
 
     expect(esClient.mget).not.toHaveBeenCalled();
+  });
+
+  it('does not call mget when event bus has no alertStatusChanged listeners', async () => {
+    const bus = new CasesEventBus(); // no listener registered
+    const alertService = new AlertService(esClient, logger, alertsClient, bus, request);
+    await alertService.updateAlertsStatus([
+      { id: 'a1', index: '.siem-signals', status: CaseStatuses.closed },
+    ]);
+
+    expect(esClient.mget).not.toHaveBeenCalled();
+    bus.removeAllListeners();
+  });
+
+  it('still resolves successfully when an async listener rejects (async listener isolation)', async () => {
+    const bus = new CasesEventBus();
+    bus.onAlertStatusChanged(async () => {
+      throw new Error('async listener boom');
+    });
+
+    esClient.mget.mockResolvedValueOnce({
+      docs: [
+        {
+          found: true,
+          _id: 'a1',
+          _index: '.siem-signals',
+          _source: { 'kibana.alert.workflow_status': 'open' },
+        },
+      ],
+    } as never);
+
+    const alertService = new AlertService(esClient, logger, alertsClient, bus, request);
+    await expect(
+      alertService.updateAlertsStatus([
+        { id: 'a1', index: '.siem-signals', status: CaseStatuses.closed },
+      ])
+    ).resolves.not.toThrow();
+    // The rejection is swallowed in the onAlertStatusChanged wrapper (.catch(() => {})).
+    // No setTimeout drain needed — the .catch is attached synchronously on the returned Promise.
+
+    bus.removeAllListeners();
   });
 });

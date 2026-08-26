@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { RoleApiCredentials } from '@kbn/scout-security';
 import { apiTest, tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 
@@ -30,20 +29,18 @@ apiTest.describe(
   'Security Solution - Workflow Trigger Registration',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
-    let adminApiCredentials: RoleApiCredentials;
+    let adminHeaders: Record<string, string>;
 
-    apiTest.beforeAll(async ({ requestAuth }) => {
-      adminApiCredentials = await requestAuth.getApiKey('admin');
+    apiTest.beforeAll(async ({ samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
+      adminHeaders = { ...cookieHeader, ...COMMON_HEADERS };
     });
 
     apiTest(
       'should register all expected Security Solution event-driven trigger definitions',
       async ({ apiClient }) => {
         const response = await apiClient.get('internal/workflows_extensions/trigger_definitions', {
-          headers: {
-            ...COMMON_HEADERS,
-            ...adminApiCredentials.apiKeyHeader,
-          },
+          headers: adminHeaders,
           responseType: 'json',
         });
 

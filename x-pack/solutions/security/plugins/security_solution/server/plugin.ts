@@ -660,7 +660,9 @@ export class Plugin implements ISecuritySolutionPlugin {
       enabled: config.experimentalFeatures.trialCompanionEnabled && plugins.cloud?.isInTrial(),
     };
 
-    this.securityEventBus = new SecuritySolutionEventBus();
+    this.securityEventBus = plugins.workflowsExtensions
+      ? new SecuritySolutionEventBus()
+      : undefined;
 
     // TODO We need to get the endpoint routes inside of initRoutes
     const enableDataGeneratorRoutes =

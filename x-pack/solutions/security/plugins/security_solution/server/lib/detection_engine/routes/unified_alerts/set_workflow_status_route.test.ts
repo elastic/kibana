@@ -466,5 +466,36 @@ describe('set unified alerts workflow status', () => {
         expect.objectContaining({ truncated: true })
       );
     });
+
+    test('emits both events with truncated: true when overflow IDs may have changed (all sampled are no-ops)', async () => {
+      // All MAX_ALERTS_PER_TRIGGER+1 IDs are sent; the sampled prefix is already at target status.
+      // Overflow IDs may still be transitioning, so both events must fire with truncated: true.
+      const oversizedIds = Array.from({ length: MAX_ALERTS_PER_TRIGGER + 1 }, (_, i) => `id-${i}`);
+      context.core.elasticsearch.client.asCurrentUser.search.mockResponse(
+        makeSearchResponse([
+          {
+            _id: oversizedIds[0],
+            _index: '.alerts-security.alerts-default',
+            _source: { 'kibana.alert.workflow_status': 'closed' }, // already at target
+          },
+        ])
+      );
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_WORKFLOW_STATUS_URL,
+        body: { signal_ids: oversizedIds, status: 'closed' },
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+      await new Promise((r) => setTimeout(r, 0));
+
+      expect(mockEventBus.emitAlertStatusChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ alertIds: [], truncated: true })
+      );
+      expect(mockEventBus.emitAttackStatusChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ attackIds: [], truncated: true })
+      );
+    });
   });
 });
