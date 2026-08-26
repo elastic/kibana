@@ -57,7 +57,7 @@ export const getReadState = async (
         : stored;
     return { overrides, readAllBefore };
   } catch (error) {
-    logger.warn(`Failed to fetch read state; returning an unannotated list. ${error}`);
+    logger.debug('Failed to fetch read state; returning an unannotated list.', { error });
     return undefined;
   }
 };
