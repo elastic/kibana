@@ -20,6 +20,7 @@ export function SpacesSupertestProvider({ getService }: DeploymentAgnosticFtrPro
   const config = getService('config');
   const license = config.get('esTestCluster.license');
   const isServerless = config.get('serverless');
+  const defaultRequestTimeout = config.get('timeouts.request');
 
   return {
     async getSupertestWithRoleScope(
@@ -30,8 +31,13 @@ export function SpacesSupertestProvider({ getService }: DeploymentAgnosticFtrPro
         withInternalHeaders: true,
       }
     ) {
+      const withTimeout: RequestHeadersOptions = {
+        requestTimeout: defaultRequestTimeout,
+        ...options,
+      };
+
       if (!user || (license === 'basic' && !isServerless)) {
-        return new SupertestWithBasicAuth(supertestWithoutAuth, user);
+        return new SupertestWithBasicAuth(supertestWithoutAuth, user, withTimeout.requestTimeout);
       }
 
       const isBuiltIn = isBuiltInRole(user.role);
@@ -40,18 +46,23 @@ export function SpacesSupertestProvider({ getService }: DeploymentAgnosticFtrPro
         await samlAuth.setCustomRole(getRoleDefinitionForUser(user));
       }
 
-      if (options.useCookieHeader) {
+      if (withTimeout.useCookieHeader) {
         const cookieHeader = await samlAuth.getM2MApiCookieCredentialsWithRoleScope(
           isBuiltIn ? user.role : samlAuth.CUSTOM_ROLE
         );
-        return new SupertestWithRoleScope(cookieHeader, supertestWithoutAuth, samlAuth, options);
+        return new SupertestWithRoleScope(
+          cookieHeader,
+          supertestWithoutAuth,
+          samlAuth,
+          withTimeout
+        );
       }
 
       // HTTP requests will be called with API key in header by default
       const roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope(
         isBuiltIn ? user.role : samlAuth.CUSTOM_ROLE
       );
-      return new SupertestWithRoleScope(roleAuthc, supertestWithoutAuth, samlAuth, options);
+      return new SupertestWithRoleScope(roleAuthc, supertestWithoutAuth, samlAuth, withTimeout);
     },
   };
 }

@@ -122,6 +122,14 @@ export const schema = Joi.object()
         try: Joi.number().default(120000),
         waitFor: Joi.number().default(20000),
         esRequestTimeout: Joi.number().default(30000),
+
+        // Deadline for a single HTTP request made through the FTR supertest wrappers. Without
+        // one, a request that stalls (rather than being refused) hangs until the enclosing
+        // mocha timeout fires, at which point the FTR aborts the whole config -- so a single
+        // stalled request is reported as every remaining test in the suite failing. Keep this
+        // comfortably below the mocha timeouts so a stall surfaces as a request error.
+        request: Joi.number().default(30000),
+
         kibanaReportCompletion: Joi.number().default(60_000),
         kibanaStabilize: Joi.number().default(15000),
         navigateStatusPageCheck: Joi.number().default(250),
