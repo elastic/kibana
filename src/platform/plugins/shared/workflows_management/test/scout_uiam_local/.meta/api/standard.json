@@ -5,7 +5,7 @@
   ],
   "tests": [
     {
-      "id": "6a0e2306c062e5d-c8e68da9353bd17",
+      "id": "17cb36a7000113d-c8e68da9353bd17",
       "title": "[NON-MKI] Workflow execution with an organization-level UIAM API key grants a Task Manager key and completes the workflow",
       "expectedStatus": "passed",
       "tags": [
@@ -13,7 +13,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/workflows_management/test/scout_task_manager_uiam/api/tests/org_api_key_workflow_execution.spec.ts",
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_uiam_local/api/tests/org_api_key_workflow_execution.spec.ts",
         "line": 40,
         "column": 27
       }

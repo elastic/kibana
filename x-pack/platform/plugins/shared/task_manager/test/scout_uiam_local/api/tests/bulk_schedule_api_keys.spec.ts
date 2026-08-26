@@ -19,7 +19,7 @@ import {
   readTaskAttributes,
   taskDocId,
 } from '../lib/helpers';
-import type { ScheduledTaskWithApiKeys } from '../lib/helpers';
+import type { ScheduledTaskWithApiKeyIds } from '../lib/helpers';
 
 const PERSISTED_TASK_ID = 'scout-bulk-schedule-persisted';
 const OMITTED_TASK_ID = 'scout-bulk-schedule-omitted';
@@ -73,7 +73,7 @@ apiTest.describe(
   'Task Manager bulkSchedule API keys',
   { tag: tags.serverless.observability.complete },
   () => {
-    const tasksToCleanup: ScheduledTaskWithApiKeys[] = [];
+    const tasksToCleanup: ScheduledTaskWithApiKeyIds[] = [];
 
     // Defensive cleanup on both sides: a prior crashed run may have left task docs behind. The
     // deletes enqueue invalidation markers for the deleted tasks' keys; those are left for the
@@ -149,7 +149,7 @@ apiTest.describe(
         const scheduled = response.body as Array<{ id: string }>;
         expect(scheduled).toHaveLength(1);
         expect(scheduled[0].id).toBe(PERSISTED_TASK_ID);
-        tasksToCleanup.push(...(response.body as ScheduledTaskWithApiKeys[]));
+        tasksToCleanup.push(...(response.body as ScheduledTaskWithApiKeyIds[]));
 
         const persisted = await readTaskAttributes(esClient, taskDocId(PERSISTED_TASK_ID));
         const persistedUserScope = persisted.userScope as Record<string, string>;
@@ -299,7 +299,7 @@ apiTest.describe(
         });
         expect(response).toHaveStatusCode(200);
 
-        const scheduled = response.body as ScheduledTaskWithApiKeys[];
+        const scheduled = response.body as ScheduledTaskWithApiKeyIds[];
         expect(scheduled).toHaveLength(2);
         tasksToCleanup.push(...scheduled);
 
@@ -309,10 +309,10 @@ apiTest.describe(
         expect(firstTask.id).not.toBe(secondTask.id);
         expect(firstTask.taskType).toBe(TEST_TASK_TYPE);
         expect(secondTask.taskType).toBe(OMITTED_TASK_TYPE);
-        expect(firstTask.apiKey).toBeDefined();
-        expect(secondTask.apiKey).toBeDefined();
-        expect(firstTask.uiamApiKey).toBeDefined();
-        expect(secondTask.uiamApiKey).toBeDefined();
+        expect(firstTask.userScope?.apiKeyId).toBeDefined();
+        expect(secondTask.userScope?.apiKeyId).toBeDefined();
+        expect(firstTask.userScope?.uiamApiKeyId).toBeDefined();
+        expect(secondTask.userScope?.uiamApiKeyId).toBeDefined();
         expect(firstTask.userScope?.apiKeyId).not.toBe(secondTask.userScope?.apiKeyId);
         expect(firstTask.userScope?.uiamApiKeyId).not.toBe(secondTask.userScope?.uiamApiKeyId);
 

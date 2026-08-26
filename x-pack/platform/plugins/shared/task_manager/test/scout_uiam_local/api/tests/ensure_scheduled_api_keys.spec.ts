@@ -16,7 +16,7 @@ import {
   readTaskAttributes,
   taskDocId,
 } from '../lib/helpers';
-import type { ScheduledTaskWithApiKeys } from '../lib/helpers';
+import type { ScheduledTaskWithApiKeyIds } from '../lib/helpers';
 
 const TASK_ID = 'scout-ensure-scheduled-api-key-leak';
 
@@ -24,7 +24,7 @@ apiTest.describe(
   'Task Manager ensureScheduled API keys',
   { tag: tags.serverless.observability.complete },
   () => {
-    let taskToCleanup: ScheduledTaskWithApiKeys | undefined;
+    let taskToCleanup: ScheduledTaskWithApiKeyIds | undefined;
 
     // Defensive cleanup on both sides: a stale task from a prior crashed run would make the
     // first ensureScheduled call skip granting (the behavior under test) and break the key-count
@@ -52,7 +52,7 @@ apiTest.describe(
       async ({ apiClient, esClient, samlAuth }) => {
         const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
 
-        const ensureScheduled = async (): Promise<ScheduledTaskWithApiKeys> => {
+        const ensureScheduled = async (): Promise<ScheduledTaskWithApiKeyIds> => {
           const response = await apiClient.post('internal/task_manager/schedule', {
             headers: { ...COMMON_HEADERS, ...cookieHeader },
             body: {
@@ -70,7 +70,7 @@ apiTest.describe(
             responseType: 'json',
           });
           expect(response).toHaveStatusCode(200);
-          return response.body as ScheduledTaskWithApiKeys;
+          return response.body as ScheduledTaskWithApiKeyIds;
         };
 
         const keysBefore = await countActiveTaskManagerEsApiKeys(esClient);

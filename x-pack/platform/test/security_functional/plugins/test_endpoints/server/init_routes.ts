@@ -943,8 +943,8 @@ export function initRoutes(
       validate: {
         body: schema.object({
           id: schema.string(),
-          authcScheme: schema.string(),
-          credential: schema.string(),
+          authcScheme: schema.string({ defaultValue: 'ApiKey' }),
+          credential: schema.maybe(schema.string()),
         }),
       },
       security: {
@@ -967,16 +967,18 @@ export function initRoutes(
           });
         }
 
-        // Create a new request with the provided authentication header
-        const requestHeaders: Headers = {
-          ...request.headers,
-          authorization: `${authcScheme} ${credential}`,
-        };
-        const fakeRawRequest: FakeRawRequest = {
-          headers: requestHeaders,
-          path: request.url.pathname,
-        };
-        const requestToUse = kibanaRequestFactory(fakeRawRequest);
+        let requestToUse = request;
+        if (credential) {
+          const requestHeaders: Headers = {
+            ...request.headers,
+            authorization: `${authcScheme} ${credential}`,
+          };
+          const fakeRawRequest: FakeRawRequest = {
+            headers: requestHeaders,
+            path: request.url.pathname,
+          };
+          requestToUse = kibanaRequestFactory(fakeRawRequest);
+        }
 
         const result = await security.authc.apiKeys.uiam.invalidate(requestToUse, { id });
 

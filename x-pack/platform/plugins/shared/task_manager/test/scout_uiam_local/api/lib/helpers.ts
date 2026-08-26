@@ -107,11 +107,9 @@ export const deleteTaskManagerTaskSilently = async (
     .catch(() => {});
 };
 
-export interface ScheduledTaskWithApiKeys {
+export interface ScheduledTaskWithApiKeyIds {
   id: string;
   taskType: string;
-  apiKey?: string;
-  uiamApiKey?: string;
   userScope?: {
     apiKeyId: string;
     uiamApiKeyId?: string;
@@ -128,10 +126,10 @@ export const deleteTaskManagerTasksWithoutInvalidationQueue = async ({
   apiClient: ApiClientFixture;
   cookieHeader: CookieHeader;
   kbnClient: KbnClient;
-  tasks: ScheduledTaskWithApiKeys[];
+  tasks: ScheduledTaskWithApiKeyIds[];
 }): Promise<void> => {
-  const esApiKeyIds = tasks.flatMap(({ apiKey, userScope }) =>
-    apiKey && userScope?.apiKeyId ? [userScope.apiKeyId] : []
+  const esApiKeyIds = tasks.flatMap(({ userScope }) =>
+    userScope?.apiKeyId ? [userScope.apiKeyId] : []
   );
   if (esApiKeyIds.length > 0) {
     const response = await apiClient.post('test_endpoints/api_keys/_invalidate', {
@@ -143,14 +141,12 @@ export const deleteTaskManagerTasksWithoutInvalidationQueue = async ({
     expect(response.body.error_count).toBe(0);
   }
 
-  for (const { uiamApiKey, userScope } of tasks) {
-    if (uiamApiKey && userScope?.uiamApiKeyId) {
+  for (const { userScope } of tasks) {
+    if (userScope?.uiamApiKeyId) {
       const response = await apiClient.post('test_endpoints/uiam/api_keys/_invalidate', {
         headers: { ...COMMON_HEADERS, ...cookieHeader },
         body: {
           id: userScope.uiamApiKeyId,
-          authcScheme: 'ApiKey',
-          credential: uiamApiKey,
         },
         responseType: 'json',
       });
