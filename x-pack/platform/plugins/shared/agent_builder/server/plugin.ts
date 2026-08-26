@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, KibanaRequest, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  CoreStart,
+  KibanaRequest,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
@@ -139,7 +145,9 @@ export class AgentBuilderPlugin
     this.isExperimentalEnabled = async (request: KibanaRequest): Promise<boolean> => {
       const [coreStart] = await coreSetup.getStartServices();
       const soClient = coreStart.savedObjects.getScopedClient(request);
-      return coreStart.uiSettings.asScopedToClient(soClient).get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID);
+      return coreStart.uiSettings
+        .asScopedToClient(soClient)
+        .get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID);
     };
 
     setupDeps.workflowsExtensions.registerStepDefinition(

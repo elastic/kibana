@@ -46,7 +46,14 @@ export class ConversationServiceImpl implements ConversationService {
   private readonly agents: AgentsServiceStart;
   private readonly eventBus?: ConversationEventBus;
 
-  constructor({ logger, security, elasticsearch, spaces, agents, eventBus }: ConversationServiceDeps) {
+  constructor({
+    logger,
+    security,
+    elasticsearch,
+    spaces,
+    agents,
+    eventBus,
+  }: ConversationServiceDeps) {
     this.logger = logger;
     this.security = security;
     this.elasticsearch = elasticsearch;

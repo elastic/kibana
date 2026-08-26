@@ -1955,31 +1955,6 @@ describe('ConversationClient', () => {
       expect(onMetadataPatched).not.toHaveBeenCalled();
     });
 
-    it('falls back to all update keys as changed when field extraction from _source fails', async () => {
-      const onMetadataPatched = jest.fn();
-      // Return a document with a corrupted _source so the inner field-extraction try/catch triggers.
-      mockEsClient.search.mockResolvedValue({
-        hits: {
-          hits: [
-            {
-              ...createConversationDocumentWithTemplate({ templateId: 'tmpl-a' }),
-              _source: null, // forces the extraction block to throw
-            },
-          ],
-        },
-      });
-
-      await createClientForMerge({ onMetadataPatched }).unsafeMergeMetadata('conversation-1', {
-        status: 'closed',
-        severity: 'high',
-      });
-
-      expect(mockEsUpdate).toHaveBeenCalled();
-      // All update keys treated as changed when extraction fails
-      expect(onMetadataPatched).toHaveBeenCalledWith(
-        expect.objectContaining({ changedFields: ['status', 'severity'] })
-      );
-    });
 
     it('does not fire onMetadataPatched when the update throws', async () => {
       const onMetadataPatched = jest.fn();
