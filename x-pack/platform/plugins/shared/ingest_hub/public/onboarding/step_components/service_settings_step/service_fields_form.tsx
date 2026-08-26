@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Suspense, useState } from 'react';
+import React, { Suspense, useMemo, useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiFieldText,
@@ -21,7 +21,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DataStreamTypeSelector, LazyPackagePolicyInputVarField } from '@kbn/fleet-plugin/public';
+import type { InputFieldProps } from '@kbn/fleet-plugin/public';
+import {
+  DataStreamTypeSelector,
+  LazyPackagePolicyInputVarField,
+  useGetDataStreams,
+} from '@kbn/fleet-plugin/public';
 import { KibanaStyledComponentsThemeProvider } from '@kbn/react-kibana-context-styled';
 
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
@@ -82,6 +87,7 @@ function VarField({
   draft,
   onFieldChange,
   forceShowErrors,
+  datastreams,
 }: {
   service: AwsServiceMatrixEntry;
   activeInput: string;
@@ -89,6 +95,7 @@ function VarField({
   draft: Record<string, Record<string, string>>;
   onFieldChange: (input: string, fieldName: string, value: string) => void;
   forceShowErrors?: boolean;
+  datastreams?: InputFieldProps['datastreams'];
 }) {
   const { colorMode } = useEuiTheme();
   const meta = resolveFieldMeta(service, activeInput, fieldName);
@@ -142,6 +149,7 @@ function VarField({
             errors={errors}
             forceShowErrors={forceShowErrors}
             packageName={service.packageName}
+            datastreams={datastreams}
           />
         </Suspense>
       </KibanaStyledComponentsThemeProvider>
@@ -163,6 +171,18 @@ function InputVarFields({
   onFieldChange: (input: string, fieldName: string, value: string) => void;
 }) {
   const [isShowingAdvanced, setIsShowingAdvanced] = useState(false);
+
+  const { data: dataStreamsData } = useGetDataStreams();
+  const datastreams = useMemo(() => {
+    const all = dataStreamsData?.data_streams ?? [];
+    // Mirror Fleet's sortDatastreamsByDataset: package's own streams first, then alphabetical.
+    return [...all].sort((a, b) => {
+      const aOwn = a.dataset.startsWith(service.packageName ?? '') ? 0 : 1;
+      const bOwn = b.dataset.startsWith(service.packageName ?? '') ? 0 : 1;
+      if (aOwn !== bOwn) return aOwn - bOwn;
+      return a.dataset.localeCompare(b.dataset);
+    });
+  }, [dataStreamsData, service.packageName]);
 
   const allConfigFields = [...(service.requiredConfig ?? []), ...(service.optionalConfig ?? [])];
   const regionFieldName = getRegionFieldName(service, activeInput);
@@ -249,6 +269,7 @@ function InputVarFields({
                 draft={varsByInput}
                 onFieldChange={onFieldChange}
                 forceShowErrors={anyRequiredEmpty}
+                datastreams={datastreams}
               />
             </React.Fragment>
           ))}
@@ -267,6 +288,7 @@ function InputVarFields({
                 fieldName={fieldName}
                 draft={varsByInput}
                 onFieldChange={onFieldChange}
+                datastreams={datastreams}
               />
             </React.Fragment>
           ))}
@@ -285,6 +307,7 @@ function InputVarFields({
                 fieldName={fieldName}
                 draft={varsByInput}
                 onFieldChange={onFieldChange}
+                datastreams={datastreams}
               />
             </React.Fragment>
           ))}

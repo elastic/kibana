@@ -10,6 +10,7 @@
 // Drives the Services UI badges and Deployment UI stack composition in the AWS onboarding flow.
 
 import type { PackageInfo, RegistryVarsEntry } from '@kbn/fleet-plugin/common';
+import { DATA_STREAM_DATASET_VAR, DATA_STREAM_TYPE_VAR } from '@kbn/fleet-plugin/common';
 
 import type { ServiceCategory } from './service_categories';
 
@@ -656,21 +657,13 @@ function computeInputPackageInfo(
   // data_stream.type: default = PT type (e.g. 'metrics'); synthesized for all non-dynamic_signal_types PTs.
   if (!bucket['data_stream.dataset']) {
     bucket['data_stream.dataset'] = {
-      name: 'data_stream.dataset',
-      type: 'text',
-      title: 'Dataset name',
-      required: true,
-      show_user: true,
+      ...DATA_STREAM_DATASET_VAR,
       default: (pt as any).name as string,
     } as RegistryVarsEntry;
   }
   if (!bucket['data_stream.type'] && ptType) {
     bucket['data_stream.type'] = {
-      name: 'data_stream.type',
-      type: 'text',
-      title: 'Data stream type',
-      required: false,
-      show_user: false,
+      ...DATA_STREAM_TYPE_VAR,
       default: ptType,
     } as RegistryVarsEntry;
   }
