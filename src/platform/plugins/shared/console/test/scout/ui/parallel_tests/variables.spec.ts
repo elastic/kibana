@@ -9,10 +9,10 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { test } from '../fixtures';
+import { spaceTest } from '../fixtures';
 
-test.describe('Console variables', { tag: tags.deploymentAgnostic }, () => {
-  test.beforeEach(async ({ browserAuth, page, pageObjects }) => {
+spaceTest.describe('Console variables', { tag: tags.deploymentAgnostic }, () => {
+  spaceTest.beforeEach(async ({ browserAuth, page, pageObjects }) => {
     await page.context().grantPermissions(['clipboard-read', 'clipboard-write']);
     await browserAuth.loginAsAdmin();
     await pageObjects.console.goto();
@@ -20,7 +20,7 @@ test.describe('Console variables', { tag: tags.deploymentAgnostic }, () => {
     await pageObjects.console.openConfigTab();
   });
 
-  test('creates and removes a variable', async ({ pageObjects }) => {
+  spaceTest('creates and removes a variable', async ({ pageObjects }) => {
     await pageObjects.console.addVariable({ name: 'index1', value: 'test' });
     await expect.poll(() => pageObjects.console.getVariableNames()).toContain('${index1}');
 
@@ -30,7 +30,7 @@ test.describe('Console variables', { tag: tags.deploymentAgnostic }, () => {
     await expect.poll(() => pageObjects.console.getVariableNames()).not.toContain('${index1}');
   });
 
-  test('copies a variable to the clipboard', async ({ page, pageObjects }) => {
+  spaceTest('copies a variable to the clipboard', async ({ page, pageObjects }) => {
     await pageObjects.console.addVariable({ name: 'test_variable', value: 'test' });
 
     await pageObjects.console.variableCopyButton('test_variable').click();
@@ -40,7 +40,7 @@ test.describe('Console variables', { tag: tags.deploymentAgnostic }, () => {
       .toContain('${test_variable}');
   });
 
-  test('interpolates a variable used in the request url', async ({ pageObjects }) => {
+  spaceTest('interpolates a variable used in the request url', async ({ pageObjects }) => {
     await pageObjects.console.addVariable({ name: 'index3', value: '_search' });
     await pageObjects.console.openShellTab();
 
@@ -51,7 +51,7 @@ test.describe('Console variables', { tag: tags.deploymentAgnostic }, () => {
     expect(await pageObjects.console.getResponseStatus()).toBe(200);
   });
 
-  test('interpolates a variable used as a request body', async ({ pageObjects }) => {
+  spaceTest('interpolates a variable used as a request body', async ({ pageObjects }) => {
     await pageObjects.console.addVariable({ name: 'query1', value: '{"match_all": {}}' });
     await pageObjects.console.openShellTab();
 
@@ -62,7 +62,7 @@ test.describe('Console variables', { tag: tags.deploymentAgnostic }, () => {
     expect(await pageObjects.console.getResponseStatus()).toBe(200);
   });
 
-  test('interpolates a variable inlined inside a request body', async ({ pageObjects }) => {
+  spaceTest('interpolates a variable inlined inside a request body', async ({ pageObjects }) => {
     await pageObjects.console.addVariable({ name: 'queryType', value: 'all' });
     await pageObjects.console.openShellTab();
 

@@ -9,48 +9,48 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { test } from '../fixtures';
+import { spaceTest } from '../fixtures';
 
-test.describe('Console tab navigation', { tag: tags.deploymentAgnostic }, () => {
-  test.beforeEach(async ({ browserAuth, pageObjects }) => {
+spaceTest.describe('Console tab navigation', { tag: tags.deploymentAgnostic }, () => {
+  spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
     await pageObjects.console.goto();
     await pageObjects.console.skipTourIfExists();
   });
 
-  test('selecting a tab updates the URL', async ({ page, pageObjects }) => {
-    await test.step('the Shell tab is the entry point', async () => {
+  spaceTest('selecting a tab updates the URL', async ({ page, pageObjects }) => {
+    await spaceTest.step('the Shell tab is the entry point', async () => {
       await expect(pageObjects.console.shellPanel).toBeVisible();
       expect(page.url()).toContain('/shell');
     });
 
-    await test.step('selecting History', async () => {
+    await spaceTest.step('selecting History', async () => {
       await pageObjects.console.openHistoryTab();
       expect(page.url()).toContain('/history');
     });
 
-    await test.step('selecting Config', async () => {
+    await spaceTest.step('selecting Config', async () => {
       await pageObjects.console.openConfigTab();
       expect(page.url()).toContain('/config');
     });
   });
 
-  test('tabs are reachable through the URL', async ({ page, pageObjects }) => {
+  spaceTest('tabs are reachable through the URL', async ({ page, pageObjects }) => {
     const shellTabUrl = page.url();
 
-    await test.step('navigating to History', async () => {
+    await spaceTest.step('navigating to History', async () => {
       await page.goto(shellTabUrl.replace('/shell', '/history'));
       await expect(pageObjects.console.historyPanel).toBeVisible();
       expect(page.url()).toContain('/history');
     });
 
-    await test.step('navigating to Config', async () => {
+    await spaceTest.step('navigating to Config', async () => {
       await page.goto(shellTabUrl.replace('/shell', '/config'));
       await expect(pageObjects.console.configPanel).toBeVisible();
       expect(page.url()).toContain('/config');
     });
 
-    await test.step('navigating back to Shell', async () => {
+    await spaceTest.step('navigating back to Shell', async () => {
       await page.goto(shellTabUrl);
       await expect(pageObjects.console.shellPanel).toBeVisible();
       expect(page.url()).toContain('/shell');

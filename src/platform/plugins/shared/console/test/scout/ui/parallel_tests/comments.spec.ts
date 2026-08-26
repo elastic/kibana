@@ -9,7 +9,7 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { test } from '../fixtures';
+import { spaceTest } from '../fixtures';
 import { enterRequestClearingSyntaxErrors } from '../lib/syntax_validation';
 
 const DEFAULT_URL = 'GET _search';
@@ -45,34 +45,34 @@ const INVALID_REQUESTS = [
   { description: 'a missing field name', body: '{\n "query": {},\n {}' },
 ];
 
-test.describe('Console comments', { tag: tags.deploymentAgnostic }, () => {
-  test.beforeEach(async ({ browserAuth, pageObjects }) => {
+spaceTest.describe('Console comments', { tag: tags.deploymentAgnostic }, () => {
+  spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
     await pageObjects.console.goto();
     await pageObjects.console.skipTourIfExists();
   });
 
-  test('accepts single line comments', async ({ pageObjects }) => {
+  spaceTest('accepts single line comments', async ({ pageObjects }) => {
     for (const { description, url, body } of SINGLE_LINE_COMMENTS) {
-      await test.step(description, async () => {
+      await spaceTest.step(description, async () => {
         await enterRequestClearingSyntaxErrors(pageObjects.console, buildRequest({ url, body }));
         await expect(pageObjects.console.invalidSyntaxMarker).toHaveCount(0);
       });
     }
   });
 
-  test('accepts multiline comments', async ({ pageObjects }) => {
+  spaceTest('accepts multiline comments', async ({ pageObjects }) => {
     for (const { description, url, body } of MULTILINE_COMMENTS) {
-      await test.step(description, async () => {
+      await spaceTest.step(description, async () => {
         await enterRequestClearingSyntaxErrors(pageObjects.console, buildRequest({ url, body }));
         await expect(pageObjects.console.invalidSyntaxMarker).toHaveCount(0);
       });
     }
   });
 
-  test('flags invalid request bodies', async ({ pageObjects }) => {
+  spaceTest('flags invalid request bodies', async ({ pageObjects }) => {
     for (const { description, body } of INVALID_REQUESTS) {
-      await test.step(description, async () => {
+      await spaceTest.step(description, async () => {
         await pageObjects.console.clearEditorText();
         await pageObjects.console.enterText(buildRequest({ body }));
         await expect(pageObjects.console.invalidSyntaxMarker).not.toHaveCount(0);

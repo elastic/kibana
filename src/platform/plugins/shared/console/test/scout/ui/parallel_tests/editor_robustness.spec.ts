@@ -9,21 +9,21 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { test } from '../fixtures';
+import { spaceTest } from '../fixtures';
 import { LARGE_INPUT } from '../fixtures/large_input';
 import { QUOTE_HEAVY_INPUT } from '../fixtures/quote_heavy_input';
 
 const INVALID_REQUEST = 'GET _search\n{"query": {"match_all": {';
 
-test.describe('Console editor robustness', { tag: tags.deploymentAgnostic }, () => {
-  test.beforeEach(async ({ browserAuth, pageObjects }) => {
+spaceTest.describe('Console editor robustness', { tag: tags.deploymentAgnostic }, () => {
+  spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
     await pageObjects.console.goto();
     await pageObjects.console.skipTourIfExists();
     await pageObjects.console.clearEditorText();
   });
 
-  test('keeps an invalid request intact when auto indenting it', async ({ pageObjects }) => {
+  spaceTest('keeps an invalid request intact when auto indenting it', async ({ pageObjects }) => {
     await pageObjects.console.enterText(INVALID_REQUEST);
     const versionBefore = await pageObjects.console.getModelVersionId();
 
@@ -35,7 +35,7 @@ test.describe('Console editor robustness', { tag: tags.deploymentAgnostic }, () 
     expect(await pageObjects.console.getEditorText()).toBe(INVALID_REQUEST);
   });
 
-  test('rejects sending a request with an invalid body', async ({ pageObjects }) => {
+  spaceTest('rejects sending a request with an invalid body', async ({ pageObjects }) => {
     await pageObjects.console.enterText(INVALID_REQUEST);
 
     await pageObjects.console.clickPlay();
@@ -46,7 +46,7 @@ test.describe('Console editor robustness', { tag: tags.deploymentAgnostic }, () 
     );
   });
 
-  test('rejects sending a request with an unsupported method', async ({ pageObjects }) => {
+  spaceTest('rejects sending a request with an unsupported method', async ({ pageObjects }) => {
     await pageObjects.console.enterText('OPTIONS /');
 
     await pageObjects.console.clickPlay();
@@ -57,7 +57,7 @@ test.describe('Console editor robustness', { tag: tags.deploymentAgnostic }, () 
     );
   });
 
-  test('opens a link written in the editor in a new tab', async ({ page, pageObjects }) => {
+  spaceTest('opens a link written in the editor in a new tab', async ({ page, pageObjects }) => {
     await pageObjects.console.enterText('# https://www.elastic.co');
     await expect(pageObjects.console.detectedLinks).not.toHaveCount(0);
 
@@ -71,7 +71,7 @@ test.describe('Console editor robustness', { tag: tags.deploymentAgnostic }, () 
     await linkPage.close();
   });
 
-  test('still autocompletes after a large payload is loaded', async ({ pageObjects }) => {
+  spaceTest('still autocompletes after a large payload is loaded', async ({ pageObjects }) => {
     // Imported rather than typed: entering this much text key by key is prohibitively slow.
     await pageObjects.console.importFile('console_import_large_input', LARGE_INPUT);
     await expect.poll(() => pageObjects.console.getEditorText()).not.toBe('');
@@ -81,14 +81,17 @@ test.describe('Console editor robustness', { tag: tags.deploymentAgnostic }, () 
     await expect(pageObjects.console.suggestWidget).toBeVisible();
   });
 
-  test('still autocompletes after a quote heavy payload is loaded', async ({ pageObjects }) => {
-    // Guards the ES|QL context detection, which used to run in super-linear time on JSON
-    // with many escaped quotes and froze the editor.
-    await pageObjects.console.importFile('console_import_quote_heavy_input', QUOTE_HEAVY_INPUT);
-    await expect.poll(() => pageObjects.console.getEditorText()).not.toBe('');
+  spaceTest(
+    'still autocompletes after a quote heavy payload is loaded',
+    async ({ pageObjects }) => {
+      // Guards the ES|QL context detection, which used to run in super-linear time on JSON
+      // with many escaped quotes and froze the editor.
+      await pageObjects.console.importFile('console_import_quote_heavy_input', QUOTE_HEAVY_INPUT);
+      await expect.poll(() => pageObjects.console.getEditorText()).not.toBe('');
 
-    await pageObjects.console.typeText('\nGET _search\n{\n"query": {\n');
+      await pageObjects.console.typeText('\nGET _search\n{\n"query": {\n');
 
-    await expect(pageObjects.console.suggestWidget).toBeVisible();
-  });
+      await expect(pageObjects.console.suggestWidget).toBeVisible();
+    }
+  );
 });

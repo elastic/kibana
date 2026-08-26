@@ -9,7 +9,7 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { test } from '../fixtures';
+import { spaceTest } from '../fixtures';
 
 // In step order.
 const STEP_TITLES = [
@@ -20,14 +20,14 @@ const STEP_TITLES = [
   'Manage Console files',
 ];
 
-test.describe('Console onboarding tour', { tag: tags.deploymentAgnostic }, () => {
-  test.beforeEach(async ({ browserAuth, pageObjects }) => {
+spaceTest.describe('Console onboarding tour', { tag: tags.deploymentAgnostic }, () => {
+  spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
     await pageObjects.console.goto();
     await pageObjects.console.skipTourIfExists();
   });
 
-  test('starts only once the run tour button is pressed', async ({ pageObjects }) => {
+  spaceTest('starts only once the run tour button is pressed', async ({ pageObjects }) => {
     await expect(pageObjects.console.tourStepTitle(STEP_TITLES[0])).toBeHidden();
 
     await pageObjects.console.runTour();
@@ -35,11 +35,11 @@ test.describe('Console onboarding tour', { tag: tags.deploymentAgnostic }, () =>
     await expect(pageObjects.console.tourStepTitle(STEP_TITLES[0])).toBeVisible();
   });
 
-  test('walks through the five steps and completes', async ({ pageObjects }) => {
+  spaceTest('walks through the five steps and completes', async ({ pageObjects }) => {
     await pageObjects.console.runTour();
 
     for (const title of STEP_TITLES.slice(0, -1)) {
-      await test.step(title, async () => {
+      await spaceTest.step(title, async () => {
         await expect(pageObjects.console.tourStepTitle(title)).toBeVisible();
         await pageObjects.console.nextTourStepButton.click();
       });
@@ -56,7 +56,7 @@ test.describe('Console onboarding tour', { tag: tags.deploymentAgnostic }, () =>
     }
   });
 
-  test('hides every step when the tour is skipped', async ({ pageObjects }) => {
+  spaceTest('hides every step when the tour is skipped', async ({ pageObjects }) => {
     await pageObjects.console.runTour();
     await expect(pageObjects.console.tourStepTitle(STEP_TITLES[0])).toBeVisible();
 
@@ -68,7 +68,7 @@ test.describe('Console onboarding tour', { tag: tags.deploymentAgnostic }, () =>
     }
   });
 
-  test('can be re-run after being skipped', async ({ pageObjects }) => {
+  spaceTest('can be re-run after being skipped', async ({ pageObjects }) => {
     await pageObjects.console.runTour();
     await expect(pageObjects.console.tourStepTitle(STEP_TITLES[0])).toBeVisible();
 

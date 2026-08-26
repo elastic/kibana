@@ -9,25 +9,25 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { test } from '../fixtures';
+import { spaceTest } from '../fixtures';
 
 const REQUEST = 'GET _search';
 
-test.describe('Console file import and export', { tag: tags.deploymentAgnostic }, () => {
-  test.beforeEach(async ({ browserAuth, pageObjects }) => {
+spaceTest.describe('Console file import and export', { tag: tags.deploymentAgnostic }, () => {
+  spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
     await pageObjects.console.goto();
     await pageObjects.console.skipTourIfExists();
     await pageObjects.console.clearEditorText();
   });
 
-  test('imports a file into the editor', async ({ pageObjects }) => {
+  spaceTest('imports a file into the editor', async ({ pageObjects }) => {
     await pageObjects.console.importFile('console_import', REQUEST);
 
     await expect.poll(() => pageObjects.console.getEditorText()).toBe(REQUEST);
   });
 
-  test('exports the editor content as a file', async ({ page, pageObjects }) => {
+  spaceTest('exports the editor content as a file', async ({ page, pageObjects }) => {
     await pageObjects.console.enterText(REQUEST);
 
     const download = page.waitForEvent('download');

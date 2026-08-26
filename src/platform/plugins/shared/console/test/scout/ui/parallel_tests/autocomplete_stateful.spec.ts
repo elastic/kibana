@@ -9,7 +9,7 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { test } from '../fixtures';
+import { spaceTest } from '../fixtures';
 
 const SNAPSHOT_TEMPLATES = [
   { type: 'fs', inserted: '"location": "path"' },
@@ -18,8 +18,8 @@ const SNAPSHOT_TEMPLATES = [
   { type: 'azure', inserted: '"path": ""' },
 ];
 
-test.describe('Console autocomplete (stateful only)', { tag: tags.stateful.classic }, () => {
-  test.beforeEach(async ({ browserAuth, pageObjects }) => {
+spaceTest.describe('Console autocomplete (stateful only)', { tag: tags.stateful.classic }, () => {
+  spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
     await pageObjects.console.goto();
     await pageObjects.console.skipTourIfExists();
@@ -29,17 +29,20 @@ test.describe('Console autocomplete (stateful only)', { tag: tags.stateful.class
   // Stateful only: serverless handles backups internally and exposes no user-managed
   // snapshot repositories, so this completion returns nothing there (verified by hand for
   // every repository `type`).
-  test('inserts the snapshot repository template of the selected type', async ({ pageObjects }) => {
-    for (const { type, inserted } of SNAPSHOT_TEMPLATES) {
-      await test.step(type, async () => {
-        await pageObjects.console.clearEditorText();
-        await pageObjects.console.typeText(`POST _snapshot/test_repo\n{\n"type": "${type}",\ns`);
-        await expect(pageObjects.console.suggestWidget).toBeVisible();
+  spaceTest(
+    'inserts the snapshot repository template of the selected type',
+    async ({ pageObjects }) => {
+      for (const { type, inserted } of SNAPSHOT_TEMPLATES) {
+        await spaceTest.step(type, async () => {
+          await pageObjects.console.clearEditorText();
+          await pageObjects.console.typeText(`POST _snapshot/test_repo\n{\n"type": "${type}",\ns`);
+          await expect(pageObjects.console.suggestWidget).toBeVisible();
 
-        await pageObjects.console.acceptAutocompleteSuggestion();
+          await pageObjects.console.acceptAutocompleteSuggestion();
 
-        await expect.poll(() => pageObjects.console.getEditorText()).toContain(inserted);
-      });
+          await expect.poll(() => pageObjects.console.getEditorText()).toContain(inserted);
+        });
+      }
     }
-  });
+  );
 });

@@ -9,10 +9,10 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { test } from '../fixtures';
+import { spaceTest } from '../fixtures';
 
-test.describe('Console copy as language', { tag: tags.deploymentAgnostic }, () => {
-  test.beforeEach(async ({ browserAuth, page, pageObjects }) => {
+spaceTest.describe('Console copy as language', { tag: tags.deploymentAgnostic }, () => {
+  spaceTest.beforeEach(async ({ browserAuth, page, pageObjects }) => {
     await page.context().grantPermissions(['clipboard-read', 'clipboard-write']);
     await browserAuth.loginAsAdmin();
     // The default language is persisted per browser context, so every test starts from curl.
@@ -20,7 +20,7 @@ test.describe('Console copy as language', { tag: tags.deploymentAgnostic }, () =
     await pageObjects.console.skipTourIfExists();
   });
 
-  test('copies the request as curl by default', async ({ page, pageObjects }) => {
+  spaceTest('copies the request as curl by default', async ({ page, pageObjects }) => {
     await pageObjects.console.openContextMenu();
     await pageObjects.console.copyAsMenuItem.click();
 
@@ -31,50 +31,52 @@ test.describe('Console copy as language', { tag: tags.deploymentAgnostic }, () =
     expect(clipboardText).toContain('curl -X GET');
   });
 
-  test('copies a selection containing a kbn request as curl only', async ({
-    page,
-    pageObjects,
-  }) => {
-    await pageObjects.console.clearEditorText();
-    await pageObjects.console.enterText('GET _search\nGET kbn:/api/spaces/space');
-    await pageObjects.console.selectAllRequests();
+  spaceTest(
+    'copies a selection containing a kbn request as curl only',
+    async ({ page, pageObjects }) => {
+      await pageObjects.console.clearEditorText();
+      await pageObjects.console.enterText('GET _search\nGET kbn:/api/spaces/space');
+      await pageObjects.console.selectAllRequests();
 
-    await test.step('the copy falls back to curl for both requests', async () => {
+      await spaceTest.step('the copy falls back to curl for both requests', async () => {
+        await pageObjects.console.openContextMenu();
+        await pageObjects.console.copyAsMenuItem.click();
+
+        await pageObjects.toasts.waitFor();
+        expect(await pageObjects.toasts.getHeaderText()).toBe(
+          'Requests copied to clipboard as curl'
+        );
+        const clipboardText = await page.evaluate(() => navigator.clipboard.readText());
+        expect(clipboardText).toContain('curl -X GET');
+      });
+
+      await spaceTest.step('no other language can be selected', async () => {
+        await pageObjects.console.selectAllRequests();
+        await pageObjects.console.openContextMenu();
+        await expect(pageObjects.console.selectLanguageMenuItem).toBeHidden();
+      });
+    }
+  );
+
+  spaceTest(
+    'copies the request in a language picked from the selector',
+    async ({ page, pageObjects }) => {
       await pageObjects.console.openContextMenu();
-      await pageObjects.console.copyAsMenuItem.click();
+      await pageObjects.console.openLanguageSelector();
+      await pageObjects.console.pickLanguage('javascript');
+      await pageObjects.console.copyAsLanguageSubmitButton.click();
 
       await pageObjects.toasts.waitFor();
-      expect(await pageObjects.toasts.getHeaderText()).toBe('Requests copied to clipboard as curl');
+      expect(await pageObjects.toasts.getHeaderText()).toBe(
+        'Request copied to clipboard as JavaScript'
+      );
+
       const clipboardText = await page.evaluate(() => navigator.clipboard.readText());
-      expect(clipboardText).toContain('curl -X GET');
-    });
+      expect(clipboardText).toContain('require("@elastic/elasticsearch")');
+    }
+  );
 
-    await test.step('no other language can be selected', async () => {
-      await pageObjects.console.selectAllRequests();
-      await pageObjects.console.openContextMenu();
-      await expect(pageObjects.console.selectLanguageMenuItem).toBeHidden();
-    });
-  });
-
-  test('copies the request in a language picked from the selector', async ({
-    page,
-    pageObjects,
-  }) => {
-    await pageObjects.console.openContextMenu();
-    await pageObjects.console.openLanguageSelector();
-    await pageObjects.console.pickLanguage('javascript');
-    await pageObjects.console.copyAsLanguageSubmitButton.click();
-
-    await pageObjects.toasts.waitFor();
-    expect(await pageObjects.toasts.getHeaderText()).toBe(
-      'Request copied to clipboard as JavaScript'
-    );
-
-    const clipboardText = await page.evaluate(() => navigator.clipboard.readText());
-    expect(clipboardText).toContain('require("@elastic/elasticsearch")');
-  });
-
-  test('changes the default language from the selector', async ({ pageObjects }) => {
+  spaceTest('changes the default language from the selector', async ({ pageObjects }) => {
     await pageObjects.console.openContextMenu();
     await expect(pageObjects.console.copyAsMenuItem).toContainText('curl', { ignoreCase: true });
 
@@ -87,7 +89,7 @@ test.describe('Console copy as language', { tag: tags.deploymentAgnostic }, () =
     await expect(pageObjects.console.copyAsMenuItem).toContainText('Python');
   });
 
-  test('keeps the new default language after copying the code', async ({ pageObjects }) => {
+  spaceTest('keeps the new default language after copying the code', async ({ pageObjects }) => {
     await pageObjects.console.openContextMenu();
     await pageObjects.console.openLanguageSelector();
     await pageObjects.console.pickLanguage('php');

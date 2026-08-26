@@ -9,14 +9,14 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { test } from '../fixtures';
+import { spaceTest } from '../fixtures';
 
 // `._shards` returns the value object, so the `_shards` key itself disappears from the
 // output while `successful` (unique to that object) stays.
 const SHARDS_FILTER = '._shards';
 
-test.describe('Console output filter', { tag: tags.deploymentAgnostic }, () => {
-  test.beforeEach(async ({ browserAuth, pageObjects }) => {
+spaceTest.describe('Console output filter', { tag: tags.deploymentAgnostic }, () => {
+  spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
     await pageObjects.console.gotoWithRequestLoaded('GET /_search?pretty');
     await pageObjects.console.skipTourIfExists();
@@ -24,7 +24,7 @@ test.describe('Console output filter', { tag: tags.deploymentAgnostic }, () => {
     await expect(pageObjects.console.outputEditorContent).toContainText('hits');
   });
 
-  test('expands and collapses the filter row', async ({ pageObjects }) => {
+  spaceTest('expands and collapses the filter row', async ({ pageObjects }) => {
     await expect(pageObjects.console.outputFilterInput).toBeHidden();
 
     await pageObjects.console.toggleOutputFilterRow();
@@ -34,31 +34,35 @@ test.describe('Console output filter', { tag: tags.deploymentAgnostic }, () => {
     await expect(pageObjects.console.outputFilterInput).toBeHidden();
   });
 
-  test('applies a filter to the output and restores it when cleared', async ({ pageObjects }) => {
-    await pageObjects.console.toggleOutputFilterRow();
+  spaceTest(
+    'applies a filter to the output and restores it when cleared',
+    async ({ pageObjects }) => {
+      await pageObjects.console.toggleOutputFilterRow();
 
-    await test.step('applying the filter narrows the output', async () => {
+      await spaceTest.step('applying the filter narrows the output', async () => {
+        await pageObjects.console.setOutputFilter(SHARDS_FILTER);
+        await expect(pageObjects.console.outputEditorContent).toContainText('"successful"');
+        await expect(pageObjects.console.outputEditorContent).not.toContainText('hits');
+      });
+
+      await spaceTest.step('clearing the filter restores the full output', async () => {
+        await pageObjects.console.setOutputFilter('');
+        await expect(pageObjects.console.outputEditorContent).toContainText('hits');
+      });
+    }
+  );
+
+  spaceTest(
+    'marks the filter button while a filter is applied and the row is collapsed',
+    async ({ pageObjects }) => {
+      await pageObjects.console.toggleOutputFilterRow();
       await pageObjects.console.setOutputFilter(SHARDS_FILTER);
-      await expect(pageObjects.console.outputEditorContent).toContainText('"successful"');
       await expect(pageObjects.console.outputEditorContent).not.toContainText('hits');
-    });
 
-    await test.step('clearing the filter restores the full output', async () => {
-      await pageObjects.console.setOutputFilter('');
-      await expect(pageObjects.console.outputEditorContent).toContainText('hits');
-    });
-  });
+      await pageObjects.console.toggleOutputFilterRow();
+      await expect(pageObjects.console.outputFilterInput).toBeHidden();
 
-  test('marks the filter button while a filter is applied and the row is collapsed', async ({
-    pageObjects,
-  }) => {
-    await pageObjects.console.toggleOutputFilterRow();
-    await pageObjects.console.setOutputFilter(SHARDS_FILTER);
-    await expect(pageObjects.console.outputEditorContent).not.toContainText('hits');
-
-    await pageObjects.console.toggleOutputFilterRow();
-    await expect(pageObjects.console.outputFilterInput).toBeHidden();
-
-    await expect(pageObjects.console.outputFilterActiveIndicator).toBeVisible();
-  });
+      await expect(pageObjects.console.outputFilterActiveIndicator).toBeVisible();
+    }
+  );
 });

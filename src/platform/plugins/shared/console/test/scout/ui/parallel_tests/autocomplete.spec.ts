@@ -9,7 +9,7 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { test } from '../fixtures';
+import { spaceTest } from '../fixtures';
 
 const CASE_VARIANTS = [
   'GET',
@@ -31,35 +31,36 @@ const COMMENT_CONTEXTS = [
   { description: 'a multiline block comment', text: '/*\n GET /' },
 ];
 
-test.describe('Console autocomplete', { tag: tags.deploymentAgnostic }, () => {
-  test.beforeEach(async ({ browserAuth, pageObjects }) => {
+spaceTest.describe('Console autocomplete', { tag: tags.deploymentAgnostic }, () => {
+  spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
     await pageObjects.console.goto();
     await pageObjects.console.skipTourIfExists();
     await pageObjects.console.clearEditorText();
   });
 
-  test('suggests inside a request body', async ({ pageObjects }) => {
+  spaceTest('suggests inside a request body', async ({ pageObjects }) => {
     await pageObjects.console.typeText('GET _search\n{\n"query": {\n');
 
     await expect(pageObjects.console.suggestWidget).toBeVisible();
   });
 
-  test('inserts a suggestion into inline JSON without breaking the quoting', async ({
-    pageObjects,
-  }) => {
-    await pageObjects.console.typeText('GET index/_search\n{"query": {te');
-    await expect(pageObjects.console.suggestWidget).toBeVisible();
+  spaceTest(
+    'inserts a suggestion into inline JSON without breaking the quoting',
+    async ({ pageObjects }) => {
+      await pageObjects.console.typeText('GET index/_search\n{"query": {te');
+      await expect(pageObjects.console.suggestWidget).toBeVisible();
 
-    await pageObjects.console.acceptAutocompleteSuggestion();
+      await pageObjects.console.acceptAutocompleteSuggestion();
 
-    await expect.poll(() => pageObjects.console.getEditorText()).toContain('"term"');
-    const editorText = await pageObjects.console.getEditorText();
-    expect(editorText).not.toContain('""term"');
-    expect(editorText).not.toContain('{term"');
-  });
+      await expect.poll(() => pageObjects.console.getEditorText()).toContain('"term"');
+      const editorText = await pageObjects.console.getEditorText();
+      expect(editorText).not.toContain('""term"');
+      expect(editorText).not.toContain('{term"');
+    }
+  );
 
-  test('does not offer the same suggestion twice', async ({ pageObjects }) => {
+  spaceTest('does not offer the same suggestion twice', async ({ pageObjects }) => {
     await pageObjects.console.typeText(
       'POST _ingest/pipeline/_simulate\n{\n"pipeline": {\n"processors": [\n{\n"script": {\n"'
     );
@@ -70,7 +71,7 @@ test.describe('Console autocomplete', { tag: tags.deploymentAgnostic }, () => {
     expect(suggestions).toStrictEqual([...new Set(suggestions)]);
   });
 
-  test('suggests the HTTP methods matching what has been typed', async ({ pageObjects }) => {
+  spaceTest('suggests the HTTP methods matching what has been typed', async ({ pageObjects }) => {
     // Sorted by `autocompleteMethods` declaration order, not alphabetically. See #270787.
     const methodsByPrefix = {
       G: ['GET'],
@@ -80,7 +81,7 @@ test.describe('Console autocomplete', { tag: tags.deploymentAgnostic }, () => {
     };
 
     for (const [prefix, methods] of Object.entries(methodsByPrefix)) {
-      await test.step(prefix, async () => {
+      await spaceTest.step(prefix, async () => {
         await pageObjects.console.clearEditorText();
         await pageObjects.console.typeText(prefix);
 
@@ -92,7 +93,7 @@ test.describe('Console autocomplete', { tag: tags.deploymentAgnostic }, () => {
     }
   });
 
-  test('suggests the API endpoints of the typed method', async ({ pageObjects }) => {
+  spaceTest('suggests the API endpoints of the typed method', async ({ pageObjects }) => {
     const endpointsByRequest = {
       'GET _': ['_alias', '_all'],
       'PUT _': ['_all'],
@@ -102,7 +103,7 @@ test.describe('Console autocomplete', { tag: tags.deploymentAgnostic }, () => {
     };
 
     for (const [request, endpoints] of Object.entries(endpointsByRequest)) {
-      await test.step(request, async () => {
+      await spaceTest.step(request, async () => {
         await pageObjects.console.clearEditorText();
         await pageObjects.console.typeText(request);
 
@@ -117,7 +118,7 @@ test.describe('Console autocomplete', { tag: tags.deploymentAgnostic }, () => {
     }
   });
 
-  test('expands a suggestion that carries placeholder fields', async ({ pageObjects }) => {
+  spaceTest('expands a suggestion that carries placeholder fields', async ({ pageObjects }) => {
     await pageObjects.console.typeText('GET _search\n{\n"ag');
     await expect(pageObjects.console.suggestWidget).toBeVisible();
 
@@ -128,22 +129,25 @@ test.describe('Console autocomplete', { tag: tags.deploymentAgnostic }, () => {
       .toContain('"aggs":{"NAME":{"AGG_TYPE":{}}}');
   });
 
-  test('activates on a single character after a slash in the url', async ({ pageObjects }) => {
+  spaceTest('activates on a single character after a slash in the url', async ({ pageObjects }) => {
     await pageObjects.console.typeText('GET .kibana/_');
 
     await expect(pageObjects.console.suggestWidget).toBeVisible();
   });
 
-  test('activates after a comma listing several indices in the url', async ({ pageObjects }) => {
-    await pageObjects.console.typeText('GET _cat/indices/.kibana,');
-    await pageObjects.console.requestAutocompleteSuggestions();
+  spaceTest(
+    'activates after a comma listing several indices in the url',
+    async ({ pageObjects }) => {
+      await pageObjects.console.typeText('GET _cat/indices/.kibana,');
+      await pageObjects.console.requestAutocompleteSuggestions();
 
-    await expect(pageObjects.console.suggestWidget).toBeVisible();
-  });
+      await expect(pageObjects.console.suggestWidget).toBeVisible();
+    }
+  );
 
-  test('activates for methods however they are capitalized', async ({ pageObjects }) => {
+  spaceTest('activates for methods however they are capitalized', async ({ pageObjects }) => {
     for (const method of CASE_VARIANTS) {
-      await test.step(method, async () => {
+      await spaceTest.step(method, async () => {
         await pageObjects.console.clearEditorText();
         await pageObjects.console.typeText(`${method} _`);
 
@@ -152,7 +156,7 @@ test.describe('Console autocomplete', { tag: tags.deploymentAgnostic }, () => {
     }
   });
 
-  test('suggests ES|QL commands inside a triple quoted query', async ({ pageObjects }) => {
+  spaceTest('suggests ES|QL commands inside a triple quoted query', async ({ pageObjects }) => {
     await pageObjects.console.typeText('POST _query\n{\n"query": """');
 
     await expect(pageObjects.console.suggestWidget).toBeVisible();
@@ -161,16 +165,17 @@ test.describe('Console autocomplete', { tag: tags.deploymentAgnostic }, () => {
       .toStrictEqual(expect.arrayContaining(['FROM', 'ROW', 'SHOW']));
   });
 
-  test('does not suggest ES|QL inside triple quotes that are not a query', async ({
-    pageObjects,
-  }) => {
-    await pageObjects.console.typeText('POST _query\n{\n"script": """\n');
+  spaceTest(
+    'does not suggest ES|QL inside triple quotes that are not a query',
+    async ({ pageObjects }) => {
+      await pageObjects.console.typeText('POST _query\n{\n"script": """\n');
 
-    await pageObjects.console.waitForAutocompleteTriggerWindow();
-    await expect(pageObjects.console.suggestWidget).toBeHidden();
-  });
+      await pageObjects.console.waitForAutocompleteTriggerWindow();
+      await expect(pageObjects.console.suggestWidget).toBeHidden();
+    }
+  );
 
-  test('does not suggest ES|QL outside of a query', async ({ pageObjects }) => {
+  spaceTest('does not suggest ES|QL outside of a query', async ({ pageObjects }) => {
     await pageObjects.console.typeText('GET _search\n{\n"query": {\n');
     await expect(pageObjects.console.suggestWidget).toBeVisible();
 
@@ -181,9 +186,9 @@ test.describe('Console autocomplete', { tag: tags.deploymentAgnostic }, () => {
     expect(suggestions).not.toContain('SHOW');
   });
 
-  test('does not activate inside a comment', async ({ pageObjects }) => {
+  spaceTest('does not activate inside a comment', async ({ pageObjects }) => {
     for (const { description, text } of COMMENT_CONTEXTS) {
-      await test.step(description, async () => {
+      await spaceTest.step(description, async () => {
         await pageObjects.console.clearEditorText();
         await pageObjects.console.typeText(text);
 

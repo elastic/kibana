@@ -9,17 +9,17 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { test } from '../fixtures';
+import { spaceTest } from '../fixtures';
 
-test.describe('Console history', { tag: tags.deploymentAgnostic }, () => {
-  test.beforeEach(async ({ browserAuth, pageObjects }) => {
+spaceTest.describe('Console history', { tag: tags.deploymentAgnostic }, () => {
+  spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
     await pageObjects.console.goto();
     await pageObjects.console.skipTourIfExists();
     await pageObjects.console.clearEditorText();
   });
 
-  test('lists executed requests and clears them', async ({ pageObjects }) => {
+  spaceTest('lists executed requests and clears them', async ({ pageObjects }) => {
     await pageObjects.console.enterText('GET /_search?pretty');
     await pageObjects.console.sendRequest();
 
@@ -31,7 +31,7 @@ test.describe('Console history', { tag: tags.deploymentAgnostic }, () => {
     await expect(pageObjects.console.historyItems).toHaveCount(0);
   });
 
-  test('loads a request from history back into the editor', async ({ pageObjects }) => {
+  spaceTest('loads a request from history back into the editor', async ({ pageObjects }) => {
     await pageObjects.console.enterText('GET _search\n{"query": {"match_all": {}}}');
     await pageObjects.console.sendRequest();
     await pageObjects.console.clearEditorText();
@@ -45,7 +45,7 @@ test.describe('Console history', { tag: tags.deploymentAgnostic }, () => {
       .toContain('GET _search\n{\n  "query": {\n    "match_all": {}\n  }\n}');
   });
 
-  test('restores and runs a request from history', async ({ pageObjects }) => {
+  spaceTest('restores and runs a request from history', async ({ pageObjects }) => {
     await pageObjects.console.enterText('GET _search\n{"query": {"match_all": {}}}');
     await pageObjects.console.sendRequest();
     await pageObjects.console.clearEditorText();

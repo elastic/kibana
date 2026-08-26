@@ -9,7 +9,7 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { test } from '../fixtures';
+import { spaceTest } from '../fixtures';
 import { enterRequestClearingSyntaxErrors } from '../lib/syntax_validation';
 
 const ACCEPTED_REQUESTS = [
@@ -36,25 +36,25 @@ const REJECTED_REQUESTS = [
   { description: 'an unterminated body', request: 'POST foo/bar\n {"foo": "bar"' },
 ];
 
-test.describe('Console input validation', { tag: tags.deploymentAgnostic }, () => {
-  test.beforeEach(async ({ browserAuth, pageObjects }) => {
+spaceTest.describe('Console input validation', { tag: tags.deploymentAgnostic }, () => {
+  spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
     await pageObjects.console.goto();
     await pageObjects.console.skipTourIfExists();
   });
 
-  test('accepts valid requests', async ({ pageObjects }) => {
+  spaceTest('accepts valid requests', async ({ pageObjects }) => {
     for (const { description, request } of ACCEPTED_REQUESTS) {
-      await test.step(description, async () => {
+      await spaceTest.step(description, async () => {
         await enterRequestClearingSyntaxErrors(pageObjects.console, request);
         await expect(pageObjects.console.invalidSyntaxMarker).toHaveCount(0);
       });
     }
   });
 
-  test('flags invalid requests', async ({ pageObjects }) => {
+  spaceTest('flags invalid requests', async ({ pageObjects }) => {
     for (const { description, request } of REJECTED_REQUESTS) {
-      await test.step(description, async () => {
+      await spaceTest.step(description, async () => {
         await pageObjects.console.clearEditorText();
         await pageObjects.console.enterText(request);
         await expect(pageObjects.console.invalidSyntaxMarker).not.toHaveCount(0);
@@ -62,7 +62,7 @@ test.describe('Console input validation', { tag: tags.deploymentAgnostic }, () =
     }
   });
 
-  test('runs a request with an inline comment in the url', async ({ pageObjects }) => {
+  spaceTest('runs a request with an inline comment in the url', async ({ pageObjects }) => {
     await pageObjects.console.clearEditorText();
     await pageObjects.console.enterText('GET _search // inline comment');
     await pageObjects.console.sendRequest();
@@ -70,7 +70,7 @@ test.describe('Console input validation', { tag: tags.deploymentAgnostic }, () =
     expect(await pageObjects.console.getResponseStatus()).toBe(200);
   });
 
-  test('runs a request with an inline comment in the body', async ({ pageObjects }) => {
+  spaceTest('runs a request with an inline comment in the body', async ({ pageObjects }) => {
     await pageObjects.console.clearEditorText();
     await pageObjects.console.enterText(
       'GET _search \n{\n "query": {\n "match_all": {} // inline comment\n}\n}'
@@ -80,11 +80,14 @@ test.describe('Console input validation', { tag: tags.deploymentAgnostic }, () =
     expect(await pageObjects.console.getResponseStatus()).toBe(200);
   });
 
-  test('does not print a deprecation warning for a supported request', async ({ pageObjects }) => {
-    await pageObjects.console.clearEditorText();
-    await pageObjects.console.enterText('GET _search');
-    await pageObjects.console.sendRequest();
+  spaceTest(
+    'does not print a deprecation warning for a supported request',
+    async ({ pageObjects }) => {
+      await pageObjects.console.clearEditorText();
+      await pageObjects.console.enterText('GET _search');
+      await pageObjects.console.sendRequest();
 
-    expect(await pageObjects.console.responseHasDeprecationWarning()).toBe(false);
-  });
+      expect(await pageObjects.console.responseHasDeprecationWarning()).toBe(false);
+    }
+  );
 });

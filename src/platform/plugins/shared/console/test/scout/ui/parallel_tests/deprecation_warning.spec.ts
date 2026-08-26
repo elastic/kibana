@@ -9,18 +9,18 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { test } from '../fixtures';
+import { spaceTest } from '../fixtures';
 
 // Stateful only: serverless blocks reaching a system index directly, so no deprecated
 // request is available there.
-test.describe('Console deprecation warnings', { tag: tags.stateful.classic }, () => {
-  test.beforeEach(async ({ browserAuth, pageObjects }) => {
+spaceTest.describe('Console deprecation warnings', { tag: tags.stateful.classic }, () => {
+  spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
     await pageObjects.console.goto();
     await pageObjects.console.skipTourIfExists();
   });
 
-  test('prints a deprecation warning for a deprecated request', async ({ pageObjects }) => {
+  spaceTest('prints a deprecation warning for a deprecated request', async ({ pageObjects }) => {
     await pageObjects.console.clearEditorText();
     await pageObjects.console.enterText('GET .kibana');
     await pageObjects.console.sendRequest();
