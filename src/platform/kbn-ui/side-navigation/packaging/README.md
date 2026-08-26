@@ -25,7 +25,6 @@ import { SideNavigation } from '@kbn/ui-side-navigation';
 
 <SideNavigation
   items={navigationItems}
-  logo={logoConfig}
   isCollapsed={false}
   activeItemId="dashboard"
   onItemClick={handleClick}
