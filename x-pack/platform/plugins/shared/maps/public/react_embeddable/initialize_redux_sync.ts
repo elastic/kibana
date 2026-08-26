@@ -12,6 +12,7 @@ import type { PublishingSubject, StateComparators } from '@kbn/presentation-publ
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type { PaletteRegistry } from '@kbn/coloring';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
+import { debounce } from 'lodash';
 import type { MapCenterAndZoom } from '../../common/descriptor_types';
 import { APP_ID, getEditPath, RENDER_TIMEOUT } from '../../common/constants';
 import type { MapStoreState } from '../reducers/store';
@@ -106,7 +107,8 @@ export function initializeReduxSync({
   );
   const dataLoading$ = new BehaviorSubject<boolean | undefined>(undefined);
 
-  const unsubscribeFromStore = store.subscribe(() => {
+  // sync embeddable state with map redux store
+  function syncWithStore() {
     if (!getMapReady(store.getState())) {
       return;
     }
@@ -134,7 +136,9 @@ export function initializeReduxSync({
     if (nextIsMapLoading !== dataLoading$.value) {
       dataLoading$.next(nextIsMapLoading);
     }
-  });
+  }
+
+  const unsubscribeFromStore = store.subscribe(debounce(syncWithStore, 100));
 
   store.dispatch(setReadOnly(true));
   store.dispatch(
@@ -212,6 +216,9 @@ export function initializeReduxSync({
       setEventHandlers: (eventHandlers: EventHandlers) => {
         store.dispatch(setEventHandlers(eventHandlers));
       },
+    },
+    internalApi: {
+      syncWithStore,
     },
     anyStateChange$: merge(
       hiddenLayers$.pipe(

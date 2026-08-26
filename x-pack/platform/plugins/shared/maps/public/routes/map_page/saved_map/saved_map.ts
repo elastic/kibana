@@ -143,12 +143,12 @@ export class SavedMap {
     return this._store;
   }
 
-  public async reset(mapEmbeddableState: MapEmbeddableState) {
+  public reset(mapEmbeddableState: MapEmbeddableState) {
     this._mapEmbeddableState = mapEmbeddableState;
-    await this.initializeStore();
+    this.initializeStore();
   }
 
-  private async initializeStore() {
+  private initializeStore() {
     if (this._mapEmbeddableState?.mapSettings !== undefined) {
       this._store.dispatch(setMapSettingsFromEncodedState(this._mapEmbeddableState.mapSettings));
     } else if (this._attributes?.settings) {
@@ -189,7 +189,7 @@ export class SavedMap {
       );
     }
 
-    const layerList: LayerDescriptor[] = (this._attributes.layers as LayerDescriptor[]) ?? [];
+    const layerList: LayerDescriptor[] = (this._attributes?.layers as LayerDescriptor[]) ?? [];
     if (layerList.length === 0) {
       const basemapLayerDescriptor = createBasemapLayerDescriptor();
       if (basemapLayerDescriptor) {
@@ -240,7 +240,7 @@ export class SavedMap {
       await Promise.all(promises);
     }
 
-    await this.initializeStore();
+    this.initializeStore();
 
     if (this._defaultLayerWizard) {
       this._store.dispatch<any>(setAutoOpenLayerWizardId(this._defaultLayerWizard));
