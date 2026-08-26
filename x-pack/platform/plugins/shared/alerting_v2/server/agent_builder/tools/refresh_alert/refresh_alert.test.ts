@@ -10,28 +10,11 @@ import { ALERTING_LOG_CODES } from '../../../lib/errors/error_codes';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { ToolType } from '@kbn/agent-builder-common';
-import {
-  ALERT_EPISODE_STATUS,
-  type AlertEpisode,
-  type AlertAttachmentData,
-} from '@kbn/alerting-v2-schemas';
+import { ALERT_EPISODE_STATUS, type AlertEpisode } from '@kbn/alerting-v2-schemas';
 import type { EpisodesClient } from '../../../lib/episodes_client';
 import type { RulesClient } from '../../../lib/rules_client';
 import type { PrivilegeChecker } from '../../../lib/services/privilege_checker/privilege_checker';
 import { refreshAlertTool, refreshAlertToolId } from './refresh_alert';
-
-const baseEpisodeData: AlertAttachmentData = {
-  '@timestamp': '2026-04-10T12:00:00.000Z',
-  'alert.id': 'ep-1',
-  'alert.status': ALERT_EPISODE_STATUS.ACTIVE,
-  'rule.id': 'rule-1',
-  group_hash: 'gh-1',
-  first_timestamp: '2026-04-10T11:00:00.000Z',
-  last_timestamp: '2026-04-10T12:00:00.000Z',
-  duration: 3600000,
-  severity: 'high',
-  last_tags: ['ops'],
-};
 
 const baseEpisodeRow: AlertEpisode = {
   '@timestamp': '2026-04-10T12:00:00.000Z',
