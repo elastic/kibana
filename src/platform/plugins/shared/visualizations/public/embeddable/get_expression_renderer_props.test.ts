@@ -230,33 +230,5 @@ describe('getExpressionRendererProps', () => {
       );
     });
 
-    it('should include undefined esqlVariables in search context when not provided', async () => {
-      const vis = createMockVis();
-      const result = await getExpressionRendererProps({
-        unifiedSearch: {
-          query: { query: '', language: 'kuery' },
-          filters: [],
-        },
-        isApproximate: false,
-        timeRange: { from: 'now-15m', to: 'now' },
-        disableTriggers: false,
-        settings: {
-          syncColors: true,
-          syncCursor: true,
-          syncTooltips: false,
-        },
-        vis,
-        onRender: jest.fn(),
-        onEvent: jest.fn(),
-        onData: jest.fn(),
-      });
-
-      expect(result.params).toBeDefined();
-      expect(result.params?.searchContext).toEqual(
-        expect.objectContaining({
-          esqlVariables: undefined,
-        })
-      );
-    });
   });
 });

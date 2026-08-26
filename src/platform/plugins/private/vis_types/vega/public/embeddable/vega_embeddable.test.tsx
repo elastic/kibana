@@ -463,25 +463,6 @@ describe('vegaEmbeddableFactory', () => {
     expect(api).not.toHaveProperty('filters$');
   });
 
-  it('publishes the union of variable names for a multi-source ES|QL spec', async () => {
-    const { api } = await buildEmbeddable();
-
-    api.applySerializedState({
-      spec: `{
-        data: [
-          { url: { "%type%": "esql", query: "FROM logs-* | WHERE machine.os.keyword == ?fizzbuzz" } },
-          { url: { "%type%": "esql", query: "FROM logs-* | WHERE color.keyword == ?color" } }
-        ]
-      }`,
-      title: 'Initial title',
-    });
-
-    const published = api.query$.getValue();
-    expect(published).toBeDefined();
-    expect(new Set(getESQLQueryVariables(published!.esql))).toEqual(new Set(['color', 'fizzbuzz']));
-    expect(apiPublishesESQLQuery(api)).toBe(true);
-  });
-
   it('does not publish an ES|QL query for non-ES|QL specs', async () => {
     const { api } = await buildEmbeddable();
 

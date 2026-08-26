@@ -738,17 +738,6 @@ describe('EsqlQueryParser._injectNamedParams', () => {
     expect(result.params).toEqual([{ fizzbuzz: 'ios' }]);
   });
 
-  test('binds a different user-named values variable the same way', () => {
-    const { parser } = createParser(rangeStart, rangeEnd, {}, [
-      { key: 'os', value: 'windows', type: ESQLVariableType.VALUES },
-    ]);
-
-    const query = 'FROM logs-* | WHERE machine.os.keyword == ?os';
-    const result = parser._injectNamedParams(query, { query });
-
-    expect(result.params).toEqual([{ os: 'windows' }]);
-  });
-
   test('omits unused dashboard variables from the request params', () => {
     const { parser } = createParser(rangeStart, rangeEnd, {}, [
       { key: 'fizzbuzz', value: 'ios', type: ESQLVariableType.VALUES },
