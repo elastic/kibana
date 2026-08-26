@@ -102,11 +102,14 @@ export function AgentBuilderNavControl() {
   );
 
   const showTooltip = !isSidebarOpen && tooltipVisible;
-  const variant = isSidebarOpen ? 'accent' : 'base';
-  const textButton = (
+  const variant = isSidebarOpen ? 'accent' : 'outlined';
+  const buttonLabelNode = (
+    <FormattedMessage id="xpack.agentBuilder.navControl.linkLabel" defaultMessage="AI Agent" />
+  );
+  const textButton = isSidebarOpen ? (
     <AiButton
       buttonRef={buttonRef}
-      variant={variant}
+      variant="accent"
       size="s"
       iconType="productAgent"
       onClick={handleClick}
@@ -114,7 +117,20 @@ export function AgentBuilderNavControl() {
       onMouseLeave={() => setTooltipVisible(true)}
       onBlur={() => setTooltipVisible(true)}
     >
-      <FormattedMessage id="xpack.agentBuilder.navControl.linkLabel" defaultMessage="AI Agent" />
+      {buttonLabelNode}
+    </AiButton>
+  ) : (
+    <AiButton
+      buttonRef={buttonRef}
+      variant="outlined"
+      size="s"
+      iconType="productAgent"
+      onClick={handleClick}
+      data-test-subj="AgentBuilderNavControlButton"
+      onMouseLeave={() => setTooltipVisible(true)}
+      onBlur={() => setTooltipVisible(true)}
+    >
+      {buttonLabelNode}
     </AiButton>
   );
   const iconButton = (
