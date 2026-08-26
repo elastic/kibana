@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, IRouter, Logger } from '@kbn/core/server';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { SmlSearchHttpResponse, SmlSearchHttpResultItem } from '../../common/http_api/sml';
 import { SML_HTTP_SEARCH_QUERY_MAX_LENGTH, SmlSearchFilterType } from '../../common/http_api/sml';
 import { smlSearchPath } from '../../common/constants';
@@ -95,6 +96,11 @@ export const registerSearchRoute = ({
         const { query, size, fields, constraints, filters } = request.body;
         const esClient = coreContext.elasticsearch.client;
 
+        const isExperimental = await coreContext.uiSettings.client.get<boolean>(
+          AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
+        );
+        const effectiveFilters = isExperimental ? filters : { ...filters, types: ['connector'] };
+
         const [, startDeps] = await coreSetup.getStartServices();
         const spaceId = startDeps.spaces?.spacesService?.getSpaceId(request) ?? 'default';
 
@@ -106,7 +112,7 @@ export const registerSearchRoute = ({
           esClient,
           request,
           constraints,
-          filters,
+          filters: effectiveFilters,
         });
 
         const body: SmlSearchHttpResponse = {
