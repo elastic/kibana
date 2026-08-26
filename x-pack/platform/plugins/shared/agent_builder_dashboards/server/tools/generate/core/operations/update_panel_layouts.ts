@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { panelGridSchema } from '@kbn/agent-builder-dashboards-common';
+import { panelGridSchema, type AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
 import { z } from '@kbn/zod/v4';
 import {
   appendPanelsToDashboard,
@@ -14,6 +14,17 @@ import {
 } from '../dashboard_state';
 import { DASHBOARD_OPERATION_FAILURE_TYPES } from '../failure_types';
 import { defineOperation } from './types';
+
+const applyGrid = ({
+  panel,
+  grid,
+}: {
+  panel: AttachmentPanel;
+  grid: AttachmentPanel['grid'] | undefined;
+}): AttachmentPanel => ({
+  ...panel,
+  ...(grid ? { grid } : {}),
+});
 
 export const updatePanelLayoutsOperation = defineOperation({
   schema: z.object({
@@ -54,10 +65,7 @@ export const updatePanelLayoutsOperation = defineOperation({
         const updateResult = updatePanelInDashboard({
           dashboardData: nextDashboardData,
           panelId,
-          transformPanel: (panel) => ({
-            ...panel,
-            ...(grid ? { grid } : {}),
-          }),
+          transformPanel: (panel) => applyGrid({ panel, grid }),
         });
 
         if (!updateResult.updated) {
@@ -84,12 +92,7 @@ export const updatePanelLayoutsOperation = defineOperation({
       const [panelToMove] = removedPanels;
       nextDashboardData = appendPanelsToDashboard({
         dashboardData: dashboardAfterRemoval,
-        panelsToAdd: [
-          {
-            ...panelToMove,
-            ...(grid ? { grid } : {}),
-          },
-        ],
+        panelsToAdd: [applyGrid({ panel: panelToMove, grid })],
         // sectionId targets a section; null promotes the panel to the top level
         sectionId: sectionId ?? undefined,
       });

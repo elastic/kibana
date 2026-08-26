@@ -6,3 +6,8 @@
  */
 
 export { dashboardGeneration } from './generation_guidance';
+export {
+  DASHBOARD_DESIGN_PRACTICES_REFERENCE_NAME,
+  dashboardDesignPracticesPrompt,
+  dashboardDesignPracticesReference,
+} from './design';

@@ -1,5 +1,5 @@
-# One generate per Prettify request
+# One Generate per Prettify request
 
-A Prettify session may run Panel Review once and `generate_dashboard` at most once. If composition looks thin, ask whether to add charts *before* that generate, then put fixes, layout, and any agreed adds in a single operations batch. Never run Panel Review on the original image after mutating — it is a stale picture, and new panels are not in it.
+A Prettify session may run Generate once. The outer agent inspects the painted screenshot, splits findings into Hard rule vs Creative, and writes `operations[]` in that one call. There is no dedicated Prettify tool and no inspect-then-Generate outer loop.
 
-This trades “see the polish, then optionally add charts” for a hard stop on the generate loop that made the PoC unusable.
+If composition looks thin, prefer modify and expand over deleting visualization panels. Never review the original image after mutating — it is a stale picture.

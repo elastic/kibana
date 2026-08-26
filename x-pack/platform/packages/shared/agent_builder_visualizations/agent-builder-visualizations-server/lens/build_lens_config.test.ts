@@ -13,6 +13,7 @@ import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import { createVisualizationGraph } from './graph_lens';
 import { buildLensConfig } from './build_lens_config';
+import type { VisualizationConfig } from './types';
 
 jest.mock('@kbn/agent-builder-genai-utils', () => ({
   validateEsqlQuery: jest.fn(),
@@ -179,6 +180,22 @@ describe('buildLensConfig', () => {
     await run(undefined);
 
     expect(mockedValidateEsqlQuery).not.toHaveBeenCalled();
+    expect(invoke.mock.calls[0][0]).toMatchObject({ esqlQuery: '' });
+  });
+
+  it('does not invent ES|QL from the existing panel when the model omitted it', async () => {
+    await buildLensConfig({
+      nlQuery: 'Hide the metric title and add a background sparkline',
+      parsedExistingConfig: {
+        type: SupportedChartType.Metric,
+        data_source: { type: 'esql', query: PROVIDED_ESQL },
+      } as VisualizationConfig,
+      modelProvider,
+      logger,
+      events,
+      esClient,
+    });
+
     expect(invoke.mock.calls[0][0]).toMatchObject({ esqlQuery: '' });
   });
 });

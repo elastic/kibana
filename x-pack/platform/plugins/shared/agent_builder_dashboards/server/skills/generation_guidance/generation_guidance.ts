@@ -6,12 +6,12 @@
  */
 
 import { platformCoreTools } from '@kbn/agent-builder-common';
-import { getChartTypeSelectionPromptContent } from '@kbn/agent-builder-visualizations-server';
 import { dashboardTools } from '../../../common';
 import type { DashboardGuidanceModule } from '../guidance_module';
-import { dashboardDesignGuidancePrompt } from './design';
-
-const chartTypeSelectionGuidance = getChartTypeSelectionPromptContent();
+import {
+  DASHBOARD_DESIGN_PRACTICES_REFERENCE_NAME,
+  dashboardDesignPracticesReference,
+} from './design';
 
 const guidance = `## Building a Dashboard
 
@@ -22,7 +22,7 @@ Every dashboard MUST have a non-empty \`title\`. If the current dashboard's titl
 Operations run in order, so earlier operations should set up state needed by later ones. Batch all operations into a single ${dashboardTools.generateDashboard} call whenever possible.
 
 When a dashboard needs sections, prefer a single batched call:
-1. Use \`add_section\` with its optional \`panels\` array when you already know the panels that belong in the new section.
+1. Use \`add_section\` with its optional \`panels\` array when you already know the panels that belong in the new section. Pass optional \`id\` when a later operation in the same batch must reference the new section (\`update_panel_layouts.sectionId\`).
 2. Use a follow-up \`add_panels\` with per-item \`sectionId\` only when you need to target an existing section returned by an earlier tool result.
 
 For a new dashboard:
@@ -33,7 +33,8 @@ For a new dashboard:
 For an existing dashboard:
 - Prefer \`edit_panels\` to change existing panel content in place rather than removing and re-adding a panel.
 - If a requested change targets a DSL, form-based, or other non-ES|QL Lens visualization panel, explicitly tell the user direct editing is not supported and ask for confirmation before replacing that panel with a newly created ES|QL-based Lens panel.
-- Use \`update_panel_layouts\` to resize, reposition, or move existing panels between top-level and sections without changing panel content.
+- Use \`update_panel_layouts\` only to resize, reposition, or move existing panels between top-level and sections. It does not change visualization content.
+- If a requested change targets presentation or content (chart type, colors, legends, axis titles, metric chrome title, secondary metrics, trendlines, palettes), use \`edit_panels\` with a natural-language \`query\` and let the visualization author decide how to apply it. Do not invent first-class layout flags for those edits.
 
 ## Panel Inputs
 
@@ -71,13 +72,16 @@ Reach for custom content only when nothing above fits:
 
 For every new Lens panel, choose and pass \`chartType\`; it is required. For a new Vega panel, \`chartType\` is an optional authoring hint — omit it when no Lens chart type represents the requested visualization. On edits, \`chartType\` is optional because the existing panel configuration provides the current visual form. When editing a Lens panel, omit \`chartType\` to preserve its current chart family; provide a new \`chartType\` when the request changes the chart family, such as from \`xy\` to \`pie\`.
 
-${chartTypeSelectionGuidance}
-
-${dashboardDesignGuidancePrompt}
+When choosing a chart type, composing the dashboard, or packing the grid, follow referenced content \`${DASHBOARD_DESIGN_PRACTICES_REFERENCE_NAME}\`.
 
 ## ES|QL
 
-Omit the \`esql\` field on visualization panels unless you received a validated query from a prior tool result or the user pasted one explicitly. Do not write or derive ES|QL yourself — the tool generates it from the natural language \`query\`.
+Do not write or invent ES|QL. On **new** panels, omit \`esql\` — the tool generates it from the natural-language \`query\`.
+
+On **edits**, look at the current panel in the dashboard attachment (\`config.data_source.query\`, or each XY \`layers[].data_source.query\`). Decide whether the wanted edition needs new columns:
+
+- **Schema-only** (hide chrome title, strip invented colors, legend, axis titles, gradient fill, hide a trend-secondary label, line→area with the same series): pass that existing query on \`edit_panels.esql\` unchanged. The visualization author then edits Lens config only and does not regenerate ES|QL.
+- **Needs new columns** (secondary metric or breakdown the current query cannot produce, a chart type that needs a different grouping): omit \`esql\` so the tool regenerates it. Still do not write the new query yourself.
 
 ## Controls
 
@@ -114,13 +118,12 @@ Do not add controls to dashboards already scoped to a single entity (one host, o
 /**
  * Environment-agnostic dashboard *generation* guidance.
  *
- * The `guidance` describes how to build a dashboard, including the detailed design guidance
- * (composition + panel layout) inlined directly. It deliberately says nothing about how the
- * current dashboard is referenced or how the result is returned/surfaced. Those are
- * environment-specific and avoided here so the block can be reused across environments. Pair it with
- * an environment-specific rendering guidance block (e.g. the Kibana one) that explains how the
- * generated dashboard is surfaced.
+ * Visual good practices (chart types, composition, grid) live in referenced
+ * content so generate and Prettify share one copy. This `guidance` is
+ * the operations vocabulary only. Pair it with environment-specific rendering
+ * guidance for how the current dashboard is referenced and surfaced.
  */
 export const dashboardGeneration: DashboardGuidanceModule = {
   guidance,
+  referencedContent: [dashboardDesignPracticesReference],
 };

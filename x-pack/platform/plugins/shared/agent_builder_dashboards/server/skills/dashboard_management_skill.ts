@@ -8,6 +8,7 @@
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import { generateDashboardTool } from '../tools';
 import { dashboardGeneration } from './generation_guidance';
+import { dashboardPrettify } from './prettify_guidance';
 import { kibanaRendering } from './rendering_guidance';
 
 export const dashboardManagementSkill = defineSkillType({
@@ -28,11 +29,14 @@ Do **not** use this skill when:
 - The user asks for a standalone visualization and does not mention a dashboard context.
 - The user needs help exploring data, fields, or query logic.
 
+${dashboardPrettify.guidance}
+
 ${dashboardGeneration.guidance}
 
 ${kibanaRendering.guidance}
 `,
   referencedContent: [
+    ...(dashboardPrettify.referencedContent ?? []),
     ...(dashboardGeneration.referencedContent ?? []),
     ...(kibanaRendering.referencedContent ?? []),
   ],

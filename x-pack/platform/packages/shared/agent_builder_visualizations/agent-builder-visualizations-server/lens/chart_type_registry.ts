@@ -98,8 +98,12 @@ export const chartTypeRegistry: ChartTypeRegistry = {
       selection:
         'Displays a single numeric value, KPI, or aggregate statistic (count, sum, average) with an optional trend line. Choose for single numbers without ranges or targets.',
       config: {
+        rules: [
+          'When a secondary metric is a trend (period-over-period change, compare-to-primary delta, or paired with a trend/sparkline background chart), hide its title: set `styling.secondary.label.visible: false` and omit `label` on the secondary metric. Keep the value and dynamic coloring. Show a secondary label only when the secondary is a different named measure (e.g. error rate next to request count).',
+        ],
         coloringRules: [
           'Metric placement: set `apply_color_to: "value"` only together with a color config; do not color the background unless the user asks. When not coloring, omit both `color` and `apply_color_to` — `apply_color_to` without a color makes Lens tint the value with a default green.',
+          'When editing an existing metric, do not preserve invented static colors or background fills from the existing config. Drop primary `color` and `apply_color_to` when they are `type: "static"` or `apply_color_to: "background"`, unless the user explicitly asked for that color. Dynamic coloring on a secondary compare is fine; copying a mustard/pink/custom primary fill is not.',
           'For clearly bounded metrics, use explicit 3-band `steps` by default. Examples: percent, ratio, CPU/memory/disk utilization, error rate, success rate, or SLO compliance.',
           'Metric charts use 3 bands; prefer "Status", "Negative", "Positive", or "Temperature" when thresholds have semantic meaning.',
           'For bounded adverse metrics like error rate %, higher values are worse; use a status/adverse palette with thresholds in the same percent scale as the metric output.',

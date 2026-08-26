@@ -18,8 +18,7 @@ const dashboardTool = (toolName: string) => {
 };
 
 /**
- * Ids of built-in dashboard tools.
- * These tools are registered by the agent_builder_dashboards plugin.
+ * Ids of dashboard tools registered by this plugin.
  */
 export const dashboardTools = {
   generateDashboard: dashboardTool('generate_dashboard'),
