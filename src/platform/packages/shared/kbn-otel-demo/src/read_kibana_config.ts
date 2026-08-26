@@ -97,11 +97,11 @@ export const readKibanaConfig = (log: ToolingLog, configPath?: string): KibanaCo
   };
 
   // Kibana API credentials - for admin operations like enabling streams.
-  // Defaults to elastic superuser which has all Kibana privileges.
-  // Can be overridden via KIBANA_USERNAME/KIBANA_PASSWORD env vars.
+  // Falls back to ES credentials so ELASTICSEARCH_USERNAME/PASSWORD covers both.
+  // Can be overridden independently via KIBANA_USERNAME/KIBANA_PASSWORD env vars.
   const kibanaCredentials = {
-    username: process.env.KIBANA_USERNAME || 'elastic',
-    password: process.env.KIBANA_PASSWORD || 'changeme',
+    username: process.env.KIBANA_USERNAME || elasticsearchConfig.username,
+    password: process.env.KIBANA_PASSWORD || elasticsearchConfig.password,
   };
 
   return { elasticsearch: elasticsearchConfig, server: serverConfig, kibanaCredentials };

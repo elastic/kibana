@@ -21,6 +21,11 @@ import type { RelevantSkillSelection } from '../utils/relevant_skills/select_rel
 export interface PromptFactoryParams {
   configuration: ResolvedConfiguration;
   capabilities: ResolvedAgentCapabilities;
+  /**
+   * Kibana space the conversation runs in. It never changes mid-conversation, so naming it in the
+   * system prompt does not break prompt caching.
+   */
+  spaceId: string;
   processedConversation: ProcessedConversation;
   skills: InternalSkillDefinition[];
   /**
