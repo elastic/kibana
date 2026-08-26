@@ -73,22 +73,30 @@ describe('ensureThreatIntelBootstrap', () => {
       expect(indexTemplatesModule.installIndexTemplates).toHaveBeenCalledTimes(1);
     });
 
-    it('does NOT call seedDefaultSources when the catalog is non-empty', async () => {
+    // Seeding used to be gated on an empty catalog, which made a partial seed
+    // permanent: if one bulk attempt created some defaults and Kibana exited before
+    // the rest landed, the next boot saw a non-empty catalog and never retried the
+    // missing ones. A single operator-created source suppressed seeding entirely.
+    // Seeding is idempotent (bulk create by stable id, 409 = already present), so it
+    // runs every boot and fills in whatever is absent.
+    it('still calls seedDefaultSources when the catalog is non-empty, to finish a partial seed', async () => {
       const esClient = makeEsClient(250);
       const logger = makeLogger();
 
       await ensureThreatIntelBootstrap({ esClient, logger });
 
-      expect(seedDefaultSourcesModule.seedDefaultSources).not.toHaveBeenCalled();
+      expect(seedDefaultSourcesModule.seedDefaultSources).toHaveBeenCalled();
     });
 
-    it('returns undefined when catalog is non-empty (seeding skipped)', async () => {
-      const esClient = makeEsClient(1);
+    it('returns the seed result even when the catalog is non-empty', async () => {
+      const esClient = makeEsClient(250);
       const logger = makeLogger();
 
       const result = await ensureThreatIntelBootstrap({ esClient, logger });
 
-      expect(result).toBeUndefined();
+      // Seeding always runs now, so bootstrap reports what it did rather than
+      // returning undefined to mean "skipped".
+      expect(result?.seed).toBeDefined();
     });
   });
 

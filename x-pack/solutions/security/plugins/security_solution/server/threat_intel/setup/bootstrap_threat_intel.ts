@@ -173,19 +173,17 @@ export const ensureThreatIntelBootstrap = async ({
   // Non-blocking check — see `checkDiamondSummaryEmbeddingEndpoint` doc comment.
   await checkDiamondSummaryEmbeddingEndpoint(esClient, log);
 
-  const catalogCount = await esClient.count(
-    { index: THREAT_INTEL_SOURCES_INDEX },
-    { ignore: [404] }
-  );
-
-  if (catalogCount.count > 0) {
-    log.debug(
-      `Threat intelligence catalog already has ${catalogCount.count} sources; skipping source seeding`
-    );
-    return undefined;
-  }
-
-  log.info('Threat intelligence catalog is empty; running source seeding');
-
+  // Seed on every boot rather than only when the catalog is empty.
+  //
+  // `seedDefaultSources` bulk-creates by stable id and treats a 409 as
+  // already-present, so this is idempotent and cheap. Gating on
+  // `count > 0` made a partial seed permanent: if one bulk attempt created some
+  // defaults and Kibana exited before the rest landed, the next boot saw a
+  // non-empty catalog and never retried the missing entries. A single
+  // operator-created source had the same effect, suppressing seeding entirely.
+  //
+  // The trade-off is that deleting a seeded default does not stick, since the next
+  // boot recreates it. Turning a default feed off is what `enabled: false` is for,
+  // and the update route sets it; delete is for sources an operator added.
   return seedThreatIntelCatalog({ esClient, logger });
 };

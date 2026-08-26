@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
   THREAT_REPORTS_INDEX,
@@ -99,6 +100,10 @@ const threatReportsTemplate = {
             // from an arbitrary feed, so a UI that injects it is stored XSS. Render
             // `body_text`, which is the stripped and collapsed form.
             body_html: { type: 'text' as const, index: false },
+            // Set when body_text is the report title rather than a real body, which
+            // happens for title-only feed entries. Enrichment can use it to skip or
+            // cheapen a stage instead of running inference over the title twice.
+            body_is_title_fallback: { type: 'boolean' as const },
             language: { type: 'keyword' as const },
             // Structured citations from STIX SDOs (external_references array). Nested so
             // per-entry field associations survive multi-field queries (e.g. source_name +
@@ -1204,6 +1209,7 @@ const migrateOneReportKeywordBounds = async (
         },
         content: {
           properties: {
+            body_is_title_fallback: { type: 'boolean' },
             external_references: {
               type: 'nested',
               properties: {
@@ -1393,6 +1399,105 @@ const ensureCompanionIndex = async (
   }
 };
 
+/**
+ * Fields a migration is responsible for adding. If one is still missing after the
+ * migrations run, `dynamic: strict` will reject every write that carries it.
+ */
+const REQUIRED_REPORT_FIELDS = [
+  'extracted.diamond',
+  'extracted.gate',
+  'extracted.vulnerability',
+  'extracted.iocs.tier',
+  'extracted.iocs.port',
+  'extracted.iocs.reference',
+  'content.external_references',
+  'lineage.content_scrubbed_at',
+] as const;
+
+const REQUIRED_INDICATOR_FIELDS = [
+  'space_id',
+  'sources',
+  'sources_truncated',
+  'ioc_tier',
+  'threat.indicator.email',
+  'threat.indicator.network',
+  'threat.indicator.cryptocurrency',
+] as const;
+
+/** Walks a dotted path through an Elasticsearch `properties` tree. */
+const hasMappedField = (mappings: MappingTypeMapping | undefined, path: string): boolean => {
+  let node = mappings?.properties as Record<string, unknown> | undefined;
+  const segments = path.split('.');
+  for (const [index, segment] of segments.entries()) {
+    const next = node?.[segment] as { properties?: Record<string, unknown> } | undefined;
+    if (!next) return false;
+    if (index === segments.length - 1) return true;
+    node = next.properties;
+  }
+  return false;
+};
+
+/**
+ * Confirms the migrations actually left a usable schema.
+ *
+ * Every migration catches and logs its own failure, which is deliberate: one index
+ * failing should not stop the others. The consequence was that `installIndexTemplates`
+ * always looked successful, so `withElasticsearchRetry` never retried and the
+ * readiness promise resolved even though `dynamic: strict` would reject later writes.
+ * Routes then accept a report and fail on write, which surfaces much later as an
+ * unexplained write error.
+ *
+ * This checks the outcome rather than each step's return value, which also catches a
+ * migration that ran without error but took a wrong branch and skipped its field.
+ * Throwing here puts bootstrap back into its retry loop and keeps readiness unresolved.
+ */
+const assertMigratedSchemaIsUsable = async (
+  esClient: ElasticsearchClient,
+  reportIndices: readonly string[],
+  log: Logger
+): Promise<void> => {
+  const missing: string[] = [];
+
+  for (const indexName of reportIndices) {
+    try {
+      const { [indexName]: m } = await esClient.indices.getMapping({ index: indexName });
+      for (const field of REQUIRED_REPORT_FIELDS) {
+        if (!hasMappedField(m?.mappings, field)) missing.push(`${indexName}:${field}`);
+      }
+    } catch (err) {
+      missing.push(`${indexName}:<mapping unreadable: ${(err as Error).message}>`);
+    }
+  }
+
+  try {
+    const exists = await esClient.indices.exists({ index: THREAT_INTEL_INDICATORS_INDEX });
+    if (exists) {
+      const { [THREAT_INTEL_INDICATORS_INDEX]: m } = await esClient.indices.getMapping({
+        index: THREAT_INTEL_INDICATORS_INDEX,
+      });
+      for (const field of REQUIRED_INDICATOR_FIELDS) {
+        if (!hasMappedField(m?.mappings, field)) {
+          missing.push(`${THREAT_INTEL_INDICATORS_INDEX}:${field}`);
+        }
+      }
+    }
+  } catch (err) {
+    missing.push(
+      `${THREAT_INTEL_INDICATORS_INDEX}:<mapping unreadable: ${(err as Error).message}>`
+    );
+  }
+
+  if (missing.length > 0) {
+    throw new Error(
+      `Threat intelligence mapping migration left ${missing.length} field(s) missing, so ` +
+        `dynamic: strict will reject writes that use them: ${missing.slice(0, 20).join(', ')}` +
+        `${missing.length > 20 ? ', …' : ''}. Bootstrap is not ready.`
+    );
+  }
+
+  log.debug('Migrated schema verified: every migration-owned field is present');
+};
+
 export const installIndexTemplates = async ({
   esClient,
   logger,
@@ -1438,6 +1543,10 @@ export const installIndexTemplates = async ({
   await migrateExistingVulnerabilityMappings(esClient, reportIndices, log);
   await migrateExistingContentScrubbedMapping(esClient, reportIndices, log);
   await migrateExistingIndicesToHidden(esClient, reportIndices, log);
+
+  // Fails the install (and therefore bootstrap readiness) when a migration left the
+  // schema unusable. Must come after every migration.
+  await assertMigratedSchemaIsUsable(esClient, reportIndices, log);
 
   log.info('Threat intelligence index templates installed');
 };

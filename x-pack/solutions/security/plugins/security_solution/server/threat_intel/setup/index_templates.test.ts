@@ -132,7 +132,16 @@ const runMigrations = async ({
     },
   })) as never);
 
-  await installIndexTemplates({ esClient, logger: loggingSystemMock.createLogger() });
+  // The mock returns the same deficient mapping on every read, so the
+  // post-migration schema check sees the field as still missing even though the
+  // migration patched it. These cases are about whether the patch was issued;
+  // the check has its own tests below.
+  let verificationError: Error | undefined;
+  try {
+    await installIndexTemplates({ esClient, logger: loggingSystemMock.createLogger() });
+  } catch (err) {
+    verificationError = err as Error;
+  }
 
   const putMappingArgs = esClient.indices.putMapping.mock.calls.map(([arg]) => arg);
   /** Every property path touched by a putMapping call, as dotted strings. */
@@ -153,7 +162,7 @@ const runMigrations = async ({
     return paths;
   });
 
-  return { esClient, putMappingArgs, patchedPaths };
+  return { esClient, putMappingArgs, patchedPaths, verificationError };
 };
 
 describe('index_templates — migrations', () => {
@@ -429,6 +438,11 @@ describe('installIndexTemplates', () => {
     esClient.indices.exists.mockResolvedValue(false);
     esClient.indices.get.mockResolvedValue({ '.kibana-threat-reports': {} });
     esClient.indices.getSettings.mockResolvedValue({});
+    // Current mappings, so the post-migration schema check does not fail the
+    // install before this assertion is reached.
+    esClient.indices.getMapping.mockImplementation((async (args: { index: string }) => ({
+      [args.index]: { mappings: fullyMigratedReportMappings() },
+    })) as never);
 
     await installIndexTemplates({ esClient, logger: loggingSystemMock.createLogger() });
 
@@ -548,5 +562,48 @@ describe('index_templates — mapping coverage guard', () => {
 
     const callIdx = src.indexOf('await migrateExistingIndicatorSpaceIdMapping', installIdx);
     expect(callIdx).toBeGreaterThan(installIdx);
+  });
+});
+
+// A migration that fails logs and returns, deliberately, so one index cannot stop
+// the others. The consequence was that installIndexTemplates always looked
+// successful, withElasticsearchRetry never retried, and the readiness promise
+// resolved even though dynamic: strict would reject later writes.
+describe('index_templates — post-migration schema check', () => {
+  it('passes when every migration-owned field is present', async () => {
+    const { verificationError } = await runMigrations();
+    expect(verificationError).toBeUndefined();
+  });
+
+  it('fails when a report field is still missing after migrating', async () => {
+    const mappings = fullyMigratedReportMappings();
+    delete (mappings.properties.extracted.properties as Record<string, unknown>).diamond;
+
+    const { verificationError } = await runMigrations({ reportMappings: mappings });
+
+    expect(verificationError?.message).toMatch(/extracted\.diamond/);
+    expect(verificationError?.message).toMatch(/Bootstrap is not ready/);
+  });
+
+  it('fails when an indicators field is still missing after migrating', async () => {
+    const indicatorMappings = fullyMigratedIndicatorMappings();
+    delete (indicatorMappings.properties as Record<string, unknown>).space_id;
+
+    const { verificationError } = await runMigrations({ indicatorMappings });
+
+    expect(verificationError?.message).toMatch(/space_id/);
+  });
+
+  // Catches a migration that ran without error but took a wrong branch, which
+  // per-migration error tracking would have reported as success.
+  it('names every missing field, not just the first', async () => {
+    const mappings = fullyMigratedReportMappings();
+    delete (mappings.properties.extracted.properties as Record<string, unknown>).diamond;
+    delete (mappings.properties.extracted.properties as Record<string, unknown>).gate;
+
+    const { verificationError } = await runMigrations({ reportMappings: mappings });
+
+    expect(verificationError?.message).toMatch(/extracted\.diamond/);
+    expect(verificationError?.message).toMatch(/extracted\.gate/);
   });
 });
