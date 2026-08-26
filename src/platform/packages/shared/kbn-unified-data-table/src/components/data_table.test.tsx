@@ -1851,6 +1851,19 @@ describe('UnifiedDataTable', () => {
 
       expect(onChangePageMock).toHaveBeenNthCalledWith(1, 0);
     });
+
+    it('renders no pagination toolbar in singlePage mode', async () => {
+      await renderComponent({
+        ...getProps(),
+        rowsPerPageOptions: [1, 5],
+        rowsPerPageState: 1,
+        paginationMode: 'singlePage',
+      });
+
+      expect(screen.queryByTestId('tablePaginationPopoverButton')).toBeNull();
+      expect(screen.queryByTestId('pagination-button-previous')).toBeNull();
+      expect(screen.queryByTestId('pagination-button-next')).toBeNull();
+    });
   });
 
   // Covers `useScrollToExpandedDoc` through the real grid rather than in isolation, since it

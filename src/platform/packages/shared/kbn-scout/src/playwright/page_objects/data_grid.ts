@@ -16,11 +16,6 @@ const IN_TABLE_SEARCH_INPUT_TEST_SUBJ = 'inTableSearchInput';
 const IN_TABLE_SEARCH_COUNTER_TEST_SUBJ = 'inTableSearchMatchesCounter';
 const IN_TABLE_SEARCH_NEXT_BUTTON_TEST_SUBJ = 'inTableSearchButtonNext';
 const IN_TABLE_SEARCH_HIGHLIGHT_CLASS_NAME = 'dataGridInTableSearch__match';
-const EUI_DATA_GRID_VIRTUALIZED_CLASS_NAME = 'euiDataGrid__virtualized';
-
-const SCROLL_STEP_PX = 500;
-const FINAL_SCROLL_STEP_PX = 100;
-const MAX_SCROLL_STEPS = 200;
 
 export type DataGridDensity = 'Compact' | 'Normal' | 'Expanded';
 export type DataGridRowHeight = 'Auto' | 'Custom';
@@ -218,19 +213,6 @@ export class DataGrid {
     return this.getPaginationContainer(scope).locator('[data-test-subj="pagination-button-next"]');
   }
 
-  /**
-   * The sample-size footer. Only mounts in `singlePage` pagination once the user has scrolled to
-   * the bottom, or on the last page in `multiPage`.
-   */
-  getFooter(): Locator {
-    return this.page.testSubj.locator('unifiedDataTableFooter');
-  }
-
-  /** The footer's "Load more" link. Absent in an embeddable, which passes no `onFetchMoreRecords`. */
-  getLoadMoreButton(): Locator {
-    return this.page.testSubj.locator('dscGridSampleSizeFetchMoreLink');
-  }
-
   async getCurrentRowHeight(scope: 'row' | 'header' = 'row'): Promise<DataGridRowHeight> {
     const buttonGroup = this.page.testSubj.locator(
       `unifiedDataTable${scope === 'header' ? 'Header' : ''}RowHeightSettings_rowHeightButtonGroup`
@@ -274,7 +256,7 @@ export class DataGrid {
   }
 
   async getDataGridFooterText(): Promise<string> {
-    const footer = this.getFooter();
+    const footer = this.page.testSubj.locator('unifiedDataTableFooter');
     await footer.waitFor({ state: 'visible' });
 
     return footer.innerText();
@@ -287,11 +269,6 @@ export class DataGrid {
       .locator('[data-test-subj="dataGridHeader"]');
     await header.waitFor({ state: 'visible' });
     return this.readHeaderLabels(header, limit);
-  }
-
-  /** The `UnifiedDataTable` wrapper; its `data-document-number` is the number of loaded rows. */
-  getDocTableWrapper(): Locator {
-    return this.page.testSubj.locator('discoverDocTable');
   }
 
   async getDocTableRowCount(): Promise<number> {
@@ -668,80 +645,6 @@ export class DataGrid {
       state: 'hidden',
       timeout: 30_000,
     });
-  }
-
-  private async getLastRenderedRowIndex(container: Locator): Promise<number> {
-    return container.evaluate((el: HTMLElement) => {
-      const rows = el.querySelectorAll<HTMLElement>('.euiDataGridRow[data-grid-row-index]');
-      const lastRow = rows[rows.length - 1];
-
-      return lastRow ? Number(lastRow.dataset.gridRowIndex) : -1;
-    });
-  }
-
-  /** Scrolls down until `rowIndex` is rendered, stepping so the app sees a scroll event per step. */
-  async scrollToRow(rowIndex: number, container: Locator = this.getDocTableWrapper()) {
-    await expect(container).toHaveAttribute('data-render-complete', 'true');
-
-    const grid = container.locator(`.${EUI_DATA_GRID_VIRTUALIZED_CLASS_NAME}`);
-
-    await expect
-      .poll(async () => {
-        const lastRow = await this.getLastRenderedRowIndex(container);
-
-        if (lastRow < rowIndex) {
-          await grid.evaluate((el: HTMLElement, delta: number) => {
-            el.scrollTop += delta;
-          }, SCROLL_STEP_PX);
-        }
-
-        return lastRow;
-      })
-      .toBeGreaterThanOrEqual(rowIndex);
-
-    await grid.evaluate((el: HTMLElement, delta: number) => {
-      el.scrollTop += delta;
-    }, FINAL_SCROLL_STEP_PX);
-  }
-
-  /**
-   * Scrolls the virtualized grid body to the bottom, in Discover or an embedded grid alike. Pass
-   * `container` to disambiguate when the page holds more than one grid.
-   */
-  async scrollToBottom(container: Locator = this.getDocTableWrapper()) {
-    await expect(container).toHaveAttribute('data-render-complete', 'true');
-
-    const grid = container.locator(`.${EUI_DATA_GRID_VIRTUALIZED_CLASS_NAME}`);
-
-    // Fail loudly on a grid with nothing to scroll, rather than let an absence assertion pass.
-    await expect
-      .poll(() => grid.evaluate((el: HTMLElement) => el.scrollHeight - el.offsetHeight))
-      .toBeGreaterThan(0);
-
-    // Restart from the top so a call from the bottom still moves, and so emits scroll events.
-    await grid.evaluate((el: HTMLElement) => {
-      el.scrollTop = 0;
-    });
-
-    // Stepped, not jumped: a jump clamps against react-window's stale content height after a fetch.
-    let previousScrollTop = -1;
-
-    for (let step = 0; step < MAX_SCROLL_STEPS; step++) {
-      const scrollTop = await grid.evaluate((el: HTMLElement, delta: number) => {
-        el.scrollTop += delta;
-        return el.scrollTop;
-      }, SCROLL_STEP_PX);
-
-      if (scrollTop === previousScrollTop) {
-        return;
-      }
-
-      previousScrollTop = scrollTop;
-    }
-
-    throw new Error(
-      `Grid did not reach the bottom within ${MAX_SCROLL_STEPS} scrolls of ${SCROLL_STEP_PX}px`
-    );
   }
 
   /**
