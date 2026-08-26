@@ -150,7 +150,7 @@ export class RulesClient {
     @inject(ArtifactTypeRegistry) private readonly artifactTypeRegistry: ArtifactTypeRegistry
   ) {
     this.config = pluginConfigAccessor.get<PluginConfig>();
-    this.logger = loggerService.forSubsystem('rules');
+    this.logger = loggerService.forSubsystem('rulesClient');
   }
 
   private getSpaceContext(): { spaceId: string } {
