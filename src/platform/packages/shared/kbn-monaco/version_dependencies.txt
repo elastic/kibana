@@ -160,15 +160,14 @@ binary-extensions@2.3.0
 body-parser@1.20.5
 bonjour-service@1.4.2
 braces@3.0.3
-browserslist@4.28.0
-browserslist@4.28.4
+browserslist@4.28.8
 buffer-from@1.1.2
 bundle-name@4.1.0
 bytes@3.1.2
 bytestreamjs@2.0.1
 call-bind-apply-helpers@1.0.2
 call-bound@1.0.4
-caniuse-lite@1.0.30001799
+caniuse-lite@1.0.30001810
 chokidar@3.5.3
 chrome-trace-event@1.0.4
 clone-deep@4.0.1
@@ -201,7 +200,7 @@ dns-packet@5.6.1
 dunder-proto@1.0.1
 duplexer@0.1.2
 ee-first@1.1.1
-electron-to-chromium@1.5.381
+electron-to-chromium@1.5.414
 encodeurl@2.0.0
 enhanced-resolve@5.24.1
 envinfo@7.21.0
@@ -320,7 +319,7 @@ multicast-dns@7.2.5
 negotiator@0.6.3
 negotiator@0.6.4
 neo-async@2.6.2
-node-releases@2.0.50
+node-releases@2.0.53
 normalize-path@3.0.0
 object-inspect@1.13.4
 obuf@1.1.2
@@ -352,7 +351,7 @@ proxy-addr@2.0.7
 punycode@2.3.1
 pvtsutils@1.3.6
 pvutils@1.1.5
-qs@6.15.2
+qs@6.15.3
 range-parser@1.2.1
 range-parser@1.3.0
 raw-body@2.5.3
@@ -365,7 +364,7 @@ require-from-string@2.0.2
 requires-port@1.0.0
 resolve-cwd@3.0.0
 resolve-from@5.0.0
-resolve@1.22.8
+resolve@1.22.12
 retry@0.13.1
 run-applescript@7.1.0
 safe-buffer@5.1.2
@@ -417,7 +416,7 @@ type-is@1.6.18
 uglify-js@3.19.3
 undici-types@7.16.0
 unpipe@1.0.0
-update-browserslist-db@1.2.3
+update-browserslist-db@1.3.1
 uri-js@4.4.1
 util-deprecate@1.0.2
 utils-merge@1.0.1

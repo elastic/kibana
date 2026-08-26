@@ -83,14 +83,14 @@
     ]
   },
   {
-    "id": "cloud-services",
-    "name": "Cloud Services",
+    "id": "siem-conduit",
+    "name": "SIEM Conduit",
     "areas": [
       "security"
     ],
     "github": {
-      "team": "elastic/cloud-services",
-      "label": "Team:Security-Cloud Services"
+      "team": "elastic/siem-conduit",
+      "label": "Team:security-siem-conduit"
     }
   },
   {
@@ -215,9 +215,7 @@
   {
     "id": "kibana-cloud-security-posture",
     "name": "Contextual Security Apps Team",
-    "areas": [
-      "security"
-    ],
+    "areas": [],
     "github": {
       "team": "elastic/kibana-cloud-security-posture",
       "label": "Team:Cloud Security"
@@ -745,13 +743,13 @@
     }
   },
   {
-    "id": "security-data-analytics",
-    "name": "Security Data Analytics",
+    "id": "security-data-engineering",
+    "name": "Security Data Engineering",
     "areas": [
       "security"
     ],
     "github": {
-      "team": "elastic/security-data-analytics",
+      "team": "elastic/security-data-engineering",
       "label": "Team: SecuritySolution"
     },
     "responsibilities": [

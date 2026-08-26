@@ -22,19 +22,22 @@ import { i18n } from '@kbn/i18n';
 import { EuiI18nNumber } from '@elastic/eui';
 import { useAppContext } from '../../../../../app_context';
 import { OverviewCard } from './overview_card';
-import type { DocCountState } from './quick_stats';
+import type { DocCountState, VectorCountState } from './quick_stats';
 import {
   docCountErrorTooltip,
   docCountErrorLabel,
   docCountApproximateTooltip,
   docCountClosedIndexTooltip,
   storageCardTitle,
+  vectorCountErrorTooltip,
+  vectorCountErrorLabel,
 } from './translations';
 
 export const SizeDocCountDetails: FunctionComponent<{
   size: string;
   docCount: DocCountState;
-}> = ({ size, docCount }) => {
+  vectorCount: VectorCountState;
+}> = ({ size, docCount, vectorCount }) => {
   const largeFontSize = useEuiFontSize('l').fontSize;
   const { config } = useAppContext();
 
@@ -101,6 +104,44 @@ export const SizeDocCountDetails: FunctionComponent<{
     return docCountContent;
   };
 
+  const renderVectorCountFooter = () => {
+    if (vectorCount.isError) {
+      return (
+        <EuiToolTip content={vectorCountErrorTooltip}>
+          <EuiFlexGroup gutterSize="xs" tabIndex={0} data-test-subj="indexDetailsVectorCountError">
+            <EuiIcon type="warning" color="warning" aria-hidden={true} />
+            <EuiTextColor color="warning">{vectorCountErrorLabel}</EuiTextColor>
+          </EuiFlexGroup>
+        </EuiToolTip>
+      );
+    }
+
+    if (vectorCount.count === undefined) {
+      return null;
+    }
+
+    return (
+      <EuiFlexGroup gutterSize="xs" data-test-subj="indexDetailsVectorCount">
+        <EuiFlexItem grow={false}>
+          <EuiIcon type="vectorTriangle" aria-hidden={true} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiI18nNumber value={vectorCount.count} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiTextColor color="subdued">
+            {i18n.translate('xpack.idxMgmt.indexDetails.overviewTab.storage.vectorCountLabel', {
+              defaultMessage: '{vectors, plural, one {Vector} other {Vectors}}',
+              values: {
+                vectors: vectorCount.count,
+              },
+            })}
+          </EuiTextColor>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  };
+
   return (
     <OverviewCard
       data-test-subj="indexDetailsSizeDocCount"
@@ -130,6 +171,7 @@ export const SizeDocCountDetails: FunctionComponent<{
       }}
       footer={{
         left: renderDocCountFooter(),
+        right: renderVectorCountFooter(),
       }}
     />
   );

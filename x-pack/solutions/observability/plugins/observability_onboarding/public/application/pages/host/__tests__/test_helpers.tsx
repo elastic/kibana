@@ -13,7 +13,6 @@ import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { render } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { CompatRouter } from 'react-router-dom-v5-compat';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import type { ObservabilityOnboardingAppServices } from '../../../..';
 
@@ -76,9 +75,7 @@ export const renderWithHostPageProviders = (
   return render(
     <I18nProvider>
       <KibanaContextProvider services={resolvedServices}>
-        <MemoryRouter initialEntries={initialEntries}>
-          <CompatRouter>{ui}</CompatRouter>
-        </MemoryRouter>
+        <MemoryRouter initialEntries={initialEntries}>{ui}</MemoryRouter>
       </KibanaContextProvider>
     </I18nProvider>
   );

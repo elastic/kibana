@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SignificantEvent } from '@kbn/significant-events-schema';
+import type { SignificantEvent, SignalEntry } from '@kbn/significant-events-schema';
 import {
   scoreTopologyCorrectness,
   scoreContinuationTopologyStability,
@@ -15,20 +15,26 @@ import {
 
 // --- Fixtures ---
 
-const signal = (ruleUuid: string) => ({
-  type: 'detection' as const,
+const signal = (ruleUuid: string): SignalEntry => ({
+  type: 'detection',
   stream_name: 'logs',
-  confirmed: true as const,
+  verdict: 'confirms',
   description: 'test signal',
   metadata: {
     rule_uuid: ruleUuid,
     detection_id: `${ruleUuid}-det`,
-    change_point_type: 'spike' as const,
+    change_point_type: 'spike',
     p_value: 0.01,
   },
 });
 
-const feature = (feature_id: string) => ({ feature_id, name: feature_id, stream_name: 'logs' });
+const feature = (feature_id: string) => ({
+  feature_id,
+  type: 'entity',
+  subtype: 'service',
+  name: feature_id,
+  stream_name: 'logs',
+});
 
 const event = (
   eventId: string,
@@ -42,6 +48,7 @@ const event = (
   causal_features: causal.map(feature),
   blast_radius: blast.map((id) => ({
     type: 'dependency' as const,
+    subtype: 'http',
     feature_id: id,
     source: 'a',
     target: 'b',
@@ -102,12 +109,12 @@ describe('scoreTopologyCorrectness', () => {
     expect(result.explanation).toMatch(/no matching actual event/);
   });
 
-  it('does not match an actual whose only shared rule UUID is refuted (confirmed=false)', () => {
-    // dismissed shares R1 with the expected event but its signal is confirmed=false.
-    // open has the same R1 confirmed=true and the correct topology.
-    // Without the confirmed filter the dismisssed event wins the overlap race;
+  it('does not match an actual whose only shared rule UUID is refuted', () => {
+    // dismissed shares R1 with the expected event but its signal is refuted.
+    // open has the same R1 confirming and the correct topology.
+    // Without the confirming filter the dismisssed event wins the overlap race;
     // with it, only open qualifies.
-    const refutedSignal = { ...signal('R1'), confirmed: false as const };
+    const refutedSignal = { ...signal('R1'), verdict: 'refutes' as const };
     const dismissed = {
       event_id: 'dismissed-1',
       status: 'dismissed' as const,

@@ -232,6 +232,30 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
   });
 
   apiTest(
+    'update: persists a conditionless composed query without a breach block',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'rule-to-conditionless-composed' } })
+      );
+      const query = {
+        format: 'composed' as const,
+        base: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
+      };
+
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: { query },
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.query).toStrictEqual(query);
+
+      const persisted = await apiServices.alertingV2.rules.get(created.id);
+      expect(persisted.query).toStrictEqual(query);
+    }
+  );
+
+  apiTest(
     'update: should update query to composed format with a recovery segment',
     async ({ apiClient, apiServices }) => {
       const created = await apiServices.alertingV2.rules.create(
@@ -510,6 +534,85 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
       });
       expect(response).toHaveStatusCode(400);
       expect(response.body.code).toBe('INVALID_SIGNAL_RULE');
+    }
+  );
+
+  apiTest(
+    'validation: should reject recovery_strategy "query" without a recovery block',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'recovery-strategy-no-block' } })
+      );
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: { recovery_strategy: 'query' },
+      });
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('INVALID_RULE_QUERY_CONFIG');
+    }
+  );
+
+  apiTest(
+    'validation: should reject a composed rule setting recovery_strategy "query" without a recovery segment',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'composed-recovery-no-segment' },
+          query: {
+            format: 'composed',
+            base: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
+            breach: { segment: 'WHERE count >= 10' },
+          },
+        })
+      );
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: { recovery_strategy: 'query' },
+      });
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('INVALID_RULE_QUERY_CONFIG');
+    }
+  );
+
+  apiTest(
+    'validation: should reject clearing recovery_strategy while a composed recovery segment remains',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'composed-recovery-stale-segment' },
+          recovery_strategy: 'query',
+          query: {
+            format: 'composed',
+            base: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
+            breach: { segment: 'WHERE count >= 10' },
+            recovery: { segment: 'WHERE count < 5' },
+          },
+        })
+      );
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: { recovery_strategy: 'no_breach' },
+      });
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('INVALID_RULE_QUERY_CONFIG');
+      // The rejected update must not have persisted: the strategy stays "query".
+      const stored = await apiServices.alertingV2.rules.get(created.id);
+      expect(stored.recovery_strategy).toBe('query');
+    }
+  );
+
+  apiTest(
+    'validation: should reject a no_data_strategy without a no_data block (standalone)',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'no-data-strategy-no-block' } })
+      );
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: { no_data_strategy: 'last_known_status' },
+      });
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('INVALID_RULE_QUERY_CONFIG');
     }
   );
 

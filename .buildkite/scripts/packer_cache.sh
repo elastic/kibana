@@ -10,6 +10,8 @@ export FORCE_BOOTSTRAP_REMOTE_CACHE=true
 
 pnpm kbn bootstrap
 
+tar -cf - node_modules | zstd -T0 -o node_modules.tar.zst
+
 if [[ ! -f "$ES_CACHE_DIR/.done" ]]; then
   cd .buildkite && npm ci && cd ..
 

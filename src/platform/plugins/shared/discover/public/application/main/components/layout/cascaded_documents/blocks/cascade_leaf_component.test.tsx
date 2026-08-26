@@ -141,7 +141,7 @@ const createContextValue = ({
     esqlQuery,
     esqlVariables: undefined,
     timeRange: undefined,
-    isApproximate: false,
+    esqlApproximation: false,
     renderViewModeToggle: undefined,
     expandedDoc$: new BehaviorSubject<DataTableRecord | undefined>(expandedDoc),
     expandedDocOwner$: new BehaviorSubject<string | undefined>(currentOwner),

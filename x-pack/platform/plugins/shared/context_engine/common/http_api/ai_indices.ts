@@ -35,6 +35,8 @@ export interface AiIndexProperties {
   dest: AiIndexDest;
   automations: AiIndexAutomation[];
   sources: AiIndexSource[];
+  /** Agent Builder agent id used for this index's Analyze & improve analysis. */
+  feedback_agent_id?: string;
 }
 
 export interface AiIndexHttpItem extends AiIndexProperties {

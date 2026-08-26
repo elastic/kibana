@@ -26,6 +26,14 @@ actions:
         description: Alerting documentation
         url: https://www.elastic.co/docs/explore-analyze/alerts-cases/alerts
       x-displayName: 'Alerting'
+  - target: '$.tags[?(@.name=="alerting-v2")]'
+    description: Change tag description and displayName
+    update:
+      description: >
+        Alerting V2 is an ES|QL-first alerting API for managing rules, alert actions, and action policies.
+        Use these endpoints to create and manage detection rules, act on alerts, and control when and how
+        notifications are delivered. These APIs are experimental.
+      x-displayName: 'Alerting V2'
   - target: '$.tags[?(@.name=="connectors")]'
     description: Change tag description and displayName
     update:

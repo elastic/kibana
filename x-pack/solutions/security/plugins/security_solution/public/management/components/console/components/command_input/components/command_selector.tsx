@@ -1,0 +1,183 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { memo, useMemo, useCallback } from 'react';
+import { css } from '@emotion/react';
+import {
+  EuiSelectable,
+  type EuiSelectableProps,
+  type EuiSelectableOption,
+  EuiSpacer,
+  htmlIdGenerator,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiBadge,
+  EuiText,
+  EuiTextTruncate,
+} from '@elastic/eui';
+import { buildCommandUsageList } from '../../../service/utils';
+import { useWithInputTextEntered } from '../../../hooks/state_selectors/use_with_input_text_entered';
+import { useConsoleStateDispatch } from '../../../hooks/state_selectors/use_console_state_dispatch';
+import { UserCommandInput } from '../../user_command_input';
+import { useWithCommandList } from '../../../hooks/state_selectors/use_with_command_list';
+import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
+
+export interface CommandSelectorProps {
+  /**
+   * The HTML `id` that will be added to the element that should have focus when this component
+   * is rendered. Useful when using it with `EuiPopover`'s `initialFocus` prop.
+   */
+  initialFocusId?: string;
+  'data-test-subj'?: string;
+}
+
+/**
+ * Displays list of commands defined, or command options if command has already been entered
+ */
+export const CommandSelector = memo<CommandSelectorProps>(
+  ({ initialFocusId = htmlIdGenerator()(), 'data-test-subj': dataTestSubj }) => {
+    const getTestId = useTestIdGenerator(dataTestSubj);
+    const commandDefinitions = useWithCommandList();
+    const dispatch = useConsoleStateDispatch();
+    const { leftOfCursorText, rightOfCursorText, enteredCommand } = useWithInputTextEntered();
+
+    const selectorOptions: EuiSelectableOption[] = useMemo(() => {
+      const options: EuiSelectableOption[] = [];
+
+      if (enteredCommand?.commandDefinition) {
+        const argNames = Object.keys(enteredCommand.commandDefinition.args ?? {}).sort();
+
+        for (const argName of argNames) {
+          options.push({
+            label: `--${argName}`,
+            key: argName,
+            data: enteredCommand.commandDefinition.args?.[argName] ?? {},
+          });
+        }
+      } else {
+        for (const commandDefinition of [...commandDefinitions].sort((a, b) =>
+          a.name.localeCompare(b.name)
+        )) {
+          options.push(
+            ...buildCommandUsageList(commandDefinition, { includeOptionalArgs: false }).map(
+              (usage) => {
+                return {
+                  label: usage,
+                  key: usage,
+                  data: commandDefinition,
+                };
+              }
+            )
+          );
+        }
+      }
+
+      return options;
+    }, [commandDefinitions, enteredCommand?.commandDefinition]);
+
+    const searchBarProps = useMemo(() => {
+      return {
+        compressed: true,
+        fullWidth: true,
+        id: initialFocusId,
+      };
+    }, [initialFocusId]);
+
+    const selectableListProps: EuiSelectableProps['listProps'] = useMemo(() => {
+      return {
+        showIcons: false,
+        bordered: true,
+      };
+    }, []);
+
+    const handleRenderOption = useCallback<NonNullable<EuiSelectableProps['renderOption']>>(
+      (option) => {
+        return (
+          <EuiFlexGroup responsive={false}>
+            <EuiFlexItem
+              grow={false}
+              css={css`
+                min-width: 240px;
+                width: 15vw;
+              `}
+            >
+              <div>
+                <EuiBadge data-test-subj={getTestId('commandName')}>
+                  <UserCommandInput input={option.label} />
+                </EuiBadge>
+              </div>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiText color="subdued" size="xs">
+                <EuiTextTruncate text={option.about ?? ''} />
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        );
+      },
+      [getTestId]
+    );
+
+    const handleSelectableOnChange: EuiSelectableProps['onChange'] = useCallback(
+      (items) => {
+        dispatch({ type: 'updateInputPopoverState', payload: { show: undefined } });
+
+        const selected = items.find((item) => item.checked === 'on');
+
+        if (selected) {
+          let textLeft: string = '';
+          let textRight: string = '';
+
+          // If a command has been entered, then we are appending an option
+          if (enteredCommand?.commandDefinition) {
+            textLeft = `${leftOfCursorText.replace(/ +?(--)$/, '')} ${selected.label}`;
+            textRight = rightOfCursorText;
+          } else {
+            textLeft = selected.label;
+            textRight = '';
+          }
+
+          dispatch({
+            type: 'updateInputTextEnteredState',
+            payload: {
+              leftOfCursorText: textLeft,
+              rightOfCursorText: textRight,
+            },
+          });
+        }
+
+        dispatch({ type: 'addFocusToKeyCapture' });
+      },
+      [dispatch, enteredCommand?.commandDefinition, leftOfCursorText, rightOfCursorText]
+    );
+
+    return (
+      <div data-test-subj={getTestId()}>
+        <EuiSelectable
+          options={selectorOptions}
+          onChange={handleSelectableOnChange}
+          renderOption={handleRenderOption}
+          searchable={true}
+          searchProps={searchBarProps}
+          listProps={selectableListProps}
+        >
+          {(list, search) => {
+            return (
+              <>
+                {list}
+                <EuiSpacer size="s" />
+                {search}
+              </>
+            );
+          }}
+        </EuiSelectable>
+      </div>
+    );
+  }
+);
+
+CommandSelector.displayName = 'CommandSelector';

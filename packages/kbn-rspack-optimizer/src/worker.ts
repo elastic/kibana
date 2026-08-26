@@ -34,6 +34,8 @@ interface StartMessage {
     dist?: boolean;
     examples?: boolean;
     themeTags?: ThemeTag[];
+    pluginPaths?: string[];
+    pluginScanDirs?: string[];
     hmr?: boolean;
     basePath?: string;
   };
@@ -63,6 +65,8 @@ async function handleStart(options: StartMessage['options']) {
       dist: options.dist,
       examples: options.examples,
       themeTags: options.themeTags ?? [...DEFAULT_THEME_TAGS],
+      pluginPaths: options.pluginPaths,
+      pluginScanDirs: options.pluginScanDirs,
       hmr: options.hmr,
       basePath: options.basePath,
       log,

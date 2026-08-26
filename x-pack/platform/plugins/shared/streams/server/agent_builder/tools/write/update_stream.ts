@@ -175,7 +175,7 @@ export const createUpdateStreamTool = ({
   annotations: {
     title: 'Update Stream',
     readOnlyHint: false,
-    destructiveHint: false,
+    destructiveHint: true,
     idempotentHint: true,
     openWorldHint: false,
   },

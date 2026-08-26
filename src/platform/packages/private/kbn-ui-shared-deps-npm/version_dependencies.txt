@@ -24,19 +24,19 @@
 @elastic/charts@72.0.1
 @elastic/datemath@5.0.3
 @elastic/emotion-sheet@1.4.1
-@elastic/esql-ast@4.19.2
-@elastic/esql-definitions@4.17.0
+@elastic/esql-ast@4.21.1
 @elastic/esql-definitions@4.19.2
-@elastic/esql-grammar@4.14.0
-@elastic/esql-promql-grammar@4.14.0
-@elastic/esql-traversal@4.19.2
-@elastic/esql-types@4.14.0
-@elastic/esql@4.19.2
+@elastic/esql-definitions@4.21.1
+@elastic/esql-grammar@4.21.1
+@elastic/esql-promql-grammar@4.21.1
+@elastic/esql-traversal@4.21.1
+@elastic/esql-types@4.21.1
+@elastic/esql@4.21.1
 @elastic/eui-theme-borealis@8.0.0
 @elastic/eui-theme-common@10.0.0
 @elastic/eui@119.0.0
 @elastic/numeral@2.5.1
-@elastic/pretty-printer@4.14.0
+@elastic/pretty-printer@4.21.1
 @elastic/prismjs-esql@4.15.0
 @emotion/babel-plugin@11.13.5
 @emotion/cache@11.14.0
@@ -137,7 +137,6 @@
 @react-native/virtualized-lists@0.86.0
 @reduxjs/toolkit@1.9.7
 @reduxjs/toolkit@2.12.0
-@remix-run/router@1.23.3
 @sinclair/typebox@0.27.10
 @standard-schema/spec@1.1.0
 @standard-schema/utils@0.3.0
@@ -281,8 +280,7 @@ browserify-des@1.0.2
 browserify-rsa@4.1.1
 browserify-sign@4.2.6
 browserify-zlib@0.2.0
-browserslist@4.28.0
-browserslist@4.28.4
+browserslist@4.28.8
 bser@2.1.1
 buffer-from@1.1.2
 buffer-xor@1.0.3
@@ -297,7 +295,7 @@ call-bound@1.0.4
 callsites@3.1.0
 camelcase@6.3.0
 camelize@1.0.1
-caniuse-lite@1.0.30001799
+caniuse-lite@1.0.30001810
 ccount@1.1.0
 chalk@4.1.2
 character-entities-html4@1.1.4
@@ -339,7 +337,7 @@ convert-source-map@2.0.0
 cookie-signature@1.0.7
 cookie@0.7.2
 copy-anything@3.0.5
-core-js@3.45.1
+core-js@3.50.0
 core-util-is@1.0.3
 cosmiconfig@7.1.0
 create-ecdh@4.0.4
@@ -388,7 +386,7 @@ domain-browser@4.22.0
 dunder-proto@1.0.1
 duplexer@0.1.2
 ee-first@1.1.1
-electron-to-chromium@1.5.381
+electron-to-chromium@1.5.414
 elliptic@6.6.1
 emoji-regex@8.0.0
 emoticon@3.2.0
@@ -484,7 +482,6 @@ hermes-estree@0.36.0
 hermes-parser@0.35.0
 hermes-parser@0.36.0
 history@4.9.0
-history@5.3.0
 hmac-drbg@1.0.1
 hoist-non-react-statics@3.3.2
 hpack.js@2.1.6
@@ -633,7 +630,7 @@ negotiator@1.0.0
 neo-async@2.6.2
 node-emoji@1.11.0
 node-int64@0.4.0
-node-releases@2.0.50
+node-releases@2.0.53
 node-stdlib-browser@1.3.1
 normalize-path@3.0.0
 nullthrows@1.1.1
@@ -680,7 +677,7 @@ path-type@4.0.0
 pbkdf2@3.1.6
 picocolors@1.1.1
 picomatch@2.3.2
-picomatch@4.0.4
+picomatch@4.0.5
 pify@2.3.0
 pify@4.0.1
 pinkie-promise@2.0.1
@@ -704,7 +701,7 @@ punycode@1.4.1
 punycode@2.3.1
 pvtsutils@1.3.6
 pvutils@1.1.5
-qs@6.15.2
+qs@6.15.3
 querystring-es3@0.2.1
 querystringify@2.2.0
 queue@6.0.2
@@ -732,10 +729,8 @@ react-redux@9.2.0
 react-refresh@0.14.2
 react-remove-scroll-bar@2.3.8
 react-remove-scroll@2.7.2
-react-router-dom-v5-compat@6.30.4
 react-router-dom@5.3.4
 react-router@5.3.4
-react-router@6.30.4
 react-style-singleton@2.2.3
 react-virtualized-auto-sizer@1.0.26
 react-window@1.8.11
@@ -769,7 +764,7 @@ resolve-cwd@3.0.0
 resolve-from@4.0.0
 resolve-from@5.0.0
 resolve-pathname@2.2.0
-resolve@1.22.8
+resolve@1.22.12
 retry@0.13.1
 rimraf@2.7.1
 ripemd160@2.0.3
@@ -879,7 +874,7 @@ unist-util-visit-parents@3.1.1
 unist-util-visit@1.4.1
 unist-util-visit@2.0.3
 unpipe@1.0.0
-update-browserslist-db@1.2.3
+update-browserslist-db@1.3.1
 uri-js@4.4.1
 url-parse@1.5.10
 url@0.11.4

@@ -17,9 +17,9 @@ import { RULES_CONTENT_LIST_ID } from '../../constants';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useComposeDiscoverFlyout } from '../../hooks/use_compose_discover_flyout';
 import {
-  useIsRuleManagementABSkillAvailable,
-  useRuleManagementABSkillRequirements,
-} from '../../hooks/use_is_rule_management_ab_skill_available';
+  useAreAgentBuilderSkillsAvailable,
+  useAgentBuilderSkillsRequirements,
+} from '../../hooks/use_are_agent_builder_skills_available';
 import { useNavigateToAgentBuilder } from '../../hooks/use_navigate_to_agent_builder';
 import {
   RuleCreateOptionsPanel,
@@ -49,8 +49,8 @@ export const RulesListPage = () => {
   const { flyout, openCreateFlyout, openCreateBuilderFlyout, openEditFlyout, openCloneFlyout } =
     useComposeDiscoverFlyout();
   const navigateToAgentBuilder = useNavigateToAgentBuilder();
-  const isRuleManagementABSkillAvailable = useIsRuleManagementABSkillAvailable();
-  const abSkillRequirements = useRuleManagementABSkillRequirements();
+  const areAgentBuilderSkillsAvailable = useAreAgentBuilderSkillsAvailable();
+  const abSkillRequirements = useAgentBuilderSkillsRequirements();
   // We always render the "Create with agent" entry points; when the skill is unavailable they
   // are shown disabled with a tooltip naming the missing prerequisite rather than hidden.
   const createWithAgentTooltipText = getCreateWithAgentTooltipText(abSkillRequirements);
@@ -72,7 +72,7 @@ export const RulesListPage = () => {
     <RuleCreateOptionsPanel
       onCreateEsqlRule={openCreateFlyout}
       onCreateWithAgent={navigateToAgentBuilder}
-      createWithAgentDisabled={!isRuleManagementABSkillAvailable}
+      createWithAgentDisabled={!areAgentBuilderSkillsAvailable}
       createWithAgentTooltipText={createWithAgentTooltipText}
       onCreateThresholdRule={onCreateThresholdRuleFromOptionsFlyout}
     />
@@ -153,7 +153,7 @@ export const RulesListPage = () => {
           onCreateRule={openCreateOptionsFlyout}
           onCreateEsqlRule={openCreateFlyout}
           onCreateWithAgent={navigateToAgentBuilder}
-          createWithAgentDisabled={!isRuleManagementABSkillAvailable}
+          createWithAgentDisabled={!areAgentBuilderSkillsAvailable}
           createWithAgentTooltipText={createWithAgentTooltipText}
         />
         <ContentList emptyState={emptyState} data-test-subj="rulesList">
@@ -175,7 +175,7 @@ export const RulesListPage = () => {
           onClose={closeCreateOptionsFlyout}
           onCreateEsqlRule={onCreateEsqlRuleFromOptionsFlyout}
           onCreateWithAgent={onCreateWithAgentFromOptionsFlyout}
-          createWithAgentDisabled={!isRuleManagementABSkillAvailable}
+          createWithAgentDisabled={!areAgentBuilderSkillsAvailable}
           createWithAgentTooltipText={createWithAgentTooltipText}
           onCreateThresholdRule={onCreateThresholdRuleFromOptionsFlyout}
         />
