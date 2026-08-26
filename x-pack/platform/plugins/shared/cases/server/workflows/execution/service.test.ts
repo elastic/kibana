@@ -200,9 +200,9 @@ describe('CasesWorkflowRunService', () => {
     });
 
     it('is also legal when exactly one case is selected (list-surface single-select)', async () => {
-      await expect(
-        run({ caseIds: ['case-1'], inputs: {} })
-      ).resolves.toEqual({ workflowExecutionId: 'execution-1' });
+      await expect(run({ caseIds: ['case-1'], inputs: {} })).resolves.toEqual({
+        workflowExecutionId: 'execution-1',
+      });
       // No case fetch when origin is absent.
       expect(casesClient.cases.get).not.toHaveBeenCalled();
     });

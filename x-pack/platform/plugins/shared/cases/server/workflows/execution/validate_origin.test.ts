@@ -335,4 +335,3 @@ describe('unified v2 alert attachment', () => {
     ).toThrow('All selected alerts must belong to the case.');
   });
 });
-
