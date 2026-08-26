@@ -1,5 +1,8 @@
 {
   "sha1": "522db71fc1487d20f60e9bde9c72869bd294645d",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "ee269d746d5108c-1f60021f34227ea",
@@ -8,12 +11,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -23,8 +20,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/create_tag.spec.ts",
-        "line": 34,
-        "column": 10
+        "line": 29,
+        "column": 45
       }
     },
     {
@@ -34,12 +31,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -49,8 +40,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/create_tag.spec.ts",
-        "line": 70,
-        "column": 10
+        "line": 63,
+        "column": 25
       }
     },
     {
@@ -60,12 +51,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -75,8 +60,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/create_tag.spec.ts",
-        "line": 87,
-        "column": 10
+        "line": 73,
+        "column": 13
       }
     },
     {
@@ -86,12 +71,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -101,8 +80,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/create_tag.spec.ts",
-        "line": 111,
-        "column": 10
+        "line": 98,
+        "column": 12
       }
     },
     {
@@ -112,12 +91,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -127,8 +100,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/create_tag.spec.ts",
-        "line": 130,
-        "column": 10
+        "line": 115,
+        "column": 40
       }
     },
     {
@@ -138,12 +111,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -153,8 +120,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/delete_tag.spec.ts",
-        "line": 34,
-        "column": 10
+        "line": 29,
+        "column": 45
       }
     },
     {
@@ -164,12 +131,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -179,8 +140,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/delete_tag.spec.ts",
-        "line": 47,
-        "column": 10
+        "line": 37,
+        "column": 72
       }
     },
     {
@@ -190,12 +151,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -205,8 +160,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/delete_tag.spec.ts",
-        "line": 60,
-        "column": 10
+        "line": 50,
+        "column": 24
       }
     },
     {
@@ -216,12 +171,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -231,8 +180,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/get_tag.spec.ts",
-        "line": 26,
-        "column": 10
+        "line": 21,
+        "column": 45
       }
     },
     {
@@ -242,12 +191,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -257,8 +200,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/get_tag.spec.ts",
-        "line": 37,
-        "column": 10
+        "line": 28,
+        "column": 40
       }
     },
     {
@@ -268,12 +211,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -283,8 +220,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/search_tags.spec.ts",
-        "line": 26,
-        "column": 10
+        "line": 21,
+        "column": 45
       }
     },
     {
@@ -297,8 +234,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_bulk_assign.spec.ts",
-        "line": 31,
-        "column": 12
+        "line": 23,
+        "column": 33
       }
     },
     {
@@ -311,8 +248,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_bulk_assign.spec.ts",
-        "line": 70,
-        "column": 12
+        "line": 68,
+        "column": 7
       }
     },
     {
@@ -325,8 +262,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_bulk_assign.spec.ts",
-        "line": 109,
-        "column": 12
+        "line": 117,
+        "column": 18
       }
     },
     {
@@ -339,8 +276,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_create.spec.ts",
-        "line": 31,
-        "column": 12
+        "line": 23,
+        "column": 33
       }
     },
     {
@@ -353,8 +290,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_create.spec.ts",
-        "line": 84,
-        "column": 12
+        "line": 71,
+        "column": 20
       }
     },
     {
@@ -367,8 +304,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_create.spec.ts",
-        "line": 113,
-        "column": 12
+        "line": 99,
+        "column": 24
       }
     },
     {
@@ -381,8 +318,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_delete.spec.ts",
-        "line": 31,
-        "column": 12
+        "line": 23,
+        "column": 33
       }
     },
     {
@@ -395,8 +332,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_delete.spec.ts",
-        "line": 57,
-        "column": 12
+        "line": 44,
+        "column": 9
       }
     },
     {
@@ -409,8 +346,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_assignable_types.spec.ts",
-        "line": 22,
-        "column": 12
+        "line": 18,
+        "column": 13
       }
     },
     {
@@ -423,8 +360,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_assignable_types.spec.ts",
-        "line": 35,
-        "column": 12
+        "line": 27,
+        "column": 46
       }
     },
     {
@@ -437,8 +374,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_assignable_types.spec.ts",
-        "line": 48,
-        "column": 12
+        "line": 38,
+        "column": 49
       }
     },
     {
@@ -451,8 +388,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_assignable_types.spec.ts",
-        "line": 61,
-        "column": 12
+        "line": 50,
+        "column": 25
       }
     },
     {
@@ -465,8 +402,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_bulk_assign.spec.ts",
-        "line": 48,
-        "column": 12
+        "line": 40,
+        "column": 33
       }
     },
     {
@@ -479,8 +416,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_bulk_assign.spec.ts",
-        "line": 66,
-        "column": 12
+        "line": 59,
+        "column": 23
       }
     },
     {
@@ -493,8 +430,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_bulk_assign.spec.ts",
-        "line": 87,
-        "column": 12
+        "line": 85,
+        "column": 6
       }
     },
     {
@@ -507,8 +444,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_bulk_assign.spec.ts",
-        "line": 123,
-        "column": 12
+        "line": 129,
+        "column": 86
       }
     },
     {
@@ -521,8 +458,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_bulk_assign.spec.ts",
-        "line": 159,
-        "column": 12
+        "line": 168,
+        "column": 11
       }
     },
     {
@@ -535,8 +472,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_bulk_delete.spec.ts",
-        "line": 39,
-        "column": 10
+        "line": 31,
+        "column": 31
       }
     },
     {
@@ -549,8 +486,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_bulk_delete.spec.ts",
-        "line": 48,
-        "column": 10
+        "line": 41,
+        "column": 64
       }
     },
     {
@@ -563,8 +500,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_bulk_delete.spec.ts",
-        "line": 60,
-        "column": 10
+        "line": 53,
+        "column": 15
       }
     },
     {
@@ -577,8 +514,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_bulk_delete.spec.ts",
-        "line": 69,
-        "column": 10
+        "line": 63,
+        "column": 21
       }
     },
     {
@@ -591,8 +528,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_create.spec.ts",
-        "line": 33,
-        "column": 10
+        "line": 25,
+        "column": 5
       }
     },
     {
@@ -605,8 +542,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_create.spec.ts",
-        "line": 51,
-        "column": 10
+        "line": 46,
+        "column": 27
       }
     },
     {
@@ -619,8 +556,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_create.spec.ts",
-        "line": 71,
-        "column": 10
+        "line": 63,
+        "column": 88
       }
     },
     {
@@ -633,8 +570,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_create.spec.ts",
-        "line": 91,
-        "column": 10
+        "line": 81,
+        "column": 12
       }
     },
     {
@@ -647,8 +584,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_delete.spec.ts",
-        "line": 42,
-        "column": 10
+        "line": 34,
+        "column": 31
       }
     },
     {
@@ -661,8 +598,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_delete.spec.ts",
-        "line": 50,
-        "column": 10
+        "line": 42,
+        "column": 75
       }
     },
     {
@@ -675,8 +612,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_delete.spec.ts",
-        "line": 62,
-        "column": 10
+        "line": 48,
+        "column": 5
       }
     },
     {
@@ -689,8 +626,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_delete.spec.ts",
-        "line": 70,
-        "column": 10
+        "line": 57,
+        "column": 14
       }
     },
     {
@@ -703,8 +640,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_find.spec.ts",
-        "line": 27,
-        "column": 10
+        "line": 19,
+        "column": 31
       }
     },
     {
@@ -717,8 +654,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_find.spec.ts",
-        "line": 47,
-        "column": 10
+        "line": 36,
+        "column": 24
       }
     },
     {
@@ -731,8 +668,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_get_all.spec.ts",
-        "line": 30,
-        "column": 10
+        "line": 22,
+        "column": 11
       }
     },
     {
@@ -745,8 +682,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_get_all.spec.ts",
-        "line": 61,
-        "column": 10
+        "line": 48,
+        "column": 20
       }
     },
     {
@@ -759,8 +696,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_get_all.spec.ts",
-        "line": 96,
-        "column": 10
+        "line": 87,
+        "column": 20
       }
     },
     {
@@ -773,8 +710,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_get.spec.ts",
-        "line": 30,
-        "column": 10
+        "line": 22,
+        "column": 11
       }
     },
     {
@@ -787,8 +724,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_get.spec.ts",
-        "line": 46,
-        "column": 10
+        "line": 33,
+        "column": 7
       }
     },
     {
@@ -801,8 +738,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_update.spec.ts",
-        "line": 42,
-        "column": 10
+        "line": 34,
+        "column": 31
       }
     },
     {
@@ -815,8 +752,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_update.spec.ts",
-        "line": 59,
-        "column": 10
+        "line": 47,
+        "column": 12
       }
     },
     {
@@ -829,8 +766,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_update.spec.ts",
-        "line": 75,
-        "column": 10
+        "line": 64,
+        "column": 15
       }
     },
     {
@@ -843,8 +780,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_update.spec.ts",
-        "line": 92,
-        "column": 10
+        "line": 78,
+        "column": 63
       }
     },
     {
@@ -857,8 +794,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_update.spec.ts",
-        "line": 31,
-        "column": 12
+        "line": 23,
+        "column": 33
       }
     },
     {
@@ -871,8 +808,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_update.spec.ts",
-        "line": 74,
-        "column": 12
+        "line": 62,
+        "column": 14
       }
     },
     {
@@ -885,8 +822,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_update.spec.ts",
-        "line": 114,
-        "column": 12
+        "line": 99,
+        "column": 9
       }
     },
     {
@@ -899,8 +836,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_update.spec.ts",
-        "line": 135,
-        "column": 12
+        "line": 118,
+        "column": 14
       }
     },
     {
@@ -910,12 +847,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -925,8 +856,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_usage_collector.spec.ts",
-        "line": 55,
-        "column": 12
+        "line": 47,
+        "column": 32
       }
     },
     {
@@ -936,12 +867,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -951,8 +876,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/upsert_tag.spec.ts",
-        "line": 34,
-        "column": 10
+        "line": 29,
+        "column": 45
       }
     },
     {
@@ -962,12 +887,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -977,8 +896,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/upsert_tag.spec.ts",
-        "line": 55,
-        "column": 10
+        "line": 48,
+        "column": 27
       }
     },
     {
@@ -988,12 +907,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -1003,8 +916,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/upsert_tag.spec.ts",
-        "line": 76,
-        "column": 10
+        "line": 64,
+        "column": 21
       }
     },
     {
@@ -1014,12 +927,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -1029,8 +936,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/upsert_tag.spec.ts",
-        "line": 96,
-        "column": 10
+        "line": 82,
+        "column": 8
       }
     },
     {
@@ -1040,12 +947,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -1055,8 +956,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/upsert_tag.spec.ts",
-        "line": 113,
-        "column": 10
+        "line": 98,
+        "column": 40
       }
     },
     {
@@ -1066,12 +967,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -1081,8 +976,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/upsert_tag.spec.ts",
-        "line": 137,
-        "column": 10
+        "line": 119,
+        "column": 16
       }
     }
   ]
