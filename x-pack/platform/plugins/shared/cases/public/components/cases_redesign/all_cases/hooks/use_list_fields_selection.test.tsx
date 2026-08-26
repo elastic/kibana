@@ -234,9 +234,7 @@ describe('useListFieldsSelection — global field sync (Bug 19099)', () => {
     expect(JSON.parse(localStorage.getItem(sharedStorageKey)!)).toEqual({
       priority_as_keyword: true,
     });
-    const listStored: Array<{ field: string }> = JSON.parse(
-      localStorage.getItem(listStorageKey)!
-    );
+    const listStored: Array<{ field: string }> = JSON.parse(localStorage.getItem(listStorageKey)!);
     expect(listStored).toEqual([{ field: 'tags', name: 'Tags', isChecked: true }]);
     expect(listStored.find((f) => f.field === 'priority_as_keyword')).toBeUndefined();
   });
