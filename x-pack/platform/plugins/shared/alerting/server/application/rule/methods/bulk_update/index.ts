@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { apiTest } from '@kbn/scout';
-export { COMMON_HEADERS, NO_AGENT_BUILDER_ROLE } from './constants';
+export type { BulkUpdateRulesItem, BulkUpdateRulesParams, BulkUpdateRulesResult } from './types';
+export { bulkUpdateRules } from './bulk_update_rules';

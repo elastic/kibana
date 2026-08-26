@@ -3196,14 +3196,6 @@ paths:
                       - description
                       - schema
                   type: array
-                capabilities:
-                  additionalProperties: false
-                  description: Controls agent capabilities during conversation. Currently supports visualization rendering for tabular tool results.
-                  type: object
-                  properties:
-                    visualizations:
-                      description: When true, allows the agent to render tabular data from tool results as interactive visualizations using custom XML elements in responses.
-                      type: boolean
                 configuration_overrides:
                   additionalProperties: false
                   description: Runtime configuration overrides. These override the stored agent configuration for this execution only.
@@ -3673,14 +3665,6 @@ paths:
                       - description
                       - schema
                   type: array
-                capabilities:
-                  additionalProperties: false
-                  description: Controls agent capabilities during conversation. Currently supports visualization rendering for tabular tool results.
-                  type: object
-                  properties:
-                    visualizations:
-                      description: When true, allows the agent to render tabular data from tool results as interactive visualizations using custom XML elements in responses.
-                      type: boolean
                 configuration_overrides:
                   additionalProperties: false
                   description: Runtime configuration overrides. These override the stored agent configuration for this execution only.
@@ -88705,7 +88689,7 @@ components:
       type: object
       properties:
         artifacts:
-          description: 'Artifacts attached to the rule, each shaped as `{ id, type, data }`. `data` carries type-specific fields: a `runbook` artifact requires `data.content` holding markdown, and a `dashboard` artifact requires `data.dashboardId` holding a dashboard saved object id. Artifacts of any other type may carry whatever fields they need in `data`.'
+          description: Artifacts attached to the rule, each shaped as `{ id, type, data }`. `data` is a type-specific object (for example a `runbook` may carry `content`, a `dashboard` may carry `dashboardId`). Per-type shape is validated by the artifact-type registry when the type is registered; unregistered types pass through with envelope bounds only.
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_artifact'
           maxItems: 100
@@ -89189,7 +89173,7 @@ components:
       type: object
       properties:
         artifacts:
-          description: 'Artifacts attached to the rule, each shaped as `{ id, type, data }`. `data` carries type-specific fields: a `runbook` artifact requires `data.content` holding markdown, and a `dashboard` artifact requires `data.dashboardId` holding a dashboard saved object id. Artifacts of any other type may carry whatever fields they need in `data`.'
+          description: Artifacts attached to the rule, each shaped as `{ id, type, data }`. `data` is a type-specific object (for example a `runbook` may carry `content`, a `dashboard` may carry `dashboardId`). Per-type shape is validated by the artifact-type registry when the type is registered; unregistered types pass through with envelope bounds only.
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_artifact'
           maxItems: 100
@@ -89572,7 +89556,7 @@ components:
       type: object
       properties:
         artifacts:
-          description: 'Artifacts attached to the rule, each shaped as `{ id, type, data }`. `data` carries type-specific fields: a `runbook` artifact requires `data.content` holding markdown, and a `dashboard` artifact requires `data.dashboardId` holding a dashboard saved object id. Artifacts of any other type may carry whatever fields they need in `data`.'
+          description: Artifacts attached to the rule, each shaped as `{ id, type, data }`. `data` is a type-specific object (for example a `runbook` may carry `content`, a `dashboard` may carry `dashboardId`). Per-type shape is validated by the artifact-type registry when the type is registered; unregistered types pass through with envelope bounds only.
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_artifact'
           maxItems: 100

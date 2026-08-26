@@ -34,19 +34,17 @@ export const Navigation = (props: ChromeNavigationProps) => {
     return null;
   }
 
-  const { navItems, logoItem, activeItemId, solutionId } = state;
+  const { navItems, activeItemId, solutionId } = state;
 
   return (
     <KibanaSectionErrorBoundary sectionName={'Navigation'} maxRetries={3}>
       <NavigationComponent
         items={navItems}
-        logo={logoItem}
         isCollapsed={props.isCollapsed}
         setWidth={props.setWidth}
         onToggleCollapsed={props.onToggleCollapsed}
         onCustomizeNavigation={onCustomizeNavigation}
         activeItemId={activeItemId}
-        showTopSeparator={true}
         data-test-subj={classnames(`${solutionId}SideNav`, 'projectSideNav', 'projectSideNavV2')}
       />
     </KibanaSectionErrorBoundary>

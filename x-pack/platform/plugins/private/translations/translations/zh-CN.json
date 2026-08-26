@@ -6151,7 +6151,6 @@
     "kbnUI.sideNavigation.footerAriaLabel": "侧边导航",
     "kbnUI.sideNavigation.footerInstructions": "您现在位于主导航的页脚菜单中。使用上下方向键来导航菜单。",
     "kbnUI.sideNavigation.goBackButtonIconAriaLabel": "返回",
-    "kbnUI.sideNavigation.logoAriaLabel": "{label} 主页",
     "kbnUI.sideNavigation.moreMenuItemLabel": "更多",
     "kbnUI.sideNavigation.moreMenuItemText": "更多",
     "kbnUI.sideNavigation.moreMenuLabel": "更多",
