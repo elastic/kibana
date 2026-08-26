@@ -1090,6 +1090,35 @@ describe('updateAlertsStatus — event bus', () => {
     bus.removeAllListeners();
   });
 
+  it('still resolves successfully when a listener throws (listener isolation)', async () => {
+    const bus = new CasesEventBus();
+    bus.onAlertStatusChanged(() => {
+      throw new Error('listener boom');
+    });
+
+    esClient.mget.mockResolvedValueOnce({
+      docs: [
+        {
+          found: true,
+          _id: 'a1',
+          _index: '.siem-signals',
+          _source: { 'kibana.alert.workflow_status': 'open' },
+        },
+      ],
+    } as never);
+
+    const alertService = new AlertService(esClient, logger, alertsClient, bus, request);
+    await expect(
+      alertService.updateAlertsStatus([
+        { id: 'a1', index: '.siem-signals', status: CaseStatuses.closed },
+      ])
+    ).resolves.not.toThrow();
+
+    expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('listener boom'));
+
+    bus.removeAllListeners();
+  });
+
   it('does not call mget when no event bus is provided', async () => {
     const alertService = new AlertService(esClient, logger, alertsClient);
     await alertService.updateAlertsStatus([

@@ -22,12 +22,20 @@ describe('noteCreated trigger', () => {
     expect(() =>
       schema.parse({
         noteId: 'n1',
-        noteContent: 'text',
         createdBy: 'user',
         documentId: 'doc-1',
-        spaceId: 'default',
       })
     ).not.toThrow();
+  });
+
+  it('strips noteContent from the parsed payload (access-control regression)', () => {
+    const result = schema.parse({
+      noteId: 'n1',
+      createdBy: 'user',
+      documentId: 'doc-1',
+      noteContent: 'secret text',
+    });
+    expect(result).not.toHaveProperty('noteContent');
   });
 
   it('rejects missing required fields', () => {

@@ -117,7 +117,12 @@ export class AlertService {
       );
 
       if (this.casesEventBus && this.request && previousStatusMap !== undefined) {
-        this.emitStatusChangedEvents(alerts, previousStatusMap, this.casesEventBus, this.request);
+        // Isolate event dispatch: a listener exception must not change the mutation result.
+        try {
+          this.emitStatusChangedEvents(alerts, previousStatusMap, this.casesEventBus, this.request);
+        } catch (err) {
+          this.logger.error(`Failed to emit alertStatusChanged events: ${err}`);
+        }
       }
 
       return updateResults.reduce((acc, updatedCount) => acc + updatedCount, 0);
