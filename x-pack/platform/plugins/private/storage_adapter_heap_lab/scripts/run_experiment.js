@@ -27,10 +27,18 @@
  *   SETTLE_MS          short pause before first sample      (default 2000)
  *   INDEX_PREFIX       index name prefix                    (default heaplab)
  *   OUT                CSV output path                      (default ./heaplab_results.csv)
+ *
+ * Forced-GC mode (measures true post-GC live set instead of a noisy min):
+ *   ES_PID             pid of the local ES JVM; when set, a full GC is forced
+ *                      (via jcmd) before each measurement and the reading is
+ *                      recorded with phase "post_gc"
+ *   JCMD               path to jcmd (default: bundled .es JDK jcmd)
+ *   GC_SETTLE_MS       pause after forcing GC before reading heap (default 4000)
  */
 
 const fs = require('fs');
 const path = require('path');
+const { execFileSync } = require('child_process');
 
 const KIBANA_URL = process.env.KIBANA_URL || 'http://localhost:5601';
 const KBN_USER = process.env.KBN_USER || 'elastic';
@@ -47,6 +55,13 @@ const INDEX_PREFIX = process.env.INDEX_PREFIX || 'heaplab';
 const UNIQUE_FIELDS = /^(1|true|yes)$/i.test(process.env.UNIQUE_FIELDS || '');
 const OUT = process.env.OUT || path.resolve(process.cwd(), 'heaplab_results.csv');
 
+const ES_PID = process.env.ES_PID || '';
+const JCMD =
+  process.env.JCMD ||
+  path.resolve(process.cwd(), '.es/9.6.0/jdk.app/Contents/Home/bin/jcmd');
+const GC_SETTLE_MS = Number(process.env.GC_SETTLE_MS || 4000);
+const FORCE_GC = Boolean(ES_PID);
+
 const authHeader = KBN_API_KEY
   ? `ApiKey ${KBN_API_KEY}`
   : `Basic ${Buffer.from(`${KBN_USER}:${KBN_PASS}`).toString('base64')}`;
@@ -59,6 +74,22 @@ const baseHeaders = {
 };
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/**
+ * Forces a full GC on the local ES JVM via jcmd (run twice to let G1 reclaim
+ * humongous/old regions), so the subsequent heap reading approximates the
+ * retained live set rather than pre-GC allocations.
+ */
+function forceGc() {
+  if (!FORCE_GC) return;
+  try {
+    execFileSync(JCMD, [ES_PID, 'GC.run'], { stdio: 'ignore' });
+    execFileSync(JCMD, [ES_PID, 'GC.run'], { stdio: 'ignore' });
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error(`  forceGc failed (pid=${ES_PID}): ${err.message}`);
+  }
+}
 
 async function call(method, endpoint, body) {
   const response = await fetch(`${KIBANA_URL}${endpoint}`, {
@@ -183,17 +214,51 @@ async function sampleRetained(step, cumulativeIndices) {
   return best;
 }
 
+/**
+ * Forces a full GC, waits for it to settle, then records a single reading as the
+ * post-GC live set (used to derive per-index heap overhead).
+ */
+async function sampleAfterGc(step, cumulativeIndices) {
+  forceGc();
+  await sleep(GC_SETTLE_MS);
+  const s = await stats();
+  const heap = maxHeap(s.nodes || []);
+  appendRow([
+    s.timestamp,
+    'post_gc',
+    step,
+    cumulativeIndices,
+    s.indicesCount,
+    s.shardsTotal,
+    s.totalFieldCount,
+    s.totalDeduplicatedFieldCount,
+    s.docsCount,
+    s.storeSizeBytes,
+    s.status,
+    heap.bytes,
+    heap.percent,
+    'post_gc_live_set',
+  ]);
+  logLine('post_gc', step, s, heap);
+  return { s, heap };
+}
+
 async function main() {
   // eslint-disable-next-line no-console
   console.log(
     `heap-lab experiment -> ${KIBANA_URL}\n` +
       `  fields/index=${NUM_FIELDS} docs/index=${DOCS_PER_INDEX} step=${STEP_INDICES} steps=${STEPS} stabilize=${STABILIZE_MS}ms uniqueFields=${UNIQUE_FIELDS}\n` +
+      `  forceGc=${FORCE_GC}${FORCE_GC ? ` (esPid=${ES_PID}, gcSettle=${GC_SETTLE_MS}ms)` : ''}\n` +
       `  output=${OUT}`
   );
 
   fs.writeFileSync(OUT, CSV_HEADER + '\n');
 
-  await sampleOnce('baseline', 0, 0, '');
+  if (FORCE_GC) {
+    await sampleAfterGc(0, 0);
+  } else {
+    await sampleOnce('baseline', 0, 0, '');
+  }
 
   let cumulative = 0;
   for (let step = 1; step <= STEPS; step++) {
@@ -220,7 +285,11 @@ async function main() {
 
     await sleep(SETTLE_MS);
     await sampleOnce('immediate', step, cumulative, '');
-    await sampleRetained(step, cumulative);
+    if (FORCE_GC) {
+      await sampleAfterGc(step, cumulative);
+    } else {
+      await sampleRetained(step, cumulative);
+    }
 
     // eslint-disable-next-line no-console
     console.log(`  step ${step} wall time ${Date.now() - startedAt}ms\n`);

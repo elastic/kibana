@@ -121,6 +121,69 @@ xychart-beta
 Flat line = run 1 (shared mapping, deduplicated). Rising line = run 2 (distinct
 mappings, not deduplicated).
 
+### Run 3 — forced-GC, per-index heap overhead (the number we actually wanted)
+
+Runs 1–2 read heap under G1GC noise, so we approximated retained heap with a
+min-over-window. Run 3 measures it directly: ES was restarted with **`-Xmx6g`**
+(so GC pauses don't distort cluster-state application), and before **every**
+sample the driver forces a full GC on the ES JVM via `jcmd <pid> GC.run` (twice),
+then reads `heap_used` — i.e. the true **post-GC live set**. Indices are added in
+**batches of 50**, **distinct** mappings, **40 fields/index**, 20 docs each. Raw:
+[`results/run3_gc_f40_batch50.csv`](results/run3_gc_f40_batch50.csv).
+
+The gap between pre-GC and post-GC is enormous and is the whole point: at 2,506
+indices the "used" heap read 3,959 MB (64%) but the **post-GC live set was only
+609 MB (9%)**. Almost all of the "used" heap during a ramp is collectable churn
+from index creation, not retained cost.
+
+| indices/shards | dedup fields | pre-GC used | **post-GC live set** |
+|---------------:|-------------:|------------:|---------------------:|
+| 6 (baseline)   | 54      | 1816 MB | **228 MB** |
+| 206            | 8,054   | 2083 MB | **240 MB** |
+| 606            | 24,054  | 3646 MB | **284 MB** |
+| 1,006          | 40,054  | 1604 MB | **351 MB** |
+| 1,506          | 60,054  | —       | **431 MB** |
+| 2,006          | 80,054  | —       | **523 MB** |
+| 2,506          | 100,054 | 3959 MB | **609 MB** |
+
+```mermaid
+xychart-beta
+    title "Run 3: post-GC live set (MB) vs #indices"
+    x-axis "indices" [6, 506, 1006, 1506, 2006, 2506]
+    y-axis "post-GC live set (MB)" 0 --> 700
+    line [228, 274, 351, 431, 523, 609]
+```
+
+Ordinary least squares on the 51 post-GC points (R² = **0.986**):
+
+- **≈ 165 KB of retained heap per index** (structural, near-empty shard, 40 fields).
+- Equivalently **≈ 4.1 KB per mapped field** — but note *fields and indices are
+  collinear here* (every index has exactly 40 fields), so this run cannot separate
+  the per-shard from the per-field term; it only gives per-index cost *at 40 fields*.
+
+**This independently reproduces the ES team's formula.** Henning's estimate is
+`num_segments*55KB + num_fields*1KB + num_shards*75KB`. For one near-empty index
+(1 shard, ~1 segment, 40 fields): `55 + 40 + 75 = 170 KB` — versus **165 KB
+measured** (within 3%). So the formula holds, and we can use it to project real
+(populated) indices, whose shards carry **~14–30 segments** (14 was the average on
+the o11y overview cluster).
+
+| per index | 100 indices | 300 indices | 500 indices |
+|-----------|------------:|------------:|------------:|
+| structural / near-empty (~165 KB) | ~16 MB | ~48 MB | ~80 MB |
+| realistic @14 segments (~0.88 MB) | ~86 MB | ~258 MB | ~430 MB |
+| realistic @30 segments (~1.76 MB) | ~172 MB | ~516 MB | ~859 MB |
+
+**Implication for the smallest (1 GB) ES nodes.** #es-distrib confirmed the
+smallest ES node is 1 GB RAM, whose JVM heap is ~50% (~512 MB), and Henning's own
+conclusion there was that *"if a customer uses all the Kibana features … a 1 GB ES
+node is no longer possible."* Our numbers put a slope on that: a consumer that
+fans `@kbn/storage-adapter` out to **300 distinct, populated system indices** would
+retain **~260–520 MB** of ES heap — i.e. it can consume the **entire usable heap of
+a 1 GB node on its own**. Structural cost alone is negligible (~48 MB); the danger
+is **segments once the indices hold real data**, exactly the term our near-empty
+local shards under-count.
+
 ## Findings
 
 1. **Shards are cheap in heap here; mappings are the cost — and identical
@@ -137,12 +200,30 @@ mappings, not deduplicated).
    ceiling.** With Kibana's own ~60 shards, a consumer creating hundreds of
    indices (× spaces) can hit it on a small cluster and index creation then fails
    with `validation_exception`.
+5. **Retained per-index heap ≈ 165 KB structural, and the ES-team formula holds.**
+   The forced-GC run (run 3) measured a clean **~165 KB/index** (R²=0.986) at 40
+   fields on near-empty shards, matching Henning's `segments*55KB + fields*1KB +
+   shards*75KB` to within 3%. Projected to **populated** shards (~14–30 segments)
+   this is **~0.9–1.8 MB/index**, so ~300 such indices ≈ **260–520 MB** — enough to
+   exhaust the usable heap of a 1 GB ES node on their own.
+6. **The run-2 "wall" was heap pressure, not a hard cluster-state limit.** Giving
+   ES 6 GB (run 3) let us reach **2,506 distinct-mapping indices with no timeout**
+   (per-batch create latency grew ~19 s → ~48 s but kept succeeding). On 2 GB the
+   collapse at ~1,000 indices was GC pauses starving cluster-state application —
+   i.e. the binding constraint really is **available heap**, which is exactly what
+   is scarce on small nodes.
 
 ## Caveats (important)
 
-- **Lower bound on heap.** Test shards hold 2 docs, so per-shard Lucene/segment
-  heap (FSTs, doc values, norms, points) is essentially absent. Production shards
-  with real data cost materially more heap per shard than measured here.
+- **Lower bound on heap (structural only).** Test shards hold 2–20 docs (~1
+  segment), so per-shard Lucene/segment heap (FSTs, doc values, norms, points) is
+  essentially absent. Production shards with real data carry ~14–30 segments and
+  cost materially more. Run 3's "realistic" projections add that segment term via
+  the ES-team formula rather than measuring it locally — treat those as estimates,
+  and prefer the serverless "memory as returned by ES" measurement for ground truth.
+- **Fields/indices collinear in run 3.** Every index used exactly 40 fields, so the
+  regression gives per-index cost *at 40 fields*; it can't independently attribute
+  per-shard vs per-field heap. A field-count sweep would be needed to separate them.
 - **Small, busy node.** 2 GB heap and a heavy dev stack (~40–55% heap before we
   start) compress the usable range and make heap noisy; absolute MB values are
   environment-specific. The *shape* of the curves is the takeaway, not the
@@ -182,4 +263,12 @@ NUM_FIELDS=100 STEP_INDICES=100 STEPS=50 OUT=/tmp/run1.csv \
 # distinct mappings:
 NUM_FIELDS=100 STEP_INDICES=100 STEPS=50 UNIQUE_FIELDS=true OUT=/tmp/run2.csv \
   node x-pack/platform/plugins/private/storage_adapter_heap_lab/scripts/run_experiment.js
+
+# forced-GC per-index overhead (run 3): restart ES with -Xmx6g, pass the ES pid so
+# the driver forces a full GC (jcmd GC.run) before each sample -> true live set:
+ES_PID=$(pgrep -f org.elasticsearch.bootstrap.Elasticsearch) \
+NUM_FIELDS=40 DOCS_PER_INDEX=20 STEP_INDICES=50 STEPS=50 UNIQUE_FIELDS=true \
+OUT=/tmp/run3.csv \
+  node x-pack/platform/plugins/private/storage_adapter_heap_lab/scripts/run_experiment.js
+node x-pack/platform/plugins/private/storage_adapter_heap_lab/scripts/analyze_overhead.js /tmp/run3.csv
 ```
