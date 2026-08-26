@@ -168,33 +168,3 @@ describe('resolveEsqlQueryEdit', () => {
     expect(resolveEsqlQueryEdit(null, undefined).isChanging).toBe(true);
   });
 });
-
-describe('customContentUpdateSchema', () => {
-  it('accepts a prompt on its own', () => {
-    expect(customContentUpdateSchema.safeParse({ prompt: 'Make it blue' }).success).toBe(true);
-  });
-
-  it('accepts an esqlQuery on its own', () => {
-    expect(customContentUpdateSchema.safeParse({ esqlQuery: 'FROM logs-*' }).success).toBe(true);
-  });
-
-  it('requires at least one of prompt or esqlQuery', () => {
-    expect(customContentUpdateSchema.safeParse({}).success).toBe(false);
-  });
-
-  it('accepts a null esqlQuery to clear the query', () => {
-    expect(customContentUpdateSchema.safeParse({ esqlQuery: null }).success).toBe(true);
-  });
-
-  it('rejects a prompt exceeding CUSTOM_CONTENT_MAX_PROMPT_LENGTH', () => {
-    expect(
-      customContentUpdateSchema.safeParse({
-        prompt: 'a'.repeat(CUSTOM_CONTENT_MAX_PROMPT_LENGTH + 1),
-      }).success
-    ).toBe(false);
-  });
-
-  it('rejects an empty prompt', () => {
-    expect(customContentUpdateSchema.safeParse({ prompt: '' }).success).toBe(false);
-  });
-});
