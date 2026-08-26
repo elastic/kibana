@@ -47,6 +47,19 @@ const baseEpisodeData: AlertAttachmentData = {
   last_tags: ['ops'],
 };
 
+const baseEpisodeRow: AlertEpisode = {
+  '@timestamp': '2026-04-10T12:00:00.000Z',
+  'episode.id': 'ep-1',
+  'episode.status': ALERT_EPISODE_STATUS.ACTIVE,
+  'rule.id': 'rule-1',
+  group_hash: 'gh-1',
+  first_timestamp: '2026-04-10T11:00:00.000Z',
+  last_timestamp: '2026-04-10T12:00:00.000Z',
+  duration: 3600000,
+  severity: 'high',
+  last_tags: ['ops'],
+};
+
 type EpisodeVersionedAttachment = VersionedAttachmentWithOrigin<
   typeof ALERT_ATTACHMENT_TYPE,
   AlertAttachmentData
@@ -126,7 +139,7 @@ describe('createAlertAttachmentType', () => {
 
   describe('resolve', () => {
     it('returns episode data parsed against the schema', async () => {
-      getEpisode.mockResolvedValueOnce(baseEpisodeData);
+      getEpisode.mockResolvedValueOnce(baseEpisodeRow);
 
       const result = await definition.resolve!('ep-1', createResolveContext());
 
@@ -135,7 +148,7 @@ describe('createAlertAttachmentType', () => {
     });
 
     it('includes the alert label when the rule can be loaded', async () => {
-      getEpisode.mockResolvedValueOnce(baseEpisodeData);
+      getEpisode.mockResolvedValueOnce(baseEpisodeRow);
       getRule.mockResolvedValueOnce({ metadata: { name: 'Host CPU high' } });
 
       const result = await definition.resolve!('ep-1', createResolveContext());
@@ -146,8 +159,8 @@ describe('createAlertAttachmentType', () => {
 
     it('includes the rule name and group when both are available', async () => {
       getEpisode.mockResolvedValueOnce({
-        ...baseEpisodeData,
-        alert_data: JSON.stringify({ host: { name: 'web-01' } }),
+        ...baseEpisodeRow,
+        episode_data: JSON.stringify({ host: { name: 'web-01' } }),
       });
       getRule.mockResolvedValueOnce({
         metadata: { name: 'Host CPU high' },
@@ -162,7 +175,7 @@ describe('createAlertAttachmentType', () => {
     });
 
     it('falls back to rule ID label when the rule cannot be loaded and there is no group name', async () => {
-      getEpisode.mockResolvedValueOnce(baseEpisodeData);
+      getEpisode.mockResolvedValueOnce(baseEpisodeRow);
       getRule.mockRejectedValueOnce(new Error('not found'));
 
       const result = await definition.resolve!('ep-1', createResolveContext());
@@ -172,8 +185,8 @@ describe('createAlertAttachmentType', () => {
 
     it('falls back to rule ID label when the rule cannot be loaded and grouping fields are unknown', async () => {
       getEpisode.mockResolvedValueOnce({
-        ...baseEpisodeData,
-        alert_data: JSON.stringify({ host: { name: 'web-01' } }),
+        ...baseEpisodeRow,
+        episode_data: JSON.stringify({ host: { name: 'web-01' } }),
       });
       getRule.mockRejectedValueOnce(new Error('not found'));
 
@@ -184,8 +197,8 @@ describe('createAlertAttachmentType', () => {
 
     it('uses grouping fields from the rule when the rule name is missing', async () => {
       getEpisode.mockResolvedValueOnce({
-        ...baseEpisodeData,
-        alert_data: JSON.stringify({ host: { name: 'web-01' }, cpu: 95 }),
+        ...baseEpisodeRow,
+        episode_data: JSON.stringify({ host: { name: 'web-01' }, cpu: 95 }),
       });
       getRule.mockResolvedValueOnce({
         metadata: { name: '' },
@@ -198,17 +211,17 @@ describe('createAlertAttachmentType', () => {
     });
 
     it('normalizes null optional fields via alertEpisodeToAlertAttachment', async () => {
-      const episodeWithNulls = {
-        ...baseEpisodeData,
+      const episodeWithNulls: AlertEpisode = {
+        ...baseEpisodeRow,
         triggered_at: null,
         last_ack_action: null,
         last_assignee_uid: null,
         last_snooze_action: null,
         snooze_expiry: null,
         last_tags: null,
-        alert_data: null,
+        episode_data: null,
         severity: null,
-      } as AlertEpisode;
+      };
       getEpisode.mockResolvedValueOnce(episodeWithNulls);
 
       const result = await definition.resolve!('ep-1', createResolveContext());
@@ -280,7 +293,7 @@ describe('createAlertAttachmentType', () => {
     });
 
     it('resolves episode data when user has Alerts: Read', async () => {
-      getEpisode.mockResolvedValueOnce(baseEpisodeData);
+      getEpisode.mockResolvedValueOnce(baseEpisodeRow);
 
       const result = await definition.resolve!('ep-1', createResolveContext());
 
@@ -320,7 +333,7 @@ describe('createAlertAttachmentType', () => {
     });
 
     it('returns false when live status matches the snapshot', async () => {
-      getEpisode.mockResolvedValueOnce(baseEpisodeData);
+      getEpisode.mockResolvedValueOnce(baseEpisodeRow);
 
       const result = await definition.isStale!(buildVersionedAttachment(), createResolveContext());
 
@@ -329,8 +342,8 @@ describe('createAlertAttachmentType', () => {
 
     it('returns true when live status differs from the snapshot', async () => {
       getEpisode.mockResolvedValueOnce({
-        ...baseEpisodeData,
-        'alert.status': ALERT_EPISODE_STATUS.INACTIVE,
+        ...baseEpisodeRow,
+        'episode.status': ALERT_EPISODE_STATUS.INACTIVE,
       });
 
       const result = await definition.isStale!(buildVersionedAttachment(), createResolveContext());
@@ -340,8 +353,8 @@ describe('createAlertAttachmentType', () => {
 
     it('returns false when both snapshot and live episode are inactive', async () => {
       getEpisode.mockResolvedValueOnce({
-        ...baseEpisodeData,
-        'alert.status': ALERT_EPISODE_STATUS.INACTIVE,
+        ...baseEpisodeRow,
+        'episode.status': ALERT_EPISODE_STATUS.INACTIVE,
       });
 
       const result = await definition.isStale!(

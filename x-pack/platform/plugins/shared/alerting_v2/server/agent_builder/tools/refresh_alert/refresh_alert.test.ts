@@ -33,6 +33,19 @@ const baseEpisodeData: AlertAttachmentData = {
   last_tags: ['ops'],
 };
 
+const baseEpisodeRow: AlertEpisode = {
+  '@timestamp': '2026-04-10T12:00:00.000Z',
+  'episode.id': 'ep-1',
+  'episode.status': ALERT_EPISODE_STATUS.ACTIVE,
+  'rule.id': 'rule-1',
+  group_hash: 'gh-1',
+  first_timestamp: '2026-04-10T11:00:00.000Z',
+  last_timestamp: '2026-04-10T12:00:00.000Z',
+  duration: 3600000,
+  severity: 'high',
+  last_tags: ['ops'],
+};
+
 describe('refreshAlertTool', () => {
   let loggerService: ReturnType<typeof createLoggerService>['loggerService'];
   let mockLogger: ReturnType<typeof createLoggerService>['mockLogger'];
@@ -84,8 +97,8 @@ describe('refreshAlertTool', () => {
   describe('handler', () => {
     it('returns the latest alert snapshot', async () => {
       const refreshed: AlertEpisode = {
-        ...baseEpisodeData,
-        'alert.status': ALERT_EPISODE_STATUS.INACTIVE,
+        ...baseEpisodeRow,
+        'episode.status': ALERT_EPISODE_STATUS.INACTIVE,
         last_timestamp: '2026-04-20T12:00:00.000Z',
         severity: 'low',
       };
@@ -110,7 +123,7 @@ describe('refreshAlertTool', () => {
     });
 
     it('includes the alert label when the rule can be loaded', async () => {
-      get.mockResolvedValueOnce(baseEpisodeData);
+      get.mockResolvedValueOnce(baseEpisodeRow);
       getRule.mockResolvedValueOnce({ metadata: { name: 'Host CPU high' } });
 
       const result = await createTool().handler({}, agentBuilderMocks.tools.createHandlerContext());
@@ -128,8 +141,8 @@ describe('refreshAlertTool', () => {
 
     it('includes the rule name and group when both are available', async () => {
       get.mockResolvedValueOnce({
-        ...baseEpisodeData,
-        alert_data: JSON.stringify({ host: { name: 'web-01' } }),
+        ...baseEpisodeRow,
+        episode_data: JSON.stringify({ host: { name: 'web-01' } }),
       });
       getRule.mockResolvedValueOnce({
         metadata: { name: 'Host CPU high' },
@@ -149,7 +162,7 @@ describe('refreshAlertTool', () => {
     });
 
     it('falls back to rule ID label when the rule cannot be loaded and there is no group name', async () => {
-      get.mockResolvedValueOnce(baseEpisodeData);
+      get.mockResolvedValueOnce(baseEpisodeRow);
       getRule.mockRejectedValueOnce(new Error('not found'));
 
       const result = await createTool().handler({}, agentBuilderMocks.tools.createHandlerContext());
@@ -166,8 +179,8 @@ describe('refreshAlertTool', () => {
 
     it('falls back to rule ID label when the rule cannot be loaded and grouping fields are unknown', async () => {
       get.mockResolvedValueOnce({
-        ...baseEpisodeData,
-        alert_data: JSON.stringify({ host: { name: 'web-01' } }),
+        ...baseEpisodeRow,
+        episode_data: JSON.stringify({ host: { name: 'web-01' } }),
       });
       getRule.mockRejectedValueOnce(new Error('not found'));
 
@@ -184,16 +197,16 @@ describe('refreshAlertTool', () => {
     });
 
     it('normalizes null optional fields', async () => {
-      const episodeWithNulls = {
-        ...baseEpisodeData,
+      const episodeWithNulls: AlertEpisode = {
+        ...baseEpisodeRow,
         last_ack_action: null,
         last_assignee_uid: null,
         last_snooze_action: null,
         snooze_expiry: null,
         last_tags: null,
-        alert_data: null,
+        episode_data: null,
         severity: null,
-      } as AlertEpisode;
+      };
       get.mockResolvedValueOnce(episodeWithNulls);
 
       const result = await createTool().handler({}, agentBuilderMocks.tools.createHandlerContext());
@@ -282,7 +295,7 @@ describe('refreshAlertTool', () => {
     });
 
     it('checks Alerts: Read before refreshing', async () => {
-      get.mockResolvedValueOnce(baseEpisodeData);
+      get.mockResolvedValueOnce(baseEpisodeRow);
 
       await createTool().handler({}, agentBuilderMocks.tools.createHandlerContext());
 
