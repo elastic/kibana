@@ -116,6 +116,10 @@ const createFakeAgentBuilder = () => {
       if (!acceptsAttachments) return;
       pending = upsert(pending, [attachment]);
     }),
+    removeAttachment: jest.fn((attachmentId: string) => {
+      if (!acceptsAttachments) return;
+      pending = pending.filter((attachment) => attachment.id !== attachmentId);
+    }),
     setChatConfig: jest.fn((config: { sessionTag?: string; attachments?: PendingAttachment[] }) => {
       sessionTag = config.sessionTag;
       if (acceptsAttachments && config.attachments) pending = upsert(pending, config.attachments);
@@ -210,6 +214,13 @@ const createFakeAgentBuilder = () => {
     window.localStorage.setItem(lastConversationKey(tag), JSON.stringify(conversationId));
   };
 
+  const publishConversation = (conversationId: string) => {
+    activeConversation$.next({
+      id: conversationId,
+      conversation: { attachments: conversations.get(conversationId) ?? [] },
+    } as ActiveConversation);
+  };
+
   const emitYamlChange = (conversationId: string, attachmentId: string, afterYaml: string) => {
     stream$(conversationId).next({
       type: ChatEventType.toolUi,
@@ -227,6 +238,11 @@ const createFakeAgentBuilder = () => {
       .filter((attachment) => attachment.type === WORKFLOW_YAML_ATTACHMENT_TYPE)
       .map((attachment) => attachment.id);
 
+  const pendingWorkflowAttachmentIds = () =>
+    pending
+      .filter((attachment) => attachment.type === WORKFLOW_YAML_ATTACHMENT_TYPE)
+      .map((attachment) => attachment.id);
+
   /** Conversation the sidebar bound to on its most recent open, if any. */
   const lastBoundConversation = () => boundConversations.at(-1);
 
@@ -237,6 +253,8 @@ const createFakeAgentBuilder = () => {
     seedConversation,
     pointSessionAtConversation,
     emitYamlChange,
+    pendingWorkflowAttachmentIds,
+    publishConversation,
     workflowAttachmentIds,
   };
 };
@@ -344,6 +362,27 @@ describe('workflow attachment sync', () => {
         'legacy-draft-uuid',
         'workflow-legacy'
       );
+    });
+
+    it('replaces an eagerly staged attachment when the legacy conversation appears later', async () => {
+      const fake = createFakeAgentBuilder();
+      setupKibana(fake.contract);
+      fake.seedConversation('conv-late', 'workflow-editor:another-workflow', [
+        { id: 'legacy-late-uuid', origin: 'workflow-late' },
+      ]);
+
+      const session = await renderEditor('workflow-late');
+      act(() => session.result.current.openAgentChat());
+
+      expect(fake.pendingWorkflowAttachmentIds()).toEqual(['workflow-yaml-editor']);
+
+      act(() => fake.publishConversation('conv-late'));
+      const [submittedAttachmentId] = fake.pendingWorkflowAttachmentIds();
+      act(() => fake.submitRound('conv-late'));
+      act(() => fake.emitYamlChange('conv-late', submittedAttachmentId, 'name: edited by agent'));
+
+      expect(fake.workflowAttachmentIds('conv-late')).toEqual(['legacy-late-uuid']);
+      expect(appliedYaml).toEqual(['name: edited by agent']);
     });
 
     it('reuses the attachment even when its origin was never linked', async () => {

@@ -300,12 +300,17 @@ export const useAgentBuilderIntegration = ({
           attachmentId,
           workflowId,
         });
+        const previousAttachmentId = syncAttachmentIdRef.current ?? attachmentId;
+        const linkedAttachmentChanged = linked !== undefined && linked.id !== previousAttachmentId;
         if (linked) {
+          if (linkedAttachmentChanged) {
+            agentBuilder.removeAttachment(previousAttachmentId);
+          }
           syncAttachmentIdRef.current = linked.id;
           bridge.setAttachmentId(linked.id);
         }
 
-        if (!attachmentTargetResolvedRef.current) {
+        if (!attachmentTargetResolvedRef.current || linkedAttachmentChanged) {
           attachmentTargetResolvedRef.current = true;
           const yaml = editorRef.current?.getModel()?.getValue();
           if (yaml !== undefined) syncAttachment(yaml);

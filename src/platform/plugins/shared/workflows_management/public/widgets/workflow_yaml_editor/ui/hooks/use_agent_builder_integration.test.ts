@@ -118,6 +118,7 @@ const embeddableChatAccessReady = {
 
 const createMockAgentBuilder = () => ({
   addAttachment: jest.fn(),
+  removeAttachment: jest.fn(),
   setChatConfig: jest.fn(),
   clearChatConfig: jest.fn(),
   openChat: jest.fn().mockReturnValue({ chatRef: { close: jest.fn() } }),
