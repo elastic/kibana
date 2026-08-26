@@ -20,5 +20,8 @@ export const createPublicAttachmentContract = ({
     getAttachmentUiDefinition: (attachmentType) => {
       return attachmentsService.getAttachmentUiDefinition(attachmentType);
     },
+    registerShareProvider: (provider) => {
+      return attachmentsService.registerShareProvider(provider);
+    },
   };
 };

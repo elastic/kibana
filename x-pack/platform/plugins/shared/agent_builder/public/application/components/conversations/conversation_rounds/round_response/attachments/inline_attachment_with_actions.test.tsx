@@ -78,7 +78,11 @@ const mockAttachmentsService = {
     renderInlineContent: mockRenderInlineContent,
   })),
   updateOrigin: jest.fn(),
-} as Pick<AttachmentsService, 'getAttachmentUiDefinition' | 'updateOrigin'> as AttachmentsService;
+  getShareProvider: jest.fn(),
+} as Pick<
+  AttachmentsService,
+  'getAttachmentUiDefinition' | 'updateOrigin' | 'getShareProvider'
+> as AttachmentsService;
 
 const createAttachment = (versionedValue: string, version: number): UnknownAttachment => ({
   id: 'attachment-1',
@@ -110,6 +114,7 @@ describe('InlineAttachmentWithActions', () => {
         },
       }),
       updateOrigin: jest.fn(),
+      getShareProvider: jest.fn(),
     };
 
     render(
@@ -132,6 +137,7 @@ describe('InlineAttachmentWithActions', () => {
         getViewSpec: () => ({ type: 'view', title: 'Nightshift event', body: [] }),
       }),
       updateOrigin: jest.fn(),
+      getShareProvider: jest.fn(),
     };
 
     render(
@@ -155,6 +161,7 @@ describe('InlineAttachmentWithActions', () => {
         renderInlineContent: () => <div>native inline</div>,
       }),
       updateOrigin: jest.fn(),
+      getShareProvider: jest.fn(),
     };
 
     render(
@@ -168,6 +175,74 @@ describe('InlineAttachmentWithActions', () => {
 
     expect(screen.getByTestId('attachment-adaptive-body').textContent).toBe('Spec wins');
     expect(screen.queryByText('native inline')).toBeNull();
+  });
+
+  describe('share provider', () => {
+    const renderWithShareProvider = ({ definition }: { definition: Record<string, unknown> }) => {
+      const shareProvider = jest.fn(() => <div data-test-subj="share-slot" />);
+      const attachmentsService = {
+        getAttachmentUiDefinition: jest.fn().mockReturnValue(definition),
+        updateOrigin: jest.fn(),
+        getShareProvider: jest.fn().mockReturnValue(shareProvider),
+      };
+
+      render(
+        <InlineAttachmentWithActions
+          attachment={{ id: 'attachment-1', type: 'test', data: {} }}
+          attachmentsService={attachmentsService as unknown as AttachmentsService}
+          conversationId="conversation-1"
+          isSidebar={false}
+        />
+      );
+
+      return { shareProvider };
+    };
+
+    it('renders the provider slot beside the action buttons', () => {
+      const { shareProvider } = renderWithShareProvider({
+        definition: {
+          getLabel: () => 'Test attachment',
+          getViewSpec: () => ({ type: 'view', title: 'Shareable', body: [] }),
+          getActionButtons: () => [
+            { label: 'Static action', type: ActionButtonType.SECONDARY, handler: jest.fn() },
+          ],
+        },
+      });
+
+      expect(screen.getByTestId('share-slot')).not.toBeNull();
+      expect(screen.getByRole('button', { name: 'Static action' })).not.toBeNull();
+      expect(shareProvider).toHaveBeenCalledWith({
+        attachment: expect.objectContaining({ id: 'attachment-1' }),
+        spec: { type: 'view', title: 'Shareable', body: [] },
+        isCanvas: false,
+      });
+    });
+
+    // The header returns null when a type has no close handler and no action
+    // buttons, which would take the share control down with it.
+    it('keeps the header when the slot is its only content', () => {
+      renderWithShareProvider({
+        definition: {
+          getLabel: () => 'Test attachment',
+          getViewSpec: () => ({ type: 'view', title: 'Shareable', body: [] }),
+        },
+      });
+
+      expect(screen.getByTestId('share-slot')).not.toBeNull();
+    });
+
+    it('passes no spec for an attachment without getViewSpec', () => {
+      const { shareProvider } = renderWithShareProvider({
+        definition: {
+          getLabel: () => 'Test attachment',
+          renderInlineContent: () => <div>native inline</div>,
+        },
+      });
+
+      expect(shareProvider).toHaveBeenCalledWith(
+        expect.objectContaining({ spec: undefined, isCanvas: false })
+      );
+    });
   });
 
   it('renders action buttons registered by inline content', async () => {
@@ -188,6 +263,7 @@ describe('InlineAttachmentWithActions', () => {
         ],
       }),
       updateOrigin: jest.fn(),
+      getShareProvider: jest.fn(),
     };
 
     render(
@@ -237,6 +313,7 @@ describe('InlineAttachmentWithActions', () => {
               : [],
         }),
         updateOrigin: jest.fn(),
+        getShareProvider: jest.fn(),
       };
 
       render(

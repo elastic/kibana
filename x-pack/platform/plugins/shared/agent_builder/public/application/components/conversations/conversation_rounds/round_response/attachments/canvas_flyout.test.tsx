@@ -61,6 +61,7 @@ jest.mock('./attachment_adaptive_body', () => ({
 const mockAttachmentsService = {
   getAttachmentUiDefinition: jest.fn(),
   updateOrigin: jest.fn(),
+  getShareProvider: jest.fn(),
 } as any;
 
 describe('CanvasFlyout', () => {
@@ -119,6 +120,31 @@ describe('CanvasFlyout', () => {
 
     expect(screen.getByText('native canvas')).not.toBeNull();
     expect(screen.queryByTestId('attachment-adaptive-body')).toBeNull();
+  });
+
+  // Canvas resolves the slot's spec directly from `getViewSpec`, not from the
+  // body's `canvasViewSpec`, which is undefined whenever the type renders its own.
+  it('renders the share slot for a type with its own canvas body', () => {
+    const shareProvider = jest.fn(() => <div data-test-subj="share-slot" />);
+    mockAttachmentsService.getShareProvider.mockReturnValue(shareProvider);
+    mockAttachmentsService.getAttachmentUiDefinition.mockReturnValue({
+      getLabel: () => 'Test attachment',
+      getViewSpec: () => ({ type: 'view', title: 'Shareable', body: [] }),
+      renderCanvasContent: () => <div>native canvas</div>,
+    });
+    mockCanvasState = {
+      attachment: { id: 'attachment-1', type: 'test', data: {} },
+      isSidebar: false,
+    };
+
+    render(<CanvasFlyout attachmentsService={mockAttachmentsService} />);
+
+    expect(screen.getByTestId('share-slot')).not.toBeNull();
+    expect(shareProvider).toHaveBeenCalledWith({
+      attachment: expect.objectContaining({ id: 'attachment-1' }),
+      spec: { type: 'view', title: 'Shareable', body: [] },
+      isCanvas: true,
+    });
   });
 
   it('closes canvas when conversation ID changes', () => {

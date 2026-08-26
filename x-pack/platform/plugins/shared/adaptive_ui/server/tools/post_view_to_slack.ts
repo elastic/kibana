@@ -11,11 +11,10 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
-import { parseViewSpec, renderSlack, validateView } from '@kbn/adaptive-ui';
-import { absolutizeViewSpecHrefs } from '../slack/absolutize_hrefs';
+import { parseViewSpec, validateView } from '@kbn/adaptive-ui';
 import { ADAPTIVE_UI_VIEW_ATTACHMENT_TYPE, adaptiveUiTools } from '../../common/constants';
 import { getKibanaPublicUrl, type KibanaPublicUrlHttp } from '../kibana_public_url';
-import { prepareSlackAssets } from '../slack/prepare_assets';
+import { postViewToSlack } from '../slack/post_view';
 
 const postViewToSlackSchema = z.object({
   connectorId: z
@@ -56,44 +55,6 @@ const errorResult = (message: string) => ({
   results: [{ type: ToolResultType.error as const, data: { message } }],
 });
 
-type ActionsClient = Awaited<ReturnType<ActionsPluginStart['getActionsClientWithRequest']>>;
-
-/** Uploads one rendered chart and returns the Slack file id to reference from its `image` block. */
-const uploadChartAsset = async ({
-  actionsClient,
-  connectorId,
-  bytes,
-  altText,
-}: {
-  actionsClient: ActionsClient;
-  connectorId: string;
-  bytes: Buffer;
-  altText: string;
-}): Promise<string> => {
-  const result = await actionsClient.execute({
-    actionId: connectorId,
-    params: {
-      subAction: 'uploadFile',
-      subActionParams: {
-        filename: 'chart.png',
-        file: bytes.toString('base64'),
-        title: altText,
-      },
-    },
-  });
-
-  if (result.status === 'error') {
-    throw new Error(result.serviceMessage ?? result.message ?? 'Unknown error');
-  }
-
-  const fileId = (result.data as { fileId?: string } | undefined)?.fileId;
-  if (!fileId) {
-    throw new Error('Slack did not return a file id for the uploaded chart');
-  }
-
-  return fileId;
-};
-
 /**
  * Renders an Adaptive UI view to Slack Block Kit and posts it through a Slack
  * (v2) connector — the in-product, full-fidelity counterpart to the offline
@@ -110,7 +71,7 @@ export const postViewToSlackTool = ({
   type: ToolType.builtin,
   description: `Post an Adaptive UI view to Slack as native Block Kit via a Slack (v2) connector.
 
-Renders the view — an existing ${ADAPTIVE_UI_VIEW_ATTACHMENT_TYPE} attachment (\`attachmentId\`) or an inline \`spec\` — to Slack Block Kit and sends it with the connector's sendMessage sub-action. Charts are uploaded as images; without the files:write scope they fall back to their text form. Requires a \`.slack2\` connector authorized with chat:write, and the bot must be a member of the target channel. Resolve the channel ID first with the Slack connector's listChannels or resolveChannelId.`,
+Renders the view — an existing ${ADAPTIVE_UI_VIEW_ATTACHMENT_TYPE} attachment (\`attachmentId\`) or an inline \`spec\` — to Slack Block Kit and sends it with the connector's sendMessage sub-action. Charts are uploaded as images; without the files:write scope they fall back to their text form. Requires a \`.slack2\` connector authorized with chat:write; posting to a public channel the app has not joined additionally needs chat:write.public, and a private channel needs an invite. Resolve the channel ID first with the Slack connector's listChannels or resolveChannelId.`,
   schema: postViewToSlackSchema,
   tags: ['adaptive-ui', 'connector', 'slack'],
   annotations: {
@@ -168,68 +129,26 @@ Renders the view — an existing ${ADAPTIVE_UI_VIEW_ATTACHMENT_TYPE} attachment 
     const actions = await getActions();
     const actionsClient = await actions.getActionsClientWithRequest(request);
 
-    const kibanaUrl = getKibanaPublicUrl({ http, spaceId });
-    const slackSpec = absolutizeViewSpecHrefs(view, kibanaUrl);
-
-    // Slack has no chart block, so chart primitives render as `image` blocks
-    // holding a placeholder ref that only becomes postable once the PNG is
-    // uploaded. If any part of that fails, re-render without asset collection so
-    // the charts degrade to their text form rather than losing the whole post.
-    const rendered = renderSlack(slackSpec, { collectAssets: true });
-    let { text, blocks } = rendered;
-
-    if (rendered.assets.length > 0) {
-      try {
-        ({ blocks } = await prepareSlackAssets(rendered, {
-          renderPng: async (node) => {
-            const { renderNodePng } = await import('../slack/render_png');
-            return renderNodePng(node);
-          },
-          upload: (bytes, altText) =>
-            uploadChartAsset({ actionsClient, connectorId, bytes, altText }),
-        }));
-      } catch (error) {
-        logger.warn(
-          `Adaptive UI chart assets could not be posted to Slack (${
-            (error as Error).message
-          }); falling back to text.`
-        );
-        ({ text, blocks } = renderSlack(slackSpec));
-      }
-    }
-
-    let executeResult;
+    let posted;
     try {
-      executeResult = await actionsClient.execute({
-        actionId: connectorId,
-        params: {
-          subAction: 'sendMessage',
-          subActionParams: { channel, text, blocks, ...(threadTs ? { threadTs } : {}) },
-        },
+      posted = await postViewToSlack({
+        actionsClient,
+        connectorId,
+        channel,
+        view,
+        kibanaUrl: getKibanaPublicUrl({ http, spaceId }),
+        threadTs,
+        logger,
       });
     } catch (error) {
-      return errorResult(
-        `Failed to post to Slack via connector "${connectorId}": ${(error as Error).message}`
-      );
+      return errorResult((error as Error).message);
     }
-
-    if (executeResult.status === 'error') {
-      const detail = executeResult.serviceMessage ?? executeResult.message ?? 'Unknown error';
-      return errorResult(
-        `Slack post failed: ${detail}. Confirm the connector is a Slack (v2) connector authorized with chat:write and that the bot is a member of the channel.`
-      );
-    }
-
-    const data = executeResult.data as { ts?: string } | undefined;
-    logger.debug(
-      `Adaptive UI view posted to Slack channel "${channel}" (ts ${data?.ts ?? 'unknown'}).`
-    );
 
     return {
       results: [
         {
           type: ToolResultType.other as const,
-          data: { channel, ts: data?.ts, blocks: blocks.length, title: view.title },
+          data: { channel, ts: posted.ts, blocks: posted.blocks, title: view.title },
         },
       ],
     };

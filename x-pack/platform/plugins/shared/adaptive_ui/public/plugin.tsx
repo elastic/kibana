@@ -16,6 +16,7 @@ import type {
 } from './types';
 import { registerAdaptiveUiAttachmentRenderers } from './attachment_types';
 import { createViewRendererUiDefinition } from './renderers/view_renderer';
+import { createAdaptiveUiShareProvider } from './share';
 
 export class AdaptiveUiPlugin
   implements
@@ -27,9 +28,11 @@ export class AdaptiveUiPlugin
     >
 {
   private readonly config: AdaptiveUiConfig;
+  private readonly isDev: boolean;
 
   constructor(initializerContext: PluginInitializerContext<AdaptiveUiConfig>) {
     this.config = initializerContext.config.get();
+    this.isDev = initializerContext.env.mode.dev;
   }
 
   setup(
@@ -53,6 +56,9 @@ export class AdaptiveUiPlugin
     // `<render type="view">` directive and `/workspace/renders` VFS read API land.
     registerAdaptiveUiAttachmentRenderers(agentBuilder.attachments, coreStart, styleIsolation);
     agentBuilder.renderers.register(createViewRendererUiDefinition(coreStart, styleIsolation));
+    agentBuilder.attachments.registerShareProvider(
+      createAdaptiveUiShareProvider({ core: coreStart, isDev: this.isDev })
+    );
     return {};
   }
 
