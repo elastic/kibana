@@ -145,5 +145,6 @@
     "@kbn/storybook",
     "@kbn/context-engine-plugin",
     "@kbn/ui-callout",
+    "@kbn/agent-builder-elastic-ai-index-ki-types",
   ]
 }
