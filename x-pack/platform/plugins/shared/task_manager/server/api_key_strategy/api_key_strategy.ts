@@ -14,6 +14,11 @@ import type {
 import type { ApiKeyType } from '../config';
 import type { ConcreteTaskInstance, TaskInstance, TaskUserScope } from '../task';
 import { INVALIDATE_API_KEY_SO_NAME } from '../saved_objects';
+import {
+  taskManagerUiamTelemetry,
+  type CredentialReason,
+  type CredentialType,
+} from '../otel/uiam_telemetry';
 
 export type { ApiKeyType } from '../config';
 
@@ -60,6 +65,23 @@ export interface ApiKeyStrategy {
     savedObjectsClient: SavedObjectsClientContract
   ): Promise<void>;
 }
+
+/**
+ * Returns a recorder for the `kibana.task_manager.task_run.count` OTel counter that
+ * only emits for user-scoped task runs — most background tasks never carry credentials
+ * and would otherwise flood the `none` series.
+ */
+export const recordTaskRunCredentialUsage = (taskInstance: ConcreteTaskInstance) => {
+  const isUserScoped =
+    Boolean(taskInstance.userScope) ||
+    Boolean(taskInstance.apiKey) ||
+    Boolean(taskInstance.uiamApiKey);
+  return (credentialType: CredentialType, credentialReason: CredentialReason): void => {
+    if (isUserScoped) {
+      taskManagerUiamTelemetry.recordTaskRun(credentialType, credentialReason);
+    }
+  };
+};
 
 export const markApiKeysForInvalidation = async (
   targets: InvalidationTarget[],
