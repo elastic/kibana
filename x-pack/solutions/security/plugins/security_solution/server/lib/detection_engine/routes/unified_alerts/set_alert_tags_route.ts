@@ -73,15 +73,12 @@ export const setUnifiedAlertsTagsRoute = (
         if (eventBus) {
           try {
             const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-            const idToIndex = await fetchAllAlertIdToIndex(esClient, index, ids);
-            for (const id of ids) {
-              const docIndex = idToIndex.get(id);
-              if (docIndex != null) {
-                if (isAttackDiscoveryIndex(docIndex)) {
-                  attackIds.push(id);
-                } else {
-                  alertIds.push(id);
-                }
+            const hits = await fetchAllAlertIdToIndex(esClient, index, ids);
+            for (const hit of hits) {
+              if (isAttackDiscoveryIndex(hit.index)) {
+                attackIds.push(hit.id);
+              } else {
+                alertIds.push(hit.id);
               }
             }
           } catch {

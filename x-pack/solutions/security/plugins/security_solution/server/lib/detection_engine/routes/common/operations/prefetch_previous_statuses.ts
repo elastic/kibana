@@ -25,6 +25,11 @@ export interface FoundHit {
   previousStatus?: WorkflowStatus;
 }
 
+export interface IdIndexPair {
+  id: string;
+  index: string;
+}
+
 const resolveIndex = (index: string | string[]): string =>
   Array.isArray(index) ? index.join(',') : index;
 
@@ -89,22 +94,25 @@ export const fetchAlertIdToIndex = async (
   esClient: ElasticsearchClient,
   index: string | string[],
   ids: string[]
-): Promise<Map<string, string>> => {
+): Promise<IdIndexPair[]> => {
   const cappedIds = ids.slice(0, MAX_ALERTS_PER_TRIGGER);
   const searchResponse = await esClient.search({
     index: resolveIndex(index),
     query: { terms: { _id: cappedIds } },
     _source: false,
-    size: cappedIds.length,
+    // Use MAX_ALERTS_PER_TRIGGER (not cappedIds.length) so cross-index duplicates
+    // (same _id in both detection-alert and Attack Discovery indices) are not
+    // truncated when the chunk is smaller than the cap.
+    size: MAX_ALERTS_PER_TRIGGER,
     ignore_unavailable: true,
   });
-  const idToIndex = new Map<string, string>();
+  const pairs: IdIndexPair[] = [];
   for (const hit of searchResponse.hits.hits) {
     if (hit._id != null && hit._index != null) {
-      idToIndex.set(hit._id, hit._index);
+      pairs.push({ id: hit._id, index: hit._index });
     }
   }
-  return idToIndex;
+  return pairs;
 };
 
 export const prefetchPreviousStatusesByQuery = async (
@@ -162,19 +170,19 @@ export const fetchAllAlertIdToIndex = async (
   esClient: ElasticsearchClient,
   index: string | string[],
   ids: string[]
-): Promise<Map<string, string>> => {
-  const allIdToIndex = new Map<string, string>();
+): Promise<IdIndexPair[]> => {
+  const allPairs: IdIndexPair[] = [];
   for (let i = 0; i < ids.length; i += MAX_ALERTS_PER_TRIGGER) {
     const partial = await fetchAlertIdToIndex(
       esClient,
       index,
       ids.slice(i, i + MAX_ALERTS_PER_TRIGGER)
     );
-    for (const [id, idx] of partial) {
-      allIdToIndex.set(id, idx);
+    for (const pair of partial) {
+      allPairs.push(pair);
     }
   }
-  return allIdToIndex;
+  return allPairs;
 };
 
 export const prefetchAllPreviousStatusesByIds = async (

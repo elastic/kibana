@@ -336,9 +336,12 @@ describe('set unified alerts assignees', () => {
 
     test('makes multiple ES calls and classifies all IDs when ids.length exceeds MAX_ALERTS_PER_TRIGGER', async () => {
       const oversizedIds = Array.from({ length: MAX_ALERTS_PER_TRIGGER + 1 }, (_, i) => `id-${i}`);
-      context.core.elasticsearch.client.asCurrentUser.search.mockResponse(
-        makeSearchResponse([{ _id: oversizedIds[0], _index: '.alerts-security.alerts-default' }])
-      );
+      // First chunk returns id-0; second chunk (the single overflow id) returns nothing.
+      context.core.elasticsearch.client.asCurrentUser.search
+        .mockResolvedValueOnce(
+          makeSearchResponse([{ _id: oversizedIds[0], _index: '.alerts-security.alerts-default' }])
+        )
+        .mockResolvedValueOnce(makeSearchResponse([]));
       const request = requestMock.create({
         method: 'post',
         path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_ASSIGNEES_URL,
@@ -355,6 +358,33 @@ describe('set unified alerts assignees', () => {
       expect(mockEventBus.emitAlertAssigneesChanged).toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({ alertIds: [oversizedIds[0]], truncated: false })
+      );
+    });
+
+    test('emits both triggers when the same _id exists in both detection and attack discovery indices', async () => {
+      context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValueOnce(
+        makeSearchResponse([
+          { _id: 'shared-id', _index: '.alerts-security.alerts-default' },
+          { _id: 'shared-id', _index: '.alerts-security.attack.discovery.alerts-default' },
+        ])
+      );
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_ASSIGNEES_URL,
+        body: {
+          ids: ['shared-id'],
+          assignees: { add: ['user-1'], remove: [] },
+        },
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAlertAssigneesChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ alertIds: ['shared-id'] })
+      );
+      expect(mockEventBus.emitAttackAssigneesChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ attackIds: ['shared-id'] })
       );
     });
   });

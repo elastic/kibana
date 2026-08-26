@@ -460,12 +460,12 @@ describe('fetchAlertIdToIndex', () => {
     jest.restoreAllMocks();
   });
 
-  it('returns an empty map when no hits are returned', async () => {
+  it('returns an empty array when no hits are returned', async () => {
     const result = await fetchAlertIdToIndex(esClient, 'index', []);
-    expect(result.size).toBe(0);
+    expect(result).toHaveLength(0);
   });
 
-  it('maps each hit _id to its _index', async () => {
+  it('returns one IdIndexPair per hit, preserving both id and index', async () => {
     const response = makeIdToIndexResponse([
       { _id: 'id-1', _index: '.alerts-security.alerts-default' },
       { _id: 'id-2', _index: '.internal.alerts-security.alerts-default-000001' },
@@ -473,8 +473,27 @@ describe('fetchAlertIdToIndex', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     esClient.search.mockResolvedValue(response as any);
     const result = await fetchAlertIdToIndex(esClient, 'index', ['id-1', 'id-2']);
-    expect(result.get('id-1')).toBe('.alerts-security.alerts-default');
-    expect(result.get('id-2')).toBe('.internal.alerts-security.alerts-default-000001');
+    expect(result.find((p) => p.id === 'id-1')?.index).toBe('.alerts-security.alerts-default');
+    expect(result.find((p) => p.id === 'id-2')?.index).toBe(
+      '.internal.alerts-security.alerts-default-000001'
+    );
+  });
+
+  it('returns two pairs for the same _id found in two different indices', async () => {
+    const response = makeIdToIndexResponse([
+      { _id: 'shared', _index: '.alerts-security.alerts-default' },
+      { _id: 'shared', _index: '.alerts-security.attack.discovery.alerts-default' },
+    ]);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    esClient.search.mockResolvedValue(response as any);
+    const result = await fetchAlertIdToIndex(esClient, 'index', ['shared']);
+    expect(result).toHaveLength(2);
+    expect(result.map((p) => p.index)).toEqual(
+      expect.arrayContaining([
+        '.alerts-security.alerts-default',
+        '.alerts-security.attack.discovery.alerts-default',
+      ])
+    );
   });
 
   it('calls search with _source: false and ignore_unavailable: true', async () => {
