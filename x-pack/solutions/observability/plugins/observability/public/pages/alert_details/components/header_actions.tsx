@@ -186,49 +186,6 @@ export function HeaderActions({
   return (
     <>
       <EuiFlexGroup direction="row" gutterSize="s" justifyContent="flexEnd">
-        {alert?.fields[ALERT_RULE_UUID] && alert?.fields[ALERT_RULE_TYPE_ID] && (
-          <EuiFlexItem grow={false}>
-            <RuleQueryInspector
-              ruleId={alert.fields[ALERT_RULE_UUID]}
-              ruleTypeId={alert.fields[ALERT_RULE_TYPE_ID]}
-              alertId={alert.fields[ALERT_UUID]}
-            />
-          </EuiFlexItem>
-        )}
-        {discoverUrl && (
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              href={discoverUrl}
-              iconType="discoverApp"
-              target="_blank"
-              data-test-subj={`alertDetailsPage_viewInDiscover${rule ? `_${rule.ruleTypeId}` : ''}`}
-              {...getEbtProps({
-                action: EBT_CLICK_ACTIONS.OPEN_IN_DISCOVER,
-                element: ALERT_DETAILS_EBT_ELEMENTS.HEADER,
-                detail: rule?.ruleTypeId,
-              })}
-            >
-              <EuiText size="s">
-                {i18n.translate('xpack.observability.alertDetails.viewInDiscover', {
-                  defaultMessage: 'View in Discover',
-                })}
-              </EuiText>
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        )}
-
-        {cases && canAddToCase && (
-          <EuiFlexItem grow={false}>
-            <ObsCasesContext>
-              <AddToCaseButton
-                alert={alert}
-                alertIndex={alertIndex}
-                rule={rule}
-                setIsPopoverOpen={setIsPopoverOpen}
-              />
-            </ObsCasesContext>
-          </EuiFlexItem>
-        )}
         <EuiFlexItem grow={false}>
           <EuiPopover
             panelPaddingSize="none"
@@ -279,6 +236,40 @@ export function HeaderActions({
                 <div style={{ width: '220px' }}>
                   <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="s">
                     <div />
+
+                    {cases && canAddToCase && (
+                      <ObsCasesContext>
+                        <AddToCaseButton
+                          alert={alert}
+                          alertIndex={alertIndex}
+                          rule={rule}
+                          setIsPopoverOpen={setIsPopoverOpen}
+                        />
+                      </ObsCasesContext>
+                    )}
+
+                    {discoverUrl && (
+                      <EuiButtonEmpty
+                        size="s"
+                        color="text"
+                        href={discoverUrl}
+                        iconType="discoverApp"
+                        target="_blank"
+                        onClick={handleClosePopover}
+                        data-test-subj={`alertDetailsPage_viewInDiscover${rule ? `_${rule.ruleTypeId}` : ''}`}
+                        {...getEbtProps({
+                          action: EBT_CLICK_ACTIONS.OPEN_IN_DISCOVER,
+                          element: ALERT_DETAILS_EBT_ELEMENTS.HEADER,
+                          detail: rule?.ruleTypeId,
+                        })}
+                      >
+                        <EuiText size="s">
+                          {i18n.translate('xpack.observability.alertDetails.viewInDiscover', {
+                            defaultMessage: 'View in Discover',
+                          })}
+                        </EuiText>
+                      </EuiButtonEmpty>
+                    )}
 
                     <EuiButtonEmpty
                       size="s"
@@ -340,6 +331,14 @@ export function HeaderActions({
                     {canReadAlertRule && (
                       <>
                         <EuiHorizontalRule margin="none" />
+
+                        {alert?.fields[ALERT_RULE_UUID] && alert?.fields[ALERT_RULE_TYPE_ID] && (
+                          <RuleQueryInspector
+                            ruleId={alert.fields[ALERT_RULE_UUID]}
+                            ruleTypeId={alert.fields[ALERT_RULE_TYPE_ID]}
+                            alertId={alert.fields[ALERT_UUID]}
+                          />
+                        )}
 
                         <EuiButtonEmpty
                           size="s"

@@ -161,7 +161,7 @@ describe('Header Actions', () => {
 
       mockCases.hooks.useCasesAddToExistingCaseModal = useCasesAddToExistingCaseModalMock;
 
-      const { getByTestId } = render(
+      const { getByTestId, findByTestId } = render(
         <HeaderActions
           alert={alertWithGroupsAndTags}
           alertIndex={'alert-index'}
@@ -177,6 +177,7 @@ describe('Header Actions', () => {
         />
       );
 
+      fireEvent.click(await findByTestId('alert-details-header-actions-menu-button'));
       fireEvent.click(getByTestId(`add-to-cases-button-mocked-type-id`));
 
       expect(attachments).toEqual([

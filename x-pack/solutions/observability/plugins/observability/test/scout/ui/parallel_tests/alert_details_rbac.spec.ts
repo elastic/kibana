@@ -149,6 +149,7 @@ test.describe(
       await test.step('shows the button for a user with cases privileges', async () => {
         await browserAuth.loginWithCustomRole(ALERTS_WITH_LOGS_RULES_AND_CASES_ROLE);
         await gotoLogsAlertDetails(pageObjects, page);
+        await page.locator('[data-test-subj="alert-details-header-actions-menu-button"]').click();
         await expect(page.locator(ADD_TO_CASE_SELECTOR)).toBeVisible();
       });
 
@@ -157,6 +158,7 @@ test.describe(
         // but has no cases access.
         await browserAuth.loginWithCustomRole(ALERTS_WITH_LOGS_RULES_ROLE);
         await gotoLogsAlertDetails(pageObjects, page);
+        await page.locator('[data-test-subj="alert-details-header-actions-menu-button"]').click();
         await expect(page.locator(ADD_TO_CASE_SELECTOR)).toBeHidden();
       });
     });
