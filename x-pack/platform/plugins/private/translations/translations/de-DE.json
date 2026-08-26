@@ -6130,7 +6130,6 @@
     "kbnUI.sideNavigation.footerAriaLabel": "Seitennavigation",
     "kbnUI.sideNavigation.footerInstructions": "Sie befinden sich im Fußzeilenmenü der Hauptnavigation. Verwenden Sie die Pfeiltasten nach oben und unten, um im Menü zu navigieren.",
     "kbnUI.sideNavigation.goBackButtonIconAriaLabel": "Zurück",
-    "kbnUI.sideNavigation.logoAriaLabel": "{label}-Startseite",
     "kbnUI.sideNavigation.moreMenuItemLabel": "Mehr",
     "kbnUI.sideNavigation.moreMenuItemText": "Mehr",
     "kbnUI.sideNavigation.moreMenuLabel": "Mehr",

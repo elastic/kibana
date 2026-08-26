@@ -6130,7 +6130,6 @@
     "kbnUI.sideNavigation.footerAriaLabel": "Navigation latérale",
     "kbnUI.sideNavigation.footerInstructions": "Vous êtes dans le menu de pied de page principal. Utilisez les flèches Haut et Bas pour naviguer dans le menu.",
     "kbnUI.sideNavigation.goBackButtonIconAriaLabel": "Retour",
-    "kbnUI.sideNavigation.logoAriaLabel": "Page d'accueil {label}",
     "kbnUI.sideNavigation.moreMenuItemLabel": "Plus",
     "kbnUI.sideNavigation.moreMenuItemText": "Plus",
     "kbnUI.sideNavigation.moreMenuLabel": "Plus",
