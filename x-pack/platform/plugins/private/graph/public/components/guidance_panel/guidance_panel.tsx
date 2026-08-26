@@ -82,7 +82,7 @@ function GuidancePanelComponent(props: GuidancePanelProps) {
 
   useEffect(() => {
     const checkIfDataViewsExist = async () => {
-      setHasDataViews(await data.dataViews.hasData.hasUserDataView());
+      setHasDataViews(await data.dataViews.hasData.hasDataView());
     };
     checkIfDataViewsExist();
   }, [setHasDataViews, data.dataViews]);

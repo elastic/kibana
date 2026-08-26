@@ -70,7 +70,7 @@ const renderDashboardListingPage = (props: Partial<DashboardListingPageProps> = 
 
 test('renders analytics no data page when the user has no data view', async () => {
   mockIsDashboardAppInNoDataState.mockResolvedValueOnce(true);
-  dataService.dataViews.hasData.hasUserDataView = jest.fn().mockResolvedValue(false);
+  dataService.dataViews.hasData.hasDataView = jest.fn().mockResolvedValue(false);
 
   renderDashboardListingPage();
 

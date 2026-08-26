@@ -157,7 +157,7 @@ export const SingleTabView = ({
             dispatch(
               internalStateActions.setInitializationState({
                 hasESData: true,
-                hasUserDataView: true,
+                hasDataView: true,
               })
             );
             const dataView = dataViewUnknown as DataView;

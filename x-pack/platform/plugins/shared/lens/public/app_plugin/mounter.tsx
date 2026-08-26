@@ -319,8 +319,8 @@ export async function mountApp(
       }, [initialInput, props.history, redirectCallback]);
       useEffect(() => {
         (async () => {
-          const hasUserDataView = await data.dataViews.hasData.hasUserDataView().catch(() => false);
-          if (!hasUserDataView) {
+          const hasDataView = await data.dataViews.hasData.hasDataView().catch(() => false);
+          if (!hasDataView) {
             setEditorState('no_data');
             return;
           }

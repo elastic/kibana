@@ -23,14 +23,14 @@ import { dashboardClient } from '../../dashboard_client';
 describe('isDashboardAppInNoDataState', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    dataService.dataViews.hasData.hasUserDataView = jest.fn().mockResolvedValue(false);
+    dataService.dataViews.hasData.hasDataView = jest.fn().mockResolvedValue(false);
     (coreServices.http.get as jest.Mock).mockResolvedValue({ datasets: [] });
     mockDashboardBackupService.dashboardHasUnsavedEdits.mockReturnValue(false);
     (dashboardClient.search as jest.Mock).mockResolvedValue({ meta: { total: 0 } });
   });
 
   it('returns false when the user has a data view', async () => {
-    dataService.dataViews.hasData.hasUserDataView = jest.fn().mockResolvedValue(true);
+    dataService.dataViews.hasData.hasDataView = jest.fn().mockResolvedValue(true);
     expect(await isDashboardAppInNoDataState()).toBe(false);
     expect(coreServices.http.get).not.toHaveBeenCalled();
   });

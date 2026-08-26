@@ -68,8 +68,8 @@ export const getMockedKibanaConfig = (permissionType: unknown) =>
           getCanSaveSync: jest.fn(),
           hasData: {
             hasESData: jest.fn(),
-            hasUserDataView: jest.fn(),
             hasDataView: jest.fn(),
+            hasUserDataView: jest.fn(),
           },
         },
       },

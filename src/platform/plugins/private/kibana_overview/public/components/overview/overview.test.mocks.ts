@@ -13,7 +13,7 @@ import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { indexPatternEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
 
-export const hasUserDataView = jest.fn();
+export const hasDataView = jest.fn();
 export const hasESData = jest.fn();
 
 export const applicationStartMock = applicationServiceMock.createStartContract();
@@ -41,7 +41,7 @@ jest.doMock('@kbn/kibana-react-plugin/public', () => ({
         hasUserDataView: jest.fn(),
         hasData: {
           hasESData,
-          hasUserDataView,
+          hasDataView,
         },
       },
       dataViewEditor: indexPatternEditorPluginMock.createStartContract(),

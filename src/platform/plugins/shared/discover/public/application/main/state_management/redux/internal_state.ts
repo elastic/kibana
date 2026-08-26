@@ -71,7 +71,7 @@ const MIDDLEWARE_THROTTLE_MS = 300;
 const MIDDLEWARE_THROTTLE_OPTIONS = { leading: false, trailing: true };
 
 const initialState: DiscoverInternalState = {
-  initializationState: { hasESData: false, hasUserDataView: false },
+  initializationState: { hasESData: false, hasDataView: false },
   userId: undefined,
   spaceId: undefined,
   persistedDiscoverSession: undefined,

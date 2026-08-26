@@ -138,7 +138,7 @@ describe('home', () => {
       addBasePath(url) {
         return `base_path/${url}`;
       },
-      hasUserDataView: jest.fn(async () => true),
+      hasDataView: jest.fn(async () => true),
       isCloudEnabled: false,
     };
   });
@@ -243,7 +243,7 @@ describe('home', () => {
     test('shows the welcome screen when enabled and there are no data views', async () => {
       defaultProps.localStorage.getItem = jest.fn().mockReturnValue('true');
 
-      renderHome({ hasUserDataView: jest.fn(async () => false) });
+      renderHome({ hasDataView: jest.fn(async () => false) });
 
       await expectWelcomeScreen();
       expect(defaultProps.localStorage.getItem).toHaveBeenCalledWith('home:welcome:show');
@@ -253,7 +253,7 @@ describe('home', () => {
       const user = userEvent.setup();
       defaultProps.localStorage.getItem = jest.fn().mockReturnValue('true');
 
-      renderHome({ hasUserDataView: jest.fn(async () => false) });
+      renderHome({ hasDataView: jest.fn(async () => false) });
 
       await expectWelcomeScreen();
       await user.click(screen.getByTestId('skipWelcomeScreen'));
@@ -265,7 +265,7 @@ describe('home', () => {
     test('shows the normal home page if loading fails', async () => {
       defaultProps.localStorage.getItem = jest.fn().mockReturnValue('true');
 
-      renderHome({ hasUserDataView: jest.fn(() => Promise.reject(new Error('Doh!'))) });
+      renderHome({ hasDataView: jest.fn(() => Promise.reject(new Error('Doh!'))) });
 
       await expectHomePage();
     });
@@ -273,7 +273,7 @@ describe('home', () => {
     test('shows the normal home page if welcome screen is disabled locally', async () => {
       defaultProps.localStorage.getItem = jest.fn().mockReturnValue('false');
 
-      renderHome({ hasUserDataView: jest.fn(async () => false) });
+      renderHome({ hasDataView: jest.fn(async () => false) });
 
       await expectHomePage();
     });
@@ -281,7 +281,7 @@ describe('home', () => {
     test("shows the normal home page if the user doesn't have access to integrations", async () => {
       mockHasIntegrationsPermission = false;
 
-      renderHome({ hasUserDataView: jest.fn(async () => false) });
+      renderHome({ hasDataView: jest.fn(async () => false) });
 
       await expectHomePage();
     });
@@ -289,20 +289,20 @@ describe('home', () => {
 
   describe('isNewKibanaInstance', () => {
     test('shows welcome when there are no data views', async () => {
-      renderHome({ hasUserDataView: jest.fn(async () => false) });
+      renderHome({ hasDataView: jest.fn(async () => false) });
 
       await expectWelcomeScreen();
     });
 
     test('shows the home page when there are data views', async () => {
-      renderHome({ hasUserDataView: jest.fn(async () => true) });
+      renderHome({ hasDataView: jest.fn(async () => true) });
 
       await expectHomePage();
     });
 
     test('shows the home page when checking for data views throws', async () => {
       renderHome({
-        hasUserDataView: jest.fn(() => {
+        hasDataView: jest.fn(() => {
           throw new Error('simulated find error');
         }),
       });
