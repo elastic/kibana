@@ -11,6 +11,7 @@ import { getESQLResults } from '@kbn/esql-utils';
 import { useKibana } from '../../../common/lib/kibana';
 import { composeEsqlQuery, TIME_RANGE_ESQL_FILTER } from '../compose_esql_query';
 import type { EsqlInspect } from './esql_inspect_button';
+import { fieldToEsqlExpr } from './episode_fields';
 
 export interface TopValueDatum {
   label: string;
@@ -44,7 +45,7 @@ const buildTopAlertsByQuery = (baseEsql: string, field: string): string =>
     baseEsql,
     [TIME_RANGE_ESQL_FILTER],
     [
-      `EVAL entity = JSON_EXTRACT(data::keyword, "$['${field}']")`,
+      `EVAL entity = ${fieldToEsqlExpr(field)}`,
       'WHERE entity IS NOT NULL',
       'STATS value = COUNT(*) BY entity',
       'SORT value DESC',

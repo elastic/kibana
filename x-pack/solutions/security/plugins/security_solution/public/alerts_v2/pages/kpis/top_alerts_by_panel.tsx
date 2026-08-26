@@ -22,20 +22,20 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { AggregateQuery, TimeRange } from '@kbn/es-query';
 import { EsqlInspectButton } from './esql_inspect_button';
 import { useTopAlertsByData } from './use_top_alerts_by_data';
+import { useEpisodeFields } from './episode_fields';
 
 const TITLE = i18n.translate('xpack.securitySolution.alertsV2.topAlertsBy.title', {
   defaultMessage: 'Top alerts by',
 });
 
-/** Mirrors the v1 progress-bar panel's group-by options. */
-const GROUP_BY_OPTIONS = [
-  { value: 'host.name', text: 'host.name' },
-  { value: 'user.name', text: 'user.name' },
-  { value: 'source.ip', text: 'source.ip' },
-  { value: 'destination.ip', text: 'destination.ip' },
-];
 const FIELD_STORAGE_KEY = 'securitySolution.alertsV2.topAlertsByField';
 const DEFAULT_FIELD = 'host.name';
+
+/** Builds select options from the discovered fields, keeping the current selection present. */
+const toSelectOptions = (fields: string[], selected: string) => {
+  const list = selected && !fields.includes(selected) ? [selected, ...fields] : fields;
+  return list.map((field) => ({ value: field, text: field }));
+};
 
 export interface TopAlertsByPanelProps {
   /** The page's ES|QL query — the chart aggregates on top of it. */
@@ -45,12 +45,15 @@ export interface TopAlertsByPanelProps {
 
 /**
  * "Top alerts by <field>" KPI for the Alerts v2 Summary tab — the v2 analogue of
- * the v1 progress-bar panel. The entity field is a flat, dotted key inside the
- * episode's flattened `data`, extracted in ES|QL via `JSON_EXTRACT`.
+ * the v1 progress-bar panel. The field dropdown is populated by discovering the
+ * real keys in the episode `data`, and values are extracted in ES|QL.
  */
 export const TopAlertsByPanel = ({ query, timeRange }: TopAlertsByPanelProps) => {
   const [storedField, setStoredField] = useLocalStorage<string>(FIELD_STORAGE_KEY, DEFAULT_FIELD);
   const field = storedField ?? DEFAULT_FIELD;
+
+  const { fields } = useEpisodeFields(query, timeRange);
+  const fieldOptions = useMemo(() => toSelectOptions(fields, field), [fields, field]);
 
   const { data, isLoading, error, inspect } = useTopAlertsByData(query, timeRange, field);
 
@@ -70,7 +73,7 @@ export const TopAlertsByPanel = ({ query, timeRange }: TopAlertsByPanelProps) =>
             aria-label={i18n.translate('xpack.securitySolution.alertsV2.topAlertsBy.fieldAriaLabel', {
               defaultMessage: 'Group top alerts by field',
             })}
-            options={GROUP_BY_OPTIONS}
+            options={fieldOptions}
             value={field}
             onChange={(event) => setStoredField(event.target.value)}
             data-test-subj="alertsV2TopAlertsByField"
