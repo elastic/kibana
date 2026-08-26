@@ -11,26 +11,24 @@ import React, { useState } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import { Navigation } from '../components/navigation';
-import type { MenuItem, NavigationStructure, SecondaryMenuItem, SideNavLogo } from '../../types';
+import type { MenuItem, NavigationStructure, SecondaryMenuItem } from '../../types';
 import { usePreventLinkNavigation } from '../hooks/use_prevent_link_navigation';
 
 interface TestComponentProps {
   isCollapsed?: boolean;
   initialActiveItemId?: string;
   items: NavigationStructure;
-  logo: SideNavLogo;
 }
 
 export const TestComponent = ({
   isCollapsed: isCollapsedProp = false,
   initialActiveItemId,
   items,
-  logo,
 }: TestComponentProps) => {
   const [activeItemId, setActiveItemId] = useState(initialActiveItemId);
   const [isCollapsed, setIsCollapsed] = useState(isCollapsedProp);
 
-  const handleItemClick = (item: SideNavLogo | MenuItem | SecondaryMenuItem) => {
+  const handleItemClick = (item: MenuItem | SecondaryMenuItem) => {
     setActiveItemId(item.id);
   };
 
@@ -42,7 +40,6 @@ export const TestComponent = ({
         activeItemId={activeItemId}
         isCollapsed={isCollapsed}
         items={items}
-        logo={logo}
         onItemClick={handleItemClick}
         onToggleCollapsed={setIsCollapsed}
         setWidth={() => {}}

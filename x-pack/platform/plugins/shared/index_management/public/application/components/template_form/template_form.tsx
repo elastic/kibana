@@ -280,7 +280,12 @@ export const TemplateForm = ({
     <>
       <AppHeader
         title={title}
-        back="/app/management/data/index_management/templates"
+        back={{
+          href: '/app/management/data/index_management/templates',
+          label: i18n.translate('xpack.idxMgmt.templateForm.backToListLabel', {
+            defaultMessage: 'Templates',
+          }),
+        }}
         spacing="bleed"
       />
 
