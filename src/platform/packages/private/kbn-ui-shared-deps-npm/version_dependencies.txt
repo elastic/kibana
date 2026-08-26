@@ -25,7 +25,6 @@
 @elastic/datemath@5.0.3
 @elastic/emotion-sheet@1.4.1
 @elastic/esql-ast@4.21.1
-@elastic/esql-definitions@4.19.2
 @elastic/esql-definitions@4.21.1
 @elastic/esql-grammar@4.21.1
 @elastic/esql-promql-grammar@4.21.1
@@ -270,7 +269,7 @@ bn.js@5.2.4
 body-parser@1.20.5
 bonjour-service@1.4.2
 brace-expansion@1.1.15
-brace-expansion@5.0.7
+brace-expansion@5.0.9
 braces@3.0.3
 brorand@1.1.0
 browser-resolve@2.0.0
@@ -615,7 +614,7 @@ mime-types@3.0.2
 mime@1.6.0
 minimalistic-assert@1.0.1
 minimalistic-crypto-utils@1.0.1
-minimatch@10.2.4
+minimatch@10.2.6
 minimatch@3.1.5
 mkdirp@1.0.4
 moment-timezone@0.6.1
@@ -914,7 +913,7 @@ wildcard@2.0.1
 wrap-ansi@7.0.0
 wrappy@1.0.2
 ws@7.5.11
-ws@8.21.1
+ws@8.21.3
 wsl-utils@0.1.0
 xtend@4.0.2
 y18n@5.0.8
