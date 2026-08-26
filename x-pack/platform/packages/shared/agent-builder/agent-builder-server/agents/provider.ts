@@ -151,6 +151,8 @@ export interface SubAgentExecution {
 export interface ExperimentalFeatures {
   /** Whether the skills feature is enabled */
   skills: boolean;
+  /** Whether AI index instructions are enabled by Context Engine and Agent Builder settings */
+  aiIndices: boolean;
   /** Whether context-aware skill filtering is enabled */
   relevantSkills: boolean;
   /** Whether the sub-agent execution feature is enabled */
