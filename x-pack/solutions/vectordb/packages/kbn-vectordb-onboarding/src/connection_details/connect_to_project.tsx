@@ -55,19 +55,21 @@ export const ConnectToProject = ({
           <EuiSpacer size="s" />
         </>
       )}
-      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
+      <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false} wrap>
         <EuiFlexItem grow={false} css={endpointUrlItemStyle}>
           <EndpointUrl
             url={isMcpServer ? mcpServerUrl : elasticsearchUrl}
             copyAriaLabel={
               isMcpServer
                 ? i18n.translate('vectordbOnboarding.pathSelection.copyMcpUrlAriaLabel', {
-                    defaultMessage: 'Copy MCP server URL',
+                    defaultMessage: 'Copy Agent Builder MCP URL',
                   })
                 : i18n.translate('vectordbOnboarding.pathSelection.copyUrlAriaLabel', {
                     defaultMessage: 'Copy Elasticsearch URL',
                   })
             }
+            isMcpServer={isMcpServer}
+            isCompact={isCompact}
             isLoading={isLoading}
             telemetryPage={telemetryPage}
             typeSelector={

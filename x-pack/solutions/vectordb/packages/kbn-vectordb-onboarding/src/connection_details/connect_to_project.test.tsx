@@ -77,18 +77,18 @@ describe('ConnectToProject', () => {
         'Elasticsearch'
       );
       expect(screen.getByTestId('vectordbConnectionTypeOption-mcpServer')).toHaveTextContent(
-        'MCP server'
+        'Agent Builder MCP'
       );
     });
 
-    it('shows and copies the MCP server URL when MCP server is selected', () => {
+    it('shows and copies the Agent Builder MCP URL when Agent Builder MCP is selected', () => {
       renderWithSelector();
 
       fireEvent.click(screen.getByTestId('vectordbConnectionTypeButton'));
       fireEvent.click(screen.getByTestId('vectordbConnectionTypeOption-mcpServer'));
 
       const mcpServerUrl = `${KIBANA_URL}${MCP_SERVER_PATH}`;
-      expect(screen.getByTestId('vectordbConnectionTypeButton')).toHaveTextContent('MCP server');
+      expect(screen.getByTestId('vectordbConnectionTypeButton')).toHaveTextContent('Agent Builder MCP');
       expect(screen.getByText(mcpServerUrl)).toBeInTheDocument();
       expect(screen.queryByText(ELASTICSEARCH_URL)).not.toBeInTheDocument();
       expect(getCurrentTextToCopy()).toBe(mcpServerUrl);

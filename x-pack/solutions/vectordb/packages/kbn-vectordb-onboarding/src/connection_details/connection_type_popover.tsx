@@ -14,7 +14,7 @@ const connectionTypeLabels = {
     defaultMessage: 'Elasticsearch',
   }),
   mcpServer: i18n.translate('vectordbOnboarding.connectionType.mcpServerLabel', {
-    defaultMessage: 'MCP server',
+    defaultMessage: 'Agent Builder MCP',
   }),
 };
 
