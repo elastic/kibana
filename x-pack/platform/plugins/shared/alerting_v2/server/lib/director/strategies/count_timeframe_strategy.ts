@@ -169,20 +169,12 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
       });
     }
 
-    // --- Entering a new status (inactive does not carry a count) ---
-    if (
-      basicResult.status !== currentEpisodeStatus &&
-      basicResult.status !== alertEpisodeStatus.inactive
-    ) {
-      return { status: basicResult.status, statusCount: DEFAULT_STATUS_COUNT };
-    }
-
-    // --- Staying in the same status (inactive does not carry a count) ---
-    if (
-      basicResult.status === currentEpisodeStatus &&
-      basicResult.status !== alertEpisodeStatus.inactive
-    ) {
-      return { status: basicResult.status, statusCount: currentStatusCount + 1 };
+    if (basicResult.status !== alertEpisodeStatus.inactive) {
+      const isStayingInStatus = basicResult.status === currentEpisodeStatus;
+      return {
+        status: basicResult.status,
+        statusCount: isStayingInStatus ? currentStatusCount + 1 : DEFAULT_STATUS_COUNT,
+      };
     }
 
     return basicResult;
@@ -193,7 +185,7 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
       return 0;
     }
 
-    return previousEpisode.last_episode_status_count ?? DEFAULT_STATUS_COUNT;
+    return previousEpisode.last_episode_status_count ?? 0;
   }
 
   private shouldSkipPending(
