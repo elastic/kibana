@@ -893,7 +893,7 @@ describe('conversations utils', () => {
       });
 
       // While the first write is pending, dispatch a second one — settled must wait for both.
-      inFlightWrites.track(
+      void inFlightWrites.track(
         new Promise<void>((resolve) => {
           resolveSecond = resolve;
         })

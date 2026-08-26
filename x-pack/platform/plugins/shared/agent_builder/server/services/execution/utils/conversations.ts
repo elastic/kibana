@@ -70,7 +70,7 @@ export const createInFlightWrites = (): InFlightWrites => {
       () => undefined
     );
     pending.add(entry);
-    entry.then(() => pending.delete(entry));
+    void entry.then(() => pending.delete(entry));
     return promise;
   };
 
