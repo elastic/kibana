@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ENTITY_ID_FIELD } from '../../../../../common/domain/definitions/common_fields';
 import { escapeEsqlStringLiteral } from '../../../../../common/esql/strings';
 import type { EsqlMatchSpec } from '../rule_registry';
 import {
@@ -13,10 +14,14 @@ import {
   ENTITY_TYPE,
   FIRST_SEEN_FIELD,
   GROUP_SIZE_CEILING,
+  MATCH_GROUP_COLUMNS,
   MATCHER_PAGE_SIZE,
   RESOLVED_TO_FIELD,
+  WATERMARK_COLUMN,
 } from './constants';
 
+// Unmapped fields would otherwise abort the whole query. Nullify so a missing
+// match field on one namespace does not fail groups that do have it.
 const NULLIFY_UNMAPPED_FIELDS_SETTING = 'SET unmapped_fields="nullify";';
 
 export interface BuildMatchGroupsQueryParams {
@@ -36,19 +41,14 @@ export interface BuildWatermarkQueryParams {
 const quote = (value: string): string => `"${escapeEsqlStringLiteral(value)}"`;
 
 const matchFieldExpression = (spec: EsqlMatchSpec): string => {
-  if (spec.field) {
-    return spec.field;
+  if (spec.fieldByNamespace) {
+    const arms = Object.entries(spec.fieldByNamespace).map(
+      ([namespace, field]) => `${ENTITY_NAMESPACE_FIELD} == ${quote(namespace)}, ${field}`
+    );
+    return `CASE(${arms.join(', ')})`;
   }
 
-  const fieldByNamespace = spec.fieldByNamespace;
-  if (!fieldByNamespace) {
-    throw new Error('EsqlMatchSpec requires field or fieldByNamespace');
-  }
-
-  const arms = Object.entries(fieldByNamespace).map(
-    ([namespace, field]) => `entity.namespace == ${quote(namespace)}, ${field}`
-  );
-  return `CASE(${arms.join(', ')})`;
+  return spec.field;
 };
 
 const namespaceFilter = (spec: EsqlMatchSpec): string | undefined => {
@@ -63,6 +63,9 @@ const sharedFilters = (spec: EsqlMatchSpec): string[] => {
   const matchField = matchFieldExpression(spec);
   const filters = [
     `${ENGINE_METADATA_TYPE_FIELD} == ${quote(ENTITY_TYPE)}`,
+    // Single-value only: two emails (or two IDs) on one entity is genuinely
+    // ambiguous for matching. Email skip is intended. CrowdStrike multi-id is
+    // a later, source-specific follow-up — do not MV_EXPAND here.
     `MV_COUNT(${matchField}) == 1`,
   ];
   const namespaces = namespaceFilter(spec);
@@ -78,12 +81,15 @@ const matchValueExpression = (spec: EsqlMatchSpec): string => {
 };
 
 const matchValueGates = (spec: EsqlMatchSpec): string[] => {
-  const gates = ['match_value IS NOT NULL', 'match_value != ""'];
+  const gates = [
+    `${MATCH_GROUP_COLUMNS.matchValue} IS NOT NULL`,
+    `${MATCH_GROUP_COLUMNS.matchValue} != ""`,
+  ];
   if (spec.inclusionPattern) {
-    gates.push(`match_value RLIKE ${quote(spec.inclusionPattern)}`);
+    gates.push(`${MATCH_GROUP_COLUMNS.matchValue} RLIKE ${quote(spec.inclusionPattern)}`);
   }
   if (spec.exclusionPattern) {
-    gates.push(`NOT match_value RLIKE ${quote(spec.exclusionPattern)}`);
+    gates.push(`NOT ${MATCH_GROUP_COLUMNS.matchValue} RLIKE ${quote(spec.exclusionPattern)}`);
   }
   return gates;
 };
@@ -112,28 +118,34 @@ export const buildMatchGroupsQuery = ({
     NULLIFY_UNMAPPED_FIELDS_SETTING,
     `FROM ${quote(index)}`,
     `| WHERE ${sharedFilters(spec).join('\n    AND ')}`,
-    `| EVAL match_value = ${matchValueExpression(spec)}`,
+    `| EVAL ${MATCH_GROUP_COLUMNS.matchValue} = ${matchValueExpression(spec)}`,
     `| WHERE ${matchValueGates(spec).join('\n    AND ')}`,
   ];
 
   if (afterMatchValue !== undefined) {
-    parts.push(`| WHERE match_value > ${quote(afterMatchValue)}`);
+    parts.push(`| WHERE ${MATCH_GROUP_COLUMNS.matchValue} > ${quote(afterMatchValue)}`);
   }
 
   parts.push(
     `| EVAL is_unresolved = CASE(${RESOLVED_TO_FIELD} IS NULL, 1, 0)`,
-    `| EVAL is_new = CASE(${watermark ? watermarkFilter(watermark) : '1 == 1'}, 1, 0)`,
-    `| EVAL unresolved_id = CASE(is_unresolved == 1, entity.id, null)`,
+    `| EVAL is_new = CASE(${watermarkFilter(watermark) ?? '1 == 1'}, 1, 0)`,
+    // Targets have no resolved_to, so they land in unresolved_id despite the
+    // name — that is why out-of-group existing targets can still be cascade-
+    // retargeted. Do not rename this to exclude them.
+    `| EVAL unresolved_id = CASE(is_unresolved == 1, ${ENTITY_ID_FIELD}, null)`,
     `| EVAL unresolved_namespace = CASE(is_unresolved == 1, ${ENTITY_NAMESPACE_FIELD}, null)`,
-    `| STATS ids = TOP(unresolved_id, ${GROUP_SIZE_CEILING}, "asc"),
-        unresolved_ns = VALUES(unresolved_namespace),
-        existing_targets = VALUES(${RESOLVED_TO_FIELD}),
-        unresolved_n = SUM(is_unresolved),
-        n = COUNT(*),
+    // TOP(..., 100) on existing_targets is lossless: groups with total_n > 100
+    // are declined in TypeScript anyway, so a dropped target could never have
+    // been used. VALUES() has no cap and can OOM the query during STATS.
+    `| STATS ${MATCH_GROUP_COLUMNS.ids} = TOP(unresolved_id, ${GROUP_SIZE_CEILING}, "asc"),
+        ${MATCH_GROUP_COLUMNS.unresolvedNs} = VALUES(unresolved_namespace),
+        ${MATCH_GROUP_COLUMNS.existingTargets} = TOP(${RESOLVED_TO_FIELD}, ${GROUP_SIZE_CEILING}, "asc"),
+        ${MATCH_GROUP_COLUMNS.unresolvedN} = SUM(is_unresolved),
+        ${MATCH_GROUP_COLUMNS.totalN} = COUNT(*),
         new_n = SUM(is_new)
-    BY match_value`,
-    `| WHERE n >= 2 AND new_n >= 1`,
-    `| SORT match_value ASC`,
+    BY ${MATCH_GROUP_COLUMNS.matchValue}`,
+    `| WHERE ${MATCH_GROUP_COLUMNS.totalN} >= 2 AND new_n >= 1`,
+    `| SORT ${MATCH_GROUP_COLUMNS.matchValue} ASC`,
     `| LIMIT ${pageSize}`
   );
 
@@ -160,9 +172,9 @@ export const buildWatermarkQuery = ({
     NULLIFY_UNMAPPED_FIELDS_SETTING,
     `FROM ${quote(index)}`,
     `| WHERE ${filters.join('\n    AND ')}`,
-    `| EVAL match_value = ${matchValueExpression(spec)}`,
+    `| EVAL ${MATCH_GROUP_COLUMNS.matchValue} = ${matchValueExpression(spec)}`,
     `| WHERE ${matchValueGates(spec).join('\n    AND ')}`,
-    `| STATS max_ts = MAX(${FIRST_SEEN_FIELD})`,
+    `| STATS ${WATERMARK_COLUMN} = MAX(${FIRST_SEEN_FIELD})`,
     `| LIMIT 1`,
   ].join('\n');
 };

@@ -11,6 +11,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { RESOLUTION_RULE_IDS, RESOLUTION_RULE_KINDS } from '../../../../common';
 import { EntityResolutionRuleTypeName } from './saved_object';
 import { ResolutionRulesClient } from './rule_client';
+import { RESOLUTION_RULE_CONFIGS } from './rule_registry';
 
 const NAMESPACE = 'default';
 
@@ -26,26 +27,14 @@ describe('ResolutionRulesClient', () => {
 
     const rules = await client.getEffectiveRules();
 
-    expect(rules).toHaveLength(6);
-    expect(rules.find((rule) => rule.id === RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH)).toEqual(
-      expect.objectContaining({
-        kind: RESOLUTION_RULE_KINDS.SAME_FIELD,
+    expect(rules).toEqual(
+      RESOLUTION_RULE_CONFIGS.map((config) => ({
+        id: config.id,
+        kind: config.kind,
+        description: config.description,
         managed: true,
-        enabled: true,
-        description: expect.any(String),
-      })
-    );
-    expect(
-      rules.find((rule) => rule.id === RESOLUTION_RULE_IDS.RELATED_USER_ALIAS_RESOLUTION)
-    ).toEqual(
-      expect.objectContaining({
-        kind: RESOLUTION_RULE_KINDS.RELATED_USER_ALIAS_RESOLUTION,
-        managed: true,
-        enabled: false,
-      })
-    );
-    expect(rules.find((rule) => rule.id === RESOLUTION_RULE_IDS.WINDOWS_SID_BRIDGE)?.enabled).toBe(
-      true
+        enabled: config.defaultEnabled,
+      }))
     );
   });
 

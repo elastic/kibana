@@ -26,7 +26,7 @@ import {
   triggerMaintainerRun,
 } from '../../../common/fixtures/helpers';
 
-apiTest.describe('Automated email resolution integration tests', { tag: ENTITY_STORE_TAGS }, () => {
+apiTest.describe('Automated resolution integration tests', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
   let internalHeaders: Record<string, string>;
 
@@ -289,7 +289,9 @@ apiTest.describe('Automated email resolution integration tests', { tag: ENTITY_S
         email: sharedEmail,
       });
 
-      await triggerMaintainerRun(apiClient, internalHeaders);
+      await triggerMaintainerRun(apiClient, internalHeaders, 'automated-resolution', {
+        sync: true,
+      });
 
       // B+A should be resolved (AD wins as target)
       await waitForResolution(esClient, singleA, singleB);
@@ -445,7 +447,9 @@ apiTest.describe('Automated email resolution integration tests', { tag: ENTITY_S
       });
 
       // Run maintainer again — A should NOT be re-linked
-      await triggerMaintainerRun(apiClient, internalHeaders);
+      await triggerMaintainerRun(apiClient, internalHeaders, 'automated-resolution', {
+        sync: true,
+      });
 
       // A should stay unresolved (first_seen is behind watermark, so not collected)
       await assertNotResolved(esClient, entityA);
@@ -472,7 +476,7 @@ apiTest.describe('Automated email resolution integration tests', { tag: ENTITY_S
   });
 
   apiTest(
-    'Windows SID bridge links system logon to Active Directory',
+    'Windows SID bridge links system account-management (IAM) entities to Active Directory',
     async ({ apiClient, esClient }) => {
       const sid = 'S-1-5-21-111-222-333-1001';
       const windowsEntity = 'test11-windows';
@@ -586,7 +590,9 @@ apiTest.describe('Automated email resolution integration tests', { tag: ENTITY_S
       userId: sid,
     });
 
-    await triggerMaintainerRun(apiClient, internalHeaders);
+    await triggerMaintainerRun(apiClient, internalHeaders, 'automated-resolution', {
+      sync: true,
+    });
     await assertNotResolved(esClient, windowsEntity);
     await assertNotResolved(esClient, adEntity);
   });
@@ -606,7 +612,9 @@ apiTest.describe('Automated email resolution integration tests', { tag: ENTITY_S
       await seedUserEntity(esClient, { entityId: oktaEntity, namespace: 'okta', email });
       await seedUserEntity(esClient, { entityId: entraEntity, namespace: 'entra_id', email });
 
-      await triggerMaintainerRun(apiClient, internalHeaders);
+      await triggerMaintainerRun(apiClient, internalHeaders, 'automated-resolution', {
+        sync: true,
+      });
       await assertNotResolved(esClient, entraEntity);
       await assertNotResolved(esClient, oktaEntity);
     } finally {

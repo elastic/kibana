@@ -7,6 +7,7 @@
 
 import { RESOLUTION_RULE_KINDS } from '../../../../../../common/domain/resolution_rules/constants';
 import type { RegisterEntityMaintainerConfig } from '../../../../../tasks/entity_maintainers/types';
+import { resolveLatestEntitiesIndexName } from '../../../../asset_manager/resolve_entity_store_indices';
 import { ResolutionClient } from '../../..';
 import {
   AUTOMATED_RESOLUTION_STATE_VERSION,
@@ -42,8 +43,16 @@ export const automatedResolutionMaintainerConfig: RegisterEntityMaintainerConfig
     const effectiveRules = new Map(
       (await resolutionRulesClient.getEffectiveRules()).map((rule) => [rule.id, rule])
     );
+    const mutatedIds = new Set<string>();
+    let backfillStarted = false;
+    const index = await resolveLatestEntitiesIndexName(esClient, namespace);
 
     for (const ruleConfig of RESOLUTION_RULE_CONFIGS) {
+      if (signal.aborted) {
+        logger.debug(`Aborted automated-resolution before rule '${ruleConfig.id}'`);
+        break;
+      }
+
       const effectiveRule = effectiveRules.get(ruleConfig.id);
       if (!effectiveRule?.enabled) {
         logger.debug(`Skipping disabled resolution rule '${ruleConfig.id}'`);
@@ -51,6 +60,17 @@ export const automatedResolutionMaintainerConfig: RegisterEntityMaintainerConfig
       }
 
       const ruleState = state.rules[ruleConfig.id] ?? EMPTY_RULE_STATE;
+      const isBackfill = ruleState.lastProcessedTimestamp == null;
+      if (isBackfill) {
+        if (backfillStarted) {
+          logger.debug(
+            `Deferring full-scan of resolution rule '${ruleConfig.id}'; another rule is backfilling this tick`
+          );
+          continue;
+        }
+        backfillStarted = true;
+      }
+
       try {
         if (ruleConfig.match) {
           rules[ruleConfig.id] = await runEsqlMatcherRule({
@@ -63,6 +83,7 @@ export const automatedResolutionMaintainerConfig: RegisterEntityMaintainerConfig
             telemetry,
             spec: ruleConfig.match,
             ruleId: ruleConfig.id,
+            mutatedIds,
           });
         } else if (ruleConfig.kind === RESOLUTION_RULE_KINDS.RELATED_USER_ALIAS_RESOLUTION) {
           rules[ruleConfig.id] = await runRelatedUserAliasResolution({
@@ -74,12 +95,19 @@ export const automatedResolutionMaintainerConfig: RegisterEntityMaintainerConfig
             signal,
             telemetry,
           });
+        } else {
+          logger.warn(
+            `Skipping resolution rule '${ruleConfig.id}': no matcher spec and unrecognized kind '${ruleConfig.kind}'`
+          );
+          continue;
         }
+
+        await esClient.indices.refresh({ index });
       } catch (error) {
         logger.warn(`Resolution rule '${ruleConfig.id}' failed: ${error}`);
       }
     }
 
-    return { ...state, version: AUTOMATED_RESOLUTION_STATE_VERSION, rules };
+    return { ...state, rules };
   },
 };

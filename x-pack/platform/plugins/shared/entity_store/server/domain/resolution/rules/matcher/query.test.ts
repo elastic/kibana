@@ -62,7 +62,7 @@ describe('ES|QL matcher query builder', () => {
       expect(query).toContain(
         'entity.lifecycle.first_seen > TO_DATETIME("2026-08-01T00:00:00.000Z")'
       );
-      expect(query).toContain('| WHERE n >= 2 AND new_n >= 1');
+      expect(query).toContain('| WHERE total_n >= 2 AND new_n >= 1');
       await expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
     });
 
@@ -71,11 +71,28 @@ describe('ES|QL matcher query builder', () => {
       expect(query.startsWith('SET unmapped_fields="nullify";')).toBe(true);
       expect(query).toContain('| LIMIT 5000');
       expect(query).toContain('TOP(unresolved_id, 100, "asc")');
+      expect(query).toContain(
+        'existing_targets = TOP(entity.relationships.resolution.resolved_to, 100, "asc")'
+      );
     });
 
     it('quotes the latest-entities index name', () => {
       const query = buildMatchGroupsQuery({ index: INDEX, spec: EMAIL });
       expect(query).toContain(`FROM "${INDEX}"`);
+    });
+
+    it('gates UPN match values on an @-shaped inclusion pattern', () => {
+      const query = buildMatchGroupsQuery({ index: INDEX, spec: UPN });
+      expect(query).toContain('match_value RLIKE "[^@]+@[^@]+"');
+      expect(UPN.inclusionPattern).toBe('[^@]+@[^@]+');
+    });
+
+    it('accepts on-prem UPNs without a dot and rejects values with no @', () => {
+      const pattern = new RegExp(`^${UPN.inclusionPattern}$`);
+      expect('jane@CORP').toMatch(pattern);
+      expect('admin@tenant.onmicrosoft.com').toMatch(pattern);
+      expect('hello').not.toMatch(pattern);
+      expect('aa534e49-edfd-4541-8256-8bbf34f122b4').not.toMatch(pattern);
     });
   });
 

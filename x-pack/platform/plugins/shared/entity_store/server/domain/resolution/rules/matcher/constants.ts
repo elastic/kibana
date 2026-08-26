@@ -20,3 +20,18 @@ export const RESOLVED_TO_FIELD = 'entity.relationships.resolution.resolved_to';
 export const ENTITY_NAMESPACE_FIELD = 'entity.namespace';
 export const FIRST_SEEN_FIELD = 'entity.lifecycle.first_seen';
 export const ENTITY_TYPE = 'user';
+
+/**
+ * ES|QL output column names for the match-group query. The query builder and
+ * the row parser both import these so a rename cannot silently drop every row.
+ */
+export const MATCH_GROUP_COLUMNS = {
+  matchValue: 'match_value',
+  ids: 'ids',
+  unresolvedNs: 'unresolved_ns',
+  existingTargets: 'existing_targets',
+  unresolvedN: 'unresolved_n',
+  totalN: 'total_n',
+} as const;
+
+export const WATERMARK_COLUMN = 'max_ts';

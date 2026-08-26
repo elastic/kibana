@@ -30,6 +30,10 @@ jest.mock('../../matcher', () => ({
   runEsqlMatcherRule: jest.fn(),
 }));
 
+jest.mock('../../../../asset_manager/resolve_entity_store_indices', () => ({
+  resolveLatestEntitiesIndexName: jest.fn().mockResolvedValue('.entities.v2.latest.default'),
+}));
+
 const matcherState = {
   lastProcessedTimestamp: '2026-03-10T00:00:00Z',
   lastRun: {
@@ -50,16 +54,30 @@ const DEFAULT_EFFECTIVE_RULES = RESOLUTION_RULE_CONFIGS.map((config) => ({
   enabled: config.defaultEnabled,
 }));
 
+const MATCHER_RULE_IDS = [
+  RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH,
+  RESOLUTION_RULE_IDS.WINDOWS_SID_BRIDGE,
+  RESOLUTION_RULE_IDS.ENTRA_GUID_BRIDGE,
+  RESOLUTION_RULE_IDS.CROWDSTRIKE_SID_BRIDGE,
+  RESOLUTION_RULE_IDS.UPN_CROSS_FIELD_BRIDGE,
+] as const;
+
+const watermarkedRules = Object.fromEntries(
+  MATCHER_RULE_IDS.map((id) => [id, matcherState])
+);
+
 const createEsClient = () =>
   ({
     search: jest.fn(),
     esql: { query: jest.fn() },
+    indices: { refresh: jest.fn().mockResolvedValue({}) },
   } as unknown as jest.Mocked<ElasticsearchClient>);
 
 const runConfig = async (
   esClient: ElasticsearchClient,
   persistedState: unknown,
-  effectiveRules = DEFAULT_EFFECTIVE_RULES
+  effectiveRules = DEFAULT_EFFECTIVE_RULES,
+  signal: AbortSignal = new AbortController().signal
 ): Promise<AutomatedResolutionState> => {
   const context = {
     status: {
@@ -72,7 +90,7 @@ const runConfig = async (
       state: persistedState,
       taskStatus: 'started',
     },
-    signal: new AbortController().signal,
+    signal,
     logger: loggerMock.create(),
     esClient,
     cpsEsClient: esClient,
@@ -108,20 +126,63 @@ describe('automatedResolutionMaintainerConfig', () => {
     expect(state.rules).toEqual({});
   });
 
-  it('runs every enabled matcher rule and skips related_user when disabled', async () => {
+  it('pins the matcher rule ids so adding a rule fails this test on purpose', () => {
+    expect(RESOLUTION_RULE_CONFIGS.filter((config) => config.match).map((config) => config.id)).toEqual(
+      [...MATCHER_RULE_IDS]
+    );
+  });
+
+  it('runs every watermarked matcher rule and skips related_user when disabled', async () => {
     const esClient = createEsClient();
     const result = await runConfig(esClient, {
+      version: AUTOMATED_RESOLUTION_STATE_VERSION,
+      rules: watermarkedRules,
+    });
+
+    expect(runEsqlMatcherRule).toHaveBeenCalledTimes(MATCHER_RULE_IDS.length);
+    expect(runRelatedUserAliasResolution).not.toHaveBeenCalled();
+    expect(esClient.indices.refresh).toHaveBeenCalledTimes(MATCHER_RULE_IDS.length);
+    expect(result.version).toBe(AUTOMATED_RESOLUTION_STATE_VERSION);
+    expect(result.rules[EMAIL_RULE]).toEqual(matcherState);
+  });
+
+  it('serializes one null-watermark backfill per tick', async () => {
+    const esClient = createEsClient();
+    const first = await runConfig(esClient, {
       version: AUTOMATED_RESOLUTION_STATE_VERSION,
       rules: {},
     });
 
-    const enabledMatcherCount = RESOLUTION_RULE_CONFIGS.filter(
-      (config) => config.match && config.defaultEnabled
-    ).length;
-    expect(runEsqlMatcherRule).toHaveBeenCalledTimes(enabledMatcherCount);
-    expect(runRelatedUserAliasResolution).not.toHaveBeenCalled();
-    expect(result.version).toBe(AUTOMATED_RESOLUTION_STATE_VERSION);
-    expect(result.rules[EMAIL_RULE]).toEqual(matcherState);
+    expect(runEsqlMatcherRule).toHaveBeenCalledTimes(1);
+    expect((runEsqlMatcherRule as jest.Mock).mock.calls[0][0].ruleId).toBe(EMAIL_RULE);
+    expect(first.rules[RESOLUTION_RULE_IDS.WINDOWS_SID_BRIDGE]).toBeUndefined();
+
+    (runEsqlMatcherRule as jest.Mock).mockClear();
+    await runConfig(esClient, {
+      version: AUTOMATED_RESOLUTION_STATE_VERSION,
+      rules: { [EMAIL_RULE]: matcherState },
+    });
+
+    expect(runEsqlMatcherRule).toHaveBeenCalledTimes(2);
+    expect((runEsqlMatcherRule as jest.Mock).mock.calls.map((call) => call[0].ruleId)).toEqual([
+      EMAIL_RULE,
+      RESOLUTION_RULE_IDS.WINDOWS_SID_BRIDGE,
+    ]);
+  });
+
+  it('does not start the next rule when the task has been aborted', async () => {
+    const esClient = createEsClient();
+    const abortCtrl = new AbortController();
+    abortCtrl.abort();
+
+    await runConfig(
+      esClient,
+      { version: AUTOMATED_RESOLUTION_STATE_VERSION, rules: watermarkedRules },
+      DEFAULT_EFFECTIVE_RULES,
+      abortCtrl.signal
+    );
+
+    expect(runEsqlMatcherRule).not.toHaveBeenCalled();
   });
 
   it('migrates legacy single-rule state and resets the email watermark before running', async () => {
@@ -147,6 +208,10 @@ describe('automatedResolutionMaintainerConfig', () => {
         lastRun: {
           resolutionsCreated: 10,
           skippedAmbiguousBuckets: 1,
+          skippedOversizedBuckets: 0,
+          skippedNoopBuckets: 0,
+          cascadeRetargeted: 0,
+          cascadesBlocked: 0,
         },
       };
 

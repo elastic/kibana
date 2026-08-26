@@ -9,18 +9,19 @@ FROM \\".entities.v2.latest.default\\"
 | EVAL match_value = TO_LOWER(CASE(entity.namespace == \\"microsoft_365\\", user.id, entity.namespace == \\"entra_id\\", user.name))
 | WHERE match_value IS NOT NULL
     AND match_value != \\"\\"
+    AND match_value RLIKE \\"[^@]+@[^@]+\\"
 | EVAL is_unresolved = CASE(entity.relationships.resolution.resolved_to IS NULL, 1, 0)
 | EVAL is_new = CASE(1 == 1, 1, 0)
 | EVAL unresolved_id = CASE(is_unresolved == 1, entity.id, null)
 | EVAL unresolved_namespace = CASE(is_unresolved == 1, entity.namespace, null)
 | STATS ids = TOP(unresolved_id, 100, \\"asc\\"),
         unresolved_ns = VALUES(unresolved_namespace),
-        existing_targets = VALUES(entity.relationships.resolution.resolved_to),
+        existing_targets = TOP(entity.relationships.resolution.resolved_to, 100, \\"asc\\"),
         unresolved_n = SUM(is_unresolved),
-        n = COUNT(*),
+        total_n = COUNT(*),
         new_n = SUM(is_new)
     BY match_value
-| WHERE n >= 2 AND new_n >= 1
+| WHERE total_n >= 2 AND new_n >= 1
 | SORT match_value ASC
 | LIMIT 5000"
 `;
@@ -41,12 +42,12 @@ FROM \\".entities.v2.latest.default\\"
 | EVAL unresolved_namespace = CASE(is_unresolved == 1, entity.namespace, null)
 | STATS ids = TOP(unresolved_id, 100, \\"asc\\"),
         unresolved_ns = VALUES(unresolved_namespace),
-        existing_targets = VALUES(entity.relationships.resolution.resolved_to),
+        existing_targets = TOP(entity.relationships.resolution.resolved_to, 100, \\"asc\\"),
         unresolved_n = SUM(is_unresolved),
-        n = COUNT(*),
+        total_n = COUNT(*),
         new_n = SUM(is_new)
     BY match_value
-| WHERE n >= 2 AND new_n >= 1
+| WHERE total_n >= 2 AND new_n >= 1
 | SORT match_value ASC
 | LIMIT 5000"
 `;
@@ -65,12 +66,12 @@ FROM \\".entities.v2.latest.default\\"
 | EVAL unresolved_namespace = CASE(is_unresolved == 1, entity.namespace, null)
 | STATS ids = TOP(unresolved_id, 100, \\"asc\\"),
         unresolved_ns = VALUES(unresolved_namespace),
-        existing_targets = VALUES(entity.relationships.resolution.resolved_to),
+        existing_targets = TOP(entity.relationships.resolution.resolved_to, 100, \\"asc\\"),
         unresolved_n = SUM(is_unresolved),
-        n = COUNT(*),
+        total_n = COUNT(*),
         new_n = SUM(is_new)
     BY match_value
-| WHERE n >= 2 AND new_n >= 1
+| WHERE total_n >= 2 AND new_n >= 1
 | SORT match_value ASC
 | LIMIT 5000"
 `;
@@ -91,12 +92,12 @@ FROM \\".entities.v2.latest.default\\"
 | EVAL unresolved_namespace = CASE(is_unresolved == 1, entity.namespace, null)
 | STATS ids = TOP(unresolved_id, 100, \\"asc\\"),
         unresolved_ns = VALUES(unresolved_namespace),
-        existing_targets = VALUES(entity.relationships.resolution.resolved_to),
+        existing_targets = TOP(entity.relationships.resolution.resolved_to, 100, \\"asc\\"),
         unresolved_n = SUM(is_unresolved),
-        n = COUNT(*),
+        total_n = COUNT(*),
         new_n = SUM(is_new)
     BY match_value
-| WHERE n >= 2 AND new_n >= 1
+| WHERE total_n >= 2 AND new_n >= 1
 | SORT match_value ASC
 | LIMIT 5000"
 `;
@@ -117,12 +118,12 @@ FROM \\".entities.v2.latest.default\\"
 | EVAL unresolved_namespace = CASE(is_unresolved == 1, entity.namespace, null)
 | STATS ids = TOP(unresolved_id, 100, \\"asc\\"),
         unresolved_ns = VALUES(unresolved_namespace),
-        existing_targets = VALUES(entity.relationships.resolution.resolved_to),
+        existing_targets = TOP(entity.relationships.resolution.resolved_to, 100, \\"asc\\"),
         unresolved_n = SUM(is_unresolved),
-        n = COUNT(*),
+        total_n = COUNT(*),
         new_n = SUM(is_new)
     BY match_value
-| WHERE n >= 2 AND new_n >= 1
+| WHERE total_n >= 2 AND new_n >= 1
 | SORT match_value ASC
 | LIMIT 5000"
 `;
@@ -142,12 +143,12 @@ FROM \\".entities.v2.latest.default\\"
 | EVAL unresolved_namespace = CASE(is_unresolved == 1, entity.namespace, null)
 | STATS ids = TOP(unresolved_id, 100, \\"asc\\"),
         unresolved_ns = VALUES(unresolved_namespace),
-        existing_targets = VALUES(entity.relationships.resolution.resolved_to),
+        existing_targets = TOP(entity.relationships.resolution.resolved_to, 100, \\"asc\\"),
         unresolved_n = SUM(is_unresolved),
-        n = COUNT(*),
+        total_n = COUNT(*),
         new_n = SUM(is_new)
     BY match_value
-| WHERE n >= 2 AND new_n >= 1
+| WHERE total_n >= 2 AND new_n >= 1
 | SORT match_value ASC
 | LIMIT 5"
 `;

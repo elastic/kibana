@@ -66,6 +66,15 @@ const FIXTURES: Record<string, unknown> = {
       },
     },
   },
+  'newer-than-current': {
+    version: AUTOMATED_RESOLUTION_STATE_VERSION + 1,
+    rules: {
+      [EMAIL_RULE]: {
+        lastProcessedTimestamp: '2026-07-01T00:00:00Z',
+        lastRun: { resolutionsCreated: 1, skippedAmbiguousBuckets: 0, futureMetric: 99 },
+      },
+    },
+  },
 };
 
 const expectNoLegacyTopLevelFields = (state: AutomatedResolutionState): void => {
@@ -80,7 +89,7 @@ describe('automated-resolution state migration', () => {
     logger = loggerMock.create();
   });
 
-  it('SCENARIO 1 - clean upgrade resets the email watermark so case-split groups can heal', () => {
+  it('resets the email watermark on a clean upgrade so case-split groups can heal', () => {
     const output = migrate(FIXTURES['clean-upgrade'], logger);
 
     expect(output.version).toBe(AUTOMATED_RESOLUTION_STATE_VERSION);
@@ -94,14 +103,14 @@ describe('automated-resolution state migration', () => {
     expectNoLegacyTopLevelFields(output);
   });
 
-  it('SCENARIO 2 - versioned state is a no-op and preserves unknown rule ids', () => {
-    const input = FIXTURES['already-migrated-v2'];
-    const output = migrate(input, logger);
+  it('preserves unknown rule ids on versioned state and sanitizes watermarks', () => {
+    const output = migrate(FIXTURES['already-migrated-v2'], logger);
 
-    expect(output).toEqual(input);
+    expect(output.version).toBe(AUTOMATED_RESOLUTION_STATE_VERSION);
+    expect(output.rules[EMAIL_RULE].lastProcessedTimestamp).toBe('2026-05-31T08:30:00Z');
     expect(output.rules.some_future_rule).toEqual({
       lastProcessedTimestamp: '2026-06-01T09:00:00Z',
-      lastRun: { resolutionsCreated: 2, skippedAmbiguousBuckets: 0 },
+      lastRun: { resolutionsCreated: 2, skippedAmbiguousBuckets: 0, ...ZEROED_STATS },
     });
   });
 
@@ -117,7 +126,7 @@ describe('automated-resolution state migration', () => {
     });
   });
 
-  it('SCENARIO 3 - empty / null / undefined state yields an empty rules map', () => {
+  it('yields an empty rules map for empty, null, or undefined state', () => {
     for (const input of [FIXTURES.empty, null, undefined]) {
       const output = migrate(input, logger);
 
@@ -127,7 +136,7 @@ describe('automated-resolution state migration', () => {
     }
   });
 
-  it('SCENARIO 4 - partial state prefers the already-migrated email rule entry then resets it', () => {
+  it('prefers the already-migrated email rule entry then resets it when version is missing', () => {
     const output = migrate(FIXTURES.partial, logger);
 
     expect(output.rules[EMAIL_RULE].lastProcessedTimestamp).toBeNull();
@@ -139,7 +148,7 @@ describe('automated-resolution state migration', () => {
     expectNoLegacyTopLevelFields(output);
   });
 
-  it('SCENARIO 5 - malformed timestamp degrades to null without throwing', () => {
+  it('degrades a malformed timestamp to null without throwing', () => {
     const output = migrate(FIXTURES['malformed-timestamp'], logger);
 
     expect(output.rules[EMAIL_RULE].lastProcessedTimestamp).toBeNull();
@@ -152,7 +161,7 @@ describe('automated-resolution state migration', () => {
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('malformed'));
   });
 
-  it('SCENARIO 6 - drops unrecognized top-level and lastRun fields', () => {
+  it('drops unrecognized top-level and lastRun fields', () => {
     const output = migrate(FIXTURES['extra-fields'], logger);
 
     expect(output.rules[EMAIL_RULE]).toEqual({
@@ -160,6 +169,39 @@ describe('automated-resolution state migration', () => {
       lastRun: { resolutionsCreated: 13, skippedAmbiguousBuckets: 4, ...ZEROED_STATS },
     });
     expect(Object.keys(output)).toEqual(['version', 'rules']);
+  });
+
+  it('leaves a newer stored version alone, including its email watermark', () => {
+    const input = FIXTURES['newer-than-current'];
+    const output = migrate(input, logger);
+
+    expect(output.version).toBe(AUTOMATED_RESOLUTION_STATE_VERSION + 1);
+    expect(output.rules[EMAIL_RULE]).toEqual(
+      (input as { rules: Record<string, unknown> }).rules[EMAIL_RULE]
+    );
+  });
+
+  it('drops a malformed per-rule watermark instead of passing it through', () => {
+    const output = migrate(
+      {
+        version: AUTOMATED_RESOLUTION_STATE_VERSION,
+        rules: {
+          [EMAIL_RULE]: {
+            lastProcessedTimestamp: { not: 'a-string' },
+            lastRun: { resolutionsCreated: 1, skippedAmbiguousBuckets: 0 },
+          },
+        },
+      },
+      logger
+    );
+
+    expect(output.rules[EMAIL_RULE].lastProcessedTimestamp).toBeNull();
+    expect(output.rules[EMAIL_RULE].lastRun).toEqual({
+      resolutionsCreated: 1,
+      skippedAmbiguousBuckets: 0,
+      ...ZEROED_STATS,
+    });
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('malformed'));
   });
 
   it('is idempotent across every fixture: migrate(migrate(s)) === migrate(s)', () => {
@@ -201,5 +243,25 @@ describe('automated-resolution state migration', () => {
       ...ZEROED_STATS,
     });
     expectNoLegacyTopLevelFields(output);
+  });
+
+  it('preserves related_user lastRun instead of coercing it into matcher stats', () => {
+    const relatedUserId = RESOLUTION_RULE_IDS.RELATED_USER_ALIAS_RESOLUTION;
+    const relatedLastRun = { seedsScanned: 10, linksCreated: 2 };
+
+    const output = migrate(
+      {
+        version: AUTOMATED_RESOLUTION_STATE_VERSION,
+        rules: {
+          [relatedUserId]: {
+            lastProcessedTimestamp: '2026-06-01T00:00:00Z',
+            lastRun: relatedLastRun,
+          },
+        },
+      },
+      logger
+    );
+
+    expect(output.rules[relatedUserId].lastRun).toEqual(relatedLastRun);
   });
 });

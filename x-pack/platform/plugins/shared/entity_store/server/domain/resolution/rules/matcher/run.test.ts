@@ -55,7 +55,7 @@ const esqlResponse = (columns: string[], values: unknown[][]): ESQLSearchRespons
 
 const emptyGroups = () =>
   esqlResponse(
-    ['match_value', 'ids', 'unresolved_ns', 'existing_targets', 'unresolved_n', 'n'],
+    ['match_value', 'ids', 'unresolved_ns', 'existing_targets', 'unresolved_n', 'total_n'],
     []
   );
 
@@ -153,7 +153,7 @@ describe('runEsqlMatcherRule', () => {
 
   it('pages until a short page and links every group', async () => {
     const page1 = esqlResponse(
-      ['match_value', 'ids', 'unresolved_ns', 'existing_targets', 'unresolved_n', 'n'],
+      ['match_value', 'ids', 'unresolved_ns', 'existing_targets', 'unresolved_n', 'total_n'],
       [
         groupRow({
           matchValue: 'a@corp.com',
@@ -183,7 +183,7 @@ describe('runEsqlMatcherRule', () => {
       ]
     );
     const page2 = esqlResponse(
-      ['match_value', 'ids', 'unresolved_ns', 'existing_targets', 'unresolved_n', 'n'],
+      ['match_value', 'ids', 'unresolved_ns', 'existing_targets', 'unresolved_n', 'total_n'],
       [
         groupRow({
           matchValue: 'f@corp.com',
@@ -232,7 +232,7 @@ describe('runEsqlMatcherRule', () => {
       .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
       .mockResolvedValueOnce(
         esqlResponse(
-          ['match_value', 'ids', 'unresolved_ns', 'existing_targets', 'unresolved_n', 'n'],
+          ['match_value', 'ids', 'unresolved_ns', 'existing_targets', 'unresolved_n', 'total_n'],
           [
             groupRow({
               matchValue: 'shared@corp.com',
@@ -260,7 +260,7 @@ describe('runEsqlMatcherRule', () => {
       .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
       .mockResolvedValueOnce(
         esqlResponse(
-          ['match_value', 'ids', 'unresolved_ns', 'existing_targets', 'unresolved_n', 'n'],
+          ['match_value', 'ids', 'unresolved_ns', 'existing_targets', 'unresolved_n', 'total_n'],
           [
             groupRow({
               matchValue: 'shared@corp.com',
@@ -287,7 +287,7 @@ describe('runEsqlMatcherRule', () => {
       .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
       .mockResolvedValueOnce(
         esqlResponse(
-          ['match_value', 'ids', 'unresolved_ns', 'existing_targets', 'unresolved_n', 'n'],
+          ['match_value', 'ids', 'unresolved_ns', 'existing_targets', 'unresolved_n', 'total_n'],
           [
             groupRow({
               matchValue: 'alice@corp.com',
@@ -317,7 +317,7 @@ describe('runEsqlMatcherRule', () => {
       .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
       .mockResolvedValueOnce(
         esqlResponse(
-          ['match_value', 'ids', 'unresolved_ns', 'existing_targets', 'unresolved_n', 'n'],
+          ['match_value', 'ids', 'unresolved_ns', 'existing_targets', 'unresolved_n', 'total_n'],
           [
             groupRow({
               matchValue: 'alice@corp.com',
@@ -346,7 +346,7 @@ describe('runEsqlMatcherRule', () => {
       .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
       .mockResolvedValueOnce(
         esqlResponse(
-          ['match_value', 'ids', 'unresolved_ns', 'existing_targets', 'unresolved_n', 'n'],
+          ['match_value', 'ids', 'unresolved_ns', 'existing_targets', 'unresolved_n', 'total_n'],
           [
             groupRow({
               matchValue: 'alice@corp.com',
@@ -379,7 +379,7 @@ describe('runEsqlMatcherRule', () => {
       .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
       .mockResolvedValueOnce(
         esqlResponse(
-          ['match_value', 'ids', 'unresolved_ns', 'existing_targets', 'unresolved_n', 'n'],
+          ['match_value', 'ids', 'unresolved_ns', 'existing_targets', 'unresolved_n', 'total_n'],
           [
             groupRow({
               matchValue: 'alice@corp.com',
@@ -408,7 +408,7 @@ describe('runEsqlMatcherRule', () => {
       .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
       .mockResolvedValueOnce(
         esqlResponse(
-          ['match_value', 'ids', 'unresolved_ns', 'existing_targets', 'unresolved_n', 'n'],
+          ['match_value', 'ids', 'unresolved_ns', 'existing_targets', 'unresolved_n', 'total_n'],
           [
             groupRow({
               matchValue: 'alice@corp.com',
@@ -441,7 +441,7 @@ describe('runEsqlMatcherRule', () => {
       .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
       .mockResolvedValueOnce(
         esqlResponse(
-          ['match_value', 'ids', 'unresolved_ns', 'existing_targets', 'unresolved_n', 'n'],
+          ['match_value', 'ids', 'unresolved_ns', 'existing_targets', 'unresolved_n', 'total_n'],
           [
             groupRow({
               matchValue: 'alice@corp.com',
@@ -476,7 +476,7 @@ describe('runEsqlMatcherRule', () => {
       .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
       .mockResolvedValueOnce(
         esqlResponse(
-          ['match_value', 'ids', 'unresolved_ns', 'existing_targets', 'unresolved_n', 'n'],
+          ['match_value', 'ids', 'unresolved_ns', 'existing_targets', 'unresolved_n', 'total_n'],
           [
             groupRow({
               matchValue: 'alice@corp.com',
@@ -507,7 +507,7 @@ describe('runEsqlMatcherRule', () => {
       .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
       .mockResolvedValueOnce(
         esqlResponse(
-          ['match_value', 'ids', 'unresolved_ns', 'existing_targets', 'unresolved_n', 'n'],
+          ['match_value', 'ids', 'unresolved_ns', 'existing_targets', 'unresolved_n', 'total_n'],
           [
             groupRow({
               matchValue: 'alice@corp.com',
@@ -538,12 +538,15 @@ describe('runEsqlMatcherRule', () => {
       expect.objectContaining({
         scope: { kind: 'rule', value: RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH },
         breakdown: expect.arrayContaining([
+          { name: 'examined', count: 1 },
           { name: 'links_created', count: 1 },
           { name: 'cascade_retargeted', count: 1 },
           { name: 'cascades_blocked', count: 0 },
           { name: 'ambiguous_skips', count: 0 },
           { name: 'oversized_skips', count: 0 },
           { name: 'noop_skips', count: 0 },
+          { name: 'blocked_skips', count: 0 },
+          { name: 'stale_overlap_skips', count: 0 },
         ]),
       })
     );
@@ -564,5 +567,236 @@ describe('runEsqlMatcherRule', () => {
     expect(result.lastProcessedTimestamp).toBe('2026-08-01T00:00:00Z');
     expect(result.lastRun).toBeNull();
     expect(mockEsClient.esql.query).toHaveBeenCalledTimes(1);
+  });
+
+  it('forwards the abort signal on the watermark query', async () => {
+    const abortCtrl = new AbortController();
+    (mockEsClient.esql.query as jest.Mock)
+      .mockResolvedValueOnce(watermarkResponse(null))
+      .mockResolvedValueOnce(emptyGroups());
+
+    await runEsqlMatcherRule(
+      createDeps(createInitialState(), mockEsClient, mockResolutionClient, {
+        signal: abortCtrl.signal,
+      })
+    );
+
+    const watermarkCall = (mockEsClient.esql.query as jest.Mock).mock.calls[0];
+    expect(watermarkCall[1]).toEqual(expect.objectContaining({ signal: abortCtrl.signal }));
+  });
+
+  it('does not advance the watermark when ES|QL returns partial results', async () => {
+    const state = createInitialState({ lastProcessedTimestamp: '2026-08-01T00:00:00Z' });
+    (mockEsClient.esql.query as jest.Mock).mockResolvedValueOnce({
+      ...watermarkResponse('2026-08-10T00:00:00Z'),
+      is_partial: true,
+    });
+
+    await expect(
+      runEsqlMatcherRule(createDeps(state, mockEsClient, mockResolutionClient))
+    ).rejects.toThrow(/partial results/);
+  });
+
+  it('throws when a required match-group column is missing', async () => {
+    (mockEsClient.esql.query as jest.Mock)
+      .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
+      .mockResolvedValueOnce(esqlResponse(['match_value', 'ids'], [['a@corp.com', ['user-1']]]));
+
+    await expect(
+      runEsqlMatcherRule(createDeps(createInitialState(), mockEsClient, mockResolutionClient))
+    ).rejects.toThrow(/missing column 'unresolved_ns'/);
+  });
+
+  it('links a group whose size equals the ceiling', async () => {
+    (mockEsClient.esql.query as jest.Mock)
+      .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
+      .mockResolvedValueOnce(
+        esqlResponse(
+          ['match_value', 'ids', 'unresolved_ns', 'existing_targets', 'unresolved_n', 'total_n'],
+          [
+            groupRow({
+              matchValue: 'alice@corp.com',
+              unresolvedIds: ['user-okta', 'user-entra'],
+              namespaces: ['okta', 'entra_id'],
+              groupSize: GROUP_SIZE_CEILING,
+            }),
+          ]
+        )
+      );
+    (mockEsClient.search as jest.Mock).mockResolvedValue({
+      hits: {
+        hits: [entityHit('user-okta', 'okta'), entityHit('user-entra', 'entra_id')],
+      },
+    });
+
+    await runEsqlMatcherRule(createDeps(createInitialState(), mockEsClient, mockResolutionClient));
+
+    expect(mockCascadeLink).toHaveBeenCalledTimes(1);
+  });
+
+  it('cascade-links both existing targets when a higher-priority unresolved member wins', async () => {
+    (mockEsClient.esql.query as jest.Mock)
+      .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
+      .mockResolvedValueOnce(
+        esqlResponse(
+          ['match_value', 'ids', 'unresolved_ns', 'existing_targets', 'unresolved_n', 'total_n'],
+          [
+            groupRow({
+              matchValue: 'alice@corp.com',
+              unresolvedIds: ['user-ad'],
+              namespaces: ['active_directory'],
+              existingTargets: ['user-okta', 'user-entra'],
+              unresolvedCount: 1,
+              groupSize: 3,
+            }),
+          ]
+        )
+      );
+    (mockEsClient.search as jest.Mock).mockResolvedValue({
+      hits: {
+        hits: [
+          entityHit('user-ad', 'active_directory'),
+          entityHit('user-okta', 'okta'),
+          entityHit('user-entra', 'entra_id'),
+        ],
+      },
+    });
+
+    await runEsqlMatcherRule(createDeps(createInitialState(), mockEsClient, mockResolutionClient));
+
+    expect(mockCascadeLink).toHaveBeenCalledWith('user-ad', ['user-okta', 'user-entra']);
+  });
+
+  it('skips a group that overlaps ids written earlier this tick and holds the watermark', async () => {
+    const state = createInitialState({ lastProcessedTimestamp: '2026-08-01T00:00:00Z' });
+    const mutatedIds = new Set(['user-okta']);
+    (mockEsClient.esql.query as jest.Mock)
+      .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
+      .mockResolvedValueOnce(
+        esqlResponse(
+          ['match_value', 'ids', 'unresolved_ns', 'existing_targets', 'unresolved_n', 'total_n'],
+          [
+            groupRow({
+              matchValue: 'alice@corp.com',
+              unresolvedIds: ['user-okta', 'user-entra'],
+              namespaces: ['okta', 'entra_id'],
+            }),
+          ]
+        )
+      );
+
+    const result = await runEsqlMatcherRule(
+      createDeps(state, mockEsClient, mockResolutionClient, { mutatedIds })
+    );
+
+    expect(mockCascadeLink).not.toHaveBeenCalled();
+    expect(result.lastProcessedTimestamp).toBe('2026-08-01T00:00:00Z');
+  });
+
+  it('reports a mixed funnel where scanned equals applied plus skipped plus failed', async () => {
+    const telemetry = { report: jest.fn() };
+    (mockEsClient.esql.query as jest.Mock)
+      .mockResolvedValueOnce(watermarkResponse('2026-08-10T00:00:00Z'))
+      .mockResolvedValueOnce(
+        esqlResponse(
+          ['match_value', 'ids', 'unresolved_ns', 'existing_targets', 'unresolved_n', 'total_n'],
+          [
+            groupRow({
+              matchValue: 'applied@corp.com',
+              unresolvedIds: ['user-okta', 'user-entra'],
+              namespaces: ['okta', 'entra_id'],
+            }),
+            groupRow({
+              matchValue: 'ambiguous@corp.com',
+              unresolvedIds: ['user-1', 'user-2'],
+              namespaces: ['microsoft_365'],
+              unresolvedCount: 2,
+              groupSize: 2,
+            }),
+            groupRow({
+              matchValue: 'oversized@corp.com',
+              unresolvedIds: ['user-a', 'user-b'],
+              namespaces: ['okta', 'entra_id'],
+              unresolvedCount: 2,
+              groupSize: GROUP_SIZE_CEILING + 1,
+            }),
+            groupRow({
+              matchValue: 'noop@corp.com',
+              unresolvedIds: [],
+              namespaces: [],
+              existingTargets: ['user-okta-noop'],
+              unresolvedCount: 0,
+              groupSize: 2,
+            }),
+            groupRow({
+              matchValue: 'blocked@corp.com',
+              unresolvedIds: ['user-blocked-a', 'user-blocked-b'],
+              namespaces: ['okta', 'entra_id'],
+            }),
+            groupRow({
+              matchValue: 'failed@corp.com',
+              unresolvedIds: ['user-fail-a', 'user-fail-b'],
+              namespaces: ['okta', 'entra_id'],
+            }),
+          ]
+        )
+      );
+    (mockEsClient.search as jest.Mock).mockImplementation(async ({ query }) => {
+      const ids: string[] = query.bool.filter[0].terms['entity.id'];
+      return {
+        hits: {
+          hits: ids.map((id) =>
+            entityHit(
+              id,
+              id.includes('okta') || id.endsWith('-a') ? 'okta' : 'entra_id'
+            )
+          ),
+        },
+      };
+    });
+    mockCascadeLink
+      .mockResolvedValueOnce({
+        linked: ['user-entra'],
+        retargeted: [],
+        skipped: [],
+        cascadesBlocked: 0,
+        target_id: 'user-okta',
+      })
+      .mockResolvedValueOnce({
+        linked: [],
+        retargeted: [],
+        skipped: [],
+        cascadesBlocked: 2,
+        target_id: 'user-blocked-a',
+      })
+      .mockRejectedValueOnce(new Error('transient ES failure'));
+
+    await runEsqlMatcherRule(
+      createDeps(createInitialState(), mockEsClient, mockResolutionClient, {
+        telemetry,
+        pageSize: 10,
+      })
+    );
+
+    const funnel = telemetry.report.mock.calls[0][0].funnel;
+    expect(funnel).toEqual({
+      scanned: 6,
+      qualified: 5,
+      applied: 1,
+      skipped: 4,
+      failed: 1,
+    });
+    expect(funnel.scanned).toBe(funnel.applied + funnel.skipped + funnel.failed);
+    expect(telemetry.report).toHaveBeenCalledWith(
+      expect.objectContaining({
+        breakdown: expect.arrayContaining([
+          { name: 'examined', count: 6 },
+          { name: 'ambiguous_skips', count: 1 },
+          { name: 'oversized_skips', count: 1 },
+          { name: 'noop_skips', count: 1 },
+          { name: 'blocked_skips', count: 1 },
+        ]),
+      })
+    );
   });
 });

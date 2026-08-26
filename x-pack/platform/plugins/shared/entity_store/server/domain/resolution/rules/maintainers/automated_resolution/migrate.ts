@@ -49,6 +49,44 @@ const toLastRun = (value: unknown): PerRuleLastRunStats | null => {
   return null;
 };
 
+const sanitizeLastRun = (value: unknown): PerRuleState['lastRun'] => {
+  if (value == null) {
+    return null;
+  }
+  const matcherStats = toLastRun(value);
+  if (matcherStats) {
+    return matcherStats;
+  }
+  // related_user (and future non-matcher rules) store a different lastRun
+  // shape. Do not coerce those into matcher stats or drop them.
+  if (isRecord(value) && !Object.hasOwn(value, 'resolutionsCreated')) {
+    return value as PerRuleState['lastRun'];
+  }
+  return null;
+};
+
+const sanitizeRule = (value: unknown, logger: Logger): PerRuleState => {
+  const record = isRecord(value) ? value : {};
+  return {
+    lastProcessedTimestamp: toWatermark(record.lastProcessedTimestamp, logger),
+    lastRun: sanitizeLastRun(record.lastRun),
+  };
+};
+
+const sanitizeRules = (
+  value: unknown,
+  logger: Logger
+): Record<string, PerRuleState> => {
+  if (!isRecord(value)) {
+    return {};
+  }
+  const rules: Record<string, PerRuleState> = {};
+  for (const [id, rule] of Object.entries(value)) {
+    rules[id] = sanitizeRule(rule, logger);
+  }
+  return rules;
+};
+
 /**
  * Reshapes the persisted automated-resolution task state into the per-rule map.
  * Runs every cycle, so it must never throw and must be idempotent.
@@ -63,14 +101,27 @@ const toLastRun = (value: unknown): PerRuleLastRunStats | null => {
  *
  * Anything else (empty / null / garbage) yields an empty map; a rule with no entry
  * backfills on its first run.
+ *
+ * If a newer Kibana stored `version` above this binary's current version, leave
+ * that marker alone. Writing CURRENT over it would re-run the newer node's
+ * one-time work when it wakes up. A mixed window can still re-fire *this*
+ * version's email reset if an older node drops `version`; that is an extra
+ * email rescan, not data loss. Do not hide a sentinel inside `rules` — that
+ * map's contract is unknown rule ids pass through.
  */
 export function migrate(input: unknown, logger: Logger): AutomatedResolutionState {
   const source = isRecord(input) ? input : {};
-  const emailRuleId = RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH;
+  const storedVersion = typeof source.version === 'number' ? source.version : 0;
 
-  const rules: Record<string, PerRuleState> = isRecord(source.rules)
-    ? { ...(source.rules as Record<string, PerRuleState>) }
-    : {};
+  if (storedVersion > AUTOMATED_RESOLUTION_STATE_VERSION) {
+    const rules = isRecord(source.rules)
+      ? (source.rules as Record<string, PerRuleState>)
+      : {};
+    return { version: storedVersion, rules };
+  }
+
+  const rules = sanitizeRules(source.rules, logger);
+  const emailRuleId = RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH;
 
   // Move the legacy flat state into the email rule slot — unless it was already
   // migrated, in which case keep the newer progress (idempotent / crash-retry safe).
@@ -83,14 +134,11 @@ export function migrate(input: unknown, logger: Logger): AutomatedResolutionStat
     };
   }
 
-  const version = typeof source.version === 'number' ? source.version : 0;
-  if (version < AUTOMATED_RESOLUTION_STATE_VERSION && Object.hasOwn(rules, emailRuleId)) {
-    const emailState = isRecord(rules[emailRuleId])
-      ? (rules[emailRuleId] as PerRuleState)
-      : undefined;
+  if (storedVersion < AUTOMATED_RESOLUTION_STATE_VERSION && Object.hasOwn(rules, emailRuleId)) {
+    const emailState = rules[emailRuleId];
     rules[emailRuleId] = {
       lastProcessedTimestamp: null,
-      lastRun: emailState ? toLastRun(emailState.lastRun) ?? emailState.lastRun ?? null : null,
+      lastRun: sanitizeLastRun(emailState.lastRun),
     };
   }
 

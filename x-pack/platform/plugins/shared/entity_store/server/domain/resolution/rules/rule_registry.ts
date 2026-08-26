@@ -32,6 +32,13 @@ export const ENTRA_GUID_PATTERN = '[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F
 /** CrowdStrike `user.id` is polymorphic; only Windows SIDs are safe to bridge to AD. */
 export const CROWDSTRIKE_SID_PATTERN = 'S-1-5-.*';
 
+/**
+ * Cheap UPN shape: at least one character, `@`, at least one character.
+ * Lucene automaton syntax (no `^`/`$`); a trailing dot is not required
+ * (`jane@CORP` is a real on-prem UPN).
+ */
+export const UPN_PATTERN = '[^@]+@[^@]+';
+
 export type EsqlMatchSpec = {
   /** Empty means every namespace (email rule). */
   namespaces: readonly string[];
@@ -72,7 +79,7 @@ export const RESOLUTION_RULE_CONFIGS: ResolutionRuleConfig[] = [
     id: RESOLUTION_RULE_IDS.WINDOWS_SID_BRIDGE,
     kind: RESOLUTION_RULE_KINDS.SAME_FIELD,
     description:
-      'Links Windows and system logon entities to Active Directory by SID (`user.id`), excluding well-known SIDs such as LocalSystem. Needs Windows/system IAM events and Active Directory entity analytics. Disable if well-known SID exclusions are not enough for your environment.',
+      'Links Windows and system account-management (IAM) entities to Active Directory by SID (`user.id`), excluding well-known SIDs such as LocalSystem. Needs Windows/system IAM events and Active Directory entity analytics. Disable if well-known SID exclusions are not enough for your environment.',
     defaultEnabled: true,
     match: {
       field: 'user.id',
@@ -85,7 +92,7 @@ export const RESOLUTION_RULE_CONFIGS: ResolutionRuleConfig[] = [
     id: RESOLUTION_RULE_IDS.ENTRA_GUID_BRIDGE,
     kind: RESOLUTION_RULE_KINDS.SAME_FIELD,
     description:
-      'Links Microsoft Defender (`m365_defender`) identities to Entra ID by GUID-shaped `user.id`. Needs Defender identity events and Entra entity analytics. Disable if Defender SID logon events leak through the GUID gate.',
+      'Links Microsoft Defender (`m365_defender`) identities to Entra ID by GUID-shaped `user.id`. Needs Defender identity events and Entra entity analytics. Disable if Defender SID IAM events leak through the GUID gate.',
     defaultEnabled: true,
     match: {
       field: 'user.id',
@@ -120,6 +127,7 @@ export const RESOLUTION_RULE_CONFIGS: ResolutionRuleConfig[] = [
       },
       namespaces: ['microsoft_365', 'entra_id'],
       lowercase: true,
+      inclusionPattern: UPN_PATTERN,
     },
   },
   {

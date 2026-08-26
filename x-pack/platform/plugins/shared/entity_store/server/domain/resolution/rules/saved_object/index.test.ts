@@ -70,15 +70,27 @@ describe('EntityResolutionRuleType', () => {
     expect(createSchema?.validate(upn)).toEqual(upn);
   });
 
-  it('model version 1 rejects the new OOTB rule ids', () => {
-    const createSchema = modelVersions[1].schemas?.create;
+  it('latest schema accepts every current rule id', () => {
+    const createSchema = modelVersions[2].schemas?.create;
+    const latestVersion = Math.max(
+      ...Object.keys(EntityResolutionRuleType.modelVersions ?? {}).map(Number)
+    );
+    const latestCreate = (EntityResolutionRuleType.modelVersions as Record<number, TestModelVersion>)[
+      latestVersion
+    ].schemas?.create;
 
-    expect(() =>
-      createSchema?.validate({
-        ...validAttributes,
-        id: RESOLUTION_RULE_IDS.WINDOWS_SID_BRIDGE,
-      })
-    ).toThrow();
+    expect(latestCreate).toBe(createSchema);
+
+    for (const id of Object.values(RESOLUTION_RULE_IDS)) {
+      const kind =
+        id === RESOLUTION_RULE_IDS.UPN_CROSS_FIELD_BRIDGE
+          ? RESOLUTION_RULE_KINDS.CROSS_FIELD
+          : id === RESOLUTION_RULE_IDS.RELATED_USER_ALIAS_RESOLUTION
+          ? RESOLUTION_RULE_KINDS.RELATED_USER_ALIAS_RESOLUTION
+          : RESOLUTION_RULE_KINDS.SAME_FIELD;
+      const attributes = { id, kind, managed: true, enabled: true };
+      expect(latestCreate?.validate(attributes)).toEqual(attributes);
+    }
   });
 
   it('ignores unknown forward-compatibility attributes', () => {
