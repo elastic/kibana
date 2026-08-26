@@ -651,6 +651,29 @@ function computeInputPackageInfo(
   for (const v of ptVarList) {
     if ((v as any).name) bucket[(v as any).name] = v;
   }
+  // Inject Fleet's synthesized stream vars (added by getNormalizedDataStreams for input packages).
+  // data_stream.dataset: default = PT name (e.g. 'aws.ec2'), matches the stream key Fleet creates.
+  // data_stream.type: default = PT type (e.g. 'metrics'); synthesized for all non-dynamic_signal_types PTs.
+  if (!bucket['data_stream.dataset']) {
+    bucket['data_stream.dataset'] = {
+      name: 'data_stream.dataset',
+      type: 'text',
+      title: 'Dataset name',
+      required: true,
+      show_user: true,
+      default: (pt as any).name as string,
+    } as RegistryVarsEntry;
+  }
+  if (!bucket['data_stream.type'] && ptType) {
+    bucket['data_stream.type'] = {
+      name: 'data_stream.type',
+      type: 'text',
+      title: 'Data stream type',
+      required: false,
+      show_user: false,
+      default: ptType,
+    } as RegistryVarsEntry;
+  }
 
   const varList = Object.values(bucket) as any[];
   const reqVars = varList.filter((v) => v.required).map((v) => v.name as string);

@@ -81,15 +81,17 @@ export function resolveFieldMeta(
  */
 export function toTyped(raw: string | undefined, meta: FieldMeta): string | boolean | string[] {
   if (meta.isBool) return raw === undefined ? meta.def.default === true : raw === 'true';
-  if (meta.multi)
-    return raw
-      ? raw
-          .split(',')
-          .map((s) => s.trim())
-          .filter(Boolean)
-      : [];
-  // For unset text/duration/etc fields, surface the manifest default so the flyout pre-fills.
-  if (raw === undefined && typeof meta.def.default === 'string') return meta.def.default;
+  if (meta.multi) {
+    if (raw)
+      return raw
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean);
+    if (raw === undefined && Array.isArray(meta.def.default)) return meta.def.default as string[];
+    return [];
+  }
+  // For unset fields, surface the manifest default (string or number/duration) so the flyout pre-fills.
+  if (raw === undefined && meta.def.default != null) return String(meta.def.default);
   return raw ?? '';
 }
 
