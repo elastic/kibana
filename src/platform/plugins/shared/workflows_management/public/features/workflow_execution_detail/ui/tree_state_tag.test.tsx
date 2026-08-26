@@ -13,7 +13,9 @@ import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { TreeStateTag } from './tree_state_tag';
 
-const renderTag = (kind: 'failed' | 'latest' | 'running' | 'final' | 'recovered') =>
+const renderTag = (
+  kind: 'failed' | 'latest' | 'running' | 'final' | 'recovered' | 'waitingForInput'
+) =>
   render(
     <EuiProvider>
       <I18nProvider>
@@ -31,6 +33,12 @@ describe('TreeStateTag', () => {
       expect(el.textContent).toMatch(new RegExp(`·\\s*${kind}`));
     }
   );
+
+  it('renders waitingForInput as a plain muted annotation with a middot prefix', () => {
+    renderTag('waitingForInput');
+    const el = screen.getByTestId('workflowStepTreeStateTag-waitingForInput');
+    expect(el.textContent).toMatch(/·\s*waiting for input/);
+  });
 
   it('renders failed as a danger chip without a middot prefix', () => {
     renderTag('failed');

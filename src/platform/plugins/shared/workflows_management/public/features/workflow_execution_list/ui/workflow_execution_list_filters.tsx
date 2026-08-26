@@ -249,6 +249,7 @@ export function ExecutionListFilters({
           size="s"
           color="text"
           iconType="filter"
+          minWidth={false}
           onClick={() => {
             setIsPopoverOpen(!isPopoverOpen);
           }}
@@ -408,7 +409,6 @@ const componentStyles = {
     padding: ${EQUAL_HEIGHT_OFFSET}px ${euiTheme.size.s};
   `,
   filterButton: ({ euiTheme }: UseEuiTheme) => css`
-    min-width: ${euiTheme.base * 4}px;
     /* Keep the default EuiButton border; tighten content spacing for icon + badge. */
     & .euiButton__content {
       gap: ${euiTheme.size.xs};

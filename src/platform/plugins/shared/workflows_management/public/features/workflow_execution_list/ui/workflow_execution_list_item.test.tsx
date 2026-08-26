@@ -14,13 +14,8 @@ import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { ExecutionStatus, type WorkflowExecutionListItemDto } from '@kbn/workflows';
 import {
   EXECUTION_HISTORY_COLUMN_WIDTHS,
-  formatCompressedStartedAt,
   getExecutionHistoryColumns,
 } from './workflow_execution_list_columns';
-
-jest.mock('../../../shared/ui/use_formatted_date', () => ({
-  useGetFormattedDateTime: () => (date: Date) => date.toISOString(),
-}));
 
 const executedByProfile: UserProfileWithAvatar = {
   uid: 'u_tal',
@@ -59,9 +54,7 @@ const renderColumns = (
     showExecutor: true,
     executedByUserProfiles: new Map([['u_tal', executedByProfile]]),
     showUnresolvedExecutors: true,
-    getFormattedDateTimeWithZone: (date) => `${date.toISOString()} (UTC (UTC+00:00))`,
-    timeZoneLabel: 'UTC (UTC+00:00)',
-    timeZone: 'UTC',
+    timeZoneSetting: 'UTC',
     ...overrides,
   });
 
@@ -85,28 +78,6 @@ const renderColumns = (
   );
 };
 
-describe('formatCompressedStartedAt', () => {
-  it('formats today as Today + time', () => {
-    const now = new Date('2026-08-24T18:00:00Z');
-    expect(formatCompressedStartedAt('2026-08-24T16:35:00Z', now, 'UTC')).toBe('Today 16:35');
-  });
-
-  it('formats yesterday as Yesterday + time', () => {
-    const now = new Date('2026-08-24T18:00:00Z');
-    expect(formatCompressedStartedAt('2026-08-23T22:04:00Z', now, 'UTC')).toBe('Yesterday 22:04');
-  });
-
-  it('formats older days as short date + time', () => {
-    const now = new Date('2026-08-24T18:00:00Z');
-    expect(formatCompressedStartedAt('2026-08-17T14:03:00Z', now, 'UTC')).toBe('Aug 17 14:03');
-  });
-
-  it('returns null for empty startedAt', () => {
-    expect(formatCompressedStartedAt('', new Date(), 'UTC')).toBeNull();
-    expect(formatCompressedStartedAt(null, new Date(), 'UTC')).toBeNull();
-  });
-});
-
 describe('execution history columns', () => {
   it('uses fixed widths that leave room for Status/Started/Duration headers', () => {
     expect(EXECUTION_HISTORY_COLUMN_WIDTHS.status).toBe('120px');
@@ -122,9 +93,7 @@ describe('execution history columns', () => {
       showExecutor: true,
       executedByUserProfiles: new Map(),
       showUnresolvedExecutors: true,
-      getFormattedDateTimeWithZone: (date) => `${date.toISOString()} (UTC (UTC+00:00))`,
-      timeZoneLabel: 'UTC (UTC+00:00)',
-      timeZone: 'UTC',
+      timeZoneSetting: 'UTC',
     });
     expect(columns.map((c) => ('field' in c ? c.field : undefined))).toEqual([
       'status',
@@ -144,7 +113,7 @@ describe('execution history columns', () => {
     expect(screen.queryByText('Error')).not.toBeInTheDocument();
   });
 
-  it('renders a warning flask for test runs and none for production', () => {
+  it('renders a flask for test runs and none for production', () => {
     const { unmount } = renderColumns({ ...baseExecution, isTestRun: false });
     expect(screen.queryByTestId('workflowExecutionListItemRunModeIcon')).not.toBeInTheDocument();
     unmount();

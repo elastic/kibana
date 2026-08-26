@@ -20,7 +20,7 @@ import {
   resolveRegisteredStepIcon,
 } from '@kbn/workflows-ui';
 import { useKibana } from '../../../hooks/use_kibana';
-import { getExecutionStatusColors, getExecutionStatusIcon } from '../status_badge';
+import { getExecutionStatusIcon } from '../status_badge';
 import { withTooltip } from '../with_tooltip';
 
 // Category icons for bare base types (e.g. `ai.prompt` + `ai.agent` → `ai`) applied
@@ -50,30 +50,13 @@ export const StepIcon = React.memo(
     const { triggersActionsUi, workflowsExtensions } = useKibana().services;
     const { actionTypeRegistry } = triggersActionsUi;
 
-    // For Overview pseudo-step, show the execution status icon
+    // Overview is a status-identity pseudo-step, not a type icon.
     if (stepType === '__overview' && executionStatus) {
       return getExecutionStatusIcon(euiTheme, executionStatus);
     }
 
-    if (executionStatus === ExecutionStatus.RUNNING) {
-      return <EuiLoadingSpinner size="m" />;
-    }
-    if (
-      executionStatus === ExecutionStatus.WAITING_FOR_INPUT ||
-      executionStatus === ExecutionStatus.WAITING_FOR_CHILD
-    ) {
-      return (
-        <EuiIcon
-          type="hourglass"
-          size="m"
-          color={getExecutionStatusColors(euiTheme, executionStatus).color}
-          aria-hidden={true}
-        />
-      );
-    }
-
     // Brand / step-type logos keep their own tokens. Status is signaled by the
-    // tree label and row background, not by recoloring the logo.
+    // tree label and row background, not by replacing or recoloring the logo.
     let iconType: IconType;
     if (stepType.startsWith('trigger_')) {
       iconType = getTriggerTypeIconType(stepType);

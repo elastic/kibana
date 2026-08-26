@@ -16,7 +16,13 @@ import { i18n } from '@kbn/i18n';
  * Qualitative row labels (iteration pins, retry tip). Distinct from metric
  * pills (token counts, "N steps", "N attempts") which keep outlined EuiBadge.
  */
-export type TreeStateTagKind = 'failed' | 'latest' | 'running' | 'final' | 'recovered';
+export type TreeStateTagKind =
+  | 'failed'
+  | 'latest'
+  | 'running'
+  | 'final'
+  | 'recovered'
+  | 'waitingForInput';
 
 export interface TreeStateTagProps {
   kind: TreeStateTagKind;
@@ -44,6 +50,10 @@ const labelFor = (kind: TreeStateTagKind): string => {
     case 'recovered':
       return i18n.translate('workflowsManagement.stepExecutionTreeRow.recoveredTag', {
         defaultMessage: 'recovered',
+      });
+    case 'waitingForInput':
+      return i18n.translate('workflowsManagement.stepExecutionTreeRow.waitingForInputTag', {
+        defaultMessage: 'waiting for input',
       });
   }
 };

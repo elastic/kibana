@@ -19,7 +19,6 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import moment from 'moment-timezone';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
@@ -27,60 +26,21 @@ import { getUserDisplayName, UserAvatar } from '@kbn/user-profile-components';
 import { ExecutionStatus, type WorkflowExecutionListItemDto } from '@kbn/workflows';
 import { formatDuration } from '../../../shared/lib/format_duration';
 import { getStatusLabel } from '../../../shared/translations';
+import {
+  formatExecutionTimestamp,
+  resolveKibanaTimeZone,
+} from '../../../shared/ui/use_formatted_date';
 import { getRunMode } from '../../workflow_execution_detail/lib/get_run_mode';
 
 /** Fixed column widths for the execution-history table (panel must not scroll horizontally). */
 export const EXECUTION_HISTORY_COLUMN_WIDTHS = {
   status: '120px',
-  /** Fits `Today 10:25` / `Yesterday 22:04` / `Aug 17 14:03` without clipping. */
+  /** Fits `Yesterday 22:04` / `Aug 17 14:03` without clipping. */
   started: '120px',
   duration: '72px',
 } as const;
 
 const EM_DASH = '\u2014';
-
-const toValidDate = (value: Date | string | null | undefined): Date | null => {
-  if (value == null || value === '') {
-    return null;
-  }
-  const date = value instanceof Date ? value : new Date(value);
-  return Number.isNaN(date.getTime()) ? null : date;
-};
-
-/**
- * Compact absolute Started label with day word:
- * `Today 10:25`, `Yesterday 22:04`, or `Aug 17 14:03` for older runs.
- */
-export const formatCompressedStartedAt = (
-  value: Date | string | null | undefined,
-  now: Date = new Date(),
-  timeZone?: string
-): string | null => {
-  const date = toValidDate(value);
-  if (!date) {
-    return null;
-  }
-  const zone = timeZone && timeZone !== 'Browser' ? timeZone : moment.tz.guess();
-  const m = moment.tz(date, zone);
-  const today = moment.tz(now, zone);
-  const time = m.format('HH:mm');
-
-  if (m.isSame(today, 'day')) {
-    return i18n.translate('workflows.workflowExecutionList.started.today', {
-      defaultMessage: 'Today {time}',
-      values: { time },
-    });
-  }
-
-  if (m.isSame(today.clone().subtract(1, 'day'), 'day')) {
-    return i18n.translate('workflows.workflowExecutionList.started.yesterday', {
-      defaultMessage: 'Yesterday {time}',
-      values: { time },
-    });
-  }
-
-  return m.format('MMM D HH:mm');
-};
 
 const getStatusBadgeColor = (
   status: ExecutionStatus
@@ -149,20 +109,35 @@ const RunModeFlask = ({ isTestRun, stepId }: { isTestRun: boolean; stepId?: stri
         });
 
   return (
-    <EuiToolTip content={tooltip} position="top" display="block">
+    <EuiToolTip
+      content={tooltip}
+      position="top"
+      anchorProps={{
+        css: css`
+          display: inline-flex;
+          align-items: center;
+          line-height: 0;
+        `,
+      }}
+    >
       <span
         tabIndex={0}
         aria-label={tooltip}
         css={css`
-          display: flex;
+          display: inline-flex;
           align-items: center;
-          justify-content: center;
-          height: 100%;
           line-height: 0;
         `}
         data-test-subj="workflowExecutionListItemRunModeIcon"
       >
-        <EuiIcon type="flask" color="warning" aria-hidden={true} />
+        <EuiIcon
+          type="flask"
+          color="subdued"
+          aria-hidden={true}
+          css={css`
+            display: block;
+          `}
+        />
       </span>
     </EuiToolTip>
   );
@@ -173,11 +148,8 @@ export interface ExecutionHistoryColumnContext {
   showExecutor: boolean;
   executedByUserProfiles: Map<string, UserProfileWithAvatar>;
   showUnresolvedExecutors: boolean;
-  /** Full absolute timestamp including zone for row tooltips. */
-  getFormattedDateTimeWithZone: (date: Date) => string | undefined;
-  /** Resolved IANA zone label for the Started column header tooltip. */
-  timeZoneLabel: string;
-  timeZone?: string;
+  /** Kibana `dateFormat:tz` (`Browser` or an IANA zone). */
+  timeZoneSetting?: string;
 }
 
 const getExecutedByDisplayName = (
@@ -197,7 +169,8 @@ const getExecutedByDisplayName = (
 export const getExecutionHistoryColumns = (
   ctx: ExecutionHistoryColumnContext
 ): Array<EuiBasicTableColumn<WorkflowExecutionListItemDto>> => {
-  const { euiTheme, getFormattedDateTimeWithZone, timeZone, timeZoneLabel } = ctx;
+  const { euiTheme, timeZoneSetting } = ctx;
+  const timeZoneLabel = resolveKibanaTimeZone(timeZoneSetting);
 
   const startedHeaderTooltip = i18n.translate(
     'workflows.workflowExecutionList.column.started.timezoneTooltip',
@@ -226,14 +199,7 @@ export const getExecutionHistoryColumns = (
           <EuiFlexItem grow={false}>
             <StatusPill status={execution.status} />
           </EuiFlexItem>
-          <EuiFlexItem
-            grow={false}
-            css={css`
-              display: flex;
-              align-items: center;
-              align-self: stretch;
-            `}
-          >
+          <EuiFlexItem grow={false}>
             <RunModeFlask isTestRun={execution.isTestRun} stepId={execution.stepId} />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -254,9 +220,8 @@ export const getExecutionHistoryColumns = (
       // We render a compact absolute label; avoid EUI's cell ellipsis clipping "Yesterday …".
       truncateText: false,
       render: (startedAt: string | null) => {
-        const date = toValidDate(startedAt);
-        const compressed = formatCompressedStartedAt(startedAt, undefined, timeZone);
-        const full = date ? getFormattedDateTimeWithZone(date) : undefined;
+        const compressed = formatExecutionTimestamp(startedAt, 'started', { timeZoneSetting });
+        const full = formatExecutionTimestamp(startedAt, 'tooltip', { timeZoneSetting });
 
         const content = (
           <EuiText

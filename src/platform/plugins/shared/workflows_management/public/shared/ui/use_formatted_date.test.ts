@@ -7,12 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import moment from 'moment-timezone';
-import {
-  formatAbsoluteTimestampWithZone,
-  formatTimeZoneLabel,
-  resolveKibanaTimeZone,
-} from './use_formatted_date';
+import { formatExecutionTimestamp, resolveKibanaTimeZone } from './use_formatted_date';
 
 describe('resolveKibanaTimeZone', () => {
   it('resolves Browser to a guessed IANA zone', () => {
@@ -27,36 +22,84 @@ describe('resolveKibanaTimeZone', () => {
   });
 });
 
-describe('formatTimeZoneLabel', () => {
-  it('includes zone name and UTC offset', () => {
-    const label = formatTimeZoneLabel('UTC', new Date('2026-08-24T12:00:00Z'));
-    expect(label).toContain('UTC');
-    expect(label).toMatch(/UTC[+-]/);
-  });
-});
+describe('formatExecutionTimestamp', () => {
+  const now = new Date('2026-08-24T18:00:00Z');
 
-describe('formatAbsoluteTimestampWithZone', () => {
-  it('formats with the configured zone and includes the zone label', () => {
-    const date = new Date('2026-08-24T16:35:00Z');
-    const formatted = formatAbsoluteTimestampWithZone(date, {
-      dateFormat: 'MMM D, YYYY @ HH:mm:ss.SSS',
-      timeZoneSetting: 'UTC',
+  describe('tooltip', () => {
+    it('formats UTC with milliseconds and a UTC designator', () => {
+      expect(
+        formatExecutionTimestamp('2026-08-24T18:26:58.239Z', 'tooltip', {
+          timeZoneSetting: 'UTC',
+        })
+      ).toBe('Aug 24, 2026 @ 18:26:58.239 UTC');
     });
-    expect(formatted).toContain(moment.tz(date, 'UTC').format('MMM D, YYYY @ HH:mm:ss.SSS'));
-    expect(formatted).toContain('UTC');
+
+    it('uses the short zone abbreviation, not the IANA id or a parenthesized offset', () => {
+      const formatted = formatExecutionTimestamp('2026-08-24T18:26:58.239Z', 'tooltip', {
+        timeZoneSetting: 'America/Los_Angeles',
+      });
+      expect(formatted).toBe('Aug 24, 2026 @ 11:26:58.239 PDT');
+      expect(formatted).not.toContain('America/Los_Angeles');
+      expect(formatted).not.toContain('(');
+    });
+
+    it('falls back to GMT±offset when the zone has no abbreviation', () => {
+      const formatted = formatExecutionTimestamp('2026-08-24T18:26:58.239Z', 'tooltip', {
+        timeZoneSetting: 'Asia/Kathmandu',
+      });
+      expect(formatted).toBe('Aug 25, 2026 @ 00:11:58.239 GMT+5:45');
+    });
+
+    it('returns null for empty values', () => {
+      expect(formatExecutionTimestamp(null, 'tooltip', { timeZoneSetting: 'UTC' })).toBeNull();
+      expect(formatExecutionTimestamp('', 'tooltip', { timeZoneSetting: 'UTC' })).toBeNull();
+    });
   });
 
-  it('shifts values when the zone is not UTC', () => {
-    const date = new Date('2026-08-24T16:35:00Z');
-    const utc = formatAbsoluteTimestampWithZone(date, {
-      dateFormat: 'HH:mm',
-      timeZoneSetting: 'UTC',
+  describe('started', () => {
+    it('formats today as time only', () => {
+      expect(
+        formatExecutionTimestamp('2026-08-24T16:35:00Z', 'started', {
+          timeZoneSetting: 'UTC',
+          now,
+        })
+      ).toBe('16:35');
     });
-    const la = formatAbsoluteTimestampWithZone(date, {
-      dateFormat: 'HH:mm',
-      timeZoneSetting: 'America/Los_Angeles',
+
+    it('formats yesterday with the day word', () => {
+      expect(
+        formatExecutionTimestamp('2026-08-23T22:04:00Z', 'started', {
+          timeZoneSetting: 'UTC',
+          now,
+        })
+      ).toBe('Yesterday 22:04');
     });
-    expect(utc).not.toEqual(la);
-    expect(la).toContain('America/Los_Angeles');
+
+    it('formats older days as short date + time', () => {
+      expect(
+        formatExecutionTimestamp('2026-08-17T14:03:00Z', 'started', {
+          timeZoneSetting: 'UTC',
+          now,
+        })
+      ).toBe('Aug 17 14:03');
+    });
+  });
+
+  describe('header', () => {
+    it('uses the same family without milliseconds or a zone', () => {
+      expect(
+        formatExecutionTimestamp('2026-08-24T18:26:58.239Z', 'header', {
+          timeZoneSetting: 'UTC',
+        })
+      ).toBe('Aug 24, 2026 @ 18:26:58');
+    });
+
+    it('does not put @ before the year', () => {
+      const formatted = formatExecutionTimestamp('2026-08-18T12:19:14.000Z', 'header', {
+        timeZoneSetting: 'UTC',
+      });
+      expect(formatted).toBe('Aug 18, 2026 @ 12:19:14');
+      expect(formatted).not.toMatch(/@ \d{4}/);
+    });
   });
 });

@@ -52,16 +52,19 @@ export const WorkflowExecutionListFlyout = ({
       data-test-subj="workflowExecutionListFlyout"
       aria-hidden={isHidden}
     >
-      <EuiFlyoutHeader>
+      <EuiFlyoutHeader css={{ padding: 0 }}>
         <EuiFlexGroup
           justifyContent="flexEnd"
           alignItems="center"
           gutterSize="none"
           responsive={false}
           css={{
-            height: '36px',
-            padding: '0 8px',
-            borderBottom: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
+            // AppHeader standard row: 16px padding + 32px size="s" control.
+            boxSizing: 'border-box',
+            minHeight: 64,
+            paddingBlock: euiTheme.size.base,
+            paddingInline: euiTheme.size.base,
+            borderBottom: euiTheme.border.thin,
           }}
         >
           <EuiButtonIcon
@@ -71,6 +74,7 @@ export const WorkflowExecutionListFlyout = ({
             })}
             color="text"
             size="s"
+            iconSize="m"
             onClick={onClose}
           />
         </EuiFlexGroup>

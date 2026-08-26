@@ -9,10 +9,9 @@
 
 /**
  * @deprecated Card rows were replaced by {@link getExecutionHistoryColumns}.
- * Kept as a re-export surface for compressed-date helpers used in tests/stories.
+ * Kept as a re-export surface for tests/stories.
  */
 export {
   EXECUTION_HISTORY_COLUMN_WIDTHS,
-  formatCompressedStartedAt,
   getExecutionHistoryColumns,
 } from './workflow_execution_list_columns';

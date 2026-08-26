@@ -36,7 +36,6 @@ import {
 import { WorkflowExecutionListFooter } from './workflow_execution_list_footer';
 import type { ExecutionListFiltersQueryParams } from './workflow_execution_list_stateful';
 import { useKibana } from '../../../hooks/use_kibana';
-import { useGetFormattedDateTimeWithZone, formatTimeZoneLabel } from '../../../shared/ui/use_formatted_date';
 
 export interface WorkflowExecutionListProps {
   executions: WorkflowExecutionListDto | null;
@@ -115,9 +114,7 @@ export const WorkflowExecutionList = ({
   const { cloud, settings } = useKibana().services;
   const showUnresolvedExecutors = !cloud?.isServerlessEnabled;
   const scrollableContentRef = useRef<HTMLDivElement>(null);
-  const getFormattedDateTimeWithZone = useGetFormattedDateTimeWithZone();
   const timeZoneSetting: string | undefined = settings.client.get('dateFormat:tz');
-  const timeZoneLabel = formatTimeZoneLabel(timeZoneSetting);
 
   const executedByValuesToResolve = useMemo(() => {
     const uniqueUsers = new Set(filters.executedBy);
@@ -173,19 +170,9 @@ export const WorkflowExecutionList = ({
         showExecutor,
         executedByUserProfiles,
         showUnresolvedExecutors,
-        getFormattedDateTimeWithZone,
-        timeZoneLabel,
-        timeZone: timeZoneSetting,
+        timeZoneSetting,
       }),
-    [
-      euiTheme,
-      showExecutor,
-      executedByUserProfiles,
-      showUnresolvedExecutors,
-      getFormattedDateTimeWithZone,
-      timeZoneLabel,
-      timeZoneSetting,
-    ]
+    [euiTheme, showExecutor, executedByUserProfiles, showUnresolvedExecutors, timeZoneSetting]
   );
 
   const handleRowClick = useCallback(
@@ -423,6 +410,8 @@ const componentStyles = {
       '& [data-test-subj="workflowExecutionListTable"] .euiTableCellContent': {
         maxWidth: '100%',
         overflow: 'hidden',
+        // UserAvatar `s` (24px) is EUI's smallest; extra cell padding gives it room.
+        paddingBlock: euiTheme.size.base,
       },
       '& [data-test-subj="workflowExecutionListTable"] .euiTableCellContent__text': {
         minWidth: 0,

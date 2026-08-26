@@ -19,8 +19,20 @@ import {
 } from './step_execution_tree_row';
 
 jest.mock('../../../shared/ui/step_icons/step_icon', () => ({
-  StepIcon: ({ stepType }: { stepType: string }) => (
-    <span data-test-subj="mock-step-icon" data-step-type={stepType} />
+  StepIcon: ({
+    stepType,
+    color,
+    iconColor,
+  }: {
+    stepType: string;
+    color?: string;
+    iconColor?: string;
+  }) => (
+    <span
+      data-test-subj="mock-step-icon"
+      data-step-type={stepType}
+      data-icon-color={color ?? iconColor ?? ''}
+    />
   ),
 }));
 
@@ -29,6 +41,14 @@ jest.mock('../../../shared/ui/token_usage_badge/token_usage_badge', () => ({
     <span data-test-subj="workflowStepTreeTokenUsage">{usage.totalTokens} tokens</span>
   ),
 }));
+
+jest.mock('@kbn/workflows-ui', () => {
+  const actual = jest.requireActual('@kbn/workflows-ui');
+  return {
+    ...actual,
+    getStepIconType: jest.fn((type: string) => actual.getStepIconType(type)),
+  };
+});
 
 const renderRow = (props: Partial<StepExecutionTreeRowProps> = {}) => {
   const onSelect = jest.fn();
@@ -87,7 +107,7 @@ describe('StepExecutionTreeRow', () => {
     expect(onToggleExpand).toHaveBeenCalled();
   });
 
-  it('renders metadata in fixed order: status, tokens, duration — omitting absent items', () => {
+  it('renders metadata in fixed order: tokens, duration — omitting absent items', () => {
     renderRow({
       status: ExecutionStatus.FAILED,
       executionTimeMs: 299,
@@ -97,11 +117,26 @@ describe('StepExecutionTreeRow', () => {
     const texts = Array.from(meta.querySelectorAll('[data-test-subj]')).map((el) =>
       el.getAttribute('data-test-subj')
     );
-    expect(texts).toEqual([
-      'workflowStepTreeStatusIcon',
-      'workflowStepTreeTokenUsage',
-      'workflowStepTreeDuration',
-    ]);
+    expect(texts).toEqual(['workflowStepTreeTokenUsage', 'workflowStepTreeDuration']);
+  });
+
+  it('places the in-progress status icon after the type icon, never in a leading slot', () => {
+    renderRow({
+      status: ExecutionStatus.RUNNING,
+      isExpandable: true,
+      onToggleExpand: jest.fn(),
+    });
+    const inner = screen.getByTestId('workflowStepTreeRowInner');
+    const items = Array.from(inner.children) as HTMLElement[];
+    expect(items[0]).toHaveAttribute('data-test-subj', 'workflowStepTreeChevronSlot');
+    expect(items[1]).toHaveAttribute('data-test-subj', 'workflowStepTreeIconSlot');
+    expect(screen.queryByTestId('workflowStepTreeStatusSlot')).toBe(items[items.length - 1]);
+    expect(
+      screen
+        .getByTestId('workflowStepTreeMeta')
+        .querySelector('[data-test-subj="workflowStepTreeStatusIcon"]')
+    ).toBeNull();
+    expect(screen.getByTestId('workflowStepTreeStatusIcon')).toBeInTheDocument();
   });
 
   it('omits duration without leaving a status/token gap when duration is absent', () => {
@@ -114,7 +149,7 @@ describe('StepExecutionTreeRow', () => {
     const texts = Array.from(meta.querySelectorAll('[data-test-subj]')).map((el) =>
       el.getAttribute('data-test-subj')
     );
-    expect(texts).toEqual(['workflowStepTreeStatusIcon', 'workflowStepTreeTokenUsage']);
+    expect(texts).toEqual(['workflowStepTreeTokenUsage']);
   });
 
   it('does not render a token badge when usage total is zero', () => {
@@ -221,6 +256,22 @@ describe('StepExecutionTreeRow', () => {
     expect(screen.queryByTestId('workflowStepTreeStatusIcon')).not.toBeInTheDocument();
   });
 
+  it('tints the step icon and omits the error glyph on failed steps', () => {
+    renderRow({ status: ExecutionStatus.FAILED });
+    expect(screen.queryByTestId('workflowStepTreeStatusIcon')).not.toBeInTheDocument();
+    expect(screen.getByTestId('mock-step-icon').getAttribute('data-icon-color')).toBeTruthy();
+  });
+
+  it('tints retry-attempt icons instead of showing an error glyph', () => {
+    renderRow({
+      stepId: 'Attempt #1',
+      isRetryAttempt: true,
+      status: ExecutionStatus.FAILED,
+    });
+    expect(screen.queryByTestId('workflowStepTreeStatusIcon')).not.toBeInTheDocument();
+    expect(screen.getByTestId('workflowStepTreeRetryAttemptIcon')).toBeInTheDocument();
+  });
+
   it('renders no metadata cluster for branch-label rows', () => {
     renderRow({
       isBranchLabel: true,
@@ -277,38 +328,44 @@ describe('StepExecutionTreeRow', () => {
     expect(row).toHaveAttribute('data-danger-fill', 'true');
   });
 
-  it('switches status icon anchoring via statusPlacement', () => {
-    const { rerender } = renderRow({
-      status: ExecutionStatus.FAILED,
-      statusPlacement: 'inline',
+  it('renders a waiting step with exactly one trailing hourglass, the type icon, and a waiting-for-input annotation', () => {
+    const { container } = renderRow({
+      stepId: 'ask_analyst',
+      stepType: 'http',
+      status: ExecutionStatus.WAITING_FOR_INPUT,
+      executionTimeMs: null,
     });
-    expect(screen.getByTestId('workflowStepExecutionTreeRow')).toHaveAttribute(
-      'data-status-placement',
-      'inline'
+    const inner = screen.getByTestId('workflowStepTreeRowInner');
+    const items = Array.from(inner.children) as HTMLElement[];
+    expect(items[0]).toHaveAttribute('data-test-subj', 'workflowStepTreeChevronSlot');
+    expect(items[1]).toHaveAttribute('data-test-subj', 'workflowStepTreeIconSlot');
+    expect(screen.getByTestId('mock-step-icon')).toHaveAttribute('data-step-type', 'http');
+    expect(container.querySelectorAll('[data-euiicon-type="hourglass"]')).toHaveLength(1);
+    expect(screen.getByTestId('workflowStepTreeStatusSlot')).toBe(items[items.length - 1]);
+    expect(screen.getByTestId('workflowStepTreeIterationTag-waitingForInput')).toHaveTextContent(
+      '· waiting for input'
     );
-    const metaInline = screen.getByTestId('workflowStepTreeMeta');
-    expect(metaInline.querySelector('[data-test-subj="workflowStepTreeStatusIcon"]')).toBeTruthy();
+  });
 
-    rerender(
-      <I18nProvider>
-        <StepExecutionTreeRow
-          stepId="my_step"
-          stepType="console"
-          status={ExecutionStatus.FAILED}
-          executionTimeMs={10}
-          selected={false}
-          onSelect={jest.fn()}
-          statusPlacement="right"
-        />
-      </I18nProvider>
+  it('omits the trailing hourglass when the waitForInput type icon is already hourglass-shaped', () => {
+    const { getStepIconType } = jest.requireMock('@kbn/workflows-ui') as {
+      getStepIconType: jest.Mock;
+    };
+    getStepIconType.mockReturnValueOnce('hourglass');
+
+    const { container } = renderRow({
+      stepId: 'collect_input',
+      stepType: 'waitForInput',
+      status: ExecutionStatus.WAITING_FOR_INPUT,
+      executionTimeMs: null,
+    });
+
+    expect(screen.getByTestId('mock-step-icon')).toHaveAttribute('data-step-type', 'waitForInput');
+    expect(container.querySelectorAll('[data-euiicon-type="hourglass"]')).toHaveLength(0);
+    expect(screen.queryByTestId('workflowStepTreeStatusSlot')).not.toBeInTheDocument();
+    expect(screen.getByTestId('workflowStepTreeIterationTag-waitingForInput')).toHaveTextContent(
+      '· waiting for input'
     );
-    expect(screen.getByTestId('workflowStepExecutionTreeRow')).toHaveAttribute(
-      'data-status-placement',
-      'right'
-    );
-    const metaRight = screen.getByTestId('workflowStepTreeMeta');
-    expect(metaRight.querySelector('[data-test-subj="workflowStepTreeStatusIcon"]')).toBeNull();
-    expect(screen.getByTestId('workflowStepTreeStatusIcon')).toBeInTheDocument();
   });
 
   it('shows Not run in the duration slot for skipped steps', () => {

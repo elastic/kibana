@@ -991,7 +991,7 @@ export const StepExecutionOpenTree = ({
   onStepExecutionClick,
   isExecutionComplete = true,
   childrenOnly = false,
-  statusPlacement = 'inline',
+  statusPlacement = 'right',
   'data-test-subj': dataTestSubj,
 }: StepExecutionOpenTreeProps) => {
   const [expandedGapIds, setExpandedGapIds] = useState<Set<string>>(new Set());
@@ -1127,7 +1127,7 @@ export interface WorkflowStepExecutionTreeProps {
   autoExpandErrorForStepId?: string | null;
   /** One-shot arrival pulse on the error region for this step execution id. */
   errorArrivalPulseStepId?: string | null;
-  /** Status icon anchoring. Default inline-left after metadata. */
+  /** Status icon anchoring. Trailing after name/meta; never before the type icon. */
   statusPlacement?: StatusPlacement;
   /** Display name for Diagnose conversation titles. */
   workflowName?: string;
@@ -1145,7 +1145,7 @@ export const WorkflowStepExecutionTree = ({
   isLoadingChildExecutions,
   autoExpandErrorForStepId,
   errorArrivalPulseStepId,
-  statusPlacement = 'inline',
+  statusPlacement = 'right',
   workflowName,
   onBeforeDiagnose,
 }: WorkflowStepExecutionTreeProps) => {

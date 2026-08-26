@@ -222,7 +222,7 @@ export class WorkflowExecutionQueryService {
     const sort = params.sortField
       ? ([
           { [params.sortField]: { order: params.sortOrder ?? 'desc' } },
-          { _id: 'desc' },
+          { id: 'desc' },
         ] as estypes.Sort)
       : undefined;
 

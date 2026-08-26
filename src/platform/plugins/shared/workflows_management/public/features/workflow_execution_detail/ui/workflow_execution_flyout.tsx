@@ -8,79 +8,77 @@
  */
 
 import {
+  copyToClipboard,
   EuiBadge,
   EuiBasicTable,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiCodeBlock,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
   EuiCopy,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
-  EuiHorizontalRule,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiHorizontalRule,
   EuiIcon,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
   EuiLink,
   EuiLoadingSpinner,
   EuiPopover,
-  EuiToken,
   EuiTab,
   EuiTabs,
   EuiText,
   EuiTextTruncate,
   EuiTitle,
+  EuiToken,
   EuiToolTip,
-  copyToClipboard,
   useEuiTheme,
 } from '@elastic/eui';
-import type { EuiBasicTableColumn, Criteria } from '@elastic/eui';
+import type { Criteria, EuiBasicTableColumn } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
-import { getFailedStepPosition } from '../lib/get_failed_step_position';
-import { getRunMode } from '../lib/get_run_mode';
-import { isTokenUsageTableField } from '../lib/is_token_usage_table_field';
-import { normalizeStepAi } from '../lib/normalize_step_ai';
-import {
-  buildIterationPseudoStep,
-  isIterationPseudoStepId,
-} from '../lib/build_iteration_pseudo_step';
-import { useChildWorkflowExecutions } from '../model/use_child_workflow_executions';
-import { useStepExecution } from '../model/use_step_execution';
+import { AiStepSection } from './ai_step_section';
+import { ExecutionTakeActionSplitButton } from './execution_take_action_split_button';
+import { ForeachIterationsSection } from './foreach_iterations_section';
+import { StepDataValueCell } from './step_data_value_cell';
+import { StepDetailAccordionSection } from './step_detail_accordion_section';
 import {
   buildOverviewStepExecutionFromContext,
   buildTriggerStepExecutionFromContext,
 } from './workflow_pseudo_step_context';
+import { WorkflowStepExecutionTree } from './workflow_step_execution_tree';
+import {
+  useAvailableConnectors,
+  useFetchConnector,
+} from '../../../entities/connectors/model/use_available_connectors';
 import { useWorkflowExecutionPolling } from '../../../entities/workflows/model/use_workflow_execution_polling';
+import {
+  buildIterationPseudoStep,
+  isIterationPseudoStepId,
+} from '../lib/build_iteration_pseudo_step';
+import { getFailedStepPosition } from '../lib/get_failed_step_position';
+import { getRunMode } from '../lib/get_run_mode';
+import { isTokenUsageTableField } from '../lib/is_token_usage_table_field';
+import { normalizeStepAi } from '../lib/normalize_step_ai';
+import { useChildWorkflowExecutions } from '../model/use_child_workflow_executions';
+import { useStepExecution } from '../model/use_step_execution';
 import { useNavigateToExecution } from '../../../hooks/navigation/use_navigate_to_execution';
 import { useKibana } from '../../../hooks/use_kibana';
 import { formatDuration } from '../../../shared/lib/format_duration';
 import { getStatusLabel } from '../../../shared/translations/status_translations';
 import { FormattedRelativeEnhanced } from '../../../shared/ui/formatted_relative_enhanced/formatted_relative_enhanced';
-import {
-  formatAbsoluteTimestampWithZone,
-} from '../../../shared/ui/use_formatted_date';
+import { formatExecutionTimestamp } from '../../../shared/ui/use_formatted_date';
 import { getExecutionStatusIcon } from '../../../shared/ui/status_badge';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
 import { TokenUsageBreakdown } from '../../../shared/ui/token_usage_badge/token_usage_breakdown';
-import { AiStepSection } from './ai_step_section';
-import { ExecutionTakeActionSplitButton } from './execution_take_action_split_button';
-import { ForeachIterationsSection } from './foreach_iterations_section';
-import { StepDetailAccordionSection } from './step_detail_accordion_section';
-import { StepDataValueCell } from './step_data_value_cell';
-import { WorkflowStepExecutionTree } from './workflow_step_execution_tree';
 import { findStepConnectorId } from '../lib/find_step_connector_id';
-import {
-  useAvailableConnectors,
-  useFetchConnector,
-} from '../../../entities/connectors/model/use_available_connectors';
 
 export interface WorkflowExecutionFlyoutProps {
   executionId: string;
@@ -123,7 +121,11 @@ const FIELD_COLUMN_MIN_PX = 100;
 const FIELD_COLUMN_MAX_PX = 160;
 
 type FieldType = 'string' | 'number' | 'boolean' | 'array' | 'null';
-type StepDataTableRow = { field: string; value: string; fieldType: FieldType };
+interface StepDataTableRow {
+  field: string;
+  value: string;
+  fieldType: FieldType;
+}
 
 const fieldTypeToToken: Record<FieldType, string> = {
   string: 'tokenString',
@@ -145,11 +147,8 @@ const flattenToRows = (
     if (val !== null && typeof val === 'object' && !Array.isArray(val)) {
       return flattenToRows(val, fullKey);
     }
-    const fieldType: FieldType = val === null
-      ? 'null'
-      : Array.isArray(val)
-      ? 'array'
-      : (typeof val as FieldType);
+    const fieldType: FieldType =
+      val === null ? 'null' : Array.isArray(val) ? 'array' : (typeof val as FieldType);
     const display =
       val === null
         ? 'null'
@@ -167,7 +166,10 @@ const filterTokenUsageFromTableRows = <T extends { field: string }>(rows: T[]): 
   rows.filter((row) => !isTokenUsageTableField(row.field));
 
 const isTableable = (v: unknown): boolean =>
-  v !== null && v !== undefined && typeof v === 'object' && !Array.isArray(v) &&
+  v !== null &&
+  v !== undefined &&
+  typeof v === 'object' &&
+  !Array.isArray(v) &&
   Object.keys(v as object).length > 0;
 
 const STEP_TEST_NAME_MAX_LEN = 24;
@@ -187,10 +189,7 @@ const StepDataSection = ({ label, data }: { label: string; data: unknown }) => {
   const hasTable = isTableable(data);
   const effectiveView = hasTable ? view : 'code';
 
-  const rows = useMemo(
-    () => filterTokenUsageFromTableRows(flattenToRows(data)),
-    [data]
-  );
+  const rows = useMemo(() => filterTokenUsageFromTableRows(flattenToRows(data)), [data]);
 
   const filteredRows = useMemo(() => {
     if (!searchTerm) return rows;
@@ -378,10 +377,9 @@ const StepDataSection = ({ label, data }: { label: string; data: unknown }) => {
                 'workflows.executionFlyout.stepDetail.searchPlaceholder',
                 { defaultMessage: 'Search fields and values' }
               )}
-              aria-label={i18n.translate(
-                'workflows.executionFlyout.stepDetail.searchAriaLabel',
-                { defaultMessage: 'Search fields and values' }
-              )}
+              aria-label={i18n.translate('workflows.executionFlyout.stepDetail.searchAriaLabel', {
+                defaultMessage: 'Search fields and values',
+              })}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               data-test-subj="workflowExecutionStepDataSearch"
@@ -443,25 +441,10 @@ const StepDataSection = ({ label, data }: { label: string; data: unknown }) => {
   );
 };
 
-const formatExecutionDate = (
-  isoString: string,
-  options: { dateFormat: string; timeZoneSetting: string | undefined }
-): string | null => {
-  const date = new Date(isoString);
-  if (isNaN(date.getTime())) return null;
-  return formatAbsoluteTimestampWithZone(date, options);
-};
-
 export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
-  ({
-    executionId,
-    workflowName: workflowNameProp,
-    workflowTags: workflowTagsProp,
-    onClose,
-  }) => {
+  ({ executionId, workflowName: workflowNameProp, workflowTags: workflowTagsProp, onClose }) => {
     const { euiTheme } = useEuiTheme();
     const { application, notifications, settings } = useKibana().services;
-    const dateFormatSetting: string = settings.client.get('dateFormat');
     const timeZoneSetting: string | undefined = settings.client.get('dateFormat:tz');
     const [activeTab, setActiveTab] = useState<FlyoutTabId>('table');
     const [selectedStepExecutionId, setSelectedStepExecutionId] = useState<string | null>(null);
@@ -477,8 +460,7 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
       workflowExecution?.workflowDefinition?.name ||
       workflowExecution?.workflowId ||
       '';
-    const workflowTags =
-      workflowTagsProp ?? workflowExecution?.workflowDefinition?.tags ?? [];
+    const workflowTags = workflowTagsProp ?? workflowExecution?.workflowDefinition?.tags ?? [];
 
     const { href: executionHref } = useNavigateToExecution({
       workflowId: workflowExecution?.workflowId ?? '',
@@ -503,9 +485,7 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
         const node = document.querySelector(
           `[data-test-subj="workflowStepTreeNode"][data-step-execution-id="${stepExecutionId}"]`
         );
-        const errorRegion = node?.querySelector(
-          '[data-test-subj="workflowFailedStepErrorPanel"]'
-        );
+        const errorRegion = node?.querySelector('[data-test-subj="workflowFailedStepErrorPanel"]');
         (errorRegion ?? node)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }, 0);
     }, []);
@@ -530,13 +510,13 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
       return () => window.clearTimeout(timer);
     }, [errorArrivalPulseStepId]);
 
-    // Auto-select + scroll + pulse once per execution open (not on tab switches).
+    // Highlight the failed step in the tree once per execution open (not on tab switches).
+    // Do not open the step-detail sub-flyout — that is only for an explicit step click.
     useEffect(() => {
       if (!workflowExecution || !failedPosition) return;
       if (autoExpandedForExecutionIdRef.current === workflowExecution.id) return;
       autoExpandedForExecutionIdRef.current = workflowExecution.id;
       setActiveTab('table');
-      setSelectedStepExecutionId(failedPosition.step.id);
       setAutoExpandErrorForStepId(failedPosition.step.id);
       setErrorArrivalPulseStepId(failedPosition.step.id);
       scrollToFailedStep(failedPosition.step.id);
@@ -545,9 +525,7 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
     const handleShare = useCallback(() => {
       if (!workflowExecution?.workflowId) return;
       const absolute =
-        typeof window !== 'undefined'
-          ? `${window.location.origin}${executionHref}`
-          : executionHref;
+        typeof window !== 'undefined' ? `${window.location.origin}${executionHref}` : executionHref;
       copyToClipboard(absolute);
       notifications.toasts.addSuccess(i18nTexts.linkCopied, { toastLifeTimeMs: 2000 });
     }, [executionHref, notifications.toasts, workflowExecution?.workflowId]);
@@ -561,8 +539,7 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
     );
 
     const selectedLightStep = useMemo(
-      () =>
-        workflowExecution?.stepExecutions.find((s) => s.id === selectedStepExecutionId) ?? null,
+      () => workflowExecution?.stepExecutions.find((s) => s.id === selectedStepExecutionId) ?? null,
       [workflowExecution?.stepExecutions, selectedStepExecutionId]
     );
 
@@ -634,7 +611,7 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
 
     const { data: fullStepExecution, isLoading: isLoadingStepData } = useStepExecution(
       executionId,
-      isPseudoStep ? undefined : (selectedStepExecutionId ?? undefined),
+      isPseudoStep ? undefined : selectedStepExecutionId ?? undefined,
       selectedLightStep?.status
     );
     const { childExecutions, isLoading: isLoadingChildExecutions } =
@@ -644,12 +621,12 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
       () => (workflowExecution?.startedAt ? new Date(workflowExecution.startedAt) : null),
       [workflowExecution?.startedAt]
     );
-    const formattedDate = workflowExecution?.startedAt
-      ? formatExecutionDate(workflowExecution.startedAt, {
-          dateFormat: dateFormatSetting,
-          timeZoneSetting,
-        })
-      : null;
+    const formattedDate = formatExecutionTimestamp(workflowExecution?.startedAt, 'header', {
+      timeZoneSetting,
+    });
+    const formattedDateTooltip = formatExecutionTimestamp(workflowExecution?.startedAt, 'tooltip', {
+      timeZoneSetting,
+    });
     const formattedDuration = useMemo(
       () =>
         workflowExecution?.duration != null ? formatDuration(workflowExecution.duration) : null,
@@ -665,9 +642,7 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
     const isForeachOrWhileStep = activeStepType === 'foreach' || activeStepType === 'while';
     const hasStepError = !isPseudoStep && activeStepExecution?.error != null;
     /** Real foreach/while output only — never synthesize child step listings as Output. */
-    const stepOutputData = hasStepError
-      ? activeStepExecution?.error
-      : activeStepExecution?.output;
+    const stepOutputData = hasStepError ? activeStepExecution?.error : activeStepExecution?.output;
 
     const definitionConnectorId = useMemo(
       () =>
@@ -713,8 +688,7 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
       return defaultModel ? { ...stepAi, model: defaultModel } : stepAi;
     }, [fetchedConnector?.config, stepAi]);
 
-    const showRunModeBadge =
-      runModeInfo?.runMode === 'test' || runModeInfo?.runMode === 'stepTest';
+    const showRunModeBadge = runModeInfo?.runMode === 'test' || runModeInfo?.runMode === 'stepTest';
     const showTagsRow = showRunModeBadge || workflowTags.length > 0;
     const stepTestTargetName = runModeInfo?.stepTestTargetName ?? '';
 
@@ -724,9 +698,7 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
       const el = document.querySelector<HTMLElement>(`.${FLYOUT_CLASSNAME}`);
       if (!el) return;
       const totalWidth = Math.min(
-        selectedStepExecutionId
-          ? EXECUTION_PANEL_WIDTH + STEP_DETAIL_WIDTH
-          : EXECUTION_PANEL_WIDTH,
+        selectedStepExecutionId ? EXECUTION_PANEL_WIDTH + STEP_DETAIL_WIDTH : EXECUTION_PANEL_WIDTH,
         window.innerWidth * 0.9
       );
       el.style.width = `${totalWidth}px`;
@@ -745,7 +717,6 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
       >
         {/* Outer flex row — each column is a visually independent panel */}
         <div css={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
-
           {/* ── Step detail panel (independent header + scrollable body) ── */}
           {selectedStepExecutionId && (
             <div
@@ -761,66 +732,64 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                 overflow: 'hidden',
               }}
             >
-                <div
+              <div
+                css={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: euiTheme.size.s,
+                  flexShrink: 0,
+                  boxSizing: 'border-box',
+                  // 64px row + 1px border — matches the execution chrome (minHeight 64 + border).
+                  height: 65,
+                  paddingBlock: euiTheme.size.base,
+                  paddingInline: euiTheme.size.base,
+                  borderBottom: euiTheme.border.thin,
+                }}
+              >
+                {(selectedLightStep?.stepType ?? activeStepExecution?.stepType) && (
+                  <StepIcon
+                    stepType={selectedLightStep?.stepType ?? activeStepExecution?.stepType ?? ''}
+                    executionStatus={selectedLightStep?.status ?? activeStepExecution?.status}
+                    size="m"
+                    css={{ flexShrink: 0 }}
+                  />
+                )}
+                <span
                   css={{
                     flex: 1,
-                    overflowY: 'auto',
-                    overflowX: 'hidden',
-                    padding: '16px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: 0,
                     minWidth: 0,
+                    fontSize: '16px',
+                    fontWeight: 600,
+                    color: euiTheme.colors.title,
+                    lineHeight: 1.25,
                   }}
                 >
-                {/* Header row — clean, no separator line */}
-                <div
-                  css={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    flexShrink: 0,
-                    paddingBottom: euiTheme.size.m,
-                  }}
-                >
-                  {(selectedLightStep?.stepType ?? activeStepExecution?.stepType) && (
-                    <StepIcon
-                      stepType={selectedLightStep?.stepType ?? activeStepExecution?.stepType ?? ''}
-                      executionStatus={selectedLightStep?.status ?? activeStepExecution?.status}
-                      size="m"
-                      css={{ flexShrink: 0 }}
-                    />
-                  )}
-                  <span
-                    css={{
-                      flex: 1,
-                      fontSize: '16px',
-                      fontWeight: 600,
-                      color: euiTheme.colors.title,
-                      lineHeight: 1.25,
-                      wordBreak: 'break-all',
-                    }}
-                  >
-                    {stepName}
-                  </span>
-                  <EuiButtonIcon
-                    iconType="cross"
-                    aria-label={i18nTexts.close}
-                    color="text"
-                    size="s"
-                    onClick={() => setSelectedStepExecutionId(null)}
-                  />
-                </div>
-
-                <EuiHorizontalRule
-                  margin="none"
-                  css={{
-                    marginLeft: '-16px',
-                    marginRight: '-16px',
-                    width: 'calc(100% + 32px)',
-                  }}
+                  <EuiTextTruncate text={stepName} />
+                </span>
+                <EuiButtonIcon
+                  iconType="cross"
+                  aria-label={i18nTexts.close}
+                  color="text"
+                  size="s"
+                  iconSize="m"
+                  onClick={() => setSelectedStepExecutionId(null)}
                 />
+              </div>
 
+              <div
+                css={{
+                  flex: 1,
+                  overflowY: 'auto',
+                  overflowX: 'hidden',
+                  // No paddingTop — the first accordion already has header padding.
+                  paddingInline: euiTheme.size.base,
+                  paddingBottom: euiTheme.size.base,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 0,
+                  minWidth: 0,
+                }}
+              >
                 {isLoadingStepData && !isPseudoStep ? (
                   <EuiFlexGroup justifyContent="center">
                     <EuiFlexItem grow={false}>
@@ -848,17 +817,42 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                   <>
                     {activeStepExecution?.executionTimeMs != null &&
                       activeStepExecution.executionTimeMs > 0 && (
-                        <EuiText size="s" color="subdued" data-test-subj="iterationPseudoStepDuration">
-                          {formatDuration(activeStepExecution.executionTimeMs)}
-                        </EuiText>
+                        <div css={{ flexShrink: 0 }}>
+                          <div
+                            css={{
+                              paddingTop: euiTheme.size.m,
+                              paddingBottom: euiTheme.size.m,
+                            }}
+                          >
+                            <EuiText
+                              size="s"
+                              color="subdued"
+                              data-test-subj="iterationPseudoStepDuration"
+                            >
+                              {i18n.translate('workflows.executionFlyout.iteration.duration', {
+                                defaultMessage: 'Duration: {duration}',
+                                values: {
+                                  duration: formatDuration(activeStepExecution.executionTimeMs),
+                                },
+                              })}
+                            </EuiText>
+                          </div>
+                          <EuiHorizontalRule
+                            margin="none"
+                            css={{
+                              marginLeft: `-${euiTheme.size.base}`,
+                              marginRight: `-${euiTheme.size.base}`,
+                              width: `calc(100% + (${euiTheme.size.base} * 2))`,
+                            }}
+                          />
+                        </div>
                       )}
-                    {activeStepExecution?.usage &&
-                      activeStepExecution.usage.totalTokens > 0 && (
-                        <TokenUsageBreakdown
-                          usage={activeStepExecution.usage}
-                          data-test-subj="iterationPseudoStepTokenUsage"
-                        />
-                      )}
+                    {activeStepExecution?.usage && activeStepExecution.usage.totalTokens > 0 && (
+                      <TokenUsageBreakdown
+                        usage={activeStepExecution.usage}
+                        data-test-subj="iterationPseudoStepTokenUsage"
+                      />
+                    )}
                     <StepDataSection
                       key={`input-${selectedStepExecutionId}`}
                       label={i18n.translate('workflows.executionFlyout.stepDetail.input', {
@@ -934,16 +928,19 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
               overflow: 'hidden',
             }}
           >
-            <EuiFlyoutHeader>
+            <EuiFlyoutHeader css={{ padding: 0 }}>
               <EuiFlexGroup
                 justifyContent="spaceBetween"
                 alignItems="center"
-                gutterSize="none"
+                gutterSize="xs"
                 responsive={false}
                 css={{
-                  height: '36px',
-                  padding: '0 8px',
-                  borderBottom: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
+                  // AppHeader standard row: 16px padding + 32px size="s" control.
+                  boxSizing: 'border-box',
+                  minHeight: 64,
+                  paddingBlock: euiTheme.size.base,
+                  paddingInline: euiTheme.size.base,
+                  borderBottom: euiTheme.border.thin,
                 }}
               >
                 <EuiButtonEmpty
@@ -956,7 +953,7 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                   {i18nTexts.back}
                 </EuiButtonEmpty>
                 <EuiFlexGroup
-                  gutterSize="none"
+                  gutterSize="xs"
                   alignItems="center"
                   justifyContent="flexEnd"
                   responsive={false}
@@ -966,6 +963,7 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                     aria-label={i18nTexts.share}
                     color="text"
                     size="s"
+                    iconSize="m"
                     onClick={handleShare}
                     isDisabled={!workflowExecution?.workflowId}
                   />
@@ -974,6 +972,7 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                     aria-label={i18nTexts.close}
                     color="text"
                     size="s"
+                    iconSize="m"
                     onClick={onClose}
                   />
                 </EuiFlexGroup>
@@ -992,9 +991,21 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                     <h2 css={{ wordBreak: 'break-word' }}>{workflowName}</h2>
                   </EuiTitle>
                   {formattedDate && startedAt && (
-                    <EuiText size="xs" color="subdued" css={{ marginTop: '3px' }}>
-                      {formattedDate} (<FormattedRelativeEnhanced value={startedAt} />)
-                    </EuiText>
+                    <EuiToolTip content={formattedDateTooltip} position="top">
+                      <span tabIndex={0}>
+                        <EuiText
+                          size="xs"
+                          color="subdued"
+                          css={{ marginTop: '3px' }}
+                          data-test-subj="workflowExecutionFlyoutStartedAt"
+                        >
+                          {formattedDate}
+                          {' ('}
+                          <FormattedRelativeEnhanced value={startedAt} />
+                          {')'}
+                        </EuiText>
+                      </span>
+                    </EuiToolTip>
                   )}
                 </div>
 
@@ -1086,23 +1097,19 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                                   textDecoration: 'underline',
                                 }}
                               >
-                                {failedPosition.index != null && failedPosition.total != null
+                                {failedPosition.index != null
                                   ? i18n.translate(
                                       'workflows.executionFlyout.result.failedAtStep',
                                       {
-                                        defaultMessage: 'Failed at step {n} of {m}',
+                                        defaultMessage: 'Failed at step {n}',
                                         values: {
                                           n: failedPosition.index,
-                                          m: failedPosition.total,
                                         },
                                       }
                                     )
-                                  : i18n.translate(
-                                      'workflows.executionFlyout.result.failed',
-                                      {
-                                        defaultMessage: 'Failed',
-                                      }
-                                    )}
+                                  : i18n.translate('workflows.executionFlyout.result.failed', {
+                                      defaultMessage: 'Failed',
+                                    })}
                               </EuiLink>
                             ) : (
                               <EuiText size="s" css={{ fontWeight: 600, fontSize: '12px' }}>
@@ -1146,7 +1153,7 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                           responsive={false}
                         >
                           <EuiFlexItem grow={false}>
-                            <EuiIcon type="clock" color="subdued" size="m" />
+                            <EuiIcon type="clock" color="subdued" size="m" aria-hidden={true} />
                           </EuiFlexItem>
                           <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
                             <EuiText size="s" css={{ fontWeight: 600, fontSize: '12px' }}>
@@ -1258,10 +1265,7 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                     >
                       {i18nTexts.tableTab}
                     </EuiTab>
-                    <EuiTab
-                      isSelected={activeTab === 'json'}
-                      onClick={() => setActiveTab('json')}
-                    >
+                    <EuiTab isSelected={activeTab === 'json'} onClick={() => setActiveTab('json')}>
                       {i18nTexts.jsonTab}
                     </EuiTab>
                   </EuiTabs>
@@ -1318,7 +1322,6 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
               </div>
             </EuiFlyoutFooter>
           </div>
-
         </div>
       </EuiFlyout>
     );

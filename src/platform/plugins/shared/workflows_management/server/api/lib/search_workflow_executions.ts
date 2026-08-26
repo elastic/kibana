@@ -59,7 +59,7 @@ export const WORKFLOW_EXECUTION_LIST_SOURCE_INCLUDES = [
   'workflowDefinition.tags',
 ] as const;
 
-const DEFAULT_SORT: Sort = [{ createdAt: 'desc' }, { _id: 'desc' }];
+const DEFAULT_SORT: Sort = [{ createdAt: 'desc' }, { id: 'desc' }];
 
 export const searchWorkflowExecutions = async ({
   esClient,

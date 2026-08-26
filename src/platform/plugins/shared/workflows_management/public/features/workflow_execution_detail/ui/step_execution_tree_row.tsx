@@ -23,6 +23,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { SerializedError, WorkflowTokenUsage } from '@kbn/workflows';
 import { ExecutionStatus, isDangerousStatus } from '@kbn/workflows';
+import { getStepIconType } from '@kbn/workflows-ui';
 import { FailedStepErrorPanel } from './failed_step_error_panel';
 import { TreeStateTag, type TreeStateTagKind } from './tree_state_tag';
 import { formatDuration } from '../../../shared/lib/format_duration';
@@ -130,8 +131,10 @@ export interface StepExecutionTreeRowProps {
   /** One-shot arrival pulse when navigating to this failure (header link / flyout open). */
   arrivalPulse?: boolean;
   /**
-   * Where the non-success status icon anchors. Default `inline` (after metadata).
-   * `right` keeps everything else inline-left and only pushes the status icon.
+   * Where the in-progress status icon (spinner / hourglass) anchors. Always
+   * trailing (after name/meta) — the chevron gutter is the only element before
+   * the step-type icon. Failed steps tint the step icon and label instead of
+   * showing a separate error glyph.
    */
   statusPlacement?: StatusPlacement;
   /** Show danger status when an ancestor aggregates a failed descendant. */
@@ -143,16 +146,9 @@ const notRunLabel = i18n.translate('workflowsManagement.stepExecutionTreeRow.not
   defaultMessage: 'Not run',
 });
 
-const shouldShowStatusIcon = (
-  status: ExecutionStatus | undefined,
-  showAggregateDanger: boolean
-): boolean => {
-  if (showAggregateDanger) return true;
+const shouldShowStatusIcon = (status: ExecutionStatus | undefined): boolean => {
   if (!status) return false;
-  if (status === ExecutionStatus.COMPLETED || status === ExecutionStatus.SKIPPED) return false;
-  if (status === ExecutionStatus.PENDING) return false;
   return (
-    isDangerousStatus(status) ||
     status === ExecutionStatus.RUNNING ||
     status === ExecutionStatus.WAITING ||
     status === ExecutionStatus.WAITING_FOR_INPUT ||
@@ -160,27 +156,8 @@ const shouldShowStatusIcon = (
   );
 };
 
-const StatusIcon = ({
-  status,
-  showAggregateDanger,
-}: {
-  status?: ExecutionStatus;
-  showAggregateDanger: boolean;
-}) => {
+const StatusIcon = ({ status }: { status?: ExecutionStatus }) => {
   const { euiTheme } = useEuiTheme();
-  if (showAggregateDanger && (!status || !isDangerousStatus(status))) {
-    return (
-      <EuiIcon
-        type="error"
-        color={euiTheme.colors.danger}
-        size="s"
-        data-test-subj="workflowStepTreeStatusIcon"
-        aria-label={i18n.translate('workflowsManagement.stepExecutionTreeRow.descendantFailed', {
-          defaultMessage: 'Contains a failed step',
-        })}
-      />
-    );
-  }
   if (!status) return null;
   if (status === ExecutionStatus.RUNNING) {
     return <EuiLoadingSpinner size="s" data-test-subj="workflowStepTreeStatusIcon" />;
@@ -193,8 +170,9 @@ const StatusIcon = ({
 };
 
 /**
- * Single open-tree row: chevron gutter, step icon, name, then inline-left metadata.
- * Shared for steps, parents, branch labels, and the trigger row.
+ * Single open-tree row: chevron gutter, status (when inline), step icon, name,
+ * then inline-left metadata. Shared for steps, parents, branch labels, and the
+ * trigger row.
  */
 export const StepExecutionTreeRow = React.memo<StepExecutionTreeRowProps>(
   ({
@@ -235,7 +213,7 @@ export const StepExecutionTreeRow = React.memo<StepExecutionTreeRowProps>(
     errorPanelMessageOverride,
     showDangerSelectionBorder = false,
     arrivalPulse = false,
-    statusPlacement = 'inline',
+    statusPlacement = 'right',
     showAggregateDanger = false,
     'data-test-subj': dataTestSubj = 'workflowStepExecutionTreeRow',
   }) => {
@@ -253,8 +231,18 @@ export const StepExecutionTreeRow = React.memo<StepExecutionTreeRowProps>(
     const showNotRun = isInactive && !isTrigger && !isBranchLabel;
     const isInteractive = forceInteractive ?? (!isSkeleton && !isBranchLabel && !isRetryParent);
     const allowHover = isInteractive && !showNotRun;
+    const tintDanger = statusIsDangerous || showAggregateDanger || hasFailedPin;
+    const typeIconIsHourglass = getStepIconType(stepType || stepId) === 'hourglass';
+    const isWaitingStatus =
+      status === ExecutionStatus.WAITING ||
+      status === ExecutionStatus.WAITING_FOR_INPUT ||
+      status === ExecutionStatus.WAITING_FOR_CHILD;
+    // Trailing hourglass only — never a leading slot. Skip it when the type
+    // icon is already hourglass-shaped (duplicate glyph).
     const showStatus =
-      !isBranchLabel && (hasFailedPin || shouldShowStatusIcon(status, showAggregateDanger));
+      !isBranchLabel &&
+      shouldShowStatusIcon(status) &&
+      !(isWaitingStatus && typeIconIsHourglass);
 
     const hoverBg = euiTheme.colors.backgroundBaseInteractiveHover;
     const selectBg = euiTheme.colors.backgroundBaseInteractiveSelect;
@@ -270,19 +258,19 @@ export const StepExecutionTreeRow = React.memo<StepExecutionTreeRowProps>(
       values: { expanded: isExpanded, stepName: stepId },
     });
 
-    // Dedupe while preserving order: pin kinds first, then extra state tags (e.g. final).
-    const resolvedStateTags = [...iterationPinKinds, ...stateTags].filter(
+    // Dedupe while preserving order: pin kinds, waiting annotation, then extra tags.
+    const waitingTags: TreeStateTagKind[] =
+      status === ExecutionStatus.WAITING_FOR_INPUT ? ['waitingForInput'] : [];
+    const resolvedStateTags = [...iterationPinKinds, ...waitingTags, ...stateTags].filter(
       (kind, index, all): kind is TreeStateTagKind => all.indexOf(kind) === index
     );
 
     const showErrorPanel = showDangerFill && Boolean(error) && Boolean(onViewFailedStepInput);
 
     const statusNode = showStatus ? (
-      <StatusIcon
-        status={hasFailedPin && !status ? ExecutionStatus.FAILED : status}
-        showAggregateDanger={showAggregateDanger && !isDangerous}
-      />
+      <StatusIcon status={status} />
     ) : null;
+    const dangerIconColor = tintDanger ? euiTheme.colors.danger : undefined;
 
     const durationNode = (() => {
       if (isBranchLabel || isTrigger) return null;
@@ -367,9 +355,6 @@ export const StepExecutionTreeRow = React.memo<StepExecutionTreeRowProps>(
         data-test-subj="workflowStepTreeMeta"
       >
         {attemptsBadge && <EuiFlexItem grow={false}>{attemptsBadge}</EuiFlexItem>}
-        {statusPlacement === 'inline' && statusNode && (
-          <EuiFlexItem grow={false}>{statusNode}</EuiFlexItem>
-        )}
         {tokenNode && <EuiFlexItem grow={false}>{tokenNode}</EuiFlexItem>}
         {durationNode && <EuiFlexItem grow={false}>{durationNode}</EuiFlexItem>}
       </EuiFlexGroup>
@@ -501,7 +486,6 @@ export const StepExecutionTreeRow = React.memo<StepExecutionTreeRowProps>(
               )}
             </EuiFlexItem>
           ) : null}
-
           <EuiFlexItem
             grow={false}
             css={css`
@@ -523,7 +507,7 @@ export const StepExecutionTreeRow = React.memo<StepExecutionTreeRowProps>(
               <EuiIcon
                 type="refresh"
                 size="m"
-                color="subdued"
+                color={tintDanger ? euiTheme.colors.danger : 'subdued'}
                 aria-hidden={true}
                 data-test-subj="workflowStepTreeRetryAttemptIcon"
               />
@@ -532,12 +516,16 @@ export const StepExecutionTreeRow = React.memo<StepExecutionTreeRowProps>(
                 <StepIcon
                   stepType={stepType}
                   executionStatus={isDangerous ? ExecutionStatus.FAILED : status ?? null}
+                  color={dangerIconColor}
+                  iconColor={dangerIconColor}
                 />
               </span>
             ) : (
               <StepIcon
                 stepType={stepType || stepId}
                 executionStatus={isTrigger ? null : status ?? null}
+                color={dangerIconColor}
+                iconColor={dangerIconColor}
               />
             )}
           </EuiFlexItem>
@@ -567,7 +555,7 @@ export const StepExecutionTreeRow = React.memo<StepExecutionTreeRowProps>(
                     font-weight: ${isExpandable || hasFailedPin ? 500 : 400};
                     color: ${selected
                       ? euiTheme.colors.textPrimary
-                      : isDangerous
+                      : tintDanger
                       ? euiTheme.colors.danger
                       : isInactive
                       ? euiTheme.colors.textDisabled
@@ -630,7 +618,7 @@ export const StepExecutionTreeRow = React.memo<StepExecutionTreeRowProps>(
             </EuiFlexItem>
           )}
 
-          {statusPlacement === 'right' && statusNode && (
+          {statusNode && (
             <EuiFlexItem
               grow={false}
               css={css`
@@ -639,6 +627,7 @@ export const StepExecutionTreeRow = React.memo<StepExecutionTreeRowProps>(
                 align-items: center;
                 min-width: ${euiTheme.size.l};
               `}
+              data-test-subj="workflowStepTreeStatusSlot"
             >
               {statusNode}
             </EuiFlexItem>
