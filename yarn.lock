@@ -455,12 +455,12 @@
   resolved "https://registry.yarnpkg.com/@aws/lambda-invoke-store/-/lambda-invoke-store-0.3.0.tgz#708802d987f8e17bdf4af4de1031660ce1cdd65f"
   integrity sha512-sl4Bm6yiMNYrZKkqqDFWN0UfnWhlS8ivKxrYl+6t0gCLrqr8y3B2IqZZbFRkfaVVp7C/baApyh71P+LeE1A2sQ==
 
-"@axe-core/playwright@4.12.1":
-  version "4.12.1"
-  resolved "https://registry.yarnpkg.com/@axe-core/playwright/-/playwright-4.12.1.tgz#4a14cd41eecc1ff01edcdc3db12a2e88acd34180"
-  integrity sha512-rMd7xriptqKpP+w5265i4Hdkv2X5kbu6uiBi/B2I7uf3hieRBM3qDCfaKPtxfiYb2mKXfF+yLODJwIx+Jv1GDw==
+"@axe-core/playwright@4.13.0":
+  version "4.13.0"
+  resolved "https://registry.yarnpkg.com/@axe-core/playwright/-/playwright-4.13.0.tgz#4826467c9622df26f0d75b4c1747c8d92ee599de"
+  integrity sha512-6YLx+kxXu5GJceG4ozFg+33a2EMTdjYwWGloJ3sb9Kta5pp+ZNS53uxGVog5JetIY8s++P5UrtX+cri+u0VAVg==
   dependencies:
-    axe-core "~4.12.1"
+    axe-core "~4.13.0"
 
 "@babel/code-frame@7.26.2":
   version "7.26.2"
@@ -1912,64 +1912,64 @@
     cssstyle "^4.2.1"
     micromatch "^4.0.8"
 
-"@elastic/esql-ast@^4.19.2":
-  version "4.19.2"
-  resolved "https://registry.yarnpkg.com/@elastic/esql-ast/-/esql-ast-4.19.2.tgz#0d1410c653af5d4784ea693520d3cca63fcae32f"
-  integrity sha512-nfxyheu+28XUUN61zoq5hm2jOIl+G9+NZn9CCDrPtiZyWx0qUtCvUGCjsO83Zr9vS/3LykMuF6uSD60qCKH8Mg==
+"@elastic/esql-ast@^4.21.1":
+  version "4.21.1"
+  resolved "https://registry.yarnpkg.com/@elastic/esql-ast/-/esql-ast-4.21.1.tgz#09da1fd9ce2aea4dc4d9abe32dfc3ea986383f5d"
+  integrity sha512-nUQIesLLeM7t1iLl8W039YLbU7oDHW2soJ3fTI6QNZ5GRJzYb0z4MMepX4jQsrNRtlkhDVTsQsAQuIF6TfgrHw==
   dependencies:
-    "@elastic/esql-definitions" "^4.19.2"
-    "@elastic/esql-grammar" "^4.19.2"
-    "@elastic/esql-promql-grammar" "^4.19.2"
-    "@elastic/esql-types" "^4.19.2"
+    "@elastic/esql-definitions" "^4.21.1"
+    "@elastic/esql-grammar" "^4.21.1"
+    "@elastic/esql-promql-grammar" "^4.21.1"
+    "@elastic/esql-types" "^4.21.1"
     tslib "2.8.1"
 
-"@elastic/esql-definitions@^4.14.0", "@elastic/esql-definitions@^4.19.2", "@elastic/esql-definitions@^4.20.0":
-  version "4.21.0"
-  resolved "https://registry.yarnpkg.com/@elastic/esql-definitions/-/esql-definitions-4.21.0.tgz#44fb965db3cf11569945c937cf5a50d27d7fb3b4"
-  integrity sha512-OWPE1N4FRkvQjfcFtPs4eYZ1GjqfzWBguT4px4t/9ptEA2953QzqCLdLmVamdYkfTaUoemZ4W8/JkDP/EK2JoA==
+"@elastic/esql-definitions@^4.14.0", "@elastic/esql-definitions@^4.20.0", "@elastic/esql-definitions@^4.21.1":
+  version "4.21.1"
+  resolved "https://registry.yarnpkg.com/@elastic/esql-definitions/-/esql-definitions-4.21.1.tgz#ee6d63a7a997a4150b42b2b225d7f10183c2f153"
+  integrity sha512-jlrR1mLO5NfJlNxeuf7/H1ragNC7yZhTBUcWPp+sjf3UgD6rvVn6AD8N4lnrLnor6RJp4v7XZB2t8XtImE1bcQ==
 
-"@elastic/esql-grammar@^4.19.2":
-  version "4.19.2"
-  resolved "https://registry.yarnpkg.com/@elastic/esql-grammar/-/esql-grammar-4.19.2.tgz#e5fd5d7822f908fa22ed9c2f3d39ea2949e2aeaf"
-  integrity sha512-/s2q3Fc7CkOf/UmrFtt9aiv/jKpcF6FXUWclBSlzfT7twaTCGOqFYuCkaTJXs1sxs9WrSOpwDPtZ72VeRIaGzQ==
+"@elastic/esql-grammar@^4.21.1":
+  version "4.21.1"
+  resolved "https://registry.yarnpkg.com/@elastic/esql-grammar/-/esql-grammar-4.21.1.tgz#3c1aa46116f49ad9637176ae6ec90b254f8e8a8d"
+  integrity sha512-MqbeD2G8DVxgsj2+8nWwcOSwqrWcqu7hywJ6KSsVI5LrIdC/uQG99x+RoxMTnIBwKrZDbeMlS1OhnDxdcp4j6w==
   dependencies:
     antlr4 "4.13.2"
     tslib "2.8.1"
 
-"@elastic/esql-promql-grammar@^4.19.2":
-  version "4.19.2"
-  resolved "https://registry.yarnpkg.com/@elastic/esql-promql-grammar/-/esql-promql-grammar-4.19.2.tgz#d1dc5199493727e40cb93e000595540fd1eaa4ea"
-  integrity sha512-yxOdje3oUKxnLwRJz4dOdbRKDFPL/wmrNCo2p8K03AEwWFkUriRb0FakIl5UMl7Xs9uxpyRo36cVbMlt6nGsrQ==
+"@elastic/esql-promql-grammar@^4.21.1":
+  version "4.21.1"
+  resolved "https://registry.yarnpkg.com/@elastic/esql-promql-grammar/-/esql-promql-grammar-4.21.1.tgz#30a6f9c3b867f2d32b00176cb9260de8e55ec9b3"
+  integrity sha512-3ZXOh+FclCzSU13oo4w/L5VXLuji2HGzJtPu+MpY9NBaf/py5eXiy8d44vb9uwVZbJP+yXMVTP8Sv0Jz2Y76PQ==
   dependencies:
     antlr4 "4.13.2"
     tslib "2.8.1"
 
-"@elastic/esql-traversal@^4.19.2":
-  version "4.19.2"
-  resolved "https://registry.yarnpkg.com/@elastic/esql-traversal/-/esql-traversal-4.19.2.tgz#9d6102e86026c2f6bfb8ebf542b9dc0ea0159f47"
-  integrity sha512-Yo9F2lz09vIA+63XOEkJI+gZzlQt5SAMJUBN056RmyoXYG7+vXqdhf2a21teKPxA7YC8xMrmW97hlhZhUkKZ1Q==
+"@elastic/esql-traversal@^4.21.1":
+  version "4.21.1"
+  resolved "https://registry.yarnpkg.com/@elastic/esql-traversal/-/esql-traversal-4.21.1.tgz#778acdedd84b08e36a644d8a71259b1be2cb465f"
+  integrity sha512-glwLR+54Rg/Xi5z8Y/ipBqF3vB48JWNQAqmVnqeAOQsgmspNFc/FpRocEMdH7Pad/CNUR81TVTmKCOt20mHuSQ==
   dependencies:
-    "@elastic/esql-ast" "^4.19.2"
-    "@elastic/esql-types" "^4.19.2"
+    "@elastic/esql-ast" "^4.21.1"
+    "@elastic/esql-types" "^4.21.1"
     tslib "2.8.1"
 
-"@elastic/esql-types@^4.19.2":
-  version "4.19.2"
-  resolved "https://registry.yarnpkg.com/@elastic/esql-types/-/esql-types-4.19.2.tgz#3f1e5ebc5a73f8445940499f8c96ae27a86f861a"
-  integrity sha512-7SP7ho+YrvtNvMdsWtOfG84b6zrgXIqW6kQGHoHDn6yU51T6cL/ypB1hxA4UCIVZ9KBPYcmE+TO/4sHgFV40kw==
+"@elastic/esql-types@^4.21.1":
+  version "4.21.1"
+  resolved "https://registry.yarnpkg.com/@elastic/esql-types/-/esql-types-4.21.1.tgz#5a2280a18588318d00f097d0810e5a34197adc86"
+  integrity sha512-eahE+yNMK/mDBIKP4Akt2ywQF+gbniAquFdAO2tDefk/psXaWadUnKy7MtmALA4kUYPJaCYk74xFdcgIbQ/mGQ==
 
-"@elastic/esql@4.19.2":
-  version "4.19.2"
-  resolved "https://registry.yarnpkg.com/@elastic/esql/-/esql-4.19.2.tgz#3ec9ecd2f9ff8623567e2d497e4ad9507321bc70"
-  integrity sha512-o3/PiC5bt1M4zL4tgA61IntmKvJYZBwZ/uU6o1AuMgEKOYtfvaEHphIJV8Cw6i0wLbLlTqZmcTjyJVa6v0HD9Q==
+"@elastic/esql@4.21.1":
+  version "4.21.1"
+  resolved "https://registry.yarnpkg.com/@elastic/esql/-/esql-4.21.1.tgz#8250c1c80579a843ef4ab5e49d5bc65ea93aec24"
+  integrity sha512-lJj+l0y9cJcFbexqXELf9AkXVHoB+1iukW41TyHMeIJ829y1ojyKCkB7wtITsnQOrMjv8R2xEAQwPDT/OFDaoA==
   dependencies:
-    "@elastic/esql-ast" "^4.19.2"
-    "@elastic/esql-definitions" "^4.19.2"
-    "@elastic/esql-grammar" "^4.19.2"
-    "@elastic/esql-promql-grammar" "^4.19.2"
-    "@elastic/esql-traversal" "^4.19.2"
-    "@elastic/esql-types" "^4.19.2"
-    "@elastic/pretty-printer" "^4.19.2"
+    "@elastic/esql-ast" "^4.21.1"
+    "@elastic/esql-definitions" "^4.21.1"
+    "@elastic/esql-grammar" "^4.21.1"
+    "@elastic/esql-promql-grammar" "^4.21.1"
+    "@elastic/esql-traversal" "^4.21.1"
+    "@elastic/esql-types" "^4.21.1"
+    "@elastic/pretty-printer" "^4.21.1"
     antlr4 "4.13.2"
     tree-dump "1.1.0"
     tslib "2.8.1"
@@ -2164,10 +2164,10 @@
     import-in-the-middle "^3.0.0"
     safe-stable-stringify "^2.4.3"
 
-"@elastic/pretty-printer@^4.19.2":
-  version "4.19.2"
-  resolved "https://registry.yarnpkg.com/@elastic/pretty-printer/-/pretty-printer-4.19.2.tgz#05beb0d9a756a24add337415c178d2e29f4db851"
-  integrity sha512-Yv9O8bJ6WzEwaxqDm3O9vfQAbdeBOwUFOJxunGFFYrM78g/7QoE6IWnUC2n1qhtnzpYlTzJsGn5ZTfp//V/eQg==
+"@elastic/pretty-printer@^4.21.1":
+  version "4.21.1"
+  resolved "https://registry.yarnpkg.com/@elastic/pretty-printer/-/pretty-printer-4.21.1.tgz#91fd8ba0940474c10ebc312d9df4017388ba72eb"
+  integrity sha512-Qdj51flOHLk4Z+n7uk3z61FAOkK4rSNCYntVv1iHyd/7xR4RT/H2jZAfXU3j03ETDQlMIoIAM5I1t0swC8BTZA==
   dependencies:
     tree-dump "1.1.0"
     tslib "2.8.1"
@@ -5145,10 +5145,6 @@
   uid ""
 
 "@kbn/core-chrome-browser@link:src/core/packages/chrome/browser":
-  version "0.0.0"
-  uid ""
-
-"@kbn/core-chrome-feature-flags@link:src/core/packages/chrome/feature-flags":
   version "0.0.0"
   uid ""
 
@@ -10576,22 +10572,10 @@
     express "^4.18.2"
     strict-event-emitter "^0.5.1"
 
-"@mswjs/interceptors@^0.39.5":
-  version "0.39.8"
-  resolved "https://registry.yarnpkg.com/@mswjs/interceptors/-/interceptors-0.39.8.tgz#0a2cf4cf26a731214ca4156273121f67dff7ebf8"
-  integrity sha512-2+BzZbjRO7Ct61k8fMNHEtoKjeWI9pIlHFTqBwZ5icHpqszIgEZbjb1MW5Z0+bITTCTl3gk4PDBxs9tA/csXvA==
-  dependencies:
-    "@open-draft/deferred-promise" "^2.2.0"
-    "@open-draft/logger" "^0.3.0"
-    "@open-draft/until" "^2.0.0"
-    is-node-process "^1.2.0"
-    outvariant "^1.4.3"
-    strict-event-emitter "^0.5.1"
-
-"@mswjs/interceptors@^0.41.3":
-  version "0.41.3"
-  resolved "https://registry.yarnpkg.com/@mswjs/interceptors/-/interceptors-0.41.3.tgz#d766dc1a168aa315a6a0b2d0f2e0cf1b74f23c82"
-  integrity sha512-cXu86tF4VQVfwz8W1SPbhoRyHJkti6mjH/XJIxp40jhO4j2k1m4KYrEykxqWPkFF3vrK4rgQppBh//AwyGSXPA==
+"@mswjs/interceptors@0.41.6", "@mswjs/interceptors@^0.41.0", "@mswjs/interceptors@^0.41.3":
+  version "0.41.6"
+  resolved "https://registry.yarnpkg.com/@mswjs/interceptors/-/interceptors-0.41.6.tgz#f126479eed31147dac952780416b759016a7aa05"
+  integrity sha512-qmDvJIjcNsZ6tXWy2G9yuCgMPTTn35GMA3dPpSLm7QJVpbQzYdw0ALy1bKoivXnEM3U93/OrK+/M719b+fg84Q==
   dependencies:
     "@open-draft/deferred-promise" "^2.2.0"
     "@open-draft/logger" "^0.3.0"
@@ -16547,12 +16531,12 @@ aws4@1.13.2, aws4@^1.8.0:
   resolved "https://registry.yarnpkg.com/aws4/-/aws4-1.13.2.tgz#0aa167216965ac9474ccfa83892cfb6b3e1e52ef"
   integrity sha512-lHe62zvbTB5eEABUVi/AwVh0ZKY9rMMDhmm+eeyuuUQbQ3+J+fONVQOZyj+DdrvD4BY33uYniyRJ4UJIaSKAfw==
 
-axe-core@4.13.0:
+axe-core@4.13.0, axe-core@~4.13.0:
   version "4.13.0"
   resolved "https://registry.yarnpkg.com/axe-core/-/axe-core-4.13.0.tgz#f868ecb1bd61d982321760e51d841ab497ab86d0"
   integrity sha512-UzGt8zg7Ny8djbYMhxl2zuEevVa7r2gJjYY5Lwr1xM7+XU2nd6CkIWFTVcCIbAP63vSz71NaVyyuSk9lHKcy0A==
 
-axe-core@^4.12.1, axe-core@~4.12.1:
+axe-core@^4.12.1:
   version "4.12.1"
   resolved "https://registry.yarnpkg.com/axe-core/-/axe-core-4.12.1.tgz#69fe2bf6dfc0b24973af91b1d8e945f79e1b7c44"
   integrity sha512-s7iGf5GaVMxEG0ENN9x+xTr7GFZCb1ZP/1uATUpCEK2X78nDB3RwbtFCo9pGAf9ru+VwoQ464DkaLEeRM08wJA==
@@ -21283,9 +21267,9 @@ fast-string-width@^3.0.2:
     fast-string-truncated-width "^3.0.2"
 
 fast-uri@^3.0.1:
-  version "3.1.5"
-  resolved "https://registry.yarnpkg.com/fast-uri/-/fast-uri-3.1.5.tgz#610f37419a030270430cecd68d74e3d4d96725d0"
-  integrity sha512-gHwA1O9LDIcKunMKhObS/HimwtehO1nPUECKAu5TpKgaO19fcWEl4bliWe1jWxVFvIXztJjjQ4L8XQ1EU9f7Jw==
+  version "3.1.6"
+  resolved "https://registry.yarnpkg.com/fast-uri/-/fast-uri-3.1.6.tgz#bfdd308ef763f835fed059f3c6c925f708e33e3a"
+  integrity sha512-7Ical1vFEMr0onbVzEDIreM22I4khW+fzyQPwvAFWBp1iwdshSZRsL4jjRvPG9JP1uiqMHRto+YU6R2/CzDz5Q==
 
 fast-wrap-ansi@^0.2.0:
   version "0.2.0"
@@ -27014,12 +26998,12 @@ no-case@^3.0.4:
     lower-case "^2.0.2"
     tslib "^2.0.3"
 
-nock@14.0.10:
-  version "14.0.10"
-  resolved "https://registry.yarnpkg.com/nock/-/nock-14.0.10.tgz#d6f4e73e1c6b4b7aa19d852176e68940e15cd19d"
-  integrity sha512-Q7HjkpyPeLa0ZVZC5qpxBt5EyLczFJ91MEewQiIi9taWuA0KB/MDJlUWtON+7dGouVdADTQsf9RA7TZk6D8VMw==
+nock@14.0.17:
+  version "14.0.17"
+  resolved "https://registry.yarnpkg.com/nock/-/nock-14.0.17.tgz#356d0ba8cc8ff48194abf93c7f569f10f07b05e7"
+  integrity sha512-EjRr1weMa4ALQX35AgZTEnP+weJJjlW1KGDiNM2IQC2069YDHas4f4B4UUYR+TTLyKWxJvOz2wObDKQs/LNreA==
   dependencies:
-    "@mswjs/interceptors" "^0.39.5"
+    "@mswjs/interceptors" "^0.41.0"
     json-stringify-safe "^5.0.1"
     propagate "^2.0.0"
 
