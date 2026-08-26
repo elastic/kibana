@@ -15,6 +15,7 @@ import {
   escapeStringValue,
   appendToESQLQuery,
   PARAM_TYPES_NO_NEED_IMPLICIT_STRING_CASTING,
+  getEsqlInlineCastType,
   extractMatchFunctionDetails,
   extractMvContainsFunctionDetails,
   getSupportedOperators,
@@ -59,15 +60,19 @@ function buildMultiValueFilterExpression(
     typeof val === 'string' ? escapeStringValue(val) : val
   );
 
-  // If we have an ES mapping type, we can safely use MV_CONTAINS with casting
+  // If we have an ES mapping type, we use MV_CONTAINS. The value is cast to the field's type so
+  // MV_CONTAINS type-matches, but only when ES|QL can actually cast to it — some ES types (e.g. `text`)
+  // have no `::` cast, in which case we leave the value uncast and let ES|QL coerce it.
   if (esMappingType) {
     const mvContainsValue =
       escapedValues.length === 1 ? escapedValues[0] : `[${escapedValues.join(', ')}]`;
+    const castType = getEsqlInlineCastType(esMappingType);
+    const mvContainsArgument = castType ? `${mvContainsValue}::${castType}` : mvContainsValue;
     return {
       expression:
         operation === '-'
-          ? `NOT MV_CONTAINS(${fieldName}, ${mvContainsValue}::${esMappingType})`
-          : `MV_CONTAINS(${fieldName}, ${mvContainsValue}::${esMappingType})`,
+          ? `NOT MV_CONTAINS(${fieldName}, ${mvContainsArgument})`
+          : `MV_CONTAINS(${fieldName}, ${mvContainsArgument})`,
       multiValueFilterFunction,
     };
   }
