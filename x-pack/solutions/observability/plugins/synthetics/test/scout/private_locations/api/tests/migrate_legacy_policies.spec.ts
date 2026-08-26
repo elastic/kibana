@@ -180,13 +180,14 @@ apiTest.describe(
         const monitorBId = uuidv4();
         const extraSpace = await createSpace(kbnClient);
         try {
+          // Seed leftover before creating monitors so Fleet isn't mid-deploy on
+          // the shared agent policy (create package_policies 404s while
+          // agentPolicyService.get returns null). Same order as the multi-space
+          // test above.
+          const staleLegacyPolicyId = await seedLegacyPolicy(apiClient, monitorAId, extraSpace);
           await createMonitor(apiClient, monitorBId, { spaces: ['default', extraSpace] });
           await createMonitor(apiClient, monitorAId);
-          const staleLegacyPolicyId = await seedLegacyPolicy(apiClient, monitorAId, extraSpace);
 
-          // Background cleanup treats space-suffixed ids as extras and may
-          // delete the leftover before the next list. Seed already waited for
-          // Fleet 200; the invariant is the post-edit policy set.
           await editMonitor(apiClient, editorHeaders, monitorAId, { name: uuidv4() });
 
           await tryForTime(CLEANUP_TIMEOUT, async () => {
