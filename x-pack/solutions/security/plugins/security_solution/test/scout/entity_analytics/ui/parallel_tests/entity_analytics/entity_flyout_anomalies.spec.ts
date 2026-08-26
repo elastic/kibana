@@ -377,7 +377,7 @@ spaceTest.describe(
         await pageObjects.entityFlyoutAnomaliesPage.getRowAction('add-to-timeline').click();
 
         await expect(pageObjects.timelinePage.panel).toBeVisible({ timeout: 30000 });
-        await expect(pageObjects.timelinePage.kqlTextarea).toHaveValue(/"host\.name":"test-host"/);
+        await expect(pageObjects.timelinePage.queryInput).toHaveText(/"host\.name":"test-host"/);
       }
     );
 

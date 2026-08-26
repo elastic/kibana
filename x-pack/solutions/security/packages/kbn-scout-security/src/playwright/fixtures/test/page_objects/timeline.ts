@@ -57,9 +57,10 @@ export class TimelinePage {
     this.timelinesTable = this.page.testSubj.locator('timelines-table');
     this.createFromTemplateButton = this.page.testSubj.locator('create-from-template');
     this.customTemplatesTab = this.page.testSubj.locator('Custom templates');
-    this.kqlTextarea = this.page.testSubj
-      .locator('timeline-search-or-filter-search-container')
-      .locator('textarea');
+    // Same node as queryInput (`timelineQueryInput` on QueryStringInput). The
+    // search-container FlexItem stays mounted while QueryBarTimeline returns
+    // null, so a descendant `textarea` locator races the data-view load.
+    this.kqlTextarea = this.queryInput;
     this.saveButtonTooltipAnchor = this.page.locator(
       'span:has([data-test-subj="timeline-modal-save-timeline"])'
     );
