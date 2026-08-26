@@ -207,7 +207,7 @@ describe('useListFieldsSelection — global field sync (Bug 19099)', () => {
     expect(globalField?.isChecked).toBe(true);
   });
 
-  it('defaults global field to unchecked when the shared key is absent', () => {
+  it('defaults global field to unchecked when the shared key and the list key are both absent', () => {
     const { result } = renderHook(() => useListFieldsSelection(), {
       wrapper: (props) => <TestProviders {...props} license={license} />,
     });
@@ -216,6 +216,23 @@ describe('useListFieldsSelection — global field sync (Bug 19099)', () => {
       (f) => f.field === 'priority_as_keyword'
     );
     expect(globalField?.isChecked).toBe(false);
+  });
+
+  it('preserves existing list-view selection for a global field when the shared key is absent (upgrade compat)', () => {
+    // Simulate a user who had the global field checked in the list view before the shared key existed
+    localStorage.setItem(
+      listStorageKey,
+      JSON.stringify([{ field: 'priority_as_keyword', name: 'Priority', isChecked: true }])
+    );
+
+    const { result } = renderHook(() => useListFieldsSelection(), {
+      wrapper: (props) => <TestProviders {...props} license={license} />,
+    });
+
+    const globalField = result.current.selectedFields.find(
+      (f) => f.field === 'priority_as_keyword'
+    );
+    expect(globalField?.isChecked).toBe(true);
   });
 
   it('writes global field checked state to the shared key and full array to the list key', () => {

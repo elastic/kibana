@@ -61,7 +61,8 @@ export function useListFieldsSelection() {
     });
 
     return merged.map((column) => {
-      // Global fields: use shared checked state if stored, otherwise default to unchecked.
+      // Global fields: use shared checked state if stored; otherwise fall back to the
+      // value already in the stored list array (upgrade compat) or the config default.
       // This keeps the selection in sync with the table view (Bug 19099).
       if (globalFieldKeys.has(column.field)) {
         return {
@@ -69,7 +70,7 @@ export function useListFieldsSelection() {
           isChecked:
             column.field in storedGlobalFieldChecked
               ? storedGlobalFieldChecked[column.field]
-              : false,
+              : column.isChecked,
         };
       }
       // Non-global fields: keep stored state; default newly added fields to unchecked.
