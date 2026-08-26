@@ -6,6 +6,8 @@
  */
 
 export class InvestigationUnavailableError extends Error {
+  public readonly statusCode = 503;
+
   constructor(reason: string) {
     super(reason);
     this.name = 'InvestigationUnavailableError';

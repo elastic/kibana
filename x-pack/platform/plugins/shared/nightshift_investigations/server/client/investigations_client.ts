@@ -111,17 +111,35 @@ function recoverSubjectFromInput(
   return undefined;
 }
 
+export interface NightshiftInvestigationsClientDeps {
+  request: KibanaRequest;
+  workflowsManagement?: WorkflowsServerPluginSetup;
+  spaces?: SpacesPluginStart;
+  logger: Logger;
+  /**
+   * Explicit override for contexts where the request cannot carry space info (e.g. workflow step
+   * definitions using getFakeRequest). See https://github.com/elastic/kibana/issues/284786.
+   */
+  spaceIdOverride?: string;
+  agentBuilder?: AgentBuilderPluginStart;
+}
+
 export class NightshiftInvestigationsClient {
-  constructor(
-    private readonly request: KibanaRequest,
-    private readonly workflowsManagement: WorkflowsServerPluginSetup | undefined,
-    private readonly spaces: SpacesPluginStart | undefined,
-    private readonly logger: Logger,
-    // Explicit override for contexts where the request cannot carry space info (e.g. workflow step
-    // definitions using getFakeRequest). See https://github.com/elastic/kibana/issues/284786.
-    private readonly spaceIdOverride?: string,
-    private readonly agentBuilder?: AgentBuilderPluginStart
-  ) {}
+  private readonly request: KibanaRequest;
+  private readonly workflowsManagement: WorkflowsServerPluginSetup | undefined;
+  private readonly spaces: SpacesPluginStart | undefined;
+  private readonly logger: Logger;
+  private readonly spaceIdOverride?: string;
+  private readonly agentBuilder?: AgentBuilderPluginStart;
+
+  constructor(deps: NightshiftInvestigationsClientDeps) {
+    this.request = deps.request;
+    this.workflowsManagement = deps.workflowsManagement;
+    this.spaces = deps.spaces;
+    this.logger = deps.logger;
+    this.spaceIdOverride = deps.spaceIdOverride;
+    this.agentBuilder = deps.agentBuilder;
+  }
 
   private getSpaceId(): string {
     return (

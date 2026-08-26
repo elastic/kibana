@@ -62,14 +62,13 @@ const makeExecution = (overrides: Record<string, unknown> = {}) => ({
 });
 
 const makeClient = () =>
-  new NightshiftInvestigationsClient(
-    mockRequest,
-    mockWorkflowsManagement,
-    undefined,
-    mockLogger,
-    SPACE_ID,
-    mockAgentBuilder
-  );
+  new NightshiftInvestigationsClient({
+    request: mockRequest,
+    workflowsManagement: mockWorkflowsManagement,
+    logger: mockLogger,
+    spaceIdOverride: SPACE_ID,
+    agentBuilder: mockAgentBuilder,
+  });
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -530,14 +529,12 @@ describe('NightshiftInvestigationsClient.start()', () => {
   });
 
   it('throws InvestigationUnavailableError when agentBuilder is not available', async () => {
-    const client = new NightshiftInvestigationsClient(
-      mockRequest,
-      mockWorkflowsManagement,
-      undefined,
-      mockLogger,
-      SPACE_ID,
-      undefined
-    );
+    const client = new NightshiftInvestigationsClient({
+      request: mockRequest,
+      workflowsManagement: mockWorkflowsManagement,
+      logger: mockLogger,
+      spaceIdOverride: SPACE_ID,
+    });
 
     await expect(client.start({ subject: { type: 'alert', id: 'alert-1' } })).rejects.toThrow(
       InvestigationUnavailableError
