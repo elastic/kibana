@@ -418,8 +418,13 @@ describe('stripHtml — entity table lookup safety', () => {
     expect(stripHtml('<p>&#65;&#x42;</p>')).toBe('AB');
   });
 
-  it('leaves an out-of-range code point as literal text', () => {
-    expect(stripHtml('<p>&#9999999;</p>')).toBe('&#9999999;');
+  // The point of this case is that an out-of-range reference cannot crash extraction.
+  // The regex decoder guarded `String.fromCodePoint` by leaving the reference as
+  // literal text; the parser instead substitutes U+FFFD, which is what the HTML spec
+  // requires and what a browser shows. Either way the input is survivable, and no
+  // reference escapes as something that could be re-read as markup.
+  it('replaces an out-of-range code point rather than throwing', () => {
+    expect(stripHtml('<p>&#9999999;</p>')).toBe('\ufffd');
   });
 });
 
@@ -624,5 +629,123 @@ describe('stripHtml — HTML comments are removed as whole nodes', () => {
     expect(
       htmlToStructured('<h2>IOCs</h2><!-- hidden > commented.test --><p>real.test</p>')
     ).not.toContain('commented.test');
+  });
+});
+
+/**
+ * These four cases are why this file parses HTML instead of pattern-matching it.
+ *
+ * Each one is a place where "find the tag with a regex" is not just imprecise but
+ * wrong in a way that changes what reaches IOC extraction: `[^>]*` cannot know
+ * whether a `>` is inside a quoted attribute, and a paired-tag pattern applied
+ * globally rescans the suffix from every opener.
+ */
+describe('markup that only a parser reads correctly', () => {
+  describe('a > inside a quoted attribute value is not a tag terminator', () => {
+    // `[^>]*` ended the tag at the attribute's `>`, so the rest of the attribute plus
+    // the real tag close leaked out as text. In an IOC section that both invents an
+    // indicator (`c2.evil.test`) and hands extraction a mangled token.
+    it('keeps hidden attribute text out of body_text', () => {
+      expect(stripHtml('<p title="score > c2.evil.test">real</p>')).toBe('real');
+    });
+
+    it('does not leak the attribute of an unquoted-then-quoted mix', () => {
+      expect(stripHtml('<p data-x=1 title="a > b">real</p>')).toBe('real');
+    });
+
+    // The heading scanner had its own `[^>]*`, so this silently disabled IOC-section
+    // handling: the heading text became `7">Indicators of Compromise`, classified as
+    // prose, and every href below it was dropped instead of lifted.
+    it('still classifies a heading carrying a quoted >', () => {
+      const structured = htmlToStructured(
+        '<h2 title="CVSS > 7">Indicators of Compromise</h2><p><a href="http://bad.test/x">link</a></p>'
+      );
+      expect(structured).toContain('## Indicators of Compromise');
+      expect(structured).toContain('http://bad.test/x');
+    });
+  });
+
+  describe('entity-encoded markup does not survive as markup', () => {
+    // RSS and Atom routinely encode a whole HTML body inside <description>. One decode
+    // leaves tags sitting in what is supposed to be plain text, which violates the
+    // body_text contract and feeds markup to the LLM stages and IOC extraction.
+    it('resolves encoded tags to text', () => {
+      expect(stripHtml('&lt;p&gt;evil.test&lt;/p&gt;')).toBe('evil.test');
+    });
+
+    it('removes an encoded script body rather than keeping its contents', () => {
+      expect(stripHtml('&lt;script&gt;fetch("http://c2.evil.test")&lt;/script&gt;ok')).toBe('ok');
+    });
+
+    it('applies the same resolution in the structured form', () => {
+      expect(htmlToStructured('&lt;p&gt;evil.test&lt;/p&gt;')).toBe('evil.test');
+    });
+
+    it('recovers encoded table cells as separate tokens', () => {
+      expect(
+        htmlToStructured(
+          '&lt;tr&gt;&lt;td&gt;evil.com&lt;/td&gt;&lt;td&gt;bad.net&lt;/td&gt;&lt;/tr&gt;'
+        )
+      ).toBe('| evil.com | bad.net |');
+    });
+
+    // The guard that keeps the re-parse from eating prose. A report explaining a
+    // technique mentions tags without closing them, and that text has to survive: the
+    // re-parse only runs when the decoded text contains a closing tag.
+    it('leaves prose that merely mentions a tag alone', () => {
+      expect(stripHtml('<p>use &lt;script&gt; carefully</p>')).toBe('use <script> carefully');
+    });
+
+    it('does not recurse past one re-parse', () => {
+      // Doubly-encoded input resolves one level per pass and then stops, so the second
+      // level is preserved as text rather than being chased to a fixpoint.
+      expect(stripHtml('&amp;lt;p&amp;gt;evil.test&amp;lt;/p&amp;gt;')).toBe(
+        '&lt;p&gt;evil.test&lt;/p&gt;'
+      );
+    });
+  });
+
+  /**
+   * Timing assertions, deliberately with a wide margin.
+   *
+   * The bounds are ~100x the measured cost, so they are not sensitive to a slow or
+   * contended CI worker, but a return to quadratic behavior overruns them by orders of
+   * magnitude. These inputs sit well inside MAX_PARSE_BYTES, so a quadratic path here is
+   * reachable by any feed and pegs a task worker rather than merely being slow.
+   */
+  describe('adversarial markup stays linear', () => {
+    it('handles many unterminated script openers', () => {
+      // The old paired-tag pattern restarted at each opener and scanned the remaining
+      // suffix for an absent `</script>`: 486ms at 480KB, and ~21s at this size.
+      const input = '<script>'.repeat(400000);
+      const started = process.hrtime.bigint();
+      const result = stripHtml(input);
+      const elapsedMs = Number(process.hrtime.bigint() - started) / 1e6;
+
+      expect(result).toBe('');
+      expect(elapsedMs).toBeLessThan(5000);
+    });
+
+    it('handles deeply nested elements without recursing', () => {
+      // Two separate hazards: a recursive walk would exhaust the call stack, and
+      // resolving script/style with a CSS selector was quadratic in depth (2.6s here).
+      const input = `${'<div>'.repeat(100000)}evil.test`;
+      const started = process.hrtime.bigint();
+      const result = stripHtml(input);
+      const elapsedMs = Number(process.hrtime.bigint() - started) / 1e6;
+
+      expect(result).toBe('evil.test');
+      expect(elapsedMs).toBeLessThan(5000);
+    });
+
+    it('keeps the structured form linear over the same input', () => {
+      const input = `${'<div>'.repeat(100000)}evil.test`;
+      const started = process.hrtime.bigint();
+      const result = htmlToStructured(input);
+      const elapsedMs = Number(process.hrtime.bigint() - started) / 1e6;
+
+      expect(result).toBe('evil.test');
+      expect(elapsedMs).toBeLessThan(5000);
+    });
   });
 });

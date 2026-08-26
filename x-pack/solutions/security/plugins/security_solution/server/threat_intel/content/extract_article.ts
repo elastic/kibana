@@ -84,14 +84,48 @@ const PAGE_CHROME_SELECTORS = [
   'body > .footer',
 ].join(', ');
 
-export const extractArticleHtml = (rawHtml: string): string => {
-  if (!rawHtml) return rawHtml;
+/**
+ * Text of `root`, skipping any subtree in `excluded`.
+ *
+ * Replaces `$(el).clone()` + `.find(CHROME).remove()` + `.text()`. `clone()` bottoms out
+ * in domhandler's `cloneNode`, which recurses once per level of nesting and throws
+ * `RangeError: Maximum call stack size exceeded` at around 1,600 nested elements — under
+ * 10KB of input, well inside `MAX_PARSE_BYTES`, on markup this function exists to handle.
+ * Worse, the exact threshold moves with how much stack the caller already used, so it
+ * presents as an intermittent crash rather than a reproducible one.
+ *
+ * Measuring in place removes the clone entirely: nothing is copied and nothing is
+ * mutated, so scoring cannot disturb the tree that is ultimately serialized.
+ */
+interface ParsedNode {
+  type: string;
+  data?: string;
+  children?: ParsedNode[];
+}
 
-  // Fetched pages are attacker-influenced and unbounded, and cheerio builds a full
-  // DOM. Truncating keeps a very fat page degraded rather than failed, since the
-  // article body is nearly always near the top.
-  const html = rawHtml.length > MAX_PARSE_BYTES ? rawHtml.slice(0, MAX_PARSE_BYTES) : rawHtml;
+const textExcluding = (root: ParsedNode, excluded: Set<unknown>): string => {
+  const out: string[] = [];
+  const stack: ParsedNode[] = [...(root.children ?? [])].reverse();
 
+  while (stack.length > 0) {
+    const node = stack.pop();
+    if (!node) break;
+    if (!excluded.has(node)) {
+      if (node.type === 'text') {
+        out.push(node.data ?? '');
+      } else {
+        const children = node.children ?? [];
+        for (let i = children.length - 1; i >= 0; i--) {
+          stack.push(children[i]);
+        }
+      }
+    }
+  }
+
+  return out.join('');
+};
+
+const selectArticleHtml = (html: string): string => {
   const $ = cheerio.load(html);
 
   // Page-level only. Done before selection so these never count toward a candidate's
@@ -121,9 +155,11 @@ export const extractArticleHtml = (rawHtml: string): string => {
     $(selector)
       .toArray()
       .map((el) => {
-        const $scored = $(el).clone();
-        $scored.find(CHROME_SELECTORS).remove();
-        return { el, priority, length: $scored.text().trim().length };
+        const excluded = new Set<unknown>($(el).find(CHROME_SELECTORS).toArray());
+        // Same boundary cast as in `text.ts`: the transitive `@types/cheerio@0.22` does
+        // not describe the DOM nodes the installed cheerio actually returns.
+        const length = textExcluding(el as unknown as ParsedNode, excluded).trim().length;
+        return { el, priority, length };
       })
   );
 
@@ -149,5 +185,37 @@ export const extractArticleHtml = (rawHtml: string): string => {
   // Strip chrome subtrees from within the container.
   $container.find(CHROME_SELECTORS).remove();
 
-  return $container.html() ?? rawHtml;
+  return $container.html() ?? html;
+};
+
+/**
+ * Strip page chrome from raw vendor HTML, returning the article body.
+ *
+ * Falls back to the unmodified input when the document is nested too deeply to
+ * serialize. parse5's serializer recurses once per level of nesting, so a page nested
+ * beyond roughly three thousand elements raises `RangeError: Maximum call stack size
+ * exceeded` from inside the library. That is not reachable by any input validation here
+ * short of rejecting the page outright, and returning the page with its chrome intact is
+ * strictly better than failing extraction: chrome is noise the section miner mostly
+ * handles, whereas a thrown error costs the whole report. The exact depth at which this
+ * trips depends on stack already in use by the caller, so it has to be handled rather
+ * than bounded.
+ *
+ * `body_text` extraction does not share this ceiling; `stripHtml` and `htmlToStructured`
+ * walk iteratively and stay linear at any depth.
+ */
+export const extractArticleHtml = (rawHtml: string): string => {
+  if (!rawHtml) return rawHtml;
+
+  // Fetched pages are attacker-influenced and unbounded, and cheerio builds a full
+  // DOM. Truncating keeps a very fat page degraded rather than failed, since the
+  // article body is nearly always near the top.
+  const html = rawHtml.length > MAX_PARSE_BYTES ? rawHtml.slice(0, MAX_PARSE_BYTES) : rawHtml;
+
+  try {
+    return selectArticleHtml(html);
+  } catch (error) {
+    if (error instanceof RangeError) return html;
+    throw error;
+  }
 };

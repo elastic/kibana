@@ -5,33 +5,17 @@
  * 2.0.
  */
 
+import * as cheerio from 'cheerio';
 import { classifyHeader, type SectionKind } from './section_headers';
 
-/**
- * Strip HTML tags and decode the small set of named entities that show up
- * routinely in RSS / vendor JSON descriptions.
- *
- * RSS feeds embed HTML in `<description>` and `<content:encoded>`. A
- * full HTML parse is overkill — we only need plain text for
- * `content.body_text`, which feeds inference (`semantic_text`) and the
- * BM25 sibling field. The downstream `enrich_threat_report`
- * workflow re-runs IOC regex extraction on `body_text` and does not
- * benefit from intact markup.
- *
- * The original HTML is preserved as `content.body_html` (mapped `index: false`) for
- * archival, so extraction can be re-run without re-fetching. It is unsanitized
- * attacker-controlled feed markup and must not be rendered: `extractArticleHtml`
- * removes a little chrome but preserves everything dangerous, so a consumer that
- * injects it has stored XSS. Render `body_text`.
- */
 /**
  * Largest input the parsers will touch.
  *
  * These entry points take fetched web pages, so the input is attacker-influenced
  * and unbounded. An ad-heavy page is realistically several megabytes, and this runs
- * inside a task worker: cheerio builds a full DOM and the regex passes each walk the
- * whole string. Truncating rather than throwing keeps a fat page degraded instead of
- * failed, since the article body is nearly always near the top.
+ * inside a task worker, where cheerio builds a full DOM. Truncating rather than
+ * throwing keeps a fat page degraded instead of failed, since the article body is
+ * nearly always near the top.
  *
  * 10MB matches the `body_html` bound the report API already enforces.
  */
@@ -41,141 +25,198 @@ const capInput = (html: string): string =>
   html.length > MAX_PARSE_BYTES ? html.slice(0, MAX_PARSE_BYTES) : html;
 
 /**
- * Removes `<script>` and `<style>` elements, including ones with no closing tag.
+ * Minimal shape of a parsed DOM node.
  *
- * The terminated patterns run first so a following sibling is not swallowed. The
- * unterminated pass then discards from an opening tag to end of input, which matters
- * for two reasons. Malformed feed HTML is one, but the bigger one is `capInput`: a
- * perfectly valid document truncated at MAX_PARSE_BYTES can lose the closing tag,
- * and the generic tag stripper then removes only `<script>` and leaves the entire
- * body as report text. That text goes to the LLM stages and IOC extraction, so it is
- * both a cost and a precision problem, not just noise.
- *
- * The end tag matches attributes and arbitrary whitespace (`</script foo>`,
- * `</script\t\n>`) so a crafted close tag cannot smuggle a body past this.
+ * Declared here rather than imported from cheerio. A transitive `@types/cheerio@0.22`
+ * shadows the types bundled with the installed cheerio 1.0.0-rc.12, predating both the
+ * node types and `contents()` by several majors. Projects that pin an explicit `types`
+ * array in their tsconfig resolve the correct types; `security_solution` does not, and
+ * narrowing type resolution for a plugin this size to fix one import is the wrong trade.
  */
-/**
- * Matches an HTML tag, requiring a tag-like character after `<`.
- *
- * A bare `<[^>]+>` treats any `<...>` span as a tag, so prose comparisons were eaten:
- * `5 < 10 and 3 > 1` collapsed to `5 1`, and threat reports contain plenty of
- * `payload < 4KB` and `CVSS > 7`. Requiring a letter, `/`, `!`, or `?` covers real
- * tags, closing tags, comments, and processing instructions while leaving prose alone.
- *
- * Shared safely because it is only ever used with `String.replace`, which resets
- * `lastIndex` around each call. Do not reach for `.test()` or `.exec()` on it without
- * cloning first, since those do carry state between calls.
- */
-const TAG_PATTERN = /<[a-z!?/][^>]*>/gi;
+interface ParsedNode {
+  type: string;
+  data?: string;
+  name?: string;
+  attribs?: Record<string, string>;
+  children?: ParsedNode[];
+}
 
 /**
- * Neutralizes any `<` that could still open a tag. Applied after the tag pass, this is
- * what makes tag stripping safe in one pass instead of needing to iterate.
+ * Elements whose subtree is markup machinery rather than report text.
+ *
+ * Skipped during the walk rather than removed up front with `$('script, style').remove()`.
+ * That selector pass is quadratic in nesting depth (measured on `'<div>'.repeat(n)`: 23ms
+ * at n=12,500 rising to 2.6s at n=100,000) because the selector engine re-checks
+ * ancestors per candidate node, which would have reintroduced the same denial of service
+ * the parser swap was meant to remove. Skipping the subtree in the walk is O(1) per node.
+ *
+ * Dropping these as whole subtrees is also what makes truncation safe: a valid document
+ * cut at `MAX_PARSE_BYTES` can lose its closing `</script>`, and the parser treats the
+ * remainder as raw script text rather than leaking it into report text.
  */
-const RESIDUAL_TAG_OPEN = /<(?=[a-z!?/])/gi;
+const RAW_TEXT_NAMES = new Set(['script', 'style']);
 
 /**
- * Removes tags, then neutralizes anything that could still open one.
+ * Rewrites an explicitly self-closed `<script/>` or `<style/>` into an empty element
+ * pair before parsing.
  *
- * The tag pass alone is not enough: removing a tag can reassemble a new one out of the
- * text on either side of it, which is what CodeQL's
- * incomplete-multi-character-sanitization rule is about. Two passes are, though. After
- * the second there is no `<` anywhere followed by a tag-name character, so nothing can
- * be reassembled by any later step and there is no fixpoint to iterate toward.
+ * HTML has no self-closing syntax for raw-text elements, so a spec-compliant parser
+ * reads `<script src="x.js"/><p>evil.test</p>` as a script whose *body* is that
+ * paragraph, and the whole remainder of the document is discarded with it. Browsers
+ * agree, but feeds do not: RSS payloads are frequently XHTML, where the form is
+ * legitimately self-closing, and honoring the HTML reading there silently drops every
+ * indicator after the tag.
  *
- * Deliberately not a loop-until-stable. That form is bounded and fast in practice, but
- * it invites the question of whether the bound is right, and it processes adversarial
- * nesting in more passes than this needs. Prose survives either way, since `5 < 10` has
- * a space after the `<`.
+ * The attribute run is quote-aware so a `>` inside an attribute value cannot end the
+ * match early, and bounded so many unterminated openers cannot make this quadratic.
+ * Overshooting the bound only means the tag is left for the parser to read per spec,
+ * which is the safe direction.
  */
-const stripTags = (input: string, replacement: string): string =>
-  input.replace(TAG_PATTERN, replacement).replace(RESIDUAL_TAG_OPEN, replacement);
+const SELF_CLOSED_RAW_TEXT = /<(script|style)((?:"[^"]*"|'[^']*'|[^>"']){0,2048}?)\/>/gi;
 
-const stripScriptAndStyle = (html: string): string =>
-  html
-    // Comments first, as whole nodes. The generic tag pattern stops at the first `>`,
-    // so a comment containing one leaked its contents into report text: the indicator in
-    // `<!-- hidden > c2.evil.test -->` survived as live text and would be extracted as a
-    // real IOC even though it is commented out.
-    .replace(/<!--[\s\S]*?-->/g, ' ')
-    // An unterminated comment runs to end of input, including after truncation.
-    .replace(/<!--[\s\S]*$/, ' ')
-    // Explicit self-closing forms, before the unterminated passes below. `/` is
-    // accepted by the opening lookahead, so `<script/>` otherwise matched the
-    // unterminated pattern and discarded every following sibling: `<script/><p>IOC</p>`
-    // lost the IOC entirely.
-    .replace(/<script(?=[\s/>])[^>]*\/>/gi, ' ')
-    .replace(/<style(?=[\s/>])[^>]*\/>/gi, ' ')
-    // `(?=[\s/>])` and not `\b`: `\b` also matches before a hyphen, so a valid custom
-    // element like `<script-loader>` was read as an unterminated `<script>` and the
-    // end-of-input pass then discarded the entire rest of the document, body and IOCs
-    // included. Requiring whitespace, `/`, or `>` pins the exact element name.
-    .replace(/<script(?=[\s/>])[\s\S]*?<\/script(?=[\s/>])[^>]*>/gi, ' ')
-    .replace(/<style(?=[\s/>])[\s\S]*?<\/style(?=[\s/>])[^>]*>/gi, ' ')
-    .replace(/<script(?=[\s/>])[\s\S]*$/i, ' ')
-    .replace(/<style(?=[\s/>])[\s\S]*$/i, ' ')
-    // Removing an unterminated element can orphan a partial tag that the generic tag
-    // pass would otherwise have absorbed: in `<scr<script>ipt>payload` the outer
-    // `<scr` was only swallowed because the script's `>` terminated it. Requiring a
-    // letter or slash after `<` keeps ordinary prose like `5 < 10` intact.
-    .replace(/<\/?[a-z][^>]*$/i, ' ');
+const normalizeSelfClosedRawText = (html: string): string =>
+  html.replace(SELF_CLOSED_RAW_TEXT, '<$1$2></$1>');
 
-export const stripHtml = (html: string | undefined | null): string => {
-  if (!html) return '';
-  const capped = capInput(html);
-  // Drop the most expensive substrings up front (script/style bodies)
-  // before falling through to the generic tag stripper.
-  const withoutScripts = stripScriptAndStyle(capped);
-  const withoutTags = stripTags(withoutScripts, ' ');
-  const decoded = decodeEntities(withoutTags);
-  return collapseWhitespace(decoded);
+/**
+ * Fragment mode (`isDocument: false`), so a `<description>` snippet is not wrapped in
+ * `<html>/<head>/<body>`. It also keeps bare table and list fragments intact, which
+ * matters because feed HTML routinely ships a `<tr>` with no enclosing `<table>`.
+ *
+ * htmlparser2 rather than cheerio's default parse5, because parse5 implements the full
+ * HTML5 tree construction algorithm and several of its steps ("has an element in button
+ * scope") walk the open-element stack, making it quadratic in nesting depth. Measured on
+ * `'<div>'.repeat(n)`: parse5 takes 14ms at n=2,000, 257ms at n=10,000 and 8.3s at
+ * n=50,000, so a few hundred KB of nested divs inside the 10MB cap pegs a task worker
+ * for minutes. htmlparser2 is linear over the same inputs (2ms / 5ms / 18ms). Both parse
+ * the malformed feed markup this file exists to handle, including implicit `</li>` and
+ * `</td>` and raw-text `<script>` bodies; parse5's extra fidelity is table foster
+ * parenting and formatting-element reconstruction, none of which affects text extraction.
+ */
+const PARSER_OPTIONS = { _useHtmlParser2: true } as const;
+
+const parseTopLevelNodes = (html: string): ParsedNode[] => {
+  const $ = cheerio.load(normalizeSelfClosedRawText(html), PARSER_OPTIONS);
+  // The one cast in this file, at the boundary where the stale typings stop describing
+  // the runtime. `toArray()` is declared, its element type is not.
+  const roots = $.root().toArray() as unknown as ParsedNode[];
+  return roots.flatMap((root) => root.children ?? []);
+};
+
+const isElement = (node: ParsedNode): boolean =>
+  node.type === 'tag' || node.type === 'script' || node.type === 'style';
+
+const elementName = (node: ParsedNode): string => node.name?.toLowerCase() ?? '';
+
+const childrenOf = (node: ParsedNode): ParsedNode[] => node.children ?? [];
+
+/**
+ * A closing tag in text that came out of a parse means the input carried
+ * entity-encoded markup, which the parser correctly decoded to text.
+ *
+ * RSS and Atom routinely encode a whole HTML body inside `<description>`, so one
+ * decode leaves `<p>...</p>` sitting in what is supposed to be plain text. A single
+ * bounded re-parse resolves that. Requiring a *closing* tag is what keeps prose safe:
+ * a threat report discussing `use &lt;script&gt; carefully` decodes to text with no
+ * closing tag and is left alone, while `&lt;script&gt;...&lt;/script&gt;` is re-parsed
+ * and removed as an element.
+ */
+const RESIDUAL_CLOSING_TAG = /<\/[a-z][a-z0-9]*\s*>/i;
+
+/** Stack entry: a node still to visit, or literal output to append after its subtree. */
+type WalkStep = { kind: 'node'; node: ParsedNode } | { kind: 'emit'; text: string };
+
+/**
+ * Pushed in reverse so the stack pops in document order.
+ *
+ * The walks in this file are iterative rather than recursive on purpose. Feed HTML is
+ * attacker-controlled and the parser imposes no nesting limit, so `'<div>'.repeat(n)`
+ * builds an arbitrarily deep tree; a recursive walk would exhaust the call stack and
+ * take the task worker down with it.
+ */
+const pushNodes = (stack: WalkStep[], nodes: ParsedNode[]): void => {
+  for (let i = nodes.length - 1; i >= 0; i--) {
+    stack.push({ kind: 'node', node: nodes[i] });
+  }
+};
+
+const hrefOf = (node: ParsedNode): string | undefined => {
+  const href = node.attribs?.href;
+  return typeof href === 'string' && href.length > 0 ? href : undefined;
 };
 
 /**
- * A `Map`, not an object literal. A bare object inherits from `Object.prototype`, so
- * `NAMED_ENTITIES['constructor']` resolves to a function and the `!== undefined`
- * guard below treats it as a valid replacement. Feed HTML containing `&constructor;`
- * or `&toString;` then injected `function Object() { [native code] }` into the report
- * body, which flows on to the LLM stages and IOC extraction.
+ * Text of a subtree with a space at every element boundary.
+ *
+ * The boundary is the whole point: `<td>evil.com</td><td>bad.net</td>` has to yield two
+ * tokens, not `evil.combad.net`. Concatenating text nodes (what a plain `.text()` does)
+ * merges adjacent indicators into one value that IOC extraction can never match.
+ *
+ * `liftHrefs` reproduces the anchor-href lift for IOC and reference sections, where the
+ * link target is itself the indicator.
  */
-const NAMED_ENTITIES = new Map<string, string>(
-  Object.entries({
-    amp: '&',
-    lt: '<',
-    gt: '>',
-    quot: '"',
-    apos: "'",
-    nbsp: ' ',
-    copy: '\u00a9',
-    reg: '\u00ae',
-    hellip: '\u2026',
-    mdash: '\u2014',
-    ndash: '\u2013',
-    lsquo: '\u2018',
-    rsquo: '\u2019',
-    ldquo: '\u201c',
-    rdquo: '\u201d',
-  })
-);
+const inlineTextOf = (nodes: ParsedNode[], liftHrefs: boolean): string => {
+  const out: string[] = [];
+  const stack: WalkStep[] = [];
+  pushNodes(stack, nodes);
+
+  while (stack.length > 0) {
+    const step = stack.pop();
+    if (!step) break;
+
+    if (step.kind === 'emit') {
+      out.push(step.text);
+    } else {
+      const { node } = step;
+      const liftedHref =
+        isElement(node) && liftHrefs && elementName(node) === 'a' ? hrefOf(node) : undefined;
+
+      if (node.type === 'text') {
+        out.push(node.data ?? '');
+      } else if (!isElement(node)) {
+        // Comments, directives, and CDATA carry no report text, but they did separate
+        // the text on either side, so they still emit a boundary. Dropping the node
+        // wholesale is what keeps `<!-- hidden > c2.evil.test -->` from being extracted
+        // as a live IOC; emitting the boundary is what keeps `evil.com<!-- x -->bad.net`
+        // from merging into one unextractable token.
+        out.push(' ');
+      } else if (RAW_TEXT_NAMES.has(elementName(node))) {
+        out.push(' ');
+      } else if (liftedHref !== undefined) {
+        out.push(` ${collapseWhitespace(inlineTextOf(childrenOf(node), false))} ${liftedHref} `);
+      } else {
+        out.push(' ');
+        stack.push({ kind: 'emit', text: ' ' });
+        pushNodes(stack, childrenOf(node));
+      }
+    }
+  }
+
+  return out.join('');
+};
+
+const extractPlainText = (html: string): string => inlineTextOf(parseTopLevelNodes(html), false);
 
 /**
- * `String.fromCodePoint` throws on anything above the Unicode maximum, and feed
- * HTML is untrusted, so `&#9999999;` would take down the whole extraction.
+ * Strip HTML tags and decode entities, yielding the plain text stored as
+ * `content.body_text`.
+ *
+ * RSS feeds embed HTML in `<description>` and `<content:encoded>`. `body_text` feeds
+ * inference (`semantic_text`) and the BM25 sibling field, and the downstream
+ * `enrich_threat_report` workflow re-runs IOC regex extraction over it, so it needs to
+ * be text with intact token boundaries rather than intact markup.
+ *
+ * The original HTML is preserved as `content.body_html` (mapped `index: false`) for
+ * archival, so extraction can be re-run without re-fetching. It is unsanitized
+ * attacker-controlled feed markup and must not be rendered: `extractArticleHtml`
+ * removes a little chrome but preserves everything dangerous, so a consumer that
+ * injects it has stored XSS. Render `body_text`.
  */
-const codePointToString = (code: number, fallback: string): string =>
-  Number.isInteger(code) && code >= 0 && code <= 0x10ffff ? String.fromCodePoint(code) : fallback;
-
-const decodeEntities = (input: string): string =>
-  input.replace(/&(#x?[0-9a-fA-F]+|[a-zA-Z]+);/g, (match, entity: string) => {
-    if (entity.startsWith('#x') || entity.startsWith('#X')) {
-      return codePointToString(parseInt(entity.slice(2), 16), match);
-    }
-    if (entity.startsWith('#')) {
-      return codePointToString(parseInt(entity.slice(1), 10), match);
-    }
-    const replacement = NAMED_ENTITIES.get(entity);
-    return replacement !== undefined ? replacement : match;
-  });
+export const stripHtml = (html: string | undefined | null): string => {
+  if (!html) return '';
+  const first = extractPlainText(capInput(html));
+  const text = RESIDUAL_CLOSING_TAG.test(first) ? extractPlainText(first) : first;
+  return collapseWhitespace(text);
+};
 
 /**
  * Collapse runs of whitespace (including unicode line separators) and
@@ -201,71 +242,117 @@ export const truncate = (input: string, maxLength: number): string => {
   // a title like "x ".repeat(N) + "very long word" would shrink to two
   // characters.
   if (lastBoundary > contentLength * 0.6) {
-    return `${slice.slice(0, lastBoundary).trimEnd()}\u2026`;
+    return `${slice.slice(0, lastBoundary).trimEnd()}…`;
   }
-  return `${slice.trimEnd()}\u2026`;
+  return `${slice.trimEnd()}…`;
 };
 
-/**
- * Split HTML at heading tag boundaries, returning chunks annotated with
- * their section kind. Each chunk carries the raw HTML for that segment
- * (including the heading tag itself for non-prose chunks).
- */
-const splitHtmlBySections = (html: string): Array<{ kind: SectionKind; html: string }> => {
-  const chunks: Array<{ kind: SectionKind; html: string }> = [];
-  let currentKind: SectionKind = 'prose';
-  // Depth of the heading that established `currentKind`, so a deeper unclassified
-  // subsection can inherit it.
-  let currentDepth = 0;
-  let currentHtml = '';
+const HEADING_NAMES = new Set(['h1', 'h2', 'h3', 'h4', 'h5', 'h6']);
 
-  const headingRe = /<h([1-6])[^>]*>([\s\S]*?)<\/h\1>/gi;
-  let lastIndex = 0;
-  let m: RegExpExecArray | null;
+/** Elements that imply a line boundary in the structured form. */
+const BLOCK_NAMES = new Set([
+  'p',
+  'div',
+  'section',
+  'article',
+  'aside',
+  'header',
+  'footer',
+  'main',
+  'figure',
+  'blockquote',
+  'pre',
+  'ul',
+  'ol',
+  'table',
+  'thead',
+  'tbody',
+  'tfoot',
+]);
 
-  while ((m = headingRe.exec(html)) !== null) {
-    const beforeHeading = html.slice(lastIndex, m.index);
-    if (beforeHeading) {
-      currentHtml += beforeHeading;
-    }
-    // Flush the current chunk before starting the new section.
-    if (currentHtml) {
-      chunks.push({ kind: currentKind, html: currentHtml });
-    }
-    const depth = Number(m[1]);
-    // Decode entities before classifying: `Indicators&nbsp;of&nbsp;Compromise` is a
-    // completely ordinary heading, and classifying the raw form read it as prose, so
-    // its anchor hrefs were dropped instead of lifted.
-    const headingText = collapseWhitespace(decodeEntities(stripTags(m[2], ' ')));
-    const classified = classifyHeader(headingText);
+const renderStructured = (html: string): string => {
+  // Section state, advanced in document order as headings are met. A heading that
+  // classifies as ioc or references becomes the anchor for everything below it, and a
+  // deeper unclassified heading is treated as its subsection: without that,
+  // `<h2>Indicators of Compromise</h2><h3>Domains</h3>` fell back to prose at `Domains`
+  // and dropped every href under it.
+  let sectionKind: SectionKind = 'prose';
+  let sectionDepth = 0;
 
-    if (classified !== 'prose') {
-      // An explicitly classified heading always wins and becomes the new anchor.
-      currentKind = classified;
-      currentDepth = depth;
-    } else if (currentKind !== 'prose' && depth > currentDepth) {
-      // A deeper unclassified heading is a subsection of the section we are in, so
-      // keep it. `<h2>Indicators of Compromise</h2><h3>Domains</h3>` used to fall
-      // back to prose at `Domains` and drop every href under it.
-      // currentKind and currentDepth are unchanged.
+  const out: string[] = [];
+  const stack: WalkStep[] = [];
+  pushNodes(stack, parseTopLevelNodes(html));
+
+  while (stack.length > 0) {
+    const step = stack.pop();
+    if (!step) break;
+
+    if (step.kind === 'emit') {
+      out.push(step.text);
     } else {
-      currentKind = 'prose';
-      currentDepth = depth;
+      const { node } = step;
+      const name = elementName(node);
+      // Anchors are lifted only under an IOC or references heading, where the link
+      // target is itself the indicator.
+      const lift = sectionKind === 'ioc' || sectionKind === 'references';
+
+      if (node.type === 'text') {
+        out.push(node.data ?? '');
+      } else if (!isElement(node)) {
+        // Comments, doctype, and CDATA contribute a boundary only.
+        out.push(' ');
+      } else if (RAW_TEXT_NAMES.has(name)) {
+        out.push(' ');
+      } else if (HEADING_NAMES.has(name)) {
+        const depth = Number(name.slice(1));
+        const text = collapseWhitespace(inlineTextOf(childrenOf(node), false));
+        const classified = classifyHeader(text);
+        if (classified !== 'prose') {
+          // An explicitly classified heading becomes the new anchor.
+          sectionKind = classified;
+          sectionDepth = depth;
+        } else if (sectionKind === 'prose' || depth <= sectionDepth) {
+          sectionKind = 'prose';
+          sectionDepth = depth;
+        }
+        // The remaining case is a deeper unclassified heading inside a classified
+        // section, which is a subsection: the anchor stays put.
+        if (text) out.push(`\n## ${text}\n`);
+      } else if (name === 'tr') {
+        const cellTexts = childrenOf(node)
+          .filter((child) => ['td', 'th'].includes(elementName(child)))
+          .map((cell) => collapseWhitespace(inlineTextOf(childrenOf(cell), lift)));
+        out.push(cellTexts.length > 0 ? `\n| ${cellTexts.join(' | ')} |\n` : '\n');
+      } else if (name === 'li') {
+        const text = collapseWhitespace(inlineTextOf(childrenOf(node), lift));
+        if (text) out.push(`\n- ${text}\n`);
+      } else if (name === 'a') {
+        const text = collapseWhitespace(inlineTextOf(childrenOf(node), false));
+        const href = lift ? hrefOf(node) : undefined;
+        // Prose anchors collapse to their visible text. Clickable inline citations
+        // (vendor docs, GitHub tool links, blog navigation) would otherwise flood
+        // extraction with reference noise, and a real inline IOC appears as defanged
+        // literal text that the regex path picks up regardless.
+        out.push(href !== undefined ? `${text} ${href} ` : `${text} `);
+      } else if (name === 'br') {
+        out.push('\n');
+      } else if (BLOCK_NAMES.has(name)) {
+        out.push('\n');
+        stack.push({ kind: 'emit', text: '\n' });
+        pushNodes(stack, childrenOf(node));
+      } else {
+        // Inline element: no boundary, contents kept.
+        pushNodes(stack, childrenOf(node));
+      }
     }
-
-    currentHtml = m[0]; // include the heading tag in this chunk
-    lastIndex = m.index + m[0].length;
   }
 
-  const remaining = html.slice(lastIndex);
-  if (remaining) {
-    currentHtml += remaining;
-  }
-  if (currentHtml) {
-    chunks.push({ kind: currentKind, html: currentHtml });
-  }
-
-  return chunks;
+  return out
+    .join('')
+    .split('\n')
+    .map((line) => line.replace(/[ \t]+/g, ' ').trim())
+    .filter((line) => line.length > 0)
+    .join('\n');
 };
 
 /**
@@ -278,7 +365,7 @@ const splitHtmlBySections = (html: string): Array<{ kind: SectionKind; html: str
  * `stripHtml` are UNCHANGED.
  *
  * Transformations:
- *   <script>/<style>          → stripped (mirrors stripHtml pre-pass)
+ *   <script>/<style>          → removed as whole elements
  *   <h1>–<h6>                 → ## heading text
  *   <tr> with <td>/<th> cells → | cell1 | cell2 | pipe-delimited row
  *   <li>                      → - item text
@@ -286,126 +373,14 @@ const splitHtmlBySections = (html: string): Array<{ kind: SectionKind; html: str
  *   <a href> in IOC/References sections → "anchortext URL" (href lifted as token)
  *   <a href> in prose         → anchor text only (href dropped, mirrors reader-mode)
  *   inline tags               → removed; content kept
- *   HTML entities             → decoded (reuses decodeEntities)
+ *   HTML entities             → decoded by the parser
  *
  * The anchor-href lift is SCOPED to IOC and References heading sections only.
- * Prose <a href> links are collapsed to their anchor text so that clickable
- * inline citations (learn.microsoft.com, GitHub tool links, blog navigation)
- * don't flood extraction with reference-noise URLs. Real inline IOCs appear
- * as defanged literal text in prose and are extracted by the regex path
- * regardless of this anchor-text collapse.
  */
 export const htmlToStructured = (html: string | undefined | null): string => {
   if (!html) return '';
-  const capped = capInput(html);
-
-  // 1. Drop script/style bodies (same pre-pass as stripHtml). The end tag
-  //    matches attributes/junk too (`</script foo>`, `</script\t\n bar>`) so a
-  //    crafted close tag cannot smuggle a body past the stripper.
-  const cleaned = stripScriptAndStyle(capped);
-
-  // 2. Split at heading boundaries so each chunk knows its section kind.
-  //    Href-lifting is applied only to ioc and references chunks (step 3 below).
-  const sectionChunks = splitHtmlBySections(cleaned);
-
-  const processedParts: string[] = [];
-
-  for (const { kind, html: chunkHtml } of sectionChunks) {
-    let s = chunkHtml;
-
-    // 3. Anchor href lift — only for IOC and References sections.
-    //    In prose: collapse <a> to its inner text (href dropped).
-    if (kind === 'ioc' || kind === 'references') {
-      // Lift hrefs into plain text FIRST, before container transforms, so URLs
-      // inside <li>/<td> survive. Produces "anchortext URL" as a bare token.
-      // Both quoted and unquoted href forms. Unquoted is valid HTML, and without
-      // the second alternative the generic tag stripper removed the attribute and
-      // an href-only IOC was lost entirely.
-      s = s.replace(
-        // `\shref\s*=` requires a real attribute boundary. Without it the greedy
-        // prefix could run past `data-href="..."` and lift the tracker instead of the
-        // link, which in an IOC section both loses the indicator and invents one.
-        /<a\b[^>]*?\shref\s*=\s*(?:["']([^"']+)["']|([^\s"'>]+))[^>]*>([\s\S]*?)<\/a>/gi,
-        (_m, quotedHref: string | undefined, bareHref: string | undefined, inner: string) => {
-          const href = quotedHref ?? bareHref ?? '';
-          const text = stripTags(inner, ' ').trim();
-          return `${text} ${href} `;
-        }
-      );
-    } else {
-      // Prose: collapse anchor to its visible text only.
-      s = s.replace(/<a\s[^>]*>([\s\S]*?)<\/a>/gi, (_m, inner: string) => {
-        return `${stripTags(inner, ' ').trim()} `;
-      });
-    }
-
-    // 4. Headings → "## text\n"
-    s = s.replace(/<h[1-6][^>]*>([\s\S]*?)<\/h[1-6]>/gi, (_m, inner: string) => {
-      const text = stripTags(inner, ' ').trim();
-      return text ? `\n## ${collapseWhitespace(text)}\n` : '';
-    });
-
-    // 5. Table rows → "| cell | cell |\n"
-    //    `</tr>` is optional too, so terminate on the next row or the table close.
-    s = s.replace(
-      /<tr\b[^>]*>([\s\S]*?)(?=<tr\b|<\/tr>|<\/tbody\b|<\/thead\b|<\/table\b|$)/gi,
-      (_m, inner: string) => {
-        const cellTexts: string[] = [];
-        // `</td>` and `</th>` are optional in HTML, so terminate on the next cell or the
-        // row/table close rather than requiring the explicit end tag. Without this a
-        // compact table fell through to generic tag removal and its cells ran together,
-        // merging adjacent indicators into one unextractable token.
-        const cellPattern =
-          /<t[dh]\b[^>]*>([\s\S]*?)(?=<t[dh]\b|<\/t[dh]>|<\/tr\b|<\/tbody\b|<\/table\b|$)/gi;
-        let cellMatch: RegExpExecArray | null;
-        while ((cellMatch = cellPattern.exec(inner)) !== null) {
-          const cellContent = stripTags(cellMatch[1], ' ').trim();
-          cellTexts.push(collapseWhitespace(cellContent));
-        }
-        return cellTexts.length > 0 ? `\n| ${cellTexts.join(' | ')} |\n` : '\n';
-      }
-    );
-
-    // 6. List items → "- text\n"
-    // `</li>` is optional too, and `<ul><li>evil.com<li>bad.net</ul>` is ordinary vendor
-    // markup. Requiring it merged the two into `evil.combad.net`.
-    s = s.replace(
-      /<li\b[^>]*>([\s\S]*?)(?=<li\b|<\/li>|<\/ul\b|<\/ol\b|$)/gi,
-      (_m, inner: string) => {
-        const text = stripTags(inner, ' ').trim();
-        return text ? `\n- ${collapseWhitespace(text)}\n` : '';
-      }
-    );
-
-    // 7. Block-level elements → newline boundary.
-    s = s.replace(
-      /<\/?(p|div|section|article|aside|header|footer|main|figure|blockquote|pre|ul|ol|table|thead|tbody|tfoot)[^>]*>/gi,
-      '\n'
-    );
-    s = s.replace(/<br\s*\/?>/gi, '\n');
-
-    // 8. Strip remaining tags (inline and any leftovers). Loop until stable so
-    //    a crafted string like `<scr<script>ipt>` cannot reassemble a tag after
-    //    a single pass.
-    let previous: string;
-    do {
-      previous = s;
-      s = stripTags(s, '');
-    } while (s !== previous);
-
-    processedParts.push(s);
-  }
-
-  // 9. Decode HTML entities.
-  const result = decodeEntities(processedParts.join(''));
-
-  // 10. Normalise runs within each line; preserve structural newlines.
-  const lines = result
-    .split('\n')
-    .map((line) => line.replace(/[ \t]+/g, ' ').trim())
-    .filter((line) => line.length > 0);
-
-  return lines.join('\n');
+  const first = renderStructured(capInput(html));
+  return RESIDUAL_CLOSING_TAG.test(first) ? renderStructured(first) : first;
 };
 
 /** `content` block written by every ingest path (adapters + manual ingest). */

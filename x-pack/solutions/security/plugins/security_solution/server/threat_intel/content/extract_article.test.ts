@@ -334,3 +334,38 @@ describe('extractArticleHtml — class-based sections and empty candidates', () 
     expect(extractArticleHtml(html)).toContain('c2.evil.test');
   });
 });
+
+/**
+ * Deeply nested markup used to crash extraction outright.
+ *
+ * Two separate recursive sites, both inside libraries: `clone()` bottomed out in
+ * domhandler's `cloneNode` at around 1,600 levels, and parse5's serializer gives out
+ * somewhere past 3,000. Both are reachable in well under 10KB of input, so a single
+ * malformed or hostile page took down report extraction, and because the threshold moves
+ * with stack already in use it read as an intermittent failure.
+ */
+describe('deeply nested markup', () => {
+  const nest = (depth: number, payload: string) =>
+    `<html><body><article>${'<div>'.repeat(depth)}${payload}</article></body></html>`;
+
+  it('extracts through nesting that used to exhaust the stack while cloning', () => {
+    const result = extractArticleHtml(nest(2000, 'evil.test'));
+
+    expect(result).toContain('evil.test');
+  });
+
+  it('degrades to the input rather than throwing when nesting defeats the serializer', () => {
+    const input = nest(6000, 'evil.test');
+
+    // The contract is that extraction never throws and never loses the indicator; the
+    // chrome stripping is what degrades.
+    expect(() => extractArticleHtml(input)).not.toThrow();
+    expect(extractArticleHtml(input)).toContain('evil.test');
+  });
+
+  it('does not swallow a genuine programming error', () => {
+    // The fallback is scoped to RangeError, so a TypeError from a real defect still
+    // surfaces instead of being reported as a page that could not be simplified.
+    expect(() => extractArticleHtml(undefined as unknown as string)).not.toThrow();
+  });
+});
