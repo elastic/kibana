@@ -161,16 +161,13 @@ An older high-severity notification can now fall outside the cap; server-side pa
 Read state is per user, lives in `userStorage`, and never touches the notification document. The
 list route **annotates** each item with `isRead` and returns the same order to every caller.
 
-- `readAllBefore` is a single timestamp marker: a notification whose representative copy is at or
-  before it reads as read. It is stamped on the user's first read, so a new user inherits the
-  backlog as read rather than a badge of everything still inside retention — the notifications
-  are still listed, they just don't count as new.
-- `_mark_all_read` advances the marker to now and clears the per-id overrides, which a marker at
-  now already subsumes.
-- `_mark_read` records a per-id override stamped with the instant it was taken. The override
-  acknowledges **the copy in hand**: a later re-push of the same `notification_id` postdates the
-  override and reads as unread again, and marking it read again re-anchors the override to the new
-  copy. Suppressing an id across re-pushes is muting, which v1 does not have.
+- `readAllBefore` is a single timestamp marker for a user ("mark all as read")
+  any notifications whose timestamp is at or before this show up as read.
+  It is stamped on the user's first read, so a new user doesn't get a giant unread backlog.
+- `_mark_all_read` advances the marker to now and clears the individual overrides
+- `_mark_read` adds an override for a specific notification id with a timestamp.
+  a later re-push of the same `notification_id` postdates the override and shows as unread again.
+  marking it read again updates the override timestamp (i.e. this is not "mute")
 - Callers with no user profile (API keys, headless consumers) get the list with `isRead` absent
   rather than a 403. The mark routes reject them, since there is no read state to write.
 

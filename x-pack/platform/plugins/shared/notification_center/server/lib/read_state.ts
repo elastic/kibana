@@ -17,8 +17,8 @@ import {
 
 /**
  * Per-user read state used to annotate the notification list.
- * `readAllBefore` is the bulk catch-up marker, stamped on the user's first read; `overrides`
- * holds the per-id exceptions taken since it, each stamped with the instant it was recorded.
+ * `readAllBefore` is the timestamped catch-up marker: "mark all as read"
+ * `overrides` holds the individual IDs marked as read since the catch-up marker.
  * `markAllRead` advances the marker and clears the overrides, since a marker at `now` already
  * subsumes every entry.
  */
@@ -29,8 +29,7 @@ export interface NotificationReadState {
 
 /**
  * Stamp the catch-up marker at the moment a user first reads their notifications, so the
- * backlog they inherit arrives read instead of badging everything still inside retention.
- * The notifications themselves stay in the list to be browsed.
+ * backlog they inherit doesn't show up as unread.
  */
 const initializeReadHorizon = async (client: IUserStorageClient): Promise<string> => {
   const readAllBefore = new Date().toISOString();
@@ -39,10 +38,9 @@ const initializeReadHorizon = async (client: IUserStorageClient): Promise<string
 };
 
 /**
- * Fetch the user's read state for annotating the notification list, initializing the catch-up
- * marker on a first read.
- * A userStorage failure degrades to `undefined` (an unannotated list) instead of
- * failing the whole read path.
+ * Fetch the user's read state for annotating the notification list.
+ * Stamp the catch-up marker on a first read.
+ * A userStorage failure results in `undefined` (an unannotated list).
  */
 export const getReadState = async (
   client: IUserStorageClient,
@@ -63,10 +61,10 @@ export const getReadState = async (
 };
 
 /**
- * Resolve whether a notification is read, judged on the timestamp of the copy representing it.
- * A per-id override wins over the bulk marker, and both are time-based: a copy pushed after
- * whichever applies is new activity and reads as unread. A `read: false` override — the half
- * of the stored shape no route writes yet — pins the id unread regardless of the copy.
+ * Determine whether a notification is read
+ * 1. Check if the notification is marked as read in the overrides object
+ * 2. If not, check if the notification is earlier than the readAllBefore timestamp
+ * 3. If both are false, the notification is unread
  */
 export const isReadAt = (
   { overrides, readAllBefore }: NotificationReadState,
@@ -97,9 +95,8 @@ const boundOverrides = (overrides: ReadOverrides): ReadOverrides => {
 };
 
 /**
- * Record a read override for a notification id, re-stamping `markedAt` when one already exists:
- * the override acknowledges the copy in hand, so an id marked read again after a re-push has to
- * anchor on the newer copy to read as read.
+ * Mark an individual notification as read, adding it to the overrides for a user.
+ * Update `markedAt` if that notification ID was already marked as read.
  */
 export const markRead = async (client: IUserStorageClient, id: string): Promise<void> => {
   const overrides = await client.get<ReadOverrides>(OVERRIDES_KEY);

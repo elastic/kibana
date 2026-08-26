@@ -23,9 +23,9 @@ import { isReadAt, type NotificationReadState } from './read_state';
 import { severityTTLQuery } from './severity_ttl_query';
 
 /**
- * Ceiling on collapsed notifications returned per query, after collapsing duplicates
- * and filtering by severity TTL and the from/to window. The client paginates over this
- * set; severity TTLs keep real volumes well under it.
+ * Max number of results the client will get back per query. This is enforced on the
+ * query results after collapsing duplicates. Meant as an arbitrary start point. Cleanup
+ * task on expired notifications should keep real volumes well under it.
  */
 export const NOTIFICATION_QUERY_RESULT_LIMIT = 1000;
 
@@ -35,15 +35,10 @@ export interface NotificationQueryDeps {
 }
 
 /**
- * Doc-level filters. User-supplied filters are limited to attributes identical across every copy
- * of a notification (`namespace`, `type`): a filter on mutable state would change which copy
- * represents the collapsed group, and with it the timestamp the read annotation anchors on.
- * `from`/`to` selects which copies are candidates for the window: a notification appears if any
- * copy falls inside it, represented by its newest in-window copy.
+ * These doc-level filters are applied to the query before collapsing duplicates.
  *
- * The severity TTL gate is the one filter on mutable state, and it is retention rather than a
- * facet. A downgraded re-push expires before an older, higher-severity copy, so until that copy
- * leaves its own window it can hand the group a stale representative.
+ * @param params - The query parameters parsed from the request.
+ * @returns The filter object for the DSL query.
  */
 const buildFilters = (params: NotificationQueryParamsParsed): QueryDslQueryContainer[] => {
   const { namespace, type, from, to } = params;
@@ -68,6 +63,7 @@ const buildFilters = (params: NotificationQueryParamsParsed): QueryDslQueryConta
  * - Return only the newest doc per `notification_id`, collapse duplicates.
  * - Filter by severity TTL, namespace, type and time-range
  * - Sort by newest first.
+ * - Annotate results with read state if provided (headless consumers don't have a read state)
  */
 export const queryNotifications = async (
   deps: NotificationQueryDeps,

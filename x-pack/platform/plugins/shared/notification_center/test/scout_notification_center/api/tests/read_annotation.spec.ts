@@ -23,9 +23,7 @@ const NAMESPACE = 'nc_api_read_state_test';
  * it takes its own mark-all-read baseline in beforeAll and seeds docs relative to that
  * marker, making the assertions immune to read-state writes from other specs.
  *
- * A per-id override only decides the outcome for a copy in the interval
- * `(marker, markedAt]`, and both ends are wall-clock instants from live API calls — hence
- * the millisecond offsets from the marker rather than round numbers.
+ * A per-id override only decides the outcome for a copy in the interval `(marker, markedAt]`
  */
 apiTest.describe(
   'Notification Center - read-state annotation',

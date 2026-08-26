@@ -14,8 +14,7 @@ import { notificationIdSchema } from '../../common/notification_schema';
  * This is used to track whether users have marked notifications as read.
  */
 
-/** Timestamp marker: notifications at or before it are read. Stamped on a user's first read,
- * so an inherited backlog is not badged as unread.
+/** Timestamp marker: notifications at or before it are read.
  */
 export const READ_ALL_BEFORE_KEY = 'notificationCenter:readAllBefore';
 
