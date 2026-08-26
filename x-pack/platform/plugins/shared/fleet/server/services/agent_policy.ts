@@ -256,9 +256,13 @@ class AgentPolicyService {
       `Starting update of agent policy [${id}] with soClient scoped to [${soClient.getCurrentNamespace()}]`
     );
 
+    // Skip the (potentially large, O(n) package-policy-count) full package policy fetch when
+    // deploying asynchronously: the async branch below only schedules a deploy task by id/spaceId
+    // and never reads `existingAgentPolicy.package_policies` — the scheduled task fetches whatever
+    // it needs itself when it runs.
     const [savedObjectType, existingAgentPolicy] = await Promise.all([
       getAgentPolicySavedObjectType(),
-      this.get(soClient, id, true),
+      this.get(soClient, id, !options.asyncDeploy),
     ]);
 
     auditLoggingService.writeCustomSoAuditLog({
@@ -2374,6 +2378,21 @@ class AgentPolicyService {
     }
   }
 
+  public async agentPoliciesExistForDownloadSourceId(downloadSourceId: string): Promise<boolean> {
+    const savedObjectType = await getAgentPolicySavedObjectType();
+    const escapedId = escapeSearchQueryPhrase(downloadSourceId);
+    const result = await appContextService
+      .getInternalUserSOClientWithoutSpaceExtension()
+      .find<AgentPolicySOAttributes>({
+        type: savedObjectType,
+        filter: `(${savedObjectType}.attributes.download_source_id:${escapedId})`,
+        fields: ['id'],
+        perPage: 1,
+        namespaces: ['*'],
+      });
+    return result.total > 0;
+  }
+
   public async bumpAllAgentPoliciesForDownloadSource(
     esClient: ElasticsearchClient,
     downloadSourceId: string,
@@ -2980,7 +2999,9 @@ function buildVerifierCredentialVars(
   if (provider === 'aws') {
     const awsVars = connectorVars as AwsCloudConnectorVars;
     vars.credentials_role_arn = awsVars.role_arn;
-    vars.credentials_external_id = awsVars.external_id as CloudConnectorSecretVar;
+    if (awsVars.external_id) {
+      vars.credentials_external_id = awsVars.external_id as CloudConnectorSecretVar;
+    }
   } else if (provider === 'azure') {
     const azureVars = connectorVars as AzureCloudConnectorVars;
     vars.credentials_tenant_id = azureVars.tenant_id;

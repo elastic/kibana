@@ -18,17 +18,17 @@ const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPoli
   description: '',
   enabled: true,
   matcher: null,
-  groupBy: null,
+  group_by: null,
   tags: null,
-  groupingMode: null,
+  grouping_mode: null,
   throttle: null,
-  snoozedUntil: null,
+  snoozed_until: null,
   destinations: [],
-  auth: { owner: 'elastic', createdByUser: true },
-  createdBy: 'elastic',
-  createdAt: '2026-01-01T00:00:00.000Z',
-  updatedBy: 'elastic',
-  updatedAt: '2026-01-01T00:00:00.000Z',
+  auth: { owner: 'elastic', created_by_user: true },
+  created_by: 'elastic',
+  created_at: '2026-01-01T00:00:00.000Z',
+  updated_by: 'elastic',
+  updated_at: '2026-01-01T00:00:00.000Z',
   ...overrides,
 });
 
@@ -53,14 +53,14 @@ describe('ActionPolicySnoozeButton', () => {
   });
 
   it('renders a bell icon when snoozedUntil is null (not snoozed)', () => {
-    renderButton(createPolicy({ snoozedUntil: null }));
+    renderButton(createPolicy({ snoozed_until: null }));
 
     expect(screen.getByTestId('actionPolicySnoozeButton')).toBeInTheDocument();
     expect(screen.queryByTestId('actionPolicyUnsnoozeButton')).not.toBeInTheDocument();
   });
 
   it('renders a bell icon when snoozedUntil is in the past (expired snooze)', () => {
-    renderButton(createPolicy({ snoozedUntil: new Date(Date.now() - 3_600_000).toISOString() }));
+    renderButton(createPolicy({ snoozed_until: new Date(Date.now() - 3_600_000).toISOString() }));
 
     expect(screen.getByTestId('actionPolicySnoozeButton')).toBeInTheDocument();
     expect(screen.queryByTestId('actionPolicyUnsnoozeButton')).not.toBeInTheDocument();
@@ -73,14 +73,14 @@ describe('ActionPolicySnoozeButton', () => {
       day: 'numeric',
     });
 
-    renderButton(createPolicy({ snoozedUntil }));
+    renderButton(createPolicy({ snoozed_until: snoozedUntil }));
 
     expect(screen.queryByTestId('actionPolicySnoozeButton')).not.toBeInTheDocument();
     expect(screen.getByTestId('actionPolicyUnsnoozeButton')).toHaveTextContent(formattedDate);
   });
 
   it('unsnoozes directly when the snoozed button is clicked', async () => {
-    renderButton(createPolicy({ snoozedUntil: new Date(Date.now() + 86_400_000).toISOString() }));
+    renderButton(createPolicy({ snoozed_until: new Date(Date.now() + 86_400_000).toISOString() }));
 
     await userEvent.click(screen.getByTestId('actionPolicyUnsnoozeButton'));
 

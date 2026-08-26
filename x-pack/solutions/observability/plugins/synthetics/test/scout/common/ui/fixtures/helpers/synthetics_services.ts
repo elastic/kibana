@@ -68,6 +68,7 @@ export interface SyntheticsServicesFixture {
   deleteParams: () => Promise<void>;
   deletePrivateLocations: () => Promise<void>;
   deleteSyntheticsIntegrations: () => Promise<void>;
+  deleteSyntheticsPackagePolicies: () => Promise<void>;
   deleteSyntheticsPackagePolicyByName: (name: string) => Promise<void>;
   deleteSettingsAndConnectors: () => Promise<void>;
   createFleetAgentPolicy: (name: string) => Promise<void>;
@@ -319,6 +320,7 @@ function createSyntheticsServices(
     await kbnClient.savedObjects.clean({
       types: ['synthetics-monitor', 'synthetics-monitor-multi-space', 'alert'],
     });
+    await deleteSyntheticsPackagePolicies();
     await cleanUpAlerts();
     await deletePings();
   };
@@ -402,6 +404,7 @@ function createSyntheticsServices(
     await kbnClient.savedObjects.clean({
       types: ['synthetics-monitor', 'synthetics-monitor-multi-space'],
     });
+    await deleteSyntheticsPackagePolicies();
     await deletePings();
   };
 
@@ -416,11 +419,7 @@ function createSyntheticsServices(
     cachedLocation = null;
   };
 
-  /**
-   * Deletes Synthetics package policies (integration policies) by exact name.
-   * Name format: {monitorName}-{locationLabel}-{namespace}, e.g. "https://amazon.com-Test private location-default"
-   */
-  const deleteSyntheticsPackagePolicyByName = async (name: string) => {
+  const getSyntheticsPackagePolicies = async (): Promise<Array<{ id: string; name: string }>> => {
     const { data } = await kbnClient.request({
       path: '/api/fleet/package_policies',
       method: 'GET',
@@ -429,16 +428,43 @@ function createSyntheticsServices(
         kuery: 'ingest-package-policies.package.name:synthetics',
       },
     });
-    const items =
-      (data as { items?: Array<{ id: string; name: string; policy_id: string }> })?.items ?? [];
-    const toDelete = items.filter((p) => p.name === name);
-    for (const pkg of toDelete) {
-      await kbnClient.request({
-        path: `/api/fleet/package_policies/${pkg.id}`,
-        method: 'DELETE',
-        query: { force: true },
-      });
+    return (data as { items?: Array<{ id: string; name: string }> })?.items ?? [];
+  };
+
+  const deletePackagePolicies = async (packagePolicyIds: string[]) => {
+    if (packagePolicyIds.length === 0) {
+      return;
     }
+    await kbnClient.request({
+      path: '/api/fleet/package_policies/delete',
+      method: 'POST',
+      body: { packagePolicyIds, force: true },
+    });
+  };
+
+  /**
+   * Deletes every Synthetics integration policy left in Fleet.
+   *
+   * Monitors are removed by deleting their saved objects directly, which never reaches the
+   * Synthetics delete API and therefore leaves the Fleet policies it created for private
+   * locations behind. A policy id is `{configId}-{locationId}`, so an orphaned policy makes
+   * every later monitor reusing that config id fail with a saved object conflict — a 500 that
+   * survives test retries and only disappears when the cluster is recreated.
+   */
+  const deleteSyntheticsPackagePolicies = async () => {
+    const policies = await getSyntheticsPackagePolicies();
+    await deletePackagePolicies(policies.map(({ id }) => id));
+  };
+
+  /**
+   * Deletes Synthetics package policies (integration policies) by exact name.
+   * Name format: {monitorName}-{locationLabel}-{namespace}, e.g. "https://amazon.com-Test private location-default"
+   */
+  const deleteSyntheticsPackagePolicyByName = async (name: string) => {
+    const policies = await getSyntheticsPackagePolicies();
+    await deletePackagePolicies(
+      policies.filter((policy) => policy.name === name).map(({ id }) => id)
+    );
   };
 
   const deleteSyntheticsIntegrations = async () => {
@@ -620,6 +646,7 @@ function createSyntheticsServices(
     deleteParams,
     deletePrivateLocations,
     deleteSyntheticsIntegrations,
+    deleteSyntheticsPackagePolicies,
     deleteSyntheticsPackagePolicyByName,
     createFleetAgentPolicy,
     deleteSettingsAndConnectors,

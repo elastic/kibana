@@ -7,7 +7,8 @@
 
 import type { FC } from 'react';
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
-import { EuiFormRow, EuiSpacer, EuiCallOut, EuiSkeletonText } from '@elastic/eui';
+import { EuiFormRow, EuiSpacer, EuiSkeletonText } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Query, Filter } from '@kbn/es-query';
@@ -197,19 +198,17 @@ export const AnomalyKqlFilter: FC<AnomalyKqlFilterProps> = React.memo(
           {errors && errors.length > 0 && (
             <>
               <EuiSpacer size="s" />
-              <EuiCallOut
+              <KbnDangerCallout
                 announceOnMount
                 title={i18n.translate('xpack.ml.anomalyDetectionAlert.kqlFilter.errorTitle', {
                   defaultMessage: 'Invalid KQL query',
                 })}
-                color="danger"
-                iconType="warning"
                 size="s"
               >
                 {errors.map((error, index) => (
                   <p key={index}>{error}</p>
                 ))}
-              </EuiCallOut>
+              </KbnDangerCallout>
             </>
           )}
         </div>

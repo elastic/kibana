@@ -22,4 +22,5 @@ export interface OnboardingPill {
   id: string;
   label: string;
   content: ReactNode;
+  trialOnly?: boolean;
 }

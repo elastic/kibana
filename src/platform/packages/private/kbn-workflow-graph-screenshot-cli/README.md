@@ -88,7 +88,7 @@ If the managed Chromium hasn't been installed (e.g. it was pruned, or bootstrap
 was skipped), Playwright's own launch error explains how to fetch it:
 
 ```
-npx playwright install chromium
+node scripts/playwright install chromium
 ```
 
 ## Caveats

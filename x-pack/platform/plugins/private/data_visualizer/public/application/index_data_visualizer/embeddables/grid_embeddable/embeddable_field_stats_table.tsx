@@ -23,7 +23,7 @@ const restorableDefaults = getDefaultDataVisualizerListState();
 const EmbeddableFieldStatsTableWrapper = (
   props: Required<FieldStatisticTableEmbeddableProps, 'dataView'>
 ) => {
-  const { onTableUpdate, onAddFilter, onRenderComplete } = props;
+  const { onTableUpdate, onAddFilter, onRenderComplete, onFieldsCountChange } = props;
 
   const [dataVisualizerListState, setDataVisualizerListState] =
     useState<Required<DataVisualizerIndexBasedAppState>>(restorableDefaults);
@@ -40,6 +40,7 @@ const EmbeddableFieldStatsTableWrapper = (
 
   const {
     configs,
+    fieldsCount,
     searchQueryLanguage,
     searchString,
     extendedColumns,
@@ -54,6 +55,11 @@ const EmbeddableFieldStatsTableWrapper = (
   useEffect(() => {
     setLastRefresh(Date.now());
   }, [props?.lastReloadRequestTime, setLastRefresh]);
+
+  useEffect(() => {
+    // undefined while (re)loading, so a stale or empty count isn't reported
+    onFieldsCountChange?.(progress === 100 ? fieldsCount : undefined);
+  }, [progress, fieldsCount, onFieldsCountChange]);
 
   const getItemIdToExpandedRowMap = useCallback(
     function (itemIds: string[], items: FieldVisConfig[]): ItemIdToExpandedRowMap {

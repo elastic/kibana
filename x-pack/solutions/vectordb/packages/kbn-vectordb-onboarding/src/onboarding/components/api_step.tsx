@@ -56,7 +56,7 @@ interface ApiStepProps {
 
 export const ApiStep = ({ tabs, consoleComment, docsPanel, pills, step, path }: ApiStepProps) => {
   const {
-    services: { application, share, console: consolePlugin },
+    services: { application, share, console: consolePlugin, cloud },
   } = useKibana();
   const { elasticsearchUrl, apiKey } = useOnboardingCredentials();
   const [language, setLanguage] = useState<Language>(DEFAULT_LANGUAGE);
@@ -75,6 +75,9 @@ export const ApiStep = ({ tabs, consoleComment, docsPanel, pills, step, path }: 
   );
 
   const telemetryPrefix = `vectordbOnboarding-${step}-${path}`;
+
+  const isInTrial = cloud?.isInTrial() ?? false;
+  const visiblePills = isInTrial ? pills : pills.filter(({ trialOnly }) => !trialOnly);
 
   const languageMenuItems = LANGUAGES.map((lang) => (
     <EuiContextMenuItem
@@ -104,10 +107,10 @@ export const ApiStep = ({ tabs, consoleComment, docsPanel, pills, step, path }: 
   return (
     <>
       <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false} color="subdued">
-        {pills.length > 0 && (
+        {visiblePills.length > 0 && (
           <>
             <EuiPanel paddingSize="s" color="transparent">
-              <OnboardingPills pills={pills} telemetryPrefix={telemetryPrefix} />
+              <OnboardingPills pills={visiblePills} telemetryPrefix={telemetryPrefix} />
             </EuiPanel>
             <EuiSpacer size="s" />
           </>

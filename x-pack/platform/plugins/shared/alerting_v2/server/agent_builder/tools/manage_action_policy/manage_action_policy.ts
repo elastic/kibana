@@ -156,7 +156,7 @@ Use operations[] to:
                 name: updatedData.name,
                 destinations: updatedData.destinations,
                 matcher: updatedData.matcher,
-                groupingMode: updatedData.groupingMode,
+                groupingMode: updatedData.grouping_mode,
                 throttle: updatedData.throttle,
               },
             },
