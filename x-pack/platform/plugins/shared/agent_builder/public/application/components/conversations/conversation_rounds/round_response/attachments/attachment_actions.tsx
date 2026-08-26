@@ -24,6 +24,8 @@ interface AttachmentActionsProps {
   iconOnly?: boolean;
 }
 
+const getIconType = ({ icon }: ActionButton) => (icon === 'expand' ? 'fullScreen' : icon);
+
 export const AttachmentActions: React.FC<AttachmentActionsProps> = ({
   buttons,
   iconOnly = false,
@@ -76,7 +78,7 @@ export const AttachmentActions: React.FC<AttachmentActionsProps> = ({
                   aria-label={button.label}
                   color="text"
                   size="s"
-                  iconType={button.icon ?? ''}
+                  iconType={getIconType(button) ?? ''}
                   isDisabled={button.disabled}
                   {...getNavProps(button)}
                 />
@@ -88,7 +90,7 @@ export const AttachmentActions: React.FC<AttachmentActionsProps> = ({
               <EuiButtonEmpty
                 color={button.color ?? 'text'}
                 size="s"
-                iconType={button.icon}
+                iconType={getIconType(button)}
                 isDisabled={button.disabled}
                 {...getNavProps(button)}
               >
@@ -107,7 +109,7 @@ export const AttachmentActions: React.FC<AttachmentActionsProps> = ({
                   aria-label={button.label}
                   color="text"
                   size="s"
-                  iconType={button.icon ?? ''}
+                  iconType={getIconType(button) ?? ''}
                   isDisabled={button.disabled}
                   {...getNavProps(button)}
                 />
@@ -119,7 +121,7 @@ export const AttachmentActions: React.FC<AttachmentActionsProps> = ({
               <EuiButton
                 color={button.color ?? 'text'}
                 size="s"
-                iconType={button.icon}
+                iconType={getIconType(button)}
                 isDisabled={button.disabled}
                 {...getNavProps(button)}
               >
@@ -165,7 +167,7 @@ export const AttachmentActions: React.FC<AttachmentActionsProps> = ({
                   id: 0,
                   items: overflowButtons.map((button) => ({
                     name: button.label,
-                    icon: button.icon,
+                    icon: getIconType(button),
                     disabled: button.disabled,
                     toolTipContent: button.disabled ? button.disabledReason : undefined,
                     href: button.href,
