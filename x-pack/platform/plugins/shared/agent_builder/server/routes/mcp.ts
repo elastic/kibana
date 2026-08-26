@@ -12,7 +12,6 @@ import path from 'node:path';
 import { createToolIdMappings } from '@kbn/agent-builder-genai-utils/langchain';
 import type { InternalToolDefinition } from '@kbn/agent-builder-server';
 import { MCP_SERVER_PATH } from '@kbn/agent-builder-common';
-import { apiPrivileges } from '../../common/features';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { KibanaMcpHttpTransport } from '../utils/mcp/kibana_mcp_http_transport';
