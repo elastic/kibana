@@ -10,7 +10,7 @@ import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { i18n } from '@kbn/i18n';
 
-export const GetConversationMetadataStepTypeId = 'agentBuilder.conversation.metadata.read';
+export const GetConversationMetadataStepTypeId = 'ai.conversation.metadata.read';
 
 const InputSchema = z.object({
   conversation_id: z.string().meta({

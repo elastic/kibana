@@ -9,8 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
 
-export const ConversationMetadataUpdatedTriggerId =
-  'agentBuilder.conversation.metadataUpdated' as const;
+export const ConversationMetadataUpdatedTriggerId = 'ai.conversation.metadataUpdated' as const;
 
 const conversationMetadataUpdatedEventSchema = z.object({
   conversationId: z.string().meta({
@@ -61,10 +60,17 @@ export const conversationMetadataUpdatedTriggerCommonDefinition: CommonTriggerDe
         {
           defaultMessage: `## Resume workflow when a proposal decision is recorded
 \`\`\`yaml
+version: '1'
+name: Handle proposal decision
 triggers:
   - type: {triggerId}
     on:
       condition: 'event.changedFields: "decision"'
+steps:
+  - name: handle_decision
+    type: console
+    with:
+      message: 'Decision recorded for conversation {{ event.conversationId }}'
 \`\`\``,
           values: {
             triggerId: ConversationMetadataUpdatedTriggerId,
@@ -76,10 +82,17 @@ triggers:
         {
           defaultMessage: `## React to severity changes on a specific template
 \`\`\`yaml
+version: '1'
+name: React to severity change
 triggers:
   - type: {triggerId}
     on:
       condition: 'event.templateId: "investigation" and event.changedFields: "severity"'
+steps:
+  - name: notify
+    type: console
+    with:
+      message: 'Severity changed on conversation {{ event.conversationId }}'
 \`\`\``,
           values: {
             triggerId: ConversationMetadataUpdatedTriggerId,
