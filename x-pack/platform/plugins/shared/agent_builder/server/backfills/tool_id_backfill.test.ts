@@ -46,9 +46,11 @@ const makeSkillSource = (toolIds: string[]): SkillProperties => ({
   updated_at: '2025-01-01T00:00:00.000Z',
 });
 
-const makeHit = <T>(source: T, id: string) => ({
+const makeHit = <T>(source: T, id: string, seqNo = 1, primaryTerm = 1) => ({
   _id: id,
   _index: '.chat-agents',
+  _seq_no: seqNo,
+  _primary_term: primaryTerm,
   _source: source,
   sort: [id],
 });
@@ -292,6 +294,29 @@ describe('backfillAgentToolIds', () => {
 
     expect(client.bulk as jest.Mock).not.toHaveBeenCalled();
   });
+
+  it('sorts on (id, space) for unambiguous search_after across spaces', async () => {
+    const source = makeAgentSource(['other.tool']);
+    const storage = buildAgentStorageMock([[source], []]);
+    const client = storage.getClient();
+
+    await backfillAgentToolIds({ storage, logger });
+
+    const searchReq = (client.search as jest.Mock).mock.calls[0][0];
+    expect(searchReq.sort).toEqual([{ id: 'asc' }, { space: 'asc' }]);
+  });
+
+  it('passes if_seq_no and if_primary_term into bulk index ops', async () => {
+    const source = makeAgentSource([OLD_ID]);
+    const storage = buildAgentStorageMock([[source], []]);
+    const client = storage.getClient();
+
+    await backfillAgentToolIds({ storage, logger });
+
+    const ops = (client.bulk as jest.Mock).mock.calls[0][0].operations;
+    expect(ops[0].index.if_seq_no).toBe(1);
+    expect(ops[0].index.if_primary_term).toBe(1);
+  });
 });
 
 describe('backfillSkillToolIds', () => {
@@ -348,5 +373,28 @@ describe('backfillSkillToolIds', () => {
     await backfillSkillToolIds({ storage, logger });
 
     expect(client.bulk as jest.Mock).not.toHaveBeenCalled();
+  });
+
+  it('sorts on (id, space) for unambiguous search_after across spaces', async () => {
+    const source = makeSkillSource(['other.tool']);
+    const storage = buildSkillStorageMock([[source], []]);
+    const client = storage.getClient();
+
+    await backfillSkillToolIds({ storage, logger });
+
+    const searchReq = (client.search as jest.Mock).mock.calls[0][0];
+    expect(searchReq.sort).toEqual([{ id: 'asc' }, { space: 'asc' }]);
+  });
+
+  it('passes if_seq_no and if_primary_term into bulk index ops', async () => {
+    const source = makeSkillSource([OLD_ID]);
+    const storage = buildSkillStorageMock([[source], []]);
+    const client = storage.getClient();
+
+    await backfillSkillToolIds({ storage, logger });
+
+    const ops = (client.bulk as jest.Mock).mock.calls[0][0].operations;
+    expect(ops[0].index.if_seq_no).toBe(1);
+    expect(ops[0].index.if_primary_term).toBe(1);
   });
 });

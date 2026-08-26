@@ -95,12 +95,22 @@ const getToolsFromAgentSource = (source: AgentProperties): ToolSelection[] => {
   return source.configuration?.tools ?? source.config?.tools ?? [];
 };
 
+interface BackfillHit<TDoc> {
+  _id: string;
+  _seq_no?: number;
+  _primary_term?: number;
+  _source?: TDoc;
+  sort?: SortResults;
+}
+
 interface BackfillClient<TDoc> {
   search: (req: StorageClientSearchRequest) => Promise<{
-    hits: { hits: Array<{ _id: string; _source?: TDoc; sort?: SortResults }> };
+    hits: { hits: Array<BackfillHit<TDoc>> };
   }>;
   bulk: (req: {
-    operations: Array<{ index: { _id: string; document: TDoc } }>;
+    operations: Array<{
+      index: { _id: string; document: TDoc; if_seq_no?: number; if_primary_term?: number };
+    }>;
     refresh: 'wait_for';
     throwOnFail: boolean;
   }) => Promise<unknown>;
@@ -110,6 +120,13 @@ interface BackfillClient<TDoc> {
  * Paginates through all documents in a storage index via search_after and bulk-indexes
  * any that need updating. The `processHits` callback receives one page of hits and returns
  * the bulk operations to apply (empty array = nothing to update for that page).
+ *
+ * Sorts on `(id, space)` — the globally-unique composite key — so search_after is
+ * unambiguous across spaces.
+ *
+ * Each bulk index op carries `if_seq_no`/`if_primary_term` from the search hit for
+ * optimistic concurrency control. A version conflict (concurrent edit) throws, which
+ * the outer pRetry catches and retries from scratch with fresh sequence numbers.
  */
 const paginatedUpdate = async <TDoc>({
   client,
@@ -121,9 +138,11 @@ const paginatedUpdate = async <TDoc>({
   label: string;
   logger: Logger;
   processHits: (
-    hits: Array<{ _id: string; _source?: TDoc }>,
+    hits: Array<BackfillHit<TDoc>>,
     now: Date
-  ) => Array<{ index: { _id: string; document: TDoc } }>;
+  ) => Array<{
+    index: { _id: string; document: TDoc; if_seq_no?: number; if_primary_term?: number };
+  }>;
 }): Promise<void> => {
   const now = new Date();
   let totalUpdated = 0;
@@ -133,7 +152,8 @@ const paginatedUpdate = async <TDoc>({
     const searchRequest: StorageClientSearchRequest = {
       track_total_hits: false,
       size: PAGE_SIZE,
-      sort: [{ id: 'asc' }],
+      seq_no_primary_term: true,
+      sort: [{ id: 'asc' }, { space: 'asc' }],
       ...(searchAfter && { search_after: searchAfter }),
     };
     const response = await client.search(searchRequest);
@@ -178,7 +198,14 @@ export const backfillAgentToolIds = async ({
     label: 'Agent',
     logger,
     processHits: (hits, now) => {
-      const ops: Array<{ index: { _id: string; document: AgentProperties } }> = [];
+      const ops: Array<{
+        index: {
+          _id: string;
+          document: AgentProperties;
+          if_seq_no?: number;
+          if_primary_term?: number;
+        };
+      }> = [];
       for (const hit of hits) {
         const source = hit._source;
         if (!source) continue;
@@ -200,6 +227,9 @@ export const backfillAgentToolIds = async ({
               update: { configuration: { tools: newTools } },
               updateDate: now,
             }),
+            ...(hit._seq_no !== undefined && hit._primary_term !== undefined
+              ? { if_seq_no: hit._seq_no, if_primary_term: hit._primary_term }
+              : {}),
           },
         });
       }
@@ -224,7 +254,14 @@ export const backfillSkillToolIds = async ({
     label: 'Skill',
     logger,
     processHits: (hits, now) => {
-      const ops: Array<{ index: { _id: string; document: SkillProperties } }> = [];
+      const ops: Array<{
+        index: {
+          _id: string;
+          document: SkillProperties;
+          if_seq_no?: number;
+          if_primary_term?: number;
+        };
+      }> = [];
       for (const hit of hits) {
         const source = hit._source;
         if (!source) continue;
@@ -241,6 +278,9 @@ export const backfillSkillToolIds = async ({
           index: {
             _id: String(hit._id),
             document: { ...source, tool_ids: newToolIds, updated_at: now.toISOString() },
+            ...(hit._seq_no !== undefined && hit._primary_term !== undefined
+              ? { if_seq_no: hit._seq_no, if_primary_term: hit._primary_term }
+              : {}),
           },
         });
       }
