@@ -9,13 +9,13 @@
 
 import type { ESQLFunction } from '@elastic/esql/types';
 import { Parser, Walker } from '@elastic/esql';
+import { inlineCastsMapping } from '@kbn/esql-language';
 import { sanitazeESQLInput } from '../sanitaze_input';
 import {
   getOperator,
   escapeStringValue,
   appendToESQLQuery,
   PARAM_TYPES_NO_NEED_IMPLICIT_STRING_CASTING,
-  getEsqlInlineCastType,
   extractMatchFunctionDetails,
   extractMvContainsFunctionDetails,
   getSupportedOperators,
@@ -66,8 +66,9 @@ function buildMultiValueFilterExpression(
   if (esMappingType) {
     const mvContainsValue =
       escapedValues.length === 1 ? escapedValues[0] : `[${escapedValues.join(', ')}]`;
-    const castType = getEsqlInlineCastType(esMappingType);
-    const mvContainsArgument = castType ? `${mvContainsValue}::${castType}` : mvContainsValue;
+    const mvContainsArgument = Object.hasOwn(inlineCastsMapping, esMappingType)
+      ? `${mvContainsValue}::${esMappingType}`
+      : mvContainsValue;
     return {
       expression:
         operation === '-'

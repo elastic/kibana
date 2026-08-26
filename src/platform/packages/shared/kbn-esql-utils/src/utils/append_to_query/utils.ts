@@ -15,7 +15,6 @@ import type {
   ESQLLiteral,
   ESQLStringLiteral,
 } from '@elastic/esql/types';
-import { inlineCastsMapping } from '@kbn/esql-language';
 
 export type SupportedOperation = '+' | '-' | 'is_not_null' | 'is_null';
 
@@ -33,14 +32,6 @@ export const PARAM_TYPES_NO_NEED_IMPLICIT_STRING_CASTING = [
   'number',
   'string',
 ];
-
-/**
- * Returns the ES|QL inline cast target for an Elasticsearch field type, or `undefined` when ES|QL has
- * no `::` cast for it (e.g. `text`). In that case the value is left uncast and ES|QL coerces it.
- */
-export function getEsqlInlineCastType(esType: string): string | undefined {
-  return Object.hasOwn(inlineCastsMapping, esType) ? esType : undefined;
-}
 
 /**
  * Gets the operator and expression type for the given operation
