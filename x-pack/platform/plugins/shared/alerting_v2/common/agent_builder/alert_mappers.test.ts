@@ -7,7 +7,7 @@
 
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
-import { alertEpisodeToAlertAttachment, mapLegacyEpisodeAttachmentData } from './alert_mappers';
+import { alertEpisodeToAlertAttachment } from './alert_mappers';
 
 const baseEpisode = {
   '@timestamp': '2026-04-10T12:00:00.000Z',
@@ -110,32 +110,3 @@ describe('alertEpisodeToAlertAttachment', () => {
   });
 });
 
-describe('mapLegacyEpisodeAttachmentData', () => {
-  it('maps episode.* keys onto alert.* keys', () => {
-    expect(
-      mapLegacyEpisodeAttachmentData({
-        '@timestamp': '2026-04-10T12:00:00.000Z',
-        'episode.id': 'ep-1',
-        'episode.label': 'Host CPU high alert',
-        'episode.status': ALERT_EPISODE_STATUS.ACTIVE,
-        'rule.id': 'rule-1',
-        episode_data: '{"host":"a"}',
-      })
-    ).toEqual({
-      '@timestamp': '2026-04-10T12:00:00.000Z',
-      'alert.id': 'ep-1',
-      'alert.label': 'Host CPU high alert',
-      'alert.status': ALERT_EPISODE_STATUS.ACTIVE,
-      'rule.id': 'rule-1',
-      alert_data: '{"host":"a"}',
-    });
-  });
-
-  it('leaves already-migrated alert.* payloads unchanged', () => {
-    const current = {
-      'alert.id': 'ep-1',
-      'alert.status': ALERT_EPISODE_STATUS.ACTIVE,
-    };
-    expect(mapLegacyEpisodeAttachmentData(current)).toBe(current);
-  });
-});

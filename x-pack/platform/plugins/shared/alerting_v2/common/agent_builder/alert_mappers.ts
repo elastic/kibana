@@ -26,37 +26,6 @@ const mapNullFieldsToUndefined = <T extends Record<string, unknown>>(
 };
 
 /**
- * Maps persisted `episode.*` attachment keys from earlier Agent Builder snapshots
- * onto the current `alert.*` shape. New `alert.*` payloads pass through unchanged.
- */
-export const mapLegacyEpisodeAttachmentData = (
-  input: Record<string, unknown>
-): Record<string, unknown> => {
-  if ('alert.id' in input) {
-    return input;
-  }
-  if (!('episode.id' in input)) {
-    return input;
-  }
-
-  const {
-    'episode.id': episodeId,
-    'episode.label': episodeLabel,
-    'episode.status': episodeStatus,
-    episode_data: episodeData,
-    ...rest
-  } = input;
-
-  return {
-    ...rest,
-    ...(episodeId !== undefined ? { 'alert.id': episodeId } : {}),
-    ...(episodeLabel !== undefined ? { 'alert.label': episodeLabel } : {}),
-    ...(episodeStatus !== undefined ? { 'alert.status': episodeStatus } : {}),
-    ...(episodeData !== undefined ? { alert_data: episodeData } : {}),
-  };
-};
-
-/**
  * Maps an {@link AlertEpisode} row to attachment `data`, converting any `null` field to `undefined`.
  * Copies only attachment-schema fields so extra ES|QL columns cannot fail a `.strict()` parse.
  */

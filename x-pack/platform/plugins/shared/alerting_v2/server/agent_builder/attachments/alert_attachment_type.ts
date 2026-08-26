@@ -19,10 +19,7 @@ import {
 } from '@kbn/alerting-v2-schemas';
 import { ALERTING_LOG_CODES } from '../../lib/errors/error_codes';
 import type { LoggerServiceContract } from '../../lib/services/logger_service/logger_service';
-import {
-  alertEpisodeToAlertAttachment,
-  mapLegacyEpisodeAttachmentData,
-} from '../../../common/agent_builder/alert_mappers';
+import { alertEpisodeToAlertAttachment } from '../../../common/agent_builder/alert_mappers';
 import type { EpisodesClient } from '../../lib/episodes_client';
 import type { RulesClient } from '../../lib/rules_client';
 import { loadRuleMetadata } from '../common/load_rule_metadata';
@@ -39,13 +36,8 @@ interface CreateAlertAttachmentTypeOptions {
   }) => PrivilegeChecker;
 }
 
-const parseAlertAttachmentData = (input: unknown) => {
-  const normalized =
-    input && typeof input === 'object'
-      ? mapLegacyEpisodeAttachmentData(input as Record<string, unknown>)
-      : input;
-  return alertAttachmentDataSchema.safeParse(normalized);
-};
+const parseAlertAttachmentData = (input: unknown) =>
+  alertAttachmentDataSchema.safeParse(input);
 
 const formatAlertDescription = ({
   attachmentId,
