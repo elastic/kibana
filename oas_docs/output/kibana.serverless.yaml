@@ -3196,14 +3196,6 @@ paths:
                       - description
                       - schema
                   type: array
-                capabilities:
-                  additionalProperties: false
-                  description: Controls agent capabilities during conversation. Currently supports visualization rendering for tabular tool results.
-                  type: object
-                  properties:
-                    visualizations:
-                      description: When true, allows the agent to render tabular data from tool results as interactive visualizations using custom XML elements in responses.
-                      type: boolean
                 configuration_overrides:
                   additionalProperties: false
                   description: Runtime configuration overrides. These override the stored agent configuration for this execution only.
@@ -3673,14 +3665,6 @@ paths:
                       - description
                       - schema
                   type: array
-                capabilities:
-                  additionalProperties: false
-                  description: Controls agent capabilities during conversation. Currently supports visualization rendering for tabular tool results.
-                  type: object
-                  properties:
-                    visualizations:
-                      description: When true, allows the agent to render tabular data from tool results as interactive visualizations using custom XML elements in responses.
-                      type: boolean
                 configuration_overrides:
                   additionalProperties: false
                   description: Runtime configuration overrides. These override the stored agent configuration for this execution only.
