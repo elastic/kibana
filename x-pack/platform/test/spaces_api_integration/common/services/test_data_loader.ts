@@ -116,32 +116,43 @@ export function getTestDataLoader({ getService }: Pick<FtrProviderContext, 'getS
         })
       );
 
-      // Adjust spaces for the imported saved objects.
-      for (const { objects, spacesToAdd = [], spacesToRemove = [] } of OBJECTS_TO_SHARE) {
-        log.debug(
-          `Updating spaces for the following objects (add: [${spacesToAdd.join(
-            ', '
-          )}], remove: [${spacesToRemove.join(', ')}]): ${objects
-            .map(({ type, id }) => `${type}:${id}`)
-            .join(', ')}`
-        );
+      // _update_objects_spaces route is internal in serverless and public in stateful.
+      // The scoped client is loop-invariant, so build it once: on serverless it mints an M2M
+      // API key, and doing that per iteration meant a fresh key for each of the
+      // OBJECTS_TO_SHARE entries, none of which was ever invalidated. This helper runs before
+      // every test in the suites that use it, so those add up.
+      const supertestWithScope = isServerless
+        ? await spacesSupertest.getSupertestWithRoleScope(
+            { role: 'admin' },
+            {
+              withCommonHeaders: true,
+              useCookieHeader: false,
+              withInternalHeaders: true,
+            }
+          )
+        : supertest;
 
-        // _update_objects_spaces route is internal in serverless and public in stateful
-        const supertestWithScope = isServerless
-          ? await spacesSupertest.getSupertestWithRoleScope(
-              { role: 'admin' },
-              {
-                withCommonHeaders: true,
-                useCookieHeader: false,
-                withInternalHeaders: true,
-              }
-            )
-          : supertest;
-        await supertestWithScope
-          .post('/api/spaces/_update_objects_spaces')
-          .set('kbn-xsrf', 'xxx')
-          .send({ objects, spacesToAdd, spacesToRemove })
-          .expect(200);
+      try {
+        // Adjust spaces for the imported saved objects.
+        for (const { objects, spacesToAdd = [], spacesToRemove = [] } of OBJECTS_TO_SHARE) {
+          log.debug(
+            `Updating spaces for the following objects (add: [${spacesToAdd.join(
+              ', '
+            )}], remove: [${spacesToRemove.join(', ')}]): ${objects
+              .map(({ type, id }) => `${type}:${id}`)
+              .join(', ')}`
+          );
+
+          await supertestWithScope
+            .post('/api/spaces/_update_objects_spaces')
+            .set('kbn-xsrf', 'xxx')
+            .send({ objects, spacesToAdd, spacesToRemove })
+            .expect(200);
+        }
+      } finally {
+        if (isServerless) {
+          await supertestWithScope.destroy();
+        }
       }
     },
 
