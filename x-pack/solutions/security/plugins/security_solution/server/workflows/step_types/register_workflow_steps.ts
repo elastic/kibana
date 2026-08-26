@@ -21,6 +21,7 @@ import { createExceptionListItemStepDefinition } from './create_exception_list_i
 import { createNoteStepDefinition } from './create_note_step/create_note_step';
 import { deleteNoteStepDefinition } from './delete_note_step/delete_note_step';
 import { getNotesStepDefinition } from './get_notes_step/get_notes_step';
+import { updateNoteStepDefinition } from './update_note_step/update_note_step';
 /**
  * Registers all security workflow steps with the workflowsExtensions plugin.
  */
@@ -42,4 +43,5 @@ export const registerWorkflowSteps = (
   workflowsExtensions.registerStepDefinition(createNoteStepDefinition);
   workflowsExtensions.registerStepDefinition(deleteNoteStepDefinition);
   workflowsExtensions.registerStepDefinition(getNotesStepDefinition);
+  workflowsExtensions.registerStepDefinition(updateNoteStepDefinition);
 };

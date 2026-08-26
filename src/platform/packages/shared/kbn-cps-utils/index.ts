@@ -8,15 +8,14 @@
  */
 
 export type { ProjectPickerProps } from './components/project_picker';
-export type {
-  ProjectPickerContentProps,
-  ProjectPickerControlsState,
-} from './components/project_picker_content';
+export type { ProjectPickerContentProps } from './components/project_picker_content';
 export type { ProjectPickerProps as ProjectScopePickerProps } from './components/project_picker_update/project_picker';
 export type {
   ProjectPickerFlyoutProps as ProjectScopePickerFlyoutContentProps,
   ProjectPickerFlyoutProps as ProjectScopePickerFlyoutProps,
 } from './components/project_picker_update/project_picker_flyout';
+export type { ProjectPickerControlsState } from './components/project_picker_update/state/reducers';
+export type { HeaderContextMenuItemProps } from './components/project_picker_update/blocks/frame/partials/header';
 export type { UseFetchProjectsResult } from './components/use_fetch_projects';
 export type {
   CPSProject,
@@ -24,6 +23,7 @@ export type {
   ICPSManager,
   ProjectsData,
   CPSAppAccessResolver,
+  CPSConfigurationLinks,
 } from './types';
 export type { ProjectRoutingValue } from '@kbn/cps-common';
 export { ProjectPicker, DisabledProjectPicker } from './components/project_picker';
@@ -36,6 +36,7 @@ export { ProjectPickerContent } from './components/project_picker_content';
 export { ProjectPickerContainer } from './components/project_picker_container';
 export { useFetchProjects } from './components/use_fetch_projects';
 export { useCpsPickerAccess } from './components/use_cps_picker_access';
+export { useIsCpsMultiProject } from './components/use_is_cps_multi_project';
 export { useRouteBasedCpsPickerAccess } from './components/use_route_based_cps_picker_access';
 export type {
   ProjectRoutingExpression,

@@ -23,6 +23,7 @@ import type { EntityStoreCoreSetup } from '../types';
 import { EngineDescriptorTypeName, type EngineDescriptor } from '../domain/saved_objects';
 import { installSharedElasticsearchAssets } from '../domain/asset_manager/install_assets';
 import { hasLegacySecurityAssets } from '../domain/asset_manager/migrate_legacy_security_assets';
+import { isLegacySecurityAssetsMigrationEnabled } from '../infra/feature_flags';
 
 const config = TasksConfig[EntityStoreTaskType.enum.legacySecurityAssetsMigration];
 
@@ -61,12 +62,18 @@ export async function runLegacySecurityAssetsMigration({
   coreStart,
   logger,
   signal,
+  isMigrationEnabled,
 }: {
   coreStart: CoreStart;
   logger: Logger;
   signal: AbortSignal;
+  isMigrationEnabled: () => Promise<boolean>;
 }): Promise<{ migrated: string[]; skipped: string[] }> {
   const taskLogger = logger.get(config.type);
+  if (!(await isMigrationEnabled())) {
+    taskLogger.info('Skipping legacy security assets migration; feature flag is off');
+    return { migrated: [], skipped: [] };
+  }
   const esClient = coreStart.elasticsearch.client.asInternalUser;
   const namespaces = await findInstalledEntityStoreNamespaces(coreStart);
   const migrated: string[] = [];
@@ -94,6 +101,7 @@ export async function runLegacySecurityAssetsMigration({
       migrationEsClient: esClient,
       logger: taskLogger,
       namespace,
+      allowLegacyMigration: true,
     });
     migrated.push(namespace);
   }
@@ -125,6 +133,8 @@ export function registerLegacySecurityAssetsMigrationTask({
               coreStart,
               logger,
               signal,
+              isMigrationEnabled: () =>
+                isLegacySecurityAssetsMigrationEnabled(coreStart.featureFlags),
             });
             logger.info(
               `Task "${config.type}" finished. Migrated namespaces: [${migrated.join(
@@ -158,12 +168,18 @@ export async function scheduleLegacySecurityAssetsMigrationIfNeeded({
   coreStart,
   taskManager,
   logger,
+  isMigrationEnabled,
 }: {
   coreStart: CoreStart;
   taskManager: TaskManagerStartContract;
   logger: Logger;
+  isMigrationEnabled: () => Promise<boolean>;
 }): Promise<void> {
   const taskLogger = logger.get(config.type);
+  if (!(await isMigrationEnabled())) {
+    taskLogger.info('Skipping legacy security assets migration schedule; feature flag is off');
+    return;
+  }
   const esClient = coreStart.elasticsearch.client.asInternalUser;
 
   let namespaces: string[];

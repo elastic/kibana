@@ -8,6 +8,7 @@
  */
 
 export { AppMenuComponent, type AppMenuBreakpointSource } from './components';
+export { AppMenuLoading, type AppMenuLoadingProps } from './components';
 export { AppMenuItem } from './components';
 export { AppMenuActionButton } from './components';
 export { AppMenuOverflowButton } from './components';

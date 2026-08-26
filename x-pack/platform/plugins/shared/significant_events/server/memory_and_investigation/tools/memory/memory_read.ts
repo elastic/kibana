@@ -9,8 +9,8 @@ import { z } from '@kbn/zod/v4';
 import { MAX_ID_LENGTH, MAX_TITLE_LENGTH } from '@kbn/significant-events-schema';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
+import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { platformStreamsMemoryTools } from './tool_ids';
 import type { MemoryToolsOptions } from './types';
 
@@ -76,7 +76,7 @@ const extractHeadingSection = (content: string, heading: string): string | undef
 
 export const createMemoryReadTool = ({
   getMemoryService,
-}: MemoryToolsOptions): BuiltinToolDefinition<typeof memoryReadSchema> => ({
+}: MemoryToolsOptions): BuiltinSkillBoundedTool<typeof memoryReadSchema> => ({
   id: platformStreamsMemoryTools.memoryRead,
   type: ToolType.builtin,
   description:
@@ -84,7 +84,6 @@ export const createMemoryReadTool = ({
     'request a specific heading section or a line range to avoid loading the full document. ' +
     'Always returns the list of headings and total line count for navigation.',
   schema: memoryReadSchema,
-  tags: ['memory'],
   handler: async ({ name, id, heading, offset, limit }, context) => {
     const memoryService = getMemoryService(context.esClient.asCurrentUser);
 

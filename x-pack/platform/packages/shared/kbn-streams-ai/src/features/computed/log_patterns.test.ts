@@ -13,7 +13,6 @@ import { logPatternsGenerator, selectLogPatternsForLlm } from './log_patterns';
 
 jest.mock('@kbn/ai-tools', () => ({
   getSigEventsLogPatternsEsql: jest.fn(),
-  DEFAULT_ESQL_QUERY_TIMEOUT_MS: 30_000,
 }));
 
 jest.mock('@kbn/traced-es-client', () => ({
@@ -26,6 +25,7 @@ const createTracedEsClientMock = jest.mocked(createTracedEsClient);
 const stream = { name: 'logs.test-default' } as Streams.all.Definition;
 const esClient = {} as ElasticsearchClient;
 const logger = {} as Logger;
+const signal = new AbortController().signal;
 const tracedClient = { traced: true };
 
 describe('logPatternsGenerator', () => {
@@ -45,13 +45,14 @@ describe('logPatternsGenerator', () => {
       end: 200,
       esClient,
       logger,
+      signal,
     });
 
     expect(createTracedEsClientMock).toHaveBeenCalledWith({
       client: esClient,
       logger,
       plugin: 'streams',
-      abortSignal: expect.any(AbortSignal),
+      abortSignal: signal,
     });
     expect(getSigEventsLogPatternsEsqlMock).toHaveBeenCalledWith({
       esClient: tracedClient,

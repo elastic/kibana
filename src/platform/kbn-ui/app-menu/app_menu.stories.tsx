@@ -12,7 +12,7 @@ import type { ComponentProps } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { EuiFlexGroup, EuiHeader, EuiPageTemplate } from '@elastic/eui';
-import { AppMenuComponent } from '.';
+import { AppMenuComponent, AppMenuLoading } from '.';
 import type { AppMenuConfig } from '.';
 
 type AppMenuWrapperProps = ComponentProps<typeof AppMenuComponent>;
@@ -722,5 +722,25 @@ export const ItemDescriptions: Story = {
   name: 'Item descriptions',
   args: {
     config: itemDescriptionsConfig,
+  },
+};
+
+export const Loading: Story = {
+  name: 'Loading skeleton',
+  render: () => (
+    <EuiHeader>
+      <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
+        <AppMenuLoading />
+      </EuiFlexGroup>
+    </EuiHeader>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Default `AppMenuLoading`: one overflow-style placeholder plus a primary-action rectangle. ' +
+          'Resize the viewport to see the same collapsed / minimal / expanded layouts as the real menu.',
+      },
+    },
   },
 };

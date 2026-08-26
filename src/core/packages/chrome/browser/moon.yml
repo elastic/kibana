@@ -20,6 +20,7 @@ dependsOn:
   - '@kbn/core-mount-utils-browser'
   - '@kbn/core-application-common'
   - '@kbn/app-menu'
+  - '@kbn/ui-app-header'
   - '@kbn/deeplinks-devtools'
   - '@kbn/deeplinks-analytics'
   - '@kbn/deeplinks-ml'

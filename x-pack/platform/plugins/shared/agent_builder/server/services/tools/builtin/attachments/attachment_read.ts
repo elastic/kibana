@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { attachmentTools, ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType, isOtherResult } from '@kbn/agent-builder-common/tools/tool_result';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { InternalBuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createErrorResult, getToolResultId } from '@kbn/agent-builder-server';
 import type { AttachmentToolsOptions } from './types';
 
@@ -29,7 +29,7 @@ export const createAttachmentReadTool = ({
   attachmentManager,
   attachmentsService,
   formatContext,
-}: AttachmentToolsOptions): BuiltinToolDefinition<typeof attachmentReadSchema> => ({
+}: AttachmentToolsOptions): InternalBuiltinToolDefinition<typeof attachmentReadSchema> => ({
   id: attachmentTools.read,
   type: ToolType.builtin,
   description:

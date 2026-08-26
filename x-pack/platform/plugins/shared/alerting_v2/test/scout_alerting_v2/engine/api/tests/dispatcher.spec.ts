@@ -19,7 +19,7 @@ import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import type { AlertEvent } from '../../../../../server/resources/datastreams/alert_events';
 import type { AlertAction } from '../../../../../server/resources/datastreams/alert_actions';
-import { LOOKBACK_WINDOW_MINUTES } from '../../../../../server/lib/dispatcher/constants';
+import { OVERLAP_WINDOW_MINUTES } from '../../../../../server/lib/dispatcher/constants';
 import type { AlertActionsFilter } from '../../../common/services';
 import type { AlertingApiServicesFixture } from '../fixtures';
 import { apiTest, buildCreateRuleData, buildExternalAlertEvent, testData } from '../fixtures';
@@ -1626,7 +1626,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
   apiTest(
     'lookback window / does not dispatch events older than the dispatcher lookback window',
     async ({ apiServices }) => {
-      const beyondLookbackSeconds = (LOOKBACK_WINDOW_MINUTES + 1) * 60;
+      const beyondLookbackSeconds = (OVERLAP_WINDOW_MINUTES + 1) * 60;
 
       await apiServices.alertingV2.ruleEvents.seed([
         buildAlertEvent({

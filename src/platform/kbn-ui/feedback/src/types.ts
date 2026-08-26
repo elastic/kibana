@@ -52,6 +52,9 @@ export interface FeedbackQuestion {
   answer: string;
 }
 
+/** App-specific context recorded with the feedback payload. */
+export type FeedbackContext = Record<string, string | boolean | number>;
+
 export interface FeedbackSubmittedData {
   app_id: string;
   solution: string;
@@ -61,6 +64,14 @@ export interface FeedbackSubmittedData {
   csat_score?: number;
   questions?: FeedbackQuestion[];
   organization_id?: string;
+  context?: FeedbackContext;
+}
+
+export interface AppDetails {
+  title: string;
+  id: string;
+  url: string;
+  context?: FeedbackContext;
 }
 
 export type FeedbackFormData = Omit<FeedbackSubmittedData, 'solution' | 'organization_id'>;

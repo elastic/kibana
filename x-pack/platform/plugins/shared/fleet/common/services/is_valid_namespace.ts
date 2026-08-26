@@ -17,7 +17,10 @@ export function isValidNamespace(
   allowBlankNamespace?: boolean,
   allowedNamespacePrefixes?: string[]
 ): { valid: boolean; error?: string } {
-  if (!namespace.trim() && allowBlankNamespace) {
+  // Only a truly empty string is treated as "blank" here. A whitespace-only value (e.g. " ")
+  // must continue on to isValidEntity below so it gets rejected by INVALID_NAMESPACE_CHARACTERS,
+  // instead of being short-circuited as if the namespace were intentionally left blank.
+  if (namespace === '' && allowBlankNamespace) {
     return { valid: true };
   }
 

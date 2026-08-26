@@ -98,8 +98,10 @@ files.forEach((file) => {
                 `./${Path.relative(Path.dirname(file.getFilePath()), literal.text)}`
               )
             ),
-            node.qualifier!,
-            node.typeArguments
+            undefined,
+            node.qualifier,
+            node.typeArguments,
+            node.isTypeOf
           );
         }
 

@@ -1,0 +1,102 @@
+{
+  "sha1": "5c9fd8ffa5d2f022fb316e56aef5f61bca7c184a",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "ed5fca72264a666-459c2f711f8e499",
+      "title": "Setup logs experience tests data",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/logs_experience/ui/parallel_tests/global.setup.ts",
+        "line": 7,
+        "column": 1
+      }
+    },
+    {
+      "id": "94ad8250756af26-08b02f06b030375",
+      "title": "Logs profile - Recommended fields should show the recommended fields group for the logs data source profile",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/logs_experience/ui/parallel_tests/recommended_fields.spec.ts",
+        "line": 32,
+        "column": 15
+      }
+    },
+    {
+      "id": "94ad8250756af26-9b87093350eb32f",
+      "title": "Logs profile - Recommended fields should NOT show the recommended fields group for a non-logs data source profile",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/logs_experience/ui/parallel_tests/recommended_fields.spec.ts",
+        "line": 45,
+        "column": 42
+      }
+    },
+    {
+      "id": "94ad8250756af26-c0c4f68f4cccb59",
+      "title": "Logs profile - Recommended fields should show the recommended fields group in ES|QL mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/logs_experience/ui/parallel_tests/recommended_fields.spec.ts",
+        "line": 75,
+        "column": 20
+      }
+    },
+    {
+      "id": "94ad8250756af26-acf6483fe1ba158",
+      "title": "Logs profile - Recommended fields should NOT show the recommended fields group for a non-logs ES|QL query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/logs_experience/ui/parallel_tests/recommended_fields.spec.ts",
+        "line": 92,
+        "column": 29
+      }
+    },
+    {
+      "id": "8462d8fddf362e8-7bb8b3164f5f9d7",
+      "title": "Teardown logs experience tests data",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/logs_experience/ui/parallel_tests/global.teardown.ts",
+        "line": 7,
+        "column": 1
+      }
+    }
+  ]
+}

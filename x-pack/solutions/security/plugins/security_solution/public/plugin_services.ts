@@ -157,7 +157,7 @@ export class PluginServices {
       savedObjectsTagging: savedObjectsTaggingOss.getTaggingApi(),
       storage: this.storage,
       sessionStorage: this.sessionStorage,
-      security: startPlugins.security,
+      security: { ...coreStart.security, ...startPlugins.security },
       securityLayout: { getPluginWrapper: () => SecuritySolutionTemplateWrapper },
       contentManagement: startPlugins.contentManagement,
       telemetry,

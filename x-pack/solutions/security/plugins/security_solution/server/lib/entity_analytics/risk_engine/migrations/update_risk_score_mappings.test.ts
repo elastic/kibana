@@ -136,6 +136,26 @@ describe('updateRiskScoreMappings', () => {
     expect(mockUpdateSavedObjectAttribute).not.toHaveBeenCalled();
   });
 
+  it('should query only the specified space when spaceId is defined', async () => {
+    soClient.find.mockResolvedValue({ ...mockSavedObjectsResponseDefaults, saved_objects: [] });
+    mockGetDefaultRiskEngineConfiguration.mockResolvedValue({
+      _meta: { mappingsVersion: '2.0.0' },
+    });
+
+    await updateRiskScoreMappings({
+      auditLogger: mockAuditLogger,
+      logger,
+      kibanaVersion,
+      getStartServices: getStartServicesMock,
+      hasEncryptionKey: true,
+      spaceId: 'my-space',
+    });
+
+    expect(soClient.find).toHaveBeenCalledWith(
+      expect.objectContaining({ namespaces: ['my-space'] })
+    );
+  });
+
   it('should update risk score mappings for every space when versions are different', async () => {
     const mockSavedObjectsResponse = {
       ...mockSavedObjectsResponseDefaults,
