@@ -218,9 +218,12 @@ export class WorkflowExecutionQueryService {
 
     const page = params.page ?? 1;
     const size = params.size ?? DEFAULT_PAGE_SIZE;
-    const from = (page - 1) * size;
+    const from = params.searchAfter?.length ? undefined : (page - 1) * size;
     const sort = params.sortField
-      ? [{ [params.sortField]: { order: params.sortOrder ?? 'desc' } }]
+      ? ([
+          { [params.sortField]: { order: params.sortOrder ?? 'desc' } },
+          { _id: 'desc' },
+        ] as estypes.Sort)
       : undefined;
 
     return searchWorkflowExecutions({
@@ -232,6 +235,7 @@ export class WorkflowExecutionQueryService {
       from,
       page,
       sort,
+      searchAfter: params.searchAfter,
       collapse: params.collapse ? { field: params.collapse } : undefined,
     });
   }

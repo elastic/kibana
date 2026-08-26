@@ -127,25 +127,55 @@ export const IterationGapRow = React.memo<IterationGapRowProps>(
             <EuiIcon type="ellipsis" size="s" color="subdued" aria-hidden="true" />
           </EuiFlexItem>
 
-          <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
-            <EuiText
-              size="s"
+          <EuiFlexItem grow={true} css={{ minWidth: 0 }}>
+            <EuiFlexGroup
+              alignItems="center"
+              gutterSize="none"
+              responsive={false}
+              wrap={false}
               css={css`
-                color: ${euiTheme.colors.textPrimary};
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                &:hover {
-                  text-decoration: underline;
-                }
+                gap: 0;
+                min-width: 0;
               `}
-              data-test-subj="workflowStepTreeGapLabel"
             >
-              {label}
-            </EuiText>
+              <EuiFlexItem grow={false} css={{ minWidth: 0, maxWidth: '100%' }}>
+                <EuiText
+                  size="s"
+                  css={css`
+                    color: ${euiTheme.colors.textPrimary};
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    &:hover {
+                      text-decoration: underline;
+                    }
+                  `}
+                  data-test-subj="workflowStepTreeGapLabel"
+                >
+                  {label}
+                </EuiText>
+              </EuiFlexItem>
+              {/* Range sits beside the action label, same left cluster as · latest on step rows. */}
+              {!isExpanded && (
+                <EuiFlexItem grow={false}>
+                  <EuiText
+                    size="xs"
+                    color="subdued"
+                    data-test-subj="workflowStepTreeGapRange"
+                    css={css`
+                      flex-shrink: 0;
+                      line-height: 1;
+                      white-space: pre;
+                    `}
+                  >
+                    {` · ${rangeLabel}`}
+                  </EuiText>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
           </EuiFlexItem>
 
-          {!isExpanded && (
+          {!isExpanded && (usage?.totalTokens || durationLabel != null) ? (
             <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
               <EuiFlexGroup
                 alignItems="center"
@@ -158,18 +188,6 @@ export const IterationGapRow = React.memo<IterationGapRowProps>(
                 `}
                 data-test-subj="workflowStepTreeGapMeta"
               >
-                <EuiFlexItem grow={false}>
-                  <EuiText size="xs" color="subdued">
-                    {rangeLabel}
-                  </EuiText>
-                </EuiFlexItem>
-                {durationLabel != null && (
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="xs" color="subdued" data-test-subj="workflowStepTreeGapDuration">
-                      {durationLabel}
-                    </EuiText>
-                  </EuiFlexItem>
-                )}
                 {usage && usage.totalTokens > 0 && (
                   <EuiFlexItem grow={false}>
                     <TokenUsageBadge
@@ -180,9 +198,16 @@ export const IterationGapRow = React.memo<IterationGapRowProps>(
                     />
                   </EuiFlexItem>
                 )}
+                {durationLabel != null && (
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="xs" color="subdued" data-test-subj="workflowStepTreeGapDuration">
+                      {durationLabel}
+                    </EuiText>
+                  </EuiFlexItem>
+                )}
               </EuiFlexGroup>
             </EuiFlexItem>
-          )}
+          ) : null}
         </EuiFlexGroup>
       </div>
     );

@@ -278,10 +278,11 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
               executionList={null}
               executionDetail={null}
             />
-            {id && isExecutionListOpen && !selectedExecutionId && canReadWorkflowExecution && (
+            {id && isExecutionListOpen && canReadWorkflowExecution && (
               <WorkflowExecutionListFlyout
                 workflowId={id}
                 onClose={onCloseExecutionList}
+                isHidden={Boolean(selectedExecutionId)}
               />
             )}
             {selectedExecutionId && canReadWorkflowExecution && (

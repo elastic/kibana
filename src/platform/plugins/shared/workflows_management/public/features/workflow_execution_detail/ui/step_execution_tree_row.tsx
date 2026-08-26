@@ -366,12 +366,12 @@ export const StepExecutionTreeRow = React.memo<StepExecutionTreeRowProps>(
         `}
         data-test-subj="workflowStepTreeMeta"
       >
-        {durationNode && <EuiFlexItem grow={false}>{durationNode}</EuiFlexItem>}
         {attemptsBadge && <EuiFlexItem grow={false}>{attemptsBadge}</EuiFlexItem>}
-        {tokenNode && <EuiFlexItem grow={false}>{tokenNode}</EuiFlexItem>}
         {statusPlacement === 'inline' && statusNode && (
           <EuiFlexItem grow={false}>{statusNode}</EuiFlexItem>
         )}
+        {tokenNode && <EuiFlexItem grow={false}>{tokenNode}</EuiFlexItem>}
+        {durationNode && <EuiFlexItem grow={false}>{durationNode}</EuiFlexItem>}
       </EuiFlexGroup>
     );
 
@@ -543,7 +543,7 @@ export const StepExecutionTreeRow = React.memo<StepExecutionTreeRowProps>(
           </EuiFlexItem>
 
           <EuiFlexItem
-            grow={false}
+            grow={true}
             css={css`
               min-width: 0;
               max-width: 100%;
@@ -632,7 +632,7 @@ export const StepExecutionTreeRow = React.memo<StepExecutionTreeRowProps>(
 
           {statusPlacement === 'right' && statusNode && (
             <EuiFlexItem
-              grow={true}
+              grow={false}
               css={css`
                 display: flex;
                 justify-content: flex-end;

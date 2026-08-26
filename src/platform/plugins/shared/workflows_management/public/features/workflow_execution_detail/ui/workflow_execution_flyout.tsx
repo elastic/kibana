@@ -64,6 +64,9 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { formatDuration } from '../../../shared/lib/format_duration';
 import { getStatusLabel } from '../../../shared/translations/status_translations';
 import { FormattedRelativeEnhanced } from '../../../shared/ui/formatted_relative_enhanced/formatted_relative_enhanced';
+import {
+  formatAbsoluteTimestampWithZone,
+} from '../../../shared/ui/use_formatted_date';
 import { getExecutionStatusIcon } from '../../../shared/ui/status_badge';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
 import { TokenUsageBreakdown } from '../../../shared/ui/token_usage_badge/token_usage_breakdown';
@@ -347,17 +350,19 @@ const StepDataSection = ({ label, data }: { label: string; data: unknown }) => {
         <EuiCodeBlock
           language="json"
           fontSize="s"
-          transparentBackground
-          paddingSize="none"
+          paddingSize="m"
           overflowHeight={300}
           isCopyable
           css={`
             & .euiCodeBlock__controls {
-              background: ${euiTheme.colors.emptyShade};
+              background: transparent;
               top: 4px;
               right: 4px;
               padding: 2px;
-              border-radius: 4px;
+            }
+
+            & .euiCodeBlock__controls .euiButtonIcon {
+              background: transparent;
             }
           `}
         >
@@ -438,20 +443,13 @@ const StepDataSection = ({ label, data }: { label: string; data: unknown }) => {
   );
 };
 
-const formatExecutionDate = (isoString: string): string | null => {
+const formatExecutionDate = (
+  isoString: string,
+  options: { dateFormat: string; timeZoneSetting: string | undefined }
+): string | null => {
   const date = new Date(isoString);
   if (isNaN(date.getTime())) return null;
-  return date
-    .toLocaleString(undefined, {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: false,
-    })
-    .replace(',', ' @');
+  return formatAbsoluteTimestampWithZone(date, options);
 };
 
 export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
@@ -462,7 +460,9 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
     onClose,
   }) => {
     const { euiTheme } = useEuiTheme();
-    const { application, notifications } = useKibana().services;
+    const { application, notifications, settings } = useKibana().services;
+    const dateFormatSetting: string = settings.client.get('dateFormat');
+    const timeZoneSetting: string | undefined = settings.client.get('dateFormat:tz');
     const [activeTab, setActiveTab] = useState<FlyoutTabId>('table');
     const [selectedStepExecutionId, setSelectedStepExecutionId] = useState<string | null>(null);
     const [autoExpandErrorForStepId, setAutoExpandErrorForStepId] = useState<string | null>(null);
@@ -645,7 +645,10 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
       [workflowExecution?.startedAt]
     );
     const formattedDate = workflowExecution?.startedAt
-      ? formatExecutionDate(workflowExecution.startedAt)
+      ? formatExecutionDate(workflowExecution.startedAt, {
+          dateFormat: dateFormatSetting,
+          timeZoneSetting,
+        })
       : null;
     const formattedDuration = useMemo(
       () =>
@@ -812,7 +815,6 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                 <EuiHorizontalRule
                   margin="none"
                   css={{
-                    marginBottom: euiTheme.size.m,
                     marginLeft: '-16px',
                     marginRight: '-16px',
                     width: 'calc(100% + 32px)',

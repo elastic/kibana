@@ -9,13 +9,12 @@
 
 import type { EuiSelectableOption, UseEuiTheme } from '@elastic/eui';
 import {
+  EuiButton,
   EuiButtonEmpty,
-  EuiFilterButton,
-  EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiIcon,
+  EuiNotificationBadge,
   EuiPopover,
   EuiPopoverTitle,
   EuiSelectable,
@@ -235,189 +234,172 @@ export function ExecutionListFilters({
   const hasActiveFilters = numActiveFilters > 0;
 
   return (
-    <EuiFilterGroup compressed css={styles.filterGroup}>
-      <EuiPopover
-        id={filterGroupPopoverId}
-        aria-label={i18n.translate('workflows.workflowExecutionList.filterPopoverAriaLabel', {
-          defaultMessage: 'Filter executions',
-        })}
-        isOpen={isPopoverOpen}
-        closePopover={() => {
-          setIsPopoverOpen(false);
-          setExecutedBySearchValue('');
-        }}
-        button={
-          <EuiFilterButton
-            grow={false}
-            onClick={() => {
-              setIsPopoverOpen(!isPopoverOpen);
-            }}
-            color="text"
-            badgeColor="accent"
-            isSelected={isPopoverOpen}
-            hasActiveFilters={hasActiveFilters}
-            // Always pass numFilters so the inline badge stays mounted (gray "0" /
-            // accent "N") and the control width does not shift.
-            numFilters={numActiveFilters}
-            numActiveFilters={hasActiveFilters ? numActiveFilters : undefined}
-            aria-label={i18n.translate(
-              'workflows.workflowExecutionList.filterIconButtonAriaLabel',
-              {
-                defaultMessage: 'Filter executions',
-              }
-            )}
-            css={styles.filterButton}
-          >
-            <EuiIcon type="filter" aria-hidden={true} />
-          </EuiFilterButton>
-        }
-        panelPaddingSize="none"
-        hasArrow={false}
-        panelStyle={{ width: '280px' }}
-        css={styles.popover}
-      >
-        <EuiPopoverTitle paddingSize="s">
-          <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
-            <EuiFlexItem css={styles.popoverTitle}>
-              <EuiTitle size="xxs">
-                <h5 className="eui-textBreakWord">
-                  {i18n.translate('workflows.workflowExecutionList.filterIconButton.title', {
-                    defaultMessage: 'Filter executions',
-                  })}
-                </h5>
-              </EuiTitle>
+    <EuiPopover
+      id={filterGroupPopoverId}
+      aria-label={i18n.translate('workflows.workflowExecutionList.filterPopoverAriaLabel', {
+        defaultMessage: 'Filter executions',
+      })}
+      isOpen={isPopoverOpen}
+      closePopover={() => {
+        setIsPopoverOpen(false);
+        setExecutedBySearchValue('');
+      }}
+      button={
+        <EuiButton
+          size="s"
+          color="text"
+          iconType="filter"
+          onClick={() => {
+            setIsPopoverOpen(!isPopoverOpen);
+          }}
+          isSelected={isPopoverOpen}
+          aria-label={i18n.translate('workflows.workflowExecutionList.filterIconButtonAriaLabel', {
+            defaultMessage: 'Filter executions',
+          })}
+          data-test-subj="workflowExecutionListFilterButton"
+          css={styles.filterButton}
+        >
+          {hasActiveFilters ? (
+            <EuiNotificationBadge color="accent" data-test-subj="workflowExecutionListFilterCount">
+              {numActiveFilters}
+            </EuiNotificationBadge>
+          ) : null}
+        </EuiButton>
+      }
+      panelPaddingSize="none"
+      hasArrow={false}
+      panelStyle={{ width: '280px' }}
+      css={styles.popover}
+    >
+      <EuiPopoverTitle paddingSize="s">
+        <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
+          <EuiFlexItem css={styles.popoverTitle}>
+            <EuiTitle size="xxs">
+              <h5 className="eui-textBreakWord">
+                {i18n.translate('workflows.workflowExecutionList.filterIconButton.title', {
+                  defaultMessage: 'Filter executions',
+                })}
+              </h5>
+            </EuiTitle>
+          </EuiFlexItem>
+          {hasActiveFilters && (
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="xs"
+                onClick={clearAll}
+                data-test-subj={`${filterGroupPopoverId}ClearAll`}
+              >
+                {i18n.translate('workflows.workflowExecutionList.filterIconButton.clearAllLink', {
+                  defaultMessage: 'Clear all',
+                })}
+              </EuiButtonEmpty>
             </EuiFlexItem>
-            {hasActiveFilters && (
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  size="xs"
-                  onClick={clearAll}
-                  data-test-subj={`${filterGroupPopoverId}ClearAll`}
-                >
-                  {i18n.translate('workflows.workflowExecutionList.filterIconButton.clearAllLink', {
-                    defaultMessage: 'Clear all',
-                  })}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        </EuiPopoverTitle>
+          )}
+        </EuiFlexGroup>
+      </EuiPopoverTitle>
 
-        <div css={styles.section}>
-          <EuiText size="xs" color="subdued" css={styles.sectionTitle}>
-            <strong>
-              {i18n.translate('workflows.workflowExecutionList.filterIconButton.statusLabel', {
-                defaultMessage: 'Status',
-              })}
-            </strong>
-          </EuiText>
-          <EuiSelectable
-            aria-label={i18n.translate(
-              'workflows.workflowExecutionList.filterIconButton.statusAriaLabel',
-              {
-                defaultMessage: 'Filter by status',
-              }
-            )}
-            options={statusOptions}
-            onChange={handleStatusChange}
-            listProps={{ isVirtualized: false, bordered: false }}
-          >
-            {(list) => list}
-          </EuiSelectable>
-        </div>
+      <div css={styles.section}>
+        <EuiText size="xs" color="subdued" css={styles.sectionTitle}>
+          <strong>
+            {i18n.translate('workflows.workflowExecutionList.filterIconButton.statusLabel', {
+              defaultMessage: 'Status',
+            })}
+          </strong>
+        </EuiText>
+        <EuiSelectable
+          aria-label={i18n.translate(
+            'workflows.workflowExecutionList.filterIconButton.statusAriaLabel',
+            {
+              defaultMessage: 'Filter by status',
+            }
+          )}
+          options={statusOptions}
+          onChange={handleStatusChange}
+          listProps={{ isVirtualized: false, bordered: false }}
+        >
+          {(list) => list}
+        </EuiSelectable>
+      </div>
 
-        <EuiHorizontalRule margin="none" />
+      <EuiHorizontalRule margin="none" />
 
-        <div css={styles.section}>
-          <EuiText size="xs" color="subdued" css={styles.sectionTitle}>
-            <strong>
-              {i18n.translate(
-                'workflows.workflowExecutionList.filterIconButton.executionTypeLabel',
-                {
-                  defaultMessage: 'Run type',
-                }
-              )}
-            </strong>
-          </EuiText>
-          <EuiSelectable
-            aria-label={i18n.translate(
-              'workflows.workflowExecutionList.filterIconButton.runTypeAriaLabel',
-              {
-                defaultMessage: 'Filter by run type',
-              }
-            )}
-            options={runTypeOptions}
-            onChange={handleRunTypeChange}
-            listProps={{ isVirtualized: false, bordered: false }}
-          >
-            {(list) => list}
-          </EuiSelectable>
-        </div>
+      <div css={styles.section}>
+        <EuiText size="xs" color="subdued" css={styles.sectionTitle}>
+          <strong>
+            {i18n.translate('workflows.workflowExecutionList.filterIconButton.executionTypeLabel', {
+              defaultMessage: 'Run type',
+            })}
+          </strong>
+        </EuiText>
+        <EuiSelectable
+          aria-label={i18n.translate(
+            'workflows.workflowExecutionList.filterIconButton.runTypeAriaLabel',
+            {
+              defaultMessage: 'Filter by run type',
+            }
+          )}
+          options={runTypeOptions}
+          onChange={handleRunTypeChange}
+          listProps={{ isVirtualized: false, bordered: false }}
+        >
+          {(list) => list}
+        </EuiSelectable>
+      </div>
 
-        {showExecutor && (
-          <>
-            <EuiHorizontalRule margin="none" />
-            <div css={styles.section}>
-              <EuiText size="xs" color="subdued" css={styles.sectionTitle}>
-                <strong>
-                  {i18n.translate(
-                    'workflows.workflowExecutionList.filterIconButton.executedByLabel',
-                    {
-                      defaultMessage: 'Executed by',
-                    }
-                  )}
-                </strong>
-              </EuiText>
-              <EuiSelectable
-                aria-label={i18n.translate(
-                  'workflows.workflowExecutionList.filterIconButton.executedByAriaLabel',
+      {showExecutor && (
+        <>
+          <EuiHorizontalRule margin="none" />
+          <div css={styles.section}>
+            <EuiText size="xs" color="subdued" css={styles.sectionTitle}>
+              <strong>
+                {i18n.translate(
+                  'workflows.workflowExecutionList.filterIconButton.executedByLabel',
                   {
-                    defaultMessage: 'Filter by executor',
+                    defaultMessage: 'Executed by',
                   }
                 )}
-                options={executedByOptions}
-                onChange={handleExecutedByChange}
-                searchable
-                searchProps={{
-                  compressed: true,
-                  placeholder: i18n.translate(
-                    'workflows.workflowExecutionList.filterIconButton.executedByPlaceholder',
-                    {
-                      defaultMessage: 'Filter by user',
-                    }
-                  ),
-                  value: executedBySearchValue,
-                  onChange: (value) => setExecutedBySearchValue(value),
-                  'data-test-subj': 'workflowExecutionListExecutedBySearch',
-                }}
-                listProps={{ isVirtualized: false, bordered: false }}
-              >
-                {(list, search) => (
-                  <>
-                    <div css={styles.executedBySearch}>{search}</div>
-                    {list}
-                  </>
-                )}
-              </EuiSelectable>
-            </div>
-          </>
-        )}
-      </EuiPopover>
-    </EuiFilterGroup>
+              </strong>
+            </EuiText>
+            <EuiSelectable
+              aria-label={i18n.translate(
+                'workflows.workflowExecutionList.filterIconButton.executedByAriaLabel',
+                {
+                  defaultMessage: 'Filter by executor',
+                }
+              )}
+              options={executedByOptions}
+              onChange={handleExecutedByChange}
+              searchable
+              searchProps={{
+                compressed: true,
+                placeholder: i18n.translate(
+                  'workflows.workflowExecutionList.filterIconButton.executedByPlaceholder',
+                  {
+                    defaultMessage: 'Filter by user',
+                  }
+                ),
+                value: executedBySearchValue,
+                onChange: (value) => setExecutedBySearchValue(value),
+                'data-test-subj': 'workflowExecutionListExecutedBySearch',
+              }}
+              listProps={{ isVirtualized: false, bordered: false }}
+            >
+              {(list, search) => (
+                <>
+                  <div css={styles.executedBySearch}>{search}</div>
+                  {list}
+                </>
+              )}
+            </EuiSelectable>
+          </div>
+        </>
+      )}
+    </EuiPopover>
   );
 }
 
 const componentStyles = {
   popover: css`
-    & .euiFilterButton__wrapper {
-      min-inline-size: 0;
-
-      &::before,
-      &::after {
-        display: none !important;
-      }
-    }
-
     & .euiPopover__anchor {
       display: inline-flex;
     }
@@ -425,32 +407,14 @@ const componentStyles = {
   popoverTitle: ({ euiTheme }: UseEuiTheme) => css`
     padding: ${EQUAL_HEIGHT_OFFSET}px ${euiTheme.size.s};
   `,
-  filterGroup: css({
-    overflow: 'visible',
-    backgroundColor: 'transparent',
-    '&::after': {
-      border: 'none',
-    },
-    '&::before': {
-      border: 'none',
-    },
-  }),
   filterButton: ({ euiTheme }: UseEuiTheme) => css`
-    width: auto;
-    min-width: 64px;
-    padding-inline: ${euiTheme.size.xs};
-    border: none;
-    box-shadow: none;
-    background-color: transparent;
-
-    &.euiFilterButton-hasNotification {
-      min-width: 64px;
+    min-width: ${euiTheme.base * 4}px;
+    /* Keep the default EuiButton border; tighten content spacing for icon + badge. */
+    & .euiButton__content {
+      gap: ${euiTheme.size.xs};
     }
 
-    & .euiFilterButton__text,
-    & .euiFilterButton__text-hasNotification {
-      min-width: 0;
-      padding-inline: 0;
+    & .euiButton__text {
       line-height: 1;
     }
   `,

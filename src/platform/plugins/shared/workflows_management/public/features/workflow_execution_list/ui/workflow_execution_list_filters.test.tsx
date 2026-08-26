@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { ExecutionStatus, ExecutionType } from '@kbn/workflows';
 import type { ExecutionListFiltersProps } from './workflow_execution_list_filters';
@@ -50,6 +50,7 @@ describe('ExecutionListFilters', () => {
   it('renders the icon-only filter button', () => {
     renderComponent();
     expect(screen.getByLabelText('Filter executions')).toBeInTheDocument();
+    expect(screen.getByTestId('workflowExecutionListFilterButton')).toBeInTheDocument();
     expect(screen.queryByText('Filters')).not.toBeInTheDocument();
   });
 
@@ -173,12 +174,9 @@ describe('ExecutionListFilters', () => {
     expect(screen.queryByText('Clear all')).not.toBeInTheDocument();
   });
 
-  it('shows a subdued 0 badge when no filters are active', () => {
+  it('does not render a filter count badge when no filters are active', () => {
     renderComponent();
-    const filterButton = screen.getByLabelText('Filter executions');
-    const badge = within(filterButton).getByText('0');
-    expect(badge).toBeInTheDocument();
-    expect(badge.className).toContain('subdued');
+    expect(screen.queryByTestId('workflowExecutionListFilterCount')).not.toBeInTheDocument();
   });
 
   it('shows an accent count badge when filters are active', () => {
@@ -189,8 +187,7 @@ describe('ExecutionListFilters', () => {
         executedBy: [],
       },
     });
-    const filterButton = screen.getByLabelText('Filter executions');
-    const badge = within(filterButton).getByLabelText('1 active filters');
+    const badge = screen.getByTestId('workflowExecutionListFilterCount');
     expect(badge).toHaveTextContent('1');
     expect(badge.className).toContain('accent');
   });

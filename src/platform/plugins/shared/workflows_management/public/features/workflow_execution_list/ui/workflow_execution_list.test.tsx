@@ -14,47 +14,6 @@ import { WorkflowExecutionList, type WorkflowExecutionListProps } from './workfl
 import { createStartServicesMock, type StartServicesMock } from '../../../mocks';
 import { getTestProvider } from '../../../shared/mocks/test_providers';
 
-jest.mock('./workflow_execution_list_item', () => ({
-  WorkflowExecutionListItem: ({
-    status,
-    startedAt,
-    executedByLabel,
-    onExecutionClick,
-    executionId,
-    selected,
-  }: {
-    status: string;
-    startedAt: Date | string | null;
-    executedByLabel?: string;
-    onExecutionClick?: (id: string) => void;
-    executionId?: string;
-    selected: boolean;
-  }) => (
-    <div
-      data-test-subj="workflowExecutionListItem"
-      data-selected={selected}
-      data-started-at={
-        !startedAt
-          ? 'null'
-          : typeof startedAt === 'string'
-            ? startedAt
-            : startedAt.toISOString()
-      }
-      data-executed-by-label={executedByLabel}
-      onClick={() => {
-        if (onExecutionClick && executionId) {
-          onExecutionClick(executionId);
-        }
-      }}
-      role="button"
-      onKeyDown={() => {}}
-      tabIndex={0}
-    >
-      {status}
-    </div>
-  ),
-}));
-
 jest.mock('./workflow_execution_list_filters', () => ({
   ExecutionListFilters: () => <div data-test-subj="executionListFilters">{'Filters'}</div>,
 }));
@@ -111,10 +70,12 @@ describe('WorkflowExecutionList', () => {
     error: null,
     onExecutionClick: jest.fn(),
     selectedId: null,
+    lastViewedId: null,
     setPaginationObserver: jest.fn(),
     canCancel: true,
     isCancelInProgress: false,
     onConfirmCancel: jest.fn().mockResolvedValue(undefined),
+    hasNextPage: false,
   };
 
   const renderComponent = (
@@ -178,13 +139,18 @@ describe('WorkflowExecutionList', () => {
   });
 
   describe('with execution data', () => {
-    it('renders all execution items', () => {
+    it('renders a non-responsive four-column table of execution rows', () => {
       renderComponent();
-      const items = screen.getAllByTestId('workflowExecutionListItem');
-      expect(items).toHaveLength(2);
+      const table = screen.getByTestId('workflowExecutionListTable');
+      expect(table).toBeInTheDocument();
+      expect(screen.getByText('Status')).toBeInTheDocument();
+      expect(screen.getByText('Started')).toBeInTheDocument();
+      expect(screen.getByText('Executed by')).toBeInTheDocument();
+      expect(screen.getByText('Duration')).toBeInTheDocument();
+      expect(screen.getAllByTestId('workflowExecutionListItem')).toHaveLength(2);
     });
 
-    it('calls onExecutionClick when an execution item is clicked', () => {
+    it('calls onExecutionClick when an execution row is clicked', () => {
       const onExecutionClick = jest.fn();
       renderComponent({ onExecutionClick });
       const items = screen.getAllByTestId('workflowExecutionListItem');
@@ -222,6 +188,11 @@ describe('WorkflowExecutionList', () => {
       expect(screen.getAllByTestId('workflowExecutionListItem')[0]).not.toHaveAttribute(
         'data-executed-by-label'
       );
+    });
+
+    it('shows a test-run flask on test executions', () => {
+      renderComponent();
+      expect(screen.getByLabelText('Test run')).toBeInTheDocument();
     });
   });
 

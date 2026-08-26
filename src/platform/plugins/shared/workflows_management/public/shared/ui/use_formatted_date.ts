@@ -45,8 +45,7 @@ export function useFormattedDate(
 ): string | undefined {
   const uiSettings = useKibana().services.settings.client;
   const dateFormatSetting: string = uiSettings.get('dateFormat');
-  const timezoneSetting: string = uiSettings.get('dateFormat:tz');
-  const usableTimezoneSetting = timezoneSetting === 'Browser' ? moment.tz.guess() : timezoneSetting;
+  const usableTimezoneSetting = resolveKibanaTimeZone(uiSettings.get('dateFormat:tz'));
 
   if (!timestamp) return undefined;
 
@@ -68,8 +67,7 @@ export function useFormattedDate(
 export function useFormattedDateTime(date: Date): string | undefined {
   const uiSettings = useKibana().services.settings.client;
   const dateFormatSetting: string = uiSettings.get('dateFormat');
-  const timezoneSetting: string = uiSettings.get('dateFormat:tz');
-  const usableTimezoneSetting = timezoneSetting === 'Browser' ? moment.tz.guess() : timezoneSetting;
+  const usableTimezoneSetting = resolveKibanaTimeZone(uiSettings.get('dateFormat:tz'));
 
   if (!date) {
     return undefined;
@@ -87,8 +85,7 @@ export function useFormattedDateTime(date: Date): string | undefined {
 export function useGetFormattedDateTime(): (date: Date) => string | undefined {
   const uiSettings = useKibana().services.settings.client;
   const dateFormatSetting: string = uiSettings.get('dateFormat');
-  const timezoneSetting: string = uiSettings.get('dateFormat:tz');
-  const usableTimezoneSetting = timezoneSetting === 'Browser' ? moment.tz.guess() : timezoneSetting;
+  const usableTimezoneSetting = resolveKibanaTimeZone(uiSettings.get('dateFormat:tz'));
 
   return useCallback(
     (date: Date) => {
@@ -105,5 +102,57 @@ export function useGetFormattedDateTime(): (date: Date) => string | undefined {
         : formatter.format(date);
     },
     [dateFormatSetting, usableTimezoneSetting]
+  );
+}
+
+/** Resolved IANA zone for Kibana `dateFormat:tz` ("Browser" → local guess). */
+export function resolveKibanaTimeZone(timezoneSetting: string | undefined): string {
+  if (!timezoneSetting || timezoneSetting === 'Browser') {
+    return moment.tz.guess();
+  }
+  return timezoneSetting;
+}
+
+/** Human-readable zone label for tooltips (e.g. `America/Los_Angeles (UTC-07:00)`). */
+export function formatTimeZoneLabel(timezoneSetting: string | undefined, at: Date = new Date()): string {
+  const zone = resolveKibanaTimeZone(timezoneSetting);
+  const offset = moment.tz(at, zone).format('Z');
+  return `${zone} (UTC${offset})`;
+}
+
+/**
+ * Full absolute timestamp with zone for row tooltips.
+ * Honors Kibana `dateFormat` + `dateFormat:tz`.
+ */
+export function formatAbsoluteTimestampWithZone(
+  date: Date,
+  options: { dateFormat: string; timeZoneSetting: string | undefined }
+): string {
+  const zone = resolveKibanaTimeZone(options.timeZoneSetting);
+  const formatted = moment.tz(date, zone).format(options.dateFormat);
+  return `${formatted} (${formatTimeZoneLabel(options.timeZoneSetting, date)})`;
+}
+
+export function useKibanaTimeZone(): string {
+  const uiSettings = useKibana().services.settings.client;
+  return resolveKibanaTimeZone(uiSettings.get('dateFormat:tz'));
+}
+
+export function useGetFormattedDateTimeWithZone(): (date: Date) => string | undefined {
+  const uiSettings = useKibana().services.settings.client;
+  const dateFormatSetting: string = uiSettings.get('dateFormat');
+  const timeZoneSetting: string = uiSettings.get('dateFormat:tz');
+
+  return useCallback(
+    (date: Date) => {
+      if (!date || !Number.isFinite(date.getTime())) {
+        return date ? invalidDateText : undefined;
+      }
+      return formatAbsoluteTimestampWithZone(date, {
+        dateFormat: dateFormatSetting,
+        timeZoneSetting,
+      });
+    },
+    [dateFormatSetting, timeZoneSetting]
   );
 }

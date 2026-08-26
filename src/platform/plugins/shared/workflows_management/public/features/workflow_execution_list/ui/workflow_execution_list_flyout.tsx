@@ -23,22 +23,34 @@ import { WorkflowExecutionList } from './workflow_execution_list_stateful';
 export interface WorkflowExecutionListFlyoutProps {
   workflowId: string;
   onClose: () => void;
+  /** Keep mounted but collapse out of the push layout while detail is shown. */
+  isHidden?: boolean;
 }
 
 export const WorkflowExecutionListFlyout = ({
   workflowId,
   onClose,
+  isHidden = false,
 }: WorkflowExecutionListFlyoutProps) => {
   const { euiTheme } = useEuiTheme();
 
   return (
     <EuiFlyout
       onClose={onClose}
-      type="push"
+      // Overlay when hidden so the detail push-flyout owns the layout slot.
+      type={isHidden ? 'overlay' : 'push'}
       paddingSize="none"
       hideCloseButton
-      style={{ minWidth: '480px', maxWidth: '480px' }}
+      ownFocus={!isHidden}
+      style={
+        isHidden
+          ? {
+              display: 'none',
+            }
+          : { minWidth: '480px', maxWidth: '480px' }
+      }
       data-test-subj="workflowExecutionListFlyout"
+      aria-hidden={isHidden}
     >
       <EuiFlyoutHeader>
         <EuiFlexGroup

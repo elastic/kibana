@@ -87,7 +87,7 @@ describe('StepExecutionTreeRow', () => {
     expect(onToggleExpand).toHaveBeenCalled();
   });
 
-  it('renders metadata in fixed order: duration, tokens, status — omitting absent items', () => {
+  it('renders metadata in fixed order: status, tokens, duration — omitting absent items', () => {
     renderRow({
       status: ExecutionStatus.FAILED,
       executionTimeMs: 299,
@@ -98,9 +98,9 @@ describe('StepExecutionTreeRow', () => {
       el.getAttribute('data-test-subj')
     );
     expect(texts).toEqual([
-      'workflowStepTreeDuration',
-      'workflowStepTreeTokenUsage',
       'workflowStepTreeStatusIcon',
+      'workflowStepTreeTokenUsage',
+      'workflowStepTreeDuration',
     ]);
   });
 
@@ -114,7 +114,7 @@ describe('StepExecutionTreeRow', () => {
     const texts = Array.from(meta.querySelectorAll('[data-test-subj]')).map((el) =>
       el.getAttribute('data-test-subj')
     );
-    expect(texts).toEqual(['workflowStepTreeTokenUsage', 'workflowStepTreeStatusIcon']);
+    expect(texts).toEqual(['workflowStepTreeStatusIcon', 'workflowStepTreeTokenUsage']);
   });
 
   it('does not render a token badge when usage total is zero', () => {
