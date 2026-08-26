@@ -19,6 +19,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { AggregateQuery, TimeRange } from '@kbn/es-query';
 import { AlertsV2SearchBar } from './alerts_v2_search_bar';
 import { AlertsV2KpisSection } from './alerts_v2_kpis_section';
+import { EpisodesTableSection } from './table/episodes_table_section';
 import { useEsqlRowCount } from './use_esql_row_count';
 
 const DEFAULT_QUERY: AggregateQuery = { esql: 'FROM $.alert-episodes' };
@@ -55,6 +56,8 @@ export const AlertsV2Page = () => {
       <DebugRowCount query={query} timeRange={timeRange} />
       <EuiSpacer size="l" />
       <AlertsV2KpisSection query={query} timeRange={timeRange} />
+      <EuiSpacer size="l" />
+      <EpisodesTableSection query={query} timeRange={timeRange} />
     </>
   );
 };
