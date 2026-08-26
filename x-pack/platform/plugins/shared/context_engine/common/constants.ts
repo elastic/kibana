@@ -16,6 +16,8 @@ export const aiIndexKiByIdPath = `${aiIndexKiListPath}/{kiId}`;
 /** Default and maximum page size when listing Knowledge Indicators for an AI index. */
 export const DEFAULT_KI_PAGE_SIZE = 25;
 export const MAX_KI_PAGE_SIZE = 100;
+/** Page size for summary-only KI list requests, no rows. */
+export const KI_SUMMARY_PAGE_SIZE = 0;
 
 export const MAX_KI_TYPE_FILTER_LENGTH = 256;
 

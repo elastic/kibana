@@ -14,6 +14,7 @@ import { useKibana } from './use_kibana';
 interface UseKiArgs {
   aiIndexId: string;
   kiId: string;
+  index: string;
   enabled?: boolean;
 }
 
@@ -23,15 +24,15 @@ interface UseKiResult {
   error: Error | undefined;
 }
 
-export const useKi = ({ aiIndexId, kiId, enabled = true }: UseKiArgs): UseKiResult => {
+export const useKi = ({ aiIndexId, kiId, index, enabled = true }: UseKiArgs): UseKiResult => {
   const {
     services: { http },
   } = useKibana();
 
   const { data, isLoading, error } = useQuery<GetKiResponse, Error>({
-    queryKey: contextEngineQueryKeys.aiIndex.ki(aiIndexId, kiId),
-    queryFn: ({ signal }) => getKi(http, { aiIndexId, kiId, signal }),
-    enabled,
+    queryKey: contextEngineQueryKeys.aiIndex.ki(aiIndexId, index, kiId),
+    queryFn: ({ signal }) => getKi(http, { aiIndexId, kiId, index, signal }),
+    enabled: enabled && index.length > 0,
   });
 
   return {

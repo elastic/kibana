@@ -5,38 +5,49 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
+import type { DiagnosticResult } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { getKi } from './ki_get';
 import { KiNotFoundError } from './errors';
 
+const createNotFoundResponseError = () =>
+  new errors.ResponseError({
+    meta: {
+      aborted: false,
+      attempts: 1,
+      connection: null,
+      context: null,
+      name: 'document_missing_exception',
+      request: {} as unknown as DiagnosticResult['meta']['request'],
+    },
+    warnings: [],
+    body: 'document_missing_exception',
+    statusCode: 404,
+  });
+
 describe('ki_get', () => {
-  const search = jest.fn();
-  const esClient = { search } as unknown as ElasticsearchClient;
+  const get = jest.fn();
+  const esClient = { get } as unknown as ElasticsearchClient;
 
   beforeEach(() => {
-    search.mockReset();
+    get.mockReset();
   });
 
   it('returns the KI id and stored document', async () => {
-    search.mockResolvedValue({
-      hits: {
-        hits: [
-          {
-            _id: 'ki-1',
-            _source: {
-              type: 'playbook',
-              title: 'Refund playbook',
-              content: 'Verify the order first.',
-            },
-          },
-        ],
+    get.mockResolvedValue({
+      _id: 'ki-1',
+      _source: {
+        type: 'playbook',
+        title: 'Refund playbook',
+        content: 'Verify the order first.',
       },
     });
 
     await expect(
       getKi(esClient, {
         aiIndexId: 'sample',
-        destValue: 'ai-index-idx-sample',
+        index: 'ai-index-idx-sample',
         kiId: 'ki-1',
       })
     ).resolves.toEqual({
@@ -48,48 +59,44 @@ describe('ki_get', () => {
       },
     });
 
-    expect(search).toHaveBeenCalledWith(
-      expect.objectContaining({
-        index: 'ai-index-idx-sample',
-        ignore_unavailable: true,
-        allow_no_indices: true,
-        query: { ids: { values: ['ki-1'] } },
-        size: 1,
-      })
-    );
+    expect(get).toHaveBeenCalledWith({
+      index: 'ai-index-idx-sample',
+      id: 'ki-1',
+    });
   });
 
   it('throws KiNotFoundError when the document is missing', async () => {
-    search.mockResolvedValue({ hits: { hits: [] } });
+    get.mockRejectedValue(createNotFoundResponseError());
 
     await expect(
       getKi(esClient, {
         aiIndexId: 'sample',
-        destValue: 'ai-index-idx-sample',
+        index: 'ai-index-idx-sample',
         kiId: 'missing',
       })
     ).rejects.toThrow(new KiNotFoundError('sample', 'missing'));
   });
 
-  it('returns the first hit when the id exists in more than one backing index', async () => {
-    search.mockResolvedValue({
-      hits: {
-        hits: [
-          { _id: 'ki-1', _index: 'idx-a', _source: { type: 'playbook', title: 'A' } },
-          { _id: 'ki-1', _index: 'idx-b', _source: { type: 'playbook', title: 'B' } },
-        ],
-      },
+  it('fetches from the concrete backing index provided by the list response', async () => {
+    get.mockResolvedValue({
+      _id: 'ki-1',
+      _source: { type: 'playbook', title: 'B' },
     });
 
     await expect(
       getKi(esClient, {
         aiIndexId: 'sample',
-        destValue: 'ai-index-idx-sample*',
+        index: 'idx-b',
         kiId: 'ki-1',
       })
     ).resolves.toEqual({
       id: 'ki-1',
-      document: { type: 'playbook', title: 'A' },
+      document: { type: 'playbook', title: 'B' },
+    });
+
+    expect(get).toHaveBeenCalledWith({
+      index: 'idx-b',
+      id: 'ki-1',
     });
   });
 });

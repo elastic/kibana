@@ -30,6 +30,7 @@ interface UseKiListResult {
   total: number;
   summary: UseKiListSummary;
   isLoading: boolean;
+  isFetching: boolean;
   error: Error | undefined;
   refetch: () => void;
 }
@@ -44,7 +45,7 @@ export const useKiList = ({
     services: { http },
   } = useKibana();
 
-  const { data, isLoading, error, refetch } = useQuery<ListKisResponse, Error>({
+  const { data, isLoading, isFetching, error, refetch } = useQuery<ListKisResponse, Error>({
     queryKey: contextEngineQueryKeys.aiIndex.kiList(aiIndexId ?? '', size, type),
     queryFn: ({ signal }) => {
       if (!aiIndexId) {
@@ -69,6 +70,7 @@ export const useKiList = ({
       countsByType: data?.summary?.counts_by_type ?? [],
     },
     isLoading,
+    isFetching,
     error: error ?? undefined,
     refetch,
   };

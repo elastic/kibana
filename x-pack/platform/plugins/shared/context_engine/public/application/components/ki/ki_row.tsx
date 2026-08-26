@@ -18,7 +18,7 @@ import React, { useState } from 'react';
 import type { GetKiResponse, KiListItem } from '../../../../common/http_api/knowledge_indicators';
 import { useKi } from '../../hooks/use_ki';
 import { getErrorMessage } from '../../utils/get_error_message';
-import { capitalizeLabel, getKiTypeLabel } from './helpers';
+import { getKiDisplayTitle, getKiDisplayTypeLabel } from './helpers';
 
 interface KiRowProps {
   aiIndexId: string;
@@ -28,8 +28,16 @@ interface KiRowProps {
 const toKiJson = ({ id, document }: GetKiResponse): string =>
   JSON.stringify({ id, ...document }, null, 2);
 
-const KiRowSource = ({ aiIndexId, kiId }: { aiIndexId: string; kiId: string }) => {
-  const { ki, isLoading, error } = useKi({ aiIndexId, kiId });
+const KiRowSource = ({
+  aiIndexId,
+  kiId,
+  index,
+}: {
+  aiIndexId: string;
+  kiId: string;
+  index: string;
+}) => {
+  const { ki, isLoading, error } = useKi({ aiIndexId, kiId, index });
 
   if (isLoading) {
     return <EuiSkeletonText lines={6} data-test-subj="contextKiRowJsonLoading" />;
@@ -67,11 +75,12 @@ const KiRowSource = ({ aiIndexId, kiId }: { aiIndexId: string; kiId: string }) =
 
 export const KiRow = ({ aiIndexId, ki }: KiRowProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const typeLabel = capitalizeLabel(getKiTypeLabel(ki.type));
+  const title = getKiDisplayTitle(ki.title);
+  const typeLabel = getKiDisplayTypeLabel(ki.type);
 
   return (
     <EuiAccordion
-      id={`contextKiRow-${ki.id}`}
+      id={`contextKiRow-${ki.index}-${ki.id}`}
       arrowDisplay="left"
       borders="none"
       paddingSize="s"
@@ -82,7 +91,7 @@ export const KiRow = ({ aiIndexId, ki }: KiRowProps) => {
         <div>
           <EuiTitle size="xxs">
             <EuiTextBlockTruncate lines={2} cloneElement>
-              <span data-test-subj="contextKiRowTitle">{ki.title}</span>
+              <span data-test-subj="contextKiRowTitle">{title}</span>
             </EuiTextBlockTruncate>
           </EuiTitle>
           <EuiText size="xs" color="subdued" data-test-subj="contextKiRowType">
@@ -91,7 +100,7 @@ export const KiRow = ({ aiIndexId, ki }: KiRowProps) => {
         </div>
       }
     >
-      {isOpen ? <KiRowSource aiIndexId={aiIndexId} kiId={ki.id} /> : null}
+      {isOpen ? <KiRowSource aiIndexId={aiIndexId} kiId={ki.id} index={ki.index} /> : null}
     </EuiAccordion>
   );
 };

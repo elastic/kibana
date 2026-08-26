@@ -47,7 +47,7 @@ export const KiListPanel = ({ aiIndex: { id: aiIndexId, dest } }: KiListPanelPro
     setSize(DEFAULT_KI_PAGE_SIZE);
   };
 
-  const { kis, total, summary, isLoading, error } = useKiList({
+  const { kis, total, summary, isLoading, isFetching, error } = useKiList({
     aiIndexId,
     size,
     type: typeFilter.kind === 'type' ? typeFilter.value : undefined,
@@ -127,7 +127,7 @@ export const KiListPanel = ({ aiIndex: { id: aiIndexId, dest } }: KiListPanelPro
           loadedCount={kis.length}
           total={total}
           size={size}
-          isLoading={isLoading}
+          isLoading={isFetching}
           discoverHref={discoverHref}
           onLoadMore={loadMore}
         />

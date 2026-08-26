@@ -19,7 +19,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { DEFAULT_KI_PAGE_SIZE } from '../../../common/constants';
+import { KI_SUMMARY_PAGE_SIZE } from '../../../common/constants';
 import {
   AutomationsPanel,
   DescriptionPanel,
@@ -57,7 +57,7 @@ export const AiIndexDetailPage = () => {
 
   const { summary } = useKiList({
     aiIndexId: aiIndex?.id,
-    size: DEFAULT_KI_PAGE_SIZE,
+    size: KI_SUMMARY_PAGE_SIZE,
     enabled: aiIndex !== undefined,
   });
 

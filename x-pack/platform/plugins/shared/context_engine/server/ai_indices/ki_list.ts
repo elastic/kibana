@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { MAX_KI_TYPE_FILTER_COUNT, takeTopKiTypeCounts } from '../../common/ki_type_counts';
 import type { KiListItem, ListKisResponse } from '../../common/http_api/knowledge_indicators';
@@ -36,17 +37,19 @@ export interface GetKisOptions {
   type?: string;
 }
 
-const toKiListItemFromHit = (hit: {
-  _id?: string;
-  _source?: KiDocumentSource;
-}): KiListItem | undefined => {
-  const { _id: id, _source: source } = hit;
-  const { type, title } = source ?? {};
-  if (id === undefined || type === undefined || title === undefined) {
+const toKiListItemFromHit = (hit: estypes.SearchHit<KiDocumentSource>): KiListItem | undefined => {
+  const { _id: id, _index: index, _source: source } = hit;
+  if (id === undefined) {
     return undefined;
   }
 
-  return { id, type, title };
+  const { type, title } = source ?? {};
+  return {
+    id,
+    index,
+    ...(type !== undefined ? { type } : {}),
+    ...(title !== undefined ? { title } : {}),
+  };
 };
 
 const buildKiListQuery = ({ type }: Pick<GetKisOptions, 'type'>) => {
@@ -69,7 +72,7 @@ export const getKis = async (
     track_total_hits: true,
     _source: [...KI_LIST_SOURCE_FIELDS],
     query: buildKiListQuery({ type }),
-    sort: [{ '@timestamp': { order: 'desc' } }, { _doc: { order: 'desc' } }],
+    sort: [{ '@timestamp': { order: 'desc', unmapped_type: 'date' } }, { _doc: { order: 'desc' } }],
     aggs: {
       all_kis: {
         global: {},

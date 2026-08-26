@@ -37,14 +37,16 @@ export const listKis = (
 interface GetKiArgs {
   aiIndexId: string;
   kiId: string;
+  index: string;
   signal?: AbortSignal;
 }
 
 export const getKi = (
   http: HttpStart,
-  { aiIndexId, kiId, signal }: GetKiArgs
+  { aiIndexId, kiId, index, signal }: GetKiArgs
 ): Promise<GetKiResponse> =>
   http.get<GetKiResponse>(buildPath(aiIndexKiByIdPath, { aiIndexId, kiId }), {
     version: AI_INDEX_INTERNAL_API_VERSION,
+    query: { index },
     ...(signal ? { signal } : {}),
   });

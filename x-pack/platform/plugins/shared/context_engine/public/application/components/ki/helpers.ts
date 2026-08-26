@@ -6,7 +6,12 @@
  */
 
 import type { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
+import { i18n } from '@kbn/i18n';
 import type { AiIndexDest } from '../../../../common/http_api/ai_indices';
+
+const noneValueLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.kiList.noneValue', {
+  defaultMessage: 'None',
+});
 
 export type KiListTypeFilter = { kind: 'all'; value: 'all' } | { kind: 'type'; value: string };
 export const ALL_TYPE_FILTER: KiListTypeFilter = { kind: 'all', value: 'all' };
@@ -27,3 +32,8 @@ export const capitalizeLabel = (label: string): string =>
   label.length > 0 ? `${label.charAt(0).toUpperCase()}${label.slice(1)}` : label;
 
 export const getKiTypeLabel = (type: string): string => type.replace(/_/g, ' ');
+
+export const getKiDisplayTitle = (title?: string): string => title ?? noneValueLabel;
+
+export const getKiDisplayTypeLabel = (type?: string): string =>
+  capitalizeLabel(getKiTypeLabel(type ?? noneValueLabel));

@@ -6,37 +6,36 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { isResponseError } from '@kbn/es-errors';
 import type { GetKiResponse, KiDocument } from '../../common/http_api/knowledge_indicators';
 import { KiNotFoundError } from './errors';
 
-const LENIENT_INDEX_OPTIONS = {
-  ignore_unavailable: true,
-  allow_no_indices: true,
-} as const;
-
 export interface GetKiOptions {
   aiIndexId: string;
-  destValue: string;
+  index: string;
   kiId: string;
 }
 
 export const getKi = async (
   esClient: ElasticsearchClient,
-  { aiIndexId, destValue, kiId }: GetKiOptions
+  { aiIndexId, index, kiId }: GetKiOptions
 ): Promise<GetKiResponse> => {
-  const response = await esClient.search<KiDocument>({
-    index: destValue,
-    ...LENIENT_INDEX_OPTIONS,
-    query: { ids: { values: [kiId] } },
-    size: 1,
-  });
+  try {
+    const response = await esClient.get<KiDocument>({
+      index,
+      id: kiId,
+    });
 
-  const { hits } = response.hits;
-  const hit = hits[0];
-  const { _id: id, _source: document } = hit ?? {};
-  if (id === undefined || document === undefined) {
-    throw new KiNotFoundError(aiIndexId, kiId);
+    const { _id: id, _source: document } = response;
+    if (document === undefined) {
+      throw new KiNotFoundError(aiIndexId, kiId);
+    }
+
+    return { id, document };
+  } catch (error) {
+    if (isResponseError(error) && error.statusCode === 404) {
+      throw new KiNotFoundError(aiIndexId, kiId);
+    }
+    throw error;
   }
-
-  return { id, document };
 };

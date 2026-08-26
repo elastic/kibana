@@ -15,7 +15,7 @@ import { useKi } from './use_ki';
 
 const renderUseKi = (
   core: CoreStart,
-  args: { aiIndexId: string; kiId: string; enabled?: boolean }
+  args: { aiIndexId: string; kiId: string; index: string; enabled?: boolean }
 ) => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   const wrapper = ({ children }: { children: React.ReactNode }) =>
@@ -32,7 +32,12 @@ describe('useKi', () => {
   it('does not fetch until enabled', () => {
     const core = coreMock.createStart();
 
-    renderUseKi(core, { aiIndexId: 'sample-ki', kiId: 'ki-1', enabled: false });
+    renderUseKi(core, {
+      aiIndexId: 'sample-ki',
+      kiId: 'ki-1',
+      index: 'ai-index-idx-sample-ki',
+      enabled: false,
+    });
 
     expect(core.http.get).not.toHaveBeenCalled();
   });
@@ -45,12 +50,19 @@ describe('useKi', () => {
     };
     (core.http.get as jest.Mock).mockResolvedValue(response);
 
-    const { result } = renderUseKi(core, { aiIndexId: 'sample-ki', kiId: 'ki-1' });
+    const { result } = renderUseKi(core, {
+      aiIndexId: 'sample-ki',
+      kiId: 'ki-1',
+      index: 'ai-index-idx-sample-ki',
+    });
 
     await waitFor(() => expect(result.current.ki).toEqual(response));
     expect(core.http.get).toHaveBeenCalledWith(
       '/internal/context_engine/ai_index/sample-ki/kis/ki-1',
-      expect.objectContaining({ version: '1' })
+      expect.objectContaining({
+        version: '1',
+        query: { index: 'ai-index-idx-sample-ki' },
+      })
     );
   });
 });

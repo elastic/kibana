@@ -19,6 +19,8 @@ const allKisAggregation = {
   },
 };
 
+const BACKING_INDEX = 'ai-index-idx-sample';
+
 describe('ki_list', () => {
   const search = jest.fn();
   const esClient = { search } as unknown as ElasticsearchClient;
@@ -34,6 +36,7 @@ describe('ki_list', () => {
         hits: [
           {
             _id: 'ki-1',
+            _index: BACKING_INDEX,
             _source: {
               type: 'playbook',
               title: 'Refund playbook',
@@ -41,6 +44,7 @@ describe('ki_list', () => {
           },
           {
             _id: 'ki-2',
+            _index: BACKING_INDEX,
             _source: {
               type: 'policy',
               title: 'Refund policy',
@@ -72,11 +76,13 @@ describe('ki_list', () => {
       kis: [
         {
           id: 'ki-1',
+          index: BACKING_INDEX,
           type: 'playbook',
           title: 'Refund playbook',
         },
         {
           id: 'ki-2',
+          index: BACKING_INDEX,
           type: 'policy',
           title: 'Refund policy',
         },
@@ -89,6 +95,10 @@ describe('ki_list', () => {
         from: 0,
         size: 25,
         query: { match_all: {} },
+        sort: [
+          { '@timestamp': { order: 'desc', unmapped_type: 'date' } },
+          { _doc: { order: 'desc' } },
+        ],
         aggs: {
           all_kis: {
             global: {},
@@ -114,6 +124,7 @@ describe('ki_list', () => {
         hits: [
           {
             _id: 'ki-1',
+            _index: BACKING_INDEX,
             _source: {
               type: 'playbook',
               title: 'Refund playbook',
@@ -154,6 +165,99 @@ describe('ki_list', () => {
             filter: [{ term: { type: 'playbook' } }],
           },
         },
+      })
+    );
+  });
+
+  it('includes KIs with missing type or title so total matches the rendered row count', async () => {
+    search.mockResolvedValue({
+      hits: {
+        total: { value: 3 },
+        hits: [
+          {
+            _id: 'ki-complete',
+            _index: BACKING_INDEX,
+            _source: {
+              type: 'playbook',
+              title: 'Complete KI',
+            },
+          },
+          {
+            _id: 'ki-missing-type',
+            _index: BACKING_INDEX,
+            _source: {
+              title: 'Missing type',
+            },
+          },
+          {
+            _id: 'ki-missing-title',
+            _index: BACKING_INDEX,
+            _source: {
+              type: 'policy',
+            },
+          },
+        ],
+      },
+      aggregations: {
+        all_kis: allKisAggregation,
+      },
+    });
+
+    await expect(
+      getKis(esClient, {
+        destValue: 'ai-index-idx-sample',
+        size: 25,
+      })
+    ).resolves.toEqual({
+      total: 3,
+      summary: {
+        total: 6,
+        counts_by_type: [
+          { type: 'playbook', count: 1 },
+          { type: 'policy', count: 1 },
+          { type: 'faq', count: 4 },
+        ],
+      },
+      kis: [
+        { id: 'ki-complete', index: BACKING_INDEX, type: 'playbook', title: 'Complete KI' },
+        { id: 'ki-missing-type', index: BACKING_INDEX, title: 'Missing type' },
+        { id: 'ki-missing-title', index: BACKING_INDEX, type: 'policy' },
+      ],
+    });
+  });
+
+  it('returns summary stats without fetching rows when size is 0', async () => {
+    search.mockResolvedValue({
+      hits: {
+        total: { value: 6 },
+        hits: [],
+      },
+      aggregations: {
+        all_kis: allKisAggregation,
+      },
+    });
+
+    await expect(
+      getKis(esClient, {
+        destValue: 'ai-index-idx-sample',
+        size: 0,
+      })
+    ).resolves.toEqual({
+      kis: [],
+      total: 6,
+      summary: {
+        total: 6,
+        counts_by_type: [
+          { type: 'playbook', count: 1 },
+          { type: 'policy', count: 1 },
+          { type: 'faq', count: 4 },
+        ],
+      },
+    });
+
+    expect(search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        size: 0,
       })
     );
   });

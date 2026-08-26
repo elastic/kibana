@@ -9,8 +9,9 @@ import type { KiTypeCount } from './ai_indices';
 
 export interface KiListItem {
   id: string;
-  type: string;
-  title: string;
+  index: string;
+  type?: string;
+  title?: string;
 }
 
 /** Unfiltered store stats. */

@@ -28,6 +28,7 @@ import {
   DEFAULT_KI_PAGE_SIZE,
   MAX_KI_PAGE_SIZE,
   MAX_KI_TYPE_FILTER_LENGTH,
+  MAX_INDEX_NAME_BYTES,
 } from '../../common/constants';
 import type {
   CreateAiIndexResponse,
@@ -156,7 +157,7 @@ const putAiIndexBodySchema = schema.object(aiIndexPropertiesSchema);
 
 const listKisQuerySchema = schema.object({
   size: schema.number({
-    min: 1,
+    min: 0,
     max: MAX_KI_PAGE_SIZE,
     defaultValue: DEFAULT_KI_PAGE_SIZE,
   }),
@@ -167,6 +168,14 @@ const listKisQuerySchema = schema.object({
       meta: { description: 'When set, return only KIs of this type.' },
     })
   ),
+});
+
+const getKiQuerySchema = schema.object({
+  index: schema.string({
+    minLength: 1,
+    maxLength: MAX_INDEX_NAME_BYTES,
+    meta: { description: 'The Elasticsearch index that stores the Knowledge Indicator.' },
+  }),
 });
 
 const handleAiIndexError = (error: unknown, response: KibanaResponseFactory) => {
@@ -407,7 +416,7 @@ export const registerAiIndexRoutes = ({
       access: 'internal',
       summary: 'Get a Knowledge Indicator',
       description:
-        'Returns the stored Knowledge Indicator document from the AI index destination backing store.',
+        'Returns the stored Knowledge Indicator document from the Elasticsearch index that stores it.',
     })
     .addVersion(
       {
@@ -415,18 +424,20 @@ export const registerAiIndexRoutes = ({
         validate: {
           request: {
             params: kiIdParamsSchema,
+            query: getKiQuerySchema,
           },
         },
       },
       withContextEngineFeatureFlag(async (ctx, request, response) => {
         const auditLogger = (await ctx.core).security.audit.logger;
         const { aiIndexId, kiId } = request.params;
+        const { index } = request.query;
         try {
-          const aiIndex = await getAiIndexService().get(aiIndexId);
+          await getAiIndexService().get(aiIndexId);
           const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
           const body: GetKiResponse = await getKi(esClient, {
             aiIndexId,
-            destValue: aiIndex.dest.value,
+            index,
             kiId,
           });
           auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.GET, id: aiIndexId }));

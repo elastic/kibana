@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
+import type { DiagnosticResult } from '@elastic/elasticsearch';
 import { actionsClientMock, actionsMock } from '@kbn/actions-plugin/server/mocks';
 import type { ActionResult, ConnectorType } from '@kbn/actions-plugin/server';
 import type { Type } from '@kbn/config-schema';
@@ -83,6 +85,23 @@ const aiIndexItem: AiIndexHttpItem = {
   date_modified: '2026-07-08T12:10:30.000Z',
 };
 
+const kiBackingIndex = '.ds-ai-index-ds-customer_support-2026.01.01-000001';
+
+const createNotFoundResponseError = () =>
+  new errors.ResponseError({
+    meta: {
+      aborted: false,
+      attempts: 1,
+      connection: null,
+      context: null,
+      name: 'document_missing_exception',
+      request: {} as unknown as DiagnosticResult['meta']['request'],
+    },
+    warnings: [],
+    body: 'document_missing_exception',
+    statusCode: 404,
+  });
+
 describe('ai indices routes', () => {
   let routes: Record<string, RegisteredRoute>;
   let aiIndexService: jest.Mocked<
@@ -94,6 +113,7 @@ describe('ai indices routes', () => {
   let actions: ReturnType<typeof actionsMock.createStart>;
   let auditLogger: { log: jest.Mock };
   let esSearch: jest.Mock;
+  let esGet: jest.Mock;
 
   const createContext = () =>
     ({
@@ -106,6 +126,7 @@ describe('ai indices routes', () => {
           client: {
             asCurrentUser: {
               search: esSearch,
+              get: esGet,
             },
           },
         },
@@ -128,6 +149,7 @@ describe('ai indices routes', () => {
     actionsClient.listTypes.mockResolvedValue(SUPPORTED_TYPE_IDS.map(buildConnectorType));
     auditLogger = { log: jest.fn() };
     esSearch = jest.fn();
+    esGet = jest.fn();
     aiIndexService = {
       create: jest.fn(),
       put: jest.fn(),
@@ -177,7 +199,10 @@ describe('ai indices routes', () => {
     await callRoute('PUT', aiIndexByIdPath, { params: { aiIndexId: 'a' }, body: {} });
     await callRoute('GET', aiIndexByIdPath, { params: { aiIndexId: 'a' } });
     await callRoute('GET', aiIndexKiListPath, { params: { aiIndexId: 'a' } });
-    await callRoute('GET', aiIndexKiByIdPath, { params: { aiIndexId: 'a', kiId: 'ki-1' } });
+    await callRoute('GET', aiIndexKiByIdPath, {
+      params: { aiIndexId: 'a', kiId: 'ki-1' },
+      query: { index: kiBackingIndex },
+    });
     await callRoute('GET', aiIndexPath, {});
     await callRoute('DELETE', aiIndexByIdPath, { params: { aiIndexId: 'a' } });
 
@@ -439,6 +464,7 @@ describe('ai indices routes', () => {
           hits: [
             {
               _id: 'ki-1',
+              _index: kiBackingIndex,
               _source: {
                 type: 'playbook',
                 title: 'Refund playbook',
@@ -492,6 +518,7 @@ describe('ai indices routes', () => {
           kis: [
             {
               id: 'ki-1',
+              index: kiBackingIndex,
               type: 'playbook',
               title: 'Refund playbook',
             },
@@ -575,32 +602,24 @@ describe('ai indices routes', () => {
   describe('GET /internal/context_engine/ai_index/{aiIndexId}/kis/{kiId}', () => {
     it('returns the stored Knowledge Indicator document', async () => {
       aiIndexService.get.mockResolvedValue(aiIndexItem);
-      esSearch.mockResolvedValue({
-        hits: {
-          hits: [
-            {
-              _id: 'ki-1',
-              _source: {
-                type: 'playbook',
-                title: 'Refund playbook',
-                content: 'Verify the order first.',
-              },
-            },
-          ],
+      esGet.mockResolvedValue({
+        _id: 'ki-1',
+        _source: {
+          type: 'playbook',
+          title: 'Refund playbook',
+          content: 'Verify the order first.',
         },
       });
 
       await callRoute('GET', aiIndexKiByIdPath, {
         params: { aiIndexId: 'customer_support', kiId: 'ki-1' },
+        query: { index: kiBackingIndex },
       });
 
-      expect(esSearch).toHaveBeenCalledWith(
-        expect.objectContaining({
-          index: aiIndexItem.dest.value,
-          query: { ids: { values: ['ki-1'] } },
-          size: 1,
-        })
-      );
+      expect(esGet).toHaveBeenCalledWith({
+        index: kiBackingIndex,
+        id: 'ki-1',
+      });
       expect(response.ok).toHaveBeenCalledWith({
         body: {
           id: 'ki-1',
@@ -615,10 +634,11 @@ describe('ai indices routes', () => {
 
     it('returns 404 when the KI does not exist', async () => {
       aiIndexService.get.mockResolvedValue(aiIndexItem);
-      esSearch.mockResolvedValue({ hits: { hits: [] } });
+      esGet.mockRejectedValue(createNotFoundResponseError());
 
       await callRoute('GET', aiIndexKiByIdPath, {
         params: { aiIndexId: 'customer_support', kiId: 'missing' },
+        query: { index: kiBackingIndex },
       });
 
       expect(response.notFound).toHaveBeenCalledWith({
@@ -631,6 +651,7 @@ describe('ai indices routes', () => {
 
       await callRoute('GET', aiIndexKiByIdPath, {
         params: { aiIndexId: 'missing', kiId: 'ki-1' },
+        query: { index: kiBackingIndex },
       });
 
       expect(response.notFound).toHaveBeenCalled();

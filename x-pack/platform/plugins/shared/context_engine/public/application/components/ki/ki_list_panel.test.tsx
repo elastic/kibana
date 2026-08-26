@@ -93,6 +93,7 @@ describe('KiListPanel', () => {
       kis: [
         {
           id: 'ki-1',
+          index: 'ai-index-idx-sample-ki',
           type: 'playbook',
           title: 'Refund playbook',
         },
@@ -103,6 +104,7 @@ describe('KiListPanel', () => {
         countsByType: stableCountsByType,
       },
       isLoading: false,
+      isFetching: false,
       error: undefined,
       refetch: jest.fn(),
     }));
@@ -173,6 +175,7 @@ describe('KiListPanel', () => {
         countsByType: [],
       },
       isLoading: true,
+      isFetching: true,
       error: undefined,
       refetch: jest.fn(),
     });
@@ -192,6 +195,7 @@ describe('KiListPanel', () => {
         countsByType: [],
       },
       isLoading: false,
+      isFetching: false,
       error: new Error('boom'),
       refetch: jest.fn(),
     });
@@ -212,6 +216,7 @@ describe('KiListPanel', () => {
         countsByType: [],
       },
       isLoading: false,
+      isFetching: false,
       error: undefined,
       refetch: jest.fn(),
     });
@@ -255,6 +260,7 @@ describe('KiListPanel', () => {
     mockUseKiList.mockImplementation(({ size = DEFAULT_KI_PAGE_SIZE }: { size?: number }) => ({
       kis: Array.from({ length: size }, (_, index) => ({
         id: `ki-${index}`,
+        index: 'ai-index-idx-sample-ki',
         type: 'playbook',
         title: `KI ${index}`,
       })),
@@ -264,6 +270,7 @@ describe('KiListPanel', () => {
         countsByType: [{ type: 'playbook', count: 50 }],
       },
       isLoading: false,
+      isFetching: false,
       error: undefined,
       refetch: jest.fn(),
     }));
@@ -283,6 +290,7 @@ describe('KiListPanel', () => {
     mockUseKiList.mockImplementation(({ size = DEFAULT_KI_PAGE_SIZE }: { size?: number }) => ({
       kis: Array.from({ length: size }, (_, index) => ({
         id: `ki-${index}`,
+        index: 'ai-index-idx-sample-ki',
         type: 'playbook',
         title: `KI ${index}`,
       })),
@@ -292,6 +300,7 @@ describe('KiListPanel', () => {
         countsByType: [{ type: 'playbook', count: 150 }],
       },
       isLoading: false,
+      isFetching: false,
       error: undefined,
       refetch: jest.fn(),
     }));
@@ -317,6 +326,7 @@ describe('KiListPanel', () => {
     mockUseKiList.mockImplementation(({ size = DEFAULT_KI_PAGE_SIZE }: { size?: number }) => ({
       kis: Array.from({ length: size }, (_, index) => ({
         id: `ki-${index}`,
+        index: 'ai-index-idx-sample-ki',
         type: 'playbook',
         title: `KI ${index}`,
       })),
@@ -326,6 +336,7 @@ describe('KiListPanel', () => {
         countsByType: [{ type: 'playbook', count: 150 }],
       },
       isLoading: false,
+      isFetching: false,
       error: undefined,
       refetch: jest.fn(),
     }));

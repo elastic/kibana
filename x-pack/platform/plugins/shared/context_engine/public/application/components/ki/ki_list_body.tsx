@@ -67,7 +67,7 @@ export const KiListBody = ({ aiIndexId, kis, isLoading, error }: KiListBodyProps
       data-test-subj="contextKiListRows"
     >
       {kis.map((ki, index) => (
-        <React.Fragment key={ki.id}>
+        <React.Fragment key={`${ki.index}:${ki.id}`}>
           <div role="listitem">
             <KiRow aiIndexId={aiIndexId} ki={ki} />
           </div>
