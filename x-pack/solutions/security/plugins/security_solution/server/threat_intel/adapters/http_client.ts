@@ -58,8 +58,13 @@ export const redactUrl = (rawUrl: string): string => {
     parsed.password = '';
     return parsed.toString();
   } catch {
-    // Unparseable input can still contain `scheme://user:pass@host`.
-    return rawUrl.replace(/\/\/[^/@\s]*@/, '//');
+    // Unparseable input can still contain `scheme://user:pass@host`, and this branch
+    // exists *because* the input is malformed, so it must not assume valid userinfo
+    // syntax. The old `[^/@\s]*@` stopped at the first `/` and the first `@`, which
+    // left credentials in place for `//user:sec/ret@host` and `//us@er:s3cr3t@host`.
+    // Over-redact through the last `@` instead: losing part of a malformed URL in an
+    // error message is strictly better than logging a password.
+    return rawUrl.replace(/\/\/\S*@/, '//');
   }
 };
 
@@ -475,9 +480,17 @@ const fetchUrlImpl = async (
     // A caller-supplied Authorization wins over one derived from userinfo: it is
     // the more specific instruction, and the source config may carry stale
     // credentials the adapter is deliberately overriding.
-    let currentHeaders = {
-      ...(authorization ? { Authorization: authorization } : {}),
-      ...(headers ?? {}),
+    // Header names are case-insensitive, so a caller passing `authorization` in any
+    // casing must fully replace the URL-derived credential. Spreading both left two
+    // distinct keys in the object, and fetch normalizes the names, so the stale URL
+    // credential could be sent alongside the intended one and fail authentication.
+    const callerHeaders = headers ?? {};
+    const callerHasAuthorization = Object.keys(callerHeaders).some(
+      (key) => key.toLowerCase() === 'authorization'
+    );
+    let currentHeaders: Record<string, string> = {
+      ...(authorization && !callerHasAuthorization ? { Authorization: authorization } : {}),
+      ...callerHeaders,
     };
 
     while (true) {

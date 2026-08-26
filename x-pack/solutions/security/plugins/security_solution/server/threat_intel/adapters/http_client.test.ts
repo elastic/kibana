@@ -1001,3 +1001,89 @@ describe('fetchUrl cloud platform endpoints', () => {
     ).rejects.toThrow(/restricted address range/);
   });
 });
+
+describe('redactUrl on malformed input', () => {
+  // This branch runs *because* the URL did not parse, so it cannot assume valid
+  // userinfo syntax. The old pattern stopped at the first `/` and the first `@`, so
+  // both of these leaked into an error that may be logged.
+  it.each([
+    ['userinfo containing a slash', 'ht!tp://user:sec/ret@host/x'],
+    ['userinfo containing an at sign', 'ht!tp://us@er:s3cr3t@host/x'],
+    ['plain malformed userinfo', 'ht!tp://u:p4ssw0rd@host/x'],
+  ])('redacts %s', (_label, raw) => {
+    const out = redactUrl(raw);
+    expect(out).not.toContain('s3cr3t');
+    expect(out).not.toContain('p4ssw0rd');
+    expect(out).not.toContain('sec/ret');
+    expect(out).not.toContain('@');
+  });
+
+  it('leaves a malformed URL without userinfo alone', () => {
+    expect(redactUrl('ht!tp://host/x')).toBe('ht!tp://host/x');
+  });
+});
+
+describe('fetchUrl authorization precedence is case-insensitive', () => {
+  const capture = () => {
+    const seen: Array<Record<string, string>> = [];
+    const fetchFn = jest.fn(async (_url: string, init?: RequestInit) => {
+      seen.push((init?.headers ?? {}) as Record<string, string>);
+      return makeResponse(200, {}, 'ok');
+    });
+    return { fetchFn, seen };
+  };
+
+  // Header names are case-insensitive and fetch normalizes them, so leaving both keys
+  // in the object could send the stale URL credential alongside the intended one.
+  it.each(['authorization', 'Authorization', 'AUTHORIZATION', 'AuThOrIzAtIoN'])(
+    'lets a caller %s replace the URL credential entirely',
+    async (headerName) => {
+      const { fetchFn, seen } = capture();
+
+      await createFetchUrl({
+        fetchFn: fetchFn as unknown as typeof fetch,
+        lookupFn: publicLookup,
+      })('https://feeduser:s3cret@example.com/feed.xml', {
+        abortSignal: new AbortController().signal,
+        headers: { [headerName]: 'Bearer explicit' },
+      });
+
+      const sent = seen[0];
+      const authKeys = Object.keys(sent).filter((k) => k.toLowerCase() === 'authorization');
+      expect(authKeys).toHaveLength(1);
+      expect(sent[authKeys[0]]).toBe('Bearer explicit');
+      expect(JSON.stringify(sent)).not.toContain('s3cret');
+    }
+  );
+
+  it('still derives the credential when the caller sends no authorization', async () => {
+    const { fetchFn, seen } = capture();
+
+    await createFetchUrl({
+      fetchFn: fetchFn as unknown as typeof fetch,
+      lookupFn: publicLookup,
+    })('https://feeduser:s3cret@example.com/feed.xml', {
+      abortSignal: new AbortController().signal,
+      headers: { Accept: 'text/xml' },
+    });
+
+    expect(seen[0].Authorization).toBe(
+      `Basic ${Buffer.from('feeduser:s3cret').toString('base64')}`
+    );
+  });
+});
+
+describe('fetchUrl rejects IPv4-translatable literals', () => {
+  it.each([
+    'http://[::ffff:0:169.254.169.254]/latest/meta-data/',
+    'http://[::ffff:0:a9fe:a9fe]/',
+    'http://[::ffff:0:7f00:1]/',
+  ])('rejects %s', async (url) => {
+    await expect(
+      createFetchUrl({
+        fetchFn: (async () => makeResponse(200)) as unknown as typeof fetch,
+        lookupFn: publicLookup,
+      })(url, { abortSignal: new AbortController().signal })
+    ).rejects.toThrow(/restricted IPv6 address range/);
+  });
+});

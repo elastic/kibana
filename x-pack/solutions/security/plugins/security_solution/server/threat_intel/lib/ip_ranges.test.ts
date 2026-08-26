@@ -60,6 +60,11 @@ describe('isNonRoutableIPv6', () => {
     // The Azure platform /32 has to be caught through the mapped form too, or the
     // literal-only fix would be bypassable with an IPv6 spelling.
     ['Azure platform VIP via IPv4-mapped hex', '::ffff:a83f:8110'],
+    // The IPv4-translatable / SIIT spelling. A literal host skips DNS validation, so a
+    // miss here reaches the embedded target directly rather than being caught later.
+    ['IPv4-translatable link-local (SIIT)', '::ffff:0:a9fe:a9fe'],
+    ['IPv4-translatable loopback (SIIT)', '::ffff:0:7f00:1'],
+    ['IPv4-translatable dotted', '::ffff:0:169.254.169.254'],
     ['Azure platform VIP via IPv4-mapped dotted', '::ffff:168.63.129.16'],
     ['site-local fec0::/10', 'fec0::1'],
     ['site-local top of range', 'feff::1'],
@@ -90,6 +95,10 @@ describe('isNonRoutableIPv6', () => {
 
   it('treats an ordinary global unicast address as routable', () => {
     expect(isNonRoutableIPv6('2606:4700:4700::1111')).toBe(false);
+  });
+
+  it('leaves a public IPv4 in the translatable form routable', () => {
+    expect(isNonRoutableIPv6('::ffff:0:5db8:d822')).toBe(false);
   });
 
   it('maps a public IPv4 through the mapped form without flagging it', () => {
