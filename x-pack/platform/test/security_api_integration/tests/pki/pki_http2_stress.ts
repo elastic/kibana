@@ -23,10 +23,9 @@
  */
 
 import { randomUUID } from 'crypto';
+import { readFileSync } from 'fs';
 import http2 from 'http2';
 import type { IncomingHttpHeaders } from 'http2';
-import { readFileSync } from 'fs';
-
 import { parse as parseCookie } from 'tough-cookie';
 
 import { CA_CERT_PATH } from '@kbn/dev-utils';
