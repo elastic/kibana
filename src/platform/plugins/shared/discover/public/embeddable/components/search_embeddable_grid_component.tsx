@@ -16,7 +16,11 @@ import { useBatchedPublishingSubjects, type FetchContext } from '@kbn/presentati
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
-import type { DataGridDensity, JsonModeSettings, SourceDisplayMode } from '@kbn/unified-data-table';
+import type {
+  DataGridDensity,
+  JsonModeSettings,
+  DocumentsDisplayMode,
+} from '@kbn/unified-data-table';
 import { DataLoadingState, useColumns } from '@kbn/unified-data-table';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
@@ -207,8 +211,8 @@ export function SearchEmbeddableGridComponent({
       onUpdateDataGridDensity: (newDensity: DataGridDensity | undefined) => {
         stateManager.density.next(newDensity);
       },
-      onUpdateSourceDisplayMode: (newSourceDisplayMode: SourceDisplayMode) => {
-        stateManager.sourceDisplayMode.next(newSourceDisplayMode);
+      onUpdateDocumentsDisplayMode: (newDocumentsDisplayMode: DocumentsDisplayMode) => {
+        stateManager.documentsDisplayMode.next(newDocumentsDisplayMode);
       },
       onUpdateJsonModeSettings: (newJsonModeSettings: JsonModeSettings) => {
         stateManager.jsonModeSettings.next(newJsonModeSettings);
@@ -228,7 +232,7 @@ export function SearchEmbeddableGridComponent({
       stateManager.sort,
       stateManager.sampleSize,
       stateManager.density,
-      stateManager.sourceDisplayMode,
+      stateManager.documentsDisplayMode,
       stateManager.jsonModeSettings,
       stateManager.grid,
       grid,
@@ -290,11 +294,11 @@ export function SearchEmbeddableGridComponent({
       services={discoverServices}
       showTimeCol={showTimeCol}
       dataGridDensityState={savedSearch.density}
-      sourceDisplayModeState={
-        isDataTableJsonViewEnabled ? savedSearch.sourceDisplayMode : undefined
+      documentsDisplayModeState={
+        isDataTableJsonViewEnabled ? savedSearch.documentsDisplayMode : undefined
       }
-      onUpdateSourceDisplayMode={
-        isDataTableJsonViewEnabled ? onStateEditedProps.onUpdateSourceDisplayMode : undefined
+      onUpdateDocumentsDisplayMode={
+        isDataTableJsonViewEnabled ? onStateEditedProps.onUpdateDocumentsDisplayMode : undefined
       }
       jsonModeSettingsState={isDataTableJsonViewEnabled ? savedSearch.jsonModeSettings : undefined}
       onUpdateJsonModeSettings={

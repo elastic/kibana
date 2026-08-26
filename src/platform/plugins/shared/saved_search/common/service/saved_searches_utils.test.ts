@@ -63,6 +63,7 @@ describe('saved_searches_utils', () => {
           "controlGroupJson": undefined,
           "density": undefined,
           "description": "foo",
+          "documentsDisplayMode": undefined,
           "grid": Object {},
           "headerRowHeight": undefined,
           "hideAggregatedPreview": undefined,
@@ -103,7 +104,6 @@ describe('saved_searches_utils', () => {
           },
           "sharingSavedObjectProps": undefined,
           "sort": Array [],
-          "sourceDisplayMode": undefined,
           "tabs": Array [
             Object {
               "attributes": Object {

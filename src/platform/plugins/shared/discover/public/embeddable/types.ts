@@ -63,7 +63,7 @@ export type SearchEmbeddablePublicState = Pick<
   | 'viewMode'
   | 'grid'
   | 'density'
-  | 'sourceDisplayMode'
+  | 'documentsDisplayMode'
   | 'jsonModeSettings'
 > & {
   rows: DataTableRecord[];

@@ -22,7 +22,7 @@ import type {
 import type {
   DataGridDensity,
   JsonModeSettings,
-  SourceDisplayMode,
+  DocumentsDisplayMode,
   UnifiedDataTableRestorableState,
 } from '@kbn/unified-data-table';
 import type {
@@ -136,9 +136,9 @@ export interface DiscoverAppState {
    */
   density?: DataGridDensity;
   /**
-   * Source column display mode: 'summary' or 'json'
+   * Documents display mode: 'table' or 'json'
    */
-  sourceDisplayMode?: SourceDisplayMode;
+  documentsDisplayMode?: DocumentsDisplayMode;
   /**
    * Settings that only apply while the source column is rendered in JSON mode
    */

@@ -27,7 +27,7 @@ import { SearchResponseWarningsCallout } from '@kbn/search-response-warnings';
 import type {
   DataGridDensity,
   JsonModeSettings,
-  SourceDisplayMode,
+  DocumentsDisplayMode,
   UnifiedDataTableProps,
   UnifiedDataTableRestorableState,
   UseColumnsProps,
@@ -131,7 +131,7 @@ function DiscoverDocumentsComponent({
     columns,
     sampleSizeState,
     density,
-    sourceDisplayMode,
+    documentsDisplayMode,
     jsonModeSettings,
   ] = useAppStateSelector((state) => {
     return [
@@ -145,7 +145,7 @@ function DiscoverDocumentsComponent({
       state.columns,
       state.sampleSize,
       state.density,
-      state.sourceDisplayMode,
+      state.documentsDisplayMode,
       state.jsonModeSettings,
     ];
   });
@@ -291,9 +291,9 @@ function DiscoverDocumentsComponent({
     [dispatch, updateAppState]
   );
 
-  const onUpdateSourceDisplayMode = useCallback(
-    (newSourceDisplayMode: SourceDisplayMode) => {
-      dispatch(updateAppState({ appState: { sourceDisplayMode: newSourceDisplayMode } }));
+  const onUpdateDocumentsDisplayMode = useCallback(
+    (newDocumentsDisplayMode: DocumentsDisplayMode) => {
+      dispatch(updateAppState({ appState: { documentsDisplayMode: newDocumentsDisplayMode } }));
     },
     [dispatch, updateAppState]
   );
@@ -592,9 +592,11 @@ function DiscoverDocumentsComponent({
             initialState={dataGridUiState}
             onInitialStateChange={onInitialStateChange}
             onFullScreenChange={setIsDataGridFullScreen}
-            sourceDisplayModeState={isDataTableJsonViewEnabled ? sourceDisplayMode : undefined}
-            onUpdateSourceDisplayMode={
-              isDataTableJsonViewEnabled ? onUpdateSourceDisplayMode : undefined
+            documentsDisplayModeState={
+              isDataTableJsonViewEnabled ? documentsDisplayMode : undefined
+            }
+            onUpdateDocumentsDisplayMode={
+              isDataTableJsonViewEnabled ? onUpdateDocumentsDisplayMode : undefined
             }
             jsonModeSettingsState={isDataTableJsonViewEnabled ? jsonModeSettings : undefined}
             onUpdateJsonModeSettings={

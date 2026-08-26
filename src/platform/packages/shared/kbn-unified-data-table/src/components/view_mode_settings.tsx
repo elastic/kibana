@@ -18,18 +18,18 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { SourceDisplayMode } from '../types';
+import type { DocumentsDisplayMode } from '../types';
 const dataTestSubj = 'unifiedDataTableViewModeSettings';
 
 export interface ViewModeSettingsProps {
-  sourceDisplayMode: SourceDisplayMode;
-  onChangeSourceDisplayMode: (sourceDisplayMode: SourceDisplayMode) => void;
+  documentsDisplayMode: DocumentsDisplayMode;
+  onChangeDocumentsDisplayMode: (documentsDisplayMode: DocumentsDisplayMode) => void;
   isNew?: boolean;
 }
 
 export function ViewModeSettings({
-  sourceDisplayMode,
-  onChangeSourceDisplayMode,
+  documentsDisplayMode,
+  onChangeDocumentsDisplayMode,
   isNew = false,
 }: ViewModeSettingsProps) {
   const { euiTheme } = useEuiTheme();
@@ -40,11 +40,11 @@ export function ViewModeSettings({
 
   const viewModeOptions = [
     {
-      id: 'summary',
+      id: 'table',
       label: i18n.translate('unifiedDataTable.viewMode.default', {
         defaultMessage: 'Table',
       }),
-      'data-test-subj': `${dataTestSubj}_viewMode_summary`,
+      'data-test-subj': `${dataTestSubj}_viewMode_table`,
     },
     {
       id: 'json',
@@ -95,8 +95,8 @@ export function ViewModeSettings({
         legend={label}
         buttonSize="compressed"
         options={viewModeOptions}
-        idSelected={sourceDisplayMode}
-        onChange={(id) => onChangeSourceDisplayMode(id as SourceDisplayMode)}
+        idSelected={documentsDisplayMode}
+        onChange={(id) => onChangeDocumentsDisplayMode(id as DocumentsDisplayMode)}
         data-test-subj={`${dataTestSubj}_viewModeButtonGroup`}
       />
     </EuiFormRow>

@@ -28,7 +28,7 @@ import type {
   DataGridDensity,
   DataTableColumnsMeta,
   JsonModeSettings,
-  SourceDisplayMode,
+  DocumentsDisplayMode,
 } from '@kbn/unified-data-table';
 
 import {
@@ -142,8 +142,8 @@ export const initializeSearchEmbeddableApi = async ({
   const rowsPerPage$ = new BehaviorSubject<number | undefined>(initialState.rowsPerPage);
   const sampleSize$ = new BehaviorSubject<number | undefined>(initialState.sampleSize);
   const density$ = new BehaviorSubject<DataGridDensity | undefined>(initialState.density);
-  const sourceDisplayMode$ = new BehaviorSubject<SourceDisplayMode | undefined>(
-    initialState.sourceDisplayMode
+  const documentsDisplayMode$ = new BehaviorSubject<DocumentsDisplayMode | undefined>(
+    initialState.documentsDisplayMode
   );
   const jsonModeSettings$ = new BehaviorSubject<JsonModeSettings | undefined>(
     initialState.jsonModeSettings
@@ -194,7 +194,7 @@ export const initializeSearchEmbeddableApi = async ({
     totalHitCount: totalHitCount$,
     viewMode: savedSearchViewMode$,
     density: density$,
-    sourceDisplayMode: sourceDisplayMode$,
+    documentsDisplayMode: documentsDisplayMode$,
     jsonModeSettings: jsonModeSettings$,
     inspectorAdapters: inspectorAdapters$,
   };
@@ -261,7 +261,7 @@ export const initializeSearchEmbeddableApi = async ({
     headerRowHeight$.next(state.headerRowHeight);
     savedSearchViewMode$.next(state.viewMode);
     density$.next(state.density);
-    sourceDisplayMode$.next(state.sourceDisplayMode);
+    documentsDisplayMode$.next(state.documentsDisplayMode);
     jsonModeSettings$.next(state.jsonModeSettings);
   };
 
