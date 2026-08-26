@@ -47,7 +47,7 @@ const createReportedTokensEvaluator = <TExample extends Example, TTaskOutput ext
     return {
       score: select(tokens),
       explanation: `Provider-reported tokens: ${tokens.prompt} input, ${tokens.completion} output`,
-      details: { ...tokens },
+      metadata: { ...tokens },
     };
   },
 });

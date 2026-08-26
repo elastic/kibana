@@ -76,6 +76,13 @@ export interface SelectableFilterPopoverProps<T extends object = Record<string, 
    * @default false
    */
   singleSelection?: boolean;
+  /**
+   * Hides the search box in the popover. Useful when the option count is
+   * small enough (e.g. 2–3) that searching adds no value.
+   *
+   * @default false
+   */
+  hideSearch?: boolean;
   /** Whether the options are loading. */
   isLoading?: boolean;
   /** Empty state message to display. */
@@ -154,6 +161,7 @@ export const SelectableFilterPopover = <T extends object = Record<string, unknow
   options,
   renderOption,
   singleSelection = false,
+  hideSearch = false,
   isLoading,
   emptyMessage,
   noMatchesMessage,
@@ -305,20 +313,23 @@ export const SelectableFilterPopover = <T extends object = Record<string, unknow
           emptyMessage={emptyMessage}
           noMatchesMessage={noMatchesMessage}
           onChange={handleSelectChange}
-          searchable
-          searchProps={{ compressed: true }}
+          {...(hideSearch
+            ? { searchable: false as const }
+            : { searchable: true as const, searchProps: { compressed: true } })}
           data-test-subj={`${dataTestSubj}-list`}
           aria-label={title}
         >
           {(list, search) => (
             <>
               {singleSelection ? (
-                <EuiPanel hasShadow={false} paddingSize="s">
-                  {search}
-                </EuiPanel>
+                !hideSearch && (
+                  <EuiPanel hasShadow={false} paddingSize="s">
+                    {search}
+                  </EuiPanel>
+                )
               ) : (
                 <FilterPopoverHeader
-                  search={search}
+                  search={hideSearch ? undefined : search}
                   activeCount={activeCount}
                   onClear={clearAll}
                   data-test-subj={`${dataTestSubj}-clear`}

@@ -58,7 +58,7 @@ export const EsqlTab = ({ onAdd }: EsqlTabProps) => {
       <EuiFlexGroup justifyContent="flexEnd" gutterSize="none">
         <EuiFlexItem grow={false}>
           <EuiButton
-            iconType="plusInCircle"
+            iconType="plusCircle"
             onClick={handleAdd}
             isDisabled={!trimmedQuery}
             data-test-subj="contextAddEsqlSourceButton"

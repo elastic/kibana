@@ -28,6 +28,11 @@ jest.mock('../hooks/use_service_has_system_metrics', () => ({
   useServiceHasSystemMetrics: () => mockUseServiceHasSystemMetrics(),
 }));
 
+// Avoid pulling the real plugin module (heavy import graph) into this test.
+jest.mock('../hooks/use_project_routing', () => ({
+  useProjectRouting: () => undefined,
+}));
+
 jest.mock('@kbn/apm-ui-shared', () => ({
   ServiceFlyoutTransactionsSection: (
     props: React.ComponentProps<typeof ServiceFlyoutTransactionsSection>

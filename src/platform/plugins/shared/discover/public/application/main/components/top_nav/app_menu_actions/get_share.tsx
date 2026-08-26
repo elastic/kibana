@@ -7,10 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React from 'react';
 import { AppMenuActionId, type DiscoverAppMenuItemType } from '@kbn/discover-utils';
-import { omit } from 'lodash';
+import type { AppHeaderShareAction } from '@kbn/app-header';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { isOfAggregateQueryType, type TimeRange } from '@kbn/es-query';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import type { DiscoverAppMenuPopoverItem } from '@kbn/discover-utils';
 import type { ShowShareMenuOptions } from '@kbn/share-plugin/public';
@@ -24,6 +27,11 @@ import {
   showPublicUrlSwitch,
 } from '../../../../../utils/get_sharing_data';
 import { createSearchSource } from '../../../state_management/utils/create_search_source';
+import { getDiscoverLocatorParams } from '../../../utils/get_discover_locator_params';
+import {
+  getExpandedDocLinkability,
+  getExpandedDocLinkDisabledReason,
+} from '../../../utils/expanded_doc';
 import type { DiscoverAppLocatorParams } from '../../../../../../common/app_locator';
 import type { AppMenuDiscoverParams } from './types';
 import type { DiscoverServices } from '../../../../../build_services';
@@ -47,6 +55,68 @@ interface BuildShareOptionsParams {
  * Specifies an explicit type for the sharing data of the Discover app.
  */
 type DiscoverSharingData = SharingData<DiscoverAppLocatorParams> & ReportingCSVSharingData;
+
+/** Explains limitations when sharing an open document. */
+const getExpandedDocHelpText = ({
+  currentTab,
+  timeRange,
+}: {
+  currentTab: TabState;
+  timeRange: TimeRange | undefined;
+}) => {
+  if (!currentTab.expandedDoc) {
+    return undefined;
+  }
+
+  const isEsqlMode = isOfAggregateQueryType(currentTab.appState.query);
+  const disabledReason = getExpandedDocLinkDisabledReason(
+    getExpandedDocLinkability(currentTab.appState.query, currentTab.expandedDoc)
+  );
+
+  // A non-linkable document takes precedence over the relative-time warning.
+  if (disabledReason) {
+    return (
+      <KbnInfoCallout
+        data-test-subj="discoverShareExpandedDocCallout"
+        title={
+          isEsqlMode
+            ? i18n.translate('discover.share.expandedResultNotLinkableTitle', {
+                defaultMessage: "This link won't include the open result",
+              })
+            : i18n.translate('discover.share.expandedDocumentNotLinkableTitle', {
+                defaultMessage: "This link won't include the open document",
+              })
+        }
+        text={disabledReason}
+      />
+    );
+  }
+
+  // Relative time may exclude the document from the recipient's results and lose its context.
+  const isTimeRangeAbsolute = !(timeRange?.from?.includes('now') || timeRange?.to?.includes('now'));
+  if (isTimeRangeAbsolute) {
+    return undefined;
+  }
+
+  return (
+    <KbnInfoCallout
+      data-test-subj="discoverShareExpandedDocCallout"
+      title={
+        isEsqlMode
+          ? i18n.translate('discover.share.expandedResultRelativeTimeTitle', {
+              defaultMessage: 'This link includes an open result',
+            })
+          : i18n.translate('discover.share.expandedDocumentRelativeTimeTitle', {
+              defaultMessage: 'This link includes an open document',
+            })
+      }
+      text={i18n.translate('discover.share.expandedDocRelativeTimeDescription', {
+        defaultMessage:
+          'Use an absolute time range so it stays in the results when the link is opened.',
+      })}
+    />
+  );
+};
 
 /**
  * Builds share options for both share modal and export integrations
@@ -98,24 +168,15 @@ export const buildShareOptions = async ({
   });
 
   // Share -> Get links -> Snapshot
-  const params: DiscoverSharingData['locatorParams'][number]['params'] = {
-    ...omit(currentTab.appState, 'dataSource'),
-    ...(persistedDiscoverSession?.id ? { savedSearchId: persistedDiscoverSession.id } : {}),
-    ...(dataView?.isPersisted()
-      ? { dataViewId: dataView?.id }
-      : { dataViewSpec: dataView?.toMinimalSpec() }),
+  const params: DiscoverSharingData['locatorParams'][number]['params'] = getDiscoverLocatorParams({
+    currentTab,
+    dataView,
+    persistedDiscoverSession,
     filters,
     timeRange,
     refreshInterval,
     profileState,
-  };
-
-  if (currentTab) {
-    params.tab = {
-      id: currentTab.id,
-      label: currentTab.label,
-    };
-  }
+  });
 
   const relativeUrl = locator.getRedirectUrl(params);
 
@@ -168,6 +229,7 @@ export const buildShareOptions = async ({
         },
         link: {
           draftModeCallOut: true,
+          helpText: getExpandedDocHelpText({ currentTab, timeRange }),
         },
       },
     },
@@ -276,6 +338,7 @@ const getExportItems = (
 };
 
 export const getShareAppMenuItem = ({
+  shareAction,
   discoverParams,
   services,
   hasIntegrations,
@@ -286,6 +349,7 @@ export const getShareAppMenuItem = ({
   totalHitsState,
   intl,
 }: {
+  shareAction?: AppHeaderShareAction;
   discoverParams: AppMenuDiscoverParams;
   services: DiscoverServices;
   hasIntegrations: boolean;
@@ -296,40 +360,31 @@ export const getShareAppMenuItem = ({
   totalHitsState: DataTotalHitsMsg;
   intl: IntlShape;
 }): DiscoverAppMenuItemType[] => {
-  if (!services.share) {
-    return [];
-  }
+  const menuItems: DiscoverAppMenuItemType[] = [];
 
-  const shareExecutor = async () => {
-    const shareOptions = await buildShareOptions({
-      discoverParams,
-      services,
-      currentTab,
-      runtimeStateManager,
-      persistedDiscoverSession,
-      totalHitsState,
-      hasUnsavedChanges,
-    });
-    services.share?.toggleShareContextMenu(shareOptions);
-  };
-
-  const menuItems: DiscoverAppMenuItemType[] = [
-    {
+  if (shareAction) {
+    menuItems.push({
       id: AppMenuActionId.share,
       order: 1,
       label: i18n.translate('discover.localMenu.shareTitle', {
         defaultMessage: 'Share',
       }),
-      tooltipContent: i18n.translate('discover.localMenu.shareTooltip', {
-        defaultMessage: 'Share session',
-      }),
+      tooltipContent:
+        shareAction.tooltip?.content ??
+        i18n.translate('discover.localMenu.shareTooltip', {
+          defaultMessage: 'Share session',
+        }),
+      tooltipTitle: shareAction.tooltip?.title,
       iconType: 'share',
       testId: 'shareTopNavButton',
-      run: () => {
-        shareExecutor();
+      disableButton: shareAction.isDisabled,
+      run: (params) => {
+        void shareAction.onClick({
+          returnFocus: params?.returnFocus ?? (() => params?.triggerElement?.focus()),
+        });
       },
-    },
-  ];
+    });
+  }
 
   if (hasIntegrations) {
     const exportItems = getExportItems(

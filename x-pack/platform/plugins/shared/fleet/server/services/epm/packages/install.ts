@@ -1326,7 +1326,7 @@ export async function createInstallation(options: {
   const typedStreams = getNormalizedDataStreams(packageInfo, GENERIC_DATASET_NAME).filter(
     (ds): ds is RegistryDataStream => !!ds.type
   );
-  const toSaveESIndexPatterns = generateESIndexPatterns(typedStreams);
+  const toSaveESIndexPatterns = generateESIndexPatterns(typedStreams, packageInfo);
 
   // For "stack-aligned" packages, default the `keep_policies_up_to_date` setting to true. For all other
   // packages, default it to undefined. Use undefined rather than false to allow us to differentiate

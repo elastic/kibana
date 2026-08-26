@@ -19,6 +19,7 @@ export const API_KEY_ATTRIBUTES_TO_STRIP = [
   'apiKeyOwner',
   'apiKeyCreatedByUser',
   'uiamApiKey',
+  'uiamApiKeyExternal',
 ] as const;
 
 interface ApiKeyRuleProperties {
@@ -26,6 +27,7 @@ interface ApiKeyRuleProperties {
   apiKeyOwner: string | null;
   apiKeyCreatedByUser: boolean | null;
   uiamApiKey?: string | null;
+  uiamApiKeyExternal?: boolean | null;
 }
 
 const encodeApiKey = (id?: string, key?: string): string | null => {
@@ -57,13 +59,24 @@ const getApiKeyRuleProperties = (
   }
 
   const encodedApiKey = encodeApiKey(esApiKeyId, esApiKey);
-  const encodedUiamApiKey = encodeApiKey(uiamApiKeyId, uiamApiKey);
+  // Framework-granted UIAM keys are stored as `base64(id:key)`. User-created Cloud API
+  // keys are raw `essu_` credentials with no key id — store them as-is; alerting never
+  // invalidates them, so no id is needed.
+  const encodedUiamApiKey =
+    encodeApiKey(uiamApiKeyId, uiamApiKey) ?? (createdByUser && uiamApiKey ? uiamApiKey : null);
 
   return {
     apiKeyOwner: username,
     apiKey: encodedApiKey,
     apiKeyCreatedByUser: createdByUser,
     ...(encodedUiamApiKey ? { uiamApiKey: encodedUiamApiKey } : {}),
+    // UIAM's verdict on whether the key is an external (user-created Cloud) API key, captured
+    // at authentication time. Rule runs use it to withhold the UIAM shared secret, which UIAM
+    // rejects for external keys. Written whenever a UIAM key is written, not only when true:
+    // `updateRuleApiKey` and `enableRule` persist through a partial saved-object update, where
+    // omitting the attribute leaves the previously stored value in place. A stale `true` would
+    // then withhold the shared secret from a freshly granted internal key.
+    ...(encodedUiamApiKey ? { uiamApiKeyExternal: apiKey.uiamResult?.external === true } : {}),
   };
 };
 
@@ -75,7 +88,10 @@ export function apiKeyAsAlertAttributes(
   apiKey: CreateAPIKeyResult | null,
   username: string | null,
   createdByUser: boolean
-): Pick<RawRule, 'apiKey' | 'apiKeyOwner' | 'apiKeyCreatedByUser' | 'uiamApiKey'> {
+): Pick<
+  RawRule,
+  'apiKey' | 'apiKeyOwner' | 'apiKeyCreatedByUser' | 'uiamApiKey' | 'uiamApiKeyExternal'
+> {
   return getApiKeyRuleProperties(apiKey, username, createdByUser);
 }
 
@@ -83,7 +99,10 @@ export function apiKeyAsRuleDomainProperties(
   apiKey: CreateAPIKeyResult | null,
   username: string | null,
   createdByUser: boolean
-): Pick<RuleDomain, 'apiKey' | 'apiKeyOwner' | 'apiKeyCreatedByUser' | 'uiamApiKey'> {
+): Pick<
+  RuleDomain,
+  'apiKey' | 'apiKeyOwner' | 'apiKeyCreatedByUser' | 'uiamApiKey' | 'uiamApiKeyExternal'
+> {
   return getApiKeyRuleProperties(apiKey, username, createdByUser);
 }
 

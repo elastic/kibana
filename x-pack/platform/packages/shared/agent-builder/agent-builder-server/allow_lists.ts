@@ -46,6 +46,13 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.observability}.get_logs`,
   `${internalNamespaces.observability}.get_apm_correlations`,
 
+  // ML anomaly detection (Agent Builder skill tools)
+  `${internalNamespaces.ml}.ad_get_job_info`,
+  `${internalNamespaces.ml}.ad_create_job`,
+  `${internalNamespaces.ml}.ad_manage_job_state`,
+  `${internalNamespaces.ml}.ad_update_job_config`,
+  `${internalNamespaces.ml}.query_anomalies`,
+
   // Security Solution
   `${internalNamespaces.security}.entity_risk_score`,
   `${internalNamespaces.security}.create_detection_rule`,
@@ -53,11 +60,16 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.security}.attack_discovery_search`,
   `${internalNamespaces.security}.security_labs_search`,
   `${internalNamespaces.security}.alerts`,
+  `${internalNamespaces.security}.build_redirect_url`,
   `${internalNamespaces.security}.add_entities_to_watchlist`,
   `${internalNamespaces.security}.create_watchlist`,
   `${internalNamespaces.security}.delete_watchlist`,
   `${internalNamespaces.security}.get_entity`,
+  `${internalNamespaces.security}.get_entity_graph`,
+  `${internalNamespaces.security}.get_entity_risk_score_history`,
+  `${internalNamespaces.security}.entity_relationship_history`,
   `${internalNamespaces.security}.list_watchlists`,
+  `${internalNamespaces.security}.get_watchlist_id`,
   `${internalNamespaces.security}.remove_entities_from_watchlist`,
   `${internalNamespaces.security}.search_entities`,
   `${internalNamespaces.security}.update_watchlist`,
@@ -72,6 +84,12 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.security}.siem_readiness.get_quality`,
   `${internalNamespaces.security}.siem_readiness.get_continuity`,
   `${internalNamespaces.security}.siem_readiness.get_retention`,
+  `${internalNamespaces.security}.siem_migration.get_rule_migration`,
+  `${internalNamespaces.security}.siem_migration.start_rule_migration`,
+  `${internalNamespaces.security}.siem_migration.get_all_rule_migration_stats`,
+  `${internalNamespaces.security}.siem_migration.get_migration_rules`,
+  `${internalNamespaces.security}.siem_migration.get_rule_migration_stats`,
+  `${internalNamespaces.security}.siem_migration.get_rule_migration_translation_stats`,
   `${internalNamespaces.security}.alert-triage`,
 
   // Streams
@@ -86,6 +104,9 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
 
   // Custom content panels
   'custom_content_update_panel',
+
+  // Platform – Context Engine
+  `${internalNamespaces.platformContextEngine}.save_automation`,
 
   // Workflows
   `${internalNamespaces.workflows}.validate_workflow`,
@@ -127,7 +148,6 @@ export const AGENT_BUILDER_AGENT_TYPES = [
   chatAgentTypeId,
   `${internalNamespaces.platformSignificantEvents}.investigation-type`,
   `${internalNamespaces.platformSignificantEvents}.discovery-type`,
-  `${internalNamespaces.platformSignificantEvents}.discovery-judge-type`,
 ] as const;
 
 export type AgentBuilderAgentType = (typeof AGENT_BUILDER_AGENT_TYPES)[number];
@@ -203,6 +223,8 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'endpoint-forensic-analysis',
   'investigate-rule',
   'siem-readiness',
+  'automatic-migration-rules-start-migration',
+  'automatic-migration-rules-summarize',
   'attack-discovery-alert-retrieval-builder',
   'attack-discovery-generator',
   'attack-discovery-workflow-troubleshooting',
@@ -211,6 +233,9 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'observability.rca',
   'observability.investigation',
   'observability.service-map',
+
+  // ML
+  `${internalNamespaces.ml}.anomaly-detection`,
 
   // Search
   `${internalNamespaces.search}.keyword-search`,
@@ -274,19 +299,25 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   'workflow.yaml',
   'workflow.yaml.diff',
 
+  // Platform – Context Engine
+  'platform.context_engine.ai_index',
+
   // Platform – Cases
   'case',
   'cases',
 
   // Platform – Alerting v2
-  'rule',
-  'action_policy',
+  'platform.alerting.rule',
+  'platform.alerting.action_policy',
+  'platform.alerting.episode',
 
   // Security Solution
   'security.alert',
   'security.alerts',
   'security.entity',
   'security.entity_analytics_dashboard',
+  'security.entity_graph',
+  'security.entity_risk_score_history',
   'security.rule',
   'security.siem_readiness',
   // gated behind experimentalFeatures.rulePreviewAttachmentEnabled

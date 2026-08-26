@@ -429,6 +429,7 @@ describe('resolveThreatIntelPackIds', () => {
     expect(resolveThreatIntelPackIds([]).sort()).toEqual([
       'aws-iam',
       'github-actions',
+      'ip-fields',
       'kubernetes',
       'okta',
     ]);

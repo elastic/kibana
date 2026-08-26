@@ -106,9 +106,15 @@ describe('ListActionPolicyExecutionsRoute', () => {
     });
   });
 
-  it('returns the client result verbatim in the response body', async () => {
+  it('maps the client result onto the snake_case response body', async () => {
     const mocks = createMocks();
-    const clientResult = { items: [{ id: 'x' }], page: 4, perPage: 25, totalEvents: 137 };
+    const clientResult = {
+      items: [{ id: 'x' }],
+      page: 4,
+      perPage: 25,
+      totalEvents: 137,
+      searchMatches: null,
+    };
     mocks.executionHistoryClient.listExecutionHistory.mockResolvedValue(clientResult as any);
 
     const request = httpServerMock.createKibanaRequest();
@@ -117,7 +123,13 @@ describe('ListActionPolicyExecutionsRoute', () => {
     await route.handle();
 
     const okCall = (mocks.deps.response.ok as jest.Mock).mock.calls[0][0];
-    expect(okCall.body).toEqual(clientResult);
+    expect(okCall.body).toEqual({
+      items: [{ id: 'x' }],
+      page: 4,
+      per_page: 25,
+      total_events: 137,
+      search_matches: null,
+    });
   });
 
   it('lets errors propagate so BaseAlertingRoute.onError handles the response', async () => {

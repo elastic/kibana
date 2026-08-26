@@ -88,6 +88,7 @@
     "@kbn/data-views-plugin",
     "@kbn/datemath",
     "@kbn/ui-theme",
+    "@kbn/ui-callout",
     "@kbn/securitysolution-list-api",
     "@kbn/core-http-browser",
     "@kbn/core-http-browser-mocks",
@@ -310,5 +311,7 @@
     "@kbn/discoveries-schemas",
     "@kbn/chart-icons",
     "@kbn/core-mount-utils-browser",
+    "@kbn/ui-callout",
+    "@kbn/shared-ux-utility",
   ]
 }

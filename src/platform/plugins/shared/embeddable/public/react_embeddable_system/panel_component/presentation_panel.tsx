@@ -12,7 +12,11 @@ import React, { useCallback, useMemo, useRef } from 'react';
 
 import { EuiErrorBoundary, EuiPanel, htmlIdGenerator } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { PublishesHideBorder, PublishesTitle } from '@kbn/presentation-publishing';
+import type {
+  PublishesFetchOnlyVisible,
+  PublishesHideBorder,
+  PublishesTitle,
+} from '@kbn/presentation-publishing';
 import {
   apiHasParentApi,
   apiPublishesViewMode,
@@ -25,6 +29,7 @@ import type { PresentationPanelHoverActionsProps } from './panel_header/presenta
 import { PresentationPanelHoverActionsWrapper } from './panel_header/presentation_panel_hover_actions_wrapper';
 import { PresentationPanelError } from './presentation_panel_error';
 import type { DefaultPresentationPanelApi, PresentationPanelProps } from './types';
+import { VisibilityTracker } from './visibility_tracker';
 
 const PresentationPanelChrome = <
   ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi,
@@ -37,7 +42,6 @@ const PresentationPanelChrome = <
   showShadow,
   showBorder,
   showBadges,
-  showNotifications,
   getActions,
   actionPredicate,
   titleHighlight,
@@ -46,7 +50,7 @@ const PresentationPanelChrome = <
 }: React.PropsWithChildren<
   Omit<
     PresentationPanelProps<ApiType, ComponentPropsType>,
-    'hidePanelChrome' | 'setDragHandles' | 'Component' | 'componentProps'
+    'hidePanelChrome' | 'setDragHandles' | 'Component' | 'componentProps' | 'componentInternalApi'
   > & {
     setDragHandle: PresentationPanelHoverActionsProps['setDragHandle'];
   }
@@ -106,7 +110,6 @@ const PresentationPanelChrome = <
         getActions,
         actionPredicate,
         viewMode,
-        showNotifications,
         showBorder,
       }}
       setDragHandle={setDragHandle}
@@ -132,7 +135,6 @@ const PresentationPanelChrome = <
             hideTitle={hideTitle}
             showBadges={showBadges}
             getActions={getActions}
-            showNotifications={showNotifications}
             panelTitle={panelTitle ?? defaultPanelTitle}
             panelDescription={panelDescription ?? defaultPanelDescription}
             titleHighlight={titleHighlight}
@@ -150,18 +152,22 @@ export const PresentationPanel = <
 >({
   Component,
   componentApi,
+  componentInternalApi,
   componentProps,
 
   setDragHandles,
   hidePanelChrome,
   ...rest
 }: PresentationPanelProps<ApiType, ComponentPropsType>) => {
-  const [blockingError, panelHideBorder, parentHideBorder] = useBatchedPublishingSubjects(
-    componentApi.blockingError$ ?? new BehaviorSubject(undefined),
-    componentApi.hideBorder$ ?? new BehaviorSubject(false),
-    (componentApi.parentApi as Partial<PublishesHideBorder>)?.hideBorder$ ??
-      new BehaviorSubject(false)
-  );
+  const [blockingError, panelHideBorder, parentHideBorder, fetchOnlyVisible] =
+    useBatchedPublishingSubjects(
+      componentApi.blockingError$ ?? new BehaviorSubject(undefined),
+      componentApi.hideBorder$ ?? new BehaviorSubject(false),
+      (componentApi.parentApi as Partial<PublishesHideBorder>)?.hideBorder$ ??
+        new BehaviorSubject(false),
+      (componentApi.parentApi as Partial<PublishesFetchOnlyVisible>)?.fetchOnlyVisible$ ??
+        new BehaviorSubject(false)
+    );
   const hideBorder = Boolean(panelHideBorder) || Boolean(parentHideBorder);
 
   const dragHandles = useRef<{ [dragHandleKey: string]: HTMLElement | null }>({});
@@ -177,6 +183,9 @@ export const PresentationPanel = <
   const InnerPanel = useMemo(() => {
     return (
       <>
+        {fetchOnlyVisible && (
+          <VisibilityTracker setVisibility={componentInternalApi.setVisibility} />
+        )}
         {blockingError && <PresentationPanelError api={componentApi} error={blockingError} />}
         <div
           className={blockingError ? 'embPanel__content--hidden' : 'embPanel__content'}
@@ -188,7 +197,14 @@ export const PresentationPanel = <
         </div>
       </>
     );
-  }, [blockingError, componentApi, Component, componentProps]);
+  }, [
+    blockingError,
+    componentApi,
+    Component,
+    componentProps,
+    componentInternalApi.setVisibility,
+    fetchOnlyVisible,
+  ]);
 
   return hidePanelChrome ? (
     InnerPanel

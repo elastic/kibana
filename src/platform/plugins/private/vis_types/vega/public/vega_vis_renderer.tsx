@@ -9,13 +9,12 @@
 
 import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { METRIC_TYPE } from '@kbn/analytics';
 import type { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { VisualizationContainer } from '@kbn/visualizations-common';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type { VegaVisualizationDependencies } from './plugin';
-import { getUsageCollectionStart } from './services';
+import { reportVegaRender } from './lib/vega_render_telemetry';
 import type { RenderValue } from './vega_fn';
 const LazyVegaVisComponent = lazy(() =>
   import('./async_services').then(({ VegaVisComponent }) => ({ default: VegaVisComponent }))
@@ -46,19 +45,11 @@ export const getVegaVisRenderer: (
     });
 
     const renderComplete = () => {
-      const usageCollection = getUsageCollectionStart();
-      const containerType = extractContainerType(handlers.getExecutionContext());
-      const visualizationType = 'vega';
-
-      if (usageCollection && containerType) {
-        const counterEvents = [
-          `render_${visualizationType}`,
-          visData.useMap ? `render_${visualizationType}_map` : undefined,
-          `render_${visualizationType}_${visData.isVegaLite ? 'lite' : 'normal'}`,
-        ].filter(Boolean) as string[];
-
-        usageCollection.reportUiCounter(containerType, METRIC_TYPE.COUNT, counterEvents);
-      }
+      reportVegaRender({
+        containerType: extractContainerType(handlers.getExecutionContext()),
+        isVegaLite: visData.isVegaLite,
+        useMap: visData.useMap,
+      });
 
       handlers.done();
     };
@@ -72,7 +63,9 @@ export const getVegaVisRenderer: (
             deps={deps}
             fireEvent={handlers.event}
             renderComplete={renderComplete}
-            renderMode={handlers.getRenderMode()}
+            // Adapts the Expressions render mode to Vega's own contract. Historically any mode
+            // other than `view` — the Visualize editor's `edit` in practice — showed warnings.
+            showWarnings={handlers.getRenderMode() !== 'view'}
             visData={visData}
           />
         </VisualizationContainer>

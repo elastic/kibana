@@ -14,26 +14,102 @@ import type {
   BackgroundAgentCompleteStep,
   TodosStep,
   AskUserQuestionStep,
+  RelevantSkillsStep,
+  SubagentRosterUpdatedStep,
   ConversationRoundStepType,
   Conversation,
 } from '@kbn/agent-builder-common/chat/conversation';
+import type {
+  ConversationAccessControl,
+  ConversationInternalState,
+} from '@kbn/agent-builder-common/chat';
+import type {
+  AttachmentVersionRef,
+  VersionedAttachment,
+} from '@kbn/agent-builder-common/attachments';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
 import type { AgentNodeState } from '@kbn/agent-builder-common/chat/round_state';
+import type { UserIdAndName } from '@kbn/agent-builder-common';
 
 export type ConversationCreateRequest = Omit<
   Conversation,
-  'id' | 'created_at' | 'updated_at' | 'user'
+  'id' | 'created_at' | 'updated_at' | 'user' | 'access_control'
 > & {
   id?: string;
+  /**
+   * Optional user override. Used to set the parent conversation's user when creating a child conversation for a subagent
+   */
+  user?: UserIdAndName;
+  access_control?: ConversationAccessControl;
 };
 
-export type ConversationUpdateRequest = Pick<Conversation, 'id'> &
+export type ConversationUpdatableFields = Pick<Conversation, 'id'> &
   Partial<
     Pick<
       Conversation,
-      'title' | 'rounds' | 'attachments' | 'state' | 'status' | 'read' | 'pinned' | 'workspace_id'
+      | 'title'
+      | 'rounds'
+      | 'attachments'
+      | 'state'
+      | 'status'
+      | 'read'
+      | 'pinned'
+      | 'workspace_id'
+      | 'access_control'
+      | 'metadata'
+      | 'template_id'
+      | 'template_version'
     >
-  >;
+  > & { read_by?: ConversationReadByEntry[] };
+
+export type ConversationUpdateRequest = Pick<
+  ConversationUpdatableFields,
+  | 'id'
+  | 'title'
+  | 'attachments'
+  | 'read'
+  | 'pinned'
+  | 'metadata'
+  | 'template_id'
+  | 'template_version'
+>;
+
+export interface GetEventsOptions {
+  /** Return only events after the one with this id (exclusive). */
+  afterEventId?: string;
+  /** Cap the number of events returned (applied after `afterEventId`). */
+  limit?: number;
+}
+
+/**
+ * Persists a single completed round as intent, not end state, so it can be merged into
+ * whatever is stored. A caller-supplied `rounds` array would drop concurrent rounds.
+ */
+export interface UpsertRoundRequest {
+  id: string;
+  /** Upserted by `round.id`: appended if new, replaced in place if present (HITL resume). */
+  round: ConversationRound;
+  /** `action: 'regenerate'` only: id of the round this one supersedes. */
+  replacesRoundId?: string;
+  state?: ConversationInternalState;
+  /** Reconciled into the stored list; `snapshot` is what the round started from. */
+  attachments?: { snapshot: VersionedAttachment[]; produced: VersionedAttachment[] };
+  /** Applied only when the stored conversation has no workspace yet. */
+  workspaceId?: string;
+}
+
+/**
+ * Adds attachments to the conversation and references them from the last stored
+ * round. Merge semantics: the target round and the attachment list are both
+ * resolved against stored state, so concurrent round or attachment writes survive.
+ */
+export interface AddAttachmentsToLastRoundRequest {
+  id: string;
+  /** Merged into the last stored round's `input.attachment_refs`. */
+  refs: AttachmentVersionRef[];
+  /** Reconciled into the stored list; `snapshot` is what the caller started from. */
+  attachments: { snapshot: VersionedAttachment[]; produced: VersionedAttachment[] };
+}
 
 export interface ConversationListOptions {
   agentId?: string;
@@ -63,7 +139,9 @@ export type PersistentConversationRoundStep =
   | CompactionStep
   | BackgroundAgentCompleteStep
   | TodosStep
-  | AskUserQuestionStep;
+  | AskUserQuestionStep
+  | RelevantSkillsStep
+  | SubagentRosterUpdatedStep;
 
 /**
  * Legacy fields that may exist in old persisted documents.
@@ -91,3 +169,17 @@ export type PersistentConversationRound = Omit<ConversationRound, 'steps'> &
   LegacyRoundFields & {
     steps: PersistentConversationRoundStep[];
   };
+
+/**
+ * One user who has read a conversation. An entry object rather than a bare id string
+ * so fields such as `read_at` can be added later without another shape migration.
+ */
+export interface ConversationReadByEntry {
+  userId: string;
+}
+
+/**
+ * Server-internal persistence shape of a conversation, carrying the per-user
+ * `read_by` list that backs the public `Conversation.read` boolean.
+ */
+export type NormalizedConversation = Conversation & { read_by?: ConversationReadByEntry[] };

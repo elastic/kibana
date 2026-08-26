@@ -480,7 +480,7 @@ describe('Dynatrace', () => {
         'https://abc123.live.dynatrace.com/api/v2/problems',
         { headers: authHeaders, params: { pageSize: 1 } }
       );
-      expect(result).toEqual({ ok: true });
+      expect(result).toEqual({});
     });
 
     it('throws when environmentUrl is missing', async () => {

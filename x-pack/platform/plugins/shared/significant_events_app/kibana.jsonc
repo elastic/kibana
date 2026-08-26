@@ -14,11 +14,12 @@
       "data",
       "licensing",
       "share",
-      "significant_events",
+      "significantEvents",
+      "streams",
       "unifiedSearch"
     ],
-    "optionalPlugins": ["agentBuilder", "cloud", "spaces"],
-    "requiredBundles": ["kibanaReact"],
+    "optionalPlugins": ["agentBuilder", "cloud", "cps", "spaces"],
+    "requiredBundles": ["kibanaReact", "observabilityAIAssistant", "stackConnectors", "esqlDataGrid"],
     "extraPublicDirs": ["common"]
   }
 }

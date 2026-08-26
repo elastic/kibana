@@ -7,9 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { API_VERSIONS, INTERNAL_API_ACCESS, PND_WATCH_URL_TEMPLATE } from '@kbn/pnd-common';
-import type { GetWatchResponse } from '@kbn/pnd-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import { getMockWatchById } from '@kbn/pnd-common';
 import type { RouteDependencies } from '../register_routes';
 import { getWatchRoutePrivileges } from './watch_route_security';
 
@@ -22,7 +20,7 @@ export const registerGetWatchRoute = ({
   logger,
   config,
   getSpaceId,
-  getWatchProjection,
+  getWatchesService,
 }: RouteDependencies) => {
   router.versioned
     .get({
@@ -47,33 +45,14 @@ export const registerGetWatchRoute = ({
       async (_context, request, response) => {
         try {
           const { watchId } = request.params;
-
-          if (config.ui.useMockData) {
-            const watch = getMockWatchById(watchId);
-            if (!watch) {
-              return response.notFound({
-                body: { message: `Watch "${watchId}" not found` },
-              });
-            }
-            const body: GetWatchResponse = { watch };
-            return response.ok({ body });
-          }
-
-          const projection = getWatchProjection?.();
-          if (!projection) {
+          // Settings ride along so the settings page loads in a single request.
+          const body = await getWatchesService().get(watchId, getSpaceId(request));
+          if (!body) {
             return response.notFound({
               body: { message: `Watch "${watchId}" not found` },
             });
           }
 
-          const result = await projection.get(watchId, getSpaceId(request));
-          if (!result) {
-            return response.notFound({
-              body: { message: `Watch "${watchId}" not found` },
-            });
-          }
-
-          const body: GetWatchResponse = result;
           return response.ok({ body });
         } catch (error) {
           logger.error(`Failed to get watch: ${error}`);

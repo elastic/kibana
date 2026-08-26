@@ -16,6 +16,7 @@ import type {
 } from '@kbn/task-manager-plugin/server/task';
 import { createToken } from '@kbn/core-di';
 import type { Newable } from 'inversify';
+import type { PluginConfig } from '../../../config';
 
 type TaskRunnerConstructor<T> = Newable<T>;
 
@@ -36,6 +37,7 @@ export interface AlertingTaskDefinition<TRunner extends AlertingTaskRunner = Ale
   taskType: string;
   title: string;
   timeout: string;
+  resolveTimeout?: (config: PluginConfig) => string;
   paramsSchema?: ObjectType;
   stateSchemaByVersion?: Record<
     number,

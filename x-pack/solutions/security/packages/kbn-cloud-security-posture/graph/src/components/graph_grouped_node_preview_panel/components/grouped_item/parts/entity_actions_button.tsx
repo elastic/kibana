@@ -183,7 +183,7 @@ export const EntityActionsButton = ({
       button={
         <EuiToolTip content={actionsButtonAriaLabel} disableScreenReaderOutput>
           <EuiButtonIcon
-            iconType="boxesHorizontal"
+            iconType="boxesVertical"
             aria-label={actionsButtonAriaLabel}
             color="text"
             onClick={togglePopover}

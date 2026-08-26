@@ -7,11 +7,12 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+import { RULE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
 import { RuleInlineContent } from './rule_inline_content';
 
 const createAttachment = (overrides: { origin?: string; enabled?: boolean } = {}) => ({
   id: 'att-1',
-  type: 'rule' as const,
+  type: RULE_ATTACHMENT_TYPE,
   versions: [],
   current_version: 1,
   origin: overrides.origin,

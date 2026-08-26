@@ -7,7 +7,7 @@
 
 import type { Datatable, DatatableRow, ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { lastValueFrom, map } from 'rxjs';
-import { TIME_FIELD } from '../constants';
+import { DEFAULT_TIME_FIELD as TIME_FIELD } from '@kbn/alerting-v2-constants';
 
 export interface ExecuteEsqlQueryOptions<Input> {
   expressions: ExpressionsStart;

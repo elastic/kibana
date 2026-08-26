@@ -6,7 +6,15 @@
  */
 
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
-import { getSkillsInstructions } from './skills';
+import type { RelevantSkill } from '@kbn/agent-builder-common';
+import { isHumanMessage } from '@langchain/core/messages';
+import {
+  getSkillsInstructions,
+  getRelevantSkillsPointerInstructions,
+  formatRelevantSkillsNotice,
+  createRelevantSkillsNoticeMessage,
+  RELEVANT_SKILLS_MESSAGE_NAME,
+} from './skills';
 
 const skill = (overrides: Partial<InternalSkillDefinition>): InternalSkillDefinition =>
   ({
@@ -73,5 +81,72 @@ describe('getSkillsInstructions', () => {
       });
       expect(result).toMatch(/- test-skill \(.+SKILL\.md\): /);
     });
+  });
+});
+
+describe('getRelevantSkillsPointerInstructions', () => {
+  it('renders a static SKILLS section with no per-skill lines', () => {
+    const result = getRelevantSkillsPointerInstructions();
+    expect(result).toContain('## SKILLS');
+    expect(result).toContain('<relevant_skills>');
+    expect(result).toContain('search_relevant_skills');
+    expect(result).toContain('load_skill');
+    // Must not embed any concrete skill list (it takes no skills argument).
+    expect(result).not.toMatch(/- \w+ \(.+SKILL\.md\)/);
+  });
+
+  it('is deterministic (cacheable) — independent of any skill set', () => {
+    expect(getRelevantSkillsPointerInstructions()).toEqual(getRelevantSkillsPointerInstructions());
+  });
+});
+
+describe('formatRelevantSkillsNotice', () => {
+  const relevant = (overrides: Partial<RelevantSkill> = {}): RelevantSkill => ({
+    id: 'platform.core.alpha',
+    name: 'alpha',
+    path: '/skills/platform/core/alpha/SKILL.md',
+    description: 'Alpha skill',
+    ...overrides,
+  });
+
+  it('wraps skills in a <relevant_skills> block with name, path and description', () => {
+    const result = formatRelevantSkillsNotice([relevant()]);
+    expect(result).toContain('<relevant_skills>');
+    expect(result).toContain('</relevant_skills>');
+    expect(result).toContain('- alpha (/skills/platform/core/alpha/SKILL.md): Alpha skill');
+    expect(result).toContain('load_skill');
+  });
+
+  it('renders the optional relevance note on its own indented line', () => {
+    const result = formatRelevantSkillsNotice([
+      relevant({ relevance_note: 'Matches the user request about X' }),
+    ]);
+    expect(result).toContain('  Matches the user request about X');
+  });
+
+  it('omits the note line when no relevance note is present', () => {
+    const result = formatRelevantSkillsNotice([relevant()]);
+    const skillLineCount = result.split('\n').filter((line) => line.startsWith('- ')).length;
+    expect(skillLineCount).toBe(1);
+  });
+});
+
+describe('createRelevantSkillsNoticeMessage', () => {
+  const relevant = (overrides: Partial<RelevantSkill> = {}): RelevantSkill => ({
+    id: 'platform.core.alpha',
+    name: 'alpha',
+    path: '/skills/platform/core/alpha/SKILL.md',
+    description: 'Alpha skill',
+    ...overrides,
+  });
+
+  it('is a user-role message tagged with the relevant-skills name so it is distinguishable from real user input', () => {
+    const message = createRelevantSkillsNoticeMessage([relevant()]);
+    expect(isHumanMessage(message)).toBe(true);
+    expect(message.name).toBe(RELEVANT_SKILLS_MESSAGE_NAME);
+    expect(message.content).toContain('<relevant_skills>');
+    expect(message.content).toContain(
+      '- alpha (/skills/platform/core/alpha/SKILL.md): Alpha skill'
+    );
   });
 });

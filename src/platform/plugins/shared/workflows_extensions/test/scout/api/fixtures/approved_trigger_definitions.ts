@@ -65,19 +65,19 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
   },
   {
     id: 'alerting.ruleCreated',
-    schemaHash: '95d5d9bc425bbc2ef5391ee67d280aa42c1acfab230920a482e91d01a02c4a13',
+    schemaHash: '2e5bdb73915698a7e5f65fd71b9feab19a60a7273c710b32c591939762bd7084',
   },
   {
     id: 'alerting.ruleDeleted',
-    schemaHash: '95d5d9bc425bbc2ef5391ee67d280aa42c1acfab230920a482e91d01a02c4a13',
+    schemaHash: '2e5bdb73915698a7e5f65fd71b9feab19a60a7273c710b32c591939762bd7084',
   },
   {
     id: 'alerting.ruleDisabled',
-    schemaHash: '95d5d9bc425bbc2ef5391ee67d280aa42c1acfab230920a482e91d01a02c4a13',
+    schemaHash: '2e5bdb73915698a7e5f65fd71b9feab19a60a7273c710b32c591939762bd7084',
   },
   {
     id: 'alerting.ruleEnabled',
-    schemaHash: '95d5d9bc425bbc2ef5391ee67d280aa42c1acfab230920a482e91d01a02c4a13',
+    schemaHash: '2e5bdb73915698a7e5f65fd71b9feab19a60a7273c710b32c591939762bd7084',
   },
   {
     id: 'alerting.ruleEventsGenerated',
@@ -89,7 +89,7 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
   },
   {
     id: 'alerting.ruleUpdated',
-    schemaHash: '95d5d9bc425bbc2ef5391ee67d280aa42c1acfab230920a482e91d01a02c4a13',
+    schemaHash: '2e5bdb73915698a7e5f65fd71b9feab19a60a7273c710b32c591939762bd7084',
   },
   {
     id: 'cases.attachmentsAdded',
@@ -118,6 +118,22 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
   {
     id: 'entityStore.entityRiskScoreChanged',
     schemaHash: '9f825d6e3cd79ed834759edfec89c88eef2be3a3e33b5872f53bddc365915593',
+  },
+  {
+    id: 'significant-events.eventCreated',
+    schemaHash: '64b1eb0d83b57fc4bdd63dd44dbac0ac98477d95db49e83f4ae5ae486131dd22',
+  },
+  {
+    id: 'significant-events.eventStatusChanged',
+    schemaHash: '9daa3d856b15e374d3697da943da7db7b2332b39b01163c5c252b8916bd4282c',
+  },
+  {
+    id: 'significant-events.investigationCompleted',
+    schemaHash: '0b4d44bfc8622414b093116ea0301d48b25ead279a9b52db77d678674aa9d770',
+  },
+  {
+    id: 'significant-events.investigationStarted',
+    schemaHash: '24a3de21574471c92605a102767c36e876a932ac13fc974e9b2d69db6194bd83',
   },
   {
     id: 'workflows.failed',

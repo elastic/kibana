@@ -6,8 +6,8 @@
  */
 
 import React, { useState } from 'react';
-import { EuiButton, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { NormalizedField } from '../../../../components/mappings_editor/types';
 
 interface IndexErrorCalloutProps {
@@ -20,40 +20,39 @@ interface IndexErrorCalloutProps {
 export const IndexErrorCallout = ({ errors }: IndexErrorCalloutProps) => {
   const [showErrors, setShowErrors] = useState(false);
   return (
-    <EuiCallOut
+    <KbnDangerCallout
       data-test-subj="indexErrorCallout"
-      color="danger"
-      iconType="error"
       title={i18n.translate('xpack.idxMgmt.indexOverview.indexErrors.title', {
         defaultMessage: 'Index has errors',
       })}
+      actionProps={{
+        primary: showErrors
+          ? {
+              onClick: () => setShowErrors(false),
+              children: i18n.translate('xpack.idxMgmt.indexOverview.indexErrors.hideErrorsLabel', {
+                defaultMessage: 'Hide full error',
+              }),
+            }
+          : {
+              onClick: () => setShowErrors(true),
+              children: i18n.translate('xpack.idxMgmt.indexOverview.indexErrors.showErrorsLabel', {
+                defaultMessage: 'Show full error',
+              }),
+            },
+      }}
     >
       {showErrors && (
-        <>
-          <p>
-            {i18n.translate('xpack.idxMgmt.indexOverview.indexErrors.body', {
-              defaultMessage: 'Found errors in the following fields:',
-            })}
-            {errors.map(({ field, error }) => (
-              <li key={field.path.join('.')}>
-                <strong>{field.path.join('.')}</strong>: {error}
-              </li>
-            ))}
-          </p>
-          <EuiButton color="danger" onClick={() => setShowErrors(false)}>
-            {i18n.translate('xpack.idxMgmt.indexOverview.indexErrors.hideErrorsLabel', {
-              defaultMessage: 'Hide full error',
-            })}
-          </EuiButton>
-        </>
-      )}
-      {!showErrors && (
-        <EuiButton color="danger" onClick={() => setShowErrors(true)}>
-          {i18n.translate('xpack.idxMgmt.indexOverview.indexErrors.showErrorsLabel', {
-            defaultMessage: 'Show full error',
+        <p>
+          {i18n.translate('xpack.idxMgmt.indexOverview.indexErrors.body', {
+            defaultMessage: 'Found errors in the following fields:',
           })}
-        </EuiButton>
+          {errors.map(({ field, error }) => (
+            <li key={field.path.join('.')}>
+              <strong>{field.path.join('.')}</strong>: {error}
+            </li>
+          ))}
+        </p>
       )}
-    </EuiCallOut>
+    </KbnDangerCallout>
   );
 };

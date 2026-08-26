@@ -27,4 +27,16 @@ describe('buildSpaceIdFilter', () => {
   it('matches the space exactly in a named space (no missing-field fallback)', () => {
     expect(buildSpaceIdFilter('my-space')).toEqual({ term: { space_id: 'my-space' } });
   });
+
+  it('drops the missing-field clause in the default space when matchMissingSpaceId is false', () => {
+    expect(buildSpaceIdFilter('default', { matchMissingSpaceId: false })).toEqual({
+      term: { space_id: 'default' },
+    });
+  });
+
+  it('is unaffected by matchMissingSpaceId in a named space', () => {
+    expect(buildSpaceIdFilter('my-space', { matchMissingSpaceId: false })).toEqual({
+      term: { space_id: 'my-space' },
+    });
+  });
 });

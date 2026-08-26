@@ -9,7 +9,7 @@ import type { ShallowWrapper } from 'enzyme';
 import { ReactWrapper } from 'enzyme';
 import type { ChangeEvent } from 'react';
 import React from 'react';
-import { screen, act, within } from '@testing-library/react';
+import { screen, act, within, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import type { EuiListGroupItemProps, EuiComboBoxProps } from '@elastic/eui';
@@ -281,12 +281,10 @@ describe('FormBasedDimensionEditor', () => {
       <FormBasedDimensionEditorComponent {...defaultProps} {...propsOverrides} />
     );
 
-    const getVisibleFieldSelectOptions = () => {
-      const optionsList = screen.getByRole('dialog');
-      return within(optionsList)
-        .getAllByRole('option')
-        .map((option) => within(option).getByTestId('fullText').textContent);
-    };
+    const getVisibleFieldSelectOptions = () =>
+      within(screen.getByTestId('comboBoxOptionsList indexPattern-dimension-field-optionsList'))
+        .getAllByTestId('fullText')
+        .map((option) => option.textContent);
 
     return { ...rtlRender, getVisibleFieldSelectOptions };
   };
@@ -337,13 +335,12 @@ describe('FormBasedDimensionEditor', () => {
     await userEvent.click(screen.getByRole('button', { name: /open list of options/i }));
     expect(screen.getByText(/There aren't any options available/)).toBeInTheDocument();
   });
-  // Failing: See https://github.com/elastic/kibana/issues/253327
-  test.skip('should list all field names and document as a whole in prioritized order', async () => {
+  it('should list all field names and document as a whole in prioritized order', async () => {
     const { getVisibleFieldSelectOptions } = renderDimensionPanel();
 
-    const comboBoxButton = screen.getAllByRole('button', { name: /open list of options/i })[0];
+    const comboBoxButton = screen.getAllByTestId('comboBoxToggleListButton')[0];
     const comboBoxInput = screen.getAllByTestId('comboBoxSearchInput')[0];
-    await userEvent.click(comboBoxButton);
+    fireEvent.click(comboBoxButton);
 
     const allOptions = [
       'Records',
@@ -356,10 +353,13 @@ describe('FormBasedDimensionEditor', () => {
     ];
     expect(allOptions.slice(0, 7)).toEqual(getVisibleFieldSelectOptions());
 
-    // // press arrow up to go back to the beginning
-    await userEvent.type(comboBoxInput, '{ArrowUp}{ArrowUp}');
+    // press arrow up (x2) to go back to the beginning
+    fireEvent.keyDown(comboBoxInput, { key: 'ArrowUp', code: 'ArrowUp' });
+    fireEvent.keyUp(comboBoxInput, { key: 'ArrowUp', code: 'ArrowUp' });
+    fireEvent.keyDown(comboBoxInput, { key: 'ArrowUp', code: 'ArrowUp' });
+    fireEvent.keyUp(comboBoxInput, { key: 'ArrowUp', code: 'ArrowUp' });
     expect(getVisibleFieldSelectOptions()).toEqual(allOptions.slice(8));
-  }, 10000); // this test can be long running due to a big tree we're rendering and userEvent.type function that is slow
+  }, 10000);
 
   it('should hide fields that have no data', () => {
     (useExistingFieldsReader as jest.Mock).mockImplementationOnce(() => {

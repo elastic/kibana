@@ -228,6 +228,7 @@ export const SharepointServer: ConnectorSpec = {
 
     callRestApi: {
       isTool: true,
+      scope: 'destroy',
       description:
         "Call any SharePoint Server REST API endpoint directly. Use this for advanced queries not covered by the other actions. The path must start with '_api/' (for example, '_api/web/title' or '_api/web/lists/GetByTitle(\\'Documents\\')/items?$top=5'). Prefer the dedicated actions (getLists, getListItems, getFolderContents, etc.) when they cover your use case.",
       input: CallRestApiInputSchema,
@@ -299,20 +300,12 @@ export const SharepointServer: ConnectorSpec = {
     }),
     handler: async (ctx) => {
       ctx.log.debug('SharePoint Server test handler');
-      try {
-        const { siteUrl } = ctx.config as { siteUrl: string };
-        const response = await ctx.client.get(`${normalizeUrl(siteUrl)}/_api/web/title`, {
-          headers: ODATA_HEADERS,
-        });
-        const title = response.data?.value ?? 'Unknown';
-        return {
-          ok: true,
-          message: `Successfully connected to SharePoint Server: ${title}`,
-        };
-      } catch (error: unknown) {
-        const message = error instanceof Error ? error.message : 'Unknown error';
-        return { ok: false, message };
-      }
+      const { siteUrl } = ctx.config as { siteUrl: string };
+      await ctx.client.get(`${normalizeUrl(siteUrl)}/_api/web/title`, {
+        headers: ODATA_HEADERS,
+      });
+      return {};
     },
+    enabled: true,
   },
 };

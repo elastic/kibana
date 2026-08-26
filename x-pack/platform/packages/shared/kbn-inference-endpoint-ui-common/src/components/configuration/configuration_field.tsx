@@ -279,11 +279,12 @@ export const ConfigInputMapField: React.FC<ConfigInputFieldProps> = ({
     headerIndex: number,
     elementIndex: number
   ) => {
-    setHeadersList((prevHeadersList) => {
-      const newHeaders = [...prevHeadersList];
-      newHeaders[headerIndex][elementIndex] = e.target.value;
-      return newHeaders;
-    });
+    const newValue = e.target.value;
+    setHeadersList((prevHeadersList) =>
+      prevHeadersList.map((header, i) =>
+        i === headerIndex ? header.map((cell, j) => (j === elementIndex ? newValue : cell)) : header
+      )
+    );
   };
 
   const onBlur = () => {

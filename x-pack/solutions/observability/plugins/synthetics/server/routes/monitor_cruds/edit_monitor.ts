@@ -15,13 +15,14 @@ import {
   InvalidLocationError,
   InvalidScheduleError,
 } from '../../synthetics_service/project_monitor/normalizers/common_fields';
+import { InvalidMaintenanceWindowError } from '../../synthetics_service/maintenance_windows/resolve_maintenance_windows';
 import type { CreateMonitorPayLoad } from './add_monitor/add_monitor_api';
 import { AddEditMonitorAPI } from './add_monitor/add_monitor_api';
 import { ELASTIC_MANAGED_LOCATIONS_DISABLED } from './project_monitor/add_monitor_project';
 import { getPrivateLocationsForNamespaces } from '../../synthetics_service/get_private_locations';
 import { mergeSourceMonitor } from './formatters/saved_object_to_monitor';
 import {
-  assertCanUpdateMonitorInAllSpaces,
+  assertCanPerformMonitorBulkActionInAllSpaces,
   validateMonitorPrivateLocationSpaces,
 } from './monitor_locations_utils';
 import type { RouteContext, SyntheticsRestApiRouteFactory } from '../types';
@@ -123,10 +124,18 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
         });
       }
 
+      const maintenanceWindowRefs = formattedConfig?.[ConfigKey.MAINTENANCE_WINDOWS];
+      const maintenanceWindows = maintenanceWindowRefs?.length
+        ? (await routeContext.syntheticsMonitorClient.syntheticsService.getMaintenanceWindows(
+            spaceId
+          )) ?? []
+        : [];
+
       editedMonitor = await editMonitorAPI.normalizeMonitor(
         formattedConfig as CreateMonitorPayLoad,
         monitor as CreateMonitorPayLoad,
-        previousMonitor.attributes.locations
+        previousMonitor.attributes.locations,
+        maintenanceWindows
       );
 
       const validationResult = validateMonitor(editedMonitor as MonitorFields, spaceId);
@@ -145,11 +154,14 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
         });
       }
 
-      const editedMonitorSpaces = (editedMonitor as MonitorFields)[ConfigKey.KIBANA_SPACES] ?? [];
-      if (editedMonitorSpaces.length > 0) {
-        const spaceAuthError = await assertCanUpdateMonitorInAllSpaces(
+      const editedMonitorSpaces = new Set([
+        ...(decryptedMonitorPrevMonitor.namespaces ?? []),
+        ...((editedMonitor as MonitorFields)[ConfigKey.KIBANA_SPACES] ?? []),
+      ]);
+      if (editedMonitorSpaces.size > 0) {
+        const spaceAuthError = await assertCanPerformMonitorBulkActionInAllSpaces(
           routeContext,
-          editedMonitorSpaces,
+          [...editedMonitorSpaces],
           decryptedMonitorPrevMonitor.type
         );
         if (spaceAuthError) {
@@ -226,7 +238,11 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
       if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
         return getMonitorNotFoundResponse(response, monitorId);
       }
-      if (error instanceof InvalidLocationError || error instanceof InvalidScheduleError) {
+      if (
+        error instanceof InvalidLocationError ||
+        error instanceof InvalidScheduleError ||
+        error instanceof InvalidMaintenanceWindowError
+      ) {
         return response.badRequest({ body: { message: error.message } });
       }
       if (error instanceof MonitorValidationError) {

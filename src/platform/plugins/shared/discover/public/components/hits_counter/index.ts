@@ -7,4 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { HitsCounter, HitsCounterMode } from './hits_counter';
+export { HitsCounter } from './hits_counter';
+export type { HitsCounterVariant } from './hits_counter';

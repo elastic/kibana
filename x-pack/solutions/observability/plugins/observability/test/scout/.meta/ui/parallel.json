@@ -1,8 +1,7 @@
 {
-  "sha1": "4cae2e128cc7c487840141f8baf8dbfbc1f97db8",
+  "sha1": "1705d0ef8d1349189fe935ccabd6752c0ae99d1c",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -262,102 +261,6 @@
       }
     },
     {
-      "id": "09420caa5b9785f-1887bb9ce43cc37",
-      "title": "Observability Landing Page redirects to page specified in defaultRoute uiSetting",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/landing.spec.ts",
-        "line": 30,
-        "column": 10
-      }
-    },
-    {
-      "id": "09420caa5b9785f-b4d285151fca090",
-      "title": "Observability Landing Page redirects to Discover logs when logs data exists",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/landing.spec.ts",
-        "line": 48,
-        "column": 15
-      }
-    },
-    {
-      "id": "09420caa5b9785f-1089e5f36b13719",
-      "title": "Observability Landing Page redirects to APM services when only APM data exists",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/landing.spec.ts",
-        "line": 59,
-        "column": 18
-      }
-    },
-    {
-      "id": "09420caa5b9785f-b8a96bff3cd83db",
-      "title": "Observability Landing Page redirects to Discover logs when both logs and APM data exist (logs priority)",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/landing.spec.ts",
-        "line": 73,
-        "column": 13
-      }
-    },
-    {
-      "id": "09420caa5b9785f-00e86e3614855e3",
-      "title": "Observability Landing Page redirects to onboarding when no data exists",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/landing.spec.ts",
-        "line": 91,
-        "column": 7
-      }
-    },
-    {
-      "id": "09420caa5b9785f-d5a54704b60249e",
-      "title": "Observability Landing Page redirects to onboarding when log data that should be ignored exists",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/landing.spec.ts",
-        "line": 98,
-        "column": 7
-      }
-    },
-    {
       "id": "ef6f2482ea914d8-f906edec2bbf00c",
       "title": "Stateful Observability Navigation - Footer renders expected footer items with working links",
       "expectedStatus": "passed",
@@ -386,8 +289,8 @@
       }
     },
     {
-      "id": "ef6f2482ea914d8-aff4cfecfe81669",
-      "title": "Stateful Observability Navigation - Footer Stack Management panel children navigate and update breadcrumbs",
+      "id": "ef6f2482ea914d8-2e928d73e90cb17",
+      "title": "Stateful Observability Navigation - Footer Stack Management panel children navigate to the correct destinations",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -409,8 +312,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/navigation/navigation_footer.spec.ts",
-        "line": 86,
-        "column": 22
+        "line": 76,
+        "column": 38
       }
     },
     {
@@ -423,7 +326,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/navigation/navigation_footer.spec.ts",
-        "line": 94,
+        "line": 86,
         "column": 22
       }
     },
@@ -442,8 +345,8 @@
       }
     },
     {
-      "id": "d4c1536758c1f7d-6bb14cf244a9765",
-      "title": "Stateful Observability Navigation - Sidebar clicking body nav items sets the active link, updates breadcrumbs, and navigates",
+      "id": "d4c1536758c1f7d-305965b9cdeeb30",
+      "title": "Stateful Observability Navigation - Sidebar clicking body nav items sets the active link and navigates",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -456,8 +359,8 @@
       }
     },
     {
-      "id": "d4c1536758c1f7d-5a93e4386d422ad",
-      "title": "Stateful Observability Navigation - Sidebar in-panel deep links navigate and update breadcrumbs",
+      "id": "d4c1536758c1f7d-e04393273fefb25",
+      "title": "Stateful Observability Navigation - Sidebar in-panel deep links navigate to the expected pages",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -465,8 +368,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/navigation/navigation_sidebar.spec.ts",
-        "line": 124,
-        "column": 92
+        "line": 122,
+        "column": 91
       }
     },
     {
@@ -479,8 +382,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/navigation/navigation_sidebar.spec.ts",
-        "line": 174,
-        "column": 10
+        "line": 166,
+        "column": 24
       }
     },
     {
@@ -493,8 +396,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/navigation/navigation_sidebar.spec.ts",
-        "line": 198,
-        "column": 11
+        "line": 192,
+        "column": 32
       }
     },
     {
@@ -584,12 +487,11 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/custom_threshold_rule/custom_threshold_rule_creation.spec.ts",
-        "line": 28,
+        "line": 29,
         "column": 10
       }
     },

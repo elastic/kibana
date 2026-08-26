@@ -7,7 +7,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import type { EpisodesSortState } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
+import type { EpisodesSortState } from '@kbn/alerting-v2-common-queries';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import deepEqual from 'fast-deep-equal';

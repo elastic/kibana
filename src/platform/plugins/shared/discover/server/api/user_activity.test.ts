@@ -15,6 +15,7 @@ describe('trackDiscoverSessionAction', () => {
     id: 'session-1',
     data: {
       title: 'My Discover session',
+      tags: ['tag-1', 'tag-2'],
     },
   };
   let trackUserAction: jest.Mock;
@@ -42,7 +43,7 @@ describe('trackDiscoverSessionAction', () => {
         id: 'session-1',
         name: 'My Discover session',
         type: 'discover_session',
-        tags: [],
+        tags: ['tag-1', 'tag-2'],
       },
     });
   });

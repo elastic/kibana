@@ -7,13 +7,12 @@
 
 import type { IconType } from '@elastic/eui';
 import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
+import type { EpisodeActionHistoryEntry } from '@kbn/alerting-v2-common-queries';
 import {
   isSupportedEpisodeSeverity,
   normalizeEpisodeSeverity,
   type EpisodeSeverity,
 } from '../../severity/severity_utils';
-import type { EpisodeActionHistoryEntry } from '../../../queries/episode_actions_history_query';
-
 export interface StateChangeSourceRow {
   '@timestamp': string;
   'episode.status': AlertEpisodeStatus;
@@ -53,11 +52,11 @@ export type TimelineEntry = StateChangeEntry | SeverityChangeEntry | ActionEntry
 
 /** Icon shown on the avatar for each action type (no system actor profile). */
 export const ACTION_ICON: Record<string, IconType> = {
-  ack: 'checkInCircleFilled',
-  unack: 'minusInCircle',
+  ack: 'checkCircleFill',
+  unack: 'minusCircle',
   snooze: 'bellSlash',
   unsnooze: 'bell',
-  deactivate: 'checkInCircleFilled',
+  deactivate: 'checkCircleFill',
   activate: 'refresh',
   tag: 'tag',
   assign: 'user',

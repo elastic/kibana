@@ -7,7 +7,6 @@
 
 import {
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -19,6 +18,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import React, { useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -171,13 +171,21 @@ export const SecretFormRow: React.FC<{
     if (disabled) return null;
     if (isConvertedToSecret)
       return (
-        <EuiCallOut announceOnMount size="s" color="warning">
-          <FormattedMessage
-            id="xpack.fleet.settings.editOutputFlyout.sslKeySecretInputConvertedCalloutTitle"
-            defaultMessage="This field will be re-saved using secret storage from plain text storage. Secrets storage requires Fleet Server v{minVersion} and above."
-            values={{ minVersion }}
-          />
-        </EuiCallOut>
+        <KbnWarningCallout
+          announceOnMount
+          size="s"
+          title={i18n.translate(
+            'xpack.fleet.settings.editOutputFlyout.sslKeySecretInputConvertedCalloutTitle',
+            { defaultMessage: 'Converting to secret storage' }
+          )}
+          text={
+            <FormattedMessage
+              id="xpack.fleet.settings.editOutputFlyout.sslKeySecretInputConvertedCalloutBody"
+              defaultMessage="Saving this field stores it as a secret instead of plain text. Secret storage requires Fleet Server v{minVersion} or later."
+              values={{ minVersion }}
+            />
+          }
+        />
       );
 
     if (!initialValue)

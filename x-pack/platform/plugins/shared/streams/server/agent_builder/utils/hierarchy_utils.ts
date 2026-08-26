@@ -28,7 +28,7 @@ export const buildProcessingChain = (
   if (Streams.WiredStream.Definition.is(definition)) {
     const sorted = [...ancestors].sort((a, b) => a.name.length - b.name.length);
     for (const ancestor of sorted) {
-      if (ancestor.ingest.processing.steps.length > 0) {
+      if ('steps' in ancestor.ingest.processing && ancestor.ingest.processing.steps.length > 0) {
         chain.push({
           source: ancestor.name,
           steps: ancestor.ingest.processing.steps,
@@ -39,7 +39,7 @@ export const buildProcessingChain = (
 
   chain.push({
     source: definition.name,
-    steps: definition.ingest.processing.steps,
+    steps: 'steps' in definition.ingest.processing ? definition.ingest.processing.steps : [],
   });
 
   return chain;

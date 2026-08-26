@@ -39,6 +39,7 @@ export const platformCoreTools = {
   smlAttach: platformCoreTool('sml_attach'),
   // Connector tools
   executeConnectorSubAction: platformCoreTool('execute_connector_sub_action'),
+  listInferenceEndpoints: platformCoreTool('list_inference_endpoints'),
 } as const;
 
 const casesTool = <TName extends string>(
@@ -89,13 +90,19 @@ export const attachmentTools = {
 
 export const internalTools = {
   runSubagent: 'run_subagent',
+  sendMessageToAgent: 'send_message_to_agent',
   sleep: 'sleep',
   writeTodos: 'write_todos',
   loadSkill: 'load_skill',
+  searchRelevantSkills: 'search_relevant_skills',
   askUserQuestion: 'ask_user_question',
   readFile: 'read_file',
   listFiles: 'list_files',
   bash: 'bash',
+  setConversationMetadata: 'set_conversation_metadata',
+  discoverApis: 'discover_apis',
+  describeApi: 'describe_api',
+  executeApi: 'execute_api',
 };
 
 export const isAttachmentTool = (toolName: string) =>
@@ -117,7 +124,17 @@ const isInternalToolName = (toolName: string) => Object.values(internalTools).in
 export const isInternalTool = (toolName: string) =>
   isAttachmentTool(toolName) || isLegacyFilestoreTool(toolName) || isInternalToolName(toolName);
 
-export const isExcludedFromFilestore = (toolName: string) => isInternalTool(toolName);
+/**
+ * Internal tools whose results are still written to the `/tool_calls` filestore.
+ */
+const filestoreAllowedInternalToolIds = new Set<string>([
+  internalTools.discoverApis,
+  internalTools.describeApi,
+  internalTools.executeApi,
+]);
+
+export const isExcludedFromFilestore = (toolName: string) =>
+  isInternalTool(toolName) && !filestoreAllowedInternalToolIds.has(toolName);
 
 /**
  * List of tool types which can be created / edited by a user.
