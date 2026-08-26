@@ -15,8 +15,9 @@ import type {
 } from '@kbn/core/server';
 import { isAllowedBuiltinAgent } from '@kbn/agent-builder-server/allow_lists';
 import type { AgentAvailabilityConfig, AgentTypeRegistry } from '@kbn/agent-builder-server/agents';
-import { agentBuilderDefaultAiIndexId, chatAgentTypeId } from '@kbn/agent-builder-common';
+import { chatAgentTypeId } from '@kbn/agent-builder-common';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { defaultAiIndices } from './default_ai_indices';
 import { createConfigurationResolver } from './resolve_configuration';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import type {
@@ -69,7 +70,7 @@ export class AgentsService {
 
     this.typeRegistry.register({
       id: chatAgentTypeId,
-      baseConfiguration: { ai_indices: [agentBuilderDefaultAiIndexId] },
+      baseConfiguration: { ai_indices: Object.keys(defaultAiIndices) },
     });
 
     return {
