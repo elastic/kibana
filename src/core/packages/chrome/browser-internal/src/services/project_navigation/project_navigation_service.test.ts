@@ -64,12 +64,10 @@ const setup = ({
   locationPathName = '/',
   navLinkIds,
   isServerless = true,
-  isNextChrome = false,
 }: {
   locationPathName?: string;
   navLinkIds?: Readonly<string[]>;
   isServerless?: boolean;
-  isNextChrome?: boolean;
 } = {}) => {
   const history = createMemoryHistory({
     initialEntries: [locationPathName],
@@ -87,7 +85,6 @@ const setup = ({
     getUiSettingsHomeRoute: () => undefined,
     logger,
     chromeBreadcrumbs$,
-    isNextChrome,
   });
 
   return { projectNavigation, history, chromeBreadcrumbs$, navLinksService };

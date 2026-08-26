@@ -34,11 +34,11 @@ Built-in interactive EUI controls participate in **sequential focus navigation**
 
 // WRONG — keyboard cannot reach the tooltip
 <EuiToolTip content="Details">
-  <EuiIcon type="iInCircle" />
+  <EuiIcon type="info" />
 </EuiToolTip>
 
 // RIGHT
 <EuiToolTip content="Details">
-  <EuiIcon type="iInCircle" tabIndex={0} />
+  <EuiIcon type="info" tabIndex={0} />
 </EuiToolTip>
 ```
