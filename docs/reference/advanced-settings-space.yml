@@ -2069,7 +2069,7 @@ groups:
 
           The default value depends on your version:
 
-          * {applies_to}`stack: ga 9.5+` Defaults to `true`.
+          * {applies_to}`stack: ga 9.5+` {applies_to}`security: ga` Defaults to `true`.
           * {applies_to}`stack: ga =9.4` Defaults to `false`.
         datatype: bool
         applies_to:
@@ -2124,7 +2124,7 @@ groups:
 
           The default value depends on your version:
 
-          * {applies_to}`stack: ga 9.2+` Defaults to `true`.
+          * {applies_to}`stack: ga 9.2+` {applies_to}`security: ga` Defaults to `true`.
           * {applies_to}`stack: ga =9.1` Defaults to `false`.
         datatype: bool
         applies_to:
