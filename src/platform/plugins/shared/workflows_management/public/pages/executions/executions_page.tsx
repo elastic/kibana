@@ -14,9 +14,10 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { WorkflowExecutionsPageContent } from './workflow_executions_page_content';
+import { useTelemetry } from '../../hooks/use_telemetry';
 import { useWorkflowsBreadcrumbs } from '../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
 
 const executionsPageTitle = i18n.translate('workflowsManagement.executionsPage.pageTitle', {
@@ -39,8 +40,13 @@ const executionsPageExperimentalBadgeLabel = i18n.translate(
 
 export function WorkflowExecutionsPage() {
   const { euiTheme } = useEuiTheme();
+  const telemetry = useTelemetry();
 
   useWorkflowsBreadcrumbs(executionsPageTitle);
+
+  useEffect(() => {
+    telemetry.reportWorkflowExecutionsPageViewed();
+  }, [telemetry]);
 
   return (
     <EuiPageTemplate

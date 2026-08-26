@@ -89,6 +89,7 @@ import { agentPolicyService } from './agent_policy';
 import { isSpaceAwarenessEnabled } from './spaces/helpers';
 import { licenseService } from './license';
 import { cloudConnectorService } from './cloud_connector';
+import { outputService } from './output';
 import * as secretsModule from './secrets';
 import { recompileInputsWithAgentVersion } from './agent_policies/package_policies_to_agent_inputs';
 import { getAgentVersionsForVersionSpecificPolicies } from './utils/version_specific_policies';
@@ -13248,7 +13249,8 @@ describe('Package policy service', () => {
     it('should update policies using deleted output', async () => {
       const soClient = createSavedObjectClientMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      const updateSpy = jest.spyOn(packagePolicyService, 'update');
+      const updateSpy = jest.spyOn(packagePolicyService, 'update').mockResolvedValue({} as any);
+      jest.spyOn(outputService, 'getDefaultDataOutputId').mockResolvedValue(null);
 
       mockAgentPolicyGet();
       soClient.find.mockResolvedValue({
@@ -13317,7 +13319,6 @@ describe('Package policy service', () => {
         {
           name: 'policy1',
           enabled: true,
-          policy_id: 'agent-policy-1',
           policy_ids: ['agent-policy-1'],
           output_id: null,
           inputs: [],
