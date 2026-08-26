@@ -10,7 +10,6 @@
     "@kbn/presentation-publishing",
     "@kbn/presentation-publishing-schemas",
     "@kbn/i18n",
-    "@kbn/inference-plugin",
     "@kbn/data-plugin",
     "@kbn/esql-utils",
     "@kbn/es-query",
