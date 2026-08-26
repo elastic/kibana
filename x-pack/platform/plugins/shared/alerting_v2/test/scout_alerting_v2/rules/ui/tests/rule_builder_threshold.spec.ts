@@ -283,7 +283,10 @@ test.describe(
       });
 
       await test.step('confirm opens flyout in ES|QL mode', async () => {
-        await page.getByRole('button', { name: 'Open in ES|QL mode' }).click();
+        await page.testSubj
+          .locator('alertingV2ConfirmBuilderToEsqlModal')
+          .locator('[data-test-subj="confirmModalConfirmButton"]')
+          .click();
         await expect(pageObjects.composeDiscover.flyout).toBeVisible({ timeout: 30_000 });
         await expect(page.testSubj.locator('composeDiscoverSwitchToEsql')).toBeHidden();
       });
@@ -329,7 +332,10 @@ test.describe(
       });
 
       await test.step('confirm switches to ES|QL mode', async () => {
-        await page.getByRole('button', { name: 'Open in ES|QL mode' }).click();
+        await page.testSubj
+          .locator('alertingV2ConfirmBuilderToEsqlModal')
+          .locator('[data-test-subj="confirmModalConfirmButton"]')
+          .click();
         await expect(page.testSubj.locator('alertingV2ConfirmBuilderToEsqlModal')).toBeHidden();
         await expect(page.testSubj.locator('composeDiscoverSwitchToEsql')).toBeHidden();
       });
