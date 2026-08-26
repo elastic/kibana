@@ -12,6 +12,7 @@ import {
   ALERTS_API_UPDATE_DEPRECATED_PRIVILEGE,
 } from '@kbn/security-solution-features/constants';
 import type { Logger } from '@kbn/core/server';
+import { ALERT_WORKFLOW_TAGS } from '@kbn/rule-data-utils';
 
 import { SetUnifiedAlertsTagsRequestBody } from '../../../../../common/api/detection_engine/unified_alerts';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
@@ -27,7 +28,7 @@ import {
   MAX_TAG_LENGTH,
   MAX_TAGS_PER_OPERATION,
 } from '../../../../../common/workflows/triggers';
-import { fetchAllAlertIdToIndex } from '../common/operations/prefetch_previous_statuses';
+import { fetchAllAlertIdIndexWithSource } from '../common/operations/prefetch_previous_statuses';
 import { isAttackDiscoveryIndex } from '../common/operations/is_attack_discovery_index';
 
 export const setUnifiedAlertsTagsRoute = (
@@ -70,15 +71,36 @@ export const setUnifiedAlertsTagsRoute = (
         const alertIds: string[] = [];
         const attackIds: string[] = [];
 
+        // Compute valid tags once so we can use them for both no-op filtering and emission.
+        const validTagsToAdd = tags.tags_to_add
+          .filter((t) => t.length <= MAX_TAG_LENGTH)
+          .slice(0, MAX_TAGS_PER_OPERATION);
+        const validTagsToRemove = tags.tags_to_remove
+          .filter((t) => t.length <= MAX_TAG_LENGTH)
+          .slice(0, MAX_TAGS_PER_OPERATION);
+
         if (eventBus) {
           try {
             const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-            const hits = await fetchAllAlertIdToIndex(esClient, index, ids);
+            const hits = await fetchAllAlertIdIndexWithSource(esClient, index, ids, [
+              ALERT_WORKFLOW_TAGS,
+            ]);
             for (const hit of hits) {
-              if (isAttackDiscoveryIndex(hit.index)) {
-                attackIds.push(hit.id);
-              } else {
-                alertIds.push(hit.id);
+              const currentTags = new Set<string>(
+                Array.isArray(hit.source[ALERT_WORKFLOW_TAGS])
+                  ? (hit.source[ALERT_WORKFLOW_TAGS] as string[])
+                  : []
+              );
+              // Only emit for documents where the operation would actually change the tags.
+              if (
+                validTagsToAdd.some((t) => !currentTags.has(t)) ||
+                validTagsToRemove.some((t) => currentTags.has(t))
+              ) {
+                if (isAttackDiscoveryIndex(hit.index)) {
+                  attackIds.push(hit.id);
+                } else {
+                  alertIds.push(hit.id);
+                }
               }
             }
           } catch {
@@ -89,12 +111,6 @@ export const setUnifiedAlertsTagsRoute = (
         return withSiemErrorHandling(response, async () => {
           const result = await updateAlertsTags({ context, index, ids, tags });
           if (eventBus) {
-            const validTagsToAdd = tags.tags_to_add
-              .filter((t) => t.length <= MAX_TAG_LENGTH)
-              .slice(0, MAX_TAGS_PER_OPERATION);
-            const validTagsToRemove = tags.tags_to_remove
-              .filter((t) => t.length <= MAX_TAG_LENGTH)
-              .slice(0, MAX_TAGS_PER_OPERATION);
             if (attackIds.length > 0) {
               void eventBus.emitAttackTagsChanged(request, {
                 attackIds: attackIds.slice(0, MAX_ALERTS_PER_TRIGGER),

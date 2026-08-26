@@ -12,6 +12,7 @@ import { MAX_ALERTS_PER_TRIGGER } from '../../../../../../common/workflows/trigg
 import {
   extractWorkflowStatus,
   fetchAlertIdToIndex,
+  fetchAlertIdIndexWithSource,
   prefetchPreviousStatusesByIds,
   prefetchPreviousStatusesByQuery,
 } from './prefetch_previous_statuses';
@@ -536,5 +537,79 @@ describe('fetchAlertIdToIndex', () => {
   it('joins an array index with commas before calling search', async () => {
     await fetchAlertIdToIndex(esClient, ['idx-a', 'idx-b'], ['id-1']);
     expect(esClient.search).toHaveBeenCalledWith(expect.objectContaining({ index: 'idx-a,idx-b' }));
+  });
+});
+
+describe('fetchAlertIdIndexWithSource', () => {
+  let context: SecuritySolutionRequestHandlerContextMock;
+  let esClient: SecuritySolutionRequestHandlerContextMock['core']['elasticsearch']['client']['asCurrentUser'];
+
+  const makeSourceResponse = (
+    hits: Array<{ _id: string; _index: string; _source?: Record<string, unknown> }>
+  ) => ({
+    hits: {
+      total: { value: hits.length, relation: 'eq' },
+      hits: hits.map((h) => ({ ...h })),
+    },
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    ({ context } = requestContextMock.createTools());
+    esClient = context.core.elasticsearch.client.asCurrentUser;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    esClient.search.mockResolvedValue(makeSourceResponse([]) as any);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
+  });
+
+  it('returns source alongside id and index for each hit', async () => {
+    const mockResp = makeSourceResponse([
+      {
+        _id: 'id-1',
+        _index: '.alerts-security.alerts-default',
+        _source: { 'kibana.alert.workflow_tags': ['tag-a'] },
+      },
+    ]);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    esClient.search.mockResolvedValue(mockResp as any);
+    const result = await fetchAlertIdIndexWithSource(
+      esClient,
+      'my-index',
+      ['id-1'],
+      ['kibana.alert.workflow_tags']
+    );
+    expect(result).toHaveLength(1);
+    expect(result[0].id).toBe('id-1');
+    expect(result[0].index).toBe('.alerts-security.alerts-default');
+    expect(result[0].source['kibana.alert.workflow_tags']).toEqual(['tag-a']);
+  });
+
+  it('returns empty source object when _source is absent', async () => {
+    const mockResp = makeSourceResponse([
+      { _id: 'id-1', _index: '.alerts-security.alerts-default' },
+    ]);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    esClient.search.mockResolvedValue(mockResp as any);
+    const result = await fetchAlertIdIndexWithSource(esClient, 'my-index', ['id-1'], []);
+    expect(result[0].source).toEqual({});
+  });
+
+  it('calls search with _source_includes and ignore_unavailable: true', async () => {
+    await fetchAlertIdIndexWithSource(
+      esClient,
+      'my-index',
+      ['id-1'],
+      ['kibana.alert.workflow_tags']
+    );
+    expect(esClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        _source_includes: ['kibana.alert.workflow_tags'],
+        ignore_unavailable: true,
+      })
+    );
   });
 });

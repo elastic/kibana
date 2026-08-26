@@ -19,7 +19,7 @@ import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
 import { MAX_ALERTS_PER_TRIGGER } from '../../../../../common/workflows/triggers';
 
 const makeSearchResponse = (
-  hits: Array<{ _id: string; _index: string }>
+  hits: Array<{ _id: string; _index: string; _source?: Record<string, unknown> }>
 ): estypes.SearchResponse<unknown> => ({
   hits: {
     total: { value: hits.length, relation: 'eq' },
@@ -417,6 +417,68 @@ describe('set unified alerts tags', () => {
       expect(mockEventBus.emitAttackTagsChanged).toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({ attackIds: ['shared-id'] })
+      );
+    });
+
+    test('does not emit for documents where the tag operation is a no-op', async () => {
+      // Both docs already have 'tag-add'; neither has 'tag-remove' → no change for either doc.
+      context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValueOnce(
+        makeSearchResponse([
+          {
+            _id: 'alert-1',
+            _index: '.alerts-security.alerts-default',
+            _source: { 'kibana.alert.workflow_tags': ['tag-add'] },
+          },
+          {
+            _id: 'attack-1',
+            _index: '.alerts-security.attack.discovery.alerts-default',
+            _source: { 'kibana.alert.workflow_tags': ['tag-add'] },
+          },
+        ])
+      );
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_TAGS_URL,
+        body: {
+          ids: ['alert-1', 'attack-1'],
+          tags: { tags_to_add: ['tag-add'], tags_to_remove: [] },
+        },
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAlertTagsChanged).not.toHaveBeenCalled();
+      expect(mockEventBus.emitAttackTagsChanged).not.toHaveBeenCalled();
+    });
+
+    test('emits only for documents where the tag operation would change something', async () => {
+      // alert-1 already has 'tag-add' → no change. alert-2 does not → change.
+      context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValueOnce(
+        makeSearchResponse([
+          {
+            _id: 'alert-1',
+            _index: '.alerts-security.alerts-default',
+            _source: { 'kibana.alert.workflow_tags': ['tag-add'] },
+          },
+          {
+            _id: 'alert-2',
+            _index: '.alerts-security.alerts-default',
+            _source: { 'kibana.alert.workflow_tags': [] },
+          },
+        ])
+      );
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_TAGS_URL,
+        body: {
+          ids: ['alert-1', 'alert-2'],
+          tags: { tags_to_add: ['tag-add'], tags_to_remove: [] },
+        },
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAlertTagsChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ alertIds: ['alert-2'] })
       );
     });
   });

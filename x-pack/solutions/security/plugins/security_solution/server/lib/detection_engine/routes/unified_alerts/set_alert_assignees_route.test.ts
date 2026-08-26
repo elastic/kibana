@@ -19,7 +19,7 @@ import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
 import { MAX_ALERTS_PER_TRIGGER } from '../../../../../common/workflows/triggers';
 
 const makeSearchResponse = (
-  hits: Array<{ _id: string; _index: string }>
+  hits: Array<{ _id: string; _index: string; _source?: Record<string, unknown> }>
 ): estypes.SearchResponse<unknown> => ({
   hits: {
     total: { value: hits.length, relation: 'eq' },
@@ -385,6 +385,68 @@ describe('set unified alerts assignees', () => {
       expect(mockEventBus.emitAttackAssigneesChanged).toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({ attackIds: ['shared-id'] })
+      );
+    });
+
+    test('does not emit for documents where the assignees operation is a no-op', async () => {
+      // Both docs already have 'user-1'; removing a uid not present → no change for either doc.
+      context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValueOnce(
+        makeSearchResponse([
+          {
+            _id: 'alert-1',
+            _index: '.alerts-security.alerts-default',
+            _source: { 'kibana.alert.workflow_assignee_ids': ['user-1'] },
+          },
+          {
+            _id: 'attack-1',
+            _index: '.alerts-security.attack.discovery.alerts-default',
+            _source: { 'kibana.alert.workflow_assignee_ids': ['user-1'] },
+          },
+        ])
+      );
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_ASSIGNEES_URL,
+        body: {
+          ids: ['alert-1', 'attack-1'],
+          assignees: { add: ['user-1'], remove: [] },
+        },
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAlertAssigneesChanged).not.toHaveBeenCalled();
+      expect(mockEventBus.emitAttackAssigneesChanged).not.toHaveBeenCalled();
+    });
+
+    test('emits only for documents where the assignees operation would change something', async () => {
+      // alert-1 already has 'user-1' → no change. alert-2 does not → change.
+      context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValueOnce(
+        makeSearchResponse([
+          {
+            _id: 'alert-1',
+            _index: '.alerts-security.alerts-default',
+            _source: { 'kibana.alert.workflow_assignee_ids': ['user-1'] },
+          },
+          {
+            _id: 'alert-2',
+            _index: '.alerts-security.alerts-default',
+            _source: { 'kibana.alert.workflow_assignee_ids': [] },
+          },
+        ])
+      );
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_ASSIGNEES_URL,
+        body: {
+          ids: ['alert-1', 'alert-2'],
+          assignees: { add: ['user-1'], remove: [] },
+        },
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAlertAssigneesChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ alertIds: ['alert-2'] })
       );
     });
   });

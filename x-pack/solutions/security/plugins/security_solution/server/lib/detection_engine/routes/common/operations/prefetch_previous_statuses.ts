@@ -30,6 +30,12 @@ export interface IdIndexPair {
   index: string;
 }
 
+export interface IdIndexPairWithSource {
+  id: string;
+  index: string;
+  source: Record<string, unknown>;
+}
+
 const resolveIndex = (index: string | string[]): string =>
   Array.isArray(index) ? index.join(',') : index;
 
@@ -189,6 +195,54 @@ export const fetchAllAlertIdToIndex = async (
       esClient,
       index,
       ids.slice(i, i + MAX_ALERTS_PER_TRIGGER)
+    );
+    for (const pair of partial) {
+      allPairs.push(pair);
+    }
+  }
+  return allPairs;
+};
+
+export const fetchAlertIdIndexWithSource = async (
+  esClient: ElasticsearchClient,
+  index: string | string[],
+  ids: string[],
+  sourceFields: string[]
+): Promise<IdIndexPairWithSource[]> => {
+  const cappedIds = ids.slice(0, MAX_ALERTS_PER_TRIGGER);
+  const searchResponse = await esClient.search({
+    index: resolveIndex(index),
+    query: { terms: { _id: cappedIds } },
+    _source_includes: sourceFields,
+    size: MAX_ALERTS_PER_TRIGGER,
+    ignore_unavailable: true,
+  });
+  const pairs: IdIndexPairWithSource[] = [];
+  for (const hit of searchResponse.hits.hits) {
+    if (hit._id != null && hit._index != null) {
+      pairs.push({
+        id: hit._id,
+        index: hit._index,
+        source: (hit._source ?? {}) as Record<string, unknown>,
+      });
+    }
+  }
+  return pairs;
+};
+
+export const fetchAllAlertIdIndexWithSource = async (
+  esClient: ElasticsearchClient,
+  index: string | string[],
+  ids: string[],
+  sourceFields: string[]
+): Promise<IdIndexPairWithSource[]> => {
+  const allPairs: IdIndexPairWithSource[] = [];
+  for (let i = 0; i < ids.length; i += MAX_ALERTS_PER_TRIGGER) {
+    const partial = await fetchAlertIdIndexWithSource(
+      esClient,
+      index,
+      ids.slice(i, i + MAX_ALERTS_PER_TRIGGER),
+      sourceFields
     );
     for (const pair of partial) {
       allPairs.push(pair);

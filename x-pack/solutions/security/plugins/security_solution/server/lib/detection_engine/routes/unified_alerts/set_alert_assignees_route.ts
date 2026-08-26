@@ -12,6 +12,7 @@ import {
   ALERTS_API_UPDATE_DEPRECATED_PRIVILEGE,
 } from '@kbn/security-solution-features/constants';
 import type { Logger } from '@kbn/core/server';
+import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
 
 import { SetUnifiedAlertsAssigneesRequestBody } from '../../../../../common/api/detection_engine/unified_alerts';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
@@ -27,7 +28,7 @@ import {
   MAX_ASSIGNEE_UID_LENGTH,
   MAX_ASSIGNEES_PER_OPERATION,
 } from '../../../../../common/workflows/triggers';
-import { fetchAllAlertIdToIndex } from '../common/operations/prefetch_previous_statuses';
+import { fetchAllAlertIdIndexWithSource } from '../common/operations/prefetch_previous_statuses';
 import { isAttackDiscoveryIndex } from '../common/operations/is_attack_discovery_index';
 
 export const setUnifiedAlertsAssigneesRoute = (
@@ -70,15 +71,36 @@ export const setUnifiedAlertsAssigneesRoute = (
         const alertIds: string[] = [];
         const attackIds: string[] = [];
 
+        // Compute valid assignees once so we can use them for both no-op filtering and emission.
+        const validAssigneesToAdd = assignees.add
+          .filter((uid) => uid.length <= MAX_ASSIGNEE_UID_LENGTH)
+          .slice(0, MAX_ASSIGNEES_PER_OPERATION);
+        const validAssigneesToRemove = assignees.remove
+          .filter((uid) => uid.length <= MAX_ASSIGNEE_UID_LENGTH)
+          .slice(0, MAX_ASSIGNEES_PER_OPERATION);
+
         if (eventBus) {
           try {
             const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-            const hits = await fetchAllAlertIdToIndex(esClient, index, ids);
+            const hits = await fetchAllAlertIdIndexWithSource(esClient, index, ids, [
+              ALERT_WORKFLOW_ASSIGNEE_IDS,
+            ]);
             for (const hit of hits) {
-              if (isAttackDiscoveryIndex(hit.index)) {
-                attackIds.push(hit.id);
-              } else {
-                alertIds.push(hit.id);
+              const currentAssignees = new Set<string>(
+                Array.isArray(hit.source[ALERT_WORKFLOW_ASSIGNEE_IDS])
+                  ? (hit.source[ALERT_WORKFLOW_ASSIGNEE_IDS] as string[])
+                  : []
+              );
+              // Only emit for documents where the operation would actually change the assignees.
+              if (
+                validAssigneesToAdd.some((uid) => !currentAssignees.has(uid)) ||
+                validAssigneesToRemove.some((uid) => currentAssignees.has(uid))
+              ) {
+                if (isAttackDiscoveryIndex(hit.index)) {
+                  attackIds.push(hit.id);
+                } else {
+                  alertIds.push(hit.id);
+                }
               }
             }
           } catch {
@@ -89,12 +111,6 @@ export const setUnifiedAlertsAssigneesRoute = (
         return withSiemErrorHandling(response, async () => {
           const result = await updateAlertsAssignees({ context, index, ids, assignees });
           if (eventBus) {
-            const validAssigneesToAdd = assignees.add
-              .filter((uid) => uid.length <= MAX_ASSIGNEE_UID_LENGTH)
-              .slice(0, MAX_ASSIGNEES_PER_OPERATION);
-            const validAssigneesToRemove = assignees.remove
-              .filter((uid) => uid.length <= MAX_ASSIGNEE_UID_LENGTH)
-              .slice(0, MAX_ASSIGNEES_PER_OPERATION);
             if (attackIds.length > 0) {
               void eventBus.emitAttackAssigneesChanged(request, {
                 attackIds: attackIds.slice(0, MAX_ALERTS_PER_TRIGGER),
