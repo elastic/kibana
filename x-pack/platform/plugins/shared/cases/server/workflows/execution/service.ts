@@ -170,9 +170,8 @@ export class CasesWorkflowRunService {
             rawEvent as Record<string, unknown>
           )
         : rawEvent;
-    const sanitizedInputs = strippedEvent !== undefined
-      ? { ...otherInputs, event: strippedEvent }
-      : otherInputs;
+    const sanitizedInputs =
+      strippedEvent !== undefined ? { ...otherInputs, event: strippedEvent } : otherInputs;
 
     const metadata = CasesWorkflowExecutionMetadataSchema.parse({
       schemaVersion: CASES_WORKFLOW_EXECUTION_METADATA_SCHEMA_VERSION,

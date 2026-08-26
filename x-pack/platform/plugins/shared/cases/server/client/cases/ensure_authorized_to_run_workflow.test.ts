@@ -87,9 +87,9 @@ describe('ensureAuthorizedToRunWorkflow', () => {
 
     // ensureAuthorized({ entities: [] }) passes vacuously — the explicit guard rejects
     // with 403 before calling ensureAuthorized, so the authorization mock is never called.
-    await expect(ensureAuthorizedToRunWorkflow({ ids: ['missing-case'] }, clientArgs)).rejects.toThrow(
-      'Unauthorized to run workflow on case'
-    );
+    await expect(
+      ensureAuthorizedToRunWorkflow({ ids: ['missing-case'] }, clientArgs)
+    ).rejects.toThrow('Unauthorized to run workflow on case');
     expect(clientArgs.authorization.ensureAuthorized).not.toHaveBeenCalled();
   });
 

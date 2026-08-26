@@ -21,7 +21,7 @@ describe('CasesWorkflowRunService', () => {
   const auditLogger = audit.asScoped(request);
   const auditLog = auditLogger.log as jest.MockedFunction<typeof auditLogger.log>;
   const casesClient = createCasesClientMock();
-  
+
   const onWorkflowStarted = jest.fn();
   let workflowsAvailable = true;
   let licenseValid = true;
@@ -251,7 +251,9 @@ describe('CasesWorkflowRunService', () => {
     // SECURITY REGRESSION TEST: a user authorized on case-a but not case-b must NOT be able
     // to start a workflow that acts on case-b.
     it('refuses to start the workflow when the caller is not authorized on all cases', async () => {
-      casesClient.cases.ensureAuthorizedToRunWorkflow.mockRejectedValue(new Error('Unauthorized: case-b'));
+      casesClient.cases.ensureAuthorizedToRunWorkflow.mockRejectedValue(
+        new Error('Unauthorized: case-b')
+      );
 
       await expect(run(multiCaseBody)).rejects.toThrow('Unauthorized: case-b');
       expect(management.runWorkflowWithAlertPreprocessing).not.toHaveBeenCalled();
