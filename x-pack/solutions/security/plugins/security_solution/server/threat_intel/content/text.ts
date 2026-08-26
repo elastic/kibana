@@ -100,12 +100,19 @@ export const collapseWhitespace = (input: string): string => input.replace(/\s+/
  */
 export const truncate = (input: string, maxLength: number): string => {
   if (input.length <= maxLength) return input;
-  const slice = input.slice(0, maxLength);
+  if (maxLength <= 0) return '';
+  // Reserve the ellipsis inside the cap. Slicing to `maxLength` and then appending
+  // put every truncated value one character over, so a field truncated to the stored
+  // title or body cap still failed a downstream length check at exactly that cap.
+  const contentLength = maxLength - 1;
+  const slice = input.slice(0, contentLength);
   const lastBoundary = slice.lastIndexOf(' ');
   // Only honor the boundary if it's reasonably close to the cap — otherwise
   // a title like "x ".repeat(N) + "very long word" would shrink to two
   // characters.
-  if (lastBoundary > maxLength * 0.6) return `${slice.slice(0, lastBoundary).trimEnd()}\u2026`;
+  if (lastBoundary > contentLength * 0.6) {
+    return `${slice.slice(0, lastBoundary).trimEnd()}\u2026`;
+  }
   return `${slice.trimEnd()}\u2026`;
 };
 
@@ -227,7 +234,10 @@ export const htmlToStructured = (html: string | undefined | null): string => {
       // the second alternative the generic tag stripper removed the attribute and
       // an href-only IOC was lost entirely.
       s = s.replace(
-        /<a\s[^>]*href=(?:["']([^"']+)["']|([^\s"'>]+))[^>]*>([\s\S]*?)<\/a>/gi,
+        // `\shref\s*=` requires a real attribute boundary. Without it the greedy
+        // prefix could run past `data-href="..."` and lift the tracker instead of the
+        // link, which in an IOC section both loses the indicator and invents one.
+        /<a\b[^>]*?\shref\s*=\s*(?:["']([^"']+)["']|([^\s"'>]+))[^>]*>([\s\S]*?)<\/a>/gi,
         (_m, quotedHref: string | undefined, bareHref: string | undefined, inner: string) => {
           const href = quotedHref ?? bareHref ?? '';
           const text = inner.replace(/<[^>]+>/g, ' ').trim();

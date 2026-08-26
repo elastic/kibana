@@ -61,7 +61,24 @@ describe('truncate', () => {
   });
 
   it('appends an ellipsis when truncated', () => {
-    expect(truncate('a'.repeat(50), 10)).toBe('aaaaaaaaaa\u2026');
+    // Nine characters plus the ellipsis, so the result is exactly the cap. Slicing to
+    // maxLength and then appending put every truncated value one over.
+    expect(truncate('a'.repeat(50), 10)).toBe('aaaaaaaaa\u2026');
+  });
+
+  // The bound is what callers pass to satisfy a downstream length check, so a result
+  // one character over defeats the point of truncating at all.
+  it.each([1, 2, 5, 10, 64, 1024])('never exceeds the cap of %i', (cap) => {
+    expect(truncate('a'.repeat(5000), cap).length).toBeLessThanOrEqual(cap);
+  });
+
+  it.each([1, 2, 5, 10, 64, 1024])('never exceeds the cap of %i with word boundaries', (cap) => {
+    expect(truncate('word '.repeat(1000), cap).length).toBeLessThanOrEqual(cap);
+  });
+
+  it('returns empty for a zero or negative cap rather than a bare ellipsis', () => {
+    expect(truncate('anything', 0)).toBe('');
+    expect(truncate('anything', -5)).toBe('');
   });
 
   it('respects a word boundary close to the cap', () => {
@@ -77,8 +94,8 @@ describe('truncate', () => {
     // The "word" is the entire string, so there's no boundary close
     // to the cap. The hard cut wins.
     const input = 'noboundariesatallnoboundariesatall';
-    expect(truncate(input, 5).startsWith('nobou')).toBe(true);
-    expect(truncate(input, 5).endsWith('\u2026')).toBe(true);
+    // Four characters of content plus the ellipsis, so five total.
+    expect(truncate(input, 5)).toBe('nobo\u2026');
   });
 });
 
@@ -344,5 +361,36 @@ describe('buildReportContent — title fallback is observable', () => {
   it('omits the flag when the body is real', () => {
     const content = buildReportContent({ title: 'T', bodyText: 'Real body.' });
     expect(content.body_is_title_fallback).toBeUndefined();
+  });
+});
+
+describe('htmlToStructured — anchor attribute boundaries', () => {
+  // Without a real attribute boundary the greedy prefix could run past
+  // `data-href="..."` and lift the tracker instead of the link, which in an IOC
+  // section both loses the indicator and invents a false one.
+  it('lifts href, not data-href', () => {
+    const html =
+      '<h2>IOCs</h2><p><a href="https://c2.evil.test/real" data-href="https://tracker.test/x">IOC</a></p>';
+    const out = htmlToStructured(html);
+    expect(out).toContain('https://c2.evil.test/real');
+    expect(out).not.toContain('https://tracker.test/x');
+  });
+
+  it('lifts href when data-href comes first', () => {
+    const html =
+      '<h2>IOCs</h2><p><a data-href="https://tracker.test/x" href="https://c2.evil.test/real">IOC</a></p>';
+    const out = htmlToStructured(html);
+    expect(out).toContain('https://c2.evil.test/real');
+    expect(out).not.toContain('https://tracker.test/x');
+  });
+
+  it('does not treat a data-href-only anchor as a link', () => {
+    const html = '<h2>IOCs</h2><p><a data-href="https://tracker.test/x">not a link</a></p>';
+    expect(htmlToStructured(html)).not.toContain('https://tracker.test/x');
+  });
+
+  it('tolerates whitespace around the equals sign', () => {
+    const html = '<h2>IOCs</h2><p><a href = "https://c2.evil.test/spaced">IOC</a></p>';
+    expect(htmlToStructured(html)).toContain('https://c2.evil.test/spaced');
   });
 });

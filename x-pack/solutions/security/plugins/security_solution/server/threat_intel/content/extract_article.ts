@@ -92,10 +92,18 @@ export const extractArticleHtml = (rawHtml: string): string => {
    * Selector order survives only as a tie-break, so a precise `article` still beats a
    * `main` of identical length.
    */
+  // Score each candidate *after* removing the same chrome the returned container
+  // gets. Measuring before meant a teaser carrying a large inline script or style
+  // could outweigh the real report on raw text length, win selection, and then be
+  // stripped down to almost nothing.
   const candidates = ARTICLE_SELECTORS.flatMap((selector, priority) =>
     $(selector)
       .toArray()
-      .map((el) => ({ el, priority, length: $(el).text().trim().length }))
+      .map((el) => {
+        const $scored = $(el).clone();
+        $scored.find(CHROME_SELECTORS).remove();
+        return { el, priority, length: $scored.text().trim().length };
+      })
   );
 
   let $container: ReturnType<typeof $> | null = null;

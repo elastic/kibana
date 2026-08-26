@@ -217,3 +217,38 @@ describe('extractArticleHtml — candidate selection', () => {
     expect(extractArticleHtml(html)).toContain('evil.test');
   });
 });
+
+describe('extractArticleHtml — scoring excludes chrome', () => {
+  // Measuring raw text before chrome removal let a teaser carrying a large inline
+  // script outweigh the real report, win selection, and then get stripped to almost
+  // nothing, dropping the report and its IOCs.
+  it('does not let a teaser win on inline script weight', () => {
+    const html = `
+      <body>
+        <article><script>${'var x = 1; '.repeat(200)}</script>teaser</article>
+        <main><p>The actor used c2.evil.test for command and control</p></main>
+      </body>`;
+
+    expect(extractArticleHtml(html)).toContain('c2.evil.test');
+  });
+
+  it('does not let inline style weight decide either', () => {
+    const html = `
+      <body>
+        <article><style>${'.a { color: red; } '.repeat(200)}</style>teaser</article>
+        <main><p>indicator c2.evil.test here</p></main>
+      </body>`;
+
+    expect(extractArticleHtml(html)).toContain('c2.evil.test');
+  });
+
+  it('still picks the article when it genuinely holds the most prose', () => {
+    const html = `
+      <body>
+        <article><p>${'real report body '.repeat(40)} c2.evil.test</p></article>
+        <main><p>short</p></main>
+      </body>`;
+
+    expect(extractArticleHtml(html)).toContain('c2.evil.test');
+  });
+});
