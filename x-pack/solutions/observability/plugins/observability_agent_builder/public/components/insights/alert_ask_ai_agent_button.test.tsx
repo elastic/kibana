@@ -101,7 +101,10 @@ describe('AlertAskAiAgentButton', () => {
           expect.objectContaining({
             id: 'alert-123',
             type: OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID,
-            data: expect.objectContaining({ alertId: 'alert-123', attachmentLabel: expect.stringContaining('CPU threshold') }),
+            data: expect.objectContaining({
+              alertId: 'alert-123',
+              attachmentLabel: expect.stringContaining('CPU threshold'),
+            }),
           }),
         ]),
       })
