@@ -19,6 +19,12 @@ export interface PreviousStatus {
   previousStatus: WorkflowStatus;
 }
 
+export interface FoundHit {
+  id: string;
+  index: string;
+  previousStatus?: WorkflowStatus;
+}
+
 const resolveIndex = (index: string | string[]): string =>
   Array.isArray(index) ? index.join(',') : index;
 
@@ -43,7 +49,11 @@ export const prefetchPreviousStatusesByIds = async (
   esClient: ElasticsearchClient,
   index: string | string[],
   ids: string[]
-): Promise<{ previousStatuses: PreviousStatus[]; idToIndex: Map<string, string> }> => {
+): Promise<{
+  previousStatuses: PreviousStatus[];
+  idToIndex: Map<string, string>;
+  hits: FoundHit[];
+}> => {
   // Use search (not mget) so ignore_unavailable: true tolerates missing indices
   // (e.g. the adhoc attack-discovery index may not exist yet).
   // Slice to MAX_ALERTS_PER_TRIGGER to stay within ES index.max_result_window.
@@ -57,6 +67,7 @@ export const prefetchPreviousStatusesByIds = async (
   });
   const previousStatuses: PreviousStatus[] = [];
   const idToIndex = new Map<string, string>();
+  const hits: FoundHit[] = [];
   for (const hit of searchResponse.hits.hits) {
     if (hit._id != null) {
       const previousStatus = extractWorkflowStatus(hit._source);
@@ -65,10 +76,13 @@ export const prefetchPreviousStatusesByIds = async (
       }
       if (hit._index != null) {
         idToIndex.set(hit._id, hit._index);
+        // Collect each (id, index) pair individually so callers can handle
+        // cross-index _id collisions (ES only guarantees uniqueness within an index).
+        hits.push({ id: hit._id, index: hit._index, previousStatus });
       }
     }
   }
-  return { previousStatuses, idToIndex };
+  return { previousStatuses, idToIndex, hits };
 };
 
 export const fetchAlertIdToIndex = async (
@@ -167,11 +181,16 @@ export const prefetchAllPreviousStatusesByIds = async (
   esClient: ElasticsearchClient,
   index: string | string[],
   ids: string[]
-): Promise<{ previousStatuses: PreviousStatus[]; idToIndex: Map<string, string> }> => {
+): Promise<{
+  previousStatuses: PreviousStatus[];
+  idToIndex: Map<string, string>;
+  hits: FoundHit[];
+}> => {
   const allPreviousStatuses: PreviousStatus[] = [];
   const allIdToIndex = new Map<string, string>();
+  const allHits: FoundHit[] = [];
   for (let i = 0; i < ids.length; i += MAX_ALERTS_PER_TRIGGER) {
-    const { previousStatuses, idToIndex } = await prefetchPreviousStatusesByIds(
+    const { previousStatuses, idToIndex, hits } = await prefetchPreviousStatusesByIds(
       esClient,
       index,
       ids.slice(i, i + MAX_ALERTS_PER_TRIGGER)
@@ -182,6 +201,9 @@ export const prefetchAllPreviousStatusesByIds = async (
     for (const [id, idx] of idToIndex) {
       allIdToIndex.set(id, idx);
     }
+    for (const h of hits) {
+      allHits.push(h);
+    }
   }
-  return { previousStatuses: allPreviousStatuses, idToIndex: allIdToIndex };
+  return { previousStatuses: allPreviousStatuses, idToIndex: allIdToIndex, hits: allHits };
 };

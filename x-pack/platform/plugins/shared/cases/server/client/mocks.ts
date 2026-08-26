@@ -77,6 +77,7 @@ const createCasesEventBusMock = (): CasesEventBus => {
     onCaseUpdated: jest.fn(),
     onAttachmentsAdded: jest.fn(),
     onAlertStatusChanged: jest.fn(),
+    hasAlertStatusChangedListeners: jest.fn().mockReturnValue(false),
   };
 };
 

@@ -80,27 +80,22 @@ export const setUnifiedAlertsWorkflowStatusRoute = (
         if (eventBus) {
           try {
             const esClient = core.elasticsearch.client.asCurrentUser;
-            const { previousStatuses, idToIndex } = await prefetchAllPreviousStatusesByIds(
-              esClient,
-              index,
-              ids
-            );
-            const previousStatusMap = new Map(previousStatuses.map((s) => [s.id, s]));
-            for (const id of ids) {
-              const docIndex = idToIndex.get(id);
-              if (docIndex != null) {
-                const previousStatus = previousStatusMap.get(id);
-                // Only emit for IDs that are actually changing status
-                const isNoOp =
-                  previousStatus !== undefined && previousStatus.previousStatus === status;
-                if (!isNoOp) {
-                  if (isAttackDiscoveryIndex(docIndex)) {
-                    attackIds.push(id);
-                    if (previousStatus) attackPreviousStatuses.push(previousStatus);
-                  } else {
-                    alertIds.push(id);
-                    if (previousStatus) alertPreviousStatuses.push(previousStatus);
-                  }
+            const { hits } = await prefetchAllPreviousStatusesByIds(esClient, index, ids);
+            // Iterate ES hits directly (keyed by (index, id)) so that cross-index
+            // _id collisions are handled correctly — ES only guarantees _id
+            // uniqueness within an index, not across indices.
+            for (const hit of hits) {
+              // Only emit for IDs that are actually changing status
+              const isNoOp = hit.previousStatus !== undefined && hit.previousStatus === status;
+              if (!isNoOp) {
+                if (isAttackDiscoveryIndex(hit.index)) {
+                  attackIds.push(hit.id);
+                  if (hit.previousStatus !== undefined)
+                    attackPreviousStatuses.push({ id: hit.id, previousStatus: hit.previousStatus });
+                } else {
+                  alertIds.push(hit.id);
+                  if (hit.previousStatus !== undefined)
+                    alertPreviousStatuses.push({ id: hit.id, previousStatus: hit.previousStatus });
                 }
               }
             }

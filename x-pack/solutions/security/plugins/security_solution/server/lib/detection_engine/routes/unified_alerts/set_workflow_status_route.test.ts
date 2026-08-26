@@ -441,15 +441,18 @@ describe('set unified alerts workflow status', () => {
 
     test('makes multiple ES calls when ids.length exceeds MAX_ALERTS_PER_TRIGGER', async () => {
       const oversizedIds = Array.from({ length: MAX_ALERTS_PER_TRIGGER + 1 }, (_, i) => `id-${i}`);
-      context.core.elasticsearch.client.asCurrentUser.search.mockResponse(
-        makeSearchResponse([
-          {
-            _id: oversizedIds[0],
-            _index: '.alerts-security.alerts-default',
-            _source: { 'kibana.alert.workflow_status': 'open' },
-          },
-        ])
-      );
+      // First chunk returns id-0; second chunk (the single overflow id) returns nothing.
+      context.core.elasticsearch.client.asCurrentUser.search
+        .mockResolvedValueOnce(
+          makeSearchResponse([
+            {
+              _id: oversizedIds[0],
+              _index: '.alerts-security.alerts-default',
+              _source: { 'kibana.alert.workflow_status': 'open' },
+            },
+          ])
+        )
+        .mockResolvedValueOnce(makeSearchResponse([]));
       const request = requestMock.create({
         method: 'post',
         path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_WORKFLOW_STATUS_URL,
@@ -471,17 +474,52 @@ describe('set unified alerts workflow status', () => {
       );
     });
 
-    test('does not emit when all IDs are already at the target status across multiple chunks', async () => {
-      const oversizedIds = Array.from({ length: MAX_ALERTS_PER_TRIGGER + 1 }, (_, i) => `id-${i}`);
+    test('emits both triggers when the same _id exists in both detection and attack discovery indices', async () => {
       context.core.elasticsearch.client.asCurrentUser.search.mockResponse(
         makeSearchResponse([
           {
-            _id: oversizedIds[0],
+            _id: 'shared-id',
             _index: '.alerts-security.alerts-default',
-            _source: { 'kibana.alert.workflow_status': 'closed' }, // already at target
+            _source: { 'kibana.alert.workflow_status': 'open' },
+          },
+          {
+            _id: 'shared-id',
+            _index: '.alerts-security.attack.discovery.alerts-default',
+            _source: { 'kibana.alert.workflow_status': 'open' },
           },
         ])
       );
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_WORKFLOW_STATUS_URL,
+        body: { signal_ids: ['shared-id'], status: 'closed' },
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAlertStatusChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ alertIds: ['shared-id'] })
+      );
+      expect(mockEventBus.emitAttackStatusChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ attackIds: ['shared-id'] })
+      );
+    });
+
+    test('does not emit when all IDs are already at the target status across multiple chunks', async () => {
+      const oversizedIds = Array.from({ length: MAX_ALERTS_PER_TRIGGER + 1 }, (_, i) => `id-${i}`);
+      // First chunk: id-0 already at target; second chunk returns nothing.
+      context.core.elasticsearch.client.asCurrentUser.search
+        .mockResolvedValueOnce(
+          makeSearchResponse([
+            {
+              _id: oversizedIds[0],
+              _index: '.alerts-security.alerts-default',
+              _source: { 'kibana.alert.workflow_status': 'closed' }, // already at target
+            },
+          ])
+        )
+        .mockResolvedValueOnce(makeSearchResponse([]));
       const request = requestMock.create({
         method: 'post',
         path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_WORKFLOW_STATUS_URL,
