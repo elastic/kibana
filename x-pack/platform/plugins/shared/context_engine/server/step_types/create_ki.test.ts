@@ -71,6 +71,50 @@ describe('getCreateKiStepDefinition', () => {
     );
   });
 
+  it('indexes with the provided ki_id so re-runs replace the same KI', async () => {
+    const esClient = { index: jest.fn().mockResolvedValue({ _id: 'logs-index-profile' }) };
+    const context = createMockStepContext({
+      input: { ai_index_id: 'my-ai-index', ki_id: 'logs-index-profile', ki: kiInput },
+      esClient,
+    });
+    const service = mockAiIndexService({ type: 'index', value: 'ai-index-idx-my-ai-index' });
+
+    const { handler } = getCreateKiStepDefinition({
+      getAiIndexService: () => service,
+      isContextEngineEnabled: enabled,
+      checkWritePrivilege: allowed,
+      ...mockKiStepTelemetry(),
+    });
+    const result = await handler(context);
+
+    expect(result).toEqual({ output: { id: 'logs-index-profile' } });
+    expect(esClient.index).toHaveBeenCalledWith(
+      expect.objectContaining({ index: 'ai-index-idx-my-ai-index', id: 'logs-index-profile' }),
+      { signal: context.abortSignal }
+    );
+  });
+
+  it('throws ValidationError when ki_id is provided for a data stream dest', async () => {
+    const esClient = { index: jest.fn() };
+    const context = createMockStepContext({
+      input: { ai_index_id: 'my-ai-index', ki_id: 'logs-index-profile', ki: kiInput },
+      esClient,
+    });
+    const service = mockAiIndexService({ type: 'data_stream', value: 'ai-index-ds-my-ai-index' });
+
+    const { handler } = getCreateKiStepDefinition({
+      getAiIndexService: () => service,
+      isContextEngineEnabled: enabled,
+      checkWritePrivilege: allowed,
+      ...mockKiStepTelemetry(),
+    });
+    const thrown = await handler(context).catch((e) => e);
+
+    expect(thrown).toBeInstanceOf(ExecutionError);
+    expect(thrown.type).toBe('ValidationError');
+    expect(esClient.index).not.toHaveBeenCalled();
+  });
+
   it('throws ValidationError when the dest is an index pattern', async () => {
     for (const destValue of ['ai-index-idx-foo*', 'ai-index-idx-foo,ai-index-idx-bar']) {
       const esClient = { index: jest.fn() };
