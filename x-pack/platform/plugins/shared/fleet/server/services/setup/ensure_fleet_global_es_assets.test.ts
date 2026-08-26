@@ -37,7 +37,9 @@ describe('ensureFleetAgentsIndexExists', () => {
       },
     };
 
-    await expect(ensureFleetAgentsIndexExists(esClient, mockLogger as any)).resolves.toBeUndefined();
+    await expect(
+      ensureFleetAgentsIndexExists(esClient, mockLogger as any)
+    ).resolves.toBeUndefined();
   });
 
   it('rethrows unrelated Elasticsearch errors', async () => {
