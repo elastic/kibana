@@ -13,7 +13,7 @@ import type { FtrProviderContextWithServices } from '../ftr_provider_context';
 import { cleanupAgentDocs, createAgentDoc } from '../helpers';
 
 const DEFAULT_DS_INDEX = `${AGENT_STATUS_CHANGE_DATA_STREAM.type}-${AGENT_STATUS_CHANGE_DATA_STREAM.dataset}-default`;
-const CUSTOM_DS_INDEX = `${AGENT_STATUS_CHANGE_DATA_STREAM.type}-${AGENT_STATUS_CHANGE_DATA_STREAM.dataset}-custom-namespace`;
+const CUSTOM_DS_INDEX = `${AGENT_STATUS_CHANGE_DATA_STREAM.type}-${AGENT_STATUS_CHANGE_DATA_STREAM.dataset}-custom_namespace`;
 
 const TASK_INTERVAL_MS = 12000; // slightly longer than the 10s configured in config.ts
 
@@ -39,7 +39,7 @@ export default function (providerContext: FtrProviderContextWithServices) {
       const { body: customBody } = await supertest
         .post('/api/fleet/agent_policies')
         .set('kbn-xsrf', 'xxxx')
-        .send({ name: 'Custom namespace test policy', namespace: 'custom-namespace', force: true })
+        .send({ name: 'Custom namespace test policy', namespace: 'custom_namespace', force: true })
         .expect(200);
       customPolicyId = customBody.item.id;
     });
@@ -112,7 +112,7 @@ export default function (providerContext: FtrProviderContextWithServices) {
       });
     });
 
-    it('should write status-change doc to custom-namespace data stream when agent is enrolled under a custom namespace policy', async () => {
+    it('should write status-change doc to custom_namespace data stream when agent is enrolled under a custom namespace policy', async () => {
       await createAgentDoc(providerContext, 'agent-custom-ns', customPolicyId, '8.17.0', true, {
         local_metadata: { host: { hostname: 'host-custom' } },
         namespaces: ['default'],
@@ -132,7 +132,7 @@ export default function (providerContext: FtrProviderContextWithServices) {
         expect(source.last_known_status).to.be.a('string');
       });
 
-      // Verify a status-change doc was written to the custom-namespace data stream
+      // Verify a status-change doc was written to the custom_namespace data stream
       await retry.tryForTime(30000, async () => {
         const dsRes = await es.search({
           index: CUSTOM_DS_INDEX,
@@ -140,12 +140,12 @@ export default function (providerContext: FtrProviderContextWithServices) {
           query: { term: { 'agent.id': 'agent-custom-ns' } },
         });
         if (dsRes.hits.hits.length === 0) {
-          throw new Error('No status-change doc found in custom-namespace data stream yet');
+          throw new Error('No status-change doc found in custom_namespace data stream yet');
         }
         const doc = dsRes.hits.hits[0]._source as any;
         expect(doc.status).to.be.a('string');
         expect(doc['agent.id'] ?? doc.agent?.id).to.be('agent-custom-ns');
-        expect(doc.data_stream?.namespace).to.be('custom-namespace');
+        expect(doc.data_stream?.namespace).to.be('custom_namespace');
       });
     });
 
