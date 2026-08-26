@@ -14,11 +14,9 @@ interface MockPool {
   end: jest.Mock;
 }
 
-const mockCreatePool = jest.fn(
-  (): MockPool => ({
-    end: jest.fn().mockResolvedValue(undefined),
-  })
-);
+const mockCreatePool = jest.fn<MockPool, [unknown?]>(() => ({
+  end: jest.fn().mockResolvedValue(undefined),
+}));
 
 jest.mock('mysql2/promise', () => ({
   createPool: (opts: unknown) => mockCreatePool(opts),
