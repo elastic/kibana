@@ -248,7 +248,7 @@ const investigateInvestigations: Investigation[] = [
       },
       {
         id: 'evt-201',
-        timestamp: new Date(Date.now() - 16.75 * 60 * 1000).toISOString(),
+        timestamp: new Date(Date.now() - 16.25 * 60 * 1000).toISOString(),
         type: 'corroboration',
         summary: 'Linked beacon hosts · confidence raised to 0.94',
         actor: SYSTEM_SECURITY_WATCH_DARK_ID,
