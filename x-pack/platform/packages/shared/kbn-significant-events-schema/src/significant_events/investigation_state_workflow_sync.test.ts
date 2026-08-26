@@ -17,6 +17,7 @@ import {
   investigationStateSchema,
   MAX_BLIND_SPOTS,
   MAX_HYPOTHESIS_EVIDENCE,
+  MAX_IMPACT_ENTITIES,
   MAX_RECOMMENDATIONS,
 } from './investigation_state';
 
@@ -532,5 +533,72 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
 
     expect(validate(tooMany)).toBe(false);
     expect(investigationStateSchema.safeParse(tooMany).success).toBe(false);
+  });
+
+  it('accepts a payload with an impact entity carrying a name and evidence under both schemas', () => {
+    const withImpact = {
+      ...validPayload,
+      impact: {
+        entities: [
+          {
+            name: 'checkout-service',
+            type: 'service',
+            evidence: {
+              description: 'checkout-service error rate during incident window',
+              esql_query:
+                'FROM traces-* | WHERE service.name == "checkout-service" AND @timestamp >= ?_tstart AND @timestamp < ?_tend | STATS errors = COUNT(*) WHERE event.outcome == "failure"',
+              time_range: { from: '2026-07-28T14:00:00Z', to: '2026-07-28T15:00:00Z' },
+            },
+          },
+        ],
+      },
+    };
+
+    expect(validate(withImpact)).toBe(true);
+    expect(investigationStateSchema.safeParse(withImpact).success).toBe(true);
+  });
+
+  it('accepts an impact entity with only a name (no optional fields) under both schemas', () => {
+    const minimalImpact = {
+      ...validPayload,
+      impact: { entities: [{ name: 'payment-service' }] },
+    };
+
+    expect(validate(minimalImpact)).toBe(true);
+    expect(investigationStateSchema.safeParse(minimalImpact).success).toBe(true);
+  });
+
+  it('accepts an impact entity with feature_id and stream_name under both schemas', () => {
+    const withKi = {
+      ...validPayload,
+      impact: {
+        entities: [{ name: 'cart-service', type: 'service', feature_id: 'ki-abc123', stream_name: 'logs-app' }],
+      },
+    };
+
+    expect(validate(withKi)).toBe(true);
+    expect(investigationStateSchema.safeParse(withKi).success).toBe(true);
+  });
+
+  it('rejects an impact entity missing its required name under both schemas', () => {
+    const missingName = {
+      ...validPayload,
+      impact: { entities: [{ type: 'service' }] },
+    };
+
+    expect(validate(missingName)).toBe(false);
+    expect(investigationStateSchema.safeParse(missingName).success).toBe(false);
+  });
+
+  it('rejects an impact entities array exceeding MAX_IMPACT_ENTITIES under both schemas', () => {
+    const tooManyEntities = {
+      ...validPayload,
+      impact: {
+        entities: Array.from({ length: MAX_IMPACT_ENTITIES + 1 }, (_, i) => ({ name: `service-${i}` })),
+      },
+    };
+
+    expect(validate(tooManyEntities)).toBe(false);
+    expect(investigationStateSchema.safeParse(tooManyEntities).success).toBe(false);
   });
 });

@@ -553,6 +553,90 @@ steps:
                     - to
                     - reason
                     - evidence
+          impact:
+            type: object
+            description: >
+              Structured account of which services or components were impacted. At most 10 entries,
+              service-level preferred. Each entity carries one optional evidence artifact (an ES|QL
+              query with absolute time window preferred) for chart rendering — description is a short
+              label only. Seed from alert grouping or sig event causal features; finalize after
+              hypotheses are settled. Omit only when no signals exist.
+            properties:
+              entities:
+                type: array
+                maxItems: 10
+                items:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                      maxLength: 512
+                    type:
+                      type: string
+                      maxLength: 255
+                      description: >
+                        Entity category. Default to "service". Use "host", "database", etc. only when
+                        no service-level entity applies.
+                    feature_id:
+                      type: string
+                      maxLength: 255
+                      description: KI feature_id when this entity came from a Knowledge Indicator.
+                    stream_name:
+                      type: string
+                      maxLength: 255
+                    evidence:
+                      type: object
+                      description: >
+                        One artifact linking this entity to the investigation. Prefer esql_query +
+                        time_range (absolute ISO 8601) so the UI can render a chart. description is
+                        a short label — no prose explanation of impact.
+                      properties:
+                        description:
+                          type: string
+                          maxLength: 10000
+                        esql_query:
+                          type: string
+                          maxLength: 10000
+                        time_range:
+                          type: object
+                          properties:
+                            from:
+                              type: string
+                              maxLength: 64
+                            to:
+                              type: string
+                              maxLength: 64
+                          required:
+                            - from
+                            - to
+                        code:
+                          type: object
+                          properties:
+                            source:
+                              type: string
+                              enum: [github_connector, code_search]
+                            repo:
+                              type: string
+                              maxLength: 255
+                            path:
+                              type: string
+                              maxLength: 512
+                            host:
+                              type: string
+                              maxLength: 255
+                            ref:
+                              type: string
+                              maxLength: 255
+                          required:
+                            - source
+                            - repo
+                            - path
+                      required:
+                        - description
+                  required:
+                    - name
+            required:
+              - entities
         required:
           - summary
           - hypotheses

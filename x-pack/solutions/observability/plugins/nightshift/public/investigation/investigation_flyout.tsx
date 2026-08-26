@@ -20,6 +20,7 @@ import {
   EuiFlyoutHeader,
   EuiHorizontalRule,
   EuiIcon,
+  EuiLoadingChart,
   EuiNotificationBadge,
   EuiPanel,
   EuiSpacer,
@@ -31,17 +32,27 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import {
+  LensConfigBuilder,
+  type LensAttributes,
+  type LensConfig,
+  type LensESQLDataset,
+} from '@kbn/lens-embeddable-utils';
+import useAsync from 'react-use/lib/useAsync';
 import { getEbtProps } from '@kbn/ebt-click';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
   EvidenceList,
+  buildEvidenceDiscoverParams,
   type InvestigationDiscoverParams,
   type InvestigationStatus,
 } from '@kbn/investigation-output';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import type {
+  InvestigationImpact,
+  InvestigationImpactEntity,
   InvestigationState,
   SignificantEventInvestigation,
 } from '@kbn/significant-events-schema';
@@ -244,6 +255,279 @@ function InvestigationFlyoutRow({
         </>
       )}
     </div>
+  );
+}
+
+type LensESQLConfig = LensConfig & { dataset: LensESQLDataset };
+
+const IMPACT_CHART_HEIGHT = 150;
+
+/**
+ * Extracts the timestamp bucket field and metric field from an ES|QL query produced by the
+ * investigator. The query must follow the pattern:
+ *   STATS <metric> = ... BY [<alias> =] BUCKET(@timestamp, ...)
+ *
+ * When the BUCKET has no alias, one is injected into the query so Lens can reference the column.
+ * Returns null when the query doesn't follow a time-series shape (e.g. a single-value aggregate).
+ */
+function parseImpactEsqlForChart(esql: string): {
+  timestampField: string;
+  metricField: string;
+  normalizedQuery: string;
+} | null {
+  const metricMatch = esql.match(/\bSTATS\b\s+(\w+)\s*=/i);
+  if (!metricMatch) return null;
+  const metricField = metricMatch[1];
+
+  // Case 1: BUCKET is already aliased — e.g. "BY time_bucket = BUCKET(@timestamp, ...)"
+  const namedBucket = esql.match(/\bBY\b[^|]*?\b(\w+)\s*=\s*BUCKET\s*\(\s*@timestamp/si);
+  if (namedBucket) {
+    return { timestampField: namedBucket[1], metricField, normalizedQuery: esql };
+  }
+
+  // Case 2: unaliased BUCKET — inject alias so Lens can reference the column by name
+  if (/\bBY\b[^|]*?\bBUCKET\s*\(\s*@timestamp/si.test(esql)) {
+    const normalizedQuery = esql.replace(
+      /(BUCKET\s*\(\s*@timestamp[^)]*\))/i,
+      'time_bucket = $1'
+    );
+    return { timestampField: 'time_bucket', metricField, normalizedQuery };
+  }
+
+  return null;
+}
+
+function ImpactEntityEsqlChart({
+  esqlQuery,
+  timeRange,
+  timestampField,
+  metricField,
+  normalizedQuery,
+}: {
+  esqlQuery: string;
+  timeRange: { from: string; to: string };
+  timestampField: string;
+  metricField: string;
+  normalizedQuery: string;
+}): React.ReactElement | null {
+  const { euiTheme } = useEuiTheme();
+  const { dataViews, lens } = useKibana().services;
+
+  const { loading, value: attributes, error } = useAsync(async () => {
+    const config: LensESQLConfig = {
+      chartType: 'xy',
+      title: '',
+      dataset: { esql: normalizedQuery },
+      layers: [
+        {
+          type: 'series',
+          seriesType: 'bar',
+          xAxis: { field: timestampField, type: 'dateHistogram' },
+          yAxis: [
+            {
+              label: metricField,
+              value: metricField,
+              format: 'number',
+              decimals: 0,
+              seriesColor: euiTheme.colors.vis.euiColorVis0,
+            },
+          ],
+        },
+      ],
+      legend: { show: false },
+      fittingFunction: 'Zero',
+      valueLabels: 'hide',
+      axisTitleVisibility: {
+        showXAxisTitle: false,
+        showYAxisTitle: false,
+        showYRightAxisTitle: false,
+      },
+    };
+    const builder = new LensConfigBuilder(dataViews);
+    return builder.build(config, { query: { esql: normalizedQuery } }) as Promise<LensAttributes>;
+  }, [dataViews, euiTheme.colors.vis.euiColorVis0, metricField, normalizedQuery, timestampField]);
+
+  const LensEmbeddableComponent = lens.EmbeddableComponent;
+
+  if (error) return null;
+
+  return (
+    <div
+      data-test-subj="nightshiftInvestigationImpactEntityChart"
+      css={css`
+        min-height: ${IMPACT_CHART_HEIGHT}px;
+      `}
+    >
+      {loading || !attributes ? (
+        <EuiFlexGroup
+          alignItems="center"
+          justifyContent="center"
+          css={css`
+            height: ${IMPACT_CHART_HEIGHT}px;
+          `}
+        >
+          <EuiFlexItem grow={false}>
+            <EuiLoadingChart size="l" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : (
+        <LensEmbeddableComponent
+          id={`nightshift-impact-${btoa(esqlQuery).slice(0, 20)}`}
+          attributes={attributes}
+          timeRange={timeRange}
+          noPadding
+          withDefaultActions
+          viewMode="view"
+          style={{ height: IMPACT_CHART_HEIGHT }}
+          executionContext={{ description: 'Nightshift investigation impact chart' }}
+        />
+      )}
+    </div>
+  );
+}
+
+function ImpactEntityRow({
+  entity,
+  index,
+  getQueryHref,
+}: {
+  entity: InvestigationImpactEntity;
+  index: number;
+  getQueryHref: (params: InvestigationDiscoverParams) => string | undefined;
+}): React.ReactElement {
+  const hasEvidence = Boolean(entity.evidence);
+  const evidence = entity.evidence;
+
+  const chartParsed = useMemo(
+    () => (evidence?.esql_query ? parseImpactEsqlForChart(evidence.esql_query) : null),
+    [evidence?.esql_query]
+  );
+  const isChartable = Boolean(chartParsed && evidence?.time_range);
+
+  const discoverHref = useMemo(() => {
+    if (!isChartable || !evidence) return undefined;
+    const params = buildEvidenceDiscoverParams(evidence);
+    return params ? getQueryHref(params) : undefined;
+  }, [isChartable, evidence, getQueryHref]);
+
+  const expandableContent = hasEvidence ? (
+    isChartable ? (
+      <>
+        <ImpactEntityEsqlChart
+          esqlQuery={evidence!.esql_query!}
+          timeRange={evidence!.time_range!}
+          timestampField={chartParsed!.timestampField}
+          metricField={chartParsed!.metricField}
+          normalizedQuery={chartParsed!.normalizedQuery}
+        />
+        {(evidence?.description || discoverHref) && (
+          <>
+            <EuiSpacer size="s" />
+            {evidence?.description && (
+              <EuiText size="xs" color="subdued">
+                {evidence.description}
+              </EuiText>
+            )}
+            {discoverHref && (
+              <>
+                <EuiSpacer size="xs" />
+                <EuiBadge
+                  color="hollow"
+                  iconType="discoverApp"
+                  href={discoverHref}
+                  target="_blank"
+                  data-test-subj="nightshiftInvestigationImpactEntityDiscoverLink"
+                >
+                  {i18n.translate(
+                    'xpack.nightshift.investigation.impactEntityOpenInDiscover',
+                    { defaultMessage: 'Open in Discover' }
+                  )}
+                </EuiBadge>
+              </>
+            )}
+          </>
+        )}
+      </>
+    ) : (
+      <EvidenceList evidence={evidence ? [evidence] : []} getQueryHref={getQueryHref} />
+    )
+  ) : undefined;
+
+  const hasQuery = Boolean(evidence?.esql_query);
+
+  return (
+    <InvestigationFlyoutRow
+      testSubj={`nightshiftInvestigationFlyoutImpactEntity-${index}`}
+      showToggle
+      isToggleDisabled={!hasEvidence}
+      showExpandedSeparator
+      expandableContent={expandableContent}
+    >
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+        <EuiFlexItem grow>
+          <FlyoutFormattedText text={entity.name} bold />
+        </EuiFlexItem>
+        {entity.type && (
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="hollow">{entity.type}</EuiBadge>
+          </EuiFlexItem>
+        )}
+        {hasQuery && (
+          <EuiFlexItem grow={false}>
+            <EuiToolTip
+              content={i18n.translate('xpack.nightshift.investigation.impactEntityChartAvailable', {
+                defaultMessage: 'Chart available',
+              })}
+            >
+              <EuiIcon
+                type="visLine"
+                size="s"
+                color="subdued"
+                aria-label={i18n.translate(
+                  'xpack.nightshift.investigation.impactEntityChartAvailableAriaLabel',
+                  { defaultMessage: 'Chart available' }
+                )}
+              />
+            </EuiToolTip>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    </InvestigationFlyoutRow>
+  );
+}
+
+function ImpactSection({
+  impact,
+  getQueryHref,
+}: {
+  impact: InvestigationImpact;
+  getQueryHref: (params: InvestigationDiscoverParams) => string | undefined;
+}): React.ReactElement | null {
+  if (!impact.entities.length) return null;
+
+  return (
+    <>
+      <FlyoutSectionTitle>
+        {i18n.translate('xpack.nightshift.investigation.impactTitle', {
+          defaultMessage: 'Impact',
+        })}
+      </FlyoutSectionTitle>
+      <EuiSpacer size="s" />
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="s"
+        data-test-subj="nightshiftInvestigationImpact"
+      >
+        {impact.entities.map((entity, index) => (
+          <EuiFlexItem key={`impact-entity-${index}`} grow={false}>
+            <InvestigationFlyoutListPanel>
+              <ImpactEntityRow entity={entity} index={index} getQueryHref={getQueryHref} />
+            </InvestigationFlyoutListPanel>
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+      <EuiSpacer size="l" />
+    </>
   );
 }
 
@@ -518,6 +802,7 @@ export function InvestigationFlyout({
 
   const headline = getInvestigationHeadline({ eventTitle, state, status });
   const conclusionBody = getConclusionText(state);
+  const impact = state?.impact;
   const recommendations = useMemo(() => parseInvestigationRecommendations(state), [state]);
   const blindSpots = useMemo(() => state?.blind_spots ?? [], [state?.blind_spots]);
   const hypotheses = useMemo(
@@ -630,6 +915,7 @@ export function InvestigationFlyout({
 
       <EuiFlyoutBody>
         <>
+          {impact && <ImpactSection impact={impact} getQueryHref={getQueryHref} />}
           <FlyoutSectionTitle>
             {i18n.translate('xpack.nightshift.investigation.conclusionTitle', {
               defaultMessage: 'Conclusion',

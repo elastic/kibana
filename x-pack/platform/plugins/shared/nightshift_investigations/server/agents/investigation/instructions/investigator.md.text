@@ -35,6 +35,25 @@ moving to the next — see <reporting_progress> for exactly what to send and wor
    Report progress: `summary` describing the timeline and signals you gathered (what deviated, when,
    and which signals were and weren't available). Still no hypotheses.
 
+2.5. **Seed impact.** Before forming hypotheses, write an initial `impact` block:
+
+   - If `inputs.context.alerts` is present (alert-triggered investigation): the alert's
+     `grouping` fields are the known starting point. Extract service-level entities first:
+     `service.name` → entity type "service"; `host.name` → type "host". Skip granular
+     fields (pod names, IPs) unless no service-level entity is available. The YAML message
+     has already established these as confirmed scope — do not re-examine whether they are
+     impacted; they are.
+   - If `inputs.context.causal_features` or `inputs.context.blast_radius` are present
+     (sig-event-triggered investigation): include entity-type entries with a name as impact
+     entities. Set `feature_id` from the KI's `feature_id`. Set `type` to "service" for
+     entity KIs, or from the KI's subtype if available.
+   - If neither: start with an empty `entities` array; the investigation will populate it.
+
+   Keep entity count at 1–3 at this stage. `evidence` on each entity may be omitted here —
+   the seeding just names the entity; evidence is added in step 5.5.
+
+   Report progress: include the seeded `impact` in the snapshot (even if entities is empty).
+
 3. **Form hypotheses.** Based on the context gathered, list every plausible candidate cause worth
    investigating — don't settle on the first plausible one. Each hypothesis starts with
    `status: investigating` and an initial `confidence` reflecting how strongly the evidence so far
@@ -63,6 +82,21 @@ moving to the next — see <reporting_progress> for exactly what to send and wor
    each with a short `title` naming the missing data source and a `description` of why it mattered.
 
    Report progress: the final hypotheses list (none left `investigating`) and `blind_spots`.
+
+5.5. **Finalize impact.** Update `impact.entities` to reflect what the investigation confirmed:
+
+   - Keep entities that evidence supports; remove speculative ones investigation ruled out.
+   - Add entities confirmed during investigation (e.g. a downstream service confirmed by
+     a dependency trace query).
+   - Attach `evidence` to each entity: one ES|QL query (with absolute `time_range`)
+     that most directly shows the failure signal for that entity. Keep `description` to
+     a short label — the query is the artifact the UI renders, not the description text.
+   - Prefer service-level grouping: if three hosts show errors because a shared service
+     is failing, list the service once, not the three hosts.
+   - Target 1–5 entities. If you find yourself listing more than 5, consolidate to the
+     services whose failure signals you confirmed directly.
+
+   Report progress: include the refined `impact`.
 
 6. **Reassess the significant event.** Only when the kickoff "Additional context" contains a
    significant event (`event_uuid`). Its `severity`, `summary`, and `status` are the triage
@@ -285,7 +319,8 @@ not end the investigation. Keep working after calling it.
   `dismissed` or `confirmed` item also carries the `evidence` that decided it — see
   <citing_evidence>.
 - `conclusion` / `recommendations` / `blind_spots` / `significant_event_updates`: leave unset until
-  steps 5–7 populate them.
+  steps 5–7 populate them. Populate `impact` progressively from step 2.5 onward — it is always
+  included in progress snapshots once seeded.
 
 **Example — after step 1 (memories loaded, nothing else done yet):**
 
@@ -439,7 +474,20 @@ not end the investigation. Keep working after calling it.
         }
       ]
     }
-  ]
+  ],
+  "impact": {
+    "entities": [
+      {
+        "name": "checkout-service",
+        "type": "service",
+        "evidence": {
+          "description": "checkout-service error rate during incident window",
+          "esql_query": "FROM traces-* | WHERE service.name == \"checkout-service\" AND @timestamp >= ?_tstart AND @timestamp < ?_tend | STATS errors = COUNT(*) WHERE event.outcome == \"failure\" BY BUCKET(@timestamp, 5 minute)",
+          "time_range": { "from": "2026-07-28T14:00:00Z", "to": "2026-07-28T15:00:00Z" }
+        }
+      }
+    ]
+  }
 }
 ```
 
@@ -517,5 +565,11 @@ been reporting via `investigation_progress_report`:
   findings, and a non-empty `evidence` list. The changes are applied automatically, so include an
   entry only when the listed evidence can defend it, and omit the array when the triage verdict
   stands.
+- **impact**: Optional. `{ entities[] }` — a list of at most 10 services or components confirmed
+  or strongly suspected to be affected. Each entity has `name` (required), optional `type` (default
+  "service"), optional `feature_id` (KI reference), and optional `evidence` (one ES|QL query +
+  absolute time range preferred — description is a short label). Seed from alert grouping or sig
+  event causal features; finalize after hypotheses are settled. Keep entity count to 1–5; prefer
+  services over granular infrastructure. Omit the field entirely only when no signals exist.
 
 </output_format>
