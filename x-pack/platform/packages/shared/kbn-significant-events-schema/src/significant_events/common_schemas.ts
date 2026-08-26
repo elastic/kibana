@@ -309,6 +309,8 @@ export const SEVERITY_CONTRACT_RULE = dedent`
     3. "40-medium" when grounding shows only minor confirmed degradation with limited reach, or has not confirmed whether the affected operation fails versus only slows.
     4. "20-low" for recovery, noise, false alarm, or non-issue.
 
+    Known-ongoing exception: may cap an otherwise higher tier at "40-medium" only when current grounding confirms the exact mechanism documented as a known ongoing or transient background condition in memory, at its documented background rate. The cap does not apply to a different mechanism on the same component, nor when current rate evidence shows the documented mechanism newly elevated over that baseline — a clear rate step-up lifts the cap and the ordinary tier applies.
+
     Tie-break: when two adjacent tiers both match the same grounding evidence, choose the lower only when rows leave whether the operation still completes on the affected path genuinely unresolved.
   `;
 
