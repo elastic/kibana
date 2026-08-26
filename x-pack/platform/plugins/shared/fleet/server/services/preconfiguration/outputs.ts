@@ -152,7 +152,7 @@ export const createManagedBulkOutputMatcher = (config?: FleetConfigType) => {
   const managedBulkUrls = new Set(
     (config ? getPreconfiguredOutputFromConfig(config) : [])
       .filter(({ id }) => AGENTLESS_MANAGED_BULK_OUTPUT_IDS.has(id))
-      .flatMap(({ hosts }) => hosts ?? [])
+      .flatMap((output) => ('hosts' in output ? output.hosts ?? [] : []))
       .flatMap((host) => {
         try {
           return [normalizeHostsForAgents(host)];
@@ -163,9 +163,9 @@ export const createManagedBulkOutputMatcher = (config?: FleetConfigType) => {
       })
   );
 
-  return ({ type, hosts }: Pick<Output, 'type' | 'hosts'>) =>
-    type === outputType.Elasticsearch &&
-    (hosts?.some((host) => managedBulkUrls.has(host)) ?? false);
+  return (output: Output) =>
+    output.type === outputType.Elasticsearch &&
+    (output.hosts?.some((host) => managedBulkUrls.has(host)) ?? false);
 };
 
 export async function ensurePreconfiguredOutputs(
