@@ -16,7 +16,12 @@
     "@kbn/workflows-extensions",
     "@kbn/workflows-management-plugin",
     "@kbn/zod",
-    "@kbn/i18n",
-    "@kbn/scout"
+    "@kbn/scout",
+    "@kbn/agent-builder-plugin",
+    "@kbn/agent-builder-common",
+    "@kbn/logging-mocks",
+    "@kbn/significant-events-schema",
+    "@kbn/agent-builder-server",
+    "@kbn/i18n"
   ]
 }

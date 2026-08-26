@@ -87,6 +87,8 @@ const augmentAlerts = async <T>({
   const cpsFields = cpsData
     ? {
         [CPS_SCOPE_EXPRESSION]: cpsData.resolvedExpression ?? null,
+        // `null` means linked projects could not be resolved for the run; an empty array means
+        // the resolved scope genuinely contains no linked projects.
         [CPS_SCOPE_LINKED_PROJECTS]: cpsData.linkedProjects ?? null,
       }
     : {};

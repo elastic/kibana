@@ -8,17 +8,39 @@
  */
 
 import type { ApplicationStart, HttpSetup } from '@kbn/core/public';
+import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { Logger } from '@kbn/logging';
 import type { ProjectRouting } from '@kbn/es-query';
 import { BehaviorSubject, combineLatest, map } from 'rxjs';
 import {
   type CPSAppAccessResolver,
   type ICPSManager,
+  type CPSConfigurationLinks,
   type ProjectsData,
+  type HeaderContextMenuItemProps,
   ProjectRoutingAccess,
   PROJECT_ROUTING,
 } from '@kbn/cps-utils';
+import { i18n } from '@kbn/i18n';
 import type { ProjectFetcher } from './project_fetcher';
+
+/** Builds the Cloud console URL for managing cross-project search links. */
+export const getManageCrossProjectSearchUrl = (cloud?: CloudStart): string | undefined => {
+  const { baseUrl } = cloud ?? {};
+  const { projectId, projectType } = cloud?.serverless ?? {};
+  if (!baseUrl || !projectId || !projectType) {
+    return undefined;
+  }
+
+  try {
+    return new URL(
+      `projects/${projectType}/${projectId}/cross-project-search`,
+      baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`
+    ).toString();
+  } catch {
+    return undefined;
+  }
+};
 
 /**
  * Central service for managing project routing and project data.
@@ -31,6 +53,7 @@ export class CPSManager implements ICPSManager {
   private readonly http: HttpSetup;
   private readonly logger: Logger;
   private readonly application: ApplicationStart;
+  private readonly cloud?: CloudStart;
   private projectFetcherPromise: Promise<ProjectFetcher> | null = null;
   private defaultProjectRouting: ProjectRouting = PROJECT_ROUTING.ALL;
   private allProjects: ProjectsData | null = null;
@@ -51,10 +74,12 @@ export class CPSManager implements ICPSManager {
     logger: Logger;
     application: ApplicationStart;
     appAccessResolvers?: Map<string, CPSAppAccessResolver>;
+    cloud?: CloudStart;
   }) {
     this.http = deps.http;
     this.logger = deps.logger.get('cps_manager');
     this.application = deps.application;
+    this.cloud = deps.cloud;
     this.readyPromise = Promise.all([
       this.initializeDefaultProjectRouting(),
       this.fetchAllProjects(),
@@ -239,5 +264,36 @@ export class CPSManager implements ICPSManager {
       );
     }
     return this.projectFetcherPromise;
+  }
+
+  public getConfigurationLinks() {
+    const configurationLinks: CPSConfigurationLinks = {
+      currentSpace: {
+        icon: 'controls',
+        label: i18n.translate('cps.projectPicker.header.adjustSpaceDefaultsLinkText', {
+          defaultMessage: 'Adjust space defaults',
+        }),
+        testSubj: 'projectPickerAdjustSpaceDefaultsMenuItem',
+        href: this.application.getUrlForApp('management', {
+          path: `kibana/spaces/edit/${this.http.spaceId}`,
+        }),
+      } satisfies HeaderContextMenuItemProps,
+    };
+
+    const manageCrossProjectSearchUrl = getManageCrossProjectSearchUrl(this.cloud);
+
+    if (manageCrossProjectSearchUrl) {
+      configurationLinks.manageCrossProjectSearch = {
+        icon: 'gear',
+        label: i18n.translate('cps.projectPicker.header.manageCrossProjectSearchLinkText', {
+          defaultMessage: 'Manage cross-project search',
+        }),
+        testSubj: 'projectPickerManageCrossProjectSearchMenuItem',
+        href: manageCrossProjectSearchUrl,
+        external: true,
+      } satisfies HeaderContextMenuItemProps;
+    }
+
+    return configurationLinks;
   }
 }

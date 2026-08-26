@@ -65,19 +65,19 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
   },
   {
     id: 'alerting.ruleCreated',
-    schemaHash: '95d5d9bc425bbc2ef5391ee67d280aa42c1acfab230920a482e91d01a02c4a13',
+    schemaHash: '2e5bdb73915698a7e5f65fd71b9feab19a60a7273c710b32c591939762bd7084',
   },
   {
     id: 'alerting.ruleDeleted',
-    schemaHash: '95d5d9bc425bbc2ef5391ee67d280aa42c1acfab230920a482e91d01a02c4a13',
+    schemaHash: '2e5bdb73915698a7e5f65fd71b9feab19a60a7273c710b32c591939762bd7084',
   },
   {
     id: 'alerting.ruleDisabled',
-    schemaHash: '95d5d9bc425bbc2ef5391ee67d280aa42c1acfab230920a482e91d01a02c4a13',
+    schemaHash: '2e5bdb73915698a7e5f65fd71b9feab19a60a7273c710b32c591939762bd7084',
   },
   {
     id: 'alerting.ruleEnabled',
-    schemaHash: '95d5d9bc425bbc2ef5391ee67d280aa42c1acfab230920a482e91d01a02c4a13',
+    schemaHash: '2e5bdb73915698a7e5f65fd71b9feab19a60a7273c710b32c591939762bd7084',
   },
   {
     id: 'alerting.ruleEventsGenerated',
@@ -89,7 +89,7 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
   },
   {
     id: 'alerting.ruleUpdated',
-    schemaHash: '95d5d9bc425bbc2ef5391ee67d280aa42c1acfab230920a482e91d01a02c4a13',
+    schemaHash: '2e5bdb73915698a7e5f65fd71b9feab19a60a7273c710b32c591939762bd7084',
   },
   {
     id: 'cases.attachmentsAdded',
