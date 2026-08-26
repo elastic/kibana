@@ -285,7 +285,15 @@ function compileDescription(
     return [compileParametrizedValue(description, compilingContext)];
   }
 
-  return [new ConstantComponent(_.isString(description) ? description : String(description))];
+  if (typeof description === 'boolean' || typeof description === 'number') {
+    return [
+      new ConstantComponent(String(description), undefined, {
+        name: description,
+      }),
+    ];
+  }
+
+  return [new ConstantComponent(String(description))];
 }
 
 function compileParametrizedValue(

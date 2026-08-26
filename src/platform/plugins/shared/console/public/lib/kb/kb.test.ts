@@ -262,4 +262,52 @@ describe('Knowledge base', () => {
       expect(suggestionNames).not.toContain('match');
     });
   });
+
+  describe('WHEN body rules contain primitive suggestions', () => {
+    it('SHOULD preserve boolean, number, and string term types', () => {
+      const api = kb._test.loadApisFromJson({
+        es: {
+          endpoints: {
+            endpoint: {
+              data_autocomplete_rules: {
+                value: {
+                  __one_of: [true, false, 0, 42, 'false', '42'],
+                },
+              },
+            },
+          },
+        },
+      });
+      kb._test.setActiveApi(api);
+      const context = {
+        otherTokenValues: [],
+        endpointComponentResolver: kb.getEndpointBodyCompleteComponents,
+        globalComponentResolver: kb.getGlobalAutocompleteComponents,
+      } as AutoCompleteContext & {
+        endpointComponentResolver: typeof kb.getEndpointBodyCompleteComponents;
+        globalComponentResolver: typeof kb.getGlobalAutocompleteComponents;
+      };
+
+      populateContext(
+        ['{', 'value'],
+        context,
+        null,
+        true,
+        kb.getEndpointBodyCompleteComponents('endpoint')
+      );
+
+      expect(
+        context.autoCompleteSet
+          ?.map(({ name }) => `${typeof name}:${String(name)}`)
+          .sort((left, right) => left.localeCompare(right))
+      ).toEqual([
+        'boolean:false',
+        'boolean:true',
+        'number:0',
+        'number:42',
+        'string:42',
+        'string:false',
+      ]);
+    });
+  });
 });
