@@ -47,7 +47,7 @@ const mockedIndices = [
 ] as unknown as DataView[];
 
 const indexPatternsService = {
-  getDefault: jest.fn(() =>
+  getDefaultDataView: jest.fn(() =>
     Promise.resolve({
       id: 'default',
       title: 'index',

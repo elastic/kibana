@@ -52,7 +52,7 @@ export const extractIndexPatternValues = (panel: Panel, defaultIndexId?: string)
 
 export const fetchIndexPattern = async (
   indexPatternValue: IndexPatternValue | undefined,
-  indexPatternsService: Pick<DataViewsService, 'getDefault' | 'get' | 'find'>,
+  indexPatternsService: Pick<DataViewsService, 'getDefaultDataView' | 'get' | 'find'>,
   options: {
     fetchKibanaIndexForStringIndexes: boolean;
   } = {
@@ -63,7 +63,7 @@ export const fetchIndexPattern = async (
   let indexPatternString: string = '';
 
   if (!indexPatternValue) {
-    indexPattern = await indexPatternsService.getDefault();
+    indexPattern = await indexPatternsService.getDefaultDataView();
   } else {
     if (isStringTypeIndexPattern(indexPatternValue)) {
       if (options.fetchKibanaIndexForStringIndexes) {

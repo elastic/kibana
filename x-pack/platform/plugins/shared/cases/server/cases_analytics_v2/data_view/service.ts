@@ -370,21 +370,8 @@ export class CasesAnalyticsV2DataViewService {
         const spec = buildCaseDataViewSpec(deps.spaceId);
         spec.runtimeFieldMap = desiredRuntimeFieldMap;
 
-        // Deliberately NOT `createAndSave`: that helper unconditionally
-        // calls `setDefault`, which claims the space's global default data
-        // view slot for the first view created when none is set yet
-        // (`setDefault(id, force=false)` only writes when there's no default).
-        // This is a fire-and-forget bootstrap that runs on the first cases
-        // request in a space, so it would race ahead of an admin's or a
-        // test's own data view and silently make the managed "Case Analytics"
-        // view the default — surfacing as the wrong pre-selected view in the
-        // Discover/Lens picker across unrelated surfaces. A managed,
-        // admin-facing analytics view is always selected explicitly, so it
-        // must never touch the default. `create` + `createSavedObject`
-        // reproduce `createAndSave` minus the `setDefault` side effect.
-        //
-        // `skipFetchFields: true` matches the previous `createAndSave` call;
-        // runtime fields come from the spec, not a field-caps refresh.
+        // `skipFetchFields: true` because runtime fields come from the spec,
+        // not a field-caps refresh.
         //
         // `overwrite: false` so a concurrent create from another node
         // surfaces a conflict instead of clobbering. Per-process concurrency
@@ -402,8 +389,7 @@ export class CasesAnalyticsV2DataViewService {
         // and let the next refresh path (template lifecycle hook or the
         // post-TTL recompute) reconcile if anything drifts.
         try {
-          const dataView = await dvService.create(spec, true /* skipFetchFields */);
-          await dvService.createSavedObject(dataView, false /* overwrite */);
+          await dvService.createAndSave(spec, false /* overwrite */, true /* skipFetchFields */);
           this.logger.info(
             `bootstrapped data view ${dataViewId} (space=${deps.spaceId}, runtime_fields=${
               Object.keys(desiredRuntimeFieldMap).length

@@ -71,12 +71,14 @@ export class ServerlessVectordbPlugin
     if (!dataViewExists) {
       const defaultDataViewExists = await dataViewsService.defaultDataViewExists();
       if (!defaultDataViewExists) {
-        await dataViewsService.createAndSave({
+        const dataView = await dataViewsService.createAndSave({
           allowNoIndex: false,
           name: 'default:all-data',
           title: '*,-.*',
           id: 'default_all_data_id',
         });
+        // data views no longer become the default on creation, so set it explicitly
+        await dataViewsService.setDefault(dataView.id!);
       }
     }
   }

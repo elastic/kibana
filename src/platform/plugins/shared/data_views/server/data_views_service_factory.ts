@@ -71,16 +71,6 @@ export const dataViewsServiceFactory = (deps: DataViewsServiceFactoryDeps) =>
               })
             ).indexPatterns.save === true
           : false,
-      getCanSaveAdvancedSettings: async () =>
-        byPassCapabilities
-          ? true
-          : request
-          ? (
-              await capabilities.resolveCapabilities(request, {
-                capabilityPath: 'advancedSettings.save',
-              })
-            ).advancedSettings.save === true
-          : false,
       scriptedFieldsEnabled: deps.scriptedFieldsEnabled,
     });
   };
