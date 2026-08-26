@@ -58,7 +58,7 @@ describe('Transform: Transform List Actions <useProjectScopeAction />', () => {
       },
     } as any;
     mockUseFetchProjects.mockReturnValue({
-      error: undefined,
+      error: null,
       isLoading: false,
       linkedProjects: [
         {
