@@ -5,6 +5,7 @@
  * 2.0.
  */
 
-export { generateDashboardTool } from './generate';
-export { reviewPanelsTool, getChatImageBytes } from './review_panels';
-export type { GetImageBytes } from './review_panels';
+export { reviewPanelsTool } from './review_panels_tool';
+export type { GetImageBytes } from './review_panels_tool';
+export { getChatImageBytes } from './get_chat_image_bytes';
+export type { PanelFinding } from './types';

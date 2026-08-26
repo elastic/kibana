@@ -8,8 +8,12 @@
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import { createDashboardManagementSkill } from './dashboard_management_skill';
 import { registerSkills } from './register_skills';
+import { dashboardTools } from '../../common';
 
-const skill = createDashboardManagementSkill(() => Promise.resolve(true));
+const skill = createDashboardManagementSkill({
+  getCustomContentEnabled: () => Promise.resolve(true),
+  getImageBytes: async () => Buffer.from([]),
+});
 
 describe('registerSkills', () => {
   it('registers the dashboard management skill', async () => {
@@ -18,7 +22,10 @@ describe('registerSkills', () => {
       skills: { register },
     } as unknown as AgentBuilderPluginSetup;
 
-    registerSkills(agentBuilder, () => Promise.resolve(true));
+    registerSkills(agentBuilder, {
+      getCustomContentEnabled: () => Promise.resolve(true),
+      getImageBytes: async () => Buffer.from([]),
+    });
 
     expect(register).toHaveBeenCalledTimes(1);
     expect(register).toHaveBeenCalledWith(expect.objectContaining({ id: 'dashboard-management' }));
@@ -43,6 +50,17 @@ describe('registerSkills', () => {
     );
     expect(skill.content).toContain(
       'provide a new `chartType` when the request changes the chart family'
+    );
+  });
+
+  it('includes the Prettify playbook and Panel Review tool', async () => {
+    expect(skill.content).toContain('platform.dashboard.review_panels');
+    expect(skill.content).toContain('at most once');
+    expect(skill.content).toContain('Without an image, this is a normal dashboard edit');
+
+    const tools = await skill.getInlineTools?.();
+    expect(tools?.map((tool) => tool.id)).toEqual(
+      expect.arrayContaining([dashboardTools.generateDashboard, dashboardTools.reviewPanels])
     );
   });
 });

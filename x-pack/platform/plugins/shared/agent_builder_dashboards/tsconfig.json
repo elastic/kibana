@@ -32,6 +32,7 @@
     "@kbn/es-query",
     "@kbn/data-plugin",
     "@kbn/agent-builder-sml-plugin",
+    "@kbn/agent-builder-genai-utils",
     "@kbn/as-code-filters-transforms",
     "@kbn/as-code-shared-transforms",
     "@kbn/data-views-plugin",

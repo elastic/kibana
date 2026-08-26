@@ -22,6 +22,7 @@ import type {
 import { registerSkills } from './skills';
 import { createDashboardAttachmentType } from './attachment_types';
 import { createDashboardSmlType } from './sml_types';
+import { getChatImageBytes } from './tools';
 
 export class AgentBuilderDashboardsPlugin
   implements
@@ -58,9 +59,15 @@ export class AgentBuilderDashboardsPlugin
     );
     setupDeps.agentBuilderSml.registerType(createDashboardSmlType({ getDashboardClient }));
 
-    registerSkills(setupDeps.agentBuilder, async () => {
-      const [coreStart] = await coreSetup.getStartServices();
-      return coreStart.featureFlags.getBooleanValue(CUSTOM_CONTENT_ENABLED_FLAG_KEY, false);
+    registerSkills(setupDeps.agentBuilder, {
+      getCustomContentEnabled: async () => {
+        const [coreStart] = await coreSetup.getStartServices();
+        return coreStart.featureFlags.getBooleanValue(CUSTOM_CONTENT_ENABLED_FLAG_KEY, false);
+      },
+      getImageBytes: async (fileId) => {
+        const [, startDeps] = await coreSetup.getStartServices();
+        return getChatImageBytes(startDeps.files, fileId);
+      },
     });
 
     return {};

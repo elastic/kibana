@@ -6,11 +6,29 @@
  */
 
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
-import { generateDashboardTool } from '../tools';
+import { generateDashboardTool, reviewPanelsTool, type GetImageBytes } from '../tools';
 import { dashboardGeneration } from './generation_guidance';
 import { kibanaRendering } from './rendering_guidance';
 
-export const createDashboardManagementSkill = (getCustomContentEnabled: () => Promise<boolean>) =>
+const PRETTIFY_PLAYBOOK = `
+## Prettify
+
+When the user asked to prettify this dashboard and an image is attached:
+1. Call \`platform.dashboard.review_panels\` once. It inspects the image and returns panel findings. Do not describe the screenshot yourself.
+2. If composition looks thin, ask whether to add charts *before* generating.
+3. Call \`platform.dashboard.generate_dashboard\` at most once. Only edit panels named in findings and pack/resize layout. Do not add or remove panels unless the user already agreed. Do not restyle every Lens panel through the inner visualization agent.
+4. Do not call review_panels again after generate — the image is stale.
+
+Without an image, this is a normal dashboard edit, not Prettify.
+`;
+
+export const createDashboardManagementSkill = ({
+  getCustomContentEnabled,
+  getImageBytes,
+}: {
+  getCustomContentEnabled: () => Promise<boolean>;
+  getImageBytes: GetImageBytes;
+}) =>
   defineSkillType({
     id: 'dashboard-management',
     name: 'dashboard-management',
@@ -28,7 +46,7 @@ Use this skill when:
 Do **not** use this skill when:
 - The user asks for a standalone visualization and does not mention a dashboard context.
 - The user needs help exploring data, fields, or query logic.
-
+${PRETTIFY_PLAYBOOK}
 ${dashboardGeneration.guidance}
 
 ${kibanaRendering.guidance}
@@ -39,6 +57,9 @@ ${kibanaRendering.guidance}
     ],
     getInlineTools: async () => {
       const customContentEnabled = await getCustomContentEnabled();
-      return [generateDashboardTool({ customContentEnabled })];
+      return [
+        generateDashboardTool({ customContentEnabled }),
+        reviewPanelsTool({ getImageBytes }),
+      ];
     },
   });
