@@ -172,6 +172,14 @@ function getMockedSoClient(
         });
       }
 
+      case outputIdToUuid('existing-preconfigured-logstash-output'): {
+        return mockOutputSO('existing-preconfigured-logstash-output', {
+          type: 'logstash',
+          is_default: false,
+          is_preconfigured: true,
+        });
+      }
+
       case outputIdToUuid('existing-kafka-output'): {
         return mockOutputSO('existing-kafka-output', {
           type: 'kafka',
@@ -345,6 +353,13 @@ function getMockedEncryptedSoClient() {
               },
             },
           },
+        });
+      }
+      case outputIdToUuid('existing-preconfigured-logstash-output'): {
+        return mockOutputSO('existing-preconfigured-logstash-output', {
+          type: 'logstash',
+          is_default: false,
+          is_preconfigured: true,
         });
       }
       case outputIdToUuid('existing-kafka-output'): {
@@ -1647,6 +1662,209 @@ describe('Output Service', () => {
         })
       ).rejects.toThrow('Cannot specify both service_token and secrets.service_token');
     });
+
+    it('rejects create when ssl.certificate_authorities contains a path with whitespace', async () => {
+      mockedAppContextService.getCloud.mockReturnValue({ isServerlessEnabled: false } as any);
+      const soClient = getMockedSoClient();
+      await expect(
+        outputService.create(soClient, esClientMock, {
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'Test',
+          type: 'elasticsearch',
+          ssl: { certificate_authorities: ['/path with spaces/ca.pem'] } as any,
+        })
+      ).rejects.toThrow('SSL certificate path cannot contain whitespace');
+    });
+
+    it('rejects create when ssl.certificate is a path with whitespace', async () => {
+      mockedAppContextService.getCloud.mockReturnValue({ isServerlessEnabled: false } as any);
+      const soClient = getMockedSoClient();
+      await expect(
+        outputService.create(soClient, esClientMock, {
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'Test',
+          type: 'logstash',
+          hosts: ['0.0.0.0:5044'],
+          ssl: { certificate: '/path with spaces/cert.pem' } as any,
+        })
+      ).rejects.toThrow('SSL certificate path cannot contain whitespace');
+    });
+
+    it('rejects create when ssl.key is a path with whitespace', async () => {
+      mockedAppContextService.getCloud.mockReturnValue({ isServerlessEnabled: false } as any);
+      const soClient = getMockedSoClient();
+      await expect(
+        outputService.create(soClient, esClientMock, {
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'Test',
+          type: 'logstash',
+          hosts: ['0.0.0.0:5044'],
+          ssl: { key: '/path with spaces/key.pem' } as any,
+        })
+      ).rejects.toThrow('SSL certificate path cannot contain whitespace');
+    });
+
+    it('rejects create when secrets.ssl.key is a string path with whitespace', async () => {
+      mockedAppContextService.getCloud.mockReturnValue({ isServerlessEnabled: false } as any);
+      const soClient = getMockedSoClient();
+      await expect(
+        outputService.create(soClient, esClientMock, {
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'Test',
+          type: 'logstash',
+          hosts: ['0.0.0.0:5044'],
+          secrets: { ssl: { key: '/path with spaces/key.pem' } } as any,
+        })
+      ).rejects.toThrow('SSL certificate path cannot contain whitespace');
+    });
+
+    it('does not apply ssl path validation when secrets.ssl.key is a { id } secret reference', async () => {
+      mockedAppContextService.getCloud.mockReturnValue({ isServerlessEnabled: false } as any);
+      const soClient = getMockedSoClient();
+      // { id } SOSecret references must be skipped by the path validator — they are not file paths.
+      await outputService.update(soClient, esClientMock, 'existing-logstash-output', {
+        secrets: { ssl: { key: { id: 'wnES3pUBqsj3cVixODPG' } } } as any,
+      });
+      expect(soClient.update).toBeCalled();
+    });
+
+    it('rejects update when ssl.certificate_authorities contains a path with whitespace', async () => {
+      mockedAppContextService.getCloud.mockReturnValue({ isServerlessEnabled: false } as any);
+      const soClient = getMockedSoClient();
+      await expect(
+        outputService.update(soClient, esClientMock, 'existing-logstash-output', {
+          ssl: { certificate_authorities: ['/path with spaces/ca.pem'] } as any,
+        })
+      ).rejects.toThrow('SSL certificate path cannot contain whitespace');
+    });
+
+    it('rejects update when ssl.certificate is a path with whitespace', async () => {
+      mockedAppContextService.getCloud.mockReturnValue({ isServerlessEnabled: false } as any);
+      const soClient = getMockedSoClient();
+      await expect(
+        outputService.update(soClient, esClientMock, 'existing-logstash-output', {
+          ssl: { certificate: '/path with spaces/cert.pem' } as any,
+        })
+      ).rejects.toThrow('SSL certificate path cannot contain whitespace');
+    });
+
+    it('rejects update when ssl.key is a path with whitespace', async () => {
+      mockedAppContextService.getCloud.mockReturnValue({ isServerlessEnabled: false } as any);
+      const soClient = getMockedSoClient();
+      await expect(
+        outputService.update(soClient, esClientMock, 'existing-logstash-output', {
+          ssl: { key: '/path with spaces/key.pem' } as any,
+        })
+      ).rejects.toThrow('SSL certificate path cannot contain whitespace');
+    });
+
+    it('rejects update when secrets.ssl.key is a string path with whitespace', async () => {
+      mockedAppContextService.getCloud.mockReturnValue({ isServerlessEnabled: false } as any);
+      const soClient = getMockedSoClient();
+      await expect(
+        outputService.update(soClient, esClientMock, 'existing-logstash-output', {
+          secrets: { ssl: { key: '/path with spaces/key.pem' } } as any,
+        })
+      ).rejects.toThrow('SSL certificate path cannot contain whitespace');
+    });
+
+    it('rejects create when both password and secrets.password are provided for kafka output', async () => {
+      mockedAppContextService.getCloud.mockReturnValue({ isServerlessEnabled: false } as any);
+      const soClient = getMockedSoClient();
+      await expect(
+        outputService.create(soClient, esClientMock, {
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'Test',
+          type: 'kafka',
+          hosts: ['localhost:9092'],
+          password: 'plaintext-password',
+          secrets: { password: 'secret-password' },
+        })
+      ).rejects.toThrow('Cannot specify both password and secrets.password');
+    });
+
+    it('rejects update when both ssl.key and secrets.ssl.key are provided', async () => {
+      mockedAppContextService.getCloud.mockReturnValue({ isServerlessEnabled: false } as any);
+      const soClient = getMockedSoClient();
+      await expect(
+        outputService.update(soClient, esClientMock, 'existing-logstash-output', {
+          ssl: { key: 'plaintext-key' } as any,
+          secrets: { ssl: { key: 'secret-key' } },
+        })
+      ).rejects.toThrow('Cannot specify both ssl.key and secrets.ssl.key');
+    });
+
+    it('rejects update when both password and secrets.password are provided for kafka output', async () => {
+      mockedAppContextService.getCloud.mockReturnValue({ isServerlessEnabled: false } as any);
+      const soClient = getMockedSoClient();
+      await expect(
+        outputService.update(soClient, esClientMock, 'existing-kafka-output', {
+          password: 'plaintext-password',
+          secrets: { password: 'secret-password' },
+        })
+      ).rejects.toThrow('Cannot specify both password and secrets.password');
+    });
+
+    it('rejects update when both service_token and secrets.service_token are provided for remote_elasticsearch output', async () => {
+      mockedAppContextService.getCloud.mockReturnValue({ isServerlessEnabled: false } as any);
+      const soClient = getMockedSoClient();
+      await expect(
+        outputService.update(soClient, esClientMock, 'existing-remote-es-output', {
+          service_token: 'token1',
+          secrets: { service_token: 'token2' },
+        })
+      ).rejects.toThrow('Cannot specify both service_token and secrets.service_token');
+    });
+
+    it('bypasses ssl path validation for preconfigured create and logs a warning', async () => {
+      mockedAppContextService.getCloud.mockReturnValue({ isServerlessEnabled: false } as any);
+      mockedAppContextService.getEncryptedSavedObjectsSetup.mockReturnValue({
+        canEncrypt: true,
+      } as any);
+      const soClient = getMockedSoClient();
+
+      await outputService.create(
+        soClient,
+        esClientMock,
+        {
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'Preconfigured logstash',
+          type: 'logstash',
+          hosts: ['0.0.0.0:5044'],
+          ssl: { certificate: '/path with spaces/cert.pem' } as any,
+        },
+        { fromPreconfiguration: true }
+      );
+
+      expect(mockedLogger.warn).toBeCalledWith(
+        expect.stringContaining('Preconfigured output failed validation')
+      );
+      expect(soClient.create).toBeCalled();
+    });
+
+    it('bypasses ssl path validation for preconfigured update and logs a warning', async () => {
+      mockedAppContextService.getCloud.mockReturnValue({ isServerlessEnabled: false } as any);
+      const soClient = getMockedSoClient();
+
+      await outputService.update(
+        soClient,
+        esClientMock,
+        'existing-preconfigured-logstash-output',
+        { ssl: { certificate: '/path with spaces/cert.pem' } } as any,
+        { fromPreconfiguration: true }
+      );
+
+      expect(mockedLogger.warn).toBeCalledWith(
+        expect.stringContaining('Preconfigured output failed validation')
+      );
+      expect(soClient.update).toBeCalled();
+    });
   });
 
   describe('update', () => {
@@ -1922,6 +2140,37 @@ describe('Output Service', () => {
         username: null,
         version: null,
         preset: 'balanced',
+      });
+    });
+
+    it('should recompute preset when config_yaml is included in a same-type elasticsearch update', async () => {
+      const soClient = getMockedSoClient({});
+
+      await outputService.update(soClient, esClientMock, 'existing-es-output', {
+        config_yaml: 'logging.level: warning',
+      });
+
+      // config_yaml !== undefined triggers recompute even without a type change (item 1 fix).
+      // No explicit `type` in the update data proves mergedType is resolved from the stored output (item 4).
+      expect(soClient.update).toBeCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.objectContaining({ config_yaml: 'logging.level: warning', preset: 'balanced' })
+      );
+    });
+
+    it('should not add a preset when config_yaml is absent from a partial elasticsearch update', async () => {
+      const soClient = getMockedSoClient({});
+
+      await outputService.update(soClient, esClientMock, 'existing-es-output', {
+        name: 'Renamed ES',
+      });
+
+      // Preset must not be computed when config_yaml is absent — doing so would clobber a
+      // stored 'custom' preset with 'balanced' on any innocuous rename.
+      expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
+        type: 'elasticsearch',
+        name: 'Renamed ES',
       });
     });
 
@@ -2983,6 +3232,50 @@ describe('Output Service', () => {
             otlp_exporter: expect.objectContaining({ tls: null }),
           })
         );
+      });
+
+      it('accepts an OTLP update when the using policy has no package policies', async () => {
+        const soClient = getMockedSoClient({});
+        mockedAgentPolicyService.list.mockResolvedValue({
+          items: [{ id: 'empty-policy', name: 'Empty Policy' }],
+        } as unknown as ReturnType<typeof mockedAgentPolicyService.list>);
+        mockedAgentPolicyService.getByIds.mockResolvedValue([]);
+        // No package policies → fetchAllItems yields nothing → no conflict
+        mockedPackagePolicyService.fetchAllItems.mockImplementation(() =>
+          Promise.resolve((async function* () {})())
+        );
+
+        await outputService.update(soClient, esClientMock, 'existing-otlp-output', {
+          is_default: true,
+        });
+
+        expect(soClient.update).toBeCalled();
+      });
+
+      it('accepts an OTLP update when all using policies have only OTel inputs', async () => {
+        const soClient = getMockedSoClient({});
+        mockedAgentPolicyService.list.mockResolvedValue({
+          items: [{ id: 'otel-policy', name: 'OTel Policy' }],
+        } as unknown as ReturnType<typeof mockedAgentPolicyService.list>);
+        mockedAgentPolicyService.getByIds.mockResolvedValue([]);
+        mockedPackagePolicyService.fetchAllItems.mockImplementation(() =>
+          Promise.resolve(
+            (async function* () {
+              yield [
+                {
+                  policy_ids: ['otel-policy'],
+                  inputs: [{ type: 'otelcol', enabled: true }],
+                } as any,
+              ];
+            })()
+          )
+        );
+
+        await outputService.update(soClient, esClientMock, 'existing-otlp-output', {
+          is_default: true,
+        });
+
+        expect(soClient.update).toBeCalled();
       });
     });
   });
