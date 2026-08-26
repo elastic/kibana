@@ -403,8 +403,43 @@ export class ConsolePage {
     });
   }
 
+  /**
+   * If the debounced request highlight ran while the editor was briefly blurred, the send
+   * button stays hidden until the next selection event — so re-fire it until it shows.
+   */
   async clickPlay() {
+    await expect
+      .poll(async () => {
+        if (await this.sendRequestButton.isVisible()) {
+          return true;
+        }
+        await this.nudgeRequestSelection();
+        return this.sendRequestButton.isVisible();
+      })
+      .toBe(true);
     await this.sendRequestButton.click();
+  }
+
+  /** Restores focus and re-fires the selection listener without changing the selection. */
+  private async nudgeRequestSelection() {
+    await this.inputEditor.evaluate((editorNode) => {
+      const editor = window.MonacoEnvironment?.monaco?.editor
+        .getEditors()
+        .find((e) => editorNode.contains(e.getContainerDomNode()));
+      const selection = editor?.getSelection();
+      if (!editor || !selection) {
+        return;
+      }
+      editor.focus();
+      const column = selection.positionColumn > 1 ? selection.positionColumn - 1 : 2;
+      editor.setSelection({
+        selectionStartLineNumber: selection.positionLineNumber,
+        selectionStartColumn: column,
+        positionLineNumber: selection.positionLineNumber,
+        positionColumn: column,
+      });
+      editor.setSelection(selection);
+    });
   }
 
   async sendRequest() {
