@@ -212,7 +212,6 @@ describe('roundsToEvents', () => {
       data: { step: steps[1], sequence: 1 },
     });
 
-    // v2 terminals no longer carry the `steps` blob: step data now lives on step events only.
     expect(events[4]).toMatchObject({ type: TimelineEventType.executionTerminated });
     const terminatedData = events[4].data as { steps?: unknown };
     expect(terminatedData.steps).toBeUndefined();

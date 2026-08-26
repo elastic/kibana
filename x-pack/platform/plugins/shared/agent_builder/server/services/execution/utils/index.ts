@@ -16,11 +16,13 @@ export {
   startConversation$,
   appendRoundTerminated$,
   streamRoundSteps$,
+  createInFlightWrites,
   STEP_FLUSH_MS,
   STEP_FLUSH_MAX,
   placeholderConversation,
   type ConversationOperation,
   type ConversationWithOperation,
+  type InFlightWrites,
 } from './conversations';
 export { convertErrors } from './convert_errors';
 export { resolveServices } from './resolve_services';

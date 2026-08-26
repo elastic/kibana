@@ -15,9 +15,12 @@ import {
   ignoreElements,
   firstValueFrom,
   bufferTime,
+  catchError,
   concatMap,
   filter,
+  EMPTY,
 } from 'rxjs';
+import type { Logger } from '@kbn/logging';
 import type {
   Conversation,
   ConversationAccessControl,
@@ -49,6 +52,37 @@ import { createConversationUpdatedEvent, createConversationCreatedEvent } from '
 
 export const STEP_FLUSH_MS = 500;
 export const STEP_FLUSH_MAX = 10;
+
+export interface InFlightWrites {
+  /** Registers a write. Returns the original promise so call sites can keep chaining on it. */
+  track: <T>(promise: Promise<T>) => Promise<T>;
+  /** Resolves once every tracked write has settled (fulfilled or rejected). Never rejects. */
+  settled: () => Promise<void>;
+}
+
+/** Creates an {@link InFlightWrites} tracker scoped to one persistence pipeline. */
+export const createInFlightWrites = (): InFlightWrites => {
+  const pending = new Set<Promise<void>>();
+
+  const track = <T>(promise: Promise<T>): Promise<T> => {
+    const entry: Promise<void> = promise.then(
+      () => undefined,
+      () => undefined
+    );
+    pending.add(entry);
+    entry.then(() => pending.delete(entry));
+    return promise;
+  };
+
+  const settled = async (): Promise<void> => {
+    // Loop: writes dispatched while we were waiting must be drained too.
+    while (pending.size > 0) {
+      await Promise.all([...pending]);
+    }
+  };
+
+  return { track, settled };
+};
 
 /**
  * Persist a new conversation and emit the corresponding event
@@ -175,10 +209,12 @@ export const startConversation$ = ({
   conversation,
   conversationClient,
   roundStartedEvents$,
+  inFlightWrites,
 }: {
   conversation: ConversationWithOperation;
   conversationClient: ConversationClient;
   roundStartedEvents$: Observable<RoundStartedEvent>;
+  inFlightWrites?: InFlightWrites;
 }): Observable<ChatEvent> => {
   return roundStartedEvents$.pipe(
     switchMap((roundStartedEvent) => {
@@ -237,12 +273,12 @@ export const startConversation$ = ({
         );
       };
 
-      return from(
-        (async () => {
-          await ensureCreated();
-          await appendStart();
-        })()
-      );
+      const startWrite = (async () => {
+        await ensureCreated();
+        await appendStart();
+      })();
+
+      return from(inFlightWrites ? inFlightWrites.track(startWrite) : startWrite);
     }),
     // Side-effect only; the conversationCreated/Updated event fires at END.
     ignoreElements()
@@ -253,23 +289,37 @@ export const streamRoundSteps$ = ({
   conversation,
   conversationClient,
   roundStepEvents$,
+  inFlightWrites,
+  logger,
 }: {
   conversation: ConversationWithOperation;
   conversationClient: ConversationClient;
   roundStepEvents$: Observable<RoundStepEvent>;
+  /** Every flush is registered so teardown cleanup can wait for in-flight writes to settle. */
+  inFlightWrites: InFlightWrites;
+  logger: Logger;
 }): Observable<ChatEvent> => {
   return roundStepEvents$.pipe(
     bufferTime(STEP_FLUSH_MS, null, STEP_FLUSH_MAX),
     filter((batch) => batch.length > 0),
     concatMap((batch) =>
       from(
-        conversationClient.appendEvents(
-          {
-            id: conversation.id,
-            events: batch.map((event) => stepChatEventToTimelineEvent(event, conversation)),
-          },
-          { access: 'converse' }
+        inFlightWrites.track(
+          conversationClient.appendEvents(
+            {
+              id: conversation.id,
+              events: batch.map((event) => stepChatEventToTimelineEvent(event, conversation)),
+            },
+            { access: 'converse' }
+          )
         )
+      ).pipe(
+        catchError((error) => {
+          logger.warn(
+            `Failed to flush step events for conversation ${conversation.id}: ${error.message}`
+          );
+          return EMPTY;
+        })
       )
     ),
     ignoreElements()

@@ -26,6 +26,7 @@ import {
   createConversationNotFoundError,
   DEFAULT_CONVERSATION_TITLE,
 } from '@kbn/agent-builder-common';
+import { loggerMock } from '@kbn/logging-mocks';
 import {
   createEmptyConversation,
   createRound,
@@ -35,6 +36,7 @@ import type { ConversationWithOperation } from './conversations';
 import {
   STEP_FLUSH_MS,
   appendRoundTerminated$,
+  createInFlightWrites,
   getConversation,
   startConversation$,
   streamRoundSteps$,
@@ -653,7 +655,7 @@ describe('conversations utils', () => {
       });
     });
 
-    it('appends the full projected step events for the round alongside the terminated event (v2)', async () => {
+    it('appends the full projected step events for the round alongside the terminated event', async () => {
       const conversationClient = createConversationClientMock();
       const conversation = withOperation(createEmptyConversation({ id: 'conv-steps' }), 'UPDATE');
       const steps: ConversationRoundStep[] = [
@@ -732,6 +734,8 @@ describe('conversations utils', () => {
           conversation,
           conversationClient,
           roundStepEvents$: stepEvents$,
+          inFlightWrites: createInFlightWrites(),
+          logger: loggerMock.create(),
         }).pipe(toArray())
       );
 
@@ -776,6 +780,8 @@ describe('conversations utils', () => {
           conversation,
           conversationClient,
           roundStepEvents$: stepEvents$,
+          inFlightWrites: createInFlightWrites(),
+          logger: loggerMock.create(),
         }).pipe(toArray())
       );
 
@@ -786,6 +792,121 @@ describe('conversations utils', () => {
 
       const emitted = await emittedPromise;
       expect(emitted).toEqual([]);
+    });
+
+    it('treats a failed flush as best-effort: logs a warning and keeps the stream alive for later flushes', async () => {
+      const conversationClient = createConversationClientMock();
+      conversationClient.appendEvents
+        .mockRejectedValueOnce(new Error('es blip'))
+        .mockResolvedValue(createEmptyConversation({ id: 'c1' }));
+      const conversation = withOperation(createEmptyConversation({ id: 'c1' }), 'UPDATE');
+      const logger = loggerMock.create();
+
+      const stepEvents$ = new Subject<RoundStepEvent>();
+      const done = lastValueFrom(
+        streamRoundSteps$({
+          conversation,
+          conversationClient,
+          roundStepEvents$: stepEvents$,
+          inFlightWrites: createInFlightWrites(),
+          logger,
+        }).pipe(toArray())
+      );
+
+      // First flush fails…
+      stepEvents$.next(stepEvent('round-1', 0));
+      jest.advanceTimersByTime(STEP_FLUSH_MS);
+      await Promise.resolve();
+      await Promise.resolve();
+
+      // …the second flush still runs and the stream completes without error.
+      stepEvents$.next(stepEvent('round-1', 1));
+      jest.advanceTimersByTime(STEP_FLUSH_MS);
+      await Promise.resolve();
+      stepEvents$.complete();
+
+      await expect(done).resolves.toEqual([]);
+      expect(conversationClient.appendEvents).toHaveBeenCalledTimes(2);
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('es blip'));
+    });
+
+    it('registers every flush with the in-flight tracker so teardown can wait for it', async () => {
+      const conversationClient = createConversationClientMock();
+      let resolveFlush!: (value: Conversation) => void;
+      conversationClient.appendEvents.mockReturnValue(
+        new Promise<Conversation>((resolve) => {
+          resolveFlush = resolve;
+        })
+      );
+      const conversation = withOperation(createEmptyConversation({ id: 'c1' }), 'UPDATE');
+      const inFlightWrites = createInFlightWrites();
+
+      const stepEvents$ = new Subject<RoundStepEvent>();
+      const subscription = streamRoundSteps$({
+        conversation,
+        conversationClient,
+        roundStepEvents$: stepEvents$,
+        inFlightWrites,
+        logger: loggerMock.create(),
+      }).subscribe();
+
+      stepEvents$.next(stepEvent('round-1', 0));
+      jest.advanceTimersByTime(STEP_FLUSH_MS);
+      await Promise.resolve();
+      expect(conversationClient.appendEvents).toHaveBeenCalledTimes(1);
+
+      // Unsubscribing does not cancel the dispatched write; `settled` must wait for it.
+      subscription.unsubscribe();
+      let settledResolved = false;
+      const settledPromise = inFlightWrites.settled().then(() => {
+        settledResolved = true;
+      });
+      await Promise.resolve();
+      await Promise.resolve();
+      expect(settledResolved).toBe(false);
+
+      resolveFlush(createEmptyConversation({ id: 'c1' }));
+      await settledPromise;
+      expect(settledResolved).toBe(true);
+    });
+  });
+
+  describe('createInFlightWrites', () => {
+    it('settled resolves even when a tracked write rejects, and drains writes added while waiting', async () => {
+      const inFlightWrites = createInFlightWrites();
+
+      let rejectFirst!: (error: Error) => void;
+      inFlightWrites
+        .track(
+          new Promise<void>((_, reject) => {
+            rejectFirst = reject;
+          })
+        )
+        .catch(() => {
+          // The caller handles the rejection; the tracker only waits for settlement.
+        });
+
+      let resolveSecond!: () => void;
+      let settledResolved = false;
+      const settledPromise = inFlightWrites.settled().then(() => {
+        settledResolved = true;
+      });
+
+      // While the first write is pending, dispatch a second one — settled must wait for both.
+      inFlightWrites.track(
+        new Promise<void>((resolve) => {
+          resolveSecond = resolve;
+        })
+      );
+
+      rejectFirst(new Error('write failed'));
+      await Promise.resolve();
+      await Promise.resolve();
+      expect(settledResolved).toBe(false);
+
+      resolveSecond();
+      await settledPromise;
+      expect(settledResolved).toBe(true);
     });
   });
 });

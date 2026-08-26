@@ -1728,6 +1728,33 @@ describe('conversation model converters', () => {
       expect(updated.events?.some((event) => event.id === 'appended::user_message')).toBe(true);
     });
 
+    it('honors caller-supplied rounds alongside events, skipping the rounds rebuild (step-only appendEvents batches)', () => {
+      // `appendEvents` passes the stored rounds through on step-only batches so each flush
+      // does not rewrite prior rounds from their event projection. When both `events` and
+      // `rounds` are in the update, the supplied rounds win over `eventsToRounds`.
+      const conversation = eventsNativeStored();
+      const passedThroughRounds = [
+        { ...conversation.rounds[0], response: { message: 'stored truth' } },
+      ];
+
+      const updated = updateConversation({
+        conversation,
+        update: {
+          id: conversation.id,
+          events: conversation.events!,
+          rounds: passedThroughRounds,
+        } as Parameters<typeof updateConversation>[0]['update'] & {
+          events: TimelineEvent[];
+        },
+        space: 'space',
+        updateDate: new Date(updateDate),
+      });
+
+      expect(updated.schema_version).toBe(CONVERSATION_SCHEMA_VERSION);
+      expect(updated.rounds).toBe(passedThroughRounds);
+      expect(updated.rounds[0].response?.message).toBe('stored truth');
+    });
+
     it('promotes a legacy conversation to events-native when a caller supplies events (appendEvents on a legacy doc)', () => {
       // Legacy docs stay rounds-only on plain updates (see the earlier test). Once a caller opts
       // in by supplying an `events` array (i.e. an `appendEvents` write lands on a legacy doc),

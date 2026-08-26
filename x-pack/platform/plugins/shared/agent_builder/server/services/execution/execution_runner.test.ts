@@ -509,6 +509,79 @@ describe('handleAgentExecution', () => {
       });
 
       await expect(lastValueFrom(events$.pipe(toArray()))).rejects.toThrow();
+      // The discard waits for in-flight writes to settle, so give the microtask chain a beat.
+      await new Promise((resolve) => setImmediate(resolve));
+
+      expect(conversationClient.discardRoundEvents).toHaveBeenCalledWith(
+        'conversation-1',
+        'round-1'
+      );
+    });
+
+    it('waits for the in-flight start write to settle before discarding, so a late write cannot resurrect events', async () => {
+      const conversation = createEmptyConversation({
+        id: 'conversation-1',
+        agent_id: 'test-agent',
+      });
+      const conversationClient = createConversationClientMock();
+      conversationClient.get.mockResolvedValue(conversation);
+      // The START append hangs until we resolve it — simulating a write still on the wire
+      // when the run dies. Unsubscription cannot cancel it.
+      let resolveStartWrite!: (value: typeof conversation) => void;
+      conversationClient.appendEvents.mockReturnValue(
+        new Promise<typeof conversation>((resolve) => {
+          resolveStartWrite = resolve;
+        })
+      );
+
+      const roundStartedEvent = {
+        type: ChatEventType.roundStarted,
+        data: {
+          round_id: 'round-1',
+          input: { message: 'Hello' },
+          started_at: '2024-01-01T00:00:00.000Z',
+        },
+      } as RoundStartedEvent;
+      executeAgentMock.mockReturnValue(
+        timer(0).pipe(
+          mergeMap(() =>
+            concat(
+              of<ChatAgentEvent>(roundStartedEvent),
+              throwError(() => new Error('agent exploded'))
+            )
+          ),
+          shareReplay()
+        )
+      );
+      resolveServicesMock.mockResolvedValue({
+        conversationClient,
+        selectedConnectorId: 'connector-1',
+        modelProvider: createModelProviderMock(),
+      } as never);
+
+      const events$ = await handleAgentExecution({
+        execution: {
+          executionId: 'execution-1',
+          executionMode: AgentExecutionMode.conversation,
+          agentParams: {
+            agentId: 'test-agent',
+            conversationId: 'conversation-1',
+            nextInput: { message: 'Hello' },
+          },
+        } as never,
+        deps: createDeps({ conversationClient }),
+        request: { headers: {} } as never,
+        abortSignal: new AbortController().signal,
+      });
+
+      await expect(lastValueFrom(events$.pipe(toArray()))).rejects.toThrow();
+      await new Promise((resolve) => setImmediate(resolve));
+
+      // The stream is dead but the START write is still pending: no discard yet.
+      expect(conversationClient.discardRoundEvents).not.toHaveBeenCalled();
+
+      resolveStartWrite(conversation);
+      await new Promise((resolve) => setImmediate(resolve));
 
       expect(conversationClient.discardRoundEvents).toHaveBeenCalledWith(
         'conversation-1',

@@ -476,7 +476,7 @@ export const updateConversation = ({
       ...merged,
       schema_version: CONVERSATION_SCHEMA_VERSION,
       events: updateEvents,
-      rounds: eventsToRounds(updateEvents),
+      rounds: safeUpdate.rounds ?? eventsToRounds(updateEvents),
     };
   }
 

@@ -66,6 +66,7 @@ import {
   startConversation$,
   appendRoundTerminated$,
   streamRoundSteps$,
+  createInFlightWrites,
   resolveServices,
   convertErrors,
   type ConversationWithOperation,
@@ -528,16 +529,17 @@ const buildPersistenceEvents = ({
         ? title$
         : undefined;
 
-    // Tracks the two-phase window: set once the START write is on its way, cleared once the
-    // round has reached its terminal event. A teardown inside that window means the run died
-    // mid-round, and the round's persisted events (start + streamed steps) must be discarded.
     let startedRoundId: string | undefined;
     let roundReachedTerminal = false;
+
+    const inFlightWrites = createInFlightWrites();
 
     const stepStream$ = streamRoundSteps$({
       conversation,
       conversationClient,
       roundStepEvents$,
+      inFlightWrites,
+      logger,
     });
 
     const twoPhase$ = roundStartedEvents$.pipe(
@@ -548,6 +550,7 @@ const buildPersistenceEvents = ({
             conversation,
             conversationClient,
             roundStartedEvents$: of(startEvent),
+            inFlightWrites,
           }),
           appendRoundTerminated$({
             conversation,
@@ -571,11 +574,14 @@ const buildPersistenceEvents = ({
           return;
         }
         const roundId = startedRoundId;
-        conversationClient.discardRoundEvents(conversation.id, roundId).catch((error) => {
-          logger.warn(
-            `Failed to discard events of failed round ${roundId} in conversation ${conversation.id}: ${error.message}`
-          );
-        });
+        inFlightWrites
+          .settled()
+          .then(() => conversationClient.discardRoundEvents(conversation.id, roundId))
+          .catch((error) => {
+            logger.warn(
+              `Failed to discard events of failed round ${roundId} in conversation ${conversation.id}: ${error.message}`
+            );
+          });
       })
     );
   }

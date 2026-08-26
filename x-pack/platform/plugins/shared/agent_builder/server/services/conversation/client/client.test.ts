@@ -2410,14 +2410,14 @@ describe('ConversationClient', () => {
         // First OCC read: only the start events are stored.
         .mockResolvedValueOnce({
           hits: {
-            hits: [createConversationDocument({ schemaVersion: 2, events: start })],
+            hits: [createConversationDocument({ schemaVersion: 1, events: start })],
           },
         })
         // Retry read: a concurrent flush won the race and landed step::0 in the meantime.
         .mockResolvedValue({
           hits: {
             hits: [
-              createConversationDocument({ schemaVersion: 2, seqNo: 2, events: [...start, step0] }),
+              createConversationDocument({ schemaVersion: 1, seqNo: 2, events: [...start, step0] }),
             ],
           },
         });
@@ -2438,6 +2438,89 @@ describe('ConversationClient', () => {
         'round-1::step::0',
         'round-1::step::1',
       ]);
+    });
+
+    it('keeps the stored rounds verbatim on step-only appendEvents batches (no projection rewrite), but rebuilds them when a terminal event lands', async () => {
+      // The stored round deliberately disagrees with what its events project, so the two
+      // behaviors are observable: passing rounds through keeps 'stored truth', a rebuild
+      // replaces it with 'projected'.
+      const storedRound = createRound({
+        id: 'round-1',
+        status: ConversationRoundStatus.completed,
+        response: { message: 'stored truth' },
+      });
+      const round1Events: TimelineEvent[] = [
+        ...startTimelineEvents('round-1'),
+        {
+          id: 'round-1::execution_terminated',
+          type: TimelineEventType.executionTerminated,
+          created_at: '2025-08-04T07:42:21.000Z',
+          actor: { type: EventActorType.agent, id: 'agent-1' },
+          execution_id: 'round-1::execution',
+          trigger_event_id: 'round-1::user_message',
+          data: {
+            outcome: { type: 'responded', response: { message: 'projected' } },
+            model_usage: { connector_id: 'c', llm_calls: 1, input_tokens: 1, output_tokens: 1 },
+            time_to_first_token: 1,
+            time_to_last_token: 2,
+          },
+        } as TimelineEvent,
+      ];
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createConversationDocument({
+              schemaVersion: 1,
+              rounds: [storedRound],
+              // round-2 is mid-run: start events stored, steps now streaming in.
+              events: [...round1Events, ...startTimelineEvents('round-2')],
+            }),
+          ],
+        },
+      });
+      mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
+
+      // A step-only flush must not rewrite round-1 from its (here diverging) event projection.
+      await client.appendEvents({
+        id: 'conversation-1',
+        events: [stepTimelineEvent('round-2', 0)],
+      });
+
+      const { document: stepFlushDoc } = mockEsClient.index.mock.calls[0][0] as {
+        document: { conversation_rounds: Array<{ id: string; response: { message: string } }> };
+      };
+      expect(stepFlushDoc.conversation_rounds.map((round) => round.id)).toEqual(['round-1']);
+      expect(stepFlushDoc.conversation_rounds[0].response.message).toBe('stored truth');
+
+      // A batch carrying a non-step (terminal) event goes through the full rounds rebuild.
+      await client.appendEvents({
+        id: 'conversation-1',
+        events: [
+          {
+            id: 'round-2::execution_terminated',
+            type: TimelineEventType.executionTerminated,
+            created_at: '2025-08-04T07:42:25.000Z',
+            actor: { type: EventActorType.agent, id: 'agent-1' },
+            execution_id: 'round-2::execution',
+            trigger_event_id: 'round-2::user_message',
+            data: {
+              outcome: { type: 'responded', response: { message: 'round 2 done' } },
+              model_usage: { connector_id: 'c', llm_calls: 1, input_tokens: 1, output_tokens: 1 },
+              time_to_first_token: 1,
+              time_to_last_token: 2,
+            },
+          } as TimelineEvent,
+        ],
+      });
+
+      const { document: terminalDoc } = mockEsClient.index.mock.calls[1][0] as {
+        document: { conversation_rounds: Array<{ id: string; response: { message: string } }> };
+      };
+      expect(terminalDoc.conversation_rounds.map((round) => round.id)).toEqual([
+        'round-1',
+        'round-2',
+      ]);
+      expect(terminalDoc.conversation_rounds[0].response.message).toBe('projected');
     });
 
     it('discardRoundEvents removes only the failed round-derived events, keeping other rounds and additive events', async () => {
@@ -2479,7 +2562,7 @@ describe('ConversationClient', () => {
         hits: {
           hits: [
             createConversationDocument({
-              schemaVersion: 2,
+              schemaVersion: 1,
               rounds: [completedRound],
               events: [...completedEvents, additiveEvent, ...failedRoundEvents],
             }),

@@ -20,6 +20,7 @@ import {
   CONVERSATION_SCHEMA_VERSION,
   CONVERSATION_TITLE_MAX_LENGTH,
   ConversationAccessControlMode,
+  TimelineEventType,
   isConversationAccessControlRole,
   normalizeConversationAccessControl,
   createBadRequestError,
@@ -467,12 +468,14 @@ class ConversationClientImpl implements ConversationClient {
       access,
       fields: (current) => {
         const existingIds = new Set((current.events ?? []).map((event) => event.id));
-        const appended = [
-          ...(current.events ?? []),
-          ...events.filter((event) => !existingIds.has(event.id)),
-        ];
+        const newEvents = events.filter((event) => !existingIds.has(event.id));
+        const appended = [...(current.events ?? []), ...newEvents];
+        const isStepOnlyBatch = newEvents.every(
+          (event) => event.type === TimelineEventType.executionStep
+        );
         return {
           events: appended,
+          ...(isStepOnlyBatch ? { rounds: current.rounds } : {}),
           schema_version: CONVERSATION_SCHEMA_VERSION,
           ...(title !== undefined ? { title } : {}),
           ...(status ? { status } : {}),
