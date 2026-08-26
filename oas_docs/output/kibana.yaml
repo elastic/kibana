@@ -107205,6 +107205,15 @@ components:
                                   - normal
                                 type: string
                             description: Data grid density. Choose "compact", "expanded", or "normal" for row spacing. If omitted, Discover or the embedding application determines the density from its current settings, such as the user preference.
+                          documents_display_mode:
+                            anyOf:
+                              - enum:
+                                  - table
+                                type: string
+                              - enum:
+                                  - json
+                                type: string
+                            description: 'Documents display mode: "table" for the formatted summary, or "json" for the raw JSON tree. When set, overrides the referenced saved object or the inline tab config in `tabs`.'
                           filters:
                             default: []
                             description: List of filters to apply to the data in the tab.
@@ -107223,7 +107232,7 @@ components:
                             description: Header row height. Use a number (1–5) or "auto" to size based on content. If omitted, Discover or the embedding application determines the height from its current settings, such as the user preference.
                           json_mode_settings:
                             additionalProperties: false
-                            description: 'Settings that only apply when the source column is displayed in JSON mode (`source_display_mode: "json"`).'
+                            description: 'Settings that only apply when the source column is displayed in JSON mode (`documents_display_mode: "json"`).'
                             type: object
                             properties:
                               hide_nulls:
@@ -107274,15 +107283,6 @@ components:
                                 - direction
                             maxItems: 100
                             type: array
-                          source_display_mode:
-                            anyOf:
-                              - enum:
-                                  - summary
-                                type: string
-                              - enum:
-                                  - json
-                                type: string
-                            description: 'Source column display mode: "summary" for the formatted summary, or "json" for the raw JSON tree. When set, overrides the referenced saved object or the inline tab config in `tabs`.'
                           view_mode:
                             anyOf:
                               - enum:
@@ -107334,6 +107334,15 @@ components:
                                   - normal
                                 type: string
                             description: Data grid density. Choose "compact", "expanded", or "normal" for row spacing. If omitted, Discover or the embedding application determines the density from its current settings, such as the user preference.
+                          documents_display_mode:
+                            anyOf:
+                              - enum:
+                                  - table
+                                type: string
+                              - enum:
+                                  - json
+                                type: string
+                            description: 'Documents display mode: "table" for the formatted summary, or "json" for the raw JSON tree. When set, overrides the referenced saved object or the inline tab config in `tabs`.'
                           header_row_height:
                             anyOf:
                               - maximum: 5
@@ -107345,7 +107354,7 @@ components:
                             description: Header row height. Use a number (1–5) or "auto" to size based on content. If omitted, Discover or the embedding application determines the height from its current settings, such as the user preference.
                           json_mode_settings:
                             additionalProperties: false
-                            description: 'Settings that only apply when the source column is displayed in JSON mode (`source_display_mode: "json"`).'
+                            description: 'Settings that only apply when the source column is displayed in JSON mode (`documents_display_mode: "json"`).'
                             type: object
                             properties:
                               hide_nulls:
@@ -107394,15 +107403,6 @@ components:
                                 - direction
                             maxItems: 100
                             type: array
-                          source_display_mode:
-                            anyOf:
-                              - enum:
-                                  - summary
-                                type: string
-                              - enum:
-                                  - json
-                                type: string
-                            description: 'Source column display mode: "summary" for the formatted summary, or "json" for the raw JSON tree. When set, overrides the referenced saved object or the inline tab config in `tabs`.'
                         required:
                           - data_source
                   maxItems: 1
@@ -107503,6 +107503,15 @@ components:
                             - normal
                           type: string
                       description: 'Data grid row spacing: `compact`, `expanded`, or `normal`. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.'
+                    documents_display_mode:
+                      anyOf:
+                        - enum:
+                            - table
+                          type: string
+                        - enum:
+                            - json
+                          type: string
+                      description: 'Documents display mode: "table" for the formatted summary, or "json" for the raw JSON tree. When set, overrides the referenced saved object or the inline tab config in `tabs`.'
                     header_row_height:
                       anyOf:
                         - maximum: 5
@@ -107514,7 +107523,7 @@ components:
                       description: 'Header row height: number (1–5) or `auto`. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.'
                     json_mode_settings:
                       additionalProperties: false
-                      description: 'Settings that only apply when the source column is displayed in JSON mode (`source_display_mode: "json"`).'
+                      description: 'Settings that only apply when the source column is displayed in JSON mode (`documents_display_mode: "json"`).'
                       type: object
                       properties:
                         hide_nulls:
@@ -107562,15 +107571,6 @@ components:
                           - direction
                       maxItems: 100
                       type: array
-                    source_display_mode:
-                      anyOf:
-                        - enum:
-                            - summary
-                          type: string
-                        - enum:
-                            - json
-                          type: string
-                      description: 'Source column display mode: "summary" for the formatted summary, or "json" for the raw JSON tree. When set, overrides the referenced saved object or the inline tab config in `tabs`.'
                 ref_id:
                   type: string
                 selected_tab_id:
