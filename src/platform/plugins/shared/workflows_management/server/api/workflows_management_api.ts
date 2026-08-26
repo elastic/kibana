@@ -56,12 +56,7 @@ import type {
   StepLogsParams,
 } from '@kbn/workflows-execution-engine/server/workflow_event_logger/types';
 import type { ServerTriggerDefinition } from '@kbn/workflows-extensions/server';
-import {
-  parseWorkflowYamlToJSON,
-  parseYamlToJSONWithoutValidation,
-  stringifyWorkflowDefinition,
-  WorkflowValidationError,
-} from '@kbn/workflows-yaml';
+import { parseYamlToJSONWithoutValidation, WorkflowValidationError } from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
 import {
   type ExternalResumeFormPageParams,
@@ -79,12 +74,12 @@ import type {
   SearchWorkflowExecutionsParams,
   WorkflowsService,
 } from './workflows_management_service';
-import { connectorParamsSchemaResolver } from '../../common/lib/connector_params_schema_resolver';
 import { formatWorkflowDiagnostic } from '../../common/lib/format_workflow_diagnostic';
 import type {
   RestoreWorkflowVersionResponseDto,
   WorkflowChangesHistoryResponse,
 } from '../../common/lib/workflow_change_history/types';
+import { updateWorkflowYamlFields } from '../../common/lib/yaml/update_workflow_yaml_fields';
 import type { BulkCreateWorkflowsResult } from '../services/workflow_crud_service';
 import type {
   ProcessedWaitForInputFacets,
@@ -367,28 +362,15 @@ export class WorkflowsManagementApi {
     spaceId: string,
     request: KibanaRequest
   ): Promise<WorkflowDetailDto> {
-    // Parse and update the YAML to change the name
-    const zodSchema = await this.workflowsService.getWorkflowZodSchema(
-      { loose: false },
-      spaceId,
-      request
-    );
-    const parsedYaml = parseWorkflowYamlToJSON(workflow.yaml, zodSchema, {
-      connectorParamsSchemaResolver,
-    });
-    if (parsedYaml.error) {
-      throw parsedYaml.error;
-    }
-
-    const updatedYaml = {
-      ...parsedYaml.data,
+    // Rewrite only the `name` field directly in the YAML text so that cloning
+    // works even when the source workflow's YAML is schema-invalid. Strictly
+    // parsing/validating here would reject invalid-but-editable workflows.
+    const clonedYaml = updateWorkflowYamlFields(workflow.yaml, {
       name: `${workflow.name} ${i18n.translate('workflowsManagement.cloneSuffix', {
         defaultMessage: 'Copy',
       })}`,
-    };
+    });
 
-    // Convert back to YAML string using proper YAML stringification
-    const clonedYaml = stringifyWorkflowDefinition(updatedYaml as unknown as WorkflowYaml);
     const result = await this.workflowsService.createWorkflow(
       { yaml: clonedYaml },
       spaceId,
