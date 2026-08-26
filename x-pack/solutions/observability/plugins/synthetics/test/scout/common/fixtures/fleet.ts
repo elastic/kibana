@@ -117,11 +117,13 @@ function fleetHttpError(action: string, res: { statusCode: number; body: unknown
 }
 
 /**
- * Creates a legacy-format synthetics package policy (id =
- * `${monitorId}-${locationId}-${spaceId}`) directly via the Fleet API and marks
- * it `is_managed`, mirroring the FTR helper. Waits for the agent policy to be
- * GET-able first: Fleet create 404s (`Agent policy not found`) while a
- * concurrent deploy is in flight. Errors include status+body.
+ * Seed a legacy-format managed synthetics package policy via Fleet.
+ *
+ * Waits for the agent policy to be GET-able first (create 404s while a
+ * concurrent deploy is in flight). Create and "exists + managed" share one
+ * retry loop: a 409 does not mean the policy is GET-able — cleanup can delete
+ * a just-created extra, and Fleet package-policy 404s are mislabelled
+ * `Saved object [fleet-agent-policies/<id>] not found`.
  */
 export async function createLegacyPackagePolicy(
   apiClient: ApiClientFixture,
@@ -146,36 +148,53 @@ export async function createLegacyPackagePolicy(
       throw fleetHttpError(`Agent policy ${fleetPolicyId} not ready`, agentPolicyRes);
     }
 
-    const res = await apiClient.post('api/fleet/package_policies', {
+    const createRes = await apiClient.post('api/fleet/package_policies', {
       headers,
       body: {
         id: legacyPolicyId,
         name: `legacy-${legacyPolicyId}`,
         namespace: 'default',
+        policy_id: fleetPolicyId,
         policy_ids: [fleetPolicyId],
         force: true,
+        is_managed: true,
         package: { name: 'synthetics', version: packageVersion },
         inputs: [{ type: 'synthetics/http', enabled: true, streams: [] }],
       },
       responseType: 'json',
     });
-    // A prior retry may have created the policy after the client timed out.
-    if (res.statusCode === 409) {
-      return;
+    if (createRes.statusCode !== 200 && createRes.statusCode !== 409) {
+      throw fleetHttpError(`Failed to create legacy package policy ${legacyPolicyId}`, createRes);
     }
-    if (res.statusCode !== 200) {
-      throw fleetHttpError(`Failed to create legacy package policy ${legacyPolicyId}`, res);
-    }
-  });
 
-  await tryForTime(60_000, async () => {
-    const res = await apiClient.put(`api/fleet/package_policies/${legacyPolicyId}`, {
+    const getRes = await apiClient.get(`api/fleet/package_policies/${legacyPolicyId}`, {
       headers,
-      body: { is_managed: true, force: true },
       responseType: 'json',
     });
-    if (res.statusCode !== 200) {
-      throw fleetHttpError(`Failed to mark package policy ${legacyPolicyId} as managed`, res);
+    if (getRes.statusCode !== 200) {
+      throw fleetHttpError(
+        `Legacy package policy ${legacyPolicyId} not found after create`,
+        getRes
+      );
+    }
+
+    const item = (getRes.body as { item: { is_managed?: boolean } }).item;
+    if (item.is_managed) {
+      return;
+    }
+
+    const putRes = await apiClient.put(`api/fleet/package_policies/${legacyPolicyId}`, {
+      headers,
+      body: {
+        is_managed: true,
+        force: true,
+        policy_id: fleetPolicyId,
+        policy_ids: [fleetPolicyId],
+      },
+      responseType: 'json',
+    });
+    if (putRes.statusCode !== 200) {
+      throw fleetHttpError(`Failed to mark package policy ${legacyPolicyId} as managed`, putRes);
     }
   });
 
