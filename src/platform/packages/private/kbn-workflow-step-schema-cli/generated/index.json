@@ -454,11 +454,25 @@
     "jina.fileToMarkdown",
     "jina.fileToRenderedImage",
     "jina.search",
+    "jira-cloud.addAttachment",
+    "jira-cloud.addComment",
+    "jira-cloud.addWatcher",
+    "jira-cloud.assignIssue",
+    "jira-cloud.createIssue",
+    "jira-cloud.deleteIssue",
+    "jira-cloud.getAttachment",
+    "jira-cloud.getCreateMetadata",
     "jira-cloud.getIssue",
+    "jira-cloud.getIssueTypes",
     "jira-cloud.getProject",
     "jira-cloud.getProjects",
+    "jira-cloud.getTransitions",
+    "jira-cloud.linkIssues",
+    "jira-cloud.removeWatcher",
     "jira-cloud.searchIssuesWithJql",
     "jira-cloud.searchUsers",
+    "jira-cloud.transitionIssue",
+    "jira-cloud.updateIssue",
     "jira-service-management.closeAlert",
     "jira-service-management.createAlert",
     "jira.fieldsByIssueType",
@@ -867,11 +881,11 @@
   "variants": {
     "strict": {
       "path": "strict/schema.json",
-      "sha256": "7020e1d7d5beffac9a5a4a6bbb182625a3932d6d1ced2bf8b62aa2a09167a1c5"
+      "sha256": "41d19bfc2d10df171d3ae100597b5c3b36ea7e9ab82f99d6da63ac1caa879796"
     },
     "template": {
       "path": "template/schema.json",
-      "sha256": "ef0ed37b53a470c0c831d274010e08cb61e352b985b9103b9c0454325ec7be56"
+      "sha256": "abb560dd70873775fefad1a342394ce5c2813ffa8bfd45cd8bdcd7a5c7d3c597"
     }
   }
 }
