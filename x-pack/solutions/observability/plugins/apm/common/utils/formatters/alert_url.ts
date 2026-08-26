@@ -7,8 +7,18 @@
 import { stringify } from 'querystring';
 import { ENVIRONMENT_ALL } from '@kbn/apm-types';
 
+const APM_SERVICES_PATH = '/app/apm/services';
+
 const format = ({ pathname, query }: { pathname: string; query: Record<string, any> }): string => {
   return `${pathname}?${stringify(query)}`;
+};
+
+const getApmServicePathname = (serviceName: string | undefined, suffix = '') => {
+  // Missing service.name: inventory, not `/services/undefined` (404).
+  if (!serviceName) {
+    return APM_SERVICES_PATH;
+  }
+  return `${APM_SERVICES_PATH}/${encodeURIComponent(serviceName)}${suffix}`;
 };
 
 export const getAlertUrlErrorCount = (
@@ -16,9 +26,7 @@ export const getAlertUrlErrorCount = (
   serviceEnv: string | undefined
 ) =>
   format({
-    // String(undefined) is "undefined", matching encodeURIComponent's JS coercion so a
-    // missing service.name stays `/services/undefined/...` rather than an empty segment.
-    pathname: `/app/apm/services/${encodeURIComponent(String(serviceName))}/errors`,
+    pathname: getApmServicePathname(serviceName, '/errors'),
     query: {
       environment: serviceEnv ?? ENVIRONMENT_ALL.value,
     },
@@ -45,7 +53,7 @@ export const getAlertUrlTransaction = (
   transactionType: string | undefined
 ) =>
   format({
-    pathname: `/app/apm/services/${encodeURIComponent(String(serviceName))}`,
+    pathname: getApmServicePathname(serviceName),
     query: {
       // Leave undefined so querystring.stringify emits `transactionType=` (empty value).
       transactionType,

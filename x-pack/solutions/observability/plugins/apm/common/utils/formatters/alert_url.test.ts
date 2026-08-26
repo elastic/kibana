@@ -28,9 +28,9 @@ describe('alert_url', () => {
       expect(url).toBe('/app/apm/services/service%20name/errors?environment=serviceEnv');
     });
 
-    it('encodes a missing service name as the path segment undefined', () => {
+    it('falls back to the service inventory when the service name is missing', () => {
       expect(getAlertUrlErrorCount(undefined, 'serviceEnv')).toBe(
-        '/app/apm/services/undefined/errors?environment=serviceEnv'
+        '/app/apm/services?environment=serviceEnv'
       );
     });
   });
@@ -76,9 +76,9 @@ describe('alert_url', () => {
       );
     });
 
-    it('encodes a missing service name as the path segment undefined', () => {
+    it('falls back to the service inventory when the service name is missing', () => {
       expect(getAlertUrlTransaction(undefined, 'serviceEnv', 'transactionType')).toBe(
-        '/app/apm/services/undefined?transactionType=transactionType&environment=serviceEnv'
+        '/app/apm/services?transactionType=transactionType&environment=serviceEnv'
       );
     });
 
