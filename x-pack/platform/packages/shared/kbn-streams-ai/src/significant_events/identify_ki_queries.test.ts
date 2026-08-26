@@ -699,9 +699,7 @@ describe('zero-query observability', () => {
     expect(result.queries).toHaveLength(0);
     expect(result.toolUsage.add_queries.calls).toBe(1);
     expect(zeroQueryWarnLines()).toHaveLength(1);
-    expect(zeroQueryWarnLines()[0]).toContain(
-      'observed=add_queries_called_no_accepted_queries'
-    );
+    expect(zeroQueryWarnLines()[0]).toContain('observed=add_queries_called_no_accepted_queries');
     expect(zeroQueryWarnLines()[0]).toContain('features_returned=0');
     expect(zeroQueryDebugLines()).toHaveLength(0);
   });
