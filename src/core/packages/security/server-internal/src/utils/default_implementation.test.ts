@@ -8,6 +8,7 @@
  */
 
 import type { CoreSecurityDelegateContract } from '@kbn/core-security-server';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { getDefaultSecurityImplementation } from './default_implementation';
 
 describe('getDefaultSecurityImplementation', () => {
@@ -55,9 +56,32 @@ describe('getDefaultSecurityImplementation', () => {
     });
   });
 
-  describe('serviceAccounts.isEnabled', () => {
-    it('returns false', () => {
+  describe('serviceAccounts', () => {
+    it('isEnabled returns false', () => {
       expect(implementation.serviceAccounts.isEnabled()).toBe(false);
+    });
+
+    it('create rejects', async () => {
+      await expect(
+        implementation.serviceAccounts.create(httpServerMock.createKibanaRequest(), {
+          name: 'my-service-account',
+          role_assignments: {},
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Service accounts are disabled"`);
+    });
+
+    // Handles are handed out at setup regardless of whether a delegate ever registers, so every
+    // workload method has to fail closed rather than run unauthenticated.
+    it.each([
+      'attachWorkload',
+      'detachWorkload',
+      'getWorkloadBinding',
+      'withScopedRequestForWorkload',
+      'getWorkloadLoopbackAuthHeaders',
+    ] as const)('%s rejects', async (method) => {
+      await expect(
+        (implementation.serviceAccounts[method] as () => Promise<unknown>)()
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Service accounts are disabled"`);
     });
   });
 

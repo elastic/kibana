@@ -16,7 +16,10 @@ import type {
   SecurityServiceStart,
 } from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { IWorkflowEventLoggerService } from '@kbn/workflows-execution-engine/server';
+import type {
+  IWorkflowEventLoggerService,
+  WorkflowServiceAccountExecution,
+} from '@kbn/workflows-execution-engine/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 
 import type { IWorkflowChangeHistoryService } from './workflow_change_history_types';
@@ -40,6 +43,7 @@ export interface WorkflowCrudDeps extends WorkflowStorageDeps {
   executionQueryService: WorkflowExecutionQueryService;
   validationService: WorkflowValidationService;
   getCoreStart: () => CoreStart;
+  getServiceAccountExecution: () => WorkflowServiceAccountExecution;
   changeHistoryService: IWorkflowChangeHistoryService;
 }
 

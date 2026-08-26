@@ -338,6 +338,16 @@ describe('WorkflowCrudService.restoreWorkflowVersion integration', () => {
       } as unknown as WorkflowExecutionQueryService,
       validationService,
       getCoreStart: () => ({} as CoreStart),
+      getServiceAccountExecution: () =>
+        ({
+          isEnabled: jest.fn().mockReturnValue(true),
+          operation: {
+            attach: jest.fn(),
+            detach: jest.fn(),
+            getBinding: jest.fn().mockResolvedValue(null),
+            withScopedRequest: jest.fn(),
+          },
+        } as any),
       changeHistoryService,
     };
 

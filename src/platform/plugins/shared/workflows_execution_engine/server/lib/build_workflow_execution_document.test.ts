@@ -69,10 +69,60 @@ describe('buildWorkflowExecutionDocument', () => {
       workflowId: 'workflow-1',
       status: ExecutionStatus.PENDING,
       executedBy: 'user-1',
+      effectiveIdentity: 'user-1',
       triggeredBy: 'manual',
       createdAt: '2024-06-01T12:00:00.000Z',
     });
     expect(workflowExecution.id).toBeDefined();
+  });
+
+  it('persists the run_as service account as the effective identity', () => {
+    const workflowExecution = buildWorkflowExecutionDocument({
+      ...baseParams,
+      workflow: {
+        ...baseWorkflow,
+        definition: {
+          name: 'Test Workflow',
+          version: '1',
+          enabled: true,
+          triggers: [],
+          steps: [],
+          settings: { run_as: 'service-account-1' },
+        },
+      },
+    });
+
+    expect(workflowExecution.executedBy).toBe('user-1');
+    expect(workflowExecution.effectiveIdentity).toBe('service-account-1');
+  });
+
+  it('uses the initiating user as effective identity for test runs', () => {
+    const workflowExecution = buildWorkflowExecutionDocument({
+      ...baseParams,
+      workflow: {
+        ...baseWorkflow,
+        isTestRun: true,
+        definition: {
+          name: 'Test Workflow',
+          version: '1',
+          enabled: true,
+          triggers: [],
+          steps: [],
+          settings: { run_as: 'service-account-1' },
+        },
+      },
+    });
+
+    expect(workflowExecution.effectiveIdentity).toBe('user-1');
+  });
+
+  it('persists whether the workflow execution is ephemeral', () => {
+    const workflowExecution = buildWorkflowExecutionDocument({
+      ...baseParams,
+      workflow: { ...baseWorkflow, isEphemeral: true },
+    });
+
+    expect(workflowExecution.isEphemeral).toBe(true);
   });
 
   it('copies managed workflow billable metadata', () => {

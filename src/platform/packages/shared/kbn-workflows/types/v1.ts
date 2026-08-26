@@ -144,6 +144,7 @@ export interface EsWorkflowExecution {
   originManagedWorkflowId?: string | null;
   managedVersion?: number | null;
   isTestRun: boolean;
+  isEphemeral?: boolean;
   status: ExecutionStatus;
   context: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
   workflowDefinition: WorkflowYaml;
@@ -156,6 +157,7 @@ export interface EsWorkflowExecution {
   error: SerializedError | null;
   createdBy?: string; // Keep for backwards compatibility with existing documents
   executedBy?: string; // User who executed the workflow
+  effectiveIdentity?: string; // User or service account whose credentials execute workflow steps
   startedAt: string;
   finishedAt: string;
   cancelRequested: boolean;
@@ -305,6 +307,7 @@ export interface WorkflowExecutionDto {
   stepExecutions: WorkflowStepExecutionDto[];
   duration: number | null;
   executedBy?: string; // User who executed the workflow
+  effectiveIdentity?: string; // User or service account whose credentials execute workflow steps
   triggeredBy?: string; // 'manual' or 'scheduled'
   yaml: string;
   context?: Record<string, unknown>;

@@ -1027,28 +1027,39 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
 
   const portCmd = resolvePort(options);
 
+  const [uiamCosmosDbContainer, ...dependentUiamContainers] = options.uiam
+    ? getUiamContainers({ includeOAuth: options.uiamOAuth })
+    : [];
+  if (uiamCosmosDbContainer) {
+    log.info('[runServerlessCluster] Starting UIAM Cosmos DB...');
+    await runUiamContainer(log, uiamCosmosDbContainer);
+    log.info(`[runServerlessCluster] UIAM Cosmos DB ready (${elapsed()})`);
+  }
+
   log.info('[runServerlessCluster] Starting ES nodes...');
   // This is where nodes are started
-  const nodeNames = await Promise.all(
-    SERVERLESS_NODES.map(async (node, i) => {
-      await runServerlessEsNode(log, {
-        ...node,
-        image: esServerlessImage,
-        params: node.params.concat(
-          resolveEsArgs(DEFAULT_SERVERLESS_ESARGS.concat(node.esArgs ?? []), options),
-          i === 0 ? portCmd : [],
-          volumeCmd
-        ),
-      });
-      return node.name;
-    }).concat(
-      options.uiam
-        ? getUiamContainers({ includeOAuth: options.uiamOAuth }).map((container) =>
-            runUiamContainer(log, container)
-          )
-        : []
-    )
-  );
+  const nodeNames = [
+    ...(uiamCosmosDbContainer ? [uiamCosmosDbContainer.name] : []),
+    ...(await Promise.all(
+      SERVERLESS_NODES.map(async (node, i) => {
+        await runServerlessEsNode(log, {
+          ...node,
+          image: esServerlessImage,
+          params: node.params.concat(
+            resolveEsArgs(DEFAULT_SERVERLESS_ESARGS.concat(node.esArgs ?? []), options),
+            i === 0 ? portCmd : [],
+            volumeCmd
+          ),
+        });
+        return node.name;
+      }).concat(
+        dependentUiamContainers.map(async (container) => {
+          await runUiamContainer(log, container);
+          return container.name;
+        })
+      )
+    )),
+  ];
   log.info(`[runServerlessCluster] All ES nodes started (${elapsed()})`);
 
   log.success(`Serverless ES cluster running.

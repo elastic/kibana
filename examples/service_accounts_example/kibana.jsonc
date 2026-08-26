@@ -1,0 +1,19 @@
+{
+  "type": "plugin",
+  "id": "@kbn/service-accounts-example-plugin",
+  "owner": "@elastic/kibana-security",
+  "description": "Example plugin that owns a workload, attaches a UIAM service account, and runs as that account — plus a directory for security-team debugging.",
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "serviceAccountsExample",
+    "server": true,
+    "browser": true,
+    "requiredPlugins": [
+      "developerExamples"
+    ],
+    "optionalPlugins": [
+      "spaces"
+    ]
+  }
+}

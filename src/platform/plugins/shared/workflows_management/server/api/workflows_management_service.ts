@@ -270,6 +270,7 @@ export class WorkflowsService {
       executionQueryService: this.executionQueryService,
       validationService: this.validationService,
       getCoreStart: () => this.coreStart,
+      getServiceAccountExecution: () => this.workflowsExecutionEngine.serviceAccountExecution,
       changeHistoryService: this.changeHistoryService,
     });
 
@@ -397,7 +398,7 @@ export class WorkflowsService {
   public async deleteWorkflows(
     ids: string[],
     spaceId: string,
-    options?: { force?: boolean }
+    options?: { force?: boolean; request?: KibanaRequest }
   ): Promise<DeleteWorkflowsResponse> {
     await this.ensureInitialized();
     return this.crudService.deleteWorkflows(ids, spaceId, options);

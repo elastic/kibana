@@ -9,7 +9,7 @@
 
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
-import type { KibanaRequest } from '@kbn/core/server';
+import type { CoreSetup, KibanaRequest } from '@kbn/core/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type {
@@ -57,6 +57,16 @@ export interface TriggerEventsContract {
   ) => Promise<SearchTriggerEventLogResult>;
 }
 
+export type WorkflowServiceAccountOperation = Pick<
+  ReturnType<CoreSetup['security']['serviceAccounts']['registerOperation']>,
+  'attach' | 'detach' | 'getBinding' | 'withScopedRequest'
+>;
+
+export interface WorkflowServiceAccountExecution {
+  isEnabled(): boolean;
+  operation: WorkflowServiceAccountOperation;
+}
+
 export interface WorkflowsExecutionEnginePluginStart {
   executeWorkflow: ExecuteWorkflow;
   executeWorkflowStep: ExecuteWorkflowStep;
@@ -67,6 +77,7 @@ export interface WorkflowsExecutionEnginePluginStart {
   scheduleWorkflow: ScheduleWorkflow;
   bulkScheduleWorkflow: BulkScheduleWorkflow;
   triggerEvents: TriggerEventsContract;
+  serviceAccountExecution: WorkflowServiceAccountExecution;
 }
 
 export interface WorkflowsExecutionEnginePluginSetupDeps {

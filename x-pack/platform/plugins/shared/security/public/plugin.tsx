@@ -8,6 +8,7 @@
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { BuildFlavor } from '@kbn/config';
 import type {
+  Capabilities,
   CoreSetup,
   CoreStart,
   HttpSetup,
@@ -42,6 +43,7 @@ import type { ConfigType } from './config';
 import { ManagementService, UserAPIClient } from './management';
 import { SecurityNavControlService } from './nav_control';
 import { SecurityCheckupService } from './security_checkup';
+import { ServiceAccountsAPIClient } from './service_accounts';
 import { SessionExpired, SessionTimeout, UnauthorizedResponseHttpInterceptor } from './session';
 import type { UiApi } from './ui_api';
 import { getUiApi } from './ui_api';
@@ -86,6 +88,12 @@ export class SecurityPlugin
   private authc!: AuthenticationServiceSetup;
   private authz!: AuthorizationServiceSetup;
   private securityApiClients!: SecurityApiClients;
+  private serviceAccountsApiClient!: ServiceAccountsAPIClient;
+  /**
+   * Captured during `start`, so that the security delegate registered during `setup` can answer
+   * capability questions synchronously.
+   */
+  private capabilities?: Capabilities;
   private buildFlavor: BuildFlavor;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
@@ -123,6 +131,8 @@ export class SecurityPlugin
       users: new UserAPIClient(core.http),
     };
 
+    this.serviceAccountsApiClient = new ServiceAccountsAPIClient(core.http);
+
     this.navControlService.setup({
       securityLicense: license,
       logoutUrl: getLogoutUrl(core.http),
@@ -145,7 +155,12 @@ export class SecurityPlugin
     });
 
     core.security.registerSecurityDelegate(
-      buildSecurityApi({ authc: this.authc, config: this.config })
+      buildSecurityApi({
+        authc: this.authc,
+        config: this.config,
+        serviceAccounts: this.serviceAccountsApiClient,
+        getCapabilities: () => this.capabilities,
+      })
     );
     core.userProfile.registerUserProfileDelegate(
       buildUserProfileApi({ userProfile: this.securityApiClients.userProfiles })
@@ -196,6 +211,10 @@ export class SecurityPlugin
   ): SecurityPluginStart {
     const { application, http, notifications, overlays } = core;
     const { anonymousPaths } = http;
+
+    // Captured unconditionally: security also runs on anonymous pages, where `management` is absent
+    // but the security delegate is still reachable.
+    this.capabilities = application.capabilities;
 
     const logoutUrl = getLogoutUrl(http);
     const tenant = http.basePath.serverBasePath;

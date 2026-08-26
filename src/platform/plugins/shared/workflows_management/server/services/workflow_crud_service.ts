@@ -27,6 +27,10 @@ import type {
 } from '@kbn/workflows';
 import { buildWorkflowFilters, GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { WorkflowPartialDetailDto } from '@kbn/workflows/types/v1';
+import {
+  getWorkflowServiceAccountCoordinates,
+  type WorkflowServiceAccountOperation,
+} from '@kbn/workflows-execution-engine/server';
 
 import { InvalidYamlSchemaError, WorkflowConflictError } from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
@@ -118,10 +122,106 @@ type SuccessfullyWrittenBulkEntry = BulkWorkflowEntry & {
   workflowData: WorkflowProperties;
 };
 
+type WorkflowServiceAccountBinding = Awaited<
+  ReturnType<WorkflowServiceAccountOperation['getBinding']>
+>;
+
 export class WorkflowCrudService {
   private indexOccWriter?: OccWriter<WorkflowProperties>;
 
   constructor(private readonly deps: WorkflowCrudDeps) {}
+
+  private getRunAsServiceAccountId(
+    definition: WorkflowYaml | null | undefined
+  ): string | undefined {
+    return definition?.settings?.run_as;
+  }
+
+  private assertServiceAccountExecutionEnabled(): void {
+    if (!this.deps.getServiceAccountExecution().isEnabled()) {
+      throw new Error('Service account execution is not enabled in this environment.');
+    }
+  }
+
+  private async getServiceAccountBinding(
+    workflowId: string,
+    spaceId: string
+  ): Promise<WorkflowServiceAccountBinding> {
+    return this.deps
+      .getServiceAccountExecution()
+      .operation.getBinding(getWorkflowServiceAccountCoordinates({ workflowId, spaceId }));
+  }
+
+  private async attachServiceAccount(params: {
+    workflowId: string;
+    spaceId: string;
+    serviceAccountId: string;
+    request: KibanaRequest;
+  }): Promise<void> {
+    this.assertServiceAccountExecutionEnabled();
+    const { workflowId, spaceId, serviceAccountId, request } = params;
+    const coordinates = getWorkflowServiceAccountCoordinates({ workflowId, spaceId });
+    const operation = this.deps.getServiceAccountExecution().operation;
+
+    await operation.attach(request, {
+      serviceAccountId,
+      workloadType: coordinates.workloadType,
+      workloadId: coordinates.workloadId,
+    });
+
+    const binding = await operation.getBinding(coordinates);
+    if (binding?.serviceAccountId !== serviceAccountId) {
+      throw new Error(`Service account binding verification failed for workflow '${workflowId}'.`);
+    }
+  }
+
+  private async detachServiceAccount(params: {
+    workflowId: string;
+    spaceId: string;
+    request: KibanaRequest;
+  }): Promise<void> {
+    this.assertServiceAccountExecutionEnabled();
+    const { workflowId, spaceId, request } = params;
+    const coordinates = getWorkflowServiceAccountCoordinates({ workflowId, spaceId });
+    const operation = this.deps.getServiceAccountExecution().operation;
+
+    await operation.detach(request, {
+      workloadType: coordinates.workloadType,
+      workloadId: coordinates.workloadId,
+    });
+
+    if ((await operation.getBinding(coordinates)) !== null) {
+      throw new Error(`Service account detach verification failed for workflow '${workflowId}'.`);
+    }
+  }
+
+  private async restoreServiceAccountBinding(params: {
+    workflowId: string;
+    spaceId: string;
+    previousBinding: WorkflowServiceAccountBinding;
+    request: KibanaRequest;
+  }): Promise<void> {
+    const { workflowId, spaceId, previousBinding, request } = params;
+
+    try {
+      if (previousBinding) {
+        await this.attachServiceAccount({
+          workflowId,
+          spaceId,
+          serviceAccountId: previousBinding.serviceAccountId,
+          request,
+        });
+      } else {
+        await this.detachServiceAccount({ workflowId, spaceId, request });
+      }
+    } catch (error) {
+      this.deps.logger.error(
+        `Failed to restore the service account binding for workflow '${workflowId}' after a workflow write failure: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
+  }
 
   async logWorkflowChangesAfterWrite(params: {
     workflows: Array<{ id: string; document: WorkflowProperties }>;
@@ -527,8 +627,12 @@ export class WorkflowCrudService {
       spaceId,
       triggerDefinitions,
     });
+    const runAsServiceAccountId = this.getRunAsServiceAccountId(definition);
+    if (runAsServiceAccountId) {
+      this.assertServiceAccountExecutionEnabled();
+    }
 
-    let id = baseId;
+    let candidateId = baseId;
     if (workflow.id) {
       // Globally unique check: a workflow ID taken in any space — including
       // soft-deleted tombstones — blocks reuse. See checkExistingIds for the
@@ -544,17 +648,52 @@ export class WorkflowCrudService {
         );
       }
     } else {
-      [id] = await resolveUniqueWorkflowIds([baseId], new Set(), (candidateIds) =>
+      [candidateId] = await resolveUniqueWorkflowIds([baseId], new Set(), (candidateIds) =>
         this.checkExistingIds(candidateIds)
       );
     }
 
-    id = await this.indexNewWorkflowDocument({
-      initialId: id,
+    const id = await this.indexNewWorkflowDocument({
+      initialId: candidateId,
       baseId,
       isUserSupplied: Boolean(workflow.id),
       document: workflowData,
     });
+
+    if (runAsServiceAccountId) {
+      try {
+        await this.attachServiceAccount({
+          workflowId: id,
+          spaceId,
+          serviceAccountId: runAsServiceAccountId,
+          request,
+        });
+      } catch (error) {
+        const binding = await this.getServiceAccountBinding(id, spaceId).catch(() => null);
+        if (binding) {
+          await this.detachServiceAccount({ workflowId: id, spaceId, request }).catch(
+            (detachError) => {
+              this.deps.logger.error(
+                `Failed to remove the service account binding while compensating workflow '${id}' creation: ${
+                  detachError instanceof Error ? detachError.message : String(detachError)
+                }`
+              );
+            }
+          );
+        }
+        await this.deps.workflowStorage
+          .getClient()
+          .delete({ id })
+          .catch((deleteError) => {
+            this.deps.logger.error(
+              `Failed to remove workflow '${id}' after its service account binding failed: ${
+                deleteError instanceof Error ? deleteError.message : String(deleteError)
+              }`
+            );
+          });
+        throw error;
+      }
+    }
 
     await this.logWorkflowChangesAfterWrite({
       workflows: [{ id, document: workflowData }],
@@ -791,57 +930,110 @@ export class WorkflowCrudService {
           }
         : undefined;
 
-    let previousVersion: number | undefined;
-    const finalData = await this.readModifyWriteWorkflowDocument(id, spaceId, {
-      getOptions: { includeDeleted: true, includeGlobal: true },
-      mutate: (existingSource: WorkflowProperties) => {
-        let updatedData: Partial<WorkflowProperties> = {
-          lastUpdatedBy: authenticatedUser,
-          updated_at: now.toISOString(),
-        };
+    let previousBinding: WorkflowServiceAccountBinding = null;
+    let serviceAccountBindingChanged = false;
+    if (yamlResult?.validationErrors.length === 0) {
+      const nextRunAsServiceAccountId = this.getRunAsServiceAccountId(
+        yamlResult.updatedDataPatch.definition
+      );
+      const serviceAccountExecution = this.deps.getServiceAccountExecution();
 
-        shouldUpdateScheduler =
-          workflow.enabled !== undefined && workflow.enabled !== existingSource.enabled;
+      if (nextRunAsServiceAccountId) {
+        this.assertServiceAccountExecutionEnabled();
+      }
+      if (serviceAccountExecution.isEnabled()) {
+        previousBinding = await this.getServiceAccountBinding(id, spaceId);
+      }
 
-        if (yamlResult) {
-          updatedData = {
-            ...updatedData,
-            yaml: yamlResult.workflowYaml,
-            ...yamlResult.updatedDataPatch,
-          };
-          validationErrors.length = 0;
-          validationErrors.push(...yamlResult.validationErrors);
-          shouldUpdateScheduler = shouldUpdateScheduler || yamlResult.shouldUpdateScheduler;
-
-          if (
-            yamlResult.validationErrors.length === 0 &&
-            yamlResult.updatedDataPatch.valid &&
-            updatedData.definition &&
-            !workflowYamlDeclaresTopLevelEnabled(yamlResult.workflowYaml)
-          ) {
-            const resolvedEnabled =
-              workflow.enabled !== undefined ? workflow.enabled : existingSource.enabled;
-            updatedData.enabled = resolvedEnabled;
-            const currentDefinition = updatedData.definition;
-            if (currentDefinition) {
-              updatedData.definition = { ...currentDefinition, enabled: resolvedEnabled };
-            }
+      if (previousBinding || nextRunAsServiceAccountId) {
+        try {
+          if (nextRunAsServiceAccountId) {
+            await this.attachServiceAccount({
+              workflowId: id,
+              spaceId,
+              serviceAccountId: nextRunAsServiceAccountId,
+              request,
+            });
+          } else {
+            await this.detachServiceAccount({ workflowId: id, spaceId, request });
           }
-        } else if (!workflowYaml) {
-          const fieldResult = applyFieldUpdates(workflow, existingSource);
-          updatedData = { ...updatedData, ...fieldResult.patch };
-          validationErrors.length = 0;
-          validationErrors.push(...fieldResult.validationErrors);
+          serviceAccountBindingChanged = true;
+        } catch (error) {
+          await this.restoreServiceAccountBinding({
+            workflowId: id,
+            spaceId,
+            previousBinding,
+            request,
+          });
+          throw error;
         }
+      }
+    }
 
-        const merged: WorkflowProperties = { ...existingSource, ...updatedData };
-        if (merged.triggerTypes === undefined) {
-          merged.triggerTypes = getTriggerTypesFromDefinition(merged.definition) ?? [];
-        }
-        previousVersion = existingSource.version;
-        return merged;
-      },
-    });
+    let previousVersion: number | undefined;
+    let finalData: WorkflowProperties;
+    try {
+      finalData = await this.readModifyWriteWorkflowDocument(id, spaceId, {
+        getOptions: { includeDeleted: true, includeGlobal: true },
+        mutate: (existingSource: WorkflowProperties) => {
+          let updatedData: Partial<WorkflowProperties> = {
+            lastUpdatedBy: authenticatedUser,
+            updated_at: now.toISOString(),
+          };
+
+          shouldUpdateScheduler =
+            workflow.enabled !== undefined && workflow.enabled !== existingSource.enabled;
+
+          if (yamlResult) {
+            updatedData = {
+              ...updatedData,
+              yaml: yamlResult.workflowYaml,
+              ...yamlResult.updatedDataPatch,
+            };
+            validationErrors.length = 0;
+            validationErrors.push(...yamlResult.validationErrors);
+            shouldUpdateScheduler = shouldUpdateScheduler || yamlResult.shouldUpdateScheduler;
+
+            if (
+              yamlResult.validationErrors.length === 0 &&
+              yamlResult.updatedDataPatch.valid &&
+              updatedData.definition &&
+              !workflowYamlDeclaresTopLevelEnabled(yamlResult.workflowYaml)
+            ) {
+              const resolvedEnabled =
+                workflow.enabled !== undefined ? workflow.enabled : existingSource.enabled;
+              updatedData.enabled = resolvedEnabled;
+              const currentDefinition = updatedData.definition;
+              if (currentDefinition) {
+                updatedData.definition = { ...currentDefinition, enabled: resolvedEnabled };
+              }
+            }
+          } else if (!workflowYaml) {
+            const fieldResult = applyFieldUpdates(workflow, existingSource);
+            updatedData = { ...updatedData, ...fieldResult.patch };
+            validationErrors.length = 0;
+            validationErrors.push(...fieldResult.validationErrors);
+          }
+
+          const merged: WorkflowProperties = { ...existingSource, ...updatedData };
+          if (merged.triggerTypes === undefined) {
+            merged.triggerTypes = getTriggerTypesFromDefinition(merged.definition) ?? [];
+          }
+          previousVersion = existingSource.version;
+          return merged;
+        },
+      });
+    } catch (error) {
+      if (serviceAccountBindingChanged) {
+        await this.restoreServiceAccountBinding({
+          workflowId: id,
+          spaceId,
+          previousBinding,
+          request,
+        });
+      }
+      throw error;
+    }
 
     await this.syncSchedulerAfterWorkflowUpdate({
       id,
@@ -953,19 +1145,87 @@ export class WorkflowCrudService {
   async deleteWorkflows(
     ids: string[],
     spaceId: string,
-    options?: { force?: boolean }
+    options?: { force?: boolean; request?: KibanaRequest }
   ): Promise<DeleteWorkflowsResponse> {
-    return deleteWorkflows({
-      ids,
-      spaceId,
-      force: options?.force ?? false,
-      storage: this.deps.workflowStorage,
-      esClient: this.deps.esClient,
-      taskScheduler: this.deps.getTaskScheduler(),
-      logger: this.deps.logger,
-      getWorkflowExecutions: (params, sp) =>
-        this.deps.executionQueryService.getWorkflowExecutions(params, sp),
-    });
+    const detachedBindings = new Map<string, Exclude<WorkflowServiceAccountBinding, null>>();
+    const request = options?.request;
+
+    if (request) {
+      try {
+        for (const id of ids) {
+          const document = await this.getWorkflowDocumentSource(id, spaceId, {
+            includeDeleted: true,
+            includeGlobal: true,
+          });
+          if (this.getRunAsServiceAccountId(document?.definition)) {
+            const binding = await this.getServiceAccountBinding(id, spaceId);
+            if (binding) {
+              await this.detachServiceAccount({ workflowId: id, spaceId, request });
+              detachedBindings.set(id, binding);
+            }
+          }
+        }
+      } catch (error) {
+        await Promise.all(
+          [...detachedBindings].map(([workflowId, previousBinding]) =>
+            this.restoreServiceAccountBinding({
+              workflowId,
+              spaceId,
+              previousBinding,
+              request,
+            })
+          )
+        );
+        throw error;
+      }
+    }
+
+    let result: DeleteWorkflowsResponse;
+    try {
+      result = await deleteWorkflows({
+        ids,
+        spaceId,
+        force: options?.force ?? false,
+        storage: this.deps.workflowStorage,
+        esClient: this.deps.esClient,
+        taskScheduler: this.deps.getTaskScheduler(),
+        logger: this.deps.logger,
+        getWorkflowExecutions: (params, sp) =>
+          this.deps.executionQueryService.getWorkflowExecutions(params, sp),
+      });
+    } catch (error) {
+      if (request) {
+        await Promise.all(
+          [...detachedBindings].map(([workflowId, previousBinding]) =>
+            this.restoreServiceAccountBinding({
+              workflowId,
+              spaceId,
+              previousBinding,
+              request,
+            })
+          )
+        );
+      }
+      throw error;
+    }
+
+    if (request) {
+      const successfulIds = new Set(result.successfulIds ?? []);
+      await Promise.all(
+        [...detachedBindings]
+          .filter(([workflowId]) => !successfulIds.has(workflowId))
+          .map(([workflowId, previousBinding]) =>
+            this.restoreServiceAccountBinding({
+              workflowId,
+              spaceId,
+              previousBinding,
+              request,
+            })
+          )
+      );
+    }
+
+    return result;
   }
 
   async disableAllWorkflows(

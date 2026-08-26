@@ -145,6 +145,7 @@ export type ConcurrencySettings = z.infer<typeof ConcurrencySettingsSchema>;
 export const LIQUID_PARSE_LIMIT_MAX = 600_000;
 export const LIQUID_RENDER_LIMIT_MAX = 2_000;
 export const LIQUID_MEMORY_LIMIT_MAX = 60_000_000;
+export const SERVICE_ACCOUNT_ID_MAX_LENGTH = 1024;
 
 export const LiquidSettingsSchema = z.object({
   parseLimit: z
@@ -180,6 +181,12 @@ export const WorkflowSettingsSchema = z.object({
   concurrency: ConcurrencySettingsSchema.optional(),
   'max-step-size': ByteSizeSchema.optional(), // e.g., '10mb', '15MB', '1gb'
   liquid: LiquidSettingsSchema.optional(),
+  run_as: z
+    .string()
+    .min(1)
+    .max(SERVICE_ACCOUNT_ID_MAX_LENGTH)
+    .optional()
+    .describe('Service account ID used to execute this saved workflow.'),
 });
 export type WorkflowSettings = z.infer<typeof WorkflowSettingsSchema>;
 
@@ -1161,6 +1168,7 @@ export const WorkflowExecutionContextSchema = z.object({
   startedAt: z.date(),
   url: z.string(),
   executedBy: z.string().optional(),
+  effectiveIdentity: z.string().optional(),
   triggeredBy: z.string().optional(),
   usage: WorkflowTokenUsageSchema.optional(),
 });

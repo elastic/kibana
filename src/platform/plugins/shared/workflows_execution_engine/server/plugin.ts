@@ -64,6 +64,10 @@ import { WorkflowsMeteringService } from './metering/metering_service';
 import { initializeLogsRepositoryDataStream } from './repositories/logs_repository/data_stream';
 import { StepExecutionRepository } from './repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
+import {
+  withWorkflowServiceAccountRequest,
+  WORKFLOW_SERVICE_ACCOUNT_OPERATION_TYPE,
+} from './service_account_execution';
 import { initializeTriggerEventsDataStream, TriggerEventHandler } from './trigger_events';
 import { initializeTriggerEventsClient } from './trigger_events/event_logs';
 import { searchTriggerEventLog as querySearchTriggerEventLog } from './trigger_events/event_logs/trigger_event_log_query';
@@ -76,6 +80,7 @@ import type {
   ResumeWorkflowExecution,
   ScheduleWorkflow,
   TriggerEventsContract,
+  WorkflowServiceAccountOperation,
   WorkflowsExecutionEnginePluginSetup,
   WorkflowsExecutionEnginePluginSetupDeps,
   WorkflowsExecutionEnginePluginStart,
@@ -148,6 +153,7 @@ export class WorkflowsExecutionEnginePlugin
   >;
   private meteringService?: WorkflowsMeteringService;
   private initializePromise?: Promise<void>;
+  private serviceAccountOperation?: WorkflowServiceAccountOperation;
   /** Set in start(); used by task runners to pass parent-resume into run/resume without exposing it on the public plugin contract. */
   private internalResumeWorkflowExecutionHandler?: InternalResumeWorkflowExecution;
 
@@ -169,6 +175,9 @@ export class WorkflowsExecutionEnginePlugin
     const config = this.config;
 
     this.coreSetup = core;
+    this.serviceAccountOperation = core.security.serviceAccounts.registerOperation({
+      type: WORKFLOW_SERVICE_ACCOUNT_OPERATION_TYPE,
+    });
 
     initializeLogsRepositoryDataStream(core.dataStreams);
     initializeTriggerEventsDataStream(core.dataStreams);
@@ -283,18 +292,51 @@ export class WorkflowsExecutionEnginePlugin
               }
 
               try {
-                const runResult = await runWorkflow({
-                  workflowRunId,
-                  spaceId,
-                  signal: taskAbortController.signal,
-                  config,
-                  logger,
-                  fakeRequest,
-                  dependencies,
-                  workflowsExecutionEngine,
-                  meteringService: this.meteringService,
-                  internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
-                });
+                const workflowExecution =
+                  await workflowExecutionRepository.getWorkflowExecutionById(
+                    workflowRunId,
+                    spaceId
+                  );
+                const run = (executionRequest: KibanaRequest) =>
+                  runWorkflow({
+                    workflowRunId,
+                    spaceId,
+                    signal: taskAbortController.signal,
+                    config,
+                    logger,
+                    fakeRequest: executionRequest,
+                    dependencies,
+                    workflowsExecutionEngine,
+                    meteringService: this.meteringService,
+                    internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
+                  });
+
+                const manualServiceAccountExecution =
+                  workflowExecution?.triggeredBy === 'manual' &&
+                  workflowExecution.isTestRun !== true &&
+                  workflowExecution.isEphemeral !== true &&
+                  workflowExecution.workflowDefinition.settings?.run_as
+                    ? {
+                        workflowId: workflowExecution.workflowId,
+                        serviceAccountId: workflowExecution.workflowDefinition.settings.run_as,
+                      }
+                    : undefined;
+                const serviceAccountOperation = this.serviceAccountOperation;
+                if (manualServiceAccountExecution && !serviceAccountOperation) {
+                  throw new Error('Service account operation is not available');
+                }
+
+                const runResult =
+                  manualServiceAccountExecution && serviceAccountOperation
+                    ? await withWorkflowServiceAccountRequest({
+                        operation: serviceAccountOperation,
+                        workflowId: manualServiceAccountExecution.workflowId,
+                        spaceId,
+                        serviceAccountId: manualServiceAccountExecution.serviceAccountId,
+                        fallbackRequest: fakeRequest,
+                        fn: run,
+                      })
+                    : await run(fakeRequest);
 
                 // Prefer cancelled when TM aborted the claim so a later stamp does not
                 // overwrite cancel's semantic outcome (shared last-write-wins buffer).
@@ -835,18 +877,37 @@ export class WorkflowsExecutionEnginePlugin
                 // runWorkflow throws after create, terminalize the still-non-terminal doc so a
                 // pending cannot hold a concurrency slot until a later tick reaps it.
                 try {
-                  await runWorkflow({
-                    workflowRunId: workflowExecution.id,
-                    spaceId: workflowExecution.spaceId,
-                    signal: taskAbortController.signal,
-                    logger,
-                    config,
-                    fakeRequest,
-                    dependencies,
-                    workflowsExecutionEngine,
-                    meteringService: this.meteringService,
-                    internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
-                  });
+                  const run = (executionRequest: KibanaRequest) =>
+                    runWorkflow({
+                      workflowRunId: workflowExecution.id,
+                      spaceId: workflowExecution.spaceId,
+                      signal: taskAbortController.signal,
+                      logger,
+                      config,
+                      fakeRequest: executionRequest,
+                      dependencies,
+                      workflowsExecutionEngine,
+                      meteringService: this.meteringService,
+                      internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
+                    });
+                  const serviceAccountId = workflow.definition?.settings?.run_as;
+                  const serviceAccountOperation = this.serviceAccountOperation;
+                  if (serviceAccountId && !serviceAccountOperation) {
+                    throw new Error('Service account operation is not available');
+                  }
+
+                  if (serviceAccountId && serviceAccountOperation) {
+                    await withWorkflowServiceAccountRequest({
+                      operation: serviceAccountOperation,
+                      workflowId,
+                      spaceId,
+                      serviceAccountId,
+                      fallbackRequest: fakeRequest,
+                      fn: run,
+                    });
+                  } else {
+                    await run(fakeRequest);
+                  }
                 } catch (error) {
                   await markScheduledExecutionFailedAfterTaskError({
                     workflowExecutionRepository,
@@ -934,6 +995,9 @@ export class WorkflowsExecutionEnginePlugin
 
     if (!this.setupDependencies) {
       throw new Error('Setup not called before start');
+    }
+    if (!this.serviceAccountOperation) {
+      throw new Error('Service account operation not registered during setup');
     }
 
     const esClient = coreStart.elasticsearch.client.asInternalUser;
@@ -1671,6 +1735,10 @@ export class WorkflowsExecutionEnginePlugin
       cancelAllActiveWorkflowExecutions,
       resumeWorkflowExecution,
       triggerEvents,
+      serviceAccountExecution: {
+        isEnabled: () => coreStart.security.serviceAccounts.isEnabled(),
+        operation: this.serviceAccountOperation,
+      },
     };
   }
 

@@ -36,6 +36,15 @@ export const workflowsExecutionEngineMock = {
         size: 10,
       }),
     },
+    serviceAccountExecution: {
+      isEnabled: jest.fn().mockReturnValue(true),
+      operation: {
+        attach: jest.fn(),
+        detach: jest.fn(),
+        getBinding: jest.fn(),
+        withScopedRequest: jest.fn(),
+      },
+    },
     config: {
       maxWorkflowDepth: 10,
     },

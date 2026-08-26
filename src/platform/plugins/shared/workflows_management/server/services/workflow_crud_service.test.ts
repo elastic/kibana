@@ -18,6 +18,7 @@ import { WorkflowCrudService } from './workflow_crud_service';
 import type { WorkflowExecutionQueryService } from './workflow_execution_query_service';
 import type { WorkflowValidationService } from './workflow_validation_service';
 import { WorkflowChangeHistoryAction } from '../../common/lib/workflow_change_history/constants';
+import { deleteWorkflows as deleteWorkflowsLib } from '../api/lib/workflow_deletion';
 import { disableAllWorkflows as disableAllWorkflowsLib } from '../api/lib/workflow_disable_all';
 import * as workflowPrepare from '../api/lib/workflow_prepare';
 import { logWorkflowChanges } from '../lib/log_workflow_changes';
@@ -31,12 +32,19 @@ jest.mock('../api/lib/workflow_disable_all', () => ({
   disableAllWorkflows: jest.fn(),
 }));
 
+jest.mock('../api/lib/workflow_deletion', () => ({
+  deleteWorkflows: jest.fn(),
+}));
+
 const mockedLogWorkflowChanges = logWorkflowChanges as jest.MockedFunction<
   typeof logWorkflowChanges
 >;
 
 const mockedDisableAllWorkflowsLib = disableAllWorkflowsLib as jest.MockedFunction<
   typeof disableAllWorkflowsLib
+>;
+const mockedDeleteWorkflowsLib = deleteWorkflowsLib as jest.MockedFunction<
+  typeof deleteWorkflowsLib
 >;
 
 const makeSource = (overrides?: Partial<WorkflowProperties>): WorkflowProperties => ({
@@ -72,6 +80,7 @@ const occSearchHit = (
 const makeStorageClient = () => ({
   search: jest.fn(),
   index: jest.fn().mockResolvedValue({ result: 'created', _seq_no: 1, _primary_term: 1 }),
+  delete: jest.fn().mockResolvedValue({ result: 'deleted' }),
   bulk: jest.fn(),
 });
 
@@ -81,6 +90,34 @@ const makeSecurityMock = (username: string = 'alice') =>
       getCurrentUser: jest.fn().mockReturnValue({ username }),
     },
   } as any);
+
+const makeServiceAccountExecutionMock = () => {
+  let binding: Record<string, unknown> | null = null;
+  const operation = {
+    attach: jest.fn().mockImplementation(async (_request, params) => {
+      binding = {
+        operationType: 'workflow_execution',
+        workloadType: params.workloadType,
+        workloadId: params.workloadId,
+        serviceAccountId: params.serviceAccountId,
+        spaceId: 'default',
+        attachedAt: '2024-01-01T00:00:00.000Z',
+        attachedBy: { type: 'user', username: 'alice' },
+      };
+      return binding;
+    }),
+    detach: jest.fn().mockImplementation(async () => {
+      binding = null;
+    }),
+    getBinding: jest.fn().mockImplementation(async () => binding),
+    withScopedRequest: jest.fn(),
+  };
+
+  return {
+    isEnabled: jest.fn().mockReturnValue(true),
+    operation,
+  };
+};
 
 const makeDeps = (
   clientOverrides?: Partial<ReturnType<typeof makeStorageClient>>,
@@ -96,6 +133,7 @@ const makeDeps = (
       safeParse: (v: unknown) => ({ success: true, data: v }),
     }),
   } as unknown as WorkflowValidationService;
+  const serviceAccountExecution = makeServiceAccountExecutionMock();
   const deps: WorkflowCrudDeps = {
     logger: loggerMock.create(),
     esClient: elasticsearchServiceMock.createElasticsearchClient(),
@@ -106,6 +144,7 @@ const makeDeps = (
     executionQueryService,
     validationService,
     getCoreStart: () => ({} as CoreStart),
+    getServiceAccountExecution: () => serviceAccountExecution as any,
     changeHistoryService: {
       isInitialized: () => false,
       asScoped: jest.fn(),
@@ -386,6 +425,7 @@ describe('WorkflowCrudService', () => {
       '    with:',
       '      message: "hi"',
     ].join('\n');
+    const validRunAsYaml = [validYaml, 'settings:', '  run_as: service-account-1'].join('\n');
 
     const request = { auth: { credentials: { username: 'alice' } } } as any;
 
@@ -418,6 +458,56 @@ describe('WorkflowCrudService', () => {
           }),
         })
       );
+    });
+
+    it('attaches and verifies settings.run_as after creating a saved workflow', async () => {
+      const { deps, client } = makeDeps();
+      client.search.mockResolvedValue({ hits: { hits: [] } });
+      const serviceAccountExecution = deps.getServiceAccountExecution();
+      const service = new WorkflowCrudService(deps);
+
+      const result = await service.createWorkflow(
+        { id: 'run-as-workflow', yaml: validRunAsYaml },
+        'default',
+        request
+      );
+
+      expect(serviceAccountExecution.operation.attach).toHaveBeenCalledWith(request, {
+        serviceAccountId: 'service-account-1',
+        workloadType: 'workflow',
+        workloadId: 'run-as-workflow',
+      });
+      expect(serviceAccountExecution.operation.getBinding).toHaveBeenCalledWith({
+        workloadType: 'workflow',
+        workloadId: 'run-as-workflow',
+        spaceId: 'default',
+      });
+      expect(result.id).toBe('run-as-workflow');
+    });
+
+    it('rejects run_as when service account execution is disabled', async () => {
+      const { deps, client } = makeDeps();
+      deps.getServiceAccountExecution().isEnabled = jest.fn().mockReturnValue(false);
+      const service = new WorkflowCrudService(deps);
+
+      await expect(
+        service.createWorkflow({ id: 'run-as-workflow', yaml: validRunAsYaml }, 'default', request)
+      ).rejects.toThrow('Service account execution is not enabled');
+      expect(client.index).not.toHaveBeenCalled();
+    });
+
+    it('removes the new workflow when attaching its service account fails', async () => {
+      const { deps, client } = makeDeps();
+      client.search.mockResolvedValue({ hits: { hits: [] } });
+      (deps.getServiceAccountExecution().operation.attach as jest.Mock).mockRejectedValueOnce(
+        new Error('attach failed')
+      );
+      const service = new WorkflowCrudService(deps);
+
+      await expect(
+        service.createWorkflow({ id: 'run-as-workflow', yaml: validRunAsYaml }, 'default', request)
+      ).rejects.toThrow('attach failed');
+      expect(client.delete).toHaveBeenCalledWith({ id: 'run-as-workflow' });
     });
 
     it('logs workflow create to change history after a successful index', async () => {
@@ -1733,6 +1823,129 @@ describe('WorkflowCrudService', () => {
       );
     });
 
+    it('reattaches settings.run_as before saving an updated workflow', async () => {
+      const previousYaml = [
+        'name: Test Workflow',
+        'enabled: true',
+        'triggers:',
+        '  - type: manual',
+        'steps: []',
+        'settings:',
+        '  run_as: service-account-1',
+      ].join('\n');
+      const updatedYaml = previousYaml.replace('steps: []', 'description: Updated\nsteps: []');
+      const { deps, client } = makeDeps();
+      client.search.mockResolvedValue({
+        hits: {
+          hits: [
+            occSearchHit('wf-1', {
+              yaml: previousYaml,
+              definition: {
+                name: 'Test Workflow',
+                enabled: true,
+                triggers: [{ type: 'manual' }],
+                steps: [],
+                settings: { run_as: 'service-account-1' },
+              } as any,
+            }),
+          ],
+        },
+      });
+      const serviceAccountExecution = deps.getServiceAccountExecution();
+      const service = new WorkflowCrudService(deps);
+
+      await service.updateWorkflow('wf-1', { yaml: updatedYaml }, 'default', request);
+
+      expect(serviceAccountExecution.operation.attach).toHaveBeenCalledWith(request, {
+        serviceAccountId: 'service-account-1',
+        workloadType: 'workflow',
+        workloadId: 'wf-1',
+      });
+      expect(client.index).toHaveBeenCalled();
+    });
+
+    it('detaches the binding before removing settings.run_as', async () => {
+      const previousYaml = [
+        'name: Test Workflow',
+        'enabled: true',
+        'triggers:',
+        '  - type: manual',
+        'steps: []',
+        'settings:',
+        '  run_as: service-account-1',
+      ].join('\n');
+      const updatedYaml = previousYaml.replace(
+        ['settings:', '  run_as: service-account-1'].join('\n'),
+        ''
+      );
+      const { deps, client } = makeDeps();
+      client.search.mockResolvedValue({
+        hits: {
+          hits: [
+            occSearchHit('wf-1', {
+              yaml: previousYaml,
+              definition: {
+                name: 'Test Workflow',
+                enabled: true,
+                triggers: [{ type: 'manual' }],
+                steps: [],
+                settings: { run_as: 'service-account-1' },
+              } as any,
+            }),
+          ],
+        },
+      });
+      const serviceAccountExecution = deps.getServiceAccountExecution();
+      await serviceAccountExecution.operation.attach(request, {
+        serviceAccountId: 'service-account-1',
+        workloadType: 'workflow',
+        workloadId: 'wf-1',
+      });
+      (serviceAccountExecution.operation.attach as jest.Mock).mockClear();
+      (serviceAccountExecution.operation.getBinding as jest.Mock).mockClear();
+      const service = new WorkflowCrudService(deps);
+
+      await service.updateWorkflow('wf-1', { yaml: updatedYaml }, 'default', request);
+
+      expect(serviceAccountExecution.operation.detach).toHaveBeenCalledWith(request, {
+        workloadType: 'workflow',
+        workloadId: 'wf-1',
+      });
+      expect(serviceAccountExecution.operation.getBinding).toHaveBeenLastCalledWith({
+        workloadType: 'workflow',
+        workloadId: 'wf-1',
+        spaceId: 'default',
+      });
+      expect(client.index).toHaveBeenCalled();
+    });
+
+    it('does not save run_as when the caller cannot attach the service account', async () => {
+      const updatedYaml = [
+        'name: Test Workflow',
+        'enabled: true',
+        'triggers:',
+        '  - type: manual',
+        'steps: []',
+        'settings:',
+        '  run_as: service-account-1',
+      ].join('\n');
+      const { deps, client } = makeDeps();
+      client.search.mockResolvedValue({
+        hits: {
+          hits: [occSearchHit('wf-1', { yaml: updatedYaml, definition: null })],
+        },
+      });
+      (deps.getServiceAccountExecution().operation.attach as jest.Mock).mockRejectedValueOnce(
+        new Error('not authorized to bind')
+      );
+      const service = new WorkflowCrudService(deps);
+
+      await expect(
+        service.updateWorkflow('wf-1', { yaml: updatedYaml }, 'default', request)
+      ).rejects.toThrow('not authorized to bind');
+      expect(client.index).not.toHaveBeenCalled();
+    });
+
     it('logs workflow update to change history after a successful write', async () => {
       const scopedChangeHistory = { logBulk: jest.fn() };
       const changeHistoryService = {
@@ -2571,6 +2784,85 @@ describe('WorkflowCrudService', () => {
       );
 
       applyYamlUpdateSpy.mockRestore();
+    });
+  });
+
+  describe('deleteWorkflows', () => {
+    const request = { auth: { credentials: { username: 'alice' } } } as any;
+    const boundDefinition = {
+      name: 'Test Workflow',
+      enabled: true,
+      triggers: [{ type: 'manual' }],
+      steps: [],
+      settings: { run_as: 'service-account-1' },
+    } as any;
+
+    beforeEach(() => {
+      mockedDeleteWorkflowsLib.mockReset();
+      mockedDeleteWorkflowsLib.mockResolvedValue({
+        successfulIds: ['wf-1'],
+        failures: [],
+      } as any);
+    });
+
+    it('detaches and verifies the binding before deleting a saved workflow', async () => {
+      const { deps, client } = makeDeps();
+      client.search.mockResolvedValue({
+        hits: {
+          hits: [occSearchHit('wf-1', { definition: boundDefinition })],
+        },
+      });
+      const serviceAccountExecution = deps.getServiceAccountExecution();
+      await serviceAccountExecution.operation.attach(request, {
+        serviceAccountId: 'service-account-1',
+        workloadType: 'workflow',
+        workloadId: 'wf-1',
+      });
+      (serviceAccountExecution.operation.attach as jest.Mock).mockClear();
+      (serviceAccountExecution.operation.getBinding as jest.Mock).mockClear();
+      const service = new WorkflowCrudService(deps);
+
+      await service.deleteWorkflows(['wf-1'], 'default', { request });
+
+      expect(serviceAccountExecution.operation.detach).toHaveBeenCalledWith(request, {
+        workloadType: 'workflow',
+        workloadId: 'wf-1',
+      });
+      expect(serviceAccountExecution.operation.getBinding).toHaveBeenLastCalledWith({
+        workloadType: 'workflow',
+        workloadId: 'wf-1',
+        spaceId: 'default',
+      });
+      expect(mockedDeleteWorkflowsLib).toHaveBeenCalled();
+    });
+
+    it('restores the binding when workflow deletion fails', async () => {
+      const { deps, client } = makeDeps();
+      client.search.mockResolvedValue({
+        hits: {
+          hits: [occSearchHit('wf-1', { definition: boundDefinition })],
+        },
+      });
+      const serviceAccountExecution = deps.getServiceAccountExecution();
+      await serviceAccountExecution.operation.attach(request, {
+        serviceAccountId: 'service-account-1',
+        workloadType: 'workflow',
+        workloadId: 'wf-1',
+      });
+      (serviceAccountExecution.operation.attach as jest.Mock).mockClear();
+      mockedDeleteWorkflowsLib.mockResolvedValue({
+        successfulIds: [],
+        failures: [{ id: 'wf-1', error: 'conflict' }],
+      } as any);
+      const service = new WorkflowCrudService(deps);
+
+      await service.deleteWorkflows(['wf-1'], 'default', { request });
+
+      expect(serviceAccountExecution.operation.attach).toHaveBeenLastCalledWith(request, {
+        serviceAccountId: 'service-account-1',
+        workloadType: 'workflow',
+        workloadId: 'wf-1',
+      });
     });
   });
 
