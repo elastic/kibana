@@ -129,10 +129,13 @@ describe('validateProtectedPolicySettings', () => {
       (endpointServices.getEndpointAuthz as jest.Mock).mockResolvedValue(
         getEndpointAuthzInitialStateMock({ canWriteAdminData: false })
       );
-      const existing = buildPolicyWithField('http://existing.server');
+      // Use separate object literals (not the same reference) so isEqual is genuinely exercised
       const args = buildArgs({
-        newPolicyValue: existing as Record<string, unknown>,
-        currentPolicyValue: existing as Record<string, unknown>,
+        newPolicyValue: buildPolicyWithField('http://existing.server') as Record<string, unknown>,
+        currentPolicyValue: buildPolicyWithField('http://existing.server') as Record<
+          string,
+          unknown
+        >,
         endpointServices,
       });
       await expect(validateProtectedPolicySettings(args)).resolves.toBeUndefined();

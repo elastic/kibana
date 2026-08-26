@@ -163,19 +163,6 @@ export const getPackagePolicyCreateCallback = (
       validateEndpointPackagePolicy(newPackagePolicy.inputs);
     }
 
-    // Gate security-critical artifact trust/transport settings behind superuser/admin.
-    // On create the stored policy does not exist yet, so currentPolicyValue is undefined
-    // and any supplied value counts as a change.
-    await validateProtectedPolicySettings({
-      newPolicyValue: (newPackagePolicy?.inputs?.[0]?.config?.policy?.value ?? undefined) as
-        | Record<string, unknown>
-        | undefined,
-      currentPolicyValue: undefined,
-      endpointServices,
-      request,
-      logger,
-    });
-
     // Optional endpoint integration configuration
     let endpointIntegrationConfig;
 

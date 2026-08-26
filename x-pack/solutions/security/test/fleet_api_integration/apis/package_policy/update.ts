@@ -1003,8 +1003,17 @@ export default function (providerContext: FtrProviderContext) {
         },
       });
 
+      afterEach(async function () {
+        // Restore a clean policy after each test so no protected value leaks between cases
+        await supertest
+          .put(`/api/fleet/package_policies/${endpointPackagePolicyId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send(buildEndpointPolicyBody())
+          .expect(200);
+      });
+
       it('returns 403 when non-superuser injects windows.advanced.artifacts.global.public_key', async function () {
-        await superTestWithoutAuth
+        const { body } = await superTestWithoutAuth
           .put(`/api/fleet/package_policies/${endpointPackagePolicyId}`)
           .set('kbn-xsrf', 'xxxx')
           .auth(
@@ -1027,10 +1036,11 @@ export default function (providerContext: FtrProviderContext) {
             })
           )
           .expect(403);
+        expect(body.message).to.contain('windows.advanced.artifacts.global.public_key');
       });
 
       it('returns 403 when non-superuser injects linux.advanced.artifacts.global.base_url', async function () {
-        await superTestWithoutAuth
+        const { body } = await superTestWithoutAuth
           .put(`/api/fleet/package_policies/${endpointPackagePolicyId}`)
           .set('kbn-xsrf', 'xxxx')
           .auth(
@@ -1052,6 +1062,7 @@ export default function (providerContext: FtrProviderContext) {
             })
           )
           .expect(403);
+        expect(body.message).to.contain('linux.advanced.artifacts.global.base_url');
       });
 
       it('returns 200 when superuser changes artifact trust settings', async function () {
@@ -1073,13 +1084,6 @@ export default function (providerContext: FtrProviderContext) {
               },
             })
           )
-          .expect(200);
-
-        // Reset back to a clean policy so subsequent tests don't see the injected key as pre-existing
-        await supertest
-          .put(`/api/fleet/package_policies/${endpointPackagePolicyId}`)
-          .set('kbn-xsrf', 'xxxx')
-          .send(buildEndpointPolicyBody())
           .expect(200);
       });
 
