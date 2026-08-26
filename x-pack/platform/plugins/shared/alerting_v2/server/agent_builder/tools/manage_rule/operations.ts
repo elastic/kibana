@@ -349,17 +349,15 @@ export const executeRuleOperations = async (
         if (esClient) {
           lastQueryColumns = await validateEsqlQuery(esClient, rootQuery);
 
-          resolvedTimeField = await resolveTimeFieldForQuery(
-            esClient,
-            rootQuery,
-            next.time_field
-          );
+          resolvedTimeField = await resolveTimeFieldForQuery(esClient, rootQuery, next.time_field);
           if (resolvedTimeField === null) {
             if (next.time_field) {
               const sourceIndex = getIndexPatternFromESQLQuery(rootQuery);
               warnings.push(
                 `The current time_field "${next.time_field}" was not found as a \`date\` or ` +
-                  `\`date_nanos\` field on ${sourceIndex ? `"${sourceIndex}"` : 'the source index'}. ` +
+                  `\`date_nanos\` field on ${
+                    sourceIndex ? `"${sourceIndex}"` : 'the source index'
+                  }. ` +
                   `The rule may fail at execution time. Use \`set_time_field\` to correct it, ` +
                   `or verify the field exists on the target index.`
               );

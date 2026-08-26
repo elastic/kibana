@@ -594,9 +594,7 @@ describe('executeRuleOperations', () => {
 
   describe('set_time_field', () => {
     it('sets the time field on the rule data', async () => {
-      const ops: RuleOperation[] = [
-        { operation: 'set_time_field', time_field: 'event.ingested' },
-      ];
+      const ops: RuleOperation[] = [{ operation: 'set_time_field', time_field: 'event.ingested' }];
 
       const result = await executeRuleOperations({}, ops);
 
@@ -605,9 +603,7 @@ describe('executeRuleOperations', () => {
 
     it('overrides a previously auto-resolved time field', async () => {
       const existing: Partial<RuleAttachmentData> = { time_field: '@timestamp' };
-      const ops: RuleOperation[] = [
-        { operation: 'set_time_field', time_field: 'timestamp' },
-      ];
+      const ops: RuleOperation[] = [{ operation: 'set_time_field', time_field: 'timestamp' }];
 
       const result = await executeRuleOperations(existing, ops);
 
@@ -660,11 +656,7 @@ describe('executeRuleOperations', () => {
         },
       ];
 
-      const result = await executeRuleOperations(
-        { time_field: 'event.ingested' },
-        ops,
-        esClient
-      );
+      const result = await executeRuleOperations({ time_field: 'event.ingested' }, ops, esClient);
 
       expect(result.data.time_field).toBe('event.ingested');
       expect(result.warnings).toEqual(
