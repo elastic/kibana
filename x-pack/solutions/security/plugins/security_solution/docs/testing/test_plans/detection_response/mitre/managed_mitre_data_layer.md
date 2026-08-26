@@ -23,6 +23,9 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
   - [Technical requirements](#technical-requirements)
   - [Product requirements](#product-requirements)
 - [Scenarios](#scenarios)
+  - [Bundled artifact](#bundled-artifact)
+    - [**Scenario: The build script generates a valid artifact from the STIX bundle**](#scenario-the-build-script-generates-a-valid-artifact-from-the-stix-bundle)
+    - [**Scenario: The build script correctly maps entities across multiple MITRE versions**](#scenario-the-build-script-correctly-maps-entities-across-multiple-mitre-versions)
   - [SO population lifecycle](#so-population-lifecycle)
     - [**Scenario: SO IDs are deterministic and match the expected format**](#scenario-so-ids-are-deterministic-and-match-the-expected-format)
     - [**Scenario: Successful population marks the service as initialized**](#scenario-successful-population-marks-the-service-as-initialized)
@@ -37,6 +40,7 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
     - [**Scenario: `framework_version` specified explicitly returns entities from that version**](#scenario-framework_version-specified-explicitly-returns-entities-from-that-version)
     - [**Scenario: `status` defaults to "active", excluding revoked and deprecated entities**](#scenario-status-defaults-to-active-excluding-revoked-and-deprecated-entities)
     - [**Scenario: `status=all` includes revoked and deprecated entities**](#scenario-statusall-includes-revoked-and-deprecated-entities)
+    - [**Scenario: Revoked entities include `superseded_by_id` when a successor exists**](#scenario-revoked-entities-include-superseded_by_id-when-a-successor-exists)
     - [**Scenario: A multi-tactic technique appears once in the techniques bucket with all its tactic IDs**](#scenario-a-multi-tactic-technique-appears-once-in-the-techniques-bucket-with-all-its-tactic-ids)
     - [**Scenario: A technique present in both versions is returned with version-specific data**](#scenario-a-technique-present-in-both-versions-is-returned-with-version-specific-data)
   - [Entities API: input validation](#entities-api-input-validation)
@@ -95,6 +99,30 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 
 ## Scenarios
 
+### Bundled artifact
+
+#### **Scenario: The build script generates a valid artifact from the STIX bundle**
+
+**Automation**: 1 unit test.
+
+```Gherkin
+When the build script is run against a STIX bundle
+Then every entity in the output artifact should pass the schema validation
+And each tactic's position should be correctly derived
+And each technique's tactic_ids should be resolved from the bundle
+```
+
+#### **Scenario: The build script correctly maps entities across multiple MITRE versions**
+
+**Automation**: 1 unit test.
+
+```Gherkin
+When the build script is run against STIX bundles for two different framework versions
+Then each entity should carry the framework_version derived from its source bundle
+And entities from different versions should be present as distinct entries in the artifact
+And an entity ID present in both versions should appear twice with version-specific metadata
+```
+
 ### SO population lifecycle
 
 #### **Scenario: SO IDs are deterministic and match the expected format**
@@ -116,6 +144,7 @@ And the total document count should match the number of entities in the bundled 
 Given population resolves successfully during plugin startup
 When MitreAttackService.populate() completes
 Then the service's initialized flag should be true
+And successful population should be logged at an appropriate level
 ```
 
 #### **Scenario: A failure during population is caught, logged, and marks the service as uninitialized**
@@ -226,6 +255,17 @@ Given the index contains entities with revoked=true and deprecated=true
 When the entities API is called with status=all
 Then at least one entity with revoked equal to true should appear across the buckets
 And at least one entity with deprecated equal to true should appear across the buckets
+```
+
+#### **Scenario: Revoked entities include `superseded_by_id` when a successor exists**
+
+**Automation**: 1 integration test.
+
+```Gherkin
+Given the index contains a revoked entity whose superseded_by_id field lists a successor
+When the entities API is called with status=all
+Then the revoked entity should appear in the response
+And its superseded_by_id field should contain the expected successor ID
 ```
 
 #### **Scenario: A multi-tactic technique appears once in the techniques bucket with all its tactic IDs**

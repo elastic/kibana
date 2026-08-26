@@ -4,7 +4,7 @@
 
 ## Summary <!-- omit from toc -->
 
-This is a test plan for the UI integration of the Managed MITRE Data Source feature: the `useMitreConfiguration()` hook that abstracts data source selection from consuming components, the MITRE ATT&CK technique picker in the rule create/edit page, and the coverage overview matrix.
+This is a test plan for the UI integration of the Managed MITRE Data Source feature: the `useMitreConfiguration()` hook that abstracts data source selection from consuming components, the MITRE ATT&CK technique picker in the rule create/edit page, the coverage overview matrix, and the AI rule creation cutover off the legacy blob.
 
 ## Table of contents <!-- omit from toc -->
 
@@ -37,7 +37,9 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
     - [**Scenario: A multi-tactic technique appears under all applicable tactic columns**](#scenario-a-multi-tactic-technique-appears-under-all-applicable-tactic-columns)
     - [**Scenario: The coverage overview shows a loading state while data loads**](#scenario-the-coverage-overview-shows-a-loading-state-while-data-loads)
     - [**Scenario: Changing coverage overview filters does not trigger a re-fetch of MITRE data**](#scenario-changing-coverage-overview-filters-does-not-trigger-a-re-fetch-of-mitre-data)
-    - [**Scenario: User can view the coverage overview with the flag off (legacy blob path)**](#scenario-user-can-view-the-coverage-overview-with-the-flag-off-legacy-blob-path)
+    - [**Scenario: User can view the coverage overview with the flag off**](#scenario-user-can-view-the-coverage-overview-with-the-flag-off)
+  - [AI rule creation](#ai-rule-creation)
+    - [**Scenario: AI rule creation loads the managed data source**](#scenario-ai-rule-creation-loads-the-managed-data-source)
 
 ## Useful information
 
@@ -222,7 +224,7 @@ Then no new request to the entities API should be made
 And the tactic and technique structure of the matrix should remain unchanged
 ```
 
-#### **Scenario: User can view the coverage overview with the flag off (legacy blob path)**
+#### **Scenario: User can view the coverage overview with the flag off**
 
 **Automation**: 1 Cypress e2e test.
 
@@ -232,4 +234,16 @@ When the coverage overview page loads
 Then tactic columns should be rendered in the order defined by the legacy hardcoded tacticOrder array
 And each technique cell should appear under its correct tactic column
 And the page should render without errors
+```
+
+### AI rule creation
+
+#### **Scenario: AI rule creation loads the managed data source**
+
+**Automation**: 1 unit test.
+
+```Gherkin
+When the AI rule creation workflow requests MITRE entity data
+Then the workflow should source MITRE data from the managed data client
+And no direct import of the legacy blob should occur
 ```
