@@ -44,7 +44,7 @@ const SYNTHETICS_PARAM_SO_TYPE = 'synthetics-param';
  */
 apiTest.describe(
   'SyncGlobalParamsSpaces',
-  { tag: [...tags.local.stateful.classic, ...tags.serverless.observability.complete] },
+  { tag: [...tags.local.stateful.classic, ...tags.local.serverless.observability.complete] },
   () => {
     let editorHeaders: Record<string, string>;
     let adminHeaders: Record<string, string>;
