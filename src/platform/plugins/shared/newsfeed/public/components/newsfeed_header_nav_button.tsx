@@ -36,8 +36,8 @@ export const NewsfeedNavButton = ({ newsfeedApi, isOpen$, onToggle }: Props) => 
     return newsFetchResult ? newsFetchResult.hasNew : false;
   }, [newsFetchResult]);
 
-  // Focus is restored inside the subscription rather than an effect: by the time an effect ran,
-  // the panel would already have handed focus to the main content area.
+  // Restoring focus inside setIsOpen fires synchronously with the close; a useEffect fires
+  // after re-render, when the sidebar has already moved focus away.
   useEffect(() => {
     const sub = isOpen$.subscribe((open) => {
       setIsOpen((prev) => {
@@ -68,8 +68,8 @@ export const NewsfeedNavButton = ({ newsfeedApi, isOpen$, onToggle }: Props) => 
     onToggle();
   }, [onToggle]);
 
-  // The tooltip stays mounted unconditionally: swapping it in and out would change the element
-  // type at this position, remounting the button and dropping focus when the panel closes.
+  // Always mounted: a conditional mount changes the element type here, remounting the button
+  // and dropping its ref.
   return (
     <EuiToolTip ref={tooltipRef} content={whatsNewLabel} disableScreenReaderOutput>
       <EuiHeaderSectionItemButton
