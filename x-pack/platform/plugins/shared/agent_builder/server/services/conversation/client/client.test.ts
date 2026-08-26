@@ -1941,9 +1941,33 @@ describe('ConversationClient', () => {
       );
     });
 
-    it('falls back to all update keys as changed when the pre-read fails', async () => {
+    it('rethrows when the access check fails (e.g. conversation not found / access denied)', async () => {
       const onMetadataPatched = jest.fn();
       mockEsClient.search.mockRejectedValue(new Error('ES unavailable'));
+
+      await expect(
+        createClientForMerge({ onMetadataPatched }).unsafeMergeMetadata('conversation-1', {
+          status: 'closed',
+        })
+      ).rejects.toThrow('ES unavailable');
+
+      expect(mockEsUpdate).not.toHaveBeenCalled();
+      expect(onMetadataPatched).not.toHaveBeenCalled();
+    });
+
+    it('falls back to all update keys as changed when field extraction from _source fails', async () => {
+      const onMetadataPatched = jest.fn();
+      // Return a document with a corrupted _source so the inner field-extraction try/catch triggers.
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              ...createConversationDocumentWithTemplate({ templateId: 'tmpl-a' }),
+              _source: null, // forces the extraction block to throw
+            },
+          ],
+        },
+      });
 
       await createClientForMerge({ onMetadataPatched }).unsafeMergeMetadata('conversation-1', {
         status: 'closed',
@@ -1951,6 +1975,7 @@ describe('ConversationClient', () => {
       });
 
       expect(mockEsUpdate).toHaveBeenCalled();
+      // All update keys treated as changed when extraction fails
       expect(onMetadataPatched).toHaveBeenCalledWith(
         expect.objectContaining({ changedFields: ['status', 'severity'] })
       );

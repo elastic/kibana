@@ -10,10 +10,10 @@ import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extens
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { conversationMetadataUpdatedTriggerCommonDefinition } from '../../common/workflows/triggers';
 
-export async function registerWorkflowSteps(
+export function registerWorkflowSteps(
   workflowsExtensions: WorkflowsExtensionsPublicPluginSetup,
   core: CoreSetup
-) {
+): void {
   workflowsExtensions.registerStepDefinition(() =>
     import('./run_agent_step').then((m) => m.createRunAgentStepDefinition(core))
   );
@@ -21,21 +21,23 @@ export async function registerWorkflowSteps(
     import('./rerank_step').then((m) => m.createRerankStepDefinition(core))
   );
 
-  const [coreStart] = await core.getStartServices();
-  const isExperimentalEnabled = coreStart.uiSettings.get<boolean>(
-    AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
+  const ifExperimental = async <T>(value: T): Promise<T | undefined> => {
+    const [coreStart] = await core.getStartServices();
+    return coreStart.uiSettings.get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID)
+      ? value
+      : undefined;
+  };
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./conversation_metadata').then((m) =>
+      ifExperimental(m.getConversationMetadataStepDefinition)
+    )
+  );
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./conversation_metadata').then((m) =>
+      ifExperimental(m.updateConversationMetadataStepDefinition)
+    )
   );
 
-  if (isExperimentalEnabled) {
-    workflowsExtensions.registerStepDefinition(() =>
-      import('./conversation_metadata').then((m) => m.getConversationMetadataStepDefinition)
-    );
-    workflowsExtensions.registerStepDefinition(() =>
-      import('./conversation_metadata').then((m) => m.updateConversationMetadataStepDefinition)
-    );
-
-    workflowsExtensions.registerTriggerDefinition(
-      conversationMetadataUpdatedTriggerCommonDefinition
-    );
-  }
+  workflowsExtensions.registerTriggerDefinition(conversationMetadataUpdatedTriggerCommonDefinition);
 }

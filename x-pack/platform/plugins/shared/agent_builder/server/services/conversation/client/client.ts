@@ -644,14 +644,15 @@ class ConversationClientImpl implements ConversationClient {
     conversationId: string,
     updates: Record<string, SerializedMetadataValue>
   ): Promise<void> {
-    // Best-effort read to compute changedFields for the trigger payload.
-    // If the read fails we fall back to treating all written keys as changed.
+    const doc = await this.getDocumentWithAccess({ conversationId, access: 'owner' });
+
+    // Best-effort extraction of prior state to compute changedFields.
+    // If extraction fails, fall back to treating all written keys as
+    // changed so the trigger still fires rather than being silently suppressed.
     let changedFields = Object.keys(updates);
     let templateId: string | undefined;
     let parentId: string | undefined;
-
     try {
-      const doc = await this.getDocumentWithAccess({ conversationId, access: 'owner' });
       const stored = (doc._source?.metadata ?? {}) as Record<string, SerializedMetadataValue>;
       changedFields = ConversationClientImpl.computeChangedFields(updates, stored);
       templateId = doc._source?.template_id;
@@ -805,6 +806,8 @@ class ConversationClientImpl implements ConversationClient {
     return document;
   }
 
+  // Note: comparison is order-sensitive for arrays — reordering elements counts as a change.
+  // This is intentional: metadata arrays (e.g. ordered checklists) preserve insertion order.
   private static computeChangedFields(
     updates: Record<string, SerializedMetadataValue>,
     stored: Record<string, SerializedMetadataValue>
