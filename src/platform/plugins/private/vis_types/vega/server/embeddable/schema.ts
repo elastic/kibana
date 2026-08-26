@@ -16,7 +16,7 @@ import {
   serializedTimeRangeSchema,
   serializedTitlesSchema,
 } from '@kbn/presentation-publishing-schemas';
-import { ON_APPLY_FILTER, ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { VEGA_SUPPORTED_TRIGGERS } from '../../common/constants';
 
 export const getVegaEmbeddableSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) => {
   return (
@@ -24,7 +24,7 @@ export const getVegaEmbeddableSchema = (getDrilldownsSchema: GetDrilldownsSchema
       .object({
         ...serializedTitlesSchema.shape,
         ...serializedTimeRangeSchema.shape,
-        ...getDrilldownsSchema([ON_APPLY_FILTER, ON_OPEN_PANEL_MENU]).shape,
+        ...getDrilldownsSchema(VEGA_SUPPORTED_TRIGGERS).shape,
         spec: z
           .discriminatedUnion('format', [
             z.object({
@@ -54,6 +54,7 @@ export const getVegaEmbeddableSchema = (getDrilldownsSchema: GetDrilldownsSchema
 /**
  * NOTE: `vis_types/vega` compiles with `strictNullChecks: false`, which can make the Zod-inferred
  * drilldowns output type incompatible with `SerializedDrilldowns` (e.g. `trigger` becomes optional).
+ * See https://github.com/elastic/kibana/issues/287451
  */
 export type VegaByValueState = z.output<ReturnType<typeof getVegaEmbeddableSchema>> &
   SerializedDrilldowns;

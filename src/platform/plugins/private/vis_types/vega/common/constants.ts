@@ -7,8 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ON_APPLY_FILTER, ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
+
 /** Frozen as part of the Dashboard REST API (`panels[].type`). */
 export const VEGA_EMBEDDABLE_TYPE = 'vega';
+
+export const VEGA_SUPPORTED_TRIGGERS = [ON_APPLY_FILTER, ON_OPEN_PANEL_MENU];
 
 /**
  * Feature flag gating the standalone Vega embeddable (UI creation actions, public API schema

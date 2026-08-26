@@ -21,7 +21,8 @@ import type {
 import { BehaviorSubject, combineLatest, EMPTY, map, merge, skip, switchMap, tap } from 'rxjs';
 import type { Query } from '@kbn/es-query';
 import { parse } from 'hjson';
-import { ON_APPLY_FILTER, ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { ON_APPLY_FILTER } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { VEGA_SUPPORTED_TRIGGERS } from '../../common/constants';
 import {
   apiHasExecutionContext,
   apiIsPresentationContainer,
@@ -190,7 +191,7 @@ export const vegaEmbeddableFactory = (
       usesEsql$,
       projectRoutingOverrides$,
       dataViews$,
-      supportedTriggers: () => [ON_APPLY_FILTER, ON_OPEN_PANEL_MENU],
+      supportedTriggers: () => VEGA_SUPPORTED_TRIGGERS,
       getTypeDisplayName: () => 'Vega',
       isEditingEnabled: () => true,
       onEdit: async ({ isNewPanel = false, returnFocus } = {}) => {
