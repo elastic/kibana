@@ -11,6 +11,10 @@ import type { LooseLensAttributes } from './lens_client';
 import { LensClient } from './lens_client';
 import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 
+jest.mock('../lazy_builder', () => ({
+  getLensBuilder: jest.fn(() => null),
+}));
+
 const mockResponse = {
   data: {},
   meta: {},

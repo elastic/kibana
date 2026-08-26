@@ -8,6 +8,7 @@
 import type { HttpStart } from '@kbn/core/public';
 import { buildPath } from '@kbn/core-http-browser';
 import type { Reference } from '@kbn/content-management-utils';
+import { isLensAPIFormat } from '@kbn/lens-embeddable-utils';
 import type { LensApiConfig, LensConfigBuilder } from '@kbn/lens-embeddable-utils';
 
 import type { LensSavedObjectAttributes } from '@kbn/lens-common';
@@ -60,7 +61,7 @@ export class LensClient {
 
     const chartType = this.builder?.getType(data);
 
-    if (this.builder?.isEnabled && this.builder?.isSupported(chartType)) {
+    if (this.builder?.isEnabled && this.builder?.isSupported(chartType) && isLensAPIFormat(data)) {
       const config = data as LensApiConfig;
       return {
         item: {
@@ -247,7 +248,11 @@ export class LensClient {
     return result.data.map(({ id, data }) => {
       const chartType = this.builder?.getType(data);
 
-      if (this.builder?.isEnabled && this.builder?.isSupported(chartType)) {
+      if (
+        this.builder?.isEnabled &&
+        this.builder?.isSupported(chartType) &&
+        isLensAPIFormat(data)
+      ) {
         const config = data as LensApiConfig;
         return {
           id,

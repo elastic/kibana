@@ -99081,6 +99081,7 @@ components:
                     esql_control: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-esql_control'
                     field_stats_table: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-field_stats_table'
                     image: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-image'
+                    lens-dashboard-app: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-lens-dashboard-app'
                     links: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-links'
                     markdown: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-markdown'
                     ml_anomaly_charts: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-ml_anomaly_charts'
@@ -99122,6 +99123,7 @@ components:
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-synthetics_stats_overview'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-time_slider_control'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-vis'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-lens-dashboard-app'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-section'
           maxItems: 1000
           type: array
@@ -100072,6 +100074,313 @@ components:
         - grid
         - config
       title: Image
+      type: object
+    Kibana_HTTP_APIs_kbn-dashboard-panel-type-lens-dashboard-app:
+      additionalProperties: false
+      properties:
+        config:
+          anyOf:
+            - allOf:
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_lensApiConfig'
+                - additionalProperties: false
+                  type: object
+                  properties:
+                    description:
+                      description: A short description of the panel.
+                      type: string
+                    drilldowns:
+                      items:
+                        anyOf:
+                          - allOf:
+                              - additionalProperties: false
+                                default:
+                                  open_in_new_tab: false
+                                  use_filters: true
+                                  use_time_range: true
+                                type: object
+                                properties:
+                                  open_in_new_tab:
+                                    default: false
+                                    description: When enabled, the dashboard opens in a new browser tab.
+                                    type: boolean
+                                  use_filters:
+                                    default: true
+                                    description: When enabled, filters are passed to the opening dashboard.
+                                    type: boolean
+                                  use_time_range:
+                                    default: true
+                                    description: When enabled, time range is passed to the opening dashboard.
+                                    type: boolean
+                              - type: object
+                                properties:
+                                  dashboard_id:
+                                    type: string
+                                required:
+                                  - dashboard_id
+                              - type: object
+                                properties:
+                                  label:
+                                    type: string
+                                  trigger:
+                                    anyOf:
+                                      - enum:
+                                          - on_apply_filter
+                                        type: string
+                                  type:
+                                    enum:
+                                      - dashboard_drilldown
+                                    type: string
+                                required:
+                                  - label
+                                  - trigger
+                                  - type
+                            title: dashboard_drilldown
+                          - allOf:
+                              - additionalProperties: false
+                                type: object
+                                properties:
+                                  open_in_new_tab:
+                                    default: true
+                                    type: boolean
+                              - type: object
+                                properties:
+                                  label:
+                                    type: string
+                                  trigger:
+                                    anyOf:
+                                      - enum:
+                                          - on_apply_filter
+                                        type: string
+                                  type:
+                                    enum:
+                                      - discover_drilldown
+                                    type: string
+                                required:
+                                  - label
+                                  - trigger
+                                  - type
+                            title: discover_drilldown
+                          - allOf:
+                              - additionalProperties: false
+                                type: object
+                                properties:
+                                  encode_url:
+                                    default: true
+                                    description: When true, URL is escaped using percent encoding
+                                    type: boolean
+                                  open_in_new_tab:
+                                    default: true
+                                    type: boolean
+                                  url:
+                                    description: Templated Url. Variables documented at https://www.elastic.co/docs/explore-analyze/dashboards/drilldowns#url-template-variable
+                                    type: string
+                                required:
+                                  - url
+                              - type: object
+                                properties:
+                                  label:
+                                    type: string
+                                  trigger:
+                                    anyOf:
+                                      - enum:
+                                          - on_click_row
+                                        type: string
+                                      - enum:
+                                          - on_click_value
+                                        type: string
+                                      - enum:
+                                          - on_open_panel_menu
+                                        type: string
+                                      - enum:
+                                          - on_select_range
+                                        type: string
+                                  type:
+                                    enum:
+                                      - url_drilldown
+                                    type: string
+                                required:
+                                  - label
+                                  - trigger
+                                  - type
+                            title: url_drilldown
+                      maxItems: 100
+                      type: array
+                    hide_border:
+                      description: When true, the panel border is hidden. Defaults to false.
+                      type: boolean
+                    hide_title:
+                      description: When true, the panel title is hidden. Defaults to false.
+                      type: boolean
+                    references:
+                      items:
+                        $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-content-management-utils-referenceSchema'
+                      type: array
+                    time_range:
+                      $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
+                    title:
+                      description: The panel title.
+                      type: string
+              description: Panel configuration stored inline
+              title: By value
+            - additionalProperties: false
+              description: Panel configuration stored in a linked library item
+              properties:
+                description:
+                  description: A short description of the panel.
+                  type: string
+                drilldowns:
+                  items:
+                    anyOf:
+                      - allOf:
+                          - additionalProperties: false
+                            default:
+                              open_in_new_tab: false
+                              use_filters: true
+                              use_time_range: true
+                            type: object
+                            properties:
+                              open_in_new_tab:
+                                default: false
+                                description: When enabled, the dashboard opens in a new browser tab.
+                                type: boolean
+                              use_filters:
+                                default: true
+                                description: When enabled, filters are passed to the opening dashboard.
+                                type: boolean
+                              use_time_range:
+                                default: true
+                                description: When enabled, time range is passed to the opening dashboard.
+                                type: boolean
+                          - type: object
+                            properties:
+                              dashboard_id:
+                                type: string
+                            required:
+                              - dashboard_id
+                          - type: object
+                            properties:
+                              label:
+                                type: string
+                              trigger:
+                                anyOf:
+                                  - enum:
+                                      - on_apply_filter
+                                    type: string
+                              type:
+                                enum:
+                                  - dashboard_drilldown
+                                type: string
+                            required:
+                              - label
+                              - trigger
+                              - type
+                        title: dashboard_drilldown
+                      - allOf:
+                          - additionalProperties: false
+                            type: object
+                            properties:
+                              open_in_new_tab:
+                                default: true
+                                type: boolean
+                          - type: object
+                            properties:
+                              label:
+                                type: string
+                              trigger:
+                                anyOf:
+                                  - enum:
+                                      - on_apply_filter
+                                    type: string
+                              type:
+                                enum:
+                                  - discover_drilldown
+                                type: string
+                            required:
+                              - label
+                              - trigger
+                              - type
+                        title: discover_drilldown
+                      - allOf:
+                          - additionalProperties: false
+                            type: object
+                            properties:
+                              encode_url:
+                                default: true
+                                description: When true, URL is escaped using percent encoding
+                                type: boolean
+                              open_in_new_tab:
+                                default: true
+                                type: boolean
+                              url:
+                                description: Templated Url. Variables documented at https://www.elastic.co/docs/explore-analyze/dashboards/drilldowns#url-template-variable
+                                type: string
+                            required:
+                              - url
+                          - type: object
+                            properties:
+                              label:
+                                type: string
+                              trigger:
+                                anyOf:
+                                  - enum:
+                                      - on_click_row
+                                    type: string
+                                  - enum:
+                                      - on_click_value
+                                    type: string
+                                  - enum:
+                                      - on_open_panel_menu
+                                    type: string
+                                  - enum:
+                                      - on_select_range
+                                    type: string
+                              type:
+                                enum:
+                                  - url_drilldown
+                                type: string
+                            required:
+                              - label
+                              - trigger
+                              - type
+                        title: url_drilldown
+                  maxItems: 100
+                  type: array
+                hide_border:
+                  description: When true, the panel border is hidden. Defaults to false.
+                  type: boolean
+                hide_title:
+                  description: When true, the panel title is hidden. Defaults to false.
+                  type: boolean
+                ref_id:
+                  type: string
+                references:
+                  items:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-content-management-utils-referenceSchema'
+                  type: array
+                time_range:
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
+                title:
+                  description: The panel title.
+                  type: string
+              required:
+                - ref_id
+              title: By reference
+              type: object
+          description: Lens embeddable schema
+        grid:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-grid'
+        id:
+          description: The unique ID of the panel.
+          type: string
+        type:
+          enum:
+            - lens-dashboard-app
+          type: string
+      required:
+        - type
+        - grid
+        - config
+      title: Visualization (dashboard application)
       type: object
     Kibana_HTTP_APIs_kbn-dashboard-panel-type-links:
       additionalProperties: false
@@ -101104,6 +101413,7 @@ components:
                 esql_control: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-esql_control'
                 field_stats_table: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-field_stats_table'
                 image: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-image'
+                lens-dashboard-app: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-lens-dashboard-app'
                 links: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-links'
                 markdown: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-markdown'
                 ml_anomaly_charts: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-ml_anomaly_charts'
@@ -101145,6 +101455,7 @@ components:
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-synthetics_stats_overview'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-time_slider_control'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-vis'
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-lens-dashboard-app'
           maxItems: 1000
           type: array
         title:

@@ -170,5 +170,22 @@ describe('Last Value Transforms', () => {
       const result = fromLastValueLensStateToAPI(input);
       expect(result.multi_value).toBe(true);
     });
+
+    it('should default multi_value to false when showArrayValues is undefined', () => {
+      const input: LastValueIndexPatternColumn = {
+        operationType: 'last_value',
+        sourceField: 'memory',
+        label: 'Last value of memory',
+        isBucketed: false,
+        dataType: 'number',
+        params: {
+          sortField: '@timestamp',
+          showArrayValues: undefined,
+        },
+      };
+
+      const result = fromLastValueLensStateToAPI(input);
+      expect(result.multi_value).toBe(false);
+    });
   });
 });
