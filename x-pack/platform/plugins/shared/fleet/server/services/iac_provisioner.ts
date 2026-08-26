@@ -25,6 +25,7 @@ import { isIacProvisionerEnabled } from './utils/iac_provisioner';
 
 const RENDER_ENDPOINT = '/api/v1/render';
 const RENDER_TIMEOUT_MS = 30_000;
+// [DO NOT MERGE] Non-skippable diff so kibana-ci builds a serverless image.
 
 /** undici reports TLS failures as `TypeError: fetch failed` with the OpenSSL reason on `cause`. */
 const formatIacProvisionerNetworkError = (error: unknown): string => {
