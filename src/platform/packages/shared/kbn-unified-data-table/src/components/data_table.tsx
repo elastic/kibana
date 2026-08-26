@@ -78,7 +78,7 @@ import type {
   DataGridPaginationMode,
   CustomBulkActions,
   DocMap,
-  SourceDisplayMode,
+  DocumentsDisplayMode,
   JsonModeSettings,
 } from '../types';
 import {
@@ -544,11 +544,11 @@ interface InternalUnifiedDataTableProps {
    * Set to 'json' to display a JSON representation of the source document
    * instead of the Summary column. Defualt is summary.
    */
-  sourceDisplayModeState?: SourceDisplayMode;
+  documentsDisplayModeState?: DocumentsDisplayMode;
   /**
    * Update the source display mode state. When omitted, the view mode toggle is hidden.
    */
-  onUpdateSourceDisplayMode?: (sourceDisplayMode: SourceDisplayMode) => void;
+  onUpdateDocumentsDisplayMode?: (documentsDisplayMode: DocumentsDisplayMode) => void;
   /**
    * Settings that only apply while the source column is rendered in JSON mode.
    */
@@ -648,8 +648,8 @@ const InternalUnifiedDataTable = React.forwardRef<
       shouldKeepAdHocDataViewImmutable,
       onFullScreenChange,
       hideFilteringOnComputedColumns,
-      sourceDisplayModeState,
-      onUpdateSourceDisplayMode,
+      documentsDisplayModeState,
+      onUpdateDocumentsDisplayMode,
       jsonModeSettingsState,
       onUpdateJsonModeSettings,
     },
@@ -665,30 +665,30 @@ const InternalUnifiedDataTable = React.forwardRef<
     const [isCompareActive, setIsCompareActive] = useRestorableState('isCompareActive', false);
     const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false);
 
-    const sourceDisplayMode = sourceDisplayModeState ?? 'summary';
+    const documentsDisplayMode = documentsDisplayModeState ?? 'table';
     const jsonModeSettings = useMemo<JsonModeSettings>(
       () => jsonModeSettingsState ?? {},
       [jsonModeSettingsState]
     );
 
-    const displayedColumns = getDisplayedColumns(columns, dataView, sourceDisplayMode);
+    const displayedColumns = getDisplayedColumns(columns, dataView, documentsDisplayMode);
     const isSummaryOnlyColumn = getIsSummaryOnlyColumn(displayedColumns);
     const showSummaryColumn = getShowSummaryColumn(displayedColumns);
 
     const { isNew: isViewModeNew, markAsSeen: markViewModeSeen } = useViewModeNewBadge(
       storage,
-      Boolean(onUpdateSourceDisplayMode)
+      Boolean(onUpdateDocumentsDisplayMode)
     );
 
-    const onChangeSourceDisplayModeWithSeen = useMemo(
+    const onChangeDocumentsDisplayModeWithSeen = useMemo(
       () =>
-        onUpdateSourceDisplayMode
-          ? (mode: SourceDisplayMode) => {
+        onUpdateDocumentsDisplayMode
+          ? (mode: DocumentsDisplayMode) => {
               markViewModeSeen();
-              onUpdateSourceDisplayMode(mode);
+              onUpdateDocumentsDisplayMode(mode);
             }
           : undefined,
-      [markViewModeSeen, onUpdateSourceDisplayMode]
+      [markViewModeSeen, onUpdateDocumentsDisplayMode]
     );
 
     const docMap = useMemo<DocMap>(
@@ -790,7 +790,7 @@ const InternalUnifiedDataTable = React.forwardRef<
           fieldFormats,
           columnsMeta,
           options,
-          sourceDisplayMode,
+          documentsDisplayMode,
           shouldShowFieldHandler,
           selectedColumns: columns,
         });
@@ -800,7 +800,7 @@ const InternalUnifiedDataTable = React.forwardRef<
         dataView,
         fieldFormats,
         columnsMeta,
-        sourceDisplayMode,
+        documentsDisplayMode,
         shouldShowFieldHandler,
         columns,
       ]
@@ -912,7 +912,7 @@ const InternalUnifiedDataTable = React.forwardRef<
         valueToStringConverter,
         componentsTourSteps,
         isPlainRecord,
-        sourceDisplayMode,
+        documentsDisplayMode,
         pageIndex: isPaginationEnabled ? paginationObj?.pageIndex : 0,
         pageSize: isPaginationEnabled ? paginationObj?.pageSize : displayedRows.length,
       }),
@@ -920,7 +920,7 @@ const InternalUnifiedDataTable = React.forwardRef<
         componentsTourSteps,
         dataView,
         isPlainRecord,
-        sourceDisplayMode,
+        documentsDisplayMode,
         isPaginationEnabled,
         displayedRows,
         expandedDoc,
@@ -966,7 +966,7 @@ const InternalUnifiedDataTable = React.forwardRef<
           isPlainRecord,
           isCompressed: dataGridDensity === DataGridDensity.COMPACT,
           columnsMeta,
-          sourceDisplayMode,
+          documentsDisplayMode,
           jsonModeSettings,
           selectedColumns: columns,
         }),
@@ -980,7 +980,7 @@ const InternalUnifiedDataTable = React.forwardRef<
         isPlainRecord,
         dataGridDensity,
         columnsMeta,
-        sourceDisplayMode,
+        documentsDisplayMode,
         jsonModeSettings,
         columns,
       ]
@@ -1156,7 +1156,7 @@ const InternalUnifiedDataTable = React.forwardRef<
 
     // In JSON mode the source cell renders a variable-height tree: force the body cell height to auto
     // and hide the "Body cell lines" setting.
-    const isJsonSourceMode = sourceDisplayMode === 'json';
+    const isJsonSourceMode = documentsDisplayMode === 'json';
     const rowHeightLines = isJsonSourceMode ? ROWS_HEIGHT_OPTIONS.auto : rowHeightLinesSetting;
     const onChangeRowHeight = isJsonSourceMode ? undefined : onChangeRowHeightSetting;
     const onChangeRowHeightLines = isJsonSourceMode ? undefined : onChangeRowHeightLinesSetting;
@@ -1192,7 +1192,7 @@ const InternalUnifiedDataTable = React.forwardRef<
           disableCellActions,
           dataGridRef,
           hideFilteringOnComputedColumns,
-          sourceDisplayMode,
+          documentsDisplayMode,
         }),
       [
         cellActionsHandling,
@@ -1219,7 +1219,7 @@ const InternalUnifiedDataTable = React.forwardRef<
         sortedColumns,
         disableCellActions,
         hideFilteringOnComputedColumns,
-        sourceDisplayMode,
+        documentsDisplayMode,
       ]
     );
 
@@ -1428,8 +1428,8 @@ const InternalUnifiedDataTable = React.forwardRef<
               lineCountInput={lineCountInput}
               headerLineCountInput={headerLineCountInput}
               densityControl={densityControl}
-              sourceDisplayMode={sourceDisplayMode}
-              onChangeSourceDisplayMode={onChangeSourceDisplayModeWithSeen}
+              documentsDisplayMode={documentsDisplayMode}
+              onChangeDocumentsDisplayMode={onChangeDocumentsDisplayModeWithSeen}
               jsonModeSettings={jsonModeSettings}
               onChangeJsonModeSettings={onUpdateJsonModeSettings}
               isViewModeNew={isViewModeNew}
@@ -1452,8 +1452,8 @@ const InternalUnifiedDataTable = React.forwardRef<
       onUpdateDataGridDensity,
       lineCountInput,
       headerLineCountInput,
-      sourceDisplayMode,
-      onChangeSourceDisplayModeWithSeen,
+      documentsDisplayMode,
+      onChangeDocumentsDisplayModeWithSeen,
       jsonModeSettings,
       onUpdateJsonModeSettings,
       isViewModeNew,

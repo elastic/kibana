@@ -23,7 +23,7 @@ const defaultDisplaySettingsProps = {
   lineCountInput: 10,
   rowHeight: RowHeightMode.custom,
   sampleSize: 10,
-  sourceDisplayMode: 'summary' as const,
+  documentsDisplayMode: 'table' as const,
   jsonModeSettings: {},
 };
 
@@ -301,14 +301,14 @@ describe('UnifiedDataTableAdditionalDisplaySettings', () => {
         onChangeRowHeightLines: jest.fn(),
         onChangeHeaderRowHeight: jest.fn(),
         onChangeHeaderRowHeightLines: jest.fn(),
-        onChangeSourceDisplayMode: jest.fn(),
+        onChangeDocumentsDisplayMode: jest.fn(),
         onChangeJsonModeSettings: jest.fn(),
         densityControl: <div data-test-subj="mockDensityControl">density</div>,
         ...props,
       });
 
-    it('should not render the view mode toggle when onChangeSourceDisplayMode is undefined', () => {
-      renderWithAllControls({ onChangeSourceDisplayMode: undefined });
+    it('should not render the view mode toggle when onChangeDocumentsDisplayMode is undefined', () => {
+      renderWithAllControls({ onChangeDocumentsDisplayMode: undefined });
 
       expect(screen.queryByTestId('unifiedDataTableViewModeSettings')).not.toBeInTheDocument();
     });
@@ -317,9 +317,10 @@ describe('UnifiedDataTableAdditionalDisplaySettings', () => {
       renderWithAllControls();
 
       expect(screen.getByTestId('unifiedDataTableViewModeSettings')).toBeVisible();
-      expect(
-        screen.getByTestId('unifiedDataTableViewModeSettings_viewMode_summary')
-      ).toHaveAttribute('aria-pressed', 'true');
+      expect(screen.getByTestId('unifiedDataTableViewModeSettings_viewMode_table')).toHaveAttribute(
+        'aria-pressed',
+        'true'
+      );
     });
 
     it('should show the default controls and hide the JSON-only settings while in "Table" mode', () => {
@@ -333,19 +334,19 @@ describe('UnifiedDataTableAdditionalDisplaySettings', () => {
       expect(screen.queryByTestId('unifiedDataTableWrapLinesSettings')).not.toBeInTheDocument();
     });
 
-    it('should call onChangeSourceDisplayMode when the view mode is switched to JSON', async () => {
-      const onChangeSourceDisplayMode = jest.fn();
+    it('should call onChangeDocumentsDisplayMode when the view mode is switched to JSON', async () => {
+      const onChangeDocumentsDisplayMode = jest.fn();
 
-      renderWithAllControls({ onChangeSourceDisplayMode });
+      renderWithAllControls({ onChangeDocumentsDisplayMode });
 
       await userEvent.click(screen.getByTestId('unifiedDataTableViewModeSettings_viewMode_json'));
 
-      expect(onChangeSourceDisplayMode).toHaveBeenCalledWith('json');
+      expect(onChangeDocumentsDisplayMode).toHaveBeenCalledWith('json');
     });
 
     it('should only show sample size, view mode, hide-nulls, and wrap-lines in "JSON" mode', () => {
       renderWithAllControls({
-        sourceDisplayMode: 'json',
+        documentsDisplayMode: 'json',
       });
 
       expect(screen.getByText('Sample size')).toBeVisible();
@@ -369,7 +370,7 @@ describe('UnifiedDataTableAdditionalDisplaySettings', () => {
 
     it('should reflect the provided jsonModeSettings on the button groups', () => {
       renderWithAllControls({
-        sourceDisplayMode: 'json',
+        documentsDisplayMode: 'json',
         jsonModeSettings: { hideNulls: true, wrapLines: false },
       });
 
@@ -387,7 +388,7 @@ describe('UnifiedDataTableAdditionalDisplaySettings', () => {
       const onChangeJsonModeSettings = jest.fn();
 
       renderWithAllControls({
-        sourceDisplayMode: 'json',
+        documentsDisplayMode: 'json',
         jsonModeSettings: { wrapLines: true },
         onChangeJsonModeSettings,
       });

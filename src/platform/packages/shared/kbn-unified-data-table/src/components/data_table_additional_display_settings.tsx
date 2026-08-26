@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
 import type { RowHeightSettingsProps } from './row_height_settings';
 import { RowHeightSettings } from './row_height_settings';
-import type { JsonModeSettings, SourceDisplayMode } from '../types';
+import type { JsonModeSettings, DocumentsDisplayMode } from '../types';
 import { ViewModeSettings } from './view_mode_settings';
 
 export const DEFAULT_MAX_ALLOWED_SAMPLE_SIZE = 1000;
@@ -35,8 +35,8 @@ export interface UnifiedDataTableAdditionalDisplaySettingsProps {
   lineCountInput: number | undefined;
   headerLineCountInput: number | undefined;
   densityControl?: React.ReactNode;
-  sourceDisplayMode: SourceDisplayMode;
-  onChangeSourceDisplayMode?: (sourceDisplayMode: SourceDisplayMode) => void;
+  documentsDisplayMode: DocumentsDisplayMode;
+  onChangeDocumentsDisplayMode?: (documentsDisplayMode: DocumentsDisplayMode) => void;
   jsonModeSettings: JsonModeSettings;
   onChangeJsonModeSettings?: (jsonModeSettings: JsonModeSettings) => void;
   isViewModeNew?: boolean;
@@ -204,8 +204,8 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
   lineCountInput,
   headerLineCountInput,
   densityControl,
-  sourceDisplayMode,
-  onChangeSourceDisplayMode,
+  documentsDisplayMode,
+  onChangeDocumentsDisplayMode,
   jsonModeSettings,
   onChangeJsonModeSettings,
   isViewModeNew,
@@ -248,11 +248,11 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
     setActiveSampleSize(sampleSize); // reset local state
   }, [sampleSize, setActiveSampleSize]);
 
-  const isJsonMode = sourceDisplayMode === 'json';
-  const viewModeSettings = onChangeSourceDisplayMode ? (
+  const isJsonMode = documentsDisplayMode === 'json';
+  const viewModeSettings = onChangeDocumentsDisplayMode ? (
     <ViewModeSettings
-      sourceDisplayMode={sourceDisplayMode}
-      onChangeSourceDisplayMode={onChangeSourceDisplayMode}
+      documentsDisplayMode={documentsDisplayMode}
+      onChangeDocumentsDisplayMode={onChangeDocumentsDisplayMode}
       isNew={isViewModeNew}
     />
   ) : null;

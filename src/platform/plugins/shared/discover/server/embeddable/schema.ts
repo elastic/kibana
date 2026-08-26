@@ -55,12 +55,12 @@ export const viewModeSchema = z
       'Discover view mode. Choose "documents" (search hits), "patterns" (pattern analysis), or "aggregated" (field statistics).',
   });
 
-const sourceDisplayModeSchema = z
-  .union([z.literal('summary'), z.literal('json')])
+const documentsDisplayModeSchema = z
+  .union([z.literal('table'), z.literal('json')])
   .optional()
   .meta({
     description:
-      'Source column display mode: "summary" for the formatted summary, or "json" for the raw JSON tree. When set, overrides the referenced saved object or the inline tab config in `tabs`.',
+      'Documents display mode: "table" for the formatted summary, or "json" for the raw JSON tree. When set, overrides the referenced saved object or the inline tab config in `tabs`.',
   });
 
 const jsonModeSettingsSchema = z
@@ -77,7 +77,7 @@ const jsonModeSettingsSchema = z
   .optional()
   .meta({
     description:
-      'Settings that only apply when the source column is displayed in JSON mode (`source_display_mode: "json"`).',
+      'Settings that only apply when the source column is displayed in JSON mode (`documents_display_mode: "json"`).',
   });
 
 export const dataTableLimitsSchema = z
@@ -136,7 +136,7 @@ export const dataTableSchema = z
         description:
           'Data row height. Use a number (1–20) or "auto" to size based on content. If omitted, defaults to the advanced setting "discover:rowHeightOption".',
       }),
-    source_display_mode: sourceDisplayModeSchema,
+    documents_display_mode: documentsDisplayModeSchema,
     json_mode_settings: jsonModeSettingsSchema,
   })
   .strict()
@@ -193,7 +193,7 @@ export const panelOverridesSchema = z
       description:
         'Number of documents to sample. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, falls back to the source or to the advanced setting "discover:sampleSize".',
     }),
-    source_display_mode: sourceDisplayModeSchema,
+    documents_display_mode: documentsDisplayModeSchema,
     json_mode_settings: jsonModeSettingsSchema,
   })
   .strict()

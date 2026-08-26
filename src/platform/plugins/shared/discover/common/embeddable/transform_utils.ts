@@ -82,7 +82,7 @@ export function fromStoredSearchEmbeddableByRef(
     rowsPerPage,
     headerRowHeight,
     density,
-    sourceDisplayMode,
+    documentsDisplayMode,
     jsonModeSettings,
     grid,
     selectedTabId,
@@ -138,7 +138,7 @@ export function fromStoredSearchEmbeddableByValue(
     rowsPerPage,
     headerRowHeight,
     density,
-    sourceDisplayMode,
+    documentsDisplayMode,
     jsonModeSettings,
     grid,
     attributes,
@@ -271,7 +271,7 @@ export function toDiscoverSessionPanelOverrides(
     rowsPerPage,
     headerRowHeight,
     density,
-    sourceDisplayMode,
+    documentsDisplayMode,
     jsonModeSettings,
     grid,
   } = storedState;
@@ -285,7 +285,7 @@ export function toDiscoverSessionPanelOverrides(
     ...(rowsPerPage && { rows_per_page: rowsPerPage }),
     ...(headerRowHeight && { header_row_height: fromStoredRowHeight(headerRowHeight) }),
     ...(density && { density }),
-    ...(sourceDisplayMode && { source_display_mode: sourceDisplayMode }),
+    ...(documentsDisplayMode && { documents_display_mode: documentsDisplayMode }),
     ...(jsonModeSettings && { json_mode_settings: fromStoredJsonModeSettings(jsonModeSettings) }),
   };
 }
@@ -302,7 +302,7 @@ export function fromDiscoverSessionPanelOverrides(
     rows_per_page: rowsPerPage,
     header_row_height: headerRowHeight,
     density,
-    source_display_mode: sourceDisplayMode,
+    documents_display_mode: documentsDisplayMode,
     json_mode_settings: jsonModeSettings,
   } = apiState;
   return {
@@ -313,7 +313,7 @@ export function fromDiscoverSessionPanelOverrides(
     ...(rowsPerPage && { rowsPerPage }),
     ...(headerRowHeight && { headerRowHeight: toStoredHeight(headerRowHeight) }),
     ...(density && { density }),
-    ...(sourceDisplayMode && { sourceDisplayMode }),
+    ...(documentsDisplayMode && { documentsDisplayMode }),
     ...(jsonModeSettings && { jsonModeSettings: toStoredJsonModeSettings(jsonModeSettings) }),
     ...(Object.keys(columnSettings ?? {}).length && { grid: toStoredGrid(columnSettings) }),
   };
