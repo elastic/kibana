@@ -10,7 +10,7 @@
 import React from 'react';
 import { css, Global } from '@emotion/react';
 import { logicalCSS, useEuiTheme, type UseEuiTheme } from '@elastic/eui';
-import { APP_MAIN_SCROLL_CONTAINER_ID, layoutVar } from '@kbn/ui-chrome-layout-constants';
+import { APP_MAIN_SCROLL_CONTAINER_ID, layoutVar } from '../constants';
 import type { LayoutAppearance } from '../layout.types';
 
 export const globalLayoutStyles = () => {

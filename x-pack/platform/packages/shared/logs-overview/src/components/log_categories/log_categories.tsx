@@ -29,6 +29,7 @@ import type {
   LogCategoriesControlBarProps,
 } from './log_categories_control_bar';
 import { LogCategoriesControlBar } from './log_categories_control_bar';
+import { LogCategoriesCancelledContent } from './log_categories_cancelled_content';
 import { LogCategoriesErrorContent } from './log_categories_error_content';
 import { LogCategoriesLoadingContent } from './log_categories_loading_content';
 import type {
@@ -160,6 +161,12 @@ export const LogCategoriesContent = React.memo<LogCategoriesContentProps>(
       });
     }, [categorizeLogsServiceActorRef]);
 
+    const retryOperation = useCallback(() => {
+      categorizeLogsServiceActorRef.send({
+        type: 'retry',
+      });
+    }, [categorizeLogsServiceActorRef]);
+
     const closeFlyout = useCallback(() => {
       categoryDetailsServiceActorRef.send({
         type: 'setExpandedCategory',
@@ -211,6 +218,8 @@ export const LogCategoriesContent = React.memo<LogCategoriesContentProps>(
             />
           ) : categorizeLogsServiceState.matches('failed') ? (
             <LogCategoriesErrorContent error={categorizeLogsServiceState.context.error} />
+          ) : categorizeLogsServiceState.matches('cancelled') ? (
+            <LogCategoriesCancelledContent onRetry={retryOperation} />
           ) : categorizeLogsServiceState.matches('countingDocuments') ? (
             <LogCategoriesLoadingContent onCancel={cancelOperation} stage="counting" />
           ) : categorizeLogsServiceState.matches('fetchingSampledCategories') ||
