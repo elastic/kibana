@@ -9,6 +9,8 @@ import { ENVIRONMENT_ALL } from '../../environment_filter_values';
 
 const APM_SERVICES_PATH = '/app/apm/services';
 
+const APM_SERVICES_PATH = '/app/apm/services';
+
 const format = ({ pathname, query }: { pathname: string; query: Record<string, any> }): string => {
   return `${pathname}?${stringify(query)}`;
 };
