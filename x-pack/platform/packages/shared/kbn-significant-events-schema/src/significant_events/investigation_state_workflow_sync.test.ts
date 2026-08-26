@@ -572,7 +572,14 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
     const withKi = {
       ...validPayload,
       impact: {
-        entities: [{ name: 'cart-service', type: 'service', feature_id: 'ki-abc123', stream_name: 'logs-app' }],
+        entities: [
+          {
+            name: 'cart-service',
+            type: 'service',
+            feature_id: 'ki-abc123',
+            stream_name: 'logs-app',
+          },
+        ],
       },
     };
 
@@ -594,7 +601,9 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
     const tooManyEntities = {
       ...validPayload,
       impact: {
-        entities: Array.from({ length: MAX_IMPACT_ENTITIES + 1 }, (_, i) => ({ name: `service-${i}` })),
+        entities: Array.from({ length: MAX_IMPACT_ENTITIES + 1 }, (_, i) => ({
+          name: `service-${i}`,
+        })),
       },
     };
 
