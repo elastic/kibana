@@ -107,7 +107,7 @@ export const taxiiAdapter: FetchAdapter = {
     const connectorId = readConnectorId(source);
     if (connectorId) {
       log.debug(
-        `Polling TAXII collection ${url} via connector ${connectorId} for source ${source._id}`
+        `Polling TAXII collection ${redactUrl(url)} via connector ${connectorId} for source ${source._id}`
       );
     }
 
@@ -148,7 +148,7 @@ export const taxiiAdapter: FetchAdapter = {
 
       if (nextToken && pages >= MAX_TAXII_PAGES) {
         log.warn(
-          `TAXII collection at ${url} still reported more pages after ${MAX_TAXII_PAGES} for ` +
+          `TAXII collection at ${redactUrl(url)} still reported more pages after ${MAX_TAXII_PAGES} for ` +
             `source ${source._id}; stopping and resuming on the next run`
         );
         break;
@@ -157,7 +157,7 @@ export const taxiiAdapter: FetchAdapter = {
 
     if (pages > 1) {
       log.debug(
-        `TAXII collection at ${url} returned ${sdos.length} objects across ${pages} pages for source ${source._id}`
+        `TAXII collection at ${redactUrl(url)} returned ${sdos.length} objects across ${pages} pages for source ${source._id}`
       );
     }
 

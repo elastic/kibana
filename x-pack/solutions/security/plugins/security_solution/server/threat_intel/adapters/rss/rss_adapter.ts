@@ -65,7 +65,7 @@ export const rssAdapter: FetchAdapter = {
     const feedBody = await readFeedBody(feedUrl, context);
     const parsed = await parseRssFeed(feedBody);
     if (parsed.entries.length === 0) {
-      log.debug(`RSS feed ${feedUrl} returned 0 items for source ${source._id}`);
+      log.debug(`RSS feed ${redactUrl(feedUrl)} returned 0 items for source ${source._id}`);
       return [];
     }
 

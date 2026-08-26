@@ -59,7 +59,9 @@ export const stixAdapter: FetchAdapter = {
 
     const sdos = splitStixBundle(bundle);
     if (sdos.length === 0) {
-      log.debug(`STIX bundle at ${url} contained 0 reportable objects for source ${source._id}`);
+      log.debug(
+        `STIX bundle at ${redactUrl(url)} contained 0 reportable objects for source ${source._id}`
+      );
       return [];
     }
 
