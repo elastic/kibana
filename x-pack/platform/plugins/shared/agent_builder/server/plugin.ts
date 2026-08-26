@@ -39,7 +39,7 @@ import { createSmlTools } from './services/tools/builtin/sml';
 import { createConnectorTools } from './services/tools/builtin/connectors';
 import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_switcher';
 import { registerInferenceFeatures } from './inference_features';
-import { runToolIdBackfill } from './services/agents/persisted/tool_id_backfill';
+import { runToolIdBackfill } from './backfills/tool_id_backfill';
 
 export class AgentBuilderPlugin
   implements

@@ -6,8 +6,11 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import type { AgentProfileStorage, AgentProperties } from './client/storage';
-import type { SkillStorage, SkillProperties } from '../../skills/persisted/client/storage';
+import type {
+  AgentProfileStorage,
+  AgentProperties,
+} from '../services/agents/persisted/client/storage';
+import type { SkillStorage, SkillProperties } from '../services/skills/persisted/client/storage';
 import {
   addToolIdsToToolSelection,
   addToolIdsToArray,

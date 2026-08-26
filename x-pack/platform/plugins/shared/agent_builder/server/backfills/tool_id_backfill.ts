@@ -11,11 +11,14 @@ import type { Logger } from '@kbn/logging';
 import type { ToolSelection } from '@kbn/agent-builder-common';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { StorageClientSearchRequest } from '@kbn/storage-adapter';
-import type { AgentProfileStorage, AgentProperties } from './client/storage';
-import { createStorage as createAgentStorage } from './client/storage';
-import type { SkillStorage, SkillProperties } from '../../skills/persisted/client/storage';
-import { createStorage as createSkillStorage } from '../../skills/persisted/client/storage';
-import { updateRequestToEs } from './client/converters';
+import type {
+  AgentProfileStorage,
+  AgentProperties,
+} from '../services/agents/persisted/client/storage';
+import { createStorage as createAgentStorage } from '../services/agents/persisted/client/storage';
+import type { SkillStorage, SkillProperties } from '../services/skills/persisted/client/storage';
+import { createStorage as createSkillStorage } from '../services/skills/persisted/client/storage';
+import { updateRequestToEs } from '../services/agents/persisted/client/converters';
 
 const PAGE_SIZE = 1000;
 
