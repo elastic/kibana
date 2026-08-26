@@ -56,7 +56,10 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
     .post({
       path: MCP_SERVER_PATH,
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
+        authz: {
+          enabled: false,
+          reason: 'MCP sever tools perform authorization checks internally',
+        },
       },
       access: 'public',
       summary: 'MCP server',
