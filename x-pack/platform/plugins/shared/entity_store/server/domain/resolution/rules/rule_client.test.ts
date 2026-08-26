@@ -24,20 +24,29 @@ describe('ResolutionRulesClient', () => {
     };
     const client = createClient(soClient);
 
-    await expect(client.getEffectiveRules()).resolves.toEqual([
-      {
-        id: RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH,
+    const rules = await client.getEffectiveRules();
+
+    expect(rules).toHaveLength(6);
+    expect(rules.find((rule) => rule.id === RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH)).toEqual(
+      expect.objectContaining({
         kind: RESOLUTION_RULE_KINDS.SAME_FIELD,
         managed: true,
         enabled: true,
-      },
-      {
-        id: RESOLUTION_RULE_IDS.RELATED_USER_ALIAS_RESOLUTION,
+        description: expect.any(String),
+      })
+    );
+    expect(
+      rules.find((rule) => rule.id === RESOLUTION_RULE_IDS.RELATED_USER_ALIAS_RESOLUTION)
+    ).toEqual(
+      expect.objectContaining({
         kind: RESOLUTION_RULE_KINDS.RELATED_USER_ALIAS_RESOLUTION,
         managed: true,
         enabled: false,
-      },
-    ]);
+      })
+    );
+    expect(rules.find((rule) => rule.id === RESOLUTION_RULE_IDS.WINDOWS_SID_BRIDGE)?.enabled).toBe(
+      true
+    );
   });
 
   it('merges saved object overrides over in-code defaults', async () => {

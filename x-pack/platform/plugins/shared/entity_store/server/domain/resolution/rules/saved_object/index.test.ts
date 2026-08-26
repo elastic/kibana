@@ -51,6 +51,36 @@ describe('EntityResolutionRuleType', () => {
     expect(() => createSchema?.validate({ ...validAttributes, kind: 'unknown_kind' })).toThrow();
   });
 
+  it('model version 2 accepts the new OOTB rule ids and cross_field kind', () => {
+    const createSchema = modelVersions[2].schemas?.create;
+    const windowsSid = {
+      id: RESOLUTION_RULE_IDS.WINDOWS_SID_BRIDGE,
+      kind: RESOLUTION_RULE_KINDS.SAME_FIELD,
+      managed: true,
+      enabled: true,
+    };
+    const upn = {
+      id: RESOLUTION_RULE_IDS.UPN_CROSS_FIELD_BRIDGE,
+      kind: RESOLUTION_RULE_KINDS.CROSS_FIELD,
+      managed: true,
+      enabled: true,
+    };
+
+    expect(createSchema?.validate(windowsSid)).toEqual(windowsSid);
+    expect(createSchema?.validate(upn)).toEqual(upn);
+  });
+
+  it('model version 1 rejects the new OOTB rule ids', () => {
+    const createSchema = modelVersions[1].schemas?.create;
+
+    expect(() =>
+      createSchema?.validate({
+        ...validAttributes,
+        id: RESOLUTION_RULE_IDS.WINDOWS_SID_BRIDGE,
+      })
+    ).toThrow();
+  });
+
   it('ignores unknown forward-compatibility attributes', () => {
     const forwardSchema = modelVersions[1].schemas?.forwardCompatibility;
 
