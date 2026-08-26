@@ -256,7 +256,9 @@ export function HeaderActions({
                         iconType="discoverApp"
                         target="_blank"
                         onClick={handleClosePopover}
-                        data-test-subj={`alertDetailsPage_viewInDiscover${rule ? `_${rule.ruleTypeId}` : ''}`}
+                        data-test-subj={`alertDetailsPage_viewInDiscover${
+                          rule ? `_${rule.ruleTypeId}` : ''
+                        }`}
                         {...getEbtProps({
                           action: EBT_CLICK_ACTIONS.OPEN_IN_DISCOVER,
                           element: ALERT_DETAILS_EBT_ELEMENTS.HEADER,
