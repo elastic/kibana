@@ -455,7 +455,7 @@ export const updateConversation = ({
   updateDate: Date;
 }) => {
   const {
-    events: _ignoredEvents,
+    events: updateEvents,
     schema_version: _ignoredSchemaVersion,
     ...safeUpdate
   } = update as ConversationUpdatableFields & {
@@ -471,6 +471,16 @@ export const updateConversation = ({
     schema_version: conversation.schema_version,
   } as Conversation;
 
+  if (updateEvents !== undefined) {
+    return {
+      ...merged,
+      schema_version: CONVERSATION_SCHEMA_VERSION,
+      events: updateEvents,
+      rounds: eventsToRounds(updateEvents),
+    };
+  }
+
+  // Legacy rounds-only doc with no events being written: never auto-promote — leave it rounds-only.
   if (!isEventsNativeVersion(merged.schema_version)) {
     return merged;
   }

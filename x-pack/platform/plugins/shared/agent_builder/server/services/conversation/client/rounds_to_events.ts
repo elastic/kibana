@@ -48,22 +48,15 @@ const roundDerivedEventIds = (roundId: string) => ({
   execution: `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.execution}`,
 });
 
-/**
- * Converts a single round into its coarse timeline events: `user_message`, `execution_started`,
- * and a terminal `execution_terminated` whose `outcome` is `responded` (completed round) or
- * `prompt_requested` (awaiting-prompt round).
- */
-export const roundToEvents = (
-  round: ConversationRound,
+/** The fields of a round needed to build its `user_message` + `execution_started` start events. */
+type RoundStart = Pick<ConversationRound, 'id' | 'input' | 'started_at' | 'author' | 'origin'>;
+
+export const roundStartEvents = (
+  round: RoundStart,
   conversation: Conversation
 ): TimelineEvent[] => {
   const ids = roundDerivedEventIds(round.id);
-  const agent = agentActor(conversation);
-  const endedAt = new Date(
-    new Date(round.started_at).getTime() + round.time_to_last_token
-  ).toISOString();
-
-  const events: TimelineEvent[] = [
+  return [
     {
       id: ids.userMessage,
       type: TimelineEventType.userMessage,
@@ -75,30 +68,48 @@ export const roundToEvents = (
       id: ids.executionStarted,
       type: TimelineEventType.executionStarted,
       created_at: round.started_at,
-      actor: agent,
+      actor: agentActor(conversation),
       execution_id: ids.execution,
       trigger_event_id: ids.userMessage,
       data: { trigger_type: TimelineTriggerType.userMessage },
     },
   ];
+};
+
+export const roundTerminatedEvent = (
+  round: ConversationRound,
+  conversation: Conversation
+): TimelineEvent | undefined => {
+  const ids = roundDerivedEventIds(round.id);
+  const endedAt = new Date(
+    new Date(round.started_at).getTime() + round.time_to_last_token
+  ).toISOString();
 
   const terminated = (outcome: ExecutionOutcome): TimelineEvent => ({
     id: ids.executionTerminated,
     type: TimelineEventType.executionTerminated,
     created_at: endedAt,
-    actor: agent,
+    actor: agentActor(conversation),
     execution_id: ids.execution,
     trigger_event_id: ids.userMessage,
     data: { ...executionRunSummary(round), outcome },
   });
 
   if (round.status === ConversationRoundStatus.completed) {
-    events.push(terminated({ type: 'responded', response: round.response }));
-  } else if (round.status === ConversationRoundStatus.awaitingPrompt) {
-    events.push(terminated({ type: 'prompt_requested', prompts: round.pending_prompts ?? [] }));
+    return terminated({ type: 'responded', response: round.response });
   }
+  if (round.status === ConversationRoundStatus.awaitingPrompt) {
+    return terminated({ type: 'prompt_requested', prompts: round.pending_prompts ?? [] });
+  }
+  return undefined;
+};
 
-  return events;
+export const roundToEvents = (
+  round: ConversationRound,
+  conversation: Conversation
+): TimelineEvent[] => {
+  const terminated = roundTerminatedEvent(round, conversation);
+  return [...roundStartEvents(round, conversation), ...(terminated ? [terminated] : [])];
 };
 
 /**
@@ -124,7 +135,7 @@ const executionRunSummary = (round: ConversationRound): ExecutionRunSummary => (
 /** Actor for a round's `user_message`: the round author (external or user), else the owner. */
 export const userMessageActor = (
   conversation: Conversation,
-  round: ConversationRound
+  round: Pick<ConversationRound, 'author' | 'origin'>
 ): EventActor => {
   if (round.author) {
     return {

@@ -17,6 +17,7 @@ import {
   type ConversationAccessControlEntry,
   CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES,
   CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH,
+  CONVERSATION_SCHEMA_VERSION,
   CONVERSATION_TITLE_MAX_LENGTH,
   ConversationAccessControlMode,
   isConversationAccessControlRole,
@@ -48,6 +49,7 @@ import {
 } from '../access_control';
 import type {
   AddAttachmentsToLastRoundRequest,
+  AppendEventsRequest,
   ConversationCreateRequest,
   ConversationUpdatableFields,
   ConversationUpdateRequest,
@@ -94,6 +96,10 @@ export interface ConversationClient {
   ): Promise<Conversation>;
   upsertRound(
     request: UpsertRoundRequest,
+    options?: { access: ConversationAccess }
+  ): Promise<Conversation>;
+  appendEvents(
+    request: AppendEventsRequest,
     options?: { access: ConversationAccess }
   ): Promise<Conversation>;
   markRead(conversationId: string, read: boolean): Promise<Conversation>;
@@ -445,6 +451,46 @@ class ConversationClientImpl implements ConversationClient {
       }),
     });
     return result;
+  }
+
+  /** Appends timeline events onto a conversation.*/
+  async appendEvents(
+    request: AppendEventsRequest,
+    options: { access: ConversationAccess } = { access: 'converse' }
+  ): Promise<Conversation> {
+    const { id: conversationId, events, title, status, state, attachments, workspaceId } = request;
+    const { access } = options;
+
+    return this.writeConversation({
+      conversationId,
+      access,
+      fields: (current) => {
+        const existingIds = new Set((current.events ?? []).map((event) => event.id));
+        const appended = [
+          ...(current.events ?? []),
+          ...events.filter((event) => !existingIds.has(event.id)),
+        ];
+        return {
+          events: appended,
+          schema_version: CONVERSATION_SCHEMA_VERSION,
+          ...(title !== undefined ? { title } : {}),
+          ...(status ? { status } : {}),
+          ...(state ? { state } : {}),
+          ...(attachments
+            ? {
+                attachments: reconcileAttachments({
+                  snapshot: attachments.snapshot,
+                  stored: current.attachments ?? [],
+                  produced: attachments.produced,
+                }),
+              }
+            : {}),
+          ...(workspaceId && !current.workspace_id ? { workspace_id: workspaceId } : {}),
+          read_by: [],
+          read: false,
+        };
+      },
+    });
   }
 
   async markRead(conversationId: string, read: boolean): Promise<Conversation> {
