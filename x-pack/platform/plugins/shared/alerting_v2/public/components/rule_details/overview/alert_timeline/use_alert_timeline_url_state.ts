@@ -5,57 +5,81 @@
  * 2.0.
  */
 
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useHistory, useLocation } from 'react-router-dom';
 import {
   createKbnUrlStateStorage,
+  Storage,
   type IKbnUrlStateStorage,
 } from '@kbn/kibana-utils-plugin/public';
+import deepEqual from 'fast-deep-equal';
+import {
+  readActivityTimeRangeFromStorage,
+  readActivityTimeRangeFromUrl,
+  resolveActivityTimeRange,
+  writeActivityTimeRangeToStorage,
+  writeActivityTimeRangeToUrl,
+  type AlertTimelineTimeRange,
+} from '../activity_time_range_state';
+import { DEFAULT_ACTIVITY_TIME_RANGE } from '../time_range';
 
-const APP_STATE_STORAGE_KEY = '_a';
-
-export interface AlertTimelineTimeRange {
-  from: string;
-  to: string;
-}
-
-interface PersistedAppState {
-  activityTimeRange?: AlertTimelineTimeRange;
-}
+export type { AlertTimelineTimeRange };
 
 /**
- * Two-way URL state sync for the Alert Timeline time range. Hydrates
- * from `_a.activityTimeRange` on mount and writes back on every change so the
- * page URL is shareable and refresh-stable.
+ * Two-way sync for the Alert activity time range. Hydrates from URL, then
+ * localStorage, then the given default. User changes write both stores so the
+ * range survives rule-to-rule navigation and is shareable via URL.
+ *
+ * Precedence on load (and on re-sync from browser Back/Forward): URL > localStorage > default.
  */
 export const useAlertTimelineUrlState = (
-  defaultTimeRange: AlertTimelineTimeRange
+  storage?: Storage
 ): [AlertTimelineTimeRange, (next: AlertTimelineTimeRange) => void] => {
   const history = useHistory();
+  const location = useLocation();
 
-  const stateStorage: IKbnUrlStateStorage = useMemo(
+  const resolvedStorage = useMemo(() => storage ?? new Storage(window.localStorage), [storage]);
+
+  const urlStateStorage: IKbnUrlStateStorage = useMemo(
     () => createKbnUrlStateStorage({ useHash: false, useHashQuery: false, history }),
     [history]
   );
 
-  const [timeRange, setTimeRange] = useState<AlertTimelineTimeRange>(() => {
-    const persisted = stateStorage.get<PersistedAppState>(APP_STATE_STORAGE_KEY);
-    return persisted?.activityTimeRange ?? defaultTimeRange;
-  });
+  const [timeRange, setTimeRangeInternal] = useState<AlertTimelineTimeRange>(() =>
+    resolveActivityTimeRange(
+      readActivityTimeRangeFromStorage(resolvedStorage),
+      readActivityTimeRangeFromUrl(urlStateStorage),
+      DEFAULT_ACTIVITY_TIME_RANGE
+    )
+  );
 
-  const isFirstWrite = useRef(true);
   useEffect(() => {
-    if (isFirstWrite.current) {
-      isFirstWrite.current = false;
-      return;
-    }
-    const current = stateStorage.get<PersistedAppState>(APP_STATE_STORAGE_KEY) ?? {};
-    stateStorage.set<PersistedAppState>(
-      APP_STATE_STORAGE_KEY,
-      { ...current, activityTimeRange: timeRange },
-      { replace: true }
+    // useState above only reads the URL on mount; user-driven changes go through setTimeRange.
+    // When location.search changes without that (e.g. browser Back/Forward), we must re-apply the
+    // state here or the picker will diverge from the address bar. Mirrors useEpisodesTableConfig.
+    const next = resolveActivityTimeRange(
+      readActivityTimeRangeFromStorage(resolvedStorage),
+      readActivityTimeRangeFromUrl(urlStateStorage),
+      DEFAULT_ACTIVITY_TIME_RANGE
     );
-  }, [stateStorage, timeRange]);
+    setTimeRangeInternal((prev) => (deepEqual(prev, next) ? prev : next));
+  }, [location.search, resolvedStorage, urlStateStorage]);
+
+  const persistRange = useCallback(
+    (next: AlertTimelineTimeRange) => {
+      writeActivityTimeRangeToStorage(resolvedStorage, next);
+      void writeActivityTimeRangeToUrl(urlStateStorage, next);
+    },
+    [resolvedStorage, urlStateStorage]
+  );
+
+  const setTimeRange = useCallback(
+    (next: AlertTimelineTimeRange) => {
+      setTimeRangeInternal(next);
+      persistRange(next);
+    },
+    [persistRange]
+  );
 
   return [timeRange, setTimeRange];
 };

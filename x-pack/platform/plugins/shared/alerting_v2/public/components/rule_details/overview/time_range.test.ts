@@ -24,7 +24,7 @@ describe('resolveGteLte', () => {
 
   describe('against a pinned clock', () => {
     const nowMs = Date.parse(NOW);
-    const fallbackWindow = { windowStartMs: nowMs - 7 * DAY_MS, windowEndMs: nowMs };
+    const fallbackWindow = { windowStartMs: nowMs - DAY_MS, windowEndMs: nowMs };
 
     beforeEach(() => {
       jest.useFakeTimers();
@@ -40,19 +40,19 @@ describe('resolveGteLte', () => {
       expect(resolveGteLte(from, to)).toEqual(fallbackWindow);
     });
 
-    it('falls back to a 7-day window when datemath rejects both bounds outright', () => {
+    it('falls back to a 24-hour window when datemath rejects both bounds outright', () => {
       // Empty strings short-circuit datemath.parse to `undefined`.
       expect(resolveGteLte('', '')).toEqual(fallbackWindow);
     });
 
-    it('falls back to a 7-day window when both bounds parse to an invalid date', () => {
+    it('falls back to a 24-hour window when both bounds parse to an invalid date', () => {
       // An invalid moment yields NaN from `valueOf()` rather than `undefined`.
       expect(resolveGteLte(MALFORMED, MALFORMED)).toEqual(fallbackWindow);
     });
 
     it('falls back per bound, keeping the parseable one', () => {
       expect(resolveGteLte(MALFORMED, ABSOLUTE_TO)).toEqual({
-        windowStartMs: nowMs - 7 * DAY_MS,
+        windowStartMs: nowMs - DAY_MS,
         windowEndMs: Date.parse(ABSOLUTE_TO),
       });
       expect(resolveGteLte(ABSOLUTE_FROM, MALFORMED)).toEqual({
