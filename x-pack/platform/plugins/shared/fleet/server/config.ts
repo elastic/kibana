@@ -289,11 +289,7 @@ export const config: PluginConfigDescriptor = {
                 schema.object({
                   certificate: schema.maybe(schema.string()),
                   key: schema.maybe(schema.string()),
-                  // One path (agentless-style) or a list. Serverless mTLS needs
-                  // both cluster-internal-cas and the MKI intermediate.
-                  ca: schema.maybe(
-                    schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { minSize: 1 })])
-                  ),
+                  ca: schema.maybe(schema.string()),
                 })
               ),
             })
