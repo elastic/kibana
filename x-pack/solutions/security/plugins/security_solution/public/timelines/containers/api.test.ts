@@ -570,6 +570,27 @@ describe('copyTimeline', () => {
     );
   });
 
+  it('derives the copied saved search title from the timeline title', async () => {
+    jest.clearAllMocks();
+
+    await api.copyTimeline({
+      timelineId: 'test',
+      timeline: {
+        ...timelineData,
+        title: 'Copied timeline',
+        savedSearchId: 'test',
+      },
+      savedSearch: mockSavedSearch,
+    });
+
+    expect(saveSavedSearchMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'Saved Discover session for Timeline - Copied timeline',
+      }),
+      { copyOnSave: false }
+    );
+  });
+
   it('does not save a saved search for timelines without `savedSearchId`', async () => {
     jest.clearAllMocks();
 
