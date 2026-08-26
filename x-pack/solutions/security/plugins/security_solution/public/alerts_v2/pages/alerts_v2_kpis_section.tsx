@@ -23,6 +23,7 @@ import { AlertsByRulePanel } from './kpis/alerts_by_rule_panel';
 import { TopAlertsByPanel } from './kpis/top_alerts_by_panel';
 import { TrendPanel } from './kpis/trend_panel';
 import { CountsPanel } from './kpis/counts_panel';
+import { TreemapPanel } from './kpis/treemap_panel';
 
 export type AlertsV2KpiView = 'summary' | 'trend' | 'counts' | 'treemap';
 
@@ -134,6 +135,8 @@ export const AlertsV2KpisSection = ({ query, timeRange }: AlertsV2KpisSectionPro
         <TrendPanel query={query} timeRange={timeRange} />
       ) : selectedView === 'counts' ? (
         <CountsPanel query={query} timeRange={timeRange} />
+      ) : selectedView === 'treemap' ? (
+        <TreemapPanel query={query} timeRange={timeRange} />
       ) : (
         <EuiEmptyPrompt
           iconType="chartBarVerticalStack"
