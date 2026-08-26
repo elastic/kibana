@@ -248,7 +248,7 @@ describe('getUpdateKiStepDefinition', () => {
       outcome: 'success',
     });
     expect(telemetry.logger.debug).toHaveBeenCalledWith(
-      "KI 'ki-1' updated in AI index 'hashed-ai-index-id'"
+      "KI 'ki-1' updated in AI index 'my-ai-index'"
     );
   });
 
@@ -281,7 +281,7 @@ describe('getUpdateKiStepDefinition', () => {
       errorType: 'NotFoundError',
     });
     expect(telemetry.logger.debug).toHaveBeenCalledWith(
-      "KI update failed in AI index 'hashed-ai-index-id': NotFoundError"
+      "KI update failed in AI index 'my-ai-index': NotFoundError"
     );
   });
 
@@ -318,7 +318,7 @@ describe('getUpdateKiStepDefinition', () => {
       outcome: 'aborted',
     });
     expect(telemetry.logger.debug).toHaveBeenCalledWith(
-      "KI update aborted in AI index 'hashed-ai-index-id'"
+      "KI update aborted in AI index 'my-ai-index'"
     );
   });
 

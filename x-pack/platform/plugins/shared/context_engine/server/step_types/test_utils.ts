@@ -48,7 +48,6 @@ export const mockAiIndexService = (dest: AiIndexDest, managed = false): AiIndexS
 export const mockKiStepTelemetry = () => ({
   analyticsService: {
     reportKiWrite: jest.fn(),
-    aiIndexIdForTelemetry: jest.fn().mockReturnValue('hashed-ai-index-id'),
   } as unknown as jest.Mocked<ContextEngineAnalyticsService>,
   logger: {
     debug: jest.fn(),

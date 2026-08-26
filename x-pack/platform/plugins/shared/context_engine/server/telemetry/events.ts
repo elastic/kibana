@@ -28,8 +28,7 @@ const kiWriteEventSchema: RootSchema<ReportKiWriteEventParams> = {
   ai_index_id: {
     type: 'keyword',
     _meta: {
-      description:
-        'AI index id; hashed with the cluster id as salt when user-owned, verbatim when managed (registered from code). "unknown" when the hash salt is not available yet.',
+      description: 'The id of the AI index the KI write targets.',
       optional: false,
     },
   },

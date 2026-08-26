@@ -297,7 +297,7 @@ describe('getCreateKiStepDefinition', () => {
       outcome: 'success',
     });
     expect(telemetry.logger.debug).toHaveBeenCalledWith(
-      "KI 'ki-1' created in AI index 'hashed-ai-index-id'"
+      "KI 'ki-1' created in AI index 'my-ai-index'"
     );
   });
 
@@ -380,7 +380,7 @@ describe('getCreateKiStepDefinition', () => {
       outcome: 'aborted',
     });
     expect(telemetry.logger.debug).toHaveBeenCalledWith(
-      "KI create aborted in AI index 'hashed-ai-index-id'"
+      "KI create aborted in AI index 'my-ai-index'"
     );
   });
 

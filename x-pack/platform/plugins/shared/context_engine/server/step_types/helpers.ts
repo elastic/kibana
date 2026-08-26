@@ -70,9 +70,7 @@ export const withKiWriteTelemetry = async <Output extends { id: string }>({
     });
     analyticsService.reportKiWrite({ action, aiIndexId, managed, outcome: 'success' });
     logger.debug(
-      `KI '${result.output.id}' ${
-        KI_WRITE_SUCCESS_VERB[action]
-      } AI index '${analyticsService.aiIndexIdForTelemetry(aiIndexId, managed)}'`
+      `KI '${result.output.id}' ${KI_WRITE_SUCCESS_VERB[action]} AI index '${aiIndexId}'`
     );
     return result;
   } catch (error) {
@@ -86,11 +84,10 @@ export const withKiWriteTelemetry = async <Output extends { id: string }>({
       outcome: aborted ? 'aborted' : 'failure',
       errorType,
     });
-    const idForLog = analyticsService.aiIndexIdForTelemetry(aiIndexId, managed);
     logger.debug(
       aborted
-        ? `KI ${action} aborted in AI index '${idForLog}'`
-        : `KI ${action} failed in AI index '${idForLog}': ${errorType}`
+        ? `KI ${action} aborted in AI index '${aiIndexId}'`
+        : `KI ${action} failed in AI index '${aiIndexId}': ${errorType}`
     );
     throw error;
   }

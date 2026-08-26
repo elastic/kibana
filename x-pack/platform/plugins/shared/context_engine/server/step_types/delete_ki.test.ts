@@ -217,7 +217,7 @@ describe('getDeleteKiStepDefinition', () => {
       outcome: 'success',
     });
     expect(telemetry.logger.debug).toHaveBeenCalledWith(
-      "KI 'ki-1' deleted from AI index 'hashed-ai-index-id'"
+      "KI 'ki-1' deleted from AI index 'my-ai-index'"
     );
   });
 
@@ -250,7 +250,7 @@ describe('getDeleteKiStepDefinition', () => {
       errorType: 'NotFoundError',
     });
     expect(telemetry.logger.debug).toHaveBeenCalledWith(
-      "KI delete failed in AI index 'hashed-ai-index-id': NotFoundError"
+      "KI delete failed in AI index 'my-ai-index': NotFoundError"
     );
   });
 
@@ -287,7 +287,7 @@ describe('getDeleteKiStepDefinition', () => {
       outcome: 'aborted',
     });
     expect(telemetry.logger.debug).toHaveBeenCalledWith(
-      "KI delete aborted in AI index 'hashed-ai-index-id'"
+      "KI delete aborted in AI index 'my-ai-index'"
     );
   });
 

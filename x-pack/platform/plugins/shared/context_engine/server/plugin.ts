@@ -176,16 +176,6 @@ export class ContextEnginePlugin
     const aiIndexLogger = this.logger.get('ai_indices');
 
     this.esClient = coreStart.elasticsearch.client.asInternalUser;
-    const esClient = this.esClient;
-
-    // The cluster uuid salts hashed AI index ids in EBT payloads; the service
-    // fetches it with a delayed retry until it succeeds.
-    this.analyticsService?.setClusterUuidFetcher(async () => {
-      const { cluster_uuid: clusterUuid } = await esClient.info({
-        filter_path: 'cluster_uuid',
-      });
-      return clusterUuid;
-    });
 
     this.aiIndexService = new AiIndexService({
       esClient: this.esClient,
@@ -243,7 +233,5 @@ export class ContextEnginePlugin
     };
   }
 
-  stop() {
-    this.analyticsService?.stop();
-  }
+  stop() {}
 }
