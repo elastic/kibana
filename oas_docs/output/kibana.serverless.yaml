@@ -2267,7 +2267,14 @@ paths:
                       delete: true
                       rename: true
                     rounds:
-                      - id: 170ec3b2-0f5a-4538-8b60-549572386d2a
+                      - feedback:
+                          chips:
+                            - accurate
+                            - useful
+                          comment: ''
+                          submitted_at: '2025-09-19T17:46:12.000Z'
+                          vote: up
+                        id: 170ec3b2-0f5a-4538-8b60-549572386d2a
                         input:
                           message: Hello, how are you?
                         response:
@@ -3196,14 +3203,6 @@ paths:
                       - description
                       - schema
                   type: array
-                capabilities:
-                  additionalProperties: false
-                  description: Controls agent capabilities during conversation. Currently supports visualization rendering for tabular tool results.
-                  type: object
-                  properties:
-                    visualizations:
-                      description: When true, allows the agent to render tabular data from tool results as interactive visualizations using custom XML elements in responses.
-                      type: boolean
                 configuration_overrides:
                   additionalProperties: false
                   description: Runtime configuration overrides. These override the stored agent configuration for this execution only.
@@ -3673,14 +3672,6 @@ paths:
                       - description
                       - schema
                   type: array
-                capabilities:
-                  additionalProperties: false
-                  description: Controls agent capabilities during conversation. Currently supports visualization rendering for tabular tool results.
-                  type: object
-                  properties:
-                    visualizations:
-                      description: When true, allows the agent to render tabular data from tool results as interactive visualizations using custom XML elements in responses.
-                      type: boolean
                 configuration_overrides:
                   additionalProperties: false
                   description: Runtime configuration overrides. These override the stored agent configuration for this execution only.
@@ -9666,6 +9657,8 @@ paths:
           name: id
           required: true
           schema:
+            maxLength: 150
+            minLength: 1
             type: string
       requestBody:
         content:
@@ -88705,7 +88698,7 @@ components:
       type: object
       properties:
         artifacts:
-          description: 'Artifacts attached to the rule, each shaped as `{ id, type, data }`. `data` carries type-specific fields: a `runbook` artifact requires `data.content` holding markdown, and a `dashboard` artifact requires `data.dashboardId` holding a dashboard saved object id. Artifacts of any other type may carry whatever fields they need in `data`.'
+          description: Artifacts attached to the rule, each shaped as `{ id, type, data }`. `data` is a type-specific object (for example a `runbook` may carry `content`, a `dashboard` may carry `dashboardId`). Per-type shape is validated by the artifact-type registry when the type is registered; unregistered types pass through with envelope bounds only.
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_artifact'
           maxItems: 100
@@ -89189,7 +89182,7 @@ components:
       type: object
       properties:
         artifacts:
-          description: 'Artifacts attached to the rule, each shaped as `{ id, type, data }`. `data` carries type-specific fields: a `runbook` artifact requires `data.content` holding markdown, and a `dashboard` artifact requires `data.dashboardId` holding a dashboard saved object id. Artifacts of any other type may carry whatever fields they need in `data`.'
+          description: Artifacts attached to the rule, each shaped as `{ id, type, data }`. `data` is a type-specific object (for example a `runbook` may carry `content`, a `dashboard` may carry `dashboardId`). Per-type shape is validated by the artifact-type registry when the type is registered; unregistered types pass through with envelope bounds only.
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_artifact'
           maxItems: 100
@@ -89572,7 +89565,7 @@ components:
       type: object
       properties:
         artifacts:
-          description: 'Artifacts attached to the rule, each shaped as `{ id, type, data }`. `data` carries type-specific fields: a `runbook` artifact requires `data.content` holding markdown, and a `dashboard` artifact requires `data.dashboardId` holding a dashboard saved object id. Artifacts of any other type may carry whatever fields they need in `data`.'
+          description: Artifacts attached to the rule, each shaped as `{ id, type, data }`. `data` is a type-specific object (for example a `runbook` may carry `content`, a `dashboard` may carry `dashboardId`). Per-type shape is validated by the artifact-type registry when the type is registered; unregistered types pass through with envelope bounds only.
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_artifact'
           maxItems: 100
@@ -99131,6 +99124,7 @@ components:
                     aiops_log_rate_analysis: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_log_rate_analysis'
                     aiops_pattern_analysis: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_pattern_analysis'
                     apm_service_map: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-apm_service_map'
+                    custom_content: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-custom_content'
                     discover_session: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-discover_session'
                     esql_control: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-esql_control'
                     field_stats_table: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-field_stats_table'
@@ -99156,6 +99150,7 @@ components:
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-ml_anomaly_swimlane'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-apm_service_map'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_change_point_chart'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-custom_content'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-discover_session'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-esql_control'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-field_stats_table'
@@ -99419,6 +99414,49 @@ components:
         - grid
         - config
       title: APM Service map
+      type: object
+    Kibana_HTTP_APIs_kbn-dashboard-panel-type-custom_content:
+      additionalProperties: false
+      properties:
+        config:
+          additionalProperties: false
+          type: object
+          properties:
+            description:
+              description: A short description of the panel.
+              type: string
+            esql_query:
+              items:
+                maxLength: 1000000
+                type: string
+              maxItems: 1
+              type: array
+            hide_border:
+              description: When true, the panel border is hidden. Defaults to false.
+              type: boolean
+            hide_title:
+              description: When true, the panel title is hidden. Defaults to false.
+              type: boolean
+            template:
+              maxLength: 510000
+              type: string
+            title:
+              description: The panel title.
+              type: string
+        grid:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-grid'
+        id:
+          description: The unique ID of the panel.
+          type: string
+        type:
+          enum:
+            - custom_content
+          type: string
+      required:
+        - type
+        - grid
+        - config
+      title: Custom content
       type: object
     Kibana_HTTP_APIs_kbn-dashboard-panel-type-discover_session:
       additionalProperties: false
@@ -101109,6 +101147,7 @@ components:
                 aiops_log_rate_analysis: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_log_rate_analysis'
                 aiops_pattern_analysis: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_pattern_analysis'
                 apm_service_map: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-apm_service_map'
+                custom_content: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-custom_content'
                 discover_session: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-discover_session'
                 esql_control: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-esql_control'
                 field_stats_table: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-field_stats_table'
@@ -101134,6 +101173,7 @@ components:
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-ml_anomaly_swimlane'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-apm_service_map'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_change_point_chart'
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-custom_content'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-discover_session'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-esql_control'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-field_stats_table'
@@ -124039,9 +124079,8 @@ components:
             - severity
         - $ref: '#/components/schemas/Security_Detections_API_MachineLearningRuleCreateFields'
     Security_Detections_API_MaxSignals:
-      default: 100
       description: |
-        Maximum number of alerts the rule can create during a single run (the rule’s Max alerts per run [advanced setting](https://www.elastic.co/docs/solutions/security/detect-and-alert/create-detection-rule#rule-ui-advanced-params) value).
+        Maximum number of alerts the rule can create during a single run (the rule’s Max alerts per run [advanced setting](https://www.elastic.co/docs/solutions/security/detect-and-alert/create-detection-rule#rule-ui-advanced-params) value). Defaults to `100`.
         > info
         > This setting can be superseded by the [Kibana configuration setting](https://www.elastic.co/docs/reference/kibana/configuration-reference/alerting-settings) `xpack.alerting.rules.run.alerts.max`, which determines the maximum alerts generated by any rule in the Kibana alerting framework. For example, if `xpack.alerting.rules.run.alerts.max` is set to 1000, the rule can generate no more than 1000 alerts even if `max_signals` is set higher.
       minimum: 1
