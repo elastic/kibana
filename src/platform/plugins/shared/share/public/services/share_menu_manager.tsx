@@ -64,6 +64,13 @@ export class ShareMenuManager {
             onClose,
             menuItems,
             publicAPIEnabled: !isServerless,
+            onUrlGenerationError: (error: Error) => {
+              core.notifications.toasts.addError(error, {
+                title: i18n.translate('share.link.generateUrlError', {
+                  defaultMessage: 'Unable to generate a URL',
+                }),
+              });
+            },
           },
           core.rendering
         );
@@ -309,9 +316,11 @@ export class ShareMenuManager {
       asExport,
       publicAPIEnabled,
       onSave,
+      onUrlGenerationError,
     }: ShowShareMenuOptions & {
       menuItems: ShareConfigs[];
       onClose: () => void;
+      onUrlGenerationError: (error: Error) => void;
     },
     rendering: RenderingService
   ) {
@@ -345,6 +354,7 @@ export class ShareMenuManager {
             unmount();
           },
           onSave,
+          onUrlGenerationError,
         },
       }),
       rendering
