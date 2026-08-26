@@ -55,6 +55,9 @@ export const ConversationsPage: React.FC = () => {
     assignee?: string | null;
   }>({ type: null, recordId: null, assignee: null });
 
+  // TODO: update data fetching to use the new conversations API (useConversations) and remove the useInvestigations hook
+  const conversations = useMemo(() => data?.investigations ?? [], [data?.investigations]);
+
   const onClickAction: BaseActionsProps['onClickAction'] = useCallback(
     (action, recordId, assignee = null) => {
       setModalState({ type: action, recordId, assignee });
@@ -63,29 +66,32 @@ export const ConversationsPage: React.FC = () => {
   );
 
   const onClickCard = useCallback(
-    (recordId: Investigation['recordId']) => {
-      setSelectedIdForDetails(recordId);
+    (id: Investigation['id']) => {
+      setSelectedIdForDetails(id);
     },
     [setSelectedIdForDetails]
   );
 
   const onClickRecommendedAction: ConversationsActionsGroupProps['onClickRecommendedAction'] =
     useCallback(
-      ({ recordId, recommendedAction }) => {
-        setSelectedIdForRecommendedAction(recordId);
+      ({ id }) => {
+        setSelectedIdForRecommendedAction(id);
       },
       [setSelectedIdForRecommendedAction]
     );
 
-  // TODO: update data fetching to use the new conversations API (useConversations) and remove the useInvestigations hook
-  const conversations = useMemo(() => data?.investigations ?? [], [data?.investigations]);
-
   const selectedRecommendedActionConversation = useMemo(
     () =>
       selectedIdForRecommendedAction
-        ? conversations.find((c) => c.recordId === selectedIdForRecommendedAction)
+        ? conversations.find((c) => c.id === selectedIdForRecommendedAction)
         : undefined,
     [conversations, selectedIdForRecommendedAction]
+  );
+
+  const selectedDetailsConversation = useMemo(
+    () =>
+      selectedIdForDetails ? conversations.find((c) => c.id === selectedIdForDetails) : undefined,
+    [conversations, selectedIdForDetails]
   );
 
   const recommendedActionIconProps = useMemo(
@@ -161,9 +167,9 @@ export const ConversationsPage: React.FC = () => {
         />
       )}
 
-      {selectedIdForDetails && (
+      {selectedIdForDetails && selectedDetailsConversation && (
         <ConversationDetailsFlyout
-          investigation={conversations.find((c) => c.recordId === selectedIdForDetails)!}
+          investigation={selectedDetailsConversation}
           onClose={() => setSelectedIdForDetails(undefined)}
           onClickAction={onClickAction}
           onClickRecommendedAction={onClickRecommendedAction}

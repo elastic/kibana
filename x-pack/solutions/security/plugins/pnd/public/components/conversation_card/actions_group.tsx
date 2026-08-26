@@ -16,10 +16,10 @@ import { ActionButton, BaseActions, type BaseActionsProps } from '../actions';
 export interface ConversationsActionsGroupProps {
   investigation: Investigation;
   onClickRecommendedAction: ({
-    recordId,
+    id,
     recommendedAction,
   }: {
-    recordId: Investigation['recordId'];
+    id: Investigation['id'];
     recommendedAction: Investigation['recommendedAction'];
   }) => void;
   onOpenChat: () => void;
@@ -50,7 +50,7 @@ export const ConversationsActionsGroup = memo<ConversationsActionsGroupProps>(
                 onClick={(event: React.MouseEvent) => {
                   event.stopPropagation();
                   onClickRecommendedAction({
-                    recordId: investigation.recordId,
+                    id: investigation.id,
                     recommendedAction: investigation.recommendedAction,
                   });
                 }}

@@ -33,7 +33,7 @@ interface ConversationQueueProps {
   briefingType: RecommendedAction;
   briefingList: Investigation[];
   onClickAction: BaseActionsProps['onClickAction'];
-  onClickCard: (recordId: Investigation['recordId']) => void;
+  onClickCard: (id: Investigation['id']) => void;
   onClickRecommendedAction: ConversationsActionsGroupProps['onClickRecommendedAction'];
   isFiltered?: boolean;
 }

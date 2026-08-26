@@ -18,103 +18,107 @@ import {
 import { type Investigation } from '@kbn/pnd-common';
 import { useHistory } from 'react-router-dom';
 import type { BaseActionsProps } from '../actions';
-import { ConversationsActionsGroup, type ConversationsActionsGroupProps } from './actions_group';
+import { ConversationsActionsGroup } from './actions_group';
 
 const CONVERSATION_CARD_RISK_SCORE_SIZE = 40;
 
-export const ConversationCard = memo<{
+interface ConversationCardProps {
   investigation: Investigation;
   hasBorder: boolean;
-  onClickRecommendedAction: ConversationsActionsGroupProps['onClickRecommendedAction'];
+  onClickRecommendedAction: BaseActionsProps['onClickRecommendedAction'];
   onClickAction: BaseActionsProps['onClickAction'];
-  onClickCard: (recordId: Investigation['recordId']) => void;
-}>(({ investigation, hasBorder, onClickRecommendedAction, onClickAction, onClickCard }) => {
-  const { euiTheme } = useEuiTheme();
-  const history = useHistory();
+  onClickCard: (id: Investigation['id']) => void;
+}
 
-  const onOpenChat = useCallback(() => {
-    history.push(`/chats`);
-  }, [history]);
+export const ConversationCard = memo<ConversationCardProps>(
+  ({ investigation, hasBorder, onClickRecommendedAction, onClickAction, onClickCard }) => {
+    const { euiTheme } = useEuiTheme();
+    const history = useHistory();
 
-  return (
-    <EuiPanel
-      paddingSize="l"
-      role="button"
-      tabIndex={0}
-      aria-label={investigation.title}
-      borderRadius="none"
-      css={{
-        cursor: 'pointer',
-        borderBottom: hasBorder ? `1px solid ${euiTheme.colors.disabled}` : 'none',
-        borderRadius: hasBorder ? 'none' : `0 0 ${euiTheme.size.s} ${euiTheme.size.s}`,
-        boxSizing: 'border-box',
-        boxShadow: 'none',
-        '&:hover': {
-          backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+    const onOpenChat = useCallback(() => {
+      history.push(`/chats`);
+    }, [history]);
+
+    return (
+      <EuiPanel
+        paddingSize="l"
+        role="button"
+        tabIndex={0}
+        aria-label={investigation.title}
+        borderRadius="none"
+        css={{
+          cursor: 'pointer',
+          borderBottom: hasBorder ? `1px solid ${euiTheme.colors.disabled}` : 'none',
+          borderRadius: hasBorder ? 'none' : `0 0 ${euiTheme.size.s} ${euiTheme.size.s}`,
+          boxSizing: 'border-box',
           boxShadow: 'none',
-        },
-      }}
-      hasBorder={false}
-      hasShadow={false}
-      onClick={() => onClickCard(investigation.recordId)}
-    >
-      <EuiFlexGroup
-        alignItems="flexStart"
-        gutterSize="l"
-        responsive
-        justifyContent="spaceBetween"
-        direction="row"
+          '&:hover': {
+            backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+            boxShadow: 'none',
+          },
+        }}
+        hasBorder={false}
+        hasShadow={false}
+        onClick={() => onClickCard(investigation.id)}
       >
-        {investigation.priorityScore != null ? (
-          <EuiFlexItem grow={false} alignSelf="center" justifyContent="center">
-            <EuiText
-              size="s"
-              component="span"
-              color="danger"
-              css={{
-                flexShrink: 0,
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                background: euiTheme.colors.backgroundLightDanger,
-                width: `${CONVERSATION_CARD_RISK_SCORE_SIZE}px`,
-                height: `${CONVERSATION_CARD_RISK_SCORE_SIZE}px`,
-                fontWeight: euiTheme.font.weight.semiBold,
-                fontVariantNumeric: 'tabular-nums',
-                borderRadius: euiTheme.size.s,
-              }}
-            >
-              {investigation.priorityScore}
-            </EuiText>
-          </EuiFlexItem>
-        ) : null}
-        <EuiFlexItem grow={true}>
-          <EuiFlexGroup gutterSize="xs" responsive direction="column">
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="xxs">
-                <EuiTextTruncate text={investigation.title} />
-              </EuiTitle>
+        <EuiFlexGroup
+          alignItems="flexStart"
+          gutterSize="l"
+          responsive
+          justifyContent="spaceBetween"
+          direction="row"
+        >
+          {investigation.priorityScore != null ? (
+            <EuiFlexItem grow={false} alignSelf="center" justifyContent="center">
+              <EuiText
+                size="s"
+                component="span"
+                color="danger"
+                css={{
+                  flexShrink: 0,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: euiTheme.colors.backgroundLightDanger,
+                  width: `${CONVERSATION_CARD_RISK_SCORE_SIZE}px`,
+                  height: `${CONVERSATION_CARD_RISK_SCORE_SIZE}px`,
+                  fontWeight: euiTheme.font.weight.semiBold,
+                  fontVariantNumeric: 'tabular-nums',
+                  borderRadius: euiTheme.size.s,
+                }}
+              >
+                {investigation.priorityScore}
+              </EuiText>
             </EuiFlexItem>
-            {investigation.summary ? (
+          ) : null}
+          <EuiFlexItem grow={true}>
+            <EuiFlexGroup gutterSize="xs" responsive direction="column">
               <EuiFlexItem grow={false}>
-                <EuiText size="s" color="subdued">
-                  <EuiTextTruncate text={investigation.summary} />
-                </EuiText>
+                <EuiTitle size="xxs">
+                  <EuiTextTruncate text={investigation.title} />
+                </EuiTitle>
               </EuiFlexItem>
-            ) : null}
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <ConversationsActionsGroup
-            investigation={investigation}
-            onClickRecommendedAction={onClickRecommendedAction}
-            onOpenChat={onOpenChat}
-            onClickAction={onClickAction}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPanel>
-  );
-});
+              {investigation.summary ? (
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s" color="subdued">
+                    <EuiTextTruncate text={investigation.summary} />
+                  </EuiText>
+                </EuiFlexItem>
+              ) : null}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <ConversationsActionsGroup
+              investigation={investigation}
+              onClickRecommendedAction={onClickRecommendedAction}
+              onOpenChat={onOpenChat}
+              onClickAction={onClickAction}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
+    );
+  }
+);
 
 ConversationCard.displayName = 'ConversationCard';
