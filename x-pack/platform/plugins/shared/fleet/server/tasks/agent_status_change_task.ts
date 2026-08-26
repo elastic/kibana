@@ -275,7 +275,6 @@ export class AgentStatusChangeTask {
 
     const agentlessPolicies: string[] = [];
     const policyNamespaceMap = new Map<string, string>();
-    const conflictedPolicies = new Set<string>();
 
     for await (const batch of agentPolicyFetcher) {
       for (const policy of batch) {
@@ -283,17 +282,7 @@ export class AgentStatusChangeTask {
           agentlessPolicies.push(policy.id);
         }
         if (policy.id && policy.namespace) {
-          if (conflictedPolicies.has(policy.id)) {
-            continue;
-          }
-          const existingNamespace = policyNamespaceMap.get(policy.id);
-          if (existingNamespace && existingNamespace !== policy.namespace) {
-            this.logger.warn(
-              `[AgentStatusChangeTask] Policy '${policy.id}' has conflicting namespaces ('${existingNamespace}' vs '${policy.namespace}'); falling back to default namespace`
-            );
-            policyNamespaceMap.delete(policy.id);
-            conflictedPolicies.add(policy.id);
-          } else {
+          if (!policyNamespaceMap.has(policy.id)) {
             policyNamespaceMap.set(policy.id, policy.namespace);
           }
         }
@@ -340,7 +329,6 @@ export class AgentStatusChangeTask {
 
     await esClient.bulk({
       operations: bulkBody,
-      refresh: 'wait_for',
     });
   };
 }

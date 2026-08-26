@@ -352,56 +352,6 @@ describe('AgentStatusChangeTask', () => {
       expect(doc.data_stream.namespace).toBe('default');
     });
 
-    it('should fallback namespace to default and log warning when same policy_id has conflicting namespaces', async () => {
-      mockAgentPolicyService.fetchAllAgentPolicies.mockImplementation(
-        getMockAgentPolicyFetchAllAgentPolicies([
-          {
-            id: 'policy-conflicted',
-            name: 'Policy Space A',
-            supports_agentless: false,
-            namespace: 'space-a',
-          },
-          {
-            id: 'policy-conflicted',
-            name: 'Policy Space B',
-            supports_agentless: false,
-            namespace: 'space-b',
-          },
-        ])
-      );
-
-      const agents = [
-        {
-          id: 'agent-conflicted-policy',
-          policy_id: 'policy-conflicted',
-          status: 'online',
-          namespaces: ['default'],
-          local_metadata: { host: { hostname: 'host-conflicted' } },
-        },
-      ] as unknown as Agent[];
-
-      mockedFetchAllAgentsByKuery
-        .mockResolvedValueOnce(getMockFetchAllAgentsByKuery(agents))
-        .mockResolvedValue(getMockFetchAllAgentsByKuery([]));
-
-      await runTask();
-
-      const bulkCall = esClient.bulk.mock.calls[0][0];
-      const operations = bulkCall.operations as any[];
-      const header = operations[0];
-      const doc = operations[1];
-
-      expect(header.create._index).toBe('logs-elastic_agent.status_change-default');
-      expect(doc.data_stream.namespace).toBe('default');
-
-      const logs = loggingSystemMock.collect(mockLogFactory);
-      expect(
-        logs.warn.some((entry) =>
-          String(entry[0]).includes("Policy 'policy-conflicted' has conflicting namespaces")
-        )
-      ).toBe(true);
-    });
-
     it('should send multiple agents on different-namespace policies in the same batch to their respective namespace-specific indices', async () => {
       const agents = [
         {
