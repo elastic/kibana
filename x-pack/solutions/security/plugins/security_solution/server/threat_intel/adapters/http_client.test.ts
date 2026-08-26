@@ -696,3 +696,156 @@ describe('fetchUrl with credentials in the URL', () => {
     ).rejects.toThrow(/restricted address range/);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Bounds and stream hygiene on the redirect path
+// ---------------------------------------------------------------------------
+
+/** Response whose body stream records whether it was released. */
+const makeResponseWithBody = (status: number, headers: Record<string, string> = {}) => {
+  const cancel = jest.fn().mockResolvedValue(undefined);
+  const response = {
+    status,
+    statusText: String(status),
+    headers: new Headers(headers),
+    body: { cancel, getReader: () => ({ read: async () => ({ done: true }) }) },
+    ok: false,
+    url: '',
+    text: async () => '',
+  } as unknown as Response;
+  return { response, cancel };
+};
+
+describe('fetchUrl DNS pre-flight bounds', () => {
+  // dns.lookup takes no AbortSignal, so a stalled resolver used to outlive both the
+  // per-request timeout and a step abort: resolution happens before any connection,
+  // which is outside everything else that bounds this function. Hostnames are
+  // operator-supplied, so that is a task-worker exhaustion vector.
+  it('gives up on a resolver that never answers', async () => {
+    const neverResolves = () => new Promise<Array<{ address: string }>>(() => {});
+
+    await expect(
+      createFetchUrl({
+        fetchFn: (async () => makeResponse(200)) as unknown as typeof fetch,
+        lookupFn: neverResolves,
+        timeoutMs: 60,
+      })('https://example.com/feed.xml', { abortSignal: new AbortController().signal })
+    ).rejects.toThrow(/Timed out or aborted resolving/);
+  });
+
+  it('gives up when the caller aborts during resolution', async () => {
+    const controller = new AbortController();
+    const neverResolves = () => new Promise<Array<{ address: string }>>(() => {});
+    setTimeout(() => controller.abort(), 20);
+
+    await expect(
+      createFetchUrl({
+        fetchFn: (async () => makeResponse(200)) as unknown as typeof fetch,
+        lookupFn: neverResolves,
+        timeoutMs: 30_000,
+      })('https://example.com/feed.xml', { abortSignal: controller.signal })
+    ).rejects.toThrow(/Timed out or aborted resolving/);
+  });
+
+  it('rejects immediately when the caller already aborted', async () => {
+    const controller = new AbortController();
+    controller.abort();
+
+    await expect(
+      createFetchUrl({
+        fetchFn: (async () => makeResponse(200)) as unknown as typeof fetch,
+        lookupFn: publicLookup,
+      })('https://example.com/feed.xml', { abortSignal: controller.signal })
+    ).rejects.toThrow(/Aborted before resolving/);
+  });
+});
+
+describe('fetchUrl non-followed 3xx', () => {
+  // Fetch only redirects 301/302/303/307/308. Treating every 3xx as a redirect made
+  // a 304 answering a caller's conditional headers throw "missing Location".
+  it('returns a 304 to the caller instead of demanding a Location', async () => {
+    const result = await createFetchUrl({
+      fetchFn: (async () => makeResponse(304, { etag: '"abc"' })) as unknown as typeof fetch,
+      lookupFn: publicLookup,
+    })('https://example.com/feed.xml', {
+      abortSignal: new AbortController().signal,
+      headers: { 'If-None-Match': '"abc"' },
+    });
+
+    expect(result.status).toBe(304);
+    expect(result.headers.etag).toBe('"abc"');
+  });
+
+  it('still follows a 308', async () => {
+    let hop = 0;
+    const fetchFn = jest.fn(async () => {
+      hop += 1;
+      return hop === 1
+        ? makeResponse(308, { location: 'https://example.com/moved.xml' })
+        : makeResponse(200, {}, 'ok');
+    });
+
+    const result = await createFetchUrl({
+      fetchFn: fetchFn as unknown as typeof fetch,
+      lookupFn: publicLookup,
+    })('https://example.com/feed.xml', { abortSignal: new AbortController().signal });
+
+    expect(result.finalUrl).toBe('https://example.com/moved.xml');
+  });
+});
+
+describe('fetchUrl redirect body release', () => {
+  // The body has to be released before anything throwable, because `finally` calls
+  // Agent.close(), which waits on in-flight requests. An unread stream keeps the
+  // request in flight, so a server streaming an endless redirect body could hang
+  // the run rather than failing it.
+  it('releases the redirect body when the destination is unsafe', async () => {
+    const { response, cancel } = makeResponseWithBody(302, {
+      location: 'https://internal.example/admin',
+    });
+
+    await expect(
+      createFetchUrl({
+        fetchFn: (async () => response) as unknown as typeof fetch,
+        lookupFn: async (host: string) =>
+          host === 'internal.example' ? [{ address: '10.0.0.5' }] : [{ address: '93.184.216.34' }],
+      })('https://example.com/feed.xml', { abortSignal: new AbortController().signal })
+    ).rejects.toThrow(/restricted address range/);
+
+    expect(cancel).toHaveBeenCalled();
+  });
+
+  it('releases the redirect body when the hop limit is exhausted', async () => {
+    const cancels: jest.Mock[] = [];
+    const fetchFn = jest.fn(async () => {
+      const { response, cancel } = makeResponseWithBody(302, {
+        location: 'https://example.com/next',
+      });
+      cancels.push(cancel);
+      return response;
+    });
+
+    await expect(
+      createFetchUrl({
+        fetchFn: fetchFn as unknown as typeof fetch,
+        lookupFn: publicLookup,
+      })('https://example.com/feed.xml', { abortSignal: new AbortController().signal })
+    ).rejects.toThrow(/Exceeded maximum redirect hops/);
+
+    expect(cancels).toHaveLength(6);
+    for (const cancel of cancels) expect(cancel).toHaveBeenCalled();
+  });
+
+  it('releases the redirect body when Location is missing', async () => {
+    const { response, cancel } = makeResponseWithBody(302, {});
+
+    await expect(
+      createFetchUrl({
+        fetchFn: (async () => response) as unknown as typeof fetch,
+        lookupFn: publicLookup,
+      })('https://example.com/feed.xml', { abortSignal: new AbortController().signal })
+    ).rejects.toThrow(/missing Location header/);
+
+    expect(cancel).toHaveBeenCalled();
+  });
+});

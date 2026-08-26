@@ -383,6 +383,50 @@ const isSameOrigin = (a: string, b: string): boolean => {
   }
 };
 
+/**
+ * Statuses that carry a `Location` and are actually followed. Treating every 3xx
+ * as a redirect made a legitimate 304 (which a caller can provoke with
+ * conditional headers) throw "missing Location" instead of being returned.
+ */
+const FOLLOWED_REDIRECT_STATUSES: ReadonlySet<number> = new Set([301, 302, 303, 307, 308]);
+
+/**
+ * Races a DNS pre-flight against the run's combined timeout/cancellation signal.
+ *
+ * `dns.lookup` does not take an AbortSignal, so on its own a stalled resolver
+ * outlives both the per-request timeout and a step abort: the feed run stays
+ * pending indefinitely. Since the hostname is operator-supplied, that is a
+ * task-worker resource-exhaustion vector, so the guard cannot be the only thing
+ * bounding it. The lookup itself keeps running in the background, but this
+ * function stops waiting on it.
+ */
+const assertSafeUrlResolvedWithin = async (
+  rawUrl: string,
+  lookupFn: DnsLookupFn,
+  signal: AbortSignal
+): Promise<ValidatedAddress | undefined> => {
+  if (signal.aborted) {
+    throw new Error(`Aborted before resolving "${redactUrl(rawUrl)}"`);
+  }
+  let onAbort: (() => void) | undefined;
+  try {
+    return await Promise.race([
+      assertSafeUrlResolved(rawUrl, lookupFn),
+      new Promise<never>((_, reject) => {
+        onAbort = () =>
+          reject(
+            new Error(
+              `Timed out or aborted resolving "${redactUrl(rawUrl)}" before any connection was made`
+            )
+          );
+        signal.addEventListener('abort', onAbort, { once: true });
+      }),
+    ]);
+  } finally {
+    if (onAbort) signal.removeEventListener('abort', onAbort);
+  }
+};
+
 const fetchUrlImpl = async (
   url: string,
   options: FetchUrlOptions,
@@ -396,13 +440,16 @@ const fetchUrlImpl = async (
   // also keeps them out of `finalUrl`.
   const { url: initialUrl, authorization } = splitUrlCredentials(url);
 
-  // Validate the initial URL before any network activity.
-  let pinned = await assertSafeUrlResolved(initialUrl, lookupFn);
-
+  // The signal is established before validation, not after, so the DNS pre-flight
+  // is inside the timeout too. Resolution happens before any connection, so a
+  // resolver that never answers used to sit outside every bound this function has.
   const { signal, cancel } = linkSignals(abortSignal, timeoutMs);
-  let dispatcher = pinned ? createPinnedDispatcher(pinned) : undefined;
+  let pinned: ValidatedAddress | undefined;
+  let dispatcher: Agent | undefined;
 
   try {
+    pinned = await assertSafeUrlResolvedWithin(initialUrl, lookupFn, signal);
+    dispatcher = pinned ? createPinnedDispatcher(pinned) : undefined;
     let currentUrl = initialUrl;
     let hopsRemaining = MAX_REDIRECT_HOPS;
     // A caller-supplied Authorization wins over one derived from userinfo: it is
@@ -429,8 +476,10 @@ const fetchUrlImpl = async (
         ...(dispatcher ? { dispatcher } : {}),
       } as RequestInit);
 
-      // Not a redirect — consume and return the response body.
-      if (response.status < 300 || response.status >= 400) {
+      // Not a followed redirect — consume and return the response body. This
+      // includes 3xx statuses that carry no Location, such as a 304 answering a
+      // caller's conditional headers.
+      if (!FOLLOWED_REDIRECT_STATUSES.has(response.status)) {
         const body = await readBodyWithCap(response, maxBytes);
         return {
           status: response.status,
@@ -441,8 +490,15 @@ const fetchUrlImpl = async (
         };
       }
 
-      // Redirect: extract Location, validate, and follow.
+      // Read what we need off the redirect, then release the stream immediately,
+      // before anything that can throw. Everything below (URL parsing, the hop
+      // limit, the destination SSRF check) can reject, and `finally` then calls
+      // `Agent.close()`, which waits on in-flight requests. An unread body keeps
+      // this request in flight, so a server streaming an endless redirect body
+      // could hang the whole feed run.
       const location = response.headers.get('location');
+      await response.body?.cancel().catch(() => {});
+
       if (!location) {
         throw new Error(`Redirect response (${response.status}) missing Location header`);
       }
@@ -459,13 +515,9 @@ const fetchUrlImpl = async (
       // legitimate feed host is the usual way into the internal network. The
       // hop gets its own pin, so each connection goes to an address that was
       // checked for that specific host.
-      pinned = await assertSafeUrlResolved(nextUrl, lookupFn);
-
-      // Release the redirect body *before* closing the agent. `Agent.close()`
-      // waits for in-flight requests to finish, and an unread response stream
-      // keeps this one in flight, so closing first can block until the timeout
-      // fires instead of returning promptly.
-      await response.body?.cancel().catch(() => {});
+      // Each hop gets its own pin, so every connection goes to an address that
+      // was checked for that specific host. Inside the signal, as above.
+      pinned = await assertSafeUrlResolvedWithin(nextUrl, lookupFn, signal);
       await dispatcher?.close().catch(() => {});
       dispatcher = pinned ? createPinnedDispatcher(pinned) : undefined;
 
