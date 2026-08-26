@@ -8,6 +8,8 @@
  */
 
 import type { Newable, ServiceIdentifier } from 'inversify';
+import { createToken } from '@kbn/core-di';
+import type { ServiceToken } from '@kbn/core-di';
 import type {
   IRouter,
   KibanaRequest,
@@ -56,23 +58,23 @@ export interface RouteHandler {
  * The service identifier that is used to register an HTTP route.
  * @public
  */
-export const Route: ServiceIdentifier<ServiceIdentifier<RouteHandler> & RouteDefinition> =
-  Symbol('Route');
+export const Route: ServiceToken<ServiceIdentifier<RouteHandler> & RouteDefinition> =
+  createToken('Route');
 
 /**
  * The service identifier of the plugin-scoped router.
  * @public
  */
-export const Router: ServiceIdentifier<IRouter<any>> = Symbol('Router');
+export const Router: ServiceToken<IRouter<any>> = createToken('Router');
 
 /**
  * The service identifier of the current request.
  * @public
  */
-export const Request: ServiceIdentifier<KibanaRequest> = Symbol('Request');
+export const Request: ServiceToken<KibanaRequest> = createToken('Request');
 
 /**
  * The service identifier of the current response factory.
  * @public
  */
-export const Response: ServiceIdentifier<KibanaResponseFactory> = Symbol('Response');
+export const Response: ServiceToken<KibanaResponseFactory> = createToken('Response');

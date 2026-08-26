@@ -22,6 +22,7 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
 } from '@kbn/discover-utils';
 import type { AggregateQuery, Query } from '@kbn/es-query';
+import { SOURCE_COLUMN } from '@kbn/unified-data-table';
 import type { DiscoverAppState } from '../application/main/state_management/redux';
 import { isEqualFilters } from '../application/main/state_management/utils/state_comparators';
 import { showTimeFieldColumn } from './show_time_field_column';
@@ -58,7 +59,7 @@ export async function getSharingData(
   // in ES|QL mode this `columns` array will be used only to generate CSV for Dashboard panels (CSV v2)
   // in Classic mode this `columns` array will be used to generate CSV for both Discover page and Dashboard panels (CSV v1)
   const columns = getColumnsWithTimeField({
-    columns: state.columns || [],
+    columns: (state.columns || []).filter((column) => column !== SOURCE_COLUMN),
     timeFieldName: index?.timeFieldName,
     uiSettings,
     query,

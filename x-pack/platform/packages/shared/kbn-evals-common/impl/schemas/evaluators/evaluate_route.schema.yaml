@@ -123,6 +123,11 @@ paths:
                               enum:
                                 - llm
                                 - code
+                            model:
+                              $ref: '../common_attributes.schema.yaml#/components/schemas/Model'
+                              description: >-
+                                Model resolved from the evaluator's `connector_id`.
+                                Absent for code evaluators, which invoke no model.
                         scores:
                           type: array
                           items:

@@ -107,7 +107,7 @@ export interface SystemCellComponentMap {
 export type SystemCellId = keyof SystemCellComponentMap;
 
 type UseCasesAddToNewCaseFlyout = (props?: Record<string, unknown> & { onSuccess: () => void }) => {
-  open: ({ attachments }: { attachments: any[] }) => void;
+  open: (props: { attachments?: any[]; getAttachments?: (owner: string) => any[] }) => void;
   close: () => void;
 };
 
@@ -117,7 +117,7 @@ type UseCasesAddToExistingCaseModal = (
   open: ({
     getAttachments,
   }: {
-    getAttachments: ({ theCase }: { theCase?: { id: string } }) => any[];
+    getAttachments: ({ theCase }: { theCase?: { id: string; owner: string } }) => any[];
   }) => void;
   close: () => void;
 };
@@ -149,7 +149,7 @@ export interface CasesService {
     useCasesAddToExistingCaseModal: UseCasesAddToExistingCaseModal;
   };
   helpers: {
-    groupAlertsByRule: (items: any[]) => any[];
+    groupAlertsByRule: (items: any[], owner: string) => any[];
     canUseCases: (owners: CasesOwner[]) => any;
     getRuleIdFromEvent: (event: { data: any[]; ecs: Ecs }) => { id: string; name: string };
   };

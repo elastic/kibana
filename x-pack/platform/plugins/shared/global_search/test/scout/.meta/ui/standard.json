@@ -1,5 +1,5 @@
 {
-  "sha1": "79103f8ce518f2fb2831c46ccacaa90ea9ddb943",
+  "sha1": "b6c5f0bdf92d9e7ef7f29f9079dc06be7363442c",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -211,7 +211,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/global_search/test/scout/ui/tests/global_search_providers.spec.ts",
         "line": 22,
-        "column": 39
+        "column": 44
       }
     },
     {
@@ -225,7 +225,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/global_search/test/scout/ui/tests/global_search_providers.spec.ts",
         "line": 27,
-        "column": 26
+        "column": 31
       }
     },
     {
@@ -253,7 +253,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/global_search/test/scout/ui/tests/global_search_providers.spec.ts",
         "line": 38,
-        "column": 73
+        "column": 78
       }
     },
     {
@@ -281,7 +281,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/global_search/test/scout/ui/tests/global_search_providers.spec.ts",
         "line": 52,
-        "column": 69
+        "column": 74
       }
     },
     {
@@ -309,7 +309,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/global_search/test/scout/ui/tests/global_search_providers.spec.ts",
         "line": 64,
-        "column": 42
+        "column": 44
       }
     }
   ]

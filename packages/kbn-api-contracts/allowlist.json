@@ -3,6 +3,14 @@
   "description": "Approved API breaking changes that should be ignored by the contract checker",
   "entries": [
     {
+      "path": "/api/alerting/rule/{id}",
+      "method": "post",
+      "reason": "Intentional: require exactly two criterion groups for log threshold ratio criteria so API validation matches executor validation and rejects malformed criteria (e.g. a single nested array) that previously saved but broke rule execution and the edit UI.",
+      "approvedBy": "@elastic/actionable-obs-team",
+      "oasdiffId": "request-property-min-items-increased",
+      "prUrl": "https://github.com/elastic/kibana/pull/283965"
+    },
+    {
       "path": "/s/{spaceId}/internal/observability/slos/_definitions",
       "method": "get",
       "reason": "False-positive: oasdiff reports response-body-one-of-added when a property is added to a schema referenced by oneOf subschemas. Actual change is adding optional preventCrossProjectSearch to SLOs_settings — backwards-compatible.",

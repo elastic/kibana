@@ -6,26 +6,28 @@
  */
 
 import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
+import {
+  CUSTOM_CONTENT_EMBEDDABLE_TYPE,
+  type CustomContentState,
+} from '@kbn/custom-content-common';
 import { z } from '@kbn/zod/v4';
 import { createPanelFailureResult, type PanelContentAttempt } from '../resolve_panel';
 import { indexPanelsById, updatePanelInDashboard } from '../dashboard_state';
 import { DASHBOARD_OPERATION_FAILURE_TYPES } from '../failure_types';
+import { getErrorMessage } from '../utils';
 import {
   PANEL_TYPE_DEFINITIONS,
   editPanelItemSchema,
   type EditPanelItem,
   type EditPanelRequestInput,
 } from './panels';
+import { mergeAndResolveCustomContentEdit } from './panel_creation';
 import { defineOperation } from './types';
 
-/**
- * An edit that passed validation. `existingPanel` is only carried for
- * `source: 'request'` edits (the resolver needs it); `source: 'config'` edits
- * don't have one.
- */
+/** An edit that passed validation, always carrying the existing panel snapshot. */
 interface ValidEdit {
   panelInput: EditPanelItem;
-  existingPanel?: AttachmentPanel;
+  existingPanel: AttachmentPanel;
 }
 
 const missingPanelResolverError =
@@ -90,7 +92,7 @@ export const editPanelsOperation = defineOperation({
           recordFailure(panelInput.panelId, validation.error);
           continue;
         }
-        validEdits.push({ panelInput });
+        validEdits.push({ panelInput, existingPanel });
         continue;
       }
 
@@ -131,11 +133,27 @@ export const editPanelsOperation = defineOperation({
 
     // Apply valid edits in input order so state changes remain deterministic.
     let nextDashboardData = dashboardData;
-    for (const { panelInput } of validEdits) {
+    for (const { panelInput, existingPanel } of validEdits) {
       if (panelInput.source === 'config') {
-        const panelContent = PANEL_TYPE_DEFINITIONS[panelInput.type].buildPanelContent(
-          panelInput.config
-        );
+        let resolvedConfig: typeof panelInput.config;
+        try {
+          resolvedConfig =
+            panelInput.type === CUSTOM_CONTENT_EMBEDDABLE_TYPE && existingPanel
+              ? context.resolveCustomContentTemplate
+                ? await mergeAndResolveCustomContentEdit(
+                    panelInput.config,
+                    existingPanel.config as CustomContentState,
+                    context.resolveCustomContentTemplate
+                  )
+                : { ...(existingPanel.config as CustomContentState), ...panelInput.config }
+              : panelInput.config;
+        } catch (err) {
+          recordFailure(panelInput.panelId, getErrorMessage(err));
+          continue;
+        }
+
+        const panelContent =
+          PANEL_TYPE_DEFINITIONS[panelInput.type].buildPanelContent(resolvedConfig);
         const updateResult = updatePanelInDashboard({
           dashboardData: nextDashboardData,
           panelId: panelInput.panelId,

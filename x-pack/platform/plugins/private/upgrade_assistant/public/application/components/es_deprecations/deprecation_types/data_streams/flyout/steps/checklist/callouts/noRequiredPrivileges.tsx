@@ -7,21 +7,20 @@
 
 import React, { Fragment } from 'react';
 
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 export const NoPrivilegesCallout: React.FunctionComponent = () => {
   return (
     <Fragment>
-      <EuiCallOut
+      <KbnDangerCallout
         title={
           <FormattedMessage
             id="xpack.upgradeAssistant.dataStream.migration.checklistStep.insufficientPrivilegeCallout.calloutTitle"
             defaultMessage="You do not have sufficient privileges to migrate this data stream"
           />
         }
-        color="danger"
-        iconType="warning"
         data-test-subj="dsInsufficientPrivilegesCallout"
       />
       <EuiSpacer size="s" />

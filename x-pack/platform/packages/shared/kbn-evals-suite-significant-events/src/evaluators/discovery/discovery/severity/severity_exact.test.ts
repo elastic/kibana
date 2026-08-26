@@ -26,6 +26,7 @@ const balanceReaderSignal: SignalEntry = {
   type: 'detection',
   stream_name: 'logs',
   description: 'Balance reader connectivity failure',
+  verdict: 'inconclusive',
   metadata: {
     rule_uuid: '3c4bf4f9-9ed9-567f-be35-332eb79ee76a',
     rule_name: 'Frontend → Balance Reader Connection Failures',

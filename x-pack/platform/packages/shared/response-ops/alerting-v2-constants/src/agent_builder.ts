@@ -28,3 +28,10 @@ export const ACTION_POLICY_MANAGEMENT_SKILL_ID = 'action-policy-management';
  */
 export const CREATE_WITH_AGENT_INITIAL_PROMPT =
   'Load the rule-management skill and help me create a new alerting v2 rule. Ask me what I want to monitor and guide me through the setup.';
+
+/**
+ * Initial message sent to the Agent Builder when the user clicks "Create with
+ * AI Agent" on the Alerting V2 action policies list empty state.
+ */
+export const CREATE_ACTION_POLICY_WITH_AGENT_INITIAL_PROMPT =
+  'Load the action-policy-management skill and help me create a new alerting v2 action policy. Ask me how I want to match, group, and notify on alert episodes and guide me through the setup.';

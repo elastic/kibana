@@ -143,6 +143,8 @@ export class Optimizer {
             cache: options.cache,
             dist: options.dist,
             examples: options.runExamples,
+            pluginPaths: options.pluginPaths,
+            pluginScanDirs: options.pluginScanDirs,
             basePath: options.basePath,
             log,
           });

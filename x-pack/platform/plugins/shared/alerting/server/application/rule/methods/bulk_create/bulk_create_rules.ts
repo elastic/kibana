@@ -44,6 +44,7 @@ import type {
 } from './types';
 import { invalidateKeys, prepareRule } from './utils';
 import { logRuleChanges } from '../common_utils/log_rule_changes';
+import { reportRuleCreatedEvent } from '../common_utils/event_based_telemetry';
 
 export async function bulkCreateRules<Params extends RuleParams = never>(
   context: RulesClientContext,
@@ -472,6 +473,21 @@ async function runBatch<Params extends RuleParams>({
         metadata: changeTracking?.metadata,
       },
     });
+
+    for (const so of successfulSavedObjects) {
+      const prepared = preparedRules.get(so.id);
+      if (prepared) {
+        reportRuleCreatedEvent(context, {
+          id: prepared.id,
+          templateId: prepared.templateId,
+          createTime: prepared.createdAt,
+          alertTypeId: prepared.ruleTypeId,
+          enabled: prepared.enabled,
+          consumer: prepared.consumer,
+          producer: prepared.producer,
+        });
+      }
+    }
   }
 
   return { successfulIds: batchSuccessfulIds, errors };

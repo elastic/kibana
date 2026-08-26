@@ -206,4 +206,4 @@ Service EUIDs are the simplest: a direct mapping from one field, no ranking, no 
 | `common/domain/euid/esql.ts` | ESQL generation for extraction pipelines |
 | `common/domain/euid/field_evaluations.ts` | Field evaluation application |
 
-All paths relative to `x-pack/solutions/security/plugins/entity_store/`.
+All paths relative to `x-pack/platform/plugins/shared/entity_store/`.

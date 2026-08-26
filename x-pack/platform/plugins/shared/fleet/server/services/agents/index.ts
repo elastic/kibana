@@ -19,7 +19,12 @@ export * from './request_diagnostics';
 export * from './migrate';
 export * from './change_privilege_level';
 export * from './rollback';
-export { getAgentUploads, getAgentUploadFile, deleteAgentUploadFile } from './uploads';
+export {
+  getAgentUploads,
+  getAgentUploadFile,
+  deleteAgentUploadFile,
+  getAgentIdForUploadFile,
+} from './uploads';
 export { AgentServiceImpl } from './agent_service';
 export type { AgentClient, AgentService } from './agent_service';
 export { BulkActionsResolver } from './bulk_actions_resolver';

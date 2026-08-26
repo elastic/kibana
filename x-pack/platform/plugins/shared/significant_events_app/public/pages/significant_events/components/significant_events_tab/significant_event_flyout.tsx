@@ -11,7 +11,6 @@ import {
   EuiBadge,
   EuiButton,
   EuiButtonIcon,
-  EuiCallOut,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiFlexGroup,
@@ -23,6 +22,7 @@ import {
   EuiHealth,
   EuiHorizontalRule,
   EuiLoadingSpinner,
+  EuiText,
   EuiPopover,
   EuiSpacer,
   EuiTitle,
@@ -30,8 +30,10 @@ import {
   copyToClipboard,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import type { SignificantEventResponse } from '@kbn/significant-events-schema';
+import { formatTimestamp } from '../../../../util/formatters';
 import { useFetchSignificantEventLifecycle } from '../../../../hooks/use_fetch_significant_event_lifecycle';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useTriggerInvestigation } from '../../../../hooks/use_trigger_investigation';
@@ -131,10 +133,34 @@ const STATUS_LABEL = i18n.translate(
   }
 );
 
+const EMPTY_VALUE = i18n.translate(
+  'xpack.significantEventsApp.significantEventsTab.flyout.emptyValue',
+  { defaultMessage: '—' }
+);
+
 interface SignificantEventFlyoutProps {
   event: SignificantEventResponse;
   onClose: () => void;
 }
+
+const BadgeRow = ({ items, color }: { items: string[]; color?: string }) => {
+  if (items.length === 0) {
+    return (
+      <EuiText size="s" color="subdued">
+        {EMPTY_VALUE}
+      </EuiText>
+    );
+  }
+  return (
+    <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+      {items.map((item, idx) => (
+        <EuiFlexItem grow={false} key={`${item}-${idx}`}>
+          <EuiBadge color={color ?? 'default'}>{item}</EuiBadge>
+        </EuiFlexItem>
+      ))}
+    </EuiFlexGroup>
+  );
+};
 
 export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyoutProps) => {
   const {
@@ -240,7 +266,10 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
                     onClick={() => {
                       if (!isUpdating) {
                         setIsActionsMenuOpen(false);
-                        updateEventStatus({ eventUuid: latestEvent.event_uuid, status: 'closed' });
+                        updateEventStatus({
+                          eventUuid: latestEvent.event_uuid,
+                          status: 'closed',
+                        });
                       }
                     }}
                     data-test-subj="sigEventCloseButton"
@@ -283,6 +312,11 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
         <EuiTitle size="s">
           <h2 id={flyoutTitleId}>{event.title}</h2>
         </EuiTitle>
+        <EuiText size="xs" color="subdued">
+          {formatTimestamp(event.created_at ?? event['@timestamp'])}
+        </EuiText>
+        <EuiSpacer size="m" />
+        <BadgeRow items={event.stream_names ?? []} color="hollow" />
         <EuiSpacer size="m" />
         <EuiFlexGroup gutterSize="s" responsive={false} wrap>
           <EuiFlexItem>
@@ -329,13 +363,9 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
             {isLifecycleLoading ? (
               <EuiLoadingSpinner size="m" />
             ) : isLifecycleError ? (
-              <EuiCallOut
-                announceOnMount
-                title={LIFECYCLE_ERROR}
-                color="danger"
-                iconType="error"
-                size="s"
-              />
+              <KbnDangerCallout announceOnMount title={LIFECYCLE_ERROR} size="s">
+                {LIFECYCLE_ERROR}
+              </KbnDangerCallout>
             ) : (
               <LifecycleTimeline data={lifecycleData} />
             )}

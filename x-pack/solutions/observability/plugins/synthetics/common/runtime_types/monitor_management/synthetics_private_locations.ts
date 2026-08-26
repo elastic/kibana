@@ -23,6 +23,7 @@ export const PrivateLocationCodec = t.intersection([
     }),
     namespace: t.string,
     spaces: t.array(t.string),
+    isAgentSharding: t.boolean,
   }),
 ]);
 
