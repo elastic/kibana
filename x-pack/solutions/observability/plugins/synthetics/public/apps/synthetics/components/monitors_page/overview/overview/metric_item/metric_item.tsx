@@ -38,7 +38,7 @@ import { MetricItemIcon } from './metric_item_icon';
 import type { FlyoutParamProps } from '../types';
 import { getTrendDuration } from '../../../../../utils/formatting/trend_duration';
 
-export const METRIC_ITEM_HEIGHT = 180;
+export const METRIC_ITEM_HEIGHT = 200; // room for a wrapped tag row above duration
 
 export const getColor = (euiTheme: EuiThemeComputed, isEnabled: boolean, status?: string) => {
   if (!isEnabled) {
