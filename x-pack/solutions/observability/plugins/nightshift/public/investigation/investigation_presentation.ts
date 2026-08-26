@@ -34,8 +34,6 @@ export interface RecommendationItem extends InvestigationRecommendation {
 
 export type BlindSpotItem = InvestigationBlindSpot;
 
-const NEXT_STEP_SECTION_TITLES = ['next steps', 'recommendations', 'try next'];
-
 export const formatInvestigationDuration = (
   startedAt: string,
   endedAt: number | string
@@ -127,137 +125,14 @@ export const getInvestigationGoalText = (state?: InvestigationState): string | u
   return state.summary.trim();
 };
 
-const extractMarkdownSection = (markdown: string, sectionTitles: string[]): string | undefined => {
-  const lines = markdown.split('\n');
-  let startIndex = -1;
-
-  for (let index = 0; index < lines.length; index += 1) {
-    const line = lines[index].trim();
-    if (!line.startsWith('#')) {
-      continue;
-    }
-    const heading = line
-      .replace(/^#+\s*/, '')
-      .trim()
-      .toLowerCase();
-    if (sectionTitles.includes(heading)) {
-      startIndex = index + 1;
-      break;
-    }
-  }
-
-  if (startIndex < 0) {
-    return undefined;
-  }
-
-  const sectionLines: string[] = [];
-  for (let index = startIndex; index < lines.length; index += 1) {
-    if (lines[index].trim().startsWith('#')) {
-      break;
-    }
-    sectionLines.push(lines[index]);
-  }
-
-  return sectionLines.join('\n').trim() || undefined;
-};
-
-const trimRecommendationDescription = (description: string): string =>
-  description.trim().replace(/:$/, '');
-
-const trimRecommendationTitle = (title: string): string => title.trim().replace(/:$/, '');
-
-const normalizeRecommendationText = (text: string): string => {
-  let normalized = text.trim();
-
-  if (normalized.endsWith('**') && (normalized.match(/\*\*/g)?.length ?? 0) % 2 !== 0) {
-    normalized = normalized.slice(0, -2).trim();
-  }
-
-  return trimRecommendationTitle(normalized);
-};
-
-const splitRecommendationBullet = (bullet: string): RecommendationItem => {
-  const trimmed = normalizeRecommendationText(bullet.replace(/^[-*]\s*/, '').trim());
-  const dotSeparator = trimmed.indexOf(' · ');
-  if (dotSeparator > 0) {
-    return {
-      title: trimRecommendationTitle(trimmed.slice(0, dotSeparator)),
-      description: trimRecommendationDescription(trimmed.slice(dotSeparator + 3)),
-    };
-  }
-
-  const sentenceEnd = trimmed.search(/[.!?](?:\s|$)/);
-  if (sentenceEnd > 0 && sentenceEnd < trimmed.length - 1) {
-    return {
-      title: trimRecommendationTitle(trimmed.slice(0, sentenceEnd + 1)),
-      description: trimRecommendationDescription(trimmed.slice(sentenceEnd + 1)),
-    };
-  }
-
-  return { title: trimRecommendationTitle(trimmed) };
-};
-
-const parseNextStepsRecommendations = (section: string): RecommendationItem[] => {
-  const recommendations: RecommendationItem[] = [];
-  let isCollectingCode = false;
-  let codeLines: string[] = [];
-
-  const attachCodeToLastRecommendation = (code: string | undefined): void => {
-    if (!code || recommendations.length === 0) {
-      return;
-    }
-
-    recommendations[recommendations.length - 1].code = code;
-  };
-
-  for (const rawLine of section.split('\n')) {
-    const trimmed = rawLine.trim();
-
-    if (trimmed.startsWith('```')) {
-      if (isCollectingCode) {
-        attachCodeToLastRecommendation(codeLines.join('\n').trim() || undefined);
-        codeLines = [];
-        isCollectingCode = false;
-      } else {
-        isCollectingCode = true;
-      }
-      continue;
-    }
-
-    if (isCollectingCode) {
-      codeLines.push(rawLine);
-      continue;
-    }
-
-    if (trimmed.startsWith('-') || trimmed.startsWith('*')) {
-      recommendations.push(splitRecommendationBullet(trimmed));
-    }
-  }
-
-  if (isCollectingCode) {
-    attachCodeToLastRecommendation(codeLines.join('\n').trim() || undefined);
-  }
-
-  return recommendations;
-};
+export const getConclusionText = (state?: InvestigationState): string | undefined =>
+  state?.conclusion?.trim() || undefined;
 
 export const parseInvestigationRecommendations = (
   state?: InvestigationState
 ): RecommendationItem[] => {
   if (state?.recommendations && state.recommendations.length > 0) {
     return state.recommendations;
-  }
-
-  // Legacy fallback: investigations completed before `recommendations` existed encoded next
-  // steps as a "## Next Steps" markdown section inside `conclusion`.
-  const fromConclusion = state?.conclusion
-    ? extractMarkdownSection(state.conclusion, NEXT_STEP_SECTION_TITLES)
-    : undefined;
-
-  const bulletRecommendations = fromConclusion ? parseNextStepsRecommendations(fromConclusion) : [];
-
-  if (bulletRecommendations.length > 0) {
-    return bulletRecommendations;
   }
 
   return [...(state?.hypotheses ?? [])]
@@ -278,15 +153,6 @@ const escapeMarkdownInline = (text: string): string => text.replace(/([\\`*_[\]]
 
 export const formatBlindSpotMarkdown = ({ title, description }: BlindSpotItem): string =>
   `**${escapeMarkdownInline(title)}** · ${escapeMarkdownInline(description)}`;
-
-export const getConclusionBody = (conclusion: string | undefined): string | undefined => {
-  if (!conclusion?.trim()) {
-    return undefined;
-  }
-
-  const body = extractMarkdownSection(conclusion, ['conclusion']) ?? conclusion.trim();
-  return body.replace(/^#+\s*conclusion\s*$/im, '').trim() || undefined;
-};
 
 export const sortInvestigationHypotheses = (
   hypotheses: InvestigationHypothesis[]

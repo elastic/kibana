@@ -86,6 +86,40 @@ describe('utils', () => {
 
       expect(result.metadata.builder_type).toBeUndefined();
     });
+
+    it('persists an omitted composed breach block as an empty segment', () => {
+      const data: CreateRuleData = {
+        ...baseCreateData,
+        query: { format: 'composed', base: 'FROM metrics-*' },
+      };
+
+      const result = transformCreateRuleBodyToRuleSoAttributes(data, serverFields);
+
+      expect(result.query).toEqual({
+        format: 'composed',
+        base: 'FROM metrics-*',
+        breach: { segment: '' },
+      });
+    });
+
+    it('leaves a populated composed breach segment untouched', () => {
+      const data: CreateRuleData = {
+        ...baseCreateData,
+        query: {
+          format: 'composed',
+          base: 'FROM metrics-*',
+          breach: { segment: 'WHERE cpu > 0.9' },
+        },
+      };
+
+      const result = transformCreateRuleBodyToRuleSoAttributes(data, serverFields);
+
+      expect(result.query).toEqual({
+        format: 'composed',
+        base: 'FROM metrics-*',
+        breach: { segment: 'WHERE cpu > 0.9' },
+      });
+    });
   });
 
   describe('buildUpdateRuleAttributes', () => {
@@ -257,6 +291,50 @@ describe('utils', () => {
       expect(result.metadata.builder_type).toBe('threshold');
     });
 
+    it('does not auto-clear metadata.builder_type when the same conditionless composed query is resent', () => {
+      const existing = createRuleSoAttributes({
+        metadata: { name: 'test-rule', builder_type: 'threshold' },
+        query: { format: 'composed', base: 'FROM metrics-*', breach: { segment: '' } },
+      });
+      const updateData: UpdateRuleData = {
+        query: { format: 'composed', base: 'FROM metrics-*' },
+      };
+
+      const result = buildUpdateRuleAttributes(existing, updateData, {
+        updatedBy: 'user-2',
+        updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
+      });
+
+      expect(result.metadata.builder_type).toBe('threshold');
+      expect(result.query).toEqual({
+        format: 'composed',
+        base: 'FROM metrics-*',
+        breach: { segment: '' },
+      });
+    });
+
+    it('normalizes an omitted composed breach block on update', () => {
+      const existing = createRuleSoAttributes({
+        query: { format: 'composed', base: 'FROM logs-*', breach: { segment: 'WHERE error' } },
+      });
+      const updateData: UpdateRuleData = {
+        query: { format: 'composed', base: 'FROM logs-*' },
+      };
+
+      const result = buildUpdateRuleAttributes(existing, updateData, {
+        updatedBy: 'user-2',
+        updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
+      });
+
+      expect(result.query).toEqual({
+        format: 'composed',
+        base: 'FROM logs-*',
+        breach: { segment: '' },
+      });
+    });
+
     it('preserves stored artifacts when the update does not touch them', () => {
       const existing = createRuleSoAttributesWithArtifacts();
 
@@ -280,6 +358,35 @@ describe('utils', () => {
   describe('transformRuleSoAttributesToRuleApiResponse', () => {
     it('returns artifacts that satisfy the strict response schema', () => {
       const attrs = createRuleSoAttributesWithArtifacts();
+
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
+
+      expect(result.artifacts).toEqual([
+        { id: 'runbook-1', type: 'runbook', data: { content: 'steps' } },
+        { id: 'dashboard-1', type: 'dashboard', data: { dashboardId: 'dash-1' } },
+      ]);
+      expect(() => ruleResponseSchema.parse(result)).not.toThrow();
+    });
+
+    it('strips legacy artifact value left on disk after model-version migration', () => {
+      const attrs = createRuleSoAttributes({
+        artifacts: [
+          {
+            id: 'runbook-1',
+            type: 'runbook',
+            data: { content: 'steps' },
+            // @ts-expect-error legacy key retained on disk for rollback
+            value: 'steps',
+          },
+          {
+            id: 'dashboard-1',
+            type: 'dashboard',
+            data: { dashboardId: 'dash-1' },
+            // @ts-expect-error legacy key retained on disk for rollback
+            value: 'dash-1',
+          },
+        ],
+      });
 
       const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
 
@@ -318,6 +425,52 @@ describe('utils', () => {
       const response = transformRuleSoAttributesToRuleApiResponse('rule-rt-1', soAttrs);
 
       expect(response.metadata.description).toBe('Round-trip desc');
+    });
+
+    it('omits the breach block when the stored composed segment is empty', () => {
+      const attrs = createRuleSoAttributes({
+        query: { format: 'composed', base: 'FROM metrics-*', breach: { segment: '' } },
+      });
+
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
+
+      expect(result.query).toEqual({ format: 'composed', base: 'FROM metrics-*' });
+    });
+
+    it('preserves an unrelated recovery segment when omitting an empty breach block', () => {
+      const attrs = createRuleSoAttributes({
+        query: {
+          format: 'composed',
+          base: 'FROM metrics-*',
+          breach: { segment: '' },
+          recovery: { segment: 'WHERE cpu < 0.5' },
+        },
+      });
+
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
+
+      expect(result.query).toEqual({
+        format: 'composed',
+        base: 'FROM metrics-*',
+        recovery: { segment: 'WHERE cpu < 0.5' },
+      });
+    });
+
+    it('round-trips a conditionless composed query through create → transform', () => {
+      const createData: CreateRuleData = {
+        ...baseCreateData,
+        query: { format: 'composed', base: 'FROM metrics-*' },
+      };
+
+      const soAttrs = transformCreateRuleBodyToRuleSoAttributes(createData, serverFields);
+      const response = transformRuleSoAttributesToRuleApiResponse('rule-rt-2', soAttrs);
+
+      expect(soAttrs.query).toEqual({
+        format: 'composed',
+        base: 'FROM metrics-*',
+        breach: { segment: '' },
+      });
+      expect(response.query).toEqual(createData.query);
     });
 
     it('includes metadata.builder_type in API response', () => {

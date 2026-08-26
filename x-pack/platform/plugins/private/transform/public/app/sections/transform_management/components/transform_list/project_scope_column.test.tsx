@@ -111,6 +111,29 @@ describe('ProjectScopeColumn', () => {
     expect(fetchProjects).toHaveBeenCalledWith('custom-project-routing');
   });
 
+  it('displays This project when custom project routing resolves to the origin project only', async () => {
+    fetchProjects.mockResolvedValueOnce({
+      origin: originProject,
+      linkedProjects: [],
+    });
+
+    renderProjectScopeColumn(
+      {
+        ...cpsManager,
+        getTotalProjectCount: jest.fn(() => 10),
+      } as unknown as ICPSManager,
+      '_id:origin-project'
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('transformListProjectScopeButton')).toHaveTextContent(
+        'This project'
+      );
+    });
+
+    expect(fetchProjects).toHaveBeenCalledWith('_id:origin-project');
+  });
+
   it('displays selected project count and opens popover for linked-only project routing', async () => {
     fetchProjects.mockResolvedValue({
       origin: null,
@@ -145,7 +168,9 @@ describe('ProjectScopeColumn', () => {
 
     resolveProjects!({ origin: originProject, linkedProjects: [] });
     await waitFor(() => {
-      expect(screen.getByTestId('transformListProjectScopeButton')).toHaveTextContent('1/2');
+      expect(screen.getByTestId('transformListProjectScopeButton')).toHaveTextContent(
+        'This project'
+      );
     });
     unmount();
   });

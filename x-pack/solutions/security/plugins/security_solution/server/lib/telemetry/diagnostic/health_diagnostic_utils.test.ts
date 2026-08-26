@@ -16,8 +16,7 @@ import {
 import {
   Action,
   QueryType,
-  type HealthDiagnosticQueryV1,
-  type HealthDiagnosticQueryV2,
+  type IndexQuery,
   type ParseFailureQuery,
 } from './health_diagnostic_service.types';
 
@@ -644,8 +643,8 @@ describe('Security Solution - Health Diagnostic Queries - utils', () => {
   });
 
   describe('mergeByPriority', () => {
-    const makeV1 = (id: string): HealthDiagnosticQueryV1 => ({
-      version: 1,
+    const makeV1 = (id: string): IndexQuery => ({
+      kind: 'index',
       id,
       name: `query-${id}`,
       index: 'test-index',
@@ -656,8 +655,8 @@ describe('Security Solution - Health Diagnostic Queries - utils', () => {
       enabled: true,
     });
 
-    const makeV2 = (id: string): HealthDiagnosticQueryV2 => ({
-      version: 2,
+    const makeV2 = (id: string): IndexQuery => ({
+      kind: 'index',
       id,
       name: `query-${id}`,
       integrations: ['endpoint.*'],
@@ -710,8 +709,8 @@ describe('Security Solution - Health Diagnostic Queries - utils', () => {
     });
 
     test('queries with the same name but different ids are both returned', () => {
-      const v1Query: HealthDiagnosticQueryV1 = { ...makeV1('id-1'), name: 'same-name' };
-      const v2Query: HealthDiagnosticQueryV2 = { ...makeV2('id-2'), name: 'same-name' };
+      const v1Query: IndexQuery = { ...makeV1('id-1'), name: 'same-name' };
+      const v2Query: IndexQuery = { ...makeV2('id-2'), name: 'same-name' };
       const result = mergeByPriority([v1Query], [v2Query]);
       expect(result).toHaveLength(2);
     });

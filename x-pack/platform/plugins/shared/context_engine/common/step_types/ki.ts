@@ -16,7 +16,9 @@ export const MAX_KI_CONTENT_LENGTH = 65536;
 export const MAX_KI_TAG_LENGTH = 256;
 export const MAX_KI_TAGS = 100;
 export const MAX_KI_ATTRIBUTE_KEY_LENGTH = 256;
-export const MAX_KI_ATTRIBUTE_VALUE_LENGTH = 1024;
+/** Must fit a max-length ES|QL query carried in `attributes.esql`. */
+export const MAX_KI_ATTRIBUTE_VALUE_LENGTH = 10_000;
+export const MAX_KI_ATTRIBUTE_ARRAY_VALUES = 100;
 export const MAX_KI_ATTRIBUTES = 100;
 
 export const aiIndexIdSchema = z
@@ -60,7 +62,12 @@ export const kiFieldsSchema = z.object({
   attributes: z
     .record(
       z.string().min(1).max(MAX_KI_ATTRIBUTE_KEY_LENGTH),
-      z.union([z.string().max(MAX_KI_ATTRIBUTE_VALUE_LENGTH), z.number(), z.boolean()])
+      z.union([
+        z.string().max(MAX_KI_ATTRIBUTE_VALUE_LENGTH),
+        z.number(),
+        z.boolean(),
+        z.array(z.string().max(MAX_KI_ATTRIBUTE_VALUE_LENGTH)).max(MAX_KI_ATTRIBUTE_ARRAY_VALUES),
+      ])
     )
     .refine((attrs) => Object.keys(attrs).length <= MAX_KI_ATTRIBUTES, {
       message: `attributes must have at most ${MAX_KI_ATTRIBUTES} entries`,
