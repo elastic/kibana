@@ -50,9 +50,9 @@ export const initializeManagedWorkflows = async ({
     if (result.status === 'rejected') {
       canReconcile = false;
       logger.error(
-        `Failed to install managed PND static workflow "${PND_STATIC_GLOBAL_WORKFLOW_IDS[index]}": ${
-          result.reason instanceof Error ? result.reason.message : String(result.reason)
-        }`
+        `Failed to install managed PND static workflow "${
+          PND_STATIC_GLOBAL_WORKFLOW_IDS[index]
+        }": ${result.reason instanceof Error ? result.reason.message : String(result.reason)}`
       );
     }
   }

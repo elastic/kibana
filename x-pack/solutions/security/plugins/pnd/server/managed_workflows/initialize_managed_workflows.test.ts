@@ -45,7 +45,9 @@ describe('initializeManagedWorkflows', () => {
 
     await initializeManagedWorkflows({ workflowsExtensions, logger });
 
-    expect(client.install.mock.calls.map(([id]) => id)).toEqual([...PND_STATIC_GLOBAL_WORKFLOW_IDS]);
+    expect(client.install.mock.calls.map(([id]) => id)).toEqual([
+      ...PND_STATIC_GLOBAL_WORKFLOW_IDS,
+    ]);
     expect(client.install).not.toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({ workflowIdSuffix: expect.any(String) })
@@ -183,7 +185,9 @@ describe('initializeManagedWorkflows', () => {
 
     await initializeManagedWorkflows({ workflowsExtensions, logger });
 
-    expect(client.install.mock.calls.map(([id]) => id)).toEqual([...PND_STATIC_GLOBAL_WORKFLOW_IDS]);
+    expect(client.install.mock.calls.map(([id]) => id)).toEqual([
+      ...PND_STATIC_GLOBAL_WORKFLOW_IDS,
+    ]);
     expect(client.ready).toHaveBeenCalledTimes(1);
   });
 
