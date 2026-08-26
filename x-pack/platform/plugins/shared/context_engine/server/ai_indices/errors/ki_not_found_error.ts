@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export interface CustomContentTokenEvent extends Record<string, unknown> {
-  type: 'token';
-  token: string;
+export class KiNotFoundError extends Error {
+  constructor(aiIndexId: string, kiId: string) {
+    super(`KI '${kiId}' not found in AI index '${aiIndexId}'`);
+    this.name = 'KiNotFoundError';
+  }
 }
