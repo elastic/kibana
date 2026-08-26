@@ -6,11 +6,20 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiButtonGroup, EuiEmptyPrompt, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiButtonGroup,
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { AggregateQuery, TimeRange } from '@kbn/es-query';
 import { SeverityLevelPanel } from './kpis/severity_level_panel';
+import { AlertsByRulePanel } from './kpis/alerts_by_rule_panel';
 
 export type AlertsV2KpiView = 'summary' | 'trend' | 'counts' | 'treemap';
 
@@ -107,7 +116,14 @@ export const AlertsV2KpisSection = ({ query, timeRange }: AlertsV2KpisSectionPro
       />
       <EuiSpacer size="m" />
       {selectedView === 'summary' ? (
-        <SeverityLevelPanel query={query} timeRange={timeRange} />
+        <EuiFlexGroup gutterSize="m">
+          <EuiFlexItem>
+            <SeverityLevelPanel query={query} timeRange={timeRange} />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <AlertsByRulePanel query={query} timeRange={timeRange} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       ) : (
         <EuiEmptyPrompt
           iconType="chartBarVerticalStack"

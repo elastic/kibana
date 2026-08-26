@@ -11,6 +11,7 @@ import type { AggregateQuery, TimeRange } from '@kbn/es-query';
 import { getESQLResults } from '@kbn/esql-utils';
 import { useKibana } from '../../../common/lib/kibana';
 import { composeEsqlQuery, TIME_RANGE_ESQL_FILTER } from '../compose_esql_query';
+import type { EsqlInspect } from './esql_inspect_button';
 
 export interface SeverityDatum {
   /** Severity keyword, e.g. "critical". Matches the shape the shared DonutChart expects. */
@@ -19,12 +20,6 @@ export interface SeverityDatum {
   value: number;
   /** Display label, e.g. "Critical". */
   label: string;
-}
-
-/** Last ES|QL request/response, for the Inspect flyout. */
-export interface EsqlInspect {
-  request: object;
-  response: object;
 }
 
 export interface UseSeverityDataResult {
