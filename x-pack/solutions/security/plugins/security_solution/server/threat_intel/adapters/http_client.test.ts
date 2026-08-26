@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { assertSafeUrlResolved, createFetchUrl, redactUrl } from './http_client';
+import {
+  assertSafeUrlResolved,
+  createFetchUrl,
+  pinnedLookupForTest,
+  redactUrl,
+} from './http_client';
 
 /** Every hostname in these tests resolves to a public address. */
 const publicLookup = async () => [{ address: '93.184.216.34' }];
@@ -487,14 +492,87 @@ describe('fetchUrl DNS pinning', () => {
       lookupFn: publicLookup,
     })(url, { abortSignal: new AbortController().signal });
 
-  it('pins the connection to the address the pre-flight validated', async () => {
+  /** Calls the pinned lookup the way Node's net layer does, in both call shapes. */
+  const throughPin = (pinned: { address: string; family: 4 | 6 }, all: boolean) =>
+    new Promise((resolve, reject) => {
+      pinnedLookupForTest(pinned)('any.host.example', { all }, (err, addr, family) =>
+        err ? reject(err) : resolve(all ? addr : { address: addr, family })
+      );
+    });
+
+  // The pin itself, asserted directly rather than by reflecting into undici's private
+  // option storage. Checking only that a dispatcher object exists would pass even if
+  // the Agent re-resolved the hostname or pinned the wrong address.
+  it('hands the connect layer the validated address in `all` mode', async () => {
+    await expect(throughPin({ address: '93.184.216.34', family: 4 }, true)).resolves.toEqual([
+      { address: '93.184.216.34', family: 4 },
+    ]);
+  });
+
+  it('hands the connect layer the validated address in single-answer mode', async () => {
+    await expect(throughPin({ address: '93.184.216.34', family: 4 }, false)).resolves.toEqual({
+      address: '93.184.216.34',
+      family: 4,
+    });
+  });
+
+  it('answers with the pinned address regardless of the hostname asked for', async () => {
+    // The whole point: the resolver is never consulted again, so a second answer
+    // cannot differ from the one the guard checked.
+    await expect(throughPin({ address: '2606:4700::1111', family: 6 }, true)).resolves.toEqual([
+      { address: '2606:4700::1111', family: 6 },
+    ]);
+  });
+
+  // And the other half of the guarantee: the pre-flight returns the address that gets
+  // pinned, so a rebinding second answer never reaches the socket.
+  it('pins the address the pre-flight validated, not a later answer', async () => {
+    let call = 0;
+    const rebinding = async () => {
+      call += 1;
+      return call === 1 ? [{ address: '93.184.216.34' }] : [{ address: '169.254.169.254' }];
+    };
+
+    const validated = await assertSafeUrlResolved('https://feed.example.com/rss', rebinding);
+
+    expect(validated).toEqual({ address: '93.184.216.34', family: 4 });
+    await expect(throughPin(validated!, true)).resolves.toEqual([
+      { address: '93.184.216.34', family: 4 },
+    ]);
+  });
+
+  it('attaches a dispatcher to the request when the host is a DNS name', async () => {
     const { fetchFn, getInit } = capturingFetch();
 
     await fetchThrough('https://feed.example.com/rss', fetchFn);
 
-    // A dispatcher pinned to the validated address closes the rebinding window
-    // between the pre-flight lookup and the connect.
     expect(getInit()?.dispatcher).toBeDefined();
+  });
+
+  // Each hop gets its own pin, so a redirect cannot inherit the previous host's.
+  it('attaches a separate dispatcher to each redirect hop', async () => {
+    const seen: unknown[] = [];
+    let hop = 0;
+    const fetchFn = jest.fn(async (_url: string, init?: RequestInit) => {
+      seen.push((init as RequestInit & { dispatcher?: unknown }).dispatcher);
+      hop += 1;
+      return hop === 1
+        ? makeResponse(302, { location: 'https://second.example.com/rss' })
+        : makeResponse(200, {}, 'ok');
+    });
+
+    await createFetchUrl({
+      fetchFn: fetchFn as unknown as typeof fetch,
+      lookupFn: async (host: string) =>
+        host === 'second.example.com'
+          ? [{ address: '198.51.100.7' }]
+          : [{ address: '93.184.216.34' }],
+    })('https://first.example.com/rss', { abortSignal: new AbortController().signal });
+
+    expect(seen).toHaveLength(2);
+    expect(seen[0]).toBeDefined();
+    expect(seen[1]).toBeDefined();
+    expect(seen[0]).not.toBe(seen[1]);
   });
 
   it('does not pin when the host is already a literal IP', async () => {
@@ -847,5 +925,79 @@ describe('fetchUrl redirect body release', () => {
     ).rejects.toThrow(/missing Location header/);
 
     expect(cancel).toHaveBeenCalled();
+  });
+});
+
+describe('fetchUrl cross-origin credential stripping', () => {
+  const captureHops = (locations: string[]) => {
+    const seen: Array<Record<string, string>> = [];
+    let hop = 0;
+    const fetchFn = jest.fn(async (_url: string, init?: RequestInit) => {
+      seen.push((init?.headers ?? {}) as Record<string, string>);
+      const location = locations[hop];
+      hop += 1;
+      return location ? makeResponse(302, { location }) : makeResponse(200, {}, 'ok');
+    });
+    return { fetchFn, seen };
+  };
+
+  // Proxy-Authorization is a standard credential header and the public `headers`
+  // option can carry it, so a feed host redirecting cross-origin would otherwise
+  // receive proxy credentials.
+  it.each(['Authorization', 'Proxy-Authorization', 'x-api-key', 'Cookie'])(
+    'strips %s on a cross-origin hop',
+    async (header) => {
+      const { fetchFn, seen } = captureHops(['https://elsewhere.test/feed.xml']);
+
+      await createFetchUrl({
+        fetchFn: fetchFn as unknown as typeof fetch,
+        lookupFn: publicLookup,
+      })('https://example.com/feed.xml', {
+        abortSignal: new AbortController().signal,
+        headers: { [header]: 'secret-value' },
+      });
+
+      expect(seen[0][header]).toBe('secret-value');
+      expect(JSON.stringify(seen[1])).not.toContain('secret-value');
+    }
+  );
+
+  it.each(['Authorization', 'Proxy-Authorization'])(
+    'keeps %s on a same-origin hop',
+    async (header) => {
+      const { fetchFn, seen } = captureHops(['https://example.com/feed-v2.xml']);
+
+      await createFetchUrl({
+        fetchFn: fetchFn as unknown as typeof fetch,
+        lookupFn: publicLookup,
+      })('https://example.com/feed.xml', {
+        abortSignal: new AbortController().signal,
+        headers: { [header]: 'secret-value' },
+      });
+
+      expect(seen[1][header]).toBe('secret-value');
+    }
+  );
+});
+
+describe('fetchUrl cloud platform endpoints', () => {
+  it('rejects the Azure platform VIP as a literal host', async () => {
+    await expect(
+      createFetchUrl({
+        fetchFn: (async () => makeResponse(200)) as unknown as typeof fetch,
+        lookupFn: publicLookup,
+      })('http://168.63.129.16/machine/?comp=goalstate', {
+        abortSignal: new AbortController().signal,
+      })
+    ).rejects.toThrow(/restricted IPv4 address range/);
+  });
+
+  it('rejects a hostname that resolves to the Azure platform VIP', async () => {
+    await expect(
+      createFetchUrl({
+        fetchFn: (async () => makeResponse(200)) as unknown as typeof fetch,
+        lookupFn: async () => [{ address: '168.63.129.16' }],
+      })('https://feed.example.com/rss', { abortSignal: new AbortController().signal })
+    ).rejects.toThrow(/restricted address range/);
   });
 });

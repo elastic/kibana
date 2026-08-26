@@ -230,28 +230,41 @@ export const assertSafeUrlResolved = async (
  * the Host header still carry the original hostname and certificate
  * verification is unaffected.
  */
-const createPinnedDispatcher = ({ address, family }: ValidatedAddress): Agent =>
-  new Agent({
-    connect: {
-      lookup: (
-        _hostname: string,
-        options: { all?: boolean },
-        callback: (
-          err: NodeJS.ErrnoException | null,
-          addressOrList: string | Array<{ address: string; family: number }>,
-          family?: number
-        ) => void
-      ) => {
-        // Node's net layer calls this either in `all` mode or single-answer
-        // mode depending on the connect path, so satisfy both shapes.
-        if (options?.all) {
-          callback(null, [{ address, family }]);
-        } else {
-          callback(null, address, family);
-        }
-      },
-    },
-  });
+type ConnectLookup = (
+  hostname: string,
+  options: { all?: boolean },
+  callback: (
+    err: NodeJS.ErrnoException | null,
+    addressOrList: string | Array<{ address: string; family: number }>,
+    family?: number
+  ) => void
+) => void;
+
+/**
+ * The connect-time lookup a pinned dispatcher installs. Always answers with the
+ * pre-validated address, whatever the hostname, which is what closes the rebinding
+ * window: the socket cannot be handed an address the guard never checked.
+ *
+ * Named and exported (as `pinnedLookupForTest`) so the pin can be asserted directly
+ * rather than by reflecting into undici's private option storage.
+ */
+const pinnedLookup =
+  ({ address, family }: ValidatedAddress): ConnectLookup =>
+  (_hostname, options, callback) => {
+    // Node's net layer calls this either in `all` mode or single-answer mode
+    // depending on the connect path, so satisfy both shapes.
+    if (options?.all) {
+      callback(null, [{ address, family }]);
+    } else {
+      callback(null, address, family);
+    }
+  };
+
+/** Exported for tests only: the lookup installed by `createPinnedDispatcher`. */
+export const pinnedLookupForTest = pinnedLookup;
+
+const createPinnedDispatcher = (pinned: ValidatedAddress): Agent =>
+  new Agent({ connect: { lookup: pinnedLookup(pinned) } });
 
 /**
  * The public contract. Deliberately does not expose the test seams below: they
@@ -371,7 +384,14 @@ const headersToRecord = (headers: Headers): Record<string, string> => {
 };
 
 // Sensitive headers that must be stripped when following a cross-origin redirect.
-const SENSITIVE_HEADERS = new Set(['authorization', 'x-api-key', 'cookie']);
+const SENSITIVE_HEADERS = new Set([
+  'authorization',
+  // Standard credential header, and the public `headers` option can carry it, so a
+  // feed host that redirects cross-origin would otherwise receive proxy credentials.
+  'proxy-authorization',
+  'x-api-key',
+  'cookie',
+]);
 
 const isSameOrigin = (a: string, b: string): boolean => {
   try {

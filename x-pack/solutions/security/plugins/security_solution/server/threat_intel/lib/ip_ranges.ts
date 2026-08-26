@@ -59,6 +59,15 @@ export const isNonRoutableIPv4 = (ip: string): boolean => {
   if (a === 198 && (b === 18 || b === 19)) return true;
   // multicast 224.0.0.0/4 and reserved/broadcast 240.0.0.0/4
   if (a >= 224) return true;
+  // Azure platform VIP 168.63.129.16/32 (WireServer / host plugin).
+  //
+  // This one is not in any RFC special-use range: it is ordinary public space that
+  // Azure routes only inside the VM, so every rule above passes it. On an Azure
+  // deployment it answers VM-scoped platform requests, and the fetch client lets a
+  // caller supply arbitrary headers, so an operator-supplied feed URL could reach it.
+  // The other cloud metadata endpoints sit in link-local 169.254.0.0/16 and are
+  // already covered.
+  if (a === 168 && b === 63 && c === 129 && Number(ip.split('.')[3]) === 16) return true;
   return false;
 };
 

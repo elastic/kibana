@@ -22,6 +22,10 @@ describe('isNonRoutableIPv4', () => {
     ['CGNAT high', '100.127.255.255'],
     ['IETF protocol assignments', '192.0.0.1'],
     ['benchmarking 198.18/15 low', '198.18.0.1'],
+    // Not in any RFC special-use range: ordinary public space that Azure routes only
+    // inside the VM, so every other rule passes it. It answers VM-scoped platform
+    // requests, and the fetch client lets a caller supply arbitrary headers.
+    ['Azure platform VIP', '168.63.129.16'],
     ['benchmarking 198.18/15 high', '198.19.0.1'],
     ['multicast', '239.255.255.250'],
     ['reserved', '240.0.0.1'],
