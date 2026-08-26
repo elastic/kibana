@@ -1,5 +1,8 @@
 {
   "sha1": "0ce6b92d08f0314746b2562dd879e484e8ee8925",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "a8aa0860fcd0029-92dfafb28d45a4f",
@@ -11,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
-        "line": 115,
-        "column": 7
+        "line": 111,
+        "column": 23
       }
     },
     {
@@ -25,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
-        "line": 120,
-        "column": 7
+        "line": 115,
+        "column": 64
       }
     },
     {
@@ -39,8 +42,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
-        "line": 128,
-        "column": 7
+        "line": 117,
+        "column": 11
       }
     },
     {
@@ -53,8 +56,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
-        "line": 135,
-        "column": 7
+        "line": 126,
+        "column": 5
       }
     },
     {
@@ -67,8 +70,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
-        "line": 143,
-        "column": 7
+        "line": 129,
+        "column": 11
       }
     },
     {
@@ -81,8 +84,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
-        "line": 152,
-        "column": 7
+        "line": 136,
+        "column": 23
       }
     },
     {
@@ -95,8 +98,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
-        "line": 157,
-        "column": 7
+        "line": 143,
+        "column": 8
       }
     },
     {
@@ -109,8 +112,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
-        "line": 162,
-        "column": 7
+        "line": 145,
+        "column": 11
       }
     },
     {
@@ -123,8 +126,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
-        "line": 167,
-        "column": 7
+        "line": 149,
+        "column": 11
       }
     },
     {
@@ -137,8 +140,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
-        "line": 174,
-        "column": 7
+        "line": 152,
+        "column": 92
       }
     },
     {
@@ -151,8 +154,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
-        "line": 182,
-        "column": 7
+        "line": 157,
+        "column": 64
       }
     },
     {
@@ -165,8 +168,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
-        "line": 190,
-        "column": 7
+        "line": 164,
+        "column": 11
       }
     },
     {
@@ -179,8 +182,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
-        "line": 202,
-        "column": 7
+        "line": 177,
+        "column": 23
       }
     },
     {
@@ -193,8 +196,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
-        "line": 211,
-        "column": 7
+        "line": 185,
+        "column": 23
       }
     },
     {
@@ -207,8 +210,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
-        "line": 221,
-        "column": 7
+        "line": 192,
+        "column": 23
       }
     },
     {
@@ -221,8 +224,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
-        "line": 243,
-        "column": 7
+        "line": 221,
+        "column": 8
       }
     },
     {
@@ -235,8 +238,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
-        "line": 279,
-        "column": 7
+        "line": 249,
+        "column": 22
       }
     },
     {
@@ -249,8 +252,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
-        "line": 321,
-        "column": 7
+        "line": 288,
+        "column": 6
       }
     },
     {
@@ -263,8 +266,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
-        "line": 336,
-        "column": 7
+        "line": 304,
+        "column": 24
       }
     },
     {
@@ -277,8 +280,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
-        "line": 404,
-        "column": 7
+        "line": 366,
+        "column": 20
       }
     },
     {
@@ -291,8 +294,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
-        "line": 463,
-        "column": 7
+        "line": 435,
+        "column": 23
       }
     },
     {
@@ -305,8 +308,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
-        "line": 477,
-        "column": 7
+        "line": 452,
+        "column": 11
       }
     },
     {
@@ -319,7 +322,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
-        "line": 514,
+        "line": 485,
         "column": 7
       }
     },
@@ -333,8 +336,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
-        "line": 544,
-        "column": 7
+        "line": 512,
+        "column": 5
       }
     },
     {
@@ -347,8 +350,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
-        "line": 550,
-        "column": 7
+        "line": 515,
+        "column": 11
       }
     },
     {
@@ -361,8 +364,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
-        "line": 580,
-        "column": 7
+        "line": 552,
+        "column": 5
       }
     },
     {
@@ -375,8 +378,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
-        "line": 594,
-        "column": 7
+        "line": 561,
+        "column": 79
       }
     },
     {
@@ -389,8 +392,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
-        "line": 608,
-        "column": 7
+        "line": 568,
+        "column": 80
       }
     },
     {
@@ -403,8 +406,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
-        "line": 623,
-        "column": 7
+        "line": 582,
+        "column": 5
       }
     },
     {
@@ -417,8 +420,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
-        "line": 662,
-        "column": 7
+        "line": 626,
+        "column": 9
       }
     },
     {
@@ -431,8 +434,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
-        "line": 667,
-        "column": 7
+        "line": 631,
+        "column": 24
       }
     },
     {
@@ -445,8 +448,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
-        "line": 674,
-        "column": 7
+        "line": 637,
+        "column": 9
       }
     },
     {
@@ -459,8 +462,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
-        "line": 682,
-        "column": 7
+        "line": 640,
+        "column": 53
       }
     },
     {
@@ -473,8 +476,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
-        "line": 689,
-        "column": 7
+        "line": 645,
+        "column": 8
       }
     },
     {
@@ -487,8 +490,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
-        "line": 707,
-        "column": 7
+        "line": 663,
+        "column": 23
       }
     },
     {
@@ -501,8 +504,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
-        "line": 733,
-        "column": 7
+        "line": 686,
+        "column": 12
       }
     },
     {
@@ -515,8 +518,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
-        "line": 752,
-        "column": 7
+        "line": 701,
+        "column": 23
       }
     },
     {
@@ -529,8 +532,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
-        "line": 769,
-        "column": 7
+        "line": 717,
+        "column": 20
       }
     },
     {
@@ -543,8 +546,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
-        "line": 809,
-        "column": 7
+        "line": 769,
+        "column": 82
       }
     },
     {
@@ -557,8 +560,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
-        "line": 834,
-        "column": 7
+        "line": 796,
+        "column": 12
       }
     },
     {
@@ -571,8 +574,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
-        "line": 844,
-        "column": 7
+        "line": 803,
+        "column": 19
       }
     },
     {
@@ -585,8 +588,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
-        "line": 858,
-        "column": 7
+        "line": 814,
+        "column": 11
       }
     },
     {
@@ -599,8 +602,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
-        "line": 899,
-        "column": 7
+        "line": 848,
+        "column": 23
       }
     },
     {
@@ -613,8 +616,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
-        "line": 907,
-        "column": 7
+        "line": 850,
+        "column": 23
       }
     },
     {
@@ -627,8 +630,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
-        "line": 930,
-        "column": 7
+        "line": 875,
+        "column": 24
       }
     },
     {
@@ -641,8 +644,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_automatic_import/ui/tests/manage_integrations_table.spec.ts",
-        "line": 975,
-        "column": 7
+        "line": 927,
+        "column": 11
       }
     }
   ]

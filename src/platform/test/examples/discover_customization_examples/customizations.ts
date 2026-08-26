@@ -10,6 +10,13 @@
 // Serverless test (remove during Scout migration): x-pack/platform/test/serverless/functional/test_suites/examples/discover_customization_examples/customizations.ts
 import type { FtrProviderContext } from '../../functional/ftr_provider_context';
 
+/**
+ * Migration recommendation: MIGRATE TO SCOUT. End-to-end of DiscoverContainer + search_bar
+ * CustomDataViewPicker loading a saved session. Picker rendering is
+ * discover_topnav.test.tsx; session load is open_discover_session.test.ts. Keep a short Scout
+ * smoke of the public customization API, not a second Discover app suite.
+ */
+
 const TEST_START_TIME = 'Sep 19, 2015 @ 06:31:44.000';
 const TEST_END_TIME = 'Sep 23, 2015 @ 18:31:44.000';
 
