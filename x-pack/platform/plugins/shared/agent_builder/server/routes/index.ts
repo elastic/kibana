@@ -9,6 +9,7 @@ import type { RouteDependencies } from './types';
 import { registerToolsRoutes } from './tools';
 import { registerInternalToolsRoutes } from './internal/tools';
 import { registerInternalSkillsRoutes } from './internal/skills';
+import { registerInternalAgentRoutes } from './internal/agents';
 import { registerInternalConversationRoutes } from './internal/conversations';
 import { registerConsumptionRoutes } from './consumption';
 import { registerInternalSmlRoutes } from './internal/sml';
@@ -30,6 +31,7 @@ export const registerRoutes = (dependencies: RouteDependencies) => {
   registerToolsRoutes(dependencies);
   registerInternalToolsRoutes(dependencies);
   registerInternalSkillsRoutes(dependencies);
+  registerInternalAgentRoutes(dependencies);
   registerInternalConversationRoutes(dependencies);
   registerConsumptionRoutes(dependencies);
   registerInternalSmlRoutes(dependencies);

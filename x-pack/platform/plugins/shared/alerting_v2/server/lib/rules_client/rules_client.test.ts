@@ -2180,7 +2180,7 @@ describe('RulesClient', () => {
       const client = createClient();
 
       const enabledAttrs = createRuleSoAttributes({
-        metadata: { name: 'enabled-rule' },
+        metadata: { name: 'enabled-rule', tags: ['critical', 'foo'] },
         schedule: { every: '5m', lookback: '1m' },
         enabled: true,
       });
@@ -2214,7 +2214,17 @@ describe('RulesClient', () => {
       ]);
 
       expect(ruleEventPublisher.emitRuleUpdated).toHaveBeenCalledWith(request, [
-        { ruleId: 'rule-1', spaceId: 'space-1' },
+        expect.objectContaining({
+          ruleId: 'rule-1',
+          spaceId: 'space-1',
+          rule: expect.objectContaining({
+            id: 'rule-1',
+            metadata: expect.objectContaining({
+              name: 'enabled-rule',
+              tags: ['critical', 'foo'],
+            }),
+          }),
+        }),
       ]);
 
       expect(res).toEqual({ affected_count: 1, errors: [] });
