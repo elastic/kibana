@@ -88,9 +88,8 @@ export class DispatcherService implements DispatcherServiceContract {
     const windowEnd = maxEnd < settled ? maxEnd : settled;
 
     if (windowEnd <= windowStart) {
-      // Degenerate: watermark is future-dated relative to now − settle. Only reachable via a
-      // persisted watermark that is ahead of the current clock — clock skew between Kibana nodes
-      // or corrupt task state. Skip the scan and hold the watermark to avoid a regress.
+      // Only reachable when the persisted watermark sits more than OVERLAP_WINDOW_MINUTES ahead
+      // of the current clock — node clock skew, or corrupt task state.
       logger.debug({
         message: () =>
           `windowEnd (${windowEnd.toISOString()}) ≤ windowStart ` +
@@ -99,8 +98,8 @@ export class DispatcherService implements DispatcherServiceContract {
       return {
         startedAt,
         nextWatermark: resolvedWatermark,
-        // Preserve stuckTicks so the escape hatch can eventually fire if the
-        // watermark is permanently future-dated (e.g. corrupt task state).
+        // Carried forward, not acted on here: the hatch lives past this early return, so it
+        // can only fire once the clock catches up and the scan resumes.
         nextStuckTicks: stuckTicks + 1,
         pipelineResult: {
           completed: true,
@@ -120,11 +119,8 @@ export class DispatcherService implements DispatcherServiceContract {
 
     const executionUuid = uuidV4();
 
-    // Combine the TM-provided signal with a self-imposed deadline so the
-    // pipeline always stops well before TM marks the task expired. Past
-    // `isExpired`, the returned state is discarded — the watermark would freeze.
-    // Uses explicit AbortController + setTimeout rather than AbortSignal.timeout /
-    // AbortSignal.any because those static methods are absent in the jsdom test env.
+    // AbortSignal.any / AbortSignal.timeout are absent in the jsdom test env, so the TM signal
+    // and the TICK_DEADLINE_MS deadline are merged by hand.
     const deadlineController = new AbortController();
     const deadlineTimer = setTimeout(() => deadlineController.abort(), TICK_DEADLINE_MS);
 
@@ -164,23 +160,17 @@ export class DispatcherService implements DispatcherServiceContract {
       }
 
       const nextWatermark = computeNextWatermark({ input, result: pipelineResult });
-      // On abort, StoreActionsStep may not have run, so recordedEpisodes is absent.
-      // Fall back to firedEpisodes (written by DispatchStep per chunk) so partial-dispatch
-      // ticks still reset the stuck counter.
-      // Known limitation: isStuck is aggregate — if any chunk in any apiKey batch makes
-      // progress, the counter resets even when later-batch groups are chronically unreachable.
-      // Those groups are not lost (watermark holds), but the escape hatch will not fire for
-      // them while earlier groups keep resetting the counter.
+      // StoreActionsStep may not have run on abort; DispatchStep's per-chunk firedEpisodes still
+      // proves progress, so a partial-dispatch tick resets the stuck counter. Known limitation:
+      // this is aggregate — progress in any apiKey batch resets it, so chronically unreachable
+      // groups in later batches never reach the hatch. They are not lost (an aborted tick holds
+      // the watermark).
       const recordedEpisodes =
-        pipelineResult.finalState.recordedEpisodes ??
-        pipelineResult.finalState.firedEpisodes ??
-        0;
+        pipelineResult.finalState.recordedEpisodes ?? pipelineResult.finalState.firedEpisodes ?? 0;
       const watermarkHeld = nextWatermark.getTime() === resolvedWatermark.getTime();
       const isStuck = watermarkHeld && recordedEpisodes === 0;
       const nextStuckTicks = isStuck ? stuckTicks + 1 : 0;
 
-      // Per-tick observability. All fields are lazy so the string is never built
-      // at production log levels where debug is off.
       logger.debug({
         message: () => {
           const watermarkLagMs = startedAt.getTime() - nextWatermark.getTime();
@@ -201,12 +191,11 @@ export class DispatcherService implements DispatcherServiceContract {
         const blockingEpisodes = pipelineResult.finalState.episodes ?? [];
         const lagMs = startedAt.getTime() - resolvedWatermark.getTime();
 
-        if (blockingEpisodes.length === 0) {
-          // Pipeline stuck before FetchEpisodesStep (e.g. WaitForResources timeout or
-          // ES overload aborting before any episodes are fetched). Advancing would
-          // silently drop whatever is in the window. Hold and reset while lag is
-          // still within one max scan window so transient infra pressure can recover.
-          // Once lag exceeds that, skip the unread window rather than stall forever.
+        const stoppedBeforeFetch = blockingEpisodes.length === 0;
+        if (stoppedBeforeFetch) {
+          // Nothing was fetched, so advancing would silently drop the window. Hold while lag
+          // stays within one scan window to let transient infra pressure recover; past that,
+          // skip the unread window rather than stall forever.
           if (lagMs > PRE_FETCH_STUCK_ADVANCE_LAG_MS) {
             const clampedEscapeTarget = new Date(
               Math.max(input.windowEnd.getTime(), resolvedWatermark.getTime())
@@ -237,23 +226,18 @@ export class DispatcherService implements DispatcherServiceContract {
           return { startedAt, nextWatermark: resolvedWatermark, nextStuckTicks: 0, pipelineResult };
         }
 
-        // The watermark has not advanced for STUCK_TICK_LIMIT consecutive ticks and
-        // we know the blocking episodes. Force-record them as `unmatched` so the
-        // `.alert-actions` dedup mark moves past them, then advance the watermark.
-        // If the batch was truncated, advance only to the truncation edge so the
-        // tail (beyond EPISODE_QUERY_LIMIT) is re-read and also escape-hatched next tick.
-        // Note: blockingEpisodes includes all fetched episodes; episodes that already have
-        // fire/notified records from a partial-dispatch tick will receive a conflicting
-        // unmatched record. The dedup query uses the latest @timestamp record, so the
-        // unmatched (written last) will win — acceptable for the escape-hatch path where
-        // the alternative is permanent stall.
+        // Force-record as `unmatched` so the `.alert-actions` dedup mark moves past these
+        // episodes. When truncated, advance only to the truncation edge so the tail beyond
+        // EPISODE_QUERY_LIMIT is re-read and hatched next tick. Episodes already fire-recorded
+        // by a partial-dispatch tick get a redundant row — same last_series_event_timestamp,
+        // so the dedup MAX is unchanged.
         const truncated = pipelineResult.finalState.truncated ?? false;
         const lastEpisode = blockingEpisodes[blockingEpisodes.length - 1];
         const escapeTarget = truncated
           ? new Date(lastEpisode.last_event_timestamp)
           : input.windowEnd;
-        // Clamp: never regress below the current watermark (guards against clock skew
-        // producing a windowEnd behind resolvedWatermark).
+        // Never regress: windowEnd can trail the watermark under clock skew, and the
+        // truncation edge can fall inside the overlap re-read.
         const clampedEscapeTarget = new Date(
           Math.max(escapeTarget.getTime(), resolvedWatermark.getTime())
         );
@@ -291,9 +275,8 @@ export class DispatcherService implements DispatcherServiceContract {
               `escape hatch bulkIndexDocs failed; holding watermark so ` +
               `episodes will be retried. ${err.message}`,
           });
-          // Do not advance: the records were not written, so dedup marks are absent.
-          // Reset stuckTicks to avoid re-triggering the escape hatch every tick while
-          // ES is unavailable.
+          // Records were not written, so the dedup marks are absent — hold. Reset the counter
+          // so the hatch does not re-fire every tick while ES is unavailable.
           return { startedAt, nextWatermark: resolvedWatermark, nextStuckTicks: 0, pipelineResult };
         }
 
