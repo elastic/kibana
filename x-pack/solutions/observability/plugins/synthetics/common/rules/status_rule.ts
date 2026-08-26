@@ -12,6 +12,8 @@ import type {
 import { isEmpty } from 'lodash';
 
 export const DEFAULT_PENDING_THRESHOLD = 2;
+export const MIN_PENDING_THRESHOLD = 1;
+export const MAX_PENDING_THRESHOLD = 100;
 export const DEFAULT_DOWN_THRESHOLD = 3;
 export const DEFAULT_LOCATIONS_THRESHOLD = 1;
 

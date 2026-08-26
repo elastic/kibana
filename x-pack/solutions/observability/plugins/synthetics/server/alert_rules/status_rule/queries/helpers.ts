@@ -230,21 +230,28 @@ const MINIMUM_STALENESS_BUFFER_FLOOR_MS = 60 * 1000;
 // significantly delaying genuine pending detection.
 const SCHEDULE_PROPORTIONAL_BUFFER_RATIO = 0.5;
 
-export const getDefaultStalenessBufferMs = (scheduleInMs: number) =>
-  Math.max(MINIMUM_STALENESS_BUFFER_FLOOR_MS, scheduleInMs * SCHEDULE_PROPORTIONAL_BUFFER_RATIO);
+const getDefaultStalenessBufferMs = (scheduleInMs: number) =>
+  Math.max(
+    MINIMUM_STALENESS_BUFFER_FLOOR_MS,
+    Math.round(scheduleInMs * SCHEDULE_PROPORTIONAL_BUFFER_RATIO)
+  );
 
+/**
+ * `stalenessBufferMs` is the buffer portion added to `scheduleInMs`, not a total timeout.
+ * Defaults to max(60s, 50% of schedule).
+ */
 export const calculateIsValidPing = ({
   previousRunEndTimeISO,
   scheduleInMs,
   previousRunDurationUs = 0,
-  minimumTotalBufferMs,
+  stalenessBufferMs,
 }: {
   previousRunEndTimeISO: string;
   scheduleInMs: number;
   previousRunDurationUs?: number;
-  minimumTotalBufferMs?: number;
+  stalenessBufferMs?: number;
 }) => {
-  const bufferMs = minimumTotalBufferMs ?? getDefaultStalenessBufferMs(scheduleInMs);
+  const bufferMs = stalenessBufferMs ?? getDefaultStalenessBufferMs(scheduleInMs);
   const msSincePreviousRunEnd = new Date().getTime() - new Date(previousRunEndTimeISO).getTime();
   const stalenessThresholdMs = scheduleInMs + Math.max(bufferMs, previousRunDurationUs / 1000);
 

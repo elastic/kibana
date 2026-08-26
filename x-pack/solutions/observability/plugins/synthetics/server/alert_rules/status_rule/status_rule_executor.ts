@@ -718,13 +718,20 @@ export class StatusRuleExecutor {
       failedStepNumber,
     };
 
+    const evaluationThreshold = 'downThreshold' in params ? params.downThreshold : pendingThreshold;
+    let evaluationValue: number | undefined;
+    if (!('downThreshold' in params)) {
+      evaluationValue = params.statusConfig.pendingCount ?? 1;
+    }
+
     const alertDocument = getMonitorAlertDocument(
       updatedMonitorSummary,
       locationNames,
       locationIds,
       useLatestChecks,
-      'downThreshold' in params ? params.downThreshold : pendingThreshold,
-      grouping
+      evaluationThreshold,
+      grouping,
+      evaluationValue
     );
 
     // Update context with step info if available

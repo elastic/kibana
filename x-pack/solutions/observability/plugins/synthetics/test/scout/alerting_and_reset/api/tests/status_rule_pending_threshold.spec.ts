@@ -11,8 +11,10 @@ import {
   apiTest,
   LOCAL_PUBLIC_LOCATION,
   mergeSyntheticsApiHeaders,
+  SYNTHETICS_ALERTS_INDEX,
   SYNTHETICS_API_URLS,
   SYNTHETICS_MONITOR_SO_TYPES,
+  type SyntheticsAlertDoc,
   type SyntheticsApiServicesFixture,
 } from '../../../common/fixtures';
 import { addMonitor, enableSynthetics } from '../../../common/fixtures/monitors';
@@ -21,16 +23,9 @@ import { tryForTime } from '../../../common/fixtures/retry';
 const RULE_TAG = 'scout-status-pending-threshold';
 const STATUS_RULE_TYPE_ID = 'xpack.synthetics.alerts.monitorStatus';
 const STATUS_RULE_CONSUMER = 'uptime';
-const ALERTS_INDEX = '.alerts-observability.uptime.alerts-default*';
 /** HTTP monitors are pending only after a 1-minute grace period. */
 const SLOW_TEST_TIMEOUT_MS = 180_000;
 const PENDING_WAIT_MS = 120_000;
-
-interface AlertDoc {
-  'kibana.alert.status'?: string;
-  'kibana.alert.reason'?: string;
-  'kibana.alert.instance.id'?: string;
-}
 
 interface StatusRuleInspectBody {
   pendingConfigs?: Record<string, { configId: string; pendingCount?: number }>;
@@ -50,8 +45,8 @@ interface AlertingRuleBody {
  * matching `tls_rule_browser_certs_alert.spec.ts`.
  *
  * HTTP monitors are not treated as pending until they are at least one minute
- * old (`isMonitorReadyForData`). Tests share worker-scoped state and run
- * sequentially: the inspect wait unblocks the firing cases.
+ * old (`isMonitorReadyForData`). Each firing test waits until the monitor is
+ * pending before creating its own rule.
  */
 apiTest.describe(
   'statusRulePendingThreshold',
@@ -61,8 +56,6 @@ apiTest.describe(
   () => {
     let editorHeaders: Record<string, string>;
     let monitorId: string;
-    let thresholdTwoRuleId: string;
-    let thresholdTwoDateStart: Date;
 
     const pendingCondition = (pendingThreshold: number) => ({
       alertOnNoData: true,
@@ -119,9 +112,12 @@ apiTest.describe(
       );
     };
 
-    const getAlertsForRule = async (esClient: EsClient, ruleId: string): Promise<AlertDoc[]> => {
-      const res = await esClient.search<AlertDoc>({
-        index: ALERTS_INDEX,
+    const getAlertsForRule = async (
+      esClient: EsClient,
+      ruleId: string
+    ): Promise<SyntheticsAlertDoc[]> => {
+      const res = await esClient.search<SyntheticsAlertDoc>({
+        index: SYNTHETICS_ALERTS_INDEX,
         ignore_unavailable: true,
         size: 10,
         query: {
@@ -133,7 +129,7 @@ apiTest.describe(
       });
       return res.hits.hits
         .map((hit) => hit._source)
-        .filter((source): source is AlertDoc => source != null);
+        .filter((source): source is SyntheticsAlertDoc => source != null);
     };
 
     const createEnabledStatusRule = async (
@@ -268,36 +264,36 @@ apiTest.describe(
     );
 
     apiTest(
-      'does not fire on the first pending evaluation when pendingThreshold is 2',
+      'waits for two consecutive pending evaluations before firing when pendingThreshold is 2',
       async ({ apiClient, apiServices, esClient }) => {
         apiTest.setTimeout(SLOW_TEST_TIMEOUT_MS);
         await waitUntilMonitorIsPending(apiClient);
 
-        const created = await createEnabledStatusRule(apiServices, 2, 'Scout pending threshold 2');
-        thresholdTwoRuleId = created.ruleId;
-        thresholdTwoDateStart = created.dateStart;
+        const { ruleId, dateStart } = await createEnabledStatusRule(
+          apiServices,
+          2,
+          'Scout pending threshold 2'
+        );
 
-        await runFirstExecution(apiServices, thresholdTwoRuleId, thresholdTwoDateStart);
-
-        const alerts = await getAlertsForRule(esClient, thresholdTwoRuleId);
-        expect(alerts.filter((alert) => alert['kibana.alert.status'] === 'active')).toHaveLength(0);
-      }
-    );
-
-    apiTest(
-      'fires on the second consecutive pending evaluation when pendingThreshold is 2',
-      async ({ apiServices, esClient }) => {
-        apiTest.setTimeout(SLOW_TEST_TIMEOUT_MS);
-        await runAdditionalExecution(apiServices, thresholdTwoRuleId, thresholdTwoDateStart);
-
-        await tryForTime(60_000, async () => {
-          const alerts = await getAlertsForRule(esClient, thresholdTwoRuleId);
-          const active = alerts.find((alert) => alert['kibana.alert.status'] === 'active');
-          expect(active).toBeDefined();
-          expect(active?.['kibana.alert.reason']).toContain('is pending');
-          expect(active?.['kibana.alert.instance.id']).toBe(
-            `${monitorId}-${LOCAL_PUBLIC_LOCATION.id}`
+        await apiTest.step('does not fire on the first pending evaluation', async () => {
+          await runFirstExecution(apiServices, ruleId, dateStart);
+          const alerts = await getAlertsForRule(esClient, ruleId);
+          expect(alerts.filter((alert) => alert['kibana.alert.status'] === 'active')).toHaveLength(
+            0
           );
+        });
+
+        await apiTest.step('fires on the second consecutive pending evaluation', async () => {
+          await runAdditionalExecution(apiServices, ruleId, dateStart);
+          await tryForTime(60_000, async () => {
+            const alerts = await getAlertsForRule(esClient, ruleId);
+            const active = alerts.find((alert) => alert['kibana.alert.status'] === 'active');
+            expect(active).toBeDefined();
+            expect(active?.['kibana.alert.reason']).toContain('is pending');
+            expect(active?.['kibana.alert.instance.id']).toBe(
+              `${monitorId}-${LOCAL_PUBLIC_LOCATION.id}`
+            );
+          });
         });
       }
     );

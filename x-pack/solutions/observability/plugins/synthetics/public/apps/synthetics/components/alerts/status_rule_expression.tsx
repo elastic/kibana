@@ -28,6 +28,8 @@ import { LocationsValueExpression } from './common/condition_locations_value';
 import { PopoverExpression } from './common/popover_expression';
 import {
   DEFAULT_PENDING_THRESHOLD,
+  MIN_PENDING_THRESHOLD,
+  MAX_PENDING_THRESHOLD,
   DEFAULT_DOWN_THRESHOLD,
   DEFAULT_LOCATIONS_THRESHOLD,
 } from '../../../../../common/rules/status_rule';
@@ -281,13 +283,17 @@ const PendingThresholdExpression = ({
       </EuiPopoverTitle>
       <EuiFieldNumber
         data-test-subj="syntheticsStatusRulePendingThreshold"
-        min={1}
-        max={100}
+        min={MIN_PENDING_THRESHOLD}
+        max={MAX_PENDING_THRESHOLD}
         compressed
         value={value}
         onChange={(evt) => {
           const next = Number(evt.target.value);
-          onChange(Number.isFinite(next) && next >= 1 ? next : 1);
+          onChange(
+            Number.isFinite(next)
+              ? Math.min(MAX_PENDING_THRESHOLD, Math.max(MIN_PENDING_THRESHOLD, next))
+              : MIN_PENDING_THRESHOLD
+          );
         }}
       />
     </PopoverExpression>

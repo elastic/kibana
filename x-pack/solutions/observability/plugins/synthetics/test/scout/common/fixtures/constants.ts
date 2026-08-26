@@ -50,6 +50,15 @@ export const INTERNAL_API_VERSION = '1';
  */
 export const SYNTHETICS_MONITOR_SO_TYPES = ['synthetics-monitor', 'synthetics-monitor-multi-space'];
 
+/** Alerts-as-data index backing the Synthetics uptime rules (status + TLS). */
+export const SYNTHETICS_ALERTS_INDEX = '.alerts-observability.uptime.alerts-default*';
+
+export interface SyntheticsAlertDoc {
+  'kibana.alert.status'?: string;
+  'kibana.alert.reason'?: string;
+  'kibana.alert.instance.id'?: string;
+}
+
 /**
  * Elastic-managed "local" public location available in the test environment.
  * Mirrors `LOCAL_PUBLIC_LOCATION` from the FTR `apis/synthetics/helpers/location.ts`.

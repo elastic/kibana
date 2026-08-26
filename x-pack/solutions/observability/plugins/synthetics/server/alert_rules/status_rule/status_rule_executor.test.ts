@@ -1421,6 +1421,89 @@ describe('StatusRuleExecutor', () => {
       // Verify grouping is present in the alert document produced
       expect(payload[ALERT_GROUPING]).toEqual(expectedGrouping);
     });
+
+    it('writes pendingCount as evaluation.value so it meets pendingThreshold', async () => {
+      statusRule.params = {
+        condition: {
+          alertOnNoData: true,
+          pendingThreshold: 2,
+        } as any,
+      };
+
+      await statusRule.scheduleAlert({
+        idWithLocation: 'config1-loc1',
+        alertId: 'alert-pending-1',
+        monitorSummary: {
+          configId: 'config1',
+          monitorId: 'mon-1',
+          monitorName: 'Test monitor',
+          monitorType: 'http',
+          monitorUrl: 'https://example.com',
+          monitorUrlLabel: 'URL',
+          locationId: 'loc1',
+          locationName: 'US Central QA',
+          locationNames: 'US Central QA',
+          hostName: 'host',
+          reason: 'Monitor is pending',
+          status: 'pending',
+          downThreshold: 1,
+          timestamp: '2024-05-13T12:33:37.000Z',
+        } as any,
+        locationNames: ['US Central QA'],
+        locationIds: ['loc1'],
+        statusConfig: {
+          configId: 'config1',
+          locationId: 'loc1',
+          status: 'pending',
+          monitorQueryId: 'mon-1',
+          monitorInfo: {} as any,
+          pendingCount: 2,
+        },
+      });
+
+      const [{ payload }] = alertsClientMock.setAlertData.mock.calls.map(([args]) => args);
+      expect(payload['kibana.alert.evaluation.threshold']).toBe(2);
+      expect(payload['kibana.alert.evaluation.value']).toBe(2);
+    });
+
+    it('keeps down-alert evaluation.value from checks', async () => {
+      await statusRule.scheduleAlert({
+        idWithLocation: 'config1-loc1',
+        alertId: 'alert-down-1',
+        useLatestChecks: true,
+        monitorSummary: {
+          configId: 'config1',
+          monitorId: 'mon-1',
+          monitorName: 'Test monitor',
+          monitorType: 'http',
+          monitorUrl: 'https://example.com',
+          monitorUrlLabel: 'URL',
+          locationId: 'loc1',
+          locationName: 'US Central QA',
+          locationNames: 'US Central QA',
+          hostName: 'host',
+          reason: 'Monitor is down',
+          status: 'down',
+          downThreshold: 2,
+          timestamp: '2024-05-13T12:33:37.000Z',
+          checks: { downWithinXChecks: 3, down: 3 },
+        } as any,
+        locationNames: ['US Central QA'],
+        locationIds: ['loc1'],
+        statusConfig: {
+          configId: 'config1',
+          locationId: 'loc1',
+          ping: {} as any,
+          checks: { downWithinXChecks: 3, down: 3 },
+          status: 'down',
+        } as any,
+        downThreshold: 2,
+      });
+
+      const [{ payload }] = alertsClientMock.setAlertData.mock.calls.map(([args]) => args);
+      expect(payload['kibana.alert.evaluation.threshold']).toBe(2);
+      expect(payload['kibana.alert.evaluation.value']).toBe(3);
+    });
   });
 });
 

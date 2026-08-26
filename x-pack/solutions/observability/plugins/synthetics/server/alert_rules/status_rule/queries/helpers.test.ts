@@ -219,13 +219,15 @@ describe('helpers', () => {
       expect(result).toBe(false);
     });
 
-    it('should respect explicit minimumTotalBufferMs override', () => {
+    it('should respect explicit stalenessBufferMs override', () => {
+      // Ping was 7 minutes ago, schedule is 5 minutes, custom buffer is 3 minutes.
+      // Total allowed: 5 + 3 = 8 minutes. 7 < 8, so ping is valid.
       const sevenMinutesAgo = new Date(mockCurrentTime - 7 * 60 * 1000).toISOString();
 
       const result = calculateIsValidPing({
         previousRunEndTimeISO: sevenMinutesAgo,
         scheduleInMs: 5 * 60 * 1000,
-        minimumTotalBufferMs: 3 * 60 * 1000,
+        stalenessBufferMs: 3 * 60 * 1000,
       });
 
       expect(result).toBe(true);
