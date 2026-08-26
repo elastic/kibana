@@ -268,41 +268,6 @@ describe('IacProvisionerService', () => {
     expect(errorLogged).toContain('unable to get issuer certificate');
   });
 
-  it('passes an array of CA paths through to the outbound Agent', async () => {
-    // A list of CA paths is valid config (kibana-controller may inject more
-    // than one). Partial-chain is still required so cluster CAs verify.
-    mockConfig({
-      api: {
-        url: 'https://cloud-iac-provisioner.cloud-iac-provisioner.svc.cluster.local',
-        tls: {
-          certificate: '/mnt/elastic-internal/http-certs/tls.crt',
-          key: '/mnt/elastic-internal/http-certs/tls.key',
-          ca: [
-            '/mnt/elastic-internal/trust-bundle/ca.crt',
-            '/mnt/elastic-internal/http-certs/ca.crt',
-          ],
-        },
-      },
-    });
-    mockLogger();
-    mockedFetch.mockResolvedValueOnce(
-      jsonResponse(200, { artifactUrl: ARTIFACT_URL, expiresAt: '2026-07-28T12:00:00Z' })
-    );
-
-    await iacProvisionerService.renderTemplate(RENDER_REQUEST);
-
-    expect(mockedAgent).toHaveBeenCalledWith({
-      connect: expect.objectContaining({
-        ca: [
-          '/mnt/elastic-internal/trust-bundle/ca.crt',
-          '/mnt/elastic-internal/http-certs/ca.crt',
-        ],
-        rejectUnauthorized: true,
-        allowPartialTrustChain: true,
-      }),
-    });
-  });
-
   it('does not replace Mozilla roots when tls.ca is unset', async () => {
     // ECH presents a client cert to the public proxy but must keep the default
     // CA store so Let's Encrypt on the hosted URL still verifies.

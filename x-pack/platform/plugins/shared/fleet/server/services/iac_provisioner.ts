@@ -263,10 +263,9 @@ class IacProvisionerServiceImpl implements IacProvisionerService {
         enabled: Boolean(tls?.certificate && tls?.key),
         certificate: tls?.certificate,
         key: tls?.key,
-        // Pass through as configured (string or string[]). Unset keeps Mozilla
-        // roots (ECH / Let's Encrypt). Serverless cluster CAs are not
-        // self-signed; the Agent sets allowPartialTrustChain when any CA is
-        // present so OpenSSL will treat them as trust anchors.
+        // Unset keeps Mozilla roots (ECH / Let's Encrypt). A single custom CA
+        // is enough: Serverless cluster CAs are not self-signed, so the Agent
+        // sets allowPartialTrustChain when any CA is present.
         certificateAuthorities: tls?.ca,
       })
     );
