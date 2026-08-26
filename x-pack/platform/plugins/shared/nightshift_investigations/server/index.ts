@@ -17,4 +17,6 @@ export type {
   NightshiftInvestigationsServerStart,
 } from './types';
 
+export { InvestigationUnavailableError } from './client/investigation_unavailable_error';
+
 export type { NightshiftInvestigationsRouteRepository } from './routes';
