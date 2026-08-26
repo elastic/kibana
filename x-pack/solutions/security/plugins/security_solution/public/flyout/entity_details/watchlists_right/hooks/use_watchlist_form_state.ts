@@ -11,6 +11,7 @@ import type { MonitoringEntitySource } from '../../../../../common/api/entity_an
 import type { SourceType } from './rule_based_source_helpers';
 import { useCreateWatchlistFormState } from './use_watchlist_form_state_create';
 import { useEditWatchlistFormState } from './use_watchlist_form_state_edit';
+import type { useRuleBasedSourceState } from './use_rule_based_source_state';
 
 export interface UseWatchlistFormStateParams {
   mode: WatchlistsFlyoutMode;
@@ -33,7 +34,7 @@ export interface WatchlistFormState {
     key: K,
     value: CreateWatchlistRequestBodyInput[K]
   ) => void;
-  setSourceValid: (valid: boolean) => void;
+  ruleBasedSource: ReturnType<typeof useRuleBasedSourceState>;
 }
 
 export const useWatchlistFormState = ({
