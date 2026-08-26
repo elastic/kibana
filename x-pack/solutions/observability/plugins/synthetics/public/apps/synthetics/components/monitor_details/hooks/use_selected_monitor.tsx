@@ -93,10 +93,10 @@ export const useSelectedMonitor = ({
     ? externalMonitor ?? null
     : availableLocalMonitor ?? externalMonitor ?? null;
 
-  // Local: wait for the heartbeat probe after a 404. Remote: the probe is the
-  // only source — once it settles empty the monitor is missing (do not spin).
-  const isMonitorMissing =
-    (isRemote || localSoMissing) && !externalMonitor && !externalMonitorLoading;
+  // Remote (`?remoteName=`) and heartbeat (local SO 404) both come from the
+  // ES probe. `localSoMissing` is that 404 — not merely `!isRemote`.
+  const usesExternalProbe = isRemote || localSoMissing;
+  const isMonitorMissing = usesExternalProbe && !externalMonitor && !externalMonitorLoading;
 
   useEffect(() => {
     if (
@@ -166,7 +166,7 @@ export const useSelectedMonitor = ({
       : syntheticsMonitorLoading || monitorListLoading || externalMonitorLoading,
     // Suppress the local 404 once we treat it as a heartbeat candidate; real
     // (non-404) errors still surface.
-    error: isRemote || localSoMissing ? null : error,
+    error: usesExternalProbe ? null : error,
     isMonitorMissing,
   };
 };

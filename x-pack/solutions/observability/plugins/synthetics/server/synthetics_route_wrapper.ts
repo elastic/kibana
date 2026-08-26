@@ -65,9 +65,10 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
           isDev: Boolean(server.isDev) && !isTestUser(server),
           heartbeatIndices,
           // CRUD / settings stay origin-only even if a client sends the header.
-          projectRouting: syntheticsRoute.writeAccess
-            ? undefined
-            : getProjectRoutingFromRequest(request),
+          projectRouting:
+            !syntheticsRoute.writeAccess && server.isCpsEnabled
+              ? getProjectRoutingFromRequest(request)
+              : undefined,
         }
       );
 

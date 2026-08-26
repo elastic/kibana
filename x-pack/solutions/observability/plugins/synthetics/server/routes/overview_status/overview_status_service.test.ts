@@ -1519,7 +1519,35 @@ describe('current status route', () => {
       expect(result.up).toBe(1);
     });
 
-    it('collects _index and applies remoteNames on serverless even without isCpsEnabled', async () => {
+    it('collects _index and applies remoteNames on serverless when CPS is on', async () => {
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+
+      esClient.search.mockResponseOnce(getEsResponse({ buckets: [] }));
+
+      const routeContext: any = {
+        request: { query: { remoteNames: ['obs-prod'] } },
+        syntheticsEsClient,
+        server: {
+          isElasticsearchServerless: true,
+          isCpsEnabled: true,
+        },
+      };
+
+      const overviewStatusService = new OverviewStatusService(routeContext);
+      overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue([]);
+
+      await overviewStatusService.getOverviewStatus();
+
+      const searchCall = esClient.search.mock.calls[0][0] as any;
+      expect(searchCall.aggs.monitors.aggs.index_name).toBeDefined();
+      const filters = searchCall.query.bool.filter;
+      const remoteFilter = filters.find((f: any) =>
+        f.bool?.should?.some((s: any) => s.wildcard?._index === 'obs-prod:*')
+      );
+      expect(remoteFilter).toBeDefined();
+    });
+
+    it('does not collect _index or apply remoteNames on serverless when CPS is off', async () => {
       const { esClient, syntheticsEsClient } = getUptimeESMockClient();
 
       esClient.search.mockResponseOnce(getEsResponse({ buckets: [] }));
@@ -1538,12 +1566,12 @@ describe('current status route', () => {
       await overviewStatusService.getOverviewStatus();
 
       const searchCall = esClient.search.mock.calls[0][0] as any;
-      expect(searchCall.aggs.monitors.aggs.index_name).toBeDefined();
-      const filters = searchCall.query.bool.filter;
+      expect(searchCall.aggs.monitors.aggs.index_name).toBeUndefined();
+      const filters = searchCall.query.bool.filter ?? [];
       const remoteFilter = filters.find((f: any) =>
         f.bool?.should?.some((s: any) => s.wildcard?._index === 'obs-prod:*')
       );
-      expect(remoteFilter).toBeDefined();
+      expect(remoteFilter).toBeUndefined();
     });
 
     it('keeps two remote monitors with the same configId+locationId from different clusters', async () => {
@@ -2107,8 +2135,8 @@ describe('current status route', () => {
 
       const result = await overviewStatusService.getOverviewStatus();
 
-      // Active-space filter is still applied (single-space view). `_index` is
-      // collected on serverless so CPS linked-project hits can be synthesized.
+      // Active-space filter is still applied (single-space view). `_index`
+      // collection is CPS-gated, so it stays off when `isCpsEnabled` is unset.
       const searchCall = esClient.search.mock.calls[0][0] as any;
       const filters = searchCall.query.bool.filter;
       const spaceFilter = filters.find((f: any) =>
@@ -2119,7 +2147,7 @@ describe('current status route', () => {
       expect(spaceTerms.terms['meta.space_id']).toContain('default');
 
       const monitorAggs = searchCall.aggs.monitors.aggs;
-      expect(monitorAggs.index_name).toBeDefined();
+      expect(monitorAggs.index_name).toBeUndefined();
       // `location_name` resolves the human-readable observer.geo.name label for
       // external monitors (remote CCS + local Heartbeat) that carry a location.
       // Heartbeat detection is always-on, so it runs even on serverless (unlike
