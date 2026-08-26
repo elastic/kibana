@@ -256,7 +256,7 @@ export async function getAgentAssignedVersionsForPolicies(
       variant_policy_ids: {
         terms: {
           field: 'policy_id',
-          size: parentPolicyIds.length * 20,
+          size: parentPolicyIds.length * 100,
         },
       },
     },
