@@ -585,6 +585,29 @@ describe('index_templates — post-migration schema check', () => {
     expect(verificationError?.message).toMatch(/Bootstrap is not ready/);
   });
 
+  // The v19 migration adds child fields to an already-existing parent and catches its
+  // own errors, so checking only the parent could not tell a pre-migration mapping
+  // from a migrated one: a failed child putMapping passed verification and writes
+  // carrying those fields were then rejected by dynamic: strict.
+  it.each(['canonical_url', 'ref_part', 'ref_part_count'])(
+    'fails when the external_references child %s is still missing',
+    async (child) => {
+      const mappings = fullyMigratedReportMappings();
+      delete (
+        mappings.properties.content.properties.external_references.properties as Record<
+          string,
+          unknown
+        >
+      )[child];
+
+      const { verificationError } = await runMigrations({ reportMappings: mappings });
+
+      expect(verificationError?.message).toMatch(
+        new RegExp(`content\\.external_references\\.${child}`)
+      );
+    }
+  );
+
   it('fails when an indicators field is still missing after migrating', async () => {
     const indicatorMappings = fullyMigratedIndicatorMappings();
     delete (indicatorMappings.properties as Record<string, unknown>).space_id;
@@ -605,5 +628,50 @@ describe('index_templates — post-migration schema check', () => {
 
     expect(verificationError?.message).toMatch(/extracted\.diamond/);
     expect(verificationError?.message).toMatch(/extracted\.gate/);
+  });
+});
+
+// `ignore: [404]` plus ignore_unavailable and allow_no_indices already turn "no report
+// indices yet" into an empty response, so anything that throws is a real request
+// failure. Swallowing them skipped every report migration and left the verifier with
+// nothing to check, so the install reported success over stale strict mappings.
+describe('index_templates — report index resolution failures', () => {
+  const installWith = async (getImpl: () => Promise<never>) => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.indices.exists.mockResolvedValue(true);
+    esClient.indices.getSettings.mockResolvedValue({});
+    esClient.indices.getMapping.mockImplementation((async (args: { index: string }) => ({
+      [args.index]: {
+        mappings:
+          args.index === THREAT_INTEL_INDICATORS_INDEX
+            ? fullyMigratedIndicatorMappings()
+            : fullyMigratedReportMappings(),
+      },
+    })) as never);
+    esClient.indices.get.mockImplementation(getImpl as never);
+
+    return installIndexTemplates({
+      esClient,
+      logger: loggingSystemMock.createLogger(),
+    }).then(
+      () => undefined,
+      (err: Error) => err
+    );
+  };
+
+  it.each([
+    ['a 503', 503],
+    ['an authorization error', 403],
+    ['a timeout', 408],
+  ])('propagates %s rather than treating it as no indices', async (_label, statusCode) => {
+    const err = await installWith(() =>
+      Promise.reject(Object.assign(new Error('request failed'), { statusCode }))
+    );
+    expect(err).toBeInstanceOf(Error);
+  });
+
+  it('still treats an empty response as no report indices', async () => {
+    const err = await installWith((() => Promise.resolve({})) as never);
+    expect(err).toBeUndefined();
   });
 });

@@ -502,16 +502,24 @@ const resolveReportIndices = async (
   esClient: ElasticsearchClient,
   log: Logger
 ): Promise<string[]> => {
-  try {
-    const response = await esClient.indices.get(
-      { index: THREAT_REPORTS_INDEX_PATTERN, ...HIDDEN_INDEX_SEARCH_OPTIONS },
-      { ignore: [404] }
-    );
-    return Object.keys(response ?? {});
-  } catch (err) {
-    log.debug(`reports index not found — skipping migration (${(err as Error).message})`);
-    return [];
+  // Deliberately not caught. `ignore: [404]` plus `ignore_unavailable` and
+  // `allow_no_indices` already turn "there are no report indices yet" into an empty
+  // response, so anything that still throws here is a real request failure: a
+  // timeout, an authorization error, a 5xx.
+  //
+  // Swallowing those returned `[]`, which skipped every report migration *and* left
+  // `assertMigratedSchemaIsUsable` with nothing to check, so the install reported
+  // success and bootstrap advertised readiness over possibly stale strict mappings.
+  // Letting it propagate puts it back in `withElasticsearchRetry`.
+  const response = await esClient.indices.get(
+    { index: THREAT_REPORTS_INDEX_PATTERN, ...HIDDEN_INDEX_SEARCH_OPTIONS },
+    { ignore: [404] }
+  );
+  const indices = Object.keys(response ?? {});
+  if (indices.length === 0) {
+    log.debug('no report indices exist yet — skipping report migrations');
   }
+  return indices;
 };
 
 const migrateExistingDiamondMappings = async (
@@ -1410,7 +1418,15 @@ const REQUIRED_REPORT_FIELDS = [
   'extracted.iocs.tier',
   'extracted.iocs.port',
   'extracted.iocs.reference',
-  'content.external_references',
+  // Child fields, not just the parent. The v19 migration adds these to an
+  // already-existing `external_references`, and it catches its own errors, so
+  // checking only the parent could not tell a pre-migration mapping from a migrated
+  // one and a failed child putMapping passed verification.
+  'content.external_references.source_name',
+  'content.external_references.url',
+  'content.external_references.canonical_url',
+  'content.external_references.ref_part',
+  'content.external_references.ref_part_count',
   'lineage.content_scrubbed_at',
 ] as const;
 
