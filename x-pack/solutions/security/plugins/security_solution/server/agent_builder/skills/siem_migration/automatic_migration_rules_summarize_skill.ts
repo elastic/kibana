@@ -18,10 +18,11 @@ import {
   NAME_NEVER_ID_BLOCK,
   AUTOMATIC_MIGRATION_GENERAL_GUIDELINES,
 } from './rules/content';
+import { RULE_MIGRATION_SKILLS } from './rules/skill_ids';
 
 export const automaticMigrationRulesSummarizeSkill = defineSkillType({
-  id: 'automatic-migration-rules-summarize',
-  name: 'automatic-migration-rules-summarize',
+  id: RULE_MIGRATION_SKILLS.SUMMARIZE,
+  name: RULE_MIGRATION_SKILLS.SUMMARIZE,
   basePath: 'skills/security/siem_migrations',
   description: `Summarize Automatic Rule Migration progress: list every rule migration with its status and rule counts, or drill into one migration's task progress and translation stats.
 

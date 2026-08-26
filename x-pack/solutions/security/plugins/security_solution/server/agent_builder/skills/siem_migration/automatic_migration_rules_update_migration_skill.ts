@@ -23,7 +23,7 @@ import { RULE_MIGRATION_SKILLS } from './rules/skill_ids';
 
 export const automaticMigrationRulesUpdateMigrationSkill = defineSkillType({
   id: 'automatic-migration-rules-update-migration',
-  name: 'automatic-migration-rules-update-migration',
+  name: RULE_MIGRATION_SKILLS.UPDATE,
   basePath: 'skills/security/siem_migrations',
   description: `Rename an Automatic Rule Migration.
 

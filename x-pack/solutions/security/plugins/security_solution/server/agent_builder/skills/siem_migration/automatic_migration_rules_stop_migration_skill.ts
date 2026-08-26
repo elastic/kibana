@@ -23,7 +23,7 @@ import { RULE_MIGRATION_SKILLS } from './rules/skill_ids';
 
 export const automaticMigrationRulesStopMigrationSkill = defineSkillType({
   id: 'automatic-migration-rules-stop-migration',
-  name: 'automatic-migration-rules-stop-migration',
+  name: RULE_MIGRATION_SKILLS.STOP,
   basePath: 'skills/security/siem_migrations',
   description: `Stop a running Automatic Rule Migration translation run.
 

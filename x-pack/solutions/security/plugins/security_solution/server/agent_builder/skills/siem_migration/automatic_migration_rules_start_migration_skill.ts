@@ -26,8 +26,8 @@ import {
 import { RULE_MIGRATION_SKILLS } from './rules/skill_ids';
 
 export const automaticMigrationRulesStartMigrationSkill = defineSkillType({
-  id: 'automatic-migration-rules-start-migration',
-  name: 'automatic-migration-rules-start-migration',
+  id: RULE_MIGRATION_SKILLS.START,
+  name: RULE_MIGRATION_SKILLS.START,
   basePath: 'skills/security/siem_migrations',
   description: `Start, reprocess, or resume an Automatic Rule Migration translation run.
 
