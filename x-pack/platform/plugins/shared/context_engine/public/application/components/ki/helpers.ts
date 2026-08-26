@@ -33,6 +33,13 @@ export const capitalizeLabel = (label: string): string =>
 
 export const getKiTypeLabel = (type: string): string => type.replace(/_/g, ' ');
 
+export const getKiListTypeFilterLabel = (type: string): string =>
+  type === ALL_TYPE_FILTER.value
+    ? i18n.translate('xpack.contextEngine.aiIndexDetail.kiList.filterAll', {
+        defaultMessage: 'All',
+      })
+    : getKiTypeLabel(type);
+
 export const getKiDisplayTitle = (title?: string): string => title ?? noneValueLabel;
 
 export const getKiDisplayTypeLabel = (type?: string): string =>

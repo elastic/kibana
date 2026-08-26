@@ -23,7 +23,7 @@ import {
   ALL_TYPE_FILTER,
   getDiscoverEsqlQuery,
   getIndexManagementLocatorParams,
-  getKiTypeLabel,
+  getKiListTypeFilterLabel,
   type KiListTypeFilter,
 } from './helpers';
 import { KiListBody } from './ki_list_body';
@@ -60,7 +60,7 @@ export const KiListPanel = ({ aiIndex: { id: aiIndexId, dest } }: KiListPanelPro
           id: type,
           label: i18n.translate('xpack.contextEngine.aiIndexDetail.kiList.filterType', {
             defaultMessage: '{typeLabel} ({count})',
-            values: { typeLabel: getKiTypeLabel(type), count },
+            values: { typeLabel: getKiListTypeFilterLabel(type), count },
           }),
           'data-test-subj': `contextKiListFilter-${type}`,
         })

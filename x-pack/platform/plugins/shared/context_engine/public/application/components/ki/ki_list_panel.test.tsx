@@ -121,7 +121,7 @@ describe('KiListPanel', () => {
     expect(screen.getByTestId('contextKiListPanelContent')).toBeInTheDocument();
     expect(screen.getByTestId('contextKiListRows')).toBeInTheDocument();
     expect(screen.getByTestId('contextKiRowTitle')).toHaveTextContent('Refund playbook');
-    expect(screen.getByTestId('contextKiListFilter-all')).toBeInTheDocument();
+    expect(screen.getByTestId('contextKiListFilter-all')).toHaveTextContent('All (6)');
     expect(screen.getByTestId('contextKiListFilter-playbook')).toBeInTheDocument();
     expect(screen.getByTestId('contextKiListFilter-policy')).toBeInTheDocument();
     expect(screen.queryByTestId('contextKiListFilter-others')).not.toBeInTheDocument();
