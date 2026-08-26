@@ -37,15 +37,53 @@ export const MAX_PARSE_BYTES = 10 * 1024 * 1024;
 const capInput = (html: string): string =>
   html.length > MAX_PARSE_BYTES ? html.slice(0, MAX_PARSE_BYTES) : html;
 
+/**
+ * Removes `<script>` and `<style>` elements, including ones with no closing tag.
+ *
+ * The terminated patterns run first so a following sibling is not swallowed. The
+ * unterminated pass then discards from an opening tag to end of input, which matters
+ * for two reasons. Malformed feed HTML is one, but the bigger one is `capInput`: a
+ * perfectly valid document truncated at MAX_PARSE_BYTES can lose the closing tag,
+ * and the generic tag stripper then removes only `<script>` and leaves the entire
+ * body as report text. That text goes to the LLM stages and IOC extraction, so it is
+ * both a cost and a precision problem, not just noise.
+ *
+ * The end tag matches attributes and arbitrary whitespace (`</script foo>`,
+ * `</script\t\n>`) so a crafted close tag cannot smuggle a body past this.
+ */
+/**
+ * Matches an HTML tag, requiring a tag-like character after `<`.
+ *
+ * A bare `<[^>]+>` treats any `<...>` span as a tag, so prose comparisons were eaten:
+ * `5 < 10 and 3 > 1` collapsed to `5 1`, and threat reports contain plenty of
+ * `payload < 4KB` and `CVSS > 7`. Requiring a letter, `/`, `!`, or `?` covers real
+ * tags, closing tags, comments, and processing instructions while leaving prose alone.
+ *
+ * Shared safely because it is only ever used with `String.replace`, which resets
+ * `lastIndex` around each call. Do not reach for `.test()` or `.exec()` on it without
+ * cloning first, since those do carry state between calls.
+ */
+const TAG_PATTERN = /<[a-z!?/][^>]*>/gi;
+
+const stripScriptAndStyle = (html: string): string =>
+  html
+    .replace(/<script[\s\S]*?<\/script\b[^>]*>/gi, ' ')
+    .replace(/<style[\s\S]*?<\/style\b[^>]*>/gi, ' ')
+    .replace(/<script\b[\s\S]*$/i, ' ')
+    .replace(/<style\b[\s\S]*$/i, ' ')
+    // Removing an unterminated element can orphan a partial tag that the generic tag
+    // pass would otherwise have absorbed: in `<scr<script>ipt>payload` the outer
+    // `<scr` was only swallowed because the script's `>` terminated it. Requiring a
+    // letter or slash after `<` keeps ordinary prose like `5 < 10` intact.
+    .replace(/<\/?[a-z][^>]*$/i, ' ');
+
 export const stripHtml = (html: string | undefined | null): string => {
   if (!html) return '';
   const capped = capInput(html);
   // Drop the most expensive substrings up front (script/style bodies)
   // before falling through to the generic tag stripper.
-  const withoutScripts = capped
-    .replace(/<script[\s\S]*?<\/script\b[^>]*>/gi, ' ')
-    .replace(/<style[\s\S]*?<\/style\b[^>]*>/gi, ' ');
-  const withoutTags = withoutScripts.replace(/<[^>]+>/g, ' ');
+  const withoutScripts = stripScriptAndStyle(capped);
+  const withoutTags = withoutScripts.replace(TAG_PATTERN, ' ');
   const decoded = decodeEntities(withoutTags);
   return collapseWhitespace(decoded);
 };
@@ -155,7 +193,7 @@ const splitHtmlBySections = (html: string): Array<{ kind: SectionKind; html: str
     // Decode entities before classifying: `Indicators&nbsp;of&nbsp;Compromise` is a
     // completely ordinary heading, and classifying the raw form read it as prose, so
     // its anchor hrefs were dropped instead of lifted.
-    const headingText = collapseWhitespace(decodeEntities(m[2].replace(/<[^>]+>/g, ' ')));
+    const headingText = collapseWhitespace(decodeEntities(m[2].replace(TAG_PATTERN, ' ')));
     const classified = classifyHeader(headingText);
 
     if (classified !== 'prose') {
@@ -221,9 +259,7 @@ export const htmlToStructured = (html: string | undefined | null): string => {
   // 1. Drop script/style bodies (same pre-pass as stripHtml). The end tag
   //    matches attributes/junk too (`</script foo>`, `</script\t\n bar>`) so a
   //    crafted close tag cannot smuggle a body past the stripper.
-  const cleaned = capped
-    .replace(/<script[\s\S]*?<\/script\b[^>]*>/gi, ' ')
-    .replace(/<style[\s\S]*?<\/style\b[^>]*>/gi, ' ');
+  const cleaned = stripScriptAndStyle(capped);
 
   // 2. Split at heading boundaries so each chunk knows its section kind.
   //    Href-lifting is applied only to ioc and references chunks (step 3 below).
@@ -249,20 +285,20 @@ export const htmlToStructured = (html: string | undefined | null): string => {
         /<a\b[^>]*?\shref\s*=\s*(?:["']([^"']+)["']|([^\s"'>]+))[^>]*>([\s\S]*?)<\/a>/gi,
         (_m, quotedHref: string | undefined, bareHref: string | undefined, inner: string) => {
           const href = quotedHref ?? bareHref ?? '';
-          const text = inner.replace(/<[^>]+>/g, ' ').trim();
+          const text = inner.replace(TAG_PATTERN, ' ').trim();
           return `${text} ${href} `;
         }
       );
     } else {
       // Prose: collapse anchor to its visible text only.
       s = s.replace(/<a\s[^>]*>([\s\S]*?)<\/a>/gi, (_m, inner: string) => {
-        return `${inner.replace(/<[^>]+>/g, ' ').trim()} `;
+        return `${inner.replace(TAG_PATTERN, ' ').trim()} `;
       });
     }
 
     // 4. Headings → "## text\n"
     s = s.replace(/<h[1-6][^>]*>([\s\S]*?)<\/h[1-6]>/gi, (_m, inner: string) => {
-      const text = inner.replace(/<[^>]+>/g, ' ').trim();
+      const text = inner.replace(TAG_PATTERN, ' ').trim();
       return text ? `\n## ${collapseWhitespace(text)}\n` : '';
     });
 
@@ -272,7 +308,7 @@ export const htmlToStructured = (html: string | undefined | null): string => {
       const cellPattern = /<t[dh][^>]*>([\s\S]*?)<\/t[dh]>/gi;
       let cellMatch: RegExpExecArray | null;
       while ((cellMatch = cellPattern.exec(inner)) !== null) {
-        const cellContent = cellMatch[1].replace(/<[^>]+>/g, ' ').trim();
+        const cellContent = cellMatch[1].replace(TAG_PATTERN, ' ').trim();
         cellTexts.push(collapseWhitespace(cellContent));
       }
       return cellTexts.length > 0 ? `\n| ${cellTexts.join(' | ')} |\n` : '\n';
@@ -280,7 +316,7 @@ export const htmlToStructured = (html: string | undefined | null): string => {
 
     // 6. List items → "- text\n"
     s = s.replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, (_m, inner: string) => {
-      const text = inner.replace(/<[^>]+>/g, ' ').trim();
+      const text = inner.replace(TAG_PATTERN, ' ').trim();
       return text ? `\n- ${collapseWhitespace(text)}\n` : '';
     });
 
@@ -297,7 +333,7 @@ export const htmlToStructured = (html: string | undefined | null): string => {
     let previous: string;
     do {
       previous = s;
-      s = s.replace(/<[^>]+>/g, '');
+      s = s.replace(TAG_PATTERN, '');
     } while (s !== previous);
 
     processedParts.push(s);

@@ -422,3 +422,62 @@ describe('stripHtml — entity table lookup safety', () => {
     expect(stripHtml('<p>&#9999999;</p>')).toBe('&#9999999;');
   });
 });
+
+describe('script and style removal without a closing tag', () => {
+  // The bigger source of these is not malformed feeds, it is `capInput`: a valid
+  // document truncated at MAX_PARSE_BYTES can lose the closing tag, and the generic
+  // tag stripper then removes only the opening tag and leaves the whole body as
+  // report text, which goes to the LLM stages and IOC extraction.
+  it('discards an unterminated script through end of input', () => {
+    expect(stripHtml('<p>before</p><script>alert(1)')).toBe('before');
+  });
+
+  it('discards an unterminated style through end of input', () => {
+    expect(stripHtml('<p>before</p><style>.c { color: red; }')).toBe('before');
+  });
+
+  it('still keeps a sibling after a terminated script', () => {
+    expect(stripHtml('<p>a</p><script>x</script><p>b</p>')).toBe('a b');
+  });
+
+  it('handles a terminated script followed by an unterminated one', () => {
+    expect(stripHtml('<p>a</p><script>x</script><p>b</p><script>y')).toBe('a b');
+  });
+
+  it('applies to the structured path too', () => {
+    const out = htmlToStructured('<p>before</p><script>var leak = "aaaa";');
+    expect(out).not.toContain('leak');
+    expect(out).toContain('before');
+  });
+
+  // The realistic route: truncation cuts a valid script mid-body.
+  it('does not leak a script body that the input cap truncated', () => {
+    const html = `<p>before</p><script>${'var x = 1; '.repeat(20)}`;
+    const capped = `${html.slice(0, 80)}`;
+    expect(stripHtml(capped)).toBe('before');
+  });
+});
+
+describe('stripHtml — prose containing angle brackets', () => {
+  // A bare `<[^>]+>` treated any `<...>` span as a tag, so a comparison in prose was
+  // eaten whole. Threat reports are full of `payload < 4KB` and `CVSS > 7`.
+  it('keeps a comparison between two numbers', () => {
+    expect(stripHtml('<p>5 < 10 and 3 > 1</p>')).toBe('5 < 10 and 3 > 1');
+  });
+
+  it('keeps a size threshold', () => {
+    expect(stripHtml('<p>payload < 4KB, CVSS > 7.5</p>')).toBe('payload < 4KB, CVSS > 7.5');
+  });
+
+  it('still removes real tags around it', () => {
+    expect(stripHtml('<div><span>a < b</span></div>')).toBe('a < b');
+  });
+
+  it('still removes comments and processing instructions', () => {
+    expect(stripHtml('<!-- note --><p>body</p>')).toBe('body');
+  });
+
+  it('still removes a closing tag', () => {
+    expect(stripHtml('<p>text</p>')).toBe('text');
+  });
+});
