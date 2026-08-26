@@ -27,7 +27,7 @@ export class ComposeDiscoverPage {
   public readonly editQueryButton: Locator;
   /**
    * Edit CTA in the query summary on the Alert Condition step. Labeled
-   * "Open query editor" before a query is applied and "Edit query" afterwards; both
+   * "Add query" before a query is applied and "Edit query" afterwards; both
    * kinds share this subject. Create uses a single unified editor and the heuristic
    * split runs on Apply (alert only).
    */
