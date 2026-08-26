@@ -696,7 +696,8 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
                 token_plain: tokensMap[policyId],
                 namespaces: policiesSpacesIndexedById[policyId],
               },
-        }))
+        })),
+        { refresh: false } // fetched by id on this path; skip wait_for
       );
     });
   }

@@ -2575,7 +2575,7 @@ describe('Agent policy', () => {
               namespaces: ['mySpace'],
             }),
           ],
-          refresh: 'wait_for',
+          refresh: false,
         })
       );
 

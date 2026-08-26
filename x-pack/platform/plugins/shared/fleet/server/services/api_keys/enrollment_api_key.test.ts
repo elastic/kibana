@@ -111,6 +111,7 @@ describe('enrollment api keys', () => {
 
       expect(esClient.create).toHaveBeenCalledWith(
         expect.objectContaining({
+          refresh: false,
           body: expect.objectContaining({
             namespaces: ['test123'],
           }),

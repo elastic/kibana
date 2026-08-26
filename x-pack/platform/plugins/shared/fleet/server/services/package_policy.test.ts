@@ -14622,7 +14622,8 @@ describe('compilePackagePolicyForVersions()', () => {
         mockPackagePolicy.id,
         expect.objectContaining({
           inputs_for_versions: expect.objectContaining({ '8.18': expect.anything(), '9.3': [] }),
-        })
+        }),
+        { refresh: false }
       );
     });
 

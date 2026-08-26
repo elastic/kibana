@@ -886,12 +886,17 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         }
 
         await soClient
-          .update<PackagePolicySOAttributes>(savedObjectType, packagePolicy.id, {
-            inputs_for_versions: {
-              ...existingInputsForVersions,
-              ...inputsForVersions,
+          .update<PackagePolicySOAttributes>(
+            savedObjectType,
+            packagePolicy.id,
+            {
+              inputs_for_versions: {
+                ...existingInputsForVersions,
+                ...inputsForVersions,
+              },
             },
-          })
+            { refresh: false }
+          )
           .catch(
             catchAndSetErrorStackTrace.withMessage(
               `attempt to update package policy saved object with inputs_for_versions failed`
