@@ -1641,7 +1641,6 @@
     "core.ui.chrome.appearanceChange.requiresPageReloadButtonLabel": "Actualiser la page",
     "core.ui.chrome.appearanceChange.successNotificationText": "Recharger la page pour afficher les modifications",
     "core.ui.chrome.appearanceChange.successNotificationTitle": "Mode de couleur système mis à jour",
-    "core.ui.chrome.breadcrumbs.ariaLabel": "Fil d'Ariane",
     "core.ui.chrome.globalHeader.logoAriaLabel": "Page d'accueil Elastic",
     "core.ui.chrome.globalHeader.searchButton.ariaLabel": "Recherche",
     "core.ui.chrome.globalHeader.searchButton.placeholder": "Recherche de contenu…",
