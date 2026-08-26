@@ -6,7 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
 import type { StabilityLevel } from '@kbn/workflows';
 import type { z } from '@kbn/zod/v4';
 
