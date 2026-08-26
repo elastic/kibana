@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import type { Investigation } from '@kbn/pnd-common';
 import { CriticalityBadge } from './criticality_badge';
-import { DETAILS_FLYOUT_LABELS as i18n } from './translations';
+import { DETAILS_FLYOUT_LABELS } from './translations';
 import type { FlyoutTab } from './details_flyout_tab_contents';
 
 export interface ConversationDetailsFlyoutHeaderProps {
@@ -28,16 +28,16 @@ export interface ConversationDetailsFlyoutHeaderProps {
 }
 
 const TABS: Array<{ id: FlyoutTab; label: string }> = [
-  { id: 'overview', label: i18n.tabs.overview },
-  { id: 'attachments', label: i18n.tabs.attachments },
-  { id: 'timeline', label: i18n.tabs.timeline },
+  { id: 'overview', label: DETAILS_FLYOUT_LABELS.tabs.overview },
+  { id: 'attachments', label: DETAILS_FLYOUT_LABELS.tabs.attachments },
+  { id: 'timeline', label: DETAILS_FLYOUT_LABELS.tabs.timeline },
 ];
 
 const formatSince = (isoTimestamp: string): string => {
   const date = new Date(isoTimestamp);
   const time = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   const minutesAgo = Math.round((Date.now() - date.getTime()) / 60000);
-  return `Since ${time} (${minutesAgo} min)`;
+  return DETAILS_FLYOUT_LABELS.header.since(time, minutesAgo);
 };
 
 export const ConversationDetailsFlyoutTabs = memo<ConversationDetailsFlyoutHeaderProps>(

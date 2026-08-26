@@ -23,6 +23,13 @@ export const DETAILS_FLYOUT_LABELS = Object.freeze({
       defaultMessage: 'Timeline',
     }),
   },
+  header: {
+    since: (time: string, minutesAgo: number) =>
+      i18n.translate('xpack.pnd.detailsFlyout.header.since', {
+        defaultMessage: 'Since {time} ({minutesAgo} min)',
+        values: { time, minutesAgo },
+      }),
+  },
   sections: {
     overview: i18n.translate('xpack.pnd.detailsFlyout.sections.situation', {
       defaultMessage: "What's happened",
