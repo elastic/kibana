@@ -14,13 +14,26 @@ import type { CommonStepDefinition } from '../../step_registry/types';
 
 export const DataParseJsonStepTypeId = 'data.parseJson' as const;
 
+export const MAX_PARSE_JSON_SOURCE_BYTES = 10 * 1024 * 1024;
+const MAX_PARSE_JSON_SOURCE_MB = MAX_PARSE_JSON_SOURCE_BYTES / (1024 * 1024);
+
 export const ConfigSchema = z.object({
-  source: z.unknown(),
+  source: z.unknown().describe(
+    i18n.translate('workflowsExtensions.dataParseJsonStep.schema.source', {
+      defaultMessage:
+        'JSON string to parse. Can be a template expression. If the value is already a structured type (object, array, number, boolean), it is returned as-is.',
+    })
+  ),
 });
 
 export const InputSchema = z.object({});
 
-export const OutputSchema = z.unknown();
+export const OutputSchema = z.unknown().describe(
+  i18n.translate('workflowsExtensions.dataParseJsonStep.schema.output', {
+    defaultMessage:
+      'The parsed value: an object, array, string, number, boolean, or null. Already-structured sources are returned unchanged.',
+  })
+);
 
 export type DataParseJsonStepConfigSchema = typeof ConfigSchema;
 export type DataParseJsonStepInputSchema = typeof InputSchema;
@@ -40,36 +53,33 @@ export const dataParseJsonStepCommonDefinition: CommonStepDefinition<
     defaultMessage: 'Parse a JSON string into a structured object or array',
   }),
   documentation: {
-    details: `# Parse JSON
-
-Parse a JSON string into a structured object or array for use in downstream steps.
-
-## Basic Usage
-
+    details: i18n.translate('workflowsExtensions.dataParseJsonStep.documentation.details', {
+      defaultMessage:
+        'Parse a JSON string into a structured object or array for use in downstream steps.',
+    }),
+    notes: [
+      i18n.translate('workflowsExtensions.dataParseJsonStep.documentation.notes.invalidJson', {
+        defaultMessage:
+          'Invalid JSON fails the step. The error includes the parse location from the JSON parser.',
+      }),
+      i18n.translate('workflowsExtensions.dataParseJsonStep.documentation.notes.sizeLimit', {
+        defaultMessage:
+          'Inputs larger than {maxMb} MB are rejected to prevent excessive memory usage.',
+        values: { maxMb: MAX_PARSE_JSON_SOURCE_MB },
+      }),
+      i18n.translate('workflowsExtensions.dataParseJsonStep.documentation.notes.liquid', {
+        defaultMessage:
+          'For inline parsing inside a Liquid expression, use the json_parse Liquid filter. Use data.parseJson when you want the parsed result as a separate named step output.',
+      }),
+    ],
+    examples: [
+      `## Basic usage
 \`\`\`yaml
 - name: parse-response
   type: data.parseJson
   source: "\${{ steps.http_request.output.body }}"
-\`\`\`
-
-## Behavior
-
-- If the source is already a structured type (object, array, number, boolean), it is returned as-is.
-- If the source is a valid JSON string, it is parsed and returned.
-- If the source is an invalid JSON string, the step returns an error with the parse location.
-
-## Configuration
-
-- **source** (required): The JSON string to parse. Can be a template expression.
-
-## Output
-
-Returns the parsed value — an object, array, string, number, boolean, or null.
-
-## Size Limits
-
-Inputs larger than 10 MB are rejected to prevent excessive memory usage.
-`,
+\`\`\``,
+    ],
   },
   inputSchema: InputSchema,
   outputSchema: OutputSchema,

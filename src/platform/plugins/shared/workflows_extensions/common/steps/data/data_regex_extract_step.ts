@@ -10,19 +10,51 @@
 import { i18n } from '@kbn/i18n';
 import { StepCategory } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
+import { REGEX_STEP_SECURITY_NOTES } from './regex_docs';
 import type { CommonStepDefinition } from '../../step_registry/types';
 
 export const DataRegexExtractStepTypeId = 'data.regexExtract' as const;
 
 export const ConfigSchema = z.object({
-  source: z.unknown(),
-  errorIfNoMatch: z.boolean().optional().default(false),
+  source: z.unknown().describe(
+    i18n.translate('workflowsExtensions.dataRegexExtractStep.schema.source', {
+      defaultMessage: 'Source string (or array of strings).',
+    })
+  ),
+  errorIfNoMatch: z
+    .boolean()
+    .optional()
+    .default(false)
+    .describe(
+      i18n.translate('workflowsExtensions.dataRegexExtractStep.schema.errorIfNoMatch', {
+        defaultMessage: 'Fail the step if the regex does not match.',
+      })
+    ),
 });
 
 export const InputSchema = z.object({
-  pattern: z.string().max(10000, 'Pattern exceeds maximum allowed length of 10,000 characters'),
-  fields: z.record(z.string(), z.string()),
-  flags: z.string().optional(),
+  pattern: z
+    .string()
+    .max(10000, 'Pattern exceeds maximum allowed length of 10,000 characters')
+    .describe(
+      i18n.translate('workflowsExtensions.dataRegexExtractStep.schema.pattern', {
+        defaultMessage: 'Regular expression.',
+      })
+    ),
+  fields: z.record(z.string(), z.string()).describe(
+    i18n.translate('workflowsExtensions.dataRegexExtractStep.schema.fields', {
+      defaultMessage:
+        'Map of output field names to capture group references ($1, $2, or named groups).',
+    })
+  ),
+  flags: z
+    .string()
+    .optional()
+    .describe(
+      i18n.translate('workflowsExtensions.dataRegexExtractStep.schema.flags', {
+        defaultMessage: 'Regex flags (for example, i, g).',
+      })
+    ),
 });
 
 export const OutputSchema = z.union([
@@ -50,10 +82,10 @@ export const dataRegexExtractStepCommonDefinition: CommonStepDefinition<
   }),
   documentation: {
     details: i18n.translate('workflowsExtensions.dataRegexExtractStep.documentation.details', {
-      defaultMessage: `The ${DataRegexExtractStepTypeId} step extracts structured data from text using regular expression capture groups. It supports both named groups and numbered groups, and can process single strings or arrays.
-
-**Security Note**: Complex regex patterns can cause performance issues (ReDoS - Regular Expression Denial of Service). The step enforces a maximum input length of 100KB per string. Avoid patterns with nested quantifiers like (a+)+, (a*)+, or (a|a)* which can cause catastrophic backtracking and hang the server.`,
+      defaultMessage: `The {stepTypeId} step extracts structured data from text using regular expression capture groups. It supports both named groups and numbered groups, and can process single strings or arrays.`,
+      values: { stepTypeId: DataRegexExtractStepTypeId },
     }),
+    notes: REGEX_STEP_SECURITY_NOTES,
     examples: [
       `## Extract using named capture groups
 \`\`\`yaml

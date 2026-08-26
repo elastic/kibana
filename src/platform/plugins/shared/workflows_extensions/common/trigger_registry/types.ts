@@ -7,21 +7,40 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License, v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { StabilityLevel } from '@kbn/workflows';
 import type { z } from '@kbn/zod/v4';
 
 /**
  * Documentation for a trigger (aligned with steps: details + examples).
+ *
+ * Together with Zod `.describe()` on `eventSchema` fields, this is the source of
+ * truth for generated reference docs. Canonical URLs, Related links, catalog
+ * grouping, DocsV3 `applies_to` (from {@link CommonTriggerDefinition.stability}
+ * + PR version).
+ *
  */
 export interface TriggerDocumentation {
   /**
-   * Detailed description with usage examples (markdown supported)
+   * Detailed description with usage notes (markdown supported).
    */
   details?: string;
   /**
    * Usage examples as markdown strings (e.g. "## Title\n```yaml\n...").
    */
   examples?: string[];
+  /**
+   * Warnings and gotchas rendered after the schema (e.g. handler-loop prevention).
+   */
+  notes?: string[];
 }
 
 /**

@@ -10,6 +10,7 @@ import { StepCategory } from '@kbn/workflows';
 import { JsonModelShapeSchema } from '@kbn/workflows/spec/schema/common/json_model_shape_schema';
 import { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
+import { AI_CONNECTOR_FIELD_NOTES } from './docs';
 
 /**
  * Step type ID for the AI prompt step.
@@ -17,7 +18,15 @@ import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 export const AiPromptStepTypeId = 'ai.prompt';
 
 export const ConfigSchema = z.object({
-  'connector-id': z.string().optional(),
+  'connector-id': z
+    .string()
+    .optional()
+    .describe(
+      i18n.translate('xpack.inferenceWorkflows.AiPromptStep.schema.connectorId', {
+        defaultMessage:
+          'The GenAI connector to use. Defaults to the workflow default connector if omitted.',
+      })
+    ),
 });
 
 // Maybe we can define specific schema for metadata in the future
@@ -30,10 +39,34 @@ export const MetadataSchema = z.record(z.string(), z.any());
  * Uses variables structure with key->value pairs.
  */
 export const InputSchema = z.object({
-  prompt: z.string(),
-  systemPrompt: z.string().optional(),
-  schema: JsonModelShapeSchema.optional().describe('The schema for the output of the step.'),
-  temperature: z.number().min(0).max(1).optional(),
+  prompt: z.string().describe(
+    i18n.translate('xpack.inferenceWorkflows.AiPromptStep.schema.prompt', {
+      defaultMessage: 'Prompt text. Supports Liquid templating.',
+    })
+  ),
+  systemPrompt: z
+    .string()
+    .optional()
+    .describe(
+      i18n.translate('xpack.inferenceWorkflows.AiPromptStep.schema.systemPrompt', {
+        defaultMessage: 'System prompt sent before the user prompt.',
+      })
+    ),
+  schema: JsonModelShapeSchema.optional().describe(
+    i18n.translate('xpack.inferenceWorkflows.AiPromptStep.schema.schema', {
+      defaultMessage: 'JSON Schema for structured output.',
+    })
+  ),
+  temperature: z
+    .number()
+    .min(0)
+    .max(1)
+    .optional()
+    .describe(
+      i18n.translate('xpack.inferenceWorkflows.AiPromptStep.schema.temperature', {
+        defaultMessage: 'Model temperature (0–1). Lower values are more deterministic.',
+      })
+    ),
 });
 
 export function getStructuredOutputSchema(contentSchema: z.ZodType) {
@@ -44,8 +77,17 @@ export function getStructuredOutputSchema(contentSchema: z.ZodType) {
 }
 
 const StringOutputSchema = z.object({
-  content: z.string(),
-  metadata: MetadataSchema,
+  content: z.string().describe(
+    i18n.translate('xpack.inferenceWorkflows.AiPromptStep.schema.output.content', {
+      defaultMessage:
+        'Free-text response, or a structured object matching schema when schema is provided.',
+    })
+  ),
+  metadata: MetadataSchema.describe(
+    i18n.translate('xpack.inferenceWorkflows.AiPromptStep.schema.output.metadata', {
+      defaultMessage: 'Model metadata returned with the response.',
+    })
+  ),
 });
 
 /**
@@ -77,10 +119,11 @@ export const AiPromptStepCommonDefinition: CommonStepDefinition<
     defaultMessage: 'Sends a prompt to an AI connector and returns the response',
   }),
   documentation: {
+    notes: AI_CONNECTOR_FIELD_NOTES,
     details: i18n.translate('xpack.inferenceWorkflows.AiPromptStep.documentation.details', {
       defaultMessage:
-        'The {stepTypeId} step sends a prompt to an AI connector and returns the response. The response can be referenced in later steps using template syntax.',
-      values: { stepTypeId: AiPromptStepTypeId },
+        'Call an LLM with a prompt. Supports optional structured output through a JSON Schema. When schema is provided, the structured result is available at {outputPath}.',
+      values: { outputPath: 'steps.<name>.output.content' },
     }),
     examples: [
       `## Basic AI prompt

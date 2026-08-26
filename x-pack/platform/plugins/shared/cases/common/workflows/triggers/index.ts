@@ -85,7 +85,7 @@ export const caseUpdatedTriggerCommonDefinition: CommonTriggerDefinition = {
   documentation: {
     details: i18n.translate('xpack.cases.workflowTriggers.caseUpdated.documentation.details', {
       defaultMessage:
-        'Emitted after case updates. Use event.updatedFields to filter by which fields changed, event.caseId to match a specific case, and event.owner to scope by case owner.',
+        'Emitted after case updates. Use event.updatedFields to filter by which fields changed, event.caseId to match a specific case, and event.owner to scope by case owner. This trigger also fires when a case status changes; cases.caseStatusUpdated fires alongside it and carries the previous status. For bulk updates, cases.caseUpdated fires once per case.',
     }),
     examples: [
       i18n.translate('xpack.cases.workflowTriggers.caseUpdated.documentation.example', {
@@ -174,7 +174,7 @@ export const attachmentsAddedTriggerCommonDefinition: CommonTriggerDefinition = 
   documentation: {
     details: i18n.translate('xpack.cases.workflowTriggers.attachmentsAdded.documentation.details', {
       defaultMessage:
-        'Emitted after attachments are added to a case, once per attachment type involved. The payload includes event.caseId, event.owner, event.attachmentIds (all IDs added in that operation for this type), and event.attachmentType (e.g. "comment", "alert"). Use KQL on event.* for trigger conditions.',
+        'Emitted after attachments are added to a case, once per attachment type involved. The payload includes event.caseId, event.owner, event.attachmentIds (all IDs added in that operation for this type), and event.attachmentType (e.g. "comment", "alert"). Adding a comment fires both this trigger (with event.attachmentType: "comment") and cases.commentsAdded. Use KQL on event.* for trigger conditions.',
     }),
     examples: [
       i18n.translate(

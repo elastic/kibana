@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { StepCategory } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
+import { AI_CONNECTOR_FIELD_NOTES } from './docs';
 
 /**
  * Step type ID for the AI summarize step.
@@ -16,25 +17,72 @@ import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 export const AiSummarizeStepTypeId = 'ai.summarize';
 
 export const ConfigSchema = z.object({
-  'connector-id': z.string().optional(),
+  'connector-id': z
+    .string()
+    .optional()
+    .describe(
+      i18n.translate('xpack.inferenceWorkflows.AiSummarizeStep.schema.connectorId', {
+        defaultMessage: 'GenAI connector to use.',
+      })
+    ),
 });
 
 /**
  * Input schema for the AI summarize step.
  */
 export const InputSchema = z.object({
-  input: z.union([z.string(), z.array(z.unknown()), z.record(z.string(), z.unknown())]),
-  instructions: z.string().optional(),
-  maxLength: z.number().int().positive().optional(),
-  temperature: z.number().min(0).max(1).optional(),
+  input: z.union([z.string(), z.array(z.unknown()), z.record(z.string(), z.unknown())]).describe(
+    i18n.translate('xpack.inferenceWorkflows.AiSummarizeStep.schema.input', {
+      defaultMessage: 'Content to summarize (string, array, or object).',
+    })
+  ),
+  instructions: z
+    .string()
+    .optional()
+    .describe(
+      i18n.translate('xpack.inferenceWorkflows.AiSummarizeStep.schema.instructions', {
+        defaultMessage: 'Summary guidance.',
+      })
+    ),
+  maxLength: z
+    .number()
+    .int()
+    .positive()
+    .optional()
+    .describe(
+      i18n.translate('xpack.inferenceWorkflows.AiSummarizeStep.schema.maxLength', {
+        defaultMessage: 'Approximate maximum length (positive integer).',
+      })
+    ),
+  temperature: z
+    .number()
+    .min(0)
+    .max(1)
+    .optional()
+    .describe(
+      i18n.translate('xpack.inferenceWorkflows.AiSummarizeStep.schema.temperature', {
+        defaultMessage: 'Model temperature (0–1).',
+      })
+    ),
 });
 
 /**
  * Output schema for the AI summarize step.
  */
 export const OutputSchema = z.object({
-  content: z.string(),
-  metadata: z.record(z.string(), z.any()).optional(),
+  content: z.string().describe(
+    i18n.translate('xpack.inferenceWorkflows.AiSummarizeStep.schema.output.content', {
+      defaultMessage: 'The generated summary.',
+    })
+  ),
+  metadata: z
+    .record(z.string(), z.any())
+    .optional()
+    .describe(
+      i18n.translate('xpack.inferenceWorkflows.AiSummarizeStep.schema.output.metadata', {
+        defaultMessage: 'Optional model metadata.',
+      })
+    ),
 });
 
 export type AiSummarizeStepConfigSchema = typeof ConfigSchema;
@@ -60,10 +108,10 @@ export const AiSummarizeStepCommonDefinition: CommonStepDefinition<
     defaultMessage: 'Generates a summary of the provided content using AI',
   }),
   documentation: {
+    notes: AI_CONNECTOR_FIELD_NOTES,
     details: i18n.translate('xpack.inferenceWorkflows.AiSummarizeStep.documentation.details', {
       defaultMessage:
-        'The {stepTypeId} step generates a concise summary of the provided content using an AI connector. The summary can be referenced in later steps using template syntax.',
-      values: { stepTypeId: AiSummarizeStepTypeId },
+        'Summarize content with an LLM. Input can be a string, an array, or an object.',
     }),
     examples: [
       `## Basic Summarization

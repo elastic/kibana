@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import { ID_MAX_LENGTH, MAX_DESCRIPTION_LENGTH } from '@kbn/alerting-v2-schemas';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
+import { ALERTING_V2_EXPERIMENTAL_NOTE } from './docs';
 
 export const RuleExecutionFailedTriggerId = 'alerting.ruleExecutionFailed' as const;
 
@@ -70,6 +71,7 @@ export const ruleExecutionFailedTriggerCommonDefinition: CommonTriggerDefinition
     defaultMessage: 'Emitted when a rule execution throws and does not complete.',
   }),
   documentation: {
+    notes: [ALERTING_V2_EXPERIMENTAL_NOTE],
     details: i18n.translate(
       'xpack.alertingV2.workflowTriggers.ruleExecutionFailed.documentation.details',
       {

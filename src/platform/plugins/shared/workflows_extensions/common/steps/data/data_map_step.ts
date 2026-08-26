@@ -15,7 +15,13 @@ import type { CommonStepDefinition } from '../../step_registry/types';
 export const DataMapStepTypeId = 'data.map';
 
 export const ConfigSchema = z.object({
-  items: z.unknown(),
+  items: z.unknown().describe(
+    i18n.translate('workflowsExtensions.dataMapStep.schema.items', {
+      defaultMessage:
+        'Source array or object. Pass arrays with {rawValue} so they remain an array rather than a string.',
+      values: { rawValue: '${{ ... }}' },
+    })
+  ),
 });
 
 /** Reserved key that triggers array iteration in a nested field spec. */
@@ -89,7 +95,14 @@ const FieldsNodeSchema: z.ZodType<FieldsNode> = z.lazy(() =>
   ])
 );
 
-export const InputSchema = z.object({ fields: z.record(z.string(), FieldsNodeSchema) });
+export const InputSchema = z.object({
+  fields: z.record(z.string(), FieldsNodeSchema).describe(
+    i18n.translate('workflowsExtensions.dataMapStep.schema.fields', {
+      defaultMessage:
+        'Per-element field mapping. Values can reference item (current element) and index (zero-based position).',
+    })
+  ),
+});
 
 export const OutputSchema = z.union([
   z.array(z.record(z.string(), z.unknown())),

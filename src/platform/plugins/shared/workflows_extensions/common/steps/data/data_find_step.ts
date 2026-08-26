@@ -15,17 +15,48 @@ import type { CommonStepDefinition } from '../../step_registry/types';
 export const DataFindStepTypeId = 'data.find';
 
 export const ConfigSchema = z.object({
-  items: z.unknown(),
+  items: z.unknown().describe(
+    i18n.translate('workflowsExtensions.dataFindStep.schema.items', {
+      defaultMessage:
+        'Source array. Pass with {rawValue} so it remains an array rather than a string.',
+      values: { rawValue: '${{ ... }}' },
+    })
+  ),
 });
 
 export const InputSchema = z.object({
-  condition: z.string(),
-  errorIfEmpty: z.boolean().optional(),
+  condition: z.string().describe(
+    i18n.translate('workflowsExtensions.dataFindStep.schema.condition', {
+      defaultMessage: 'KQL predicate evaluated per element.',
+    })
+  ),
+  errorIfEmpty: z
+    .boolean()
+    .optional()
+    .describe(
+      i18n.translate('workflowsExtensions.dataFindStep.schema.errorIfEmpty', {
+        defaultMessage: 'Fail the step when no element matches.',
+      })
+    ),
 });
 
 export const OutputSchema = z.object({
-  item: z.unknown().nullable(),
-  index: z.number().nullable(),
+  item: z
+    .unknown()
+    .nullable()
+    .describe(
+      i18n.translate('workflowsExtensions.dataFindStep.schema.output.item', {
+        defaultMessage: 'The first matching element, or null when nothing matches.',
+      })
+    ),
+  index: z
+    .number()
+    .nullable()
+    .describe(
+      i18n.translate('workflowsExtensions.dataFindStep.schema.output.index', {
+        defaultMessage: 'Zero-based index of the match, or null when nothing matches.',
+      })
+    ),
 });
 
 export type DataFindStepConfigSchema = typeof ConfigSchema;
