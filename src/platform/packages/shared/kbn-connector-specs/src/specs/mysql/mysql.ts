@@ -179,7 +179,8 @@ export const MysqlConnector: ConnectorSpec = {
       handler: async (ctx, input: QueryInput) => {
         assertReadOnly(input.sql);
         const maxRows = resolveMaxRows(input.maxRows);
-        return runSql(ctx, `SELECT * FROM (\n${input.sql}\n) AS _q LIMIT ${maxRows}`);
+        const inner = input.sql.replace(/;\s*$/, '');
+        return runSql(ctx, `SELECT * FROM (\n${inner}\n) AS _q LIMIT ${maxRows}`);
       },
     },
 
