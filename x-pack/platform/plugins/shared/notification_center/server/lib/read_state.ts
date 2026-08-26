@@ -52,7 +52,9 @@ export const getReadState = async (
       client.get<string>(READ_ALL_BEFORE_KEY),
     ]);
     const readAllBefore =
-      stored === READ_ALL_BEFORE_DEFAULT ? await initializeReadHorizon(client) : stored;
+      typeof stored !== 'string' || !stored || stored === READ_ALL_BEFORE_DEFAULT
+        ? await initializeReadHorizon(client)
+        : stored;
     return { overrides, readAllBefore };
   } catch (error) {
     logger.warn(`Failed to fetch read state; returning an unannotated list. ${error}`);
