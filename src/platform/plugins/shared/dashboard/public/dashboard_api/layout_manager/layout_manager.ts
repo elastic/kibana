@@ -529,7 +529,10 @@ export function initializeLayoutManager(
       anyStateChange$: merge(
         layout$.pipe(skip(1)),
         latestChildrenState$.pipe(debounceTime(UNSAVED_CHANGES_DEBOUNCE))
-      ).pipe(map(() => undefined)),
+      ).pipe(
+        debounceTime(0), // batch state + layout updates
+        map(() => undefined)
+      ),
       childrenStateLoading$,
       getSerializedStateForPanel: (panelId: string) => currentChildState[panelId],
       getLastSavedStateForPanel: (panelId: string) => lastSavedChildState[panelId],
