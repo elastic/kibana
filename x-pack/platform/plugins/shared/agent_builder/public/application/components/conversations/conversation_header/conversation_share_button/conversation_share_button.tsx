@@ -111,16 +111,6 @@ const ConversationSharePopover: React.FC<{
     }
   );
 
-  const excludedIds = new Set([conversation.user.id, ...memberIds].filter(Boolean));
-  const suggestedProfileByUid = new Map(suggestedProfiles.map((profile) => [profile.uid, profile]));
-  const userOptions = suggestedProfiles
-    .filter((profile) => !excludedIds.has(profile.uid))
-    .map((profile) => ({
-      label: getUserDisplayName(profile.user),
-      value: profile.uid,
-      key: profile.uid,
-    }));
-
   const { mutate: updateAccessControl, isLoading: isSaving } = useUpdateConversationAccessControl({
     conversationId: conversation.id,
     onSuccess: () => {
@@ -263,19 +253,25 @@ const ConversationSharePopover: React.FC<{
         >
           {canUpdateAccessControl ? (
             <ConversationShareEditableContent
-              accessMode={accessMode}
-              errorMessage={errorMessage}
-              isPublic={isPublic}
-              isSaving={isSaving}
-              isSearchingUsers={isSearchingUsers}
-              memberProfiles={memberProfiles}
-              onAccessModeChange={onAccessModeChange}
-              onAddUser={onAddUser}
-              onRemoveUser={onRemoveUser}
-              ownerProfile={ownerProfile}
-              setSearchValue={setSearchValue}
-              suggestedProfileByUid={suggestedProfileByUid}
-              userOptions={userOptions}
+              access={{
+                mode: accessMode,
+                errorMessage,
+                isSaving,
+                onChange: onAccessModeChange,
+              }}
+              members={{
+                ownerProfile,
+                profiles: memberProfiles,
+                onRemove: onRemoveUser,
+              }}
+              userSearch={{
+                ownerId,
+                memberIds,
+                suggestedProfiles,
+                isSearching: isSearchingUsers,
+                onAdd: onAddUser,
+                onSearch: setSearchValue,
+              }}
             />
           ) : (
             <ConversationParticipantsList

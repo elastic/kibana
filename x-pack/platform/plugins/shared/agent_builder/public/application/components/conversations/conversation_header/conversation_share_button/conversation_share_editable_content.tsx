@@ -17,7 +17,7 @@ import {
   EuiText,
   type EuiComboBoxOptionOption,
 } from '@elastic/eui';
-import type { ConversationAccessControlMode } from '@kbn/agent-builder-common';
+import { ConversationAccessControlMode } from '@kbn/agent-builder-common';
 import {
   getUserDisplayName,
   UserAvatar,
@@ -52,47 +52,52 @@ const UserSearchOption: React.FC<{
 };
 
 export const ConversationShareEditableContent: React.FC<{
-  accessMode: ConversationAccessControlMode;
-  errorMessage?: string;
-  isPublic: boolean;
-  isSaving: boolean;
-  isSearchingUsers: boolean;
-  memberProfiles: UserProfileWithAvatar[];
-  onAccessModeChange: (nextAccessMode: ConversationAccessControlMode) => void;
-  onAddUser: (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => void;
-  onRemoveUser: (id: string) => void;
-  ownerProfile?: UserProfileWithAvatar;
-  setSearchValue: (value: string) => void;
-  suggestedProfileByUid: Map<string, UserProfileWithAvatar>;
-  userOptions: Array<EuiComboBoxOptionOption<string>>;
-}> = ({
-  accessMode,
-  errorMessage,
-  isPublic,
-  isSaving,
-  isSearchingUsers,
-  memberProfiles,
-  onAccessModeChange,
-  onAddUser,
-  onRemoveUser,
-  ownerProfile,
-  setSearchValue,
-  suggestedProfileByUid,
-  userOptions,
-}) => {
+  access: {
+    mode: ConversationAccessControlMode;
+    errorMessage?: string;
+    isSaving: boolean;
+    onChange: (nextAccessMode: ConversationAccessControlMode) => void;
+  };
+  members: {
+    ownerProfile?: UserProfileWithAvatar;
+    profiles: UserProfileWithAvatar[];
+    onRemove: (id: string) => void;
+  };
+  userSearch: {
+    memberIds: string[];
+    ownerId?: string;
+    suggestedProfiles: UserProfileWithAvatar[];
+    isSearching: boolean;
+    onAdd: (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => void;
+    onSearch: (value: string) => void;
+  };
+}> = ({ access, members, userSearch }) => {
+  const isPublic = access.mode === ConversationAccessControlMode.Public;
+  const excludedIds = new Set([userSearch.ownerId, ...userSearch.memberIds].filter(Boolean));
+  const suggestedProfileByUid = new Map(
+    userSearch.suggestedProfiles.map((profile) => [profile.uid, profile])
+  );
+  const userOptions = userSearch.suggestedProfiles
+    .filter((profile) => !excludedIds.has(profile.uid))
+    .map((profile) => ({
+      label: getUserDisplayName(profile.user),
+      value: profile.uid,
+      key: profile.uid,
+    }));
+
   const editableHeader = (
     <>
-      {errorMessage ? (
+      {access.errorMessage ? (
         <>
-          <EuiCallOut announceOnMount color="danger" size="s" title={errorMessage} />
+          <EuiCallOut announceOnMount color="danger" size="s" title={access.errorMessage} />
           <EuiSpacer size="m" />
         </>
       ) : null}
 
       <ConversationAccessModeSelect
-        accessMode={accessMode}
-        isSaving={isSaving}
-        onAccessModeChange={onAccessModeChange}
+        accessMode={access.mode}
+        isSaving={access.isSaving}
+        onAccessModeChange={access.onChange}
       />
     </>
   );
@@ -115,10 +120,10 @@ export const ConversationShareEditableContent: React.FC<{
           aria-label={searchUsersLabel}
           options={userOptions}
           selectedOptions={[]}
-          onChange={onAddUser}
-          onSearchChange={setSearchValue}
-          isLoading={isSearchingUsers}
-          isDisabled={isSaving}
+          onChange={userSearch.onAdd}
+          onSearchChange={userSearch.onSearch}
+          isLoading={userSearch.isSearching}
+          isDisabled={access.isSaving}
           isClearable={false}
           prepend={
             <EuiIcon
@@ -146,10 +151,10 @@ export const ConversationShareEditableContent: React.FC<{
       <EuiSpacer size="s" />
 
       <ConversationParticipantsList
-        ownerProfile={ownerProfile}
-        memberProfiles={memberProfiles}
-        isSaving={isSaving}
-        onRemoveUser={onRemoveUser}
+        ownerProfile={members.ownerProfile}
+        memberProfiles={members.profiles}
+        isSaving={access.isSaving}
+        onRemoveUser={members.onRemove}
       />
     </>
   );
