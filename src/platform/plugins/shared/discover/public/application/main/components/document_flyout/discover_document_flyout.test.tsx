@@ -413,6 +413,8 @@ describe('DiscoverDocumentFlyout', () => {
         result: esHitsMock.map((hit) => buildDataTableRecord(hit, dataViewMock)),
       });
     });
+    // Freeze the seeded results so the unawaited main fetch can't replace them mid-assertion.
+    documents$.next = jest.fn();
 
     const rowFromResults = documents$
       .getValue()
