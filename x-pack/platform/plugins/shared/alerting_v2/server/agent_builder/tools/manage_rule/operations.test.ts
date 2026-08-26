@@ -193,78 +193,6 @@ describe('executeRuleOperations', () => {
       );
     });
 
-    it('uses an explicit time_field override when provided', async () => {
-      const esClient = createMockEsClient();
-      esClient.asCurrentUser.esql.query.mockResolvedValueOnce({
-        columns: [{ name: 'cpu', type: 'double' }],
-        values: [],
-      } as never);
-      esClient.asCurrentUser.fieldCaps.mockResolvedValueOnce({
-        fields: { '@timestamp': { date: {} }, 'event.ingested': { date: {} } },
-      } as never);
-
-      const ops: RuleOperation[] = [
-        {
-          operation: 'set_query',
-          query: {
-            format: 'standalone',
-            breach: { query: 'FROM metrics-* | STATS avg(cpu)' },
-          },
-          time_field: 'event.ingested',
-        },
-      ];
-
-      const result = await executeRuleOperations({}, ops, esClient);
-
-      expect(result.data.time_field).toBe('event.ingested');
-    });
-
-    it('throws when an explicit time_field does not exist on the index', async () => {
-      const esClient = createMockEsClient();
-      esClient.asCurrentUser.esql.query.mockResolvedValueOnce({
-        columns: [{ name: 'cpu', type: 'double' }],
-        values: [],
-      } as never);
-      esClient.asCurrentUser.fieldCaps.mockResolvedValueOnce({
-        fields: { '@timestamp': { date: {} } },
-      } as never);
-
-      const ops: RuleOperation[] = [
-        {
-          operation: 'set_query',
-          query: {
-            format: 'standalone',
-            breach: { query: 'FROM metrics-* | STATS avg(cpu)' },
-          },
-          time_field: 'nonexistent_field',
-        },
-      ];
-
-      await expect(executeRuleOperations({}, ops, esClient)).rejects.toThrow(
-        RuleOperationValidationError
-      );
-      await expect(executeRuleOperations({}, ops, esClient)).rejects.toThrow(
-        /The specified time_field "nonexistent_field" does not exist/
-      );
-    });
-
-    it('applies explicit time_field without ES client (no validation)', async () => {
-      const ops: RuleOperation[] = [
-        {
-          operation: 'set_query',
-          query: {
-            format: 'standalone',
-            breach: { query: 'FROM metrics-* | STATS avg(cpu)' },
-          },
-          time_field: 'event.ingested',
-        },
-      ];
-
-      const result = await executeRuleOperations({}, ops);
-
-      expect(result.data.time_field).toBe('event.ingested');
-    });
-
     it('keeps the existing time field when it cannot be looked up but one is already set', async () => {
       const esClient = createMockEsClient();
       esClient.asCurrentUser.esql.query.mockResolvedValue({
@@ -661,6 +589,81 @@ describe('executeRuleOperations', () => {
       const result = await executeRuleOperations({}, ops);
 
       expect(result.data.grouping?.fields).toEqual(['service.name']);
+    });
+  });
+
+  describe('set_time_field', () => {
+    it('sets the time field on the rule data', async () => {
+      const ops: RuleOperation[] = [
+        { operation: 'set_time_field', time_field: 'event.ingested' },
+      ];
+
+      const result = await executeRuleOperations({}, ops);
+
+      expect(result.data.time_field).toBe('event.ingested');
+    });
+
+    it('overrides a previously auto-resolved time field', async () => {
+      const existing: Partial<RuleAttachmentData> = { time_field: '@timestamp' };
+      const ops: RuleOperation[] = [
+        { operation: 'set_time_field', time_field: 'timestamp' },
+      ];
+
+      const result = await executeRuleOperations(existing, ops);
+
+      expect(result.data.time_field).toBe('timestamp');
+    });
+
+    it('survives a subsequent set_query that cannot resolve via field-caps', async () => {
+      const esClient = createMockEsClient();
+      esClient.asCurrentUser.esql.query.mockResolvedValueOnce({
+        columns: [{ name: 'cpu', type: 'double' }],
+        values: [],
+      } as never);
+      // fieldCaps fails — simulates a federated/external source.
+      esClient.asCurrentUser.fieldCaps.mockRejectedValueOnce(new Error('not an ES index'));
+
+      const ops: RuleOperation[] = [
+        { operation: 'set_time_field', time_field: 'event_time' },
+        {
+          operation: 'set_query',
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM external-source | STATS COUNT(*)' },
+          },
+        },
+      ];
+
+      const result = await executeRuleOperations({}, ops, esClient);
+
+      expect(result.data.time_field).toBe('event_time');
+      expect(result.data.query).toBeDefined();
+    });
+
+    it('survives a subsequent set_query where field-caps returns no date fields', async () => {
+      const esClient = createMockEsClient();
+      esClient.asCurrentUser.esql.query.mockResolvedValueOnce({
+        columns: [{ name: 'value', type: 'long' }],
+        values: [],
+      } as never);
+      esClient.asCurrentUser.fieldCaps.mockResolvedValueOnce({
+        fields: {},
+      } as never);
+
+      const ops: RuleOperation[] = [
+        { operation: 'set_time_field', time_field: 'ingest_timestamp' },
+        {
+          operation: 'set_query',
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM no-date-index | STATS COUNT(*)' },
+          },
+        },
+      ];
+
+      const result = await executeRuleOperations({}, ops, esClient);
+
+      expect(result.data.time_field).toBe('ingest_timestamp');
     });
   });
 
