@@ -11,15 +11,13 @@ import { getCaseWorkflowRunUrl } from '../../../common/api';
 
 export const runCaseWorkflow = async ({
   http,
-  caseId,
   workflowId,
   body,
 }: {
   http: HttpStart;
-  caseId: string;
   workflowId: string;
   body: RunCaseWorkflowRequest;
 }): Promise<RunCaseWorkflowResponse> =>
-  http.post<RunCaseWorkflowResponse>(getCaseWorkflowRunUrl(caseId, workflowId), {
+  http.post<RunCaseWorkflowResponse>(getCaseWorkflowRunUrl(workflowId), {
     body: JSON.stringify(body),
   });

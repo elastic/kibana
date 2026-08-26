@@ -37,9 +37,9 @@ export const useCasesWorkflowExecutor = ({
     async ({ workflowId, inputs }) => {
       const response = await runCaseWorkflow({
         http,
-        caseId,
         workflowId,
         body: {
+          caseIds: [caseId],
           inputs,
           origin: { type: originType, id: originId },
         },

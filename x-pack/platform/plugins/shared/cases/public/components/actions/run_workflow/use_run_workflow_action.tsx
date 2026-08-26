@@ -35,7 +35,8 @@ interface UseRunWorkflowActionProps {
 
 /**
  * Shared action hook for the cases list row menu and the bulk-actions menu.
- * Delegates execution to `useRunCasesWorkflow`, which fans out one run per case.
+ * Delegates execution to `useRunCasesWorkflow`, which fires a single workflow
+ * execution over all selected cases via the multi-case endpoint.
  */
 export const useRunWorkflowAction = ({
   onAction,

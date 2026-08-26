@@ -39,7 +39,7 @@ describe('useRunWorkflowOnCases', () => {
   const caseA: CaseUI = { ...basicCase, id: 'case-a', owner: 'securitySolution', title: 'Case A' };
   const caseB: CaseUI = { ...basicCase, id: 'case-b', owner: 'securitySolution', title: 'Case B' };
 
-  it('always uses event.caseIds (single case → one-element array)', async () => {
+  it('sends caseIds in the body (single case)', async () => {
     mockRunCaseWorkflow.mockResolvedValueOnce({
       workflowExecutionId: 'exec-1',
       activityStatus: 'succeeded',
@@ -52,16 +52,16 @@ describe('useRunWorkflowOnCases', () => {
 
     expect(mockRunCaseWorkflow).toHaveBeenCalledWith({
       http: mockHttp,
-      caseId: 'case-a',
       workflowId: 'wf-1',
       body: {
-        inputs: { event: { caseIds: ['case-a'] } },
+        caseIds: ['case-a'],
+        inputs: {},
         origin: { type: CASE_WORKFLOW_ORIGIN_TYPE, id: 'case-a' },
       },
     });
   });
 
-  it('always uses event.caseIds (multiple cases → multi-element array)', async () => {
+  it('sends all selected caseIds in one execution (multi-case)', async () => {
     mockRunCaseWorkflow.mockResolvedValueOnce({
       workflowExecutionId: 'exec-a',
       activityStatus: 'succeeded',
@@ -75,13 +75,28 @@ describe('useRunWorkflowOnCases', () => {
     expect(mockRunCaseWorkflow).toHaveBeenCalledTimes(1);
     expect(mockRunCaseWorkflow).toHaveBeenCalledWith({
       http: mockHttp,
-      caseId: 'case-a',
       workflowId: 'wf-1',
       body: {
-        inputs: { event: { caseIds: ['case-a', 'case-b'] } },
+        caseIds: ['case-a', 'case-b'],
+        inputs: {},
         origin: { type: CASE_WORKFLOW_ORIGIN_TYPE, id: 'case-a' },
       },
     });
+  });
+
+  it('does not inject event.caseIds on the client — the server owns that field', async () => {
+    mockRunCaseWorkflow.mockResolvedValueOnce({
+      workflowExecutionId: 'exec-1',
+      activityStatus: 'succeeded',
+    });
+
+    const { result } = renderHook(() => useRunWorkflowOnCases({ cases: [caseA, caseB] }));
+    await act(async () => {
+      await result.current({ workflowId: 'wf-1', inputs: {} });
+    });
+
+    const callArgs = mockRunCaseWorkflow.mock.calls[0][0];
+    expect((callArgs.body.inputs as Record<string, unknown>).event).toBeUndefined();
   });
 
   it('shows a success toast with a right-floated "View execution" button', async () => {
@@ -157,7 +172,7 @@ describe('useRunWorkflowOnCases', () => {
     expect(mockToasts.addWarning).not.toHaveBeenCalled();
   });
 
-  it('preserves caller-supplied manual inputs alongside the caseIds event', async () => {
+  it('passes caller-supplied manual inputs unmodified to the body', async () => {
     mockRunCaseWorkflow.mockResolvedValueOnce({
       workflowExecutionId: 'exec-a',
       activityStatus: 'succeeded',
@@ -171,10 +186,8 @@ describe('useRunWorkflowOnCases', () => {
     expect(mockRunCaseWorkflow).toHaveBeenCalledWith(
       expect.objectContaining({
         body: expect.objectContaining({
-          inputs: {
-            manual_field: 'value',
-            event: { caseIds: ['case-a', 'case-b'] },
-          },
+          caseIds: ['case-a', 'case-b'],
+          inputs: { manual_field: 'value' },
         }),
       })
     );

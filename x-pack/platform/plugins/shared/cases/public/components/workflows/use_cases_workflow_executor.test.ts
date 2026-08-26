@@ -37,7 +37,7 @@ describe('useCasesWorkflowExecutor', () => {
       })
     );
 
-  it('calls runCaseWorkflow with the correct params', async () => {
+  it('calls runCaseWorkflow with caseIds array, no top-level caseId', async () => {
     mockRunCaseWorkflow.mockResolvedValueOnce({
       workflowExecutionId: 'exec-abc',
       activityStatus: 'succeeded',
@@ -51,9 +51,9 @@ describe('useCasesWorkflowExecutor', () => {
 
     expect(mockRunCaseWorkflow).toHaveBeenCalledWith({
       http: mockHttp,
-      caseId: 'case-1',
       workflowId: 'wf-123',
       body: {
+        caseIds: ['case-1'],
         inputs: { foo: 'bar' },
         origin: { type: CASE_WORKFLOW_ORIGIN_TYPE, id: 'case-1' },
       },

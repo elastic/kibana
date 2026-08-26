@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiButton, EuiFlexGroup } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import type { ToMountPointParams } from '@kbn/react-kibana-mount';
 import { useCallback } from 'react';
 import type { RunWorkflowExecutor } from '@kbn/workflows-ui';
 import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
@@ -22,7 +23,7 @@ import * as i18n from './translations';
  * Builds the `text` mount point for the "View execution" button, floated right,
  * matching the RunWorkflowPanel success toast style.
  */
-const buildViewExecutionText = (executionHref: string, rendering: object) =>
+const buildViewExecutionText = (executionHref: string, rendering: ToMountPointParams) =>
   toMountPoint(
     <EuiFlexGroup justifyContent="flexEnd">
       <EuiButton
@@ -41,18 +42,13 @@ const buildViewExecutionText = (executionHref: string, rendering: object) =>
 /**
  * Returns a stable `RunWorkflowExecutor` that handles 1..N selected cases.
  *
- * All selections — single or bulk — fire a single workflow execution via the
- * first case's endpoint. The event payload is always `{ caseIds: [id1, …] }`
- * so single and bulk runs are consistent and workflows can always iterate
- * over the list.
+ * All selections — single or bulk — fire a single workflow execution against the
+ * multi-case endpoint. The server owns `event.caseIds`; the client passes the
+ * authorized case ids in `body.caseIds` and the server injects them into the event.
  *
  * The panel's built-in success toast must be suppressed (`showSuccessToast={false}`)
  * because this executor owns all toasting. On API error it rethrows so the
  * panel can show its own error toast.
- *
- * The panel always passes `{ ...manualInputs, ...panelInputs }` as `inputs`.
- * The caller must pass `inputs={}` at the panel level so this hook can inject
- * the `event` field without it being overridden by a shared value.
  */
 export const useRunWorkflowOnCases = ({ cases }: { cases: CasesUI }): RunWorkflowExecutor => {
   const http = useHttp();
@@ -63,15 +59,15 @@ export const useRunWorkflowOnCases = ({ cases }: { cases: CasesUI }): RunWorkflo
   return useCallback(
     async ({ workflowId, inputs }) => {
       const caseIds = cases.map(({ id }) => id);
-      const { id: firstCaseId } = cases[0];
-      const origin = { type: CASE_WORKFLOW_ORIGIN_TYPE, id: firstCaseId };
+      // origin.id must be a member of caseIds — the server validates this.
+      const origin = { type: CASE_WORKFLOW_ORIGIN_TYPE, id: caseIds[0] };
 
       const response = await runCaseWorkflow({
         http,
-        caseId: firstCaseId,
         workflowId,
         body: {
-          inputs: { ...inputs, event: { caseIds } },
+          caseIds,
+          inputs,
           origin,
         },
       });
