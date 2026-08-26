@@ -102,18 +102,28 @@ const CSV_HEADER = [
   'total_dedup_field_count',
   'docs_count',
   'store_size_bytes',
-  'heap_used_bytes_max',
-  'heap_used_percent_max',
+  'cluster_status',
+  'heap_used_bytes',
+  'heap_used_percent',
+  'note',
 ].join(',');
 
 function appendRow(row) {
-  fs.appendFileSync(OUT, row.join(',') + '\n');
+  fs.appendFileSync(OUT, row.map((v) => (v === undefined ? '' : v)).join(',') + '\n');
 }
 
-async function sample(phase, step, cumulativeIndices) {
+function logLine(phase, step, s, heap) {
+  // eslint-disable-next-line no-console
+  console.log(
+    `[${phase}] step ${step} | idx=${s.indicesCount} shards=${s.shardsTotal} fields=${s.totalFieldCount} ` +
+      `heap=${(heap.bytes / 1024 / 1024).toFixed(0)}MB (${heap.percent}%) status=${s.status}`
+  );
+}
+
+async function sampleOnce(phase, step, cumulativeIndices, note) {
   const s = await stats();
   const heap = maxHeap(s.nodes || []);
-  const row = [
+  appendRow([
     s.timestamp,
     phase,
     step,
@@ -124,17 +134,51 @@ async function sample(phase, step, cumulativeIndices) {
     s.totalDeduplicatedFieldCount,
     s.docsCount,
     s.storeSizeBytes,
+    s.status,
     heap.bytes,
     heap.percent,
-  ];
-  appendRow(row);
-  // eslint-disable-next-line no-console
-  console.log(
-    `[${phase}] step ${step} | idx=${s.indicesCount} shards=${s.shardsTotal} fields=${
-      s.totalFieldCount
-    } heap=${(heap.bytes / 1024 / 1024).toFixed(0)}MB (${heap.percent}%)`
-  );
-  return s;
+    note || '',
+  ]);
+  logLine(phase, step, s, heap);
+  return { s, heap };
+}
+
+/**
+ * Polls heap every ~5s across the stabilization window and records the sample
+ * with the lowest heap (an approximation of retained heap after GC), so the
+ * trend reflects retained mapping/cluster-state cost rather than transient GC.
+ */
+async function sampleRetained(step, cumulativeIndices) {
+  const reads = Math.max(2, Math.floor(STABILIZE_MS / 5000));
+  let best = null;
+  for (let r = 0; r < reads; r++) {
+    const s = await stats();
+    const heap = maxHeap(s.nodes || []);
+    if (!best || heap.bytes < best.heap.bytes) {
+      best = { s, heap };
+    }
+    if (r < reads - 1) {
+      await sleep(5000);
+    }
+  }
+  appendRow([
+    best.s.timestamp,
+    'stabilized',
+    step,
+    cumulativeIndices,
+    best.s.indicesCount,
+    best.s.shardsTotal,
+    best.s.totalFieldCount,
+    best.s.totalDeduplicatedFieldCount,
+    best.s.docsCount,
+    best.s.storeSizeBytes,
+    best.s.status,
+    best.heap.bytes,
+    best.heap.percent,
+    'retained_min',
+  ]);
+  logLine('stabilized', step, best.s, best.heap);
+  return best;
 }
 
 async function main() {
@@ -147,12 +191,25 @@ async function main() {
 
   fs.writeFileSync(OUT, CSV_HEADER + '\n');
 
-  await sample('baseline', 0, 0);
+  await sampleOnce('baseline', 0, 0, '');
 
   let cumulative = 0;
   for (let step = 1; step <= STEPS; step++) {
     const startedAt = Date.now();
-    const result = await generate(STEP_INDICES);
+    let result;
+    try {
+      result = await generate(STEP_INDICES);
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(`  step ${step} generate FAILED: ${err.message}`);
+      await sampleOnce(
+        'breaking_point',
+        step,
+        cumulative + STEP_INDICES,
+        err.message.replace(/[\r\n,]+/g, ' ').slice(0, 300)
+      );
+      break;
+    }
     cumulative += STEP_INDICES;
     // eslint-disable-next-line no-console
     console.log(
@@ -160,10 +217,8 @@ async function main() {
     );
 
     await sleep(SETTLE_MS);
-    await sample('immediate', step, cumulative);
-
-    await sleep(STABILIZE_MS);
-    await sample('stabilized', step, cumulative);
+    await sampleOnce('immediate', step, cumulative, '');
+    await sampleRetained(step, cumulative);
 
     // eslint-disable-next-line no-console
     console.log(`  step ${step} wall time ${Date.now() - startedAt}ms\n`);

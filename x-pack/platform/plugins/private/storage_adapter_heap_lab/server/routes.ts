@@ -46,52 +46,62 @@ export const registerRoutes = (router: IRouter, logger: Logger): void => {
     },
     async (ctx, req, res) => {
       const { numIndices, numFields, numDocs, indexPrefix, batchSize, seed } = req.body;
-      const core = await ctx.core;
-      const esClient = core.elasticsearch.client.asInternalUser;
-
       const runId = `${Date.now().toString(36)}${Math.floor(Math.random() * 1e6).toString(36)}`;
       const startedAt = Date.now();
+      logger.info(`[heap-lab] generate called runId=${runId} numIndices=${numIndices}`);
 
       const schemaDefinition = buildSchema(numFields);
       const createdIndices: string[] = [];
       let totalDocs = 0;
 
-      for (let i = 0; i < numIndices; i++) {
-        const name = `${indexPrefix}-${runId}-${padIndex(i)}`;
-        const storageSettings: IndexStorageSettings = { name, schema: schemaDefinition };
-        const adapter = new StorageIndexAdapter<IndexStorageSettings, SyntheticDocument>(
-          esClient,
-          logger,
-          storageSettings
-        );
-        const client = adapter.getClient();
+      try {
+        const core = await ctx.core;
+        // Use the current user (a superuser locally) so we can create arbitrary index
+        // names. `asInternalUser` is `kibana_system`, which only has privileges on the
+        // specific patterns granted to it — a real operational cost for new
+        // storage-adapter consumers, but orthogonal to the heap/shard cost we measure here.
+        const esClient = core.elasticsearch.client.asCurrentUser;
 
-        // A single index() bootstraps the index template + backing index + alias,
-        // then we bulk-load the remaining documents in batches.
-        const rng = createRng(seed + i);
+        for (let i = 0; i < numIndices; i++) {
+          const name = `${indexPrefix}-${runId}-${padIndex(i)}`;
+          const storageSettings: IndexStorageSettings = { name, schema: schemaDefinition };
+          const adapter = new StorageIndexAdapter<IndexStorageSettings, SyntheticDocument>(
+            esClient,
+            logger,
+            storageSettings
+          );
+          const client = adapter.getClient();
+          const rng = createRng(seed + i);
 
-        if (numDocs > 0) {
-          let inserted = 0;
-          while (inserted < numDocs) {
-            const batch = Math.min(batchSize, numDocs - inserted);
-            const operations = Array.from({ length: batch }, () => ({
-              index: { document: buildDocument(numFields, rng) },
-            }));
-            await client.bulk({ operations, refresh: false, throwOnFail: true });
-            inserted += batch;
+          if (numDocs > 0) {
+            let inserted = 0;
+            while (inserted < numDocs) {
+              const batch = Math.min(batchSize, numDocs - inserted);
+              const operations = Array.from({ length: batch }, () => ({
+                index: { document: buildDocument(numFields, rng) },
+              }));
+              await client.bulk({ operations, refresh: false, throwOnFail: true });
+              inserted += batch;
+            }
+            totalDocs += inserted;
+          } else {
+            // A single index() bootstraps the template + backing index + alias.
+            await client.index({ document: buildDocument(numFields, rng), refresh: false });
           }
-          totalDocs += inserted;
-        } else {
-          // Still create the index (assets) even when no documents are requested.
-          await client.index({ document: buildDocument(numFields, rng), refresh: false });
-          // Remove the placeholder so "0 docs" truly means an empty index.
-          await esClient.indices.refresh({ index: name }).catch(() => undefined);
-          await esClient
-            .deleteByQuery({ index: name, query: { match_all: {} }, refresh: false })
-            .catch(() => undefined);
-        }
 
-        createdIndices.push(name);
+          createdIndices.push(name);
+        }
+      } catch (error) {
+        const err = error as Error;
+        logger.error(
+          `[heap-lab] run ${runId} failed (${err?.constructor?.name}): ${err.stack || err.message}`
+        );
+        return res.customError({
+          statusCode: 500,
+          body: {
+            message: `heap-lab generate failed after ${createdIndices.length} indices: ${err.message}`,
+          },
+        });
       }
 
       const elapsedMs = Date.now() - startedAt;
@@ -141,6 +151,7 @@ export const registerRoutes = (router: IRouter, logger: Logger): void => {
       return res.ok({
         body: {
           timestamp: new Date().toISOString(),
+          status: clusterStats.status,
           nodes,
           indicesCount: clusterStats.indices?.count,
           shardsTotal: clusterStats.indices?.shards?.total,
