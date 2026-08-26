@@ -23,6 +23,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { LazyPackagePolicyInputVarField } from '@kbn/fleet-plugin/public';
+import { KibanaStyledComponentsThemeProvider } from '@kbn/react-kibana-context-styled';
 
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { makeDsView } from '../../aws_service_matrix';
@@ -30,7 +31,6 @@ import {
   REGION_FIELD_NAMES,
   getFlyoutFields,
   getRegionFieldName,
-  getRequiredBooleanFields,
   getRequiredTextFields,
   isAdvancedVar,
   resolveFieldMeta,
@@ -76,6 +76,8 @@ export interface ServiceFieldsFormProps {
 // this UI. Strip the manifest description so the misleading help text isn't shown.
 const ECF_TRIGGER_VARS = new Set(['bucket_arn', 'log_group_arn']);
 
+// TODO: extract a shared DataStreamTypeSelector component usable by both Fleet's
+// package_policy_input_stream.tsx and this flyout, so the options and labels are not duplicated.
 const DATA_STREAM_TYPE_OPTIONS = [
   { id: 'logs', label: 'Logs' },
   { id: 'metrics', label: 'Metrics' },
@@ -97,6 +99,7 @@ function VarField({
   onFieldChange: (input: string, fieldName: string, value: string) => void;
   forceShowErrors?: boolean;
 }) {
+  const { colorMode } = useEuiTheme();
   const meta = resolveFieldMeta(service, activeInput, fieldName);
   if (!meta) return null;
   const value = toTyped(draft[activeInput]?.[fieldName], meta);
@@ -147,18 +150,22 @@ function VarField({
   const varDef = ECF_TRIGGER_VARS.has(fieldName)
     ? { ...meta.def, description: undefined, multi: true, required: true }
     : meta.def;
+  // KibanaStyledComponentsThemeProvider supplies the legacy styled-components EUI theme that
+  // Fleet's var field accesses via props.theme.eui (e.g. FixedHeightDiv for yaml fields).
   return (
     <div data-test-subj={`serviceSettingsFlyout-${activeInput}-field-${fieldName}`}>
-      <Suspense fallback={<EuiLoadingSpinner size="m" />}>
-        <LazyPackagePolicyInputVarField
-          varDef={varDef}
-          value={value}
-          onChange={(next) => onFieldChange(activeInput, fieldName, toDraft(next))}
-          errors={errors}
-          forceShowErrors={forceShowErrors}
-          packageName={service.packageName}
-        />
-      </Suspense>
+      <KibanaStyledComponentsThemeProvider darkMode={colorMode === 'DARK'}>
+        <Suspense fallback={<EuiLoadingSpinner size="m" />}>
+          <LazyPackagePolicyInputVarField
+            varDef={varDef}
+            value={value}
+            onChange={(next) => onFieldChange(activeInput, fieldName, toDraft(next))}
+            errors={errors}
+            forceShowErrors={forceShowErrors}
+            packageName={service.packageName}
+          />
+        </Suspense>
+      </KibanaStyledComponentsThemeProvider>
     </div>
   );
 }
@@ -190,15 +197,20 @@ function InputVarFields({
   const otherFlyoutFields = flyoutFields.filter(
     (f) => !REGION_FIELD_NAMES.has(f) && !requiredTextFieldSet.has(f)
   );
-  const requiredBoolFields = getRequiredBooleanFields(service, activeInput);
-
   const isAdvanced = (fieldName: string) => {
     const meta = resolveFieldMeta(service, activeInput, fieldName);
     return meta ? isAdvancedVar(meta.def) : false;
   };
 
-  const primaryBoolFields = requiredBoolFields.filter((f) => !isAdvanced(f));
-  const advancedBoolFields = requiredBoolFields.filter(isAdvanced);
+  // Collect ALL bool fields from both required and optional config — getRequiredBooleanFields
+  // only covers show_user:true bools from requiredConfig, missing optional bools like
+  // "Enable request tracing" (show_user:false in optionalConfig).
+  const allBoolFields = allConfigFields.filter((f) => {
+    const meta = resolveFieldMeta(service, activeInput, f);
+    return meta?.isBool ?? false;
+  });
+  const primaryBoolFields = allBoolFields.filter((f) => !isAdvanced(f));
+  const advancedBoolFields = allBoolFields.filter(isAdvanced);
   const primaryOtherFields = otherFlyoutFields.filter((f) => !isAdvanced(f));
   const advancedOtherFields = otherFlyoutFields.filter(isAdvanced);
 

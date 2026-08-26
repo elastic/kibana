@@ -113,6 +113,10 @@ export function getDefaultInput(service: AwsServiceMatrixEntry | undefined): str
   return service?.defaultEnabledInputs?.[0] ?? service?.inputs?.[0] ?? null;
 }
 
+// TODO: add the "Create dedicated index template for custom dataset (recommended)" switch
+// that Fleet shows in advanced options for input packages when data_stream.dataset is customised
+// (package_policy_input_stream.tsx, rendered after advancedVars when showPipelinesAndMappings is true).
+// It is a Fleet UI construct, not a manifest var — needs Fleet's useIndexTemplateExists hook.
 export function getFlyoutFields(
   service: AwsServiceMatrixEntry,
   activeInput: string | null
