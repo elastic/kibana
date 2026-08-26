@@ -7,6 +7,7 @@
 
 import type { AppMenuItemType } from '@kbn/core-chrome-app-menu-components';
 import { i18n } from '@kbn/i18n';
+import { APM_APP_MENU_EBT_ACTIONS, apmAppMenuEbt } from './ebt_constants';
 
 const storageExplorerLabel = i18n.translate('xpack.apm.storageExplorerLinkLabel', {
   defaultMessage: 'Storage explorer',
@@ -30,6 +31,7 @@ export function getStorageExplorerMenuItem({
     label: storageExplorerLabel,
     iconType: 'database',
     href,
+    ebt: apmAppMenuEbt(APM_APP_MENU_EBT_ACTIONS.VIEW_STORAGE_EXPLORER),
     testId: 'apmStorageExplorerHeaderLink',
     order,
     overflow: true,

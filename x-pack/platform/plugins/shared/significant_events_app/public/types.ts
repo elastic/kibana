@@ -8,6 +8,7 @@
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
@@ -27,6 +28,7 @@ export interface SignificantEventsAppStartDependencies {
   agentBuilder?: AgentBuilderPluginStart;
   charts: ChartsPluginStart;
   cloud?: CloudStart;
+  cps?: CPSPluginStart;
   data: DataPublicPluginStart;
   licensing: LicensingPluginStart;
   share: SharePluginStart;

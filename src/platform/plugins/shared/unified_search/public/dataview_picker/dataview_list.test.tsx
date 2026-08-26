@@ -167,6 +167,24 @@ describe('DataView list component', () => {
     });
   });
 
+  it('should render the items when dataViewsList arrives after the initial render', async () => {
+    const wrap = (element: React.ReactElement) => (
+      <div style={{ width: '400px', height: '300px' }}>{element}</div>
+    );
+    const { rerender } = render(wrap(<DataViewsList {...props} dataViewsList={[]} />));
+
+    expect(screen.queryAllByRole('option')).toHaveLength(0);
+
+    // The list is fetched asynchronously, so it can arrive as a prop update after mount
+    rerender(wrap(<DataViewsList {...props} dataViewsList={list} />));
+
+    await waitFor(() => {
+      expect(screen.getAllByRole('option')).toHaveLength(2);
+      expect(screen.getByRole('option', { name: /^dataview-1 / })).toBeInTheDocument();
+      expect(screen.getByRole('option', { name: /^dataview-2 / })).toBeInTheDocument();
+    });
+  });
+
   it('should handle empty dataviews list', async () => {
     renderWithContainer(<DataViewsList {...props} dataViewsList={[]} />);
 

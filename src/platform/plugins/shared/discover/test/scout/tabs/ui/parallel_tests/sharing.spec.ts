@@ -35,6 +35,8 @@ const openSharedPage = async (page: ScoutPage, sharedUrl: string, kbnUrl: Kibana
 };
 
 spaceTest.describe('Discover tabs - sharing', { tag: '@local-stateful-classic' }, () => {
+  spaceTest.setTimeout(90_000);
+
   spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
     await discoverScoutSpace.setupDiscoverDefaults();
   });

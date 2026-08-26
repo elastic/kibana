@@ -21,6 +21,7 @@ import type { CellActionRenderer } from '../shared/components/cell_actions';
 import { cellActionRenderer } from '../shared/components/cell_actions';
 import type { OpenFlyoutLinkProps } from '../shared/components/open_flyout_link';
 import { OpenFlyoutLink } from '../shared/components/open_flyout_link';
+import { CHILD_DOCUMENT_FLYOUT_TEST_ID } from '../shared/components/test_ids';
 import { getColumns } from './tools/prevalence/utils/get_columns';
 import {
   useDefaultDocumentFlyoutProperties,
@@ -111,9 +112,11 @@ export interface OpenDocumentFlyoutParams {
   origin?: FlyoutOrigin;
   /**
    * Flyout-history title to use for this open, when already known synchronously by the caller
-   * (e.g. `getDocumentHistoryTitle(hit)`). For `openDocumentFlyoutFromIndex`, omitted means no
-   * title. For `openDocumentFlyoutFromIndexAsChild`, omitted falls back to the bare "Alert" title,
-   * since the full document isn't loaded yet at open time.
+   * (e.g. `getDocumentHistoryTitle(hit)`).
+   * - `openDocumentFlyoutFromIndex` — omitted means no title.
+   * - `openDocumentFlyoutFromIndexAsChild` / `openDocumentFlyoutFromPattern` — omitted falls back
+   *   to the bare "Alert" label so EUI's managed flyout never shows "Unknown Flyout" in its
+   *   navigation history. Supply a richer title (e.g. `"Alert: <rule name>"`) when available.
    */
   title?: string;
 }
@@ -285,17 +288,21 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
   // and child open methods. Only the `session` differs between them, so it is kept private here and
   // callers pick `openDocumentFlyoutFromIndex` (main) or `openDocumentFlyoutFromIndexAsChild` (child).
   const buildFromIndexContent = useCallback(
-    ({
-      documentId,
-      indexName,
-      renderCellActions = cellActionRenderer,
-      onAlertUpdated = noop,
-    }: OpenDocumentFlyoutParams) => (
+    (
+      {
+        documentId,
+        indexName,
+        renderCellActions = cellActionRenderer,
+        onAlertUpdated = noop,
+      }: OpenDocumentFlyoutParams,
+      dataTestSubj?: string
+    ) => (
       <DocumentFlyoutWrapper
         documentId={documentId}
         indexName={indexName}
         renderCellActions={renderCellActions}
         onAlertUpdated={onAlertUpdated}
+        dataTestSubj={dataTestSubj}
       />
     ),
     []
@@ -352,7 +359,7 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
       );
       const onClose = buildOnClose(parentDescriptor);
       open(
-        buildFromIndexContent(params),
+        buildFromIndexContent(params, CHILD_DOCUMENT_FLYOUT_TEST_ID),
         {
           ...defaultDocumentFlyoutProperties,
           historyKey,
@@ -387,6 +394,7 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
       renderCellActions = cellActionRenderer,
       onAlertUpdated = noop,
       origin,
+      title,
     }: OpenDocumentFlyoutParams) => {
       writeOnOpen({
         kind: FLYOUT_DESCRIPTOR_KIND.documentFromPattern,
@@ -401,7 +409,16 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
           renderCellActions={renderCellActions}
           onAlertUpdated={onAlertUpdated}
         />,
-        { ...defaultDocumentFlyoutProperties, historyKey, session: sessionMode, onClose },
+        {
+          ...defaultDocumentFlyoutProperties,
+          historyKey,
+          session: sessionMode,
+          // Fall back to the bare "Alert" label so EUI's managed flyout never shows
+          // "Unknown Flyout" in its navigation history. Callers may supply a richer
+          // title (e.g. "Alert: <rule name>") if they know it at call time.
+          title: title ?? getAlertHistoryTitle(),
+          onClose,
+        },
         {
           surface: FLYOUT_SURFACE.FLYOUT,
           flyoutType: FLYOUT_TYPE.DOCUMENT,

@@ -128,7 +128,8 @@ export class AsyncDomainEventBus<TEvent extends DomainEvent = DomainEvent, TCont
       this.#emitter.emit(event.type, event);
     }
     this.logger.debug({
-      message: () => `[alerting_v2.EventBus] Emitted ${event.type} with ${JSON.stringify(event)} `,
+      message: () => `[alerting_v2.EventBus] Emitted ${event.type}`,
+      labels: { event_type: event.type },
     });
   }
 

@@ -9,7 +9,11 @@ import type { AgentPolicy } from '@kbn/fleet-plugin/common';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import { addPrivateLocationRoute, getAgentPolicySpaceIds } from './add_private_location';
+import {
+  addPrivateLocationRoute,
+  getAgentPolicySpaceIds,
+  PrivateLocationSchema,
+} from './add_private_location';
 import { PrivateLocationRepository } from '../../../repositories/private_location_repository';
 
 jest.mock('./migrate_legacy_private_locations');
@@ -132,6 +136,26 @@ describe('addPrivateLocationRoute handler - space containment', () => {
     expect(create).toHaveBeenCalled();
   });
 
+  it('persists isAgentSharding on create', async () => {
+    const { routeContext, response } = makeRouteContext({
+      policySpaceIds: [ALL_SPACES_ID],
+      requestSpaces: ['naims'],
+    });
+    routeContext.request.body = {
+      ...routeContext.request.body,
+      isAgentSharding: true,
+    };
+    const create = stubDownstream();
+
+    await addPrivateLocationRoute().handler(routeContext);
+
+    expect(response.badRequest).not.toHaveBeenCalled();
+    expect(create).toHaveBeenCalledWith(
+      expect.objectContaining({ isAgentSharding: true }),
+      expect.any(String)
+    );
+  });
+
   it('bypasses the containment check when the agent policy is all-spaces', async () => {
     const { routeContext, response } = makeRouteContext({
       policySpaceIds: [ALL_SPACES_ID],
@@ -165,5 +189,26 @@ describe('PrivateLocationRepository.getLocationSpaces', () => {
 
   it('falls back to agentPolicySpaces when locationSpaces is undefined', () => {
     expect(repo().getLocationSpaces({ agentPolicySpaces: ['default'] })).toEqual(['default']);
+  });
+});
+
+describe('PrivateLocationSchema isAgentSharding', () => {
+  const base = { label: 'loc', agentPolicyId: 'ap' };
+
+  it('accepts a boolean flag', () => {
+    expect(PrivateLocationSchema.validate({ ...base, isAgentSharding: true })).toEqual(
+      expect.objectContaining({ isAgentSharding: true })
+    );
+    expect(PrivateLocationSchema.validate({ ...base, isAgentSharding: false })).toEqual(
+      expect.objectContaining({ isAgentSharding: false })
+    );
+  });
+
+  it('allows omitting the flag so existing clients stay classic', () => {
+    expect(PrivateLocationSchema.validate(base).isAgentSharding).toBeUndefined();
+  });
+
+  it('rejects a non-boolean flag', () => {
+    expect(() => PrivateLocationSchema.validate({ ...base, isAgentSharding: 'yes' })).toThrow();
   });
 });

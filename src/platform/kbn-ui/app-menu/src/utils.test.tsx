@@ -449,6 +449,42 @@ describe('utils', () => {
       expect(result['data-test-subj']).toBe('my-test-id');
     });
 
+    it('should include data-ebt attributes when ebt is provided', () => {
+      const item = {
+        ...baseItem,
+        ebt: { action: 'viewSettings', detail: 'settings' },
+      };
+      const result = mapAppMenuItemToPanelItem(item);
+
+      expect(result).toMatchObject({
+        'data-ebt-action': 'viewSettings',
+        'data-ebt-element': 'appMenu',
+        'data-ebt-detail': 'settings',
+      });
+    });
+
+    it('should always set data-ebt-element to appMenu and omit detail when absent', () => {
+      const item = {
+        ...baseItem,
+        ebt: { action: 'viewSettings' },
+      };
+      const result = mapAppMenuItemToPanelItem(item);
+
+      expect(result).toMatchObject({
+        'data-ebt-action': 'viewSettings',
+        'data-ebt-element': 'appMenu',
+      });
+      expect(result).not.toHaveProperty('data-ebt-detail');
+    });
+
+    it('should omit data-ebt attributes when ebt is not provided', () => {
+      const result = mapAppMenuItemToPanelItem(baseItem);
+
+      expect(result).not.toHaveProperty('data-ebt-action');
+      expect(result).not.toHaveProperty('data-ebt-element');
+      expect(result).not.toHaveProperty('data-ebt-detail');
+    });
+
     it('should include tooltip content and title', () => {
       const item = { ...baseItem, tooltipContent: 'Content', tooltipTitle: 'Title' };
       const result = mapAppMenuItemToPanelItem(item);
@@ -507,6 +543,84 @@ describe('utils', () => {
       const result = mapAppMenuItemToPanelItem(baseItem);
 
       expect(result.css).toBeUndefined();
+    });
+
+    it('should keep a plain string name when description is not provided', () => {
+      const result = mapAppMenuItemToPanelItem(baseItem);
+
+      expect(result.name).toBe('Test item');
+    });
+
+    it('should omit the panel icon when a description is provided', () => {
+      const result = mapAppMenuItemToPanelItem({
+        ...baseItem,
+        iconType: 'gear',
+        description: 'Supporting text',
+      });
+
+      expect(result.icon).toBeUndefined();
+    });
+
+    it('should render a spinner next to the label when a described item is loading', () => {
+      const { name, icon } = mapAppMenuItemToPanelItem({
+        ...baseItem,
+        testId: 'loading-item',
+        iconType: 'gear',
+        description: 'Supporting text',
+        isLoading: true,
+      });
+
+      expect(icon).toBeUndefined();
+      expect(isValidElement(name)).toBe(true);
+
+      if (!isValidElement(name)) {
+        throw new Error('Expected name to be a React element');
+      }
+
+      const { getByTestId } = render(name as ReactElement);
+      expect(getByTestId('loading-item-loading')).toBeInTheDocument();
+    });
+
+    it('should render the description below the label when provided', () => {
+      const item = {
+        ...baseItem,
+        testId: 'described-item',
+        iconType: 'gear' as const,
+        description: 'Supporting text',
+      };
+      const { name } = mapAppMenuItemToPanelItem(item);
+
+      expect(isValidElement(name)).toBe(true);
+
+      if (!isValidElement(name)) {
+        throw new Error('Expected name to be a React element');
+      }
+
+      const { getByText, getByTestId, container } = render(name as ReactElement);
+      expect(getByText('Test item')).toBeInTheDocument();
+      expect(getByTestId('described-item-description')).toBeInTheDocument();
+      expect(container.querySelector('[data-euiicon-type="gear"]')).toBeInTheDocument();
+    });
+
+    it('should render the description with a label badge when both are provided', () => {
+      const item = {
+        ...baseItem,
+        testId: 'badged-item',
+        labelBadgeText: 'New',
+        description: 'Supporting text',
+      };
+      const { name } = mapAppMenuItemToPanelItem(item);
+
+      expect(isValidElement(name)).toBe(true);
+
+      if (!isValidElement(name)) {
+        throw new Error('Expected name to be a React element');
+      }
+
+      const { getByText, getByTestId } = render(name as ReactElement);
+      expect(getByText('Test item')).toBeInTheDocument();
+      expect(getByTestId('badged-item-badge')).toHaveTextContent('New');
+      expect(getByTestId('badged-item-description')).toBeInTheDocument();
     });
   });
 
@@ -870,6 +984,42 @@ describe('utils', () => {
       const switchIndex = panelItems.findIndex((i) => i.key === 'switch-test-switch');
       expect(actionIndex).toBeLessThan(switchIndex);
       expect(switchIndex).toBe(panelItems.length - 1);
+    });
+
+    it('should keep a plain string name for items without a description', () => {
+      const items: AppMenuPopoverItem[] = [{ id: '1', label: 'Item 1', run: jest.fn(), order: 1 }];
+
+      const panels = getPopoverPanels({ items });
+      const panelItems = panels[0].items as Array<{ name?: unknown }>;
+
+      expect(panelItems[0].name).toBe('Item 1');
+    });
+
+    it('should include the description in the rendered item name', () => {
+      const items: AppMenuPopoverItem[] = [
+        {
+          id: '1',
+          label: 'Item 1',
+          run: jest.fn(),
+          order: 1,
+          testId: 'item-with-description',
+          description: 'Supporting text',
+        },
+      ];
+
+      const panels = getPopoverPanels({ items });
+      const panelItems = panels[0].items as Array<{ name?: unknown }>;
+      const { name } = panelItems[0];
+
+      expect(isValidElement(name)).toBe(true);
+
+      if (!isValidElement(name)) {
+        throw new Error('Expected name to be a React element');
+      }
+
+      const { getByText, getByTestId } = render(name as ReactElement);
+      expect(getByText('Item 1')).toBeInTheDocument();
+      expect(getByTestId('item-with-description-description')).toBeInTheDocument();
     });
   });
 

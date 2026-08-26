@@ -1,8 +1,7 @@
 {
-  "sha1": "02fdf6bb41d66384c3c5f9d4257e4b16b61886ac",
+  "sha1": "0d147fef96dc6629f43c55d55ac37526955a9eb4",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -15,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/task_manager/test/scout/api/tests/execution_control_routes.spec.ts",
-        "line": 40,
-        "column": 12
+        "line": 33,
+        "column": 15
       }
     },
     {
@@ -29,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/task_manager/test/scout/api/tests/execution_control_routes.spec.ts",
-        "line": 54,
-        "column": 12
+        "line": 41,
+        "column": 47
       }
     },
     {
@@ -43,8 +42,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/task_manager/test/scout/api/tests/execution_control_routes.spec.ts",
-        "line": 72,
-        "column": 12
+        "line": 59,
+        "column": 27
       }
     },
     {
@@ -57,8 +56,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/task_manager/test/scout/api/tests/execution_control_routes.spec.ts",
-        "line": 97,
-        "column": 12
+        "line": 77,
+        "column": 16
       }
     },
     {
@@ -71,8 +70,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/task_manager/test/scout/api/tests/execution_control_routes.spec.ts",
-        "line": 109,
-        "column": 12
+        "line": 95,
+        "column": 7
       }
     },
     {
@@ -85,8 +84,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/task_manager/test/scout/api/tests/execution_control_routes.spec.ts",
-        "line": 120,
-        "column": 12
+        "line": 101,
+        "column": 42
       }
     },
     {
@@ -99,8 +98,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/task_manager/test/scout/api/tests/internal_routes.spec.ts",
-        "line": 31,
-        "column": 12
+        "line": 24,
+        "column": 59
       }
     },
     {
@@ -113,8 +112,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/task_manager/test/scout/api/tests/internal_routes.spec.ts",
-        "line": 56,
-        "column": 12
+        "line": 42,
+        "column": 22
       }
     },
     {
@@ -127,8 +126,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/task_manager/test/scout/api/tests/internal_routes.spec.ts",
-        "line": 84,
-        "column": 12
+        "line": 66,
+        "column": 25
       }
     },
     {
@@ -141,8 +140,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/task_manager/test/scout/api/tests/internal_routes.spec.ts",
-        "line": 100,
-        "column": 12
+        "line": 82,
+        "column": 6
       }
     },
     {
@@ -155,8 +154,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/task_manager/test/scout/api/tests/internal_routes.spec.ts",
-        "line": 117,
-        "column": 12
+        "line": 93,
+        "column": 11
       }
     },
     {
@@ -169,8 +168,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/task_manager/test/scout/api/tests/internal_routes.spec.ts",
-        "line": 146,
-        "column": 12
+        "line": 118,
+        "column": 13
       }
     },
     {
@@ -183,8 +182,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/task_manager/test/scout/api/tests/internal_routes.spec.ts",
-        "line": 156,
-        "column": 12
+        "line": 124,
+        "column": 23
       }
     },
     {
@@ -197,8 +196,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/task_manager/test/scout/api/tests/internal_routes.spec.ts",
-        "line": 184,
-        "column": 12
+        "line": 150,
+        "column": 18
       }
     },
     {
@@ -211,8 +210,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/task_manager/test/scout/api/tests/internal_routes.spec.ts",
-        "line": 194,
-        "column": 12
+        "line": 156,
+        "column": 84
       }
     }
   ]

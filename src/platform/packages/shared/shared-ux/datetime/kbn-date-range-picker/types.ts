@@ -53,6 +53,12 @@ export interface TimeRangeBounds {
 /** Used for presets and recent options */
 export interface TimeRangeBoundsOption extends TimeRangeBounds {
   label?: string;
+  /**
+   * Whether the option belongs to the user. Options owned by configuration set
+   * this to `false` so they cannot be removed from the UI.
+   * @default true
+   */
+  isEditable?: boolean;
 }
 
 /** Calendar-specific configuration options. */

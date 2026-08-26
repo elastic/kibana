@@ -16,7 +16,24 @@ if [[ ! "${DISABLE_CI_STATS_SHIPPING:-}" ]]; then
   fi
 
   echo "--- Ship Kibana Distribution Metrics to CI Stats"
-  "${cmd[@]}"
+  if ! "${cmd[@]}"; then
+    # On PR builds, auto-fix limit overages from the metrics this build already produced and push as kibanamachine.
+    # Overages above 15% (per-build, vs current limits.yml) are refused and fail as before; the bundle-size-limits-comment workflow is the tripwire for cumulative bumps.
+    if [[ "${BUILDKITE_PIPELINE_SLUG:-}" == "kibana-pull-request" ]] && ! is_auto_commit_disabled; then
+      echo "--- Attempting to auto-update bundle size limits from build metrics"
+      if node scripts/build_rspack_bundles --update-limits-from-metrics target/optimizer_bundle_metrics.json; then
+        # check_for_changed_files commits ALL tracked changes, so only auto-commit when limits.yml is the only modified file
+        unexpected_changes="$(git status --porcelain -- . ':!packages/kbn-rspack-optimizer/limits.yml' ':!config/node.options' ':!config/kibana.yml')"
+        if [[ -z "$unexpected_changes" ]]; then
+          check_for_changed_files "node scripts/build_rspack_bundles --update-limits" true "Update bundle limits"
+        else
+          echo "Not auto-committing bundle limits: unexpected working tree changes alongside limits.yml:"
+          echo "$unexpected_changes"
+        fi
+      fi
+    fi
+    exit 1
+  fi
 fi
 
 echo "--- Upload Build Artifacts"

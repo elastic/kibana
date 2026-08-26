@@ -1,0 +1,90 @@
+version: "1"
+# Every 4h: fetch enabled sources, skip known fingerprints (90d), write new reports.
+# Scoped to `workflow.spaceId` plus global (`*`) catalog rows via `space_id`.
+name: Ingest threat feeds
+description: Fetch enabled sources and write new reports to .kibana-threat-reports
+tags:
+  - threat-intel
+enabled: true
+settings:
+  concurrency:
+    key: "threat-intel-ingest-{{ workflow.spaceId }}"
+    strategy: drop
+    max: 1
+triggers:
+  - type: scheduled
+    with:
+      every: "4h"
+steps:
+  - name: set_space_context
+    type: data.set
+    with:
+      spaceId: "{{ workflow.spaceId }}"
+
+  - name: load_sources
+    type: elasticsearch.search
+    with:
+      index: .kibana-threat-intel-sources
+      size: 1000
+      query:
+        bool:
+          filter:
+            - term:
+                enabled:
+                  value: true
+            - terms:
+                space_id:
+                  - "{{ variables.spaceId }}"
+                  - "*"
+
+  - name: dispatch_each_source
+    type: foreach
+    foreach: "{{ steps.load_sources.output.hits.hits }}"
+    steps:
+      # `${{ }}` keeps the hit as an object. `{{ }}` stringifies it to "[object Object]".
+      - name: fetch_source
+        type: threat_intel.fetch_source
+        with:
+          source: "${{ foreach.item }}"
+        on-failure:
+          continue: true
+
+      - name: skip_empty_source
+        type: loop.continue
+        if: "NOT steps.fetch_source.output.total_fetched > 0 OR NOT steps.fetch_source.output.reports:*"
+
+      - name: emit_reports
+        type: foreach
+        foreach: "{{ steps.fetch_source.output.reports | default: '[]' }}"
+        steps:
+          - name: check_dedup
+            type: elasticsearch.search
+            with:
+              index: .kibana-threat-reports
+              size: 0
+              track_total_hits: true
+              query:
+                bool:
+                  filter:
+                    - term:
+                        content_fingerprint: "{{ foreach.item.content_fingerprint }}"
+                    - range:
+                        "@timestamp":
+                          gte: "now-90d"
+                    - terms:
+                        space_id:
+                          - "{{ variables.spaceId }}"
+                          - "*"
+
+          - name: skip_if_seen
+            type: loop.continue
+            if: "steps.check_dedup.output.hits.total.value > 0"
+
+          - name: write_report
+            type: elasticsearch.index
+            with:
+              index: .kibana-threat-reports
+              op_type: create
+              document: "${{ foreach.item }}"
+            on-failure:
+              continue: true

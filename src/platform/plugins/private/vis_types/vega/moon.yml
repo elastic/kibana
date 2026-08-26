@@ -52,6 +52,7 @@ dependsOn:
   - '@kbn/es-types'
   - '@kbn/esql-utils'
   - '@kbn/scout'
+  - '@kbn/presentation-util'
 tags:
   - plugin
   - prod

@@ -68,6 +68,7 @@ describe('conversations utils', () => {
 
         expect(result.access_control).toEqual({
           access_mode: ConversationAccessControlMode.Private,
+          entries: [],
         });
       });
 
@@ -85,7 +86,50 @@ describe('conversations utils', () => {
 
         expect(result.access_control).toEqual({
           access_mode: ConversationAccessControlMode.Public,
+          entries: [],
         });
+      });
+
+      it('defaults read_only to false for new conversation placeholders', async () => {
+        const conversationClient = createConversationClientMock();
+
+        const result = await getConversation({
+          agentId: 'test-agent',
+          conversationId: undefined,
+          conversationClient,
+        });
+
+        expect(result.read_only).toBe(false);
+      });
+
+      it('uses explicit read_only for new conversation placeholders', async () => {
+        const conversationClient = createConversationClientMock();
+
+        const result = await getConversation({
+          agentId: 'test-agent',
+          conversationId: undefined,
+          conversationClient,
+          readOnly: true,
+        });
+
+        expect(result.read_only).toBe(true);
+      });
+
+      it('ignores read_only when auto-created conversation already exists', async () => {
+        const conversationClient = createConversationClientMock();
+        conversationClient.exists.mockResolvedValue(true);
+        conversationClient.get.mockResolvedValue(createEmptyConversation({ read_only: false }));
+
+        const result = await getConversation({
+          agentId: 'test-agent',
+          conversationId: 'existing-conversation',
+          autoCreateConversationWithId: true,
+          conversationClient,
+          readOnly: true,
+        });
+
+        expect(result.operation).toBe('UPDATE');
+        expect(result.read_only).toBe(false);
       });
 
       it('returns UPDATE operation when conversationId is provided', async () => {
@@ -160,6 +204,7 @@ describe('conversations utils', () => {
         const existingConversation = createEmptyConversation({
           access_control: {
             access_mode: ConversationAccessControlMode.Private,
+            entries: [],
           },
         });
         conversationClient.exists.mockResolvedValue(true);
@@ -178,6 +223,7 @@ describe('conversations utils', () => {
         expect(result.operation).toBe('UPDATE');
         expect(result.access_control).toEqual({
           access_mode: ConversationAccessControlMode.Private,
+          entries: [],
         });
       });
     });

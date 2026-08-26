@@ -13,9 +13,9 @@ import { ACTION_COLUMN_WIDTH } from './common_styles';
 import { getNotesCount, getPinnedEventCount } from '../helpers';
 import * as i18n from '../translations';
 import {
-  ESQL_SUPER_TIMELINE_INCOMPATIBLE,
-  EQL_SUPER_TIMELINE_INCOMPATIBLE,
-  SUPER_TIMELINE_QUERY_TYPE_COLUMN_HEADER,
+  ESQL_QUERY_NOT_MERGED,
+  EQL_QUERY_NOT_MERGED,
+  SUPER_TIMELINE_QUERY_MERGING_COLUMN_HEADER,
 } from '../../super_timeline/translations';
 import type { FavoriteTimelineResult, OpenTimelineResult } from '../types';
 import { type TimelineType, TimelineTypeEnum } from '../../../../../common/api/timeline';
@@ -106,13 +106,13 @@ export const getIconHeaderColumns = ({
   return timelineType === TimelineTypeEnum.template ? templateColumns : defaultColumns;
 };
 
-/** Returns the column that flags ES|QL and EQL timelines as incompatible with Super Timeline. */
+/** Returns the column that indicates whether an ES|QL or EQL timeline's query is merged into Super Timeline. */
 export const getSuperTimelineQueryTypeColumn = (): EuiTableFieldDataColumnType<object> => ({
   align: 'center' as HorizontalAlignment,
   field: 'savedSearchId',
   name: (
     <EuiIconTip
-      content={SUPER_TIMELINE_QUERY_TYPE_COLUMN_HEADER}
+      content={SUPER_TIMELINE_QUERY_MERGING_COLUMN_HEADER}
       iconProps={{ 'data-test-subj': 'super-timeline-query-type-header-icon' }}
       size="m"
       type="merge"
@@ -122,10 +122,9 @@ export const getSuperTimelineQueryTypeColumn = (): EuiTableFieldDataColumnType<o
     if (savedSearchId != null) {
       return (
         <EuiIconTip
-          iconProps={{ 'data-test-subj': 'super-timeline-esql-incompatible-icon' }}
-          content={ESQL_SUPER_TIMELINE_INCOMPATIBLE}
-          type="warning"
-          color="warning"
+          iconProps={{ 'data-test-subj': 'super-timeline-esql-query-not-merged-icon' }}
+          content={ESQL_QUERY_NOT_MERGED}
+          type="info"
           size="m"
         />
       );
@@ -133,10 +132,9 @@ export const getSuperTimelineQueryTypeColumn = (): EuiTableFieldDataColumnType<o
     if (timelineResult.queryType?.hasEql === true) {
       return (
         <EuiIconTip
-          iconProps={{ 'data-test-subj': 'super-timeline-eql-incompatible-icon' }}
-          content={EQL_SUPER_TIMELINE_INCOMPATIBLE}
-          type="warning"
-          color="warning"
+          iconProps={{ 'data-test-subj': 'super-timeline-eql-query-not-merged-icon' }}
+          content={EQL_QUERY_NOT_MERGED}
+          type="info"
           size="m"
         />
       );

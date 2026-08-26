@@ -24,6 +24,7 @@ export class LensMetric {
    * to assert it appears should poll `count()` before snapshotting via `getMetricVisualizationData`.
    */
   readonly metricProgressBar;
+  readonly legacyMetricLabel;
   readonly legacyMetricValue;
 
   constructor(private readonly page: ScoutPage) {
@@ -37,6 +38,7 @@ export class LensMetric {
     this.metricProgressBar = this.page.locator(
       '[data-test-subj="mtrVis"] .echSingleMetricProgress'
     );
+    this.legacyMetricLabel = this.page.testSubj.locator('metric_label');
     this.legacyMetricValue = this.page.testSubj.locator('metric_value');
   }
 

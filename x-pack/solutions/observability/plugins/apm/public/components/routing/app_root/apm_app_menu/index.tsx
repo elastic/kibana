@@ -163,7 +163,9 @@ export function ApmAppMenu({ children }: { children?: React.ReactNode }) {
 
     return {
       items,
-      primaryActionItem: getAddDataMenuItem({ href: addDataUrl }),
+      primaryActionItem: getAddDataMenuItem({
+        href: addDataUrl,
+      }),
     };
   }, [
     addDataUrl,

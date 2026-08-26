@@ -7,6 +7,7 @@
 
 import type { AppMenuItemType } from '@kbn/core-chrome-app-menu-components';
 import { i18n } from '@kbn/i18n';
+import { APM_APP_MENU_EBT_ACTIONS, apmAppMenuEbt } from './ebt_constants';
 
 const settingsLabel = i18n.translate('xpack.apm.settingsLinkLabel', {
   defaultMessage: 'Settings',
@@ -24,6 +25,7 @@ export function getSettingsMenuItem({
     label: settingsLabel,
     iconType: 'gear',
     href,
+    ebt: apmAppMenuEbt(APM_APP_MENU_EBT_ACTIONS.VIEW_SETTINGS),
     testId: 'apmSettingsHeaderLink',
     order,
     overflow: true,

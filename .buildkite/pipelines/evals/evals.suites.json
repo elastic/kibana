@@ -140,7 +140,7 @@
     {
       "id": "llm-tasks",
       "name": "LLM Tasks",
-      "slackChannel": "#appex-ai-infra-alerts",
+      "slackChannel": "#search-ml-ux-team",
       "configPath": "x-pack/platform/packages/shared/ai-infra/kbn-evals-suite-llm-tasks/playwright.config.ts",
       "tags": [
         "ai-infra"
@@ -270,6 +270,21 @@
         "evals:attack-discovery"
       ],
       "serverConfigSet": "evals_tracing"
+    },
+    {
+      "id": "attack-discovery-agent-builder",
+      "name": "Attack Discovery Agent Builder",
+      "slackChannel": "#security-generative-ai-evals",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-agent-builder/playwright.config.ts",
+      "tags": [
+        "security",
+        "attack-discovery",
+        "agent-builder"
+      ],
+      "ciLabels": [
+        "evals:attack-discovery-agent-builder"
+      ],
+      "serverConfigSet": "evals_attack_discovery_agent_builder"
     },
     {
       "id": "lead-generation",

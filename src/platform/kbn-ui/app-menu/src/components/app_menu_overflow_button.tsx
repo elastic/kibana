@@ -11,9 +11,10 @@ import React from 'react';
 import { EuiButtonIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { getIsSelectedColor } from '../utils';
+import { getAppMenuEbtDomProps, getIsSelectedColor } from '../utils';
 import { AppMenuPopover } from './app_menu_popover';
 import type { AppMenuItemType, AppMenuPrimaryActionItem, AppMenuSwitch } from '../types';
+import { APP_MENU_EBT_OPEN_MORE_ACTION } from '../constants';
 import { APP_MENU_TEST_SUBJECTS } from '../test_subjects';
 
 interface AppMenuShowMoreButtonProps {
@@ -74,6 +75,7 @@ export const AppMenuOverflowButton = ({
         isSelected={isPopoverOpen}
         css={buttonCss}
         data-test-subj={APP_MENU_TEST_SUBJECTS.overflowButton}
+        {...getAppMenuEbtDomProps({ action: APP_MENU_EBT_OPEN_MORE_ACTION })}
       />
     </EuiToolTip>
   );
@@ -91,6 +93,8 @@ export const AppMenuOverflowButton = ({
       switchConfig={switchConfig}
       onClose={onPopoverClose}
       onCloseOverflowButton={onPopoverClose}
+      anchorPosition="downRight"
+      repositionToCrossAxis={false}
     />
   );
 };

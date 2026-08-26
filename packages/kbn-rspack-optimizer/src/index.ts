@@ -54,8 +54,9 @@ export {
   validateLimitsForAllBundles,
   updateBundleLimits,
   DEFAULT_LIMITS_PATH,
+  DEFAULT_MAX_LIMIT_INCREASE_FRACTION,
 } from './limits';
-export type { Limits } from './limits';
+export type { Limits, UpdateBundleLimitsOptions } from './limits';
 
 // Types
 export type { ThemeTag } from './types';

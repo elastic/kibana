@@ -36,6 +36,14 @@ describe('AppMenuOverflowButton', () => {
     expect(screen.getByTestId(APP_MENU_TEST_SUBJECTS.overflowButton)).toBeInTheDocument();
   });
 
+  it('should include data-ebt attributes for opening the More menu', () => {
+    render(<AppMenuOverflowButton {...defaultProps} />);
+
+    const button = screen.getByTestId(APP_MENU_TEST_SUBJECTS.overflowButton);
+    expect(button).toHaveAttribute('data-ebt-action', 'openMoreMenu');
+    expect(button).toHaveAttribute('data-ebt-element', 'appMenu');
+  });
+
   it('should call onPopoverToggle when clicked', async () => {
     const user = userEvent.setup();
     render(<AppMenuOverflowButton {...defaultProps} />);

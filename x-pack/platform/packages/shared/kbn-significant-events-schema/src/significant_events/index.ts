@@ -16,11 +16,14 @@ export {
   causalFeatureSchema,
   signalEntrySchema,
   severitySchema,
+  SIGNAL_VERDICTS,
   SEVERITY_OPTIONS,
+  SEVERITY_CONTRACT_RULE,
   getSeverityLabel,
   type BlastRadiusEntry,
   type CausalFeature,
   type SignalEntry,
+  type SignalVerdict,
   type Severity,
 } from './common_schemas';
 export type { KnowledgeIndicator } from '../queries';
@@ -36,6 +39,8 @@ export {
   significantEventStatusSchema,
 } from './events';
 export {
+  MAX_SHORT_STRING_LENGTH,
+  MAX_MEDIUM_STRING_LENGTH,
   MAX_ID_LENGTH,
   MAX_RULE_NAME_LENGTH,
   MAX_TEXT_LENGTH,
@@ -53,13 +58,19 @@ export {
   INVESTIGATION_PROGRESS_UI_EVENT,
   INVESTIGATE_STEP_ID,
   MAX_HYPOTHESIS_EVIDENCE,
+  MAX_RECOMMENDATIONS,
+  MAX_BLIND_SPOTS,
   MAX_SIGNIFICANT_EVENT_UPDATE_EVIDENCE,
   MAX_SIGNIFICANT_EVENT_UPDATES,
   significantEventUpdateSchema,
   investigationStateSchema,
   type SignificantEventUpdate,
   type InvestigationEvidence,
+  type InvestigationEvidenceCode,
   type InvestigationHypothesis,
+  type InvestigationRecommendation,
+  type InvestigationBlindSpot,
+  type InvestigationRunStatus,
   type InvestigationState,
 } from './investigation_state';
 export {
@@ -69,4 +80,5 @@ export {
   SIGNIFICANT_EVENTS_TUNING_FIELD_BOUNDS,
   significantEventsTuningConfigSchema,
   validateSignificantEventsTuningConfig,
+  resolveSignificantEventsTuningConfig,
 } from './tuning_config';

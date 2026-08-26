@@ -15,6 +15,7 @@ type BuilderArgs = Pick<
   UserActionBuilderArgs,
   | 'userAction'
   | 'unifiedAttachmentTypeRegistry'
+  | 'permissions'
   | 'caseData'
   | 'handleDeleteComment'
   | 'userProfiles'
@@ -33,6 +34,7 @@ export const createUnifiedAttachmentUserActionBuilder = ({
   userProfiles,
   attachment,
   unifiedAttachmentTypeRegistry,
+  permissions,
   caseData,
   isLoading,
   handleDeleteComment,
@@ -47,6 +49,7 @@ export const createUnifiedAttachmentUserActionBuilder = ({
     userProfiles,
     attachment,
     registry: unifiedAttachmentTypeRegistry,
+    permissions,
     caseData,
     handleDeleteComment,
     isLoading,

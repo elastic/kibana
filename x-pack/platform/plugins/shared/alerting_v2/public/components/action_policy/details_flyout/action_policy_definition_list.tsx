@@ -30,7 +30,15 @@ export interface ActionPolicyDefinitionListProps {
 }
 
 export const ActionPolicyDefinitionList = ({ policy }: ActionPolicyDefinitionListProps) => {
-  const { description, tags, matcher, groupingMode, groupBy, throttle, destinations = [] } = policy;
+  const {
+    description,
+    tags,
+    matcher,
+    grouping_mode: groupingMode,
+    group_by: groupBy,
+    throttle,
+    destinations = [],
+  } = policy;
 
   const items: EuiDescriptionListProps['listItems'] = [
     {

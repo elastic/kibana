@@ -95,6 +95,7 @@ pivot:
       - 'Feature:SharingURLs'
       - 'Feature:Reporting'
       - 'Team:Reporting Services'
+      - 'Feature:AlertingV2'
     'Dashboards and visualizations':
       - 'Feature:Dashboard'
       - 'Feature:Drilldowns'
@@ -306,6 +307,7 @@ bundle:
   output_directory: docs/releases
   repo: kibana
   owner: elastic
+  branch: main
   link_allow_repos:
     - elastic/kibana
     - elastic/elasticsearch

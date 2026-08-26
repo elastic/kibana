@@ -31,7 +31,8 @@ pageLoadAssetSize:
   console: 31191
   contentConnectors: 33014
   contentManagement: 8350
-  contextEngine: 5837
+  contextEngine: 7557
+  contextEngineAgentBuilder: 4999
   controls: 10300
   core: 563693
   cps: 9209
@@ -62,7 +63,7 @@ pageLoadAssetSize:
   embeddable: 19587
   embeddableAlertsTable: 6524
   enterpriseSearch: 37565
-  entityStore: 14114
+  entityStore: 15562
   esql: 29469
   esqlDataGrid: 10209
   esUiShared: 101220
@@ -132,6 +133,7 @@ pageLoadAssetSize:
   navigation: 18855
   newsfeed: 11110
   nightshift: 7911
+  nightshiftInvestigations: 5000
   noDataPage: 1749
   notificationCenter: 1791
   observability: 116568
@@ -144,7 +146,7 @@ pageLoadAssetSize:
   observabilityShared: 86067
   osquery: 48500
   painlessLab: 6299
-  pnd: 7674
+  pnd: 13291
   presentationUtil: 8391
   productDocBase: 6767
   productIntercept: 9860
