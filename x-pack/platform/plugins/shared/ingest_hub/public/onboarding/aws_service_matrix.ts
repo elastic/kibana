@@ -863,6 +863,10 @@ export function buildAwsServiceMatrix(
           varDefsByInput[ptInputType] = inputPkgInfo.varDefsByInput[ptInputType];
           inputs = [ptInputType];
           defaultEnabledInputs.push(ptInputType);
+          // Use the PT title as the switch label in the service settings flyout.
+          // pt.inputs[] is empty for input packages, so the normal inputTitles loop below
+          // never fires. Store pt.title here so getInputDisplayLabel can return it.
+          if ((pt as any).title) inputTitles[ptInputType] = (pt as any).title as string;
           // Input packages (e.g. otelcol) have no pt.inputs[] so the IDF derivation below
           // cannot run and leaves identityFederationSupported as undefined. The gate is
           // !== false, so undefined would incorrectly show IDF. Default to false until the
