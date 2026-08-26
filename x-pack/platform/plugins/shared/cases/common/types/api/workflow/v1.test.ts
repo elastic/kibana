@@ -29,7 +29,10 @@ describe('CasesWorkflowExecutionMetadataSchema', () => {
 
   it(`accepts metadata with up to ${MAX_CASES_PER_WORKFLOW_RUN} case ids (the cap)`, () => {
     const ids = Array.from({ length: MAX_CASES_PER_WORKFLOW_RUN }, (_, i) => `case-${i}`);
-    const result = CasesWorkflowExecutionMetadataSchema.safeParse({ ...validMetadata, caseIds: ids });
+    const result = CasesWorkflowExecutionMetadataSchema.safeParse({
+      ...validMetadata,
+      caseIds: ids,
+    });
     expect(result.success).toBe(true);
   });
 

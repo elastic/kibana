@@ -185,9 +185,7 @@ describe('recordWorkflowExecution', () => {
   });
 
   it('propagates a bulkCreateUserAction rejection', async () => {
-    userActionService.creator.bulkCreateUserAction.mockRejectedValue(
-      new Error('ES write failed')
-    );
+    userActionService.creator.bulkCreateUserAction.mockRejectedValue(new Error('ES write failed'));
 
     await expect(
       recordWorkflowExecution(

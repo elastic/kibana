@@ -81,9 +81,9 @@ describe('ensureAuthorizedToUpdate', () => {
       type: 'cases',
       error: { statusCode: 404, error: 'Not Found', message: 'Saved object not found' },
     };
-    clientArgs.services.caseService.getCases.mockResolvedValue(
-      { saved_objects: [soError] } as unknown as Awaited<ReturnType<typeof clientArgs.services.caseService.getCases>>
-    );
+    clientArgs.services.caseService.getCases.mockResolvedValue({
+      saved_objects: [soError],
+    } as unknown as Awaited<ReturnType<typeof clientArgs.services.caseService.getCases>>);
 
     // ensureAuthorized({ entities: [] }) passes vacuously — the explicit guard rejects
     // with 403 before calling ensureAuthorized, so the authorization mock is never called.
@@ -103,9 +103,9 @@ describe('ensureAuthorizedToUpdate', () => {
       type: 'cases',
       error: { statusCode: 404, error: 'Not Found', message: 'Saved object not found' },
     };
-    clientArgs.services.caseService.getCases.mockResolvedValue(
-      { saved_objects: [caseA, soError] } as unknown as Awaited<ReturnType<typeof clientArgs.services.caseService.getCases>>
-    );
+    clientArgs.services.caseService.getCases.mockResolvedValue({
+      saved_objects: [caseA, soError],
+    } as unknown as Awaited<ReturnType<typeof clientArgs.services.caseService.getCases>>);
 
     await expect(
       ensureAuthorizedToUpdate({ ids: [caseA.id, 'missing-case'] }, clientArgs)

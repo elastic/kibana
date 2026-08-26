@@ -6,8 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { createCaseError } from '../../common/error';
-import { isSOError } from '../../common/error';
+import { createCaseError, isSOError } from '../../common/error';
 import { UserActionActions, UserActionTypes } from '../../../common/types/domain';
 import type { WorkflowOrigin, WorkflowPayload } from '../../../common/types/domain';
 import type { CasesClientArgs } from '../types';

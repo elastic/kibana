@@ -304,7 +304,11 @@ describe('CasesWorkflowRunService', () => {
 
   it('rejects an observable that does not belong to the case', async () => {
     await expect(
-      run({ caseIds: ['case-1'], inputs: {}, origin: { type: 'cases.observable', id: 'observable-1' } })
+      run({
+        caseIds: ['case-1'],
+        inputs: {},
+        origin: { type: 'cases.observable', id: 'observable-1' },
+      })
     ).rejects.toThrow('Observable "observable-1" does not belong to case "case-1".');
     expect(management.runWorkflow).not.toHaveBeenCalled();
   });
