@@ -75,6 +75,25 @@ describe('createEvaluatorRegistry', () => {
       expect(registry.isBuiltIn('tone')).toBe(false);
     });
 
+    it('declares compare polarity so ingested scores do not fall back to the name heuristic', async () => {
+      const { scoped } = createRegistry();
+      const listed = await scoped.list();
+      const directionByName = Object.fromEntries(
+        listed.map(({ name, direction }) => [name, direction])
+      );
+
+      expect(directionByName).toEqual(
+        expect.objectContaining({
+          correctness: 'maximize',
+          groundedness: 'maximize',
+          latency: 'minimize',
+          input_tokens: 'minimize',
+          output_tokens: 'minimize',
+          tool_calls: 'neutral',
+        })
+      );
+    });
+
     it('resolves without reaching the store', async () => {
       const { scoped, definitionClient } = createRegistry();
 
