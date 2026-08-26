@@ -132,8 +132,7 @@ export const getPackagePolicyCreateCallback = (
   cloud: CloudSetup,
   productFeatures: ProductFeaturesService,
   telemetryConfigProvider: TelemetryConfigProvider,
-  experimentalFeatures: ExperimentalFeatures,
-  endpointServices: EndpointAppContextService
+  experimentalFeatures: ExperimentalFeatures
 ): PostPackagePolicyCreateCallback => {
   return async (
     newPackagePolicy,

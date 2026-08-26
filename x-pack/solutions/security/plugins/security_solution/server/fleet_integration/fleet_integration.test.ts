@@ -200,8 +200,7 @@ describe('Fleet integrations', () => {
         cloudService,
         productFeaturesService,
         telemetryConfigProviderMock,
-        experimentalFeatures,
-        endpointServicesMock
+        experimentalFeatures
       );
 
       return callback(
