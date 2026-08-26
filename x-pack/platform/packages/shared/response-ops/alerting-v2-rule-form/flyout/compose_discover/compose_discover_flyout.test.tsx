@@ -13,9 +13,10 @@ import { ESQLVariableType } from '@kbn/esql-types';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { applicationServiceMock } from '@kbn/core/public/mocks';
+import { applicationServiceMock, coreMock } from '@kbn/core/public/mocks';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
@@ -248,6 +249,8 @@ const createMockServices = (): RuleFormServices => ({
   dataViews: dataViewPluginMocks.createStartContract(),
   notifications: notificationServiceMock.createStartContract(),
   application: applicationServiceMock.createStartContract(),
+  uiSettings: uiSettingsServiceMock.createStartContract(),
+  featureFlags: coreMock.createStart().featureFlags,
   lens: lensPluginMock.createStartContract(),
   uiActions: uiActionsPluginMock.createStartContract(),
 });

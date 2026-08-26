@@ -42,11 +42,16 @@ jest.mock('./query_details_flyout', () => ({
 jest.mock('./pack_results_header', () => ({
   PackResultsHeader: () => null,
 }));
+// Capturing spies rather than `() => null`: the date window these two build is
+// derived entirely from the props this table hands them, so withholding a prop
+// here is invisible to any assertion made further down the tree.
+const mockPackViewInLensAction = jest.fn((_props: Record<string, unknown>) => null);
+const mockPackViewInDiscoverAction = jest.fn((_props: Record<string, unknown>) => null);
 jest.mock('../../lens/pack_view_in_lens', () => ({
-  PackViewInLensAction: () => null,
+  PackViewInLensAction: (props: Record<string, unknown>) => mockPackViewInLensAction(props),
 }));
 jest.mock('../../discover/pack_view_in_discover', () => ({
-  PackViewInDiscoverAction: () => null,
+  PackViewInDiscoverAction: (props: Record<string, unknown>) => mockPackViewInDiscoverAction(props),
 }));
 jest.mock('../../cases/add_to_cases', () => ({
   AddToCaseWrapper: ({ children }: { children: React.ReactNode }) => <>{children}</>,
@@ -142,5 +147,60 @@ describe('PackQueriesStatusTable — export filters store', () => {
     });
     expect(screen.queryByTestId('mock-result-tabs')).not.toBeInTheDocument();
     expect(store.getFilters('action-query-1')).toBeUndefined();
+  });
+});
+
+describe('PackQueriesStatusTable — view in Discover/Lens bounds', () => {
+  const startDate = '2026-08-10T09:00:00.000Z';
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
+  });
+
+  // Half of https://github.com/elastic/sdh-security-team/issues/1779 was the
+  // caller: the action's `@timestamp` was withheld from these components unless
+  // the row belonged to a schedule, which left the live-query window with no
+  // anchor to span from.
+  it.each([
+    ['Discover', () => mockPackViewInDiscoverAction],
+    ['Lens', () => mockPackViewInLensAction],
+  ])('forwards the action timestamp to %s for a live query row', (_name, getMock) => {
+    renderWithContext(
+      <PackQueriesStatusTable
+        actionId="parent-action-id"
+        agentIds={['agent-1']}
+        data={twoItemData}
+        startDate={startDate}
+      />
+    );
+
+    expect(getMock()).toHaveBeenCalled();
+    expect(getMock().mock.calls[0][0]).toEqual(
+      expect.objectContaining({
+        scheduleId: undefined,
+        timestamp: startDate,
+      })
+    );
+  });
+
+  it('forwards the execution window to Discover for a scheduled row', () => {
+    renderWithContext(
+      <PackQueriesStatusTable
+        actionId="schedule-id"
+        data={twoItemData}
+        startDate={startDate}
+        scheduleId="schedule-id"
+        executionCount={7}
+      />
+    );
+
+    expect(mockPackViewInDiscoverAction.mock.calls[0][0]).toEqual(
+      expect.objectContaining({
+        scheduleId: 'schedule-id',
+        executionCount: 7,
+        timestamp: startDate,
+      })
+    );
   });
 });
