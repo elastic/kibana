@@ -7,14 +7,14 @@
 
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
-import { getIndexPatternFromESQLQuery, parseTimeFieldFromESQLQuery } from '@kbn/esql-utils';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { getEsqlDataSourceCarriers } from '@kbn/agent-builder-visualizations-server';
 import { isSection, type DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
+import type { ResolvedEsqlDataset } from '../../resolve_esql_dataset';
+import { resolveEsqlDataset } from '../../resolve_esql_dataset';
 import { getErrorMessage } from '../core';
 import type { DatasetTimeRange } from './select_time_range';
 
-const DEFAULT_TIME_FIELD = '@timestamp';
 /** Shared log prefix for the default-time-range step. */
 export const LOG_PREFIX = '[default-time-range]';
 
@@ -62,59 +62,13 @@ export const extractEsqlQueries = (panels: DashboardAttachmentData['panels']): s
   return [...queries];
 };
 
-interface ResolvedDataset {
-  index: string;
-  timeField: string;
-}
-
-const indexHasTimestamp = async (
-  esClient: IScopedClusterClient,
-  index: string,
-  projectRouting?: string
-): Promise<boolean> => {
-  const response = await esClient.asCurrentUser.fieldCaps({
-    index,
-    fields: DEFAULT_TIME_FIELD,
-    include_unmapped: false,
-    project_routing: projectRouting,
-  });
-  return Boolean(response.fields?.[DEFAULT_TIME_FIELD]);
-};
-
-/**
- * Resolve the time field used for the dashboard-level time range.
- *
- * Prefer the field referenced by `?_tstart` / `?_tend` in the ES|QL query. If the
- * query has no explicit time-bound field, fall back to `@timestamp` when the
- * index exposes it. Queries without a resolvable time field are treated as
- * time-independent and skipped.
- */
-const resolveDataset = async (
-  esClient: IScopedClusterClient,
-  query: string,
-  projectRouting?: string
-): Promise<ResolvedDataset | null> => {
-  const index = getIndexPatternFromESQLQuery(query);
-  if (!index) {
-    return null;
-  }
-  const queryTimeField = parseTimeFieldFromESQLQuery(query);
-  if (queryTimeField) {
-    return { index, timeField: queryTimeField };
-  }
-  if (await indexHasTimestamp(esClient, index, projectRouting)) {
-    return { index, timeField: DEFAULT_TIME_FIELD };
-  }
-  return null;
-};
-
 interface MinMaxValue {
   value?: number | null;
 }
 
 const queryMinMax = async (
   esClient: IScopedClusterClient,
-  { index, timeField }: ResolvedDataset,
+  { index, timeField }: ResolvedEsqlDataset,
   projectRouting?: string
 ): Promise<DatasetTimeRange | null> => {
   const { aggregations } = await esClient.asCurrentUser.search({
@@ -156,18 +110,18 @@ export const probeDatasetTimeRanges = async ({
 }: ProbeDatasetTimeRangesParams): Promise<DatasetTimeRange[]> => {
   const resolvedDatasets = await Promise.all(
     queries.map((query) =>
-      resolveDataset(esClient, query, projectRouting).catch((error) => {
+      resolveEsqlDataset(esClient, query, projectRouting).catch((error) => {
         logger.debug(
           `${LOG_PREFIX} could not resolve a time field; skipping that panel: ${getErrorMessage(
             error
           )}`
         );
-        return null;
+        return undefined;
       })
     )
   );
 
-  const resolvedDatasetsMap = new Map<string, ResolvedDataset>();
+  const resolvedDatasetsMap = new Map<string, ResolvedEsqlDataset>();
   for (const dataset of resolvedDatasets) {
     if (dataset) {
       resolvedDatasetsMap.set(`${dataset.index}::${dataset.timeField}`, dataset);
