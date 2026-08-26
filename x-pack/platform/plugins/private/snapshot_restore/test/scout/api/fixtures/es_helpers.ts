@@ -28,7 +28,7 @@ export const createFsRepository = (esClient: EsClient, name: string, location: s
   });
 
 export const deleteRepository = (esClient: EsClient, name: string) =>
-  esClient.snapshot.deleteRepository({ name }).catch(() => {});
+  esClient.snapshot.deleteRepository({ name });
 
 export const putSlmPolicy = (esClient: EsClient, policy: SeedSlmPolicy) =>
   esClient.slm.putLifecycle({
@@ -47,7 +47,7 @@ export const putSlmPolicy = (esClient: EsClient, policy: SeedSlmPolicy) =>
   });
 
 export const deleteSlmPolicy = (esClient: EsClient, policyName: string) =>
-  esClient.slm.deleteLifecycle({ policy_id: policyName }).catch(() => {});
+  esClient.slm.deleteLifecycle({ policy_id: policyName });
 
 /** Triggers an SLM policy run and returns the generated snapshot name. */
 export const executeSlmPolicy = async (esClient: EsClient, policyName: string): Promise<string> => {
@@ -62,7 +62,7 @@ export const createSnapshot = (esClient: EsClient, snapshot: string, repository:
   esClient.snapshot.create({ snapshot, repository, wait_for_completion: true });
 
 export const deleteAllSnapshotsInRepo = (esClient: EsClient, repository: string) =>
-  esClient.snapshot.delete({ repository, snapshot: '*' }).catch(() => {});
+  esClient.snapshot.delete({ repository, snapshot: '*' });
 
 /**
  * Waits for a specific snapshot to reach a terminal state. SLM runs are asynchronous, so this

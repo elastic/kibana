@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { randomUUID } from 'crypto';
+
 import { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import type { ApiClientFixture, RoleApiCredentials } from '@kbn/scout';
@@ -23,20 +25,32 @@ import {
   waitForSnapshotToFinish,
 } from '../fixtures/es_helpers';
 
-const REPO_NAME_1 = 'test_repo_1';
-const REPO_NAME_2 = 'test_another_repo_2';
-const REPO_PATH_1 = '/tmp/repo_1';
-const REPO_PATH_2 = '/tmp/repo_2';
+// Namespace all cluster-level resources per run so parallel/orphaned suites can't collide. Prefixes
+// keep the order the sort tests rely on: a_snapshot < another_snapshot < backup_snapshot <
+// xyz_another_snapshot; test_another_repo_2 < test_repo_1.
+const runId = randomUUID().slice(0, 8);
+const REPO_NAME_1 = `test_repo_1_${runId}`;
+const REPO_NAME_2 = `test_another_repo_2_${runId}`;
+// Per-run subdirs under the registered `path.repo` entries.
+const REPO_PATH_1 = `/tmp/repo_1/${runId}`;
+const REPO_PATH_2 = `/tmp/repo_2/${runId}`;
 // SLM policies to test policyName filter
-const POLICY_NAME_1 = 'test_policy_1';
-const POLICY_NAME_2 = 'test_another_policy_2';
-const POLICY_SNAPSHOT_NAME_1 = 'backup_snapshot';
-const POLICY_SNAPSHOT_NAME_2 = 'a_snapshot';
+const POLICY_NAME_1 = `test_policy_1_${runId}`;
+const POLICY_NAME_2 = `test_another_policy_2_${runId}`;
+const POLICY_SNAPSHOT_NAME_1 = `backup_snapshot_${runId}`;
+const POLICY_SNAPSHOT_NAME_2 = `a_snapshot_${runId}`;
 // snapshots created without SLM policies
 const BATCH_SIZE_1 = 3;
 const BATCH_SIZE_2 = 5;
-const BATCH_SNAPSHOT_NAME_1 = 'another_snapshot';
-const BATCH_SNAPSHOT_NAME_2 = 'xyz_another_snapshot';
+const BATCH_SNAPSHOT_NAME_1 = `another_snapshot_${runId}`;
+const BATCH_SNAPSHOT_NAME_2 = `xyz_another_snapshot_${runId}`;
+// Highest snapshot name, used by desc-sort assertions.
+const LAST_BATCH_2_SNAPSHOT_NAME = `${BATCH_SNAPSHOT_NAME_2}_${BATCH_SIZE_2 - 1}`;
+// Exact snapshot-name search target.
+const BATCH_1_SNAPSHOT_2_NAME = `${BATCH_SNAPSHOT_NAME_1}_2`;
+// Run-isolated substrings matching only repo 2 / policy 2, for the partial-match searches.
+const REPO_2_SEARCH_TOKEN = `another_repo_2_${runId}`;
+const POLICY_2_SEARCH_TOKEN = `another_policy_2_${runId}`;
 // total count consists of both batches' sizes + 2 snapshots created by 2 SLM policies (one each)
 const SNAPSHOT_COUNT = BATCH_SIZE_1 + BATCH_SIZE_2 + 2;
 // API defaults used in the UI
@@ -188,7 +202,7 @@ apiTest.describe('Snapshot and Restore - snapshots', { tag: ['@local-stateful-cl
      * snapshots name in desc order:
      * "xyz_another_snapshot...", "backup_snapshot...", "another_snapshot...", "a_snapshot..."
      */
-    expect(snapshots[0].snapshot).toBe('xyz_another_snapshot_4');
+    expect(snapshots[0].snapshot).toBe(LAST_BATCH_2_SNAPSHOT_NAME);
   });
 
   apiTest('sorting: sorts by repository name (asc)', async ({ apiClient }) => {
@@ -224,7 +238,7 @@ apiTest.describe('Snapshot and Restore - snapshots', { tag: ['@local-stateful-cl
       sortDirection: 'desc',
     });
     // the last snapshot that was created during this test setup
-    expect(snapshots[0].snapshot).toBe('xyz_another_snapshot_4');
+    expect(snapshots[0].snapshot).toBe(LAST_BATCH_2_SNAPSHOT_NAME);
   });
 
   // these properties are only tested as being accepted by the API
@@ -241,60 +255,60 @@ apiTest.describe('Snapshot and Restore - snapshots', { tag: ['@local-stateful-cl
 
   // search - snapshot name
   apiTest('search snapshot name: exact match', async ({ apiClient }) => {
-    // list snapshots with the name "another_snapshot_2"
+    // list snapshots with the exact name of the 3rd snapshot in the first batch
     const { snapshots } = await getSnapshots(apiClient, {
       searchField: 'snapshot',
-      searchValue: 'another_snapshot_2',
+      searchValue: BATCH_1_SNAPSHOT_2_NAME,
       searchMatch: 'must',
       searchOperator: 'exact',
     });
     expect(snapshots).toHaveLength(1);
-    expect(snapshots[0].snapshot).toBe('another_snapshot_2');
+    expect(snapshots[0].snapshot).toBe(BATCH_1_SNAPSHOT_2_NAME);
   });
 
   apiTest('search snapshot name: partial match', async ({ apiClient }) => {
-    // list snapshots with the name containing "another"
+    // Both batch prefixes contain BATCH_SNAPSHOT_NAME_1, so this matches both batches.
     const { snapshots } = await getSnapshots(apiClient, {
       searchField: 'snapshot',
-      searchValue: 'another',
+      searchValue: BATCH_SNAPSHOT_NAME_1,
       searchMatch: 'must',
       searchOperator: 'eq',
     });
-    // both batches created snapshots containing "another" in the name
+    // both batches created snapshots whose name contains the first batch prefix
     expect(snapshots).toHaveLength(BATCH_SIZE_1 + BATCH_SIZE_2);
     const snapshotNamesContainSearch = snapshots.every((snapshot) =>
-      snapshot.snapshot.includes('another')
+      snapshot.snapshot.includes(BATCH_SNAPSHOT_NAME_1)
     );
     expect(snapshotNamesContainSearch).toBe(true);
   });
 
   apiTest('search snapshot name: excluding search with exact match', async ({ apiClient }) => {
-    // list snapshots with the name not "another_snapshot_2"
+    // list snapshots with the name not equal to the 3rd snapshot in the first batch
     const { snapshots } = await getSnapshots(apiClient, {
       searchField: 'snapshot',
-      searchValue: 'another_snapshot_2',
+      searchValue: BATCH_1_SNAPSHOT_2_NAME,
       searchMatch: 'must_not',
       searchOperator: 'exact',
     });
     expect(snapshots).toHaveLength(SNAPSHOT_COUNT - 1);
     const snapshotIsExcluded = snapshots.every(
-      (snapshot) => snapshot.snapshot !== 'another_snapshot_2'
+      (snapshot) => snapshot.snapshot !== BATCH_1_SNAPSHOT_2_NAME
     );
     expect(snapshotIsExcluded).toBe(true);
   });
 
   apiTest('search snapshot name: excluding search with partial match', async ({ apiClient }) => {
-    // list snapshots with the name not starting with "another"
+    // list snapshots whose name does not contain the first batch prefix (excludes both batches)
     const { snapshots } = await getSnapshots(apiClient, {
       searchField: 'snapshot',
-      searchValue: 'another',
+      searchValue: BATCH_SNAPSHOT_NAME_1,
       searchMatch: 'must_not',
       searchOperator: 'eq',
     });
-    // both batches created snapshots with names containing "another"
+    // both batches created snapshots whose name contains the first batch prefix
     expect(snapshots).toHaveLength(SNAPSHOT_COUNT - BATCH_SIZE_1 - BATCH_SIZE_2);
     const snapshotsAreExcluded = snapshots.every(
-      (snapshot) => !snapshot.snapshot.includes('another')
+      (snapshot) => !snapshot.snapshot.includes(BATCH_SNAPSHOT_NAME_1)
     );
     expect(snapshotsAreExcluded).toBe(true);
   });
@@ -330,17 +344,17 @@ apiTest.describe('Snapshot and Restore - snapshots', { tag: ['@local-stateful-cl
   });
 
   apiTest('search repository name: partial match', async ({ apiClient }) => {
-    // list snapshots from repository with the name containing "another" (i.e. repo 2)
+    // list snapshots from the repository whose name contains the repo-2 token (i.e. repo 2)
     const { snapshots } = await getSnapshots(apiClient, {
       searchField: 'repository',
-      searchValue: 'another',
+      searchValue: REPO_2_SEARCH_TOKEN,
       searchMatch: 'must',
       searchOperator: 'eq',
     });
     // repo 2 only contains snapshots created by batch 2
     expect(snapshots).toHaveLength(BATCH_SIZE_2);
-    const repositoryNameMatches = snapshots.every((snapshot) =>
-      snapshot.repository.includes('another')
+    const repositoryNameMatches = snapshots.every(
+      (snapshot) => snapshot.repository === REPO_NAME_2
     );
     expect(repositoryNameMatches).toBe(true);
   });
@@ -396,18 +410,16 @@ apiTest.describe('Snapshot and Restore - snapshots', { tag: ['@local-stateful-cl
   });
 
   apiTest('search policy name: partial match', async ({ apiClient }) => {
-    // list snapshots created by the policy with the name containing "another"
+    // list snapshots created by the policy whose name contains the policy-2 token
     const { snapshots } = await getSnapshots(apiClient, {
       searchField: 'policyName',
-      searchValue: 'another',
+      searchValue: POLICY_2_SEARCH_TOKEN,
       searchMatch: 'must',
       searchOperator: 'eq',
     });
-    // 1 snapshot was created by the policy "test_another_policy_2"
+    // 1 snapshot was created by POLICY_NAME_2
     expect(snapshots).toHaveLength(1);
-    const policyNameMatches = snapshots.every((snapshot) =>
-      (snapshot.policyName ?? '').includes('another')
-    );
+    const policyNameMatches = snapshots.every((snapshot) => snapshot.policyName === POLICY_NAME_2);
     expect(policyNameMatches).toBe(true);
   });
 
@@ -429,18 +441,18 @@ apiTest.describe('Snapshot and Restore - snapshots', { tag: ['@local-stateful-cl
   });
 
   apiTest('search policy name: excluding search with partial match', async ({ apiClient }) => {
-    // list snapshots created by the policy with the name not containing "another"
+    // list snapshots created by the policy whose name does not contain the policy-2 token
     const { snapshots } = await getSnapshots(apiClient, {
       searchField: 'policyName',
-      searchValue: 'another',
+      searchValue: POLICY_2_SEARCH_TOKEN,
       searchMatch: 'must_not',
       searchOperator: 'eq',
     });
-    // only 1 snapshot was created by SLM policy containing "another" in the name
+    // only 1 snapshot was created by POLICY_NAME_2
     // search results should also contain snapshots without SLM policy
     expect(snapshots).toHaveLength(SNAPSHOT_COUNT - 1);
     const snapshotsExcluded = snapshots.every(
-      (snapshot) => !(snapshot.policyName ?? '').includes('another')
+      (snapshot) => (snapshot.policyName ?? '') !== POLICY_NAME_2
     );
     expect(snapshotsExcluded).toBe(true);
   });

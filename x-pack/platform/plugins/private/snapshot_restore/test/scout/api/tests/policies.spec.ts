@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { randomUUID } from 'crypto';
+
 import { apiTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import type { EsClient, RoleApiCredentials } from '@kbn/scout';
@@ -18,17 +20,19 @@ import {
   putSlmPolicy,
 } from '../fixtures/es_helpers';
 
-const LOCAL_REPO_NAME = 'test_repo';
-const LOCAL_REPO_LOCATION = '/tmp/repo';
+// Namespace all cluster-level resources per run so parallel/orphaned suites can't collide.
+const runId = randomUUID().slice(0, 8);
+const LOCAL_REPO_NAME = `test_repo_${runId}`;
+// Per-run subdir under the registered `path.repo` entry.
+const LOCAL_REPO_LOCATION = `/tmp/repo/${runId}`;
 // On Cloud the managed `found-snapshots` repository is always present, so SLM policies can
 // reference it without creating an `fs` repository (which Cloud forbids).
 const CLOUD_REPO_NAME = 'found-snapshots';
 
-const POLICY_NAMES = [
-  'test_create_policy',
-  'test_create_required_fields_policy',
-  'test_update_policy',
-];
+const CREATE_POLICY_NAME = `test_create_policy_${runId}`;
+const CREATE_REQUIRED_FIELDS_POLICY_NAME = `test_create_required_fields_policy_${runId}`;
+const UPDATE_POLICY_NAME = `test_update_policy_${runId}`;
+const UPDATE_SNAPSHOT_NAME = 'my_snapshot';
 
 // Runs on local and Cloud. Locally we register a file system (`fs`) repository; on Cloud that is
 // forbidden, so we reuse the always-present managed `found-snapshots` repository instead. These
@@ -37,6 +41,8 @@ const POLICY_NAMES = [
 apiTest.describe('Snapshot and Restore - SLM policies', { tag: tags.stateful.classic }, () => {
   let credentials: RoleApiCredentials;
   let repoName: string;
+  // Track created policies so teardown only deletes what exists.
+  const createdPolicyNames = new Set<string>();
 
   const headers = () => ({ ...COMMON_HEADERS, ...credentials.apiKeyHeader });
 
@@ -52,7 +58,8 @@ apiTest.describe('Snapshot and Restore - SLM policies', { tag: tags.stateful.cla
   });
 
   apiTest.afterEach(async ({ esClient }) => {
-    await Promise.all(POLICY_NAMES.map((name) => deleteSlmPolicy(esClient, name)));
+    await Promise.all([...createdPolicyNames].map((name) => deleteSlmPolicy(esClient, name)));
+    createdPolicyNames.clear();
   });
 
   apiTest.afterAll(async ({ esClient, config }) => {
@@ -61,21 +68,20 @@ apiTest.describe('Snapshot and Restore - SLM policies', { tag: tags.stateful.cla
     }
   });
 
-  const UPDATE_POLICY_NAME = 'test_update_policy';
-  const UPDATE_SNAPSHOT_NAME = 'my_snapshot';
-
   // Seed a policy directly via ES so the PUT request has something to update.
-  const seedUpdatePolicy = (esClient: EsClient) =>
-    putSlmPolicy(esClient, {
+  const seedUpdatePolicy = async (esClient: EsClient) => {
+    await putSlmPolicy(esClient, {
       policyName: UPDATE_POLICY_NAME,
       snapshotName: UPDATE_SNAPSHOT_NAME,
       schedule: '0 30 1 * * ?',
       repository: repoName,
       config: { indices: ['my_index'], ignoreUnavailable: true },
     });
+    createdPolicyNames.add(UPDATE_POLICY_NAME);
+  };
 
   apiTest('create: should create a SLM policy', async ({ apiClient, esClient }) => {
-    const policyName = 'test_create_policy';
+    const policyName = CREATE_POLICY_NAME;
 
     const response = await apiClient.post(`${API_BASE_PATH}/policies`, {
       headers: headers(),
@@ -105,6 +111,7 @@ apiTest.describe('Snapshot and Restore - SLM policies', { tag: tags.stateful.cla
 
     expect(response).toHaveStatusCode(200);
     expect(response.body).toStrictEqual({ acknowledged: true });
+    createdPolicyNames.add(policyName);
 
     const policyFromEs = await esClient.slm.getLifecycle({ policy_id: policyName, human: true });
     expect(policyFromEs[policyName].policy).toStrictEqual({
@@ -130,7 +137,7 @@ apiTest.describe('Snapshot and Restore - SLM policies', { tag: tags.stateful.cla
   apiTest(
     'create: should create a policy with only required fields',
     async ({ apiClient, esClient }) => {
-      const policyName = 'test_create_required_fields_policy';
+      const policyName = CREATE_REQUIRED_FIELDS_POLICY_NAME;
 
       const response = await apiClient.post(`${API_BASE_PATH}/policies`, {
         headers: headers(),
@@ -147,6 +154,7 @@ apiTest.describe('Snapshot and Restore - SLM policies', { tag: tags.stateful.cla
 
       expect(response).toHaveStatusCode(200);
       expect(response.body).toStrictEqual({ acknowledged: true });
+      createdPolicyNames.add(policyName);
 
       const policyFromEs = await esClient.slm.getLifecycle({
         policy_id: policyName,
