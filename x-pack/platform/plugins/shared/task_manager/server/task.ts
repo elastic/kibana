@@ -24,6 +24,11 @@ export enum TaskPriority {
   Normal = 50,
 }
 
+export enum TaskTypeGroup {
+  Alerting = 'alerting',
+  Actions = 'actions',
+}
+
 export enum TaskCost {
   Tiny = 1,
   Normal = 2,
@@ -256,6 +261,15 @@ export const taskDefinitionSchema = schema.object(
     ),
 
     paramsSchema: schema.maybe(schema.any()),
+
+    /**
+     * Used to group tasks for metrics calculated within task_manager.
+     * If value is defined, metrics will be included in the alerting/actions grouping metrics.
+     * If not set, metrics will only be calculated for the specific task type.
+     */
+    taskTypeGroup: schema.maybe(
+      schema.oneOf([schema.literal('alerting'), schema.literal('actions')])
+    ),
   },
   {
     validate({ timeout, priority, cost }) {
@@ -282,7 +296,10 @@ export const taskDefinitionSchema = schema.object(
  * Defines a task which can be scheduled and run by the Kibana
  * task manager.
  */
-export type TaskDefinition = Omit<TypeOf<typeof taskDefinitionSchema>, 'paramsSchema'> & {
+export type TaskDefinition = Omit<
+  TypeOf<typeof taskDefinitionSchema>,
+  'paramsSchema' | 'taskTypeGroup'
+> & {
   /**
    * Creates an object that has a run function which performs the task's work,
    * and an optional cancel function which cancels the task.
@@ -296,6 +313,7 @@ export type TaskDefinition = Omit<TypeOf<typeof taskDefinitionSchema>, 'paramsSc
     }
   >;
   paramsSchema?: ObjectType;
+  taskTypeGroup?: TaskTypeGroup;
 };
 
 export enum TaskStatus {
@@ -321,6 +339,13 @@ export interface TaskUserScope {
   uiamApiKeyId?: string;
   spaceId?: string;
   apiKeyCreatedByUser: boolean;
+  /**
+   * UIAM's verdict on whether `uiamApiKey` is an external (user-created Cloud) API key,
+   * captured from `AuthenticatedUser.api_key.internal === false` when the task was scheduled.
+   * External keys must not be presented to Elasticsearch with the UIAM shared secret, so task
+   * runs mark their fake request accordingly. Absent means internal-key treatment.
+   */
+  uiamApiKeyExternal?: boolean;
   userProfileId?: string;
   userName?: string;
 }

@@ -30,6 +30,7 @@ import {
   RenderersService,
   ChatService,
   ConversationsService,
+  ConversationTemplatesService,
   DocLinksService,
   NavigationService,
   ToolsService,
@@ -38,10 +39,12 @@ import {
   OAuthClientsService,
   PluginsService,
   EventsService,
+  SpaceSettingsService,
   type AgentBuilderInternalService,
 } from './services';
 import { createPublicEmbeddableChatAccess } from './services/access';
 import { createPublicAttachmentContract } from './services/attachments';
+import { createPublicConversationTemplatesContract } from './services/conversation_templates';
 import { createPublicRenderersContract } from './services/renderers';
 import { createPublicToolContract } from './services/tools';
 import { createPublicAgentsContract } from './services/agents';
@@ -91,6 +94,7 @@ export class AgentBuilderPlugin
     updateProps: (props: EmbeddableConversationProps) => void;
     resetBrowserApiTools: () => void;
     addAttachment: (attachment: AttachmentInput) => void;
+    removeAttachmentById: (attachmentId: string) => void;
   } | null = null;
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private isEarsEnabled = false;
@@ -160,12 +164,14 @@ export class AgentBuilderPlugin
     const eventsService = new EventsService();
     const chatService = new ChatService({ http, events: eventsService });
     const conversationsService = new ConversationsService({ http });
+    const conversationTemplatesService = new ConversationTemplatesService();
     const docLinksService = new DocLinksService(core.docLinks.links);
     const toolsService = new ToolsService({ http });
     const skillsService = new SkillsService({ http });
     const smlService = new SmlService({ http });
     const pluginsService = new PluginsService({ http });
     const oauthClientsService = new OAuthClientsService({ http });
+    const spaceSettingsService = new SpaceSettingsService({ http });
     const accessChecker = new AgentBuilderAccessChecker({ licensing, inference });
 
     if (!this.setupServices) {
@@ -227,6 +233,7 @@ export class AgentBuilderPlugin
       renderersService,
       chatService,
       conversationsService,
+      conversationTemplatesService,
       docLinksService,
       navigationService,
       toolsService,
@@ -234,6 +241,7 @@ export class AgentBuilderPlugin
       smlService,
       pluginsService,
       oauthClientsService,
+      spaceSettingsService,
       startDependencies,
       usageCollection,
       accessChecker,
@@ -310,6 +318,9 @@ export class AgentBuilderPlugin
     const agentBuilderService: AgentBuilderPluginStart = {
       agents: createPublicAgentsContract({ agentService }),
       attachments: createPublicAttachmentContract({ attachmentsService }),
+      conversationTemplates: createPublicConversationTemplatesContract({
+        conversationTemplatesService,
+      }),
       renderers: createPublicRenderersContract({ renderersService }),
       tools: createPublicToolContract({ toolsService }),
       events: createPublicEventsContract({ eventsService }),
@@ -320,6 +331,11 @@ export class AgentBuilderPlugin
       addAttachment: (attachment: AttachmentInput) => {
         if (this.sidebarCallbacks) {
           this.sidebarCallbacks.addAttachment(attachment);
+        }
+      },
+      removeAttachment: (attachmentId: string) => {
+        if (this.sidebarCallbacks) {
+          this.sidebarCallbacks.removeAttachmentById(attachmentId);
         }
       },
       setChatConfig: (config: EmbeddableConversationProps) => {
