@@ -10,7 +10,11 @@ import type { ResolvedResourceWithSampling } from '../utils/resources';
 import { formatResourceWithSampledValues } from '../utils/resources';
 import type { Action } from './actions';
 import { formatAction, isRequestDocumentationAction } from './actions';
-import { getEsqlInstructions } from './prompts/instructions_template';
+import {
+  getEsqlInstructions,
+  getNamedParamsInstructions,
+  getRowLimitOverride,
+} from './prompts/instructions_template';
 import type { EsqlLoadedDocumentation } from './documentation';
 import { EsqlDocEntry } from './documentation';
 
@@ -93,15 +97,7 @@ ${getDocumentationSection({
 
 ## Instructions
 
-${getEsqlInstructions({ defaultLimit: rowLimit, disableNamedParams })}
-
-${
-  additionalInstructions
-    ? `<user-instructions>\n${additionalInstructions}\n</user-instructions>
-
-*Note: When conflicting, user instructions should take precedence over the default instructions.*`
-    : ''
-}
+${getEsqlInstructions()}
 
 Take your time and think step by step about the natural language query and how to convert it into ES|QL.
 
@@ -125,9 +121,21 @@ ${additionalContext ? `<additional-context>\n${additionalContext}\n</additional-
 
 ${formatResourceWithSampledValues({ resource })}
 
+${disableNamedParams ? '' : getNamedParamsInstructions()}
+
+${getRowLimitOverride(rowLimit)}
+
+${
+  additionalInstructions
+    ? `<user-instructions>\n${additionalInstructions}\n</user-instructions>
+
+*Note: When conflicting, user instructions should take precedence over the default instructions.*`
+    : ''
+}
+
 Now, based on that information, please generate the ES|QL query.`,
     ],
-    ...previousActions.flatMap((a) => formatAction(a)),
+    ...previousActions.flatMap((a, i) => formatAction(a, { toolCallId: `action_${i}` })),
   ];
 };
 

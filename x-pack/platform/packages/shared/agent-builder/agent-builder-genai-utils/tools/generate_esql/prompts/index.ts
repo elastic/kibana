@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export { getEsqlInstructions, type InstructionsTemplateParams } from './instructions_template';
+export {
+  getEsqlInstructions,
+  getNamedParamsInstructions,
+  getRowLimitOverride,
+  DEFAULT_LIMIT,
+} from './instructions_template';

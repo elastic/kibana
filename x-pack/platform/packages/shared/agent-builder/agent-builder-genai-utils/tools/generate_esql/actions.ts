@@ -77,17 +77,37 @@ export function isValidateQueryAction(action: Action): action is ValidateQueryAc
   return action.type === 'validate_query';
 }
 
+export interface FormatActionOptions {
+  /**
+   * Tool call id to use for actions that render as a tool call / tool result pair.
+   * Defaults to a random id via {@link generateFakeToolCallId} when omitted. Callers that
+   * rebuild the same prompt repeatedly (e.g. across generate-step retries) should pass a
+   * deterministic, request-scoped id (e.g. index-derived) so already-sent bytes don't shift
+   * from one rebuild to the next.
+   */
+  toolCallId?: string;
+  /**
+   * Defaults to `true`, matching the historical positional-parameter default. Must keep
+   * defaulting to `true` when omitted from the options object — flipping this silently
+   * changes `autocorrect_query`/`execute_query`/`validate_query` failure messages from
+   * conversational AI/user pairs to tool-call format, which is a functional change outside
+   * the scope of the id-determinism fix that introduced this options object.
+   */
+  withoutToolCalls?: boolean;
+}
+
 /**
  * Format an action into a couple of [ai, user] messages to be used in prompts.
  */
-export const formatAction = (action: Action, withoutToolCalls = true): BaseMessageLike[] => {
+export const formatAction = (action: Action, options?: FormatActionOptions): BaseMessageLike[] => {
   // Important notice: Claude is *very* stupid with tool configuration
   // and will be fine calling tools that are not available, just based on previous tool calls
   // which means we can't represent the action history as a tool call list
   // and are forced to similar a conversation instead.
   // yes, this is sub-optimal, but this is how Claude behaves.
 
-  const toolCallId = generateFakeToolCallId();
+  const { toolCallId: providedToolCallId, withoutToolCalls = true } = options ?? {};
+  const toolCallId = providedToolCallId ?? generateFakeToolCallId();
   switch (action.type) {
     case 'generate_query':
       return [

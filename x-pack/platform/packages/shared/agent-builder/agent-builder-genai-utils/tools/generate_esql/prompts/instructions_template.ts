@@ -5,28 +5,25 @@
  * 2.0.
  */
 
-export interface InstructionsTemplateParams {
-  /**
-   * The default LIMIT to use when no specific limit is requested by the user.
-   */
-  defaultLimit?: number;
-  /**
-   * If true, omits the instruction to use named parameters (?_tstart, ?_tend)
-   * for time range filtering.
-   */
-  disableNamedParams?: boolean;
-}
-
-const DEFAULT_LIMIT = 100;
+/**
+ * Default row limit applied by {@link getEsqlInstructions} when the caller doesn't
+ * request a specific one. Also the threshold {@link getRowLimitOverride} compares
+ * against to decide whether an override needs calling out at all.
+ */
+export const DEFAULT_LIMIT = 100;
 
 /**
- * Generates ES|QL query generation instructions with configurable limit values.
+ * Generates the static ES|QL query generation instructions.
  * This is a copy of the instructions from the inference plugin, modified to support
  * custom row limits for Agent Builder's index search tool.
+ *
+ * This string is constant — it takes no parameters — so it can sit in the (cached)
+ * system prompt unconditionally. Caller-specific overrides (a non-default row limit,
+ * disabling named-parameter guidance) are returned by {@link getRowLimitOverride} and
+ * {@link getNamedParamsInstructions} instead, for the caller to place in the user
+ * message where they don't break the shared system-prompt prefix.
  */
-export const getEsqlInstructions = (params: InstructionsTemplateParams = {}): string => {
-  const { defaultLimit = DEFAULT_LIMIT, disableNamedParams = false } = params;
-
+export const getEsqlInstructions = (): string => {
   return `<instructions>
 
     ## Follow the syntax
@@ -51,7 +48,7 @@ export const getEsqlInstructions = (params: InstructionsTemplateParams = {}): st
 
     1. **Applying Limits:**
         * **User-Specified:** If the user provides a number ("top 10", "get 50"), use it for the \`LIMIT\`.
-        * **Default:** If no number is given, default to \`LIMIT ${defaultLimit}\` for both raw events and \`GROUP BY\` results.
+        * **Default:** If no number is given, default to \`LIMIT ${DEFAULT_LIMIT}\` for both raw events and \`GROUP BY\` results.
 
     2. **Time-series aggregations:** Queries that bucket by time (e.g. \`STATS ... BY BUCKET(@timestamp, ...)\`)
        should **not** have a \`LIMIT\` by default — a trailing \`LIMIT\` truncates the series and
@@ -94,27 +91,43 @@ export const getEsqlInstructions = (params: InstructionsTemplateParams = {}): st
     | SORT count DESC
     \`\`\`
 
-    ${
-      disableNamedParams
-        ? ''
-        : `## Using named parameters for start and end time periods
-
-    Unless specified otherwise, you should always use named parameters (?_tstart and ?_tend) for start and end time in WHERE conditions, BUCKET ranges or TRANGE ,
-    examples:
-    - "FROM myindex | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend"
-    - "FROM myindex | ... BUCKET(@timestamp, 50, ?_tstart, ?_tend)"
-    - "TS mytsds | WHERE TRANGE(?_tstart, ?_tend)"
-
-    NEVER hardcode time ranges into the query itself (absolute or using now() syntax)
-
-    It is also preferred to use  "... BUCKET(@timestamp, 50, ?_tstart, ?_tend)" instead of " ... WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend ... BUCKET(@timestamp, 50)"
-
-    `
-    }## Do not invent things to please the user
+    ## Do not invent things to please the user
 
     If what the user is asking for is not technically achievable with ES|QL's capabilities, just inform
     the user. DO NOT invent capabilities not described in the documentation just to provide
     a positive answer to the user.
 </instructions>
 `;
+};
+
+/**
+ * Guidance on using named parameters (\`?_tstart\`, \`?_tend\`) for time-range filtering.
+ * Extracted verbatim from the instructions above so callers can append it to the user
+ * message only when needed (`!disableNamedParams`), keeping the system prompt static.
+ */
+export const getNamedParamsInstructions = (): string => {
+  return `## Using named parameters for start and end time periods
+
+Unless specified otherwise, you should always use named parameters (?_tstart and ?_tend) for start and end time in WHERE conditions, BUCKET ranges or TRANGE ,
+examples:
+- "FROM myindex | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend"
+- "FROM myindex | ... BUCKET(@timestamp, 50, ?_tstart, ?_tend)"
+- "TS mytsds | WHERE TRANGE(?_tstart, ?_tend)"
+
+NEVER hardcode time ranges into the query itself (absolute or using now() syntax)
+
+It is also preferred to use  "... BUCKET(@timestamp, 50, ?_tstart, ?_tend)" instead of " ... WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend ... BUCKET(@timestamp, 50)"
+`;
+};
+
+/**
+ * Returns an instruction line overriding the default row limit cited in
+ * {@link getEsqlInstructions}, or `''` when `rowLimit` is unset or equal to the default
+ * (in which case the static instructions already say the right thing).
+ */
+export const getRowLimitOverride = (rowLimit?: number): string => {
+  if (rowLimit === undefined || rowLimit === DEFAULT_LIMIT) {
+    return '';
+  }
+  return `Note: for this request, use \`LIMIT ${rowLimit}\` instead of the default \`LIMIT ${DEFAULT_LIMIT}\` mentioned in the instructions above, whenever a default (non-user-specified) limit applies.`;
 };
