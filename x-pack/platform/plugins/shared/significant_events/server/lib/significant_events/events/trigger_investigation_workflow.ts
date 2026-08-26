@@ -31,8 +31,18 @@ export const triggerInvestigationWorkflow = async ({
     return undefined;
   }
 
-  const { title, summary, stream_names, event_uuid, event_id, status, severity, confidence } =
-    event;
+  const {
+    title,
+    summary,
+    stream_names,
+    event_uuid,
+    event_id,
+    status,
+    severity,
+    confidence,
+    causal_features,
+    blast_radius,
+  } = event;
 
   const client = nightshiftInvestigations.getInvestigationsClient(request);
 
@@ -50,6 +60,8 @@ export const triggerInvestigationWorkflow = async ({
         severity,
         summary,
         confidence,
+        causal_features: causal_features ?? [],
+        blast_radius: blast_radius ?? [],
       },
     });
     investigationId = response.investigation_id;
