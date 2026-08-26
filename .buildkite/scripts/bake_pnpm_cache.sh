@@ -8,7 +8,6 @@ set -euo pipefail
 # It produces three directories under $KBN_PNPM_CACHE_DIR (default ~/.kibana):
 #   pnpm-store/    the content-addressable pnpm store
 #   node_modules/  a fully installed, hoisted node_modules linked to that store
-#   Cypress/       the cypress browser binary (normally in ~/.cache/Cypress)
 #
 # .buildkite/scripts/bootstrap.sh consumes them (see the "Using ~/.kibana/... as a
 # starting point" block). node_modules and the store are moved as a pair so the
@@ -66,16 +65,6 @@ else
   echo "node_modules not found @ $KIBANA_DIR/node_modules"
 fi
 
-# Stage the cypress binary the postinstall above downloaded, so agents restore it
-# instead of re-downloading (and re-running cypress's flaky cold-install postinstall).
-CYPRESS_CACHE_SRC="${CYPRESS_CACHE_FOLDER:-$HOME/.cache/Cypress}"
-if [[ -d "$CYPRESS_CACHE_SRC" ]]; then
-  rm -rf "$PNPM_CACHE_DIR/Cypress"
-  mv "$CYPRESS_CACHE_SRC" "$PNPM_CACHE_DIR/Cypress"
-else
-  echo "pnpm store not found @ $KIBANA_DIR/.pnpm-store"
-fi
-
 if [[ -d "$KIBANA_DIR/.pnpm-store" ]]; then
   rm -rf "$PNPM_CACHE_DIR/.pnpm-store"
   mv "$KIBANA_DIR/.pnpm-store" "$PNPM_CACHE_DIR/.pnpm-store"
@@ -84,9 +73,8 @@ else
 fi
 
 echo "--- pnpm cache ready"
-du -sh "$PNPM_CACHE_DIR/pnpm-store" "$PNPM_CACHE_DIR/node_modules" "$PNPM_CACHE_DIR/Cypress" "$ES_CACHE_DIR" 2>/dev/null || true
+du -sh "$PNPM_CACHE_DIR/pnpm-store" "$PNPM_CACHE_DIR/node_modules" "$ES_CACHE_DIR" 2>/dev/null || true
 echo "Bake these into the agent image so they land at:"
 echo "  $PNPM_CACHE_DIR/.pnpm-store"
 echo "  $PNPM_CACHE_DIR/node_modules"
-echo "  $PNPM_CACHE_DIR/Cypress"
 echo "  $ES_CACHE_DIR"
