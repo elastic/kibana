@@ -290,6 +290,7 @@ enabled:
   - x-pack/platform/test/security_api_integration/oidc_multiple_realms.config.ts
   - x-pack/platform/test/security_api_integration/pki.config.ts
   - x-pack/platform/test/security_api_integration/pki.http2.config.ts
+  - x-pack/platform/test/security_api_integration/pki.http2.stress.config.ts
   - x-pack/platform/test/security_api_integration/saml.config.ts
   - x-pack/platform/test/security_api_integration/saml.http2.config.ts
   - x-pack/platform/test/security_api_integration/saml_cloud.config.ts
