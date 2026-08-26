@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   EuiCallOut,
   EuiFlexGroup,
@@ -16,6 +16,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { AggregateQuery, TimeRange } from '@kbn/es-query';
 import {
   UnifiedDataTable,
@@ -58,7 +59,9 @@ const DEFAULT_COLUMNS = [
 ];
 const SAMPLE_SIZE = 100;
 const GRID_HEIGHT = 500;
-const NO_SORT: SortOrder[] = [];
+const DEFAULT_SORT: SortOrder[] = [['@timestamp', 'desc']];
+const COLUMNS_STORAGE_KEY = 'securitySolution.alertsV2.episodesTableColumns';
+const SORT_STORAGE_KEY = 'securitySolution.alertsV2.episodesTableSort';
 
 /** Human-readable column headers, mirroring the v1 alerts table labels. */
 const COLUMN_DISPLAY_NAMES: Record<string, string> = {
@@ -115,13 +118,26 @@ export interface EpisodesTableSectionProps {
  */
 export const EpisodesTableSection = ({ query, timeRange }: EpisodesTableSectionProps) => {
   const { services } = useKibana();
-  const { rows, columnsMeta, dataView, isLoading, error, inspect } = useEpisodesTableData(
-    query,
-    timeRange
+
+  const [storedColumns, setStoredColumns] = useLocalStorage<string[]>(
+    COLUMNS_STORAGE_KEY,
+    DEFAULT_COLUMNS
+  );
+  const columns = storedColumns ?? DEFAULT_COLUMNS;
+  const onSetColumns = useCallback(
+    (nextColumns: string[]) => setStoredColumns(nextColumns),
+    [setStoredColumns]
   );
 
-  const [columns, setColumns] = useState<string[]>(DEFAULT_COLUMNS);
-  const onSetColumns = useCallback((nextColumns: string[]) => setColumns(nextColumns), []);
+  const [storedSort, setStoredSort] = useLocalStorage<SortOrder[]>(SORT_STORAGE_KEY, DEFAULT_SORT);
+  const sort = storedSort ?? DEFAULT_SORT;
+  const onSort = useCallback((nextSort: SortOrder[]) => setStoredSort(nextSort), [setStoredSort]);
+
+  const { rows, columnsMeta, dataView, isLoading, error, inspect } = useEpisodesTableData(
+    query,
+    timeRange,
+    sort
+  );
 
   const tableServices = useMemo(
     () => ({
@@ -200,11 +216,12 @@ export const EpisodesTableSection = ({ query, timeRange }: EpisodesTableSectionP
             rows={rows}
             loadingState={isLoading ? DataLoadingState.loading : DataLoadingState.loaded}
             onSetColumns={onSetColumns}
-            sort={NO_SORT}
+            sort={sort}
+            onSort={onSort}
             sampleSizeState={SAMPLE_SIZE}
             showTimeCol={false}
             isPlainRecord
-            isSortEnabled={false}
+            isSortEnabled
             isInMemorySortEnabled={false}
             controlColumnIds={[]}
             services={tableServices}

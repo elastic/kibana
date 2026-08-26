@@ -10,7 +10,7 @@ import type { AggregateQuery, TimeRange } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getESQLResults, getESQLAdHocDataview, formatESQLColumns } from '@kbn/esql-utils';
-import { getTextBasedColumnsMeta } from '@kbn/unified-data-table';
+import { getTextBasedColumnsMeta, type SortOrder } from '@kbn/unified-data-table';
 import { useKibana } from '../../../common/lib/kibana';
 import { composeEsqlQuery, TIME_RANGE_ESQL_FILTER } from '../compose_esql_query';
 import type { EsqlInspect } from '../kpis/esql_inspect_button';
@@ -47,17 +47,28 @@ export const ECS_DATA_COLUMNS = [
 
 const stripJsonQuotes = (value: string): string => value.replace(/^"|"$/g, '');
 
+/** Server-side sort: `SORT` runs after the EVAL, so any column (incl. extracted ones) is sortable. */
+const buildSortClause = (sort: SortOrder[]): string[] => {
+  if (!sort.length) {
+    return [];
+  }
+  const clause = sort
+    .map(([field, direction]) => `\`${field}\` ${String(direction).toUpperCase()}`)
+    .join(', ');
+  return [`SORT ${clause}`];
+};
+
 // The episodes list is the page's query (the `$.alert-episodes` view), time-scoped
 // and capped. Unlike the KPIs there's no aggregation — we want the episode rows,
 // plus the ECS columns pulled out of `data`.
-const buildEpisodesTableQuery = (baseEsql: string): string => {
+const buildEpisodesTableQuery = (baseEsql: string, sort: SortOrder[]): string => {
   const evalExpr = ECS_DATA_COLUMNS.map(
     (field) => `\`${field}\` = JSON_EXTRACT(data::keyword, "$['${field}']")`
   ).join(', ');
   return composeEsqlQuery(
     baseEsql,
     [TIME_RANGE_ESQL_FILTER],
-    [`EVAL ${evalExpr}`, `LIMIT ${PAGE_SIZE}`]
+    [`EVAL ${evalExpr}`, ...buildSortClause(sort), `LIMIT ${PAGE_SIZE}`]
   );
 };
 
@@ -78,7 +89,8 @@ const INITIAL_STATE: UseEpisodesTableDataResult = {
  */
 export const useEpisodesTableData = (
   query: AggregateQuery,
-  timeRange: TimeRange
+  timeRange: TimeRange,
+  sort: SortOrder[]
 ): UseEpisodesTableDataResult => {
   const {
     services: { data, dataViews, http },
@@ -88,7 +100,7 @@ export const useEpisodesTableData = (
   const abortRef = useRef<AbortController>();
 
   const run = useCallback(
-    async (baseEsql: string, range: TimeRange) => {
+    async (baseEsql: string, range: TimeRange, sortState: SortOrder[]) => {
       abortRef.current?.abort();
       const controller = new AbortController();
       abortRef.current = controller;
@@ -97,7 +109,7 @@ export const useEpisodesTableData = (
       try {
         const [{ response, params }, dataView] = await Promise.all([
           getESQLResults({
-            esqlQuery: buildEpisodesTableQuery(baseEsql),
+            esqlQuery: buildEpisodesTableQuery(baseEsql, sortState),
             search: data.search.search,
             signal: controller.signal,
             timeRange: range,
@@ -147,8 +159,8 @@ export const useEpisodesTableData = (
   );
 
   useEffect(() => {
-    run(query.esql, timeRange);
-  }, [run, query, timeRange]);
+    run(query.esql, timeRange, sort);
+  }, [run, query, timeRange, sort]);
 
   return state;
 };
