@@ -172,10 +172,10 @@ describe('rule template create-rule schema coupling', () => {
                 },
                 "breach": Object {
                   "additionalProperties": false,
-                  "description": "Breach detection configuration (required).",
+                  "description": "Breach detection configuration. Omit to treat every base row as a breach.",
                   "properties": Object {
                     "segment": Object {
-                      "description": "Appendable ES|QL segment for breach detection (required).",
+                      "description": "A clause appended to the end of the rule's ES|QL query. Required in breach blocks.",
                       "maxLength": 10000,
                       "minLength": 1,
                       "type": "string",
@@ -210,7 +210,6 @@ describe('rule template create-rule schema coupling', () => {
               "required": Array [
                 "format",
                 "base",
-                "breach",
               ],
               "type": "object",
             },

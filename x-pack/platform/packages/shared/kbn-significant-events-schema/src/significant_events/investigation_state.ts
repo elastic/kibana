@@ -224,10 +224,12 @@ export const investigationStateSchema = z.object({
   recommendations: z.array(investigationRecommendationSchema).max(MAX_RECOMMENDATIONS).optional(),
   /**
    * Actionable knowledge gaps discovered during the investigation. Replaces the free-text
-   * `gaps_found` string array; investigations persisted before this field existed are read back
-   * without any blind spots, since this schema strips the keys it no longer declares. That loss is
-   * accepted rather than migrated — the gaps are also folded into the memory `_gaps/overview` page
-   * by the workflow's `merge_investigation_gaps` step, so they survive outside this payload.
+   * `gaps_found` string array. Investigations persisted before this field existed still carry
+   * `gaps_found`, which this schema strips as a key it no longer declares — so recovering them
+   * means rewriting the raw payload before it reaches this schema, as
+   * `normalizeLegacyInvestigationState` in `@kbn/investigation-output` does. Those gaps are also
+   * folded into the memory `_gaps/overview` page by the workflow's `merge_investigation_gaps`
+   * step, so they survive outside this payload either way.
    */
   blind_spots: z.array(investigationBlindSpotSchema).max(MAX_BLIND_SPOTS).optional(),
   /**
