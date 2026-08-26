@@ -17,7 +17,9 @@ import {
   EuiSpacer,
   EuiStepsHorizontal,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { useForm } from 'react-hook-form';
 import { useHistory, useLocation } from 'react-router-dom';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -107,8 +109,18 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
   const {
     services: { dataSourcesClient },
   } = useKibana<DataFederationKibanaServices>();
+  const { euiTheme } = useEuiTheme();
   const history = useHistory();
   const location = useLocation();
+  const footerCss = useMemo(
+    () => css`
+      position: sticky;
+      bottom: 0;
+      z-index: 1;
+      background-color: ${euiTheme.colors.backgroundBasePlain};
+    `,
+    [euiTheme.colors.backgroundBasePlain]
+  );
   const draftStorageKey = useMemo(
     () => getWizardFormDraftStorageKey(isEditMode, initialDataSet?.name),
     [initialDataSet?.name, isEditMode]
@@ -150,7 +162,9 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
 
   const syncRegionFromResource = useCallback(
     (resource: string, dataSourceName: string) => {
-      const selectedDataSource = dataSources.find((dataSource) => dataSource.name === dataSourceName);
+      const selectedDataSource = dataSources.find(
+        (dataSource) => dataSource.name === dataSourceName
+      );
       if (selectedDataSource && selectedDataSource.type !== 's3') {
         return;
       }
@@ -621,7 +635,10 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
       </div>
       {isFlow3 ? (
         <div hidden={currentStep !== PREVIEW_RESULTS_STEP}>
-          <PreviewResultsStep values={wizardFormValues} />
+          <PreviewResultsStep
+            values={wizardFormValues}
+            isActive={currentStep === PREVIEW_RESULTS_STEP}
+          />
         </div>
       ) : null}
       <div hidden={currentStep !== reviewStep}>
@@ -658,59 +675,61 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
           </>
         ) : null}
 
-        <EuiSpacer size="xl" />
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty data-test-subj="datasetWizardCancel" onClick={handleCancel}>
-              {datasetWizardStrings.cancelButton()}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="s" responsive={false}>
-              {showBackButton ? (
+        <div css={footerCss} data-test-subj="datasetWizardFooter">
+          <EuiSpacer size="xl" />
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty data-test-subj="datasetWizardCancel" onClick={handleCancel}>
+                {datasetWizardStrings.cancelButton()}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize="s" responsive={false}>
+                {showBackButton ? (
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty data-test-subj="datasetWizardBack" onClick={handleBack}>
+                      {datasetWizardStrings.backButton()}
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                ) : null}
+                {showTestConfiguration ? (
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      data-test-subj="datasetWizardTestConfiguration"
+                      isLoading={isTestConfigLoading}
+                      onClick={handleTestConfiguration}
+                    >
+                      {datasetWizardStrings.testConfigurationButton()}
+                    </EuiButton>
+                  </EuiFlexItem>
+                ) : null}
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty data-test-subj="datasetWizardBack" onClick={handleBack}>
-                    {datasetWizardStrings.backButton()}
-                  </EuiButtonEmpty>
+                  {isLastStep ? (
+                    <EuiButton
+                      fill
+                      data-test-subj="datasetWizardSubmit"
+                      isLoading={isSaving}
+                      disabled={isSaving}
+                      onClick={() => void handleSubmit()}
+                    >
+                      {isEditMode
+                        ? datasetWizardStrings.saveButton()
+                        : datasetWizardStrings.addButton()}
+                    </EuiButton>
+                  ) : (
+                    <EuiButton
+                      fill
+                      data-test-subj="datasetWizardNext"
+                      onClick={() => void handleNext()}
+                    >
+                      {datasetWizardStrings.nextButton()}
+                    </EuiButton>
+                  )}
                 </EuiFlexItem>
-              ) : null}
-              {showTestConfiguration ? (
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    data-test-subj="datasetWizardTestConfiguration"
-                    isLoading={isTestConfigLoading}
-                    onClick={handleTestConfiguration}
-                  >
-                    {datasetWizardStrings.testConfigurationButton()}
-                  </EuiButton>
-                </EuiFlexItem>
-              ) : null}
-              <EuiFlexItem grow={false}>
-                {isLastStep ? (
-                  <EuiButton
-                    fill
-                    data-test-subj="datasetWizardSubmit"
-                    isLoading={isSaving}
-                    disabled={isSaving}
-                    onClick={() => void handleSubmit()}
-                  >
-                    {isEditMode
-                      ? datasetWizardStrings.saveButton()
-                      : datasetWizardStrings.addButton()}
-                  </EuiButton>
-                ) : (
-                  <EuiButton
-                    fill
-                    data-test-subj="datasetWizardNext"
-                    onClick={() => void handleNext()}
-                  >
-                    {datasetWizardStrings.nextButton()}
-                  </EuiButton>
-                )}
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </div>
       </EuiPageSection>
       {isCreateDataSourceFlyoutOpen ? (
         <CreateDataSourceFlyout

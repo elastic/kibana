@@ -7,12 +7,17 @@
 
 import type { FunctionComponent } from 'react';
 import React from 'react';
+import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
 
 import type { CreateDatasetFormValues } from './create_dataset_flyout_form_state';
 import { DatasetSettingsField } from './dataset_settings_field';
 import type { DatasetSettingsFieldId } from './dataset_settings_visibility';
+
+export const datasetSettingsFieldsWidthCss = css`
+  width: 80%;
+`;
 
 const chunkFields = <T,>(items: readonly T[], size: number): T[][] => {
   const chunks: T[][] = [];
@@ -44,7 +49,7 @@ export const DatasetSettingsFieldsLayout: FunctionComponent<DatasetSettingsField
   const rows = chunkFields(fields, columns);
 
   return (
-    <>
+    <div css={datasetSettingsFieldsWidthCss}>
       {rows.map((rowFields, rowIndex) => (
         <React.Fragment key={rowFields.join('-') || `empty-row-${rowIndex}`}>
           {rowIndex > 0 ? <EuiSpacer size="l" /> : null}
@@ -67,6 +72,6 @@ export const DatasetSettingsFieldsLayout: FunctionComponent<DatasetSettingsField
           </EuiFlexGroup>
         </React.Fragment>
       ))}
-    </>
+    </div>
   );
 };

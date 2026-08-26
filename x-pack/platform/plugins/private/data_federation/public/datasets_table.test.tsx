@@ -151,6 +151,23 @@ describe('DatasetsTable', () => {
     expect(onOpenInDiscover).toHaveBeenCalledWith(expect.objectContaining({ name: 'set1' }));
   });
 
+  it('renders an enabled toggle to the left of actions and updates it when clicked', () => {
+    const { getByRole, getByTestId } = renderTable({
+      filteredItems: [createDataSetRow({ name: 'set1', dataSource: 'ds1' })],
+    });
+
+    expect(getByRole('columnheader', { name: 'Enabled' })).toBeInTheDocument();
+
+    const enabledSwitch = getByTestId('dataSetsSetsEnabledSwitch-set1');
+    expect(enabledSwitch).toBeChecked();
+
+    fireEvent.click(enabledSwitch);
+    expect(enabledSwitch).not.toBeChecked();
+
+    fireEvent.click(enabledSwitch);
+    expect(enabledSwitch).toBeChecked();
+  });
+
   it('disables Open in Discover when the locator is unavailable', () => {
     const onOpenInDiscover = jest.fn();
 

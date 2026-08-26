@@ -120,6 +120,14 @@ export const mainTranslations = {
       description: i18n.translate('xpack.dataFederation.setsTable.columnDescription', {
         defaultMessage: 'Description',
       }),
+      enabled: i18n.translate('xpack.dataFederation.setsTable.columnEnabled', {
+        defaultMessage: 'Enabled',
+      }),
+      enabledToggleAriaLabel: (name: string) =>
+        i18n.translate('xpack.dataFederation.setsTable.enabledToggleAriaLabel', {
+          defaultMessage: 'Enabled {name}',
+          values: { name },
+        }),
       actions: i18n.translate('xpack.dataFederation.setsTable.columnActions', {
         defaultMessage: 'Actions',
       }),

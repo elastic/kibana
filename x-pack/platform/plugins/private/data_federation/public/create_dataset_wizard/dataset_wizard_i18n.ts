@@ -284,26 +284,6 @@ export const datasetWizardStrings = {
       defaultMessage: 'Custom dataset settings JSON editor',
     }),
 
-  settingsCustomFieldsLabel: () =>
-    i18n.translate('xpack.dataFederation.datasetWizard.settingsCustomFieldsLabel', {
-      defaultMessage: 'Custom settings',
-    }),
-
-  advancedSettingsJsonViewLabel: () =>
-    i18n.translate('xpack.dataFederation.datasetWizard.advancedSettingsJsonViewLabel', {
-      defaultMessage: 'JSON view',
-    }),
-
-  advancedSettingsListViewLabel: () =>
-    i18n.translate('xpack.dataFederation.datasetWizard.advancedSettingsListViewLabel', {
-      defaultMessage: 'Form view',
-    }),
-
-  advancedSettingsViewToggleLegend: () =>
-    i18n.translate('xpack.dataFederation.datasetWizard.advancedSettingsViewToggleLegend', {
-      defaultMessage: 'Advanced settings view',
-    }),
-
   settingsCustomJsonInvalidSyntax: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.settingsCustomJsonInvalidSyntax', {
       defaultMessage: 'Invalid JSON format.',
@@ -721,16 +701,6 @@ export const datasetWizardStrings = {
   previewResultsButton: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.previewResultsButton', {
       defaultMessage: 'Preview results',
-    }),
-
-  previewResultsRefreshButtonLabel: () =>
-    i18n.translate('xpack.dataFederation.datasetWizard.previewResultsRefreshButtonLabel', {
-      defaultMessage: 'Refresh',
-    }),
-
-  previewResultsRefreshAriaLabel: () =>
-    i18n.translate('xpack.dataFederation.datasetWizard.previewResultsRefreshAriaLabel', {
-      defaultMessage: 'Refresh preview results',
     }),
 
   testConfigurationPreviewTableCaption: (rowCount: number) =>

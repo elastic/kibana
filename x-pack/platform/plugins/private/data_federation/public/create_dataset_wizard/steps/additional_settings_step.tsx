@@ -7,12 +7,21 @@
 
 import type { FunctionComponent, MutableRefObject } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { EuiCallOut, EuiForm, EuiFormRow, EuiSpacer, EuiSuperSelect, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiForm,
+  EuiFormRow,
+  EuiSpacer,
+  EuiSuperSelect,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import type { Control, UseFormGetValues, UseFormSetValue } from 'react-hook-form';
 import { useController, useWatch } from 'react-hook-form';
 
 import { DatasetSettingsAccordions } from '../../create_dataset_flyout/dataset_settings_accordions';
 import { DatasetSettingsCommonPanel } from '../../create_dataset_flyout/dataset_settings_common_panel';
+import { datasetSettingsFieldsWidthCss } from '../../create_dataset_flyout/dataset_settings_fields_layout';
 import { DatasetSettingsFlow3SettingsPanel } from '../../create_dataset_flyout/dataset_settings_flow3_settings_panel';
 import { applySettingsForFormat } from '../../create_dataset_flyout/dataset_settings_defaults';
 import { buildDefaultSettingsCustomJson } from '../../create_dataset_flyout/settings_custom_json_schema';
@@ -224,8 +233,7 @@ export const AdditionalSettingsStep: FunctionComponent<AdditionalSettingsStepPro
   }, [autoDetectedFormat, flowVariant, format]);
 
   const showDataSourceSetupWarning = useMemo(
-    () =>
-      isDatasetWizardFlow3(flowVariant) && !autoDetectedRegion && !autoDetectedFormat,
+    () => isDatasetWizardFlow3(flowVariant) && !autoDetectedRegion && !autoDetectedFormat,
     [autoDetectedFormat, autoDetectedRegion, flowVariant]
   );
 
@@ -257,6 +265,7 @@ export const AdditionalSettingsStep: FunctionComponent<AdditionalSettingsStepPro
         <>
           <EuiSpacer size="m" />
           <EuiCallOut
+            announceOnMount
             color="primary"
             iconType="info"
             size="s"
@@ -271,28 +280,32 @@ export const AdditionalSettingsStep: FunctionComponent<AdditionalSettingsStepPro
 
       <EuiForm component="div">
         {isDatasetWizardFlow3(flowVariant) ? (
-          <WizardRegionField
-            control={control}
-            autoDetectedRegion={autoDetectedRegion}
-            onRegionManualChange={onRegionManualChange}
-          />
+          <div css={datasetSettingsFieldsWidthCss}>
+            <WizardRegionField
+              control={control}
+              autoDetectedRegion={autoDetectedRegion}
+              onRegionManualChange={onRegionManualChange}
+            />
+          </div>
         ) : null}
 
-        <EuiFormRow label={createDatasetFlyoutStrings.settingsFormatLabel()} fullWidth>
-          <EuiSuperSelect
-            options={formatSuperSelectOptions}
-            data-test-subj="datasetWizardSettingsFormat"
-            fullWidth
-            aria-label={createDatasetFlyoutStrings.settingsFormatLabel()}
-            placeholder={createDatasetFlyoutStrings.settingsFormatPlaceholder()}
-            valueOfSelected={hasFormatSelected ? format : undefined}
-            onChange={(nextFormat) => {
-              handleFormatSelection(nextFormat, 'manual');
-            }}
-            name={formatField.name}
-            buttonRef={formatField.ref}
-          />
-        </EuiFormRow>
+        <div css={datasetSettingsFieldsWidthCss}>
+          <EuiFormRow label={createDatasetFlyoutStrings.settingsFormatLabel()} fullWidth>
+            <EuiSuperSelect
+              options={formatSuperSelectOptions}
+              data-test-subj="datasetWizardSettingsFormat"
+              fullWidth
+              aria-label={createDatasetFlyoutStrings.settingsFormatLabel()}
+              placeholder={createDatasetFlyoutStrings.settingsFormatPlaceholder()}
+              valueOfSelected={hasFormatSelected ? format : undefined}
+              onChange={(nextFormat) => {
+                handleFormatSelection(nextFormat, 'manual');
+              }}
+              name={formatField.name}
+              buttonRef={formatField.ref}
+            />
+          </EuiFormRow>
+        </div>
 
         {hasFormatSelected ? (
           isDatasetWizardFlow3(flowVariant) ? (

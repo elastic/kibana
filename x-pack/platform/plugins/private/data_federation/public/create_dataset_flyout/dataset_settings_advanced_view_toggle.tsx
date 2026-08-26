@@ -6,21 +6,18 @@
  */
 
 import type { FunctionComponent } from 'react';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import type { Control, FieldPath, UseFormGetValues, UseFormSetValue } from 'react-hook-form';
 import { useWatch } from 'react-hook-form';
 import { debounce } from 'lodash';
 
 import type { DatasetWizardFormValues } from '../create_dataset_wizard/dataset_wizard_form_state';
-import { datasetWizardStrings } from '../create_dataset_wizard/dataset_wizard_i18n';
 import type {
   CreateDatasetSettingsFormValues,
   DatasetErrorModeFormValue,
   DatasetFormatFormValue,
 } from './create_dataset_flyout_form_state';
 import { buildDatasetSettingsFromFormValues } from './create_dataset_flyout_form_state';
-import { DatasetSettingsCustomJsonEditor } from './dataset_settings_custom_json_editor';
 import { DatasetSettingsFieldsLayout } from './dataset_settings_fields_layout';
 import { getFlow3AdvancedFields } from './dataset_settings_flow3_layout';
 import { getVisibleCustomJsonApiKeys } from './settings_custom_json_schema';
@@ -30,8 +27,6 @@ import {
   stripJsonComments,
   type DatasetSettingsCustomJsonApiKey,
 } from './settings_custom_json_utils';
-
-type AdvancedViewMode = 'json' | 'list';
 
 const CUSTOM_JSON_API_KEY_SET = new Set<string>(DATASET_SETTINGS_CUSTOM_JSON_API_KEYS);
 const JSON_ONLY_API_KEYS = new Set<string>(['target_split_size']);
@@ -94,8 +89,6 @@ export interface DatasetSettingsAdvancedViewToggleProps {
 export const DatasetSettingsAdvancedViewToggle: FunctionComponent<
   DatasetSettingsAdvancedViewToggleProps
 > = ({ control, getValues, setValue, format, errorMode, testSubjPrefix }) => {
-  const [activeView, setActiveView] = useState<AdvancedViewMode>('list');
-  const lastValidParsedRef = useRef<Record<string, unknown>>({});
   const prevSettingsDigestRef = useRef<string | null>(null);
 
   const advancedFields = useMemo(
@@ -152,8 +145,6 @@ export const DatasetSettingsAdvancedViewToggle: FunctionComponent<
       return;
     }
 
-    lastValidParsedRef.current = parsed;
-
     if (skipJsonToFormRef.current) {
       skipJsonToFormRef.current = false;
       return;
@@ -193,98 +184,12 @@ export const DatasetSettingsAdvancedViewToggle: FunctionComponent<
     setValue('settings_custom_json', newJson, { shouldDirty: true, shouldValidate: true });
   }, [getValues, setValue, settings, visibleJsonApiKeys]);
 
-  const handleViewChange = useCallback(
-    (nextViewId: string) => {
-      const nextView = nextViewId as AdvancedViewMode;
-      if (nextView === activeView) {
-        return;
-      }
-
-      debouncedPopulateFieldsFromJson.flush();
-
-      if (nextView === 'list') {
-        const parsed =
-          tryParseJson(getValues('settings_custom_json')) ?? lastValidParsedRef.current;
-        populateFieldsFromJson(parsed);
-      } else {
-        skipJsonToFormRef.current = true;
-        const newJson = buildJsonFromFormSettings(
-          getValues('settings') as CreateDatasetSettingsFormValues,
-          visibleJsonApiKeys,
-          getValues('settings_custom_json')
-        );
-        setValue('settings_custom_json', newJson, { shouldDirty: true, shouldValidate: true });
-      }
-
-      setActiveView(nextView);
-    },
-    [
-      activeView,
-      debouncedPopulateFieldsFromJson,
-      getValues,
-      populateFieldsFromJson,
-      setValue,
-      visibleJsonApiKeys,
-    ]
-  );
-
-  const toggleOptions = useMemo(
-    () => [
-      {
-        id: 'list',
-        label: datasetWizardStrings.advancedSettingsListViewLabel(),
-        iconType: 'list',
-      },
-      {
-        id: 'json',
-        label: datasetWizardStrings.advancedSettingsJsonViewLabel(),
-        iconType: 'editorCodeBlock',
-      },
-    ],
-    []
-  );
-
   return (
-    <>
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="none">
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xxs">
-            <h4>
-              {activeView === 'json'
-                ? datasetWizardStrings.settingsCustomJsonLabel()
-                : datasetWizardStrings.settingsCustomFieldsLabel()}
-            </h4>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonGroup
-            legend={datasetWizardStrings.advancedSettingsViewToggleLegend()}
-            options={toggleOptions}
-            idSelected={activeView}
-            onChange={handleViewChange}
-            isIconOnly
-            buttonSize="compressed"
-            data-test-subj={`${testSubjPrefix}AdvancedSettingsViewToggle`}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
-      {activeView === 'json' ? (
-        <DatasetSettingsCustomJsonEditor
-          control={control}
-          format={format}
-          errorMode={errorMode}
-          hideLabel
-          testSubjPrefix={testSubjPrefix}
-        />
-      ) : (
-        <DatasetSettingsFieldsLayout
-          control={control}
-          fields={advancedFields}
-          testSubjPrefix={testSubjPrefix}
-          columns={1}
-        />
-      )}
-    </>
+    <DatasetSettingsFieldsLayout
+      control={control}
+      fields={advancedFields}
+      testSubjPrefix={testSubjPrefix}
+      columns={1}
+    />
   );
 };

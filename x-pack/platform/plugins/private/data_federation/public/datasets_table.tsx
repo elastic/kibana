@@ -18,6 +18,7 @@ import {
   EuiInMemoryTable,
   EuiPopover,
   EuiSpacer,
+  EuiSwitch,
   EuiToolTip,
 } from '@elastic/eui';
 
@@ -162,6 +163,8 @@ export const DatasetsTable: FunctionComponent<DatasetsTableProps> = ({
   onDelete,
   onDeleteSelected,
 }) => {
+  const [enabledByName, setEnabledByName] = useState<Record<string, boolean>>({});
+
   const columns = useMemo<Array<EuiBasicTableColumn<DataSetListRow>>>(
     () => [
       {
@@ -204,8 +207,32 @@ export const DatasetsTable: FunctionComponent<DatasetsTableProps> = ({
         'data-test-subj': 'dataSetsSetsColDescription',
       },
       {
+        name: mainTranslations.columns.dataSets.enabled,
+        width: '1%',
+        render: (item: DataSetListRow) => {
+          const isEnabled = enabledByName[item.name] ?? true;
+
+          return (
+            <EuiSwitch
+              compressed
+              showLabel={false}
+              label={mainTranslations.columns.dataSets.enabledToggleAriaLabel(item.name)}
+              checked={isEnabled}
+              onChange={(event) => {
+                setEnabledByName((current) => ({
+                  ...current,
+                  [item.name]: event.target.checked,
+                }));
+              }}
+              data-test-subj={`dataSetsSetsEnabledSwitch-${item.name}`}
+            />
+          );
+        },
+        'data-test-subj': 'dataSetsSetsColEnabled',
+      },
+      {
         name: mainTranslations.columns.dataSets.actions,
-        width: '12%',
+        width: '1%',
         align: 'right',
         render: (item: DataSetListRow) => (
           <DatasetsTableActionsCell
@@ -219,7 +246,7 @@ export const DatasetsTable: FunctionComponent<DatasetsTableProps> = ({
         ),
       },
     ],
-    [isOpenInDiscoverEnabled, onClone, onDelete, onEdit, onOpenInDiscover]
+    [enabledByName, isOpenInDiscoverEnabled, onClone, onDelete, onEdit, onOpenInDiscover]
   );
 
   return (

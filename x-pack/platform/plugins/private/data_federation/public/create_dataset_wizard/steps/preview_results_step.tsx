@@ -6,8 +6,9 @@
  */
 
 import type { FunctionComponent } from 'react';
-import React, { useEffect, useRef, useState } from 'react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { EuiButton, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { isEqual } from 'lodash';
 
 import { datasetWizardStrings } from '../dataset_wizard_i18n';
 import type { DatasetWizardFormValues } from '../dataset_wizard_form_state';
@@ -18,12 +19,31 @@ const PREVIEW_RESULTS_LOADING_MS = 600;
 
 export interface PreviewResultsStepProps {
   values: DatasetWizardFormValues;
+  isActive: boolean;
 }
 
-export const PreviewResultsStep: FunctionComponent<PreviewResultsStepProps> = ({ values }) => {
+export const PreviewResultsStep: FunctionComponent<PreviewResultsStepProps> = ({
+  values,
+  isActive,
+}) => {
   const [previewedValues, setPreviewedValues] = useState<DatasetWizardFormValues | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const loadingTimeoutRef = useRef<number | undefined>();
+  const wasActiveRef = useRef(isActive);
+
+  const startPreview = useCallback(() => {
+    if (loadingTimeoutRef.current !== undefined) {
+      window.clearTimeout(loadingTimeoutRef.current);
+    }
+
+    const valuesToPreview = values;
+    setIsLoading(true);
+    loadingTimeoutRef.current = window.setTimeout(() => {
+      setPreviewedValues(valuesToPreview);
+      setIsLoading(false);
+      loadingTimeoutRef.current = undefined;
+    }, PREVIEW_RESULTS_LOADING_MS);
+  }, [values]);
 
   useEffect(
     () => () => {
@@ -34,46 +54,24 @@ export const PreviewResultsStep: FunctionComponent<PreviewResultsStepProps> = ({
     []
   );
 
-  const hasPreview = previewedValues !== null && !isLoading;
+  useEffect(() => {
+    const becameActive = isActive && !wasActiveRef.current;
+    wasActiveRef.current = isActive;
 
-  const handlePreview = () => {
-    const valuesToPreview = values;
-
-    if (loadingTimeoutRef.current !== undefined) {
-      window.clearTimeout(loadingTimeoutRef.current);
+    if (!becameActive || previewedValues === null || isEqual(previewedValues, values)) {
+      return;
     }
 
-    setIsLoading(true);
-    loadingTimeoutRef.current = window.setTimeout(() => {
-      setPreviewedValues(valuesToPreview);
-      setIsLoading(false);
-      loadingTimeoutRef.current = undefined;
-    }, PREVIEW_RESULTS_LOADING_MS);
-  };
+    startPreview();
+  }, [isActive, previewedValues, startPreview, values]);
+
+  const hasPreview = previewedValues !== null && !isLoading;
 
   return (
     <div data-test-subj="datasetWizardPreviewResultsStep">
-      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="s">
-            <h3>{datasetWizardStrings.previewResultsTitle()}</h3>
-          </EuiTitle>
-        </EuiFlexItem>
-        {hasPreview ? (
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              iconType="refresh"
-              color="text"
-              size="s"
-              onClick={handlePreview}
-              aria-label={datasetWizardStrings.previewResultsRefreshAriaLabel()}
-              data-test-subj="datasetWizardPreviewResultsRefreshButton"
-            >
-              {datasetWizardStrings.previewResultsRefreshButtonLabel()}
-            </EuiButton>
-          </EuiFlexItem>
-        ) : null}
-      </EuiFlexGroup>
+      <EuiTitle size="s">
+        <h3>{datasetWizardStrings.previewResultsTitle()}</h3>
+      </EuiTitle>
       <EuiSpacer size="m" />
       <EuiText size="s">
         <p>{datasetWizardStrings.testConfigurationPreviewDescription()}</p>
@@ -88,7 +86,7 @@ export const PreviewResultsStep: FunctionComponent<PreviewResultsStepProps> = ({
       ) : isLoading ? (
         <TestConfigurationPreviewContent values={values} isLoading />
       ) : (
-        <EuiButton data-test-subj="datasetWizardPreviewResultsButton" onClick={handlePreview}>
+        <EuiButton data-test-subj="datasetWizardPreviewResultsButton" onClick={startPreview}>
           {datasetWizardStrings.previewResultsButton()}
         </EuiButton>
       )}

@@ -539,7 +539,7 @@ describe('DatasetWizard step navigation', () => {
       settings_custom_json: buildDefaultSettingsCustomJson('parquet', 'fail_fast'),
     };
 
-    const { getByTestId } = renderWizard(
+    const { getByRole, getByTestId } = renderWizard(
       `/create?step=${ADDITIONAL_SETTINGS_STEP}`,
       draft,
       DATASET_WIZARD_FLOW_VARIANT_3
@@ -547,18 +547,11 @@ describe('DatasetWizard step navigation', () => {
 
     await waitFor(() => {
       expect(getByTestId('datasetWizardAdditionalSettingsStep')).toBeVisible();
-      expect(getByTestId('datasetWizardSettingsCustomJsonEditor')).toBeInTheDocument();
+      expect(getByTestId('datasetWizardSettingsPartitionDetection')).toBeInTheDocument();
     });
 
-    const editor = getByTestId('datasetWizardSettingsCustomJsonEditor') as HTMLTextAreaElement;
-    fireEvent.change(editor, {
-      target: {
-        value: editor.value.replace(
-          '"partition_detection": "auto"',
-          '"partition_detection": "hive"'
-        ),
-      },
-    });
+    fireEvent.click(getByTestId('datasetWizardSettingsPartitionDetection'));
+    fireEvent.click(getByRole('option', { name: /Hive/ }));
 
     fireEvent.click(getByTestId('datasetWizardNext'));
 
