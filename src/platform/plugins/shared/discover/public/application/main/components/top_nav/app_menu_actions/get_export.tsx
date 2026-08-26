@@ -111,9 +111,7 @@ export const getExportAppMenuItem = ({
       getState,
       runtimeStateManager,
       services,
-      includeCurrentTimeSettings: persistedDiscoverSession
-        ? undefined
-        : includeCurrentTimeSettings,
+      includeCurrentTimeSettings: persistedDiscoverSession ? undefined : includeCurrentTimeSettings,
       tabId: exportCurrentTab ? currentTab.id : undefined,
       title,
     });
