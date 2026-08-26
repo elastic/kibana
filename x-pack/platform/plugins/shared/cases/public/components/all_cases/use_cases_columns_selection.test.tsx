@@ -6,16 +6,29 @@
  */
 
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
-import { renderHook } from '@testing-library/react';
+import { renderHook, act } from '@testing-library/react';
 
 import { TestProviders } from '../../common/mock';
 import { useCasesColumnsSelection } from './use_cases_columns_selection';
 import { useCasesColumnsConfiguration } from './use_cases_columns_configuration';
+import { useCasesConfig } from '../../common/lib/kibana';
+import { useGlobalInlineFields } from './hooks/use_global_inline_fields';
+import { LOCAL_STORAGE_KEYS } from '../../../common/constants';
 import React from 'react';
 
 jest.mock('./use_cases_columns_configuration');
+jest.mock('../../common/lib/kibana', () => ({
+  ...jest.requireActual('../../common/lib/kibana'),
+  useCasesConfig: jest.fn(),
+}));
+jest.mock('./hooks/use_global_inline_fields', () => ({
+  ...jest.requireActual('./hooks/use_global_inline_fields'),
+  useGlobalInlineFields: jest.fn(),
+}));
 
 const useCasesColumnsConfigurationMock = useCasesColumnsConfiguration as jest.Mock;
+const useCasesConfigMock = useCasesConfig as jest.Mock;
+const useGlobalInlineFieldsMock = useGlobalInlineFields as jest.Mock;
 
 const localStorageKey = 'securitySolution.cases.list.tableColumns';
 const casesColumnsConfig = {
@@ -43,6 +56,8 @@ describe('useCasesColumnsSelection ', () => {
 
   beforeEach(() => {
     useCasesColumnsConfigurationMock.mockReturnValue(casesColumnsConfig);
+    useCasesConfigMock.mockReturnValue({ templatesEnabled: false });
+    useGlobalInlineFieldsMock.mockReturnValue({ globalInlineFields: [], isLoading: false });
 
     localStorage.clear();
   });
@@ -117,5 +132,93 @@ describe('useCasesColumnsSelection ', () => {
         "setSelectedColumns": [Function],
       }
     `);
+  });
+});
+
+describe('useCasesColumnsSelection — global field sync (Bug 19099)', () => {
+  const license = licensingMock.createLicense({ license: { type: 'platinum' } });
+  const sharedStorageKey = `securitySolution.${LOCAL_STORAGE_KEYS.casesGlobalFieldColumns}`;
+  const tableStorageKey = `securitySolution.${LOCAL_STORAGE_KEYS.casesTableColumns}`;
+
+  const mockGlobalField = { name: 'priority', type: 'keyword', control: 'INPUT_TEXT' };
+  const globalColumnsConfig = {
+    title: { field: 'title', name: 'Name', canDisplay: true, isCheckedDefault: true },
+    priority_as_keyword: {
+      field: 'priority_as_keyword',
+      name: 'Priority',
+      canDisplay: true,
+      isCheckedDefault: false,
+    },
+  };
+
+  beforeEach(() => {
+    useCasesColumnsConfigurationMock.mockReturnValue(globalColumnsConfig);
+    useCasesConfigMock.mockReturnValue({ templatesEnabled: true });
+    useGlobalInlineFieldsMock.mockReturnValue({
+      globalInlineFields: [mockGlobalField],
+      isLoading: false,
+      isLoaded: true,
+    });
+    localStorage.clear();
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('reads global field checked state from the shared key', () => {
+    localStorage.setItem(sharedStorageKey, JSON.stringify({ priority_as_keyword: true }));
+
+    const { result } = renderHook(() => useCasesColumnsSelection(), {
+      wrapper: (props) => <TestProviders {...props} license={license} />,
+    });
+
+    const globalCol = result.current.selectedColumns.find((c) => c.field === 'priority_as_keyword');
+    expect(globalCol?.isChecked).toBe(true);
+  });
+
+  it('defaults global field to unchecked when the shared key is absent', () => {
+    const { result } = renderHook(() => useCasesColumnsSelection(), {
+      wrapper: (props) => <TestProviders {...props} license={license} />,
+    });
+
+    const globalCol = result.current.selectedColumns.find((c) => c.field === 'priority_as_keyword');
+    expect(globalCol?.isChecked).toBeFalsy();
+  });
+
+  it('writes global field state to the shared key and non-global state to the table key', () => {
+    const { result } = renderHook(() => useCasesColumnsSelection(), {
+      wrapper: (props) => <TestProviders {...props} license={license} />,
+    });
+
+    act(() => {
+      result.current.setSelectedColumns([
+        { field: 'title', name: 'Name', isChecked: true },
+        { field: 'priority_as_keyword', name: 'Priority', isChecked: true },
+      ]);
+    });
+
+    // Global field goes to shared key
+    expect(JSON.parse(localStorage.getItem(sharedStorageKey)!)).toEqual({
+      priority_as_keyword: true,
+    });
+    // Non-global column goes to the table-specific key; global field is absent
+    const tableStored: Array<{ field: string }> = JSON.parse(
+      localStorage.getItem(tableStorageKey)!
+    );
+    expect(tableStored).toEqual([{ field: 'title', name: 'Name', isChecked: true }]);
+    expect(tableStored.find((c) => c.field === 'priority_as_keyword')).toBeUndefined();
+  });
+
+  it('does not write to the shared key when the update contains no global fields', () => {
+    const { result } = renderHook(() => useCasesColumnsSelection(), {
+      wrapper: (props) => <TestProviders {...props} license={license} />,
+    });
+
+    act(() => {
+      result.current.setSelectedColumns([{ field: 'title', name: 'Name', isChecked: false }]);
+    });
+
+    expect(localStorage.getItem(sharedStorageKey)).toBeNull();
   });
 });

@@ -13,10 +13,22 @@ import { TestProviders } from '../../../../common/mock';
 import { LOCAL_STORAGE_KEYS } from '../../../../../common/constants';
 import { useListFieldsSelection } from './use_list_fields_selection';
 import { useCasesColumnsConfiguration } from '../../../all_cases/use_cases_columns_configuration';
+import { useCasesConfig } from '../../../../common/lib/kibana';
+import { useGlobalInlineFields } from '../../../all_cases/hooks/use_global_inline_fields';
 
 jest.mock('../../../all_cases/use_cases_columns_configuration');
+jest.mock('../../../../common/lib/kibana', () => ({
+  ...jest.requireActual('../../../../common/lib/kibana'),
+  useCasesConfig: jest.fn(),
+}));
+jest.mock('../../../all_cases/hooks/use_global_inline_fields', () => ({
+  ...jest.requireActual('../../../all_cases/hooks/use_global_inline_fields'),
+  useGlobalInlineFields: jest.fn(),
+}));
 
 const useCasesColumnsConfigurationMock = useCasesColumnsConfiguration as jest.Mock;
+const useCasesConfigMock = useCasesConfig as jest.Mock;
+const useGlobalInlineFieldsMock = useGlobalInlineFields as jest.Mock;
 
 const localStorageKey = `securitySolution.${LOCAL_STORAGE_KEYS.casesListFields}`;
 
@@ -71,6 +83,8 @@ describe('useListFieldsSelection', () => {
 
   beforeEach(() => {
     useCasesColumnsConfigurationMock.mockReturnValue(casesColumnsConfig);
+    useCasesConfigMock.mockReturnValue({ templatesEnabled: false });
+    useGlobalInlineFieldsMock.mockReturnValue({ globalInlineFields: [], isLoading: false });
     localStorage.clear();
   });
 
@@ -130,6 +144,116 @@ describe('useListFieldsSelection', () => {
     expect(result.current.selectedFields).toEqual([
       { field: 'tags', name: 'Tags', isChecked: true },
       { field: 'category', name: 'Category', isChecked: false },
+    ]);
+  });
+});
+
+describe('useListFieldsSelection — global field sync (Bug 19099)', () => {
+  const license = licensingMock.createLicense({ license: { type: 'platinum' } });
+  const sharedStorageKey = `securitySolution.${LOCAL_STORAGE_KEYS.casesGlobalFieldColumns}`;
+  const listStorageKey = `securitySolution.${LOCAL_STORAGE_KEYS.casesListFields}`;
+
+  const mockGlobalField = { name: 'priority', type: 'keyword', control: 'INPUT_TEXT' };
+
+  const globalColumnsConfig = {
+    // Always-visible fields excluded from list selection
+    title: { field: 'title', name: 'Name', canDisplay: true, isCheckedDefault: true },
+    assignees: { field: 'assignees', name: 'Assignees', canDisplay: true, isCheckedDefault: true },
+    createdBy: { field: 'createdBy', name: 'Reporter', canDisplay: true, isCheckedDefault: true },
+    updatedAt: {
+      field: 'updatedAt',
+      name: 'Last updated',
+      canDisplay: true,
+      isCheckedDefault: true,
+    },
+    status: { field: 'status', name: 'Status', canDisplay: true, isCheckedDefault: true },
+    severity: { field: 'severity', name: 'Severity', canDisplay: true, isCheckedDefault: true },
+    // Non-global optional field
+    tags: { field: 'tags', name: 'Tags', canDisplay: true, isCheckedDefault: false },
+    // Global field
+    priority_as_keyword: {
+      field: 'priority_as_keyword',
+      name: 'Priority',
+      canDisplay: true,
+      isCheckedDefault: false,
+    },
+  };
+
+  beforeEach(() => {
+    useCasesColumnsConfigurationMock.mockReturnValue(globalColumnsConfig);
+    useCasesConfigMock.mockReturnValue({ templatesEnabled: true });
+    useGlobalInlineFieldsMock.mockReturnValue({
+      globalInlineFields: [mockGlobalField],
+      isLoading: false,
+      isLoaded: true,
+    });
+    localStorage.clear();
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('reads global field checked state from the shared key', () => {
+    localStorage.setItem(sharedStorageKey, JSON.stringify({ priority_as_keyword: true }));
+
+    const { result } = renderHook(() => useListFieldsSelection(), {
+      wrapper: (props) => <TestProviders {...props} license={license} />,
+    });
+
+    const globalField = result.current.selectedFields.find(
+      (f) => f.field === 'priority_as_keyword'
+    );
+    expect(globalField?.isChecked).toBe(true);
+  });
+
+  it('defaults global field to unchecked when the shared key is absent', () => {
+    const { result } = renderHook(() => useListFieldsSelection(), {
+      wrapper: (props) => <TestProviders {...props} license={license} />,
+    });
+
+    const globalField = result.current.selectedFields.find(
+      (f) => f.field === 'priority_as_keyword'
+    );
+    expect(globalField?.isChecked).toBe(false);
+  });
+
+  it('writes global field state to the shared key and non-global state to the list key', () => {
+    const { result } = renderHook(() => useListFieldsSelection(), {
+      wrapper: (props) => <TestProviders {...props} license={license} />,
+    });
+
+    act(() => {
+      result.current.setSelectedFields([
+        { field: 'tags', name: 'Tags', isChecked: true },
+        { field: 'priority_as_keyword', name: 'Priority', isChecked: true },
+      ]);
+    });
+
+    // FAILURE SCENARIO: global field written to list key instead of shared key
+    expect(JSON.parse(localStorage.getItem(sharedStorageKey)!)).toEqual({
+      priority_as_keyword: true,
+    });
+    const listStored: Array<{ field: string }> = JSON.parse(
+      localStorage.getItem(listStorageKey)!
+    );
+    expect(listStored).toEqual([{ field: 'tags', name: 'Tags', isChecked: true }]);
+    expect(listStored.find((f) => f.field === 'priority_as_keyword')).toBeUndefined();
+  });
+
+  it('non-global field selections in one view do not appear in the other view storage key', () => {
+    const { result } = renderHook(() => useListFieldsSelection(), {
+      wrapper: (props) => <TestProviders {...props} license={license} />,
+    });
+
+    act(() => {
+      result.current.setSelectedFields([{ field: 'tags', name: 'Tags', isChecked: true }]);
+    });
+
+    // Non-global field goes only to the list key, not the shared key
+    expect(localStorage.getItem(sharedStorageKey)).toBeNull();
+    expect(JSON.parse(localStorage.getItem(listStorageKey)!)).toEqual([
+      { field: 'tags', name: 'Tags', isChecked: true },
     ]);
   });
 });
