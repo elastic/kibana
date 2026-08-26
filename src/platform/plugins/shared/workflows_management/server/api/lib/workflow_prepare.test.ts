@@ -378,10 +378,10 @@ describe('prepareWorkflowDocumentFromYaml', () => {
     expect(result.workflowData.valid).toBe(false);
   });
 
-  it('uses nameOverride when the YAML root cannot carry a name (e.g. cloning invalid YAML)', () => {
+  it('uses nameFallback when the YAML root cannot carry a name (e.g. cloning invalid YAML)', () => {
     const zodSchema = getWorkflowZodSchema({});
 
-    // A scalar root has no `name` key to extract, so without the override this would
+    // A scalar root has no `name` key to extract, so without the fallback this would
     // collapse to "Untitled workflow".
     const result = prepareWorkflowDocumentFromYaml({
       yaml: 'not-a-workflow',
@@ -389,14 +389,14 @@ describe('prepareWorkflowDocumentFromYaml', () => {
       authenticatedUser: 'user1',
       now,
       spaceId: 'default',
-      nameOverride: 'Original Copy',
+      nameFallback: 'Original Copy',
     });
 
     expect(result.workflowData.name).toBe('Original Copy');
     expect(result.workflowData.valid).toBe(false);
   });
 
-  it('prefers the YAML-embedded name over nameOverride', () => {
+  it('prefers the YAML-embedded name over nameFallback', () => {
     const zodSchema = getWorkflowZodSchema({});
 
     const result = prepareWorkflowDocumentFromYaml({
@@ -405,7 +405,7 @@ describe('prepareWorkflowDocumentFromYaml', () => {
       authenticatedUser: 'user1',
       now,
       spaceId: 'default',
-      nameOverride: 'Override Name',
+      nameFallback: 'Fallback Name',
     });
 
     expect(result.workflowData.name).toBe('From YAML');

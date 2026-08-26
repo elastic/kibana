@@ -377,7 +377,7 @@ export class WorkflowsManagementApi {
       { yaml: clonedYaml },
       spaceId,
       request,
-      { nameOverride: cloneName }
+      { nameFallback: cloneName }
     );
     this.notifySml(result.id, 'create', request);
     return result;

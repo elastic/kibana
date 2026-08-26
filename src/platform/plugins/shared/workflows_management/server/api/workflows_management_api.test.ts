@@ -111,7 +111,7 @@ describe('WorkflowsManagementApi', () => {
         }),
         'default',
         mockRequest,
-        { nameOverride: 'Original Workflow Copy' }
+        { nameFallback: 'Original Workflow Copy' }
       );
       expect(result.name).toBe('Original Workflow Copy');
       expect(result.id).toBe('workflow-clone-456');
@@ -256,7 +256,7 @@ enabled: true`;
         { yaml: 'not-a-workflow' },
         'default',
         mockRequest,
-        { nameOverride: 'Original Copy' }
+        { nameFallback: 'Original Copy' }
       );
     });
 
@@ -298,7 +298,7 @@ enabled: true`;
         expect.any(Object),
         spaceId,
         mockRequest,
-        { nameOverride: 'Original Workflow Copy' }
+        { nameFallback: 'Original Workflow Copy' }
       );
     });
   });
