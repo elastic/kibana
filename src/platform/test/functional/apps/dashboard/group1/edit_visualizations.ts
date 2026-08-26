@@ -97,7 +97,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await expectVegaText('Test');
       await editVegaVis();
       await visualize.saveVisualizationAndReturn();
-      expectVegaText('Modified');
+      await expectVegaText('Modified');
     });
 
     it('cancel button returns to dashboard with no modal if there are no changes to apply', async () => {
