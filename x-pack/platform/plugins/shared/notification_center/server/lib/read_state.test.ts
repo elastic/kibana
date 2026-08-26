@@ -14,14 +14,7 @@ import {
   READ_ALL_BEFORE_KEY,
   type ReadOverrides,
 } from '../storage/user_storage';
-import {
-  getReadState,
-  isReadAt,
-  markRead,
-  markAllRead,
-  prepareReadState,
-  type NotificationReadState,
-} from './read_state';
+import { getReadState, isReadAt, markRead, markAllRead } from './read_state';
 
 const createClient = (initial: { overrides?: ReadOverrides; readAllBefore?: string } = {}) => {
   const store: Record<string, unknown> = {
@@ -129,7 +122,7 @@ describe('getReadState', () => {
     const stamped = store[READ_ALL_BEFORE_KEY] as string;
     expect(state?.readAllBefore).toBe(stamped);
     // The marker postdates the backlog, so what the user inherits reads as read
-    expect(state && isReadAt(prepareReadState(state), 'a', '2026-01-01T00:00:00.000Z')).toBe(true);
+    expect(state && isReadAt(state, 'a', '2026-01-01T00:00:00.000Z')).toBe(true);
   });
 
   it('leaves an existing marker untouched', async () => {
@@ -146,13 +139,12 @@ describe('getReadState', () => {
     const logger = loggingSystemMock.createLogger();
 
     await expect(getReadState(client, logger)).resolves.toBeUndefined();
-    expect(logger.debug).toHaveBeenCalled();
+    expect(logger.warn).toHaveBeenCalled();
   });
 });
 
 describe('isReadAt', () => {
-  const at = (copy: string, state: NotificationReadState) =>
-    isReadAt(prepareReadState(state), 'a', copy);
+  const at = (copy: string, state: Parameters<typeof isReadAt>[0]) => isReadAt(state, 'a', copy);
 
   it('reads copies at or before readAllBefore when the id has no override', () => {
     const state = { overrides: {}, readAllBefore: '2026-07-15T00:00:00.000Z' };

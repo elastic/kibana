@@ -19,7 +19,7 @@ import type {
   NotificationQueryResult,
 } from '../../common/types';
 import { getNotificationDataStreamClient } from '../storage/notification_data_stream';
-import { isReadAt, prepareReadState, type NotificationReadState } from './read_state';
+import { isReadAt, type NotificationReadState } from './read_state';
 import { severityTTLQuery } from './severity_ttl_query';
 
 /**
@@ -88,7 +88,6 @@ export const queryNotifications = async (
 
   const truncated = response.hits.hits.length > NOTIFICATION_QUERY_RESULT_LIMIT;
   const hits = response.hits.hits.slice(0, NOTIFICATION_QUERY_RESULT_LIMIT);
-  const preparedReadState = resolvedReadState ? prepareReadState(resolvedReadState) : undefined;
 
   const items: NotificationListItem[] = [];
   const malformedIds: string[] = [];
@@ -100,11 +99,11 @@ export const queryNotifications = async (
     }
     const notification = parsed.data;
     items.push(
-      preparedReadState
+      resolvedReadState
         ? {
             ...notification,
             isRead: isReadAt(
-              preparedReadState,
+              resolvedReadState,
               notification.notification_id,
               notification['@timestamp']
             ),

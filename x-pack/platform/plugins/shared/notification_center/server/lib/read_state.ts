@@ -27,12 +27,6 @@ export interface NotificationReadState {
   readAllBefore: string;
 }
 
-/** Read state with the bulk marker parsed once before annotating a result set. */
-export interface PreparedNotificationReadState {
-  overrides: ReadOverrides;
-  readAllBeforeMs: number;
-}
-
 /**
  * Stamp the catch-up marker at the moment a user first reads their notifications, so the
  * backlog they inherit doesn't show up as unread.
@@ -68,18 +62,14 @@ export const getReadState = async (
   }
 };
 
-/** Parse the persisted bulk marker once before annotating notification copies. */
-export const prepareReadState = ({
-  overrides,
-  readAllBefore,
-}: NotificationReadState): PreparedNotificationReadState => ({
-  overrides,
-  readAllBeforeMs: Date.parse(readAllBefore),
-});
-
-/** Determine whether a notification copy is covered by the user's read state. */
+/**
+ * Determine whether a notification is read
+ * 1. Check if the notification is marked as read in the overrides object
+ * 2. If not, check if the notification is earlier than the readAllBefore timestamp
+ * 3. If both are false, the notification is unread
+ */
 export const isReadAt = (
-  { overrides, readAllBeforeMs }: PreparedNotificationReadState,
+  { overrides, readAllBefore }: NotificationReadState,
   id: string,
   copyTimestamp: string
 ): boolean => {
@@ -88,7 +78,7 @@ export const isReadAt = (
   if (override) {
     return override.read && copyMs <= Date.parse(override.markedAt);
   }
-  return copyMs <= readAllBeforeMs;
+  return copyMs <= Date.parse(readAllBefore);
 };
 
 /** Keep the newest MAX_OVERRIDES entries, dropping the oldest by `markedAt`
