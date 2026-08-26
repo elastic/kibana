@@ -808,6 +808,25 @@ describe('useAvailablePackages', () => {
       expect(result.current.allCards).toHaveLength(1);
       expect(result.current.allCards.every((c) => !c.isCollectionCard)).toBe(true);
     });
+
+    it('skips applyGrouping and emits individual cards when disableCollectionGrouping is true, even if flag is on', () => {
+      mockExperimentalFeaturesServiceGet.mockReturnValue({
+        enableIntegrationCollectionTiles: true,
+      });
+
+      const { result } = renderHook(() =>
+        useAvailablePackages({
+          prereleaseIntegrationsEnabled: false,
+          disableCollectionGrouping: true,
+        })
+      );
+
+      // applyGrouping should NOT be called — individual cards are used directly
+      expect(mockApplyGrouping).not.toHaveBeenCalled();
+      // The single package should appear as a normal card, not a collection
+      expect(result.current.allCards).toHaveLength(1);
+      expect(result.current.allCards[0].isCollectionCard).toBeFalsy();
+    });
   });
 
   describe('sorting', () => {
