@@ -88,7 +88,9 @@ describe('ConnectToProject', () => {
       fireEvent.click(screen.getByTestId('vectordbConnectionTypeOption-mcpServer'));
 
       const mcpServerUrl = `${KIBANA_URL}${MCP_SERVER_PATH}`;
-      expect(screen.getByTestId('vectordbConnectionTypeButton')).toHaveTextContent('Agent Builder MCP');
+      expect(screen.getByTestId('vectordbConnectionTypeButton')).toHaveTextContent(
+        'Agent Builder MCP'
+      );
       expect(screen.getByText(mcpServerUrl)).toBeInTheDocument();
       expect(screen.queryByText(ELASTICSEARCH_URL)).not.toBeInTheDocument();
       expect(getCurrentTextToCopy()).toBe(mcpServerUrl);
