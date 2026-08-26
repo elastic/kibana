@@ -3063,21 +3063,21 @@ describe('Output Service', () => {
         per_page: 10000,
         total: 3,
         saved_objects: [
-          mockOutputSO('preconfigured-es', {
+          { score: 0, ...mockOutputSO('preconfigured-es', {
             type: 'elasticsearch',
             is_preconfigured: true,
             ssl: 'encrypted-ciphertext',
-          }),
-          mockOutputSO('non-preconfigured-es', {
+          }) },
+          { score: 0, ...mockOutputSO('non-preconfigured-es', {
             type: 'elasticsearch',
             is_preconfigured: false,
-          }),
-          mockOutputSO('preconfigured-kafka', {
+          }) },
+          { score: 0, ...mockOutputSO('preconfigured-kafka', {
             type: 'kafka',
             is_preconfigured: true,
             password: 'encrypted-ciphertext',
             kibana_api_key: 'encrypted-ciphertext',
-          }),
+          }) },
         ],
       });
 

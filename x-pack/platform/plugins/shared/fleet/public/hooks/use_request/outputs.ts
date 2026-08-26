@@ -40,6 +40,7 @@ export function useGetOutputs() {
     data: result.data,
     error: result.error,
     isLoading: result.isLoading,
+    isInitialRequest: result.isLoading,
     resendRequest: result.refetch,
   };
 }
