@@ -286,7 +286,7 @@ describe('AgentExecutionService', () => {
               nextInput: { message: 'hello', attachments: [imageAttachment] },
             },
           })
-        ).rejects.toThrow(/Image attachments are disabled/);
+        ).rejects.toThrow(/Image attachments are an experimental feature/);
 
         expect(attachmentsService.validate).not.toHaveBeenCalled();
         expect(mockExecutionClient.create).not.toHaveBeenCalled();
