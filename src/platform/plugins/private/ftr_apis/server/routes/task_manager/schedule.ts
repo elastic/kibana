@@ -64,6 +64,11 @@ const scheduleBodySchema = schema.object({
    * Intended for FTR/Scout only (this route is behind `ftrApis`). Omitted or false preserves existing callers' body shape.
    */
   skipRequestForScheduling: schema.maybe(schema.boolean()),
+  /**
+   * When true with a normal schedule (request present), grant only the Elasticsearch API key (no UIAM).
+   * FTR/Scout only (`ftrApis`).
+   */
+  onEsKey: schema.maybe(schema.boolean()),
 });
 
 export const registerTaskManagerScheduleRoute = (
@@ -91,7 +96,7 @@ export const registerTaskManagerScheduleRoute = (
         });
       }
 
-      const { task, skipRequestForScheduling } = req.body as {
+      const { task, skipRequestForScheduling, onEsKey } = req.body as {
         task: {
           taskType: string;
           id?: string;
@@ -104,12 +109,16 @@ export const registerTaskManagerScheduleRoute = (
           cost?: InstanceTaskCost;
         };
         skipRequestForScheduling?: boolean;
+        onEsKey?: boolean;
       };
 
       const taskResult =
         skipRequestForScheduling === true
           ? await startContract.schedule(task)
-          : await startContract.schedule(task, { request: req });
+          : await startContract.schedule(task, {
+              request: req,
+              ...(onEsKey === true ? { onEsKey: true } : {}),
+            });
 
       return res.ok({ body: taskResult });
     }

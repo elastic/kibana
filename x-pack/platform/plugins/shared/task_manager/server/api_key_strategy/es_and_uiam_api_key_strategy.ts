@@ -99,7 +99,7 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
     // entirely. Non-clone requests keep the existing ES (+ optional UIAM) behavior.
     const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
     const isUiamRequest = !!authorizationHeader && isUiamCredential(authorizationHeader);
-    const cloneUiamRequest = isUiamRequest && cloneApiKey;
+    const cloneUiamRequest = isUiamRequest && cloneApiKey && opts?.onEsKey !== true;
 
     if (cloneUiamRequest) {
       const uiamOnlyKeys = await this.grantUiamApiKeys(
@@ -131,13 +131,16 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
       user,
       apiKeyCreatedByUser,
     });
-    const uiamKeys = await this.grantUiamApiKeys(
-      taskInstances,
-      request,
-      user,
-      apiKeyCreatedByUser,
-      isUiamRequest
-    );
+    const uiamKeys =
+      opts?.onEsKey === true
+        ? new Map<string, UiamApiKeyResult>()
+        : await this.grantUiamApiKeys(
+            taskInstances,
+            request,
+            user,
+            apiKeyCreatedByUser,
+            isUiamRequest
+          );
 
     const result = new Map<string, ApiKeySOFields>();
     taskInstances.forEach((task) => {

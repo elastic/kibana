@@ -41,6 +41,9 @@ const scheduleOptionsToStoreApiKeyOptions = (
   if (options.request) {
     storeOpts.request = options.request;
   }
+  if (options.onEsKey === true) {
+    storeOpts.onEsKey = true;
+  }
   if (options.cloneApiKey === true) {
     storeOpts.cloneApiKey = true;
   }

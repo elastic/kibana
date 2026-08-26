@@ -25,6 +25,8 @@ export interface ApiKeySOFields {
 
 /** Optional flags passed to {@link ApiKeyStrategy.grantApiKeys}. */
 export interface GrantApiKeysOpts {
+  /** When true, grant only the Elasticsearch API key (skip UIAM). */
+  onEsKey?: boolean;
   /**
    * When true, clone the caller's API key credentials instead of reusing them directly.
    * See {@link ApiKeyOptions.cloneApiKey}.
