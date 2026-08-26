@@ -16,11 +16,11 @@ import { prettyCompactStringify } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
 
 import type { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
-import type { VegaByValueState } from '../../server';
 import { CodeEditor, HJSON_LANG_ID } from '@kbn/code-editor';
 import { type UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import type { VegaByValueState } from '../../server';
 import { getNotifications } from '../services';
 import type { VisParams } from '../vega_fn';
 import { VegaHelpMenu } from './vega_help_menu';

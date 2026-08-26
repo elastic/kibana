@@ -64,9 +64,7 @@ export const VegaEditorFlyout = ({
   onSave: (spec: VegaByValueState['spec']) => void;
 }) => {
   const initialEditorValue =
-    initialSpec.format === 'json'
-      ? JSON.stringify(initialSpec.value, null, 2)
-      : initialSpec.value;
+    initialSpec.format === 'json' ? JSON.stringify(initialSpec.value, null, 2) : initialSpec.value;
   const [spec, setSpec] = useState(initialEditorValue);
   const [previewedSpec, setPreviewedSpec] = useState(initialEditorValue);
   const [format, setFormat] = useState<VegaByValueState['spec']['format']>(initialSpec.format);

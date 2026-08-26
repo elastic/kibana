@@ -291,8 +291,7 @@ export const vegaEmbeddableFactory = (
               query: data.query as Query,
               filters: data.filters,
               visParams: {
-                spec:
-                  spec.format === 'json' ? JSON.stringify(spec.value) : spec.value,
+                spec: spec.format === 'json' ? JSON.stringify(spec.value) : spec.value,
               },
               searchSessionId: data.searchSessionId,
               executionContext: {
