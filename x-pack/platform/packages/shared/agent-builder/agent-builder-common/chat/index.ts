@@ -163,6 +163,7 @@ export type { ConversationListOptions } from './conversation_list';
 export {
   CONVERSATION_SCHEMA_VERSION,
   MIN_EVENTS_NATIVE_SCHEMA_VERSION,
+  isEventsNativeVersion,
   EventActorType,
   TimelineTriggerType,
   TimelineEventType,
