@@ -394,3 +394,31 @@ describe('htmlToStructured — anchor attribute boundaries', () => {
     expect(htmlToStructured(html)).toContain('https://c2.evil.test/spaced');
   });
 });
+
+describe('stripHtml — entity table lookup safety', () => {
+  // A bare object literal inherits Object.prototype, so these names resolved to
+  // functions and the `!== undefined` guard treated them as valid replacements,
+  // injecting `function Object() { [native code] }` into the report body from
+  // untrusted feed HTML.
+  it.each(['constructor', 'toString', 'valueOf', 'hasOwnProperty', '__proto__'])(
+    'leaves &%s; alone instead of resolving a prototype member',
+    (name) => {
+      const out = stripHtml(`<p>value &${name}; here</p>`);
+      expect(out).toBe(`value &${name}; here`);
+      expect(out).not.toContain('native code');
+      expect(out).not.toContain('[object Object]');
+    }
+  );
+
+  it('still decodes the real named entities', () => {
+    expect(stripHtml('<p>a &amp; b &nbsp; c &hellip;</p>')).toBe('a & b c \u2026');
+  });
+
+  it('still decodes numeric and hex entities', () => {
+    expect(stripHtml('<p>&#65;&#x42;</p>')).toBe('AB');
+  });
+
+  it('leaves an out-of-range code point as literal text', () => {
+    expect(stripHtml('<p>&#9999999;</p>')).toBe('&#9999999;');
+  });
+});

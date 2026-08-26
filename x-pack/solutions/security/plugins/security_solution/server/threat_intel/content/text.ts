@@ -50,23 +50,32 @@ export const stripHtml = (html: string | undefined | null): string => {
   return collapseWhitespace(decoded);
 };
 
-const NAMED_ENTITIES: Record<string, string> = {
-  amp: '&',
-  lt: '<',
-  gt: '>',
-  quot: '"',
-  apos: "'",
-  nbsp: ' ',
-  copy: '\u00a9',
-  reg: '\u00ae',
-  hellip: '\u2026',
-  mdash: '\u2014',
-  ndash: '\u2013',
-  lsquo: '\u2018',
-  rsquo: '\u2019',
-  ldquo: '\u201c',
-  rdquo: '\u201d',
-};
+/**
+ * A `Map`, not an object literal. A bare object inherits from `Object.prototype`, so
+ * `NAMED_ENTITIES['constructor']` resolves to a function and the `!== undefined`
+ * guard below treats it as a valid replacement. Feed HTML containing `&constructor;`
+ * or `&toString;` then injected `function Object() { [native code] }` into the report
+ * body, which flows on to the LLM stages and IOC extraction.
+ */
+const NAMED_ENTITIES = new Map<string, string>(
+  Object.entries({
+    amp: '&',
+    lt: '<',
+    gt: '>',
+    quot: '"',
+    apos: "'",
+    nbsp: ' ',
+    copy: '\u00a9',
+    reg: '\u00ae',
+    hellip: '\u2026',
+    mdash: '\u2014',
+    ndash: '\u2013',
+    lsquo: '\u2018',
+    rsquo: '\u2019',
+    ldquo: '\u201c',
+    rdquo: '\u201d',
+  })
+);
 
 /**
  * `String.fromCodePoint` throws on anything above the Unicode maximum, and feed
@@ -83,7 +92,7 @@ const decodeEntities = (input: string): string =>
     if (entity.startsWith('#')) {
       return codePointToString(parseInt(entity.slice(1), 10), match);
     }
-    const replacement = NAMED_ENTITIES[entity];
+    const replacement = NAMED_ENTITIES.get(entity);
     return replacement !== undefined ? replacement : match;
   });
 
