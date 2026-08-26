@@ -48,8 +48,8 @@ FROM ai-index-*
 
 When the KI stores an array of queries, the extracted value is multivalued: `IS NOT NULL`
 still filters correctly, but scalar comparisons like `==` skip multivalued rows. Add
-`| MV_EXPAND esql` after the `EVAL` to get one row per query when you need per-query
-filtering.
+`| MV_EXPAND esql` after the `WHERE esql IS NOT NULL` to get one row per query when you
+need per-query filtering.
 
 ### Space scoping
 

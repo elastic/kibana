@@ -114,8 +114,8 @@ Do **not** hand-write or persist workflow YAML yourself. Use these tools:
 
 - **platform.core.generate_workflow** — create or edit a workflow from a natural-language description.
   Pass this skill's workflow shape descriptions as the spec (include the target AI index id, source
-  indices, the `ai.prompt` profile + access pattern requirements, the validation step, the verified
-  KI sink, and the KI doc shape).
+  indices, the `ai.prompt` profile + access pattern requirements, the verified KI sink
+  (`verifyKi` gate → `createKi`), and the KI doc shape).
   It emits a diff card and workflow attachment; it does NOT save the workflow.
 - **platform.core.execute_workflow** — run a workflow after the user has saved it.
 - **platform.core.execute_esql** — run an ES|QL query. Use it to validate that "example queries" are functional and correct.
@@ -299,7 +299,9 @@ Retrieve the 1–3 generated KIs by running `FROM <backing index of the AI index
 
 Ask yourself:
 - Is the output the expected structure?
-- are the access patterns correct?
+- are the access patterns correct? Run each `esql_example` with `platform.core.execute_esql` —
+  the ES|QL verifier only parses, so a query can pass verification yet fail on unknown fields
+  at execution time.
 - would I, as an Agent, find this context useful?
 - If any two KIs have similar titles, query for one of them specifically and confirm it out-ranks its near-duplicate siblings. If it doesn't, the `description` is not carrying enough differentiating signal — fix that before expanding. Only do this query > improve description test once, and move on after.
 
@@ -433,9 +435,12 @@ description: |
 ## Writing and verifying KIs — the `context-engine` steps
 
 Sink KIs with the dedicated `context-engine` workflow steps — never with raw
-`elasticsearch.index`. The dedicated steps validate the KI shape, enforce the Context Engine
-write privilege, resolve the AI index to its backing store, and are the write path the
-verification gate below protects. All `context-engine` steps require the Context Engine advanced
+`elasticsearch.index`. The dedicated steps enforce the Context Engine write privilege,
+resolve the AI index to its backing store, and are the write path the verification gate
+below protects. They do **not** validate the `ki` object's shape at runtime — a `ki` built
+with `data.set` is indexed as-is — so the workflow must produce the "KI document shape"
+above itself: `type` and `title` present, no top-level `@timestamp` (a caller-supplied
+`@timestamp` is not stripped). All `context-engine` steps require the Context Engine advanced
 setting (`contextEngine:enabled`); confirm availability and exact params with
 `platform.workflows.get_step_definitions`.
 
@@ -444,16 +449,20 @@ setting (`contextEngine:enabled`); confirm availability and exact params with
 | `context-engine.createKi` | `ai_index_id`, `ki_id` (optional), `ki` | `id` of the created KI |
 | `context-engine.updateKi` | `ai_index_id`, `ki_id`, `ki` (partial — only the provided fields change) | `id`, `result` (`updated` or `noop`) |
 | `context-engine.deleteKi` | `ai_index_id`, `ki_id` | `id` of the deleted KI |
-| `context-engine.verifyKi` | `ki` (a partial KI is accepted) | `passed`, `results[]` — one `{ verifier, passed, reason }` per applicable verifier |
+| `context-engine.verifyKi` | `ki` (a partial KI is accepted) | `passed`, `results[]` — one `{ verifier, passed, reason }` per applicable verifier (`reason` is present on failures) |
 
-- `ai_index_id` is the **AI index id**, not an Elasticsearch index name. `createKi`
-  auto-creates the AI index when it does not exist yet, always backed by a regular index
-  (`ai-index-idx-<id>`); an AI index backed by a datastream (`ai-index-ds-*`, for timeseries
-  KIs) must be created in the Context Engine beforehand.
+- `ai_index_id` is the **AI index id**, not an Elasticsearch index name. It must match
+  `^[a-z0-9][a-z0-9_-]*$` (lowercase letters and digits, plus `_`/`-`) — other ids fail
+  auto-creation. `createKi` auto-creates the AI index when it does not exist yet, always
+  backed by a regular index (`ai-index-idx-<id>`); an AI index backed by a datastream
+  (`ai-index-ds-*`, for timeseries KIs) must be created in the Context Engine beforehand.
+  If a backing index named `ai-index-idx-<id>` already exists but was created outside the
+  Context Engine (e.g. directly by an older workflow, with incompatible mappings), writes
+  can fail — pick a new id or remove the stale index first.
 - `createKi` sets `@timestamp` itself. Pass `ki_id` for a stable, caller-chosen document id —
   re-runs with the same `ki_id` replace the KI, making writes idempotent (see the KI upsert
-  below). Index-backed AI indices accept `ki_id`; data-stream-backed AI indices always
-  generate the id.
+  below). Index-backed AI indices accept `ki_id`; data-stream-backed AI indices generate the
+  id and **reject** a supplied `ki_id` (the write fails).
 - The `ki` object is the "KI document shape" above: `type` and `title` required;
   `description`, `content`, `tags`, `attributes` optional.
 
@@ -465,6 +474,10 @@ the KI and returns a per-verifier summary; each failure names the `verifier` and
 applies only when the KI carries `attributes.esql`. When no verifier applies, the step
 passes with empty `results`. Do not hardcode a verifier list; newly registered verifiers
 apply automatically.
+
+The ES|QL verifier is a **static parse** — it checks syntax only and never runs the query,
+so a query referencing a nonexistent field or index still passes. Execute each
+`esql_example` live with `platform.core.execute_esql` (Phase 5) to catch those.
 
 Verification is not built into the write steps, so an ungated workflow will silently
 persist a KI whose ES|QL does not even parse. Every generated workflow must gate its
@@ -487,11 +500,10 @@ appending a duplicate — this is the default for every re-runnable workflow.
 
 When a re-run must **merge** with the stored KI instead of replacing it (union
 `evidence`/`tags`, average `confidence` — see the dedup rules in the grounding contract):
-read the stored KI first
-(`FROM <backing index> METADATA _id, _source | WHERE _id == "<ki_id>" | LIMIT 1`), compute
-the merged fields in the workflow, and write them with `context-engine.updateKi`. Create the
-backing index up front (`elasticsearch.indices.create` with `on-failure: continue`, as in
-the reference workflow) so this read works on the very first run, before any KI exists.
+read the stored KI first with an `elasticsearch.search` step using an `ids` query
+(`ids: { values: ["<ki_id>"] }`) and `ignore_unavailable: true` — it returns empty hits,
+instead of erroring, before the backing index exists on the very first run. Compute the
+merged fields in the workflow and write them with `context-engine.updateKi`.
 
 Note: `createKi` refreshes `@timestamp` on each replace; `updateKi` keeps the stored one. A
 merge flow that needs a reliable last-profiled date should write it into `attributes` (e.g.
@@ -651,7 +663,7 @@ Detection guardrails (bake into the prompt):
 
 ## Adapting the recipe
 
-- **Scheduling:** When the workflow runs on a schedule, query `FROM <backing index> METADATA _id | WHERE _id == "<ki_id>" | KEEP @timestamp | LIMIT 1` to retrieve the KI's last-profiled date (`createKi` refreshes `@timestamp` on each replace; merge flows using `updateKi` should compare `attributes.last_profiled_at` instead — see the KI upsert note). Ensure the backing index exists first (see the KI upsert) so this query works on the first run. Skip re-profiling if the source index has not been updated since that timestamp (e.g. check with `elasticsearch.search` using a `range` query on the source index's `@timestamp`). This avoids burning LLM tokens on unchanged data.
+- **Scheduling:** When the workflow runs on a schedule, read the KI's last-profiled date with an `elasticsearch.search` step using an `ids` query on `<ki_id>` and `ignore_unavailable: true` — empty hits (not an error) means never profiled, including before the backing index exists on the first run. `createKi` refreshes `@timestamp` on each replace; merge flows using `updateKi` should compare `attributes.last_profiled_at` instead — see the KI upsert note. Skip re-profiling if the source index has not been updated since that timestamp (e.g. check with `elasticsearch.search` using a `range` query on the source index's `@timestamp`). This avoids burning LLM tokens on unchanged data.
 
 - **Large or noisy indices (multi-iteration with exclusion):** For indices whose content cannot be captured in a single 20-document random sample, use a while-loop convergence pattern: `sample_docs` → `profile_index` → merge into the accumulated result → repeat. Crucially, **exclude what you've already covered on each re-sample** rather than re-rolling blindly: add a `must_not` filter for the entities/patterns already profiled (e.g. `must_not` on known `service.name` values) so each pass sees *new* data instead of re-profiling the same dominant records. Combine with `random_score` for variety within the not-yet-covered slice. Stop when a pass surfaces nothing new, `coverage` meets threshold, or max iterations is reached — whichever comes first. Merge per the dedup rules in the grounding contract.
 

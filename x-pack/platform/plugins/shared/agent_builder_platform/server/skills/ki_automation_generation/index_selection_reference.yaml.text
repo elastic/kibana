@@ -9,8 +9,9 @@ tags:
   - index-selection
   - knowledge-indicators
 consts:
-  # Context Engine AI index id; createKi registers the AI index if missing.
-  # Its backing index is ai-index-idx-{{ consts.ai_index_id }}.
+  # Context Engine AI index id; createKi registers the AI index if missing,
+  # backed by ai-index-idx-{{ consts.ai_index_id }}. If an AI index with this id
+  # is already registered, createKi writes to its existing destination instead.
   ai_index_id: ki-example
   indices:
     - raw-cases-all
@@ -19,12 +20,6 @@ consts:
 triggers:
   - type: manual
 steps:
-  - name: ensure_target_index
-    type: elasticsearch.indices.create
-    with:
-      index: "ai-index-idx-{{ consts.ai_index_id }}"
-    on-failure:
-      continue: true
   - name: loop_indices
     type: foreach
     foreach: "{{ consts.indices | json }}"
@@ -113,6 +108,7 @@ steps:
                 description: >
                   One entry per authoritative question-class. Each is a parameterized
                   ES|QL query the agent fills in at ask-time.
+                minItems: 1
                 items:
                   type: object
                   properties:
@@ -134,6 +130,10 @@ steps:
                           type: { type: string }
                           example: { type: string }
                     returns: { type: string }
+                  required:
+                    - question_type
+                    - esql_template
+                    - esql_example
             required:
               - display_name
               - purpose
@@ -156,7 +156,6 @@ steps:
               # Put every ES|QL query the KI carries in attributes.esql so verifiers check it.
               # Here: each access pattern's runnable esql_example.
               esql: "${{ steps.profile_index.output.content.access_patterns | map: 'esql_example' }}"
-              ingestion_method: manual
               key_fields: "{{ steps.profile_index.output.content.key_fields | join: ', ' }}"
               when_to_use: "{{ steps.profile_index.output.content.when_to_use }}"
               joins: "{{ steps.profile_index.output.content.joins | join: ', ' }}"
