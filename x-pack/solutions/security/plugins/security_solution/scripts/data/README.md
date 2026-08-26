@@ -139,7 +139,7 @@ Then confirm in Alerts UI that `kibana.alert.rule.name` / severity / MITRE / rea
 
 ## Threat intel RSS (mustard demo)
 
-`--threat-intel` seeds **one enabled RSS source per selected pack** into `.kibana-threat-intel-sources`, plus a digest subscription in `.kibana-threat-intel-subscriptions`. Each feed is a `data:application/rss+xml,...` URL with a **single current item** (canonical title, no dated duplicate) so mustard `source_ingestion` demos real ingest once per pack without minting near-duplicate "today" cards.
+`--threat-intel` seeds **one enabled RSS source per selected pack** into `.kibana-threat-intel-sources`. Each feed is a `data:application/rss+xml,...` URL with a **single current item** (canonical title, no dated duplicate) so mustard `source_ingestion` demos real ingest once per pack without minting near-duplicate "today" cards.
 
 `--threat-intel-reports` (implies `--threat-intel`) also bulk-writes **seeded historic reports** into `.kibana-threat-reports` from `--start-date` through **`--end-date` minus 24h**. The trailing day is left empty so mustard `source_ingestion` can create the real Last-24h reports. Historic docs rotate distinct per-pack article variants (`historicArticles` in `PACK_TI_SCENARIOS`) so Hub timelines are not the same four titles with date suffixes. The newest ~40% of historic slots also use per-pack emerging `source.name` aliases (older slots stay on the four canonical names) so Hub **Sources** can rise vs prior period; live RSS and the Sources index stay canonical. Newest historic slots use Critical/High so longer presets still show severity variety. Use `--threat-intel-report-count` to override the default **12 historic reports per pack**.
 
@@ -154,7 +154,7 @@ Observable contract in `lib/threat_intel_fixtures.ts` (`PACK_TI_SCENARIOS`):
 
 This is independent of the episode entity catalog (`lib/entities.ts`). Packs are mostly hostless SaaS/cloud audit; Entity Graph for packs is user ↔ IP via `related.*`.
 
-Fixture ids/names stay eval-neutral (`ti-rss-<pack>`, subscription `threat-intel-digest`). They do **not** use `data-generator` branding in document fields.
+Fixture ids/names stay eval-neutral (`ti-rss-<pack>`). They do **not** use `data-generator` branding in document fields.
 
 Environment telemetry is the Technology Watch packs (`logs-okta.system.*`, `logs-aws.cloudtrail.*`, `logs-kubernetes.audit.*`, `logs-github.audit.*`). This path does **not** write `logs-aws.local` or merge with the mustard branch. Generate here, then run mustard Kibana against the same Elasticsearch.
 
@@ -190,8 +190,7 @@ Restart Kibana after flag changes (`iocIndicatorSyncEnabled` syncs extracted IOC
 1. Generate once with the command above (packs + TI RSS + historic Hub reports + preview alerts). Confirm generate logs `Seeded N threat report(s) into .kibana-threat-reports`.
 2. Run `threat-intel.source_ingestion` → pending reports from the four `ti-rss-*` sources (**1 current RSS item each**) into the live 24h window only.
 3. Run `threat-intel.nl_extraction_behavioral` → IOCs, behaviors, categories, regions (and severity, once mustard enrich classifies it) on those workflow-ingested reports.
-4. Run `threat-intel.digest_delivery` → seeded `threat-intel-digest` subscription produces a digest row.
-5. Run `threat-intel.hit_provenance_backfill` → updates `provenance.environment_hits*` from **Detection Engine alerts** (Indicator Match / technique overlap), not from raw pack `logs-*`. Expect non-zero Env. hits after preview alerts + indicator sync.
+4. Run `threat-intel.hit_provenance_backfill` → updates `provenance.environment_hits*` from **Detection Engine alerts** (Indicator Match / technique overlap), not from raw pack `logs-*`. Expect non-zero Env. hits after preview alerts + indicator sync.
 
 **B. Tier 1 / Tier 2 hunts (Agent Builder tools from PR 269002)**
 
@@ -232,7 +231,7 @@ After step 3 (extraction), in Agent Builder use topic prompts that force the hun
 - `-h`, `--hosts` / `-u`, `--users`: Entity pool sizes (default: `5`)
 - `--start-date` / `--end-date`: Date math window (default: `1d` → `now`)
 - `--seed`: Deterministic scaling
-- `--clean`: Delete generator-owned episode indices, pack indices (selected `--packs`, or all packs if omitted), matching alerts, pack custom rules, discoveries, cases, and generator TI RSS sources/subscription. With `--alert-mode none`, hunts are deleted and not reinstalled.
+- `--clean`: Delete generator-owned episode indices, pack indices (selected `--packs`, or all packs if omitted), matching alerts, pack custom rules, discoveries, cases, and generator TI RSS sources. With `--alert-mode none`, hunts are deleted and not reinstalled.
 
 ### Episodes + packs
 
@@ -250,7 +249,7 @@ After step 3 (extraction), in Agent Builder use topic prompts that force the hun
 
 ### Optional extras
 
-- `--threat-intel`: Per-pack RSS sources + digest subscription for mustard TI workflows (defaults `--packs` to all four when omitted)
+- `--threat-intel`: Per-pack RSS sources for mustard TI workflows (defaults `--packs` to all four when omitted)
 - `--threat-intel-reports`: Also seed historic Hub reports into `.kibana-threat-reports` across the generate window (implies `--threat-intel`)
 - `--threat-intel-report-count`: Historic reports per pack (default: 12) when `--threat-intel-reports` is set
 - `--attacks`: Synthetic Attack Discoveries
@@ -271,7 +270,7 @@ After step 3 (extraction), in Agent Builder use topic prompts that force the hun
 3. Optional `--clean`
 4. Scale + index episode events/alerts into concrete indices
 5. Index selected packs (+ install custom MITRE hunts unless `alert-mode=none`)
-6. Optional `--threat-intel` / `--threat-intel-reports`: seed per-pack RSS sources + digest subscription (+ historic Hub reports when reports flag is set)
+6. Optional `--threat-intel` / `--threat-intel-reports`: seed per-pack RSS sources (+ historic Hub reports when reports flag is set)
 7. Initialize detections / ensure preview index (skipped for `none`)
 8. **preview:** honest Rule Preview per producing rule → copy  
    **live:** enable rules for the detection engine (unless `--leave-rules-disabled`)  
