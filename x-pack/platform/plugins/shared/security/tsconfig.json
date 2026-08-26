@@ -20,6 +20,8 @@
   ],
   "kbn_references": [
     "@kbn/cloud-plugin",
+    "@kbn/encrypted-saved-objects-plugin",
+    "@kbn/es-query",
     "@kbn/features-plugin",
     "@kbn/licensing-plugin",
     "@kbn/spaces-plugin",
@@ -120,6 +122,7 @@
     "@kbn/projects-solutions-groups",
     "@kbn/unsaved-changes-prompt",
     "@kbn/ui-callout",
+    "@kbn/zod",
   ],
   "exclude": ["target/**/*"]
 }
