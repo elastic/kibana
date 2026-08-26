@@ -74,9 +74,8 @@ spaceTest.describe(
           });
 
           await expect(panelError).toBeVisible();
-          expect(
-            await pageObjects.panelInspector.getSearchSessionIdByPanelTitle(UNDELAYED_PANEL_TITLE)
-          ).toBe(FAKE_SEARCH_SESSION_ID);
+          await pageObjects.dashboard.openInspector(UNDELAYED_PANEL_TITLE);
+          expect(await pageObjects.inspector.getSearchSessionId()).toBe(FAKE_SEARCH_SESSION_ID);
         });
 
         await spaceTest.step('re-submitting starts a fresh session and renders', async () => {
@@ -87,18 +86,16 @@ spaceTest.describe(
           // The dashboard rewrites the hash asynchronously; waiting on the predicate avoids
           // reading the URL before the restored id has been dropped.
           await page.waitForURL((url) => !url.href.includes('searchSessionId'));
-          expect(
-            await pageObjects.panelInspector.getSearchSessionIdByPanelTitle(UNDELAYED_PANEL_TITLE)
-          ).not.toBe(FAKE_SEARCH_SESSION_ID);
+          await pageObjects.dashboard.openInspector(UNDELAYED_PANEL_TITLE);
+          expect(await pageObjects.inspector.getSearchSessionId()).not.toBe(FAKE_SEARCH_SESSION_ID);
         });
 
         await spaceTest.step('going back restores the session from the URL', async () => {
           await page.goBack();
           await page.waitForURL(/searchSessionId/);
 
-          expect(
-            await pageObjects.panelInspector.getSearchSessionIdByPanelTitle(UNDELAYED_PANEL_TITLE)
-          ).toBe(FAKE_SEARCH_SESSION_ID);
+          await pageObjects.dashboard.openInspector(UNDELAYED_PANEL_TITLE);
+          expect(await pageObjects.inspector.getSearchSessionId()).toBe(FAKE_SEARCH_SESSION_ID);
         });
       }
     );

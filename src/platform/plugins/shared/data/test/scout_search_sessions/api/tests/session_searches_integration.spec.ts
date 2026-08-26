@@ -20,17 +20,16 @@
  * so they belong here rather than in a UI spec.
  */
 
-import type { ApiClientFixture } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import {
   apiTest,
   SESSION_API_PATH,
-  ESE_API_PATH,
   COMMON_HEADERS,
   waitFor,
   randomSessionId,
-  randomHash,
+  submitSearch,
+  saveSession,
 } from '../fixtures';
 
 const ONE_MINUTE_MS = 60_000;
@@ -45,59 +44,20 @@ apiTest.describe(
       ({ cookieHeader } = await samlAuth.asInteractiveUser('admin'));
     });
 
-    /**
-     * Submits a search under `sessionId` and returns the Elasticsearch async search id.
-     * `wait_for_completion_timeout: '1ms'` guarantees the search is still running when it
-     * returns, so it has an id to track.
-     */
-    const submitSearch = async (
-      apiClient: ApiClientFixture,
-      sessionId: string,
-      { isStored }: { isStored?: boolean } = {}
-    ): Promise<string> => {
-      const response = await apiClient.post(ESE_API_PATH, {
-        headers: { ...COMMON_HEADERS, ...cookieHeader },
-        body: {
-          sessionId,
-          ...(isStored ? { isStored: true } : {}),
-          params: {
-            body: { query: { match_all: {} } },
-            wait_for_completion_timeout: '1ms',
-          },
-          requestHash: randomHash(),
-        },
-      });
-
-      expect(response).toHaveStatusCode(200);
-      return response.body.id;
-    };
-
-    const saveSession = async (apiClient: ApiClientFixture, sessionId: string) => {
-      const response = await apiClient.post(SESSION_API_PATH, {
-        headers: { ...COMMON_HEADERS, ...cookieHeader },
-        body: {
-          sessionId,
-          name: 'My Session',
-          appId: 'discover',
-          expires: '123',
-          locatorId: 'discover',
-        },
-      });
-      expect(response).toHaveStatusCode(200);
-    };
-
     apiTest(
       'keeps an unsaved session short-lived and extends it once the session is saved and extended',
       async ({ apiClient, esClient }) => {
         const sessionId = randomSessionId();
 
-        const unsavedSearchId = await submitSearch(apiClient, sessionId);
+        const unsavedSearchId = await submitSearch(apiClient, sessionId, cookieHeader);
         const unsavedStatus = await esClient.asyncSearch.status({ id: unsavedSearchId });
         expect(unsavedStatus.expiration_time_in_millis).toBeLessThan(Date.now() + ONE_MINUTE_MS);
 
-        await saveSession(apiClient, sessionId);
+        await saveSession(apiClient, sessionId, cookieHeader);
 
-        const storedSearchId = await submitSearch(apiClient, sessionId, { isStored: true });
+        const storedSearchId = await submitSearch(apiClient, sessionId, cookieHeader, {
+          isStored: true,
+        });
         // Kibana extends the keep-alive asynchronously once the search is tracked by the session.
         await waitFor(
           async () => {
@@ -135,8 +95,8 @@ apiTest.describe(
       async ({ apiClient, esClient }) => {
         const sessionId = randomSessionId();
 
-        await saveSession(apiClient, sessionId);
-        const searchId = await submitSearch(apiClient, sessionId, { isStored: true });
+        await saveSession(apiClient, sessionId, cookieHeader);
+        const searchId = await submitSearch(apiClient, sessionId, cookieHeader, { isStored: true });
 
         // Only searches the session has actually tracked get cleaned up with it.
         await waitFor(
@@ -178,8 +138,8 @@ apiTest.describe(
       async ({ apiClient, esClient }) => {
         const sessionId = randomSessionId();
 
-        await saveSession(apiClient, sessionId);
-        const firstId = await submitSearch(apiClient, sessionId, { isStored: true });
+        await saveSession(apiClient, sessionId, cookieHeader);
+        const firstId = await submitSearch(apiClient, sessionId, cookieHeader, { isStored: true });
 
         // Wait for the first ES async search to finish — modelling the state where all of a
         // session's tracked searches are done, but a follow-up (e.g. an "other bucket" filter
@@ -209,7 +169,7 @@ apiTest.describe(
 
         // Submit the follow-up after the first search is done. The session engine must accept
         // and track it even though its existing search has already completed.
-        const secondId = await submitSearch(apiClient, sessionId, { isStored: true });
+        const secondId = await submitSearch(apiClient, sessionId, cookieHeader, { isStored: true });
 
         await waitFor(
           async () => {

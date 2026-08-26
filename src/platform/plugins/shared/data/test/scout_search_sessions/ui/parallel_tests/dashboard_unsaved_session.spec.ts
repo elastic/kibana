@@ -30,14 +30,21 @@ spaceTest.describe(
     spaceTest.beforeEach(async ({ apiServices, browserAuth, pageObjects, scoutSpace }) => {
       await apiServices.sampleData.install(FLIGHTS_SAMPLE_DATA_SET, scoutSpace.id);
 
-      await browserAuth.loginAsPrivilegedUser();
+      await apiServices.discover.create(
+        {
+          title: SAVED_SEARCH_TITLE,
+          tabs: [
+            {
+              id: 'slow-query',
+              label: SAVED_SEARCH_TITLE,
+              data_source: { type: 'esql', query: SLOW_ESQL_QUERY },
+            },
+          ],
+        },
+        scoutSpace.id
+      );
 
-      await pageObjects.discover.goto({ queryMode: 'esql' });
-      await pageObjects.discover.waitUntilTabIsLoaded();
-      await pageObjects.discover.codeEditor.setCodeEditorValue(SLOW_ESQL_QUERY);
-      await pageObjects.discover.submitQuery();
-      await pageObjects.discover.waitUntilSearchingHasFinished();
-      await pageObjects.discover.saveSearch(SAVED_SEARCH_TITLE);
+      await browserAuth.loginAsPrivilegedUser();
 
       await pageObjects.dashboard.openNewDashboard();
       await pageObjects.dashboard.addPanelFromLibrary(SAVED_SEARCH_TITLE);
@@ -47,21 +54,13 @@ spaceTest.describe(
       await pageObjects.backgroundSearch.sendToBackground({ isSubmitButton: true });
     });
 
-    spaceTest.afterEach(async ({ page, kbnUrl, scoutSpace }) => {
+    spaceTest.afterEach(async ({ page, kbnUrl, pageObjects, scoutSpace }) => {
       await deleteAllBackgroundSearches({ page, kbnUrl, spaceId: scoutSpace.id });
       await scoutSpace.savedObjects.cleanStandardList();
-
-      // The leftover "New Dashboard" draft would be restored by the next openNewDashboard(). It has
-      // to be discarded from the listing: while the dashboard is mounted its unsaved-changes
+      // The leftover "New Dashboard" draft would be restored by the next openNewDashboard(). It
+      // has to be discarded from the listing: while the dashboard is mounted its unsaved-changes
       // manager keeps rewriting the session storage key, so clearing it in place is undone.
-      await page.gotoApp('dashboards');
-      const discardDraftButton = page.testSubj.locator('discard-unsaved-New-Dashboard');
-      // Guarded because a test that failed before adding the panel leaves no draft behind.
-      if (await discardDraftButton.isVisible()) {
-        await discardDraftButton.click();
-        await page.testSubj.click('confirmModalConfirmButton');
-        await discardDraftButton.waitFor({ state: 'hidden' });
-      }
+      await pageObjects.dashboard.discardUnsavedDashboard();
     });
 
     spaceTest.afterAll(async ({ scoutSpace }) => {
@@ -91,10 +90,7 @@ spaceTest.describe(
       'restores the unsaved dashboard after its draft has been discarded',
       async ({ page, pageObjects }) => {
         await pageObjects.dashboard.waitForRenderComplete();
-
-        await page.gotoApp('dashboards');
-        await page.testSubj.click('discard-unsaved-New-Dashboard');
-        await page.testSubj.click('confirmModalConfirmButton');
+        await pageObjects.dashboard.discardUnsavedDashboard();
 
         await pageObjects.backgroundSearchManagement.goTo();
         await pageObjects.backgroundSearchManagement.waitForRowStatus('complete');

@@ -54,16 +54,15 @@ spaceTest.describe(
         await spaceTest.step(
           'navigating to the Lens editor and back starts a new session for a by-reference panel',
           async () => {
-            const byRefSessionId = await pageObjects.panelInspector.getSearchSessionIdByPanelTitle(
-              LENS_TITLE
-            );
+            await pageObjects.dashboard.openInspector(LENS_TITLE);
+            const byRefSessionId = await pageObjects.inspector.getSearchSessionId();
 
             await pageObjects.dashboard.navigateToLensEditorFromPanel(LENS_TITLE);
             await pageObjects.lens.saveAndReturn();
             await pageObjects.dashboard.waitForRenderComplete();
 
-            const newByRefSessionId =
-              await pageObjects.panelInspector.getSearchSessionIdByPanelTitle(LENS_TITLE);
+            await pageObjects.dashboard.openInspector(LENS_TITLE);
+            const newByRefSessionId = await pageObjects.inspector.getSearchSessionId();
             expect(newByRefSessionId).not.toBe(byRefSessionId);
           }
         );
@@ -74,15 +73,15 @@ spaceTest.describe(
             await pageObjects.dashboard.unlinkFromLibrary(LENS_TITLE);
             await pageObjects.dashboard.waitForRenderComplete();
 
-            const byValueSessionId =
-              await pageObjects.panelInspector.getSearchSessionIdByPanelTitle(LENS_TITLE);
+            await pageObjects.dashboard.openInspector(LENS_TITLE);
+            const byValueSessionId = await pageObjects.inspector.getSearchSessionId();
 
             await pageObjects.dashboard.navigateToLensEditorFromPanel(LENS_TITLE);
             await pageObjects.lens.saveAndReturn();
             await pageObjects.dashboard.waitForRenderComplete();
 
-            const newByValueSessionId =
-              await pageObjects.panelInspector.getSearchSessionIdByPanelTitle(LENS_TITLE);
+            await pageObjects.dashboard.openInspector(LENS_TITLE);
+            const newByValueSessionId = await pageObjects.inspector.getSearchSessionId();
             expect(newByValueSessionId).toBe(byValueSessionId);
           }
         );

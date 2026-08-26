@@ -44,13 +44,13 @@ spaceTest.describe('Discover search session state', { tag: '@local-stateful-clas
 
   spaceTest('assigns a new search session id to each search', async ({ pageObjects }) => {
     await pageObjects.unifiedTabs.openInspectorForActiveTab();
-    const firstSessionId = await pageObjects.panelInspector.readSearchSessionId();
+    const firstSessionId = await pageObjects.inspector.getSearchSessionId();
 
     await pageObjects.discover.submitQuery();
     await pageObjects.discover.waitUntilSearchingHasFinished();
 
     await pageObjects.unifiedTabs.openInspectorForActiveTab();
-    const secondSessionId = await pageObjects.panelInspector.readSearchSessionId();
+    const secondSessionId = await pageObjects.inspector.getSearchSessionId();
     expect(secondSessionId).not.toBe(firstSessionId);
   });
 
@@ -63,7 +63,7 @@ spaceTest.describe('Discover search session state', { tag: '@local-stateful-clas
         await page.components.toast().closeAll();
 
         await pageObjects.unifiedTabs.openInspectorForActiveTab();
-        expect(await pageObjects.panelInspector.readSearchSessionId()).toBe(FAKE_SEARCH_SESSION_ID);
+        expect(await pageObjects.inspector.getSearchSessionId()).toBe(FAKE_SEARCH_SESSION_ID);
       });
 
       await spaceTest.step('re-submitting the query starts a fresh session', async () => {
@@ -78,9 +78,7 @@ spaceTest.describe('Discover search session state', { tag: '@local-stateful-clas
         await page.waitForURL((url) => !url.href.includes('searchSessionId'));
 
         await pageObjects.unifiedTabs.openInspectorForActiveTab();
-        expect(await pageObjects.panelInspector.readSearchSessionId()).not.toBe(
-          FAKE_SEARCH_SESSION_ID
-        );
+        expect(await pageObjects.inspector.getSearchSessionId()).not.toBe(FAKE_SEARCH_SESSION_ID);
       });
 
       await spaceTest.step('going back restores the session from the URL', async () => {
@@ -88,7 +86,7 @@ spaceTest.describe('Discover search session state', { tag: '@local-stateful-clas
         await page.waitForURL(/searchSessionId/);
 
         await pageObjects.unifiedTabs.openInspectorForActiveTab();
-        expect(await pageObjects.panelInspector.readSearchSessionId()).toBe(FAKE_SEARCH_SESSION_ID);
+        expect(await pageObjects.inspector.getSearchSessionId()).toBe(FAKE_SEARCH_SESSION_ID);
       });
     }
   );

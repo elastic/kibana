@@ -84,12 +84,10 @@ spaceTest.describe('Dashboard search timeout', { tag: '@local-stateful-classic' 
         // The toast overlays the panels the inspector is opened from.
         await page.components.toast().closeAll();
 
-        undelayedSessionId = await pageObjects.panelInspector.getSearchSessionIdByPanelTitle(
-          UNDELAYED_PANEL_TITLE
-        );
-        const delayedSessionId = await pageObjects.panelInspector.getSearchSessionIdByPanelTitle(
-          DELAYED_PANEL_TITLE
-        );
+        await pageObjects.dashboard.openInspector(UNDELAYED_PANEL_TITLE);
+        undelayedSessionId = await pageObjects.inspector.getSearchSessionId();
+        await pageObjects.dashboard.openInspector(DELAYED_PANEL_TITLE);
+        const delayedSessionId = await pageObjects.inspector.getSearchSessionId();
 
         expect(delayedSessionId).toBe(undelayedSessionId);
       });
@@ -104,21 +102,18 @@ spaceTest.describe('Dashboard search timeout', { tag: '@local-stateful-classic' 
           .poll(
             async () => {
               await page.components.toast().closeAll();
-              const currentSessionId =
-                await pageObjects.panelInspector.getSearchSessionIdByPanelTitle(
-                  UNDELAYED_PANEL_TITLE
-                );
+              await pageObjects.dashboard.openInspector(UNDELAYED_PANEL_TITLE);
+              const currentSessionId = await pageObjects.inspector.getSearchSessionId();
               return currentSessionId !== undelayedSessionId;
             },
             { timeout: 30_000 }
           )
           .toBe(true);
 
-        const newUndelayedSessionId =
-          await pageObjects.panelInspector.getSearchSessionIdByPanelTitle(UNDELAYED_PANEL_TITLE);
-        const newDelayedSessionId = await pageObjects.panelInspector.getSearchSessionIdByPanelTitle(
-          DELAYED_PANEL_TITLE
-        );
+        await pageObjects.dashboard.openInspector(UNDELAYED_PANEL_TITLE);
+        const newUndelayedSessionId = await pageObjects.inspector.getSearchSessionId();
+        await pageObjects.dashboard.openInspector(DELAYED_PANEL_TITLE);
+        const newDelayedSessionId = await pageObjects.inspector.getSearchSessionId();
 
         expect(newDelayedSessionId).toBe(newUndelayedSessionId);
         expect(newUndelayedSessionId).not.toBe(undelayedSessionId);
