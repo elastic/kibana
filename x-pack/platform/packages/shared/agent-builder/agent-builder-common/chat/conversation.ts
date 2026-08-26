@@ -641,6 +641,20 @@ export interface BackgroundExecutionState {
 
 export type ConversationWithoutRounds = Omit<Conversation, 'rounds'>;
 
+export interface ConversationPermissions {
+  rename: boolean;
+  delete: boolean;
+  update_access_control: boolean;
+}
+
+export type ConversationWithPermissions = Conversation & {
+  permissions: ConversationPermissions;
+};
+
+export type ConversationWithoutRoundsWithPermissions = ConversationWithoutRounds & {
+  permissions: ConversationPermissions;
+};
+
 export type ConversationAction = 'regenerate';
 
 // Compaction summary types

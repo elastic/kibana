@@ -16,6 +16,7 @@ import type {
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import type { PromptRequest, PromptResponse } from '@kbn/agent-builder-common/agents';
+import type { ConversationWithPermissions } from './conversations';
 
 /**
  * Body payload for the public agent_builder converse endpoints (`/api/agent_builder/converse`, `/converse/async`).
@@ -52,3 +53,5 @@ export type ChatResponse = Omit<
     prompts?: PromptRequest[];
   };
 };
+
+export type ChatConverseResponse = ConversationWithPermissions;
