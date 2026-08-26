@@ -81,6 +81,11 @@ export interface RunWorkflowPanelProps {
   onClose: () => void;
   /** Optional callback invoked when workflow execution is triggered. */
   onExecute?: () => void;
+  /**
+   * When false, the panel skips its built-in success toast so the caller can
+   * report the outcome itself (e.g. a multi-target run). Defaults to true.
+   */
+  showSuccessToast?: boolean;
 }
 
 interface RunWorkflowPanelServices {
@@ -98,6 +103,7 @@ export const RunWorkflowPanel = ({
   filterWorkflow,
   onClose,
   onExecute,
+  showSuccessToast = true,
 }: RunWorkflowPanelProps) => {
   const {
     services: { application, notifications, rendering },
@@ -137,6 +143,7 @@ export const RunWorkflowPanel = ({
       const mergedInputs = { ...extraInputs, ...inputs };
 
       const onSuccess = (data: RunWorkflowResponseDto) => {
+        if (!showSuccessToast) return;
         notifications.toasts.addSuccess({
           title: i18n.WORKFLOW_START_SUCCESS_TOAST,
           ...(rendering && {
@@ -198,6 +205,7 @@ export const RunWorkflowPanel = ({
       rendering,
       onClose,
       onExecute,
+      showSuccessToast,
     ]
   );
 

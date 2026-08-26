@@ -35,6 +35,12 @@ const CASE_TRIGGER_TYPES = new Set<string>([
 ]);
 
 /**
+ * Stable empty array used as the default for workflowTags to avoid
+ * re-creating the array on every render (which would defeat downstream memos).
+ */
+const NO_WORKFLOW_TAGS: readonly string[] = [];
+
+/**
  * Returns a predicate that keeps workflows matching any configured tag.
  * An empty `workflowTags` array means no filtering — all enabled workflows pass.
  */
@@ -74,11 +80,31 @@ export const createCaseWorkflowComparator = (
   };
 };
 
+/**
+ * Returns true when the current user satisfies all four conditions required to
+ * run a workflow from a case:
+ *   1. `cases:<owner>/updateCase` privilege (permissions.update)
+ *   2. `runWorkflows.enabled` kibana config flag
+ *   3. Workflows UI feature flag (uiSetting)
+ *   4. `workflowsManagement:execute` application capability
+ */
+export const useCanRunCaseWorkflow = (): boolean => {
+  const { permissions } = useCasesContext();
+  const { runWorkflowsEnabled } = useCasesConfig();
+  const { canExecuteWorkflow } = useWorkflowsCapabilities();
+  const workflowsUIEnabled = useWorkflowsUIEnabledSetting();
+
+  return useMemo(
+    () => permissions.update && runWorkflowsEnabled && workflowsUIEnabled && canExecuteWorkflow,
+    [permissions.update, runWorkflowsEnabled, workflowsUIEnabled, canExecuteWorkflow]
+  );
+};
+
 interface UseRunCaseWorkflowArgs {
   caseData: CaseUI;
   /**
    * Tag allowlist from the case configuration (empty = show all workflows).
-   * When omitted the hook reads the configured tags itself via `useCasesConfig`.
+   * When omitted the hook uses an empty list (no filtering).
    * Pass an explicit value to override (e.g. from #19047 integration).
    */
   workflowTags?: string[];
@@ -105,17 +131,11 @@ export const useRunCaseWorkflow = ({
   caseData,
   workflowTags: workflowTagsOverride,
 }: UseRunCaseWorkflowArgs): UseRunCaseWorkflowResult => {
-  const { permissions } = useCasesContext();
-  const { runWorkflowsEnabled } = useCasesConfig();
-  const { canExecuteWorkflow } = useWorkflowsCapabilities();
-  const workflowsUIEnabled = useWorkflowsUIEnabledSetting();
+  const canRunWorkflow = useCanRunCaseWorkflow();
 
-  const canRunWorkflow = useMemo(
-    () => permissions.update && runWorkflowsEnabled && workflowsUIEnabled && canExecuteWorkflow,
-    [permissions.update, runWorkflowsEnabled, workflowsUIEnabled, canExecuteWorkflow]
-  );
-
-  const workflowTags = workflowTagsOverride ?? [];
+  // Use a stable module-level empty array to avoid defeating downstream memos
+  // when no override is provided.
+  const workflowTags = workflowTagsOverride ?? NO_WORKFLOW_TAGS;
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const openModal = useCallback(() => setIsModalOpen(true), []);
@@ -124,11 +144,10 @@ export const useRunCaseWorkflow = ({
   const inputs = useMemo(
     () => ({
       event: {
-        caseId: caseData.id,
-        owner: caseData.owner,
+        caseIds: [caseData.id],
       },
     }),
-    [caseData.id, caseData.owner]
+    [caseData.id]
   );
 
   const origin = useMemo(
@@ -139,10 +158,7 @@ export const useRunCaseWorkflow = ({
   const runWorkflow = useCasesWorkflowExecutor({ caseId: caseData.id, origin });
 
   const filterWorkflow = useMemo(() => createCaseWorkflowFilter(workflowTags), [workflowTags]);
-  const sortWorkflow = useMemo(
-    () => createCaseWorkflowComparator(workflowTags),
-    [workflowTags]
-  );
+  const sortWorkflow = useMemo(() => createCaseWorkflowComparator(workflowTags), [workflowTags]);
 
   return {
     canRunWorkflow,

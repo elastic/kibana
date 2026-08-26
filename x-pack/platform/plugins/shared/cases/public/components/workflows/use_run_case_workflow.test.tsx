@@ -120,10 +120,10 @@ describe('useRunCaseWorkflow', () => {
   });
 
   describe('inputs', () => {
-    it('includes the case id and owner in the event payload', () => {
+    it('includes the case id in a caseIds array in the event payload', () => {
       const { result } = renderHookWithDefaults();
       expect(result.current.inputs).toEqual({
-        event: { caseId: basicCase.id, owner: basicCase.owner },
+        event: { caseIds: [basicCase.id] },
       });
     });
   });

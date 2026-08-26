@@ -22,3 +22,16 @@ export const WORKFLOW_ACTIVITY_FAILED = i18n.translate(
       'The workflow started, but the execution could not be added to the case activity.',
   }
 );
+
+export const RUN_WORKFLOW_STARTED = (count: number): string =>
+  i18n.translate('xpack.cases.workflows.runWorkflowStarted', {
+    defaultMessage: 'Started the workflow on {count, plural, one {# case} other {# cases}}',
+    values: { count },
+  });
+
+export const VIEW_WORKFLOW_EXECUTION = i18n.translate(
+  'xpack.cases.workflows.viewWorkflowExecution',
+  {
+    defaultMessage: 'View workflow execution',
+  }
+);
