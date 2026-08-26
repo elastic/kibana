@@ -191,6 +191,10 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   showQueryInput?: boolean;
   showAddFilter?: boolean;
   showDatePicker?: boolean;
+  /**
+   * Disables the date picker for KQL/Lucene when every data view is known to have no time field.
+   */
+  disableDatePickerOnNoTimeField?: boolean;
   isDisabled?: boolean;
   showAutoRefreshOnly?: boolean;
   timeHistory?: TimeHistoryContract;
@@ -837,21 +841,32 @@ export const QueryBarTopRow = React.memo(
       );
       // ES|QL: skip while the query is dirty so the picker doesn't flicker as the
       // derived data view (and its time field) is still being resolved.
-      const shouldEvaluateTimeField = !isQueryLangSelected || !props.isDirty;
-      if (shouldEvaluateTimeField && resolvedDataViews.length > 0) {
-        const hasTimeField = Boolean(isQueryLangSelected)
-          ? Boolean(resolvedDataViews[0].timeFieldName)
-          : resolvedDataViews.some((indexPattern) => Boolean(indexPattern.timeFieldName));
-        if (!hasTimeField) {
-          isDisabled = {
-            display: (
-              <span data-test-subj="kbnQueryBar-datePicker-disabled">
-                {strings.getDisabledDatePickerLabel()}
-              </span>
-            ),
-          };
-          enableTooltip = true;
+      const shouldEvaluateTimeField = Boolean(isQueryLangSelected)
+        ? !props.isDirty
+        : Boolean(props.disableDatePickerOnNoTimeField);
+      let hasTimeField: boolean | undefined;
+      if (isQueryLangSelected) {
+        const [dataView] = resolvedDataViews;
+        if (dataView && 'timeFieldName' in dataView) {
+          hasTimeField = Boolean(dataView.timeFieldName);
         }
+      } else if (
+        resolvedDataViews.length > 0 &&
+        resolvedDataViews.every((indexPattern) => 'timeFieldName' in indexPattern)
+      ) {
+        hasTimeField = resolvedDataViews.some((indexPattern) =>
+          Boolean(indexPattern.timeFieldName)
+        );
+      }
+      if (shouldEvaluateTimeField && hasTimeField === false) {
+        isDisabled = {
+          display: (
+            <span data-test-subj="kbnQueryBar-datePicker-disabled">
+              {strings.getDisabledDatePickerLabel()}
+            </span>
+          ),
+        };
+        enableTooltip = true;
       }
 
       const wrapperClasses = classNames('kbnQueryBar__datePickerWrapper');

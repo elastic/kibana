@@ -517,6 +517,7 @@ export function InternalDashboardTopNav({
           savedQueryId={savedQueryId}
           indexPatterns={allDataViews ?? []}
           allowSavingQueries
+          disableDatePickerOnNoTimeField
           enableDateRangePicker
           appName={DASHBOARD_APP_ID}
           onQuerySubmit={(_payload, isUpdate) => {

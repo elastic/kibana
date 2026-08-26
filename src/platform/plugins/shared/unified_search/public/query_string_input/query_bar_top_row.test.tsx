@@ -33,6 +33,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { stubIndexPattern } from '@kbn/data-plugin/public/stubs';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { kqlPluginMock } from '@kbn/kql/public/mocks';
 import type { Filter } from '@kbn/es-query';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
@@ -852,6 +853,7 @@ describe('QueryBarTopRowTopRow', () => {
           timeHistory: mockTimeHistory,
           indexPatterns: [dataView],
           showDatePicker: true,
+          disableDatePickerOnNoTimeField: true,
           dateRangeFrom: 'now-7d',
           dateRangeTo: 'now',
         })
@@ -863,6 +865,55 @@ describe('QueryBarTopRowTopRow', () => {
         } else {
           expect(screen.getByTestId('kbnQueryBar-datePicker-disabled')).toBeInTheDocument();
         }
+      });
+    });
+
+    it('Should keep the KQL date picker enabled by default when no timeFieldName exists', async () => {
+      const dataView = {
+        ...stubIndexPattern,
+        timeFieldName: undefined,
+      };
+      render(
+        wrapWithPicker({
+          query: kqlQuery,
+          isDirty: false,
+          screenTitle: 'Another Screen',
+          timeHistory: mockTimeHistory,
+          indexPatterns: [dataView],
+          showDatePicker: true,
+          dateRangeFrom: 'now-7d',
+          dateRangeTo: 'now',
+        })
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId(pickerButtonTestSubj)).toBeEnabled();
+        expect(screen.queryByTestId('kbnQueryBar-datePicker-disabled')).not.toBeInTheDocument();
+      });
+    });
+
+    it('Should keep the KQL date picker enabled when time field metadata is unknown', async () => {
+      const partialIndexPattern = {
+        title: 'partial-index-pattern',
+        fields: stubIndexPattern.fields,
+      } as DataView;
+      render(
+        wrapWithPicker({
+          query: kqlQuery,
+          isDirty: false,
+          screenTitle: 'Another Screen',
+          timeHistory: mockTimeHistory,
+          indexPatterns: [partialIndexPattern],
+          showDatePicker: true,
+          disableDatePickerOnNoTimeField: true,
+          dateRangeFrom: 'now-7d',
+          dateRangeTo: 'now',
+        })
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId(pickerButtonTestSubj)).toBeEnabled();
+        expect(screen.queryByTestId('kbnQueryBar-datePicker-disabled')).not.toBeInTheDocument();
       });
     });
 
@@ -879,6 +930,7 @@ describe('QueryBarTopRowTopRow', () => {
           timeHistory: mockTimeHistory,
           indexPatterns: [dataViewWithoutTime, stubIndexPattern],
           showDatePicker: true,
+          disableDatePickerOnNoTimeField: true,
           dateRangeFrom: 'now-7d',
           dateRangeTo: 'now',
         })
