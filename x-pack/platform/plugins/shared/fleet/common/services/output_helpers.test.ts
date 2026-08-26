@@ -121,6 +121,28 @@ describe('getAllowedOutputTypesForAgentPolicy', () => {
     expect(res).toContain(outputType.Kafka);
   });
 
+  it('should return all output types for a policy with no package policies (no constraint)', () => {
+    const res = getAllowedOutputTypesForAgentPolicy({} as any);
+
+    expect(res).toContain(outputType.Otlp);
+    expect(res).toContain(outputType.Logstash);
+    expect(res).toContain(outputType.Kafka);
+  });
+
+  it('should return all output types for a policy with an empty package_policies array', () => {
+    const res = getAllowedOutputTypesForAgentPolicy({ package_policies: [] } as any);
+
+    expect(res).toContain(outputType.Otlp);
+    expect(res).toContain(outputType.Logstash);
+    expect(res).toContain(outputType.Kafka);
+  });
+
+  it('should still return only elasticsearch when has_fleet_server is true and policy has no package policies', () => {
+    const res = getAllowedOutputTypesForAgentPolicy({ has_fleet_server: true } as any);
+
+    expect(res).toEqual([outputType.Elasticsearch]);
+  });
+
   it('should still return only elasticsearch for fleet server even when an OTel input is also present', () => {
     const res = getAllowedOutputTypesForAgentPolicy({
       package_policies: [

@@ -62,7 +62,9 @@ const agentPolicyUsesConnectors = (agentPolicy: AgentPolicyForOutputEligibility)
 export const canUseManagedBulk = (agentPolicy: AgentPolicyForOutputEligibility): boolean =>
   !agentPolicyUsesConnectors(agentPolicy) && !agentPolicyHasOtelInputs(agentPolicy);
 
-export const agentPolicyHasOnlyOtelInputs = (agentPolicy: Partial<AgentPolicy>): boolean => {
+export const agentPolicyHasOnlyOtelInputs = (
+  agentPolicy: AgentPolicyForOutputEligibility
+): boolean => {
   const packagePolicies = agentPolicy.package_policies ?? [];
   return (
     packagePolicies.length > 0 &&
@@ -94,6 +96,12 @@ export function getAllowedOutputTypesForAgentPolicy(agentPolicy: Partial<AgentPo
 
   if (agentPolicy.supports_agentless) {
     return AGENTLESS_ALLOWED_OUTPUT_TYPES;
+  }
+
+  // A policy with no package policies has no inputs to constrain the output; every type is valid.
+  // Eligibility is re-checked against the resolved output on package policy create.
+  if ((agentPolicy.package_policies ?? []).length === 0) {
+    return Object.values(outputType);
   }
 
   if (agentPolicyHasOnlyOtelInputs(agentPolicy)) {
@@ -131,15 +139,11 @@ export function getAllowedOutputTypesForPackagePolicy(
 }
 
 export function getAllowedOutputTypesForIntegration(packageName?: string): string[] {
-  if (packageName) {
-    const isRestrictedToSameClusterES = sameClusterRestrictedPackages.includes(packageName);
-
-    if (isRestrictedToSameClusterES) {
-      return [outputType.Elasticsearch];
-    }
+  if (packageName && sameClusterRestrictedPackages.includes(packageName)) {
+    return [outputType.Elasticsearch];
   }
 
-  return BEATS_OUTPUT_TYPES;
+  return Object.values(outputType);
 }
 
 export function outputYmlIncludesReservedPerformanceKey(

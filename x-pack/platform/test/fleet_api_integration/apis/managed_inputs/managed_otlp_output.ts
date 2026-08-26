@@ -13,11 +13,6 @@
  * comment anticipated this addition. Enabling `managedOtlpOutput` only in this config keeps
  * the flag scoped to where it is meaningful.
  *
- * Coverage:
- *   - Create: grpc happy path, http/protobuf with optional fields, protocol-validation 400s,
- *     inline tls credential rejection (400).
- *   - Update: otlp_exporter update.
- *   - Policy gating: pure-OTel policy accepted, mixed OTel+beats policy rejected.
  */
 
 import expect from '@kbn/expect';
@@ -317,6 +312,61 @@ export default function (providerContext: FtrProviderContext) {
 
         return { otlpOutputId, policyId, policyName };
       };
+
+      it('allows creating an agent policy with an OTLP output and no package policies, then adding an OTel integration', async () => {
+        const { body: outputBody } = await supertest
+          .post('/api/fleet/outputs')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `otlp-empty-policy-${uuidv4()}`,
+            type: 'otlp',
+            otlp_exporter: { endpoint: 'https://otlp.example.com:4317', protocol: 'grpc' },
+          })
+          .expect(200);
+        const otlpOutputId: string = outputBody.item.id;
+
+        // Create a policy with no package policies and assign the OTLP output directly.
+        const policyName = `empty-otlp-${uuidv4()}`;
+        const { body: policyBody } = await supertest
+          .post('/api/fleet/agent_policies')
+          .set('kbn-xsrf', 'xxxx')
+          .send({ name: policyName, namespace: 'default', data_output_id: otlpOutputId })
+          .expect(200);
+        const policyId: string = policyBody.item.id;
+
+        // Adding a pure-OTel integration must succeed (proves the intersection now includes otlp).
+        await supertest
+          .post('/api/fleet/package_policies')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `otel-pkg-${uuidv4()}`,
+            namespace: 'default',
+            policy_id: policyId,
+            package: { name: DYNAMIC_PKG, version: DYNAMIC_PKG_VERSION },
+            inputs: {
+              'otlpreceiver-otelcol': {
+                enabled: true,
+                streams: { 'test_otel_dynamic.otlpreceiver': { enabled: true, vars: {} } },
+              },
+            },
+          })
+          .expect(200);
+
+        // Adding a beats integration afterwards must still be rejected.
+        const { body: rejectBody } = await supertest
+          .post('/api/fleet/package_policies')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `filetest-rejected-${uuidv4()}`,
+            namespace: 'default',
+            policy_id: policyId,
+            package: { name: 'filetest', title: 'For File Tests', version: '0.1.0' },
+            inputs: [],
+          })
+          .expect(400);
+
+        expect(rejectBody.message).to.contain('output type "otlp"');
+      });
 
       it('allows assigning the OTLP output to a pure-OTel agent policy', async () => {
         const { otlpOutputId, policyId, policyName } = await createOtlpOutputAndOtelPolicy(
