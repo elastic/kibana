@@ -72,9 +72,7 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
     const iconWrapperClassName = `${NAVIGATION_SELECTOR_PREFIX}-iconWrapper`;
 
     const buttonStyles = css`
-      --menu-item-text-color: ${isHighlighted
-        ? euiTheme.components.buttons.textColorPrimary
-        : euiTheme.components.buttons.textColorText};
+      --menu-item-text-color: ${euiTheme.components.buttons.textColorText};
       --high-contrast-hover-indicator-color: var(--menu-item-text-color);
       ${useHighContrastModeStyles(`.${iconWrapperClassName}`)};
 
@@ -99,9 +97,12 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
         align-items: center;
         height: ${euiTheme.size.xl};
         width: ${euiTheme.size.xl};
+        box-sizing: border-box;
         border-radius: ${euiTheme.border.radius.control};
+        border: ${euiTheme.border.width.thin} solid
+          ${isHighlighted ? euiTheme.colors.borderBasePlain : 'transparent'};
         background-color: ${isHighlighted
-          ? euiTheme.components.buttons.backgroundPrimary
+          ? euiTheme.components.buttons.backgroundText
           : euiTheme.colors.backgroundTransparent};
         z-index: 1;
       }
@@ -116,20 +117,15 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
       }
 
       &:focus-visible .${iconWrapperClassName} {
-        border: ${euiTheme.border.width.thick} solid
-          ${isHighlighted ? euiTheme.colors.textPrimary : euiTheme.colors.textParagraph};
+        border: ${euiTheme.border.width.thick} solid ${euiTheme.colors.textParagraph};
       }
 
       &:hover .${iconWrapperClassName}::before {
-        background-color: ${isHighlighted
-          ? euiTheme.components.buttons.backgroundPrimaryHover
-          : euiTheme.components.buttons.backgroundTextHover};
+        background-color: ${euiTheme.components.buttons.backgroundTextHover};
       }
 
       &:active .${iconWrapperClassName}::before {
-        background-color: ${isHighlighted
-          ? euiTheme.components.buttons.backgroundPrimaryActive
-          : euiTheme.components.buttons.backgroundTextActive};
+        background-color: ${euiTheme.components.buttons.backgroundTextActive};
       }
     `;
 
