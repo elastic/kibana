@@ -133,7 +133,10 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
       return basicResult;
     }
 
-    if (alertEvent.status === alertEventStatus.no_data && rule.no_data_strategy === noDataStrategy.last_known_status) {
+    if (
+      alertEvent.status === alertEventStatus.no_data &&
+      rule.no_data_strategy === noDataStrategy.last_known_status
+    ) {
       return basicResult.status !== alertEpisodeStatus.inactive
         ? { status: basicResult.status, statusCount: 0 }
         : basicResult;
