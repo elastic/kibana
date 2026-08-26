@@ -35,11 +35,11 @@ export const COLUMN_SAMPLE_SIZE = i18n.translate(
 );
 
 export const COLUMN_MEAN_A = i18n.translate('xpack.evals.compareExperiments.columns.meanA', {
-  defaultMessage: 'Mean baseline',
+  defaultMessage: 'Mean target',
 });
 
 export const COLUMN_MEAN_B = i18n.translate('xpack.evals.compareExperiments.columns.meanB', {
-  defaultMessage: 'Mean target',
+  defaultMessage: 'Mean baseline',
 });
 
 export const COLUMN_DIFF = i18n.translate('xpack.evals.compareExperiments.columns.diff', {

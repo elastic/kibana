@@ -507,7 +507,7 @@ const ExampleDrilldownFlyout: React.FC<{
                   return { style: { opacity: 0.55 } };
                 }
 
-                const diff = computeCompareDiff(item.scoreA!, item.scoreB!);
+                const diff = computeCompareDiff(item.scoreB!, item.scoreA!);
                 if (diff === 0 || direction === 'neutral') return {};
                 if (isImproved(diff, direction)) {
                   return {
