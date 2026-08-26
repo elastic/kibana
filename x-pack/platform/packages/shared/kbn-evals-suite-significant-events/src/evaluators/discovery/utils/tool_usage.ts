@@ -48,6 +48,20 @@ export function getToolCallCount(steps: ConverseStep[]): number {
   return steps.filter((step) => step.type === 'tool_call').length;
 }
 
+const isSchemaOrToolError = (step: ConverseStep): boolean => {
+  if (step.type !== 'tool_call' || !Array.isArray(step.results)) {
+    return false;
+  }
+  return step.results.some(
+    (result) =>
+      isRecord(result) &&
+      (result.type === 'error' ||
+        (isRecord(result.data) &&
+          typeof result.data.message === 'string' &&
+          /schema|items/i.test(result.data.message)))
+  );
+};
+
 const getRetryableBulkErrorCount = (step: ConverseStep): number => {
   if (step.type !== 'tool_call' || !Array.isArray(step.results)) return 0;
   return step.results.reduce<number>((count, result) => {
@@ -71,7 +85,10 @@ const getBulkInputCount = (step: ConverseStep): number =>
 export interface PersistenceCallSummary {
   count: number;
   valid: boolean;
+  /** True only when the first call had item-level bulk errors and the retry resubmitted exactly those items. */
   retriedPartialFailure: boolean;
+  /** True when the first call returned a schema or tool-level error and the retry submitted a populated payload. */
+  retriedSchemaFailure: boolean;
 }
 
 /** One normal persistence call, or one retry after a completed call exposed item-level bulk errors. */
@@ -81,12 +98,15 @@ export function summarizePersistenceCalls(
 ): PersistenceCallSummary {
   const calls = steps.filter((step) => step.type === 'tool_call' && step.tool_id === toolId);
   if (calls.length === 1) {
-    return { count: 1, valid: true, retriedPartialFailure: false };
+    return { count: 1, valid: true, retriedPartialFailure: false, retriedSchemaFailure: false };
   }
   const failedItemCount = calls.length === 2 ? getRetryableBulkErrorCount(calls[0]) : 0;
   const retriedPartialFailure =
     failedItemCount > 0 && getBulkInputCount(calls[1]) === failedItemCount;
-  return { count: calls.length, valid: retriedPartialFailure, retriedPartialFailure };
+  const retriedSchemaFailure =
+    calls.length === 2 && isSchemaOrToolError(calls[0]) && getBulkInputCount(calls[1]) > 0;
+  const valid = retriedPartialFailure || retriedSchemaFailure;
+  return { count: calls.length, valid, retriedPartialFailure, retriedSchemaFailure };
 }
 
 /**

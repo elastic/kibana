@@ -351,6 +351,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const promptFactory = createPromptFactory({
     configuration: resolvedConfiguration,
     capabilities: resolvedCapabilities,
+    spaceId: context.spaceId,
     skills: filteredSkills,
     processedConversation,
     toolManager,
