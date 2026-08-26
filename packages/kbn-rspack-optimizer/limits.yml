@@ -1,9 +1,9 @@
 pageLoadAssetSize:
   actions: 3918
   advancedSettings: 1983
-  agentBuilder: 640
+  agentBuilder: 639
   agentBuilderDashboards: 3548
-  agentBuilderPlatform: 22809
+  agentBuilderPlatform: 22808
   agentBuilderSml: 592
   agentBuilderVisualizations: 1545
   agentBuilderWorkflows: 1016
@@ -11,7 +11,7 @@ pageLoadAssetSize:
   aiops: 581
   alerting: 9176
   alertingVTwo: 19251
-  apm: 32320
+  apm: 32294
   apmShared: 2011
   apmSourcesAccess: 1170
   automaticImport: 14093
@@ -28,10 +28,10 @@ pageLoadAssetSize:
   cloudFullStory: 1634
   cloudLinks: 18197
   cloudSecurityPosture: 12020
-  console: 24748
+  console: 24736
   contentConnectors: 3084
   contentManagement: 6898
-  contextEngine: 2388
+  contextEngine: 3390
   contextEngineAgentBuilder: 2548
   controls: 3940
   core: 315
@@ -50,10 +50,10 @@ pageLoadAssetSize:
   dataViewFieldEditor: 16022
   dataViewManagement: 1280
   dataViews: 1691
-  dataVisualizer: 7691
+  dataVisualizer: 7669
   developerToolbar: 2174
-  devTools: 4402
-  discover: 19235
+  devTools: 4390
+  discover: 19046
   discoverEnhanced: 1346
   discoveries: 31974
   discoverShared: 1065
@@ -80,7 +80,7 @@ pageLoadAssetSize:
   expressionTagcloud: 6582
   expressionXY: 617
   features: 1481
-  feedback: 4929
+  feedback: 5447
   fieldFormats: 4253
   fieldsMetadata: 1824
   files: 3954
@@ -101,7 +101,7 @@ pageLoadAssetSize:
   inference: 5940
   inferenceWorkflows: 1139
   infra: 45799
-  ingestHub: 8121
+  ingestHub: 8059
   ingestPipelines: 534
   inputControlVis: 3213
   inspectComponent: 1141
@@ -142,9 +142,9 @@ pageLoadAssetSize:
   observabilityAIAssistantApp: 6116
   observabilityAiAssistantManagement: 2262
   observabilityLogsExplorer: 1343
-  observabilityOnboarding: 7870
+  observabilityOnboarding: 9005
   observabilityShared: 8138
-  osquery: 14302
+  osquery: 14206
   painlessLab: 2519
   pnd: 4544
   presentationUtil: 346
@@ -177,7 +177,7 @@ pageLoadAssetSize:
   searchQueryRules: 2414
   searchSynonyms: 2185
   security: 972
-  securitySolution: 157599
+  securitySolution: 156695
   securitySolutionEss: 21506
   securitySolutionServerless: 34765
   serverless: 1567
@@ -187,12 +187,12 @@ pageLoadAssetSize:
   serverlessWorkplaceAI: 3611
   sessionView: 643
   share: 374
-  shared-core: 338587
-  shared-misc: 116593
+  shared-core: 316407
+  shared-misc: 141556
   shared-packages: 5035107
   shared-plugins: 13663604
   shared-solution-packages: 344698
-  significantEvents: 3422
+  significantEvents: 3386
   significantEventsApp: 5438
   slo: 19463
   snapshotRestore: 17153

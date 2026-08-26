@@ -12305,7 +12305,7 @@
     redux-thunk "^3.1.0"
     reselect "^5.1.0"
 
-"@rsbuild/plugin-check-syntax@1.6.1", "@rsbuild/plugin-check-syntax@^1.6.1":
+"@rsbuild/plugin-check-syntax@^1.6.1":
   version "1.6.1"
   resolved "https://registry.yarnpkg.com/@rsbuild/plugin-check-syntax/-/plugin-check-syntax-1.6.1.tgz#fd1655204b52e8c7cb18dc5779092247cca9ae67"
   integrity sha512-26xtEYN0QjZYoyt0lWnvIztBWjEZJvcfw7MN4f5B4SpNggmnF7F7aNPrgkY3EccXVFx1VGQBhnCkBV//OoS07Q==
@@ -20429,6 +20429,7 @@ es-toolkit@^1.22.0, es-toolkit@^1.49.0:
   version "1.50.0"
   resolved "https://registry.yarnpkg.com/es-toolkit/-/es-toolkit-1.50.0.tgz#2665c21d0ab76286f478ece3a235463097aeabd3"
   integrity sha512-OyZKhUVvEep9ITEiwHn8GKnMRQIVqoSIX7WnRbkWgJkllCujilqP2rD0u979tkl8wqyc8ICwlc1UBVv/Sl1G6w==
+
 es6-promise@^4.2.8:
   version "4.2.8"
   resolved "https://registry.yarnpkg.com/es6-promise/-/es6-promise-4.2.8.tgz#4eb21594c972bc40553d276e510539143db53e0a"
