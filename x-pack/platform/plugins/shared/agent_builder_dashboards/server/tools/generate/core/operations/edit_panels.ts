@@ -8,6 +8,7 @@
 import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
 import {
   CUSTOM_CONTENT_EMBEDDABLE_TYPE,
+  toEsqlQueryState,
   type CustomContentState,
 } from '@kbn/custom-content-common';
 import { z } from '@kbn/zod/v4';
@@ -135,7 +136,7 @@ export const editPanelsOperation = defineOperation({
     let nextDashboardData = dashboardData;
     for (const { panelInput, existingPanel } of validEdits) {
       if (panelInput.source === 'config') {
-        let resolvedConfig: typeof panelInput.config;
+        let resolvedConfig: typeof panelInput.config | CustomContentState;
         try {
           resolvedConfig =
             panelInput.type === CUSTOM_CONTENT_EMBEDDABLE_TYPE && existingPanel
@@ -145,7 +146,12 @@ export const editPanelsOperation = defineOperation({
                     existingPanel.config as CustomContentState,
                     context.resolveCustomContentTemplate
                   )
-                : { ...(existingPanel.config as CustomContentState), ...panelInput.config }
+                : {
+                    ...(existingPanel.config as CustomContentState),
+                    ...(panelInput.config.esqlQuery !== undefined
+                      ? { esql_query: toEsqlQueryState(panelInput.config.esqlQuery ?? undefined) }
+                      : {}),
+                  }
               : panelInput.config;
         } catch (err) {
           recordFailure(panelInput.panelId, getErrorMessage(err));
