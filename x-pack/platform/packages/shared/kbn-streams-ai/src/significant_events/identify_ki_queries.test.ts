@@ -97,9 +97,8 @@ describe('computeValidationLookback', () => {
     expect(query.mock.calls[0][0].query).toBe('FROM logs-a, logs-a.* | STATS total = COUNT(*)');
   });
 
-  it('keeps a narrow window for a dense stream', async () => {
+  it('floors the window at the 24h evidence window', async () => {
     const { esClient, query } = createEsClient();
-    // 100k docs in the 10m probe window => rate already meets the target budget.
     query.mockResolvedValueOnce(countResponse(100_000));
 
     const result = await computeValidationLookback({
@@ -109,12 +108,11 @@ describe('computeValidationLookback', () => {
       logger,
     });
 
-    expect(result).toBe('now-10m');
+    expect(result).toBe('now-1440m');
   });
 
   it('widens the window for a sparse stream', async () => {
     const { esClient, query } = createEsClient();
-    // 100 docs / 10m => rate of 10/min; target of 100_000 docs needs 10_000 minutes.
     query.mockResolvedValueOnce(countResponse(100));
 
     const result = await computeValidationLookback({
@@ -141,7 +139,7 @@ describe('computeValidationLookback', () => {
     expect(result).toBe('now-10080m');
   });
 
-  it('falls back to the probe window when the probe itself fails', async () => {
+  it('falls back to the evidence window when the probe itself fails', async () => {
     const { esClient, query } = createEsClient();
     query.mockRejectedValueOnce(new Error('Request timed out'));
 
@@ -152,7 +150,7 @@ describe('computeValidationLookback', () => {
       logger,
     });
 
-    expect(result).toBe('now-10m');
+    expect(result).toBe('now-1440m');
     expect(logger.debug).toHaveBeenCalled();
   });
 });
@@ -201,6 +199,7 @@ interface HarnessOptions {
   scriptedAddQueries?: Array<Array<Record<string, unknown>>>;
   callGetStreamFeatures?: boolean;
   features?: Feature[];
+  esqlResponse?: (queryString: string) => unknown;
 }
 
 const scriptedQuery = (
@@ -244,9 +243,16 @@ const runIdentifyKIQueries = async (options: HarnessOptions = {}) => {
     return createReasoningResponse();
   });
 
+  const { esClient, query: esqlQueryMock } = createEsClient();
+  esqlQueryMock.mockImplementation(async (request: { query: string }) => {
+    const custom = options.esqlResponse?.(request.query);
+    if (custom instanceof Error) throw custom;
+    return custom !== undefined ? custom : countResponse(1);
+  });
+
   const result = await identifyKIQueries({
     stream: options.stream ?? stream,
-    esClient: createEsClient().esClient,
+    esClient,
     getFeatures,
     inferenceClient,
     signal,
@@ -263,6 +269,7 @@ const runIdentifyKIQueries = async (options: HarnessOptions = {}) => {
     capturedOptions: () => capturedOptions,
     toolResponses,
     addQueriesResponses,
+    esqlQueryMock,
   };
 };
 
@@ -279,13 +286,16 @@ describe('identifyKIQueries agent', () => {
   });
 
   describe('eval-only intent contract', () => {
-    it('production mode leaves the tool schema and queries unchanged', async () => {
+    it('advertises optional expects_matches in production', async () => {
       const { result, capturedOptions, addQueriesResponses } = await runIdentifyKIQueries({
         scriptedAddQueries: [[scriptedQuery('FROM logs | WHERE message == "x"')]],
       });
 
       const schema = addQueriesSchema(capturedOptions());
-      expect(schema.properties.queries.items.properties.expects_matches).toBeUndefined();
+      expect(schema.properties.queries.items.properties.expects_matches).toEqual({
+        type: 'boolean',
+        description: expect.any(String),
+      });
       expect(schema.properties.queries.items.required).not.toContain('expects_matches');
 
       expect(result.queries).toHaveLength(1);
@@ -298,23 +308,7 @@ describe('identifyKIQueries agent', () => {
       expect(addQueriesResponse.response.queries[0].status).toBe('Added');
     });
 
-    it('eval mode advertises expects_matches but never makes it required', async () => {
-      const { capturedOptions } = await runIdentifyKIQueries({
-        requireQueryIntent: true,
-        scriptedAddQueries: [[]],
-      });
-
-      const schema = addQueriesSchema(capturedOptions());
-      expect(schema.properties.queries.items.properties.expects_matches).toEqual({
-        type: 'boolean',
-        description: expect.any(String),
-      });
-      expect(schema.properties.queries.items.required).not.toContain('expects_matches');
-    });
-
     it('does not count an intent-only rejection as an add_queries tool failure', async () => {
-      // requireQueryIntent is eval-only, so charging tool_usage for it would make the eval-arm
-      // score incomparable to production, where the rule does not exist.
       const { result } = await runIdentifyKIQueries({
         requireQueryIntent: true,
         collectQueryAttempts: true,
@@ -325,7 +319,6 @@ describe('identifyKIQueries agent', () => {
 
       expect(result.toolUsage.add_queries.calls).toBe(1);
       expect(result.toolUsage.add_queries.failures).toBe(0);
-      // The omission is still observable, just not as a tool failure.
       expect(result.queryAttempts?.[0]).toMatchObject({ failureReason: 'missing_intent' });
     });
 
@@ -336,7 +329,6 @@ describe('identifyKIQueries agent', () => {
         scriptedAddQueries: [
           [
             scriptedQuery('FROM logs | WHERE message == "a"', { expects_matches: undefined }),
-            // Unknown feature_ids is a real tool-usage fault and must survive the split.
             scriptedQuery('FROM logs | WHERE message == "b"', {
               expects_matches: true,
               feature_ids: ['nope'],
@@ -394,6 +386,8 @@ describe('identifyKIQueries agent', () => {
             scriptedQuery('FROM logs | WHERE message == "new"', { expects_matches: true }),
           ],
         ],
+        esqlResponse: (queryString: string) =>
+          queryString.includes('"dup"') ? countResponse(0) : undefined,
       });
 
       expect(result.queries).toHaveLength(2);
@@ -479,8 +473,6 @@ describe('identifyKIQueries agent', () => {
     });
 
     it('rejects an exact duplicate even when its seed was outside the model context', async () => {
-      // 60 seeds sorted by severity; the duplicate target has severity 1 and is
-      // sliced out of the 50-item context, but full-list dedup must still catch it.
       const existingQueries = Array.from({ length: 60 }, (_, i) => seedQuery(i));
       const targeted = seedQuery(1);
       existingQueries[1] = {
@@ -510,8 +502,6 @@ describe('identifyKIQueries agent', () => {
     });
 
     it('rejects a duplicate when the seed FROM differs from the stream sources', async () => {
-      // Mirrors the eval: the stream name is a wildcard and seeds are authored un-rewritten, so
-      // the candidate's FROM is rewritten to `logs*, logs*.*` while the seed says `logs`.
       const wildcardStream = {
         name: 'logs*',
         description: 'A test stream',
@@ -548,8 +538,6 @@ describe('identifyKIQueries agent', () => {
     });
 
     it('reports exactDuplicate even when an earlier gate rejects the attempt first', async () => {
-      // `status` is first-failure-wins, so a duplicate that also omits intent surfaces as
-      // 'Failed to add'. `exactDuplicate` must still identify it as a duplicate.
       const { result, addQueriesResponses } = await runIdentifyKIQueries({
         requireQueryIntent: true,
         collectQueryAttempts: true,
@@ -564,7 +552,6 @@ describe('identifyKIQueries agent', () => {
           },
         ],
         scriptedAddQueries: [
-          // No expects_matches, so the intent gate claims it before dedup runs.
           [scriptedQuery('FROM logs | WHERE message == "dup"', { expects_matches: undefined })],
         ],
       });
@@ -633,6 +620,153 @@ describe('identifyKIQueries agent', () => {
         response: { queries: Array<{ status: string }> };
       };
       expect(response.response.queries.map((q) => q.status)).toEqual(['Added', 'Added']);
+    });
+  });
+
+  describe('zero-match existence protocol', () => {
+    const deadEsql = 'FROM logs | WHERE error.type == "AutoOpsRuntimeException"';
+
+    const deadPredicateResponses = (queryString: string) =>
+      queryString.includes('"AutoOpsRuntimeException"') ? countResponse(0) : undefined;
+
+    it('rejects an expected query with no matches', async () => {
+      const { result, addQueriesResponses } = await runIdentifyKIQueries({
+        collectQueryAttempts: true,
+        scriptedAddQueries: [[scriptedQuery(deadEsql)]],
+        esqlResponse: deadPredicateResponses,
+      });
+
+      expect(result.queries).toHaveLength(0);
+
+      const response = addQueriesResponses[0] as {
+        response: { queries: Array<{ status: string; error?: string }> };
+      };
+      const [flagged] = response.response.queries;
+      expect(flagged.status).toBe('Failed to add');
+      expect(flagged.error).toContain('matched 0 documents');
+      expect(flagged.error).toContain('expects_matches');
+
+      expect(result.queryAttempts?.[0]).toMatchObject({
+        failureReason: 'no_matches',
+      });
+    });
+
+    it('accepts a zero-match watch', async () => {
+      const { result, addQueriesResponses } = await runIdentifyKIQueries({
+        scriptedAddQueries: [[scriptedQuery(deadEsql, { expects_matches: false })]],
+        esqlResponse: deadPredicateResponses,
+      });
+
+      const response = addQueriesResponses[0] as {
+        response: { queries: Array<{ hints?: string[] }> };
+      };
+      expect(response.response.queries[0].hints).toEqual([expect.stringContaining('watch query')]);
+      expect(result.queries[0].expects_matches).toBe(false);
+    });
+
+    it('promotes a matching watch to a live query', async () => {
+      const { result, addQueriesResponses } = await runIdentifyKIQueries({
+        scriptedAddQueries: [
+          [scriptedQuery('FROM logs | WHERE error.type == "Live"', { expects_matches: false })],
+        ],
+      });
+
+      const response = addQueriesResponses[0] as {
+        response: { queries: Array<{ hints?: string[] }> };
+      };
+      expect(response.response.queries[0].hints).toEqual([
+        expect.stringContaining('recorded as a live query'),
+      ]);
+      expect(result.queries[0].expects_matches).toBe(true);
+    });
+
+    it('skips existence validation for STATS queries', async () => {
+      const statsEsql =
+        'FROM logs | STATS metric_value = COUNT(*) WHERE error.type == "Absent" BY bucket = BUCKET(@timestamp, 1 minute) | KEEP bucket, metric_value';
+      const { result, esqlQueryMock } = await runIdentifyKIQueries({
+        scriptedAddQueries: [[scriptedQuery(statsEsql)]],
+        esqlResponse: (queryString: string) =>
+          queryString.includes('"Absent"') ? countResponse(0) : undefined,
+      });
+
+      expect(result.queries).toHaveLength(1);
+      expect(result.queries[0].type).toBe('stats');
+      expect(esqlQueryMock.mock.calls.map(([request]) => request.query)).toEqual([
+        'FROM logs, logs.* | STATS total = COUNT(*)',
+        `${statsEsql.replace('FROM logs', 'FROM logs, logs.*')}\n| LIMIT 0`,
+      ]);
+    });
+
+    it('distinguishes an unmapped field found in _source', async () => {
+      const unmappedEsql = 'FROM logs | WHERE attributes.exception.type == "OutOfMemoryError"';
+
+      const { result, addQueriesResponses } = await runIdentifyKIQueries({
+        collectQueryAttempts: true,
+        scriptedAddQueries: [[scriptedQuery(unmappedEsql)]],
+        esqlResponse: (queryString: string) => {
+          if (queryString.startsWith('SET unmapped_fields')) return countResponse(4);
+          if (queryString.includes('attributes.exception.type')) {
+            return new Error('Unknown column [attributes.exception.type]');
+          }
+          return undefined;
+        },
+      });
+
+      expect(result.queries).toHaveLength(0);
+
+      const response = addQueriesResponses[0] as {
+        response: { queries: Array<{ error?: string }> };
+      };
+      const [flagged] = response.response.queries;
+      expect(flagged.error).toContain('queryable schema');
+      expect(flagged.error).toContain('attributes.exception.type');
+
+      expect(result.queryAttempts?.[0]).toMatchObject({
+        failureReason: 'unmapped_field',
+      });
+    });
+
+    it('rejects an unknown field absent from _source', async () => {
+      const unknownEsql = 'FROM logs | WHERE nope.field == "value"';
+
+      const { result, addQueriesResponses } = await runIdentifyKIQueries({
+        collectQueryAttempts: true,
+        scriptedAddQueries: [[scriptedQuery(unknownEsql)]],
+        esqlResponse: (queryString: string) => {
+          if (queryString.startsWith('SET unmapped_fields')) return countResponse(0);
+          if (queryString.includes('nope.field')) {
+            return new Error('Unknown column [nope.field]');
+          }
+          return undefined;
+        },
+      });
+
+      expect(result.queries).toHaveLength(0);
+      const response = addQueriesResponses[0] as {
+        response: { queries: Array<{ error?: string }> };
+      };
+      expect(response.response.queries[0].error).toContain('nope.field');
+      expect(result.queryAttempts?.[0]).toMatchObject({
+        failureReason: 'no_matches',
+      });
+    });
+
+    it('keeps STATS unknown columns as validation errors', async () => {
+      const esql =
+        'FROM logs | STATS metric_value = PERCENTILE(missing.duration, 95) BY bucket = BUCKET(@timestamp, 1 minute) | KEEP bucket, metric_value';
+      const { result } = await runIdentifyKIQueries({
+        collectQueryAttempts: true,
+        scriptedAddQueries: [[scriptedQuery(esql)]],
+        esqlResponse: (queryString: string) =>
+          queryString.includes('PERCENTILE(missing.duration')
+            ? new Error('Unknown column [missing.duration]')
+            : undefined,
+      });
+
+      expect(result.queries).toHaveLength(0);
+      expect(result.queryAttempts?.[0]).toMatchObject({
+        failureReason: 'validation_error',
+      });
     });
   });
 });

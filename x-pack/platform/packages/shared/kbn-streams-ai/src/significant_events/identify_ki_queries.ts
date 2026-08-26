@@ -16,6 +16,7 @@ import {
   getStatsQueryHints,
   normalizeEsqlSafe,
   replaceFromSources,
+  withUnmappedFieldsDirective,
 } from '@kbn/streams-schema';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
@@ -48,10 +49,14 @@ export const DEFAULT_MAX_EXISTING_QUERIES_FOR_CONTEXT = 50;
 export const DEFAULT_QUERY_VALIDATION_TIMEOUT_MS = 10_000;
 
 /**
- * Window the volume probe measures over, and the floor for the derived
- * validation lookback. Kept short so the probe itself is cheap.
+ * Window the volume probe measures over. Kept short so the probe itself
+ * is cheap.
  */
 const PROBE_WINDOW_MINUTES = 10;
+
+// Features are extracted over the trailing 24h, so validation must cover at least that window
+// or a rare-but-real signal from hours ago becomes indistinguishable from a value that never occurs.
+const MIN_LOOKBACK_MINUTES = 1_440;
 
 /**
  * Approximate document budget validation should touch. The lookback is
@@ -84,6 +89,8 @@ function getErrorMessage(error: unknown): string {
 
 /**
  * Sizes the `@timestamp` lookback used to validate candidate KI queries.
+ * Floored at the 24h feature-evidence window; widens (up to 7 days) for
+ * sparse streams so validation still runs against real data.
  *
  * `sources` may be an ES|QL view (query streams resolve to a `$.`-prefixed
  * view with no backing index - see `getSourcesForStream`), so volume is
@@ -127,21 +134,21 @@ export async function computeValidationLookback({
     const ratePerMinute = total / PROBE_WINDOW_MINUTES;
     const lookbackMinutes = Math.min(
       MAX_LOOKBACK_MINUTES,
-      Math.max(PROBE_WINDOW_MINUTES, Math.round(TARGET_VALIDATION_DOCS / ratePerMinute))
+      Math.max(MIN_LOOKBACK_MINUTES, Math.round(TARGET_VALIDATION_DOCS / ratePerMinute))
     );
     return `now-${lookbackMinutes}m`;
   } catch (error) {
     // Unlike a confirmed total of 0 (real evidence the stream is quiet, so
     // widening is justified), an error tells us nothing about density -
-    // there's no basis to guess wide, only to not regress from the fixed
-    // window this probe replaces.
+    // there's no basis to guess wide, so fall back to the evidence-window
+    // floor that every derived lookback is clamped to anyway.
     logger.debug(
       () =>
         `Failed to probe validation volume for [${sources.join(
           ', '
-        )}]; falling back to ${probeWindow}: ${getErrorMessage(error)}`
+        )}]; falling back to now-${MIN_LOOKBACK_MINUTES}m: ${getErrorMessage(error)}`
     );
-    return probeWindow;
+    return `now-${MIN_LOOKBACK_MINUTES}m`;
   }
 }
 
@@ -174,7 +181,56 @@ interface ParsedToolQuery {
 
 export type QueryAttemptStatus = 'Added' | 'Duplicate' | 'Failed to add';
 
-export type QueryAttemptFailureReason = 'missing_intent' | 'unknown_features' | 'validation_error';
+export type QueryAttemptFailureReason =
+  | 'missing_intent'
+  | 'unknown_features'
+  | 'validation_error'
+  | 'no_matches'
+  | 'unmapped_field';
+
+const UNKNOWN_COLUMN_PATTERN = /Unknown column \[([^\]]+)\]/g;
+
+function extractUnknownColumns(message: string): string[] {
+  const columns = new Set<string>();
+  for (const match of message.matchAll(UNKNOWN_COLUMN_PATTERN)) {
+    columns.add(match[1]);
+  }
+  return [...columns];
+}
+
+function isUnknownColumnError(message: string): boolean {
+  return /Unknown column \[/.test(message);
+}
+
+function renderNoMatchesError(lookback: string): string {
+  return (
+    `Query matched 0 documents between ${lookback} and now, so it was NOT added. ` +
+    `A 0-match usually means the field or literal is wrong - a mistyped value, a shortened form ` +
+    `when only a qualified one is indexed, or a token that does not survive analysis. Correct the ` +
+    `query and resubmit. Only if the condition is genuinely not present in this window (not yet ` +
+    `occurring, or grounded solely in evidence older than the window) resubmit UNCHANGED with ` +
+    `"expects_matches": false to record it as a watch.`
+  );
+}
+
+function renderUnmappedFieldError(fields: string[]): string {
+  return (
+    `Query references field(s) not present in the queryable schema: [${fields.join(', ')}]. ` +
+    `They exist in the raw documents but are not mapped, so they cannot be queried directly. ` +
+    `Loading them from _source did find matching documents, so the value is real - switch to a ` +
+    `mapped field that carries the same value (a free-text field often contains it inline) and ` +
+    `match the value exactly as it appears in that field's sample values.`
+  );
+}
+
+function renderUnknownFieldError(fields: string[], lookback: string): string {
+  return (
+    `Query references field(s) not present in the queryable schema: [${fields.join(', ')}], and ` +
+    `loading them from _source found no matching documents between ${lookback} and now. Verify the ` +
+    `field name against the dataset_analysis schema and the literal value, then resubmit a ` +
+    `corrected query.`
+  );
+}
 
 // Eval-only: one record per query across all add_queries calls, incl. rejected ones.
 export interface QueryAttempt {
@@ -252,7 +308,6 @@ export async function identifyKIQueries({
   const prompt = createGenerateSignificantEventsPrompt({
     systemPrompt,
     additionalTools,
-    requireQueryIntent,
   });
   const targetSources = getSourcesForStream(stream);
 
@@ -365,6 +420,25 @@ export async function identifyKIQueries({
           let hasNonIntentFailures = false;
           let hasIntentFailures = false;
 
+          const probeMatchCount = async (probeQuery: string): Promise<number> => {
+            const probeResponse = (await esClient.esql.query(
+              {
+                query: probeQuery,
+                filter: {
+                  range: {
+                    '@timestamp': {
+                      gte: validationLookback,
+                      lte: 'now',
+                    },
+                  },
+                },
+                format: 'json',
+              },
+              { signal, requestTimeout: queryValidationTimeoutMs }
+            )) as unknown as ESQLSearchResponse;
+            return Number(probeResponse.values?.[0]?.[0] ?? 0);
+          };
+
           const queryValidationResults = await Promise.all(
             queries.map(async (query) => {
               // `status` is first-failure-wins, so a duplicate that also trips an earlier gate
@@ -461,21 +535,81 @@ export async function identifyKIQueries({
 
                 const hints = getStatsQueryHints(rewritten);
 
-                await esClient.esql.query(
-                  {
-                    query: `${rewritten}\n| LIMIT 0`,
-                    filter: {
-                      range: {
-                        '@timestamp': {
-                          gte: validationLookback,
-                          lte: 'now',
-                        },
-                      },
-                    },
-                    format: 'json',
-                  },
-                  { signal, requestTimeout: queryValidationTimeoutMs }
-                );
+                let preflightUnknownColumnError: string | null = null;
+                try {
+                  await probeMatchCount(`${rewritten}\n| LIMIT 0`);
+                } catch (preflightError) {
+                  const preflightMessage = getErrorMessage(preflightError);
+                  if (derivedType === 'stats' || !isUnknownColumnError(preflightMessage)) {
+                    throw preflightError;
+                  }
+                  preflightUnknownColumnError = preflightMessage;
+                }
+
+                const isWatch = query.expects_matches === false;
+                let effectiveExpectsMatches = query.expects_matches;
+
+                if (derivedType === 'match') {
+                  const existenceProbe = `${rewritten}\n| LIMIT 1\n| STATS COUNT(*)`;
+                  let matchCount: number;
+                  try {
+                    matchCount = await probeMatchCount(existenceProbe);
+                  } catch (probeError) {
+                    const probeMessage = getErrorMessage(probeError);
+                    if (!isUnknownColumnError(probeMessage)) throw probeError;
+
+                    const fields = extractUnknownColumns(probeMessage);
+                    let loadCount = 0;
+                    try {
+                      loadCount = await probeMatchCount(
+                        withUnmappedFieldsDirective(existenceProbe)
+                      );
+                    } catch {
+                      loadCount = 0;
+                    }
+                    hasNonIntentFailures = true;
+                    return {
+                      query,
+                      valid: false,
+                      status: 'Failed to add' as const,
+                      failureReason: (loadCount > 0 ? 'unmapped_field' : 'no_matches') as const,
+                      exactDuplicate,
+                      error:
+                        loadCount > 0
+                          ? renderUnmappedFieldError(fields)
+                          : renderUnknownFieldError(fields, validationLookback),
+                    };
+                  }
+
+                  if (preflightUnknownColumnError !== null) {
+                    throw new Error(preflightUnknownColumnError);
+                  }
+
+                  const matched = matchCount > 0;
+
+                  if (isWatch) {
+                    if (matched) {
+                      effectiveExpectsMatches = true;
+                      warnings.push(
+                        'Marked as a watch (expects_matches=false) but matched the validation window; recorded as a live query (expects_matches=true).'
+                      );
+                    } else {
+                      warnings.push(
+                        'Accepted as a watch query (expects_matches=false): matched 0 documents in the validation window.'
+                      );
+                    }
+                  } else if (!matched) {
+                    hasNonIntentFailures = true;
+                    return {
+                      query,
+                      valid: false,
+                      status: 'Failed to add' as const,
+                      failureReason: 'no_matches' as const,
+                      exactDuplicate,
+                      error: renderNoMatchesError(validationLookback),
+                    };
+                  }
+                }
 
                 validatedQueries.push({
                   type: derivedType,
@@ -486,7 +620,7 @@ export async function identifyKIQueries({
                   severity_score: query.severity_score,
                   evidence: query.evidence,
                   replaces: query.replaces,
-                  expects_matches: query.expects_matches,
+                  expects_matches: effectiveExpectsMatches,
                   features: queryFeatures,
                 });
 
@@ -496,6 +630,7 @@ export async function identifyKIQueries({
                     ...query,
                     type: derivedType,
                     esql: rewritten,
+                    expects_matches: effectiveExpectsMatches,
                   },
                   valid: true,
                   status: 'Added' as const,
