@@ -19,3 +19,8 @@ export const NO_AGENT_BUILDER_ROLE: KibanaRole = {
   elasticsearch: { cluster: [], indices: [] },
   kibana: [{ base: [], feature: { advancedSettings: ['read'] }, spaces: ['*'] }],
 };
+
+export const INVESTIGATIONS_READ_ROLE: KibanaRole = {
+  elasticsearch: { cluster: [], indices: [] },
+  kibana: [{ base: [], feature: { agentBuilder: ['read'] }, spaces: ['*'] }],
+};
