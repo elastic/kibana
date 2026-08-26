@@ -14,11 +14,8 @@ export { selectTools } from './select_tools';
 export { getPendingRound } from './prompts';
 export { evictInternalEvents } from './evict_internal_events';
 export { formatAttachmentsMetadata } from './attachment_presentation';
-export {
-  emitExecutionStepEvents,
-  computeFreshRoundStepOffset,
-  resumedRoundStepOffset,
-} from './emit_execution_step_events';
+export { emitExecutionStepEvents } from './emit_execution_step_events';
+export { buildRoundPrefixSteps } from './round_steps';
 export {
   createResultTransformer,
   type CreateResultTransformerOptions,

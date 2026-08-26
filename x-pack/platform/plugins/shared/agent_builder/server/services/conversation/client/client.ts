@@ -102,6 +102,7 @@ export interface ConversationClient {
     request: AppendEventsRequest,
     options?: { access: ConversationAccess }
   ): Promise<Conversation>;
+  discardRoundEvents(conversationId: string, roundId: string): Promise<void>;
   markRead(conversationId: string, read: boolean): Promise<Conversation>;
   list(options?: ConversationListOptions): Promise<ConversationWithoutRoundsWithPermissions[]>;
   delete(conversationId: string): Promise<boolean>;
@@ -489,6 +490,19 @@ class ConversationClientImpl implements ConversationClient {
           read_by: [],
           read: false,
         };
+      },
+    });
+  }
+  async discardRoundEvents(conversationId: string, roundId: string): Promise<void> {
+    await this.writeConversation({
+      conversationId,
+      access: 'converse',
+      fields: (current) => {
+        const events = current.events ?? [];
+        const remaining = events.filter((event) => !event.id.startsWith(`${roundId}::`));
+        // Nothing to discard: return no fields, so a legacy (rounds-only) document is not
+        // promoted to events-native by writing its read-derived timeline back.
+        return remaining.length === events.length ? {} : { events: remaining };
       },
     });
   }

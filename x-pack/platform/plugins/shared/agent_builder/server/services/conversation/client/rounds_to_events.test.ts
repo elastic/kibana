@@ -201,6 +201,7 @@ describe('roundsToEvents', () => {
     // Step events carry the exact step payload from round.steps + a matching sequence.
     expect(events[2]).toMatchObject({
       type: TimelineEventType.executionStep,
+      created_at: '2026-01-01T00:00:00.000Z',
       execution_id: 'round-1::execution',
       trigger_event_id: 'round-1::user_message',
       actor: { type: EventActorType.agent, id: 'agent-1' },
@@ -242,5 +243,11 @@ describe('isRoundDerivedEventId', () => {
     expect(isRoundDerivedEventId('some-additive-error')).toBe(false);
     expect(isRoundDerivedEventId('::user_message::follow-up')).toBe(false);
     expect(isRoundDerivedEventId('')).toBe(false);
+  });
+
+  it('rejects additive ids that merely contain the step marker (check is anchored to ::step::N$)', () => {
+    expect(isRoundDerivedEventId('my-error::step::context')).toBe(false);
+    expect(isRoundDerivedEventId('round-1::step::0::retry')).toBe(false);
+    expect(isRoundDerivedEventId('round-1::step::')).toBe(false);
   });
 });

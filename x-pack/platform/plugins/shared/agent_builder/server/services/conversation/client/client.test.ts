@@ -2369,6 +2369,160 @@ describe('ConversationClient', () => {
       ]);
     });
 
+    // Minimal round-derived timeline events for concurrency tests. The runs are unfinished
+    // (no terminal event), matching what step flushes append mid-round.
+    const startTimelineEvents = (roundId: string): TimelineEvent[] => [
+      {
+        id: `${roundId}::user_message`,
+        type: TimelineEventType.userMessage,
+        created_at: '2025-08-04T07:42:20.789Z',
+        actor: { type: EventActorType.user, id: 'user-1', username: 'test-user' },
+        data: { message: 'hello' },
+      },
+      {
+        id: `${roundId}::execution_started`,
+        type: TimelineEventType.executionStarted,
+        created_at: '2025-08-04T07:42:20.789Z',
+        actor: { type: EventActorType.agent, id: 'agent-1' },
+        execution_id: `${roundId}::execution`,
+        trigger_event_id: `${roundId}::user_message`,
+        data: { trigger_type: TimelineTriggerType.userMessage },
+      },
+    ];
+
+    const stepTimelineEvent = (roundId: string, sequence: number): TimelineEvent =>
+      ({
+        id: `${roundId}::step::${sequence}`,
+        type: TimelineEventType.executionStep,
+        created_at: '2025-08-04T07:42:20.789Z',
+        actor: { type: EventActorType.agent, id: 'agent-1' },
+        execution_id: `${roundId}::execution`,
+        trigger_event_id: `${roundId}::user_message`,
+        data: { step: { type: 'reasoning', reasoning: `step ${sequence}` }, sequence },
+      } as TimelineEvent);
+
+    it('merges concurrent appendEvents flushes on OCC conflict so no events are lost and none duplicate', async () => {
+      const start = startTimelineEvents('round-1');
+      const step0 = stepTimelineEvent('round-1', 0);
+      const step1 = stepTimelineEvent('round-1', 1);
+
+      mockEsClient.search
+        // First OCC read: only the start events are stored.
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [createConversationDocument({ schemaVersion: 2, events: start })],
+          },
+        })
+        // Retry read: a concurrent flush won the race and landed step::0 in the meantime.
+        .mockResolvedValue({
+          hits: {
+            hits: [
+              createConversationDocument({ schemaVersion: 2, seqNo: 2, events: [...start, step0] }),
+            ],
+          },
+        });
+      mockEsClient.index.mockRejectedValueOnce(createConflictError());
+      mockEsClient.index.mockResolvedValue({ _seq_no: 3, _primary_term: 1 });
+
+      // This flush carries step::0 (already persisted concurrently) and step::1 (new).
+      await client.appendEvents({ id: 'conversation-1', events: [step0, step1] });
+
+      expect(mockEsClient.index).toHaveBeenCalledTimes(2);
+      const { document: indexed } = mockEsClient.index.mock.calls[1][0] as {
+        document: { events?: Array<{ id: string }> };
+      };
+      // The concurrent writer's step::0 is kept exactly once, and step::1 is appended.
+      expect(indexed.events?.map((event) => event.id)).toEqual([
+        'round-1::user_message',
+        'round-1::execution_started',
+        'round-1::step::0',
+        'round-1::step::1',
+      ]);
+    });
+
+    it('discardRoundEvents removes only the failed round-derived events, keeping other rounds and additive events', async () => {
+      const completedRound = createRound({
+        id: 'round-1',
+        status: ConversationRoundStatus.completed,
+      });
+      const completedEvents: TimelineEvent[] = [
+        ...startTimelineEvents('round-1'),
+        {
+          id: 'round-1::execution_terminated',
+          type: TimelineEventType.executionTerminated,
+          created_at: '2025-08-04T07:42:21.000Z',
+          actor: { type: EventActorType.agent, id: 'agent-1' },
+          execution_id: 'round-1::execution',
+          trigger_event_id: 'round-1::user_message',
+          data: {
+            outcome: { type: 'responded', response: { message: 'done' } },
+            model_usage: { connector_id: 'c', llm_calls: 1, input_tokens: 1, output_tokens: 1 },
+            time_to_first_token: 1,
+            time_to_last_token: 2,
+          },
+        } as TimelineEvent,
+      ];
+      const additiveEvent = {
+        id: 'additive-error-1',
+        type: TimelineEventType.executionTerminated,
+        created_at: '2025-08-04T07:42:22.000Z',
+        actor: { type: EventActorType.agent, id: 'agent-1' },
+        data: {},
+      } as TimelineEvent;
+      // round-2 failed mid-run: start + one streamed step, no terminal.
+      const failedRoundEvents = [
+        ...startTimelineEvents('round-2'),
+        stepTimelineEvent('round-2', 0),
+      ];
+
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createConversationDocument({
+              schemaVersion: 2,
+              rounds: [completedRound],
+              events: [...completedEvents, additiveEvent, ...failedRoundEvents],
+            }),
+          ],
+        },
+      });
+      mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
+
+      await client.discardRoundEvents('conversation-1', 'round-2');
+
+      const { document: indexed } = mockEsClient.index.mock.calls[0][0] as {
+        document: { events?: Array<{ id: string }> };
+      };
+      expect(indexed.events?.map((event) => event.id)).toEqual([
+        'round-1::user_message',
+        'round-1::execution_started',
+        'round-1::execution_terminated',
+        'additive-error-1',
+      ]);
+    });
+
+    it('discardRoundEvents does not promote a legacy conversation when there is nothing to discard', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createConversationDocument({
+              rounds: [createRound({ id: 'round-1', status: ConversationRoundStatus.completed })],
+            }),
+          ],
+        },
+      });
+      mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
+
+      await client.discardRoundEvents('conversation-1', 'round-never-started');
+
+      const { document: indexed } = mockEsClient.index.mock.calls[0][0] as {
+        document: { schema_version?: number; events?: unknown[]; conversation_rounds: unknown[] };
+      };
+      expect(indexed.schema_version).toBeUndefined();
+      expect(indexed.events).toBeUndefined();
+      expect(indexed.conversation_rounds).toHaveLength(1);
+    });
+
     it('leaves legacy conversations rounds-only on update (no events / no schema_version written)', async () => {
       mockEsClient.search.mockResolvedValue({
         hits: {

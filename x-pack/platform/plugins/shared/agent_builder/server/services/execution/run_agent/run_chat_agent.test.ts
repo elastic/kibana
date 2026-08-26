@@ -34,8 +34,7 @@ jest.mock('./utils', () => ({
   evictInternalEvents: jest.fn(() => (source$: any) => source$),
   estimatePerRoundTokens: jest.fn().mockResolvedValue([]),
   emitExecutionStepEvents: jest.fn(() => () => undefined),
-  computeFreshRoundStepOffset: jest.fn().mockReturnValue(0),
-  resumedRoundStepOffset: jest.fn().mockReturnValue(0),
+  buildRoundPrefixSteps: jest.fn().mockReturnValue([]),
 }));
 
 jest.mock('./tools/register_internal_tools', () => ({

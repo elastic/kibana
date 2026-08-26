@@ -17,6 +17,7 @@ import {
   ignoreElements,
   concat,
   concatMap,
+  finalize,
   take,
 } from 'rxjs';
 import type { Observable } from 'rxjs';
@@ -272,6 +273,7 @@ const handleConversationExecution = async ({
         title$,
         agentEvents$,
         action,
+        logger,
       })
     : EMPTY;
 
@@ -503,21 +505,16 @@ const buildPersistenceEvents = ({
   title$,
   agentEvents$,
   action,
+  logger,
 }: {
   conversation: ConversationWithOperation;
   conversationClient: ConversationClient;
   title$: Observable<string>;
   agentEvents$: Observable<ChatEvent>;
   action?: ConversationAction;
+  logger: Logger;
 }): Observable<ChatEvent> => {
   const roundCompletedEvents$ = agentEvents$.pipe(filter(isRoundCompleteEvent));
-  const roundStepEvents$ = agentEvents$.pipe(filter(isRoundStepEvent));
-
-  const stepStream$ = streamRoundSteps$({
-    conversation,
-    conversationClient,
-    roundStepEvents$,
-  });
 
   const isRegenerate = action === 'regenerate';
   const isResume = isPendingResumeConversation(conversation);
@@ -525,14 +522,28 @@ const buildPersistenceEvents = ({
 
   if (useTwoPhase) {
     const roundStartedEvents$ = agentEvents$.pipe(filter(isRoundStartedEvent));
+    const roundStepEvents$ = agentEvents$.pipe(filter(isRoundStepEvent));
     const endTitle$ =
       conversation.operation === 'CREATE' || conversationNeedsTitle(conversation)
         ? title$
         : undefined;
 
+    // Tracks the two-phase window: set once the START write is on its way, cleared once the
+    // round has reached its terminal event. A teardown inside that window means the run died
+    // mid-round, and the round's persisted events (start + streamed steps) must be discarded.
+    let startedRoundId: string | undefined;
+    let roundReachedTerminal = false;
+
+    const stepStream$ = streamRoundSteps$({
+      conversation,
+      conversationClient,
+      roundStepEvents$,
+    });
+
     const twoPhase$ = roundStartedEvents$.pipe(
-      concatMap((startEvent) =>
-        concat(
+      concatMap((startEvent) => {
+        startedRoundId = startEvent.data.round_id;
+        return concat(
           startConversation$({
             conversation,
             conversationClient,
@@ -541,33 +552,48 @@ const buildPersistenceEvents = ({
           appendRoundTerminated$({
             conversation,
             conversationClient,
-            roundCompletedEvents$: roundCompletedEvents$.pipe(take(1)),
+            roundCompletedEvents$: roundCompletedEvents$.pipe(
+              filter((event) => event.data.round.id === startEvent.data.round_id),
+              take(1),
+              tap(() => {
+                roundReachedTerminal = true;
+              })
+            ),
             title$: endTitle$,
           })
-        )
-      )
+        );
+      })
     );
 
-    return merge(stepStream$, twoPhase$);
+    return merge(stepStream$, twoPhase$).pipe(
+      finalize(() => {
+        if (startedRoundId === undefined || roundReachedTerminal) {
+          return;
+        }
+        const roundId = startedRoundId;
+        conversationClient.discardRoundEvents(conversation.id, roundId).catch((error) => {
+          logger.warn(
+            `Failed to discard events of failed round ${roundId} in conversation ${conversation.id}: ${error.message}`
+          );
+        });
+      })
+    );
   }
 
-  const endWrite$ =
-    conversation.operation === 'CREATE'
-      ? createConversation$({
-          conversation,
-          conversationClient,
-          title$,
-          roundCompletedEvents$,
-        })
-      : updateConversation$({
-          conversationClient,
-          conversation,
-          roundCompletedEvents$,
-          action,
-          title$: conversationNeedsTitle(conversation) ? title$ : undefined,
-        });
-
-  return merge(stepStream$, endWrite$);
+  return conversation.operation === 'CREATE'
+    ? createConversation$({
+        conversation,
+        conversationClient,
+        title$,
+        roundCompletedEvents$,
+      })
+    : updateConversation$({
+        conversationClient,
+        conversation,
+        roundCompletedEvents$,
+        action,
+        title$: conversationNeedsTitle(conversation) ? title$ : undefined,
+      });
 };
 
 /**

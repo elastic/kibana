@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { filter, finalize, from, merge, ReplaySubject, shareReplay } from 'rxjs';
+import { filter, finalize, from, merge, ReplaySubject, share, shareReplay } from 'rxjs';
 import { Command } from '@langchain/langgraph';
 import {
   isStreamEvent,
@@ -44,8 +44,7 @@ import {
   evictInternalEvents,
   estimatePerRoundTokens,
   emitExecutionStepEvents,
-  computeFreshRoundStepOffset,
-  resumedRoundStepOffset,
+  buildRoundPrefixSteps,
 } from './utils';
 import { registerInternalTools } from './tools/register_internal_tools';
 import {
@@ -427,7 +426,10 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       structuredOutput,
     }),
     finalize(() => manualEvents$.complete()),
-    shareReplay()
+    // share() (not shareReplay) — both subscribers (the step emitter below and the merged
+    // events$) attach synchronously before the async graph emits, and replaying every graph
+    // event for the run's lifetime would buffer large tool results unboundedly.
+    share()
   );
 
   const processedInput: RoundInput = {
@@ -448,20 +450,15 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     },
   });
 
-  const initialStepSequence = pendingRound
-    ? resumedRoundStepOffset(pendingRound)
-    : computeFreshRoundStepOffset({
-        compactionResult,
-        relevantSkillsSelection,
-      });
-  emitExecutionStepEvents({
-    graphEvents$,
-    manualEvents$,
-    roundId,
-    executionId: `${roundId}::execution`,
-    triggerEventId: `${roundId}::user_message`,
-    initialSequence: initialStepSequence,
-  });
+  if (!pendingRound && action !== 'regenerate') {
+    emitExecutionStepEvents({
+      graphEvents$,
+      manualEvents$,
+      roundId,
+      executionId: `${roundId}::execution`,
+      initialSequence: buildRoundPrefixSteps({ compactionResult, relevantSkillsSelection }).length,
+    });
+  }
 
   // Use provided overrides, or fall back to pending round's overrides (for HITL resume)
   const effectiveOverrides = configurationOverrides ?? pendingRound?.configuration_overrides;

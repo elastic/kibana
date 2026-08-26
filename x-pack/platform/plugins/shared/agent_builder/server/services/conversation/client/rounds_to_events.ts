@@ -38,12 +38,14 @@ const ROUND_DERIVED_EVENT_ID_SUFFIX_VALUES: readonly string[] = [
   ROUND_DERIVED_EVENT_ID_SUFFIXES.execution,
 ];
 
+const STEP_EVENT_ID_PATTERN = /::step::\d+$/;
+
 /**
  * True when `id` was produced by {@link roundToEvents}
  */
 export const isRoundDerivedEventId = (id: string): boolean =>
   ROUND_DERIVED_EVENT_ID_SUFFIX_VALUES.some((suffix) => id.endsWith(suffix)) ||
-  id.includes(ROUND_DERIVED_EVENT_ID_SUFFIXES.stepPrefix);
+  STEP_EVENT_ID_PATTERN.test(id);
 
 /** Round-derived event ids for a given round, keyed for readability. */
 const roundDerivedEventIds = (roundId: string) => ({
@@ -90,12 +92,10 @@ export const roundStepEvents = (
   conversation: Conversation
 ): TimelineEvent[] => {
   const ids = roundDerivedEventIds(round.id);
-  const startedAtMs = new Date(round.started_at).getTime();
   return (round.steps ?? []).map((step, index) => ({
     id: roundStepEventId(round.id, index),
     type: TimelineEventType.executionStep,
-    // 1ms bump per step so re-derivation is deterministic without colliding with started/terminated.
-    created_at: new Date(startedAtMs + index + 1).toISOString(),
+    created_at: round.started_at,
     actor: agentActor(conversation),
     execution_id: ids.execution,
     trigger_event_id: ids.userMessage,

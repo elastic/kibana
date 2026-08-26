@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { lastValueFrom, of, toArray } from 'rxjs';
+import { concat, lastValueFrom, mergeMap, of, shareReplay, throwError, timer, toArray } from 'rxjs';
 import {
   AgentExecutionMode,
   AgentBuilderErrorCode,
@@ -14,6 +14,7 @@ import {
   ConversationAccessControlMode,
   ConversationOriginType,
   createBadRequestError,
+  type ChatAgentEvent,
   type ChatEvent,
   type RoundCompleteEvent,
   type RoundStartedEvent,
@@ -372,7 +373,8 @@ describe('handleAgentExecution', () => {
       } as RoundStartedEvent;
       const roundCompleteEvent = {
         type: ChatEventType.roundComplete,
-        data: { round: createRound({}) },
+        // The END append is scoped to the started round, so the completed round must carry its id.
+        data: { round: createRound({ id: 'round-1' }) },
       } as RoundCompleteEvent;
       executeAgentMock.mockReturnValue(of(roundStartedEvent, roundCompleteEvent));
       resolveServicesMock.mockResolvedValue({
@@ -422,7 +424,8 @@ describe('handleAgentExecution', () => {
       } as RoundStartedEvent;
       const roundCompleteEvent = {
         type: ChatEventType.roundComplete,
-        data: { round: createRound({}) },
+        // The END append is scoped to the started round, so the completed round must carry its id.
+        data: { round: createRound({ id: 'round-1' }) },
       } as RoundCompleteEvent;
       executeAgentMock.mockReturnValue(of(roundStartedEvent, roundCompleteEvent));
       resolveServicesMock.mockResolvedValue({
@@ -450,6 +453,66 @@ describe('handleAgentExecution', () => {
 
       expect(conversationClient.create).toHaveBeenCalledWith(
         expect.objectContaining({ read_only: true })
+      );
+      expect(conversationClient.discardRoundEvents).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('two-phase failure cleanup', () => {
+    it('discards the round-derived events when the run fails after round start', async () => {
+      const conversation = createEmptyConversation({
+        id: 'conversation-1',
+        agent_id: 'test-agent',
+      });
+      const conversationClient = createConversationClientMock();
+      conversationClient.get.mockResolvedValue(conversation);
+      conversationClient.appendEvents.mockResolvedValue(conversation);
+
+      const roundStartedEvent = {
+        type: ChatEventType.roundStarted,
+        data: {
+          round_id: 'round-1',
+          input: { message: 'Hello' },
+          started_at: '2024-01-01T00:00:00.000Z',
+        },
+      } as RoundStartedEvent;
+      executeAgentMock.mockReturnValue(
+        timer(0).pipe(
+          mergeMap(() =>
+            concat(
+              of<ChatAgentEvent>(roundStartedEvent),
+              throwError(() => new Error('agent exploded'))
+            )
+          ),
+          shareReplay()
+        )
+      );
+      resolveServicesMock.mockResolvedValue({
+        conversationClient,
+        selectedConnectorId: 'connector-1',
+        modelProvider: createModelProviderMock(),
+      } as never);
+
+      const events$ = await handleAgentExecution({
+        execution: {
+          executionId: 'execution-1',
+          executionMode: AgentExecutionMode.conversation,
+          agentParams: {
+            agentId: 'test-agent',
+            conversationId: 'conversation-1',
+            nextInput: { message: 'Hello' },
+          },
+        } as never,
+        deps: createDeps({ conversationClient }),
+        request: { headers: {} } as never,
+        abortSignal: new AbortController().signal,
+      });
+
+      await expect(lastValueFrom(events$.pipe(toArray()))).rejects.toThrow();
+
+      expect(conversationClient.discardRoundEvents).toHaveBeenCalledWith(
+        'conversation-1',
+        'round-1'
       );
     });
   });
