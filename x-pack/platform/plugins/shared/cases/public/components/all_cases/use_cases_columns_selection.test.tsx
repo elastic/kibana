@@ -186,7 +186,7 @@ describe('useCasesColumnsSelection — global field sync (Bug 19099)', () => {
     expect(globalCol?.isChecked).toBeFalsy();
   });
 
-  it('writes global field state to the shared key and non-global state to the table key', () => {
+  it('writes global field checked state to the shared key and full array to the table key', () => {
     const { result } = renderHook(() => useCasesColumnsSelection(), {
       wrapper: (props) => <TestProviders {...props} license={license} />,
     });
@@ -198,16 +198,18 @@ describe('useCasesColumnsSelection — global field sync (Bug 19099)', () => {
       ]);
     });
 
-    // Global field goes to shared key
+    // Global field checked state goes to shared key
     expect(JSON.parse(localStorage.getItem(sharedStorageKey)!)).toEqual({
       priority_as_keyword: true,
     });
-    // Non-global column goes to the table-specific key; global field is absent
+    // Full array (including global field) goes to table key to preserve column order
     const tableStored: Array<{ field: string }> = JSON.parse(
       localStorage.getItem(tableStorageKey)!
     );
-    expect(tableStored).toEqual([{ field: 'title', name: 'Name', isChecked: true }]);
-    expect(tableStored.find((c) => c.field === 'priority_as_keyword')).toBeUndefined();
+    expect(tableStored).toEqual([
+      { field: 'title', name: 'Name', isChecked: true },
+      { field: 'priority_as_keyword', name: 'Priority', isChecked: true },
+    ]);
   });
 
   it('does not write to the shared key when the update contains no global fields', () => {

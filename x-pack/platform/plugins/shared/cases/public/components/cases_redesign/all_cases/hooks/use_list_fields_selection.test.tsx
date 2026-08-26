@@ -218,7 +218,7 @@ describe('useListFieldsSelection — global field sync (Bug 19099)', () => {
     expect(globalField?.isChecked).toBe(false);
   });
 
-  it('writes global field state to the shared key and non-global state to the list key', () => {
+  it('writes global field checked state to the shared key and full array to the list key', () => {
     const { result } = renderHook(() => useListFieldsSelection(), {
       wrapper: (props) => <TestProviders {...props} license={license} />,
     });
@@ -230,13 +230,16 @@ describe('useListFieldsSelection — global field sync (Bug 19099)', () => {
       ]);
     });
 
-    // FAILURE SCENARIO: global field written to list key instead of shared key
+    // Global field checked state goes to shared key (for cross-view sync)
     expect(JSON.parse(localStorage.getItem(sharedStorageKey)!)).toEqual({
       priority_as_keyword: true,
     });
+    // Full array (including global field) goes to list key to preserve field order
     const listStored: Array<{ field: string }> = JSON.parse(localStorage.getItem(listStorageKey)!);
-    expect(listStored).toEqual([{ field: 'tags', name: 'Tags', isChecked: true }]);
-    expect(listStored.find((f) => f.field === 'priority_as_keyword')).toBeUndefined();
+    expect(listStored).toEqual([
+      { field: 'tags', name: 'Tags', isChecked: true },
+      { field: 'priority_as_keyword', name: 'Priority', isChecked: true },
+    ]);
   });
 
   it('non-global field selections in one view do not appear in the other view storage key', () => {

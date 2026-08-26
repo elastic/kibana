@@ -50,18 +50,18 @@ export function useCasesColumnsSelection() {
 
   const setSelectedColumns = useCallback(
     (newColumns: CasesColumnSelection[]) => {
-      const nonGlobal: CasesColumnSelection[] = [];
       const globalUpdates: Record<string, boolean> = {};
 
       for (const col of newColumns) {
         if (globalFieldKeys.has(col.field)) {
           globalUpdates[col.field] = col.isChecked;
-        } else {
-          nonGlobal.push(col);
         }
       }
 
-      setStoredTableColumns(nonGlobal);
+      // Persist the full array (including global fields) so column order is preserved.
+      // Global field checked state is additionally written to the shared key so the
+      // list view picks up the same value.
+      setStoredTableColumns(newColumns);
       if (Object.keys(globalUpdates).length > 0) {
         setStoredGlobalFieldChecked((prev) => ({ ...prev, ...globalUpdates }));
       }
