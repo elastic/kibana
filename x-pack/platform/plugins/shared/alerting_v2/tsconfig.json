@@ -142,7 +142,8 @@
     "@kbn/security-authorization-core",
     "@kbn/security-plugin-types-server",
     "@kbn/core-test-helpers-model-versions",
-    "@kbn/content-list-common"
+    "@kbn/content-list-common",
+    "@kbn/agent-builder-tools-base"
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"]
 }

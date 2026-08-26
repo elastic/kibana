@@ -55,7 +55,7 @@ export const getWorkflowExecutionHistoryTool = ({
   type: ToolType.builtin,
   description:
     `Fetch workflow execution results for action policy "${policyId}" (attachment "${attachmentId}"). ` +
-    'Given workflow execution IDs (from dispatch history), returns each execution\'s status ' +
+    "Given workflow execution IDs (from dispatch history), returns each execution's status " +
     '(completed/failed/running/waiting_for_input), duration, output, and error details. ' +
     'Use to verify whether notifications were actually delivered after dispatch. ' +
     'This tool is read-only.',
@@ -89,7 +89,8 @@ export const getWorkflowExecutionHistoryTool = ({
             return result.value;
           }
           if (result.status === 'rejected') {
-            const message = result.reason instanceof Error ? result.reason.message : String(result.reason);
+            const message =
+              result.reason instanceof Error ? result.reason.message : String(result.reason);
             return { execution_id: executionIds[idx], error: message };
           }
           return { execution_id: executionIds[idx], error: 'Execution not found' };
