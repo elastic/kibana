@@ -111,7 +111,6 @@ ${generateRuleOperationsDoc()}
 - Every \`set_query\` call **must** include \`format: "composed"\` or \`format: "standalone"\`. Omitting \`format\` will fail validation.
   - **Composed** shares a \`base\` query with appendable \`breach.segment\` and optional \`recovery.segment\`:
     \`{ format: "composed", base: "FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name", breach: { segment: "WHERE avg_cpu > 0.9" } }\`
-    Omit \`breach\` to treat every row returned by \`base\` as a breach.
   - **Standalone** uses independent full queries:
     \`{ format: "standalone", breach: { query: "FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name | WHERE avg_cpu > 0.9" } }\`
 - The base query must be a valid ES|QL statement.
@@ -121,8 +120,10 @@ ${generateRuleOperationsDoc()}
 - **Never** use backtick quoting around index names or field names in ES|QL. Standard index patterns (letters, digits, dashes, dots, underscores, wildcards, and colons for CCS) do not require backticks. Backticks break cross-cluster search and are almost never needed in practice. Write \`FROM remote_cluster:metrics-system.cpu-default\`, not \`FROM \\\`remote_cluster:metrics-system.cpu-default\\\`\`.
 - The \`set_schedule\` lookback should be >= the execution interval (\`every\`).
 - The \`set_query\` operation validates the query against Elasticsearch automatically.
+  It will resolve a default time field if one is not specified.
   If the query references an unknown index or field, the tool will return an error
   with the Elasticsearch error message. Inspect the error, fix the query, and retry.
+- If \`set_query\` fails with a time-field error, use \`set_time_field\` to specify the timestamp column explicitly, then retry \`set_query\`. Do not guess the field name — ask the user which column to use.
 - If grouping fields are set after a query, they are validated against the query's
   output columns. Use fields that appear in the query results.
 
@@ -188,10 +189,10 @@ When the user asks what \`active\` / \`pending\` / \`recovering\` / \`inactive\`
 When the user specifies a severity (e.g. "make this a critical alert"), add an \`EVAL severity = "..."\` pipe to the breach query or segment via \`set_query\`. Consult the [alert-event-severity reference](./references/alert-event-severity.md) for valid values, the extraction model, and literal vs conditional patterns.
 
 ### Recovery Strategy
-When the user wants alerts to recover only when a condition is met, to never recover, or asks how recovery is detected, set \`recovery_strategy\` on \`set_query\`. Consult the [recovery-strategy reference](./references/recovery-strategy.md).
+When the user wants alerts to recover only when a condition is met, to never recover, or asks how recovery is detected, use \`set_recovery_strategy\`. This can be set independently of the query — no need to re-supply the query just to change the strategy. When using \`recovery_strategy: "query"\`, also provide a recovery block via \`set_query\`. Consult the [recovery-strategy reference](./references/recovery-strategy.md).
 
 ### No-Data Strategy
-When the user asks what happens if data stops arriving (missing metrics, heartbeat, "keep the last status"), set \`no_data_strategy\` on \`set_query\`. Consult the [no-data-strategy reference](./references/no-data-strategy.md).
+When the user asks what happens if data stops arriving (missing metrics, heartbeat, "keep the last status"), use \`set_no_data_strategy\`. This can be set independently of the query. Standalone-format rules need a \`no_data\` query block via \`set_query\` when the strategy is not \`"none"\`. Consult the [no-data-strategy reference](./references/no-data-strategy.md).
 
 ### Notifications
 When the user asks for email, Slack, PagerDuty, or how rules send notifications, consult the [notifications-overview reference](./references/notifications-overview.md).`,

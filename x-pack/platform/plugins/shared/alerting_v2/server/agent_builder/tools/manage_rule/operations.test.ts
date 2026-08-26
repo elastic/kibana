@@ -592,6 +592,122 @@ describe('executeRuleOperations', () => {
     });
   });
 
+  describe('set_recovery_strategy', () => {
+    it('sets recovery_strategy without requiring a query', async () => {
+      const ops: RuleOperation[] = [
+        { operation: 'set_recovery_strategy', recovery_strategy: 'no_breach' },
+      ];
+
+      const result = await executeRuleOperations({}, ops);
+
+      expect(result.data.recovery_strategy).toBe('no_breach');
+    });
+
+    it('overrides a previously set recovery_strategy', async () => {
+      const existing: Partial<RuleAttachmentData> = { recovery_strategy: 'no_breach' };
+      const ops: RuleOperation[] = [
+        { operation: 'set_recovery_strategy', recovery_strategy: 'none' },
+      ];
+
+      const result = await executeRuleOperations(existing, ops);
+
+      expect(result.data.recovery_strategy).toBe('none');
+    });
+
+    it('works when set before set_query with a matching recovery block', async () => {
+      const ops: RuleOperation[] = [
+        { operation: 'set_recovery_strategy', recovery_strategy: 'query' },
+        {
+          operation: 'set_query',
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM metrics-* | WHERE cpu > 0.9' },
+            recovery: { query: 'FROM metrics-* | WHERE cpu < 0.5' },
+          },
+        },
+      ];
+
+      const result = await executeRuleOperations({}, ops);
+
+      expect(result.data.recovery_strategy).toBe('query');
+    });
+
+    it('throws when set to "query" without a recovery block on the accumulated rule', async () => {
+      const ops: RuleOperation[] = [
+        {
+          operation: 'set_query',
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM metrics-* | WHERE cpu > 0.9' },
+          },
+        },
+        { operation: 'set_recovery_strategy', recovery_strategy: 'query' },
+      ];
+
+      await expect(executeRuleOperations({}, ops)).rejects.toThrow(
+        'recovery_strategy "query" requires a recovery block'
+      );
+    });
+  });
+
+  describe('set_no_data_strategy', () => {
+    it('sets no_data_strategy without requiring a query', async () => {
+      const ops: RuleOperation[] = [
+        { operation: 'set_no_data_strategy', no_data_strategy: 'last_known_status' },
+      ];
+
+      const result = await executeRuleOperations({}, ops);
+
+      expect(result.data.no_data_strategy).toBe('last_known_status');
+    });
+
+    it('overrides a previously set no_data_strategy', async () => {
+      const existing: Partial<RuleAttachmentData> = { no_data_strategy: 'last_known_status' };
+      const ops: RuleOperation[] = [
+        { operation: 'set_no_data_strategy', no_data_strategy: 'none' },
+      ];
+
+      const result = await executeRuleOperations(existing, ops);
+
+      expect(result.data.no_data_strategy).toBe('none');
+    });
+
+    it('works when set before set_query with a matching no_data block', async () => {
+      const ops: RuleOperation[] = [
+        { operation: 'set_no_data_strategy', no_data_strategy: 'recover' },
+        {
+          operation: 'set_query',
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM metrics-* | WHERE cpu > 0.9' },
+            no_data: { query: 'FROM heartbeat-* | STATS COUNT(*) BY host.name' },
+          },
+        },
+      ];
+
+      const result = await executeRuleOperations({}, ops);
+
+      expect(result.data.no_data_strategy).toBe('recover');
+    });
+
+    it('throws when standalone rule sets non-none strategy without a no_data block', async () => {
+      const ops: RuleOperation[] = [
+        {
+          operation: 'set_query',
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM metrics-* | WHERE cpu > 0.9' },
+          },
+        },
+        { operation: 'set_no_data_strategy', no_data_strategy: 'last_known_status' },
+      ];
+
+      await expect(executeRuleOperations({}, ops)).rejects.toThrow(
+        'requires a no_data block in the query'
+      );
+    });
+  });
+
   describe('cross-field validation', () => {
     it('throws when isNew is true and no name is provided', async () => {
       const ops: RuleOperation[] = [{ operation: 'set_kind', kind: 'alert' }];
