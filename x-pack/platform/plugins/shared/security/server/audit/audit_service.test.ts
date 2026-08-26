@@ -1121,10 +1121,13 @@ describe('runtime audit log write failures', () => {
     return { audit, fileName, loggingConfigs, statuses };
   };
 
+  const auditAppender = (loggerContextConfig: LoggerContextConfigInput) =>
+    (loggerContextConfig.appenders as Record<string, FileAppenderPluginConfig>).auditTrailAppender;
+
   it('hands the appender an `onWriteError` handler so a mid-write failure cannot crash Kibana', () => {
     const { audit, loggingConfigs } = setupWithFileAppender();
 
-    const appender = loggingConfigs[0].appenders!.auditTrailAppender as FileAppenderPluginConfig;
+    const appender = auditAppender(loggingConfigs[0]);
 
     expect(appender.type).toEqual('file');
     expect(appender.onWriteError).toEqual(expect.any(Function));
@@ -1133,8 +1136,7 @@ describe('runtime audit log write failures', () => {
 
   it('reports degraded when the appender fails mid-write, not only at startup', () => {
     const { audit, fileName, loggingConfigs, statuses } = setupWithFileAppender();
-    const { onWriteError } = loggingConfigs[0].appenders!
-      .auditTrailAppender as FileAppenderPluginConfig;
+    const { onWriteError } = auditAppender(loggingConfigs[0]);
 
     expect(statuses.at(-1)!.level).toEqual(ServiceStatusLevels.available);
 
@@ -1148,8 +1150,7 @@ describe('runtime audit log write failures', () => {
 
   it('turns the audit logger off once a write has failed, so the appender stops being used', () => {
     const { audit, fileName, loggingConfigs } = setupWithFileAppender();
-    const { onWriteError } = loggingConfigs[0].appenders!
-      .auditTrailAppender as FileAppenderPluginConfig;
+    const { onWriteError } = auditAppender(loggingConfigs[0]);
 
     expect(loggingConfigs[0].loggers![0].level).toEqual('info');
 
@@ -1172,14 +1173,13 @@ describe('runtime audit log write failures', () => {
       } as AppenderConfigType,
     });
 
-    const { appenders } = createLoggingConfig(
+    const loggingConfig = createLoggingConfig(
       auditConfig,
       false,
       undefined,
       auditHandler
     )({ allowAuditLogging: true });
-    const appender = appenders!.auditTrailAppender as FileAppenderPluginConfig;
-    appender.onWriteError!({ path: 'audit.log', reason: 'ENOSPC' });
+    auditAppender(loggingConfig).onWriteError!({ path: 'audit.log', reason: 'ENOSPC' });
 
     expect(auditHandler).toHaveBeenCalledTimes(1);
     expect(operatorHandler).not.toHaveBeenCalled();
