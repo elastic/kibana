@@ -117,7 +117,9 @@ export const useUpdateConversationAccessControl = ({
               }
             : current
       );
-      // Refresh conversation list caches too: they are independent from the byId cache and may surface access-control-derived state such as public/private mode.
+
+      // Refresh conversation list caches too: they are independent from the byId cache
+      // and may surface access-control-derived state such as public/private mode.
       queryClient.invalidateQueries({ queryKey: queryKeys.conversations.all });
 
       onSuccess?.(normalizedAccessControl);
