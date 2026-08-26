@@ -6,7 +6,7 @@
  */
 
 import type { Case } from '../../../common/types/domain';
-import { validateOrigin } from './validate_origin';
+import { validateOrigin, validateMultiCaseOrigin } from './validate_origin';
 
 const theCase = {
   id: 'case-1',
@@ -293,5 +293,66 @@ describe('unified v2 alert attachment', () => {
         theCase: caseWithUnifiedAlert,
       })
     ).toThrow('All selected alerts must belong to the case.');
+  });
+});
+
+describe('validateMultiCaseOrigin', () => {
+  const caseIds = ['case-a', 'case-b', 'case-c'];
+  const origin = { type: 'cases.case' as const, id: 'case-a' };
+
+  it('accepts a valid multi-case run with a cases.case origin whose id is in caseIds', () => {
+    expect(() => validateMultiCaseOrigin({ origin, caseIds, inputs: {} })).not.toThrow();
+  });
+
+  it('rejects cases.observable origin type for multi-case runs', () => {
+    expect(() =>
+      validateMultiCaseOrigin({
+        origin: { type: 'cases.observable', id: 'obs-1' },
+        caseIds,
+        inputs: {},
+      })
+    ).toThrow('can only be used with a single case');
+  });
+
+  it('rejects cases.alert origin type for multi-case runs', () => {
+    expect(() =>
+      validateMultiCaseOrigin({
+        origin: { type: 'cases.alert', id: 'alert-1' },
+        caseIds,
+        inputs: {},
+      })
+    ).toThrow('can only be used with a single case');
+  });
+
+  it('rejects cases.alerts origin type for multi-case runs', () => {
+    expect(() =>
+      validateMultiCaseOrigin({
+        origin: { type: 'cases.alerts', id: 'case-a' },
+        caseIds,
+        inputs: {},
+      })
+    ).toThrow('can only be used with a single case');
+  });
+
+  it('rejects origin.id that is not in caseIds', () => {
+    expect(() =>
+      validateMultiCaseOrigin({
+        origin: { type: 'cases.case', id: 'not-in-list' },
+        caseIds,
+        inputs: {},
+      })
+    ).toThrow('Workflow origin id must be one of the requested case ids.');
+  });
+
+  it('rejects inputs containing alertIds for multi-case runs', () => {
+    expect(() =>
+      validateMultiCaseOrigin({
+        origin,
+        caseIds,
+        inputs: {
+          event: { alertIds: [{ _id: 'alert-1', _index: '.alerts-index' }] },
+        },
+      })
+    ).toThrow('Alert inputs can only be used with a single case.');
   });
 });

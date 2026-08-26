@@ -16,7 +16,8 @@ import {
 } from '../../../common/types/domain/user_action/workflow/constants';
 import { UserActionActions, UserActionTypes } from '../../../common/types/domain';
 
-const CASE_ID = 'test-case-1';
+const CASE_ID_A = 'test-case-a';
+const CASE_ID_B = 'test-case-b';
 const OWNER = SECURITY_SOLUTION_OWNER;
 
 const WORKFLOW_PAYLOAD = {
@@ -25,13 +26,16 @@ const WORKFLOW_PAYLOAD = {
   executionId: 'exec-abc',
 };
 
-const CASE_ORIGIN = { type: CASE_WORKFLOW_ORIGIN_TYPE, id: CASE_ID };
+const CASE_ORIGIN = { type: CASE_WORKFLOW_ORIGIN_TYPE, id: CASE_ID_A };
 
-const caseSO = {
+const makeCaseSO = (id: string) => ({
   ...mockCases[0],
-  id: CASE_ID,
+  id,
   attributes: { ...mockCases[0].attributes, owner: OWNER },
-};
+});
+
+const caseSOA = makeCaseSO(CASE_ID_A);
+const caseSOB = makeCaseSO(CASE_ID_B);
 
 describe('preflightWorkflowExecution', () => {
   const clientArgs = createCasesClientMockArgs();
@@ -42,28 +46,43 @@ describe('preflightWorkflowExecution', () => {
     jest.clearAllMocks();
   });
 
-  it('resolves without error when below the user action limit', async () => {
+  it('resolves without error when all cases are below the user action limit', async () => {
     userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({
-      [CASE_ID]: MAX_USER_ACTIONS_PER_CASE - 1,
+      [CASE_ID_A]: MAX_USER_ACTIONS_PER_CASE - 1,
     });
 
     await expect(
-      preflightWorkflowExecution({ caseId: CASE_ID }, clientArgs)
+      preflightWorkflowExecution({ caseIds: [CASE_ID_A] }, clientArgs)
     ).resolves.toBeUndefined();
 
     expect(userActionService.getMultipleCasesUserActionsTotal).toHaveBeenCalledWith({
-      caseIds: [CASE_ID],
+      caseIds: [CASE_ID_A],
     });
   });
 
-  it('throws when the case has reached MAX_USER_ACTIONS_PER_CASE', async () => {
+  it('issues a single bulk call for multiple cases', async () => {
     userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({
-      [CASE_ID]: MAX_USER_ACTIONS_PER_CASE,
+      [CASE_ID_A]: 0,
+      [CASE_ID_B]: 0,
     });
 
-    await expect(preflightWorkflowExecution({ caseId: CASE_ID }, clientArgs)).rejects.toThrow(
-      /limit of \d+ user actions/
-    );
+    await preflightWorkflowExecution({ caseIds: [CASE_ID_A, CASE_ID_B] }, clientArgs);
+
+    expect(userActionService.getMultipleCasesUserActionsTotal).toHaveBeenCalledTimes(1);
+    expect(userActionService.getMultipleCasesUserActionsTotal).toHaveBeenCalledWith({
+      caseIds: [CASE_ID_A, CASE_ID_B],
+    });
+  });
+
+  it('throws when any case has reached MAX_USER_ACTIONS_PER_CASE', async () => {
+    userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({
+      [CASE_ID_A]: MAX_USER_ACTIONS_PER_CASE - 1,
+      [CASE_ID_B]: MAX_USER_ACTIONS_PER_CASE,
+    });
+
+    await expect(
+      preflightWorkflowExecution({ caseIds: [CASE_ID_A, CASE_ID_B] }, clientArgs)
+    ).rejects.toThrow(/limit of \d+ user actions/);
   });
 });
 
@@ -74,28 +93,41 @@ describe('recordWorkflowExecution', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    clientArgs.services.caseService.getCase.mockResolvedValue(caseSO);
+    clientArgs.services.caseService.getCases.mockResolvedValue({
+      saved_objects: [caseSOA],
+    });
     clientArgs.authorization.ensureAuthorized.mockResolvedValue();
-    userActionService.creator.createUserAction.mockResolvedValue(undefined as never);
+    userActionService.creator.bulkCreateUserAction.mockResolvedValue(undefined as never);
   });
 
-  it('fetches the case owner from the SO and authorizes with it', async () => {
+  it('bulk-fetches all cases and authorizes with all entities in one call', async () => {
+    clientArgs.services.caseService.getCases.mockResolvedValue({
+      saved_objects: [caseSOA, caseSOB],
+    });
+
     await recordWorkflowExecution(
-      { caseId: CASE_ID, workflow: WORKFLOW_PAYLOAD, origin: CASE_ORIGIN },
+      { caseIds: [CASE_ID_A, CASE_ID_B], workflow: WORKFLOW_PAYLOAD, origin: CASE_ORIGIN },
       clientArgs
     );
 
-    expect(clientArgs.services.caseService.getCase).toHaveBeenCalledWith({ id: CASE_ID });
+    expect(clientArgs.services.caseService.getCases).toHaveBeenCalledWith({
+      caseIds: [CASE_ID_A, CASE_ID_B],
+    });
+    expect(clientArgs.services.caseService.getCases).toHaveBeenCalledTimes(1);
+    expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledTimes(1);
     expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledWith(
       expect.objectContaining({
-        entities: [{ id: CASE_ID, owner: OWNER }],
+        entities: expect.arrayContaining([
+          { id: CASE_ID_A, owner: OWNER },
+          { id: CASE_ID_B, owner: OWNER },
+        ]),
       })
     );
   });
 
   it('uses the workflow access operation, not the case-update operation', async () => {
     await recordWorkflowExecution(
-      { caseId: CASE_ID, workflow: WORKFLOW_PAYLOAD, origin: CASE_ORIGIN },
+      { caseIds: [CASE_ID_A], workflow: WORKFLOW_PAYLOAD, origin: CASE_ORIGIN },
       clientArgs
     );
 
@@ -109,26 +141,34 @@ describe('recordWorkflowExecution', () => {
     );
   });
 
-  it('calls createUserAction with the correct payload and refresh', async () => {
+  it('calls bulkCreateUserAction with one entry per case and wait_for refresh', async () => {
+    clientArgs.services.caseService.getCases.mockResolvedValue({
+      saved_objects: [caseSOA, caseSOB],
+    });
     const alertOrigin = { type: ALERT_WORKFLOW_ORIGIN_TYPE, id: 'alert-1', index: '.my-index' };
 
     await recordWorkflowExecution(
-      { caseId: CASE_ID, workflow: WORKFLOW_PAYLOAD, origin: alertOrigin },
+      { caseIds: [CASE_ID_A, CASE_ID_B], workflow: WORKFLOW_PAYLOAD, origin: alertOrigin },
       clientArgs
     );
 
-    expect(userActionService.creator.createUserAction).toHaveBeenCalledWith({
-      userAction: {
-        type: UserActionTypes.workflow,
-        action: UserActionActions.create,
-        caseId: CASE_ID,
-        owner: OWNER,
-        user: clientArgs.user,
-        payload: {
-          workflow: WORKFLOW_PAYLOAD,
-          origin: alertOrigin,
-        },
-      },
+    expect(userActionService.creator.bulkCreateUserAction).toHaveBeenCalledWith({
+      userActions: expect.arrayContaining([
+        expect.objectContaining({
+          type: UserActionTypes.workflow,
+          action: UserActionActions.create,
+          caseId: CASE_ID_A,
+          owner: OWNER,
+          payload: { workflow: WORKFLOW_PAYLOAD, origin: alertOrigin },
+        }),
+        expect.objectContaining({
+          type: UserActionTypes.workflow,
+          action: UserActionActions.create,
+          caseId: CASE_ID_B,
+          owner: OWNER,
+          payload: { workflow: WORKFLOW_PAYLOAD, origin: alertOrigin },
+        }),
+      ]),
       refresh: 'wait_for',
     });
   });
@@ -138,18 +178,20 @@ describe('recordWorkflowExecution', () => {
 
     await expect(
       recordWorkflowExecution(
-        { caseId: CASE_ID, workflow: WORKFLOW_PAYLOAD, origin: CASE_ORIGIN },
+        { caseIds: [CASE_ID_A], workflow: WORKFLOW_PAYLOAD, origin: CASE_ORIGIN },
         clientArgs
       )
     ).rejects.toThrow('Failed to record workflow execution');
   });
 
-  it('propagates a createUserAction rejection', async () => {
-    userActionService.creator.createUserAction.mockRejectedValue(new Error('ES write failed'));
+  it('propagates a bulkCreateUserAction rejection', async () => {
+    userActionService.creator.bulkCreateUserAction.mockRejectedValue(
+      new Error('ES write failed')
+    );
 
     await expect(
       recordWorkflowExecution(
-        { caseId: CASE_ID, workflow: WORKFLOW_PAYLOAD, origin: CASE_ORIGIN },
+        { caseIds: [CASE_ID_A], workflow: WORKFLOW_PAYLOAD, origin: CASE_ORIGIN },
         clientArgs
       )
     ).rejects.toThrow('Failed to record workflow execution');

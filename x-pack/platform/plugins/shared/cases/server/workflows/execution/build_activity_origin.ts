@@ -19,6 +19,11 @@ import { findAlertIndex } from './alert_attachment_utils';
  * - `cases.observable` → adds `typeKey` and `value` from the matching observable.
  * - all other origins → returned unchanged.
  *
+ * `theCase` is optional: for multi-case runs the sub-entity origin types (`cases.alert`,
+ * `cases.observable`) are rejected before this function is called, so the enrichment branches
+ * are never reached. Passing `undefined` makes the multi-case caller's intent explicit without
+ * requiring a dummy case object.
+ *
  * We derive enrichment from the case object (not from `inputs.event.*`) because
  * `preprocessAlertInputs` rewrites `event` into a different shape before the run, so
  * reading from `inputs` post-processing would be fragile.
@@ -28,15 +33,15 @@ export const buildActivityOrigin = ({
   theCase,
 }: {
   origin: CaseWorkflowRunOrigin;
-  theCase: Case;
+  theCase?: Case;
 }): WorkflowOrigin => {
   if (origin.type === ALERT_WORKFLOW_ORIGIN_TYPE) {
-    const alertIndex = findAlertIndex(origin.id, theCase.comments ?? []);
+    const alertIndex = theCase ? findAlertIndex(origin.id, theCase.comments ?? []) : undefined;
     return alertIndex !== undefined ? { ...origin, index: alertIndex } : origin;
   }
 
   if (origin.type === OBSERVABLE_WORKFLOW_ORIGIN_TYPE) {
-    const obs = theCase.observables.find(({ id }) => id === origin.id);
+    const obs = theCase?.observables.find(({ id }) => id === origin.id);
     if (obs) {
       return { ...origin, typeKey: obs.typeKey, value: obs.value };
     }

@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import { WriteOperations } from '../../authorization';
 import type { OperationDetails } from '../../authorization';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
-import { createCaseError } from '../../common/error';
+import { createCaseError, createCaseErrorFromSOError } from '../../common/error';
+import { isSOError } from '../../common/error';
 import type { CasesClientArgs } from '../types';
 
 /**
@@ -34,11 +36,19 @@ export const WORKFLOW_RUN_AUTHZ_OPERATION: OperationDetails = {
 };
 
 export interface EnsureAuthorizedToUpdateParams {
-  id: string;
+  ids: string[];
 }
 
+/**
+ * Authorizes the caller to run a workflow against all the given case IDs.
+ *
+ * The check is all-or-nothing: if the caller lacks `cases:<owner>/updateCase` on *any* of the
+ * requested cases, a 403 is thrown and no execution is started. The deliberate ordering mirrors
+ * `delete.ts`/`bulk_update.ts`: authorization runs before not-found errors are surfaced so an
+ * unauthorized caller cannot learn which IDs exist.
+ */
 export const ensureAuthorizedToUpdate = async (
-  { id }: EnsureAuthorizedToUpdateParams,
+  { ids }: EnsureAuthorizedToUpdateParams,
   clientArgs: CasesClientArgs
 ): Promise<void> => {
   const {
@@ -48,14 +58,41 @@ export const ensureAuthorizedToUpdate = async (
   } = clientArgs;
 
   try {
-    const theCase = await caseService.getCase({ id });
+    const { saved_objects: cases } = await caseService.getCases({ caseIds: ids });
+
+    // Authorize before reporting not-found errors so an unauthorized caller
+    // cannot distinguish "this case doesn't exist" from "you can't see it".
+    const entities = cases
+      .filter((c) => !isSOError(c))
+      .map((c) => ({ id: c.id, owner: (c as Exclude<typeof c, { error: unknown }>).attributes.owner }));
+
+    if (entities.length === 0) {
+      // ensureAuthorized({ entities: [] }) passes vacuously because it derives an empty
+      // privilege set from zero owners. Reject explicitly so an unauthorized caller never
+      // receives a 404 that would reveal which case ids do not exist.
+      throw Boom.forbidden(
+        'Unauthorized to run workflow on case'
+      );
+    }
+
+    // One privilege round-trip covers all owners; throws Boom.forbidden if any is unauthorized.
     await authorization.ensureAuthorized({
       operation: WORKFLOW_RUN_AUTHZ_OPERATION,
-      entities: [{ id: theCase.id, owner: theCase.attributes.owner }],
+      entities,
     });
+
+    // Only after authorization: surface any SO-level errors (not-found, etc.).
+    for (const theCase of cases) {
+      if (isSOError(theCase)) {
+        throw createCaseErrorFromSOError(
+          theCase.error,
+          `Failed to authorize update for case ids: ${ids.join(', ')}`
+        );
+      }
+    }
   } catch (error) {
     throw createCaseError({
-      message: `Failed to authorize update for case id: ${id}: ${error}`,
+      message: `Failed to authorize update for case ids: ${ids.join(', ')}: ${error}`,
       error,
       logger,
     });

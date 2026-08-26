@@ -5,30 +5,32 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import { createCaseError } from '../../common/error';
-import { validateMaxUserActions } from '../../common/validators';
+import { isSOError } from '../../common/error';
 import { UserActionActions, UserActionTypes } from '../../../common/types/domain';
 import type { WorkflowOrigin, WorkflowPayload } from '../../../common/types/domain';
 import type { CasesClientArgs } from '../types';
 import { WORKFLOW_RUN_AUTHZ_OPERATION } from '../cases/ensure_authorized_to_update';
+import { MAX_USER_ACTIONS_PER_CASE } from '../../../common/constants';
 
 export interface PreflightWorkflowExecutionArgs {
-  caseId: string;
+  caseIds: string[];
 }
 
 export interface RecordWorkflowExecutionArgs {
-  caseId: string;
+  caseIds: string[];
   workflow: WorkflowPayload;
   origin: WorkflowOrigin;
 }
 
 /**
- * Validates that recording the workflow execution would not exceed the per-case user-action limit.
- * Must be called before starting the workflow execution so a rejection happens before anything
- * irreversible.
+ * Validates that recording the workflow execution would not exceed the per-case user-action limit
+ * for any of the requested cases. Must be called before starting the workflow execution so a
+ * rejection happens before anything irreversible.
  */
 export const preflightWorkflowExecution = async (
-  { caseId }: PreflightWorkflowExecutionArgs,
+  { caseIds }: PreflightWorkflowExecutionArgs,
   clientArgs: CasesClientArgs
 ): Promise<void> => {
   const {
@@ -37,10 +39,19 @@ export const preflightWorkflowExecution = async (
   } = clientArgs;
 
   try {
-    await validateMaxUserActions({ caseId, userActionService, userActionsToAdd: 1 });
+    const totals = await userActionService.getMultipleCasesUserActionsTotal({ caseIds });
+
+    for (const caseId of caseIds) {
+      const total = totals[caseId] ?? 0;
+      if (total + 1 > MAX_USER_ACTIONS_PER_CASE) {
+        throw Boom.badRequest(
+          `The case with id ${caseId} has reached the limit of ${MAX_USER_ACTIONS_PER_CASE} user actions.`
+        );
+      }
+    }
   } catch (error) {
     throw createCaseError({
-      message: `Failed to preflight workflow execution for case ${caseId}: ${error}`,
+      message: `Failed to preflight workflow execution for cases [${caseIds.join(', ')}]: ${error}`,
       error,
       logger,
     });
@@ -48,13 +59,14 @@ export const preflightWorkflowExecution = async (
 };
 
 /**
- * Records a workflow execution user action in the case activity log.
+ * Records a workflow execution user action in the case activity log for each requested case.
  *
- * The case owner is fetched from the saved object so that authorization cannot be bypassed
- * by passing a forged owner — this method is exposed on the public UserActionsSubClient.
+ * Authorization is all-or-nothing across all cases — if the caller lacks updateCase on any case,
+ * no activity row is written. The case owners are fetched from saved objects so that authorization
+ * cannot be bypassed by passing a forged owner.
  */
 export const recordWorkflowExecution = async (
-  { caseId, workflow, origin }: RecordWorkflowExecutionArgs,
+  { caseIds, workflow, origin }: RecordWorkflowExecutionArgs,
   clientArgs: CasesClientArgs
 ): Promise<void> => {
   const {
@@ -65,34 +77,43 @@ export const recordWorkflowExecution = async (
   } = clientArgs;
 
   try {
-    // Fetch the case to obtain the authoritative owner — we never trust caller-supplied owner
-    // because this function is exposed on the public UserActionsSubClient.
-    const theCase = await caseService.getCase({ id: caseId });
-    const owner = theCase.attributes.owner;
+    // Bulk-fetch all cases to obtain their authoritative owners.
+    const { saved_objects: cases } = await caseService.getCases({ caseIds });
 
-    // Use the workflow-specific access operation (not Operations.updateCase) so the audit log
-    // emits an 'access' event rather than a 'change' event for workflow runs.
+    const entities = cases
+      .filter((c) => !isSOError(c))
+      .map((c) => ({
+        id: c.id,
+        owner: (c as Exclude<typeof c, { error: unknown }>).attributes.owner,
+      }));
+
+    // All-or-nothing authorization: one privilege round-trip across all owners.
+    // Use the workflow-specific access operation so the audit log emits an 'access'
+    // event rather than a 'change' event.
     await authorization.ensureAuthorized({
       operation: WORKFLOW_RUN_AUTHZ_OPERATION,
-      entities: [{ id: caseId, owner }],
+      entities,
     });
 
-    await userActionService.creator.createUserAction({
-      userAction: {
-        type: UserActionTypes.workflow,
-        action: UserActionActions.create,
-        caseId,
-        owner,
-        user,
-        payload: { workflow, origin },
-      },
-      // wait_for ensures the activity row is visible to the next find that the client issues
+    // Build one user action per case in a single bulk write.
+    const userActions = entities.map(({ id: caseId, owner }) => ({
+      type: UserActionTypes.workflow,
+      action: UserActionActions.create,
+      caseId,
+      owner,
+      user,
+      payload: { workflow, origin },
+    }));
+
+    await userActionService.creator.bulkCreateUserAction({
+      userActions,
+      // wait_for ensures the activity rows are visible to the next find the client issues
       // right after the run mutation resolves.
       refresh: 'wait_for',
     });
   } catch (error) {
     throw createCaseError({
-      message: `Failed to record workflow execution for case ${caseId}: ${error}`,
+      message: `Failed to record workflow execution for cases [${caseIds.join(', ')}]: ${error}`,
       error,
       logger,
     });
