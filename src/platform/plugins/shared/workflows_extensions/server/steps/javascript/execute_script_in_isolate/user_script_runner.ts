@@ -90,16 +90,37 @@ const USER_SCRIPT_RUNNER = `
     return clean;
   };
   const functionResult = new Function($0)();
-  return sanitize(functionResult, new WeakSet());
+  // Reject Promise returns explicitly: with JSON serialization a Promise would silently
+  // become {} instead of failing at copy-out as it did before this change.
+  if (functionResult instanceof Promise) {
+    throw new Error('Script returned a Promise. Only synchronous code is supported.');
+  }
+  // Serialize inside the guest so the copy-out is a flat string bounded by memoryLimit.
+  // JSON.stringify(undefined) returns undefined, not a string; ?? 'null' normalizes that.
+  return JSON.stringify(sanitize(functionResult, new WeakSet())) ?? 'null';
 `;
 
-export const runUserScript = (
+export const runUserScript = async (
   ivmContext: ivm.Context,
   script: string,
-  executionTimeoutMs: number
-): Promise<unknown> =>
-  ivmContext.evalClosure(USER_SCRIPT_RUNNER, [script], {
+  executionTimeoutMs: number,
+  maxOutputChars: number
+): Promise<unknown> => {
+  const jsonStr = await ivmContext.evalClosure(USER_SCRIPT_RUNNER, [script], {
     arguments: { copy: true },
     result: { copy: true },
     timeout: executionTimeoutMs,
   });
+
+  if (typeof jsonStr !== 'string') {
+    throw new Error('Script returned a non-serializable value');
+  }
+
+  if (jsonStr.length > maxOutputChars) {
+    throw new Error(
+      `Script output exceeded the size limit of ${Math.round(maxOutputChars / 1024 / 1024)} MB`
+    );
+  }
+
+  return JSON.parse(jsonStr);
+};

@@ -265,6 +265,34 @@ describe('executeScriptInIsolate', () => {
     ).rejects.toThrow(createScriptOutOfMemoryMessage(CODE_MEMORY_LIMIT_MB));
   });
 
+  it('rejects instead of OOM-ing the host when the script returns N refs to a large string', async () => {
+    // Regression: before the JSON-in-guest fix, `result: { copy: true }` on a value like
+    // [s, s, ..., s] (N pointers to a shared 1 MB string) would allocate N × 1 MB in the
+    // HOST because V8's value serializer clones each slot independently. The guest heap
+    // stayed within its limit while the host grew without bound, eventually OOM-ing Kibana.
+    //
+    // Now JSON.stringify runs inside the isolate: 20 refs × 1 MB produces a ~20 MB JSON
+    // string which exceeds the 8 MB guest heap, so the isolate OOMs cleanly and the host
+    // never allocates the bulk. The test itself continuing after this call proves the host
+    // process is still alive. (isolated-vm requires memoryLimit ≥ 8 MB.)
+    const MEMORY_LIMIT_MB = 8;
+    await expect(
+      executeScriptInIsolate({
+        script: `
+          const s = 'z'.repeat(1024 * 1024);
+          const a = new Array(20);
+          for (let i = 0; i < 20; i++) a[i] = s;
+          return a;
+        `,
+        logger: createLogger(),
+        abortSignal: new AbortController().signal,
+        memoryLimitMb: MEMORY_LIMIT_MB,
+        executionTimeoutMs: CODE_EXECUTION_TIMEOUT_MS,
+        maxConsoleLogCount: CODE_MAX_CONSOLE_LOG_COUNT,
+      })
+    ).rejects.toThrow(createScriptOutOfMemoryMessage(MEMORY_LIMIT_MB));
+  });
+
   describe('prototype pollution prevention', () => {
     const runScript = (script: string): Promise<unknown> =>
       executeScriptInIsolate({
@@ -337,16 +365,14 @@ describe('executeScriptInIsolate', () => {
       expect(result).toEqual({ label: '__proto__', count: 3 });
     });
 
-    it('preserves built-in object types such as Date (does not flatten to {})', async () => {
+    it('serializes built-in object types such as Date to their JSON representation (ISO string)', async () => {
       const iso = '2026-01-02T03:04:05.000Z';
       const result = (await runScript(`return { when: new Date('${iso}') };`)) as {
-        when: Date;
+        when: string;
       };
 
-      // The copied-out Date originates from the isolate realm, so cross-realm
-      // `instanceof` is unreliable; assert on the structural tag and value.
-      expect(Object.prototype.toString.call(result.when)).toBe('[object Date]');
-      expect(result.when.toISOString()).toBe(iso);
+      // JSON.stringify converts Date to its ISO string; the host receives a string, not a Date.
+      expect(result.when).toBe(iso);
     });
 
     it('strips __proto__ even when user code overrides Set.prototype.has before returning', async () => {

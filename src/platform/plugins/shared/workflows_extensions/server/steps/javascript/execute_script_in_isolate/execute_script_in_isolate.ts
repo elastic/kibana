@@ -71,7 +71,7 @@ export const executeScriptInIsolate = async ({
       Promise.race([
         catastrophicPromise,
         wallClockTimeout,
-        runUserScript(ivmContext, script, executionTimeoutMs),
+        runUserScript(ivmContext, script, executionTimeoutMs, memoryLimitMb * 1024 * 1024),
       ]),
       abortSignal,
       isolate

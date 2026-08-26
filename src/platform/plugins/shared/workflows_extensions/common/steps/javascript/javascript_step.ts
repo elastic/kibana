@@ -78,6 +78,35 @@ Scripts run in an isolated sandbox with no runtime context object. Embed workflo
         return { label: '{{ consts.greeting }}', count: users.length };
 \`\`\`
 
+## Runtime environment
+
+### Available
+
+All standard ECMAScript built-ins that V8 provides:
+
+- **Language features**: \`const\`/\`let\`/\`var\`, destructuring, spread, template literals, optional chaining, nullish coalescing, generator functions (\`function*\`), \`for...of\`, \`try/catch\`, \`class\`, etc.
+- **Core objects**: \`Object\`, \`Array\`, \`Function\`, \`Math\`, \`JSON\`, \`Date\`, \`RegExp\`
+- **Collections**: \`Map\`, \`Set\`, \`WeakMap\`, \`WeakSet\`
+- **Typed data**: \`ArrayBuffer\`, \`DataView\`, \`Int8Array\`, \`Uint8Array\`, \`Float64Array\`, and all other typed arrays
+- **Other built-ins**: \`Promise\` (constructable but not awaitable — see restrictions), \`Proxy\`, \`Reflect\`, \`Symbol\`, \`BigInt\`, \`Intl\`, \`Error\` and its subclasses, \`eval\`, \`globalThis\`/\`global\`
+- **Console**: \`console.log\`, \`console.info\`, \`console.warn\`, \`console.error\`, \`console.debug\` are routed to the step log. All other \`console.*\` methods (\`table\`, \`dir\`, \`trace\`, etc.) are no-ops.
+
+### Not available
+
+These are platform or runtime APIs — not part of the ECMAScript spec — and are not injected into the sandbox:
+
+| Not available | Why |
+|---|---|
+| \`async\`/\`await\`, \`return Promise\` | Synchronous execution only; returning a \`Promise\` fails the step |
+| \`setTimeout\`, \`setInterval\`, \`clearTimeout\`, \`clearInterval\` | No timer support |
+| \`fetch\`, \`XMLHttpRequest\` | No network access |
+| \`require\`, \`import()\` | No module loading |
+| \`process\`, \`Buffer\`, \`__dirname\`, \`__filename\` | No Node.js APIs |
+| \`TextEncoder\`, \`TextDecoder\`, \`URL\`, \`URLSearchParams\` | Web/Node platform APIs |
+| \`crypto\` | Web Crypto API |
+| \`structuredClone\`, \`queueMicrotask\`, \`performance\` | Web/Node platform APIs |
+| \`window\`, \`document\`, \`navigator\` | No browser APIs |
+
 ## Limits
 
 | Limit | Value |
@@ -85,8 +114,9 @@ Scripts run in an isolated sandbox with no runtime context object. Embed workflo
 | Template size (\`with.code\` in YAML) | ${CODE_TEMPLATE_MAX_KB} KB |
 | Rendered code size (after Liquid) | ${CODE_MAX_LENGTH_MB} MB |
 | Execution timeout | ${CODE_EXECUTION_TIMEOUT_SECONDS} s |
-| Execution memory limit | ${CODE_MEMORY_LIMIT_MB} MB |
+| Memory limit (guest heap) | ${CODE_MEMORY_LIMIT_MB} MB |
 | \`console.*\` calls per run | ${CODE_MAX_CONSOLE_LOG_COUNT} (additional logs are dropped) |
+| Console message length | 1024 characters (longer messages are truncated) |
 
 The template limit applies to the code as written in the workflow YAML (including \`{{ ... }}\` placeholders). Liquid can expand the code beyond ${CODE_TEMPLATE_MAX_KB} KB at execution time; the rendered code must stay within ${CODE_MAX_LENGTH_MB} MB.
 
@@ -96,7 +126,18 @@ The template limit applies to the code as written in the workflow YAML (includin
 
 ## Output
 
-Returns the value produced by the code. The output schema is dynamic and depends on what the code returns.
+The step output is the value returned by the script, serialized through \`JSON.stringify\` and then passed to downstream steps. Only JSON-compatible values survive the serialization:
+
+| Returned type | Received by downstream steps |
+|---|---|
+| Plain object / array / string / number / boolean / \`null\` | Preserved as-is |
+| \`Date\` | ISO 8601 string (e.g. \`"2026-01-02T03:04:05.000Z"\`) |
+| \`Map\`, \`Set\`, \`RegExp\` | \`{}\` (no own enumerable properties) |
+| \`undefined\` (no \`return\` / \`return undefined\`) | \`null\` |
+| Function values inside objects | Silently dropped |
+| \`BigInt\` | Step fails (\`JSON.stringify\` rejects \`BigInt\`) |
+| Circular reference | Step fails (detected before serialization) |
+| Object keys named \`__proto__\`, \`constructor\`, or \`prototype\` | Stripped (prototype-pollution prevention) |
 `,
   },
   inputSchema: InputSchema,
