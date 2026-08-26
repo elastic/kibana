@@ -12,6 +12,7 @@ import type { AppHeaderMenu } from '@kbn/app-header';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { isSequenceValid } from '@kbn/alerting-v2-rule-form';
 import type { FormValues, SequenceFormValues } from '@kbn/alerting-v2-rule-form';
+import { experimentalBadge } from '../../components/experimental_badge';
 import { DEFAULT_SEQUENCE_RULE_NAME } from './use_sequence_builder_form';
 
 export interface SequenceBuilderHeaderProps {
@@ -91,6 +92,7 @@ export const SequenceBuilderHeader: React.FC<SequenceBuilderHeaderProps> = ({
     <AppHeader
       sticky={false}
       title={editableTitle}
+      badges={[experimentalBadge]}
       spacing="bleed"
       back={{
         href: rulesListHref,
