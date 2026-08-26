@@ -191,3 +191,28 @@ describe('canonicalizeUrl — review fixes', () => {
     expect(canonicalizeUrl('https://www.example.com/path')).toBe('https://example.com/path');
   });
 });
+
+describe('canonicalizeUrl — all utm_ fields', () => {
+  // The named set was only the common subset while the contract promises all of them,
+  // so two citations of the same article failed to deduplicate over a newer field.
+  it.each([
+    'utm_source_platform',
+    'utm_creative_format',
+    'utm_marketing_tactic',
+    'utm_something_new',
+  ])('strips %s', (param) => {
+    expect(canonicalizeUrl(`https://example.com/report?${param}=newsletter`)).toBe(
+      'https://example.com/report'
+    );
+  });
+
+  it('deduplicates two citations differing only by a newer utm field', () => {
+    expect(canonicalizeUrl('https://example.com/report')).toBe(
+      canonicalizeUrl('https://example.com/report?utm_source_platform=newsletter')
+    );
+  });
+
+  it('does not strip an unrelated param that merely starts with ut', () => {
+    expect(canonicalizeUrl('https://example.com/r?utility=1')).toContain('utility=1');
+  });
+});

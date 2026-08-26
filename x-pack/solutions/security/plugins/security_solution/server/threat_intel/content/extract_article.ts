@@ -36,12 +36,15 @@ const ARTICLE_SELECTORS = [
 /**
  * Chrome element selectors removed from the selected container.
  * Be conservative — only elements that are unambiguously page chrome.
+ *
+ * `header`, `footer`, and `aside` are deliberately NOT here. HTML permits them inside
+ * an article to hold its own introduction, citations, and callouts, so removing every
+ * descendant threw away report content: an `<article><header>` commonly carries the
+ * executive summary, and IOC callouts live in `<aside>`. They are page chrome only
+ * when they sit outside the article, which `PAGE_CHROME_SELECTORS` handles.
  */
 const CHROME_SELECTORS = [
   'nav',
-  'header',
-  'footer',
-  'aside',
   '[role="navigation"]',
   'script',
   'style',
@@ -67,6 +70,12 @@ const CHROME_SELECTORS = [
  * 3. Remove CHROME_SELECTORS from within the chosen container.
  * 4. Return the cleaned container HTML.
  */
+/**
+ * Chrome that is only chrome at page level. Removed from outside the chosen container,
+ * never from within it, so an article's own header, footer, or aside survives.
+ */
+const PAGE_CHROME_SELECTORS = ['body > header', 'body > footer', 'body > aside'].join(', ');
+
 export const extractArticleHtml = (rawHtml: string): string => {
   if (!rawHtml) return rawHtml;
 
@@ -76,6 +85,10 @@ export const extractArticleHtml = (rawHtml: string): string => {
   const html = rawHtml.length > MAX_PARSE_BYTES ? rawHtml.slice(0, MAX_PARSE_BYTES) : rawHtml;
 
   const $ = cheerio.load(html);
+
+  // Page-level only. Done before selection so these never count toward a candidate's
+  // score, while an article's own header/footer/aside still does.
+  $(PAGE_CHROME_SELECTORS).remove();
 
   /**
    * Pick the container with the most text across *all* selectors, rather than the

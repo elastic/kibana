@@ -87,8 +87,14 @@ export const canonicalizeUrl = (rawUrl: string): string | undefined => {
   // Normalize query: remove tracking params, sort remainder for stability
   const params = new URLSearchParams();
   for (const [key, value] of parsed.searchParams.entries()) {
+    // Prefix match on `utm_`, because the named set is only the common subset and the
+    // doc comment promises all of them. Google keeps adding fields
+    // (`utm_source_platform`, `utm_creative_format`), and any one left in the key
+    // stops two citations of the same article from deduplicating.
     const isTracking =
-      TRACKING_PARAMS.has(key) || (key === 'ref' && TRACKING_REF_VALUES.has(value.toLowerCase()));
+      key.startsWith('utm_') ||
+      TRACKING_PARAMS.has(key) ||
+      (key === 'ref' && TRACKING_REF_VALUES.has(value.toLowerCase()));
     if (!isTracking) {
       params.append(key, value);
     }

@@ -252,3 +252,40 @@ describe('extractArticleHtml — scoring excludes chrome', () => {
     expect(extractArticleHtml(html)).toContain('c2.evil.test');
   });
 });
+
+describe('extractArticleHtml — article-owned semantic elements', () => {
+  // HTML permits header/footer/aside inside an article. Removing every descendant threw
+  // away report content, and because the same removal fed scoring it could also make the
+  // real article lose to a teaser.
+  it('keeps an executive summary in the article header', () => {
+    const html =
+      '<body><article><header><h1>Report</h1><p>Summary names c2.evil.test</p></header><p>body</p></article></body>';
+    expect(extractArticleHtml(html)).toContain('c2.evil.test');
+  });
+
+  it('keeps an IOC callout in an article aside', () => {
+    const html = '<body><article><p>body</p><aside>IOC: c2.evil.test</aside></article></body>';
+    expect(extractArticleHtml(html)).toContain('c2.evil.test');
+  });
+
+  it('keeps a citation in the article footer', () => {
+    const html =
+      '<body><article><p>body</p><footer>Source: https://vendor.test/r</footer></article></body>';
+    expect(extractArticleHtml(html)).toContain('vendor.test');
+  });
+
+  it('still removes page-level chrome outside the article', () => {
+    const html =
+      '<body><header>Site nav junk</header><article><p>real c2.evil.test</p></article><footer>site footer</footer></body>';
+    const out = extractArticleHtml(html);
+    expect(out).toContain('c2.evil.test');
+    expect(out).not.toContain('Site nav junk');
+  });
+
+  it('still removes nav inside the container', () => {
+    const html = '<body><article><nav>skip links</nav><p>real c2.evil.test</p></article></body>';
+    const out = extractArticleHtml(html);
+    expect(out).toContain('c2.evil.test');
+    expect(out).not.toContain('skip links');
+  });
+});

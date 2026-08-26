@@ -67,10 +67,14 @@ const TAG_PATTERN = /<[a-z!?/][^>]*>/gi;
 
 const stripScriptAndStyle = (html: string): string =>
   html
-    .replace(/<script[\s\S]*?<\/script\b[^>]*>/gi, ' ')
-    .replace(/<style[\s\S]*?<\/style\b[^>]*>/gi, ' ')
-    .replace(/<script\b[\s\S]*$/i, ' ')
-    .replace(/<style\b[\s\S]*$/i, ' ')
+    // `(?=[\s/>])` and not `\b`: `\b` also matches before a hyphen, so a valid custom
+    // element like `<script-loader>` was read as an unterminated `<script>` and the
+    // end-of-input pass then discarded the entire rest of the document, body and IOCs
+    // included. Requiring whitespace, `/`, or `>` pins the exact element name.
+    .replace(/<script(?=[\s/>])[\s\S]*?<\/script(?=[\s/>])[^>]*>/gi, ' ')
+    .replace(/<style(?=[\s/>])[\s\S]*?<\/style(?=[\s/>])[^>]*>/gi, ' ')
+    .replace(/<script(?=[\s/>])[\s\S]*$/i, ' ')
+    .replace(/<style(?=[\s/>])[\s\S]*$/i, ' ')
     // Removing an unterminated element can orphan a partial tag that the generic tag
     // pass would otherwise have absorbed: in `<scr<script>ipt>payload` the outer
     // `<scr` was only swallowed because the script's `>` terminated it. Requiring a

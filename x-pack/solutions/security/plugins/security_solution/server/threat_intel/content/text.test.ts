@@ -481,3 +481,35 @@ describe('stripHtml — prose containing angle brackets', () => {
     expect(stripHtml('<p>text</p>')).toBe('text');
   });
 });
+
+describe('script/style removal respects exact tag names', () => {
+  // `\b` also matches before a hyphen, so a valid custom element was read as an
+  // unterminated `<script>` and the end-of-input pass discarded the entire rest of the
+  // document, report body and IOCs included.
+  it('does not treat a custom element as an unterminated script', () => {
+    const out = stripHtml('<p>before</p><script-loader></script-loader><p>c2.evil.test</p>');
+    expect(out).toContain('c2.evil.test');
+    expect(out).toContain('before');
+  });
+
+  it('does not treat a custom style element as an unterminated style', () => {
+    const out = stripHtml('<p>before</p><style-sheet></style-sheet><p>c2.evil.test</p>');
+    expect(out).toContain('c2.evil.test');
+  });
+
+  it('still removes a real terminated script', () => {
+    expect(stripHtml('<p>a</p><script>x</script><p>b</p>')).toBe('a b');
+  });
+
+  it('still removes a real unterminated script', () => {
+    expect(stripHtml('<p>a</p><script>leak')).toBe('a');
+  });
+
+  it('still removes a script with attributes', () => {
+    expect(stripHtml('<p>a</p><script type="text/javascript">x</script><p>b</p>')).toBe('a b');
+  });
+
+  it('still removes a self-closing script tag form', () => {
+    expect(stripHtml('<p>a</p><script/><p>b</p>')).toContain('a');
+  });
+});
