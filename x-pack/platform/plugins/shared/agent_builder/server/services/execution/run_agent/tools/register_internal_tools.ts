@@ -29,7 +29,7 @@ import { createBashTool } from './bash';
 import {
   createDiscoverApisTool,
   createDescribeApiTool,
-  createDescribeTypeTool,
+  createDescribeApiTypeTool,
   createExecuteApiTool,
 } from './api';
 import { createTodoTool } from '../../../tools/builtin/todo';
@@ -124,7 +124,7 @@ export const registerInternalTools = async ({
   if (experimentalFeatures.apiTools) {
     tools.push(createDiscoverApisTool());
     tools.push(createDescribeApiTool());
-    tools.push(createDescribeTypeTool());
+    tools.push(createDescribeApiTypeTool());
     tools.push(createExecuteApiTool({ selfClient }));
   }
 

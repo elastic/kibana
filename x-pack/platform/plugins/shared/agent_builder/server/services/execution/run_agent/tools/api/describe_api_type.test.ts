@@ -10,8 +10,8 @@ import { internalTools } from '@kbn/agent-builder-common/tools';
 import type { ErrorResultData } from '@kbn/agent-builder-common/tools/tool_result';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import { agentBuilderMocks } from '../../../../../mocks';
-import { createDescribeTypeTool } from './describe_type';
-import type { ApiDescribeTypeResultData } from './describe_type';
+import { createDescribeApiTypeTool } from './describe_api_type';
+import type { ApiDescribeTypeResultData } from './describe_api_type';
 import { getRegistries } from '../../api/registry';
 import type { ApiRegistry, ApiRegistryDefinition, LoadedApi } from '../../api';
 
@@ -73,7 +73,7 @@ const searchApi: ApiRegistryDefinition = {
   destructive: false,
 };
 
-describe('createDescribeTypeTool', () => {
+describe('createDescribeApiTypeTool', () => {
   let loadApi: jest.Mock;
 
   beforeEach(() => {
@@ -86,16 +86,16 @@ describe('createDescribeTypeTool', () => {
   });
 
   it('has the correct id', () => {
-    const tool = createDescribeTypeTool();
-    expect(tool.id).toBe(internalTools.describeType);
+    const tool = createDescribeApiTypeTool();
+    expect(tool.id).toBe(internalTools.describeApiType);
   });
 
   it('returns the full definition of a type the API schema stubbed', async () => {
     loadApi.mockResolvedValue(createLoadedApi(searchApi));
 
-    const tool = createDescribeTypeTool();
+    const tool = createDescribeApiTypeTool();
     const result = (await tool.handler(
-      { target: 'elasticsearch', api: 'search', type: 'QueryContainer' },
+      { target: 'elasticsearch', api: 'search', types: ['QueryContainer'] },
       agentBuilderMocks.tools.createHandlerContext()
     )) as ToolHandlerStandardReturn;
 
@@ -109,9 +109,9 @@ describe('createDescribeTypeTool', () => {
   it('stubs a nested type that is itself too large and reports it as expandable', async () => {
     loadApi.mockResolvedValue(createLoadedApi(searchApi));
 
-    const tool = createDescribeTypeTool();
+    const tool = createDescribeApiTypeTool();
     const result = (await tool.handler(
-      { target: 'elasticsearch', api: 'search', type: 'QueryContainer' },
+      { target: 'elasticsearch', api: 'search', types: ['QueryContainer'] },
       agentBuilderMocks.tools.createHandlerContext()
     )) as ToolHandlerStandardReturn;
 
@@ -123,9 +123,9 @@ describe('createDescribeTypeTool', () => {
   it('strips the routing annotation the API schema carries', async () => {
     loadApi.mockResolvedValue(createLoadedApi(searchApi));
 
-    const tool = createDescribeTypeTool();
+    const tool = createDescribeApiTypeTool();
     const result = (await tool.handler(
-      { target: 'elasticsearch', api: 'search', type: 'BoolQuery' },
+      { target: 'elasticsearch', api: 'search', types: ['BoolQuery'] },
       agentBuilderMocks.tools.createHandlerContext()
     )) as ToolHandlerStandardReturn;
 
@@ -134,12 +134,82 @@ describe('createDescribeTypeTool', () => {
     expect(data.expandable_types).toEqual([]);
   });
 
+  it('describes every requested type in a single call, in the order requested', async () => {
+    loadApi.mockResolvedValue(createLoadedApi(searchApi));
+
+    const tool = createDescribeApiTypeTool();
+    const result = (await tool.handler(
+      { target: 'elasticsearch', api: 'search', types: ['BoolQuery', 'QueryContainer'] },
+      agentBuilderMocks.tools.createHandlerContext()
+    )) as ToolHandlerStandardReturn;
+
+    expect(result.results).toHaveLength(2);
+    expect(result.results.map((entry) => (entry.data as ApiDescribeTypeResultData).type)).toEqual([
+      'BoolQuery',
+      'QueryContainer',
+    ]);
+    expect(
+      result.results.every(
+        (entry) => (entry.data as ApiDescribeTypeResultData).schema_yaml.length > 0
+      )
+    ).toBe(true);
+  });
+
+  it('describes a repeated type name only once', async () => {
+    loadApi.mockResolvedValue(createLoadedApi(searchApi));
+
+    const tool = createDescribeApiTypeTool();
+    const result = (await tool.handler(
+      { target: 'elasticsearch', api: 'search', types: ['BoolQuery', 'BoolQuery'] },
+      agentBuilderMocks.tools.createHandlerContext()
+    )) as ToolHandlerStandardReturn;
+
+    expect(result.results).toHaveLength(1);
+    expect((result.results[0].data as ApiDescribeTypeResultData).type).toBe('BoolQuery');
+  });
+
+  it('returns the types it resolved alongside one error naming those it did not', async () => {
+    loadApi.mockResolvedValue(createLoadedApi(searchApi));
+
+    const tool = createDescribeApiTypeTool();
+    const result = (await tool.handler(
+      {
+        target: 'elasticsearch',
+        api: 'search',
+        types: ['BoolQuery', 'NotAType', 'AlsoNotAType'],
+      },
+      agentBuilderMocks.tools.createHandlerContext()
+    )) as ToolHandlerStandardReturn;
+
+    expect(result.results).toHaveLength(2);
+    expect((result.results[0].data as ApiDescribeTypeResultData).type).toBe('BoolQuery');
+
+    expect(result.results[1].type).toBe(ToolResultType.error);
+    const error = result.results[1].data as ErrorResultData;
+    expect(error.message).toContain('references no types named "NotAType", "AlsoNotAType"');
+  });
+
+  it('bounds the number of types a single call may request', () => {
+    const tool = createDescribeApiTypeTool();
+    const base = { target: 'elasticsearch', api: 'search' };
+
+    expect(tool.schema.safeParse({ ...base, types: [] }).success).toBe(false);
+    expect(
+      tool.schema.safeParse({ ...base, types: Array.from({ length: 21 }, () => 'BoolQuery') })
+        .success
+    ).toBe(false);
+    expect(
+      tool.schema.safeParse({ ...base, types: Array.from({ length: 20 }, () => 'BoolQuery') })
+        .success
+    ).toBe(true);
+  });
+
   it('returns an error naming the type when the API references no such type', async () => {
     loadApi.mockResolvedValue(createLoadedApi(searchApi));
 
-    const tool = createDescribeTypeTool();
+    const tool = createDescribeApiTypeTool();
     const result = (await tool.handler(
-      { target: 'elasticsearch', api: 'search', type: 'NotAType' },
+      { target: 'elasticsearch', api: 'search', types: ['NotAType'] },
       agentBuilderMocks.tools.createHandlerContext()
     )) as ToolHandlerStandardReturn;
 
@@ -161,9 +231,9 @@ describe('createDescribeTypeTool', () => {
       })
     );
 
-    const tool = createDescribeTypeTool();
+    const tool = createDescribeApiTypeTool();
     const result = (await tool.handler(
-      { target: 'elasticsearch', api: 'info', type: 'QueryContainer' },
+      { target: 'elasticsearch', api: 'info', types: ['QueryContainer'] },
       agentBuilderMocks.tools.createHandlerContext()
     )) as ToolHandlerStandardReturn;
 
@@ -189,9 +259,9 @@ describe('createDescribeTypeTool', () => {
     );
 
     const context = agentBuilderMocks.tools.createHandlerContext();
-    const tool = createDescribeTypeTool();
+    const tool = createDescribeApiTypeTool();
     const result = (await tool.handler(
-      { target: 'elasticsearch', api: 'indices.create', type: 'Duration' },
+      { target: 'elasticsearch', api: 'indices.create', types: ['Duration'] },
       context
     )) as ToolHandlerStandardReturn;
 
@@ -206,9 +276,9 @@ describe('createDescribeTypeTool', () => {
   it('returns a helpful error for an unknown API identifier', async () => {
     loadApi.mockRejectedValue(new UnknownApiError('does.not.exist'));
 
-    const tool = createDescribeTypeTool();
+    const tool = createDescribeApiTypeTool();
     const result = (await tool.handler(
-      { target: 'elasticsearch', api: 'does.not.exist', type: 'QueryContainer' },
+      { target: 'elasticsearch', api: 'does.not.exist', types: ['QueryContainer'] },
       agentBuilderMocks.tools.createHandlerContext()
     )) as ToolHandlerStandardReturn;
 
@@ -220,9 +290,9 @@ describe('createDescribeTypeTool', () => {
   it('returns an error result when loading fails for another reason', async () => {
     loadApi.mockRejectedValue(new Error('network down'));
 
-    const tool = createDescribeTypeTool();
+    const tool = createDescribeApiTypeTool();
     const result = (await tool.handler(
-      { target: 'elasticsearch', api: 'search', type: 'QueryContainer' },
+      { target: 'elasticsearch', api: 'search', types: ['QueryContainer'] },
       agentBuilderMocks.tools.createHandlerContext()
     )) as ToolHandlerStandardReturn;
 

@@ -63,9 +63,9 @@ Returns:
   type's name, and lists the names of its immediate children under \`x-properties\` (object
   property names) or \`x-one-of\` (union member types). An \`x-omitted\` count means that list
   was itself truncated. A stub tells you a value of that type is accepted and what it can contain,
-  but not how to spell any of it out, so call \`${internalTools.describeType}\` with the same
-  \`target\` and \`api\` plus that type name before building a value for it. Never guess a
-  stubbed type's contents.
+  but not how to spell any of it out, so call \`${internalTools.describeApiType}\` with the same
+  \`target\` and \`api\` plus the names of every stubbed type you need, in one call, before
+  building values for them. Never guess a stubbed type's contents.
 - \`expandable_types\`: the name of every type the schema stubbed, so you can see up front what
   still has to be expanded before you can fill it in.
 
