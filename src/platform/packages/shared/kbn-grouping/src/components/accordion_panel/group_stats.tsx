@@ -76,7 +76,9 @@ const GroupStatsComponent = <T,>({
                   <EuiToolTip position="top" content={stat.badge.value}>
                     <EuiBadge
                       tabIndex={0}
-                      style={{ marginLeft: 10, width: stat.badge.width ?? 35 }}
+                      css={css`
+                        margin-left: ${euiTheme.size.s};
+                      `}
                       color={stat.badge.color ?? 'hollow'}
                     >
                       {stat.badge.value > 99 ? '99+' : stat.badge.value.toString()}
@@ -95,10 +97,6 @@ const GroupStatsComponent = <T,>({
                 .smallDot {
                   width: 3px !important;
                   display: inline-block;
-                }
-                .euiBadge__text {
-                  text-align: center;
-                  width: 100%;
                 }
               `}
               data-test-subj={dataTestSubj}

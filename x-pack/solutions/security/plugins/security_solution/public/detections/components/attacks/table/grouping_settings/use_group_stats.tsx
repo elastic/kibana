@@ -48,7 +48,6 @@ export const useGroupStats = ({ getAttack }: UseGroupStatsProps) => {
           title: STATS_GROUP_ALERTS,
           badge: {
             value: totalAlerts,
-            width: 50,
             color: euiTheme.colors.danger,
           },
         },
