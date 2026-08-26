@@ -40,12 +40,7 @@ export const ALERTING_RULE_TRIGGER_EXAMPLES = [
   }),
 ];
 
-export const ALERTING_EPISODE_TRIGGER_NOTES = [
-  i18n.translate('xpack.alertingVTwo.workflowTriggers.episode.documentation.notes.external', {
-    defaultMessage:
-      'Available only when the experimental alerting system is enabled. These triggers are not configured through a triggers block in workflow YAML; the alerting system attaches the workflow to the matching trigger type.',
-  }),
-];
+export const ALERTING_EPISODE_TRIGGER_NOTES = [ALERTING_V2_EXPERIMENTAL_NOTE];
 
 export const ALERTING_EPISODE_TRIGGER_EXAMPLES = [
   i18n.translate('xpack.alertingVTwo.workflowTriggers.episode.documentation.example', {
