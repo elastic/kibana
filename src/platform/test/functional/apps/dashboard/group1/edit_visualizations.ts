@@ -43,8 +43,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   const expectVegaText = async (text: string) => {
-    const vegaText = await (await vegaChart.getViewContainer()).findByTagName('text');
-    expect(await vegaText.getVisibleText()).to.eql(text);
+    await retry.try(async () => {
+      const vegaText = await (await vegaChart.getViewContainer()).findByTagName('text');
+      expect(await vegaText.getVisibleText()).to.eql(text);
+    });
   };
 
   const createVegaVis = async (title?: string) => {
@@ -95,9 +97,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await expectVegaText('Test');
       await editVegaVis();
       await visualize.saveVisualizationAndReturn();
-      await retry.try(async () => {
-        expect(await (await vegaChart.getViewContainer()).getVisibleText()).to.eql('Modified');
-      });
+      expectVegaText('Modified');
     });
 
     it('cancel button returns to dashboard with no modal if there are no changes to apply', async () => {
