@@ -104,8 +104,8 @@ export function formatPairedTTestReport({
   });
 
   const header = [
-    `Experiment A: ${experimentIdA}`,
-    `Experiment B: ${experimentIdB}`,
+    `Baseline: ${experimentIdA}`,
+    `Target: ${experimentIdB}`,
     `Significance threshold: p < ${significanceThreshold}`,
   ];
   const summary = `Significant differences: ${significantCount}/${sortedResults.length}`;

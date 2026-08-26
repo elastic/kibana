@@ -29,8 +29,8 @@ describe('formatPairedTTestReport', () => {
     });
 
     expect(header).toEqual([
-      'Experiment A: experiment-1',
-      'Experiment B: experiment-2',
+      'Baseline: experiment-1',
+      'Target: experiment-2',
       'Significance threshold: p < 0.05',
     ]);
     expect(summary).toBe('Significant differences: 1/1');

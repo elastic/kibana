@@ -267,7 +267,7 @@ export const FLYOUT_NO_EXAMPLES_BODY = i18n.translate(
 export const SWAP_EXPERIMENTS_LABEL = i18n.translate(
   'xpack.evals.compareExperiments.swapExperimentsLabel',
   {
-    defaultMessage: 'Swap experiment A and experiment B',
+    defaultMessage: 'Swap baseline and target',
   }
 );
 
@@ -287,11 +287,11 @@ export const BADGE_OLDER = i18n.translate('xpack.evals.compareExperiments.badgeO
 });
 
 export const FLYOUT_TRACE_A = i18n.translate('xpack.evals.compareExperiments.flyoutTraceA', {
-  defaultMessage: 'View trace (Experiment A)',
+  defaultMessage: 'View trace (baseline)',
 });
 
 export const FLYOUT_TRACE_B = i18n.translate('xpack.evals.compareExperiments.flyoutTraceB', {
-  defaultMessage: 'View trace (Experiment B)',
+  defaultMessage: 'View trace (target)',
 });
 
 export const EXPORT_CSV = i18n.translate('xpack.evals.compareExperiments.exportCsv', {
