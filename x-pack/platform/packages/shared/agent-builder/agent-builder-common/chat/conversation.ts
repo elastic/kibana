@@ -581,6 +581,8 @@ export interface Conversation {
   read_only?: boolean;
   /** Coarse event timeline for this conversation, derived from `rounds` on read.*/
   events?: TimelineEvent[];
+  /** Schema version of the stored events. */
+  schema_version?: number;
 }
 
 export type TodoStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled';
@@ -638,6 +640,20 @@ export interface BackgroundExecutionState {
 }
 
 export type ConversationWithoutRounds = Omit<Conversation, 'rounds'>;
+
+export interface ConversationPermissions {
+  rename: boolean;
+  delete: boolean;
+  update_access_control: boolean;
+}
+
+export type ConversationWithPermissions = Conversation & {
+  permissions: ConversationPermissions;
+};
+
+export type ConversationWithoutRoundsWithPermissions = ConversationWithoutRounds & {
+  permissions: ConversationPermissions;
+};
 
 export type ConversationAction = 'regenerate';
 

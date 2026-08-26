@@ -10,6 +10,7 @@ import type { EvaluationCriterionStructured } from '@kbn/evals';
 import type { Detection, SignificantEvent } from '@kbn/significant-events-schema';
 import type { ExistingQuerySummary } from '@kbn/streams-ai';
 import type { GcsConfig } from '../data_generators/replay';
+import type { ChronicSeedConfig as ChronicSeedInput } from '../data_generators/seed_chronic_background';
 import type { ValidKIFeatureType } from '../evaluators/ki_feature_extraction';
 
 export interface SamplingCriterion extends EvaluationCriterionStructured {
@@ -95,11 +96,19 @@ export interface KIFeatureDeduplicationScenario {
   snapshot_source?: SnapshotSourceOverride;
 }
 
+export type { ChronicSeedInput };
+
 export interface DiscoveryScenario {
   input: {
     scenario_id: string;
     stream_name: string;
     detections: Array<Partial<Detection>>;
+    /**
+     * Seeds a synthetic chronic rate-flat failure pattern (steady logs + one backed query KI)
+     * instead of relying on snapshot incident data; the detection `@timestamp` is stamped from
+     * the seed's change point. Positive fixture for the grounding skill's rate gate.
+     */
+    chronic_seed?: ChronicSeedInput;
   };
   /** Ordered ground-truth continuation chains by `rule_name`, keyed by continuation path label. */
   continuationChains?: Record<string, string[]>;
