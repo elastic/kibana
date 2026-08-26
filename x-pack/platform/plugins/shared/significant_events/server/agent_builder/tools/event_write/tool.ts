@@ -109,7 +109,10 @@ export const eventsWriteItemSchema = significantEventSchema
           'A confirms item cannot include not_checked signals; emit each not_checked detection as its own dismissed item.',
       });
     }
+    // Continuations inherit prior severity; this cycle's signals may be
+    // inconclusive (telemetry gap, errored query) without a new confirms.
     if (
+      !item.event_id &&
       item.status === 'open' &&
       (item.severity === '60-high' || item.severity === '80-critical') &&
       grounded.length > 0 &&

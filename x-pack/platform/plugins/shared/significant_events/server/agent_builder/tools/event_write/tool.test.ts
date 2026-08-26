@@ -132,14 +132,22 @@ describe('events_write tool', () => {
       },
     });
 
-    it('rejects an open 60-high item whose grounded signals lack a confirms verdict', () => {
+    it('rejects an open 60-high new event whose grounded signals lack a confirms verdict', () => {
       const result = eventsWriteSchema.safeParse({
-        items: [{ ...input, signals: [signalWith('off_topic')] }],
+        items: [{ ...input, event_id: undefined, signals: [signalWith('off_topic')] }],
       });
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.error.issues.at(-1)?.message).toContain('requires at least one confirms');
       }
+    });
+
+    it('accepts an open 60-high continuation whose grounded signals lack a confirms verdict', () => {
+      expect(
+        eventsWriteSchema.safeParse({
+          items: [{ ...input, signals: [signalWith('off_topic')] }],
+        }).success
+      ).toBe(true);
     });
 
     it('accepts an open 60-high item backed by a confirms signal', () => {
