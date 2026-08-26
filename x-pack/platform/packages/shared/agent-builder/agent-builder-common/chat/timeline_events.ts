@@ -27,6 +27,9 @@ export const CONVERSATION_SCHEMA_VERSION = 1;
  */
 export const MIN_EVENTS_NATIVE_SCHEMA_VERSION = 1;
 
+export const isEventsNativeVersion = (version: number | undefined): version is number =>
+  typeof version === 'number' && version >= MIN_EVENTS_NATIVE_SCHEMA_VERSION;
+
 /** The kind of participant that produced a timeline event. */
 export enum EventActorType {
   /** An authenticated Kibana user. */
