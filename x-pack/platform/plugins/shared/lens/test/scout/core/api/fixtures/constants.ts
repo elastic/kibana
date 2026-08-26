@@ -64,4 +64,5 @@ export const getExampleLensBody = (
       value: { alignment: LENS_METRIC_STATE_DEFAULTS.primaryAlign, sizing: 'auto' },
     },
   },
+  tags: [],
 });
