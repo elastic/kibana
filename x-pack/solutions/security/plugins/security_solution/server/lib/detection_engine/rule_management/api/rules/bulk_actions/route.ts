@@ -330,8 +330,22 @@ export const performBulkActionRoute = (
               const ruleIds = rules.map((rule) => rule.id);
               const bulkDeleteResult = await detectionRulesClient.bulkDeleteRules({ ruleIds });
 
-              errors.push(...bulkDeleteResult.errors);
-              deleted = bulkDeleteResult.rules;
+              // A 404 on delete means the rule is already gone, e.g. deleted by a
+              // concurrent bulk delete targeting an overlapping set of rules. The
+              // desired end state is reached, so count it as a successful deletion
+              // instead of failing the whole operation.
+              const rulesById = new Map(rules.map((rule) => [rule.id, rule]));
+              const alreadyDeletedRules: RuleAlertType[] = [];
+              for (const error of bulkDeleteResult.errors) {
+                const alreadyDeletedRule =
+                  error.status === 404 ? rulesById.get(error.rule.id) : undefined;
+                if (alreadyDeletedRule) {
+                  alreadyDeletedRules.push(alreadyDeletedRule);
+                } else {
+                  errors.push(error);
+                }
+              }
+              deleted = [...bulkDeleteResult.rules, ...alreadyDeletedRules];
               break;
             }
             case BulkActionTypeEnum.duplicate: {

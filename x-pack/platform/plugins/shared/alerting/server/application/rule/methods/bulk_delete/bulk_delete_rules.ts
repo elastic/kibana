@@ -272,11 +272,6 @@ const bulkDeleteWithOCC = async (
         taskIdsToDelete.push(taskIdToRuleIdMapping[status.id]);
       }
       deletedRuleIds.push(status.id);
-    } else if (status.error.statusCode === 404) {
-      // The rule is already gone (e.g. deleted by a concurrent bulk delete targeting an
-      // overlapping set of rules). The desired end state is reached, so treat it as a
-      // successful deletion instead of failing the whole operation.
-      deletedRuleIds.push(status.id);
     } else {
       errors.push({
         message: status.error.message ?? 'n/a',

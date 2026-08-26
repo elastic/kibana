@@ -354,51 +354,6 @@ describe('bulkDelete', () => {
     });
   });
 
-  test('should treat 404 delete errors as deleted rules and not report them as errors', async () => {
-    unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
-      statuses: [
-        { id: 'id1', type: RULE_SAVED_OBJECT_TYPE, success: true },
-        getBulkOperationStatusErrorResponse(404),
-        { id: 'id3', type: RULE_SAVED_OBJECT_TYPE, success: true },
-      ],
-    });
-
-    const result = await rulesClient.bulkDeleteRules({ filter: 'fake_filter' });
-
-    expect(taskManager.bulkRemove).toHaveBeenCalledTimes(1);
-    expect(taskManager.bulkRemove).toHaveBeenCalledWith(['id1', 'id3']);
-    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
-      { apiKeys: ['MTIzOmFiYw=='] },
-      expect.anything(),
-      expect.anything()
-    );
-    expect(result).toStrictEqual({
-      rules: [returnedRuleForBulkOps1, returnedRuleForBulkOps2, returnedRuleForBulkOps3],
-      errors: [],
-      total: 2,
-      taskIdsFailedToBeDeleted: [],
-    });
-  });
-
-  test('should return success without errors when all rules were already deleted (404)', async () => {
-    unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
-      statuses: [
-        { ...getBulkOperationStatusErrorResponse(404), id: 'id1' },
-        { ...getBulkOperationStatusErrorResponse(404), id: 'id2' },
-        { ...getBulkOperationStatusErrorResponse(404), id: 'id3' },
-      ],
-    });
-
-    const result = await rulesClient.bulkDeleteRules({ filter: 'fake_filter' });
-
-    expect(result).toStrictEqual({
-      rules: [returnedRuleForBulkOps1, returnedRuleForBulkOps2, returnedRuleForBulkOps3],
-      errors: [],
-      total: 2,
-      taskIdsFailedToBeDeleted: [],
-    });
-  });
-
   test('should try to delete rules, one successful and one with 409 error, which will not be deleted with retry', async () => {
     unsecuredSavedObjectsClient.bulkDelete
       .mockResolvedValueOnce({
