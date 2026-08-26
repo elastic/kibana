@@ -28,22 +28,36 @@ export const DataFederationHome: FunctionComponent = () => {
     services: { dataSourcesClient, datasetsClient },
   } = useKibana<DataFederationKibanaServices>();
 
-  const {
-    items: dataSources,
-    reload: reloadDataSources,
-  } = useLoadList<DataSource>(
+  const { items: dataSources, reload: reloadDataSources } = useLoadList<DataSource>(
     useCallback(async () => await dataSourcesClient.get(), [dataSourcesClient])
   );
 
-  const {
-    items: dataSets,
-    reload: reloadDataSets,
-  } = useLoadList<DataSetWithName>(
+  const { items: dataSets, reload: reloadDataSets } = useLoadList<DataSetWithName>(
     useCallback(async () => await datasetsClient.get(), [datasetsClient])
   );
 
   const [selectedTabId, setSelectedTabId] = useState<'sets' | 'sources'>('sets');
   const [dataSourceFilter, setDataSourceFilter] = useState<string[]>([]);
+  const [disabledDataSourceNames, setDisabledDataSourceNames] = useState<ReadonlySet<string>>(
+    () => new Set()
+  );
+
+  const onDataSourceEnabledChange = useCallback((name: string, enabled: boolean) => {
+    setDisabledDataSourceNames((current) => {
+      const isDisabled = current.has(name);
+      if (enabled === !isDisabled) {
+        return current;
+      }
+
+      const next = new Set(current);
+      if (enabled) {
+        next.delete(name);
+      } else {
+        next.add(name);
+      }
+      return next;
+    });
+  }, []);
 
   useEffect(() => {
     const tab = new URLSearchParams(location.search).get('tab');
@@ -99,6 +113,8 @@ export const DataFederationHome: FunctionComponent = () => {
           dataSets={dataSets}
           loadDataSources={reloadDataSources}
           onViewDataSetsForDataSource={viewDataSetsForDataSource}
+          disabledDataSourceNames={disabledDataSourceNames}
+          onDataSourceEnabledChange={onDataSourceEnabledChange}
         />
       );
     }
@@ -110,9 +126,20 @@ export const DataFederationHome: FunctionComponent = () => {
         loadDataSets={reloadDataSets}
         dataSourceFilter={dataSourceFilter}
         onDataSourceFilterChange={setDataSourceFilter}
+        disabledDataSourceNames={disabledDataSourceNames}
       />
     );
-  }, [dataSourceFilter, dataSources, dataSets, reloadDataSets, reloadDataSources, selectedTabId, viewDataSetsForDataSource]);
+  }, [
+    dataSourceFilter,
+    dataSources,
+    dataSets,
+    disabledDataSourceNames,
+    onDataSourceEnabledChange,
+    reloadDataSets,
+    reloadDataSources,
+    selectedTabId,
+    viewDataSetsForDataSource,
+  ]);
 
   return (
     <>

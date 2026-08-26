@@ -8,12 +8,28 @@
 import type { FunctionComponent } from 'react';
 import React, { useMemo } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiButton, EuiButtonIcon, EuiInMemoryTable, EuiLink, EuiSpacer, EuiToolTip } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiInMemoryTable,
+  EuiLink,
+  EuiSpacer,
+  EuiSwitch,
+  EuiToolTip,
+  useEuiTheme,
+} from '@elastic/eui';
 
 import { ALL_DATA_SOURCE_TYPES, type DataSource } from '../common';
 import { DataSourceConnectionStatusHealth } from './data_source_connection_status_badge';
 import { getMockDataSourceConnectionStatus } from './data_source_connection_status';
 import { getDataSourceTypeVerbose } from './get_data_source_type_label';
+import {
+  DISABLED_TABLE_ROW_CLASS,
+  EMPTY_DISABLED_DATA_SOURCE_NAMES,
+  getDisabledTableRowCss,
+} from './disabled_table_row_styles';
 import { mainTranslations } from './main_i18n';
 
 export interface DataSourcesTableProps {
@@ -26,7 +42,69 @@ export interface DataSourcesTableProps {
   onDelete: (item: DataSource) => void;
   onDeleteSelected: (items: readonly DataSource[]) => void;
   onViewDataSetsForDataSource?: (dataSourceName: string) => void;
+  disabledDataSourceNames?: ReadonlySet<string>;
+  onDataSourceEnabledChange?: (name: string, enabled: boolean) => void;
 }
+
+interface DataSourcesTableActionsCellProps {
+  item: DataSource;
+  hasDataSets: boolean;
+  onEdit: (item: DataSource) => void;
+  onDelete: (item: DataSource) => void;
+}
+
+const DataSourcesTableActionsCell: FunctionComponent<DataSourcesTableActionsCellProps> = ({
+  item,
+  hasDataSets,
+  onEdit,
+  onDelete,
+}) => {
+  const isSupportedType = ALL_DATA_SOURCE_TYPES.includes(item.type);
+
+  return (
+    <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="flexEnd" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiToolTip
+          content={
+            isSupportedType
+              ? mainTranslations.columns.dataSources.editActionDescription
+              : mainTranslations.columns.dataSources.editActionUnsupportedTypeDescription
+          }
+        >
+          <span tabIndex={0}>
+            <EuiButtonIcon
+              aria-label={mainTranslations.columns.dataSources.editAction}
+              iconType="pencil"
+              isDisabled={!isSupportedType}
+              onClick={() => onEdit(item)}
+              data-test-subj="dataSetsEditButton"
+            />
+          </span>
+        </EuiToolTip>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiToolTip
+          content={
+            hasDataSets
+              ? mainTranslations.columns.dataSources.deleteActionHasDataSetsDescription
+              : mainTranslations.columns.dataSources.deleteActionDescription
+          }
+        >
+          <span tabIndex={0}>
+            <EuiButtonIcon
+              aria-label={mainTranslations.columns.dataSources.deleteAction}
+              iconType="trash"
+              color="danger"
+              isDisabled={hasDataSets}
+              onClick={() => onDelete(item)}
+              data-test-subj="dataSetsDeleteIconButton"
+            />
+          </span>
+        </EuiToolTip>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
 
 export const DataSourcesTable: FunctionComponent<DataSourcesTableProps> = ({
   dataSources,
@@ -38,7 +116,12 @@ export const DataSourcesTable: FunctionComponent<DataSourcesTableProps> = ({
   onDelete,
   onDeleteSelected,
   onViewDataSetsForDataSource,
+  disabledDataSourceNames = EMPTY_DISABLED_DATA_SOURCE_NAMES,
+  onDataSourceEnabledChange,
 }) => {
+  const { euiTheme } = useEuiTheme();
+  const disabledRowCss = useMemo(() => getDisabledTableRowCss(euiTheme), [euiTheme]);
+
   const columns = useMemo<Array<EuiBasicTableColumn<DataSource>>>(
     () => [
       {
@@ -98,66 +181,48 @@ export const DataSourcesTable: FunctionComponent<DataSourcesTableProps> = ({
         'data-test-subj': 'dataSetsColDescription',
       },
       {
+        name: mainTranslations.columns.dataSources.enabled,
+        width: '1%',
+        render: (item: DataSource) => {
+          const isEnabled = !disabledDataSourceNames.has(item.name);
+
+          return (
+            <EuiSwitch
+              compressed
+              showLabel={false}
+              label={mainTranslations.columns.dataSources.enabledToggleAriaLabel(item.name)}
+              checked={isEnabled}
+              onChange={(event) => {
+                onDataSourceEnabledChange?.(item.name, event.target.checked);
+              }}
+              data-test-subj={`dataSetsEnabledSwitch-${item.name}`}
+            />
+          );
+        },
+        'data-test-subj': 'dataSetsColEnabled',
+      },
+      {
         name: mainTranslations.columns.dataSources.actions,
-        width: '8%',
-        actions: [
-          {
-            enabled: (item) => ALL_DATA_SOURCE_TYPES.includes(item.type),
-            render: (item: DataSource, isSupportedType: boolean) => (
-              // EUI's default item action can't show a tooltip on a disabled icon button
-              // (aria-disabled sets pointer-events: none, which blocks hover), so this
-              // wraps the button manually to explain why editing is disabled.
-              <EuiToolTip
-                content={
-                  isSupportedType
-                    ? mainTranslations.columns.dataSources.editActionDescription
-                    : mainTranslations.columns.dataSources.editActionUnsupportedTypeDescription
-                }
-              >
-                <span tabIndex={0}>
-                  <EuiButtonIcon
-                    aria-label={mainTranslations.columns.dataSources.editAction}
-                    iconType="pencil"
-                    isDisabled={!isSupportedType}
-                    onClick={() => onEdit(item)}
-                    data-test-subj="dataSetsEditButton"
-                  />
-                </span>
-              </EuiToolTip>
-            ),
-          },
-          {
-            // Same limitation as the edit action above: EUI can't show a tooltip on a
-            // disabled default action icon, so this renders the button manually to explain
-            // why deleting is disabled.
-            render: (item: DataSource) => {
-              const hasDataSets = (dataSetsCountByDataSource.get(item.name) ?? 0) > 0;
-              return (
-                <EuiToolTip
-                  content={
-                    hasDataSets
-                      ? mainTranslations.columns.dataSources.deleteActionHasDataSetsDescription
-                      : mainTranslations.columns.dataSources.deleteActionDescription
-                  }
-                >
-                  <span tabIndex={0}>
-                    <EuiButtonIcon
-                      aria-label={mainTranslations.columns.dataSources.deleteAction}
-                      iconType="trash"
-                      color="danger"
-                      isDisabled={hasDataSets}
-                      onClick={() => onDelete(item)}
-                      data-test-subj="dataSetsDeleteIconButton"
-                    />
-                  </span>
-                </EuiToolTip>
-              );
-            },
-          },
-        ],
+        width: '1%',
+        align: 'right',
+        render: (item: DataSource) => (
+          <DataSourcesTableActionsCell
+            item={item}
+            hasDataSets={(dataSetsCountByDataSource.get(item.name) ?? 0) > 0}
+            onEdit={onEdit}
+            onDelete={onDelete}
+          />
+        ),
       },
     ],
-    [dataSetsCountByDataSource, onDelete, onEdit, onViewDataSetsForDataSource]
+    [
+      dataSetsCountByDataSource,
+      disabledDataSourceNames,
+      onDataSourceEnabledChange,
+      onDelete,
+      onEdit,
+      onViewDataSetsForDataSource,
+    ]
   );
 
   return (
@@ -167,6 +232,12 @@ export const DataSourcesTable: FunctionComponent<DataSourcesTableProps> = ({
         items={dataSources}
         itemId="name"
         columns={columns}
+        css={disabledRowCss}
+        rowProps={(item) =>
+          disabledDataSourceNames.has(item.name)
+            ? { className: DISABLED_TABLE_ROW_CLASS }
+            : undefined
+        }
         search={{
           box: {
             incremental: true,

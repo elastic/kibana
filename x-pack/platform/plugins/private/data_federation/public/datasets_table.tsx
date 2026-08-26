@@ -20,6 +20,7 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 
 import type { DataSetWithName, DataSource } from '../common';
@@ -28,6 +29,11 @@ import { getDataSourceTypeVerbose } from './get_data_source_type_label';
 import { AddDatasetMenuButton } from './add_dataset_menu_button';
 import type { DatasetWizardFlowVariant } from './create_dataset_wizard/dataset_wizard_flow_variant';
 import { mainTranslations } from './main_i18n';
+import {
+  DISABLED_TABLE_ROW_CLASS,
+  EMPTY_DISABLED_DATA_SOURCE_NAMES,
+  getDisabledTableRowCss,
+} from './disabled_table_row_styles';
 
 /** Data set row in the table; `type` is resolved from the linked data source. */
 export type DataSetListRow = DataSetWithName & { type?: DataSource['type'] };
@@ -46,11 +52,13 @@ export interface DatasetsTableProps {
   isOpenInDiscoverEnabled?: boolean;
   onDelete: (item: DataSetListRow) => void;
   onDeleteSelected: (items: DataSetListRow[]) => void;
+  disabledDataSourceNames?: ReadonlySet<string>;
 }
 
 interface DatasetsTableActionsCellProps {
   item: DataSetListRow;
   isOpenInDiscoverEnabled: boolean;
+  isDatasetEnabled: boolean;
   onOpenInDiscover: (item: DataSetListRow) => void;
   onClone: (item: DataSetListRow) => void;
   onEdit: (item: DataSetListRow) => void;
@@ -60,6 +68,7 @@ interface DatasetsTableActionsCellProps {
 const DatasetsTableActionsCell: FunctionComponent<DatasetsTableActionsCellProps> = ({
   item,
   isOpenInDiscoverEnabled,
+  isDatasetEnabled,
   onOpenInDiscover,
   onClone,
   onEdit,
@@ -67,19 +76,28 @@ const DatasetsTableActionsCell: FunctionComponent<DatasetsTableActionsCellProps>
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const closePopover = () => setIsPopoverOpen(false);
+  const isDiscoverActionEnabled = isOpenInDiscoverEnabled && isDatasetEnabled;
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="flexEnd" responsive={false}>
       <EuiFlexItem grow={false}>
-        <EuiToolTip content={mainTranslations.columns.dataSets.openInDiscoverActionDescription}>
-          <EuiButtonIcon
-            iconType="discoverApp"
-            color="text"
-            aria-label={mainTranslations.columns.dataSets.openInDiscoverAction}
-            disabled={!isOpenInDiscoverEnabled}
-            onClick={() => onOpenInDiscover(item)}
-            data-test-subj="dataSetsSetsOpenInDiscoverButton"
-          />
+        <EuiToolTip
+          content={
+            isDatasetEnabled
+              ? mainTranslations.columns.dataSets.openInDiscoverActionDescription
+              : mainTranslations.columns.dataSets.openInDiscoverDisabledBecauseDataset
+          }
+        >
+          <span tabIndex={0}>
+            <EuiButtonIcon
+              iconType="discoverApp"
+              color="text"
+              aria-label={mainTranslations.columns.dataSets.openInDiscoverAction}
+              disabled={!isDiscoverActionEnabled}
+              onClick={() => onOpenInDiscover(item)}
+              data-test-subj="dataSetsSetsOpenInDiscoverButton"
+            />
+          </span>
         </EuiToolTip>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -148,6 +166,44 @@ const DatasetsTableActionsCell: FunctionComponent<DatasetsTableActionsCellProps>
   );
 };
 
+interface DatasetEnabledSwitchProps {
+  item: DataSetListRow;
+  isEnabled: boolean;
+  isDataSourceDisabled: boolean;
+  onEnabledChange: (name: string, enabled: boolean) => void;
+}
+
+const DatasetEnabledSwitch: FunctionComponent<DatasetEnabledSwitchProps> = ({
+  item,
+  isEnabled,
+  isDataSourceDisabled,
+  onEnabledChange,
+}) => {
+  const switchControl = (
+    <EuiSwitch
+      compressed
+      showLabel={false}
+      label={mainTranslations.columns.dataSets.enabledToggleAriaLabel(item.name)}
+      checked={isEnabled}
+      disabled={isDataSourceDisabled}
+      onChange={(event) => {
+        onEnabledChange(item.name, event.target.checked);
+      }}
+      data-test-subj={`dataSetsSetsEnabledSwitch-${item.name}`}
+    />
+  );
+
+  if (!isDataSourceDisabled) {
+    return switchControl;
+  }
+
+  return (
+    <EuiToolTip content={mainTranslations.columns.dataSets.enabledToggleDisabledBecauseDataSource}>
+      <span tabIndex={0}>{switchControl}</span>
+    </EuiToolTip>
+  );
+};
+
 export const DatasetsTable: FunctionComponent<DatasetsTableProps> = ({
   filteredItems,
   selectedItems,
@@ -162,8 +218,11 @@ export const DatasetsTable: FunctionComponent<DatasetsTableProps> = ({
   isOpenInDiscoverEnabled = false,
   onDelete,
   onDeleteSelected,
+  disabledDataSourceNames = EMPTY_DISABLED_DATA_SOURCE_NAMES,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const [enabledByName, setEnabledByName] = useState<Record<string, boolean>>({});
+  const disabledRowCss = useMemo(() => getDisabledTableRowCss(euiTheme), [euiTheme]);
 
   const columns = useMemo<Array<EuiBasicTableColumn<DataSetListRow>>>(
     () => [
@@ -210,21 +269,20 @@ export const DatasetsTable: FunctionComponent<DatasetsTableProps> = ({
         name: mainTranslations.columns.dataSets.enabled,
         width: '1%',
         render: (item: DataSetListRow) => {
-          const isEnabled = enabledByName[item.name] ?? true;
+          const isDataSourceDisabled = disabledDataSourceNames.has(item.data_source);
+          const isEnabled = (enabledByName[item.name] ?? true) && !isDataSourceDisabled;
 
           return (
-            <EuiSwitch
-              compressed
-              showLabel={false}
-              label={mainTranslations.columns.dataSets.enabledToggleAriaLabel(item.name)}
-              checked={isEnabled}
-              onChange={(event) => {
+            <DatasetEnabledSwitch
+              item={item}
+              isEnabled={isEnabled}
+              isDataSourceDisabled={isDataSourceDisabled}
+              onEnabledChange={(name, enabled) => {
                 setEnabledByName((current) => ({
                   ...current,
-                  [item.name]: event.target.checked,
+                  [name]: enabled,
                 }));
               }}
-              data-test-subj={`dataSetsSetsEnabledSwitch-${item.name}`}
             />
           );
         },
@@ -238,6 +296,10 @@ export const DatasetsTable: FunctionComponent<DatasetsTableProps> = ({
           <DatasetsTableActionsCell
             item={item}
             isOpenInDiscoverEnabled={isOpenInDiscoverEnabled}
+            isDatasetEnabled={
+              (enabledByName[item.name] ?? true) &&
+              !disabledDataSourceNames.has(item.data_source)
+            }
             onOpenInDiscover={onOpenInDiscover}
             onClone={onClone}
             onEdit={onEdit}
@@ -246,7 +308,15 @@ export const DatasetsTable: FunctionComponent<DatasetsTableProps> = ({
         ),
       },
     ],
-    [enabledByName, isOpenInDiscoverEnabled, onClone, onDelete, onEdit, onOpenInDiscover]
+    [
+      disabledDataSourceNames,
+      enabledByName,
+      isOpenInDiscoverEnabled,
+      onClone,
+      onDelete,
+      onEdit,
+      onOpenInDiscover,
+    ]
   );
 
   return (
@@ -256,6 +326,12 @@ export const DatasetsTable: FunctionComponent<DatasetsTableProps> = ({
         items={filteredItems}
         itemId="name"
         columns={columns}
+        css={disabledRowCss}
+        rowProps={(item) =>
+          (enabledByName[item.name] ?? true) && !disabledDataSourceNames.has(item.data_source)
+            ? undefined
+            : { className: DISABLED_TABLE_ROW_CLASS }
+        }
         search={{
           box: {
             incremental: true,

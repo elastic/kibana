@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { EuiProvider } from '@elastic/eui';
 import { fireEvent, render } from '@testing-library/react';
 
 import type { DataSource } from '../common';
+import type { DataSourcesTableProps } from './data_sources_table';
 import { DataSourcesTable } from './data_sources_table';
 
 const createDataSource = (name: string, type: DataSource['type'] | string): DataSource =>
@@ -79,7 +80,10 @@ describe('DataSourcesTable', () => {
 
   it('links dataset count to the datasets filter when count is greater than zero', () => {
     const onViewDataSetsForDataSource = jest.fn();
-    const dataSetsCountByDataSource = new Map<string, number>([['Source A', 2], ['Source B', 0]]);
+    const dataSetsCountByDataSource = new Map<string, number>([
+      ['Source A', 2],
+      ['Source B', 0],
+    ]);
 
     const { getByTestId, getByText } = render(
       <EuiProvider>
@@ -203,5 +207,61 @@ describe('DataSourcesTable', () => {
     fireEvent.click(getByTestId('dataSetsDeleteButton'));
     expect(onDeleteSelected).toHaveBeenCalledTimes(1);
     expect(onDeleteSelected).toHaveBeenCalledWith(selectedDataSources);
+  });
+
+  it('renders an enabled toggle to the left of actions and updates it when clicked', () => {
+    const Harness = () => {
+      const [disabledDataSourceNames, setDisabledDataSourceNames] = useState(
+        () => new Set<string>()
+      );
+      const onDataSourceEnabledChange: DataSourcesTableProps['onDataSourceEnabledChange'] = (
+        name,
+        enabled
+      ) => {
+        setDisabledDataSourceNames((current) => {
+          const next = new Set(current);
+          if (enabled) {
+            next.delete(name);
+          } else {
+            next.add(name);
+          }
+          return next;
+        });
+      };
+
+      return (
+        <DataSourcesTable
+          dataSources={[createDataSource('ds1', 's3')]}
+          selectedDataSources={[]}
+          dataSetsCountByDataSource={new Map()}
+          onSelectionChange={jest.fn()}
+          onCreate={jest.fn()}
+          onEdit={jest.fn()}
+          onDelete={jest.fn()}
+          onDeleteSelected={jest.fn()}
+          disabledDataSourceNames={disabledDataSourceNames}
+          onDataSourceEnabledChange={onDataSourceEnabledChange}
+        />
+      );
+    };
+
+    const { getByRole, getByTestId } = render(
+      <EuiProvider>
+        <Harness />
+      </EuiProvider>
+    );
+
+    expect(getByRole('columnheader', { name: 'Enabled' })).toBeInTheDocument();
+
+    const enabledSwitch = getByTestId('dataSetsEnabledSwitch-ds1');
+    expect(enabledSwitch).toBeChecked();
+
+    fireEvent.click(enabledSwitch);
+    expect(enabledSwitch).not.toBeChecked();
+    expect(enabledSwitch.closest('tr')).toHaveClass('dataFederationTableRow--disabled');
+
+    fireEvent.click(enabledSwitch);
+    expect(enabledSwitch).toBeChecked();
+    expect(enabledSwitch.closest('tr')).not.toHaveClass('dataFederationTableRow--disabled');
   });
 });

@@ -30,6 +30,7 @@ export interface DatasetsTabContentProps {
   loadDataSets: () => Promise<void>;
   dataSourceFilter: readonly string[];
   onDataSourceFilterChange: (value: string[]) => void;
+  disabledDataSourceNames?: ReadonlySet<string>;
 }
 
 export const DatasetsTabContent: FunctionComponent<DatasetsTabContentProps> = ({
@@ -38,6 +39,7 @@ export const DatasetsTabContent: FunctionComponent<DatasetsTabContentProps> = ({
   loadDataSets,
   dataSourceFilter,
   onDataSourceFilterChange,
+  disabledDataSourceNames,
 }) => {
   const history = useHistory();
   const {
@@ -211,6 +213,7 @@ export const DatasetsTabContent: FunctionComponent<DatasetsTabContentProps> = ({
         isOpenInDiscoverEnabled={Boolean(discoverLocator)}
         onDelete={handleDeleteDataSet}
         onDeleteSelected={handleDeleteSelectedDataSets}
+        disabledDataSourceNames={disabledDataSourceNames}
       />
       {pendingDeleteDataSet ? (
         <ConfirmDeleteDataSetModal

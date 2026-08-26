@@ -7,11 +7,12 @@
 
 import React from 'react';
 import { EuiProvider } from '@elastic/eui';
-import { fireEvent, render } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 
 import type { DataSetWithName } from '../common';
 import type { DataSetListRow, DatasetsTableProps } from './datasets_table';
 import { DatasetsTable } from './datasets_table';
+import { mainTranslations } from './main_i18n';
 
 const createDataSetRow = ({
   name,
@@ -152,20 +153,66 @@ describe('DatasetsTable', () => {
   });
 
   it('renders an enabled toggle to the left of actions and updates it when clicked', () => {
+    const onOpenInDiscover = jest.fn();
     const { getByRole, getByTestId } = renderTable({
       filteredItems: [createDataSetRow({ name: 'set1', dataSource: 'ds1' })],
+      isOpenInDiscoverEnabled: true,
+      onOpenInDiscover,
     });
 
     expect(getByRole('columnheader', { name: 'Enabled' })).toBeInTheDocument();
 
     const enabledSwitch = getByTestId('dataSetsSetsEnabledSwitch-set1');
     expect(enabledSwitch).toBeChecked();
+    expect(getByTestId('dataSetsSetsOpenInDiscoverButton')).toBeEnabled();
 
     fireEvent.click(enabledSwitch);
     expect(enabledSwitch).not.toBeChecked();
+    expect(enabledSwitch.closest('tr')).toHaveClass('dataFederationTableRow--disabled');
+
+    const disabledDiscoverButton = getByTestId('dataSetsSetsOpenInDiscoverButton');
+    expect(disabledDiscoverButton).toBeDisabled();
+    fireEvent.click(disabledDiscoverButton);
+    expect(onOpenInDiscover).not.toHaveBeenCalled();
 
     fireEvent.click(enabledSwitch);
     expect(enabledSwitch).toBeChecked();
+    expect(enabledSwitch.closest('tr')).not.toHaveClass('dataFederationTableRow--disabled');
+    expect(getByTestId('dataSetsSetsOpenInDiscoverButton')).toBeEnabled();
+  });
+
+  it('disables the enabled toggle when the data source is disabled', () => {
+    const { getAllByTestId, getByTestId } = renderTable({
+      filteredItems: [
+        createDataSetRow({ name: 'set1', dataSource: 'ds1' }),
+        createDataSetRow({ name: 'set2', dataSource: 'ds2' }),
+      ],
+      dataSourceNames: ['ds1', 'ds2'],
+      disabledDataSourceNames: new Set(['ds1']),
+      isOpenInDiscoverEnabled: true,
+    });
+
+    const disabledSwitch = getByTestId('dataSetsSetsEnabledSwitch-set1');
+    expect(disabledSwitch).toBeDisabled();
+    expect(disabledSwitch).not.toBeChecked();
+    expect(disabledSwitch.closest('tr')).toHaveClass('dataFederationTableRow--disabled');
+
+    fireEvent.click(disabledSwitch);
+    expect(disabledSwitch).not.toBeChecked();
+
+    fireEvent.mouseOver(disabledSwitch.parentElement as Node);
+    expect(screen.getByRole('tooltip')).toHaveTextContent(
+      mainTranslations.columns.dataSets.enabledToggleDisabledBecauseDataSource
+    );
+
+    const enabledSwitch = getByTestId('dataSetsSetsEnabledSwitch-set2');
+    expect(enabledSwitch).toBeEnabled();
+    expect(enabledSwitch).toBeChecked();
+    expect(enabledSwitch.closest('tr')).not.toHaveClass('dataFederationTableRow--disabled');
+
+    const discoverButtons = getAllByTestId('dataSetsSetsOpenInDiscoverButton');
+    expect(discoverButtons[0]).toBeDisabled();
+    expect(discoverButtons[1]).toBeEnabled();
   });
 
   it('disables Open in Discover when the locator is unavailable', () => {

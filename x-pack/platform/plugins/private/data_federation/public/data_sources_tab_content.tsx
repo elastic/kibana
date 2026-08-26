@@ -29,6 +29,8 @@ export interface DataSourcesTabContentProps {
   dataSets: DataSetWithName[];
   loadDataSources: () => Promise<void>;
   onViewDataSetsForDataSource: (dataSourceName: string) => void;
+  disabledDataSourceNames?: ReadonlySet<string>;
+  onDataSourceEnabledChange?: (name: string, enabled: boolean) => void;
 }
 
 export const DataSourcesTabContent: FunctionComponent<DataSourcesTabContentProps> = ({
@@ -36,6 +38,8 @@ export const DataSourcesTabContent: FunctionComponent<DataSourcesTabContentProps
   dataSets,
   loadDataSources,
   onViewDataSetsForDataSource,
+  disabledDataSourceNames,
+  onDataSourceEnabledChange,
 }) => {
   const [flyout, setFlyout] = useState<DataSourceFlyoutState>({ mode: 'closed' });
   const [pendingDeleteDataSource, setPendingDeleteDataSource] = useState<DataSource | null>(null);
@@ -204,6 +208,8 @@ export const DataSourcesTabContent: FunctionComponent<DataSourcesTabContentProps
         onDelete={handleDeleteDataSource}
         onDeleteSelected={handleDeleteSelectedDataSources}
         onViewDataSetsForDataSource={onViewDataSetsForDataSource}
+        disabledDataSourceNames={disabledDataSourceNames}
+        onDataSourceEnabledChange={onDataSourceEnabledChange}
       />
       {flyout.mode !== 'closed' ? (
         <CreateDataSourceFlyout

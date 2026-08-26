@@ -51,6 +51,14 @@ export const mainTranslations = {
       description: i18n.translate('xpack.dataFederation.table.columnDescription', {
         defaultMessage: 'Description',
       }),
+      enabled: i18n.translate('xpack.dataFederation.table.columnEnabled', {
+        defaultMessage: 'Enabled',
+      }),
+      enabledToggleAriaLabel: (name: string) =>
+        i18n.translate('xpack.dataFederation.table.enabledToggleAriaLabel', {
+          defaultMessage: 'Enabled {name}',
+          values: { name },
+        }),
       actions: i18n.translate('xpack.dataFederation.table.columnActions', {
         defaultMessage: 'Actions',
       }),
@@ -128,6 +136,12 @@ export const mainTranslations = {
           defaultMessage: 'Enabled {name}',
           values: { name },
         }),
+      enabledToggleDisabledBecauseDataSource: i18n.translate(
+        'xpack.dataFederation.setsTable.enabledToggleDisabledBecauseDataSource',
+        {
+          defaultMessage: 'The data source is disabled, so this dataset cannot be enabled.',
+        }
+      ),
       actions: i18n.translate('xpack.dataFederation.setsTable.columnActions', {
         defaultMessage: 'Actions',
       }),
@@ -165,6 +179,12 @@ export const mainTranslations = {
         'xpack.dataFederation.setsTable.openInDiscoverActionDescription',
         {
           defaultMessage: 'Open this dataset in Discover',
+        }
+      ),
+      openInDiscoverDisabledBecauseDataset: i18n.translate(
+        'xpack.dataFederation.setsTable.openInDiscoverDisabledBecauseDataset',
+        {
+          defaultMessage: 'This dataset is disabled, so it cannot be opened in Discover.',
         }
       ),
       moreActions: i18n.translate('xpack.dataFederation.setsTable.moreActions', {
