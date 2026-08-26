@@ -7,12 +7,15 @@
 
 import { BuildGroupsStep, buildActionGroups } from './build_groups_step';
 import {
+  createActionPolicy,
   createAlertEpisode,
   createDispatcherPipelineState,
   createMatchedPair,
-  createActionPolicy,
   createRule,
+  createStepLogger,
 } from '../fixtures/test_utils';
+
+const logger = createStepLogger();
 
 describe('BuildGroupsStep', () => {
   const step = new BuildGroupsStep();
@@ -30,7 +33,7 @@ describe('BuildGroupsStep', () => {
       ],
     });
 
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
@@ -42,7 +45,7 @@ describe('BuildGroupsStep', () => {
   it('returns empty groups when no matched pairs', async () => {
     const state = createDispatcherPipelineState({ matched: [] });
 
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;

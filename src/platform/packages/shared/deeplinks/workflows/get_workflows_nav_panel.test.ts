@@ -76,11 +76,11 @@ describe('getWorkflowsNavPanel', () => {
         renderAs: 'panelOpener',
         children: [
           { link: `${WORKFLOWS_APP_ID}:${WorkflowsPageName.list}`, breadcrumbStatus: 'hidden' },
-          { link: `${WORKFLOWS_APP_ID}:${WorkflowsPageName.library}`, breadcrumbStatus: 'hidden' },
           {
             link: `${WORKFLOWS_APP_ID}:${WorkflowsPageName.executions}`,
             breadcrumbStatus: 'hidden',
           },
+          { link: `${WORKFLOWS_APP_ID}:${WorkflowsPageName.library}`, breadcrumbStatus: 'hidden' },
         ],
       },
     ]);

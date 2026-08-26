@@ -8,13 +8,13 @@
 import { i18n } from '@kbn/i18n';
 import type { FunctionComponent } from 'react';
 import React from 'react';
-import { EuiCallOut } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 
 export const SystemIndicesOverwrittenCallOut: FunctionComponent<{
   featureStates: string[] | undefined;
 }> = ({ featureStates }) => {
   return (
-    <EuiCallOut
+    <KbnInfoCallout
       data-test-subj="systemIndicesInfoCallOut"
       title={i18n.translate(
         'xpack.snapshotRestore.restoreForm.stepLogistics.systemIndicesCallOut.title',
@@ -27,7 +27,6 @@ export const SystemIndicesOverwrittenCallOut: FunctionComponent<{
           },
         }
       )}
-      iconType="pin"
       size="s"
       aria-live="polite"
       aria-atomic="true"

@@ -16,7 +16,7 @@ import type {
   RecoveryType,
 } from '../types';
 import type { FormValues } from '../../../form/types';
-import { ModeSelect } from '../../../form/fields/mode_select';
+import { KindSelect } from '../../../form/fields/kind_select';
 import { AlertDelayField } from '../../../form/fields/alert_delay_field';
 import { NoDataStrategySelect } from '../../../form/fields/no_data_strategy_select';
 import { RecoveryConditionStep } from './recovery_condition_step';
@@ -45,12 +45,12 @@ export function OutcomeStep({
 
   return (
     <>
-      <ModeSelect
+      <KindSelect
         value={isAlert ? 'alert' : 'signal'}
         onChange={onKindChange}
         disabled={state.childOpen}
         readOnly={isEditing}
-        data-test-subj="composeDiscoverModeSelect"
+        data-test-subj="composeDiscoverKindSelect"
       />
       {isAlert && (
         <>

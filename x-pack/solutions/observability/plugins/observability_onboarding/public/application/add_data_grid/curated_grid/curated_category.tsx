@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiSpacer, EuiTitle, useGeneratedHtmlId } from '@elastic/eui';
+import { EuiSpacer, EuiTitle, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 interface Props {
   id: string;
@@ -16,10 +17,17 @@ interface Props {
 
 export const CuratedCategorySection = ({ id, label, children }: Props) => {
   const labelId = useGeneratedHtmlId({ prefix: 'integrationsCategory', suffix: id });
+  const { euiTheme } = useEuiTheme();
 
   return (
     <section aria-labelledby={labelId}>
-      <EuiTitle size="xxs">
+      <EuiTitle
+        size="xxs"
+        css={css`
+          color: ${euiTheme.colors.textSubdued};
+          text-transform: uppercase;
+        `}
+      >
         <h4 id={labelId}>{label}</h4>
       </EuiTitle>
       <EuiSpacer size="s" />

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { map, ReplaySubject, type Subscription } from 'rxjs';
+
 import type {
   ObservabilityPublicSetup,
   ObservabilityPublicStart,
@@ -33,6 +35,7 @@ import type {
 import type { IngestHubStart } from '@kbn/ingest-hub-plugin/public';
 import type { ObservabilityOnboardingConfig } from '../server';
 import { PLUGIN_ID } from '../common';
+import { IS_ADD_DATA_PAGE_V2_ENABLED } from '../common/feature_flags';
 import { ObservabilityOnboardingLocatorDefinition } from './locators/onboarding_locator/locator_definition';
 import type { ObservabilityOnboardingPluginLocators } from './locators';
 import type { ConfigSchema } from '.';
@@ -43,6 +46,10 @@ import {
   OBSERVABILITY_ONBOARDING_FLOW_ERROR_TELEMETRY_EVENT,
   OBSERVABILITY_ONBOARDING_FLOW_DATASET_DETECTED_TELEMETRY_EVENT,
 } from '../common/telemetry_events';
+import {
+  registerAddDataExperienceContext,
+  type AddDataExperience,
+} from './analytics/register_add_data_experience_context';
 
 export type ObservabilityOnboardingPluginSetup = void;
 export type ObservabilityOnboardingPluginStart = void;
@@ -77,6 +84,8 @@ export class ObservabilityOnboardingPlugin
   implements Plugin<ObservabilityOnboardingPluginSetup, ObservabilityOnboardingPluginStart>
 {
   private locators?: ObservabilityOnboardingPluginLocators;
+  private readonly addDataExperience$ = new ReplaySubject<AddDataExperience>(1);
+  private addDataExperienceSubscription?: Subscription;
 
   constructor(private readonly ctx: PluginInitializerContext) {}
 
@@ -134,6 +143,7 @@ export class ObservabilityOnboardingPlugin
     core.analytics.registerEventType(
       OBSERVABILITY_ONBOARDING_FLOW_DATASET_DETECTED_TELEMETRY_EVENT
     );
+    registerAddDataExperienceContext(core.analytics, this.addDataExperience$);
 
     return {
       locators: this.locators,
@@ -141,6 +151,11 @@ export class ObservabilityOnboardingPlugin
     };
   }
   public async start(core: CoreStart, plugins: ObservabilityOnboardingPluginStartDeps) {
+    this.addDataExperienceSubscription = core.featureFlags
+      .getBooleanValue$(IS_ADD_DATA_PAGE_V2_ENABLED, false)
+      .pipe(map((enabled): AddDataExperience => (enabled ? 'v2' : 'v1')))
+      .subscribe(this.addDataExperience$);
+
     if (plugins.ingestHub) {
       const { registerIngestFlows } = await import('./ingest_hub/register_ingest_flows');
       registerIngestFlows(core, plugins);
@@ -158,5 +173,10 @@ export class ObservabilityOnboardingPlugin
     return {
       locators: this.locators,
     };
+  }
+
+  public stop() {
+    this.addDataExperienceSubscription?.unsubscribe();
+    this.addDataExperience$.complete();
   }
 }

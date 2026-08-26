@@ -123,7 +123,14 @@ export function initRoutes(
     {
       path: `/api/sample_tasks/schedule_with_api_key`,
       validate: {
-        body: taskSchema,
+        body: schema.object({
+          task: innerTaskSchema,
+          /**
+           * Grants only an Elasticsearch API key, skipping UIAM. Lets a test create a task in the
+           * pre-UIAM state so the UIAM provisioning task has something to convert.
+           */
+          onEsKey: schema.maybe(schema.boolean()),
+        }),
       },
       security: {
         authz: {
@@ -138,13 +145,16 @@ export function initRoutes(
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse<any>> {
       const taskManager = await taskManagerStart;
-      const { task: taskFields } = req.body;
+      const { task: taskFields, onEsKey } = req.body;
       const task = {
         ...taskFields,
         scope: [scope],
       };
 
-      const taskResult = await taskManager.schedule(task, { request: req });
+      const taskResult = await taskManager.schedule(task, {
+        request: req,
+        ...(onEsKey === undefined ? {} : { onEsKey }),
+      });
 
       return res.ok({ body: taskResult });
     }

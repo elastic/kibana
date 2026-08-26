@@ -33,6 +33,7 @@ const ALLOWED_IN_SOURCE = [
 ];
 
 const ALLOWED_IN_TESTS_ONLY = [
+  '@emotion/jest',
   '@kbn/test-jest-helpers',
   '@testing-library/react',
   '@testing-library/user-event',

@@ -38,7 +38,6 @@ export interface BuildLensConfigParams {
   existingConfig?: string;
   parsedExistingConfig?: VisualizationConfig | null;
   includeTimeRange?: boolean;
-  additionalChartConfigInstructions?: string;
   modelProvider: ModelProvider;
   logger: Logger;
   events: ToolEventEmitter;
@@ -61,7 +60,6 @@ export const buildLensConfig = async ({
   existingConfig,
   parsedExistingConfig = null,
   includeTimeRange = true,
-  additionalChartConfigInstructions,
   modelProvider,
   logger,
   events,
@@ -80,8 +78,7 @@ export const buildLensConfig = async ({
     logger,
     events,
     esClient,
-    includeTimeRange,
-    additionalChartConfigInstructions
+    includeTimeRange
   );
 
   // If the user provides ES|QL, use it only when validation says it is safe.

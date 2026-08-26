@@ -11,6 +11,13 @@
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../functional/ftr_provider_context';
 
+/**
+ * Migration recommendation: DELETE. Stats aggregation/view-type logic is Jest
+ * (kbn-unified-field-list field_stats_utils.test.ts, field_stats.test.tsx). Discover Scout already
+ * smokes the sidebar popover (test/scout/sidebar/ui/parallel_tests/sidebar_field_stats_filters.spec.ts).
+ * Exact doc counts and top-value strings are data-correctness, not UI.
+ */
+
 const TEST_START_TIME = 'Sep 19, 2015 @ 06:31:44.000';
 const TEST_END_TIME = 'Sep 23, 2015 @ 18:31:44.000';
 

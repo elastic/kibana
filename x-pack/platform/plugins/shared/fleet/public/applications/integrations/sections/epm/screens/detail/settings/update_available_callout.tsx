@@ -10,7 +10,6 @@ import { css } from '@emotion/react';
 
 import {
   EuiButton,
-  EuiCallOut,
   EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
@@ -19,6 +18,7 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { type BreakingChangesLog } from '../utils';
@@ -60,11 +60,7 @@ export const UpdateAvailableCallout = ({
   );
 
   return (
-    <EuiCallOut
-      color="warning"
-      iconType="warning"
-      title={breakingChanges ? titleWithBreakingChanges : defaultTitle}
-    >
+    <KbnWarningCallout title={breakingChanges ? titleWithBreakingChanges : defaultTitle}>
       {isOneChange ? (
         <>
           <FormattedMessage
@@ -136,7 +132,7 @@ export const UpdateAvailableCallout = ({
           />
         </>
       )}
-    </EuiCallOut>
+    </KbnWarningCallout>
   );
 };
 
