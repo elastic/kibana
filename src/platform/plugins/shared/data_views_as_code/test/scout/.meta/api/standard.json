@@ -1,13 +1,13 @@
 {
-  "sha1": "c24e8b56f603456ffccd2c12aa791688e46c5e81",
+  "sha1": "6a2eea9b733f3c5adfac9a196b205aee03401ab5",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
   ],
   "tests": [
     {
-      "id": "c30666c9b3b6156-d19fa41e7270071",
-      "title": "DELETE /api/data_views/{id} - as code can delete an existing data view",
+      "id": "c30666c9b3b6156-7d4b80a73d3e3d1",
+      "title": "DELETE /api/data_views/v2/{id} - as code can delete an existing data view",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -21,13 +21,13 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views_as_code/test/scout/api/tests/delete_data_view.spec.ts",
-        "line": 18,
-        "column": 30
+        "line": 21,
+        "column": 32
       }
     },
     {
-      "id": "c30666c9b3b6156-1dd234de9987eae",
-      "title": "DELETE /api/data_views/{id} - as code returns 404 when deleting a non-existing data view",
+      "id": "c30666c9b3b6156-e77994961e67c1d",
+      "title": "DELETE /api/data_views/v2/{id} - as code returns 404 when deleting a non-existing data view",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -41,13 +41,13 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views_as_code/test/scout/api/tests/delete_data_view.spec.ts",
-        "line": 38,
-        "column": 7
+        "line": 41,
+        "column": 9
       }
     },
     {
-      "id": "c30666c9b3b6156-0c13bc9a7a7fa1e",
-      "title": "DELETE /api/data_views/{id} - as code returns 403 when user does not have indexPatterns:manage privilege",
+      "id": "c30666c9b3b6156-1a7afb88eece75d",
+      "title": "DELETE /api/data_views/v2/{id} - as code returns 403 when user does not have indexPatterns:manage privilege",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -61,13 +61,13 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views_as_code/test/scout/api/tests/delete_data_view.spec.ts",
-        "line": 51,
-        "column": 12
+        "line": 54,
+        "column": 14
       }
     },
     {
-      "id": "e9d43db51b73ef9-f5a2a74a653d734",
-      "title": "GET /api/data_views/{id} - as code can retrieve a data view",
+      "id": "e9d43db51b73ef9-4d26ee25dad8cf3",
+      "title": "GET /api/data_views/v2/{id} - as code can retrieve a data view",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -86,8 +86,8 @@
       }
     },
     {
-      "id": "e9d43db51b73ef9-b8ddc905beb07b4",
-      "title": "GET /api/data_views/{id} - as code returns 404 for a non-existing data view",
+      "id": "e9d43db51b73ef9-b9da3f8a6539839",
+      "title": "GET /api/data_views/v2/{id} - as code returns 404 for a non-existing data view",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -106,8 +106,8 @@
       }
     },
     {
-      "id": "e9d43db51b73ef9-bcd9d7cb91797f8",
-      "title": "GET /api/data_views/{id} - as code returns 400 when ID is too long",
+      "id": "e9d43db51b73ef9-edc66382f3c469d",
+      "title": "GET /api/data_views/v2/{id} - as code returns 400 when ID is too long",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -126,8 +126,8 @@
       }
     },
     {
-      "id": "e1e3a3ad0739513-1703cdf32019d9a",
-      "title": "POST /api/data_views - as code can create a data view with index_pattern only",
+      "id": "e1e3a3ad0739513-a9a7fc146269e22",
+      "title": "POST /api/data_views/v2 - as code can create a data view with index_pattern only",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -146,8 +146,8 @@
       }
     },
     {
-      "id": "e1e3a3ad0739513-7e676cb30fb212f",
-      "title": "POST /api/data_views - as code can create a data view with index_pattern, name, and time_field",
+      "id": "e1e3a3ad0739513-b0aa3b0ab525a4c",
+      "title": "POST /api/data_views/v2 - as code can create a data view with index_pattern, name, and time_field",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -166,8 +166,8 @@
       }
     },
     {
-      "id": "e1e3a3ad0739513-1e229de6bd371a2",
-      "title": "POST /api/data_views - as code can create a data view with field_settings and return transformed shape",
+      "id": "e1e3a3ad0739513-575043d3c631108",
+      "title": "POST /api/data_views/v2 - as code can create a data view with field_settings and return transformed shape",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -186,8 +186,8 @@
       }
     },
     {
-      "id": "e1e3a3ad0739513-d03e1ca2bab2252",
-      "title": "POST /api/data_views - as code can create a data view without an explicit id",
+      "id": "e1e3a3ad0739513-0d881228c0b09b7",
+      "title": "POST /api/data_views/v2 - as code can create a data view without an explicit id",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -206,8 +206,8 @@
       }
     },
     {
-      "id": "e1e3a3ad0739513-501d48bdaf02875",
-      "title": "POST /api/data_views - as code returns 403 when user has indexPatterns read privilege but not manage privilege",
+      "id": "e1e3a3ad0739513-4fef3fbf9ad6c37",
+      "title": "POST /api/data_views/v2 - as code returns 403 when user has indexPatterns read privilege but not manage privilege",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -226,8 +226,8 @@
       }
     },
     {
-      "id": "e1e3a3ad0739513-66be2ca0b6f16bb",
-      "title": "POST /api/data_views - as code returns 400 when index_pattern is missing",
+      "id": "e1e3a3ad0739513-fc4d94efe938769",
+      "title": "POST /api/data_views/v2 - as code returns 400 when index_pattern is missing",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -246,8 +246,8 @@
       }
     },
     {
-      "id": "e1e3a3ad0739513-f2800e03448d394",
-      "title": "POST /api/data_views - as code returns 400 when index_pattern is an empty string",
+      "id": "e1e3a3ad0739513-e7cbc9b412ef95c",
+      "title": "POST /api/data_views/v2 - as code returns 400 when index_pattern is an empty string",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -266,8 +266,8 @@
       }
     },
     {
-      "id": "e1e3a3ad0739513-2d6bb738b1ad125",
-      "title": "POST /api/data_views - as code returns 400 when body is empty",
+      "id": "e1e3a3ad0739513-46e5916ed6f220e",
+      "title": "POST /api/data_views/v2 - as code returns 400 when body is empty",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -286,8 +286,8 @@
       }
     },
     {
-      "id": "e1e3a3ad0739513-4a604d843cfb6af",
-      "title": "POST /api/data_views - as code returns 400 when field_settings contains an invalid format type",
+      "id": "e1e3a3ad0739513-85b318d2fe0d00f",
+      "title": "POST /api/data_views/v2 - as code returns 400 when field_settings contains an invalid format type",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -306,8 +306,8 @@
       }
     },
     {
-      "id": "e1e3a3ad0739513-519107ff5d00258",
-      "title": "POST /api/data_views - as code returns 400 when id is provided in the request body",
+      "id": "e1e3a3ad0739513-8b857ab66888e44",
+      "title": "POST /api/data_views/v2 - as code returns 400 when id is provided in the request body",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -326,8 +326,8 @@
       }
     },
     {
-      "id": "e1e3a3ad0739513-db0e157ee073c21",
-      "title": "POST /api/data_views - as code returns 409 when creating a data view with a duplicate name",
+      "id": "e1e3a3ad0739513-b16e678f62dcefc",
+      "title": "POST /api/data_views/v2 - as code returns 409 when creating a data view with a duplicate name",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -346,8 +346,8 @@
       }
     },
     {
-      "id": "e1e3a3ad0739513-92335717fdec4a1",
-      "title": "POST /api/data_views - as code returns 409 when index_pattern collides with an existing unnamed data view",
+      "id": "e1e3a3ad0739513-2bcb714352cd51f",
+      "title": "POST /api/data_views/v2 - as code returns 409 when index_pattern collides with an existing unnamed data view",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -366,8 +366,8 @@
       }
     },
     {
-      "id": "717cd43f36ae1de-c92b9f2719b265a",
-      "title": "PUT /api/data_views/{id} - as code creates a data view when the id does not exist",
+      "id": "717cd43f36ae1de-f1721bb84c51408",
+      "title": "PUT /api/data_views/v2/{id} - as code creates a data view when the id does not exist",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -386,8 +386,8 @@
       }
     },
     {
-      "id": "717cd43f36ae1de-98836e8063b3e1f",
-      "title": "PUT /api/data_views/{id} - as code updates an existing data view when the id exists",
+      "id": "717cd43f36ae1de-199eb5386df6358",
+      "title": "PUT /api/data_views/v2/{id} - as code updates an existing data view when the id exists",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -406,8 +406,8 @@
       }
     },
     {
-      "id": "717cd43f36ae1de-f4ebd1983706335",
-      "title": "PUT /api/data_views/{id} - as code clears fields omitted from PUT body when updating an existing data view",
+      "id": "717cd43f36ae1de-19a5d0f8eb74d9f",
+      "title": "PUT /api/data_views/v2/{id} - as code clears fields omitted from PUT body when updating an existing data view",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -426,8 +426,8 @@
       }
     },
     {
-      "id": "717cd43f36ae1de-53e0d5dedd26d4a",
-      "title": "PUT /api/data_views/{id} - as code updates using the resolved id when the request id is a legacy alias",
+      "id": "717cd43f36ae1de-6e401a195500373",
+      "title": "PUT /api/data_views/v2/{id} - as code updates using the resolved id when the request id is a legacy alias",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -446,8 +446,8 @@
       }
     },
     {
-      "id": "717cd43f36ae1de-1496e9714da7ca4",
-      "title": "PUT /api/data_views/{id} - as code returns 400 when request body contains id",
+      "id": "717cd43f36ae1de-93a79148fb7bb2a",
+      "title": "PUT /api/data_views/v2/{id} - as code returns 400 when request body contains id",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -466,8 +466,8 @@
       }
     },
     {
-      "id": "717cd43f36ae1de-3a100a95ddccf07",
-      "title": "PUT /api/data_views/{id} - as code returns 400 when id is too long",
+      "id": "717cd43f36ae1de-075fa633412b1a9",
+      "title": "PUT /api/data_views/v2/{id} - as code returns 400 when id is too long",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -486,8 +486,8 @@
       }
     },
     {
-      "id": "717cd43f36ae1de-c49e18e568e8611",
-      "title": "PUT /api/data_views/{id} - as code returns 400 when creating via PUT and body contains composite field with invalid format type",
+      "id": "717cd43f36ae1de-82b2a76e1337b3a",
+      "title": "PUT /api/data_views/v2/{id} - as code returns 400 when creating via PUT and body contains composite field with invalid format type",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -506,8 +506,8 @@
       }
     },
     {
-      "id": "717cd43f36ae1de-f57a0d06a056bf2",
-      "title": "PUT /api/data_views/{id} - as code returns 400 when updating via PUT and body contains composite field with invalid format type",
+      "id": "717cd43f36ae1de-d184a24bc03d442",
+      "title": "PUT /api/data_views/v2/{id} - as code returns 400 when updating via PUT and body contains composite field with invalid format type",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -526,8 +526,8 @@
       }
     },
     {
-      "id": "717cd43f36ae1de-3969de541f378c2",
-      "title": "PUT /api/data_views/{id} - as code returns 403 when user does not have indexPatterns manage privilege",
+      "id": "717cd43f36ae1de-e98549c29b886ce",
+      "title": "PUT /api/data_views/v2/{id} - as code returns 403 when user does not have indexPatterns manage privilege",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -546,8 +546,8 @@
       }
     },
     {
-      "id": "717cd43f36ae1de-7df0429725ed242",
-      "title": "PUT /api/data_views/{id} - as code returns 409 when creating via PUT with a duplicate name",
+      "id": "717cd43f36ae1de-b81f17e19cf08ad",
+      "title": "PUT /api/data_views/v2/{id} - as code returns 409 when creating via PUT with a duplicate name",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",

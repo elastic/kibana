@@ -14,6 +14,7 @@ import { createAssetsNavigationTree } from './assets_navigation_tree';
 import { createEntityAnalyticsNavigationTree } from './entity_analytics_navigation_tree';
 import { createMachineLearningNavigationTree } from './ml_navigation_tree';
 import { createAlertDetectionsNavigationTree } from './alert_detections_navigation_tree';
+import { createPndNavigationTree, createPndSecondaryNavigationTree } from './pnd_navigation_tree';
 
 export const defaultNavigationTree = {
   alertDetections: createAlertDetectionsNavigationTree,
@@ -25,5 +26,7 @@ export const defaultNavigationTree = {
   assets: createAssetsNavigationTree,
   entityAnalytics: createEntityAnalyticsNavigationTree,
   ml: createMachineLearningNavigationTree,
+  pnd: createPndNavigationTree,
+  pndSecondary: createPndSecondaryNavigationTree,
 };
 export type DefaultNavigationTree = typeof defaultNavigationTree;

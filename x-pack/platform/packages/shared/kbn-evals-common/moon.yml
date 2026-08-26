@@ -20,6 +20,7 @@ project:
   sourceRoot: x-pack/platform/packages/shared/kbn-evals-common
 dependsOn:
   - '@kbn/zod'
+  - '@kbn/zod-helpers'
 tags:
   - shared-common
   - package

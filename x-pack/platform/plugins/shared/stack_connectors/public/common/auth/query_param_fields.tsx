@@ -55,7 +55,7 @@ export const QueryParamFields: React.FC<Props> = ({ readOnly }) => {
                 <EuiFlexItem grow={false}>
                   {!limitExceeded && (
                     <EuiButton
-                      iconType="plusInCircle"
+                      iconType="plusCircle"
                       onClick={addItem}
                       disabled={readOnly}
                       data-test-subj="httpAddQueryParamButton"
@@ -158,7 +158,7 @@ export const QueryParamFields: React.FC<Props> = ({ readOnly }) => {
                         <EuiButtonIcon
                           color="danger"
                           onClick={() => removeItem(item.id)}
-                          iconType="minusInCircle"
+                          iconType="minusCircle"
                           disabled={readOnly}
                           aria-label={i18n.DELETE_QUERY_PARAM_BUTTON}
                           data-test-subj="httpRemoveQueryParamButton"

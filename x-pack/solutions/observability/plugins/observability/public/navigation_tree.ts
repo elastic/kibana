@@ -109,7 +109,7 @@ function createNavTree({
       },
       {
         link: 'slo',
-        icon: 'visGauge',
+        icon: 'chartGauge',
       },
       ...(streamsAvailable
         ? [
@@ -290,6 +290,10 @@ function createNavTree({
             },
           ]),
       {
+        icon: 'sparkles',
+        link: 'context_engine' as const,
+      },
+      {
         id: 'machine_learning-landing',
         title: i18n.translate('xpack.observability.obltNav.machineLearning', {
           defaultMessage: 'Machine Learning',
@@ -432,7 +436,7 @@ function createNavTree({
             title: i18n.translate('xpack.observability.obltNav.ingestHub', {
               defaultMessage: 'Ingest Hub',
             }),
-            icon: 'launch',
+            icon: 'rocket',
             children: [
               {
                 link: 'ingestHub' as const,
@@ -451,7 +455,7 @@ function createNavTree({
               defaultMessage: 'Add data',
             }),
             link: 'observabilityOnboarding' as const,
-            icon: 'plusInCircle',
+            icon: 'plusCircle',
             children: [
               {
                 link: 'onboarding' as const,

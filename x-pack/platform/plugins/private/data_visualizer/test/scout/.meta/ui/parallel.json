@@ -1,0 +1,465 @@
+{
+  "sha1": "a59d25d0a175549454aee50cf1d4afd3f296bc9d",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
+  "tests": [
+    {
+      "id": "9e156c7c212e11b-f2cd2d3cdc77643",
+      "title": "Ingest data to Elasticsearch",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/global.setup.ts",
+        "line": 5,
+        "column": 1
+      }
+    },
+    {
+      "id": "60d8218dafa8e69-b0d8d76ebf5387c",
+      "title": "data drift data view flows from data view creation mode allows analyzing data drift without saving",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/data_drift_data_view_flyout.spec.ts",
+        "line": 23,
+        "column": 13
+      }
+    },
+    {
+      "id": "60d8218dafa8e69-f2d55cce9d8b89e",
+      "title": "data drift data view flows from data view creation mode hides analyze data drift without saving option if patterns are same",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/data_drift_data_view_flyout.spec.ts",
+        "line": 40,
+        "column": 23
+      }
+    },
+    {
+      "id": "60d8218dafa8e69-adfe07a24e56afd",
+      "title": "data drift data view flows from data view creation mode loads non-time series data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/data_drift_data_view_flyout.spec.ts",
+        "line": 68,
+        "column": 14
+      }
+    },
+    {
+      "id": "60d8218dafa8e69-87479a94df5ecb6",
+      "title": "data drift data view flows opens the data view editor from picker and loads drift after creation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/data_drift_data_view_flyout.spec.ts",
+        "line": 71,
+        "column": 26
+      }
+    },
+    {
+      "id": "c955b89422536e7-a476ca8e0991b30",
+      "title": "data drift with ft_farequote_filter_and_kuery saved search loads the source data in data drift",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/data_drift_saved_search.spec.ts",
+        "line": 27,
+        "column": 35
+      }
+    },
+    {
+      "id": "d1125f54f4e0853-1320f9efa11a7bb",
+      "title": "esql data visualizer with farequote",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/esql_data_visualizer.spec.ts",
+        "line": 296,
+        "column": 40
+      }
+    },
+    {
+      "id": "d1125f54f4e0853-3b1ae758b94a4b9",
+      "title": "esql data visualizer with module_sample_logs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/esql_data_visualizer.spec.ts",
+        "line": 298,
+        "column": 5
+      }
+    },
+    {
+      "id": "c6d3bb646ff33f9-e94b0a08f109cbc",
+      "title": "field statistics in Dashboard with lucene saved search and filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/field_stats_grid_in_dashboard.spec.ts",
+        "line": 189,
+        "column": 14
+      }
+    },
+    {
+      "id": "878c4354c62ea4c-272fdd550c918ac",
+      "title": "field statistics in Discover (trial license) when disabled should show view mode toggle but not Field stats tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/field_stats_grid_in_discover_license.spec.ts",
+        "line": 52,
+        "column": 29
+      }
+    },
+    {
+      "id": "70c87e3dbb63de5-38988915a7a0da1",
+      "title": "field statistics in Discover with farequote index pattern (Failing: See https://github.com/elastic/kibana/issues/259109)",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/field_stats_grid_in_discover.spec.ts",
+        "line": 95,
+        "column": 11
+      }
+    },
+    {
+      "id": "70c87e3dbb63de5-21cd92665f31333",
+      "title": "field statistics in Discover with KQL saved search (Failing: See https://github.com/elastic/kibana/issues/259109)",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/field_stats_grid_in_discover.spec.ts",
+        "line": 106,
+        "column": 5
+      }
+    },
+    {
+      "id": "70c87e3dbb63de5-cf989e04ab2d4fe",
+      "title": "field statistics in Discover with lucene saved search and filter (Failing: See https://github.com/elastic/kibana/issues/259109)",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/field_stats_grid_in_discover.spec.ts",
+        "line": 115,
+        "column": 18
+      }
+    },
+    {
+      "id": "70c87e3dbb63de5-42c330fc43b4713",
+      "title": "field statistics in Discover with geo point field (Failing: See https://github.com/elastic/kibana/issues/259109)",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/field_stats_grid_in_discover.spec.ts",
+        "line": 118,
+        "column": 9
+      }
+    },
+    {
+      "id": "f2e3245a8f1e32d-5f199982a4df7d8",
+      "title": "file based data visualizer with an artificial server log",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/file_data_visualizer.spec.ts",
+        "line": 39,
+        "column": 54
+      }
+    },
+    {
+      "id": "f2e3245a8f1e32d-97fa25824f581f5",
+      "title": "file based data visualizer with a file containing geo field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/file_data_visualizer.spec.ts",
+        "line": 39,
+        "column": 54
+      }
+    },
+    {
+      "id": "f2e3245a8f1e32d-832d93063e5b06a",
+      "title": "file based data visualizer with a file with a missing new line char at the end",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/file_data_visualizer.spec.ts",
+        "line": 39,
+        "column": 54
+      }
+    },
+    {
+      "id": "f2e3245a8f1e32d-c8404e610f8d1f2",
+      "title": "file based data visualizer with a file which does not generate a ingest pipeline",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/file_data_visualizer.spec.ts",
+        "line": 39,
+        "column": 54
+      }
+    },
+    {
+      "id": "f2e3245a8f1e32d-9170b54eeda0b85",
+      "title": "file based data visualizer with a non-log file",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/file_data_visualizer.spec.ts",
+        "line": 137,
+        "column": 84
+      }
+    },
+    {
+      "id": "e66fb412c0b109c-f020e8bf4268fdf",
+      "title": "data view management adds new field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/index_data_visualizer_data_view_management.spec.ts",
+        "line": 178,
+        "column": 13
+      }
+    },
+    {
+      "id": "e66fb412c0b109c-c6fa264f5d4ad28",
+      "title": "data view management sets custom label for existing field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/index_data_visualizer_data_view_management.spec.ts",
+        "line": 186,
+        "column": 26
+      }
+    },
+    {
+      "id": "e66fb412c0b109c-ac1e60a0c3cc320",
+      "title": "data view management deletes existing field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/index_data_visualizer_data_view_management.spec.ts",
+        "line": 207,
+        "column": 5
+      }
+    },
+    {
+      "id": "b14967ae97ff43a-dce3fd3298d8870",
+      "title": "index based with farequote index pattern displays index details",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/index_data_visualizer_farequote_data_view.spec.ts",
+        "line": 22,
+        "column": 7
+      }
+    },
+    {
+      "id": "1a89474c47f84ff-ad5a60996a37671",
+      "title": "index based with farequote KQL saved search and filters displays index details",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/index_data_visualizer_farequote_filtered_saved_search.spec.ts",
+        "line": 28,
+        "column": 15
+      }
+    },
+    {
+      "id": "f117ca6c42d98ec-aa8eeabb309279d",
+      "title": "index based with farequote KQL saved search displays index details",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/index_data_visualizer_farequote_kql_saved_search.spec.ts",
+        "line": 25,
+        "column": 15
+      }
+    },
+    {
+      "id": "abad014be7b8968-c9b537ae2326098",
+      "title": "index based with farequote lucene saved search displays index details",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/index_data_visualizer_farequote_lucene_saved_search.spec.ts",
+        "line": 25,
+        "column": 15
+      }
+    },
+    {
+      "id": "3a365604f6ecde5-c20d79c51b19716",
+      "title": "data visualizer with pinned global filters retains pinned filters from discover with lucene saved search and filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/index_data_visualizer_filters.spec.ts",
+        "line": 208,
+        "column": 29
+      }
+    },
+    {
+      "id": "3a365604f6ecde5-9d56a21515974f6",
+      "title": "data visualizer with pinned global filters retains pinned filters to discover with lucene saved search and filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/index_data_visualizer_filters.spec.ts",
+        "line": 219,
+        "column": 15
+      }
+    },
+    {
+      "id": "3a365604f6ecde5-ff7285bfd69927e",
+      "title": "data visualizer with pinned global filters retains pinned filters from discover with KQL saved search and filters",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/index_data_visualizer_filters.spec.ts",
+        "line": 224,
+        "column": 29
+      }
+    },
+    {
+      "id": "3a365604f6ecde5-b9a3c04d6089f55",
+      "title": "data visualizer with pinned global filters retains pinned filters to discover with KQL saved search and filters",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/index_data_visualizer_filters.spec.ts",
+        "line": 233,
+        "column": 24
+      }
+    },
+    {
+      "id": "083e7f520d8de49-43f4b5aa0da25c5",
+      "title": "index based random sampler controls with small data sets",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/index_data_visualizer_random_sampler.spec.ts",
+        "line": 82,
+        "column": 32
+      }
+    },
+    {
+      "id": "2c0287fd48ab0fd-ead208e338df473",
+      "title": "index based with module sample logs displays index details",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/index_data_visualizer_sample_logs.spec.ts",
+        "line": 23,
+        "column": 5
+      }
+    },
+    {
+      "id": "c50dbbf8476e1e6-76791fb8649a847",
+      "title": "Reset data visualizer Scout test settings",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_visualizer/test/scout/ui/parallel_tests/global.teardown.ts",
+        "line": 5,
+        "column": 1
+      }
+    }
+  ]
+}

@@ -1,5 +1,5 @@
 {
-  "sha1": "",
+  "sha1": "fe2cd019eec16e547d013210201bf26f9934136b",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -12,8 +12,8 @@
       "tags": [],
       "location": {
         "file": "src/platform/plugins/shared/vis_types/timeseries/test/scout/ui/parallel_tests/global.setup.ts",
-        "line": 13,
-        "column": 16
+        "line": 7,
+        "column": 1
       }
     },
     {
@@ -25,8 +25,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/vis_types/timeseries/test/scout/ui/parallel_tests/annotations.spec.ts",
-        "line": 58,
-        "column": 12
+        "line": 46,
+        "column": 13
       }
     },
     {
@@ -38,8 +38,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/vis_types/timeseries/test/scout/ui/parallel_tests/annotations.spec.ts",
-        "line": 75,
-        "column": 12
+        "line": 68,
+        "column": 22
       }
     },
     {
@@ -51,8 +51,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/vis_types/timeseries/test/scout/ui/parallel_tests/annotations.spec.ts",
-        "line": 99,
-        "column": 12
+        "line": 97,
+        "column": 9
       }
     },
     {
@@ -64,8 +64,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/vis_types/timeseries/test/scout/ui/parallel_tests/basics.spec.ts",
-        "line": 33,
-        "column": 12
+        "line": 24,
+        "column": 46
       }
     },
     {
@@ -77,8 +77,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/vis_types/timeseries/test/scout/ui/parallel_tests/basics.spec.ts",
-        "line": 40,
-        "column": 12
+        "line": 29,
+        "column": 13
       }
     },
     {
@@ -90,8 +90,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/vis_types/timeseries/test/scout/ui/parallel_tests/basics.spec.ts",
-        "line": 46,
-        "column": 12
+        "line": 31,
+        "column": 5
       }
     },
     {
@@ -103,8 +103,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/vis_types/timeseries/test/scout/ui/parallel_tests/basics.spec.ts",
-        "line": 55,
-        "column": 12
+        "line": 34,
+        "column": 42
       }
     },
     {
@@ -116,8 +116,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/vis_types/timeseries/test/scout/ui/parallel_tests/basics.spec.ts",
-        "line": 64,
-        "column": 12
+        "line": 40,
+        "column": 81
       }
     },
     {
@@ -129,8 +129,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/vis_types/timeseries/test/scout/ui/parallel_tests/chart_click.spec.ts",
-        "line": 78,
-        "column": 14
+        "line": 59,
+        "column": 51
       }
     },
     {
@@ -142,8 +142,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/vis_types/timeseries/test/scout/ui/parallel_tests/chart_click.spec.ts",
-        "line": 93,
-        "column": 14
+        "line": 72,
+        "column": 15
       }
     },
     {
@@ -155,8 +155,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/vis_types/timeseries/test/scout/ui/parallel_tests/chart_data.spec.ts",
-        "line": 69,
-        "column": 12
+        "line": 58,
+        "column": 11
       }
     },
     {
@@ -168,8 +168,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/vis_types/timeseries/test/scout/ui/parallel_tests/chart_data.spec.ts",
-        "line": 84,
-        "column": 12
+        "line": 85,
+        "column": 13
       }
     },
     {
@@ -181,8 +181,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/vis_types/timeseries/test/scout/ui/parallel_tests/chart_data.spec.ts",
-        "line": 99,
-        "column": 12
+        "line": 138,
+        "column": 32
       }
     },
     {
@@ -194,8 +194,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/vis_types/timeseries/test/scout/ui/parallel_tests/chart_data.spec.ts",
-        "line": 136,
-        "column": 12
+        "line": 252,
+        "column": 13
       }
     },
     {
@@ -207,8 +207,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/vis_types/timeseries/test/scout/ui/parallel_tests/chart_data.spec.ts",
-        "line": 179,
-        "column": 12
+        "line": 235,
+        "column": 29
       }
     },
     {
@@ -220,8 +220,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/vis_types/timeseries/test/scout/ui/parallel_tests/chart_data.spec.ts",
-        "line": 198,
-        "column": 12
+        "line": 253,
+        "column": 29
       }
     },
     {
@@ -233,8 +233,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/vis_types/timeseries/test/scout/ui/parallel_tests/chart_data.spec.ts",
-        "line": 218,
-        "column": 12
+        "line": 294,
+        "column": 29
       }
     },
     {
@@ -246,8 +246,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/vis_types/timeseries/test/scout/ui/parallel_tests/chart_data.spec.ts",
-        "line": 235,
-        "column": 12
+        "line": 311,
+        "column": 29
       }
     },
     {
@@ -259,8 +259,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/vis_types/timeseries/test/scout/ui/parallel_tests/chart_data.spec.ts",
-        "line": 252,
-        "column": 12
+        "line": 346,
+        "column": 29
       }
     },
     {
@@ -272,8 +272,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/vis_types/timeseries/test/scout/ui/parallel_tests/formatters.spec.ts",
-        "line": 34,
-        "column": 12
+        "line": 27,
+        "column": 66
       }
     },
     {
@@ -285,8 +285,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/vis_types/timeseries/test/scout/ui/parallel_tests/formatters.spec.ts",
-        "line": 43,
-        "column": 12
+        "line": 33,
+        "column": 33
       }
     },
     {
@@ -298,8 +298,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/vis_types/timeseries/test/scout/ui/parallel_tests/formatters.spec.ts",
-        "line": 51,
-        "column": 12
+        "line": 39,
+        "column": 16
       }
     },
     {
@@ -311,8 +311,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/vis_types/timeseries/test/scout/ui/parallel_tests/formatters.spec.ts",
-        "line": 59,
-        "column": 12
+        "line": 42,
+        "column": 29
       }
     },
     {
@@ -324,8 +324,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/vis_types/timeseries/test/scout/ui/parallel_tests/hiding_series.spec.ts",
-        "line": 54,
-        "column": 12
+        "line": 46,
+        "column": 13
       }
     },
     {
@@ -337,8 +337,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/vis_types/timeseries/test/scout/ui/parallel_tests/hiding_series.spec.ts",
-        "line": 73,
-        "column": 12
+        "line": 53,
+        "column": 50
       }
     },
     {
@@ -350,8 +350,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/vis_types/timeseries/test/scout/ui/parallel_tests/index_pattern_mode.spec.ts",
-        "line": 46,
-        "column": 14
+        "line": 37,
+        "column": 35
       }
     },
     {
@@ -363,8 +363,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/vis_types/timeseries/test/scout/ui/parallel_tests/index_pattern_mode.spec.ts",
-        "line": 59,
-        "column": 14
+        "line": 42,
+        "column": 24
       }
     },
     {
@@ -376,8 +376,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/vis_types/timeseries/test/scout/ui/parallel_tests/index_pattern_mode.spec.ts",
-        "line": 74,
-        "column": 14
+        "line": 51,
+        "column": 26
       }
     }
   ]

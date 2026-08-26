@@ -16,10 +16,10 @@ import type {
 import type {
   CreateAgentResponse,
   DeleteAgentResponse,
-  AgentDefinitionWithPermissions,
   GetAgentAccessControlResponse,
   GetAgentResponse,
   ListAgentResponse,
+  ListAgentResponseItem,
   UpdateAgentAccessControlResponse,
   UpdateAgentResponse,
 } from '../../../common/http_api/agents';
@@ -35,7 +35,7 @@ export class AgentService {
   /**
    * List all agents
    */
-  async list(options?: AgentListOptions): Promise<AgentDefinitionWithPermissions[]> {
+  async list(options?: AgentListOptions): Promise<ListAgentResponseItem[]> {
     const res = await this.http.get<ListAgentResponse>(`${publicApiPath}/agents`);
     return res.results;
   }
@@ -43,14 +43,14 @@ export class AgentService {
   /**
    * Get a single agent by id
    */
-  async get(id: string): Promise<AgentDefinitionWithPermissions> {
+  async get(id: string): Promise<GetAgentResponse> {
     return await this.http.get<GetAgentResponse>(`${publicApiPath}/agents/${id}`);
   }
 
   /**
    * Create a new agent
    */
-  async create(profile: AgentCreateRequest): Promise<AgentDefinitionWithPermissions> {
+  async create(profile: AgentCreateRequest): Promise<CreateAgentResponse> {
     return await this.http.post<CreateAgentResponse>(`${publicApiPath}/agents`, {
       body: JSON.stringify(profile),
     });
@@ -59,7 +59,7 @@ export class AgentService {
   /**
    * Update an existing agent
    */
-  async update(id: string, update: AgentUpdateRequest): Promise<AgentDefinitionWithPermissions> {
+  async update(id: string, update: AgentUpdateRequest): Promise<UpdateAgentResponse> {
     return await this.http.put<UpdateAgentResponse>(`${publicApiPath}/agents/${id}`, {
       body: JSON.stringify(update),
     });

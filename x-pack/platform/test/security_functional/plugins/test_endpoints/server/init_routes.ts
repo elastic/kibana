@@ -644,8 +644,11 @@ export function initRoutes(
         body: schema.object({
           name: schema.string(),
           expiration: schema.maybe(schema.string()),
-          authcScheme: schema.string(),
-          credential: schema.string(),
+          // Omit both to grant with the incoming request itself, which is how the callers that grant
+          // on behalf of an end user do it, and the only way the request carries an authenticated
+          // user.
+          authcScheme: schema.maybe(schema.string()),
+          credential: schema.maybe(schema.string()),
         }),
       },
       security: {
@@ -668,16 +671,19 @@ export function initRoutes(
           });
         }
 
-        // Create a new request with the provided authentication header
-        const requestHeaders: Headers = {
-          ...request.headers,
-          authorization: `${authcScheme} ${credential}`,
-        };
-        const fakeRawRequest: FakeRawRequest = {
-          headers: requestHeaders,
-          path: request.url.pathname,
-        };
-        const requestToUse = kibanaRequestFactory(fakeRawRequest);
+        let requestToUse = request;
+        if (credential) {
+          // Create a new request with the provided authentication header
+          const requestHeaders: Headers = {
+            ...request.headers,
+            authorization: `${authcScheme} ${credential}`,
+          };
+          const fakeRawRequest: FakeRawRequest = {
+            headers: requestHeaders,
+            path: request.url.pathname,
+          };
+          requestToUse = kibanaRequestFactory(fakeRawRequest);
+        }
 
         const result = await security.authc.apiKeys.uiam.grant(requestToUse, {
           name,

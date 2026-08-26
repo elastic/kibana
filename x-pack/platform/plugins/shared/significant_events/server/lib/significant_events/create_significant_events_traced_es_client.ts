@@ -11,7 +11,9 @@ import { createTracedEsClient } from '@kbn/traced-es-client';
 export const createSignificantEventsTracedEsClient = ({
   client,
   logger,
+  abortSignal,
 }: {
   client: ElasticsearchClient;
   logger: Logger;
-}) => createTracedEsClient({ client, logger, plugin: 'significantEvents' });
+  abortSignal?: AbortSignal;
+}) => createTracedEsClient({ client, logger, plugin: 'significantEvents', abortSignal });

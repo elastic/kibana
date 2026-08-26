@@ -458,7 +458,7 @@ export function MonitorDetailFlyout(props: Props) {
                     <EuiButtonEmpty
                       data-test-subj="syntheticsFlyoutActionsButton"
                       size="s"
-                      iconType="arrowDown"
+                      iconType="chevronSingleDown"
                       iconSide="right"
                       onClick={onClick}
                     >
@@ -596,7 +596,7 @@ export function MonitorDetailFlyout(props: Props) {
                         isDisabled={!remoteMonitorUrl}
                         href={remoteMonitorUrl}
                         target="_blank"
-                        iconType="popout"
+                        iconType="external"
                         iconSide="right"
                       >
                         {VIEW_ON_REMOTE_CLUSTER_TEXT}

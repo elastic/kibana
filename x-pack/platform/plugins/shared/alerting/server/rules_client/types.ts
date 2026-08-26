@@ -13,6 +13,7 @@ import type {
   PluginInitializerContext,
   ISavedObjectsRepository,
   UiSettingsServiceStart,
+  AnalyticsServiceStart,
 } from '@kbn/core/server';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
 import type { ActionsClient, ActionsAuthorization } from '@kbn/actions-plugin/server';
@@ -125,6 +126,13 @@ export interface RulesClientContext {
   readonly shouldGrantUiam?: boolean;
   readonly isServerless: boolean;
   readonly featureFlags: FeatureFlagsStart;
+  /**
+   * Used to report EBT events (e.g. rule create telemetry). Optional on the context so the
+   * many hand-constructed test contexts across the codebase aren't forced to wire it. In
+   * production it is always provided by {@link RulesClientFactory}. Consumers must fail open
+   * (try/catch) around any `reportEvent` call, since telemetry must never break rule operations.
+   */
+  readonly analytics?: Pick<AnalyticsServiceStart, 'reportEvent'>;
 }
 
 export type NormalizedAlertAction = DistributiveOmit<RuleAction, 'actionTypeId'>;

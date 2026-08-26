@@ -36,7 +36,8 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     });
   };
 
-  describe('Managing Unified Tabs', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/222113
+  describe.skip('Managing Unified Tabs', () => {
     before(async () => {
       await browser.setWindowSize(1200, 800);
       await kibanaServer.savedObjects.cleanStandardList();

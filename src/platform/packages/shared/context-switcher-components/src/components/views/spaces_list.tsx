@@ -103,7 +103,7 @@ export const SpacesListView = ({
                       <EuiFlexItem grow={false}>
                         <EuiToolTip content={BACK_BUTTON_ARIA_LABEL} disableScreenReaderOutput>
                           <EuiButtonIcon
-                            iconType="arrowLeft"
+                            iconType="chevronSingleLeft"
                             aria-label={BACK_BUTTON_ARIA_LABEL}
                             color="text"
                             display="empty"

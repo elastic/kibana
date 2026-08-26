@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
-import type { KibanaRequest } from '@kbn/core-http-server';
+import type { HttpServiceStart, KibanaRequest } from '@kbn/core-http-server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
@@ -19,7 +19,9 @@ import {
   AgentExecutionMode,
   createInternalError,
   isAgentBuilderError,
+  normalizeInteractive,
 } from '@kbn/agent-builder-common';
+import type { InteractivityConfig } from '@kbn/agent-builder-common';
 import type { PromptStorageState } from '@kbn/agent-builder-common/agents/prompts';
 import type {
   ExperimentalFeatures,
@@ -53,6 +55,7 @@ import { createTodoStateManager } from '@kbn/agent-builder-server/runner';
 import type { AgentExecutionService } from '@kbn/agent-builder-server/execution';
 import type { ToolsServiceStart } from '../../tools';
 import type { AgentsServiceStart } from '../../agents';
+import type { ConversationService } from '../../conversation';
 import type { AttachmentServiceStart } from '../../attachments';
 import type { RendererServiceStart } from '../../renderers';
 import type { ModelProviderFactoryFn } from './model_provider';
@@ -70,10 +73,12 @@ import { createResultStore } from './store/volumes/tool_results/tool_result_stor
 import { createSkillsStore } from './store/volumes/skills/skills_store';
 import type { SkillServiceStart } from '../../skills';
 import type { PluginsServiceStart } from '../../plugins/plugin_service';
+import type { ConversationTemplatesServiceStart } from '../../conversation/templates';
 
 export interface CreateScopedRunnerDeps {
   // core services
   elasticsearch: ElasticsearchServiceStart;
+  http: HttpServiceStart;
   security: SecurityServiceStart;
   savedObjects: SavedObjectsServiceStart;
   uiSettings: UiSettingsServiceStart;
@@ -84,8 +89,10 @@ export interface CreateScopedRunnerDeps {
   modelProvider: ModelProvider;
   toolsService: ToolsServiceStart;
   agentsService: AgentsServiceStart;
+  conversationService: ConversationService;
   attachmentsService: AttachmentServiceStart;
   renderersService: RendererServiceStart;
+  conversationTemplates: ConversationTemplatesServiceStart;
   promptManager: PromptManager;
   stateManager: ConversationStateManager;
   trackingService?: TrackingService;
@@ -95,6 +102,11 @@ export interface CreateScopedRunnerDeps {
   logger: Logger;
   request: KibanaRequest;
   defaultConnectorId?: string;
+  /**
+   * Optional CPS project routing expression scoping this run's search tools to a set of projects
+   * Defaults to space-level routing (all linked projects in the current space) when omitted.
+   */
+  projectRouting?: string;
   /**
    * Optional abort signal for the run (e.g. from the request).
    * Propagated to hooks so they can respect cancellation.
@@ -110,6 +122,10 @@ export interface CreateScopedRunnerDeps {
   toolManager: ToolManager;
   /** Execution mode for this runner context. */
   executionMode: AgentExecutionMode;
+  /** Canonical interactivity config for this runner context. */
+  interactivity: InteractivityConfig;
+  /** Id of the parent execution that spawned this one, if any. */
+  parentExecutionId?: string;
   /** Sub-agent executor for spawning child executions. */
   subAgentExecutor: SubAgentExecutor;
   /** Experimental features enabled for this runner context. */
@@ -122,6 +138,7 @@ export type CreateRunnerDeps = Omit<
   CreateScopedRunnerDeps,
   | 'request'
   | 'defaultConnectorId'
+  | 'projectRouting'
   | 'resultStore'
   | 'skillsStore'
   | 'attachmentStateManager'
@@ -132,6 +149,8 @@ export type CreateRunnerDeps = Omit<
   | 'toolManager'
   | 'subAgentExecutor'
   | 'executionMode'
+  | 'interactivity'
+  | 'parentExecutionId'
   | 'experimentalFeatures'
 > & {
   modelProviderFactory: ModelProviderFactoryFn;
@@ -207,6 +226,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
   const createScopedRunnerWithDeps = async ({
     request,
     defaultConnectorId,
+    projectRouting,
     telemetryMetadata,
     maxContentLength,
     conversation,
@@ -214,9 +234,12 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     promptState,
     abortSignal,
     executionMode,
+    interactivity,
+    parentExecutionId,
   }: {
     request: KibanaRequest;
     defaultConnectorId?: string;
+    projectRouting?: string;
     telemetryMetadata?: ConnectorTelemetryMetadata;
     maxContentLength?: number;
     conversation?: Conversation;
@@ -224,6 +247,8 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     promptState?: PromptStorageState;
     abortSignal?: AbortSignal;
     executionMode: AgentExecutionMode;
+    interactivity: InteractivityConfig;
+    parentExecutionId?: string;
   }): Promise<ScopedRunner> => {
     const resultStore = createResultStore({ conversation });
     const skillsStore = createSkillsStore({ skills: [] });
@@ -245,7 +270,11 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       maxContentLength,
     });
 
-    const subAgentExecutor = createSubAgentExecutor({ request, getExecutionService });
+    const subAgentExecutor = createSubAgentExecutor({
+      request,
+      getExecutionService,
+      projectRouting,
+    });
 
     const uiSettingsClient = runnerDeps.uiSettings.asScopedToClient(
       runnerDeps.savedObjects.getScopedClient(request)
@@ -265,6 +294,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       // forcefully disabled until the UI is implemented
       askUserQuestion: false, // isExperimentalEnabled,
       bash: bashEnabled,
+      apiTools: experimentalEnabled,
     };
 
     const allDeps = {
@@ -272,6 +302,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       modelProvider,
       request,
       defaultConnectorId,
+      projectRouting,
       abortSignal,
       resultStore,
       skillsStore,
@@ -281,6 +312,8 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       promptManager,
       toolManager,
       executionMode,
+      interactivity,
+      parentExecutionId,
       subAgentExecutor,
       experimentalFeatures,
     };
@@ -298,6 +331,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
         abortSignal,
         // tools always executed in standalone context
         executionMode: AgentExecutionMode.standalone,
+        interactivity: { enabled: false },
       });
       return runner.runTool(otherParams);
     },
@@ -311,6 +345,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
         abortSignal,
         // tools always executed in standalone context
         executionMode: AgentExecutionMode.standalone,
+        interactivity: { enabled: false },
       });
       return runner.runInternalTool(otherParams);
     },
@@ -318,22 +353,29 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       const {
         request,
         defaultConnectorId,
+        projectRouting,
         telemetryMetadata,
         maxContentLength,
         abortSignal,
         executionMode = AgentExecutionMode.conversation,
+        interactive,
+        parentExecutionId,
         ...otherParams
       } = params;
       const { nextInput, conversation } = params.agentParams;
+      const interactivity = normalizeInteractive(interactive, executionMode);
       const runner = await createScopedRunnerWithDeps({
         request,
         defaultConnectorId,
+        projectRouting,
         telemetryMetadata,
         maxContentLength,
         conversation,
         nextInput,
         abortSignal,
         executionMode,
+        interactivity,
+        parentExecutionId,
         promptState: getAgentPromptStorageState({
           input: nextInput,
           conversation,

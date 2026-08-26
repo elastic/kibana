@@ -30,7 +30,7 @@ export const WorkflowStepLink: React.FC<WorkflowStepLinkProps> = ({ step }) => {
     <EuiButtonEmpty
       data-test-subj="workflowStepLink"
       href={editorUrl}
-      iconType="popout"
+      iconType="external"
       rel="noopener noreferrer"
       size="xs"
       target="_blank"

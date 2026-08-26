@@ -14,6 +14,7 @@ import type { AttachmentsService } from './attachments';
 import type { RenderersService } from './renderers';
 import type { ChatService } from './chat';
 import type { ConversationsService } from './conversations';
+import type { ConversationTemplatesService } from './conversation_templates';
 import type { DocLinksService } from './doc_links';
 import type { ToolsService } from './tools';
 import type { SkillsService } from './skills/skills_service';
@@ -29,6 +30,7 @@ export interface AgentBuilderInternalService {
   renderersService: RenderersService;
   chatService: ChatService;
   conversationsService: ConversationsService;
+  conversationTemplatesService: ConversationTemplatesService;
   docLinksService: DocLinksService;
   navigationService: NavigationService;
   toolsService: ToolsService;

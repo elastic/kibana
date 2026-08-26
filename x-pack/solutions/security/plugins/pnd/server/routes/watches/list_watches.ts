@@ -7,7 +7,6 @@
 
 import { API_VERSIONS, INTERNAL_API_ACCESS, PND_WATCHES_URL } from '@kbn/pnd-common';
 import type { ListWatchesResponse } from '@kbn/pnd-common';
-import { MOCK_MANAGED_WATCHES } from '@kbn/pnd-common';
 import type { RouteDependencies } from '../register_routes';
 import { getWatchRoutePrivileges } from './watch_route_security';
 
@@ -16,7 +15,7 @@ export const registerListWatchesRoute = ({
   logger,
   config,
   getSpaceId,
-  getWatchProjection,
+  getWatchesService,
 }: RouteDependencies) => {
   router.versioned
     .get({
@@ -38,17 +37,7 @@ export const registerListWatchesRoute = ({
       },
       async (_context, request, response) => {
         try {
-          if (config.ui.useMockData) {
-            const body: ListWatchesResponse = { watches: MOCK_MANAGED_WATCHES };
-            return response.ok({ body });
-          }
-
-          const projection = getWatchProjection?.();
-          if (!projection) {
-            return response.ok({ body: { watches: [] } });
-          }
-
-          const body: ListWatchesResponse = await projection.list(getSpaceId(request));
+          const body: ListWatchesResponse = await getWatchesService().list(getSpaceId(request));
           return response.ok({ body });
         } catch (error) {
           logger.error(`Failed to list watches: ${error}`);

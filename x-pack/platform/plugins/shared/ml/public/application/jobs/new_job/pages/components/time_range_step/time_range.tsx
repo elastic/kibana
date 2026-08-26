@@ -141,6 +141,7 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
                 callback={fullTimeRangeCallback}
                 timefilter={timefilter}
                 apiPath={`${ML_INTERNAL_BASE_PATH}/fields_service/time_field_range`}
+                projectRouting={jobCreator.projectRouting ?? undefined}
               />
             </EuiFlexItem>
             <EuiFlexItem />

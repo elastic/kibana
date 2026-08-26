@@ -422,7 +422,7 @@ export const TemplateActionsMenu: React.FC<TemplateActionsMenuProps> = ({
           <EuiButtonEmpty
             size="xs"
             color="text"
-            iconType="plusInCircle"
+            iconType="plusCircle"
             iconSide="left"
             onClick={() => (isOpen ? setIsOpen(false) : openMenu())}
             aria-label={`${i18n.ACTIONS_MENU_ARIA} (${SHORTCUT_HINT})`}

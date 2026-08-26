@@ -14,10 +14,12 @@ export type {
   FakeRequestUserFields,
 } from './src/authc';
 export type { CoreAuditService } from './src/audit';
+export type { CoreServiceAccountsService } from './src/service_accounts';
 export type {
   CoreSecurityDelegateContract,
   AuthenticationServiceContract,
   AuditServiceContract,
+  ServiceAccountsServiceContract,
 } from './src/api_provider';
 export type {
   SecurityRequestHandlerContext,

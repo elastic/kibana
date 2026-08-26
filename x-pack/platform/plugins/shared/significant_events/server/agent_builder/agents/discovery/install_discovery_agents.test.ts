@@ -28,10 +28,10 @@ describe('installDiscoveryAgents', () => {
       agent: {
         id: SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID,
         type: SIGNIFICANT_EVENTS_DISCOVERY_AGENT_TYPE_ID,
-        name: 'Significant Events Discovery',
+        name: 'Nightshift Triager',
         description: discoveryAgentType.description,
         labels: ['observability', 'streams', 'significant-events', 'discovery'],
-        avatar_symbol: 'SD',
+        avatar_symbol: 'NT',
         access_control: { access_mode: AgentAccessControlMode.Public },
         configuration: {
           tools: [],

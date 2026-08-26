@@ -38,7 +38,7 @@ export const ReferencedContentEmptyState: React.FC<{ onAdd: () => void }> = ({ o
       </EuiText>
       <EuiSpacer size="m" />
       <EuiButton
-        iconType="plusInCircle"
+        iconType="plusCircle"
         onClick={onAdd}
         data-test-subj="agentBuilderSkillReferencedContentAddFile"
         {...addFileEbtProps}

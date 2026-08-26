@@ -22,6 +22,7 @@ import {
   getCloudConnectorNameError,
   isCloudConnectorNameValid,
   CLOUD_CONNECTOR_NAME_MAX_LENGTH,
+  getAnyCloudConnectorIacTemplateUrl,
 } from './utils';
 import { SINGLE_ACCOUNT, ORGANIZATION_ACCOUNT } from './constants';
 import type { CloudConnectorCredentials } from './types';
@@ -770,6 +771,36 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
       expect(result).toBeUndefined();
     });
   });
+
+  describe('Token-free template URLs', () => {
+    const tokenFreeUrl =
+      'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https://elastic-cspm-cft.s3.eu-central-1.amazonaws.com/cloudformation-federated-identity-aws-9.5.0.yml';
+
+    it('should return the URL as-is when it contains no substitution tokens', () => {
+      const result = getCloudConnectorRemoteRoleTemplate({
+        cloud: mockCloudSetup,
+        accountType: SINGLE_ACCOUNT,
+        iacTemplateUrl: tokenFreeUrl,
+      });
+
+      expect(result).toBe(tokenFreeUrl);
+    });
+
+    it('should return the URL as-is even when no elastic resource ID can be derived', () => {
+      const noResourceCloudSetup = {
+        isCloudEnabled: false,
+        isServerlessEnabled: false,
+      } as CloudSetup;
+
+      const result = getCloudConnectorRemoteRoleTemplate({
+        cloud: noResourceCloudSetup,
+        accountType: SINGLE_ACCOUNT,
+        iacTemplateUrl: tokenFreeUrl,
+      });
+
+      expect(result).toBe(tokenFreeUrl);
+    });
+  });
 });
 
 describe('getKibanaComponentId', () => {
@@ -944,5 +975,52 @@ describe('Cloud Connector Name Validation', () => {
         'Federated Identity Name must be 255 characters or less'
       );
     });
+  });
+});
+
+describe('getAnyCloudConnectorIacTemplateUrl', () => {
+  it('returns undefined for undefined input', () => {
+    expect(getAnyCloudConnectorIacTemplateUrl(undefined)).toBeUndefined();
+  });
+
+  it('returns undefined when package has no var_groups or policy_templates', () => {
+    expect(getAnyCloudConnectorIacTemplateUrl({} as any)).toBeUndefined();
+  });
+
+  it('returns iac_template_url from var_groups options (primary path — AWS package format)', () => {
+    const packageInfo = {
+      var_groups: [
+        {
+          name: 'credentials',
+          title: 'Credentials',
+          selector_title: 'Auth method',
+          options: [
+            {
+              name: 'cloud_connector',
+              title: 'Federated Identity',
+              provider: 'aws',
+              vars: [],
+              iac_template_url:
+                'https://example.com/cloudformation.yaml?account_type=ACCOUNT_TYPE&resource_id=RESOURCE_ID',
+            },
+          ],
+        },
+      ],
+    } as any;
+    expect(getAnyCloudConnectorIacTemplateUrl(packageInfo)).toBe(
+      'https://example.com/cloudformation.yaml?account_type=ACCOUNT_TYPE&resource_id=RESOURCE_ID'
+    );
+  });
+
+  it('returns undefined when var_groups exist but no cloud provider option found', () => {
+    const packageInfo = {
+      var_groups: [
+        {
+          name: 'g1',
+          options: [{ name: 'no_cloud_provider', provider: 'other', vars: [] }],
+        },
+      ],
+    } as any;
+    expect(getAnyCloudConnectorIacTemplateUrl(packageInfo)).toBeUndefined();
   });
 });

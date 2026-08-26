@@ -90,7 +90,7 @@ export const BulkOperations = ({
         <EuiButton
           data-test-subj="syntheticsBulkActionsButton"
           size="s"
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           iconSide="right"
           isDisabled={true}
         >
@@ -283,7 +283,7 @@ export const BulkOperations = ({
         <EuiButton
           data-test-subj="syntheticsBulkActionsButton"
           size="s"
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           iconSide="right"
           onClick={() => setIsPopoverOpen((isOpen) => !isOpen)}
         >

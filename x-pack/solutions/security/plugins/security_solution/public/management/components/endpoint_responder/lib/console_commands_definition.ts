@@ -188,6 +188,8 @@ export interface GetEndpointConsoleCommandsOptions {
   platform: SupportedHostOsType;
 }
 
+// A refactor of response action command definition will be done in the near(ish) future
+// eslint-disable-next-line complexity
 export const getEndpointConsoleCommands = ({
   endpointAgentId,
   agentType,
@@ -202,6 +204,7 @@ export const getEndpointConsoleCommands = ({
     microsoftDefenderEndpointCancelEnabled,
     responseActionsEndpointCancel,
     responseActionsEndpointMemoryDump,
+    responseActionsEndpointMemoryDumpRaw,
     responseActionsEndpointRunScript,
     responseActionsEndpointKillProcessDescendants,
   } = featureFlags;
@@ -751,6 +754,9 @@ export const getEndpointConsoleCommands = ({
     const endpointSupportsProcessDump = (endpointCapabilities as EndpointCapabilities[]).includes(
       'memdump_process'
     );
+    const endpointSupportsRawDump = (endpointCapabilities as EndpointCapabilities[]).includes(
+      'memdump_raw'
+    );
     const getMemoryDumpTypeNotSupportedMessage = (type: 'process' | 'kernel') =>
       i18n.translate(
         'xpack.securitySolution.consoleCommandsDefinition.memoryDump.kernelTypeNotSupported',
@@ -785,18 +791,23 @@ export const getEndpointConsoleCommands = ({
           return true;
         }
 
-        const memoryDumpType = argsInterface.hasArg('kernel') ? 'kernel' : 'process';
+        const memoryDumpType = argsInterface.hasArg('kernel')
+          ? 'kernel'
+          : argsInterface.hasArg('raw')
+          ? 'raw'
+          : 'process';
 
         // PID and Entity ID are only supported for process memory dumps
         if (
-          memoryDumpType === 'kernel' &&
+          (memoryDumpType === 'kernel' || memoryDumpType === 'raw') &&
           (argsInterface.hasArg('pid') || argsInterface.hasArg('entityId'))
         ) {
           return i18n.translate(
             'xpack.securitySolution.consoleCommandsDefinition.memoryDump.pidAndEntityIdNotSupportedForKernel',
             {
               defaultMessage:
-                '"pid" and "entityId" arguments are not supported for "kernel" memory dumps',
+                '"pid" and "entityId" arguments are not supported for "{type}" memory dumps',
+              values: { type: memoryDumpType },
             }
           );
         }
@@ -851,6 +862,19 @@ export const getEndpointConsoleCommands = ({
             return true;
           },
         },
+        ...(agentType === 'endpoint' &&
+        responseActionsEndpointMemoryDumpRaw &&
+        endpointSupportsRawDump
+          ? {
+              raw: {
+                about: CONSOLE_COMMANDS.memoryDump.rawArgAbout,
+                required: false,
+                allowMultiples: false,
+                mustHaveValue: false,
+                exclusiveOr: true,
+              },
+            }
+          : {}),
         entityId: {
           required: false,
           allowMultiples: false,
@@ -870,7 +894,9 @@ export const getEndpointConsoleCommands = ({
       helpCommandPosition: 6,
       helpDisabled: !doesEndpointSupportCommand('memory-dump'),
       helpHidden: !getRbacControl({ commandName: 'execute', privileges: endpointPrivileges }),
-      helpUsage: getMemoryDumpHelpUsage(),
+      helpUsage: getMemoryDumpHelpUsage(
+        agentType === 'endpoint' && responseActionsEndpointMemoryDumpRaw && endpointSupportsRawDump
+      ),
     });
   }
 

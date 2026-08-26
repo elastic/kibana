@@ -68,7 +68,6 @@ import type {
   FleetServerAgent,
 } from '@kbn/fleet-plugin/common/types';
 import semver from 'semver';
-import axios from 'axios';
 import { userInfo } from 'os';
 import pRetry from 'p-retry';
 import { getPolicyDataForUpdate } from '../../../common/endpoint/service/policy';
@@ -84,7 +83,7 @@ import {
   RETRYABLE_TRANSIENT_ERRORS,
   retryOnError,
 } from '../../../common/endpoint/data_loaders/utils';
-import { catchAxiosErrorFormatAndThrow } from '../../../common/endpoint/format_axios_error';
+import { catchHttpErrorFormatAndThrow } from '../../../common/endpoint/format_http_error';
 import { FleetAgentGenerator } from '../../../common/endpoint/data_generators/fleet_agent_generator';
 import type { PolicyData } from '../../../common/endpoint/types';
 
@@ -186,7 +185,7 @@ export const assignFleetAgentToNewPolicy = async ({
       retry_on_conflict: 5,
       doc: update,
     })
-    .catch(catchAxiosErrorFormatAndThrow);
+    .catch(catchHttpErrorFormatAndThrow);
 };
 
 type FleetAgentCheckInUpdateDoc = Pick<
@@ -265,7 +264,7 @@ export const checkInFleetAgent = async (
       retry_on_conflict: 5,
       doc: update,
     })
-    .catch(catchAxiosErrorFormatAndThrow);
+    .catch(catchHttpErrorFormatAndThrow);
 };
 
 /**
@@ -287,7 +286,7 @@ export const fetchFleetAgents = async (
       },
       query: options,
     })
-    .catch(catchAxiosErrorFormatAndThrow)
+    .catch(catchHttpErrorFormatAndThrow)
     .then((response) => response.data);
 };
 
@@ -372,7 +371,7 @@ export const fetchFleetServerHostList = async (
       },
     })
     .then((response) => response.data)
-    .catch(catchAxiosErrorFormatAndThrow);
+    .catch(catchHttpErrorFormatAndThrow);
 };
 
 /**
@@ -417,7 +416,7 @@ export const fetchAgentPolicyEnrollmentKey = async (
       },
       query: { kuery: `policy_id: "${agentPolicyId}"` },
     })
-    .catch(catchAxiosErrorFormatAndThrow)
+    .catch(catchHttpErrorFormatAndThrow)
     .then((response) => response.data.items[0]);
 
   if (!apiKey) {
@@ -446,7 +445,7 @@ export const fetchAgentPolicyList = async (
       query: options,
     })
     .then((response) => response.data)
-    .catch(catchAxiosErrorFormatAndThrow);
+    .catch(catchHttpErrorFormatAndThrow);
 };
 
 /**
@@ -465,7 +464,7 @@ export const fetchAgentPolicy = async (
       headers: { 'elastic-api-version': '2023-10-31' },
     })
     .then((response) => response.data.item)
-    .catch(catchAxiosErrorFormatAndThrow);
+    .catch(catchHttpErrorFormatAndThrow);
 };
 
 /**
@@ -487,7 +486,7 @@ export const deleteAgentPolicy = async (
       headers: { 'elastic-api-version': '2023-10-31' },
     })
     .then((response) => response.data)
-    .catch(catchAxiosErrorFormatAndThrow);
+    .catch(catchHttpErrorFormatAndThrow);
 };
 
 /**
@@ -509,7 +508,7 @@ export const fetchIntegrationPolicyList = async (
       query: options,
     })
     .then((response) => response.data)
-    .catch(catchAxiosErrorFormatAndThrow);
+    .catch(catchHttpErrorFormatAndThrow);
 };
 
 /**
@@ -534,15 +533,17 @@ export const getAgentVersionMatchingCurrentStack = async (
 
   const agentVersions = await pRetry<string[]>(
     async () => {
-      return axios
-        .get('https://artifacts-api.elastic.co/v1/versions')
-        .catch(catchAxiosErrorFormatAndThrow)
-        .then((response) =>
-          map(
-            response.data.versions.filter(isValidArtifactVersion),
-            (version) => version.split('-SNAPSHOT')[0]
-          )
-        );
+      const url = 'https://artifacts-api.elastic.co/v1/versions';
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`[GET ${url}] ${response.status} ${response.statusText}`);
+      }
+
+      const { versions } = (await response.json()) as { versions: string[] };
+      return map(
+        versions.filter(isValidArtifactVersion),
+        (version) => version.split('-SNAPSHOT')[0]
+      );
     },
     { maxTimeout: 10000 }
   );
@@ -623,12 +624,12 @@ export const getAgentDownloadUrl = async (
 
   const searchResult: ElasticArtifactSearchResponse = await pRetry(
     async () => {
-      return axios
-        .get<ElasticArtifactSearchResponse>(artifactSearchUrl)
-        .catch(catchAxiosErrorFormatAndThrow)
-        .then((response) => {
-          return response.data;
-        });
+      const response = await fetch(artifactSearchUrl);
+      if (!response.ok) {
+        throw new Error(`[GET ${artifactSearchUrl}] ${response.status} ${response.statusText}`);
+      }
+
+      return (await response.json()) as ElasticArtifactSearchResponse;
     },
     { maxTimeout: 10000 }
   );
@@ -661,12 +662,12 @@ export const getLatestAgentDownloadVersion = async (
   const semverMatch = `<=${version.replace(`-SNAPSHOT`, '')}`;
   const artifactVersionsResponse: { versions: string[] } = await pRetry(
     async () => {
-      return axios
-        .get<{ versions: string[] }>(artifactsUrl)
-        .catch(catchAxiosErrorFormatAndThrow)
-        .then((response) => {
-          return response.data;
-        });
+      const response = await fetch(artifactsUrl);
+      if (!response.ok) {
+        throw new Error(`[GET ${artifactsUrl}] ${response.status} ${response.statusText}`);
+      }
+
+      return (await response.json()) as { versions: string[] };
     },
     { maxTimeout: 10000 }
   );
@@ -722,7 +723,7 @@ export const unEnrollFleetAgent = async (
         'elastic-api-version': API_VERSIONS.public.v1,
       },
     })
-    .catch(catchAxiosErrorFormatAndThrow);
+    .catch(catchHttpErrorFormatAndThrow);
 
   return data;
 };
@@ -748,7 +749,7 @@ export const getAgentPolicyEnrollmentKey = async (
         'elastic-api-version': API_VERSIONS.public.v1,
       },
     })
-    .catch(catchAxiosErrorFormatAndThrow);
+    .catch(catchHttpErrorFormatAndThrow);
 
   return data.items?.[0]?.api_key;
 };
@@ -767,7 +768,7 @@ export const generateFleetServiceToken = async (
       body: {},
     })
     .then((response) => response.data.value)
-    .catch(catchAxiosErrorFormatAndThrow);
+    .catch(catchHttpErrorFormatAndThrow);
 
   logger.verbose(`New service token created: ${serviceToken}`);
 
@@ -782,7 +783,7 @@ export const fetchFleetOutputs = async (kbnClient: KbnClient): Promise<GetOutput
       headers: { 'elastic-api-version': '2023-10-31' },
     })
     .then((response) => response.data)
-    .catch(catchAxiosErrorFormatAndThrow);
+    .catch(catchHttpErrorFormatAndThrow);
 };
 
 export const getFleetElasticsearchOutputHost = async (
@@ -963,7 +964,7 @@ export const createAgentPolicy = async ({
       body,
     })
     .then((response) => response.data.item)
-    .catch(catchAxiosErrorFormatAndThrow);
+    .catch(catchHttpErrorFormatAndThrow);
 };
 
 interface GetOrCreateDefaultAgentPolicyOptions {
@@ -1038,7 +1039,7 @@ export const createIntegrationPolicy = async (
       },
     })
     .then((response) => response.data.item)
-    .catch(catchAxiosErrorFormatAndThrow);
+    .catch(catchHttpErrorFormatAndThrow);
 };
 
 /**
@@ -1057,7 +1058,7 @@ export const fetchPackageInfo = async (
       method: 'GET',
     })
     .then((response) => response.data.item)
-    .catch(catchAxiosErrorFormatAndThrow);
+    .catch(catchHttpErrorFormatAndThrow);
 };
 
 interface AddMicrosoftDefenderForEndpointToAgentPolicyOptions {
@@ -1988,7 +1989,7 @@ export const copyAgentPolicy = async ({
       },
     })
     .then((response) => response.data.item)
-    .catch(catchAxiosErrorFormatAndThrow);
+    .catch(catchHttpErrorFormatAndThrow);
 };
 
 /**
@@ -2004,7 +2005,7 @@ export const ensureFleetSetup = memoize(
         headers: { 'Elastic-Api-Version': API_VERSIONS.public.v1 },
         method: 'POST',
       })
-      .catch(catchAxiosErrorFormatAndThrow);
+      .catch(catchHttpErrorFormatAndThrow);
 
     if (!setupResponse.data.isInitialized) {
       log.verbose(`Fleet setup response:`, setupResponse);
@@ -2068,7 +2069,7 @@ export const enableFleetSpaceAwareness = memoize(async (kbnClient: KbnClient): P
       headers: { 'Elastic-Api-Version': '1' },
       method: 'POST',
     })
-    .catch(catchAxiosErrorFormatAndThrow);
+    .catch(catchHttpErrorFormatAndThrow);
 });
 
 /**
@@ -2086,7 +2087,7 @@ export const fetchIntegrationPolicy = async (
       method: 'GET',
       headers: { 'elastic-api-version': '2023-10-31' },
     })
-    .catch(catchAxiosErrorFormatAndThrow)
+    .catch(catchHttpErrorFormatAndThrow)
     .then((response) => response.data.item);
 };
 
@@ -2117,7 +2118,7 @@ export const updateIntegrationPolicy = async (
       body: fullPolicyData,
       headers: { 'elastic-api-version': '2023-10-31' },
     })
-    .catch(catchAxiosErrorFormatAndThrow)
+    .catch(catchHttpErrorFormatAndThrow)
     .then((response) => response.data.item);
 };
 
@@ -2157,7 +2158,7 @@ export const updateAgentPolicy = async (
       body: fullPolicyData,
       headers: { 'elastic-api-version': '2023-10-31' },
     })
-    .catch(catchAxiosErrorFormatAndThrow)
+    .catch(catchHttpErrorFormatAndThrow)
     .then((response) => response.data.item);
 };
 
@@ -2266,7 +2267,7 @@ export const installIntegration = async (
       method: 'POST',
       path: epmRouteService.getInstallPath(integrationName, version),
     })
-    .catch(catchAxiosErrorFormatAndThrow)
+    .catch(catchHttpErrorFormatAndThrow)
     .then((response) => response.data);
 };
 

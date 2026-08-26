@@ -58,6 +58,7 @@ describe('getTemplate()', () => {
         "alertDelay": undefined,
         "artifacts": undefined,
         "description": "test template",
+        "engine": undefined,
         "flapping": undefined,
         "id": "1",
         "name": "test template",

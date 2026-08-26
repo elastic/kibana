@@ -69,8 +69,8 @@ steps:
     aggregate-by: 'significant_events'
     create-conversation: true
     public-conversation: true
+    timeout: 1800s
     with:
-      timeout: 1800s
       # Tag the agent execution with the workflow execution id so callers that already know
       # it (e.g. the UI, or the significant event this investigation is attached to) can look
       # up the agent execution's (auto-generated) id via findExecutions and follow its live
@@ -120,6 +120,79 @@ steps:
                 reason:
                   type: string
                   maxLength: 10000
+                evidence:
+                  type: array
+                  description: >
+                    What this hypothesis' verdict rests on — at most 3 entries. Every hypothesis
+                    that ends "confirmed" or "dismissed" must carry at least one. Only cite ES|QL
+                    you actually executed, verbatim, with the absolute window it ran over; never
+                    invent a query.
+                  maxItems: 3
+                  items:
+                    type: object
+                    properties:
+                      description:
+                        type: string
+                        maxLength: 10000
+                        description: What was observed and why it decided this hypothesis.
+                      esql_query:
+                        type: string
+                        maxLength: 10000
+                        description: The exact ES|QL query executed to gather this evidence, when one was run.
+                      time_range:
+                        type: object
+                        description: >
+                          Absolute ISO 8601 window esql_query was evaluated over. Set it whenever
+                          esql_query is set — without it the query cannot be opened in Discover.
+                        properties:
+                          from:
+                            type: string
+                            maxLength: 64
+                          to:
+                            type: string
+                            maxLength: 64
+                        required:
+                          - from
+                          - to
+                      code:
+                        type: object
+                        description: The source file backing this evidence, when you read code.
+                        properties:
+                          source:
+                            type: string
+                            enum: [github_connector, code_search]
+                            description: >
+                              How YOU read this file — not where the code appears to be hosted.
+                              "code_search" if you read it through Semantic Code Search;
+                              "github_connector" if you called a GitHub connector. A repository
+                              named like a GitHub project is not evidence of either.
+                          repo:
+                            type: string
+                            maxLength: 255
+                            description: Repository in owner/name form, e.g. elastic/kibana.
+                          path:
+                            type: string
+                            maxLength: 512
+                            description: Repository-relative file path.
+                          host:
+                            type: string
+                            maxLength: 255
+                            description: >
+                              Hostname the code can be browsed on, copied from the origin of a URL
+                              the tool returned (e.g. "github.com"). Never guess it from the
+                              repository name — omit it if the tool reported no URL.
+                          ref:
+                            type: string
+                            maxLength: 255
+                            description: >
+                              Commit SHA the file was read at, copied from the tool response. Omit
+                              it rather than substituting a branch name.
+                        required:
+                          - source
+                          - repo
+                          - path
+                    required:
+                      - description
               required:
                 - candidate
                 - confidence
@@ -127,20 +200,62 @@ steps:
           conclusion:
             type: string
             maxLength: 10000
-          gaps_found:
+            description: >
+              The mechanism/root-cause narrative, as plain prose — no markdown headings or bullet
+              lists. Actionable steps belong in recommendations, not here.
+          recommendations:
+            type: array
+            description: >
+              Concrete, actionable steps to resolve or mitigate the issue — prefer specific commands,
+              config changes, or code over general advice like "investigate further" or "monitor the
+              situation".
+            maxItems: 5
+            items:
+              type: object
+              properties:
+                title:
+                  type: string
+                  maxLength: 512
+                  description: The action itself, stated concretely (e.g. "Revert the pool-size config change").
+                description:
+                  type: string
+                  maxLength: 10000
+                  description: Why this step helps, or detail needed to carry it out, when the title alone isn't enough.
+                code:
+                  type: string
+                  maxLength: 10000
+                  description: >
+                    A command, config snippet, or code change backing this step, when one applies.
+                    Raw source, not a fenced markdown block.
+              required:
+                - title
+          blind_spots:
             type: array
             description: >
               Actionable knowledge gaps discovered during this investigation — data sources that were
-              missing or inaccessible and would have helped diagnose the issue. Each item must be a
-              concrete, actionable statement of missing data that could reasonably be provided, such as:
+              missing or inaccessible and would have helped diagnose the issue. Each item is an object:
+              `title` names the missing data source concisely and could reasonably be provided (e.g.
               "No traces available for the cart service", "Infrastructure metrics absent for host X",
-              "No code repository access for service Y".
+              "No code repository access for service Y"), and `description` states why that gap mattered
+              to this investigation.
               Do NOT include incident-specific observations (e.g. "the pod crashed", "no logs during the
               outage window") — those are incident facts, not actionable knowledge gaps. Reduce the
               finding to what data source is missing and why it matters, not what happened during the incident.
+            maxItems: 10
             items:
-              type: string
-              maxLength: 10000
+              type: object
+              properties:
+                title:
+                  type: string
+                  maxLength: 512
+                  description: The missing data source or access, named concisely (e.g. "No traces for the cart service").
+                description:
+                  type: string
+                  maxLength: 10000
+                  description: Why this gap mattered to the investigation.
+              required:
+                - title
+                - description
           significant_event_updates:
             type: array
             description: >
@@ -187,6 +302,58 @@ steps:
                             type: string
                             maxLength: 10000
                             description: The exact ES|QL query executed to gather this evidence, when one was run.
+                          time_range:
+                            type: object
+                            description: >
+                              Absolute ISO 8601 window esql_query was evaluated over. Set it whenever
+                              esql_query is set — without it the query cannot be opened in Discover.
+                            properties:
+                              from:
+                                type: string
+                                maxLength: 64
+                              to:
+                                type: string
+                                maxLength: 64
+                            required:
+                              - from
+                              - to
+                          code:
+                            type: object
+                            description: The source file backing this evidence, when you read code.
+                            properties:
+                              source:
+                                type: string
+                                enum: [github_connector, code_search]
+                                description: >
+                                  How YOU read this file — not where the code appears to be hosted.
+                                  "code_search" if you read it through Semantic Code Search;
+                                  "github_connector" if you called a GitHub connector. A repository
+                                  named like a GitHub project is not evidence of either.
+                              repo:
+                                type: string
+                                maxLength: 255
+                                description: Repository in owner/name form, e.g. elastic/kibana.
+                              path:
+                                type: string
+                                maxLength: 512
+                                description: Repository-relative file path.
+                              host:
+                                type: string
+                                maxLength: 255
+                                description: >
+                                  Hostname the code can be browsed on, copied from the origin of a
+                                  URL the tool returned (e.g. "github.com"). Never guess it from the
+                                  repository name — omit it if the tool reported no URL.
+                              ref:
+                                type: string
+                                maxLength: 255
+                                description: >
+                                  Commit SHA the file was read at, copied from the tool response.
+                                  Omit it rather than substituting a branch name.
+                            required:
+                              - source
+                              - repo
+                              - path
                         required:
                           - description
                   required:
@@ -229,6 +396,58 @@ steps:
                             type: string
                             maxLength: 10000
                             description: The exact ES|QL query executed to gather this evidence, when one was run.
+                          time_range:
+                            type: object
+                            description: >
+                              Absolute ISO 8601 window esql_query was evaluated over. Set it whenever
+                              esql_query is set — without it the query cannot be opened in Discover.
+                            properties:
+                              from:
+                                type: string
+                                maxLength: 64
+                              to:
+                                type: string
+                                maxLength: 64
+                            required:
+                              - from
+                              - to
+                          code:
+                            type: object
+                            description: The source file backing this evidence, when you read code.
+                            properties:
+                              source:
+                                type: string
+                                enum: [github_connector, code_search]
+                                description: >
+                                  How YOU read this file — not where the code appears to be hosted.
+                                  "code_search" if you read it through Semantic Code Search;
+                                  "github_connector" if you called a GitHub connector. A repository
+                                  named like a GitHub project is not evidence of either.
+                              repo:
+                                type: string
+                                maxLength: 255
+                                description: Repository in owner/name form, e.g. elastic/kibana.
+                              path:
+                                type: string
+                                maxLength: 512
+                                description: Repository-relative file path.
+                              host:
+                                type: string
+                                maxLength: 255
+                                description: >
+                                  Hostname the code can be browsed on, copied from the origin of a
+                                  URL the tool returned (e.g. "github.com"). Never guess it from the
+                                  repository name — omit it if the tool reported no URL.
+                              ref:
+                                type: string
+                                maxLength: 255
+                                description: >
+                                  Commit SHA the file was read at, copied from the tool response.
+                                  Omit it rather than substituting a branch name.
+                            required:
+                              - source
+                              - repo
+                              - path
                         required:
                           - description
                   required:
@@ -274,6 +493,58 @@ steps:
                             type: string
                             maxLength: 10000
                             description: The exact ES|QL query executed to gather this evidence, when one was run.
+                          time_range:
+                            type: object
+                            description: >
+                              Absolute ISO 8601 window esql_query was evaluated over. Set it whenever
+                              esql_query is set — without it the query cannot be opened in Discover.
+                            properties:
+                              from:
+                                type: string
+                                maxLength: 64
+                              to:
+                                type: string
+                                maxLength: 64
+                            required:
+                              - from
+                              - to
+                          code:
+                            type: object
+                            description: The source file backing this evidence, when you read code.
+                            properties:
+                              source:
+                                type: string
+                                enum: [github_connector, code_search]
+                                description: >
+                                  How YOU read this file — not where the code appears to be hosted.
+                                  "code_search" if you read it through Semantic Code Search;
+                                  "github_connector" if you called a GitHub connector. A repository
+                                  named like a GitHub project is not evidence of either.
+                              repo:
+                                type: string
+                                maxLength: 255
+                                description: Repository in owner/name form, e.g. elastic/kibana.
+                              path:
+                                type: string
+                                maxLength: 512
+                                description: Repository-relative file path.
+                              host:
+                                type: string
+                                maxLength: 255
+                                description: >
+                                  Hostname the code can be browsed on, copied from the origin of a
+                                  URL the tool returned (e.g. "github.com"). Never guess it from the
+                                  repository name — omit it if the tool reported no URL.
+                              ref:
+                                type: string
+                                maxLength: 255
+                                description: >
+                                  Commit SHA the file was read at, copied from the tool response.
+                                  Omit it rather than substituting a branch name.
+                            required:
+                              - source
+                              - repo
+                              - path
                         required:
                           - description
                   required:
@@ -331,16 +602,16 @@ steps:
     plugin-id: 'significant_events_memory_investigation_gaps'
     aggregate-by: 'significant_events'
     create-conversation: false
+    timeout: 120s
     with:
-      timeout: 120s
       message: |
         Call load_skill with path skills/platform/streams/significant-events-memory to get the memory tools.
 
-        The following knowledge gaps were identified during an investigation:
+        The following knowledge gaps were identified during an investigation, as JSON objects each carrying a `title` (the missing data source, named concisely) and a `description` (why that gap mattered):
 
-        {{ steps.investigate.output.structured_output.gaps_found | json }}
+        {{ steps.investigate.output.structured_output.blind_spots | json }}
 
-        Keep only gaps that are actionable structural deficiencies — a data source or access that is missing and could reasonably be provided (e.g. "No traces for the cart service", "No infrastructure metrics for host X", "No code repository access for service Y"). Discard incident-specific observations that just describe what happened during the outage (e.g. "the pod crashed", "no logs during the failure window").
+        Keep only gaps whose `title` is an actionable structural deficiency — a data source or access that is missing and could reasonably be provided (e.g. "No traces for the cart service", "No infrastructure metrics for host X", "No code repository access for service Y"). Discard incident-specific observations that just describe what happened during the outage (e.g. "the pod crashed", "no logs during the failure window").
 
         Read the current _gaps/overview page with platform_sig_events_memory_read. Compare the filtered gaps against it. If every gap is already reflected there, stop and write nothing. If there are genuinely new gaps, weave them into the existing sections (do not add a separate section) and save the page with platform_sig_events_memory_write using categories ["_system/gaps"].
     on-failure:

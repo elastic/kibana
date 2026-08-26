@@ -18,6 +18,7 @@ paths:
           required: true
           schema:
             type: string
+            maxLength: 256
       responses:
         "200":
           description: Successful response

@@ -43,7 +43,6 @@ jest.doMock('@kbn/kibana-react-plugin/public', () => ({
       },
     },
   }),
-  RedirectAppLinks: jest.fn((element: JSX.Element) => element),
   overviewPageActions: jest.fn().mockReturnValue([]),
   OverviewPageFooter: jest.fn().mockReturnValue(React.createElement(React.Fragment)),
   KibanaPageTemplate: jest.fn().mockReturnValue(React.createElement(React.Fragment)),

@@ -8,6 +8,16 @@
 import { useEffect, useRef } from 'react';
 import { parse } from 'yaml';
 import { monaco } from '@kbn/monaco';
+import {
+  getAuthorableFieldNameViolation,
+  getFoldedFieldName,
+} from '../../../../common/utils/template_fields';
+import {
+  charsetNameMessage,
+  nameTooLongMessage,
+  foldedNameCollisionMessage,
+} from '../../../../common/types/domain/template/strict_fields';
+import { getExistingFieldNames } from '../utils/validate_template_definition';
 
 interface FieldNameInfo {
   name: string;
@@ -19,9 +29,17 @@ interface FieldNameInfo {
 
 const FIELD_NAME_VALIDATION_OWNER = 'field-name-validation';
 
+/**
+ * `existingDefinition` — the template's currently-stored definition when editing an existing
+ * template (undefined when creating) — grandfathers field names that predate the
+ * authoring-charset rule, so an untouched legacy field doesn't show a squiggle (and, via
+ * `validateTemplateDefinitionYaml`, doesn't disable Save) on every edit. Mirrors the server-side
+ * grandfathering in `TemplatesService.updateTemplate`.
+ */
 export const useFieldNameValidation = (
   editor: monaco.editor.IStandaloneCodeEditor | null,
-  value: string
+  value: string,
+  existingDefinition?: string
 ) => {
   const validationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -40,7 +58,7 @@ export const useFieldNameValidation = (
     }
 
     validationTimeoutRef.current = setTimeout(() => {
-      validateFieldNames(model, value);
+      validateFieldNames(model, value, existingDefinition);
     }, 300);
 
     return () => {
@@ -48,10 +66,14 @@ export const useFieldNameValidation = (
         clearTimeout(validationTimeoutRef.current);
       }
     };
-  }, [editor, value]);
+  }, [editor, value, existingDefinition]);
 };
 
-function validateFieldNames(model: monaco.editor.ITextModel, yamlContent: string) {
+function validateFieldNames(
+  model: monaco.editor.ITextModel,
+  yamlContent: string,
+  existingDefinition?: string
+) {
   try {
     const parsed = parse(yamlContent);
     const fields = parsed?.fields;
@@ -62,7 +84,12 @@ function validateFieldNames(model: monaco.editor.ITextModel, yamlContent: string
     }
 
     const fieldInfos = collectFieldNames(yamlContent, fields);
-    const markers = createDuplicateFieldMarkers(fieldInfos);
+    const grandfatheredNames =
+      existingDefinition !== undefined ? getExistingFieldNames(existingDefinition) : undefined;
+    const markers = [
+      ...createDuplicateFieldMarkers(fieldInfos),
+      ...createInvalidNameMarkers(fieldInfos, fields, grandfatheredNames),
+    ];
 
     monaco.editor.setModelMarkers(model, FIELD_NAME_VALIDATION_OWNER, markers);
   } catch (error) {
@@ -121,6 +148,78 @@ export function collectFieldNames(yamlContent: string, fields: unknown[]): Field
   }
 
   return fieldInfos;
+}
+
+/**
+ * Places a Monaco error marker on every field name that fails the authoring rules — charset
+ * (`AUTHORABLE_SNAKE_KEY`), derived-key length, or a camelCase-folded collision with a name in
+ * `grandfatheredNames` — using the same message builders as the strict write schema so the
+ * squiggle text matches the Save-gate footer and the server error. A name that byte-exactly
+ * matches an entry in `grandfatheredNames` (already present in the currently-stored definition
+ * — see `getExistingFieldNames`) is left unmarked, so editing a template that predates the
+ * rules doesn't show a permanent squiggle.
+ * Runs alongside `createDuplicateFieldMarkers` so the editor shows inline squiggles before Save.
+ */
+export function createInvalidNameMarkers(
+  fieldInfos: FieldNameInfo[],
+  rawFields: unknown[],
+  grandfatheredNames?: ReadonlySet<string>
+): monaco.editor.IMarkerData[] {
+  const markers: monaco.editor.IMarkerData[] = [];
+  const foldedNameIndex = new Map<string, string>();
+  for (const name of grandfatheredNames ?? []) {
+    foldedNameIndex.set(getFoldedFieldName(name), name);
+  }
+
+  for (let i = 0; i < fieldInfos.length; i++) {
+    const info = fieldInfos[i];
+    const rawField = rawFields[i];
+
+    if (info && !grandfatheredNames?.has(info.name)) {
+      const type =
+        typeof rawField === 'object' && rawField !== null && 'type' in rawField
+          ? (rawField as { type: unknown }).type
+          : undefined;
+
+      // Only inline (non-$ref) fields have a type; $ref aliases are rare in the template editor
+      // and are validated by the strict schema on save, so we skip them here.
+      if (typeof type === 'string') {
+        const message = getInvalidNameMessage(info.name, type, foldedNameIndex);
+        if (message !== undefined) {
+          markers.push({
+            startLineNumber: info.startLineNumber,
+            startColumn: info.startColumn,
+            endLineNumber: info.endLineNumber,
+            endColumn: info.endColumn,
+            severity: 8, // Error
+            message,
+            source: FIELD_NAME_VALIDATION_OWNER,
+          });
+        }
+      }
+    }
+  }
+
+  return markers;
+}
+
+/**
+ * The marker message for a name, or `undefined` when the name is fine. Mirrors the precedence
+ * in the strict schema's `assertAuthorableName`: charset/length first, then the folded-twin
+ * check (only reachable for names that are not byte-exactly grandfathered — the caller skips
+ * those before getting here).
+ */
+function getInvalidNameMessage(
+  name: string,
+  type: string,
+  foldedNameIndex: ReadonlyMap<string, string>
+): string | undefined {
+  const violation = getAuthorableFieldNameViolation(name, type);
+  if (violation === 'length') return nameTooLongMessage(name);
+  if (violation === 'charset') return charsetNameMessage(name);
+
+  const collidingName = foldedNameIndex.get(getFoldedFieldName(name));
+  return collidingName !== undefined ? foldedNameCollisionMessage(name, collidingName) : undefined;
 }
 
 export function createDuplicateFieldMarkers(

@@ -93,7 +93,7 @@ describe('AlertEpisodeMetadataSection', () => {
     } as never);
   });
 
-  it('renders a loading spinner while events / data view are loading', () => {
+  it('renders a skeleton while events / data view are loading', () => {
     runEsqlAsyncSearchMock.mockImplementation(() => new Promise(() => {}));
     useAlertingEpisodeSourceDataViewMock.mockReturnValue({
       value: undefined,
@@ -107,7 +107,11 @@ describe('AlertEpisodeMetadataSection', () => {
       { wrapper }
     );
 
-    expect(screen.getByRole('progressbar')).toBeInTheDocument();
+    expect(
+      screen
+        .getByTestId('alertingV2EpisodeMetadataSectionLoading')
+        .querySelector('.euiSkeletonText')
+    ).not.toBeNull();
   });
 
   it('renders an error message when event data fails to load', async () => {

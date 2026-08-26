@@ -63,6 +63,11 @@ export const getClustersQuery = (
           top_hits: {
             size: 1,
             sort: [{ '@timestamp': { order: 'desc' } }],
+            // Restrict to only the fields consumed by getClustersFromAggs to avoid
+            // fetching full finding documents (which can be large) for every cluster.
+            _source: {
+              includes: ['@timestamp', 'rule.benchmark', 'cloud', 'orchestrator.cluster'],
+            },
           },
         },
         ...failedFindingsAggQuery,

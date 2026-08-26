@@ -12,6 +12,7 @@ import type {
   SavedObjectReference,
   IBasePath,
 } from '@kbn/core/server';
+import { isNonLocalIndexName } from '@kbn/es-query';
 import { flatMap, uniqWith, xorWith } from 'lodash';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 import { addSpaceIdToPath } from '@kbn/core-spaces-common';
@@ -208,6 +209,13 @@ export const flattenAttachmentSavedObject = (
   version: savedObject.version ?? '0',
   ...savedObject.attributes,
 });
+
+/**
+ * Filters out alerts whose index belongs to a linked project (`cluster:index`),
+ * which cannot be resolved through the origin-only alerts ES client.
+ */
+export const filterOriginAlerts = <T extends { index: string }>(alerts: T[]): T[] =>
+  alerts.filter((alert) => !isNonLocalIndexName(alert.index));
 
 export const getIDsAndIndicesAsArrays = (
   comment: AttachmentRequestV2

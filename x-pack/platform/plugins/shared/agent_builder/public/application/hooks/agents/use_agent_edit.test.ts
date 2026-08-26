@@ -26,7 +26,7 @@ jest.mock('@kbn/react-query', () => ({
   useQueryClient: () => ({ invalidateQueries: jest.fn() }),
 }));
 
-jest.mock('react-router-dom-v5-compat', () => ({
+jest.mock('@kbn/shared-ux-router', () => ({
   useSearchParams: () => [new URLSearchParams(), jest.fn()],
 }));
 
@@ -75,6 +75,17 @@ describe('useAgentEdit submit (create/clone branch)', () => {
     mockCreate.mockResolvedValue({ id: 'cloned-agent' });
     mockUpdate.mockResolvedValue({ id: 'existing-agent' });
     mockUpdateAccessControl.mockResolvedValue({
+      access_mode: AgentAccessControlMode.Private,
+      entries: [],
+    });
+  });
+
+  it('defaults a brand-new agent to private', () => {
+    const { result } = renderHook(() =>
+      useAgentEdit({ onSaveSuccess: jest.fn(), onSaveError: jest.fn() })
+    );
+
+    expect(result.current.state.access_control).toEqual({
       access_mode: AgentAccessControlMode.Private,
       entries: [],
     });

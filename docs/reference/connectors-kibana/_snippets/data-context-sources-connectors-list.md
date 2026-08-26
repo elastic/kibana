@@ -24,7 +24,6 @@
 - [Google Cloud Monitoring](/reference/connectors-kibana/google-cloud-monitoring-action-type.md): Find, silence, and snooze GCP alerting policies, and enrich alerts with metric, uptime, and SLO data.
 - [Google Cloud Storage](/reference/connectors-kibana/google-cloud-storage-action-type.md): Search and access objects in Google Cloud Storage buckets.
 - [Google Drive](/reference/connectors-kibana/google-drive-action-type.md): Search and access files and folders in Google Drive.
-- [Google Gmail](/reference/connectors-kibana/gmail-action-type.md): Search and read emails from Gmail.
 - [Grafana](/reference/connectors-kibana/grafana-action-type.md): Read alerts and rules, manage silences, and post annotations.
 - [GraphQL](/reference/connectors-kibana/graphql-action-type.md): Run queries and mutations, and introspect schemas on any GraphQL endpoint.
 - [HubSpot](/reference/connectors-kibana/hubspot-action-type.md): Search and retrieve contacts, companies, deals, and tickets from HubSpot CRM.
@@ -39,7 +38,7 @@
 - [OneDrive](/reference/connectors-kibana/one-drive-action-type.md): Search files and folders, browse drives, read file content, and list files shared with you in Microsoft OneDrive.
 - [OpenSearch](/reference/connectors-kibana/opensearch-aws-opensearch-service-action-type.md): Acknowledge and search alerts, run and manage monitors, handle Security Analytics detector alerts, and search and index documents.
 - [Outlook](/reference/connectors-kibana/outlook-action-type.md): Search emails, list folders, and read messages and attachments in Microsoft Outlook.
-- [PagerDuty (MCP)](/reference/connectors-kibana/pagerduty-mcp-action-type.md): Access incidents, escalation policies, schedules, on-calls, users, and teams in PagerDuty.
+- [PagerDuty](/reference/connectors-kibana/pagerduty-mcp-action-type.md): Access and manage incidents, escalation policies, schedules, on-calls, users, and teams in PagerDuty.
 - [PostHog](/reference/connectors-kibana/posthog-action-type.md): Triage error-tracking issues, run HogQL queries, and control feature flags.
 - [Prometheus](/reference/connectors-kibana/prometheus-action-type.md): Run PromQL queries, and read, silence, and manage alerts and alert groups in Alertmanager.
 - [Rootly](/reference/connectors-kibana/rootly-action-type.md): Declare and drive incidents through their lifecycle.
@@ -51,6 +50,8 @@
 - [Slack (v2)](/reference/connectors-kibana/slack-v2-action-type.md): Search and send messages in Slack.
 - [Snowflake](/reference/connectors-kibana/snowflake-action-type.md): Query Snowflake, discover databases, schemas, tables, and views, and run semantic searches through Cortex Search.
 - [Tavily](/reference/connectors-kibana/tavily-action-type.md): Search the web and extract content from web pages.
+- [Trello](/reference/connectors-kibana/trello-action-type.md): Search boards, lists, and cards, create and update cards, and post comments in Trello.
+- [UniFi](/reference/connectors-kibana/unifi-action-type.md): Inventory UniFi Network sites, devices, clients, and networks, inspect UniFi Protect cameras and sensors, and restart devices or authorize guests.
 - [Workday](/reference/connectors-kibana/workday-action-type.md): Access Workday HR data across workers, org structure, time off, recruiting, and holidays.
 - [Zabbix](/reference/connectors-kibana/zabbix-action-type.md): Triage problems, manage maintenance windows, and enable or disable hosts and triggers.
 - [Zendesk](/reference/connectors-kibana/zendesk-action-type.md): Search and retrieve Zendesk tickets, users, organizations, and Help Center articles using the Zendesk API.
@@ -59,6 +60,9 @@
 **Identity management**
 
 - [1Password](/reference/connectors-kibana/one-password-action-type.md): Manage users in 1Password Enterprise Password Manager — list, get, suspend, and reactivate users.
+- [Okta](/reference/connectors-kibana/okta-action-type.md): Contain compromised identities — suspend users, revoke sessions, reset MFA, manage group membership, and query System Log events.
+- [Google Cloud IAM](/reference/connectors-kibana/gcp-iam-action-type.md): Disable service accounts, revoke leaked keys, and grant or revoke IAM role bindings.
+- [Google Cloud Secret Manager](/reference/connectors-kibana/gcp-secret-manager-action-type.md): Inspect secrets, add and disable secret versions, and read access policy.
 
 **Email security**
 
@@ -71,5 +75,6 @@
 - [Censys](/reference/connectors-kibana/censys-action-type.md): Enrich hosts, web properties, and certificates, submit assets for rescanning, and run CensEye threat-hunting jobs.
 - [GreyNoise](/reference/connectors-kibana/greynoise-action-type.md): Detect and classify Internet scanning noise.
 - [Shodan](/reference/connectors-kibana/shodan-action-type.md): Perform Internet-wide asset discovery and vulnerability scanning.
+- [URLScan.io](/reference/connectors-kibana/urlscan-io-action-type.md): Search historical URL scans, detonate a URL in a sandboxed browser, and retrieve verdicts, screenshots, and page content.
 - [URLVoid](/reference/connectors-kibana/urlvoid-action-type.md): Check domain and URL reputation using multi-engine scanning.
 - [VirusTotal](/reference/connectors-kibana/virustotal-action-type.md): Perform file scanning, URL and domain analysis, result retrieval, and threat intelligence lookups.

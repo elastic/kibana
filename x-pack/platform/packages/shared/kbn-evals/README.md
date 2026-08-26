@@ -51,6 +51,7 @@ Config files live in `scripts/vault/config.<profile>.json`. The golden cluster p
 | `--judge <id>`      | Connector for LLM-as-a-judge evaluators          |
 | `--grep <pattern>`  | Filter tests by name                             |
 | `--repetitions <n>` | Repeat each example N times                      |
+| `--space-ids <ids>` | Spaces to assign datasets and scores to (the run works from the first) |
 | `--skip-server`     | Skip EDOT/Scout startup (use existing services)  |
 | `--skip-init`       | Skip config and connector setup                  |
 | `--dry-run`         | Print configuration and exit                     |
@@ -117,19 +118,6 @@ This wraps `node scripts/scout.js start-server --arch stateful --domain classic 
 node scripts/edot_collector.js
 # Override target ES cluster:
 ELASTICSEARCH_HOST=http://localhost:9200 node scripts/edot_collector.js
-```
-
-</details>
-
-<details>
-<summary>Phoenix executor (backward compatibility)</summary>
-
-The Phoenix-backed executor is maintained in [`@kbn/evals-phoenix-executor`](../kbn-evals-phoenix-executor/) for backward compatibility. That package is the source of truth for Phoenix integration.
-
-To switch:
-
-```bash
-KBN_EVALS_EXECUTOR=phoenix node scripts/evals run --suite <id>
 ```
 
 </details>
@@ -228,11 +216,12 @@ Run a suite on any branch without a PR:
 | `EVAL_SUITE_ID`                   | yes                | Suite id from `evals.suites.json`. Comma-separate to run several suites                                      |
 | `EVAL_MODEL_GROUPS`               | yes                | Comma-separated model groups, e.g. `eis/openai-gpt-5.4,llm-gateway/gpt-5.2`                                  |
 | `EVAL_INCLUDE_EIS_MODELS`         | for `eis/*` models | Set to `1` when using EIS models or an EIS judge                                                             |
-| `EVALUATION_CONNECTOR_ID`         | no                 | LLM-as-judge connector override                                                                              |
+| `EVAL_CONNECTOR_ID`               | no                 | LLM-as-judge connector override                                                                              |
 | `EVAL_SERVER_CONFIG_SET`          | some suites        | From `serverConfigSet` in `evals.suites.json`                                                                |
 | `KIBANA_BUILD_ID`                 | no                 | Reuse a Kibana build from another job (skips build step)                                                     |
 | `EVAL_GREP`                       | no                 | Playwright test name filter (same as `node scripts/evals run --grep`)                                        |
-| `EVALUATION_REPETITIONS`          | no                 | Repeat each example N times (same as `--repetitions`)                                                        |
+| `EVAL_REPETITIONS`                | no                 | Repeat each example N times (same as `--repetitions`)                                                        |
+| `EVAL_SPACE_IDS`                  | no                 | Comma-separated spaces to assign datasets and scores to (same as `--space-ids`)                              |
 | `EVAL_SLACK_NOTIFICATION_CHANNEL` | no                 | Slack channel or member ID to send the triage to. If unset, no Slack notification is sent for on-demand runs |
 
 Example (single suite):
@@ -344,6 +333,22 @@ evaluate('the model should answer truthfully', async ({ inferenceClient, executo
   );
 });
 ```
+
+### Tagging datasets
+
+Datasets can declare `tags` and a `maturity` level, which the dataset list in Kibana filters on. Declaring them alongside the examples keeps them current on every run:
+
+```ts
+const dataset = {
+  name: 'my-dataset',
+  description: 'my-description',
+  tags: ['agent-builder', 'esql'],
+  maturity: 'golden', // 'raw' | 'cleaned' | 'golden'
+  examples: [{ input: { content: 'Hi' }, output: { content: 'Hey' } }],
+};
+```
+
+Tags are lowercased and deduplicated when stored, so `ESQL` and `esql` are the same tag. Each tag must start with a letter or number and may otherwise contain letters, numbers and `: . _ -`; a tag with a space or comma in it fails the upsert with a 400, so keep them slug-like (`team:obs-ai`, `esql`). Leaving either field out preserves what the dataset already has, so a suite that doesn't declare them will not wipe tags curated in the UI.
 
 ### Typing datasets
 

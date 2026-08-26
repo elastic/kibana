@@ -85,7 +85,7 @@ export function ListingRoute({
     () => (
       <EuiButton
         fill
-        iconType="plusInCircle"
+        iconType="plusCircle"
         onClick={onCreateGraph}
         data-test-subj="graphCreateGraphButton"
       >

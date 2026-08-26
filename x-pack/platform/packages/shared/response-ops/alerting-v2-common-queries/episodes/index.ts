@@ -26,12 +26,7 @@ export {
   addEpisodeAggregation,
   applyFilterState,
 } from './episodes_query';
-export type {
-  AlertEpisode,
-  AlertEpisodeEsqlRow,
-  EpisodesFilterState,
-  EpisodesSortState,
-} from './episodes_query';
+export type { AlertEpisodeEsqlRow, EpisodesFilterState, EpisodesSortState } from './episodes_query';
 
 export { buildEpisodeQuery } from './episode_query';
 

@@ -22,6 +22,10 @@
     "@kbn/kibana-react-plugin",
     "@kbn/i18n",
     "@kbn/i18n-react",
+    "@kbn/core-chrome-browser",
+    "@kbn/core-chrome-browser-context",
+    "@kbn/core-chrome-browser-hooks",
+    "@kbn/shared-ux-page-solution-nav",
     "@kbn/shared-ux-prompt-not-found",
     "@kbn/shared-ux-router",
     "@kbn/core-application-browser",
@@ -123,6 +127,7 @@
     "@kbn/app-header",
     "@kbn/deeplinks-workflows",
     "@kbn/core-chrome-app-menu-components",
+    "@kbn/mock-idp-utils",
   ],
   "exclude": ["target/**/*"]
 }

@@ -9,7 +9,9 @@
 
 import { parse as yamlLoad } from 'yaml';
 import { FIPS_GH_LABELS, FIPS_VERSION } from '#pipeline-utils/pr_labels';
+import { getKibanaDir } from '#pipeline-utils/utils';
 
+process.chdir(getKibanaDir());
 const mockAreChangesSkippable = jest.fn();
 const mockDoAnyChangesMatch = jest.fn();
 const mockDoAllChangesMatch = jest.fn();

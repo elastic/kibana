@@ -6,6 +6,7 @@
  */
 
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
+import type { Optional } from '@kbn/utility-types';
 import type { IndexStorageSettings } from '@kbn/storage-adapter';
 import { StorageIndexAdapter, types } from '@kbn/storage-adapter';
 import { chatSystemIndex } from '@kbn/agent-builder-server';
@@ -15,7 +16,10 @@ import type {
   ConversationInternalState,
   ConversationRoundStatus,
   ConversationOrigin,
+  TimelineEvent,
+  ActiveExecution,
 } from '@kbn/agent-builder-common/chat';
+import type { SerializedMetadataValue } from '@kbn/agent-builder-common';
 import type { PersistentConversationRound } from './types';
 
 export const conversationIndexName = chatSystemIndex('conversations');
@@ -32,15 +36,57 @@ const storageSettings = {
       created_at: types.date({}),
       updated_at: types.date({}),
       conversation_rounds: types.object({ dynamic: false, properties: {} }),
+      events: types.nested({
+        properties: {
+          id: types.keyword({}),
+          type: types.keyword({}),
+          created_at: types.date({}),
+          execution_id: types.keyword({}),
+          trigger_event_id: types.keyword({}),
+          actor: types.object({
+            dynamic: false,
+            properties: {
+              type: types.keyword({}),
+              id: types.keyword({}),
+            },
+          }),
+          data: types.object({ dynamic: false, properties: {} }),
+        },
+      }),
+      active_execution: types.object({
+        dynamic: false,
+        properties: {
+          execution_id: types.keyword({}),
+          trigger_event_id: types.keyword({}),
+          started_at: types.date({}),
+        },
+      }),
+      schema_version: types.long({}),
       attachments: types.object({ dynamic: false, properties: {} }),
       state: types.object({ dynamic: false, properties: {} }),
       status: types.keyword({}),
       read: types.boolean({}),
       pinned: types.boolean({}),
+      read_only: types.boolean({}),
       workspace_id: types.keyword({}),
+      parent_conversation: types.object({
+        dynamic: false,
+        properties: {
+          id: types.keyword({}),
+          relation: types.keyword({}),
+        },
+      }),
       access_control: types.object({
         properties: {
           access_mode: types.keyword({}),
+          entries: types.nested({
+            properties: {
+              type: types.keyword({}),
+              id: types.keyword({}),
+              role: types.keyword({}),
+              added_at: types.date({}),
+            },
+          }),
         },
         dynamic: false,
       }),
@@ -50,9 +96,20 @@ const storageSettings = {
         },
         dynamic: false,
       }),
+      metadata: types.flattened({}),
+      template_id: types.keyword({}),
+      template_version: types.long({}),
     },
   },
 } satisfies IndexStorageSettings;
+
+/**
+ * Persistent shape of the parent-conversation link.
+ */
+export interface PersistentConversationParentLink {
+  id: string;
+  relation: string;
+}
 
 export interface ConversationProperties {
   user_id?: string;
@@ -63,14 +120,22 @@ export interface ConversationProperties {
   created_at: string;
   updated_at: string;
   conversation_rounds: PersistentConversationRound[];
+  events?: TimelineEvent[];
+  active_execution?: ActiveExecution;
+  schema_version?: number;
   attachments?: VersionedAttachment[];
   state?: ConversationInternalState;
   status?: ConversationRoundStatus;
   read?: boolean;
   pinned?: boolean;
+  read_only?: boolean;
   workspace_id?: string;
-  access_control?: ConversationAccessControl;
+  access_control?: Optional<ConversationAccessControl, 'entries'>;
+  parent_conversation?: PersistentConversationParentLink;
   origin?: ConversationOrigin;
+  metadata?: Record<string, SerializedMetadataValue>;
+  template_id?: string;
+  template_version?: number;
   // legacy field
   rounds?: PersistentConversationRound[];
 }

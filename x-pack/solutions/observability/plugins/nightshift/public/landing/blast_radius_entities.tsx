@@ -10,8 +10,10 @@ import React, { useEffect, useMemo, useState } from 'react';
 import {
   EuiBadge,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
   EuiPanel,
   EuiText,
   useEuiFontSize,
@@ -126,12 +128,24 @@ function BlastRadiusEntityButton({
 
 export interface BlastRadiusEntitiesProps {
   entities: BlastRadiusChip[];
+  /** Streams that could not be reached, so `entities` is known to be incomplete. */
+  failedStreamNames?: string[];
+  /** Every stream failed, so nothing could be resolved at all. */
+  isError?: boolean;
+  isLoading?: boolean;
+  onRetry?: () => void;
   onSelect: (chipKey: string) => void;
   selectedEntityKey?: string;
 }
 
+const NO_STREAM_NAMES: string[] = [];
+
 export function BlastRadiusEntities({
   entities,
+  failedStreamNames = NO_STREAM_NAMES,
+  isError = false,
+  isLoading = false,
+  onRetry,
   onSelect,
   selectedEntityKey,
 }: BlastRadiusEntitiesProps): React.ReactElement | null {
@@ -164,7 +178,10 @@ export function BlastRadiusEntities({
   }, [entities, expanded, hasOverflow, selectedEntityKey]);
   const hiddenCount = Math.max(entities.length - visibleEntities.length, 0);
 
-  if (entities.length === 0) {
+  const hasFailures = isError || failedStreamNames.length > 0;
+
+  // A failed lookup must not read as "nothing was impacted", so the panel stays up to explain it.
+  if (entities.length === 0 && !isLoading && !hasFailures) {
     return null;
   }
 
@@ -191,77 +208,129 @@ export function BlastRadiusEntities({
           `}
         >
           {i18n.translate('xpack.nightshift.blastRadiusTitle', {
-            defaultMessage: 'Impacted entities',
+            defaultMessage: 'Impacted services',
           })}
         </span>
-        <EuiFlexGroup
-          alignItems="center"
-          gutterSize="none"
-          responsive={false}
-          wrap={true}
-          css={css`
-            gap: calc(${euiTheme.size.xs} + ${euiTheme.size.xxs});
-          `}
-        >
-          {visibleEntities.map(({ count, key, name }) => (
-            <EuiFlexItem grow={false} key={key}>
-              <BlastRadiusEntityButton
-                chipKey={key}
-                count={count}
-                isSelected={selectedEntityKey === key}
-                name={name}
-                onClick={() => onSelect(key)}
-              />
+        {isLoading && (
+          <EuiFlexGroup justifyContent="center">
+            <EuiFlexItem grow={false}>
+              <EuiLoadingSpinner size="m" data-test-subj="blast-radius-loading" />
             </EuiFlexItem>
-          ))}
-          {hasOverflow && !expanded && (
-            <EuiFlexItem
-              grow={false}
-              css={css`
-                margin-left: ${euiTheme.size.xxs};
-              `}
+          </EuiFlexGroup>
+        )}
+
+        {hasFailures && !isLoading && (
+          <EuiCallOut
+            announceOnMount
+            color="warning"
+            data-test-subj="blast-radius-error"
+            iconType="warning"
+            size="s"
+            title={
+              isError
+                ? i18n.translate('xpack.nightshift.blastRadiusErrorTitle', {
+                    defaultMessage: 'Unable to load impacted services',
+                  })
+                : i18n.translate('xpack.nightshift.blastRadiusPartialErrorTitle', {
+                    defaultMessage: 'Some impacted services could not be loaded',
+                  })
+            }
+            text={
+              isError ? undefined : (
+                <p data-test-subj="blast-radius-failed-streams">
+                  {i18n.translate('xpack.nightshift.blastRadiusPartialErrorDescription', {
+                    defaultMessage: 'No response from {streamNames}.',
+                    values: { streamNames: failedStreamNames.join(', ') },
+                  })}
+                </p>
+              )
+            }
+          >
+            <EuiButtonEmpty
+              color="warning"
+              data-test-subj="blast-radius-retry"
+              flush="left"
+              iconType="refresh"
+              onClick={() => onRetry?.()}
+              size="s"
             >
-              <EuiButtonEmpty
-                data-test-subj="blast-radius-show-more"
-                flush="left"
-                onClick={() => setExpanded(true)}
-                size="xs"
-                {...getEbtProps({
-                  action: NIGHTSHIFT_EBT_ACTIONS.EXPAND_BLAST_RADIUS,
-                  element: NIGHTSHIFT_EBT_ELEMENTS.BLAST_RADIUS,
-                })}
+              {i18n.translate('xpack.nightshift.blastRadiusRetryButtonText', {
+                defaultMessage: 'Retry',
+              })}
+            </EuiButtonEmpty>
+          </EuiCallOut>
+        )}
+
+        {!isLoading && entities.length > 0 && (
+          <EuiFlexGroup
+            alignItems="center"
+            gutterSize="none"
+            responsive={false}
+            wrap={true}
+            css={css`
+              gap: calc(${euiTheme.size.xs} + ${euiTheme.size.xxs});
+            `}
+          >
+            {visibleEntities.map(({ count, key, name }) => (
+              <EuiFlexItem grow={false} key={key}>
+                <BlastRadiusEntityButton
+                  chipKey={key}
+                  count={count}
+                  isSelected={selectedEntityKey === key}
+                  name={name}
+                  onClick={() => onSelect(key)}
+                />
+              </EuiFlexItem>
+            ))}
+            {hasOverflow && !expanded && (
+              <EuiFlexItem
+                grow={false}
+                css={css`
+                  margin-left: ${euiTheme.size.xxs};
+                `}
               >
-                {i18n.translate('xpack.nightshift.blastRadiusShowMore', {
-                  defaultMessage: '+{count} more',
-                  values: { count: hiddenCount },
-                })}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          )}
-          {hasOverflow && expanded && (
-            <EuiFlexItem
-              grow={false}
-              css={css`
-                margin-left: ${euiTheme.size.xxs};
-              `}
-            >
-              <EuiButtonEmpty
-                data-test-subj="blast-radius-show-less"
-                flush="left"
-                onClick={() => setExpanded(false)}
-                size="xs"
-                {...getEbtProps({
-                  action: NIGHTSHIFT_EBT_ACTIONS.COLLAPSE_BLAST_RADIUS,
-                  element: NIGHTSHIFT_EBT_ELEMENTS.BLAST_RADIUS,
-                })}
+                <EuiButtonEmpty
+                  data-test-subj="blast-radius-show-more"
+                  flush="left"
+                  onClick={() => setExpanded(true)}
+                  size="xs"
+                  {...getEbtProps({
+                    action: NIGHTSHIFT_EBT_ACTIONS.EXPAND_BLAST_RADIUS,
+                    element: NIGHTSHIFT_EBT_ELEMENTS.BLAST_RADIUS,
+                  })}
+                >
+                  {i18n.translate('xpack.nightshift.blastRadiusShowMore', {
+                    defaultMessage: '+{count} more',
+                    values: { count: hiddenCount },
+                  })}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            )}
+            {hasOverflow && expanded && (
+              <EuiFlexItem
+                grow={false}
+                css={css`
+                  margin-left: ${euiTheme.size.xxs};
+                `}
               >
-                {i18n.translate('xpack.nightshift.blastRadiusShowLess', {
-                  defaultMessage: 'Show less',
-                })}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
+                <EuiButtonEmpty
+                  data-test-subj="blast-radius-show-less"
+                  flush="left"
+                  onClick={() => setExpanded(false)}
+                  size="xs"
+                  {...getEbtProps({
+                    action: NIGHTSHIFT_EBT_ACTIONS.COLLAPSE_BLAST_RADIUS,
+                    element: NIGHTSHIFT_EBT_ELEMENTS.BLAST_RADIUS,
+                  })}
+                >
+                  {i18n.translate('xpack.nightshift.blastRadiusShowLess', {
+                    defaultMessage: 'Show less',
+                  })}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        )}
       </EuiPanel>
     </EuiFlexItem>
   );

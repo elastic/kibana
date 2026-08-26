@@ -38,4 +38,13 @@ export const servers: ScoutServerConfig = {
       '--xpack.alerting.rules.apiKeyType=uiam',
     ],
   },
+  esTestCluster: {
+    ...uiamConfig.esTestCluster,
+    serverArgs: [
+      ...uiamConfig.esTestCluster.serverArgs,
+      // feature flags to enable CPS compatibility for anomaly detection jobs and transforms
+      'es.transform_cross_project_feature_flag_enabled=true',
+      'es.ml_cross_project_feature_flag_enabled=true',
+    ],
+  },
 };

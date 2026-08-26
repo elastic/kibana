@@ -99,9 +99,9 @@ export const changeDataView: InternalStateThunkActionCreator<
     }
 
     if (nextDataView && currentDataView) {
-      // Mark all profile state fields to reset if we are switching to a different data view
+      // Mark all profile app state default fields to reset if we are switching to a different data view
       dispatch(
-        internalStateActions.setProfileStateFieldsToReset({
+        internalStateActions.setProfileAppStateDefaultFieldsToReset({
           tabId,
           fieldsToReset: 'all',
         })

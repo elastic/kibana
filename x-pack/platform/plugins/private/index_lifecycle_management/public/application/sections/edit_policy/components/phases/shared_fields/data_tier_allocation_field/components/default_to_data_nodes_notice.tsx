@@ -7,8 +7,8 @@
 
 import type { FunctionComponent } from 'react';
 import React from 'react';
-import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 
 import { useKibana } from '../../../../../../../../shared_imports';
 import type { PhaseWithAllocation } from '../../../../../../../../../common/types';
@@ -25,19 +25,21 @@ export const DefaultToDataNodesNotice: FunctionComponent<{ phase: PhaseWithAlloc
   } = useKibana();
 
   return (
-    <EuiCallOut
+    <KbnInfoCallout
       data-test-subj="defaultToDataNodesNotice"
       style={{ maxWidth: 400 }}
       title={noCustomAttributesTitle}
-      color="primary"
-    >
-      <p>
-        {i18n.translate(
-          'xpack.indexLifecycleMgmt.warmPhase.dataTier.defaultToDataNodesDescription',
-          { defaultMessage: 'Data will be allocated to any available data node.' }
-        )}
-      </p>
-      {nodeAllocationMigrationGuidance({ docLinks })}
-    </EuiCallOut>
+      text={
+        <>
+          <p>
+            {i18n.translate(
+              'xpack.indexLifecycleMgmt.warmPhase.dataTier.defaultToDataNodesDescription',
+              { defaultMessage: 'Data will be allocated to any available data node.' }
+            )}
+          </p>
+          {nodeAllocationMigrationGuidance({ docLinks })}
+        </>
+      }
+    />
   );
 };

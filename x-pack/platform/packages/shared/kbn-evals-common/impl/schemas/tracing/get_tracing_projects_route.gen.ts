@@ -37,15 +37,15 @@ export const GetTracingProjectsRequestQuery = lazySchema(() =>
     /**
      * Start of time range (ISO 8601)
      */
-    from: z.string().optional(),
+    from: z.string().max(64).optional(),
     /**
      * End of time range (ISO 8601)
      */
-    to: z.string().optional(),
+    to: z.string().max(64).optional(),
     /**
      * Filter projects by name (case-insensitive substring match)
      */
-    name: z.string().optional(),
+    name: z.string().max(256).optional(),
     page: z.coerce.number().int().min(1).optional().default(1),
     per_page: z.coerce.number().int().min(1).max(100).optional().default(25),
   })

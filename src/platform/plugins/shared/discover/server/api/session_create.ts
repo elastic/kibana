@@ -29,7 +29,7 @@ export const createDiscoverSession = async (
 
   return {
     id: savedObject.id,
-    data: transformDiscoverSessionOut(savedObject.attributes, savedObject.references),
+    data: transformDiscoverSessionOut(savedObject.attributes, savedObject.references).sessionState,
     meta: getMeta(savedObject),
   };
 };

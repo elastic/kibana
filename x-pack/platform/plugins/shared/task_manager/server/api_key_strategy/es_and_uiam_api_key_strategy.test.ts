@@ -20,7 +20,15 @@ import {
   shouldCloneApiKeyFromRequest,
 } from '../lib/api_key_utils';
 
-jest.mock('../lib/api_key_utils');
+// `getUiamApiKeySecret` is a pure format helper the assertions below rely on, so it keeps its real
+// implementation while the credential-minting helpers are stubbed.
+jest.mock('../lib/api_key_utils', () => ({
+  ...jest.requireActual('../lib/api_key_utils'),
+  createApiKey: jest.fn(),
+  hasApiKey: jest.fn(),
+  getApiKeyFromRequest: jest.fn(),
+  shouldCloneApiKeyFromRequest: jest.fn(),
+}));
 const createApiKeyMock = createApiKey as jest.MockedFunction<typeof createApiKey>;
 const hasApiKeyMock = hasApiKey as jest.MockedFunction<typeof hasApiKey>;
 const getApiKeyFromRequestMock = getApiKeyFromRequest as jest.MockedFunction<
@@ -89,6 +97,16 @@ describe('EsAndUiamApiKeyStrategy', () => {
     test('returns uiamApiKey when typeToUse is UIAM and uiamApiKey exists', () => {
       const { strategy } = createStrategy(ApiKeyType.UIAM);
       const task = mockTaskInstance({ apiKey: 'es-key', uiamApiKey: 'essu_uiam-key' });
+
+      expect(strategy.getApiKeyForFakeRequest(task)).toBe('essu_uiam-key');
+    });
+
+    test('returns the raw secret when uiamApiKey is stored in the `base64(id:secret)` format written by UIAM provisioning', () => {
+      const { strategy } = createStrategy(ApiKeyType.UIAM);
+      const task = mockTaskInstance({
+        apiKey: 'es-key',
+        uiamApiKey: Buffer.from('uiam-key-id:essu_uiam-key').toString('base64'),
+      });
 
       expect(strategy.getApiKeyForFakeRequest(task)).toBe('essu_uiam-key');
     });
@@ -175,6 +193,21 @@ describe('EsAndUiamApiKeyStrategy', () => {
         expect.objectContaining({ tags: expect.any(Array) })
       );
       expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    test('normalizes a `base64(id:secret)` uiamApiKey on the ES-strategy fallback path', () => {
+      const { strategy } = createStrategy(ApiKeyType.ES);
+      const task = mockTaskInstance({
+        uiamApiKey: Buffer.from('uiam-key-id:essu_uiam-key').toString('base64'),
+        userScope: {
+          apiKeyId: 'uiam-key-id',
+          uiamApiKeyId: 'uiam-key-id',
+          spaceId: 'default',
+          apiKeyCreatedByUser: false,
+        },
+      });
+
+      expect(strategy.getApiKeyForFakeRequest(task)).toBe('essu_uiam-key');
     });
 
     test('returns undefined and does not log when task has no keys', () => {

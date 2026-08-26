@@ -392,7 +392,7 @@ describe('KibanaEvalsClient', () => {
       description: 'resolved from ES',
       examples: [{ input: { q: 'resolved' }, output: { expected: 'answer' } }],
     });
-    const upsertDataset = jest.fn().mockResolvedValue(undefined);
+    const upsertDataset = jest.fn().mockResolvedValue('server-assigned-id');
     const client = createClient({ getDatasetByName, upsertDataset });
 
     const task = jest.fn(async () => ({ ok: true }));
@@ -421,12 +421,57 @@ describe('KibanaEvalsClient', () => {
     expect(upsertDataset).toHaveBeenCalledWith({
       name: 'external-dataset',
       description: 'resolved from ES',
+      tags: undefined,
+      maturity: undefined,
       examples: [{ input: { q: 'resolved' }, output: { expected: 'answer' } }],
     });
     expect(task).toHaveBeenCalledTimes(1);
     expect(result.datasetName).toBe('external-dataset');
     expect(result.datasetDescription).toBe('resolved from ES');
     expect(Object.values(result.runs)).toHaveLength(1);
+  });
+
+  it('stamps scores with the dataset id the server assigned', async () => {
+    const onEvaluationComplete = jest.fn().mockResolvedValue(undefined);
+    const client = createClient({
+      repetitions: 1,
+      onEvaluationComplete,
+      upsertDataset: jest.fn().mockResolvedValue('server-assigned-id'),
+    });
+
+    const [exp] = await client.runExperiment(
+      {
+        datasets: [{ name: 'ds', description: 'desc', examples: [{ input: { q: 1 } }] }],
+        task: async () => ({ ok: true }),
+      },
+      [{ name: 'AlwaysOne', kind: 'CODE', evaluate: async () => ({ score: 1 }) }]
+    );
+
+    expect(exp.datasetId).toBe('server-assigned-id');
+    expect(onEvaluationComplete.mock.calls[0][0].datasetId).toBe('server-assigned-id');
+  });
+
+  it('falls back to the upstream dataset id when nothing persists the dataset', async () => {
+    const client = createClient({
+      repetitions: 1,
+      getDatasetByName: jest.fn().mockResolvedValue({
+        id: 'upstream-dataset-id',
+        name: 'ds',
+        description: 'desc',
+        examples: [{ input: { q: 1 } }],
+      }),
+    });
+
+    const [exp] = await client.runExperiment(
+      {
+        datasets: [{ name: 'ds', description: 'placeholder', examples: [] }],
+        task: async () => ({ ok: true }),
+        trustUpstreamDataset: true,
+      },
+      []
+    );
+
+    expect(exp.datasetId).toBe('upstream-dataset-id');
   });
 
   it('throws when trustUpstreamDataset=true without getDatasetByName', async () => {
@@ -520,6 +565,94 @@ describe('KibanaEvalsClient', () => {
           result: { score: 1 },
         })
       );
+    });
+
+    it('reports each evaluator kind and judge model on the event', async () => {
+      const onEvaluationComplete = jest.fn().mockResolvedValue(undefined);
+      const client = createClient({ repetitions: 1, onEvaluationComplete });
+      const judgeModel = { id: 'gpt-4o', family: 'GPT', provider: 'OpenAI' };
+
+      await client.runExperiment(
+        {
+          datasets: [{ ...dataset, examples: [dataset.examples[0]] }],
+          task: async () => ({ value: 1 }),
+        },
+        [
+          {
+            name: 'Judge',
+            kind: 'LLM',
+            evaluate: async () => ({ score: 1 }),
+            getModel: () => judgeModel,
+          },
+          evaluators[0],
+        ]
+      );
+
+      expect(
+        onEvaluationComplete.mock.calls.map(([{ evaluationRun }]) => ({
+          name: evaluationRun.name,
+          kind: evaluationRun.kind,
+          model: evaluationRun.model,
+        }))
+      ).toEqual([
+        { name: 'Judge', kind: 'LLM', model: judgeModel },
+        { name: 'AlwaysOne', kind: 'CODE', model: undefined },
+      ]);
+    });
+
+    it('reads the judge model only after the evaluator resolves', async () => {
+      const onEvaluationComplete = jest.fn().mockResolvedValue(undefined);
+      const client = createClient({ repetitions: 1, onEvaluationComplete });
+      // Mirrors EvaluatorApiClient, which only learns its model from the response.
+      let lateModel: { id: string } | undefined;
+
+      await client.runExperiment(
+        {
+          datasets: [{ ...dataset, examples: [dataset.examples[0]] }],
+          task: async () => ({ value: 1 }),
+        },
+        [
+          {
+            name: 'LateJudge',
+            kind: 'LLM',
+            evaluate: async () => {
+              lateModel = { id: 'resolved-late' };
+              return { score: 1 };
+            },
+            getModel: () => lateModel,
+          },
+        ]
+      );
+
+      expect(onEvaluationComplete.mock.calls[0][0].evaluationRun.model).toEqual({
+        id: 'resolved-late',
+      });
+    });
+
+    it('reads the evaluator version after the evaluator resolves', async () => {
+      const onEvaluationComplete = jest.fn().mockResolvedValue(undefined);
+      const client = createClient({ repetitions: 1, onEvaluationComplete });
+      let resolvedVersion: string | undefined;
+
+      await client.runExperiment(
+        {
+          datasets: [{ ...dataset, examples: [dataset.examples[0]] }],
+          task: async () => ({ value: 1 }),
+        },
+        [
+          {
+            name: 'VersionedJudge',
+            kind: 'LLM',
+            evaluate: async () => {
+              resolvedVersion = '1.2.0';
+              return { score: 1 };
+            },
+            getVersion: () => resolvedVersion,
+          },
+        ]
+      );
+
+      expect(onEvaluationComplete.mock.calls[0][0].evaluationRun.version).toBe('1.2.0');
     });
 
     it('uses stringified exampleIndex when example has no id', async () => {

@@ -59,12 +59,12 @@ describe('events_write tool', () => {
     expect(emptyItems.success).toBe(false);
     if (!missingItems.success) {
       expect(missingItems.error.issues[0].message).toBe(
-        'Invalid input: expected array, received undefined'
+        'Pass items as a non-empty array of event objects.'
       );
     }
     if (!emptyItems.success) {
       expect(emptyItems.error.issues[0].message).toBe(
-        'Too small: expected array to have >=1 items'
+        'Pass items as a non-empty array of event objects.'
       );
     }
     expect(
@@ -76,6 +76,36 @@ describe('events_write tool', () => {
 
   it('rejects input without an items array', () => {
     expect(eventsWriteSchema.safeParse(input).success).toBe(false);
+  });
+
+  it('rejects duplicate detection rules across event items', () => {
+    const signal = {
+      type: 'detection' as const,
+      stream_name: 'logs.test',
+      description: 'Found: error. Impact: requests failed.',
+      verdict: 'confirms',
+      evidence: { esql_query: 'FROM logs.test', result: 'found' },
+      metadata: {
+        rule_uuid: 'rule-1',
+        detection_id: 'detection-1',
+        change_point_type: 'spike' as const,
+        p_value: 0.01,
+      },
+    };
+
+    const result = eventsWriteSchema.safeParse({
+      items: [
+        { ...input, signals: [signal] },
+        { ...input, signals: [signal] },
+      ],
+    });
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues.at(-1)?.message).toBe(
+        'Each detection rule UUID may appear in only one event item per write'
+      );
+    }
   });
 
   it('normalizes an empty event_id to an omitted event_id', () => {

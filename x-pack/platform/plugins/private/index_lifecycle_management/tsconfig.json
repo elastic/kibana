@@ -42,7 +42,8 @@
     "@kbn/data-lifecycle-phases",
     "@kbn/index-lifecycle-management-common-shared",
     "@kbn/licensing-types",
-    "@kbn/test-eui-helpers"
+    "@kbn/test-eui-helpers",
+    "@kbn/ui-callout"
   ],
   "exclude": ["target/**/*"]
 }

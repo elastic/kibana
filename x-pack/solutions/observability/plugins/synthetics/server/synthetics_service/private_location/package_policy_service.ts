@@ -6,7 +6,7 @@
  */
 
 import type { NewPackagePolicyWithId } from '@kbn/fleet-plugin/server/services/package_policy';
-import type { UpdatePackagePolicyWithId } from '@kbn/fleet-plugin/common';
+import type { PackagePolicy, UpdatePackagePolicyWithId } from '@kbn/fleet-plugin/common';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
@@ -83,6 +83,44 @@ export class PackagePolicyService {
     return uniqBy(ids.flat(), 'id');
   }
 
+  /**
+   * All synthetics package policies bound to a location's Fleet agent policy,
+   * across every space. A scalable private location is backed by a single agent
+   * policy, so a targeted `policy_ids` query returns exactly its monitors —
+   * far cheaper than scanning the whole synthetics package-policy index and
+   * filtering by id suffix in memory (this runs once per location per rebalance
+   * cycle, ~1m). Paginated so a location with more than one page of monitors
+   * isn't truncated.
+   */
+  async listByAgentPolicy({
+    agentPolicyId,
+    signal,
+  }: {
+    agentPolicyId: string;
+    signal?: AbortSignal;
+  }): Promise<PackagePolicy[]> {
+    const soClient = this.server.coreStart.savedObjects.createInternalRepository();
+    const items: PackagePolicy[] = [];
+    const perPage = 1000;
+    let page = 1;
+    let hasMore = true;
+
+    while (hasMore) {
+      signal?.throwIfAborted();
+      const { items: pageItems } = await this.server.fleet.packagePolicyService.list(soClient, {
+        kuery: `ingest-package-policies.package.name:synthetics AND ingest-package-policies.policy_ids:"${agentPolicyId}"`,
+        spaceId: ALL_SPACES_ID,
+        page,
+        perPage,
+      });
+      items.push(...pageItems);
+      hasMore = pageItems.length === perPage;
+      page += 1;
+    }
+
+    return items;
+  }
+
   async bulkCreate({
     newPolicies,
     spaceId,
@@ -148,6 +186,39 @@ export class PackagePolicyService {
 
     const res = await Promise.all(promises);
     return res.flatMap((r) => r.failedPolicies);
+  }
+
+  /**
+   * Updates package policies that are already known to live in `spaceId`,
+   * scoping the SO client straight to that space. Unlike {@link bulkUpdate},
+   * this skips the agent-policy-derived space routing in
+   * {@link getDefaultAndSpacePackagePolicies}: that routing is meant for the
+   * create/edit flow (deciding where a policy *should* live based on its agent
+   * policy) and misroutes an existing policy whose recorded space has diverged
+   * from its agent policy's spaces — silently dropping the write.
+   */
+  async bulkUpdateInSpace({
+    policiesToUpdate,
+    spaceId,
+  }: {
+    policiesToUpdate: UpdatePackagePolicyWithId[];
+    spaceId: string;
+  }) {
+    if (policiesToUpdate.length === 0) {
+      return [];
+    }
+
+    const soClient = this.getSpaceSoClient(spaceId === ALL_SPACES_ID ? DEFAULT_SPACE_ID : spaceId);
+    const { failedPolicies } = await this.server.fleet.packagePolicyService.bulkUpdate(
+      soClient,
+      this.getInternalEsClient(),
+      policiesToUpdate,
+      {
+        force: true,
+        asyncDeploy: true,
+      }
+    );
+    return failedPolicies;
   }
 
   async bulkDelete({

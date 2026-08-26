@@ -9,11 +9,12 @@ import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 
 import { registerFeaturePrivileges } from './privileges';
-import { ALERTING_V2_FEATURES } from '../../../common/feature_privileges';
+import { ALERTING_V2_FEATURES, getFeatureManagementApps } from '../../../common/feature_privileges';
 import {
   ALERTING_V2_ACTION_POLICIES_APP_ID,
   ALERTING_V2_EPISODES_APP_ID,
   ALERTING_V2_EXECUTION_HISTORY_APP_ID,
+  ALERTING_V2_RULE_LIBRARY_APP_ID,
   ALERTING_V2_RULES_APP_ID,
   ALERTING_V2_SECTION_ID,
 } from '@kbn/alerting-v2-constants';
@@ -57,19 +58,32 @@ describe('registerFeaturePrivileges', () => {
     expect(rulesFeature.privileges?.read.alerts).toBeUndefined();
   });
 
+  it('grants read access to rule templates on the rules feature (catalog SOs)', () => {
+    const rulesFeature = getRegisteredFeature(ALERTING_V2_FEATURES.rules.id);
+
+    expect(rulesFeature.privileges?.all.savedObject).toEqual({
+      all: ['alerting_rule'],
+      read: ['alerting_rule_template'],
+    });
+    expect(rulesFeature.privileges?.read.savedObject).toEqual({
+      all: [],
+      read: ['alerting_rule', 'alerting_rule_template'],
+    });
+  });
+
   describe('management app gating', () => {
     // Regression: without these declarations Kibana Core treats each
     // alerting_v2 management app as unowned/public within Management, which
     // leaks the "Stack Management" navlink to unrelated read-only roles.
     // See feature_controls/*_security.ts.
     it.each([
-      [ALERTING_V2_FEATURES.rules.id, ALERTING_V2_RULES_APP_ID],
-      [ALERTING_V2_FEATURES.alerts.id, ALERTING_V2_EPISODES_APP_ID],
-      [ALERTING_V2_FEATURES.actionPolicies.id, ALERTING_V2_ACTION_POLICIES_APP_ID],
-      [ALERTING_V2_FEATURES.executionHistory.id, ALERTING_V2_EXECUTION_HISTORY_APP_ID],
-    ])('gates the "%s" feature behind the "%s" management app', (featureId, expectedApp) => {
+      [ALERTING_V2_FEATURES.rules.id, [ALERTING_V2_RULES_APP_ID, ALERTING_V2_RULE_LIBRARY_APP_ID]],
+      [ALERTING_V2_FEATURES.alerts.id, [ALERTING_V2_EPISODES_APP_ID]],
+      [ALERTING_V2_FEATURES.actionPolicies.id, [ALERTING_V2_ACTION_POLICIES_APP_ID]],
+      [ALERTING_V2_FEATURES.executionHistory.id, [ALERTING_V2_EXECUTION_HISTORY_APP_ID]],
+    ])('gates the "%s" feature behind the %j management app(s)', (featureId, expectedApps) => {
       const registered = getRegisteredFeature(featureId);
-      const expectedManagement = { [ALERTING_V2_SECTION_ID]: [expectedApp] };
+      const expectedManagement = { [ALERTING_V2_SECTION_ID]: expectedApps };
 
       expect(registered.management).toEqual(expectedManagement);
       expect(registered.privileges?.all.management).toEqual(expectedManagement);
@@ -87,8 +101,16 @@ describe('registerFeaturePrivileges', () => {
       }
     );
 
-    it('assigns a unique management app id to each feature (clean split)', () => {
-      const managementApps = Object.values(ALERTING_V2_FEATURES).map((f) => f.managementApp);
+    it('does not add additional management apps to the standalone `app` array', () => {
+      const registered = getRegisteredFeature(ALERTING_V2_FEATURES.rules.id);
+
+      expect(registered.app).not.toContain(ALERTING_V2_RULE_LIBRARY_APP_ID);
+      expect(registered.privileges?.all.app).not.toContain(ALERTING_V2_RULE_LIBRARY_APP_ID);
+      expect(registered.privileges?.read.app).not.toContain(ALERTING_V2_RULE_LIBRARY_APP_ID);
+    });
+
+    it('assigns unique management app ids across features', () => {
+      const managementApps = Object.values(ALERTING_V2_FEATURES).flatMap(getFeatureManagementApps);
       expect(new Set(managementApps).size).toBe(managementApps.length);
     });
   });

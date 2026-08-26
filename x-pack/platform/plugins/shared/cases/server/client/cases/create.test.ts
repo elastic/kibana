@@ -814,7 +814,12 @@ describe('create', () => {
             assignees: [],
             category: null,
             connector: { fields: null, id: '.none', name: 'None', type: '.none' },
-            customFields: [],
+            // Persisted value (post-fill), not the raw request: the two configured optional
+            // custom fields are padded to null since the caller sent neither.
+            customFields: [
+              { key: 'first_customField_key', type: CustomFieldTypes.TEXT, value: null },
+              { key: 'second_customField_key', type: CustomFieldTypes.TOGGLE, value: null },
+            ],
             description: 'testing sir',
             owner: 'securitySolution',
             settings: { syncAlerts: true },
@@ -1116,6 +1121,39 @@ describe('create', () => {
 
     const adapterCasesClientMock = createCasesClientMock();
 
+    // Linked v2 definitions for the configured v1 fields — write-time mirroring
+    // only writes keys that resolve to a definition (via legacyKey or name).
+    const adapterFieldDefinitions = [
+      {
+        fieldDefinitionId: 'fd-priority',
+        name: 'priority',
+        owner: SECURITY_SOLUTION_OWNER,
+        description: '',
+        isGlobal: true,
+        legacyKey: 'priority',
+        definition: yamlStringify({
+          name: 'priority',
+          type: 'keyword',
+          control: 'INPUT_TEXT',
+          label: 'Priority',
+        }),
+      },
+      {
+        fieldDefinitionId: 'fd-count',
+        name: 'count',
+        owner: SECURITY_SOLUTION_OWNER,
+        description: '',
+        isGlobal: true,
+        legacyKey: 'count',
+        definition: yamlStringify({
+          name: 'count',
+          type: 'integer',
+          control: 'INPUT_NUMBER',
+          label: 'Count',
+        }),
+      },
+    ];
+
     beforeEach(() => {
       jest.clearAllMocks();
       adapterCasesClientMock.configure.get = jest
@@ -1126,6 +1164,10 @@ describe('create', () => {
     it('mirrors customFields into extended_fields when templates flag is enabled', async () => {
       const clientArgs = createCasesClientMockArgs();
       clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+      clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+        fieldDefinitions: adapterFieldDefinitions,
+        total: adapterFieldDefinitions.length,
+      });
       clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
 
       await create({ ...theCase, customFields }, clientArgs, adapterCasesClientMock);
@@ -1137,54 +1179,123 @@ describe('create', () => {
       });
     });
 
-    it('does not mirror customFields into extended_fields when templates flag is disabled', async () => {
-      // FAILURE SCENARIO: adapter runs unconditionally — extended_fields written when flag is off.
+    it('mirrors customFields into extended_fields even when templates flag is disabled (addendum A1)', async () => {
+      // Pairing for existing links runs independently of the feature flag: once
+      // a link exists, live sync must not depend on xpack.cases.templates.enabled.
       const clientArgs = createCasesClientMockArgs();
       clientArgs.config = { ...clientArgs.config, templates: { enabled: false } };
+      clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+        fieldDefinitions: adapterFieldDefinitions,
+        total: adapterFieldDefinitions.length,
+      });
       clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
 
       await create({ ...theCase, customFields }, clientArgs, adapterCasesClientMock);
 
       const [[createArgs]] = clientArgs.services.caseService.createCase.mock.calls;
-      expect(createArgs.attributes.extended_fields).toBeUndefined();
+      expect(createArgs.attributes.extended_fields).toMatchObject({
+        priority_as_keyword: 'high',
+        count_as_integer: '5',
+      });
     });
 
-    it('overrides explicit extended_fields values when customField is also set (customFields-win)', async () => {
+    it('rejects conflicting explicit dual input with a structured 400 instead of picking a side', async () => {
       const clientArgs = createCasesClientMockArgs();
       clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
       clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
-        fieldDefinitions: [
+        fieldDefinitions: adapterFieldDefinitions,
+        total: adapterFieldDefinitions.length,
+      });
+      clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
+
+      await expect(
+        create(
           {
-            fieldDefinitionId: 'fd-priority',
-            name: 'priority',
-            owner: SECURITY_SOLUTION_OWNER,
-            description: '',
-            isGlobal: true,
-            definition: yamlStringify({
-              name: 'priority',
-              type: 'keyword',
-              control: 'INPUT_TEXT',
-              label: 'Priority',
-            }),
+            ...theCase,
+            customFields: [{ key: 'priority', type: CustomFieldTypes.TEXT, value: 'low' }],
+            extended_fields: { priority_as_keyword: 'critical' },
           },
-        ],
-        total: 1,
+          clientArgs,
+          adapterCasesClientMock
+        )
+      ).rejects.toThrow(
+        'conflicting values for both representations of the linked field(s): "priority"'
+      );
+
+      expect(clientArgs.services.caseService.createCase).not.toHaveBeenCalled();
+    });
+
+    it('accepts semantically equal explicit dual input and persists one canonical pair', async () => {
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+      clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+        fieldDefinitions: adapterFieldDefinitions,
+        total: adapterFieldDefinitions.length,
       });
       clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
 
       await create(
         {
           ...theCase,
-          customFields: [{ key: 'priority', type: CustomFieldTypes.TEXT, value: 'low' }],
-          // Pre-set v2 value — customFields wins and overrides it.
-          extended_fields: { priority_as_keyword: 'critical' },
+          customFields: [{ key: 'priority', type: CustomFieldTypes.TEXT, value: 'same' }],
+          extended_fields: { priority_as_keyword: 'same' },
         },
         clientArgs,
         adapterCasesClientMock
       );
 
       const [[createArgs]] = clientArgs.services.caseService.createCase.mock.calls;
-      expect(createArgs.attributes.extended_fields?.priority_as_keyword).toBe('low');
+      expect(createArgs.attributes.extended_fields?.priority_as_keyword).toBe('same');
+    });
+
+    it('omits a mirrored customField from Activity when it matches a template default', async () => {
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+      clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
+      clientArgs.services.templatesService.getTemplate.mockResolvedValue({
+        id: 'so-tpl',
+        type: 'cases-templates',
+        references: [],
+        attributes: {
+          templateId: 'tmpl-ext',
+          name: 'Ext Template',
+          owner: SECURITY_SOLUTION_OWNER,
+          definition: yamlStringify({
+            name: 'Ext Template',
+            fields: [
+              {
+                control: 'INPUT_TEXT',
+                name: 'priority',
+                label: 'Priority',
+                type: 'keyword',
+                metadata: { default: 'medium' },
+              },
+            ],
+          }),
+          templateVersion: 1,
+          deletedAt: null,
+          isLatest: true,
+        },
+      });
+
+      await create(
+        {
+          ...theCase,
+          template: { id: 'tmpl-ext', version: 1 },
+          customFields: [{ key: 'priority', type: CustomFieldTypes.TEXT, value: 'medium' }],
+        },
+        clientArgs,
+        adapterCasesClientMock
+      );
+
+      const [[createArgs]] = clientArgs.services.caseService.createCase.mock.calls;
+      expect(createArgs.attributes.extended_fields).toEqual({ priority_as_keyword: 'medium' });
+      const [[bulkArgs]] =
+        clientArgs.services.userActionService.creator.bulkCreateUserAction.mock.calls;
+      const userActionsByType: Record<string, { payload: unknown }> = Object.fromEntries(
+        bulkArgs.userActions.map((ua: { type: string; payload: unknown }) => [ua.type, ua])
+      );
+      expect(userActionsByType.extended_fields).toBeUndefined();
     });
 
     it('preserves a mirror key for a customField absent from the request (synthetic-null regression)', async () => {
@@ -1194,22 +1305,8 @@ describe('create', () => {
       const clientArgs = createCasesClientMockArgs();
       clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
       clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
-        fieldDefinitions: [
-          {
-            fieldDefinitionId: 'fd-priority',
-            name: 'priority',
-            owner: SECURITY_SOLUTION_OWNER,
-            description: '',
-            isGlobal: true,
-            definition: yamlStringify({
-              name: 'priority',
-              type: 'keyword',
-              control: 'INPUT_TEXT',
-              label: 'Priority',
-            }),
-          },
-        ],
-        total: 1,
+        fieldDefinitions: adapterFieldDefinitions,
+        total: adapterFieldDefinitions.length,
       });
       clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
 
@@ -1230,6 +1327,50 @@ describe('create', () => {
       expect(createArgs.attributes.extended_fields?.priority_as_keyword).toBe('crit');
       // count was submitted — it must still be mirrored.
       expect(createArgs.attributes.extended_fields?.count_as_integer).toBe('5');
+    });
+
+    it('creates successfully when two required linked fields are split across customFields and extended_fields', async () => {
+      // FAILURE SCENARIO (before fix): pre-pair validation only saw its own representation —
+      // the customFields-required check never looked at extended_fields, and the extended_fields
+      // pre-pair check ran before pairing had mirrored `priority` over, so `count` (sent only via
+      // extended_fields) or `priority` (sent only via customFields) could be wrongly rejected as
+      // "missing" even though pairing would have produced a fully valid final map.
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+      adapterCasesClientMock.configure.get = jest.fn().mockResolvedValue([
+        {
+          owner: theCase.owner,
+          customFields: adapterCustomFieldsCfg.map((cf) => ({ ...cf, required: true })),
+        },
+      ]);
+      clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+        fieldDefinitions: adapterFieldDefinitions,
+        total: adapterFieldDefinitions.length,
+      });
+      clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
+
+      await create(
+        {
+          ...theCase,
+          // priority supplied via customFields only; count supplied via extended_fields only.
+          customFields: [{ key: 'priority', type: CustomFieldTypes.TEXT, value: 'high' }],
+          extended_fields: { count_as_integer: '5' },
+        },
+        clientArgs,
+        adapterCasesClientMock
+      );
+
+      const [[createArgs]] = clientArgs.services.caseService.createCase.mock.calls;
+      expect(createArgs.attributes.extended_fields).toMatchObject({
+        priority_as_keyword: 'high',
+        count_as_integer: '5',
+      });
+      expect(createArgs.attributes.customFields).toMatchObject(
+        expect.arrayContaining([
+          expect.objectContaining({ key: 'priority', value: 'high' }),
+          expect.objectContaining({ key: 'count', value: 5 }),
+        ])
+      );
     });
   });
 
@@ -1349,7 +1490,7 @@ describe('create', () => {
       });
     });
 
-    it('emits template and extended_fields user actions so the audit trail matches the persisted case', async () => {
+    it('emits an applied-template user action without field rows when only defaults are persisted', async () => {
       const clientArgs = createClientArgs();
 
       await create(
@@ -1369,10 +1510,63 @@ describe('create', () => {
       expect(byType.template.payload).toEqual({
         template: { id: 'tmpl-exp', version: 4, name: 'Expansion Template' },
       });
-      // The initial extended_fields are recorded exactly as persisted on the case SO.
-      expect(byType.extended_fields.payload).toEqual({
-        extended_fields: { priority_as_keyword: 'medium' },
+      // Case SO still stores template defaults; Activity omits fields that match those defaults.
+      expect(byType.extended_fields).toBeUndefined();
+      const [[createArgs]] = clientArgs.services.caseService.createCase.mock.calls;
+      expect(createArgs.attributes.extended_fields).toEqual({ priority_as_keyword: 'medium' });
+    });
+
+    it('emits extended_fields user actions only for values that differ from template defaults', async () => {
+      const clientArgs = createClientArgs();
+
+      await create(
+        {
+          ...minimalRequest,
+          template: { id: 'tmpl-exp', version: 4 },
+          extended_fields: { priority_as_keyword: 'urgent' },
+        },
+        clientArgs,
+        expansionCasesClientMock
+      );
+
+      const [[bulkArgs]] =
+        clientArgs.services.userActionService.creator.bulkCreateUserAction.mock.calls;
+      const byType: Record<string, { payload: unknown }> = Object.fromEntries(
+        bulkArgs.userActions.map((ua: { type: string; payload: unknown }) => [ua.type, ua])
+      );
+
+      expect(byType.template.payload).toEqual({
+        template: { id: 'tmpl-exp', version: 4, name: 'Expansion Template' },
       });
+      expect(byType.extended_fields.payload).toEqual({
+        extended_fields: { priority_as_keyword: 'urgent' },
+      });
+    });
+
+    it('emits an extended_fields user action when the caller clears a non-empty template default', async () => {
+      const clientArgs = createClientArgs();
+
+      await create(
+        {
+          ...minimalRequest,
+          template: { id: 'tmpl-exp', version: 4 },
+          extended_fields: { priority_as_keyword: '' },
+        },
+        clientArgs,
+        expansionCasesClientMock
+      );
+
+      const [[bulkArgs]] =
+        clientArgs.services.userActionService.creator.bulkCreateUserAction.mock.calls;
+      const byType: Record<string, { payload: unknown }> = Object.fromEntries(
+        bulkArgs.userActions.map((ua: { type: string; payload: unknown }) => [ua.type, ua])
+      );
+
+      expect(byType.extended_fields.payload).toEqual({
+        extended_fields: { priority_as_keyword: '' },
+      });
+      const [[createArgs]] = clientArgs.services.caseService.createCase.mock.calls;
+      expect(createArgs.attributes.extended_fields).toEqual({ priority_as_keyword: '' });
     });
 
     it('checks the assignCase operation when the template introduces assignees', async () => {
@@ -1488,23 +1682,346 @@ describe('create', () => {
       ).not.toHaveBeenCalled();
     });
 
-    it('validates the merged extended_fields (template fetched once)', async () => {
+    it('creates the case and fetches the template once when extended_fields contains an unknown key', async () => {
       const clientArgs = createClientArgs();
 
-      await expect(
-        create(
-          {
-            ...minimalRequest,
-            template: { id: 'tmpl-exp' },
-            extended_fields: { unknown_key_as_keyword: 'x' },
-          },
-          clientArgs,
-          expansionCasesClientMock
-        )
-      ).rejects.toThrow('Unknown extended field key: "unknown_key_as_keyword"');
-      expect(clientArgs.services.caseService.createCase).not.toHaveBeenCalled();
+      await create(
+        {
+          ...minimalRequest,
+          template: { id: 'tmpl-exp' },
+          extended_fields: { unknown_key_as_keyword: 'x' },
+        },
+        clientArgs,
+        expansionCasesClientMock
+      );
+
+      expect(clientArgs.services.caseService.createCase).toHaveBeenCalledTimes(1);
       // Expansion resolved the template; validation reused it instead of fetching again.
       expect(clientArgs.services.templatesService.getTemplate).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('server-side global field defaults', () => {
+    const makeGlobalDef = (
+      name: string,
+      defaultValue?: unknown,
+      { required = false }: { required?: boolean } = {}
+    ) => ({
+      fieldDefinitionId: `fd-${name}`,
+      name,
+      owner: SECURITY_SOLUTION_OWNER,
+      description: '',
+      isGlobal: true,
+      definition: yamlStringify({
+        name,
+        type: 'keyword',
+        control: 'INPUT_TEXT',
+        label: name,
+        ...(required ? { validation: { required: true } } : {}),
+        ...(defaultValue !== undefined ? { metadata: { default: defaultValue } } : {}),
+      }),
+    });
+
+    const createClientArgs = ({ templatesEnabled = true } = {}) => {
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.config = { ...clientArgs.config, templates: { enabled: templatesEnabled } };
+      clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
+      clientArgs.services.licensingService.isAtLeastPlatinum.mockResolvedValue(true);
+      return clientArgs;
+    };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('applies global field defaults when the request has no extended_fields', async () => {
+      // FAILURE SCENARIO (before fix): the create-case UI injects global-field defaults
+      // client-side, so only UI-created cases persisted them — API / workflow-step creation
+      // left every global field empty.
+      const clientArgs = createClientArgs();
+      clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+        fieldDefinitions: [makeGlobalDef('risk_score', 'high'), makeGlobalDef('notes')],
+        total: 2,
+      });
+
+      await create(theCase, clientArgs, casesClientMock);
+
+      const [[createArgs]] = clientArgs.services.caseService.createCase.mock.calls;
+      // Only fields that declare a YAML default are injected. A field without one would
+      // produce '' — a value-free key that (for required fields) would fail its own
+      // validation — so `notes` must not appear.
+      expect(createArgs.attributes.extended_fields).toEqual({
+        risk_score_as_keyword: 'high',
+      });
+      expect(clientArgs.services.fieldDefinitionsService.getFieldDefinitions).toHaveBeenCalledWith(
+        SECURITY_SOLUTION_OWNER,
+        { isGlobal: true }
+      );
+      // The persisted extended_fields (from the injected default) must be recorded in the
+      // activity log even without a template — that audit trail is no longer template-scoped.
+      expect(
+        clientArgs.services.userActionService.creator.bulkCreateUserAction
+      ).toHaveBeenCalledWith({
+        userActions: [
+          expect.objectContaining({
+            type: 'extended_fields',
+            payload: { extended_fields: { risk_score_as_keyword: 'high' } },
+          }),
+        ],
+      });
+    });
+
+    it('caller-sent values win over global defaults', async () => {
+      const clientArgs = createClientArgs();
+      clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+        fieldDefinitions: [makeGlobalDef('risk_score', 'high')],
+        total: 1,
+      });
+
+      await create(
+        { ...theCase, extended_fields: { risk_score_as_keyword: 'low' } },
+        clientArgs,
+        casesClientMock
+      );
+
+      const [[createArgs]] = clientArgs.services.caseService.createCase.mock.calls;
+      expect(createArgs.attributes.extended_fields).toEqual({ risk_score_as_keyword: 'low' });
+    });
+
+    it('a caller-sent empty string wins over a global default', async () => {
+      // An explicit empty value is a caller decision — the default must not resurrect it.
+      const clientArgs = createClientArgs();
+      clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+        fieldDefinitions: [makeGlobalDef('risk_score', 'high')],
+        total: 1,
+      });
+
+      await create(
+        { ...theCase, extended_fields: { risk_score_as_keyword: '' } },
+        clientArgs,
+        casesClientMock
+      );
+
+      const [[createArgs]] = clientArgs.services.caseService.createCase.mock.calls;
+      expect(createArgs.attributes.extended_fields).toEqual({ risk_score_as_keyword: '' });
+    });
+
+    it('global defaults win over template defaults on a storage-key collision; caller wins over both', async () => {
+      // The global definition is authoritative on a storage-key collision (see
+      // resolveApplicableFields), mirroring the create form, which preserves global values
+      // over a selected template's defaults.
+      const clientArgs = createClientArgs();
+      clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+        fieldDefinitions: [makeGlobalDef('priority', 'global-default')],
+        total: 1,
+      });
+      clientArgs.services.templatesService.getTemplate.mockResolvedValue({
+        id: 'so-tpl',
+        type: 'cases-templates',
+        references: [],
+        attributes: {
+          templateId: 'tmpl-collision',
+          name: 'Collision Template',
+          owner: SECURITY_SOLUTION_OWNER,
+          definition: yamlStringify({
+            name: 'Collision Template',
+            fields: [
+              {
+                name: 'priority',
+                type: 'keyword',
+                control: 'INPUT_TEXT',
+                label: 'Priority',
+                metadata: { default: 'template-default' },
+              },
+              {
+                name: 'summary',
+                type: 'keyword',
+                control: 'INPUT_TEXT',
+                label: 'Summary',
+                metadata: { default: 'template-summary' },
+              },
+            ],
+          }),
+          templateVersion: 1,
+          deletedAt: null,
+          isLatest: true,
+        },
+      });
+
+      const minimalRequest = omit(theCase, ['severity', 'assignees']);
+
+      await create(
+        { ...minimalRequest, template: { id: 'tmpl-collision', version: 1 } },
+        clientArgs,
+        casesClientMock
+      );
+
+      const [[createArgs]] = clientArgs.services.caseService.createCase.mock.calls;
+      expect(createArgs.attributes.extended_fields).toEqual({
+        priority_as_keyword: 'global-default',
+        summary_as_keyword: 'template-summary',
+      });
+      const [[bulkArgs]] =
+        clientArgs.services.userActionService.creator.bulkCreateUserAction.mock.calls;
+      const firstUserActionsByType: Record<string, { payload: unknown }> = Object.fromEntries(
+        bulkArgs.userActions.map((ua: { type: string; payload: unknown }) => [ua.type, ua])
+      );
+      expect(firstUserActionsByType.extended_fields).toBeUndefined();
+
+      jest.clearAllMocks();
+      clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
+
+      await create(
+        {
+          ...minimalRequest,
+          template: { id: 'tmpl-collision', version: 1 },
+          extended_fields: { priority_as_keyword: 'caller-value' },
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+      const [[secondCreateArgs]] = clientArgs.services.caseService.createCase.mock.calls;
+      expect(secondCreateArgs.attributes.extended_fields).toEqual({
+        priority_as_keyword: 'caller-value',
+        summary_as_keyword: 'template-summary',
+      });
+      const [[secondBulkArgs]] =
+        clientArgs.services.userActionService.creator.bulkCreateUserAction.mock.calls;
+      const secondUserActionsByType: Record<string, { payload: unknown }> = Object.fromEntries(
+        secondBulkArgs.userActions.map((ua: { type: string; payload: unknown }) => [ua.type, ua])
+      );
+      expect(secondUserActionsByType.extended_fields.payload).toEqual({
+        extended_fields: { priority_as_keyword: 'caller-value' },
+      });
+    });
+
+    it('does not write extended_fields when no global field definitions exist', async () => {
+      // Guard: the injection must not materialize an empty extended_fields map.
+      const clientArgs = createClientArgs();
+
+      await create(theCase, clientArgs, casesClientMock);
+
+      const [[createArgs]] = clientArgs.services.caseService.createCase.mock.calls;
+      expect(createArgs.attributes.extended_fields).toBeUndefined();
+    });
+
+    it('does not fetch or apply global defaults when the templates feature is disabled', async () => {
+      const clientArgs = createClientArgs({ templatesEnabled: false });
+      clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+        fieldDefinitions: [makeGlobalDef('risk_score', 'high')],
+        total: 1,
+      });
+
+      await create(theCase, clientArgs, casesClientMock);
+
+      const [[createArgs]] = clientArgs.services.caseService.createCase.mock.calls;
+      expect(createArgs.attributes.extended_fields).toBeUndefined();
+      expect(
+        clientArgs.services.fieldDefinitionsService.getFieldDefinitions
+      ).not.toHaveBeenCalled();
+    });
+
+    describe('required global fields', () => {
+      // Defaults injection must be invisible to callers that never engaged with
+      // extended_fields: a request without extended_fields that succeeded before injection
+      // existed must keep succeeding after it, even when a REQUIRED global field has no
+      // default (required stays a UI submit-time gate there, exactly like v1 required
+      // customFields). Full create-time `required` enforcement only applies when the caller —
+      // or a pinned template — actually produced an extended_fields map, which is the
+      // pre-injection behavior. These tests lock both sides in so the inject/validate steps
+      // can't silently become a breaking change (or silently drop the existing enforcement).
+      it('creates the case when a required global field has no default and no caller value (no extended_fields sent)', async () => {
+        // Regression guard for the v1 mirror: required legacy customFields are mirrored into
+        // required global definitions with no default, so rejecting here would 400 every
+        // customFields-only create in such a space.
+        const clientArgs = createClientArgs();
+        clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+          fieldDefinitions: [makeGlobalDef('risk_score', undefined, { required: true })],
+          total: 1,
+        });
+
+        await create(theCase, clientArgs, casesClientMock);
+
+        const [[createArgs]] = clientArgs.services.caseService.createCase.mock.calls;
+        // Nothing to inject (no default) — the field is simply left unset.
+        expect(createArgs.attributes.extended_fields).toBeUndefined();
+      });
+
+      it('injected defaults do not trigger required enforcement of other global fields', async () => {
+        // The injection materializes an extended_fields map the caller never sent; validating
+        // that map with full create semantics would enforce `required` on the no-default field
+        // and reject a request that succeeded before injection existed.
+        const clientArgs = createClientArgs();
+        clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+          fieldDefinitions: [
+            makeGlobalDef('notes', 'default notes'),
+            makeGlobalDef('risk_score', undefined, { required: true }),
+          ],
+          total: 2,
+        });
+
+        await create(theCase, clientArgs, casesClientMock);
+
+        const [[createArgs]] = clientArgs.services.caseService.createCase.mock.calls;
+        expect(createArgs.attributes.extended_fields).toEqual({
+          notes_as_keyword: 'default notes',
+        });
+      });
+
+      it('still rejects when the caller sends extended_fields but omits a required global field', async () => {
+        // Pre-injection behavior preserved: a caller that engages with extended_fields gets
+        // full create-time validation, including `required` on absent fields.
+        const clientArgs = createClientArgs();
+        clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+          fieldDefinitions: [
+            makeGlobalDef('risk_score', undefined, { required: true }),
+            makeGlobalDef('notes'),
+          ],
+          total: 2,
+        });
+
+        await expect(
+          create(
+            { ...theCase, extended_fields: { notes_as_keyword: 'some notes' } },
+            clientArgs,
+            casesClientMock
+          )
+        ).rejects.toThrow('Field "risk_score" is required');
+        expect(clientArgs.services.caseService.createCase).not.toHaveBeenCalled();
+      });
+
+      it('creates the case when a required global field has a default', async () => {
+        const clientArgs = createClientArgs();
+        clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+          fieldDefinitions: [makeGlobalDef('risk_score', 'high', { required: true })],
+          total: 1,
+        });
+
+        await create(theCase, clientArgs, casesClientMock);
+
+        const [[createArgs]] = clientArgs.services.caseService.createCase.mock.calls;
+        expect(createArgs.attributes.extended_fields).toEqual({ risk_score_as_keyword: 'high' });
+      });
+
+      it('creates the case when the caller sends a value for a required global field without a default', async () => {
+        const clientArgs = createClientArgs();
+        clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+          fieldDefinitions: [makeGlobalDef('risk_score', undefined, { required: true })],
+          total: 1,
+        });
+
+        await create(
+          { ...theCase, extended_fields: { risk_score_as_keyword: 'caller-value' } },
+          clientArgs,
+          casesClientMock
+        );
+
+        const [[createArgs]] = clientArgs.services.caseService.createCase.mock.calls;
+        expect(createArgs.attributes.extended_fields).toEqual({
+          risk_score_as_keyword: 'caller-value',
+        });
+      });
     });
   });
 });

@@ -377,7 +377,7 @@ export function CloudForwarderPanel() {
                       { defaultMessage: 'Waiting for data from EDOT Cloud Forwarder' }
                     )
               }
-              iconType="checkInCircleFilled"
+              iconType="checkCircleFill"
               isLoading={!hasData}
               css={css`
                 max-width: 40%;

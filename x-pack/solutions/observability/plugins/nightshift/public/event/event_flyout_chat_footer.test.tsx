@@ -18,7 +18,7 @@ const mockOpenChat = jest.fn();
 jest.mock('../hooks/use_kibana', () => ({
   useKibana: () => ({
     services: {
-      http: { get: jest.fn(), basePath: { prepend: (path: string) => path } },
+      http: { basePath: { prepend: (path: string) => path } },
       agentBuilder: { openChat: mockOpenChat },
     },
   }),

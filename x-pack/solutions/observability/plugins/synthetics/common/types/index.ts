@@ -9,6 +9,7 @@ export type * from './synthetics_monitor';
 export type * from './monitor_validation';
 export type * from './default_alerts';
 export type * from './overview';
+export type * from './agent_stats';
 
 // Re-export schema-derived types from server for use in common and public
 export type {

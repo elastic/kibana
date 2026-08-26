@@ -47,11 +47,16 @@ jest.mock('../../form/hooks/use_data_fields', () => ({
   }),
 }));
 
+jest.mock('@kbn/alerting-v2-browser-shared', () => ({
+  AlertingDateRangePicker: () => <div data-test-subj="querySandboxDatePicker" />,
+}));
+
 jest.mock('../../form/contexts/rule_form_context', () => ({
   useRuleFormServices: () => ({
     http: {},
     data: { search: { search: jest.fn() } },
     dataViews: {},
+    notifications: { toasts: { addDanger: jest.fn(), addWarning: jest.fn() } },
     lens: { EmbeddableComponent: () => null, stateHelperApi: jest.fn() },
   }),
 }));
@@ -103,6 +108,13 @@ describe('QuerySandbox', () => {
   it('renders the sandbox container', () => {
     renderSandbox();
     expect(screen.getByTestId('querySandbox')).toBeInTheDocument();
+  });
+
+  it('renders the editor and results panels', () => {
+    renderSandbox();
+    expect(screen.getByTestId('querySandboxEditorPanel')).toBeInTheDocument();
+    expect(screen.getByTestId('querySandboxResultsPanel')).toBeInTheDocument();
+    expect(screen.getByTestId('querySandboxEditorResizeHandle')).toBeInTheDocument();
   });
 
   it('renders the search button', () => {
@@ -337,7 +349,7 @@ describe('QuerySandbox', () => {
   });
 
   describe('headerActions', () => {
-    it('renders headerActions in the query header row when provided', () => {
+    it('renders headerActions in the in-editor toolbar when provided', () => {
       renderSandbox({
         headerActions: <button data-test-subj="customHeaderAction">Split</button>,
       });

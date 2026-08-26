@@ -15,5 +15,7 @@ export type {
   FeedbackRegistryEntry,
   FeedbackSubmittedData,
   FeedbackQuestion,
+  FeedbackContext,
   FeedbackFormData,
+  AppDetails,
 } from './src/types';

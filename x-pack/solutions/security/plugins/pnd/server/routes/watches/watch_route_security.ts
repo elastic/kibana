@@ -6,7 +6,7 @@
  */
 
 import { WorkflowsManagementApiActions } from '@kbn/workflows';
-import { PND_API_PRIVILEGE_READ } from '../../../common/constants';
+import { PND_API_PRIVILEGE_READ, PND_API_PRIVILEGE_WRITE } from '../../../common/constants';
 
 /**
  * Live watch routes project managed Workflows. Require the same privilege pair
@@ -25,3 +25,9 @@ export const getLiveWatchReadPrivileges = () => [
 
 export const getWatchRoutePrivileges = (useMockData: boolean) =>
   useMockData ? [PND_API_PRIVILEGE_READ] : getLiveWatchReadPrivileges();
+
+/**
+ * Settings writes only ever reach the in-memory store, so they need no Workflows privileges. The
+ * routes themselves return 501 when `useMockData` is false, which is what keeps this safe.
+ */
+export const getWatchWriteRoutePrivileges = () => [PND_API_PRIVILEGE_WRITE];

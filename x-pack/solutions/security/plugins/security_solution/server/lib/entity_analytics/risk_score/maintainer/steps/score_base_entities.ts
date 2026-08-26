@@ -24,6 +24,8 @@ import { fetchEntitiesByIds } from '../utils/fetch_entities_by_ids';
 import type { ScopedLogger } from '../utils/with_log_context';
 import { persistScoresToEntityStore, persistScoresToRiskIndex } from './persist_scores';
 
+const BASE_SCORING_REQUEST_TIMEOUT = '5m';
+
 interface ScoreBaseEntitiesParams {
   esClient: ElasticsearchClient;
   crudClient: EntityUpdateClient;
@@ -234,7 +236,8 @@ const fetchNextEuidPage = async ({
       index: alertsIndex,
       pageSize,
       afterKey,
-    })
+    }),
+    { requestTimeout: BASE_SCORING_REQUEST_TIMEOUT }
   );
 
   const compositeAgg = (
@@ -269,10 +272,13 @@ const scorePageFromAlerts = async ({
   alertFilters: QueryDslQueryContainer[];
 }): Promise<ParsedRiskScore[]> => {
   const query = getBaseScoreESQL(entityType, bounds, sampleSize, pageSize, alertsIndex);
-  const esqlResponse = await esClient.esql.query({
-    query,
-    filter: { bool: { filter: alertFilters } },
-  });
+  const esqlResponse = await esClient.esql.query(
+    {
+      query,
+      filter: { bool: { filter: alertFilters } },
+    },
+    { requestTimeout: BASE_SCORING_REQUEST_TIMEOUT }
+  );
 
   return (esqlResponse.values ?? []).map(parseEsqlBaseScoreRow(alertsIndex));
 };

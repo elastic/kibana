@@ -14,6 +14,7 @@ import {
   type Conversation,
 } from '@kbn/agent-builder-common';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
+import type { ConversationPermissions } from '../../../common/http_api/conversations';
 import type { ErrorPromptType } from '../components/common/prompt/error_prompt';
 import { queryKeys } from '../query_keys';
 import { createNewRound } from '../utils/new_conversation';
@@ -81,6 +82,16 @@ export const useConversation = () => {
   });
 
   return { conversation, isLoading, isFetching, isFetched, isError, error };
+};
+
+export const useConversationPermissions = (): ConversationPermissions => {
+  const { conversation } = useConversation();
+
+  return {
+    rename: conversation?.permissions.rename ?? false,
+    delete: conversation?.permissions.delete ?? false,
+    update_access_control: conversation?.permissions.update_access_control ?? false,
+  };
 };
 
 export const useConversationStatus = () => {

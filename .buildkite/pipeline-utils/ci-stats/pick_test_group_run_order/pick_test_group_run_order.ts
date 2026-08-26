@@ -9,7 +9,7 @@
 
 import * as Fs from 'fs';
 
-import minimatch from 'minimatch';
+import { minimatch } from 'minimatch';
 import { getAffectedPackages, listChangedFiles } from '../../affected-packages';
 import type { BuildkiteStep } from '../../buildkite';
 import { BuildkiteClient } from '../../buildkite';
@@ -155,6 +155,7 @@ export async function pickTestGroupRunOrder() {
       pipelineSlug: config.pipelineSlug,
       prNumber: config.prNumber,
       prMergeBase: config.prMergeBase,
+      mergeQueueMergeBase: config.mergeQueueMergeBase,
     }),
     groups: buildCiStatsGroups({
       jestUnitConfigs,

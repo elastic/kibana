@@ -289,7 +289,7 @@ Make sure you use tools available to you to fulfill this request.
 Use markdown headers, tables, and code blocks for clarity. Include relevant emojis for visual distinction and ensure the response is concise, actionable, and tailored to Elastic Security workflows.`;
 export const starterPromptDescription2 = 'Latest Elastic Security Labs research';
 export const starterPromptTitle2 = 'Research';
-export const starterPromptIcon2 = 'launch';
+export const starterPromptIcon2 = 'rocket';
 export const starterPromptPrompt2 = `Retrieve and summarize the latest Elastic Security Labs articles one by one sorted by latest at the top, and consider using all tools available to you to fulfill this request. Ensure the response includes:
 Article Summaries
 Title and Link: Provide the title of each article with a hyperlink to the original content.

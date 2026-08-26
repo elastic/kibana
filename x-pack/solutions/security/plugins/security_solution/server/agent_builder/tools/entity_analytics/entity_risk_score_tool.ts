@@ -300,5 +300,12 @@ export const entityRiskScoreTool = (
       }
     },
     tags: ['security', 'entity-risk-score', 'entities'],
+    annotations: {
+      title: 'Get Entity Risk Score',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
   };
 };

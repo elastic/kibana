@@ -5,15 +5,32 @@
  * 2.0.
  */
 
-import React, { createContext, type FC, useCallback, useEffect, useMemo, useState } from 'react';
+import React, {
+  createContext,
+  type FC,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { pick } from 'lodash';
 
 import type { EuiStepStatus } from '@elastic/eui';
-import { EuiConfirmModal, EuiFormRow, EuiSteps, EuiToolTip } from '@elastic/eui';
+import {
+  EuiConfirmModal,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiSteps,
+  EuiToolTip,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/public';
+import type { ProjectRouting } from '@kbn/es-query';
 import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
@@ -46,12 +63,16 @@ import { WizardNav } from '../wizard_nav';
 
 import { TRANSFORM_STORAGE_KEYS } from './storage';
 import { StepDefine } from './step_define';
+import { ProjectScopeSelector } from './project_scope_selector';
 
 const styles = {
   steps: css`
     .euiStep__content {
       padding-right: 0;
     }
+  `,
+  projectScopeSelector: css`
+    min-inline-size: 180px;
   `,
 };
 
@@ -96,7 +117,9 @@ export const Wizard: FC<WizardProps> = React.memo(
   }) => {
     const { showNodeInfo } = useEnabledFeatures();
     const appDependencies = useAppDependencies();
-    const { uiSettings, data, dataViewEditor, fieldFormats, charts } = appDependencies;
+    const { uiSettings, data, dataViewEditor, fieldFormats, charts, cps } = appDependencies;
+    const cpsManager = cps?.cpsManager;
+    const shouldUseProjectScope = Boolean(cps?.isTierEligible && cpsManager && !cloneConfig);
     const dataView = searchItems?.dataView;
     const defaultTransformFunction = getInitialTransformFunction(
       cloneConfig,
@@ -114,6 +137,38 @@ export const Wizard: FC<WizardProps> = React.memo(
     const [stepCreateState, setStepCreateState] = useState(getDefaultStepCreateState);
     const [savedDataViews, setSavedDataViews] = useState<DataViewListItem[]>([]);
     const [pendingDataViewId, setPendingDataViewId] = useState<string>();
+    const [projectRouting, setProjectRouting] = useState<ProjectRouting | undefined>();
+    const projectRoutingRef = useRef(projectRouting);
+    const hasUserSelectedProjectRouting = useRef(false);
+    const changeDataViewModalTitleId = useGeneratedHtmlId();
+
+    useEffect(() => {
+      projectRoutingRef.current = projectRouting;
+    }, [projectRouting]);
+
+    useEffect(() => {
+      if (!shouldUseProjectScope || !cpsManager) {
+        return;
+      }
+
+      let canceled = false;
+
+      cpsManager.whenReady().then(() => {
+        if (canceled || hasUserSelectedProjectRouting.current) {
+          return;
+        }
+
+        const defaultProjectRouting = cpsManager.getDefaultProjectRouting();
+        setProjectRouting(defaultProjectRouting);
+        setStepDefineState((prevState) =>
+          prevState ? { ...prevState, projectRouting: defaultProjectRouting } : prevState
+        );
+      });
+
+      return () => {
+        canceled = true;
+      };
+    }, [cpsManager, shouldUseProjectScope]);
 
     const resetWizardState = useCallback(
       (nextSearchItems: SearchItems, transformFunction: TransformFunction) => {
@@ -125,6 +180,10 @@ export const Wizard: FC<WizardProps> = React.memo(
           cloneConfig,
           nextSearchItems.dataView
         );
+        if (shouldUseProjectScope && nextStepDefineState.projectRouting === undefined) {
+          nextStepDefineState.projectRouting =
+            projectRoutingRef.current ?? cpsManager?.getDefaultProjectRouting();
+        }
 
         setStepDefineState(nextStepDefineState);
         setStepDetailsState(
@@ -136,7 +195,7 @@ export const Wizard: FC<WizardProps> = React.memo(
         setStepCreateState(getDefaultStepCreateState());
         setCurrentStep(WIZARD_STEPS.DEFINE);
       },
-      [cloneConfig]
+      [cloneConfig, cpsManager, shouldUseProjectScope]
     );
 
     useEffect(() => {
@@ -181,8 +240,27 @@ export const Wizard: FC<WizardProps> = React.memo(
     }, [defaultTransformFunction, pendingDataViewId, setSavedObjectId]);
 
     const cancelDataViewChange = useCallback(() => setPendingDataViewId(undefined), []);
+    const handleProjectRoutingChange = useCallback((nextProjectRouting: ProjectRouting) => {
+      hasUserSelectedProjectRouting.current = true;
+      setProjectRouting(nextProjectRouting);
+      setStepDefineState((prevState) =>
+        prevState ? { ...prevState, projectRouting: nextProjectRouting } : prevState
+      );
+      setStepCreateState(getDefaultStepCreateState());
+      setCurrentStep(WIZARD_STEPS.DEFINE);
+    }, []);
     const canEditDataView = Boolean(dataViewEditor?.userPermissions.editDataView());
     const isDataViewPickerDisabled = setSavedObjectId === undefined;
+    const projectScopeSelector =
+      shouldUseProjectScope && cpsManager ? (
+        <EuiFlexItem grow={false} css={styles.projectScopeSelector}>
+          <ProjectScopeSelector
+            cpsManager={cpsManager}
+            onProjectRoutingChange={handleProjectRoutingChange}
+            projectRouting={projectRouting}
+          />
+        </EuiFlexItem>
+      ) : null;
     const dataViewPickerComponent = (
       <DataViewPicker
         compressed={false}
@@ -212,7 +290,7 @@ export const Wizard: FC<WizardProps> = React.memo(
       />
     );
 
-    const dataViewPicker = (
+    const dataViewPickerRow = (
       <EuiFormRow
         label={i18n.translate('xpack.transform.stepDefineForm.dataViewLabel', {
           defaultMessage: 'Data view',
@@ -238,6 +316,12 @@ export const Wizard: FC<WizardProps> = React.memo(
           dataViewPickerComponent
         )}
       </EuiFormRow>
+    );
+    const dataViewPicker = (
+      <EuiFlexGroup alignItems="flexStart" gutterSize="m">
+        {projectScopeSelector}
+        <EuiFlexItem grow>{dataViewPickerRow}</EuiFlexItem>
+      </EuiFlexGroup>
     );
 
     const transformConfig =
@@ -356,6 +440,8 @@ export const Wizard: FC<WizardProps> = React.memo(
               <EuiSteps css={styles.steps} steps={stepsConfig} />
               {pendingDataViewId ? (
                 <EuiConfirmModal
+                  aria-labelledby={changeDataViewModalTitleId}
+                  titleProps={{ id: changeDataViewModalTitleId }}
                   title={i18n.translate(
                     'xpack.transform.transformsWizard.changeDataViewConfirmModalTitle',
                     {

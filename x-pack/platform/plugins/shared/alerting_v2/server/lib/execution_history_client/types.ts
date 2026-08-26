@@ -5,14 +5,23 @@
  * 2.0.
  */
 
-import type { ListRuleExecutionsResponse } from '@kbn/alerting-v2-schemas';
-import type { FindRuleExecutionsQuery } from '../services/event_log_service/types';
+import type {
+  FindRuleExecutionsQuery,
+  PaginatedResult,
+  RuleExecution,
+} from '../services/event_log_service/types';
 
 /**
  * Client-side arguments for {@link ExecutionHistoryClientContract.getRuleExecutions}.
  */
 export type ListRuleExecutionsArgs = Omit<FindRuleExecutionsQuery, 'spaceId'>;
 
+/**
+ * Internal (camelCase) result of a rule-execution read. The route maps it to
+ * the snake_case API contract via `toListRuleExecutionsResponse`.
+ */
+export type ListRuleExecutionsResult = PaginatedResult<RuleExecution>;
+
 export interface ExecutionHistoryClientContract {
-  listRuleExecutions(args: ListRuleExecutionsArgs): Promise<ListRuleExecutionsResponse>;
+  listRuleExecutions(args: ListRuleExecutionsArgs): Promise<ListRuleExecutionsResult>;
 }

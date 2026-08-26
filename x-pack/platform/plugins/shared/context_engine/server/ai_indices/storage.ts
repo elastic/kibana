@@ -21,6 +21,7 @@ const storageSettings = {
   schema: {
     properties: {
       description: types.text({}),
+      feedback_agent_id: types.keyword({}),
       managed: types.boolean({}),
       date_created: types.date({}),
       date_modified: types.date({}),
@@ -39,6 +40,7 @@ const storageSettings = {
 
 export interface AiIndexDocument {
   description?: string;
+  feedback_agent_id?: string;
   // Optional for backward compatibility with entries written before managed
   // indices existed; absence is treated as unmanaged (`false`) on read.
   managed?: boolean;

@@ -82,7 +82,7 @@ function RowSelectionButton({ rowIndex }: { rowIndex: number }) {
             values: { rowIndex: rowIndex + 1 },
           }
         )}
-        iconType={selectedRowIndex === rowIndex ? 'minimize' : 'expand'}
+        iconType={selectedRowIndex === rowIndex ? 'minimize' : 'maximize'}
         color={selectedRowIndex === rowIndex ? 'primary' : 'text'}
       />
     </EuiToolTip>
@@ -524,6 +524,7 @@ export function PreviewTable({
 
   return (
     <EuiDataGrid
+      data-test-subj="streamsAppPreviewDataGrid"
       aria-label={i18n.translate('xpack.streams.resultPanel.euiDataGrid.previewLabel', {
         defaultMessage: 'Preview',
       })}

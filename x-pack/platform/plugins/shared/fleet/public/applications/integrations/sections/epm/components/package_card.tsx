@@ -57,6 +57,7 @@ export function PackageCard({
   release,
   id,
   fromIntegrations,
+  fromCollection,
   isReauthorizationRequired,
   isUnverified,
   isUpdateAvailable,
@@ -202,13 +203,15 @@ export function PackageCard({
     );
   }
 
-  const { application } = useStartServices();
+  const { application, http } = useStartServices();
 
   const onCardClick = () => {
-    if (url.startsWith(INTEGRATIONS_BASE_PATH)) {
+    // Use basePath-prefixed comparison so this works with server.basePath or space-path prefixes.
+    const integrationsBase = http.basePath.prepend(INTEGRATIONS_BASE_PATH);
+    if (url.startsWith(integrationsBase)) {
       application.navigateToApp(INTEGRATIONS_PLUGIN_ID, {
-        path: url.slice(INTEGRATIONS_BASE_PATH.length),
-        state: { fromIntegrations },
+        path: url.slice(integrationsBase.length),
+        state: { fromIntegrations, ...(fromCollection ? { fromCollection } : {}) },
       });
     } else if (url.startsWith('http') || url.startsWith('https')) {
       window.open(url, '_blank');

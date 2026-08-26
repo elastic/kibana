@@ -31,7 +31,8 @@ pageLoadAssetSize:
   console: 31191
   contentConnectors: 33014
   contentManagement: 8350
-  contextEngine: 5837
+  contextEngine: 7557
+  contextEngineAgentBuilder: 4999
   controls: 10300
   core: 563693
   cps: 9209
@@ -62,11 +63,11 @@ pageLoadAssetSize:
   embeddable: 19587
   embeddableAlertsTable: 6524
   enterpriseSearch: 37565
-  entityStore: 14114
+  entityStore: 15562
   esql: 29469
   esqlDataGrid: 10209
   esUiShared: 101220
-  evals: 8650
+  evals: 9654
   eventAnnotation: 22334
   eventAnnotationListing: 13164
   exploratoryView: 45042
@@ -77,7 +78,7 @@ pageLoadAssetSize:
   expressionPartitionVis: 29826
   expressions: 104955
   expressionTagcloud: 14009
-  expressionXY: 45000
+  expressionXY: 46000
   features: 4145
   feedback: 7642
   fieldFormats: 64634
@@ -132,6 +133,7 @@ pageLoadAssetSize:
   navigation: 18855
   newsfeed: 11110
   nightshift: 7911
+  nightshiftInvestigations: 5000
   noDataPage: 1749
   notificationCenter: 1791
   observability: 116568
@@ -142,9 +144,9 @@ pageLoadAssetSize:
   observabilityLogsExplorer: 4918
   observabilityOnboarding: 14161
   observabilityShared: 86067
-  osquery: 48128
+  osquery: 48500
   painlessLab: 6299
-  pnd: 7674
+  pnd: 13291
   presentationUtil: 8391
   productDocBase: 6767
   productIntercept: 9860

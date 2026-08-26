@@ -5,19 +5,11 @@
  * 2.0.
  */
 
-import type { Observable } from 'rxjs';
 import type { FocusedSignificantEventService } from './focused_significant_event_service';
 
 /**
  * App-scoped services threaded through the Kibana context.
  */
 export interface SignificantEventsAppServices {
-  /**
-   * The plugin-wide availability gate (rollout flag × license × pricing tier),
-   * created once in the plugin's start() and multicast. Components read it through
-   * `useSignificantEventsPrivileges` instead of recreating the observable, because
-   * every feature-flag evaluation POSTs a usage counter.
-   */
-  availability$: Observable<boolean>;
   focusedSignificantEventService: FocusedSignificantEventService;
 }

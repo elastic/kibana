@@ -107,10 +107,10 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
   );
   const accessControlModeOptions = [
     {
-      value: AgentAccessControlMode.Public,
+      value: AgentAccessControlMode.Private,
       inputDisplay: renderAccessControlModeOption({
-        icon: ACCESS_CONTROL_MODE_ICON[AgentAccessControlMode.Public],
-        label: ACCESS_CONTROL_MODE_LABELS[AgentAccessControlMode.Public],
+        icon: ACCESS_CONTROL_MODE_ICON[AgentAccessControlMode.Private],
+        label: ACCESS_CONTROL_MODE_LABELS[AgentAccessControlMode.Private],
       }),
     },
     {
@@ -121,10 +121,10 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
       }),
     },
     {
-      value: AgentAccessControlMode.Private,
+      value: AgentAccessControlMode.Public,
       inputDisplay: renderAccessControlModeOption({
-        icon: ACCESS_CONTROL_MODE_ICON[AgentAccessControlMode.Private],
-        label: ACCESS_CONTROL_MODE_LABELS[AgentAccessControlMode.Private],
+        icon: ACCESS_CONTROL_MODE_ICON[AgentAccessControlMode.Public],
+        label: ACCESS_CONTROL_MODE_LABELS[AgentAccessControlMode.Public],
       }),
     },
   ];

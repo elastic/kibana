@@ -376,6 +376,20 @@ export class WorkflowApi {
     );
   }
 
+  /**
+   * Installs a template from raw YAML (e.g. an uploaded file) rather than a
+   * catalog slug. The server parses, renders, and creates the workflow.
+   */
+  async installTemplateFromYaml(
+    yaml: string,
+    values: Record<string, unknown>
+  ): Promise<InstallTemplateResponse> {
+    return this.http.post(`${INTERNAL_BASE}/library/templates/install`, {
+      body: JSON.stringify({ yaml, values }),
+      version: INTERNAL_API_VERSION,
+    });
+  }
+
   async restoreWorkflowVersion(
     workflowId: string,
     eventId: string,
