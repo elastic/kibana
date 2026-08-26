@@ -10,7 +10,7 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiFlyoutFooter } from '@elastic/
 import type { Investigation } from '@kbn/pnd-common';
 import { BaseActions, type CardActionType } from '../actions';
 import type { ConversationsActionsGroupProps } from '../conversation_card';
-import { DETAILS_FLYOUT_LABELS as i18n } from './translations';
+import { DETAILS_FLYOUT_LABELS } from './translations';
 
 export interface ConversationDetailsFlyoutFooterProps {
   investigation: Investigation;
@@ -26,7 +26,7 @@ export const ConversationDetailsFlyoutFooter = memo<ConversationDetailsFlyoutFoo
         <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
             <EuiButton iconType="productAgent" onClick={onOpenChat} size="s">
-              {i18n.actions.openChat}
+              {DETAILS_FLYOUT_LABELS.actions.openChat}
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

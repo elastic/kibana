@@ -13,7 +13,7 @@ import type { ConversationsActionsGroupProps } from '../conversation_card';
 import { ConversationDetailsFlyoutHeader } from './flyout_header';
 import { ConversationDetailsFlyoutBody } from './flyout_body';
 import { ConversationDetailsFlyoutFooter } from './flyout_footer';
-import { DETAILS_FLYOUT_LABELS as i18n } from './translations';
+import { DETAILS_FLYOUT_LABELS } from './translations';
 
 export interface ConversationDetailsFlyoutProps {
   investigation: Investigation;
@@ -27,18 +27,17 @@ export const ConversationDetailsFlyout = memo<ConversationDetailsFlyoutProps>(
   ({ investigation, onClose, onClickAction, onClickRecommendedAction, onOpenChat }) => {
     return (
       <EuiFlyout
-        aria-label={i18n.ariaLabel}
+        aria-label={DETAILS_FLYOUT_LABELS.ariaLabel}
         type="push"
         size="s"
         paddingSize="s"
         onClose={onClose}
         ownFocus={false}
         flyoutMenuProps={{
-          title: 'flyout menu',
           trailingActions: [
             {
               iconType: 'share',
-              ['aria-label']: 'Share',
+              ['aria-label']: DETAILS_FLYOUT_LABELS.header.flyoutMenuAriaLabel,
               onClick: () => {
                 // TODO: Implement if needed
                 return;

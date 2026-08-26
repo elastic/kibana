@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import type { Investigation } from '@kbn/pnd-common';
 import { DetailsBlock } from './detail_block';
-import { DETAILS_FLYOUT_LABELS as i18n } from './translations';
+import { DETAILS_FLYOUT_LABELS } from './translations';
 import { TimelineEventList } from '../timeline';
 
 export type FlyoutTab = 'overview' | 'attachments' | 'timeline';
@@ -36,12 +36,12 @@ const getColumns = () => {
   return [
     {
       field: 'field',
-      name: i18n.overview.fieldColumn,
+      name: DETAILS_FLYOUT_LABELS.overview.fieldColumn,
       render: (field: string) => cellContent(field),
     },
     {
       field: 'value',
-      name: i18n.overview.valueColumn,
+      name: DETAILS_FLYOUT_LABELS.overview.valueColumn,
       render: (value: string) => cellContent(value),
     },
   ];
@@ -63,22 +63,26 @@ export const OverviewTab = memo<{ investigation: Investigation }>(({ investigati
     value: string;
   }
   const impactRows: ImpactRow[] = [
-    affectedSurface ? { field: i18n.overview.compromised, value: affectedSurface } : null,
-    severity ? { field: i18n.overview.severity, value: severity } : null,
+    affectedSurface
+      ? { field: DETAILS_FLYOUT_LABELS.overview.compromised, value: affectedSurface }
+      : null,
+    severity ? { field: DETAILS_FLYOUT_LABELS.overview.severity, value: severity } : null,
   ].filter((row): row is ImpactRow => row !== null);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
       {summary && (
         <EuiFlexItem>
-          <DetailsBlock title={i18n.sections.overview}>
+          <DetailsBlock title={DETAILS_FLYOUT_LABELS.sections.overview}>
             <EuiText size="s" color="subdued">
               <p>{displayedSummary}</p>
             </EuiText>
             {isCondensed && (
               <div>
                 <EuiButtonEmpty size="s" flush="left" onClick={() => setExpanded((prev) => !prev)}>
-                  {expanded ? i18n.overview.showLess : i18n.overview.showMore}
+                  {expanded
+                    ? DETAILS_FLYOUT_LABELS.overview.showLess
+                    : DETAILS_FLYOUT_LABELS.overview.showMore}
                 </EuiButtonEmpty>
               </div>
             )}
@@ -114,7 +118,7 @@ export const OverviewTab = memo<{ investigation: Investigation }>(({ investigati
                 <EuiTextTruncate text={title} />
               </EuiText>
               <EuiText size="xs" color="subdued">
-                <span>{i18n.overview.triggerAlert}</span>
+                <span>{DETAILS_FLYOUT_LABELS.overview.triggerAlert}</span>
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -123,10 +127,10 @@ export const OverviewTab = memo<{ investigation: Investigation }>(({ investigati
 
       {impactRows.length > 0 && (
         <EuiFlexItem>
-          <DetailsBlock title={i18n.sections.impact}>
+          <DetailsBlock title={DETAILS_FLYOUT_LABELS.sections.impact}>
             <EuiPanel hasBorder paddingSize="none" style={{ borderRadius: euiTheme.size.s }}>
               <EuiBasicTable
-                tableCaption={i18n.overview.tableCaption}
+                tableCaption={DETAILS_FLYOUT_LABELS.overview.tableCaption}
                 rowHeader="field"
                 items={impactRows}
                 columns={getColumns()}
@@ -144,10 +148,10 @@ OverviewTab.displayName = 'OverviewTab';
 export const AttachmentsTab = memo(() => (
   <EuiEmptyPrompt
     iconType="paperClip"
-    title={<h3>{i18n.attachments.emptyTitle}</h3>}
+    title={<h3>{DETAILS_FLYOUT_LABELS.attachments.emptyTitle}</h3>}
     body={
       <EuiText size="s" color="subdued">
-        <p>{i18n.attachments.emptyBody}</p>
+        <p>{DETAILS_FLYOUT_LABELS.attachments.emptyBody}</p>
       </EuiText>
     }
   />
@@ -160,7 +164,7 @@ export const TimelineTab = memo<{ events: Investigation['events'] }>(({ events }
       <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
-            <h3>{i18n.sections.timeline}</h3>
+            <h3>{DETAILS_FLYOUT_LABELS.sections.timeline}</h3>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

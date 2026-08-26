@@ -6,9 +6,9 @@
  */
 
 import React, { memo } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiBadge } from '@elastic/eui';
 import type { Investigation } from '@kbn/pnd-common';
+import { DETAILS_FLYOUT_LABELS } from './translations';
 import { getEmptyValue } from '../helpers';
 
 export interface CriticalityBadgeProps {
@@ -20,10 +20,7 @@ export const CriticalityBadge = memo<CriticalityBadgeProps>(({ priorityScore }) 
   return (
     <div>
       <EuiBadge color="danger">
-        {i18n.translate('xpack.pnd.criticalityBadge.priorityScore', {
-          defaultMessage: 'Criticality · {priorityScore}',
-          values: { priorityScore },
-        }) ?? emptyValue}
+        {priorityScore ? DETAILS_FLYOUT_LABELS.header.criticalityBadge(priorityScore) : emptyValue}
       </EuiBadge>
     </div>
   );
