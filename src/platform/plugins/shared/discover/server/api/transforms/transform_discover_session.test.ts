@@ -105,7 +105,7 @@ describe('discover session API transforms', () => {
       expect(transformed).toEqual(discoverSessionApiData);
     });
 
-    it('omits time_range when time restore is disabled', () => {
+    it('omits time_range but preserves refresh_interval when time restore is disabled', () => {
       const [classicTab] = discoverSessionAttributes.tabs;
       const { sessionState } = transformDiscoverSessionOut({
         ...discoverSessionAttributes,
@@ -115,6 +115,29 @@ describe('discover session API transforms', () => {
             attributes: {
               ...classicTab.attributes,
               timeRestore: false,
+            },
+          },
+        ],
+      });
+
+      expect(sessionState.tabs[0]).not.toHaveProperty('time_range');
+      expect(sessionState.tabs[0].refresh_interval).toEqual({
+        value: 60000,
+        pause: true,
+      });
+    });
+
+    it('preserves refresh_interval when the stored time range is absent', () => {
+      const [classicTab] = discoverSessionAttributes.tabs;
+      const { sessionState } = transformDiscoverSessionOut({
+        ...discoverSessionAttributes,
+        tabs: [
+          {
+            ...classicTab,
+            attributes: {
+              ...classicTab.attributes,
+              timeRestore: true,
+              timeRange: undefined,
             },
           },
         ],
@@ -323,7 +346,7 @@ describe('discover session API transforms', () => {
       expect(attributes.tabs[0].attributes.timeRestore).toBe(true);
     });
 
-    it('disables time restore when time_range is absent', () => {
+    it('persists refresh_interval independently when time_range is absent', () => {
       const [, esqlTab] = apiData.tabs;
       const { attributes } = transformDiscoverSessionIn({
         ...apiData,

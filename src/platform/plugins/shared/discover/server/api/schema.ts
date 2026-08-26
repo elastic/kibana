@@ -144,7 +144,8 @@ const discoverSessionTabPresentationSchema = z
         'Time range to restore when the tab is opened. When omitted, Discover uses the global time settings.',
     }),
     refresh_interval: refreshIntervalSchema.optional().meta({
-      description: 'Refresh interval to restore when `time_range` is set.',
+      description:
+        'Refresh interval associated with this tab. It can be stored independently; the presence of `time_range` controls whether the time settings are restored.',
     }),
     vis_context: visContextSchema.optional(),
     control_panels: discoverSessionControlPanelsSchema.optional(),
