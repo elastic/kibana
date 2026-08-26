@@ -1,6 +1,8 @@
 {
-  "lastModified": "2026-02-12T18:08:10.264Z",
   "sha1": "ace4fa767fb89ecdbb6f261ff7497e3f66125693",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "0d46d86b877f63c-caca4780f786cad",

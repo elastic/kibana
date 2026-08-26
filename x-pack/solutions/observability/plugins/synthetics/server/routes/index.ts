@@ -68,6 +68,7 @@ import { addSyntheticsParamsRoute } from './settings/params/add_param';
 import { deleteSyntheticsParamsRoute } from './settings/params/delete_param';
 import { createOverviewTrendsRoute } from './overview_trends/overview_trends';
 import { getMaintenanceWindowsRoute } from './maintenance_windows/get_maintenance_windows';
+import { getOutdatedMwAgentLocations } from './settings/private_locations/get_outdated_mw_agents';
 
 export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   addSyntheticsProjectMonitorRoute,
@@ -113,6 +114,7 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   cleanupPrivateLocationRoute,
   syncParamsSyntheticsParamsRoute,
   syncParamsSettingsParamsRoute,
+  getOutdatedMwAgentLocations,
   getMaintenanceWindowsRoute,
 ];
 
