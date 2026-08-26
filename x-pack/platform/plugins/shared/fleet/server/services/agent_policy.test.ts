@@ -1024,11 +1024,17 @@ describe('Agent policy', () => {
         .spyOn(agentPolicyService, 'deployPolicy')
         .mockResolvedValue(undefined as any);
 
-      await expect(agentPolicyService.delete(soClient, esClient, 'mocked')).rejects.toThrow(
-        'SO delete failed'
-      );
-
-      expect(deploySpy).toHaveBeenCalledWith(soClient, 'mocked');
+      try {
+        await expect(agentPolicyService.delete(soClient, esClient, 'mocked')).rejects.toThrow(
+          'SO delete failed'
+        );
+        expect(deploySpy).toHaveBeenCalledWith(soClient, 'mocked');
+      } finally {
+        // Restore the original so subsequent deployPolicy tests are not affected.
+        // jest.resetAllMocks() (used in beforeEach) clears implementations but does not
+        // restore spies, so without this the deployPolicy describe block would call a no-op.
+        deploySpy.mockRestore();
+      }
     });
 
     it('should only delete package polices that are not shared with other agent policies', async () => {
