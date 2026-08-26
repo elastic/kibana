@@ -60,11 +60,11 @@ export const CompareExperimentsResponse = lazySchema(() =>
       skippedMissingPairs: z.number().int(),
       skippedNullScores: z.number().int(),
       /**
-       * Whether Experiment A scores were truncated due to size limits
+       * Whether the baseline scores were truncated due to size limits
        */
       truncatedA: z.boolean(),
       /**
-       * Whether Experiment B scores were truncated due to size limits
+       * Whether the target scores were truncated due to size limits
        */
       truncatedB: z.boolean(),
     }),

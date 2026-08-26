@@ -58,10 +58,10 @@ paths:
                         type: integer
                       truncatedA:
                         type: boolean
-                        description: Whether Experiment A scores were truncated due to size limits
+                        description: Whether the baseline scores were truncated due to size limits
                       truncatedB:
                         type: boolean
-                        description: Whether Experiment B scores were truncated due to size limits
+                        description: Whether the target scores were truncated due to size limits
                     required:
                       - totalPairs
                       - skippedMissingPairs

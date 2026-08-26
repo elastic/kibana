@@ -34,18 +34,18 @@ function resolveDirectionFromEvaluatorName(evaluatorName: string): Direction {
  * Resolve metric polarity for a paired baseline/target comparison of the same evaluator.
  * - Both missing: legacy name-based heuristic (backward compatible with pre-metadata scores)
  * - Only one side defined: use that side
- * - Both defined: prefer baseline
+ * - Both defined: prefer target
  */
 export function resolveDirection(
-  baselineDirection: Direction | undefined,
   targetDirection: Direction | undefined,
+  baselineDirection: Direction | undefined,
   evaluatorName: string
 ): Direction {
-  if (baselineDirection !== undefined) {
-    return baselineDirection;
-  }
   if (targetDirection !== undefined) {
     return targetDirection;
+  }
+  if (baselineDirection !== undefined) {
+    return baselineDirection;
   }
   return resolveDirectionFromEvaluatorName(evaluatorName);
 }
@@ -109,6 +109,7 @@ export function pairScores(
 
     referenceMap.delete(key);
 
+    // A is target after pairScores(target, baseline) unification.
     const direction = resolveDirection(
       scoreA.evaluator.direction,
       match.evaluator.direction,
