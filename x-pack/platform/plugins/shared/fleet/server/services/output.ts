@@ -660,7 +660,7 @@ class OutputService {
       throw new OutputInvalidError('OTLP output type is not enabled');
     }
 
-    await validateOutputServerless(this, output, options?.id);
+    await validateOutputServerless(this, output);
     const isPreconfigured =
       (options?.fromPreconfiguration ||
         ('is_preconfigured' in output && output.is_preconfigured)) ??
