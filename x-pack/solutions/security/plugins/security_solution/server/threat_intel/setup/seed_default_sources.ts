@@ -131,7 +131,10 @@ export const seedDefaultSources = async ({
     failed: 0,
   };
 
-  log.info(`Seeding ${result.total} default threat-intel sources`);
+  // Debug, not info: this runs on every boot so a partial seed can finish, and on a
+  // healthy deployment every entry is already present. The caller logs the outcome at
+  // info when something actually changed.
+  log.debug(`Seeding ${result.total} default threat-intel sources`);
 
   for (let offset = 0; offset < DEFAULT_SOURCES.length; offset += BULK_CREATE_CHUNK_SIZE) {
     const chunk = DEFAULT_SOURCES.slice(offset, offset + BULK_CREATE_CHUNK_SIZE);

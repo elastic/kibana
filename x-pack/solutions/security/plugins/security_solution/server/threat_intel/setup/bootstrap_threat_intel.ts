@@ -103,12 +103,11 @@ const seedThreatIntelCatalog = async ({
   const seed = await withElasticsearchRetry(
     async () => {
       const result = await seedDefaultSources({ esClient, logger });
-      // Partial failures have to retry. `seedDefaultSources` catches per-item
-      // and bulk errors and reports them as `failed`, so returning here would
-      // treat a partial seed as success: the next boot sees a non-empty catalog
-      // and skips seeding forever, permanently omitting the rest of the starter
-      // catalog. Retrying is safe because already-created entries come back as
-      // `skipped` (conflicts are idempotent).
+      // Partial failures have to retry within this boot. `seedDefaultSources`
+      // catches per-item and bulk errors and reports them as `failed`, so returning
+      // here would treat a partial seed as success and leave the rest of the starter
+      // catalog missing until the next restart. Retrying is safe because
+      // already-created entries come back as `skipped` (conflicts are idempotent).
       if (result.failed > 0) {
         throw new Error(
           `${result.failed} of ${result.total} default sources failed to seed ` +
@@ -121,10 +120,17 @@ const seedThreatIntelCatalog = async ({
     'Threat intelligence default source seeding'
   );
 
-  log.info(
+  // Seeding runs on every boot so a partial seed can finish, which means the steady
+  // state is "created 0, all skipped". Only say something at info when the catalog
+  // actually changed, otherwise this is one noise line per restart forever.
+  const summary =
     `Threat intelligence source seeding finished: ${seed.created} sources created, ` +
-      `${seed.skipped} already present, ${seed.failed} failed (${seed.total} catalog entries)`
-  );
+    `${seed.skipped} already present, ${seed.failed} failed (${seed.total} catalog entries)`;
+  if (seed.created > 0 || seed.failed > 0) {
+    log.info(summary);
+  } else {
+    log.debug(summary);
+  }
 
   const catalogCount = await esClient.count(
     { index: THREAT_INTEL_SOURCES_INDEX },
