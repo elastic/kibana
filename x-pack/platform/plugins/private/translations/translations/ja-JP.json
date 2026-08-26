@@ -1656,7 +1656,6 @@
     "core.ui.chrome.appearanceChange.requiresPageReloadButtonLabel": "ページを再読み込み",
     "core.ui.chrome.appearanceChange.successNotificationText": "変更を確認するには、ページを再読み込みしてください",
     "core.ui.chrome.appearanceChange.successNotificationTitle": "システム色モードが更新されました",
-    "core.ui.chrome.breadcrumbs.ariaLabel": "ブレッドクラム",
     "core.ui.chrome.globalHeader.logoAriaLabel": "Elasticホーム",
     "core.ui.chrome.globalHeader.searchButton.ariaLabel": "検索",
     "core.ui.chrome.globalHeader.searchButton.placeholder": "コンテンツを検索...",

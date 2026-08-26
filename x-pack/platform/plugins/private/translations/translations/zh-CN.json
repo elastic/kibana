@@ -1655,7 +1655,6 @@
     "core.ui.chrome.appearanceChange.requiresPageReloadButtonLabel": "重新加载页面",
     "core.ui.chrome.appearanceChange.successNotificationText": "重新加载页面以查看更改",
     "core.ui.chrome.appearanceChange.successNotificationTitle": "系统颜色模式已更新",
-    "core.ui.chrome.breadcrumbs.ariaLabel": "痕迹导航",
     "core.ui.chrome.globalHeader.logoAriaLabel": "Elastic 主页",
     "core.ui.chrome.globalHeader.searchButton.ariaLabel": "搜索",
     "core.ui.chrome.globalHeader.searchButton.placeholder": "查找内容……",
