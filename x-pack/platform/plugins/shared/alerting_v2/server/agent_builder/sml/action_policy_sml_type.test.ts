@@ -10,13 +10,13 @@ import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { ACTION_POLICY_ATTACHMENT_TYPE, ACTION_POLICY_SML_TYPE } from '@kbn/alerting-v2-schemas';
+import { ACTION_POLICY_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
+import { ACTION_POLICY_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import type { ActionPolicyClient } from '../../lib/action_policy_client';
 import {
   ACTION_POLICY_SAVED_OBJECT_TYPE,
   type ActionPolicySavedObjectAttributes,
 } from '../../saved_objects';
-import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { createActionPolicySmlType } from './action_policy_sml_type';
 
 const baseActionPolicyAttrs: ActionPolicySavedObjectAttributes = {
@@ -77,8 +77,8 @@ describe('createActionPolicySmlType', () => {
     });
 
   describe('id and fetchFrequency', () => {
-    it('uses the shared ACTION_POLICY_SML_TYPE constant', () => {
-      expect(buildDefinition().id).toBe(ACTION_POLICY_SML_TYPE);
+    it('uses the shared ACTION_POLICY_KI_TYPE constant', () => {
+      expect(buildDefinition().id).toBe(ACTION_POLICY_KI_TYPE);
     });
 
     it('returns "1m" as fetch frequency', () => {
@@ -197,7 +197,7 @@ describe('createActionPolicySmlType', () => {
 
       expect(getRepoSo).toHaveBeenCalledWith(ACTION_POLICY_SAVED_OBJECT_TYPE, 'policy-1');
       expect(result).toEqual({
-        type: ACTION_POLICY_SML_TYPE,
+        type: ACTION_POLICY_KI_TYPE,
         title: 'Critical alerts → Slack',
         content: [
           'Critical alerts → Slack',
@@ -247,10 +247,10 @@ describe('createActionPolicySmlType', () => {
   });
 
   describe('getPermissions', () => {
-    it('returns the action-policies-read API privilege', () => {
+    it('returns the registered ai_index read action for action policies', () => {
       // This is the security-critical assertion the original review
       // flagged as missing. The action policies API gates reads on
-      // `api:read_action_policies` (via ALERTING_V2_API_PRIVILEGES);
+      // `ai_index:<kiType>/read` (via ALERTING_V2_API_PRIVILEGES);
       // the SML entry MUST stamp the same privilege so a user without
       // it cannot see policy entries in agent context.
       //
@@ -265,7 +265,7 @@ describe('createActionPolicySmlType', () => {
       const permissions = buildDefinition().getPermissions!('policy-1', buildSmlContext());
       expect(permissions).toEqual({
         kibana: {
-          privileges: [{ name: `api:${ALERTING_V2_API_PRIVILEGES.actionPolicies.read}` }],
+          privileges: { name: [`ai_index:${ACTION_POLICY_KI_TYPE}/read`] },
         },
       });
     });
@@ -276,10 +276,10 @@ describe('createActionPolicySmlType', () => {
       const originId = overrides.origin_id ?? 'policy-1';
       return {
         id: 'sml-1',
-        type: ACTION_POLICY_SML_TYPE,
+        type: ACTION_POLICY_KI_TYPE,
         title: 'Critical alerts → Slack',
         origin_id: originId,
-        origin: { uri: `${ACTION_POLICY_SML_TYPE}://${originId}` },
+        origin: { uri: `${ACTION_POLICY_KI_TYPE}://${originId}` },
         content: '',
         created_at: '2026-04-10T00:00:00.000Z',
         updated_at: '2026-04-10T00:00:00.000Z',

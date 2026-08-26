@@ -61,7 +61,7 @@ export interface CloudConnectorNewSecretVar {
 
 export interface AwsCloudConnectorVars {
   role_arn: CloudConnectorVar;
-  external_id: CloudConnectorSecretVar | CloudConnectorNewSecretVar;
+  external_id?: CloudConnectorSecretVar | CloudConnectorNewSecretVar;
 }
 
 export interface AzureCloudConnectorVars {

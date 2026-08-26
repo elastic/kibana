@@ -10,6 +10,7 @@ import { useCasesAddToExistingCaseModal } from '../../../all_cases/selector_moda
 import type { PropsWithChildren } from 'react';
 import React from 'react';
 import type { Filter } from '@kbn/es-query';
+import { BehaviorSubject } from 'rxjs';
 import {
   getMockApplications$,
   getMockCurrentAppId$,
@@ -18,11 +19,11 @@ import {
   mockLensAttributes,
   getMockServices,
 } from './mocks';
-import { useKibana } from '../../../../common/lib/kibana';
+import { useCasesConfig, useKibana } from '../../../../common/lib/kibana';
 import { waitFor } from '@testing-library/react';
 import { openModal } from './open_modal';
 import type { CasesActionContextProps } from './types';
-import { LENS_ATTACHMENT_TYPE } from '../../../../../common/constants/attachments';
+import { LENS_ATTACHMENT_TYPE, LENS_SO_TYPE } from '../../../../../common/constants/attachments';
 
 const element = document.createElement('div');
 document.body.appendChild(element);
@@ -42,6 +43,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
 jest.mock('../../../../common/lib/kibana', () => {
   return {
     useKibana: jest.fn(),
+    useCasesConfig: jest.fn(() => ({ attachmentsEnabled: false })),
     KibanaContextProvider: jest
       .fn()
       .mockImplementation(({ children, ...props }) => <div {...props}>{children}</div>),
@@ -72,6 +74,8 @@ describe('openModal', () => {
   });
 
   beforeEach(() => {
+    jest.clearAllMocks();
+    (useCasesConfig as jest.Mock).mockReturnValue({ attachmentsEnabled: false });
     mockUseCasesAddToExistingCaseModal.mockReturnValue({
       open: mockOpenModal,
     });
@@ -84,8 +88,6 @@ describe('openModal', () => {
         },
       },
     });
-
-    jest.clearAllMocks();
   });
 
   it('should open modal with an attachment with the time range as relative values', async () => {
@@ -415,6 +417,128 @@ describe('openModal', () => {
 
       expect(services.plugins.data.query.filterManager.extract).not.toHaveBeenCalled();
       expect(attributes).toEqual(mockLensAttributes);
+    });
+  });
+
+  describe('by-ref library-backed attachments', () => {
+    const libraryLensApi = () =>
+      getMockLensApi(undefined, {
+        savedObjectId$: new BehaviorSubject<string | undefined>('so-1'),
+      });
+
+    const getAttachments = async () => {
+      await waitFor(() => {
+        expect(mockOpenModal).toHaveBeenCalled();
+      });
+      return mockOpenModal.mock.calls[0][0].getAttachments();
+    };
+
+    it('stays by-value when attachments are disabled even if savedObjectId is present', async () => {
+      (useCasesConfig as jest.Mock).mockReturnValue({ attachmentsEnabled: false });
+
+      openModal(
+        libraryLensApi(),
+        'myAppId',
+        {} as unknown as CasesActionContextProps,
+        getMockServices()
+      );
+
+      expect(await getAttachments()).toEqual([
+        {
+          type: LENS_ATTACHMENT_TYPE,
+          data: {
+            state: {
+              attributes: mockLensAttributes,
+              timeRange: {
+                from: '2023-12-31T00:00:00.000Z',
+                to: '2024-01-01T00:00:00.000Z',
+              },
+              metadata: { description: mockDescription },
+            },
+          },
+        },
+      ]);
+    });
+
+    it('stays by-value when attachments are enabled but the panel is ad-hoc', async () => {
+      (useCasesConfig as jest.Mock).mockReturnValue({ attachmentsEnabled: true });
+
+      openModal(
+        getMockLensApi(),
+        'myAppId',
+        {} as unknown as CasesActionContextProps,
+        getMockServices()
+      );
+
+      expect(await getAttachments()).toEqual([
+        {
+          type: LENS_ATTACHMENT_TYPE,
+          data: {
+            state: {
+              attributes: mockLensAttributes,
+              timeRange: {
+                from: '2023-12-31T00:00:00.000Z',
+                to: '2024-01-01T00:00:00.000Z',
+              },
+              metadata: { description: mockDescription },
+            },
+          },
+        },
+      ]);
+    });
+
+    it('emits a by-ref payload when serializeState.ref_id is set and savedObjectId$ is empty', async () => {
+      (useCasesConfig as jest.Mock).mockReturnValue({ attachmentsEnabled: true });
+
+      openModal(
+        getMockLensApi(undefined, {
+          serializeState: () => ({ ref_id: 'so-from-serialize' } as never),
+        }),
+        'myAppId',
+        {} as unknown as CasesActionContextProps,
+        getMockServices()
+      );
+
+      expect(await getAttachments()).toEqual([
+        {
+          type: LENS_ATTACHMENT_TYPE,
+          attachmentId: 'so-from-serialize',
+          metadata: { title: 'mockTitle', soType: LENS_SO_TYPE },
+          data: {
+            attributes: mockLensAttributes,
+            timeRange: {
+              from: '2023-12-31T00:00:00.000Z',
+              to: '2024-01-01T00:00:00.000Z',
+            },
+          },
+        },
+      ]);
+    });
+
+    it('emits a by-ref payload when attachments are enabled and savedObjectId is present', async () => {
+      (useCasesConfig as jest.Mock).mockReturnValue({ attachmentsEnabled: true });
+
+      openModal(
+        libraryLensApi(),
+        'myAppId',
+        {} as unknown as CasesActionContextProps,
+        getMockServices()
+      );
+
+      expect(await getAttachments()).toEqual([
+        {
+          type: LENS_ATTACHMENT_TYPE,
+          attachmentId: 'so-1',
+          metadata: { title: 'mockTitle', soType: LENS_SO_TYPE },
+          data: {
+            attributes: mockLensAttributes,
+            timeRange: {
+              from: '2023-12-31T00:00:00.000Z',
+              to: '2024-01-01T00:00:00.000Z',
+            },
+          },
+        },
+      ]);
     });
   });
 });

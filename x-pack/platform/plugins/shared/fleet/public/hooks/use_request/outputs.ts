@@ -22,14 +22,27 @@ import type {
 
 import { API_VERSIONS } from '../../../common/constants';
 
-import { sendRequest, sendRequestForRq, useRequest } from './use_request';
+import { sendRequest, sendRequestForRq } from './use_request';
 
-export function useGetOutputs() {
-  return useRequest<GetOutputsResponse>({
+export const OUTPUTS_QUERY_KEY = ['fleet', 'outputs'];
+
+function sendGetOutputs() {
+  return sendRequestForRq<GetOutputsResponse>({
     method: 'get',
     path: outputRoutesService.getListPath(),
     version: API_VERSIONS.public.v1,
   });
+}
+
+export function useGetOutputs() {
+  const result = useQuery(OUTPUTS_QUERY_KEY, sendGetOutputs);
+  return {
+    data: result.data,
+    error: result.error,
+    isLoading: result.isLoading,
+    isInitialRequest: result.isLoading,
+    resendRequest: result.refetch,
+  };
 }
 
 export function useDefaultOutput() {

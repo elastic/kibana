@@ -1,0 +1,13 @@
+{
+  "type": "plugin",
+  "id": "@kbn/context-engine-agent-builder-plugin",
+  "owner": "@elastic/context-eng",
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "contextEngineAgentBuilder",
+    "browser": true,
+    "server": true,
+    "requiredPlugins": ["agentBuilder", "contextEngine", "workflowsManagement", "security"]
+  }
+}

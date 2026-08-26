@@ -1,8 +1,7 @@
 {
-  "sha1": "a68589765d7489b15bf9b3072f1d7cfdd7c99f94",
+  "sha1": "78e9dc4f5d8734b11bd51e181c433cde6f2f2b5b",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -14,8 +13,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/ui/tests/classification_creation.spec.ts",
-        "line": 98,
-        "column": 23
+        "line": 100,
+        "column": 17
       }
     },
     {
@@ -125,6 +124,34 @@
       }
     },
     {
+      "id": "0e907d752fc9d32-c1a30a350e5bcce",
+      "title": "index based actions panel on trial license create advanced job action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/ui/tests/index_data_visualizer_actions_panel_trial.spec.ts",
+        "line": 28,
+        "column": 28
+      }
+    },
+    {
+      "id": "0e907d752fc9d32-4dc45a678b432b5",
+      "title": "index based actions panel on trial license view in discover page action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/ui/tests/index_data_visualizer_actions_panel_trial.spec.ts",
+        "line": 37,
+        "column": 13
+      }
+    },
+    {
       "id": "5d272fc26d0cce3-2fecdf3a8ab97ec",
       "title": "outlier detection creation iowa house prices outlier detection: full creation journey",
       "expectedStatus": "passed",
@@ -133,8 +160,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/ui/tests/outlier_detection_creation.spec.ts",
-        "line": 109,
-        "column": 8
+        "line": 111,
+        "column": 9
       }
     },
     {
@@ -146,8 +173,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/ui/tests/regression_creation.spec.ts",
-        "line": 97,
-        "column": 23
+        "line": 99,
+        "column": 17
       }
     }
   ]

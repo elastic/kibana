@@ -46,11 +46,11 @@ spec:
           access_level: MANAGE_BUILD_AND_READ
         kibana-tech-leads:
           access_level: MANAGE_BUILD_AND_READ
-      schedules:
-        Tuesday and Friday 8 am UTC:
-          cronline: 0 8 * * 2,5
-          message: Tuesday and Friday 8 am UTC
-          branch: main
+      # schedules:
+      # Tuesday and Friday 8 am UTC:
+      #   cronline: 0 8 * * 2,5
+      #   message: Tuesday and Friday 8 am UTC
+      #   branch: main
       tags:
         - kibana
         - ':kibana: Kibana release path'

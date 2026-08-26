@@ -113,7 +113,7 @@ export const CaseViewAttachments = ({
     () =>
       unifiedAttachmentTypeRegistry
         .list()
-        .filter((type) => !type.getAttachmentTabViewObject?.()?.children)
+        .filter((type) => !type.getAttachmentList?.()?.children)
         .map((type) => type.id),
     [unifiedAttachmentTypeRegistry]
   );
@@ -125,7 +125,7 @@ export const CaseViewAttachments = ({
         .list()
         .flatMap((type) => {
           if (!isTypeVisible(type.id)) return [];
-          const Children = type.getAttachmentTabViewObject?.()?.children;
+          const Children = type.getAttachmentList?.()?.children;
           if (!Children) {
             return [];
           }
@@ -134,9 +134,9 @@ export const CaseViewAttachments = ({
           if (count < 1) {
             return [];
           }
-          return [{ id: type.id, displayName: type.displayName, count, Children }];
+          return [{ id: type.id, label: type.getLabel(), count, Children }];
         })
-        .sort((a, b) => a.displayName.localeCompare(b.displayName)),
+        .sort((a, b) => a.label.localeCompare(b.label)),
     [unifiedAttachmentTypeRegistry, countsByType, effectiveFileCount, isTypeVisible]
   );
 
@@ -332,11 +332,11 @@ export const CaseViewAttachments = ({
           />
         ) : (
           <EuiFlexGroup direction="column" gutterSize="m">
-            {attachmentSections.map(({ id, displayName, count, Children }) => (
+            {attachmentSections.map(({ id, label, count, Children }) => (
               <AttachmentAccordion
                 key={id}
                 id={id}
-                title={displayName}
+                title={label}
                 count={count}
                 isOpen={!collapsedAttachmentIds.has(id)}
                 onToggle={(isOpen) => onAttachmentToggle(id, isOpen)}

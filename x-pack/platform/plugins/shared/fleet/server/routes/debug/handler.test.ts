@@ -9,11 +9,24 @@ import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/serv
 
 import { OUTPUT_SAVED_OBJECT_TYPE } from '../../constants';
 
+import { isDebugAuthorized } from '../../services/security';
+import { addNamespaceFilteringToQuery } from '../../services/spaces/query_namespaces_filtering';
+
 import {
   fetchIndexHandler,
   fetchSavedObjectNamesHandler,
   fetchSavedObjectsHandler,
 } from './handler';
+
+jest.mock('../../services/security', () => ({ isDebugAuthorized: jest.fn() }));
+jest.mock('../../services/spaces/query_namespaces_filtering', () => ({
+  addNamespaceFilteringToQuery: jest.fn(),
+}));
+
+const mockIsDebugAuthorized = isDebugAuthorized as jest.MockedFunction<typeof isDebugAuthorized>;
+const mockAddNamespaceFilteringToQuery = addNamespaceFilteringToQuery as jest.MockedFunction<
+  typeof addNamespaceFilteringToQuery
+>;
 
 describe('Fleet debug handlers', () => {
   const createMockResponse = () => ({
@@ -22,16 +35,56 @@ describe('Fleet debug handlers', () => {
       ...opts,
       statusCode: 400,
     })),
+    forbidden: jest.fn().mockImplementation((opts: { body?: { message?: string } }) => ({
+      ...opts,
+      statusCode: 403,
+    })),
+  });
+
+  beforeEach(() => {
+    mockIsDebugAuthorized.mockReturnValue(true);
+    // Pass query through unchanged (simulates space awareness disabled / no filter added).
+    mockAddNamespaceFilteringToQuery.mockImplementation(async (query) => query);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   describe('fetchIndexHandler', () => {
+    it('returns 403 when caller is not superuser', async () => {
+      mockIsDebugAuthorized.mockReturnValue(false);
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const context = {
+        core: Promise.resolve({ elasticsearch: { client: { asInternalUser: esClient } } }),
+        fleet: Promise.resolve({
+          internalSoClient: savedObjectsClientMock.create(),
+          spaceId: 'default',
+        }),
+      } as any;
+      const response = createMockResponse();
+
+      const result = await fetchIndexHandler(
+        context,
+        { body: { index: '.fleet-agents' } } as any,
+        response as any
+      );
+
+      expect(result).toEqual({
+        body: { message: 'Debug routes require superuser privileges.' },
+        statusCode: 403,
+      });
+      expect(esClient.search).not.toHaveBeenCalled();
+    });
+
     it('returns 400 when index is not allowed for debug', async () => {
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       const context = {
-        core: Promise.resolve({
-          elasticsearch: { client: { asInternalUser: esClient } },
+        core: Promise.resolve({ elasticsearch: { client: { asInternalUser: esClient } } }),
+        fleet: Promise.resolve({
+          internalSoClient: savedObjectsClientMock.create(),
+          spaceId: 'default',
         }),
-        fleet: Promise.resolve({ internalSoClient: savedObjectsClientMock.create() }),
       } as any;
       const response = createMockResponse();
 
@@ -54,10 +107,11 @@ describe('Fleet debug handlers', () => {
       esClient.search.mockResolvedValue(searchResult as any);
 
       const context = {
-        core: Promise.resolve({
-          elasticsearch: { client: { asInternalUser: esClient } },
+        core: Promise.resolve({ elasticsearch: { client: { asInternalUser: esClient } } }),
+        fleet: Promise.resolve({
+          internalSoClient: savedObjectsClientMock.create(),
+          spaceId: 'default',
         }),
-        fleet: Promise.resolve({ internalSoClient: savedObjectsClientMock.create() }),
       } as any;
       const response = createMockResponse();
 
@@ -68,11 +122,39 @@ describe('Fleet debug handlers', () => {
       );
 
       expect(result).toEqual({ body: searchResult, statusCode: 200 });
-      expect(esClient.search).toHaveBeenCalledWith({ index: '.fleet-agents' });
+      expect(esClient.search).toHaveBeenCalledWith({ index: '.fleet-agents', query: { bool: {} } });
     });
   });
 
   describe('fetchSavedObjectsHandler', () => {
+    it('returns 403 when caller is not superuser', async () => {
+      mockIsDebugAuthorized.mockReturnValue(false);
+      const soClient = savedObjectsClientMock.create();
+      const context = {
+        core: Promise.resolve({
+          elasticsearch: {
+            client: {
+              asInternalUser: elasticsearchServiceMock.createClusterClient().asInternalUser,
+            },
+          },
+        }),
+        fleet: Promise.resolve({ internalSoClient: soClient, spaceId: 'default' }),
+      } as any;
+      const response = createMockResponse();
+
+      const result = await fetchSavedObjectsHandler(
+        context,
+        { body: { type: OUTPUT_SAVED_OBJECT_TYPE, name: 'my-output' } } as any,
+        response as any
+      );
+
+      expect(result).toEqual({
+        body: { message: 'Debug routes require superuser privileges.' },
+        statusCode: 403,
+      });
+      expect(soClient.find).not.toHaveBeenCalled();
+    });
+
     it('returns 400 when saved object type is not allowed for debug', async () => {
       const soClient = savedObjectsClientMock.create();
       const context = {
@@ -83,7 +165,7 @@ describe('Fleet debug handlers', () => {
             },
           },
         }),
-        fleet: Promise.resolve({ internalSoClient: soClient }),
+        fleet: Promise.resolve({ internalSoClient: soClient, spaceId: 'default' }),
       } as any;
       const response = createMockResponse();
 
@@ -113,7 +195,7 @@ describe('Fleet debug handlers', () => {
             },
           },
         }),
-        fleet: Promise.resolve({ internalSoClient: soClient }),
+        fleet: Promise.resolve({ internalSoClient: soClient, spaceId: 'default' }),
       } as any;
       const response = createMockResponse();
 
@@ -133,6 +215,34 @@ describe('Fleet debug handlers', () => {
   });
 
   describe('fetchSavedObjectNamesHandler', () => {
+    it('returns 403 when caller is not superuser', async () => {
+      mockIsDebugAuthorized.mockReturnValue(false);
+      const soClient = savedObjectsClientMock.create();
+      const context = {
+        core: Promise.resolve({
+          elasticsearch: {
+            client: {
+              asInternalUser: elasticsearchServiceMock.createClusterClient().asInternalUser,
+            },
+          },
+        }),
+        fleet: Promise.resolve({ internalSoClient: soClient, spaceId: 'default' }),
+      } as any;
+      const response = createMockResponse();
+
+      const result = await fetchSavedObjectNamesHandler(
+        context,
+        { body: { type: OUTPUT_SAVED_OBJECT_TYPE } } as any,
+        response as any
+      );
+
+      expect(result).toEqual({
+        body: { message: 'Debug routes require superuser privileges.' },
+        statusCode: 403,
+      });
+      expect(soClient.find).not.toHaveBeenCalled();
+    });
+
     it('returns 400 when saved object type is not allowed for debug', async () => {
       const soClient = savedObjectsClientMock.create();
       const context = {
@@ -143,7 +253,7 @@ describe('Fleet debug handlers', () => {
             },
           },
         }),
-        fleet: Promise.resolve({ internalSoClient: soClient }),
+        fleet: Promise.resolve({ internalSoClient: soClient, spaceId: 'default' }),
       } as any;
       const response = createMockResponse();
 
@@ -179,7 +289,7 @@ describe('Fleet debug handlers', () => {
             },
           },
         }),
-        fleet: Promise.resolve({ internalSoClient: soClient }),
+        fleet: Promise.resolve({ internalSoClient: soClient, spaceId: 'default' }),
       } as any;
       const response = createMockResponse();
 
