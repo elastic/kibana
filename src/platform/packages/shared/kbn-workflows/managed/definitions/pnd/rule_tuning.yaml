@@ -246,10 +246,6 @@ steps:
             id: "{{ foreach.item.0 }}"
             query: "{{ steps.diagnose_rule.output.structured_output.proposed_query }}"
 
-      # Marking runs last so a failed PATCH aborts before tagging and the next sweep can
-      # retry the rule. A tagging failure is tolerated (`continue: true`) so it doesn't
-      # kill the rest of the sweep.
-      #
       # ES|QL rows arrive as positional arrays, so `item.5` is the sixth field the
       # harvest's KEEP projects: the alert_ids multivalue.
       - name: mark_alerts_reviewed
