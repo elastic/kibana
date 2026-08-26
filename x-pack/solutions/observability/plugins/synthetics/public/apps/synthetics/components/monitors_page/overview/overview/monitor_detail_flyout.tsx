@@ -35,6 +35,10 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux-v7';
 import { useKibanaSpace } from '../../../../../../hooks/use_kibana_space';
 import { createRemoteMonitorDetailUrl } from '../../../../utils/remote/remote_monitor_urls';
+import {
+  getRemoteUrlUnavailableTooltip,
+  getViewOnRemoteOriginButtonLabel,
+} from '../../../../utils/remote/remote_origin_copy';
 import type { ClientPluginsStart } from '../../../../../../plugin';
 import { useMonitorDetail } from '../../../../hooks/use_monitor_detail';
 import { useMonitorDetailLocator } from '../../../../hooks/use_monitor_detail_locator';
@@ -589,7 +593,7 @@ export function MonitorDetailFlyout(props: Props) {
                 <EuiFlexGroup gutterSize="s">
                   <EuiFlexItem grow={false}>
                     <EuiToolTip
-                      content={!remoteMonitorUrl ? REMOTE_URL_UNAVAILABLE_TEXT : undefined}
+                      content={!remoteMonitorUrl ? getRemoteUrlUnavailableTooltip() : undefined}
                     >
                       <EuiButton
                         data-test-subj="syntheticsMonitorDetailFlyoutViewRemoteButton"
@@ -599,7 +603,7 @@ export function MonitorDetailFlyout(props: Props) {
                         iconType="external"
                         iconSide="right"
                       >
-                        {VIEW_ON_REMOTE_CLUSTER_TEXT}
+                        {getViewOnRemoteOriginButtonLabel()}
                       </EuiButton>
                     </EuiToolTip>
                   </EuiFlexItem>
@@ -765,18 +769,3 @@ const FLYOUT_TABS: Array<{ id: FlyoutTabId; label: string }> = [
     }),
   },
 ];
-
-const VIEW_ON_REMOTE_CLUSTER_TEXT = i18n.translate(
-  'xpack.synthetics.monitorList.viewOnRemoteClusterText',
-  {
-    defaultMessage: 'View on remote cluster',
-  }
-);
-
-const REMOTE_URL_UNAVAILABLE_TEXT = i18n.translate(
-  'xpack.synthetics.monitorList.remoteUrlUnavailableText',
-  {
-    defaultMessage:
-      'The remote Kibana URL is not available. Ensure the remote cluster has server.publicBaseUrl configured.',
-  }
-);
