@@ -7,7 +7,6 @@
 
 import { z } from '@kbn/zod/v4';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { AttachmentFormatContext } from '@kbn/agent-builder-server/attachments';
 import type { BuiltinAttachmentBoundedTool } from '@kbn/agent-builder-server/attachments';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
@@ -21,12 +20,7 @@ import { ALERTING_LOG_CODES } from '../../../lib/errors/error_codes';
 const DEFAULT_PER_PAGE = 10;
 
 const getRuleExecutionHistorySchema = z.object({
-  page: z
-    .number()
-    .int()
-    .min(1)
-    .optional()
-    .describe('Page number (1-indexed). Defaults to 1.'),
+  page: z.number().int().min(1).optional().describe('Page number (1-indexed). Defaults to 1.'),
   perPage: z
     .number()
     .int()
@@ -40,10 +34,7 @@ const getRuleExecutionHistorySchema = z.object({
     .array(z.enum(['success', 'failure']))
     .optional()
     .describe('Filter by execution outcome.'),
-  sort: z
-    .enum(['startedAt', 'duration'])
-    .optional()
-    .describe('Sort field. Defaults to startedAt.'),
+  sort: z.enum(['startedAt', 'duration']).optional().describe('Sort field. Defaults to startedAt.'),
   sortOrder: z.enum(['asc', 'desc']).optional().describe('Sort direction. Defaults to desc.'),
 });
 

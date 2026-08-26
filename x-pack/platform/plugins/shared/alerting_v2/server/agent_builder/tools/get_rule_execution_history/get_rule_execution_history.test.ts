@@ -13,7 +13,10 @@ import { ToolType } from '@kbn/agent-builder-common';
 import type { EventLogServiceContract } from '../../../lib/services/event_log_service/event_log_service';
 import type { PrivilegeChecker } from '../../../lib/services/privilege_checker/privilege_checker';
 import type { RuleExecution } from '../../../lib/services/event_log_service/types';
-import { getRuleExecutionHistoryTool, getRuleExecutionHistoryToolId } from './get_rule_execution_history';
+import {
+  getRuleExecutionHistoryTool,
+  getRuleExecutionHistoryToolId,
+} from './get_rule_execution_history';
 
 const createExecution = (overrides: Partial<RuleExecution> = {}): RuleExecution => ({
   id: 'exec-1',

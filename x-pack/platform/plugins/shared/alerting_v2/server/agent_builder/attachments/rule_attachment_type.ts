@@ -21,15 +21,15 @@ import type { LoggerServiceContract } from '../../lib/services/logger_service/lo
 import type { EventLogServiceContract } from '../../lib/services/event_log_service/event_log_service';
 import type { PrivilegeChecker } from '../../lib/services/privilege_checker/privilege_checker';
 import type { RulesClient } from '../../lib/rules_client';
-import {
-  getRuleExecutionHistoryTool,
-} from '../tools/get_rule_execution_history';
+import { getRuleExecutionHistoryTool } from '../tools/get_rule_execution_history';
 
 interface CreateRuleAttachmentTypeOptions {
   logger: LoggerServiceContract;
   getRulesClient: (context: AttachmentResolveContext) => RulesClient;
   getEventLogService: () => EventLogServiceContract;
-  getPrivilegeChecker: (context: { request: import('@kbn/core-http-server').KibanaRequest }) => PrivilegeChecker;
+  getPrivilegeChecker: (context: {
+    request: import('@kbn/core-http-server').KibanaRequest;
+  }) => PrivilegeChecker;
 }
 
 const formatRuleAttachmentDescription = (

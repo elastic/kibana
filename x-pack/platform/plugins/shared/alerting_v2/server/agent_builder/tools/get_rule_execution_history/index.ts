@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-export { getRuleExecutionHistoryTool, getRuleExecutionHistoryToolId } from './get_rule_execution_history';
+export {
+  getRuleExecutionHistoryTool,
+  getRuleExecutionHistoryToolId,
+} from './get_rule_execution_history';
 export type { GetRuleExecutionHistoryToolParams } from './get_rule_execution_history';
