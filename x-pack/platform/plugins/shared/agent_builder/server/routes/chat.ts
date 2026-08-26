@@ -239,26 +239,6 @@ export const conversePayloadSchema = schema.object({
       },
     })
   ),
-  capabilities: schema.maybe(
-    schema.object(
-      {
-        visualizations: schema.maybe(
-          schema.boolean({
-            meta: {
-              description:
-                'When true, allows the agent to render tabular data from tool results as interactive visualizations using custom XML elements in responses.',
-            },
-          })
-        ),
-      },
-      {
-        meta: {
-          description:
-            'Controls agent capabilities during conversation. Currently supports visualization rendering for tabular tool results.',
-        },
-      }
-    )
-  ),
   browser_api_tools: schema.maybe(
     schema.arrayOf(
       schema.object({
@@ -503,7 +483,6 @@ export function registerChatRoutes({
       attachments,
       access_control: accessControl,
       read_only: readOnly,
-      capabilities,
       browser_api_tools: browserApiTools,
       configuration_overrides: configurationOverrides,
       action,
@@ -529,7 +508,6 @@ export function registerChatRoutes({
         readOnly,
         origin,
         callback,
-        capabilities,
         browserApiTools,
         configurationOverrides,
         action,

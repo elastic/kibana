@@ -9,7 +9,6 @@ import type {
   ConversationAction,
   ConversationAccessControl,
   ConversationRound,
-  AgentCapabilities,
   AssistantResponse,
   RuntimeAgentConfigurationOverrides,
 } from '@kbn/agent-builder-common';
@@ -29,7 +28,6 @@ export interface ChatRequestBodyPayload {
   /** Applied when the round creates the conversation; ignored when continuing an existing one. */
   read_only?: boolean;
   execution_id?: string;
-  capabilities?: AgentCapabilities;
   attachments?: AttachmentInput[];
   input?: string;
   prompts?: Record<string, PromptResponse>;
