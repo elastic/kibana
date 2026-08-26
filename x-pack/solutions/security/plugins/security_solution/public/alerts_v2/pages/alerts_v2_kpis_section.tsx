@@ -21,6 +21,7 @@ import type { AggregateQuery, TimeRange } from '@kbn/es-query';
 import { SeverityLevelPanel } from './kpis/severity_level_panel';
 import { AlertsByRulePanel } from './kpis/alerts_by_rule_panel';
 import { TopAlertsByPanel } from './kpis/top_alerts_by_panel';
+import { TrendPanel } from './kpis/trend_panel';
 
 export type AlertsV2KpiView = 'summary' | 'trend' | 'counts' | 'treemap';
 
@@ -128,6 +129,8 @@ export const AlertsV2KpisSection = ({ query, timeRange }: AlertsV2KpisSectionPro
             <TopAlertsByPanel query={query} timeRange={timeRange} />
           </EuiFlexItem>
         </EuiFlexGroup>
+      ) : selectedView === 'trend' ? (
+        <TrendPanel query={query} timeRange={timeRange} />
       ) : (
         <EuiEmptyPrompt
           iconType="chartBarVerticalStack"
