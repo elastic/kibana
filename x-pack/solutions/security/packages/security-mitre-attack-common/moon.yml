@@ -15,7 +15,7 @@ project:
   description: Moon project for @kbn/security-mitre-attack-common
   channel: ''
   owner: '@elastic/security-detection-engineering'
-  sourceRoot: x-pack/solutions/security/packages/mitre-attack/mitre-attack-common
+  sourceRoot: x-pack/solutions/security/packages/security-mitre-attack-common
 dependsOn:
   - '@kbn/zod'
 tags:

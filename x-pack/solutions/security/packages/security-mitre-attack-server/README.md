@@ -34,7 +34,7 @@ on first load and cached for subsequent calls.
 From the Kibana repo root:
 
 ```sh
-node x-pack/solutions/security/packages/mitre-attack/mitre-attack-server/scripts/build_artifact.js
+node x-pack/solutions/security/packages/security-mitre-attack-server/scripts/build_artifact.js
 ```
 
 The script fetches the pinned MITRE ATT&CK STIX bundle from

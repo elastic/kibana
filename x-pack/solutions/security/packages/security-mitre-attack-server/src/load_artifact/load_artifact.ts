@@ -34,7 +34,7 @@ export const loadMitreArtifact = (): MitreEntity[] => {
     throw new Error(
       `MITRE ATT&CK artifact not found at '${ARTIFACT_PATH}'. ` +
         `Run the build script to generate it: ` +
-        `node x-pack/solutions/security/packages/mitre-attack/mitre-attack-server/scripts/build_artifact.js`
+        `node x-pack/solutions/security/packages/security-mitre-attack-server/scripts/build_artifact.js`
     );
   }
 
