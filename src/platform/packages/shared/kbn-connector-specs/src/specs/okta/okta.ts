@@ -543,7 +543,7 @@ export const Okta: ConnectorSpec = {
 
     addUserToGroup: {
       isTool: true,
-      scope: 'write',
+      scope: 'destroy',
       description:
         'Add a user to a group (for example a quarantine group) as a remediation lever. Requires okta.groups.manage (and a group-capable admin role) or Okta returns 403. Uses PUT and returns 204 on success.',
       input: AddUserToGroupInputSchema,

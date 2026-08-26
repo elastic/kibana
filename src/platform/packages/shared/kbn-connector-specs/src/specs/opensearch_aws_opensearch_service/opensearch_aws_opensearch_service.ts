@@ -203,7 +203,7 @@ export const OpensearchAwsOpensearchService: ConnectorSpec = {
 
     executeMonitor: {
       isTool: true,
-      scope: 'write',
+      scope: 'destroy',
       description:
         'Run a monitor immediately instead of waiting for its schedule, evaluating its query and trigger conditions now. Set dryrun to true to see the trigger results without sending any notification actions.',
       input: ExecuteMonitorInputSchema,
