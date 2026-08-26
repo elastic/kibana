@@ -22,7 +22,6 @@ describe('CasesWorkflowRunService', () => {
   const auditLog = auditLogger.log as jest.MockedFunction<typeof auditLogger.log>;
   const casesClient = createCasesClientMock();
 
-  const onWorkflowStarted = jest.fn();
   let workflowsAvailable = true;
   let licenseValid = true;
   const license = {
@@ -44,7 +43,6 @@ describe('CasesWorkflowRunService', () => {
     management,
     logger,
     audit,
-    onWorkflowStarted,
   });
   const theCase = {
     id: 'case-1',
@@ -61,7 +59,7 @@ describe('CasesWorkflowRunService', () => {
   const defaultBody: RunCaseWorkflowRequest = {
     caseIds: ['case-1'],
     inputs: { event: { caseIds: ['case-1'] } },
-    origin: { type: 'cases.case', id: 'case-1' },
+    origin: { type: 'cases.case', caseId: 'case-1' },
   };
 
   const run = (body: RunCaseWorkflowRequest = defaultBody) =>
@@ -91,7 +89,6 @@ describe('CasesWorkflowRunService', () => {
       workflowExecutionId: 'execution-1',
       inputs,
     }));
-    onWorkflowStarted.mockResolvedValue(undefined);
   });
 
   it('starts the workflow with server-owned metadata', async () => {
@@ -122,18 +119,6 @@ describe('CasesWorkflowRunService', () => {
         origin: defaultBody.origin,
       },
     });
-    expect(onWorkflowStarted).toHaveBeenCalledWith({
-      caseIds: ['case-1'],
-      // processedInputs from the mock: client caseIds stripped, eventOverrides not applied
-      // (the mock returns `inputs` as-is).
-      inputs: { event: {} },
-      origin: defaultBody.origin,
-      workflow: {
-        id: 'workflow-1',
-        name: 'Investigate case',
-        executionId: 'execution-1',
-      },
-    });
     expect(auditLog).toHaveBeenCalledWith(
       expect.objectContaining({
         event: expect.objectContaining({
@@ -147,7 +132,7 @@ describe('CasesWorkflowRunService', () => {
     );
   });
 
-  it('passes alert preprocessing context and uses the processed inputs in the callback', async () => {
+  it('passes alert preprocessing context with event intact', async () => {
     const body: RunCaseWorkflowRequest = {
       caseIds: ['case-1'],
       inputs: {
@@ -156,17 +141,14 @@ describe('CasesWorkflowRunService', () => {
           alertIds: [{ _id: 'alert-1', _index: '.alerts' }],
         },
       },
-      origin: { type: 'cases.alert', id: 'alert-1' },
-    };
-    const processedInputs = {
-      event: { triggerType: 'alert', alerts: [{ id: 'alert-1' }] },
+      origin: { type: 'cases.alert', caseId: 'case-1', alertId: 'alert-1' },
     };
     casesClient.attachments.getAllDocumentsAttachedToCase.mockResolvedValue(
       createAttachedAlerts({ type: 'alert', alertId: 'alert-1', index: '.alerts' })
     );
     management.runWorkflowWithAlertPreprocessing.mockResolvedValue({
       workflowExecutionId: 'execution-1',
-      inputs: processedInputs,
+      inputs: { event: { triggerType: 'alert', alerts: [{ id: 'alert-1' }] } },
     });
 
     await expect(run(body)).resolves.toEqual({ workflowExecutionId: 'execution-1' });
@@ -189,20 +171,16 @@ describe('CasesWorkflowRunService', () => {
         preprocessingContext: context,
       })
     );
-    expect(onWorkflowStarted).toHaveBeenCalledWith(
-      expect.objectContaining({ inputs: processedInputs })
-    );
   });
 
-  describe('multi-case runs', () => {
-    const multiCaseBody: RunCaseWorkflowRequest = {
+  describe('bulk runs (no origin)', () => {
+    const bulkBody: RunCaseWorkflowRequest = {
       caseIds: ['case-a', 'case-b', 'case-c'],
       inputs: { event: { caseIds: ['case-a', 'case-b', 'case-c'] } },
-      origin: { type: 'cases.case', id: 'case-a' },
     };
 
     it('fires exactly one workflow execution for N cases with server-owned event.caseIds', async () => {
-      await expect(run(multiCaseBody)).resolves.toEqual({ workflowExecutionId: 'execution-1' });
+      await expect(run(bulkBody)).resolves.toEqual({ workflowExecutionId: 'execution-1' });
       expect(management.runWorkflowWithAlertPreprocessing).toHaveBeenCalledTimes(1);
       expect(management.runWorkflowWithAlertPreprocessing).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -216,13 +194,21 @@ describe('CasesWorkflowRunService', () => {
       );
     });
 
-    it('does NOT call casesClient.cases.get for multi-case runs (avoids N×fetch)', async () => {
-      await run(multiCaseBody);
+    it('does NOT call casesClient.cases.get for bulk runs (avoids N×fetch)', async () => {
+      await run(bulkBody);
+      expect(casesClient.cases.get).not.toHaveBeenCalled();
+    });
+
+    it('is also legal when exactly one case is selected (list-surface single-select)', async () => {
+      await expect(
+        run({ caseIds: ['case-1'], inputs: {} })
+      ).resolves.toEqual({ workflowExecutionId: 'execution-1' });
+      // No case fetch when origin is absent.
       expect(casesClient.cases.get).not.toHaveBeenCalled();
     });
 
     it('emits one audit event per case on success', async () => {
-      await run(multiCaseBody);
+      await run(bulkBody);
       expect(auditLog).toHaveBeenCalledTimes(3);
       for (const id of ['case-a', 'case-b', 'case-c']) {
         expect(auditLog).toHaveBeenCalledWith(
@@ -236,7 +222,7 @@ describe('CasesWorkflowRunService', () => {
 
     it('emits one audit event per case on failure', async () => {
       management.runWorkflowWithAlertPreprocessing.mockRejectedValue(new Error('execution failed'));
-      await expect(run(multiCaseBody)).rejects.toThrow('execution failed');
+      await expect(run(bulkBody)).rejects.toThrow('execution failed');
       expect(auditLog).toHaveBeenCalledTimes(3);
       for (const id of ['case-a', 'case-b', 'case-c']) {
         expect(auditLog).toHaveBeenCalledWith(
@@ -255,40 +241,63 @@ describe('CasesWorkflowRunService', () => {
         new Error('Unauthorized: case-b')
       );
 
-      await expect(run(multiCaseBody)).rejects.toThrow('Unauthorized: case-b');
+      await expect(run(bulkBody)).rejects.toThrow('Unauthorized: case-b');
       expect(management.runWorkflowWithAlertPreprocessing).not.toHaveBeenCalled();
     });
 
-    it('rejects a multi-case run with a non-case origin type', async () => {
+    it('rejects alert inputs when origin is absent', async () => {
+      await expect(
+        run({
+          caseIds: ['case-a', 'case-b'],
+          inputs: { event: { alertIds: [{ _id: 'a-1', _index: '.alerts' }] } },
+        })
+      ).rejects.toThrow('Alert inputs can only be used with a single case.');
+      expect(management.runWorkflowWithAlertPreprocessing).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('single-case (sub-entity) origin types reject multiple caseIds', () => {
+    it('rejects cases.case with multiple caseIds', async () => {
       await expect(
         run({
           caseIds: ['case-a', 'case-b'],
           inputs: {},
-          origin: { type: 'cases.observable', id: 'obs-1' },
+          origin: { type: 'cases.case', caseId: 'case-a' },
         })
       ).rejects.toThrow('can only be used with a single case');
       expect(management.runWorkflowWithAlertPreprocessing).not.toHaveBeenCalled();
     });
 
-    it('rejects a multi-case run where origin.id is not in caseIds', async () => {
+    it('rejects cases.observable with multiple caseIds', async () => {
       await expect(
         run({
           caseIds: ['case-a', 'case-b'],
           inputs: {},
-          origin: { type: 'cases.case', id: 'not-in-list' },
+          origin: { type: 'cases.observable', caseId: 'case-a', observableId: 'obs-1' },
         })
-      ).rejects.toThrow('Workflow origin id must be one of the requested case ids.');
+      ).rejects.toThrow('can only be used with a single case');
       expect(management.runWorkflowWithAlertPreprocessing).not.toHaveBeenCalled();
     });
 
-    it('rejects a multi-case run with alert inputs', async () => {
+    it('rejects cases.alert with multiple caseIds', async () => {
       await expect(
         run({
           caseIds: ['case-a', 'case-b'],
-          inputs: { event: { alertIds: [{ _id: 'a-1', _index: '.alerts' }] } },
-          origin: { type: 'cases.case', id: 'case-a' },
+          inputs: {},
+          origin: { type: 'cases.alert', caseId: 'case-a', alertId: 'alert-1' },
         })
-      ).rejects.toThrow('Alert inputs can only be used with a single case.');
+      ).rejects.toThrow('can only be used with a single case');
+      expect(management.runWorkflowWithAlertPreprocessing).not.toHaveBeenCalled();
+    });
+
+    it('rejects cases.alerts with multiple caseIds', async () => {
+      await expect(
+        run({
+          caseIds: ['case-a', 'case-b'],
+          inputs: {},
+          origin: { type: 'cases.alerts', caseId: 'case-a' },
+        })
+      ).rejects.toThrow('can only be used with a single case');
       expect(management.runWorkflowWithAlertPreprocessing).not.toHaveBeenCalled();
     });
   });
@@ -301,7 +310,7 @@ describe('CasesWorkflowRunService', () => {
     await run({
       caseIds: ['case-1'],
       inputs: { event: { caseIds: ['case-1', 'case-evil'], triggerType: 'manual' } },
-      origin: { type: 'cases.case', id: 'case-1' },
+      origin: { type: 'cases.case', caseId: 'case-1' },
     });
 
     expect(management.runWorkflowWithAlertPreprocessing).toHaveBeenCalledWith(
@@ -335,10 +344,10 @@ describe('CasesWorkflowRunService', () => {
     expect(management.runWorkflowWithAlertPreprocessing).not.toHaveBeenCalled();
   });
 
-  it('rejects a case origin that does not match the route case', async () => {
+  it('rejects a case origin whose caseId does not match the target case', async () => {
     await expect(
-      run({ caseIds: ['case-1'], inputs: {}, origin: { type: 'cases.case', id: 'case-2' } })
-    ).rejects.toThrow('Workflow origin id must match case id "case-1".');
+      run({ caseIds: ['case-1'], inputs: {}, origin: { type: 'cases.case', caseId: 'case-2' } })
+    ).rejects.toThrow('Workflow origin caseId must match case id "case-1".');
     expect(management.runWorkflowWithAlertPreprocessing).not.toHaveBeenCalled();
   });
 
@@ -347,7 +356,7 @@ describe('CasesWorkflowRunService', () => {
       run({
         caseIds: ['case-1'],
         inputs: {},
-        origin: { type: 'cases.observable', id: 'observable-1' },
+        origin: { type: 'cases.observable', caseId: 'case-1', observableId: 'observable-1' },
       })
     ).rejects.toThrow('Observable "observable-1" does not belong to case "case-1".');
     expect(management.runWorkflowWithAlertPreprocessing).not.toHaveBeenCalled();
@@ -363,7 +372,7 @@ describe('CasesWorkflowRunService', () => {
       run({
         caseIds: ['case-1'],
         inputs: { event: { observables: [{ id: 'observable-1' }] } },
-        origin: { type: 'cases.observable', id: 'observable-1' },
+        origin: { type: 'cases.observable', caseId: 'case-1', observableId: 'observable-1' },
       })
     ).resolves.toEqual({ workflowExecutionId: 'execution-1' });
   });
@@ -379,7 +388,7 @@ describe('CasesWorkflowRunService', () => {
       run({
         caseIds: ['case-1'],
         inputs: { event: { alertIds: [{ _id: 'alert-99', _index: '.alerts' }] } },
-        origin: { type: 'cases.case', id: 'case-1' },
+        origin: { type: 'cases.case', caseId: 'case-1' },
       })
     ).rejects.toThrow('All selected alerts must belong to the case.');
     expect(management.runWorkflowWithAlertPreprocessing).not.toHaveBeenCalled();
@@ -398,7 +407,7 @@ describe('CasesWorkflowRunService', () => {
       run({
         caseIds: ['case-1'],
         inputs: { event: { alertIds: [{ _id: 'alert-99', _index: '.alerts' }] } },
-        origin: { type: 'cases.observable', id: 'observable-1' },
+        origin: { type: 'cases.observable', caseId: 'case-1', observableId: 'observable-1' },
       })
     ).rejects.toThrow('All selected alerts must belong to the case.');
     expect(management.runWorkflowWithAlertPreprocessing).not.toHaveBeenCalled();
@@ -413,7 +422,7 @@ describe('CasesWorkflowRunService', () => {
       run({
         caseIds: ['case-1'],
         inputs: { event: { alertIds: [{ _id: 'alert-2', _index: '.alerts' }] } },
-        origin: { type: 'cases.alert', id: 'alert-2' },
+        origin: { type: 'cases.alert', caseId: 'case-1', alertId: 'alert-2' },
       })
     ).rejects.toThrow('All selected alerts must belong to the case.');
     expect(management.runWorkflowWithAlertPreprocessing).not.toHaveBeenCalled();
@@ -430,7 +439,7 @@ describe('CasesWorkflowRunService', () => {
       run({
         caseIds: ['case-1'],
         inputs: { event: { alertIds: [{ _id: 'alert-1', _index: '.alerts-spoofed' }] } },
-        origin: { type: 'cases.alert', id: 'alert-1' },
+        origin: { type: 'cases.alert', caseId: 'case-1', alertId: 'alert-1' },
       })
     ).rejects.toThrow('All selected alerts must belong to the case.');
     expect(management.runWorkflowWithAlertPreprocessing).not.toHaveBeenCalled();
@@ -441,14 +450,14 @@ describe('CasesWorkflowRunService', () => {
       run({
         caseIds: ['case-1'],
         inputs: {},
-        origin: { type: 'cases.alert', id: 'alert-1' },
+        origin: { type: 'cases.alert', caseId: 'case-1', alertId: 'alert-1' },
       })
     ).rejects.toThrow('Alert workflow origins require at least one selected alert.');
     expect(casesClient.attachments.getAllDocumentsAttachedToCase).not.toHaveBeenCalled();
     expect(management.runWorkflowWithAlertPreprocessing).not.toHaveBeenCalled();
   });
 
-  it('rejects a single-alert origin that is not selected', async () => {
+  it('rejects a single-alert origin whose alertId is not among the selected alerts', async () => {
     casesClient.attachments.getAllDocumentsAttachedToCase.mockResolvedValue(
       createAttachedAlerts(
         { type: 'alert', alertId: 'alert-1', index: '.alerts' },
@@ -460,7 +469,7 @@ describe('CasesWorkflowRunService', () => {
       run({
         caseIds: ['case-1'],
         inputs: { event: { alertIds: [{ _id: 'alert-1', _index: '.alerts' }] } },
-        origin: { type: 'cases.alert', id: 'alert-2' },
+        origin: { type: 'cases.alert', caseId: 'case-1', alertId: 'alert-2' },
       })
     ).rejects.toThrow('Alert workflow origin "alert-2" is not selected.');
     expect(management.runWorkflowWithAlertPreprocessing).not.toHaveBeenCalled();
@@ -485,7 +494,7 @@ describe('CasesWorkflowRunService', () => {
             ],
           },
         },
-        origin: { type: 'cases.alerts', id: 'case-1' },
+        origin: { type: 'cases.alerts', caseId: 'case-1' },
       })
     ).resolves.toEqual({ workflowExecutionId: 'execution-1' });
   });
@@ -519,15 +528,6 @@ describe('CasesWorkflowRunService', () => {
 
     await expect(run()).rejects.toThrow('Workflow is disabled. Enable it to run it.');
     expect(management.runWorkflowWithAlertPreprocessing).not.toHaveBeenCalled();
-  });
-
-  it('preserves the execution result when the post-execution callback fails', async () => {
-    onWorkflowStarted.mockRejectedValue(new Error('callback failed'));
-
-    await expect(run()).resolves.toEqual({ workflowExecutionId: 'execution-1' });
-    expect(logger.error).toHaveBeenCalledWith(
-      expect.stringContaining('post-execution callback failed')
-    );
   });
 
   it('audits execution failures', async () => {

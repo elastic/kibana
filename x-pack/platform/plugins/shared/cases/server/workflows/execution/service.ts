@@ -16,15 +16,11 @@ import {
   CASES_WORKFLOW_EXECUTION_SOURCE,
 } from '../../../common/constants';
 import { CasesWorkflowExecutionMetadataSchema } from '../../../common/types/api/workflow/v1';
-import type {
-  CaseWorkflowRunOrigin,
-  RunCaseWorkflowRequest,
-  RunCaseWorkflowResponse,
-} from '../../../common/types/api';
+import type { RunCaseWorkflowRequest, RunCaseWorkflowResponse } from '../../../common/types/api';
 import { AttachmentType } from '../../../common/types/domain';
 import type { CasesClient } from '../../client';
 import type { CasesRequestHandlerContext } from '../../types';
-import { getSelectedAlertPairs, validateOrigin, validateMultiCaseOrigin } from './validate_origin';
+import { getSelectedAlertPairs, validateOrigin } from './validate_origin';
 
 interface RunWorkflowParams {
   workflowId: string;
@@ -39,31 +35,17 @@ interface CasesWorkflowRunServiceDeps {
   management: WorkflowsServerPluginSetup['management'];
   logger: Logger;
   audit: SecurityPluginSetup['audit'];
-  onWorkflowStarted?: (event: CasesWorkflowStartedEvent) => Promise<void>;
-}
-
-export interface CasesWorkflowStartedEvent {
-  caseIds: string[];
-  workflow: {
-    id: string;
-    name: string;
-    executionId: string;
-  };
-  origin: CaseWorkflowRunOrigin;
-  inputs: Record<string, unknown>;
 }
 
 export class CasesWorkflowRunService {
   private readonly management: WorkflowsServerPluginSetup['management'];
   private readonly logger: Logger;
   private readonly audit: SecurityPluginSetup['audit'];
-  private readonly onWorkflowStarted?: (event: CasesWorkflowStartedEvent) => Promise<void>;
 
-  constructor({ management, logger, audit, onWorkflowStarted }: CasesWorkflowRunServiceDeps) {
+  constructor({ management, logger, audit }: CasesWorkflowRunServiceDeps) {
     this.management = management;
     this.logger = logger;
     this.audit = audit;
-    this.onWorkflowStarted = onWorkflowStarted;
   }
 
   public async run({
@@ -124,15 +106,20 @@ export class CasesWorkflowRunService {
     // which IDs exist. One privilege round-trip for all owners via ensureAuthorized.
     await casesClient.cases.ensureAuthorizedToRunWorkflow({ ids: caseIds });
 
-    // For single-case runs, fetch the case to validate sub-entity origins and alert membership.
-    // For multi-case runs, only cases.case origin is legal — no case fetch is needed.
-    if (caseIds.length > 1) {
-      validateMultiCaseOrigin({
-        origin: body.origin,
-        caseIds,
-        inputs: body.inputs,
-      });
+    // `origin` is optional. When absent the run is a list-surface (bulk) run: the caller
+    // was not looking at any specific sub-entity, alert inputs are not permitted, and no
+    // case fetch is needed. When present the run is scoped to a single case with a specific
+    // sub-entity context; origin-entity membership and alert attachment are validated.
+    if (body.origin === undefined) {
+      if (getSelectedAlertPairs(body.inputs).length > 0) {
+        throw Boom.badRequest('Alert inputs can only be used with a single case.');
+      }
     } else {
+      if (caseIds.length > 1) {
+        throw Boom.badRequest(
+          `Workflow origin type "${body.origin.type}" can only be used with a single case.`
+        );
+      }
       const theCase = await casesClient.cases.get({ id: caseIds[0] });
       const attachedAlerts =
         getSelectedAlertPairs(body.inputs).length > 0
@@ -188,16 +175,16 @@ export class CasesWorkflowRunService {
     // eventOverrides injects the server-owned caseIds into `event` *after* alert preprocessing
     // runs. preprocessAlertInputs replaces the whole `event` object with the alert-event shape,
     // so pre-merging caseIds into event (before the call) would silently drop them on alert runs.
-    const { workflowExecutionId, inputs: processedInputs } =
-      await this.management.runWorkflowWithAlertPreprocessing({
-        workflow: toWorkflowExecutionEngineModel(workflow),
-        spaceId,
-        inputs: sanitizedInputs,
-        request,
-        preprocessingContext: context,
-        metadata,
-        eventOverrides: { caseIds },
-      });
+    const { workflowExecutionId } = await this.management.runWorkflowWithAlertPreprocessing({
+      workflow: toWorkflowExecutionEngineModel(workflow),
+      spaceId,
+      inputs: sanitizedInputs,
+      request,
+      preprocessingContext: context,
+      metadata,
+      eventOverrides: { caseIds },
+    });
+
     // One audit event per case keeps the audit trail queryable by individual case ID.
     this.logWorkflowRunAuditEvents({
       auditLogger,
@@ -206,27 +193,6 @@ export class CasesWorkflowRunService {
       workflowExecutionId,
       outcome: 'success',
     });
-
-    if (this.onWorkflowStarted) {
-      try {
-        await this.onWorkflowStarted({
-          caseIds,
-          inputs: processedInputs,
-          origin: body.origin,
-          workflow: {
-            id: workflow.id,
-            name: workflow.name,
-            executionId: workflowExecutionId,
-          },
-        });
-      } catch (error) {
-        this.logger.error(
-          `Workflow "${workflowId}" execution "${workflowExecutionId}" started but its post-execution callback failed: ${
-            error instanceof Error ? error.message : String(error)
-          }`
-        );
-      }
-    }
 
     return { workflowExecutionId };
   }

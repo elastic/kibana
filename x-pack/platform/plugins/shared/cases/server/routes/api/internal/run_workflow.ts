@@ -38,15 +38,31 @@ export const runCaseWorkflowBodySchema = schema.object({
         ? undefined
         : `Workflow inputs cannot exceed ${MAX_WORKFLOW_INPUTS_BYTES} bytes.`,
   }),
-  origin: schema.object({
-    type: schema.oneOf([
-      schema.literal(CASE_WORKFLOW_ORIGIN_TYPE),
-      schema.literal(OBSERVABLE_WORKFLOW_ORIGIN_TYPE),
-      schema.literal(ALERT_WORKFLOW_ORIGIN_TYPE),
-      schema.literal(ALERTS_WORKFLOW_ORIGIN_TYPE),
-    ]),
-    id: schema.string({ minLength: 1, maxLength: MAX_CASE_WORKFLOW_RUN_ID_LENGTH }),
-  }),
+  // Optional — absence means a list-surface (bulk) run with no sub-entity context.
+  // When present, it is a discriminated union; each variant is strict (no unknown keys).
+  // `schema.object` rejects extra keys by default, so the variants self-discriminate.
+  origin: schema.maybe(
+    schema.oneOf([
+      schema.object({
+        type: schema.literal(CASE_WORKFLOW_ORIGIN_TYPE),
+        caseId: schema.string({ minLength: 1, maxLength: MAX_CASE_WORKFLOW_RUN_ID_LENGTH }),
+      }),
+      schema.object({
+        type: schema.literal(OBSERVABLE_WORKFLOW_ORIGIN_TYPE),
+        caseId: schema.string({ minLength: 1, maxLength: MAX_CASE_WORKFLOW_RUN_ID_LENGTH }),
+        observableId: schema.string({ minLength: 1, maxLength: MAX_CASE_WORKFLOW_RUN_ID_LENGTH }),
+      }),
+      schema.object({
+        type: schema.literal(ALERT_WORKFLOW_ORIGIN_TYPE),
+        caseId: schema.string({ minLength: 1, maxLength: MAX_CASE_WORKFLOW_RUN_ID_LENGTH }),
+        alertId: schema.string({ minLength: 1, maxLength: MAX_CASE_WORKFLOW_RUN_ID_LENGTH }),
+      }),
+      schema.object({
+        type: schema.literal(ALERTS_WORKFLOW_ORIGIN_TYPE),
+        caseId: schema.string({ minLength: 1, maxLength: MAX_CASE_WORKFLOW_RUN_ID_LENGTH }),
+      }),
+    ])
+  ),
 });
 
 export const runCaseWorkflowParamsSchema = schema.object({

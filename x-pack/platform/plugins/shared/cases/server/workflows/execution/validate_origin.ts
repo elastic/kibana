@@ -44,47 +44,13 @@ export const getSelectedAlertPairs = (inputs: Record<string, unknown>): AlertPai
 };
 
 /**
- * Validates origin rules for a **multi-case** run (`caseIds.length > 1`).
- *
- * Only `cases.case` origin type is legal for multi-case runs. Sub-entity origins
- * (`cases.observable`, `cases.alert`, `cases.alerts`) each reference an entity
- * within exactly one case and therefore require `caseIds.length === 1`.
- *
- * Alert inputs (`inputs.event.alertIds`) are also rejected for multi-case runs:
- * alert membership is verified per-case, so there is no meaningful check to
- * perform across N cases.
- */
-export const validateMultiCaseOrigin = ({
-  origin,
-  caseIds,
-  inputs,
-}: {
-  origin: CaseWorkflowRunOrigin;
-  caseIds: string[];
-  inputs: Record<string, unknown>;
-}): void => {
-  if (origin.type !== CASE_WORKFLOW_ORIGIN_TYPE) {
-    throw Boom.badRequest(
-      `Workflow origin type "${origin.type}" can only be used with a single case.`
-    );
-  }
-  if (!caseIds.includes(origin.id)) {
-    throw Boom.badRequest('Workflow origin id must be one of the requested case ids.');
-  }
-  if (getSelectedAlertPairs(inputs).length > 0) {
-    throw Boom.badRequest('Alert inputs can only be used with a single case.');
-  }
-};
-
-/**
  * Validates that the requested workflow `origin` is consistent with `caseId`
  * and, when alert inputs are present, that every selected alert is attached
  * to the case.
  *
- * The alert-membership check (fix: was previously skipped for non-alert
- * origins) is enforced regardless of `origin.type` so callers cannot bypass
- * it by using a `cases.case` or `cases.observable` origin type while still
- * injecting arbitrary alert documents into the workflow via `inputs.event.alertIds`.
+ * The alert-membership check is enforced regardless of `origin.type` so callers
+ * cannot bypass it by using a `cases.case` or `cases.observable` origin type while
+ * still injecting arbitrary alert documents into the workflow via `inputs.event.alertIds`.
  */
 export const validateOrigin = ({
   origin,
@@ -101,12 +67,21 @@ export const validateOrigin = ({
 }): void => {
   // Step 1 — origin-entity membership checks
   if (origin.type === CASE_WORKFLOW_ORIGIN_TYPE || origin.type === ALERTS_WORKFLOW_ORIGIN_TYPE) {
-    if (origin.id !== caseId) {
-      throw Boom.badRequest(`Workflow origin id must match case id "${caseId}".`);
+    if (origin.caseId !== caseId) {
+      throw Boom.badRequest(`Workflow origin caseId must match case id "${caseId}".`);
     }
   } else if (origin.type === OBSERVABLE_WORKFLOW_ORIGIN_TYPE) {
-    if (!theCase.observables.some(({ id }) => id === origin.id)) {
-      throw Boom.badRequest(`Observable "${origin.id}" does not belong to case "${caseId}".`);
+    if (origin.caseId !== caseId) {
+      throw Boom.badRequest(`Workflow origin caseId must match case id "${caseId}".`);
+    }
+    if (!theCase.observables.some(({ id }) => id === origin.observableId)) {
+      throw Boom.badRequest(
+        `Observable "${origin.observableId}" does not belong to case "${caseId}".`
+      );
+    }
+  } else if (origin.type === ALERT_WORKFLOW_ORIGIN_TYPE) {
+    if (origin.caseId !== caseId) {
+      throw Boom.badRequest(`Workflow origin caseId must match case id "${caseId}".`);
     }
   }
 
@@ -121,9 +96,9 @@ export const validateOrigin = ({
     // For a single-alert origin the named alert must also be among the selected ones.
     if (
       origin.type === ALERT_WORKFLOW_ORIGIN_TYPE &&
-      !selectedPairs.some(({ _id }) => _id === origin.id)
+      !selectedPairs.some(({ _id }) => _id === origin.alertId)
     ) {
-      throw Boom.badRequest(`Alert workflow origin "${origin.id}" is not selected.`);
+      throw Boom.badRequest(`Alert workflow origin "${origin.alertId}" is not selected.`);
     }
   } else if (
     origin.type === ALERT_WORKFLOW_ORIGIN_TYPE ||

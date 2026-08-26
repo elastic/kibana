@@ -8,10 +8,7 @@
 import type { DocumentResponse } from '../../../common/types/api';
 import type { Case } from '../../../common/types/domain';
 import { getAlertInfoFromComments } from '../../common/utils';
-import {
-  validateOrigin as validateOriginWithAttachments,
-  validateMultiCaseOrigin,
-} from './validate_origin';
+import { validateOrigin as validateOriginWithAttachments } from './validate_origin';
 
 const theCase = {
   id: 'case-1',
@@ -38,10 +35,10 @@ const validateOrigin = (
 // ── cases.case origin ─────────────────────────────────────────────────────────
 
 describe('cases.case origin', () => {
-  it('passes when origin id matches case id and no alert inputs are present', () => {
+  it('passes when caseId matches and no alert inputs are present', () => {
     expect(() =>
       validateOrigin({
-        origin: { type: 'cases.case', id: 'case-1' },
+        origin: { type: 'cases.case', caseId: 'case-1' },
         caseId: 'case-1',
         inputs: {},
         theCase,
@@ -49,15 +46,15 @@ describe('cases.case origin', () => {
     ).not.toThrow();
   });
 
-  it('throws when origin id does not match case id', () => {
+  it('throws when caseId does not match the target case', () => {
     expect(() =>
       validateOrigin({
-        origin: { type: 'cases.case', id: 'case-2' },
+        origin: { type: 'cases.case', caseId: 'case-2' },
         caseId: 'case-1',
         inputs: {},
         theCase,
       })
-    ).toThrow('Workflow origin id must match case id "case-1".');
+    ).toThrow('Workflow origin caseId must match case id "case-1".');
   });
 
   it('throws when alertIds are present but not attached to the case', () => {
@@ -70,7 +67,7 @@ describe('cases.case origin', () => {
 
     expect(() =>
       validateOrigin({
-        origin: { type: 'cases.case', id: 'case-1' },
+        origin: { type: 'cases.case', caseId: 'case-1' },
         caseId: 'case-1',
         inputs: { event: { alertIds: [{ _id: 'unattached-alert', _index: '.alerts' }] } },
         theCase: caseWithAlert,
@@ -86,7 +83,7 @@ describe('cases.case origin', () => {
 
     expect(() =>
       validateOrigin({
-        origin: { type: 'cases.case', id: 'case-1' },
+        origin: { type: 'cases.case', caseId: 'case-1' },
         caseId: 'case-1',
         inputs: { event: { alertIds: [{ _id: 'alert-1', _index: '.alerts' }] } },
         theCase: caseWithAlert,
@@ -103,10 +100,10 @@ describe('cases.observable origin', () => {
     observables: [{ id: 'obs-1' }],
   } as unknown as Case;
 
-  it('passes when observable belongs to the case', () => {
+  it('passes when observable belongs to the case and caseId matches', () => {
     expect(() =>
       validateOrigin({
-        origin: { type: 'cases.observable', id: 'obs-1' },
+        origin: { type: 'cases.observable', caseId: 'case-1', observableId: 'obs-1' },
         caseId: 'case-1',
         inputs: {},
         theCase: caseWithObs,
@@ -114,10 +111,21 @@ describe('cases.observable origin', () => {
     ).not.toThrow();
   });
 
+  it('throws when caseId does not match', () => {
+    expect(() =>
+      validateOrigin({
+        origin: { type: 'cases.observable', caseId: 'case-2', observableId: 'obs-1' },
+        caseId: 'case-1',
+        inputs: {},
+        theCase: caseWithObs,
+      })
+    ).toThrow('Workflow origin caseId must match case id "case-1".');
+  });
+
   it('throws when observable does not belong to the case', () => {
     expect(() =>
       validateOrigin({
-        origin: { type: 'cases.observable', id: 'obs-99' },
+        origin: { type: 'cases.observable', caseId: 'case-1', observableId: 'obs-99' },
         caseId: 'case-1',
         inputs: {},
         theCase: caseWithObs,
@@ -133,7 +141,7 @@ describe('cases.observable origin', () => {
 
     expect(() =>
       validateOrigin({
-        origin: { type: 'cases.observable', id: 'obs-1' },
+        origin: { type: 'cases.observable', caseId: 'case-1', observableId: 'obs-1' },
         caseId: 'case-1',
         inputs: { event: { alertIds: [{ _id: 'unattached-alert', _index: '.alerts' }] } },
         theCase: caseWithBoth,
@@ -153,10 +161,21 @@ describe('cases.alert origin', () => {
     ],
   } as unknown as Case;
 
+  it('throws when caseId does not match', () => {
+    expect(() =>
+      validateOrigin({
+        origin: { type: 'cases.alert', caseId: 'case-2', alertId: 'alert-1' },
+        caseId: 'case-1',
+        inputs: { event: { alertIds: [{ _id: 'alert-1', _index: '.alerts' }] } },
+        theCase: caseWithAlerts,
+      })
+    ).toThrow('Workflow origin caseId must match case id "case-1".');
+  });
+
   it('throws when no alertIds are provided', () => {
     expect(() =>
       validateOrigin({
-        origin: { type: 'cases.alert', id: 'alert-1' },
+        origin: { type: 'cases.alert', caseId: 'case-1', alertId: 'alert-1' },
         caseId: 'case-1',
         inputs: {},
         theCase: caseWithAlerts,
@@ -167,7 +186,7 @@ describe('cases.alert origin', () => {
   it('throws when a selected alert is not attached', () => {
     expect(() =>
       validateOrigin({
-        origin: { type: 'cases.alert', id: 'alert-99' },
+        origin: { type: 'cases.alert', caseId: 'case-1', alertId: 'alert-99' },
         caseId: 'case-1',
         inputs: { event: { alertIds: [{ _id: 'alert-99', _index: '.alerts' }] } },
         theCase: caseWithAlerts,
@@ -179,7 +198,7 @@ describe('cases.alert origin', () => {
     // Validates that (id, index) pairs are compared — not just ids.
     expect(() =>
       validateOrigin({
-        origin: { type: 'cases.alert', id: 'alert-1' },
+        origin: { type: 'cases.alert', caseId: 'case-1', alertId: 'alert-1' },
         caseId: 'case-1',
         inputs: { event: { alertIds: [{ _id: 'alert-1', _index: '.alerts-wrong-index' }] } },
         theCase: caseWithAlerts,
@@ -187,10 +206,10 @@ describe('cases.alert origin', () => {
     ).toThrow('All selected alerts must belong to the case.');
   });
 
-  it('throws when origin alert id is not among the selected alerts', () => {
+  it('throws when origin alertId is not among the selected alerts', () => {
     expect(() =>
       validateOrigin({
-        origin: { type: 'cases.alert', id: 'alert-2' },
+        origin: { type: 'cases.alert', caseId: 'case-1', alertId: 'alert-2' },
         caseId: 'case-1',
         inputs: { event: { alertIds: [{ _id: 'alert-1', _index: '.alerts' }] } },
         theCase: caseWithAlerts,
@@ -198,10 +217,10 @@ describe('cases.alert origin', () => {
     ).toThrow('Alert workflow origin "alert-2" is not selected.');
   });
 
-  it('passes when the selected alert is attached and matches the origin id', () => {
+  it('passes when the selected alert is attached and matches the origin alertId', () => {
     expect(() =>
       validateOrigin({
-        origin: { type: 'cases.alert', id: 'alert-1' },
+        origin: { type: 'cases.alert', caseId: 'case-1', alertId: 'alert-1' },
         caseId: 'case-1',
         inputs: { event: { alertIds: [{ _id: 'alert-1', _index: '.alerts' }] } },
         theCase: caseWithAlerts,
@@ -221,21 +240,21 @@ describe('cases.alerts origin', () => {
     ],
   } as unknown as Case;
 
-  it('throws when origin id does not match case id', () => {
+  it('throws when caseId does not match', () => {
     expect(() =>
       validateOrigin({
-        origin: { type: 'cases.alerts', id: 'case-2' },
+        origin: { type: 'cases.alerts', caseId: 'case-2' },
         caseId: 'case-1',
         inputs: {},
         theCase: caseWithAlerts,
       })
-    ).toThrow('Workflow origin id must match case id "case-1".');
+    ).toThrow('Workflow origin caseId must match case id "case-1".');
   });
 
   it('throws when no alertIds are provided', () => {
     expect(() =>
       validateOrigin({
-        origin: { type: 'cases.alerts', id: 'case-1' },
+        origin: { type: 'cases.alerts', caseId: 'case-1' },
         caseId: 'case-1',
         inputs: {},
         theCase: caseWithAlerts,
@@ -246,7 +265,7 @@ describe('cases.alerts origin', () => {
   it('passes when all selected alerts are attached', () => {
     expect(() =>
       validateOrigin({
-        origin: { type: 'cases.alerts', id: 'case-1' },
+        origin: { type: 'cases.alerts', caseId: 'case-1' },
         caseId: 'case-1',
         inputs: {
           event: {
@@ -282,7 +301,7 @@ describe('unified v2 alert attachment', () => {
 
     expect(() =>
       validateOrigin({
-        origin: { type: 'cases.alert', id: 'alert-unified-1' },
+        origin: { type: 'cases.alert', caseId: 'case-1', alertId: 'alert-unified-1' },
         caseId: 'case-1',
         inputs: {
           event: { alertIds: [{ _id: 'alert-unified-1', _index: '.alerts-observability' }] },
@@ -306,7 +325,7 @@ describe('unified v2 alert attachment', () => {
 
     expect(() =>
       validateOrigin({
-        origin: { type: 'cases.alert', id: 'alert-unified-1' },
+        origin: { type: 'cases.alert', caseId: 'case-1', alertId: 'alert-unified-1' },
         caseId: 'case-1',
         inputs: {
           event: { alertIds: [{ _id: 'alert-unified-1', _index: '.alerts-wrong' }] },
@@ -317,63 +336,3 @@ describe('unified v2 alert attachment', () => {
   });
 });
 
-describe('validateMultiCaseOrigin', () => {
-  const caseIds = ['case-a', 'case-b', 'case-c'];
-  const origin = { type: 'cases.case' as const, id: 'case-a' };
-
-  it('accepts a valid multi-case run with a cases.case origin whose id is in caseIds', () => {
-    expect(() => validateMultiCaseOrigin({ origin, caseIds, inputs: {} })).not.toThrow();
-  });
-
-  it('rejects cases.observable origin type for multi-case runs', () => {
-    expect(() =>
-      validateMultiCaseOrigin({
-        origin: { type: 'cases.observable', id: 'obs-1' },
-        caseIds,
-        inputs: {},
-      })
-    ).toThrow('can only be used with a single case');
-  });
-
-  it('rejects cases.alert origin type for multi-case runs', () => {
-    expect(() =>
-      validateMultiCaseOrigin({
-        origin: { type: 'cases.alert', id: 'alert-1' },
-        caseIds,
-        inputs: {},
-      })
-    ).toThrow('can only be used with a single case');
-  });
-
-  it('rejects cases.alerts origin type for multi-case runs', () => {
-    expect(() =>
-      validateMultiCaseOrigin({
-        origin: { type: 'cases.alerts', id: 'case-a' },
-        caseIds,
-        inputs: {},
-      })
-    ).toThrow('can only be used with a single case');
-  });
-
-  it('rejects origin.id that is not in caseIds', () => {
-    expect(() =>
-      validateMultiCaseOrigin({
-        origin: { type: 'cases.case', id: 'not-in-list' },
-        caseIds,
-        inputs: {},
-      })
-    ).toThrow('Workflow origin id must be one of the requested case ids.');
-  });
-
-  it('rejects inputs containing alertIds for multi-case runs', () => {
-    expect(() =>
-      validateMultiCaseOrigin({
-        origin,
-        caseIds,
-        inputs: {
-          event: { alertIds: [{ _id: 'alert-1', _index: '.alerts-index' }] },
-        },
-      })
-    ).toThrow('Alert inputs can only be used with a single case.');
-  });
-});

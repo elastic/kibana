@@ -7,19 +7,64 @@
 
 import { z } from '@kbn/zod/v4';
 import {
+  ALERTS_WORKFLOW_ORIGIN_TYPE,
+  ALERT_WORKFLOW_ORIGIN_TYPE,
   CASES_WORKFLOW_EXECUTION_METADATA_SCHEMA_VERSION,
   CASES_WORKFLOW_EXECUTION_SOURCE,
-  CASE_WORKFLOW_RUN_ORIGIN_TYPES,
+  CASE_WORKFLOW_ORIGIN_TYPE,
   MAX_CASES_PER_WORKFLOW_RUN,
   MAX_CASE_WORKFLOW_RUN_ID_LENGTH,
+  OBSERVABLE_WORKFLOW_ORIGIN_TYPE,
 } from '../../../constants';
 
-export const CaseWorkflowRunOriginSchema = z
-  .object({
-    type: z.enum(CASE_WORKFLOW_RUN_ORIGIN_TYPES),
-    id: z.string().min(1).max(MAX_CASE_WORKFLOW_RUN_ID_LENGTH),
-  })
-  .strict();
+const idField = z.string().min(1).max(MAX_CASE_WORKFLOW_RUN_ID_LENGTH);
+
+/**
+ * Identifies where the user was when they triggered the workflow run.
+ * Each variant is a discriminated union member and carries only the identifiers
+ * relevant to that surface — no overloaded `id` field.
+ *
+ * - `cases.case`       — triggered from the case detail page.
+ * - `cases.observable` — triggered from the observables table for a specific observable.
+ * - `cases.alert`      — triggered from the alerts table for a single alert.
+ * - `cases.alerts`     — triggered from the alerts table with a multi-alert selection.
+ *
+ * `origin` is **optional** on the request. When absent the run is treated as a
+ * list-surface (bulk) run: the caller was not looking at any specific sub-entity,
+ * the full case set is described by `caseIds`, and alert inputs are not permitted.
+ *
+ * The API schema carries identifiers only. Display enrichment (alert index, observable
+ * typeKey/value) is derived server-side from the case at activity-write time so that
+ * client-supplied label text cannot spoof the activity log.
+ */
+export const CaseWorkflowRunOriginSchema = z.discriminatedUnion('type', [
+  z
+    .object({
+      type: z.literal(CASE_WORKFLOW_ORIGIN_TYPE),
+      caseId: idField,
+    })
+    .strict(),
+  z
+    .object({
+      type: z.literal(OBSERVABLE_WORKFLOW_ORIGIN_TYPE),
+      caseId: idField,
+      observableId: idField,
+    })
+    .strict(),
+  z
+    .object({
+      type: z.literal(ALERT_WORKFLOW_ORIGIN_TYPE),
+      caseId: idField,
+      alertId: idField,
+    })
+    .strict(),
+  z
+    .object({
+      type: z.literal(ALERTS_WORKFLOW_ORIGIN_TYPE),
+      caseId: idField,
+    })
+    .strict(),
+]);
 
 export type CaseWorkflowRunOrigin = z.infer<typeof CaseWorkflowRunOriginSchema>;
 
@@ -31,7 +76,7 @@ export const CasesWorkflowExecutionMetadataSchema = z
       .array(z.string().min(1).max(MAX_CASE_WORKFLOW_RUN_ID_LENGTH))
       .min(1)
       .max(MAX_CASES_PER_WORKFLOW_RUN),
-    origin: CaseWorkflowRunOriginSchema,
+    origin: CaseWorkflowRunOriginSchema.optional(),
   })
   .strict();
 
@@ -40,7 +85,7 @@ export type CasesWorkflowExecutionMetadata = z.infer<typeof CasesWorkflowExecuti
 export interface RunCaseWorkflowRequest {
   caseIds: string[];
   inputs: Record<string, unknown>;
-  origin: CaseWorkflowRunOrigin;
+  origin?: CaseWorkflowRunOrigin;
 }
 
 export interface RunCaseWorkflowResponse {
