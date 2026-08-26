@@ -20,6 +20,7 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { AggregateQuery, TimeRange } from '@kbn/es-query';
 import { SeverityLevelPanel } from './kpis/severity_level_panel';
 import { AlertsByRulePanel } from './kpis/alerts_by_rule_panel';
+import { TopAlertsByPanel } from './kpis/top_alerts_by_panel';
 
 export type AlertsV2KpiView = 'summary' | 'trend' | 'counts' | 'treemap';
 
@@ -122,6 +123,9 @@ export const AlertsV2KpisSection = ({ query, timeRange }: AlertsV2KpisSectionPro
           </EuiFlexItem>
           <EuiFlexItem>
             <AlertsByRulePanel query={query} timeRange={timeRange} />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <TopAlertsByPanel query={query} timeRange={timeRange} />
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : (
