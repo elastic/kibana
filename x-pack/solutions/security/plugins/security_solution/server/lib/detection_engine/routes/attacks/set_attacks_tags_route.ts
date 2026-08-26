@@ -20,6 +20,7 @@ import type { ITelemetryEventsSender } from '../../../telemetry/sender';
 import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
 import {
   MAX_ALERTS_PER_TRIGGER,
+  MAX_TAG_LENGTH,
   MAX_TAGS_PER_OPERATION,
 } from '../../../../../common/workflows/triggers';
 import { updateAlertsTags } from '../common/operations/update_alerts_tags';
@@ -89,8 +90,12 @@ export const setAttacksTagsRoute = (
               const result = await updateAlertsTags({ context, index: attackIndex, ids, tags });
               void eventBus?.emitAttackTagsChanged(request, {
                 attackIds: ids.slice(0, MAX_ALERTS_PER_TRIGGER),
-                tagsToAdd: tags.tags_to_add.slice(0, MAX_TAGS_PER_OPERATION),
-                tagsToRemove: tags.tags_to_remove.slice(0, MAX_TAGS_PER_OPERATION),
+                tagsToAdd: tags.tags_to_add
+                  .filter((t) => t.length <= MAX_TAG_LENGTH)
+                  .slice(0, MAX_TAGS_PER_OPERATION),
+                tagsToRemove: tags.tags_to_remove
+                  .filter((t) => t.length <= MAX_TAG_LENGTH)
+                  .slice(0, MAX_TAGS_PER_OPERATION),
                 truncated: ids.length > MAX_ALERTS_PER_TRIGGER,
               });
               return result;
@@ -119,11 +124,15 @@ export const setAttacksTagsRoute = (
               .map((hit) => hit._id)
               .filter((id): id is string => id != null);
 
-            const relatedAlertIds = attackDocs.hits.hits.flatMap((hit) => {
-              const source = hit._source as Record<string, unknown> | undefined;
-              const alertIds = source?.[ALERT_ATTACK_DISCOVERY_ALERT_IDS];
-              return Array.isArray(alertIds) ? (alertIds as string[]) : [];
-            });
+            const relatedAlertIds = Array.from(
+              new Set(
+                attackDocs.hits.hits.flatMap((hit) => {
+                  const source = hit._source as Record<string, unknown> | undefined;
+                  const alertIds = source?.[ALERT_ATTACK_DISCOVERY_ALERT_IDS];
+                  return Array.isArray(alertIds) ? (alertIds as string[]) : [];
+                })
+              )
+            );
 
             const combinedIds = Array.from(new Set([...verifiedAttackIds, ...relatedAlertIds]));
 
@@ -131,18 +140,25 @@ export const setAttacksTagsRoute = (
             // the target to the unified index pattern for the cascade update.
             const index = await getUnifiedAlertsIndex({ context, ruleDataClient });
 
+            const validTagsToAdd = tags.tags_to_add
+              .filter((t) => t.length <= MAX_TAG_LENGTH)
+              .slice(0, MAX_TAGS_PER_OPERATION);
+            const validTagsToRemove = tags.tags_to_remove
+              .filter((t) => t.length <= MAX_TAG_LENGTH)
+              .slice(0, MAX_TAGS_PER_OPERATION);
+
             const result = await updateAlertsTags({ context, index, ids: combinedIds, tags });
             void eventBus?.emitAttackTagsChanged(request, {
               attackIds: verifiedAttackIds.slice(0, MAX_ALERTS_PER_TRIGGER),
-              tagsToAdd: tags.tags_to_add.slice(0, MAX_TAGS_PER_OPERATION),
-              tagsToRemove: tags.tags_to_remove.slice(0, MAX_TAGS_PER_OPERATION),
+              tagsToAdd: validTagsToAdd,
+              tagsToRemove: validTagsToRemove,
               truncated: verifiedAttackIds.length > MAX_ALERTS_PER_TRIGGER,
             });
             if (relatedAlertIds.length > 0) {
               void eventBus?.emitAlertTagsChanged(request, {
                 alertIds: relatedAlertIds.slice(0, MAX_ALERTS_PER_TRIGGER),
-                tagsToAdd: tags.tags_to_add.slice(0, MAX_TAGS_PER_OPERATION),
-                tagsToRemove: tags.tags_to_remove.slice(0, MAX_TAGS_PER_OPERATION),
+                tagsToAdd: validTagsToAdd,
+                tagsToRemove: validTagsToRemove,
                 truncated: relatedAlertIds.length > MAX_ALERTS_PER_TRIGGER,
               });
             }

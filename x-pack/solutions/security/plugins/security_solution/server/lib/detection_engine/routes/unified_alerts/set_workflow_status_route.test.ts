@@ -413,6 +413,32 @@ describe('set unified alerts workflow status', () => {
       );
     });
 
+    test('does not emit when all alerts already have the requested status', async () => {
+      context.core.elasticsearch.client.asCurrentUser.search.mockResponse(
+        makeSearchResponse([
+          {
+            _id: 'somefakeid1',
+            _index: '.alerts-security.alerts-default',
+            _source: { 'kibana.alert.workflow_status': 'closed' },
+          },
+          {
+            _id: 'somefakeid2',
+            _index: '.alerts-security.alerts-default',
+            _source: { 'kibana.alert.workflow_status': 'closed' },
+          },
+        ])
+      );
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_WORKFLOW_STATUS_URL,
+        body: typicalSetStatusSignalByIdsPayload(), // status: 'closed'
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAlertStatusChanged).not.toHaveBeenCalled();
+      expect(mockEventBus.emitAttackStatusChanged).not.toHaveBeenCalled();
+    });
+
     test('caps search size at MAX_ALERTS_PER_TRIGGER and sets truncated: true when ids.length exceeds the limit', async () => {
       const oversizedIds = Array.from({ length: MAX_ALERTS_PER_TRIGGER + 1 }, (_, i) => `id-${i}`);
       context.core.elasticsearch.client.asCurrentUser.search.mockResponse(

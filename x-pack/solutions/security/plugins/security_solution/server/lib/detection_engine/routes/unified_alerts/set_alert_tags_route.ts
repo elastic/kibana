@@ -24,6 +24,7 @@ import { withSiemErrorHandling } from '../with_siem_error_handling';
 import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
 import {
   MAX_ALERTS_PER_TRIGGER,
+  MAX_TAG_LENGTH,
   MAX_TAGS_PER_OPERATION,
 } from '../../../../../common/workflows/triggers';
 import { fetchAlertIdToIndex } from '../common/operations/prefetch_previous_statuses';
@@ -91,20 +92,27 @@ export const setUnifiedAlertsTagsRoute = (
         return withSiemErrorHandling(response, async () => {
           const result = await updateAlertsTags({ context, index, ids, tags });
           if (eventBus) {
+            const validTagsToAdd = tags.tags_to_add
+              .filter((t) => t.length <= MAX_TAG_LENGTH)
+              .slice(0, MAX_TAGS_PER_OPERATION);
+            const validTagsToRemove = tags.tags_to_remove
+              .filter((t) => t.length <= MAX_TAG_LENGTH)
+              .slice(0, MAX_TAGS_PER_OPERATION);
+            const truncated = ids.length > MAX_ALERTS_PER_TRIGGER;
             if (attackIds.length > 0) {
               void eventBus.emitAttackTagsChanged(request, {
                 attackIds: attackIds.slice(0, MAX_ALERTS_PER_TRIGGER),
-                tagsToAdd: tags.tags_to_add.slice(0, MAX_TAGS_PER_OPERATION),
-                tagsToRemove: tags.tags_to_remove.slice(0, MAX_TAGS_PER_OPERATION),
-                truncated: ids.length > MAX_ALERTS_PER_TRIGGER,
+                tagsToAdd: validTagsToAdd,
+                tagsToRemove: validTagsToRemove,
+                truncated,
               });
             }
             if (alertIds.length > 0) {
               void eventBus.emitAlertTagsChanged(request, {
                 alertIds: alertIds.slice(0, MAX_ALERTS_PER_TRIGGER),
-                tagsToAdd: tags.tags_to_add.slice(0, MAX_TAGS_PER_OPERATION),
-                tagsToRemove: tags.tags_to_remove.slice(0, MAX_TAGS_PER_OPERATION),
-                truncated: ids.length > MAX_ALERTS_PER_TRIGGER,
+                tagsToAdd: validTagsToAdd,
+                tagsToRemove: validTagsToRemove,
+                truncated,
               });
             }
           }

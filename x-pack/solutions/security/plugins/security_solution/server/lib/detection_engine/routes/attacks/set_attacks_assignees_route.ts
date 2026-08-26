@@ -128,11 +128,15 @@ export const setAttacksAssigneesRoute = (
               .map((hit) => hit._id)
               .filter((id): id is string => id != null);
 
-            const relatedAlertIds = attackDocs.hits.hits.flatMap((hit) => {
-              const source = hit._source as Record<string, unknown> | undefined;
-              const alertIds = source?.[ALERT_ATTACK_DISCOVERY_ALERT_IDS];
-              return Array.isArray(alertIds) ? (alertIds as string[]) : [];
-            });
+            const relatedAlertIds = Array.from(
+              new Set(
+                attackDocs.hits.hits.flatMap((hit) => {
+                  const source = hit._source as Record<string, unknown> | undefined;
+                  const alertIds = source?.[ALERT_ATTACK_DISCOVERY_ALERT_IDS];
+                  return Array.isArray(alertIds) ? (alertIds as string[]) : [];
+                })
+              )
+            );
 
             const combinedIds = Array.from(new Set([...verifiedAttackIds, ...relatedAlertIds]));
 

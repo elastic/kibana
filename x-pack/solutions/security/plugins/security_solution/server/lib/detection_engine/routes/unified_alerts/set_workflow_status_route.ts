@@ -90,12 +90,17 @@ export const setUnifiedAlertsWorkflowStatusRoute = (
               const docIndex = idToIndex.get(id);
               if (docIndex != null) {
                 const previousStatus = previousStatusMap.get(id);
-                if (isAttackDiscoveryIndex(docIndex)) {
-                  attackIds.push(id);
-                  if (previousStatus) attackPreviousStatuses.push(previousStatus);
-                } else {
-                  alertIds.push(id);
-                  if (previousStatus) alertPreviousStatuses.push(previousStatus);
+                // Only emit for IDs that are actually changing status
+                const isNoOp =
+                  previousStatus !== undefined && previousStatus.previousStatus === status;
+                if (!isNoOp) {
+                  if (isAttackDiscoveryIndex(docIndex)) {
+                    attackIds.push(id);
+                    if (previousStatus) attackPreviousStatuses.push(previousStatus);
+                  } else {
+                    alertIds.push(id);
+                    if (previousStatus) alertPreviousStatuses.push(previousStatus);
+                  }
                 }
               }
             }
