@@ -12,12 +12,14 @@ import { apiTest } from '../fixtures';
 import { COMMON_HEADERS, TEST_TASK_TYPE } from '../fixtures/constants';
 import {
   TASK_MANAGER_INDEX,
+  deleteTaskManagerTasksWithoutInvalidationQueue,
   deleteTaskManagerTaskSilently,
   queryTaskManagerEsApiKeysByType,
   readInvalidationMarkerKeyIds,
   readTaskAttributes,
   taskDocId,
 } from '../lib/helpers';
+import type { ScheduledTaskWithApiKeys } from '../lib/helpers';
 
 const PERSISTED_TASK_ID = 'scout-bulk-schedule-persisted';
 const OMITTED_TASK_ID = 'scout-bulk-schedule-omitted';
@@ -36,17 +38,6 @@ const ALL_TASK_IDS = [
  */
 const OMITTED_TASK_TYPE = 'task_manager:mark_removed_tasks_as_unrecognized';
 const UNSUPPORTED_TASK_TYPE = 'scout_bulk_schedule_unsupported_type';
-
-interface ScheduledTaskWithApiKeys {
-  id: string;
-  taskType: string;
-  apiKey?: string;
-  uiamApiKey?: string;
-  userScope?: {
-    apiKeyId: string;
-    uiamApiKeyId?: string;
-  };
-}
 
 /**
  * The keys granted for the tasks under test never land on a task document, so their ids can only
@@ -82,7 +73,7 @@ apiTest.describe(
   'Task Manager bulkSchedule API keys',
   { tag: tags.serverless.observability.complete },
   () => {
-    const idlessTasksToCleanup: ScheduledTaskWithApiKeys[] = [];
+    const tasksToCleanup: ScheduledTaskWithApiKeys[] = [];
 
     // Defensive cleanup on both sides: a prior crashed run may have left task docs behind. The
     // deletes enqueue invalidation markers for the deleted tasks' keys; those are left for the
@@ -95,50 +86,19 @@ apiTest.describe(
       }
     });
 
-    apiTest.afterEach(async ({ apiClient, esClient, samlAuth }) => {
-      if (idlessTasksToCleanup.length === 0) {
+    apiTest.afterEach(async ({ apiClient, kbnClient, samlAuth }) => {
+      if (tasksToCleanup.length === 0) {
         return;
       }
 
-      // Revoke both credentials immediately through the test-only endpoints, then remove the
-      // disabled task documents directly. Task Manager's delete route would enqueue invalidation
-      // markers that may not be processed before the suite's server stops.
       const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
-      const esApiKeyIds = idlessTasksToCleanup.flatMap(({ apiKey, userScope }) =>
-        apiKey && userScope?.apiKeyId ? [userScope.apiKeyId] : []
-      );
-      if (esApiKeyIds.length > 0) {
-        const response = await apiClient.post('test_endpoints/api_keys/_invalidate', {
-          headers: { ...COMMON_HEADERS, ...cookieHeader },
-          body: { ids: esApiKeyIds },
-          responseType: 'json',
-        });
-        expect(response).toHaveStatusCode(200);
-        expect(response.body.error_count).toBe(0);
-      }
-
-      for (const { uiamApiKey, userScope } of idlessTasksToCleanup) {
-        if (uiamApiKey && userScope?.uiamApiKeyId) {
-          const response = await apiClient.post('test_endpoints/uiam/api_keys/_invalidate', {
-            headers: { ...COMMON_HEADERS, ...cookieHeader },
-            body: {
-              id: userScope.uiamApiKeyId,
-              authcScheme: 'ApiKey',
-              credential: uiamApiKey,
-            },
-            responseType: 'json',
-          });
-          expect(response).toHaveStatusCode(200);
-          expect(response.body.error_count).toBe(0);
-        }
-      }
-
-      await Promise.all(
-        idlessTasksToCleanup.map(({ id }) =>
-          esClient.delete({ index: TASK_MANAGER_INDEX, id: taskDocId(id), refresh: true })
-        )
-      );
-      idlessTasksToCleanup.length = 0;
+      await deleteTaskManagerTasksWithoutInvalidationQueue({
+        apiClient,
+        cookieHeader,
+        kbnClient,
+        tasks: tasksToCleanup,
+      });
+      tasksToCleanup.length = 0;
     });
 
     apiTest.afterAll(async ({ apiClient, samlAuth }) => {
@@ -189,6 +149,7 @@ apiTest.describe(
         const scheduled = response.body as Array<{ id: string }>;
         expect(scheduled).toHaveLength(1);
         expect(scheduled[0].id).toBe(PERSISTED_TASK_ID);
+        tasksToCleanup.push(...(response.body as ScheduledTaskWithApiKeys[]));
 
         const persisted = await readTaskAttributes(esClient, taskDocId(PERSISTED_TASK_ID));
         const persistedUserScope = persisted.userScope as Record<string, string>;
@@ -340,7 +301,7 @@ apiTest.describe(
 
         const scheduled = response.body as ScheduledTaskWithApiKeys[];
         expect(scheduled).toHaveLength(2);
-        idlessTasksToCleanup.push(...scheduled);
+        tasksToCleanup.push(...scheduled);
 
         const [firstTask, secondTask] = scheduled;
         expect(firstTask.id).not.toBe('');

@@ -11,10 +11,12 @@ import { apiTest } from '../fixtures';
 import { COMMON_HEADERS, TEST_TASK_TYPE } from '../fixtures/constants';
 import {
   countActiveTaskManagerEsApiKeys,
+  deleteTaskManagerTasksWithoutInvalidationQueue,
   deleteTaskManagerTaskSilently,
   readTaskAttributes,
   taskDocId,
 } from '../lib/helpers';
+import type { ScheduledTaskWithApiKeys } from '../lib/helpers';
 
 const TASK_ID = 'scout-ensure-scheduled-api-key-leak';
 
@@ -22,6 +24,8 @@ apiTest.describe(
   'Task Manager ensureScheduled API keys',
   { tag: tags.serverless.observability.complete },
   () => {
+    let taskToCleanup: ScheduledTaskWithApiKeys | undefined;
+
     // Defensive cleanup on both sides: a stale task from a prior crashed run would make the
     // first ensureScheduled call skip granting (the behavior under test) and break the key-count
     // delta. Invalidation markers enqueued by the delete are left for the invalidation task to
@@ -31,9 +35,16 @@ apiTest.describe(
       await deleteTaskManagerTaskSilently(apiClient, cookieHeader, TASK_ID);
     });
 
-    apiTest.afterAll(async ({ apiClient, samlAuth }) => {
+    apiTest.afterAll(async ({ apiClient, kbnClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
-      await deleteTaskManagerTaskSilently(apiClient, cookieHeader, TASK_ID);
+      if (taskToCleanup) {
+        await deleteTaskManagerTasksWithoutInvalidationQueue({
+          apiClient,
+          cookieHeader,
+          kbnClient,
+          tasks: [taskToCleanup],
+        });
+      }
     });
 
     apiTest(
@@ -41,7 +52,7 @@ apiTest.describe(
       async ({ apiClient, esClient, samlAuth }) => {
         const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
 
-        const ensureScheduled = async () => {
+        const ensureScheduled = async (): Promise<ScheduledTaskWithApiKeys> => {
           const response = await apiClient.post('internal/task_manager/schedule', {
             headers: { ...COMMON_HEADERS, ...cookieHeader },
             body: {
@@ -59,11 +70,12 @@ apiTest.describe(
             responseType: 'json',
           });
           expect(response).toHaveStatusCode(200);
+          return response.body as ScheduledTaskWithApiKeys;
         };
 
         const keysBefore = await countActiveTaskManagerEsApiKeys(esClient);
 
-        await ensureScheduled();
+        taskToCleanup = await ensureScheduled();
 
         const created = await readTaskAttributes(esClient, taskDocId(TASK_ID));
         const createdUserScope = created.userScope as Record<string, string>;
