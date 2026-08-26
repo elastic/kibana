@@ -34,6 +34,7 @@ import type { SerializedError } from '@reduxjs/toolkit';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { DataCascadeRestorableState } from '@kbn/shared-ux-document-data-cascade';
 import type { DiscoverDataSource } from '../../../../../common/data_sources';
+import type { ExpandedDocRef } from '../../utils/expanded_doc';
 import type { DiscoverLayoutRestorableState } from '../../components/layout/discover_layout_restorable_state';
 import type { ProfileStateMap } from '../../../../../common/context_awareness';
 import type { DefaultEsqlQueryConfig } from '../../../../context_awareness';
@@ -133,6 +134,10 @@ export interface DiscoverAppState {
    * When true, ES|QL queries use approximate execution for faster, estimated results.
    */
   esqlApproximation?: boolean;
+  /**
+   * The expanded document reference
+   */
+  expandedDoc?: ExpandedDocRef;
 }
 
 export interface CascadedDocumentsState {

@@ -1,5 +1,8 @@
 {
-  "sha1": "e7d3e26fe3c05d052c800c1491a3eaaa11e534af",
+  "sha1": "49c9f07ab55176b9ce6e26723739d8c42a155de0",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "44990549d751d28-a9d1a7757c95551",
@@ -11,8 +14,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/kibana_overview/test/scout/ui/tests/analytics.spec.ts",
-        "line": 24,
-        "column": 7
+        "line": 16,
+        "column": 21
       }
     },
     {
@@ -25,8 +28,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/kibana_overview/test/scout/ui/tests/analytics.spec.ts",
-        "line": 32,
-        "column": 7
+        "line": 21,
+        "column": 21
       }
     },
     {
@@ -39,8 +42,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/kibana_overview/test/scout/ui/tests/footer.spec.ts",
-        "line": 26,
-        "column": 7
+        "line": 18,
+        "column": 42
       }
     },
     {
@@ -53,8 +56,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/kibana_overview/test/scout/ui/tests/overview_a11y.spec.ts",
-        "line": 24,
-        "column": 7
+        "line": 16,
+        "column": 21
       }
     },
     {
@@ -67,8 +70,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/kibana_overview/test/scout/ui/tests/page_header.spec.ts",
-        "line": 24,
-        "column": 7
+        "line": 25,
+        "column": 21
       }
     },
     {
@@ -81,8 +84,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/kibana_overview/test/scout/ui/tests/page_header.spec.ts",
-        "line": 31,
-        "column": 7
+        "line": 30,
+        "column": 21
       }
     },
     {
@@ -95,8 +98,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/kibana_overview/test/scout/ui/tests/page_header.spec.ts",
-        "line": 38,
-        "column": 7
+        "line": 34,
+        "column": 11
       }
     },
     {
@@ -109,8 +112,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/kibana_overview/test/scout/ui/tests/solutions.spec.ts",
-        "line": 24,
-        "column": 7
+        "line": 16,
+        "column": 21
       }
     },
     {
@@ -123,8 +126,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/kibana_overview/test/scout/ui/tests/solutions.spec.ts",
-        "line": 38,
-        "column": 7
+        "line": 28,
+        "column": 11
       }
     },
     {
@@ -137,8 +140,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/kibana_overview/test/scout/ui/tests/solutions.spec.ts",
-        "line": 50,
-        "column": 7
+        "line": 36,
+        "column": 5
       }
     }
   ]
