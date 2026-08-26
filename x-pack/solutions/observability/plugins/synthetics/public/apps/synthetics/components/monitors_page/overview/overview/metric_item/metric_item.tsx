@@ -217,6 +217,8 @@ export const MetricItem = ({
             pointer-events: auto;
             opacity: 1;
           }
+          /* Charts clips the body on __gap, not __body. */
+          .echMetricText__gap,
           .echMetricText__body {
             overflow: visible;
           }
