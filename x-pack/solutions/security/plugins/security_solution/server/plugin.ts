@@ -9,6 +9,7 @@ import type { Observable } from 'rxjs';
 import { QUERY_RULE_TYPE_ID, SAVED_QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import type {
   ElasticsearchClient,
+  KibanaRequest,
   Logger,
   LogMeta,
   RequestHandlerContext,
@@ -216,8 +217,9 @@ export class Plugin implements ISecuritySolutionPlugin {
   private isServerless: boolean;
 
   /** Derived in `setup()`, where `cps` is available as a dependency, and consumed in `start()` */
-  private defendCpsEnabled = false;
   private platformCpsEnabled = false;
+  /** The `defendCrossProjectSearch` experimental flag; AND-ed with `cps.isCpsActive` per request */
+  private defendCpsFeatureFlagEnabled = false;
 
   constructor(context: PluginInitializerContext) {
     const serverConfig = createConfig(context);
@@ -334,8 +336,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     const experimentalFeatures = config.experimentalFeatures;
 
     this.platformCpsEnabled = plugins.cps?.getCpsEnabled() ?? false;
-    this.defendCpsEnabled =
-      this.platformCpsEnabled && experimentalFeatures.defendCrossProjectSearch;
+    this.defendCpsFeatureFlagEnabled = experimentalFeatures.defendCrossProjectSearch;
 
     initSavedObjects(core.savedObjects, experimentalFeatures, this.logger.get('initSavedObjects'));
     initEncryptedSavedObjects({
@@ -959,7 +960,8 @@ export class Plugin implements ISecuritySolutionPlugin {
       esClient: core.elasticsearch.client.asInternalUser,
       clusterClient: core.elasticsearch.client,
       dataStart: plugins.data,
-      cpsEnabled: this.defendCpsEnabled,
+      isCpsActive: async (request: KibanaRequest): Promise<boolean> =>
+        this.defendCpsFeatureFlagEnabled && ((await plugins.cps?.isCpsActive(request)) ?? false),
       productFeaturesService,
       savedObjectsServiceStart: core.savedObjects,
       connectorActions: plugins.actions,

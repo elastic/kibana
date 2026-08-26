@@ -113,6 +113,8 @@ describe('Spaces Public API', () => {
     const mockCpsStart = options.cpsEnabled
       ? {
           createNpreClient: jest.fn().mockReturnValue(npreClient),
+          getLinkedProjects: jest.fn().mockResolvedValue([]),
+          isCpsActive: jest.fn().mockResolvedValue(false),
         }
       : undefined;
 

@@ -682,7 +682,7 @@ describe('getActionResultsRoute', () => {
     const createCpsContext = (mockSearchFn: jest.Mock) => {
       const mockCpsSearch = jest.fn().mockReturnValue({ search: mockSearchFn });
       const context = createMockOsqueryContext();
-      (context as { cpsEnabled: boolean }).cpsEnabled = true;
+      (context.isCpsActive as jest.Mock).mockResolvedValue(true);
       const mockSavedObjectsClient = {
         find: jest.fn(),
         get: jest.fn(),
@@ -786,7 +786,7 @@ describe('getActionResultsRoute', () => {
       const contextSearchFn = jest.fn();
 
       const cpsContext = createMockOsqueryContext();
-      (cpsContext as { cpsEnabled: boolean }).cpsEnabled = true;
+      (cpsContext.isCpsActive as jest.Mock).mockResolvedValue(true);
       const mockSavedObjectsClient = {
         find: jest.fn(),
         get: jest.fn(),

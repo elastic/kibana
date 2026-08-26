@@ -17,7 +17,11 @@ Kibana acts as a **transparent orchestrator**. It does not execute cross-project
 ## Server-Side (`server/`)
 
 - **API Routes**: Registers endpoints like `POST /internal/cps/projects_tags` to retrieve project tags from Elasticsearch (`/_project/tags`), delegating authorization to the scoped Elasticsearch client.
-- **Configuration**: Exposes the `cpsEnabled` flag via its setup contract, which is used by other parts of the system (like Core's `ElasticsearchService`) to toggle CPS behaviors.
+- **Configuration**: Exposes the `cpsEnabled` flag via its setup contract, which is used by other parts of the system (like Core's `ElasticsearchService`) to toggle CPS behaviors. `cpsEnabled` means "this deployment can do CPS" and is true on all serverless projects.
+- **Start contract**: When `cpsEnabled` is true, `start()` returns:
+  - `createNpreClient(request)` — a request-scoped client for named project routing expressions.
+  - `getLinkedProjects(request)` — the linked projects visible to the request principal, or `undefined` when they could not be resolved (unauthorized or the call failed). `undefined` is distinct from `[]`: "unknown" must never be read as "none".
+  - `isCpsActive(request)` — `true` only when a cross-project read is both possible and meaningful for this request (at least one linked project is visible to the principal). This is the signal consumers should use for "this request can and should fan out". Unresolved resolves to `false`, so a principal that cannot list linked projects reads origin-only rather than failing. When `cpsEnabled` is false, `start()` returns `undefined` (capability off).
 
 ### API Routes
 

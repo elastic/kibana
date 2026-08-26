@@ -89,8 +89,15 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       security: plugins.security,
       telemetryEventsSender: this.telemetryEventsSender,
       licensing: plugins.licensing,
-      cpsEnabled:
-        (plugins.cps?.getCpsEnabled() ?? false) && experimentalFeatures.crossProjectSearch,
+      isCpsActive: async (request) => {
+        if (!experimentalFeatures.crossProjectSearch) {
+          return false;
+        }
+
+        const [, startPlugins] = await core.getStartServices();
+
+        return (await startPlugins.cps?.isCpsActive(request)) ?? false;
+      },
     };
 
     initSavedObjects(core.savedObjects);

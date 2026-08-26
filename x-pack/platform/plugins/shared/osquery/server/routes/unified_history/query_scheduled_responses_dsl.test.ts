@@ -141,7 +141,7 @@ describe('buildScheduledResponsesQuery', () => {
     });
 
     test('requires an exact default space_id when CPS is enabled', () => {
-      const result = buildScheduledResponsesQuery({ spaceId: defaultSpaceId, cpsEnabled: true });
+      const result = buildScheduledResponsesQuery({ spaceId: defaultSpaceId, cpsActive: true });
       const query = result.body.query as Record<string, unknown>;
       const filters = (query.bool as Record<string, unknown>).filter as unknown[];
 
@@ -158,7 +158,7 @@ describe('buildScheduledResponsesQuery', () => {
     });
 
     test('leaves the non-default space filter unchanged when CPS is enabled', () => {
-      const result = buildScheduledResponsesQuery({ spaceId: 'security', cpsEnabled: true });
+      const result = buildScheduledResponsesQuery({ spaceId: 'security', cpsActive: true });
       const query = result.body.query as Record<string, unknown>;
       const filters = (query.bool as Record<string, unknown>).filter as unknown[];
 

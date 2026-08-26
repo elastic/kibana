@@ -24,7 +24,7 @@ describe('fetchActionResponses()', () => {
     esClientMock = elasticsearchServiceMock.createScopedClusterClient().asInternalUser;
     applyActionListEsSearchMock(esClientMock);
     (endpointServiceMock.isCcsEnabled as jest.Mock).mockResolvedValue(false);
-    (endpointServiceMock.isCpsEnabled as jest.Mock).mockReturnValue(false);
+    (endpointServiceMock.isCpsActive as jest.Mock).mockResolvedValue(false);
   });
 
   it('should return results', async () => {
@@ -159,15 +159,16 @@ describe('fetchActionResponses()', () => {
 
   it('should not CCS-prefix the endpoint response index once the read fans out', async () => {
     (endpointServiceMock.isCcsEnabled as jest.Mock).mockResolvedValue(true);
-    (endpointServiceMock.isCpsEnabled as jest.Mock).mockReturnValue(true);
+    (endpointServiceMock.isCpsActive as jest.Mock).mockResolvedValue(true);
     const scopedEsClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
     applyActionListEsSearchMock(scopedEsClient);
-    (endpointServiceMock.getReadEsClient as jest.Mock).mockReturnValue(scopedEsClient);
+    (endpointServiceMock.getReadEsClient as jest.Mock).mockResolvedValue(scopedEsClient);
 
+    const scoped = await endpointServiceMock.asScoped(httpServerMock.createKibanaRequest());
     await fetchActionResponses({
       esClient: esClientMock,
       endpointService: endpointServiceMock,
-      scoped: endpointServiceMock.asScoped(httpServerMock.createKibanaRequest()),
+      scoped,
     });
 
     expect(scopedEsClient.search).toHaveBeenCalledWith(
@@ -265,19 +266,19 @@ describe('fetchActionResponses()', () => {
       readEsClientMock = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
       applyActionListEsSearchMock(readEsClientMock);
 
-      endpointServiceMock.isCpsEnabled.mockReturnValue(true);
-      endpointServiceMock.getReadEsClient.mockReturnValue(readEsClientMock);
+      endpointServiceMock.isCpsActive.mockResolvedValue(true);
+      endpointServiceMock.getReadEsClient.mockResolvedValue(readEsClientMock);
     });
 
     afterEach(() => {
-      endpointServiceMock.isCpsEnabled.mockReturnValue(false);
+      endpointServiceMock.isCpsActive.mockResolvedValue(false);
     });
 
     it('should read the Endpoint response index as the request user so it can fan out', async () => {
       await fetchActionResponses({
         esClient: esClientMock,
         endpointService: endpointServiceMock,
-        scoped: endpointServiceMock.asScoped(request),
+        scoped: await endpointServiceMock.asScoped(request),
         actionIds: ['a'],
       });
 
@@ -292,7 +293,7 @@ describe('fetchActionResponses()', () => {
       await fetchActionResponses({
         esClient: esClientMock,
         endpointService: endpointServiceMock,
-        scoped: endpointServiceMock.asScoped(request),
+        scoped: await endpointServiceMock.asScoped(request),
         actionIds: ['a'],
       });
 
@@ -310,7 +311,7 @@ describe('fetchActionResponses()', () => {
       await fetchActionResponses({
         esClient: esClientMock,
         endpointService: endpointServiceMock,
-        scoped: endpointServiceMock.asScoped(request),
+        scoped: await endpointServiceMock.asScoped(request),
         actionIds: ['a'],
       });
 
