@@ -9,7 +9,7 @@
 
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, concatMap, merge, of, Subject } from 'rxjs';
+import { BehaviorSubject, combineLatest, concatMap, map, merge, of, Subject } from 'rxjs';
 import { v4 } from 'uuid';
 import type { EuiFlyoutProps } from '@elastic/eui';
 import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
@@ -193,6 +193,19 @@ export function getDashboardApi({
 
   const pauseFetchManager = initializePauseFetchManager(filtersManager);
 
+  const canCancel$ = new BehaviorSubject<boolean>(false);
+  const canCancelSubscription = combineLatest([
+    dataLoadingManager.api.dataLoading$,
+    filtersManager.api.childFiltersLoading$,
+  ])
+    .pipe(
+      map(([dataLoading, childFiltersLoading]) => {
+        // Only allow cancel when data is loading AND filters are not loading
+        return Boolean(dataLoading && !childFiltersLoading);
+      })
+    )
+    .subscribe((value) => canCancel$.next(value));
+
   const dashboardApi = {
     ...viewModeManager.api,
     ...dataLoadingManager.api,
@@ -210,6 +223,7 @@ export function getDashboardApi({
     esqlVariables$: esqlVariablesManager.api.publishedEsqlVariables$,
     ...timesliceManager.api,
     ...pauseFetchManager.api,
+    canCancel$,
     ...initializeTrackContentfulRender(),
     anyStateChange$: merge(
       settingsManager.internalApi.anyStateChange$,
@@ -357,6 +371,8 @@ export function getDashboardApi({
       timesliceManager.cleanup();
       projectRoutingManager?.cleanup();
       pauseFetchManager.cleanup();
+      canCancelSubscription.unsubscribe();
+      canCancel$.complete();
       trackPanel.cleanup();
     },
   };

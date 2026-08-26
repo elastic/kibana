@@ -180,6 +180,7 @@ export function InternalDashboardTopNav({
     publishedEsqlVariables,
     unpublishedEsqlVariables,
     dataLoading,
+    canCancel,
   ] = useBatchedPublishingSubjects(
     dashboardApi.dataViews$,
     dashboardApi.fullScreenMode$,
@@ -195,7 +196,8 @@ export function InternalDashboardTopNav({
     dashboardApi.unpublishedTimeslice$,
     dashboardInternalApi.publishedEsqlVariables$,
     dashboardInternalApi.unpublishedEsqlVariables$,
-    dashboardApi.dataLoading$
+    dashboardApi.dataLoading$,
+    dashboardApi.canCancel$
   );
 
   const hasUnpublishedFilters = useMemo(() => {
@@ -538,7 +540,7 @@ export function InternalDashboardTopNav({
             hasUnpublishedFilters || hasUnpublishedTimeslice || hasUnpublishedVariables
           }
           isLoading={dataLoading ?? false}
-          onCancel={handleCancel}
+          onCancel={canCancel ? handleCancel : undefined}
           useBackgroundSearchButton={
             dataService.search.isBackgroundSearchEnabled &&
             getDashboardCapabilities().storeSearchSession
