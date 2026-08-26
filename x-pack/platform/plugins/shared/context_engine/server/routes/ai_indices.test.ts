@@ -602,12 +602,19 @@ describe('ai indices routes', () => {
   describe('GET /internal/context_engine/ai_index/{aiIndexId}/kis/{kiId}', () => {
     it('returns the stored Knowledge Indicator document', async () => {
       aiIndexService.get.mockResolvedValue(aiIndexItem);
-      esGet.mockResolvedValue({
-        _id: 'ki-1',
-        _source: {
-          type: 'playbook',
-          title: 'Refund playbook',
-          content: 'Verify the order first.',
+      esSearch.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'ki-1',
+              _index: kiBackingIndex,
+              _source: {
+                type: 'playbook',
+                title: 'Refund playbook',
+                content: 'Verify the order first.',
+              },
+            },
+          ],
         },
       });
 
@@ -616,10 +623,17 @@ describe('ai indices routes', () => {
         query: { index: kiBackingIndex },
       });
 
-      expect(esGet).toHaveBeenCalledWith({
-        index: kiBackingIndex,
-        id: 'ki-1',
-      });
+      expect(esSearch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: aiIndexItem.dest.value,
+          query: {
+            bool: {
+              filter: [{ ids: { values: ['ki-1'] } }, { term: { _index: kiBackingIndex } }],
+            },
+          },
+          size: 1,
+        })
+      );
       expect(response.ok).toHaveBeenCalledWith({
         body: {
           id: 'ki-1',
@@ -634,7 +648,11 @@ describe('ai indices routes', () => {
 
     it('returns 404 when the KI does not exist', async () => {
       aiIndexService.get.mockResolvedValue(aiIndexItem);
-      esGet.mockRejectedValue(createNotFoundResponseError());
+      esSearch.mockResolvedValue({
+        hits: {
+          hits: [],
+        },
+      });
 
       await callRoute('GET', aiIndexKiByIdPath, {
         params: { aiIndexId: 'customer_support', kiId: 'missing' },
@@ -643,6 +661,24 @@ describe('ai indices routes', () => {
 
       expect(response.notFound).toHaveBeenCalledWith({
         body: { message: new KiNotFoundError('customer_support', 'missing').message },
+      });
+    });
+
+    it('returns 404 when the index is outside the AI index dest', async () => {
+      aiIndexService.get.mockResolvedValue(aiIndexItem);
+      esSearch.mockResolvedValue({
+        hits: {
+          hits: [],
+        },
+      });
+
+      await callRoute('GET', aiIndexKiByIdPath, {
+        params: { aiIndexId: 'customer_support', kiId: 'ki-1' },
+        query: { index: 'logs-*' },
+      });
+
+      expect(response.notFound).toHaveBeenCalledWith({
+        body: { message: new KiNotFoundError('customer_support', 'ki-1').message },
       });
     });
 

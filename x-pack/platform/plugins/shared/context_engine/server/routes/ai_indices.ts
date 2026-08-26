@@ -433,10 +433,11 @@ export const registerAiIndexRoutes = ({
         const { aiIndexId, kiId } = request.params;
         const { index } = request.query;
         try {
-          await getAiIndexService().get(aiIndexId);
+          const aiIndex = await getAiIndexService().get(aiIndexId);
           const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
           const body: GetKiResponse = await getKi(esClient, {
             aiIndexId,
+            destValue: aiIndex.dest.value,
             index,
             kiId,
           });
