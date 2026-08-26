@@ -94,13 +94,6 @@ export const createAdCreateJobTool = (
   type: ToolType.builtin,
   description:
     'Discover OOTB job recipes, validate an unsaved job config (including full datafeed preview and cardinality checks), preview datafeed documents, estimate bucket span, and create the job and datafeed once validation passes.',
-  annotations: {
-    title: 'Create Anomaly Detection Job',
-    readOnlyHint: false,
-    destructiveHint: false,
-    idempotentHint: false,
-    openWorldHint: false,
-  },
   experimental: true,
   schema,
   handler: async (

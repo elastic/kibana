@@ -21,13 +21,6 @@ import { AD_MANAGE_JOB_STATE_TOOL_ID } from './tool_ids';
 /** Groups that mark a scratch job created by the agent builder. */
 const SCRATCH_GROUP = 'ml-agent-scratch';
 
-const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
-
-/** Terminal datafeed states: the datafeed has stopped itself. */
-const TERMINAL_DATAFEED_STATES = new Set(['stopped', 'failed']);
-/** Datafeed states where the batch run is still in flight. */
-const ACTIVE_DATAFEED_STATES = new Set(['started', 'starting', 'stopping']);
-
 const schema = z.object({
   operation: z.enum([
     'open_job',
@@ -93,13 +86,6 @@ export const createAdManageJobStateTool = (
   type: ToolType.builtin,
   description:
     'Change ML job and datafeed state: open/close job, start/stop datafeed, revert to a model snapshot, preview a datafeed, delete a scratch job, or block until a batch datafeed run completes.',
-  annotations: {
-    title: 'Manage Anomaly Detection Job State',
-    readOnlyHint: false,
-    destructiveHint: true,
-    idempotentHint: false,
-    openWorldHint: false,
-  },
   experimental: true,
   schema,
   handler: async (

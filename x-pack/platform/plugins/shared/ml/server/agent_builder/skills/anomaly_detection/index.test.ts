@@ -65,10 +65,10 @@ describe('createAnomalyDetectionSkill', () => {
     }
   });
 
-  it('exposes 5 ML tools inline so they only load when the skill is read', async () => {
+  it('exposes 6 ML tools inline so they only load when the skill is read', async () => {
     const skill = createAnomalyDetectionSkill(mockResolveMlCapabilities);
     expect(skill.getInlineTools).toBeDefined();
     const tools = await skill.getInlineTools!();
-    expect(tools).toHaveLength(5);
+    expect(tools).toHaveLength(6);
   });
 });

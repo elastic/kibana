@@ -18,6 +18,7 @@ import type { AnomalySwimLaneEmbeddableState } from '@kbn/ml-server-schemas/embe
 import type { AnomalyChartsEmbeddableState } from '@kbn/ml-server-schemas/embeddables/anomaly_charts';
 import type { SingleMetricViewerEmbeddableState } from '@kbn/ml-server-schemas/embeddables/single_metric_viewer';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import type { HasSerializedChildState } from '@kbn/presentation-publishing';
 
 // The embeddable hover-actions button ("Menu for...") is absolutely positioned at top:0.
 // The agent builder's inner panel has overflow:hidden + no padding, which clips it.
@@ -28,7 +29,19 @@ const embeddableWrapperCss = css`
 
 type MlChartAttachment<TData extends object> = UnknownAttachment & { data: TData };
 
-const buildParentApi = (state: object, timeRange?: TimeRange) => ({
+const buildParentApi = <T extends object>(
+  state: T,
+  timeRange?: TimeRange
+): HasSerializedChildState<T> & {
+  query$: BehaviorSubject<Query | undefined>;
+  filters$: BehaviorSubject<Filter[] | undefined>;
+  timeRange$: BehaviorSubject<TimeRange | undefined>;
+  executionContext: {
+    type: 'agent_builder';
+    description: string;
+    id: string;
+  };
+} => ({
   getSerializedStateForChild: () => state,
   query$: new BehaviorSubject<Query | undefined>(undefined),
   filters$: new BehaviorSubject<Filter[] | undefined>([]),

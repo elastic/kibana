@@ -12,6 +12,7 @@ import {
   AD_MANAGE_JOB_STATE_TOOL_ID,
   AD_UPDATE_JOB_CONFIG_TOOL_ID,
   QUERY_ANOMALIES_TOOL_ID,
+  CREATE_ML_CHARTS_TOOL_ID,
 } from './tools/tool_ids';
 import type { MlClientFactoryDeps } from './ml_client_factory';
 
@@ -61,7 +62,8 @@ describe('registerAnomalyDetectionAgentBuilder', () => {
     expect(registeredIds).toContain(AD_MANAGE_JOB_STATE_TOOL_ID);
     expect(registeredIds).toContain(AD_UPDATE_JOB_CONFIG_TOOL_ID);
     expect(registeredIds).toContain(QUERY_ANOMALIES_TOOL_ID);
-    expect(inlineTools).toHaveLength(5);
+    expect(registeredIds).toContain(CREATE_ML_CHARTS_TOOL_ID);
+    expect(inlineTools).toHaveLength(6);
   });
 
   it('each inline tool has a description, schema, and is experimental', async () => {
