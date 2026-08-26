@@ -100,8 +100,9 @@ const ConversationSharePopover: React.FC<{
   const profileByUid = new Map(profiles.map((profile) => [profile.uid, profile]));
 
   const debouncedSearch = useDebouncedValue(searchValue, SEARCH_DEBOUNCE_MS);
+  const suggestedUsersSearch = searchValue ? debouncedSearch : '';
   const { data: suggestedProfiles = [], isFetching: isSearchingUsers } = useSuggestUsers(
-    debouncedSearch,
+    suggestedUsersSearch,
     {
       enabled:
         canUpdateAccessControl &&
@@ -131,6 +132,19 @@ const ConversationSharePopover: React.FC<{
       setMemberIds(accessControlMemberIds);
     },
   });
+
+  const closePopover = () => {
+    setIsPopoverOpen(false);
+    setSearchValue('');
+  };
+
+  const onPopoverButtonClick = () => {
+    if (isPopoverOpen) {
+      setSearchValue('');
+    }
+
+    setIsPopoverOpen(!isPopoverOpen);
+  };
 
   const saveAccessControl = (
     nextAccessMode: ConversationAccessControlMode,
@@ -192,11 +206,9 @@ const ConversationSharePopover: React.FC<{
 
   return (
     <EuiPopover
-      button={
-        <ConversationSharePopoverButton onClick={() => setIsPopoverOpen((isOpen) => !isOpen)} />
-      }
+      button={<ConversationSharePopoverButton onClick={onPopoverButtonClick} />}
       isOpen={isPopoverOpen}
-      closePopover={() => setIsPopoverOpen(false)}
+      closePopover={closePopover}
       panelPaddingSize="none"
       anchorPosition="downRight"
       aria-label={canUpdateAccessControl ? sharingLabel : participantsLabel}
@@ -230,7 +242,7 @@ const ConversationSharePopover: React.FC<{
                 size="s"
                 color="text"
                 aria-label={closeLabel}
-                onClick={() => setIsPopoverOpen(false)}
+                onClick={closePopover}
                 data-test-subj="agentBuilderConversationSharingCloseButton"
               />
             </EuiToolTip>

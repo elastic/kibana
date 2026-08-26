@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, fireEvent, render, screen, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import {
   ConversationAccessControlMode,
@@ -435,6 +435,26 @@ describe('ConversationShareButton', () => {
 
     expect(mockUseSuggestUsers).toHaveBeenLastCalledWith('', { enabled: false });
 
+    await openPopover();
+
+    expect(mockUseSuggestUsers).toHaveBeenLastCalledWith('', { enabled: true });
+  });
+
+  it('resets the user suggestion search when reopening the sharing popover', async () => {
+    renderShareButton();
+    await openPopover();
+
+    fireEvent.change(screen.getByLabelText('Search for users to add'), {
+      target: { value: 'not-a-user' },
+    });
+
+    await waitFor(() => {
+      expect(mockUseSuggestUsers).toHaveBeenLastCalledWith('not-a-user', { enabled: true });
+    });
+
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('agentBuilderConversationSharingCloseButton'));
+    });
     await openPopover();
 
     expect(mockUseSuggestUsers).toHaveBeenLastCalledWith('', { enabled: true });
