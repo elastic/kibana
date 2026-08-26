@@ -219,6 +219,9 @@ describe('useCasesColumnsSelection — global field sync (Bug 19099)', () => {
       result.current.setSelectedColumns([{ field: 'title', name: 'Name', isChecked: false }]);
     });
 
-    expect(localStorage.getItem(sharedStorageKey)).toBeNull();
+    // useCasesLocalStorage initializes the key with the default value ({}) on mount,
+    // but no global field keys should have been written.
+    const sharedStored = JSON.parse(localStorage.getItem(sharedStorageKey) || '{}');
+    expect(Object.keys(sharedStored)).toHaveLength(0);
   });
 });

@@ -248,8 +248,10 @@ describe('useListFieldsSelection — global field sync (Bug 19099)', () => {
       result.current.setSelectedFields([{ field: 'tags', name: 'Tags', isChecked: true }]);
     });
 
-    // Non-global field goes only to the list key, not the shared key
-    expect(localStorage.getItem(sharedStorageKey)).toBeNull();
+    // useCasesLocalStorage initializes the key with the default value ({}) on mount,
+    // but no global field keys should have been written.
+    const sharedStored = JSON.parse(localStorage.getItem(sharedStorageKey) || '{}');
+    expect(Object.keys(sharedStored)).toHaveLength(0);
     expect(JSON.parse(localStorage.getItem(listStorageKey)!)).toEqual([
       { field: 'tags', name: 'Tags', isChecked: true },
     ]);
