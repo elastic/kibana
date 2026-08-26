@@ -47,9 +47,7 @@ describe('getKibanaRoleSchema', () => {
         base: ['all'],
       }));
 
-      expect(() =>
-        getKibanaRoleSchema(() => basePrivilegeNamesMap).validate(kibana)
-      ).not.toThrow();
+      expect(() => getKibanaRoleSchema(() => basePrivilegeNamesMap).validate(kibana)).not.toThrow();
     });
   });
 
