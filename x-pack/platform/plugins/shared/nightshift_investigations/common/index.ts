@@ -101,6 +101,15 @@ export interface AlertInvestigationContext {
 export interface StartInvestigationRequest {
   subject: InvestigationSubject;
   /**
+   * Caller-supplied prompt for the investigation agent. Falls back to a generic
+   * message derived from the subject when omitted.
+   */
+  message?: string;
+  /**
+   * Stream names the investigation should scope its signal search to.
+   */
+  stream_names?: string[];
+  /**
    * Caller-supplied key for concurrency control. Passed to the workflow engine as
    * `concurrency_key`, which maps to `concurrencyGroupKey` in the execution index.
    * Two starts with the same key cancel-and-replace the in-flight run (cancel-in-progress

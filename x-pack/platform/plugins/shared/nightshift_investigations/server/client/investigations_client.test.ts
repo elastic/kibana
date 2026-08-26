@@ -9,12 +9,23 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { ExecutionStatus } from '@kbn/workflows';
 import { SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { InvestigationStatus } from '../../common';
+import { installInvestigationAgent } from '../lib/install_investigation_agent';
 import {
   InvestigationNotFoundError,
+  InvestigationUnavailableError,
   MissingAlertContextError,
   NightshiftInvestigationsClient,
 } from './investigations_client';
+
+jest.mock('../lib/install_investigation_agent', () => ({
+  installInvestigationAgent: jest.fn().mockResolvedValue(undefined),
+}));
+
+const installInvestigationAgentMock = installInvestigationAgent as jest.MockedFunction<
+  typeof installInvestigationAgent
+>;
 
 const SPACE_ID = 'test-space';
 
@@ -28,6 +39,8 @@ const mockManagement = {
 const mockWorkflowsManagement = {
   management: mockManagement,
 } as unknown as WorkflowsServerPluginSetup;
+
+const mockAgentBuilder = {} as unknown as AgentBuilderPluginStart;
 
 const mockLogger = {
   info: jest.fn(),
@@ -50,16 +63,17 @@ const makeExecution = (overrides: Record<string, unknown> = {}) => ({
 });
 
 const makeClient = () =>
-  new NightshiftInvestigationsClient(
-    mockRequest,
-    mockWorkflowsManagement,
-    undefined,
-    mockLogger,
-    SPACE_ID
-  );
+  new NightshiftInvestigationsClient({
+    request: mockRequest,
+    workflowsManagement: mockWorkflowsManagement,
+    logger: mockLogger,
+    spaceIdOverride: SPACE_ID,
+    agentBuilder: mockAgentBuilder,
+  });
 
 beforeEach(() => {
   jest.clearAllMocks();
+  installInvestigationAgentMock.mockResolvedValue(undefined);
 });
 
 describe('NightshiftInvestigationsClient.get()', () => {
@@ -485,12 +499,68 @@ describe('NightshiftInvestigationsClient.start()', () => {
     );
   });
 
-  it('throws when the workflow is not installed', async () => {
+  it('uses the caller-supplied message and stream_names when provided', async () => {
+    mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+    mockManagement.runWorkflow.mockResolvedValue('exec-789');
+
+    await makeClient().start({
+      subject: { type: 'significant_event', id: 'se-1' },
+      message: 'Checkout latency breach\n\nP99 latency climbed above 2s.',
+      stream_names: ['logs.checkout'],
+    });
+
+    const [, , inputs] = mockManagement.runWorkflow.mock.calls[0];
+    expect(inputs.message).toBe('Checkout latency breach\n\nP99 latency climbed above 2s.');
+    expect(inputs.stream_names).toEqual(['logs.checkout']);
+  });
+
+  // Uses a significant event subject: an alert investigation cannot reach the generic fallback
+  // any more, because it is rejected without the alert data the brief is composed from.
+  it('falls back to a generic message and empty stream_names when omitted', async () => {
+    mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+    mockManagement.runWorkflow.mockResolvedValue('exec-999');
+
+    await makeClient().start({ subject: { type: 'significant_event', id: 'se-1' } });
+
+    const [, , inputs] = mockManagement.runWorkflow.mock.calls[0];
+    expect(inputs.message).toBe('Investigation requested for significant_event se-1');
+    expect(inputs.stream_names).toEqual([]);
+  });
+
+  it('ensures the investigation agent exists in the space before running the workflow', async () => {
+    mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+    mockManagement.runWorkflow.mockResolvedValue('exec-123');
+
+    await makeClient().start({ subject: { type: 'alert', id: 'alert-1' }, context: alertContext });
+
+    expect(installInvestigationAgentMock).toHaveBeenCalledWith({
+      agentBuilder: mockAgentBuilder,
+      spaceId: SPACE_ID,
+    });
+    expect(installInvestigationAgentMock.mock.invocationCallOrder[0]).toBeLessThan(
+      mockManagement.runWorkflow.mock.invocationCallOrder[0]
+    );
+  });
+
+  it('throws InvestigationUnavailableError when the workflow is not installed', async () => {
     mockManagement.getWorkflow.mockResolvedValue(null);
 
     await expect(
       makeClient().start({ subject: { type: 'significant_event', id: 'se-1' } })
-    ).rejects.toThrow('Investigations are not configured in this space');
+    ).rejects.toThrow(InvestigationUnavailableError);
+  });
+
+  it('throws InvestigationUnavailableError when agentBuilder is not available', async () => {
+    const client = new NightshiftInvestigationsClient({
+      request: mockRequest,
+      workflowsManagement: mockWorkflowsManagement,
+      logger: mockLogger,
+      spaceIdOverride: SPACE_ID,
+    });
+
+    await expect(client.start({ subject: { type: 'alert', id: 'alert-1' } })).rejects.toThrow(
+      InvestigationUnavailableError
+    );
   });
 
   // The route schema also enforces this, but the workflow step definition and the plugin start
@@ -531,6 +601,22 @@ describe('NightshiftInvestigationsClient.start()', () => {
       const inputs = mockManagement.runWorkflow.mock.calls[0][2];
       expect(inputs.message).toContain('Latency is too high');
       expect(inputs.message).not.toBe('Investigation requested for alert alert-1');
+    });
+
+    // The composed brief is only for alert subjects; a caller-supplied message still wins
+    // everywhere else, which is the behaviour every non-alert caller already relies on.
+    it('keeps the caller-supplied message for a significant event subject', async () => {
+      mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+      mockManagement.runWorkflow.mockResolvedValue('exec-654');
+
+      await makeClient().start({
+        subject: { type: 'significant_event', id: 'se-1' },
+        message: 'Checkout latency breach',
+        context: { alerts: [alertContext.alerts[0]] },
+      });
+
+      const inputs = mockManagement.runWorkflow.mock.calls[0][2];
+      expect(inputs.message).toBe('Checkout latency breach');
     });
   });
 });
