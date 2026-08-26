@@ -412,7 +412,7 @@ async function getSessionsCreatedAt(esClient: any): Promise<number[]> {
   await esClient.indices
     .refresh({ index: '.kibana_security_session*', ignore_unavailable: true })
     .catch(() => {});
-  const result = await esClient.search<{ createdAt: number }>({
+  const result = await esClient.search({
     index: '.kibana_security_session*',
     ignore_unavailable: true,
   });

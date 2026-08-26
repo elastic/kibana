@@ -10,17 +10,6 @@ import { expect } from '@kbn/scout/api';
 
 const KBN_XSRF = 'xxx';
 
-function extractSessionCookie(setCookieHeader: string | string[] | undefined): string {
-  const list = Array.isArray(setCookieHeader)
-    ? setCookieHeader
-    : setCookieHeader
-    ? [setCookieHeader]
-    : [];
-  const sidCookie = list.find((c) => c.startsWith('sid='));
-  if (!sidCookie) throw new Error('No sid cookie found');
-  return sidCookie.split(';')[0];
-}
-
 async function clearAllSessions(
   apiClient: any,
   config: { auth: { username: string; password: string } }

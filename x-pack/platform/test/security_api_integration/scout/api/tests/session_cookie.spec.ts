@@ -23,7 +23,7 @@ function extractSessionCookie(setCookieHeader: string | string[] | undefined): s
 
 test.describe('Session Cookie', { tag: [...tags.stateful.classic] }, () => {
   async function loginWithBasic(
-    apiClient: Parameters<Parameters<typeof test>[1]>[0]['apiClient'],
+    apiClient: any,
     username: string,
     password: string
   ): Promise<string> {
