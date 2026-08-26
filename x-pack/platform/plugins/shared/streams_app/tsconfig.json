@@ -122,5 +122,6 @@
     "@kbn/agent-builder-browser",
     "@kbn/agent-builder-server",
     "@kbn/agent-builder-common",
+    "@kbn/kql",
   ]
 }

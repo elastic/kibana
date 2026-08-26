@@ -69,6 +69,7 @@ import {
   getStatLabel,
   resolveMetricReading,
   resolveMetricSparkline,
+  setMetricRefreshSalt,
   toneColor,
   type BucketKey,
   type MetricDescriptor,
@@ -126,6 +127,13 @@ interface Props {
    * severity tones regardless of any persisted config.
    */
   readonly enablePaletteColoring?: boolean;
+  /**
+   * Bumped by the ElasticOn Inventory auto-refresh (and manual refresh) so
+   * tiles re-roll their synthesized readings — see `setMetricRefreshSalt`.
+   * Purely a cache-buster for the per-row memoization; the actual new
+   * values come from the salted hash.
+   */
+  readonly refreshTick?: number;
 }
 
 /**
@@ -141,6 +149,13 @@ const SelectedEntityContext = createContext<string | null>(null);
  * forward the flag down to `SubTypeRow` / `CategoryCardInner`.
  */
 const PaletteColoringEnabledContext = createContext<boolean>(false);
+
+/**
+ * Auto-refresh cache-buster (see {@link setMetricRefreshSalt}). Threaded so
+ * `BucketTileRow` can list it as a memo dependency and recompute readings
+ * when the ElasticOn Inventory refreshes.
+ */
+const RefreshTickContext = createContext<number>(0);
 
 // ---------------------------------------------------------------------------
 // Color helpers
@@ -200,6 +215,56 @@ const flattenColor = (foreground: string, background: string): string => {
 /** Opaque hex equivalent of a severity tile tone (tone over the page). */
 const solidToneColor = (tone: MetricTone, euiTheme: EuiThemeComputed): string =>
   flattenColor(toneColor(tone, euiTheme), euiTheme.colors.emptyShade);
+
+/**
+ * Default Steps rules for a numeric metric: one threshold per severity
+ * band (Good / Warning / Critical) at the metric's own warn/crit values,
+ * coloured with the *exact* solid tones the tiles use in Automatic mode.
+ * Derived from the live metric so the "out of the box" Steps setup always
+ * mirrors Automatic coloring (colours + thresholds) — the seed is never
+ * persisted, so it can't drift from Automatic as the theme/metric change.
+ */
+const buildDefaultStepRules = (
+  metric: MetricDescriptor,
+  euiTheme: EuiThemeComputed
+): StepRule[] => {
+  if (metric.kind !== 'numeric') return [];
+  // Use the exact same (semi-transparent) tones the tiles paint in
+  // Automatic mode so a fresh Steps setup is pixel-identical to Automatic.
+  // The little color-picker swatch flattens these for display only.
+  const goodColor = toneColor('good', euiTheme);
+  const warningColor = toneColor('warning', euiTheme);
+  const dangerColor = toneColor('danger', euiTheme);
+  const { warn, crit, direction } = metric.thresholds;
+  const minValue = Math.round(metric.range.min);
+  if (direction === 'asc') {
+    return [
+      { color: goodColor, label: 'Good', value: minValue },
+      { color: warningColor, label: 'Warning', value: warn },
+      { color: dangerColor, label: 'Critical', value: crit },
+    ];
+  }
+  return [
+    { color: dangerColor, label: 'Critical', value: minValue },
+    { color: warningColor, label: 'Warning', value: crit },
+    { color: goodColor, label: 'Good', value: warn },
+  ];
+};
+
+/**
+ * The rules a Steps config should render with: the user's persisted rules
+ * once they've edited them, otherwise the freshly-derived defaults. Keeping
+ * unedited buckets on the derived defaults means stale rules from earlier
+ * builds can never override the Automatic-matching seed.
+ */
+const effectiveStepRules = (
+  coloring: ColoringConfig,
+  metric: MetricDescriptor,
+  euiTheme: EuiThemeComputed
+): readonly StepRule[] =>
+  coloring.rules && coloring.rules.length > 0
+    ? coloring.rules
+    : buildDefaultStepRules(metric, euiTheme);
 
 // ---------------------------------------------------------------------------
 // Tile
@@ -448,17 +513,6 @@ const TileSparkline = ({ values, color }: { values: readonly number[]; color: st
   );
 };
 
-const sparklineColor = (reading: MetricReading, euiTheme: EuiThemeComputed): string => {
-  switch (reading.tone) {
-    case 'danger':
-      return euiTheme.colors.severity.danger;
-    case 'warning':
-      return euiTheme.colors.severity.warning;
-    default:
-      return euiTheme.colors.severity.success;
-  }
-};
-
 /**
  * Styled dark hover card for a tile — consistent with the Geomap view's
  * region card. Shows the entity name + type, the current Color-by value
@@ -542,7 +596,10 @@ const MetricTileTooltip = ({
         <span style={{ fontWeight: 600 }}>{reading.displayValue}</span>
       </div>
       {sparkline ? (
-        <TileSparkline values={sparkline} color={fillColor ?? sparklineColor(reading, euiTheme)} />
+        <TileSparkline
+          values={sparkline}
+          color={fillColor ?? solidToneColor(reading.tone, euiTheme)}
+        />
       ) : null}
     </div>
   );
@@ -574,6 +631,9 @@ const BucketTileRow = ({
   paletteRange = null,
 }: BucketTileRowProps) => {
   const { euiTheme } = useEuiTheme();
+  // Auto-refresh cache-buster: listed in the `ordered` memo deps so tiles
+  // recompute their (salted) readings when the Inventory refreshes.
+  const refreshTick = useContext(RefreshTickContext);
   // Palette mode paints each tile from a value-ramp (Gradient) or a set
   // of threshold rules (Steps); resolve a concrete colour per reading.
   // When off, `fillFor` returns undefined so tiles fall back to tone.
@@ -583,13 +643,16 @@ const BucketTileRow = ({
         return undefined;
       }
       if (coloring.type === 'steps') {
-        if (!coloring.rules || coloring.rules.length === 0) return undefined;
-        return resolveStepColor(reading.rawValue, coloring.rules, euiTheme.colors.lightShade);
+        return resolveStepColor(
+          reading.rawValue,
+          effectiveStepRules(coloring, metric, euiTheme),
+          euiTheme.colors.lightShade
+        );
       }
       if (!paletteRange) return undefined;
       return resolvePaletteColor(reading.rawValue, paletteRange, coloring);
     },
-    [coloring, paletteRange, euiTheme.colors.lightShade]
+    [coloring, paletteRange, metric, euiTheme]
   );
   // Clamp the stat to "Last" for categorical metrics (Phase, Status,
   // …) since avg/min/max of an enum has no meaning. Resolved here so
@@ -611,6 +674,11 @@ const BucketTileRow = ({
   // visually shuffle when the user changes stat.
   const sortByValue = Boolean(coloring && coloring.mode === 'palette' && metric.kind === 'numeric');
   const ordered = useMemo(() => {
+    // Re-seed the shared reading salt from the refresh tick so tiles re-roll
+    // on Inventory (auto-)refresh. Tick 0 keeps the empty (stable) salt so
+    // every other mode / first render is unchanged. All rows share the same
+    // tick, so the salt stays consistent across the grid and the tooltips.
+    setMetricRefreshSalt(refreshTick ? String(refreshTick) : '');
     const withReadings = entities.map((entity) => ({
       entity,
       // Health hint keeps the tile color coherent with the
@@ -635,7 +703,7 @@ const BucketTileRow = ({
       return a.entity.name.localeCompare(b.entity.name);
     });
     return withReadings;
-  }, [entities, metric, effectiveStat, sortByValue]);
+  }, [entities, metric, effectiveStat, sortByValue, refreshTick]);
   // No truncation — every entity in the bucket renders as its own tile
   // so the grid view stays consistent with the count shown in the
   // header (and with the list-view count). Instead of a flat
@@ -928,8 +996,10 @@ const BucketMetricLegend = ({
   // set of threshold-rule swatches. Placed after all hooks so hook order
   // stays stable across renders.
   if (coloring && coloring.mode === 'palette') {
-    if (coloring.type === 'steps' && coloring.rules && coloring.rules.length > 0) {
-      return <StepRulesLegend metric={metric} rules={coloring.rules} />;
+    if (coloring.type === 'steps') {
+      return (
+        <StepRulesLegend metric={metric} rules={effectiveStepRules(coloring, metric, euiTheme)} />
+      );
     }
     if (coloring.type === 'gradient' && paletteRange) {
       return <PaletteGradientLegend metric={metric} coloring={coloring} range={paletteRange} />;
@@ -1054,10 +1124,15 @@ const StepRulesEditor = ({
                 onChange={(color) => updateRule(index, { color })}
                 color={rule.color}
                 compressed
+                showAlpha
                 swatches={toneSwatches}
                 button={
                   <EuiColorPickerSwatch
-                    color={rule.color}
+                    // The stored colour may be a semi-transparent tone
+                    // (so tiles match Automatic exactly); flatten it over
+                    // the panel so the swatch shows the true colour instead
+                    // of a washed-out / white square.
+                    color={flattenColor(rule.color, euiTheme.colors.emptyShade)}
                     aria-label={i18n.translate(
                       'xpack.streams.entityCentricLab.entities.bucket.controls.stepColorAriaLabel',
                       { defaultMessage: 'Select color' }
@@ -1258,38 +1333,21 @@ const BucketMetricControlsFlyout = ({
   // switching to Steps opens identical to today's default colouring, then
   // the user tweaks colours / labels / thresholds. `desc` metrics (higher
   // is better) map the danger band to the low end.
-  const defaultStepRules = useMemo<StepRule[]>(() => {
-    if (draftMetric.kind !== 'numeric') return [];
-    const goodColor = solidToneColor('good', euiTheme);
-    const warningColor = solidToneColor('warning', euiTheme);
-    const dangerColor = solidToneColor('danger', euiTheme);
-    const { warn, crit, direction } = draftMetric.thresholds;
-    const minValue = Math.round(draftMetric.range.min);
-    if (direction === 'asc') {
-      return [
-        { color: goodColor, label: 'Good', value: minValue },
-        { color: warningColor, label: 'Warning', value: warn },
-        { color: dangerColor, label: 'Critical', value: crit },
-      ];
-    }
-    return [
-      { color: dangerColor, label: 'Critical', value: minValue },
-      { color: warningColor, label: 'Warning', value: crit },
-      { color: goodColor, label: 'Good', value: warn },
-    ];
-  }, [draftMetric, euiTheme]);
+  const defaultStepRules = useMemo<StepRule[]>(
+    () => buildDefaultStepRules(draftMetric, euiTheme),
+    [draftMetric, euiTheme]
+  );
 
   const updateColoring = (patch: Partial<ColoringConfig>) =>
     setDraftColoring((current) => ({ ...current, ...patch }));
 
-  // Switching to Steps seeds default rules the first time (from the
-  // metric thresholds) so the editor never opens empty.
+  // Switching type never persists the seeded rules: unedited Steps
+  // buckets derive their rules from the metric at render time (see
+  // `effectiveStepRules`) so they always mirror Automatic and can't be
+  // overridden by stale rules from an earlier build. Rules are only
+  // persisted once the user actually edits a colour / label / threshold.
   const handleTypeChange = (nextType: PaletteType) => {
-    if (nextType === 'steps' && (!draftColoring.rules || draftColoring.rules.length === 0)) {
-      updateColoring({ type: nextType, rules: defaultStepRules });
-    } else {
-      updateColoring({ type: nextType });
-    }
+    updateColoring({ type: nextType });
   };
 
   const handleApply = () => {
@@ -1395,14 +1453,14 @@ const BucketMetricControlsFlyout = ({
                       id: 'severity',
                       label: i18n.translate(
                         'xpack.streams.entityCentricLab.entities.bucket.controls.colorModeSeverity',
-                        { defaultMessage: 'Severity' }
+                        { defaultMessage: 'Automatic' }
                       ),
                     },
                     {
                       id: 'palette',
                       label: i18n.translate(
                         'xpack.streams.entityCentricLab.entities.bucket.controls.colorModePalette',
-                        { defaultMessage: 'Value palette' }
+                        { defaultMessage: 'Custom' }
                       ),
                     },
                   ]}
@@ -1697,11 +1755,9 @@ const SubTypeRow = ({ bucketKey, label, entities, onSelectEntity }: SubTypeRowPr
   // back gracefully so the row still renders.
   const metric = findMetric(bucketKey, selection.metricId) ?? getBucketMetrics(bucketKey)[0];
   const { coloring } = selection;
-  const paletteActive =
-    paletteEnabled &&
-    coloring.mode === 'palette' &&
-    metric.kind === 'numeric' &&
-    (coloring.type === 'gradient' || (coloring.rules?.length ?? 0) > 0);
+  // Steps no longer needs persisted rules to be active — unedited buckets
+  // derive defaults from the metric (see `effectiveStepRules`).
+  const paletteActive = paletteEnabled && coloring.mode === 'palette' && metric.kind === 'numeric';
   const paletteRange = useMemo(
     () =>
       paletteActive && coloring.type === 'gradient'
@@ -2127,11 +2183,9 @@ const CategoryCardInner = ({
   const metric = findMetric(bucketKey, selection.metricId) ?? getBucketMetrics(bucketKey)[0];
   const categoryLabel = getCategoryDescriptor(category)?.label ?? category;
   const { coloring } = selection;
-  const paletteActive =
-    paletteEnabled &&
-    coloring.mode === 'palette' &&
-    metric.kind === 'numeric' &&
-    (coloring.type === 'gradient' || (coloring.rules?.length ?? 0) > 0);
+  // Steps no longer needs persisted rules to be active — unedited buckets
+  // derive defaults from the metric (see `effectiveStepRules`).
+  const paletteActive = paletteEnabled && coloring.mode === 'palette' && metric.kind === 'numeric';
   const paletteRange = useMemo(
     () =>
       paletteActive && coloring.type === 'gradient'
@@ -2196,6 +2250,7 @@ export const GroupedGridView = ({
   selectedEntityName = null,
   groupCloudByProvider = false,
   enablePaletteColoring = false,
+  refreshTick = 0,
 }: Props) => {
   // Subscribe to chaos-mode flips so PayFlow storyline tiles can
   // swap colour the moment the user rolls back. `getEffectiveEntityHealth`
@@ -2251,25 +2306,27 @@ export const GroupedGridView = ({
   return (
     <SelectedEntityContext.Provider value={selectedEntityName}>
       <PaletteColoringEnabledContext.Provider value={enablePaletteColoring}>
-        <EuiFlexGroup direction="column" gutterSize="m">
-          {grouped.map((section) =>
-            section.category === 'cloud' && groupCloudByProvider ? (
-              <CloudGroupedCards
-                key={section.category}
-                entities={section.rows}
-                onSelectEntity={onSelectEntity}
-              />
-            ) : (
-              <EuiFlexItem key={section.category} grow={false}>
-                <CategoryCard
-                  category={section.category}
+        <RefreshTickContext.Provider value={refreshTick}>
+          <EuiFlexGroup direction="column" gutterSize="m">
+            {grouped.map((section) =>
+              section.category === 'cloud' && groupCloudByProvider ? (
+                <CloudGroupedCards
+                  key={section.category}
                   entities={section.rows}
                   onSelectEntity={onSelectEntity}
                 />
-              </EuiFlexItem>
-            )
-          )}
-        </EuiFlexGroup>
+              ) : (
+                <EuiFlexItem key={section.category} grow={false}>
+                  <CategoryCard
+                    category={section.category}
+                    entities={section.rows}
+                    onSelectEntity={onSelectEntity}
+                  />
+                </EuiFlexItem>
+              )
+            )}
+          </EuiFlexGroup>
+        </RefreshTickContext.Provider>
       </PaletteColoringEnabledContext.Provider>
     </SelectedEntityContext.Provider>
   );

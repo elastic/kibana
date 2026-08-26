@@ -37,6 +37,13 @@ interface Props {
   readonly facets: Record<TagKey, string[]>;
   readonly activeFilters: ActiveTagFilters;
   readonly onChange: (next: ActiveTagFilters) => void;
+  /** Render at the compact (32px) filter height to line up with the search bar. */
+  readonly compressed?: boolean;
+  /**
+   * Hide the built-in "Clear filters" affordance. Set when the caller owns a
+   * unified clear button that resets these plus other filters (ElasticOn).
+   */
+  readonly hideClear?: boolean;
 }
 
 const TagFilterPopover = ({
@@ -124,7 +131,13 @@ const TagFilterPopover = ({
   );
 };
 
-export const EntitiesTagFilters = ({ facets, activeFilters, onChange }: Props) => {
+export const EntitiesTagFilters = ({
+  facets,
+  activeFilters,
+  onChange,
+  compressed = false,
+  hideClear = false,
+}: Props) => {
   const totalActive = useMemo(
     () => TAG_KEYS.reduce((sum, key) => sum + activeFilters[key].length, 0),
     [activeFilters]
@@ -149,6 +162,7 @@ export const EntitiesTagFilters = ({ facets, activeFilters, onChange }: Props) =
     >
       <EuiFlexItem grow={false}>
         <EuiFilterGroup
+          compressed={compressed}
           aria-label={i18n.translate(
             'xpack.streams.entityCentricLab.entities.tagFilter.groupAriaLabel',
             { defaultMessage: 'Entity tag filters' }
@@ -186,7 +200,7 @@ export const EntitiesTagFilters = ({ facets, activeFilters, onChange }: Props) =
           />
         </EuiFilterGroup>
       </EuiFlexItem>
-      {totalActive > 0 ? (
+      {!hideClear && totalActive > 0 ? (
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             size="xs"

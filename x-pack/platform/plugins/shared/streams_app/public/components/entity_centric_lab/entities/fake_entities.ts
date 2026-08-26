@@ -167,6 +167,14 @@ export interface Entity {
   readonly age: string;
   readonly anomalyDetection: string;
   readonly tags: EntityTags;
+  /**
+   * Extra, entity-type-specific attributes (e.g. Hosts carry
+   * `os` / `cloudProvider` / `serviceName`). These power the per-category
+   * "extra filters" shown to the right of the shared tag filters — see
+   * {@link CATEGORY_EXTRA_FILTERS}. Only seeded for categories that declare
+   * extra filters; `undefined` elsewhere.
+   */
+  readonly attributes?: Readonly<Record<string, string>>;
 }
 
 export interface EntityCategoryCounts {
@@ -270,6 +278,64 @@ const TAG_POOLS: Record<TagKey, readonly string[]> = {
   region: REGION_VALUES,
 };
 
+/**
+ * Definition of one entity-type-specific "extra" filter. These render to the
+ * right of the shared tag filters (Team / Application / …) whenever the
+ * inventory is scoped to the owning category, mirroring how the real Hosts /
+ * inventory views expose type-specific facets (Operating System, Cloud
+ * Provider, Service Name, …). `pool` is the source of truth for the values a
+ * category's entities can carry; the popover only surfaces values that
+ * actually occur (see {@link getExtraFacets}).
+ */
+export interface ExtraFilterDef {
+  readonly key: string;
+  readonly label: string;
+  /** Optional helper text rendered inside the filter popover. */
+  readonly help?: string;
+  readonly pool: readonly string[];
+}
+
+const HOST_OS_VALUES: readonly string[] = [
+  'Ubuntu 22.04 LTS',
+  'Amazon Linux 2',
+  'RHEL 9',
+  'Windows Server 2019',
+  'Debian 12',
+];
+
+const HOST_CLOUD_PROVIDER_VALUES: readonly string[] = ['AWS', 'GCP', 'Azure', 'On-prem'];
+
+const HOST_SERVICE_NAME_VALUES: readonly string[] = [
+  'nginx',
+  'postgres',
+  'redis',
+  'kafka',
+  'elasticsearch',
+  'mongodb',
+];
+
+/**
+ * Per-category extra filters. Add an entry here (plus, if you want them to
+ * filter something real, seed the matching attributes in the builders below)
+ * to expose type-specific facets on that category's inventory page.
+ */
+export const CATEGORY_EXTRA_FILTERS: Partial<Record<EntityCategoryId, readonly ExtraFilterDef[]>> = {
+  hosts: [
+    { key: 'os', label: 'Operating system', pool: HOST_OS_VALUES },
+    { key: 'cloudProvider', label: 'Cloud provider', pool: HOST_CLOUD_PROVIDER_VALUES },
+    {
+      key: 'serviceName',
+      label: 'Service name',
+      help: 'Services detected running on the host (from the system integration).',
+      pool: HOST_SERVICE_NAME_VALUES,
+    },
+  ],
+};
+
+/** Extra filters declared for a category, or an empty list when none. */
+export const getCategoryExtraFilters = (category: EntityCategoryId): readonly ExtraFilterDef[] =>
+  CATEGORY_EXTRA_FILTERS[category] ?? [];
+
 // Tiny string hash used purely as a deterministic per-entity-per-tag
 // pseudo-random source. Each tag is computed from a *different* string
 // (e.g. "hosts-app-12", "hosts-env-12") so the resulting values are
@@ -293,6 +359,24 @@ const buildTags = (scope: string, index: number): EntityTags => ({
   team: pickTag(TEAM_VALUES, `${scope}-team`, index),
   region: pickTag(REGION_VALUES, `${scope}-region`, index),
 });
+
+// Deterministically seed the extra, category-specific attributes (e.g. a
+// host's OS / cloud provider / detected service) from each filter def's pool,
+// using the same independent-hash scheme as tags so values are stable and
+// uncorrelated. Returns `undefined` for categories with no extra filters.
+const buildExtraAttributes = (
+  category: EntityCategoryId,
+  scope: string,
+  index: number
+): Record<string, string> | undefined => {
+  const defs = CATEGORY_EXTRA_FILTERS[category];
+  if (!defs || defs.length === 0) return undefined;
+  const attributes: Record<string, string> = {};
+  for (const def of defs) {
+    attributes[def.key] = pickTag(def.pool, `${scope}-${def.key}`, index);
+  }
+  return attributes;
+};
 
 // One region is deliberately "on fire" so the Geomap view tells a clear
 // story: a single all-red donut while every other region reads
@@ -521,6 +605,7 @@ const buildCategoryEntities = (spec: CategorySpec): Entity[] => {
       age: AGE_SAMPLES[i % AGE_SAMPLES.length],
       anomalyDetection: ANOMALY_SAMPLES[i % ANOMALY_SAMPLES.length],
       tags,
+      attributes: buildExtraAttributes(spec.category, spec.category, i),
     });
   }
   return sortByHealth(entities);
@@ -692,6 +777,57 @@ export const matchesTagFilters = (entity: Entity, filters: ActiveTagFilters): bo
     const values = filters[key];
     if (values.length > 0 && !values.includes(entity.tags[key])) {
       return false;
+    }
+  }
+  return true;
+};
+
+export type ActiveExtraFilters = Record<string, readonly string[]>;
+
+export const EMPTY_EXTRA_FILTERS: ActiveExtraFilters = {};
+
+/**
+ * Distinct values actually present for each extra-filter def across the
+ * supplied (already category-scoped) entities, alphabetically sorted — the
+ * source data for the extra filter popovers.
+ */
+export const getExtraFacets = (
+  entities: readonly Entity[],
+  defs: readonly ExtraFilterDef[]
+): Record<string, string[]> => {
+  const sets = new Map<string, Set<string>>(defs.map((def) => [def.key, new Set<string>()]));
+  for (const entity of entities) {
+    if (!entity.attributes) continue;
+    for (const def of defs) {
+      const value = entity.attributes[def.key];
+      if (value) sets.get(def.key)!.add(value);
+    }
+  }
+  const facets: Record<string, string[]> = {};
+  for (const def of defs) {
+    facets[def.key] = Array.from(sets.get(def.key)!).sort();
+  }
+  return facets;
+};
+
+export const isAnyExtraFilterActive = (filters: ActiveExtraFilters): boolean =>
+  Object.values(filters).some((values) => values.length > 0);
+
+/**
+ * Honors the active extra filters, but only for keys declared by `defs` — so a
+ * selection made on one category can't silently filter another after
+ * navigation (stale keys are ignored rather than blanking the grid).
+ */
+export const matchesExtraFilters = (
+  entity: Entity,
+  filters: ActiveExtraFilters,
+  defs: readonly ExtraFilterDef[]
+): boolean => {
+  for (const def of defs) {
+    const values = filters[def.key];
+    if (values && values.length > 0) {
+      const actual = entity.attributes?.[def.key];
+      if (!actual || !values.includes(actual)) return false;
     }
   }
   return true;

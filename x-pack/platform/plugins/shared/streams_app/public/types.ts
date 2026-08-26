@@ -35,6 +35,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
 import type { EvalsPublicStart } from '@kbn/evals-plugin/public';
+import type { KqlPluginStart } from '@kbn/kql/public';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 export interface ConfigSchema {}
@@ -66,6 +67,9 @@ export interface StreamsAppStartDependencies {
   fieldFormats: FieldFormatsStart;
   fieldsMetadata: FieldsMetadataPublicStart;
   indexLifecycleManagement?: IndexLifecycleManagementPluginStart;
+  // Optional — used by the entity-centric lab (ElasticOn) to inject
+  // in-memory value suggestions into the unified search bar's autocomplete.
+  kql?: KqlPluginStart;
   indexManagement: IndexManagementPluginStart;
   ingestPipelines: IngestPipelinesPluginStart;
   licensing: LicensingPluginStart;

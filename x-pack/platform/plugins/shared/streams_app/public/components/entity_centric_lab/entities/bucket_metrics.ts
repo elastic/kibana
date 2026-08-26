@@ -1111,11 +1111,30 @@ const stableHash = (input: string): number => {
 };
 
 /**
+ * Live auto-refresh salt (ElasticOn Inventory only). The readings are
+ * otherwise fully deterministic per (entity, metric, stat) so reloads
+ * don't shuffle colors. When the search bar's auto-refresh ticks (or the
+ * user hits refresh) the caller sets a new salt via
+ * {@link setMetricRefreshSalt}, which perturbs the hash so tiles visibly
+ * re-roll — simulating live data. Empty salt (the default) preserves the
+ * original, stable readings everywhere else.
+ */
+let refreshSalt = '';
+
+export const setMetricRefreshSalt = (salt: string): void => {
+  refreshSalt = salt;
+};
+
+/**
  * Normalize a hash to [0, 1) — exact enough for picking values out of a
  * small lookup table or interpolating into a numeric range.
  */
 const unitHash = (entityName: string, metricId: string, statId: StatId): number =>
-  stableHash(`${metricId}::${statId}::${entityName}`) / 0x7fffffff;
+  stableHash(
+    refreshSalt
+      ? `${refreshSalt}::${metricId}::${statId}::${entityName}`
+      : `${metricId}::${statId}::${entityName}`
+  ) / 0x7fffffff;
 
 const roundTo = (value: number, precision: number): number => {
   const factor = 10 ** precision;

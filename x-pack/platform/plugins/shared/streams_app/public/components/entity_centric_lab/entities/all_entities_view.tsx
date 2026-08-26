@@ -8,9 +8,11 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
+import type { Filter, Query } from '@kbn/es-query';
 import {
   EuiBetaBadge,
   EuiButton,
+  EuiButtonEmpty,
   EuiButtonGroup,
   EuiFieldSearch,
   EuiFlexGroup,
@@ -94,15 +96,24 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { useTimeRangeUpdate } from '../../../hooks/use_time_range_update';
 import { useTimefilter } from '../../../hooks/use_timefilter';
-import type { ActiveTagFilters, Entity, EntityCategoryId } from './fake_entities';
+import type {
+  ActiveExtraFilters,
+  ActiveTagFilters,
+  Entity,
+  EntityCategoryId,
+} from './fake_entities';
 import { getCloudProvider, getCloudService, type CloudProviderId } from './cloud_providers';
 import { useCloudHierarchyEnabled } from './use_cloud_hierarchy';
 import {
+  EMPTY_EXTRA_FILTERS,
   EMPTY_TAG_FILTERS,
   TAG_KEYS,
   buildFakeEntities,
   getCategoryDescriptor,
+  getCategoryExtraFilters,
+  getExtraFacets,
   getTagFacets,
+  matchesExtraFilters,
   matchesTagFilters,
 } from './fake_entities';
 import { GroupedGridView } from './grouped_grid_view';
@@ -110,10 +121,14 @@ import { CloudSideNav } from './cloud_side_nav';
 import { EntitiesListView } from './entities_list_view';
 import { GeomapView } from './geomap_view';
 import { EntitiesTagFilters } from './entities_tag_filters';
+import { EntityExtraFilters } from './entity_extra_filters';
 import { AllEntitiesOverviewView } from './all_entities_overview_view';
 import { MonitoringAssetsView } from './monitoring_assets_view';
 import { SavedViewsBar } from './saved_views_bar';
 import { SaveViewButton } from './save_view_button';
+import { compileEntityKql, entityMatchesFilters } from './entity_kql';
+import { useEntityLabDataView } from './use_entity_lab_data_view';
+import { useEntityValueSuggestions } from './use_entity_value_suggestions';
 import {
   applyViewToStorage,
   areStatesEqual,
@@ -341,7 +356,7 @@ export const AllEntitiesView = ({
   const {
     core: { notifications, uiSettings },
     dependencies: {
-      start: { agentBuilder, charts },
+      start: { agentBuilder, charts, unifiedSearch },
     },
   } = useKibana();
   // Lab experience mode (Stack Management → Advanced Settings → Discover). The
@@ -383,6 +398,21 @@ export const AllEntitiesView = ({
   );
   const handleTimeRefresh = useCallback(() => refresh(), [refresh]);
 
+  // ElasticOn Inventory unified search bar: an ad-hoc data view (fields only,
+  // no backing index) powers autocomplete + "+ Add filter"; the KQL / filters
+  // are evaluated against the seeded entities in-memory (see `entity_kql.ts`).
+  const labDataView = useEntityLabDataView(isElasticOn);
+  // "+ Add filter" chips (transient; not persisted with saved views yet).
+  const [labFilters, setLabFilters] = useState<Filter[]>([]);
+  // Bumped on every (auto-)refresh to re-roll the fake metric readings so
+  // the hex map visibly "lives". The grid consumes the tick to re-seed the
+  // reading salt (see GroupedGridView), keeping tiles + tooltips consistent.
+  const [refreshTick, setRefreshTick] = useState(0);
+  const handleLiveRefresh = useCallback(() => {
+    setRefreshTick((tick) => tick + 1);
+    refresh();
+  }, [refresh]);
+
   // Saved views: named snapshots of category + tab + view mode + filters
   // + search, persisted in `localStorage`. `useSavedViews` exposes the
   // list + CRUD; the SavedViewsBar renders the load / save / rename /
@@ -411,11 +441,33 @@ export const AllEntitiesView = ({
     }
     return list;
   }, [dataset.entities, categoryScope, cloudProviderScope, cloudServiceScope]);
+  // Feed the unified search bar's value autocomplete from the visible slice,
+  // so suggestions match the facet dropdowns (e.g. `application:` offers the
+  // same app names). ElasticOn-only; no-op otherwise.
+  useEntityValueSuggestions(isElasticOn, labDataView, scopedEntities);
   // Tag facets must be computed from the visible slice. If we kept them
   // global, a scoped page would show filter options that always empty the
   // grid (e.g. "Application: ml-platform" on the Databases page when no
   // database is tagged with that application).
   const tagFacets = useMemo(() => getTagFacets(scopedEntities), [scopedEntities]);
+  // Entity-type-specific "extra" filters (e.g. Hosts → OS / Cloud provider /
+  // Service name). Only surfaced when the inventory is scoped to a category
+  // that declares them, and only in ElasticOn.
+  const extraFilterDefs = useMemo(
+    () => (isElasticOn && categoryScope ? getCategoryExtraFilters(categoryScope) : []),
+    [isElasticOn, categoryScope]
+  );
+  const extraFacets = useMemo(
+    () => getExtraFacets(scopedEntities, extraFilterDefs),
+    [scopedEntities, extraFilterDefs]
+  );
+  const [activeExtraFilters, setActiveExtraFilters] =
+    useState<ActiveExtraFilters>(EMPTY_EXTRA_FILTERS);
+  // Extra filters are category-specific, so clear them when the scope changes
+  // to avoid a selection from one category silently narrowing another.
+  useEffect(() => {
+    setActiveExtraFilters(EMPTY_EXTRA_FILTERS);
+  }, [categoryScope, cloudProviderScope, cloudServiceScope]);
   const categoryDescriptor = categoryScope ? getCategoryDescriptor(categoryScope) : undefined;
   // Cloud provider / service descriptors resolved from the scope, used
   // to swap the page header (icon + label) to the provider logo and
@@ -577,12 +629,49 @@ export const AllEntitiesView = ({
   }, [isElasticOn, categoryScope, loadViewId, defaultViewId, savedViewsList, history]);
 
   const filteredEntities = useMemo(() => {
+    // ElasticOn: `search` holds a KQL expression driven by the unified
+    // search bar (reusing the same state slot so saved views keep working).
+    // Evaluate it — plus any "+ Add filter" chips — against the entities.
+    if (isElasticOn) {
+      const predicate = compileEntityKql(search);
+      return scopedEntities.filter(
+        (entity) =>
+          matchesTagFilters(entity, activeTagFilters) &&
+          matchesExtraFilters(entity, activeExtraFilters, extraFilterDefs) &&
+          predicate(entity) &&
+          entityMatchesFilters(labFilters, entity)
+      );
+    }
     const query = search.trim().toLowerCase();
     return scopedEntities.filter((entity) => {
       if (query && !entity.name.toLowerCase().includes(query)) return false;
       return matchesTagFilters(entity, activeTagFilters);
     });
-  }, [scopedEntities, search, activeTagFilters]);
+  }, [
+    scopedEntities,
+    search,
+    activeTagFilters,
+    isElasticOn,
+    labFilters,
+    activeExtraFilters,
+    extraFilterDefs,
+  ]);
+
+  // Any filter dimension active (tags, extra facets, "+ Add filter" chips, or a
+  // typed KQL query) — drives the unified "Clear filters" affordance below.
+  const hasActiveFilters =
+    TAG_KEYS.some((key) => activeTagFilters[key].length > 0) ||
+    Object.values(activeExtraFilters).some((values) => values.length > 0) ||
+    labFilters.length > 0 ||
+    search.trim() !== '';
+
+  // Reset every filter dimension in one click (ElasticOn toolbar).
+  const handleClearFilters = useCallback(() => {
+    setActiveTagFilters(EMPTY_TAG_FILTERS);
+    setActiveExtraFilters(EMPTY_EXTRA_FILTERS);
+    setLabFilters([]);
+    setSearch('');
+  }, [setActiveTagFilters]);
 
   // Resolve the clicked entity's `type` and `health` from the dataset so the
   // shared flyout can pick the right kind template (service / host / pod /
@@ -966,6 +1055,7 @@ export const AllEntitiesView = ({
                 <EuiButton
                   key="manage"
                   iconType="gear"
+                  size={isElasticOn ? 's' : 'm'}
                   onClick={() => {
                     router.push('/manage-entity-types', { path: {}, query: {} });
                   }}
@@ -997,6 +1087,182 @@ export const AllEntitiesView = ({
               ) : (
                 <AllEntitiesOverviewView onSelectEntity={openEntity} />
               )
+            ) : isElasticOn ? (
+              <>
+                {/*
+                  ElasticOn Inventory toolbar (3 rows):
+                    1. Unified KQL search bar — the same "multidimensional
+                       filter" used on Hosts / Infrastructure inventory (query
+                       + "+ Add filter" + time range + auto-refresh). There's
+                       no backing index, so the KQL / filters are evaluated
+                       in-memory against the seeded entities (see entity_kql).
+                       `search` doubles as the query string so saved views keep
+                       working unchanged.
+                    2. Independent facet filters (region, environment, …).
+                    3. Summary + Group-by-provider + view-mode toggle + Save view.
+                */}
+                <div css={NO_GROW}>
+                  <unifiedSearch.ui.SearchBar
+                    appName="streamsApp"
+                    indexPatterns={labDataView ? [labDataView] : []}
+                    showQueryInput
+                    showQueryMenu
+                    showFilterBar
+                    showDatePicker
+                    isAutoRefreshDisabled={false}
+                    displayStyle="inPage"
+                    query={{ query: search, language: 'kuery' } as Query}
+                    filters={labFilters}
+                    dateRangeFrom={rangeFrom}
+                    dateRangeTo={rangeTo}
+                    onQuerySubmit={(payload, isUpdate) => {
+                      const nextQuery = payload.query?.query;
+                      setSearch(typeof nextQuery === 'string' ? nextQuery : '');
+                      if (payload.dateRange) {
+                        handleTimeChange({
+                          start: payload.dateRange.from,
+                          end: payload.dateRange.to,
+                        });
+                      }
+                      if (!isUpdate) handleLiveRefresh();
+                    }}
+                    onFiltersUpdated={setLabFilters}
+                    onRefresh={handleLiveRefresh}
+                    placeholder={i18n.translate(
+                      'xpack.streams.entityCentricLab.entities.searchBarPlaceholder',
+                      {
+                        defaultMessage:
+                          'Search entities — e.g. health:unhealthy AND environment:production',
+                      }
+                    )}
+                  />
+                </div>
+                <EuiSpacer size="s" />
+                <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} css={NO_GROW}>
+                  <EuiFlexItem grow={false}>
+                    <EntitiesTagFilters
+                      facets={tagFacets}
+                      activeFilters={activeTagFilters}
+                      onChange={setActiveTagFilters}
+                      compressed
+                      hideClear
+                    />
+                  </EuiFlexItem>
+                  {extraFilterDefs.length > 0 ? (
+                    <EuiFlexItem grow={false}>
+                      <EntityExtraFilters
+                        defs={extraFilterDefs}
+                        facets={extraFacets}
+                        activeFilters={activeExtraFilters}
+                        onChange={setActiveExtraFilters}
+                        compressed
+                      />
+                    </EuiFlexItem>
+                  ) : null}
+                  {hasActiveFilters ? (
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmpty
+                        size="xs"
+                        flush="left"
+                        iconType="cross"
+                        onClick={handleClearFilters}
+                        data-test-subj="entityCentricLabClearFilters"
+                      >
+                        {i18n.translate(
+                          'xpack.streams.entityCentricLab.entities.clearFilters',
+                          { defaultMessage: 'Clear filters' }
+                        )}
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                  ) : null}
+                </EuiFlexGroup>
+                <EuiSpacer size="m" />
+                <EuiFlexGroup
+                  alignItems="center"
+                  gutterSize="m"
+                  responsive={false}
+                  wrap
+                  css={NO_GROW}
+                >
+                  <EuiFlexItem grow={false}>
+                    <EuiTitle size="xxs">
+                      <h3>
+                        {i18n.translate('xpack.streams.entityCentricLab.entities.summary', {
+                          defaultMessage: '{entities} Entities · {groups} Groups',
+                          values: {
+                            entities: filteredEntities.length.toLocaleString(),
+                            groups: categoryScope
+                              ? filteredEntities.length > 0
+                                ? 1
+                                : 0
+                              : dataset.totalGroups,
+                          },
+                        })}
+                      </h3>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                  <EuiFlexItem />
+                  {showCloudHierarchyToggle ? (
+                    <EuiFlexItem grow={false}>
+                      <EuiSwitch
+                        compressed
+                        label={i18n.translate(
+                          'xpack.streams.entityCentricLab.entities.cloudHierarchyToggle',
+                          { defaultMessage: 'Group by provider' }
+                        )}
+                        checked={cloudHierarchyEnabled}
+                        onChange={(event) => setCloudHierarchyEnabled(event.target.checked)}
+                        data-test-subj="entityCentricLabCloudHierarchyToggle"
+                      />
+                    </EuiFlexItem>
+                  ) : null}
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonGroup
+                      legend={i18n.translate(
+                        'xpack.streams.entityCentricLab.entities.viewMode.legend',
+                        { defaultMessage: 'View mode' }
+                      )}
+                      options={viewModeOptions}
+                      idSelected={effectiveViewMode}
+                      onChange={(id) => setViewMode(id as ViewMode)}
+                      isIconOnly
+                      buttonSize="compressed"
+                      data-test-subj="entityCentricLabEntitiesViewModeToggle"
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <SaveViewButton
+                      currentState={currentViewState}
+                      loadedView={loadedView}
+                      isModified={isLoadedViewModified}
+                      onUpdate={handleUpdateLoadedView}
+                      onSaveAsNew={handleSaveAsNewView}
+                      showMakeDefault={isElasticOn}
+                      isLoadedViewDefault={
+                        Boolean(loadedView) && savedViewsApi.defaultViewId === loadedView?.id
+                      }
+                      compact
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                <EuiHorizontalRule margin="m" />
+                {effectiveViewMode === 'grid' ? (
+                  <GroupedGridView
+                    entities={filteredEntities}
+                    onSelectEntity={openEntity}
+                    selectedEntityName={selectedEntityName}
+                    groupCloudByProvider={cloudHierarchyEnabled}
+                    enablePaletteColoring={isElasticOn}
+                    refreshTick={refreshTick}
+                  />
+                ) : (
+                  <EntitiesListView
+                    entities={filteredEntities}
+                    onSelectEntity={openEntity}
+                    groupCloudByProvider={cloudHierarchyEnabled}
+                  />
+                )}
+              </>
             ) : (
               <>
                 {/*
@@ -1150,6 +1416,7 @@ export const AllEntitiesView = ({
                     selectedEntityName={selectedEntityName}
                     groupCloudByProvider={cloudHierarchyEnabled}
                     enablePaletteColoring={isElasticOn}
+                    refreshTick={refreshTick}
                   />
                 ) : effectiveViewMode === 'geomap' ? (
                   <GeomapView

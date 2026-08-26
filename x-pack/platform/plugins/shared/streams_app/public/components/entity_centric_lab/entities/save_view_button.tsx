@@ -70,6 +70,8 @@ interface Props {
   readonly showMakeDefault?: boolean;
   /** Whether the currently loaded view is already the default. */
   readonly isLoadedViewDefault?: boolean;
+  /** Render the toolbar button at the compact (32px) height. */
+  readonly compact?: boolean;
 }
 
 export const SaveViewButton = ({
@@ -80,6 +82,7 @@ export const SaveViewButton = ({
   onSaveAsNew,
   showMakeDefault = false,
   isLoadedViewDefault = false,
+  compact = false,
 }: Props) => {
   const [isOpen, setIsOpen] = useState(false);
   // When a view is loaded the modal opens on the update/new choice; default to
@@ -144,6 +147,7 @@ export const SaveViewButton = ({
         <EuiFlexItem grow={false}>
           <EuiButton
             iconType="save"
+            size={compact ? 's' : 'm'}
             onClick={openModal}
             data-test-subj="entityCentricLabSaveViewButton"
           >
