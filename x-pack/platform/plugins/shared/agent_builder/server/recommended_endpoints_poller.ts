@@ -229,7 +229,9 @@ export class RecommendedEndpointsPoller {
     }
 
     this.logger.debug(
-      `Derived recommendations — main: [${result.recommended?.join(', ') ?? 'unchanged'}], fast: [${result.fast?.join(', ') ?? 'unchanged'}]`
+      `Derived recommendations — main: [${result.recommended?.join(', ') ?? 'unchanged'}], fast: [${
+        result.fast?.join(', ') ?? 'unchanged'
+      }]`
     );
     return result;
   }
