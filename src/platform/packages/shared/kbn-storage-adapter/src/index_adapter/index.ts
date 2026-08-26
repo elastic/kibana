@@ -133,6 +133,11 @@ function optionalTransportArgs(
 
 export interface StorageIndexAdapterOptions<TApplicationType> {
   /**
+   * Client used for cluster-scoped index template operations. Defaults to the
+   * primary client so existing consumers retain their current authorization behavior.
+   */
+  indexManagementClient?: ElasticsearchClient;
+  /**
    * If this callback is provided, it will be called on every _source before returned to the caller of the search or get methods.
    * This is useful for migrating documents from one version to another, or for transforming the document before returning it.
    * This should be used as rarely as possible - in most cases, new properties should be added as optional.
@@ -195,6 +200,10 @@ export class StorageIndexAdapter<
     this.isServerless = options.isServerless;
   }
 
+  private get indexManagementClient(): ElasticsearchClient {
+    return this.options.indexManagementClient ?? this.esClient;
+  }
+
   /**
    * Probes the ES cluster via `info()` to determine if we're running
    * against Serverless ES. The result is cached for the lifetime of
@@ -230,9 +239,13 @@ export class StorageIndexAdapter<
     const mappings: IndicesPutIndexTemplateIndexTemplateMapping['mappings'] = {
       _meta: { version },
       dynamic: 'strict',
-      properties: {
-        ...mapValues(this.storage.schema.properties, toElasticsearchMappingProperty),
-      },
+      ...(this.storage.inlineSchemaMappings === false
+        ? {}
+        : {
+            properties: {
+              ...mapValues(this.storage.schema.properties, toElasticsearchMappingProperty),
+            },
+          }),
     };
 
     const aliases: IndicesPutIndexTemplateIndexTemplateMapping['aliases'] = {
@@ -243,13 +256,21 @@ export class StorageIndexAdapter<
 
     const putTemplate = (includeSettings: boolean) =>
       wrapEsCall(
-        this.esClient.indices.putIndexTemplate({
+        this.indexManagementClient.indices.putIndexTemplate({
           name: getIndexTemplateName(this.storage.name),
           create: false,
           allow_auto_create: false,
           index_patterns: getIndexPattern(this.storage.name),
           _meta: { version },
           ...(this.storage.priority !== undefined ? { priority: this.storage.priority } : {}),
+          ...(this.storage.composedOf !== undefined
+            ? { composed_of: this.storage.composedOf }
+            : {}),
+          ...(this.storage.ignoreMissingComponentTemplates !== undefined
+            ? {
+                ignore_missing_component_templates: this.storage.ignoreMissingComponentTemplates,
+              }
+            : {}),
           template: {
             ...(includeSettings ? { settings: StorageIndexAdapter.INDEX_SETTINGS } : {}),
             mappings,
@@ -282,7 +303,7 @@ export class StorageIndexAdapter<
 
   private async getExistingIndexTemplate(): Promise<IndicesIndexTemplate | undefined> {
     return await wrapEsCall(
-      this.esClient.indices.getIndexTemplate({
+      this.indexManagementClient.indices.getIndexTemplate({
         name: getIndexTemplateName(this.storage.name),
       })
     )
@@ -359,9 +380,10 @@ export class StorageIndexAdapter<
   }
 
   private async updateMappingsOfExistingIndex({ name }: { name: string }) {
-    const simulateIndexTemplateResponse = await this.esClient.indices.simulateIndexTemplate({
-      name: getIndexName(this.storage.name, 999999),
-    });
+    const simulateIndexTemplateResponse =
+      await this.indexManagementClient.indices.simulateIndexTemplate({
+        name: getIndexName(this.storage.name, 999999),
+      });
 
     if (simulateIndexTemplateResponse.template.mappings) {
       await this.esClient.indices.putMapping({
@@ -609,7 +631,7 @@ export class StorageIndexAdapter<
     const hasTemplate = !!template;
     if (template) {
       await wrapEsCall(
-        this.esClient.indices.deleteIndexTemplate({
+        this.indexManagementClient.indices.deleteIndexTemplate({
           name: getIndexTemplateName(this.storage.name),
         })
       );
