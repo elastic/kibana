@@ -32,6 +32,11 @@ export class SearchExamplesPage {
   readonly saveBackgroundSearchButton: Locator;
   readonly sqlQueryInput: Locator;
   readonly querySubmitButton: Locator;
+  readonly warningsTab: Locator;
+  readonly warningsCodeBlock: Locator;
+  readonly viewWarningBtn: Locator;
+  readonly inspectorPanel: Locator;
+  readonly inspectorCloseButton: Locator;
 
   constructor(
     private readonly page: ScoutPage,
@@ -52,6 +57,11 @@ export class SearchExamplesPage {
     );
     this.sqlQueryInput = this.page.testSubj.locator('sqlQueryInput');
     this.querySubmitButton = this.page.testSubj.locator('querySubmitButton');
+    this.warningsTab = this.page.testSubj.locator('warningsTab');
+    this.warningsCodeBlock = this.page.testSubj.locator('warningsCodeBlock');
+    this.viewWarningBtn = this.page.testSubj.locator('viewWarningBtn');
+    this.inspectorPanel = this.page.testSubj.locator('inspectorPanel');
+    this.inspectorCloseButton = this.page.testSubj.locator('euiFlyoutCloseButton');
   }
 
   searchResults(count: number): Locator {
@@ -83,6 +93,23 @@ export class SearchExamplesPage {
     await this.selectSingleComboOption('searchBucketField', 'geo.src');
     await this.selectSingleComboOption('searchMetricField', 'memory');
     await this.datePicker.setAbsoluteRange(LOGSTASH_TIME_RANGE);
+  }
+
+  /**
+   * Configures the Search demo for shard-failure warnings: downsampled
+   * data view, rollup metric field, and the range covering sample-01.
+   */
+  async configureWarningsDemo(): Promise<void> {
+    await this.selectSingleComboOption('dataViewSelector', 'sample-01,sample-01-rollup');
+    await this.page.testSubj.locator('searchMetricField').waitFor({ state: 'visible' });
+    await this.selectSingleComboOption(
+      'searchMetricField',
+      'kubernetes.container.memory.usage.bytes'
+    );
+    await this.datePicker.setAbsoluteRange({
+      from: 'Jun 17, 2022 @ 00:00:00.000',
+      to: 'Jun 23, 2022 @ 00:00:00.000',
+    });
   }
 
   /**
