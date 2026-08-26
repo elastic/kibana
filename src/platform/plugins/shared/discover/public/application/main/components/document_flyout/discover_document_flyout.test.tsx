@@ -340,6 +340,8 @@ describe('DiscoverDocumentFlyout', () => {
       searchResult: searchResponseFor(outOfResultsHit),
       hits: esHitsMock,
     });
+    // Freeze the seeded results so the unawaited main fetch can't replace them mid-assertion.
+    toolkit.getCurrentTabDataStateContainer().data$.documents$.next = jest.fn();
 
     await waitFor(() => {
       expect(toolkit.getCurrentTab().expandedDoc?.raw._id).toBe(outOfResultsHit._id);
