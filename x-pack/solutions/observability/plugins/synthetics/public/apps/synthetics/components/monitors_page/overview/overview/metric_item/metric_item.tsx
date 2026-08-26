@@ -259,6 +259,7 @@ export const MetricItem = ({
                     <div
                       role="button"
                       tabIndex={0}
+                      css={{ width: '100%', minWidth: 0 }}
                       onMouseDown={(e) => e.stopPropagation()}
                       onMouseUp={(e) => e.stopPropagation()}
                       onClick={(e) => {
