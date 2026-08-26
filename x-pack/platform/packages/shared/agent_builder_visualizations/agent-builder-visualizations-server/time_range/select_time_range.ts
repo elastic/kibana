@@ -9,7 +9,7 @@ const HOUR_MS = 60 * 60 * 1000;
 const DAY_MS = 24 * HOUR_MS;
 
 /**
- * Keep generated dashboard defaults focused and cheap to render.
+ * Cap for generated default time ranges so they stay focused and cheap to render.
  *
  * Data newer than this is shown relative to `now`; older data gets an absolute
  * range anchored to the dataset's newest timestamp.
