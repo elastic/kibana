@@ -619,7 +619,7 @@ function computeDataStreamInfo(
   const dsOptVars = [
     ...new Set(
       dsAllVars
-        .filter((v: any) => !v.required && v.show_user && !dsReqVarSet.has(v.name as string))
+        .filter((v: any) => !v.required && !dsReqVarSet.has(v.name as string))
         .map((v: any) => v.name as string)
     ),
   ];
@@ -656,7 +656,7 @@ function computeInputPackageInfo(
   const reqVars = varList.filter((v) => v.required).map((v) => v.name as string);
   const reqVarSet = new Set(reqVars);
   const optVars = varList
-    .filter((v) => !v.required && v.show_user && !reqVarSet.has(v.name))
+    .filter((v) => !v.required && !reqVarSet.has(v.name))
     .map((v) => v.name as string);
 
   return {
@@ -683,7 +683,7 @@ function deriveUnionConfig(varDefsByInput: Record<string, Record<string, Registr
   const optVars = [
     ...new Set(
       allVars
-        .filter((v: any) => !v.required && v.show_user && !reqVarSet.has(v.name as string))
+        .filter((v: any) => !v.required && !reqVarSet.has(v.name as string))
         .map((v: any) => v.name as string)
     ),
   ];

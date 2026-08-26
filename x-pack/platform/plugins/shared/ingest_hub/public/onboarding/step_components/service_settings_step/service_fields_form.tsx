@@ -282,6 +282,7 @@ function InputVarFields({
           </EuiFlexGroup>
           {isShowingAdvanced && (
             <>
+              <EuiSpacer size="s" />
               {advancedBoolFields.map((fieldName, i) => (
                 <React.Fragment key={fieldName}>
                   {i > 0 && <EuiSpacer size="m" />}

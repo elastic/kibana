@@ -119,7 +119,6 @@ export function getFlyoutFields(
   return allFields.filter((f) => {
     const meta = resolveFieldMeta(service, activeInput, f);
     if (!meta) return false;
-    if (!meta.showUser) return false;
     // Bool fields are rendered as switches in their own section; exclude from text flyout fields.
     if (meta.isBool) return false;
     return true;
