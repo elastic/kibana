@@ -47,10 +47,10 @@ export class ServerlessVectordbPlugin
 
   public setup(
     core: CoreSetup<StartDependencies>,
-    { serverless, agentBuilder }: SetupDependencies
+    { serverless, agentBuilder, cloud }: SetupDependencies
   ) {
     serverless.setupProjectSettings(VECTORDB_PROJECT_SETTINGS);
-    registerSearchSkills({ agentBuilder, logger: this.logger });
+    registerSearchSkills({ agentBuilder, cloud, logger: this.logger });
 
     const router = core.http.createRouter();
     registerDeploymentStatsRoute(router, this.logger);
