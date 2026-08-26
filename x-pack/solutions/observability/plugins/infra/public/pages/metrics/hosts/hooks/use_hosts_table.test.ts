@@ -12,6 +12,7 @@ import * as useUnifiedSearchHooks from './use_unified_search';
 import * as useHostsViewHooks from './use_hosts_view';
 import * as useKibanaContextForPluginHook from '../../../../hooks/use_kibana';
 import * as useMetricsDataViewHooks from '../../../../containers/metrics_source';
+import * as useHostsTableUrlStateHooks from './use_hosts_table_url_state';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { TIMESTAMP_FIELD } from '../../../../../common/constants';
 
@@ -19,6 +20,8 @@ jest.mock('./use_unified_search');
 jest.mock('./use_hosts_view');
 jest.mock('../../../../containers/metrics_source');
 jest.mock('../../../../hooks/use_kibana');
+jest.mock('./use_hosts_table_url_state');
+jest.mock('react-use/lib/useAsync', () => jest.fn(() => ({ value: undefined })));
 
 const mockUseUnifiedSearchContext =
   useUnifiedSearchHooks.useUnifiedSearchContext as jest.MockedFunction<
@@ -36,6 +39,11 @@ const mockUseKibanaContextForPlugin =
   useKibanaContextForPluginHook.useKibanaContextForPlugin as jest.MockedFunction<
     typeof useKibanaContextForPluginHook.useKibanaContextForPlugin
   >;
+const mockUseHostsTableUrlState =
+  useHostsTableUrlStateHooks.useHostsTableUrlState as jest.MockedFunction<
+    typeof useHostsTableUrlStateHooks.useHostsTableUrlState
+  >;
+const setTableProperties = jest.fn();
 
 const mockHostNode: InfraEntityMetricsItem[] = [
   {
@@ -126,16 +134,13 @@ const mockKibanaServices = {
 };
 
 describe('useHostTable hook', () => {
-  beforeAll(() => {
+  beforeEach(() => {
     mockUseUnifiedSearchContext.mockReturnValue({
       searchCriteria: {
         dateRange: { from: 'now-15m', to: 'now' },
+        preferredSchema: 'ecs',
       },
     } as ReturnType<typeof useUnifiedSearchHooks.useUnifiedSearchContext>);
-
-    mockUseHostsViewContext.mockReturnValue({
-      hostNodes: mockHostNode,
-    } as ReturnType<typeof useHostsViewHooks.useHostsViewContext>);
 
     mockUseHostsViewContext.mockReturnValue({
       hostNodes: mockHostNode,
@@ -156,6 +161,15 @@ describe('useHostTable hook', () => {
     mockUseKibanaContextForPlugin.mockReturnValue({
       services: mockKibanaServices,
     } as unknown as ReturnType<typeof useKibanaContextForPluginHook.useKibanaContextForPlugin>);
+
+    mockUseHostsTableUrlState.mockReturnValue([
+      {
+        detailsItemId: null,
+        pagination: { pageIndex: 0, pageSize: 10 },
+        sorting: { field: 'title', direction: 'asc' },
+      },
+      setTableProperties,
+    ]);
   });
   it('it should map the nodes returned from the snapshot api to a format matching eui table items', () => {
     const expected: Array<Partial<HostNodeRow>> = [
@@ -202,5 +216,67 @@ describe('useHostTable hook', () => {
     const { result } = renderHook(() => useHostsTable());
 
     expect(result.current.items).toStrictEqual(expected);
+  });
+
+  it('shows network columns for ECS and hides them for semconv', () => {
+    const { result, rerender } = renderHook(() => useHostsTable());
+    const getColumnTestSubjects = () =>
+      result.current.columns.flatMap((column) =>
+        'data-test-subj' in column && column['data-test-subj'] ? [column['data-test-subj']] : []
+      );
+
+    expect(getColumnTestSubjects()).toEqual(
+      expect.arrayContaining(['hostsView-tableRow-rx', 'hostsView-tableRow-tx'])
+    );
+
+    mockUseUnifiedSearchContext.mockReturnValue({
+      searchCriteria: {
+        dateRange: { from: 'now-15m', to: 'now' },
+        preferredSchema: 'semconv',
+      },
+    } as ReturnType<typeof useUnifiedSearchHooks.useUnifiedSearchContext>);
+    rerender();
+
+    expect(getColumnTestSubjects()).not.toEqual(
+      expect.arrayContaining(['hostsView-tableRow-rx', 'hostsView-tableRow-tx'])
+    );
+  });
+
+  it.each([
+    ['title', 'asc', ['host-0', 'host-1']],
+    ['title', 'desc', ['host-1', 'host-0']],
+    ['cpuV2', 'asc', ['host-0', 'host-1']],
+    ['cpuV2', 'desc', ['host-1', 'host-0']],
+  ] as const)('sorts the current page by %s %s', (field, direction, expectedNames) => {
+    mockUseHostsTableUrlState.mockReturnValue([
+      {
+        detailsItemId: null,
+        pagination: { pageIndex: 0, pageSize: 10 },
+        sorting: { field, direction },
+      },
+      setTableProperties,
+    ]);
+
+    const { result } = renderHook(() => useHostsTable());
+
+    expect(result.current.currentPage.map(({ name }) => name)).toEqual(expectedNames);
+  });
+
+  it.each([
+    [0, 'host-0'],
+    [1, 'host-1'],
+  ] as const)('returns the expected row for page %s', (pageIndex, expectedName) => {
+    mockUseHostsTableUrlState.mockReturnValue([
+      {
+        detailsItemId: null,
+        pagination: { pageIndex, pageSize: 1 },
+        sorting: { field: 'title', direction: 'asc' },
+      },
+      setTableProperties,
+    ]);
+
+    const { result } = renderHook(() => useHostsTable());
+
+    expect(result.current.currentPage.map(({ name }) => name)).toEqual([expectedName]);
   });
 });
