@@ -156,6 +156,7 @@ export function getRegionFieldName(
   if (activeInput === 'aws-s3' && rc.includes('region')) return 'region';
   if (activeInput === 'aws-cloudwatch' && rc.includes('region_name')) return 'region_name';
   if (rc.includes('aws_region')) return 'aws_region';
+  if (rc.includes('region')) return 'region'; // input packages (e.g. otelcol)
   return 'aws_region';
 }
 

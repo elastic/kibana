@@ -54,6 +54,10 @@ function getInputDisplayLabel(input: string, inputTitles?: Record<string, string
       return i18n.translate('xpack.ingestHub.serviceSettingsStep.flyout.input.cloudwatch', {
         defaultMessage: 'Collect logs via CloudWatch',
       });
+    case 'otelcol':
+      return i18n.translate('xpack.ingestHub.serviceSettingsStep.flyout.input.otelcol', {
+        defaultMessage: 'Collect metrics via CloudWatch',
+      });
     default:
       return input;
   }

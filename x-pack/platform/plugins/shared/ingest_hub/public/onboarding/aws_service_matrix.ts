@@ -577,6 +577,192 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   },
 ];
 
+// ── Private helpers ──────────────────────────────────────────────────────────
+
+/** Derive var definitions for a single data stream from its manifest streams. */
+function computeDataStreamInfo(
+  entry: AwsServiceStaticEntry,
+  ds: any,
+  dsId: string
+): DataStreamInfo {
+  const dsStreams: Array<{ input?: string; enabled?: boolean; vars?: RegistryVarsEntry[] }> =
+    ds?.streams ?? [];
+  const dsManifestInputs = [...new Set(dsStreams.map((s) => s.input as string).filter(Boolean))];
+
+  // Static entry inputs act as an allowlist — restrict per-DS inputs when set (e.g. WAF → S3 only).
+  const dsEffectiveInputs =
+    entry.inputs && dsManifestInputs.some((i) => entry.inputs!.includes(i))
+      ? entry.inputs.filter((i) => dsManifestInputs.includes(i))
+      : dsManifestInputs;
+
+  const dsDefaultEnabledInputs = dsEffectiveInputs.filter((input) => {
+    const stream = dsStreams.find((s) => s.input === input);
+    return stream?.enabled !== false;
+  });
+
+  // Build per-DS var defs: input → varName → definition. First-wins within each input bucket.
+  const dsVarDefsByInput: Record<string, Record<string, RegistryVarsEntry>> = {};
+  for (const s of dsStreams) {
+    if (!s.input || !dsEffectiveInputs.includes(s.input)) continue;
+    const bucket = (dsVarDefsByInput[s.input] ??= {});
+    for (const v of (s.vars ?? []) as RegistryVarsEntry[]) {
+      if (!(v as any).name) continue;
+      bucket[(v as any).name] ??= v;
+    }
+  }
+
+  const dsAllVars = Object.values(dsVarDefsByInput).flatMap((byName) => Object.values(byName));
+  const dsReqVars = [
+    ...new Set(dsAllVars.filter((v: any) => v.required).map((v: any) => v.name as string)),
+  ];
+  const dsReqVarSet = new Set(dsReqVars);
+  const dsOptVars = [
+    ...new Set(
+      dsAllVars
+        .filter((v: any) => !v.required && v.show_user && !dsReqVarSet.has(v.name as string))
+        .map((v: any) => v.name as string)
+    ),
+  ];
+
+  return {
+    title: ds?.title as string | undefined,
+    type: ds?.type as SignalType | undefined,
+    inputs: dsEffectiveInputs,
+    defaultEnabledInputs: dsDefaultEnabledInputs,
+    varDefsByInput: dsVarDefsByInput,
+    requiredConfig: dsReqVars.length > 0 ? dsReqVars : undefined,
+    optionalConfig: dsOptVars.length > 0 ? dsOptVars : undefined,
+  };
+}
+
+/**
+ * Build a single synthetic DataStreamInfo for an input package (no data_streams on the PT).
+ * PT-level vars (pt.vars) are policy-template-specific config (e.g. period).
+ * Package-level vars (pkg.vars) are auth/credentials — excluded here, covered in Step 3.
+ */
+function computeInputPackageInfo(
+  entry: AwsServiceStaticEntry,
+  pt: any,
+  ptType: string | undefined,
+  ptInputType: string
+): DataStreamInfo {
+  const ptVarList = ((pt as any)?.vars ?? []) as RegistryVarsEntry[];
+  const bucket: Record<string, RegistryVarsEntry> = {};
+  for (const v of ptVarList) {
+    if ((v as any).name) bucket[(v as any).name] = v;
+  }
+
+  const varList = Object.values(bucket) as any[];
+  const reqVars = varList.filter((v) => v.required).map((v) => v.name as string);
+  const reqVarSet = new Set(reqVars);
+  const optVars = varList
+    .filter((v) => !v.required && v.show_user && !reqVarSet.has(v.name))
+    .map((v) => v.name as string);
+
+  return {
+    title: (pt as any).title as string | undefined,
+    type: ptType as SignalType | undefined,
+    inputs: [ptInputType],
+    defaultEnabledInputs: [ptInputType],
+    varDefsByInput: { [ptInputType]: bucket },
+    requiredConfig: reqVars.length > 0 ? reqVars : undefined,
+    optionalConfig: optVars.length > 0 ? optVars : undefined,
+  };
+}
+
+/** Derive union requiredConfig / optionalConfig from the accumulated varDefsByInput map. */
+function deriveUnionConfig(varDefsByInput: Record<string, Record<string, RegistryVarsEntry>>): {
+  requiredConfig: string[] | undefined;
+  optionalConfig: string[] | undefined;
+} {
+  const allVars = Object.values(varDefsByInput).flatMap((byName) => Object.values(byName));
+  const reqVars = [
+    ...new Set(allVars.filter((v: any) => v.required).map((v: any) => v.name as string)),
+  ];
+  const reqVarSet = new Set(reqVars);
+  const optVars = [
+    ...new Set(
+      allVars
+        .filter((v: any) => !v.required && v.show_user && !reqVarSet.has(v.name as string))
+        .map((v: any) => v.name as string)
+    ),
+  ];
+  return {
+    requiredConfig: reqVars.length > 0 ? reqVars : undefined,
+    optionalConfig: optVars.length > 0 ? optVars : undefined,
+  };
+}
+
+/**
+ * Build the merged deploymentMethods array.
+ * managed_integration is always preferred when present; static methods are demoted to non-preferred.
+ */
+function buildDeploymentMethods(
+  staticMethods: DeploymentMethodEntry[] | undefined,
+  managedIntegrations: boolean
+): DeploymentMethodEntry[] {
+  const methods: DeploymentMethodEntry[] = [];
+  if (managedIntegrations) {
+    methods.push({ method: 'managed_integration', preferred: true });
+  }
+  if (staticMethods?.length) {
+    methods.push(
+      ...(managedIntegrations
+        ? staticMethods.map((m) => ({ ...m, preferred: false }))
+        : staticMethods)
+    );
+  }
+  if (!managedIntegrations && methods.length > 0 && !methods.some((dm) => dm.preferred)) {
+    methods[0] = { ...methods[0], preferred: true };
+  }
+  return methods;
+}
+
+/**
+ * For ECF-only services, restrict requiredConfig to trigger vars (bucket_arn / log_group_arn)
+ * and collapse the dataStreams list to the single ecfDataStream when one is declared.
+ * Returns undefined when not applicable (non-ECF service).
+ */
+function applyEcfOnlyConfig(
+  entry: AwsServiceStaticEntry,
+  deploymentMethods: DeploymentMethodEntry[],
+  varDefsByInput: Record<string, Record<string, RegistryVarsEntry>>,
+  inputs: string[] | undefined,
+  dataStreams: string[]
+):
+  | { requiredConfig: string[] | undefined; optionalConfig: undefined; dataStreams: string[] }
+  | undefined {
+  if (!deploymentMethods.length || !deploymentMethods.every((m) => m.method === 'ecf')) {
+    return undefined;
+  }
+
+  const ECF_TRIGGER_VARS = new Set(['bucket_arn', 'log_group_arn']);
+  const effectiveInputSet = new Set(inputs ?? []);
+  const ecfVarNames = [
+    ...new Set(
+      Object.entries(varDefsByInput)
+        .filter(([input]) => effectiveInputSet.size === 0 || effectiveInputSet.has(input))
+        .flatMap(([, byName]) => Object.keys(byName))
+        .filter((v) => ECF_TRIGGER_VARS.has(v))
+    ),
+  ];
+
+  // For OTel twins aliasing a multi-DS ECS PT, restrict to the single ecfDataStream so the
+  // settings panel renders a simple single-ARN form instead of a multi-DS panel.
+  const resultDataStreams =
+    entry.ecfOnly && entry.ecfDataStream && dataStreams.includes(entry.ecfDataStream)
+      ? [entry.ecfDataStream]
+      : dataStreams;
+
+  return {
+    requiredConfig: ecfVarNames.length > 0 ? ecfVarNames : undefined,
+    optionalConfig: undefined,
+    dataStreams: resultDataStreams,
+  };
+}
+
+// ── Main builder ─────────────────────────────────────────────────────────────
+
 /**
  * Merge the static routing table with data from any Fleet package manifest.
  * Derives signalTypes, dataStreams, inputs, requiredConfig, optionalConfig, varDefsByInput,
@@ -599,7 +785,6 @@ export function buildAwsServiceMatrix(
     let identityFederationSupported: boolean | undefined;
     const inputTitles: Record<string, string> = {};
     let managedIntegrations = false;
-    let pt: any;
     const varDefsByInput: Record<string, Record<string, RegistryVarsEntry>> = {};
     const varDefsByDataStream: Record<string, DataStreamInfo> = {};
     const signalTypesSet = new Set<SignalType>();
@@ -611,15 +796,11 @@ export function buildAwsServiceMatrix(
     if (packageInfo) {
       // Find the policy template by name. OTel twins alias an existing ECS policy template via
       // `policyTemplate` — the aws package has no *_otel policy templates on EPR.
-      pt = (packageInfo.policy_templates ?? []).find(
+      const pt = (packageInfo.policy_templates ?? []).find(
         (p: any) => p.name === (entry.policyTemplate ?? entry.id)
       );
 
       if (pt) {
-        // Agentless is read at the policy-template level, which may cover both logs and metrics
-        // data streams (e.g. ec2 has ec2_logs + ec2_metrics under one template). Both signal
-        // types inherit managed_integration from the same flag, which is the correct behaviour
-        // today — all those templates are intended for agentless.
         managedIntegrations =
           (pt as any)?.deployment_modes?.agentless?.enabled === true && !entry.ecfOnly;
 
@@ -633,135 +814,66 @@ export function buildAwsServiceMatrix(
           signalTypesSet.add(ptType as SignalType);
         }
 
-        // Collect all data streams for this policy template, excluding any blocked ones.
         const ptDataStreamIds: string[] = (pt as any).data_streams ?? [];
         const includedDsIds = ptDataStreamIds.filter(
           (dsId) => !(excludedDataStreams ?? []).includes(dsId)
         );
 
+        // Regular package: iterate data streams.
         for (const dsId of includedDsIds) {
           const ds = (packageInfo.data_streams ?? []).find((d: any) => d.path === dsId);
           if (!ds) continue;
 
           dataStreams.push(dsId);
-
           if ((ds as any)?.type === 'logs' || (ds as any)?.type === 'metrics') {
             signalTypesSet.add((ds as any).type as SignalType);
           }
 
-          const dsStreams: Array<{
-            input?: string;
-            enabled?: boolean;
-            vars?: RegistryVarsEntry[];
-          }> = (ds as any)?.streams ?? [];
-          const dsManifestInputs: string[] = [
-            ...new Set(dsStreams.map((s) => s.input as string).filter(Boolean)),
-          ];
+          const dsInfo = computeDataStreamInfo(entry, ds, dsId);
+          varDefsByDataStream[dsId] = dsInfo;
 
-          // Static entry inputs act as an allowlist — restrict per-DS inputs when the static
-          // entry already sets them (e.g. WAF → S3 only for ECF).
-          const dsEffectiveInputs =
-            entry.inputs && dsManifestInputs.some((i) => entry.inputs!.includes(i))
-              ? entry.inputs.filter((i) => dsManifestInputs.includes(i))
-              : dsManifestInputs;
-
-          const dsDefaultEnabledInputs = dsEffectiveInputs.filter((input) => {
-            const stream = dsStreams.find((s) => s.input === input);
-            return stream?.enabled !== false;
-          });
-
-          // Build per-DS var defs (input → varName → definition). First-wins within each input
-          // bucket when the same var name appears in multiple streams of the same input type.
-          const dsVarDefsByInput: Record<string, Record<string, RegistryVarsEntry>> = {};
-          for (const s of dsStreams) {
-            if (!s.input || !dsEffectiveInputs.includes(s.input)) continue;
-            const bucket = (dsVarDefsByInput[s.input] ??= {});
-            for (const v of (s.vars ?? []) as RegistryVarsEntry[]) {
-              if (!(v as any).name) continue;
-              bucket[(v as any).name] ??= v;
-            }
-          }
-
-          // Derive per-DS required/optional config.
-          const dsAllVars: RegistryVarsEntry[] = Object.values(dsVarDefsByInput).flatMap((byName) =>
-            Object.values(byName)
-          );
-          const dsReqVars: string[] = [
-            ...new Set(dsAllVars.filter((v: any) => v.required).map((v: any) => v.name as string)),
-          ];
-          const dsReqVarSet = new Set(dsReqVars);
-          const dsOptVars: string[] = [
-            ...new Set(
-              dsAllVars
-                .filter(
-                  (v: any) => !v.required && v.show_user && !dsReqVarSet.has(v.name as string)
-                )
-                .map((v: any) => v.name as string)
-            ),
-          ];
-
-          varDefsByDataStream[dsId] = {
-            title: (ds as any).title as string | undefined,
-            type: (ds as any).type as SignalType | undefined,
-            inputs: dsEffectiveInputs,
-            defaultEnabledInputs: dsDefaultEnabledInputs,
-            varDefsByInput: dsVarDefsByInput,
-            requiredConfig: dsReqVars.length > 0 ? dsReqVars : undefined,
-            optionalConfig: dsOptVars.length > 0 ? dsOptVars : undefined,
-          };
-
-          // Merge into the union varDefsByInput (first-wins per input+var).
-          for (const [input, byName] of Object.entries(dsVarDefsByInput)) {
+          // Merge dsVarDefsByInput into the union (first-wins per input+var).
+          for (const [input, byName] of Object.entries(dsInfo.varDefsByInput)) {
             const bucket = (varDefsByInput[input] ??= {});
             for (const [varName, varDef] of Object.entries(byName)) {
               bucket[varName] ??= varDef;
             }
           }
 
-          // Accumulate the inputs union (only when not overridden by a static allowlist).
+          // Accumulate inputs union (only when not overridden by a static allowlist).
           if (!entry.inputs) {
-            for (const input of dsEffectiveInputs) {
+            for (const input of dsInfo.inputs) {
               if (!inputs) inputs = [];
               if (!inputs.includes(input)) inputs.push(input);
             }
           }
 
-          // Merge defaultEnabledInputs into the union.
-          for (const input of dsDefaultEnabledInputs) {
+          for (const input of dsInfo.defaultEnabledInputs) {
             if (!defaultEnabledInputs.includes(input)) defaultEnabledInputs.push(input);
           }
         }
 
-        // Derive union requiredConfig / optionalConfig from all data streams' vars.
-        const allVars: RegistryVarsEntry[] = Object.values(varDefsByInput).flatMap((byName) =>
-          Object.values(byName)
-        );
-
-        const reqVars: string[] = [
-          ...new Set(allVars.filter((v: any) => v.required).map((v: any) => v.name as string)),
-        ];
-        if (reqVars.length > 0) {
-          requiredConfig = reqVars;
+        // Input package: no data_streams on the PT; use a synthetic DS entry.
+        const ptInputType = (pt as any)?.input as string | undefined;
+        if (includedDsIds.length === 0 && ptInputType) {
+          const inputPkgInfo = computeInputPackageInfo(entry, pt, ptType, ptInputType);
+          const syntheticDsId = entry.id;
+          dataStreams.push(syntheticDsId);
+          varDefsByDataStream[syntheticDsId] = inputPkgInfo;
+          varDefsByInput[ptInputType] = inputPkgInfo.varDefsByInput[ptInputType];
+          inputs = [ptInputType];
+          defaultEnabledInputs.push(ptInputType);
         }
 
-        const reqVarSet = new Set(reqVars);
-        const optVars: string[] = [
-          ...new Set(
-            allVars
-              .filter((v: any) => !v.required && v.show_user && !reqVarSet.has(v.name as string))
-              .map((v: any) => v.name as string)
-          ),
-        ];
-        if (optVars.length > 0) {
-          optionalConfig = optVars;
-        }
+        // Derive union requiredConfig / optionalConfig.
+        ({ requiredConfig, optionalConfig } = deriveUnionConfig(varDefsByInput));
 
-        // defaultEnabled: true unless the PT has no enabled inputs at all.
+        // defaultEnabled: false only when the manifest explicitly disables all inputs.
         if (dataStreams.length > 0) {
           defaultEnabled = defaultEnabledInputs.length > 0;
         }
 
-        // Static override: when set, restrict which inputs are on by default.
+        // Static override: restrict which inputs are on by default.
         if (entry.defaultEnabledInputs) {
           defaultEnabledInputs.splice(
             0,
@@ -770,7 +882,7 @@ export function buildAwsServiceMatrix(
           );
         }
 
-        // Collect per-input display titles from the policy template manifest.
+        // Collect per-input display titles.
         const ptInputs: any[] = (pt as any)?.inputs ?? [];
         for (const ptInput of ptInputs) {
           if (ptInput.type && ptInput.title) {
@@ -778,8 +890,7 @@ export function buildAwsServiceMatrix(
           }
         }
 
-        // Derive identityFederationSupported: true when at least one of the PT's inputs does NOT
-        // hide 'identity_federation' in the 'credential_type' var_group.
+        // Derive identityFederationSupported.
         const allDsInputTypes = new Set(Object.keys(varDefsByInput));
         if (ptInputs.length > 0 && allDsInputTypes.size > 0) {
           const relevantInputs = ptInputs.filter((i: any) => allDsInputTypes.has(i.type));
@@ -796,60 +907,19 @@ export function buildAwsServiceMatrix(
     }
 
     const signalTypes: SignalType[] = [...signalTypesSet];
-
-    // Build the merged deploymentMethods array.
-    // managed_integration is always preferred when present; static methods are demoted.
-    const methods: DeploymentMethodEntry[] = [];
-    if (managedIntegrations) {
-      methods.push({ method: 'managed_integration', preferred: true });
-    }
-    if (staticMethods?.length) {
-      methods.push(
-        ...(managedIntegrations
-          ? staticMethods.map((m) => ({ ...m, preferred: false }))
-          : staticMethods)
-      );
-    }
-    const deploymentMethods: DeploymentMethodEntry[] = methods;
-
-    if (
-      !managedIntegrations &&
-      deploymentMethods.length > 0 &&
-      !deploymentMethods.some((dm) => dm.preferred)
-    ) {
-      deploymentMethods[0] = { ...deploymentMethods[0], preferred: true };
-    }
-
-    // Auto-hide when no deployment methods are available and not explicitly shown.
+    const deploymentMethods = buildDeploymentMethods(staticMethods, managedIntegrations);
     const showInUI = entry.showInUI ?? deploymentMethods.length > 0;
 
-    // For ECF-only services, ECF manages all configuration internally.
-    // Only the trigger-source var needs user input: bucket_arn (S3) or log_group_arn (CloudWatch).
-    // Restrict to the effective inputs so services with a static input allowlist (e.g. WAF → S3
-    // only) don't surface trigger vars from inputs they don't support.
-    const ECF_TRIGGER_VARS = new Set(['bucket_arn', 'log_group_arn']);
-    if (deploymentMethods.length > 0 && deploymentMethods.every((m) => m.method === 'ecf')) {
-      const effectiveInputSet = new Set(inputs ?? []);
-      const ecfVarNames = [
-        ...new Set(
-          Object.entries(varDefsByInput)
-            .filter(([input]) => effectiveInputSet.size === 0 || effectiveInputSet.has(input))
-            .flatMap(([, byName]) => Object.keys(byName))
-            .filter((v) => ECF_TRIGGER_VARS.has(v))
-        ),
-      ];
-      if (ecfVarNames.length > 0) {
-        requiredConfig = ecfVarNames;
-        optionalConfig = undefined;
-      }
-
-      // For ECF-only entries that declare an explicit ecfDataStream (OTel twins that alias a
-      // multi-DS ECS policy template), restrict the data-stream list to just that one DS.
-      // Without this, e.g. s3access_otel would expose the full s3 PT's DS set ['s3','s3access'],
-      // causing a complex multi-DS settings panel instead of the simple single-ARN form.
-      if (entry.ecfOnly && entry.ecfDataStream && dataStreams.includes(entry.ecfDataStream)) {
-        dataStreams.splice(0, dataStreams.length, entry.ecfDataStream);
-      }
+    const ecfConfig = applyEcfOnlyConfig(
+      entry,
+      deploymentMethods,
+      varDefsByInput,
+      inputs,
+      dataStreams
+    );
+    if (ecfConfig) {
+      ({ requiredConfig, optionalConfig } = ecfConfig);
+      dataStreams.splice(0, dataStreams.length, ...ecfConfig.dataStreams);
     }
 
     return {
