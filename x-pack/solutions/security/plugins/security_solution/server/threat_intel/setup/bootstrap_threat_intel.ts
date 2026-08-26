@@ -132,14 +132,23 @@ const seedThreatIntelCatalog = async ({
     log.debug(summary);
   }
 
-  const catalogCount = await esClient.count(
-    { index: THREAT_INTEL_SOURCES_INDEX },
-    { ignore: [404] }
-  );
-  if (catalogCount.count === 0 && seed.created === 0) {
-    log.error(
-      'Threat intelligence source seeding completed but `.kibana-threat-intel-sources` is still empty'
+  // Diagnostic only, so it must not be able to fail bootstrap. Templates, migrations,
+  // and seeding have all succeeded by this point, and this is the one-time readiness
+  // promise: letting a transient count timeout reject it would leave the pipeline
+  // unready for the lifetime of the process, over a log line. The real setup work is
+  // what `withElasticsearchRetry` guards.
+  try {
+    const catalogCount = await esClient.count(
+      { index: THREAT_INTEL_SOURCES_INDEX },
+      { ignore: [404] }
     );
+    if (catalogCount.count === 0 && seed.created === 0) {
+      log.error(
+        'Threat intelligence source seeding completed but `.kibana-threat-intel-sources` is still empty'
+      );
+    }
+  } catch (err) {
+    log.debug(`Post-seed catalog count check failed, ignoring: ${(err as Error).message}`);
   }
 
   return { seed };

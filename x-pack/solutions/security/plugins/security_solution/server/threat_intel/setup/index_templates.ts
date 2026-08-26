@@ -1408,49 +1408,88 @@ const ensureCompanionIndex = async (
 };
 
 /**
- * Fields a migration is responsible for adding. If one is still missing after the
- * migrations run, `dynamic: strict` will reject every write that carries it.
+ * What a migration is responsible for leaving behind.
+ *
+ * `path` alone is not enough for every entry. The v26 migration changes a *parameter*
+ * (`ignore_above`) on paths that already exist on a pre-v26 index, so an
+ * existence-only check cannot tell a migrated index from an unmigrated one. Entries
+ * that name `ignoreAbove` are verified by value.
  */
-const REQUIRED_REPORT_FIELDS = [
-  'extracted.diamond',
-  'extracted.gate',
-  'extracted.vulnerability',
-  'extracted.iocs.tier',
-  'extracted.iocs.port',
-  'extracted.iocs.reference',
+interface RequiredMapping {
+  path: string;
+  ignoreAbove?: number;
+}
+
+const REQUIRED_REPORT_FIELDS: readonly RequiredMapping[] = [
+  { path: 'extracted.diamond' },
+  { path: 'extracted.gate' },
+  { path: 'extracted.vulnerability' },
+  { path: 'extracted.iocs.tier' },
+  { path: 'extracted.iocs.port' },
+  { path: 'lineage.content_scrubbed_at' },
   // Child fields, not just the parent. The v19 migration adds these to an
   // already-existing `external_references`, and it catches its own errors, so
   // checking only the parent could not tell a pre-migration mapping from a migrated
   // one and a failed child putMapping passed verification.
-  'content.external_references.source_name',
-  'content.external_references.url',
-  'content.external_references.canonical_url',
-  'content.external_references.ref_part',
-  'content.external_references.ref_part_count',
-  'lineage.content_scrubbed_at',
-] as const;
+  { path: 'content.external_references.ref_part' },
+  { path: 'content.external_references.ref_part_count' },
+  { path: 'content.external_references.source_name', ignoreAbove: FEED_TEXT_IGNORE_ABOVE },
+  { path: 'content.external_references.url', ignoreAbove: FEED_TEXT_IGNORE_ABOVE },
+  { path: 'content.external_references.canonical_url', ignoreAbove: FEED_TEXT_IGNORE_ABOVE },
+  { path: 'content.external_references.external_id', ignoreAbove: FEED_TEXT_IGNORE_ABOVE },
+  // v26. `body_is_title_fallback` is a new field, so a failed v26 putMapping makes
+  // `dynamic: strict` reject every title-only report; the bounded keywords are
+  // existing paths whose parameter changed, which is why they are checked by value.
+  { path: 'content.body_is_title_fallback' },
+  { path: 'extracted.iocs.value', ignoreAbove: FEED_TEXT_IGNORE_ABOVE },
+  { path: 'extracted.iocs.defanged', ignoreAbove: FEED_TEXT_IGNORE_ABOVE },
+  { path: 'extracted.iocs.reference', ignoreAbove: FEED_TEXT_IGNORE_ABOVE },
+];
 
-const REQUIRED_INDICATOR_FIELDS = [
-  'space_id',
-  'sources',
-  'sources_truncated',
-  'ioc_tier',
-  'threat.indicator.email',
-  'threat.indicator.network',
-  'threat.indicator.cryptocurrency',
-] as const;
+const REQUIRED_INDICATOR_FIELDS: readonly RequiredMapping[] = [
+  { path: 'space_id' },
+  { path: 'sources' },
+  { path: 'sources_truncated' },
+  { path: 'ioc_tier' },
+  { path: 'threat.indicator.email', ignoreAbove: FEED_TEXT_IGNORE_ABOVE },
+  { path: 'threat.indicator.network' },
+  { path: 'threat.indicator.cryptocurrency' },
+  { path: 'threat.indicator.url.full', ignoreAbove: FEED_TEXT_IGNORE_ABOVE },
+  { path: 'threat.indicator.provider', ignoreAbove: FEED_TEXT_IGNORE_ABOVE },
+  { path: 'source_report_url', ignoreAbove: FEED_TEXT_IGNORE_ABOVE },
+];
 
-/** Walks a dotted path through an Elasticsearch `properties` tree. */
-const hasMappedField = (mappings: MappingTypeMapping | undefined, path: string): boolean => {
+/** Resolves a dotted path through an Elasticsearch `properties` tree. */
+const getMappedField = (
+  mappings: MappingTypeMapping | undefined,
+  path: string
+): Record<string, unknown> | undefined => {
   let node = mappings?.properties as Record<string, unknown> | undefined;
   const segments = path.split('.');
   for (const [index, segment] of segments.entries()) {
-    const next = node?.[segment] as { properties?: Record<string, unknown> } | undefined;
-    if (!next) return false;
-    if (index === segments.length - 1) return true;
+    const next = node?.[segment] as
+      | (Record<string, unknown> & { properties?: Record<string, unknown> })
+      | undefined;
+    if (!next) return undefined;
+    if (index === segments.length - 1) return next;
     node = next.properties;
   }
-  return false;
+  return undefined;
+};
+
+/** Returns a description of what is wrong with a required mapping, or undefined. */
+const checkRequiredMapping = (
+  mappings: MappingTypeMapping | undefined,
+  required: RequiredMapping
+): string | undefined => {
+  const field = getMappedField(mappings, required.path);
+  if (!field) return required.path;
+  if (required.ignoreAbove !== undefined && field.ignore_above !== required.ignoreAbove) {
+    return `${required.path} (ignore_above ${String(field.ignore_above)}, expected ${
+      required.ignoreAbove
+    })`;
+  }
+  return undefined;
 };
 
 /**
@@ -1477,8 +1516,9 @@ const assertMigratedSchemaIsUsable = async (
   for (const indexName of reportIndices) {
     try {
       const { [indexName]: m } = await esClient.indices.getMapping({ index: indexName });
-      for (const field of REQUIRED_REPORT_FIELDS) {
-        if (!hasMappedField(m?.mappings, field)) missing.push(`${indexName}:${field}`);
+      for (const required of REQUIRED_REPORT_FIELDS) {
+        const problem = checkRequiredMapping(m?.mappings, required);
+        if (problem) missing.push(`${indexName}:${problem}`);
       }
     } catch (err) {
       missing.push(`${indexName}:<mapping unreadable: ${(err as Error).message}>`);
@@ -1491,16 +1531,37 @@ const assertMigratedSchemaIsUsable = async (
       const { [THREAT_INTEL_INDICATORS_INDEX]: m } = await esClient.indices.getMapping({
         index: THREAT_INTEL_INDICATORS_INDEX,
       });
-      for (const field of REQUIRED_INDICATOR_FIELDS) {
-        if (!hasMappedField(m?.mappings, field)) {
-          missing.push(`${THREAT_INTEL_INDICATORS_INDEX}:${field}`);
-        }
+      for (const required of REQUIRED_INDICATOR_FIELDS) {
+        const problem = checkRequiredMapping(m?.mappings, required);
+        if (problem) missing.push(`${THREAT_INTEL_INDICATORS_INDEX}:${problem}`);
       }
     }
   } catch (err) {
     missing.push(
       `${THREAT_INTEL_INDICATORS_INDEX}:<mapping unreadable: ${(err as Error).message}>`
     );
+  }
+
+  // The hidden-index migration also catches its own failures, and mappings-only
+  // verification let a transient putSettings failure through: pre-existing report,
+  // source, and indicator indices stay visible to ordinary wildcard searches and
+  // index-pattern discovery, against the hidden-index contract, and it is only retried
+  // after another restart.
+  for (const indexName of [
+    ...reportIndices,
+    THREAT_INTEL_SOURCES_INDEX,
+    THREAT_INTEL_INDICATORS_INDEX,
+  ]) {
+    try {
+      const settings = await esClient.indices.getSettings({ index: indexName }, { ignore: [404] });
+      // An absent entry means the index does not exist, which is not a failure.
+      const hidden = settings?.[indexName]?.settings?.index?.hidden;
+      if (settings?.[indexName] && hidden !== true && hidden !== 'true') {
+        missing.push(`${indexName}:<index.hidden is ${String(hidden)}>`);
+      }
+    } catch (err) {
+      missing.push(`${indexName}:<settings unreadable: ${(err as Error).message}>`);
+    }
   }
 
   if (missing.length > 0) {

@@ -55,12 +55,13 @@ const fullyMigratedReportMappings = () => ({
   properties: {
     content: {
       properties: {
+        body_is_title_fallback: {},
         external_references: {
           properties: {
-            source_name: {},
-            url: {},
-            canonical_url: {},
-            external_id: {},
+            source_name: { ignore_above: 2048 },
+            url: { ignore_above: 2048 },
+            canonical_url: { ignore_above: 2048 },
+            external_id: { ignore_above: 2048 },
             description: {},
             ref_part: {},
             ref_part_count: {},
@@ -80,10 +81,11 @@ const fullyMigratedReportMappings = () => ({
             tier_heuristic: {},
             tier_basis: {},
             port: {},
-            reference: {},
+            reference: { ignore_above: 2048 },
             block_index: {},
-            // `ignore_above` on the IOC value is the v26 marker.
+            // v26 bounds these by value, not just existence.
             value: { ignore_above: 2048 },
+            defanged: { ignore_above: 2048 },
           },
         },
       },
@@ -98,9 +100,18 @@ const fullyMigratedIndicatorMappings = () => ({
     ioc_tier: {},
     sources: {},
     sources_truncated: {},
+    source_report_url: { ignore_above: 2048 },
     threat: {
       properties: {
-        indicator: { properties: { email: {}, network: {}, cryptocurrency: {} } },
+        indicator: {
+          properties: {
+            email: { ignore_above: 2048 },
+            network: {},
+            cryptocurrency: {},
+            provider: { ignore_above: 2048 },
+            url: { properties: { full: { ignore_above: 2048 } } },
+          },
+        },
       },
     },
   },
@@ -607,6 +618,60 @@ describe('index_templates — post-migration schema check', () => {
       );
     }
   );
+
+  // The v26 migration changes a parameter on paths that already exist on a pre-v26
+  // index, so an existence-only check could not tell a migrated index from an
+  // unmigrated one and a failed v26 putMapping passed verification.
+  it('fails when a bounded field exists but lost its ignore_above', async () => {
+    const mappings = fullyMigratedReportMappings();
+    (mappings.properties.extracted.properties.iocs.properties as Record<string, unknown>).value =
+      {};
+
+    const { verificationError } = await runMigrations({ reportMappings: mappings });
+
+    expect(verificationError?.message).toMatch(/extracted\.iocs\.value/);
+    expect(verificationError?.message).toMatch(/ignore_above/);
+  });
+
+  it('fails when the v26 boolean field is missing entirely', async () => {
+    const mappings = fullyMigratedReportMappings();
+    delete (mappings.properties.content.properties as Record<string, unknown>)
+      .body_is_title_fallback;
+
+    const { verificationError } = await runMigrations({ reportMappings: mappings });
+
+    expect(verificationError?.message).toMatch(/content\.body_is_title_fallback/);
+  });
+
+  // The hidden-index migration catches its own failures too, and mappings-only
+  // verification let a transient putSettings failure advertise readiness while the
+  // indices stayed visible to ordinary wildcard searches.
+  it('fails when an index is still not hidden', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.indices.exists.mockResolvedValue(true);
+    esClient.indices.get.mockResolvedValue({ [REPORT_INDEX]: {} });
+    esClient.indices.getMapping.mockImplementation((async (args: { index: string }) => ({
+      [args.index]: {
+        mappings:
+          args.index === THREAT_INTEL_INDICATORS_INDEX
+            ? fullyMigratedIndicatorMappings()
+            : fullyMigratedReportMappings(),
+      },
+    })) as never);
+    esClient.indices.getSettings.mockResolvedValue({
+      [REPORT_INDEX]: { settings: { index: { hidden: 'false' } } },
+    });
+
+    const err = await installIndexTemplates({
+      esClient,
+      logger: loggingSystemMock.createLogger(),
+    }).then(
+      () => undefined,
+      (e: Error) => e
+    );
+
+    expect(err?.message).toMatch(/index\.hidden/);
+  });
 
   it('fails when an indicators field is still missing after migrating', async () => {
     const indicatorMappings = fullyMigratedIndicatorMappings();
