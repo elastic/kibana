@@ -21,8 +21,14 @@ import {
   UnifiedDataTable,
   DataLoadingState,
   type SortOrder,
+  type CustomCellRenderer,
   type CustomGridColumnsConfiguration,
 } from '@kbn/unified-data-table';
+import {
+  EpisodeSeverityCell,
+  EpisodeStatusCell,
+} from '@kbn/alerting-v2-episodes-ui/components/episodes_table_cell_renderers';
+import { useAlertingRulesCache } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rules_cache';
 import { useKibana } from '../../../common/lib/kibana';
 import { EsqlInspectButton } from '../kpis/esql_inspect_button';
 import { useEpisodesTableData } from './use_episodes_table_data';
@@ -40,6 +46,7 @@ const TITLE_ID = 'alertsV2EpisodesTableTitle';
  */
 const DEFAULT_COLUMNS = [
   '@timestamp',
+  'episode.status',
   'rule.id',
   'severity',
   'host.name',
@@ -57,6 +64,9 @@ const NO_SORT: SortOrder[] = [];
 const COLUMN_DISPLAY_NAMES: Record<string, string> = {
   '@timestamp': i18n.translate('xpack.securitySolution.alertsV2.episodesTable.columns.timestamp', {
     defaultMessage: 'Last seen',
+  }),
+  'episode.status': i18n.translate('xpack.securitySolution.alertsV2.episodesTable.columns.status', {
+    defaultMessage: 'Status',
   }),
   'rule.id': i18n.translate('xpack.securitySolution.alertsV2.episodesTable.columns.rule', {
     defaultMessage: 'Rule',
@@ -125,6 +135,27 @@ export const EpisodesTableSection = ({ query, timeRange }: EpisodesTableSectionP
     [services]
   );
 
+  // Resolve rule.id (UUID) → rule name via the RnA rules-by-ids lookup.
+  const ruleIds = useMemo(
+    () =>
+      Array.from(new Set(rows.map((row) => String(row.flattened['rule.id'] ?? '')).filter(Boolean))),
+    [rows]
+  );
+  const { rulesCache } = useAlertingRulesCache({ ruleIds, services: { http: services.http } });
+
+  const externalCustomRenderers = useMemo<CustomCellRenderer>(
+    () => ({
+      'episode.status': EpisodeStatusCell,
+      severity: EpisodeSeverityCell,
+      'rule.id': ({ row }) => {
+        const ruleId = String(row.flattened['rule.id'] ?? '');
+        const name = rulesCache[ruleId]?.metadata?.name ?? ruleId;
+        return <span title={name}>{name || '—'}</span>;
+      },
+    }),
+    [rulesCache]
+  );
+
   return (
     <EuiPanel hasBorder paddingSize="m" data-test-subj="alertsV2EpisodesTableSection">
       <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
@@ -164,6 +195,7 @@ export const EpisodesTableSection = ({ query, timeRange }: EpisodesTableSectionP
             columns={columns}
             columnsMeta={columnsMeta}
             customGridColumnsConfiguration={CUSTOM_GRID_COLUMNS_CONFIGURATION}
+            externalCustomRenderers={externalCustomRenderers}
             dataView={dataView}
             rows={rows}
             loadingState={isLoading ? DataLoadingState.loading : DataLoadingState.loaded}
