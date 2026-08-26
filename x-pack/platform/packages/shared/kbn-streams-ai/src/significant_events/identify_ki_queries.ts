@@ -569,11 +569,11 @@ export async function identifyKIQueries({
         ? 'no_get_stream_features_calls'
         : toolUsage.get_stream_features.failures === toolUsage.get_stream_features.calls
         ? 'get_stream_features_failed'
+        : toolUsage.add_queries.calls > 0
+        ? 'add_queries_called_no_accepted_queries'
         : returnedFeatureMap.size === 0
         ? 'no_features_returned'
-        : toolUsage.add_queries.calls === 0
-        ? 'no_add_queries_calls'
-        : 'add_queries_called_no_accepted_queries';
+        : 'no_add_queries_calls';
     const message =
       `Generated 0 Significant Event KI queries: ` +
       `observed=${observed}, max_steps=${resolvedMaxSteps}, ` +

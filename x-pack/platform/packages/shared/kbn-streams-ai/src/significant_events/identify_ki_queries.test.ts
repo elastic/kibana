@@ -689,6 +689,23 @@ describe('zero-query observability', () => {
     expect(zeroQueryWarnLines()).toHaveLength(0);
   });
 
+  it('warns when the model submits queries after feature inspection returns nothing', async () => {
+    const { result } = await runIdentifyKIQueries({
+      features: [],
+      callGetStreamFeatures: true,
+      scriptedAddQueries: [[scriptedQuery('FROM logs | WHERE message == "x"')]],
+    });
+
+    expect(result.queries).toHaveLength(0);
+    expect(result.toolUsage.add_queries.calls).toBe(1);
+    expect(zeroQueryWarnLines()).toHaveLength(1);
+    expect(zeroQueryWarnLines()[0]).toContain(
+      'observed=add_queries_called_no_accepted_queries'
+    );
+    expect(zeroQueryWarnLines()[0]).toContain('features_returned=0');
+    expect(zeroQueryDebugLines()).toHaveLength(0);
+  });
+
   it('warns exactly one zero-query line with observed=no_get_stream_features_calls when no feature inspection ran', async () => {
     const { result } = await runIdentifyKIQueries({
       callGetStreamFeatures: false,
