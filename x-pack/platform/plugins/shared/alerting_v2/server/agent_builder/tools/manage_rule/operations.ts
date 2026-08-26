@@ -272,6 +272,7 @@ export interface EsqlColumn {
 export interface RuleOperationsResult {
   data: Partial<RuleAttachmentData>;
   queryColumns?: EsqlColumn[];
+  warnings?: string[];
 }
 
 /**
@@ -307,7 +308,7 @@ export const executeRuleOperations = async (
 ): Promise<RuleOperationsResult> => {
   let next = { ...data };
   let lastQueryColumns: EsqlColumn[] | undefined;
-  let timeFieldExplicitlySet = false;
+  const warnings: string[] = [];
 
   for (const op of operations) {
     switch (op.operation) {
@@ -348,13 +349,21 @@ export const executeRuleOperations = async (
         if (esClient) {
           lastQueryColumns = await validateEsqlQuery(esClient, rootQuery);
 
-          if (!timeFieldExplicitlySet) {
-            resolvedTimeField = await resolveTimeFieldForQuery(
-              esClient,
-              rootQuery,
-              next.time_field
-            );
-            if (resolvedTimeField === null) {
+          resolvedTimeField = await resolveTimeFieldForQuery(
+            esClient,
+            rootQuery,
+            next.time_field
+          );
+          if (resolvedTimeField === null) {
+            if (next.time_field) {
+              const sourceIndex = getIndexPatternFromESQLQuery(rootQuery);
+              warnings.push(
+                `The current time_field "${next.time_field}" was not found as a \`date\` or ` +
+                  `\`date_nanos\` field on ${sourceIndex ? `"${sourceIndex}"` : 'the source index'}. ` +
+                  `The rule may fail at execution time. Use \`set_time_field\` to correct it, ` +
+                  `or verify the field exists on the target index.`
+              );
+            } else {
               const sourceIndex = getIndexPatternFromESQLQuery(rootQuery);
               throw new RuleOperationValidationError(
                 `Could not determine a time field for the query: the source index ` +
@@ -365,16 +374,14 @@ export const executeRuleOperations = async (
                   `Add a date field to the data, or use \`set_time_field\` to specify one.`
               );
             }
-            if (resolvedTimeField === undefined && !next.time_field) {
-              throw new RuleOperationValidationError(
-                `Could not determine a time field for the query and none is set. A \`date\` or ` +
-                  `\`date_nanos\` field is required for the rule's lookback window; use ` +
-                  `\`set_time_field\` to specify one.`
-              );
-            }
           }
-          // When time_field was explicitly set, skip auto-resolution entirely
-          // so field-caps failures don't clobber the override.
+          if (resolvedTimeField === undefined && !next.time_field) {
+            throw new RuleOperationValidationError(
+              `Could not determine a time field for the query and none is set. A \`date\` or ` +
+                `\`date_nanos\` field is required for the rule's lookback window; use ` +
+                `\`set_time_field\` to specify one.`
+            );
+          }
         }
         next = {
           ...next,
@@ -413,7 +420,6 @@ export const executeRuleOperations = async (
 
       case 'set_time_field':
         next = { ...next, time_field: op.time_field };
-        timeFieldExplicitlySet = true;
         break;
 
       case 'set_grouping': {
@@ -531,5 +537,6 @@ export const executeRuleOperations = async (
   return {
     data: next,
     ...(lastQueryColumns ? { queryColumns: lastQueryColumns } : {}),
+    ...(warnings.length > 0 ? { warnings } : {}),
   };
 };

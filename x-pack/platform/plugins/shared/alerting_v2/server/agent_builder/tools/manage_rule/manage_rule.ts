@@ -69,7 +69,7 @@ ${generateRuleOperationsUsageList()}`,
         currentAttachment?.versions.at(-1)?.data ?? {};
       ruleId = currentAttachment?.origin;
 
-      const { data: updatedData, queryColumns } = await executeRuleOperations(
+      const { data: updatedData, queryColumns, warnings } = await executeRuleOperations(
         currentData,
         operations,
         esClient,
@@ -134,6 +134,7 @@ ${generateRuleOperationsUsageList()}`,
                 ...(dashboards.length > 0 ? { dashboards } : {}),
               },
               ...(queryColumns ? { queryColumns } : {}),
+              ...(warnings && warnings.length > 0 ? { warnings } : {}),
             },
           },
         ],

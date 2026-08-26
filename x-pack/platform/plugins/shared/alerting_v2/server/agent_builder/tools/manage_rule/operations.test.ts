@@ -640,6 +640,38 @@ describe('executeRuleOperations', () => {
       expect(result.data.query).toBeDefined();
     });
 
+    it('warns instead of throwing when existing time_field is not on the new index', async () => {
+      const esClient = createMockEsClient();
+      esClient.asCurrentUser.esql.query.mockResolvedValueOnce({
+        columns: [{ name: 'value', type: 'long' }],
+        values: [],
+      } as never);
+      esClient.asCurrentUser.fieldCaps.mockResolvedValueOnce({
+        fields: {},
+      } as never);
+
+      const ops: RuleOperation[] = [
+        {
+          operation: 'set_query',
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM no-date-index | STATS COUNT(*)' },
+          },
+        },
+      ];
+
+      const result = await executeRuleOperations(
+        { time_field: 'event.ingested' },
+        ops,
+        esClient
+      );
+
+      expect(result.data.time_field).toBe('event.ingested');
+      expect(result.warnings).toEqual(
+        expect.arrayContaining([expect.stringContaining('event.ingested')])
+      );
+    });
+
     it('survives a subsequent set_query where field-caps returns no date fields', async () => {
       const esClient = createMockEsClient();
       esClient.asCurrentUser.esql.query.mockResolvedValueOnce({
