@@ -41,8 +41,14 @@ export const NewsfeedNavButton = ({ newsfeedApi, isOpen$, onToggle }: Props) => 
   useEffect(() => {
     const sub = isOpen$.subscribe((open) => {
       setIsOpen((prev) => {
-        if (prev && !open && document.activeElement?.matches(':focus-visible')) {
-          buttonRef.current?.focus();
+        if (prev && !open) {
+          let shouldRestoreFocus = true;
+          try {
+            shouldRestoreFocus = document.activeElement?.matches(':focus-visible') ?? true;
+          } catch {
+            // :focus-visible unsupported — restore focus unconditionally
+          }
+          if (shouldRestoreFocus) buttonRef.current?.focus();
         }
         return open;
       });
