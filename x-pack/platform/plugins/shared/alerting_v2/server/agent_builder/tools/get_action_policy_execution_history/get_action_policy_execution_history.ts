@@ -20,12 +20,7 @@ import { ALERTING_LOG_CODES } from '../../../lib/errors/error_codes';
 const DEFAULT_PER_PAGE = 10;
 
 const getActionPolicyExecutionHistorySchema = z.object({
-  page: z
-    .number()
-    .int()
-    .min(1)
-    .optional()
-    .describe('Page number (1-indexed). Defaults to 1.'),
+  page: z.number().int().min(1).optional().describe('Page number (1-indexed). Defaults to 1.'),
   perPage: z
     .number()
     .int()
@@ -50,7 +45,9 @@ export interface GetActionPolicyExecutionHistoryToolParams {
   attachmentId: string;
   policyId: string;
   logger: LoggerServiceContract;
-  getExecutionHistoryClient: (context: { request: KibanaRequest }) => ActionPolicyExecutionHistoryClient;
+  getExecutionHistoryClient: (context: {
+    request: KibanaRequest;
+  }) => ActionPolicyExecutionHistoryClient;
   getPrivilegeChecker: (context: { request: KibanaRequest }) => PrivilegeChecker;
 }
 

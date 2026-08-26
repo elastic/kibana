@@ -26,8 +26,12 @@ import { getActionPolicyExecutionHistoryTool } from '../tools/get_action_policy_
 interface CreateActionPolicyAttachmentTypeOptions {
   logger: LoggerServiceContract;
   getActionPolicyClient: (context: AttachmentResolveContext) => ActionPolicyClient;
-  getExecutionHistoryClient: (context: { request: import('@kbn/core-http-server').KibanaRequest }) => ActionPolicyExecutionHistoryClient;
-  getPrivilegeChecker: (context: { request: import('@kbn/core-http-server').KibanaRequest }) => PrivilegeChecker;
+  getExecutionHistoryClient: (context: {
+    request: import('@kbn/core-http-server').KibanaRequest;
+  }) => ActionPolicyExecutionHistoryClient;
+  getPrivilegeChecker: (context: {
+    request: import('@kbn/core-http-server').KibanaRequest;
+  }) => PrivilegeChecker;
 }
 
 const formatActionPolicyDescription = (
