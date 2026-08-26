@@ -134,4 +134,26 @@ describe('triggerInvestigationWorkflow', () => {
 
     expect(result).toBeUndefined();
   });
+
+  it('returns undefined and logs a warning when client.start() throws', async () => {
+    const start = jest
+      .fn()
+      .mockRejectedValue(new Error('Investigations are not configured in this space'));
+    const nightshiftInvestigations = {
+      getInvestigationsClient: jest.fn().mockReturnValue({ start }),
+    } as unknown as NightshiftInvestigationsServerStart;
+    const logger = createLogger();
+
+    const result = await triggerInvestigationWorkflow({
+      nightshiftInvestigations,
+      request: createRequest(),
+      logger,
+      event: createEvent(),
+    });
+
+    expect(result).toBeUndefined();
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Investigation trigger failed')
+    );
+  });
 });

@@ -35,23 +35,31 @@ export const triggerInvestigationWorkflow = async ({
 
   const client = nightshiftInvestigations.getInvestigationsClient(request);
 
-  const { investigation_id } = await client.start({
-    subject: { type: 'significant_event', id: event_uuid },
-    message: `${title}\n\n${summary}`,
-    stream_names: stream_names ?? [],
-    concurrency_key: event_id,
-    context: {
-      event_uuid,
-      event_id,
-      status,
-      severity,
-      summary,
-      confidence,
-    },
-  });
+  let investigationId: string;
+  try {
+    const response = await client.start({
+      subject: { type: 'significant_event', id: event_uuid },
+      message: `${title}\n\n${summary}`,
+      stream_names: stream_names ?? [],
+      concurrency_key: event_id,
+      context: {
+        event_uuid,
+        event_id,
+        status,
+        severity,
+        summary,
+        confidence,
+      },
+    });
+    investigationId = response.investigation_id;
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    logger.warn(`Investigation trigger failed for event "${event_uuid}": ${message}`);
+    return undefined;
+  }
 
   logger.info(
-    `Triggered investigation workflow for event "${event_uuid}", executionId=${investigation_id}`
+    `Triggered investigation workflow for event "${event_uuid}", executionId=${investigationId}`
   );
-  return investigation_id;
+  return investigationId;
 };
