@@ -139,7 +139,7 @@ describe('getReadState', () => {
     const logger = loggingSystemMock.createLogger();
 
     await expect(getReadState(client, logger)).resolves.toBeUndefined();
-    expect(logger.warn).toHaveBeenCalled();
+    expect(logger.debug).toHaveBeenCalled();
   });
 });
 
