@@ -5,7 +5,6 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { TEST_MESSAGE } from '@kbn/connector-schemas/email/constants';
 
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { ObjectRemover } from '../../../../../common/lib';
@@ -54,7 +53,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
       }
     });
 
-    it('uses a fixed message when running via _execute', async () => {
+    it('does not have a footer', async () => {
       const from = `bob@${EmailDomainAllowed}`;
       const conn = await createConnector(from);
       expect(conn.status).to.be(200);
@@ -74,7 +73,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
       const { status } = run.body || {};
       expect(status).to.be('ok');
 
-      expect(run.body.data.message.text).to.be(TEST_MESSAGE);
+      expect(run.body.data.message.text).to.be('email-message');
     });
 
     describe('fails for invalid email domains', () => {
