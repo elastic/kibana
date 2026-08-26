@@ -28,6 +28,7 @@ export {
   PND_SKILLS_URL,
   PND_SKILL_URL_TEMPLATE,
   PND_WATCHES_URL,
+  PND_WATCH_SCHEDULE_URL_TEMPLATE,
   PND_WATCH_URL_TEMPLATE,
   PND_WORKERS_URL,
   PND_WORKER_URL_TEMPLATE,
@@ -56,9 +57,32 @@ export {
   buildInvestigationProposalsUrl,
   buildInvestigationUrl,
   buildSkillUrl,
+  buildWatchScheduleUrl,
   buildWatchUrl,
   buildWorkerUrl,
 } from './constants';
+
+export {
+  ATTACK_DISCOVERY_ACTION_CAPABILITIES,
+  ATTACK_DISCOVERY_ASSET_CRITICALITY_LEVELS,
+  ATTACK_DISCOVERY_MANUAL_ACTION_TYPES,
+  ATTACK_DISCOVERY_RECOMMENDED_ACTION_PRIORITIES,
+} from './recommended_actions';
+export type {
+  AttackDiscoveryAssetCriticalityLevel,
+  AttackDiscoveryCapabilityRef,
+  AttackDiscoveryExecutionParamsByActionType,
+  AttackDiscoveryKibanaActionType,
+  AttackDiscoveryKibanaRecommendedAction,
+  AttackDiscoveryKillProcessExecutionParams,
+  AttackDiscoveryManualActionType,
+  AttackDiscoveryManualRecommendedAction,
+  AttackDiscoveryRecommendedAction,
+  AttackDiscoveryRecommendedActionPriority,
+  AttackDiscoveryRecommendedActionTargets,
+  AttackDiscoveryRecommendedActionType,
+  AttackDiscoverySetAssetCriticalityExecutionParams,
+} from './recommended_actions';
 
 export { CONVERSATION_QUEUE_CATEGORIES, CONVERSATION_QUEUE_LABELS } from './translations';
 

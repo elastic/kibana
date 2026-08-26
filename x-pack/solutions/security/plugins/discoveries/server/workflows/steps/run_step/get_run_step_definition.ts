@@ -21,17 +21,14 @@ import type { DiscoveriesPluginStartDeps } from '../../../types';
 import { resolveConnectorDetails } from '../../helpers/resolve_connector_details';
 import { resolveDefaultConnectorId } from '../../helpers/resolve_default_connector_id';
 import { checkManagedWorkflowIntegrity } from '../../../managed_workflows/check_managed_workflow_integrity';
-import { ATTACK_DISCOVERY_RUN_SOFT_DEADLINE_MS } from './constants';
-
-const SOFT_DEADLINE_SENTINEL = Symbol('attack-discovery-run-soft-deadline');
-type SoftDeadlineSentinel = typeof SOFT_DEADLINE_SENTINEL;
 
 /**
  * Server-side implementation of the Attack Discovery run step.
  *
  * Orchestrates the full pipeline (alert retrieval → generation → validation)
- * in a single workflow step. Supports sync mode (returns discoveries inline)
- * and async mode (fire-and-forget, returns execution_uuid only).
+ * in a single workflow step. Sync mode awaits the pipeline to completion and
+ * returns discoveries inline (bounded by the step's own `timeout`); async mode
+ * is fire-and-forget and returns execution_uuid only.
  *
  * The `replacements` map is explicitly excluded from the output for security.
  */
@@ -211,94 +208,49 @@ export const getRunStepDefinition = ({
           };
         }
 
-        // sync mode races the pipeline against a soft deadline (see constants.ts).
-        // If the pipeline doesn't finish in time, return execution_uuid only and
-        // let the pipeline keep running in the background — the AB workflow tool
-        // wrapper then receives a clean response well inside its own 120s ceiling,
-        // and the agent resumes via the dedicated AD status tool.
-        const pipelinePromise = executeGenerationWorkflow(executeParams);
+        // sync mode (the default): await the pipeline to completion and return
+        // the discoveries inline. The step's own `timeout` bounds the wait for a
+        // slow generation. The Agent Builder run tool needs to stay under its
+        // 120s wrapper ceiling and applies its own soft deadline separately — it
+        // does not use this step, so no soft deadline is applied here.
+        const outcome = await executeGenerationWorkflow(executeParams);
 
-        let softDeadlineTimer: NodeJS.Timeout | undefined;
-        const softDeadlinePromise = new Promise<SoftDeadlineSentinel>((resolve) => {
-          softDeadlineTimer = setTimeout(
-            () => resolve(SOFT_DEADLINE_SENTINEL),
-            ATTACK_DISCOVERY_RUN_SOFT_DEADLINE_MS
-          );
-        });
-
-        try {
-          const raced = await Promise.race([pipelinePromise, softDeadlinePromise]);
-
-          if (raced === SOFT_DEADLINE_SENTINEL) {
-            context.logger.info(
-              `Attack Discovery sync pipeline exceeded soft deadline of ${ATTACK_DISCOVERY_RUN_SOFT_DEADLINE_MS}ms; returning execution_uuid for slow-path resume (execution=${executionUuid})`
-            );
-
-            // The pipeline keeps running in the background; surface any later
-            // rejection so it doesn't surface as an unhandled promise rejection.
-            pipelinePromise.catch((err) => {
-              logger.error(
-                `Attack Discovery sync pipeline rejected after returning early (execution=${executionUuid}): ${
-                  err instanceof Error ? err.message : String(err)
-                }`
-              );
-            });
-
-            return {
-              output: {
-                execution_uuid: executionUuid,
-                status: 'pending' as const,
-              },
-            };
-          }
-
-          const outcome = raced;
-
-          if (outcome.outcome === 'validation_succeeded') {
-            const { alertRetrievalResult, generationResult, validationResult } = outcome;
-
-            return {
-              output: {
-                alerts_context_count: alertRetrievalResult.alertsContextCount,
-                // R3: the run step persists via the persist step and returns exactly the
-                // discoveries it was handed (`[]` when the persist step did not run).
-                attack_discoveries: (validationResult.discoveriesToPersist ?? []) as Array<{
-                  alert_ids: string[];
-                  details_markdown: string;
-                  entity_summary_markdown?: string;
-                  id?: string;
-                  mitre_attack_tactics?: string[];
-                  summary_markdown: string;
-                  timestamp?: string;
-                  title: string;
-                }>,
-                discovery_count: validationResult.generatedCount,
-                execution_uuid: generationResult.executionUuid,
-                status: 'completed' as const,
-              },
-            };
-          }
-
-          context.logger.warn(`Attack Discovery validation failed (execution=${executionUuid})`);
+        if (outcome.outcome === 'validation_succeeded') {
+          const { alertRetrievalResult, generationResult, validationResult } = outcome;
 
           return {
             output: {
-              alerts_context_count: 0,
-              attack_discoveries: null,
-              discovery_count: 0,
-              execution_uuid: executionUuid,
+              alerts_context_count: alertRetrievalResult.alertsContextCount,
+              // R3: the run step persists via the persist step and returns exactly the
+              // discoveries it was handed (`[]` when the persist step did not run).
+              attack_discoveries: (validationResult.discoveriesToPersist ?? []) as Array<{
+                alert_ids: string[];
+                details_markdown: string;
+                entity_summary_markdown?: string;
+                id?: string;
+                mitre_attack_tactics?: string[];
+                summary_markdown: string;
+                timestamp?: string;
+                title: string;
+              }>,
+              discovery_count: validationResult.generatedCount,
+              execution_uuid: generationResult.executionUuid,
               status: 'completed' as const,
             },
           };
-        } finally {
-          // Always clear the soft-deadline timer so it does not leak into the
-          // event loop when the pipeline promise rejects (the timer would
-          // otherwise stay pending until it fired). This also covers the
-          // success and soft-deadline-exceeded paths.
-          if (softDeadlineTimer != null) {
-            clearTimeout(softDeadlineTimer);
-          }
         }
+
+        context.logger.warn(`Attack Discovery validation failed (execution=${executionUuid})`);
+
+        return {
+          output: {
+            alerts_context_count: 0,
+            attack_discoveries: null,
+            discovery_count: 0,
+            execution_uuid: executionUuid,
+            status: 'completed' as const,
+          },
+        };
       } catch (error) {
         context.logger.error(
           `Attack Discovery run step failed: ${
