@@ -36,8 +36,8 @@ export class NewsfeedPageObject extends FtrService {
     });
   }
 
-  async openNewsfeedPanel() {
-    this.log.debug('openNewsfeedPanel');
+  async isNewsfeedPanelOpen() {
+    this.log.debug('isNewsfeedPanelOpen');
     return await this.testSubjects.exists('newsfeedSidebar');
   }
 
