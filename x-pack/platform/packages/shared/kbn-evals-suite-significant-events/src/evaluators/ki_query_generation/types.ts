@@ -76,6 +76,11 @@ export const getQueriesFromOutput = (output: KIQueryGenerationOutput | undefined
   return Array.isArray(output) ? output : output.queries ?? [];
 };
 
+export const getToolUsageFromOutput = (
+  output: KIQueryGenerationOutput | undefined
+): SignificantEventsToolUsage | undefined =>
+  output && !Array.isArray(output) ? output.toolUsage : undefined;
+
 /**
  * Reads the attempt diagnostics a task returns when `collectQueryAttempts` is on.
  * `undefined` means the task did not collect them, which is distinct from an empty run.

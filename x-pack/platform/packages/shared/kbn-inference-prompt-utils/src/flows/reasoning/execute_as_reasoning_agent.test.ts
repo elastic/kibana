@@ -221,6 +221,46 @@ describe('external text with non-planning tool calls', () => {
     expect(secondCall.toolChoice).toBe('auto');
     expect(result.diagnostics.externalContentToolContinuations).toBe(1);
   });
+
+  test('terminates after the step budget while executing a task tool on every turn', async () => {
+    const prompt = makePrompt();
+    const externalTurn = (toolCallId: string) => ({
+      content: `internal${END_INTERNAL_REASONING_MARKER}${LONG_EXTERNAL}`,
+      toolCalls: [
+        {
+          type: 'function' as const,
+          function: { name: 'fetch_data', arguments: {} },
+          toolCallId,
+        },
+      ],
+      tokens: 1,
+    });
+    const inferenceClient = {
+      prompt: jest
+        .fn()
+        .mockResolvedValueOnce(externalTurn('x1'))
+        .mockResolvedValueOnce(externalTurn('x2'))
+        .mockResolvedValueOnce(externalTurn('x3'))
+        .mockResolvedValueOnce({ content: 'final', toolCalls: [], tokens: 1 }),
+    } as Partial<jest.Mocked<BoundInferenceClient>> as jest.Mocked<BoundInferenceClient>;
+
+    const fetchData = jest.fn().mockResolvedValue({ response: { result: 'ok' } });
+
+    const result = await executeAsReasoningAgent({
+      inferenceClient,
+      prompt,
+      maxSteps: 3,
+      toolCallbacks: { fetch_data: fetchData, complete: jest.fn() },
+      input: { foo: '' },
+    });
+
+    // One prompt call per step, plus the forced final call after the budget is spent.
+    expect(inferenceClient.prompt).toHaveBeenCalledTimes(4);
+    // The task tool executes on each of the three non-final turns.
+    expect(fetchData).toHaveBeenCalledTimes(3);
+    // Every external-content turn was continued, not prematurely completed.
+    expect(result.diagnostics.externalContentToolContinuations).toBe(3);
+  });
 });
 
 describe('executeAsReasoningAgent', () => {

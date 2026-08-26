@@ -40,6 +40,7 @@ interface Params {
   connectorId: string;
   systemPrompt: string;
   maxExistingQueriesForContext?: number;
+  maxDurationMs?: number;
   queryValidationTimeoutMs?: number;
 }
 
@@ -68,6 +69,7 @@ export async function identifyKIQueries(
     connectorId,
     systemPrompt,
     maxExistingQueriesForContext,
+    maxDurationMs,
     queryValidationTimeoutMs,
   } = params;
   const {
@@ -143,6 +145,7 @@ export async function identifyKIQueries(
       existingQueries,
       maxExistingQueriesForContext,
       maxSteps: semanticCodeSearchTools ? MAX_STEPS_WITH_SEMANTIC_CODE_SEARCH_TOOLS : undefined,
+      maxDurationMs,
       queryValidationTimeoutMs,
     });
 

@@ -31,6 +31,14 @@ const parseSelection = (rawSelection: string | undefined): string[] => {
   return [...new Set(requested)];
 };
 
+const collectScenarioIds = (datasets: DatasetConfig[]): string[] => [
+  ...new Set(
+    datasets.flatMap((dataset) =>
+      dataset.kiQueryGeneration.map((scenario) => scenario.input.scenario_id)
+    )
+  ),
+];
+
 /**
  * Resolves which KI query-generation scenarios to run.
  *
@@ -54,23 +62,11 @@ export const resolveQueryGenerationDatasets = (
     return {
       datasets,
       isFocused,
-      selectedScenarioIds: [
-        ...new Set(
-          datasets.flatMap((dataset) =>
-            dataset.kiQueryGeneration.map((scenario) => scenario.input.scenario_id)
-          )
-        ),
-      ].sort(),
+      selectedScenarioIds: collectScenarioIds(datasets).sort(),
     };
   }
 
-  const available = [
-    ...new Set(
-      datasets.flatMap((dataset) =>
-        dataset.kiQueryGeneration.map((scenario) => scenario.input.scenario_id)
-      )
-    ),
-  ];
+  const available = collectScenarioIds(datasets);
   const unknown = requested.filter((id) => !available.includes(id));
   if (unknown.length > 0) {
     throw new Error(

@@ -13,6 +13,9 @@ import {
 } from '../../src/evaluators/ki_query_generation';
 import { getEmptyDatastreamEvaluators, selectQueryGenerationEvaluators } from './select_evaluators';
 
+const SHARED_EVALUATORS_ENV = 'SELECTED_EVALUATORS';
+const QUERY_GENERATION_EVALUATORS_ENV = 'KI_QUERY_GENERATION_EVALUATORS';
+
 const evaluator = (name: string): Evaluator => ({
   name,
   kind: 'CODE',
@@ -23,18 +26,23 @@ const scenarioCriteria: ScenarioCriteriaConfig = {
   criteriaFn: () => evaluator('criteria'),
 };
 
-const setSelection = (value: string | undefined) => {
+const setEnv = (name: string, value: string | undefined) => {
   if (value == null) {
-    delete process.env.SELECTED_EVALUATORS;
+    delete process.env[name];
   } else {
-    process.env.SELECTED_EVALUATORS = value;
+    process.env[name] = value;
   }
 };
 
 describe('selectQueryGenerationEvaluators', () => {
   const ORIGINAL = { ...process.env };
 
-  afterEach(() => {
+  beforeEach(() => {
+    delete process.env[SHARED_EVALUATORS_ENV];
+    delete process.env[QUERY_GENERATION_EVALUATORS_ENV];
+  });
+
+  afterAll(() => {
     process.env = { ...ORIGINAL };
   });
 
@@ -42,21 +50,28 @@ describe('selectQueryGenerationEvaluators', () => {
     expect(() => selectQueryGenerationEvaluators([])).toThrow(/empty list/);
   });
 
-  it('returns the nonempty input unchanged when the env var is unset', () => {
-    setSelection(undefined);
+  it('returns the nonempty input unchanged when both env vars are unset', () => {
     const evaluators = [evaluator('a'), evaluator('b')];
     expect(selectQueryGenerationEvaluators(evaluators)).toBe(evaluators);
   });
 
-  it('throws for an empty requested name', () => {
-    setSelection('');
-    expect(() => selectQueryGenerationEvaluators([evaluator('a')])).toThrow(
-      /Unknown evaluator\(s\)/
-    );
+  it('follows the shared permissive selection for SELECTED_EVALUATORS and never throws for unknown names', () => {
+    setEnv(SHARED_EVALUATORS_ENV, 'Factuality');
+    expect(() => selectQueryGenerationEvaluators([evaluator('generation_success')])).not.toThrow();
+    expect(selectQueryGenerationEvaluators([evaluator('generation_success')])).toEqual([]);
   });
 
-  it('selects exactly the requested evaluators', () => {
-    setSelection('generation_success,tool_usage_validation');
+  it('SELECTED_EVALUATORS selects exact names shared with the rest of the suite', () => {
+    setEnv(SHARED_EVALUATORS_ENV, 'generation_success');
+    const selected = selectQueryGenerationEvaluators([
+      evaluator('generation_success'),
+      evaluator('tool_usage_validation'),
+    ]);
+    expect(selected.map((item) => item.name)).toEqual(['generation_success']);
+  });
+
+  it('KI_QUERY_GENERATION_EVALUATORS strictly selects exact names', () => {
+    setEnv(QUERY_GENERATION_EVALUATORS_ENV, 'generation_success,tool_usage_validation');
     const selected = selectQueryGenerationEvaluators([
       evaluator('generation_success'),
       evaluator('tool_usage_validation'),
@@ -68,17 +83,31 @@ describe('selectQueryGenerationEvaluators', () => {
     ]);
   });
 
-  it('throws for a misspelled evaluator before model calls', () => {
-    setSelection('generation_sucess');
+  it('fails fast on unknown KI_QUERY_GENERATION_EVALUATORS names before model calls', () => {
+    setEnv(QUERY_GENERATION_EVALUATORS_ENV, 'generation_sucess');
     expect(() => selectQueryGenerationEvaluators([evaluator('generation_success')])).toThrow(
-      /generation_sucess/
+      /Unknown evaluator\(s\) requested via KI_QUERY_GENERATION_EVALUATORS: generation_sucess/
     );
   });
 
-  it('throws for a partially valid request and lists every unmatched name', () => {
-    setSelection('generation_success,nope');
+  it('fails fast on a partially valid request and lists every unmatched name', () => {
+    setEnv(QUERY_GENERATION_EVALUATORS_ENV, 'generation_success,nope');
     expect(() => selectQueryGenerationEvaluators([evaluator('generation_success')])).toThrow(
       /nope.*Available: generation_success/
+    );
+  });
+
+  it('fails an empty KI_QUERY_GENERATION_EVALUATORS value with the original input visible', () => {
+    setEnv(QUERY_GENERATION_EVALUATORS_ENV, '');
+    expect(() => selectQueryGenerationEvaluators([evaluator('a')])).toThrow(
+      /without empty items; received ""/
+    );
+  });
+
+  it('fails a trailing-comma KI_QUERY_GENERATION_EVALUATORS value with the original input visible', () => {
+    setEnv(QUERY_GENERATION_EVALUATORS_ENV, 'generation_success, ');
+    expect(() => selectQueryGenerationEvaluators([evaluator('generation_success')])).toThrow(
+      /without empty items; received "generation_success, "/
     );
   });
 });
@@ -86,28 +115,39 @@ describe('selectQueryGenerationEvaluators', () => {
 describe('selectQueryGenerationEvaluators with the real query-generation list', () => {
   const ORIGINAL = { ...process.env };
 
-  afterEach(() => {
+  beforeEach(() => {
+    delete process.env[SHARED_EVALUATORS_ENV];
+    delete process.env[QUERY_GENERATION_EVALUATORS_ENV];
+  });
+
+  afterAll(() => {
     process.env = { ...ORIGINAL };
   });
 
-  it('returns every evaluator in list order when unset', () => {
-    setSelection(undefined);
-    const evaluators = createKIQueryGenerationEvaluators(
-      {} as ElasticsearchClient,
-      scenarioCriteria,
-      {} as Logger
-    );
+  const realEvaluators = () =>
+    createKIQueryGenerationEvaluators({} as ElasticsearchClient, scenarioCriteria, {} as Logger);
+
+  it('returns every evaluator in list order when both env vars are unset', () => {
+    const evaluators = realEvaluators();
     expect(selectQueryGenerationEvaluators(evaluators)).toEqual(evaluators);
   });
 
-  it('excludes all LLM evaluators from a code-only selection', () => {
-    setSelection('generation_success,tool_usage_validation');
-    const evaluators = createKIQueryGenerationEvaluators(
-      {} as ElasticsearchClient,
-      scenarioCriteria,
-      {} as Logger
-    );
-    const selected = selectQueryGenerationEvaluators(evaluators);
+  it('SELECTED_EVALUATORS selects exact names from the real list permissively', () => {
+    setEnv(SHARED_EVALUATORS_ENV, 'generation_success');
+    const selected = selectQueryGenerationEvaluators(realEvaluators());
+    expect(selected.map((item) => item.name)).toEqual(['generation_success']);
+    expect(selected.every((item) => item.kind === 'CODE')).toBe(true);
+  });
+
+  it('KI_QUERY_GENERATION_EVALUATORS can select the mandatory canary evaluator from the real list', () => {
+    setEnv(QUERY_GENERATION_EVALUATORS_ENV, 'expected_generation_outcome');
+    const selected = selectQueryGenerationEvaluators(realEvaluators());
+    expect(selected.map((item) => item.name)).toEqual(['expected_generation_outcome']);
+  });
+
+  it('KI_QUERY_GENERATION_EVALUATORS excludes all LLM evaluators from a code-only selection', () => {
+    setEnv(QUERY_GENERATION_EVALUATORS_ENV, 'generation_success,tool_usage_validation');
+    const selected = selectQueryGenerationEvaluators(realEvaluators());
     expect(selected.map((item) => item.name).sort()).toEqual([
       'generation_success',
       'tool_usage_validation',
@@ -119,13 +159,28 @@ describe('selectQueryGenerationEvaluators with the real query-generation list', 
 describe('empty-datastream canary evaluator independence', () => {
   const ORIGINAL = { ...process.env };
 
-  afterEach(() => {
+  beforeEach(() => {
+    delete process.env[SHARED_EVALUATORS_ENV];
+    delete process.env[QUERY_GENERATION_EVALUATORS_ENV];
+  });
+
+  afterAll(() => {
     process.env = { ...ORIGINAL };
   });
 
-  it('uses its mandatory evaluator when the main selection excludes it', () => {
-    setSelection('generation_success,tool_usage_validation');
+  it('keeps the mandatory evaluator enabled regardless of either selection variable', () => {
+    setEnv(SHARED_EVALUATORS_ENV, 'Factuality');
+    setEnv(QUERY_GENERATION_EVALUATORS_ENV, 'generation_success,tool_usage_validation');
 
+    expect(getEmptyDatastreamEvaluators()).toEqual([
+      expect.objectContaining({
+        name: 'expected_generation_outcome',
+        kind: 'CODE',
+      }),
+    ]);
+  });
+
+  it('keeps the mandatory evaluator enabled when both variables are unset', () => {
     expect(getEmptyDatastreamEvaluators()).toEqual([
       expect.objectContaining({
         name: 'expected_generation_outcome',

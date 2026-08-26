@@ -39,6 +39,7 @@ export interface GenerateKIQueriesParams {
   streamName: string;
   connectorId?: string;
   maxExistingQueriesForContext?: number;
+  maxDurationMs?: number;
   queryValidationTimeoutMs?: number;
 }
 
@@ -71,6 +72,7 @@ export async function generateKIQueries(
     streamName,
     connectorId: connectorIdOverride,
     maxExistingQueriesForContext,
+    maxDurationMs,
     queryValidationTimeoutMs,
   } = params;
   const {
@@ -157,6 +159,7 @@ export async function generateKIQueries(
       connectorId,
       systemPrompt: significantEventsPromptOverride,
       maxExistingQueriesForContext,
+      maxDurationMs,
       queryValidationTimeoutMs,
     },
     {

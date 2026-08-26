@@ -5,15 +5,31 @@
  * 2.0.
  */
 
-import { parseSelectedEvaluators } from '@kbn/evals';
+import { selectEvaluators } from '@kbn/evals';
 
 import { expectedGenerationOutcomeEvaluator } from '../../src/evaluators/ki_query_generation/expected_generation_outcome';
 
+const QUERY_GENERATION_EVALUATORS_ENV = 'KI_QUERY_GENERATION_EVALUATORS';
+
+const selectEvaluatorsBySharedVariable = selectEvaluators as <TEvaluator extends { name: string }>(
+  evaluators: TEvaluator[]
+) => TEvaluator[];
+
+const parseQueryGenerationEvaluatorSelection = (rawSelection: string): string[] => {
+  const requested = rawSelection.split(',').map((name) => name.trim());
+  if (requested.some((name) => name.length === 0)) {
+    throw new Error(
+      `${QUERY_GENERATION_EVALUATORS_ENV} must be a comma-separated list of evaluator names ` +
+        `without empty items; received ${JSON.stringify(rawSelection)}`
+    );
+  }
+  return [...new Set(requested)];
+};
+
 /**
- * Applies `SELECTED_EVALUATORS` to the complete evaluator list after it is
- * assembled, failing fast on unknown or empty selections instead of silently
- * running nothing. This suite uses exact evaluator names only; @K metric
- * patterns are not supported.
+ * Applies the strict query-generation evaluator selection when configured.
+ * Otherwise it preserves the shared `SELECTED_EVALUATORS` behavior used by
+ * the rest of the suite.
  */
 export const selectQueryGenerationEvaluators = <TEvaluator extends { name: string }>(
   evaluators: TEvaluator[]
@@ -22,17 +38,19 @@ export const selectQueryGenerationEvaluators = <TEvaluator extends { name: strin
     throw new Error('Cannot select evaluators from an empty list');
   }
 
-  const requested = parseSelectedEvaluators();
-  if (requested.length === 0) {
-    return evaluators;
+  const rawSelection = process.env[QUERY_GENERATION_EVALUATORS_ENV];
+  if (rawSelection === undefined) {
+    return selectEvaluatorsBySharedVariable(evaluators);
   }
 
+  const requested = parseQueryGenerationEvaluatorSelection(rawSelection);
   const available = evaluators.map((evaluator) => evaluator.name);
   const unknown = requested.filter((name) => !available.includes(name));
   if (unknown.length > 0) {
     throw new Error(
-      `Unknown evaluator(s) requested via SELECTED_EVALUATORS: ${unknown.join(', ')}. ` +
-        `Available: ${available.join(', ')}.`
+      `Unknown evaluator(s) requested via ${QUERY_GENERATION_EVALUATORS_ENV}: ${unknown.join(
+        ', '
+      )}. ` + `Available: ${available.join(', ')}.`
     );
   }
 

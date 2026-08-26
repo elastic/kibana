@@ -134,4 +134,15 @@ describe('generateKIQueries', () => {
     expect(result).not.toHaveProperty('reasoningDiagnostics');
     expect(result).not.toHaveProperty('toolUsage');
   });
+
+  it('forwards maxDurationMs to the query generation wrapper', async () => {
+    await generateKIQueries(
+      { streamName: 'logs.test', connectorId: 'test-connector', maxDurationMs: 300000 },
+      makeDeps({ logger })
+    );
+
+    expect(identifyKIQueriesMock.mock.calls[0][0]).toEqual(
+      expect.objectContaining({ maxDurationMs: 300000, connectorId: 'test-connector' })
+    );
+  });
 });

@@ -19,6 +19,7 @@ import { createStatsQualityCalibrationEvaluator } from './stats/stats_quality_ca
 import { createToolUsageEvaluator } from './tool_usage/tool_usage_validation';
 import { exactDuplicateAvoidanceEvaluator } from './novelty/exact_duplicate_avoidance';
 import { generationSuccessEvaluator } from './generation_success';
+import { expectedGenerationOutcomeEvaluator } from './expected_generation_outcome';
 import type {
   KIQueryGenerationEvaluationExample,
   KIQueryGenerationEvaluator,
@@ -53,6 +54,7 @@ export const createKIQueryGenerationEvaluators = (
     createToolUsageEvaluator(),
     exactDuplicateAvoidanceEvaluator,
     generationSuccessEvaluator,
+    expectedGenerationOutcomeEvaluator,
   ];
   if (!scenarioCriteria) {
     return evaluators;

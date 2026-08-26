@@ -110,6 +110,16 @@ describe('generateSignificantEventDefinitions (semantic code search wiring)', ()
     expect(result.reasoningDiagnostics).toEqual({ externalContentToolContinuations: 4 });
   });
 
+  it('forwards maxDurationMs to the shared agent', async () => {
+    await identifyKIQueries(
+      { definition, connectorId: 'c1', systemPrompt: 'SYSTEM', maxDurationMs: 300000 },
+      buildDeps()
+    );
+
+    const args = generateSignificantEventsMock.mock.calls[0][0];
+    expect(args.maxDurationMs).toBe(300000);
+  });
+
   it('forwards the SCS tools, appends the prompt snippet, and raises the step budget', async () => {
     const semanticCodeSearchTools = makeCodeTools();
 

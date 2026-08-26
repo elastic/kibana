@@ -76,6 +76,16 @@ import {
 
 const TRUST_UPSTREAM = process.env.SIGEVENTS_TRUST_UPSTREAM === 'true';
 
+const EMPTY_DATASTREAM_MAX_STEPS = 4;
+
+const resolveConnectorModel = (connector: Parameters<typeof connectorToInference>[0]): string => {
+  try {
+    return getConnectorDefaultModel(connectorToInference(connector)) ?? connector.id;
+  } catch {
+    return connector.id;
+  }
+};
+
 evaluate.describe('KI query generation', { tag: tags.serverless.observability.complete }, () => {
   const scenarioResolution = resolveQueryGenerationDatasets(getActiveDatasets());
   const activeDatasets = scenarioResolution.datasets;
@@ -465,11 +475,8 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                   evaluator_names: evaluatorsList.map((evaluator) => evaluator.name),
                   effective_max_steps: effectiveMaxSteps,
                   repetitions,
-                  generation_model:
-                    getConnectorDefaultModel(connectorToInference(connector)) ?? connector.id,
-                  judge_model:
-                    getConnectorDefaultModel(connectorToInference(evaluationConnector)) ??
-                    evaluationConnector.id,
+                  generation_model: resolveConnectorModel(connector),
+                  judge_model: resolveConnectorModel(evaluationConnector),
                 })}`
               );
 
@@ -525,7 +532,6 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
       'KI query generation',
       async ({
         executorClient,
-        evaluators,
         esClient,
         inferenceClient,
         logger,
@@ -538,6 +544,7 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
           throw new Error('Missing temporary test index for empty datastream evaluation');
         }
 
+        const emptyDatastreamEvaluators = getEmptyDatastreamEvaluators();
         logger.info(
           `QUERY_GENERATION_EVAL_CONFIG ${JSON.stringify({
             dataset: 'empty-datastream',
@@ -545,14 +552,11 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
             grounding: 'baseline',
             scenario_ids: ['empty-datastream'],
             example_ids: ['empty-datastream'],
-            evaluator_names: ['expected_generation_outcome'],
-            effective_max_steps: 4,
+            evaluator_names: emptyDatastreamEvaluators.map((evaluator) => evaluator.name),
+            effective_max_steps: EMPTY_DATASTREAM_MAX_STEPS,
             repetitions,
-            generation_model:
-              getConnectorDefaultModel(connectorToInference(connector)) ?? connector.id,
-            judge_model:
-              getConnectorDefaultModel(connectorToInference(evaluationConnector)) ??
-              evaluationConnector.id,
+            generation_model: resolveConnectorModel(connector),
+            judge_model: resolveConnectorModel(evaluationConnector),
           })}`
         );
 
@@ -577,19 +581,23 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                 emptyDataStreamTestIndex!
               );
 
-              const { queries, reasoningDiagnostics } = await identifyKIQueries({
-                stream: streamFromApi as Streams.all.Definition,
-                esClient,
-                inferenceClient,
-                logger,
-                signal: new AbortController().signal,
-                systemPrompt: significantEventsPrompt,
-                getFeatures: async () => [],
-                maxSteps: 4,
-              });
+              const { queries, queryAttempts, toolUsage, reasoningDiagnostics } =
+                await identifyKIQueries({
+                  stream: streamFromApi as Streams.all.Definition,
+                  esClient,
+                  inferenceClient,
+                  logger,
+                  signal: new AbortController().signal,
+                  systemPrompt: significantEventsPrompt,
+                  getFeatures: async () => [],
+                  maxSteps: EMPTY_DATASTREAM_MAX_STEPS,
+                  collectQueryAttempts: true,
+                });
 
               return {
                 queries,
+                query_attempts: queryAttempts,
+                toolUsage,
                 reasoning_diagnostics: reasoningDiagnostics,
                 traceId: getCurrentTraceId(),
                 ki_source: 'none' as const,
@@ -598,9 +606,8 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
             },
           },
           // The empty-stream safety canary always runs its mandatory deterministic
-          // evaluator. SELECTED_EVALUATORS only narrows the configurable main
-          // query-generation experiment; it must never disable this canary.
-          getEmptyDatastreamEvaluators()
+          // evaluator. Evaluator-selection variables must never disable this canary.
+          emptyDatastreamEvaluators
         );
       }
     );

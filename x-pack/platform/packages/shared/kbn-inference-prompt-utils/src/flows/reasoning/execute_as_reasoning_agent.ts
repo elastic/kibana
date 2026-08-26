@@ -338,7 +338,7 @@ export async function executeAsReasoningAgent(
 
     if (hasExternalContent) {
       content = internalContent + END_INTERNAL_REASONING_MARKER;
-      completeNextTurn = nonSystemToolCalls.length === 0;
+      completeNextTurn = !shouldContinueAfterExternalContent;
     }
 
     const assistantMessage: AssistantMessage = {
@@ -360,10 +360,6 @@ export async function executeAsReasoningAgent(
       (toolCall) => toolCall.function.name === finalToolCallName
     );
 
-    if (!shouldComplete && !hasCalledFinalTool && shouldContinueAfterExternalContent) {
-      diagnostics.externalContentToolContinuations += 1;
-    }
-
     if (shouldComplete || hasCalledFinalTool) {
       // We don't want to send these results back to the LLM, if we are already
       // completing
@@ -376,6 +372,10 @@ export async function executeAsReasoningAgent(
         input: removeSystemToolCalls(prevMessages),
         diagnostics,
       };
+    }
+
+    if (shouldContinueAfterExternalContent) {
+      diagnostics.externalContentToolContinuations += 1;
     }
 
     const toolMessagesForNonSystemToolCalls = nonSystemToolCalls.length

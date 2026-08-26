@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+const MIN_MAX_STEPS = 2;
+const MAX_MAX_STEPS = 20;
+
 /**
  * Resolves the query-generation max-steps override.
  *
- * Controlled by `KI_QUERY_GENERATION_MAX_STEPS` (1..20). Resolved once per
- * run; callers share this single resolved value for logging and execution.
+ * Controlled by `KI_QUERY_GENERATION_MAX_STEPS` (2..20).
  */
 export const resolveMaxSteps = (
   raw = process.env.KI_QUERY_GENERATION_MAX_STEPS
@@ -17,8 +19,12 @@ export const resolveMaxSteps = (
   if (raw == null || raw.trim() === '') {
     return undefined;
   }
-  if (!/^(?:[1-9]|1[0-9]|20)$/.test(raw.trim())) {
-    throw new Error('KI_QUERY_GENERATION_MAX_STEPS must be an integer from 1 to 20');
+  const trimmed = raw.trim();
+  const value = Number(trimmed);
+  if (!Number.isInteger(value) || value < MIN_MAX_STEPS || value > MAX_MAX_STEPS) {
+    throw new Error(
+      `KI_QUERY_GENERATION_MAX_STEPS must be an integer from ${MIN_MAX_STEPS} to ${MAX_MAX_STEPS}`
+    );
   }
-  return Number(raw.trim());
+  return value;
 };
