@@ -94,6 +94,7 @@ import {
 } from './agent_builder/attachment_types';
 import type { SecurityCanvasEmbeddedBundle } from './agent_builder/components/security_redux_embedded_provider';
 import { registerWorkflowSteps } from './workflows/step_types';
+import { registerThreatIntelWorkflowSteps } from './threat_intel/workflows/step_types';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private config: SecuritySolutionUiConfigType;
@@ -152,6 +153,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     if (workflowsExtensions) {
       registerWorkflowSteps(workflowsExtensions);
+      if (this.experimentalFeatures.threatIntelSupplyEnabled) {
+        registerThreatIntelWorkflowSteps(workflowsExtensions);
+      }
     }
 
     // Lazily instantiate subPlugins and initialize services
