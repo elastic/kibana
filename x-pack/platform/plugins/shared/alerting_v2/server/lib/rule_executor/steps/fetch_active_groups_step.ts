@@ -30,7 +30,8 @@ import type { PluginConfig } from '../../../config';
 export class FetchActiveGroupsStep implements RuleExecutionStep {
   public readonly name = 'fetch_active_groups';
 
-  private readonly maxGroupsPerExecution: number;
+  /** Active-group fetch bound, tied to `alerts.max` so recovery sees every existing episode. */
+  private readonly maxActiveGroups: number;
 
   constructor(
     @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
@@ -38,8 +39,7 @@ export class FetchActiveGroupsStep implements RuleExecutionStep {
     @inject(PluginInitializer('config'))
     pluginConfigAccessor: PluginInitializerContext<PluginConfig>['config']
   ) {
-    this.maxGroupsPerExecution =
-      pluginConfigAccessor.get<PluginConfig>().rules.run.maxGroupsPerExecution;
+    this.maxActiveGroups = pluginConfigAccessor.get<PluginConfig>().rules.run.alerts.max;
   }
 
   public executeStream(streamState: PipelineStateStream): PipelineStateStream {
@@ -54,12 +54,12 @@ export class FetchActiveGroupsStep implements RuleExecutionStep {
         step.internalQueryService,
         state.input.ruleId,
         state.input.executionContext,
-        step.maxGroupsPerExecution
+        step.maxActiveGroups
       );
 
-      if (activeGroups.length >= step.maxGroupsPerExecution) {
+      if (activeGroups.length >= step.maxActiveGroups) {
         step.logger.warn({
-          message: `[${step.name}] Active-group fetch hit maxGroupsPerExecution=${step.maxGroupsPerExecution} for rule ${state.input.ruleId}; active set may be truncated`,
+          message: `[${step.name}] Active-group fetch hit alerts.max=${step.maxActiveGroups} for rule ${state.input.ruleId}; active set may be truncated`,
           code: ALERTING_LOG_CODES.RULE_EXECUTION_ACTIVE_GROUPS_TRUNCATED,
           labels: {
             rule_id: state.input.ruleId,

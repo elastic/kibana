@@ -21,7 +21,7 @@ import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import type { PluginConfig } from '../../../config';
 
 describe('FetchActiveGroupsStep', () => {
-  function createStep(maxGroupsPerExecution = 10000) {
+  function createStep(maxAlerts = 10000, maxGroupsPerExecution = 10000) {
     const internal = createQueryService();
     const logger = createLoggerService();
 
@@ -32,7 +32,7 @@ describe('FetchActiveGroupsStep', () => {
         minimumScheduleInterval: '1m',
         maxScheduledPerMinute: 400,
         run: {
-          alerts: { max: 10000 },
+          alerts: { max: maxAlerts },
           maxGroupsPerExecution,
           query: { maxResponseSize: 50 * 1024 * 1024 },
         },
@@ -98,7 +98,7 @@ describe('FetchActiveGroupsStep', () => {
     ]);
   });
 
-  it('bounds the fetch with the configured maxGroupsPerExecution as an explicit LIMIT', async () => {
+  it('bounds the fetch with alerts.max as an explicit LIMIT, decoupled from maxGroupsPerExecution', async () => {
     const { step, internalEsClient } = createStep(2500);
     mockActiveGroups(internalEsClient, ['group-a']);
 
@@ -113,7 +113,7 @@ describe('FetchActiveGroupsStep', () => {
     expect(request.query).toContain('| LIMIT 2500');
   });
 
-  it('warns that the active set may be truncated when the fetch hits the limit', async () => {
+  it('warns that the active set may be truncated when the fetch hits alerts.max', async () => {
     const { step, internalEsClient, mockLogger } = createStep(2);
     mockActiveGroups(internalEsClient, ['group-a', 'group-b']);
 
@@ -125,7 +125,7 @@ describe('FetchActiveGroupsStep', () => {
 
     expect(mockLogger.warn).toHaveBeenCalledTimes(1);
     expect(mockLogger.warn).toHaveBeenCalledWith(
-      expect.stringContaining('hit maxGroupsPerExecution=2'),
+      expect.stringContaining('hit alerts.max=2'),
       expect.objectContaining({
         labels: expect.objectContaining({
           code: ALERTING_LOG_CODES.RULE_EXECUTION_ACTIVE_GROUPS_TRUNCATED,

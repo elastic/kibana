@@ -62,7 +62,7 @@ export class ClassifyAbsentGroupsStep implements RuleExecutionStep {
   public readonly name = 'classify_absent_groups';
 
   private readonly maxQueryResponseSize: number;
-  private readonly maxGroupsPerExecution: number;
+  private readonly maxActiveGroups: number;
 
   constructor(
     @inject(QueryServiceInternalToken) private readonly internalQueryService: QueryServiceContract,
@@ -73,7 +73,7 @@ export class ClassifyAbsentGroupsStep implements RuleExecutionStep {
   ) {
     const { run } = pluginConfigAccessor.get<PluginConfig>().rules;
     this.maxQueryResponseSize = run.query.maxResponseSize;
-    this.maxGroupsPerExecution = run.maxGroupsPerExecution;
+    this.maxActiveGroups = run.alerts.max;
   }
 
   public executeStream(streamState: PipelineStateStream): PipelineStateStream {
@@ -134,7 +134,7 @@ export class ClassifyAbsentGroupsStep implements RuleExecutionStep {
           this.internalQueryService,
           rule.id,
           input.executionContext,
-          this.maxGroupsPerExecution
+          this.maxActiveGroups
         );
 
     if (activeGroups.length === 0) {
