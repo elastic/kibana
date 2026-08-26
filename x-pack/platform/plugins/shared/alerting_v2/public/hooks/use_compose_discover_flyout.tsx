@@ -202,9 +202,18 @@ export const useComposeDiscoverFlyout = ({
   const openCreateFromTemplateFlyout = useCallback(
     (template: RuleTemplateResponse) => {
       const syntheticRule = templateToSyntheticRule(template);
-      openRuleFlyout(syntheticRule, 'create');
+      const result = resolveBuilderMode(syntheticRule);
+      if (result !== 'esql' && result !== 'esql-fallback') {
+        setTargetRule(syntheticRule);
+        setFlyoutMode('create');
+        setBuilderType(result.builderType);
+        setInitialBuilderState(result.initialBuilderState);
+        setFlyoutOpen(true);
+      } else {
+        openInEsql(syntheticRule, 'create');
+      }
     },
-    [openRuleFlyout]
+    [resolveBuilderMode, openInEsql]
   );
 
   const flyout = flyoutOpen ? (
