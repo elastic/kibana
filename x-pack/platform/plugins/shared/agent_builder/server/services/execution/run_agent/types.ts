@@ -13,8 +13,7 @@ export interface AiIndexCatalogEntry {
   id: string;
   /**
    * The ES|QL `FROM` target (index name, pattern, or comma-separated list). Absent when the id
-   * could not be resolved (no resolver, access denied, unknown id): the id is not a query target,
-   * so nameless entries are left out of the prompt's "Available to this agent" list.
+   * could not be resolved; nameless entries are omitted from the prompt.
    */
   name?: string;
   description?: string;
@@ -24,14 +23,8 @@ export interface AiIndexCatalogEntry {
 
 export interface ResolvedConfiguration {
   instructions: string;
-  /**
-   * Context Engine ids of the AI indices this agent may use. These are ids, not Elasticsearch
-   * index names.
-   */
+  /** Context Engine ids (not Elasticsearch index names) of the AI indices this agent may use. */
   aiIndices: string[];
-  /**
-   * Rendered details for each configured AI index, in config order. Built once per run by
-   * `resolveAiIndexCatalog`; absent when the AI indices feature is off.
-   */
+  /** Rendered AI index catalog, in config order. Absent when the AI indices feature is off. */
   aiIndexCatalog?: AiIndexCatalogEntry[];
 }

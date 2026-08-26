@@ -36,11 +36,8 @@ export const registerContextEngineAgentBuilderIntegration = ({
     const [, startDeps] = await coreSetup.getStartServices();
     const { contextEngine, security } = startDeps;
 
-    // The registry read below goes through the internal user, so mirror the enforcement
-    // Context Engine's own API layer applies to reads: the caller must hold the Context
-    // Engine read privilege. The check is space-aware (Kibana feature privileges are
-    // granted per space); denied callers get no details. Check errors propagate: the
-    // caller degrades to rendering without index details (fail closed).
+    // list() reads through the internal user, bypassing Context Engine's API-layer authz, so
+    // re-apply CE's read privilege here for the requesting user (space-aware). Denied -> no details.
     const checkPrivileges = security.authz.checkPrivilegesDynamicallyWithRequest(request);
     const { hasAllRequested } = await checkPrivileges({
       kibana: [security.authz.actions.api.get(apiPrivileges.readContextEngine)],

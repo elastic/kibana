@@ -8,29 +8,20 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 
 /**
- * Resolved details for a single AI index, sourced from the AI index registry
- * (Context Engine). Used to describe configured AI indices in agent prompts.
+ * Details for a single AI index, sourced from the Context Engine registry.
  */
 export interface AiIndexDetail {
   /** Registry id of the AI index (the value stored in agent `ai_indices` config). */
   id: string;
-  /**
-   * Human-friendly name of the index — the ES|QL `FROM` target
-   * (may be an index name, pattern, or comma-separated list).
-   */
+  /** The ES|QL `FROM` target (index name, pattern, or comma-separated list). */
   name: string;
-  /** Optional description of the index contents. */
   description?: string;
 }
 
 /**
- * Resolves AI index ids to their details, on behalf of the given request's user.
- *
- * Registered by the `context_engine_agent_builder` bridge plugin at setup time,
- * and invoked once per agent run to describe configured AI indices in the
- * system prompt. Implementations must enforce the caller's access to the
- * registry (details are authz-sensitive) and should return details for the ids
- * the caller may see, silently omitting the rest.
+ * Resolves AI index ids to their details for the requesting user. Registered by the
+ * `context_engine_agent_builder` bridge and invoked once per run. Details are authz-sensitive:
+ * implementations must enforce the caller's registry access and omit ids they may not see.
  */
 export type AiIndexResolver = (params: {
   ids: string[];

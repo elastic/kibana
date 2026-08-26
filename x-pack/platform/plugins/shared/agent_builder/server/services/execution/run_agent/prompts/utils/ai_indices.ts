@@ -9,9 +9,8 @@ import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
 import type { AiIndexCatalogEntry } from '../../types';
 
 /**
- * Builds the AI INDICES section: what AI indices are, which ones this agent can reach, and how to
- * limit results to the current space. Renders from the catalog resolved once per run by
- * `resolveAiIndexCatalog`. Returns an empty string when disabled or the agent has none.
+ * Builds the AI INDICES prompt section from the resolved catalog: what AI indices are, which ones
+ * this agent can reach, and how to scope results to the current space. Empty when disabled or none.
  */
 export const getAiIndicesInstructions = ({
   enabled,
@@ -26,8 +25,7 @@ export const getAiIndicesInstructions = ({
     return '';
   }
 
-  // Nameless entries (id unresolved: no resolver, access denied, unknown id) are left out —
-  // the id is not a valid `FROM` target, and the generic `ai-index-*` guidance still applies.
+  // Nameless (unresolved) entries are omitted: the id is not a valid `FROM` target.
   const entries = catalog
     .filter(({ name }) => name !== undefined)
     .map(({ name, description, guidance }) =>

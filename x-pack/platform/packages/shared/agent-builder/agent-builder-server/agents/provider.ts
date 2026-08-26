@@ -322,10 +322,8 @@ export interface AgentHandlerContext {
    */
   trackingService?: AgentBuilderTracking;
   /**
-   * Resolver for AI index details (name, description), registered by the
-   * `context_engine_agent_builder` bridge plugin. Absent when the bridge (or
-   * Context Engine) is not available; prompts then fall back to id-only
-   * rendering for non-default AI indices.
+   * Resolves AI index details, registered by the `context_engine_agent_builder` bridge.
+   * Absent when the bridge is unavailable; non-default AI indices then render as ids only.
    */
   aiIndexResolver?: AiIndexResolver;
 }

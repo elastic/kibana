@@ -12,17 +12,11 @@ import { defaultAiIndices } from '../../../agents/default_ai_indices';
 import type { AiIndexCatalogEntry } from '../types';
 
 /**
- * Builds the AI index catalog rendered in the system prompt, one entry per configured id
- * in config order (deduped). For each id: the static default map wins (it carries curated
- * guidance); otherwise the resolver's details are used (name = the `FROM` target,
- * description from the registry); ids the resolver doesn't know — or all non-default ids
- * when no resolver is registered or the caller may not read the registry — degrade to a
- * nameless entry, which the prompt keeps out of its "Available to this agent" list (the
- * id is not a valid `FROM` target).
- *
- * The resolver is called at most once, only for non-default ids, and on behalf of the
- * request's user. Resolver failures are swallowed (degrading to nameless entries) so a
- * Context Engine hiccup never breaks a run.
+ * Builds the prompt's AI index catalog, one entry per configured id in config order (deduped).
+ * Static defaults win over the resolver (they carry curated guidance); the resolver is called
+ * once for the remaining ids. Ids that stay unresolved become nameless entries, which the prompt
+ * omits since the id is not a valid `FROM` target. Resolver failures are swallowed so a Context
+ * Engine hiccup never breaks a run.
  */
 export const resolveAiIndexCatalog = async ({
   aiIndices,
