@@ -53,6 +53,7 @@ export class NightshiftInvestigationsPlugin
     core: CoreSetup<NightshiftInvestigationsStartDeps, NightshiftInvestigationsServerStart>,
     plugins: NightshiftInvestigationsSetupDeps
   ): NightshiftInvestigationsServerSetup {
+    // Core gates the plugin on xpack.nightshift_investigations.enabled.
     this.workflowsManagement = plugins.workflowsManagement;
 
     const getInvestigationsClient = (request: KibanaRequest, spaceId?: string) =>

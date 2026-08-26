@@ -7,13 +7,12 @@
 
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
-import type { KibanaRole } from '@kbn/scout';
-import { apiTest, COMMON_HEADERS, NO_AGENT_BUILDER_ROLE } from '../fixtures';
-
-const INVESTIGATIONS_READ_ROLE: KibanaRole = {
-  elasticsearch: { cluster: [], indices: [] },
-  kibana: [{ base: [], feature: { agentBuilder: ['read'] }, spaces: ['*'] }],
-};
+import {
+  apiTest,
+  COMMON_HEADERS,
+  INVESTIGATIONS_READ_ROLE,
+  NO_AGENT_BUILDER_ROLE,
+} from '../fixtures';
 
 const LIST_PATH = 'internal/nightshift/investigations';
 
