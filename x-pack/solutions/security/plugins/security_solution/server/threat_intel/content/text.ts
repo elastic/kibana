@@ -18,8 +18,11 @@ import { classifyHeader, type SectionKind } from './section_headers';
  * workflow re-runs IOC regex extraction on `body_text` and does not
  * benefit from intact markup.
  *
- * The original HTML is preserved as `content.body_html` (mapped
- * `index: false`) so consumers can render formatted HTML when needed.
+ * The original HTML is preserved as `content.body_html` (mapped `index: false`) for
+ * archival, so extraction can be re-run without re-fetching. It is unsanitized
+ * attacker-controlled feed markup and must not be rendered: `extractArticleHtml`
+ * removes a little chrome but preserves everything dangerous, so a consumer that
+ * injects it has stored XSS. Render `body_text`.
  */
 /**
  * Largest input the parsers will touch.
@@ -90,6 +93,19 @@ const stripTags = (input: string, replacement: string): string =>
 
 const stripScriptAndStyle = (html: string): string =>
   html
+    // Comments first, as whole nodes. The generic tag pattern stops at the first `>`,
+    // so a comment containing one leaked its contents into report text: the indicator in
+    // `<!-- hidden > c2.evil.test -->` survived as live text and would be extracted as a
+    // real IOC even though it is commented out.
+    .replace(/<!--[\s\S]*?-->/g, ' ')
+    // An unterminated comment runs to end of input, including after truncation.
+    .replace(/<!--[\s\S]*$/, ' ')
+    // Explicit self-closing forms, before the unterminated passes below. `/` is
+    // accepted by the opening lookahead, so `<script/>` otherwise matched the
+    // unterminated pattern and discarded every following sibling: `<script/><p>IOC</p>`
+    // lost the IOC entirely.
+    .replace(/<script(?=[\s/>])[^>]*\/>/gi, ' ')
+    .replace(/<style(?=[\s/>])[^>]*\/>/gi, ' ')
     // `(?=[\s/>])` and not `\b`: `\b` also matches before a hyphen, so a valid custom
     // element like `<script-loader>` was read as an unterminated `<script>` and the
     // end-of-input pass then discarded the entire rest of the document, body and IOCs

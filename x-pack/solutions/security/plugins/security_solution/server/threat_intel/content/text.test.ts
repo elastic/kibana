@@ -509,8 +509,19 @@ describe('script/style removal respects exact tag names', () => {
     expect(stripHtml('<p>a</p><script type="text/javascript">x</script><p>b</p>')).toBe('a b');
   });
 
-  it('still removes a self-closing script tag form', () => {
-    expect(stripHtml('<p>a</p><script/><p>b</p>')).toContain('a');
+  // This assertion used to check only that the *preceding* text survived, which is why
+  // it passed while every following sibling was being discarded. The content after the
+  // tag is the part that matters.
+  it('removes a self-closing script without dropping what follows', () => {
+    expect(stripHtml('<p>a</p><script/><p>b</p>')).toBe('a b');
+  });
+
+  it('removes a self-closing script with attributes without dropping what follows', () => {
+    expect(stripHtml('<p>a</p><script src="x.js"/><p>c2.evil.test</p>')).toBe('a c2.evil.test');
+  });
+
+  it('removes a self-closing style without dropping what follows', () => {
+    expect(stripHtml('<p>a</p><style/><p>b</p>')).toBe('a b');
   });
 });
 
@@ -569,9 +580,7 @@ describe('htmlToStructured — implicit end tags', () => {
   });
 
   it('separates rows with omitted </tr>', () => {
-    const out = htmlToStructured(
-      '<h2>IOCs</h2><table><tr><td>evil.com<tr><td>bad.net</table>'
-    );
+    const out = htmlToStructured('<h2>IOCs</h2><table><tr><td>evil.com<tr><td>bad.net</table>');
     expect(out).toContain('evil.com');
     expect(out).toContain('bad.net');
     expect(out).not.toContain('evil.combad.net');
@@ -583,5 +592,37 @@ describe('htmlToStructured — implicit end tags', () => {
     );
     expect(out).toContain('evil.com');
     expect(out).toContain('bad.net');
+  });
+});
+
+describe('stripHtml — HTML comments are removed as whole nodes', () => {
+  // The generic tag pattern stops at the first `>`, so a comment containing one leaked
+  // its contents into report text. A commented-out indicator then becomes a live IOC.
+  it('removes a comment containing a greater-than sign', () => {
+    expect(stripHtml('before<!-- hidden > c2.evil.test -->after')).toBe('before after');
+  });
+
+  it('does not leak a commented-out indicator into the text', () => {
+    expect(stripHtml('<p>real.test</p><!-- old > commented.test -->')).not.toContain(
+      'commented.test'
+    );
+  });
+
+  it('removes an ordinary comment', () => {
+    expect(stripHtml('before<!-- note -->after')).toBe('before after');
+  });
+
+  it('removes an unterminated comment through end of input', () => {
+    expect(stripHtml('before<!-- hidden c2.evil.test')).toBe('before');
+  });
+
+  it('removes a multiline comment', () => {
+    expect(stripHtml('a<!--\n line > one\n line two\n-->b')).toBe('a b');
+  });
+
+  it('applies to the structured path too', () => {
+    expect(
+      htmlToStructured('<h2>IOCs</h2><!-- hidden > commented.test --><p>real.test</p>')
+    ).not.toContain('commented.test');
   });
 });
