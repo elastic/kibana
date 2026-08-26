@@ -111473,7 +111473,7 @@ components:
                   type: string
                 visible:
                   default: false
-                  description: When `true`, displays the secondary metric name as its label. Defaults to `false`.
+                  description: When `true`, displays the secondary metric name as its label.
                   type: boolean
             value:
               additionalProperties: false

@@ -299,8 +299,7 @@ const metricStylingSchema = z
              * Whether to display the label
              */
             visible: z.boolean().default(DEFAULT_SECONDARY_LABEL_VISIBLE).optional().meta({
-              description:
-                'When `true`, displays the secondary metric name as its label. Defaults to `false`.',
+              description: 'When `true`, displays the secondary metric name as its label.',
             }),
             /**
              * Label placement relative to the secondary metric value. Possible values:
