@@ -100,11 +100,12 @@ export const eventsWriteItemSchema = significantEventSchema
     const signals = item.signals ?? [];
     const grounded = signals.filter((s) => s.evidence != null);
     const hasConfirms = grounded.some((s) => s.verdict === 'confirms');
+    const hasOffTopicObservedError = grounded.some((s) => s.verdict === 'off_topic');
     const hasNotChecked = signals.some((s) => s.verdict === 'not_checked');
 
     if (hasConfirms && hasNotChecked) {
       ctx.addIssue({
-        code: 'custom',
+        code: z.ZodIssueCode.custom,
         message:
           'A confirms item cannot include not_checked signals; emit each not_checked detection as its own dismissed item.',
       });
@@ -112,16 +113,17 @@ export const eventsWriteItemSchema = significantEventSchema
     // Continuations inherit prior severity; this cycle's signals may be
     // inconclusive (telemetry gap, errored query) without a new confirms.
     if (
-      !item.event_id &&
+      item.event_id === undefined &&
       item.status === 'open' &&
       (item.severity === '60-high' || item.severity === '80-critical') &&
       grounded.length > 0 &&
-      !hasConfirms
+      !hasConfirms &&
+      !hasOffTopicObservedError
     ) {
       ctx.addIssue({
-        code: 'custom',
+        code: z.ZodIssueCode.custom,
         message:
-          'An open event at "60-high" or above whose signals carry query evidence requires at least one confirms signal; without a confirmed, newly elevated failure use a lower severity or a non-open status.',
+          'An open event at "60-high" or above whose signals carry query evidence requires at least one confirms or off_topic (observed-error) signal; without confirmed or observed-error evidence use a lower severity or a non-open status.',
       });
     }
   });

@@ -85,9 +85,15 @@ const parseEventsWriteStep = (
   };
 };
 
+const isProducedDiscovery = (result: EventsWriteItemResult): boolean => {
+  if (result.written) return true;
+  return result.reason === 'existing_active_event' || result.reason === 'unchanged_outcome';
+};
+
 /**
  * Extract events from `events_write` tool call steps for continuation seeding.
- * Includes existing_active_event and unchanged_outcome results so follow-up cycles retain the episode.
+ * Includes existing_active_event and unchanged_outcome so follow-up cycles can resolve the episode
+ * when the handler skipped a no-op write.
  */
 export const extractDiscoveriesFromToolCall = (steps: ConverseStep[]): SignificantEvent[] =>
   toolCallSteps(steps, platformSignificantEventsTools.eventsWrite).flatMap((step) => {
@@ -99,14 +105,12 @@ export const extractDiscoveriesFromToolCall = (steps: ConverseStep[]): Significa
     const { items, results } = parsed;
     return results
       .map((result, index) =>
-        !result.written &&
-        result.reason !== 'existing_active_event' &&
-        result.reason !== 'unchanged_outcome'
-          ? undefined
-          : ({
+        isProducedDiscovery(result)
+          ? ({
               ...items[index],
               event_id: result.event_id,
             } as SignificantEvent)
+          : undefined
       )
       .filter((event): event is SignificantEvent => event !== undefined);
   });

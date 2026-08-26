@@ -96,18 +96,46 @@ describe('extractDiscoveriesFromToolCall', () => {
     expect(extractDiscoveriesFromToolCall(steps)[0]).not.toHaveProperty('written');
   });
 
-  it('retains an unchanged continuation for the next cycle', () => {
+  it('treats existing_active_event and unchanged_outcome as produced discoveries', () => {
     const steps: ConverseStep[] = [
       {
         type: 'tool_call',
         tool_id: TOOL_ID_EVENTS_WRITE,
-        tool_call_id: 'ew-unchanged',
-        params: { items: [{ event_id: 'event-1', title: 'Existing event', status: 'open' }] },
+        tool_call_id: 'ew-dedup',
+        params: { items: [{ title: 'Existing episode', status: 'open' }] },
         results: [
           {
             data: {
               results: [
-                { index: 0, event_id: 'event-1', written: false, reason: 'unchanged_outcome' },
+                {
+                  index: 0,
+                  event_id: 'event-existing',
+                  written: false,
+                  reason: 'existing_active_event',
+                  existing_event_id: 'event-existing',
+                },
+              ],
+            },
+          },
+        ],
+      },
+      {
+        type: 'tool_call',
+        tool_id: TOOL_ID_EVENTS_WRITE,
+        tool_call_id: 'ew-noop',
+        params: {
+          items: [{ event_id: 'event-stable', title: 'Unchanged continuation', status: 'open' }],
+        },
+        results: [
+          {
+            data: {
+              results: [
+                {
+                  index: 0,
+                  event_id: 'event-stable',
+                  written: false,
+                  reason: 'unchanged_outcome',
+                },
               ],
             },
           },
@@ -116,7 +144,8 @@ describe('extractDiscoveriesFromToolCall', () => {
     ];
 
     expect(extractDiscoveriesFromToolCall(steps)).toEqual([
-      expect.objectContaining({ event_id: 'event-1', title: 'Existing event' }),
+      expect.objectContaining({ event_id: 'event-existing', title: 'Existing episode' }),
+      expect.objectContaining({ event_id: 'event-stable', title: 'Unchanged continuation' }),
     ]);
   });
 

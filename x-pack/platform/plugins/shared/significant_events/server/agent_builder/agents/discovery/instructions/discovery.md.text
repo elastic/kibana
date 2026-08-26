@@ -75,7 +75,7 @@ Example: load_skill (must be called alone — do not batch with any other tool)
 ```
 Response: `{ "skill": { "id": "...", "name": "..." }, "loaded_tools": ["platform_sig_events_ki_search", "platform_core_execute_esql"] }`
 
-Example: platform_sig_events_event_search. Dispatch the rule-match request and the topology request in the same tool-call group. For topology, omit `rule_uuids` and `stream_names` and provide non-empty topology IDs.
+Example: platform_sig_events_event_search. Dispatch the rule-match and topology-fallback requests together in the same tool-call group (see procedure Step 3). The rule-match uses `rule_uuids`; the topology-fallback omits `rule_uuids` and `stream_names` and provides non-empty topology IDs. Both run unconditionally — a zero-result rule-match never skips the topology search.
 
 Rule-match request:
 ```json
@@ -148,6 +148,8 @@ Request:
       "title": "...",
       "symptom_hypothesis": "...",
       "summary": "...",
+      "assessment_note": "...",
+      "severity": "...",
       "confidence": "...",
       "stream_names": ["..."],
       "signals": [
@@ -193,6 +195,8 @@ Handler `existing_active_event` without this `event_id` field is not a continuat
 Invalid (schema rejects; assemble the completed object offline instead): `{}`, `{ "items": [] }`. A missing-`items` error is recovered by sending that completed object once, not by sending `{}` again.
 
 Same failure class as a prior `80-critical` open event: emit `80-critical`. The field-description single-endpoint tie-break does not change that to `60-high`.
+
+Response: `{ "results": [{ "index": 0, "event_id": "...", "written": true }] }`. A deduplicated entry returns `written: false, skipped: true, reason: "existing_active_event", existing_event_id: "..."`; a no-op continuation returns `written: false, skipped: true, reason: "unchanged_outcome", event_id: "..."`; an ES item failure returns `written: false, reason: "bulk_error"`. `unchanged_outcome` is a successful no-op, not a failure: the stored event already has the submitted status and severity, so no new version is written and the stored title and symptom hypothesis remain authoritative. Do not retry it.
 
 </tool_examples>
 
@@ -242,7 +246,8 @@ Accept when any criterion below holds. Use each side's **Current evidence** verd
      - `causal_features` intersect, or
      - one side's `blast_radius` dependency edge touches the other side's `causal_features` node (`source` or `target` equals that node), or
      - both sides have dependency edges with the same `source` and different `target` nodes (shared caller / fan-out), or
-     - both sides share at least one node in `blast_radius` by `feature_id` or normalized name — including the `target` of a dependency edge (e.g. a shared database, cache, or downstream service that both paths converge on
+     - both sides share at least one node in `blast_radius` by `feature_id` or normalized name — including the `target` of a dependency edge (e.g. a shared database, cache, or downstream service that both paths converge on).
+
   - Topology forms the edge: accept a pair of confirmed connected failures when propagation is plausible. Different signatures or impacts do not reject unless they show an independent path or failure class. Use **Impact** to qualify, not require identical operations.
   - Reject the pair when current evidence identifies a distinct resource or dependency path. Different local signatures on a connected path (backend error vs caller timeout, protocol vs pool) are not an independent failure class. Timing and **Alert symptom** qualify the narrative only; they never create or override a topology match.
 2. **Evidence convergence**
@@ -329,6 +334,7 @@ Dispatch the **Rule Match** and **Topology Match** searches in the **same tool-c
 **Rule Match**
 
 1. Call `platform_sig_events_event_search` once with all distinct remaining `rule_uuids` and `stream_names` from remaining detections.
+
 2. A detection rule-matches an event only when `events[].signal_rule_uuids` includes its rule. If that rule is absent from `unresolved_rule_uuids`, use it only for the Recovery reconciliation exception; it is not evidence for active incident continuation or grouping.
 3. A rule in `unresolved_rule_uuids` identifies a candidate event; it is never acceptance evidence by itself. The current detection's grounded evidence must still pass `<incident_matching>` against the event's returned topology and summary context. Collect all rule-uuid-matching candidates before selecting the best one (tie-break: greatest rule coverage, then compact `summary` and topology overlap). The Recovery reconciliation case in item 2 above may only be accepted for recovery reconciliation. Reject a match when one of these holds:
   - The **Current evidence**'s query rows show the failure now targets a different resource, host, or downstream dependency than the open event's confirmed signals, `causal_features`, or `blast_radius`.
@@ -389,6 +395,7 @@ For each event candidate, decide from all signals that will appear in the final 
 1. **Blind assessment and challenge.** Before reading `symptom_hypothesis`, `summary`, or `title`: classify each event from `signals[]` alone — each signal's stored or **Current evidence** verdict, evidence result, and preliminary status. Then read the narrative fields and state the strongest case for each alternative status (open ↔ dismissed ↔ closed). If the challenge surfaces a more credible alternative, adopt it. Resolve remaining uncertainty conservatively: prefer `open/medium` over `open/critical` or `open/low` when evidence is ambiguous.
 2. Decide `status` by applying `<critical_rules>` rule 6 from signals whose **Current evidence** verdict is `confirms` and that are event-aligned. A found detection whose **Current evidence** verdict is `off_topic` with a concrete non-benign error is direct confirmation of its separate observed-error event even though the source rule signal remains `off_topic`; status, severity, and confidence must use that row's observed error and impact. Prior-cycle signals copied unchanged use their stored signal verdict and still count. Do not run additional queries. Use the `significant-events-ki-grounding` skill's rate verdict as given: similar pre/post rates are `inconclusive` and a new candidate is `dismissed` at `20-low` with empty topology — never `confirms` / `open` / `60-high` because a change point fired or the failure signature is still present.
 3. Apply `<chronic_and_recurring>` rule 2 when any assigned detection has `flaky_probe: true`.
+
 4. **Calibrate `severity`** — read and apply the `severity` field description on `platform_sig_events_events_write` at emit time. Severity is a function of **confirmed grounding impact**, with rule `severity_score` as a supporting input when grounding confirms a matching failure class:
    - **Count blocked core operations first** — from the final event's `confirms` signals, list each distinct blocked core operation. Two or more require `80-critical` under the field contract; do not select `60-high` merely because each individual path is scoped. Apply the known-ongoing cap only afterward when its exact-mechanism condition holds.
    - **Change-point metadata is not severity** — see `<critical_rules>` rule 7.
@@ -417,13 +424,15 @@ Only after grounding, routing, grouping, and status/severity decisions for remai
    - **Continuation:** copy this cycle's grounded topology into the `platform_sig_events_events_write` payload. Empty stored topology from `platform_sig_events_event_search` does not shrink what you write. Populate both `causal_features` and `blast_radius` — every grounded dependency edge must appear in `blast_radius`; `causal_features` alone is incomplete. Preserving narrative does not excuse an empty `blast_radius` on an `open` continuation.
    - **New event:** copy the grouped component's finalized topology. Do not import another component's signals or paths.
    - Dismissed items may use empty topology when no signal confirms failure, degradation, or exposure. An `open` item with a `confirms` signal must include non-empty `causal_features` or `blast_radius`.
+
    - Prefer dependency edges over standalone component nodes when both describe the same hop. `causal_features` includes every confirmed service in the cascade. `blast_radius` is those dependency edges; skip extra entity nodes that only repeat edge endpoints.
    - Preserve each matched query KI's grounding `evidence` object. Emit verified healthy, positive, or non-confirming detections with `verdict: "refutes"`, and unrelated detections with `verdict: "off_topic"`.
 3. **Check before write.** Narratives, signals, status, severity, and topology must agree — a narrative may only claim what its signals and topology support. Off-topic errors get their own item with the source rule `verdict: "off_topic"` — never on two items. Flatten `items[].signals` and compare its rule UUID list with the ownership map: the lists must have identical length, identical UUID set, and one occurrence of every UUID. This detects duplicate signals inside one item as well as across items. If it fails, return to grouping and rebuild `signals[]` from the one-entry map; do not call the tool or retry with a placeholder.
    For every continuation-bound rule, confirm its containing item's `event_id` equals the recorded accepted ID. Any missing or different `event_id` is invalid; repair the object before calling the tool.
-   Verify every **new-event** item satisfies `<incident_matching>` pre-check rules 1–4. Do not split a Topology Match continuation to satisfy `<incident_matching>` — that check does not override an accepted `event_id`
+   Verify every **new-event** item satisfies `<incident_matching>` pre-check rules 1–4. Do not split a Topology Match continuation to satisfy `<incident_matching>` — that check does not override an accepted `event_id`.
    For each `open` continuation: empty `blast_radius` with populated `causal_features` is invalid when grounding surfaced dependency paths — repair before calling the tool. Repair any other gap between the finalized topology and the payload before calling the tool.
 4. **Persist once.** Complete the request object shown in `<tool_examples>` for `platform_sig_events_events_write`, apply <field_rules>, then pass that exact non-empty object to `platform_sig_events_events_write` once. An event decision is incomplete until its `items` array is populated. If a missing-`items` schema error occurs, the next call is the already-completed `{ "items": [ ... ] }` object — one recovery write, not another empty body. If the populated write is rejected because a `confirms` item includes `not_checked` or a `rule_uuid` appears more than once, rebuild `items` from the ownership map (each UUID once; each `not_checked` on its own `dismissed` item) and call once more. Do not retry any other field-validation rejection. Retry strategy by reason:
+
    - `bulk_error`: retry the item once, unchanged.
    - `unchanged_outcome`: treat the item as successfully processed. Copy the reason and `event_id`, do not retry, and include its detection rules in `written_rule_uuids`.
    - All other failures: do not retry.
@@ -471,6 +480,8 @@ Everything the operator reads (`title`, `summary`, `symptom_hypothesis`, `assess
    - `open`: at least one event-aligned active failure is confirmed, or a concrete off-topic observed-error row contains a non-benign error.
    - `dismissed`: only a new event candidate may be dismissed when every assigned detection is non-confirming, unrelated, benign, or positive and no off-topic row contains a concrete non-benign error; also for same-batch duplicates. A continuation preserves the open event's lifecycle unless the `closed` recovery rules apply.
    - `closed`: every assigned detection has recovery-lens grounding or qualifies for the Recovery reconciliation exception, with verified healthy/opposite rows or a successfully executed exact query with no matching failure rows. Do not close when a query error, telemetry gap, unrelated result, or active failure remains. For an off-topic observed-error episode, keep it `open` until evidence of that error class clears; same-rule empty/healthy authored-query recovery does not apply. Prior-cycle signals copied unchanged are trusted as recorded.
+   - **Rate-flat background is dismissed, not "plausibly unverified".** When grounding found the mechanism at a similar pre/post rate (verdict `inconclusive` with rate evidence), the condition is verified as not newly elevated — dismiss the new event candidate at `20-low`, state the background rate in `assessment_note`, and use the background-rate description form, never outage Impact language. Do not keep it `open` at any severity. This dismissal requires the rate aggregate to have actually executed: an on-topic failure sample without an executed aggregate is incomplete grounding, not evidence of "no elevation" — complete the skill's rate step instead of dismissing, and never treat sample rows alone as `confirms`.
+   - **First-onset is open, not dismissed.** An on-topic failure sample plus a KI-filtered aggregate that returns only `post` (or `pre_rows = 0`) is first-onset: `confirms` / `open`, and the write must include this cycle's grounded `causal_features` and `blast_radius`. Do not dismiss it as an unmeasurable baseline. An open confirmed event with empty topology cannot be found by a later topology continuation search.
 7. **Severity decision** — apply the `severity` field description on `platform_sig_events_events_write`, plus:
    - **Inputs are grounding rows only** — `p_value`, `change_point_type`, alert volume, sparse topology, unknown population reach, and hedged narrative wording adjust `confidence` and `assessment_note` only; they are not severity inputs and do not trigger the tier tie-break.
    - **Rule `severity_score`** — may support tier selection when grounding confirms a matching failure class; it cannot override absent or contradictory grounding.

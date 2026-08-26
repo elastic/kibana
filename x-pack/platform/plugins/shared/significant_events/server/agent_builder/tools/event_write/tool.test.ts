@@ -62,12 +62,12 @@ describe('events_write tool', () => {
     expect(missingItems.success).toBe(false);
     expect(emptyItems.success).toBe(false);
     if (!missingItems.success) {
-      expect(missingItems.error.issues[0].message).toBe(
+      expect(missingItems.error.issues[0].message).toContain(
         'Pass items as a non-empty array of event objects.'
       );
     }
     if (!emptyItems.success) {
-      expect(emptyItems.error.issues[0].message).toBe(
+      expect(emptyItems.error.issues[0].message).toContain(
         'Pass items as a non-empty array of event objects.'
       );
     }
@@ -118,7 +118,7 @@ describe('events_write tool', () => {
   });
 
   describe('open high-severity confirms invariant', () => {
-    const signalWith = (verdict: 'confirms' | 'off_topic') => ({
+    const signalWith = (verdict: 'confirms' | 'off_topic' | 'inconclusive') => ({
       type: 'detection' as const,
       stream_name: 'logs.test',
       description: 'Found: error. Impact: requests failed.',
@@ -134,7 +134,7 @@ describe('events_write tool', () => {
 
     it('rejects an open 60-high new event whose grounded signals lack a confirms verdict', () => {
       const result = eventsWriteSchema.safeParse({
-        items: [{ ...input, event_id: undefined, signals: [signalWith('off_topic')] }],
+        items: [{ ...input, event_id: undefined, signals: [signalWith('inconclusive')] }],
       });
       expect(result.success).toBe(false);
       if (!result.success) {
@@ -178,6 +178,107 @@ describe('events_write tool', () => {
       if (!result.success) {
         expect(result.error.issues.at(-1)?.message).toContain('cannot include not_checked');
       }
+    });
+
+    it('accepts an open 60-high item whose signals carry no evidence (quiet rules)', () => {
+      const quiet = {
+        type: 'detection' as const,
+        stream_name: 'logs.test',
+        description: 'Rule X: no backed query KI matched this detection.',
+        verdict: 'not_checked',
+        metadata: {
+          rule_uuid: 'rule-1',
+          detection_id: 'detection-1',
+          change_point_type: 'spike' as const,
+          p_value: 0.01,
+        },
+      };
+      expect(eventsWriteSchema.safeParse({ items: [{ ...input, signals: [quiet] }] }).success).toBe(
+        true
+      );
+    });
+  });
+
+  describe('open high-severity confirms invariant', () => {
+    const signalWith = (verdict: string) => ({
+      type: 'detection' as const,
+      stream_name: 'logs.test',
+      description: 'Found: matching failure logs at similar pre/post rates. Impact: not new.',
+      verdict,
+      evidence: { esql_query: 'FROM logs.test', result: 'found' },
+      metadata: {
+        rule_uuid: 'rule-1',
+        detection_id: 'detection-1',
+        change_point_type: 'spike' as const,
+        p_value: 0.01,
+      },
+    });
+
+    it('rejects a new open 60-high item whose grounded signals lack a confirms verdict', () => {
+      const { event_id: _omitted, ...newEventInput } = input;
+      const result = eventsWriteSchema.safeParse({
+        items: [{ ...newEventInput, signals: [signalWith('inconclusive')] }],
+      });
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues.at(-1)?.message).toContain('requires at least one confirms');
+      }
+    });
+
+    it('accepts an open 60-high continuation (event_id present) with only inconclusive grounded signals', () => {
+      expect(
+        eventsWriteSchema.safeParse({
+          items: [{ ...input, signals: [signalWith('inconclusive')] }],
+        }).success
+      ).toBe(true);
+    });
+
+    it('accepts an open 60-high item backed by a confirms signal', () => {
+      expect(
+        eventsWriteSchema.safeParse({
+          items: [{ ...input, signals: [signalWith('confirms')] }],
+        }).success
+      ).toBe(true);
+    });
+
+    it('accepts an open 40-medium item with only inconclusive grounded signals', () => {
+      expect(
+        eventsWriteSchema.safeParse({
+          items: [
+            { ...input, severity: '40-medium' as const, signals: [signalWith('inconclusive')] },
+          ],
+        }).success
+      ).toBe(true);
+    });
+
+    it('rejects mixing confirms and not_checked on the same item', () => {
+      const quiet = {
+        type: 'detection' as const,
+        stream_name: 'logs.test',
+        description: 'Rule Y: no backed query KI matched this detection.',
+        verdict: 'not_checked' as const,
+        metadata: {
+          rule_uuid: 'rule-2',
+          detection_id: 'detection-2',
+          change_point_type: 'spike' as const,
+          p_value: 0.2,
+        },
+      };
+      const result = eventsWriteSchema.safeParse({
+        items: [{ ...input, signals: [signalWith('confirms'), quiet] }],
+      });
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues.at(-1)?.message).toContain('cannot include not_checked');
+      }
+    });
+
+    it('accepts an open 60-high item whose only grounded signal is off_topic (observed-error path)', () => {
+      expect(
+        eventsWriteSchema.safeParse({
+          items: [{ ...input, signals: [signalWith('off_topic')] }],
+        }).success
+      ).toBe(true);
     });
 
     it('accepts an open 60-high item whose signals carry no evidence (quiet rules)', () => {

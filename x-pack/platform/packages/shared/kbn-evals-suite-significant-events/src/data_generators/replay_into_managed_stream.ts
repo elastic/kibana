@@ -29,7 +29,7 @@ const TIMESTAMP_TRANSFORM_SCRIPT = `
     Instant maxTime = Instant.parse(params.max_timestamp);
     Instant originalTime = Instant.parse(ctx['@timestamp'].toString());
     long deltaMillis = maxTime.toEpochMilli() - originalTime.toEpochMilli();
-    Instant now = Instant.ofEpochMilli(System.currentTimeMillis());
+    Instant now = Instant.parse(params.replay_now);
     ctx['@timestamp'] = now.minusMillis(deltaMillis).toString();
   }
 `;
@@ -38,7 +38,28 @@ export interface ReplayStats {
   total: number;
   created: number;
   skipped: number;
+  /** Snapshot-time max `@timestamp` across the replayed logs indices. */
+  maxTimestamp: string;
+  /** Wall-clock instant the snapshot max was shifted onto — the fixed `now` used by the transform. */
+  replayNow: string;
 }
+
+/**
+ * Maps a snapshot-time timestamp onto the replayed timeline using the same shift the
+ * replay pipeline applied to every log document: `replayNow - (maxTimestamp - timestamp)`.
+ */
+export const shiftSnapshotTimestamp = ({
+  timestamp,
+  maxTimestamp,
+  replayNow,
+}: {
+  timestamp: string;
+  maxTimestamp: string;
+  replayNow: string;
+}): string =>
+  new Date(
+    Date.parse(replayNow) - (Date.parse(maxTimestamp) - Date.parse(timestamp))
+  ).toISOString();
 
 interface ReplayArtifacts {
   runId: number;
@@ -247,11 +268,13 @@ const createReplayPipeline = async ({
   esClient,
   pipelineName,
   maxTimestamp,
+  replayNow,
   chainedPipelineName,
 }: {
   esClient: Client;
   pipelineName: string;
   maxTimestamp: string;
+  replayNow: string;
   chainedPipelineName?: string;
 }): Promise<void> => {
   await esClient.ingest.putPipeline({
@@ -260,7 +283,7 @@ const createReplayPipeline = async ({
       {
         script: {
           lang: 'painless',
-          params: { max_timestamp: maxTimestamp },
+          params: { max_timestamp: maxTimestamp, replay_now: replayNow },
           source: TIMESTAMP_TRANSFORM_SCRIPT,
         },
       },
@@ -323,7 +346,7 @@ const reindexTempIndicesIntoManagedStream = async ({
   esClient: Client;
   tempIndices: string[];
   log: ToolingLog;
-}): Promise<ReplayStats> => {
+}): Promise<Omit<ReplayStats, 'maxTimestamp' | 'replayNow'>> => {
   log.debug('Reindexing into managed logs stream via default_pipeline');
   const reindexResult = await esClient.reindex(
     {
@@ -506,10 +529,12 @@ export async function replayIntoManagedStream(
       previousDefaultPipeline,
     });
 
+    const replayNow = new Date().toISOString();
     await createReplayPipeline({
       esClient,
       pipelineName: artifacts.pipelineName,
       maxTimestamp,
+      replayNow,
       chainedPipelineName,
     });
 
@@ -530,7 +555,7 @@ export async function replayIntoManagedStream(
     log.info(
       `Replay complete: ${stats.created}/${stats.total} docs indexed, ${stats.skipped} skipped`
     );
-    return stats;
+    return { ...stats, maxTimestamp, replayNow };
   } finally {
     await cleanupReplayArtifacts({ esClient, log, artifacts });
   }

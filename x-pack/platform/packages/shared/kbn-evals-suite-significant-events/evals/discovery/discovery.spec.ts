@@ -21,8 +21,11 @@ import {
   canonicalDetectionsFromGroundTruth,
   resetMemoryPages,
   replayIntoMemoryPages,
+  shiftSnapshotTimestamp,
+  type ReplayShift,
 } from '../../src/data_generators/replay';
 import { replayKnowledgeIndicatorsSnapshot } from '../../src/data_generators/replay_knowledge_indicators_snapshot';
+import { seedChronicBackground } from '../../src/data_generators/seed_chronic_background';
 import { evaluate } from '../../src/evaluate';
 import {
   getActiveDatasets,
@@ -127,14 +130,6 @@ evaluate.describe(
               continue;
             }
 
-            // Detections always come from the canonical dataset regardless of source mode.
-            // The snapshot only provides logs and KIs replayed into ES — schema changes
-            // between snapshot capture and current code make snapshot detections unreliable.
-            const detections = canonicalDetectionsFromGroundTruth({
-              streamName: scenario.input.stream_name,
-              rules: scenario.input.detections,
-            });
-
             if (!replayedSnapshotKeys.has(key)) {
               // Ensure KI features index is available by replaying the snapshot once per source.
               await cleanSignificantEventsDataStreams(esClient, log);
@@ -164,6 +159,16 @@ evaluate.describe(
               replayedSnapshotKeys.add(key);
             }
 
+            // Detections always come from the canonical dataset regardless of source mode.
+            // The snapshot only provides logs and KIs replayed into ES — schema changes
+            // between snapshot capture and current code make snapshot detections unreliable.
+            // Change points are re-stamped onto the replayed timeline inside each task, using
+            // the shift of the replay the agent actually queries.
+            const detections = canonicalDetectionsFromGroundTruth({
+              streamName: scenario.input.stream_name,
+              rules: scenario.input.detections,
+            });
+
             collectedExamples.push({ scenario, detections, snapshotKey: key });
             snapshotSources.set(scenario.input.scenario_id, snapshotSource);
           }
@@ -188,6 +193,7 @@ evaluate.describe(
             // Concurrency must remain 1 — this variable is not safe under concurrent tasks.
             // Raising concurrency requires replacing it with a per-invocation approach or a proper lock.
             let lastReplayedSnapshotKey: string | undefined;
+            let lastReplayShift: ReplayShift | undefined;
 
             const detectionsByScenario = new Map(
               collectedExamples.map(({ scenario, detections, snapshotKey }) => [
@@ -287,6 +293,10 @@ evaluate.describe(
                     }
                     await esClient.indices.refresh({ index: MANAGED_STREAM_SEARCH_PATTERN });
                     lastReplayedSnapshotKey = snapshotKey;
+                    lastReplayShift = {
+                      maxTimestamp: stats.maxTimestamp,
+                      replayNow: stats.replayNow,
+                    };
                   }
 
                   // Replay captured KIs into the live KI stream so search_knowledge_indicators
@@ -298,8 +308,36 @@ evaluate.describe(
                     snapshotSource.gcs
                   );
 
+                  // Stamp detection change points onto the timeline of the replay the agent will
+                  // actually query, so the grounding skill's pre/post rate windows frame the real
+                  // incident neighborhood instead of the canonical dummy timestamp. Chronic-seed
+                  // scenarios instead seed a synthetic rate-flat pattern and stamp from its
+                  // change point (already in live coordinates).
+                  let stampedDetections = detections;
+                  if (input.chronic_seed) {
+                    const [rule] = detections;
+                    const seeded = await seedChronicBackground({
+                      esClient,
+                      log,
+                      streamName: input.stream_name,
+                      ruleUuid: rule.rule_uuid,
+                      ruleName: rule.rule_name ?? rule.rule_uuid,
+                      config: input.chronic_seed,
+                    });
+                    stampedDetections = detections.map((d) => ({
+                      ...d,
+                      '@timestamp': seeded.detectionTimestamp,
+                    }));
+                  } else if (lastReplayShift) {
+                    stampedDetections = canonicalDetectionsFromGroundTruth({
+                      streamName: input.stream_name,
+                      rules: input.detections,
+                      shift: lastReplayShift,
+                    });
+                  }
+
                   // Same message shape as the production batch.
-                  const agentInput = buildDiscoveryInput({ detections });
+                  const agentInput = buildDiscoveryInput({ detections: stampedDetections });
 
                   const converseResult = await agentBuilderClient.converse({
                     agentId: SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID,
@@ -310,7 +348,7 @@ evaluate.describe(
                     // Agent outputs via events_write tool calls; extract significant events from steps.
                     significantEvents: extractSignificantEventsFromToolCall(converseResult.steps),
                     // Thread the input detections through so snapshot-mode evaluators can access them.
-                    inputDetections: detections,
+                    inputDetections: stampedDetections,
                     // Raw steps — trajectory/grounding evaluators read tool calls from these.
                     steps: converseResult.steps,
                     // Agent runs inline, so its gen_ai spans nest under the eval's trace.
@@ -370,6 +408,9 @@ evaluate.describe(
               const runs = collectedExamples.flatMap(({ scenario, detections, snapshotKey }) => {
                 if (detections.length === 0) return [];
                 if (scenario.memoryPages?.length) return [];
+                // Chronic-seeded scenarios grade the rate gate only; continuation policy for
+                // known-chronic patterns is owned by the memory-usage work.
+                if (scenario.input.chronic_seed) return [];
                 const byRuleName = new Map(detections.map((d) => [d.rule_name, d]));
                 const continuationChains = Object.entries(scenario.continuationChains ?? {});
                 const allPlans: ContinuationPlan[] = [
@@ -420,6 +461,7 @@ evaluate.describe(
 
               const runById = new Map(runs.map((run) => [run.id, run]));
               let lastReplayedSnapshotKey: string | undefined;
+              let lastReplayShift: ReplayShift | undefined;
 
               await executorClient.runExperiment(
                 {
@@ -498,6 +540,10 @@ evaluate.describe(
 
                       await esClient.indices.refresh({ index: MANAGED_STREAM_SEARCH_PATTERN });
                       lastReplayedSnapshotKey = run.snapshotKey;
+                      lastReplayShift = {
+                        maxTimestamp: stats.maxTimestamp,
+                        replayNow: stats.replayNow,
+                      };
                     }
 
                     await replayKnowledgeIndicatorsSnapshot(
@@ -521,8 +567,21 @@ evaluate.describe(
                       // next cycle's `event_search status: "open"` call finds it.
                       for (let i = 0; i < run.sequence.length; i++) {
                         const base = run.sequence[i];
+                        // Same re-stamping as the discovery task: change points must live on the
+                        // replayed timeline for the grounding rate windows to be meaningful.
+                        const authored = run.scenario.input.detections.find(
+                          (r) => r.rule_uuid === base.rule_uuid
+                        )?.['@timestamp'];
                         const detection: Detection = {
                           ...base,
+                          ...(authored && lastReplayShift
+                            ? {
+                                '@timestamp': shiftSnapshotTimestamp({
+                                  timestamp: authored,
+                                  ...lastReplayShift,
+                                }),
+                              }
+                            : {}),
                           detection_id: `${base.detection_id ?? base.rule_uuid}-fire-${i}`,
                         };
                         const agentInput = buildDiscoveryInput({ detections: [detection] });
