@@ -110,7 +110,7 @@ const runJsonList = async (
   });
   if (response.status >= 400) {
     throw new Error(
-      `Vendor API fetch ${url} failed: HTTP ${response.status} ${response.statusText}`
+      `Vendor API fetch ${redactUrl(url)} failed: HTTP ${response.status} ${response.statusText}`
     );
   }
 
@@ -122,7 +122,9 @@ const runJsonList = async (
   const list = readDotPath(parsed, handler.listPath);
   if (!Array.isArray(list)) {
     log.warn(
-      `Vendor API list_path '${handler.listPath}' did not resolve to an array on ${url} — skipping (source ${source._id})`
+      `Vendor API list_path '${handler.listPath}' did not resolve to an array on ${redactUrl(
+        url
+      )} — skipping (source ${source._id})`
     );
     return [];
   }

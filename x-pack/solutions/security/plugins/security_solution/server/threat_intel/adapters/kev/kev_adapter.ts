@@ -5,11 +5,33 @@
  * 2.0.
  */
 
-import { fetchUrlForContext } from '../http_client';
+import { fetchUrlForContext, redactUrl } from '../http_client';
 import { buildFingerprint } from '../fingerprint';
 import { severityScore } from '../../content/severity';
 import { buildReportContent } from '../../content/text';
 import type { FetchAdapter, NormalizedReport, SourceHit, AdapterRunContext } from '../types';
+
+/**
+ * Every field `buildKevReport` reads, not just the identity ones.
+ *
+ * The gate used to check `cveID`, `vendorProject`, `product`, and `vulnerabilityName`
+ * only, while the report body interpolates `shortDescription` and `requiredAction` and
+ * `normalizedReportSchema` requires `date_added` and `due_date`. A custom or
+ * temporarily malformed KEV feed missing any of those produced a report with the string
+ * `undefined` in its body and a missing required field, which fails output validation
+ * for the whole step rather than skipping the one bad entry.
+ */
+const isCompleteKevEntry = (vuln: KevVulnerability): boolean =>
+  Boolean(
+    vuln.cveID &&
+      vuln.vendorProject &&
+      vuln.product &&
+      vuln.vulnerabilityName &&
+      vuln.shortDescription &&
+      vuln.requiredAction &&
+      vuln.dateAdded &&
+      vuln.dueDate
+  );
 
 const KEV_FEED_URL =
   'https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json';
@@ -149,7 +171,9 @@ export const kevAdapter: FetchAdapter = {
 
     if (response.status >= 400) {
       throw new Error(
-        `KEV feed returned HTTP ${response.status} ${response.statusText} from ${feedUrl}`
+        `KEV feed returned HTTP ${response.status} ${response.statusText} from ${redactUrl(
+          feedUrl
+        )}`
       );
     }
 
@@ -169,7 +193,7 @@ export const kevAdapter: FetchAdapter = {
 
     const reports: NormalizedReport[] = [];
     for (const vuln of vulnerabilities) {
-      if (vuln.cveID && vuln.vendorProject && vuln.product && vuln.vulnerabilityName) {
+      if (isCompleteKevEntry(vuln)) {
         reports.push(buildKevReport(vuln, feedUrl, ingestedAt, spaceId, source._id));
       } else {
         log.warn(
@@ -181,7 +205,9 @@ export const kevAdapter: FetchAdapter = {
     }
 
     log.info(
-      `kev-adapter: ${feedUrl} → ${reports.length} reports (catalogVersion=${envelope.catalogVersion})`
+      `kev-adapter: ${redactUrl(feedUrl)} → ${reports.length} reports (catalogVersion=${
+        envelope.catalogVersion
+      })`
     );
 
     return reports;
