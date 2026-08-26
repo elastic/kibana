@@ -10,6 +10,8 @@ declare module 'dom-to-image-more' {
   }
 
   const domtoimage: {
+    toPng(node: Node, options?: DomToImageOptions): Promise<string>;
+    toJpeg(node: Node, options?: DomToImageOptions): Promise<string>;
     toBlob(node: Node, options?: DomToImageOptions): Promise<Blob | null>;
   };
 

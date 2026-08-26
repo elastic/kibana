@@ -34,6 +34,30 @@ describe('catalogDashboardPanels', () => {
     ]);
   });
 
+  it('includes the Lens chart type so review can leave wide tables alone', () => {
+    expect(
+      catalogDashboardPanels({
+        title: 'Metrics',
+        panels: [
+          {
+            type: LENS_EMBEDDABLE_TYPE,
+            id: 'table-1',
+            grid: { x: 0, y: 60, w: 48, h: 19 },
+            config: { title: 'Errors by host', type: 'data_table' },
+          },
+        ],
+      })
+    ).toEqual([
+      {
+        id: 'table-1',
+        type: LENS_EMBEDDABLE_TYPE,
+        title: 'Errors by host',
+        chart_type: 'data_table',
+        grid: { x: 0, y: 60, w: 48, h: 19 },
+      },
+    ]);
+  });
+
   it('flattens section panels and records the section id', () => {
     expect(
       catalogDashboardPanels({
@@ -61,6 +85,35 @@ describe('catalogDashboardPanels', () => {
         type: LENS_EMBEDDABLE_TYPE,
         grid,
         section_id: 'sec-1',
+      },
+    ]);
+  });
+
+  it('includes ES|QL from the Lens data source so review can see what the panel queries', () => {
+    expect(
+      catalogDashboardPanels({
+        title: 'Metrics',
+        panels: [
+          {
+            type: LENS_EMBEDDABLE_TYPE,
+            id: 'lens-1',
+            grid,
+            config: {
+              title: 'Error rate',
+              type: 'metric',
+              data_source: { type: 'esql', query: 'FROM logs | STATS count = COUNT(*)' },
+            },
+          },
+        ],
+      })
+    ).toEqual([
+      {
+        id: 'lens-1',
+        type: LENS_EMBEDDABLE_TYPE,
+        title: 'Error rate',
+        chart_type: 'metric',
+        esql: 'FROM logs | STATS count = COUNT(*)',
+        grid,
       },
     ]);
   });

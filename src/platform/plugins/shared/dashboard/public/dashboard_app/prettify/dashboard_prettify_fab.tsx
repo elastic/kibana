@@ -48,8 +48,9 @@ export const DashboardPrettifyFab = ({
 
     const updateVisibility = async () => {
       try {
-        const action: Action<OpenDashboardPrettifyActionContext> =
-          await uiActionsService.getAction(OPEN_DASHBOARD_PRETTIFY_ACTION_ID);
+        const action = (await uiActionsService.getAction(
+          OPEN_DASHBOARD_PRETTIFY_ACTION_ID
+        )) as Action<OpenDashboardPrettifyActionContext>;
         const compatible = await action.isCompatible({
           dashboardApi,
           dashboardInternalApi,
@@ -90,8 +91,9 @@ export const DashboardPrettifyFab = ({
         onClick={async () => {
           setIsCapturing(true);
           try {
-            const action: Action<OpenDashboardPrettifyActionContext> =
-              await uiActionsService.getAction(OPEN_DASHBOARD_PRETTIFY_ACTION_ID);
+            const action = (await uiActionsService.getAction(
+              OPEN_DASHBOARD_PRETTIFY_ACTION_ID
+            )) as Action<OpenDashboardPrettifyActionContext>;
             await action.execute({
               dashboardApi,
               dashboardInternalApi,

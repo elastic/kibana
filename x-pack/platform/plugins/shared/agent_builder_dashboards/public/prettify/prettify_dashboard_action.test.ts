@@ -11,7 +11,6 @@ import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/agent-builder-dashboards-common';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import {
-  OPEN_DASHBOARD_PRETTIFY_ACTION_ID,
   type DashboardInternalApi,
   type OpenDashboardPrettifyActionContext,
 } from '@kbn/dashboard-plugin/public';
@@ -77,7 +76,6 @@ const context = (
 ): OpenDashboardPrettifyActionContext => ({
   dashboardApi,
   dashboardInternalApi,
-  trigger: { id: OPEN_DASHBOARD_PRETTIFY_ACTION_ID },
 });
 
 describe('createPrettifyDashboardAction', () => {
@@ -210,7 +208,7 @@ describe('createPrettifyDashboardAction', () => {
     const dashboardApi = {
       ...createDashboardApi(),
       layout$,
-    } as DashboardApi;
+    } as unknown as DashboardApi;
     captureDashboardImage.mockRejectedValue(new Error('blank png'));
     const action = createAction();
 

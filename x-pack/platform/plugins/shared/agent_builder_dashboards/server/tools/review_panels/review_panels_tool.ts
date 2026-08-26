@@ -16,7 +16,6 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { createErrorResult } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import {
-  DASHBOARD_ATTACHMENT_TYPE,
   isDashboardAttachment,
 } from '@kbn/agent-builder-dashboards-common';
 import { dashboardTools } from '../../../common';
@@ -42,7 +41,9 @@ export const reviewPanelsTool = ({
   type: ToolType.builtin,
   description: `Inspect a painted dashboard screenshot for panel-level visual findings.
 
-Requires a dashboard attachment and an image in the conversation. Returns structured findings (panel id, rule, what is wrong). Does not mutate the dashboard.
+Requires a dashboard attachment and an image in the conversation. Returns structured findings (panel id, rule, what, fix). Does not mutate the dashboard.
+
+Only reports layout size problems and chart types that invert the data. Does not report title phrasing or Kibana chrome.
 
 Call this when the user asked to prettify a dashboard and an image is attached. Do not call it on a dashboard without an image.`,
   schema: reviewPanelsSchema,

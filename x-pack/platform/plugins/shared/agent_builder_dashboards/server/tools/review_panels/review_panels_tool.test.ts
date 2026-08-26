@@ -77,8 +77,9 @@ describe('reviewPanelsTool', () => {
     inspectDashboardImage.mockReset().mockResolvedValue([
       {
         panel_id: 'lens-1',
-        rule: 'no duplicated metric titles',
-        what: 'title repeats the metric label',
+        rule: 'disproportionate_size',
+        what: 'metric is stretched full width',
+        fix: '{ x: 0, y: 0, w: 12, h: 5 }',
       },
     ]);
     getImageBytes.mockReset().mockResolvedValue(Buffer.from('png'));
@@ -152,8 +153,9 @@ describe('reviewPanelsTool', () => {
             findings: [
               {
                 panel_id: 'lens-1',
-                rule: 'no duplicated metric titles',
-                what: 'title repeats the metric label',
+                rule: 'disproportionate_size',
+                what: 'metric is stretched full width',
+                fix: '{ x: 0, y: 0, w: 12, h: 5 }',
               },
             ],
           },

@@ -57,6 +57,10 @@ describe('registerSkills', () => {
     expect(skill.content).toContain('platform.dashboard.review_panels');
     expect(skill.content).toContain('at most once');
     expect(skill.content).toContain('Without an image, this is a normal dashboard edit');
+    expect(skill.content).toContain('update_panel_layouts');
+    expect(skill.content).toContain('rebuilds the visualization');
+    expect(skill.content).toContain('If every finding was skipped');
+    expect(skill.content).toContain('Never shrink a data table');
 
     const tools = await skill.getInlineTools?.();
     expect(tools?.map((tool) => tool.id)).toEqual(

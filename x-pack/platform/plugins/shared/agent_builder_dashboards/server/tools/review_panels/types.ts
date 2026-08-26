@@ -8,10 +8,13 @@
 import type { ModelProvider } from '@kbn/agent-builder-server';
 import type { PanelCatalogEntry } from './catalog_dashboard_panels';
 
+export type PanelReviewRule = 'disproportionate_size' | 'wrong_chart_type';
+
 export interface PanelFinding {
   panel_id: string;
-  rule: string;
+  rule: PanelReviewRule;
   what: string;
+  fix: string;
 }
 
 export interface DashboardImage {
