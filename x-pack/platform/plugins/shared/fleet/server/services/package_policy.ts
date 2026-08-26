@@ -776,7 +776,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           package_agent_version_condition: pkgInfo.conditions?.agent?.version,
         },
 
-        { ...options, id: packagePolicyId }
+        {
+          ...options,
+          id: packagePolicyId,
+          // Name uniqueness is lock + PackagePolicyNameExistsError retry (create-with-packages)
+          // or requireUniqueName (TOCTOU either way). HTTP returns this SO; skip wait_for.
+          refresh: false,
+        }
       )
       .catch(
         catchAndSetErrorStackTrace.withMessage(

@@ -103,6 +103,7 @@ async function createPackagePolicy(
     () =>
       appContextService.getLockManagerService()!.withLock(lockKey, async () => {
         newPackagePolicy.name = await incrementPackageName(soClient, packageToInstall, spaceIds);
+        // Lock + PackagePolicyNameExistsError retry replace wait_for for system-N uniqueness.
         await packagePolicyService.create(
           soClient,
           esClient,

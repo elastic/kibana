@@ -831,7 +831,7 @@ describe('Package policy service', () => {
         expect.objectContaining({
           package_agent_version_condition: '>=9.3.0',
         }),
-        expect.anything()
+        expect.objectContaining({ id: 'test-package-policy', refresh: false })
       );
     });
 
