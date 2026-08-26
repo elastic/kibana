@@ -91,8 +91,7 @@ export const createRunWorkflowRoute = ({ service, getSpaceId }: RunWorkflowRoute
     routerOptions: {
       access: 'internal',
       summary: 'Run a workflow from one or more cases',
-      description:
-        'Runs a workflow with server-owned execution metadata for the authorized cases.',
+      description: 'Runs a workflow with server-owned execution metadata for the authorized cases.',
     },
     handler: async ({ context, request, response }) => {
       const caseContext = await context.cases;

@@ -178,7 +178,12 @@ export class CasesWorkflowRunService {
         : {};
     const mergedInputs = { ...body.inputs, event: { ...event, caseIds } };
 
-    const processedInputs = await preprocessAlertInputs(mergedInputs, context, spaceId, this.logger);
+    const processedInputs = await preprocessAlertInputs(
+      mergedInputs,
+      context,
+      spaceId,
+      this.logger
+    );
     const metadata = CasesWorkflowExecutionMetadataSchema.parse({
       schemaVersion: CASES_WORKFLOW_EXECUTION_METADATA_SCHEMA_VERSION,
       source: CASES_WORKFLOW_EXECUTION_SOURCE,

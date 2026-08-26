@@ -9,8 +9,7 @@ import Boom from '@hapi/boom';
 import { WriteOperations } from '../../authorization';
 import type { OperationDetails } from '../../authorization';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
-import { createCaseError, createCaseErrorFromSOError } from '../../common/error';
-import { isSOError } from '../../common/error';
+import { createCaseError, createCaseErrorFromSOError, isSOError } from '../../common/error';
 import type { CasesClientArgs } from '../types';
 
 /**
@@ -64,15 +63,16 @@ export const ensureAuthorizedToUpdate = async (
     // cannot distinguish "this case doesn't exist" from "you can't see it".
     const entities = cases
       .filter((c) => !isSOError(c))
-      .map((c) => ({ id: c.id, owner: (c as Exclude<typeof c, { error: unknown }>).attributes.owner }));
+      .map((c) => ({
+        id: c.id,
+        owner: (c as Exclude<typeof c, { error: unknown }>).attributes.owner,
+      }));
 
     if (entities.length === 0) {
       // ensureAuthorized({ entities: [] }) passes vacuously because it derives an empty
       // privilege set from zero owners. Reject explicitly so an unauthorized caller never
       // receives a 404 that would reveal which case ids do not exist.
-      throw Boom.forbidden(
-        'Unauthorized to run workflow on case'
-      );
+      throw Boom.forbidden('Unauthorized to run workflow on case');
     }
 
     // One privilege round-trip covers all owners; throws Boom.forbidden if any is unauthorized.

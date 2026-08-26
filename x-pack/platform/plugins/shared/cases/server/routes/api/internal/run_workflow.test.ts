@@ -105,16 +105,12 @@ describe('run workflow route', () => {
     });
 
     it('rejects an empty caseIds array', () => {
-      expect(() =>
-        runCaseWorkflowBodySchema.validate({ ...validBody, caseIds: [] })
-      ).toThrow();
+      expect(() => runCaseWorkflowBodySchema.validate({ ...validBody, caseIds: [] })).toThrow();
     });
 
     it(`rejects more than ${MAX_CASES_PER_WORKFLOW_RUN} case ids`, () => {
       const ids = Array.from({ length: MAX_CASES_PER_WORKFLOW_RUN + 1 }, (_, i) => `case-${i}`);
-      expect(() =>
-        runCaseWorkflowBodySchema.validate({ ...validBody, caseIds: ids })
-      ).toThrow();
+      expect(() => runCaseWorkflowBodySchema.validate({ ...validBody, caseIds: ids })).toThrow();
     });
 
     it('rejects duplicate case ids', () => {
