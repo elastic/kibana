@@ -68,9 +68,8 @@ export class HydrateEpisodeDataStep implements DispatcherStep {
       logger.warn({
         code: ALERTING_LOG_CODES.HYDRATE_EPISODE_DATA_STEP_MISSING_RULE_EVENTS_ROW,
         message: () =>
-          `${
-            requested - hydrated
-          } of ${requested} episodes had no matching .rule-events row; data will be absent for those episodes`,
+          `${requested - hydrated} of ${requested} episodes had no matching rule-events row; ` +
+          `their data will be absent`,
       });
     }
 
