@@ -1,8 +1,7 @@
 {
-  "sha1": "ab13d2cee56763a1b1298dcc4cfa7ab2beeb5c4b",
+  "sha1": "5d26dbf2a7c330a1165145a49797c04a0431ac95",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -563,6 +562,48 @@
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/sidebar_error_handling.spec.ts",
         "line": 25,
         "column": 28
+      }
+    },
+    {
+      "id": "68458d257ac9b36-45d6adf763ad160",
+      "title": "Agent Builder — per-space default agent admin sets and clears the space default from the agents list",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/space_default_agent.spec.ts",
+        "line": 76,
+        "column": 11
+      }
+    },
+    {
+      "id": "68458d257ac9b36-de662ae87232055",
+      "title": "Agent Builder — per-space default agent restricts a non-admin to the space default agent",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/space_default_agent.spec.ts",
+        "line": 100,
+        "column": 61
+      }
+    },
+    {
+      "id": "68458d257ac9b36-b7847fbf70756d4",
+      "title": "Agent Builder — per-space default agent admin still sees all agents when a space default is set",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/space_default_agent.spec.ts",
+        "line": 130,
+        "column": 15
       }
     }
   ]
