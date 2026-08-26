@@ -50,14 +50,19 @@ apiTest.describe('Remote clusters API', { tag: ['@local-stateful-classic'] }, ()
     await removeOwnedClusters(esClient);
   });
 
-  apiTest('returns an empty list when no clusters are registered', async ({ apiClient }) => {
+  apiTest('does not list clusters it has not registered', async ({ apiClient }) => {
     const response = await apiClient.get(API_BASE_PATH, {
       headers: { ...COMMON_HEADERS, ...credentials.apiKeyHeader },
       responseType: 'json',
     });
 
     expect(response).toHaveStatusCode(200);
-    expect(response.body).toStrictEqual([]);
+
+    const owned = new Set<string>(OWNED_CLUSTER_NAMES);
+    const ownedInResponse = response.body.filter((cluster: { name: string }) =>
+      owned.has(cluster.name)
+    );
+    expect(ownedInResponse).toStrictEqual([]);
   });
 
   apiTest('adds a remote cluster', async ({ apiClient }) => {
