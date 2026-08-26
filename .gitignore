@@ -39,6 +39,8 @@ types.eslint.config.js
 types.eslint.config.cjs
 __tmp__
 .bug-fixer-session/
+.qa-validator-session/
+**/qa-ticket-validator/live.env
 .playwright-mcp/
 .exploratory-session/
 .codex/
@@ -208,7 +210,8 @@ src/platform/plugins/shared/console/packaging/react/translations
 
 # Agent skill working output (team-auto-tests-stats markdown only — never commit)
 .cursor/tmp/
-.agents/tmp/
+# Match repo-root and nested skill trees (e.g. security_solution/.agents/tmp/)
+**/.agents/tmp/
 
 # Parallel step internal working notes (kept locally, not committed)
 src/platform/plugins/shared/workflows_execution_engine/docs/parallel_step_gaps.md
