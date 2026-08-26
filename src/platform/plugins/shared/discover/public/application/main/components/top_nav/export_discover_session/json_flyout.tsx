@@ -9,7 +9,13 @@
 
 import React, { useCallback, useState } from 'react';
 
-import { EuiFlyout, EuiSwitch, useGeneratedHtmlId } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyout,
+  EuiSwitch,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { ExportJsonFlyoutContent } from '@kbn/as-code-export-flyout-component';
 import { i18n } from '@kbn/i18n';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
@@ -27,7 +33,11 @@ import type {
 interface ExportDiscoverSessionJsonFlyoutProps {
   canShowDevTools: boolean;
   closeFlyout: () => void;
-  getExportJson: (exportCurrentTab: boolean) => DiscoverSessionSanitizeRequest;
+  getExportJson: (
+    exportCurrentTab: boolean,
+    includeCurrentTimeSettings: boolean
+  ) => DiscoverSessionSanitizeRequest;
+  initialIncludeCurrentTimeSettings: boolean;
   sanitizeExportJson: (state: DiscoverSessionSanitizeRequest) => Promise<{
     data: DiscoverSessionApiData;
     warnings: readonly string[];
@@ -40,15 +50,19 @@ export const ExportDiscoverSessionJsonFlyout = ({
   canShowDevTools,
   closeFlyout,
   getExportJson,
+  initialIncludeCurrentTimeSettings,
   sanitizeExportJson,
   title,
   useConsoleUrl,
 }: ExportDiscoverSessionJsonFlyoutProps) => {
   const titleId = useGeneratedHtmlId({ prefix: 'discoverExportJsonFlyoutTitle' });
   const [exportCurrentTab, setExportCurrentTab] = useState(false);
+  const [includeCurrentTimeSettings, setIncludeCurrentTimeSettings] = useState(
+    initialIncludeCurrentTimeSettings
+  );
   const getSelectedExportJson = useCallback(
-    () => getExportJson(exportCurrentTab),
-    [exportCurrentTab, getExportJson]
+    () => getExportJson(exportCurrentTab, includeCurrentTimeSettings),
+    [exportCurrentTab, getExportJson, includeCurrentTimeSettings]
   );
 
   return (
@@ -69,15 +83,33 @@ export const ExportDiscoverSessionJsonFlyout = ({
         }
         getExportJson={getSelectedExportJson}
         headerActions={
-          <EuiSwitch
-            compressed
-            checked={exportCurrentTab}
-            data-test-subj="discoverExportJsonCurrentTabSwitch"
-            label={i18n.translate('discover.exportJson.exportCurrentTabToggleSwitch', {
-              defaultMessage: 'Export only the current tab',
-            })}
-            onChange={(event) => setExportCurrentTab(event.target.checked)}
-          />
+          <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiSwitch
+                compressed
+                checked={exportCurrentTab}
+                data-test-subj="discoverExportJsonCurrentTabSwitch"
+                label={i18n.translate('discover.exportJson.exportCurrentTabToggleSwitch', {
+                  defaultMessage: 'Export only the current tab',
+                })}
+                onChange={(event) => setExportCurrentTab(event.target.checked)}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiSwitch
+                compressed
+                checked={includeCurrentTimeSettings}
+                data-test-subj="discoverExportJsonCurrentTimeSettingsSwitch"
+                label={i18n.translate(
+                  'discover.exportJson.includeCurrentTimeSettingsToggleSwitch',
+                  {
+                    defaultMessage: 'Include current time settings',
+                  }
+                )}
+                onChange={(event) => setIncludeCurrentTimeSettings(event.target.checked)}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         }
         isTechnicalPreview
         objectType={i18n.translate('discover.exportJson.objectTypeLabel', {

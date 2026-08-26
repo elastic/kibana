@@ -37,11 +37,21 @@ describe('buildDiscoverSessionExportRequest', () => {
         appState: { interval: 'auto' },
       })
     );
+    toolkit.internalState.dispatch(
+      internalStateActions.updateGlobalState({
+        tabId: toolkit.getCurrentTab().id,
+        globalState: {
+          timeRange: { from: 'now-15m', to: 'now' },
+          refreshInterval: { pause: false, value: 5000 },
+        },
+      })
+    );
 
     const result = buildDiscoverSessionExportRequest({
       getState: toolkit.internalState.getState,
       runtimeStateManager: toolkit.runtimeStateManager,
       services,
+      includeCurrentTimeSettings: true,
       title: 'Untitled Discover session',
     });
 
@@ -56,7 +66,9 @@ describe('buildDiscoverSessionExportRequest', () => {
             attributes: expect.objectContaining({
               hideChart: expect.any(Boolean),
               hideTable: false,
-              timeRestore: false,
+              timeRestore: true,
+              timeRange: { from: 'now-15m', to: 'now' },
+              refreshInterval: { pause: false, value: 5000 },
               chartInterval: 'auto',
               kibanaSavedObjectMeta: {
                 searchSourceJSON: expect.any(String),
@@ -68,6 +80,39 @@ describe('buildDiscoverSessionExportRequest', () => {
     );
     expect(result).not.toHaveProperty('id');
     expect(result).not.toHaveProperty('meta');
+  });
+
+  it('excludes current time settings when disabled', async () => {
+    const services = createDiscoverServicesMock();
+    const toolkit = getDiscoverInternalStateMock({
+      services,
+      persistedDataViews: [dataViewMock],
+    });
+
+    await toolkit.initializeTabs();
+    await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });
+    toolkit.internalState.dispatch(
+      internalStateActions.updateGlobalState({
+        tabId: toolkit.getCurrentTab().id,
+        globalState: {
+          timeRange: { from: 'now-15m', to: 'now' },
+          refreshInterval: { pause: false, value: 5000 },
+        },
+      })
+    );
+
+    const result = buildDiscoverSessionExportRequest({
+      getState: toolkit.internalState.getState,
+      runtimeStateManager: toolkit.runtimeStateManager,
+      services,
+      includeCurrentTimeSettings: false,
+      title: 'Untitled Discover session',
+    });
+    const [tab] = result.attributes.tabs;
+
+    expect(tab.attributes.timeRestore).toBe(false);
+    expect(tab.attributes.timeRange).toBeUndefined();
+    expect(tab.attributes.refreshInterval).toBeUndefined();
   });
 
   it('includes the current control state for server sanitization', async () => {
@@ -106,6 +151,7 @@ describe('buildDiscoverSessionExportRequest', () => {
       getState: toolkit.internalState.getState,
       runtimeStateManager: toolkit.runtimeStateManager,
       services,
+      includeCurrentTimeSettings: false,
       title: 'Session with controls',
     });
 
@@ -137,12 +183,14 @@ describe('buildDiscoverSessionExportRequest', () => {
       getState: toolkit.internalState.getState,
       runtimeStateManager: toolkit.runtimeStateManager,
       services,
+      includeCurrentTimeSettings: false,
       title: 'All tabs session',
     });
     const selectedTabResult = buildDiscoverSessionExportRequest({
       getState: toolkit.internalState.getState,
       runtimeStateManager: toolkit.runtimeStateManager,
       services,
+      includeCurrentTimeSettings: false,
       tabId: secondTab.id,
       title: 'Single tab session',
     });

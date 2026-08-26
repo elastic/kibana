@@ -104,13 +104,14 @@ export const getExportAppMenuItem = ({
       defaultMessage: 'Untitled Discover session',
     });
 
-  const getExportJson = (exportCurrentTab: boolean) => {
+  const getExportJson = (exportCurrentTab: boolean, includeCurrentTimeSettings: boolean) => {
     const title = getDiscoverSessionTitle();
 
     return buildDiscoverSessionExportRequest({
       getState,
       runtimeStateManager,
       services,
+      includeCurrentTimeSettings,
       tabId: exportCurrentTab ? currentTab.id : undefined,
       title,
     });
@@ -139,6 +140,9 @@ export const getExportAppMenuItem = ({
         canShowDevTools={Boolean(services.capabilities.dev_tools?.show)}
         closeFlyout={onFinishAction}
         getExportJson={getExportJson}
+        initialIncludeCurrentTimeSettings={
+          persistedDiscoverSession?.tabs.some((tab) => tab.timeRestore) ?? true
+        }
         sanitizeExportJson={(state) => sanitizeDiscoverSession(services.http, state)}
         title={getDiscoverSessionTitle()}
         useConsoleUrl={share.url.locators.useUrl}

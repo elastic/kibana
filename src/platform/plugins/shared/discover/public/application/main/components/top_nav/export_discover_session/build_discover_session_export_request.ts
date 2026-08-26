@@ -15,6 +15,7 @@ import {
   selectAllTabs,
   selectTab,
   selectTabRuntimeState,
+  TabInitializationStatus,
   type DiscoverInternalState,
   type RuntimeStateManager,
 } from '../../../state_management/redux';
@@ -42,17 +43,21 @@ export const buildDiscoverSessionExportRequest = ({
   getState,
   runtimeStateManager,
   services,
+  includeCurrentTimeSettings,
   tabId,
   title,
 }: {
   getState: () => DiscoverInternalState;
   runtimeStateManager: RuntimeStateManager;
   services: DiscoverServices;
+  includeCurrentTimeSettings: boolean;
   tabId?: string;
   title: string;
 }): DiscoverSessionSanitizeRequest => {
   const state = getState();
-  const tabs = tabId ? [selectTab(state, tabId)] : selectAllTabs(state);
+  const allTabs = selectAllTabs(state);
+  const tabs = tabId ? [selectTab(state, tabId)] : allTabs;
+  const selectedTab = allTabs.find((tab) => tab.id === state.tabs.unsafeCurrentId);
   const storedTabs = tabs.map((tab) => {
     const currentDataView = selectTabRuntimeState(
       runtimeStateManager,
@@ -62,8 +67,19 @@ export const buildDiscoverSessionExportRequest = ({
     const storedTab = fromTabStateToSavedObjectTab({
       tab,
       currentDataView,
+      overridenTimeRestore: includeCurrentTimeSettings,
       services,
     });
+
+    if (
+      tab.initializationState.initializationStatus === TabInitializationStatus.NotStarted &&
+      includeCurrentTimeSettings &&
+      !storedTab.timeRange &&
+      selectedTab?.globalState.timeRange
+    ) {
+      storedTab.timeRange = selectedTab.globalState.timeRange;
+      storedTab.refreshInterval = selectedTab.globalState.refreshInterval;
+    }
 
     if (tab.overriddenVisContextAfterInvalidation) {
       storedTab.visContext = tab.overriddenVisContextAfterInvalidation;

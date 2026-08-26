@@ -24,7 +24,10 @@ import { ExportDiscoverSessionJsonFlyout } from './json_flyout';
 type MockExportJsonFlyoutContentProps = React.ComponentProps<typeof ExportJsonFlyoutContent>;
 
 const mockGetExportJson = jest.fn(
-  (_exportCurrentTab: boolean): DiscoverSessionSanitizeRequest => ({
+  (
+    _exportCurrentTab: boolean,
+    _includeCurrentTimeSettings: boolean
+  ): DiscoverSessionSanitizeRequest => ({
     attributes: {
       title: 'Discover session',
       description: '',
@@ -60,12 +63,13 @@ describe('Discover export JSON flyout', () => {
     jest.clearAllMocks();
   });
 
-  const renderFlyout = () =>
+  const renderFlyout = (initialIncludeCurrentTimeSettings = true) =>
     render(
       <ExportDiscoverSessionJsonFlyout
         canShowDevTools
         closeFlyout={jest.fn()}
         getExportJson={mockGetExportJson}
+        initialIncludeCurrentTimeSettings={initialIncludeCurrentTimeSettings}
         sanitizeExportJson={mockSanitizeExportJson}
         title="Discover session"
         useConsoleUrl={mockUseUrl}
@@ -136,11 +140,13 @@ describe('Discover export JSON flyout', () => {
     render(<>{initialProps.headerActions}</>);
     initialProps.getExportJson();
 
-    const exportCurrentTabSwitch = screen.getByRole('switch');
+    const exportCurrentTabSwitch = screen.getByRole('switch', {
+      name: 'Export only the current tab',
+    });
 
     expect(screen.getByText('Export only the current tab')).toBeInTheDocument();
     expect(exportCurrentTabSwitch).not.toBeChecked();
-    expect(mockGetExportJson).toHaveBeenLastCalledWith(false);
+    expect(mockGetExportJson).toHaveBeenLastCalledWith(false, true);
 
     fireEvent.click(exportCurrentTabSwitch);
 
@@ -148,7 +154,43 @@ describe('Discover export JSON flyout', () => {
       mockExportJsonFlyoutContent.mock.calls[mockExportJsonFlyoutContent.mock.calls.length - 1][0];
     updatedProps.getExportJson();
 
-    expect(mockGetExportJson).toHaveBeenLastCalledWith(true);
+    expect(mockGetExportJson).toHaveBeenLastCalledWith(true, true);
+  });
+
+  it('includes current time settings by default and allows excluding them', () => {
+    renderFlyout();
+
+    const initialProps = mockExportJsonFlyoutContent.mock.calls[0][0];
+
+    render(<>{initialProps.headerActions}</>);
+    initialProps.getExportJson();
+
+    const includeCurrentTimeSettingsSwitch = screen.getByRole('switch', {
+      name: 'Include current time settings',
+    });
+
+    expect(includeCurrentTimeSettingsSwitch).toBeChecked();
+    expect(mockGetExportJson).toHaveBeenLastCalledWith(false, true);
+
+    fireEvent.click(includeCurrentTimeSettingsSwitch);
+
+    const updatedProps =
+      mockExportJsonFlyoutContent.mock.calls[mockExportJsonFlyoutContent.mock.calls.length - 1][0];
+    updatedProps.getExportJson();
+
+    expect(mockGetExportJson).toHaveBeenLastCalledWith(false, false);
+  });
+
+  it('uses the persisted time setting as the initial toggle value', () => {
+    renderFlyout(false);
+
+    const props = mockExportJsonFlyoutContent.mock.calls[0][0];
+
+    render(<>{props.headerActions}</>);
+
+    expect(
+      screen.getByRole('switch', { name: 'Include current time settings' })
+    ).not.toBeChecked();
   });
 
   it('surfaces export errors through prepareExportJson', async () => {
