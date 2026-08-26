@@ -55,6 +55,7 @@ describe('SkillsProjectionService', () => {
     management = { getWorkflows: jest.fn() };
     service = new SkillsProjectionService(
       management as unknown as WatchWorkflowsManagementClient,
+      undefined,
       mockLogger
     );
   });

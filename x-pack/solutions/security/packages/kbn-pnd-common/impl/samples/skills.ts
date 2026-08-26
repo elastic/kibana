@@ -37,7 +37,6 @@ export const SKILLS_SEED: WatchSkillSeed[] = [
     id: 'alert-triage',
     watchIds: [SYSTEM_SECURITY_WATCH_FLOOR_ID, SYSTEM_SECURITY_WATCH_DARK_ID],
     lastRunSecondsAgo: 4,
-    enabled: true,
   },
   {
     id: 'mitre-attack-mapping',
@@ -47,44 +46,35 @@ export const SKILLS_SEED: WatchSkillSeed[] = [
       SYSTEM_SECURITY_WATCH_DETECTION_ID,
     ],
     lastRunSecondsAgo: 18 * MINUTE,
-    enabled: true,
   },
   {
     id: 'dark-web-feeds',
     watchIds: [SYSTEM_SECURITY_WATCH_FLOOR_ID],
     lastRunSecondsAgo: 1 * HOUR,
-    enabled: true,
   },
   {
     id: 'virustotal-lookup',
     watchIds: [SYSTEM_SECURITY_WATCH_FLOOR_ID],
     lastRunSecondsAgo: null,
-    // Globally off. Watch Floor still attaches it with the per-watch flag on, which is what
-    // demonstrates effective = global AND per-watch.
-    enabled: false,
   },
   {
     id: 'case-assembly',
     watchIds: [SYSTEM_SECURITY_WATCH_OFFICER_ID],
     lastRunSecondsAgo: 12 * MINUTE,
-    enabled: true,
   },
   {
     id: 'escalation',
     watchIds: [SYSTEM_SECURITY_WATCH_OFFICER_ID],
     lastRunSecondsAgo: 3 * HOUR,
-    enabled: true,
   },
   {
     id: 'containment',
     watchIds: [SYSTEM_SECURITY_WATCH_DARK_ID],
     lastRunSecondsAgo: 31 * MINUTE,
-    enabled: true,
   },
   {
     id: 'rule-preview',
     watchIds: [SYSTEM_SECURITY_WATCH_DETECTION_ID],
     lastRunSecondsAgo: 26 * MINUTE,
-    enabled: true,
   },
 ];
