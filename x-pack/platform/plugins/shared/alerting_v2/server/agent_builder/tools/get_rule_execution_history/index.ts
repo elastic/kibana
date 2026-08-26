@@ -1,0 +1,9 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+export { getRuleExecutionHistoryTool, getRuleExecutionHistoryToolId } from './get_rule_execution_history';
+export type { GetRuleExecutionHistoryToolParams } from './get_rule_execution_history';

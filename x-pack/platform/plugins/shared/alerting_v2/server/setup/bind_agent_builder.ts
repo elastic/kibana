@@ -28,6 +28,7 @@ import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../lib/services/logger_service/logger_service';
+import { EventLogServiceToken } from '../lib/services/event_log_service/tokens';
 import { SettingsServiceToken } from '../lib/services/settings_service/tokens';
 import type { AlertingServerSetupDependencies } from '../types';
 
@@ -61,6 +62,9 @@ export function bindAgentBuilder({ bind }: ContainerModuleLoadOptions) {
       createRuleAttachmentType({
         logger: loggerService.forSubsystem('agentBuilder'),
         getRulesClient: (context) => resolveRequestScoped(injection, context.request, RulesClient),
+        getEventLogService: () => injection.getContainer().get(EventLogServiceToken),
+        getPrivilegeChecker: (context) =>
+          resolveRequestScoped(injection, context.request, PrivilegeChecker),
       }) as AttachmentTypeDefinition,
     [LoggerServiceToken, CoreStart('injection')]
   );

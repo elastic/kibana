@@ -18,11 +18,18 @@ import {
 import Boom from '@hapi/boom';
 import { ALERTING_LOG_CODES } from '../../lib/errors/error_codes';
 import type { LoggerServiceContract } from '../../lib/services/logger_service/logger_service';
+import type { EventLogServiceContract } from '../../lib/services/event_log_service/event_log_service';
+import type { PrivilegeChecker } from '../../lib/services/privilege_checker/privilege_checker';
 import type { RulesClient } from '../../lib/rules_client';
+import {
+  getRuleExecutionHistoryTool,
+} from '../tools/get_rule_execution_history';
 
 interface CreateRuleAttachmentTypeOptions {
   logger: LoggerServiceContract;
   getRulesClient: (context: AttachmentResolveContext) => RulesClient;
+  getEventLogService: () => EventLogServiceContract;
+  getPrivilegeChecker: (context: { request: import('@kbn/core-http-server').KibanaRequest }) => PrivilegeChecker;
 }
 
 const formatRuleAttachmentDescription = (
@@ -48,6 +55,8 @@ const formatRuleAttachmentDescription = (
 export const createRuleAttachmentType = ({
   logger,
   getRulesClient,
+  getEventLogService,
+  getPrivilegeChecker,
 }: CreateRuleAttachmentTypeOptions): AttachmentTypeDefinition<
   typeof RULE_ATTACHMENT_TYPE,
   RuleAttachmentData
@@ -119,6 +128,21 @@ export const createRuleAttachmentType = ({
       type: 'text',
       value: formatRuleAttachmentDescription(attachment.id, attachment.data, attachment.origin),
     }),
+    getBoundedTools: () => {
+      const ruleId = attachment.origin ?? attachment.data.id;
+      if (!ruleId) {
+        return [];
+      }
+      return [
+        getRuleExecutionHistoryTool({
+          attachmentId: attachment.id,
+          ruleId,
+          logger,
+          getEventLogService,
+          getPrivilegeChecker,
+        }),
+      ];
+    },
   }),
 
   getAgentDescription: () =>
