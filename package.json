@@ -1910,7 +1910,7 @@
     "qs": "6.15.2",
     "react-refresh": "0.18.0",
     "react-test-renderer": "17.0.2",
-    "recast": "0.23.19",
+    "recast": "0.24.0",
     "regenerate": "1.4.2",
     "resolve": "1.22.8",
     "rxjs-marbles": "7.0.1",
