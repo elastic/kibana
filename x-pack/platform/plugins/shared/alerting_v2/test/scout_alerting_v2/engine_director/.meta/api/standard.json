@@ -286,7 +286,7 @@
     },
     {
       "id": "e747878cbda0163-9085e2d8ed11df7",
-      "title": "Director no_data_strategy 'last_known_status' resets status_count to 0 while episode status is unchanged",
+      "title": "Director no_data_strategy 'last_known_status' omits status_count on no-data holds",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",

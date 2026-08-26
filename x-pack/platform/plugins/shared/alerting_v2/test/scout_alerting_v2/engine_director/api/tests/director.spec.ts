@@ -1589,7 +1589,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
   );
 
   apiTest(
-    "no_data_strategy 'last_known_status' resets status_count to 0 while episode status is unchanged",
+    "no_data_strategy 'last_known_status' omits status_count on no-data holds",
     async ({ apiServices }) => {
       const HOST = 'host-director-no-data-last-known';
 
@@ -1643,7 +1643,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       expect(noDataEvents.length).toBeGreaterThanOrEqual(1);
       for (const event of noDataEvents) {
         expect(event.episode?.status).toBe('pending');
-        expect(event.episode?.status_count).toBe(0);
+        expect(event.episode?.status_count).toBeUndefined();
       }
     }
   );

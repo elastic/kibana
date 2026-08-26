@@ -675,33 +675,28 @@ describe('CountTimeframeStrategy', () => {
       recovering_count: 3,
     };
 
-    it.each<[string, AlertEpisodeStatus, number]>([
+    it.each<[string, AlertEpisodeStatus, number | null]>([
       ['pending', alertEpisodeStatus.pending, 1],
       ['pending', alertEpisodeStatus.pending, 2],
       ['recovering', alertEpisodeStatus.recovering, 1],
       ['recovering', alertEpisodeStatus.recovering, 2],
       ['active', alertEpisodeStatus.active, 1],
       ['active', alertEpisodeStatus.active, 4],
-    ])('resets statusCount to 0 on %s hold (count %s)', (_label, from, statusCount) => {
-      expectTransition({
-        from,
-        on: alertEventStatus.no_data,
-        to: from,
+      ['inactive', alertEpisodeStatus.inactive, null],
+    ])('omits statusCount on %s hold (count %s)', (_label, from, statusCount) => {
+      const result = getNextState({
+        eventStatus: alertEventStatus.no_data,
         stateTransition,
         noDataStrategy: 'last_known_status',
-        statusCount,
-        expectedStatusCount: 0,
+        previousEpisode: buildLatestAlertEvent({
+          episodeStatus: from,
+          eventStatus: alertEventStatus.no_data,
+          statusCount,
+        }),
       });
-    });
 
-    it('does not set statusCount on inactive hold', () => {
-      expectTransition({
-        from: alertEpisodeStatus.inactive,
-        on: alertEventStatus.no_data,
-        to: alertEpisodeStatus.inactive,
-        stateTransition,
-        noDataStrategy: 'last_known_status',
-      });
+      expect(result.status).toBe(from);
+      expect(result).not.toHaveProperty('statusCount');
     });
   });
 
