@@ -29,7 +29,7 @@ export const createRuleStepCommonDefinition: BaseStepDefinition<
     defaultMessage: 'Create Detection Rule',
   }),
   description: i18n.translate('xpack.securitySolution.workflows.steps.createRule.description', {
-    defaultMessage: 'Create a new detection rule from a rule object.',
+    defaultMessage: 'Create a new, disabled detection rule from a rule object.',
   }),
   category: StepCategory.KibanaSecurity,
   inputSchema: createRuleInputSchema,
@@ -39,7 +39,7 @@ export const createRuleStepCommonDefinition: BaseStepDefinition<
       'xpack.securitySolution.workflows.steps.createRule.documentation.details',
       {
         defaultMessage:
-          'Creates a detection rule in current space via Create Detection Rule API endpoint. The rule object is passed under the "rule" property and must match the request body of that endpoint; see: https://www.elastic.co/docs/api/doc/kibana/operation/operation-createrule for the fields of each rule type. The created rule is disabled by default: set "rule.enabled: true" to create it as enabled.',
+          'Creates a detection rule in current space via Create Detection Rule API endpoint. The rule object is passed under the "rule" property and must match the request body of that endpoint; see: https://www.elastic.co/docs/api/doc/kibana/operation/operation-createrule for the fields of each rule type. The rule is always created disabled, so "rule.enabled" is ignored. Add a "security.enableRule" step to activate it.',
       }
     ),
     examples: [

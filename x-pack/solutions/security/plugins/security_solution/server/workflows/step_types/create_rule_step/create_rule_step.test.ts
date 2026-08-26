@@ -81,7 +81,7 @@ describe('createRuleStepDefinition', () => {
     });
   });
 
-  it('forwards an explicit enabled value unchanged', async () => {
+  it('overrides an explicit "enabled: true" so the rule is still created disabled', async () => {
     mockContext = {
       input: { rule: { ...rule, enabled: true } },
       contextManager: mockContextManager,
@@ -89,7 +89,7 @@ describe('createRuleStepDefinition', () => {
     mockContextManager.callKibanaApi.mockResolvedValue({
       status: 200,
       headers: {},
-      body: { ...rule, enabled: true, id: 'rule-1' },
+      body: { ...rule, enabled: false, id: 'rule-1' },
     });
 
     await createRuleStepDefinition.handler(mockContext);
@@ -97,7 +97,7 @@ describe('createRuleStepDefinition', () => {
     expect(mockContextManager.callKibanaApi).toHaveBeenCalledWith({
       method: 'POST',
       path: DETECTION_ENGINE_RULES_URL,
-      body: { ...rule, enabled: true },
+      body: { ...rule, enabled: false },
     });
   });
 
