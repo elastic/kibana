@@ -36,6 +36,7 @@ export const initializeStateApi = <StateType extends object = object>({
     // anyStateChange$ does not emit on subscribe
     // use startWith to get latest state on subscribe
     startWith(undefined),
+    debounceTime(UNSAVED_CHANGES_DEBOUNCE),
     map(() => serializeState())
   );
 
@@ -51,7 +52,6 @@ export const initializeStateApi = <StateType extends object = object>({
 
   const hasUnsavedChanges$ = latestState$.pipe(
     combineLatestWith(parentApi.lastSavedStateForChild$(uuid)),
-    debounceTime(UNSAVED_CHANGES_DEBOUNCE),
     map(([currentState, lastSavedState]) => {
       // check state equality
       return !areComparatorsEqual(
