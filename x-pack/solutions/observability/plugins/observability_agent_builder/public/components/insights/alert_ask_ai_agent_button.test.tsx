@@ -10,6 +10,7 @@ import { render, fireEvent } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+import { OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID } from '../../../common';
 import { AlertAskAiAgentButton } from './alert_ask_ai_agent_button';
 import { useKibana } from '../../hooks/use_kibana';
 import { useLicense } from '../../hooks/use_license';
@@ -99,7 +100,8 @@ describe('AlertAskAiAgentButton', () => {
         attachments: expect.arrayContaining([
           expect.objectContaining({
             id: 'alert-123',
-            data: expect.objectContaining({ alertId: 'alert-123' }),
+            type: OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID,
+            data: expect.objectContaining({ alertId: 'alert-123', attachmentLabel: expect.stringContaining('CPU threshold') }),
           }),
         ]),
       })
@@ -134,5 +136,48 @@ describe('AlertAskAiAgentButton', () => {
     setupMocks({ hasAgentBuilder: false });
     const { queryByTestId } = renderButton();
     expect(queryByTestId('alertAskAiAgentButton')).not.toBeInTheDocument();
+  });
+
+  it('omits attachmentLabel from the payload when alertTitle is not provided', () => {
+    setupMocks();
+    const { getByTestId } = render(
+      <EuiThemeProvider>
+        <AlertAskAiAgentButton alertId="alert-123" />
+      </EuiThemeProvider>
+    );
+
+    fireEvent.click(getByTestId('alertAskAiAgentButton'));
+
+    expect(mockOpenChat).toHaveBeenCalledWith(
+      expect.objectContaining({
+        attachments: expect.arrayContaining([
+          expect.objectContaining({
+            id: 'alert-123',
+            type: OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID,
+            data: { alertId: 'alert-123' },
+          }),
+        ]),
+      })
+    );
+    const [call] = mockOpenChat.mock.calls;
+    expect(call[0].attachments[0].data).not.toHaveProperty('attachmentLabel');
+  });
+
+  it('renders the button but click is silent when agentBuilder has no openChat method', () => {
+    mockUseLicense.mockReturnValue({
+      getLicense: () => ({ hasAtLeast: () => true }),
+    });
+    mockUseUiSetting$.mockReturnValue([AIChatExperience.Agent]);
+    mockUseGenAIConnectors.mockReturnValue({ hasConnectors: true });
+    mockUseKibana.mockReturnValue({
+      services: {
+        agentBuilder: {},
+        application: { capabilities: { agentBuilder: { show: true } } },
+      },
+    });
+
+    const { getByTestId } = renderButton();
+    fireEvent.click(getByTestId('alertAskAiAgentButton'));
+    expect(mockOpenChat).not.toHaveBeenCalled();
   });
 });

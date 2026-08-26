@@ -184,7 +184,7 @@ export function HeaderActions({
   };
 
   return (
-    <>
+    <ObsCasesContext>
       <EuiFlexGroup direction="row" gutterSize="s" justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
           <EuiPopover
@@ -238,14 +238,12 @@ export function HeaderActions({
                     <div />
 
                     {cases && canAddToCase && (
-                      <ObsCasesContext>
-                        <AddToCaseButton
-                          alert={alert}
-                          alertIndex={alertIndex}
-                          rule={rule}
-                          setIsPopoverOpen={setIsPopoverOpen}
-                        />
-                      </ObsCasesContext>
+                      <AddToCaseButton
+                        alert={alert}
+                        alertIndex={alertIndex}
+                        rule={rule}
+                        setIsPopoverOpen={setIsPopoverOpen}
+                      />
                     )}
 
                     {discoverUrl && (
@@ -392,7 +390,7 @@ export function HeaderActions({
           onLoading={noop}
         />
       ) : null}
-    </>
+    </ObsCasesContext>
   );
 }
 

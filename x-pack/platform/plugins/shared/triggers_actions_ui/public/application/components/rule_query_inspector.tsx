@@ -64,6 +64,8 @@ export function RuleQueryInspector({ ruleId, ruleTypeId, alertId }: RuleQueryIns
   return (
     <EuiButtonEmpty
       data-test-subj="ruleQueryInspectorButton"
+      size="s"
+      color="text"
       iconType="inspect"
       onClick={handleInspect}
       isLoading={isLoading}
