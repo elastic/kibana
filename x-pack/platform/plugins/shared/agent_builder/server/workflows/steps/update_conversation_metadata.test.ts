@@ -24,7 +24,7 @@ describe('updateConversationMetadataStepDefinition', () => {
       experimentalEnabled
     );
 
-    expect(definition.id).toBe('agentBuilder.conversation.metadata.patch');
+    expect(definition.id).toBe('ai.conversation.metadata.patch');
     expect(typeof definition.handler).toBe('function');
     expect(definition.inputSchema.safeParse(baseInput).success).toBe(true);
   });

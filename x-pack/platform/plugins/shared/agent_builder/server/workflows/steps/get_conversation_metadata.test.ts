@@ -19,7 +19,7 @@ describe('getConversationMetadataStepDefinition', () => {
       experimentalEnabled
     );
 
-    expect(definition.id).toBe('agentBuilder.conversation.metadata.read');
+    expect(definition.id).toBe('ai.conversation.metadata.read');
     expect(typeof definition.handler).toBe('function');
     expect(definition.inputSchema.safeParse({ conversation_id: 'abc-123' }).success).toBe(true);
   });
