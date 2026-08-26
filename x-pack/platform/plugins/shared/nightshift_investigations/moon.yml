@@ -28,6 +28,12 @@ dependsOn:
   - '@kbn/workflows-management-plugin'
   - '@kbn/zod'
   - '@kbn/scout'
+  - '@kbn/agent-builder-plugin'
+  - '@kbn/agent-builder-common'
+  - '@kbn/logging-mocks'
+  - '@kbn/significant-events-schema'
+  - '@kbn/agent-builder-server'
+  - '@kbn/i18n'
 tags:
   - plugin
   - prod
