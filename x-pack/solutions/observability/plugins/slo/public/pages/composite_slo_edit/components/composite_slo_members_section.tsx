@@ -7,7 +7,6 @@
 
 import {
   EuiButtonIcon,
-  EuiCallOut,
   EuiComboBox,
   EuiFieldNumber,
   EuiFlexGroup,
@@ -19,6 +18,7 @@ import {
   EuiToolTip,
   type EuiComboBoxOptionOption,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -99,9 +99,8 @@ export function CompositeSloMembersSection() {
     >
       <EuiFlexGroup direction="column" gutterSize="m">
         {atMax && (
-          <EuiCallOut
+          <KbnWarningCallout
             announceOnMount
-            color="warning"
             size="s"
             title={i18n.translate('xpack.slo.compositeSloEdit.members.maxWarning', {
               defaultMessage: 'Maximum of {max} member SLOs reached.',

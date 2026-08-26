@@ -6,7 +6,8 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { EuiCallOut, EuiSpacer, EuiHorizontalRule, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiSpacer, EuiHorizontalRule, EuiLoadingSpinner } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FiltersExpressionsSelect, StatusExpressionSelect } from '../monitor_expressions';
 import { AddFilterButton } from './add_filter_btn';
@@ -118,7 +119,7 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (p
 
 export const AlertMonitorCount = ({ count, loading }: { count: number; loading?: boolean }) => {
   return (
-    <EuiCallOut
+    <KbnInfoCallout
       size="s"
       title={
         <span data-test-subj="alertSnapShotCount">
@@ -130,7 +131,6 @@ export const AlertMonitorCount = ({ count, loading }: { count: number; loading?:
           {loading && <EuiLoadingSpinner />}
         </span>
       }
-      iconType="info"
     />
   );
 };

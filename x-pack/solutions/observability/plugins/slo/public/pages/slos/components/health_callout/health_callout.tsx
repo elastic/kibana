@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import { uniqBy } from 'lodash';
@@ -44,13 +45,18 @@ export function HealthCallout({ sloList = [] }: { sloList: SLOWithSummaryRespons
   const deduplicatedList = uniqBy(problematicSloList, (item) => item.id);
 
   return (
-    <EuiCallOut
+    <KbnDangerCallout
       data-test-subj="sloHealthCallout"
-      color="danger"
-      iconType={isOpen ? 'chevronSingleDown' : 'chevronSingleRight'}
       size="s"
       onClick={(e) => {
         setIsOpen(!isOpen);
+      }}
+      onDismiss={dismiss}
+      dismissButtonProps={{
+        'data-test-subj': 'sloHealthCalloutDimissButton',
+        'aria-label': i18n.translate('xpack.slo.sloList.healthCallout.buttonDimissLabel', {
+          defaultMessage: 'Dismiss',
+        }),
       }}
       title={
         <FormattedMessage
@@ -58,55 +64,31 @@ export function HealthCallout({ sloList = [] }: { sloList: SLOWithSummaryRespons
           defaultMessage="Some SLOs are unhealthy"
         />
       }
+      text={
+        <span data-test-subj="sloHealthCalloutDescription">
+          <FormattedMessage
+            id="xpack.slo.sloList.healthCallout.operationalProblemsDescription"
+            defaultMessage="The following {count, plural, one {SLO} other {SLOs}} might have some operational problems. You can inspect {count, plural, one {it} other {each one}} here:"
+            values={{
+              count: deduplicatedList.length,
+            }}
+          />
+        </span>
+      }
     >
       {isOpen && (
-        <EuiFlexGroup
-          gutterSize="xs"
-          direction="column"
-          alignItems="flexStart"
-          onClick={(e) => {
-            e.stopPropagation();
-          }}
-        >
-          <EuiFlexItem>
-            <span data-test-subj="sloHealthCalloutDescription">
-              <FormattedMessage
-                id="xpack.slo.sloList.healthCallout.operationalProblemsDescription"
-                defaultMessage="The following {count, plural, one {SLO} other {SLOs}} might have some operational problems. You can inspect {count, plural, one {it} other {each one}} here:"
-                values={{
-                  count: deduplicatedList.length,
-                }}
+        <ul>
+          {deduplicatedList.map((result) => (
+            <li key={result.id}>
+              <ContentWithInspectCta
+                textSize="xs"
+                content={result.name}
+                url={paths.sloDetails(result.id, result.instanceId, undefined, 'overview')}
               />
-            </span>
-            <ul>
-              {deduplicatedList.map((result) => (
-                <li key={result.id}>
-                  <ContentWithInspectCta
-                    textSize="xs"
-                    content={result.name}
-                    url={paths.sloDetails(result.id, result.instanceId, undefined, 'overview')}
-                  />
-                </li>
-              ))}
-            </ul>
-          </EuiFlexItem>
-          <EuiFlexGroup direction="row" gutterSize="xs">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                data-test-subj="sloHealthCalloutDimissButton"
-                color="text"
-                size="s"
-                onClick={dismiss}
-              >
-                <FormattedMessage
-                  id="xpack.slo.sloList.healthCallout.buttonDimissLabel"
-                  defaultMessage="Dismiss"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexGroup>
+            </li>
+          ))}
+        </ul>
       )}
-    </EuiCallOut>
+    </KbnDangerCallout>
   );
 }

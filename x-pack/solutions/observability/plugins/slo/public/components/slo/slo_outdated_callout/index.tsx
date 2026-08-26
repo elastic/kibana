@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { encode } from '@kbn/rison';
 import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import React from 'react';
@@ -31,38 +32,34 @@ export function SloOutdatedCallout() {
   if (!isLoading && data && data.total > 0) {
     return (
       <>
-        <EuiCallOut
+        <KbnWarningCallout
           announceOnMount
-          color="warning"
-          iconType="warning"
           title={i18n.translate('xpack.slo.outdatedSloCallout.title', {
             defaultMessage: '{total} Outdated SLOs Detected',
             values: {
               total: data.total,
             },
           })}
-        >
-          <p>
+          text={
             <FormattedMessage
               id="xpack.slo.outdatedSloCallout.message"
               defaultMessage="We've noticed that you have {total} outdated SLO definitions, these SLOs will not be running or alerting until you've reset them. Please click the button below to review the SLO definitions; you can choose to either reset the SLO definition or remove it."
               values={{ total: data.total }}
             />
-          </p>
-          <p>
-            <EuiButton
-              color="warning"
-              data-test-subj="o11ySloOutdatedCalloutViewOutdatedSloDefinitionsButton"
-              fill
-              onClick={handleClick}
-            >
-              <FormattedMessage
-                id="xpack.slo.outdatedSloCallout.buttonLabel"
-                defaultMessage="Review Outdated SLO Definitions"
-              />
-            </EuiButton>
-          </p>
-        </EuiCallOut>
+          }
+          actionProps={{
+            primary: {
+              'data-test-subj': 'o11ySloOutdatedCalloutViewOutdatedSloDefinitionsButton',
+              onClick: handleClick,
+              children: (
+                <FormattedMessage
+                  id="xpack.slo.outdatedSloCallout.buttonLabel"
+                  defaultMessage="Review Outdated SLO Definitions"
+                />
+              ),
+            },
+          }}
+        />
         <EuiSpacer size="m" />
       </>
     );

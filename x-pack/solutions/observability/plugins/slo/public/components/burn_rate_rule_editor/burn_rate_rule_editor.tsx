@@ -10,8 +10,9 @@ import React, { useEffect, useState } from 'react';
 import type { SLODefinitionResponse } from '@kbn/slo-schema';
 import { ALL_VALUE } from '@kbn/slo-schema';
 
-import { EuiCallOut, EuiLoadingSpinner, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { useFetchSloDetails } from '../../hooks/use_fetch_slo_details';
 import type { BurnRateRuleParams, WindowSchema, Dependency } from '../../typings';
 import { SloSelector } from './slo_selector';
@@ -105,9 +106,8 @@ export function BurnRateRuleEditor(props: Props) {
       {selectedSlo?.groupBy && ![selectedSlo.groupBy].flat().includes(ALL_VALUE) && (
         <>
           <EuiSpacer size="l" />
-          <EuiCallOut
+          <KbnWarningCallout
             announceOnMount
-            color="warning"
             size="s"
             title={i18n.translate('xpack.slo.rules.groupByMessage', {
               defaultMessage:

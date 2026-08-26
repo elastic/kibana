@@ -6,7 +6,8 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiButton, EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
+import { EuiLink, EuiSpacer } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibanaSpace } from '../../../../hooks/use_kibana_space';
@@ -87,13 +88,11 @@ const RemoteCallout = () => {
 
   return (
     <>
-      <EuiCallOut
+      <KbnInfoCallout
         data-test-subj="syntheticsMonitorRemoteCallout"
         title={REMOTE_MONITOR_TITLE}
-        iconType="cluster"
-      >
-        <p>
-          {remoteKibanaUrl ? (
+        text={
+          remoteKibanaUrl ? (
             <FormattedMessage
               id="xpack.synthetics.monitorDetails.remoteCallout.descriptionWithUrl"
               defaultMessage="This is a remote monitor which belongs to another Kibana instance. It is fetched from the remote cluster: {remoteName} with Kibana URL {kibanaUrl}."
@@ -117,21 +116,20 @@ const RemoteCallout = () => {
               defaultMessage="This is a remote monitor which belongs to another Kibana instance. It is fetched from the remote cluster: {remoteName}."
               values={{ remoteName: <strong>{monitor.remote.remoteName}</strong> }}
             />
-          )}
-        </p>
-        <EuiButton
-          data-test-subj="syntheticsMonitorRemoteCalloutButton"
-          color="primary"
-          fill
-          isDisabled={!remoteMonitorUrl}
-          href={remoteMonitorUrl}
-          target="_blank"
-          iconType="external"
-          iconSide="right"
-        >
-          {VIEW_ON_REMOTE_CLUSTER_LABEL}
-        </EuiButton>
-      </EuiCallOut>
+          )
+        }
+        actionProps={{
+          primary: {
+            'data-test-subj': 'syntheticsMonitorRemoteCalloutButton',
+            isDisabled: !remoteMonitorUrl,
+            href: remoteMonitorUrl,
+            target: '_blank',
+            iconType: 'external',
+            iconSide: 'right',
+            children: VIEW_ON_REMOTE_CLUSTER_LABEL,
+          },
+        }}
+      />
       <EuiSpacer size="m" />
     </>
   );
@@ -139,18 +137,16 @@ const RemoteCallout = () => {
 
 const HeartbeatCallout = () => (
   <>
-    <EuiCallOut
+    <KbnInfoCallout
       data-test-subj="syntheticsMonitorHeartbeatCallout"
       title={HEARTBEAT_MONITOR_TITLE}
-      iconType="agentApp"
-    >
-      <p>
+      text={
         <FormattedMessage
           id="xpack.synthetics.monitorDetails.heartbeatCallout.description"
           defaultMessage="This monitor is run by Heartbeat / Elastic Agent (e.g. Kubernetes autodiscovery). It has no Synthetics configuration, so it is read-only here — manage it where the Heartbeat / Agent policy is configured."
         />
-      </p>
-    </EuiCallOut>
+      }
+    />
     <EuiSpacer size="m" />
   </>
 );

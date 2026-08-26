@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiCallOut } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -19,7 +20,7 @@ export const OldAlertCallOut: React.FC<Props> = ({ isOldAlert }) => {
     <>
       <EuiSpacer size="m" />
 
-      <EuiCallOut
+      <KbnInfoCallout
         size="s"
         title={
           <FormattedMessage
@@ -27,7 +28,6 @@ export const OldAlertCallOut: React.FC<Props> = ({ isOldAlert }) => {
             defaultMessage="You may be editing an older alert, some fields may not auto-populate."
           />
         }
-        iconType="warning"
       />
     </>
   );

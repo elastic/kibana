@@ -17,7 +17,6 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiDescriptionList,
-  EuiCallOut,
   EuiButton,
   EuiButtonEmpty,
   EuiBadge,
@@ -26,6 +25,7 @@ import {
   EuiButtonIcon,
   EuiToolTip,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { useDateFormat } from '../../../../../hooks/use_date_format';
 import { useSyntheticsSettingsContext } from '../../../contexts';
@@ -102,30 +102,35 @@ export const ErrorPreviewFlyout = ({
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
-        <EuiCallOut title={ERROR_MESSAGE_LABEL} color="danger" iconType="warning" size="s">
-          <EuiFlexGroup alignItems="flexStart" gutterSize="s">
-            <EuiFlexItem>
-              <EuiText size="s" style={{ wordBreak: 'break-word' }}>
-                {error.errorMessage}
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiCopy textToCopy={error.errorMessage}>
-                {(copy) => (
-                  <EuiToolTip content={COPY_LABEL} disableScreenReaderOutput>
-                    <EuiButtonIcon
-                      data-test-subj="syntheticsErrorPreviewFlyoutButton"
-                      iconType="copy"
-                      onClick={copy}
-                      aria-label={COPY_LABEL}
-                      size="xs"
-                    />
-                  </EuiToolTip>
-                )}
-              </EuiCopy>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiCallOut>
+        <KbnDangerCallout
+          title={ERROR_MESSAGE_LABEL}
+          size="s"
+          text={
+            <EuiFlexGroup alignItems="flexStart" gutterSize="s">
+              <EuiFlexItem>
+                <EuiText size="s" style={{ wordBreak: 'break-word' }}>
+                  {error.errorMessage}
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiCopy textToCopy={error.errorMessage}>
+                  {(copy) => (
+                    <EuiToolTip content={COPY_LABEL} disableScreenReaderOutput>
+                      <EuiButtonIcon
+                        color="danger"
+                        data-test-subj="syntheticsErrorPreviewFlyoutButton"
+                        iconType="copy"
+                        onClick={copy}
+                        aria-label={COPY_LABEL}
+                        size="xs"
+                      />
+                    </EuiToolTip>
+                  )}
+                </EuiCopy>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          }
+        />
 
         <EuiSpacer size="m" />
 

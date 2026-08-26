@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiCallOut, EuiSpacer, EuiLink, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { EuiSpacer, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { usePermissions } from '../../../hooks/use_permissions';
 
 export function SloPermissionsCallout() {
@@ -23,12 +24,20 @@ export function SloPermissionsCallout() {
 
   return (
     <>
-      <EuiCallOut
-        color="warning"
-        iconType="warning"
+      <KbnWarningCallout
         title={i18n.translate('xpack.slo.permissionsCallout.title', {
           defaultMessage: 'Insufficient Permissions',
         })}
+        actionProps={{
+          primary: {
+            'data-test-subj': 'sloSloPermissionsCalloutReadTheDocumentationLink',
+            href: 'https://www.elastic.co/guide/en/observability/current/slo-privileges.html',
+            target: '_blank',
+            children: i18n.translate('xpack.slo.permissionsCallout.readDocumentation', {
+              defaultMessage: 'Read the documentation for more details',
+            }),
+          },
+        }}
       >
         <EuiFlexGroup gutterSize="m" direction="column">
           <FormattedMessage
@@ -73,18 +82,8 @@ export function SloPermissionsCallout() {
               </li>
             </ul>
           </EuiFlexItem>
-
-          <EuiLink
-            data-test-subj="sloSloPermissionsCalloutReadTheDocumentationLink"
-            href="https://www.elastic.co/guide/en/observability/current/slo-privileges.html"
-            target="_blank"
-          >
-            {i18n.translate('xpack.slo.permissionsCallout.readDocumentation', {
-              defaultMessage: 'Read the documentation for more details',
-            })}
-          </EuiLink>
         </EuiFlexGroup>
-      </EuiCallOut>
+      </KbnWarningCallout>
       <EuiSpacer size="m" />
     </>
   );

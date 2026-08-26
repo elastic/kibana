@@ -7,8 +7,6 @@
 
 import React from 'react';
 import {
-  EuiButton,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageSection,
@@ -23,6 +21,7 @@ import {
 } from '@elastic/eui';
 import { RECORDS_FIELD } from '@kbn/exploratory-view-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { Ping } from '../../../../../../../common/runtime_types';
 import { useSyntheticsSettingsContext } from '../../../../contexts';
@@ -124,41 +123,29 @@ export const FlyoutLastTestRun = ({
       {latestPing.error ? (
         <>
           <EuiSpacer size="s" />
-          <EuiCallOut
+          <KbnDangerCallout
             announceOnMount
             data-test-subj="flyoutLastTestRunErrorCallout"
             title={latestPing.error.message}
             size="s"
-            color="danger"
-            iconType="warning"
-            css={{
-              borderRadius: euiTheme.border.radius.medium,
-              fontWeight: euiTheme.font.weight.semiBold,
-            }}
-          >
-            {/*
-              For remote monitors the SO does not exist on the local cluster,
-              so this link would land on a 404/empty error-details page. Hide
-              the button in v1; a follow-up can extend the remote-URL helper
-              with a `/errors/<stateId>` variant. See #267516.
-            */}
-            {latestPing.state?.id && !remoteName && (
-              <EuiButton
-                data-test-subj="flyoutViewErrorDetails"
-                color="danger"
-                size="s"
-                href={getErrorDetailsUrl({
-                  basePath,
-                  configId,
-                  locationId,
-                  spaceId,
-                  stateId: latestPing.state.id,
-                })}
-              >
-                {VIEW_ERROR_DETAILS_LABEL}
-              </EuiButton>
-            )}
-          </EuiCallOut>
+            actionProps={
+              latestPing.state?.id && !remoteName
+                ? {
+                    primary: {
+                      'data-test-subj': 'flyoutViewErrorDetails',
+                      href: getErrorDetailsUrl({
+                        basePath,
+                        configId,
+                        locationId,
+                        spaceId,
+                        stateId: latestPing.state.id,
+                      }),
+                      children: VIEW_ERROR_DETAILS_LABEL,
+                    },
+                  }
+                : undefined
+            }
+          />
         </>
       ) : null}
     </EuiPageSection>

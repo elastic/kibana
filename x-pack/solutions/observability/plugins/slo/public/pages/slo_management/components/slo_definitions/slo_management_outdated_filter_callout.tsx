@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiCallOut, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { useUrlSearchState } from '../../hooks/use_url_search_state';
 
 export function SloOutdatedFilterCallout() {
@@ -17,26 +17,25 @@ export function SloOutdatedFilterCallout() {
   }
 
   return (
-    <EuiCallOut color="primary">
-      <EuiText>
-        {i18n.translate('xpack.slo.outdatedSloFilterCallout.title', {
-          defaultMessage:
-            "You're currently viewing only outdated SLOs. You can reset them from the action menu to bring them up to date.",
-        })}{' '}
-        <EuiLink
-          data-test-subj="outdated-filter-help-callout"
-          onClick={() => {
+    <KbnInfoCallout
+      title={i18n.translate('xpack.slo.outdatedSloFilterCallout.title', {
+        defaultMessage:
+          "You're currently viewing only outdated SLOs. You can reset them from the action menu to bring them up to date.",
+      })}
+      actionProps={{
+        primary: {
+          'data-test-subj': 'outdated-filter-help-callout',
+          onClick: () => {
             onStateChange({
               ...state,
               includeOutdatedOnly: false,
             });
-          }}
-        >
-          {i18n.translate('xpack.slo.outdatedSloFilterCallout.action', {
+          },
+          children: i18n.translate('xpack.slo.outdatedSloFilterCallout.action', {
             defaultMessage: 'Remove filter',
-          })}
-        </EuiLink>
-      </EuiText>
-    </EuiCallOut>
+          }),
+        },
+      }}
+    />
   );
 }

@@ -7,9 +7,7 @@
 import type { ChangeEvent } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFieldSearch,
   EuiFormRow,
   EuiIconTip,
@@ -19,6 +17,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type {
@@ -363,26 +362,27 @@ export const Expressions: React.FC<Props> = (props) => {
         </div>
       ) : metricsViewLoadError ? (
         <>
-          <EuiCallOut
+          <KbnDangerCallout
             announceOnMount
             data-test-subj="infraMetricThresholdConditionsError"
             title={i18n.translate('xpack.infra.metricThreshold.rule.metricsViewError.title', {
               defaultMessage: 'Sorry, there was a problem loading the conditions',
             })}
-            color="danger"
-            iconType="warning"
-          >
-            <p>{metricsViewLoadError}</p>
-            <EuiButton
-              data-test-subj="infraMetricThresholdConditionsErrorTryAgain"
-              onClick={refetchMetricsView}
-              iconType="refresh"
-            >
-              {i18n.translate('xpack.infra.metricThreshold.rule.metricsViewError.tryAgain', {
-                defaultMessage: 'Try again',
-              })}
-            </EuiButton>
-          </EuiCallOut>
+            text={metricsViewLoadError}
+            actionProps={{
+              primary: {
+                'data-test-subj': 'infraMetricThresholdConditionsErrorTryAgain',
+                onClick: refetchMetricsView,
+                iconType: 'refresh',
+                children: i18n.translate(
+                  'xpack.infra.metricThreshold.rule.metricsViewError.tryAgain',
+                  {
+                    defaultMessage: 'Try again',
+                  }
+                ),
+              },
+            }}
+          />
           <EuiSpacer size="m" />
         </>
       ) : (

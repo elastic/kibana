@@ -6,7 +6,8 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { EuiButton, EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
+import { EuiLink, EuiSpacer } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useGetUrlParams, useUrlParams } from '../../hooks';
@@ -44,37 +45,42 @@ const LeftoverIntegrationFound: React.FC = () => {
   if (!packagePolicyId) return null;
 
   return (
-    <EuiCallOut title="Leftover integration found" color="warning" iconType="question">
-      <p>
-        <FormattedMessage
-          id="xpack.synthetics.leftOver.errors.title"
-          defaultMessage="Please click on the button below to delete the integration. Normally this should not happen.
+    <KbnWarningCallout
+      title="Leftover integration found"
+      text={
+        <p>
+          <FormattedMessage
+            id="xpack.synthetics.leftOver.errors.title"
+            defaultMessage="Please click on the button below to delete the integration. Normally this should not happen.
         Since the monitor has been deleted, the integration was supposed to be deleted automatically. If
         this happens often, report it by "
-        />
-        <EuiLink
-          data-test-subj="syntheticsLeftoverIntegrationFoundCreatingAnIssueLink"
-          href="https://github.com/elastic/kibana/issues/new/choose"
-        >
-          <FormattedMessage
-            id="xpack.synthetics.leftOver.errors.createIssue"
-            defaultMessage="creating an issue."
           />
-        </EuiLink>
-      </p>
-      <EuiButton
-        data-test-subj="syntheticsUseMonitorNotFoundDeleteIntegrationButton"
-        color="danger"
-        isLoading={loading && isDeleting}
-        onClick={() => {
-          setIsDeleting(true);
-        }}
-      >
-        <FormattedMessage
-          id="xpack.synthetics.leftOver.errors.delete"
-          defaultMessage="Delete integration"
-        />
-      </EuiButton>
-    </EuiCallOut>
+          <EuiLink
+            data-test-subj="syntheticsLeftoverIntegrationFoundCreatingAnIssueLink"
+            href="https://github.com/elastic/kibana/issues/new/choose"
+          >
+            <FormattedMessage
+              id="xpack.synthetics.leftOver.errors.createIssue"
+              defaultMessage="creating an issue."
+            />
+          </EuiLink>
+        </p>
+      }
+      actionProps={{
+        primary: {
+          'data-test-subj': 'syntheticsUseMonitorNotFoundDeleteIntegrationButton',
+          isLoading: loading && isDeleting,
+          onClick: () => {
+            setIsDeleting(true);
+          },
+          children: (
+            <FormattedMessage
+              id="xpack.synthetics.leftOver.errors.delete"
+              defaultMessage="Delete integration"
+            />
+          ),
+        },
+      }}
+    />
   );
 };

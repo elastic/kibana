@@ -6,7 +6,8 @@
  */
 
 import React, { useContext, useEffect } from 'react';
-import { EuiCallOut, EuiButton, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { useDispatch } from 'react-redux-v7';
 import { UptimeSettingsContext } from '../../../contexts';
 import * as labels from './translations';
@@ -23,22 +24,19 @@ export const ShowLicenseInfo = () => {
 
   return (
     <>
-      <EuiCallOut
+      <KbnInfoCallout
         data-test-subj="uptimeMLLicenseInfo"
         className="license-info-trial"
         title={labels.START_TRAIL}
-        color="primary"
-        iconType="question"
-      >
-        <p>{labels.START_TRAIL_DESC}</p>
-        <EuiButton
-          data-test-subj="syntheticsShowLicenseInfoButton"
-          color="primary"
-          href={basePath + `/app/management/stack/license_management/home`}
-        >
-          {labels.START_TRAIL}
-        </EuiButton>
-      </EuiCallOut>
+        text={labels.START_TRAIL_DESC}
+        actionProps={{
+          primary: {
+            'data-test-subj': 'syntheticsShowLicenseInfoButton',
+            href: basePath + `/app/management/stack/license_management/home`,
+            children: labels.START_TRAIL,
+          },
+        }}
+      />
       <EuiSpacer />
     </>
   );

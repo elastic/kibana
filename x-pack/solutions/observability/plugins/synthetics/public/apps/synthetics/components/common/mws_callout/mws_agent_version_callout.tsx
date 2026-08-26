@@ -5,7 +5,8 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { AgentVersionWarningText } from './mws_agent_version_warning_line';
 
@@ -16,16 +17,13 @@ import { AgentVersionWarningText } from './mws_agent_version_warning_line';
  */
 export const MwsAgentVersionCallout = () => (
   <>
-    <EuiCallOut
+    <KbnWarningCallout
       title={i18n.translate('xpack.synthetics.maintenanceWindowCallout.agentVersionOnly.title', {
         defaultMessage: 'Maintenance window may not be honored',
       })}
-      color="warning"
-      iconType="warning"
+      text={<AgentVersionWarningText />}
       data-test-subj="maintenanceWindowAgentVersionCallout"
-    >
-      <AgentVersionWarningText />
-    </EuiCallOut>
+    />
     <EuiSpacer size="s" />
   </>
 );
