@@ -31,6 +31,7 @@ export default {
 
 const mock = new CodeEditorStorybookMock();
 const argTypes = mock.getArgumentTypes();
+const args = mock.getArguments();
 
 export const Basic = {
   render: (params: CodeEditorStorybookParams) => {
@@ -44,7 +45,7 @@ export const Basic = {
       />
     );
   },
-
+  args,
   argTypes,
 };
 
@@ -87,7 +88,7 @@ export const CustomLogLanguage = {
       </div>
     );
   },
-
+  args,
   argTypes,
 };
 
@@ -250,6 +251,6 @@ const FitToContentComponent = (params: CodeEditorStorybookParams) => {
 
 export const FitToContent = {
   render: (params: CodeEditorStorybookParams) => <FitToContentComponent {...params} />,
-
+  args,
   argTypes,
 };

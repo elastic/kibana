@@ -16,6 +16,10 @@ import { EuiFlexItem } from '@elastic/eui';
 import mdx from './README.mdx';
 import { Markdown } from './markdown';
 
+const mock = new MarkdownStorybookMock();
+const argTypes = mock.getArgumentTypes();
+const args = mock.getArguments();
+
 export default {
   title: 'Markdown/Markdown Editor',
   description: 'A wrapper around `EuiMarkdownEditor`, to be used for markdown within Kibana',
@@ -24,10 +28,9 @@ export default {
       page: mdx,
     },
   },
+  args,
+  argTypes,
 };
-
-const mock = new MarkdownStorybookMock();
-const argTypes = mock.getArgumentTypes();
 
 export const MarkdownStoryComponent = {
   render: (params: MarkdownStorybookParams) => {
@@ -40,6 +43,4 @@ export const MarkdownStoryComponent = {
       </EuiFlexItem>
     );
   },
-
-  argTypes,
 };

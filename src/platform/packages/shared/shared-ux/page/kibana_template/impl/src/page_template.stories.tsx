@@ -52,6 +52,7 @@ export const WithNoDataConfig = {
   },
 
   argTypes: noDataConfigMock.getArgumentTypes(),
+  args: noDataConfigMock.getArguments(),
 };
 
 export const WithSolutionNav = {
@@ -64,6 +65,7 @@ export const WithSolutionNav = {
   },
 
   argTypes: solutionNavMock.getArgumentTypes(),
+  args: solutionNavMock.getArguments(),
 };
 
 export const WithBoth = {
@@ -76,6 +78,7 @@ export const WithBoth = {
   },
 
   argTypes: templateMock.getArgumentTypes(),
+  args: templateMock.getArguments(),
 };
 
 export const WithNeither = {
@@ -88,4 +91,5 @@ export const WithNeither = {
   },
 
   argTypes: innerMock.getArgumentTypes(),
+  args: innerMock.getArguments(),
 };
