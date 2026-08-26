@@ -438,7 +438,7 @@ describe('CountTimeframeStrategy', () => {
       });
     });
 
-    it('increments from 1 (not 2) when a legacy active episode has a null status count', () => {
+    it('increments from 1 when a legacy active episode has a null status count', () => {
       expectTransition({
         from: alertEpisodeStatus.active,
         on: alertEventStatus.breached,
@@ -449,7 +449,7 @@ describe('CountTimeframeStrategy', () => {
       });
     });
 
-    it('increments from 1 (not 2) when a legacy recovering episode has a null status count', () => {
+    it('increments from 1 when a legacy recovering episode has a null status count', () => {
       expectTransition({
         from: alertEpisodeStatus.recovering,
         on: alertEventStatus.recovered,

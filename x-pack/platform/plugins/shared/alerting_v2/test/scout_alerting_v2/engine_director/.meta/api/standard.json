@@ -300,7 +300,7 @@
     },
     {
       "id": "e747878cbda0163-a1b3c8d9e0f12345",
-      "title": "Director no_data_strategy 'none' does not emit no_data events and status_count keeps incrementing on breach",
+      "title": "Director no_data_strategy 'none' freezes the episode when data disappears — no new events are emitted",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",

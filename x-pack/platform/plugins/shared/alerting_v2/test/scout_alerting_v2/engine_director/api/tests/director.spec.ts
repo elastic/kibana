@@ -1649,7 +1649,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
   );
 
   apiTest(
-    "no_data_strategy 'none' does not emit no_data events and status_count keeps incrementing on breach",
+    "no_data_strategy 'none' freezes the episode when data disappears — no new events are emitted",
     async ({ apiServices }) => {
       const HOST = 'host-director-no-data-none';
 
@@ -1684,33 +1684,57 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
         episodeStatus: 'active',
       });
 
-      const activeEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
+      const activeEventsBefore = await apiServices.alertingV2.ruleEvents.find(rule.id, {
         episodeStatus: 'active',
       });
-      const counts = [...activeEvents]
+      const countsBefore = [...activeEventsBefore]
         .sort((a, b) => Date.parse(a['@timestamp']) - Date.parse(b['@timestamp']))
         .map((event) => event.episode?.status_count);
 
-      expect(counts.slice(0, 3)).toStrictEqual([1, 2, 3]);
+      expect(countsBefore.slice(0, 3)).toStrictEqual([1, 2, 3]);
 
-      // Remove data — with no_data_strategy 'none', no no_data events should
-      // be produced. The episode simply stops receiving new events.
+      const eventCountBefore = activeEventsBefore.length;
+      const lastActiveTimestamp = [...activeEventsBefore]
+        .sort((a, b) => Date.parse(a['@timestamp']) - Date.parse(b['@timestamp']))
+        .at(-1)!['@timestamp'];
+
       await apiServices.alertingV2.sourceIndex.deleteDocs({
         index: SOURCE_INDEX,
         query: { term: { 'host.name': HOST } },
       });
 
-      // Wait for a couple more executor runs so absent-group classification
-      // has a chance to fire (it should not produce any no_data events).
       await apiServices.alertingV2.ruleExecutions.waitForRuns({
         ruleId: rule.id,
         runs: 2,
       });
 
+      // No no_data events — no_data_strategy 'none' skips detection entirely.
       const noDataEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
         status: 'no_data',
       });
       expect(noDataEvents).toHaveLength(0);
+
+      // No recovered events — recovery_strategy 'none' skips recovery.
+      const recoveredEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
+        status: 'recovered',
+      });
+      expect(recoveredEvents).toHaveLength(0);
+
+      // No new active events after the data was removed — the episode is
+      // frozen at its last state with no further status_count increments.
+      const activeEventsAfter = await apiServices.alertingV2.ruleEvents.find(rule.id, {
+        episodeStatus: 'active',
+      });
+      const newActiveEvents = activeEventsAfter.filter(
+        (event) => Date.parse(event['@timestamp']) > Date.parse(lastActiveTimestamp)
+      );
+      expect(newActiveEvents).toHaveLength(0);
+      expect(activeEventsAfter.length).toBe(eventCountBefore);
+
+      // Latest episode state is still active.
+      const latestStates = await apiServices.alertingV2.ruleEvents.getLatestEpisodeStates(rule.id);
+      const [latestState] = Array.from(latestStates.values());
+      expect(latestState.episode?.status).toBe('active');
     }
   );
 
