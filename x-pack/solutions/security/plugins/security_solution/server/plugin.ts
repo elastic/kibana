@@ -217,6 +217,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
   /** Derived in `setup()`, where `cps` is available as a dependency, and consumed in `start()` */
   private defendCpsEnabled = false;
+  private platformCpsEnabled = false;
 
   constructor(context: PluginInitializerContext) {
     const serverConfig = createConfig(context);
@@ -332,8 +333,9 @@ export class Plugin implements ISecuritySolutionPlugin {
     const { appClientFactory, productFeaturesService, pluginContext, config, logger } = this;
     const experimentalFeatures = config.experimentalFeatures;
 
+    this.platformCpsEnabled = plugins.cps?.getCpsEnabled() ?? false;
     this.defendCpsEnabled =
-      (plugins.cps?.getCpsEnabled() ?? false) && experimentalFeatures.defendCrossProjectSearch;
+      this.platformCpsEnabled && experimentalFeatures.defendCrossProjectSearch;
 
     initSavedObjects(core.savedObjects, experimentalFeatures, this.logger.get('initSavedObjects'));
     initEncryptedSavedObjects({
@@ -674,7 +676,8 @@ export class Plugin implements ISecuritySolutionPlugin {
       core.docLinks,
       this.endpointContext,
       trialCompanionDeps,
-      enableDataGeneratorRoutes
+      enableDataGeneratorRoutes,
+      this.platformCpsEnabled
     );
 
     registerEndpointRoutes(router, this.endpointContext);

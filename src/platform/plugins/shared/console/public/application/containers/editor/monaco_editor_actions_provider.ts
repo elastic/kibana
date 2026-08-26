@@ -11,6 +11,9 @@ import type { CSSProperties, Dispatch } from 'react';
 import { debounce, range } from 'lodash';
 import type { ConsoleParsedRequestsProvider, ParsedRequest } from '@kbn/monaco';
 import { getParsedRequestsProvider, monaco } from '@kbn/monaco';
+import { i18n } from '@kbn/i18n';
+import { XJson } from '@kbn/es-ui-shared-plugin/public';
+import type { ErrorAnnotation } from '@kbn/monaco/src/languages/console/types';
 import {
   endsWithConsoleBodyContinuation,
   getLineRemainderWithoutConsoleComments,
@@ -18,9 +21,6 @@ import {
   isInsideConsoleString,
   isRequestLineWithUrl,
 } from '@kbn/monaco/src/languages/console/utils';
-import { i18n } from '@kbn/i18n';
-import { XJson } from '@kbn/es-ui-shared-plugin/public';
-import type { ErrorAnnotation } from '@kbn/monaco/src/languages/console/types';
 import { isQuotaExceededError } from '../../../services/history';
 import { DEFAULT_VARIABLES, KIBANA_API_PREFIX } from '../../../../common/constants';
 import { getStorage, StorageKeys } from '../../../services';
@@ -32,22 +32,15 @@ import type { Actions } from '../../stores/request';
 import {
   AutocompleteType,
   containsUrlParams,
-  getAutoIndentedRequests,
   getBodyCompletionItems,
-  getCurlRequest,
   getDocumentationLinkFromAutocomplete,
   getKibanaApiDocLink,
   getLineTokens,
   getMethodCompletionItems,
-  getRequestEndLineNumber,
-  getRequestStartLineNumber,
   getUrlParamsCompletionItems,
   getUrlPathCompletionItems,
   isRequestLineStart,
-  replaceRequestVariables,
   shouldTriggerSuggestions,
-  trackSentRequests,
-  getRequestFromEditor,
   getTripleQuoteContext,
 } from './utils';
 import type { TripleQuoteContext } from './utils';
@@ -55,7 +48,18 @@ import type { TripleQuoteContext } from './utils';
 import type { AdjustedParsedRequest } from './types';
 import { type RequestToRestore, RestoreMethod } from '../../../types';
 import type { ContextValue } from '../../contexts';
-import { containsComments, removeCommentsFromData } from './utils/requests_utils';
+import {
+  containsComments,
+  getAutoIndentedRequests,
+  getCurlRequest,
+  getRequestEndLineNumber,
+  getRequestFromEditor,
+  getRequestStartLineNumber,
+  removeCommentsFromData,
+  replaceRequestVariables,
+  trackSentRequests,
+} from './utils/request';
+
 import { onlyBodyClosingTokensRegex } from './utils/constants';
 
 const AUTO_INDENTATION_ACTION_LABEL = 'Apply indentations';
@@ -867,7 +871,8 @@ export class MonacoEditorActionsProvider {
         position,
         requestStartLineNumber,
         this,
-        this.getRequestStartColumn(model, request, requestStartLineNumber)
+        this.getRequestStartColumn(model, request, requestStartLineNumber),
+        { isInsideTripleQuotedString: insideTripleQuotes }
       );
       return {
         suggestions,
@@ -960,7 +965,6 @@ export class MonacoEditorActionsProvider {
     const {
       services: { notifications },
     } = context;
-    const { toasts } = notifications;
     const parsedRequests = await this.getSelectedParsedRequests();
     const selectionStartLineNumber = parsedRequests[0].startLineNumber;
     const selectionEndLineNumber = parsedRequests[parsedRequests.length - 1].endLineNumber;
@@ -978,12 +982,22 @@ export class MonacoEditorActionsProvider {
     const selectedText = this.getTextInRange(selectedRange);
     const allText = this.getTextInRange();
 
-    const autoIndentedText = getAutoIndentedRequests(
+    const { text: autoIndentedText, hasCommentFallback } = getAutoIndentedRequests(
       parsedRequests,
       selectedText,
-      allText,
-      (text) => toasts.addWarning(text)
+      allText
     );
+
+    if (hasCommentFallback) {
+      notifications.toasts.addWarning(
+        i18n.translate(
+          'console.notification.monaco.warning.commentAutoIndentFallbackWarningMessage',
+          {
+            defaultMessage: 'Some request bodies with comments could not be safely auto-indented.',
+          }
+        )
+      );
+    }
 
     this.editor.executeEdits(AUTO_INDENTATION_ACTION_LABEL, [
       {

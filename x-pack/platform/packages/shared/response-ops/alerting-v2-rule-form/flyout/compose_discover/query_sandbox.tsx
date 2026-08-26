@@ -41,7 +41,7 @@ import type { QueryTab } from './types';
 import { CpsPicker } from './cps_picker';
 import { useResolveTimeField } from './use_resolve_time_field';
 import { extractFromSourceQuery } from './extract_from_source_query';
-import { MIN_EDITOR_HEIGHT, MAX_EDITOR_HEIGHT } from './constants';
+import { MIN_EDITOR_HEIGHT, MAX_EDITOR_HEIGHT, ESQL_CODE_EDITOR_OPTIONS } from './constants';
 import { useQuerySandboxStyles } from './query_sandbox.styles';
 import { useEditorHeightResize } from './use_editor_height_resize';
 
@@ -316,10 +316,7 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
         onChange={(v) => onQueryChange?.(v)}
         height="100%"
         options={{
-          minimap: { enabled: false },
-          automaticLayout: true,
-          scrollBeyondLastLine: false,
-          fontSize: 13,
+          ...ESQL_CODE_EDITOR_OPTIONS,
           readOnly: isReadOnly,
           domReadOnly: isReadOnly,
         }}
@@ -382,6 +379,16 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
               </EuiButton>
             </EuiToolTip>
           </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <AlertingDateRangePicker
+              from={dateRange.dateStart}
+              to={dateRange.dateEnd}
+              onChange={handleDateRangeChange}
+              services={services}
+              width="auto"
+              data-test-subj="querySandboxDatePicker"
+            />
+          </EuiFlexItem>
           <EuiFlexItem grow={false} css={timeFieldSelectCss}>
             <EuiSelect
               options={timeFieldOptions}
@@ -402,17 +409,11 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
               data-test-subj="querySandboxTimeField"
             />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <AlertingDateRangePicker
-              from={dateRange.dateStart}
-              to={dateRange.dateEnd}
-              onChange={handleDateRangeChange}
-              services={services}
-              width="auto"
-              data-test-subj="querySandboxDatePicker"
-            />
-          </EuiFlexItem>
-          {headerActions && <EuiFlexItem grow={false}>{headerActions}</EuiFlexItem>}
+          {headerActions && (
+            <EuiFlexItem grow={false} css={{ marginLeft: 'auto' }}>
+              {headerActions}
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
         <EuiSpacer size="s" />
         <div css={editorBodyCss} style={{ height: editorHeight }}>

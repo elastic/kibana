@@ -251,6 +251,82 @@ describe('IacProvisionerService', () => {
     );
   });
 
+  it('logs the TLS cause when undici wraps it as fetch failed', async () => {
+    mockConfig();
+    const logger = mockLogger();
+    const failure = new TypeError('fetch failed');
+    failure.cause = new Error('unable to get issuer certificate');
+    mockedFetch.mockRejectedValueOnce(failure);
+
+    await expect(iacProvisionerService.renderTemplate(RENDER_REQUEST)).rejects.toThrow(
+      IacProvisionerUnavailableError
+    );
+    const errorLogged = logger.error.mock.calls.flat().map(String).join(' ');
+    expect(errorLogged).toContain('fetch failed');
+    expect(errorLogged).toContain('unable to get issuer certificate');
+  });
+
+  it('passes an array of CA paths through to the outbound Agent', async () => {
+    // kibana-controller injects both cluster-internal-cas and the MKI
+    // intermediate so rejectUnauthorized: true can complete the chain.
+    mockConfig({
+      api: {
+        url: 'https://cloud-iac-provisioner.cloud-iac-provisioner.svc.cluster.local',
+        tls: {
+          certificate: '/mnt/elastic-internal/http-certs/tls.crt',
+          key: '/mnt/elastic-internal/http-certs/tls.key',
+          ca: [
+            '/mnt/elastic-internal/trust-bundle/ca.crt',
+            '/mnt/elastic-internal/http-certs/ca.crt',
+          ],
+        },
+      },
+    });
+    mockLogger();
+    mockedFetch.mockResolvedValueOnce(
+      jsonResponse(200, { artifactUrl: ARTIFACT_URL, expiresAt: '2026-07-28T12:00:00Z' })
+    );
+
+    await iacProvisionerService.renderTemplate(RENDER_REQUEST);
+
+    expect(mockedAgent).toHaveBeenCalledWith({
+      connect: expect.objectContaining({
+        ca: [
+          '/mnt/elastic-internal/trust-bundle/ca.crt',
+          '/mnt/elastic-internal/http-certs/ca.crt',
+        ],
+        rejectUnauthorized: true,
+      }),
+    });
+  });
+
+  it('does not replace Mozilla roots when tls.ca is unset', async () => {
+    // ECH presents a client cert to the public proxy but must keep the default
+    // CA store so Let's Encrypt on the hosted URL still verifies.
+    mockConfig({
+      api: {
+        url: 'https://cloud-iac-provisioner.eu-west-1.aws.svc.qa.elastic.cloud',
+        tls: {
+          certificate: '/mnt/elastic-internal/http-certs/tls.crt',
+          key: '/mnt/elastic-internal/http-certs/tls.key',
+        },
+      },
+    });
+    mockLogger();
+    mockedFetch.mockResolvedValueOnce(
+      jsonResponse(200, { artifactUrl: ARTIFACT_URL, expiresAt: '2026-07-28T12:00:00Z' })
+    );
+
+    await iacProvisionerService.renderTemplate(RENDER_REQUEST);
+
+    expect(mockedAgent).toHaveBeenCalledWith({
+      connect: expect.objectContaining({
+        ca: undefined,
+        rejectUnauthorized: true,
+      }),
+    });
+  });
+
   it('maps a body that fails to read to IacProvisionerUnavailableError', async () => {
     mockConfig();
     mockLogger();

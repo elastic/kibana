@@ -272,50 +272,49 @@ export function ProjectPickerFilterDisplay({
   return (
     <div data-test-subj="projectPickerFilterDisplayContainer">
       {renderFilterBadgeContextMenu()}
-      <EuiFlexGroup direction="column" gutterSize="none">
-        <EuiFlexItem css={styles.filterBadgesContainer}>
-          <EuiFlexGroup gutterSize="s" responsive={false}>
-            {filterEntries.map(([id, entry]) => {
-              const isNonInteractive =
-                id === currentFilterInputId ||
-                state.controlsState === 'disabled' ||
-                state.isFilterProposalPending;
+      <EuiFlexGroup gutterSize="s" responsive={false} css={styles.filterBadgesContainer}>
+        {filterEntries.map(([id, entry]) => {
+          const isNonInteractive =
+            id === currentFilterInputId ||
+            state.controlsState === 'disabled' ||
+            state.isFilterProposalPending;
 
-              return (
-                <EuiFlexItem key={id} grow={false}>
-                  <FilterBadge
-                    filter={entry.expression}
-                    isDisabled={isNonInteractive}
-                    isInactive={!entry.enabled}
-                    {...(isNonInteractive
-                      ? {
-                          iconType: 'empty',
-                          iconSide: 'right',
+          return (
+            <EuiFlexItem key={id} grow={false}>
+              <FilterBadge
+                filter={entry.expression}
+                isDisabled={isNonInteractive}
+                isInactive={!entry.enabled}
+                {...(isNonInteractive
+                  ? {
+                      iconType: 'empty',
+                      iconSide: 'right',
+                    }
+                  : {
+                      iconSide: 'right',
+                      iconType: 'cross',
+                      iconOnClick: handleFilterBadgeIconClick.bind(null, id),
+                      iconOnClickAriaLabel: i18n.translate(
+                        'cpsUtils.projectPicker.filterDisplay.filterBadgeIconClickAriaLabel',
+                        {
+                          defaultMessage: 'Remove filter',
                         }
-                      : {
-                          iconSide: 'right',
-                          iconType: 'cross',
-                          iconOnClick: handleFilterBadgeIconClick.bind(null, id),
-                          iconOnClickAriaLabel: i18n.translate(
-                            'cpsUtils.projectPicker.filterDisplay.filterBadgeIconClickAriaLabel',
-                            {
-                              defaultMessage: 'Remove filter',
-                            }
-                          ),
-                          onClick: handleFilterBadgeClick.bind(null, id),
-                          onClickAriaLabel: i18n.translate(
-                            'cpsUtils.projectPicker.filterDisplay.filterBadgeClickAriaLabel',
-                            {
-                              defaultMessage: 'Click to view filter actions',
-                            }
-                          ),
-                        })}
-                  />
-                </EuiFlexItem>
-              );
-            })}
-          </EuiFlexGroup>
-        </EuiFlexItem>
+                      ),
+                      onClick: handleFilterBadgeClick.bind(null, id),
+                      onClickAriaLabel: i18n.translate(
+                        'cpsUtils.projectPicker.filterDisplay.filterBadgeClickAriaLabel',
+                        {
+                          defaultMessage: 'Click to view filter actions',
+                        }
+                      ),
+                      closeButtonProps: {
+                        'data-test-subj': `filterBadgeCloseButton-${id}`,
+                      },
+                    })}
+              />
+            </EuiFlexItem>
+          );
+        })}
       </EuiFlexGroup>
     </div>
   );
