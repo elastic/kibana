@@ -11,6 +11,7 @@ import {
   classifySeverity,
   toSeverityResult,
   type ClassifySeverityLlmOutput,
+  classifySeverityLlmOutputSchema,
 } from './classify_severity';
 
 const buildModel = (
@@ -110,5 +111,19 @@ describe('classifySeverity', () => {
 describe('toSeverityResult', () => {
   it('maps high to score 70', () => {
     expect(toSeverityResult('high')).toEqual({ level: 'high', score: 70 });
+  });
+});
+
+describe('classifySeverityLlmOutputSchema bounds', () => {
+  it('truncates an over-long rationale', () => {
+    const parsed = classifySeverityLlmOutputSchema.parse({
+      level: 'high',
+      rationale: 'x'.repeat(50_000),
+    });
+    expect(parsed.rationale?.length).toBe(2_000);
+  });
+
+  it('leaves the rationale optional', () => {
+    expect(classifySeverityLlmOutputSchema.parse({ level: 'low' }).rationale).toBeUndefined();
   });
 });

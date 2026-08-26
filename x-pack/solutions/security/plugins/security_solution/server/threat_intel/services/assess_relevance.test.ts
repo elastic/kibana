@@ -7,7 +7,7 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ScopedModel } from '@kbn/agent-builder-server';
-import { assessRelevance } from './assess_relevance';
+import { assessRelevance, relevanceOutputSchema } from './assess_relevance';
 import type { RelevanceOutput } from './assess_relevance';
 
 const SAMPLE_OUTPUT: RelevanceOutput = {
@@ -116,5 +116,45 @@ describe('assessRelevance', () => {
     const { model } = buildModel(SAMPLE_OUTPUT);
     const result = await assessRelevance(model, logger, { text: 'Pointer article.' });
     expect(result).toHaveProperty('primary_links');
+  });
+});
+
+// `withStructuredOutput` is mocked everywhere above, so the schema's own parsing of
+// model output is never exercised by those tests. A7 requires LLM output to be bounded
+// before it is stored, and these are the assertions that fail if the bound is removed.
+describe('relevanceOutputSchema bounds', () => {
+  const valid = {
+    is_intelligence: true,
+    quality_class: 'intel' as const,
+    evidence_tier: 'primary' as const,
+    needs_render: false,
+    primary_links: ['https://vendor.test/a'],
+    has_original_commentary: true,
+    reason: 'because',
+  };
+
+  it('truncates an over-long reason rather than rejecting the whole enrichment', () => {
+    const parsed = relevanceOutputSchema.parse({ ...valid, reason: 'x'.repeat(50_000) });
+    expect(parsed.reason.length).toBe(2_000);
+  });
+
+  it('caps the number of primary links', () => {
+    const parsed = relevanceOutputSchema.parse({
+      ...valid,
+      primary_links: Array.from({ length: 500 }, (_v, i) => `https://vendor.test/${i}`),
+    });
+    expect(parsed.primary_links.length).toBe(20);
+  });
+
+  it('caps the length of each primary link', () => {
+    const parsed = relevanceOutputSchema.parse({
+      ...valid,
+      primary_links: [`https://vendor.test/${'a'.repeat(50_000)}`],
+    });
+    expect(parsed.primary_links[0].length).toBe(2_048);
+  });
+
+  it('leaves ordinary output untouched', () => {
+    expect(relevanceOutputSchema.parse(valid)).toEqual(valid);
   });
 });

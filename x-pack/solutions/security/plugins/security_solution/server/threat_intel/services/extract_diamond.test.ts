@@ -7,7 +7,7 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ScopedModel } from '@kbn/agent-builder-server';
-import { extractDiamond } from './extract_diamond';
+import { extractDiamond, extractDiamondLlmOutputSchema } from './extract_diamond';
 
 const NONE_VERTEX = { signal: 'NONE' as const, summary: '' };
 const HIGH_VERTEX = { signal: 'HIGH' as const, summary: 'FIN7 operators' };
@@ -116,5 +116,44 @@ describe('extractDiamond', () => {
 
     expect(result.extraction_mode).toBe('per_vertex_fallback');
     expect(result.signal_count).toBe(0);
+  });
+});
+
+// Each vertex summary is mapped `semantic_text`, so its length is an embedding charge
+// paid per report per vertex, four vertices deep. Nothing else in the pipeline caps it.
+describe('extractDiamondLlmOutputSchema bounds', () => {
+  const vertex = (summary: string) => ({ signal: 'HIGH' as const, summary });
+
+  it('truncates an over-long vertex summary', () => {
+    const parsed = extractDiamondLlmOutputSchema.parse({
+      adversary: vertex('x'.repeat(50_000)),
+      capability: vertex('ok'),
+      infrastructure: vertex('ok'),
+      victim: vertex('ok'),
+    });
+    expect(parsed.adversary.summary.length).toBe(4_000);
+  });
+
+  it('bounds every vertex, not just the first', () => {
+    const long = 'x'.repeat(50_000);
+    const parsed = extractDiamondLlmOutputSchema.parse({
+      adversary: vertex(long),
+      capability: vertex(long),
+      infrastructure: vertex(long),
+      victim: vertex(long),
+    });
+    for (const v of [parsed.adversary, parsed.capability, parsed.infrastructure, parsed.victim]) {
+      expect(v.summary.length).toBe(4_000);
+    }
+  });
+
+  it('leaves an ordinary summary untouched', () => {
+    const parsed = extractDiamondLlmOutputSchema.parse({
+      adversary: vertex('APT29'),
+      capability: vertex('ok'),
+      infrastructure: vertex('ok'),
+      victim: vertex('ok'),
+    });
+    expect(parsed.adversary.summary).toBe('APT29');
   });
 });
