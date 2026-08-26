@@ -125,7 +125,7 @@ describe('scoreToolUsage', () => {
     expect(scoreToolUsage({ steps, detectionCount: 1 })).toEqual({
       score: 1,
       label: 'correct',
-      explanation: 'Correctly called all tools',
+      explanation: 'Correctly called all tools and retried after a schema or tool error',
     });
   });
 
