@@ -8,7 +8,10 @@
 import { schema } from '@kbn/config-schema';
 import type { KibanaRequest } from '@kbn/core/server';
 import { WorkflowsManagementOperationPrivileges } from '@kbn/workflows';
-import { INTERNAL_CASE_WORKFLOW_RUN_URL } from '../../../../common/constants';
+import {
+  INTERNAL_CASE_WORKFLOW_RUN_URL,
+  MAX_CASES_PER_WORKFLOW_RUN,
+} from '../../../../common/constants';
 import {
   ALERT_WORKFLOW_ORIGIN_TYPE,
   ALERTS_WORKFLOW_ORIGIN_TYPE,
@@ -22,6 +25,15 @@ import { createCasesRoute } from '../create_cases_route';
 const MAX_WORKFLOW_INPUTS_BYTES = 1_000_000;
 
 export const runCaseWorkflowBodySchema = schema.object({
+  caseIds: schema.arrayOf(
+    schema.string({ minLength: 1, maxLength: MAX_CASE_WORKFLOW_RUN_ID_LENGTH }),
+    {
+      minSize: 1,
+      maxSize: MAX_CASES_PER_WORKFLOW_RUN,
+      validate: (ids) =>
+        new Set(ids).size === ids.length ? undefined : 'caseIds must not contain duplicates.',
+    }
+  ),
   inputs: schema.recordOf(schema.string({ maxLength: 1024 }), schema.any(), {
     validate: (inputs) =>
       Buffer.byteLength(JSON.stringify(inputs)) <= MAX_WORKFLOW_INPUTS_BYTES
@@ -40,7 +52,6 @@ export const runCaseWorkflowBodySchema = schema.object({
 });
 
 export const runCaseWorkflowParamsSchema = schema.object({
-  case_id: schema.string({ minLength: 1, maxLength: MAX_CASE_WORKFLOW_RUN_ID_LENGTH }),
   workflow_id: schema.string({
     minLength: 1,
     maxLength: MAX_CASE_WORKFLOW_RUN_ID_LENGTH,
@@ -66,8 +77,8 @@ export const createRunWorkflowRoute = ({ service, getSpaceId }: RunWorkflowRoute
     // 2. Handler-level (inside CasesWorkflowRunService): `cases:<owner>/updateCase` — checked
     //    by `casesClient.cases.ensureAuthorizedToUpdate`. This is owner-scoped and cannot be
     //    declared statically on the route (which is why `DEFAULT_CASES_ROUTE_SECURITY` opts out
-    //    for all other Cases routes). It ensures the caller can only trigger workflows for cases
-    //    they are authorized to write to within the current space.
+    //    for all other Cases routes). It ensures the caller can only trigger workflows for the
+    //    authorized cases within the current space.
     security: {
       authz: {
         requiredPrivileges: [...WorkflowsManagementOperationPrivileges.execute],
@@ -79,15 +90,15 @@ export const createRunWorkflowRoute = ({ service, getSpaceId }: RunWorkflowRoute
     },
     routerOptions: {
       access: 'internal',
-      summary: 'Run a workflow from a case',
-      description: 'Runs a workflow with server-owned execution metadata for the authorized case.',
+      summary: 'Run a workflow from one or more cases',
+      description:
+        'Runs a workflow with server-owned execution metadata for the authorized cases.',
     },
     handler: async ({ context, request, response }) => {
       const caseContext = await context.cases;
       const casesClient = await caseContext.getCasesClient();
-      const { case_id: caseId, workflow_id: workflowId } = request.params;
+      const { workflow_id: workflowId } = request.params;
       const result = await service.run({
-        caseId,
         workflowId,
         body: request.body,
         request,

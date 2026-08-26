@@ -82,6 +82,7 @@ export {
   AIOPS_LOG_RATE_ANALYSIS_ATTACHMENT_TYPE,
   CASE_MARKDOWN_EDITOR_PLUGIN_CLICKED_EVENT_TYPE,
   INTERNAL_CASE_WORKFLOW_RUN_URL,
+  MAX_CASES_PER_WORKFLOW_RUN,
 } from './constants';
 
 export type { AttachmentAttributes } from './types/domain';

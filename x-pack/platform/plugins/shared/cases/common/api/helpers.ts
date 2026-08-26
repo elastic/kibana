@@ -113,5 +113,5 @@ export const getCaseSimilarCasesUrl = (caseId: string) => {
   return INTERNAL_CASE_SIMILAR_CASES_URL.replace('{case_id}', caseId);
 };
 
-export const getCaseWorkflowRunUrl = (caseId: string, workflowId: string): string =>
-  INTERNAL_CASE_WORKFLOW_RUN_URL.replace('{case_id}', caseId).replace('{workflow_id}', workflowId);
+export const getCaseWorkflowRunUrl = (workflowId: string): string =>
+  INTERNAL_CASE_WORKFLOW_RUN_URL.replace('{workflow_id}', workflowId);

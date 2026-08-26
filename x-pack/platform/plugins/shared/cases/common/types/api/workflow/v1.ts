@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { MAX_CASES_PER_WORKFLOW_RUN } from '../../../constants';
 
 export const CASES_WORKFLOW_EXECUTION_SOURCE = 'cases' as const;
 export const CASES_WORKFLOW_EXECUTION_METADATA_SCHEMA_VERSION = 1 as const;
@@ -34,7 +35,10 @@ export const CasesWorkflowExecutionMetadataSchema = z
   .object({
     schemaVersion: z.literal(CASES_WORKFLOW_EXECUTION_METADATA_SCHEMA_VERSION),
     source: z.literal(CASES_WORKFLOW_EXECUTION_SOURCE),
-    caseId: z.string().min(1).max(MAX_CASE_WORKFLOW_RUN_ID_LENGTH),
+    caseIds: z
+      .array(z.string().min(1).max(MAX_CASE_WORKFLOW_RUN_ID_LENGTH))
+      .min(1)
+      .max(MAX_CASES_PER_WORKFLOW_RUN),
     origin: CaseWorkflowRunOriginSchema,
   })
   .strict();
@@ -42,6 +46,7 @@ export const CasesWorkflowExecutionMetadataSchema = z
 export type CasesWorkflowExecutionMetadata = z.infer<typeof CasesWorkflowExecutionMetadataSchema>;
 
 export interface RunCaseWorkflowRequest {
+  caseIds: string[];
   inputs: Record<string, unknown>;
   origin: CaseWorkflowRunOrigin;
 }
