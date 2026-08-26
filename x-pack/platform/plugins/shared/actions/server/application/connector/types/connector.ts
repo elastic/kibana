@@ -22,10 +22,10 @@ export interface Connector {
   isSystemAction: ConnectorSchemaType['isSystemAction'];
   isConnectorTypeDeprecated: ConnectorSchemaType['isConnectorTypeDeprecated'];
   authMode?: ConnectorSchemaType['authMode'];
-  /**
-   * One-time secrets returned on create (or when credentials are minted on update).
-   * Never persisted. GET/list omit this field.
-   */
+}
+
+/** One-time secrets returned on create/update/rotate; never persisted and omitted from GET/list. */
+export interface ConnectorWithMintedSecrets extends Connector {
   secrets?: {
     ingestToken?: string;
   };

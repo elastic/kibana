@@ -38,6 +38,7 @@ export type {
 export type {
   ConnectorWithExtraFindData as FindActionResult,
   Connector,
+  ConnectorWithMintedSecrets,
   ConnectorType,
 } from './application/connector/types';
 

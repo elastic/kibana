@@ -9,11 +9,12 @@ import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 import { SavedObjectsUtils, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
+import type { ConnectorWithMintedSecrets } from '../../types';
 import type { ConnectorCreateParams } from './types';
 import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
 import { validateConfig, validateConnector, validateSecrets } from '../../../../lib';
 import { isConnectorDeprecated } from '../../lib';
-import type { HookServices, ActionResult, RawAction } from '../../../../types';
+import type { HookServices, RawAction } from '../../../../types';
 import { tryCatch } from '../../../../lib';
 import { invokePostCreateListeners } from '../../../../lib/invoke_lifecycle_listeners';
 import { ensureConfigAuthType } from '../../../../lib/ensure_config_auth_type';
@@ -28,7 +29,7 @@ export async function create({
   context,
   action: { actionTypeId, name, config, secrets },
   options,
-}: ConnectorCreateParams): Promise<ActionResult> {
+}: ConnectorCreateParams): Promise<ConnectorWithMintedSecrets> {
   const id = options?.id || SavedObjectsUtils.generateId();
 
   try {

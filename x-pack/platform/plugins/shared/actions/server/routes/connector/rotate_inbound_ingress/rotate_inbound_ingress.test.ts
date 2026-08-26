@@ -11,7 +11,7 @@ import { licenseStateMock } from '../../../lib/license_state.mock';
 import { mockHandlerArguments } from '../../_mock_handler_arguments';
 import { actionsClientMock } from '../../../actions_client/actions_client.mock';
 import { verifyAccessAndContext } from '../../verify_access_and_context';
-import { createMockConnector } from '../../../application/connector/mocks';
+import { createMockConnectorWithMintedSecrets } from '../../../application/connector/mocks';
 
 jest.mock('../../verify_access_and_context', () => ({
   verifyAccessAndContext: jest.fn(),
@@ -33,7 +33,7 @@ describe('rotateInboundIngressRoute', () => {
 
     expect(config.path).toBe('/internal/actions/connector/{id}/_rotate_ingress');
 
-    const rotateResult = createMockConnector({
+    const rotateResult = createMockConnectorWithMintedSecrets({
       id: '1',
       actionTypeId: '.inboundWebhook',
       name: 'sales-ingress',

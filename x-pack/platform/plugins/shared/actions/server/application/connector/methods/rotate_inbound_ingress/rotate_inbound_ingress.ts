@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 
 import type { SavedObjectAttributes } from '@kbn/core/server';
 import type { RawAction } from '../../../../types';
-import type { Connector } from '../../types';
+import type { ConnectorWithMintedSecrets } from '../../types';
 import { resolveInboundEventsSpaceId } from '../../../../inbound/ensure_connector_ingress_credentials';
 import { update } from '../update';
 import type { RotateInboundIngressParams } from './types';
@@ -20,7 +20,7 @@ import type { RotateInboundIngressParams } from './types';
 export async function rotateInboundIngress({
   context,
   id,
-}: RotateInboundIngressParams): Promise<Connector> {
+}: RotateInboundIngressParams): Promise<ConnectorWithMintedSecrets> {
   await context.authorization.ensureAuthorized({ operation: 'update' });
 
   const spaceId = resolveInboundEventsSpaceId(context);

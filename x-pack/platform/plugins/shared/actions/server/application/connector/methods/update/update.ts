@@ -9,7 +9,7 @@ import Boom from '@hapi/boom';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import { i18n } from '@kbn/i18n';
 import { isUndefined, omitBy } from 'lodash';
-import type { Connector } from '../../types';
+import type { Connector, ConnectorWithMintedSecrets } from '../../types';
 import type { ConnectorUpdateParams } from './types';
 import { PreconfiguredActionDisabledModificationError } from '../../../../lib/errors/preconfigured_action_disabled_modification';
 import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
@@ -35,7 +35,7 @@ export async function update({
   id,
   action,
   rotateIngress = false,
-}: ConnectorUpdateParams): Promise<Connector> {
+}: ConnectorUpdateParams): Promise<ConnectorWithMintedSecrets> {
   try {
     await context.authorization.ensureAuthorized({ operation: 'update' });
 

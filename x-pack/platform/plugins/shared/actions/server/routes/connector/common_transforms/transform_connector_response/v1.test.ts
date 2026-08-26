@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { Connector } from '../../../../application/connector/types';
+import type { ConnectorWithMintedSecrets } from '../../../../application/connector/types';
 import { transformConnectorResponse } from './v1';
 
 describe('transformConnectorResponse', () => {
-  const baseConnector: Connector = {
+  const baseConnector: ConnectorWithMintedSecrets = {
     id: 'id-1',
     name: 'Sales ingress',
     actionTypeId: '.inboundWebhook',

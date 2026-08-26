@@ -6,7 +6,7 @@
  */
 
 import type { FindActionResult, InMemoryConnector } from '../..';
-import type { Connector, ConnectorType } from './types';
+import type { Connector, ConnectorType, ConnectorWithMintedSecrets } from './types';
 import './jest_matchers';
 
 export function createMockConnector(overrides: Partial<Connector> = {}): Connector {
@@ -19,6 +19,15 @@ export function createMockConnector(overrides: Partial<Connector> = {}): Connect
     isDeprecated: false,
     isSystemAction: false,
     isConnectorTypeDeprecated: false,
+    ...overrides,
+  };
+}
+
+export function createMockConnectorWithMintedSecrets(
+  overrides: Partial<ConnectorWithMintedSecrets> = {}
+): ConnectorWithMintedSecrets {
+  return {
+    ...createMockConnector(),
     ...overrides,
   };
 }
