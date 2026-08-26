@@ -145,7 +145,7 @@ apiTest.describe('Remote clusters API', { tag: ['@local-stateful-classic'] }, ()
             headers: { ...COMMON_HEADERS, ...credentials.apiKeyHeader },
             responseType: 'json',
           });
-          return body;
+          return body.filter((cluster: { name: string }) => cluster.name === CLUSTER_NAME);
         },
         { timeout: 120_000 }
       )
