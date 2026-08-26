@@ -408,6 +408,32 @@ describe('prefetchPreviousStatusesByQuery', () => {
     const call = (esClient.search as unknown as jest.Mock).mock.calls[0][0];
     expect(call).not.toHaveProperty('runtime_mappings');
   });
+
+  it('adds must_not term filter when excludeStatus is provided', async () => {
+    const query = { term: { 'some.field': 'value' } };
+
+    await prefetchPreviousStatusesByQuery(esClient, 'index', query, undefined, 'closed');
+
+    expect(esClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: {
+          bool: {
+            filter: query,
+            must_not: { term: { [ALERT_WORKFLOW_STATUS]: 'closed' } },
+          },
+        },
+      })
+    );
+  });
+
+  it('omits must_not when excludeStatus is not provided', async () => {
+    const query = { term: { 'some.field': 'value' } };
+
+    await prefetchPreviousStatusesByQuery(esClient, 'index', query);
+
+    const call = (esClient.search as unknown as jest.Mock).mock.calls[0][0];
+    expect(call.query.bool).not.toHaveProperty('must_not');
+  });
 });
 
 describe('fetchAlertIdToIndex', () => {

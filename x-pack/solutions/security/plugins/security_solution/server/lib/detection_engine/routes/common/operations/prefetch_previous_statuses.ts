@@ -97,16 +97,21 @@ export const prefetchPreviousStatusesByQuery = async (
   esClient: ElasticsearchClient,
   index: string | string[],
   query: estypes.QueryDslQueryContainer,
-  runtimeMappings?: estypes.MappingRuntimeFields
+  runtimeMappings?: estypes.MappingRuntimeFields,
+  excludeStatus?: string
 ): Promise<{
   ids: string[];
   previousStatuses: PreviousStatus[];
   idToIndex: Map<string, string>;
   truncated: boolean;
 }> => {
+  const boolQuery: estypes.QueryDslBoolQuery = { filter: query };
+  if (excludeStatus !== undefined) {
+    boolQuery.must_not = { term: { [ALERT_WORKFLOW_STATUS]: excludeStatus } };
+  }
   const searchResponse = await esClient.search({
     index: resolveIndex(index),
-    query: { bool: { filter: query } },
+    query: { bool: boolQuery },
     _source_includes: [ALERT_WORKFLOW_STATUS, 'signal.status'],
     size: MAX_ALERTS_PER_TRIGGER,
     track_total_hits: MAX_ALERTS_PER_TRIGGER + 1,

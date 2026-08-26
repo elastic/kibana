@@ -416,20 +416,16 @@ describe('set signal status', () => {
         );
       });
 
-      test('does not emit when all query matches already have the target status', async () => {
+      test('does not emit when prefetch returns no results (all pre-filtered by excludeStatus)', async () => {
+        // With excludeStatus passed to prefetchPreviousStatusesByQuery, ES filters out docs
+        // already at the target status via must_not. An empty result means nothing is transitioning.
         context.core.elasticsearch.client.asCurrentUser.search.mockResponse({
           took: 1,
           timed_out: false,
           _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
           hits: {
-            hits: [
-              {
-                _id: 'query-alert-1',
-                _index: '.siem-signals-default',
-                _source: { 'kibana.alert.workflow_status': 'closed' },
-              },
-            ],
-            total: { value: 1, relation: 'eq' },
+            hits: [],
+            total: { value: 0, relation: 'eq' },
             max_score: 0,
           },
         });

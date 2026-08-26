@@ -192,7 +192,8 @@ export const setSignalsStatusRoute = (
                   esClient,
                   alertsIndex,
                   query,
-                  runtimeMappings
+                  runtimeMappings,
+                  status
                 ));
               } catch {
                 logger.warn('Failed to pre-fetch alert IDs for workflow trigger');
@@ -210,14 +211,13 @@ export const setSignalsStatusRoute = (
               runtimeMappings
             );
 
-            const changingByQuery = previousStatuses.filter((ps) => ps.previousStatus !== status);
-            // Emit when known changes exist OR when the prefetch was truncated: docs beyond
-            // the cap may still be transitioning even if the sampled page was all no-ops.
-            if (changingByQuery.length > 0 || truncated) {
+            // previousStatuses only contains docs not already at `status` (pre-filtered by
+            // excludeStatus), so every entry here is a genuine transition.
+            if (previousStatuses.length > 0) {
               void eventBus?.emitAlertStatusChanged(request, {
-                alertIds: changingByQuery.map((ps) => ps.id),
+                alertIds: previousStatuses.map((ps) => ps.id),
                 status,
-                previousStatuses: changingByQuery,
+                previousStatuses,
                 truncated,
               });
             }

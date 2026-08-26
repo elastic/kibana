@@ -6,6 +6,7 @@
  */
 
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
+import type { Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { ALERT_ATTACK_DISCOVERY_ALERT_IDS } from '@kbn/elastic-assistant-common';
 import {
@@ -40,7 +41,8 @@ export const setAttacksTagsRoute = (
   router: SecuritySolutionPluginRouter,
   ruleDataClient: IRuleDataClient | null,
   telemetrySender: ITelemetryEventsSender,
-  eventBus?: SecuritySolutionEventBus
+  eventBus?: SecuritySolutionEventBus,
+  logger?: Logger
 ) => {
   router.versioned
     .post({
@@ -89,20 +91,25 @@ export const setAttacksTagsRoute = (
             async () => {
               // Verify which IDs actually exist in the attack index before emitting,
               // so the event payload never includes unknown/non-attack IDs.
+              // Failures here must never block the mutation.
               let verifiedAttackIds: string[] = [];
               if (eventBus) {
-                const attackDocs = await searchAlerts({
-                  context,
-                  index: attackIndex,
-                  params: {
-                    query: { bool: { filter: { terms: { _id: ids } } } },
-                    _source: false,
-                    size: Math.min(ids.length, MAX_ALERTS_PER_TRIGGER),
-                  },
-                });
-                verifiedAttackIds = attackDocs.hits.hits
-                  .map((hit) => hit._id)
-                  .filter((id): id is string => id != null);
+                try {
+                  const attackDocs = await searchAlerts({
+                    context,
+                    index: attackIndex,
+                    params: {
+                      query: { bool: { filter: { terms: { _id: ids } } } },
+                      _source: false,
+                      size: Math.min(ids.length, MAX_ALERTS_PER_TRIGGER),
+                    },
+                  });
+                  verifiedAttackIds = attackDocs.hits.hits
+                    .map((hit) => hit._id)
+                    .filter((id): id is string => id != null);
+                } catch (err) {
+                  logger?.warn(`Failed to verify attack IDs for workflow trigger: ${err}`);
+                }
               }
               const result = await updateAlertsTags({ context, index: attackIndex, ids, tags });
               if (eventBus && verifiedAttackIds.length > 0) {

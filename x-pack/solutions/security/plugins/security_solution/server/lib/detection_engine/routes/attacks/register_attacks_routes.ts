@@ -25,6 +25,6 @@ export const registerAttacksRoutes = (
 ) => {
   searchAttacksRoute(router, telemetrySender);
   setAttacksStatusRoute(router, ruleDataClient, telemetrySender, eventBus, logger);
-  setAttacksTagsRoute(router, ruleDataClient, telemetrySender, eventBus);
-  setAttacksAssigneesRoute(router, ruleDataClient, telemetrySender, eventBus);
+  setAttacksTagsRoute(router, ruleDataClient, telemetrySender, eventBus, logger);
+  setAttacksAssigneesRoute(router, ruleDataClient, telemetrySender, eventBus, logger);
 };
