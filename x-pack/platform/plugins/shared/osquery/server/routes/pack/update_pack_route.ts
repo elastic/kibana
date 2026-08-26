@@ -8,10 +8,11 @@
 import moment from 'moment-timezone';
 import { v4 as uuidv4 } from 'uuid';
 import { set } from '@kbn/safer-lodash-set';
-import { unset, has, filter, map, mapKeys, mapValues, some, isEmpty, keyBy } from 'lodash';
+import { unset, has, get, filter, map, mapKeys, mapValues, some, isEmpty, keyBy } from 'lodash';
 import { produce } from 'immer-v9';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import type { SavedObjectReference } from '@kbn/core/server';
 import { type IRouter, SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
@@ -391,9 +392,10 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         );
 
         // `agentPolicyIds` carries every agent policy that resolved to the
-        // package policy being written (see groupAgentPolicyIdsByPackagePolicy
-        // below); a shared package policy needs one deterministic shard.
-        const buildFleetPackBlock = (agentPolicyIds: string[]) => {
+        // package policy being written; a shared one needs a deterministic
+        // shard. `wireShard` (the shard already on the block) is preserved when
+        // there are no shard-bearing targets, rather than resetting to 100%.
+        const buildFleetPackBlock = (agentPolicyIds: string[], wireShard?: number) => {
           const { queries: builtQueries, ...packDefaults } = convertSOQueriesToPackConfig(
             convertedQueries,
             {
@@ -409,7 +411,10 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           );
 
           return {
-            shard: resolveSharedPackagePolicyShard(agentPolicyIds, policyShards),
+            shard:
+              agentPolicyIds.length === 0 && wireShard !== undefined
+                ? wireShard
+                : resolveSharedPackagePolicyShard(agentPolicyIds, policyShards),
             pack_id: updatedPackSO.id,
             pack_name: updatedPackSO.attributes.name,
             ...packDefaults,
@@ -417,13 +422,21 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           };
         };
 
+        // Set by the edit-only reference heal below, which runs AFTER
+        // `updatedPackSO` was read — otherwise the 200 body would be built from
+        // pre-heal references and contradict an immediately following GET.
+        let healedAgentPolicyReferences: SavedObjectReference[] | undefined;
+
         const buildResponseData = (): PackResponseData => {
           const { attributes: attrs } = updatedPackSO;
           // policy_ids and shards must mirror the GET contract: policy attachments
           // live on `references`, not `attributes`, and the public shards shape is
           // an object map (read_pack_route uses convertShardsToObject).
           const policyIds = map(
-            filter(updatedPackSO.references, ['type', LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE]),
+            filter(healedAgentPolicyReferences ?? updatedPackSO.references, [
+              'type',
+              LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
+            ]),
             'id'
           );
 
@@ -581,11 +594,24 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
               )
             );
           } else {
-            // Edit-only. Write targets come from the wire scan, not SO references,
-            // so metadata repairs reach packs whose references drifted. Only
-            // rewrites blocks that already exist; never attaches.
+            // Edit-only. Write targets are the UNION of the wire scan (repairs
+            // blocks whose SO references drifted) and the reference-resolved
+            // policies (attach-on-edit). Wire-only would 200 while advertising
+            // `policy_ids: [P]` and writing nothing to P.
+            const editWriteTargets = new Map<string, PackagePolicy>();
+            for (const packagePolicy of currentPackagePolicies) {
+              editWriteTargets.set(packagePolicy.id, packagePolicy);
+            }
+
+            for (const { packagePolicy } of groupAgentPolicyIdsByPackagePolicy(
+              policiesList,
+              packagePolicies
+            ).values()) {
+              editWriteTargets.set(packagePolicy.id, packagePolicy);
+            }
+
             await Promise.all(
-              currentPackagePolicies.map((packagePolicy) =>
+              [...editWriteTargets.values()].map((packagePolicy) =>
                 packagePolicyService?.update(
                   spaceScopedClient,
                   esClient,
@@ -601,11 +627,22 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                     }
 
                     const pk = makePackKey(updatedPackSO.attributes.name, spaceId);
+                    const existingShard = get(
+                      draft,
+                      `inputs[0].config.osquery.value.packs.${pk}.shard`
+                    ) as number | undefined;
                     removePackFromPolicy(draft, updatedPackSO.attributes.name, spaceId);
                     set(
                       draft,
                       `inputs[0].config.osquery.value.packs.${pk}`,
-                      buildFleetPackBlock(packagePolicy.policy_ids ?? [])
+                      buildFleetPackBlock(
+                        // Intersect with this pack's OWN targets: `policyShards`
+                        // is keyed off `policiesList`, so co-tenants on a shared
+                        // package policy resolve to DEFAULT_PACK_SHARD and
+                        // `Math.max` would promote a deliberate 25 to 100.
+                        (packagePolicy.policy_ids ?? []).filter((id) => policiesList.includes(id)),
+                        existingShard
+                      )
                     );
 
                     return draft;
@@ -616,8 +653,20 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
             // Heal references to match the wire. Best-effort: the save already
             // committed, so a heal failure must not fail the response.
+            // Only heal ids this pack demonstrably targets: a flatMap of every
+            // `policy_ids` can't tell "reference drifted" from "shares a package
+            // policy", and the edit form prefills `policy_ids` from this
+            // response, so an invented id becomes an explicit retarget on the
+            // next save. A shard entry proves intent; otherwise require the
+            // package policy to be unshared.
+            const shardTargetedIds = new Set(Object.keys(effectiveShards ?? {}));
             const wiredPolicyIds = new Set(
-              currentPackagePolicies.flatMap((pp) => pp.policy_ids ?? [])
+              currentPackagePolicies.flatMap((pp) => {
+                const policyIds = pp.policy_ids ?? [];
+                if (policyIds.length <= 1) return policyIds;
+
+                return policyIds.filter((id) => shardTargetedIds.has(id));
+              })
             );
             const soRefPolicyIds = new Set(currentAgentPolicyIds);
             const missingFromRefs = [...wiredPolicyIds].filter((id) => !soRefPolicyIds.has(id));
@@ -650,18 +699,20 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                     'type',
                     LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
                   ]);
+                  const healedReferences = [
+                    ...nonAgentPolicyReferences,
+                    ...existingAgentPolicyReferences,
+                    ...addedRefs,
+                  ];
                   await spaceScopedClient.update<PackSavedObject>(
                     packSavedObjectType,
                     request.params.id,
                     {},
-                    {
-                      references: [
-                        ...nonAgentPolicyReferences,
-                        ...existingAgentPolicyReferences,
-                        ...addedRefs,
-                      ],
-                    }
+                    { references: healedReferences }
                   );
+                  // Only after the write commits, so a failed heal reports
+                  // what is actually persisted.
+                  healedAgentPolicyReferences = healedReferences;
                 }
               } catch (healErr) {
                 logger.warn(

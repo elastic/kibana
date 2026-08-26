@@ -149,7 +149,8 @@ export const deriveEffectiveQueryKey = (
 ): string => (query.id ? query.id : String(indexOrKey));
 
 // Shape-agnostic emptiness check for a pack's `queries` (array or record).
-// Shared by the V4 mint guard and the reconcile filter so they can't drift.
+// Shared by the V4 mint guard and the reconciler's per-pack skip so they can't
+// drift (the reconciler checks at its write site, being wire-first).
 // Typed as a guard so a truthy result narrows away null/undefined.
 export const hasQueries = <T extends unknown[] | Record<string, unknown>>(
   queries: T | null | undefined
@@ -359,9 +360,8 @@ export interface ConvertSOQueriesToPackConfigOptions {
   // never silently ships RRULE state to Fleet.
   isRruleFeatureEnabled: boolean;
   // Anchor used when the stored start_date is absent or the epoch sentinel.
-  // Pass the pack's created_at. When omitted (packs predating created_at, e.g.
-  // NDJSON imports) the epoch sentinel is emitted — a deterministic anchor so
-  // repeated writes stay byte-identical and the reconciler's diff gate holds.
+  // The pack's created_at. When absent or unparseable the epoch sentinel is
+  // emitted — deterministic, so the reconciler's diff gate holds.
   fallbackStartDate?: string;
 }
 
@@ -380,10 +380,13 @@ export const convertSOQueriesToPackConfig = (
 ): PackConfigOutput => {
   const { spaceId, packSchedule, isRruleFeatureEnabled, fallbackStartDate } = options;
   // Never `now()`: a time-of-write anchor differs on every call, so the
-  // reconciler would rewrite the policy (and re-anchor execution numbering)
-  // on every Kibana restart for packs lacking created_at. The epoch anchor
-  // yields large but stable, monotonically incrementing execution counts.
-  const resolvedFallback = fallbackStartDate ?? START_DATE_EPOCH_FALLBACK;
+  // reconciler would rewrite the policy (re-anchoring execution numbering) on
+  // every restart. Validate rather than `?? EPOCH` — `created_at` is
+  // `schema.maybe(schema.string())`, and an anchor beats can't parse (including
+  // `''`, which `??` misses) makes it report execution count 0.
+  const resolvedFallback = isValidRfc3339(fallbackStartDate)
+    ? fallbackStartDate
+    : START_DATE_EPOCH_FALLBACK;
 
   const packMode: ScheduleType | undefined = isRruleFeatureEnabled
     ? packSchedule?.schedule_type ?? undefined

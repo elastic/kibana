@@ -381,6 +381,43 @@ describe('Pack utils', () => {
       expect(out.queries.real.start_date).toBe('2026-06-18T11:37:48.355Z');
     });
 
+    // Packs predating created_at have no anchor. The value must be STABLE: a
+    // time-of-write now() defeats the reconciler's isEqual gate, rewriting the
+    // policy and re-anchoring execution numbering on every restart.
+    test('interval mode — deterministic epoch anchor when there is no fallbackStartDate either', () => {
+      const build = () =>
+        convertSOQueriesToPackConfig(
+          [{ id: 'q1', name: 'q1', query: 'SELECT 1', interval: 60, schedule_id: 'sid-1' }],
+          { isRruleFeatureEnabled: true }
+        );
+
+      const first = build();
+      const second = build();
+
+      expect(first.queries.q1.start_date).toBe(START_DATE_EPOCH_FALLBACK);
+      expect(first.queries.q1.start_date).toBe(second.queries.q1.start_date);
+    });
+
+    // `created_at` is `schema.maybe(schema.string())`, so it can be '' (which
+    // `??` misses) or malformed — and an unparseable anchor makes the agent
+    // report execution count 0, the very bug this fallback exists to fix.
+    test.each([
+      ['empty string', ''],
+      ['not a date', 'not-a-date'],
+      ['date only, no time', '2026-05-01'],
+      ['calendar-invalid', '2026-02-30T00:00:00.000Z'],
+    ])(
+      'interval mode — %s fallbackStartDate falls through to the epoch sentinel',
+      (_label, bad) => {
+        const out = convertSOQueriesToPackConfig(
+          [{ id: 'q1', name: 'q1', query: 'SELECT 1', interval: 60, schedule_id: 'sid-1' }],
+          { isRruleFeatureEnabled: true, fallbackStartDate: bad }
+        );
+
+        expect(out.queries.q1.start_date).toBe(START_DATE_EPOCH_FALLBACK);
+      }
+    );
+
     // Absent start_date (pre-backfill packs) falls back to pack created_at.
     test('interval mode — absent start_date replaced with fallbackStartDate', () => {
       const packCreatedAt = '2026-04-15T12:00:00.000Z';

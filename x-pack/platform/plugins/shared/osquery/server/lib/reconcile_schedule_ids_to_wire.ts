@@ -10,6 +10,7 @@ import { get, isEqual, unset } from 'lodash';
 import { produce } from 'immer-v9';
 import type { CoreStart, Logger } from '@kbn/core/server';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import { packSavedObjectType } from '../../common/types';
 import type { PackSavedObject } from '../common/types';
@@ -21,22 +22,44 @@ import {
 import {
   convertSOQueriesToPackConfig,
   fetchAllPackagePolicies,
+  hasQueries,
   makePackKey,
   removePackFromPolicy,
 } from '../routes/pack/utils';
 import { escapeFilterValue } from '../routes/utils/generate_copy_name';
 
-/** Pack-block keys are `${spaceId}--${packName}`, or a legacy bare `${packName}` (default space). */
-const parsePackKey = (key: string): { spaceId: string; packName: string } => {
-  const separatorIndex = key.indexOf('--');
-  if (separatorIndex === -1) {
-    return { spaceId: 'default', packName: key };
+/**
+ * Resolve a pack block's name and space from the policy and block, never by
+ * parsing its `${spaceId}--${packName}` key: both halves can contain `--`
+ * (space ids admit `-`, pack names are unbounded), and since
+ * `makePackKey(parse(key))` round-trips, a mis-split silently overwrites the
+ * block with another pack's queries.
+ */
+const resolvePackBlockIdentity = (
+  packagePolicy: PackagePolicy,
+  packKey: string,
+  block: unknown
+): { spaceId: string; packName: string } => {
+  const blockPackName = (block as { pack_name?: unknown } | undefined)?.pack_name;
+  const packName =
+    typeof blockPackName === 'string' && blockPackName.length
+      ? blockPackName
+      : // Legacy block predating `pack_name`: the bare key IS the name.
+        stripSpacePrefix(packKey, packagePolicy.spaceIds);
+
+  return { spaceId: packagePolicy.spaceIds?.[0] ?? DEFAULT_SPACE_ID, packName };
+};
+
+/** Strip a `${spaceId}--` prefix only for a space the policy really lives in. */
+const stripSpacePrefix = (packKey: string, spaceIds: string[] | undefined): string => {
+  for (const spaceId of spaceIds ?? [DEFAULT_SPACE_ID]) {
+    const prefix = `${spaceId}--`;
+    if (packKey.startsWith(prefix)) {
+      return packKey.slice(prefix.length);
+    }
   }
 
-  return {
-    spaceId: key.slice(0, separatorIndex),
-    packName: key.slice(separatorIndex + 2),
-  };
+  return packKey;
 };
 
 /**
@@ -92,8 +115,10 @@ export const reconcileScheduleIdsToWire = async ({
       return { hadFailures: false };
     }
 
-    // Indexed so writes can splice back updated versions (409 prevention when
-    // several packs live on the same policy).
+    // Indexed so writes splice back the updated policy when several packs share
+    // one. Prevents a silent lost update, not a 409: Fleet strips `version` when
+    // a `packagePolicyUpdate` callback is registered, and security_solution
+    // always registers one — so a stale copy would overwrite, never conflict.
     const policiesByIndex = packagePolicies;
 
     const spaceWorkItems = new Map<
@@ -109,7 +134,7 @@ export const reconcileScheduleIdsToWire = async ({
       if (!packsBlock) continue;
 
       for (const packKey of Object.keys(packsBlock)) {
-        const { spaceId, packName } = parsePackKey(packKey);
+        const { spaceId, packName } = resolvePackBlockIdentity(pp, packKey, packsBlock[packKey]);
         const items = spaceWorkItems.get(spaceId) ?? [];
         items.push({ ppIndex: i, packKey, packName });
         spaceWorkItems.set(spaceId, items);
@@ -135,6 +160,9 @@ export const reconcileScheduleIdsToWire = async ({
         return { hadFailures: true };
       }
 
+      // Must come from the policy's own `spaceIds`: Fleet's `update` takes no
+      // spaceId and reads through the client's namespace, so a client scoped
+      // elsewhere 404s before the write and re-arms this one-shot forever.
       const spaceClient = getInternalSavedObjectsClientForSpaceId(coreStart, spaceId);
 
       const packSOsByName = new Map<string, { id: string; attributes: PackSavedObject }>();
@@ -167,8 +195,12 @@ export const reconcileScheduleIdsToWire = async ({
             }
           }
         } catch (err) {
+          // A THROWN lookup is a transient fault, not an absent SO: flag it so
+          // the one-shot re-arms rather than recording permanent non-repair.
+          // The genuinely-absent case is the silent skip below.
+          hadFailures = true;
           logger.warn(
-            `reconcileScheduleIdsToWire: failed to look up pack SO "${packName}" in space ${spaceId}: ${
+            `reconcileScheduleIdsToWire: failed to look up pack SO "${packName}" in space ${spaceId}, will retry: ${
               (err as Error).message
             }`
           );
@@ -193,6 +225,17 @@ export const reconcileScheduleIdsToWire = async ({
         }
 
         const { id: packId, attributes: packAttrs } = packEntry;
+
+        // Nothing to anchor; rebuilding would write an empty `queries` map every
+        // pass. `enabled` is deliberately NOT gated on — a disabled-but-wired
+        // pack is the drift we repair in place (detaching is the routes' job).
+        if (!hasQueries(packAttrs.queries)) {
+          logger.debug(
+            `reconcileScheduleIdsToWire: pack "${packKey}" has no queries, skipping write`
+          );
+          continue;
+        }
+
         const pp = policiesByIndex[ppIndex];
         const canonicalPackKey = makePackKey(packName, spaceId);
         const packPath = `inputs[0].config.osquery.value.packs.${canonicalPackKey}`;
@@ -240,6 +283,9 @@ export const reconcileScheduleIdsToWire = async ({
             pp.id,
             produce<PackagePolicy>(pp, (draft) => {
               unset(draft, 'id');
+              // Fleet's `update` doesn't strip `spaceIds` — only its callback
+              // chain does. Match Fleet's own explicit-whitelist convention.
+              unset(draft, 'spaceIds');
               removePackFromPolicy(draft, packName, spaceId);
               set(draft, packPath, intendedPackBlock);
 
@@ -247,7 +293,8 @@ export const reconcileScheduleIdsToWire = async ({
             })
           );
 
-          // Splice back so later packs on this policy see the version bump (409).
+          // Splice back so later packs on this policy build from the just-written
+          // state rather than a stale copy (see the lost-update note above).
           policiesByIndex[ppIndex] = { ...updatedPolicy, id: updatedPolicy.id ?? pp.id };
 
           logger.debug(
