@@ -166,6 +166,24 @@ describe('buildIngestRequest', () => {
     });
   });
 
+  it('includes the evaluator version', () => {
+    const [request] = buildIngestRequest({
+      taskModel,
+      evaluatorModel,
+      repetitions: 1,
+      hostName: 'host-a',
+      gitMetadata: { branch: 'main', commitSha: 'abc123' },
+      source: {
+        kind: 'event',
+        event: createEvent({
+          evaluationRun: { ...createEvent().evaluationRun, version: '1.2.0' },
+        }),
+      },
+    });
+
+    expect(request.scores[0].evaluator.version).toBe('1.2.0');
+  });
+
   it('includes example metadata when taskRun.metadata is a plain object', () => {
     const requests = buildIngestRequest({
       taskModel,

@@ -13,6 +13,9 @@ import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import { IngestHubPlugin } from './plugin';
+import type { FleetStart } from '@kbn/fleet-plugin/public';
+
+const mockFleet = {} as unknown as FleetStart;
 
 const createPluginContext = (buildFlavor: 'traditional' | 'serverless' = 'traditional') =>
   ({
@@ -42,7 +45,7 @@ describe('IngestHubPlugin', () => {
       const coreStart = coreMock.createStart();
       disableFeatureFlag(coreStart);
 
-      const { navigationAvailable$ } = plugin.start(coreStart, {});
+      const { navigationAvailable$ } = plugin.start(coreStart, { fleet: mockFleet });
       await expect(firstValueFrom(navigationAvailable$)).resolves.toBe(false);
     });
 
@@ -64,7 +67,7 @@ describe('IngestHubPlugin', () => {
           projectType: 'observability',
         } as CloudStart['serverless'];
 
-        const { navigationAvailable$ } = plugin.start(coreStart, { cloud });
+        const { navigationAvailable$ } = plugin.start(coreStart, { cloud, fleet: mockFleet });
         await expect(firstValueFrom(navigationAvailable$)).resolves.toBe(true);
       });
 
@@ -75,7 +78,7 @@ describe('IngestHubPlugin', () => {
           projectType: 'security',
         } as CloudStart['serverless'];
 
-        const { navigationAvailable$ } = plugin.start(coreStart, { cloud });
+        const { navigationAvailable$ } = plugin.start(coreStart, { cloud, fleet: mockFleet });
         await expect(firstValueFrom(navigationAvailable$)).resolves.toBe(false);
       });
     });
@@ -92,7 +95,7 @@ describe('IngestHubPlugin', () => {
       });
 
       it('emits true without spaces plugin', async () => {
-        const { navigationAvailable$ } = plugin.start(coreStart, {});
+        const { navigationAvailable$ } = plugin.start(coreStart, { fleet: mockFleet });
         await expect(firstValueFrom(navigationAvailable$)).resolves.toBe(true);
       });
 
@@ -105,7 +108,7 @@ describe('IngestHubPlugin', () => {
           disabledFeatures: [],
         });
 
-        const { navigationAvailable$ } = plugin.start(coreStart, { spaces });
+        const { navigationAvailable$ } = plugin.start(coreStart, { spaces, fleet: mockFleet });
         await expect(firstValueFrom(navigationAvailable$)).resolves.toBe(true);
       });
 
@@ -118,7 +121,7 @@ describe('IngestHubPlugin', () => {
           disabledFeatures: [],
         });
 
-        const { navigationAvailable$ } = plugin.start(coreStart, { spaces });
+        const { navigationAvailable$ } = plugin.start(coreStart, { spaces, fleet: mockFleet });
         await expect(firstValueFrom(navigationAvailable$)).resolves.toBe(false);
       });
     });

@@ -16,6 +16,7 @@ import type {
 } from './types';
 import { registerTools } from './tools';
 import { registerAttachmentTypes } from './attachment_types';
+import { registerConversationTemplates } from './conversation_templates';
 import { registerSkills } from './skills';
 import { createConnectorSmlType } from './sml_types/connector';
 import { createConnectorLifecycleHandler } from './connector_lifecycle/connector_lifecycle_handler';
@@ -48,6 +49,7 @@ export class AgentBuilderPlatformPlugin
       coreSetup,
       setupDeps,
     });
+    registerConversationTemplates({ setupDeps });
     const getActionsStart = async () => {
       const [, startDeps] = await coreSetup.getStartServices();
       return startDeps.actions;

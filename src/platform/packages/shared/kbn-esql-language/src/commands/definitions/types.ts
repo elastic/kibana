@@ -384,6 +384,14 @@ export interface ValidationErrors {
     message: string;
     type: { columnName: string; types?: string };
   };
+  inSubqueryTypeMismatch: {
+    message: string;
+    type: { leftField: string; leftType: string; rightField: string; rightType: string };
+  };
+  inSubqueryColumnCountMismatch: {
+    message: string;
+    type: { expected: number; actual: number };
+  };
   unsupportedMode: {
     message: string;
     type: { command: string; value: string; expected: string };

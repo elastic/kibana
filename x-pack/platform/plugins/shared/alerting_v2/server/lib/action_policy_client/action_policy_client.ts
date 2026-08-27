@@ -15,6 +15,7 @@ import type {
   MatcherContext,
 } from '@kbn/alerting-v2-schemas';
 import {
+  ALERT_EPISODE_STATUS,
   createActionPolicyDataSchema,
   updateActionPolicyDataSchema,
 } from '@kbn/alerting-v2-schemas';
@@ -133,6 +134,8 @@ const bulkErrorFromThrown = (id: string, e: unknown): ActionPolicyBulkError => {
 
 @injectable()
 export class ActionPolicyClient {
+  private readonly logger: LoggerServiceContract;
+
   constructor(
     @inject(ActionPolicySavedObjectServiceScopedToken)
     private readonly actionPolicySavedObjectService: ActionPolicySavedObjectServiceContract,
@@ -144,9 +147,10 @@ export class ActionPolicyClient {
     private readonly esoClient: EncryptedSavedObjectsClient,
     @inject(ActionPolicyNamespaceToken)
     private readonly namespace: string | undefined,
-    @inject(LoggerServiceToken)
-    private readonly logger: LoggerServiceContract
-  ) {}
+    @inject(LoggerServiceToken) loggerService: LoggerServiceContract
+  ) {
+    this.logger = loggerService.forSubsystem('actionPolicyClient');
+  }
 
   /**
    * Validates a request body with a Zod schema and produces a uniform
@@ -408,7 +412,7 @@ export class ActionPolicyClient {
       last_event_timestamp: '',
       group_hash: '',
       episode_id: '',
-      episode_status: 'active',
+      episode_status: ALERT_EPISODE_STATUS.ACTIVE,
       rule: {
         id: ruleId ?? '',
         name: resolvedName,
