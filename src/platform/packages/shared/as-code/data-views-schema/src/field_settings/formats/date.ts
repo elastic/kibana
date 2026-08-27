@@ -17,7 +17,7 @@ export const dateFormatSchema = z
       .object({
         pattern: momentPatternSchema.default('MMM D, YYYY @ HH:mm:ss.SSS'),
       })
-      .optional(),
+      .nullish(),
   })
   .meta({
     id: 'kbn-field-format-date',

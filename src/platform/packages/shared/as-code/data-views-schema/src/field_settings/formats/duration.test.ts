@@ -38,7 +38,31 @@ describe('formatSchema', () => {
       });
     });
 
-    it('is valid with required params only', () => {
+    it('is valid without params', () => {
+      const result = formatSchema.safeParse({
+        type: 'duration',
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual({
+        type: 'duration',
+      });
+    });
+
+    it('is valid with null params', () => {
+      const result = formatSchema.safeParse({
+        type: 'duration',
+        params: null,
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual({
+        type: 'duration',
+        params: null,
+      });
+    });
+
+    it('is valid with input and output format only', () => {
       const result = formatSchema.safeParse({
         type: 'duration',
         params: {
@@ -56,6 +80,33 @@ describe('formatSchema', () => {
           output_precision: 2,
           use_short_suffix: false,
           include_space_with_suffix: true,
+        },
+      });
+    });
+
+    it('is valid with null optional params', () => {
+      const result = formatSchema.safeParse({
+        type: 'duration',
+        params: {
+          input_format: null,
+          output_format: null,
+          output_precision: null,
+          show_suffix: null,
+          use_short_suffix: null,
+          include_space_with_suffix: null,
+        },
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual({
+        type: 'duration',
+        params: {
+          input_format: null,
+          output_format: null,
+          output_precision: null,
+          show_suffix: null,
+          use_short_suffix: null,
+          include_space_with_suffix: null,
         },
       });
     });

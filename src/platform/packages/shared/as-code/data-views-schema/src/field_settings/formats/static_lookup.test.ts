@@ -51,6 +51,62 @@ describe('formatSchema', () => {
       });
     });
 
+    it('is valid without params', () => {
+      const result = formatSchema.safeParse({
+        type: 'static_lookup',
+      });
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual({
+        type: 'static_lookup',
+      });
+    });
+
+    it('is valid with null params', () => {
+      const result = formatSchema.safeParse({
+        type: 'static_lookup',
+        params: null,
+      });
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual({
+        type: 'static_lookup',
+        params: null,
+      });
+    });
+
+    it('is valid with null lookup entries', () => {
+      const result = formatSchema.safeParse({
+        type: 'static_lookup',
+        params: {
+          lookup_entries: null,
+          unknown_key_value: null,
+        },
+      });
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual({
+        type: 'static_lookup',
+        params: {
+          lookup_entries: null,
+          unknown_key_value: null,
+        },
+      });
+    });
+
+    it('is valid with null lookup entry fields', () => {
+      const result = formatSchema.safeParse({
+        type: 'static_lookup',
+        params: {
+          lookup_entries: [{ key: null, value: null }],
+        },
+      });
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual({
+        type: 'static_lookup',
+        params: {
+          lookup_entries: [{ key: null, value: null }],
+        },
+      });
+    });
+
     it('returns an error for invalid lookup entry', () => {
       const result = formatSchema.safeParse({
         type: 'static_lookup',

@@ -16,7 +16,7 @@ export const numeralPatternSchema = z
     description:
       'Numeral.js format pattern. See https://www.elastic.co/docs/explore-analyze/numeral-formatting to learn more.',
   })
-  .optional();
+  .nullish();
 
 export const momentPatternSchema = z
   .string()
@@ -24,4 +24,4 @@ export const momentPatternSchema = z
     title: 'Moment.js pattern',
     description: 'Moment.js format pattern. See https://momentjs.com/ to learn more.',
   })
-  .optional();
+  .nullish();

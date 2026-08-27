@@ -104,6 +104,91 @@ describe('formatSchema', () => {
       });
     });
 
+    it('is valid without params', () => {
+      const result = formatSchema.safeParse({
+        type: 'color',
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual({
+        type: 'color',
+      });
+    });
+
+    it('is valid with null params', () => {
+      const result = formatSchema.safeParse({
+        type: 'color',
+        params: null,
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual({
+        type: 'color',
+        params: null,
+      });
+    });
+
+    it('is valid with null colors', () => {
+      const result = formatSchema.safeParse({
+        type: 'color',
+        params: {
+          field_type: 'string',
+          colors: null,
+        },
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual({
+        type: 'color',
+        params: {
+          field_type: 'string',
+          colors: null,
+        },
+      });
+    });
+
+    it('is valid with null color option fields', () => {
+      const result = formatSchema.safeParse({
+        type: 'color',
+        params: {
+          field_type: 'string',
+          colors: [
+            {
+              regex: null,
+              text: null,
+              background: null,
+            },
+          ],
+        },
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual({
+        type: 'color',
+        params: {
+          field_type: 'string',
+          colors: [
+            {
+              regex: null,
+              text: null,
+              background: null,
+            },
+          ],
+        },
+      });
+    });
+
+    it('returns an error when the field_type discriminator is missing', () => {
+      const result = formatSchema.safeParse({
+        type: 'color',
+        params: {
+          colors: [],
+        },
+      });
+
+      expect(result.success).toBe(false);
+    });
+
     it('returns an error for invalid typed params', () => {
       const result = formatSchema.safeParse({
         type: 'color',

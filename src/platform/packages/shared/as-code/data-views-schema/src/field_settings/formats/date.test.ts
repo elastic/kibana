@@ -37,6 +37,34 @@ describe('formatSchema', () => {
       });
     });
 
+    it('is valid with null params', () => {
+      const result = formatSchema.safeParse({
+        type: 'date',
+        params: null,
+      });
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual({
+        type: 'date',
+        params: null,
+      });
+    });
+
+    it('is valid with null pattern', () => {
+      const result = formatSchema.safeParse({
+        type: 'date',
+        params: {
+          pattern: null,
+        },
+      });
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual({
+        type: 'date',
+        params: {
+          pattern: null,
+        },
+      });
+    });
+
     it('returns an error for invalid pattern', () => {
       const result = formatSchema.safeParse({
         type: 'date',

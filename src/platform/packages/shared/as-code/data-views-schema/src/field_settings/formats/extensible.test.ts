@@ -27,5 +27,29 @@ describe('formatSchema', () => {
         },
       });
     });
+
+    it('is valid without params', () => {
+      const result = formatSchema.safeParse({
+        type: 'my_custom_format',
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual({
+        type: 'my_custom_format',
+      });
+    });
+
+    it('is valid with null params', () => {
+      const result = formatSchema.safeParse({
+        type: 'my_custom_format',
+        params: null,
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual({
+        type: 'my_custom_format',
+        params: null,
+      });
+    });
   });
 });

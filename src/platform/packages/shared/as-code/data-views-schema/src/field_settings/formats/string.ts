@@ -47,9 +47,9 @@ export const stringFormatSchema = z
                 'Decodes the field value from URL parameter. For example: "Some%20Text" -> "Some Text".',
             }),
           ])
-          .optional(),
+          .nullish(),
       })
-      .optional(),
+      .nullish(),
   })
   .meta({
     id: 'kbn-field-format-string',

@@ -37,6 +37,34 @@ describe('formatSchema', () => {
       });
     });
 
+    it('is valid with null params', () => {
+      const result = formatSchema.safeParse({
+        type: 'percent',
+        params: null,
+      });
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual({
+        type: 'percent',
+        params: null,
+      });
+    });
+
+    it('is valid with null pattern', () => {
+      const result = formatSchema.safeParse({
+        type: 'percent',
+        params: {
+          pattern: null,
+        },
+      });
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual({
+        type: 'percent',
+        params: {
+          pattern: null,
+        },
+      });
+    });
+
     it('returns an error for invalid pattern', () => {
       const result = formatSchema.safeParse({
         type: 'percent',

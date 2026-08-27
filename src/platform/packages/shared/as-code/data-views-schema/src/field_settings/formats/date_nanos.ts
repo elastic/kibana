@@ -17,7 +17,7 @@ export const dateNanosFormatSchema = z
       .object({
         pattern: momentPatternSchema.default('MMM D, YYYY @ HH:mm:ss.SSSSSSSSS'),
       })
-      .optional(),
+      .nullish(),
   })
   .meta({
     id: 'kbn-field-format-date_nanos',

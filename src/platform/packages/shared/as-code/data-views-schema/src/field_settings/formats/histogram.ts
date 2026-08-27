@@ -13,10 +13,12 @@ import { numeralPatternSchema } from './common';
 export const histogramFormatSchema = z
   .object({
     type: z.literal('histogram'),
-    params: z.object({
-      format: z.union([z.literal('bytes'), z.literal('percent'), z.literal('number')]),
-      pattern: numeralPatternSchema,
-    }),
+    params: z
+      .object({
+        format: z.union([z.literal('bytes'), z.literal('percent'), z.literal('number')]).nullish(),
+        pattern: numeralPatternSchema,
+      })
+      .nullish(),
   })
   .meta({
     id: 'kbn-field-format-histogram',

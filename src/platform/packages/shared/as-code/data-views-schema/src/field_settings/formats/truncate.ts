@@ -14,9 +14,9 @@ export const truncateFormatSchema = z
     type: z.literal('truncate'),
     params: z
       .object({
-        field_length: z.number().optional(),
+        field_length: z.number().nullish(),
       })
-      .optional(),
+      .nullish(),
   })
   .meta({
     id: 'kbn-field-format-truncate',

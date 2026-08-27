@@ -17,7 +17,7 @@ export const numberFormatSchema = z
       .object({
         pattern: numeralPatternSchema,
       })
-      .optional(),
+      .nullish(),
   })
   .meta({
     id: 'kbn-field-format-number',

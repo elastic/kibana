@@ -37,6 +37,18 @@ describe('formatSchema', () => {
       });
     });
 
+    it('is valid with null params', () => {
+      const result = formatSchema.safeParse({
+        type: 'string',
+        params: null,
+      });
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual({
+        type: 'string',
+        params: null,
+      });
+    });
+
     it('is valid with empty params', () => {
       const result = formatSchema.safeParse({
         type: 'string',
@@ -46,6 +58,22 @@ describe('formatSchema', () => {
       expect(result.data).toEqual({
         type: 'string',
         params: {},
+      });
+    });
+
+    it('is valid with null transform', () => {
+      const result = formatSchema.safeParse({
+        type: 'string',
+        params: {
+          transform: null,
+        },
+      });
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual({
+        type: 'string',
+        params: {
+          transform: null,
+        },
       });
     });
 

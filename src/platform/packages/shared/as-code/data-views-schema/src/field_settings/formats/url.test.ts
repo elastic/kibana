@@ -73,6 +73,84 @@ describe('formatSchema', () => {
       });
     });
 
+    it('is valid without params', () => {
+      const result = formatSchema.safeParse({
+        type: 'url',
+      });
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual({
+        type: 'url',
+      });
+    });
+
+    it('is valid with null params', () => {
+      const result = formatSchema.safeParse({
+        type: 'url',
+        params: null,
+      });
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual({
+        type: 'url',
+        params: null,
+      });
+    });
+
+    it('is valid with null optional params', () => {
+      const result = formatSchema.safeParse({
+        type: 'url',
+        params: {
+          type: 'a',
+          url_template: null,
+          label_template: null,
+          open_link_in_current_tab: null,
+        },
+      });
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual({
+        type: 'url',
+        params: {
+          type: 'a',
+          url_template: null,
+          label_template: null,
+          open_link_in_current_tab: null,
+        },
+      });
+    });
+
+    it('is valid with null image dimensions', () => {
+      const result = formatSchema.safeParse({
+        type: 'url',
+        params: {
+          type: 'img',
+          url_template: null,
+          label_template: null,
+          width: null,
+          height: null,
+        },
+      });
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual({
+        type: 'url',
+        params: {
+          type: 'img',
+          url_template: null,
+          label_template: null,
+          width: null,
+          height: null,
+        },
+      });
+    });
+
+    it('returns an error when the type discriminator is missing', () => {
+      const result = formatSchema.safeParse({
+        type: 'url',
+        params: {
+          url_template: 'https://example.com/{{value}}',
+        },
+      });
+      expect(result.success).toBe(false);
+    });
+
     it('returns an error for invalid params', () => {
       const result = formatSchema.safeParse({
         type: 'url',

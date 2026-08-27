@@ -9,11 +9,11 @@
 import { z } from '@kbn/zod';
 
 const baseColorOptions = z.object({
-  text: z.string().meta({
+  text: z.string().nullish().meta({
     title: 'Text color',
     description: 'The text color to use for the field.',
   }),
-  background: z.string().meta({
+  background: z.string().nullish().meta({
     title: 'Background color',
     description: 'The background color to use for the field.',
   }),
@@ -22,44 +22,52 @@ const baseColorOptions = z.object({
 export const colorFormatSchema = z
   .object({
     type: z.literal('color'),
-    params: z.discriminatedUnion('field_type', [
-      z.object({
-        field_type: z.literal('string'),
-        colors: z.array(
-          baseColorOptions.extend({
-            regex: z.string().meta({
-              title: 'Regex',
-              description:
-                'When the field type is a string, this regex is used to determine the color.',
-            }),
-          })
-        ),
-      }),
-      z.object({
-        field_type: z.literal('number'),
-        colors: z.array(
-          baseColorOptions.extend({
-            range: z.string().meta({
-              title: 'Range',
-              description:
-                'When the field type is a number, this range is used to determine the color.',
-            }),
-          })
-        ),
-      }),
-      z.object({
-        field_type: z.literal('boolean'),
-        colors: z.array(
-          baseColorOptions.extend({
-            boolean: z.boolean().meta({
-              title: 'Boolean',
-              description:
-                'When the field type is a boolean, this boolean is used to determine the color.',
-            }),
-          })
-        ),
-      }),
-    ]),
+    params: z
+      .discriminatedUnion('field_type', [
+        z.object({
+          field_type: z.literal('string'),
+          colors: z
+            .array(
+              baseColorOptions.extend({
+                regex: z.string().nullish().meta({
+                  title: 'Regex',
+                  description:
+                    'When the field type is a string, this regex is used to determine the color.',
+                }),
+              })
+            )
+            .nullish(),
+        }),
+        z.object({
+          field_type: z.literal('number'),
+          colors: z
+            .array(
+              baseColorOptions.extend({
+                range: z.string().nullish().meta({
+                  title: 'Range',
+                  description:
+                    'When the field type is a number, this range is used to determine the color.',
+                }),
+              })
+            )
+            .nullish(),
+        }),
+        z.object({
+          field_type: z.literal('boolean'),
+          colors: z
+            .array(
+              baseColorOptions.extend({
+                boolean: z.boolean().nullish().meta({
+                  title: 'Boolean',
+                  description:
+                    'When the field type is a boolean, this boolean is used to determine the color.',
+                }),
+              })
+            )
+            .nullish(),
+        }),
+      ])
+      .nullish(),
   })
   .meta({
     id: 'kbn-field-format-color',

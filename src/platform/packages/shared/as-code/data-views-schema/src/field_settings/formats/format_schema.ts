@@ -46,7 +46,7 @@ const knownFormatSchemas = {
   url: urlFormatSchema,
 } as const;
 
-const extensibleFormatSchema = z.object({ type: z.string(), params: z.any().optional() });
+const extensibleFormatSchema = z.object({ type: z.string(), params: z.any().nullish() });
 
 export const formatSchema = z
   .union([

@@ -47,6 +47,49 @@ describe('formatSchema', () => {
       });
     });
 
+    it('is valid without params', () => {
+      const result = formatSchema.safeParse({
+        type: 'histogram',
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual({
+        type: 'histogram',
+      });
+    });
+
+    it('is valid with null params', () => {
+      const result = formatSchema.safeParse({
+        type: 'histogram',
+        params: null,
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual({
+        type: 'histogram',
+        params: null,
+      });
+    });
+
+    it('is valid with null format and pattern', () => {
+      const result = formatSchema.safeParse({
+        type: 'histogram',
+        params: {
+          format: null,
+          pattern: null,
+        },
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual({
+        type: 'histogram',
+        params: {
+          format: null,
+          pattern: null,
+        },
+      });
+    });
+
     it('returns an error for invalid format', () => {
       const result = formatSchema.safeParse({
         type: 'histogram',

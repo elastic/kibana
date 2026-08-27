@@ -17,7 +17,7 @@ export const bytesFormatSchema = z
       .object({
         pattern: numeralPatternSchema,
       })
-      .optional(),
+      .nullish(),
   })
   .meta({
     id: 'kbn-field-format-bytes',

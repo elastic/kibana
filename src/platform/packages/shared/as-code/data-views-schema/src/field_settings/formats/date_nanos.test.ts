@@ -37,6 +37,34 @@ describe('formatSchema', () => {
       });
     });
 
+    it('is valid with null params', () => {
+      const result = formatSchema.safeParse({
+        type: 'date_nanos',
+        params: null,
+      });
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual({
+        type: 'date_nanos',
+        params: null,
+      });
+    });
+
+    it('is valid with null pattern', () => {
+      const result = formatSchema.safeParse({
+        type: 'date_nanos',
+        params: {
+          pattern: null,
+        },
+      });
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual({
+        type: 'date_nanos',
+        params: {
+          pattern: null,
+        },
+      });
+    });
+
     it('returns an error for invalid pattern', () => {
       const result = formatSchema.safeParse({
         type: 'date_nanos',

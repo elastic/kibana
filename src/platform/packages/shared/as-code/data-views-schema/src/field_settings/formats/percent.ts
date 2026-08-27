@@ -17,7 +17,7 @@ export const percentFormatSchema = z
       .object({
         pattern: numeralPatternSchema,
       })
-      .optional(),
+      .nullish(),
   })
   .meta({
     id: 'kbn-field-format-percent',

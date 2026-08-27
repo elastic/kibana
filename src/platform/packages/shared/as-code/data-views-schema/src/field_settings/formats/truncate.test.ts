@@ -37,6 +37,18 @@ describe('formatSchema', () => {
       });
     });
 
+    it('is valid with null params', () => {
+      const result = formatSchema.safeParse({
+        type: 'truncate',
+        params: null,
+      });
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual({
+        type: 'truncate',
+        params: null,
+      });
+    });
+
     it('is valid with empty params', () => {
       const result = formatSchema.safeParse({
         type: 'truncate',
@@ -46,6 +58,22 @@ describe('formatSchema', () => {
       expect(result.data).toEqual({
         type: 'truncate',
         params: {},
+      });
+    });
+
+    it('is valid with null field_length', () => {
+      const result = formatSchema.safeParse({
+        type: 'truncate',
+        params: {
+          field_length: null,
+        },
+      });
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual({
+        type: 'truncate',
+        params: {
+          field_length: null,
+        },
       });
     });
 

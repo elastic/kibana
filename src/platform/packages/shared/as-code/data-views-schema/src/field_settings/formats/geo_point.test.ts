@@ -39,6 +39,36 @@ describe('formatSchema', () => {
       });
     });
 
+    it('is valid with null params', () => {
+      const result = formatSchema.safeParse({
+        type: 'geo_point',
+        params: null,
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual({
+        type: 'geo_point',
+        params: null,
+      });
+    });
+
+    it('is valid with null transform', () => {
+      const result = formatSchema.safeParse({
+        type: 'geo_point',
+        params: {
+          transform: null,
+        },
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual({
+        type: 'geo_point',
+        params: {
+          transform: null,
+        },
+      });
+    });
+
     it('returns an error for invalid transform', () => {
       const result = formatSchema.safeParse({
         type: 'geo_point',
