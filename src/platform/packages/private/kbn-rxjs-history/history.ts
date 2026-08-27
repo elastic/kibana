@@ -8,6 +8,7 @@
  */
 
 import * as jsondiffpatch from 'jsondiffpatch';
+import { cloneDeep } from 'lodash';
 
 import { BehaviorSubject, combineLatest, filter, map, pairwise, skip } from 'rxjs';
 
@@ -26,7 +27,10 @@ export function startTrackingHistory<T extends object = {}>({
   const pointer$ = new BehaviorSubject<number>(-1);
   let undoOrRedoAction = false;
 
-  const currentState$ = new BehaviorSubject<T | undefined>(state$.getValue());
+  const initialState = state$.getValue();
+  const currentState$ = new BehaviorSubject<T | undefined>(
+    initialState ? mapState(initialState) : undefined
+  );
   const disabledActions$ = new BehaviorSubject({
     undo: true as boolean,
     redo: true as boolean,
@@ -77,7 +81,7 @@ export function startTrackingHistory<T extends object = {}>({
 
     const reversedPatch = jsondiffpatch.reverse(history[pointer]); // must undo the **current** patch
     undoOrRedoAction = true;
-    currentState$.next(jsondiffpatch.patch(state$.getValue(), reversedPatch) as T);
+    currentState$.next(jsondiffpatch.patch(cloneDeep(state$.getValue()), reversedPatch) as T);
     pointer$.next(pointer - 1);
     return true;
   };
@@ -89,12 +93,20 @@ export function startTrackingHistory<T extends object = {}>({
 
     const patch = history[pointer + 1]; // must apply the **next** patch
     undoOrRedoAction = true;
-    currentState$.next(jsondiffpatch.patch(state$.getValue(), patch) as T);
+    currentState$.next(jsondiffpatch.patch(cloneDeep(state$.getValue()), patch) as T);
     pointer$.next(pointer + 1);
     return true;
   };
 
   const keyDownHandler = (event: KeyboardEvent) => {
+    if (
+      event.target instanceof HTMLElement &&
+      ['INPUT', 'TEXTAREA', 'SELECT'].includes(event.target.tagName)
+    ) {
+      // if in an input field, do not allow undo/redo to be triggered by keyboard shortcuts
+      return;
+    }
+
     const isModifier = event.ctrlKey || event.metaKey;
     if (isModifier) {
       const key = event.key.toLocaleLowerCase();
