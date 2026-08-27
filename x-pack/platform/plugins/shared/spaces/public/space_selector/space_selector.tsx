@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import './space_selector.scss';
-
 import {
   EuiButtonGroup,
   EuiFieldSearch,
@@ -327,11 +325,7 @@ const BackgroundPortal = React.memo(function BackgroundPortal() {
   const kbnFullScreenBgCss = useKbnFullScreenBgCss();
   return (
     <EuiPortal>
-      <div
-        className="spcSelectorBackground spcSelectorBackground__nonMixinAttributes"
-        css={kbnFullScreenBgCss}
-        role="presentation"
-      />
+      <div css={[kbnFullScreenBgCss, styles.backgroundStyles]} role="presentation" />
     </EuiPortal>
   );
 });

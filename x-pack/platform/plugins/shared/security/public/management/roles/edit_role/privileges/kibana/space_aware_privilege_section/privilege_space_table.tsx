@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import './privilege_space_table.scss';
-
 import type { EuiBadgeProps, EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBadge,
@@ -18,7 +16,9 @@ import {
   EuiIconTip,
   EuiInMemoryTable,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/css';
 import React, { Component } from 'react';
 
 import { i18n } from '@kbn/i18n';
@@ -63,6 +63,37 @@ interface TableRow {
     reserved: string[];
   };
 }
+
+const SpacePrivilegeTable = ({
+  columns,
+  items,
+}: {
+  columns: Array<EuiBasicTableColumn<TableRow>>;
+  items: TableRow[];
+}) => {
+  const { euiTheme } = useEuiTheme();
+
+  // a single class selector, so EuiTableRow's own `:hover` background still wins
+  const globalSpaceRowClass = css`
+    background-color: ${euiTheme.colors.backgroundBaseSubdued};
+  `;
+
+  return (
+    <EuiInMemoryTable
+      tableCaption={i18n.translate(
+        'xpack.security.management.editRole.spacePrivilegeTable.caption',
+        {
+          defaultMessage: 'Space privilege assignments',
+        }
+      )}
+      columns={columns}
+      items={items}
+      rowProps={(item: TableRow) => ({
+        className: isGlobalPrivilegeDefinition(item.privileges) ? globalSpaceRowClass : '',
+      })}
+    />
+  );
+};
 
 export class PrivilegeSpaceTable extends Component<Props, State> {
   public state = {
@@ -286,25 +317,7 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
       });
     }
 
-    return (
-      <EuiInMemoryTable
-        tableCaption={i18n.translate(
-          'xpack.security.management.editRole.spacePrivilegeTable.caption',
-          {
-            defaultMessage: 'Space privilege assignments',
-          }
-        )}
-        columns={columns}
-        items={rows}
-        rowProps={(item: TableRow) => {
-          return {
-            className: isGlobalPrivilegeDefinition(item.privileges)
-              ? 'secPrivilegeTable__row--isGlobalSpace'
-              : '',
-          };
-        }}
-      />
-    );
+    return <SpacePrivilegeTable columns={columns} items={rows} />;
   };
 
   private getSortedPrivileges = () => {
