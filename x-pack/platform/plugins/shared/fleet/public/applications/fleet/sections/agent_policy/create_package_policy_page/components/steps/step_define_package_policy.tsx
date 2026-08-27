@@ -128,6 +128,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
         onSelectionsChange: updatePackagePolicy,
         packagePolicy,
         hideInVarGroupOptions,
+        isEditPage,
       });
 
     const {
