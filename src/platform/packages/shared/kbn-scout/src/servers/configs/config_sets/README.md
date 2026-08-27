@@ -1,6 +1,6 @@
 # Scout server config sets
 
-Each folder here is a [custom server config set](https://www.elastic.co/docs/extend/kibana/testing/feature-flags#scout-feature-flags-custom-servers): `ScoutServerConfig` overrides that make Scout boot its own Kibana (and Elasticsearch) instead of sharing the `default` set.
+Each folder here is a server config set: the `ScoutServerConfig` Scout uses to boot Kibana (and Elasticsearch). `default/` is what suites get unless they ask for something else. Every other folder is a [custom server config set](https://www.elastic.co/docs/extend/kibana/testing/feature-flags#scout-feature-flags-custom-servers) that boots its own servers instead.
 
 > [!WARNING]
 > **Only add a new set as a last resort.** Each one needs its own dedicated server in CI, and you can't turn it on or off per suite. Most settings don't need a set at all: Kibana Core feature flags can be [flipped at runtime](https://www.elastic.co/docs/extend/kibana/testing/feature-flags#scout-feature-flags-runtime) with `apiServices.core.settings()` (no test servers restart, shares the default servers).
