@@ -630,3 +630,77 @@ describe('hidden subtrees do not inflate candidate scores', () => {
     expect(stripHtml(extractArticleHtml(page))).toContain('evil.test');
   });
 });
+
+/**
+ * Page-level chrome is removed only when a narrower container wins.
+ *
+ * Removing it before selection lost report content on any page with no article container:
+ * `<body><header><p>IOC: c2.evil.test</p></header><div>…</div></body>` had the header deleted
+ * and then the body fallback returned only the div. A body-level `header` or `aside` is
+ * unambiguously chrome only when something narrower is the report, and this file's rule is that
+ * a false-keep is noise the section miner handles while a false-strip can drop an indicator.
+ */
+describe('page-level chrome and the body fallback', () => {
+  it.each([
+    [
+      'a body header',
+      '<html><body><header><p>IOC: c2.evil.test</p></header><div>details</div></body></html>',
+    ],
+    [
+      'a body aside',
+      '<html><body><aside><p>IOC: c2.evil.test</p></aside><div>details</div></body></html>',
+    ],
+  ])('keeps report content in %s when no container matches', (_label, html) => {
+    const result = stripHtml(extractArticleHtml(html));
+
+    expect(result).toContain('c2.evil.test');
+    expect(result).toContain('details');
+  });
+
+  it('still removes page chrome when a container wins', () => {
+    const result = stripHtml(
+      extractArticleHtml(
+        '<html><body><header>site nav</header><article><p>report evil.test</p></article><footer>foot</footer></body></html>'
+      )
+    );
+
+    expect(result).toBe('report evil.test');
+  });
+});
+
+/**
+ * A hidden candidate scores zero. Neither scoring path could see the candidate's own `hidden`
+ * attribute: the precise path passes inner HTML, which drops the wrapper, and the length map is
+ * built from text nodes. So a large `<article hidden>` outscored the visible report, and
+ * returning its inner HTML stripped the attribute that marked it non-rendered, so downstream
+ * treated stale hidden text as the report.
+ */
+describe('hidden candidates cannot win selection', () => {
+  const STALE = `${'stale '.repeat(3000)}c2.stale.test`;
+
+  it.each([
+    [
+      'article',
+      `<html><body><article hidden>${STALE}</article><main><p>report evil.test</p></main></body></html>`,
+    ],
+    [
+      'main',
+      `<html><body><main hidden>${STALE}</main><article><p>report evil.test</p></article></body></html>`,
+    ],
+  ])('prefers the visible report over a hidden %s', (_label, html) => {
+    const result = stripHtml(extractArticleHtml(html));
+
+    expect(result).toContain('evil.test');
+    expect(result).not.toContain('c2.stale.test');
+  });
+
+  it('yields nothing when the only candidate is hidden', () => {
+    expect(
+      stripHtml(
+        extractArticleHtml(
+          '<html><body><article hidden>only hidden c2.stale.test</article></body></html>'
+        )
+      )
+    ).toBe('');
+  });
+});

@@ -105,6 +105,7 @@ const PAGE_CHROME_SELECTORS = [
 interface ParsedNode {
   type: string;
   data?: string;
+  attribs?: Record<string, string>;
   children?: ParsedNode[];
 }
 
@@ -232,7 +233,14 @@ const selectArticleHtml = (html: string): string => {
 
   // Page-level only. Done before selection so these never count toward a candidate's
   // score, while an article's own header/footer/aside still does.
-  $(PAGE_CHROME_SELECTORS).remove();
+  // Page-level chrome is NOT removed here. It used to be, and that lost report content on any
+  // page with no article container: `<body><header><p>IOC: c2.evil.test</p></header><div>…` had
+  // the header deleted and then the body fallback returned only the div. A body-level `header`
+  // or `aside` is unambiguously chrome only when something narrower is the report, which is not
+  // known until selection has run, and this file's own rule is that a false-keep is noise the
+  // section miner handles while a false-strip can drop an indicator.
+  //
+  // It is applied after selection, and only when a narrower container won.
 
   // Chrome removed document-wide, up front, rather than from the chosen container at the
   // end. Two reasons, and the first is severe: `$container.find(selectorList)` is quadratic
@@ -295,10 +303,21 @@ const selectArticleHtml = (html: string): string => {
   // against a tree that still contained chrome is the bug the removals exist to prevent.
   const lengths = usePreciseScore ? undefined : visibleLengths(roots);
 
+  // A hidden candidate scores zero in both paths.
+  //
+  // Neither path could see the candidate's own `hidden` attribute: the precise path passes
+  // `$(el).html()`, which is the inner HTML and drops the wrapper, and the length map is built
+  // from text nodes. So a large `<article hidden>` outscored the visible `<main>` report, and
+  // returning its inner HTML stripped the very attribute that marked it non-rendered, so
+  // downstream treated stale hidden text as the report and lost every real indicator.
+  const isHidden = (el: unknown): boolean => (el as ParsedNode).attribs?.hidden !== undefined;
+
   const candidates = candidateEls.map(({ el, priority }) => ({
     el,
     priority,
-    length: usePreciseScore
+    length: isHidden(el)
+      ? 0
+      : usePreciseScore
       ? stripHtml($(el).html() ?? '').length
       : lengths?.get(el as unknown as ParsedNode) ?? 0,
   }));
@@ -317,16 +336,21 @@ const selectArticleHtml = (html: string): string => {
     }
   }
 
-  // Fall back to the document body, or to the whole fragment when there is no body
-  // element. htmlparser2 does not synthesize `<html>/<head>/<body>` the way parse5 does,
-  // so a `<description>` fragment has no body to fall back to and would otherwise return
-  // nothing at all.
-  if ($container === null || $container.length === 0) {
-    const $body = $('body');
-    $container = $body.length > 0 ? $body : $.root();
+  if ($container !== null && $container.length > 0) {
+    // A narrower container won, so page-level chrome is chrome and cannot be the report.
+    // Removing it now rather than before selection is what keeps the fallback below honest.
+    $(PAGE_CHROME_SELECTORS).remove();
+    return $container.html() ?? html;
   }
 
-  return $container.html() ?? html;
+  // Fall back to the document body, or to the whole fragment when there is no body
+  // element, keeping page-level chrome. htmlparser2 does not synthesize
+  // `<html>/<head>/<body>` the way parse5 does, so a `<description>` fragment has no body to
+  // fall back to and would otherwise return nothing at all.
+  const $body = $('body');
+  const $fallback = $body.length > 0 ? $body : $.root();
+
+  return $fallback.html() ?? html;
 };
 
 /**
