@@ -21,7 +21,9 @@ describe('assertPlatinumLicenseForTools', () => {
     license.hasAtLeast.mockReturnValue(true);
     licensing.getLicense.mockResolvedValue(license);
 
-    await expect(assertPlatinumLicenseForTools(createGetLicensing(licensing))).resolves.toBeUndefined();
+    await expect(
+      assertPlatinumLicenseForTools(createGetLicensing(licensing))
+    ).resolves.toBeUndefined();
   });
 
   it('resolves when the license is trial', async () => {
@@ -30,7 +32,9 @@ describe('assertPlatinumLicenseForTools', () => {
     license.hasAtLeast.mockReturnValue(true);
     licensing.getLicense.mockResolvedValue(license);
 
-    await expect(assertPlatinumLicenseForTools(createGetLicensing(licensing))).resolves.toBeUndefined();
+    await expect(
+      assertPlatinumLicenseForTools(createGetLicensing(licensing))
+    ).resolves.toBeUndefined();
   });
 
   it('throws SloToolValidationError when the license is basic', async () => {

@@ -36,8 +36,7 @@ export const registerAgentBuilder = ({
 
   const deps: SloToolDeps = {
     getScopedClients,
-    getLicensing: () =>
-      core.getStartServices().then(([, pluginsStart]) => pluginsStart.licensing),
+    getLicensing: () => core.getStartServices().then(([, pluginsStart]) => pluginsStart.licensing),
     config,
     logger,
   };

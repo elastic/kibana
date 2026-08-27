@@ -129,7 +129,11 @@ export const listSlosTool = (
         tags: result.tags,
       }));
 
-      return { results: [createOtherResult({ total, page: resultPage, perPage: resultPerPage, results: trimmed })] };
+      return {
+        results: [
+          createOtherResult({ total, page: resultPage, perPage: resultPerPage, results: trimmed }),
+        ],
+      };
     } catch (error) {
       return toToolErrorResult({ error, metadata: { params }, logger });
     }
