@@ -119,10 +119,72 @@ const RAW_TEXT_NAMES = new Set(['script', 'style']);
  * Overshooting the bound only means the tag is left for the parser to read per spec,
  * which is the safe direction.
  */
-const SELF_CLOSED_RAW_TEXT = /<(script|style)((?:"[^"]*"|'[^']*'|[^>"']){0,2048}?)\/>/gi;
+const RAW_TEXT_TAG_NAMES = ['script', 'style'] as const;
 
-export const normalizeSelfClosedRawText = (html: string): string =>
-  html.replace(SELF_CLOSED_RAW_TEXT, '<$1$2></$1>');
+/**
+ * Scanned in a single pass rather than matched with a regex.
+ *
+ * The regex form bounded its attribute run to keep one opener cheap, but it still
+ * restarted at every `<script` in the input, and each attempt spent the whole allowance
+ * before failing. On `'<script'.repeat(n)` that is about 293 character checks per input
+ * byte, or billions inside the 10MB cap: measured 405ms at 896KB, extrapolating to
+ * roughly 4.5 seconds of pegged CPU for one page. Linear rather than quadratic, but a
+ * constant that large is still a worker the queue does not get back.
+ *
+ * This visits each character at most once. Attribute scanning stays quote-aware, so a
+ * `>` inside an attribute value cannot end a tag early, and an unterminated tag runs to
+ * end of input and is left for the parser to read per spec, which is the safe direction.
+ */
+export const normalizeSelfClosedRawText = (html: string): string => {
+  const lower = html.toLowerCase();
+  const pieces: string[] = [];
+  let copiedTo = 0;
+  let cursor = 0;
+
+  while (cursor < html.length) {
+    const open = lower.indexOf('<', cursor);
+    const name =
+      open === -1
+        ? undefined
+        : RAW_TEXT_TAG_NAMES.find((candidate) => lower.startsWith(`<${candidate}`, open));
+    const afterName = open === -1 || name === undefined ? -1 : open + 1 + name.length;
+    // A tag boundary has to follow the name, or `<scriptfoo` would be treated as one.
+    const isTagStart =
+      afterName !== -1 && (afterName >= html.length || /[\s/>]/.test(html[afterName]));
+
+    if (open === -1) {
+      cursor = html.length;
+    } else if (!isTagStart) {
+      cursor = open + 1;
+    } else {
+      let scan = afterName;
+      let quote = '';
+      while (scan < html.length && !(quote === '' && html[scan] === '>')) {
+        const char = html[scan];
+        if (quote !== '') {
+          if (char === quote) quote = '';
+        } else if (char === '"' || char === "'") {
+          quote = char;
+        }
+        scan += 1;
+      }
+
+      if (scan >= html.length) {
+        cursor = html.length;
+      } else if (html[scan - 1] === '/') {
+        pieces.push(html.slice(copiedTo, scan - 1), `></${name}>`);
+        copiedTo = scan + 1;
+        cursor = scan + 1;
+      } else {
+        cursor = scan + 1;
+      }
+    }
+  }
+
+  if (copiedTo === 0) return html;
+  pieces.push(html.slice(copiedTo));
+  return pieces.join('');
+};
 
 /**
  * Fragment mode (`isDocument: false`), so a `<description>` snippet is not wrapped in
@@ -139,7 +201,14 @@ export const normalizeSelfClosedRawText = (html: string): string =>
  * `</td>` and raw-text `<script>` bodies; parse5's extra fidelity is table foster
  * parenting and formatting-element reconstruction, none of which affects text extraction.
  */
-const PARSER_OPTIONS = { _useHtmlParser2: true } as const;
+const PARSER_OPTIONS = {
+  _useHtmlParser2: true,
+  // HTML treats `<![CDATA[ ... ]]>` as a bogus comment, which is right for a web page and
+  // wrong for a feed: RSS and Atom use CDATA precisely to carry an HTML document, and
+  // reading it as a comment dropped the whole article body. Only affects `<![CDATA[`;
+  // ordinary `<!-- -->` comments still parse as comments and are still discarded.
+  recognizeCDATA: true,
+} as const;
 
 const parseTopLevelNodes = (html: string): ParsedNode[] => {
   const $ = cheerio.load(normalizeSelfClosedRawText(html), PARSER_OPTIONS);
@@ -164,10 +233,32 @@ const childrenOf = (node: ParsedNode): ParsedNode[] => node.children ?? [];
  * decode leaves `<p>...</p>` sitting in what is supposed to be plain text. A single
  * bounded re-parse resolves that. Requiring a *closing* tag is what keeps prose safe:
  * a threat report discussing `use &lt;script&gt; carefully` decodes to text with no
- * closing tag and is left alone, while `&lt;script&gt;...&lt;/script&gt;` is re-parsed
- * and removed as an element.
+ * closing tag and is left alone.
  */
 const RESIDUAL_CLOSING_TAG = /<\/[a-z][a-z0-9]*\s*>/i;
+
+/**
+ * A closing tag alone is not enough to justify re-parsing, because escaped markup is
+ * also how a report *displays* markup on purpose.
+ *
+ * `<code>&lt;script&gt;fetch('https://c2.evil.test')&lt;/script&gt;</code>` decodes to
+ * text carrying a complete escaped snippet. Re-parsing that read it as a live script
+ * element and deleted it, losing the IOC the report was published to communicate. A
+ * whole encoded document and an escaped snippet are indistinguishable once decoded, so
+ * the decision has to be made from the input instead.
+ *
+ * The signal is whether the input brought any markup of its own. An entity-encoded
+ * document parses to a single text node and nothing else, so a re-parse is the only way
+ * to reach its content. Anything with real elements is an already-parsed document, and
+ * escaped markup inside it is content the author chose to show.
+ *
+ * Checked at the top level only, which is where the distinction lives and costs nothing.
+ * The trade-off is a mixed document, real markup plus an encoded document inside it,
+ * which keeps its encoded tags visible in `body_text`. That is the safe direction: noise
+ * the section miner mostly absorbs, against silently deleting indicators.
+ */
+const carriesOwnMarkup = (nodes: ParsedNode[]): boolean =>
+  nodes.some((node) => isElement(node) || node.type === 'cdata');
 
 /** Stack entry: a node still to visit, or literal output to append after its subtree. */
 type WalkStep = { kind: 'node'; node: ParsedNode } | { kind: 'emit'; text: string };
@@ -201,6 +292,32 @@ const hrefOf = (node: ParsedNode): string | undefined => {
  * `liftHrefs` reproduces the anchor-href lift for IOC and reference sections, where the
  * link target is itself the indicator.
  */
+/**
+ * Concatenated text of a subtree, ignoring element structure.
+ *
+ * Used for CDATA, whose payload the parser hands back as opaque text rather than as a
+ * parsed subtree.
+ */
+const rawTextOf = (nodes: ParsedNode[]): string => {
+  const out: string[] = [];
+  const stack: ParsedNode[] = [...nodes].reverse();
+
+  while (stack.length > 0) {
+    const node = stack.pop();
+    if (!node) break;
+    if (node.type === 'text') {
+      out.push(node.data ?? '');
+    } else {
+      const children = childrenOf(node);
+      for (let i = children.length - 1; i >= 0; i--) {
+        stack.push(children[i]);
+      }
+    }
+  }
+
+  return out.join('');
+};
+
 const inlineTextOf = (nodes: ParsedNode[], liftHrefs: boolean): string => {
   const out: string[] = [];
   const stack: WalkStep[] = [];
@@ -219,8 +336,15 @@ const inlineTextOf = (nodes: ParsedNode[], liftHrefs: boolean): string => {
 
       if (node.type === 'text') {
         out.push(node.data ?? '');
+      } else if (node.type === 'cdata') {
+        // RSS and Atom carry an entire HTML document inside `<![CDATA[ ... ]]>`, and the
+        // parser hands the payload back as opaque text rather than a parsed subtree.
+        // Emitting a boundary and moving on discarded the whole article body for every
+        // feed that ships its content this way, so the payload is parsed instead. One
+        // level is enough: CDATA cannot nest.
+        out.push(` ${extractPlainText(rawTextOf(childrenOf(node)))} `);
       } else if (!isElement(node)) {
-        // Comments, directives, and CDATA carry no report text, but they did separate
+        // Comments and directives carry no report text, but they did separate
         // the text on either side, so they still emit a boundary. Dropping the node
         // wholesale is what keeps `<!-- hidden > c2.evil.test -->` from being extracted
         // as a live IOC; emitting the boundary is what keeps `evil.com<!-- x -->bad.net`
@@ -262,9 +386,10 @@ const extractPlainText = (html: string): string => inlineTextOf(parseTopLevelNod
  */
 export const stripHtml = (html: string | undefined | null): string => {
   if (!html) return '';
-  const first = extractPlainText(capInput(html));
-  const text = RESIDUAL_CLOSING_TAG.test(first) ? extractPlainText(first) : first;
-  return collapseWhitespace(text);
+  const nodes = parseTopLevelNodes(capInput(html));
+  const first = inlineTextOf(nodes, false);
+  const reparse = RESIDUAL_CLOSING_TAG.test(first) && !carriesOwnMarkup(nodes);
+  return collapseWhitespace(reparse ? extractPlainText(first) : first);
 };
 
 /**
@@ -347,8 +472,12 @@ const renderStructured = (html: string): string => {
 
       if (node.type === 'text') {
         out.push(node.data ?? '');
+      } else if (node.type === 'cdata') {
+        // Same as the plain-text walker: the CDATA payload is an HTML document the
+        // parser did not parse, so it is parsed here rather than dropped.
+        out.push(`\n${renderStructured(rawTextOf(childrenOf(node)))}\n`);
       } else if (!isElement(node)) {
-        // Comments, doctype, and CDATA contribute a boundary only.
+        // Comments and doctype contribute a boundary only.
         out.push(' ');
       } else if (RAW_TEXT_NAMES.has(name)) {
         out.push(' ');
@@ -389,8 +518,17 @@ const renderStructured = (html: string): string => {
         out.push('\n');
         stack.push({ kind: 'emit', text: '\n' });
         pushNodes(stack, childrenOf(node));
-      } else {
+      } else if (INLINE_NAMES.has(name)) {
         // Inline element: no boundary, contents kept.
+        pushNodes(stack, childrenOf(node));
+      } else {
+        // Unknown or custom element. Same conservative default as the plain-text
+        // walker: treating these as inline merged adjacent indicators, so
+        // `<ioc-value>evil.com</ioc-value><ioc-value>bad.net</ioc-value>` came out as
+        // `evil.combad.net`. Vendor web components make that common, and it defeats the
+        // one thing this structured form exists to preserve.
+        out.push('\n');
+        stack.push({ kind: 'emit', text: '\n' });
         pushNodes(stack, childrenOf(node));
       }
     }
@@ -428,8 +566,10 @@ const renderStructured = (html: string): string => {
  */
 export const htmlToStructured = (html: string | undefined | null): string => {
   if (!html) return '';
-  const first = renderStructured(capInput(html));
-  return RESIDUAL_CLOSING_TAG.test(first) ? renderStructured(first) : first;
+  const capped = capInput(html);
+  const first = renderStructured(capped);
+  const reparse = RESIDUAL_CLOSING_TAG.test(first) && !carriesOwnMarkup(parseTopLevelNodes(capped));
+  return reparse ? renderStructured(first) : first;
 };
 
 /** `content` block written by every ingest path (adapters + manual ingest). */

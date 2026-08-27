@@ -789,3 +789,126 @@ describe('inline markup does not split tokens', () => {
     );
   });
 });
+
+/**
+ * CDATA carries an HTML document, not a comment.
+ *
+ * HTML treats `<![CDATA[ ... ]]>` as a bogus comment, which is correct for a web page and
+ * wrong for a feed: RSS and Atom use it precisely to ship article content. Read as a
+ * comment, the entire body was discarded and the report reached enrichment empty.
+ */
+describe('CDATA payloads', () => {
+  it('extracts text from a CDATA article body', () => {
+    expect(stripHtml('<description><![CDATA[<p>IOC: evil.test</p>]]></description>')).toBe(
+      'IOC: evil.test'
+    );
+  });
+
+  it('keeps structure from a CDATA article body', () => {
+    expect(
+      htmlToStructured(
+        '<description><![CDATA[<h2>Indicators of Compromise</h2><p>evil.test</p>]]></description>'
+      )
+    ).toBe('## Indicators of Compromise\nevil.test');
+  });
+
+  it('preserves table cell boundaries inside CDATA', () => {
+    expect(
+      htmlToStructured(
+        '<description><![CDATA[<tr><td>evil.com</td><td>bad.net</td></tr>]]></description>'
+      )
+    ).toBe('| evil.com | bad.net |');
+  });
+
+  // The payload is parsed, so script bodies inside it are removed as elements rather than
+  // surfacing as text that extraction would mine for IOCs.
+  it('removes a script carried inside CDATA', () => {
+    expect(stripHtml('<description><![CDATA[<script>bad()</script>ok]]></description>')).toBe('ok');
+  });
+
+  // Enabling CDATA recognition must not turn ordinary comments into content.
+  it('still discards ordinary comments', () => {
+    expect(stripHtml('visible<!-- hidden > c2.evil.test -->text')).toBe('visible text');
+  });
+});
+
+/**
+ * Escaped markup is also how a report displays markup on purpose.
+ *
+ * A single decode cannot tell an entity-encoded document from a snippet the author chose
+ * to show, so re-parse eligibility is decided from whether the input brought markup of
+ * its own. Re-parsing unconditionally deleted the escaped script in a `<code>` block and
+ * with it the IOC the report was published to communicate.
+ */
+describe('re-parsing entity-encoded markup', () => {
+  it('keeps an escaped snippet displayed inside real markup', () => {
+    expect(
+      stripHtml(`<code>&lt;script&gt;fetch('https://c2.evil.test')&lt;/script&gt;</code>`)
+    ).toBe(`<script>fetch('https://c2.evil.test')</script>`);
+  });
+
+  it('still decodes an entity-encoded document', () => {
+    expect(stripHtml('&lt;p&gt;evil.test&lt;/p&gt;')).toBe('evil.test');
+  });
+
+  it('still removes a script from an entity-encoded document', () => {
+    expect(stripHtml('&lt;script&gt;fetch("http://c2.evil.test")&lt;/script&gt;ok')).toBe('ok');
+  });
+
+  it('leaves prose mentioning an unclosed tag alone', () => {
+    expect(stripHtml('use &lt;script&gt; carefully')).toBe('use <script> carefully');
+  });
+});
+
+/**
+ * The structured walker has to default unknown elements to a boundary for the same reason
+ * the plain-text walker does. Treating them as inline merged separate indicators, and
+ * vendor web components make that common.
+ */
+describe('structured output boundaries for unknown elements', () => {
+  it('separates adjacent custom elements', () => {
+    expect(
+      htmlToStructured('<h2>IOCs</h2><ioc-value>evil.com</ioc-value><ioc-value>bad.net</ioc-value>')
+    ).toBe('## IOCs\nevil.com\nbad.net');
+  });
+
+  it('still joins inline markup inside a paragraph', () => {
+    expect(htmlToStructured('<h2>IOCs</h2><p>c2.<strong>evil</strong>.test</p>')).toBe(
+      '## IOCs\nc2.evil.test'
+    );
+  });
+});
+
+/**
+ * The self-closing normalizer runs on every page before the parser, so its own cost has
+ * to stay linear. The regex form restarted at every `<script` and spent its full
+ * attribute allowance before failing: about 293 character checks per input byte, or
+ * roughly 4.5 seconds at the 10MB cap. `'<script>'` openers exit that regex immediately
+ * at the `>` and never exercised the path, which is why the earlier adversarial test
+ * missed it.
+ */
+describe('self-closing normalization stays linear', () => {
+  it('handles many unterminated openers cheaply', () => {
+    const input = '<script'.repeat(512000);
+    const started = process.hrtime.bigint();
+    stripHtml(input);
+    const elapsedMs = Number(process.hrtime.bigint() - started) / 1e6;
+
+    expect(elapsedMs).toBeLessThan(400);
+  });
+
+  it('does not end a tag at a > inside a quoted attribute', () => {
+    expect(stripHtml('<script src="a>b.js"/>kept')).toBe('kept');
+  });
+
+  it('does not treat a longer element name as a raw-text tag', () => {
+    expect(stripHtml('<scriptfoo>not a script</scriptfoo>')).toBe('not a script');
+  });
+
+  it('still normalizes a self-closed script and style', () => {
+    expect(stripHtml('<article><script src="x.js"/><p>IOC: evil.test</p></article>')).toBe(
+      'IOC: evil.test'
+    );
+    expect(stripHtml('<article><style/><p>IOC: evil.test</p></article>')).toBe('IOC: evil.test');
+  });
+});
