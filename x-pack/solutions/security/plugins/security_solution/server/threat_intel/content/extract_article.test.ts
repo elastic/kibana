@@ -158,7 +158,10 @@ describe('extractArticleHtml', () => {
     expect(result).toContain('10.0.0.1');
   });
 
-  it('strips <form> and <noscript>', () => {
+  // `noscript` was in this list and is not chrome: it is reader-visible fallback, which
+  // `text.ts` keeps for that reason, so stripping it here made the two stages disagree and
+  // an article serving its body as fallback reached `stripHtml` empty. `form` stays.
+  it('strips <form> but keeps <noscript>', () => {
     const html = `
       <article>
         <form action="/search"><input name="q" /><button>Search</button></form>
@@ -168,7 +171,7 @@ describe('extractArticleHtml', () => {
     `;
     const result = extractArticleHtml(html);
     expect(result).not.toContain('/search');
-    expect(result).not.toContain('Please enable JavaScript');
+    expect(result).toContain('Please enable JavaScript');
     expect(result).toContain('203.0.113.0');
   });
 
@@ -560,5 +563,32 @@ describe('a teaser inflated by disappearing markup does not win selection', () =
     );
 
     expect(stripHtml(extracted)).toBe('IOC: evil.test');
+  });
+});
+
+/**
+ * `noscript` is reader-visible fallback, not chrome, and `text.ts` keeps it for that reason.
+ * Removing it here made the two stages disagree, so an article serving its body as fallback
+ * reached `stripHtml` empty.
+ */
+describe('noscript is not chrome', () => {
+  it('keeps an article body served as noscript fallback', () => {
+    const result = stripHtml(
+      extractArticleHtml(
+        '<html><body><article><noscript><p>IOC: c2.evil.test</p></noscript></article></body></html>'
+      )
+    );
+
+    expect(result).toBe('IOC: c2.evil.test');
+  });
+
+  it('still removes real chrome from the same article', () => {
+    const result = stripHtml(
+      extractArticleHtml(
+        '<html><body><article><nav>menu</nav><script>t=1</script><p>IOC: evil.test</p></article></body></html>'
+      )
+    );
+
+    expect(result).toBe('IOC: evil.test');
   });
 });

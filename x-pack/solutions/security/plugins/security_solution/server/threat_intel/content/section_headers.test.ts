@@ -207,3 +207,33 @@ describe('irregular plural headings', () => {
     }
   );
 });
+
+/**
+ * `about the ` swept up ordinary report sections. `About the malware`, `About the campaign`
+ * and `About the vulnerability` all classified as references, which changes href lifting and
+ * marks real report content and its indicators as citation noise.
+ */
+describe('the about-the terminator is scoped to authorship', () => {
+  it.each([['About the author'], ['About the author, Jane Doe'], ['about the author bio']])(
+    'still classifies %s as references',
+    (heading) => {
+      expect(classifyHeader(heading)).toBe('references');
+    }
+  );
+
+  it.each([
+    ['About the malware'],
+    ['About the campaign'],
+    ['About the vulnerability'],
+    ['About the threat actor'],
+  ])('classifies %s as prose', (heading) => {
+    expect(classifyHeader(heading)).toBe('prose');
+  });
+
+  it.each([['Related articles'], ['Share this article'], ['Discover more'], ['Similar posts']])(
+    'leaves the other terminator prefixes working: %s',
+    (heading) => {
+      expect(classifyHeader(heading)).toBe('references');
+    }
+  );
+});

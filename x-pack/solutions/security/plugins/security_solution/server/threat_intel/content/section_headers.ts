@@ -108,7 +108,17 @@ export const TERMINATOR_HEADER_TERMS = new Set([
  * (e.g. "Related Articles: 2024 Edition" → normalized "related articles: 2024 edition"
  * doesn't match the set, but starts with "related ").
  */
-export const TERMINATOR_PREFIXES = ['related ', 'similar ', 'share ', 'about the ', 'discover '];
+export const TERMINATOR_PREFIXES = [
+  'related ',
+  'similar ',
+  'share ',
+  // `about the author` rather than `about the `, which swept up ordinary report sections:
+  // `About the malware`, `About the campaign` and `About the vulnerability` all classified as
+  // references, so real report content and its indicators were tagged as citation noise. The
+  // prefix form is kept so an author name may follow.
+  'about the author',
+  'discover ',
+];
 
 export type SectionKind = 'ioc' | 'references' | 'prose';
 

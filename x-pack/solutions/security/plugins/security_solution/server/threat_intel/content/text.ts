@@ -495,6 +495,21 @@ const STRUCTURAL_FEED_CONTAINERS = new Set(['item', 'entry', 'channel', 'feed', 
  */
 const ATOM_TEXT_CONSTRUCTS = new Set(['title', 'summary', 'content', 'rights', 'subtitle']);
 
+/**
+ * An Atom text construct declaring content that is NOT encoded markup.
+ *
+ * Its payload is literal, so it is emitted as text rather than walked. The type handling
+ * added for entity-encoded payloads was bypassed by the CDATA branch, which always reparsed:
+ * `<summary type="text"><![CDATA[Exploit uses <script> and c2.evil.test]]></summary>` had the
+ * `<script>` read as an unterminated raw-text element and lost the rest of the sentence and
+ * the indicator, while the entity spelling of the same content was preserved. Two spellings
+ * of one thing behaving differently is the bug.
+ */
+const isLiteralTextConstruct = (node: ParsedNode): boolean =>
+  isElement(node) &&
+  ATOM_TEXT_CONSTRUCTS.has(localName(elementName(node))) &&
+  !isEncodedHtmlWrapper(node);
+
 /** An element whose text payload is an entity-encoded HTML document. */
 const isEncodedHtmlWrapper = (node: ParsedNode): boolean => {
   const name = localName(elementName(node));
@@ -762,6 +777,14 @@ const inlineTextOf = (nodes: ParsedNode[], liftHrefs: boolean): string => {
         out.push(' ');
       } else if (SKIPPED_SUBTREE_NAMES.has(elementName(node))) {
         out.push(' ');
+      } else if (isLiteralTextConstruct(node)) {
+        // Atom says this payload is text, so it is emitted rather than walked.
+        //
+        // Markers unwrapped rather than left in place, because HTML treats `<title>` as an
+        // escapable raw-text element and so hands back `<![CDATA[ … ]]>` as literal
+        // characters, where `<summary>` gets a parsed CDATA node. Without this, one Atom text
+        // construct showed the markers and the other did not, for the same input.
+        out.push(` ${unwrapCdata(rawTextOf(childrenOf(node)))} `);
       } else if (cdataDepth < MAX_CDATA_DEPTH && isTextOnlyEncodedWrapper(node)) {
         // A feed wrapper whose payload is text is that feed's encoded body, wherever it sits
         // in the document. Parsed into this walk, bounded by the same depth counter CDATA
@@ -911,6 +934,9 @@ const renderStructured = (html: string): string => {
         out.push(' ');
       } else if (SKIPPED_SUBTREE_NAMES.has(name)) {
         out.push(' ');
+      } else if (isLiteralTextConstruct(node)) {
+        // Same as the plain-text walker.
+        out.push(`\n${unwrapCdata(rawTextOf(childrenOf(node)))}\n`);
       } else if (cdataDepth < MAX_CDATA_DEPTH && isTextOnlyEncodedWrapper(node)) {
         // Same as the plain-text walker. Section state is walker-local, so feeding the
         // payload onto this stack inherits it.

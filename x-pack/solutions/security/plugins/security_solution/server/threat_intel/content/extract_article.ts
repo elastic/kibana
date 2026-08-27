@@ -49,12 +49,17 @@ const ARTICLE_SELECTORS = [
  * executive summary, and IOC callouts live in `<aside>`. They are page chrome only
  * when they sit outside the article, which `PAGE_CHROME_SELECTORS` handles.
  */
+/*
+ * `noscript` is deliberately absent. It is reader-visible fallback, not chrome, and
+ * `text.ts` keeps it for exactly that reason, so removing it here made the two stages
+ * disagree: an article serving its body as fallback reached `stripHtml` empty, and
+ * `<article><noscript><p>IOC: c2.evil.test</p></noscript></article>` extracted to nothing.
+ */
 const CHROME_SELECTORS = [
   'nav',
   '[role="navigation"]',
   'script',
   'style',
-  'noscript',
   'form',
   '.sidebar',
   '.nav',

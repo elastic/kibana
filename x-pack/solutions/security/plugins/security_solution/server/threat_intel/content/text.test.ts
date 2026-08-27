@@ -1807,3 +1807,57 @@ describe('structural feed containers are not encoded bodies', () => {
     expect(result).not.toContain('false-ioc.test');
   });
 });
+
+/**
+ * An Atom text construct declaring literal content has to behave the same whichever spelling
+ * the feed uses. The type handling added for entity-encoded payloads was bypassed by the
+ * CDATA branch, which always reparsed, so a text-typed summary lost its content when written
+ * as CDATA and kept it when written with entities.
+ */
+describe('Atom literal types with a CDATA payload', () => {
+  const CDATA = '<![CDATA[Exploit uses <script> and c2.evil.test]]>';
+  const EXPECTED = 'Exploit uses <script> and c2.evil.test';
+
+  it.each([
+    ['an explicit text type', `<summary type="text">${CDATA}</summary>`],
+    ['an omitted type', `<summary>${CDATA}</summary>`],
+    ['an xhtml type', `<summary type="xhtml">${CDATA}</summary>`],
+    ['a text-typed title', `<title type="text">${CDATA}</title>`],
+  ])('keeps the payload literal for %s', (_label, html) => {
+    const result = stripHtml(html);
+
+    expect(result).toBe(EXPECTED);
+    expect(result).toContain('c2.evil.test');
+  });
+
+  it('agrees with the entity spelling of the same content', () => {
+    expect(
+      stripHtml('<summary type="text">Exploit uses &lt;script&gt; and c2.evil.test</summary>')
+    ).toBe(EXPECTED);
+  });
+
+  it('keeps the payload literal in structured output too', () => {
+    expect(htmlToStructured(`<summary type="text">${CDATA}</summary>`)).toBe(EXPECTED);
+  });
+
+  // HTML-declaring constructs and RSS wrappers must still parse their CDATA as markup.
+  it.each([
+    [
+      'an html-typed summary',
+      '<summary type="html"><![CDATA[<p>evil.com</p>]]></summary>',
+      'evil.com',
+    ],
+    [
+      'a media-typed content',
+      '<content type="text/html"><![CDATA[<p>evil.com</p>]]></content>',
+      'evil.com',
+    ],
+    [
+      'an rss description',
+      '<description><![CDATA[<p>IOC: evil.test</p>]]></description>',
+      'IOC: evil.test',
+    ],
+  ])('still parses CDATA as markup for %s', (_label, html, expected) => {
+    expect(stripHtml(html)).toBe(expected);
+  });
+});
