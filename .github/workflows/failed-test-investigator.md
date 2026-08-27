@@ -254,7 +254,7 @@ This issue may have been investigated before (for example, it was reopened after
 When the verdict is that no change to this repository is needed, close the issue with the `close-issue` tool. Close only when **all** of the following hold:
 
 - the classification is `ci-environment` and `confidence` is `medium` or `high`: the failure came from a transient, external, or one-off cause with nothing test- or product-related to fix;
-- the failure is not recurring: a CI-environment failure that keeps hitting the same test or suite needs escalation, not closing — leave it open;
+- the failure is not recurring: a CI-environment failure that keeps hitting the same test or suite needs escalation, not closing — leave it open. **Exception:** pre-fix CI lag (the run's `Build hash` predates the fix — see the `flaky-test-investigator` skill's pipelines reference) is closable **even if it repeats**, because repeated lag is expected until the Cloud image catches up with `main`, not a problem to escalate;
 - you did not add `failure:ai-fixable` or `ai:fix-flaky`, and no fix PR referencing this issue is open.
 
 Call the tool at most once, only after posting the verdict comment, and do not attach a closing comment to it. Instead, make the close visible in the verdict comment with a note block right after (and outside) the `<details>` block:
@@ -263,6 +263,8 @@ Call the tool at most once, only after posting the verdict comment, and do not a
 > [!NOTE]
 > Closing this issue: {one-sentence reason}. It will reopen automatically if the test fails again.
 ```
+
+For pre-fix CI lag, make the reason verifiable by naming the commit — e.g. "the failing run used Kibana `<short-sha>`, which predates the fix, so it ran pre-fix code, not a recurrence".
 
 When in doubt, leave the issue open.
 
