@@ -39,13 +39,15 @@ export const ModelCard: React.FC<ModelCardProps> = ({ model, onClick }) => {
 
   return (
     <EuiCard
-      title={<EuiAvatar
-        name={modelCreator}
-        iconType={provider?.icon ?? 'machineLearningApp'}
-        color="plain"
-        size="l"
-        type="space"
-      />}
+      title={
+        <EuiAvatar
+          name={modelCreator}
+          iconType={provider?.icon ?? 'machineLearningApp'}
+          color="plain"
+          size="l"
+          type="space"
+        />
+      }
       textAlign="left"
       paddingSize="m"
       data-test-subj={`eisModelCard-${modelName}`}

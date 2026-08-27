@@ -9,10 +9,10 @@ import React from 'react';
 
 import { EuiFlexGrid, EuiFlexItem, useCurrentEuiBreakpoint, useEuiTheme } from '@elastic/eui';
 import { useContentListItems } from '@kbn/content-list-provider';
+import { css } from '@emotion/react';
 import { getItemModelId, toGroupedModel } from '../../utils/eis_content_list_utils';
 import { EisNoModelsPrompt } from './eis_no_models_prompt';
 import { ModelCard } from './model_card';
-import { css } from '@emotion/react';
 interface EisCardGridProps {
   onViewModelDetails: (modelId: string) => void;
 }
