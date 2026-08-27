@@ -167,7 +167,7 @@ function DetailFlyoutDurationChart({
           ...(showPreviousPeriod
             ? [
                 {
-                  seriesType: 'line',
+                  seriesType: 'line' as const,
                   color: euiTheme.colors.vis.euiColorVis7,
                   time: {
                     from: previousDurationChartFrom ?? DEFAULT_PREVIOUS_DURATION_CHART_FROM,
@@ -183,10 +183,10 @@ function DetailFlyoutDurationChart({
                       values: [location],
                     },
                   ],
-                  dataType: 'synthetics',
+                  dataType: 'synthetics' as const,
                   selectedMetricField: 'monitor.duration.us',
                   name: PREVIOUS_PERIOD_SERIES_NAME,
-                  operationType: 'average',
+                  operationType: 'average' as const,
                 },
               ]
             : []),

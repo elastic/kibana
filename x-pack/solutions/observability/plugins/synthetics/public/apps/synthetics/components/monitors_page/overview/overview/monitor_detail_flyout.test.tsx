@@ -410,7 +410,7 @@ describe('duration chart attributes', () => {
             syntheticsMonitor: {
               config_id: 'test-id',
               created_at: createdAt,
-            },
+            } as any,
           },
         },
       }
@@ -463,7 +463,7 @@ describe('duration chart attributes', () => {
             syntheticsMonitor: {
               config_id: 'previous-monitor',
               created_at: moment().subtract(2, 'hours').toISOString(),
-            },
+            } as any,
           },
         },
       }
@@ -496,7 +496,7 @@ describe('duration chart attributes', () => {
             syntheticsMonitor: {
               config_id: '01435ca1-2c1f-44de-ba4e-b0a7bd14ef5c',
               created_at: moment().subtract(3, 'days').toISOString(),
-            },
+            } as any,
           },
           overviewStatus: {
             status: {
@@ -510,8 +510,9 @@ describe('duration chart attributes', () => {
                   tags: ['flyout-duration-chart'],
                   isEnabled: true,
                   isStatusAlertEnabled: false,
-                  overallStatus: 'up',
-                  locations: [{ id: 'us_central_qa', label: 'US Central QA', status: 'up' }],
+                  status: 'up',
+                  locationId: 'us_central_qa',
+                  locationLabel: 'US Central QA',
                 },
               },
               downConfigs: {},
