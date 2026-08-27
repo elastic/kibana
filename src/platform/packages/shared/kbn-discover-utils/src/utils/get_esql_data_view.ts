@@ -43,8 +43,7 @@ export async function getEsqlDataView(
   const projectRouting = services.cps?.cpsManager?.getProjectRouting();
   const effectiveProjectRouting = getProjectRoutingFromEsqlQuery(query.esql) ?? projectRouting;
   const routingChanged =
-    currentDataView != null &&
-    dataViewRoutingMap.get(currentDataView) !== effectiveProjectRouting;
+    currentDataView != null && dataViewRoutingMap.get(currentDataView) !== effectiveProjectRouting;
 
   if (
     currentDataView?.isPersisted() ||

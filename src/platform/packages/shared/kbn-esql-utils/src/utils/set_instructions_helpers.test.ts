@@ -45,6 +45,5 @@ describe('set instructions helpers', () => {
         expect(result).toBe('_alias: projectId');
       });
     });
-
   });
 });

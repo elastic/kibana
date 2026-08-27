@@ -99,7 +99,11 @@ export async function getESQLAdHocDataview({
   http?: HttpStart;
   effectiveProjectRouting?: string;
 }) {
-  const timeFieldName = await getESQLTimeField({ query, http, projectRouting: effectiveProjectRouting });
+  const timeFieldName = await getESQLTimeField({
+    query,
+    http,
+    projectRouting: effectiveProjectRouting,
+  });
 
   const indexPattern = getIndexPatternFromESQLQuery(query);
   const dataViewId =
