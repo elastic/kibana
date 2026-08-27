@@ -184,7 +184,13 @@ export const MonacoEditor = ({
     unregisterKeyboardCommands();
   }, [destroyResizeChecker, unregisterKeyboardCommands]);
 
-  const esqlCallbacks = useConsoleEsqlCallbacks({ application, http, licensing, data });
+  const esqlCallbacks = useConsoleEsqlCallbacks({
+    application,
+    http,
+    licensing,
+    data,
+    entitiesRefreshed$: autocompleteInfo.entitiesRefreshed$,
+  });
 
   const suggestionProvider = useMemo(
     () => ConsoleLang.getSuggestionProvider?.(esqlCallbacks, actionsProvider),
