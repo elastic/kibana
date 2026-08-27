@@ -891,7 +891,8 @@ export class MonacoEditorActionsProvider {
         position,
         requestStartLineNumber,
         this,
-        this.getRequestStartColumn(model, request, requestStartLineNumber)
+        this.getRequestStartColumn(model, request, requestStartLineNumber),
+        { isInsideTripleQuotedString: insideTripleQuotes }
       );
       return {
         suggestions,

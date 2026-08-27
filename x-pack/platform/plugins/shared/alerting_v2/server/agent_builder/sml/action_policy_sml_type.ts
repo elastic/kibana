@@ -7,13 +7,13 @@
 
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import type { SmlTypeDefinition } from '@kbn/agent-builder-sml-plugin/server';
+import { kibanaPermissions } from '@kbn/agent-builder-sml-plugin/server';
 import {
   ACTION_POLICY_ATTACHMENT_TYPE,
   actionPolicyAttachmentDataSchema,
 } from '@kbn/alerting-v2-schemas';
 import { ACTION_POLICY_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { ACTION_POLICY_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import type { ActionPolicySavedObjectAttributes } from '../../saved_objects';
 import type { ActionPolicyClient } from '../../lib/action_policy_client';
@@ -102,15 +102,12 @@ export const createActionPolicySmlType = ({
   },
 
   /**
-   * Action policies are gated by the Alerting v2 action-policies read API
-   * privilege — the same gate the action policies API checks before
-   * surfacing policy data.
+   * Action policies are gated by the dedicated `ai_index:alerting_v2_action_policy/read` action.
+   * The Alerting v2 feature grants it by declaring `aiIndex: { read: [ACTION_POLICY_KI_TYPE] }`
+   * (see `common/feature_privileges.ts`), so the `kiType` here must stay in step with that
+   * declaration.
    */
-  getPermissions: () => ({
-    kibana: {
-      privileges: [{ name: `api:${ALERTING_V2_API_PRIVILEGES.actionPolicies.read}` }],
-    },
-  }),
+  getPermissions: () => kibanaPermissions({ kiType: ACTION_POLICY_KI_TYPE }),
 
   toAttachment: async (item, context) => {
     if (!(await getIsAlertingV2Enabled())) {

@@ -6,6 +6,7 @@
  */
 
 import type { LogsManifest } from '@kbn/synthtrace/src/lib/service_graph_logs/types';
+import type { FeatureUpsert } from '@kbn/significant-events-schema';
 import { DEP_TO_CATEGORY } from '@kbn/synthtrace/src/lib/service_graph_logs/constants';
 import type { SeedContext } from '../types';
 import { deterministicId } from '../types';
@@ -17,21 +18,16 @@ const INFRA_DEP_SUBTYPE: Record<string, string> = {
 };
 
 /**
- * Builds the canonical feature payload objects from the manifest.
- * Used by seedFeatures (which adds index-only fields status/last_seen).
+ * Builds feature upsert payloads from the manifest.
  */
-export function buildFeaturePayloads(
-  ctx: SeedContext,
-  manifest: LogsManifest
-): Array<Record<string, unknown>> {
-  const features: Array<Record<string, unknown>> = [];
+export function buildFeaturePayloads(ctx: SeedContext, manifest: LogsManifest): FeatureUpsert[] {
+  const features: FeatureUpsert[] = [];
 
   for (const svc of manifest.services) {
     const runtime = 'runtime' in svc ? String(svc.runtime) : 'unknown';
     const infraDeps = 'infraDeps' in svc && Array.isArray(svc.infraDeps) ? [...svc.infraDeps] : [];
     features.push({
       id: deterministicId(ctx.streamName, 'feature', 'entity', svc.name),
-      uuid: deterministicId(ctx.streamName, 'feature-uuid', 'entity', svc.name),
       stream_name: ctx.streamName,
       type: 'entity',
       subtype: 'service',
@@ -50,7 +46,6 @@ export function buildFeaturePayloads(
     const subtype = DEP_TO_CATEGORY[dep] ?? 'database';
     features.push({
       id: deterministicId(ctx.streamName, 'feature', 'infra-entity', dep),
-      uuid: deterministicId(ctx.streamName, 'feature-uuid', 'infra-entity', dep),
       stream_name: ctx.streamName,
       type: 'entity',
       subtype,
@@ -77,7 +72,6 @@ export function buildFeaturePayloads(
 
     features.push({
       id: deterministicId(ctx.streamName, 'feature', 'dependency', key),
-      uuid: deterministicId(ctx.streamName, 'feature-uuid', 'dependency', key),
       stream_name: ctx.streamName,
       type: 'dependency',
       subtype,
