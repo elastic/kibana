@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
-import type { UserProfileAvatarData, UserProfileWithAvatar } from '@kbn/user-profile-components';
+import { useMutation, useQueryClient } from '@kbn/react-query';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import type { Conversation } from '@kbn/agent-builder-common';
 import {
   ConversationAccessControlMode,
@@ -16,34 +16,9 @@ import {
 import type { UpdateConversationAccessControlRequestBody } from '../../../common/http_api/conversations';
 import { queryKeys } from '../query_keys';
 import { mutationKeys } from '../mutation_keys';
-import { useKibana } from './use_kibana';
 import { useAgentBuilderServices } from './use_agent_builder_service';
 import { useConversation } from './use_conversation';
-
-export const useConversationAccessControlProfiles = ({
-  uids,
-  enabled,
-}: {
-  uids: string[];
-  enabled: boolean;
-}) => {
-  const {
-    services: { userProfile },
-  } = useKibana();
-
-  const dedupedUids = Array.from(new Set(uids)).sort();
-
-  return useQuery({
-    queryKey: queryKeys.security.ownerProfiles(dedupedUids),
-    enabled: enabled && dedupedUids.length > 0,
-    queryFn: async (): Promise<UserProfileWithAvatar[]> => {
-      return await userProfile.bulkGet<{ avatar?: UserProfileAvatarData }>({
-        uids: new Set(dedupedUids),
-        dataPath: 'avatar',
-      });
-    },
-  });
-};
+import { useUserProfiles } from './use_user_profiles';
 
 export const hasInviteMembersSummary = (accessControl: ConversationAccessControl) => {
   return (
@@ -69,7 +44,7 @@ export const useInviteMembersSummary = () => {
 
   const visibleMemberIds = memberIdsByLatestAdded.slice(0, 2);
 
-  const { data: visibleMemberProfiles = [] } = useConversationAccessControlProfiles({
+  const { data: visibleMemberProfiles = [] } = useUserProfiles({
     uids: visibleMemberIds,
     enabled: hasSummary && visibleMemberIds.length > 0,
   });

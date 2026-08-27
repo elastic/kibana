@@ -33,11 +33,11 @@ import {
 } from '../../../../hooks/use_conversation';
 import {
   hasInviteMembersSummary,
-  useConversationAccessControlProfiles,
   useUpdateConversationAccessControl,
 } from '../../../../hooks/use_conversation_access_control';
 import { useExperimentalFeatures } from '../../../../hooks/use_experimental_features';
 import { useSuggestUsers } from '../../../../hooks/use_suggest_users';
+import { useUserProfiles } from '../../../../hooks/use_user_profiles';
 import { ConversationParticipantsList } from './conversation_participants_list';
 import { ConversationShareEditableContent } from './conversation_share_editable_content';
 import {
@@ -93,7 +93,7 @@ const ConversationSharePopover: React.FC<{
 
   const ownerId = conversation.user.id;
   const profileUids = [ownerId, ...memberIds].filter((uid): uid is string => Boolean(uid));
-  const { data: profiles = [] } = useConversationAccessControlProfiles({
+  const { data: profiles = [] } = useUserProfiles({
     uids: profileUids,
     enabled: isPopoverOpen,
   });

@@ -20,11 +20,11 @@ import {
 } from '../../../../hooks/use_conversation';
 import { useSuggestUsers } from '../../../../hooks/use_suggest_users';
 import {
-  useConversationAccessControlProfiles,
   useInviteMembersSummary,
   useUpdateConversationAccessControl,
 } from '../../../../hooks/use_conversation_access_control';
 import { useExperimentalFeatures } from '../../../../hooks/use_experimental_features';
+import { useUserProfiles } from '../../../../hooks/use_user_profiles';
 import { ConversationShareButton } from './conversation_share_button';
 
 jest.mock('../../../../hooks/use_conversation', () => ({
@@ -42,11 +42,14 @@ jest.mock('../../../../hooks/use_conversation_access_control', () => {
 
   return {
     hasInviteMembersSummary: actual.hasInviteMembersSummary,
-    useConversationAccessControlProfiles: jest.fn(),
     useInviteMembersSummary: jest.fn(),
     useUpdateConversationAccessControl: jest.fn(),
   };
 });
+
+jest.mock('../../../../hooks/use_user_profiles', () => ({
+  useUserProfiles: jest.fn(),
+}));
 
 jest.mock('../../../../hooks/use_experimental_features', () => ({
   useExperimentalFeatures: jest.fn(),
@@ -56,10 +59,10 @@ const mockUseConversation = jest.mocked(useConversation);
 const mockUseConversationPermissions = jest.mocked(useConversationPermissions);
 const mockUseIsUnpersistedConversation = jest.mocked(useIsUnpersistedConversation);
 const mockUseSuggestUsers = jest.mocked(useSuggestUsers);
-const mockUseConversationAccessControlProfiles = jest.mocked(useConversationAccessControlProfiles);
 const mockUseInviteMembersSummary = jest.mocked(useInviteMembersSummary);
 const mockUseUpdateConversationAccessControl = jest.mocked(useUpdateConversationAccessControl);
 const mockUseExperimentalFeatures = jest.mocked(useExperimentalFeatures);
+const mockUseUserProfiles = jest.mocked(useUserProfiles);
 
 const mutate = jest.fn();
 let updateOptions: Parameters<typeof useUpdateConversationAccessControl>[0];
@@ -141,7 +144,7 @@ const renderShareButton = ({
   mockUseExperimentalFeatures.mockReturnValue(isExperimentalFeaturesEnabled);
   mockUseSuggestUsers.mockReturnValue({ data: [], isFetching: false } as never);
   mockUseInviteMembersSummary.mockReturnValue(inviteMembersSummary);
-  mockUseConversationAccessControlProfiles.mockReturnValue({
+  mockUseUserProfiles.mockReturnValue({
     data: [ownerProfile, memberProfile, secondMemberProfile, thirdMemberProfile],
   } as never);
   mockUseUpdateConversationAccessControl.mockImplementation((options) => {
