@@ -50,6 +50,8 @@ export function createTestConfig(options: CreateTestConfigOptions) {
             { product_line: 'endpoint', product_tier: 'complete' },
           ])}`,
           `--xpack.actions.preconfigured=${JSON.stringify(PRECONFIGURED_ACTION_CONNECTORS)}`,
+          // Mock prebuilt-rules setup uploads the bundled security_detection_engine package name.
+          `--xpack.fleet.internal.allowRegistryPackageUploads=true`,
           `--xpack.securitySolution.enableExperimental=${JSON.stringify([
             'endpointExceptionsMovedUnderManagement',
             'ruleChangesHistoryEnabled',

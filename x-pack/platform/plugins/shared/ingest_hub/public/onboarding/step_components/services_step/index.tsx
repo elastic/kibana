@@ -191,7 +191,9 @@ export function ServicesStep({ onContinue, onBack }: ServicesStepProps) {
                           onToggle={handleToggle}
                           displayName={
                             duplicateNamesInCategory.has(service.name)
-                              ? `${service.name} ${SIGNAL_TYPE_LABELS[service.signalType]}`
+                              ? `${service.name} ${service.signalTypes
+                                  .map((t) => SIGNAL_TYPE_LABELS[t])
+                                  .join(' & ')}`
                               : undefined
                           }
                         />

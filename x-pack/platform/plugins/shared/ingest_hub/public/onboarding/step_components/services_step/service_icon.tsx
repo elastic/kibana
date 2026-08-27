@@ -35,7 +35,7 @@ export const ServiceIcon: React.FC<ServiceIconProps> = ({ service }) => {
 
   // Tier 1: icon from the matching policy template
   const policyTemplateIcon = packageInfo?.policy_templates
-    ?.find((pt) => pt.name === service.policyTemplate)
+    ?.find((pt) => pt.name === service.id)
     ?.icons?.find((icon) => icon.type === 'image/svg+xml');
 
   // Tier 2: package-level icon
