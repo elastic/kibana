@@ -30,13 +30,6 @@ const VERDICTS = [
 /** Verdicts that must have a dedicated switch case, i.e. an automated action path. */
 const ACTIONABLE_VERDICTS = ['no_coverage', 'covered_disabled', 'prebuilt_available'] as const;
 
-const getYaml = (
-  definition: typeof PND_DETECTION_COVERAGE_WORKFLOW | typeof PND_WATCH_DETECTION_WORKFLOW
-): string => {
-  if ('yaml' in definition && definition.yaml) return definition.yaml;
-  return definition.yamlTemplate({ settingsVersion: 1, autonomyLevel: 'manual' });
-};
-
 interface YamlStep {
   name: string;
   type: string;
@@ -48,7 +41,7 @@ interface YamlStep {
   'on-failure'?: { continue?: boolean };
 }
 
-const workerDefinition = parse(getYaml(PND_DETECTION_COVERAGE_WORKFLOW)) as {
+const workerDefinition = parse(PND_DETECTION_COVERAGE_WORKFLOW.yaml) as {
   steps: YamlStep[];
   outputs?: Array<{ name: string }>;
   triggers?: Array<{ type: string }>;
@@ -71,11 +64,16 @@ describe('Detection Coverage worker', () => {
   it('is registered as a worker, not a catalog watch', () => {
     expect(PND_DETECTION_COVERAGE_WORKFLOW.id).toBe(PND_DETECTION_COVERAGE_WORKFLOW_ID);
     // Workers carry no `watch` selector, so they stay out of the Watch catalog.
-    expect(PND_DETECTION_COVERAGE_WORKFLOW.visibility?.selectors).toBeUndefined();
+    expect(
+      (PND_DETECTION_COVERAGE_WORKFLOW as { visibility?: { selectors?: unknown } }).visibility
+        ?.selectors
+    ).toBeUndefined();
   });
 
   it('is reachable from the Detection Watch gap branch', () => {
-    const watch = parse(getYaml(PND_WATCH_DETECTION_WORKFLOW)) as { steps: YamlStep[] };
+    const watch = parse(
+      PND_WATCH_DETECTION_WORKFLOW.yamlTemplate({ settingsVersion: 1, autonomyLevel: 'manual' })
+    ) as { steps: YamlStep[] };
     const dispatch = flatten(watch.steps).find(
       (step) => step.type === 'workflow.execute' && step.name === 'run_coverage'
     );
