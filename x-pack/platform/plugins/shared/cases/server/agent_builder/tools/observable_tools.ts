@@ -8,7 +8,10 @@
 import { z } from '@kbn/zod/v4';
 import { platformCoreCasesTools, ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
+import type { CoreSetup } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { CasesServerStartDependencies } from '../../types';
+import { getCasesToolAvailability } from '../utils/get_cases_tool_availability';
 import { addObservablesStepCommonDefinition } from '../../../common/workflows/steps/add_observables';
 import { updateObservableStepCommonDefinition } from '../../../common/workflows/steps/update_observable';
 import { addObservablesStepDefinition } from '../../workflows/steps/add_observables';
@@ -38,6 +41,7 @@ const observablesSchema = z.object({
 });
 
 export const observablesTool = (
+  coreSetup: CoreSetup<CasesServerStartDependencies>,
   getCasesClientFn: GetCasesClientFn
 ): BuiltinToolDefinition<typeof observablesSchema> => {
   const addObservablesStepDef = addObservablesStepDefinition(getCasesClientFn);
@@ -54,6 +58,10 @@ export const observablesTool = (
       destructiveHint: true,
       idempotentHint: false,
       openWorldHint: false,
+    },
+    availability: {
+      cacheMode: 'space',
+      handler: async ({ request }) => getCasesToolAvailability({ core: coreSetup, request }),
     },
     schema: observablesSchema,
     tags: ['cases'],

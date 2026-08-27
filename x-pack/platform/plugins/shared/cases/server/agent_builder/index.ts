@@ -56,7 +56,7 @@ export function registerCasesAgentBuilderTools(
   agentBuilder.tools.register(
     attachmentsTool(coreSetup, getCasesClient, unifiedAttachmentTypeRegistry, attachmentsEnabled)
   );
-  agentBuilder.tools.register(observablesTool(getCasesClient));
+  agentBuilder.tools.register(observablesTool(coreSetup, getCasesClient));
   agentBuilder.skills.register(buildCasesSkill(templatesEnabled));
   // Only expose the analytics skill when the analytics indices exist.
   if (analyticsV2Enabled) {
