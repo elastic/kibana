@@ -145,6 +145,7 @@ describe('Monitor Detail Flyout', () => {
       {
         state: {
           monitorDetails: {
+            syntheticsMonitor: null,
             syntheticsMonitorLoading: true,
           },
         },

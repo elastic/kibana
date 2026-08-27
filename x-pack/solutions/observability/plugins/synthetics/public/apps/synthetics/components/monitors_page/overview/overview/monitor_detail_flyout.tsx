@@ -360,7 +360,7 @@ export function MonitorDetailFlyout(props: Props) {
       paddingSize="none"
     >
       {error && !isLoading && <ErrorCallout {...error} />}
-      {isLoading && <LoadingState />}
+      {isLoading && !monitorObject && <LoadingState />}
       {monitorObject && (
         <>
           <EuiFlyoutHeader hasBorder>
