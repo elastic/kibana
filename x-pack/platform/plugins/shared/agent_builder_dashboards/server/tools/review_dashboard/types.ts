@@ -6,6 +6,7 @@
  */
 
 import type { ModelProvider } from '@kbn/agent-builder-server';
+import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
 import type {
   ControlCatalogEntry,
   PanelCatalogEntry,
@@ -112,9 +113,7 @@ export type DashboardFinding =
 export type PanelFinding = DashboardFinding;
 
 export type InspectDashboardImage = (args: {
-  panels: PanelCatalogEntry[];
-  controls: ControlCatalogEntry[];
-  sections: SectionCatalogEntry[];
+  dashboard: DashboardAttachmentData;
   image: DashboardImage;
   modelProvider: ModelProvider;
 }) => Promise<DashboardFinding[]>;

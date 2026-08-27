@@ -9,7 +9,7 @@ A button-started polish session whose signal is the auto-sent prompt and whose e
 _Avoid_: prettifyPanelConfigs, generate_dashboard mode, dashboard_screenshot type, forked attachment, layout-only pretty without an image (v1), screenshot-before-render
 
 **Dashboard Review**:
-A sensor: a vision inspection of a rendered dashboard image plus a catalog of panels, sections, and controls. It uses the same design practices as generate (chart types, composition, grid) by reference. It yields dashboard-level findings (`pack_layout`, `weak_sections`, `monotone_chart_types`, `weak_controls`) and panel-level invert / one-category / stacked titles / metric fill / sparse KPI (`wrong_chart_type`, `one_category_chart`, `duplicate_inner_title`, `metric_fill`, `thin_metric`). It does not mutate the dashboard. The dashboard-management skill exposes it as `platform.dashboard.review_dashboard`; the Prettify prompt is what tells the agent to call it.
+A sensor: a vision inspection of a rendered dashboard image plus the full dashboard attachment. It uses the same design practices as generate (chart types, composition, grid) by reference. It yields dashboard-level findings (`pack_layout`, `weak_sections`, `monotone_chart_types`, `weak_controls`) and panel-level invert / one-category / stacked titles / metric fill / sparse KPI (`wrong_chart_type`, `one_category_chart`, `duplicate_inner_title`, `metric_fill`, `thin_metric`). It does not mutate the dashboard. The dashboard-management skill exposes it as `platform.dashboard.review_dashboard`; the Prettify prompt is what tells the agent to call it.
 _Avoid_: review (bare), dashboard critique, judge, ES|QL-execution review, panel-only size nits
 
 **Dashboard Finding**:

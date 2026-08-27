@@ -5,10 +5,72 @@
  * 2.0.
  */
 
-import { inspectDashboardImage } from './inspect_dashboard_image';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
+import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
+import { getDashboardReviewPayloadSizes, inspectDashboardImage } from './inspect_dashboard_image';
+
+const fatDashboard: DashboardAttachmentData = {
+  title: 'Metrics',
+  description: 'Latency and errors',
+  time_range: { from: 'now-24h', to: 'now', mode: 'relative' },
+  panels: [
+    {
+      type: LENS_EMBEDDABLE_TYPE,
+      id: 'lens-1',
+      grid: { x: 0, y: 0, w: 24, h: 12 },
+      config: {
+        title: 'Error rate',
+        type: 'metric',
+        hide_panel_titles: false,
+        data_source: { type: 'esql', query: 'FROM logs | STATS count = COUNT(*)' },
+        metrics: [
+          {
+            type: 'primary',
+            column: 'count',
+            color: { type: 'static', color: '#F5C518' },
+            apply_color_to: 'background',
+            format: { id: 'percent', params: { decimals: 1 } },
+          },
+        ],
+        sampling: 1,
+        legend: { isVisible: false },
+      },
+    },
+    {
+      type: LENS_EMBEDDABLE_TYPE,
+      id: 'lens-2',
+      grid: { x: 24, y: 0, w: 12, h: 12 },
+      config: {
+        title: 'Latency',
+        type: 'xy',
+        data_source: {
+          type: 'esql',
+          query: 'FROM logs | STATS p99 = PERCENTILE(latency, 99) BY @timestamp',
+        },
+        layers: [
+          {
+            type: 'series',
+            seriesType: 'line',
+            xAccessor: '@timestamp',
+            accessors: ['p99'],
+          },
+        ],
+        legend: { isVisible: true, position: 'right' },
+        fittingFunction: 'Linear',
+      },
+    },
+  ],
+  pinned_panels: [
+    {
+      id: 'c1',
+      type: 'options_list_control',
+      config: { title: 'Host', fieldName: 'host.name', dataViewId: 'logs-*' },
+    },
+  ],
+};
 
 describe('inspectDashboardImage', () => {
-  it('sends the screenshot and dashboard catalog to a structured vision call', async () => {
+  it('sends the screenshot and full dashboard attachment to a structured vision call', async () => {
     const invoke = jest.fn().mockResolvedValue({
       findings: [
         {
@@ -36,25 +98,7 @@ describe('inspectDashboardImage', () => {
     };
 
     const findings = await inspectDashboardImage({
-      panels: [
-        {
-          id: 'lens-1',
-          type: 'lens',
-          title: 'Error rate',
-          chart_type: 'metric',
-          esql: 'FROM logs | STATS count = COUNT(*)',
-          grid: { x: 0, y: 0, w: 24, h: 12 },
-        },
-        {
-          id: 'lens-2',
-          type: 'lens',
-          title: 'Latency',
-          chart_type: 'xy',
-          grid: { x: 24, y: 0, w: 12, h: 12 },
-        },
-      ],
-      sections: [],
-      controls: [{ id: 'c1', type: 'options_list_control', title: 'Host' }],
+      dashboard: fatDashboard,
       image: { bytes: Buffer.from('png'), mimeType: 'image/png' },
       modelProvider: modelProvider as never,
     });
@@ -90,9 +134,12 @@ describe('inspectDashboardImage', () => {
     expect(textPart.text).toContain('data table');
     expect(textPart.text).toContain('Never shrink');
     expect(textPart.text).toContain('stretched KPIs');
-    expect(textPart.text).toContain('catalog is what each panel is');
-    expect(textPart.text).toContain('PNG is how it looks');
+    expect(textPart.text).toContain('Dashboard attachment:');
+    expect(textPart.text).not.toContain('Dashboard catalog:');
+    expect(textPart.text).toContain('full dashboard attachment');
+    expect(textPart.text).toContain('Infer each finding');
     expect(textPart.text).toContain('FROM logs | STATS count = COUNT(*)');
+    expect(textPart.text).toContain('fittingFunction');
     expect(textPart.text).toContain('Dashboard Composition Guidelines');
     expect(textPart.text).toContain('Grid Packing Rules');
     expect(textPart.text).toContain('Available chart types');
@@ -111,6 +158,13 @@ describe('inspectDashboardImage', () => {
         },
       },
     ]);
+  });
+
+  it('measures how much larger the attachment JSON is than the compact catalog', () => {
+    expect(getDashboardReviewPayloadSizes(fatDashboard)).toEqual({
+      catalogBytes: 449,
+      attachmentBytes: 1061,
+    });
   });
 
   it('drops an incomplete pack_layout and keeps invert findings', async () => {
@@ -138,24 +192,23 @@ describe('inspectDashboardImage', () => {
     };
 
     const findings = await inspectDashboardImage({
-      panels: [
-        {
-          id: 'table-1',
-          type: 'lens',
-          title: 'Errors by host',
-          chart_type: 'data_table',
-          grid: { x: 0, y: 60, w: 48, h: 19 },
-        },
-        {
-          id: 'lens-1',
-          type: 'lens',
-          title: 'Errors over time',
-          chart_type: 'pie',
-          grid: { x: 0, y: 0, w: 24, h: 12 },
-        },
-      ],
-      sections: [],
-      controls: [],
+      dashboard: {
+        title: 'Errors',
+        panels: [
+          {
+            type: LENS_EMBEDDABLE_TYPE,
+            id: 'table-1',
+            grid: { x: 0, y: 60, w: 48, h: 19 },
+            config: { title: 'Errors by host', type: 'data_table' },
+          },
+          {
+            type: LENS_EMBEDDABLE_TYPE,
+            id: 'lens-1',
+            grid: { x: 0, y: 0, w: 24, h: 12 },
+            config: { title: 'Errors over time', type: 'pie' },
+          },
+        ],
+      },
       image: { bytes: Buffer.from('png'), mimeType: 'image/png' },
       modelProvider: modelProvider as never,
     });

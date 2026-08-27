@@ -18,11 +18,9 @@ import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { isDashboardAttachment } from '@kbn/agent-builder-dashboards-common';
 import { dashboardTools } from '../../../common';
 import {
-  catalogDashboardControls,
-  catalogDashboardPanels,
-  catalogDashboardSections,
-} from './catalog_dashboard_panels';
-import { inspectDashboardImage as defaultInspectDashboardImage } from './inspect_dashboard_image';
+  getDashboardReviewPayloadSizes,
+  inspectDashboardImage as defaultInspectDashboardImage,
+} from './inspect_dashboard_image';
 import type { InspectDashboardImage } from './types';
 
 const MISSING_PRETTIFY_EVIDENCE =
@@ -73,10 +71,13 @@ Call this when the user asked to prettify a dashboard and an image is attached. 
     try {
       const bytes = await getImageBytes(imageData.data.file_id);
       const dashboardData = dashboardVersion.data;
+      const sizes = getDashboardReviewPayloadSizes(dashboardData);
+      const ratio = (sizes.attachmentBytes / Math.max(sizes.catalogBytes, 1)).toFixed(1);
+      logger.debug(
+        `Dashboard Review payload: catalog ${sizes.catalogBytes}B, attachment ${sizes.attachmentBytes}B (${ratio}x)`
+      );
       const findings = await inspectDashboardImage({
-        panels: catalogDashboardPanels(dashboardData),
-        sections: catalogDashboardSections(dashboardData),
-        controls: catalogDashboardControls(dashboardData),
+        dashboard: dashboardData,
         image: { bytes, mimeType: imageData.data.mime_type },
         modelProvider,
       });

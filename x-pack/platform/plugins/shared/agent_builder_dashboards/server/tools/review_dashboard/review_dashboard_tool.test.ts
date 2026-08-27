@@ -136,11 +136,15 @@ describe('reviewDashboardTool', () => {
     const result = await tool.handler({}, context);
 
     expect(getImageBytes).toHaveBeenCalledWith('file-1');
+    expect(context.logger.debug).toHaveBeenCalledWith(
+      expect.stringMatching(/Dashboard Review payload: catalog \d+B, attachment \d+B/)
+    );
     expect(inspectDashboardImage).toHaveBeenCalledWith(
       expect.objectContaining({
-        panels: [expect.objectContaining({ id: 'lens-1', title: 'Error rate' })],
-        sections: [],
-        controls: [],
+        dashboard: expect.objectContaining({
+          title: 'Metrics',
+          panels: [expect.objectContaining({ id: 'lens-1' })],
+        }),
         image: expect.objectContaining({
           bytes: Buffer.from('png'),
           mimeType: 'image/png',
