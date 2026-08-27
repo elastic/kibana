@@ -16,6 +16,9 @@ export const ACTIONS_TRANSLATIONS = Object.freeze({
     actions: i18n.translate('xpack.pnd.baseActions.actions', {
       defaultMessage: 'Actions',
     }),
+    openInChat: i18n.translate('xpack.pnd.baseActions.openInChat', {
+      defaultMessage: 'Open in chat',
+    }),
     openIncident: i18n.translate('xpack.pnd.baseActions.openIncident', {
       defaultMessage: 'Open an incident',
     }),

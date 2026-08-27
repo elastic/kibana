@@ -8,6 +8,7 @@
 import React, { memo } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiFlyoutFooter } from '@elastic/eui';
 import type { Investigation } from '@kbn/pnd-common';
+import { useOpenInChat } from '../../hooks/use_open_in_chat';
 import { BaseActions, type BaseActionsProps } from '../actions';
 import type { ConversationsActionsGroupProps } from '../conversation_card';
 import { DETAILS_FLYOUT_LABELS } from './translations';
@@ -16,11 +17,12 @@ export interface ConversationDetailsFlyoutFooterProps {
   investigation: Investigation;
   onClickAction: BaseActionsProps['onClickAction'];
   onClickRecommendedAction: ConversationsActionsGroupProps['onClickRecommendedAction'];
-  onOpenChat: () => void;
 }
 
 export const ConversationDetailsFlyoutFooter = memo<ConversationDetailsFlyoutFooterProps>(
-  ({ investigation, onClickAction, onClickRecommendedAction, onOpenChat }) => {
+  ({ investigation, onClickAction, onClickRecommendedAction }) => {
+    const onOpenChat = useOpenInChat(investigation.id);
+
     return (
       <EuiFlyoutFooter>
         <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" justifyContent="flexEnd">

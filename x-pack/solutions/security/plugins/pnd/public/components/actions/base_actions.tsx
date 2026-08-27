@@ -21,6 +21,7 @@ import type { ConversationsActionsGroupProps } from '../conversation_card';
 import { ActionButton } from './action_button';
 import { ACTIONS_TRANSLATIONS } from './translations';
 import { getActionButtonIconProps } from '../helpers';
+import { useOpenInChat } from '../../hooks/use_open_in_chat';
 
 interface ActionConfig {
   key: string;
@@ -83,9 +84,9 @@ export const BaseActions = memo<BaseActionsProps>(
     'data-test-subj': dataTestSubj,
   }) => {
     const [isOpen, setIsOpen] = useState(false);
-
     const handleClose = useCallback(() => setIsOpen(false), []);
     const handleToggle = useCallback(() => setIsOpen((prev) => !prev), []);
+    const onOpenChat = useOpenInChat(investigation.id);
 
     const button = isFlyout ? (
       <EuiButton
@@ -124,6 +125,18 @@ export const BaseActions = memo<BaseActionsProps>(
               },
             ]
           : []),
+        ...(!isFlyout
+          ? [
+              {
+                key: 'openChat',
+                icon: 'productAgent',
+                name: ACTIONS_TRANSLATIONS.buttons.openInChat,
+                onClick: onOpenChat,
+                // TODO: Add a isDisabled for actions that are disabled
+                // might apply to openIncident if the investigation already has an incident created
+              },
+            ]
+          : []),
         {
           key: 'openIncident',
           icon: 'document',
@@ -146,7 +159,7 @@ export const BaseActions = memo<BaseActionsProps>(
           onClick: () => onClickAction('dismiss', investigation.recordId),
         },
       ],
-      [onClickRecommendedAction, investigation, onClickAction]
+      [onClickRecommendedAction, investigation, isFlyout, onOpenChat, onClickAction]
     );
 
     const items = useContextMenuItems(actionConfigs, handleClose);

@@ -158,9 +158,6 @@ export const ConversationsPage: React.FC = () => {
           onClose={() => setSelectedIdForDetails(undefined)}
           onClickAction={onClickAction}
           onClickRecommendedAction={onClickRecommendedAction}
-          onOpenChat={() => {
-            // TODO: implement open chat functionality
-          }}
         />
       )}
 

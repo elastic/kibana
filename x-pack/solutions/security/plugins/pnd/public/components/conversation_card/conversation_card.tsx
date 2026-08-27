@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, memo } from 'react';
+import React, { memo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -16,7 +16,6 @@ import {
   EuiTextTruncate,
 } from '@elastic/eui';
 import { type Investigation } from '@kbn/pnd-common';
-import { useHistory } from 'react-router-dom';
 import type { BaseActionsProps } from '../actions';
 import { ConversationsActionsGroup } from './actions_group';
 
@@ -33,11 +32,6 @@ interface ConversationCardProps {
 export const ConversationCard = memo<ConversationCardProps>(
   ({ investigation, hasBorder, onClickRecommendedAction, onClickAction, onClickCard }) => {
     const { euiTheme } = useEuiTheme();
-    const history = useHistory();
-
-    const onOpenChat = useCallback(() => {
-      history.push(`/chats`);
-    }, [history]);
 
     return (
       <EuiPanel
@@ -117,7 +111,6 @@ export const ConversationCard = memo<ConversationCardProps>(
             <ConversationsActionsGroup
               investigation={investigation}
               onClickRecommendedAction={onClickRecommendedAction}
-              onOpenChat={onOpenChat}
               onClickAction={onClickAction}
             />
           </EuiFlexItem>

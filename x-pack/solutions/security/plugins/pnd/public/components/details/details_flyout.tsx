@@ -20,11 +20,10 @@ export interface ConversationDetailsFlyoutProps {
   onClose: () => void;
   onClickAction: BaseActionsProps['onClickAction'];
   onClickRecommendedAction: ConversationsActionsGroupProps['onClickRecommendedAction'];
-  onOpenChat: () => void;
 }
 
 export const ConversationDetailsFlyout = memo<ConversationDetailsFlyoutProps>(
-  ({ investigation, onClose, onClickAction, onClickRecommendedAction, onOpenChat }) => {
+  ({ investigation, onClose, onClickAction, onClickRecommendedAction }) => {
     return (
       <EuiFlyout
         aria-label={DETAILS_FLYOUT_LABELS.ariaLabel}
@@ -52,7 +51,6 @@ export const ConversationDetailsFlyout = memo<ConversationDetailsFlyoutProps>(
           investigation={investigation}
           onClickAction={onClickAction}
           onClickRecommendedAction={onClickRecommendedAction}
-          onOpenChat={onOpenChat}
         />
       </EuiFlyout>
     );

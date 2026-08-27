@@ -11,17 +11,17 @@ import { EuiButtonEmpty, EuiIcon, EuiFlexGroup, EuiFlexItem, useEuiTheme } from 
 import { type Investigation } from '@kbn/pnd-common';
 import { getActionButtonIconProps } from '../helpers';
 import { CONVERSATION_CARD_ACTIONS } from './translations';
-import { ActionButton, BaseActions, type BaseActionsProps } from '../actions';
+import { BaseActions, type BaseActionsProps } from '../actions';
 
 export interface ConversationsActionsGroupProps {
   investigation: Investigation;
   onClickRecommendedAction?: ({ id }: { id: Investigation['id'] }) => void;
-  onOpenChat: () => void;
+
   onClickAction: BaseActionsProps['onClickAction'];
 }
 
 export const ConversationsActionsGroup = memo<ConversationsActionsGroupProps>(
-  ({ investigation, onClickRecommendedAction, onOpenChat, onClickAction }) => {
+  ({ investigation, onClickRecommendedAction, onClickAction }) => {
     const { euiTheme } = useEuiTheme();
 
     return (
@@ -66,13 +66,6 @@ export const ConversationsActionsGroup = memo<ConversationsActionsGroupProps>(
             },
           })}
         />
-        <EuiFlexItem grow={false}>
-          <ActionButton
-            iconType="productAgent"
-            tooltipContent={CONVERSATION_CARD_ACTIONS.openChat}
-            onClick={onOpenChat}
-          />
-        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <BaseActions investigation={investigation} onClickAction={onClickAction} />
         </EuiFlexItem>
