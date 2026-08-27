@@ -312,6 +312,34 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       );
     });
 
+    it('does not follow up when only an unrelated MW was updated during this run', async () => {
+      const startedAt = new Date('2024-06-01T10:00:00.000Z');
+      const taskInstance = {
+        ...getMockTaskInstance(),
+        startedAt,
+      };
+      jest.spyOn(task, 'hasMWsChanged').mockResolvedValue({
+        hasMWsChanged: false,
+      } as any);
+      jest.spyOn(task, 'fetchMonitorMwsIds').mockResolvedValue(['mw-1']);
+      jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
+        {
+          id: 'pl-1',
+          label: 'Private Location 1',
+          isServiceManaged: false,
+          agentPolicyId: 'policy-1',
+        },
+      ]);
+      mockSyntheticsMonitorClient.syntheticsService.getMaintenanceWindows = jest
+        .fn()
+        .mockResolvedValue([{ id: 'alerting-mw', updatedAt: '2024-06-01T10:00:05.000Z' }]);
+
+      const result = await task.runTask({ taskInstance });
+
+      expect(scheduleOf(result)).toEqual({ interval: DEFAULT_TASK_SCHEDULE });
+      expect(runAtOf(result)).toBeUndefined();
+    });
+
     it('does not follow up when MW updatedAt is not after this run started', async () => {
       const startedAt = new Date('2024-06-01T10:00:00.000Z');
       const taskInstance = {
@@ -684,7 +712,9 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         .fn()
         .mockResolvedValue([{ id: 'mw-1', updatedAt: '2024-06-01T10:00:05.000Z' }]);
 
-      await expect(task.haveMWsUpdatedSince('2024-06-01T10:00:00.000Z')).resolves.toBe(true);
+      await expect(task.haveMWsUpdatedSince('2024-06-01T10:00:00.000Z', ['mw-1'])).resolves.toBe(
+        true
+      );
     });
 
     it('returns false when MW updates are not after the given timestamp', async () => {
@@ -692,7 +722,19 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         .fn()
         .mockResolvedValue([{ id: 'mw-1', updatedAt: '2024-06-01T09:59:59.000Z' }]);
 
-      await expect(task.haveMWsUpdatedSince('2024-06-01T10:00:00.000Z')).resolves.toBe(false);
+      await expect(task.haveMWsUpdatedSince('2024-06-01T10:00:00.000Z', ['mw-1'])).resolves.toBe(
+        false
+      );
+    });
+
+    it('returns false when the updated MW is not referenced by any monitor', async () => {
+      mockSyntheticsMonitorClient.syntheticsService.getMaintenanceWindows = jest
+        .fn()
+        .mockResolvedValue([{ id: 'alerting-mw', updatedAt: '2024-06-01T10:00:05.000Z' }]);
+
+      await expect(task.haveMWsUpdatedSince('2024-06-01T10:00:00.000Z', ['mw-1'])).resolves.toBe(
+        false
+      );
     });
   });
 

@@ -233,7 +233,7 @@ export class SyncPrivateLocationMonitorsTask {
 
       // Only `updatedAt` after this run's start — missing IDs persist after a
       // sync and would schedule follow-ups forever.
-      if (await this.haveMWsUpdatedSince(taskState.lastStartedAt)) {
+      if (await this.haveMWsUpdatedSince(taskState.lastStartedAt, monitorMwsIds)) {
         this.debugLog(
           `Maintenance windows changed during this run; scheduling an immediate follow-up`
         );
@@ -367,10 +367,14 @@ export class SyncPrivateLocationMonitorsTask {
     };
   }
 
-  async haveMWsUpdatedSince(sinceIso: string): Promise<boolean> {
+  async haveMWsUpdatedSince(sinceIso: string, monitorMwsIds: string[]): Promise<boolean> {
     const { syntheticsService } = this.syntheticsMonitorClient;
     const maintenanceWindows = (await syntheticsService.getMaintenanceWindows(ALL_SPACES_ID)) ?? [];
+    const monitorMwIds = new Set(monitorMwsIds);
     return maintenanceWindows.some((mw) => {
+      if (!monitorMwIds.has(mw.id)) {
+        return false;
+      }
       const updatedAt = mw.updatedAt;
       return Boolean(updatedAt) && moment(updatedAt).isAfter(moment(sinceIso));
     });
