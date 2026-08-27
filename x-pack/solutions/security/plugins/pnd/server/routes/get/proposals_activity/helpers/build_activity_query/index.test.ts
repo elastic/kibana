@@ -45,8 +45,10 @@ describe('buildActivityQuery', () => {
     expect(filters()).toContainEqual({ term: { spaceId: SPACE_ID } });
   });
 
-  it('hard-filters to the PND watch workflow ids (mitigation 2)', () => {
-    expect(filters()).toContainEqual({ terms: { workflowId: [...PND_WATCH_WORKFLOW_IDS] } });
+  it('hard-filters to the per-space PND watch document ids (mitigation 2)', () => {
+    expect(filters()).toContainEqual({
+      terms: { workflowId: PND_WATCH_WORKFLOW_IDS.map((id) => `${id}-${SPACE_ID}`) },
+    });
   });
 
   it('hard-filters to the four registry step ids (mitigation 2)', () => {

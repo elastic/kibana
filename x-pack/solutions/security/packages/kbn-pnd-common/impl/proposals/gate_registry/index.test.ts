@@ -283,6 +283,35 @@ describe('getGateDefinition', () => {
       getGateDefinition(SYSTEM_SECURITY_WATCH_FLOOR_ID, 'await_something_else')
     ).toBeUndefined();
   });
+
+  it('resolves a registered gate from the per-space document id when spaceId is passed', () => {
+    expect(
+      getGateDefinition(
+        `${SYSTEM_SECURITY_WATCH_FLOOR_ID}-default`,
+        PND_GATE_STEP_IDS.awaitOpenInvestigation,
+        'default'
+      )?.gateId
+    ).toBe('open_investigation');
+  });
+
+  it('does not resolve a catalog-looking document id without spaceId', () => {
+    expect(
+      getGateDefinition(
+        `${SYSTEM_SECURITY_WATCH_FLOOR_ID}-default`,
+        PND_GATE_STEP_IDS.awaitOpenInvestigation
+      )
+    ).toBeUndefined();
+  });
+
+  it('does not resolve a catalog-looking id with a different suffix', () => {
+    expect(
+      getGateDefinition(
+        `${SYSTEM_SECURITY_WATCH_FLOOR_ID}-evil`,
+        PND_GATE_STEP_IDS.awaitOpenInvestigation,
+        'default'
+      )
+    ).toBeUndefined();
+  });
 });
 
 describe('resolveAutoAcceptableGates', () => {

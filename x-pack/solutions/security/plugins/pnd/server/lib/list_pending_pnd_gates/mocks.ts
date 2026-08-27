@@ -53,7 +53,10 @@ export const createPendingGatesManagementClientMock = (
     .fn()
     .mockImplementation(async ({ workflowId }: { workflowId: string }) => ({
       results: runs
-        .filter((run) => (run.workflowId ?? SYSTEM_SECURITY_WATCH_FLOOR_ID) === workflowId)
+        .filter((run) => {
+          const definitionId = run.workflowId ?? SYSTEM_SECURITY_WATCH_FLOOR_ID;
+          return workflowId === definitionId || workflowId.startsWith(`${definitionId}-`);
+        })
         .map((run) => ({
           id: run.runId,
           startedAt: run.startedAt ?? '2026-08-02T00:00:00.000Z',

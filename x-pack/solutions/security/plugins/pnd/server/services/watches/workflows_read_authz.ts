@@ -51,6 +51,10 @@ export class WorkflowsManagedReadForbiddenError extends Error {
   }
 }
 
+/** HTTP status a watch route should surface for a projection error. */
+export const httpStatusFromWatchError = (error: unknown): number =>
+  error instanceof WorkflowsManagedReadForbiddenError ? error.statusCode : 500;
+
 /** Assert the caller may read managed workflows, throwing {@link WorkflowsManagedReadForbiddenError} otherwise. */
 export const assertCanReadManagedWorkflows = (request: KibanaRequest): void => {
   if (!canReadManagedWorkflows(request)) {

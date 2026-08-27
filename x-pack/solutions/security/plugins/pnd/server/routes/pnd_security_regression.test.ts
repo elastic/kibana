@@ -30,7 +30,7 @@
  *   D3  the proposals queue omits gates whose Attack Discovery the caller cannot read
  *   D4  `listPendingPndGates` returns only registered gates, never a superset
  *   D6  no unjustified internal-user client remains in `pnd/server` (all four identifiers)
- *   D6 companion  proposals/runs/executions require Workflows managed-execution read, not PND-read alone
+ *   D6 companion  proposals/runs/executions/`_auto_respond` require Workflows managed-execution read
  *   F3  a detection-rule worker is installable but never resumable (install list ≠ resume allow-list)
  *   B6a `_apply` refuses to write any detection-rule field outside PND_TUNABLE_RULE_FIELDS, and
  *       refuses a `query` change aimed at a rule whose type is not `query`
@@ -402,6 +402,8 @@ describe('PND security regression — S1 (_respond/_auto_respond resume primitiv
         requiredPrivileges: [
           PND_API_PRIVILEGE_AUTONOMY_WRITE,
           WorkflowsManagementApiActions.execute,
+          WorkflowsManagementApiActions.readManaged,
+          ...WorkflowsManagementOperationPrivileges.readManagedExecution,
         ],
       },
     });
@@ -514,6 +516,20 @@ describe('PND security regression — execution reads require Workflows managed-
     expect(
       deps.router.versioned.getRoute('get', PND_EXECUTION_URL_TEMPLATE).config.security
     ).toEqual(expectedAuthz);
+  });
+
+  it('requires managed-execution read on `_auto_respond` so listing parked gates is not a side-channel', () => {
+    const deps = createDeps({ getWorkflowsManagementClient: jest.fn() });
+
+    registerAutoRespondToProposalsRoute(deps);
+
+    const authz = deps.router.versioned.getRoute('post', PND_PROPOSALS_AUTO_RESPOND_URL).config
+      .security?.authz;
+    const required = authz != null && 'requiredPrivileges' in authz ? authz.requiredPrivileges : [];
+
+    expect(required).toEqual(
+      expect.arrayContaining(WorkflowsManagementOperationPrivileges.readManagedExecution)
+    );
   });
 });
 
@@ -1139,7 +1155,8 @@ describe('PND security regression — S9 (space confinement)', () => {
 
     expect(managementClient.getWorkflowExecutions).toHaveBeenCalledWith(
       expect.any(Object),
-      REQUEST_SPACE
+      REQUEST_SPACE,
+      expect.any(Object)
     );
   });
 

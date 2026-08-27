@@ -7,23 +7,23 @@
 
 import { API_VERSIONS, INTERNAL_API_ACCESS, PND_WATCHES_URL } from '@kbn/pnd-common';
 import type { ListWatchesResponse } from '@kbn/pnd-common';
-import { PND_API_PRIVILEGE_READ } from '../../../common/constants';
 import type { RouteDependencies } from '../register_routes';
+import { httpStatusFromWatchError } from '../../services/watches/workflows_read_authz';
+import { getWatchRouteAuthz } from './watch_route_security';
 
 export const registerListWatchesRoute = ({
-  router,
-  logger,
+  config,
   getSpaceId,
   getWatchesService,
+  logger,
+  router,
 }: RouteDependencies) => {
   router.versioned
     .get({
       path: PND_WATCHES_URL,
       access: INTERNAL_API_ACCESS,
       security: {
-        authz: {
-          requiredPrivileges: [PND_API_PRIVILEGE_READ],
-        },
+        authz: getWatchRouteAuthz(config.ui.useMockData),
       },
       summary: 'List PND watches',
     })
@@ -44,7 +44,7 @@ export const registerListWatchesRoute = ({
         } catch (error) {
           logger.error(`Failed to list watches: ${error}`);
           return response.customError({
-            statusCode: 500,
+            statusCode: httpStatusFromWatchError(error),
             body: { message: 'Failed to list watches' },
           });
         }

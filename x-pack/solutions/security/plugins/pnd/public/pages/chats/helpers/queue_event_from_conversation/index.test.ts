@@ -64,4 +64,16 @@ describe('queueEventFromConversation', () => {
 
     expect(event.actionLabel).toBeUndefined();
   });
+
+  it('carries the conversation updatedAt so the row can show last updated', () => {
+    const event = queueEventFromConversation({ conversation });
+
+    expect(event.updatedAt).toEqual(conversation.updatedAt);
+  });
+
+  it('keeps the conversation updatedAt when a proposal is paired', () => {
+    const event = queueEventFromConversation({ conversation, proposals: [proposal] });
+
+    expect(event.updatedAt).toEqual(conversation.updatedAt);
+  });
 });

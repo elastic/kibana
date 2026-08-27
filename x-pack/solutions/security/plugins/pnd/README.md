@@ -280,7 +280,7 @@ the per-space Advanced Setting defaults to `false`: those two facts explain almo
 | `xpack.pnd.enabled` | `kibana.yml` / `config/kibana.dev.yml` | `false` | The whole plugin. No `/app/pnd`, no `/internal/pnd/*` routes, no Kibana feature/privileges, the managed-workflow **owner** is not registered so `initializeManagedWorkflows` is not called and orphan cleanup prunes any previously installed PND watches. See [When disabled](#when-disabled). |
 | `securitySolution.attackDiscoveryWorkflowsEnabled` | `feature_flags.overrides` | `true` | Attack Discovery **2.0** itself. With it off, AD 2.0 internal routes 404 and no discovery is ever generated through the 2.0 pipeline, so `security.attackDiscoveryCreated` cannot fire. This is the `discoveries` plugin's own flag. |
 | `securitySolution:enableAttackDiscoveryWorkflows` | per-space Advanced Setting (`security_solution/server/ui_settings.ts`) | **`false`** | Which AD implementation the space runs. **Off (the default) → the AD UI silently falls back to AD 1.0 (`elastic_assistant`), which PND is deliberately not integrated with, so PND sees nothing.** This is correct behavior, not a bug. It reads as a bug to anyone who has not read this section. |
-| Watch toggle (Floor, etc.) | Watch catalog / `PATCH /internal/pnd/watches/{id}` `{ enabled: true }` | **off until an analyst enables it in that space** | Catalog watches are **not** installed at boot. Opening the catalog does not install them. Until Floor is enabled in the space, `security.attackDiscoveryCreated` has no per-space subscriber and the AlertZero loop stays empty. |
+| Watch toggle (Floor, etc.) | Watch catalog / `PATCH /internal/pnd/watches/{id}` `{ enabled: true }` | **off until an analyst enables it in that space** | Catalog watches are **not** installed at boot. Opening the catalog does not install them. Until Floor is enabled in the space, `security.attackDiscoveryCreated` has no per-space subscriber and the AlertZero loop stays empty. Each watch's **Enabled** switch is on its settings page (`/app/pnd/watches/{id}`), not on Workers. After you turn **one catalog watch** on, a modal offers to enable the remaining catalog watches in that space (Floor, Officer, Dark, Deep, Post-Incident). Dismissing leaves only the one you just enabled. Detection and auto-approver are not in that offer. This is a POC convenience on top of main's per-watch toggle — **not** a fifth demo gate. |
 | `xpack.pnd.ui.useMockData` | `kibana.yml` / `config/kibana.dev.yml` | **`false`** (live) | Whether the pre-existing Watch catalog and investigation routes serve fixtures. **The internal routes this epic added are live-only and ignore the flag.** Set `true` only to render the older UI without a running stack. |
 
 To enable everything for local development:
@@ -291,8 +291,10 @@ feature_flags.overrides:
   securitySolution.attackDiscoveryWorkflowsEnabled: true
 # and, per space, set securitySolution:enableAttackDiscoveryWorkflows: true
 # in Stack Management → Advanced Settings (it is a UI setting, not a yml key).
-# Then enable Watch Floor in that space's catalog. All four AlertZero gates must
-# be on: plugin, feature flag, Advanced Setting, and the watch toggle.
+# Then enable Watch Floor in that space's catalog (each watch's settings
+# header switch). All four AlertZero gates must be on: plugin, feature flag,
+# Advanced Setting, and the watch toggle. Enabling one catalog watch offers
+# to turn the other four on in this space; that offer is convenience, not a gate.
 ```
 
 ### `useMockData: false` is now the safe default
@@ -306,9 +308,12 @@ which authorizes managed reads (`getWorkflows` / `getWorkflow`) against `request
 down-scopes managed-execution enrichment to the caller's `readManagedExecution` privilege (see
 [`services/watches/workflows_read_authz.ts`](server/services/watches/workflows_read_authz.ts)). So
 request-scoped Workflows authz now lives inside the projection, which is what makes live projection
-the correct default. Execution privileges are declared as `extendedPrivileges` (surfaced in
-`request.authzResult`) rather than gated at the route, so recent-run enrichment simply omits itself
-when the caller lacks them instead of 403-ing the whole read.
+the correct default. List, get, live PATCH, GET/PUT autonomy, and `_auto_respond` declare that same
+managed-read pair on the route so core fills `request.authzResult`; without those declarations the
+projection throws `WorkflowsManagedReadForbiddenError` even for a superuser. On catalog reads,
+execution privileges are `extendedPrivileges` so recent-run enrichment omits itself when the caller
+lacks them. `_auto_respond` (like the proposals queue) **requires** managed-execution read: its
+listing of parked gates is the payload, not optional enrichment.
 
 The request threading used to pass through a separate `watch_workflow_projection_service.ts`.
 #284009 deleted that file and folded it into
@@ -994,9 +999,10 @@ register `#57`, and it is a question for design, not a gap to close by re-adding
   handler authorizes on its own privilege, then writes server-side via
   `savedObjects.getUnsafeInternalClient().asScopedToNamespace(spaceId)` + `uiSettings.asScopedToClient`,
   bypassing the `manage_advanced_settings` (admin) requirement uiSettings writes normally carry (C11).
-- **Read:** `GET /internal/pnd/autonomy`, a low-privilege route the dial UI calls. Response is
-  **flat**: `{ watchId, autonomyLevel, autoAccept }`. The Floor and Post-Incident YAML no longer
-  call it — autonomy is evaluated at approval time.
+- **Read:** `GET /internal/pnd/autonomy`, the dial UI's read path. Live: `pnd_read` plus Workflows
+  `read` / `readManaged` (execution reads as `extendedPrivileges`) so `get()` can evaluate
+  `authzResult`. Mock: `pnd_read` only. Response is **flat**: `{ watchId, autonomyLevel, autoAccept }`.
+  The Floor and Post-Incident YAML no longer call it — autonomy is evaluated at approval time.
 - **Raising the level mid-flight:** `POST /internal/pnd/proposals/_auto_respond` with `origin: 'dial'`
   resumes already-pending gates the new level permits. The per-run auto-approver posts the same
   route with `origin: 'auto'`. A scheduled workflow at plugin start has no user request, so it
@@ -1123,9 +1129,9 @@ them and replaced the mock behind one (see [the alignment rule](#the-alignment-r
 
 | Method + path | Purpose | Notes |
 |---|---|---|
-| `GET /internal/pnd/autonomy` | The Watch workflows' read path | Low privilege. Flat `{ watchId, autonomyLevel, autoAccept }`. |
-| `PUT /internal/pnd/autonomy` | Persist an autonomy level — the **only** autonomy write path | `pnd_manage_autonomy`. `watchId` allow-listed against `SYSTEM_SECURITY_WATCH_IDS`; level validated `manual\|assisted\|supervised` **before** the key is built (S4). `PATCH /internal/pnd/watches/{watchId}` rejects `autonomyLevel` with 400 rather than offering a second path (register `#36`). |
-| `PATCH /internal/pnd/watches/{watchId}` | Persist one Save from the Watch settings page | `pnd_write`. Body is **plural** — `skills` (maxItems 64) — so one draft-until-Save press carries the whole page (bead `kibana-phf4.21`); every element is validated **before** any of them mutates, so a rejected element lands nothing. Refuses `autonomyLevel` (register `#36`), `worker` (`#39`) and, since bead `kibana-phf4.33`, a non-empty `approvalGates` (`#57`) with 400 — an empty array says nothing about gates and stays a no-op. Settings other than `enabled` are mock-mode-only and answer 501 when `useMockData: false`. |
+| `GET /internal/pnd/autonomy` | The dial UI's read path | Live: `pnd_read` plus Workflows `read` / `readManaged` (execution reads as extended privileges) so `get()` can evaluate `authzResult`. Mock: `pnd_read` only. Flat `{ watchId, autonomyLevel, autoAccept }`. YAML no longer calls it. |
+| `PUT /internal/pnd/autonomy` | Persist an autonomy level — the **only** autonomy write path | Live: `pnd_manage_autonomy` plus Workflows `read` / `readManaged` (execution reads as extended privileges) so get-before-write can evaluate `authzResult`. Mock: `pnd_manage_autonomy` only. `watchId` allow-listed against `SYSTEM_SECURITY_WATCH_IDS`; level validated `manual\|assisted\|supervised` **before** the key is built (S4). `PATCH /internal/pnd/watches/{watchId}` rejects `autonomyLevel` with 400 rather than offering a second path (register `#36`). |
+| `PATCH /internal/pnd/watches/{watchId}` | Persist one Save from the Watch settings page, or the header Enabled switch | Live: `pnd_write` plus Workflows `read` / `readManaged` (and execution reads as extended privileges) so get-after-write can evaluate `authzResult`. Mock: `pnd_write` only. Body is **plural** — `skills` (maxItems 64) — so one draft-until-Save press carries the whole page (bead `kibana-phf4.21`); every element is validated **before** any of them mutates, so a rejected element lands nothing. Refuses `autonomyLevel` (register `#36`), `worker` (`#39`) and, since bead `kibana-phf4.33`, a non-empty `approvalGates` (`#57`) with 400 — an empty array says nothing about gates and stays a no-op. Settings other than `enabled` are mock-mode-only and answer 501 when `useMockData: false`. |
 | `GET /internal/pnd/conversations/_derive` | UUIDv5 ids + rendered AD markdown | Resolves the AD **as the caller** (S3), 404 when not readable. The Watch Floor's first step. |
 | `GET /internal/pnd/conversations` | Derived-id set ∩ Agent Builder list | Returns typed `PndConversation`s in all four kinds (`investigation` / `incident` / `tuning` / `thread`); a `thread` row also carries its `gateId`, plus recovered `parentConversationId` / `parentConversationRelation` and (on incidents) `promotedFrom`. Registers **eight** derived ids per AD alert (three alert-keyed, four threads, one Deep Watch worker). `kind` / `page` / `perPage` page each chat-page group independently; omit them for the unpaged set lifecycle still reads. Read by four surfaces on one react-query key — the chats page, the lifecycle view, the flyout's Attachments section, and the queue, which uses it to **name** an investigation group and for nothing else. |
 | `POST /internal/pnd/threads/_ensure` | Materialise the `[Thread]` conversation for one proposal | `pnd_threads_write`. Body is `{ correlationId, gateId }` **only**; unknown properties are dropped rather than rejected, because a workflow `kibana.request` must never be 400ed for an extra field. Idempotent. |
@@ -1133,7 +1139,7 @@ them and replaced the mock behind one (see [the alignment rule](#the-alignment-r
 | `GET /internal/pnd/conversations/{conversationId}/attachments` | List a conversation's Agent Builder attachments | `pnd_read`. A narrow projection, not a passthrough. |
 | `GET /internal/pnd/proposals` | Pending gates grouped by bucket | Enriched from the gate registry + `context.event` + reasoning; deduped by `(adId, gateId)`, newest kept (S10). |
 | `POST /internal/pnd/proposals/{sourceId}/_respond` | Resume a pending gate | Dual privilege; **workflow id re-derived from the persisted execution** and allow-listed to `PND_WATCH_WORKFLOW_IDS`; `stepId` must be a registered gate; always via `resumeWorkflowExecution` (S1). Emits `pnd.incidentClosed` on an **approved** containment only, and `security.detectionChangeSignal` at every Floor HITL terminal (a dismissal at open-investigation or promote-incident, and either decision at containment), independently and best-effort ([ADR-014](#adr-014)). |
-| `POST /internal/pnd/proposals/_auto_respond` | Auto-accept pending gates the current uiSettings level permits | Dual privilege (`pnd_manage_autonomy` AND `workflowsManagement:execute`). Re-enforces `alwaysGate` in the partition helper **and** in `approveGate` (S5 / S5-b). Body `{ watchId, origin: 'auto' \| 'dial' }`; origin selects `pnd-autonomy-auto` / `pnd-autonomy-dial`. Payload from `gate.autoApproveResponse`. Replaces `_sweep`. |
+| `POST /internal/pnd/proposals/_auto_respond` | Auto-accept pending gates the current uiSettings level permits | `pnd_manage_autonomy` AND Workflows `execute` (S1/D1) plus managed definition read (`get()`) **and** managed-execution read (the parked-gate listing is the payload, same as `GET /proposals`). Re-enforces `alwaysGate` in the partition helper **and** in `approveGate` (S5 / S5-b). Body `{ watchId, origin: 'auto' \| 'dial' }`; origin selects `pnd-autonomy-auto` / `pnd-autonomy-dial`. Payload from `gate.autoApproveResponse`. Replaces `_sweep`. |
 | `GET /internal/pnd/runs` | Recent Watch runs (AD 2.0 "Generations" equivalent) | Closed `PndRunStatus` enum; `deepLinkPath = /{workflowId}?tab=executions&executionId={runId}`; filtered to caller-readable discoveries via `_find?ids=` (S3). **Dismissal is client-side only** (PND has no event writer): a documented divergence from AD Generations. |
 | `GET /internal/pnd/executions/{correlationId}` | Four-phase projection | Always-complete **14-row** `PHASE_CATALOG` skeleton (10 step rows + 4 gate rows), aggregating Watch Floor + Post-Incident step executions via the shared `correlateExecutions` helper; the two `upstream` rows read `upstream`, unrun live rows `not_started`. Same AD-as-caller authz as `_derive` (S3). |
 | `GET /internal/pnd/tuning/candidate-rules` | The distinct detection rules behind one discovery's constituent alerts — the menu `draft_tuning` chooses from instead of recalling a rule id (register `#24`) | `pnd_read`. The discovery resolves **as the caller** (S3) and an unreadable id is a **404, not an empty menu**, because an empty menu is a real answer here. The alert fan-out is refused above `PND_DISCOVERY_CONTEXT_MAX_ALERT_IDS` with a 400 raised *before* any query runs (a truncated menu would narrow the choice while the drafting step believed it saw every rule), and the distinct rules are capped by the aggregation's `terms` size at `PND_TUNING_CANDIDATE_RULES_MAX`. A genuine failure is a visible **500**, not `rules: []` — the opposite of `/discovery-context`, where an empty list is an absent overlay rather than a claim. Optional `ruleRef` filters to the DCS's rule; a `ruleRef` that matches nothing degrades to the **full** list rather than an empty one. |

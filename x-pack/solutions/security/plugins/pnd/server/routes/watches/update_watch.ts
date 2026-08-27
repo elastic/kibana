@@ -14,28 +14,28 @@ import {
   PND_WATCH_URL_TEMPLATE,
   UpdateWatchRequestBody,
 } from '@kbn/pnd-common';
-import { PND_API_PRIVILEGE_WRITE } from '../../../common/constants';
 import type { RouteDependencies } from '../register_routes';
+import { httpStatusFromWatchError } from '../../services/watches/workflows_read_authz';
 import { storeUnavailableResponse } from '../store_route_guard';
+import { getWatchUpdateRouteAuthz } from './watch_route_security';
 
 const UpdateWatchRequestParams = z.object({
   watchId: z.string().min(1).max(128),
 });
 
 export const registerUpdateWatchRoute = ({
-  router,
-  logger,
+  config,
   getSpaceId,
   getWatchesService,
+  logger,
+  router,
 }: RouteDependencies) => {
   router.versioned
     .patch({
       path: PND_WATCH_URL_TEMPLATE,
       access: INTERNAL_API_ACCESS,
       security: {
-        authz: {
-          requiredPrivileges: [PND_API_PRIVILEGE_WRITE],
-        },
+        authz: getWatchUpdateRouteAuthz(config.ui.useMockData),
       },
       summary: 'Update a PND watch and its settings',
     })
@@ -115,7 +115,7 @@ export const registerUpdateWatchRoute = ({
         } catch (error) {
           logger.error(`Failed to update watch: ${error}`);
           return response.customError({
-            statusCode: 500,
+            statusCode: httpStatusFromWatchError(error),
             body: {
               message: i18n.translate('xpack.pnd.watchUpdateResponseErrorMessage', {
                 defaultMessage: 'Failed to update watch',

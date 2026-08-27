@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -20,16 +20,25 @@ import { useHistory, useParams } from 'react-router-dom';
 import type { ScopedHistory } from '@kbn/core/public';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useQueryClient } from '@kbn/react-query';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import type { AppHeaderBadge, AppHeaderMenu } from '@kbn/app-header';
-import { PND_SIGNAL_DRIVEN_WATCH_TRIGGERS } from '@kbn/pnd-common';
+import { API_VERSIONS, PND_SIGNAL_DRIVEN_WATCH_TRIGGERS, buildWatchUrl } from '@kbn/pnd-common';
 import { usePndDocTitle } from '../../hooks/use_pnd_doc_title';
-import { useUpdateWatch, useWatch } from '../../hooks/use_watches_api';
+import {
+  notifyWatchUpdateError,
+  useUpdateWatch,
+  useWatch,
+  useWatches,
+} from '../../hooks/use_watches_api';
 import { useWorkers } from '../../hooks/use_workers_api';
+import { queryKeys } from '../../query_keys';
 import { getErrorMessage } from '../../states';
 import { buildRunsWatchIdSearch } from './activity/helpers/read_runs_watch_id';
+import { remainingDisabledCatalogWatchIds } from './helpers/remaining_disabled_catalog_watch_ids';
 import { useWatchSettingsDraft } from './hooks/use_watch_settings_draft';
 import { AutonomyControl } from './components/autonomy_control';
+import { EnableRemainingWatchesModal } from './components/enable_remaining_watches_modal';
 import { SettingsSection } from './components/settings_section';
 import { WatchRunsLedger } from './components/watch_runs_ledger';
 import { WatchSkillsTable } from './components/watch_skills_table';
@@ -44,8 +53,12 @@ export const WatchDetailPage: React.FC = () => {
   const history = useHistory();
   const { watchId } = useParams<{ watchId: string }>();
   const { data, isLoading, error, refetch } = useWatch(watchId);
+  const { data: watchesData } = useWatches();
   const { data: workersData } = useWorkers();
   const { mutate: updateWatch, isLoading: isSaving } = useUpdateWatch(watchId);
+  const queryClient = useQueryClient();
+  const [isEnablingRemaining, setIsEnablingRemaining] = useState(false);
+  const [remainingWatchIds, setRemainingWatchIds] = useState<readonly string[] | null>(null);
   /**
    * `history` here is the `ScopedHistory` the app mounted its `Router` with, which the leave-confirm
    * below needs. It is the same object react-router's `useHistory()` returns, but that hook types it
@@ -168,6 +181,58 @@ export const WatchDetailPage: React.FC = () => {
     ];
   }, [isDirty, watch]);
 
+  const onEnabledChange = useCallback(
+    (checked: boolean) => {
+      updateWatch(
+        { enabled: checked },
+        {
+          onSuccess: () => {
+            if (!checked || watch == null) {
+              return;
+            }
+            const remaining = remainingDisabledCatalogWatchIds({
+              justEnabledId: watch.id,
+              watches: watchesData?.watches ?? [],
+            });
+            if (remaining.length > 0) {
+              setRemainingWatchIds(remaining);
+            }
+          },
+        }
+      );
+    },
+    [updateWatch, watch, watchesData?.watches]
+  );
+
+  const onCancelEnableRemaining = useCallback(() => {
+    setRemainingWatchIds(null);
+  }, []);
+
+  const onConfirmEnableRemaining = useCallback(async () => {
+    if (http == null || remainingWatchIds == null || remainingWatchIds.length === 0) {
+      return;
+    }
+    setIsEnablingRemaining(true);
+    try {
+      await Promise.all(
+        remainingWatchIds.map((id) =>
+          http.patch(buildWatchUrl(id), {
+            body: JSON.stringify({ enabled: true }),
+            version: API_VERSIONS.internal.v1,
+          })
+        )
+      );
+      await queryClient.invalidateQueries({ queryKey: queryKeys.watches.list() });
+      setRemainingWatchIds(null);
+    } catch (enableError) {
+      if (toasts != null) {
+        notifyWatchUpdateError(toasts, enableError);
+      }
+    } finally {
+      setIsEnablingRemaining(false);
+    }
+  }, [http, queryClient, remainingWatchIds, toasts]);
+
   /**
    * The Enabled switch writes through immediately, unlike everything in the draft.
    *
@@ -184,10 +249,10 @@ export const WatchDetailPage: React.FC = () => {
       label: settingsI18n.ENABLED_SWITCH_LABEL,
       labelProps: undefined,
       checked: watch.enabled,
-      onChange: (checked: boolean) => updateWatch({ enabled: checked }),
+      onChange: onEnabledChange,
       'data-test-subj': 'pndWatchEnabledSwitch',
     };
-  }, [watch, updateWatch]);
+  }, [onEnabledChange, watch]);
 
   /** Save and Discard appear only on a watch that has settings to save. */
   const primaryAction = useMemo<AppHeaderMenu['primaryActionItem']>(() => {
@@ -500,6 +565,14 @@ export const WatchDetailPage: React.FC = () => {
           </EuiFlexItem>
         ))}
       </EuiFlexGroup>
+      {remainingWatchIds != null && remainingWatchIds.length > 0 ? (
+        <EnableRemainingWatchesModal
+          isEnabling={isEnablingRemaining}
+          onCancel={onCancelEnableRemaining}
+          onConfirm={onConfirmEnableRemaining}
+          remainingWatchIds={remainingWatchIds}
+        />
+      ) : null}
     </WatchesSectionLayout>
   );
 };

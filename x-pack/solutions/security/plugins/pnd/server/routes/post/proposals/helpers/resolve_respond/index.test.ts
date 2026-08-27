@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { SYSTEM_SECURITY_WATCH_DEEP_ID } from '@kbn/pnd-common';
+import { SYSTEM_SECURITY_WATCH_FLOOR_ID } from '@kbn/pnd-common';
 import type { WatchWorkflowsManagementClient } from '../../../../../services/watches/watch_workflows_management_client';
 import { resolveRespondTarget } from '.';
 
 const parsed = {
   stepExecutionId: 'step-exec-1',
-  workflowId: SYSTEM_SECURITY_WATCH_DEEP_ID,
+  workflowId: SYSTEM_SECURITY_WATCH_FLOOR_ID,
   workflowRunId: 'run-1',
 };
 
@@ -21,7 +21,7 @@ const execution = (overrides = {}) => ({
   stepExecutions: [
     { id: 'step-exec-1', status: 'waiting_for_input', stepId: 'await_open_investigation' },
   ],
-  workflowId: SYSTEM_SECURITY_WATCH_DEEP_ID,
+  workflowId: SYSTEM_SECURITY_WATCH_FLOOR_ID,
   ...overrides,
 });
 
@@ -120,6 +120,39 @@ describe('resolveRespondTarget', () => {
     });
 
     expect(result.status).toEqual('unknown_gate');
+  });
+
+  it('resolves a pending gate on the per-space document id (S1)', async () => {
+    const documentId = `${SYSTEM_SECURITY_WATCH_FLOOR_ID}-agent-3`;
+    const result = await resolveRespondTarget({
+      managementClient: createManagementClient(
+        execution({
+          workflowId: documentId,
+        })
+      ),
+      parsed: {
+        ...parsed,
+        workflowId: documentId,
+      },
+      spaceId: 'agent-3',
+    });
+
+    expect(result.status).toEqual('ok');
+  });
+
+  it('rejects a catalog-looking document id that is not this space (S1)', async () => {
+    const result = await resolveRespondTarget({
+      managementClient: createManagementClient(
+        execution({ workflowId: `${SYSTEM_SECURITY_WATCH_FLOOR_ID}-evil` })
+      ),
+      parsed: {
+        ...parsed,
+        workflowId: `${SYSTEM_SECURITY_WATCH_FLOOR_ID}-evil`,
+      },
+      spaceId: 'agent-3',
+    });
+
+    expect(result.status).toEqual('forbidden_workflow');
   });
 
   it('rejects a step that is no longer waiting for input', async () => {

@@ -19,6 +19,7 @@ import {
 import { foldChildren } from '../helpers/fold_children';
 import { stopRowActivation } from '../helpers/stop_row_activation';
 import { QueueRiskBadge } from '../queue_risk_badge';
+import { RelativeUpdatedAt } from '../relative_updated_at';
 import * as i18n from '../translations';
 import type { QueueDecision, QueueEvent, QueueParent } from '../types';
 
@@ -197,18 +198,30 @@ export const ThreadGroupCard: React.FC<ThreadGroupCardProps> = ({
               )}
             </div>
 
-            {onOpenChat != null && (
-              <EuiToolTip content={i18n.OPEN_IN_CHAT} disableScreenReaderOutput>
-                <EuiButtonIcon
-                  aria-label={i18n.openInChatAriaLabel(parent.title)}
-                  color="text"
-                  data-test-subj="pndQueueThreadGroupOpenInChat"
-                  iconType="productAgent"
-                  onClick={onHeaderChat}
-                  onKeyDown={stopRowActivation}
-                  size="s"
-                />
-              </EuiToolTip>
+            {(parent.updatedAt != null || onOpenChat != null) && (
+              <div
+                css={css`
+                  align-items: center;
+                  display: flex;
+                  flex-shrink: 0;
+                  gap: ${euiTheme.size.s};
+                `}
+              >
+                {parent.updatedAt != null && <RelativeUpdatedAt updatedAt={parent.updatedAt} />}
+                {onOpenChat != null && (
+                  <EuiToolTip content={i18n.OPEN_IN_CHAT} disableScreenReaderOutput>
+                    <EuiButtonIcon
+                      aria-label={i18n.openInChatAriaLabel(parent.title)}
+                      color="text"
+                      data-test-subj="pndQueueThreadGroupOpenInChat"
+                      iconType="productAgent"
+                      onClick={onHeaderChat}
+                      onKeyDown={stopRowActivation}
+                      size="s"
+                    />
+                  </EuiToolTip>
+                )}
+              </div>
             )}
           </div>
 
@@ -319,6 +332,7 @@ export const ThreadGroupCard: React.FC<ThreadGroupCardProps> = ({
               >
                 {child.description}
               </p>
+              {child.updatedAt != null && <RelativeUpdatedAt updatedAt={child.updatedAt} />}
               <p
                 css={css`
                   color: ${euiTheme.colors.textSuccess};
@@ -390,6 +404,7 @@ export const ThreadGroupCard: React.FC<ThreadGroupCardProps> = ({
             >
               {child.description}
             </p>
+            {child.updatedAt != null && <RelativeUpdatedAt updatedAt={child.updatedAt} />}
             <div
               css={css`
                 align-items: center;

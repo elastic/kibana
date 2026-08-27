@@ -31,6 +31,7 @@ const queueParentFromConversation = (conversation: PndConversation): QueueParent
   id: conversation.id,
   summary: conversation.correlationId,
   title: conversation.title,
+  updatedAt: conversation.updatedAt,
 });
 
 const childrenOf = ({

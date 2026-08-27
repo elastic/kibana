@@ -118,3 +118,31 @@ export const groupControlAriaLabel = (modeLabel: string): string =>
     defaultMessage: 'Group the queue by {modeLabel}',
     values: { modeLabel },
   });
+
+export const UPDATED_JUST_NOW = i18n.translate('xpack.pnd.queue.relativeUpdatedAt.nowLabel', {
+  defaultMessage: 'now',
+});
+
+export const updatedMinutesLabel = (minutes: number): string =>
+  i18n.translate('xpack.pnd.queue.relativeUpdatedAt.minutesLabel', {
+    defaultMessage: '{minutes}m',
+    values: { minutes },
+  });
+
+export const updatedHoursLabel = (hours: number): string =>
+  i18n.translate('xpack.pnd.queue.relativeUpdatedAt.hoursLabel', {
+    defaultMessage: '{hours}h',
+    values: { hours },
+  });
+
+export const updatedDaysLabel = (days: number): string =>
+  i18n.translate('xpack.pnd.queue.relativeUpdatedAt.daysLabel', {
+    defaultMessage: '{days}d',
+    values: { days },
+  });
+
+export const lastUpdatedAriaLabel = (relativeTime: string): string =>
+  i18n.translate('xpack.pnd.queue.relativeUpdatedAtAriaLabel', {
+    defaultMessage: 'Last updated {relativeTime}',
+    values: { relativeTime },
+  });

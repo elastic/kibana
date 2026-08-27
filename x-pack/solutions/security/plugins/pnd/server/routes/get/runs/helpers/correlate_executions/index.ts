@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import { pndWatchDocumentId } from '@kbn/pnd-common';
 import type { WorkflowExecutionListItemDto } from '@kbn/workflows';
 import { readCorrelationIdFromEvent } from '@kbn/workflows/managed';
 
@@ -138,11 +139,11 @@ export const correlateExecutions = async ({
           const { results } =
             request == null
               ? await managementClient.getWorkflowExecutions(
-                  { page: 1, size, workflowId: watchId },
+                  { page: 1, size, workflowId: pndWatchDocumentId(watchId, spaceId) },
                   spaceId
                 )
               : await managementClient.getWorkflowExecutions(
-                  { page: 1, size, workflowId: watchId },
+                  { page: 1, size, workflowId: pndWatchDocumentId(watchId, spaceId) },
                   spaceId,
                   request
                 );

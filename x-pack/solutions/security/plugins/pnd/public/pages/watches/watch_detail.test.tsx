@@ -12,8 +12,10 @@ import { Route } from '@kbn/shared-ux-router';
 import {
   PND_DETECTION_CHANGE_SIGNAL_TRIGGER_ID,
   PND_SIGNAL_DRIVEN_WATCH_TRIGGERS,
+  SYSTEM_SECURITY_WATCH_DARK_ID,
   SYSTEM_SECURITY_WATCH_DEEP_ID,
   SYSTEM_SECURITY_WATCH_FLOOR_ID,
+  SYSTEM_SECURITY_WATCH_OFFICER_ID,
   SYSTEM_SECURITY_WATCH_POST_INCIDENT_ID,
   WATCHES_SEED,
 } from '@kbn/pnd-common';
@@ -226,6 +228,7 @@ const renderWatchDetail = ({
   saveOutcome = 'pending',
   settingsOverrides,
   watch = deepWatch,
+  watches = WATCHES_SEED,
   withSettings = true,
   workers = [floorWorker],
 }: {
@@ -236,6 +239,7 @@ const renderWatchDetail = ({
   settingsOverrides?: Partial<WatchSettings>;
   /** The watch under test. Defaults to Deep; the post-incident watch is the signal-driven one. */
   watch?: Watch;
+  watches?: Watch[];
   withSettings?: boolean;
   workers?: WatchWorker[];
 } = {}) => {
@@ -253,7 +257,7 @@ const renderWatchDetail = ({
     }
   });
   useUpdateWatch.mockReturnValue({ mutate: updateWatch });
-  useWatches.mockReturnValue({ data: { watches: WATCHES_SEED }, isLoading: false });
+  useWatches.mockReturnValue({ data: { watches }, isLoading: false });
   useWorkers.mockReturnValue({ data: { workers }, error: null, isLoading: false });
   useWatch.mockReturnValue({
     data: {
@@ -688,7 +692,7 @@ describe('WatchDetailPage', () => {
 
       fireEvent.click(screen.getByTestId('pndWatchEnabledSwitch'));
 
-      expect(updateWatch).toHaveBeenCalledWith({ enabled: !deepWatch.enabled });
+      expect(updateWatch).toHaveBeenCalledWith({ enabled: !deepWatch.enabled }, expect.any(Object));
     });
 
     it('does not arm the leave-confirm from the Enabled switch', () => {
@@ -698,6 +702,90 @@ describe('WatchDetailPage', () => {
       act(() => history.push('/watches'));
 
       expect(services.overlays.openConfirm).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('enable remaining catalog watches', () => {
+    const disabledCatalog = WATCHES_SEED.map((seedWatch) => ({ ...seedWatch, enabled: false }));
+
+    it('offers to enable the other catalog watches after turning one on', () => {
+      renderWatchDetail({
+        saveOutcome: 'success',
+        watch: { ...deepWatch, enabled: false },
+        watches: disabledCatalog,
+      });
+
+      fireEvent.click(screen.getByTestId('pndWatchEnabledSwitch'));
+
+      expect(screen.getByTestId('pndEnableRemainingWatchesModal')).toBeInTheDocument();
+    });
+
+    it('does not offer after turning a watch off', () => {
+      renderWatchDetail({
+        saveOutcome: 'success',
+        watch: deepWatch,
+        watches: WATCHES_SEED.map((seedWatch) => ({ ...seedWatch, enabled: true })),
+      });
+
+      fireEvent.click(screen.getByTestId('pndWatchEnabledSwitch'));
+
+      expect(screen.queryByTestId('pndEnableRemainingWatchesModal')).not.toBeInTheDocument();
+    });
+
+    it('does not offer when every other catalog watch is already on', () => {
+      renderWatchDetail({
+        saveOutcome: 'success',
+        watch: { ...deepWatch, enabled: false },
+        watches: WATCHES_SEED.map((seedWatch) => ({
+          ...seedWatch,
+          enabled: seedWatch.id !== SYSTEM_SECURITY_WATCH_DEEP_ID,
+        })),
+      });
+
+      fireEvent.click(screen.getByTestId('pndWatchEnabledSwitch'));
+
+      expect(screen.queryByTestId('pndEnableRemainingWatchesModal')).not.toBeInTheDocument();
+    });
+
+    it('enables the remaining catalog watches on confirm', async () => {
+      const { services } = renderWatchDetail({
+        saveOutcome: 'success',
+        watch: { ...deepWatch, enabled: false },
+        watches: disabledCatalog,
+      });
+      services.http.patch.mockResolvedValue({});
+
+      fireEvent.click(screen.getByTestId('pndWatchEnabledSwitch'));
+      fireEvent.click(screen.getByTestId('pndEnableRemainingWatchesConfirm'));
+
+      await waitFor(() => {
+        expect(services.http.patch).toHaveBeenCalledTimes(4);
+      });
+
+      const patchedIds = services.http.patch.mock.calls.map(([url]: [string]) => url);
+      expect(patchedIds).toEqual(
+        expect.arrayContaining([
+          expect.stringContaining(SYSTEM_SECURITY_WATCH_FLOOR_ID),
+          expect.stringContaining(SYSTEM_SECURITY_WATCH_OFFICER_ID),
+          expect.stringContaining(SYSTEM_SECURITY_WATCH_DARK_ID),
+          expect.stringContaining(SYSTEM_SECURITY_WATCH_POST_INCIDENT_ID),
+        ])
+      );
+      expect(patchedIds.join(' ')).not.toContain(SYSTEM_SECURITY_WATCH_DEEP_ID);
+    });
+
+    it('leaves only the watch just enabled when the offer is dismissed', async () => {
+      const { services } = renderWatchDetail({
+        saveOutcome: 'success',
+        watch: { ...deepWatch, enabled: false },
+        watches: disabledCatalog,
+      });
+
+      fireEvent.click(screen.getByTestId('pndWatchEnabledSwitch'));
+      fireEvent.click(screen.getByTestId('pndEnableRemainingWatchesCancel'));
+
+      expect(screen.queryByTestId('pndEnableRemainingWatchesModal')).not.toBeInTheDocument();
+      expect(services.http.patch).not.toHaveBeenCalled();
     });
   });
 

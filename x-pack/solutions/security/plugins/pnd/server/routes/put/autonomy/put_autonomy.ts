@@ -12,32 +12,35 @@ import {
   SetAutonomyRequestBody,
 } from '@kbn/pnd-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import { PND_API_PRIVILEGE_AUTONOMY_WRITE } from '../../../../common/constants';
 import type { RouteDependencies } from '../../register_routes';
 import { isWatchAutonomyLevel } from '../../../lib/as_watch_autonomy_level';
 import { buildAutonomyResponse } from '../../../lib/build_autonomy_response';
 import { isSystemSecurityWatchId } from '../../../lib/is_system_security_watch_id';
+import { httpStatusFromWatchError } from '../../../services/watches/workflows_read_authz';
+import { getAutonomyWriteRouteAuthz } from '../../watches/watch_route_security';
 
 /**
  * `PUT /internal/pnd/autonomy` — the operator write path.
  *
- * Gated on the dedicated {@link PND_API_PRIVILEGE_AUTONOMY_WRITE} privilege
- * (grantable independently of `pnd all`). Writes the per-space template value
+ * Gated on the dedicated `pnd_autonomy_write` privilege (grantable independently
+ * of `pnd all`) plus Workflows managed-read in live mode, because the handler
+ * re-reads via `get()` before writing. Writes the per-space template value
  * (install-on-save, without enabling). Must not go through `PATCH /watches`,
  * which lacks this privilege.
  */
 export const registerPutAutonomyRoute = ({
-  router,
-  logger,
+  config,
   getSpaceId,
   getWatchesService,
+  logger,
+  router,
 }: RouteDependencies) => {
   router.versioned
     .put({
       path: PND_AUTONOMY_URL,
       access: INTERNAL_API_ACCESS,
       security: {
-        authz: { requiredPrivileges: [PND_API_PRIVILEGE_AUTONOMY_WRITE] },
+        authz: getAutonomyWriteRouteAuthz(config.ui.useMockData),
       },
       summary: "Set a PND watch's autonomy level",
     })
@@ -96,7 +99,7 @@ export const registerPutAutonomyRoute = ({
         } catch (error) {
           logger.error(`Failed to set autonomy for watch "${watchId}": ${error}`);
           return response.customError({
-            statusCode: 500,
+            statusCode: httpStatusFromWatchError(error),
             body: { message: 'Failed to set autonomy' },
           });
         }

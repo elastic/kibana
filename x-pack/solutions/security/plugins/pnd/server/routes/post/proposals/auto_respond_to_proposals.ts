@@ -14,10 +14,8 @@ import {
   PND_PROPOSALS_AUTO_RESPOND_URL,
 } from '@kbn/pnd-common';
 import type { AutoRespondToProposalsResponse } from '@kbn/pnd-common';
-import { WorkflowsManagementApiActions } from '@kbn/workflows';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 
-import { PND_API_PRIVILEGE_AUTONOMY_WRITE } from '../../../../common/constants';
 import {
   listPendingPndGates,
   PND_PENDING_GATES_MAX_RUNS,
@@ -25,6 +23,8 @@ import {
 import { asWatchAutonomyLevel } from '../../../lib/as_watch_autonomy_level';
 import { isSystemSecurityWatchId } from '../../../lib/is_system_security_watch_id';
 import type { RouteDependencies } from '../../register_routes';
+import { httpStatusFromWatchError } from '../../../services/watches/workflows_read_authz';
+import { getLiveAutoRespondRouteAuthz } from '../../watches/watch_route_security';
 import { approveGate } from './helpers/approve_gate';
 import { partitionAutoRespondableGates } from './helpers/partition_auto_respondable_gates';
 
@@ -60,6 +60,11 @@ const PND_AUTO_RESPOND_PAGE_SIZE = PND_PENDING_GATES_MAX_RUNS;
  * stamp and first-writer-wins still apply. The space is always the request's,
  * never a parameter and never `'*'` (S9). Autonomy is always read from the
  * per-space template values — never trusted from the request body.
+ *
+ * Parked-gate discovery is a managed-execution read, same as `GET /proposals`.
+ * Execution privileges are **required** (not extended): this route must not
+ * become a side-channel around Workflows execution RBAC. The listing also
+ * threads `request` so the projection asserts `authzResult`.
  */
 export const registerAutoRespondToProposalsRoute = ({
   getSpaceId,
@@ -73,14 +78,7 @@ export const registerAutoRespondToProposalsRoute = ({
       path: PND_PROPOSALS_AUTO_RESPOND_URL,
       access: INTERNAL_API_ACCESS,
       security: {
-        authz: {
-          // Both are required (AND), matching `_respond`. See the S1/D1 note above — the
-          // autonomy-write grant alone must not be able to drive a workflow resume.
-          requiredPrivileges: [
-            PND_API_PRIVILEGE_AUTONOMY_WRITE,
-            WorkflowsManagementApiActions.execute,
-          ],
-        },
+        authz: getLiveAutoRespondRouteAuthz(),
       },
       summary: 'Auto-respond to pending PND proposals the current autonomy level accepts',
     })
@@ -121,6 +119,7 @@ export const registerAutoRespondToProposalsRoute = ({
           const { results } = await listPendingPndGates({
             logger,
             managementClient,
+            request,
             size: PND_AUTO_RESPOND_PAGE_SIZE,
             spaceId,
             watchIds: [watchId],
@@ -128,6 +127,7 @@ export const registerAutoRespondToProposalsRoute = ({
 
           const { autoRespondable, skipped } = partitionAutoRespondableGates({
             autonomyLevel,
+            spaceId,
             steps: results,
             watchId,
           });
@@ -172,7 +172,7 @@ export const registerAutoRespondToProposalsRoute = ({
         } catch (error) {
           logger.error(`Failed to auto-respond to PND proposals for watch "${watchId}": ${error}`);
           return response.customError({
-            statusCode: 500,
+            statusCode: httpStatusFromWatchError(error),
             body: { message: 'Failed to auto-respond to PND proposals' },
           });
         }

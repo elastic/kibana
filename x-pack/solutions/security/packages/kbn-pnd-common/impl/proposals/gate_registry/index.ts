@@ -11,6 +11,7 @@ import {
   SYSTEM_SECURITY_WATCH_POST_INCIDENT_ID,
   WATCH_AUTONOMY_LEVELS,
 } from '../../../constants';
+import { resolvePndWatchDefinitionId } from '../../watches/pnd_watch_document_id';
 import type { PndConversationKind } from '../../conversations/derive_conversation_ids';
 import type { RecommendedAction } from '../../schemas';
 
@@ -243,8 +244,12 @@ const REGISTRY_BY_KEY: ReadonlyMap<string, PndGateDefinition> = new Map(
  */
 export const getGateDefinition = (
   workflowId: string,
-  stepId: string
-): PndGateDefinition | undefined => REGISTRY_BY_KEY.get(compositeKey(workflowId, stepId));
+  stepId: string,
+  spaceId?: string
+): PndGateDefinition | undefined => {
+  const definitionId = resolvePndWatchDefinitionId(workflowId, spaceId) ?? workflowId;
+  return REGISTRY_BY_KEY.get(compositeKey(definitionId, stepId));
+};
 
 const REGISTRY_BY_GATE_ID: ReadonlyMap<string, PndGateDefinition> = new Map(
   PND_GATE_REGISTRY.map((gate) => [gate.gateId, gate])

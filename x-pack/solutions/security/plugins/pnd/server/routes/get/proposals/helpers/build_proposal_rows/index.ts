@@ -20,6 +20,11 @@ export interface BuildProposalRowsParams {
   /** `runId → correlationId` from `listPendingPndGates`. */
   attackDiscoveryIdByRunId: Map<string, string>;
   /**
+   * Space the steps were listed in. Used to resolve a per-space document id back to
+   * the catalog definition id the gate registry and Watch chips speak.
+   */
+  spaceId?: string;
+  /**
    * Attack Discovery alert ids the calling user can read, resolved via the `_find?ids=` check
    * (security finding S3). A gate whose correlated discovery is **not** in this set is dropped, so a
    * caller can never see a proposal — or its reasoning — assembled from a discovery they cannot
@@ -61,10 +66,11 @@ export const buildProposalRows = ({
   attackDiscoveryIdByRunId,
   readableAttackDiscoveryAlertIds,
   reasoningByStepId,
+  spaceId,
   steps,
 }: BuildProposalRowsParams): PndProposalRow[] =>
   steps.flatMap((step): PndProposalRow[] => {
-    const gate = getGateDefinition(step.workflowId, step.stepId);
+    const gate = getGateDefinition(step.workflowId, step.stepId, spaceId);
     if (gate == null) {
       return [];
     }
@@ -102,7 +108,7 @@ export const buildProposalRows = ({
           gateId: gate.gateId,
         }),
         title,
-        workflowId: step.workflowId,
+        workflowId: gate.workflowId,
         workflowRunId: step.workflowRunId,
       },
     ];

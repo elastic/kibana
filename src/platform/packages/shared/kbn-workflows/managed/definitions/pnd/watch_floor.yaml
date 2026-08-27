@@ -317,10 +317,16 @@ steps:
   # (in-process, forwards this run's request) → child's kibana.request is 3
   # against Core's MAX_SELF_CALL_DEPTH = 4. No continue: a failed worker must
   # not look like a false-positive and skip to not_an_incident.
+  #
+  # Catalog watches install per-space as `${definitionId}-${spaceId}` (register
+  # #43). `workflow.execute` looks up the document id exactly — it does not
+  # apply `workflowIdSuffix` — so the child must be `system-security-watch-deep-{{ workflow.spaceId }}`,
+  # not the catalog id. Static helpers (auto-approver, rule workers) stay
+  # unsuffixed: they still live at `*`.
   - name: investigate
     type: workflow.execute
     with:
-      workflow-id: system-security-watch-deep
+      workflow-id: system-security-watch-deep-{{ workflow.spaceId }}
       inputs:
         attack_discovery_alert_id: "{{ event.attackDiscoveryAlertId }}"
         space_id: "{{ workflow.spaceId }}"

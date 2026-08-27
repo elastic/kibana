@@ -52,6 +52,10 @@ const createManagementClient = ({
     Pick<WatchWorkflowsManagementClient, 'getWorkflowExecutions' | 'getWorkflowExecution'>
   >);
 
+const SPACE_ID = 'agent-3';
+const deepDocumentId = `${SYSTEM_SECURITY_WATCH_DEEP_ID}-${SPACE_ID}`;
+const postIncidentDocumentId = `${SYSTEM_SECURITY_WATCH_POST_INCIDENT_ID}-${SPACE_ID}`;
+
 const baseParams = (managementClient: ReturnType<typeof createManagementClient>) => ({
   logger: loggerMock.create(),
   managementClient: managementClient as unknown as WatchWorkflowsManagementClient,
@@ -63,7 +67,7 @@ const baseParams = (managementClient: ReturnType<typeof createManagementClient>)
 describe('correlateExecutions', () => {
   it('decodes the attack-discovery id from execution context', async () => {
     const managementClient = createManagementClient({
-      executionsByWatch: { [SYSTEM_SECURITY_WATCH_DEEP_ID]: [listItem()] },
+      executionsByWatch: { [deepDocumentId]: [listItem()] },
       contextByRunId: { 'run-1': { correlationId: 'ad-1' } },
     });
 
@@ -74,7 +78,7 @@ describe('correlateExecutions', () => {
 
   it('exposes the raw event object for downstream projection', async () => {
     const managementClient = createManagementClient({
-      executionsByWatch: { [SYSTEM_SECURITY_WATCH_DEEP_ID]: [listItem()] },
+      executionsByWatch: { [deepDocumentId]: [listItem()] },
       contextByRunId: { 'run-1': { correlationId: 'ad-1', spaceId: 'agent-3' } },
     });
 
@@ -86,7 +90,7 @@ describe('correlateExecutions', () => {
   it('tags each execution with the watch it was listed under', async () => {
     const managementClient = createManagementClient({
       executionsByWatch: {
-        [SYSTEM_SECURITY_WATCH_POST_INCIDENT_ID]: [listItem({ id: 'run-det' })],
+        [postIncidentDocumentId]: [listItem({ id: 'run-det' })],
       },
       contextByRunId: { 'run-det': { correlationId: 'ad-9' } },
     });
@@ -99,10 +103,8 @@ describe('correlateExecutions', () => {
   it('merges both watches and sorts newest-first', async () => {
     const managementClient = createManagementClient({
       executionsByWatch: {
-        [SYSTEM_SECURITY_WATCH_DEEP_ID]: [
-          listItem({ id: 'older', startedAt: '2026-08-01T00:00:00.000Z' }),
-        ],
-        [SYSTEM_SECURITY_WATCH_POST_INCIDENT_ID]: [
+        [deepDocumentId]: [listItem({ id: 'older', startedAt: '2026-08-01T00:00:00.000Z' })],
+        [postIncidentDocumentId]: [
           listItem({ id: 'newer', startedAt: '2026-08-02T00:00:00.000Z' }),
         ],
       },
@@ -116,7 +118,7 @@ describe('correlateExecutions', () => {
   it('caps the merged result at size', async () => {
     const managementClient = createManagementClient({
       executionsByWatch: {
-        [SYSTEM_SECURITY_WATCH_DEEP_ID]: [
+        [deepDocumentId]: [
           listItem({ id: 'a', startedAt: '2026-08-03T00:00:00.000Z' }),
           listItem({ id: 'b', startedAt: '2026-08-02T00:00:00.000Z' }),
           listItem({ id: 'c', startedAt: '2026-08-01T00:00:00.000Z' }),
@@ -132,13 +134,11 @@ describe('correlateExecutions', () => {
   it('caps the merged result at mergedSize when it is given', async () => {
     const managementClient = createManagementClient({
       executionsByWatch: {
-        [SYSTEM_SECURITY_WATCH_DEEP_ID]: [
+        [deepDocumentId]: [
           listItem({ id: 'a', startedAt: '2026-08-03T00:00:00.000Z' }),
           listItem({ id: 'b', startedAt: '2026-08-02T00:00:00.000Z' }),
         ],
-        [SYSTEM_SECURITY_WATCH_POST_INCIDENT_ID]: [
-          listItem({ id: 'c', startedAt: '2026-08-01T00:00:00.000Z' }),
-        ],
+        [postIncidentDocumentId]: [listItem({ id: 'c', startedAt: '2026-08-01T00:00:00.000Z' })],
       },
     });
 
@@ -154,13 +154,11 @@ describe('correlateExecutions', () => {
   it('keeps every watch in the window when mergedSize covers all of them', async () => {
     const managementClient = createManagementClient({
       executionsByWatch: {
-        [SYSTEM_SECURITY_WATCH_DEEP_ID]: [
+        [deepDocumentId]: [
           listItem({ id: 'a', startedAt: '2026-08-03T00:00:00.000Z' }),
           listItem({ id: 'b', startedAt: '2026-08-02T00:00:00.000Z' }),
         ],
-        [SYSTEM_SECURITY_WATCH_POST_INCIDENT_ID]: [
-          listItem({ id: 'c', startedAt: '2026-08-01T00:00:00.000Z' }),
-        ],
+        [postIncidentDocumentId]: [listItem({ id: 'c', startedAt: '2026-08-01T00:00:00.000Z' })],
       },
     });
 
@@ -175,21 +173,43 @@ describe('correlateExecutions', () => {
 
   it('still lists only `size` executions per watch when mergedSize is larger', async () => {
     const managementClient = createManagementClient({
-      executionsByWatch: { [SYSTEM_SECURITY_WATCH_DEEP_ID]: [listItem()] },
+      executionsByWatch: { [`${SYSTEM_SECURITY_WATCH_DEEP_ID}-agent-3`]: [listItem()] },
     });
 
     await correlateExecutions({ ...baseParams(managementClient), mergedSize: 300, size: 100 });
 
     expect(managementClient.getWorkflowExecutions).toHaveBeenCalledWith(
-      { page: 1, size: 100, workflowId: SYSTEM_SECURITY_WATCH_DEEP_ID },
+      { page: 1, size: 100, workflowId: `${SYSTEM_SECURITY_WATCH_DEEP_ID}-agent-3` },
       'agent-3'
     );
+  });
+
+  it('queries the per-space document id and keeps watchId as the catalog definition id', async () => {
+    const managementClient = createManagementClient({
+      executionsByWatch: {
+        [`${SYSTEM_SECURITY_WATCH_POST_INCIDENT_ID}-agent-3`]: [listItem({ id: 'run-det' })],
+      },
+      contextByRunId: { 'run-det': { correlationId: 'ad-9' } },
+    });
+
+    const [correlated] = await correlateExecutions({
+      ...baseParams(managementClient),
+      watchIds: [SYSTEM_SECURITY_WATCH_POST_INCIDENT_ID],
+    });
+
+    expect(managementClient.getWorkflowExecutions).toHaveBeenCalledWith(
+      expect.objectContaining({
+        workflowId: `${SYSTEM_SECURITY_WATCH_POST_INCIDENT_ID}-agent-3`,
+      }),
+      'agent-3'
+    );
+    expect(correlated.watchId).toEqual(SYSTEM_SECURITY_WATCH_POST_INCIDENT_ID);
   });
 
   it('filters out executions started before the start bound', async () => {
     const managementClient = createManagementClient({
       executionsByWatch: {
-        [SYSTEM_SECURITY_WATCH_DEEP_ID]: [
+        [deepDocumentId]: [
           listItem({ id: 'kept', startedAt: '2026-08-02T00:00:00.000Z' }),
           listItem({ id: 'dropped', startedAt: '2026-07-01T00:00:00.000Z' }),
         ],
@@ -207,7 +227,7 @@ describe('correlateExecutions', () => {
   it('ignores a date-math bound it cannot parse', async () => {
     const managementClient = createManagementClient({
       executionsByWatch: {
-        [SYSTEM_SECURITY_WATCH_DEEP_ID]: [listItem({ id: 'kept' })],
+        [deepDocumentId]: [listItem({ id: 'kept' })],
       },
     });
 
@@ -221,7 +241,7 @@ describe('correlateExecutions', () => {
 
   it('scopes each execution read to the resolved space (S9)', async () => {
     const managementClient = createManagementClient({
-      executionsByWatch: { [SYSTEM_SECURITY_WATCH_DEEP_ID]: [listItem()] },
+      executionsByWatch: { [deepDocumentId]: [listItem()] },
       contextByRunId: { 'run-1': { correlationId: 'ad-1' } },
     });
 
@@ -232,7 +252,7 @@ describe('correlateExecutions', () => {
 
   it('degrades a failing per-watch listing to an empty contribution', async () => {
     const getWorkflowExecutions = jest.fn(async ({ workflowId }: { workflowId: string }) => {
-      if (workflowId === SYSTEM_SECURITY_WATCH_DEEP_ID) {
+      if (workflowId === deepDocumentId) {
         throw new Error('boom');
       }
       return {
@@ -252,7 +272,7 @@ describe('correlateExecutions', () => {
   it('degrades a failing context decode to an empty correlation', async () => {
     const getWorkflowExecution = jest.fn().mockRejectedValue(new Error('boom'));
     const managementClient = createManagementClient({
-      executionsByWatch: { [SYSTEM_SECURITY_WATCH_DEEP_ID]: [listItem()] },
+      executionsByWatch: { [deepDocumentId]: [listItem()] },
       getWorkflowExecution,
     });
 
@@ -263,14 +283,14 @@ describe('correlateExecutions', () => {
 
   it('forwards the request on each execution listing when one is supplied', async () => {
     const managementClient = createManagementClient({
-      executionsByWatch: { [SYSTEM_SECURITY_WATCH_DEEP_ID]: [listItem()] },
+      executionsByWatch: { [deepDocumentId]: [listItem()] },
     });
     const request = { authzResult: {} } as never;
 
     await correlateExecutions({ ...baseParams(managementClient), request });
 
     expect(managementClient.getWorkflowExecutions).toHaveBeenCalledWith(
-      { page: 1, size: 50, workflowId: SYSTEM_SECURITY_WATCH_DEEP_ID },
+      { page: 1, size: 50, workflowId: deepDocumentId },
       'agent-3',
       request
     );

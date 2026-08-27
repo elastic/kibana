@@ -181,7 +181,7 @@ describe('registerGetProposalsActivityRoute', () => {
     await invoke(deps);
 
     expect(searchMock.mock.calls[0][0].query.bool.filter).toContainEqual({
-      terms: { workflowId: [...PND_WATCH_WORKFLOW_IDS] },
+      terms: { workflowId: PND_WATCH_WORKFLOW_IDS.map((id) => `${id}-${REQUEST_SPACE}`) },
     });
   });
 

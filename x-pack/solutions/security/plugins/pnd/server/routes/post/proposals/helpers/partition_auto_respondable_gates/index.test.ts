@@ -28,6 +28,7 @@ describe('partitionAutoRespondableGates', () => {
   it('marks a reversible gate auto-respondable at the assisted level', () => {
     const { autoRespondable } = partitionAutoRespondableGates({
       autonomyLevel: 'assisted',
+      spaceId: 'agent-3',
       steps: [step('await_open_investigation')],
       watchId: SYSTEM_SECURITY_WATCH_FLOOR_ID,
     });
@@ -46,6 +47,7 @@ describe('partitionAutoRespondableGates', () => {
   it('leaves every gate in place at the manual level', () => {
     const { skipped, autoRespondable } = partitionAutoRespondableGates({
       autonomyLevel: 'manual',
+      spaceId: 'agent-3',
       steps: [step('await_open_investigation'), step('await_promote_incident')],
       watchId: SYSTEM_SECURITY_WATCH_FLOOR_ID,
     });
@@ -74,6 +76,7 @@ describe('partitionAutoRespondableGates', () => {
       it.each([...WATCH_AUTONOMY_LEVELS])('is refused at the %s level', (autonomyLevel) => {
         const { skipped, autoRespondable } = partitionAutoRespondableGates({
           autonomyLevel,
+          spaceId: 'agent-3',
           steps: [step(gate.stepId, { workflowId: gate.workflowId })],
           watchId: gate.workflowId,
         });
@@ -89,6 +92,7 @@ describe('partitionAutoRespondableGates', () => {
   it('accepts a non-alwaysGate gate at the supervised level', () => {
     const { autoRespondable } = partitionAutoRespondableGates({
       autonomyLevel: 'supervised',
+      spaceId: 'agent-3',
       steps: [step('await_promote_incident')],
       watchId: SYSTEM_SECURITY_WATCH_FLOOR_ID,
     });
@@ -99,6 +103,7 @@ describe('partitionAutoRespondableGates', () => {
   it('carries autoApproveResponse from the registry so the route does not hardcode the payload', () => {
     const { autoRespondable } = partitionAutoRespondableGates({
       autonomyLevel: 'supervised',
+      spaceId: 'agent-3',
       steps: [step('await_promote_incident')],
       watchId: SYSTEM_SECURITY_WATCH_FLOOR_ID,
     });
@@ -109,6 +114,7 @@ describe('partitionAutoRespondableGates', () => {
   it('ignores pending gates that belong to another watch', () => {
     const { skipped, autoRespondable } = partitionAutoRespondableGates({
       autonomyLevel: 'supervised',
+      spaceId: 'agent-3',
       steps: [
         step('await_open_investigation', { workflowId: 'system-security-watch-post-incident' }),
       ],
@@ -124,6 +130,7 @@ describe('partitionAutoRespondableGates', () => {
   it('ignores pending steps that are not registered gates', () => {
     const { skipped, autoRespondable } = partitionAutoRespondableGates({
       autonomyLevel: 'supervised',
+      spaceId: 'agent-3',
       steps: [step('some_other_wait_step')],
       watchId: SYSTEM_SECURITY_WATCH_FLOOR_ID,
     });
@@ -137,6 +144,7 @@ describe('partitionAutoRespondableGates', () => {
   it('fail-closes for a level outside the shared scale', () => {
     const { skipped, autoRespondable } = partitionAutoRespondableGates({
       autonomyLevel: 'autonomous' as WatchAutonomyLevel,
+      spaceId: 'agent-3',
       steps: [step('await_open_investigation')],
       watchId: SYSTEM_SECURITY_WATCH_FLOOR_ID,
     });

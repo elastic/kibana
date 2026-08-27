@@ -118,8 +118,9 @@ export const PND_API_PRIVILEGE_PROPOSALS_RESPOND = 'pnd_proposals_respond' as co
  * Granted only by the dedicated "Manage autonomy" sub-feature
  * ({@link PND_MANAGE_AUTONOMY_PRIVILEGE_ID}) and therefore grantable independently
  * of `pnd all` — changing autonomy decides how many consequential actions execute
- * without a human, so it is its own grant. The low-privilege read path
- * (`GET /internal/pnd/autonomy`) does not require it.
+ * without a human, so it is its own grant. The read path (`GET /internal/pnd/autonomy`)
+ * does not require it; live GET still requires Workflows managed-read because it
+ * re-reads via `get()`.
  */
 export const PND_API_PRIVILEGE_AUTONOMY_WRITE = 'pnd_autonomy_write' as const;
 

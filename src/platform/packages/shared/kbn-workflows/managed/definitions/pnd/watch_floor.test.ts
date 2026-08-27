@@ -594,7 +594,7 @@ describe('watch_floor.yaml self-contained gate prompts (A7)', () => {
   });
 
   it('bumps the managed version, so the workflow timeout reaches an installed stack', () => {
-    expect(PND_WATCH_FLOOR_WORKFLOW.version).toBeGreaterThan(18);
+    expect(PND_WATCH_FLOOR_WORKFLOW.version).toBeGreaterThan(19);
   });
 
   describe.each([
@@ -970,8 +970,12 @@ describe('watch_floor.yaml investigation split (kibana-tjil.8)', () => {
       expect(step.type).toBe('workflow.execute');
     });
 
-    it('invokes Deep Watch', () => {
-      expect(step.with?.['workflow-id']).toBe('system-security-watch-deep');
+    it('invokes the per-space Deep document, not the catalog definition id', () => {
+      expect(step.with?.['workflow-id']).toBe('system-security-watch-deep-{{ workflow.spaceId }}');
+    });
+
+    it('bumps the managed version, so the per-space Deep id reaches an installed stack', () => {
+      expect(PND_WATCH_FLOOR_WORKFLOW.version).toBeGreaterThan(19);
     });
 
     it('passes both inputs Deep declares', () => {

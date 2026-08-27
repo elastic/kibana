@@ -23,6 +23,8 @@ dependsOn:
   - '@kbn/features-plugin'
   - '@kbn/kibana-react-plugin'
   - '@kbn/pnd-common'
+  - '@kbn/security-solution-features'
+  - '@kbn/security-solution-navigation'
   - '@kbn/zod'
   - '@kbn/zod-helpers'
   - '@kbn/i18n'
@@ -41,6 +43,12 @@ dependsOn:
   - '@kbn/agent-builder-common'
   - '@kbn/logging-mocks'
   - '@kbn/core-http-server-mocks'
+  - '@kbn/charts-theme'
+  - '@kbn/unsaved-changes-prompt'
+  - '@kbn/agent-builder-server'
+  - '@kbn/core-http-router-server-mocks'
+  - '@kbn/elastic-assistant-common'
+  - '@kbn/core-http-server'
 tags:
   - plugin
   - prod

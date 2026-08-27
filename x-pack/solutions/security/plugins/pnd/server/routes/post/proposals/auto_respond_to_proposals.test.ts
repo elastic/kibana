@@ -16,9 +16,10 @@ import {
   SYSTEM_SECURITY_WATCH_FLOOR_ID,
 } from '@kbn/pnd-common';
 import type { PndAutoRespondOrigin, WatchAutonomyLevel } from '@kbn/pnd-common';
-import { PND_API_PRIVILEGE_AUTONOMY_WRITE } from '../../../../common/constants';
 import { createPendingGatesManagementClientMock } from '../../../lib/list_pending_pnd_gates/mocks';
 import type { RouteDependencies } from '../../register_routes';
+import { WorkflowsManagedReadForbiddenError } from '../../../services/watches/workflows_read_authz';
+import { getLiveAutoRespondRouteAuthz } from '../../watches/watch_route_security';
 import { registerAutoRespondToProposalsRoute } from './auto_respond_to_proposals';
 
 const step = (stepId: string) => ({
@@ -46,20 +47,23 @@ const createDeps = (
   autonomyLevel: WatchAutonomyLevel = 'supervised'
 ) => {
   const router = mockRouter.create();
+  const get = jest.fn().mockResolvedValue({
+    settings: { autonomy: autonomyLevel },
+    settingsRevision: null,
+  });
   const deps = {
     config: { enabled: true, ui: { useMockData: false } },
+    get,
     getSpaceId: jest.fn().mockReturnValue('agent-3'),
-    getWatchesService: jest.fn().mockReturnValue({
-      get: jest.fn().mockResolvedValue({
-        settings: { autonomy: autonomyLevel },
-        settingsRevision: null,
-      }),
-    }),
+    getWatchesService: jest.fn().mockReturnValue({ get }),
     getWatchProjection: jest.fn(),
     getWorkflowsManagementClient: jest.fn().mockReturnValue(managementClient),
     logger: loggerMock.create(),
     router,
-  } as unknown as RouteDependencies & { router: ReturnType<typeof mockRouter.create> };
+  } as unknown as RouteDependencies & {
+    get: jest.Mock;
+    router: ReturnType<typeof mockRouter.create>;
+  };
 
   return deps;
 };
@@ -96,13 +100,24 @@ describe('registerAutoRespondToProposalsRoute', () => {
     expect(
       deps.router.versioned.getRoute('post', PND_PROPOSALS_AUTO_RESPOND_URL).config.security
     ).toEqual({
-      authz: {
-        requiredPrivileges: [
-          PND_API_PRIVILEGE_AUTONOMY_WRITE,
-          WorkflowsManagementApiActions.execute,
-        ],
-      },
+      authz: getLiveAutoRespondRouteAuthz(),
     });
+  });
+
+  it('requires managed-execution read so listing parked gates is not a Workflows RBAC side-channel', () => {
+    const deps = createDeps(createManagementClient([]));
+
+    registerAutoRespondToProposalsRoute(deps);
+
+    const authz = deps.router.versioned.getRoute('post', PND_PROPOSALS_AUTO_RESPOND_URL).config
+      .security?.authz;
+    const required = authz != null && 'requiredPrivileges' in authz ? authz.requiredPrivileges : [];
+
+    expect(required).toContain(WorkflowsManagementApiActions.readExecution);
+    expect(required).toContain(WorkflowsManagementApiActions.readManagedExecution);
+    expect(
+      authz != null && 'extendedPrivileges' in authz ? authz.extendedPrivileges : undefined
+    ).toBeUndefined();
   });
 
   it('auto-responds to a permitted gate at the current level', async () => {
@@ -210,7 +225,8 @@ describe('registerAutoRespondToProposalsRoute', () => {
 
     expect(managementClient.getWorkflowExecutions).toHaveBeenCalledWith(
       expect.any(Object),
-      'agent-3'
+      'agent-3',
+      expect.any(Object)
     );
   });
 
@@ -222,8 +238,11 @@ describe('registerAutoRespondToProposalsRoute', () => {
     await invoke(getHandler(deps.router));
 
     expect(managementClient.getWorkflowExecutions).toHaveBeenCalledWith(
-      expect.objectContaining({ workflowId: SYSTEM_SECURITY_WATCH_FLOOR_ID }),
-      'agent-3'
+      expect.objectContaining({
+        workflowId: `${SYSTEM_SECURITY_WATCH_FLOOR_ID}-agent-3`,
+      }),
+      'agent-3',
+      expect.any(Object)
     );
   });
 
@@ -254,6 +273,29 @@ describe('registerAutoRespondToProposalsRoute', () => {
     const response = await invoke(getHandler(deps.router));
 
     expect(response.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 503 }));
+  });
+
+  it('maps a managed-read forbidden error to 403 rather than a retried 500', async () => {
+    const deps = createDeps(createManagementClient([]));
+    deps.get.mockRejectedValue(new WorkflowsManagedReadForbiddenError());
+    registerAutoRespondToProposalsRoute(deps);
+
+    const response = await invoke(getHandler(deps.router));
+
+    expect(response.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 403 }));
+  });
+
+  it('maps a managed-execution-read forbidden error from the gate listing to 403', async () => {
+    const managementClient = createManagementClient([step('await_promote_incident')]);
+    managementClient.getWorkflowExecutions.mockRejectedValue(
+      new WorkflowsManagedReadForbiddenError()
+    );
+    const deps = createDeps(managementClient);
+    registerAutoRespondToProposalsRoute(deps);
+
+    const response = await invoke(getHandler(deps.router));
+
+    expect(response.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 403 }));
   });
 
   it('returns a 500 when listing throws', async () => {

@@ -74,6 +74,7 @@ export const findPndProposalRow = async ({
     attackDiscoveryIdByRunId,
     readableAttackDiscoveryAlertIds: new Set([correlationId]),
     reasoningByStepId,
+    spaceId,
     steps: results,
   });
 

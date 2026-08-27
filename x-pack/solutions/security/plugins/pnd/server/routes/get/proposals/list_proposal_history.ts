@@ -123,6 +123,7 @@ export const registerListProposalHistoryRoute = ({
             attackDiscoveryIdByRunId,
             readableAttackDiscoveryAlertIds,
             reasoningByStepId,
+            spaceId,
             steps: results,
           })
             .map((row): PndProposalRow => ({ ...row, ...answerByStepId.get(row.stepExecutionId) }))

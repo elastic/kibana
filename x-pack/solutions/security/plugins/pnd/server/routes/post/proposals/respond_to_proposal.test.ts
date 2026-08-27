@@ -227,6 +227,35 @@ describe('registerRespondToProposalRoute', () => {
     expect(response.ok).toHaveBeenCalledWith({ body: { resumed: true, sourceId: SOURCE_ID } });
   });
 
+  it('accepts a source id whose workflow id is the per-space document id (S1)', async () => {
+    const documentId = `${SYSTEM_SECURITY_WATCH_FLOOR_ID}-agent-3`;
+    const managementClient = createManagementClient();
+    managementClient.getWorkflowExecution.mockResolvedValue(execution({ workflowId: documentId }));
+    const deps = createDeps(managementClient);
+    registerRespondToProposalRoute(deps);
+
+    const response = await invoke(getHandler(deps.router), {
+      sourceId: `${documentId}:run-1:step-exec-1`,
+    });
+
+    expect(response.ok).toHaveBeenCalledWith({
+      body: { resumed: true, sourceId: `${documentId}:run-1:step-exec-1` },
+    });
+  });
+
+  it('rejects a catalog-looking document id that is not this space (S1)', async () => {
+    const managementClient = createManagementClient();
+    const deps = createDeps(managementClient);
+    registerRespondToProposalRoute(deps);
+
+    const response = await invoke(getHandler(deps.router), {
+      sourceId: `${SYSTEM_SECURITY_WATCH_FLOOR_ID}-evil:run-1:step-exec-1`,
+    });
+
+    expect(response.badRequest).toHaveBeenCalledTimes(1);
+    expect(managementClient.getWorkflowExecution).not.toHaveBeenCalled();
+  });
+
   it('rejects a source id whose workflow id is outside the allow-list (S1)', async () => {
     const managementClient = createManagementClient();
     const deps = createDeps(managementClient);
