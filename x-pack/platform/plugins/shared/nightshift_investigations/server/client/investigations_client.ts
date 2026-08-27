@@ -14,7 +14,9 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
 import type {
+  AlertInvestigationContext,
   GetInvestigationResponse,
+  InvestigationContext,
   InvestigationStatus,
   InvestigationSubject,
   ListInvestigationItem,
@@ -23,11 +25,16 @@ import type {
   StartInvestigationRequest,
   StartInvestigationResponse,
 } from '../../common';
+import { alertInvestigationContextSchema, freeFormContextSchema } from '../../common';
 
-import { buildInvestigationMessage, getAlertSnapshots } from './build_investigation_message';
-import { InvestigationNotFoundError, MissingAlertContextError } from './errors';
+import { buildInvestigationMessage } from './build_investigation_message';
+import { InvalidInvestigationContextError, InvestigationNotFoundError } from './errors';
 import { InvestigationUnavailableError } from './investigation_unavailable_error';
-export { InvestigationNotFoundError, InvestigationUnavailableError, MissingAlertContextError };
+export {
+  InvalidInvestigationContextError,
+  InvestigationNotFoundError,
+  InvestigationUnavailableError,
+};
 
 const SORT_FIELD_MAP: Record<
   NonNullable<ListInvestigationsRequest['sort_field']>,
@@ -150,6 +157,38 @@ export class NightshiftInvestigationsClient {
     );
   }
 
+  /**
+   * Validates the context against the contract for its subject type and composes the brief the
+   * agent will read. Done here and not only in the route schema, because the workflow step
+   * definition and the plugin start contract both reach `start` without passing through route
+   * validation. Each branch parses with its own schema, so the alert brief is composed from a
+   * value the schema has already vouched for rather than from a re-checked `unknown`.
+   */
+  private prepareAgentInput(
+    subject: InvestigationSubject,
+    message: string | undefined,
+    context: InvestigationContext | AlertInvestigationContext
+  ): { message: string; context: Record<string, unknown> } {
+    if (subject.type === 'alert') {
+      const parsed = alertInvestigationContextSchema.safeParse(context);
+      if (!parsed.success) {
+        throw new InvalidInvestigationContextError(subject.type, parsed.error);
+      }
+      // An alert investigation always gets the brief composed from its alert data — that is what
+      // the alert context exists for. Every other subject keeps the caller-supplied message.
+      return { message: buildInvestigationMessage(parsed.data), context: parsed.data };
+    }
+
+    const parsed = freeFormContextSchema.safeParse(context);
+    if (!parsed.success) {
+      throw new InvalidInvestigationContextError(subject.type, parsed.error);
+    }
+    return {
+      message: message ?? `Investigation requested for ${subject.type} ${subject.id}`,
+      context: parsed.data,
+    };
+  }
+
   async start({
     subject,
     message,
@@ -165,11 +204,7 @@ export class NightshiftInvestigationsClient {
       throw new InvestigationUnavailableError('agentBuilder is not available');
     }
 
-    // Enforced here rather than only in the route schema, because the workflow step definition and
-    // the plugin start contract both call this method without passing through route validation.
-    if (subject.type === 'alert' && !getAlertSnapshots(context)) {
-      throw new MissingAlertContextError();
-    }
+    const prepared = this.prepareAgentInput(subject, message, context);
 
     const spaceId = this.getSpaceId();
 
@@ -188,17 +223,11 @@ export class NightshiftInvestigationsClient {
     }
 
     const inputs = {
-      // An alert investigation always gets the brief composed from its alert data — that is what
-      // the alert context exists for, and the guard above guarantees the snapshots are there. Every
-      // other subject keeps the caller-supplied message.
-      message:
-        subject.type === 'alert'
-          ? buildInvestigationMessage(subject, context)
-          : message ?? `Investigation requested for ${subject.type} ${subject.id}`,
+      message: prepared.message,
       stream_names: stream_names ?? [],
       ...(concurrency_key ? { concurrency_key } : {}),
       context: {
-        ...context,
+        ...prepared.context,
         source: subject.type,
         [`${subject.type}_id`]: subject.id,
       },

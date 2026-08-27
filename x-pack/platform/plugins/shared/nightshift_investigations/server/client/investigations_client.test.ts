@@ -13,9 +13,9 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { InvestigationStatus } from '../../common';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
 import {
+  InvalidInvestigationContextError,
   InvestigationNotFoundError,
   InvestigationUnavailableError,
-  MissingAlertContextError,
   NightshiftInvestigationsClient,
 } from './investigations_client';
 
@@ -564,20 +564,72 @@ describe('NightshiftInvestigationsClient.start()', () => {
   });
 
   // The route schema also enforces this, but the workflow step definition and the plugin start
-  // contract reach start() directly, and without the snapshots the agent gets a bare uuid.
-  describe('alert context guard', () => {
+  // contract reach start() directly, and the step types its context as a plain record.
+  describe('alert context validation', () => {
     it.each([
       ['no context at all', undefined],
       ['a context with no alerts key', { source: 'alert' }],
       ['an empty alerts array', { alerts: [] }],
       ['an alert missing required fields', { alerts: [{ id: 'alert-1' }] }],
+      ['an alert whose evaluation is the wrong shape', { alerts: [{ evaluation: { value: {} } }] }],
     ])('rejects an alert investigation with %s', async (_label, context) => {
       mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
 
       await expect(
         makeClient().start({ subject: { type: 'alert', id: 'alert-1' }, context })
-      ).rejects.toThrow(MissingAlertContextError);
+      ).rejects.toThrow(InvalidInvestigationContextError);
       expect(mockManagement.runWorkflow).not.toHaveBeenCalled();
+    });
+
+    // Without this, `event_uuid` reaches the workflow's attach steps and files an alert's findings
+    // against a significant event.
+    it.each([['event_uuid'], ['stream_names'], ['source']])(
+      'rejects an alert investigation whose context also carries %s',
+      async (key) => {
+        mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+
+        await expect(
+          makeClient().start({
+            subject: { type: 'alert', id: 'alert-1' },
+            context: { ...alertContext, [key]: 'whatever' },
+          })
+        ).rejects.toThrow(InvalidInvestigationContextError);
+        expect(mockManagement.runWorkflow).not.toHaveBeenCalled();
+      }
+    );
+
+    it('names the offending keys and fields so the caller can see what was rejected', async () => {
+      mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+
+      await expect(
+        makeClient().start({
+          subject: { type: 'alert', id: 'alert-1' },
+          context: { ...alertContext, event_uuid: 'se-1', severity: 'high' },
+        })
+      ).rejects.toThrow(/event_uuid[\s\S]*severity/);
+    });
+
+    it('reports which snapshot field was wrong rather than a bare rejection', async () => {
+      mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+
+      await expect(
+        makeClient().start({
+          subject: { type: 'alert', id: 'alert-1' },
+          context: { alerts: [{ ...alertContext.alerts[0], flapping: 'nope' }] },
+        })
+      ).rejects.toThrow(/flapping/);
+    });
+
+    it('leaves the free-form context of a significant event subject alone', async () => {
+      mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+      mockManagement.runWorkflow.mockResolvedValue('exec-790');
+
+      await expect(
+        makeClient().start({
+          subject: { type: 'significant_event', id: 'se-1' },
+          context: { event_uuid: 'se-1', severity: 'high' },
+        })
+      ).resolves.toEqual({ investigation_id: 'exec-790' });
     });
 
     it('does not require alerts for a significant event subject', async () => {

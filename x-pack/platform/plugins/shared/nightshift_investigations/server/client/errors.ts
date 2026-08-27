@@ -7,6 +7,8 @@
 
 /* eslint-disable max-classes-per-file */
 
+import { z } from '@kbn/zod/v4';
+
 export class InvestigationNotFoundError extends Error {
   constructor(investigationId: string) {
     super(`Investigation "${investigationId}" not found`);
@@ -15,16 +17,20 @@ export class InvestigationNotFoundError extends Error {
 }
 
 /**
- * Thrown when an alert investigation is started without the alert data it exists to reason about.
- * The route schema catches this for HTTP callers, but the workflow step definition and the plugin
- * start contract reach the client directly, and without the snapshots the agent gets an opaque
- * uuid and nothing else.
+ * Thrown when an investigation's context does not match the contract for its subject type.
+ *
+ * The route schema rejects malformed HTTP bodies before they reach the client, but the workflow
+ * step definition types its context as a plain record and the plugin start contract takes a
+ * TypeScript type, so both can hand the client something the route would have refused. Validating
+ * in the client means every caller gets the same answer, and the message comes from the schema
+ * rather than from a hand-written check that has to be kept in step with it.
  */
-export class MissingAlertContextError extends Error {
-  constructor() {
-    super(
-      'An alert investigation requires context.alerts to hold at least one alert snapshot with id, rule_name and reason'
-    );
-    this.name = 'MissingAlertContextError';
+export class InvalidInvestigationContextError extends Error {
+  public readonly issues: z.core.$ZodIssue[];
+
+  constructor(subjectType: string, error: z.ZodError) {
+    super(`Invalid context for a ${subjectType} investigation: ${z.prettifyError(error)}`);
+    this.name = 'InvalidInvestigationContextError';
+    this.issues = error.issues;
   }
 }

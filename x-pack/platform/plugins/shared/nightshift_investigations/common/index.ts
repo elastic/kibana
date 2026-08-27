@@ -5,98 +5,33 @@
  * 2.0.
  */
 
-export type InvestigationSubjectType = 'significant_event' | 'alert';
-
-export interface InvestigationSubject {
-  type: InvestigationSubjectType;
-  id: string;
-}
-
-export interface InvestigationContext {
-  [key: string]: unknown;
-}
-
 /**
- * A point-in-time copy of the alert fields an investigation needs, taken by the caller at
- * trigger time. The investigation reads this instead of re-fetching the alert, so the run
- * reflects the alert as it looked when the trigger fired.
- *
- * Field sources are `kibana.alert.*`. Everything optional here is optional because the source
- * field is not guaranteed, not merely for convenience — see the notes on each.
+ * The alert-facing types are derived from the zod schemas in `./schemas`, so the validation a
+ * caller is held to and the type the code is written against cannot disagree.
  */
-export interface AlertSnapshot {
-  /** `kibana.alert.uuid` */
-  id: string;
-  /** `kibana.alert.rule.uuid` */
-  rule_id: string;
-  /** `kibana.alert.rule.name` */
-  rule_name: string;
-  /** `kibana.alert.rule.rule_type_id`, e.g. `apm.transaction_duration`. */
-  rule_type_id: string;
-  /** `kibana.alert.rule.category` — the rule type's display name, e.g. "Latency threshold". */
-  rule_category: string;
-  /** `kibana.alert.reason` — human-readable statement of why the alert fired. */
-  reason: string;
-  /** `kibana.alert.status` */
-  status: string;
-  /** `kibana.alert.start` */
-  start: string;
-  /** `kibana.alert.flapping` — written by the alerting framework for every alert. */
-  flapping: boolean;
-  /**
-   * `kibana.alert.url`. Optional: the framework does not write this — individual rule types do,
-   * and many observability rule types never set it.
-   */
-  url?: string;
-  /** `kibana.alert.rule.tags` */
-  rule_tags?: string[];
-  /**
-   * `kibana.alert.grouping` — nested entity grouping, e.g. `{ service: { name: 'checkout' } }`.
-   * Optional: lives in the legacy experimental field map, which rule types opt into.
-   */
-  grouping?: Record<string, unknown>;
-  /**
-   * `kibana.alert.group` — the same grouping in flat form. Optional for the same reason as
-   * `grouping`.
-   */
-  group?: AlertSnapshotGroup[];
-  /** The rule condition that fired. Optional for the same reason as `grouping`. */
-  evaluation?: AlertSnapshotEvaluation;
-  /** `kibana.alert.rule.parameters` — raw, un-formatted rule params. */
-  rule_parameters?: Record<string, unknown>;
-  /**
-   * `kibana.alert.index_pattern` — a starting point for ES|QL queries. Optional and usually
-   * absent: only the infra metric-threshold, inventory-threshold and log-threshold rule types
-   * populate it. Deriving it per rule type from `rule_parameters` is separate work.
-   */
-  index_pattern?: string;
-}
+export type {
+  AlertInvestigationContext,
+  AlertSnapshot,
+  AlertSnapshotEvaluation,
+  AlertSnapshotGroup,
+  InvestigationContext,
+  InvestigationSubject,
+  InvestigationSubjectType,
+} from './schemas';
 
-export interface AlertSnapshotGroup {
-  field: string;
-  value: string;
-}
+export {
+  alertInvestigationContextSchema,
+  alertSnapshotSchema,
+  freeFormContextSchema,
+  investigationSubjectSchema,
+  MAX_ALERTS_PER_INVESTIGATION,
+} from './schemas';
 
-export interface AlertSnapshotEvaluation {
-  /**
-   * The observed value, from `kibana.alert.evaluation.value` or, when the rule type writes the
-   * plural field instead, `kibana.alert.evaluation.values`. Every type here is real:
-   * `scaled_float` in the legacy experimental field map, a `keyword` holding a stringified
-   * number for `.es-query`, and an array for the custom-threshold rule type, which writes one
-   * entry per configured metric.
-   */
-  value?: number | string | Array<number | string>;
-  /**
-   * `kibana.alert.evaluation.threshold`. Scalar for most rule types, but an array for the
-   * custom-threshold rule type, which writes one entry per criterion.
-   */
-  threshold?: number | number[];
-}
-
-/** Context shape required when `subject.type` is `alert`. */
-export interface AlertInvestigationContext {
-  alerts: AlertSnapshot[];
-}
+import type {
+  AlertInvestigationContext,
+  InvestigationContext,
+  InvestigationSubject,
+} from './schemas';
 
 export interface StartInvestigationRequest {
   subject: InvestigationSubject;

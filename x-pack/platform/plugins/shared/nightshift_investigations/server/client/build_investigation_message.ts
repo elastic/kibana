@@ -6,10 +6,9 @@
  */
 
 import type {
+  AlertInvestigationContext,
   AlertSnapshot,
   AlertSnapshotEvaluation,
-  AlertSnapshotGroup,
-  InvestigationSubject,
 } from '../../common';
 
 /**
@@ -17,6 +16,11 @@ import type {
  * the whole brief. A bare "Investigation requested for alert <uuid>" gives the agent an opaque
  * id and nothing to reason about; the alert already carries the rule condition and the affected
  * entity, so state them.
+ *
+ * The context arrives already parsed against `alertInvestigationContextSchema`, so every field
+ * read below is guaranteed to be the shape it claims. Nothing here re-checks it: the hand-written
+ * guards that used to live in this file were a second declaration of the same contract, and they
+ * drifted — one accepted a three-field snapshot that then threw while being rendered.
  */
 
 /**
@@ -51,89 +55,8 @@ function sanitize(value: string): string {
   );
 }
 
-const REQUIRED_STRINGS = [
-  'id',
-  'rule_id',
-  'rule_name',
-  'rule_type_id',
-  'rule_category',
-  'reason',
-  'status',
-  'start',
-] as const;
-
 function isString(value: unknown): value is string {
   return typeof value === 'string';
-}
-
-function isStringArray(value: unknown): value is string[] {
-  return Array.isArray(value) && value.every(isString);
-}
-
-function isGroupList(value: unknown): value is AlertSnapshotGroup[] {
-  return (
-    Array.isArray(value) &&
-    value.every((entry) => isPlainObject(entry) && isString(entry.field) && isString(entry.value))
-  );
-}
-
-function isNumber(value: unknown): value is number {
-  return typeof value === 'number';
-}
-
-function isNumberOrString(value: unknown): value is number | string {
-  return isNumber(value) || isString(value);
-}
-
-function isScalarOrArrayOf(value: unknown, check: (v: unknown) => boolean): boolean {
-  return check(value) || (Array.isArray(value) && value.every(check));
-}
-
-function isEvaluation(value: unknown): value is AlertSnapshotEvaluation {
-  if (!isPlainObject(value)) return false;
-  return (
-    absentOr(value.value, (v) => isScalarOrArrayOf(v, isNumberOrString)) &&
-    absentOr(value.threshold, (v) => isScalarOrArrayOf(v, isNumber))
-  );
-}
-
-function absentOr(value: unknown, check: (v: unknown) => boolean): boolean {
-  return value == null || check(value);
-}
-
-/**
- * Every field `describeAlert` reads is checked here, not just the ones that identify a snapshot.
- * A partial snapshot used to satisfy this guard and then throw a TypeError further down, on the
- * same non-route paths the guard exists to protect.
- */
-function isAlertSnapshot(value: unknown): value is AlertSnapshot {
-  if (!isPlainObject(value)) return false;
-  if (!REQUIRED_STRINGS.every((key) => isString(value[key]))) return false;
-  if (typeof value.flapping !== 'boolean') return false;
-  return (
-    absentOr(value.url, isString) &&
-    absentOr(value.index_pattern, isString) &&
-    absentOr(value.rule_tags, isStringArray) &&
-    absentOr(value.grouping, isPlainObject) &&
-    absentOr(value.group, isGroupList) &&
-    absentOr(value.evaluation, isEvaluation) &&
-    absentOr(value.rule_parameters, isPlainObject)
-  );
-}
-
-export function getAlertSnapshots(context: unknown): AlertSnapshot[] | undefined {
-  if (!isPlainObject(context)) return undefined;
-  const { alerts } = context;
-  if (!Array.isArray(alerts) || alerts.length === 0) return undefined;
-
-  // Narrowed one at a time: `Array.prototype.every` does not narrow the array it was called on,
-  // so the previous form returned an unchecked `AlertSnapshot[]`.
-  const snapshots: AlertSnapshot[] = [];
-  for (const candidate of alerts) {
-    if (!isAlertSnapshot(candidate)) return undefined;
-    snapshots.push(candidate);
-  }
-  return snapshots;
 }
 
 /**
@@ -187,7 +110,9 @@ function describeEntity(alert: AlertSnapshot): string | undefined {
  * a multi-metric custom-threshold rule reports one value per metric, and dropping the rest would
  * silently misstate the condition that fired.
  */
-function formatEvaluationPart(part: number | string | Array<number | string> | undefined) {
+function formatEvaluationPart(
+  part: AlertSnapshotEvaluation['value'] | AlertSnapshotEvaluation['threshold']
+) {
   if (part == null) return undefined;
   const entries = Array.isArray(part) ? part : [part];
   if (entries.length === 0) return undefined;
@@ -236,12 +161,8 @@ function describeAlert(alert: AlertSnapshot): string {
   return lines.join('\n');
 }
 
-export function buildInvestigationMessage(subject: InvestigationSubject, context: unknown): string {
-  const alerts = subject.type === 'alert' ? getAlertSnapshots(context) : undefined;
-
-  if (!alerts) {
-    return `Investigation requested for ${subject.type} ${subject.id}`;
-  }
+export function buildInvestigationMessage(context: AlertInvestigationContext): string {
+  const { alerts } = context;
 
   const body =
     alerts.length === 1
