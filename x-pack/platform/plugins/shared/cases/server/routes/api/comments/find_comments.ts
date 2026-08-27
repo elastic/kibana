@@ -12,6 +12,7 @@ import { CASE_FIND_ATTACHMENTS_URL } from '../../../../common/constants';
 import { createCasesRoute } from '../create_cases_route';
 import { createCaseError } from '../../../common/error';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
+import { toLegacyFindResponse } from '../../../common/attachments';
 
 export const findCommentsRoute = createCasesRoute({
   method: 'get',
@@ -35,10 +36,12 @@ export const findCommentsRoute = createCasesRoute({
       const client = await caseContext.getCasesClient();
       const query = request.query as attachmentApiV1.FindAttachmentsQueryParams;
 
-      const res: attachmentApiV1.AttachmentsFindResponse = await client.attachments.find({
-        caseID: request.params.case_id,
-        findQueryParams: query,
-      });
+      const res = toLegacyFindResponse(
+        await client.attachments.find({
+          caseID: request.params.case_id,
+          findQueryParams: query,
+        })
+      );
 
       return response.ok({
         body: res,

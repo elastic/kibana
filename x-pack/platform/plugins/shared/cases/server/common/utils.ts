@@ -521,7 +521,9 @@ export const extractLensReferencesFromCommentString = (
 export const getOrUpdateLensReferences = (
   lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'],
   newComment: string,
-  currentComment?: SavedObject<UserCommentAttachmentPayload>
+  currentComment?: Pick<SavedObject<UserCommentAttachmentPayload>, 'references'> & {
+    attributes: { comment: string };
+  }
 ) => {
   if (!currentComment) {
     return extractLensReferencesFromCommentString(lensEmbeddableFactory, newComment);

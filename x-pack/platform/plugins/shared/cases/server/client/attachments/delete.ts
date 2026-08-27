@@ -36,7 +36,6 @@ export async function deleteAll(
   try {
     const comments = await caseService.getAllCaseComments({
       id: caseID,
-      mode: 'legacy',
     });
 
     if (comments.total <= 0) {
@@ -103,7 +102,6 @@ export async function deleteComment(
   try {
     const attachment = await attachmentService.getter.get({
       savedObjectId,
-      mode: 'legacy',
     });
 
     if (attachment == null) {

@@ -25,7 +25,7 @@ import { AttachmentType } from '../../../common/types/domain';
 export interface AttachmentTypeTransformer<TOld = unknown, TNew = unknown> {
   // --- Request payload (API layer) ---
   isLegacyPayload(attachment: AttachmentRequestV2): boolean;
-  isUnifiedPayload(attachment: AttachmentRequestV2): boolean;
+  isUnifiedPayload(attachment: AttachmentRequestV2): attachment is UnifiedAttachmentPayload;
   toUnifiedPayload(attachment: AttachmentRequestV2): UnifiedAttachmentPayload;
   toLegacyPayload(attachment: AttachmentRequestV2): AttachmentRequest;
 
@@ -51,7 +51,7 @@ export const passThroughTransformer: AttachmentTypeTransformer<
       )
     );
   },
-  isUnifiedPayload(attachment: AttachmentRequestV2): boolean {
+  isUnifiedPayload(attachment: AttachmentRequestV2): attachment is UnifiedAttachmentPayload {
     return (
       typeof attachment === 'object' &&
       attachment !== null &&

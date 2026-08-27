@@ -12,6 +12,7 @@ import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 import type { attachmentDomainV2 } from '../../../../common/types/domain';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
+import { toLegacyAttachmentResponse } from '../../../common/attachments';
 
 export const getCommentRoute = createCasesRoute({
   method: 'get',
@@ -33,10 +34,12 @@ export const getCommentRoute = createCasesRoute({
     try {
       const caseContext = await context.cases;
       const client = await caseContext.getCasesClient();
-      const res: attachmentDomainV2.AttachmentV2 = await client.attachments.get({
-        savedObjectId: request.params.comment_id,
-        caseID: request.params.case_id,
-      });
+      const res: attachmentDomainV2.AttachmentV2 = toLegacyAttachmentResponse(
+        await client.attachments.get({
+          savedObjectId: request.params.comment_id,
+          caseID: request.params.case_id,
+        })
+      );
 
       return response.ok({
         body: res,

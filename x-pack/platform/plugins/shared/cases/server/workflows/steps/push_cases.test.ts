@@ -78,6 +78,41 @@ describe('pushCasesStepDefinition', () => {
     expect(output.output.cases).toHaveLength(2);
   });
 
+  it('converts unified comments back to the legacy wire shape before returning', async () => {
+    const unifiedComment = {
+      id: 'comment-1',
+      version: 'WzQ3LDFc',
+      type: 'comment',
+      data: { content: 'Investigating now' },
+      owner: 'securitySolution',
+      created_at: '2020-02-19T23:06:33.798Z',
+      created_by: {
+        full_name: 'Leslie Knope',
+        username: 'lknope',
+        email: 'leslie.knope@elastic.co',
+      },
+      pushed_at: null,
+      pushed_by: null,
+      updated_at: null,
+      updated_by: null,
+    };
+    const pushedCase = { ...caseWithConnector, comments: [unifiedComment] };
+    const push = jest.fn().mockResolvedValue(pushedCase);
+    const definition = pushCasesStepDefinition(makeCasesClient({ push }));
+
+    const result = await definition.handler(createContext({ case_ids: ['case-1'] }));
+
+    const output = result as { output: { cases: Array<{ comments: unknown[] }> } };
+    expect(output.output.cases[0].comments).toEqual([
+      {
+        ...unifiedComment,
+        type: 'user',
+        comment: 'Investigating now',
+        data: undefined,
+      },
+    ]);
+  });
+
   it('skips push and returns the case as-is when no connector is configured', async () => {
     const caseWithoutConnector = { ...createCaseResponseFixture, connector: null };
     const get = jest.fn().mockResolvedValue(caseWithoutConnector);

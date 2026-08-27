@@ -159,7 +159,7 @@ export const commentAttachmentTransformer: AttachmentTypeTransformer<
   isLegacyPayload(attachment: unknown): boolean {
     return isLegacyPayloadCommentAttachment(attachment as AttachmentRequestV2);
   },
-  isUnifiedPayload(attachment: unknown): boolean {
+  isUnifiedPayload(attachment: unknown): attachment is UnifiedAttachmentPayload {
     return isUnifiedPayloadCommentAttachment(attachment as AttachmentRequestV2);
   },
   toUnifiedPayload(attachment: unknown): UnifiedValueAttachmentPayload {

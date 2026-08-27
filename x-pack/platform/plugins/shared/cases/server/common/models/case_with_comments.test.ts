@@ -46,6 +46,7 @@ describe('CaseCommentModel', () => {
   clientArgs.services.caseService.patchCase.mockResolvedValue(theCase);
   clientArgs.services.attachmentService.create.mockResolvedValue(mockCaseComments[0]);
   clientArgs.services.attachmentService.update.mockResolvedValue(mockCaseComments[0]);
+  clientArgs.services.attachmentService.getter.get.mockResolvedValue(mockCaseComments[0]);
   clientArgs.services.attachmentService.bulkCreate.mockResolvedValue({
     saved_objects: mockCaseComments,
   });
