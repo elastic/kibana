@@ -55,7 +55,10 @@ export class RulesAdapterV2 implements IRulesManagementClient {
 
   async createRule(id: string, definition: SignificantEventsRuleDefinition): Promise<void> {
     await this.rulesClient
-      .createRule({ data: toV2CreateBody(definition, this.options), options: { id } })
+      .createRule({
+        data: toV2CreateBody({ definition, options: this.options }),
+        options: { id },
+      })
       .catch((error) => {
         if (isBoom(error) && error.output.statusCode === 409) {
           return this.updateRule(id, definition);
@@ -66,7 +69,7 @@ export class RulesAdapterV2 implements IRulesManagementClient {
 
   async updateRule(id: string, definition: SignificantEventsRuleDefinition): Promise<void> {
     await this.rulesClient
-      .updateRule({ id, data: toV2UpdateBody(definition, this.options) })
+      .updateRule({ id, data: toV2UpdateBody({ definition, options: this.options }) })
       .catch((error) => {
         if (isBoom(error) && error.output.statusCode === 404) {
           return this.createRuleWithoutFallback(id, definition);
@@ -132,7 +135,10 @@ export class RulesAdapterV2 implements IRulesManagementClient {
     definition: SignificantEventsRuleDefinition
   ): Promise<void> {
     await this.rulesClient
-      .createRule({ data: toV2CreateBody(definition, this.options), options: { id } })
+      .createRule({
+        data: toV2CreateBody({ definition, options: this.options }),
+        options: { id },
+      })
       .catch((error) => {
         if (isBoom(error) && error.output.statusCode === 409) {
           return;
@@ -142,19 +148,25 @@ export class RulesAdapterV2 implements IRulesManagementClient {
   }
 }
 
-function toV2BreachQuery(
-  esqlQuery: string,
-  timestampField: string,
-  { isServerless }: RulesAdapterV2Options
-): string {
+interface ToV2BodyParams {
+  definition: SignificantEventsRuleDefinition;
+  options: RulesAdapterV2Options;
+}
+
+function toV2BreachQuery({
+  esqlQuery,
+  timestampField,
+  isServerless,
+}: {
+  esqlQuery: string;
+  timestampField: string;
+  isServerless: boolean;
+}): string {
   const compiled = compileMatchCountBreachQuery(esqlQuery, timestampField);
   return isServerless ? withAllProjectsRouting(compiled) : compiled;
 }
 
-function toV2CommonBody(
-  definition: SignificantEventsRuleDefinition,
-  options: RulesAdapterV2Options
-) {
+function toV2CommonBody({ definition, options }: ToV2BodyParams) {
   const { every, lookback } = getMetricSeriesRuleSchedule();
   return {
     metadata: {
@@ -170,19 +182,20 @@ function toV2CommonBody(
     query: {
       format: 'standalone' as const,
       breach: {
-        query: toV2BreachQuery(definition.esqlQuery, definition.timestampField, options),
+        query: toV2BreachQuery({
+          esqlQuery: definition.esqlQuery,
+          timestampField: definition.timestampField,
+          isServerless: options.isServerless,
+        }),
       },
     },
   };
 }
 
-function toV2CreateBody(
-  definition: SignificantEventsRuleDefinition,
-  options: RulesAdapterV2Options
-) {
+function toV2CreateBody({ definition, options }: ToV2BodyParams) {
   return {
     kind: 'signal' as const,
-    ...toV2CommonBody(definition, options),
+    ...toV2CommonBody({ definition, options }),
   };
 }
 
