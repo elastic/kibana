@@ -9,6 +9,7 @@ import React from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { I18nProvider } from '@kbn/i18n-react';
 import { AgentShardingField } from './agent_sharding_field';
 import { useLicense } from '../../../hooks/use_license';
 import type { PrivateLocation } from '../../../../../../common/runtime_types';
@@ -28,9 +29,11 @@ const Form = ({
     defaultValues: { isAgentSharding: defaultChecked } as PrivateLocation,
   });
   return (
-    <FormProvider {...form}>
-      <AgentShardingField isEditingShardedLocation={isEditingShardedLocation} />
-    </FormProvider>
+    <I18nProvider>
+      <FormProvider {...form}>
+        <AgentShardingField isEditingShardedLocation={isEditingShardedLocation} />
+      </FormProvider>
+    </I18nProvider>
   );
 };
 
