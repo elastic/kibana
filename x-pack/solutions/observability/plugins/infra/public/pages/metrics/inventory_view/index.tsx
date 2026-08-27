@@ -6,26 +6,25 @@
  */
 
 import React from 'react';
-import type { EuiPageHeaderProps } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPageSection, useEuiTheme } from '@elastic/eui';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
+import { AppHeader } from '@kbn/app-header';
 import { css } from '@emotion/react';
 import { OnboardingFlow } from '../../../components/shared/templates/no_data_config';
 import { InfraPageTemplate } from '../../../components/shared/templates/infra_page_template';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { inventoryTitle } from '../../../translations';
-import { SavedViews } from './components/saved_views';
 import { SnapshotContainer } from './components/snapshot_container';
-import { InventoryHeaderContent } from './components/header_content';
-import { fullHeightContentStyles } from '../../../page_template.styles';
 import { WaffleTimeProvider } from './hooks/use_waffle_time';
 import { WaffleFiltersProvider } from './hooks/use_waffle_filters';
 import { InventoryViewsProvider } from './hooks/use_inventory_views';
 import { WaffleOptionsProvider } from './hooks/use_waffle_options';
 import { InventoryTimeRangeMetadataProvider } from './providers/inventory_timerange_metadata_provider';
+import { useMetricsAppHeaderMenu } from '../header/use_metrics_app_header_menu';
 
-export const SnapshotPage = () => {
+export const SnapshotPage = (): React.ReactElement => {
+  const { euiTheme } = useEuiTheme();
   useTrackPageview({ app: 'infra_metrics', path: 'inventory' });
   useTrackPageview({ app: 'infra_metrics', path: 'inventory', delay: 15000 });
 
@@ -38,6 +37,8 @@ export const SnapshotPage = () => {
     { parent: 'app' }
   );
 
+  const { menu, flyouts } = useMetricsAppHeaderMenu();
+
   return (
     <InventoryViewsProvider>
       <WaffleOptionsProvider>
@@ -48,29 +49,57 @@ export const SnapshotPage = () => {
                 <InfraPageTemplate
                   onboardingFlow={OnboardingFlow.Infra}
                   dataSourceAvailability="all"
-                  pageHeader={{
-                    pageTitle: (
-                      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-                        <EuiFlexItem grow={false}>{inventoryTitle}</EuiFlexItem>
-                        <EuiFlexItem grow={false}>
-                          <SavedViews />
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    ),
-                    rightSideItems: [],
-                    color: 'subdued' as unknown as EuiPageHeaderProps['color'],
-                    children: <InventoryHeaderContent />,
-                  }}
                   pageSectionProps={{
+                    paddingSize: 'none',
                     contentProps: {
                       css: css`
-                        ${fullHeightContentStyles};
+                        display: flex;
+                        flex-direction: column;
+                        flex: 1 1 auto;
+                        min-height: 0;
+                        height: 100%;
+                        width: 100%;
                         padding-bottom: 0;
                       `,
                     },
                   }}
                 >
-                  <SnapshotContainer />
+                  <AppHeader title={inventoryTitle} menu={menu} spacing="standard" />
+                  {flyouts}
+                  <EuiPageSection
+                    paddingSize="m"
+                    grow
+                    restrictWidth={false}
+                    contentProps={{
+                      css: css`
+                        display: flex;
+                        flex-direction: column;
+                        flex: 1 1 auto;
+                        min-height: 0;
+                        height: 100%;
+                        width: 100%;
+                        padding-top: ${euiTheme.size.base};
+                        padding-bottom: 0;
+                      `,
+                    }}
+                  >
+                    <EuiFlexGroup
+                      direction="column"
+                      gutterSize="none"
+                      css={css`
+                        flex: 1;
+                        min-height: 0;
+                      `}
+                    >
+                      <EuiFlexItem
+                        css={css`
+                          min-height: 0;
+                        `}
+                      >
+                        <SnapshotContainer />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiPageSection>
                 </InfraPageTemplate>
               </div>
             </InventoryTimeRangeMetadataProvider>
