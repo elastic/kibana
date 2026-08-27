@@ -521,8 +521,7 @@ steps:
 
       expect(result.diagnostics.length).toBeGreaterThan(0);
       for (const diag of result.diagnostics) {
-        expect(diag.ruleId).toBeDefined();
-        expect(isWorkflowValidationRuleId(diag.ruleId!)).toBe(true);
+        expect(isWorkflowValidationRuleId(diag.ruleId)).toBe(true);
       }
     });
 
