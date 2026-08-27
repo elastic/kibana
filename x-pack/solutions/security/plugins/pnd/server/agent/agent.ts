@@ -37,7 +37,7 @@ export const agentType = {
   baseConfiguration: {
     // TODO - add custom instructions for this agent type
     tools: [],
-    skill_ids: ['attack-discovery-generator'],
+    skill_ids: [],
     connector_ids: [],
     enable_elastic_capabilities: false,
   },
