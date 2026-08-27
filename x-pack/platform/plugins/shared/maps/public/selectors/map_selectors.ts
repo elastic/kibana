@@ -171,8 +171,7 @@ export const getMapExtent = ({ map }: MapStoreState): MapExtent | undefined => m
 
 export const getMapBuffer = ({ map }: MapStoreState): MapExtent | undefined => map.mapState.buffer;
 
-export const getMapZoom = ({ map }: MapStoreState): number =>
-  map.mapState.zoom ? map.mapState.zoom : 0;
+export const getMapZoom = ({ map }: MapStoreState): number => map.mapState.zoom ?? 1;
 
 export const getMapCenter = ({ map }: MapStoreState): MapCenter =>
   map.mapState.center ? map.mapState.center : { lat: 0, lon: 0 };
