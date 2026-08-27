@@ -962,6 +962,22 @@ describe('UnifiedDataTable', () => {
       },
       EXTENDED_JEST_TIMEOUT
     );
+
+    it(
+      'should hide Columns and Sort toolbar controls in JSON source mode',
+      async () => {
+        await renderComponent({
+          ...getProps(),
+          documentsDisplayModeState: 'json',
+        });
+
+        expect(getLastEuiDataGridProps().toolbarVisibility).toMatchObject({
+          showColumnSelector: false,
+          showSortSelector: false,
+        });
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
   });
 
   describe('custom control columns', () => {
@@ -1370,7 +1386,7 @@ describe('UnifiedDataTable', () => {
       async () => {
         await renderComponent({
           ...getProps(),
-          sourceDisplayMode: 'json',
+          documentsDisplayModeState: 'json',
           rowHeightState: 2,
         });
 
@@ -1384,7 +1400,7 @@ describe('UnifiedDataTable', () => {
       async () => {
         await renderComponent({
           ...getProps(),
-          sourceDisplayMode: 'summary',
+          documentsDisplayModeState: 'table',
           rowHeightState: 2,
         });
 
@@ -1396,32 +1412,13 @@ describe('UnifiedDataTable', () => {
     );
 
     it(
-      'hides the "Body cell lines" display setting in JSON mode, leaving the header control',
-      async () => {
-        await renderComponent({
-          ...getProps(),
-          onUpdateRowHeight: jest.fn(),
-          onUpdateHeaderRowHeight: jest.fn(),
-          sourceDisplayMode: 'json',
-        });
-
-        await userEvent.click(screen.getByTestId('dataGridDisplaySelectorButton'));
-        await waitForEuiPopoverOpen();
-
-        expect(screen.queryByTestId('unifiedDataTableRowHeightSettings')).not.toBeInTheDocument();
-        expect(screen.getByTestId('unifiedDataTableHeaderRowHeightSettings')).toBeVisible();
-      },
-      EXTENDED_JEST_TIMEOUT
-    );
-
-    it(
       'shows the "Body cell lines" display setting in summary mode',
       async () => {
         await renderComponent({
           ...getProps(),
           onUpdateRowHeight: jest.fn(),
           onUpdateHeaderRowHeight: jest.fn(),
-          sourceDisplayMode: 'summary',
+          documentsDisplayModeState: 'table',
         });
 
         await userEvent.click(screen.getByTestId('dataGridDisplaySelectorButton'));
