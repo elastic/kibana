@@ -1,7 +1,8 @@
 {
-  "name": "@kbn/aiops-change-point-detection",
-  "private": true,
+  "name": "@kbn/context-engine-plugin",
   "version": "1.0.0",
+  "private": true,
   "license": "Elastic License 2.0",
+  "kbnGenerated": true,
   "sideEffects": false
 }
