@@ -337,6 +337,8 @@ export function HeaderActions({
                             ruleId={alert.fields[ALERT_RULE_UUID]}
                             ruleTypeId={alert.fields[ALERT_RULE_TYPE_ID]}
                             alertId={alert.fields[ALERT_UUID]}
+                            size="s"
+                            color="text"
                           />
                         )}
 

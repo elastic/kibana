@@ -81,7 +81,7 @@ export function AlertAskAiAgentButton({ alertId, alertTitle }: AlertAskAiAgentBu
       data-test-subj="alertAskAiAgentButton"
       variant="outlined"
       iconType="addToChat"
-      size="s"
+      size="m"
       onClick={handleClick}
     >
       {i18n.translate('xpack.observabilityAgentBuilder.alertAskAiAgentButton.label', {
