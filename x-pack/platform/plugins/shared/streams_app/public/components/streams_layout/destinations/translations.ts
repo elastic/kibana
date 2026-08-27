@@ -17,9 +17,9 @@ export const DOCUMENTS_COLUMN_HEADER = i18n.translate(
   { defaultMessage: 'Docs' }
 );
 
-export const INGESTION_COLUMN_HEADER = i18n.translate(
-  'xpack.streams.destinationsTable.ingestionColumnHeader',
-  { defaultMessage: 'Ingestion' }
+export const THROUGHPUT_COLUMN_HEADER = i18n.translate(
+  'xpack.streams.destinationsTable.throughputColumnHeader',
+  { defaultMessage: 'Throughput' }
 );
 
 export const STORAGE_COLUMN_HEADER = i18n.translate(
@@ -40,6 +40,11 @@ export const RETENTION_COLUMN_HEADER = i18n.translate(
 export const ACTIONS_COLUMN_HEADER = i18n.translate(
   'xpack.streams.destinationsTable.actionsColumnHeader',
   { defaultMessage: 'Actions' }
+);
+
+export const RESET_COLUMN_WIDTH_LABEL = i18n.translate(
+  'xpack.streams.destinationsTable.resetColumnWidthLabel',
+  { defaultMessage: 'Reset width' }
 );
 
 export const DATA_QUALITY_FILTER_LABEL = i18n.translate(

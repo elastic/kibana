@@ -5,20 +5,30 @@
  * 2.0.
  */
 
-import type { CriteriaWithPagination } from '@elastic/eui';
+import type {
+  EuiDataGridOnColumnResizeHandler,
+  EuiDataGridSorting,
+  EuiDataGridStyle,
+  EuiDataGridToolBarVisibilityOptions,
+  EuiThemeModifications,
+} from '@elastic/eui';
 import {
   EuiButton,
+  EuiDataGrid,
   EuiEmptyPrompt,
   EuiFieldSearch,
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiInMemoryTable,
   EuiLoadingElastic,
+  EuiText,
+  EuiThemeProvider,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { useDebounceFn } from '@kbn/react-hooks';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import type { EntityTablePageSize } from '../../../../common/url_schema';
 import { ENTITY_TABLE_PAGE_SIZES } from '../../../../common/url_schema';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { useTimeRange } from '../../../hooks/use_time_range';
@@ -27,8 +37,13 @@ import { getFormattedError } from '../../../util/errors';
 import { StreamsAppSearchBar } from '../../streams_app_search_bar';
 import { FilterGroup } from '../../stream_list_view/filter_group';
 import type { EntityTableSortDirection } from '../entity_table';
-import { buildDestinationRows } from './build_destination_rows';
-import { createDestinationColumns, getEffectiveSortField } from './destination_columns';
+import { buildDestinationRows, getEffectiveSortField } from './build_destination_rows';
+import {
+  createDestinationActionsColumn,
+  createDestinationCellRenderer,
+  createDestinationColumns,
+  DEFAULT_VISIBLE_COLUMNS,
+} from './destination_columns';
 import {
   useDestinationsTableEvents,
   useDestinationsTableSelector,
@@ -46,10 +61,32 @@ import {
   SEARCH_PLACEHOLDER,
   TABLE_CAPTION,
 } from './translations';
-import type { DestinationRow } from './types';
 import { useDestinationMetrics } from './use_destination_metrics';
 
 const SEARCH_DEBOUNCE_OPTIONS = { wait: 300 };
+
+const GRID_STYLE: EuiDataGridStyle = {
+  border: 'all',
+  header: 'shade',
+  stripes: false,
+  rowHover: 'highlight',
+};
+
+const TRANSPARENT_COLUMN_SEPARATORS: EuiThemeModifications = {
+  components: {
+    LIGHT: { dataGridVerticalLineBorderColor: 'transparent' },
+    DARK: { dataGridVerticalLineBorderColor: 'transparent' },
+  },
+};
+
+const GRID_WRAPPER_PROPS = { cloneElement: true } as const;
+
+const ROW_HEIGHTS_OPTIONS = { defaultHeight: 'auto' } as const;
+
+const TOOLBAR_VISIBILITY: EuiDataGridToolBarVisibilityOptions = {
+  showSortSelector: false,
+  showFullScreenSelector: false,
+};
 
 export function DestinationsTable() {
   const { timeState$ } = useTimefilter();
@@ -121,10 +158,11 @@ function DestinationsTableContent() {
 
   const destinations = useDestinationsTableSelector((state) => state.context.items);
   const urlState = useDestinationsTableSelector((state) => state.context.urlState);
-  const isLoading = useDestinationsTableSelector((state) => state.matches('loading'));
   const { changeSearch, changeSort, changePage } = useDestinationsTableEvents();
   const [searchText, setSearchText] = useState(urlState.query);
   const [selectedQualities, setSelectedQualities] = useState<string[]>([]);
+  const [visibleColumns, setVisibleColumns] = useState<string[]>(DEFAULT_VISIBLE_COLUMNS);
+  const [columnWidths, setColumnWidths] = useState<Record<string, number>>({});
   const { run: debouncedChangeSearch } = useDebounceFn(changeSearch, SEARCH_DEBOUNCE_OPTIONS);
 
   const {
@@ -143,6 +181,13 @@ function DestinationsTableContent() {
     storageLoaded,
   } = useDestinationMetrics(destinations);
 
+  const sortField = getEffectiveSortField(urlState.sortField, {
+    documentsCount: docCountsLoaded,
+    ingestionRate: ingestionLoaded && !ingestionError,
+    storageBytes: storageLoaded,
+    dataQuality: qualityLoaded,
+  });
+
   const rows = useMemo(
     () =>
       buildDestinationRows({
@@ -153,6 +198,8 @@ function DestinationsTableContent() {
         ingestionByStream,
         storageByStream,
         qualityByStream,
+        sortField,
+        sortDirection: urlState.sortDirection,
       }),
     [
       destinations,
@@ -162,24 +209,22 @@ function DestinationsTableContent() {
       ingestionByStream,
       storageByStream,
       qualityByStream,
+      sortField,
+      urlState.sortDirection,
     ]
   );
 
-  const sortField = getEffectiveSortField(urlState.sortField, {
-    documentsCount: docCountsLoaded,
-    ingestionRate: ingestionLoaded && !ingestionError,
-    storageBytes: storageLoaded,
-    dataQuality: qualityLoaded,
-  });
-
-  const handleTableChange = ({ sort, page }: CriteriaWithPagination<DestinationRow>) => {
-    if (sort) {
-      changeSort(String(sort.field), sort.direction as EntityTableSortDirection);
-    }
-    if (page) {
-      changePage(page.index, page.size);
-    }
-  };
+  const handleSort = useCallback<EuiDataGridSorting['onSort']>(
+    (sortingColumns) => {
+      // The grid sorts on a single column, so the newest entry wins.
+      const nextSort = sortingColumns[sortingColumns.length - 1];
+      changeSort(
+        nextSort?.id ?? 'name',
+        (nextSort?.direction ?? 'asc') as EntityTableSortDirection
+      );
+    },
+    [changeSort]
+  );
 
   const getDestinationHref = useCallback(
     (destinationName: string) =>
@@ -190,24 +235,75 @@ function DestinationsTableContent() {
     [router, rangeFrom, rangeTo]
   );
 
-  const columns = createDestinationColumns({
-    searchText,
-    getDestinationHref,
-    hasFailureStoreAccess,
-    getStreamHistogram,
-    timeState,
-    docCountsLoaded,
-    ingestionLoaded,
-    ingestionError,
-    storageLoaded,
-    qualityLoaded,
-    qualityLoading,
-  });
+  const handleColumnResize = useCallback<EuiDataGridOnColumnResizeHandler>(
+    ({ columnId, width }) => {
+      setColumnWidths((previous) => ({ ...previous, [columnId]: width }));
+    },
+    []
+  );
+
+  const handleResetColumnWidth = useCallback((columnId: string) => {
+    setColumnWidths(({ [columnId]: _removed, ...remaining }) => remaining);
+  }, []);
+
+  const columns = useMemo(
+    () =>
+      createDestinationColumns({
+        hasFailureStoreAccess,
+        docCountsLoaded,
+        ingestionLoaded,
+        ingestionError,
+        storageLoaded,
+        qualityLoaded,
+        visibleColumns,
+        columnWidths,
+        onResetColumnWidth: handleResetColumnWidth,
+      }),
+    [
+      hasFailureStoreAccess,
+      docCountsLoaded,
+      ingestionLoaded,
+      ingestionError,
+      storageLoaded,
+      qualityLoaded,
+      visibleColumns,
+      columnWidths,
+      handleResetColumnWidth,
+    ]
+  );
+
+  const renderCellValue = useMemo(
+    () =>
+      createDestinationCellRenderer({
+        rows,
+        searchText,
+        getDestinationHref,
+        getStreamHistogram,
+        timeState,
+        ingestionLoaded,
+        ingestionError,
+        storageLoaded,
+        qualityLoading,
+      }),
+    [
+      rows,
+      searchText,
+      getDestinationHref,
+      getStreamHistogram,
+      timeState,
+      ingestionLoaded,
+      ingestionError,
+      storageLoaded,
+      qualityLoading,
+    ]
+  );
+
+  const trailingControlColumns = useMemo(() => [createDestinationActionsColumn(rows)], [rows]);
 
   return (
     <EuiFlexGroup
       direction="column"
-      gutterSize="s"
+      gutterSize="m"
       className={css`
         flex: 1;
         min-height: 0;
@@ -255,32 +351,58 @@ function DestinationsTableContent() {
         grow
         className={css`
           min-height: 0;
-          overflow-y: auto;
         `}
       >
-        <EuiInMemoryTable<DestinationRow>
-          loading={isLoading}
-          data-test-subj="streamsDestinationsTable"
-          itemId="name"
-          items={rows}
-          noItemsMessage={NO_DESTINATIONS_MESSAGE}
-          tableCaption={TABLE_CAPTION}
-          onTableChange={handleTableChange}
-          sorting={{
-            sort: {
-              field: sortField,
-              direction: urlState.sortDirection,
-            },
-          }}
-          pagination={{
-            initialPageSize: ENTITY_TABLE_PAGE_SIZES[0],
-            pageSizeOptions: [...ENTITY_TABLE_PAGE_SIZES],
-            pageIndex: urlState.pageIndex,
-            pageSize: urlState.pageSize,
-          }}
-          columns={columns}
-        />
+        <EuiThemeProvider modify={TRANSPARENT_COLUMN_SEPARATORS} wrapperProps={GRID_WRAPPER_PROPS}>
+          <EuiDataGrid
+            data-test-subj="streamsDestinationsTable"
+            aria-label={TABLE_CAPTION}
+            columns={columns}
+            columnVisibility={{
+              visibleColumns,
+              setVisibleColumns,
+              canDragAndDropColumns: false,
+            }}
+            trailingControlColumns={trailingControlColumns}
+            onColumnResize={handleColumnResize}
+            rowCount={rows.length}
+            renderCellValue={renderCellValue}
+            renderCustomGridBody={rows.length === 0 ? EmptyGridBody : undefined}
+            gridStyle={GRID_STYLE}
+            rowHeightsOptions={ROW_HEIGHTS_OPTIONS}
+            toolbarVisibility={TOOLBAR_VISIBILITY}
+            sorting={{
+              columns: [{ id: sortField, direction: urlState.sortDirection }],
+              onSort: handleSort,
+            }}
+            pagination={{
+              pageIndex: urlState.pageIndex,
+              pageSize: urlState.pageSize,
+              pageSizeOptions: [...ENTITY_TABLE_PAGE_SIZES],
+              onChangePage: (pageIndex) => changePage(pageIndex, urlState.pageSize),
+              onChangeItemsPerPage: (pageSize) => changePage(0, pageSize as EntityTablePageSize),
+            }}
+          />
+        </EuiThemeProvider>
       </EuiFlexItem>
     </EuiFlexGroup>
+  );
+}
+
+function EmptyGridBody() {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <EuiText
+      size="s"
+      color="subdued"
+      textAlign="center"
+      data-test-subj="streamsDestinationsEmpty"
+      className={css`
+        padding: ${euiTheme.size.l};
+      `}
+    >
+      {NO_DESTINATIONS_MESSAGE}
+    </EuiText>
   );
 }

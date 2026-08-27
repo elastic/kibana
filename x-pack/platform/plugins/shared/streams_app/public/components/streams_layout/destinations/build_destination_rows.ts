@@ -6,9 +6,58 @@
  */
 
 import type { QualityIndicators } from '@kbn/dataset-quality-plugin/common';
+import type { EntityTableSortDirection } from '../entity_table';
 import type { Destination, DestinationRow } from './types';
 
 const TAG_QUERY_PREFIX = 'tag:';
+
+const SORTABLE_FIELDS = [
+  'name',
+  'documentsCount',
+  'ingestionRate',
+  'storageBytes',
+  'dataQuality',
+  'retentionMs',
+] as const;
+
+export type SortableField = (typeof SORTABLE_FIELDS)[number];
+
+export const isSortableField = (value: string): value is SortableField =>
+  (SORTABLE_FIELDS as readonly string[]).includes(value);
+
+export type MetricSortField = Exclude<SortableField, 'name' | 'retentionMs'>;
+
+export const getEffectiveSortField = (
+  sortField: string,
+  metricSortReady: Record<MetricSortField, boolean>
+): SortableField => {
+  if (!isSortableField(sortField)) {
+    return 'name';
+  }
+  if (sortField === 'name' || sortField === 'retentionMs') {
+    return sortField;
+  }
+  return metricSortReady[sortField] ? sortField : 'name';
+};
+
+const QUALITY_RANK: Record<QualityIndicators, number> = {
+  poor: 0,
+  degraded: 1,
+  good: 2,
+};
+
+const compareRows = (a: DestinationRow, b: DestinationRow, field: SortableField): number => {
+  if (field === 'name') {
+    return a.name.localeCompare(b.name);
+  }
+  if (field === 'dataQuality') {
+    return toQualityRank(a.dataQuality) - toQualityRank(b.dataQuality);
+  }
+  return a[field] - b[field];
+};
+
+const toQualityRank = (quality: QualityIndicators | undefined): number =>
+  quality !== undefined ? QUALITY_RANK[quality] : Number.NEGATIVE_INFINITY;
 
 export const matchesDestinationQuery = (destination: Destination, query: string): boolean => {
   if (!query) {
@@ -44,6 +93,8 @@ export const buildDestinationRows = ({
   ingestionByStream,
   storageByStream,
   qualityByStream,
+  sortField,
+  sortDirection,
 }: {
   destinations: Destination[];
   searchText: string;
@@ -52,8 +103,11 @@ export const buildDestinationRows = ({
   ingestionByStream: Record<string, number>;
   storageByStream: Record<string, number>;
   qualityByStream: Record<string, QualityIndicators>;
+  sortField: SortableField;
+  sortDirection: EntityTableSortDirection;
 }): DestinationRow[] => {
   const query = searchText.trim().toLowerCase();
+  const directionFactor = sortDirection === 'desc' ? -1 : 1;
 
   return destinations
     .filter((destination) => matchesDestinationQuery(destination, query))
@@ -68,5 +122,6 @@ export const buildDestinationRows = ({
       (row) =>
         selectedQualities.length === 0 ||
         (row.dataQuality !== undefined && selectedQualities.includes(row.dataQuality))
-    );
+    )
+    .sort((a, b) => directionFactor * compareRows(a, b, sortField));
 };
