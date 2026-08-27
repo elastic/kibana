@@ -31,7 +31,7 @@ export const ExpandButton = (props: EuiDataGridCellValueElementProps) => {
     ? i18n.translate('unifiedDataTable.grid.closeDocDetails', {
         defaultMessage: 'Close details',
       })
-    : i18n.translate('unifiedDataTable.grid.viewDoc', {
+    : i18n.translate('unifiedDataTable.grid.viewDocDetails', {
         defaultMessage: 'View details',
       });
 
