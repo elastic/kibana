@@ -6,7 +6,6 @@
  */
 
 import { withActiveInferenceSpan, ElasticGenAIAttributes } from '@kbn/inference-tracing';
-import type { ChatCompleteCacheControl } from '@kbn/inference-common';
 import type { TimeRange } from '@kbn/agent-builder-common';
 import { EffortLevels } from '@kbn/agent-builder-common';
 import type { ModelProvider, ScopedModel } from '@kbn/agent-builder-server';
@@ -19,7 +18,6 @@ import type { EsqlResponse } from '../utils/esql';
 import { createNlToEsqlGraph } from './graph';
 import { indexExplorer } from '../index_explorer';
 import { loadDocumentation } from './documentation';
-import { getDefaultEsqlCacheKey } from './cache_key';
 
 export class GenerateEsqlNoDataError extends Error {
   readonly code = 'NO_DATA' as const;
