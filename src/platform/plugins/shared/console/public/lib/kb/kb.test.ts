@@ -144,4 +144,50 @@ describe('Knowledge base', () => {
     indices: ['index1', 'index2'],
     autoCompleteSet: ['_multi_indices', '_single_index'],
   });
+
+  describe('WHEN body rules contain primitive suggestions', () => {
+    it('SHOULD preserve boolean, number, and string term types', () => {
+      const api = kb._test.loadApisFromJson({
+        es: {
+          endpoints: {
+            endpoint: {
+              data_autocomplete_rules: {
+                value: {
+                  __one_of: [true, false, 0, 42, 'false', '42'],
+                },
+              },
+            },
+          },
+        },
+      });
+      kb._test.setActiveApi(api);
+      const context = {
+        otherTokenValues: [],
+        endpointComponentResolver: kb.getEndpointBodyCompleteComponents,
+        globalComponentResolver: kb.getGlobalAutocompleteComponents,
+      } as AutoCompleteContext & {
+        endpointComponentResolver: typeof kb.getEndpointBodyCompleteComponents;
+        globalComponentResolver: typeof kb.getGlobalAutocompleteComponents;
+      };
+      const components = kb.getEndpointBodyCompleteComponents('endpoint');
+      if (!components) {
+        throw new Error('Expected endpoint body completion components');
+      }
+
+      populateContext(['{', 'value'], context, null, true, components);
+
+      expect(
+        context.autoCompleteSet
+          ?.map(({ name }) => `${typeof name}:${String(name)}`)
+          .sort((left, right) => left.localeCompare(right))
+      ).toEqual([
+        'boolean:false',
+        'boolean:true',
+        'number:0',
+        'number:42',
+        'string:42',
+        'string:false',
+      ]);
+    });
+  });
 });

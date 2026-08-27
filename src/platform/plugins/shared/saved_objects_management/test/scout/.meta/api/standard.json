@@ -1,5 +1,8 @@
 {
   "sha1": "8e1b2d34e40044c5352f1a808d4c3d37362f2838",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "3b22d421111c31e-2feeac49d7dbb52",
@@ -575,8 +578,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/imports.spec.ts",
-        "line": 62,
-        "column": 10
+        "line": 63,
+        "column": 20
       }
     },
     {
@@ -589,8 +592,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/imports.spec.ts",
-        "line": 80,
-        "column": 10
+        "line": 81,
+        "column": 20
       }
     },
     {
@@ -603,8 +606,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/imports.spec.ts",
-        "line": 98,
-        "column": 10
+        "line": 99,
+        "column": 20
       }
     },
     {
@@ -617,8 +620,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/imports.spec.ts",
-        "line": 116,
-        "column": 10
+        "line": 117,
+        "column": 20
       }
     },
     {
@@ -1111,8 +1114,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/scroll_count_large.spec.ts",
-        "line": 71,
-        "column": 10
+        "line": 73,
+        "column": 16
       }
     },
     {
