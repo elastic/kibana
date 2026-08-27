@@ -134,10 +134,11 @@ export class SignificantEventsPlugin
     const significantEventsServices = createSignificantEventsServices();
     const knowledgeIndicatorService = new KnowledgeIndicatorService(core, this.logger);
     const { streams: streamsSetup } = plugins;
-    // `SET project_routing` is serverless-only preview syntax, and `cps.cpsEnabled` is only
-    // settable on serverless, so this is the gate that keeps the directive out of rule queries
-    // everywhere else.
-    const cpsEnabled = plugins.cps?.getCpsEnabled() ?? false;
+    // `SET project_routing` is serverless-only preview syntax, so all serverless rules carry
+    // the directive unconditionally. This makes every rule CPS-ready the moment Cross-Project
+    // Search is toggled on, without requiring a sync cycle to rewrite existing breach queries.
+    // On a single-project deployment `_alias:*` resolves to just that project — a no-op.
+    const isServerless = plugins.cloud?.isServerlessEnabled ?? false;
 
     this.getScopedClients = async ({
       request,
@@ -212,7 +213,7 @@ export class SignificantEventsPlugin
       const resolveSignificantEventsAlertingContext =
         createSignificantEventsAlertingContextResolver({
           getAlertingV2RulesClient,
-          cpsEnabled,
+          isServerless,
         });
 
       const createKnowledgeIndicatorClient = (context: SignificantEventsAlertingContext) =>

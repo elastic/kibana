@@ -16,7 +16,10 @@ import { PROJECT_ROUTING_ALL } from '@kbn/cps-server-utils';
  * Knowledge indicators model all data available to a stream rather than one project, so
  * detection has to match the scope extraction ran at.
  *
- * `SET project_routing` is serverless-only preview syntax - only call this when CPS is enabled.
+ * `SET project_routing` is serverless-only preview syntax. It is applied unconditionally on
+ * serverless so every rule is CPS-ready without a sync cycle when Cross-Project Search is
+ * toggled on. On a single-project deployment `_alias:*` resolves to just that project — a
+ * no-op.
  */
 export const withAllProjectsRouting = (query: string): string =>
   `SET project_routing="${PROJECT_ROUTING_ALL}";\n${query}`;

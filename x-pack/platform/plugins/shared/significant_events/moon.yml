@@ -73,7 +73,6 @@ dependsOn:
   - '@kbn/inference-plugin'
   - '@kbn/security-plugin'
   - '@kbn/cloud-plugin'
-  - '@kbn/cps'
   - '@kbn/scout'
   - '@kbn/core-http-server-mocks'
   - '@kbn/apm-utils'

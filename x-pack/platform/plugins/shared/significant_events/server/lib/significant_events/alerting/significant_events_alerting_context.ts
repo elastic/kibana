@@ -27,10 +27,10 @@ export interface SignificantEventsAlertingContext {
 export interface ResolveSignificantEventsAlertingContextParams {
   getAlertingV2RulesClient: () => Promise<RulesClientApi>;
   /**
-   * Whether Cross-Project Search is enabled. Rules compiled while it is on scope their
-   * queries across every linked project instead of the space's routing expression.
+   * Whether this Kibana instance runs on serverless. Serverless rules unconditionally carry
+   * a `SET project_routing` directive so they are CPS-ready without a sync cycle.
    */
-  cpsEnabled: boolean;
+  isServerless: boolean;
 }
 
 export interface RuleBackedQueryCandidate {
@@ -66,7 +66,9 @@ export function createSignificantEventsAlertingContextResolver(
       const alertingV2RulesClient = await params.getAlertingV2RulesClient();
       return {
         alertsReader: ALERTS_READER_V2,
-        rulesClient: new RulesAdapterV2(alertingV2RulesClient, { cpsEnabled: params.cpsEnabled }),
+        rulesClient: new RulesAdapterV2(alertingV2RulesClient, {
+          isServerless: params.isServerless,
+        }),
         alertingV2RulesClient,
       };
     })();

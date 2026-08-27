@@ -26,10 +26,10 @@ const FIND_PAGE_SIZE = 500;
 
 export interface RulesAdapterV2Options {
   /**
-   * Whether Cross-Project Search is enabled. When it is, compiled breach queries carry a
-   * `SET project_routing` directive scoping them across every linked project.
+   * Whether this Kibana instance runs on serverless. Serverless rules unconditionally carry
+   * a `SET project_routing` directive so they are CPS-ready without a sync cycle.
    */
-  cpsEnabled: boolean;
+  isServerless: boolean;
 }
 
 /**
@@ -145,10 +145,10 @@ export class RulesAdapterV2 implements IRulesManagementClient {
 function toV2BreachQuery(
   esqlQuery: string,
   timestampField: string,
-  { cpsEnabled }: RulesAdapterV2Options
+  { isServerless }: RulesAdapterV2Options
 ): string {
   const compiled = compileMatchCountBreachQuery(esqlQuery, timestampField);
-  return cpsEnabled ? withAllProjectsRouting(compiled) : compiled;
+  return isServerless ? withAllProjectsRouting(compiled) : compiled;
 }
 
 function toV2CommonBody(
