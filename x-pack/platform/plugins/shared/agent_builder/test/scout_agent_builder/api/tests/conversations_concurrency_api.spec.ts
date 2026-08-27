@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { RoleApiCredentials } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { createLlmProxy, type LlmProxy } from '@kbn/ftr-llm-proxy';
 import {
@@ -19,13 +18,11 @@ apiTest.describe(
   'Agent Builder — concurrent conversation writes API',
   { tag: [...tags.stateful.classic, ...tags.serverless.search] },
   () => {
-    let adminCredentials: RoleApiCredentials;
     let llmProxy: LlmProxy;
     let connectorId: string;
     const conversationIds: string[] = [];
 
-    apiTest.beforeAll(async ({ requestAuth, log, kbnClient }) => {
-      adminCredentials = await requestAuth.getApiKeyForAdmin();
+    apiTest.beforeAll(async ({ log, kbnClient }) => {
       llmProxy = await createLlmProxy(log);
       const { id } = await createGenAiConnectorForProxy(kbnClient, llmProxy);
       connectorId = id;
