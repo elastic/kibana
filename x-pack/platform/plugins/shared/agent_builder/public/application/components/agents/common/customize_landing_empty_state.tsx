@@ -24,8 +24,7 @@ const EMPTY_STATE_PANEL_MAX_WIDTH_PX = 805;
 
 const ILLUSTRATION_WELL_WIDTH_PX = 215;
 const ILLUSTRATION_WELL_HEIGHT_PX = 252;
-
-
+const ILLUSTRATION_IMAGE_SIZE_PX = 96;
 
 export interface CustomizeLandingEmptyStateProps {
   illustrationSrc?: string;
