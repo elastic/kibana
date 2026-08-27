@@ -49,6 +49,8 @@ import {
 import { ConversationSharePopoverButton } from './conversation_share_popover_button';
 
 const SEARCH_DEBOUNCE_MS = 200;
+const POPOVER_WIDTH = 470;
+const POPOVER_HEADER_MIN_HEIGHT = 48;
 
 export const ConversationShareButton: React.FC = () => {
   const isExperimentalFeaturesEnabled = useExperimentalFeatures();
@@ -207,7 +209,7 @@ const ConversationSharePopover: React.FC<ConversationSharePopoverProps> = ({ con
     >
       <div
         css={css`
-          width: 467px;
+          width: ${POPOVER_WIDTH}px;
           max-width: calc(100vw - ${euiTheme.size.xl});
         `}
         data-test-subj="agentBuilderConversationSharingPopover"
@@ -218,7 +220,7 @@ const ConversationSharePopover: React.FC<ConversationSharePopoverProps> = ({ con
           gutterSize="s"
           responsive={false}
           css={css`
-            min-height: 48px;
+            min-height: ${POPOVER_HEADER_MIN_HEIGHT}px;
             padding: 0 ${euiTheme.size.m};
           `}
         >

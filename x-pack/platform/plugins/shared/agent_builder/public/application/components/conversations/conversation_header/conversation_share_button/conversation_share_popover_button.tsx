@@ -22,6 +22,8 @@ import { useConversationPermissions } from '../../../../hooks/use_conversation';
 import { useInviteMembersSummary } from '../../../../hooks/use_conversation_access_control';
 import { extraMembersLabel, inviteLabel, sharingLabel } from './conversation_share_i18n';
 
+const EXTRA_COUNT_AVATAR_OVERLAP_OFFSET = 1;
+
 interface ConversationShareTriggerButtonProps {
   ariaLabel: string;
   children: React.ReactNode;
@@ -127,7 +129,7 @@ const InviteMembersSummaryButton: React.FC<InviteMembersSummaryButtonProps> = ({
           <EuiFlexItem
             grow={false}
             css={css`
-              margin-inline-start: calc(-${avatarOverlap} + 1px);
+              margin-inline-start: calc(-${avatarOverlap} + ${EXTRA_COUNT_AVATAR_OVERLAP_OFFSET}px);
             `}
           >
             <EuiAvatar

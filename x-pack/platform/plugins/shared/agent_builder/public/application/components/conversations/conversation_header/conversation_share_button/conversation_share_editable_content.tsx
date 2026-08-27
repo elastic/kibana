@@ -27,6 +27,8 @@ import { ConversationAccessModeSelect } from './conversation_access_mode_select'
 import { ConversationParticipantsList } from './conversation_participants_list';
 import { currentMembersLabel, searchUsersLabel } from './conversation_share_i18n';
 
+const USER_SEARCH_OPTION_ROW_HEIGHT = 48;
+
 interface UserSearchOptionProps {
   profile: UserProfileWithAvatar;
 }
@@ -157,7 +159,7 @@ export const ConversationShareEditableContent: React.FC<ConversationShareEditabl
 
             return <UserSearchOption key={option.key ?? option.value} profile={profile} />;
           }}
-          rowHeight={48}
+          rowHeight={USER_SEARCH_OPTION_ROW_HEIGHT}
           data-test-subj="agentBuilderConversationSharingUserSearch"
         />
       </EuiFormRow>

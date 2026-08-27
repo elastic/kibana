@@ -24,6 +24,8 @@ import {
 import { useConversationPermissions } from '../../../../hooks/use_conversation';
 import { authorLabel, removeMemberLabel } from './conversation_share_i18n';
 
+const MEMBER_ROW_MIN_HEIGHT = 50;
+
 interface UserAccessRowProps {
   profile: UserProfileWithAvatar;
   badge?: string;
@@ -48,7 +50,7 @@ const UserAccessRow: React.FC<UserAccessRowProps> = ({
       gutterSize="s"
       responsive={false}
       css={css`
-        min-height: 49px;
+        min-height: ${MEMBER_ROW_MIN_HEIGHT}px;
         padding: ${euiTheme.size.s} 0;
         border-bottom: ${hasBottomBorder ? euiTheme.border.thin : 'none'};
       `}
