@@ -727,6 +727,7 @@ export interface DocLinks {
   };
   readonly telemetry: {
     readonly settings: string;
+    readonly securityData: string;
   };
   readonly playground: {
     readonly chatPlayground: string;
