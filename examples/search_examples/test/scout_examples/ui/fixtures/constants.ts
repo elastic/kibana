@@ -13,6 +13,9 @@ export const LOGSTASH_FUNCTIONAL_ARCHIVE =
 export const LENS_BASIC_KBN_ARCHIVE =
   'x-pack/platform/test/functional/fixtures/kbn_archives/lens/lens_basic.json';
 
+/** Includes `A Saved Search`. Shares the `logstash-*` data view id with lens_basic. */
+export const DISCOVER_KBN_ARCHIVE = 'src/platform/test/functional/fixtures/kbn_archiver/discover';
+
 export const DATA_VIEW = 'logstash-*';
 
 /** Absolute range covering logstash_functional fixture data (date-picker display format). */

@@ -10,7 +10,6 @@
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 
-const DISCOVER_KBN_ARCHIVE = 'src/platform/test/functional/fixtures/kbn_archiver/discover';
 const LOGSTASH_TIME_RANGE = {
   from: 'Sep 19, 2015 @ 06:31:44.000',
   to: 'Sep 23, 2015 @ 18:31:44.000',
@@ -18,13 +17,11 @@ const LOGSTASH_TIME_RANGE = {
 
 test.describe('Discover customization examples', { tag: '@local-stateful-classic' }, () => {
   test.beforeAll(async ({ kbnClient }) => {
-    await kbnClient.importExport.load(DISCOVER_KBN_ARCHIVE);
     await kbnClient.uiSettings.update({ defaultIndex: 'logstash-*' });
   });
 
   test.afterAll(async ({ kbnClient }) => {
     await kbnClient.uiSettings.unset('defaultIndex');
-    await kbnClient.importExport.unload(DISCOVER_KBN_ARCHIVE);
   });
 
   test.beforeEach(async ({ browserAuth, page, pageObjects }) => {

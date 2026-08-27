@@ -8,9 +8,14 @@
  */
 
 import { globalTeardownHook } from '@kbn/scout';
-import { LENS_BASIC_KBN_ARCHIVE } from '../fixtures/constants';
+import { DISCOVER_KBN_ARCHIVE, LENS_BASIC_KBN_ARCHIVE } from '../fixtures/constants';
 
-globalTeardownHook('Unload lens_basic archives for search_examples', async ({ kbnClient, log }) => {
-  log.debug('[teardown:search_examples] unloading lens_basic saved objects...');
-  await kbnClient.importExport.unload(LENS_BASIC_KBN_ARCHIVE);
-});
+globalTeardownHook(
+  'Unload discover + lens_basic archives for search_examples',
+  async ({ kbnClient, log }) => {
+    log.debug('[teardown:search_examples] unloading discover saved objects...');
+    await kbnClient.importExport.unload(DISCOVER_KBN_ARCHIVE);
+    log.debug('[teardown:search_examples] unloading lens_basic saved objects...');
+    await kbnClient.importExport.unload(LENS_BASIC_KBN_ARCHIVE);
+  }
+);

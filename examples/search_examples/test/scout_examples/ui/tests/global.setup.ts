@@ -8,7 +8,11 @@
  */
 
 import { globalSetupHook } from '@kbn/scout';
-import { LENS_BASIC_KBN_ARCHIVE, LOGSTASH_FUNCTIONAL_ARCHIVE } from '../fixtures/constants';
+import {
+  DISCOVER_KBN_ARCHIVE,
+  LENS_BASIC_KBN_ARCHIVE,
+  LOGSTASH_FUNCTIONAL_ARCHIVE,
+} from '../fixtures/constants';
 
 globalSetupHook(
   'Load logstash + lens_basic archives for search_examples',
@@ -17,5 +21,7 @@ globalSetupHook(
     await esArchiver.loadIfNeeded(LOGSTASH_FUNCTIONAL_ARCHIVE);
     log.debug('[setup:search_examples] loading lens_basic saved objects...');
     await kbnClient.importExport.load(LENS_BASIC_KBN_ARCHIVE);
+    log.debug('[setup:search_examples] loading discover saved objects...');
+    await kbnClient.importExport.load(DISCOVER_KBN_ARCHIVE);
   }
 );
