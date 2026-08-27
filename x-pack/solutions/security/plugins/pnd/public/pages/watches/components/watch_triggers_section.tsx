@@ -53,7 +53,7 @@ export const WatchTriggersSection: React.FC<WatchTriggersSectionProps> = ({
           value={schedule.selectedId}
           options={schedule.optionIds.map((optionId) => ({
             value: optionId,
-            text: i18n.SCHEDULE_OPTION_LABELS[optionId] ?? optionId,
+            text: i18n.scheduleOptionLabel(optionId),
           }))}
           onChange={(event) => onScheduleChange(event.target.value)}
           data-test-subj="pndWatchScheduleSelect"

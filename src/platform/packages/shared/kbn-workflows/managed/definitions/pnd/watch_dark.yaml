@@ -1,8 +1,8 @@
 version: "1"
 name: Dark Watch
 description: >
-  Dark Watch. Continuous, technology-aware hunting with overnight UTC sweeps
-  and reviewable findings.
+  Dark Watch. Continuous, technology-aware hunting on a recurring UTC sweep
+  with reviewable findings.
 enabled: false
 tags:
   - watch
@@ -18,14 +18,11 @@ settings:
     strategy: drop
     max: 1
 triggers:
+  # Every N hours, chosen via the `scheduleId` setting (default every 4h).
+  # Rendered from the token on install; see renderPndWatchDarkYaml.
   - type: scheduled
     with:
-      rrule:
-        freq: DAILY
-        interval: 1
-        tzid: UTC
-        byhour: [22, 23, 0, 1, 2, 3, 4, 5]
-        byminute: [0]
+      every: "__WATCH_SCHEDULE_EVERY__"
   - type: manual
 consts:
   # managedTemplateValues surface: CommonWatchSettings (autonomy, triggers,
@@ -50,11 +47,9 @@ consts:
     onDemand: true
     draft: false
     cadence: sweep
-    # Display metadata: matches the hourly rrule above, not the hunt cooldown.
-    every: 60
-    from: 22
-    to: 6
-    mode: window
+    # Display metadata: mirrors the run-frequency schedule interval above, not
+    # the hunt cooldown.
+    every: "__WATCH_SCHEDULE_EVERY__"
     ui:
       color: "#f59e0b"
       icon: bolt

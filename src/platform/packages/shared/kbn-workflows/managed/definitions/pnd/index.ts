@@ -39,6 +39,11 @@ export {
   PND_RULE_TUNING_WORKFLOW_ID,
 } from './rule_workflows';
 export { PND_WATCH_DARK_WORKFLOW, PND_WATCH_DARK_WORKFLOW_ID } from './watch_dark';
+export {
+  DARK_WATCH_DEFAULT_SCHEDULE_ID,
+  DARK_WATCH_SCHEDULE_OPTION_IDS,
+  isDarkWatchScheduleId,
+} from './watch_dark_schedule';
 export { PND_WATCH_DEEP_WORKFLOW, PND_WATCH_DEEP_WORKFLOW_ID } from './watch_deep';
 export { PND_WATCH_DETECTION_WORKFLOW, PND_WATCH_DETECTION_WORKFLOW_ID } from './watch_detection';
 export { PND_WATCH_FLOOR_WORKFLOW, PND_WATCH_FLOOR_WORKFLOW_ID } from './watch_floor';

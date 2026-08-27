@@ -15,7 +15,7 @@ describe('createDarkWatchSettingsRegistration', () => {
     expect(darkWatchSettings.createDefaultValues()).toEqual({
       settingsVersion: 1,
       autonomyLevel: 'supervised',
-      scheduleId: 'dark-overnight-sweep',
+      scheduleId: 'every-4h',
       allowManualRun: true,
       scopes: [
         { name: 'Mail · IdP', access: 'full', label: 'Read + monitor' },
@@ -44,7 +44,7 @@ describe('createDarkWatchSettingsRegistration', () => {
     const defaults = darkWatchSettings.createDefaultValues();
     const result = darkWatchSettings.applyPatch(defaults, {
       autonomyLevel: 'manual',
-      triggers: { scheduleId: 'dark-custom-sweep', allowManualRun: false },
+      triggers: { scheduleId: 'every-2h', allowManualRun: false },
       dark: {
         inferenceEndpointId: 'my-inference-endpoint',
         tier2When: 'always',
@@ -56,7 +56,7 @@ describe('createDarkWatchSettingsRegistration', () => {
     expect(result.values).toEqual({
       ...defaults,
       autonomyLevel: 'manual',
-      scheduleId: 'dark-custom-sweep',
+      scheduleId: 'every-2h',
       allowManualRun: false,
       inferenceEndpointId: 'my-inference-endpoint',
       tier2When: 'always',
@@ -74,7 +74,7 @@ describe('createDarkWatchSettingsRegistration', () => {
         candidateLimit: 10,
         fanOutMax: 10,
         huntCooldownMinutes: 240,
-        scheduleId: 'dark-overnight-sweep',
+        scheduleId: 'every-4h',
         allowManualRun: true,
         scopes: [
           { name: 'Mail · IdP', access: 'full', label: 'Read + monitor' },
@@ -83,6 +83,14 @@ describe('createDarkWatchSettingsRegistration', () => {
         ],
       },
     });
+  });
+
+  it('rejects an out-of-range scheduleId', () => {
+    expect(() =>
+      darkWatchSettings.applyPatch(darkWatchSettings.createDefaultValues(), {
+        triggers: { scheduleId: 'every-48h', allowManualRun: true },
+      })
+    ).toThrow(/invalid scheduleId/);
   });
 
   it('rejects post-MVP worker patches', () => {

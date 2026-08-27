@@ -6,6 +6,7 @@
  */
 
 import { SYSTEM_SECURITY_WATCH_DARK_ID, WatchAutonomyLevel } from '@kbn/pnd-common';
+import { DARK_WATCH_DEFAULT_SCHEDULE_ID, isDarkWatchScheduleId } from '@kbn/workflows/managed';
 import type { DarkWatchTemplateValues } from '@kbn/workflows/managed';
 import type { WatchSettingsRegistration } from './types';
 
@@ -94,7 +95,7 @@ const parseDarkWatchValues = (raw: Record<string, unknown>): DarkWatchTemplateVa
     );
   }
 
-  if (typeof scheduleId !== 'string' || scheduleId.length === 0 || scheduleId.length > 128) {
+  if (typeof scheduleId !== 'string' || !isDarkWatchScheduleId(scheduleId)) {
     throw new Error(
       `PND watch "${SYSTEM_SECURITY_WATCH_DARK_ID}" settings contain an invalid scheduleId`
     );
@@ -136,7 +137,7 @@ const parseDarkWatchValues = (raw: Record<string, unknown>): DarkWatchTemplateVa
 const DEFAULT_DARK_WATCH_VALUES: DarkWatchTemplateValues = {
   settingsVersion: WATCH_SETTINGS_VERSION,
   autonomyLevel: 'supervised',
-  scheduleId: 'dark-overnight-sweep',
+  scheduleId: DARK_WATCH_DEFAULT_SCHEDULE_ID,
   allowManualRun: true,
   scopes: DEFAULT_SCOPES,
   inferenceEndpointId: '',

@@ -16,7 +16,7 @@ import { WorkflowSchema } from '../../../spec/schema';
 const values: DarkWatchTemplateValues = {
   settingsVersion: 1,
   autonomyLevel: 'supervised',
-  scheduleId: 'dark-overnight-sweep',
+  scheduleId: 'every-4h',
   allowManualRun: true,
   scopes: [{ name: 'Mail · IdP', access: 'full', label: 'Read + monitor' }],
   inferenceEndpointId: 'dark-tier2-inference-endpoint',
@@ -56,6 +56,38 @@ describe('PND_WATCH_DARK_WORKFLOW', () => {
 
     expect(selectStep?.with?.size).toBe(values.candidateLimit);
     expect(fanOutStep?.concurrency?.max).toBe(values.fanOutMax);
+  });
+
+  it('renders the scheduled trigger interval from scheduleId', () => {
+    const document = parse(renderedYaml) as {
+      triggers: Array<{ type: string; with?: { every?: unknown } }>;
+    };
+    const scheduledTrigger = document.triggers.find(({ type }) => type === 'scheduled');
+
+    expect(scheduledTrigger?.with?.every).toBe('4h');
+  });
+
+  it('falls back to the default cadence for an unrecognized scheduleId', () => {
+    const rendered = PND_WATCH_DARK_WORKFLOW.yamlTemplate({
+      ...values,
+      scheduleId: 'not-a-schedule',
+    });
+    const document = parse(rendered) as {
+      triggers: Array<{ type: string; with?: { every?: unknown } }>;
+    };
+    const scheduledTrigger = document.triggers.find(({ type }) => type === 'scheduled');
+
+    expect(scheduledTrigger?.with?.every).toBe('4h');
+  });
+
+  it('maps a non-default scheduleId to its hourly interval', () => {
+    const rendered = PND_WATCH_DARK_WORKFLOW.yamlTemplate({ ...values, scheduleId: 'every-6h' });
+    const document = parse(rendered) as {
+      triggers: Array<{ type: string; with?: { every?: unknown } }>;
+    };
+    const scheduledTrigger = document.triggers.find(({ type }) => type === 'scheduled');
+
+    expect(scheduledTrigger?.with?.every).toBe('6h');
   });
 
   it('passes the Tier 2 dials to the hunt Worker', () => {

@@ -185,19 +185,18 @@ export const MANUAL_RUN_HELP = i18n.translate('xpack.pnd.watches.settings.trigge
   defaultMessage: 'Lets an analyst start a run outside the schedule.',
 });
 
-export const SCHEDULE_OPTION_LABELS: Record<string, string> = {
-  'every-5m': i18n.translate('xpack.pnd.watches.settings.schedule.every5m', {
-    defaultMessage: 'Every 5 minutes',
-  }),
-  'every-15m': i18n.translate('xpack.pnd.watches.settings.schedule.every15m', {
-    defaultMessage: 'Every 15 minutes',
-  }),
-  'every-30m': i18n.translate('xpack.pnd.watches.settings.schedule.every30m', {
-    defaultMessage: 'Every 30 minutes',
-  }),
-  hourly: i18n.translate('xpack.pnd.watches.settings.schedule.hourly', {
-    defaultMessage: 'Every hour',
-  }),
+const SCHEDULE_ID_HOURS_PATTERN = /^every-(\d+)h$/;
+
+// Dark's schedule option ids are hourly intervals (`every-1h` … `every-24h`), so
+// a single parameterized message covers every id. Unknown ids fall back to the
+// raw value rather than rendering blank.
+export const scheduleOptionLabel = (optionId: string): string => {
+  const match = SCHEDULE_ID_HOURS_PATTERN.exec(optionId);
+  if (!match) return optionId;
+  return i18n.translate('xpack.pnd.watches.settings.schedule.everyHours', {
+    defaultMessage: 'Every {hours, plural, one {hour} other {# hours}}',
+    values: { hours: Number(match[1]) },
+  });
 };
 
 /* -------------------------------------------------------------------------- */
@@ -544,7 +543,7 @@ const WATCH_INTROS: Record<string, string> = {
   }),
   [SYSTEM_SECURITY_WATCH_DARK_ID]: i18n.translate('xpack.pnd.watches.settings.intro.dark', {
     defaultMessage:
-      'Hunts continuously for threats and coverage gaps nobody has reported yet, and sweeps overnight. Findings arrive as reviewable evidence rather than alerts. Everything below configures this one Watch.',
+      'Hunts continuously for threats and coverage gaps nobody has reported yet, sweeping on a recurring schedule. Findings arrive as reviewable evidence rather than alerts. Everything below configures this one Watch.',
   }),
   [SYSTEM_SECURITY_WATCH_DEEP_ID]: i18n.translate('xpack.pnd.watches.settings.intro.deep', {
     defaultMessage:

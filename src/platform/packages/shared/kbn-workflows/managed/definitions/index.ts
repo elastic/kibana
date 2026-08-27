@@ -95,6 +95,9 @@ export {
 } from './significant_events';
 export { SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID } from './nightshift_investigations/investigation';
 export {
+  DARK_WATCH_DEFAULT_SCHEDULE_ID,
+  DARK_WATCH_SCHEDULE_OPTION_IDS,
+  isDarkWatchScheduleId,
   PND_DARK_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
   PND_DARK_CORRELATION_WORKFLOW_ID,
   PND_DARK_PACKAGE_REPORT_WORKFLOW_ID,
