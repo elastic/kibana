@@ -749,3 +749,43 @@ describe('markup that only a parser reads correctly', () => {
     });
   });
 });
+
+/**
+ * Inline markup must not create a token boundary.
+ *
+ * Threat reports split indicators across inline formatting constantly, and the regex
+ * implementation could not tell an inline element from a block one: it substituted a
+ * space for every tag, so `c2.<strong>evil</strong>.test` reached IOC extraction as
+ * `c2. evil .test` and the domain was never matched. Preserved here as an allowlist, so
+ * an unknown or custom element still yields a boundary; a spurious boundary splits one
+ * token, a missing one merges two indicators into an unextractable value.
+ */
+describe('inline markup does not split tokens', () => {
+  it.each([
+    ['strong inside a domain', '<p>c2.<strong>evil</strong>.test</p>', 'c2.evil.test'],
+    ['bold separator', '<p>evil<b>.</b>com</p>', 'evil.com'],
+    ['span mid-token', '<p>evi<span>l</span>.com</p>', 'evil.com'],
+    ['code mid-token', '<p>evil<code>.</code>com</p>', 'evil.com'],
+    ['anchor mid-token', '<p>c2.<a href="http://x">evil</a>.test</p>', 'c2.evil.test'],
+  ])('keeps %s intact', (_label, html, expected) => {
+    expect(stripHtml(html)).toBe(expected);
+  });
+
+  it.each([
+    ['paragraphs', '<p>evil.com</p><p>bad.net</p>'],
+    ['table cells', '<tr><td>evil.com</td><td>bad.net</td></tr>'],
+    ['list items', '<ul><li>evil.com<li>bad.net</ul>'],
+    ['line breaks', 'evil.com<br>bad.net'],
+    ['divs', '<div>evil.com</div><div>bad.net</div>'],
+    ['comments', 'evil.com<!-- x -->bad.net'],
+    ['unknown elements', '<my-widget>evil.com</my-widget><my-widget>bad.net</my-widget>'],
+  ])('still separates %s', (_label, html) => {
+    expect(stripHtml(html)).toBe('evil.com bad.net');
+  });
+
+  it('keeps inline content joined inside a table cell', () => {
+    expect(htmlToStructured('<tr><td>evi<span>l</span>.com</td><td>bad.net</td></tr>')).toBe(
+      '| evil.com | bad.net |'
+    );
+  });
+});

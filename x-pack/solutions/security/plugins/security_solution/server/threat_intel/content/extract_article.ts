@@ -6,7 +6,7 @@
  */
 
 import * as cheerio from 'cheerio';
-import { MAX_PARSE_BYTES } from './text';
+import { MAX_PARSE_BYTES, normalizeSelfClosedRawText } from './text';
 
 /**
  * Strip known page chrome (nav/header/footer/sidebar) from raw vendor HTML,
@@ -103,30 +103,116 @@ interface ParsedNode {
   children?: ParsedNode[];
 }
 
-const textExcluding = (root: ParsedNode, excluded: Set<unknown>): string => {
-  const out: string[] = [];
-  const stack: ParsedNode[] = [...(root.children ?? [])].reverse();
+/**
+ * htmlparser2 rather than cheerio's default parse5, matching `text.ts`.
+ *
+ * parse5's HTML5 tree construction is quadratic in nesting depth, and this entry point
+ * pays that cost on up to 10MB of attacker-influenced input: measured through this
+ * function, 112ms at 5,000 nested elements, 433ms at 10,000, and 2.2s at 20,000. Bounding
+ * the output could not have helped, because the cost is in the parse itself.
+ */
+const PARSER_OPTIONS = { _useHtmlParser2: true } as const;
+
+/**
+ * Nesting depth past which the page is not simplified at all.
+ *
+ * cheerio's selector engine is quadratic in depth independently of the parser (653ms to
+ * evaluate one selector list against 50,000 nested elements), and unlike the parser it
+ * cannot simply be swapped: `ARTICLE_SELECTORS` and `CHROME_SELECTORS` carry class, id,
+ * attribute, and child-combinator forms whose semantics are worth more than
+ * reimplementing them by hand for a heuristic pre-step.
+ *
+ * So the selectors are kept and the input they run against is bounded instead. Real
+ * article pages nest a few dozen elements deep; 256 is far above anything legitimate and
+ * far below where the quadratic term costs anything. Past it the page is returned
+ * unsimplified, which is the same degradation this function already applies elsewhere:
+ * chrome is noise the section miner mostly handles, whereas spending a task worker on one
+ * hostile page costs every other report in the queue.
+ */
+const MAX_NESTING_DEPTH = 256;
+
+const maxDepthOf = (roots: ParsedNode[]): number => {
+  let max = 0;
+  const stack: Array<{ node: ParsedNode; depth: number }> = roots.map((node) => ({
+    node,
+    depth: 1,
+  }));
 
   while (stack.length > 0) {
-    const node = stack.pop();
-    if (!node) break;
-    if (!excluded.has(node)) {
-      if (node.type === 'text') {
-        out.push(node.data ?? '');
-      } else {
-        const children = node.children ?? [];
-        for (let i = children.length - 1; i >= 0; i--) {
-          stack.push(children[i]);
-        }
-      }
+    const frame = stack.pop();
+    if (!frame) break;
+    if (frame.depth > max) max = frame.depth;
+    // No early exit on the bound: the walk is linear and the caller wants the real depth
+    // for its own decision, so stopping early would only trade clarity for nothing.
+    for (const child of frame.node.children ?? []) {
+      stack.push({ node: child, depth: frame.depth + 1 });
     }
   }
 
-  return out.join('');
+  return max;
+};
+
+/**
+ * Visible-character count of every node's subtree, excluding chrome, in one pass.
+ *
+ * Scoring each candidate with its own subtree traversal was quadratic whenever candidates
+ * nest, and `ARTICLE_SELECTORS` nest readily: `'<article>'.repeat(n)` produces n
+ * candidates whose subtrees all overlap. Measured through this function, 16ms at n=200
+ * rising to 770ms at n=1,600, from 14KB of input.
+ *
+ * Computing bottom-up makes every candidate a map lookup instead. A chrome subtree
+ * contributes zero, which is what the per-candidate `find(CHROME).remove()` used to
+ * achieve, and because chrome is chrome wherever it sits the result is identical.
+ *
+ * Counts non-whitespace characters rather than trimming: the previous `.text().trim()`
+ * could not be expressed as a sum over subtrees, and the only thing the score is used for
+ * is comparing candidates and rejecting empty ones. Both survive the change.
+ */
+const visibleLengths = (roots: ParsedNode[], chrome: Set<unknown>): Map<ParsedNode, number> => {
+  const lengths = new Map<ParsedNode, number>();
+  const stack: Array<{ node: ParsedNode; expanded: boolean }> = roots.map((node) => ({
+    node,
+    expanded: false,
+  }));
+
+  while (stack.length > 0) {
+    const frame = stack.pop();
+    if (!frame) break;
+    const { node, expanded } = frame;
+
+    if (chrome.has(node)) {
+      lengths.set(node, 0);
+    } else if (node.type === 'text') {
+      lengths.set(node, (node.data ?? '').replace(/\s/g, '').length);
+    } else if (!expanded) {
+      stack.push({ node, expanded: true });
+      for (const child of node.children ?? []) {
+        stack.push({ node: child, expanded: false });
+      }
+    } else {
+      let total = 0;
+      for (const child of node.children ?? []) {
+        total += lengths.get(child) ?? 0;
+      }
+      lengths.set(node, total);
+    }
+  }
+
+  return lengths;
 };
 
 const selectArticleHtml = (html: string): string => {
-  const $ = cheerio.load(html);
+  // Normalized before parsing, for the same reason `text.ts` does it: HTML has no
+  // self-closing syntax for raw-text elements, so a spec-compliant parser reads
+  // `<article><script src="x.js"/><p>IOC: evil.test</p></article>` as a script whose body
+  // is that paragraph. Chrome removal then deleted the script and the report with it,
+  // leaving `<article></article>`. XHTML-style feeds write this form legitimately.
+  const $ = cheerio.load(normalizeSelfClosedRawText(html), PARSER_OPTIONS);
+
+  // The one cast in this file, at the boundary where the transitive `@types/cheerio@0.22`
+  // stops describing the DOM the installed cheerio actually returns.
+  const roots = $.root().toArray() as unknown as ParsedNode[];
+  if (maxDepthOf(roots) > MAX_NESTING_DEPTH) return html;
 
   // Page-level only. Done before selection so these never count toward a candidate's
   // score, while an article's own header/footer/aside still does.
@@ -143,24 +229,24 @@ const selectArticleHtml = (html: string): string => {
    * every IOC in the report was missed.
    *
    * Text length is a blunt proxy for "the substantive one", but it is the signal that
-   * actually separates a card from a body, and it is what the reviewer asked for.
-   * Selector order survives only as a tie-break, so a precise `article` still beats a
-   * `main` of identical length.
+   * actually separates a card from a body. Selector order survives only as a tie-break,
+   * so a precise `article` still beats a `main` of identical length.
+   *
+   * Scored *after* discounting the same chrome the returned container gets. Measuring
+   * before meant a teaser carrying a large inline script or style could outweigh the real
+   * report on raw text length, win selection, and then be stripped to almost nothing.
    */
-  // Score each candidate *after* removing the same chrome the returned container
-  // gets. Measuring before meant a teaser carrying a large inline script or style
-  // could outweigh the real report on raw text length, win selection, and then be
-  // stripped down to almost nothing.
+  const chrome = new Set<unknown>($(CHROME_SELECTORS).toArray());
+  const lengths = visibleLengths(roots, chrome);
+
   const candidates = ARTICLE_SELECTORS.flatMap((selector, priority) =>
     $(selector)
       .toArray()
-      .map((el) => {
-        const excluded = new Set<unknown>($(el).find(CHROME_SELECTORS).toArray());
-        // Same boundary cast as in `text.ts`: the transitive `@types/cheerio@0.22` does
-        // not describe the DOM nodes the installed cheerio actually returns.
-        const length = textExcluding(el as unknown as ParsedNode, excluded).trim().length;
-        return { el, priority, length };
-      })
+      .map((el) => ({
+        el,
+        priority,
+        length: lengths.get(el as unknown as ParsedNode) ?? 0,
+      }))
   );
 
   let $container: ReturnType<typeof $> | null = null;
@@ -177,9 +263,13 @@ const selectArticleHtml = (html: string): string => {
     }
   }
 
-  // Fall back to <body> — never return nothing.
+  // Fall back to the document body, or to the whole fragment when there is no body
+  // element. htmlparser2 does not synthesize `<html>/<head>/<body>` the way parse5 does,
+  // so a `<description>` fragment has no body to fall back to and would otherwise return
+  // nothing at all.
   if ($container === null || $container.length === 0) {
-    $container = $('body');
+    const $body = $('body');
+    $container = $body.length > 0 ? $body : $.root();
   }
 
   // Strip chrome subtrees from within the container.

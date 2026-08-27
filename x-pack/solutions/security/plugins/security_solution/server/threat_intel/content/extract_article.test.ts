@@ -369,3 +369,93 @@ describe('deeply nested markup', () => {
     expect(() => extractArticleHtml(undefined as unknown as string)).not.toThrow();
   });
 });
+
+/**
+ * Simplification must stay cheap on hostile input.
+ *
+ * Every case here was measured before it was fixed. The timing bounds are roughly 100x
+ * the measured cost so they are not sensitive to a contended CI worker, but the
+ * quadratic behavior they replaced overruns them by orders of magnitude.
+ */
+describe('hostile markup stays cheap', () => {
+  const within = (budgetMs: number, fn: () => string): string => {
+    const started = process.hrtime.bigint();
+    const result = fn();
+    const elapsedMs = Number(process.hrtime.bigint() - started) / 1e6;
+
+    expect(elapsedMs).toBeLessThan(budgetMs);
+    return result;
+  };
+
+  // parse5's tree construction is quadratic in depth, and it ran before any output-side
+  // guard could help: 433ms at 10,000 nested elements and 2.2s at 20,000.
+  it('does not pay a quadratic parse on deeply nested markup', () => {
+    const input = `<html><body><article>${'<div>'.repeat(100000)}evil.test</article></body></html>`;
+
+    expect(within(5000, () => extractArticleHtml(input))).toContain('evil.test');
+  });
+
+  // Overlapping candidates each got their own subtree traversal: 770ms from 14KB of
+  // input at 1,600 nested `<article>` elements. The depth guard alone does not cover
+  // this, since candidates can overlap well inside the depth bound.
+  it('scores overlapping candidates without rescanning their subtrees', () => {
+    const filler = '<p>lorem ipsum dolor sit amet consectetur adipiscing elit</p>';
+    const nested = Array.from({ length: 250 }, () => `<article>${filler}`).join('');
+    const input = `<html><body>${nested}evil.test</body></html>`;
+
+    expect(within(5000, () => extractArticleHtml(input))).toContain('evil.test');
+  });
+
+  // A page past the depth bound is returned unsimplified rather than being processed
+  // slowly or dropped. What must not happen is losing the content.
+  it('returns a page past the depth bound unsimplified rather than empty', () => {
+    const input = `<html><body><article>${'<div>'.repeat(1000)}evil.test</article></body></html>`;
+    const result = extractArticleHtml(input);
+
+    expect(result).toContain('evil.test');
+  });
+
+  it('still simplifies a page just inside the depth bound', () => {
+    const input = `<html><body><header>site nav</header><article>${'<div>'.repeat(
+      100
+    )}evil.test</article><footer>foot</footer></body></html>`;
+    const result = extractArticleHtml(input);
+
+    expect(result).toContain('evil.test');
+    expect(result).not.toContain('site nav');
+    expect(result).not.toContain('foot');
+  });
+});
+
+/**
+ * HTML has no self-closing syntax for raw-text elements, so a spec-compliant parser reads
+ * `<script src="x.js"/>` as a script whose body is everything after it. Chrome removal
+ * then deleted the script and the report along with it. RSS payloads are frequently
+ * XHTML, where the form is legitimately self-closing.
+ */
+describe('self-closed raw-text elements', () => {
+  it('keeps the report following a self-closed script', () => {
+    const result = extractArticleHtml(
+      '<html><body><article><script src="x.js"/><p>IOC: evil.test</p></article></body></html>'
+    );
+
+    expect(result).toContain('evil.test');
+  });
+
+  it('keeps the report following a self-closed style', () => {
+    const result = extractArticleHtml(
+      '<html><body><article><style/><p>IOC: evil.test</p></article></body></html>'
+    );
+
+    expect(result).toContain('evil.test');
+  });
+
+  it('still removes a properly terminated script from the article', () => {
+    const result = extractArticleHtml(
+      '<html><body><article><script>var tracker = 1;</script><p>IOC: evil.test</p></article></body></html>'
+    );
+
+    expect(result).toContain('evil.test');
+    expect(result).not.toContain('tracker');
+  });
+});

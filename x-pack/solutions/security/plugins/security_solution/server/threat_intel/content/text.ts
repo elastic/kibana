@@ -25,6 +25,53 @@ const capInput = (html: string): string =>
   html.length > MAX_PARSE_BYTES ? html.slice(0, MAX_PARSE_BYTES) : html;
 
 /**
+ * Inline elements, which carry no token boundary.
+ *
+ * Everything else does. Threat reports routinely split an indicator across inline
+ * formatting, and `<p>c2.<strong>evil</strong>.test</p>` has to yield `c2.evil.test`
+ * rather than `c2. evil .test`, or extraction misses the domain entirely. The regex
+ * implementation could not draw this distinction at all, because it only ever saw a
+ * `<tag>` to substitute; the parser knows which element it is looking at.
+ *
+ * Listed as an allowlist rather than a blocklist so an unknown or custom element still
+ * produces a boundary. That is the safe default: a spurious boundary splits one token,
+ * whereas a missing one silently merges two adjacent indicators into an unextractable
+ * value.
+ */
+const INLINE_NAMES = new Set([
+  'a',
+  'abbr',
+  'b',
+  'bdi',
+  'bdo',
+  'cite',
+  'code',
+  'data',
+  'dfn',
+  'em',
+  'font',
+  'i',
+  'kbd',
+  'mark',
+  'q',
+  'rp',
+  'rt',
+  'ruby',
+  's',
+  'samp',
+  'small',
+  'span',
+  'strong',
+  'sub',
+  'sup',
+  'time',
+  'tt',
+  'u',
+  'var',
+  'wbr',
+]);
+
+/**
  * Minimal shape of a parsed DOM node.
  *
  * Declared here rather than imported from cheerio. A transitive `@types/cheerio@0.22`
@@ -74,7 +121,7 @@ const RAW_TEXT_NAMES = new Set(['script', 'style']);
  */
 const SELF_CLOSED_RAW_TEXT = /<(script|style)((?:"[^"]*"|'[^']*'|[^>"']){0,2048}?)\/>/gi;
 
-const normalizeSelfClosedRawText = (html: string): string =>
+export const normalizeSelfClosedRawText = (html: string): string =>
   html.replace(SELF_CLOSED_RAW_TEXT, '<$1$2></$1>');
 
 /**
@@ -183,6 +230,8 @@ const inlineTextOf = (nodes: ParsedNode[], liftHrefs: boolean): string => {
         out.push(' ');
       } else if (liftedHref !== undefined) {
         out.push(` ${collapseWhitespace(inlineTextOf(childrenOf(node), false))} ${liftedHref} `);
+      } else if (INLINE_NAMES.has(elementName(node))) {
+        pushNodes(stack, childrenOf(node));
       } else {
         out.push(' ');
         stack.push({ kind: 'emit', text: ' ' });
