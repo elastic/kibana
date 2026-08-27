@@ -256,14 +256,21 @@ export async function getFullAgentPolicy(
     ? rawPackagePolicySecretReferences.filter(({ id }) => compiledSecretIds.has(id))
     : rawPackagePolicySecretReferences;
 
-  if (compiledSecretIds && packagePolicySecretReferences.length < rawPackagePolicySecretReferences.length) {
+  if (
+    compiledSecretIds &&
+    packagePolicySecretReferences.length < rawPackagePolicySecretReferences.length
+  ) {
     const droppedIds = rawPackagePolicySecretReferences
       .filter(({ id }) => !compiledSecretIds.has(id))
       .map(({ id }) => id);
     appContextService
       .getLogger()
       .info(
-        `Pruned ${droppedIds.length} package policy secret reference(s) not present in the compiled agent policy (agent policy: ${agentPolicy.id}): ${droppedIds.join(', ')}`
+        `Pruned ${
+          droppedIds.length
+        } package policy secret reference(s) not present in the compiled agent policy (agent policy: ${
+          agentPolicy.id
+        }): ${droppedIds.join(', ')}`
       );
   }
 

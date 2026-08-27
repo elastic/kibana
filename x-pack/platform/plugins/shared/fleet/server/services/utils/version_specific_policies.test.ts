@@ -283,21 +283,30 @@ describe('getVersionSpecificPolicies', () => {
   });
 
   it('uses the rebuilt policy secret_references when the policy is rebuilt for the agent version', async () => {
-    const { agentPolicyService: mockedAgentPolicyService } = jest.requireMock('../agent_policy') as any;
+    const { agentPolicyService: mockedAgentPolicyService } = jest.requireMock(
+      '../agent_policy'
+    ) as any;
     mockedAgentPolicyService.getFullAgentPolicy.mockImplementation(
       async (_: any, id: string, { agentVersion }: { agentVersion: string }) => ({
         id,
         inputs: agentVersion.startsWith('9.') ? [{ type: 'cel' }] : [],
-        secret_references: agentVersion.startsWith('9.')
-          ? [{ id: 'secret-for-9x' }]
-          : [],
+        secret_references: agentVersion.startsWith('9.') ? [{ id: 'secret-for-9x' }] : [],
       })
     );
 
-    const fleetServerPolicy = { data: { inputs: [], secret_references: [{ id: 'base-secret' }] } } as any;
-    const fullPolicy = { id: 'policy1', inputs: [{}], secret_references: [{ id: 'base-secret' }] } as any;
+    const fleetServerPolicy = {
+      data: { inputs: [], secret_references: [{ id: 'base-secret' }] },
+    } as any;
+    const fullPolicy = {
+      id: 'policy1',
+      inputs: [{}],
+      secret_references: [{ id: 'base-secret' }],
+    } as any;
 
-    const policies = await getVersionSpecificPolicies(soClient, fleetServerPolicy, fullPolicy, ['9.3', '8.9']);
+    const policies = await getVersionSpecificPolicies(soClient, fleetServerPolicy, fullPolicy, [
+      '9.3',
+      '8.9',
+    ]);
 
     const policy93 = policies.find((p) => p.policy_id === 'policy1#9.3');
     const policy89 = policies.find((p) => p.policy_id === 'policy1#8.9');

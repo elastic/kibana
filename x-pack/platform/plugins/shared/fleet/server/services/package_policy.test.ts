@@ -4713,10 +4713,33 @@ describe('Package policy service', () => {
           ...storedAttributes,
         };
         soClient.bulkGet.mockResolvedValue({
-          saved_objects: [{ id: policy.id, type: 'ingest-package-policies', references: [], version: '1', attributes: policy }],
+          saved_objects: [
+            {
+              id: policy.id,
+              type: 'ingest-package-policies',
+              references: [],
+              version: '1',
+              attributes: policy,
+            },
+          ],
         });
-        soClient.update.mockImplementation(async (_type, _id, attrs) => ({ id: policy.id, type: 'ingest-package-policies', references: [], version: '2', attributes: attrs } as any));
-        soClient.get.mockResolvedValue({ id: policy.id, type: 'ingest-package-policies', references: [], version: '2', attributes: policy } as any);
+        soClient.update.mockImplementation(
+          async (_type, _id, attrs) =>
+            ({
+              id: policy.id,
+              type: 'ingest-package-policies',
+              references: [],
+              version: '2',
+              attributes: attrs,
+            } as any)
+        );
+        soClient.get.mockResolvedValue({
+          id: policy.id,
+          type: 'ingest-package-policies',
+          references: [],
+          version: '2',
+          attributes: policy,
+        } as any);
         return policy;
       };
 
@@ -4733,13 +4756,20 @@ describe('Package policy service', () => {
         mockAgentPolicyGet();
 
         mockedSecretsModule.isSecretStorageEnabled.mockResolvedValue(true);
-        mockedSecretsModule.extractAndUpdateSecrets.mockImplementation(async ({ packagePolicyUpdate }) => ({
-          packagePolicyUpdate,
-          secretReferences: [],
-          secretsToDelete: [{ id: 'old-secret-1' }],
-        }));
+        mockedSecretsModule.extractAndUpdateSecrets.mockImplementation(
+          async ({ packagePolicyUpdate }) => ({
+            packagePolicyUpdate,
+            secretReferences: [],
+            secretsToDelete: [{ id: 'old-secret-1' }],
+          })
+        );
 
-        await packagePolicyService.update(soClient, esClient, createPackagePolicyMock().id, createPackagePolicyMock());
+        await packagePolicyService.update(
+          soClient,
+          esClient,
+          createPackagePolicyMock().id,
+          createPackagePolicyMock()
+        );
 
         const updatedAttrs = soClient.update.mock.calls[0][2] as any;
         expect(updatedAttrs.secret_references).toEqual([]);
@@ -4753,7 +4783,12 @@ describe('Package policy service', () => {
 
         mockedSecretsModule.isSecretStorageEnabled.mockResolvedValue(false);
 
-        await packagePolicyService.update(soClient, esClient, createPackagePolicyMock().id, createPackagePolicyMock());
+        await packagePolicyService.update(
+          soClient,
+          esClient,
+          createPackagePolicyMock().id,
+          createPackagePolicyMock()
+        );
 
         const updatedAttrs = soClient.update.mock.calls[0][2] as any;
         expect(updatedAttrs).not.toHaveProperty('secret_references');
@@ -4762,15 +4797,20 @@ describe('Package policy service', () => {
       it('does not call deleteSecretsIfNotReferenced when cloud_connector_id is set', async () => {
         const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
         const soClient = createSavedObjectClientMock();
-        buildUpdateSOMocks(soClient, { cloud_connector_id: 'connector-1', secret_references: [{ id: 'connector-secret-1' }] });
+        buildUpdateSOMocks(soClient, {
+          cloud_connector_id: 'connector-1',
+          secret_references: [{ id: 'connector-secret-1' }],
+        });
         mockAgentPolicyGet();
 
         mockedSecretsModule.isSecretStorageEnabled.mockResolvedValue(true);
-        mockedSecretsModule.extractAndUpdateSecrets.mockImplementation(async ({ packagePolicyUpdate }) => ({
-          packagePolicyUpdate,
-          secretReferences: [],
-          secretsToDelete: [{ id: 'connector-secret-1' }],
-        }));
+        mockedSecretsModule.extractAndUpdateSecrets.mockImplementation(
+          async ({ packagePolicyUpdate }) => ({
+            packagePolicyUpdate,
+            secretReferences: [],
+            secretsToDelete: [{ id: 'connector-secret-1' }],
+          })
+        );
 
         await packagePolicyService.update(soClient, esClient, createPackagePolicyMock().id, {
           ...createPackagePolicyMock(),
@@ -4787,19 +4827,28 @@ describe('Package policy service', () => {
         mockAgentPolicyGet();
 
         mockedSecretsModule.isSecretStorageEnabled.mockResolvedValue(true);
-        mockedSecretsModule.extractAndUpdateSecrets.mockImplementation(async ({ packagePolicyUpdate }) => ({
-          packagePolicyUpdate,
-          secretReferences: [],
-          secretsToDelete: [],
-        }));
+        mockedSecretsModule.extractAndUpdateSecrets.mockImplementation(
+          async ({ packagePolicyUpdate }) => ({
+            packagePolicyUpdate,
+            secretReferences: [],
+            secretsToDelete: [],
+          })
+        );
 
         const payloadWithoutVars = createPackagePolicyMock();
         delete (payloadWithoutVars as any).vars;
 
-        await packagePolicyService.update(soClient, esClient, createPackagePolicyMock().id, payloadWithoutVars);
+        await packagePolicyService.update(
+          soClient,
+          esClient,
+          createPackagePolicyMock().id,
+          payloadWithoutVars
+        );
 
         const extractCall = mockedSecretsModule.extractAndUpdateSecrets.mock.calls[0][0] as any;
-        expect(extractCall.packagePolicyUpdate.vars).toEqual({ stored_var: { type: 'text', value: 'stored' } });
+        expect(extractCall.packagePolicyUpdate.vars).toEqual({
+          stored_var: { type: 'text', value: 'stored' },
+        });
       });
     });
   });

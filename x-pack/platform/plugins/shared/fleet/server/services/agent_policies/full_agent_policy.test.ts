@@ -2562,7 +2562,14 @@ describe('getFullAgentPolicy', () => {
                 id: 'input-1',
                 type: 'logfile',
                 enabled: true,
-                streams: [{ id: 's1', enabled: true, compiled_stream: { val: BigInt(1) as any }, data_stream: { type: 'logs', dataset: 'test' } }],
+                streams: [
+                  {
+                    id: 's1',
+                    enabled: true,
+                    compiled_stream: { val: BigInt(1) as any },
+                    data_stream: { type: 'logs', dataset: 'test' },
+                  },
+                ],
               },
             ],
           },
