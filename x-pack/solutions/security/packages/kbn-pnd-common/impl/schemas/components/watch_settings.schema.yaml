@@ -112,19 +112,6 @@ components:
         enabled:
           type: boolean
 
-    WatchGeneralSettings:
-      type: object
-      required:
-        - runAsIdentity
-        - showMvpScopeWarning
-      properties:
-        runAsIdentity:
-          type: string
-          description: Service account each run executes as, e.g. svc-watch-floor
-        showMvpScopeWarning:
-          type: boolean
-          description: Renders the MVP-scope callout about autonomy inheritance being undecided
-
     WatchSelectSetting:
       type: object
       description: A single-choice setting. Both ids resolve to copy in the UI.
@@ -255,8 +242,6 @@ components:
           description: >-
             The selected level. The scale itself is shared across every watch, so it is not repeated
             per watch — see WATCH_AUTONOMY_LEVELS.
-        general:
-          $ref: '#/components/schemas/WatchGeneralSettings'
         triggers:
           $ref: '#/components/schemas/WatchTriggersSettings'
         scopeRouting:
