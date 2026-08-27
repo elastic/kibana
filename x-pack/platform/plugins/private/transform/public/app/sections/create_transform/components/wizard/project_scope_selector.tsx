@@ -180,6 +180,8 @@ export const ProjectScopeSelector = ({
           </EuiButton>
         }
         closePopover={() => setIsPopoverOpen(false)}
+        css={{ inlineSize: '100%' }}
+        display="block"
         isOpen={isPopoverOpen}
         panelPaddingSize="none"
         panelProps={{ css: { width: 560 } }}

@@ -323,7 +323,9 @@ export const Wizard: FC<WizardProps> = React.memo(
     );
     const dataViewPicker = (
       <EuiFlexGroup alignItems="flexStart" gutterSize="s">
-        {projectScopeSelector}
+        {projectScopeSelector ? (
+          <EuiFlexItem grow={false}>{projectScopeSelector}</EuiFlexItem>
+        ) : null}
         <EuiFlexItem grow>{dataViewPickerRow}</EuiFlexItem>
       </EuiFlexGroup>
     );
