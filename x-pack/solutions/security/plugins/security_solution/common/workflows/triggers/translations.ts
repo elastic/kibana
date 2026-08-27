@@ -65,7 +65,10 @@ export const ALERT_TAGS_CHANGED_SCHEMA_ALERT_IDS_DESCRIPTION = i18n.translate(
 
 export const ALERT_TAGS_CHANGED_SCHEMA_TRUNCATED_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.workflows.triggers.alertTagsChanged.schema.truncated',
-  { defaultMessage: 'True if the number of affected alerts exceeded the capture limit.' }
+  {
+    defaultMessage:
+      'True if any payload field was capped: either the number of affected alerts exceeded the capture limit, or the number of tags in the request exceeded the per-operation limit.',
+  }
 );
 
 // Alert assignees changed
@@ -77,7 +80,10 @@ export const ALERT_ASSIGNEES_CHANGED_SCHEMA_ALERT_IDS_DESCRIPTION = i18n.transla
 
 export const ALERT_ASSIGNEES_CHANGED_SCHEMA_TRUNCATED_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.workflows.triggers.alertAssigneesChanged.schema.truncated',
-  { defaultMessage: 'True if the number of affected alerts exceeded the capture limit.' }
+  {
+    defaultMessage:
+      'True if any payload field was capped: either the number of affected alerts exceeded the capture limit, or the number of assignees in the request exceeded the per-operation limit.',
+  }
 );
 
 // Attack status changed
@@ -106,7 +112,10 @@ export const ATTACK_TAGS_CHANGED_SCHEMA_ATTACK_IDS_DESCRIPTION = i18n.translate(
 
 export const ATTACK_TAGS_CHANGED_SCHEMA_TRUNCATED_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.workflows.triggers.attackTagsChanged.schema.truncated',
-  { defaultMessage: 'True if the number of affected attacks exceeded the capture limit.' }
+  {
+    defaultMessage:
+      'True if any payload field was capped: either the number of affected attacks exceeded the capture limit, or the number of tags in the request exceeded the per-operation limit.',
+  }
 );
 
 // Attack assignees changed
@@ -118,7 +127,10 @@ export const ATTACK_ASSIGNEES_CHANGED_SCHEMA_ATTACK_IDS_DESCRIPTION = i18n.trans
 
 export const ATTACK_ASSIGNEES_CHANGED_SCHEMA_TRUNCATED_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.workflows.triggers.attackAssigneesChanged.schema.truncated',
-  { defaultMessage: 'True if the number of affected attacks exceeded the capture limit.' }
+  {
+    defaultMessage:
+      'True if any payload field was capped: either the number of affected attacks exceeded the capture limit, or the number of assignees in the request exceeded the per-operation limit.',
+  }
 );
 
 // Note created

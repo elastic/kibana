@@ -83,6 +83,23 @@ export const setAttacksAssigneesRoute = (
           return siemResponse.error({ statusCode: 400, body: validationErrors });
         }
 
+        // Compute assignee arrays once for both branches: allValid* for truncation detection,
+        // valid* (capped) for the event payload.
+        const allValidAssigneesToAdd = assignees.add.filter(
+          (uid) => uid.length <= MAX_ASSIGNEE_UID_LENGTH
+        );
+        const allValidAssigneesToRemove = assignees.remove.filter(
+          (uid) => uid.length <= MAX_ASSIGNEE_UID_LENGTH
+        );
+        const validAssigneesToAdd = allValidAssigneesToAdd.slice(0, MAX_ASSIGNEES_PER_OPERATION);
+        const validAssigneesToRemove = allValidAssigneesToRemove.slice(
+          0,
+          MAX_ASSIGNEES_PER_OPERATION
+        );
+        const operationTruncated =
+          allValidAssigneesToAdd.length > MAX_ASSIGNEES_PER_OPERATION ||
+          allValidAssigneesToRemove.length > MAX_ASSIGNEES_PER_OPERATION;
+
         // Attack indices scope the update by query, so unknown/non-attack ids are
         // filtered out naturally (they never match `terms: { _id }`).
         const attackIndex = await getAttackAlertsIndex({ context });
@@ -124,13 +141,9 @@ export const setAttacksAssigneesRoute = (
               if (eventBus && verifiedAttackIds.length > 0) {
                 void eventBus.emitAttackAssigneesChanged(request, {
                   attackIds: verifiedAttackIds,
-                  assigneesToAdd: assignees.add
-                    .filter((uid) => uid.length <= MAX_ASSIGNEE_UID_LENGTH)
-                    .slice(0, MAX_ASSIGNEES_PER_OPERATION),
-                  assigneesToRemove: assignees.remove
-                    .filter((uid) => uid.length <= MAX_ASSIGNEE_UID_LENGTH)
-                    .slice(0, MAX_ASSIGNEES_PER_OPERATION),
-                  truncated: ids.length > MAX_ALERTS_PER_TRIGGER,
+                  assigneesToAdd: validAssigneesToAdd,
+                  assigneesToRemove: validAssigneesToRemove,
+                  truncated: ids.length > MAX_ALERTS_PER_TRIGGER || operationTruncated,
                 });
               }
               return result;
@@ -181,18 +194,12 @@ export const setAttacksAssigneesRoute = (
               ids: combinedIds,
               assignees,
             });
-            const validAssigneesToAdd = assignees.add
-              .filter((uid) => uid.length <= MAX_ASSIGNEE_UID_LENGTH)
-              .slice(0, MAX_ASSIGNEES_PER_OPERATION);
-            const validAssigneesToRemove = assignees.remove
-              .filter((uid) => uid.length <= MAX_ASSIGNEE_UID_LENGTH)
-              .slice(0, MAX_ASSIGNEES_PER_OPERATION);
             if (verifiedAttackIds.length > 0) {
               void eventBus?.emitAttackAssigneesChanged(request, {
                 attackIds: verifiedAttackIds.slice(0, MAX_ALERTS_PER_TRIGGER),
                 assigneesToAdd: validAssigneesToAdd,
                 assigneesToRemove: validAssigneesToRemove,
-                truncated: verifiedAttackIds.length > MAX_ALERTS_PER_TRIGGER,
+                truncated: verifiedAttackIds.length > MAX_ALERTS_PER_TRIGGER || operationTruncated,
               });
             }
             if (relatedAlertIds.length > 0) {
@@ -200,7 +207,7 @@ export const setAttacksAssigneesRoute = (
                 alertIds: relatedAlertIds.slice(0, MAX_ALERTS_PER_TRIGGER),
                 assigneesToAdd: validAssigneesToAdd,
                 assigneesToRemove: validAssigneesToRemove,
-                truncated: relatedAlertIds.length > MAX_ALERTS_PER_TRIGGER,
+                truncated: relatedAlertIds.length > MAX_ALERTS_PER_TRIGGER || operationTruncated,
               });
             }
             return result;

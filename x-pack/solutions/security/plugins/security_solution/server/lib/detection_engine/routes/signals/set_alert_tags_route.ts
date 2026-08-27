@@ -68,13 +68,16 @@ export const setAlertTagsRoute = (
         const spaceId = securitySolution.getSpaceId() ?? 'default';
         const index = `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
 
+        const operationTruncated =
+          tags.tags_to_add.length > MAX_TAGS_PER_OPERATION ||
+          tags.tags_to_remove.length > MAX_TAGS_PER_OPERATION;
         return withSiemErrorHandling(response, async () => {
           const result = await updateAlertsTags({ context, index, ids, tags });
           void eventBus?.emitAlertTagsChanged(request, {
             alertIds: ids.slice(0, MAX_ALERTS_PER_TRIGGER),
             tagsToAdd: tags.tags_to_add.slice(0, MAX_TAGS_PER_OPERATION),
             tagsToRemove: tags.tags_to_remove.slice(0, MAX_TAGS_PER_OPERATION),
-            truncated: ids.length > MAX_ALERTS_PER_TRIGGER,
+            truncated: ids.length > MAX_ALERTS_PER_TRIGGER || operationTruncated,
           });
           return result;
         });

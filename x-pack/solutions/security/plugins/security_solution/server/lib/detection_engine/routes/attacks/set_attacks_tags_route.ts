@@ -79,6 +79,16 @@ export const setAttacksTagsRoute = (
           return buildSiemResponse(response).error({ statusCode: 400, body: validationErrors });
         }
 
+        // Compute tag arrays once for both branches: allValid* for no-op/truncation detection,
+        // valid* (capped) for the event payload.
+        const allValidTagsToAdd = tags.tags_to_add.filter((t) => t.length <= MAX_TAG_LENGTH);
+        const allValidTagsToRemove = tags.tags_to_remove.filter((t) => t.length <= MAX_TAG_LENGTH);
+        const validTagsToAdd = allValidTagsToAdd.slice(0, MAX_TAGS_PER_OPERATION);
+        const validTagsToRemove = allValidTagsToRemove.slice(0, MAX_TAGS_PER_OPERATION);
+        const operationTruncated =
+          allValidTagsToAdd.length > MAX_TAGS_PER_OPERATION ||
+          allValidTagsToRemove.length > MAX_TAGS_PER_OPERATION;
+
         // Attack indices scope the update by query, so unknown/non-attack ids are
         // filtered out naturally (they never match `terms: { _id }`).
         const attackIndex = await getAttackAlertsIndex({ context });
@@ -115,13 +125,9 @@ export const setAttacksTagsRoute = (
               if (eventBus && verifiedAttackIds.length > 0) {
                 void eventBus.emitAttackTagsChanged(request, {
                   attackIds: verifiedAttackIds,
-                  tagsToAdd: tags.tags_to_add
-                    .filter((t) => t.length <= MAX_TAG_LENGTH)
-                    .slice(0, MAX_TAGS_PER_OPERATION),
-                  tagsToRemove: tags.tags_to_remove
-                    .filter((t) => t.length <= MAX_TAG_LENGTH)
-                    .slice(0, MAX_TAGS_PER_OPERATION),
-                  truncated: ids.length > MAX_ALERTS_PER_TRIGGER,
+                  tagsToAdd: validTagsToAdd,
+                  tagsToRemove: validTagsToRemove,
+                  truncated: ids.length > MAX_ALERTS_PER_TRIGGER || operationTruncated,
                 });
               }
               return result;
@@ -166,20 +172,13 @@ export const setAttacksTagsRoute = (
             // the target to the unified index pattern for the cascade update.
             const index = await getUnifiedAlertsIndex({ context, ruleDataClient });
 
-            const validTagsToAdd = tags.tags_to_add
-              .filter((t) => t.length <= MAX_TAG_LENGTH)
-              .slice(0, MAX_TAGS_PER_OPERATION);
-            const validTagsToRemove = tags.tags_to_remove
-              .filter((t) => t.length <= MAX_TAG_LENGTH)
-              .slice(0, MAX_TAGS_PER_OPERATION);
-
             const result = await updateAlertsTags({ context, index, ids: combinedIds, tags });
             if (verifiedAttackIds.length > 0) {
               void eventBus?.emitAttackTagsChanged(request, {
                 attackIds: verifiedAttackIds.slice(0, MAX_ALERTS_PER_TRIGGER),
                 tagsToAdd: validTagsToAdd,
                 tagsToRemove: validTagsToRemove,
-                truncated: verifiedAttackIds.length > MAX_ALERTS_PER_TRIGGER,
+                truncated: verifiedAttackIds.length > MAX_ALERTS_PER_TRIGGER || operationTruncated,
               });
             }
             if (relatedAlertIds.length > 0) {
@@ -187,7 +186,7 @@ export const setAttacksTagsRoute = (
                 alertIds: relatedAlertIds.slice(0, MAX_ALERTS_PER_TRIGGER),
                 tagsToAdd: validTagsToAdd,
                 tagsToRemove: validTagsToRemove,
-                truncated: relatedAlertIds.length > MAX_ALERTS_PER_TRIGGER,
+                truncated: relatedAlertIds.length > MAX_ALERTS_PER_TRIGGER || operationTruncated,
               });
             }
             return result;
