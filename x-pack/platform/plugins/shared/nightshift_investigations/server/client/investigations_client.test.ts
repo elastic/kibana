@@ -10,7 +10,10 @@ import { ExecutionStatus } from '@kbn/workflows';
 import { SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
-import type { InvestigationSavedObjectClient } from '../saved_objects';
+import type {
+  InvestigationSavedObjectClient,
+  NightshiftInvestigationAttributes,
+} from '../saved_objects';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
 import {
   InvestigationNotFoundError,
@@ -75,19 +78,21 @@ const makeClient = () =>
     security: mockSecurity,
   });
 
-const makeSoAttrs = (overrides: Record<string, unknown> = {}) => ({
+const makeSoAttrs = (
+  overrides: Partial<NightshiftInvestigationAttributes> = {}
+): NightshiftInvestigationAttributes => ({
   investigation_id: 'inv-1',
-  status: 'completed' as const,
-  subject_type: 'alert' as const,
+  status: 'completed',
+  subject_type: 'alert',
   subject_id: 'alert-42',
-  trigger_type: 'automatic' as const,
+  trigger_type: 'automatic',
   concurrency_key: undefined,
   executed_by: 'test-user',
   created_at: '2024-01-01T00:00:00Z',
   completed_at: '2024-01-01T01:00:00Z',
   summary: 'All clear.',
   conclusion: 'No issues found.',
-  hypotheses: [{ candidate: 'h1', confidence: 0.9, status: 'confirmed' as const }],
+  hypotheses: [{ candidate: 'h1', confidence: 0.9, status: 'confirmed' }],
   recommendations: [{ title: 'Keep monitoring' }],
   blind_spots: [{ title: 'Blind spot', description: 'desc' }],
   significant_event_updates: [],
@@ -165,12 +170,19 @@ describe('NightshiftInvestigationsClient.get()', () => {
       mockManagement.getWorkflowExecution.mockResolvedValue({
         status: ExecutionStatus.FAILED,
         finishedAt: '2024-01-01T03:00:00Z',
+        error: { message: 'Internal credential error: secret-token-xyz' },
       });
 
       const result = await makeClient().get('inv-1');
 
       expect(result.status).toBe('failed');
       expect(result.error).toBe('Investigation failed');
+      expect(result.error).not.toContain('secret-token-xyz');
+      expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('secret-token-xyz'));
+      expect(mockInvestigationSoClient.update).toHaveBeenCalledWith(
+        'inv-1',
+        expect.objectContaining({ status: 'failed', error: 'Investigation failed' })
+      );
     });
 
     it('does not reconcile when workflow is also still running', async () => {
@@ -260,7 +272,7 @@ describe('NightshiftInvestigationsClient.list()', () => {
     );
   });
 
-  it('returns results using the same shape as get', async () => {
+  it('returns a slim list item without structured output', async () => {
     mockInvestigationSoClient.find.mockResolvedValue({
       results: [
         {
@@ -287,12 +299,21 @@ describe('NightshiftInvestigationsClient.list()', () => {
       executed_by: 'test-user',
       error: undefined,
       summary: 'All clear.',
-      conclusion: 'No issues found.',
-      hypotheses: [{ candidate: 'h1', confidence: 0.9, status: 'confirmed' }],
-      recommendations: [{ title: 'Keep monitoring' }],
-      blind_spots: [{ title: 'Blind spot', description: 'desc' }],
-      significant_event_updates: [],
     });
+    expect(result.results[0]).not.toHaveProperty('conclusion');
+    expect(result.results[0]).not.toHaveProperty('hypotheses');
+  });
+
+  it('source-filters find to list fields', async () => {
+    await makeClient().list();
+    expect(mockInvestigationSoClient.find).toHaveBeenCalledWith(
+      expect.objectContaining({
+        fields: expect.arrayContaining(['status', 'summary', 'error']),
+      })
+    );
+    const { fields } = mockInvestigationSoClient.find.mock.calls[0][0];
+    expect(fields).not.toContain('hypotheses');
+    expect(fields).not.toContain('conclusion');
   });
 });
 
@@ -434,5 +455,43 @@ describe('NightshiftInvestigationsClient.start()', () => {
     await expect(client.start({ subject: { type: 'alert', id: 'alert-1' } })).rejects.toThrow(
       InvestigationUnavailableError
     );
+  });
+});
+
+describe('NightshiftInvestigationsClient.update()', () => {
+  it('persists the provided error when status is failed', async () => {
+    await makeClient().update('inv-1', {
+      status: 'failed',
+      error: 'Agent timed out.',
+    });
+
+    expect(mockInvestigationSoClient.update).toHaveBeenCalledWith(
+      'inv-1',
+      expect.objectContaining({ status: 'failed', error: 'Agent timed out.' })
+    );
+    expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('Agent timed out.'));
+  });
+
+  it('persists a generic error when status is failed and no error is provided', async () => {
+    await makeClient().update('inv-1', { status: 'failed' });
+
+    expect(mockInvestigationSoClient.update).toHaveBeenCalledWith(
+      'inv-1',
+      expect.objectContaining({ status: 'failed', error: 'Investigation failed' })
+    );
+  });
+
+  it('does not persist an error field when status is completed', async () => {
+    await makeClient().update('inv-1', {
+      status: 'completed',
+      summary: 'All clear.',
+    });
+
+    expect(mockInvestigationSoClient.update).toHaveBeenCalledWith(
+      'inv-1',
+      expect.objectContaining({ status: 'completed', summary: 'All clear.' })
+    );
+    const [, attrs] = mockInvestigationSoClient.update.mock.calls[0];
+    expect(attrs).not.toHaveProperty('error');
   });
 });

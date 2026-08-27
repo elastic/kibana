@@ -18,6 +18,7 @@ import type {
   InvestigationStatus,
   InvestigationSubject,
   InvestigationTriggerType,
+  ListInvestigationItem,
   ListInvestigationsRequest,
   ListInvestigationsResponse,
   UpdatableInvestigationStatus,
@@ -29,22 +30,40 @@ import type {
   InvestigationSavedObjectClient,
   InvestigationSavedObjectUpdateAttributes,
   InvestigationStructuredOutput,
+  NightshiftInvestigationAttributes,
 } from '../saved_objects';
-import type { NightshiftInvestigationAttributes } from '../saved_objects';
-
 import { InvestigationNotFoundError } from './errors';
 import { InvestigationUnavailableError } from './investigation_unavailable_error';
 export { InvestigationNotFoundError, InvestigationUnavailableError };
+
+/** Used when persist omitted `error`, or when reconciling a failed workflow execution. */
+const FALLBACK_INVESTIGATION_ERROR = 'Investigation failed';
+
+const LIST_SO_FIELDS = [
+  'completed_at',
+  'concurrency_key',
+  'created_at',
+  'error',
+  'executed_by',
+  'status',
+  'subject_id',
+  'subject_type',
+  'summary',
+  'trigger_type',
+] as const satisfies ReadonlyArray<keyof NightshiftInvestigationAttributes>;
 
 export interface UpdateInvestigationRequest extends InvestigationStructuredOutput {
   status: UpdatableInvestigationStatus;
   error?: string;
 }
 
-function toInvestigationResponse(
-  id: string,
-  attrs: NightshiftInvestigationAttributes
-): GetInvestigationResponse {
+function toListInvestigationItem({
+  id,
+  attrs,
+}: {
+  id: string;
+  attrs: NightshiftInvestigationAttributes;
+}): ListInvestigationItem {
   return {
     investigation_id: id,
     subject: { type: attrs.subject_type, id: attrs.subject_id },
@@ -56,6 +75,18 @@ function toInvestigationResponse(
     executed_by: attrs.executed_by,
     error: attrs.error,
     summary: attrs.summary,
+  };
+}
+
+function toInvestigationResponse({
+  id,
+  attrs,
+}: {
+  id: string;
+  attrs: NightshiftInvestigationAttributes;
+}): GetInvestigationResponse {
+  return {
+    ...toListInvestigationItem({ id, attrs }),
     conclusion: attrs.conclusion,
     hypotheses: attrs.hypotheses,
     recommendations: attrs.recommendations,
@@ -255,10 +286,14 @@ export class NightshiftInvestigationsClient {
   async update(investigationId: string, state: UpdateInvestigationRequest): Promise<void> {
     const { status, error, ...output } = state;
 
+    if (status === 'failed' && error) {
+      this.logger.warn(`Investigation "${investigationId}" failed: ${error}`);
+    }
+
     const attrs: InvestigationSavedObjectUpdateAttributes = {
       status,
       ...(isTerminalStatus(status) && { completed_at: new Date().toISOString() }),
-      ...(error !== undefined && { error }),
+      ...(status === 'failed' && { error: error ?? FALLBACK_INVESTIGATION_ERROR }),
       ...output,
     };
 
@@ -272,7 +307,7 @@ export class NightshiftInvestigationsClient {
       throw new InvestigationNotFoundError(investigationId);
     }
 
-    const response = toInvestigationResponse(investigationId, soAttrs);
+    const response = toInvestigationResponse({ id: investigationId, attrs: soAttrs });
 
     if (soAttrs.status === 'running') {
       const reconciled = await this.reconcileStaleRunningStatus(investigationId);
@@ -312,8 +347,12 @@ export class NightshiftInvestigationsClient {
     const correction: InvestigationSavedObjectUpdateAttributes = {
       status: workflowStatus,
       completed_at: execution.finishedAt ?? new Date().toISOString(),
-      ...(workflowStatus === 'failed' && { error: 'Investigation failed' }),
+      ...(workflowStatus === 'failed' && { error: FALLBACK_INVESTIGATION_ERROR }),
     };
+
+    if (workflowStatus === 'failed' && execution.error?.message) {
+      this.logger.warn(`Investigation "${investigationId}" failed: ${execution.error.message}`);
+    }
 
     await this.investigationSoClient.update(investigationId, correction).catch((err) => {
       this.logger.warn(
@@ -349,9 +388,12 @@ export class NightshiftInvestigationsClient {
       sortOrder: sort_order,
       page,
       perPage: size,
+      fields: [...LIST_SO_FIELDS],
     });
 
-    const results = result.results.map((so) => toInvestigationResponse(so.id, so.attributes));
+    const results = result.results.map((so) =>
+      toListInvestigationItem({ id: so.id, attrs: so.attributes })
+    );
 
     return { results, page: result.page, size: result.size, total: result.total };
   }

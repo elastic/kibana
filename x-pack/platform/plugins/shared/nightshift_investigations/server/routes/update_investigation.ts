@@ -16,6 +16,9 @@ import {
 import { UPDATABLE_INVESTIGATION_STATUSES } from '../../common';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
 
+const orAbsent = <T extends z.ZodType>(schema: T) =>
+  schema.nullish().transform((value): z.infer<T> | undefined => value ?? undefined);
+
 export const updateInvestigationRoute = createNightshiftInvestigationsServerRoute({
   endpoint: 'PATCH /internal/nightshift/investigations/{id}',
   options: {
@@ -35,19 +38,17 @@ export const updateInvestigationRoute = createNightshiftInvestigationsServerRout
     }),
     body: z.object({
       status: z.enum(UPDATABLE_INVESTIGATION_STATUSES),
-      error: z.string().max(MAX_TEXT_LENGTH).optional(),
-      summary: z.string().max(MAX_TEXT_LENGTH).optional(),
-      conclusion: z.string().max(MAX_TEXT_LENGTH).optional(),
-      hypotheses: z.array(z.record(z.string(), z.unknown())).max(MAX_HYPOTHESES).optional(),
-      recommendations: z
-        .array(z.record(z.string(), z.unknown()))
-        .max(MAX_RECOMMENDATIONS)
-        .optional(),
-      blind_spots: z.array(z.record(z.string(), z.unknown())).max(MAX_BLIND_SPOTS).optional(),
-      significant_event_updates: z
-        .array(z.record(z.string(), z.unknown()))
-        .max(MAX_SIGNIFICANT_EVENT_UPDATES)
-        .optional(),
+      error: orAbsent(z.string().max(MAX_TEXT_LENGTH)),
+      summary: orAbsent(z.string().max(MAX_TEXT_LENGTH)),
+      conclusion: orAbsent(z.string().max(MAX_TEXT_LENGTH)),
+      hypotheses: orAbsent(z.array(z.record(z.string(), z.unknown())).max(MAX_HYPOTHESES)),
+      recommendations: orAbsent(
+        z.array(z.record(z.string(), z.unknown())).max(MAX_RECOMMENDATIONS)
+      ),
+      blind_spots: orAbsent(z.array(z.record(z.string(), z.unknown())).max(MAX_BLIND_SPOTS)),
+      significant_event_updates: orAbsent(
+        z.array(z.record(z.string(), z.unknown())).max(MAX_SIGNIFICANT_EVENT_UPDATES)
+      ),
     }),
   }),
   handler: async ({ request, params, getInvestigationsClient }) => {

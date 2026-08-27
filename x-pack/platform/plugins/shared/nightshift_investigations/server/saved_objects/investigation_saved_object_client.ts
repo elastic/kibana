@@ -7,9 +7,8 @@
 
 import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { escapeKuery } from '@kbn/es-query';
-import type { InvestigationStatus } from '../../common';
-import type { PaginatedResponse } from '../../common';
+import { escapeQuotes } from '@kbn/es-query';
+import type { InvestigationStatus, PaginatedResponse } from '../../common';
 import {
   NIGHTSHIFT_INVESTIGATION_SO_TYPE,
   type NightshiftInvestigationAttributes,
@@ -41,6 +40,7 @@ export interface FindInvestigationsOptions {
   sortOrder?: 'asc' | 'desc';
   page?: number;
   perPage?: number;
+  fields?: string[];
 }
 
 export type FindInvestigationsResult = PaginatedResponse<
@@ -49,13 +49,16 @@ export type FindInvestigationsResult = PaginatedResponse<
 
 export interface InvestigationSavedObjectClientDeps {
   savedObjectsClient: SavedObjectsClientContract;
+  namespace?: string;
 }
 
 export class InvestigationSavedObjectClient {
   private readonly savedObjectsClient: SavedObjectsClientContract;
+  private readonly namespace?: string;
 
-  constructor({ savedObjectsClient }: InvestigationSavedObjectClientDeps) {
+  constructor({ savedObjectsClient, namespace }: InvestigationSavedObjectClientDeps) {
     this.savedObjectsClient = savedObjectsClient;
+    this.namespace = namespace;
   }
 
   async create({
@@ -68,7 +71,7 @@ export class InvestigationSavedObjectClient {
     await this.savedObjectsClient.create<NightshiftInvestigationAttributes>(
       NIGHTSHIFT_INVESTIGATION_SO_TYPE,
       attributes,
-      { id }
+      { id, namespace: this.namespace }
     );
   }
 
@@ -76,7 +79,8 @@ export class InvestigationSavedObjectClient {
     try {
       const so = await this.savedObjectsClient.get<NightshiftInvestigationAttributes>(
         NIGHTSHIFT_INVESTIGATION_SO_TYPE,
-        id
+        id,
+        { namespace: this.namespace }
       );
       return so.attributes;
     } catch (error) {
@@ -88,7 +92,9 @@ export class InvestigationSavedObjectClient {
   }
 
   async update(id: string, attributes: InvestigationSavedObjectUpdateAttributes): Promise<void> {
-    await this.savedObjectsClient.update(NIGHTSHIFT_INVESTIGATION_SO_TYPE, id, attributes);
+    await this.savedObjectsClient.update(NIGHTSHIFT_INVESTIGATION_SO_TYPE, id, attributes, {
+      namespace: this.namespace,
+    });
   }
 
   async findByConcurrencyKey(
@@ -96,12 +102,13 @@ export class InvestigationSavedObjectClient {
   ): Promise<SavedObject<NightshiftInvestigationAttributes> | undefined> {
     const result = await this.savedObjectsClient.find<NightshiftInvestigationAttributes>({
       type: NIGHTSHIFT_INVESTIGATION_SO_TYPE,
-      filter: `${NIGHTSHIFT_INVESTIGATION_SO_TYPE}.attributes.concurrency_key: "${escapeKuery(
+      filter: `${NIGHTSHIFT_INVESTIGATION_SO_TYPE}.attributes.concurrency_key: "${escapeQuotes(
         concurrencyKey
       )}"`,
       perPage: 1,
       sortField: 'created_at',
       sortOrder: 'desc',
+      namespaces: this.namespace ? [this.namespace] : undefined,
     });
 
     return result.saved_objects[0];
@@ -113,7 +120,7 @@ export class InvestigationSavedObjectClient {
 
     if (options.statuses?.length) {
       const statusFilter = options.statuses
-        .map((s) => `${attr('status')}: "${escapeKuery(s)}"`)
+        .map((s) => `${attr('status')}: "${escapeQuotes(s)}"`)
         .join(' OR ');
       filters.push(`(${statusFilter})`);
     }
@@ -127,7 +134,7 @@ export class InvestigationSavedObjectClient {
 
     for (const [field, value, op] of rangeFilters) {
       if (value) {
-        filters.push(`${attr(field)} ${op} "${escapeKuery(value)}"`);
+        filters.push(`${attr(field)} ${op} "${escapeQuotes(value)}"`);
       }
     }
 
@@ -138,6 +145,8 @@ export class InvestigationSavedObjectClient {
       sortOrder: options.sortOrder ?? 'desc',
       page: options.page,
       perPage: options.perPage,
+      namespaces: this.namespace ? [this.namespace] : undefined,
+      ...(options.fields?.length ? { fields: options.fields } : {}),
     });
 
     return {

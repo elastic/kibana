@@ -7,19 +7,15 @@
 
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
-import type { ApiClientFixture, KibanaRole } from '@kbn/scout';
+import type { ApiClientFixture } from '@kbn/scout';
 import {
   apiTest,
   COMMON_HEADERS,
   INVESTIGATIONS_READ_ROLE,
+  INVESTIGATIONS_WRITE_ROLE,
   seedInvestigation,
   deleteInvestigation,
 } from '../fixtures';
-
-const INVESTIGATIONS_WRITE_ROLE: KibanaRole = {
-  elasticsearch: { cluster: [], indices: [] },
-  kibana: [{ base: [], feature: { agentBuilder: ['all'] }, spaces: ['*'] }],
-};
 
 const SO_TYPE = 'nightshift-investigation';
 

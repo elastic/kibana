@@ -144,6 +144,9 @@ export class NightshiftInvestigationsPlugin
   }
 
   private getInvestigationsClient = (request: KibanaRequest, spaceId?: string) => {
+    const resolvedSpaceId =
+      spaceId ?? this.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+
     return new NightshiftInvestigationsClient({
       request,
       workflowsManagement: this.workflowsManagement,
@@ -151,13 +154,14 @@ export class NightshiftInvestigationsPlugin
       logger: this.logger,
       spaceIdOverride: spaceId,
       agentBuilder: this.agentBuilder,
-      investigationSoClient: this.createInvestigationSoClient(request),
+      investigationSoClient: this.createInvestigationSoClient(request, resolvedSpaceId),
       security: this.security,
     });
   };
 
   private createInvestigationSoClient = (
-    request: KibanaRequest
+    request: KibanaRequest,
+    spaceId: string
   ): InvestigationSavedObjectClient => {
     if (!this.savedObjects) {
       throw new Error('savedObjects is not available — plugin start() has not been called');
@@ -166,7 +170,8 @@ export class NightshiftInvestigationsPlugin
       excludedExtensions: [SECURITY_EXTENSION_ID],
       includedHiddenTypes: [NIGHTSHIFT_INVESTIGATION_SO_TYPE],
     });
-    return new InvestigationSavedObjectClient({ savedObjectsClient });
+    const namespace = spaceId !== DEFAULT_SPACE_ID ? spaceId : undefined;
+    return new InvestigationSavedObjectClient({ savedObjectsClient, namespace });
   };
 
   /**

@@ -114,7 +114,7 @@ apiTest.describe(
       }
     });
 
-    apiTest('each result has the same shape as get', async ({ apiClient }) => {
+    apiTest('each result has list fields without structured output', async ({ apiClient }) => {
       const response = await listInvestigations(apiClient, cookieHeader);
       expect(response).toHaveStatusCode(200);
 
@@ -127,6 +127,10 @@ apiTest.describe(
       expect(inv.status).toBe('completed');
       expect(inv.started_at).toBe('2024-06-01T10:00:00Z');
       expect(inv.summary).toBe('First investigation.');
+      expect(inv.conclusion).toBeUndefined();
+      expect(inv.hypotheses).toBeUndefined();
+      expect(inv.recommendations).toBeUndefined();
+      expect(inv.blind_spots).toBeUndefined();
     });
 
     apiTest('filters by status', async ({ apiClient }) => {

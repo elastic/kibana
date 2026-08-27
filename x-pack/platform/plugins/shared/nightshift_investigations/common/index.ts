@@ -114,7 +114,21 @@ export interface PaginatedResponse<T> {
   total: number;
 }
 
-export type ListInvestigationsResponse = PaginatedResponse<GetInvestigationResponse>;
+export type ListInvestigationItem = Pick<
+  GetInvestigationResponse,
+  | 'completed_at'
+  | 'concurrency_key'
+  | 'error'
+  | 'executed_by'
+  | 'investigation_id'
+  | 'started_at'
+  | 'status'
+  | 'subject'
+  | 'summary'
+  | 'trigger_type'
+>;
+
+export type ListInvestigationsResponse = PaginatedResponse<ListInvestigationItem>;
 
 export {
   INVESTIGATION_STARTED_TRIGGER_ID,

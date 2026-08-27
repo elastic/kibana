@@ -11,6 +11,7 @@ const SO_TYPE = 'nightshift-investigation';
 
 export interface SeedInvestigationOptions {
   id: string;
+  space?: string;
   status?: string;
   subject_type?: string;
   subject_id?: string;
@@ -30,6 +31,7 @@ export const seedInvestigation = async (
 ) => {
   const {
     id,
+    space,
     status = 'running',
     subject_type = 'alert',
     subject_id = 'test-alert-1',
@@ -42,6 +44,7 @@ export const seedInvestigation = async (
     type: SO_TYPE,
     id,
     overwrite: true,
+    space,
     attributes: {
       investigation_id: id,
       status,
@@ -54,9 +57,9 @@ export const seedInvestigation = async (
   });
 };
 
-export const deleteInvestigation = async (kbnClient: KbnClient, id: string) => {
+export const deleteInvestigation = async (kbnClient: KbnClient, id: string, space?: string) => {
   try {
-    await kbnClient.savedObjects.delete({ type: SO_TYPE, id });
+    await kbnClient.savedObjects.delete({ type: SO_TYPE, id, space });
   } catch {
     // ignore 404s during cleanup
   }
