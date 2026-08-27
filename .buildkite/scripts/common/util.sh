@@ -287,3 +287,18 @@ clean_cached_images() {
   docker images -q | sort -u | xargs -r docker rmi -f || true
   docker image prune -af || true
 }
+
+# Move the first existing source dir onto dest (no-op if none exist).
+copy_first_available() {
+  local dest="$1"
+  shift
+  local src
+  for src in "$@"; do
+    if [[ -d "$src" ]]; then
+      echo "Using $src as a starting point"
+      mkdir -p "$(dirname "$dest")"
+      mv "$src" "$dest"
+      return 0
+    fi
+  done
+}
