@@ -334,3 +334,47 @@ describe('searchCasesTool handler — search mode', () => {
     expect(results[0].data.message).toMatch(/page 1 of/i);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Tests: availability
+// ---------------------------------------------------------------------------
+
+describe('searchCasesTool availability', () => {
+  const makeCore = (solution: string | undefined) => {
+    const coreSetup = coreMock.createSetup();
+    const pluginsStart = {
+      spaces: {
+        spacesService: {
+          getActiveSpace: jest.fn().mockResolvedValue({ solution }),
+        },
+      },
+    };
+    coreSetup.getStartServices.mockResolvedValue([coreMock.createStart(), pluginsStart, {}]);
+    return coreSetup;
+  };
+
+  it('returns unavailable for es solution', async () => {
+    const coreSetup = makeCore('es');
+    const getCasesClientFn = jest.fn();
+    const tool = searchCasesTool(coreSetup, getCasesClientFn);
+    const request = httpServerMock.createKibanaRequest();
+    const result = await tool.availability!.handler({ request } as any);
+    expect(result).toEqual({ status: 'unavailable', reason: expect.any(String) });
+  });
+
+  it('returns available for classic solution', async () => {
+    const coreSetup = makeCore('classic');
+    const getCasesClientFn = jest.fn();
+    const tool = searchCasesTool(coreSetup, getCasesClientFn);
+    const request = httpServerMock.createKibanaRequest();
+    const result = await tool.availability!.handler({ request } as any);
+    expect(result).toEqual({ status: 'available' });
+  });
+
+  it('cacheMode is space', () => {
+    const coreSetup = coreMock.createSetup();
+    coreSetup.getStartServices.mockResolvedValue([coreMock.createStart(), {}, {}]);
+    const tool = searchCasesTool(coreSetup, jest.fn());
+    expect(tool.availability?.cacheMode).toBe('space');
+  });
+});
