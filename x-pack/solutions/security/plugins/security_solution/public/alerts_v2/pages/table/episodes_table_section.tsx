@@ -31,12 +31,14 @@ import {
   EpisodeStatusCell,
 } from '@kbn/alerting-v2-episodes-ui/components/episodes_table_cell_renderers';
 import { useAlertingRulesCache } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rules_cache';
+import { AlertEpisodeAssigneeCell } from '@kbn/alerting-v2-episodes-ui/components/assignee_cell';
 import {
   createAckAction,
   createUnackAction,
   createResolveAction,
   createUnresolveAction,
   createEditTagsAction,
+  createEditAssigneeAction,
 } from '@kbn/alerting-v2-episodes-ui/actions';
 import { useQueryClient } from '@kbn/react-query';
 import type { RowControlColumn } from '@kbn/discover-utils';
@@ -48,6 +50,7 @@ import { HostNameCell } from './host_name_cell';
 import { UserNameCell } from './user_name_cell';
 import { NetworkIpCell } from './network_ip_cell';
 import { useInvestigateEpisodeInTimeline } from './use_investigate_episode_in_timeline';
+import { useEpisodeAssignees } from './use_episode_assignees';
 import { EpisodeActionsMenu } from './episode_actions_menu';
 import { useFlyoutApi } from '../../../flyout_v2/use_flyout_api';
 import { useEsqlAvailability } from '../../../common/hooks/esql/use_esql_availability';
@@ -72,6 +75,8 @@ const DEFAULT_COLUMNS = [
   'episode.status',
   'rule.id',
   'severity',
+  // `assignees` isn't in the view; it's side-fetched from `.alert-actions` and rendered from a map.
+  'assignees',
   'host.name',
   'user.name',
   'process.name',
@@ -82,8 +87,9 @@ const DEFAULT_COLUMNS = [
 const SAMPLE_SIZE = 100;
 const GRID_HEIGHT = 500;
 const DEFAULT_SORT: SortOrder[] = [['first_timestamp', 'desc']];
-// Bumped to v2 so the `@timestamp` → `first_timestamp` default takes effect over any persisted state.
-const COLUMNS_STORAGE_KEY = 'securitySolution.alertsV2.episodesTableColumns.v2';
+// Bumped when the default column set changes so it takes effect over any persisted state (v2: the
+// `@timestamp` → `first_timestamp` swap; v3: added the side-fetched `assignees` column).
+const COLUMNS_STORAGE_KEY = 'securitySolution.alertsV2.episodesTableColumns.v3';
 const SORT_STORAGE_KEY = 'securitySolution.alertsV2.episodesTableSort.v2';
 const VIEW_DETAILS_LABEL = i18n.translate(
   'xpack.securitySolution.alertsV2.episodesTable.viewDetails',
@@ -119,6 +125,9 @@ const COLUMN_DISPLAY_NAMES: Record<string, string> = {
   }),
   severity: i18n.translate('xpack.securitySolution.alertsV2.episodesTable.columns.severity', {
     defaultMessage: 'Severity',
+  }),
+  assignees: i18n.translate('xpack.securitySolution.alertsV2.episodesTable.columns.assignees', {
+    defaultMessage: 'Assignee',
   }),
   'host.name': i18n.translate('xpack.securitySolution.alertsV2.episodesTable.columns.host', {
     defaultMessage: 'Host name',
@@ -216,11 +225,27 @@ export const EpisodesTableSection = ({ query, timeRange }: EpisodesTableSectionP
     [services, queryClient, presetAlertTags]
   );
 
+  // Assignees (episode-scoped): the factory opens the RnA assignee picker, then posts an `assign`
+  // action. Needs userProfile + docLinks (for the user picker) on top of the shared deps.
+  const editAssigneeAction = useMemo(
+    () =>
+      createEditAssigneeAction({
+        http: services.http,
+        overlays: services.overlays,
+        notifications: services.notifications,
+        rendering: services.rendering,
+        userProfile: services.userProfile,
+        docLinks: services.docLinks,
+        queryClient,
+      }),
+    [services, queryClient]
+  );
+
   // Everything the per-row "…" (More actions) menu offers — v2 mutations, ordered by the factories'
   // own `order`. Mirrors the v1 alerts table's per-row take-action menu.
   const episodeActions = useMemo(
-    () => [...statusActions, editTagsAction],
-    [statusActions, editTagsAction]
+    () => [...statusActions, editTagsAction, editAssigneeAction],
+    [statusActions, editTagsAction, editAssigneeAction]
   );
 
   const tableServices = useMemo(
@@ -244,6 +269,31 @@ export const EpisodesTableSection = ({ query, timeRange }: EpisodesTableSectionP
     [rows]
   );
   const { rulesCache } = useAlertingRulesCache({ ruleIds, services: { http: services.http } });
+
+  // Side-fetch the current assignee per visible episode (the view doesn't carry it).
+  const episodeIds = useMemo(
+    () =>
+      Array.from(
+        new Set(rows.map((row) => String(row.flattened['episode.id'] ?? '')).filter(Boolean))
+      ),
+    [rows]
+  );
+  const { assignees: assigneesByEpisode, refetch: refetchAssignees } =
+    useEpisodeAssignees(episodeIds);
+
+  // After a mutation, refresh the table (rows) and the side-fetched assignees together — an `assign`
+  // doesn't change the visible episode set, so the assignees lookup needs an explicit re-run.
+  const refetchAll = useCallback(() => {
+    refetch();
+    refetchAssignees();
+  }, [refetch, refetchAssignees]);
+
+  // The synthetic `assignees` column isn't in the ES|QL result, so give the grid a type for it
+  // (the grid renders any column in `columns`; without a meta entry it has no type to fall back on).
+  const gridColumnsMeta = useMemo(
+    () => ({ ...columnsMeta, assignees: { type: 'string' as const } }),
+    [columnsMeta]
+  );
 
   const { openDocumentFlyoutFromHit, openRuleFlyout, openAnalyzer, openSessionView, openNotes } =
     useFlyoutApi();
@@ -273,8 +323,16 @@ export const EpisodesTableSection = ({ query, timeRange }: EpisodesTableSectionP
           </EuiLink>
         );
       },
+      // `assignees` is a synthetic column (not in the ES|QL result); the value comes from the
+      // side-fetched map, keyed by episode.id. The cell resolves the uid → user profile itself.
+      assignees: ({ row }) => (
+        <AlertEpisodeAssigneeCell
+          assigneeUid={assigneesByEpisode.get(String(row.flattened['episode.id'] ?? '')) ?? undefined}
+          userProfile={services.userProfile}
+        />
+      ),
     }),
-    [rulesCache, openRuleFlyout]
+    [rulesCache, openRuleFlyout, assigneesByEpisode, services.userProfile]
   );
 
   // Row actions. "View details" hands the episode DataTableRecord straight to the document flyout
@@ -291,7 +349,7 @@ export const EpisodesTableSection = ({ query, timeRange }: EpisodesTableSectionP
             Control={Control}
             record={record}
             actions={episodeActions}
-            onSuccess={refetch}
+            onSuccess={refetchAll}
           />
         ),
       },
@@ -367,7 +425,7 @@ export const EpisodesTableSection = ({ query, timeRange }: EpisodesTableSectionP
     return controls;
   }, [
     episodeActions,
-    refetch,
+    refetchAll,
     openDocumentFlyoutFromHit,
     openAnalyzer,
     openSessionView,
@@ -413,7 +471,7 @@ export const EpisodesTableSection = ({ query, timeRange }: EpisodesTableSectionP
           <UnifiedDataTable
             ariaLabelledBy={TITLE_ID}
             columns={columns}
-            columnsMeta={columnsMeta}
+            columnsMeta={gridColumnsMeta}
             customGridColumnsConfiguration={CUSTOM_GRID_COLUMNS_CONFIGURATION}
             externalCustomRenderers={externalCustomRenderers}
             dataView={dataView}
