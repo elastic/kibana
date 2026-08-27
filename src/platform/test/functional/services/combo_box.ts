@@ -397,22 +397,32 @@ export class ComboBoxService extends FtrService {
    *
    * @param comboBoxElement element that wraps up EuiComboBox
    * @param value option text
+   * @param options.requireValid when true (default), plain-text comboboxes also require
+   *   aria-invalid !== 'true'. Pass false to match the committed value only — e.g. a field
+   *   that is selected but transiently invalid.
    */
   public async isOptionSelected(
     comboBoxElement: WebElementWrapper,
-    value: string
+    value: string,
+    options: { requireValid?: boolean } = {}
   ): Promise<boolean> {
-    this.log.debug(`comboBox.isOptionSelected, value: ${value}`);
+    const { requireValid = true } = options;
+    this.log.debug(`comboBox.isOptionSelected, value: ${value}, requireValid: ${requireValid}`);
     const $ = await comboBoxElement.parseDomContent();
 
     if (await this.isSingleSelectionPlainText(comboBoxElement)) {
       const input = $('input[role="combobox"]');
+      // Normalizing text here for Firefox driver shenanigans
+      const selectedValue = String(input.val() ?? '')
+        .toLowerCase()
+        .trim();
+      const valueMatches = value.toLowerCase().trim() === selectedValue;
 
-      const hasValidValue =
-        input.attr('aria-invalid') !== 'true' &&
-        value.toLowerCase().trim() === input.val().toLowerCase().trim(); // Normalizing text here for Firefox driver shenanigans
+      if (!valueMatches) {
+        return false;
+      }
 
-      return !!hasValidValue;
+      return requireValid ? input.attr('aria-invalid') !== 'true' : true;
     }
 
     const selectedOptions = $('.euiComboBoxPill')

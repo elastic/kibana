@@ -245,18 +245,15 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       } else {
         await this.selectOperation(opts.operation, opts.isPreviousIncompatible);
       }
-      if (opts.field) {
-        await this.selectOptionFromComboBox('indexPattern-dimension-field', opts.field);
-        // Field must commit to Lens state before close, or close discards the transition.
-        // Check the combobox's committed value directly rather than comboBox.isOptionSelected,
-        // which also requires aria-invalid !== 'true' and so times out on a transiently invalid
-        // remote field (e.g. an average over a CCS data view).
+      const field = opts.field;
+      if (field) {
+        await this.selectOptionFromComboBox('indexPattern-dimension-field', field);
+        // Field label must be in the combobox before close, or close discards the transition.
+        // Ignore aria-invalid: a just-selected remote field (e.g. average over a CCS data view)
+        // can be transiently invalid even after the value has committed.
         await retry.waitFor('field selection to commit', async () => {
-          const input = await find.byCssSelector(
-            '[data-test-subj="indexPattern-dimension-field"] input[role="combobox"]'
-          );
-          const value = (await input.getAttribute('value')) ?? '';
-          return value.trim().toLowerCase() === opts.field!.trim().toLowerCase();
+          const fieldCombo = await testSubjects.find('indexPattern-dimension-field');
+          return await comboBox.isOptionSelected(fieldCombo, field, { requireValid: false });
         });
       }
 
