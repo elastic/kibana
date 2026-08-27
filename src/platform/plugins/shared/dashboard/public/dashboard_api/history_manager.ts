@@ -22,7 +22,6 @@ import {
 import { startTrackingHistory } from '@kbn/rxjs-history';
 
 import type { DashboardState } from '../../common';
-import type { initializeLayoutManager } from './layout_manager';
 import type { initializeTrackOverlay } from './track_overlay';
 
 export function initializeHistoryManager({
