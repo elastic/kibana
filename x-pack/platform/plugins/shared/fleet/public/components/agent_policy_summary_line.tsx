@@ -124,12 +124,11 @@ export const AgentPolicySummaryLine = memo<{
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
                   {showVersionSpecificTooltip && (
-                    <EuiFlexItem grow={false}>
+                    <EuiFlexItem grow={false} data-test-subj="agentPolicyVersionSpecificTooltip">
                       <EuiIconTip
                         type="info"
                         size="m"
                         color="subdued"
-                        data-test-subj="agentPolicyVersionSpecificTooltip"
                         content={
                           <FormattedMessage
                             id="xpack.fleet.agentPolicySummaryLine.versionSpecificPolicyTooltip"
