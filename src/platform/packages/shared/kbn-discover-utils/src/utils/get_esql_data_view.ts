@@ -64,7 +64,9 @@ export async function getEsqlDataView(
       http: services.http,
       effectiveProjectRouting,
     });
-    dataViewRoutingMap.set(newDataView, effectiveProjectRouting);
+    if (newDataView) {
+      dataViewRoutingMap.set(newDataView, effectiveProjectRouting);
+    }
     return newDataView;
   }
   return currentDataView;
