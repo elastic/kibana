@@ -133,7 +133,6 @@ export const generateEsql = async ({
   timeRange: inputTimeRange,
   disableNamedParams,
   includeDatasets = false,
-  sessionId,
   model: inputModel,
   modelProvider,
   esClient,
@@ -147,8 +146,6 @@ export const generateEsql = async ({
   const docBase = await EsqlDocumentBase.load();
   const documentation = await loadDocumentation();
   const esqlCallbacks = buildServerESQLCallbacks({ client: esClient });
-  const cacheSessionId = sessionId ?? getDefaultEsqlCacheKey();
-  const cacheControl: ChatCompleteCacheControl = { type: 'ephemeral', ttl: '5m' };
 
   const graph = createNlToEsqlGraph({
     model,
@@ -157,8 +154,6 @@ export const generateEsql = async ({
     documentation,
     esqlCallbacks,
     includeDatasets,
-    sessionId: cacheSessionId,
-    cacheControl,
   });
 
   return withActiveInferenceSpan(
@@ -166,9 +161,6 @@ export const generateEsql = async ({
     {
       attributes: {
         [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN',
-        [ElasticGenAIAttributes.CacheControlType]: cacheControl.type,
-        [ElasticGenAIAttributes.CacheControlTTL]: cacheControl.ttl,
-        [ElasticGenAIAttributes.CacheControlSessionId]: cacheSessionId,
       },
     },
     async () => {
