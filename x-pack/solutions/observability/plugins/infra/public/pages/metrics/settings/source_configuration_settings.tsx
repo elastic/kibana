@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPageSection,
+  EuiPanel,
+  EuiSpacer,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { BottomBarActions, Prompt, useLinkProps } from '@kbn/observability-shared-plugin/public';
@@ -124,95 +131,97 @@ export const SourceConfigurationSettings = ({
   const showLoading = isLoading && !source;
 
   return (
-    <PageTemplate data-test-subj="sourceConfigurationContent" restrictWidth>
+    <PageTemplate data-test-subj="sourceConfigurationContent" paddingSize="none">
       <AppHeader title={settingsTitle} back={inventoryBack} menu={menu} spacing="standard" />
       {flyouts}
-      {showLoading ? (
-        <div data-test-subj="sourceLoadingPage">
-          <LoadingPrompt
-            message={i18n.translate('xpack.infra.sourceLoadingPage.loadingDataSourcesMessage', {
-              defaultMessage: 'Loading data sources',
-            })}
-          />
-        </div>
-      ) : (
-        <>
-          <Prompt
-            prompt={
-              isFormDirty
-                ? i18n.translate('xpack.infra.sourceConfiguration.unsavedFormPrompt', {
-                    defaultMessage: 'Are you sure you want to leave? Changes will be lost',
-                  })
-                : undefined
-            }
-          />
-          <EuiPanel paddingSize="l" hasShadow={false} hasBorder={true}>
-            <NameConfigurationPanel
-              isLoading={isLoading}
-              nameFieldProps={indicesConfigurationProps.name}
-              readOnly={!isWriteable}
+      <EuiPageSection restrictWidth paddingSize="l">
+        {showLoading ? (
+          <div data-test-subj="sourceLoadingPage">
+            <LoadingPrompt
+              message={i18n.translate('xpack.infra.sourceLoadingPage.loadingDataSourcesMessage', {
+                defaultMessage: 'Loading data sources',
+              })}
             />
-          </EuiPanel>
-          <EuiSpacer />
-          <EuiPanel paddingSize="l" hasShadow={false} hasBorder={true}>
-            <IndicesConfigurationPanel
-              isLoading={isLoading}
-              metricAliasFieldProps={indicesConfigurationProps.metricAlias}
-              readOnly={!isWriteable}
-              metricIndicesExist={metricIndicesExist}
-              remoteClustersExist={remoteClustersExist}
-              isMetricAliasChanged={Boolean(getUnsavedChanges().metricAlias)}
-              numberOfInfraRules={numberOfInfraRules}
+          </div>
+        ) : (
+          <>
+            <Prompt
+              prompt={
+                isFormDirty
+                  ? i18n.translate('xpack.infra.sourceConfiguration.unsavedFormPrompt', {
+                      defaultMessage: 'Are you sure you want to leave? Changes will be lost',
+                    })
+                  : undefined
+              }
             />
-          </EuiPanel>
-          <EuiSpacer />
-          {hasInfraMLCapabilities && (
-            <>
-              <EuiPanel paddingSize="l" hasShadow={false} hasBorder={true}>
-                <MLConfigurationPanel
-                  isLoading={isLoading}
-                  readOnly={!isWriteable}
-                  anomalyThresholdFieldProps={indicesConfigurationProps.anomalyThreshold}
-                />
-              </EuiPanel>
-              <EuiSpacer />
-            </>
-          )}
-          <EuiSpacer />
-          {errors.length > 0 ? (
-            <>
-              <EuiCallOut announceOnMount color="danger">
-                <ul>
-                  {errors.map((error, errorIndex) => (
-                    <li key={errorIndex}>{error}</li>
-                  ))}
-                </ul>
-              </EuiCallOut>
-              <EuiSpacer size="m" />
-            </>
-          ) : null}
-          <EuiSpacer size="m" />
-          <EuiFlexGroup>
-            {isWriteable && (
-              <EuiFlexItem>
-                {isFormDirty && (
-                  <BottomBarActions
-                    areChangesInvalid={!isFormValid}
-                    onDiscardChanges={resetAllUnsavedChanges}
-                    onSave={persistUpdates}
-                    saveLabel={i18n.translate('xpack.infra.sourceConfiguration.saveButton', {
-                      defaultMessage: 'Save changes',
-                    })}
-                    isLoading={false}
-                    unsavedChangesCount={unsavedChangesCount}
-                    appTestSubj="infra"
+            <EuiPanel paddingSize="l" hasShadow={false} hasBorder={true}>
+              <NameConfigurationPanel
+                isLoading={isLoading}
+                nameFieldProps={indicesConfigurationProps.name}
+                readOnly={!isWriteable}
+              />
+            </EuiPanel>
+            <EuiSpacer />
+            <EuiPanel paddingSize="l" hasShadow={false} hasBorder={true}>
+              <IndicesConfigurationPanel
+                isLoading={isLoading}
+                metricAliasFieldProps={indicesConfigurationProps.metricAlias}
+                readOnly={!isWriteable}
+                metricIndicesExist={metricIndicesExist}
+                remoteClustersExist={remoteClustersExist}
+                isMetricAliasChanged={Boolean(getUnsavedChanges().metricAlias)}
+                numberOfInfraRules={numberOfInfraRules}
+              />
+            </EuiPanel>
+            <EuiSpacer />
+            {hasInfraMLCapabilities && (
+              <>
+                <EuiPanel paddingSize="l" hasShadow={false} hasBorder={true}>
+                  <MLConfigurationPanel
+                    isLoading={isLoading}
+                    readOnly={!isWriteable}
+                    anomalyThresholdFieldProps={indicesConfigurationProps.anomalyThreshold}
                   />
-                )}
-              </EuiFlexItem>
+                </EuiPanel>
+                <EuiSpacer />
+              </>
             )}
-          </EuiFlexGroup>
-        </>
-      )}
+            <EuiSpacer />
+            {errors.length > 0 ? (
+              <>
+                <EuiCallOut announceOnMount color="danger">
+                  <ul>
+                    {errors.map((error, errorIndex) => (
+                      <li key={errorIndex}>{error}</li>
+                    ))}
+                  </ul>
+                </EuiCallOut>
+                <EuiSpacer size="m" />
+              </>
+            ) : null}
+            <EuiSpacer size="m" />
+            <EuiFlexGroup>
+              {isWriteable && (
+                <EuiFlexItem>
+                  {isFormDirty && (
+                    <BottomBarActions
+                      areChangesInvalid={!isFormValid}
+                      onDiscardChanges={resetAllUnsavedChanges}
+                      onSave={persistUpdates}
+                      saveLabel={i18n.translate('xpack.infra.sourceConfiguration.saveButton', {
+                        defaultMessage: 'Save changes',
+                      })}
+                      isLoading={false}
+                      unsavedChangesCount={unsavedChangesCount}
+                      appTestSubj="infra"
+                    />
+                  )}
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          </>
+        )}
+      </EuiPageSection>
     </PageTemplate>
   );
 };
