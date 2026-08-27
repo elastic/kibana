@@ -9,7 +9,11 @@
 
 import type { ProjectRouting } from '@kbn/es-query';
 import { PROJECT_ROUTING } from '@kbn/cps-common';
-import { getFilterExpressionLookupKey, type FilterExpressionValue } from './filter_input_codec';
+import {
+  FilterOperator,
+  getFilterExpressionLookupKey,
+  type FilterExpressionValue,
+} from './filter_input_codec';
 import {
   encodeFilterOnlyRouting,
   projectRoutingCodec,
@@ -29,6 +33,16 @@ export {
   ROUTING_WILDCARD,
   PROJECT_SELECTION_DIMENSION,
 } from './project_routing_codec';
+
+/** EXISTS `_alias` — the filter half of `PROJECT_ROUTING.ORIGIN` (`_alias:_origin`). */
+export const ALIAS_EXISTS_FILTER: FilterExpressionValue = {
+  operator: FilterOperator.EXISTS,
+  tagName: '_alias',
+  tagValue: undefined,
+};
+
+export const isAliasExistsFilter = (expression: FilterExpressionValue): boolean =>
+  expression.operator === FilterOperator.EXISTS && expression.tagName === '_alias';
 
 export const createFilterExpressionsMap = (expressions: readonly FilterExpressionValue[]) =>
   new Map(
@@ -56,12 +70,9 @@ export function reconcileDecodedRouting(
 /**
  * Parses a project routing string into filter expressions and excluded-project overrides.
  *
- * Special-cases the legacy `PROJECT_ROUTING.ALL`/`PROJECT_ROUTING.ORIGIN` (`_alias:*`/
- * `_alias:_origin`) constants before delegating to the codec: the codec only understands
- * `_id`-based selection, so these would otherwise decode as a stray `_alias` tag filter that
- * no real project ever matches (aliases are real project names, never literally `*`/`_origin`).
- * `_alias:_origin` can only be resolved here, not in the codec itself, since it requires
- * knowing which available project id is the origin project — a codec-external concern.
+ * `PROJECT_ROUTING.ALL` / `PROJECT_ROUTING.ORIGIN` (`_alias:*` / `_alias:_origin`) are closed
+ * shapes handled here and never passed to the codec. ALL is EXISTS `_alias` with no exclusions;
+ * ORIGIN is the same filter plus exclusions of every non-origin project.
  */
 export function parseDefaultProjectRouting(
   routing: ProjectRouting,
@@ -69,13 +80,15 @@ export function parseDefaultProjectRouting(
   originProjectId?: string
 ): { filterExpressions: FilterExpressionValue[]; excludedOverrides: string[] } {
   if (routing === PROJECT_ROUTING.ALL) {
-    return { filterExpressions: [], excludedOverrides: [] };
+    return { filterExpressions: [ALIAS_EXISTS_FILTER], excludedOverrides: [] };
   }
 
-  if (routing === PROJECT_ROUTING.ORIGIN && originProjectId) {
+  if (routing === PROJECT_ROUTING.ORIGIN) {
     return {
-      filterExpressions: [],
-      excludedOverrides: availableProjectIds.filter((id) => id !== originProjectId),
+      filterExpressions: [ALIAS_EXISTS_FILTER],
+      excludedOverrides: originProjectId
+        ? availableProjectIds.filter((id) => id !== originProjectId)
+        : [],
     };
   }
 

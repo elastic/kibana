@@ -102,7 +102,7 @@ export const createActionPolicySmlType = ({
   },
 
   /**
-   * Action policies are gated by the dedicated `ai_index:action_policy/read` action.
+   * Action policies are gated by the dedicated `ai_index:alerting_v2_action_policy/read` action.
    * The Alerting v2 feature grants it by declaring `aiIndex: { read: [ACTION_POLICY_KI_TYPE] }`
    * (see `common/feature_privileges.ts`), so the `kiType` here must stay in step with that
    * declaration.
