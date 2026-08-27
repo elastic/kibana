@@ -121,12 +121,19 @@ export type SectionKind = 'ioc' | 'references' | 'prose';
  * section as prose. Rather than doubling the lists by hand and inevitably missing some,
  * the tolerance lives here, so a term only ever needs one spelling.
  *
- * A term whose plural is not on the final word still needs both forms listed.
+ * Covers the trailing-`s` and `y`/`ies` forms. A term whose plural is not on the final word
+ * still needs both forms listed.
  */
 const matchesTerm = (terms: Set<string>, normalized: string): boolean => {
   if (terms.has(normalized)) return true;
   if (normalized.endsWith('s') && terms.has(normalized.slice(0, -1))) return true;
-  return terms.has(`${normalized}s`);
+  if (terms.has(`${normalized}s`)) return true;
+  // `y` to `ies`, because a trailing `s` is not the only way English pluralizes and
+  // `bibliography` was listed while `Bibliographies` classified as prose. Handled as the
+  // class rather than by adding the one word, since the same gap would return for any future
+  // term ending in `y`.
+  if (normalized.endsWith('ies') && terms.has(`${normalized.slice(0, -3)}y`)) return true;
+  return normalized.endsWith('y') && terms.has(`${normalized.slice(0, -1)}ies`);
 };
 
 /**

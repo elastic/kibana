@@ -620,7 +620,16 @@ const hrefOf = (node: ParsedNode): string | undefined => {
  */
 const isTextOnlyEncodedWrapper = (node: ParsedNode): boolean => {
   if (!isElement(node) || !isEncodedHtmlWrapper(node)) return false;
-  const children = childrenOf(node);
+
+  // Comments and directives are packaging, not payload, and `rawTextOf` already contributes
+  // nothing for them. Counting them as content meant a feed writing
+  // `<description><!-- generated -->…</description>` failed the text-only check, so its
+  // encoded body was never expanded and the script URL inside it stayed in `body_text`. This
+  // is the same exclusion `peelFeedWrappers` makes, which I applied there and not here.
+  const children = childrenOf(node).filter(
+    (child) => child.type !== 'comment' && child.type !== 'directive'
+  );
+
   return (
     children.length > 0 &&
     children.every((child) => child.type === 'text') &&

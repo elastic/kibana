@@ -183,3 +183,27 @@ describe('heading normalization resists backtracking', () => {
     expect(normalizeHeader(heading)).toBe(expected);
   });
 });
+
+/**
+ * A trailing `s` is not the only way English pluralizes. `bibliography` was listed and
+ * `Bibliographies` classified as prose, so the heading did not terminate the intelligence
+ * section and citations below it were treated as report prose rather than reference noise.
+ * Handled as the `y`/`ies` class rather than by adding the one word.
+ */
+describe('irregular plural headings', () => {
+  it.each([
+    ['Bibliography', 'references'],
+    ['Bibliographies', 'references'],
+    ['bibliographies', 'references'],
+  ])('classifies %s as %s', (heading, expected) => {
+    expect(classifyHeader(heading)).toBe(expected);
+  });
+
+  // The wider tolerance must not start matching prose headings.
+  it.each([['Glossary'], ['Glossaries'], ['Analysis'], ['Summary'], ['Overview']])(
+    'leaves %s as prose',
+    (heading) => {
+      expect(classifyHeader(heading)).toBe('prose');
+    }
+  );
+});

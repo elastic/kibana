@@ -1605,3 +1605,56 @@ describe('encoded bodies in realistic feed documents', () => {
     expect(elapsedMs).toBeLessThan(3000);
   });
 });
+
+/**
+ * Comments and directives inside an encoded wrapper are packaging, not payload.
+ *
+ * Counting them as content meant `<description><!-- generated -->…</description>` failed the
+ * text-only check, so its encoded body was never expanded and the script URL inside it stayed
+ * in body_text. Bare input was saved by the document-level gate; inside a feed with metadata
+ * siblings, nothing caught it. This is the same exclusion `peelFeedWrappers` already made.
+ */
+describe('packaging nodes inside an encoded wrapper', () => {
+  it.each([
+    [
+      'a comment beside the payload',
+      '<description><!-- generated -->&lt;script&gt;fetch("https://false-ioc.test")&lt;/script&gt;safe</description>',
+      'safe',
+    ],
+    [
+      'a comment inside a realistic feed',
+      '<rss><channel><title>F</title><item><description><!-- x -->' +
+        '&lt;script&gt;fetch("https://false-ioc.test")&lt;/script&gt;safe' +
+        '</description></item></channel></rss>',
+      'F safe',
+    ],
+    [
+      'a directive beside the payload',
+      '<description><?p x?>&lt;p&gt;evil.com&lt;/p&gt;</description>',
+      'evil.com',
+    ],
+  ])('expands the encoded body despite %s', (_label, html, expected) => {
+    const result = stripHtml(html);
+
+    expect(result).toBe(expected);
+    expect(result).not.toContain('false-ioc.test');
+  });
+
+  it('keeps structured boundaries through a comment in the wrapper', () => {
+    expect(
+      htmlToStructured(
+        '<rss><channel><item><description><!-- x -->' +
+          '&lt;p&gt;evil.com&lt;/p&gt;&lt;p&gt;bad.net&lt;/p&gt;' +
+          '</description></item></channel></rss>'
+      )
+    ).toBe('evil.com\nbad.net');
+  });
+
+  // An element child still means mixed content rather than an encoded payload, so ignoring
+  // comments must not start treating real markup as encoded.
+  it('does not expand a wrapper that also holds real markup', () => {
+    expect(stripHtml('<description><p>real</p>&lt;p&gt;enc&lt;/p&gt;</description>')).toBe(
+      'real <p>enc</p>'
+    );
+  });
+});
