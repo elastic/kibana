@@ -23,6 +23,11 @@ import {
   mergeEmitterWorkflowIntoEventChainVisited,
 } from '../lib/telemetry/utils/extract_execution_metadata';
 import { WorkflowExecutionTelemetryClient } from '../lib/telemetry/workflow_execution_telemetry_client';
+import {
+  WORKFLOWS_EXECUTIONS_INDEX,
+  WORKFLOWS_STEP_EXECUTIONS_INDEX,
+} from '../repositories/data_access_layer/constants/execution_indexes';
+import { PlainIndexDataClient } from '../repositories/data_access_layer/implementations/plain_index/plain_index_data_client';
 import type {
   StepExecutionPersistence,
   WorkflowExecutionPersistence,
@@ -73,9 +78,22 @@ export async function setupDependencies({
 
   const workflowExecutionPersistence =
     workflowExecutionRepositoryOverride ??
-    new WorkflowExecutionRepository(internalEsClient, logger);
+    new WorkflowExecutionRepository(
+      new PlainIndexDataClient({
+        esClient: internalEsClient,
+        logger,
+        indexName: WORKFLOWS_EXECUTIONS_INDEX,
+      })
+    );
   const stepExecutionPersistence =
-    stepExecutionRepositoryOverride ?? new StepExecutionRepository(internalEsClient, logger);
+    stepExecutionRepositoryOverride ??
+    new StepExecutionRepository(
+      new PlainIndexDataClient({
+        esClient: internalEsClient,
+        logger,
+        indexName: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+      })
+    );
   const workflowRepository = new WorkflowRepository({
     esClient: internalEsClient,
     logger,

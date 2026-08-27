@@ -16,7 +16,6 @@ import {
   WorkflowsManagementApiActions,
   type WorkflowYaml,
 } from '@kbn/workflows';
-import { WORKFLOW_SML_TYPE } from '@kbn/workflows/common/constants';
 import {
   WorkflowExecutionInvalidStatusError,
   WorkflowNotFoundError,

@@ -121,16 +121,16 @@ describe('setupDependencies', () => {
       headers: {},
     } as KibanaRequest;
 
-    const result = await setupDependencies(
+    const result = await setupDependencies({
       workflowRunId,
       spaceId,
-      mockLogger,
-      mockConfig,
-      mockDependencies,
-      mockWorkflowExecutionRepository,
-      mockStepExecutionRepository,
-      mockFakeRequest
-    );
+      logger: mockLogger,
+      config: mockConfig,
+      dependencies: mockDependencies,
+      workflowExecutionRepository: mockWorkflowExecutionRepository,
+      stepExecutionRepository: mockStepExecutionRepository,
+      fakeRequest: mockFakeRequest,
+    });
 
     expect(mockAsScoped).toHaveBeenCalledWith(mockFakeRequest);
     expect(result.esClient).toBe(mockAsCurrentUser);
@@ -151,16 +151,16 @@ describe('setupDependencies', () => {
       headers: {},
     } as KibanaRequest;
 
-    await setupDependencies(
+    await setupDependencies({
       workflowRunId,
       spaceId,
-      mockLogger,
-      mockConfig,
-      mockDependencies,
-      mockWorkflowExecutionRepository,
-      mockStepExecutionRepository,
-      mockFakeRequest
-    );
+      logger: mockLogger,
+      config: mockConfig,
+      dependencies: mockDependencies,
+      workflowExecutionRepository: mockWorkflowExecutionRepository,
+      stepExecutionRepository: mockStepExecutionRepository,
+      fakeRequest: mockFakeRequest,
+    });
 
     expect(mockDependencies.actions.getActionsClientWithRequest).toHaveBeenCalledWith(
       mockFakeRequest
@@ -184,16 +184,16 @@ describe('setupDependencies', () => {
         headers: {},
       } as KibanaRequest;
 
-      await setupDependencies(
+      await setupDependencies({
         workflowRunId,
         spaceId,
-        mockLogger,
-        mockConfig,
-        mockDependencies,
-        mockWorkflowExecutionRepository,
-        mockStepExecutionRepository,
-        mockFakeRequest
-      );
+        logger: mockLogger,
+        config: mockConfig,
+        dependencies: mockDependencies,
+        workflowExecutionRepository: mockWorkflowExecutionRepository,
+        stepExecutionRepository: mockStepExecutionRepository,
+        fakeRequest: mockFakeRequest,
+      });
 
       expect(WorkflowGraph.fromWorkflowDefinition).toHaveBeenCalledWith(
         mockWorkflowExecution.workflowDefinition,
@@ -206,16 +206,16 @@ describe('setupDependencies', () => {
         headers: {},
       } as KibanaRequest;
 
-      await setupDependencies(
+      await setupDependencies({
         workflowRunId,
         spaceId,
-        mockLogger,
-        mockConfig,
-        mockDependencies,
-        mockWorkflowExecutionRepository,
-        mockStepExecutionRepository,
-        mockFakeRequest
-      );
+        logger: mockLogger,
+        config: mockConfig,
+        dependencies: mockDependencies,
+        workflowExecutionRepository: mockWorkflowExecutionRepository,
+        stepExecutionRepository: mockStepExecutionRepository,
+        fakeRequest: mockFakeRequest,
+      });
 
       expect(WorkflowGraph.fromWorkflowDefinition).toHaveBeenCalledWith(expect.anything(), {
         timeout: '6h',
@@ -245,16 +245,16 @@ describe('setupDependencies', () => {
       (isGraphBuildError as unknown as jest.Mock).mockReturnValue(true);
 
       await expect(
-        setupDependencies(
+        setupDependencies({
           workflowRunId,
           spaceId,
-          mockLogger,
-          mockConfig,
-          mockDependencies,
-          mockWorkflowExecutionRepository,
-          mockStepExecutionRepository,
-          mockFakeRequest
-        )
+          logger: mockLogger,
+          config: mockConfig,
+          dependencies: mockDependencies,
+          workflowExecutionRepository: mockWorkflowExecutionRepository,
+          stepExecutionRepository: mockStepExecutionRepository,
+          fakeRequest: mockFakeRequest,
+        })
       ).rejects.toBeInstanceOf(WorkflowGraphSetupError);
 
       expect(mockWorkflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith(
@@ -275,16 +275,16 @@ describe('setupDependencies', () => {
       (isGraphBuildError as unknown as jest.Mock).mockReturnValue(false);
 
       await expect(
-        setupDependencies(
+        setupDependencies({
           workflowRunId,
           spaceId,
-          mockLogger,
-          mockConfig,
-          mockDependencies,
-          mockWorkflowExecutionRepository,
-          mockStepExecutionRepository,
-          mockFakeRequest
-        )
+          logger: mockLogger,
+          config: mockConfig,
+          dependencies: mockDependencies,
+          workflowExecutionRepository: mockWorkflowExecutionRepository,
+          stepExecutionRepository: mockStepExecutionRepository,
+          fakeRequest: mockFakeRequest,
+        })
       ).rejects.toBe(otherError);
 
       expect(mockWorkflowExecutionRepository.updateWorkflowExecution).not.toHaveBeenCalled();
@@ -304,16 +304,16 @@ describe('setupDependencies', () => {
     });
 
     await expect(
-      setupDependencies(
+      setupDependencies({
         workflowRunId,
         spaceId,
-        mockLogger,
-        mockConfig,
-        mockDependencies,
-        mockWorkflowExecutionRepository,
-        mockStepExecutionRepository,
-        mockFakeRequest
-      )
+        logger: mockLogger,
+        config: mockConfig,
+        dependencies: mockDependencies,
+        workflowExecutionRepository: mockWorkflowExecutionRepository,
+        stepExecutionRepository: mockStepExecutionRepository,
+        fakeRequest: mockFakeRequest,
+      })
     ).rejects.toThrow(`Workflow execution with ID ${workflowRunId} not found`);
 
     expect(mockWorkflowExecutionRepository.getWorkflowExecutionById).toHaveBeenCalledWith(
@@ -347,16 +347,16 @@ describe('setupDependencies', () => {
       });
       (mockDependencies.workflowsExtensions.isReady as jest.Mock).mockReturnValue(isReadyPromise);
 
-      const setupPromise = setupDependencies(
+      const setupPromise = setupDependencies({
         workflowRunId,
         spaceId,
-        mockLogger,
-        mockConfig,
-        mockDependencies,
-        mockWorkflowExecutionRepository,
-        mockStepExecutionRepository,
-        mockFakeRequest
-      );
+        logger: mockLogger,
+        config: mockConfig,
+        dependencies: mockDependencies,
+        workflowExecutionRepository: mockWorkflowExecutionRepository,
+        stepExecutionRepository: mockStepExecutionRepository,
+        fakeRequest: mockFakeRequest,
+      });
 
       // Let any microtasks before the isReady await run
       await Promise.resolve();
