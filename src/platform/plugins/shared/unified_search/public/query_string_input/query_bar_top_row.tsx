@@ -156,9 +156,7 @@ const getWrapperWithTooltip = (
 };
 
 // @internal
-export type ShowDatePicker =
-  | boolean
-  | { disabled: boolean };
+export type ShowDatePicker = boolean | { disabled: boolean };
 
 // @internal
 export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> {
