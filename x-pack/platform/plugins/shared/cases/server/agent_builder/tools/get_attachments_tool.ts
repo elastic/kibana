@@ -10,6 +10,7 @@ import { platformCoreCasesTools, ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { CoreSetup } from '@kbn/core/server';
+import type { Logger } from '@kbn/logging';
 import { getAllAttachmentsStepDefinition } from '../../workflows/steps/get_all_attachments';
 import type { CasesClient } from '../../client';
 import type { CasesServerStartDependencies } from '../../types';
@@ -28,7 +29,8 @@ const getAttachmentsSchema = z.object({
 
 export const getAttachmentsTool = (
   coreSetup: CoreSetup<CasesServerStartDependencies>,
-  getCasesClientFn: GetCasesClientFn
+  getCasesClientFn: GetCasesClientFn,
+  logger: Logger
 ): BuiltinToolDefinition<typeof getAttachmentsSchema> => {
   const getAllAttachmentsStepDef = getAllAttachmentsStepDefinition(getCasesClientFn);
 
@@ -47,7 +49,8 @@ export const getAttachmentsTool = (
     tags: ['cases'],
     availability: {
       cacheMode: 'space',
-      handler: async ({ request }) => getCasesToolAvailability({ core: coreSetup, request }),
+      handler: async ({ request }) =>
+        getCasesToolAvailability({ core: coreSetup, logger, request }),
     },
     handler: async (args, toolContext) => {
       const { case_id } = args;

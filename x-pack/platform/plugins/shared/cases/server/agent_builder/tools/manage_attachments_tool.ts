@@ -10,6 +10,7 @@ import { platformCoreCasesTools, ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { CoreSetup } from '@kbn/core/server';
+import type { Logger } from '@kbn/logging';
 import type { CasesServerStartDependencies } from '../../types';
 import { getCasesToolAvailability } from '../utils/get_cases_tool_availability';
 import { addCommentStepCommonDefinition } from '../../../common/workflows/steps/add_comment';
@@ -100,7 +101,8 @@ export const manageAttachmentsTool = (
   coreSetup: CoreSetup<CasesServerStartDependencies>,
   getCasesClientFn: GetCasesClientFn,
   unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry,
-  isCasesAttachmentsEnabled: boolean
+  isCasesAttachmentsEnabled: boolean,
+  logger: Logger
 ): BuiltinToolDefinition<typeof manageAttachmentsSchema> => {
   const addCommentStepDef = addCommentStepDefinition(getCasesClientFn);
   const addAlertsStepDef = addAlertsStepDefinition(getCasesClientFn);
@@ -139,7 +141,8 @@ export const manageAttachmentsTool = (
     tags: ['cases'],
     availability: {
       cacheMode: 'space',
-      handler: async ({ request }) => getCasesToolAvailability({ core: coreSetup, request }),
+      handler: async ({ request }) =>
+        getCasesToolAvailability({ core: coreSetup, logger, request }),
     },
     handler: async (args, toolContext) => {
       const { mode, case_id, attachments, ...rest } = args;

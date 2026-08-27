@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { getCasesToolAvailability } from './get_cases_tool_availability';
 
 const makeCore = (solution: string | undefined) => {
@@ -22,35 +22,36 @@ const makeCore = (solution: string | undefined) => {
 };
 
 const request = httpServerMock.createKibanaRequest();
+const logger = loggingSystemMock.createLogger();
 
 describe('getCasesToolAvailability', () => {
   it('returns unavailable for es solution', async () => {
     const core = makeCore('es');
-    const result = await getCasesToolAvailability({ core: core as any, request });
+    const result = await getCasesToolAvailability({ core: core as any, logger, request });
     expect(result).toEqual({ status: 'unavailable', reason: expect.any(String) });
   });
 
   it('returns available for classic solution', async () => {
     const core = makeCore('classic');
-    const result = await getCasesToolAvailability({ core: core as any, request });
+    const result = await getCasesToolAvailability({ core: core as any, logger, request });
     expect(result).toEqual({ status: 'available' });
   });
 
   it('returns available for oblt solution', async () => {
     const core = makeCore('oblt');
-    const result = await getCasesToolAvailability({ core: core as any, request });
+    const result = await getCasesToolAvailability({ core: core as any, logger, request });
     expect(result).toEqual({ status: 'available' });
   });
 
   it('returns available for security solution', async () => {
     const core = makeCore('security');
-    const result = await getCasesToolAvailability({ core: core as any, request });
+    const result = await getCasesToolAvailability({ core: core as any, logger, request });
     expect(result).toEqual({ status: 'available' });
   });
 
   it('returns available when solution is undefined (stateful, no space gating)', async () => {
     const core = makeCore(undefined);
-    const result = await getCasesToolAvailability({ core: core as any, request });
+    const result = await getCasesToolAvailability({ core: core as any, logger, request });
     expect(result).toEqual({ status: 'available' });
   });
 
@@ -61,7 +62,7 @@ describe('getCasesToolAvailability', () => {
       {}, // no spaces key
       {},
     ]);
-    const result = await getCasesToolAvailability({ core: coreSetup as any, request });
+    const result = await getCasesToolAvailability({ core: coreSetup as any, logger, request });
     expect(result).toEqual({ status: 'available' });
   });
 
@@ -75,7 +76,7 @@ describe('getCasesToolAvailability', () => {
       },
     };
     coreSetup.getStartServices.mockResolvedValue([coreMock.createStart(), pluginsStart, {}]);
-    const result = await getCasesToolAvailability({ core: coreSetup as any, request });
+    const result = await getCasesToolAvailability({ core: coreSetup as any, logger, request });
     expect(result).toEqual({ status: 'available' });
   });
 });

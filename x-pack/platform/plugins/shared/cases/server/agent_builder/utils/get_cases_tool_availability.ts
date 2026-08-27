@@ -7,14 +7,17 @@
 
 import type { CoreSetup } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { Logger } from '@kbn/logging';
 import type { ToolAvailabilityResult } from '@kbn/agent-builder-server';
 import type { CasesServerStartDependencies } from '../../types';
 
 export async function getCasesToolAvailability({
   core,
+  logger,
   request,
 }: {
   core: CoreSetup<CasesServerStartDependencies>;
+  logger: Logger;
   request: KibanaRequest;
 }): Promise<ToolAvailabilityResult> {
   try {
@@ -26,8 +29,9 @@ export async function getCasesToolAvailability({
         reason: 'Cases is not available in Elasticsearch projects',
       };
     }
-  } catch {
-    // Spaces service unavailable — default to available
+  } catch (error) {
+    // Fail open: if Spaces is absent or any service error occurs, default to available
+    logger.debug(`Cases tool availability check failed, defaulting to available: ${error}`);
   }
   return { status: 'available' };
 }

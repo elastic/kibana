@@ -49,7 +49,13 @@ describe('attachmentsTool (deprecated)', () => {
   const buildTool = (registry: UnifiedAttachmentTypeRegistry, enabled: boolean) => {
     const coreSetup = coreMock.createSetup();
     coreSetup.getStartServices.mockResolvedValue([coreMock.createStart(), {}, {}]);
-    return attachmentsTool(coreSetup, jest.fn().mockResolvedValue(casesClient), registry, enabled);
+    return attachmentsTool(
+      coreSetup,
+      jest.fn().mockResolvedValue(casesClient),
+      registry,
+      enabled,
+      loggingSystemMock.createLogger()
+    );
   };
 
   it('has a description that directs agents to the replacement tools', () => {
@@ -162,7 +168,13 @@ describe('attachmentsTool availability', () => {
 
   it('returns unavailable for es solution', async () => {
     const coreSetup = makeCore('es');
-    const tool = attachmentsTool(coreSetup, jest.fn(), emptyRegistry, true);
+    const tool = attachmentsTool(
+      coreSetup,
+      jest.fn(),
+      emptyRegistry,
+      true,
+      loggingSystemMock.createLogger()
+    );
     const request = httpServerMock.createKibanaRequest();
     const result = await tool.availability!.handler({ request } as any);
     expect(result).toEqual({ status: 'unavailable', reason: expect.any(String) });
@@ -170,7 +182,13 @@ describe('attachmentsTool availability', () => {
 
   it('returns available for oblt solution', async () => {
     const coreSetup = makeCore('oblt');
-    const tool = attachmentsTool(coreSetup, jest.fn(), emptyRegistry, true);
+    const tool = attachmentsTool(
+      coreSetup,
+      jest.fn(),
+      emptyRegistry,
+      true,
+      loggingSystemMock.createLogger()
+    );
     const request = httpServerMock.createKibanaRequest();
     const result = await tool.availability!.handler({ request } as any);
     expect(result).toEqual({ status: 'available' });
@@ -179,7 +197,13 @@ describe('attachmentsTool availability', () => {
   it('cacheMode is space', () => {
     const coreSetup = coreMock.createSetup();
     coreSetup.getStartServices.mockResolvedValue([coreMock.createStart(), {}, {}]);
-    const tool = attachmentsTool(coreSetup, jest.fn(), emptyRegistry, true);
+    const tool = attachmentsTool(
+      coreSetup,
+      jest.fn(),
+      emptyRegistry,
+      true,
+      loggingSystemMock.createLogger()
+    );
     expect(tool.availability?.cacheMode).toBe('space');
   });
 });

@@ -49,7 +49,13 @@ describe('manageAttachmentsTool', () => {
   const buildTool = (registry: UnifiedAttachmentTypeRegistry, enabled: boolean) => {
     const coreSetup = coreMock.createSetup();
     coreSetup.getStartServices.mockResolvedValue([coreMock.createStart(), {}, {}]);
-    return manageAttachmentsTool(coreSetup, jest.fn().mockResolvedValue(casesClient), registry, enabled);
+    return manageAttachmentsTool(
+      coreSetup,
+      jest.fn().mockResolvedValue(casesClient),
+      registry,
+      enabled,
+      loggingSystemMock.createLogger()
+    );
   };
 
   it('has the correct tool id', () => {
@@ -168,7 +174,13 @@ describe('manageAttachmentsTool availability', () => {
 
   it('returns unavailable for es solution', async () => {
     const coreSetup = makeCore('es');
-    const tool = manageAttachmentsTool(coreSetup, jest.fn(), buildRegistry([]), true);
+    const tool = manageAttachmentsTool(
+      coreSetup,
+      jest.fn(),
+      buildRegistry([]),
+      true,
+      loggingSystemMock.createLogger()
+    );
     const request = httpServerMock.createKibanaRequest();
     const result = await tool.availability!.handler({ request } as any);
     expect(result).toEqual({ status: 'unavailable', reason: expect.any(String) });
@@ -176,7 +188,13 @@ describe('manageAttachmentsTool availability', () => {
 
   it('returns available for security solution', async () => {
     const coreSetup = makeCore('security');
-    const tool = manageAttachmentsTool(coreSetup, jest.fn(), buildRegistry([]), true);
+    const tool = manageAttachmentsTool(
+      coreSetup,
+      jest.fn(),
+      buildRegistry([]),
+      true,
+      loggingSystemMock.createLogger()
+    );
     const request = httpServerMock.createKibanaRequest();
     const result = await tool.availability!.handler({ request } as any);
     expect(result).toEqual({ status: 'available' });
@@ -185,7 +203,13 @@ describe('manageAttachmentsTool availability', () => {
   it('cacheMode is space', () => {
     const coreSetup = coreMock.createSetup();
     coreSetup.getStartServices.mockResolvedValue([coreMock.createStart(), {}, {}]);
-    const tool = manageAttachmentsTool(coreSetup, jest.fn(), buildRegistry([]), true);
+    const tool = manageAttachmentsTool(
+      coreSetup,
+      jest.fn(),
+      buildRegistry([]),
+      true,
+      loggingSystemMock.createLogger()
+    );
     expect(tool.availability?.cacheMode).toBe('space');
   });
 });
