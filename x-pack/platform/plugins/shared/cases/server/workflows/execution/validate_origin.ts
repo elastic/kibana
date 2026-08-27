@@ -16,9 +16,6 @@ import {
 } from '../../../common/constants';
 import type { Case } from '../../../common/types/domain';
 
-// `@types/lodash` types `isPlainObject` as `boolean`, so we wrap it to get a
-// `value is Record<string, unknown>` predicate. Same pattern as `isRecord` in
-// server/common/attachments/alert.ts.
 const isRecord = (value: unknown): value is Record<string, unknown> => isPlainObject(value);
 const getRecord = (value: unknown): Record<string, unknown> | undefined =>
   isRecord(value) ? value : undefined;
