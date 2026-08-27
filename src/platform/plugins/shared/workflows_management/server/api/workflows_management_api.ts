@@ -62,12 +62,7 @@ import type {
   ServerTriggerDefinition,
   WorkflowExecutionCapabilities,
 } from '@kbn/workflows-extensions/server';
-import {
-  parseWorkflowYamlToJSON,
-  parseYamlToJSONWithoutValidation,
-  stringifyWorkflowDefinition,
-  WorkflowValidationError,
-} from '@kbn/workflows-yaml';
+import { parseYamlToJSONWithoutValidation, WorkflowValidationError } from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
 import {
   type ExternalResumeFormPageParams,
