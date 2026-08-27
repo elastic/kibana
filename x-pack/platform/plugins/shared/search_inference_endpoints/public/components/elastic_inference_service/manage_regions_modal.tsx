@@ -29,6 +29,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { UseEuiTheme } from '@elastic/eui';
 import { regionKey } from '../../utils/eis_utils';
 import { useManageRegionsState } from './use_manage_regions_state';
+import { ConfirmRegionChangeModal } from './confirm_region_change_modal';
 import { ConfirmRegionSelectionModal } from './confirm_region_selection_modal';
 import { ConfirmDeleteRegionPolicyModal } from './confirm_delete_region_policy_modal';
 import { RestrictTrafficToggle } from './restrict_traffic_toggle';
@@ -61,6 +62,7 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
     showConfirmation,
     showDeleteConfirmation,
     conflictArtifacts,
+    isRedesignEnabled,
     handleLocationTypeChange,
     handleRequestSave,
     handleConfirmSave,
@@ -268,17 +270,27 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
         </EuiModalFooter>
       </EuiModal>
 
-      {showConfirmation && (
-        <ConfirmRegionSelectionModal
-          mode={activeTab}
-          selectedRegions={filteredRegions}
-          selectedGeos={[...geoTab.checkedGeos]}
-          conflictArtifacts={conflictArtifacts}
-          onConfirm={handleConfirmSave}
-          onCancel={handleCancelConfirmation}
-          isSaving={isSaving}
-        />
-      )}
+      {showConfirmation &&
+        (isRedesignEnabled ? (
+          <ConfirmRegionSelectionModal
+            mode={activeTab}
+            selectedRegions={filteredRegions}
+            selectedGeos={[...geoTab.checkedGeos]}
+            conflictArtifacts={conflictArtifacts}
+            onConfirm={handleConfirmSave}
+            onCancel={handleCancelConfirmation}
+            isSaving={isSaving}
+          />
+        ) : (
+          <ConfirmRegionChangeModal
+            mode={activeTab}
+            selectedRegions={filteredRegions}
+            selectedGeos={[...geoTab.checkedGeos]}
+            onConfirm={handleConfirmSave}
+            onCancel={handleCancelConfirmation}
+            isSaving={isSaving}
+          />
+        ))}
 
       {showDeleteConfirmation && (
         <ConfirmDeleteRegionPolicyModal
