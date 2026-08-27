@@ -1,13 +1,12 @@
 {
-  "sha1": "5eb5a650e6e7f07ad52f9983b366694223fb43c7",
+  "sha1": "2d3e9ef9230502d5bd43fa938c1c86f533b31a3a",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
-      "id": "4adce93c9c34324-4605cdea5bf880b",
-      "title": "[NON-MKI] Rule operations with an organization-level UIAM API key creating an enabled rule fails with a clear 400 instead of a parse error",
+      "id": "4adce93c9c34324-ea24e7d5a288549",
+      "title": "[NON-MKI] Rule operations with an organization-level UIAM API key creating an enabled rule reuses the raw key as a user-managed key",
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-search",
@@ -29,13 +28,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout_uiam_local/api/parallel_tests/org_level_uiam_api_key.spec.ts",
-        "line": 35,
-        "column": 47
+        "line": 37,
+        "column": 24
       }
     },
     {
-      "id": "4adce93c9c34324-cb6acea62df327e",
-      "title": "[NON-MKI] Rule operations with an organization-level UIAM API key creating a disabled rule succeeds (no rule API key is resolved for disabled rules)",
+      "id": "4adce93c9c34324-46ee92351bd0605",
+      "title": "[NON-MKI] Rule operations with an organization-level UIAM API key creating a disabled rule and enabling it afterwards succeeds",
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-search",
@@ -57,8 +56,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout_uiam_local/api/parallel_tests/org_level_uiam_api_key.spec.ts",
-        "line": 48,
-        "column": 26
+        "line": 56,
+        "column": 16
       }
     }
   ]

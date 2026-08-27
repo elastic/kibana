@@ -38,6 +38,30 @@ jest.mock('../../../../hooks/use_tracing_enabled', () => ({
   useTracingEnabled: () => false,
 }));
 
+jest.mock('../../../../hooks/use_conversation', () => ({
+  useAgentId: () => undefined,
+}));
+
+jest.mock('./feedback_controls/use_feedback', () => ({
+  useFeedback: () => ({
+    vote: null,
+    chips: [],
+    comment: '',
+    modalOpen: false,
+    inviteVisible: false,
+    submitted: false,
+    submittedFading: false,
+    isSubmitting: false,
+    setVote: jest.fn(),
+    toggleChip: jest.fn(),
+    setComment: jest.fn(),
+    openModal: jest.fn(),
+    closeModal: jest.fn(),
+    dismissInvite: jest.fn(),
+    submit: jest.fn(),
+  }),
+}));
+
 const copyMock = copy as jest.MockedFunction<typeof copy>;
 const useToastsMock = useToasts as jest.MockedFunction<typeof useToasts>;
 const addSuccessToast = jest.fn();
