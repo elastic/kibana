@@ -12,34 +12,34 @@ import type { DataTableRecord, RowControlComponent } from '@kbn/discover-utils';
 import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
 import type { EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
 
-const CHANGE_STATUS_LABEL = i18n.translate(
-  'xpack.securitySolution.alertsV2.episodesTable.changeStatus',
-  { defaultMessage: 'Change status' }
+const MORE_ACTIONS_LABEL = i18n.translate(
+  'xpack.securitySolution.alertsV2.episodesTable.moreActions',
+  { defaultMessage: 'More actions' }
 );
 
-export interface EpisodeStatusMenuProps {
+export interface EpisodeActionsMenuProps {
   /** The grid's row-control button component, used as the popover anchor. */
   Control: RowControlComponent;
   /** The episode row; its `flattened` is the `AlertEpisode` the action factories consume. */
   record: DataTableRecord;
-  /** Status actions (ack/unack/resolve/unresolve), already built with `{ http, notifications }`. */
+  /** The mutation actions (status ack/unack/resolve/unresolve, tags, …), already built with deps. */
   actions: EpisodeAction[];
   /** Called after an action succeeds, to refresh the table (the view is eventually consistent). */
   onSuccess: () => void;
 }
 
 /**
- * Row control that opens a small menu of the status actions compatible with the given episode.
- * v2 has no open/acknowledged/closed field: "status" is a set of actions appended to
- * `.alert-actions` (ack/unack, resolve/unresolve). Each action's `execute` posts the change and
- * toasts; `isCompatible` decides which apply to the episode's current state.
+ * Row "…" menu that lists the mutation actions compatible with the given episode — mirroring the
+ * v1 alerts table's per-row "take action" menu. Each item is an RnA `EpisodeAction`: `isCompatible`
+ * decides which apply to the episode's current state, and `execute` posts the change to
+ * `.alert-actions` (or opens its own editor, e.g. the tags flyout) and toasts.
  */
-export const EpisodeStatusMenu = ({
+export const EpisodeActionsMenu = ({
   Control,
   record,
   actions,
   onSuccess,
-}: EpisodeStatusMenuProps) => {
+}: EpisodeActionsMenuProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const episode = record.flattened as unknown as AlertEpisode;
@@ -53,10 +53,10 @@ export const EpisodeStatusMenu = ({
 
   const button = (
     <Control
-      data-test-subj="alertsV2StatusMenuButton"
+      data-test-subj="alertsV2ActionsMenuButton"
       iconType="boxesVertical"
-      label={CHANGE_STATUS_LABEL}
-      tooltipContent={CHANGE_STATUS_LABEL}
+      label={MORE_ACTIONS_LABEL}
+      tooltipContent={MORE_ACTIONS_LABEL}
       disabled={compatibleActions.length === 0}
       onClick={() => setIsOpen((open) => !open)}
     />
@@ -76,7 +76,7 @@ export const EpisodeStatusMenu = ({
           <EuiContextMenuItem
             key={action.id}
             icon={action.iconType}
-            data-test-subj={`alertsV2StatusAction-${action.id}`}
+            data-test-subj={`alertsV2Action-${action.id}`}
             onClick={() => {
               setIsOpen(false);
               void action.execute({ episodes: [episode], onSuccess });

@@ -36,16 +36,19 @@ import {
   createUnackAction,
   createResolveAction,
   createUnresolveAction,
+  createEditTagsAction,
 } from '@kbn/alerting-v2-episodes-ui/actions';
+import { useQueryClient } from '@kbn/react-query';
 import type { RowControlColumn } from '@kbn/discover-utils';
-import { useKibana } from '../../../common/lib/kibana';
+import { DEFAULT_ALERT_TAGS_KEY } from '../../../../common/constants';
+import { useKibana, useUiSetting$ } from '../../../common/lib/kibana';
 import { EsqlInspectButton } from '../kpis/esql_inspect_button';
 import { useEpisodesTableData } from './use_episodes_table_data';
 import { HostNameCell } from './host_name_cell';
 import { UserNameCell } from './user_name_cell';
 import { NetworkIpCell } from './network_ip_cell';
 import { useInvestigateEpisodeInTimeline } from './use_investigate_episode_in_timeline';
-import { EpisodeStatusMenu } from './episode_status_menu';
+import { EpisodeActionsMenu } from './episode_actions_menu';
 import { useFlyoutApi } from '../../../flyout_v2/use_flyout_api';
 import { useEsqlAvailability } from '../../../common/hooks/esql/use_esql_availability';
 
@@ -191,6 +194,35 @@ export const EpisodesTableSection = ({ query, timeRange }: EpisodesTableSectionP
     ];
   }, [services.http, services.notifications]);
 
+  // Tags (series-scoped): the factory opens the RnA tags flyout, then posts a `tag` action. It needs
+  // a heavier dep set (overlays/rendering/expressions/spaces for the flyout, queryClient for the tag
+  // list) — all reachable here (services is CoreStart & plugins; the app wraps a react-query client).
+  const queryClient = useQueryClient();
+  // Reuse v1's preset tag vocabulary so v1 and v2 share the same tags (the flyout also still fetches
+  // ES suggestions and allows new ones).
+  const [presetAlertTags] = useUiSetting$<string[]>(DEFAULT_ALERT_TAGS_KEY);
+  const editTagsAction = useMemo(
+    () =>
+      createEditTagsAction({
+        http: services.http,
+        overlays: services.overlays,
+        notifications: services.notifications,
+        rendering: services.rendering,
+        expressions: services.expressions,
+        spaces: services.spaces,
+        queryClient,
+        presetTags: presetAlertTags ?? [],
+      }),
+    [services, queryClient, presetAlertTags]
+  );
+
+  // Everything the per-row "…" (More actions) menu offers — v2 mutations, ordered by the factories'
+  // own `order`. Mirrors the v1 alerts table's per-row take-action menu.
+  const episodeActions = useMemo(
+    () => [...statusActions, editTagsAction],
+    [statusActions, editTagsAction]
+  );
+
   const tableServices = useMemo(
     () => ({
       theme: services.theme,
@@ -253,12 +285,12 @@ export const EpisodesTableSection = ({ query, timeRange }: EpisodesTableSectionP
   const rowAdditionalLeadingControls = useMemo<RowControlColumn[]>(() => {
     const controls: RowControlColumn[] = [
       {
-        id: 'episodeStatus',
+        id: 'episodeActions',
         render: (Control, { record }) => (
-          <EpisodeStatusMenu
+          <EpisodeActionsMenu
             Control={Control}
             record={record}
-            actions={statusActions}
+            actions={episodeActions}
             onSuccess={refetch}
           />
         ),
@@ -334,7 +366,7 @@ export const EpisodesTableSection = ({ query, timeRange }: EpisodesTableSectionP
     }
     return controls;
   }, [
-    statusActions,
+    episodeActions,
     refetch,
     openDocumentFlyoutFromHit,
     openAnalyzer,
