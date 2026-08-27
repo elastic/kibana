@@ -1,21 +1,9 @@
 {
-  "sha1": "001597df0c9a13f60a529198c65beff6e7e372f5",
+  "sha1": "4548a64dd686cbd321a57ac07170dc78607c15f9",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
-    {
-      "id": "6c80b774cf64439-77a83c0bedb19bd",
-      "title": "Teardown tabs tests data",
-      "expectedStatus": "passed",
-      "tags": [],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/global.teardown.ts",
-        "line": 7,
-        "column": 1
-      }
-    },
     {
       "id": "11b6599941153f8-ebb8e7d98ca43bb",
       "title": "Setup tabs tests data",
@@ -36,7 +24,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/controls.spec.ts",
-        "line": 66,
+        "line": 37,
         "column": 23
       }
     },
@@ -49,7 +37,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/controls.spec.ts",
-        "line": 76,
+        "line": 47,
         "column": 18
       }
     },
@@ -62,8 +50,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/controls.spec.ts",
-        "line": 101,
-        "column": 22
+        "line": 74,
+        "column": 20
       }
     },
     {
@@ -75,8 +63,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/controls.spec.ts",
-        "line": 129,
-        "column": 33
+        "line": 101,
+        "column": 13
       }
     },
     {
@@ -88,7 +76,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/controls.spec.ts",
-        "line": 147,
+        "line": 121,
         "column": 22
       }
     },
@@ -244,7 +232,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/new_search_clears_tabs.spec.ts",
-        "line": 26,
+        "line": 27,
         "column": 25
       }
     },
@@ -413,7 +401,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/refresh_uninitialized_tabs.spec.ts",
-        "line": 28,
+        "line": 29,
         "column": 25
       }
     },
@@ -660,7 +648,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/save_and_load_sessions.spec.ts",
-        "line": 46,
+        "line": 47,
         "column": 25
       }
     },
@@ -673,7 +661,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/save_and_load_sessions.spec.ts",
-        "line": 91,
+        "line": 92,
         "column": 11
       }
     },
@@ -842,8 +830,19 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/unsaved_local_state.spec.ts",
-        "line": 54,
+        "line": 55,
         "column": 25
+      }
+    },
+    {
+      "id": "6c80b774cf64439-77a83c0bedb19bd",
+      "title": "Teardown tabs tests data",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/global.teardown.ts",
+        "line": 7,
+        "column": 1
       }
     }
   ]

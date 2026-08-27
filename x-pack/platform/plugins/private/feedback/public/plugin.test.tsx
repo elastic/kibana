@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { FeedbackPlugin } from './plugin';
 import { coreMock } from '@kbn/core/public/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
@@ -16,6 +16,7 @@ describe('Feedback Plugin', () => {
   let coreStartMock: ReturnType<typeof coreMock.createStart>;
   let cloudStartMock: ReturnType<typeof cloudMock.createStart>;
   let isOptedIn$: Subject<boolean>;
+  let currentAppId$: BehaviorSubject<string | undefined>;
   let telemetryStartMock: TelemetryPluginStart;
   let plugin: FeedbackPlugin;
 
@@ -24,12 +25,12 @@ describe('Feedback Plugin', () => {
 
   const enableFeedback = () => coreStartMock.notifications.feedback.isEnabled.mockReturnValue(true);
 
-  const enableChromeNext = () => coreStartMock.featureFlags.getBooleanValue.mockReturnValue(true);
-
   beforeEach(() => {
     coreStartMock = coreMock.createStart();
     cloudStartMock = cloudMock.createStart();
     isOptedIn$ = new Subject<boolean>();
+    currentAppId$ = new BehaviorSubject<string | undefined>(undefined);
+    coreStartMock.application.currentAppId$ = currentAppId$;
     // The plugin only consumes `isOptedIn$`, so a Subject we can emit on is all we need.
     telemetryStartMock = {
       telemetryService: { isOptedIn$ },
@@ -61,7 +62,6 @@ describe('Feedback Plugin', () => {
   describe('Chrome Next', () => {
     beforeEach(() => {
       enableFeedback();
-      enableChromeNext();
     });
 
     it('registers the feedback handler only once opt-in resolves to true', () => {
@@ -90,13 +90,72 @@ describe('Feedback Plugin', () => {
     });
   });
 
-  it('does not register the feedback handler when Chrome Next is disabled', () => {
-    enableFeedback();
-    coreStartMock.featureFlags.getBooleanValue.mockReturnValue(false);
+  describe('setContext', () => {
+    const getAppDetailsFromTrigger = () => {
+      const [[{ content }]] = coreStartMock.chrome.navControls.registerRight.mock.calls;
+      return (content as React.ReactElement).props.children.props.getAppDetails as () => {
+        title: string;
+        id: string;
+        url: string;
+        context?: Record<string, string | boolean | number>;
+      };
+    };
 
-    startPlugin();
-    isOptedIn$.next(true);
+    it('no-ops when appId does not match the current app', () => {
+      enableFeedback();
+      const { setContext } = startPlugin();
+      currentAppId$.next('dashboard');
 
-    expect(coreStartMock.chrome.next.registerFeedbackHandler).not.toHaveBeenCalled();
+      setContext('discover', { isEsql: true });
+
+      expect(getAppDetailsFromTrigger()().context).toBeUndefined();
+    });
+
+    it('stores context only while appId is the current app', () => {
+      enableFeedback();
+      const { setContext } = startPlugin();
+      currentAppId$.next('discover');
+
+      setContext('discover', { isEsql: true });
+
+      expect(getAppDetailsFromTrigger()().context).toEqual({ isEsql: true });
+    });
+
+    it('clears context when the current app changes', () => {
+      enableFeedback();
+      const { setContext } = startPlugin();
+      currentAppId$.next('discover');
+      setContext('discover', { isEsql: true });
+
+      currentAppId$.next('dashboard');
+
+      expect(getAppDetailsFromTrigger()().context).toBeUndefined();
+    });
+
+    it('clears context on unregister', () => {
+      enableFeedback();
+      const { setContext } = startPlugin();
+      currentAppId$.next('discover');
+      const unregister = setContext('discover', { isEsql: true });
+
+      unregister();
+
+      expect(getAppDetailsFromTrigger()().context).toBeUndefined();
+    });
+
+    it('uses options.title as a full app title override', () => {
+      enableFeedback();
+      const { setContext } = startPlugin();
+      currentAppId$.next('discover');
+
+      setContext('discover', { isEsql: true }, { title: 'Analytics - Discover ES|QL' });
+
+      expect(getAppDetailsFromTrigger()()).toEqual(
+        expect.objectContaining({
+          title: 'Analytics - Discover ES|QL',
+          context: { isEsql: true },
+        })
+      );
+    });
   });
 });

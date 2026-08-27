@@ -7,25 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo, useMemo, type ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, useEuiMemoizedStyles } from '@elastic/eui';
 import {
   buildNodes,
   buildRows,
-  collectSearchMatches,
   collectExpandableIds,
   type FormatValue,
   type JsonValue,
-  type SearchMatches,
 } from './tree_model';
+import { collectSearchMatches, EMPTY_SEARCH_MATCHES } from './doc_scan';
 import {
   useRovingTreeNavigation,
   useTreeExpansion,
   type TreeExpansionState,
 } from './use_tree_interaction';
-import { ClosingBracketRow, NodeRowView, PagerRowView, treeStyles } from './tree_rows';
+import {
+  ClosingBracketRow,
+  EmptyRootPlaceholder,
+  NodeRowView,
+  PagerRowView,
+  treeStyles,
+} from './tree_rows';
 
 export type { FormatValue, JsonValue } from './tree_model';
 export type { TreeExpansionState } from './use_tree_interaction';
@@ -45,9 +49,11 @@ export interface JsonTreeViewerProps {
    * Function called for each leaf node to render its value. Used by highlighting.
    */
   formatValue?: FormatValue;
+  /** Optional extra content rendered in the tree's header row, next to the expand/collapse control. */
+  extraHeaderContent?: ReactNode;
+  /** When false, leaf values render on a single truncated line instead of wrapping. Defaults to true. */
+  wrapLines?: boolean;
 }
-
-const EMPTY_SEARCH_MATCHES: SearchMatches = { containers: new Set(), reveals: new Map() };
 
 export const JsonTreeViewer = memo(function JsonTreeViewer({
   json,
@@ -55,8 +61,10 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
   onStateChange,
   expandNodesContainingTerm,
   formatValue,
+  extraHeaderContent,
+  wrapLines = true,
 }: JsonTreeViewerProps) {
-  const styles = useMemoCss(treeStyles);
+  const styles = useEuiMemoizedStyles(treeStyles);
 
   const nodes = useMemo(() => buildNodes(json), [json]);
   const expandableIds = useMemo(() => collectExpandableIds(nodes), [nodes]);
@@ -96,32 +104,36 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
 
   return (
     <>
-      {hasControls && (
+      {(hasControls || extraHeaderContent) && (
         <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              buttonRef={expandAllRef}
-              flush="left"
-              iconType={isAllExpanded ? 'fold' : 'unfold'}
-              onClick={isAllExpanded ? collapseAll : expandAll}
-              onKeyDown={onControlKeyDown}
-              size="xs"
-              color="text"
-              data-test-subj="jsonTreeViewerExpandAll"
-            >
-              {isAllExpanded
-                ? i18n.translate('unifiedDataTable.jsonTreeViewer.collapseAll', {
-                    defaultMessage: 'Collapse all',
-                  })
-                : i18n.translate('unifiedDataTable.jsonTreeViewer.expandAll', {
-                    defaultMessage: 'Expand all',
-                  })}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
+          {hasControls && (
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                buttonRef={expandAllRef}
+                flush="left"
+                iconType={isAllExpanded ? 'fold' : 'unfold'}
+                iconSize="s"
+                onClick={isAllExpanded ? collapseAll : expandAll}
+                onKeyDown={onControlKeyDown}
+                size="xs"
+                color="text"
+                data-test-subj="jsonTreeViewerExpandAll"
+              >
+                {isAllExpanded
+                  ? i18n.translate('unifiedDataTable.jsonTreeViewer.collapseAll', {
+                      defaultMessage: 'Collapse all',
+                    })
+                  : i18n.translate('unifiedDataTable.jsonTreeViewer.expandAll', {
+                      defaultMessage: 'Expand all',
+                    })}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          )}
+          {extraHeaderContent && <EuiFlexItem grow={false}>{extraHeaderContent}</EuiFlexItem>}
         </EuiFlexGroup>
       )}
 
-      <div css={styles.wrapper}>
+      <div css={[styles.wrapper, !wrapLines && styles.noWrap]}>
         <div
           role="tree"
           aria-label={i18n.translate('unifiedDataTable.jsonTreeViewer.treeAriaLabel', {
@@ -129,37 +141,41 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
           })}
           data-test-subj="jsonTreeViewer"
         >
-          {rows.map((row) => {
-            if (row.kind === 'closing') {
-              return <ClosingBracketRow key={row.id} row={row} />;
-            }
-            if (row.kind === 'pager') {
+          {rows.length === 0 ? (
+            <EmptyRootPlaceholder collectionType={rootType} />
+          ) : (
+            rows.map((row) => {
+              if (row.kind === 'closing') {
+                return <ClosingBracketRow key={row.id} row={row} />;
+              }
+              if (row.kind === 'pager') {
+                return (
+                  <PagerRowView
+                    key={row.id}
+                    row={row}
+                    isActive={row.id === activeRowId}
+                    rowRef={registerRow(row.id)}
+                    onShowMore={() => revealMore(row.collectionId)}
+                    onShowFewer={() => showFewer(row.collectionId)}
+                    onFocus={() => setActive(row.id)}
+                    onKeyDown={(event) => onRowKeyDown(event, row)}
+                  />
+                );
+              }
               return (
-                <PagerRowView
-                  key={row.id}
+                <NodeRowView
+                  key={row.node.id}
                   row={row}
-                  isActive={row.id === activeRowId}
-                  rowRef={registerRow(row.id)}
-                  onShowMore={() => revealMore(row.collectionId)}
-                  onShowFewer={() => showFewer(row.collectionId)}
-                  onFocus={() => setActive(row.id)}
+                  isActive={row.node.id === activeRowId}
+                  rowRef={registerRow(row.node.id)}
+                  onActivate={() => row.hasChildren && toggle(row.node.id)}
+                  onFocus={() => setActive(row.node.id)}
                   onKeyDown={(event) => onRowKeyDown(event, row)}
+                  formatValue={formatValue}
                 />
               );
-            }
-            return (
-              <NodeRowView
-                key={row.node.id}
-                row={row}
-                isActive={row.node.id === activeRowId}
-                rowRef={registerRow(row.node.id)}
-                onActivate={() => row.hasChildren && toggle(row.node.id)}
-                onFocus={() => setActive(row.node.id)}
-                onKeyDown={(event) => onRowKeyDown(event, row)}
-                formatValue={formatValue}
-              />
-            );
-          })}
+            })
+          )}
         </div>
       </div>
     </>

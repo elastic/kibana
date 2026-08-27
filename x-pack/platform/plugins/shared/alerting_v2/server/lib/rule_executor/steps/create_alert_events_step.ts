@@ -5,24 +5,18 @@
  * 2.0.
  */
 
-import { inject, injectable } from 'inversify';
+import { injectable } from 'inversify';
 import type { PipelineStateStream, RuleExecutionStep } from '../types';
 import {
   createAlertEventsBatchBuilder,
   resolveAlertEventType,
   type AlertEventsBatchBuilder,
 } from '../build_alert_events';
-import {
-  LoggerServiceToken,
-  type LoggerServiceContract,
-} from '../../services/logger_service/logger_service';
 import { guardedExpandStep } from '../stream_utils';
 
 @injectable()
 export class CreateAlertEventsStep implements RuleExecutionStep {
   public readonly name = 'create_alert_events';
-
-  constructor(@inject(LoggerServiceToken) private readonly logger: LoggerServiceContract) {}
 
   public executeStream(streamState: PipelineStateStream): PipelineStateStream {
     const step = this;
@@ -30,6 +24,7 @@ export class CreateAlertEventsStep implements RuleExecutionStep {
 
     return guardedExpandStep(streamState, ['rule', 'esqlRowBatch'], async function* (state) {
       const eventType = resolveAlertEventType(state.rule);
+      const logger = state.logger.withLabels({ step: step.name });
 
       if (!buildBatch) {
         buildBatch = createAlertEventsBatchBuilder({
@@ -41,9 +36,7 @@ export class CreateAlertEventsStep implements RuleExecutionStep {
           type: eventType,
         });
 
-        step.logger.debug({
-          message: `[${step.name}] Created alert events builder for rule ${state.input.ruleId}`,
-        });
+        logger.debug({ message: 'Created alert events builder' });
       }
 
       const alertEventsBatch = buildBatch([...state.esqlRowBatch]);

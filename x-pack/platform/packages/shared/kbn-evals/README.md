@@ -51,6 +51,7 @@ Config files live in `scripts/vault/config.<profile>.json`. The golden cluster p
 | `--judge <id>`      | Connector for LLM-as-a-judge evaluators          |
 | `--grep <pattern>`  | Filter tests by name                             |
 | `--repetitions <n>` | Repeat each example N times                      |
+| `--space-ids <ids>` | Spaces to assign datasets and scores to (the run works from the first) |
 | `--skip-server`     | Skip EDOT/Scout startup (use existing services)  |
 | `--skip-init`       | Skip config and connector setup                  |
 | `--dry-run`         | Print configuration and exit                     |
@@ -83,15 +84,15 @@ node scripts/evals start --suite agent-builder --repetitions 3
 #### Advanced options
 
 <details>
-<summary>LiteLLM setup</summary>
+<summary>OpenRouter setup</summary>
 
-If you have access to the internal LiteLLM gateway:
+If you have an OpenRouter API key (from vault config or `OPENROUTER_API_KEY`):
 
 ```bash
-bash x-pack/platform/packages/shared/kbn-evals/scripts/litellm/dev_env.sh
+bash x-pack/platform/packages/shared/kbn-evals/scripts/openrouter/dev_env.sh
 ```
 
-This logs you in via SSO, generates a virtual key, and exports `KIBANA_TESTING_AI_CONNECTORS`.
+This generates connectors from the OpenRouter catalog and prints `export` lines for `OPENROUTER_BASE_URL`, `OPENROUTER_API_KEY`, and `KIBANA_TESTING_AI_CONNECTORS`.
 
 </details>
 
@@ -189,7 +190,7 @@ Add GitHub labels to trigger evals in PR CI:
 | `models:weekly-eis-models`    | Per-suite EIS model alias (resolves from `evals.suites.json`)     |
 | `evals:skip-<suite-id>`       | Skip a suite, e.g. `evals:skip-smoke-tests`                       |
 
-Model groups follow the pattern `eis/<modelId>` for EIS or `llm-gateway/<model>` for LiteLLM.
+Model groups follow the pattern `eis/<modelId>` for EIS or `openrouter/<provider>-<model>` for OpenRouter.
 
 PRs touching the eval framework get `evals:smoke-tests` automatically
 ([`.github/paths-labeller.yml`](../../../../../.github/paths-labeller.yml)). Add
@@ -213,13 +214,14 @@ Run a suite on any branch without a PR:
 | Variable                          | Required           | Description                                                                                                  |
 | --------------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------ |
 | `EVAL_SUITE_ID`                   | yes                | Suite id from `evals.suites.json`. Comma-separate to run several suites                                      |
-| `EVAL_MODEL_GROUPS`               | yes                | Comma-separated model groups, e.g. `eis/openai-gpt-5.4,llm-gateway/gpt-5.2`                                  |
+| `EVAL_MODEL_GROUPS`               | yes                | Comma-separated model groups, e.g. `eis/openai-gpt-5.4,openrouter/openai-gpt-5.4`                            |
 | `EVAL_INCLUDE_EIS_MODELS`         | for `eis/*` models | Set to `1` when using EIS models or an EIS judge                                                             |
 | `EVAL_CONNECTOR_ID`               | no                 | LLM-as-judge connector override                                                                              |
 | `EVAL_SERVER_CONFIG_SET`          | some suites        | From `serverConfigSet` in `evals.suites.json`                                                                |
 | `KIBANA_BUILD_ID`                 | no                 | Reuse a Kibana build from another job (skips build step)                                                     |
 | `EVAL_GREP`                       | no                 | Playwright test name filter (same as `node scripts/evals run --grep`)                                        |
 | `EVAL_REPETITIONS`                | no                 | Repeat each example N times (same as `--repetitions`)                                                        |
+| `EVAL_SPACE_IDS`                  | no                 | Comma-separated spaces to assign datasets and scores to (same as `--space-ids`)                              |
 | `EVAL_SLACK_NOTIFICATION_CHANNEL` | no                 | Slack channel or member ID to send the triage to. If unset, no Slack notification is sent for on-demand runs |
 
 Example (single suite):

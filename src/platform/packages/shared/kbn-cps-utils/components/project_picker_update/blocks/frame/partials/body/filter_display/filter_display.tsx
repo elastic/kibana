@@ -71,6 +71,7 @@ const getFilterBadgeContextMenuItems = ({
       onClick(this: FilterBadgeClickActionContext, e) {
         e.preventDefault();
         onEditFilter({ id: this.id, expression: this.expression });
+        closePopover();
       },
     },
     {
@@ -87,7 +88,7 @@ const getFilterBadgeContextMenuItems = ({
         return !enabled;
       },
       isDisplayed: ({ projectPickerState, id }) => {
-        const filterExpression = projectPickerState.filterExpressions.get(id);
+        const filterExpression = projectPickerState.displayedFilterExpressions.get(id);
         if (!filterExpression) {
           return false;
         }
@@ -111,7 +112,7 @@ const getFilterBadgeContextMenuItems = ({
         return !enabled;
       },
       isDisplayed: ({ projectPickerState, id }) => {
-        const filterExpression = projectPickerState.filterExpressions.get(id);
+        const filterExpression = projectPickerState.displayedFilterExpressions.get(id);
         if (!filterExpression) {
           return false;
         }
@@ -132,7 +133,7 @@ const getFilterBadgeContextMenuItems = ({
         closePopover();
       },
       isDisplayed: ({ projectPickerState, id }) => {
-        return projectPickerState.filterExpressions.get(id)!.enabled;
+        return projectPickerState.displayedFilterExpressions.get(id)!.enabled;
       },
     },
     {
@@ -146,7 +147,7 @@ const getFilterBadgeContextMenuItems = ({
         closePopover();
       },
       isDisplayed: ({ projectPickerState, id }) => {
-        return projectPickerState.filterExpressions.get(id)!.enabled === false;
+        return projectPickerState.displayedFilterExpressions.get(id)!.enabled === false;
       },
     },
     {
@@ -183,8 +184,8 @@ export function ProjectPickerFilterDisplay({
   }, []);
 
   const filterEntries = useMemo(
-    () => Array.from(state.filterExpressions.entries()),
-    [state.filterExpressions]
+    () => Array.from(state.displayedFilterExpressions.entries()),
+    [state.displayedFilterExpressions]
   );
 
   const selectedFilter = useMemo(() => {
@@ -192,13 +193,13 @@ export function ProjectPickerFilterDisplay({
       return null;
     }
 
-    const entry = state.filterExpressions.get(selectedFilterId);
+    const entry = state.displayedFilterExpressions.get(selectedFilterId);
     if (!entry) {
       return null;
     }
 
     return { id: selectedFilterId, ...entry };
-  }, [selectedFilterId, state.filterExpressions]);
+  }, [selectedFilterId, state.displayedFilterExpressions]);
 
   const filterBadgeContextMenuItems = useMemo(() => {
     return getFilterBadgeContextMenuItems({ onEditFilter, actions, closePopover });
@@ -271,47 +272,49 @@ export function ProjectPickerFilterDisplay({
   return (
     <div data-test-subj="projectPickerFilterDisplayContainer">
       {renderFilterBadgeContextMenu()}
-      <EuiFlexGroup direction="column" gutterSize="none">
-        <EuiFlexItem css={styles.filterBadgesContainer}>
-          <EuiFlexGroup gutterSize="s" responsive={false}>
-            {filterEntries.map(([id, entry]) => {
-              const isNonInteractive = id === currentFilterInputId || state.isReadOnly;
+      <EuiFlexGroup gutterSize="s" responsive={false} css={styles.filterBadgesContainer}>
+        {filterEntries.map(([id, entry]) => {
+          const isNonInteractive =
+            id === currentFilterInputId ||
+            state.controlsState === 'disabled' ||
+            state.isFilterProposalPending;
 
-              return (
-                <EuiFlexItem key={id} grow={false}>
-                  <FilterBadge
-                    filter={entry.expression}
-                    isDisabled={isNonInteractive}
-                    isInactive={!entry.enabled}
-                    {...(isNonInteractive
-                      ? {
-                          iconType: 'empty',
-                          iconSide: 'right',
+          return (
+            <EuiFlexItem key={id} grow={false}>
+              <FilterBadge
+                filter={entry.expression}
+                isDisabled={isNonInteractive}
+                isInactive={!entry.enabled}
+                {...(isNonInteractive
+                  ? {
+                      iconType: 'empty',
+                      iconSide: 'right',
+                    }
+                  : {
+                      iconSide: 'right',
+                      iconType: 'cross',
+                      iconOnClick: handleFilterBadgeIconClick.bind(null, id),
+                      iconOnClickAriaLabel: i18n.translate(
+                        'cpsUtils.projectPicker.filterDisplay.filterBadgeIconClickAriaLabel',
+                        {
+                          defaultMessage: 'Remove filter',
                         }
-                      : {
-                          iconSide: 'right',
-                          iconType: 'cross',
-                          iconOnClick: handleFilterBadgeIconClick.bind(null, id),
-                          iconOnClickAriaLabel: i18n.translate(
-                            'cpsUtils.projectPicker.filterDisplay.filterBadgeIconClickAriaLabel',
-                            {
-                              defaultMessage: 'Remove filter',
-                            }
-                          ),
-                          onClick: handleFilterBadgeClick.bind(null, id),
-                          onClickAriaLabel: i18n.translate(
-                            'cpsUtils.projectPicker.filterDisplay.filterBadgeClickAriaLabel',
-                            {
-                              defaultMessage: 'Click to view filter actions',
-                            }
-                          ),
-                        })}
-                  />
-                </EuiFlexItem>
-              );
-            })}
-          </EuiFlexGroup>
-        </EuiFlexItem>
+                      ),
+                      onClick: handleFilterBadgeClick.bind(null, id),
+                      onClickAriaLabel: i18n.translate(
+                        'cpsUtils.projectPicker.filterDisplay.filterBadgeClickAriaLabel',
+                        {
+                          defaultMessage: 'Click to view filter actions',
+                        }
+                      ),
+                      closeButtonProps: {
+                        'data-test-subj': `filterBadgeCloseButton-${id}`,
+                      },
+                    })}
+              />
+            </EuiFlexItem>
+          );
+        })}
       </EuiFlexGroup>
     </div>
   );

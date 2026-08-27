@@ -9,8 +9,12 @@ paths:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
       operationId: UpdatePrivMonUser
+      deprecated: true
       summary: Update a monitored user
-      description: Updates the details of an existing monitored privileged user by their document ID.
+      description: |
+        **Deprecated in 9.4.0.** Use the Watchlists API instead.
+
+        Updates the details of an existing monitored privileged user by their document ID.
       parameters:
         - name: id
           in: path

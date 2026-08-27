@@ -8,13 +8,12 @@
  */
 
 import type { z } from '@kbn/zod';
-import { durationFormatSchema, legacyDurationFormatSchema } from './duration_units';
+import { durationFormatSchema } from './duration_units';
 
 type DurationFormat = z.infer<typeof durationFormatSchema>;
-type LegacyDurationFormat = z.infer<typeof legacyDurationFormatSchema>;
 
 describe('Duration unit schemas', () => {
-  describe('durationFormatSchema (GA)', () => {
+  describe('durationFormatSchema', () => {
     it('validates fine-grained input units without inventing decimals/compact', () => {
       const input = {
         type: 'duration',
@@ -99,50 +98,6 @@ describe('Duration unit schemas', () => {
       expect(() =>
         durationFormatSchema.parse({ type: 'duration', from: 'auto', to: 's' })
       ).toThrow();
-    });
-  });
-
-  // Legacy duration units are intentionally free-form strings (no enum validation) to preserve
-  // the pre-GA behavior, so nothing is rejected based on the unit name.
-  describe('legacyDurationFormatSchema', () => {
-    it('validates legacy `m` for minutes', () => {
-      const input = {
-        type: 'duration',
-        from: 'm',
-        to: 'humanize',
-      } satisfies LegacyDurationFormat;
-
-      expect(legacyDurationFormatSchema.parse(input)).toEqual(input);
-    });
-
-    it('validates legacy `humanizePrecise` output', () => {
-      const input = {
-        type: 'duration',
-        from: 'us',
-        to: 'humanizePrecise',
-      } satisfies LegacyDurationFormat;
-
-      expect(legacyDurationFormatSchema.parse(input)).toEqual(input);
-    });
-
-    it('accepts GA unit names without enum validation', () => {
-      const input = {
-        type: 'duration',
-        from: 'min',
-        to: 'auto-approximate',
-      } satisfies LegacyDurationFormat;
-
-      expect(legacyDurationFormatSchema.parse(input)).toEqual(input);
-    });
-
-    it('accepts arbitrary unit strings for backwards compatibility', () => {
-      const input = {
-        type: 'duration',
-        from: 'minutes',
-        to: 'anything',
-      } satisfies LegacyDurationFormat;
-
-      expect(legacyDurationFormatSchema.parse(input)).toEqual(input);
     });
   });
 });

@@ -1,8 +1,7 @@
 {
   "sha1": "4c98de547e10883caef0526e908b05e25ba750ca",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -15,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_otel/api/tests/audit_log_traditional.spec.ts",
-        "line": 61,
-        "column": 12
+        "line": 53,
+        "column": 13
       }
     },
     {
@@ -29,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_otel/api/tests/audit_log_traditional.spec.ts",
-        "line": 98,
-        "column": 12
+        "line": 81,
+        "column": 18
       }
     },
     {
@@ -43,8 +42,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_otel/api/tests/audit_log.spec.ts",
-        "line": 83,
-        "column": 12
+        "line": 79,
+        "column": 23
       }
     },
     {
@@ -57,8 +56,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_otel/api/tests/audit_log.spec.ts",
-        "line": 160,
-        "column": 12
+        "line": 141,
+        "column": 24
       }
     },
     {
@@ -71,8 +70,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_otel/api/tests/audit_log.spec.ts",
-        "line": 210,
-        "column": 12
+        "line": 186,
+        "column": 18
       }
     },
     {
@@ -85,8 +84,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_otel/api/tests/audit_log.spec.ts",
-        "line": 270,
-        "column": 12
+        "line": 233,
+        "column": 24
       }
     },
     {
@@ -99,8 +98,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_otel/api/tests/audit_log.spec.ts",
-        "line": 325,
-        "column": 12
+        "line": 281,
+        "column": 20
       }
     }
   ]

@@ -18,6 +18,7 @@ export interface ScoutPrivateLocation {
   agentPolicyId: string;
   geo: { lat: number; lon: number };
   isServiceManaged: false;
+  isAgentSharding?: boolean;
 }
 
 /**
@@ -37,9 +38,13 @@ export interface SyntheticsPrivateLocationApi {
   addFleetPolicy(name: string, spaceIds?: string[]): Promise<{ id: string }>;
   setTestLocations(
     testFleetPolicyIds: string[],
-    spaceId?: string | string[]
+    spaceId?: string | string[],
+    opts?: { isAgentSharding?: boolean }
   ): Promise<ScoutPrivateLocation[]>;
-  addTestPrivateLocation(spaceId?: string | string[]): Promise<ScoutPrivateLocation>;
+  addTestPrivateLocation(
+    spaceId?: string | string[],
+    opts?: { isAgentSharding?: boolean }
+  ): Promise<ScoutPrivateLocation>;
   getSharedPrivateLocation(): Promise<ScoutPrivateLocation>;
   resetSharedPrivateLocation(): void;
   cleanUpPrivateLocationsAndPolicies(): Promise<void>;
@@ -225,7 +230,8 @@ export function createSyntheticsPrivateLocationApi(
 
   const setTestLocations = async (
     testFleetPolicyIds: string[],
-    spaceId?: string | string[]
+    spaceId?: string | string[],
+    { isAgentSharding }: { isAgentSharding?: boolean } = {}
   ): Promise<ScoutPrivateLocation[]> => {
     const locations: ScoutPrivateLocation[] = testFleetPolicyIds.map((id) => ({
       id,
@@ -233,6 +239,7 @@ export function createSyntheticsPrivateLocationApi(
       agentPolicyId: id,
       geo: { lat: 0, lon: 0 },
       isServiceManaged: false,
+      ...(isAgentSharding ? { isAgentSharding: true } : {}),
     }));
     const initialNamespaces = spaceId
       ? Array.isArray(spaceId)
@@ -266,12 +273,13 @@ export function createSyntheticsPrivateLocationApi(
   };
 
   const addTestPrivateLocation = async (
-    spaceId: string | string[] = 'default'
+    spaceId: string | string[] = 'default',
+    opts: { isAgentSharding?: boolean } = {}
   ): Promise<ScoutPrivateLocation> => {
     await installSyntheticsPackage();
     const spaceIds = Array.isArray(spaceId) ? spaceId : [spaceId];
     const { id: policyId } = await addFleetPolicy(`Scout test policy ${uuidv4()}`, spaceIds);
-    const [location] = await setTestLocations([policyId], spaceId);
+    const [location] = await setTestLocations([policyId], spaceId, opts);
     return location;
   };
 

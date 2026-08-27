@@ -90,6 +90,13 @@ export function createGetLogsTool({
   const toolDefinition: BuiltinToolDefinition<typeof getLogsSchema, GetLogsHandlerResult> = {
     id: OBSERVABILITY_GET_LOGS_TOOL_ID,
     type: ToolType.builtin,
+    annotations: {
+      title: 'Get Logs',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     description: dedent(
       `Searches and filters logs, returning a histogram trend, total count, compact log samples, and message pattern categories in a single query.
 

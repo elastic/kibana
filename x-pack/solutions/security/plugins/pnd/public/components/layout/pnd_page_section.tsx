@@ -8,14 +8,13 @@
 import React from 'react';
 import type { EuiPageSectionProps, EuiThemeComputed } from '@elastic/eui';
 import { EuiPageSection, useEuiTheme } from '@elastic/eui';
-import { PND_FAB_CONTENT_OFFSET, PND_PAGE_PADDING_TOP } from './constants';
 
 export type PndPageSectionProps = Omit<EuiPageSectionProps, 'paddingSize'>;
 
 const getContentPaddingCss = (euiTheme: EuiThemeComputed) => ({
-  paddingTop: PND_PAGE_PADDING_TOP,
+  paddingTop: euiTheme.size.l,
   paddingRight: euiTheme.size.l,
-  paddingBottom: PND_FAB_CONTENT_OFFSET,
+  paddingBottom: euiTheme.size.l,
   paddingLeft: euiTheme.size.l,
 });
 

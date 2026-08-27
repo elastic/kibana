@@ -9,8 +9,10 @@ import type {
   CompactionSummary,
   ConversationAction,
   ConversationRound,
+  ConversationRoundAuthor,
   ConverseInput,
   RoundInput,
+  MetadataFieldValue,
 } from '@kbn/agent-builder-common';
 import { createBadRequestError } from '@kbn/agent-builder-common';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
@@ -40,6 +42,16 @@ export interface ProcessedConversation {
   attachmentStateManager: AttachmentStateManager;
   /** Compaction summary covering older rounds that were replaced by this summary */
   compactionSummary?: CompactionSummary;
+  /** Persistent sub-agent roster */
+  subagentRosterFallback?: Record<string, string>;
+  /**
+   * Deserialized metadata from the active conversation template.
+   * Populated from `conversation.metadata` at prepare time so prompt factories
+   * receive it via `processedConversation` rather than as a separate parameter.
+   */
+  metadata?: Record<string, MetadataFieldValue>;
+  /** ID of the template applied to this conversation, used to look up field definitions. */
+  template_id?: string;
 }
 
 /**
@@ -140,13 +152,19 @@ const prepareForAction = ({
 export const prepareConversation = async ({
   previousRounds,
   nextInput,
+  nextInputAuthor,
   context,
   action,
+  metadata,
+  templateId,
 }: {
   previousRounds: ConversationRound[];
   nextInput: ConverseInput;
+  nextInputAuthor?: ConversationRoundAuthor;
   context: AgentHandlerContext;
   action?: ConversationAction;
+  metadata?: Record<string, MetadataFieldValue>;
+  templateId?: string;
 }): Promise<ProcessedConversation> => {
   const { attachments: attachmentsService, attachmentStateManager } = context;
   const resolveContext: AttachmentResolveContext = {
@@ -195,7 +213,9 @@ export const prepareConversation = async ({
         attachment_refs: attachmentRefs,
       },
     };
-    processedRounds.push(prepareRound({ round: strippedRound, attachmentStateManager }));
+    processedRounds.push(
+      prepareRound({ round: strippedRound, author: round.author, attachmentStateManager })
+    );
   }
 
   attachmentStateManager.clearAccessTracking();
@@ -219,6 +239,7 @@ export const prepareConversation = async ({
   };
   const processedNextInput = prepareRoundInput({
     input: strippedNextInput,
+    author: nextInputAuthor,
     attachmentStateManager,
   });
 
@@ -250,27 +271,33 @@ export const prepareConversation = async ({
     previousRounds: processedRounds,
     attachmentTypes,
     attachmentStateManager,
+    ...(metadata !== undefined ? { metadata } : {}),
+    ...(templateId !== undefined ? { template_id: templateId } : {}),
   };
 };
 
 const prepareRound = ({
   round,
+  author,
   attachmentStateManager,
 }: {
   round: ConversationRound;
+  author?: ConversationRoundAuthor;
   attachmentStateManager: AttachmentStateManager;
 }): ProcessedConversationRound => {
   return {
     ...round,
-    input: prepareRoundInput({ input: round.input, attachmentStateManager }),
+    input: prepareRoundInput({ input: round.input, author, attachmentStateManager }),
   };
 };
 
 const prepareRoundInput = ({
   input,
+  author,
   attachmentStateManager,
 }: {
   input: RoundInput | ConverseInput;
+  author?: ConversationRoundAuthor;
   attachmentStateManager: AttachmentStateManager;
 }): ProcessedRoundInput => {
   const inputAttachments: Partial<ProcessedRoundInput> = {};
@@ -294,6 +321,7 @@ const prepareRoundInput = ({
     // attachments are always stripped before this function. this is here to satisfy the type
     // for legacy compatibility
     attachments: [],
+    ...(author !== undefined ? { author } : {}),
     ...inputAttachments,
   };
 };

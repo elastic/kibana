@@ -11,7 +11,6 @@ import type { EuiTabbedContentTab } from '@elastic/eui';
 import { useGeneratedHtmlId } from '@elastic/eui';
 
 import {
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -24,8 +23,8 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-
 import type { FilteringValidation } from '@kbn/search-connectors';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import { AdvancedSyncRules } from './advanced_sync_rules';
 import { EditSyncRulesTab } from './edit_sync_rules_tab';
@@ -126,9 +125,8 @@ export const EditSyncRulesFlyout: React.FC<EditFilteringFlyoutProps> = ({
           <EuiFlexGroup direction="column">
             {errors.map((error, index) => (
               <EuiFlexItem id={`${index}`} grow={false}>
-                <EuiCallOut
+                <KbnDangerCallout
                   announceOnMount
-                  color="danger"
                   title={i18n.translate(
                     'xpack.enterpriseSearch.content.index.connector.syncRules.flyout.errorTitle',
                     {
@@ -146,7 +144,7 @@ export const EditSyncRulesFlyout: React.FC<EditFilteringFlyoutProps> = ({
                       <p id={message}>{message}</p>
                     ))}
                   </>
-                </EuiCallOut>
+                </KbnDangerCallout>
               </EuiFlexItem>
             ))}
           </EuiFlexGroup>

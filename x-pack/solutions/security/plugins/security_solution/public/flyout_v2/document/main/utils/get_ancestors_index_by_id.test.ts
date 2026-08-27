@@ -20,6 +20,9 @@ const item = (field: string, values: string[]): TimelineEventsDetailsItem => ({
   isObjectArray: false,
 });
 
+const LOCAL_DOCUMENT_INDEX = '.alerts-security.alerts-default';
+const REMOTE_DOCUMENT_INDEX = 'project-a:.internal.alerts-security.alerts-default-000001';
+
 describe('getAncestorsIndexById', () => {
   it('maps a single ancestor id to its index', () => {
     const data = [
@@ -27,7 +30,9 @@ describe('getAncestorsIndexById', () => {
       item(ANCESTOR_INDEX, ['.ds-logs-source-1']),
     ];
 
-    expect(getAncestorsIndexById(data)).toEqual({ 'ancestor-1': '.ds-logs-source-1' });
+    expect(getAncestorsIndexById(data, LOCAL_DOCUMENT_INDEX)).toEqual({
+      'ancestor-1': '.ds-logs-source-1',
+    });
   });
 
   it('aligns multiple ancestor ids with their indices by position', () => {
@@ -36,7 +41,7 @@ describe('getAncestorsIndexById', () => {
       item(ANCESTOR_INDEX, ['.ds-logs-source-1', '.internal.alerts-security.alerts-default']),
     ];
 
-    expect(getAncestorsIndexById(data)).toEqual({
+    expect(getAncestorsIndexById(data, LOCAL_DOCUMENT_INDEX)).toEqual({
       'ancestor-1': '.ds-logs-source-1',
       'ancestor-2': '.internal.alerts-security.alerts-default',
     });
@@ -48,7 +53,9 @@ describe('getAncestorsIndexById', () => {
       item(LEGACY_ANCESTOR_INDEX, ['.ds-logs-source-1']),
     ];
 
-    expect(getAncestorsIndexById(data)).toEqual({ 'ancestor-1': '.ds-logs-source-1' });
+    expect(getAncestorsIndexById(data, LOCAL_DOCUMENT_INDEX)).toEqual({
+      'ancestor-1': '.ds-logs-source-1',
+    });
   });
 
   it('merges ancestor ids from both the current and legacy fields', () => {
@@ -59,7 +66,7 @@ describe('getAncestorsIndexById', () => {
       item(LEGACY_ANCESTOR_INDEX, ['.ds-logs-source-2']),
     ];
 
-    expect(getAncestorsIndexById(data)).toEqual({
+    expect(getAncestorsIndexById(data, LOCAL_DOCUMENT_INDEX)).toEqual({
       'ancestor-1': '.ds-logs-source-1',
       'ancestor-2': '.ds-logs-source-2',
     });
@@ -72,7 +79,7 @@ describe('getAncestorsIndexById', () => {
       item(ANCESTOR_INDEX, ['.ds-logs-source-1']),
     ];
 
-    expect(getAncestorsIndexById(data)).toEqual({});
+    expect(getAncestorsIndexById(data, LOCAL_DOCUMENT_INDEX)).toEqual({});
   });
 
   it('skips ancestor ids that have no aligned index', () => {
@@ -81,11 +88,38 @@ describe('getAncestorsIndexById', () => {
       item(ANCESTOR_INDEX, ['.ds-logs-source-1']),
     ];
 
-    expect(getAncestorsIndexById(data)).toEqual({ 'ancestor-1': '.ds-logs-source-1' });
+    expect(getAncestorsIndexById(data, LOCAL_DOCUMENT_INDEX)).toEqual({
+      'ancestor-1': '.ds-logs-source-1',
+    });
   });
 
   it('returns an empty map when there are no ancestor ids', () => {
-    expect(getAncestorsIndexById([item(ANCESTOR_INDEX, ['.ds-logs-source-1'])])).toEqual({});
-    expect(getAncestorsIndexById([])).toEqual({});
+    expect(
+      getAncestorsIndexById([item(ANCESTOR_INDEX, ['.ds-logs-source-1'])], LOCAL_DOCUMENT_INDEX)
+    ).toEqual({});
+    expect(getAncestorsIndexById([], LOCAL_DOCUMENT_INDEX)).toEqual({});
+  });
+
+  it('qualifies ancestor indices with the linked-project prefix when the alert lives in a remote project', () => {
+    const data = [
+      item(EVENT_SOURCE_FIELD_NAME, ['ancestor-1', 'ancestor-2']),
+      item(ANCESTOR_INDEX, ['.ds-logs-source-1', '.internal.alerts-security.alerts-default']),
+    ];
+
+    expect(getAncestorsIndexById(data, REMOTE_DOCUMENT_INDEX)).toEqual({
+      'ancestor-1': 'project-a:.ds-logs-source-1',
+      'ancestor-2': 'project-a:.internal.alerts-security.alerts-default',
+    });
+  });
+
+  it('leaves an already-qualified ancestor index unchanged when the alert lives in a remote project', () => {
+    const data = [
+      item(EVENT_SOURCE_FIELD_NAME, ['ancestor-1']),
+      item(ANCESTOR_INDEX, ['project-a:.ds-logs-source-1']),
+    ];
+
+    expect(getAncestorsIndexById(data, REMOTE_DOCUMENT_INDEX)).toEqual({
+      'ancestor-1': 'project-a:.ds-logs-source-1',
+    });
   });
 });

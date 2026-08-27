@@ -10,11 +10,15 @@ import { ALERT_EPISODE_STATUS } from './alert_action_schema';
 import { tagsSchema } from './common';
 import { ID_MAX_LENGTH, MAX_FINGERPRINT_LENGTH } from './constants';
 
-export const alertEpisodeStatusSchema = z.enum([
-  ALERT_EPISODE_STATUS.ACTIVE,
-  ALERT_EPISODE_STATUS.INACTIVE,
-  ALERT_EPISODE_STATUS.PENDING,
-  ALERT_EPISODE_STATUS.RECOVERING,
+export const alertEpisodeStatusSchema = z.union([
+  z.literal(ALERT_EPISODE_STATUS.INACTIVE).describe('The alert episode is fully recovered'),
+  z
+    .literal(ALERT_EPISODE_STATUS.PENDING)
+    .describe('Breached but below the consecutive-breaches threshold'),
+  z.literal(ALERT_EPISODE_STATUS.ACTIVE).describe('Met the threshold — alert is firing'),
+  z
+    .literal(ALERT_EPISODE_STATUS.RECOVERING)
+    .describe('Breach stopped but recovery condition is not yet met'),
 ]);
 
 /**
@@ -32,12 +36,12 @@ export const alertEpisodeSchema = z
     last_timestamp: z.iso.datetime(),
     duration: z.number(),
     /** ISO timestamp of the first event where episode.status === 'active'. */
-    triggered_at: z.iso.datetime().optional(),
-    last_ack_action: z.enum(['ack', 'unack']).optional(),
+    triggered_at: z.iso.datetime().nullable().optional(),
+    last_ack_action: z.enum(['ack', 'unack']).nullable().optional(),
     last_assignee_uid: z.string().min(1).max(ID_MAX_LENGTH).nullable().optional(),
-    last_snooze_action: z.enum(['snooze', 'unsnooze']).optional(),
-    snooze_expiry: z.iso.datetime().optional(),
-    last_tags: tagsSchema.optional(),
+    last_snooze_action: z.enum(['snooze', 'unsnooze']).nullable().optional(),
+    snooze_expiry: z.iso.datetime().nullable().optional(),
+    last_tags: tagsSchema.nullable().optional(),
     /** JSON string from the latest non-empty alert `data`. */
     episode_data: z.string().nullable().optional(),
     /** Latest top-level `severity` from a breached rule event, when present. */

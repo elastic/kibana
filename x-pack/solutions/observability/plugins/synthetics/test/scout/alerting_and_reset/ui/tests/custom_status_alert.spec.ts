@@ -10,67 +10,75 @@ import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../../common/ui/fixtures';
 
 // Failing: See https://github.com/elastic/kibana/issues/268088
-test.describe.skip('CustomStatusAlert', { tag: tags.stateful.classic }, () => {
-  let configId: string;
+test.describe.skip(
+  'CustomStatusAlert',
+  { tag: [...tags.stateful.classic, '@local-serverless-observability_complete'] },
+  () => {
+    let configId: string;
 
-  test.beforeAll(async ({ syntheticsServices }) => {
-    await syntheticsServices.cleanUp();
-  });
-
-  test.afterAll(async ({ syntheticsServices }) => {
-    await syntheticsServices.cleanUp();
-  });
-
-  test('creates a custom status alert rule', async ({
-    pageObjects,
-    page,
-    browserAuth,
-    syntheticsServices,
-  }) => {
-    const firstCheckTime = new Date(Date.now()).toISOString();
-
-    await test.step('login and navigate to overview', async () => {
-      await browserAuth.loginAsPrivilegedUser();
-      await pageObjects.syntheticsApp.navigateToOverview(15);
+    test.beforeAll(async ({ syntheticsServices }) => {
+      await syntheticsServices.cleanUp();
     });
 
-    await test.step('create monitor and summary doc', async () => {
-      configId = await syntheticsServices.addMonitor(
-        'Test Monitor',
-        {
-          type: 'http',
-          urls: 'https://www.google.com',
-        },
-        configId
-      );
-      await syntheticsServices.addSummaryDocument({
-        timestamp: firstCheckTime,
-        configId,
-      });
+    test.afterAll(async ({ syntheticsServices }) => {
+      await syntheticsServices.cleanUp();
     });
 
-    await test.step('create custom status rule', async () => {
-      await pageObjects.syntheticsApp.refreshOverview();
-      await pageObjects.syntheticsApp.openManageStatusRule();
-      await page.testSubj.click('createNewStatusRule');
+    test('creates a custom status alert rule', async ({
+      pageObjects,
+      page,
+      browserAuth,
+      syntheticsServices,
+    }) => {
+      const firstCheckTime = new Date(Date.now()).toISOString();
 
-      let requestMade = false;
-      page.on('request', (request) => {
-        if (request.url().includes('api/alerting/rule') && request.method() === 'POST') {
-          requestMade = true;
-        }
+      await test.step('login and navigate to overview', async () => {
+        await browserAuth.loginAsPrivilegedUser();
+        await pageObjects.syntheticsApp.navigateToOverview(15);
       });
 
-      await page.testSubj.click('ruleFormStep-details');
-      await expect(page.getByText('Related dashboards')).toBeVisible();
-      await page.testSubj.click('ruleFlyoutFooterSaveButton');
-      await page.testSubj.click('confirmModalConfirmButton');
-      expect(requestMade).toBe(true);
-    });
+      await test.step('create monitor and summary doc', async () => {
+        configId = await syntheticsServices.addMonitor(
+          'Test Monitor',
+          {
+            type: 'http',
+            urls: 'https://www.google.com',
+          },
+          configId
+        );
+        await syntheticsServices.addSummaryDocument({
+          timestamp: firstCheckTime,
+          configId,
+        });
+      });
 
-    await test.step('verify rule creation', async () => {
-      await pageObjects.syntheticsApp.goToRulesPage();
-      await expect(page.getByText('Synthetics monitor status rule')).toBeVisible();
+      await test.step('create custom status rule', async () => {
+        await pageObjects.syntheticsApp.refreshOverview();
+        await pageObjects.syntheticsApp.openManageStatusRule();
+        await page.testSubj.click('createNewStatusRule');
+
+        const ruleCreationResponse = page.waitForResponse(
+          (response) =>
+            response.url().includes('api/alerting/rule') && response.request().method() === 'POST'
+        );
+
+        await page.testSubj.click('ruleFormStep-details');
+        await expect(page.getByText('Related dashboards')).toBeVisible();
+        await page.testSubj.click('ruleFlyoutFooterSaveButton');
+        await page.testSubj.click('confirmModalConfirmButton');
+
+        const response = await ruleCreationResponse;
+        expect(response.ok()).toBe(true);
+      });
+
+      await test.step('verify rule creation', async () => {
+        const ruleName = 'Synthetics monitor status rule';
+        await pageObjects.syntheticsApp.goToRulesPage();
+        // Search by name to force a fresh scoped query: the list fetches once on load, which with preset rules (serverless) can predate the new rule being queryable.
+        await page.testSubj.fill('ruleSearchField', ruleName);
+        await page.testSubj.locator('ruleSearchField').press('Enter');
+        await expect(page.getByText(ruleName)).toBeVisible();
+      });
     });
-  });
-});
+  }
+);

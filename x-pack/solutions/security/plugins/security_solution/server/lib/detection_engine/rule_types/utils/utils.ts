@@ -7,7 +7,7 @@
 
 import agent from 'elastic-apm-node';
 import { createHash } from 'crypto';
-import { get, invert, isArray, isEmpty, merge, sum } from 'lodash';
+import { get, invert, isArray, isEmpty, isEqual, merge, sum } from 'lodash';
 import moment from 'moment';
 import objectHash from 'object-hash';
 
@@ -789,15 +789,53 @@ export const isMachineLearningParams = (params: RuleParams): params is MachineLe
  * @param sortIds estypes.SortResults | undefined
  * @returns SortResults
  */
+// stringified Java Long.MAX_VALUE, used as a sentinel sort value when Elasticsearch expects one
+const LONG_MAX_VALUE = '9223372036854775807';
+
 export const getSafeSortIds = (sortIds: estypes.SortResults | undefined) => {
   return sortIds?.map((sortId) => {
     // haven't determined when we would receive a null value for a sort id
     // but in case we do, default to sending the stringified Java max_int
     if (sortId == null || sortId === '' || Number(sortId) >= Number.MAX_SAFE_INTEGER) {
-      return '9223372036854775807';
+      return LONG_MAX_VALUE;
     }
     return sortId;
   });
+};
+
+/**
+ * Same Long.MAX_VALUE clamping as {@link getSafeSortIds}, for cursors that mix formatted
+ * date_nanos values with plain date ones. Null and empty values are left as they are so callers
+ * can stop paging via {@link getUnusableCursorWarning}: replacing them with the sentinel would
+ * put the cursor outside the range a date_nanos field accepts.
+ */
+export const getSafeNanosSortIds = (sortIds: estypes.SortResults | undefined) => {
+  return sortIds?.map((sortId) => {
+    if (sortId != null && sortId !== '' && Number(sortId) >= Number.MAX_SAFE_INTEGER) {
+      return LONG_MAX_VALUE;
+    }
+    return sortId;
+  });
+};
+
+// in mixed date/date_nanos patterns, timestamps missing or outside the nanos range
+// on date-mapped shards yield cursors that either format to null or never advance
+// (the same docs match again every page); callers stop paging instead of failing or looping
+export const getUnusableCursorWarning = (
+  sortIds: estypes.SortResults | undefined,
+  prevSortIds: estypes.SortResults | undefined
+): string | undefined => {
+  if (sortIds == null) {
+    return undefined;
+  }
+  const unusable =
+    sortIds.some((val) => val == null || val === '') || isEqual(sortIds, prevSortIds);
+  if (!unusable) {
+    return undefined;
+  }
+  return `Pagination stopped: the last document's sort values ${JSON.stringify(
+    sortIds
+  )} cannot be used as a search_after cursor, because a timestamp is missing or outside the date_nanos supported range on an index where it is not mapped as date_nanos. Remaining documents were not evaluated.`;
 };
 
 export const isWrappedEventHit = (event: SimpleHit): event is WrappedEventHit => {

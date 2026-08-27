@@ -135,6 +135,13 @@ export const manageCasesTool = (
     description: `Cases CRUD + assign/tags/custom fields${
       isTemplatesEnabled ? '/extended fields' : ''
     }. Modes: ${modesDescription}. See \`mode\` field for required inputs.\n\n${CASES_SOLUTION_CONTEXT_INSTRUCTION}${CASES_TOOL_TEXT_INSTRUCTION}`,
+    annotations: {
+      title: 'Manage Cases',
+      readOnlyHint: false,
+      destructiveHint: true,
+      idempotentHint: false,
+      openWorldHint: false,
+    },
     schema: manageCasesSchema,
     tags: ['cases'],
     handler: async (args, toolContext) => {

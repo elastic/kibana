@@ -9,14 +9,16 @@ import {
   AgentExecutionMode,
   agentBuilderDefaultAgentId,
   ToolOrigin,
-  type AgentCapabilities,
+  type ConversationTemplate,
+  type SerializedMetadataValue,
 } from '@kbn/agent-builder-common';
 import type { AgentHandlerContext } from '@kbn/agent-builder-server';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
+import type { InternalBuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
 import type { ScopedRunner } from '@kbn/agent-builder-server/runner';
 import { ToolManagerToolType } from '@kbn/agent-builder-server/runner';
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import { createSubagentTool } from './run_subagent';
+import { createSendMessageTool } from './send_message';
 import { createSleepTool } from './sleep';
 import { createLoadSkillTool } from './load_skill';
 import { createSearchRelevantSkillsTool } from './search_relevant_skills';
@@ -26,16 +28,21 @@ import { createListFilesTool } from './list_files';
 import { createBashTool } from './bash';
 import { createDiscoverApisTool, createDescribeApiTool, createExecuteApiTool } from './api';
 import { createTodoTool } from '../../../tools/builtin/todo';
+import { createSetConversationMetadataTool } from '../../../tools/builtin/set_conversation_metadata';
 import { builtinToolToExecutable } from '../utils/select_tools';
 import type { BackgroundExecutionService } from '../background_execution_service';
+import type { SubagentTracker } from '../subagent_tracker';
 
 export interface RegisterInternalToolsParams {
   context: AgentHandlerContext;
   agentId?: string;
   executionId?: string;
-  capabilities?: AgentCapabilities;
   abortSignal?: AbortSignal;
   backgroundExecutionService: BackgroundExecutionService;
+  /** Callback to merge key/value updates into the active conversation's metadata. */
+  updateConversationMetadata?: (updates: Record<string, SerializedMetadataValue>) => Promise<void>;
+  /** Active conversation template, used to validate values written by the LLM. */
+  conversationTemplate?: ConversationTemplate;
   /** The agent's resolved skills, used by the `search_relevant_skills` tool. */
   filteredSkills: InternalSkillDefinition[];
   /**
@@ -44,6 +51,12 @@ export interface RegisterInternalToolsParams {
    * flag, since the tool also relies on the fast model.
    */
   relevantSkillsEnabled: boolean;
+  /** Parent conversation id — passed to `run_subagent` for persistent-mode creations. */
+  parentConversationId?: string;
+  /** Round-local persistent sub-agent tracker. */
+  subagentTracker: SubagentTracker;
+  /** Existence probe for stale-entry recovery in persistent `run_subagent`. */
+  conversationExists: (conversationId: string) => Promise<boolean>;
 }
 
 /**
@@ -55,11 +68,15 @@ export const registerInternalTools = async ({
   context,
   agentId,
   executionId,
-  capabilities,
   abortSignal,
   backgroundExecutionService,
+  updateConversationMetadata,
+  conversationTemplate,
   filteredSkills,
   relevantSkillsEnabled,
+  parentConversationId,
+  subagentTracker,
+  conversationExists,
 }: RegisterInternalToolsParams): Promise<void> => {
   const {
     toolManager,
@@ -68,6 +85,7 @@ export const registerInternalTools = async ({
     modelProvider,
     experimentalFeatures,
     executionMode,
+    interactivity,
     defaultConnectorId,
     subAgentExecutor,
     analyticsService,
@@ -76,11 +94,14 @@ export const registerInternalTools = async ({
     bashService,
     todoStateManager,
     selfClient,
+    parentExecutionId,
   } = context;
 
-  const interactive = executionMode !== AgentExecutionMode.standalone;
+  // Sub-agent spawning is reserved for top-level, non-standalone runs
+  const canSpawnSubagents = executionMode !== AgentExecutionMode.standalone && !parentExecutionId;
+  const interactive = interactivity.enabled;
 
-  const tools: Array<BuiltinToolDefinition<any>> = [];
+  const tools: Array<InternalBuiltinToolDefinition<any>> = [];
 
   // Filesystem — read_file and list_files are always on; bash is FF-gated.
   tools.push(createReadFileTool({ filesystemService }));
@@ -101,17 +122,30 @@ export const registerInternalTools = async ({
     tools.push(createExecuteApiTool({ selfClient }));
   }
 
-  // Sub-agent + sleep — experimental, and not available in standalone mode.
-  if (experimentalFeatures.subagents && interactive) {
+  // run_subagent + send_message + sleep — experimental; reserved for top-level
+  // runs (see `canSpawnSubagents` above for why sub-agents can't nest-spawn).
+  if (experimentalFeatures.subagents && canSpawnSubagents) {
     tools.push(
       createSubagentTool({
         agentId: agentId ?? agentBuilderDefaultAgentId,
         executionId: executionId ?? '',
         connectorId: defaultConnectorId,
-        capabilities,
         subAgentExecutor,
         abortSignal,
         backgroundExecutionService,
+        parentConversationId,
+        subagentTracker,
+        conversationExists,
+      })
+    );
+    tools.push(
+      createSendMessageTool({
+        agentId: agentId ?? agentBuilderDefaultAgentId,
+        executionId: executionId ?? '',
+        subAgentExecutor,
+        abortSignal,
+        backgroundExecutionService,
+        subagentTracker,
       })
     );
     tools.push(createSleepTool());
@@ -125,6 +159,16 @@ export const registerInternalTools = async ({
   // load_skill — gated on the skills feature only.
   if (experimentalFeatures.skills) {
     tools.push(createLoadSkillTool({ analyticsService, trackingService }));
+  }
+
+  // set_conversation_metadata — only when both callback and template are wired.
+  if (updateConversationMetadata && conversationTemplate) {
+    tools.push(
+      createSetConversationMetadataTool({
+        updateConversationMetadata,
+        template: conversationTemplate,
+      })
+    );
   }
 
   // search_relevant_skills — context-aware skill discovery. Gated on the effective enablement
