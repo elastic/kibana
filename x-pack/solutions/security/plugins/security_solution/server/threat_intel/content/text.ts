@@ -127,6 +127,17 @@ interface ParsedNode {
 const SKIPPED_SUBTREE_NAMES = new Set(['script', 'style', 'template']);
 
 /**
+ * Whether this element's subtree never reaches a reader.
+ *
+ * Name alone was not enough: an element carrying the HTML `hidden` attribute is not rendered
+ * either, and its text was being stored and promoted as an indicator. It also inflated article
+ * scoring, which calls `stripHtml`, so a candidate holding a large hidden subtree could
+ * outscore the real report and drop it.
+ */
+const isSkippedSubtree = (node: ParsedNode): boolean =>
+  SKIPPED_SUBTREE_NAMES.has(elementName(node)) || node.attribs?.hidden !== undefined;
+
+/**
  * Rewrites an explicitly self-closed `<script/>` or `<style/>` into an empty element
  * pair before parsing.
  *
@@ -488,6 +499,24 @@ const ENCODED_HTML_WRAPPER_BARE_NAMES = new Set(['description']);
 const ENCODED_HTML_WRAPPER_QUALIFIED_NAMES = new Set(['content:encoded']);
 
 /**
+ * Whether a name is the RSS Content Module's `encoded`, under any prefix.
+ *
+ * XML prefixes are aliases for a namespace URI, so a feed binding the Content Module to `ti:`
+ * writes `ti:encoded` and means exactly `content:encoded`. Matching the conventional QName
+ * alone left those feeds' encoded script bodies as visible report text.
+ *
+ * Prefix presence is the test rather than the declared URI. Resolving the URI properly means
+ * tracking `xmlns:` scope through the tree, which the HTML parse does not model, and the
+ * distinction that mattered in the earlier report was bare `encoded` versus namespaced: an
+ * unprefixed `<encoded>` is an ordinary custom element, while a prefixed one is a module
+ * element. If prefix presence proves too loose, URI resolution is the stricter next step.
+ */
+const isNamespacedEncoded = (qualified: string): boolean => {
+  const colon = qualified.indexOf(':');
+  return colon > 0 && qualified.slice(colon + 1) === 'encoded';
+};
+
+/**
  * Feed containers that are descended through but never treated as an encoded body.
  *
  * These were in the same set as `description` and it cost report content. Every name in the
@@ -564,6 +593,7 @@ const isEncodedHtmlWrapper = (node: ParsedNode): boolean => {
   const qualified = elementName(node);
   const name = localName(qualified);
   if (ENCODED_HTML_WRAPPER_QUALIFIED_NAMES.has(qualified)) return true;
+  if (isNamespacedEncoded(qualified)) return true;
   if (ENCODED_HTML_WRAPPER_BARE_NAMES.has(qualified)) return true;
 
   // A namespaced description has to declare HTML, mirroring the Atom rule below. Media RSS
@@ -664,8 +694,11 @@ const shouldReparse = (nodes: ParsedNode[], decoded: string, inWrapper = false):
 
 /** Stack entry: a node still to visit, or literal output to append after its subtree. */
 type WalkStep =
-  | { kind: 'node'; node: ParsedNode; cdataDepth: number; literalCdata: boolean }
+  | { kind: 'node'; node: ParsedNode; cdataDepth: number; literalCdata: boolean; inFeed: boolean }
   | { kind: 'emit'; text: string };
+
+/** Feed document roots. Their descendants are report containers; elsewhere the names are not. */
+const FEED_ROOT_NAMES = new Set(['rss', 'feed']);
 
 /**
  * How many times a CDATA payload may be expanded into the walk.
@@ -696,10 +729,11 @@ const pushNodes = (
   stack: WalkStep[],
   nodes: ParsedNode[],
   cdataDepth = 0,
-  literalCdata = false
+  literalCdata = false,
+  inFeed = false
 ): void => {
   for (let i = nodes.length - 1; i >= 0; i--) {
-    stack.push({ kind: 'node', node: nodes[i], cdataDepth, literalCdata });
+    stack.push({ kind: 'node', node: nodes[i], cdataDepth, literalCdata, inFeed });
   }
 };
 
@@ -829,7 +863,7 @@ const inlineTextOf = (nodes: ParsedNode[], liftHrefs: boolean): string => {
     if (step.kind === 'emit') {
       out.push(step.text);
     } else {
-      const { node, cdataDepth, literalCdata } = step;
+      const { node, cdataDepth, literalCdata, inFeed } = step;
       const liftedHref =
         isElement(node) && liftHrefs && elementName(node) === 'a' ? hrefOf(node) : undefined;
 
@@ -863,10 +897,10 @@ const inlineTextOf = (nodes: ParsedNode[], liftHrefs: boolean): string => {
         // as a live IOC; emitting the boundary is what keeps `evil.com<!-- x -->bad.net`
         // from merging into one unextractable token.
         out.push(' ');
-      } else if (SKIPPED_SUBTREE_NAMES.has(elementName(node))) {
+      } else if (isSkippedSubtree(node)) {
         out.push(' ');
       } else if (isInlineXmlConstruct(node)) {
-        pushNodes(stack, childrenOf(node), cdataDepth, true);
+        pushNodes(stack, childrenOf(node), cdataDepth, true, inFeed);
       } else if (isLiteralTextConstruct(node)) {
         // Atom says this payload is text, so it is emitted rather than walked.
         //
@@ -891,17 +925,18 @@ const inlineTextOf = (nodes: ParsedNode[], liftHrefs: boolean): string => {
             stack,
             parseTopLevelNodes(rawTextOf(childrenOf(node))),
             cdataDepth + 1,
-            literalCdata
+            literalCdata,
+            inFeed
           );
         }
       } else if (liftedHref !== undefined) {
         out.push(` ${collapseWhitespace(inlineTextOf(childrenOf(node), false))} ${liftedHref} `);
       } else if (INLINE_NAMES.has(elementName(node))) {
-        pushNodes(stack, childrenOf(node), cdataDepth, literalCdata);
+        pushNodes(stack, childrenOf(node), cdataDepth, literalCdata, inFeed);
       } else {
         out.push(' ');
         stack.push({ kind: 'emit', text: ' ' });
-        pushNodes(stack, childrenOf(node), cdataDepth, literalCdata);
+        pushNodes(stack, childrenOf(node), cdataDepth, literalCdata, inFeed);
       }
     }
   }
@@ -1012,7 +1047,7 @@ const renderStructured = (html: string): string => {
     if (step.kind === 'emit') {
       out.push(step.text);
     } else {
-      const { node, cdataDepth, literalCdata } = step;
+      const { node, cdataDepth, literalCdata, inFeed } = step;
       const name = elementName(node);
       // Anchors are lifted only under an IOC or references heading, where the link
       // target is itself the indicator.
@@ -1041,21 +1076,30 @@ const renderStructured = (html: string): string => {
       } else if (!isElement(node)) {
         // Comments and doctype contribute a boundary only.
         out.push(' ');
-      } else if (SKIPPED_SUBTREE_NAMES.has(name)) {
+      } else if (isSkippedSubtree(node)) {
         out.push(' ');
-      } else if (STRUCTURAL_FEED_CONTAINERS.has(localName(name))) {
+      } else if (FEED_ROOT_NAMES.has(localName(name))) {
+        // Entering a feed document. Everything below is report containers, which is the only
+        // context where the container names mean what they say.
+        out.push('\n');
+        stack.push({ kind: 'emit', text: '\n' });
+        pushNodes(stack, childrenOf(node), cdataDepth, literalCdata, true);
+      } else if (inFeed && STRUCTURAL_FEED_CONTAINERS.has(localName(name))) {
         // Section state resets at a report boundary. It is walker-local, which is what lets a
         // wrapper payload inherit it, but one walk covers a whole feed document, so an `IOCs`
         // heading in one item left href lifting on for every later item and an ordinary citation
-        // anchor in the next entry was emitted as an indicator. One stack, many reports, so the
-        // reset has to be explicit.
+        // anchor in the next entry was emitted as an indicator.
+        //
+        // Gated on feed context, because resetting on the name alone broke ordinary vendor
+        // markup: `<h2>IOCs</h2><item>domain values</item><p><a href="…">indicator</a></p>` reset
+        // to prose at a plain `<item>` and dropped the href that was still under the heading.
         sectionKind = 'prose';
         sectionDepth = 0;
         out.push('\n');
         stack.push({ kind: 'emit', text: '\n' });
-        pushNodes(stack, childrenOf(node), cdataDepth, literalCdata);
+        pushNodes(stack, childrenOf(node), cdataDepth, literalCdata, inFeed);
       } else if (isInlineXmlConstruct(node)) {
-        pushNodes(stack, childrenOf(node), cdataDepth, true);
+        pushNodes(stack, childrenOf(node), cdataDepth, true, inFeed);
       } else if (isLiteralTextConstruct(node)) {
         // Same as the plain-text walker.
         out.push(`\n${unwrapCdata(rawTextOf(childrenOf(node)))}\n`);
@@ -1069,7 +1113,8 @@ const renderStructured = (html: string): string => {
             stack,
             parseTopLevelNodes(rawTextOf(childrenOf(node))),
             cdataDepth + 1,
-            literalCdata
+            literalCdata,
+            inFeed
           );
         }
       } else if (HEADING_NAMES.has(name)) {
@@ -1108,10 +1153,10 @@ const renderStructured = (html: string): string => {
       } else if (BLOCK_NAMES.has(name)) {
         out.push('\n');
         stack.push({ kind: 'emit', text: '\n' });
-        pushNodes(stack, childrenOf(node), cdataDepth, literalCdata);
+        pushNodes(stack, childrenOf(node), cdataDepth, literalCdata, inFeed);
       } else if (INLINE_NAMES.has(name)) {
         // Inline element: no boundary, contents kept.
-        pushNodes(stack, childrenOf(node), cdataDepth, literalCdata);
+        pushNodes(stack, childrenOf(node), cdataDepth, literalCdata, inFeed);
       } else {
         // Unknown or custom element. Same conservative default as the plain-text
         // walker: treating these as inline merged adjacent indicators, so
@@ -1120,7 +1165,7 @@ const renderStructured = (html: string): string => {
         // one thing this structured form exists to preserve.
         out.push('\n');
         stack.push({ kind: 'emit', text: '\n' });
-        pushNodes(stack, childrenOf(node), cdataDepth, literalCdata);
+        pushNodes(stack, childrenOf(node), cdataDepth, literalCdata, inFeed);
       }
     }
   }

@@ -616,3 +616,17 @@ describe('CDATA stays opaque through article extraction', () => {
     ).toBe('IOC: evil.test');
   });
 });
+
+/**
+ * Scoring calls `stripHtml`, so a hidden subtree that never reaches a reader must not inflate a
+ * candidate. One holding a large hidden block could otherwise outscore the real report.
+ */
+describe('hidden subtrees do not inflate candidate scores', () => {
+  it('prefers the real report over a teaser inflated by hidden text', () => {
+    const page =
+      `<html><body><article><div hidden>${'x '.repeat(20000)}</div>teaser</article>` +
+      '<main><p>report evil.test</p></main></body></html>';
+
+    expect(stripHtml(extractArticleHtml(page))).toContain('evil.test');
+  });
+});

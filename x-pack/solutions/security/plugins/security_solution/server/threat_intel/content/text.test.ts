@@ -2198,3 +2198,94 @@ describe('section state does not leak across feed items', () => {
     ).toBe('## IOCs\nioc https://c2.evil.test/x');
   });
 });
+
+/**
+ * XML prefixes are aliases for a namespace URI, so a feed binding the RSS Content Module to
+ * `ti:` writes `ti:encoded` and means `content:encoded`. Matching the conventional QName alone
+ * left those feeds' encoded script bodies as visible report text.
+ */
+describe('the content module under an aliased prefix', () => {
+  it('expands an aliased encoded element', () => {
+    const result = stripHtml(
+      '<rss xmlns:ti="http://purl.org/rss/1.0/modules/content/"><channel><item><ti:encoded>' +
+        "&lt;script&gt;fetch('https://false-ioc.test')&lt;/script&gt;safe" +
+        '</ti:encoded></item></channel></rss>'
+    );
+
+    expect(result).toBe('safe');
+    expect(result).not.toContain('false-ioc.test');
+  });
+
+  it('still expands the conventional prefix', () => {
+    expect(stripHtml('<content:encoded>&lt;p&gt;evil.com&lt;/p&gt;</content:encoded>')).toBe(
+      'evil.com'
+    );
+  });
+
+  // The unprefixed name is an ordinary custom element and stays literal.
+  it('leaves a bare encoded element literal', () => {
+    expect(stripHtml('<encoded>Exploit uses &lt;script&gt; and c2.evil.test</encoded>')).toBe(
+      'Exploit uses <script> and c2.evil.test'
+    );
+  });
+});
+
+/**
+ * An element carrying the HTML `hidden` attribute is not rendered, so its text is not report
+ * content. It was being stored and promoted as an indicator, and because article scoring calls
+ * `stripHtml`, a candidate holding a large hidden subtree could outscore the real report.
+ */
+describe('hidden subtrees', () => {
+  it.each([
+    ['a bare hidden attribute', '<div hidden>c2.stale.test</div><p>safe</p>'],
+    ['hidden with a value', '<div hidden="hidden">c2.stale.test</div><p>safe</p>'],
+  ])('drops %s', (_label, html) => {
+    const result = stripHtml(html);
+
+    expect(result).toBe('safe');
+    expect(result).not.toContain('c2.stale.test');
+  });
+
+  it('drops a hidden subtree from structured output too', () => {
+    expect(htmlToStructured('<div hidden>c2.stale.test</div><p>safe</p>')).toBe('safe');
+  });
+
+  it('keeps a visible sibling of the same shape', () => {
+    expect(stripHtml('<div>keep.test</div><p>safe</p>')).toBe('keep.test safe');
+  });
+});
+
+/**
+ * Report-boundary resets need actual feed context. Matching the container names anywhere broke
+ * ordinary vendor markup: a plain `<item>` under an IOC heading reset to prose and dropped the
+ * href-only indicators below it.
+ */
+describe('report-boundary resets are scoped to feeds', () => {
+  it('does not reset at a non-feed item', () => {
+    expect(
+      htmlToStructured(
+        '<h2>IOCs</h2><item>domain values</item><p><a href="https://c2.evil.test/x">indicator</a></p>'
+      )
+    ).toBe('## IOCs\ndomain values\nindicator https://c2.evil.test/x');
+  });
+
+  it.each([
+    [
+      'rss items',
+      '<rss><channel><item><h2>IOCs</h2><p><a href="https://a.test/x">ioc</a></p></item>' +
+        '<item><p><a href="https://citation.test">read</a></p></item></channel></rss>',
+      'citation.test',
+    ],
+    [
+      'atom entries',
+      '<feed><entry><h2>IOCs</h2><p><a href="https://a.test/x">ioc</a></p></entry>' +
+        '<entry><p><a href="https://cite.test">read</a></p></entry></feed>',
+      'cite.test',
+    ],
+  ])('still resets between %s', (_label, html, leaked) => {
+    const result = htmlToStructured(html);
+
+    expect(result).toContain('ioc https://a.test/x');
+    expect(result).not.toContain(leaked);
+  });
+});
