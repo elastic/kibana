@@ -105,6 +105,7 @@ export const internalTools = {
   setConversationMetadata: 'set_conversation_metadata',
   discoverApis: 'discover_apis',
   describeApi: 'describe_api',
+  describeApiType: 'describe_api_type',
   executeApi: 'execute_api',
 };
 
@@ -133,6 +134,7 @@ export const isInternalTool = (toolName: string) =>
 const filestoreAllowedInternalToolIds = new Set<string>([
   internalTools.discoverApis,
   internalTools.describeApi,
+  internalTools.describeApiType,
   internalTools.executeApi,
 ]);
 
