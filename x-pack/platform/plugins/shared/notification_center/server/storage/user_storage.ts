@@ -14,8 +14,7 @@ import { notificationIdSchema } from '../../common/notification_schema';
  * This is used to track whether users have marked notifications as read.
  */
 
-/** Timestamp marker: notifications at or before it are read; also used to ensure
- * new users are not flooded with notifications.
+/** Timestamp marker: notifications at or before it are read.
  */
 export const READ_ALL_BEFORE_KEY = 'notificationCenter:readAllBefore';
 
@@ -25,7 +24,9 @@ export const READ_ALL_BEFORE_KEY = 'notificationCenter:readAllBefore';
  */
 export const OVERRIDES_KEY = 'notificationCenter:overrides';
 
-/** userStorage doesn't allow null defaults for key values, so we use this default to represent an unset state. */
+/** userStorage doesn't allow null defaults for key values, so this stands for an unset marker
+ * until a user's first read replaces it.
+ */
 export const READ_ALL_BEFORE_DEFAULT = '1970-01-01T00:00:00.000Z';
 
 /** Ceiling for the number of per-id read overrides. */
