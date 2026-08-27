@@ -19,7 +19,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
-import React, { Component } from 'react';
+import React, { Component, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -73,10 +73,12 @@ const SpacePrivilegeTable = ({
 }) => {
   const { euiTheme } = useEuiTheme();
 
-  // a single class selector, so EuiTableRow's own `:hover` background still wins
-  const globalSpaceRowClass = css`
-    background-color: ${euiTheme.colors.backgroundBaseSubdued};
-  `;
+  const globalSpaceRowClass = useMemo(
+    () => css`
+      background-color: ${euiTheme.colors.backgroundBaseSubdued};
+    `,
+    [euiTheme.colors.backgroundBaseSubdued]
+  );
 
   return (
     <EuiInMemoryTable
