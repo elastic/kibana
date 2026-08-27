@@ -33,7 +33,6 @@ const getWithLatestDefaults = (state?: EntityStoreGlobalStateOverrides): EntityS
   });
 };
 
-
 export class EntityStoreGlobalStateClient {
   constructor(
     private readonly soClient: SavedObjectsClientContract,
@@ -88,7 +87,7 @@ export class EntityStoreGlobalStateClient {
 
         const storedLogsOverrides =
           raw.attributes.defaultsVersion === 'latest'
-            ? (raw.attributes.logsExtraction ?? {})
+            ? raw.attributes.logsExtraction ?? {}
             : getLegacyLogExtractionOverrides(raw.attributes.logsExtraction ?? {});
         const existing = getWithLatestDefaults(raw.attributes);
         return this.replace(
