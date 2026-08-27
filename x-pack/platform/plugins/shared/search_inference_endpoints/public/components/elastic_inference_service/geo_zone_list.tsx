@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { EuiCheckbox, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTextColor } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiCheckableCard, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { getGeoDisplayName } from '../../utils/eis_utils';
+import { scrollableListStyles } from './region_preferences_list.styles';
 
 export interface GeoZoneListProps {
   availableGeos: string[];
@@ -20,31 +20,25 @@ export const GeoZoneList: React.FC<GeoZoneListProps> = ({
   availableGeos,
   checkedGeos,
   onToggleGeo,
-}) => (
-  <EuiFlexGroup direction="column" gutterSize="s">
-    {availableGeos.map((geo) => (
-      <EuiFlexItem key={geo}>
-        <EuiPanel hasBorder hasShadow={false} paddingSize="s" data-test-subj={`geoZoneRow-${geo}`}>
-          <EuiCheckbox
-            id={`geo-checkbox-${geo}`}
-            label={
-              <span>
-                <strong>{getGeoDisplayName(geo)}</strong>
-                {' — '}
-                <EuiTextColor color="subdued">
-                  {i18n.translate(
-                    'xpack.searchInferenceEndpoints.manageRegions.geo.allAvailableRegions',
-                    { defaultMessage: 'All available regions' }
-                  )}
-                </EuiTextColor>
-              </span>
-            }
-            checked={checkedGeos.has(geo)}
-            onChange={() => onToggleGeo(geo)}
-            data-test-subj={`geoZoneCheckbox-${geo}`}
-          />
-        </EuiPanel>
-      </EuiFlexItem>
-    ))}
-  </EuiFlexGroup>
-);
+}) => {
+  const euiThemeContext = useEuiTheme();
+
+  return (
+    <div css={scrollableListStyles(euiThemeContext)} data-test-subj="manageRegionsGeoList">
+      <EuiFlexGroup direction="column" gutterSize="s">
+        {availableGeos.map((geo) => (
+          <EuiFlexItem key={geo} grow={false} data-test-subj={`geoZoneRow-${geo}`}>
+            <EuiCheckableCard
+              id={`geo-checkbox-${geo}`}
+              checkableType="checkbox"
+              label={getGeoDisplayName(geo)}
+              checked={checkedGeos.has(geo)}
+              onChange={() => onToggleGeo(geo)}
+              data-test-subj={`geoZoneCheckbox-${geo}`}
+            />
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+    </div>
+  );
+};

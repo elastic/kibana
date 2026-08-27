@@ -6,39 +6,41 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup } from '@elastic/eui';
+import { EuiHorizontalRule, EuiPanel, useEuiTheme } from '@elastic/eui';
 import type { ZoneGroup } from '../../utils/eis_utils';
 import { RegionZoneItem } from './region_zone_item';
+import { scrollableListStyles } from './region_preferences_list.styles';
 
 export type { ZoneGroup };
 
 interface RegionZoneListProps {
   zoneGroups: ZoneGroup[];
   checkedKeys: Set<string>;
-  expandedZones: Set<string>;
   onToggleRegion: (key: string) => void;
-  onToggleExpand: (zoneId: string, isOpen: boolean) => void;
 }
 
 export const RegionZoneList: React.FC<RegionZoneListProps> = ({
   zoneGroups,
   checkedKeys,
-  expandedZones,
   onToggleRegion,
-  onToggleExpand,
 }) => {
+  const euiThemeContext = useEuiTheme();
+
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
-      {zoneGroups.map((zone) => (
-        <RegionZoneItem
-          key={zone.geo}
-          zone={zone}
-          checkedKeys={checkedKeys}
-          expandedZones={expandedZones}
-          onToggleRegion={onToggleRegion}
-          onToggleExpand={onToggleExpand}
-        />
-      ))}
-    </EuiFlexGroup>
+    <EuiPanel
+      hasBorder
+      hasShadow={false}
+      paddingSize="none"
+      data-test-subj="manageRegionsRegionList"
+    >
+      <div css={scrollableListStyles(euiThemeContext)}>
+        {zoneGroups.map((zone, index) => (
+          <React.Fragment key={zone.geo}>
+            {index > 0 && <EuiHorizontalRule margin="none" />}
+            <RegionZoneItem zone={zone} checkedKeys={checkedKeys} onToggleRegion={onToggleRegion} />
+          </React.Fragment>
+        ))}
+      </div>
+    </EuiPanel>
   );
 };
