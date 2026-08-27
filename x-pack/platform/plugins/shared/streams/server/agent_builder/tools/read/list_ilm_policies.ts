@@ -91,6 +91,18 @@ export const createListIlmPoliciesTool = ({
     openWorldHint: false,
   },
   schema: listIlmPoliciesSchema,
+  availability: {
+    cacheMode: 'global',
+    handler: async () => {
+      if (isServerless) {
+        return {
+          status: 'unavailable',
+          reason: 'ILM is not available on serverless deployments.',
+        };
+      }
+      return { status: 'available' };
+    },
+  },
   handler: async (_input, { request }) => {
     if (isServerless) {
       return {
