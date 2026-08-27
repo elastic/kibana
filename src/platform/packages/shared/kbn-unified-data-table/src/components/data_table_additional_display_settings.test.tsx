@@ -399,55 +399,56 @@ describe('UnifiedDataTableAdditionalDisplaySettings', () => {
     });
   });
 
-  describe('expandedLevels', () => {
+  describe('defaultRenderedLeafNodes', () => {
     const renderJsonMode = (props: Partial<UnifiedDataTableAdditionalDisplaySettingsProps> = {}) =>
       renderDisplaySettings({
-        sourceDisplayMode: 'json',
-        onChangeSourceDisplayMode: jest.fn(),
+        documentsDisplayMode: 'json',
+        onChangeDocumentsDisplayMode: jest.fn(),
         onChangeJsonModeSettings: jest.fn(),
         ...props,
       });
 
-    const getExpandedLevelsInput = () => screen.getByTestId('unifiedDataTableExpandedLevelsInput');
+    // In JSON mode the "Values shown" range is the only numeric input rendered (sample size and row
+    // heights are not wired here), so the lone spinbutton is its input.
+    const getValuesShownInput = () => screen.getByRole('spinbutton');
 
-    it('is not rendered in summary mode', () => {
-      renderJsonMode({ sourceDisplayMode: 'summary' });
+    it('is not rendered in table mode', () => {
+      renderJsonMode({ documentsDisplayMode: 'table' });
 
-      expect(screen.queryByTestId('unifiedDataTableExpandedLevelsInput')).not.toBeInTheDocument();
+      expect(screen.queryByRole('spinbutton')).not.toBeInTheDocument();
     });
 
     it('renders first, above the Hide nulls control', () => {
       renderJsonMode();
 
-      const input = getExpandedLevelsInput();
+      const input = getValuesShownInput();
       const hideNulls = screen.getByTestId('unifiedDataTableHideNullsSettings');
-      // The two controls are separate, non-nested rows, so this is exactly FOLLOWING when the
-      // expanded-levels input comes first.
+      // Separate, non-nested rows, so this is exactly FOLLOWING when "Values shown" comes first.
       expect(input.compareDocumentPosition(hideNulls)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
     });
 
-    it('defaults to 0 when unset', () => {
+    it('defaults to 200 when unset', () => {
       renderJsonMode({ jsonModeSettings: {} });
 
-      expect(screen.getByText('Expanded levels')).toBeVisible();
-      expect(getExpandedLevelsInput()).toHaveValue(0);
+      expect(screen.getByText('Values shown')).toBeVisible();
+      expect(getValuesShownInput()).toHaveValue(200);
     });
 
-    it('reflects the provided expandedLevels', () => {
-      renderJsonMode({ jsonModeSettings: { expandedLevels: 3 } });
+    it('reflects the provided value', () => {
+      renderJsonMode({ jsonModeSettings: { defaultRenderedLeafNodes: 100 } });
 
-      expect(getExpandedLevelsInput()).toHaveValue(3);
+      expect(getValuesShownInput()).toHaveValue(100);
     });
 
     it('propagates a change, preserving the other JSON settings', async () => {
       const onChangeJsonModeSettings = jest.fn();
       renderJsonMode({ jsonModeSettings: { hideNulls: true }, onChangeJsonModeSettings });
 
-      await replaceNumberInputValue(getExpandedLevelsInput(), '2');
+      await replaceNumberInputValue(getValuesShownInput(), '100');
 
       expect(onChangeJsonModeSettings).toHaveBeenLastCalledWith({
         hideNulls: true,
-        expandedLevels: 2,
+        defaultRenderedLeafNodes: 100,
       });
     });
 
@@ -455,10 +456,10 @@ describe('UnifiedDataTableAdditionalDisplaySettings', () => {
       const onChangeJsonModeSettings = jest.fn();
       renderJsonMode({ jsonModeSettings: {}, onChangeJsonModeSettings });
 
-      await replaceNumberInputValue(getExpandedLevelsInput(), '9');
+      await replaceNumberInputValue(getValuesShownInput(), '999');
 
-      expect(getExpandedLevelsInput()).toHaveValue(5);
-      expect(onChangeJsonModeSettings).toHaveBeenLastCalledWith({ expandedLevels: 5 });
+      expect(getValuesShownInput()).toHaveValue(500);
+      expect(onChangeJsonModeSettings).toHaveBeenLastCalledWith({ defaultRenderedLeafNodes: 500 });
     });
   });
 });

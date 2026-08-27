@@ -131,7 +131,7 @@ describe('model_versions', () => {
     });
   });
 
-  describe('jsonModeSettings.expandedLevels schema', () => {
+  describe('jsonModeSettings.defaultRenderedLeafNodes schema', () => {
     const sessionWithJsonModeSettings = (jsonModeSettings: Record<string, unknown>) => ({
       title: 'discover session',
       description: '',
@@ -154,18 +154,24 @@ describe('model_versions', () => {
       ],
     });
 
-    it('accepts expandedLevels within the allowed range', () => {
+    it('accepts defaultRenderedLeafNodes within the allowed range', () => {
       expect(() =>
-        SCHEMA_DISCOVER_SESSION_V15.validate(sessionWithJsonModeSettings({ expandedLevels: 5 }))
+        SCHEMA_DISCOVER_SESSION_V15.validate(
+          sessionWithJsonModeSettings({ defaultRenderedLeafNodes: 500 })
+        )
       ).not.toThrow();
     });
 
-    it('rejects expandedLevels outside the allowed range', () => {
+    it('rejects defaultRenderedLeafNodes outside the allowed range', () => {
       expect(() =>
-        SCHEMA_DISCOVER_SESSION_V15.validate(sessionWithJsonModeSettings({ expandedLevels: 6 }))
+        SCHEMA_DISCOVER_SESSION_V15.validate(
+          sessionWithJsonModeSettings({ defaultRenderedLeafNodes: 501 })
+        )
       ).toThrow();
       expect(() =>
-        SCHEMA_DISCOVER_SESSION_V15.validate(sessionWithJsonModeSettings({ expandedLevels: -1 }))
+        SCHEMA_DISCOVER_SESSION_V15.validate(
+          sessionWithJsonModeSettings({ defaultRenderedLeafNodes: -1 })
+        )
       ).toThrow();
     });
   });

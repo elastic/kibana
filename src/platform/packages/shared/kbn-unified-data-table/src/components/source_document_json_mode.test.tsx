@@ -145,21 +145,21 @@ describe('SourceDocumentJsonMode', () => {
     expect(container.textContent).not.toContain('empty');
   });
 
-  describe('expandedLevels setting', () => {
+  describe('defaultRenderedLeafNodes setting', () => {
     const nestedHit: EsHitRecord = {
       _id: '1',
       _index: 'test',
       _source: { user: { name: 'Alice' } },
     };
 
-    it('seeds the tree expanded to the configured number of levels', () => {
-      renderCell(nestedHit, { jsonModeSettings: { expandedLevels: 1 } });
+    it('auto-expands the tree by default to render the nested leaves', () => {
+      renderCell(nestedHit);
 
       expect(screen.getByTestId(rowTestId('user.name'))).toHaveTextContent('"Alice"');
     });
 
-    it('leaves nested collections collapsed when the setting is unset', () => {
-      renderCell(nestedHit);
+    it('leaves the tree collapsed when the budget is 0', () => {
+      renderCell(nestedHit, { jsonModeSettings: { defaultRenderedLeafNodes: 0 } });
 
       expect(screen.getByTestId(rowTestId('user'))).toBeVisible();
       expect(screen.queryByTestId(rowTestId('user.name'))).not.toBeInTheDocument();
@@ -208,7 +208,11 @@ describe('SourceDocumentJsonMode', () => {
 
     it('filters on the exact clicked element of a multi-value field', async () => {
       const onFilter = jest.fn();
-      renderCell({ _id: '1', _index: 'test', _source: { bytes: [100, 200] } }, { onFilter });
+      // Start collapsed so the click drives the expansion under test, not the auto-expand default.
+      renderCell(
+        { _id: '1', _index: 'test', _source: { bytes: [100, 200] } },
+        { onFilter, jsonModeSettings: { defaultRenderedLeafNodes: 0 } }
+      );
 
       await userEvent.click(screen.getByTestId(rowTestId('bytes')));
 
@@ -220,7 +224,7 @@ describe('SourceDocumentJsonMode', () => {
       const onFilter = jest.fn();
       renderCell(
         { _id: '1', _index: 'test', _source: { bytes: [100, 200] } },
-        { onFilter, isPlainRecord: true }
+        { onFilter, isPlainRecord: true, jsonModeSettings: { defaultRenderedLeafNodes: 0 } }
       );
 
       await userEvent.click(screen.getByTestId(rowTestId('bytes')));

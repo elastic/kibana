@@ -31,9 +31,13 @@ export const CHILDREN_INCREMENT = 10;
 // We need to put a limit to not blow up the DOM.
 export const MAX_SEARCH_REVEAL = 100;
 
-// Safety budget for bulk expansion (Expand all / recursive Cmd-click)
+// Safety ceiling, in rendered leaf nodes, for bulk expansion (Expand all / recursive Cmd-click) and
+// the upper bound of the "Values shown" default-density setting.
 // indices-stats is a good index to test this limit.
-export const MAX_EXPANDED_ROWS = 500;
+export const MAX_EXPANDED_LEAVES = 500;
+
+// Default number of leaf nodes each JSON cell renders — seeds the initial expansion.
+export const DEFAULT_RENDERED_LEAF_NODES = 200;
 
 export const ROOT_ID = 'json-viewer-$root';
 
@@ -311,50 +315,106 @@ const normalizePrimitive = (value: unknown): JsonPrimitive => {
 export const getNodeId = (path: readonly string[]): string =>
   path.reduce((id, key) => `${id}/${key.length}:${key}`, 'json-viewer');
 
+// Counts the leaf nodes among a collection's visible window (its first INITIAL_CHILDREN children,
+// i.e. what renders before the pager). A primitive is a leaf; so is an empty collection, which
+// renders as a single terminal `{}`/`[]` row. Non-empty collections aren't leaves — their own leaves
+// count once they are expanded.
+const countVisibleLeaves = (nodes: JsonNode[]): number =>
+  nodes
+    .slice(0, INITIAL_CHILDREN)
+    .filter((node) => node.kind === 'leaf' || node.children.length === 0).length;
+
 /**
- * Collects the ids of collections to expand, breadth-first, until expanding one more would exceed
- * the rendered-row budget. Empty collections can't be expanded. Breadth-first so the first levels
- * expand first; deeper nodes stay collapsed and can be expanded on demand.
- *
- * When `maxDepth` is set, only collections shallower than it are expanded (roots are at depth 0), so
- * the result opens exactly `maxDepth` nested levels; leaving it undefined expands every level the
- * budget allows.
+ * Collects the ids of collections to expand, breadth-first, until expanding one more would render
+ * more than `budget` leaf nodes. Only each collection's visible window (first INITIAL_CHILDREN) is
+ * walked — matching what the pager shows — and the always-visible top-level leaves spend budget
+ * first. Breadth-first so shallower levels open before deeper ones; the rest stay collapsed and can
+ * be expanded on demand.
  */
 export const collectExpandableIds = (
   roots: JsonNode[],
-  budget: number = MAX_EXPANDED_ROWS,
-  maxDepth?: number
+  budget: number = MAX_EXPANDED_LEAVES
 ): string[] => {
   const ids: string[] = [];
-  let remaining = budget;
-  const queue: Array<{ node: CollectionNode; depth: number }> = [];
-  const enqueue = (nodes: JsonNode[], depth: number) => {
-    for (const node of nodes) {
+  // Top-level leaves render without any expansion, so they spend budget before we open anything.
+  let remaining = budget - countVisibleLeaves(roots);
+  const queue: CollectionNode[] = [];
+  const enqueue = (nodes: JsonNode[]) => {
+    for (const node of nodes.slice(0, INITIAL_CHILDREN)) {
       if (node.kind === 'collection' && node.children.length > 0) {
-        queue.push({ node, depth });
+        queue.push(node);
       }
     }
   };
 
-  enqueue(roots, 0);
+  enqueue(roots);
   for (let head = 0; head < queue.length; head++) {
-    const { node, depth } = queue[head];
-    // Past the requested depth: leave this collection (and everything below it) collapsed.
-    if (maxDepth !== undefined && depth >= maxDepth) {
-      continue;
-    }
-    // Expanding a collection reveals up to INITIAL_CHILDREN child rows (the pager caps the rest).
-    const cost = Math.min(node.children.length, INITIAL_CHILDREN);
+    // Budget spent: nothing more would render, and we must not auto-open leaf-less headers either.
+    if (remaining <= 0) break;
+    const node = queue[head];
+    // Expanding this collection renders the leaves among its first INITIAL_CHILDREN children.
+    const cost = countVisibleLeaves(node.children);
     if (cost > remaining) {
-      // Budget spent for this branch; keep scanning — a smaller sibling may still fit.
+      // This branch overflows the budget; keep scanning — a smaller sibling may still fit.
       continue;
     }
     ids.push(node.id);
     remaining -= cost;
-    enqueue(node.children, depth + 1);
+    enqueue(node.children);
   }
 
   return ids;
+};
+
+/** The initial expand/reveal state seeded into a fresh JSON cell. */
+export interface DefaultSeed {
+  expanded: Set<string>;
+  revealed: Map<string, number>;
+}
+
+/**
+ * Builds the initial expand/reveal state for a fresh cell: opens collections and lifts per-collection
+ * pagers, breadth-first, until about `leafBudget` leaf nodes render. Children are revealed in
+ * INITIAL_CHILDREN-sized chunks that interleave across lists (round-robin), so a wide list can't
+ * render all of its rows before deeper leaves get a turn. Lists keep their default pager below the
+ * budget, so a small `leafBudget` never renders fewer than the usual window. `expanded.size` is
+ * bounded by MAX_EXPANDED_LEAVES so a leaf-less document can't open unbounded collections.
+ */
+export const collectDefaultSeed = (roots: JsonNode[], leafBudget: number): DefaultSeed => {
+  const expanded = new Set<string>();
+  const revealed = new Map<string, number>();
+  let leaves = 0;
+
+  const queue: Array<{ listId: string; nodes: JsonNode[]; offset: number }> = [
+    { listId: ROOT_ID, nodes: roots, offset: 0 },
+  ];
+
+  for (let head = 0; head < queue.length; head++) {
+    if (leaves >= leafBudget || expanded.size >= MAX_EXPANDED_LEAVES) break;
+    const { listId, nodes, offset } = queue[head];
+    const end = Math.min(offset + INITIAL_CHILDREN, nodes.length);
+    let shown = offset;
+    for (let i = offset; i < end && leaves < leafBudget; i++) {
+      const node = nodes[i];
+      shown = i + 1;
+      if (node.kind === 'collection' && node.children.length > 0) {
+        expanded.add(node.id);
+        queue.push({ listId: node.id, nodes: node.children, offset: 0 });
+      } else {
+        leaves += 1; // primitive or empty collection
+      }
+    }
+    // Lift this list's pager only when we revealed past the default window.
+    if (shown > INITIAL_CHILDREN) {
+      revealed.set(listId, shown);
+    }
+    // More hidden children remain — revisit this list later (round-robin) if budget allows.
+    if (end < nodes.length && leaves < leafBudget) {
+      queue.push({ listId, nodes, offset: end });
+    }
+  }
+
+  return { expanded, revealed };
 };
 
 /** Serialize a subtree back to JSON (used by the copy-value / copy-subtree features) */

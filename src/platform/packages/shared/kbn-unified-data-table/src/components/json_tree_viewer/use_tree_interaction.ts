@@ -22,6 +22,7 @@ import {
   INITIAL_CHILDREN,
   isFocusable,
   rowKey,
+  type DefaultSeed,
   type NodeRow,
   type PagerRow,
   type RenderRow,
@@ -32,9 +33,9 @@ export interface TreeExpansionState {
   expanded: ReadonlySet<string>;
   // User clicked show more to see more hidden siblings.
   revealed: ReadonlyMap<string, number>;
-  // The `defaultExpandedLevels` this state was seeded at. A virtualization remount at the same level
-  // restores the user's own expansions; a changed setting re-seeds instead of restoring.
-  seedLevel?: number;
+  // The `defaultRenderedLeafNodes` budget this state was seeded at. A virtualization remount at the
+  // same budget restores the user's own expansions; a changed setting re-seeds instead of restoring.
+  seedBudget?: number;
 }
 
 interface UseTreeExpansionArgs {
@@ -42,10 +43,10 @@ interface UseTreeExpansionArgs {
   onStateChange?: (state: TreeExpansionState) => void;
   expandedBySearchNodes: ReadonlySet<string>;
   expandableIds: string[];
-  // Collections to open when seeding a fresh cell (every collection up to `defaultExpandedLevels`).
-  seedExpandedIds: string[];
-  // How many nested levels to open by default; also tags the mirrored state so a change re-seeds.
-  defaultExpandedLevels: number;
+  // Expand/reveal state to open a fresh cell with (breadth-first up to the leaf-node budget).
+  seed: DefaultSeed;
+  // How many leaf nodes to render by default; also tags the mirrored state so a change re-seeds.
+  defaultRenderedLeafNodes: number;
 }
 
 export interface TreeExpansion {
@@ -68,42 +69,42 @@ export const useTreeExpansion = ({
   onStateChange,
   expandedBySearchNodes,
   expandableIds,
-  seedExpandedIds,
-  defaultExpandedLevels,
+  seed,
+  defaultRenderedLeafNodes,
 }: UseTreeExpansionArgs): TreeExpansion => {
-  // Restore the stored state only when it was seeded at the current level (a virtualization remount);
-  // otherwise seed a fresh tree opened to `defaultExpandedLevels`.
+  // Restore the stored state only when it was seeded at the current budget (a virtualization
+  // remount); otherwise seed a fresh tree opened to `defaultRenderedLeafNodes` leaves.
   const [expanded, setExpanded] = useState<ReadonlySet<string>>(() =>
-    initialState && initialState.seedLevel === defaultExpandedLevels
+    initialState && initialState.seedBudget === defaultRenderedLeafNodes
       ? initialState.expanded
-      : new Set(seedExpandedIds)
+      : seed.expanded
   );
   const [revealed, setRevealed] = useState<ReadonlyMap<string, number>>(() =>
-    initialState && initialState.seedLevel === defaultExpandedLevels
+    initialState && initialState.seedBudget === defaultRenderedLeafNodes
       ? initialState.revealed
-      : new Map()
+      : seed.revealed
   );
 
   // Mirror expand/reveal state to the host on every change so it can restore the tree after a remount,
-  // tagged with the level it was seeded at (read via a ref so the tag never drives the effect itself).
+  // tagged with the budget it was seeded at (read via a ref so the tag never drives the effect itself).
   const onStateChangeRef = useRef(onStateChange);
   onStateChangeRef.current = onStateChange;
-  const seedLevelRef = useRef(defaultExpandedLevels);
-  seedLevelRef.current = defaultExpandedLevels;
+  const seedBudgetRef = useRef(defaultRenderedLeafNodes);
+  seedBudgetRef.current = defaultRenderedLeafNodes;
   useEffect(() => {
-    onStateChangeRef.current?.({ expanded, revealed, seedLevel: seedLevelRef.current });
+    onStateChangeRef.current?.({ expanded, revealed, seedBudget: seedBudgetRef.current });
   }, [expanded, revealed]);
 
-  // Snap every cell to the new depth when the setting changes: re-seed expansion (discarding manual
-  // expand/collapse). The ref guards the initial mount and re-renders where the level is unchanged
+  // Snap every cell to the new density when the setting changes: re-seed expansion (discarding manual
+  // expand/collapse). The ref guards the initial mount and re-renders where the budget is unchanged
   // (e.g. toggling "Hide nulls" rebuilds the tree but must not wipe the user's expansions).
-  const appliedLevelRef = useRef(defaultExpandedLevels);
+  const appliedBudgetRef = useRef(defaultRenderedLeafNodes);
   useEffect(() => {
-    if (appliedLevelRef.current === defaultExpandedLevels) return;
-    appliedLevelRef.current = defaultExpandedLevels;
-    setExpanded(new Set(seedExpandedIds));
-    setRevealed(new Map());
-  }, [defaultExpandedLevels, seedExpandedIds]);
+    if (appliedBudgetRef.current === defaultRenderedLeafNodes) return;
+    appliedBudgetRef.current = defaultRenderedLeafNodes;
+    setExpanded(seed.expanded);
+    setRevealed(seed.revealed);
+  }, [defaultRenderedLeafNodes, seed]);
 
   // The user's own expansion unioned with the search-driven set. The search set is never persisted
   // (the write-through effect above only mirrors `expanded`/`revealed`), so a query never pollutes

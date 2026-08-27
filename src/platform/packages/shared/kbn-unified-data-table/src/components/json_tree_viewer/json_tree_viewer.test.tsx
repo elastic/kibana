@@ -522,88 +522,100 @@ describe('JsonTreeViewer', () => {
     });
   });
 
-  describe('defaultExpandedLevels', () => {
-    const nested = { user: { address: { city: 'Berlin' } } };
+  describe('defaultRenderedLeafNodes', () => {
+    const doc = { user: { name: 'Alice', address: { city: 'Berlin' } } };
 
-    it('leaves everything collapsed by default', () => {
-      render(<JsonTreeViewer json={nested} />);
+    it('leaves everything collapsed when the budget is 0', () => {
+      render(<JsonTreeViewer json={doc} defaultRenderedLeafNodes={0} />);
 
-      expect(screen.queryByTestId(rowTestId('user.address'))).not.toBeInTheDocument();
+      expect(screen.queryByTestId(rowTestId('user.name'))).not.toBeInTheDocument();
     });
 
-    it('seeds a fresh cell opened to the requested number of levels', () => {
-      render(<JsonTreeViewer json={nested} defaultExpandedLevels={1} />);
+    it('is collapsed by default when the prop is omitted', () => {
+      render(<JsonTreeViewer json={doc} />);
 
-      // Level 1 opens the top-level `user`, revealing `address` — which itself stays collapsed.
-      expect(screen.getByTestId(rowTestId('user.address'))).toBeVisible();
+      expect(screen.queryByTestId(rowTestId('user.name'))).not.toBeInTheDocument();
+    });
+
+    it('seeds a fresh cell with enough expansion to render the requested leaves', () => {
+      render(<JsonTreeViewer json={doc} defaultRenderedLeafNodes={1} />);
+
+      // A one-leaf budget opens `user`, rendering its direct leaf; `address` stays collapsed.
+      expect(screen.getByTestId(rowTestId('user.name'))).toHaveTextContent('"Alice"');
       expect(screen.queryByTestId(rowTestId('user.address.city'))).not.toBeInTheDocument();
     });
 
-    it('opens deeper nesting as the level increases', () => {
-      render(<JsonTreeViewer json={nested} defaultExpandedLevels={2} />);
+    it('opens deeper nesting as the budget increases', () => {
+      render(<JsonTreeViewer json={doc} defaultRenderedLeafNodes={2} />);
 
       expect(screen.getByTestId(rowTestId('user.address.city'))).toHaveTextContent('"Berlin"');
     });
 
-    it('re-seeds an already-rendered cell when the level changes', () => {
-      const { rerender } = render(<JsonTreeViewer json={nested} defaultExpandedLevels={0} />);
-      expect(screen.queryByTestId(rowTestId('user.address'))).not.toBeInTheDocument();
+    it('reveals a large list up to the budget instead of only the first 10', () => {
+      const bigArray = Array.from({ length: 25 }, (_, i) => i);
+      render(<JsonTreeViewer json={bigArray} defaultRenderedLeafNodes={20} />);
 
-      rerender(<JsonTreeViewer json={nested} defaultExpandedLevels={2} />);
+      // The pager is lifted from the default 10 to 20 items; the rest stay behind "Show more".
+      expect(screen.getByTestId(rowTestId('19'))).toBeVisible();
+      expect(screen.queryByTestId(rowTestId('20'))).not.toBeInTheDocument();
+      expect(screen.getByTestId(moreTestId())).toBeVisible();
+    });
+
+    it('re-seeds an already-rendered cell when the budget changes', () => {
+      const { rerender } = render(<JsonTreeViewer json={doc} defaultRenderedLeafNodes={0} />);
+      expect(screen.queryByTestId(rowTestId('user.name'))).not.toBeInTheDocument();
+
+      rerender(<JsonTreeViewer json={doc} defaultRenderedLeafNodes={2} />);
       expect(screen.getByTestId(rowTestId('user.address.city'))).toHaveTextContent('"Berlin"');
     });
 
-    it('tags the mirrored state with the level it was seeded at', () => {
+    it('tags the mirrored state with the budget it was seeded at', () => {
       let lastState: TreeExpansionState | undefined;
       render(
         <JsonTreeViewer
-          json={nested}
-          defaultExpandedLevels={1}
+          json={doc}
+          defaultRenderedLeafNodes={2}
           onStateChange={(state) => (lastState = state)}
         />
       );
 
-      expect(lastState?.seedLevel).toBe(1);
+      expect(lastState?.seedBudget).toBe(2);
     });
 
-    it('restores the user’s expansions on remount when the seed level is unchanged', async () => {
-      const doc = { user: { name: 'Alice' }, org: { name: 'Acme' } };
+    it('restores the user’s expansions on remount when the seed budget is unchanged', async () => {
+      const twoRoots = { user: { name: 'Alice' }, org: { name: 'Acme' } };
       let lastState: TreeExpansionState | undefined;
       const { unmount } = render(
         <JsonTreeViewer
-          json={doc}
-          defaultExpandedLevels={0}
+          json={twoRoots}
+          defaultRenderedLeafNodes={0}
           onStateChange={(state) => (lastState = state)}
         />
       );
 
-      // The level-0 seed leaves `org` closed; the user opens it manually.
+      // The 0-leaf seed leaves `org` closed; the user opens it manually.
       await userEvent.click(screen.getByTestId(rowTestId('org')));
-      expect(lastState?.seedLevel).toBe(0);
+      expect(lastState?.seedBudget).toBe(0);
 
-      // A fresh instance at the same level restores that manual expansion.
+      // A fresh instance at the same budget restores that manual expansion.
       unmount();
-      render(<JsonTreeViewer json={doc} defaultExpandedLevels={0} initialState={lastState} />);
+      render(
+        <JsonTreeViewer json={twoRoots} defaultRenderedLeafNodes={0} initialState={lastState} />
+      );
       expect(screen.getByTestId(rowTestId('org.name'))).toHaveTextContent('"Acme"');
     });
 
-    it('ignores stored state seeded at a different level and re-seeds', () => {
+    it('ignores stored state seeded at a different budget and re-seeds', () => {
       const staleState: TreeExpansionState = {
         expanded: new Set(),
         revealed: new Map(),
-        seedLevel: 0,
+        seedBudget: 0,
       };
 
-      render(
-        <JsonTreeViewer
-          json={{ user: { name: 'Alice' } }}
-          defaultExpandedLevels={1}
-          initialState={staleState}
-        />
-      );
+      render(<JsonTreeViewer json={doc} defaultRenderedLeafNodes={2} initialState={staleState} />);
 
-      // The level-1 seed wins over the stale (collapsed) state.
-      expect(screen.getByTestId(rowTestId('user.name'))).toHaveTextContent('"Alice"');
+      // The 2-leaf seed wins over the stale (collapsed) state.
+      expect(screen.getByTestId(rowTestId('user.address.city'))).toHaveTextContent('"Berlin"');
     });
   });
 });

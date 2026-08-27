@@ -13,8 +13,9 @@ import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, useEuiMemoizedStyles } from 
 import {
   buildNodes,
   buildRows,
+  collectDefaultSeed,
   collectExpandableIds,
-  MAX_EXPANDED_ROWS,
+  MAX_EXPANDED_LEAVES,
   rootToJsonString,
   type FormatValue,
   type GetLeafActions,
@@ -59,8 +60,8 @@ export interface JsonTreeViewerProps {
   extraHeaderContent?: ReactNode;
   /** When false, leaf values render on a single truncated line instead of wrapping. Defaults to true. */
   wrapLines?: boolean;
-  /** Nested levels opened when a fresh cell is seeded (0 = fully collapsed). Defaults to 0. */
-  defaultExpandedLevels?: number;
+  /** Leaf nodes rendered when a fresh cell is seeded (0 = fully collapsed). Defaults to 0. */
+  defaultRenderedLeafNodes?: number;
 }
 
 export const JsonTreeViewer = memo(function JsonTreeViewer({
@@ -72,18 +73,19 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
   getLeafActions,
   extraHeaderContent,
   wrapLines = true,
-  defaultExpandedLevels = 0,
+  defaultRenderedLeafNodes = 0,
 }: JsonTreeViewerProps) {
   const styles = useEuiMemoizedStyles(treeStyles);
 
   const nodes = useMemo(() => buildNodes(json), [json]);
 
+  // Expand all / isAllExpanded use the full safety ceiling.
   const expandableIds = useMemo(() => collectExpandableIds(nodes), [nodes]);
-  // The subset opened when seeding a fresh cell: the same budgeted, breadth-first set capped to
-  // `defaultExpandedLevels` nested levels.
-  const seedExpandedIds = useMemo(
-    () => collectExpandableIds(nodes, MAX_EXPANDED_ROWS, defaultExpandedLevels),
-    [nodes, defaultExpandedLevels]
+  // The initial expand/reveal state for a fresh cell: open collections and lift pagers breadth-first
+  // until ~N leaf nodes render, capped to the safety ceiling.
+  const seed = useMemo(
+    () => collectDefaultSeed(nodes, Math.min(defaultRenderedLeafNodes, MAX_EXPANDED_LEAVES)),
+    [nodes, defaultRenderedLeafNodes]
   );
 
   const searchTermLower = expandNodesContainingTerm?.trim().toLowerCase() ?? '';
@@ -97,8 +99,8 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
     onStateChange,
     expandedBySearchNodes: searchMatches.containers,
     expandableIds,
-    seedExpandedIds,
-    defaultExpandedLevels,
+    seed,
+    defaultRenderedLeafNodes,
   });
 
   const rootType = useMemo(() => (Array.isArray(json) ? 'array' : 'object'), [json]);

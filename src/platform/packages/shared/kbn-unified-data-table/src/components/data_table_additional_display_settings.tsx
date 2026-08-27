@@ -9,28 +9,22 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { EuiRangeProps } from '@elastic/eui';
-import {
-  EuiButtonGroup,
-  EuiFieldNumber,
-  EuiFormRow,
-  EuiHorizontalRule,
-  EuiRange,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiButtonGroup, EuiFormRow, EuiHorizontalRule, EuiRange, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
 import type { RowHeightSettingsProps } from './row_height_settings';
 import { RowHeightSettings } from './row_height_settings';
 import type { JsonModeSettings, DocumentsDisplayMode } from '../types';
 import { ViewModeSettings } from './view_mode_settings';
+import { DEFAULT_RENDERED_LEAF_NODES, MAX_EXPANDED_LEAVES } from './json_tree_viewer/tree_model';
 
 export const DEFAULT_MAX_ALLOWED_SAMPLE_SIZE = 1000;
 export const MIN_ALLOWED_SAMPLE_SIZE = 1;
 export const RANGE_MIN_SAMPLE_SIZE = 10; // it's necessary to be able to use `step={10}` configuration for EuiRange
 export const RANGE_STEP_SAMPLE_SIZE = 10;
 
-export const MIN_EXPANDED_LEVELS = 0;
-export const MAX_EXPANDED_LEVELS = 5;
+export const MIN_RENDERED_LEAF_NODES = 0;
+export const RENDERED_LEAF_NODES_STEP = 50;
 
 export interface UnifiedDataTableAdditionalDisplaySettingsProps {
   rowHeight: RowHeightSettingsProps['rowHeight'];
@@ -159,56 +153,64 @@ const OnOffButtonGroup = ({
   );
 };
 
-const clampExpandedLevels = (value: number) =>
-  Math.min(Math.max(Math.round(value), MIN_EXPANDED_LEVELS), MAX_EXPANDED_LEVELS);
+const clampRenderedLeafNodes = (value: number) =>
+  Math.min(Math.max(Math.round(value), MIN_RENDERED_LEAF_NODES), MAX_EXPANDED_LEAVES);
 
-const ExpandedLevelsSetting = ({
-  expandedLevels,
-  onChangeExpandedLevels,
+const ValuesShownSetting = ({
+  defaultRenderedLeafNodes,
+  onChangeDefaultRenderedLeafNodes,
 }: {
-  expandedLevels: number;
-  onChangeExpandedLevels: (levels: number) => void;
+  defaultRenderedLeafNodes: number;
+  onChangeDefaultRenderedLeafNodes: (value: number) => void;
 }) => {
-  const [activeLevels, setActiveLevels] = useState<number | ''>(expandedLevels);
+  const [activeValue, setActiveValue] = useState<number | ''>(defaultRenderedLeafNodes);
 
   useEffect(() => {
-    setActiveLevels(expandedLevels); // reset local state when the stored value changes
-  }, [expandedLevels]);
+    setActiveValue(defaultRenderedLeafNodes); // reset local state when the stored value changes
+  }, [defaultRenderedLeafNodes]);
 
   const debouncedOnChange = useMemo(
-    () => debounce(onChangeExpandedLevels, 300, { leading: false, trailing: true }),
-    [onChangeExpandedLevels]
+    () => debounce(onChangeDefaultRenderedLeafNodes, 300, { leading: false, trailing: true }),
+    [onChangeDefaultRenderedLeafNodes]
   );
 
-  const onChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      const { value } = event.target;
-      if (value === '') {
-        setActiveLevels(''); // allow clearing the field mid-edit without committing
+  // EUI rejects a value that isn't a multiple of `step`, which the input lets the user type, so fall
+  // back to a step of 1 for off-step values (same approach as the sample-size control).
+  const step =
+    activeValue === '' || checkIfValueIsMultipleOfStep(activeValue, RENDERED_LEAF_NODES_STEP)
+      ? RENDERED_LEAF_NODES_STEP
+      : 1;
+
+  const onChange = useCallback<NonNullable<EuiRangeProps['onChange']>>(
+    (event) => {
+      if (!('value' in event.target) || event.target.value === '') {
+        setActiveValue(''); // allow clearing the input mid-edit without committing
         return;
       }
-      const clamped = clampExpandedLevels(Number(value));
-      setActiveLevels(clamped);
+      const clamped = clampRenderedLeafNodes(Number(event.target.value));
+      setActiveValue(clamped);
       debouncedOnChange(clamped);
     },
     [debouncedOnChange]
   );
 
-  const expandedLevelsLabel = i18n.translate('unifiedDataTable.expandedLevelsLabel', {
-    defaultMessage: 'Expanded levels',
+  const valuesShownLabel = i18n.translate('unifiedDataTable.defaultRenderedLeafNodesLabel', {
+    defaultMessage: 'Values shown',
   });
 
   return (
-    <EuiFormRow label={expandedLevelsLabel} display="columnCompressed">
-      <EuiFieldNumber
+    <EuiFormRow label={valuesShownLabel} display="columnCompressed">
+      <EuiRange
         compressed
         fullWidth
-        min={MIN_EXPANDED_LEVELS}
-        max={MAX_EXPANDED_LEVELS}
-        step={1}
-        value={activeLevels}
+        min={MIN_RENDERED_LEAF_NODES}
+        max={MAX_EXPANDED_LEAVES}
+        step={step}
+        showInput
+        showRange
+        value={activeValue}
         onChange={onChange}
-        data-test-subj="unifiedDataTableExpandedLevelsInput"
+        data-test-subj="unifiedDataTableRenderedLeafNodesInput"
       />
     </EuiFormRow>
   );
@@ -223,7 +225,8 @@ const JsonModeDisplaySettings = ({
 }) => {
   const hideNulls = jsonModeSettings.hideNulls ?? false;
   const wrapLines = jsonModeSettings.wrapLines ?? true;
-  const expandedLevels = jsonModeSettings.expandedLevels ?? 0;
+  const defaultRenderedLeafNodes =
+    jsonModeSettings.defaultRenderedLeafNodes ?? DEFAULT_RENDERED_LEAF_NODES;
 
   const hideNullsLabel = i18n.translate('unifiedDataTable.hideNullsLabel', {
     defaultMessage: 'Hide nulls',
@@ -233,21 +236,21 @@ const JsonModeDisplaySettings = ({
     defaultMessage: 'Wrap lines',
   });
 
-  // Keep a stable callback that always merges into the latest settings, so the debounced number
-  // input never fires with a stale `jsonModeSettings`.
+  // Keep a stable callback that always merges into the latest settings, so the debounced range input
+  // never fires with a stale `jsonModeSettings`.
   const settingsRef = useRef(jsonModeSettings);
   settingsRef.current = jsonModeSettings;
-  const onChangeExpandedLevels = useCallback(
-    (levels: number) =>
-      onChangeJsonModeSettings?.({ ...settingsRef.current, expandedLevels: levels }),
+  const onChangeDefaultRenderedLeafNodes = useCallback(
+    (value: number) =>
+      onChangeJsonModeSettings?.({ ...settingsRef.current, defaultRenderedLeafNodes: value }),
     [onChangeJsonModeSettings]
   );
 
   return (
     <>
-      <ExpandedLevelsSetting
-        expandedLevels={expandedLevels}
-        onChangeExpandedLevels={onChangeExpandedLevels}
+      <ValuesShownSetting
+        defaultRenderedLeafNodes={defaultRenderedLeafNodes}
+        onChangeDefaultRenderedLeafNodes={onChangeDefaultRenderedLeafNodes}
       />
       <OnOffButtonGroup
         label={hideNullsLabel}
