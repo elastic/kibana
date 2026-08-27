@@ -74,3 +74,5 @@ export const METRICS_EXPERIENCE_PRODUCT_FEATURE_ID = 'discover:metrics-experienc
  */
 export const DISCOVER_SESSION_API_BASE_PATH = '/api/discover_sessions';
 export const DISCOVER_SESSION_API_VERSION = '1';
+
+export const DATA_TABLE_JSON_VIEW_FEATURE_FLAG_KEY = 'discover.dataTableJsonView';

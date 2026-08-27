@@ -19,7 +19,7 @@ import type { Logger } from '@kbn/logging';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
 import { registerRoutes } from './api/register_routes';
-import { getDiscoverSessionEmbeddableSchema } from './embeddable/schema';
+import { discoverSessionSchemaProvider } from './discover_session_schema_provider';
 import type { DiscoverServerPluginStart, DiscoverServerPluginStartDeps } from '.';
 import { DISCOVER_APP_LOCATOR } from '../common';
 import { capabilitiesProvider } from './capabilities_provider';
@@ -95,7 +95,7 @@ export class DiscoverServerPlugin
     plugins.embeddable.registerEmbeddableServerDefinition(SEARCH_EMBEDDABLE_TYPE, {
       title: 'Discover session',
       getTransforms: (drilldownTransforms) => getSearchEmbeddableTransforms(drilldownTransforms),
-      getSchema: (getDrilldownsSchema) => getDiscoverSessionEmbeddableSchema(getDrilldownsSchema),
+      getSchema: discoverSessionSchemaProvider.getEmbeddableSchema,
     });
 
     if (plugins.agentBuilder) {
@@ -123,6 +123,8 @@ export class DiscoverServerPlugin
   }
 
   public start(core: CoreStart, deps: DiscoverServerPluginStartDeps) {
+    discoverSessionSchemaProvider.initialize(core.featureFlags);
+
     return { locator: initializeLocatorServices(core, deps) };
   }
 }

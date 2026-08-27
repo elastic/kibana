@@ -284,6 +284,12 @@ export const getDiscoverSessionEmbeddableSchema = (
     getDiscoverSessionByReferenceEmbeddableSchema(getDrilldownsSchema),
   ]);
 
+export {
+  discoverSessionByReferencePropsSchema,
+  discoverSessionByValuePropsSchema,
+  withPanelSchemas,
+};
+
 export type DiscoverSessionPanelOverrides = z.output<typeof panelOverridesSchema>;
 export type DiscoverSessionClassicTab = z.output<typeof classicTabSchema>;
 export type DiscoverSessionEsqlTab = z.output<typeof esqlTabSchema>;

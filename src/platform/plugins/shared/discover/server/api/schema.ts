@@ -300,6 +300,8 @@ export const discoverSessionSearchResponseSchema = z
   })
   .strict();
 
+export { discoverSessionClassicTabSchema, discoverSessionEsqlTabSchema };
+
 export type DiscoverSessionApiData = z.output<typeof discoverSessionApiDataSchema>;
 export type DiscoverSessionApiResponse = z.output<typeof discoverSessionApiResponseSchema>;
 export type DiscoverSessionGetResponse = z.output<typeof discoverSessionGetResponseSchema>;

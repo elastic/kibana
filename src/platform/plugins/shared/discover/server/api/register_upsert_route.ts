@@ -13,8 +13,8 @@ import type { VersionedRouter } from '@kbn/core-http-server';
 import type { CoreSetup, Logger, RequestHandlerContext } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { z } from '@kbn/zod';
+import { discoverSessionSchemaProvider } from '../discover_session_schema_provider';
 import { getRouteConfig } from './get_route_config';
-import { discoverSessionApiDataSchema, discoverSessionApiResponseSchema } from './schema';
 import { upsertDiscoverSession } from './session_upsert';
 import { trackDiscoverSessionAction } from './user_activity';
 
@@ -37,7 +37,7 @@ export const registerUpsertRoute = (
     .addVersion(
       {
         version: routeVersion,
-        validate: {
+        validate: () => ({
           request: {
             params: z
               .object({
@@ -46,22 +46,24 @@ export const registerUpsertRoute = (
                 }),
               })
               .strict(),
-            body: discoverSessionApiDataSchema,
+            body: discoverSessionSchemaProvider.getApiSchemas().discoverSessionApiDataSchema,
           },
           response: {
             200: {
-              body: () => discoverSessionApiResponseSchema,
+              body: () =>
+                discoverSessionSchemaProvider.getApiSchemas().discoverSessionApiResponseSchema,
               description: 'Updated',
             },
             201: {
-              body: () => discoverSessionApiResponseSchema,
+              body: () =>
+                discoverSessionSchemaProvider.getApiSchemas().discoverSessionApiResponseSchema,
               description: 'Created',
             },
             400: { description: 'Invalid request' },
             403: { description: 'Forbidden' },
             409: { description: 'Conflict' },
           },
-        },
+        }),
       },
       async (context, request, response) =>
         telemetryHandler(request, { usageCounter }, async () => {

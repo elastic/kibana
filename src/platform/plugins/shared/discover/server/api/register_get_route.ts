@@ -14,8 +14,8 @@ import type { VersionedRouter } from '@kbn/core-http-server';
 import type { Logger, RequestHandlerContext } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { discoverSessionSchemaProvider } from '../discover_session_schema_provider';
 import { getRouteConfig } from './get_route_config';
-import { discoverSessionGetResponseSchema } from './schema';
 import { getDiscoverSession } from './session_get';
 
 export const registerGetRoute = (
@@ -35,7 +35,7 @@ export const registerGetRoute = (
     .addVersion(
       {
         version: routeVersion,
-        validate: {
+        validate: () => ({
           request: {
             params: z
               .object({
@@ -47,7 +47,8 @@ export const registerGetRoute = (
           },
           response: {
             200: {
-              body: () => discoverSessionGetResponseSchema,
+              body: () =>
+                discoverSessionSchemaProvider.getApiSchemas().discoverSessionGetResponseSchema,
               description: 'Success',
             },
             403: { description: 'Forbidden' },
@@ -55,7 +56,7 @@ export const registerGetRoute = (
             409: { description: 'Conflict' },
             500: { description: 'Internal server error' },
           },
-        },
+        }),
       },
       async (context, request, response) =>
         telemetryHandler(request, { usageCounter }, async () => {
