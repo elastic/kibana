@@ -679,7 +679,12 @@ export class VersionSpecificPolicyAssignmentTask {
       );
       for (const parentPolicyId of noConditionParentIds) {
         throwIfAborted(abortController);
-        await this.reassignOrphanedAgentsToBasePolicy(esClient, soClient, parentPolicyId, abortController);
+        await this.reassignOrphanedAgentsToBasePolicy(
+          esClient,
+          soClient,
+          parentPolicyId,
+          abortController
+        );
       }
     }
 
