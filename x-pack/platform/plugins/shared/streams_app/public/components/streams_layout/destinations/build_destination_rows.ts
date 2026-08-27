@@ -46,14 +46,31 @@ const QUALITY_RANK: Record<QualityIndicators, number> = {
   good: 2,
 };
 
-const compareRows = (a: DestinationRow, b: DestinationRow, field: SortableField): number => {
+const compareRows = (
+  a: DestinationRow,
+  b: DestinationRow,
+  field: SortableField,
+  directionFactor: number
+): number => {
   if (field === 'name') {
-    return a.name.localeCompare(b.name);
+    return directionFactor * a.name.localeCompare(b.name);
   }
   if (field === 'dataQuality') {
-    return toQualityRank(a.dataQuality) - toQualityRank(b.dataQuality);
+    return directionFactor * (toQualityRank(a.dataQuality) - toQualityRank(b.dataQuality));
   }
-  return a[field] - b[field];
+  return compareNumbers(a[field], b[field], directionFactor);
+};
+
+const compareNumbers = (aValue: number, bValue: number, directionFactor: number): number => {
+  const aUnknown = Number.isNaN(aValue);
+  const bUnknown = Number.isNaN(bValue);
+  if (aUnknown || bUnknown) {
+    if (aUnknown && bUnknown) {
+      return 0;
+    }
+    return aUnknown ? 1 : -1;
+  }
+  return directionFactor * (aValue - bValue);
 };
 
 const toQualityRank = (quality: QualityIndicators | undefined): number =>
@@ -123,5 +140,5 @@ export const buildDestinationRows = ({
         selectedQualities.length === 0 ||
         (row.dataQuality !== undefined && selectedQualities.includes(row.dataQuality))
     )
-    .sort((a, b) => directionFactor * compareRows(a, b, sortField));
+    .sort((a, b) => compareRows(a, b, sortField, directionFactor));
 };
