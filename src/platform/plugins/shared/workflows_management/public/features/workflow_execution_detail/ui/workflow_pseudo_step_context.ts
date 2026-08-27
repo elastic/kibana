@@ -43,7 +43,12 @@ export function buildTriggerContextFromExecution(
       triggerType = 'alert';
     } else if (event.type === 'manual') {
       triggerType = 'manual';
-    } else if (isEventDrivenWorkflowTriggerSource(triggeredBy)) {
+    } else if (
+      isEventDrivenWorkflowTriggerSource({
+        triggeredBy,
+        context: executionContext,
+      })
+    ) {
       triggerType = 'event';
     } else {
       triggerType = 'document';

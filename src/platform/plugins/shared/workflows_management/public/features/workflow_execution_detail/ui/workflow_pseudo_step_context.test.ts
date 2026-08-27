@@ -59,6 +59,29 @@ describe('buildTriggerContextFromExecution', () => {
     });
   });
 
+  it('should detect manual trigger when context event type is manual (synthesized event)', () => {
+    const inputs = { severity: 'high', hostId: 'host-1' };
+    const result = buildTriggerContextFromExecution({
+      event: { type: 'manual', inputs, spaceId: 'default' },
+      inputs,
+    });
+    expect(result).toEqual({
+      triggerType: 'manual',
+      input: inputs, // context.inputs, not the synthesized event object
+    });
+  });
+
+  it('should not treat custom provenance strings as event-driven without an event payload', () => {
+    const result = buildTriggerContextFromExecution(
+      { inputs: { query: 'gen' } },
+      'attack-discovery-pipeline'
+    );
+    expect(result).toEqual({
+      triggerType: 'manual',
+      input: { query: 'gen' },
+    });
+  });
+
   it('should return event trigger type when triggeredBy from execution is event-driven', () => {
     const event = { workflow: { id: 'w1' } };
     const result = buildTriggerContextFromExecution({ event }, 'workflows.failed');
@@ -77,6 +100,14 @@ describe('buildTriggerContextFromExecution', () => {
   it('should use inputs as input when event is not present', () => {
     const result = buildTriggerContextFromExecution({ inputs: { foo: 'bar' } });
     expect(result?.input).toEqual({ foo: 'bar' });
+  });
+
+  it('should default to manual when context has neither event nor inputs', () => {
+    const result = buildTriggerContextFromExecution({ spaceId: 'default' });
+    expect(result).toEqual({
+      triggerType: 'manual',
+      input: undefined,
+    });
   });
 });
 
@@ -97,12 +128,35 @@ describe('buildTriggerStepExecutionFromContext', () => {
     yaml: '',
   };
 
+  const completedActionStep: WorkflowExecutionDto['stepExecutions'][number] = {
+    id: 'step-1',
+    stepId: 'action-1',
+    stepType: 'action',
+    status: ExecutionStatus.COMPLETED,
+    scopeStack: [],
+    workflowRunId: 'exec-1',
+    workflowId: 'wf-1',
+    startedAt: '',
+    topologicalIndex: 0,
+    globalExecutionIndex: 0,
+    stepExecutionIndex: 0,
+  };
+
   it('returns null when context is null', () => {
     expect(
       buildTriggerStepExecutionFromContext({
         ...baseExecution,
         context: null,
       } as unknown as WorkflowExecutionDto)
+    ).toBeNull();
+  });
+
+  it('returns null when execution has no context', () => {
+    expect(
+      buildTriggerStepExecutionFromContext({
+        ...baseExecution,
+        context: undefined,
+      })
     ).toBeNull();
   });
 
@@ -125,6 +179,51 @@ describe('buildTriggerStepExecutionFromContext', () => {
     expect(result?.output).toBeUndefined();
   });
 
+  it('builds trigger step with COMPLETED status for successful execution', () => {
+    const result = buildTriggerStepExecutionFromContext({
+      ...baseExecution,
+      stepExecutions: [completedActionStep],
+      context: { inputs: { name: 'test' } },
+    });
+    expect(result).not.toBeNull();
+    expect(result?.status).toBe(ExecutionStatus.COMPLETED);
+    expect(result?.error).toBeUndefined();
+  });
+
+  it('builds trigger step with FAILED status when execution failed before steps', () => {
+    const result = buildTriggerStepExecutionFromContext({
+      ...baseExecution,
+      status: ExecutionStatus.FAILED,
+      error: { type: 'InputValidationError', message: 'name: Required' },
+      context: { inputs: {} },
+    });
+    expect(result).not.toBeNull();
+    expect(result?.status).toBe(ExecutionStatus.FAILED);
+    expect(result?.error).toEqual({ type: 'InputValidationError', message: 'name: Required' });
+  });
+
+  it('does not set FAILED on trigger step when execution failed after steps ran', () => {
+    const result = buildTriggerStepExecutionFromContext({
+      ...baseExecution,
+      status: ExecutionStatus.FAILED,
+      error: { type: 'StepError', message: 'step failed' },
+      stepExecutions: [{ ...completedActionStep, status: ExecutionStatus.FAILED }],
+      context: { inputs: { name: 'test' } },
+    });
+    expect(result).not.toBeNull();
+    expect(result?.status).toBe(ExecutionStatus.COMPLETED);
+    expect(result?.error).toBeUndefined();
+  });
+
+  it('sets stepId and stepType from the alert trigger type', () => {
+    const result = buildTriggerStepExecutionFromContext({
+      ...baseExecution,
+      context: { event: { alerts: [{ id: 'a1' }] } },
+    });
+    expect(result?.stepId).toBe('alert');
+    expect(result?.stepType).toBe('trigger_alert');
+  });
+
   it('sets trigger_event pseudo-step for event-driven execution', () => {
     const result = buildTriggerStepExecutionFromContext({
       ...baseExecution,
@@ -133,6 +232,49 @@ describe('buildTriggerStepExecutionFromContext', () => {
     });
     expect(result?.stepId).toBe('event');
     expect(result?.stepType).toBe('trigger_event');
+  });
+
+  it('uses context.inputs as trigger input when event is the synthesized manual event', () => {
+    const inputs = { severity: 'high' };
+    const result = buildTriggerStepExecutionFromContext({
+      ...baseExecution,
+      stepExecutions: [completedActionStep],
+      context: {
+        event: { type: 'manual', inputs, spaceId: 'default' },
+        inputs,
+      },
+    });
+    expect(result).not.toBeNull();
+    expect(result?.stepId).toBe('manual');
+    expect(result?.stepType).toBe('trigger_manual');
+    expect(result?.input).toEqual(inputs); // context.inputs, not the synthesized event
+  });
+
+  it('exposes manual inputs as output when both event and inputs are present', () => {
+    const result = buildTriggerStepExecutionFromContext({
+      ...baseExecution,
+      stepExecutions: [completedActionStep],
+      context: {
+        event: { alerts: [{ id: 'alert-1' }] },
+        inputs: { ticketId: 'ABC-123' },
+      },
+    });
+    expect(result).not.toBeNull();
+    expect(result?.input).toEqual({ alerts: [{ id: 'alert-1' }] });
+    expect(result?.output).toEqual({ ticketId: 'ABC-123' });
+  });
+
+  it('does not set output when only event is present', () => {
+    const result = buildTriggerStepExecutionFromContext({
+      ...baseExecution,
+      stepExecutions: [completedActionStep],
+      // The server always persists an `inputs` key (empty object when no manual inputs
+      // were supplied alongside the event), so the realistic persisted shape includes it.
+      context: { event: { alerts: [{ id: 'alert-1' }] }, inputs: {} },
+    });
+    expect(result).not.toBeNull();
+    expect(result?.input).toEqual({ alerts: [{ id: 'alert-1' }] });
+    expect(result?.output).toBeUndefined();
   });
 });
 
