@@ -28,6 +28,11 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   // Alerting
   `${internalNamespaces.platformAlerting}.manage_rule`,
 
+  // Observability – SLO
+  `${internalNamespaces.observability}.list_slos`,
+  `${internalNamespaces.observability}.manage_slo`,
+  `${internalNamespaces.observability}.delete_slo`,
+
   // Observability
   `${internalNamespaces.observability}.get_anomaly_detection_jobs`,
   `${internalNamespaces.observability}.run_log_rate_analysis`,
@@ -230,6 +235,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'attack-discovery-workflow-troubleshooting',
 
   // O11Y
+  'observability.slo-management',
   'observability.rca',
   'observability.investigation',
   'observability.service-map',
@@ -328,6 +334,7 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   'diagnostic_report',
 
   // Observability
+  'observability.slo.definition',
   'observability.ai_insight',
   'observability.error',
   'observability.alert',
