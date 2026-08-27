@@ -8,7 +8,12 @@
 import { errors } from '@elastic/elasticsearch';
 
 import { schema } from '@kbn/config-schema';
-import type { CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  CoreStart,
+  KibanaRequest,
+  PluginInitializerContext,
+} from '@kbn/core/server';
 import { ROUTE_TAG_AUTH_FLOW } from '@kbn/security-plugin/server';
 import { restApiKeySchema } from '@kbn/security-plugin-types-server';
 import type {
@@ -42,6 +47,230 @@ export function initRoutes(
   );
 
   const router = core.http.createRouter();
+
+  const PREAUTH_HOLD_HEADER = 'x-elastic-preauth-hold';
+  const PREAUTH_HOLD_ID_MAX_LENGTH = 64;
+  const PREAUTH_HOLD_TIMEOUT_MS = 10_000;
+  const PREAUTH_HOLD_PATH_PREFIX = '/authentication/preauth_holds';
+
+  interface PreauthHoldSocketSnapshot {
+    authorized: boolean | null;
+    peerCertificateNull: boolean;
+  }
+
+  interface PreauthHoldState {
+    parked: boolean;
+    continuedAfterHold: boolean;
+    authCompleted: boolean;
+    snapshotSocket: () => PreauthHoldSocketSnapshot;
+    release: () => void;
+  }
+
+  const preauthHolds = new Map<string, PreauthHoldState>();
+
+  const readHoldId = (value: string | string[] | undefined): string | undefined => {
+    if (value === undefined) {
+      return undefined;
+    }
+    const holdId = Array.isArray(value) ? value[0] : value;
+    if (!holdId || holdId.length > PREAUTH_HOLD_ID_MAX_LENGTH) {
+      return undefined;
+    }
+    return holdId;
+  };
+
+  const snapshotSocket = (request: KibanaRequest): PreauthHoldSocketSnapshot => ({
+    authorized: request.socket.authorized ?? null,
+    peerCertificateNull: request.socket.getPeerCertificate(true) === null,
+  });
+
+  // Park inside PKIAuthenticationProvider.authenticate, not onPreAuth.
+  // Hapi's request cycle bails when `_isReplied` is set (see @hapi/hapi Request._lifecycle).
+  // RST_STREAM during onPreAuth emits `aborted`, Hapi replies immediately, and Auth never runs —
+  // so PKI never sees the destroyed-stream socket and the Scout test false-greens.
+  // Wrapping the already-loaded provider keeps us inside the in-flight Auth cycle function after
+  // session lookup, which is the window that invalidates the shared ES token (kibana#258232).
+  const findPkiAuthenticationProvider = () => {
+    for (const [moduleId, cached] of Object.entries(require.cache)) {
+      const normalizedId = moduleId.replaceAll('\\', '/');
+      if (normalizedId.includes('.test.')) {
+        continue;
+      }
+      if (
+        !normalizedId.endsWith('/authentication/providers/pki.ts') &&
+        !normalizedId.endsWith('/authentication/providers/pki.js')
+      ) {
+        continue;
+      }
+      const providerClass = (
+        cached?.exports as
+          | {
+              PKIAuthenticationProvider?: {
+                prototype: {
+                  authenticate: (request: KibanaRequest, session?: unknown) => Promise<unknown>;
+                };
+              };
+            }
+          | undefined
+      )?.PKIAuthenticationProvider;
+      if (typeof providerClass?.prototype.authenticate === 'function') {
+        return providerClass;
+      }
+    }
+    const pkiModules = Object.keys(require.cache)
+      .filter((moduleId) => moduleId.includes('pki'))
+      .join(', ');
+    throw new Error(
+      `security-test-endpoints could not locate PKIAuthenticationProvider to install the HTTP/2 preauth hold. pki modules in require.cache: ${
+        pkiModules || '(none)'
+      }`
+    );
+  };
+
+  let pkiAuthenticateHoldInstalled = false;
+  const installPkiAuthenticateHold = () => {
+    if (pkiAuthenticateHoldInstalled) {
+      return;
+    }
+
+    const pkiProviderClass = findPkiAuthenticationProvider();
+    const originalPkiAuthenticate = pkiProviderClass.prototype.authenticate;
+    pkiProviderClass.prototype.authenticate = async function wrappedPkiAuthenticate(
+      this: unknown,
+      request: KibanaRequest,
+      session?: unknown
+    ) {
+      const holdId = readHoldId(request.headers[PREAUTH_HOLD_HEADER]);
+      if (!holdId) {
+        return originalPkiAuthenticate.call(this, request, session);
+      }
+
+      preauthHolds.get(holdId)?.release();
+
+      const deferred: { resolve: () => void } = { resolve: () => undefined };
+      const released = new Promise<void>((resolve) => {
+        deferred.resolve = resolve;
+      });
+
+      const hold: PreauthHoldState = {
+        parked: true,
+        continuedAfterHold: false,
+        authCompleted: false,
+        snapshotSocket: () => snapshotSocket(request),
+        release: () => deferred.resolve(),
+      };
+      preauthHolds.set(holdId, hold);
+
+      let timeoutId: NodeJS.Timeout | undefined;
+      try {
+        await Promise.race([
+          released,
+          new Promise<void>((resolve) => {
+            timeoutId = setTimeout(resolve, PREAUTH_HOLD_TIMEOUT_MS);
+          }),
+        ]);
+      } finally {
+        if (timeoutId !== undefined) {
+          clearTimeout(timeoutId);
+        }
+      }
+
+      hold.continuedAfterHold = true;
+      try {
+        return await originalPkiAuthenticate.call(this, request, session);
+      } finally {
+        hold.authCompleted = true;
+        hold.parked = false;
+        // Keep the completed hold around long enough for the test to observe `authCompleted`,
+        // then evict so the map does not retain the request (and its socket) indefinitely.
+        setTimeout(() => {
+          if (preauthHolds.get(holdId) === hold) {
+            preauthHolds.delete(holdId);
+          }
+        }, PREAUTH_HOLD_TIMEOUT_MS).unref();
+      }
+    };
+
+    pkiAuthenticateHoldInstalled = true;
+    logger.info('Installed PKI authenticate preauth hold for HTTP/2 stream-cancel tests.');
+  };
+
+  try {
+    installPkiAuthenticateHold();
+  } catch (err) {
+    logger.warn(
+      `PKI preauth hold was not installed during setup; will retry at start. ${
+        err instanceof Error ? err.message : String(err)
+      }`
+    );
+  }
+
+  void core
+    .getStartServices()
+    .then(() => installPkiAuthenticateHold())
+    .catch((err) => {
+      logger.error(
+        `PKI preauth hold could not be installed at start; the preauth hold test routes will not function. ${
+          err instanceof Error ? err.message : String(err)
+        }`
+      );
+    });
+
+  const unauthenticatedTestRouteSecurity = {
+    authc: {
+      enabled: false as const,
+      reason:
+        'This route is part of a security functional test plugin and does not require authentication.',
+    },
+    authz: {
+      enabled: false as const,
+      reason: 'This route is opted out from authorization',
+    },
+  };
+
+  const holdIdParams = {
+    params: schema.object({
+      id: schema.string({ minLength: 1, maxLength: PREAUTH_HOLD_ID_MAX_LENGTH }),
+    }),
+  };
+
+  router.get(
+    {
+      path: `${PREAUTH_HOLD_PATH_PREFIX}/{id}`,
+      security: unauthenticatedTestRouteSecurity,
+      validate: holdIdParams,
+    },
+    (_context, request, response) => {
+      const hold = preauthHolds.get(request.params.id);
+      const socket = hold?.snapshotSocket();
+      return response.ok({
+        body: {
+          parked: hold?.parked ?? false,
+          continuedAfterHold: hold?.continuedAfterHold ?? false,
+          authCompleted: hold?.authCompleted ?? false,
+          authorized: socket?.authorized ?? null,
+          peerCertificateNull: socket?.peerCertificateNull ?? false,
+        },
+      });
+    }
+  );
+
+  router.post(
+    {
+      path: `${PREAUTH_HOLD_PATH_PREFIX}/{id}/release`,
+      security: unauthenticatedTestRouteSecurity,
+      validate: holdIdParams,
+      options: { xsrfRequired: false },
+    },
+    (_context, request, response) => {
+      const hold = preauthHolds.get(request.params.id);
+      if (!hold) {
+        return response.notFound();
+      }
+      hold.release();
+      return response.ok();
+    }
+  );
 
   for (const isAuthFlow of [true, false]) {
     router.get(
