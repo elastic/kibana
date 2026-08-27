@@ -2032,9 +2032,7 @@ describe('ConversationClient', () => {
 
       await createClientForMerge().unsafeMergeMetadata('conversation-1', { status: 'open' });
 
-      expect(mockEsGet).toHaveBeenCalledWith(
-        expect.objectContaining({ id: 'conversation-1' })
-      );
+      expect(mockEsGet).toHaveBeenCalledWith(expect.objectContaining({ id: 'conversation-1' }));
       // search is not called — the real-time get is the only read
       expect(mockEsClient.search).not.toHaveBeenCalled();
     });
