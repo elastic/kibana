@@ -114,6 +114,9 @@ test('creates and verifies a dashboard', async ({ pageObjects, page }) => {
 ## Waiting + flake control
 
 - Don’t use `page.waitForTimeout`. Wait on a page-ready signal (loading indicator hidden, container visible, `expect.poll` on element counts).
+- **Bind the wait to the _terminal_ signal the assertion reads**, not an earlier step. Guarding the click, dismissing one toast, or waiting on one intermediate render while the asserted element still races is the top reason a wait-based flake fix recurs.
+- **Wait on the rendered outcome; if there's no element, expose one.** Prefer `expect(locator).toBeVisible()` on the element that shows the data. When nothing renders to wait on, add an app-side DOM signal (`data-test-subj` / `data-loaded` attribute) — it reflects the committed render (a response resolving ≠ the DOM updated) and doesn't couple to the endpoint. Prefer mocking/seeding when the flake is data arrival. Use `page.waitForResponse(...)` (armed *before* the action) only as a last resort for a no-UI gate (a background write or setup precondition); it's unreliable when several requests hit the same endpoint (e.g. a dashboard).
+- **Poll a read, never an action:** re-query _inside_ `expect.poll`/`toPass` (a handle captured once still goes stale); never re-fire a `click`/type/`goto`/request inside the loop — that hides an actionability bug rather than fixing it.
 - When an explicit wait is needed, prefer `locator.waitFor({ state: 'visible' })` over a bare `locator.waitFor()`. The two are equivalent (`visible` is the default state), but stating it keeps the intent explicit and consistent with RTL-style readiness checks.
 - If selectors aren’t stable, add `data-test-subj` (Scout uses it as the `testIdAttribute`).
 - Some locators are restricted by `@kbn/eslint/scout_no_locators` (e.g. `globalLoadingIndicator`). Don’t use them in tests or page objects for app loading state management; rely on Playwright auto-waiting and page-ready signals instead.
