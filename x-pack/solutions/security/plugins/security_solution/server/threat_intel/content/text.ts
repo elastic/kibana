@@ -534,6 +534,14 @@ const ATOM_TEXT_CONSTRUCTS = new Set(['title', 'summary', 'content', 'rights', '
  */
 const isLiteralTextConstruct = (node: ParsedNode): boolean => {
   if (!isElement(node) || !ATOM_TEXT_CONSTRUCTS.has(localName(elementName(node)))) return false;
+
+  // An Atom text construct holds character data and nothing else, so an element child means
+  // this is the HTML element of the same name rather than the Atom one. `summary` is both, and
+  // taking the literal branch for `<details><summary><script>…</script>Visible</summary>` put
+  // the script body and its URL into `body_text`, because that branch emits raw text and does
+  // not apply subtree filtering. Element children now fall through to the normal walk, where
+  // `script` is skipped.
+  if (childrenOf(node).some(isElement)) return false;
   // Only a text-valued construct is literal. `xhtml` content is inline markup and has to be
   // walked: taking the literal branch merged its block boundaries and emitted its script
   // bodies, so `<summary type="xhtml"><div><p>a</p><p>b</p><script>…</script></div></summary>`
@@ -858,18 +866,25 @@ const inlineTextOf = (nodes: ParsedNode[], liftHrefs: boolean): string => {
         // characters, where `<summary>` gets a parsed CDATA node. Without this, one Atom text
         // construct showed the markers and the other did not, for the same input.
         out.push(` ${unwrapCdata(rawTextOf(childrenOf(node)))} `);
-      } else if (cdataDepth < MAX_CDATA_DEPTH && isTextOnlyEncodedWrapper(node)) {
+      } else if (isTextOnlyEncodedWrapper(node)) {
         // A feed wrapper whose payload is text is that feed's encoded body, wherever it sits
         // in the document. Parsed into this walk, bounded by the same depth counter CDATA
         // uses, so a wrapper nested in a wrapper cannot spin.
+        //
+        // Past the bound the payload is dropped rather than falling through to the generic
+        // walker, which would emit the still-encoded markup as visible text. The CDATA branch
+        // already dropped at its limit; this one had no over-limit case at all, so the bound
+        // narrowed the branch instead of bounding it.
         out.push(' ');
         stack.push({ kind: 'emit', text: ' ' });
-        pushNodes(
-          stack,
-          parseTopLevelNodes(rawTextOf(childrenOf(node))),
-          cdataDepth + 1,
-          literalCdata
-        );
+        if (cdataDepth < MAX_CDATA_DEPTH) {
+          pushNodes(
+            stack,
+            parseTopLevelNodes(rawTextOf(childrenOf(node))),
+            cdataDepth + 1,
+            literalCdata
+          );
+        }
       } else if (liftedHref !== undefined) {
         out.push(` ${collapseWhitespace(inlineTextOf(childrenOf(node), false))} ${liftedHref} `);
       } else if (INLINE_NAMES.has(elementName(node))) {
@@ -1024,17 +1039,19 @@ const renderStructured = (html: string): string => {
       } else if (isLiteralTextConstruct(node)) {
         // Same as the plain-text walker.
         out.push(`\n${unwrapCdata(rawTextOf(childrenOf(node)))}\n`);
-      } else if (cdataDepth < MAX_CDATA_DEPTH && isTextOnlyEncodedWrapper(node)) {
-        // Same as the plain-text walker. Section state is walker-local, so feeding the
-        // payload onto this stack inherits it.
+      } else if (isTextOnlyEncodedWrapper(node)) {
+        // Same as the plain-text walker, including dropping past the depth bound rather than
+        // letting a still-encoded payload through as visible text.
         out.push('\n');
         stack.push({ kind: 'emit', text: '\n' });
-        pushNodes(
-          stack,
-          parseTopLevelNodes(rawTextOf(childrenOf(node))),
-          cdataDepth + 1,
-          literalCdata
-        );
+        if (cdataDepth < MAX_CDATA_DEPTH) {
+          pushNodes(
+            stack,
+            parseTopLevelNodes(rawTextOf(childrenOf(node))),
+            cdataDepth + 1,
+            literalCdata
+          );
+        }
       } else if (HEADING_NAMES.has(name)) {
         const depth = Number(name.slice(1));
         const text = collapseWhitespace(inlineTextOf(childrenOf(node), false));

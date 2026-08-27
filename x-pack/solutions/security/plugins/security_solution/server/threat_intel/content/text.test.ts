@@ -2006,3 +2006,92 @@ describe('unterminated raw-text close tags stay opaque', () => {
     expect(stripHtml('<script>a=1</script foo="x"><p>safe</p>')).toBe('safe');
   });
 });
+
+/**
+ * `summary` is a standard HTML element as well as an Atom construct, and the predicate matched
+ * on name alone. An Atom text construct holds character data and nothing else, so an element
+ * child means this is the HTML element, and the literal branch emits raw text without applying
+ * subtree filtering: `<details><summary><script>…</script>Visible</summary></details>` put the
+ * script body and its URL into body_text.
+ */
+describe('HTML elements sharing an Atom construct name', () => {
+  it('walks an HTML summary normally and skips its script', () => {
+    const html =
+      '<details><summary><script>fetch("https://false-ioc.test")</script>Visible</summary></details>';
+    const result = stripHtml(html);
+
+    expect(result).toBe('Visible');
+    expect(result).not.toContain('false-ioc.test');
+  });
+
+  it('does the same in structured output', () => {
+    expect(
+      htmlToStructured(
+        '<details><summary><script>fetch("https://false-ioc.test")</script>Visible</summary></details>'
+      )
+    ).toBe('Visible');
+  });
+
+  it('skips a template inside an HTML summary too', () => {
+    expect(
+      stripHtml(
+        '<details><summary><template><p>c2.stale.test</p></template>Visible</summary></details>'
+      )
+    ).toBe('Visible');
+  });
+
+  // The Atom behaviors all rely on character-data-only content, so they are unaffected.
+  it.each([
+    [
+      'a text-typed summary',
+      '<summary type="text">Exploit uses &lt;script&gt; and c2.evil.test</summary>',
+      'Exploit uses <script> and c2.evil.test',
+    ],
+    [
+      'an html-typed summary',
+      '<summary type="html">&lt;p&gt;evil.com&lt;/p&gt;</summary>',
+      'evil.com',
+    ],
+    [
+      'a text-typed summary with CDATA',
+      '<summary type="text"><![CDATA[Exploit uses <script> and c2.evil.test]]></summary>',
+      'Exploit uses <script> and c2.evil.test',
+    ],
+  ])('still handles %s', (_label, html, expected) => {
+    expect(stripHtml(html)).toBe(expected);
+  });
+
+  // An xhtml construct has element children by design and is walked, which this change must
+  // not disturb.
+  it('still walks an xhtml construct', () => {
+    expect(
+      stripHtml(
+        '<summary type="xhtml"><div><p>evil.com</p><p>bad.net</p><script>x</script></div></summary>'
+      )
+    ).toBe('evil.com bad.net');
+  });
+});
+
+/**
+ * The wrapper-expansion branch had no over-limit case: its depth test was part of the branch
+ * condition, so exceeding the bound fell through to the generic walker instead of stopping. The
+ * CDATA branch drops at its limit and this one has to match, or the bound narrows the branch
+ * rather than bounding the work.
+ */
+describe('wrapper expansion drops past its depth bound', () => {
+  const encode = (value: string) => value.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+  it.each([[1], [3], [4], [5], [8]])(
+    'never emits still-encoded markup at %s layers of encoded wrapper',
+    (layers) => {
+      let inner = '<script>fetch("https://false-ioc.test")</script>safe';
+      for (let layer = 0; layer < layers; layer++) {
+        inner = encode(`<description>${inner}</description>`);
+      }
+      const html = `<description>${inner}</description>`;
+
+      expect(stripHtml(html)).not.toContain('false-ioc.test');
+      expect(htmlToStructured(html)).not.toContain('false-ioc.test');
+    }
+  );
+});
