@@ -9,7 +9,7 @@
   "type": "plugin",
   "id": "@kbn/slo-shared-plugin",
   "owner": [
-    "@elastic/actionable-obs-team"
+    "@elastic/nightshift-sre-agent-team"
   ],
   "group": "platform",
   "visibility": "shared",

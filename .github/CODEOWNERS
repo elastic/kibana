@@ -501,7 +501,7 @@ src/platform/packages/shared/context-switcher-components @elastic/appex-sharedux
 src/platform/packages/shared/controls/control-group-renderer @elastic/kibana-presentation
 src/platform/packages/shared/controls/controls-constants @elastic/kibana-presentation
 src/platform/packages/shared/controls/controls-schemas @elastic/kibana-presentation
-src/platform/packages/shared/dashboards/dashboards-selector @elastic/actionable-obs-team
+src/platform/packages/shared/dashboards/dashboards-selector @elastic/obs-signals-logs-team
 src/platform/packages/shared/deeplinks/agent_builder @elastic/workchat-eng
 src/platform/packages/shared/deeplinks/analytics @elastic/kibana-data-discovery @elastic/kibana-presentation @elastic/kibana-visualizations
 src/platform/packages/shared/deeplinks/context-engine @elastic/context-eng
@@ -537,7 +537,7 @@ src/platform/packages/shared/kbn-axe-config @elastic/appex-qa
 src/platform/packages/shared/kbn-background-search @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-bench @elastic/kibana-core
 src/platform/packages/shared/kbn-cache-cli @elastic/kibana-operations
-src/platform/packages/shared/kbn-calculate-auto @elastic/actionable-obs-team
+src/platform/packages/shared/kbn-calculate-auto @elastic/obs-signals-logs-team
 src/platform/packages/shared/kbn-calculate-width-from-char-count @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-cases-components @elastic/kibana-cases
 src/platform/packages/shared/kbn-cbor @elastic/kibana-operations
@@ -672,7 +672,7 @@ src/platform/packages/shared/kbn-rison @elastic/kibana-operations
 src/platform/packages/shared/kbn-router-to-openapispec @elastic/kibana-core
 src/platform/packages/shared/kbn-router-utils @elastic/obs-signals-traces-team @elastic/obs-signals-metrics-team
 src/platform/packages/shared/kbn-rrule @elastic/response-ops
-src/platform/packages/shared/kbn-rule-data-utils @elastic/security-detection-engineering @elastic/response-ops @elastic/actionable-obs-team
+src/platform/packages/shared/kbn-rule-data-utils @elastic/security-detection-engineering @elastic/response-ops @elastic/nightshift-sre-agent-team
 src/platform/packages/shared/kbn-safer-lodash-set @elastic/kibana-security
 src/platform/packages/shared/kbn-saved-search-component @elastic/obs-signals-logs-team
 src/platform/packages/shared/kbn-scout @elastic/appex-qa
@@ -980,12 +980,12 @@ x-pack/examples/third_party_vis_lens_example @elastic/kibana-visualizations
 x-pack/examples/triggers_actions_ui_example @elastic/response-ops
 x-pack/packages/ai-infra/product-doc-artifact-builder @elastic/search-ml-ux
 x-pack/packages/ai-infra/security-labs-artifact-builder @elastic/security-threat-hunting
-x-pack/packages/kbn-synthetics-private-location @elastic/actionable-obs-team
+x-pack/packages/kbn-synthetics-private-location @elastic/obs-signals-logs-team
 x-pack/performance @elastic/appex-qa
 x-pack/platform/packages/private/feedback-registry @elastic/appex-sharedux
 x-pack/platform/packages/private/kbn-alerting-state-types @elastic/response-ops
 x-pack/platform/packages/private/kbn-data-quality @elastic/kibana-management
-x-pack/platform/packages/private/kbn-infra-forge @elastic/actionable-obs-team
+x-pack/platform/packages/private/kbn-infra-forge @elastic/obs-signals-logs-team
 x-pack/platform/packages/private/kbn-random-sampling @elastic/kibana-visualizations
 x-pack/platform/packages/private/kbn-scout-release-testing @elastic/appex-qa
 x-pack/platform/packages/private/maps/vector_tile_utils @elastic/kibana-presentation
@@ -1049,7 +1049,7 @@ x-pack/platform/packages/shared/ai-infra/inference-common @elastic/search-ml-ux
 x-pack/platform/packages/shared/ai-infra/inference-langchain @elastic/search-ml-ux
 x-pack/platform/packages/shared/ai-infra/kbn-evals-suite-llm-tasks @elastic/search-ml-ux
 x-pack/platform/packages/shared/ai-infra/product-doc-common @elastic/search-ml-ux
-x-pack/platform/packages/shared/alerting-rule-utils @elastic/actionable-obs-team
+x-pack/platform/packages/shared/alerting-rule-utils @elastic/nightshift-sre-agent-team
 x-pack/platform/packages/shared/custom-content/custom-content-common @elastic/kibana-presentation
 x-pack/platform/packages/shared/custom-content/custom-content-server @elastic/kibana-visualizations @elastic/kibana-presentation
 x-pack/platform/packages/shared/file-upload @elastic/search-ml-ux
@@ -1068,7 +1068,7 @@ x-pack/platform/packages/shared/kbn-change-history @elastic/kibana-core
 x-pack/platform/packages/shared/kbn-change-history-ui @elastic/workflows-eng
 x-pack/platform/packages/shared/kbn-classic-stream-flyout @elastic/kibana-management
 x-pack/platform/packages/shared/kbn-content-packs-schema @elastic/streams-ui
-x-pack/platform/packages/shared/kbn-data-forge @elastic/actionable-obs-team
+x-pack/platform/packages/shared/kbn-data-forge @elastic/obs-signals-logs-team
 x-pack/platform/packages/shared/kbn-data-lifecycle-phases @elastic/kibana-management
 x-pack/platform/packages/shared/kbn-dissect-heuristics @elastic/streams-ui
 x-pack/platform/packages/shared/kbn-elastic-agent-condition-language @elastic/fleet
@@ -1108,7 +1108,7 @@ x-pack/platform/packages/shared/kbn-sample-parser @elastic/streams-ui @elastic/o
 x-pack/platform/packages/shared/kbn-search-index-documents @elastic/search-ml-ux
 x-pack/platform/packages/shared/kbn-shared-components @elastic/search-ml-ux
 x-pack/platform/packages/shared/kbn-significant-events-schema @elastic/obs-sig-events-team
-x-pack/platform/packages/shared/kbn-slo-schema @elastic/actionable-obs-team
+x-pack/platform/packages/shared/kbn-slo-schema @elastic/nightshift-sre-agent-team
 x-pack/platform/packages/shared/kbn-streamlang @elastic/streams-ui
 x-pack/platform/packages/shared/kbn-streamlang-tests @elastic/streams-ui
 x-pack/platform/packages/shared/kbn-streamlang-yaml-editor @elastic/streams-ui
@@ -1266,7 +1266,7 @@ x-pack/platform/plugins/shared/observability_ai_assistant @elastic/nightshift-co
 x-pack/platform/plugins/shared/osquery @elastic/security-defend-workflows
 x-pack/platform/plugins/shared/osquery/cypress @elastic/security-defend-workflows
 x-pack/platform/plugins/shared/query_activity @elastic/kibana-management
-x-pack/platform/plugins/shared/rule_registry @elastic/response-ops @elastic/actionable-obs-team
+x-pack/platform/plugins/shared/rule_registry @elastic/response-ops @elastic/nightshift-sre-agent-team
 x-pack/platform/plugins/shared/sample_data_ingest @elastic/search-ml-ux
 x-pack/platform/plugins/shared/saved_objects_tagging @elastic/appex-sharedux
 x-pack/platform/plugins/shared/screenshotting @elastic/kibana-reporting-services
@@ -1276,7 +1276,7 @@ x-pack/platform/plugins/shared/security @elastic/kibana-security
 x-pack/platform/plugins/shared/serverless @elastic/appex-sharedux
 x-pack/platform/plugins/shared/significant_events @elastic/obs-sig-events-team
 x-pack/platform/plugins/shared/significant_events_app @elastic/obs-sig-events-team
-x-pack/platform/plugins/shared/slo_shared @elastic/actionable-obs-team
+x-pack/platform/plugins/shared/slo_shared @elastic/nightshift-sre-agent-team
 x-pack/platform/plugins/shared/spaces @elastic/kibana-security
 x-pack/platform/plugins/shared/stack_alerts @elastic/response-ops
 x-pack/platform/plugins/shared/stack_connectors @elastic/response-ops
@@ -1324,9 +1324,9 @@ x-pack/platform/test/spaces_api_integration/common/plugins/spaces_test_plugin @e
 x-pack/platform/test/ui_capabilities/common/plugins/foo_plugin @elastic/kibana-security
 x-pack/platform/test/usage_collection/plugins/application_usage_test @elastic/kibana-core
 x-pack/platform/test/usage_collection/plugins/stack_management_usage_test @elastic/kibana-management
-x-pack/solutions/observability/packages/alert-details @elastic/actionable-obs-team
-x-pack/solutions/observability/packages/alerting-test-data @elastic/actionable-obs-team
-x-pack/solutions/observability/packages/get-padded-alert-time-range-util @elastic/actionable-obs-team
+x-pack/solutions/observability/packages/alert-details @elastic/nightshift-sre-agent-team
+x-pack/solutions/observability/packages/alerting-test-data @elastic/nightshift-sre-agent-team
+x-pack/solutions/observability/packages/get-padded-alert-time-range-util @elastic/nightshift-sre-agent-team
 x-pack/solutions/observability/packages/kbn-alerts-grouping @elastic/response-ops
 x-pack/solutions/observability/packages/kbn-apm-embeddable-common @elastic/obs-signals-traces-team
 x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant @elastic/nightshift-context-and-research-team
@@ -1337,14 +1337,14 @@ x-pack/solutions/observability/packages/kbn-scout-oblt @elastic/appex-qa
 x-pack/solutions/observability/packages/kbn-synthetics-forge @elastic/obs-ux-management-team
 x-pack/solutions/observability/packages/kbn-ts-type-check-oblt-cli @elastic/observability-ui
 x-pack/solutions/observability/packages/nav-icons @elastic/obs-signals-logs-team
-x-pack/solutions/observability/packages/synthetics-test-data @elastic/actionable-obs-team
+x-pack/solutions/observability/packages/synthetics-test-data @elastic/obs-signals-logs-team
 x-pack/solutions/observability/packages/utils-browser @elastic/observability-ui
 x-pack/solutions/observability/packages/utils-common @elastic/observability-ui
 x-pack/solutions/observability/packages/utils-server @elastic/observability-ui
 x-pack/solutions/observability/plugins/apm @elastic/obs-signals-traces-team
 x-pack/solutions/observability/plugins/apm_data_access @elastic/obs-signals-traces-team
 x-pack/solutions/observability/plugins/client_apps @elastic/apm-agent-approvers
-x-pack/solutions/observability/plugins/exploratory_view @elastic/actionable-obs-team
+x-pack/solutions/observability/plugins/exploratory_view @elastic/obs-signals-logs-team
 x-pack/solutions/observability/plugins/infra @elastic/obs-signals-metrics-team
 x-pack/solutions/observability/plugins/metrics_data_access @elastic/obs-signals-metrics-team
 x-pack/solutions/observability/plugins/nightshift @elastic/nightshift-context-and-research-team @elastic/nightshift-sre-agent-team
@@ -1357,10 +1357,10 @@ x-pack/solutions/observability/plugins/observability_shared @elastic/observabili
 x-pack/solutions/observability/plugins/profiling @elastic/obs-signals-logs-team
 x-pack/solutions/observability/plugins/profiling_data_access @elastic/obs-signals-logs-team
 x-pack/solutions/observability/plugins/serverless_observability @elastic/observability-ui
-x-pack/solutions/observability/plugins/slo @elastic/actionable-obs-team
-x-pack/solutions/observability/plugins/synthetics @elastic/actionable-obs-team @elastic/obs-signals-logs-team
-x-pack/solutions/observability/plugins/uptime @elastic/actionable-obs-team
-x-pack/solutions/observability/plugins/ux @elastic/actionable-obs-team
+x-pack/solutions/observability/plugins/slo @elastic/nightshift-sre-agent-team
+x-pack/solutions/observability/plugins/synthetics @elastic/obs-signals-logs-team
+x-pack/solutions/observability/plugins/uptime @elastic/obs-signals-logs-team
+x-pack/solutions/observability/plugins/ux @elastic/obs-signals-logs-team
 x-pack/solutions/observability/test
 x-pack/solutions/search/packages/kbn-ipynb @elastic/search-ml-ux
 x-pack/solutions/search/packages/kbn-scout-search @elastic/appex-qa @elastic/search-ml-ux
@@ -1755,64 +1755,64 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 ### Observability Plugins
 
 # Observability plugin
-/x-pack/solutions/observability/plugins/observability/common/annotations.ts @elastic/actionable-obs-team
-/x-pack/solutions/observability/plugins/observability/common/custom_threshold_rule @elastic/actionable-obs-team
-/x-pack/solutions/observability/plugins/observability/common/locators @elastic/actionable-obs-team
-/x-pack/solutions/observability/plugins/observability/common/utils/alerting @elastic/actionable-obs-team
-/x-pack/solutions/observability/plugins/observability/public/components/alert_actions @elastic/actionable-obs-team
-/x-pack/solutions/observability/plugins/observability/public/components/alert_overview @elastic/actionable-obs-team
-/x-pack/solutions/observability/plugins/observability/public/components/alert_search_bar @elastic/actionable-obs-team
-/x-pack/solutions/observability/plugins/observability/public/components/alert_sources @elastic/actionable-obs-team
-/x-pack/solutions/observability/plugins/observability/public/components/alerts_flyout @elastic/actionable-obs-team
-/x-pack/solutions/observability/plugins/observability/public/components/alerts_table @elastic/actionable-obs-team
-/x-pack/solutions/observability/plugins/observability/public/components/alert_severity_badge.stories.tsx @elastic/actionable-obs-team
-/x-pack/solutions/observability/plugins/observability/public/components/alert_severity_badge.tsx @elastic/actionable-obs-team
-/x-pack/solutions/observability/plugins/observability/public/components/alert_status_indicator.tsx @elastic/actionable-obs-team
-/x-pack/solutions/observability/plugins/observability/public/components/annotations @elastic/actionable-obs-team
-/x-pack/solutions/observability/plugins/observability/public/components/custom_threshold @elastic/actionable-obs-team
-/x-pack/solutions/observability/plugins/observability/public/components/rule_condition_chart @elastic/actionable-obs-team
-/x-pack/solutions/observability/plugins/observability/public/components/rule_kql_filter @elastic/actionable-obs-team
-/x-pack/solutions/observability/plugins/observability/public/hooks/use_app_link @elastic/actionable-obs-team
-/x-pack/solutions/observability/plugins/observability/public/hooks/create_use_rules_link.ts @elastic/actionable-obs-team
-/x-pack/solutions/observability/plugins/observability/public/hooks/use_alert_details_page_view_ebt.test.tsx @elastic/actionable-obs-team
-/x-pack/solutions/observability/plugins/observability/public/hooks/use_alert_details_page_view_ebt.ts @elastic/actionable-obs-team
-/x-pack/solutions/observability/plugins/observability/public/hooks/use_case_view_navigation.ts @elastic/actionable-obs-team
-/x-pack/solutions/observability/plugins/observability/public/hooks/use_delete_rules.ts @elastic/actionable-obs-team
-/x-pack/solutions/observability/plugins/observability/public/hooks/use_disable_rule.ts @elastic/actionable-obs-team
-/x-pack/solutions/observability/plugins/observability/public/hooks/use_enable_rule.ts @elastic/actionable-obs-team
-/x-pack/solutions/observability/plugins/observability/public/hooks/use_fetch_alert_data.ts @elastic/actionable-obs-team
-/x-pack/solutions/observability/plugins/observability/public/hooks/use_fetch_alert_detail.ts @elastic/actionable-obs-team
-/x-pack/solutions/observability/plugins/observability/public/hooks/use_fetch_bulk_cases.test.ts @elastic/actionable-obs-team
-/x-pack/solutions/observability/plugins/observability/public/hooks/use_fetch_bulk_cases.ts @elastic/actionable-obs-team
-/x-pack/solutions/observability/plugins/observability/public/hooks/use_fetch_rule_types.ts @elastic/actionable-obs-team
-/x-pack/solutions/observability/plugins/observability/public/hooks/use_fetch_rule.ts @elastic/actionable-obs-team
-/x-pack/solutions/observability/plugins/observability/public/hooks/use_get_available_rules_with_descriptions.ts @elastic/actionable-obs-team
-/x-pack/solutions/observability/plugins/observability/public/hooks/use_get_filtered_rule_types.ts @elastic/actionable-obs-team
-/x-pack/solutions/observability/plugins/observability/public/hooks/use_rules_table_filters.test.tsx @elastic/actionable-obs-team
-/x-pack/solutions/observability/plugins/observability/public/hooks/use_run_rule.ts @elastic/actionable-obs-team
-/x-pack/solutions/observability/plugins/observability/public/hooks/use_summary_time_range.tsx @elastic/actionable-obs-team
-/x-pack/solutions/observability/plugins/observability/public/hooks/use_update_api_key.ts @elastic/actionable-obs-team
-/x-pack/solutions/observability/plugins/observability/public/locators @elastic/actionable-obs-team
-/x-pack/solutions/observability/plugins/observability/public/pages/alert_details @elastic/actionable-obs-team
-/x-pack/solutions/observability/plugins/observability/public/pages/alerts @elastic/actionable-obs-team
-/x-pack/solutions/observability/plugins/observability/public/pages/annotations @elastic/actionable-obs-team
-/x-pack/solutions/observability/plugins/observability/public/pages/cases @elastic/actionable-obs-team
-/x-pack/solutions/observability/plugins/observability/public/pages/rule_details @elastic/actionable-obs-team
-/x-pack/solutions/observability/plugins/observability/public/pages/rules @elastic/actionable-obs-team
-/x-pack/solutions/observability/plugins/observability/public/rules @elastic/actionable-obs-team
-/x-pack/solutions/observability/plugins/observability/public/typings/alerts.ts @elastic/actionable-obs-team
-/x-pack/solutions/observability/plugins/observability/server/features/cases_v1.ts @elastic/actionable-obs-team
-/x-pack/solutions/observability/plugins/observability/server/features/cases_v2.ts @elastic/actionable-obs-team
-/x-pack/solutions/observability/plugins/observability/server/features/cases_v3.ts @elastic/actionable-obs-team
-/x-pack/solutions/observability/plugins/observability/server/lib/annotations @elastic/actionable-obs-team
-/x-pack/solutions/observability/plugins/observability/server/lib/rules @elastic/actionable-obs-team
-/x-pack/solutions/observability/plugins/observability/server/routes/alerts @elastic/actionable-obs-team
-/x-pack/solutions/observability/plugins/observability/server/routes/rules @elastic/actionable-obs-team
-/x-pack/solutions/observability/plugins/observability/server/saved_objects/threshold.ts @elastic/actionable-obs-team
-/x-pack/solutions/observability/plugins/observability/server/services @elastic/actionable-obs-team
-/x-pack/solutions/observability/plugins/observability/test/scout/api @elastic/actionable-obs-team
-/x-pack/solutions/observability/plugins/observability/test/scout/ui/fixtures/page_objects/rule_details_page.ts @elastic/actionable-obs-team
-/x-pack/solutions/observability/plugins/observability/test/scout/ui/fixtures/page_objects/rules_page.ts @elastic/actionable-obs-team
+/x-pack/solutions/observability/plugins/observability/common/annotations.ts @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/plugins/observability/common/custom_threshold_rule @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/plugins/observability/common/locators @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/plugins/observability/common/utils/alerting @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/plugins/observability/public/components/alert_actions @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/plugins/observability/public/components/alert_overview @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/plugins/observability/public/components/alert_search_bar @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/plugins/observability/public/components/alert_sources @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/plugins/observability/public/components/alerts_flyout @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/plugins/observability/public/components/alerts_table @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/plugins/observability/public/components/alert_severity_badge.stories.tsx @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/plugins/observability/public/components/alert_severity_badge.tsx @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/plugins/observability/public/components/alert_status_indicator.tsx @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/plugins/observability/public/components/annotations @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/plugins/observability/public/components/custom_threshold @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/plugins/observability/public/components/rule_condition_chart @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/plugins/observability/public/components/rule_kql_filter @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/plugins/observability/public/hooks/use_app_link @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/plugins/observability/public/hooks/create_use_rules_link.ts @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/plugins/observability/public/hooks/use_alert_details_page_view_ebt.test.tsx @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/plugins/observability/public/hooks/use_alert_details_page_view_ebt.ts @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/plugins/observability/public/hooks/use_case_view_navigation.ts @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/plugins/observability/public/hooks/use_delete_rules.ts @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/plugins/observability/public/hooks/use_disable_rule.ts @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/plugins/observability/public/hooks/use_enable_rule.ts @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/plugins/observability/public/hooks/use_fetch_alert_data.ts @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/plugins/observability/public/hooks/use_fetch_alert_detail.ts @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/plugins/observability/public/hooks/use_fetch_bulk_cases.test.ts @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/plugins/observability/public/hooks/use_fetch_bulk_cases.ts @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/plugins/observability/public/hooks/use_fetch_rule_types.ts @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/plugins/observability/public/hooks/use_fetch_rule.ts @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/plugins/observability/public/hooks/use_get_available_rules_with_descriptions.ts @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/plugins/observability/public/hooks/use_get_filtered_rule_types.ts @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/plugins/observability/public/hooks/use_rules_table_filters.test.tsx @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/plugins/observability/public/hooks/use_run_rule.ts @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/plugins/observability/public/hooks/use_summary_time_range.tsx @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/plugins/observability/public/hooks/use_update_api_key.ts @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/plugins/observability/public/locators @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/plugins/observability/public/pages/alert_details @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/plugins/observability/public/pages/alerts @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/plugins/observability/public/pages/annotations @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/plugins/observability/public/pages/cases @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/plugins/observability/public/pages/rule_details @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/plugins/observability/public/pages/rules @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/plugins/observability/public/rules @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/plugins/observability/public/typings/alerts.ts @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/plugins/observability/server/features/cases_v1.ts @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/plugins/observability/server/features/cases_v2.ts @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/plugins/observability/server/features/cases_v3.ts @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/plugins/observability/server/lib/annotations @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/plugins/observability/server/lib/rules @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/plugins/observability/server/routes/alerts @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/plugins/observability/server/routes/rules @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/plugins/observability/server/saved_objects/threshold.ts @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/plugins/observability/server/services @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/plugins/observability/test/scout/api @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/plugins/observability/test/scout/ui/fixtures/page_objects/rule_details_page.ts @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/plugins/observability/test/scout/ui/fixtures/page_objects/rules_page.ts @elastic/nightshift-sre-agent-team
 
 # Observability AI Assistant
 /x-pack/platform/test/serverless/api_integration/test_suites/data_usage @elastic/kibana-management
@@ -1859,16 +1859,16 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.apm.index.ts @elastic/obs-signals-traces-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.apm.stateful.config.ts @elastic/obs-signals-traces-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/infra/ @elastic/obs-signals-metrics-team
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.index.ts @elastic/obs-signals-metrics-team @elastic/actionable-obs-team # Shared config: loads alerting tests
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.serverless.config.ts @elastic/obs-signals-metrics-team @elastic/actionable-obs-team # Shared config: loads alerting tests
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.index.ts @elastic/obs-signals-metrics-team @elastic/actionable-obs-team # Shared config: loads alerting tests
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.stateful.config.ts @elastic/obs-signals-metrics-team @elastic/actionable-obs-team # Shared config: loads alerting tests
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.index.ts @elastic/obs-signals-metrics-team @elastic/nightshift-sre-agent-team # Shared config: loads alerting tests
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.serverless.config.ts @elastic/obs-signals-metrics-team @elastic/nightshift-sre-agent-team # Shared config: loads alerting tests
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.index.ts @elastic/obs-signals-metrics-team @elastic/nightshift-sre-agent-team # Shared config: loads alerting tests
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.stateful.config.ts @elastic/obs-signals-metrics-team @elastic/nightshift-sre-agent-team # Shared config: loads alerting tests
 /x-pack/solutions/observability/test/functional/page_objects/asset_details.ts @elastic/obs-signals-metrics-team # Assigned per https://github.com/elastic/kibana/pull/200157/files/c83fae62151fe634342c498aca69b686b739fe45#r1842202022
 /x-pack/solutions/observability/test/functional/page_objects/infra_* @elastic/obs-signals-metrics-team
 /x-pack/solutions/observability/test/fixtures/es_archives/infra @elastic/obs-signals-metrics-team
 /src/platform/test/common/plugins/otel_metrics @elastic/obs-signals-metrics-team
 /x-pack/solutions/observability/plugins/infra/common @elastic/obs-signals-metrics-team
-/x-pack/solutions/observability/plugins/infra/common/alerting/metrics @elastic/actionable-obs-team
+/x-pack/solutions/observability/plugins/infra/common/alerting/metrics @elastic/nightshift-sre-agent-team
 /x-pack/solutions/observability/plugins/infra/docs @elastic/obs-signals-metrics-team
 /x-pack/solutions/observability/plugins/infra/public/alerting @elastic/obs-signals-metrics-team
 /x-pack/solutions/observability/plugins/infra/public/apps @elastic/obs-signals-metrics-team
@@ -1975,23 +1975,22 @@ x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/significa
 /x-pack/solutions/observability/test/api_integration/services/index.ts @elastic/obs-signals-metrics-team
 /x-pack/solutions/observability/test/api_integration/services/infra_log_views.ts @elastic/obs-signals-metrics-team
 
-# Actionable Observability (formerly Observability UX Management) team
-
-/x-pack/solutions/observability/test/api_integration/services/slo.ts @elastic/actionable-obs-team
-/x-pack/solutions/observability/test/functional/services/observability @elastic/actionable-obs-team
-/x-pack/solutions/observability/test/accessibility/apps/observability.ts @elastic/actionable-obs-team
-/x-pack/solutions/observability/test/functional/services/slo/ @elastic/actionable-obs-team
-/x-pack/solutions/observability/plugins/infra/public/alerting @elastic/actionable-obs-team
-/x-pack/solutions/observability/plugins/infra/server/lib/alerting @elastic/actionable-obs-team
-/x-pack/solutions/observability/test/common/utils/ @elastic/actionable-obs-team
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/alerting/ @elastic/actionable-obs-team
+# Actionable Observability
+/x-pack/solutions/observability/test/api_integration/services/slo.ts @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/test/functional/services/slo/ @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/plugins/infra/public/alerting @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/plugins/infra/server/lib/alerting @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/test/functional/page_objects/alert_controls.ts @elastic/nightshift-sre-agent-team
+/x-pack/solutions/observability/test/functional/services/observability @elastic/obs-signals-logs-team
+/x-pack/solutions/observability/test/accessibility/apps/observability.ts @elastic/obs-signals-logs-team
+/x-pack/solutions/observability/test/common/utils/ @elastic/obs-signals-logs-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/alerting/ @elastic/nightshift-sre-agent-team
 /x-pack/solutions/observability/test/ensemble @elastic/obs-ux-management-team
-/x-pack/solutions/observability/test/functional/page_objects/alert_controls.ts @elastic/actionable-obs-team
-/x-pack/platform/test/serverless/functional/page_objects/svl_custom_roles_page.ts @elastic/actionable-obs-team
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/services/alerting_api.ts @elastic/actionable-obs-team @elastic/appex-qa
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/services/slo_api.ts @elastic/actionable-obs-team @elastic/appex-qa
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/services/synthetics_params_api.ts @elastic/actionable-obs-team @elastic/appex-qa
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/services/synthetics_private_location.ts @elastic/actionable-obs-team @elastic/appex-qa
+/x-pack/platform/test/serverless/functional/page_objects/svl_custom_roles_page.ts @elastic/obs-signals-logs-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/services/alerting_api.ts @elastic/nightshift-sre-agent-team @elastic/appex-qa
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/services/slo_api.ts @elastic/nightshift-sre-agent-team @elastic/appex-qa
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/services/synthetics_params_api.ts @elastic/obs-signals-logs-team @elastic/appex-qa
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/services/synthetics_private_location.ts @elastic/obs-signals-logs-team @elastic/appex-qa
 
 
 # Elastic Stack Monitoring
@@ -2030,13 +2029,13 @@ x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/significa
 #CC# /x-pack/plugins/observability_solution/observability/ @elastic/apm-ui
 
 # Uptime
-/x-pack/solutions/observability/test/functional/page_objects/uptime_page.ts @elastic/actionable-obs-team
-/x-pack/solutions/observability/test/accessibility/apps/uptime.ts @elastic/actionable-obs-team
-/x-pack/solutions/observability/test/functional/apps/uptime @elastic/actionable-obs-team
-/x-pack/solutions/observability/test/fixtures/es_archives/uptime @elastic/actionable-obs-team
-/x-pack/solutions/observability/test/functional/services/uptime @elastic/actionable-obs-team
-/x-pack/solutions/observability/test/api_integration/apis/uptime @elastic/actionable-obs-team
-/x-pack/solutions/observability/test/serverless/api_integration/test_suites/synthetics @elastic/actionable-obs-team
+/x-pack/solutions/observability/test/functional/page_objects/uptime_page.ts @elastic/obs-signals-logs-team
+/x-pack/solutions/observability/test/accessibility/apps/uptime.ts @elastic/obs-signals-logs-team
+/x-pack/solutions/observability/test/functional/apps/uptime @elastic/obs-signals-logs-team
+/x-pack/solutions/observability/test/fixtures/es_archives/uptime @elastic/obs-signals-logs-team
+/x-pack/solutions/observability/test/functional/services/uptime @elastic/obs-signals-logs-team
+/x-pack/solutions/observability/test/api_integration/apis/uptime @elastic/obs-signals-logs-team
+/x-pack/solutions/observability/test/serverless/api_integration/test_suites/synthetics @elastic/obs-signals-logs-team
 
 # Observability-ui folder level permissions (need to be before individual files inside the folder)
 /x-pack/solutions/observability/test/serverless/functional/test_suites @elastic/observability-ui
@@ -2590,7 +2589,7 @@ packages/kbn-eslint-plugin-eslint/rules/no_unsafe_hash.js @elastic/kibana-securi
 /x-pack/platform/test/screenshot_creation/apps/response_ops_docs @elastic/response-ops
 /x-pack/solutions/observability/test/screenshot_creation/ @elastic/response-ops
 /x-pack/solutions/security/test/screenshot_creation/ @elastic/response-ops
-/x-pack/platform/test/rule_registry @elastic/response-ops @elastic/actionable-obs-team
+/x-pack/platform/test/rule_registry @elastic/response-ops @elastic/nightshift-sre-agent-team
 /x-pack/platform/test/accessibility/apps/group3/rules_connectors.ts @elastic/response-ops
 /x-pack/platform/test/serverless/functional/page_objects/svl_triggers_actions_ui_page.ts @elastic/response-ops
 /x-pack/platform/test/serverless/functional/page_objects/svl_rule_details_ui_page.ts @elastic/response-ops
@@ -2600,7 +2599,7 @@ packages/kbn-eslint-plugin-eslint/rules/no_unsafe_hash.js @elastic/kibana-securi
 /x-pack/platform/test/plugin_api_integration/test_suites/event_log/ @elastic/response-ops
 /x-pack/platform/test/functional_with_es_ssl/apps/embeddable_alerts_table/ @elastic/response-ops
 /x-pack/platform/test/functional_with_es_ssl/apps/triggers_actions_ui/ @elastic/response-ops
-/x-pack/platform/test/functional_with_es_ssl/apps/rules/ @elastic/actionable-obs-team @elastic/response-ops
+/x-pack/platform/test/functional_with_es_ssl/apps/rules/ @elastic/nightshift-sre-agent-team @elastic/response-ops
 /x-pack/solutions/search/test/serverless/functional/test_suites/screenshot_creation/response_ops_docs @elastic/response-ops
 /x-pack/solutions/security/test/serverless/functional/test_suites/screenshot_creation/response_ops_docs @elastic/response-ops
 /x-pack/solutions/observability/test/serverless/functional/test_suites/screenshot_creation/response_ops_docs @elastic/response-ops
@@ -3812,9 +3811,9 @@ x-pack/platform/plugins/shared/actions/server/saved_objects/index.ts @elastic/re
 x-pack/platform/plugins/shared/alerting/server/saved_objects/index.ts @elastic/response-ops @elastic/kibana-security
 x-pack/platform/plugins/shared/anonymization/server/saved_objects/register_anonymization_salt_saved_object_type.ts @elastic/workchat-eng @elastic/security-threat-hunting @elastic/kibana-security
 x-pack/platform/plugins/shared/fleet/server/saved_objects/index.ts @elastic/streams-ui @elastic/kibana-security
-x-pack/solutions/observability/plugins/synthetics/server/saved_objects/saved_objects.ts @elastic/actionable-obs-team @elastic/obs-signals-logs-team @elastic/kibana-security
-x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetics_monitor/legacy_synthetics_monitor.ts @elastic/actionable-obs-team @elastic/obs-signals-logs-team @elastic/kibana-security
-x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetics_param.ts @elastic/actionable-obs-team @elastic/obs-signals-logs-team @elastic/kibana-security
+x-pack/solutions/observability/plugins/synthetics/server/saved_objects/saved_objects.ts @elastic/obs-signals-logs-team @elastic/kibana-security
+x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetics_monitor/legacy_synthetics_monitor.ts @elastic/obs-signals-logs-team @elastic/kibana-security
+x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetics_param.ts @elastic/obs-signals-logs-team @elastic/kibana-security
 
 # OpenTelemetry semantic conventions Buildkite pipeline and scripts
 /scripts/generate_otel_semconv.js @elastic/streams-ui
