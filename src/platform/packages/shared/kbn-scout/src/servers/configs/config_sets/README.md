@@ -9,9 +9,9 @@ Each folder here is a [custom server config set](https://www.elastic.co/docs/ext
 
 ## Why not just enable the flag in the `default` config set?
 
-The `default` set is meant to match a real Elastic Cloud deployment as closely as possible (a [Cloud-first approach](https://www.elastic.co/docs/extend/kibana/testing/scout-best-practices#design-tests-with-a-cloud-first-mindset)). Two reasons that matters:
+The `default` set is meant to match a real Elastic Cloud deployment as closely as possible (a Cloud-first approach). Two reasons that matters:
 
-- If a test passes locally, that's a good sign it'll pass in the Cloud pipelines. Write it once, run it everywhere.
+- Scout follows a [write it once, run it everywhere](https://www.elastic.co/docs/extend/kibana/testing/scout-best-practices#design-tests-with-a-cloud-first-mindset) philosophy: if a test passes locally, that's a good sign it will also pass in the Cloud pipelines.
 - A clean default is what lets UI and API configs from different solutions share one set of servers. Many suites count on that staying stable.
 
 So the rule is: **don't enable a feature flag in `default/` unless it's also on in Cloud.** Experimental behavior shouldn't live in the environment that stands in for the normal customer experience. A suite that tests a flipped flag should flip it at runtime where possible, and only get its own set when Kibana needs the setting at boot.
