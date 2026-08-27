@@ -193,7 +193,42 @@ await managed.install(MY_WORKFLOW_ID, { spaceId: GLOBAL_WORKFLOW_SPACE_ID });
 
 ### No default
 
-`spaceId` is required for managed operations. Omitted/empty `spaceId` is rejected. Use `GLOBAL_WORKFLOW_SPACE_ID` (`'*'`) explicitly when you want a global install.
+`spaceId` is required for managed operations. Omitted/empty `spaceId` is rejected. Use
+`GLOBAL_WORKFLOW_SPACE_ID` (`'*'`) explicitly when you want a global install.
+
+### Scoping raw request paths at runtime
+
+The `spaceId` above is about where the **workflow definition** lives and which space an
+*execution* is stamped with. It has no effect on the HTTP requests a workflow makes while it
+runs — that is a separate, step-level concern.
+
+A `kibana.request` step, and any `kibana.*` connector step using `with.request` or
+`with.form_data`, is not space-scoped by the engine. `kibana_action_step.ts` checks
+`cleanParams.request`, then `cleanParams.form_data`, and only its final `else` branch reaches
+`buildKibanaRequest`, whose connector lookup is what applies `applySpacePrefix`. All three shapes
+send their `path` verbatim:
+
+| Shape | Applies to |
+| --- | --- |
+| top-level `path` | `type: kibana.request` |
+| `with.request` object | any `kibana.*` type, including generated connectors |
+| `with.form_data` with a top-level `path` | any `kibana.*` type |
+
+An unprefixed path in any of these always hits the **default space**, no matter which space the
+execution belongs to — including a global (`'*'`) workflow executing on behalf of a named space.
+Because `/api/x` and `/s/default/api/x` behave identically, this fails silently in the default
+space and only reproduces when verified in a named non-default space.
+
+Prefix the path with the executing space, e.g. `/s/{{ workflow.spaceId }}/...`. `workflow.spaceId`
+is correct for most workflows, but it is not the only valid expression: a workflow that takes its
+target space as an input or a variable (`{{ inputs.space_id }}`, `{{ variables.spaceId }}`) should
+prefix with that instead — the requirement is that the segment resolves to the executing space,
+not that it is literally `workflow.spaceId`. Cluster-level routes that are not space-scoped (e.g.
+`/api/status`) are the deliberate exception.
+
+This bit the Security Alert Analysis workflow (elastic/kibana#287438): its note-writing steps used
+a bare `/api/note`, so every note was written to the default space regardless of which space the
+alert was in, and the workflow still reported success.
 
 ## 5) Workflow identity
 
@@ -520,14 +555,15 @@ Every managed definition declares a `version: number` (positive integer, startin
 
 The definition's `version` is persisted as `managedVersion` on the workflow document. It serves three main purposes:
 
-1. **yamlTemplate migration** — For definitions using `yamlTemplate`, the version drives migrations when the template value structure changes between versions. This is not relevant for definitions using static `yaml`.
+1. **Owner-defined template migration** — The platform does not migrate `yamlTemplate` value shapes. Owners must version and migrate persisted values before calling `ready()` when automatic reconciliation could render them with a new template.
 2. **Telemetry & visibility** — The `managedVersion` is a human-readable label logged in telemetry and audit events, and returned in API responses (to the user in the GET workflow endpoint, or plugin-to-plugin via `managedWorkflowClient.getWorkflowStatus`). It helps answer "is this workflow up to date?"
 3. **Non-YAML config updates** — While YAML content changes trigger managed workflow updates automatically (based on content hash), other config properties (e.g. `billable`) do not. Bumping the version explicitly forces the workflow and its full config to be updated.
 
 **When to bump `version`:**
 
 - **Bump** when the change involves non-YAML config (e.g. `billable`, `management` policy changes), or when it is a YAML change you want explicit visibility/auditability for.
-- **Optional** when the change is YAML-only and minor (e.g. a display name fix) — the content hash diff will trigger the upgrade regardless, and the version bump adds no functional value in this case.
+- **Optional** for YAML-only changes on a fixed `yaml` definition because its content hash triggers the upgrade.
+- **Required** when a `yamlTemplate` closes over imported YAML or another external constant. The template hash covers the function source, not closed-over content, so changing only the imported content does not change the hash.
 
 ### `billable` — execution metering
 
@@ -573,6 +609,20 @@ The status API accepts the same identity options as install/uninstall, except te
 - pass `workflowIdSuffix` to check a deterministic suffixed instance
 
 `getWorkflowStatus` does not mutate workflow state. To repair `missing` or `drifted` workflows, call `install` through the same plugin-scoped client.
+
+### Reading persisted owner state
+
+Owners that need persisted template values can read them through the same plugin-scoped client. Ownership is bound by `initManagedWorkflowsClient`, so callers cannot read another plugin's managed workflows.
+
+```ts
+const state = await managed.getInstalledWorkflowState(status.workflowId, 'my-space');
+
+if (state?.templateValues) {
+  await migrateTemplateValues(state.templateValues);
+}
+```
+
+Use `listInstalledWorkflowStates()` when the owner must inspect all of its installed instances across spaces, such as migrating versioned template values before calling `ready()`. These methods expose persisted managed-workflow state to the owner plugin only; they are not public HTTP workflow APIs.
 
 ## 11) Executing managed workflows
 
@@ -648,3 +698,4 @@ Because there is a **single persisted document** for a global workflow, any edit
 13. Bump `version` on the definition when changing non-YAML config or when you want explicit visibility for a YAML change. For minor YAML-only fixes, bumping is optional (the content hash triggers the upgrade).
 14. Use `managed.getWorkflowStatus(...)` for read-only pre-flight checks before execution.
 15. Execute via `managed.execute(request, ...)`; for dynamic instances, pass the deterministic `workflowId`.
+16. Prefix every raw request path (`kibana.request`, `with.request`, `with.form_data`) with the executing space — see [Scoping raw request paths at runtime](#scoping-raw-request-paths-at-runtime). A cluster-level route is the deliberate exception.
