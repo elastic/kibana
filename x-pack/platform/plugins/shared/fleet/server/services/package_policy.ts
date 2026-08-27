@@ -1665,7 +1665,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     // Internal callers can omit top-level fields (e.g. `vars`) when they only intend to touch
     // a subset of the policy. Without this backfill, `getPolicySecretPaths` and
     // `_compilePackagePolicyInputs` would see an empty/absent set and could zero out
-    // `secret_references` for secrets that are still in use. See https://github.com/elastic/kibana/issues/282280
+    // `secret_references` for secrets that are still in use.
     if (restOfPackagePolicy.vars === undefined) {
       restOfPackagePolicy.vars = oldPackagePolicy.vars;
     }
@@ -1813,7 +1813,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           // Write the array even when empty: `soClient.update` is a partial merge, so omitting the
           // key leaves a previously stored (now stale) array intact. `undefined` means secret
           // storage is disabled — omit the key so plaintext policies are unchanged.
-          // See https://github.com/elastic/kibana/issues/282280
           ...(secretReferences !== undefined && { secret_references: secretReferences }),
           revision: oldPackagePolicy.revision + 1,
           updated_at: new Date().toISOString(),
@@ -1898,7 +1897,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     });
     // Cloud-connector secrets are shared across package policies and are not tracked in
     // `ingest-package-policies`, so `deleteSecretsIfNotReferenced` cannot see all consumers.
-    // Mirrors the existing guard at the delete path. See https://github.com/elastic/kibana/issues/282280
+    // Mirrors the existing guard at the delete path.
     const deleteSecretsPromise =
       secretsToDelete?.length && !oldPackagePolicy.cloud_connector_id
         ? deleteSecrets({ esClient, soClient, ids: secretsToDelete.map((s) => s.id) })
@@ -2152,7 +2151,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           secretReferences = secretsRes.secretReferences;
           // Cloud-connector secrets are shared and not tracked in `ingest-package-policies`,
           // so the reference-count guard cannot see all consumers. Skip deletion.
-          // See https://github.com/elastic/kibana/issues/282280
           if (!oldPackagePolicy.cloud_connector_id) {
             allSecretsToDelete.push(...secretsRes.secretsToDelete);
           }
@@ -2224,7 +2222,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             // Write the array even when empty: `soClient.bulkUpdate` is a partial merge, so
             // omitting the key leaves a previously stored (now stale) array intact.
             // `undefined` means secret storage is disabled — omit the key.
-            // See https://github.com/elastic/kibana/issues/282280
             ...(secretReferences !== undefined && { secret_references: secretReferences }),
             revision: oldPackagePolicy.revision + 1,
             updated_at: new Date().toISOString(),

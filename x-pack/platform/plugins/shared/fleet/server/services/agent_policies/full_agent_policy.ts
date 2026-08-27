@@ -239,7 +239,7 @@ export async function getFullAgentPolicy(
     : [];
   // Only include package policy secret refs that appear inline as `$co.elastic.secret{<id>}`
   // placeholders in the compiled policy. Disabled inputs/policies, never-rendered secret vars,
-  // and stale SO entries (#282280) would otherwise make Fleet Server fetch ids nothing references.
+  // and stale SO entries would otherwise make Fleet Server fetch ids nothing references.
   //
   // Scan `agentInputs` (pre-OTel-filter) PLUS `otelcolConfig`: OTel inputs are removed from
   // `inputs` below and re-emitted at the policy root, so their placeholders only appear there.
