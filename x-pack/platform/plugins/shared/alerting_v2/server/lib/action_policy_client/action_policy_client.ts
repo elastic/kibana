@@ -134,6 +134,8 @@ const bulkErrorFromThrown = (id: string, e: unknown): ActionPolicyBulkError => {
 
 @injectable()
 export class ActionPolicyClient {
+  private readonly logger: LoggerServiceContract;
+
   constructor(
     @inject(ActionPolicySavedObjectServiceScopedToken)
     private readonly actionPolicySavedObjectService: ActionPolicySavedObjectServiceContract,
@@ -145,9 +147,10 @@ export class ActionPolicyClient {
     private readonly esoClient: EncryptedSavedObjectsClient,
     @inject(ActionPolicyNamespaceToken)
     private readonly namespace: string | undefined,
-    @inject(LoggerServiceToken)
-    private readonly logger: LoggerServiceContract
-  ) {}
+    @inject(LoggerServiceToken) loggerService: LoggerServiceContract
+  ) {
+    this.logger = loggerService.forSubsystem('actionPolicyClient');
+  }
 
   /**
    * Validates a request body with a Zod schema and produces a uniform

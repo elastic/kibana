@@ -81,7 +81,6 @@ export const EditCustomContentFlyout = ({
     esqlDataError,
     handleFetchData,
     isRenderLoading,
-    hasPreviewedCurrentDraft,
     handleRender,
   } = useEditFlyoutState({
     esqlQuery,
@@ -232,13 +231,16 @@ export const EditCustomContentFlyout = ({
                   value={draftTemplate}
                   onChange={setDraftTemplate}
                   height={editorHeight}
-                  placeholder={i18n.translate(
-                    'xpack.customContent.editFlyout.templatePlaceholder',
-                    {
-                      defaultMessage:
-                        '<!-- Write your HTML, CSS, and Liquid here, or use "Generate with chat" above. -->',
-                    }
-                  )}
+                  placeholder={
+                    isAiAvailable
+                      ? i18n.translate('xpack.customContent.editFlyout.templatePlaceholderAi', {
+                          defaultMessage:
+                            '<!-- Write your HTML, CSS, and Liquid here, or use "Generate with chat" above. -->',
+                        })
+                      : i18n.translate('xpack.customContent.editFlyout.templatePlaceholderNoAi', {
+                          defaultMessage: '<!-- Write your HTML, CSS, and Liquid here. -->',
+                        })
+                  }
                   options={{
                     fontSize: 12,
                     minimap: { enabled: false },
@@ -253,14 +255,15 @@ export const EditCustomContentFlyout = ({
                     defaultMessage: 'Copy template',
                   })}
                   disableScreenReaderOutput
+                  anchorProps={{ css: copyButtonCss }}
                 >
                   <EuiButtonIcon
-                    css={copyButtonCss}
                     iconType="copy"
                     aria-label={i18n.translate('xpack.customContent.editFlyout.copyTemplate', {
                       defaultMessage: 'Copy template',
                     })}
                     onClick={() => navigator.clipboard?.writeText(draftTemplate)}
+                    data-test-subj="customContentCopyTemplateButton"
                   />
                 </EuiToolTip>
               </div>
@@ -290,7 +293,7 @@ export const EditCustomContentFlyout = ({
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onClose}>
+            <EuiButtonEmpty onClick={onClose} data-test-subj="customContentCancelButton">
               {i18n.translate('xpack.customContent.editFlyout.cancelButton', {
                 defaultMessage: 'Cancel',
               })}
@@ -303,16 +306,22 @@ export const EditCustomContentFlyout = ({
                   color="success"
                   iconType="play"
                   isLoading={isRenderLoading}
-                  disabled={!hasChanges || hasPreviewedCurrentDraft}
+                  disabled={!draftTemplate.trim()}
                   onClick={handleRender}
+                  data-test-subj="customContentRunPreviewButton"
                 >
                   {i18n.translate('xpack.customContent.editFlyout.runPreviewButton', {
-                    defaultMessage: 'Run Preview',
+                    defaultMessage: 'Run preview',
                   })}
                 </EuiButton>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton fill onClick={handleSave} disabled={!hasChanges}>
+                <EuiButton
+                  fill
+                  onClick={handleSave}
+                  disabled={!hasChanges}
+                  data-test-subj="customContentApplyButton"
+                >
                   {i18n.translate('xpack.customContent.editFlyout.applyButton', {
                     defaultMessage: 'Apply and close',
                   })}
