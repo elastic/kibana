@@ -1,0 +1,100 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`schema_to_skill_docs generateObjectiveDoc matches snapshot 1`] = `
+"# Objectives and Error Budgets
+
+## Budgeting Methods
+
+- \`occurrences\`: Occurrences: SLI = good events / total events over the time window. Use for request-based SLOs.
+- \`timeslices\`: Timeslices: the time window is cut into slices of timesliceWindow; a slice is good when its ratio ≥ timesliceTarget. SLI = good slices / total slices. Use for time-based SLOs. Requires timesliceTarget and timesliceWindow in objective, and sli.metric.timeslice indicator if using metric comparisons.
+
+## Time Windows
+
+- **rolling**: sliding window, continuously updated. Allowed durations: \`7d\`, \`30d\`, \`90d\`.
+- **calendarAligned**: resets at the start of each calendar period. Allowed durations: \`1w\`, \`1M\`.
+
+## Error Budget Math
+
+error budget = 1 − \`target\`
+
+consumed budget = bad fraction ÷ error budget
+
+Example: target \`0.999\` over a \`30d\` rolling window ⇒ 0.1% error budget ≈ 43.2 minutes of bad events.
+
+## Constraints
+
+- \`target\` must be strictly between 0 and 1 (exclusive). Example: \`0.999\` = 99.9%.
+- \`timesliceTarget\` and \`timesliceWindow\` are **required** when \`budgetingMethod\` is \`\\"timeslices\\"\`. They are ignored for \`\\"occurrences\\"\`.
+- \`timesliceWindow\` accepts \`m\` or \`h\` units (e.g. \`\\"5m\\"\`, \`\\"1h\\"\`) and must be shorter than the time window.
+- \`sli.metric.timeslice\` indicator requires \`budgetingMethod: \\"timeslices\\"\`."
+`;
+
+exports[`schema_to_skill_docs generateSloIndicatorsDoc matches snapshot 1`] = `
+"# SLO Indicator Types
+
+\`indicator\` defines how the SLI is computed. Pick the variant by data source.
+Each indicator type maps to a specific \`type\` discriminator value.
+
+#### \`type: \\"sli.apm.transactionDuration\\"\`
+
+Use for APM latency SLIs. Measures the ratio of APM transactions faster than a given latency threshold.
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| \`type\` | \\"sli.apm.transactionDuration\\" | required |  |
+| \`params\` | object | required |  |
+
+#### \`type: \\"sli.apm.transactionErrorRate\\"\`
+
+Use for APM error-rate SLIs. Measures the ratio of APM transactions that did not result in an error.
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| \`type\` | \\"sli.apm.transactionErrorRate\\" | required |  |
+| \`params\` | object | required |  |
+
+#### \`type: \\"sli.synthetics.availability\\"\`
+
+Use for Synthetics monitor availability SLIs. Measures the ratio of successful monitor checks.
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| \`type\` | \\"sli.synthetics.availability\\" | required |  |
+| \`params\` | object | required |  |
+
+#### \`type: \\"sli.kql.custom\\"\`
+
+Use for custom KQL-based SLIs on any index. Define good and total event populations with KQL filters.
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| \`type\` | \\"sli.kql.custom\\" | required |  |
+| \`params\` | object | required |  |
+
+#### \`type: \\"sli.metric.custom\\"\`
+
+Use for custom metric-aggregation SLIs. Define good and total as math equations over field aggregations.
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| \`type\` | \\"sli.metric.custom\\" | required |  |
+| \`params\` | object | required |  |
+
+#### \`type: \\"sli.metric.timeslice\\"\`
+
+Use for timeslice-based metric SLIs. Only valid with budgetingMethod: \\"timeslices\\". The time window is divided into slices; a slice is good when the metric equation satisfies the comparator threshold.
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| \`type\` | \\"sli.metric.timeslice\\" | required |  |
+| \`params\` | object | required |  |
+
+#### \`type: \\"sli.histogram.custom\\"\`
+
+Use for histogram-based SLIs. Define good and total event populations using value_count or range aggregations on a pre-aggregated histogram field.
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| \`type\` | \\"sli.histogram.custom\\" | required |  |
+| \`params\` | object | required |  |"
+`;
