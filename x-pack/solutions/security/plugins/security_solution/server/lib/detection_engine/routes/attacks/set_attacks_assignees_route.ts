@@ -26,6 +26,7 @@ import {
 } from '../../../../../common/workflows/triggers';
 import { updateAlertsAssignees } from '../common/operations/update_alerts_assignees';
 import { searchAlerts } from '../common/operations/search_alerts';
+import { verifyAlertIdsInIndex } from '../common/operations/prefetch_previous_statuses';
 import { validateAlertAssigneesArrays } from '../common/validators/validate_alert_arrays';
 import { getAttackAlertsIndex } from '../common/index_patterns/get_attack_alerts_index';
 import { getUnifiedAlertsIndex } from '../common/index_patterns/get_unified_alerts_index';
@@ -188,6 +189,24 @@ export const setAttacksAssigneesRoute = (
             // the target to the unified index pattern for the cascade update.
             const index = await getUnifiedAlertsIndex({ context, ruleDataClient });
 
+            // Verify that the related alert IDs still exist in the unified index;
+            // stale/deleted references must not appear in the emitted event payload.
+            let verifiedRelatedAlertIds: string[] = [];
+            if (eventBus && relatedAlertIds.length > 0) {
+              try {
+                const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+                verifiedRelatedAlertIds = await verifyAlertIdsInIndex(
+                  esClient,
+                  index,
+                  relatedAlertIds
+                );
+              } catch (err) {
+                logger?.warn(
+                  `Failed to verify related alert IDs for workflow trigger (assignees): ${err}`
+                );
+              }
+            }
+
             const result = await updateAlertsAssignees({
               context,
               index,
@@ -202,12 +221,13 @@ export const setAttacksAssigneesRoute = (
                 truncated: verifiedAttackIds.length > MAX_ALERTS_PER_TRIGGER || operationTruncated,
               });
             }
-            if (relatedAlertIds.length > 0) {
+            if (verifiedRelatedAlertIds.length > 0) {
               void eventBus?.emitAlertAssigneesChanged(request, {
-                alertIds: relatedAlertIds.slice(0, MAX_ALERTS_PER_TRIGGER),
+                alertIds: verifiedRelatedAlertIds.slice(0, MAX_ALERTS_PER_TRIGGER),
                 assigneesToAdd: validAssigneesToAdd,
                 assigneesToRemove: validAssigneesToRemove,
-                truncated: relatedAlertIds.length > MAX_ALERTS_PER_TRIGGER || operationTruncated,
+                truncated:
+                  verifiedRelatedAlertIds.length > MAX_ALERTS_PER_TRIGGER || operationTruncated,
               });
             }
             return result;

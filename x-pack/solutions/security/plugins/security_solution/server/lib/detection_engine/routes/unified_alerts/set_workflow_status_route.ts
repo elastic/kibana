@@ -116,22 +116,28 @@ export const setUnifiedAlertsWorkflowStatusRoute = (
             reason: closingReason.reason,
           });
           if (prefetchSucceeded) {
-            const attackTruncated = attackIds.length > MAX_ALERTS_PER_TRIGGER;
-            const alertTruncated = alertIds.length > MAX_ALERTS_PER_TRIGGER;
             if (attackIds.length > 0) {
+              const cappedAttackIds = attackIds.slice(0, MAX_ALERTS_PER_TRIGGER);
+              const cappedAttackIdSet = new Set(cappedAttackIds);
               void eventBus?.emitAttackStatusChanged(request, {
-                attackIds: attackIds.slice(0, MAX_ALERTS_PER_TRIGGER),
+                attackIds: cappedAttackIds,
                 status,
-                previousStatuses: attackPreviousStatuses.slice(0, MAX_ALERTS_PER_TRIGGER),
-                truncated: attackTruncated,
+                // Filter to the capped set so previousStatuses never references an ID
+                // that was truncated out of attackIds (the two arrays are independent).
+                previousStatuses: attackPreviousStatuses.filter((ps) =>
+                  cappedAttackIdSet.has(ps.id)
+                ),
+                truncated: attackIds.length > MAX_ALERTS_PER_TRIGGER,
               });
             }
             if (alertIds.length > 0) {
+              const cappedAlertIds = alertIds.slice(0, MAX_ALERTS_PER_TRIGGER);
+              const cappedAlertIdSet = new Set(cappedAlertIds);
               void eventBus?.emitAlertStatusChanged(request, {
-                alertIds: alertIds.slice(0, MAX_ALERTS_PER_TRIGGER),
+                alertIds: cappedAlertIds,
                 status,
-                previousStatuses: alertPreviousStatuses.slice(0, MAX_ALERTS_PER_TRIGGER),
-                truncated: alertTruncated,
+                previousStatuses: alertPreviousStatuses.filter((ps) => cappedAlertIdSet.has(ps.id)),
+                truncated: alertIds.length > MAX_ALERTS_PER_TRIGGER,
               });
             }
           }

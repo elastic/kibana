@@ -196,6 +196,15 @@ export const prefetchPreviousStatusesByQuery = async (
   return { ids, previousStatuses, idToIndex, truncated };
 };
 
+export const verifyAlertIdsInIndex = async (
+  esClient: ElasticsearchClient,
+  index: string | string[],
+  ids: string[]
+): Promise<string[]> => {
+  const pairs = await fetchAllAlertIdToIndex(esClient, index, ids);
+  return Array.from(new Set(pairs.map((p) => p.id)));
+};
+
 export const fetchAllAlertIdToIndex = async (
   esClient: ElasticsearchClient,
   index: string | string[],

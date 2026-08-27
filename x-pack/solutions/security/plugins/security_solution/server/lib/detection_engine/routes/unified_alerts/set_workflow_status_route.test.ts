@@ -549,6 +549,61 @@ describe('set unified alerts workflow status', () => {
       expect(emitCall.previousStatuses).toHaveLength(MAX_ALERTS_PER_TRIGGER);
     });
 
+    test('excludes previousStatuses entries for IDs truncated from alertIds', async () => {
+      // Scenario: id-0 has unrecognized status 'triaged' (appears in alertIds but not
+      // previousStatuses). id-1..id-4999 and id-5000..id-9999 have recognised 'open'.
+      // id-10000 (overflow) also has recognised 'open'. Without the fix, previousStatuses
+      // would include {id-10000, 'open'} even though id-10000 is not in the emitted alertIds.
+      const firstChunkHits = [
+        {
+          _id: 'id-0',
+          _index: '.alerts-security.alerts-default',
+          _source: { 'kibana.alert.workflow_status': 'triaged' }, // unrecognized
+        },
+        ...Array.from({ length: MAX_ALERTS_PER_TRIGGER / 2 - 1 }, (_, i) => ({
+          _id: `id-${i + 1}`,
+          _index: '.alerts-security.alerts-default',
+          _source: { 'kibana.alert.workflow_status': 'open' },
+        })),
+      ];
+      const secondChunkHits = Array.from({ length: MAX_ALERTS_PER_TRIGGER / 2 }, (_, i) => ({
+        _id: `id-${MAX_ALERTS_PER_TRIGGER / 2 + i}`,
+        _index: '.alerts-security.alerts-default',
+        _source: { 'kibana.alert.workflow_status': 'open' },
+      }));
+      context.core.elasticsearch.client.asCurrentUser.search
+        .mockResolvedValueOnce(makeSearchResponse(firstChunkHits))
+        .mockResolvedValueOnce(makeSearchResponse(secondChunkHits))
+        .mockResolvedValueOnce(
+          makeSearchResponse([
+            {
+              _id: `id-${MAX_ALERTS_PER_TRIGGER}`,
+              _index: '.alerts-security.alerts-default',
+              _source: { 'kibana.alert.workflow_status': 'open' },
+            },
+          ])
+        );
+      const oversizedIds = Array.from({ length: MAX_ALERTS_PER_TRIGGER + 1 }, (_, i) => `id-${i}`);
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_WORKFLOW_STATUS_URL,
+        body: { signal_ids: oversizedIds, status: 'closed' },
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+      await new Promise((r) => setTimeout(r, 0));
+      const emitCall = mockEventBus.emitAlertStatusChanged.mock.calls[0][1];
+      expect(emitCall.alertIds).toHaveLength(MAX_ALERTS_PER_TRIGGER);
+      // id-0 is in alertIds (unrecognised status → changing) but has no previousStatuses entry.
+      // id-10000 is NOT in alertIds (truncated) so must also be absent from previousStatuses.
+      expect(
+        emitCall.previousStatuses.find(
+          (ps: { id: string }) => ps.id === `id-${MAX_ALERTS_PER_TRIGGER}`
+        )
+      ).toBeUndefined();
+      // previousStatuses should only contain entries for id-1..id-9999 (9999 entries).
+      expect(emitCall.previousStatuses).toHaveLength(MAX_ALERTS_PER_TRIGGER - 1);
+    });
+
     test('does not emit when all IDs are already at the target status across multiple chunks', async () => {
       const oversizedIds = Array.from({ length: MAX_ALERTS_PER_TRIGGER + 1 }, (_, i) => `id-${i}`);
       // chunkSize = 5000, so 3 chunks. First chunk: id-0 already at target; others return nothing.

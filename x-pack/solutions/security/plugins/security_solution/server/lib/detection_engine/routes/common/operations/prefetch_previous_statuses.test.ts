@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import type { SecuritySolutionRequestHandlerContextMock } from '../../__mocks__/request_context';
 import { requestContextMock } from '../../__mocks__';
@@ -15,6 +16,7 @@ import {
   fetchAlertIdIndexWithSource,
   prefetchPreviousStatusesByIds,
   prefetchPreviousStatusesByQuery,
+  verifyAlertIdsInIndex,
 } from './prefetch_previous_statuses';
 
 const makeSearchResponse = (
@@ -545,6 +547,58 @@ describe('fetchAlertIdToIndex', () => {
   it('joins an array index with commas before calling search', async () => {
     await fetchAlertIdToIndex(esClient, ['idx-a', 'idx-b'], ['id-1']);
     expect(esClient.search).toHaveBeenCalledWith(expect.objectContaining({ index: 'idx-a,idx-b' }));
+  });
+});
+
+describe('verifyAlertIdsInIndex', () => {
+  let context: SecuritySolutionRequestHandlerContextMock;
+  let esClient: SecuritySolutionRequestHandlerContextMock['core']['elasticsearch']['client']['asCurrentUser'];
+
+  const makeIdResponse = (
+    hits: Array<{ _id: string; _index: string }>
+  ): estypes.SearchResponse<unknown> => ({
+    took: 1,
+    timed_out: false,
+    _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+    hits: {
+      total: { value: hits.length, relation: 'eq' },
+      max_score: 0,
+      hits: hits.map((h) => ({ _id: h._id, _index: h._index, _score: 0 })),
+    },
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    ({ context } = requestContextMock.createTools());
+    esClient = context.core.elasticsearch.client.asCurrentUser;
+    esClient.search.mockResolvedValue(makeIdResponse([]));
+  });
+
+  it('returns unique verified IDs for found docs', async () => {
+    esClient.search.mockResolvedValueOnce(
+      makeIdResponse([
+        { _id: 'a', _index: '.alerts-security.alerts-default' },
+        { _id: 'b', _index: '.alerts-security.alerts-default' },
+      ])
+    );
+    const result = await verifyAlertIdsInIndex(esClient, 'index', ['a', 'b', 'c']);
+    expect(result).toEqual(['a', 'b']);
+  });
+
+  it('deduplicates IDs that appear in multiple index families', async () => {
+    esClient.search.mockResolvedValueOnce(
+      makeIdResponse([
+        { _id: 'shared', _index: '.alerts-security.alerts-default' },
+        { _id: 'shared', _index: '.attack-discovery-alerts-default' },
+      ])
+    );
+    const result = await verifyAlertIdsInIndex(esClient, 'index', ['shared']);
+    expect(result).toEqual(['shared']);
+  });
+
+  it('returns empty array when no IDs are found', async () => {
+    const result = await verifyAlertIdsInIndex(esClient, 'index', ['missing']);
+    expect(result).toEqual([]);
   });
 });
 

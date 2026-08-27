@@ -390,8 +390,13 @@ describe('set attacks assignees', () => {
     });
 
     test('emits attackAssigneesChanged and alertAssigneesChanged for cascade update', async () => {
-      context.core.elasticsearch.client.asCurrentUser.search.mockResponse(
+      // Call 1: attack doc fetch — returns attack1 with relatedAlertIds = ['alertA']
+      context.core.elasticsearch.client.asCurrentUser.search.mockResponseOnce(
         getSearchResponse([{ _id: 'attack1', alertIds: ['alertA'] }])
+      );
+      // Call 2: related alert verification — alertA exists in the unified index
+      context.core.elasticsearch.client.asCurrentUser.search.mockResponseOnce(
+        getSearchResponse([{ _id: 'alertA' }])
       );
       await server.inject(
         getRequest({ ...defaultBody, update_related_alerts: true }),
@@ -406,6 +411,24 @@ describe('set attacks assignees', () => {
         expect.anything(),
         expect.objectContaining({ alertIds: ['alertA'], truncated: false })
       );
+    });
+
+    test('does not emit alertAssigneesChanged when related alert IDs are not found (stale references)', async () => {
+      // Call 1: attack doc fetch
+      context.core.elasticsearch.client.asCurrentUser.search.mockResponseOnce(
+        getSearchResponse([{ _id: 'attack1', alertIds: ['stale-alert'] }])
+      );
+      // Call 2: verification returns empty — the related alert no longer exists
+      context.core.elasticsearch.client.asCurrentUser.search.mockResponseOnce(
+        getSearchResponse([])
+      );
+      await server.inject(
+        getRequest({ ...defaultBody, update_related_alerts: true }),
+        requestContextMock.convertContext(context)
+      );
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAttackAssigneesChanged).toHaveBeenCalled();
+      expect(mockEventBus.emitAlertAssigneesChanged).not.toHaveBeenCalled();
     });
 
     test('does not emit when validation fails', async () => {
