@@ -145,7 +145,7 @@ describe('SourceDocumentJsonMode', () => {
     expect(container.textContent).not.toContain('empty');
   });
 
-  describe('defaultRenderedLeafNodes setting', () => {
+  describe('defaultRenderedNodes setting', () => {
     const nestedHit: EsHitRecord = {
       _id: '1',
       _index: 'test',
@@ -159,7 +159,7 @@ describe('SourceDocumentJsonMode', () => {
     });
 
     it('leaves the tree collapsed when the budget is 0', () => {
-      renderCell(nestedHit, { jsonModeSettings: { defaultRenderedLeafNodes: 0 } });
+      renderCell(nestedHit, { jsonModeSettings: { defaultRenderedNodes: 0 } });
 
       expect(screen.getByTestId(rowTestId('user'))).toBeVisible();
       expect(screen.queryByTestId(rowTestId('user.name'))).not.toBeInTheDocument();
@@ -211,7 +211,7 @@ describe('SourceDocumentJsonMode', () => {
       // Start collapsed so the click drives the expansion under test, not the auto-expand default.
       renderCell(
         { _id: '1', _index: 'test', _source: { bytes: [100, 200] } },
-        { onFilter, jsonModeSettings: { defaultRenderedLeafNodes: 0 } }
+        { onFilter, jsonModeSettings: { defaultRenderedNodes: 0 } }
       );
 
       await userEvent.click(screen.getByTestId(rowTestId('bytes')));
@@ -224,7 +224,7 @@ describe('SourceDocumentJsonMode', () => {
       const onFilter = jest.fn();
       renderCell(
         { _id: '1', _index: 'test', _source: { bytes: [100, 200] } },
-        { onFilter, isPlainRecord: true, jsonModeSettings: { defaultRenderedLeafNodes: 0 } }
+        { onFilter, isPlainRecord: true, jsonModeSettings: { defaultRenderedNodes: 0 } }
       );
 
       await userEvent.click(screen.getByTestId(rowTestId('bytes')));

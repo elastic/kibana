@@ -15,7 +15,7 @@ import {
   buildRows,
   collectDefaultSeed,
   collectExpandableIds,
-  MAX_EXPANDED_LEAVES,
+  MAX_RENDERED_NODES,
   rootToJsonString,
   type FormatValue,
   type GetLeafActions,
@@ -60,8 +60,8 @@ export interface JsonTreeViewerProps {
   extraHeaderContent?: ReactNode;
   /** When false, leaf values render on a single truncated line instead of wrapping. Defaults to true. */
   wrapLines?: boolean;
-  /** Leaf nodes rendered when a fresh cell is seeded (0 = fully collapsed). Defaults to 0. */
-  defaultRenderedLeafNodes?: number;
+  /** Rows rendered when a fresh cell is seeded (0 = fully collapsed). Defaults to 0. */
+  defaultRenderedNodes?: number;
 }
 
 export const JsonTreeViewer = memo(function JsonTreeViewer({
@@ -73,7 +73,7 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
   getLeafActions,
   extraHeaderContent,
   wrapLines = true,
-  defaultRenderedLeafNodes = 0,
+  defaultRenderedNodes = 0,
 }: JsonTreeViewerProps) {
   const styles = useEuiMemoizedStyles(treeStyles);
 
@@ -82,10 +82,10 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
   // Expand all / isAllExpanded use the full safety ceiling.
   const expandableIds = useMemo(() => collectExpandableIds(nodes), [nodes]);
   // The initial expand/reveal state for a fresh cell: open collections and lift pagers breadth-first
-  // until ~N leaf nodes render, capped to the safety ceiling.
+  // until ~N rows render, capped to the safety ceiling.
   const seed = useMemo(
-    () => collectDefaultSeed(nodes, Math.min(defaultRenderedLeafNodes, MAX_EXPANDED_LEAVES)),
-    [nodes, defaultRenderedLeafNodes]
+    () => collectDefaultSeed(nodes, Math.min(defaultRenderedNodes, MAX_RENDERED_NODES)),
+    [nodes, defaultRenderedNodes]
   );
 
   const searchTermLower = expandNodesContainingTerm?.trim().toLowerCase() ?? '';
@@ -100,7 +100,7 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
     expandedBySearchNodes: searchMatches.containers,
     expandableIds,
     seed,
-    defaultRenderedLeafNodes,
+    defaultRenderedNodes,
   });
 
   const rootType = useMemo(() => (Array.isArray(json) ? 'array' : 'object'), [json]);

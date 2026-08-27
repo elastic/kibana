@@ -16,15 +16,15 @@ import type { RowHeightSettingsProps } from './row_height_settings';
 import { RowHeightSettings } from './row_height_settings';
 import type { JsonModeSettings, DocumentsDisplayMode } from '../types';
 import { ViewModeSettings } from './view_mode_settings';
-import { DEFAULT_RENDERED_LEAF_NODES, MAX_EXPANDED_LEAVES } from './json_tree_viewer/tree_model';
+import { DEFAULT_RENDERED_NODES, MAX_RENDERED_NODES } from './json_tree_viewer/tree_model';
 
 export const DEFAULT_MAX_ALLOWED_SAMPLE_SIZE = 1000;
 export const MIN_ALLOWED_SAMPLE_SIZE = 1;
 export const RANGE_MIN_SAMPLE_SIZE = 10; // it's necessary to be able to use `step={10}` configuration for EuiRange
 export const RANGE_STEP_SAMPLE_SIZE = 10;
 
-export const MIN_RENDERED_LEAF_NODES = 0;
-export const RENDERED_LEAF_NODES_STEP = 50;
+export const MIN_RENDERED_NODES = 0;
+export const RENDERED_NODES_STEP = 50;
 
 export interface UnifiedDataTableAdditionalDisplaySettingsProps {
   rowHeight: RowHeightSettingsProps['rowHeight'];
@@ -153,32 +153,32 @@ const OnOffButtonGroup = ({
   );
 };
 
-const clampRenderedLeafNodes = (value: number) =>
-  Math.min(Math.max(Math.round(value), MIN_RENDERED_LEAF_NODES), MAX_EXPANDED_LEAVES);
+const clampRenderedNodes = (value: number) =>
+  Math.min(Math.max(Math.round(value), MIN_RENDERED_NODES), MAX_RENDERED_NODES);
 
 const ValuesShownSetting = ({
-  defaultRenderedLeafNodes,
-  onChangeDefaultRenderedLeafNodes,
+  defaultRenderedNodes,
+  onChangeDefaultRenderedNodes,
 }: {
-  defaultRenderedLeafNodes: number;
-  onChangeDefaultRenderedLeafNodes: (value: number) => void;
+  defaultRenderedNodes: number;
+  onChangeDefaultRenderedNodes: (value: number) => void;
 }) => {
-  const [activeValue, setActiveValue] = useState<number | ''>(defaultRenderedLeafNodes);
+  const [activeValue, setActiveValue] = useState<number | ''>(defaultRenderedNodes);
 
   useEffect(() => {
-    setActiveValue(defaultRenderedLeafNodes); // reset local state when the stored value changes
-  }, [defaultRenderedLeafNodes]);
+    setActiveValue(defaultRenderedNodes); // reset local state when the stored value changes
+  }, [defaultRenderedNodes]);
 
   const debouncedOnChange = useMemo(
-    () => debounce(onChangeDefaultRenderedLeafNodes, 300, { leading: false, trailing: true }),
-    [onChangeDefaultRenderedLeafNodes]
+    () => debounce(onChangeDefaultRenderedNodes, 300, { leading: false, trailing: true }),
+    [onChangeDefaultRenderedNodes]
   );
 
   // EUI rejects a value that isn't a multiple of `step`, which the input lets the user type, so fall
   // back to a step of 1 for off-step values (same approach as the sample-size control).
   const step =
-    activeValue === '' || checkIfValueIsMultipleOfStep(activeValue, RENDERED_LEAF_NODES_STEP)
-      ? RENDERED_LEAF_NODES_STEP
+    activeValue === '' || checkIfValueIsMultipleOfStep(activeValue, RENDERED_NODES_STEP)
+      ? RENDERED_NODES_STEP
       : 1;
 
   const onChange = useCallback<NonNullable<EuiRangeProps['onChange']>>(
@@ -187,14 +187,14 @@ const ValuesShownSetting = ({
         setActiveValue(''); // allow clearing the input mid-edit without committing
         return;
       }
-      const clamped = clampRenderedLeafNodes(Number(event.target.value));
+      const clamped = clampRenderedNodes(Number(event.target.value));
       setActiveValue(clamped);
       debouncedOnChange(clamped);
     },
     [debouncedOnChange]
   );
 
-  const valuesShownLabel = i18n.translate('unifiedDataTable.defaultRenderedLeafNodesLabel', {
+  const valuesShownLabel = i18n.translate('unifiedDataTable.defaultRenderedNodesLabel', {
     defaultMessage: 'Values shown',
   });
 
@@ -203,14 +203,14 @@ const ValuesShownSetting = ({
       <EuiRange
         compressed
         fullWidth
-        min={MIN_RENDERED_LEAF_NODES}
-        max={MAX_EXPANDED_LEAVES}
+        min={MIN_RENDERED_NODES}
+        max={MAX_RENDERED_NODES}
         step={step}
         showInput
         showRange
         value={activeValue}
         onChange={onChange}
-        data-test-subj="unifiedDataTableRenderedLeafNodesInput"
+        data-test-subj="unifiedDataTableRenderedNodesInput"
       />
     </EuiFormRow>
   );
@@ -225,8 +225,7 @@ const JsonModeDisplaySettings = ({
 }) => {
   const hideNulls = jsonModeSettings.hideNulls ?? false;
   const wrapLines = jsonModeSettings.wrapLines ?? true;
-  const defaultRenderedLeafNodes =
-    jsonModeSettings.defaultRenderedLeafNodes ?? DEFAULT_RENDERED_LEAF_NODES;
+  const defaultRenderedNodes = jsonModeSettings.defaultRenderedNodes ?? DEFAULT_RENDERED_NODES;
 
   const hideNullsLabel = i18n.translate('unifiedDataTable.hideNullsLabel', {
     defaultMessage: 'Hide nulls',
@@ -240,17 +239,17 @@ const JsonModeDisplaySettings = ({
   // never fires with a stale `jsonModeSettings`.
   const settingsRef = useRef(jsonModeSettings);
   settingsRef.current = jsonModeSettings;
-  const onChangeDefaultRenderedLeafNodes = useCallback(
+  const onChangeDefaultRenderedNodes = useCallback(
     (value: number) =>
-      onChangeJsonModeSettings?.({ ...settingsRef.current, defaultRenderedLeafNodes: value }),
+      onChangeJsonModeSettings?.({ ...settingsRef.current, defaultRenderedNodes: value }),
     [onChangeJsonModeSettings]
   );
 
   return (
     <>
       <ValuesShownSetting
-        defaultRenderedLeafNodes={defaultRenderedLeafNodes}
-        onChangeDefaultRenderedLeafNodes={onChangeDefaultRenderedLeafNodes}
+        defaultRenderedNodes={defaultRenderedNodes}
+        onChangeDefaultRenderedNodes={onChangeDefaultRenderedNodes}
       />
       <OnOffButtonGroup
         label={hideNullsLabel}

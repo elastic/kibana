@@ -399,7 +399,7 @@ describe('UnifiedDataTableAdditionalDisplaySettings', () => {
     });
   });
 
-  describe('defaultRenderedLeafNodes', () => {
+  describe('defaultRenderedNodes', () => {
     const renderJsonMode = (props: Partial<UnifiedDataTableAdditionalDisplaySettingsProps> = {}) =>
       renderDisplaySettings({
         documentsDisplayMode: 'json',
@@ -427,17 +427,17 @@ describe('UnifiedDataTableAdditionalDisplaySettings', () => {
       expect(input.compareDocumentPosition(hideNulls)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
     });
 
-    it('defaults to 200 when unset', () => {
+    it('defaults to 100 when unset', () => {
       renderJsonMode({ jsonModeSettings: {} });
 
       expect(screen.getByText('Values shown')).toBeVisible();
-      expect(getValuesShownInput()).toHaveValue(200);
+      expect(getValuesShownInput()).toHaveValue(100);
     });
 
     it('reflects the provided value', () => {
-      renderJsonMode({ jsonModeSettings: { defaultRenderedLeafNodes: 100 } });
+      renderJsonMode({ jsonModeSettings: { defaultRenderedNodes: 300 } });
 
-      expect(getValuesShownInput()).toHaveValue(100);
+      expect(getValuesShownInput()).toHaveValue(300);
     });
 
     it('propagates a change, preserving the other JSON settings', async () => {
@@ -448,7 +448,7 @@ describe('UnifiedDataTableAdditionalDisplaySettings', () => {
 
       expect(onChangeJsonModeSettings).toHaveBeenLastCalledWith({
         hideNulls: true,
-        defaultRenderedLeafNodes: 100,
+        defaultRenderedNodes: 100,
       });
     });
 
@@ -459,7 +459,7 @@ describe('UnifiedDataTableAdditionalDisplaySettings', () => {
       await replaceNumberInputValue(getValuesShownInput(), '999');
 
       expect(getValuesShownInput()).toHaveValue(500);
-      expect(onChangeJsonModeSettings).toHaveBeenLastCalledWith({ defaultRenderedLeafNodes: 500 });
+      expect(onChangeJsonModeSettings).toHaveBeenLastCalledWith({ defaultRenderedNodes: 500 });
     });
   });
 });

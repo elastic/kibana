@@ -522,11 +522,11 @@ describe('JsonTreeViewer', () => {
     });
   });
 
-  describe('defaultRenderedLeafNodes', () => {
+  describe('defaultRenderedNodes', () => {
     const doc = { user: { name: 'Alice', address: { city: 'Berlin' } } };
 
     it('leaves everything collapsed when the budget is 0', () => {
-      render(<JsonTreeViewer json={doc} defaultRenderedLeafNodes={0} />);
+      render(<JsonTreeViewer json={doc} defaultRenderedNodes={0} />);
 
       expect(screen.queryByTestId(rowTestId('user.name'))).not.toBeInTheDocument();
     });
@@ -537,23 +537,23 @@ describe('JsonTreeViewer', () => {
       expect(screen.queryByTestId(rowTestId('user.name'))).not.toBeInTheDocument();
     });
 
-    it('seeds a fresh cell with enough expansion to render the requested leaves', () => {
-      render(<JsonTreeViewer json={doc} defaultRenderedLeafNodes={1} />);
+    it('seeds a fresh cell with enough expansion to render the requested rows', () => {
+      render(<JsonTreeViewer json={doc} defaultRenderedNodes={2} />);
 
-      // A one-leaf budget opens `user`, rendering its direct leaf; `address` stays collapsed.
+      // A budget of 2 rows opens `user` and renders its child; nested `address` stays collapsed.
       expect(screen.getByTestId(rowTestId('user.name'))).toHaveTextContent('"Alice"');
       expect(screen.queryByTestId(rowTestId('user.address.city'))).not.toBeInTheDocument();
     });
 
     it('opens deeper nesting as the budget increases', () => {
-      render(<JsonTreeViewer json={doc} defaultRenderedLeafNodes={2} />);
+      render(<JsonTreeViewer json={doc} defaultRenderedNodes={10} />);
 
       expect(screen.getByTestId(rowTestId('user.address.city'))).toHaveTextContent('"Berlin"');
     });
 
     it('reveals a large list up to the budget instead of only the first 10', () => {
       const bigArray = Array.from({ length: 25 }, (_, i) => i);
-      render(<JsonTreeViewer json={bigArray} defaultRenderedLeafNodes={20} />);
+      render(<JsonTreeViewer json={bigArray} defaultRenderedNodes={20} />);
 
       // The pager is lifted from the default 10 to 20 items; the rest stay behind "Show more".
       expect(screen.getByTestId(rowTestId('19'))).toBeVisible();
@@ -562,10 +562,10 @@ describe('JsonTreeViewer', () => {
     });
 
     it('re-seeds an already-rendered cell when the budget changes', () => {
-      const { rerender } = render(<JsonTreeViewer json={doc} defaultRenderedLeafNodes={0} />);
+      const { rerender } = render(<JsonTreeViewer json={doc} defaultRenderedNodes={0} />);
       expect(screen.queryByTestId(rowTestId('user.name'))).not.toBeInTheDocument();
 
-      rerender(<JsonTreeViewer json={doc} defaultRenderedLeafNodes={2} />);
+      rerender(<JsonTreeViewer json={doc} defaultRenderedNodes={10} />);
       expect(screen.getByTestId(rowTestId('user.address.city'))).toHaveTextContent('"Berlin"');
     });
 
@@ -574,7 +574,7 @@ describe('JsonTreeViewer', () => {
       render(
         <JsonTreeViewer
           json={doc}
-          defaultRenderedLeafNodes={2}
+          defaultRenderedNodes={2}
           onStateChange={(state) => (lastState = state)}
         />
       );
@@ -588,20 +588,18 @@ describe('JsonTreeViewer', () => {
       const { unmount } = render(
         <JsonTreeViewer
           json={twoRoots}
-          defaultRenderedLeafNodes={0}
+          defaultRenderedNodes={0}
           onStateChange={(state) => (lastState = state)}
         />
       );
 
-      // The 0-leaf seed leaves `org` closed; the user opens it manually.
+      // The budget-0 seed leaves `org` closed; the user opens it manually.
       await userEvent.click(screen.getByTestId(rowTestId('org')));
       expect(lastState?.seedBudget).toBe(0);
 
       // A fresh instance at the same budget restores that manual expansion.
       unmount();
-      render(
-        <JsonTreeViewer json={twoRoots} defaultRenderedLeafNodes={0} initialState={lastState} />
-      );
+      render(<JsonTreeViewer json={twoRoots} defaultRenderedNodes={0} initialState={lastState} />);
       expect(screen.getByTestId(rowTestId('org.name'))).toHaveTextContent('"Acme"');
     });
 
@@ -612,9 +610,9 @@ describe('JsonTreeViewer', () => {
         seedBudget: 0,
       };
 
-      render(<JsonTreeViewer json={doc} defaultRenderedLeafNodes={2} initialState={staleState} />);
+      render(<JsonTreeViewer json={doc} defaultRenderedNodes={10} initialState={staleState} />);
 
-      // The 2-leaf seed wins over the stale (collapsed) state.
+      // The budget-10 seed wins over the stale (collapsed) state.
       expect(screen.getByTestId(rowTestId('user.address.city'))).toHaveTextContent('"Berlin"');
     });
   });

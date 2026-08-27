@@ -180,7 +180,7 @@ const SCHEMA_TAB_ATTRIBUTES_V15 = SCHEMA_TAB_ATTRIBUTES_V14.extends({
     schema.object({
       hideNulls: schema.maybe(schema.boolean()),
       wrapLines: schema.maybe(schema.boolean()),
-      defaultRenderedLeafNodes: schema.maybe(schema.number({ min: 0, max: 500 })),
+      defaultRenderedNodes: schema.maybe(schema.number({ min: 0, max: 500 })),
     })
   ),
 });

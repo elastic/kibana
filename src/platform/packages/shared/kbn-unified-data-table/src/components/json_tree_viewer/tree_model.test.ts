@@ -63,38 +63,11 @@ describe('collectExpandableIds', () => {
     expect(collectExpandableIds(nodes, 2)).toEqual([getNodeId(['a']), getNodeId(['b'])]);
   });
 
-  it('counts leaf nodes, not collection headers, against the budget', () => {
-    // The only leaves are the two `deep` values; the four collection headers cost nothing.
+  it('expands shallow levels before deeper ones (breadth-first)', () => {
     const nodes = buildNodes({ a: { a1: { deep: 1 } }, b: { b1: { deep: 1 } } });
 
-    expect(collectExpandableIds(nodes, 2)).toEqual([
-      getNodeId(['a']),
-      getNodeId(['b']),
-      getNodeId(['a', 'a1']),
-      getNodeId(['b', 'b1']),
-    ]);
-  });
-
-  it('skips a collection that overflows the budget but still fits a smaller sibling', () => {
-    const nodes = buildNodes({ a: { x: 1, y: 2, z: 3 }, b: { m: 1 } });
-
-    // `a` has 3 leaves and overflows a budget of 1; `b` (1 leaf) still fits.
-    expect(collectExpandableIds(nodes, 1)).toEqual([getNodeId(['b'])]);
-  });
-
-  it('expands shallow levels before deeper ones (breadth-first)', () => {
-    const nodes = buildNodes({ a: { deep: { x: 1 } }, b: { y: 1 } });
-
-    // A 1-leaf budget opens both top-level collections (their headers are free) but leaves the
-    // deeper `deep` collection collapsed.
-    expect(collectExpandableIds(nodes, 1)).toEqual([getNodeId(['a']), getNodeId(['b'])]);
-  });
-
-  it('counts the always-visible top-level leaves against the budget', () => {
-    const nodes = buildNodes({ a: 1, b: 2, nested: { x: 1 } });
-
-    // The two top-level leaves already spend a budget of 2, so `nested` stays collapsed.
-    expect(collectExpandableIds(nodes, 2)).toEqual([]);
+    // A budget of 2 rows fits the two shallow collections; their nested children do not.
+    expect(collectExpandableIds(nodes, 2)).toEqual([getNodeId(['a']), getNodeId(['b'])]);
   });
 });
 
@@ -102,7 +75,7 @@ describe('collectDefaultSeed', () => {
   it('opens nested collections without lifting any pager for a small document', () => {
     const nodes = buildNodes({ user: { name: 'Alice', address: { city: 'Berlin' } } });
 
-    const { expanded, revealed } = collectDefaultSeed(nodes, 200);
+    const { expanded, revealed } = collectDefaultSeed(nodes, 100);
 
     expect(expanded).toEqual(new Set([getNodeId(['user']), getNodeId(['user', 'address'])]));
     expect(revealed.size).toBe(0); // nothing exceeds the default per-collection window
@@ -113,16 +86,17 @@ describe('collectDefaultSeed', () => {
 
     const { expanded, revealed } = collectDefaultSeed(nodes, 20);
 
-    expect(expanded.size).toBe(0); // a flat array has no nested collections to open
+    // A flat array has no nested collections; every shown item is one row, so the pager lifts to 20.
+    expect(expanded.size).toBe(0);
     expect(revealed.get(ROOT_ID)).toBe(20);
   });
 
-  it('expands and reveals array items to reach the budget', () => {
+  it('expands and reveals array items to reach the row budget', () => {
     const nodes = buildNodes(Array.from({ length: 30 }, (_, i) => ({ v: i })));
 
-    const { expanded, revealed } = collectDefaultSeed(nodes, 20);
+    const { expanded, revealed } = collectDefaultSeed(nodes, 40);
 
-    // Each object holds one leaf, so ~20 objects open and the root pager lifts to 20.
+    // 20 object headers + their 20 leaf rows = 40 rows, so 20 objects open and the pager lifts to 20.
     expect(expanded.size).toBe(20);
     expect(revealed.get(ROOT_ID)).toBe(20);
   });

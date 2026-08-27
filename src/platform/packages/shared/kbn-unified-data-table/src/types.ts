@@ -74,8 +74,8 @@ export type DocumentsDisplayMode = 'table' | 'json';
 export interface JsonModeSettings extends SerializableRecord {
   hideNulls?: boolean;
   wrapLines?: boolean;
-  /** How many leaf nodes every JSON cell renders by default; seeds the initial expansion. */
-  defaultRenderedLeafNodes?: number;
+  /** How many rows every JSON cell renders by default; seeds the initial expansion. */
+  defaultRenderedNodes?: number;
 }
 
 export type CustomBulkActions = Array<
