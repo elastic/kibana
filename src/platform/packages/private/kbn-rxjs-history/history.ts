@@ -9,7 +9,7 @@
 
 import * as jsondiffpatch from 'jsondiffpatch';
 
-import { BehaviorSubject, combineLatest, debounceTime, filter, map, pairwise, skip } from 'rxjs';
+import { BehaviorSubject, combineLatest, filter, map, pairwise, skip } from 'rxjs';
 
 export function startTrackingHistory<T extends object = {}>({
   state$,
