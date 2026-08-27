@@ -103,6 +103,11 @@
     "@kbn/test-eui-helpers",
     "@kbn/shared-ux-utility",
     "@kbn/esql-utils",
+    "@kbn/app-header",
+    "@kbn/core-chrome-app-menu",
+    "@kbn/core-chrome-app-menu-components",
+    "@kbn/core-chrome-browser-context",
+    "@kbn/core-chrome-browser-mocks",
     "@kbn/sort-predicates",
     "@kbn/presentation-publishing",
     "@kbn/saved-objects-finder-plugin",
@@ -118,6 +123,7 @@
     "@kbn/core-application-browser",
     "@kbn/core-chrome-browser",
     "@kbn/core-capabilities-common",
+    "@kbn/managed-content-badge",
     "@kbn/esql-types",
     "@kbn/react-kibana-context-theme",
     "@kbn/fields-metadata-plugin",
@@ -148,9 +154,7 @@
     "@kbn/as-code-shared-telemetry",
     "@kbn/core-http-browser",
     "@kbn/use-observable",
-    "@kbn/zod",
-    "@kbn/app-header",
-    "@kbn/managed-content-badge"
+    "@kbn/zod"
   ],
   "exclude": ["target/**/*"]
 }

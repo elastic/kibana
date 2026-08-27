@@ -87,6 +87,41 @@ export async function createRuntimeFieldFromEditor(
 }
 
 /**
+ * Clicks an AppMenu item, opening the overflow popover when the control is not inline.
+ * Mirrors Discover/Dashboard Scout `clickAppMenuItem` for Lens classic chrome.
+ */
+export async function clickLensAppMenuItem(page: ScoutPage, testId: string): Promise<void> {
+  const item = page.testSubj.locator(testId);
+  if (await item.isVisible()) {
+    await item.click();
+    return;
+  }
+
+  const overflowButton = page.testSubj.locator('app-menu-overflow-button');
+  const popover = page.testSubj.locator('app-menu-popover');
+
+  if (await popover.isVisible()) {
+    await overflowButton.click();
+    await expect(popover).toBeHidden();
+  }
+
+  await expect(overflowButton).toBeVisible();
+  await overflowButton.click();
+
+  const popoverOpened = await popover
+    .waitFor({ state: 'visible', timeout: 2000 })
+    .then(() => true)
+    .catch(() => false);
+  if (!popoverOpened) {
+    await overflowButton.click();
+  }
+
+  await expect(popover).toBeVisible();
+  await expect(item).toBeVisible();
+  await item.click();
+}
+
+/**
  * Opens Lens export and completes the CSV download path.
  *
  * Lens Share has two product outcomes after one Export click:
@@ -102,6 +137,11 @@ export async function completeLensCsvExport(page: ScoutPage): Promise<void> {
   const csvMenuItem = page.testSubj.locator('exportMenuItem-CSV');
 
   // Readiness before click: csvEnabled / shareUrlEnabled both require hasData.
+  // Export may sit in the overflow menu when AppMenu slots are full.
+  const overflowButton = page.testSubj.locator('app-menu-overflow-button');
+  if (!(await exportButton.isVisible()) && (await overflowButton.isVisible())) {
+    await overflowButton.click();
+  }
   await expect(exportButton).toBeEnabled();
   await exportButton.click();
 

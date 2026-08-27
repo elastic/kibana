@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { act } from 'react-dom/test-utils';
 import { App } from './app';
 import type { LensAppProps } from './types';
@@ -41,6 +41,8 @@ import { faker } from '@faker-js/faker';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { setMockedPresentationUtilServices } from '@kbn/presentation-util-plugin/public/mocks';
+import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
+import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { EditorFrameServiceProvider } from '../editor_frame_service/editor_frame_service_context';
 
 jest.mock('lodash', () => ({
@@ -48,14 +50,36 @@ jest.mock('lodash', () => ({
   debounce: (fn: unknown) => fn,
 }));
 
-jest.mock('@kbn/react-kibana-mount', () => {
-  const original = jest.requireActual('@kbn/react-kibana-mount');
+// Force wide breakpoints so the AppHeader app menu renders its items inline
+// instead of collapsing them into the overflow popover (jsdom defaults smaller).
+jest.mock('@kbn/ui-chrome-layout-utils', () => ({
+  useCurrentChromeApplicationBreakpoint: () => 'xl',
+}));
+
+jest.mock('@elastic/eui', () => ({
+  ...jest.requireActual('@elastic/eui'),
+  useCurrentEuiBreakpoint: () => 'xl',
+  useIsWithinBreakpoints: (breakpoints: string[]) => breakpoints.includes('xl'),
+}));
+
+// ChromeAppHeaderRegistration / AppMenu only register with chrome and return null.
+// Render AppHeader inline in unit tests so menu item test subjects remain assertable.
+jest.mock('@kbn/app-header', () => {
+  const actual = jest.requireActual('@kbn/app-header');
   return {
-    ...original,
-    // Render portal children inline so setHeaderActionMenu content is assertable in unit tests.
-    MountPointPortal: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    ...actual,
+    ChromeAppHeaderRegistration: (props: Record<string, unknown>) => (
+      <actual.AppHeader {...props} />
+    ),
   };
 });
+
+jest.mock('@kbn/core-chrome-app-menu', () => ({
+  AppMenu: ({ config }: { config?: unknown }) => {
+    const { AppHeader } = jest.requireActual('@kbn/app-header');
+    return <AppHeader title="lens" menu={config} />;
+  },
+}));
 
 const defaultSavedObjectId: string = faker.string.uuid();
 
@@ -107,14 +131,14 @@ describe('Lens App', () => {
   } = {}) {
     const Wrapper = ({ children }: { children: React.ReactNode }) => (
       <KibanaContextProvider services={services}>
-        {services.chrome.withProvider(
+        <ChromeServiceProvider value={{ chrome: chromeServiceMock.createStartContract() }}>
           <EditorFrameServiceProvider
             visualizationMap={visualizationMap}
             datasourceMap={datasourceMapOverride ?? datasourceMap}
           >
             {children}
           </EditorFrameServiceProvider>
-        )}
+        </ChromeServiceProvider>
       </KibanaContextProvider>
     );
 
@@ -147,109 +171,6 @@ describe('Lens App', () => {
     expect(screen.getByText('Editor frame')).toBeInTheDocument();
   });
 
-  describe('ChromeAppHeaderRegistration', () => {
-    function enableChromeNextProjectHeader() {
-      Object.defineProperty(services.chrome.next, 'isEnabled', {
-        configurable: true,
-        get: () => true,
-      });
-      (services.chrome.getChromeStyle as jest.Mock).mockReturnValue('project');
-      (services.chrome.getChromeStyle$ as jest.Mock).mockReturnValue(
-        new BehaviorSubject('project')
-      );
-      (services.chrome.next.appHeader.set as jest.Mock).mockReturnValue(jest.fn());
-    }
-
-    it('registers title and leaves menu to setHeaderActionMenu / search bar separate', async () => {
-      enableChromeNextProjectHeader();
-      await renderApp();
-
-      expect(services.chrome.next.appHeader.set).toHaveBeenCalledWith(
-        expect.objectContaining({
-          title: undefined,
-          back: undefined,
-          menu: undefined,
-          spacing: 'compact',
-        })
-      );
-      expect(screen.getByTestId('top-nav')).toBeInTheDocument();
-      expect(services.unifiedSearch.ui.AggregateQuerySearchBar).toHaveBeenCalledWith(
-        expect.objectContaining({
-          showFilterBar: true,
-          showQueryInput: true,
-        }),
-        {}
-      );
-      expect(screen.getByTestId('lnsApp_topNav')).toBeInTheDocument();
-    });
-
-    it('registers the document title when a saved visualization is loaded', async () => {
-      enableChromeNextProjectHeader();
-      await renderApp({
-        preloadedState: {
-          persistedDoc: getLensDocumentMock({
-            title: 'My Lens visualization',
-          }),
-        },
-      });
-
-      expect(services.chrome.next.appHeader.set).toHaveBeenCalledWith(
-        expect.objectContaining({
-          title: 'My Lens visualization',
-        })
-      );
-    });
-
-    it('registers the managed badge', async () => {
-      enableChromeNextProjectHeader();
-      await renderApp({
-        preloadedState: {
-          managed: true,
-        },
-      });
-
-      expect(services.chrome.next.appHeader.set).toHaveBeenCalledWith(
-        expect.objectContaining({
-          badges: expect.arrayContaining([
-            expect.objectContaining({
-              'data-test-subj': 'managedContentBadge',
-            }),
-          ]),
-        })
-      );
-    });
-
-    it('registers an explicit back to the originating dashboard when editing from a panel', async () => {
-      enableChromeNextProjectHeader();
-      props.redirectToOrigin = jest.fn();
-      props.incomingState = {
-        originatingApp: 'dashboards',
-        originatingPath: '/view/abc',
-      };
-      services.getOriginatingAppName = jest.fn(() => 'Dashboards');
-
-      await renderApp();
-
-      expect(services.chrome.next.appHeader.set).toHaveBeenCalledWith(
-        expect.objectContaining({
-          back: expect.objectContaining({
-            href: expect.stringContaining('dashboards'),
-            label: 'Dashboards',
-            onClick: expect.any(Function),
-          }),
-        })
-      );
-
-      const registeredConfig = (services.chrome.next.appHeader.set as jest.Mock).mock.calls.at(
-        -1
-      )?.[0];
-      const event = { preventDefault: jest.fn() };
-      registeredConfig.back.onClick(event);
-      expect(event.preventDefault).toHaveBeenCalled();
-      expect(props.redirectToOrigin).toHaveBeenCalled();
-    });
-  });
-
   it('updates global filters with store state', async () => {
     const pinnedField = createMockedField({ name: 'pinnedField', type: '' });
     const indexPattern = createMockedIndexPattern({ id: 'index1' }, [pinnedField]);
@@ -278,11 +199,15 @@ describe('Lens App', () => {
       props.topNavMenuEntryGenerators = [
         () => ({
           label: 'My entry',
+          testId: 'lnsApp_myEntry',
           run: runFn,
         }),
       ];
       await renderApp();
-      expect(screen.getByText('My entry')).toBeInTheDocument();
+      const entry = screen.getByTestId('lnsApp_myEntry');
+      expect(entry).toBeInTheDocument();
+      await userEvent.click(entry);
+      expect(runFn).toHaveBeenCalled();
     });
 
     it('passes current state, filter, query timerange and initial context into getter', async () => {
@@ -562,7 +487,7 @@ describe('Lens App', () => {
     });
   });
 
-  describe('AggregateQuerySearchBar#showDatePicker', () => {
+  describe('TopNavMenu#showDatePicker', () => {
     it('shows date picker if any used index pattern isTimeBased', async () => {
       services.dataViews.get = jest
         .fn()
@@ -619,7 +544,7 @@ describe('Lens App', () => {
     });
   });
 
-  describe('AggregateQuerySearchBar#dataViewPickerProps', () => {
+  describe('TopNavMenu#dataViewPickerProps', () => {
     it('calls the nav component with the correct dataview picker props if permissions are given', async () => {
       const { lensStore } = await renderApp();
       services.dataViewEditor.userPermissions.editDataView = () => true;
@@ -656,7 +581,7 @@ describe('Lens App', () => {
   });
 
   describe('persistence', () => {
-    it('passes query and indexPatterns to AggregateQuerySearchBar', async () => {
+    it('passes query and indexPatterns to TopNavMenu', async () => {
       const { lensStore } = await renderApp();
       const query = { query: 'fake query', language: 'kuery' };
       const document = getLensDocumentMock({
@@ -1042,11 +967,17 @@ describe('Lens App', () => {
   });
 
   describe('share button', () => {
-    const getShareButton = () => screen.getByTestId('lnsApp_shareButton');
+    const getShareButton = async () => {
+      const overflow = screen.queryByTestId('app-menu-overflow-button');
+      if (overflow) {
+        await userEvent.click(overflow);
+      }
+      return screen.getByTestId(/lnsApp_shareButton/);
+    };
 
     it('should be disabled when no data is available', async () => {
       await renderApp({ preloadedState: { isSaveable: true } });
-      expect(getShareButton()).toBeDisabled();
+      expect(await getShareButton()).toBeDisabled();
     });
 
     it('should not disable share when not saveable', async () => {
@@ -1057,7 +988,7 @@ describe('Lens App', () => {
         },
       });
 
-      expect(getShareButton()).toBeEnabled();
+      expect(await getShareButton()).toBeEnabled();
     });
 
     it('should still be enabled even if the user is missing save permissions', async () => {
@@ -1072,7 +1003,7 @@ describe('Lens App', () => {
           activeData: { layer1: { type: 'datatable', columns: [], rows: [] } },
         },
       });
-      expect(getShareButton()).toBeEnabled();
+      expect(await getShareButton()).toBeEnabled();
     });
 
     it('should still be enabled even if the user is missing shortUrl permissions', async () => {
@@ -1088,7 +1019,7 @@ describe('Lens App', () => {
         },
       });
 
-      expect(getShareButton()).toBeEnabled();
+      expect(await getShareButton()).toBeEnabled();
     });
 
     it('should be disabled if the user is missing shortUrl permissions and visualization is not saveable', async () => {
@@ -1103,22 +1034,30 @@ describe('Lens App', () => {
           activeData: { layer1: { type: 'datatable', columns: [], rows: [] } },
         },
       });
-      expect(getShareButton()).toBeDisabled();
+      expect(await getShareButton()).toBeDisabled();
     });
   });
 
   describe('inspector', () => {
+    const getInspectButton = async () => {
+      const overflow = screen.queryByTestId('app-menu-overflow-button');
+      if (overflow) {
+        await userEvent.click(overflow);
+      }
+      return screen.getByTestId('lnsApp_inspectButton');
+    };
+
     it('inspector button should be available', async () => {
       await renderApp({
         preloadedState: { isSaveable: true },
       });
-      expect(screen.getByTestId('lnsApp_inspectButton')).toBeEnabled();
+      expect(await getInspectButton()).toBeEnabled();
     });
     it('should open inspect panel', async () => {
       await renderApp({
         preloadedState: { isSaveable: true },
       });
-      await userEvent.click(screen.getByTestId('lnsApp_inspectButton'));
+      await userEvent.click(await getInspectButton());
       expect(services.inspector.inspect).toHaveBeenCalledTimes(1);
     });
   });
@@ -1215,9 +1154,9 @@ describe('Lens App', () => {
         }),
       });
 
-      const AggregateQueryTopNavMenu = services.unifiedSearch.ui
+      const AggregateQuerySearchBar = services.unifiedSearch.ui
         .AggregateQuerySearchBar as jest.Mock;
-      const onQuerySubmit = AggregateQueryTopNavMenu.mock.calls[0][0].onQuerySubmit;
+      const onQuerySubmit = AggregateQuerySearchBar.mock.calls[0][0].onQuerySubmit;
       act(() =>
         onQuerySubmit({
           dateRange: { from: 'now-14d', to: 'now-7d' },
