@@ -1,0 +1,1416 @@
+{
+  "sha1": "d24e3e651c7392d64ee87130ac1ec1f7ffd0ea81",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "e946f5ee591eefe-eddb5d61c0fc249",
+      "title": "Console autocomplete (stateful only) inserts the snapshot repository template of the selected type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/autocomplete_stateful.spec.ts",
+        "line": 30,
+        "column": 3
+      }
+    },
+    {
+      "id": "e7ed3a10b6ce0d6-da5902d0f911d23",
+      "title": "Console autocomplete suggests inside a request body",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/autocomplete.spec.ts",
+        "line": 52,
+        "column": 20
+      }
+    },
+    {
+      "id": "e7ed3a10b6ce0d6-4ec17b149a515d0",
+      "title": "Console autocomplete inserts a suggestion into inline JSON without breaking the quoting",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/autocomplete.spec.ts",
+        "line": 58,
+        "column": 14
+      }
+    },
+    {
+      "id": "e7ed3a10b6ce0d6-0905b998c633330",
+      "title": "Console autocomplete does not offer the same suggestion twice",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/autocomplete.spec.ts",
+        "line": 71,
+        "column": 12
+      }
+    },
+    {
+      "id": "e7ed3a10b6ce0d6-0671ddd9d47148b",
+      "title": "Console autocomplete suggests the HTTP methods matching what has been typed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/autocomplete.spec.ts",
+        "line": 78,
+        "column": 26
+      }
+    },
+    {
+      "id": "e7ed3a10b6ce0d6-8251a8e0be6e05b",
+      "title": "Console autocomplete suggests the API endpoints of the typed method",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/autocomplete.spec.ts",
+        "line": 110,
+        "column": 21
+      }
+    },
+    {
+      "id": "e7ed3a10b6ce0d6-844eb3acfaeedb4",
+      "title": "Console autocomplete expands a suggestion that carries placeholder fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/autocomplete.spec.ts",
+        "line": 150,
+        "column": 13
+      }
+    },
+    {
+      "id": "e7ed3a10b6ce0d6-e411bcc9a7a5952",
+      "title": "Console autocomplete activates on a single character after a slash in the url",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/autocomplete.spec.ts",
+        "line": 157,
+        "column": 5
+      }
+    },
+    {
+      "id": "e7ed3a10b6ce0d6-9501057c04c7de5",
+      "title": "Console autocomplete activates after a comma listing several indices in the url",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/autocomplete.spec.ts",
+        "line": 160,
+        "column": 23
+      }
+    },
+    {
+      "id": "e7ed3a10b6ce0d6-29cf07a9862664b",
+      "title": "Console autocomplete activates for methods however they are capitalized",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/autocomplete.spec.ts",
+        "line": 170,
+        "column": 14
+      }
+    },
+    {
+      "id": "e7ed3a10b6ce0d6-644ff7ad77e413c",
+      "title": "Console autocomplete suggests ES|QL commands inside a triple quoted query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/autocomplete.spec.ts",
+        "line": 179,
+        "column": 23
+      }
+    },
+    {
+      "id": "e7ed3a10b6ce0d6-1616ed60c676060",
+      "title": "Console autocomplete does not suggest ES|QL inside triple quotes that are not a query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/autocomplete.spec.ts",
+        "line": 189,
+        "column": 78
+      }
+    },
+    {
+      "id": "e7ed3a10b6ce0d6-d6859840941ae40",
+      "title": "Console autocomplete does not suggest ES|QL outside of a query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/autocomplete.spec.ts",
+        "line": 191,
+        "column": 13
+      }
+    },
+    {
+      "id": "e7ed3a10b6ce0d6-f8a517924cf94a0",
+      "title": "Console autocomplete does not activate inside a comment",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/autocomplete.spec.ts",
+        "line": 200,
+        "column": 3
+      }
+    },
+    {
+      "id": "7c9e3b397dc58b8-bf78bdc0ff168ba",
+      "title": "Console comments accepts single line comments",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/comments.spec.ts",
+        "line": 60,
+        "column": 13
+      }
+    },
+    {
+      "id": "7c9e3b397dc58b8-c0ab89eef7e2e33",
+      "title": "Console comments accepts multiline comments",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/comments.spec.ts",
+        "line": 67,
+        "column": 70
+      }
+    },
+    {
+      "id": "7c9e3b397dc58b8-6405700720294fe",
+      "title": "Console comments flags invalid request bodies",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/comments.spec.ts",
+        "line": 71,
+        "column": 21
+      }
+    },
+    {
+      "id": "66c597b498a0030-a1fb15dc0e62f49",
+      "title": "Console config shows the accessibility overlay on Escape and hides it once disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/console_config.spec.ts",
+        "line": 15,
+        "column": 64
+      }
+    },
+    {
+      "id": "66c597b498a0030-4efbaf0e111fd04",
+      "title": "Console config applies the configured font size to the editor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/console_config.spec.ts",
+        "line": 37,
+        "column": 11
+      }
+    },
+    {
+      "id": "66c597b498a0030-3c4e2b61a682cab",
+      "title": "Console config opens and closes the help popover",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/console_config.spec.ts",
+        "line": 52,
+        "column": 27
+      }
+    },
+    {
+      "id": "43db406b4369725-eb35a68a4c66738",
+      "title": "Console tab navigation selecting a tab updates the URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/console_tabs.spec.ts",
+        "line": 15,
+        "column": 46
+      }
+    },
+    {
+      "id": "43db406b4369725-801ea865acf7274",
+      "title": "Console tab navigation tabs are reachable through the URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/console_tabs.spec.ts",
+        "line": 27,
+        "column": 11
+      }
+    },
+    {
+      "id": "34aa609aa2fd7cc-3e9c0c1c60d4982",
+      "title": "Console context menu opens with the copy, documentation and auto indent actions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/context_menu.spec.ts",
+        "line": 15,
+        "column": 46
+      }
+    },
+    {
+      "id": "34aa609aa2fd7cc-74aec9ea1241ac6",
+      "title": "Console context menu shows the keyboard shortcut badges of the auto indent and API reference actions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/context_menu.spec.ts",
+        "line": 23,
+        "column": 14
+      }
+    },
+    {
+      "id": "34aa609aa2fd7cc-edb0beb2c84d628",
+      "title": "Console context menu auto indents the current request",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/context_menu.spec.ts",
+        "line": 30,
+        "column": 20
+      }
+    },
+    {
+      "id": "34aa609aa2fd7cc-2eec95fcce84f8a",
+      "title": "Console context menu auto indents a comment inside the request body to its nesting level",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/context_menu.spec.ts",
+        "line": 40,
+        "column": 20
+      }
+    },
+    {
+      "id": "34aa609aa2fd7cc-72ea2ef7e1ee4b2",
+      "title": "Console context menu opens the API reference of the current request in a new tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/context_menu.spec.ts",
+        "line": 47,
+        "column": 23
+      }
+    },
+    {
+      "id": "a5fe65af53e11aa-97d15192224142d",
+      "title": "Console copy as language copies the request as curl by default",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/copy_as_language.spec.ts",
+        "line": 18,
+        "column": 5
+      }
+    },
+    {
+      "id": "a5fe65af53e11aa-3be934407890fe2",
+      "title": "Console copy as language copies a selection containing a kbn request as curl only",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/copy_as_language.spec.ts",
+        "line": 24,
+        "column": 23
+      }
+    },
+    {
+      "id": "a5fe65af53e11aa-6ea0dfdcecb3e13",
+      "title": "Console copy as language copies the request in a language picked from the selector",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/copy_as_language.spec.ts",
+        "line": 46,
+        "column": 22
+      }
+    },
+    {
+      "id": "a5fe65af53e11aa-595157622e7fb81",
+      "title": "Console copy as language changes the default language from the selector",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/copy_as_language.spec.ts",
+        "line": 62,
+        "column": 5
+      }
+    },
+    {
+      "id": "a5fe65af53e11aa-0e8242704234750",
+      "title": "Console copy as language keeps the new default language after copying the code",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/copy_as_language.spec.ts",
+        "line": 77,
+        "column": 4
+      }
+    },
+    {
+      "id": "8119b38910bf5fe-b1e5ecf530b8e74",
+      "title": "Console output copy to clipboard copies the selected output on a human-speed (held) click",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/copy_output.spec.ts",
+        "line": 20,
+        "column": 26
+      }
+    },
+    {
+      "id": "c9a3ab2888247ae-2fd5a6e89dc9392",
+      "title": "Console deprecation warnings prints a deprecation warning for a deprecated request",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/deprecation_warning.spec.ts",
+        "line": 17,
+        "column": 46
+      }
+    },
+    {
+      "id": "3e78fc47253424f-b375b9a57fef08f",
+      "title": "Console editor robustness keeps an invalid request intact when auto indenting it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/editor_robustness.spec.ts",
+        "line": 19,
+        "column": 64
+      }
+    },
+    {
+      "id": "3e78fc47253424f-512378299a28c43",
+      "title": "Console editor robustness rejects sending a request with an invalid body",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/editor_robustness.spec.ts",
+        "line": 27,
+        "column": 23
+      }
+    },
+    {
+      "id": "3e78fc47253424f-86bd60a22a66c9a",
+      "title": "Console editor robustness rejects sending a request with an unsupported method",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/editor_robustness.spec.ts",
+        "line": 34,
+        "column": 23
+      }
+    },
+    {
+      "id": "3e78fc47253424f-68a3eca5153041e",
+      "title": "Console editor robustness opens a link written in the editor in a new tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/editor_robustness.spec.ts",
+        "line": 39,
+        "column": 23
+      }
+    },
+    {
+      "id": "3e78fc47253424f-afa9651c7bd88ec",
+      "title": "Console editor robustness still autocompletes after a large payload is loaded",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/editor_robustness.spec.ts",
+        "line": 60,
+        "column": 79
+      }
+    },
+    {
+      "id": "3e78fc47253424f-d3a1d03bfe92032",
+      "title": "Console editor robustness still autocompletes after a quote heavy payload is loaded",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/editor_robustness.spec.ts",
+        "line": 66,
+        "column": 74
+      }
+    },
+    {
+      "id": "ba1ec79b454cf05-7f76768fa82a2b9",
+      "title": "Console history lists executed requests and clears them",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/history.spec.ts",
+        "line": 15,
+        "column": 64
+      }
+    },
+    {
+      "id": "ba1ec79b454cf05-a2fdc569fae2218",
+      "title": "Console history loads a request from history back into the editor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/history.spec.ts",
+        "line": 23,
+        "column": 23
+      }
+    },
+    {
+      "id": "ba1ec79b454cf05-fc3fd69e6627b28",
+      "title": "Console history restores and runs a request from history",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/history.spec.ts",
+        "line": 34,
+        "column": 75
+      }
+    },
+    {
+      "id": "c20eba188e79e29-7cbe49efb42fb75",
+      "title": "Console file import and export imports a file into the editor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/import_export.spec.ts",
+        "line": 17,
+        "column": 64
+      }
+    },
+    {
+      "id": "c20eba188e79e29-85c356a11a14de8",
+      "title": "Console file import and export exports the editor content as a file",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/import_export.spec.ts",
+        "line": 21,
+        "column": 23
+      }
+    },
+    {
+      "id": "d110f7a4de4d097-d007bb6d424f76d",
+      "title": "Console input validation accepts valid requests",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/input_validation.spec.ts",
+        "line": 50,
+        "column": 16
+      }
+    },
+    {
+      "id": "d110f7a4de4d097-949b20c738a971f",
+      "title": "Console input validation flags invalid requests",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/input_validation.spec.ts",
+        "line": 55,
+        "column": 5
+      }
+    },
+    {
+      "id": "d110f7a4de4d097-69ff9b0fe3213ca",
+      "title": "Console input validation runs a request with an inline comment in the url",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/input_validation.spec.ts",
+        "line": 59,
+        "column": 63
+      }
+    },
+    {
+      "id": "d110f7a4de4d097-a896c8a19148df5",
+      "title": "Console input validation runs a request with an inline comment in the body",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/input_validation.spec.ts",
+        "line": 65,
+        "column": 5
+      }
+    },
+    {
+      "id": "d110f7a4de4d097-95601f4c44f15b6",
+      "title": "Console input validation does not print a deprecation warning for a supported request",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/input_validation.spec.ts",
+        "line": 70,
+        "column": 23
+      }
+    },
+    {
+      "id": "b576e1fe638a9c0-6df6cd1b2c3eaa2",
+      "title": "Console keyboard shortcuts opens and closes the shortcuts popover",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/keyboard_shortcuts.spec.ts",
+        "line": 22,
+        "column": 64
+      }
+    },
+    {
+      "id": "b576e1fe638a9c0-28c406609a54289",
+      "title": "Console keyboard shortcuts executes the request on Ctrl+Enter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/keyboard_shortcuts.spec.ts",
+        "line": 29,
+        "column": 64
+      }
+    },
+    {
+      "id": "b576e1fe638a9c0-a9a84de8460af74",
+      "title": "Console keyboard shortcuts auto indents the current request on Ctrl+I",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/keyboard_shortcuts.spec.ts",
+        "line": 35,
+        "column": 23
+      }
+    },
+    {
+      "id": "b576e1fe638a9c0-904b61e76555404",
+      "title": "Console keyboard shortcuts jumps to the previous request on Ctrl+Up",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/keyboard_shortcuts.spec.ts",
+        "line": 39,
+        "column": 78
+      }
+    },
+    {
+      "id": "b576e1fe638a9c0-0f0c6df22a8d17b",
+      "title": "Console keyboard shortcuts jumps back to the next request on Ctrl+Down",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/keyboard_shortcuts.spec.ts",
+        "line": 46,
+        "column": 68
+      }
+    },
+    {
+      "id": "b576e1fe638a9c0-ff60170f88e7213",
+      "title": "Console keyboard shortcuts opens the API reference of the current request on Ctrl+/",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/keyboard_shortcuts.spec.ts",
+        "line": 55,
+        "column": 66
+      }
+    },
+    {
+      "id": "b576e1fe638a9c0-b48f8cc607f1682",
+      "title": "Console keyboard shortcuts stops handling shortcuts once they are turned off",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/keyboard_shortcuts.spec.ts",
+        "line": 76,
+        "column": 38
+      }
+    },
+    {
+      "id": "4e71674913e6bbd-0fcf46fe03c11e7",
+      "title": "Console load_from deep links appends the request carried in the data URI to the editor content",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/load_from.spec.ts",
+        "line": 19,
+        "column": 64
+      }
+    },
+    {
+      "id": "4e71674913e6bbd-05b34a8193be6e4",
+      "title": "Console load_from deep links shows an error toast when the data URI cannot be decoded",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/load_from.spec.ts",
+        "line": 30,
+        "column": 7
+      }
+    },
+    {
+      "id": "70ea902b76e305b-34c9c8d634e96b9",
+      "title": "Console onboarding tour starts only once the run tour button is pressed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/onboarding_tour.spec.ts",
+        "line": 30,
+        "column": 13
+      }
+    },
+    {
+      "id": "70ea902b76e305b-ca0818ab072b074",
+      "title": "Console onboarding tour walks through the five steps and completes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/onboarding_tour.spec.ts",
+        "line": 35,
+        "column": 18
+      }
+    },
+    {
+      "id": "70ea902b76e305b-c3396710d54b881",
+      "title": "Console onboarding tour hides every step when the tour is skipped",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/onboarding_tour.spec.ts",
+        "line": 52,
+        "column": 23
+      }
+    },
+    {
+      "id": "70ea902b76e305b-3c6cc3cb2079a7b",
+      "title": "Console onboarding tour can be re-run after being skipped",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/onboarding_tour.spec.ts",
+        "line": 61,
+        "column": 18
+      }
+    },
+    {
+      "id": "93c8e14b3a5a53b-25a99106ba5cdcf",
+      "title": "Console output filter expands and collapses the filter row",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/output_filter.spec.ts",
+        "line": 20,
+        "column": 23
+      }
+    },
+    {
+      "id": "93c8e14b3a5a53b-61978698bee3be7",
+      "title": "Console output filter applies a filter to the output and restores it when cleared",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/output_filter.spec.ts",
+        "line": 27,
+        "column": 62
+      }
+    },
+    {
+      "id": "93c8e14b3a5a53b-35f823db8073c23",
+      "title": "Console output filter marks the filter button while a filter is applied and the row is collapsed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/output_filter.spec.ts",
+        "line": 42,
+        "column": 13
+      }
+    },
+    {
+      "id": "77fc2b53f4be25d-96e915591b091f4",
+      "title": "Console variables creates and removes a variable",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/variables.spec.ts",
+        "line": 18,
+        "column": 23
+      }
+    },
+    {
+      "id": "77fc2b53f4be25d-b1c7a743efc0714",
+      "title": "Console variables copies a variable to the clipboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/variables.spec.ts",
+        "line": 25,
+        "column": 23
+      }
+    },
+    {
+      "id": "77fc2b53f4be25d-1246b693ca8f096",
+      "title": "Console variables interpolates a variable used in the request url",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/variables.spec.ts",
+        "line": 33,
+        "column": 66
+      }
+    },
+    {
+      "id": "77fc2b53f4be25d-579a33996db95fd",
+      "title": "Console variables interpolates a variable used as a request body",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/variables.spec.ts",
+        "line": 43,
+        "column": 91
+      }
+    },
+    {
+      "id": "77fc2b53f4be25d-c61e496eae6b2aa",
+      "title": "Console variables interpolates a variable inlined inside a request body",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/variables.spec.ts",
+        "line": 54,
+        "column": 13
+      }
+    }
+  ]
+}
