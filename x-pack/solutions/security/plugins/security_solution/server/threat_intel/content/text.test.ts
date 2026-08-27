@@ -1099,3 +1099,59 @@ describe('raw-text end tags carrying junk', () => {
     expect(elapsedMs).toBeLessThan(1500);
   });
 });
+
+/**
+ * A feed is not a document, so its containers are transparent.
+ *
+ * `<description>` around an entity-encoded body is packaging, where `<code>` around
+ * escaped markup is content. Without peeling the wrapper it satisfied the
+ * carries-own-markup test on its own and suppressed the re-parse for every feed shipping
+ * its body encoded rather than in CDATA, leaving the decoded script and its URL in
+ * body_text for extraction to mine as a false indicator.
+ */
+describe('entity-encoded bodies inside feed wrappers', () => {
+  const ENCODED = '&lt;script&gt;fetch("https://false-ioc.test")&lt;/script&gt;safe';
+
+  it.each([
+    ['no wrapper', ENCODED],
+    ['description', `<description>${ENCODED}</description>`],
+    ['content:encoded', `<content:encoded>${ENCODED}</content:encoded>`],
+    ['namespaced description', `<media:description>${ENCODED}</media:description>`],
+    ['atom summary', `<summary>${ENCODED}</summary>`],
+    ['item around description', `<item><description>${ENCODED}</description></item>`],
+    [
+      'full rss nesting',
+      `<rss><channel><item><description>${ENCODED}</description></item></channel></rss>`,
+    ],
+    ['whitespace around the payload', `<description>\n  ${ENCODED}\n</description>`],
+  ])('re-parses through %s', (_label, html) => {
+    const result = stripHtml(html);
+
+    expect(result).toBe('safe');
+    expect(result).not.toContain('false-ioc.test');
+  });
+
+  it('applies structured boundaries through a wrapper', () => {
+    expect(
+      htmlToStructured(
+        '<description>&lt;p&gt;evil.com&lt;/p&gt;&lt;p&gt;bad.net&lt;/p&gt;</description>'
+      )
+    ).toBe('evil.com\nbad.net');
+  });
+
+  // Peeling must not reopen the escaped-snippet deletion: a wrapper is transparent, an
+  // HTML content element is not.
+  it.each([
+    ['a code block', '<code>&lt;script&gt;fetch("https://c2.evil.test")&lt;/script&gt;</code>'],
+    ['a code block inside a div', '<div><code>&lt;script&gt;x&lt;/script&gt;</code></div>'],
+  ])('still preserves an escaped snippet displayed inside %s', (_label, html) => {
+    expect(stripHtml(html)).toContain('<script>');
+  });
+
+  // A wrapper alongside real content is not sole-child packaging, so it stays put.
+  it('does not peel a wrapper that sits beside real content', () => {
+    expect(stripHtml('<description>&lt;p&gt;a&lt;/p&gt;</description><p>real</p>')).toBe(
+      '<p>a</p> real'
+    );
+  });
+});

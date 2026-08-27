@@ -322,8 +322,65 @@ const RESIDUAL_CLOSING_TAG = /<\/[a-z][a-z0-9:_-]*\s*>/i;
  * which keeps its encoded tags visible in `body_text`. That is the safe direction: noise
  * the section miner mostly absorbs, against silently deleting indicators.
  */
+/**
+ * Feed container elements, which wrap an encoded document without being part of one.
+ *
+ * A feed is not a document, so its containers are transparent: `<description>` around an
+ * entity-encoded body is packaging, where a `<code>` around escaped markup is content.
+ * Without peeling them, the wrapper itself satisfied `carriesOwnMarkup` and suppressed the
+ * re-parse for every feed that ships its body encoded rather than in CDATA, leaving the
+ * decoded `<script>` and its URL in `body_text` for extraction to mine as a false IOC.
+ *
+ * Matched on the local name, so namespaced spellings (`content:encoded`,
+ * `media:description`, `dc:description`) resolve without listing each prefix. `summary` and
+ * `title` are HTML element names too, but they only peel as the sole top-level element,
+ * which a real HTML document never presents.
+ */
+const FEED_WRAPPER_NAMES = new Set([
+  'description',
+  'encoded',
+  'content',
+  'summary',
+  'title',
+  'value',
+  'item',
+  'entry',
+  'channel',
+  'feed',
+  'rss',
+]);
+
+const localName = (name: string): string => name.slice(name.lastIndexOf(':') + 1);
+
+/**
+ * Strip transparent feed wrappers so eligibility is judged on the payload.
+ *
+ * Only peels a wrapper that is the sole meaningful child, so a wrapper sitting alongside
+ * real content is left in place. Depth-bounded because the loop is driven by input shape.
+ */
+const peelFeedWrappers = (nodes: ParsedNode[]): ParsedNode[] => {
+  let current = nodes;
+
+  for (let depth = 0; depth < 8; depth++) {
+    const meaningful = current.filter(
+      (node) => node.type !== 'text' || (node.data ?? '').trim() !== ''
+    );
+    const [only] = meaningful;
+    const isWrapper =
+      meaningful.length === 1 &&
+      only !== undefined &&
+      isElement(only) &&
+      FEED_WRAPPER_NAMES.has(localName(elementName(only)));
+
+    if (!isWrapper || only === undefined) return current;
+    current = childrenOf(only);
+  }
+
+  return current;
+};
+
 const carriesOwnMarkup = (nodes: ParsedNode[]): boolean =>
-  nodes.some((node) => isElement(node) || node.type === 'cdata');
+  peelFeedWrappers(nodes).some((node) => isElement(node) || node.type === 'cdata');
 
 /** Stack entry: a node still to visit, or literal output to append after its subtree. */
 type WalkStep = { kind: 'node'; node: ParsedNode } | { kind: 'emit'; text: string };
