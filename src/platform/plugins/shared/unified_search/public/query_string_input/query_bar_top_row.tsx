@@ -149,14 +149,16 @@ const getWrapperWithTooltip = (
   }
 
   return (
-    // The `{ disabled }` API is generic, but today's only consumers disable due to a missing time field.
     <EuiToolTip position="top" content={strings.getNoTimeFieldTooltip()}>
       {children}
     </EuiToolTip>
   );
 };
 
-export type ShowDatePicker = boolean | { disabled: boolean };
+// @internal
+export type ShowDatePicker =
+  | boolean
+  | { disabled: boolean };
 
 // @internal
 export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> {
