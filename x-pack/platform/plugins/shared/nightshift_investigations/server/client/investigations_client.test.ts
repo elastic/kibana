@@ -620,6 +620,40 @@ describe('NightshiftInvestigationsClient.start()', () => {
       ).rejects.toThrow(/flapping/);
     });
 
+    // The workflow interpolates context.event_uuid into an internal request path, so a value that
+    // is not id-shaped could point the attach steps at a different endpoint. Everything else in a
+    // significant-event context stays open, because that payload belongs to another plugin.
+    it.each([
+      ['a path separator', 'events/../../other'],
+      ['a parent-directory segment', '..'],
+      ['a query string', 'abc?expand=true'],
+      ['a fragment', 'abc#frag'],
+      ['an empty string', ''],
+      ['a non-string', { nested: true }],
+    ])('rejects a significant event context whose event_uuid carries %s', async (_label, uuid) => {
+      mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+
+      await expect(
+        makeClient().start({
+          subject: { type: 'significant_event', id: 'se-1' },
+          context: { event_uuid: uuid },
+        })
+      ).rejects.toThrow(InvalidInvestigationContextError);
+      expect(mockManagement.runWorkflow).not.toHaveBeenCalled();
+    });
+
+    it('accepts the uuid shape the significant events plugin actually sends', async () => {
+      mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+      mockManagement.runWorkflow.mockResolvedValue('exec-791');
+
+      await expect(
+        makeClient().start({
+          subject: { type: 'significant_event', id: 'se-1' },
+          context: { event_uuid: '3f2504e0-4f89-11d3-9a0c-0305e82c3301' },
+        })
+      ).resolves.toEqual({ investigation_id: 'exec-791' });
+    });
+
     it('leaves the free-form context of a significant event subject alone', async () => {
       mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
       mockManagement.runWorkflow.mockResolvedValue('exec-790');

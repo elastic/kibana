@@ -128,9 +128,31 @@ export const alertInvestigationContextSchema = z
   })
   .strict();
 
+/**
+ * The one key in an otherwise open context that the workflow itself acts on: it interpolates
+ * `context.event_uuid` into an internal request path, so a value carrying `/`, `?` or `..` would
+ * point those steps at a different endpoint. Real values are uuids, so an id-shaped allowlist
+ * costs a legitimate caller nothing.
+ */
+const significantEventUuidSchema = z
+  .string()
+  .min(1)
+  .max(500)
+  .regex(/^[A-Za-z0-9_-]+$/, 'event_uuid must be an id: letters, digits, underscore or hyphen');
+
+/**
+ * Deliberately open apart from `event_uuid`. The significant events plugin owns the payload it
+ * sends, and this plugin cannot depend on it, so enumerating its fields here would be a hand-kept
+ * copy of another plugin's contract — one that starts rejecting their investigations the day they
+ * add a field. Only the key with a hazard attached is constrained; the bounds on key count and key
+ * length stay, so an open context is still not an unbounded one.
+ */
 export const freeFormContextSchema = z
-  .record(z.string().max(128), z.unknown())
-  .refine((value) => Object.keys(value).length <= 50, { message: 'context exceeds 50 key limit' });
+  .looseObject({ event_uuid: significantEventUuidSchema.optional() })
+  .refine((value) => Object.keys(value).length <= 50, { message: 'context exceeds 50 key limit' })
+  .refine((value) => Object.keys(value).every((key) => key.length <= 128), {
+    message: 'context has a key longer than 128 characters',
+  });
 
 export type InvestigationSubjectType = z.infer<typeof investigationSubjectTypeSchema>;
 export type InvestigationSubject = z.infer<typeof investigationSubjectSchema>;
