@@ -50,6 +50,7 @@ import { pkgToPkgKey, splitPkgKey } from '../epm/registry';
 import { appContextService } from '../app_context';
 
 import {
+  collectCompiledSecretRefIds,
   getFleetServerHostsSecretReferences,
   getOutputSecretReferences,
   getDownloadSourceSecretReferences,
@@ -236,9 +237,43 @@ export async function getFullAgentPolicy(
   const downloadSourceSecretReferences = downloadSource
     ? getDownloadSourceSecretReferences(downloadSource)
     : [];
-  const packagePolicySecretReferences = (agentPolicy?.package_policies || []).flatMap(
+  // Only include package policy secret refs that appear inline as `$co.elastic.secret{<id>}`
+  // placeholders in the compiled policy. Disabled inputs/policies, never-rendered secret vars,
+  // and stale SO entries (#282280) would otherwise make Fleet Server fetch ids nothing references.
+  //
+  // Scan `agentInputs` (pre-OTel-filter) PLUS `otelcolConfig`: OTel inputs are removed from
+  // `inputs` below and re-emitted at the policy root, so their placeholders only appear there.
+  //
+  // Fail open: if the scan cannot serialize, keep every reference rather than dropping valid ones.
+  const rawPackagePolicySecretReferences = (agentPolicy?.package_policies || []).flatMap(
     (policy) => policy.secret_references || []
   );
+  const compiledSecretIds =
+    rawPackagePolicySecretReferences.length > 0
+      ? collectCompiledSecretRefIds([agentInputs, otelcolConfig])
+      : new Set<string>();
+  let packagePolicySecretReferences = compiledSecretIds
+    ? rawPackagePolicySecretReferences.filter(({ id }) => compiledSecretIds.has(id))
+    : rawPackagePolicySecretReferences;
+
+  if (compiledSecretIds && packagePolicySecretReferences.length < rawPackagePolicySecretReferences.length) {
+    const droppedIds = rawPackagePolicySecretReferences
+      .filter(({ id }) => !compiledSecretIds.has(id))
+      .map(({ id }) => id);
+    appContextService
+      .getLogger()
+      .info(
+        `Pruned ${droppedIds.length} package policy secret reference(s) not present in the compiled agent policy (agent policy: ${agentPolicy.id}): ${droppedIds.join(', ')}`
+      );
+  }
+
+  // Deduplicate: two package policies on one agent policy can legitimately share a secret id.
+  const seenIds = new Set<string>();
+  packagePolicySecretReferences = packagePolicySecretReferences.filter(({ id }) => {
+    if (seenIds.has(id)) return false;
+    seenIds.add(id);
+    return true;
+  });
 
   const fullAgentPolicy: FullAgentPolicy = {
     id: agentPolicy.id,

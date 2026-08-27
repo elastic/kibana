@@ -108,6 +108,12 @@ export async function getVersionSpecificPolicies(
         // POLICY_CHANGE actions every checkin. See https://github.com/elastic/kibana/issues/276294
         id: versionedPolicyId,
         inputs: getInputsForVersion(updatedFullPolicy?.inputs ?? fullPolicy.inputs, version),
+        // When the policy was rebuilt for this agent version, its `secret_references` was pruned
+        // against those recompiled inputs. Use that pruned array instead of the base-doc array,
+        // otherwise a placeholder emitted only for certain agent versions would have no matching
+        // entry and Fleet Server would deliver the literal `$co.elastic.secret{X}` to the agent.
+        // See https://github.com/elastic/kibana/issues/282280
+        ...(updatedFullPolicy && { secret_references: updatedFullPolicy.secret_references }),
       },
     };
     fleetServerPolicies.push(versionSpecificPolicy);

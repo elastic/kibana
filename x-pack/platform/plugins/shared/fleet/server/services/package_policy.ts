@@ -1662,6 +1662,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     // eslint-disable-next-line prefer-const
     let { version, id: _id, ...restOfPackagePolicy } = packagePolicy;
 
+    // Internal callers can omit top-level fields (e.g. `vars`) when they only intend to touch
+    // a subset of the policy. Without this backfill, `getPolicySecretPaths` and
+    // `_compilePackagePolicyInputs` would see an empty/absent set and could zero out
+    // `secret_references` for secrets that are still in use. See https://github.com/elastic/kibana/issues/282280
+    if (restOfPackagePolicy.vars === undefined) {
+      restOfPackagePolicy.vars = oldPackagePolicy.vars;
+    }
+
     if (!packagePolicy.package?.name) {
       throw new FleetError(
         `Package policy "${packagePolicy.name}" without package are not supported`
@@ -1802,7 +1810,11 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           ...(elasticsearchPrivileges && {
             elasticsearch: { privileges: elasticsearchPrivileges },
           }),
-          ...(secretReferences?.length && { secret_references: secretReferences }),
+          // Write the array even when empty: `soClient.update` is a partial merge, so omitting the
+          // key leaves a previously stored (now stale) array intact. `undefined` means secret
+          // storage is disabled — omit the key so plaintext policies are unchanged.
+          // See https://github.com/elastic/kibana/issues/282280
+          ...(secretReferences !== undefined && { secret_references: secretReferences }),
           revision: oldPackagePolicy.revision + 1,
           updated_at: new Date().toISOString(),
           updated_by: options?.user?.username ?? 'system',
@@ -1884,9 +1896,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       pkgName: newPolicy.package!.name,
       currentVersion: newPolicy.package!.version,
     });
-    const deleteSecretsPromise = secretsToDelete?.length
-      ? deleteSecrets({ esClient, soClient, ids: secretsToDelete.map((s) => s.id) })
-      : Promise.resolve();
+    // Cloud-connector secrets are shared across package policies and are not tracked in
+    // `ingest-package-policies`, so `deleteSecretsIfNotReferenced` cannot see all consumers.
+    // Mirrors the existing guard at the delete path. See https://github.com/elastic/kibana/issues/282280
+    const deleteSecretsPromise =
+      secretsToDelete?.length && !oldPackagePolicy.cloud_connector_id
+        ? deleteSecrets({ esClient, soClient, ids: secretsToDelete.map((s) => s.id) })
+        : Promise.resolve();
 
     await Promise.all([bumpPromise, assetRemovePromise, deleteSecretsPromise]);
 
@@ -2134,7 +2150,12 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
           restOfPackagePolicy = secretsRes.packagePolicyUpdate;
           secretReferences = secretsRes.secretReferences;
-          allSecretsToDelete.push(...secretsRes.secretsToDelete);
+          // Cloud-connector secrets are shared and not tracked in `ingest-package-policies`,
+          // so the reference-count guard cannot see all consumers. Skip deletion.
+          // See https://github.com/elastic/kibana/issues/282280
+          if (!oldPackagePolicy.cloud_connector_id) {
+            allSecretsToDelete.push(...secretsRes.secretsToDelete);
+          }
           inputs = restOfPackagePolicy.inputs as PackagePolicyInput[];
         }
         inputs = _compilePackagePolicyInputs(
@@ -2200,7 +2221,11 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             ...(elasticsearchPrivileges && {
               elasticsearch: { privileges: elasticsearchPrivileges },
             }),
-            ...(secretReferences?.length && { secret_references: secretReferences }),
+            // Write the array even when empty: `soClient.bulkUpdate` is a partial merge, so
+            // omitting the key leaves a previously stored (now stale) array intact.
+            // `undefined` means secret storage is disabled — omit the key.
+            // See https://github.com/elastic/kibana/issues/282280
+            ...(secretReferences !== undefined && { secret_references: secretReferences }),
             revision: oldPackagePolicy.revision + 1,
             updated_at: new Date().toISOString(),
             updated_by: options?.user?.username ?? 'system',
@@ -3046,7 +3071,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         .getInternalUserSOClientWithoutSpaceExtension()
         .find<PackagePolicySOAttributes>({
           type: savedObjectType,
-          fields: ['name', 'enabled', 'policy_ids', 'inputs', 'output_id'],
+          fields: ['name', 'enabled', 'policy_ids', 'inputs', 'output_id', 'vars', 'package'],
           searchFields: ['output_id'],
           search: escapeSearchQueryPhrase(outputId),
           perPage: SO_SEARCH_LIMIT,
@@ -3060,6 +3085,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         enabled: packagePolicy.enabled,
         policy_ids: packagePolicy.policy_ids,
         inputs: packagePolicy.inputs,
+        vars: packagePolicy.vars,
         output_id: packagePolicy.output_id === outputId ? null : packagePolicy.output_id,
         package: packagePolicy.package,
       });
