@@ -15420,7 +15420,6 @@
     "xpack.automaticImport.dataStreams.reanalyzeModal.cancelButton": "取消",
     "xpack.automaticImport.dataStreams.reanalyzeModal.confirmButton": "重新分析",
     "xpack.automaticImport.dataStreams.reanalyzeModal.title": "重新分析数据流 \"{dataStreamTitle}\"？",
-    "xpack.automaticImport.dataStreams.samplesNormalizedWarningLinesOmitted": "仅发送前 {maxLines} 行非空行。{omittedCount, plural, one {# additional line was not sent.} other {另有 # 行未发送}}",
     "xpack.automaticImport.dataStreams.samplesNormalizedWarningTitle": "应用了样本日志限制",
     "xpack.automaticImport.dataStreams.selectIndexLabel": "选择索引",
     "xpack.automaticImport.dataStreams.selectPlaceholder": "选择......",
