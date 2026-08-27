@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { METRICS_SETTINGS_PATH } from './metrics_header_paths';
+
 /**
  * Metrics parent paths that already render AppHeader and must not also mount HeaderMenuPortal.
  * Route PRs append their path here when they consume the shared menu helper.
  */
-export const METRICS_HEADER_PORTAL_EXCLUDED_PATHS: readonly string[] = [];
+export const METRICS_HEADER_PORTAL_EXCLUDED_PATHS: readonly string[] = [METRICS_SETTINGS_PATH];
 
 export function isMetricsHeaderPortalExcluded(
   pathname: string,
