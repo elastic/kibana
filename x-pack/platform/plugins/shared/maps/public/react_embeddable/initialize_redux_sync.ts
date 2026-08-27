@@ -145,7 +145,7 @@ export function initializeReduxSync({
     const nextMapInitError = getMapInitError(store.getState());
     if (nextMapInitError && !blockingError$.value) {
       blockingError$.next(new Error(nextMapInitError));
-    } else if (!nextMapInitError && !blockingError$.value) {
+    } else if (!nextMapInitError && blockingError$.value) {
       blockingError$.next(undefined);
     }
   });
