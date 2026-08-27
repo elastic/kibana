@@ -23,7 +23,7 @@ import type {
 import { registerEvalsPublicWorkflowSteps } from './workflows';
 import { APP_TITLE } from './translations';
 
-const MANAGEMENT_KEYWORDS = ['evals', 'evaluations', 'ai', 'llm', 'trace', 'tracing'] as const;
+const EVALS_KEYWORDS = ['evals', 'evaluations', 'ai', 'llm', 'trace', 'tracing'] as const;
 
 const DEFAULT_ADD_TO_DATASET_LABEL = i18n.translate('xpack.evals.addToDatasetAction.label', {
   defaultMessage: 'Add to dataset',
@@ -59,7 +59,7 @@ export class EvalsPublicPlugin
       euiIconType: 'flask',
       category: DEFAULT_APP_CATEGORIES.kibana,
       visibleIn: ['globalSearch', 'classicSideNav', 'projectSideNav'],
-      keywords: [...MANAGEMENT_KEYWORDS],
+      keywords: [...EVALS_KEYWORDS],
       async mount({ element, history }) {
         const { mountStandaloneApp } = await import('./standalone_app/mount_app');
         const [coreStart, startDeps] = await coreSetup.getStartServices();
@@ -72,7 +72,7 @@ export class EvalsPublicPlugin
         id: PLUGIN_ID,
         title: APP_TITLE,
         order: 2,
-        keywords: [...MANAGEMENT_KEYWORDS],
+        keywords: [...EVALS_KEYWORDS],
         capabilitiesId: PLUGIN_ID,
         mount: async (mountParams) => {
           const { mountManagementSection } = await import('./management_section/mount_section');
