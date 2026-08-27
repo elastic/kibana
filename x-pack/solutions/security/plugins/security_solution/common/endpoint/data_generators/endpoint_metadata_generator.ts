@@ -167,11 +167,6 @@ export class EndpointMetadataGenerator extends BaseDataGenerator {
       capabilities.push('cancel');
     }
 
-    // v9.6.0 introduced Kill-Process descendents
-    if (gte(agentVersion, '9.6.0')) {
-      capabilities.push('kill_process_descendents');
-    }
-
     // v9.6.0 introduced physical memory dump capability
     if (gte(agentVersion, '9.6.0')) {
       capabilities.push('memdump_raw');
