@@ -34,7 +34,11 @@ export const MAX_OVERRIDES = 500;
 
 export const readAllBeforeSchema = z.iso.datetime();
 
-/** An override for one ID */
+/** An override for one ID
+ * `read`: boolean indicating whether the notification is read.
+ *   boolean enables client to mark notifications as read and unread explicitly.
+ * `markedAt`: timestamp of the read action.
+ */
 export const readOverrideSchema = z
   .object({ read: z.boolean(), markedAt: z.iso.datetime() })
   .strict();
