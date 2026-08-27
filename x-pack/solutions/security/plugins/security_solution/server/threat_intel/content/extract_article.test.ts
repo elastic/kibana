@@ -517,17 +517,41 @@ describe('CDATA survives article extraction', () => {
  * losing the real indicator entirely. CDATA is now unwrapped before the parse so both see
  * the same document.
  */
-describe('CDATA-backed script does not win selection', () => {
-  it('prefers the real report over a teaser inflated by a CDATA bundle', () => {
-    const bundle = 'var x=1;'.repeat(4000);
-    const page =
-      `<html><body><article><![CDATA[<script>${bundle}</script>teaser]]></article>` +
-      '<main><p>actual report with evil.test</p></main></body></html>';
+describe('a teaser inflated by disappearing markup does not win selection', () => {
+  const BUNDLE = 'var x=1;'.repeat(4000);
+
+  // Counting bytes in the DOM was wrong the same way for each of these: markup that the
+  // downstream stage strips still inflated the candidate, so a teaser beat the real report
+  // and then collapsed to a few characters, losing every indicator. Scoring with `stripHtml`
+  // covers all of them, and any representation it learns to strip later.
+  it.each([
+    ['a CDATA script', `<article><![CDATA[<script>${BUNDLE}</script>teaser]]></article>`],
+    ['an entity-encoded script', `<article>&lt;script&gt;${BUNDLE}&lt;/script&gt;teaser</article>`],
+    ['an entity-encoded style', `<article>&lt;style&gt;${BUNDLE}&lt;/style&gt;teaser</article>`],
+    ['an ordinary script', `<article><script>${BUNDLE}</script>teaser</article>`],
+  ])('prefers the real report over a teaser inflated by %s', (_label, teaser) => {
+    const page = `<html><body>${teaser}<main><p>actual report with evil.test</p></main></body></html>`;
 
     const result = stripHtml(extractArticleHtml(page));
 
     expect(result).toContain('evil.test');
     expect(result).not.toContain('var x=1');
+  });
+
+  // Precise scoring is one parse per candidate, so it is bounded. These shapes take the
+  // fallback path and must stay cheap rather than correct.
+  it.each([
+    ['many candidates', `<html><body>${'<article>x</article>'.repeat(80000)}</body></html>`],
+    [
+      'many children',
+      `<html><body><article>${'<b>x</b>'.repeat(200000)}<nav>m</nav></article></body></html>`,
+    ],
+  ])('stays cheap on %s', (_label, page) => {
+    const started = process.hrtime.bigint();
+    extractArticleHtml(page);
+    const elapsedMs = Number(process.hrtime.bigint() - started) / 1e6;
+
+    expect(elapsedMs).toBeLessThan(5000);
   });
 
   it('still keeps a CDATA article body that is the real content', () => {

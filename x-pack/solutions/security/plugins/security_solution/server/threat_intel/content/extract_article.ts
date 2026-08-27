@@ -6,7 +6,13 @@
  */
 
 import * as cheerio from 'cheerio';
-import { capToParseBytes, normalizeSelfClosedRawText, PARSER_OPTIONS, unwrapCdata } from './text';
+import {
+  capToParseBytes,
+  normalizeSelfClosedRawText,
+  PARSER_OPTIONS,
+  stripHtml,
+  unwrapCdata,
+} from './text';
 
 /**
  * Strip known page chrome (nav/header/footer/sidebar) from raw vendor HTML,
@@ -130,6 +136,16 @@ interface ParsedNode {
  */
 const MAX_NESTING_DEPTH = 256;
 
+/**
+ * Bounds on scoring candidates with the real downstream text function.
+ *
+ * Precise scoring costs one `stripHtml` per candidate, so it is used only where that is
+ * cheap. Real article pages have a handful of article-like containers and are well under a
+ * megabyte; past either bound the linear DOM count is used instead.
+ */
+const PRECISE_SCORE_MAX_CANDIDATES = 32;
+const PRECISE_SCORE_MAX_BYTES = 2 * 1024 * 1024;
+
 const maxDepthOf = (roots: ParsedNode[]): number => {
   let max = 0;
   const stack: Array<{ node: ParsedNode; depth: number }> = roots.map((node) => ({
@@ -251,20 +267,43 @@ const selectArticleHtml = (html: string): string => {
    * cannot outweigh the real report on raw text length, win selection, and then be
    * stripped to almost nothing.
    */
+  const candidateEls = ARTICLE_SELECTORS.flatMap((selector, priority) =>
+    $(selector)
+      .toArray()
+      .map((el) => ({ el, priority }))
+  );
+
+  // Scored with `stripHtml`, the function that actually produces `body_text`, rather than
+  // with an approximation of it.
+  //
+  // Counting bytes in the DOM kept being wrong in the same way: markup that disappears
+  // downstream still inflated a candidate. A `<script>` inside CDATA did it, and once that
+  // was fixed an entity-encoded `&lt;script&gt;` body did it again, because neither is
+  // visible to the chrome selectors but both are text as far as a DOM walk is concerned. In
+  // both cases a teaser outscored the real report, won selection, and then collapsed to a
+  // few characters, losing every indicator in the report. Any future representation the
+  // downstream stage learns to strip would have been a third instance.
+  //
+  // Bounded rather than unconditional, because this is one parse per candidate: a page with
+  // more than a few dozen article-like containers, or one larger than a couple of megabytes,
+  // falls back to the linear DOM count. Mis-selecting on a page like that is acceptable;
+  // spending a task worker on it is not. The choice is made once per document so every
+  // candidate is measured the same way.
+  const usePreciseScore =
+    candidateEls.length <= PRECISE_SCORE_MAX_CANDIDATES && html.length <= PRECISE_SCORE_MAX_BYTES;
+
   // `roots` was captured before the removals above, which mutate the tree in place, so this
   // walk sees the post-removal document. That ordering is load-bearing: scoring candidates
   // against a tree that still contained chrome is the bug the removals exist to prevent.
-  const lengths = visibleLengths(roots);
+  const lengths = usePreciseScore ? undefined : visibleLengths(roots);
 
-  const candidates = ARTICLE_SELECTORS.flatMap((selector, priority) =>
-    $(selector)
-      .toArray()
-      .map((el) => ({
-        el,
-        priority,
-        length: lengths.get(el as unknown as ParsedNode) ?? 0,
-      }))
-  );
+  const candidates = candidateEls.map(({ el, priority }) => ({
+    el,
+    priority,
+    length: usePreciseScore
+      ? stripHtml($(el).html() ?? '').length
+      : lengths?.get(el as unknown as ParsedNode) ?? 0,
+  }));
 
   let $container: ReturnType<typeof $> | null = null;
   if (candidates.length > 0) {
