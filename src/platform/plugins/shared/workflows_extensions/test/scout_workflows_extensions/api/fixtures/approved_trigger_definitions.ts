@@ -10,10 +10,19 @@
 /**
  * APPROVED TRIGGER DEFINITIONS
  *
- * This list must be kept up-to-date with all registered trigger definitions.
+ * This list is the full catalog of registered trigger definitions. The Scout
+ * suite under `test/scout_workflows_extensions` boots the
+ * `workflows_extensions` config set so gated plugins are enabled and every
+ * registered trigger is present.
+ *
  * When a new trigger is registered, developers must:
  * 1. Add the trigger ID and schema hash to this list (alphabetically sorted)
  * 2. Get approval from the workflows-eng team
+ * 3. If registration is gated by a plugin `enabled` config that is not already
+ *    on in the `workflows_extensions` Scout config set
+ *    (`classic.stateful.config.ts`), add that flag there. Do not add flags
+ *    that already default to `true` on stateful (for example
+ *    `xpack.alerting_v2.enabled` and `xpack.significantEvents.enabled`).
  *
  * If the event schema changes, the schema hash must be updated, and get the approval again.
  *
@@ -23,45 +32,47 @@
  *   schemaHash: 'a1b2c3d4e5f6...',
  * },
  *
- * To get the schemaHash for a trigger: run the server, then GET internal/workflows_extensions/trigger_definitions
- * and copy the schemaHash from the response for the trigger id.
+ * To get the schemaHash for a trigger: run this suite (or start the server with
+ * `--serverConfigSet workflows_extensions`), then GET
+ * internal/workflows_extensions/trigger_definitions and copy the schemaHash
+ * from the response for the trigger id.
  */
 export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: string }> = [
   {
     id: 'alerting.episodeAcked',
-    schemaHash: 'd280f377a1b17bcbd655e93f00ebb80b1935ef93951115cc1559305a5da01942',
+    schemaHash: '53f31d5468c0fb12a49faa3233c78a87837772cb161d1db8072803877bddf3b6',
   },
   {
     id: 'alerting.episodeActivated',
-    schemaHash: '91921d540292ae32b96893da10fd10ce746b2ede5c5f7f06e0bd19bdd31e8207',
+    schemaHash: 'c5a55a218565c7d084269021a9d6252d9ea972a8a9ce496082da5c6e76d09a01',
   },
   {
     id: 'alerting.episodeAssigned',
-    schemaHash: 'cab4d7b9ed82d802f6dd51f4d29327f7fb84bfabcf958a046c53ceb5d7136b0b',
+    schemaHash: 'b99211de1fdabb5e2a2942031495b8c34d317a3feccd7efaa81bf997c0412439',
   },
   {
     id: 'alerting.episodeDeactivated',
-    schemaHash: 'a394bb060c7cb9ec0b0d279cc47afc0366f9813273872895331b3d29a66cc9a3',
+    schemaHash: '623ec35bd18482cc9a3bc7a9ecaf3b3de4f203c8cacc207e102b8a5b14fa554a',
   },
   {
     id: 'alerting.episodeSnoozed',
-    schemaHash: 'ca2d9156382a2d132b94e6058488d1f78df92e539445403f1b315ea16a3e6270',
+    schemaHash: 'f0517884b4e0560f86a62515c0d84420fed367ef2cfdda501cfedad010f22914',
   },
   {
     id: 'alerting.episodeTagged',
-    schemaHash: '4625536d4a9c39dd3f769ec13d304d21c11ff88f6c8b3254990a3773ff9aae8e',
+    schemaHash: 'd6ad1872b85995d8088dfacbad85f775236ceb61a3982b077c7a00902c84bf95',
   },
   {
     id: 'alerting.episodeUnacked',
-    schemaHash: 'd280f377a1b17bcbd655e93f00ebb80b1935ef93951115cc1559305a5da01942',
+    schemaHash: '53f31d5468c0fb12a49faa3233c78a87837772cb161d1db8072803877bddf3b6',
   },
   {
     id: 'alerting.episodeUnassigned',
-    schemaHash: 'd280f377a1b17bcbd655e93f00ebb80b1935ef93951115cc1559305a5da01942',
+    schemaHash: '53f31d5468c0fb12a49faa3233c78a87837772cb161d1db8072803877bddf3b6',
   },
   {
     id: 'alerting.episodeUnsnoozed',
-    schemaHash: 'd280f377a1b17bcbd655e93f00ebb80b1935ef93951115cc1559305a5da01942',
+    schemaHash: '53f31d5468c0fb12a49faa3233c78a87837772cb161d1db8072803877bddf3b6',
   },
   {
     id: 'alerting.ruleCreated',
@@ -81,7 +92,7 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
   },
   {
     id: 'alerting.ruleEventsGenerated',
-    schemaHash: '31e25156a8b716955cad7a2ac7e2344d825c17d327aeb9223b3c6a836e07aa14',
+    schemaHash: '809265f7f0af6bdd32df0498a0f756a17220587024df2fe25eb69b0060b38fe1',
   },
   {
     id: 'alerting.ruleExecutionFailed',

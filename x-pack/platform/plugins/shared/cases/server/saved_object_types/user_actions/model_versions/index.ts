@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './packs_table';
+export { modelVersion1 } from './model_version_1';
