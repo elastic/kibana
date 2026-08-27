@@ -2067,13 +2067,13 @@ paths:
             default: 1
             minimum: 1
             type: number
-        - description: Number of results per page. Maximum 50.
+        - description: Number of results per page. Maximum 1000.
           in: query
           name: per_page
           required: false
           schema:
-            default: 50
-            maximum: 50
+            default: 1000
+            maximum: 1000
             minimum: 1
             type: number
         - description: Sort direction for results, ordered by updated_at.
@@ -2102,7 +2102,7 @@ paths:
                   value:
                     pagination:
                       page: 1
-                      per_page: 50
+                      per_page: 1000
                       total: 3
                     results:
                       - agent_id: elastic-ai-agent
@@ -2121,7 +2121,7 @@ paths:
                   value:
                     pagination:
                       page: 1
-                      per_page: 50
+                      per_page: 1000
                       total: 128
                     results:
                       - agent_id: elastic-ai-agent
@@ -2142,7 +2142,7 @@ paths:
         - lang: curl
           source: |
             curl \
-              -X GET "${KIBANA_URL}/api/agent_builder/conversations?page=1&per_page=50&sort_order=desc" \
+              -X GET "${KIBANA_URL}/api/agent_builder/conversations?page=1&sort_order=desc" \
               -H "Authorization: ApiKey ${API_KEY}" \
               -H "elastic-api-version: 2023-10-31"
         - label: Filter to pinned conversations
@@ -2154,7 +2154,7 @@ paths:
               -H "elastic-api-version: 2023-10-31"
         - lang: Console
           source: |
-            GET kbn://api/agent_builder/conversations?page=1&per_page=50&sort_order=desc
+            GET kbn://api/agent_builder/conversations?page=1&sort_order=desc
       x-state: Added in 9.2.0
       x-metaTags:
         - content: Kibana
