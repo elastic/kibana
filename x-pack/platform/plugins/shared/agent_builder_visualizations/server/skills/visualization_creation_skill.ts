@@ -77,6 +77,7 @@ Do **not** use this skill when:
      - \`chartType\` (required for a new Lens visualization; optional hint for a new Vega visualization; optional on updates)
      - \`esql\` (optional, when you have a validated ES|QL)
      - \`attachment_id\` (optional, only when updating an existing visualization)
+     - \`time_range\` (optional; **only** when the user explicitly named a time window, e.g. "last 7 days", "May 20–24". Do not invent a range. Omit it otherwise — create applies a data-aware default, and edits keep the existing range.)
    - For multi-panel requests, resolve the index (and validate the fields) ONCE up front, then call ${
      platformCoreTools.createVisualization
    } once per panel WITH that \`index\`. Do **not** fan out several index-less calls in parallel — a single failed auto-discovery fails all of them identically.
@@ -159,6 +160,17 @@ For every new Lens visualization, choose and pass \`chartType\`; it is required.
   "query": "Show average system.cpu.total.pct over time grouped by host.name",
   "index": "metrics-system.cpu-default",
   "chartType": "xy"
+}
+\`\`\`
+
+## Create with an explicit user-named time window
+
+\`\`\`json
+{
+  "query": "Show error count over the last 7 days",
+  "index": "logs-*",
+  "chartType": "xy",
+  "time_range": { "from": "now-7d", "to": "now" }
 }
 \`\`\`
 

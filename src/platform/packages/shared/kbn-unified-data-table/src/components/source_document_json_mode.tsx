@@ -22,6 +22,7 @@ import type {
 import { formatFieldStringValueWithHighlights } from '@kbn/discover-utils';
 import { CELL_CLASS } from '../utils/get_render_cell_value';
 import { flattenedToNestedDocument, MAX_TREE_VALUES } from '../utils/build_document_tree';
+import type { JsonModeSettings } from '../types';
 import type { FormatValue } from './json_tree_viewer/json_tree_viewer';
 import { JsonTreeViewer, type TreeExpansionState } from './json_tree_viewer/json_tree_viewer';
 import { getDocumentText } from './json_tree_viewer/doc_scan';
@@ -37,6 +38,7 @@ export interface SourceDocumentJsonModeProps {
   columnsMeta: DataTableColumnsMeta | undefined;
   shouldShowFieldHandler: ShouldShowFieldInTableHandler;
   fieldFormats: FieldFormatsStart;
+  jsonModeSettings?: JsonModeSettings;
   /** When set, the JSON tree is filtered to these fields; empty = whole document. */
   selectedColumns?: string[];
 }
@@ -47,10 +49,14 @@ export const SourceDocumentJsonMode = ({
   columnsMeta,
   shouldShowFieldHandler,
   fieldFormats,
+  jsonModeSettings,
   selectedColumns,
 }: SourceDocumentJsonModeProps) => {
   const { inTableSearchTerm, isCounting: isInTableSearchCounting } =
     useContext(InTableSearchCellContext);
+
+  const hideNulls = jsonModeSettings?.hideNulls ?? false;
+  const wrapLines = jsonModeSettings?.wrapLines ?? true;
 
   const initialTreeState = useMemo(() => treeExpansionStore.get(row.raw), [row]);
   const onTreeStateChange = useCallback(
@@ -58,12 +64,14 @@ export const SourceDocumentJsonMode = ({
     [row]
   );
 
-  // Unflatten the row and process fields for better rendering.
+  // Unflatten the row and process fields for better rendering. Null values are dropped here when
+  // hidden, so they take no part in search or the truncation budget.
   const { tree: documentTree, truncated } = flattenedToNestedDocument({
     row,
     dataView,
     columnsMeta,
     shouldShowFieldHandler,
+    hideNulls,
     selectedColumns,
   });
 
@@ -129,6 +137,7 @@ export const SourceDocumentJsonMode = ({
         onStateChange={onTreeStateChange}
         expandNodesContainingTerm={inTableSearchTerm}
         formatValue={formatTreeValue}
+        wrapLines={wrapLines}
       />
     </span>
   );
