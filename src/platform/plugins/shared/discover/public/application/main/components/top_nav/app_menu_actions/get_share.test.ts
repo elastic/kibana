@@ -7,7 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isValidElement } from 'react';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import {
+  ExpandedDocLinkability,
+  getExpandedDocLinkDisabledReason,
+} from '../../../utils/expanded_doc';
+import type { DiscoverAppState } from '../../../state_management/redux';
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { buildShareOptions } from './get_share';
 import {
@@ -321,5 +329,129 @@ describe('getShare', () => {
     );
 
     getContextsSpy.mockRestore();
+  });
+
+  describe('expanded document link callout', () => {
+    const buildOptions = () =>
+      buildShareOptions({
+        services: mockDiscoverService,
+        discoverParams: {
+          dataView: dataViewMock,
+          isEsqlMode: false,
+          adHocDataViews: [],
+          authorizedRuleTypeIds: [],
+        },
+        currentTab: toolkit.getCurrentTab(),
+        runtimeStateManager: toolkit.runtimeStateManager,
+        persistedDiscoverSession: undefined,
+        totalHitsState: { result: 0, fetchStatus: FetchStatus.COMPLETE },
+        hasUnsavedChanges: false,
+      });
+
+    const expandedDoc = buildDataTableRecord({ _id: '1', _index: 'i' }, dataViewMock);
+    const expandedDocWithoutMetadata = buildDataTableRecord(
+      { _source: { message: 'no metadata' } },
+      dataViewMock
+    );
+
+    const setExpandedDoc = (doc: DataTableRecord | undefined) => {
+      toolkit.internalState.dispatch(
+        internalStateActions.setExpandedDoc({
+          tabId: toolkit.getCurrentTab().id,
+          expandedDoc: doc,
+        })
+      );
+    };
+
+    const setQuery = (query: DiscoverAppState['query']) => {
+      toolkit.internalState.dispatch(
+        internalStateActions.updateAppState({
+          tabId: toolkit.getCurrentTab().id,
+          appState: { query },
+        })
+      );
+    };
+
+    // `getTime` is a fixed stub, so configure it directly.
+    const setTimeRange = (timeRange: { from: string; to: string }) => {
+      jest
+        .mocked(mockDiscoverService.data.query.timefilter.timefilter.getTime)
+        .mockReturnValue(timeRange);
+    };
+
+    const getHelpTextProps = async () => {
+      const shareOptions = await buildOptions();
+      const helpText = shareOptions.objectTypeMeta.config?.link?.helpText;
+
+      return isValidElement<{ title: string; text: string }>(helpText) ? helpText.props : undefined;
+    };
+
+    afterEach(() => {
+      setExpandedDoc(undefined);
+      setQuery({ query: '', language: 'kuery' });
+      setTimeRange({ from: 'now-15m', to: 'now' });
+    });
+
+    it('warns that a relative time range may not contain the linked document', async () => {
+      setQuery({ query: '', language: 'kuery' });
+      setTimeRange({ from: 'now-15m', to: 'now' });
+      setExpandedDoc(expandedDoc);
+
+      expect((await getHelpTextProps())?.title).toBe('This link includes an open document');
+    });
+
+    it('refers to an open result for an ES|QL query with a relative time range', async () => {
+      setQuery({ esql: 'FROM logs METADATA _id, _index' });
+      setTimeRange({ from: 'now-15m', to: 'now' });
+      setExpandedDoc(expandedDoc);
+
+      expect((await getHelpTextProps())?.title).toBe('This link includes an open result');
+    });
+
+    it('does not warn when the time range is already absolute', async () => {
+      setQuery({ query: '', language: 'kuery' });
+      setTimeRange({ from: '2025-01-01T00:00:00.000Z', to: '2025-01-02T00:00:00.000Z' });
+      setExpandedDoc(expandedDoc);
+
+      expect(await getHelpTextProps()).toBeUndefined();
+    });
+
+    it('does not warn when no document is expanded', async () => {
+      setTimeRange({ from: 'now-15m', to: 'now' });
+
+      expect(await getHelpTextProps()).toBeUndefined();
+    });
+
+    it('explains when the expanded document is missing _id/_index', async () => {
+      setQuery({ esql: 'FROM logs' });
+      setExpandedDoc(expandedDocWithoutMetadata);
+
+      const props = await getHelpTextProps();
+
+      expect(props?.title).toBe("This link won't include the open result");
+      expect(props?.text).toBe(
+        getExpandedDocLinkDisabledReason(ExpandedDocLinkability.EsqlMissingMetadata)
+      );
+    });
+
+    it('explains when an ES|QL query transforms its rows', async () => {
+      setQuery({ esql: 'FROM logs METADATA _id, _index | STATS count() BY host' });
+      setExpandedDoc(expandedDoc);
+
+      const props = await getHelpTextProps();
+
+      expect(props?.title).toBe("This link won't include the open result");
+      expect(props?.text).toBe(
+        getExpandedDocLinkDisabledReason(ExpandedDocLinkability.EsqlTransformational)
+      );
+    });
+
+    it('reports the unlinkable reason ahead of the relative time range', async () => {
+      setQuery({ esql: 'FROM logs' });
+      setTimeRange({ from: 'now-15m', to: 'now' });
+      setExpandedDoc(expandedDocWithoutMetadata);
+
+      expect((await getHelpTextProps())?.title).toBe("This link won't include the open result");
+    });
   });
 });
