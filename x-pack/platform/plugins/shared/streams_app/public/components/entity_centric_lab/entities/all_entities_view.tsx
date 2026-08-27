@@ -14,6 +14,7 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonGroup,
+  EuiCopy,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
@@ -1293,6 +1294,33 @@ export const AllEntitiesView = ({
                       compact
                       neutral
                     />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiCopy
+                      textToCopy={typeof window !== 'undefined' ? window.location.href : ''}
+                      beforeMessage={i18n.translate(
+                        'xpack.streams.entityCentricLab.entities.copyUrl.tooltip',
+                        { defaultMessage: 'Copy a link to this view to share' }
+                      )}
+                      afterMessage={i18n.translate(
+                        'xpack.streams.entityCentricLab.entities.copyUrl.copied',
+                        { defaultMessage: 'Copied' }
+                      )}
+                    >
+                      {(copy) => (
+                        <EuiButton
+                          size="s"
+                          color="text"
+                          iconType="link"
+                          onClick={copy}
+                          data-test-subj="entityCentricLabCopyUrlButton"
+                        >
+                          {i18n.translate('xpack.streams.entityCentricLab.entities.copyUrl.label', {
+                            defaultMessage: 'Copy URL',
+                          })}
+                        </EuiButton>
+                      )}
+                    </EuiCopy>
                   </EuiFlexItem>
                 </EuiFlexGroup>
                 <EuiHorizontalRule margin="m" />
