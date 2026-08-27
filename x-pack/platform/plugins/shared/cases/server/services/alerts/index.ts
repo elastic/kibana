@@ -147,13 +147,17 @@ export class AlertService {
     if (typeof source !== 'object' || source === null) return undefined;
     const s = source as Record<string, unknown>;
     const modern = s[ALERT_WORKFLOW_STATUS];
-    if (
-      modern === 'open' ||
-      modern === 'acknowledged' ||
-      modern === 'in-progress' ||
-      modern === 'closed'
-    ) {
-      return modern;
+    if (modern != null) {
+      // A non-null modern field is authoritative; do not fall back to signal.status.
+      if (
+        modern === 'open' ||
+        modern === 'acknowledged' ||
+        modern === 'in-progress' ||
+        modern === 'closed'
+      ) {
+        return modern;
+      }
+      return undefined;
     }
     // Legacy .siem-signals documents only have signal.status; use it as a fallback.
     const signal = s.signal;

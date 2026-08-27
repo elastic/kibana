@@ -1056,6 +1056,38 @@ describe('updateAlertsStatus — event bus', () => {
     bus.removeAllListeners();
   });
 
+  it('emits with the affected ID when unrecognized modern status coexists with a valid signal.status', async () => {
+    // parseWorkflowStatus must not fall back to signal.status when the modern field is non-null.
+    // Without the guard, signal.status 'closed' would equal the target and suppress the event,
+    // even though the update script will mutate the non-null modern field from 'triaged' to 'closed'.
+    const bus = new CasesEventBus();
+    const listener = jest.fn();
+    bus.onAlertStatusChanged(listener);
+
+    esClient.mget.mockResolvedValueOnce({
+      docs: [
+        {
+          found: true,
+          _id: 'a1',
+          _index: '.siem-signals',
+          _source: { 'kibana.alert.workflow_status': 'triaged', signal: { status: 'closed' } },
+        },
+      ],
+    } as never);
+
+    const alertService = new AlertService(esClient, logger, alertsClient, bus, request);
+    await alertService.updateAlertsStatus([
+      { id: 'a1', index: '.siem-signals', status: CaseStatuses.closed },
+    ]);
+
+    expect(listener).toHaveBeenCalledTimes(1);
+    const { payload } = listener.mock.calls[0][0];
+    expect(payload.alertIds).toEqual(['a1']);
+    expect(payload.previousStatuses).toEqual([]);
+
+    bus.removeAllListeners();
+  });
+
   it('treats same id with different indices as independent entries (composite key)', async () => {
     const bus = new CasesEventBus();
     const listener = jest.fn();

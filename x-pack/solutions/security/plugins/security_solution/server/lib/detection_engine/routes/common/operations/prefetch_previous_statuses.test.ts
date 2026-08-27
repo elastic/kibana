@@ -53,6 +53,14 @@ describe('extractWorkflowStatus', () => {
     expect(extractWorkflowStatus({ [ALERT_WORKFLOW_STATUS]: 'triaged' })).toBeUndefined();
   });
 
+  it('returns undefined for an unrecognized modern status even when a valid signal.status is present', () => {
+    // The update script treats a non-null modern field as authoritative; signal.status must not
+    // be used as a fallback here or the no-op check would suppress events for changing docs.
+    expect(
+      extractWorkflowStatus({ [ALERT_WORKFLOW_STATUS]: 'triaged', signal: { status: 'closed' } })
+    ).toBeUndefined();
+  });
+
   it('returns the status when it is a valid WorkflowStatus value', () => {
     expect(extractWorkflowStatus({ [ALERT_WORKFLOW_STATUS]: 'acknowledged' })).toBe('acknowledged');
     expect(extractWorkflowStatus({ [ALERT_WORKFLOW_STATUS]: 'open' })).toBe('open');
