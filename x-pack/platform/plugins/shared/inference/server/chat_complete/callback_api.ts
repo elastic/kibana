@@ -42,6 +42,7 @@ import {
   retryHoldingTokenCountEvents,
   streamToResponse,
 } from './utils';
+import { retryWithExponentialBackoff } from '../../common/utils/retry_with_exponential_backoff';
 import type { InferenceCallbackManager } from '../inference_client/callback_manager';
 import { getRetryFilter } from '../../common/utils/error_retry_filter';
 import { deanonymizeMessage } from './anonymization/deanonymize_message';
@@ -283,6 +284,7 @@ function createChatCompletePipeline({
               toolChoice,
               tools,
               temperature,
+              reasoning,
               logger,
               functionCalling,
               modelName,
@@ -290,6 +292,8 @@ function createChatCompletePipeline({
               metadata,
               timeout,
               maxContentLength,
+              cacheControl,
+              sessionId,
               stream,
             }).pipe(chunksIntoMessage({ toolOptions: { toolChoice, tools }, logger }))
         ).pipe(
@@ -301,7 +305,7 @@ function createChatCompletePipeline({
                 maxRetry: connectorRetry.maxRetries,
                 backoffMultiplier: connectorRetry.backoffMultiplier,
                 initialDelay: connectorRetry.initialDelay,
-                errorFilter: (error) => !emittedEvent && connectorRetry.retryFilter(error),
+                errorFilter: (error: Error) => !emittedEvent && connectorRetry.retryFilter(error),
               })
             : identity
         );

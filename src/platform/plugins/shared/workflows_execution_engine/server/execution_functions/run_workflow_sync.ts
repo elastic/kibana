@@ -56,7 +56,10 @@ export const runWorkflowSync = async ({
     stepExecutionRepository,
   });
 
-  validateSyncWorkflow(setup.workflowExecutionGraph);
+  validateSyncWorkflow(
+    setup.workflowExecutionGraph,
+    dependencies.workflowsExtensions.getStepDefinition
+  );
   await setup.workflowRuntime.start();
   await workflowExecutionLoop({
     ...setup,
