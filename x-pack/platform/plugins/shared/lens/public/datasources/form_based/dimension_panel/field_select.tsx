@@ -222,6 +222,9 @@ export const FieldSelect: FC<FieldSelectProps> = ({
       onDelete={onDeleteColumn}
       fieldIsInvalid={Boolean(incompleteOperation || fieldIsInvalid)}
       data-test-subj={dataTestSub ?? 'indexPattern-dimension-field'}
+      // FTR waits on this (Lens sourceField), not the combobox input value, which
+      // setElement types as a filter before the option click lands.
+      data-selected-field={selectedField}
       aria-describedby={ariaDescribedby}
       aria-label={ariaLabel}
     />

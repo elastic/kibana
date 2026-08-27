@@ -248,15 +248,15 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       const field = opts.field;
       if (field) {
         await this.selectOptionFromComboBox('indexPattern-dimension-field', field);
-        // Close too early discards the operation→field transition. The input label is a proxy
-        // for that click; Lens layer state (sourceField / clearing incompleteColumns) updates
-        // asynchronously and has no test hook. Skip aria-invalid: FieldSelect ORs
-        // incompleteOperation into it, so the combo stays "invalid" until that async update
-        // lands. A field already in the dropdown is a valid option — invalid here means
-        // "dimension not finished yet", which is slow to clear on CCS (ftr-remote:logstash-*).
+        // Close too early discards the operation→field transition. Do not wait on the
+        // combobox input: setElement types `field` as a filter before the option is
+        // clicked. data-selected-field is Lens sourceField (or incompleteField) and
+        // updates only after insertOrReplaceColumn. It is independent of aria-invalid,
+        // which stays true while incompleteOperation is set and can linger on CCS.
         await retry.waitFor('field selection to commit', async () => {
           const fieldCombo = await testSubjects.find('indexPattern-dimension-field');
-          return await comboBox.isOptionSelected(fieldCombo, field, { requireValid: false });
+          const selected = (await fieldCombo.getAttribute('data-selected-field')) ?? '';
+          return selected === field;
         });
       }
 

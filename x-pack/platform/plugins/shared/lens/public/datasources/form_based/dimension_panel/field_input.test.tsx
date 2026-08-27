@@ -156,6 +156,21 @@ describe('FieldInput', () => {
     expect(screen.getByTestId('indexPattern-dimension-field')).toBeInTheDocument();
   });
 
+  it('should expose the Lens-committed field on the combobox for functional tests', () => {
+    const { unmount } = renderFieldInput();
+    expect(screen.getByTestId('indexPattern-dimension-field')).toHaveAttribute(
+      'data-selected-field',
+      'source'
+    );
+    unmount();
+
+    renderFieldInput({ incompleteField: 'dest' });
+    expect(screen.getByTestId('indexPattern-dimension-field')).toHaveAttribute(
+      'data-selected-field',
+      'dest'
+    );
+  });
+
   it('should render an error message when incomplete operation is on', () => {
     const { container } = renderFieldInput({
       incompleteOperation: 'terms',
