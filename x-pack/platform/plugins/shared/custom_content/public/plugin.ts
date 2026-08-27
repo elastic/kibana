@@ -17,6 +17,7 @@ import { CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE } from '../common/panel_context_
 import { customContentContextAttachmentUiDefinition } from './attachment_types/custom_content_context';
 import { setServices } from './services';
 import { ADD_CUSTOM_CONTENT_ACTION_ID } from '../common/constants';
+import { setAnalyticsSetup } from './telemetry/analytics_setup';
 
 interface SetupDeps {
   embeddable: EmbeddableSetup;
@@ -30,10 +31,7 @@ interface StartDeps {
 
 export class CustomContentPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
   setup(core: CoreSetup, { embeddable }: SetupDeps) {
-    void import('./telemetry/events_registration').then(
-      ({ registerCustomContentAnalyticsEvents }) =>
-        registerCustomContentAnalyticsEvents(core.analytics)
-    );
+    setAnalyticsSetup(core.analytics);
     embeddable.registerEmbeddablePublicDefinition(CUSTOM_CONTENT_EMBEDDABLE_TYPE, async () => {
       const { customContentEmbeddableFactory } = await import('./async_services');
       return customContentEmbeddableFactory;
