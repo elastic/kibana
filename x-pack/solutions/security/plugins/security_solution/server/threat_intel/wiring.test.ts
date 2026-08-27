@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { readFileSync } from 'fs';
+import { join } from 'path';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ExperimentalFeatures } from '../../common';
 import { registerThreatIntelInferenceFeatures } from './inference_features';
@@ -228,6 +230,40 @@ describe('threat intel wiring', () => {
       await new Promise(process.nextTick);
       expect(schedulePromoteThreatIndicatorsTask).not.toHaveBeenCalled();
       expect(scheduleScrubReportContentTask).not.toHaveBeenCalled();
+    });
+  });
+
+  // ALL_REGISTRATIONS is hand-written, so it drifts the moment wiring.ts gains a
+  // registration and nobody adds the row. That failure is silent and it lands on the
+  // one guarantee the whole flag-off design rests on, so derive the expected set from
+  // wiring.ts itself rather than trusting the list to stay in step.
+  describe('the flag-off list stays in step with wiring.ts', () => {
+    it('covers every registration wiring.ts actually performs', () => {
+      const wiringSrc = readFileSync(join(__dirname, 'wiring.ts'), 'utf8');
+      const testSrc = readFileSync(join(__dirname, 'wiring.test.ts'), 'utf8');
+
+      // Imported AND called. Imported alone would count a type-only import; called
+      // alone matches prose, since a log line ending "... registered (" looks exactly
+      // like a call to a regex.
+      const imported = new Set(
+        [...wiringSrc.matchAll(/^import\s[\s\S]*?from\s+'[^']+';/gm)]
+          .flatMap((m) => [...m[0].matchAll(/\b((?:register|schedule|ensure)[A-Za-z]+)\b/g)])
+          .map((m) => m[1])
+      );
+      const called = new Set(
+        [...wiringSrc.matchAll(/\b((?:register|schedule|ensure)[A-Za-z]+)\s*\(/g)]
+          .map((m) => m[1])
+          .filter((name) => imported.has(name))
+      );
+      expect(called.size).toBeGreaterThan(0);
+
+      const listed = testSrc.slice(
+        testSrc.indexOf('const ALL_REGISTRATIONS'),
+        testSrc.indexOf('] as const;')
+      );
+
+      const uncovered = [...called].filter((name) => !listed.includes(name));
+      expect(uncovered).toEqual([]);
     });
   });
 });
