@@ -8,31 +8,20 @@
 import xml2js from 'xml2js';
 
 /**
- * Resolved payload of a feed entry's description/content, disambiguated once,
- * here, where the feed's actual XML structure and namespace declarations are
- * visible. Downstream HTML processing never needs to know whether this was
- * entity-encoded HTML, inline XML child elements, or CDATA — those are all
- * XML-parse-time distinctions that are fully resolved by the time this leaves
- * this file. Only the html/text distinction survives, because that's the one
- * decision the RSS adapter still needs to make: whether to run `stripHtml`
- * over it and whether to store it as `content.body_html`.
+ * Resolved payload of a feed entry's description/content, disambiguated once here where
+ * the feed's XML structure and namespace declarations are visible. Downstream HTML
+ * processing never needs to know whether this was entity-encoded HTML, inline XML child
+ * elements, or CDATA — only the html/text distinction survives, since that's the one
+ * decision the RSS adapter still makes: whether to run `stripHtml` and store `body_html`.
  */
 export type EntryBody = { kind: 'markup'; html: string } | { kind: 'text'; text: string };
 
 /**
- * Format-agnostic representation of a single feed entry. The RSS
- * adapter emits one `NormalizedReport` per `RssEntry` regardless of
- * whether the upstream feed is RSS 2.0, Atom, or RDF — keeping the
- * normalization step format-agnostic means the adapter doesn't have
- * to branch on the feed family at every step.
- *
- * `id` is the most stable identifier the feed exposes (Atom `<id>`,
- * RSS `<guid>`, falling back to `<link>` when neither is present).
- * It's used by the adapter to seed the per-item `content_fingerprint`
- * and to populate `lineage.source_doc_ref.id`. If we end up with
- * two items that share the same `id` *and* the same title, the
- * fingerprint will collapse them — which is what we want for
- * RSS-syndicated copies of the same advisory.
+ * Format-agnostic representation of a single feed entry, so the adapter doesn't branch on
+ * RSS 2.0 vs Atom vs RDF past this point. `id` is the most stable identifier the feed
+ * exposes (Atom `<id>`, RSS `<guid>`, falling back to `<link>`) and seeds the per-item
+ * `content_fingerprint` — two items sharing both `id` and title collapse to one
+ * fingerprint, which is the intended dedup for RSS-syndicated copies of one advisory.
  */
 export interface RssEntry {
   id: string;
@@ -53,37 +42,27 @@ export interface ParsedFeed {
 }
 
 /**
- * Parse an RSS 2.0, Atom, or RDF feed.
- *
- * Tolerant by design — feeds in the wild violate every spec at least
- * sometimes, so we treat the structure as advisory and collect what
- * we can. Items missing every identifying field (no `id`, `guid`, or
- * `link`) are dropped because there's no stable seed for the
- * fingerprint and including them would just create one new row per
- * run forever.
+ * Parses an RSS 2.0, Atom, or RDF feed. Tolerant by design — feeds in the wild violate
+ * every spec at least sometimes, so the structure is treated as advisory. Items missing
+ * every identifying field (`id`/`guid`/`link`) are dropped, since there's no stable
+ * fingerprint seed and keeping them would create a fresh row every run forever.
  */
 export const parseRssFeed = async (xml: string): Promise<ParsedFeed> => {
   const trimmed = xml.trim();
   if (!trimmed) return { feedTitle: '', entries: [] };
 
-  // `explicitArray: true` matches the existing siem_migrations XmlParser
-  // convention so all child accessors are arrays — which simplifies the
-  // walk below (no `Array.isArray` branches per field).
+  // `explicitArray: true` makes every child accessor an array, avoiding `Array.isArray`
+  // branches below. `explicitChildren`/`preserveChildrenOrder`/`charsAsChildren`/
+  // `includeWhiteChars` add an ordered `$$` child list (element and text, in position)
+  // alongside the by-name-grouped arrays — needed to capture and re-serialize an Atom
+  // `type="xhtml"` construct's real child markup rather than losing its structure to the
+  // by-name shape's concatenated text.
   //
-  // `explicitChildren`/`preserveChildrenOrder`/`charsAsChildren`/`includeWhiteChars`
-  // add an ordered `$$` child list (text runs included, in position) alongside the
-  // existing by-name-grouped arrays. This is what lets an Atom `type="xhtml"` construct's
-  // real child markup be captured and re-serialized instead of being silently dropped —
-  // the by-name shape only exposed the concatenated *text* of a subtree, which for mixed
-  // element/text content loses structure entirely.
-  //
-  // Deliberately NOT using xml2js's own `xmlns: true` option: it couples to the
-  // underlying SAX parser's strict mode, which throws on an undeclared namespace
-  // prefix. Real feeds routinely use `dc:`/`content:` without a declaration in scope,
-  // which is exactly the kind of spec violation this parser exists to tolerate — verified
-  // by running it, an undeclared prefix throws with `xmlns: true` and does not without it.
-  // Namespace resolution for the one case that needs it (`content:encoded` under an
-  // aliased prefix) is done separately, below, over the same lenient parse.
+  // Deliberately NOT using xml2js's own `xmlns: true`: it couples to the SAX parser's
+  // strict mode, which throws on an undeclared namespace prefix — and real feeds routinely
+  // use `dc:`/`content:` with no declaration in scope, which is exactly the violation this
+  // parser exists to tolerate. Namespace resolution for the one case that needs it
+  // (`content:encoded` under an aliased prefix) is done separately below.
   const parsed = await xml2js.parseStringPromise(trimmed, {
     explicitArray: true,
     explicitCharkey: true,
@@ -233,13 +212,10 @@ const findChildByLocalName = (
 
 /**
  * Resolves the RSS Content Module's `encoded` element, under any prefix, and returns its
- * text when found.
- *
- * The conventional `content:` prefix is accepted even when undeclared — feeds that use it
- * virtually always mean the Content Module, and requiring a declaration would reject working
- * feeds this parser has always accepted. Any *other* prefix has to resolve, via an actual
- * `xmlns:` declaration on the item or the document root, to the module's namespace URI —
- * an aliased prefix (`<ti:encoded>`) is only the Content Module when a feed actually says so.
+ * text when found. The conventional `content:` prefix is accepted even when undeclared,
+ * since feeds that use it virtually always mean the Content Module; any other prefix has
+ * to actually resolve, via an `xmlns:` declaration on the item or document root, to the
+ * module's namespace URI.
  */
 const resolveContentEncoded = (item: XmlNode, rootScope: NamespaceScope): string | undefined => {
   const found = findChildByLocalName(item, 'encoded');
@@ -290,11 +266,9 @@ const escapeAttr = (value: string): string => value.replace(/[&"<]/g, (c) => ATT
 
 /**
  * Re-serializes an xml2js `explicitChildren` subtree into an HTML string.
- *
- * `xml2js.Builder` cannot do this — verified by running it against this exact shape, it
- * throws `Invalid character in name` because it iterates `$$`/`#name` bookkeeping keys as
- * if they were element names. This walker is small because the shape is fully known here;
- * `#name: '__text__'` marks a text run (added by `charsAsChildren`), anything else is an
+ * `xml2js.Builder` can't do this — it throws `Invalid character in name`, since it
+ * iterates the `$$`/`#name` bookkeeping keys as if they were element names.
+ * `#name: '__text__'` marks a text run (added by `charsAsChildren`); anything else is an
  * element.
  */
 const serializeXmlNode = (node: XmlChildNode): string => {

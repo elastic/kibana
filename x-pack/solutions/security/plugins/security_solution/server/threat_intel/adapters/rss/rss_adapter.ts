@@ -24,11 +24,9 @@ const readFeedUrl = (source: SourceHit): string | undefined => {
 };
 
 /**
- * Resolve the RSS/Atom body for a source URL.
- *
- * `data:` URLs are decoded in-process (used by the security_solution data
- * generator fixtures). Network URLs go through `fetchUrl`, which enforces
- * the http/https SSRF guard.
+ * Resolves the RSS/Atom body for a source URL. `data:` URLs are decoded in-process (used
+ * by the data generator fixtures); network URLs go through `fetchUrl`, which enforces the
+ * http/https SSRF guard.
  */
 const readFeedBody = async (feedUrl: string, context: AdapterRunContext): Promise<string> => {
   if (isDataUrl(feedUrl)) {
@@ -77,25 +75,16 @@ export const rssAdapter: FetchAdapter = {
     const reports: NormalizedReport[] = [];
     for (const entry of parsed.entries) {
       const title = collapseWhitespace(entry.title || parsed.feedTitle || source._source.name);
-      // Keep the untruncated text for the fingerprint so a revision that only
-      // differs past the stored-body cap is still detected as a change.
-      //
-      // `parse_rss.ts` has already decided whether this entry's body is markup or plain
-      // text — markup goes through stripHtml, text is already safe and is used as-is, and
-      // only the markup case has anything to archive as `body_html`. A text-typed Atom
-      // construct (untyped, or `type="text"`) is genuinely not HTML, so storing it as
-      // `body_html` would mislabel it; omitting it here is a deliberate correctness fix,
-      // not an oversight — no existing report shape depended on that mislabeling.
+      // `parse_rss.ts` has already decided markup vs text. Only markup goes through
+      // stripHtml and has anything to archive as `body_html` — a text-typed Atom construct
+      // is genuinely not HTML, so it's stored as-is with no `body_html`.
       const fullBodyText =
         entry.body?.kind === 'markup' ? stripHtml(entry.body.html) : entry.body?.text ?? '';
+      // Untruncated, so a revision differing only past the stored-body cap is still
+      // detected as a change.
       const bodyText = truncate(fullBodyText, BODY_TEXT_MAX_LENGTH);
-      // Per-item fingerprint seed: feed URL + stable item id + canonical title,
-      // plus the publish timestamp and a hash of the body. Advisories commonly
-      // keep their `<guid>` and title while revising the text and IOCs, so
-      // identity alone would dedup the revision away forever. Including the
-      // body means a re-fetch of the unchanged item still collapses to one
-      // fingerprint, while a revised item produces a fresh row for
-      // `enrich_threat_report` to re-extract over.
+      // Includes the body, not just id/title, since advisories commonly keep their <guid>
+      // while revising the text — identity alone would dedup the revision away forever.
       const fingerprint = buildFingerprint([
         feedUrl,
         entry.id,
