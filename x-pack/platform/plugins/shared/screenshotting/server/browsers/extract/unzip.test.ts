@@ -11,7 +11,7 @@
  */
 
 import { existsSync, readFileSync } from 'fs';
-import { readFile } from 'fs/promises';
+import { readFile, lstat } from 'fs/promises';
 import path from 'path';
 import mockFs from 'mock-fs';
 import { ExtractError } from './extract_error';
@@ -21,6 +21,7 @@ const readFixture = (name: string) => readFileSync(path.resolve(__dirname, '__fi
 
 const TEST_ZIP = readFixture('test.zip');
 const PATH_TRAVERSAL_ZIP = readFixture('path_traversal.zip');
+const SYMLINK_ESCAPE_ZIP = readFixture('symlink_escape.zip');
 const SYMLINK_OK_ZIP = readFixture('symlink_ok.zip');
 
 describe('unzip', () => {
@@ -56,6 +57,21 @@ describe('unzip', () => {
     await expect(unzip('/path_traversal.zip', '/output')).rejects.toThrow(expectedError);
     expect(existsSync('/output/escaped.txt')).toEqual(false);
     expect(existsSync('/escaped.txt')).toEqual(false);
+  });
+
+  it('does not follow zip symlinks whose target lands outside the origin path', async () => {
+    mockFs({
+      '/symlink_escape.zip': SYMLINK_ESCAPE_ZIP,
+      '/output': {},
+    });
+
+    await expect(unzip('/symlink_escape.zip', '/output')).resolves.toBeUndefined();
+    expect(existsSync('/escaped.txt')).toEqual(false);
+    expect(existsSync('/output/escaped.txt')).toEqual(false);
+    expect(existsSync('/output/symlink_escape/escaped.txt')).toEqual(false);
+
+    expect(existsSync('/output/symlink_escape/link')).toEqual(true);
+    expect((await lstat('/output/symlink_escape/link')).isSymbolicLink()).toEqual(false);
   });
 
   it('extracts zip entries whose symlink target stays inside the origin path', async () => {
