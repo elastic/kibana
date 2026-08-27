@@ -54,11 +54,18 @@ export interface AdapterRunContext {
    * Scoped Elasticsearch client, for adapters that need to read or write source
    * state such as TAXII cursors. No adapter uses it yet.
    *
-   * It runs as the requesting user, so it CANNOT touch the plugin-owned
-   * `.kibana-threat-*` indices: those are system indices, and a Kibana feature
-   * privilege is not an Elasticsearch privilege, so every non-superuser gets a
-   * security_exception. Anything reading or writing those has to go through the
-   * internal user, as the routes and tasks do.
+   * It runs as the requesting user, so in practice it CANNOT touch the plugin-owned
+   * `.kibana-threat-*` indices: a Kibana feature privilege is not an Elasticsearch
+   * privilege, and nothing in this plugin grants an index privilege on them, so every
+   * non-superuser gets a security_exception. Anything reading or writing those has to
+   * go through the internal user, as the routes and tasks do.
+   *
+   * Not because they are system or restricted indices. They are ordinary hidden
+   * indices: `.kibana-*` (hyphen) is not in Elasticsearch's restricted set, which
+   * covers `.kibana` and `.kibana_*` (underscore), and an ordinary role granted `read`
+   * on one of these reads it fine without `allow_restricted_indices`. Verified against
+   * a live cluster. The distinction matters because it is the difference between "no
+   * role can be given access" and "no role has been given access yet".
    */
   esClient: ElasticsearchClient;
   /** Step-scoped logger. Per-adapter messages are tagged with the adapter type. */
