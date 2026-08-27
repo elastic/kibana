@@ -427,9 +427,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       structuredOutput,
     }),
     finalize(() => manualEvents$.complete()),
-    // share() (not shareReplay) — both subscribers (the step emitter below and the merged
-    // events$) attach synchronously before the async graph emits, and replaying every graph
-    // event for the run's lifetime would buffer large tool results unboundedly.
     share()
   );
 

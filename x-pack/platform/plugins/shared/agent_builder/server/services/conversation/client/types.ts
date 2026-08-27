@@ -114,17 +114,6 @@ export interface AppendEventsRequest {
   attachments?: { snapshot: VersionedAttachment[]; produced: VersionedAttachment[] };
   /** Applied only when the stored conversation has no workspace yet. */
   workspaceId?: string;
-  /**
-   * When true, incoming events with an id that matches a stored event replace that
-   * event in place (position preserved). New ids are still appended in order. Default
-   * is `false` — the standard skip-dedup semantics, used by mid-run step flushes so
-   * a repeated flush is a no-op.
-   *
-   * Used by the two-phase persistence path at round-end to overwrite the earlier
-   * live projections (receipt-time raw `user_message`, live `execution_started`,
-   * streamed step events) with the canonical projections built from the completed
-   * round.
-   */
   overwrite?: boolean;
 }
 

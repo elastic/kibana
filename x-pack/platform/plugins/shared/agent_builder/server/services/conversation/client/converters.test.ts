@@ -1370,10 +1370,6 @@ describe('conversation model converters', () => {
     });
 
     it('seeds the timeline from a caller-supplied events array when rounds is empty (atomic create-with-event path)', () => {
-      // This is the receipt-time input persistence contract: `persistRoundInput$`
-      // creates the conversation doc atomically with a pre-built user_message event
-      // in a single ES op. `createRequestToEs` must honor that seed rather than
-      // clobber it with the empty round-derived projection.
       const seedEvent: TimelineEvent = {
         id: 'round-1::user_message',
         type: TimelineEventType.userMessage,
@@ -1730,9 +1726,6 @@ describe('conversation model converters', () => {
     });
 
     it('trusts events supplied in the update payload (appendEvents path derives rounds from them)', () => {
-      // `appendEvents` writes a new event batch into an events-native doc and passes it through
-      // `updateConversation.update.events`. The writer trusts that batch verbatim (dedup happens
-      // upstream in `appendEvents` itself); `rounds` is re-derived to keep both projections in sync.
       const conversation = eventsNativeStored();
       const appended: TimelineEvent = {
         id: 'appended::user_message',
@@ -1759,9 +1752,6 @@ describe('conversation model converters', () => {
     });
 
     it('honors caller-supplied rounds alongside events, skipping the rounds rebuild (step-only appendEvents batches)', () => {
-      // `appendEvents` passes the stored rounds through on step-only batches so each flush
-      // does not rewrite prior rounds from their event projection. When both `events` and
-      // `rounds` are in the update, the supplied rounds win over `eventsToRounds`.
       const conversation = eventsNativeStored();
       const passedThroughRounds = [
         { ...conversation.rounds[0], response: { message: 'stored truth' } },
@@ -1786,9 +1776,6 @@ describe('conversation model converters', () => {
     });
 
     it('promotes a legacy conversation to events-native when a caller supplies events (appendEvents on a legacy doc)', () => {
-      // Legacy docs stay rounds-only on plain updates (see the earlier test). Once a caller opts
-      // in by supplying an `events` array (i.e. an `appendEvents` write lands on a legacy doc),
-      // the doc self-heals to events-native with the caller's timeline as the source of truth.
       const conversation = legacyStored();
       const seededEvents: TimelineEvent[] = [
         {

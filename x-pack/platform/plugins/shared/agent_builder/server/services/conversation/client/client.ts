@@ -217,13 +217,6 @@ class ConversationClientImpl implements ConversationClient {
             buildReadAccessFilter({ user: this.user, agentIds }),
             // Hide sub-agent conversations from the nav list - hardcoded until we need to do better
             { bool: { must_not: [{ exists: { field: 'parent_conversation' } }] } },
-            // Hide empty events-native placeholders (docs whose creation completed but
-            // whose first round never landed anything on the timeline — e.g. the client
-            // aborted before the atomic create finished). Legacy docs without a
-            // `schema_version` are unaffected. New docs seed the timeline atomically
-            // with `user_message`, so this is defense in depth against already-leaked
-            // placeholders and any future path that could create a doc before events
-            // land on it.
             {
               bool: {
                 must_not: [
@@ -511,15 +504,6 @@ class ConversationClientImpl implements ConversationClient {
       access,
       fields: (current) => {
         const currentEvents = current.events ?? [];
-        // Two paths, single output shape:
-        //  - overwrite=false (default): skip-dedup append. Repeated flushes of the same
-        //    step id are a no-op; new ids append in order. This is what live step flushes
-        //    and the receipt-time input write want.
-        //  - overwrite=true: id-keyed replace-in-place. Incoming events with a matching
-        //    stored id replace that entry (position preserved); new ids append in order.
-        //    This is what the round-end append wants so the canonical projection replaces
-        //    the earlier live snapshots (raw user_message, mid-run execution_started,
-        //    streamed steps) without shuffling the timeline.
         let appended: TimelineEvent[];
         if (overwrite) {
           const incomingById = new Map(events.map((event) => [event.id, event]));
@@ -532,10 +516,7 @@ class ConversationClientImpl implements ConversationClient {
           const newEvents = events.filter((event) => !existingIds.has(event.id));
           appended = [...currentEvents, ...newEvents];
         }
-        // A step-only append can skip the rounds rebuild: a mid-run step flush is not
-        // authoritative for the round's shape (it lacks the terminal event), and the
-        // round-end overwrite will re-project rounds anyway. The overwrite path is
-        // always authoritative — let `updateConversation` re-derive rounds from events.
+
         const isStepOnlyBatch =
           !overwrite && events.every((event) => event.type === TimelineEventType.executionStep);
         return {
@@ -561,15 +542,7 @@ class ConversationClientImpl implements ConversationClient {
       },
     });
   }
-  /**
-   * Discards the execution-derived timeline events of a round (execution_started + steps),
-   * leaving the `user_message` in place. Used by the two-phase persistence path when a
-   * round starts but never terminates (failure, abort, cancel).
-   *
-   * Keeping `user_message` means the input the user typed is preserved on the timeline
-   * even if the run fails. `eventsToRounds` drops it from the rounds projection until it
-   * has a paired execution_started + terminal event, so it appears as an orphan input.
-   */
+
   async discardRoundEvents(conversationId: string, roundId: string): Promise<void> {
     await this.writeConversation({
       conversationId,

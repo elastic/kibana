@@ -62,12 +62,6 @@ export const roundStepEventId = (roundId: string, sequence: number): string =>
 /** The fields of a round needed to build its `user_message` start event. */
 type RoundStart = Pick<ConversationRound, 'id' | 'input' | 'started_at' | 'author' | 'origin'>;
 
-/**
- * Builds only the `user_message` timeline event for a round.
- *
- * Split out from {@link roundStartEvents} so the execution runner can persist the input
- * as soon as the request is received — independent of, and prior to, the run starting.
- */
 export const userMessageEvent = (round: RoundStart, conversation: Conversation): TimelineEvent => ({
   id: `${round.id}${ROUND_DERIVED_EVENT_ID_SUFFIXES.userMessage}`,
   type: TimelineEventType.userMessage,
@@ -76,13 +70,6 @@ export const userMessageEvent = (round: RoundStart, conversation: Conversation):
   data: round.input,
 });
 
-/**
- * Builds only the `execution_started` timeline event for a round.
- *
- * Kept separate from {@link userMessageEvent} so the run-start persistence write can
- * land after the receipt-time input write, and can be rolled back independently on
- * failure or abort while the input event stays on the timeline.
- */
 export const executionStartedEvent = (
   round: Pick<ConversationRound, 'id' | 'started_at'>,
   conversation: Conversation
@@ -99,13 +86,6 @@ export const executionStartedEvent = (
   };
 };
 
-/**
- * The two start-of-round timeline events (`user_message` + `execution_started`).
- *
- * Kept for the read-derive path (`roundsToEvents`) which needs both projected from a
- * round in one call. The write path uses the split builders above so each event has
- * its own persistence lifecycle.
- */
 export const roundStartEvents = (
   round: RoundStart,
   conversation: Conversation

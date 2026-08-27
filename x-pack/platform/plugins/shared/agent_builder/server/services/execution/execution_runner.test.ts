@@ -57,8 +57,6 @@ jest.mock('./utils', () => {
   };
 });
 
-// The execution runner mints a round id at request receipt. Freeze it so tests can assert
-// which id gets threaded through, discarded, or persisted.
 jest.mock('uuid', () => {
   const actual = jest.requireActual('uuid');
   return {
@@ -488,8 +486,6 @@ describe('handleAgentExecution', () => {
       conversationClient.get.mockResolvedValue(conversation);
       conversationClient.appendEvents.mockResolvedValue(conversation);
 
-      // The agent starts and completes normally; the mocked run only emits AFTER a tick,
-      // so the receipt-time append must land first.
       const roundStartedEvent = {
         type: ChatEventType.roundStarted,
         data: {
@@ -531,7 +527,6 @@ describe('handleAgentExecution', () => {
 
       await lastValueFrom(events$.pipe(toArray()));
 
-      // The first appendEvents call is the receipt-time raw user_message.
       const [firstAppendCall] = conversationClient.appendEvents.mock.calls;
       expect(firstAppendCall[0].events).toHaveLength(1);
       expect(firstAppendCall[0].events[0]).toMatchObject({
@@ -732,14 +727,7 @@ describe('handleAgentExecution', () => {
       // Cleanup waits for in-flight writes to settle first — flush the microtask chain.
       await new Promise((resolve) => setImmediate(resolve));
 
-      // On CREATE we own the doc end-to-end. Rather than leave a headless
-      // placeholder in the user's conversation list, delete it wholesale.
-      // uuid mock at the top of the file pins the receipt-time roundId to 'round-1',
-      // and the placeholder conversation id also comes from uuidv4 so it lands on the
-      // same mocked value.
       expect(conversationClient.delete).toHaveBeenCalledTimes(1);
-      // discardRoundEvents is skipped on CREATE — the doc is gone, so there's nothing
-      // to sweep events out of.
       expect(conversationClient.discardRoundEvents).not.toHaveBeenCalled();
     });
   });

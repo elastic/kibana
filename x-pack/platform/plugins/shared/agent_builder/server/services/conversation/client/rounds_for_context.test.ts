@@ -102,8 +102,6 @@ describe('roundsForContext', () => {
   });
 
   it('produces no round for an orphan user_message (receipt-time input with no paired execution)', () => {
-    // Simulates the state after a failed run: the receipt-time user_message stayed on
-    // the timeline but its execution_started + steps + terminated were discarded.
     const orphanUserMessage: TimelineEvent = {
       id: 'r-orphan::user_message',
       type: TimelineEventType.userMessage,
@@ -118,14 +116,10 @@ describe('roundsForContext', () => {
       schema_version: CONVERSATION_SCHEMA_VERSION,
     });
 
-    // Orphan input: preserved on the timeline (visible to timeline consumers) but not
-    // projected as a round for LLM context.
     expect(roundsForContext(conversation)).toEqual([]);
   });
 
   it('still produces no round when a paired execution_started is missing (input + terminal without a start)', () => {
-    // Defense in depth: even if a partial group somehow exists, eventsToRounds groups by
-    // execution_id and requires an execution_terminated event to emit a round.
     const orphanUserMessage: TimelineEvent = {
       id: 'r-partial::user_message',
       type: TimelineEventType.userMessage,
@@ -149,7 +143,6 @@ describe('roundsForContext', () => {
       schema_version: CONVERSATION_SCHEMA_VERSION,
     });
 
-    // In-progress round with no terminal event is not context-eligible.
     expect(roundsForContext(conversation)).toEqual([]);
   });
 });

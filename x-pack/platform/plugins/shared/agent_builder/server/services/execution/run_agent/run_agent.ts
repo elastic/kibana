@@ -25,12 +25,6 @@ export interface RunAgentParams {
    * The next message in this conversation that the agent should respond to.
    */
   nextInput: ConverseInput;
-  /**
-   * Pre-minted id for the round about to run. The execution runner mints this at request
-   * receipt so it can persist the `user_message` event before the agent run starts, then
-   * threads the same id into the run so all downstream round-derived events share it.
-   * Optional: if omitted, the run generates its own id (used by legacy callers).
-   */
   roundId?: string;
   /**
    * Current conversation.

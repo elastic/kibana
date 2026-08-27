@@ -67,13 +67,6 @@ export const createBackgroundAgentStep = (
   };
 };
 
-/**
- * The wrapper steps a fresh round is prefixed with (compaction, relevant skills), in their
- * final order. The round builder pushes these ahead of the event-derived steps, and the live
- * step emitter derives its starting `sequence` from this array's length — deriving both from
- * one function keeps streamed sequences aligned with final step positions even when a new
- * wrapper step is added.
- */
 export const buildRoundPrefixSteps = ({
   compactionResult,
   relevantSkillsSelection,

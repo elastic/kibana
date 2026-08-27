@@ -228,10 +228,6 @@ const handleConversationExecution = async ({
     origin,
   });
 
-  // Mint the round id and capture the receipt timestamp here, at the execution runner boundary.
-  // - Threaded into the run so `round_started`, `execution_step`, `execution_terminated` share it.
-  // - Used by the two-phase persistence path to write the raw `user_message` event immediately,
-  //   before the agent run starts (decoupling input persistence from execution).
   const roundId = uuidv4();
   const receivedAt = new Date();
 
@@ -549,8 +545,7 @@ const buildPersistenceEvents = ({
   /** Resolved author for the round input (external system or Kibana user). */
   author?: ConversationRoundAuthor;
   /**
-   * Full execution origin (from the caller). Only the round-origin slice is stamped on
-   * the timeline event; the conversation-level origin is already on the conversation.
+   * Full execution origin (from the caller).
    */
   origin?: ExecutionConversationOrigin;
 }): Observable<ChatEvent> => {
@@ -572,13 +567,8 @@ const buildPersistenceEvents = ({
 
     const inFlightWrites = createInFlightWrites();
 
-    // Extract the round-origin slice (type only) from the full execution origin. The
-    // conversation-level origin already lives on the conversation itself.
     const roundOrigin = origin ? { type: origin.type } : undefined;
 
-    // Receipt-time input write. Runs first — no step flush or execution_started append
-    // can race doc creation because the two-phase merge only subscribes after this
-    // observable completes (concat).
     const input$ = persistRoundInput$({
       conversation,
       conversationClient,
@@ -623,31 +613,14 @@ const buildPersistenceEvents = ({
       )
     );
 
-    // concat: receipt-time input write completes before any step flush or run-start
-    // append is allowed to run. If the input write fails, the whole persistence stream
-    // errors — matching today's start-failure behavior.
     return concat(input$, merge(stepStream$, twoPhase$)).pipe(
       finalize(() => {
-        // Fires on completion, error, and unsubscription (cancel/abort).
-        // Cleanup strategy depends on which branch we're on:
-        //   - CREATE (fresh doc): the doc was eagerly created with only the
-        //     receipt-time `user_message` inside it. If the first round never
-        //     terminated, the doc has no completed rounds to preserve, so we
-        //     hard-delete it rather than leave a headless placeholder in the
-        //     user's conversation list.
-        //   - UPDATE (existing doc with prior rounds): only sweep the current
-        //     round's execution-derived events (execution_started + steps).
-        //     The receipt-time `user_message` is kept as an intentional orphan;
-        //     `eventsToRounds` drops it from the rounds projection until a
-        //     paired execution_started + terminal event lands.
         if (roundReachedTerminal) {
           return;
         }
         const cleanup = async () => {
           await inFlightWrites.settled();
           if (conversation.operation === 'CREATE') {
-            // `delete()` treats 404 as success, so a doc that never actually
-            // got created (e.g. the input write itself failed) is a no-op.
             await conversationClient.delete(conversation.id);
             return;
           }

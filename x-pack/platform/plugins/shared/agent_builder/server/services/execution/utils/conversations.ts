@@ -210,22 +210,6 @@ export const updateConversation$ = ({
 
 /**
  * Receipt-time input write.
- *
- * Persists a single `user_message` timeline event for the round about to run. This is the
- * first write in the two-phase persistence path — it runs before the agent execution starts,
- * so the input is persisted regardless of the run's fate (failure, abort, or completion).
- *
- * CREATE branch: the doc is created atomically with the `user_message` seeded into its
- * timeline in a single `_index?op_type=create` call. This eliminates a window where a
- * separate "create empty doc, then append event" sequence could leave a headless
- * placeholder if the second write failed or the request was torn down between the two.
- * If another writer wins the eager-create race, we fall back to `appendEvents` so the
- * event still lands on the winning doc.
- *
- * UPDATE branch: the doc already exists; only the `appendEvents` write is dispatched.
- *
- * Emits nothing on the outward chat stream (side-effect only). The final `conversationCreated`
- * / `conversationUpdated` event still fires at round-end via {@link appendRoundTerminated$}.
  */
 export const persistRoundInput$ = ({
   conversation,
@@ -241,11 +225,6 @@ export const persistRoundInput$ = ({
   conversationClient: ConversationClient;
   roundId: string;
   receivedAt: Date;
-  /**
-   * Raw wire input. Only the message + attachment refs are persisted at receipt time; the
-   * canonical projection (with `attachment_context` and processed attachment refs) lands at
-   * round-end via the overwrite append.
-   */
   input: ConverseInput;
   author?: ConversationRoundAuthor;
   origin?: ConversationRoundOrigin;
@@ -255,9 +234,6 @@ export const persistRoundInput$ = ({
   return from(
     inFlightWrites.track(
       (async () => {
-        // `ConverseInput.message` is optional but `RoundInput.message` is required —
-        // default to an empty string for the receipt-time snapshot. The overwrite at
-        // round-end replaces this with the processed input which always has a message.
         const event = userMessageEvent(
           {
             id: roundId,
@@ -285,9 +261,6 @@ export const persistRoundInput$ = ({
               origin: conversation.origin,
               read_only: conversation.read_only,
               rounds: [],
-              // Seed the timeline atomically with the create so an abort mid-write
-              // can never leave the doc empty. `createRequestToEs` uses this list
-              // verbatim when `rounds` is empty.
               events: [event],
               ...(isPersistentSubagentCreate && hasResolvedParentUser
                 ? { user: conversation.user }
@@ -298,8 +271,6 @@ export const persistRoundInput$ = ({
             });
             return;
           } catch (error) {
-            // Someone else won the eager-create race — the doc exists, so add the
-            // event to whatever doc landed rather than dropping the input.
             if (!isConversationAlreadyExistsError(error)) {
               throw error;
             }
@@ -315,12 +286,6 @@ export const persistRoundInput$ = ({
   ).pipe(ignoreElements());
 };
 
-/**
- * Appends the `execution_started` timeline event as its own write, in response to the
- * `round_started` chat event from the agent run. Split from the receipt-time input write
- * so the two lifecycle events can succeed/fail independently: a failed run leaves the input
- * on the timeline but rolls back only the execution-derived events.
- */
 export const appendExecutionStarted$ = ({
   conversation,
   conversationClient,
@@ -347,7 +312,6 @@ export const appendExecutionStarted$ = ({
         )
       );
     }),
-    // Side-effect only; the conversationCreated/Updated event fires at END.
     ignoreElements()
   );
 };
@@ -434,15 +398,6 @@ export const appendRoundTerminated$ = ({
             workspace_id: workspaceId,
           } = roundCompletedEvent.data;
 
-          // Write the full canonical projection for the round in one append.
-          //   - `user_message` overwrites the receipt-time raw input with the processed one
-          //     (attachment_refs, attachment_context populated).
-          //   - `execution_started` overwrites the mid-run event with its final timestamps.
-          //   - step events overwrite any live-streamed ones with the same id.
-          //   - the terminal event is appended fresh.
-          // `overwrite: true` guarantees canonical projections replace the earlier snapshots
-          // by id (position preserved). `roundTerminatedEvent` only emits for
-          // completed/awaitingPrompt statuses, which is the round-complete contract.
           const events: TimelineEvent[] = roundToEvents(round, conversation);
 
           const resolvedTitle = title$ ? await firstValueFrom(title$) : undefined;
@@ -484,14 +439,6 @@ export type ConversationOperation = 'CREATE' | 'UPDATE';
 
 export type ConversationWithOperation = Conversation & { operation: ConversationOperation };
 
-/**
- * Resolves the conversation to update, or returns a placeholder for one to create.
- * conversationId takes precedence over origin. When no conversationId is provided,
- * origin is used to find an existing conversation before creating a new placeholder.
- * autoCreateConversationWithId only applies when conversationId is provided: missing
- * conversations are created with that ID when enabled, and rejected by get() otherwise.
- * Note: Validation and manipulation for regenerate is handled in runDefaultAgentMode.
- */
 export const getConversation = async ({
   agentId,
   conversationId,
