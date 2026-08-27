@@ -1753,3 +1753,57 @@ describe('non-rendered subtrees', () => {
     expect(stripHtml('<noscript><p>fallback.test</p></noscript>after')).toBe('fallback.test after');
   });
 });
+
+/**
+ * Being a feed container is not the same as being an encoded HTML body.
+ *
+ * Every container name shared one set, and every name in it expanded a text-only payload, so
+ * a sentence mentioning markup inside any of them was reparsed as live HTML and the
+ * unterminated script subtree swallowed the rest. RSS and Atom define no HTML content for
+ * `item`, `entry`, `channel`, `feed` or `rss`: those are structure to walk through.
+ *
+ * `value` is gone entirely rather than reclassified. It is a generic XML and custom-element
+ * name with no basis in either format, added speculatively, so it was deleting text from any
+ * document that happened to use it.
+ */
+describe('structural feed containers are not encoded bodies', () => {
+  const LITERAL = 'Exploit uses &lt;script&gt; and c2.evil.test';
+  const DECODED = 'Exploit uses <script> and c2.evil.test';
+
+  it.each([['value'], ['item'], ['entry'], ['channel'], ['feed'], ['rss'], ['foo']])(
+    'keeps literal text inside <%s>',
+    (name) => {
+      const result = stripHtml(`<${name}>${LITERAL}</${name}>`);
+
+      expect(result).toBe(DECODED);
+      expect(result).toContain('c2.evil.test');
+    }
+  );
+
+  it('keeps literal text through nested structural containers', () => {
+    expect(stripHtml(`<rss><channel><item>${LITERAL}</item></channel></rss>`)).toBe(DECODED);
+  });
+
+  // Descending through structure to reach a real encoded wrapper still has to work.
+  it.each([
+    [
+      'a description inside the full rss nesting',
+      '<rss><channel><title>F</title><item><description>' +
+        '&lt;script&gt;fetch("https://false-ioc.test")&lt;/script&gt;safe' +
+        '</description></item></channel></rss>',
+      'F safe',
+    ],
+    [
+      'an html-typed summary inside an atom entry',
+      '<feed><entry><title>T</title><summary type="html">' +
+        '&lt;script&gt;fetch("https://false-ioc.test")&lt;/script&gt;safe' +
+        '</summary></entry></feed>',
+      'T safe',
+    ],
+  ])('still expands %s', (_label, html, expected) => {
+    const result = stripHtml(html);
+
+    expect(result).toBe(expected);
+    expect(result).not.toContain('false-ioc.test');
+  });
+});

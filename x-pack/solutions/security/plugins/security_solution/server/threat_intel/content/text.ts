@@ -458,16 +458,23 @@ const RESIDUAL_CLOSING_TAG = /<\/[a-z][a-z0-9:_-]*(?=[\s/>])/i;
  * `title` are HTML element names too, but they only peel as the sole top-level element,
  * which a real HTML document never presents.
  */
-const FEED_WRAPPER_NAMES = new Set([
-  'description',
-  'encoded',
-  'value',
-  'item',
-  'entry',
-  'channel',
-  'feed',
-  'rss',
-]);
+const ENCODED_HTML_WRAPPER_NAMES = new Set(['description', 'encoded']);
+
+/**
+ * Feed containers that are descended through but never treated as an encoded body.
+ *
+ * These were in the same set as `description` and it cost report content. Every name in the
+ * old set expanded its payload when that payload was text-only, so a sentence mentioning
+ * markup inside any of them was reparsed as live HTML and the unterminated script subtree
+ * swallowed the rest: `<item>Exploit uses &lt;script&gt; and c2.evil.test</item>` came out as
+ * `Exploit uses`, losing the indicator. RSS and Atom define no HTML content for `item`,
+ * `entry`, `channel`, `feed` or `rss`, so they are structure to walk through and nothing more.
+ *
+ * `value` is gone entirely rather than moved. It is a generic XML and custom-element name
+ * with no basis in either format, and I had added it speculatively, so it was deleting text
+ * from any document that happened to use it.
+ */
+const STRUCTURAL_FEED_CONTAINERS = new Set(['item', 'entry', 'channel', 'feed', 'rss']);
 
 /**
  * Atom text constructs, which declare their own content type.
@@ -482,12 +489,16 @@ const FEED_WRAPPER_NAMES = new Set([
  * `xhtml` is excluded along with `text`, since its content is real markup rather than
  * encoded markup and needs no second parse. RSS `<description>` and `content:encoded` carry
  * no type attribute and are encoded HTML by convention, so they stay unconditional above.
+ *
+ * The structural containers are deliberately not here and not in the encoded set: they are
+ * walked through, never expanded.
  */
 const ATOM_TEXT_CONSTRUCTS = new Set(['title', 'summary', 'content', 'rights', 'subtitle']);
 
+/** An element whose text payload is an entity-encoded HTML document. */
 const isEncodedHtmlWrapper = (node: ParsedNode): boolean => {
   const name = localName(elementName(node));
-  if (FEED_WRAPPER_NAMES.has(name)) return true;
+  if (ENCODED_HTML_WRAPPER_NAMES.has(name)) return true;
   if (!ATOM_TEXT_CONSTRUCTS.has(name)) return false;
 
   // Parameters stripped before comparing, since a media type may carry them
@@ -529,11 +540,16 @@ const peelFeedWrappers = (nodes: ParsedNode[]): { nodes: ParsedNode[]; peeled: b
       meaningful.length === 1 &&
       only !== undefined &&
       isElement(only) &&
-      isEncodedHtmlWrapper(only);
+      (isEncodedHtmlWrapper(only) || STRUCTURAL_FEED_CONTAINERS.has(localName(elementName(only))));
 
     if (!isWrapper || only === undefined) return { nodes: current, peeled };
+    // Only an encoded-HTML wrapper sets the flag. Descending through `<item>` says where the
+    // payload lives, not what it is, and treating the two the same meant a text-only
+    // structural container had its payload reparsed: `<item>Exploit uses &lt;script&gt; and
+    // c2.evil.test</item>` came out as `Exploit uses`, the unterminated script subtree having
+    // swallowed the rest.
+    if (isEncodedHtmlWrapper(only)) peeled = true;
     current = childrenOf(only);
-    peeled = true;
   }
 
   return { nodes: current, peeled };
