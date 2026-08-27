@@ -368,11 +368,13 @@ describe('set unified alerts tags', () => {
 
     test('makes multiple ES calls and classifies all IDs when ids.length exceeds MAX_ALERTS_PER_TRIGGER', async () => {
       const oversizedIds = Array.from({ length: MAX_ALERTS_PER_TRIGGER + 1 }, (_, i) => `id-${i}`);
-      // First chunk returns id-0; second chunk (the single overflow id) returns nothing.
+      // hitsPerIdCap=2 → chunkSize=5000; 10001 IDs → 3 chunks (5000+5000+1).
+      // First chunk returns id-0; second and third return nothing.
       context.core.elasticsearch.client.asCurrentUser.search
         .mockResolvedValueOnce(
           makeSearchResponse([{ _id: oversizedIds[0], _index: '.alerts-security.alerts-default' }])
         )
+        .mockResolvedValueOnce(makeSearchResponse([]))
         .mockResolvedValueOnce(makeSearchResponse([]));
       const request = requestMock.create({
         method: 'post',
@@ -384,8 +386,8 @@ describe('set unified alerts tags', () => {
       });
       await server.inject(request, requestContextMock.convertContext(context));
       await new Promise((r) => setTimeout(r, 0));
-      // Chunked: 2 ES calls for MAX_ALERTS_PER_TRIGGER+1 IDs
-      expect(context.core.elasticsearch.client.asCurrentUser.search.mock.calls.length).toBe(2);
+      // Chunked: 3 ES calls for MAX_ALERTS_PER_TRIGGER+1 IDs with hitsPerIdCap=2 (chunkSize=5000)
+      expect(context.core.elasticsearch.client.asCurrentUser.search.mock.calls.length).toBe(3);
       // Only id-0 was found; truncated is false because alertIds.length (1) <= MAX_ALERTS_PER_TRIGGER
       expect(mockEventBus.emitAlertTagsChanged).toHaveBeenCalledWith(
         expect.anything(),

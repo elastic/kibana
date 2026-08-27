@@ -213,14 +213,15 @@ export const fetchAlertIdIndexWithSource = async (
   esClient: ElasticsearchClient,
   index: string | string[],
   ids: string[],
-  sourceFields: string[]
+  sourceFields: string[],
+  hitsPerIdCap = 1
 ): Promise<IdIndexPairWithSource[]> => {
-  const cappedIds = ids.slice(0, MAX_ALERTS_PER_TRIGGER);
+  const cappedIds = ids.slice(0, Math.floor(MAX_ALERTS_PER_TRIGGER / hitsPerIdCap));
   const searchResponse = await esClient.search({
     index: resolveIndex(index),
     query: { terms: { _id: cappedIds } },
     _source_includes: sourceFields,
-    size: MAX_ALERTS_PER_TRIGGER,
+    size: cappedIds.length * hitsPerIdCap,
     ignore_unavailable: true,
   });
   const pairs: IdIndexPairWithSource[] = [];
@@ -240,15 +241,18 @@ export const fetchAllAlertIdIndexWithSource = async (
   esClient: ElasticsearchClient,
   index: string | string[],
   ids: string[],
-  sourceFields: string[]
+  sourceFields: string[],
+  hitsPerIdCap = 1
 ): Promise<IdIndexPairWithSource[]> => {
+  const chunkSize = Math.floor(MAX_ALERTS_PER_TRIGGER / hitsPerIdCap);
   const allPairs: IdIndexPairWithSource[] = [];
-  for (let i = 0; i < ids.length; i += MAX_ALERTS_PER_TRIGGER) {
+  for (let i = 0; i < ids.length; i += chunkSize) {
     const partial = await fetchAlertIdIndexWithSource(
       esClient,
       index,
-      ids.slice(i, i + MAX_ALERTS_PER_TRIGGER),
-      sourceFields
+      ids.slice(i, i + chunkSize),
+      sourceFields,
+      hitsPerIdCap
     );
     for (const pair of partial) {
       allPairs.push(pair);
