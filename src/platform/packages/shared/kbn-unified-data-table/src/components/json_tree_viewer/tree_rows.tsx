@@ -39,6 +39,9 @@ import {
   type PrimitiveType,
 } from './tree_model';
 
+const LABEL_TEXT_CLASS = 'jsonTreeViewerLabelText';
+const VALUE_CLASS = 'jsonTreeViewerValue';
+
 // ---- Row view components (one per render-row kind) ----
 
 // Focus and roving-tabindex wiring shared by the focusable row kinds.
@@ -234,7 +237,7 @@ const PrimitiveValue = memo(function PrimitiveValue({
   const styles = useEuiMemoizedStyles(treeStyles);
   if (primitiveType === 'string') {
     return (
-      <span css={[styles.value, styles.valueString]}>
+      <span className={VALUE_CLASS} css={[styles.value, styles.valueString]}>
         {'"'}
         {formatted ?? String(value)}
         {'"'}
@@ -242,9 +245,17 @@ const PrimitiveValue = memo(function PrimitiveValue({
     );
   }
   if (primitiveType === 'number' || primitiveType === 'boolean') {
-    return <span css={[styles.value, styles.valueScalar]}>{formatted ?? String(value)}</span>;
+    return (
+      <span className={VALUE_CLASS} css={[styles.value, styles.valueScalar]}>
+        {formatted ?? String(value)}
+      </span>
+    );
   }
-  return <span css={[styles.value, styles.valueNull]}>null</span>;
+  return (
+    <span className={VALUE_CLASS} css={[styles.value, styles.valueNull]}>
+      null
+    </span>
+  );
 });
 
 const Comma = memo(function Comma() {
@@ -344,7 +355,7 @@ const NodeLabel = memo(function NodeLabel({
   if (node.kind === 'leaf') {
     return (
       <span css={styles.label}>
-        <span css={styles.labelText}>
+        <span className={LABEL_TEXT_CLASS} css={styles.labelText}>
           <KeyPrefix name={node.key} isArrayItem={node.isArrayItem} />
           <PrimitiveValue
             primitiveType={node.primitiveType}
@@ -365,7 +376,7 @@ const NodeLabel = memo(function NodeLabel({
   if (!hasChildren) {
     return (
       <span css={styles.label}>
-        <span css={styles.labelText}>
+        <span className={LABEL_TEXT_CLASS} css={styles.labelText}>
           <KeyPrefix name={node.key} isArrayItem={node.isArrayItem} />
           <span css={styles.bracket}>{`${open}${close}`}</span>
           {trailingComma && <Comma />}
@@ -379,7 +390,7 @@ const NodeLabel = memo(function NodeLabel({
   if (isExpanded) {
     return (
       <span css={styles.label}>
-        <span css={styles.labelText}>
+        <span className={LABEL_TEXT_CLASS} css={styles.labelText}>
           <KeyPrefix name={node.key} isArrayItem={node.isArrayItem} />
           <span css={styles.bracket}>{open}</span>
         </span>
@@ -391,15 +402,43 @@ const NodeLabel = memo(function NodeLabel({
   // Collapsed: a one-line preview, e.g. `"user": { 2 fields }`.
   return (
     <span css={styles.label}>
-      <span css={styles.labelText}>
+      <span className={LABEL_TEXT_CLASS} css={styles.labelText}>
         <KeyPrefix name={node.key} isArrayItem={node.isArrayItem} />
         <span css={styles.bracket}>{open}</span>
-        <span css={styles.count}>{collectionCountLabel(node)}</span>
+        <span css={styles.count}>
+          {collectionCountLabel(node.collectionType, node.children.length)}
+        </span>
         <span css={styles.bracket}>{close}</span>
         {trailingComma && <Comma />}
       </span>
       <SubtreeCopyButton node={node} />
     </span>
+  );
+});
+
+/** Root placeholder when the document has no visible fields (e.g. hide-nulls left an empty object). */
+export const EmptyRootPlaceholder = memo(function EmptyRootPlaceholder({
+  collectionType,
+}: {
+  collectionType: CollectionType;
+}) {
+  const styles = useEuiMemoizedStyles(treeStyles);
+  const { euiTheme } = useEuiTheme();
+  return (
+    <div
+      css={styles.row}
+      style={{ paddingInlineStart: rowPaddingInlineStart(euiTheme, 0) }}
+      data-test-subj="jsonTreeViewerEmpty"
+    >
+      <span css={styles.caret} aria-hidden />
+      <span css={styles.label}>
+        <span className={LABEL_TEXT_CLASS} css={styles.labelText}>
+          <span css={styles.bracket}>{OPEN_BRACKET[collectionType]}</span>
+          <span css={styles.count}>{collectionCountLabel(collectionType, 0)}</span>
+          <span css={styles.bracket}>{CLOSE_BRACKET[collectionType]}</span>
+        </span>
+      </span>
+    </div>
   );
 });
 
@@ -432,9 +471,8 @@ const pagerButtonKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {
 };
 
 // ---- i18n labels ----
-const collectionCountLabel = (node: CollectionNode) => {
-  const count = node.children.length;
-  return node.collectionType === 'array'
+const collectionCountLabel = (collectionType: CollectionType, count: number) =>
+  collectionType === 'array'
     ? i18n.translate('unifiedDataTable.jsonTreeViewer.itemCount', {
         defaultMessage: '{count, plural, one {# item} other {# items}}',
         values: { count },
@@ -443,7 +481,6 @@ const collectionCountLabel = (node: CollectionNode) => {
         defaultMessage: '{count, plural, one {# field} other {# fields}}',
         values: { count },
       });
-};
 
 const showMoreLabel = (collectionType: CollectionType, count: number) =>
   collectionType === 'array'
@@ -527,6 +564,17 @@ const treeStyles = ({ euiTheme }: UseEuiTheme) => ({
     '&:focus-visible': { opacity: 1 },
   }),
   value: css({ minWidth: 0, overflowWrap: 'anywhere', whiteSpace: 'pre-wrap' }),
+  noWrap: css({
+    [`& .${LABEL_TEXT_CLASS}`]: {
+      display: 'block',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap',
+    },
+    [`& .${VALUE_CLASS}`]: {
+      whiteSpace: 'nowrap',
+    },
+  }),
   valueString: css({ color: euiTheme.colors.textDanger }),
   valueScalar: css({ color: euiTheme.colors.textAccent }),
   valueNull: css({ color: euiTheme.colors.textSubdued, fontStyle: 'italic' }),
