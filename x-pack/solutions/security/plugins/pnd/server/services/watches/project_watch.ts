@@ -145,6 +145,15 @@ export const projectSkillsFromDefinition = (
       const withBlock = isRecord(step.with) ? step.with : {};
       const agentId = asString(step['agent-id']);
 
+      // Parse configuration_overrides.skill_ids unconditionally so they survive
+      // when the agent lookup is unavailable or the agent-id cannot be resolved.
+      const overridesBlock = isRecord(withBlock.configuration_overrides)
+        ? withBlock.configuration_overrides
+        : {};
+      const overrideSkillIds = Array.isArray(overridesBlock.skill_ids)
+        ? overridesBlock.skill_ids.filter((s): s is string => typeof s === 'string')
+        : null;
+
       if (agentId && agentLookupCalback) {
         const agentDef = agentLookupCalback.getAgent(agentId);
         if (agentDef) {
@@ -152,23 +161,27 @@ export const projectSkillsFromDefinition = (
             ? agentLookupCalback.getAgentType(agentDef.type)
             : undefined;
           const baseSkills: readonly string[] = agentTypeDef?.baseConfiguration?.skill_ids ?? [];
-          const overridesBlock = isRecord(withBlock.configuration_overrides)
-            ? withBlock.configuration_overrides
-            : {};
-          const stepSkillIds = Array.isArray(overridesBlock.skill_ids)
-            ? overridesBlock.skill_ids.filter((s): s is string => typeof s === 'string')
-            : null;
-          const agentSkills: readonly string[] = agentDef.configuration.skill_ids ?? [];
-          for (const id of [...baseSkills, ...(stepSkillIds ?? agentSkills)]) {
+          // When the step has no overrides, fall back to the agent's own skill list.
+          const agentSkills: readonly string[] =
+            overrideSkillIds === null ? agentDef.configuration.skill_ids ?? [] : [];
+          for (const id of [...baseSkills, ...(overrideSkillIds ?? agentSkills)]) {
             if (id) skillIds.add(id);
           }
           return;
         }
       }
 
-      const message = asString(withBlock.message);
-      if (message) collectSkillIdsFromText(message, skillIds);
-      collectSkillIdsFromText(JSON.stringify(withBlock), skillIds);
+      // No lookup or unresolved agent: use structured overrides when present so
+      // skills are not lost. Fall back to URI scanning only when no overrides exist.
+      if (overrideSkillIds !== null) {
+        for (const id of overrideSkillIds) {
+          if (id) skillIds.add(id);
+        }
+      } else {
+        const message = asString(withBlock.message);
+        if (message) collectSkillIdsFromText(message, skillIds);
+        collectSkillIdsFromText(JSON.stringify(withBlock), skillIds);
+      }
     }
   });
 

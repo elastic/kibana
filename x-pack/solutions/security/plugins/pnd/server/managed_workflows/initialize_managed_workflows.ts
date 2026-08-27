@@ -19,9 +19,11 @@ const MANAGED_WORKFLOW_STATE_LIST_CAP = 1000;
 export const initializeManagedWorkflows = async ({
   workflowsExtensions,
   logger,
+  ensureAgentForSpace,
 }: {
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
   logger: Logger;
+  ensureAgentForSpace?: (spaceId: string) => Promise<void>;
 }): Promise<PluginScopedManagedWorkflowsApi> => {
   const client = await workflowsExtensions.initManagedWorkflowsClient(
     PND_MANAGED_WORKFLOW_OWNER_ID
@@ -45,6 +47,7 @@ export const initializeManagedWorkflows = async ({
     }
   }
 
+  const watchSpaces = new Set<string>();
   try {
     const states = await client.listInstalledWorkflowStates();
     if (states.length >= MANAGED_WORKFLOW_STATE_LIST_CAP) {
@@ -81,6 +84,8 @@ export const initializeManagedWorkflows = async ({
       const registration = watchRegistry.get(state.definitionId);
       if (!registration?.settings) continue;
 
+      watchSpaces.add(state.spaceId);
+
       try {
         const migration = state.templateValues
           ? registration.settings.migrate(state.templateValues)
@@ -111,6 +116,10 @@ export const initializeManagedWorkflows = async ({
         error instanceof Error ? error.message : String(error)
       }`
     );
+  }
+
+  if (ensureAgentForSpace && watchSpaces.size > 0) {
+    await Promise.allSettled([...watchSpaces].map((spaceId) => ensureAgentForSpace(spaceId)));
   }
 
   if (canReconcile) {

@@ -368,6 +368,59 @@ describe('project watch', () => {
         );
         expect(result.map((c) => c.id)).toEqual(['valid', 'also-valid']);
       });
+
+      it('returns override skills when there is no agent lookup', () => {
+        const result = projectSkillsFromDefinition(
+          makeDefinition(
+            step({
+              with: { message: 'go', configuration_overrides: { skill_ids: ['override-a'] } },
+            })
+          ),
+          undefined
+          // no agentLookup
+        );
+        expect(result.map((c) => c.id)).toEqual(['override-a']);
+      });
+
+      it('returns override skills when the agent-id cannot be resolved from the lookup', () => {
+        const agents: AgentLookup = {
+          getAgent: () => null,
+          getAgentType: () => null,
+          getSkill: () => null,
+        };
+        const result = projectSkillsFromDefinition(
+          makeDefinition(
+            step({
+              with: { message: 'go', configuration_overrides: { skill_ids: ['override-b'] } },
+            })
+          ),
+          undefined,
+          agents
+        );
+        expect(result.map((c) => c.id)).toEqual(['override-b']);
+      });
+
+      it('does not URI-scan when overrides are present but agent is unresolved', () => {
+        const agents: AgentLookup = {
+          getAgent: () => null,
+          getAgentType: () => null,
+          getSkill: () => null,
+        };
+        const result = projectSkillsFromDefinition(
+          makeDefinition(
+            step({
+              with: {
+                message: 'also use skill://uri-skill to proceed',
+                configuration_overrides: { skill_ids: ['structured-skill'] },
+              },
+            })
+          ),
+          undefined,
+          agents
+        );
+        // Only the structured override is returned; URI scanning is not run.
+        expect(result.map((c) => c.id)).toEqual(['structured-skill']);
+      });
     });
 
     describe('fallback to URI scanning', () => {

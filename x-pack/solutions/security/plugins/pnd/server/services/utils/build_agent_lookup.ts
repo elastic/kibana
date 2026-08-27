@@ -41,7 +41,7 @@ export const buildAgentLookup = async (
     ]);
     const [agentList, skillList] = await Promise.all([
       agentRegistry.list({ includeManaged: true }),
-      skillRegistry.list(),
+      skillRegistry.list({ includePlugins: true, summaryOnly: true }),
     ]);
     const agentMap = new Map(agentList.map((a) => [a.id, a]));
     const skillMap = new Map(skillList.map((s) => [s.id, s]));

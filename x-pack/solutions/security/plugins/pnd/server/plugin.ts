@@ -122,6 +122,10 @@ export class PndPlugin
     const managedWorkflows = initializeManagedWorkflows({
       workflowsExtensions: plugins.workflowsExtensions,
       logger: this.logger,
+      ensureAgentForSpace: plugins.agentBuilder
+        ? (spaceId) =>
+            ensureAgentSafe({ agentBuilder: plugins.agentBuilder!, spaceId, logger: this.logger })
+        : undefined,
     }).catch((error) => {
       this.logger.error(
         `PND managed workflow initialization failed: ${
