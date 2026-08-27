@@ -2,6 +2,10 @@ steps:
   - name: 'Bump versions.json'
     key: bump-versions-json
     command: .buildkite/scripts/steps/version_bump/bump_versions_json.sh
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 3
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
