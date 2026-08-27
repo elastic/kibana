@@ -73,6 +73,8 @@ export interface ListExecutionHistoryResult {
 
 @injectable()
 export class ActionPolicyExecutionHistoryClient {
+  private readonly logger: LoggerServiceContract;
+
   constructor(
     @inject(EventLogServiceToken) private readonly eventLogService: EventLogServiceContract,
     @inject(ActionPolicyClient) private readonly actionPolicyClient: ActionPolicyClient,
@@ -81,8 +83,10 @@ export class ActionPolicyExecutionHistoryClient {
     private readonly workflowsManagement: WorkflowsServerPluginSetup['management'],
     @inject(PluginStart<AlertingServerStartDependencies['spaces']>('spaces'))
     private readonly spaces: AlertingServerStartDependencies['spaces'],
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
-  ) {}
+    @inject(LoggerServiceToken) loggerService: LoggerServiceContract
+  ) {
+    this.logger = loggerService.forSubsystem('executionHistory');
+  }
 
   public async listExecutionHistory({
     request,
@@ -208,7 +212,7 @@ export class ActionPolicyExecutionHistoryClient {
 
   private unwrapArray<T>(result: PromiseSettledResult<T[]>, code: AlertingV2LogCode): T[] {
     if (result.status === 'fulfilled') return result.value;
-    this.logger.error({ error: result.reason, code });
+    this.logger.warn({ message: 'Execution history lookup failed', error: result.reason, code });
     return [];
   }
 
@@ -236,7 +240,7 @@ export class ActionPolicyExecutionHistoryClient {
     code: AlertingV2LogCode
   ): { items: T[]; total: number } {
     if (result.status === 'fulfilled') return result.value;
-    this.logger.error({ error: result.reason, code });
+    this.logger.warn({ message: 'Execution history lookup failed', error: result.reason, code });
     return { items: [], total: 0 };
   }
 }

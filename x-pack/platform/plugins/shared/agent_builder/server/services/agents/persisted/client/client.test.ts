@@ -8,7 +8,7 @@
 import { loggerMock } from '@kbn/logging-mocks';
 import { isAgentNotFoundError } from '@kbn/agent-builder-common';
 import { buildReadAccessFilter } from '../../access_control';
-import { getUserFromRequest, isAdminFromRequest } from '../../../utils';
+import { getUserFromRequest } from '../../../utils';
 import { createSpaceDslFilter } from '../../../../utils/spaces';
 import { createClient, createSystemClient, type AgentClient } from './client';
 
@@ -37,11 +37,9 @@ jest.mock('./storage', () => ({
 
 jest.mock('../../../utils', () => ({
   getUserFromRequest: jest.fn(),
-  isAdminFromRequest: jest.fn(),
 }));
 
 const getUserFromRequestMock = getUserFromRequest as jest.MockedFunction<typeof getUserFromRequest>;
-const isAdminFromRequestMock = isAdminFromRequest as jest.MockedFunction<typeof isAdminFromRequest>;
 
 describe('AgentClient', () => {
   let client: AgentClient;
@@ -51,7 +49,6 @@ describe('AgentClient', () => {
     logger = loggerMock.create();
     jest.clearAllMocks();
     getUserFromRequestMock.mockResolvedValue(mockUser);
-    isAdminFromRequestMock.mockResolvedValue(false);
 
     client = await createClient({
       space: testSpace,
@@ -107,7 +104,7 @@ describe('AgentClient', () => {
     });
 
     it('omits the read access filter for admin users', async () => {
-      isAdminFromRequestMock.mockResolvedValue(true);
+      getUserFromRequestMock.mockResolvedValue({ ...mockUser, isAdmin: true });
       client = await createClient({
         space: testSpace,
         logger,
@@ -147,7 +144,7 @@ describe('AgentClient', () => {
     };
 
     const buildClient = (isAdmin: boolean): Promise<AgentClient> => {
-      isAdminFromRequestMock.mockResolvedValue(isAdmin);
+      getUserFromRequestMock.mockResolvedValue({ ...mockUser, isAdmin });
       return createClient({
         space: testSpace,
         logger,

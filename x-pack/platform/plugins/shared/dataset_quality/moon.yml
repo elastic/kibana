@@ -83,6 +83,9 @@ dependsOn:
   - '@kbn/streams-plugin'
   - '@kbn/licensing-plugin'
   - '@kbn/ui-callout'
+  - '@kbn/scout'
+  - '@kbn/scout-synthtrace'
+  - '@kbn/synthtrace-client'
 tags:
   - plugin
   - prod
@@ -94,6 +97,7 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/scout/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js
