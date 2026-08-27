@@ -523,8 +523,7 @@ describe('RuleDataClient', () => {
                   status: 409,
                   error: {
                     type: 'version_conflict_engine_exception',
-                    reason:
-                      '[4]: version conflict, document already exists (current version [1])',
+                    reason: '[4]: version conflict, document already exists (current version [1])',
                   },
                 },
               },
@@ -565,8 +564,7 @@ describe('RuleDataClient', () => {
                   status: 409,
                   error: {
                     type: 'version_conflict_engine_exception',
-                    reason:
-                      '[4]: version conflict, document already exists (current version [1])',
+                    reason: '[4]: version conflict, document already exists (current version [1])',
                   },
                 },
               },

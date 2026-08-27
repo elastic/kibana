@@ -57,8 +57,7 @@ const hasNonIgnorableBulkErrors = (response: estypes.BulkResponse): boolean =>
   (response.items ?? []).some((item) =>
     Object.values(item).some(
       (operation) =>
-        operation?.error != null &&
-        !IGNORED_BULK_ITEM_STATUS_CODES.includes(operation.status)
+        operation?.error != null && !IGNORED_BULK_ITEM_STATUS_CODES.includes(operation.status)
     )
   );
 
