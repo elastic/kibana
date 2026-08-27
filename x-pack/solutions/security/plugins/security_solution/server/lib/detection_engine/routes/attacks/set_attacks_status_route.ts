@@ -37,6 +37,7 @@ import { searchAlerts } from '../common/operations/search_alerts';
 import { validateClosingReason } from '../common/validators/validate_closing_reason';
 import { getAttackAlertsIndex } from '../common/index_patterns/get_attack_alerts_index';
 import { getUnifiedAlertsIndex } from '../common/index_patterns/get_unified_alerts_index';
+import { isAttackDiscoveryIndex } from '../common/operations/is_attack_discovery_index';
 import { buildSiemResponse } from '../utils';
 import {
   ATTACKS_INVALID_CLOSING_REASON_ERROR,
@@ -246,15 +247,23 @@ export const setAttacksStatusRoute = (
               });
             }
             // Same pattern for related detection alerts.
-            const noOpRelatedIds = new Set(
-              relatedAlertPreviousStatuses
-                .filter((ps) => ps.previousStatus === status)
-                .map((ps) => ps.id)
+            // Exclude any hits that landed in an Attack Discovery index: the unified index
+            // contains both families, so a stale related-alert ID that collides with an AD
+            // doc _id must not be emitted as a detection-alert event.
+            const nonAdRelatedHits = relatedAlertHits.filter(
+              (h) => !isAttackDiscoveryIndex(h.index)
             );
-            const changingRelatedIds = relatedAlertHits
+            const nonAdRelatedIdSet = new Set(nonAdRelatedHits.map((h) => h.id));
+            const nonAdPreviousStatuses = relatedAlertPreviousStatuses.filter((ps) =>
+              nonAdRelatedIdSet.has(ps.id)
+            );
+            const noOpRelatedIds = new Set(
+              nonAdPreviousStatuses.filter((ps) => ps.previousStatus === status).map((ps) => ps.id)
+            );
+            const changingRelatedIds = nonAdRelatedHits
               .filter((h) => !noOpRelatedIds.has(h.id))
               .map((h) => h.id);
-            const changingRelated = relatedAlertPreviousStatuses.filter(
+            const changingRelated = nonAdPreviousStatuses.filter(
               (ps) => ps.previousStatus !== status
             );
             if (changingRelatedIds.length > 0) {

@@ -39,7 +39,7 @@ const ADHOC_INDEX = `${ATTACK_DISCOVERY_ADHOC_ALERTS_COMMON_INDEX_PREFIX}-defaul
 const DETECTION_ALERTS_INDEX = '.alerts-security.alerts-default';
 
 const getSearchResponse = (
-  hits: Array<{ _id: string; alertIds?: string[]; workflowStatus?: string }>
+  hits: Array<{ _id: string; alertIds?: string[]; workflowStatus?: string; _index?: string }>
 ): estypes.SearchResponse<unknown> => ({
   took: 1,
   timed_out: false,
@@ -47,9 +47,9 @@ const getSearchResponse = (
   hits: {
     total: { value: hits.length, relation: 'eq' },
     max_score: 0,
-    hits: hits.map(({ _id, alertIds, workflowStatus }) => ({
+    hits: hits.map(({ _id, alertIds, workflowStatus, _index = SCHEDULED_INDEX }) => ({
       _id,
-      _index: SCHEDULED_INDEX,
+      _index,
       _source: {
         ...(alertIds !== undefined ? { [ALERT_ATTACK_DISCOVERY_ALERT_IDS]: alertIds } : {}),
         ...(workflowStatus !== undefined ? { [ALERT_WORKFLOW_STATUS]: workflowStatus } : {}),
@@ -467,10 +467,11 @@ describe('set attacks workflow status', () => {
           ])
         );
         // Second search: prefetchPreviousStatusesByIds for related alerts
+        // Use DETECTION_ALERTS_INDEX so hits are correctly classified as detection alerts.
         context.core.elasticsearch.client.asCurrentUser.search.mockResponseOnce(
           getSearchResponse([
-            { _id: 'alertA', workflowStatus: 'open' },
-            { _id: 'alertB', workflowStatus: 'open' },
+            { _id: 'alertA', workflowStatus: 'open', _index: DETECTION_ALERTS_INDEX },
+            { _id: 'alertB', workflowStatus: 'open', _index: DETECTION_ALERTS_INDEX },
           ])
         );
       });
@@ -496,6 +497,35 @@ describe('set attacks workflow status', () => {
             status: 'acknowledged',
           })
         );
+      });
+
+      test('does not emit alertStatusChanged for related IDs whose only hit is in an AD index', async () => {
+        // Simulate: 'alertA' is a stale reference that collides with an AD doc _id.
+        // 'alertB' is a real detection alert. Only 'alertB' should appear in the event.
+        context.core.elasticsearch.client.asCurrentUser.search.mockReset();
+        context.core.elasticsearch.client.asCurrentUser.search.mockResponseOnce(
+          getSearchResponse([
+            { _id: 'attack1', alertIds: ['alertA', 'alertB'], workflowStatus: 'open' },
+          ])
+        );
+        context.core.elasticsearch.client.asCurrentUser.search.mockResponseOnce(
+          getSearchResponse([
+            { _id: 'alertA', workflowStatus: 'open', _index: SCHEDULED_INDEX },
+            { _id: 'alertB', workflowStatus: 'open', _index: DETECTION_ALERTS_INDEX },
+          ])
+        );
+
+        await server.inject(
+          getRequest({ ...defaultBody, update_related_alerts: true }),
+          requestContextMock.convertContext(context)
+        );
+        await new Promise((r) => setTimeout(r, 0));
+        expect(mockEventBus.emitAlertStatusChanged).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.objectContaining({ alertIds: ['alertB'] })
+        );
+        const call = (mockEventBus.emitAlertStatusChanged as jest.Mock).mock.calls[0][1];
+        expect(call.alertIds).not.toContain('alertA');
       });
     });
   });
