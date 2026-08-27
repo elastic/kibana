@@ -39,6 +39,18 @@ export const LOAD_ERROR = i18n.translate('xpack.pnd.watches.skills.loadError', {
   defaultMessage: 'Unable to load skills.',
 });
 
+export const NOT_IMPLEMENTED_TITLE = i18n.translate(
+  'xpack.pnd.watches.skills.notImplemented.title',
+  {
+    defaultMessage: 'Skills are not implemented yet',
+  }
+);
+
+export const NOT_IMPLEMENTED_BODY = i18n.translate('xpack.pnd.watches.skills.notImplemented.body', {
+  defaultMessage:
+    'The skill catalog has no durable storage in live mode. Open a Watch on the left to change its settings.',
+});
+
 /**
  * Name and description per skill id. The API carries ids only, so all skill copy lives here.
  * Keep in step with `SKILLS_SEED` in `@kbn/pnd-common`.

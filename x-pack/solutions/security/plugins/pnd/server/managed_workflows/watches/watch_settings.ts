@@ -8,9 +8,9 @@
 import {
   SYSTEM_SECURITY_WATCH_DARK_ID,
   SYSTEM_SECURITY_WATCH_DEEP_ID,
-  SYSTEM_SECURITY_WATCH_DETECTION_ID,
   SYSTEM_SECURITY_WATCH_FLOOR_ID,
   SYSTEM_SECURITY_WATCH_OFFICER_ID,
+  SYSTEM_SECURITY_WATCH_POST_INCIDENT_ID,
   WatchAutonomyLevel,
 } from '@kbn/pnd-common';
 import type { SYSTEM_SECURITY_WATCH_IDS } from '@kbn/pnd-common';
@@ -25,7 +25,7 @@ const WATCH_SETTINGS_VERSIONS: Record<RegisteredWatchId, number> = {
   [SYSTEM_SECURITY_WATCH_OFFICER_ID]: 1,
   [SYSTEM_SECURITY_WATCH_DARK_ID]: 1,
   [SYSTEM_SECURITY_WATCH_DEEP_ID]: 1,
-  [SYSTEM_SECURITY_WATCH_DETECTION_ID]: 1,
+  [SYSTEM_SECURITY_WATCH_POST_INCIDENT_ID]: 1,
 };
 
 const parseWatchValues = (watchId: RegisteredWatchId, raw: Record<string, unknown>) => {

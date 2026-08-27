@@ -12,17 +12,17 @@ import {
   PND_RULE_WORKFLOW_MANAGEMENT,
   PND_WORKER_VISIBILITY,
 } from './constants';
-import WATCH_DETECTION_YAML from './watch_detection.yaml';
+import WATCH_AUTO_APPROVER_YAML from './watch_auto_approver.yaml';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from '../../types';
 
-export const PND_WATCH_DETECTION_WORKFLOW_ID = 'system-security-watch-detection';
+export const PND_WATCH_AUTO_APPROVER_WORKFLOW_ID = 'system-security-watch-auto-approver';
 
-export const PND_WATCH_DETECTION_WORKFLOW = {
+export const PND_WATCH_AUTO_APPROVER_WORKFLOW = {
   billable: false,
-  id: PND_WATCH_DETECTION_WORKFLOW_ID,
+  id: PND_WATCH_AUTO_APPROVER_WORKFLOW_ID,
   management: PND_RULE_WORKFLOW_MANAGEMENT,
   pluginId: PND_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 8,
+  version: 1,
   visibility: PND_WORKER_VISIBILITY,
-  yamlTemplate: (_values: ManagedWorkflowTemplateValues): string => WATCH_DETECTION_YAML,
+  yamlTemplate: (_values: ManagedWorkflowTemplateValues): string => WATCH_AUTO_APPROVER_YAML,
 } as const satisfies ManagedWorkflowDefinition;

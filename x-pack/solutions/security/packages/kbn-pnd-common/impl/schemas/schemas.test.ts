@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  MOCK_INVESTIGATIONS,
-  MOCK_PROPOSALS,
-  SKILLS_SEED,
-  WATCHES_SEED,
-  WORKERS_SEED,
-} from '../samples';
+import { MOCK_INVESTIGATIONS, MOCK_PROPOSALS, SKILLS_SEED, WATCHES_SEED } from '../samples';
 import type { Investigation, Proposal, Watch } from '.';
 import {
   GetInvestigationResponse,
@@ -20,7 +14,6 @@ import {
   ListInvestigationsResponse,
   ListWatchesResponse,
   WatchSkill,
-  WatchWorker,
 } from '.';
 
 describe('PND schema smoke tests', () => {
@@ -40,16 +33,6 @@ describe('PND schema smoke tests', () => {
     }
   });
 
-  it('parses seed workers through WatchWorker', () => {
-    for (const { lastRunSecondsAgo, ...rest } of WORKERS_SEED) {
-      const result = WatchWorker.parse({
-        ...rest,
-        lastRun: lastRunSecondsAgo == null ? null : new Date().toISOString(),
-      });
-      expect(result.watchIds.length).toBeGreaterThan(0);
-    }
-  });
-
   it('parses seed skills through WatchSkill', () => {
     for (const { lastRunSecondsAgo, ...rest } of SKILLS_SEED) {
       const result = WatchSkill.parse({
@@ -57,16 +40,6 @@ describe('PND schema smoke tests', () => {
         lastRun: lastRunSecondsAgo == null ? null : new Date().toISOString(),
       });
       expect(result.watchIds.length).toBeGreaterThan(0);
-    }
-  });
-
-  it('keeps worker watch ids within the managed catalog', () => {
-    const watchIds = new Set(WATCHES_SEED.map(({ id }) => id));
-
-    for (const worker of WORKERS_SEED) {
-      for (const watchId of worker.watchIds) {
-        expect(watchIds).toContain(watchId);
-      }
     }
   });
 

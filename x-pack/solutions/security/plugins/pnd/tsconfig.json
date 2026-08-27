@@ -12,6 +12,8 @@
     "@kbn/features-plugin",
     "@kbn/kibana-react-plugin",
     "@kbn/pnd-common",
+    "@kbn/security-solution-features",
+    "@kbn/security-solution-navigation",
     "@kbn/zod",
     "@kbn/zod-helpers",
     "@kbn/i18n",

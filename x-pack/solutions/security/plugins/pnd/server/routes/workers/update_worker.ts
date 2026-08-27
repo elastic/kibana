@@ -7,41 +7,46 @@
 
 import { z } from '@kbn/zod/v4';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import {
-  API_VERSIONS,
-  INTERNAL_API_ACCESS,
-  PND_WORKER_URL_TEMPLATE,
-  type WatchWorker,
-} from '@kbn/pnd-common';
-import { PND_API_PRIVILEGE_WRITE } from '../../../common/constants';
+import { API_VERSIONS, INTERNAL_API_ACCESS, PND_WORKER_URL_TEMPLATE } from '@kbn/pnd-common';
+import { getWatchWriteRouteAuthz } from '../watches/watch_route_security';
 import type { RouteDependencies } from '../register_routes';
-import { storeUnavailableResponse } from '../store_route_guard';
 
 const UpdateWorkerRequestParams = z.object({
   workerId: z.string().min(1).max(128),
 });
 
-/** Toggles the worker's global flag. Per-watch attachments are patched via PATCH /watches/{id}. */
 const UpdateWorkerRequestBody = z.object({
   enabled: z.boolean(),
 });
 
-export const registerUpdateWorkerRoute = ({
-  router,
-  logger,
-  config,
-  getWatchesService,
-}: RouteDependencies) => {
+/** Named so the reason travels with the response rather than living only in this file. */
+const REFUSAL_REASON =
+  'a worker is a read-only projection of an ai.agent step of a watch, so there is nothing to enable';
+
+/**
+ * Refuses every request with 400 (kibana-phf4.6).
+ *
+ * A worker used to carry a global enablement flag that this route wrote to the in-memory store.
+ * Nothing consulted that flag at execution time, so the write changed no behaviour at all while the
+ * response told the caller it had: the switch on the settings page moved, and the watch carried on
+ * doing exactly what its lane said. A worker is now projected from the lane's real `ai.agent` steps,
+ * which is not a thing that can be toggled — the step exists because the YAML declares it.
+ *
+ * The route stays registered, validated, and refuses out loud rather than being deleted, for three
+ * reasons. A 404 would read as "wrong id" and invite a retry with a different one. Removing it
+ * entirely would make an older client's request 404 the same way a typo does. And validating the body
+ * before refusing keeps the answer about the *thing being asked for* rather than about how it was
+ * spelled, which is what makes the reason below actionable.
+ */
+export const registerUpdateWorkerRoute = ({ router }: RouteDependencies) => {
   router.versioned
     .patch({
       path: PND_WORKER_URL_TEMPLATE,
       access: INTERNAL_API_ACCESS,
       security: {
-        authz: {
-          requiredPrivileges: [PND_API_PRIVILEGE_WRITE],
-        },
+        authz: getWatchWriteRouteAuthz(),
       },
-      summary: 'Update a PND worker',
+      summary: 'Refuse a PND worker update',
     })
     .addVersion(
       {
@@ -53,29 +58,11 @@ export const registerUpdateWorkerRoute = ({
           },
         },
       },
-      async (_context, request, response) => {
-        try {
-          if (!config.ui.useMockData) {
-            return storeUnavailableResponse(response);
-          }
-
-          const { workerId } = request.params;
-          const worker = getWatchesService().setWorkerEnabled(workerId, request.body.enabled);
-          if (!worker) {
-            return response.notFound({
-              body: { message: `Worker "${workerId}" not found` },
-            });
-          }
-
-          const body: { worker: WatchWorker } = { worker };
-          return response.ok({ body });
-        } catch (error) {
-          logger.error(`Failed to update worker: ${error}`);
-          return response.customError({
-            statusCode: 500,
-            body: { message: 'Failed to update worker' },
-          });
-        }
-      }
+      async (_context, request, response) =>
+        response.badRequest({
+          body: {
+            message: `Cannot update worker "${request.params.workerId}": ${REFUSAL_REASON}`,
+          },
+        })
     );
 };

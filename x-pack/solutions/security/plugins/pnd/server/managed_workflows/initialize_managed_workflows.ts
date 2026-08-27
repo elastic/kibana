@@ -6,7 +6,11 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import { PND_MANAGED_WATCH_WORKFLOW_IDS, PND_RULE_WORKFLOW_IDS } from '@kbn/workflows/managed';
+import {
+  PND_MANAGED_WATCH_WORKFLOW_IDS,
+  PND_STATIC_HELPER_WORKFLOW_IDS,
+  PND_WORKFLOW_TEMPLATE_VALUES,
+} from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
@@ -31,16 +35,21 @@ export const initializeManagedWorkflows = async ({
   // the new definition. The next Kibana start retries the complete pass.
   let canReconcile = true;
 
-  const ruleWorkflowInstalls = await Promise.allSettled(
-    PND_RULE_WORKFLOW_IDS.map((id) => client.install(id, { spaceId: GLOBAL_WORKFLOW_SPACE_ID }))
+  const staticHelperInstalls = await Promise.allSettled(
+    PND_STATIC_HELPER_WORKFLOW_IDS.map((id) =>
+      client.install(id, {
+        spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+        values: PND_WORKFLOW_TEMPLATE_VALUES,
+      })
+    )
   );
-  for (const [index, result] of ruleWorkflowInstalls.entries()) {
+  for (const [index, result] of staticHelperInstalls.entries()) {
     if (result.status === 'rejected') {
       canReconcile = false;
       logger.error(
-        `Failed to install managed PND rule workflow "${PND_RULE_WORKFLOW_IDS[index]}": ${
-          result.reason instanceof Error ? result.reason.message : String(result.reason)
-        }`
+        `Failed to install managed PND static helper workflow "${
+          PND_STATIC_HELPER_WORKFLOW_IDS[index]
+        }": ${result.reason instanceof Error ? result.reason.message : String(result.reason)}`
       );
     }
   }

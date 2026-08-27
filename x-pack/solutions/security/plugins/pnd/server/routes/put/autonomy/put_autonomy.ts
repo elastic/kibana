@@ -9,7 +9,6 @@ import {
   API_VERSIONS,
   INTERNAL_API_ACCESS,
   PND_AUTONOMY_URL,
-  buildWatchAutonomyUiSettingKey,
   SetAutonomyRequestBody,
 } from '@kbn/pnd-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
@@ -17,25 +16,21 @@ import { PND_API_PRIVILEGE_AUTONOMY_WRITE } from '../../../../common/constants';
 import type { RouteDependencies } from '../../register_routes';
 import { isWatchAutonomyLevel } from '../../../lib/as_watch_autonomy_level';
 import { buildAutonomyResponse } from '../../../lib/build_autonomy_response';
-import { getScopedInternalUiSettingsClient } from '../../../lib/scoped_internal_ui_settings_client';
 import { isSystemSecurityWatchId } from '../../../lib/is_system_security_watch_id';
 
 /**
  * `PUT /internal/pnd/autonomy` — the operator write path.
  *
  * Gated on the dedicated {@link PND_API_PRIVILEGE_AUTONOMY_WRITE} privilege
- * (grantable independently of `pnd all`). The internal repository has NO
- * SO-level authz, so this route's own checks are the only control: it
- * allow-lists the `watchId` against the managed set and re-validates the level is
- * exactly a {@link WATCH_AUTONOMY_LEVELS} member BEFORE constructing the settings
- * key (security finding S4), then writes as the internal user (bypassing
- * `manage_advanced_settings`).
+ * (grantable independently of `pnd all`). Writes the per-space template value
+ * (install-on-save, without enabling). Must not go through `PATCH /watches`,
+ * which lacks this privilege.
  */
 export const registerPutAutonomyRoute = ({
   router,
   logger,
   getSpaceId,
-  getStartServices,
+  getWatchesService,
 }: RouteDependencies) => {
   router.versioned
     .put({
@@ -59,8 +54,7 @@ export const registerPutAutonomyRoute = ({
         const { autonomyLevel, watchId } = request.body;
 
         // Security finding S4: allow-list the watchId and re-validate the level
-        // BEFORE building the key. Do not rely on the uiSettings client rejecting
-        // unregistered keys.
+        // BEFORE writing template values.
         if (!isSystemSecurityWatchId(watchId)) {
           return response.badRequest({
             body: { message: `Unknown watchId "${watchId}"` },
@@ -74,17 +68,31 @@ export const registerPutAutonomyRoute = ({
         }
 
         try {
-          const [{ savedObjects, uiSettings }] = await getStartServices();
           const spaceId = getSpaceId(request);
-          const uiSettingsClient = getScopedInternalUiSettingsClient({
-            savedObjects,
+          const service = getWatchesService();
+          const current = await service.get(watchId, spaceId, request);
+          const result = await service.update(
+            watchId,
+            { autonomyLevel, settingsRevision: current?.settingsRevision ?? null },
             spaceId,
-            uiSettings,
+            request
+          );
+
+          if (result.outcome === 'updated') {
+            return response.ok({ body: buildAutonomyResponse(watchId, autonomyLevel) });
+          }
+
+          if (result.outcome === 'conflict') {
+            return response.conflict({
+              body: { message: 'Watch settings changed; reload and retry' },
+            });
+          }
+
+          logger.error(`Failed to set autonomy for watch "${watchId}": ${result.outcome}`);
+          return response.customError({
+            statusCode: 500,
+            body: { message: 'Failed to set autonomy' },
           });
-
-          await uiSettingsClient.set(buildWatchAutonomyUiSettingKey(watchId), autonomyLevel);
-
-          return response.ok({ body: buildAutonomyResponse(watchId, autonomyLevel) });
         } catch (error) {
           logger.error(`Failed to set autonomy for watch "${watchId}": ${error}`);
           return response.customError({

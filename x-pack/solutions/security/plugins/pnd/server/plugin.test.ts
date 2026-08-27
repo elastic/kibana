@@ -8,7 +8,12 @@
 import { coreMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { PndConfig } from './config';
-import { PND_API_PRIVILEGE_READ, PND_API_PRIVILEGE_WRITE } from '../common/constants';
+import {
+  PND_API_PRIVILEGE_PROPOSALS_RESPOND,
+  PND_API_PRIVILEGE_READ,
+  PND_API_PRIVILEGE_THREADS_WRITE,
+  PND_API_PRIVILEGE_WRITE,
+} from '../common/constants';
 import { PndPlugin } from './plugin';
 import { initializeManagedWorkflows } from './managed_workflows/initialize_managed_workflows';
 import { registerOwner } from './managed_workflows/register_owner';
@@ -130,7 +135,12 @@ describe('PndPlugin feature-flag gating', () => {
         expect.objectContaining({
           privileges: expect.objectContaining({
             all: expect.objectContaining({
-              api: expect.arrayContaining([PND_API_PRIVILEGE_READ, PND_API_PRIVILEGE_WRITE]),
+              api: expect.arrayContaining([
+                PND_API_PRIVILEGE_READ,
+                PND_API_PRIVILEGE_WRITE,
+                PND_API_PRIVILEGE_PROPOSALS_RESPOND,
+                PND_API_PRIVILEGE_THREADS_WRITE,
+              ]),
               ui: expect.arrayContaining(['write']),
             }),
             read: expect.objectContaining({ api: [PND_API_PRIVILEGE_READ] }),
@@ -178,7 +188,7 @@ describe('PndPlugin feature-flag gating', () => {
       );
     });
 
-    it('registers the space-scoped autonomy uiSettings during setup', () => {
+    it('does not register space-scoped autonomy uiSettings', () => {
       const plugin = new PndPlugin(createContext(createConfig({ enabled: true })));
       const coreSetup = coreMock.createSetup();
       const features = { registerKibanaFeature: jest.fn() };
@@ -195,9 +205,7 @@ describe('PndPlugin feature-flag gating', () => {
         } as never
       );
 
-      expect(coreSetup.uiSettings.register).toHaveBeenCalledWith(
-        expect.objectContaining({ 'pnd:autonomy:system-security-watch-deep': expect.any(Object) })
-      );
+      expect(coreSetup.uiSettings.register).not.toHaveBeenCalled();
     });
 
     it('registers the manage-autonomy sub-feature privilege independently of "all"', () => {

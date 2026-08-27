@@ -17,7 +17,6 @@ import {
 
 const settings: WatchSettings = {
   autonomy: 'manual',
-  general: { runAsIdentity: 'svc-watch-floor', showMvpScopeWarning: true },
   runsLedger: [],
   scopeRouting: {
     assigneeQueue: { optionIds: ['unassigned', 'threat-hunting'], selectedId: 'unassigned' },

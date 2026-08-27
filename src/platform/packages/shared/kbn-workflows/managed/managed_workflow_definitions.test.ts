@@ -13,11 +13,16 @@ import { managedWorkflowDefinitions } from '.';
 import type { ManagedWorkflowTemplateValuesById } from '.';
 import {
   EXAMPLE_MANAGED_WORKFLOW_ID,
+  PND_RULE_CREATION_WORKFLOW_ID,
+  PND_RULE_PREVIEW_WORKFLOW_ID,
+  PND_RULE_TUNING_WORKFLOW_ID,
+  PND_WATCH_AUTO_APPROVER_WORKFLOW_ID,
   PND_WATCH_DARK_WORKFLOW_ID,
   PND_WATCH_DEEP_WORKFLOW_ID,
   PND_WATCH_DETECTION_WORKFLOW_ID,
   PND_WATCH_FLOOR_WORKFLOW_ID,
   PND_WATCH_OFFICER_WORKFLOW_ID,
+  PND_WATCH_POST_INCIDENT_WORKFLOW_ID,
   SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
@@ -27,6 +32,7 @@ import WATCH_DEEP_YAML from './definitions/pnd/watch_deep.yaml';
 import WATCH_DETECTION_YAML from './definitions/pnd/watch_detection.yaml';
 import WATCH_FLOOR_YAML from './definitions/pnd/watch_floor.yaml';
 import WATCH_OFFICER_YAML from './definitions/pnd/watch_officer.yaml';
+import WATCH_POST_INCIDENT_YAML from './definitions/pnd/watch_post_incident.yaml';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from './types';
 import { WorkflowSchemaBase } from '../spec/schema';
 
@@ -67,6 +73,26 @@ const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
     autonomyLevel: 'manual',
   },
   [PND_WATCH_DETECTION_WORKFLOW_ID]: {
+    settingsVersion: 1,
+    autonomyLevel: 'manual',
+  },
+  [PND_WATCH_POST_INCIDENT_WORKFLOW_ID]: {
+    settingsVersion: 1,
+    autonomyLevel: 'manual',
+  },
+  [PND_WATCH_AUTO_APPROVER_WORKFLOW_ID]: {
+    settingsVersion: 1,
+    autonomyLevel: 'manual',
+  },
+  [PND_RULE_PREVIEW_WORKFLOW_ID]: {
+    settingsVersion: 1,
+    autonomyLevel: 'manual',
+  },
+  [PND_RULE_TUNING_WORKFLOW_ID]: {
+    settingsVersion: 1,
+    autonomyLevel: 'manual',
+  },
+  [PND_RULE_CREATION_WORKFLOW_ID]: {
     settingsVersion: 1,
     autonomyLevel: 'manual',
   },
@@ -144,11 +170,12 @@ function createContentFingerprint(content: string): string {
 }
 
 it.each([
-  [PND_WATCH_FLOOR_WORKFLOW_ID, WATCH_FLOOR_YAML, '1:29aa5f25'],
-  [PND_WATCH_OFFICER_WORKFLOW_ID, WATCH_OFFICER_YAML, '1:9b3f3d18'],
-  [PND_WATCH_DARK_WORKFLOW_ID, WATCH_DARK_YAML, '1:4f835cad'],
-  [PND_WATCH_DEEP_WORKFLOW_ID, WATCH_DEEP_YAML, '1:79b46054'],
-  [PND_WATCH_DETECTION_WORKFLOW_ID, WATCH_DETECTION_YAML, '1:c23724c4'],
+  [PND_WATCH_FLOOR_WORKFLOW_ID, WATCH_FLOOR_YAML, '19:ef20a452'],
+  [PND_WATCH_OFFICER_WORKFLOW_ID, WATCH_OFFICER_YAML, '6:ac13554a'],
+  [PND_WATCH_DARK_WORKFLOW_ID, WATCH_DARK_YAML, '6:add36220'],
+  [PND_WATCH_DEEP_WORKFLOW_ID, WATCH_DEEP_YAML, '13:971b27fd'],
+  [PND_WATCH_DETECTION_WORKFLOW_ID, WATCH_DETECTION_YAML, '8:c9f95029'],
+  [PND_WATCH_POST_INCIDENT_WORKFLOW_ID, WATCH_POST_INCIDENT_YAML, '14:58a5b54e'],
 ] as const)(
   'requires bumping %s definition.version together with the imported YAML fingerprint',
   (workflowId, importedYaml, expectedFingerprint) => {

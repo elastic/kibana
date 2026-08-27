@@ -47,10 +47,9 @@ import {
   getWatch as getStoredWatch,
   listSkills as listStoredSkills,
   listWatches as listStoredWatches,
-  listWorkers as listStoredWorkers,
   setSkillEnabled as setStoredSkillEnabled,
-  setWorkerEnabled as setStoredWorkerEnabled,
 } from '../watch_store/watch_store';
+import { projectWorkers } from './project_workers';
 import { PND_MANAGED_WORKFLOW_OWNER_ID } from '../../../common/constants';
 
 const WATCH_VISIBILITY_CONTEXT = getManagedWorkflowSelectorVisibilityContext('watch');
@@ -148,7 +147,7 @@ export class WatchesService {
   /* Reads                                                                  */
   /* ---------------------------------------------------------------------- */
 
-  async list(spaceId: string): Promise<ListWatchesResponse> {
+  async list(spaceId: string, request: KibanaRequest): Promise<ListWatchesResponse> {
     if (this.useMockData) {
       const watches = await this.withWorkflowEnablement(listStoredWatches(), spaceId);
       return ListWatchesResponse.parse({ watches: [...watches].sort(compareWatchesForDisplay) });
@@ -169,6 +168,7 @@ export class WatchesService {
         visibilityContext: [WATCH_VISIBILITY_CONTEXT],
       },
       spaceId,
+      request,
       { includeExecutionHistory: true, includeManagedExecutionHistory: true }
     );
 
@@ -207,7 +207,7 @@ export class WatchesService {
           // omitted from getWorkflows (selector filter, pagination) must still appear.
           if (status.installed) {
             try {
-              const detail = await management.getWorkflow(status.workflowId, spaceId);
+              const detail = await management.getWorkflow(status.workflowId, spaceId, request);
               if (detail) {
                 return {
                   ...projectWorkflowToWatch(toWatchListItem(detail)),
@@ -230,7 +230,11 @@ export class WatchesService {
     return ListWatchesResponse.parse({ watches: watches.sort(compareWatchesForDisplay) });
   }
 
-  async get(watchId: string, spaceId: string): Promise<GetWatchResponse | undefined> {
+  async get(
+    watchId: string,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<GetWatchResponse | undefined> {
     if (this.useMockData) {
       const stored = getStoredWatch(watchId);
       if (!stored) {
@@ -300,7 +304,7 @@ export class WatchesService {
     }
 
     const management = this.requireManagement();
-    const detail = await management.getWorkflow(workflowDocumentId, spaceId);
+    const detail = await management.getWorkflow(workflowDocumentId, spaceId, request);
     if (!detail) {
       return undefined;
     }
@@ -460,11 +464,11 @@ export class WatchesService {
     if (touchesSettings) return { outcome: 'unavailable' };
     if (enabled != null) {
       const management = this.requireManagement();
-      const detail = await management.getWorkflow(watchId, spaceId);
+      const detail = await management.getWorkflow(watchId, spaceId, request);
       if (!detail) return { outcome: 'not-found' };
       await management.updateWorkflow(watchId, { enabled }, spaceId, request);
     }
-    const response = await this.get(watchId, spaceId);
+    const response = await this.get(watchId, spaceId, request);
     return response ? { outcome: 'updated', response } : { outcome: 'not-found' };
   }
 
@@ -528,7 +532,7 @@ export class WatchesService {
     if (patch.enabled != null) {
       if (!status.installed) {
         if (!patch.enabled) {
-          const response = await this.get(registration.id, spaceId);
+          const response = await this.get(registration.id, spaceId, request);
           return response ? { outcome: 'updated', response } : { outcome: 'not-found' };
         }
 
@@ -559,24 +563,20 @@ export class WatchesService {
       );
     }
 
-    const response = await this.get(registration.id, spaceId);
+    const response = await this.get(registration.id, spaceId, request);
     return response ? { outcome: 'updated', response } : { outcome: 'not-found' };
   }
 
   /* ---------------------------------------------------------------------- */
-  /* Global worker and skill catalogs — store-only for now                  */
+  /* Global worker and skill catalogs                                       */
   /* ---------------------------------------------------------------------- */
 
   listWorkers(): WatchWorker[] {
-    return listStoredWorkers();
+    return projectWorkers({ logger: this.logger });
   }
 
   listSkills(): WatchSkill[] {
     return listStoredSkills();
-  }
-
-  setWorkerEnabled(workerId: string, enabled: boolean): WatchWorker | undefined {
-    return setStoredWorkerEnabled(workerId, enabled);
   }
 
   setSkillEnabled(skillId: string, enabled: boolean): WatchSkill | undefined {

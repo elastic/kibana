@@ -3,7 +3,7 @@ name: Watch Officer
 description: >
   Tier-2 Security Watch Officer skeleton. Escalates criticals, drafts briefs,
   and stages gated response proposals for human approval.
-enabled: true
+enabled: false
 tags:
   - watch
   - watch-officer
@@ -11,6 +11,9 @@ triggers:
   - type: manual
 consts:
   watch_policy:
+    settingsVersion: __WATCH_SETTINGS_VERSION__
+    # Persisted plumbing only; runtime autonomy is request-time from template values.
+    autonomy: "__WATCH_AUTONOMY_LEVEL__"
     mandate: Escalation & briefs
     autonomyLevel: manual
     handoff: oncall

@@ -187,7 +187,7 @@ describe('WatchesService', () => {
 
   describe('list', () => {
     it('projects uninstalled live catalog entries without fixture runtime data', async () => {
-      const response = await createPersistentHarness().createService().list(SPACE);
+      const response = await createPersistentHarness().createService().list(SPACE, request);
       const floor = response.watches.find(({ id }) => id === FLOOR);
 
       expect(floor).toEqual(
@@ -218,7 +218,7 @@ describe('WatchesService', () => {
         results: [],
       });
 
-      const response = await service.list(SPACE);
+      const response = await service.list(SPACE, request);
       const floor = response.watches.find(({ id }) => id === FLOOR);
 
       expect(response.watches).toHaveLength(5);
@@ -235,7 +235,7 @@ describe('WatchesService', () => {
       const service = harness.createService(true);
       await service.update(FLOOR, { enabled: true }, SPACE, request);
 
-      const response = await service.list(SPACE);
+      const response = await service.list(SPACE, request);
 
       expect(response.watches.find(({ id }) => id === FLOOR)?.enabled).toBe(true);
     });
@@ -271,12 +271,12 @@ describe('WatchesService', () => {
 
       expect(first.outcome).toBe('updated');
       expect(second.outcome).toBe('updated');
-      expect((await harness.createService().get(FLOOR, 'space-a'))?.settings?.autonomy).toBe(
-        'supervised'
-      );
-      expect((await harness.createService().get(FLOOR, 'space-b'))?.settings?.autonomy).toBe(
-        'assisted'
-      );
+      expect(
+        (await harness.createService().get(FLOOR, 'space-a', request))?.settings?.autonomy
+      ).toBe('supervised');
+      expect(
+        (await harness.createService().get(FLOOR, 'space-b', request))?.settings?.autonomy
+      ).toBe('assisted');
     });
 
     it('omits settings when durable workflow state cannot be read', async () => {
@@ -292,7 +292,7 @@ describe('WatchesService', () => {
         .mocked(harness.managedWorkflows.getInstalledWorkflowState)
         .mockRejectedValueOnce(new Error('state unavailable'));
 
-      const body = await service.get(FLOOR, SPACE);
+      const body = await service.get(FLOOR, SPACE, request);
 
       expect(body?.watch.id).toBe(FLOOR);
       expect(body?.settings).toBeUndefined();
@@ -436,11 +436,6 @@ describe('WatchesService', () => {
       expect(service.listWorkers().length).toBeGreaterThan(0);
       expect(service.listSkills().length).toBeGreaterThan(0);
 
-      expect(service.setWorkerEnabled('containment', false)?.enabled).toBe(false);
-      // The identically named skill is a different thing and must be untouched.
-      expect(service.listSkills().find(({ id }) => id === 'containment')?.enabled).toBe(true);
-
-      expect(service.setWorkerEnabled('nope', false)).toBeUndefined();
       expect(service.setSkillEnabled('nope', false)).toBeUndefined();
     });
   });

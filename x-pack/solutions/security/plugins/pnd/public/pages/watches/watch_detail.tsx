@@ -9,11 +9,9 @@ import React, { useCallback, useMemo } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCode,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
@@ -493,36 +491,6 @@ export const WatchDetailPage: React.FC = () => {
             <EuiText size="s" color="subdued" data-test-subj="pndWatchIntro">
               <p>{intro}</p>
             </EuiText>
-          </EuiFlexItem>
-        ) : null}
-
-        {/*
-          The whole General section, collapsed into the header (2026-08-17 simplification): the run-as
-          account sits under the description as a muted lock plus a monospace name, with no field label,
-          no help text and no MVP-scope callout. It is read-only until IAM run-as support lands, and
-          this reads as an identity rather than an unfilled field — which is what a labelled, editable
-          -looking `EuiFormRow` made it look like.
-
-          The lock glyph is `aria-hidden` and the pair is labelled instead, because a lock beside bare
-          text tells a screen reader nothing.
-        */}
-        {settings?.general ? (
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup
-              alignItems="center"
-              aria-label={settingsI18n.RUN_AS_IDENTITY_ARIA_LABEL}
-              gutterSize="s"
-              responsive={false}
-            >
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="lock" size="s" color="subdued" aria-hidden />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiCode transparentBackground data-test-subj="pndWatchRunAsIdentity">
-                  {settings.general.runAsIdentity}
-                </EuiCode>
-              </EuiFlexItem>
-            </EuiFlexGroup>
           </EuiFlexItem>
         ) : null}
 

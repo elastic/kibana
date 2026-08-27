@@ -74,6 +74,9 @@ export const PND_ALERTS_INDEX_BASE = '.alerts-security.alerts' as const;
 export const ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING =
   'securitySolution:enableAttackDiscoveryWorkflows' as const;
 
+/** Owner id PND registers and installs managed workflows under. */
+export const PND_MANAGED_WORKFLOW_OWNER_ID = 'pnd' as const;
+
 /**
  * Response header the AD-derived list routes stamp so a caller can tell an "AD 2.0 not enabled in
  * this space" empty result (`'false'`) apart from a genuinely empty queue (`'true'`), instead of an

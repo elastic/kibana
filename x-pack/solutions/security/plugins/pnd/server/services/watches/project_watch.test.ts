@@ -101,32 +101,27 @@ describe('project watch', () => {
 
   describe('projectSchedule', () => {
     it('uses actual manual-only triggers instead of an incompatible policy mode', () => {
-      expect(
-        projectSchedule([{ type: 'manual', summary: 'Manual / on demand' }], {
-          mode: 'always',
-          cadence: 'stream',
-          onDemand: false,
-        })
-      ).toMatchObject({ mode: 'demand', cadence: 'manual', set: false, onDemand: true });
+      expect(projectSchedule([{ type: 'manual', summary: 'Manual / on demand' }])).toMatchObject({
+        mode: 'demand',
+        cadence: 'manual',
+        set: false,
+        onDemand: true,
+      });
     });
 
-    it('preserves a configured window for scheduled watches', () => {
-      expect(
-        projectSchedule([{ type: 'schedule', summary: 'Scheduled' }], {
-          mode: 'window',
-          from: 22,
-          to: 6,
-        })
-      ).toMatchObject({ mode: 'window', set: true, from: 22, to: 6 });
+    it('marks a scheduled watch as always-on rather than a policy window', () => {
+      expect(projectSchedule([{ type: 'schedule', summary: 'Scheduled' }])).toMatchObject({
+        mode: 'always',
+        set: true,
+        from: 0,
+        to: 23,
+      });
     });
   });
 
   /**
-   * Autonomy has exactly one source of truth: the `pnd:autonomy:<watchId>` uiSetting that
-   * `GET /internal/pnd/autonomy` serves and the gates read. The projection must therefore not
-   * surface a second one, even though the managed YAML still declares an intended default in
-   * `consts.watch_policy.autonomyLevel` — two copies of the level that can disagree is exactly the
-   * failure this guards against.
+   * Autonomy is stored on per-space template values and served by GET /internal/pnd/autonomy.
+   * The projection must not surface a second copy from YAML `consts.watch_policy.autonomyLevel`.
    */
   describe('projectWorkflowToWatch autonomy', () => {
     it('does not project an autonomy level, even when the YAML declares one', () => {
