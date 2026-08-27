@@ -8,7 +8,10 @@ import { createAction } from 'redux-toolkit-v1';
 import type { MonitorOverviewPageState } from '..';
 import { createAsyncAction } from '../utils/actions';
 
-import type { OverviewStaleStatus, PaginatedOverviewStatus } from '../../../../../common/runtime_types';
+import type {
+  OverviewStaleStatus,
+  PaginatedOverviewStatus,
+} from '../../../../../common/runtime_types';
 
 export const fetchOverviewStatusAction = createAsyncAction<
   { pageState: MonitorOverviewPageState; scopeStatusByLocation?: boolean; statusFilter?: string },
