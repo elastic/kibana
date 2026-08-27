@@ -15,9 +15,12 @@ spaceTest.describe('Console copy as language', { tag: tags.deploymentAgnostic },
   spaceTest.beforeEach(async ({ browserAuth, page, pageObjects }) => {
     await page.context().grantPermissions(['clipboard-read', 'clipboard-write']);
     await browserAuth.loginAsAdmin();
-    // The default language is persisted per browser context, so every test starts from curl.
     await pageObjects.console.gotoWithRequestLoaded('GET _search');
     await pageObjects.console.skipTourIfExists();
+  });
+
+  spaceTest.afterEach(async ({ page }) => {
+    await page.evaluate(() => localStorage.removeItem('sense:defaultLanguage'));
   });
 
   spaceTest('copies the request as curl by default', async ({ page, pageObjects }) => {

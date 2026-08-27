@@ -1,5 +1,5 @@
 {
-  "sha1": "d24e3e651c7392d64ee87130ac1ec1f7ffd0ea81",
+  "sha1": "77b255816394d13108cd0d87d4eb2f0e9b5c27ba",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -554,7 +554,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/copy_as_language.spec.ts",
-        "line": 18,
+        "line": 20,
         "column": 5
       }
     },
@@ -574,8 +574,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/copy_as_language.spec.ts",
-        "line": 24,
-        "column": 23
+        "line": 26,
+        "column": 69
       }
     },
     {
@@ -595,7 +595,7 @@
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/copy_as_language.spec.ts",
         "line": 46,
-        "column": 22
+        "column": 27
       }
     },
     {
@@ -614,8 +614,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/copy_as_language.spec.ts",
-        "line": 62,
-        "column": 5
+        "line": 60,
+        "column": 9
       }
     },
     {
@@ -635,7 +635,7 @@
       "location": {
         "file": "src/platform/plugins/shared/console/test/scout/ui/parallel_tests/copy_as_language.spec.ts",
         "line": 77,
-        "column": 4
+        "column": 29
       }
     },
     {
