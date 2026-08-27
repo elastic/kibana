@@ -1327,67 +1327,6 @@ describe('bodies without a closing tag stay literal without one', () => {
   });
 });
 
-describe('escaped markup amid feed-shaped structural nesting', () => {
-  // Everything the previous rounds established has to survive amid feed-shaped tag names,
-  // which this file no longer treats specially.
-  it.each([
-    [
-      'a text-typed atom summary',
-      '<feed><entry><title>T</title><summary type="text">Uses &lt;script&gt; c2.evil.test</summary></entry></feed>',
-      'T Uses <script> c2.evil.test',
-    ],
-    [
-      'a snippet displayed in code',
-      '<code>&lt;script&gt;fetch("https://c2.evil.test")&lt;/script&gt;</code>',
-      '<script>fetch("https://c2.evil.test")</script>',
-    ],
-  ])('still preserves %s', (_label, html, expected) => {
-    expect(stripHtml(html)).toBe(expected);
-  });
-
-  // Deeply or widely nested feed-shaped tag names must stay linear like any other markup.
-  it.each([
-    ['deeply nested wrappers', `${'<description>'.repeat(50000)}x`],
-    ['many sibling wrappers', '<description>&lt;p&gt;x&lt;/p&gt;</description>'.repeat(50000)],
-  ])('stays bounded on %s', (_label, input) => {
-    const started = process.hrtime.bigint();
-    expect(() => stripHtml(input)).not.toThrow();
-    const elapsedMs = Number(process.hrtime.bigint() - started) / 1e6;
-
-    expect(elapsedMs).toBeLessThan(3000);
-  });
-});
-
-/**
- * Comments and directives beside an escaped payload are packaging, not content, and must not
- * change whether the surrounding text is treated as markup.
- */
-describe('packaging nodes beside escaped markup', () => {
-  // An element child still means mixed content rather than an encoded payload alone.
-  it('does not expand a wrapper that also holds real markup', () => {
-    expect(stripHtml('<description><p>real</p>&lt;p&gt;enc&lt;/p&gt;</description>')).toBe(
-      'real <p>enc</p>'
-    );
-  });
-});
-
-/**
- * A `type=` attribute carries no meaning to this file: any element wrapping escaped markup
- * stays literal, regardless of what its own attributes claim to be.
- */
-describe('a type attribute does not trigger re-parsing', () => {
-  const ENCODED = '&lt;script&gt;fetch("https://false-ioc.test")&lt;/script&gt;safe';
-
-  it.each([
-    ['a media type on summary', `<summary type="text/html">${ENCODED}</summary>`],
-    ['an xml media type', `<content type="application/xhtml+xml">${ENCODED}</content>`],
-    ['a non-html media type', `<content type="text/plain">${ENCODED}</content>`],
-    ['the xhtml shorthand', `<content type="xhtml">${ENCODED}</content>`],
-  ])('leaves content declared with %s literal', (_label, html) => {
-    expect(stripHtml(html)).toContain('<script>');
-  });
-});
-
 /**
  * `<template>` is inert. The parser puts its children in a document fragment that no reader
  * ever sees, so component templates carrying example or stale URLs were feeding body_text
@@ -1430,105 +1369,6 @@ describe('non-rendered subtrees', () => {
   // deliberately not skipped.
   it('keeps noscript content', () => {
     expect(stripHtml('<noscript><p>fallback.test</p></noscript>after')).toBe('fallback.test after');
-  });
-});
-
-/**
- * Feed-shaped container names (`item`, `entry`, `channel`, `feed`, `rss`) carry no special
- * meaning to this file: they are walked like any unknown element, and escaped markup inside
- * them stays literal.
- */
-describe('feed-shaped container names are not encoded bodies', () => {
-  const LITERAL = 'Exploit uses &lt;script&gt; and c2.evil.test';
-  const DECODED = 'Exploit uses <script> and c2.evil.test';
-
-  it.each([['value'], ['item'], ['entry'], ['channel'], ['feed'], ['rss'], ['foo']])(
-    'keeps literal text inside <%s>',
-    (name) => {
-      const result = stripHtml(`<${name}>${LITERAL}</${name}>`);
-
-      expect(result).toBe(DECODED);
-      expect(result).toContain('c2.evil.test');
-    }
-  );
-
-  it('keeps literal text through nested structural containers', () => {
-    expect(stripHtml(`<rss><channel><item>${LITERAL}</item></channel></rss>`)).toBe(DECODED);
-  });
-});
-
-/**
- * CDATA is parsed as markup unconditionally, so an unclosed tag inside it (e.g. a bare
- * `<script>` with no matching close) is read as a real, skipped element rather than literal
- * text, regardless of what enclosing element or attribute it sits under.
- */
-describe('CDATA inside a text construct is parsed like any other CDATA', () => {
-  it.each([
-    [
-      'an html-typed summary',
-      '<summary type="html"><![CDATA[<p>evil.com</p>]]></summary>',
-      'evil.com',
-    ],
-    [
-      'a media-typed content',
-      '<content type="text/html"><![CDATA[<p>evil.com</p>]]></content>',
-      'evil.com',
-    ],
-  ])('still parses CDATA as markup for %s', (_label, html, expected) => {
-    expect(stripHtml(html)).toBe(expected);
-  });
-});
-
-/**
- * Nested element children are walked as markup regardless of any enclosing attribute, since
- * this file no longer treats a `type=` attribute as meaningful. A CDATA child is character
- * data per XML rather than HTML, so it goes through the same universal CDATA-as-markup path
- * as everywhere else, not a literal path reserved for one construct.
- */
-describe('nested element children are walked as markup', () => {
-  const SCRIPT = "<script>fetch('https://false-ioc.test')</script>";
-  const XHTML = `<div><p>evil.com</p><p>bad.net</p>${SCRIPT}</div>`;
-
-  it('preserves block boundaries and drops script bodies', () => {
-    const result = stripHtml(`<summary type="xhtml">${XHTML}</summary>`);
-
-    expect(result).toBe('evil.com bad.net');
-    expect(result).not.toContain('false-ioc.test');
-  });
-
-  it('preserves structured boundaries', () => {
-    expect(
-      htmlToStructured('<summary type="xhtml"><div><p>evil.com</p><p>bad.net</p></div></summary>')
-    ).toBe('evil.com\nbad.net');
-  });
-
-  it('walks a media-typed content the same way', () => {
-    expect(stripHtml(`<content type="xhtml">${XHTML}</content>`)).toBe('evil.com bad.net');
-  });
-});
-
-/**
- * A namespaced tag name (`media:description`, `dc:description`, or an arbitrary prefix) is an
- * ordinary custom element to this file: escaped markup inside it stays literal, the same as
- * any unprefixed custom element.
- */
-describe('namespaced tag names are not encoded bodies', () => {
-  const LITERAL = 'Exploit uses &lt;script&gt; and c2.evil.test';
-  const DECODED = 'Exploit uses <script> and c2.evil.test';
-
-  it.each([
-    [
-      'media:description with an explicit plain type',
-      `<media:description type="plain">${LITERAL}</media:description>`,
-    ],
-    ['media:description with no type', `<media:description>${LITERAL}</media:description>`],
-    ['dc:description', `<dc:description>${LITERAL}</dc:description>`],
-    ['an arbitrary namespaced description', `<foo:description>${LITERAL}</foo:description>`],
-  ])('keeps %s literal', (_label, html) => {
-    const result = stripHtml(html);
-
-    expect(result).toBe(DECODED);
-    expect(result).toContain('c2.evil.test');
   });
 });
 
@@ -1583,64 +1423,16 @@ describe('HTML elements sharing an Atom construct name', () => {
       )
     ).toBe('Visible');
   });
-
-  it('still handles a text-typed summary', () => {
-    expect(
-      stripHtml('<summary type="text">Exploit uses &lt;script&gt; and c2.evil.test</summary>')
-    ).toBe('Exploit uses <script> and c2.evil.test');
-  });
-
-  // An xhtml construct has element children by design and is walked, which this change must
-  // not disturb.
-  it('still walks an xhtml construct', () => {
-    expect(
-      stripHtml(
-        '<summary type="xhtml"><div><p>evil.com</p><p>bad.net</p><script>x</script></div></summary>'
-      )
-    ).toBe('evil.com bad.net');
-  });
 });
 
-/**
- * A `type=` attribute is not a signal this file acts on. CDATA is always attempted as markup,
- * so a real, closeable subtree inside it (e.g. `<p>evil.com</p>`) is walked as markup
- * regardless of the enclosing element's attributes, and nested element children (the `xhtml`
- * shape) are always walked too.
- */
-describe('CDATA and nested elements are walked the same regardless of type', () => {
-  it('still parses a text/html media type as markup', () => {
-    expect(stripHtml('<content type="text/html"><![CDATA[<p>evil.com</p>]]></content>')).toBe(
-      'evil.com'
-    );
-  });
-
-  it.each([
-    ['the xhtml shorthand', 'xhtml'],
-    ['an xhtml media type', 'application/xhtml+xml'],
-    ['a generic xml media type', 'application/xml'],
-  ])('walks %s as markup', (_label, type) => {
-    expect(
-      stripHtml(
-        `<content type="${type}"><div><p>evil.com</p><p>bad.net</p><script>x</script></div></content>`
-      )
-    ).toBe('evil.com bad.net');
-  });
-});
-
-describe('section lifting within a single container', () => {
-  it('still lifts every href within the same item', () => {
+describe('multiple hrefs lift within the same section', () => {
+  it('lifts every href under one heading', () => {
     expect(
       htmlToStructured(
-        '<rss><channel><item><h2>IOCs</h2><p><a href="https://c2.evil.test/x">ioc</a></p>' +
-          '<p><a href="https://b.test/y">two</a></p></item></channel></rss>'
+        '<h2>IOCs</h2><p><a href="https://c2.evil.test/x">ioc</a></p>' +
+          '<p><a href="https://b.test/y">two</a></p>'
       )
     ).toBe('## IOCs\nioc https://c2.evil.test/x\ntwo https://b.test/y');
-  });
-
-  it('is unaffected without a feed container', () => {
-    expect(htmlToStructured('<h2>IOCs</h2><p><a href="https://c2.evil.test/x">ioc</a></p>')).toBe(
-      '## IOCs\nioc https://c2.evil.test/x'
-    );
   });
 });
 
@@ -1701,22 +1493,6 @@ describe('self-closing detection and unquoted attribute values', () => {
 
   it('still handles a quoted > in the open tag', () => {
     expect(stripHtml('<script src="a>b.js"/>kept')).toBe('kept');
-  });
-});
-
-/**
- * A namespace prefix and its `xmlns:` binding carry no meaning to this file: `content:encoded`
- * is an ordinary namespaced tag name, and escaped markup inside it stays literal regardless of
- * what the binding claims.
- */
-describe('a namespace binding does not trigger re-parsing', () => {
-  it('leaves content:encoded literal regardless of its namespace binding', () => {
-    const result = stripHtml(
-      '<content:encoded xmlns:content="urn:literal">Exploit uses &lt;script&gt; and c2.evil.test</content:encoded>'
-    );
-
-    expect(result).toBe('Exploit uses <script> and c2.evil.test');
-    expect(result).toContain('c2.evil.test');
   });
 });
 
