@@ -111,7 +111,6 @@ export const ExecutionDataViewer = React.memo<ExecutionDataViewerProps>(
               <EuiButtonGroup
                 isIconOnly
                 buttonSize="compressed"
-                color="primary"
                 type="single"
                 idSelected={selectedViewMode}
                 legend={i18n.translate('workflows.jsonDataTable.viewMode', {

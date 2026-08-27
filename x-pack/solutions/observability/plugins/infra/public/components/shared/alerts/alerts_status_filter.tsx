@@ -50,7 +50,6 @@ export function AlertsStatusFilter({ status, onChange }: AlertStatusFilterProps)
       legend={i18n.translate('xpack.infra.hostsViewPage.tabs.alerts.alertStatusFilter.legend', {
         defaultMessage: 'Filter by',
       })}
-      color="primary"
       options={options}
       idSelected={status}
       onChange={(id) => onChange(id as AlertStatus)}

@@ -139,7 +139,6 @@ export const VisualizeTab = memo(() => {
   return (
     <>
       <EuiButtonGroup
-        color="primary"
         name="coarsness"
         legend={i18n.translate(
           'xpack.securitySolution.flyout.left.visualize.buttonGroupLegendLabel',
