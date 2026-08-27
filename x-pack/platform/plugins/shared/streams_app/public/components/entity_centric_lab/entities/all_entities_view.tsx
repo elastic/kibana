@@ -1103,6 +1103,7 @@ export const AllEntitiesView = ({
                   key="manage"
                   iconType="gear"
                   size={isElasticOn ? 's' : 'm'}
+                  color={isElasticOn ? 'text' : 'primary'}
                   onClick={() => {
                     router.push('/manage-entity-types', { path: {}, query: {} });
                   }}
@@ -1274,6 +1275,7 @@ export const AllEntitiesView = ({
                       onChange={(id) => setViewMode(id as ViewMode)}
                       isIconOnly
                       buttonSize="compressed"
+                      color="text"
                       data-test-subj="entityCentricLabEntitiesViewModeToggle"
                     />
                   </EuiFlexItem>
@@ -1289,6 +1291,7 @@ export const AllEntitiesView = ({
                         Boolean(loadedView) && savedViewsApi.defaultViewId === loadedView?.id
                       }
                       compact
+                      neutral
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>
