@@ -87,12 +87,9 @@ describe('OnlineScoreService', () => {
       documents: expect.any(Array),
       refresh: 'wait_for',
     });
-    expect(capturedDocuments.map(({ _id }) => _id)).toEqual([
-      'space-a-workflow-1-trace-1-correctness-factuality',
-    ]);
-    expect(computeOnlineScoreDocumentId(capturedDocuments[0])).toBe(
-      'space-a-workflow-1-trace-1-correctness-factuality'
-    );
+    const documentId = computeOnlineScoreDocumentId(capturedDocuments[0]);
+    expect(capturedDocuments.map(({ _id }) => _id)).toEqual([documentId]);
+    expect(documentId).toMatch(/^[a-f0-9]{64}$/);
     expect(capturedDocuments[0]).toMatchObject({
       '@timestamp': expect.any(String),
       space_ids: ['space-a'],
@@ -108,6 +105,36 @@ describe('OnlineScoreService', () => {
         name: 'factuality',
       },
     });
+  });
+
+  it('includes the evaluator version in collision-safe document ids', () => {
+    const document = getBaseDocument();
+    const nextVersionDocument = {
+      ...document,
+      evaluator: { ...document.evaluator, version: '2.0.0' },
+    };
+    const delimiterCollisionDocument = {
+      ...document,
+      monitor: { ...document.monitor, id: 'workflow' },
+      trace_id: '1-trace-1',
+    };
+
+    expect(computeOnlineScoreDocumentId(document)).not.toBe(
+      computeOnlineScoreDocumentId(nextVersionDocument)
+    );
+    expect(computeOnlineScoreDocumentId(document)).not.toBe(
+      computeOnlineScoreDocumentId(delimiterCollisionDocument)
+    );
+  });
+
+  it('canonicalizes space ids without mutating the input', () => {
+    const document = { ...getBaseDocument(), space_ids: ['space-b', 'space-a'] };
+    const reorderedDocument = { ...document, space_ids: ['space-a', 'space-b'] };
+
+    expect(computeOnlineScoreDocumentId(document)).toBe(
+      computeOnlineScoreDocumentId(reorderedDocument)
+    );
+    expect(document.space_ids).toEqual(['space-b', 'space-a']);
   });
 
   it('treats 409 responses as idempotent skips', async () => {

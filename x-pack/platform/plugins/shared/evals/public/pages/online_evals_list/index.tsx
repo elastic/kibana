@@ -368,10 +368,6 @@ export const OnlineEvalsListPage: React.FC = () => {
             items={workflows}
             columns={columns}
             loading={isLoading}
-            rowProps={(item) => ({
-              onClick: () => history.push(`/online/${item.id}`),
-              style: { cursor: 'pointer' },
-            })}
             data-test-subj="onlineEvalsTable"
           />
         )}

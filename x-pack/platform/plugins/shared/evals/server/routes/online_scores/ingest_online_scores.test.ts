@@ -165,8 +165,8 @@ describe('POST /internal/evals/online_scores', () => {
     expect(logger.error).toHaveBeenCalled();
   });
 
-  it('returns 500 with the thrown error message when service throws', async () => {
-    const { handler, context, onlineScoreService } = setup();
+  it('returns a generic 500 response and logs details when the service throws', async () => {
+    const { handler, context, onlineScoreService, logger } = setup();
     onlineScoreService.bulkCreate.mockRejectedValueOnce(new Error('boom'));
 
     const response = await handler(
@@ -176,6 +176,9 @@ describe('POST /internal/evals/online_scores', () => {
     );
 
     expect(response.status).toBe(500);
-    expect(response.payload).toEqual({ message: 'boom' });
+    expect(response.payload).toEqual({ message: 'Failed to ingest online evaluation scores' });
+    expect(logger.error).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to ingest online evaluation scores: Error: boom')
+    );
   });
 });

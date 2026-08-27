@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { createHash } from 'node:crypto';
 import type { Logger } from '@kbn/core/server';
 import type { DataStreamsStart } from '@kbn/core-data-streams-server';
 import type { AnyIDataStreamClient, ClientSearchRequest } from '@kbn/data-streams';
@@ -38,13 +39,16 @@ export interface ListOnlineScoresParams {
 export const computeOnlineScoreDocumentId = (
   document: Pick<OnlineScoreDocument, 'space_ids' | 'monitor' | 'trace_id' | 'evaluator' | 'score'>
 ): string => {
-  return [
-    ...document.space_ids,
+  const identity = JSON.stringify([
+    [...document.space_ids].sort(),
     document.monitor.id,
     document.trace_id,
     document.evaluator.name,
+    document.evaluator.version,
     document.score.name,
-  ].join('-');
+  ]);
+
+  return createHash('sha256').update(identity, 'utf8').digest('hex');
 };
 
 export class OnlineScoreService {

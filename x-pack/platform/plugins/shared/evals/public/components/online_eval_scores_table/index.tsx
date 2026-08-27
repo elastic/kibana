@@ -19,6 +19,13 @@ import { i18n } from '@kbn/i18n';
 
 type OnlineScoreRow = ListOnlineScoresResponse['data'][number];
 
+const encodeRowIdPart = (value: string): string => `${value.length}:${value}`;
+
+export const getOnlineScoreRowId = (item: OnlineScoreRow): string =>
+  [item.trace_id, item.evaluator.name, item.evaluator.version, item.score.name]
+    .map(encodeRowIdPart)
+    .join('|');
+
 export interface OnlineEvalScoresTableProps {
   items: OnlineScoreRow[];
   totalItemCount: number;
@@ -94,7 +101,7 @@ export const OnlineEvalScoresTable: React.FC<OnlineEvalScoresTableProps> = ({
             return '-';
           }
 
-          const rowId = `${item.trace_id}-${item.evaluator.name}-${item.score.name}`;
+          const rowId = getOnlineScoreRowId(item);
           const isExpanded = rowId in expandedRows;
           return (
             <EuiButton
@@ -164,7 +171,7 @@ export const OnlineEvalScoresTable: React.FC<OnlineEvalScoresTableProps> = ({
       tableCaption={i18n.translate('xpack.evals.onlineEvaluations.detail.scoresTableCaption', {
         defaultMessage: 'Recent online evaluation scores',
       })}
-      itemId={(item) => `${item.trace_id}-${item.evaluator.name}-${item.score.name}`}
+      itemId={getOnlineScoreRowId}
       itemIdToExpandedRowMap={expandedRows}
       data-test-subj="onlineEvalRecentScoresTable"
     />

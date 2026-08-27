@@ -19,14 +19,6 @@ import type { RouteDependencies } from '../register_routes';
 
 const ONLINE_SCORE_INGEST_PAYLOAD_CAP_BYTES = 5 * 1024 * 1024;
 
-const getErrorMessage = (error: unknown): string => {
-  if (error instanceof Error) {
-    return error.message;
-  }
-
-  return String(error);
-};
-
 export const registerIngestOnlineScoresRoute = ({
   router,
   logger,
@@ -112,7 +104,7 @@ export const registerIngestOnlineScoresRoute = ({
           return response.customError({
             statusCode: 500,
             body: {
-              message: getErrorMessage(error),
+              message: 'Failed to ingest online evaluation scores',
             },
           });
         }

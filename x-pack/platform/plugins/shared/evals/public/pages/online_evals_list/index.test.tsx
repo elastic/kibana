@@ -126,13 +126,14 @@ describe('OnlineEvalsListPage', () => {
       refetch: jest.fn(),
     } as unknown as ReturnType<typeof useOnlineEvalWorkflows>);
 
-    const { container } = renderPage();
+    const { container, history } = renderPage();
     const switchElement = container.querySelector(
       '[data-test-subj="onlineEvalEnabledSwitch-workflow-1"]'
     ) as HTMLButtonElement;
     fireEvent.click(switchElement);
 
     expect(mutate).toHaveBeenCalledWith({ workflowId: 'workflow-1', enabled: false });
+    expect(history.location.pathname).toBe('/online');
   });
 
   it('calls DELETE mutation after confirm modal submit', () => {
@@ -153,9 +154,10 @@ describe('OnlineEvalsListPage', () => {
       refetch: jest.fn(),
     } as unknown as ReturnType<typeof useOnlineEvalWorkflows>);
 
-    renderPage();
+    const { history } = renderPage();
 
     fireEvent.click(screen.getByLabelText('Delete workflow [online-eval] quality monitor'));
+    expect(history.location.pathname).toBe('/online');
     fireEvent.click(screen.getByRole('button', { name: 'Delete' }));
 
     expect(mutate).toHaveBeenCalledWith({ workflowId: 'workflow-1' });
