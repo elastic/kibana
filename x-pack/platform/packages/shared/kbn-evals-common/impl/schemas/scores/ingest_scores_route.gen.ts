@@ -48,6 +48,7 @@ export const IngestScoresRequestBody = lazySchema(() =>
             id: z.string().max(1024),
             index: z.number().int(),
             input: z.object({}).catchall(z.unknown()).optional(),
+            metadata: z.object({}).catchall(z.unknown()).optional(),
             dataset: z.object({
               id: z.string().max(1024),
               name: z.string().max(256),
@@ -60,11 +61,23 @@ export const IngestScoresRequestBody = lazySchema(() =>
           }),
           evaluator: z.object({
             name: z.string().max(256),
+            /**
+             * The evaluator version that produced the score, so a run stays reproducible after the definition moves on.
+             */
+            version: z.string().max(64).optional(),
             score: z.number().nullable().optional(),
             label: z.string().max(256).nullable().optional(),
             explanation: z.string().max(4096).nullable().optional(),
             metadata: z.object({}).catchall(z.unknown()).optional(),
             trace_id: z.string().max(256).nullable().optional(),
+            /**
+             * Model this evaluator judged with. When omitted, the top-level `evaluator_model` is used unless `kind` is `code`.
+             */
+            model: Model.optional(),
+            /**
+             * Whether the evaluator invoked a model. `code` suppresses the top-level `evaluator_model` fallback so deterministic evaluators are not attributed a judge.
+             */
+            kind: z.enum(['llm', 'code']).optional(),
           }),
         })
       )

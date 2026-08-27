@@ -8,7 +8,7 @@
  */
 
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
-import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
+import { HTTPAuthorizationHeader, markExternalUiamCredential } from '@kbn/core-security-server';
 import {
   callKibanaApi,
   CallKibanaApiResponseTooLargeError,
@@ -72,17 +72,26 @@ const mockSelfResponse = (response: Response) => ({ response });
 function createFakeRequest({
   headers = {},
   isInternalApiRequest = false,
+  externalUiamCredential = false,
 }: {
   headers?: Record<string, string>;
   isInternalApiRequest?: boolean;
+  externalUiamCredential?: boolean;
 } = {}): KibanaRequest {
-  return {
+  const request = {
     headers: {
       authorization: 'ApiKey test-key',
       ...headers,
     },
     isInternalApiRequest,
+    isFakeRequest: true,
   } as unknown as KibanaRequest;
+
+  if (externalUiamCredential) {
+    markExternalUiamCredential(request);
+  }
+
+  return request;
 }
 
 /**
@@ -93,13 +102,23 @@ const UIAM_ATTESTATION_HEADER = 'x-some-internal-caller-attestation';
 
 const mockGetAttestationHeaders = jest.fn();
 
-function createCoreStart({ uiamAttestation }: { uiamAttestation?: string } = {}): CoreStart {
+function createCoreStart({
+  uiamAttestation,
+  serverBasePath = '',
+}: {
+  uiamAttestation?: string;
+  serverBasePath?: string;
+} = {}): CoreStart {
   if (uiamAttestation) {
     mockGetAttestationHeaders.mockReturnValue({ [UIAM_ATTESTATION_HEADER]: uiamAttestation });
   }
 
   return {
     http: {
+      basePath: {
+        serverBasePath,
+        prepend: jest.fn((path: string) => `${serverBasePath}${path}`),
+      },
       selfClient: { asScoped: mockAsScoped },
     },
     security: {
@@ -143,6 +162,66 @@ describe('callKibanaApi', () => {
     expect(options.method).toBe('GET');
     expect(options.query).toEqual({ perPage: 20, owner: 'cases', skip: undefined });
     expect(options.body).toBeUndefined();
+  });
+
+  it('includes the configured server base path in loopback requests', async () => {
+    mockSelfFetch.mockResolvedValue(mockSelfResponse(createMockResponse({ body: { ok: true } })));
+
+    await callKibanaApi(
+      {
+        fakeRequest: createFakeRequest(),
+        coreStart: createCoreStart({ serverBasePath: '/my-base-path' }),
+      },
+      {
+        method: 'GET',
+        path: '/api/status',
+      }
+    );
+
+    expect(mockSelfFetch.mock.calls[0][0]).toBe('/my-base-path/api/status');
+  });
+
+  it('delegates server base path resolution to Core', async () => {
+    mockSelfFetch.mockResolvedValue(mockSelfResponse(createMockResponse({ body: { ok: true } })));
+    const coreStart = createCoreStart({ serverBasePath: '/configured-base-path' });
+    const prependBasePath = coreStart.http.basePath.prepend as jest.Mock;
+    prependBasePath.mockReturnValue('/core-resolved-base-path/api/status');
+
+    await callKibanaApi(
+      {
+        fakeRequest: createFakeRequest(),
+        coreStart,
+      },
+      {
+        method: 'GET',
+        path: '/api/status',
+      }
+    );
+
+    expect(prependBasePath).toHaveBeenCalledWith('/api/status');
+    expect(mockSelfFetch.mock.calls[0][0]).toBe('/core-resolved-base-path/api/status');
+  });
+
+  it('places a non-default space after the configured server base path', async () => {
+    mockSelfFetch.mockResolvedValue(mockSelfResponse(createMockResponse({ body: { ok: true } })));
+
+    await callKibanaApi(
+      {
+        fakeRequest: createFakeRequest(),
+        coreStart: createCoreStart({ serverBasePath: '/my-base-path' }),
+        spaceId: 'my-space',
+      },
+      {
+        method: 'POST',
+        path: '/api/detection_engine/signals/assignees',
+        body: { assignees: ['elastic'] },
+      }
+    );
+
+    expect(mockSelfFetch.mock.calls[0][0]).toBe(
+      '/my-base-path/s/my-space/api/detection_engine/signals/assignees'
+    );
+    expect(lastFetchOptions().body).toEqual({ assignees: ['elastic'] });
   });
 
   // The self client resolves the base URL itself, and the workflow fake request has no base path, so
@@ -255,6 +334,32 @@ describe('callKibanaApi', () => {
     expect(mockGetAttestationHeaders).toHaveBeenCalledTimes(1);
     expect(mockGetAttestationHeaders).toHaveBeenCalledWith(
       new HTTPAuthorizationHeader('ApiKey', 'essu_internal_key')
+    );
+  });
+
+  it('does not stamp the attestation for a user-created (external) UIAM credential', async () => {
+    // The receiving Kibana would honor the attestation and attach the UIAM shared secret to its
+    // Elasticsearch calls, and UIAM rejects external keys presented with client authentication.
+    mockSelfFetch.mockResolvedValue(mockSelfResponse(createMockResponse({ body: { ok: true } })));
+
+    await callKibanaApi(
+      {
+        fakeRequest: createFakeRequest({
+          headers: { authorization: 'ApiKey essu_user_created_key' },
+          externalUiamCredential: true,
+        }),
+        coreStart: createCoreStart({ uiamAttestation: 'valid-attestation' }),
+      },
+      { method: 'GET', path: '/api/status' }
+    );
+
+    expect(lastFetchHeaders()[UIAM_ATTESTATION_HEADER]).toBeUndefined();
+    expect(mockGetAttestationHeaders).not.toHaveBeenCalled();
+    // The credential itself still goes out; only the attestation is withheld.
+    expect(mockAsScoped).toHaveBeenCalledWith(
+      expect.objectContaining({
+        headers: expect.objectContaining({ authorization: 'ApiKey essu_user_created_key' }),
+      })
     );
   });
 

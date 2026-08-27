@@ -7,7 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 import { useMutation, useQueryClient } from '@kbn/react-query';
-import { useCallback } from 'react';
+import type { KnowledgeIndicator } from '@kbn/streams-ai';
+import {
+  DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG,
+  resolveSignificantEventsTuningConfig,
+} from '@kbn/significant-events-schema';
+import { OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_TUNING_CONFIG } from '@kbn/management-settings-ids';
+import { useCallback, useMemo } from 'react';
 import { DISCOVERY_QUERIES_QUERY_KEY } from '../../../hooks/use_fetch_discovery_queries';
 import { DISCOVERY_QUERIES_OCCURRENCES_QUERY_KEY } from '../../../hooks/use_fetch_discovery_queries_occurrences';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -19,6 +25,11 @@ import { getPromoteSkipReason } from '../../../lib/promote_skip_reason';
 
 export const KI_ROW_ACTION_MUTATION_KEY = ['ki-row-action'];
 
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+const durabilityExpiresAt = (durable: boolean, ttlDays: number): string | undefined =>
+  durable ? undefined : new Date(Date.now() + ttlDays * DAY_MS).toISOString();
+
 interface UseKnowledgeIndicatorActionsParams {
   streamName: string;
   onSuccess?: () => void;
@@ -28,14 +39,25 @@ export function useKnowledgeIndicatorActions({
   streamName,
   onSuccess,
 }: UseKnowledgeIndicatorActionsParams) {
-  const {
-    core: {
-      notifications: { toasts },
-    },
-  } = useKibana();
+  const { core } = useKibana();
+  const { toasts } = core.notifications;
   const queryClient = useQueryClient();
-  const { excludeFeaturesInBulk, restoreFeaturesInBulk } = useStreamFeaturesApi(streamName);
-  const { promote } = useQueriesApi();
+
+  const featureTtlDays = useMemo<number>(() => {
+    try {
+      const raw = core.settings.globalClient.get<unknown>(
+        OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_TUNING_CONFIG,
+        DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG
+      );
+      const stored = typeof raw === 'string' ? JSON.parse(raw) : raw;
+      return resolveSignificantEventsTuningConfig(stored).feature_ttl_days;
+    } catch {
+      return DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG.feature_ttl_days;
+    }
+  }, [core]);
+  const { excludeFeaturesInBulk, restoreFeaturesInBulk, setFeatureDurability } =
+    useStreamFeaturesApi(streamName);
+  const { promote, setQueryDurability } = useQueriesApi();
 
   const invalidateData = useCallback(async () => {
     await Promise.all([
@@ -97,11 +119,48 @@ export function useKnowledgeIndicatorActions({
     },
   });
 
+  const setDurabilityAction = useMutation<
+    void,
+    Error,
+    { knowledgeIndicator: KnowledgeIndicator; durable: boolean }
+  >({
+    mutationKey: KI_ROW_ACTION_MUTATION_KEY,
+    mutationFn: async ({ knowledgeIndicator, durable }) => {
+      const expiresAt = durabilityExpiresAt(durable, featureTtlDays);
+      if (knowledgeIndicator.kind === 'feature') {
+        await setFeatureDurability(knowledgeIndicator.feature, expiresAt);
+      } else {
+        await setQueryDurability({
+          query: knowledgeIndicator.query,
+          streamName: knowledgeIndicator.stream_name,
+          expiresAt,
+        });
+      }
+    },
+    onSuccess: async (_result, { durable }) => {
+      await invalidateData();
+      toasts.addSuccess({
+        title: durable ? MAKE_DURABLE_SUCCESS_TOAST : MAKE_EXPIRING_SUCCESS_TOAST,
+      });
+      onSuccess?.();
+    },
+    onError: (error, { durable }) => {
+      toasts.addError(getFormattedError(error), {
+        title: durable ? MAKE_DURABLE_ERROR_TOAST : MAKE_EXPIRING_ERROR_TOAST,
+      });
+    },
+  });
+
   return {
     excludeFeature: excludeAction.mutate,
     restoreFeature: restoreAction.mutate,
     promoteQuery: promoteAction.mutate,
-    isMutating: excludeAction.isLoading || restoreAction.isLoading || promoteAction.isLoading,
+    setDurability: setDurabilityAction.mutate,
+    isMutating:
+      excludeAction.isLoading ||
+      restoreAction.isLoading ||
+      promoteAction.isLoading ||
+      setDurabilityAction.isLoading,
   };
 }
 
@@ -125,6 +184,16 @@ export const DELETE_LABEL = i18n.translate(
   {
     defaultMessage: 'Delete',
   }
+);
+
+export const MAKE_DURABLE_LABEL = i18n.translate(
+  'xpack.significantEventsApp.knowledgeIndicatorActions.makeDurableLabel',
+  { defaultMessage: 'Make durable' }
+);
+
+export const MAKE_EXPIRING_LABEL = i18n.translate(
+  'xpack.significantEventsApp.knowledgeIndicatorActions.makeExpiringLabel',
+  { defaultMessage: 'Make expiring' }
 );
 
 const EXCLUDE_SUCCESS_TOAST = i18n.translate(
@@ -155,4 +224,24 @@ const PROMOTE_SUCCESS_TOAST = i18n.translate(
 const PROMOTE_ERROR_TOAST = i18n.translate(
   'xpack.significantEventsApp.knowledgeIndicatorActions.promoteErrorToast',
   { defaultMessage: 'Failed to promote knowledge indicator' }
+);
+
+const MAKE_DURABLE_SUCCESS_TOAST = i18n.translate(
+  'xpack.significantEventsApp.knowledgeIndicatorActions.makeDurableSuccessToast',
+  { defaultMessage: 'Knowledge indicator is now durable' }
+);
+
+const MAKE_DURABLE_ERROR_TOAST = i18n.translate(
+  'xpack.significantEventsApp.knowledgeIndicatorActions.makeDurableErrorToast',
+  { defaultMessage: 'Failed to make knowledge indicator durable' }
+);
+
+const MAKE_EXPIRING_SUCCESS_TOAST = i18n.translate(
+  'xpack.significantEventsApp.knowledgeIndicatorActions.makeExpiringSuccessToast',
+  { defaultMessage: 'Knowledge indicator is now expiring' }
+);
+
+const MAKE_EXPIRING_ERROR_TOAST = i18n.translate(
+  'xpack.significantEventsApp.knowledgeIndicatorActions.makeExpiringErrorToast',
+  { defaultMessage: 'Failed to make knowledge indicator expiring' }
 );

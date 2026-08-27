@@ -18,7 +18,7 @@ import {
 
 /**
  * @param zIndexOverride When the new flyout system is enabled, this is dynamically computed by
- * `useTimelinePortalZIndex` so that Timeline stays correctly stacked relative to the new
+ * `useUnmanagedFlyoutZIndex` so that Timeline stays correctly stacked relative to the new
  * EUI-managed flyouts. Falls back to the static `maskBelowHeader` theme value otherwise (ie the
  * legacy expandable flyout system, where `TimelineFlyout`/`SecuritySolutionFlyout` handle their own
  * fixed offsets relative to that same static value).

@@ -16,7 +16,7 @@ const Path = require('path');
 function getNodeRegisterParserConfig(path) {
   const ext = Path.extname(path);
 
-  if (ext === '.js') {
+  if (ext === '.js' || ext === '.mjs' || ext === '.jsx') {
     return {
       syntax: 'ecmascript',
       jsx: true,

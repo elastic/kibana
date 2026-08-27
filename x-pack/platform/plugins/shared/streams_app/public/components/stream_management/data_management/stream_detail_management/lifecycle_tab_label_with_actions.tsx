@@ -84,7 +84,7 @@ export const buildLifecycleTabActions = ({
       label: i18n.translate('xpack.streams.lifecycleTab.actions.importFromStream', {
         defaultMessage: 'Import from another stream',
       }),
-      iconType: 'importAction',
+      iconType: 'download',
       disabled: !onImportFromStream || isImportFromStreamDisabled,
       'data-test-subj': 'streamsLifecycleTabImportFromStream',
       onClick: () => {

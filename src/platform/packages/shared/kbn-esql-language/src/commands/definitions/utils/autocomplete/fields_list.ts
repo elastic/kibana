@@ -51,6 +51,8 @@ export async function suggestFieldsList(
     ignoredColumnsForEmptyExpression?: string[];
     /** If true, disables col0 and assignment suggestions (for contexts where assignments are not supported) */
     disableNewColumnSuggestion?: boolean;
+    /** Whether this expression context can suggest subquery operands after IN / NOT IN */
+    allowSubquery?: ExpressionContextOptions['allowSubquery'];
   }
 ): Promise<ISuggestionItem[]> {
   if (!callbacks?.getByType) {
@@ -84,6 +86,7 @@ export async function suggestFieldsList(
       preferredExpressionType: options?.preferredExpressionType,
       getFunctionsToIgnore: options?.getFunctionsToIgnore,
       ignoredColumnsForEmptyExpression: options?.ignoredColumnsForEmptyExpression,
+      allowSubquery: options?.allowSubquery,
     },
   });
 

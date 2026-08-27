@@ -29,13 +29,9 @@ export function getDeepLinks({
   const links: AppDeepLink[] = [
     {
       id: WorkflowsPageName.list,
-      title: libraryEnabled
-        ? i18n.translate('workflowsManagement.nav.workflowsDeepLinkTitle', {
-            defaultMessage: 'Workflows',
-          })
-        : PLUGIN_NAME,
+      title: PLUGIN_NAME,
       path: '/',
-      ...(libraryEnabled ? { visibleIn: sideNavVisibleIn } : {}),
+      ...((libraryEnabled || executionsViewEnabled) && { visibleIn: sideNavVisibleIn }),
     },
   ];
 
@@ -43,7 +39,7 @@ export function getDeepLinks({
     links.push({
       id: WorkflowsPageName.library,
       title: i18n.translate('workflowsManagement.nav.libraryDeepLinkTitle', {
-        defaultMessage: 'Template Library',
+        defaultMessage: 'Template library',
       }),
       path: '/library',
       visibleIn: sideNavVisibleIn,
@@ -57,6 +53,7 @@ export function getDeepLinks({
         defaultMessage: 'Executions',
       }),
       path: '/executions',
+      visibleIn: sideNavVisibleIn,
     });
   }
 

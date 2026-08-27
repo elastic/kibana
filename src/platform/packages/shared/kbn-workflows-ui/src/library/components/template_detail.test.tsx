@@ -91,13 +91,17 @@ jest.mock('./template_yaml_preview', () => ({
 }));
 
 // The install section has its own test (it needs kibana services and a query
-// client); the stub exposes the preview-values callback and echoes the
-// `previewYaml` prop so their wiring through TemplateDetail can be asserted.
+// client); the stub exposes the preview-values and step callbacks and echoes
+// the `previewYaml` prop so their wiring through TemplateDetail can be asserted.
 jest.mock('./install_form', () => ({
   TemplateInstallSection: ({
+    step,
+    onStepChange,
     onPreviewValuesChange,
     previewYaml,
   }: {
+    step: string;
+    onStepChange: (step: 'details' | 'setup') => void;
     onPreviewValuesChange?: (values: Record<string, unknown>) => void;
     previewYaml: string;
   }) => (
@@ -107,6 +111,12 @@ jest.mock('./install_form', () => ({
         data-test-subj="mockInstallSectionCommit"
         onClick={() => onPreviewValuesChange?.({ 'max-age': 42 })}
       />
+      <button
+        type="button"
+        data-test-subj="mockInstallSectionSetup"
+        onClick={() => onStepChange('setup')}
+      />
+      <pre data-test-subj="mockInstallSectionStep">{step}</pre>
       <pre data-test-subj="mockInstallSectionPreviewYaml">{previewYaml}</pre>
     </div>
   ),
@@ -178,16 +188,16 @@ describe('TemplateDetail', () => {
     expect(screen.getByTestId('workflowLibraryTemplateDetail-version')).toHaveTextContent('1.2.0');
   });
 
-  it('should render the solution logo and humanized tag badges under the title', () => {
+  it('should render the solution logo and localized tag badges under the title', () => {
     renderDetail();
     expect(screen.getByText('Solutions')).toBeInTheDocument();
     // Solutions render as product logos (name shown on hover), not text.
     expect(
       screen.getByTestId('workflowLibraryTemplateDetail-solution-security')
     ).toBeInTheDocument();
-    // Categories render as tags under the title (humanized).
+    // Categories render as tags under the title, using the localized vocabulary name.
     const tags = screen.getByTestId('workflowLibraryTemplateDetail-tags');
-    expect(within(tags).getByText('Threat Intel')).toBeInTheDocument();
+    expect(within(tags).getByText('Threat intelligence')).toBeInTheDocument();
     expect(within(tags).getByText('Enrichment')).toBeInTheDocument();
   });
 
@@ -231,6 +241,46 @@ describe('TemplateDetail', () => {
     );
   });
 
+  it('should swap the metadata block for the setup header on the setup step', () => {
+    renderDetail();
+    expect(screen.queryByTestId('workflowLibraryTemplateDetail-setupHeader')).toBeNull();
+
+    fireEvent.click(screen.getByTestId('mockInstallSectionSetup'));
+
+    const setupHeader = screen.getByTestId('workflowLibraryTemplateDetail-setupHeader');
+    expect(
+      within(setupHeader).getByRole('heading', { name: 'Setup workflow' })
+    ).toBeInTheDocument();
+    expect(within(setupHeader).getByText('For My Template')).toBeInTheDocument();
+    expect(screen.getByTestId('mockInstallSectionStep')).toHaveTextContent('setup');
+    // The summary is gone, the preview stays.
+    expect(screen.queryByTestId('workflowLibraryTemplateDetail-tags')).toBeNull();
+    expect(screen.queryByTestId('workflowLibraryTemplateDetail-version')).toBeNull();
+    expect(screen.getByTestId('workflowLibraryTemplateDetail-preview')).toBeInTheDocument();
+  });
+
+  it('should return to the template summary from the setup step, keeping the committed values', () => {
+    render(
+      <WorkflowsUiServicesProvider services={createMockWorkflowsUiServices()}>
+        <TemplateDetail slug="my-template" backButton={<button type="button">{'Back'}</button>} />
+      </WorkflowsUiServicesProvider>
+    );
+
+    fireEvent.click(screen.getByTestId('mockInstallSectionCommit'));
+    fireEvent.click(screen.getByTestId('mockInstallSectionSetup'));
+
+    // The host's back link is replaced by one that returns to the summary.
+    expect(screen.queryByRole('button', { name: 'Back' })).toBeNull();
+    fireEvent.click(screen.getByTestId('workflowLibraryTemplateDetailBackToTemplateButton'));
+
+    expect(screen.getByRole('heading', { name: 'My Template' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Back' })).toBeInTheDocument();
+    expect(screen.getByTestId('mockInstallSectionStep')).toHaveTextContent('details');
+    expect(screen.getByTestId('workflowLibraryTemplateDetail-preview').textContent).toContain(
+      'maxAge: 42'
+    );
+  });
+
   it('should show the selected step YAML in a read-only graph flyover', () => {
     renderGraphDetail();
 
@@ -258,5 +308,22 @@ describe('TemplateDetail', () => {
     mockUseTemplate.mockReturnValue({ data: undefined, isLoading: false, isError: true });
     renderDetail();
     expect(screen.getByTestId('workflowLibraryTemplateDetail-error')).toBeInTheDocument();
+  });
+
+  it('should render an in-memory template without fetching by slug', () => {
+    // No slug and no fetch result — the query must not be consulted.
+    mockUseTemplate.mockReturnValue({ data: undefined, isLoading: true, isError: true });
+
+    render(
+      <WorkflowsUiServicesProvider services={createMockWorkflowsUiServices()}>
+        <TemplateDetail template={TEMPLATE_BODY} installMode="custom" />
+      </WorkflowsUiServicesProvider>
+    );
+
+    expect(mockUseTemplate).toHaveBeenCalledWith(undefined);
+    expect(screen.getByRole('heading', { name: 'My Template' })).toBeInTheDocument();
+    expect(screen.getByTestId('workflowLibraryTemplateDetail-preview')).toBeInTheDocument();
+    expect(screen.queryByTestId('workflowLibraryTemplateDetail-loading')).toBeNull();
+    expect(screen.queryByTestId('workflowLibraryTemplateDetail-error')).toBeNull();
   });
 });

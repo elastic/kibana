@@ -508,7 +508,12 @@ export interface CpsLinkedProject {
 
 export interface CpsData {
   resolvedExpression?: string;
-  linkedProjects: CpsLinkedProject[];
+  /**
+   * Linked projects visible to the rule's execution principal. `undefined` means resolution
+   * failed (unknown scope), while an empty array means the resolved scope genuinely contains
+   * no linked projects.
+   */
+  linkedProjects?: CpsLinkedProject[];
 }
 
 export interface ConsumerExecutionMetrics {
@@ -549,6 +554,10 @@ export type {
   RawRuleMonitoring,
 } from './saved_objects/schemas/raw_rule';
 
-export type { RawRuleTemplate } from './saved_objects/schemas/raw_rule_template';
+export type {
+  RawRuleTemplate,
+  AlertingV1RawRuleTemplate,
+  AlertingV2RawRuleTemplate,
+} from './saved_objects/schemas/raw_rule_template';
 
 export type { DataStreamAdapter } from './alerts_service/lib/data_stream_adapter';

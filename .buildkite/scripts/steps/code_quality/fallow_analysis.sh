@@ -5,7 +5,7 @@ set -euo pipefail
 source .buildkite/scripts/common/util.sh
 
 FALLOW_VERSION="2.76.0"
-FALLOW_OWNERS="@elastic/search-kibana @elastic/workchat-eng"
+FALLOW_OWNERS="@elastic/search-ml-ux"
 FALLOW_JSON=".fallow/fallow-results.json"
 REPORT_SCRIPT=".buildkite/scripts/steps/code_quality/fallow_report.mjs"
 OWNER_SNAPSHOT=".fallow/owner-snapshot.json"
@@ -26,7 +26,7 @@ gsutil cp "$GCS_SNAPSHOT" "$OWNER_SNAPSHOT_PREV" 2>/dev/null \
 
 echo "--- Run fallow analysis"
 echo "Checks: complexity hotspots · per-file health scores"
-echo "Scope: @elastic/search-kibana and @elastic/workchat-eng (via CODEOWNERS, excludes tests/stories/mocks)"
+echo "Scope: @elastic/search-ml-ux (via CODEOWNERS, excludes tests/stories/mocks)"
 echo "Note: dead code detection skipped (unreliable in Kibana — @kbn/* path aliases not resolved by fallow)"
 echo ""
 echo "Run locally (same as CI):"

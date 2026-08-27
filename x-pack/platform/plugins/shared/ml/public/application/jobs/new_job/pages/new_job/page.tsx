@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { useEffect, Fragment, useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -54,7 +54,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   const timefilter = useTimefilter();
   const dataSourceContext = useDataSource();
   const {
-    services: { maps: mapsPlugin, uiSettings },
+    services: { maps: mapsPlugin, uiSettings, cps },
   } = useMlKibana();
   const mlApi = useMlApi();
   const newJobCapsService = useNewJobCapsService();
@@ -152,6 +152,12 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
     }
   }
 
+  if (dataSourceContext.projectRouting) {
+    jobCreator.projectRouting = dataSourceContext.projectRouting;
+  } else if (cps?.cpsManager && jobCreator.projectRouting === null) {
+    jobCreator.projectRouting = cps.cpsManager.getDefaultProjectRouting() ?? null;
+  }
+
   if (autoSetTimeRange) {
     // for advanced jobs, load the full time range start and end times
     // so they can be used for job validation and bucket span estimation
@@ -213,15 +219,13 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   const jobCreatorTitle = getJobCreatorTitle(jobCreator);
 
   return (
-    <Fragment>
-      <div data-test-subj={`mlPageJobWizardHeader-${jobCreator.type}`}>
-        <MlAppHeader
-          title={`${i18n.translate('xpack.ml.newJob.page.createJob', {
-            defaultMessage: 'Create job',
-          })}: ${jobCreatorTitle}`}
-          back={anomalyDetectionJobsBack}
-        />
-      </div>
+    <div data-test-subj={`mlPageJobWizardHeader-${jobCreator.type}`}>
+      <MlAppHeader
+        title={`${i18n.translate('xpack.ml.newJob.page.createJob', {
+          defaultMessage: 'Create job',
+        })}: ${jobCreatorTitle}`}
+        back={anomalyDetectionJobsBack}
+      />
 
       <div style={{ backgroundColor: 'inherit' }} data-test-subj={`mlPageJobWizard ${jobType}`}>
         <EuiText size={'s'}>
@@ -238,6 +242,13 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
               values={{ dataViewName: jobCreator.indexPatternDisplayName }}
             />
           )}
+          {jobCreator.projectRouting !== null ? (
+            <FormattedMessage
+              id="xpack.ml.newJob.page.createJob.projectScope"
+              defaultMessage=", project scope: {projectScope}"
+              values={{ projectScope: jobCreator.projectRouting }}
+            />
+          ) : null}
         </EuiText>
 
         <Wizard
@@ -251,6 +262,6 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
           firstWizardStep={firstWizardStep}
         />
       </div>
-    </Fragment>
+    </div>
   );
 };

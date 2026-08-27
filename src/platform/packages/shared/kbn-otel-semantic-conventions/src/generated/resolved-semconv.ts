@@ -13,13 +13,13 @@
  * This file is auto-generated. Do not edit manually.
  * Sources: resolved-semconv.yaml + hardcoded OTLP mappings
  * Registry groups: 145
- * Metric groups: 537
+ * Metric groups: 561
  * Hardcoded fields: 34
- * Total fields: 1202
+ * Total fields: 1232
  *
  * @internal
  *
- * WARNING: This object contains 1202+ field definitions (~50KB+ minified).
+ * WARNING: This object contains 1232+ field definitions (~50KB+ minified).
  * Direct import will significantly increase client bundle size.
  *
  * RECOMMENDED USAGE:
@@ -45,7 +45,7 @@ export const semconvFlat = {
   'android.os.api_level': {
     name: 'android.os.api_level',
     description:
-      'Uniquely identifies the framework API revision offered by a version (`os.version`) of the android operating system. More information can be found in the [Android API levels documentation](https://developer.android.com/guide/topics/manifest/uses-sdk-element#ApiLevels).',
+      'Uniquely identifies the framework API revision offered by a version (`os.version`) of the Android operating system. More information can be found in the [Android API levels documentation](https://developer.android.com/guide/topics/manifest/uses-sdk-element#ApiLevels).',
     type: 'keyword',
     example: '33',
   },
@@ -57,7 +57,7 @@ export const semconvFlat = {
   },
   'app.crash.id': {
     name: 'app.crash.id',
-    description: 'A unique identifier representing an instance of an end-user facing app crash.',
+    description: 'A unique identifier representing an instance of an end user facing app crash.',
     type: 'keyword',
     example: '083d3d2d-9a0e-47f8-be3d-bc3c5538ba38',
   },
@@ -140,14 +140,14 @@ export const semconvFlat = {
   },
   'artifact.attestation.id': {
     name: 'artifact.attestation.id',
-    description: 'The id of the build [software attestation](https://slsa.dev/attestation-model).',
+    description: 'The ID of the build [software attestation](https://slsa.dev/attestation-model).',
     type: 'keyword',
     example: '123',
   },
   'artifact.filename': {
     name: 'artifact.filename',
     description:
-      'The human readable file name of the artifact, typically generated during build and release processes. Often includes the package name and version in the file name.',
+      'The human readable filename of the artifact, typically generated during build and release processes. Often includes the package name and version in the filename.',
     type: 'keyword',
     example: 'golang-binary-amd64-v0.1.0',
   },
@@ -748,6 +748,45 @@ export const semconvFlat = {
     type: 'keyword',
     example: 'Windows',
   },
+  'browser.web_vital.delta': {
+    name: 'browser.web_vital.delta',
+    description:
+      'The delta between the current value and the last-reported value. See [delta](https://github.com/GoogleChrome/web-vitals?tab=readme-ov-file#report-only-the-delta-of-changes).',
+    type: 'double',
+    example: '0.2',
+  },
+  'browser.web_vital.id': {
+    name: 'browser.web_vital.id',
+    description: 'A unique ID representing this particular metric instance.',
+    type: 'keyword',
+    example: 'v3-1677874579383-6381583661209',
+  },
+  'browser.web_vital.name': {
+    name: 'browser.web_vital.name',
+    description: 'Name of the web vital.',
+    type: 'keyword',
+    example: 'cls',
+  },
+  'browser.web_vital.navigation_type': {
+    name: 'browser.web_vital.navigation_type',
+    description:
+      'The type of navigation, as reported by the [Navigation Timing API](https://developer.mozilla.org/docs/Web/API/PerformanceNavigationTiming/type), with additional values reported by the web-vitals library.',
+    type: 'keyword',
+    example: 'navigate',
+  },
+  'browser.web_vital.rating': {
+    name: 'browser.web_vital.rating',
+    description:
+      'The rating of the web vital value against the "good", "needs improvement", and "poor" thresholds defined for the metric.',
+    type: 'keyword',
+    example: 'good',
+  },
+  'browser.web_vital.value': {
+    name: 'browser.web_vital.value',
+    description: 'Value of the web vital.',
+    type: 'double',
+    example: '1',
+  },
   'cassandra.consistency.level': {
     name: 'cassandra.consistency.level',
     description:
@@ -889,7 +928,7 @@ export const semconvFlat = {
   'client.address': {
     name: 'client.address',
     description:
-      'Client address - domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.',
+      'Client address - domain name if available without reverse DNS lookup; otherwise, IP address or UNIX domain socket name.',
     type: 'keyword',
     example: 'client.example.com',
   },
@@ -1046,7 +1085,7 @@ export const semconvFlat = {
   'code.file.path': {
     name: 'code.file.path',
     description:
-      "The source code file name that identifies the code unit as uniquely as possible (preferably an absolute file path). This attribute MUST NOT be used on the Profile signal since the data is already captured in 'message Function'. This constraint is imposed to prevent redundancy and maintain data integrity.",
+      "The source code filename that identifies the code unit as uniquely as possible (preferably an absolute file path). This attribute MUST NOT be used on the Profile signal since the data is already captured in 'message Function'. This constraint is imposed to prevent redundancy and maintain data integrity.",
     type: 'keyword',
     example: '/',
   },
@@ -1125,7 +1164,7 @@ export const semconvFlat = {
   },
   'container.image.repo_digests': {
     name: 'container.image.repo_digests',
-    description: 'Repo digests of the container image as provided by the container runtime.',
+    description: 'Repository digests of the container image as provided by the container runtime.',
     type: 'keyword',
     example:
       'example@sha256:afcc7f1ac1b49db317a7196c902e61c6c3c4607d63599ee1a82d702d249a0ccb,internal.registry.example.com:5000/example@sha256:b69959407d21e8a062e0416bf13405bb2b71ed7a84dde4158ebafacfa06f5578',
@@ -1283,7 +1322,7 @@ export const semconvFlat = {
   },
   'deployment.id': {
     name: 'deployment.id',
-    description: 'The id of the deployment.',
+    description: 'The ID of the deployment.',
     type: 'keyword',
     example: '1208',
   },
@@ -1301,7 +1340,7 @@ export const semconvFlat = {
   'destination.address': {
     name: 'destination.address',
     description:
-      'Destination address - domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.',
+      'Destination address - domain name if available without reverse DNS lookup; otherwise, IP address or UNIX domain socket name.',
     type: 'keyword',
     example: 'destination.example.com',
   },
@@ -1702,7 +1741,7 @@ export const semconvFlat = {
   'file.path': {
     name: 'file.path',
     description:
-      'Full path to the file, including the file name. It should include the drive letter, when appropriate.',
+      'Full path to the file, including the filename. It should include the drive letter, when appropriate.',
     type: 'keyword',
     example: '/home/alice/example.png',
   },
@@ -2072,7 +2111,7 @@ export const semconvFlat = {
   'host.name': {
     name: 'host.name',
     description:
-      'Name of the host. On Unix systems, it may contain what the hostname command returns, or the fully qualified hostname, or another name specified by the user.',
+      'Name of the host. On UNIX systems, it may contain what the hostname command returns, or the fully qualified hostname, or another name specified by the user.',
     type: 'keyword',
     example: 'opentelemetry-test',
   },
@@ -2302,6 +2341,7 @@ export const semconvFlat = {
     name: 'hw.state',
     description: 'The current state of the component',
     type: 'keyword',
+    example: 'ok',
   },
   'hw.tape_drive.operation_type': {
     name: 'hw.tape_drive.operation_type',
@@ -2313,6 +2353,7 @@ export const semconvFlat = {
     name: 'hw.type',
     description: 'Type of the component',
     type: 'keyword',
+    example: 'voltage',
   },
   'hw.vendor': {
     name: 'hw.vendor',
@@ -3103,7 +3144,7 @@ export const semconvFlat = {
   },
   'messaging.gcp_pubsub.message.ack_id': {
     name: 'messaging.gcp_pubsub.message.ack_id',
-    description: 'The ack id for a given message.',
+    description: 'The ack ID for a given message.',
     type: 'keyword',
     example: 'a',
   },
@@ -3122,7 +3163,7 @@ export const semconvFlat = {
   'messaging.kafka.cluster.id': {
     name: 'messaging.kafka.cluster.id',
     description:
-      'The Kafka cluster id, obtained from the broker metadata exposed through the Kafka client (or AdminClient) API.',
+      'The Kafka cluster ID, obtained from the broker metadata exposed through the Kafka client (or AdminClient) API.',
     type: 'keyword',
     example: 'MkU3OEVBNTcwNTJENDM2Qk',
   },
@@ -3214,7 +3255,7 @@ export const semconvFlat = {
   },
   'messaging.rocketmq.message.keys': {
     name: 'messaging.rocketmq.message.keys',
-    description: 'Key(s) of message, another way to mark message besides message id.',
+    description: 'Key(s) of message, another way to mark message besides message ID.',
     type: 'keyword',
     example: 'keyA,keyB',
   },
@@ -3450,13 +3491,13 @@ export const semconvFlat = {
   },
   'metrics.container.cpu.time': {
     name: 'metrics.container.cpu.time',
-    description: 'CPU time consumed.',
+    description: 'Total CPU time consumed.',
     type: 'double',
   },
   'metrics.container.cpu.usage': {
     name: 'metrics.container.cpu.usage',
     description:
-      "Container's CPU usage, measured in cpus. Range from 0 to the number of allocatable CPUs.",
+      "Container's CPU usage, measured in CPUs. Range from 0 to the number of allocatable CPUs.",
     type: 'double',
   },
   'metrics.container.disk.io': {
@@ -3866,9 +3907,19 @@ export const semconvFlat = {
     description: 'Lower limit of battery charge fraction to ensure proper operation.',
     type: 'double',
   },
+  'metrics.hw.battery.status': {
+    name: 'metrics.hw.battery.status',
+    description: 'Operational status: `1` (true) or `0` (false) for each of the possible states.',
+    type: 'double',
+  },
   'metrics.hw.battery.time_left': {
     name: 'metrics.hw.battery.time_left',
     description: 'Time left before battery is completely charged or discharged.',
+    type: 'double',
+  },
+  'metrics.hw.cpu.errors': {
+    name: 'metrics.hw.cpu.errors',
+    description: 'Total number of errors encountered and corrected by the CPU.',
     type: 'double',
   },
   'metrics.hw.cpu.speed': {
@@ -3879,6 +3930,21 @@ export const semconvFlat = {
   'metrics.hw.cpu.speed.limit': {
     name: 'metrics.hw.cpu.speed.limit',
     description: 'CPU maximum frequency.',
+    type: 'double',
+  },
+  'metrics.hw.cpu.status': {
+    name: 'metrics.hw.cpu.status',
+    description: 'Operational status: `1` (true) or `0` (false) for each of the possible states.',
+    type: 'double',
+  },
+  'metrics.hw.disk_controller.status': {
+    name: 'metrics.hw.disk_controller.status',
+    description: 'Operational status: `1` (true) or `0` (false) for each of the possible states.',
+    type: 'double',
+  },
+  'metrics.hw.enclosure.status': {
+    name: 'metrics.hw.enclosure.status',
+    description: 'Operational status: `1` (true) or `0` (false) for each of the possible states.',
     type: 'double',
   },
   'metrics.hw.energy': {
@@ -3906,6 +3972,16 @@ export const semconvFlat = {
     description: 'Fan speed expressed as a fraction of its maximum speed.',
     type: 'double',
   },
+  'metrics.hw.fan.status': {
+    name: 'metrics.hw.fan.status',
+    description: 'Operational status: `1` (true) or `0` (false) for each of the possible states.',
+    type: 'double',
+  },
+  'metrics.hw.gpu.errors': {
+    name: 'metrics.hw.gpu.errors',
+    description: 'Number of errors encountered by the GPU.',
+    type: 'double',
+  },
   'metrics.hw.gpu.io': {
     name: 'metrics.hw.gpu.io',
     description: 'Received and transmitted bytes by the GPU.',
@@ -3924,6 +4000,11 @@ export const semconvFlat = {
   'metrics.hw.gpu.memory.utilization': {
     name: 'metrics.hw.gpu.memory.utilization',
     description: 'Fraction of GPU memory used.',
+    type: 'double',
+  },
+  'metrics.hw.gpu.status': {
+    name: 'metrics.hw.gpu.status',
+    description: 'Operational status: `1` (true) or `0` (false) for each of the possible states.',
     type: 'double',
   },
   'metrics.hw.gpu.utilization': {
@@ -3953,9 +4034,19 @@ export const semconvFlat = {
       'Instantaneous power consumed by the entire physical host in Watts (`hw.host.energy` is preferred).',
     type: 'double',
   },
+  'metrics.hw.logical_disk.errors': {
+    name: 'metrics.hw.logical_disk.errors',
+    description: 'Number of errors encountered on this logical disk.',
+    type: 'double',
+  },
   'metrics.hw.logical_disk.limit': {
     name: 'metrics.hw.logical_disk.limit',
     description: 'Size of the logical disk.',
+    type: 'double',
+  },
+  'metrics.hw.logical_disk.status': {
+    name: 'metrics.hw.logical_disk.status',
+    description: 'Operational status: `1` (true) or `0` (false) for each of the possible states.',
     type: 'double',
   },
   'metrics.hw.logical_disk.usage': {
@@ -3968,9 +4059,19 @@ export const semconvFlat = {
     description: 'Logical disk space utilization as a fraction.',
     type: 'double',
   },
+  'metrics.hw.memory.errors': {
+    name: 'metrics.hw.memory.errors',
+    description: 'Number of errors encountered on this memory module.',
+    type: 'double',
+  },
   'metrics.hw.memory.size': {
     name: 'metrics.hw.memory.size',
     description: 'Size of the memory module.',
+    type: 'double',
+  },
+  'metrics.hw.memory.status': {
+    name: 'metrics.hw.memory.status',
+    description: 'Operational status: `1` (true) or `0` (false) for each of the possible states.',
     type: 'double',
   },
   'metrics.hw.network.bandwidth.limit': {
@@ -3983,6 +4084,11 @@ export const semconvFlat = {
     description: 'Utilization of the network bandwidth as a fraction.',
     type: 'double',
   },
+  'metrics.hw.network.errors': {
+    name: 'metrics.hw.network.errors',
+    description: 'Number of errors encountered by the network adapter.',
+    type: 'double',
+  },
   'metrics.hw.network.io': {
     name: 'metrics.hw.network.io',
     description: 'Received and transmitted network traffic in bytes.',
@@ -3993,6 +4099,11 @@ export const semconvFlat = {
     description: 'Received and transmitted network traffic in packets (or frames).',
     type: 'double',
   },
+  'metrics.hw.network.status': {
+    name: 'metrics.hw.network.status',
+    description: 'Operational status: `1` (true) or `0` (false) for each of the possible states.',
+    type: 'double',
+  },
   'metrics.hw.network.up': {
     name: 'metrics.hw.network.up',
     description: 'Link status: `1` (up) or `0` (down).',
@@ -4001,6 +4112,11 @@ export const semconvFlat = {
   'metrics.hw.physical_disk.endurance_utilization': {
     name: 'metrics.hw.physical_disk.endurance_utilization',
     description: 'Endurance remaining for this SSD disk.',
+    type: 'double',
+  },
+  'metrics.hw.physical_disk.errors': {
+    name: 'metrics.hw.physical_disk.errors',
+    description: 'Number of errors encountered on this disk.',
     type: 'double',
   },
   'metrics.hw.physical_disk.size': {
@@ -4014,6 +4130,11 @@ export const semconvFlat = {
       'Value of the corresponding [S.M.A.R.T.](https://wikipedia.org/wiki/S.M.A.R.T.) (Self-Monitoring, Analysis, and Reporting Technology) attribute.',
     type: 'double',
   },
+  'metrics.hw.physical_disk.status': {
+    name: 'metrics.hw.physical_disk.status',
+    description: 'Operational status: `1` (true) or `0` (false) for each of the possible states.',
+    type: 'double',
+  },
   'metrics.hw.power': {
     name: 'metrics.hw.power',
     description: 'Instantaneous power consumed by the component.',
@@ -4022,6 +4143,11 @@ export const semconvFlat = {
   'metrics.hw.power_supply.limit': {
     name: 'metrics.hw.power_supply.limit',
     description: 'Maximum power output of the power supply.',
+    type: 'double',
+  },
+  'metrics.hw.power_supply.status': {
+    name: 'metrics.hw.power_supply.status',
+    description: 'Operational status: `1` (true) or `0` (false) for each of the possible states.',
     type: 'double',
   },
   'metrics.hw.power_supply.usage': {
@@ -4039,9 +4165,19 @@ export const semconvFlat = {
     description: 'Operational status: `1` (true) or `0` (false) for each of the possible states.',
     type: 'double',
   },
+  'metrics.hw.tape_drive.errors': {
+    name: 'metrics.hw.tape_drive.errors',
+    description: 'Number of errors encountered by the tape drive.',
+    type: 'double',
+  },
   'metrics.hw.tape_drive.operations': {
     name: 'metrics.hw.tape_drive.operations',
     description: 'Operations performed by the tape drive.',
+    type: 'double',
+  },
+  'metrics.hw.tape_drive.status': {
+    name: 'metrics.hw.tape_drive.status',
+    description: 'Operational status: `1` (true) or `0` (false) for each of the possible states.',
     type: 'double',
   },
   'metrics.hw.temperature': {
@@ -4052,6 +4188,11 @@ export const semconvFlat = {
   'metrics.hw.temperature.limit': {
     name: 'metrics.hw.temperature.limit',
     description: 'Temperature limit in degrees Celsius.',
+    type: 'double',
+  },
+  'metrics.hw.temperature.status': {
+    name: 'metrics.hw.temperature.status',
+    description: 'Operational status: `1` (true) or `0` (false) for each of the possible states.',
     type: 'double',
   },
   'metrics.hw.voltage': {
@@ -4067,6 +4208,11 @@ export const semconvFlat = {
   'metrics.hw.voltage.nominal': {
     name: 'metrics.hw.voltage.nominal',
     description: 'Nominal (expected) voltage.',
+    type: 'double',
+  },
+  'metrics.hw.voltage.status': {
+    name: 'metrics.hw.voltage.status',
+    description: 'Operational status: `1` (true) or `0` (false) for each of the possible states.',
     type: 'double',
   },
   'metrics.jvm.buffer.count': {
@@ -4384,7 +4530,7 @@ export const semconvFlat = {
   },
   'metrics.k8s.node.cpu.allocatable': {
     name: 'metrics.k8s.node.cpu.allocatable',
-    description: 'Amount of cpu allocatable on the node.',
+    description: 'Amount of CPU allocatable on the node.',
     type: 'double',
   },
   'metrics.k8s.node.cpu.time': {
@@ -4395,7 +4541,7 @@ export const semconvFlat = {
   'metrics.k8s.node.cpu.usage': {
     name: 'metrics.k8s.node.cpu.usage',
     description:
-      "Node's CPU usage, measured in cpus. Range from 0 to the number of allocatable CPUs.",
+      "Node's CPU usage, measured in CPUs. Range from 0 to the number of allocatable CPUs.",
     type: 'double',
   },
   'metrics.k8s.node.ephemeral_storage.allocatable': {
@@ -4411,6 +4557,16 @@ export const semconvFlat = {
   'metrics.k8s.node.filesystem.capacity': {
     name: 'metrics.k8s.node.filesystem.capacity',
     description: 'Node filesystem capacity.',
+    type: 'double',
+  },
+  'metrics.k8s.node.filesystem.inode.count': {
+    name: 'metrics.k8s.node.filesystem.inode.count',
+    description: "The total inodes in the node's root filesystem.",
+    type: 'double',
+  },
+  'metrics.k8s.node.filesystem.inode.free': {
+    name: 'metrics.k8s.node.filesystem.inode.free',
+    description: "The free inodes in the node's root filesystem.",
     type: 'double',
   },
   'metrics.k8s.node.filesystem.usage': {
@@ -4470,7 +4626,7 @@ export const semconvFlat = {
   },
   'metrics.k8s.node.system_container.cpu.usage': {
     name: 'metrics.k8s.node.system_container.cpu.usage',
-    description: "Node's system container CPU usage, measured in cpus.",
+    description: "Node's system container CPU usage, measured in CPUs.",
     type: 'double',
   },
   'metrics.k8s.node.system_container.memory.usage': {
@@ -4521,7 +4677,7 @@ export const semconvFlat = {
   'metrics.k8s.pod.cpu.usage': {
     name: 'metrics.k8s.pod.cpu.usage',
     description:
-      "Pod's CPU usage, measured in cpus. Range from 0 to the number of allocatable CPUs.",
+      "Pod's CPU usage, measured in CPUs. Range from 0 to the number of allocatable CPUs.",
     type: 'double',
   },
   'metrics.k8s.pod.filesystem.available': {
@@ -5238,7 +5394,7 @@ export const semconvFlat = {
   },
   'metrics.process.unix.file_descriptor.count': {
     name: 'metrics.process.unix.file_descriptor.count',
-    description: 'Number of unix file descriptors in use by the process.',
+    description: 'Number of UNIX file descriptors in use by the process.',
     type: 'double',
   },
   'metrics.process.uptime': {
@@ -5448,12 +5604,12 @@ export const semconvFlat = {
   },
   'metrics.system.paging.usage': {
     name: 'metrics.system.paging.usage',
-    description: 'Unix swap or windows pagefile usage.',
+    description: 'UNIX swap or windows pagefile usage.',
     type: 'double',
   },
   'metrics.system.paging.utilization': {
     name: 'metrics.system.paging.utilization',
-    description: 'Swap (unix) or pagefile (windows) utilization.',
+    description: 'Swap (UNIX) or pagefile (windows) utilization.',
     type: 'double',
   },
   'metrics.system.process.count': {
@@ -5464,6 +5620,12 @@ export const semconvFlat = {
   'metrics.system.process.created': {
     name: 'metrics.system.process.created',
     description: 'Total number of processes created over uptime of the host.',
+    type: 'double',
+  },
+  'metrics.system.process.limit': {
+    name: 'metrics.system.process.limit',
+    description:
+      'The maximum number of concurrent processes/tasks allowed by the operating system.',
     type: 'double',
   },
   'metrics.system.uptime': {
@@ -5597,7 +5759,7 @@ export const semconvFlat = {
   'network.connection.subtype': {
     name: 'network.connection.subtype',
     description:
-      'This describes more details regarding the connection.type. It may be the type of cell technology connection, but it could be used for describing details about a wifi connection.',
+      'This describes more details regarding the connection.type. It may be the type of cell technology connection, but it could be used for describing details about a Wi-Fi connection.',
     type: 'keyword',
     example: 'L',
   },
@@ -5622,7 +5784,7 @@ export const semconvFlat = {
   },
   'network.local.address': {
     name: 'network.local.address',
-    description: 'Local address of the network connection - IP address or Unix domain socket name.',
+    description: 'Local address of the network connection - IP address or UNIX domain socket name.',
     type: 'keyword',
     example: '10.1.2.80',
   },
@@ -5634,7 +5796,7 @@ export const semconvFlat = {
   },
   'network.peer.address': {
     name: 'network.peer.address',
-    description: 'Peer address of the network connection - IP address or Unix domain socket name.',
+    description: 'Peer address of the network connection - IP address or UNIX domain socket name.',
     type: 'keyword',
     example: '10.1.2.80',
   },
@@ -5917,14 +6079,14 @@ export const semconvFlat = {
   'pprof.profile.drop_frames': {
     name: 'pprof.profile.drop_frames',
     description:
-      'Frames with Function.function_name fully matching the regexp will be dropped from the samples, along with their successors.',
+      'Frames with Function.function_name fully matching the regular expression will be dropped from the samples, along with their successors.',
     type: 'keyword',
     example: '/foobar/',
   },
   'pprof.profile.keep_frames': {
     name: 'pprof.profile.keep_frames',
     description:
-      'Frames with Function.function_name fully matching the regexp will be kept, even if it matches drop_frames.',
+      'Frames with Function.function_name fully matching the regular expression will be kept, even if it matches drop_frames.',
     type: 'keyword',
     example: '/bazinga/',
   },
@@ -6341,7 +6503,7 @@ export const semconvFlat = {
   },
   'session.id': {
     name: 'session.id',
-    description: 'A unique id to identify a session.',
+    description: 'A unique ID to identify a session.',
     type: 'keyword',
     example: '0',
   },
@@ -6377,7 +6539,7 @@ export const semconvFlat = {
   'source.address': {
     name: 'source.address',
     description:
-      'Source address - domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.',
+      'Source address - domain name if available without reverse DNS lookup; otherwise, IP address or UNIX domain socket name.',
     type: 'keyword',
     example: 'source.example.com',
   },
@@ -6796,7 +6958,7 @@ export const semconvFlat = {
   },
   'url.registered_domain': {
     name: 'url.registered_domain',
-    description: 'The highest registered url domain, stripped of the subdomain.',
+    description: 'The highest registered URL domain, stripped of the subdomain.',
     type: 'keyword',
     example: 'example.com',
   },
@@ -6810,7 +6972,7 @@ export const semconvFlat = {
   'url.subdomain': {
     name: 'url.subdomain',
     description:
-      'The subdomain portion of a fully qualified domain name includes all of the names except the host name under the registered_domain. In a partially qualified domain, or if the qualification level of the full name cannot be determined, subdomain contains all of the names below the registered domain.',
+      'The subdomain portion of a fully qualified domain name includes all of the names except the hostname under the registered_domain. In a partially qualified domain, or if the qualification level of the full name cannot be determined, subdomain contains all of the names below the registered domain.',
     type: 'keyword',
     example: 'east',
   },

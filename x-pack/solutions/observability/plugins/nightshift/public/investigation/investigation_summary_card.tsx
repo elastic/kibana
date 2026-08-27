@@ -27,41 +27,65 @@ import { buildRecommendationChatOptions } from './open_investigation_item_in_cha
 import { useKibana } from '../hooks/use_kibana';
 import { InvestigationItemChatButton } from './investigation_item_chat_button';
 import { BlindSpotsTable } from './blind_spots_table';
-import { InvestigationCompleteStatus, InvestigatingStatusDots } from './investigation_status_badge';
+import {
+  InvestigationCompleteStatus,
+  InvestigationFailedStatus,
+  InvestigatingStatusDots,
+} from './investigation_status_badge';
 import { InvestigationFormattedText } from './investigation_formatted_text';
 import { TruncatableSummary } from '../common/truncatable_summary';
 import { createFadeOverlayBackground } from '../common/fade_overlay_background';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_constants';
 import { nightshiftOpacityTransition, nightshiftReducedMotionStyles } from '../common/transition';
 import {
-  getConclusionBody,
+  getConclusionText,
+  getInvestigationCompleteStatusLabel,
   getInvestigationGoalText,
   getInvestigationHeadline,
-  getInvestigationWorkflowStatusLabel,
   getInvestigationTimeLabel,
   isInvestigationInvestigated,
   isInvestigationTerminalFailure,
   getPrimaryRecommendation,
-  mapBlindSpots,
-  type InvestigationRecommendation,
+  type RecommendationItem,
 } from './investigation_presentation';
 
 const INLINE_BLIND_SPOT_LIMIT = 4;
 const tryNextRowActionClassName = 'nightshiftInvestigationTryNextRowAction';
 
 const recommendationChatTooltip = i18n.translate(
-  'xpack.observability.nightshift.investigation.recommendationChatTooltip',
+  'xpack.nightshift.investigation.recommendationChatTooltip',
   {
     defaultMessage: 'Ask agent about this recommendation',
   }
 );
 
-const completedStatusLabel = i18n.translate(
-  'xpack.observability.nightshift.investigation.summaryCompleteStatusLabel',
-  {
-    defaultMessage: 'Complete',
+const getSummaryStatusLabel = (status: InvestigationStatus): string => {
+  if (isInvestigationInvestigated(status)) {
+    return getInvestigationCompleteStatusLabel();
   }
-);
+
+  if (status === 'failed') {
+    return i18n.translate('xpack.nightshift.investigation.summaryFailedStatusLabel', {
+      defaultMessage: 'Failed',
+    });
+  }
+
+  if (status === 'unavailable') {
+    return i18n.translate('xpack.nightshift.investigation.summaryUnavailableStatusLabel', {
+      defaultMessage: 'Unavailable',
+    });
+  }
+
+  if (status === 'loading') {
+    return i18n.translate('xpack.nightshift.investigation.summaryLoadingStatusLabel', {
+      defaultMessage: 'Loading',
+    });
+  }
+
+  return i18n.translate('xpack.nightshift.investigation.summaryInProgressStatusLabel', {
+    defaultMessage: 'In progress',
+  });
+};
 
 function InvestigationStatusRow({
   status,
@@ -76,7 +100,7 @@ function InvestigationStatusRow({
 }): React.ReactElement {
   const isInvestigated = isInvestigationInvestigated(status);
   const isTerminalFailure = isInvestigationTerminalFailure(status);
-  const statusLabel = getInvestigationWorkflowStatusLabel(status);
+  const statusLabel = getSummaryStatusLabel(status);
   const timeLabel = getInvestigationTimeLabel({
     startedAt,
     endedAt,
@@ -90,14 +114,19 @@ function InvestigationStatusRow({
           <EuiTitle size="xxs">
             <h4>
               <InvestigationCompleteStatus
-                label={completedStatusLabel}
+                label={statusLabel}
                 testSubj="nightshiftInvestigationStatusIcon"
               />
             </h4>
           </EuiTitle>
         ) : isTerminalFailure ? (
           <EuiTitle size="xxs">
-            <h4>{statusLabel}</h4>
+            <h4>
+              <InvestigationFailedStatus
+                label={statusLabel}
+                testSubj="nightshiftInvestigationFailedStatusIcon"
+              />
+            </h4>
           </EuiTitle>
         ) : (
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
@@ -125,7 +154,7 @@ function TryNextPanel({
   recommendation,
   onShowMoreRecommendations,
 }: {
-  recommendation: InvestigationRecommendation;
+  recommendation: RecommendationItem;
   onShowMoreRecommendations?: () => void;
 }): React.ReactElement {
   const { euiTheme } = useEuiTheme();
@@ -142,7 +171,7 @@ function TryNextPanel({
         <EuiFlexItem grow={false}>
           <EuiTitle size="xxs">
             <h4>
-              {i18n.translate('xpack.observability.nightshift.investigation.tryNextTitle', {
+              {i18n.translate('xpack.nightshift.investigation.tryNextTitle', {
                 defaultMessage: 'Try next',
               })}
             </h4>
@@ -160,7 +189,7 @@ function TryNextPanel({
                 element: NIGHTSHIFT_EBT_ELEMENTS.INVESTIGATION_SUMMARY,
               })}
             >
-              {i18n.translate('xpack.observability.nightshift.investigation.moreRecommendations', {
+              {i18n.translate('xpack.nightshift.investigation.moreRecommendations', {
                 defaultMessage: 'More recommendations',
               })}
             </EuiButtonEmpty>
@@ -260,10 +289,10 @@ export function InvestigationSummaryCard({
   const isRunning = status === 'running' || status === 'loading';
   const headline = getInvestigationHeadline({ eventTitle, state, status });
   const goalText = getInvestigationGoalText(state);
-  const conclusionBody = getConclusionBody(state?.conclusion);
+  const conclusionBody = getConclusionText(state);
   const primaryRecommendation = status === 'complete' ? getPrimaryRecommendation(state) : undefined;
   const blindSpots =
-    status === 'complete' ? mapBlindSpots(state?.gaps_found).slice(0, INLINE_BLIND_SPOT_LIMIT) : [];
+    status === 'complete' ? (state?.blind_spots ?? []).slice(0, INLINE_BLIND_SPOT_LIMIT) : [];
 
   return (
     <>

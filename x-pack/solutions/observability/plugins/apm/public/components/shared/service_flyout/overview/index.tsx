@@ -28,6 +28,7 @@ import { useServiceFlyoutContext } from '../service_flyout_context';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { LatencyAggregationTypeSelect } from '../../charts/latency_chart/latency_aggregation_type_select';
 import { useServiceHasSystemMetrics } from '../hooks/use_service_has_system_metrics';
+import { useProjectRouting } from '../hooks/use_project_routing';
 import { getChartDefinitions } from './chart_configs';
 import { ServiceFlyoutLensChart } from './lens_chart';
 import { ServiceFlyoutQueryControls } from './query_controls';
@@ -181,6 +182,9 @@ export function ServiceFlyoutOverview() {
     rangeFrom,
     rangeTo,
   });
+  // CPS: embed the active project routing in the generated ES|QL so the Lens charts query
+  // the same projects as the surrounding APM APIs (which forward it via `x-project-routing`).
+  const projectRouting = useProjectRouting();
 
   const { keyMetrics, infrastructureMetrics } = useMemo(
     () =>
@@ -198,6 +202,7 @@ export function ServiceFlyoutOverview() {
             ebt={{ element: SERVICE_FLYOUT_EBT_ELEMENTS.CHART_CONTROLS }}
           />
         ),
+        projectRouting,
       }),
     [
       capabilities.schema,
@@ -206,6 +211,7 @@ export function ServiceFlyoutOverview() {
       latencyAggregationType,
       service.name,
       transactionType,
+      projectRouting,
     ]
   );
 

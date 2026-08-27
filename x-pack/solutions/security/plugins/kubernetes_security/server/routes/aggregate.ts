@@ -22,6 +22,8 @@ import {
   ENTRY_LEADER_ENTITY_ID,
   ENTRY_LEADER_USER_ID,
   ENTRY_LEADER_INTERACTIVE,
+  INDEX_PATTERN_MAX_LENGTH,
+  QUERY_DSL_MAX_LENGTH,
 } from '../../common/constants';
 import type { AggregateBucketPaginationResult } from '../../common/types';
 
@@ -51,8 +53,8 @@ export const registerAggregateRoute = (router: IRouter, logger: Logger) => {
         validate: {
           request: {
             query: schema.object({
-              index: schema.string(),
-              query: schema.string(),
+              index: schema.string({ maxLength: INDEX_PATTERN_MAX_LENGTH }),
+              query: schema.string({ maxLength: QUERY_DSL_MAX_LENGTH }),
               countBy: schema.maybe(
                 schema.oneOf([
                   schema.literal(ORCHESTRATOR_CLUSTER_ID),

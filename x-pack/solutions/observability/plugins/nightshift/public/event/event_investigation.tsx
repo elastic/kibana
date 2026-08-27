@@ -28,6 +28,7 @@ import {
   type InvestigationFlyoutTabId,
 } from '../investigation/investigation_flyout';
 import { InvestigationSummaryCard } from '../investigation/investigation_summary_card';
+import { isInvestigationInvestigated } from '../common/investigation_progress_status';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_constants';
 
 export interface EventInvestigationProps {
@@ -57,19 +58,22 @@ export function EventInvestigation({
     setIsFlyoutOpen(true);
   }, []);
 
+  const canOpenInvestigationFlyout =
+    Boolean(investigation?.workflow_execution_id) && isInvestigationInvestigated(status);
+
   return (
     <>
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
             <h3>
-              {i18n.translate('xpack.observability.nightshift.flyout.investigationTitle', {
+              {i18n.translate('xpack.nightshift.flyout.investigationTitle', {
                 defaultMessage: 'Investigation',
               })}
             </h3>
           </EuiTitle>
         </EuiFlexItem>
-        {investigation?.workflow_execution_id && (
+        {canOpenInvestigationFlyout && (
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               size="xs"
@@ -82,7 +86,7 @@ export function EventInvestigation({
                 detail: status,
               })}
             >
-              {i18n.translate('xpack.observability.nightshift.flyout.investigationShowDetails', {
+              {i18n.translate('xpack.nightshift.flyout.investigationShowDetails', {
                 defaultMessage: 'Show details',
               })}
             </EuiButtonEmpty>
@@ -95,7 +99,7 @@ export function EventInvestigation({
       {!investigation ? (
         <EuiText size="s" color="subdued" data-test-subj="nightshiftInvestigationEmptyState">
           <p>
-            {i18n.translate('xpack.observability.nightshift.flyout.investigationEmptyDescription', {
+            {i18n.translate('xpack.nightshift.flyout.investigationEmptyDescription', {
               defaultMessage: 'No investigation yet.',
             })}
           </p>
@@ -106,22 +110,16 @@ export function EventInvestigation({
           color="warning"
           iconType="warning"
           size="s"
-          title={i18n.translate(
-            'xpack.observability.nightshift.flyout.investigationMissingWorkflowTitle',
-            {
-              defaultMessage: 'Investigation unavailable',
-            }
-          )}
+          title={i18n.translate('xpack.nightshift.flyout.investigationMissingWorkflowTitle', {
+            defaultMessage: 'Investigation unavailable',
+          })}
           data-test-subj="nightshiftInvestigationMissingWorkflowCallout"
         >
           <EuiText size="s">
-            {i18n.translate(
-              'xpack.observability.nightshift.flyout.investigationMissingWorkflowDescription',
-              {
-                defaultMessage:
-                  'This investigation is missing workflow details and cannot be loaded.',
-              }
-            )}
+            {i18n.translate('xpack.nightshift.flyout.investigationMissingWorkflowDescription', {
+              defaultMessage:
+                'This investigation is missing workflow details and cannot be loaded.',
+            })}
           </EuiText>
         </EuiCallOut>
       ) : (
@@ -136,13 +134,12 @@ export function EventInvestigation({
         />
       )}
 
-      {isFlyoutOpen && investigation?.workflow_execution_id && (
+      {isFlyoutOpen && canOpenInvestigationFlyout && investigation && (
         <InvestigationFlyout
           eventTitle={event.title}
           investigation={investigation}
           status={status}
           state={state}
-          error={error}
           conversationId={conversationId}
           initialTab={flyoutTab}
           tabRequestId={tabRequestId}

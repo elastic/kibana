@@ -9,10 +9,12 @@ import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+
+import { KbnInfoCallout } from '@kbn/ui-callout';
 
 import { Status } from '../../../../../../../common/types/api';
 
@@ -49,14 +51,12 @@ export const CopyAndCustomizePipelinePanel: React.FC = () => {
   }
   return (
     <>
-      <EuiCallOut
+      <KbnInfoCallout
         title={i18n.translate(
           'xpack.enterpriseSearch.content.index.pipelines.copyCustomizeCallout.title',
           { defaultMessage: 'Unlock your custom pipelines' }
         )}
-        iconType="lock"
-      >
-        <p>
+        text={
           <FormattedMessage
             id="xpack.enterpriseSearch.content.index.pipelines.copyCustomizeCallout.description"
             defaultMessage="Your index is using our default ingestion pipeline, {defaultPipeline}. Copy that pipeline into an index-specific configuration to unlock the ability to create custom ingestion and inference pipelines."
@@ -64,19 +64,20 @@ export const CopyAndCustomizePipelinePanel: React.FC = () => {
               defaultPipeline: <strong>{pipelineName}</strong>,
             }}
           />
-        </p>
-        <EuiButton
-          data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-ingestPipelines-copyAndCustomize`}
-          isLoading={createStatus === Status.LOADING}
-          iconType="lockOpen"
-          onClick={() => createCustomPipeline({ indexName })}
-        >
-          {i18n.translate(
-            'xpack.enterpriseSearch.content.index.pipelines.ingestFlyout.copyButtonLabel',
-            { defaultMessage: 'Copy and customize' }
-          )}
-        </EuiButton>
-      </EuiCallOut>
+        }
+        actionProps={{
+          primary: {
+            'data-telemetry-id': `entSearchContent-${ingestionMethod}-pipelines-ingestPipelines-copyAndCustomize`,
+            isLoading: createStatus === Status.LOADING,
+            iconType: 'lockOpen',
+            onClick: () => createCustomPipeline({ indexName }),
+            children: i18n.translate(
+              'xpack.enterpriseSearch.content.index.pipelines.ingestFlyout.copyButtonLabel',
+              { defaultMessage: 'Copy and customize' }
+            ),
+          },
+        }}
+      />
       <EuiSpacer />
     </>
   );

@@ -437,6 +437,17 @@ describe('WHERE Autocomplete', () => {
       );
     });
 
+    test.each([
+      'from index | WHERE (doubleField in (FROM index | KEEP doubleField))',
+      'from index | WHERE (doubleField not in (FROM index | KEEP doubleField)) ',
+    ])('suggests null checks after a parenthesized IN subquery (%s)', async (query) => {
+      await whereExpectSuggestions(query, [
+        '\n',
+        ...getOperatorSuggestions([...logicalOperators, ...nullCheckOperators]),
+        '| ',
+      ]);
+    });
+
     test('suggestions after IS (NOT) NULL', async () => {
       await whereExpectSuggestions(
         'FROM index | WHERE tags.keyword IS NULL ',

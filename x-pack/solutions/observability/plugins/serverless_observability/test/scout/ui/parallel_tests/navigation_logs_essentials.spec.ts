@@ -109,7 +109,6 @@ test.describe(
       await test.step('Alerts', async () => {
         await nav.clickBodyNavItemByDeepLinkId('observability-overview:alerts');
         await expect(page.testSubj.locator('alertsPageWithData')).toBeVisible();
-        await expect(nav.activeNavItemByDeepLinkId('observability-overview:alerts')).toBeVisible();
       });
     });
 

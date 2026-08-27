@@ -86,7 +86,7 @@ export const javaSettings: RawSettingDefinition[] = [
     type: 'text',
     defaultValue: '',
     label: i18n.translate('apmCommon.agentConfig.enableInstrumentations.label', {
-      defaultMessage: 'Disable instrumentations',
+      defaultMessage: 'Enable instrumentations',
     }),
     description: i18n.translate('apmCommon.agentConfig.enableInstrumentations.description', {
       defaultMessage:
@@ -95,7 +95,7 @@ export const javaSettings: RawSettingDefinition[] = [
         '[Java APM Agent documentation](https://www.elastic.co/guide/en/apm/agent/java/current/config-core.html#config-disable-instrumentations).\n' +
         '\n' +
         'When set to non-empty value, only listed instrumentations will be enabled ' +
-        'if they are not disabled through `disable_instrumentations`or `enable_experimental_instrumentations`.\n' +
+        'if they are not disabled through `disable_instrumentations` or `enable_experimental_instrumentations`.\n' +
         'When not set or empty (default), all instrumentations enabled by default will be enabled ' +
         'unless they are disabled through `disable_instrumentations` or `enable_experimental_instrumentations`.',
     }),

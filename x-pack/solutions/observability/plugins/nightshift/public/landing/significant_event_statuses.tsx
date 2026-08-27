@@ -198,7 +198,7 @@ export function SignificantEventStatuses({
         <EuiFlexItem>
           <SignificantEventStatusCard
             count={needsActionCount}
-            label={i18n.translate('xpack.observability.nightshift.summary.needActionLabel', {
+            label={i18n.translate('xpack.nightshift.summary.needActionLabel', {
               defaultMessage: 'Need action',
             })}
             onClick={onNeedsActionClick}
@@ -209,7 +209,7 @@ export function SignificantEventStatuses({
         <EuiFlexItem>
           <SignificantEventStatusCard
             count={resolvedCount}
-            label={i18n.translate('xpack.observability.nightshift.summary.resolvedLabel', {
+            label={i18n.translate('xpack.nightshift.summary.resolvedLabel', {
               defaultMessage: 'Resolved',
             })}
             onClick={onResolvedClick}

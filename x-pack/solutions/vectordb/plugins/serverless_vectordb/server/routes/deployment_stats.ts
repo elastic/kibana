@@ -8,7 +8,13 @@
 import type { IRouter, Logger } from '@kbn/core/server';
 import { AuthzDisabled } from '@kbn/core-security-server';
 import { DEPLOYMENT_STATS_PATH } from '../../common/constants';
-import { fetchDashboardsCount, fetchIndexStats } from '../lib/deployment_stats';
+import { fetchDashboardsCount } from '../lib/dashboards';
+import {
+  INDEX_STATS_UNAVAILABLE,
+  fetchApiKeysStats,
+  fetchIndexStats,
+  hasIndexManagePrivilege,
+} from '../lib/deployment_stats';
 
 export const registerDeploymentStatsRoute = (router: IRouter, logger: Logger) => {
   router.get(
@@ -16,7 +22,9 @@ export const registerDeploymentStatsRoute = (router: IRouter, logger: Logger) =>
       path: DEPLOYMENT_STATS_PATH,
       validate: false,
       security: {
-        authz: AuthzDisabled.delegateToESClient,
+        authz: AuthzDisabled.fromReason(
+          'Index stats are read with elevated privileges, so the handler checks the caller holds the Elasticsearch `manage` index privilege before returning cluster-wide totals; the dashboard count is authorized by the saved objects client'
+        ),
       },
     },
     async (context, request, response) => {
@@ -25,18 +33,27 @@ export const registerDeploymentStatsRoute = (router: IRouter, logger: Logger) =>
         const client = core.elasticsearch.client;
         const savedObjectsClient = core.savedObjects.getClient();
 
-        const [{ indicesCount, storeSizeBytes, vectorDocsCount }, dashboardsCount] =
-          await Promise.all([
-            fetchIndexStats(client, logger),
-            fetchDashboardsCount(savedObjectsClient, logger),
-          ]);
+        const [
+          { indicesCount, storeSizeBytes, vectorCount, documentsCount },
+          dashboardsCount,
+          { total: apiKeysCount, expiring: expiringApiKeysCount },
+        ] = await Promise.all([
+          hasIndexManagePrivilege(client, logger).then((isPrivileged) =>
+            isPrivileged ? fetchIndexStats(client, logger) : INDEX_STATS_UNAVAILABLE
+          ),
+          fetchDashboardsCount(savedObjectsClient, logger),
+          fetchApiKeysStats(client, logger),
+        ]);
 
         return response.ok({
           body: {
             indicesCount,
             storeSizeBytes,
-            vectorDocsCount,
+            vectorCount,
+            documentsCount,
             dashboardsCount,
+            apiKeysCount,
+            expiringApiKeysCount,
           },
         });
       } catch (error) {

@@ -100,6 +100,7 @@ export const getRulesClientMockParams = (
     isSystemAction: jest.fn(),
     featureFlags: coreFeatureFlagsMock.createStart(),
     isServerless: false,
+    analytics: { reportEvent: jest.fn() },
     ...overrides,
   };
 

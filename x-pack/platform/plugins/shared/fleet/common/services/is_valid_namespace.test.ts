@@ -44,6 +44,14 @@ describe('Fleet - isValidNamespace', () => {
     expect(isValidNamespace('default', false, ['prod', 'qa']).valid).toBe(false);
   });
 
+  it('returns false for whitespace-only namespaces, even when blank namespaces are allowed', () => {
+    // Regression test for https://github.com/elastic/kibana/issues/276589 - a whitespace-only
+    // namespace (e.g. " ") must not be treated the same as a genuinely blank namespace.
+    expect(isValidNamespace(' ', true).valid).toBe(false);
+    expect(isValidNamespace('   ', true).valid).toBe(false);
+    expect(isValidNamespace(' ', true, ['test']).valid).toBe(false);
+  });
+
   it('accepts a namespace matching any of multiple allowed prefixes', () => {
     expect(isValidNamespace('prod', false, ['prod', 'qa']).valid).toBe(true);
     expect(isValidNamespace('qa', false, ['prod', 'qa']).valid).toBe(true);

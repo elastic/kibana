@@ -13,6 +13,7 @@ import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 
 import { type FakeRawRequest, type Headers } from '@kbn/core-http-server';
 import type { ApiKeyInvalidationFn, UiamApiKeyInvalidationFn } from '../invalidate_api_keys_task';
+import { getUiamApiKeySecret } from '../../lib/api_key_utils';
 
 export type InvalidateAPIKeyResult =
   | { apiKeysEnabled: false }
@@ -48,7 +49,9 @@ export async function invalidateUiamAPIKeys(
   }
 
   const requestHeaders: Headers = {};
-  requestHeaders.authorization = `ApiKey ${params.uiamApiKey}`;
+  // `uiam.invalidate` authenticates the forged request with the key being revoked, so the stored
+  // value has to be normalized to the raw `essu_…` secret first (see `getUiamApiKeySecret`).
+  requestHeaders.authorization = `ApiKey ${getUiamApiKeySecret(params.uiamApiKey)}`;
   const fakeRawRequest: FakeRawRequest = {
     headers: requestHeaders,
   };

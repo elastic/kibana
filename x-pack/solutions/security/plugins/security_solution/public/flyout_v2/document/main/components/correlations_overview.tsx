@@ -36,10 +36,6 @@ export interface CorrelationsOverviewProps {
    */
   scopeId: string;
   /**
-   * Boolean indicating if the flyout is open in rule preview
-   */
-  isRulePreview: boolean;
-  /**
    * Whether to show the arrow icon in the panel header
    */
   showIcon: boolean;
@@ -55,18 +51,15 @@ export interface CorrelationsOverviewProps {
  * and the SummaryPanel component for data rendering.
  */
 export const CorrelationsOverview = memo(
-  ({
-    hit,
-    scopeId,
-    isRulePreview,
-    showIcon,
-    onShowCorrelationsDetails,
-  }: CorrelationsOverviewProps) => {
+  ({ hit, scopeId, showIcon, onShowCorrelationsDetails }: CorrelationsOverviewProps) => {
     const documentId = useMemo(() => hit.raw._id || '', [hit.raw._id]);
 
-    const { show: showAlertsByAncestry, ancestryDocumentId } = useShowRelatedAlertsByAncestry({
+    const {
+      show: showAlertsByAncestry,
+      ancestryDocumentId,
+      ancestryDocumentIndex,
+    } = useShowRelatedAlertsByAncestry({
       hit,
-      isRulePreview,
     });
     const { show: showSameSourceAlerts, originalEventId } = useShowRelatedAlertsBySameSourceEvent({
       hit,
@@ -113,7 +106,7 @@ export const CorrelationsOverview = memo(
             />
           ),
           link,
-          iconType: showIcon ? 'arrowStart' : undefined,
+          iconType: showIcon ? 'chevronLimitLeft' : undefined,
         }}
         data-test-subj={CORRELATIONS_TEST_ID}
       >
@@ -149,6 +142,7 @@ export const CorrelationsOverview = memo(
             {showAlertsByAncestry && (
               <RelatedAlertsByAncestry
                 documentId={ancestryDocumentId}
+                documentIndex={ancestryDocumentIndex}
                 onShowCorrelationsDetails={onShowCorrelationsDetails}
               />
             )}

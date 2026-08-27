@@ -53,7 +53,7 @@ const mergeToolSelections = (base: ToolSelection[], delta: ToolSelection[]): Too
  * (the floor) with the agent's own configuration (the delta), additively:
  *
  * - instructions: concatenated base-first with a delimiter.
- * - tools / skill_ids / plugin_ids / workflow_ids / connector_ids: union, base-first,
+ * - tools / skill_ids / plugin_ids / workflow_ids / connector_ids / ai_indices: union, base-first,
  *   deduplicated. A base that sets `connector_ids: []` pins the floor to "no connectors".
  * - enable_elastic_capabilities: the delta overrides the base when set.
  */
@@ -83,6 +83,9 @@ export const mergeAgentConfiguration = (
   }
   if (base.connector_ids !== undefined) {
     result.connector_ids = dedupConcat(base.connector_ids, delta.connector_ids ?? []);
+  }
+  if (base.ai_indices !== undefined) {
+    result.ai_indices = dedupConcat(base.ai_indices, delta.ai_indices ?? []);
   }
   if (base.enable_elastic_capabilities !== undefined) {
     result.enable_elastic_capabilities =

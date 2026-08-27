@@ -140,11 +140,17 @@ Top-level strategy fields (sit alongside `query` on the rule, not inside it):
 | Parameter | Value | Source |
 | --- | --- | --- |
 | Task type | `alerting_v2:rule_executor` | [`task_definition.ts`](task_definition.ts) |
-| Task timeout | `5m` | [`task_definition.ts`](task_definition.ts) |
+| Task timeout | `xpack.alerting_v2.rules.run.timeout`, defaults to `DEFAULT_RULE_EXECUTION_TIMEOUT` (`5m`) | [`task_definition.ts`](task_definition.ts) |
 | Schedule | Per rule | [`schedule.ts`](schedule.ts) |
 | Max alerts per run | `xpack.alerting_v2.rules.run.alerts.max`, default and ceiling `10000` | [`config.ts`](../../config.ts) |
+| JSON query row cap | Internal `NON_STREAMING_MAX_ROWS` (`1000`); applied on the JSON path as `LIMIT min(alerts.max, NON_STREAMING_MAX_ROWS)` | [`config.ts`](../../config.ts) |
+| ES\|QL response format | `xpack.alerting_v2.esql.responseFormat`, `json` or `arrow`, defaults to `json` | [`config.ts`](../../config.ts) |
 
-`ExecuteRuleQueryStep` unconditionally appends `\| LIMIT <max>` to the breach query before execution. ES|QL takes the min across multiple `LIMIT` commands, so an author-supplied smaller limit still wins.
+`xpack.alerting_v2.rules.run.timeout`, when set, applies uniformly to the rule executor task. The rule executor task definition owns this via its `resolveTimeout` hook, which resolves the value as `config → DEFAULT_RULE_EXECUTION_TIMEOUT`; other task types (dispatcher, telemetry, API-key invalidation) omit the hook and keep their static `timeout`. The resolved value is applied where tasks are registered with Task Manager in [`setup/bind_tasks.ts`](../../setup/bind_tasks.ts).
+
+`ExecuteRuleQueryStep` unconditionally appends `\| LIMIT <max>` to the breach query before execution. The LIMIT is `alerts.max` on the Arrow path and `min(alerts.max, NON_STREAMING_MAX_ROWS)` on the JSON path, so a transport choice cannot silently change the product-level alerts cap. ES|QL takes the min across multiple `LIMIT` commands, so an author-supplied smaller limit still wins.
+
+`xpack.alerting_v2.esql.responseFormat` selects how `QueryService.executeQueryStream` fetches results. `json` (default) runs the single-shot JSON query and yields the full result set as one in-memory batch; `arrow` streams self-contained Arrow record batches.
 
 ## Pipeline state
 
@@ -336,29 +342,22 @@ Do **not** add a step when:
 ### Step 1: Create the step class
 
 ```typescript
-import { inject, injectable } from 'inversify';
+import { injectable } from 'inversify';
 import type { PipelineStateStream, RuleExecutionStep } from '../types';
 import { mapStep, requireState } from '../stream_utils';
 import type { RuleResponse } from '../../rules_client';
-import {
-  LoggerServiceToken,
-  type LoggerServiceContract,
-} from '../../services/logger_service/logger_service';
 
 @injectable()
 export class MyNewStep implements RuleExecutionStep {
   public readonly name = 'my_new_step';
 
-  constructor(
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
-  ) {}
-
   public executeStream(input: PipelineStateStream): PipelineStateStream {
     return mapStep(input, async (state) => {
+      const logger = state.logger.withLabels({ step: this.name });
       const requiredState = requireState(state, ['rule']);
 
       if (!requiredState.ok) {
-        this.logger.debug({ message: `[${this.name}] State not ready, halting` });
+        logger.debug({ message: 'State not ready, halting' });
         return requiredState.result;
       }
 
@@ -416,23 +415,16 @@ import { MyNewStep } from './my_new_step';
 import {
   collectStreamResults,
   createPipelineStream,
-  createRuleExecutionInput,
+  createRulePipelineState,
   createRuleResponse,
 } from '../test_utils';
-import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 
 describe('MyNewStep', () => {
   it('continues with data when successful', async () => {
-    const { loggerService } = createLoggerService();
-    const step = new MyNewStep(loggerService);
+    const step = new MyNewStep();
 
     const stream = step.executeStream(
-      createPipelineStream([
-        {
-          input: createRuleExecutionInput(),
-          rule: createRuleResponse(),
-        },
-      ])
+      createPipelineStream([createRulePipelineState({ rule: createRuleResponse() })])
     );
 
     const [result] = await collectStreamResults(stream);
@@ -457,12 +449,14 @@ import {
 } from '../../services/logger_service/logger_service';
 
 @injectable()
-export class PerformanceMiddleware implements RuleExecutionMiddleware {
-  public readonly name = 'performance';
+export class StepCompletionMiddleware implements RuleExecutionMiddleware {
+  public readonly name = 'step_completion';
 
-  constructor(
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
-  ) {}
+  private readonly logger: LoggerServiceContract;
+
+  constructor(@inject(LoggerServiceToken) loggerService: LoggerServiceContract) {
+    this.logger = loggerService.forSubsystem('ruleExecutor');
+  }
 
   public execute(
     ctx: RuleExecutionMiddlewareContext,
@@ -470,23 +464,22 @@ export class PerformanceMiddleware implements RuleExecutionMiddleware {
     input: PipelineStateStream
   ): PipelineStateStream {
     const stream = next(input);
-    const logger = this.logger;
+    const logger = this.logger.withLabels({ step: ctx.step.name });
 
     return (async function* () {
-      const start = performance.now();
       try {
         for await (const result of stream) {
           yield result;
         }
       } finally {
-        logger.debug({
-          message: `Step [${ctx.step.name}] took ${performance.now() - start}ms`,
-        });
+        logger.debug({ message: 'Step completed' });
       }
     })();
   }
 }
 ```
+
+Middleware wraps the stream rather than mapping over state, so it injects the logger service directly — unlike steps, which log through `state.logger`. Keep timings out of messages and labels; `ApmMiddleware` already spans each step.
 
 Register middleware in `setup/bind_rule_executor.ts` on `RuleExecutionMiddlewaresToken`. Binding order defines wrapping order.
 

@@ -34,6 +34,9 @@ export const NO_DEFAULT_MODEL = 'NO_DEFAULT_MODEL';
 
 export const CHAT_COMPLETION_TASK_TYPE = 'chat_completion';
 
+export const REGION_PREFERENCES_REDESIGN_FEATURE_FLAG =
+  'searchSolution.regionPreferencesRedesignEnabled';
+
 /**
  * Maps a `csp::region` key to a human-readable region name.
  * Based on the EIS inference locations list provided by the EIS team.

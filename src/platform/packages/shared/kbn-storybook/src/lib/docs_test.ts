@@ -120,8 +120,9 @@ const hasDocset = (dir: string): boolean =>
   DOCSET_FILES.some((file) => existsSync(join(dir, file)));
 
 // Walk up from an alias's Storybook config toward the repo root, returning the nearest
-// directory that holds a docset.yml (the docs-builder docset colocated with the package,
-// e.g. src/platform/kbn-ui). Returns undefined when no docset lives on that path.
+// directory that holds a docset.yml. Returns undefined when no docset lives on that path,
+// which is the case for docsets kept outside the package tree, such as `docs-dev`; those
+// need `--docs-path`.
 const findDocsetDir = (startDir: string): string | undefined => {
   let dir = resolve(startDir);
   for (;;) {
@@ -168,9 +169,10 @@ const startDocsBuilder = ({
   port?: number;
   log: StorybookDocsTestLog;
 }): ChildProcess => {
-  // Run from inside the docset directory with no --path: a docset nested more than one
-  // level below the git root otherwise trips docs-builder's disjoint-scope-roots check.
-  const args = ['serve', ...(port ? ['--port', String(port)] : [])];
+  // Run from inside the docset directory: a docset nested more than one level below the git
+  // root otherwise trips docs-builder's disjoint-scope-roots check. `--path .` is still
+  // required because discovery starting at the git root prefers the public `docs/docset.yml`.
+  const args = ['serve', '--path', '.', ...(port ? ['--port', String(port)] : [])];
   log.info(`Starting docs-builder in ${docsetDir} with KIBANA_STORYBOOK_REGISTRY=${registryUrl}`);
   const child = spawn('docs-builder', args, {
     cwd: docsetDir,

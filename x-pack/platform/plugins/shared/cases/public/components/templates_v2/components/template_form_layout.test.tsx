@@ -13,6 +13,7 @@ import { parse as yamlParse } from 'yaml';
 import type { YamlEditorFormValues } from './template_form';
 import { TemplateFormLayout, getTemplateEditorBodyOffset } from './template_form_layout';
 import type { TemplateMetadata } from '../utils/template_metadata';
+import { MAX_TEMPLATE_NAME_LENGTH } from '../../../../common/constants';
 import type { CaseAssignees } from '../../../../common/types/domain_zod/user/v1';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
@@ -122,7 +123,6 @@ const TestWrapper = ({
   return (
     <TemplateFormLayout
       form={form}
-      title={isEdit ? i18n.EDIT_TEMPLATE_TITLE : i18n.ADD_TEMPLATE_TITLE}
       onCreate={onCreate}
       isEdit={isEdit}
       isSaving={isSaving}
@@ -165,12 +165,75 @@ describe('TemplateFormLayout', () => {
     });
   });
 
-  it('renders the layout with title', () => {
+  it('renders the template name as the page title', () => {
     renderWithTestingProviders(<TestWrapper onCreate={mockOnCreate} />);
 
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
-      i18n.ADD_TEMPLATE_TITLE
+      'Template metadata'
     );
+  });
+
+  it('shows a placeholder as the page title while the template is unnamed', () => {
+    renderWithTestingProviders(
+      <TestWrapper
+        onCreate={mockOnCreate}
+        initialMetadata={{ name: '', description: '', tags: [] }}
+      />
+    );
+
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+      i18n.UNTITLED_TEMPLATE
+    );
+  });
+
+  it('renames the template from the page title', async () => {
+    renderWithTestingProviders(<TestWrapper onCreate={mockOnCreate} />);
+
+    await userEvent.click(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.titleButton));
+    await userEvent.clear(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.titleInput));
+    await userEvent.type(
+      screen.getByTestId(APP_HEADER_TEST_SUBJECTS.titleInput),
+      'Phishing triage'
+    );
+    await userEvent.keyboard('{enter}');
+
+    // This suite mocks useCasesLocalStorage to hold no draft, so the rendered title always falls
+    // back to initialMetadata. Assert the commit instead of the redisplay.
+    await waitFor(() => {
+      expect(mockSetStoredMetadataState).toHaveBeenCalledWith(
+        expect.objectContaining({ name: 'Phishing triage' })
+      );
+    });
+  });
+
+  it('rejects an over-long name inline and keeps the title editor open', async () => {
+    renderWithTestingProviders(<TestWrapper onCreate={mockOnCreate} />);
+
+    await userEvent.click(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.titleButton));
+    await userEvent.clear(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.titleInput));
+    await userEvent.type(
+      screen.getByTestId(APP_HEADER_TEST_SUBJECTS.titleInput),
+      'x'.repeat(MAX_TEMPLATE_NAME_LENGTH + 1)
+    );
+    await userEvent.keyboard('{enter}');
+
+    // Our validator's message, surfaced on the field being fixed, with the editor still open.
+    expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.titleError)).toHaveTextContent(
+      i18n.TEMPLATE_NAME_MAX_LENGTH(MAX_TEMPLATE_NAME_LENGTH)
+    );
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.titleInput)).toBeInTheDocument();
+  });
+
+  it("leaves an emptied name to the header's own empty guard and does not commit it", async () => {
+    renderWithTestingProviders(<TestWrapper onCreate={mockOnCreate} />);
+
+    await userEvent.click(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.titleButton));
+    await userEvent.clear(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.titleInput));
+    await userEvent.keyboard('{enter}');
+
+    // AppHeader rejects an empty title before it reaches our onSave, so the name is never blanked.
+    expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.titleError)).toBeInTheDocument();
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.titleInput)).toBeInTheDocument();
   });
 
   it('renders the YAML editor', () => {

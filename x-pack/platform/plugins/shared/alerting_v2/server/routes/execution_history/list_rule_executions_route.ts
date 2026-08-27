@@ -12,12 +12,15 @@ import {
   listRuleExecutionsRequestSchema,
   listRuleExecutionsResponseSchema,
   type ListRuleExecutionsRequest,
+  type ListRuleExecutionsResponse,
+  type RuleExecutionView,
 } from '@kbn/alerting-v2-schemas';
 import { inject, injectable } from 'inversify';
 import { ExecutionHistoryClientToken } from '../../lib/execution_history_client';
 import type {
   ExecutionHistoryClientContract,
   ListRuleExecutionsArgs,
+  ListRuleExecutionsResult,
 } from '../../lib/execution_history_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
@@ -48,6 +51,49 @@ export const toListRuleExecutionsArgs = ({
     sortOrder,
     page,
     perPage,
+  };
+};
+
+const toRuleExecutionView = ({
+  id,
+  rule,
+  spaceId,
+  startedAt,
+  endedAt,
+  timings: { duration, scheduledDelay, ...restTimings },
+  outcome,
+  reason,
+  error,
+  ...rest
+}: ListRuleExecutionsResult['items'][number]): Complete<RuleExecutionView> => {
+  assertAllFieldsMapped(rest);
+  assertAllFieldsMapped(restTimings);
+  return {
+    id,
+    rule,
+    space_id: spaceId,
+    started_at: startedAt,
+    ended_at: endedAt,
+    timings: { duration, scheduled_delay: scheduledDelay },
+    outcome,
+    reason,
+    error: error && { message: error.message, stack_trace: error.stackTrace },
+  };
+};
+
+export const toListRuleExecutionsResponse = ({
+  items,
+  total,
+  page,
+  perPage,
+  ...rest
+}: ListRuleExecutionsResult): Complete<ListRuleExecutionsResponse> => {
+  assertAllFieldsMapped(rest);
+  return {
+    items: items.map(toRuleExecutionView),
+    total,
+    page,
+    per_page: perPage,
   };
 };
 
@@ -97,6 +143,6 @@ export class ListRuleExecutionsRoute extends BaseAlertingRoute {
     const result = await this.executionHistoryClient.listRuleExecutions(
       toListRuleExecutionsArgs(this.request.query)
     );
-    return this.ctx.response.ok({ body: result });
+    return this.ctx.response.ok({ body: toListRuleExecutionsResponse(result) });
   }
 }

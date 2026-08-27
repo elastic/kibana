@@ -6,12 +6,14 @@
  */
 
 import Boom from '@hapi/boom';
+import pMap from 'p-map';
 import {
   BULK_FILTER_MAX_RESOURCES,
   BULK_QUERY_SAMPLE_SIZE,
   createRuleDataSchema,
   isStateTransitionAllowed,
   updateRuleDataSchema,
+  type RuleKind,
 } from '@kbn/alerting-v2-schemas';
 import { PluginStart } from '@kbn/core-di';
 import { Request, PluginInitializer } from '@kbn/core-di-server';
@@ -21,14 +23,15 @@ import type {
   KibanaRequest as CoreKibanaRequest,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { TaskManagerStartContract, TaskStatus } from '@kbn/task-manager-plugin/server';
 import { TaskAlreadyRunningError } from '@kbn/task-manager-plugin/server/lib/errors';
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
 import { treeifyError, type z } from '@kbn/zod/v4';
 import { inject, injectable } from 'inversify';
 import { type RuleSavedObjectAttributes } from '../../saved_objects';
 import { withApm as withApmDecorator } from '../apm/with_apm_decorator';
-import { ALERTING_V2_ERROR_CODES } from '../errors/error_codes';
+import { ArtifactTypeRegistry } from '../artifact_types';
+import { ALERTING_ERROR_CODES, ALERTING_LOG_CODES } from '../errors/error_codes';
 import {
   getInvalidRuleDataMessage,
   getRuleAlreadyExistsMessage,
@@ -67,12 +70,20 @@ import type {
   FindRulesArgs,
   FindRulesResponse,
   FindRulesSortField,
+  RotationCandidate,
   RuleResponse,
   UpdateRuleParams,
 } from './types';
 import {
   assertImmutableUnchanged,
+  validateMergedRuleAttributes,
   buildUpdateRuleAttributes,
+  groupCandidatesByInterval,
+  isTaskMidRun,
+  ruleDisabledError,
+  ruleRunningError,
+  rotationFailedError,
+  toBulkError,
   transformCreateRuleBodyToRuleSoAttributes,
   transformRuleSoAttributesToRuleApiResponse,
 } from './utils';
@@ -83,28 +94,12 @@ const DEFAULT_PAGE = 1;
 const DEFAULT_PER_PAGE = 20;
 
 /**
- * Maps a saved-object status code to the stable, machine-readable bulk-error
- * `code` returned in the response body. Keeps the by-ID and by-query
- * endpoints aligned with the single-rule error codes so a client can
- * dispatch on `error.code` uniformly.
+ * Max concurrent `bulkUpdateSchedules` calls when rotating executor task API
+ * keys. One call is issued per distinct schedule interval; in practice only a
+ * handful of intervals are in use, so this cap mainly bounds the pathological
+ * many-distinct-interval by-query batch.
  */
-const bulkErrorCodeForStatus = (statusCode: number): string => {
-  if (statusCode === 404) {
-    return ALERTING_V2_ERROR_CODES.RULE_NOT_FOUND;
-  }
-  if (statusCode === 409) {
-    return ALERTING_V2_ERROR_CODES.RULE_VERSION_CONFLICT;
-  }
-  return ALERTING_V2_ERROR_CODES.INTERNAL_SERVER_ERROR;
-};
-
-const toBulkError = (
-  id: string,
-  err: { statusCode: number; message: string }
-): BulkOperationError => ({
-  id,
-  error: { code: bulkErrorCodeForStatus(err.statusCode), message: err.message },
-});
+const ROTATION_CONCURRENCY = 10;
 
 /**
  * Builds a per-rule bulk error flagging that the rule's saved object was
@@ -114,7 +109,7 @@ const toBulkError = (
  */
 const toTaskManagerDriftError = (id: string, message: string): BulkOperationError => ({
   id,
-  error: { code: ALERTING_V2_ERROR_CODES.TASK_MANAGER_DRIFT, message },
+  error: { code: ALERTING_ERROR_CODES.TASK_MANAGER_DRIFT, message },
 });
 
 const errorMessage = (err: unknown): string => (err instanceof Error ? err.message : String(err));
@@ -136,6 +131,7 @@ const mapSortField = (sortField?: FindRulesSortField): string | undefined => {
 @injectable()
 export class RulesClient {
   private readonly config: PluginConfig;
+  private readonly logger: LoggerServiceContract;
 
   constructor(
     @inject(Request) private readonly request: KibanaRequest,
@@ -150,9 +146,11 @@ export class RulesClient {
     @inject(RulesSavedObjectServiceInternalToken)
     private readonly rulesSavedObjectServiceInternal: RulesSavedObjectServiceContract,
     @inject(RuleEventPublisher) private readonly ruleEventPublisher: RuleEventPublisher,
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
+    @inject(LoggerServiceToken) loggerService: LoggerServiceContract,
+    @inject(ArtifactTypeRegistry) private readonly artifactTypeRegistry: ArtifactTypeRegistry
   ) {
     this.config = pluginConfigAccessor.get<PluginConfig>();
+    this.logger = loggerService.forSubsystem('rulesClient');
   }
 
   private getSpaceContext(): { spaceId: string } {
@@ -204,7 +202,7 @@ export class RulesClient {
       throw Boom.badRequest(
         `Rule schedule interval of "${every}" is shorter than the allowed minimum of "${minimumScheduleInterval}"`,
         {
-          code: ALERTING_V2_ERROR_CODES.SCHEDULE_INTERVAL_TOO_SHORT,
+          code: ALERTING_ERROR_CODES.SCHEDULE_INTERVAL_TOO_SHORT,
           details: { interval: every, minimumScheduleInterval },
         }
       );
@@ -247,7 +245,7 @@ export class RulesClient {
       throw Boom.badRequest(
         `Rule schedule of "${updatedEvery}" would exceed the limit of ${maxScheduledPerMinute} rule runs per minute`,
         {
-          code: ALERTING_V2_ERROR_CODES.MAX_SCHEDULES_PER_MINUTE_EXCEEDED,
+          code: ALERTING_ERROR_CODES.MAX_SCHEDULES_PER_MINUTE_EXCEEDED,
           details: { interval: updatedEvery, maxScheduledPerMinute },
         }
       );
@@ -262,7 +260,7 @@ export class RulesClient {
     const parsed = schema.safeParse(data);
     if (!parsed.success) {
       throw Boom.badRequest(getInvalidRuleDataMessage(context, stringifyZodError(parsed.error)), {
-        code: ALERTING_V2_ERROR_CODES.INVALID_RULE_DATA,
+        code: ALERTING_ERROR_CODES.INVALID_RULE_DATA,
         details: { context, errors: treeifyError(parsed.error) },
       });
     }
@@ -278,7 +276,7 @@ export class RulesClient {
     } catch (e) {
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
         throw Boom.notFound(getRuleNotFoundMessage(id), {
-          code: ALERTING_V2_ERROR_CODES.RULE_NOT_FOUND,
+          code: ALERTING_ERROR_CODES.RULE_NOT_FOUND,
           details: { rule_id: id },
         });
       }
@@ -320,7 +318,7 @@ export class RulesClient {
     } catch (e) {
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
         throw Boom.conflict(getRuleVersionConflictMessage(id), {
-          code: ALERTING_V2_ERROR_CODES.RULE_VERSION_CONFLICT,
+          code: ALERTING_ERROR_CODES.RULE_VERSION_CONFLICT,
           details: { rule_id: id },
         });
       }
@@ -332,6 +330,7 @@ export class RulesClient {
   public async createRule(params: CreateRuleParams): Promise<RuleResponse> {
     const { spaceId } = this.getSpaceContext();
     const parsed = this.parseRuleData(createRuleDataSchema, params.data, 'create');
+    this.artifactTypeRegistry.validate(parsed.artifacts);
 
     const userProfileUid = await this.userService.getCurrentUserProfileUid();
 
@@ -360,7 +359,7 @@ export class RulesClient {
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
         const conflictId = params.options?.id ?? 'unknown';
         throw Boom.conflict(getRuleAlreadyExistsMessage(conflictId), {
-          code: ALERTING_V2_ERROR_CODES.RULE_ALREADY_EXISTS,
+          code: ALERTING_ERROR_CODES.RULE_ALREADY_EXISTS,
           details: { rule_id: conflictId },
         });
       }
@@ -376,7 +375,16 @@ export class RulesClient {
         scheduleEvery: ruleAttributes.schedule.every,
       });
     } catch (e) {
-      await this.rulesSavedObjectService.delete({ id }).catch(() => {});
+      try {
+        await this.rulesSavedObjectService.delete({ id });
+      } catch (rollbackError) {
+        this.logger.error({
+          message: 'Failed to roll back rule creation after task scheduling failed',
+          error: rollbackError,
+          code: ALERTING_LOG_CODES.RULE_CREATE_ROLLBACK_FAILED,
+          labels: { rule_id: id, space_id: spaceId },
+        });
+      }
       throw e;
     }
 
@@ -391,6 +399,9 @@ export class RulesClient {
   public async updateRule({ id, data, options }: UpdateRuleParams): Promise<RuleResponse> {
     const { spaceId } = this.getSpaceContext();
     const parsed = this.parseRuleData(updateRuleDataSchema, data, 'update');
+    if (parsed.artifacts !== undefined) {
+      this.artifactTypeRegistry.validate(parsed.artifacts ?? undefined);
+    }
 
     const userProfileUid = await this.userService.getCurrentUserProfileUid();
     const nowIso = new Date().toISOString();
@@ -404,7 +415,7 @@ export class RulesClient {
       })
     ) {
       throw Boom.badRequest('stateTransition is only allowed for rules of kind "alert".', {
-        code: ALERTING_V2_ERROR_CODES.INVALID_STATE_TRANSITION,
+        code: ALERTING_ERROR_CODES.INVALID_STATE_TRANSITION,
         details: { rule_id: id, rule_kind: existingAttrs.kind },
       });
     }
@@ -415,6 +426,8 @@ export class RulesClient {
       updatedAt: nowIso,
       version: ruleVersion,
     });
+
+    validateMergedRuleAttributes(id, nextAttrs);
 
     await this.validateSchedule({
       updatedEvery: nextAttrs.schedule.every,
@@ -521,7 +534,7 @@ export class RulesClient {
 
     if (!attrs.enabled) {
       throw Boom.badRequest(`Rule with id "${id}" is disabled and cannot be run`, {
-        code: ALERTING_V2_ERROR_CODES.RULE_DISABLED,
+        code: ALERTING_ERROR_CODES.RULE_DISABLED,
         details: { rule_id: id },
       });
     }
@@ -534,7 +547,7 @@ export class RulesClient {
     } catch (e) {
       if (e instanceof TaskAlreadyRunningError) {
         throw Boom.conflict(`Rule with id "${id}" is already running`, {
-          code: ALERTING_V2_ERROR_CODES.RULE_ALREADY_RUNNING,
+          code: ALERTING_ERROR_CODES.RULE_ALREADY_RUNNING,
           details: { rule_id: id },
         });
       }
@@ -547,7 +560,7 @@ export class RulesClient {
         : undefined;
 
       throw Boom.internal(`Failed to run rule with id "${id}"`, {
-        code: existingCode ?? ALERTING_V2_ERROR_CODES.RULE_RUN_ERROR,
+        code: existingCode ?? ALERTING_ERROR_CODES.RULE_RUN_ERROR,
         details: { rule_id: id },
       });
     }
@@ -557,7 +570,7 @@ export class RulesClient {
       // rejected with a 409 — the task was not actually rescheduled. Surface
       // as a soft conflict so the caller can retry.
       throw Boom.conflict(`Running rule with id "${id}" conflicted, please retry`, {
-        code: ALERTING_V2_ERROR_CODES.RULE_RUN_CONFLICT,
+        code: ALERTING_ERROR_CODES.RULE_RUN_CONFLICT,
         details: { rule_id: id },
       });
     }
@@ -645,9 +658,15 @@ export class RulesClient {
   }
 
   @withApm
-  public async getTags(params: { filter?: string } = {}): Promise<string[]> {
-    const soFilter = params.filter ? buildRuleSoFilter(params.filter) : undefined;
-    return this.rulesSavedObjectService.findTags({ filter: soFilter });
+  public async getTags(
+    params: { search?: string; kind?: RuleKind; size?: number } = {}
+  ): Promise<string[]> {
+    const soFilter = params.kind ? buildRuleSoFilter(`kind:${params.kind}`) : undefined;
+    return this.rulesSavedObjectService.findTags({
+      search: params.search,
+      filter: soFilter,
+      size: params.size,
+    });
   }
 
   @withApm
@@ -674,7 +693,7 @@ export class RulesClient {
       ),
       total: res.total,
       page,
-      perPage,
+      per_page: perPage,
     };
   }
 
@@ -751,7 +770,7 @@ export class RulesClient {
 
     this.logger.error({
       error: new Error(message),
-      code: ALERTING_V2_ERROR_CODES.TASK_MANAGER_DRIFT,
+      code: ALERTING_LOG_CODES.RULE_TASK_MANAGER_DRIFT,
     });
 
     errors?.push(...driftedRuleIds.map((id) => toTaskManagerDriftError(id, message)));
@@ -893,7 +912,7 @@ export class RulesClient {
 
         this.logger.error({
           error: new Error(message),
-          code: ALERTING_V2_ERROR_CODES.TASK_MANAGER_DRIFT,
+          code: ALERTING_LOG_CODES.RULE_TASK_MANAGER_DRIFT,
         });
 
         for (const id of driftedRuleIds) {
@@ -1015,7 +1034,255 @@ export class RulesClient {
   }
 
   /**
-   * By-query dispatcher shared by delete / enable / disable. Always issues a
+   * Rotates the executor task API key for each rule to one derived from the
+   * current user's credentials. The v2 executor authenticates against ES with a
+   * Task Manager-managed API key captured from whoever last created/updated the
+   * rule; that key never expires, so it can outlive the user's privileges.
+   *
+   * Rotation goes through `taskManager.bulkUpdateSchedules(..., { regenerateApiKey: true })`
+   * rather than `bulkSchedule`: it updates the *existing* task in place (no
+   * re-create, so `runAt`/state are preserved) and — crucially — grants a new
+   * key **and invalidates the old one** (`bulkSchedule` only grants, leaking the
+   * previous key). `bulkUpdateSchedules` takes a single schedule per call, so we
+   * group rules by their interval and pass each group its own interval, leaving
+   * the cadence unchanged (only the key rotates).
+   *
+   * Rules that cannot be rotated are reported as per-rule errors, never dropped:
+   *   - disabled rules (`RULE_DISABLED`) — a disabled rule has no executor task;
+   *     rotating would recreate one and corrupt a later re-enable, so they are
+   *     rejected before any Task Manager call.
+   *   - currently-running rules (`RULE_ALREADY_RUNNING`) — `bulkUpdateSchedules`
+   *     only touches `idle` tasks, so a running task is skipped; we surface it
+   *     instead of silently leaving its key un-rotated.
+   *   - rules whose rotation call failed — reported per-rule; a failure in one
+   *     interval group never aborts the others, so successful groups still rotate.
+   *
+   * The saved-object audit metadata (`updatedBy`/`updatedAt`) is stamped only for
+   * rules whose key actually rotated.
+   */
+  private async executeBulkUpdateApiKey(ids: string[]): Promise<BulkResponse> {
+    const { spaceId } = this.getSpaceContext();
+    const errors: BulkOperationError[] = [];
+    let affectedCount = 0;
+
+    if (ids.length === 0) {
+      return { affected_count: 0, errors: [] };
+    }
+
+    const fetchResults = await this.rulesSavedObjectService.bulkGetByIds(ids);
+
+    const candidates: RotationCandidate[] = [];
+
+    for (const doc of fetchResults) {
+      if ('error' in doc) {
+        errors.push(toBulkError(doc.id, doc.error));
+        continue;
+      }
+
+      if (!doc.attributes.enabled) {
+        errors.push(ruleDisabledError(doc.id, doc.attributes.metadata.name));
+        continue;
+      }
+
+      candidates.push({
+        id: doc.id,
+        taskId: getRuleExecutorTaskId({ ruleId: doc.id, spaceId }),
+        attrs: doc.attributes,
+        version: doc.version,
+      });
+    }
+
+    if (candidates.length === 0) {
+      return { affected_count: 0, errors };
+    }
+
+    // Rotate the keys on the existing executor tasks (grants a new key and
+    // invalidates the old one). Running tasks / per-task failures come back as
+    // per-rule errors to merge into the response.
+    const { rotated: rotatedCandidates, errors: rotationErrors } =
+      await this.rotateExecutorTaskApiKeys(candidates);
+    errors.push(...rotationErrors);
+
+    if (rotatedCandidates.length === 0) {
+      return { affected_count: 0, errors };
+    }
+
+    // Keys rotated — stamp the audit metadata so the rotation is attributable to
+    // the current user. Per-rule save failures are reported as errors.
+    const userProfileUid = await this.userService.getCurrentUserProfileUid();
+    const nowIso = new Date().toISOString();
+
+    const itemsToUpdate = rotatedCandidates.map((candidate) => ({
+      id: candidate.id,
+      attrs: {
+        ...candidate.attrs,
+        updatedBy: userProfileUid,
+        updatedAt: nowIso,
+      } satisfies RuleSavedObjectAttributes,
+      version: candidate.version,
+    }));
+
+    const updateResults = await this.rulesSavedObjectService.bulkUpdate(itemsToUpdate);
+
+    const updatedRules: EventRule[] = [];
+    for (let i = 0; i < updateResults.length; i++) {
+      const updateResult = updateResults[i];
+      const item = itemsToUpdate[i];
+
+      if (!updateResult.success) {
+        errors.push(toBulkError(updateResult.id, updateResult.error, item.attrs.metadata.name));
+        continue;
+      }
+
+      affectedCount += 1;
+      const rule = transformRuleSoAttributesToRuleApiResponse(item.id, item.attrs);
+      updatedRules.push({ ruleId: rule.id, spaceId, rule });
+    }
+
+    this.ruleEventPublisher.emitRuleUpdated(this.request, updatedRules);
+
+    return { affected_count: affectedCount, errors };
+  }
+
+  /**
+   * Rotates the executor task API keys for the given (enabled) candidates via
+   * `bulkUpdateSchedules({ regenerateApiKey: true })`, which grants a new key and
+   * invalidates the old one. That API takes one schedule per call and only
+   * updates `idle` tasks, so candidates are grouped by their interval (passing
+   * each group its own interval leaves the schedule unchanged) and any task
+   * skipped for being mid-run is reported as `RULE_ALREADY_RUNNING`.
+   *
+   * Returns the candidates whose key actually rotated, plus the per-rule errors
+   * (running tasks and per-task/group failures) to merge into the bulk response.
+   * A group whose rotation fails (e.g. the key grant is rejected) is reported as
+   * per-rule errors rather than aborting the other groups — so a partial failure
+   * still rotates and stamps the groups that succeeded.
+   */
+  private async rotateExecutorTaskApiKeys(
+    candidates: RotationCandidate[]
+  ): Promise<{ rotated: RotationCandidate[]; errors: BulkOperationError[] }> {
+    const errors: BulkOperationError[] = [];
+    const taskIdToCandidate = new Map(candidates.map((candidate) => [candidate.taskId, candidate]));
+    const candidatesByInterval = groupCandidatesByInterval(candidates);
+
+    const rotatedTaskIds = new Set<string>();
+    const erroredRuleIds = new Set<string>();
+
+    // One call per distinct interval, run with bounded concurrency. Each call is
+    // isolated: a group-level failure is captured as per-rule errors so it never
+    // aborts the other groups (mutations below are synchronous post-await, so the
+    // shared sets/array are safe under concurrency).
+    await pMap(
+      [...candidatesByInterval.entries()],
+      async ([interval, group]) => {
+        try {
+          const result = await this.taskManager.bulkUpdateSchedules(
+            group.map((candidate) => candidate.taskId),
+            { interval },
+            {
+              request: this.request,
+              regenerateApiKey: true,
+              cloneApiKey: true,
+            }
+          );
+
+          for (const task of result.tasks) {
+            rotatedTaskIds.add(task.id);
+          }
+          for (const taskError of result.errors) {
+            const candidate = taskIdToCandidate.get(taskError.id);
+            const ruleId = candidate?.id ?? taskError.id;
+            erroredRuleIds.add(ruleId);
+            // Task Manager nests the status under `error.statusCode` (a
+            // `SavedObjectError`); the top-level `status` on `ErrorOutput` is
+            // declared but left unpopulated by `retryableBulkUpdate`, so we read
+            // the nested field (mapping e.g. a 409 to RULE_VERSION_CONFLICT) and
+            // let a missing code fall back to a 500 in `rotationFailedError`.
+            const statusCode =
+              'statusCode' in taskError.error ? taskError.error.statusCode : undefined;
+            errors.push(rotationFailedError(ruleId, statusCode, candidate?.attrs.metadata.name));
+          }
+        } catch (e) {
+          // A whole-group failure (e.g. the per-task-type key grant was rejected).
+          // Report every rule in the group and keep going with the other groups.
+          const failure = e instanceof Error ? e.message : String(e);
+          this.logger.warn({
+            message: `Failed to rotate executor task API keys for ${group.length} rule(s) at interval "${interval}": ${failure}`,
+            code: ALERTING_LOG_CODES.RULE_API_KEY_ROTATION_FAILED,
+          });
+          for (const candidate of group) {
+            erroredRuleIds.add(candidate.id);
+            errors.push(
+              rotationFailedError(candidate.id, undefined, candidate.attrs.metadata.name)
+            );
+          }
+        }
+      },
+      { concurrency: ROTATION_CONCURRENCY }
+    );
+
+    // `bulkUpdateSchedules` only touches `idle` tasks, so a candidate that was
+    // neither rotated nor errored was skipped because its task is non-idle.
+    const rotated: RotationCandidate[] = [];
+    const skipped: RotationCandidate[] = [];
+    for (const candidate of candidates) {
+      if (rotatedTaskIds.has(candidate.taskId)) {
+        rotated.push(candidate);
+        continue;
+      }
+      if (erroredRuleIds.has(candidate.id)) {
+        continue;
+      }
+      skipped.push(candidate);
+    }
+
+    if (skipped.length > 0) {
+      errors.push(...(await this.classifySkippedRotations(skipped)));
+    }
+
+    return { rotated, errors };
+  }
+
+  /**
+   * Classifies executor tasks that `bulkUpdateSchedules` skipped (non-idle) by
+   * observing their real status rather than assuming they are running: only a
+   * mid-run task (`running`/`claiming`) frees up on its own, so only those get
+   * `RULE_ALREADY_RUNNING`. Any other non-idle state (`failed`/`unrecognized`/`dead_letter`/…)
+   * or a task that can't be read is reported as a generic rotation failure.
+   * If the status lookup itself fails we fall back to `RULE_ALREADY_RUNNING`,
+   * the most likely non-idle reason.
+   */
+  private async classifySkippedRotations(
+    skipped: RotationCandidate[]
+  ): Promise<BulkOperationError[]> {
+    let statusByTaskId: Map<string, TaskStatus>;
+    try {
+      const results = await this.taskManager.bulkGet(skipped.map((candidate) => candidate.taskId));
+      statusByTaskId = new Map(
+        results.flatMap((result) =>
+          result.tag === 'ok' ? [[result.value.id, result.value.status] as const] : []
+        )
+      );
+    } catch (e) {
+      const failure = e instanceof Error ? e.message : String(e);
+      this.logger.warn({
+        message: `Failed to read the status of ${skipped.length} skipped executor task(s); assuming they are running: ${failure}`,
+        code: ALERTING_LOG_CODES.RULE_API_KEY_ROTATION_FAILED,
+      });
+      return skipped.map((candidate) =>
+        ruleRunningError(candidate.id, candidate.attrs.metadata.name)
+      );
+    }
+
+    return skipped.map((candidate) =>
+      isTaskMidRun(statusByTaskId.get(candidate.taskId))
+        ? ruleRunningError(candidate.id, candidate.attrs.metadata.name)
+        : rotationFailedError(candidate.id, undefined, candidate.attrs.metadata.name)
+    );
+  }
+
+  /**
+   * By-query dispatcher shared by delete / enable / disable / update API key. Always issues a
    * cheap `countByQuery` first (a `perPage: 0` aggregation, no doc streaming)
    * and only opens the PIT-based id stream when it's actually needed:
    *
@@ -1055,7 +1322,7 @@ export class RulesClient {
       throw Boom.badRequest(
         `Filter matches ${total} rules, exceeding the maximum of ${BULK_FILTER_MAX_RESOURCES} per request. Narrow the filter or split the operation into multiple requests.`,
         {
-          code: ALERTING_V2_ERROR_CODES.BULK_QUERY_MATCH_LIMIT_EXCEEDED,
+          code: ALERTING_ERROR_CODES.BULK_QUERY_MATCH_LIMIT_EXCEEDED,
           details: { match_count: total, limit: BULK_FILTER_MAX_RESOURCES },
         }
       );
@@ -1104,6 +1371,16 @@ export class RulesClient {
   }
 
   @withApm
+  public async bulkUpdateApiKey(params: BulkByIdsParams): Promise<BulkResponse> {
+    return this.executeBulkUpdateApiKey(params.ids);
+  }
+
+  @withApm
+  public async updateApiKeyByQuery(params: BulkByQueryParams): Promise<BulkByQueryResult> {
+    return this.runByQuery(params, (ids) => this.executeBulkUpdateApiKey(ids));
+  }
+
+  @withApm
   public async upsertRule({
     id,
     data,
@@ -1112,6 +1389,7 @@ export class RulesClient {
     data: CreateRuleData;
   }): Promise<{ rule: RuleResponse; created: boolean }> {
     const parsed = this.parseRuleData(createRuleDataSchema, data, 'upsert');
+    this.artifactTypeRegistry.validate(parsed.artifacts);
 
     const exists = await this.ruleExists({ id });
 

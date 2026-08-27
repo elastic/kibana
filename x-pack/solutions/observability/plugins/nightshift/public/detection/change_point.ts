@@ -9,34 +9,32 @@ import { i18n } from '@kbn/i18n';
 import type { ChangePointType } from '@kbn/significant-events-schema';
 
 const CHANGE_POINT_LABELS: Record<ChangePointType, string> = {
-  spike: i18n.translate('xpack.observability.nightshift.flyout.changePoint.spikeLabel', {
+  spike: i18n.translate('xpack.nightshift.flyout.changePoint.spikeLabel', {
     defaultMessage: 'Spike',
   }),
-  dip: i18n.translate('xpack.observability.nightshift.flyout.changePoint.dipLabel', {
+  dip: i18n.translate('xpack.nightshift.flyout.changePoint.dipLabel', {
     defaultMessage: 'Dip',
   }),
-  trend_change: i18n.translate(
-    'xpack.observability.nightshift.flyout.changePoint.trendChangeLabel',
-    { defaultMessage: 'Trend change' }
-  ),
-  step_change: i18n.translate('xpack.observability.nightshift.flyout.changePoint.stepChangeLabel', {
+  trend_change: i18n.translate('xpack.nightshift.flyout.changePoint.trendChangeLabel', {
+    defaultMessage: 'Trend change',
+  }),
+  step_change: i18n.translate('xpack.nightshift.flyout.changePoint.stepChangeLabel', {
     defaultMessage: 'Step change',
   }),
   distribution_change: i18n.translate(
-    'xpack.observability.nightshift.flyout.changePoint.distributionChangeLabel',
+    'xpack.nightshift.flyout.changePoint.distributionChangeLabel',
     { defaultMessage: 'Distribution change' }
   ),
-  non_stationary: i18n.translate(
-    'xpack.observability.nightshift.flyout.changePoint.nonStationaryLabel',
-    { defaultMessage: 'Non-stationary' }
-  ),
-  stationary: i18n.translate('xpack.observability.nightshift.flyout.changePoint.stationaryLabel', {
+  non_stationary: i18n.translate('xpack.nightshift.flyout.changePoint.nonStationaryLabel', {
+    defaultMessage: 'Non-stationary',
+  }),
+  stationary: i18n.translate('xpack.nightshift.flyout.changePoint.stationaryLabel', {
     defaultMessage: 'Stationary',
   }),
 };
 
 const UNKNOWN_CHANGE_POINT_LABEL = i18n.translate(
-  'xpack.observability.nightshift.flyout.changePoint.unknownLabel',
+  'xpack.nightshift.flyout.changePoint.unknownLabel',
   { defaultMessage: 'Unknown' }
 );
 

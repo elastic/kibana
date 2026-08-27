@@ -71,7 +71,7 @@ export const GraphPreviewPanel = ({
         headerContent: (
           <EuiBetaBadge
             alignment="middle"
-            iconType="beaker"
+            iconType="flask"
             data-test-subj={GRAPH_PREVIEW_TECHNICAL_PREVIEW_TEST_ID}
             label={i18n.translate(
               'xpack.securitySolution.flyout.document.visualizations.graphPreview.technicalPreviewLabel',
@@ -86,7 +86,7 @@ export const GraphPreviewPanel = ({
             )}
           />
         ),
-        iconType: showIcon ? 'arrowStart' : undefined,
+        iconType: showIcon ? 'chevronLimitLeft' : undefined,
         ...(showLink && {
           link: {
             callback: onShowGraph,

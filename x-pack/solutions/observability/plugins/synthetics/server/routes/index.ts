@@ -73,6 +73,8 @@ import { addPrivateLocationRoute } from './settings/private_locations/add_privat
 import { deletePrivateLocationRoute } from './settings/private_locations/delete_private_location';
 import { editPrivateLocationRoute } from './settings/private_locations/edit_private_location';
 import { getPrivateLocationsRoute } from './settings/private_locations/get_private_locations';
+import { getPrivateLocationAgentStats } from './settings/private_locations/get_agent_stats';
+import { getMonitorAgentAssignment } from './settings/private_locations/get_monitor_agent_assignment';
 import { getSyntheticsFilters } from './filters/filters';
 import { getAllSyntheticsMonitorRoute } from './monitor_cruds/get_monitors_list';
 import { getLocationMonitors } from './settings/private_locations/get_location_monitors';
@@ -142,6 +144,8 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   getErrorStatsRoute,
   getMonitorSummaryStatsRoute,
   getSyntheticsDiagnosticsRoute,
+  getPrivateLocationAgentStats,
+  getMonitorAgentAssignment,
   getMaintenanceWindowsRoute,
 ];
 

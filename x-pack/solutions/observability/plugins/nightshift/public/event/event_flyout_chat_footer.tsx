@@ -83,44 +83,35 @@ export function EventFlyoutChatFooter({
   }, [agentBuilder, closeMenu, conversationId]);
 
   const inProgressTooltip = latestInvestigationInProgress
-    ? i18n.translate('xpack.observability.nightshift.flyout.openInChatInProgressTooltip', {
+    ? i18n.translate('xpack.nightshift.flyout.openInChatInProgressTooltip', {
         defaultMessage:
           'An investigation is still running. You can start a new chat about this significant event.',
       })
     : undefined;
 
-  const openInChatLabel = i18n.translate(
-    'xpack.observability.nightshift.flyout.openInChatButtonLabel',
-    {
-      defaultMessage: 'Open in chat',
-    }
-  );
+  const openInChatLabel = i18n.translate('xpack.nightshift.flyout.openInChatButtonLabel', {
+    defaultMessage: 'Open in chat',
+  });
 
-  const newChatItemLabel = i18n.translate(
-    'xpack.observability.nightshift.flyout.openInChatNewConversationItem',
-    {
-      defaultMessage: 'New chat about this event',
-    }
-  );
+  const newChatItemLabel = i18n.translate('xpack.nightshift.flyout.openInChatNewConversationItem', {
+    defaultMessage: 'New chat about this event',
+  });
 
   const investigationMenuItemLabel = truncateForMenu(event.title);
 
   const investigationChatUnavailableLabel = i18n.translate(
-    'xpack.observability.nightshift.flyout.openInChatInvestigationUnavailable',
+    'xpack.nightshift.flyout.openInChatInvestigationUnavailable',
     {
       defaultMessage: 'Investigation chat is still loading',
     }
   );
 
-  const menuAriaLabel = i18n.translate(
-    'xpack.observability.nightshift.flyout.openInChatMenuAriaLabel',
-    {
-      defaultMessage: 'Open in chat options',
-    }
-  );
+  const menuAriaLabel = i18n.translate('xpack.nightshift.flyout.openInChatMenuAriaLabel', {
+    defaultMessage: 'Open in chat options',
+  });
 
   const investigationsMenuTitle = i18n.translate(
-    'xpack.observability.nightshift.flyout.openInChatInvestigationsMenuTitle',
+    'xpack.nightshift.flyout.openInChatInvestigationsMenuTitle',
     {
       defaultMessage: 'Investigations',
     }
@@ -140,7 +131,7 @@ export function EventFlyoutChatFooter({
       <EuiContextMenuItem
         data-test-subj="nightshiftEventFlyoutOpenInvestigationChatItem"
         disabled={!conversationId}
-        icon="discuss"
+        icon="comment"
         onClick={openInvestigationChat}
         toolTipContent={conversationId ? undefined : investigationChatUnavailableLabel}
         {...getEbtProps({
@@ -193,7 +184,7 @@ export function EventFlyoutChatFooter({
               css={css`
                 margin-left: ${euiTheme.size.m};
               `}
-              type="arrowDown"
+              type="chevronSingleDown"
               size="s"
               aria-hidden="true"
             />

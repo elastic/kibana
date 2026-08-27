@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/search-api-panels'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/search-kibana'
+  defaultOwner: '@elastic/search-ml-ux'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/search-api-panels'
   description: Moon project for @kbn/search-api-panels
   channel: ''
-  owner: '@elastic/search-kibana'
+  owner: '@elastic/search-ml-ux'
   sourceRoot: src/platform/packages/shared/kbn-search-api-panels
 dependsOn:
   - '@kbn/i18n'
@@ -26,6 +26,7 @@ dependsOn:
   - '@kbn/kibana-react-plugin'
   - '@kbn/core'
   - '@kbn/i18n-react'
+  - '@kbn/announcement-banner'
 tags:
   - shared-browser
   - package
