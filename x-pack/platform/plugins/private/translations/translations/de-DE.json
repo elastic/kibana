@@ -14390,7 +14390,6 @@
     "xpack.automaticImport.dataStreams.reanalyzeModal.cancelButton": "Abbrechen",
     "xpack.automaticImport.dataStreams.reanalyzeModal.confirmButton": "Erneut analysieren",
     "xpack.automaticImport.dataStreams.reanalyzeModal.title": "Datenstrom „{dataStreamTitle}“ erneut analysieren?",
-    "xpack.automaticImport.dataStreams.samplesNormalizedWarningLinesOmitted": "Nur die ersten {maxLines} nichtleeren Zeilen werden gesendet. {omittedCount, plural, one {# additional line was not sent.} other {# additional lines were not sent.}}",
     "xpack.automaticImport.dataStreams.samplesNormalizedWarningTitle": "Beispiel für angewendete Log-Limits",
     "xpack.automaticImport.dataStreams.selectIndexLabel": "Wählen Sie einen Index",
     "xpack.automaticImport.dataStreams.selectPlaceholder": "Auswählen ...",
