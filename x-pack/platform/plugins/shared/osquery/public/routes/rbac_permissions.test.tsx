@@ -59,9 +59,6 @@ jest.mock('../common/hooks/use_breadcrumbs', () => ({
 }));
 
 // Mock route components to avoid loading full trees
-jest.mock('./live_queries', () => ({
-  LiveQueries: () => <div data-test-subj="live-queries" />,
-}));
 jest.mock('./history', () => ({
   History: () => <div data-test-subj="history" />,
 }));
@@ -84,7 +81,7 @@ const createTestQueryClient = () =>
 
 const renderRoute = (path: string, capabilities: OsqueryCapabilities) => {
   mockCapabilities = capabilities;
-  const features = { ...allowedExperimentalValues, queryHistoryRework: true };
+  const features = { ...allowedExperimentalValues };
 
   return render(
     <EuiProvider>
