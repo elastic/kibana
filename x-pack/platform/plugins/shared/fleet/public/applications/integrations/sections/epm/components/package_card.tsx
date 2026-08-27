@@ -34,6 +34,7 @@ import type { IntegrationCardItem } from '../screens/home';
 import { InlineReleaseBadge } from '../../../components';
 import { useStartServices } from '../../../hooks';
 import { INTEGRATIONS_BASE_PATH, INTEGRATIONS_PLUGIN_ID } from '../../../constants';
+import { VariantCountBadge } from '../screens/home/components/variant_count_badge';
 
 import {
   InstallationStatus,
@@ -41,7 +42,6 @@ import {
   shouldShowInstallationStatus,
 } from './installation_status';
 import { wrapTitleWithDeprecated } from './utils';
-import { VariantCountBadge } from '../screens/home/components/variant_count_badge';
 
 export type PackageCardProps = IntegrationCardItem;
 
@@ -204,9 +204,16 @@ export function PackageCard({
     // Use basePath-prefixed comparison so this works with server.basePath or space-path prefixes.
     const integrationsBase = http.basePath.prepend(INTEGRATIONS_BASE_PATH);
     if (url.startsWith(integrationsBase)) {
+      const path = url.slice(integrationsBase.length);
+      // When navigating straight to the add-integration page, pass the current URL as
+      // onCancelUrl so the Cancel button returns the user to where they came from
+      // (e.g. the integrations catalog) rather than the integration detail page.
+      const cancelState = path.includes('/add-integration')
+        ? { onCancelUrl: window.location.href }
+        : {};
       application.navigateToApp(INTEGRATIONS_PLUGIN_ID, {
-        path: url.slice(integrationsBase.length),
-        state: { fromIntegrations, ...(fromCollection ? { fromCollection } : {}) },
+        path,
+        state: { fromIntegrations, ...(fromCollection ? { fromCollection } : {}), ...cancelState },
       });
     } else if (url.startsWith('http') || url.startsWith('https')) {
       window.open(url, '_blank');
