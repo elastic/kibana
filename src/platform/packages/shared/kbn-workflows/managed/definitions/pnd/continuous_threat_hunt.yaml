@@ -1,89 +1,161 @@
 version: "1"
 name: Dark Watch - Continuous Threat Hunt
 description: >
-  Worker invoked by the Dark Watch Orchestrator. Runs hunt_coordinator (an
-  internal service, not a Worker): Tier 1 deterministic lookup always, Tier
-  2 LLM corroboration when Tier 1 finds candidates. Appends findings, writes
-  the SSE payload on a corroborated hit, and records hunt feedback. Doesn't
-  touch Proposals — that's packaging's job.
-enabled: true
+  Dark Watch's only tagged Worker. Continuous, technology-aware hunting on a
+  recurring UTC sweep with reviewable findings. Owns schedule, settings, and
+  report fan-out; composes untagged children (hunt, correlation, package_report).
+enabled: false
 tags:
   - watch
   - watch-dark
-  - dark-watch-worker
+settings:
+  # Ceiling for one sweep across concurrent report branches.
+  timeout: "6h"
+  # Drop the next tick if a sweep is still running. The `parallel` step below
+  # blocks until every branch joins, so this lock also closes the
+  # double-hunt window for a report still mid-sweep.
+  concurrency:
+    key: security-dark-continuous-threat-hunt
+    strategy: drop
+    max: 1
 triggers:
+  # Every N hours, chosen via the `scheduleId` setting (default every 4h).
+  # Rendered from the token on install; see renderPndContinuousThreatHuntYaml.
+  - type: scheduled
+    with:
+      every: "__WATCH_SCHEDULE_EVERY__"
   - type: manual
-inputs:
-  additionalProperties: false
-  properties:
-    report_id:
-      description: Threat report id this hunt pass runs against (dark:report:{report_id}).
-      type: string
-    investigation_id:
-      description: Conversation id of the report's Investigation.
-      type: string
-    inference_endpoint_id:
-      description: >
-        Inference endpoint id for Tier 2 (from Dark orchestrator watch_settings).
-        Empty string degrades to Tier 1 only.
-      type: string
-    tier2_when:
-      description: When to run Tier 2 (on_hits | always), from orchestrator settings.
-      type: string
-  required:
-    - report_id
-    - investigation_id
+consts:
+  # managedTemplateValues surface: CommonWatchSettings (autonomy, triggers,
+  # scopes) plus the Dark-owned dials. Tokens are substituted on install.
+  watch_settings:
+    autonomy: "__WATCH_AUTONOMY_LEVEL__"
+    triggers:
+      scheduleId: "__WATCH_SCHEDULE_ID__"
+      allowManualRun: __WATCH_ALLOW_MANUAL_RUN__
+    scopes: __WATCH_SCOPES_JSON__
+    inferenceEndpointId: "__WATCH_INFERENCE_ENDPOINT_ID__"
+    tier2When: __WATCH_TIER2_WHEN__
+    candidateLimit: __WATCH_CANDIDATE_LIMIT__
+    fanOutMax: __WATCH_FAN_OUT_MAX__
+    huntCooldownMinutes: __WATCH_HUNT_COOLDOWN_MINUTES__
+  watch_policy:
+    settingsVersion: __WATCH_SETTINGS_VERSION__
+    # Persisted plumbing only; runtime autonomy semantics are defined separately.
+    autonomy: "__WATCH_AUTONOMY_LEVEL__"
+    mandate: Continuous, technology-aware hunting for relevant threats and coverage gaps
+    handoff: brief
+    onDemand: true
+    draft: false
+    cadence: sweep
+    # Display metadata: mirrors the run-frequency schedule interval above, not
+    # the hunt cooldown.
+    every: "__WATCH_SCHEDULE_EVERY__"
+    ui:
+      color: "#f59e0b"
+      icon: bolt
+      order: 30
+    scopeSummary: Mail · IdP · edge / VPN
+    callables: []
 steps:
-  # Always runs Tier 1; gates Tier 2 on whether Tier 1 found candidates.
-  - name: run_hunt_coordinator
+  # --- Stage 0: readiness gate + candidate selection ------------------
+  - name: check_ti_readiness
     type: kibana.request
     with:
       request:
-        method: POST
-        path: /internal/pnd/threat_intel/hunt_coordinator
-        body:
-          report_id: "{{ inputs.report_id }}"
-          inference_endpoint_id: "{{ inputs.inference_endpoint_id }}"
-          tier2_when: "{{ inputs.tier2_when }}"
+        method: GET
+        path: /internal/pnd/threat_intel/readiness
 
-  # Tier 1 event = whole hunt_for_threat result bundle, one per run (not per
-  # IOC hit). Tier 2 event = corroboration output, when present. Always
-  # appended, hit or not.
-  - name: append_hunt_events
-    type: kibana.request
+  # Empty candidate set (no-op fan-out below) when TI supply chain is
+  # degraded, instead of hunting stale indicators.
+  - name: select_candidate_reports
+    type: elasticsearch.search
+    if: "${{ steps.check_ti_readiness.output.ready == true }}"
     with:
-      request:
-        method: POST
-        path: /internal/pnd/investigations/{{ inputs.investigation_id }}/events
-        body:
-          kind: hunt
-          report_id: "{{ inputs.report_id }}"
-          tier1: "{{ steps.run_hunt_coordinator.output.tier1 | json }}"
-          tier2: "{{ steps.run_hunt_coordinator.output.tier2 | default: null | json }}"
+      index: ".kibana-threat-reports"
+      # Rendered as a literal: `size` and `concurrency.max` are numbers in the
+      # workflow schema, so they can't be Liquid references to consts.
+      size: __WATCH_CANDIDATE_LIMIT__
+      query:
+        bool:
+          filter:
+            - term:
+                reportable: true
+            # Never-hunted reports lack last_hunted_at; a bare range excludes them.
+            - bool:
+                should:
+                  - range:
+                      last_hunted_at:
+                        lte: "now-__WATCH_HUNT_COOLDOWN_MINUTES__m"
+                  - bool:
+                      must_not:
+                        exists:
+                          field: last_hunted_at
+                minimum_should_match: 1
+      # Ranked reports first (corroborated), then by base rank. Never-hunted
+      # docs lack corroborated_rank_score so they sort after ranked ones, still
+      # ordered by rank_score as the secondary key.
+      sort:
+        - corroborated_rank_score:
+            order: desc
+            missing: _last
+        - rank_score:
+            order: desc
+            missing: 0
 
-  # Written on a corroborated hit. Fills a Proposal's metadata once one is
-  # created after correlation (title, severity, entities, evidence, etc).
-  - name: write_sse_payload
-    type: kibana.request
-    if: "${{ steps.run_hunt_coordinator.output.corroborated_hit == true }}"
-    with:
-      request:
-        method: POST
-        path: /internal/pnd/investigations/{{ inputs.investigation_id }}/sse
-        body:
-          report_id: "{{ inputs.report_id }}"
-          sse: "{{ steps.run_hunt_coordinator.output.sse | json }}"
+  # --- Stage 1-5: one straight-line branch per selected report --------
+  # Branch body must be straight-line, atomic steps only (no nested
+  # if/foreach/parallel — #18208), so hunt and correlation run
+  # serially below instead of concurrently.
+  - name: report_fan_out
+    type: parallel
+    foreach: "{{ steps.select_candidate_reports.output.hits.hits | json }}"
+    concurrency:
+      max: __WATCH_FAN_OUT_MAX__
+    steps:
+      - name: find_or_create_investigation
+        type: kibana.request
+        with:
+          request:
+            method: POST
+            path: /internal/pnd/investigations
+            body:
+              report_id: "{{ foreach.item._source.report_id }}"
+              opportunity_id: "{{ foreach.item._source.opportunity_id }}"
 
-  # Writes last_hunted_at, rank score, status, and run id to the shared
-  # threat-report store.
-  - name: write_hunt_feedback
-    type: kibana.request
-    with:
-      request:
-        method: POST
-        path: /internal/pnd/threat_intel/reports/{{ inputs.report_id }}/hunt_feedback
-        body:
-          last_hunted_at: "{{ execution.startedAt }}"
-          corroborated_rank_score: "{{ steps.run_hunt_coordinator.output.corroborated_rank_score }}"
-          last_hunt_status: "{{ steps.run_hunt_coordinator.output.status }}"
-          last_hunt_run_id: "{{ execution.id }}"
+      - name: hunt
+        type: workflow.execute
+        with:
+          workflow-id: system-security-dark-hunt
+          inputs:
+            report_id: "{{ foreach.item._source.report_id }}"
+            investigation_id: "{{ steps.find_or_create_investigation.output.investigation_id }}"
+            inference_endpoint_id: "{{ consts.watch_settings.inferenceEndpointId }}"
+            tier2_when: "{{ consts.watch_settings.tier2When }}"
+
+      - name: correlation
+        type: workflow.execute
+        with:
+          workflow-id: system-security-dark-correlation
+          inputs:
+            report_id: "{{ foreach.item._source.report_id }}"
+            investigation_id: "{{ steps.find_or_create_investigation.output.investigation_id }}"
+
+      - name: package_report
+        type: workflow.execute
+        with:
+          workflow-id: system-security-dark-package-report
+          inputs:
+            report_id: "{{ foreach.item._source.report_id }}"
+            investigation_id: "{{ steps.find_or_create_investigation.output.investigation_id }}"
+
+      # Starts this report's gate(s) right away. Route handler creates
+      # dark_proposal_gate executions server-side (no-op if empty).
+      - name: start_proposal_gates
+        type: kibana.request
+        with:
+          request:
+            method: POST
+            path: /internal/pnd/investigations/{{ steps.find_or_create_investigation.output.investigation_id }}/start_gates
+            body:
+              proposals: "{{ steps.package_report.output.proposals_to_gate | json }}"

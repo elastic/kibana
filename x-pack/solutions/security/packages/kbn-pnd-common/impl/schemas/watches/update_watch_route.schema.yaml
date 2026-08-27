@@ -114,7 +114,7 @@ paths:
                 dark:
                   type: object
                   description: >-
-                    Partial Dark Watch settings patch. Only valid for system-security-watch-dark;
+                    Partial Dark Watch settings patch. Only valid for system-security-dark-continuous-threat-hunt;
                     other watches reject it.
                   properties:
                     inferenceEndpointId:

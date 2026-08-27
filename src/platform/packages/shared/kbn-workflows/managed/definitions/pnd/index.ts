@@ -12,15 +12,15 @@ import {
   PND_RULE_PREVIEW_WORKFLOW_ID,
   PND_RULE_TUNING_WORKFLOW_ID,
 } from './rule_workflows';
-import { PND_WATCH_DARK_WORKFLOW_ID } from './watch_dark';
+import { PND_WATCH_DARK_WORKFLOW_ID } from './continuous_threat_hunt';
 import { PND_WATCH_DEEP_WORKFLOW_ID } from './watch_deep';
 import { PND_WATCH_DETECTION_WORKFLOW_ID } from './watch_detection';
 import { PND_WATCH_FLOOR_WORKFLOW_ID } from './watch_floor';
 import { PND_WATCH_OFFICER_WORKFLOW_ID } from './watch_officer';
 
 export {
-  PND_DARK_CONTINUOUS_THREAT_HUNT_WORKFLOW,
-  PND_DARK_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
+  PND_DARK_HUNT_WORKFLOW,
+  PND_DARK_HUNT_WORKFLOW_ID,
   PND_DARK_CORRELATION_WORKFLOW,
   PND_DARK_CORRELATION_WORKFLOW_ID,
   PND_DARK_PACKAGE_REPORT_WORKFLOW,
@@ -38,7 +38,7 @@ export {
   PND_RULE_TUNING_WORKFLOW,
   PND_RULE_TUNING_WORKFLOW_ID,
 } from './rule_workflows';
-export { PND_WATCH_DARK_WORKFLOW, PND_WATCH_DARK_WORKFLOW_ID } from './watch_dark';
+export { PND_WATCH_DARK_WORKFLOW, PND_WATCH_DARK_WORKFLOW_ID } from './continuous_threat_hunt';
 export {
   DARK_WATCH_DEFAULT_SCHEDULE_ID,
   DARK_WATCH_SCHEDULE_OPTION_IDS,

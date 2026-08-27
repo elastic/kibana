@@ -43,7 +43,7 @@ export const buildInvestigationUrl = (id: string) =>
 /** Managed catalog workflow ids — owned by Security. */
 export const SYSTEM_SECURITY_WATCH_FLOOR_ID = 'system-security-watch-floor' as const;
 export const SYSTEM_SECURITY_WATCH_OFFICER_ID = 'system-security-watch-officer' as const;
-export const SYSTEM_SECURITY_WATCH_DARK_ID = 'system-security-watch-dark' as const;
+export const SYSTEM_SECURITY_WATCH_DARK_ID = 'system-security-dark-continuous-threat-hunt' as const;
 export const SYSTEM_SECURITY_WATCH_DEEP_ID = 'system-security-watch-deep' as const;
 export const SYSTEM_SECURITY_WATCH_DETECTION_ID = 'system-security-watch-detection' as const;
 

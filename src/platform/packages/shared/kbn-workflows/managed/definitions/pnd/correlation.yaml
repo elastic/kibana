@@ -1,17 +1,14 @@
 version: "1"
 name: Dark Watch - Correlation
 description: >
-  Worker invoked by the Dark Watch Orchestrator after hunt.
+  Untagged child workflow invoked by continuous_threat_hunt after hunt.
   Correlates this report's hunt findings against other open Investigations
   by shared anchors (IOC hashes, entity ids) and actors, then appends a
   correlation event with related Proposal ids + a score matrix. Doesn't
   touch Proposals directly — packaging reads this event to decide create vs.
   dismiss.
 enabled: true
-tags:
-  - watch
-  - watch-dark
-  - dark-watch-worker
+tags: []
 triggers:
   - type: manual
 inputs:

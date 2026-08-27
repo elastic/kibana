@@ -252,7 +252,7 @@ components:
       type: object
       description: >-
         Dark Watch settings extension returned on GET and accepted (partially) on PATCH. Maps onto
-        managedTemplateValues for system-security-watch-dark.
+        managedTemplateValues for system-security-dark-continuous-threat-hunt.
       required:
         - inferenceEndpointId
         - tier2When
@@ -337,4 +337,4 @@ components:
           $ref: '#/components/schemas/DarkWatchSettings'
           description: >-
             Dark Watch extension dials (CommonWatchSettings + Dark-owned fields beyond autonomy).
-            Present only for system-security-watch-dark.
+            Present only for system-security-dark-continuous-threat-hunt.

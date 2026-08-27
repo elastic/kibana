@@ -8,7 +8,7 @@
  */
 
 import { parse } from 'yaml';
-import { PND_WATCH_DARK_WORKFLOW } from './watch_dark';
+import { PND_WATCH_DARK_WORKFLOW } from './continuous_threat_hunt';
 import type { DarkWatchTemplateValues } from './watch_template_values';
 import { convertToWorkflowGraph } from '../../../graph';
 import { WorkflowSchema } from '../../../spec/schema';
@@ -90,14 +90,21 @@ describe('PND_WATCH_DARK_WORKFLOW', () => {
     expect(scheduledTrigger?.with?.every).toBe('6h');
   });
 
-  it('passes the Tier 2 dials to the hunt Worker', () => {
+  it('passes the Tier 2 dials to the hunt child', () => {
     const document = parse(renderedYaml) as {
-      steps: Array<{ name: string; steps?: Array<{ name: string; with?: { inputs?: unknown } }> }>;
+      steps: Array<{
+        name: string;
+        steps?: Array<{
+          name: string;
+          with?: { 'workflow-id'?: string; inputs?: unknown };
+        }>;
+      }>;
     };
     const huntStep = document.steps
       .find(({ name }) => name === 'report_fan_out')
       ?.steps?.find(({ name }) => name === 'hunt');
 
+    expect(huntStep?.with?.['workflow-id']).toBe('system-security-dark-hunt');
     expect(huntStep?.with?.inputs).toMatchObject({
       inference_endpoint_id: '{{ consts.watch_settings.inferenceEndpointId }}',
       tier2_when: '{{ consts.watch_settings.tier2When }}',

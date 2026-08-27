@@ -8,10 +8,7 @@ description: >
   Runs outside any parallel branch, so it can wait indefinitely on human
   input, unlike the Orchestrator's report branches.
 enabled: true
-tags:
-  - watch
-  - watch-dark
-  - dark-watch-worker
+tags: []
 triggers:
   - type: manual
 inputs:

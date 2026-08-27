@@ -98,13 +98,15 @@ yarn openapi:generate
 
 ## Managed workflows
 
-Owner plugin id: `pnd`. Catalog definitions:
+Owner plugin id: `pnd`. Catalog definitions (tagged Watch Workers):
 
 - `system-security-watch-floor`
 - `system-security-watch-officer`
-- `system-security-watch-dark`
+- `system-security-dark-continuous-threat-hunt` (Dark Watch's only tagged Worker; settings + schedule live here)
 - `system-security-watch-deep`
 - `system-security-watch-detection`
+
+Dark also installs untagged child workflows for domain composition (`system-security-dark-hunt`, `…-correlation`, `…-package-report`, `…-proposal-gate`). Those are not catalog members.
 
 Central PND watch definitions live in `src/platform/packages/shared/kbn-workflows/managed/definitions/pnd/`, with one module per Watch. The platform package owns the static managed-workflow metadata, YAML, template function, and template value type. PND owns each Watch's settings defaults, migrations, patch behavior, and API projection under `server/managed_workflows/watches/`. The PND catalog comes from the PND registry rather than managed-workflow selector visibility.
 

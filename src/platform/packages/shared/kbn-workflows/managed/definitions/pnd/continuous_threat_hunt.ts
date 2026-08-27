@@ -8,14 +8,15 @@
  */
 
 import { PND_MANAGED_WORKFLOW_PLUGIN_ID, PND_WATCH_MANAGEMENT } from './constants';
-import WATCH_DARK_YAML from './watch_dark.yaml';
+import CONTINUOUS_THREAT_HUNT_YAML from './continuous_threat_hunt.yaml';
 import { darkWatchScheduleEvery } from './watch_dark_schedule';
 import type { DarkWatchTemplateValues } from './watch_template_values';
 import type { ManagedWorkflowDefinition } from '../../types';
 
-export const PND_WATCH_DARK_WORKFLOW_ID = 'system-security-watch-dark';
+/** Dark Watch's only tagged Worker (watch + watch-dark). Catalog / settings key. */
+export const PND_WATCH_DARK_WORKFLOW_ID = 'system-security-dark-continuous-threat-hunt';
 
-const renderPndWatchDarkYaml = ({
+const renderPndContinuousThreatHuntYaml = ({
   settingsVersion,
   autonomyLevel,
   scheduleId,
@@ -29,7 +30,7 @@ const renderPndWatchDarkYaml = ({
 }: DarkWatchTemplateValues): string =>
   // `scheduleId` is the selected option id; its scheduled-trigger interval is
   // resolved from the catalog (default cadence on an unrecognized id).
-  WATCH_DARK_YAML.replaceAll('__WATCH_SETTINGS_VERSION__', String(settingsVersion))
+  CONTINUOUS_THREAT_HUNT_YAML.replaceAll('__WATCH_SETTINGS_VERSION__', String(settingsVersion))
     .replaceAll('__WATCH_AUTONOMY_LEVEL__', autonomyLevel)
     .replaceAll('__WATCH_SCHEDULE_ID__', scheduleId)
     .replaceAll('__WATCH_SCHEDULE_EVERY__', darkWatchScheduleEvery(scheduleId))
@@ -46,6 +47,6 @@ export const PND_WATCH_DARK_WORKFLOW = {
   id: PND_WATCH_DARK_WORKFLOW_ID,
   management: PND_WATCH_MANAGEMENT,
   pluginId: PND_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 1,
-  yamlTemplate: renderPndWatchDarkYaml,
+  version: 2,
+  yamlTemplate: renderPndContinuousThreatHuntYaml,
 } as const satisfies ManagedWorkflowDefinition<DarkWatchTemplateValues>;

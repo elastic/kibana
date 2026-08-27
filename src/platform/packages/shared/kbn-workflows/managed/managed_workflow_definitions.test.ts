@@ -22,7 +22,7 @@ import {
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
 } from './definitions';
-import WATCH_DARK_YAML from './definitions/pnd/watch_dark.yaml';
+import CONTINUOUS_THREAT_HUNT_YAML from './definitions/pnd/continuous_threat_hunt.yaml';
 import WATCH_DEEP_YAML from './definitions/pnd/watch_deep.yaml';
 import WATCH_DETECTION_YAML from './definitions/pnd/watch_detection.yaml';
 import WATCH_FLOOR_YAML from './definitions/pnd/watch_floor.yaml';
@@ -158,7 +158,7 @@ function createContentFingerprint(content: string): string {
 it.each([
   [PND_WATCH_FLOOR_WORKFLOW_ID, WATCH_FLOOR_YAML, '1:29aa5f25'],
   [PND_WATCH_OFFICER_WORKFLOW_ID, WATCH_OFFICER_YAML, '1:9b3f3d18'],
-  [PND_WATCH_DARK_WORKFLOW_ID, WATCH_DARK_YAML, '1:96d63018'],
+  [PND_WATCH_DARK_WORKFLOW_ID, CONTINUOUS_THREAT_HUNT_YAML, '2:e86b88b3'],
   [PND_WATCH_DEEP_WORKFLOW_ID, WATCH_DEEP_YAML, '1:79b46054'],
   [PND_WATCH_DETECTION_WORKFLOW_ID, WATCH_DETECTION_YAML, '1:c23724c4'],
 ] as const)(

@@ -234,7 +234,7 @@ export const DarkWatchScope = lazySchema(() =>
 export type DarkWatchScope = z.infer<typeof DarkWatchScope>;
 
 /**
- * Dark Watch settings extension returned on GET and accepted (partially) on PATCH. Maps onto managedTemplateValues for system-security-watch-dark.
+ * Dark Watch settings extension returned on GET and accepted (partially) on PATCH. Maps onto managedTemplateValues for system-security-dark-continuous-threat-hunt.
  */
 export const DarkWatchSettings = lazySchema(() =>
   z.object({
@@ -279,7 +279,7 @@ export const WatchSettings = lazySchema(() =>
     approvalGates: z.array(WatchApprovalGate).optional(),
     runsLedger: z.array(WatchLedgerEntry).optional(),
     /**
-     * Dark Watch extension dials (CommonWatchSettings + Dark-owned fields beyond autonomy). Present only for system-security-watch-dark.
+     * Dark Watch extension dials (CommonWatchSettings + Dark-owned fields beyond autonomy). Present only for system-security-dark-continuous-threat-hunt.
      */
     dark: DarkWatchSettings.optional(),
   })

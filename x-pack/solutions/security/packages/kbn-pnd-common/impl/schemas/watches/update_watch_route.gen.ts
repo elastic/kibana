@@ -89,7 +89,7 @@ export const UpdateWatchRequestBody = lazySchema(() =>
       })
       .optional(),
     /**
-     * Partial Dark Watch settings patch. Only valid for system-security-watch-dark; other watches reject it.
+     * Partial Dark Watch settings patch. Only valid for system-security-dark-continuous-threat-hunt; other watches reject it.
      */
     dark: z
       .object({

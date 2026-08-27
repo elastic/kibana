@@ -1,7 +1,7 @@
 version: "1"
 name: Dark Watch - Package Report
 description: >
-  Worker invoked by the Dark Watch Orchestrator once hunt and
+  Untagged child workflow invoked by continuous_threat_hunt once hunt and
   correlation have appended their findings. Decides create vs. dismiss and,
   when reviewable, creates the report's Proposal(s) concurrently via its own
   `parallel` step (legal — not nested inside another `parallel` branch,
@@ -9,10 +9,7 @@ description: >
   dark_proposal_gate itself (the Orchestrator's start_proposal_gates step
   does that right after this Worker returns).
 enabled: true
-tags:
-  - watch
-  - watch-dark
-  - dark-watch-worker
+tags: []
 triggers:
   - type: manual
 inputs:
