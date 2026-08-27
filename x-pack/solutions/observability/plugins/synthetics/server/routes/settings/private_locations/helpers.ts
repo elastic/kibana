@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { SavedObject, SavedObjectsFindResult } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
 import { formatSecrets, normalizeSecrets } from '../../../synthetics_service/utils';
 import type { AgentPolicyInfo } from '../../../../common/types';
 import type {
@@ -121,5 +122,15 @@ export const updatePrivateLocationMonitors = async ({
     }),
   ]);
 
-  return Promise.all(promises.flat());
+  const results = await Promise.all(promises.flat());
+  if (
+    results.some((result) => result?.failedConfigs && Object.keys(result.failedConfigs).length > 0)
+  ) {
+    throw new Error(
+      i18n.translate('xpack.synthetics.editPrivateLocation.monitorRewriteFailed', {
+        defaultMessage: 'Failed to update monitors for this private location.',
+      })
+    );
+  }
+  return results;
 };

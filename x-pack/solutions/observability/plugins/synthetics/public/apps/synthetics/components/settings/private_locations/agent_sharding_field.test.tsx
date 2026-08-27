@@ -85,4 +85,60 @@ describe('AgentShardingField', () => {
 
     expect(screen.getByTestId('syntheticsAgentShardingCallout')).toBeInTheDocument();
   });
+
+  it('toggles off without a confirm modal when creating a location', async () => {
+    useLicenseMock.mockReturnValue({ hasAtLeast: () => true, getLicense: () => null });
+    render(<Form isEditingShardedLocation={false} />);
+
+    await userEvent.click(screen.getByTestId('syntheticsAgentShardingSwitch'));
+    expect(screen.getByTestId('syntheticsAgentShardingCallout')).toBeInTheDocument();
+
+    await userEvent.click(screen.getByTestId('syntheticsAgentShardingSwitch'));
+
+    expect(
+      screen.queryByTestId('syntheticsDisableAgentShardingConfirmModal')
+    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId('syntheticsAgentShardingCallout')).not.toBeInTheDocument();
+  });
+
+  it('asks for confirmation before turning sharding off on an existing scalable location', async () => {
+    useLicenseMock.mockReturnValue({ hasAtLeast: () => true, getLicense: () => null });
+    render(<Form isEditingShardedLocation={true} defaultChecked={true} />);
+
+    await userEvent.click(screen.getByTestId('syntheticsAgentShardingSwitch'));
+
+    expect(screen.getByTestId('syntheticsDisableAgentShardingConfirmModal')).toBeInTheDocument();
+    expect(screen.getByText('Turn off scalable location?')).toBeInTheDocument();
+    expect(screen.getByText(/rewrite every monitor on this location/i)).toBeInTheDocument();
+    expect(screen.getByTestId('syntheticsAgentShardingCallout')).toBeInTheDocument();
+    expect(screen.getByTestId('syntheticsAgentShardingSwitch')).toBeChecked();
+  });
+
+  it('keeps sharding on when the disable confirmation is cancelled', async () => {
+    useLicenseMock.mockReturnValue({ hasAtLeast: () => true, getLicense: () => null });
+    render(<Form isEditingShardedLocation={true} defaultChecked={true} />);
+
+    await userEvent.click(screen.getByTestId('syntheticsAgentShardingSwitch'));
+    await userEvent.click(screen.getByTestId('confirmModalCancelButton'));
+
+    expect(
+      screen.queryByTestId('syntheticsDisableAgentShardingConfirmModal')
+    ).not.toBeInTheDocument();
+    expect(screen.getByTestId('syntheticsAgentShardingCallout')).toBeInTheDocument();
+    expect(screen.getByTestId('syntheticsAgentShardingSwitch')).toBeChecked();
+  });
+
+  it('turns sharding off after the disable confirmation is accepted', async () => {
+    useLicenseMock.mockReturnValue({ hasAtLeast: () => true, getLicense: () => null });
+    render(<Form isEditingShardedLocation={true} defaultChecked={true} />);
+
+    await userEvent.click(screen.getByTestId('syntheticsAgentShardingSwitch'));
+    await userEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+
+    expect(
+      screen.queryByTestId('syntheticsDisableAgentShardingConfirmModal')
+    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId('syntheticsAgentShardingCallout')).not.toBeInTheDocument();
+    expect(screen.getByTestId('syntheticsAgentShardingSwitch')).not.toBeChecked();
+  });
 });

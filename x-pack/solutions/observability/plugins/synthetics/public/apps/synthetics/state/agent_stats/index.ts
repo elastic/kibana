@@ -29,6 +29,8 @@ const initialState: AgentStatsState = {
 
 const invalidateAgentStatsCache = (state: AgentStatsState) => {
   state.data = null;
+  state.loading = true;
+  state.error = null;
 };
 
 export const agentStatsReducer = createReducer(initialState, (builder) => {

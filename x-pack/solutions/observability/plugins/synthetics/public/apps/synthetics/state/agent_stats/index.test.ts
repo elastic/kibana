@@ -34,6 +34,14 @@ const location: PrivateLocation = {
 
 const seeded = () => agentStatsReducer(undefined, getAgentStatsAction.success([stats]));
 
+const fetchError = {
+  name: 'Error',
+  body: { message: 'Unable to load' },
+  requestUrl: '/internal/synthetics/private_locations/agent_stats',
+};
+
+const seededWithError = () => agentStatsReducer(seeded(), getAgentStatsAction.fail(fetchError));
+
 describe('agentStatsReducer', () => {
   it('clears cached stats when a private location is created, edited, or deleted', () => {
     expect(seeded().data).toEqual([stats]);
@@ -47,5 +55,21 @@ describe('agentStatsReducer', () => {
     expect(agentStatsReducer(seeded(), deletePrivateLocationAction.success([location])).data).toBe(
       null
     );
+  });
+
+  it('marks stats as loading and clears a previous error on create, edit, or delete success', () => {
+    expect(seededWithError()).toEqual(
+      expect.objectContaining({ data: [stats], loading: false, error: fetchError })
+    );
+
+    for (const action of [
+      createPrivateLocationAction.success(location),
+      editPrivateLocationAction.success(location),
+      deletePrivateLocationAction.success([location]),
+    ]) {
+      expect(agentStatsReducer(seededWithError(), action)).toEqual(
+        expect.objectContaining({ data: null, loading: true, error: null })
+      );
+    }
   });
 });
