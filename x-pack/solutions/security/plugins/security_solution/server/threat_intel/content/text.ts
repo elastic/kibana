@@ -573,7 +573,7 @@ const BLOCK_NAMES = new Set([
   'tfoot',
 ]);
 
-const renderStructured = (html: string): string => {
+const renderStructured = (nodes: ParsedNode[]): string => {
   // Section state, advanced in document order as headings are met. A classified heading
   // becomes the anchor for everything below it; a deeper unclassified heading is its
   // subsection and doesn't reset the anchor.
@@ -582,7 +582,7 @@ const renderStructured = (html: string): string => {
 
   const out: string[] = [];
   const stack: WalkStep[] = [];
-  pushNodes(stack, parseTopLevelNodes(html));
+  pushNodes(stack, nodes);
 
   while (stack.length > 0) {
     const step = stack.pop();
@@ -688,10 +688,10 @@ const renderStructured = (html: string): string => {
  */
 export const htmlToStructured = (html: string | undefined | null): string => {
   if (!html) return '';
-  const capped = capToParseBytes(html);
-  const first = renderStructured(capped);
-  const reparse = shouldReparse(parseTopLevelNodes(capped), first);
-  return reparse ? renderStructured(first) : first;
+  const nodes = parseTopLevelNodes(capToParseBytes(html));
+  const first = renderStructured(nodes);
+  const reparse = shouldReparse(nodes, first);
+  return reparse ? renderStructured(parseTopLevelNodes(first)) : first;
 };
 
 /** `content` block written by every ingest path (adapters + manual ingest). */
@@ -729,10 +729,16 @@ export const buildReportContent = ({
   bodyHtml?: string;
   language?: string;
 }): ReportContentDocument => {
-  const isTitleFallback = bodyText.trim().length === 0;
+  const hasBody = bodyText.trim().length > 0;
+  const hasTitle = title.trim().length > 0;
+  // A title fallback needs a real title to fall back to. Without this, a report with
+  // both fields empty stored an empty body_text (unavoidable — there's nothing to
+  // substitute) but was still labeled a title fallback, which is a real headline-only
+  // report to a consumer deciding whether to skip or cheapen enrichment.
+  const isTitleFallback = !hasBody && hasTitle;
   return {
     title,
-    body_text: isTitleFallback ? title : bodyText,
+    body_text: hasBody ? bodyText : title,
     ...(bodyHtml !== undefined ? { body_html: bodyHtml } : {}),
     language,
     // Observable rather than silent: a consumer can skip or cheapen enrichment

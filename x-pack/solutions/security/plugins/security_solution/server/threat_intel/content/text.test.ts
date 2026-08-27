@@ -362,6 +362,18 @@ describe('buildReportContent — title fallback is observable', () => {
     const content = buildReportContent({ title: 'T', bodyText: 'Real body.' });
     expect(content.body_is_title_fallback).toBeUndefined();
   });
+
+  // A title fallback needs a real title to fall back to. Without this check, a report
+  // with both fields empty stored an empty body_text (unavoidable) but was still labeled
+  // a title fallback, misrepresenting a genuinely empty report as a real headline-only one.
+  it.each([
+    ['an empty title', ''],
+    ['a whitespace-only title', '   '],
+  ])('omits the flag when the body is empty and the title is %s', (_label, title) => {
+    const content = buildReportContent({ title, bodyText: '' });
+    expect(content.body_text).toBe(title);
+    expect(content.body_is_title_fallback).toBeUndefined();
+  });
 });
 
 describe('htmlToStructured — anchor attribute boundaries', () => {
