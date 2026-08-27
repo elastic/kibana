@@ -14,9 +14,14 @@ import { lensCommonSavedObjectSchemaV2 } from '../../../../content_management/zo
 /**
  * Shared schema only for by-reference Lens API configs saved to library
  */
-const lensApiConfigLibItemSharedSchema = z.object({
-  tags: getAsCodeTagsSchema('Tag IDs to associate with this visualization.'),
-});
+const lensApiConfigLibItemSharedSchema = z
+  .object({
+    tags: getAsCodeTagsSchema('Tag IDs to associate with this visualization.'),
+  })
+  .meta({
+    id: 'lensApiConfigLibItemSharedSchema',
+    title: 'Library Visualization Item Shared Schema',
+  });
 
 /**
  * Schema for Lens API configs by reference library item, only supports DSL configs
