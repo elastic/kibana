@@ -26,12 +26,11 @@ export function AlertAskAiAgentButton({ alertId, alertTitle }: AlertAskAiAgentBu
     services: { agentBuilder, application },
   } = useKibana();
 
-  const { getLicense } = useLicense();
-  const license = getLicense();
+  const { hasAtLeast } = useLicense();
   const [chatExperience] = useUiSetting$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
   const { hasConnectors } = useGenAIConnectors();
 
-  const hasEnterpriseLicense = license?.hasAtLeast('enterprise');
+  const hasEnterpriseLicense = hasAtLeast('enterprise');
   const isAgentChatExperienceEnabled = chatExperience === AIChatExperience.Agent;
   const hasAgentBuilderAccess = application?.capabilities.agentBuilder?.show === true;
 

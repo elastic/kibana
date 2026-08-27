@@ -104,9 +104,11 @@ export function createAlertAskAiAgentButton(
   });
 
   return (props: AlertAskAiAgentButtonProps) => (
-    <KibanaReactContextProvider>
-      <AlertAskAiAgentButtonLazy {...props} />
-    </KibanaReactContextProvider>
+    <QueryClientProvider client={queryClient}>
+      <KibanaReactContextProvider>
+        <AlertAskAiAgentButtonLazy {...props} />
+      </KibanaReactContextProvider>
+    </QueryClientProvider>
   );
 }
 
