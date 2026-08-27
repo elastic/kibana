@@ -108,7 +108,8 @@ export type SeverityLevel = (typeof SEVERITY_LEVELS)[number];
 /**
  * The `ioc_tier` values a consumer that wants precision should see.
  *
- * `.threat-intel-indicators` deliberately stores the full candidate set, * including `uncertain`, because precision is a property of the consumer rather than
+ * `.threat-intel-indicators` deliberately stores the full candidate set,
+ * including `uncertain`, because precision is a property of the consumer rather than
  * of the intel: a hunt query wants recall and a blocking rule wants precision, and
  * one write-time threshold cannot serve both. This is the read-side half of that
  * split, and the filtered per-space alias is built from it.

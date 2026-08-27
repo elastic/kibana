@@ -6,9 +6,12 @@
  */
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { THREAT_INTEL_INDICATORS_INDEX } from '../../../common/threat_intel';
 import { ensureIndicatorAliasForSpace, indicatorAliasForSpace } from './indicator_alias';
 
-const INDEX = '.kibana-threat-intel-indicators';
+// Derived rather than hardcoded so the suite follows the constant. The one property
+// worth pinning independently is asserted below: the name must stay outside `.kibana`.
+const INDEX = THREAT_INTEL_INDICATORS_INDEX;
 
 const setup = (getAliasResponse: unknown = {}) => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
@@ -22,6 +25,15 @@ const putArgs = (esClient: ReturnType<typeof setup>['esClient']) =>
 describe('indicatorAliasForSpace', () => {
   it('names the alias after the index and space', () => {
     expect(indicatorAliasForSpace('marketing')).toBe(`${INDEX}-marketing`);
+  });
+
+  // An Indicator Match rule reads this alias as its own API key, and `viewer` grants
+  // nothing under `.kibana`. Elasticsearch's reserved roles grant
+  // `.threat-intel-indicators-*` instead, so a name that drifted back under `.kibana`
+  // would be unreadable by every non-superuser and the rule would silently match
+  // nothing. Nothing else in this suite would catch that.
+  it('keeps the alias outside the .kibana namespace so it can be granted', () => {
+    expect(indicatorAliasForSpace('default').startsWith('.kibana')).toBe(false);
   });
 
   // Kibana permits a space id starting with `-` or `_`, which Elasticsearch rejects

@@ -16,7 +16,7 @@ import {
 /**
  * The alias a consumer in `spaceId` queries instead of the raw indicators index.
  *
- * `.kibana-threat-intel-indicators` holds the full set of candidate indicators for
+ * `.threat-intel-indicators` holds the full set of candidate indicators for
  * every space, labelled by `space_id` and `ioc_tier`. Neither label is enforced by
  * Elasticsearch: it does not apply Kibana Spaces filtering, and it has no notion of
  * a confidence threshold. So a consumer pointed at the raw index sees every space's
@@ -29,12 +29,14 @@ import {
  *
  * What the alias does NOT solve is access. An Indicator Match rule reads its threat
  * index as the rule's own API key, which inherits the rule author's Elasticsearch
- * roles, not their Kibana feature privileges. Nothing in this plugin grants an index
- * privilege on the indicator index or its aliases, so a rule pointed at one fails for
- * every non-superuser until an operator adds `read` on
- * `.kibana-threat-intel-indicators*` to the relevant role. That is a gap in the
- * pipeline, not a property of the alias: the alias narrows what a reader sees, it does
- * not make them a reader.
+ * roles, not their Kibana feature privileges. The built-in `viewer` role grants read on
+ * everything that does not start with a dot, plus a hand-maintained list of dotted
+ * exceptions in Elasticsearch's `ReservedRolesStore`. That is why the index sits outside
+ * `.kibana-`, which is on no such list, and why the grant added there is on
+ * `.threat-intel-indicators-*`: the trailing hyphen matches these per-space aliases and
+ * never the raw index. On a deployment whose Elasticsearch predates that grant, an
+ * operator has to add `read` on `.threat-intel-indicators-*` by hand. The alias narrows
+ * what a reader sees; it does not make them a reader.
  *
  * The space id is never at the start of the name, so a space id beginning with `-`
  * or `_` (which Kibana permits and Elasticsearch rejects in an alias) cannot
