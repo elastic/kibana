@@ -93,6 +93,7 @@ const buildContainer = () => {
         </EuiFlyoutBody>
       </EuiFlyout>
     ),
+    getRulesPage: () => <div data-test-subj="rules-page">v1 rules page stub</div>,
   });
 
   container.bind(PluginStart('kql')).toConstantValue({

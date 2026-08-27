@@ -20,6 +20,10 @@ const PANEL_ID = 'alerting';
  * original Alerts page as a flyout link, Rule Management (Rules, Rule library),
  * and Notifications and Suppressions (Action Policies).
  *
+ * `management:rules` opens `/app/management/rules` (the Insights and Alerting
+ * copy of the v2 Rules page). Stack Management still has the original under
+ * Alerting V2 Preview.
+ *
  * Spread into a navigation tree `body`:
  *
  * ```ts

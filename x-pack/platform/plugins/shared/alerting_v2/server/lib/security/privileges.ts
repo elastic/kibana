@@ -8,7 +8,11 @@
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import type { AppCategory } from '@kbn/core/types';
-import { ALERTING_V2_SECTION_ID } from '@kbn/alerting-v2-constants';
+import {
+  ALERTING_V2_RULES_APP_ID,
+  ALERTING_V2_SECTION_ID,
+  INSIGHTS_AND_ALERTING_SECTION_ID,
+} from '@kbn/alerting-v2-constants';
 import { APP_ID } from '../constants';
 import {
   ALERTING_V2_API_PRIVILEGES,
@@ -29,21 +33,24 @@ const category: AppCategory = {
 const buildKibanaFeature = (feature: AlertingV2FeatureDefinition): KibanaFeatureConfig => {
   const managementApps = [...getFeatureManagementApps(feature)];
   const app = [APP_ID];
+  const management = {
+    [ALERTING_V2_SECTION_ID]: managementApps,
+    // Solution-nav `management:rules` mounts the same Rules UI under Insights and Alerting.
+    ...(feature.managementApp === ALERTING_V2_RULES_APP_ID
+      ? { [INSIGHTS_AND_ALERTING_SECTION_ID]: [ALERTING_V2_RULES_APP_ID] }
+      : {}),
+  };
 
   return {
     id: feature.id,
     name: feature.name,
     category,
     app,
-    management: {
-      [ALERTING_V2_SECTION_ID]: managementApps,
-    },
+    management,
     privileges: {
       all: {
         app,
-        management: {
-          [ALERTING_V2_SECTION_ID]: managementApps,
-        },
+        management,
         ...(feature.privileges.all.aiIndex
           ? { aiIndex: { ...feature.privileges.all.aiIndex } }
           : {}),
@@ -57,9 +64,7 @@ const buildKibanaFeature = (feature: AlertingV2FeatureDefinition): KibanaFeature
       },
       read: {
         app,
-        management: {
-          [ALERTING_V2_SECTION_ID]: managementApps,
-        },
+        management,
         ...(feature.privileges.read.aiIndex
           ? { aiIndex: { ...feature.privileges.read.aiIndex } }
           : {}),

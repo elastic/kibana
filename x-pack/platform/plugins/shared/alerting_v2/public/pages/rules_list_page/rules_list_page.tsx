@@ -37,7 +37,7 @@ import { RulesListHeader } from './rules_list_header';
 import { RulesListTableContainer } from './rules_list_table_container';
 import { useRulesDataSource } from './rules_data_source';
 
-export const RulesListPage = () => {
+export const RulesListPage = ({ hideManageV1Rules = false }: { hideManageV1Rules?: boolean }) => {
   useBreadcrumbs('rules_list');
 
   const canWrite = useService(UserCapabilities).canWrite('rules');
@@ -60,8 +60,9 @@ export const RulesListPage = () => {
   const navigateToAgentBuilder = useNavigateToAgentBuilder();
   const areAgentBuilderSkillsAvailable = useAreAgentBuilderSkillsAvailable();
   const abSkillRequirements = useAgentBuilderSkillsRequirements();
-  const { navigateToUrl } = useService(CoreStart('application'));
+  const { navigateToUrl, getUrlForApp } = useService(CoreStart('application'));
   const basePath = useService(CoreStart('http')).basePath;
+  const manageV1RulesHref = hideManageV1Rules ? undefined : getUrlForApp('rules');
   const navigateToSequenceBuilder = useCallback(() => {
     navigateToUrl(basePath.prepend(paths.sequenceRuleCreate));
   }, [navigateToUrl, basePath]);
@@ -164,6 +165,7 @@ export const RulesListPage = () => {
       >
         <RulesListHeader
           canWrite={canWrite}
+          manageV1RulesHref={manageV1RulesHref}
           onCreateRule={openCreateOptionsFlyout}
           onCreateEsqlRule={openCreateFlyout}
           onCreateWithAgent={navigateToAgentBuilder}

@@ -18,6 +18,7 @@ import {
   ALERTING_V2_RULE_LIBRARY_APP_ID,
   ALERTING_V2_RULES_APP_ID,
   ALERTING_V2_SECTION_ID,
+  INSIGHTS_AND_ALERTING_SECTION_ID,
 } from '@kbn/alerting-v2-constants';
 
 describe('registerFeaturePrivileges', () => {
@@ -109,7 +110,13 @@ describe('registerFeaturePrivileges', () => {
       [ALERTING_V2_FEATURES.executionHistory.id, [ALERTING_V2_EXECUTION_HISTORY_APP_ID]],
     ])('gates the "%s" feature behind the %j management app(s)', (featureId, expectedApps) => {
       const registered = getRegisteredFeature(featureId);
-      const expectedManagement = { [ALERTING_V2_SECTION_ID]: expectedApps };
+      const expectedManagement =
+        featureId === ALERTING_V2_FEATURES.rules.id
+          ? {
+              [ALERTING_V2_SECTION_ID]: expectedApps,
+              [INSIGHTS_AND_ALERTING_SECTION_ID]: [ALERTING_V2_RULES_APP_ID],
+            }
+          : { [ALERTING_V2_SECTION_ID]: expectedApps };
 
       expect(registered.management).toEqual(expectedManagement);
       expect(registered.privileges?.all.management).toEqual(expectedManagement);

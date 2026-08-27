@@ -11,7 +11,11 @@ import { OnSetup, PluginSetup, PluginStart, Start } from '@kbn/core-di';
 import { CoreSetup, CoreStart, PluginInitializer } from '@kbn/core-di-browser';
 import type { PluginInitializerContext } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import type { ManagementSetup } from '@kbn/management-plugin/public';
+import {
+  ManagementApp,
+  type ManagementAppMountParams,
+  type ManagementSetup,
+} from '@kbn/management-plugin/public';
 import type { SharePluginSetup } from '@kbn/share-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -109,20 +113,46 @@ const pluginModule = new ContainerModule(({ bind }) => {
       order: 1,
     });
 
+    const mountRulesApp = async (
+      params: ManagementAppMountParams,
+      { showRulesV2Tab = false }: { showRulesV2Tab?: boolean } = {}
+    ) => {
+      const [coreStart] = await getStartServices();
+      const { mountAlertingV2App } = await import('./application/mount');
+      return mountAlertingV2App({
+        params,
+        container: coreStart.injection.getContainer(),
+        coreStart,
+        showRulesV2Tab,
+      });
+    };
+
     alertingSection.registerApp({
       id: ALERTING_V2_RULES_APP_ID,
       title: 'Rules',
       order: 1,
+      // Keep this page in Stack Management, but do not occupy the `management:rules`
+      // deep link — that id is used by the `/app/management/rules` copy for solution nav.
+      hideFromGlobalSearch: true,
       async mount(params) {
-        const [coreStart] = await getStartServices();
-        const { mountAlertingV2App } = await import('./application/mount');
-        return mountAlertingV2App({
-          params,
-          container: coreStart.injection.getContainer(),
-          coreStart,
-        });
+        return mountRulesApp(params);
       },
     });
+
+    // Mount at `/app/management/rules` so `management:rules` (solution-nav) lands
+    // on this page. `registerApp` always prefixes the section id, so construct
+    // the app with an explicit basePath.
+    const insightsAndAlertingRulesApp = new ManagementApp({
+      id: ALERTING_V2_RULES_APP_ID,
+      title: i18n.translate('xpack.alertingV2.management.rulesNavTitle', {
+        defaultMessage: 'Rules',
+      }),
+      order: 0,
+      hideFromSidebar: true,
+      basePath: `/${ALERTING_V2_RULES_APP_ID}`,
+      mount: (params) => mountRulesApp(params, { showRulesV2Tab: true }),
+    });
+    management.sections.section.insightsAndAlerting.apps.push(insightsAndAlertingRulesApp);
 
     alertingSection.registerApp({
       id: ALERTING_V2_RULE_LIBRARY_APP_ID,
@@ -235,6 +265,7 @@ const pluginModule = new ContainerModule(({ bind }) => {
 
       if (!alertingEnabled) {
         disableAlertingManagementUi(alertingSection);
+        insightsAndAlertingRulesApp.disable();
         return;
       }
 

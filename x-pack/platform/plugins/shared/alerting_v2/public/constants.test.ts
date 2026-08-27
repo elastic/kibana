@@ -6,7 +6,13 @@
  */
 
 import { decode as decodeRison } from '@kbn/rison';
-import { ALERTING_V2_EPISODES_BASE_PATH, paths } from './constants';
+import {
+  ALERTING_V2_EPISODES_BASE_PATH,
+  ALERTING_V2_RULES_BASE_PATH,
+  MANAGEMENT_RULES_BASE_PATH,
+  MANAGEMENT_RULES_V1_TAB_PATH,
+  paths,
+} from './constants';
 
 /** Parse the `_a` rison blob from the generated URL. */
 const decodeAppState = (url: string): unknown => {
@@ -14,6 +20,22 @@ const decodeAppState = (url: string): unknown => {
   if (!raw) return undefined;
   return (decodeRison(raw) as Record<string, unknown>)?.episodesList;
 };
+
+describe('rules list paths', () => {
+  it('keeps the Alerting V2 Preview rules page at alertingV2/rules', () => {
+    expect(ALERTING_V2_RULES_BASE_PATH).toBe('/app/management/alertingV2/rules');
+    expect(paths.ruleList).toBe(ALERTING_V2_RULES_BASE_PATH);
+  });
+
+  it('exposes a separate Insights and Alerting rules page', () => {
+    expect(MANAGEMENT_RULES_BASE_PATH).toBe('/app/management/rules');
+    expect(MANAGEMENT_RULES_BASE_PATH).not.toBe(ALERTING_V2_RULES_BASE_PATH);
+  });
+
+  it('scopes the classic v1 rules tab to /v1', () => {
+    expect(MANAGEMENT_RULES_V1_TAB_PATH).toBe('/v1');
+  });
+});
 
 describe('paths.alertEpisodesListHref', () => {
   it('returns the base episodes path when called with no options', () => {
