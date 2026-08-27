@@ -10,7 +10,7 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { Logger, StartServicesAccessor } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { RULES_API_ALL, RULES_API_READ } from '@kbn/security-solution-features/constants';
-import { WorkflowsManagementApiActions } from '@kbn/workflows';
+import { WorkflowsManagementOperationPrivileges } from '@kbn/workflows';
 import { SECURITY_ALERT_ANALYSIS_WORKFLOW_ID } from '@kbn/workflows/managed';
 import {
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AGENT_ID,
@@ -46,7 +46,7 @@ export { ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE };
 const REQUIRED_PRIVILEGES = [
   'manage_advanced_settings',
   RULES_API_ALL,
-  WorkflowsManagementApiActions.updateManaged,
+  ...WorkflowsManagementOperationPrivileges.updateManaged,
 ];
 
 const LICENSE_ERROR_MESSAGE = i18n.translate(

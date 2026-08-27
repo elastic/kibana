@@ -83,14 +83,23 @@ describe('AlertAnalysisWorkflowPage', () => {
     workflowId: 'system-security-alert-analysis-default',
   });
 
-  const renderComponent = () => {
+  const renderComponent = ({
+    canUpdateManagedWorkflow = true,
+    settingsRequest,
+  }: {
+    canUpdateManagedWorkflow?: boolean;
+    settingsRequest?: jest.Mock;
+  } = {}) => {
     coreStart.application.capabilities = {
       ...coreStart.application.capabilities,
       advancedSettings: { show: true, save: true },
       securitySolution: { show: true, crud: true },
-      workflowsManagement: { updateWorkflow: true },
+      workflowsManagement: {
+        updateWorkflow: true,
+        updateManagedWorkflow: canUpdateManagedWorkflow,
+      },
     };
-    // The page reads rules-edit via useUserPrivileges (not raw capabilities).
+    // The page reads rules privileges via useUserPrivileges (not raw capabilities).
     useUserPrivilegesMock.mockReturnValue({
       rulesPrivileges: { rules: { read: true, edit: true } },
     });
@@ -101,6 +110,9 @@ describe('AlertAnalysisWorkflowPage', () => {
       const [path, options] = args as [string, { method?: string; body?: string } | undefined];
 
       if (path === ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE) {
+        if (options?.method !== 'PUT' && settingsRequest) {
+          return settingsRequest();
+        }
         return options?.method === 'PUT'
           ? settingsGetResponse(JSON.parse(options.body as string))
           : settingsGetResponse();
@@ -143,6 +155,32 @@ describe('AlertAnalysisWorkflowPage', () => {
       { id: 'my-custom-agent', name: 'My Custom Agent', readonly: false },
       { id: 'platform.builtin', name: 'Built-in Agent', readonly: true },
     ]);
+  });
+
+  it('renders not found without loading data when managed workflow update is unauthorized', async () => {
+    renderComponent({ canUpdateManagedWorkflow: false });
+
+    expect(await screen.findByTestId('notFoundPage')).toBeInTheDocument();
+    expect(coreStart.http.fetch).not.toHaveBeenCalled();
+    expect(useLoadConnectorsMock).not.toHaveBeenCalled();
+    expect(listAgentsMock).not.toHaveBeenCalled();
+  });
+
+  it('shows an error prompt and retries a failed settings request', async () => {
+    const settingsRequest = jest
+      .fn()
+      .mockRejectedValueOnce(new Error('Unable to load settings'))
+      .mockResolvedValueOnce(settingsGetResponse());
+
+    renderComponent({ settingsRequest });
+
+    expect(await screen.findByTestId('alertAnalysisWorkflowSettingsError')).toBeInTheDocument();
+    expect(screen.queryByTestId('alertAnalysisWorkflowSettingsLoading')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('alertAnalysisWorkflowSettingsRetryButton'));
+
+    expect(await screen.findByTestId('alertAnalysisWorkflowSaveButton')).toBeInTheDocument();
+    expect(settingsRequest).toHaveBeenCalledTimes(2);
   });
 
   it('loads Agent Builder models and lists built-in and external inference endpoints', async () => {

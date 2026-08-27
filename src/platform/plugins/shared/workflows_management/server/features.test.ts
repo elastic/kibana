@@ -8,6 +8,7 @@
  */
 
 import { WORKFLOW_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
+import { WorkflowsManagementApiActions, WorkflowsManagementUiActions } from '@kbn/workflows';
 
 import { WorkflowsManagementFeatureConfig } from './features';
 
@@ -37,5 +38,17 @@ describe('WorkflowsManagementFeatureConfig', () => {
     const subPrivilege = getSubFeaturePrivilege('workflow_read_managed')!;
 
     expect(subPrivilege.aiIndex).toBeUndefined();
+  });
+
+  it('grants managed workflow update API and UI actions through its explicit subfeature', () => {
+    const subPrivilege = getSubFeaturePrivilege('workflow_update_managed');
+
+    expect(subPrivilege).toEqual(
+      expect.objectContaining({
+        includeIn: 'none',
+        api: [WorkflowsManagementApiActions.updateManaged],
+        ui: [WorkflowsManagementUiActions.updateManaged],
+      })
+    );
   });
 });

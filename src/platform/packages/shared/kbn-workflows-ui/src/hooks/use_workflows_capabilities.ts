@@ -19,6 +19,7 @@ const CapabilitiesMap = {
   canReadWorkflow: WorkflowsManagementUiActions.read,
   canReadManagedWorkflow: WorkflowsManagementUiActions.readManaged,
   canUpdateWorkflow: WorkflowsManagementUiActions.update,
+  canUpdateManagedWorkflow: WorkflowsManagementUiActions.updateManaged,
   canDeleteWorkflow: WorkflowsManagementUiActions.delete,
   canExecuteWorkflow: WorkflowsManagementUiActions.execute,
   canReadWorkflowExecution: WorkflowsManagementUiActions.readExecution,

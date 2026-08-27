@@ -169,7 +169,7 @@ export const WorkflowsManagementFeatureConfig: KibanaFeatureConfig = {
               includeIn: 'none',
               savedObject: { all: [], read: [] },
               api: [WorkflowsManagementApiActions.updateManaged],
-              ui: [],
+              ui: [WorkflowsManagementUiActions.updateManaged],
             },
           ],
         },

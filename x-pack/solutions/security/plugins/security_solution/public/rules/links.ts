@@ -45,6 +45,8 @@ import { IconRollup } from '../common/icons/rollup';
 import { IconDashboards } from '../common/icons/dashboards';
 
 const WORKFLOWS_MANAGEMENT_UPDATE_PRIVILEGE = `${WORKFLOWS_MANAGEMENT_FEATURE_ID}.${WorkflowsManagementUiActions.update}`;
+const WORKFLOWS_MANAGEMENT_UPDATE_MANAGED_PRIVILEGE = `${WORKFLOWS_MANAGEMENT_FEATURE_ID}.${WorkflowsManagementUiActions.updateManaged}`;
+const ADVANCED_SETTINGS_SAVE_PRIVILEGE = 'advancedSettings.save';
 
 export const links: LinkItem = {
   id: SecurityPageName.rulesLanding,
@@ -126,7 +128,13 @@ export const links: LinkItem = {
         createElement(AiIcon, { iconType: 'sparkles', ...props }),
       path: ALERT_ANALYSIS_WORKFLOW_PATH,
       capabilities: [
-        [RULES_UI_READ_PRIVILEGE, RULES_UI_EDIT_PRIVILEGE, WORKFLOWS_MANAGEMENT_UPDATE_PRIVILEGE],
+        [
+          RULES_UI_READ_PRIVILEGE,
+          RULES_UI_EDIT_PRIVILEGE,
+          ADVANCED_SETTINGS_SAVE_PRIVILEGE,
+          WORKFLOWS_MANAGEMENT_UPDATE_PRIVILEGE,
+          WORKFLOWS_MANAGEMENT_UPDATE_MANAGED_PRIVILEGE,
+        ],
       ],
       // Enterprise-only feature. On lower licenses the link is marked unavailable (it stays in the
       // side nav and Rules landing page but is dropped from global search), and visiting the URL
