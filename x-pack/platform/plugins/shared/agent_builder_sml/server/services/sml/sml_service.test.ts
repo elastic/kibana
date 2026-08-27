@@ -101,11 +101,19 @@ const expectedVisibilityFilter = ({
                 ...(actions
                   ? [
                       {
-                        terms_set: {
-                          [PERM_NAME_FIELD]: {
-                            terms: actions,
-                            minimum_should_match_field: PERM_COUNT_FIELD,
-                          },
+                        bool: {
+                          minimum_should_match: 1,
+                          should: [
+                            { term: { [PERM_COUNT_FIELD]: 0 } },
+                            {
+                              terms_set: {
+                                [PERM_NAME_FIELD]: {
+                                  terms: actions,
+                                  minimum_should_match_field: PERM_COUNT_FIELD,
+                                },
+                              },
+                            },
+                          ],
                         },
                       },
                     ]

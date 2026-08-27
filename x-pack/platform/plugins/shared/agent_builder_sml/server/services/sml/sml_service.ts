@@ -401,11 +401,16 @@ const resolveAuthorizedUniverse = async ({
  * Mirrors the Elasticsearch-side implicit DLS query: a document is visible when it carries no
  * privilege elements at all (public), OR when at least one element scoped to this requested space
  * (or to the global wildcard) matches. What "matches" means depends on `authz`:
- * - with `authz` (security plugin present), the element must additionally have ALL of its actions
- *   covered by what the caller holds (the `terms_set` clause);
+ * - with `authz` (security plugin present), the element must additionally either require no
+ *   actions at all (`count: 0` — see below) or have ALL of its actions covered by what the caller
+ *   holds (the `terms_set` clause);
  * - without `authz` (security plugin absent — dev / test), space scoping alone applies:
  *   privilege enforcement is skipped, matching the open-access semantics of every other
  *   Kibana surface in that configuration.
+ *
+ * The `count: 0` escape is what makes a type that omits `getPermissions` public *within its
+ * spaces*, which is the contract {@link SmlTypeDefinition.getPermissions} advertises. Such a type
+ * still gets one element per space stamped, just with an empty action list.
  *
  * The public-document branch must be `must_not nested(match_all)`, not `must_not exists`: the
  * values live on child documents, so a root-level `exists` on a nested leaf matches everything and
@@ -448,11 +453,20 @@ const buildVisibilityFilter = ({
                 ...(authz
                   ? [
                       {
-                        terms_set: {
-                          [PERM_NAME_FIELD]: {
-                            terms: authz.authorizedActions,
-                            minimum_should_match_field: PERM_COUNT_FIELD,
-                          },
+                        bool: {
+                          minimum_should_match: 1,
+                          should: [
+                            // `terms_set` cannot express minimum_should_match_field: 0
+                            { term: { [PERM_COUNT_FIELD]: 0 } },
+                            {
+                              terms_set: {
+                                [PERM_NAME_FIELD]: {
+                                  terms: authz.authorizedActions,
+                                  minimum_should_match_field: PERM_COUNT_FIELD,
+                                },
+                              },
+                            },
+                          ],
                         },
                       },
                     ]
