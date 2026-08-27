@@ -278,11 +278,7 @@ export const WorkflowExecutionList = ({
                 }
               },
               tabIndex: 0,
-              css: isSelected
-                ? styles.selectedRow
-                : isLastViewed
-                ? styles.lastViewedRow
-                : styles.selectableRow,
+              css: isSelected || isLastViewed ? styles.selectedRow : styles.selectableRow,
             };
           }}
           data-test-subj="workflowExecutionListTable"
@@ -431,23 +427,6 @@ const componentStyles = {
     css({
       backgroundColor: euiTheme.colors.backgroundBaseInteractiveSelect,
       cursor: 'pointer',
-    }),
-  lastViewedRow: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      // Subtle persistent marker after Back — cleared only when another execution is opened.
-      boxShadow: `inset ${euiTheme.size.xs} 0 0 0 ${euiTheme.colors.borderBasePrimary}`,
-      backgroundColor: euiTheme.colors.backgroundBaseInteractiveSelect,
-      backgroundImage: `linear-gradient(
-        to right,
-        ${euiTheme.colors.backgroundBaseInteractiveSelect} 0%,
-        transparent 100%
-      )`,
-      opacity: 0.85,
-      cursor: 'pointer',
-      '&:hover': {
-        backgroundColor: euiTheme.colors.backgroundBaseInteractiveHover,
-        opacity: 1,
-      },
     }),
   selectableRow: ({ euiTheme }: UseEuiTheme) =>
     css({

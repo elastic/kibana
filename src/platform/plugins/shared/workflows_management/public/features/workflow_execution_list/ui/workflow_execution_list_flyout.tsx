@@ -59,11 +59,11 @@ export const WorkflowExecutionListFlyout = ({
           gutterSize="none"
           responsive={false}
           css={{
-            // AppHeader standard row: 16px padding + 32px size="s" control.
+            // AppHeader compact: 8px padding + 32px size="s" control = 48px.
             boxSizing: 'border-box',
-            minHeight: 64,
-            paddingBlock: euiTheme.size.base,
-            paddingInline: euiTheme.size.base,
+            minHeight: 48,
+            paddingBlock: euiTheme.size.s,
+            paddingInline: euiTheme.size.s,
             borderBottom: euiTheme.border.thin,
           }}
         >

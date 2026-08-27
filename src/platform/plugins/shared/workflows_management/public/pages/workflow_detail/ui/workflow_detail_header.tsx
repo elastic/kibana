@@ -481,6 +481,7 @@ export const WorkflowDetailHeader = React.memo(
             badges={badges}
             menu={appMenu}
             docLink={WORKFLOWS_DOCUMENTATION_URL}
+            spacing="compact"
           />
         </EuiPageTemplate>
         {runConfirmationModal}

@@ -739,10 +739,10 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                   gap: euiTheme.size.s,
                   flexShrink: 0,
                   boxSizing: 'border-box',
-                  // 64px row + 1px border — matches the execution chrome (minHeight 64 + border).
-                  height: 65,
-                  paddingBlock: euiTheme.size.base,
-                  paddingInline: euiTheme.size.base,
+                  // AppHeader compact: 8px padding + 32px control = 48px.
+                  minHeight: 48,
+                  paddingBlock: euiTheme.size.s,
+                  paddingInline: euiTheme.size.s,
                   borderBottom: euiTheme.border.thin,
                 }}
               >
@@ -754,18 +754,24 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                     css={{ flexShrink: 0 }}
                   />
                 )}
-                <span
+                <EuiTitle
+                  size="xs"
                   css={{
                     flex: 1,
                     minWidth: 0,
-                    fontSize: '16px',
-                    fontWeight: 600,
-                    color: euiTheme.colors.title,
-                    lineHeight: 1.25,
+                    marginBottom: 0,
                   }}
                 >
-                  <EuiTextTruncate text={stepName} />
-                </span>
+                  <h2
+                    css={{
+                      minWidth: 0,
+                      margin: 0,
+                      color: euiTheme.colors.title,
+                    }}
+                  >
+                    <EuiTextTruncate text={stepName} />
+                  </h2>
+                </EuiTitle>
                 <EuiButtonIcon
                   iconType="cross"
                   aria-label={i18nTexts.close}
@@ -935,11 +941,11 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                 gutterSize="xs"
                 responsive={false}
                 css={{
-                  // AppHeader standard row: 16px padding + 32px size="s" control.
+                  // AppHeader compact: 8px padding + 32px size="s" control = 48px.
                   boxSizing: 'border-box',
-                  minHeight: 64,
-                  paddingBlock: euiTheme.size.base,
-                  paddingInline: euiTheme.size.base,
+                  minHeight: 48,
+                  paddingBlock: euiTheme.size.s,
+                  paddingInline: euiTheme.size.s,
                   borderBottom: euiTheme.border.thin,
                 }}
               >
