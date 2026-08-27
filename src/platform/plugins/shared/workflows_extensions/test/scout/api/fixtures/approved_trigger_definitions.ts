@@ -10,17 +10,18 @@
 /**
  * APPROVED TRIGGER DEFINITIONS
  *
- * This list is the full catalog of registered trigger definitions. The Scout
- * suite under `test/scout_workflows_extensions` boots the
- * `workflows_extensions` config set so gated plugins are enabled and every
- * registered trigger is present.
+ * This list is the full catalog of registered trigger definitions. Default Scout
+ * stateful classic already loads plugins whose `enabled` flag defaults to true
+ * (Alerting v2, Significant Events). Plugins that default to disabled (Nightshift)
+ * are turned on in the default Scout server config
+ * (`kbn-scout` `config_sets/default/stateful/base.config.ts`).
  *
  * When a new trigger is registered, developers must:
  * 1. Add the trigger ID and schema hash to this list (alphabetically sorted)
  * 2. Get approval from the workflows-eng team
  * 3. If registration is gated by a plugin `enabled` config that is not already
- *    on in the `workflows_extensions` Scout config set
- *    (`classic.stateful.config.ts`), add that flag there
+ *    default-on, add `--xpack.<plugin>.enabled=true` to the default Scout
+ *    stateful config (`config_sets/default/stateful/base.config.ts`)
  *
  * If the event schema changes, the schema hash must be updated, and get the approval again.
  *
@@ -30,8 +31,7 @@
  *   schemaHash: 'a1b2c3d4e5f6...',
  * },
  *
- * To get the schemaHash for a trigger: run this suite (or start the server with
- * `--serverConfigSet workflows_extensions`), then GET
+ * To get the schemaHash for a trigger: run this suite, then GET
  * internal/workflows_extensions/trigger_definitions and copy the schemaHash
  * from the response for the trigger id.
  */
