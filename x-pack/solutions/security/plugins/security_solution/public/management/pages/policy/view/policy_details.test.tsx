@@ -25,6 +25,7 @@ import {
   getPolicyEventFiltersPath,
   getPolicyHostIsolationExceptionsPath,
   getPolicyTrustedAppsPath,
+  getPolicyTrustedDevicesPath,
 } from '../../../common/routing';
 import { policyListApiPathHandlers } from '../store/test_mock_utils';
 import { PolicyDetails } from './policy_details';
@@ -274,6 +275,55 @@ describe('Policy Details', () => {
       const tab = policyView.find('button#protectionUpdates');
       expect(tab).toHaveLength(1);
       expect(tab.text()).toBe('Protection updates');
+    });
+
+    describe('trusted devices tab', () => {
+      const renderWithTrustedDevicesPrivilege = async (canReadTrustedDevices: boolean) => {
+        setExperimentalFlag({ trustedDevices: true });
+        useUserPrivilegesMock.mockReturnValue({
+          endpointPrivileges: {
+            loading: false,
+            canReadTrustedDevices,
+          },
+        });
+        policyView = render();
+        await asyncActions;
+        policyView.update();
+      };
+
+      it('should not display the trusted devices tab with no privileges', async () => {
+        await renderWithTrustedDevicesPrivilege(false);
+        expect(policyView.find('button#trustedDevices')).toHaveLength(0);
+      });
+
+      it('should display the trusted devices tab with the correct privilege', async () => {
+        await renderWithTrustedDevicesPrivilege(true);
+        expect(policyView.find('button#trustedDevices')).toHaveLength(1);
+      });
+
+      it('should redirect to policy details when no trusted devices required privileges', async () => {
+        history.push(getPolicyTrustedDevicesPath('1'));
+        await renderWithTrustedDevicesPrivilege(false);
+        expect(history.location.pathname).toBe(policyDetailsPathUrl);
+        expect(coreStart.notifications.toasts.addDanger).toHaveBeenCalledTimes(1);
+        expect(coreStart.notifications.toasts.addDanger).toHaveBeenCalledWith(
+          'You do not have the required Kibana permissions to use the given artifact.'
+        );
+      });
+
+      it('should not display trusted devices without the feature flag enabled', async () => {
+        setExperimentalFlag({ trustedDevices: false });
+        useUserPrivilegesMock.mockReturnValue({
+          endpointPrivileges: {
+            loading: false,
+            canReadTrustedDevices: true,
+          },
+        });
+        policyView = render();
+        await asyncActions;
+        policyView.update();
+        expect(policyView.find('button#trustedDevices')).toHaveLength(0);
+      });
     });
 
     describe('without enterprise license', () => {
