@@ -103,7 +103,7 @@ properties:
     x-state: Technical preview
     description: >
       The case's stored field values, keyed by storage key (for example
-      `priority_as_keyword`). Requires the `xpack.cases.templates.enabled` setting.
+      `priority_as_keyword`).
     additionalProperties:
       type: string
   external_service:
