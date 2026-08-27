@@ -58212,7 +58212,6 @@
     "xpack.triggersActionsUI.connectors.home.connectorsTabTitle": "Connectors",
     "xpack.triggersActionsUI.connectors.home.createConnector": "Connector erstellen",
     "xpack.triggersActionsUI.connectors.home.description": "Verbinden Sie Drittanbieter-Software mit Ihren Alerting-Daten.",
-    "xpack.triggersActionsUI.connectors.home.documentationButtonLabel": "Dokumentation",
     "xpack.triggersActionsUI.connectors.home.logsTabTitle": "Logs",
     "xpack.triggersActionsUI.connectors.home.preconfiguredSkippedWarning": "{count, plural, one {Preconfigured connector} other {Preconfigured connectors}} mit {count, plural, one {ID} other {IDs}} [{ids}] {count, plural, one {was} other {were}} übersprungen, da ein {count, plural, one {it conflicts} other {they conflict}} mit einem bereits vorhandenen Connector besteht.",
     "xpack.triggersActionsUI.createConnectorFlyout": "{headerName} Flyout",

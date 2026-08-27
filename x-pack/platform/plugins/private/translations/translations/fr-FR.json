@@ -57959,7 +57959,6 @@
     "xpack.triggersActionsUI.connectors.home.connectorsTabTitle": "Connecteurs",
     "xpack.triggersActionsUI.connectors.home.createConnector": "Créer un connecteur",
     "xpack.triggersActionsUI.connectors.home.description": "Connectez des logiciels tiers avec vos données d'alerting.",
-    "xpack.triggersActionsUI.connectors.home.documentationButtonLabel": "Documentation",
     "xpack.triggersActionsUI.connectors.home.logsTabTitle": "Logs",
     "xpack.triggersActionsUI.connectors.home.preconfiguredSkippedWarning": "{count, plural, one {Preconfigured connector} other {connecteurs préconfigurés}} avec {count, plural, one {ID} other {identifiants}} [{ids}] {count, plural, one {was} other {ont été}} ignoré(s) car {count, plural, one {it conflicts} other {ils sont en conflit}} avec un connecteur déjà existant.",
     "xpack.triggersActionsUI.createConnectorFlyout": "Menu volant {headerName}",
