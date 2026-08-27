@@ -59,11 +59,13 @@ export const RuleViz = ({ dispatchedAction }: { dispatchedAction: PayloadAction<
       title={
         <EuiFlexGroup alignItems="center" gutterSize="s" css={{ display: 'inline-flex' }}>
           <EuiFlexItem grow={false}>
-            {i18n.translate('xpack.synthetics.statusRuleViz.ruleAppliesToFlexItemLabel', {
-              defaultMessage:
-                'Rule applies to {total} existing {total, plural, one {monitor} other {monitors}}',
-              values: { total: data?.monitors.length },
-            })}
+            <span data-test-subj="syntheticsStatusRuleVizMonitorCount">
+              {i18n.translate('xpack.synthetics.statusRuleViz.ruleAppliesToFlexItemLabel', {
+                defaultMessage:
+                  'Rule applies to {total} existing {total, plural, one {monitor} other {monitors}}',
+                values: { total: data?.monitors.length },
+              })}
+            </span>
           </EuiFlexItem>
           {loading && (
             <EuiFlexItem grow={false}>

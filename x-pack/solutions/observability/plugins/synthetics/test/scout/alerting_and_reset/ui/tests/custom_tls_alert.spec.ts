@@ -62,16 +62,16 @@ test.describe(
     });
 
     test('can filter monitors by KQL', async ({ pageObjects, page }) => {
-      await expect(pageObjects.syntheticsApp.ruleMonitorCountButton).toBeVisible({});
+      await expect(pageObjects.syntheticsApp.ruleMonitorCount).toBeVisible({});
       await page.testSubj.typeWithDelay('queryInput', 'monitor.type: "tcp"', { delay: 100 });
       await page.testSubj.locator('queryInput').press('Enter');
-      await expect(pageObjects.syntheticsApp.ruleMonitorCountButton).toHaveText(
-        '0 existing monitors'
+      await expect(pageObjects.syntheticsApp.ruleMonitorCount).toHaveText(
+        'Rule applies to 0 existing monitors'
       );
     });
 
     test('can filter monitors by type', async ({ pageObjects, page }) => {
-      await expect(pageObjects.syntheticsApp.ruleMonitorCountButton).toBeVisible({});
+      await expect(pageObjects.syntheticsApp.ruleMonitorCount).toBeVisible({});
       await page.getByRole('button', { name: 'Type All' }).click();
       await page.testSubj.click('monitorTypeField');
       await page.getByRole('option', { name: 'http' }).click();
@@ -79,14 +79,14 @@ test.describe(
         .locator('ruleDefinition')
         .getByRole('button', { name: 'Type http' })
         .click();
-      await expect(pageObjects.syntheticsApp.ruleMonitorCountButton).toHaveText(
-        '1 existing monitor'
+      await expect(pageObjects.syntheticsApp.ruleMonitorCount).toHaveText(
+        'Rule applies to 1 existing monitor'
       );
     });
 
     test('can create rule and fire alert', async ({ pageObjects, page }) => {
       await test.step('create TLS rule', async () => {
-        await expect(pageObjects.syntheticsApp.ruleMonitorCountButton).toBeVisible({});
+        await expect(pageObjects.syntheticsApp.ruleMonitorCount).toBeVisible({});
         let requestMade = false;
         page.on('request', (request) => {
           if (request.url().includes('api/alerting/rule') && request.method() === 'POST') {
