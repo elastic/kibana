@@ -59,7 +59,7 @@ test.describe(
         timeout: 60_000,
       });
       await expect(page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.title)).toHaveText(
-        'Significant Events'
+        'Nightshift Management'
       );
     });
 

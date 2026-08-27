@@ -17,11 +17,13 @@ export async function kibanaRequest(
   config: ConnectionConfig,
   method: string,
   path: string,
-  body?: unknown
+  body?: unknown,
+  space: string = 'default'
 ): Promise<{ status: number; data: unknown }> {
+  const spacePath = space === 'default' ? path : `/s/${encodeURIComponent(space)}${path}`;
   let response: Response;
   try {
-    response = await fetch(`${config.kibanaUrl}${path}`, {
+    response = await fetch(`${config.kibanaUrl}${spacePath}`, {
       method,
       signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
       headers: {
