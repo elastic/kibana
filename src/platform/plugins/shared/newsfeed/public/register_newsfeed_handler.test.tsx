@@ -65,10 +65,7 @@ describe('registerNewsfeedHandler', () => {
     open();
 
     expect(markAsRead).toHaveBeenCalledWith(['test-hash-1']);
-    expect(openSystemFlyout).toHaveBeenCalledWith(expect.anything(), {
-      size: 's',
-      'data-test-subj': 'NewsfeedFlyout',
-    });
+    expect(openSystemFlyout).toHaveBeenCalledWith(expect.anything(), { size: 's' });
 
     subscription.unsubscribe();
   });

@@ -46,8 +46,6 @@ export class GlobalSearch {
       await this.clearField();
     }
     await this.page.testSubj.fill('nav-search-input', term);
-    // Results arrive in batches with no UI "done" signal; wait for the list to settle.
-    await this.page.waitForTimeout(1500);
   }
 
   async getFieldValue() {

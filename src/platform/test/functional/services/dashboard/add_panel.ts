@@ -15,7 +15,6 @@ export class DashboardAddPanelService extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly flyout = this.ctx.getService('flyout');
-  private readonly browser = this.ctx.getService('browser');
   private readonly header = this.ctx.getPageObject('header');
   private readonly savedObjectsFinder = this.ctx.getService('savedObjectsFinder');
   private readonly toasts = this.ctx.getService('toasts');
@@ -220,10 +219,6 @@ export class DashboardAddPanelService extends FtrService {
 
   async closeAddPanel() {
     this.log.debug('DashboardAddPanel.closeAddPanel');
-    if (await this.testSubjects.exists('chromeNextSearchModal', { timeout: 0 })) {
-      await this.browser.pressKeys(this.browser.keys.ESCAPE);
-      await this.testSubjects.missingOrFail('chromeNextSearchModal');
-    }
     await this.flyout.ensureAllClosed();
   }
 
