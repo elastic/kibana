@@ -8,23 +8,67 @@
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import { platformCoreTools, platformCoreCasesTools } from '@kbn/agent-builder-common';
 
-export const casesSkill = defineSkillType({
-  id: 'cases-management',
-  name: 'cases-management',
-  basePath: 'skills/platform/cases',
-  description:
-    'Manage investigation and incident cases across Elastic Security, Observability, and Stack Management. Covers creating, updating, searching, and enriching cases with comments, alerts, events, and observables (IOCs).',
+const SKILL_DESCRIPTION =
+  'Manage investigation and incident cases across Elastic Security, Observability, and Stack Management. Covers creating, updating, searching, and enriching cases with comments, alerts, events, and observables (IOCs).';
 
-  content: `# Cases Management
+const EXTENDED_FIELDS_SECTION = `
+## Extended fields (template fields)
+
+When the Cases templates feature is enabled, cases may have **extended fields** — structured fields defined by a global field library or per-template configuration. These are separate from and should not be confused with legacy custom fields.
+
+**Use \`set_extended_fields\` mode** (not \`set_custom_field\`) to write extended field values.
+
+Required inputs:
+- \`case_id\` — the case to update
+- \`fields\` — a \`Record<string, string>\` mapping each storage key to its new value
+
+Storage keys follow the \`<name>_as_<type>\` convention (e.g. \`priority_as_keyword\`, \`due_date_as_date\`). To discover the exact keys a case accepts, call \`GET /api/cases/{case_id}/fields\` — the response lists every applicable field with its key, label, and type.
+
+Value encoding:
+- Single-value fields (text, select, toggle, date): pass the value as a plain string (e.g. \`"high"\`, \`"2025-01-01"\`, \`"true"\`).
+- Multi-value fields (checkbox_group, user_picker): pass a JSON-encoded array string (e.g. \`"[\\"alice\\",\\"bob\\"]"\`).
+- To clear a field: pass an empty string \`""\`.
+
+Provided keys are merged into the case's existing extended fields — unlisted keys are left unchanged.
+
+Example:
+\`\`\`json
+{
+  "mode": "set_extended_fields",
+  "case_id": "abc-123",
+  "fields": {
+    "priority_as_keyword": "high",
+    "due_date_as_date": "2025-06-01"
+  }
+}
+\`\`\`
+`;
+
+const buildManageModesCell = (isTemplatesEnabled: boolean) => {
+  const base =
+    '`create`, `create_from_template`, `update`, `update_bulk`, `delete`, `assign`, `unassign`, `add_tags`, `set_custom_field`';
+  return isTemplatesEnabled ? `${base}, \`set_extended_fields\`` : base;
+};
+
+export const buildCasesSkill = (isTemplatesEnabled: boolean) =>
+  defineSkillType({
+    id: 'cases-management',
+    name: 'cases-management',
+    basePath: 'skills/platform/cases',
+    description: SKILL_DESCRIPTION,
+
+    content: `# Cases Management
 
 You have full read **and write** access to Elastic cases across Security, Observability, and Stack Management. If a user asks for any operation below, you can do it — never claim read-only access.
 
 | Tool | Operations |
 |------|------------|
 | \`${platformCoreTools.cases}\` | get by ID, bulk get, search/filter, find similar, find by alert ID |
-| \`${platformCoreCasesTools.manage}\` | \`create\`, \`create_from_template\`, \`update\`, \`update_bulk\`, \`delete\`, \`assign\`, \`unassign\`, \`add_tags\`, \`set_custom_field\` |
+| \`${platformCoreCasesTools.manage}\` | ${buildManageModesCell(isTemplatesEnabled)} |
 | \`${platformCoreCasesTools.attachments}\` | \`add_comment\`, \`add_alerts\`, \`add_events\`, \`add_attachments\`, \`get_all\` |
-| \`${platformCoreCasesTools.observables}\` | \`add\`, \`update\`, \`delete\` (IOCs) |
+| \`${platformCoreCasesTools.observables}\` | \`add\`, \`update\`, \`delete\` (IOCs) |${
+      isTemplatesEnabled ? EXTENDED_FIELDS_SECTION : ''
+    }
 
 ## Solution context — highest-priority rule
 
