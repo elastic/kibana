@@ -100,7 +100,7 @@ const getDashboardsCard = ({
   actions: [
     {
       key: 'createDashboard',
-      iconType: 'plusInCircle',
+      iconType: 'plusCircle',
       label: i18n.translate('xpack.serverlessVectordb.home.dashboardsCard.createDashboard', {
         defaultMessage: 'Create a dashboard',
       }),
@@ -149,7 +149,7 @@ const getWorkflowsCard = ({
   actions: [
     {
       key: 'createWorkflow',
-      iconType: 'plusInCircle',
+      iconType: 'plusCircle',
       label: i18n.translate('xpack.serverlessVectordb.home.workflowsCard.createWorkflow', {
         defaultMessage: 'Create a workflow',
       }),
@@ -198,7 +198,7 @@ const getApiKeysCard = ({
   actions: [
     {
       key: 'createApiKey',
-      iconType: 'plusInCircle',
+      iconType: 'plusCircle',
       label: i18n.translate('xpack.serverlessVectordb.home.apiKeysCard.createApiKey', {
         defaultMessage: 'Create an API key',
       }),
