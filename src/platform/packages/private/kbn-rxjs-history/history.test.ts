@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, firstValueFrom, skip } from 'rxjs';
+import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { startTrackingHistory } from './history';
 
 const setupHistory = ({
