@@ -20,7 +20,6 @@ import {
   EuiFlyoutHeader,
   EuiHorizontalRule,
   EuiIcon,
-  EuiIconTip,
   EuiNotificationBadge,
   EuiPanel,
   EuiSpacer,
