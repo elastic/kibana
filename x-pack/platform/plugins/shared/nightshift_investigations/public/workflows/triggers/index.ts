@@ -7,11 +7,7 @@
 
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 
-/**
- * Registers the significant-events custom workflow triggers on the public side using async loaders,
- * so the trigger definition module (and its zod schemas) stays out of the plugin's main bundle.
- */
-export const registerSignificantEventsWorkflowTriggers = (
+export const registerInvestigationsWorkflowTriggers = (
   workflowsExtensions: WorkflowsExtensionsPublicPluginSetup | undefined
 ): void => {
   if (!workflowsExtensions) {
@@ -20,12 +16,17 @@ export const registerSignificantEventsWorkflowTriggers = (
 
   workflowsExtensions.registerTriggerDefinition(() =>
     import('../../../common/workflows/triggers').then(
-      (module) => module.eventCreatedTriggerCommonDefinition
+      (module) => module.investigationStartedTriggerCommonDefinition
     )
   );
   workflowsExtensions.registerTriggerDefinition(() =>
     import('../../../common/workflows/triggers').then(
-      (module) => module.eventStatusChangedTriggerCommonDefinition
+      (module) => module.investigationCompletedTriggerCommonDefinition
+    )
+  );
+  workflowsExtensions.registerTriggerDefinition(() =>
+    import('../../../common/workflows/triggers').then(
+      (module) => module.investigationFailedTriggerCommonDefinition
     )
   );
 };
