@@ -38,9 +38,15 @@ export interface ExtractedIoc {
 type WorkingIoc = ExtractedIoc & { _offset?: number };
 
 export interface ExtractIocsResult {
+  /** How many IOCs were found, before the nested-object cap. */
   count: number;
   iocs: ExtractedIoc[];
   ioc_set_hash: string | null;
+  /**
+   * Set when `count` exceeded `MAX_IOCS_PER_REPORT` and `iocs` was truncated. Present
+   * only when it happened, so the common case stays a three-key object.
+   */
+  truncated?: true;
 }
 
 // ── Atomic patterns ────────────────────────────────────────────────────────────
@@ -108,6 +114,30 @@ const trimUrlPunctuation = (url: string): string => {
  * IOC type by a wide margin (a domain caps at 253, an email at 254, a hash at 128).
  */
 const MAX_IOC_VALUE_LENGTH = MAX_URL_LENGTH;
+
+/**
+ * Most IOCs one report may carry.
+ *
+ * `extracted.iocs` is a `nested` field, so every entry is its own Lucene document and
+ * the reports index leaves `index.mapping.nested_objects.limit` at the Elasticsearch
+ * default of 10,000. Crossing it does not drop the extra IOCs, it rejects the entire
+ * report document, so the report stays `pending` and every enrichment run re-tries it.
+ *
+ * Reachable from one 5,000,000-character analyst paste or a dense feed item:
+ * `text_indicator_list` chunks its output across documents, but every other path writes
+ * a single one. 5,000 matches the per-document budget that adapter already uses and
+ * leaves room for the `external_references` entries sharing the same limit.
+ */
+const MAX_IOCS_PER_REPORT = 5_000;
+
+/** Most promotable first. Only consulted when a report has to be truncated. */
+const TIER_RANK: readonly string[] = [
+  'discriminating',
+  'contextual',
+  'uncertain',
+  'reference',
+  'denied',
+];
 
 const iocDedupKey = (type: IocType, value: string): string =>
   `${type}:${type === 'url' || type === 'wallet' ? value : value.toLowerCase()}`;
@@ -1343,9 +1373,20 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
 
   const cleanedIocs: ExtractedIoc[] = iocs.map(({ _offset: _, ...rest }) => rest);
 
+  // Highest tier first, so a truncated report keeps its most promotable indicators
+  // rather than whichever happened to appear earliest in the text.
+  const capped =
+    cleanedIocs.length > MAX_IOCS_PER_REPORT
+      ? [...cleanedIocs]
+          .sort((a, b) => TIER_RANK.indexOf(a.tier) - TIER_RANK.indexOf(b.tier))
+          .slice(0, MAX_IOCS_PER_REPORT)
+      : cleanedIocs;
+
   return {
+    // The count found, not the count returned, so the truncation is visible.
     count: cleanedIocs.length,
-    iocs: cleanedIocs,
+    iocs: capped,
     ioc_set_hash: iocSetHash,
+    ...(capped.length < cleanedIocs.length ? { truncated: true as const } : {}),
   };
 };

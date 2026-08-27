@@ -1856,3 +1856,43 @@ describe('extract_iocs — over-long values', () => {
     expect(urlValues(r)).toContain(atBound);
   });
 });
+
+// `extracted.iocs` is a `nested` field and the reports index leaves
+// `nested_objects.limit` at the Elasticsearch default of 10,000. Crossing it rejects the
+// whole report document rather than dropping the extra entries, so the report stays
+// `pending` and every enrichment run re-tries it. Only `text_indicator_list` chunks
+// across documents; a 5MB analyst paste writes one.
+describe('extract_iocs — nested-object cap', () => {
+  /** Enough distinct public domains to blow past the cap. */
+  const manyDomains = (n: number) =>
+    Array.from({ length: n }, (_v, i) => `evil-${i}.com`).join(' ');
+
+  test('returns at most the per-report cap', () => {
+    const r = extractIocs({ text: manyDomains(6_000) });
+    expect(r.iocs.length).toBeLessThanOrEqual(5_000);
+  });
+
+  test('reports the true count, so the truncation is visible', () => {
+    const r = extractIocs({ text: manyDomains(6_000) });
+    expect(r.count).toBeGreaterThan(r.iocs.length);
+    expect(r.truncated).toBe(true);
+  });
+
+  test('does not flag truncation when under the cap', () => {
+    const r = extractIocs({ text: manyDomains(10) });
+    expect(r.truncated).toBeUndefined();
+    expect(r.count).toBe(r.iocs.length);
+  });
+
+  // A truncated report should keep what is worth promoting, not whatever appeared first.
+  test('keeps the most promotable tiers when it truncates', () => {
+    const r = extractIocs({ text: manyDomains(6_000) });
+    const nonPromotable = r.iocs.filter(
+      (ioc) => ioc.tier === 'reference' || ioc.tier === 'denied'
+    ).length;
+    const promotable = r.iocs.filter(
+      (ioc) => ioc.tier === 'discriminating' || ioc.tier === 'contextual'
+    ).length;
+    expect(promotable).toBeGreaterThanOrEqual(nonPromotable);
+  });
+});
