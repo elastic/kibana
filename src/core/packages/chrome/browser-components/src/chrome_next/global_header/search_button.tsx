@@ -57,6 +57,7 @@ export const SearchButton = React.memo(({ layout = 'compact' }: SearchButtonProp
   const euiFontSizeS = useEuiFontSize('s').fontSize;
   const baseStyleVars = useHeaderButtonStyleVars();
   const compactQuery = useEuiBreakpoint(['xs', 's']);
+  const mMin = useEuiMinBreakpoint('m');
   const xlMin = useEuiMinBreakpoint('xl');
   const isExpanded = layout === 'expanded';
 
@@ -100,7 +101,9 @@ export const SearchButton = React.memo(({ layout = 'compact' }: SearchButtonProp
     ...(isExpanded
       ? {
           justifyContent: 'space-between',
-          width: mathWithUnits(euiTheme.size.xxl, (x) => x * 10),
+          [mMin]: {
+            width: mathWithUnits(euiTheme.size.xxl, (x) => x * 10),
+          },
           [xlMin]: {
             width: mathWithUnits(euiTheme.size.xxl, (x) => x * 15),
           },
@@ -123,20 +126,18 @@ export const SearchButton = React.memo(({ layout = 'compact' }: SearchButtonProp
         headerButtonBaseStyles,
         headerButtonBorderedStyles,
         searchOverrides,
-        !isExpanded ? compactButtonStyles : undefined,
+        compactButtonStyles,
       ]}
       style={baseStyleVars}
       onClick={config.onClick}
     >
       <span css={leadingStyles}>
         <EuiIcon type="magnify" size="m" color={euiTheme.colors.textParagraph} aria-hidden />
-        <span css={[placeholderStyles, !isExpanded ? collapsibleStyles : undefined]}>
+        <span css={[placeholderStyles, collapsibleStyles]}>
           {isExpanded ? EXPANDED_PLACEHOLDER : COMPACT_PLACEHOLDER}
         </span>
       </span>
-      <EuiBadge css={[shortcutBadgeStyles, !isExpanded ? collapsibleStyles : undefined]}>
-        {shortcutLabel}
-      </EuiBadge>
+      <EuiBadge css={[shortcutBadgeStyles, collapsibleStyles]}>{shortcutLabel}</EuiBadge>
     </button>
   );
 });

@@ -43,10 +43,6 @@ exports[`Header renders 1`] = `
               </span>
             </span>
           </a>
-        </div>
-        <div
-          class="euiHeaderSectionItem emotion-euiHeaderSectionItem"
-        >
           <a
             aria-label="Elastic home"
             class="css-4ghmd2-logoCss"
