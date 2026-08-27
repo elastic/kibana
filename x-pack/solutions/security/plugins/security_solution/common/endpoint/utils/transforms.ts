@@ -27,10 +27,7 @@ export const waitForMetadataTransformsReady = usageTracker.track(
     /** The version of the Endpoint Package */
     version: string
   ): Promise<void> => {
-    const isReady = await waitFor(() => areMetadataTransformsReady(esClient, version));
-    if (!isReady) {
-      throw new Error('Timed out waiting for metadata transforms to be ready');
-    }
+    await waitFor(() => areMetadataTransformsReady(esClient, version));
   }
 );
 
