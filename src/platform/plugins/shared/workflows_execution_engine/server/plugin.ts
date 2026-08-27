@@ -976,7 +976,7 @@ export class WorkflowsExecutionEnginePlugin
     // to ES out-of-band so the synchronous call path has no inline ES writes.
     if (this.config.syncExecution.enabled && this.config.syncLogDrain.enabled) {
       this.syncLogDrain = new SyncLogDrain(
-        new LogsRepository(coreStart.dataStreams),
+        new LogsRepository(coreStart.dataStreams, this.logger),
         this.logger.get('sync_log_drain'),
         this.config.syncLogDrain
       );

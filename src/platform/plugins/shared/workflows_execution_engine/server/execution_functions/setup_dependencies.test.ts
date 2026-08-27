@@ -430,16 +430,15 @@ describe('setupDependencies', () => {
       const mockFakeRequest = { headers: {} } as KibanaRequest;
       const mockDrain = { enqueue: jest.fn(), shutdown: jest.fn() };
 
-      await setupDependencies(
+      await setupDependencies({
         workflowRunId,
         spaceId,
-        mockLogger,
-        mockConfig,
-        mockDependencies,
-        mockFakeRequest,
-        undefined,
-        { syncLogDrain: mockDrain as any }
-      );
+        logger: mockLogger,
+        config: mockConfig,
+        dependencies: mockDependencies,
+        fakeRequest: mockFakeRequest,
+        syncLogDrain: mockDrain as any,
+      });
 
       // WorkflowEventLoggerService is the hoisted jest.mock — its constructor is
       // a jest.fn() so we can assert how setup_dependencies called it.
