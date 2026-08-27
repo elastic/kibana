@@ -39,10 +39,14 @@ import {
   createUnresolveAction,
   createEditTagsAction,
   createEditAssigneeAction,
+  type EpisodeAction,
 } from '@kbn/alerting-v2-episodes-ui/actions';
+import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
 import { useQueryClient } from '@kbn/react-query';
 import type { RowControlColumn } from '@kbn/discover-utils';
-import { DEFAULT_ALERT_TAGS_KEY } from '../../../../common/constants';
+import { SECURITY_EPISODE_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
+import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
+import { APP_ID, DEFAULT_ALERT_TAGS_KEY } from '../../../../common/constants';
 import { useKibana, useUiSetting$ } from '../../../common/lib/kibana';
 import { EsqlInspectButton } from '../kpis/esql_inspect_button';
 import { useEpisodesTableData } from './use_episodes_table_data';
@@ -110,6 +114,14 @@ const SESSION_VIEW_LABEL = i18n.translate(
 const NOTES_LABEL = i18n.translate('xpack.securitySolution.alertsV2.episodesTable.notes', {
   defaultMessage: 'Add note',
 });
+const ADD_TO_NEW_CASE_LABEL = i18n.translate(
+  'xpack.securitySolution.alertsV2.episodesTable.addToNewCase',
+  { defaultMessage: 'Add to new case' }
+);
+const ADD_TO_EXISTING_CASE_LABEL = i18n.translate(
+  'xpack.securitySolution.alertsV2.episodesTable.addToExistingCase',
+  { defaultMessage: 'Add to existing case' }
+);
 
 /** Human-readable column headers, mirroring the v1 alerts table labels. */
 const COLUMN_DISPLAY_NAMES: Record<string, string> = {
@@ -241,13 +253,6 @@ export const EpisodesTableSection = ({ query, timeRange }: EpisodesTableSectionP
     [services, queryClient]
   );
 
-  // Everything the per-row "…" (More actions) menu offers — v2 mutations, ordered by the factories'
-  // own `order`. Mirrors the v1 alerts table's per-row take-action menu.
-  const episodeActions = useMemo(
-    () => [...statusActions, editTagsAction, editAssigneeAction],
-    [statusActions, editTagsAction, editAssigneeAction]
-  );
-
   const tableServices = useMemo(
     () => ({
       theme: services.theme,
@@ -269,6 +274,75 @@ export const EpisodesTableSection = ({ query, timeRange }: EpisodesTableSectionP
     [rows]
   );
   const { rulesCache } = useAlertingRulesCache({ ruleIds, services: { http: services.http } });
+
+  // Add to case: attach an episode as a `security.episode` case attachment (comment + Episodes
+  // table). We store display fields inline in `metadata` — the episode is an ES|QL projection with
+  // no queryable doc — using the resolved rule name for the title.
+  const casesUi = services.cases;
+  const userCasesPermissions = casesUi.helpers.canUseCases([APP_ID]);
+  // The unified attachment framework (and thus the `security.episode` type) is gated behind
+  // `xpack.cases.attachments.enabled`; there's no legacy fallback for episodes, so we only offer
+  // "Add to case" when it's on.
+  const attachmentsEnabled = casesUi.config.attachmentsEnabled;
+  const createCaseFlyout = casesUi.hooks.useCasesAddToNewCaseFlyout({});
+  const selectCaseModal = casesUi.hooks.useCasesAddToExistingCaseModal();
+  const buildEpisodeCaseAttachments = useCallback(
+    (episodes: AlertEpisode[]): CaseAttachmentsWithoutOwner =>
+      episodes.map((episode) => {
+        const ep = episode as unknown as Record<string, unknown>;
+        const ruleId = String(ep['rule.id'] ?? '');
+        return {
+          type: SECURITY_EPISODE_ATTACHMENT_TYPE,
+          attachmentId: String(ep['episode.id'] ?? ''),
+          metadata: {
+            title: rulesCache[ruleId]?.metadata?.name ?? ruleId,
+            ruleId,
+            status: String(ep['episode.status'] ?? ''),
+            severity: ep.severity != null ? String(ep.severity) : null,
+            triggeredAt: ep.first_timestamp != null ? String(ep.first_timestamp) : null,
+          },
+        };
+      }),
+    [rulesCache]
+  );
+  const addToCaseActions = useMemo<EpisodeAction[]>(() => {
+    if (!attachmentsEnabled || !(userCasesPermissions.createComment && userCasesPermissions.read)) {
+      return [];
+    }
+    return [
+      {
+        id: 'ALERTS_V2_ADD_TO_NEW_CASE',
+        order: 60,
+        displayName: ADD_TO_NEW_CASE_LABEL,
+        iconType: 'plusInCircle',
+        isCompatible: () => true,
+        execute: async ({ episodes }) =>
+          createCaseFlyout.open({ attachments: buildEpisodeCaseAttachments(episodes) }),
+      },
+      {
+        id: 'ALERTS_V2_ADD_TO_EXISTING_CASE',
+        order: 61,
+        displayName: ADD_TO_EXISTING_CASE_LABEL,
+        iconType: 'folderOpen',
+        isCompatible: () => true,
+        execute: async ({ episodes }) =>
+          selectCaseModal.open({ getAttachments: () => buildEpisodeCaseAttachments(episodes) }),
+      },
+    ];
+  }, [
+    attachmentsEnabled,
+    userCasesPermissions,
+    createCaseFlyout,
+    selectCaseModal,
+    buildEpisodeCaseAttachments,
+  ]);
+
+  // Everything the per-row "…" (More actions) menu offers — v2 mutations plus add-to-case, ordered
+  // by `order`. Mirrors the v1 alerts table's per-row take-action menu.
+  const episodeActions = useMemo(
+    () => [...statusActions, editTagsAction, editAssigneeAction, ...addToCaseActions],
+    [statusActions, editTagsAction, editAssigneeAction, addToCaseActions]
+  );
 
   // Side-fetch the current assignee per visible episode (the view doesn't carry it).
   const episodeIds = useMemo(
