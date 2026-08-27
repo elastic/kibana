@@ -8,6 +8,8 @@
  */
 
 import { globalSetupHook } from '@kbn/scout';
+import { globalSetupHookWithSynthtrace } from '@kbn/scout-synthtrace';
+import { log as synthtraceLog, timerange } from '@kbn/synthtrace-client';
 import { DATE_NESTED_ES_ARCHIVE } from '../../../common/ui/fixtures/constants';
 
 globalSetupHook('Setup Discover core tests data', async ({ esArchiver, log }) => {
@@ -71,3 +73,31 @@ globalSetupHook('Setup Discover core tests data', async ({ esArchiver, log }) =>
   await esArchiver.loadIfNeeded(DATE_NESTED_ES_ARCHIVE);
   log.debug('[setup:date_nested] date_nested ES data ready');
 });
+
+globalSetupHookWithSynthtrace(
+  'Setup legacy log stream embeddable data',
+  { tag: '@local-stateful-classic' },
+  async ({ log, logsSynthtraceEsClient }) => {
+    const now = Date.now();
+
+    log.debug('[setup:legacy_log_stream] indexing synthtrace logs...');
+    await logsSynthtraceEsClient.index(
+      timerange(now - 30 * 60 * 1000, now + 30 * 60 * 1000)
+        .interval('1m')
+        .rate(5)
+        .generator((timestamp) =>
+          synthtraceLog
+            .create()
+            .message('This is a log message')
+            .timestamp(timestamp)
+            .dataset('synth.discover')
+            .namespace('default')
+            .logLevel('info')
+            .defaults({
+              'service.name': 'synth-discover',
+            })
+        )
+    );
+    log.debug('[setup:legacy_log_stream] synthtrace logs ready');
+  }
+);

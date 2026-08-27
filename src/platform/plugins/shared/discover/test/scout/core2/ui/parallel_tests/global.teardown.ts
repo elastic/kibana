@@ -7,8 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { globalTeardownHook } from '@kbn/scout';
+import { globalTeardownHook as baseGlobalTeardownHook, mergeTests } from '@kbn/scout';
+import { synthtraceFixture } from '@kbn/scout-synthtrace';
 
-globalTeardownHook('Teardown Discover core tests data', async ({ log }) => {
-  log.debug('[teardown:core] no custom teardown required');
-});
+const globalTeardownHookWithSynthtrace = mergeTests(baseGlobalTeardownHook, synthtraceFixture);
+
+globalTeardownHookWithSynthtrace(
+  'Teardown legacy log stream embeddable data',
+  { tag: '@local-stateful-classic' },
+  async ({ log, logsSynthtraceEsClient }) => {
+    log.debug('[teardown:legacy_log_stream] cleaning synthtrace logs...');
+    await logsSynthtraceEsClient.clean();
+    log.debug('[teardown:legacy_log_stream] synthtrace logs cleaned');
+  }
+);
