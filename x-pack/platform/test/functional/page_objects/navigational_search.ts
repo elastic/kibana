@@ -25,10 +25,8 @@ export class NavigationalSearchPageObject extends FtrService {
     if (await this.testSubjects.exists(SEARCH_MODAL, { timeout: 0 })) {
       return;
     }
-    if (await this.testSubjects.exists(SEARCH_BUTTON, { timeout: 0 })) {
-      await this.testSubjects.click(SEARCH_BUTTON);
-      await this.testSubjects.existOrFail(SEARCH_MODAL);
-    }
+    await this.testSubjects.click(SEARCH_BUTTON);
+    await this.testSubjects.existOrFail(SEARCH_MODAL);
   }
 
   async focus() {

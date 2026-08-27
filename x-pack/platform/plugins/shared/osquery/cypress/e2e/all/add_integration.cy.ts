@@ -72,10 +72,8 @@ describe.skip('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => 
       cy.contains('Add Osquery Manager');
       cy.getBySel('osquery-add-integration-button');
       cy.get('body').then(($body) => {
-        if ($body.find('[data-test-subj="chromeNextGlobalHeaderSearchButton"]').length) {
+        if (!$body.find('[data-test-subj="chromeNextSearchModal"]:visible').length) {
           cy.getBySel('chromeNextGlobalHeaderSearchButton').click();
-        } else if ($body.find('[data-test-subj="nav-search-reveal"]').length) {
-          cy.getBySel('nav-search-reveal').click();
         }
       });
       cy.getBySel('nav-search-input').type('Osquery');

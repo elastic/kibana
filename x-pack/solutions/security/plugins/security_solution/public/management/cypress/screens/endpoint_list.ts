@@ -109,10 +109,8 @@ export const navigateToEndpointList = (
   endpointHostName?: string
 ): void => {
   cy.get('body').then(($body) => {
-    if ($body.find('[data-test-subj="chromeNextGlobalHeaderSearchButton"]').length) {
+    if (!$body.find('[data-test-subj="chromeNextSearchModal"]:visible').length) {
       cy.getByTestSubj('chromeNextGlobalHeaderSearchButton').click();
-    } else if ($body.find('[data-test-subj="nav-search-reveal"]').length) {
-      cy.getByTestSubj('nav-search-reveal').click();
     }
   });
   cy.getByTestSubj('nav-search-input').type('endpoints');

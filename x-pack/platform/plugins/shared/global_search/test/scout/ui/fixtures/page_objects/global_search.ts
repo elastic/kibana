@@ -71,14 +71,32 @@ export class GlobalSearch {
       .locator('chromeNextSearchModal')
       .locator('.euiSelectableList__list');
 
+    // EuiSelectable virtualizes rows, so off-screen labels are not in the DOM.
+    // scrollIntoViewIfNeeded is a no-op until this windowing container scrolls.
+    await list.waitFor({ state: 'visible' });
+    await list.evaluate((element) => {
+      element.scrollTop = 0;
+    });
+
     await expect(async () => {
-      if ((await item.count()) === 0) {
-        await list.evaluate((el) => {
-          el.scrollTop += 200;
-        });
+      if ((await item.count()) > 0) {
+        return;
       }
-      await expect(item).toBeVisible({ timeout: 1000 });
+
+      const canScrollFurther = await list.evaluate((element) => {
+        const previousTop = element.scrollTop;
+        element.scrollTop += element.clientHeight;
+        return element.scrollTop !== previousTop;
+      });
+
+      if (!canScrollFurther) {
+        throw new Error(`Search result "${label}" was not found in the virtualized list`);
+      }
+
+      throw new Error(`Search result "${label}" is not rendered yet`);
     }).toPass({ timeout: 15000 });
+
+    await expect(item).toBeVisible();
   }
 
   async isNoResultsPlaceholderDisplayed() {

@@ -122,11 +122,10 @@ export const navigateUsingGlobalSearch = (page: keyof typeof navSearchText) => {
 
 export const openGlobalSearch = () => {
   cy.get('body').then(($body) => {
-    if ($body.find('[data-test-subj="chromeNextGlobalHeaderSearchButton"]').length) {
-      cy.get('[data-test-subj="chromeNextGlobalHeaderSearchButton"]').click();
-    } else if ($body.find('[data-test-subj="nav-search-reveal"]').length) {
-      cy.get('[data-test-subj="nav-search-reveal"]').click();
+    if ($body.find('[data-test-subj="chromeNextSearchModal"]:visible').length) {
+      return;
     }
+    cy.get('[data-test-subj="chromeNextGlobalHeaderSearchButton"]').click();
   });
   cy.get('[data-test-subj="nav-search-input"]').should('be.visible');
 };
