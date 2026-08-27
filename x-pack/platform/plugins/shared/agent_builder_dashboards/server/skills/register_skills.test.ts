@@ -60,36 +60,22 @@ describe('registerSkills', () => {
     );
   });
 
-  it('keeps the Prettify playbook in referenced content instead of the skill body', async () => {
-    expect(skill.content).toContain('platform.dashboard.review_dashboard');
-    expect(skill.content).toContain('prettify-playbook');
+  it('tells the agent to call prettify_dashboard once instead of inlining the playbook', async () => {
+    expect(skill.content).toContain('platform.dashboard.prettify_dashboard');
+    expect(skill.content).toContain('Do not read the image');
     expect(skill.content).toContain('Without an image, this is a normal dashboard edit');
+    expect(skill.content).not.toContain('platform.dashboard.review_dashboard');
+    expect(skill.content).not.toContain('prettify-playbook');
+    expect(skill.content).not.toContain('pack_layout');
     expect(skill.content).not.toContain('If every finding was skipped');
     expect(skill.content).not.toContain('rebuilds the visualization');
-    expect(skill.content).not.toContain('pack_layout');
-    expect(skill.content).not.toContain('disproportionate_size');
 
-    const playbook = skill.referencedContent?.find((ref) => ref.name === 'prettify-playbook');
-    expect(playbook?.content).toContain('pack_layout');
-    expect(playbook?.content).toContain('weak_sections');
-    expect(playbook?.content).toContain('monotone_chart_types');
-    expect(playbook?.content).toContain('weak_controls');
-    expect(playbook?.content).toContain('duplicate_inner_title');
-    expect(playbook?.content).toContain('one_category_chart');
-    expect(playbook?.content).toContain('metric_fill');
-    expect(playbook?.content).toContain('thin_metric');
-    expect(playbook?.content).toContain('hide_title');
-    expect(playbook?.content).toContain('clear_metric_fill');
-    expect(playbook?.content).toContain('metric_trendline');
-    expect(playbook?.content).toContain('add_controls');
-    expect(playbook?.content).toContain('rebuilds the visualization');
-    expect(playbook?.content).toContain('If every finding was skipped');
-    expect(playbook?.content).toContain('Never shrink a data table');
-    expect(playbook?.content).toContain('at most once');
+    expect(skill.referencedContent?.some((ref) => ref.name === 'prettify-playbook')).toBe(false);
 
     const tools = await skill.getInlineTools?.();
     expect(tools?.map((tool) => tool.id)).toEqual(
-      expect.arrayContaining([dashboardTools.generateDashboard, dashboardTools.reviewDashboard])
+      expect.arrayContaining([dashboardTools.generateDashboard, dashboardTools.prettifyDashboard])
     );
+    expect(tools?.map((tool) => tool.id)).not.toContain(dashboardTools.reviewDashboard);
   });
 });

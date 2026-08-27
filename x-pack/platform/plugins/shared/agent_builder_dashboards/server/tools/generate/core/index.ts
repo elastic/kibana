@@ -6,6 +6,7 @@
  */
 
 export { dashboardOperationSchema, executeDashboardOperations } from './operations';
+export type { DashboardOperation } from './operations';
 
 export { getErrorMessage, hasValidCreateMetadataOperations } from './utils';
 

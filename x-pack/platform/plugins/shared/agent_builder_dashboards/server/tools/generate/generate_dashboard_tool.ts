@@ -11,11 +11,7 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import {
-  DASHBOARD_ATTACHMENT_TYPE,
-  isSection,
-  type DashboardAttachmentData,
-} from '@kbn/agent-builder-dashboards-common';
+import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/agent-builder-dashboards-common';
 
 import { createCustomContentTemplateResolver } from '@kbn/custom-content-server';
 import { dashboardTools } from '../../../common';
@@ -28,6 +24,7 @@ import {
   dashboardOperationSchema,
 } from './core';
 import { applyDefaultDashboardTimeRange } from './time_range';
+import { summarizeDashboard } from './summarize_dashboard';
 
 const newDashboardMetadataErrorMessage =
   'New dashboards require a set_metadata operation with a non-empty title.';
@@ -41,51 +38,6 @@ const generateDashboardSchema = z.object({
       '(optional) The id of the dashboard attachment to update. Omit to create a new dashboard. The tool reads the current dashboard payload from this reference, so you never have to pass the full payload back in.'
     ),
   operations: z.array(dashboardOperationSchema).min(1),
-});
-
-/**
- * Compact projection of a dashboard payload, returned in the tool result.
- *
- * The full dashboard payload lives in the dashboard attachment (referenced by
- * id); the LLM only ever sees this slim summary, so it never has to re-emit the
- * heavy payload into a follow-up tool call.
- *
- * `authoringNotesByPanelId` holds the one-sentence note describing every chart
- * authored in this run, keyed by panel id. Panels that were not authored now
- * (or whose engine returned no note) simply have no `authoring_note`.
- */
-const summarizeDashboard = (
-  dashboardData: DashboardAttachmentData,
-  authoringNotesByPanelId: Map<string, string>
-) => ({
-  title: dashboardData.title,
-  description: dashboardData.description,
-  panels: dashboardData.panels.map((widget) => {
-    if (isSection(widget)) {
-      return {
-        id: widget.id,
-        title: widget.title,
-        collapsed: widget.collapsed,
-        grid: widget.grid,
-        panels: widget.panels.map((panel) => ({
-          type: panel.type,
-          id: panel.id,
-          grid: panel.grid,
-          authoring_note: authoringNotesByPanelId.get(panel.id),
-        })),
-      };
-    }
-    return {
-      type: widget.type,
-      id: widget.id,
-      grid: widget.grid,
-      authoring_note: authoringNotesByPanelId.get(widget.id),
-    };
-  }),
-  controls: (dashboardData.pinned_panels ?? []).map((control) => {
-    const c = control as { id?: string; type?: string; config?: { title?: string } };
-    return { id: c.id, type: c.type, title: c.config?.title };
-  }),
 });
 
 const CUSTOM_CONTENT_TOOL_GUIDANCE = `

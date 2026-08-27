@@ -5,7 +5,5 @@
  * 2.0.
  */
 
-export { generateDashboardTool } from './generate';
-export { reviewDashboardTool, getChatImageBytes } from './review_dashboard';
-export type { GetImageBytes } from './review_dashboard';
-export { prettifyDashboardTool } from './prettify';
+export { prettifyDashboardTool } from './prettify_dashboard_tool';
+export { findingsToPrettifyOperations } from './findings_to_prettify_operations';

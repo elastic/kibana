@@ -1,6 +1,6 @@
 # Prettify mutates only findings and layout
 
-The single `generate_dashboard` in a Prettify session may:
+The single mutate in a Prettify session may:
 
 - pack every panel via `update_panel_layouts` from a complete `pack_layout` finding
 - hide a panel chrome title (`hide_title`) when it duplicates the visualization's inner title
