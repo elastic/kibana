@@ -9,13 +9,11 @@ import type { Logger } from '@kbn/core/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { JsonOutputParser } from '@langchain/core/output_parsers';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
-import type { LeadEntity, Observation } from '../types';
-
-export interface ScoredEntityInput {
-  readonly entity: LeadEntity;
-  readonly priority: number;
-  readonly observations: Observation[];
-}
+import {
+  formatRelatedEntity,
+  formatOmittedRelatedEntityCounts,
+} from '../../../../../common/entity_analytics/lead_generation/format_related_entity';
+import type { ScoredEntity } from '../types';
 
 export interface LlmSynthesisResult {
   readonly title: string;
@@ -56,6 +54,9 @@ Rules:
 - When a lead includes "Peer context" (other candidate entities sharing the same signal), you may reference it in the byline or description to convey scope — e.g. "alongside 5 other privileged accounts escalating in the same window". Only use peer counts that are provided; never invent them.
 - Never mention, quote, or paraphrase the \`signal_strength\` value anywhere (title, byline, description, tags). It is an internal ranking signal, not something meaningful to an analyst, and must not be shown.
 - Only state a numeric risk score when a "Risk escalation" line is present for that lead; use exactly the from/to numbers and window given, and never invent, estimate, or restate a risk score from any other field (including \`signal_strength\`). If no "Risk escalation" line is present, do not mention a risk score at all.
+- Reference other entities only by name from those explicitly listed under "Related entities" for that lead; never infer or invent a connection. When that section is absent, do not mention related entities or their absence.
+- "interacted with: at least N entities" is a lower bound, not an exact count — write "at least N", never "only N" or "exactly N".
+- A "(not shown: N more X)" note means the list was truncated, not an additional entity — you may mention that more exist (e.g. "among dozens of other hosts it accesses"), but never treat it as a specific, nameable entity.
 
 You will receive data for {lead_count} lead(s). Respond ONLY with a valid JSON array (no markdown fences, no extra text) containing exactly {lead_count} objects in the same order as the input, each matching this schema:
 {{
@@ -73,7 +74,7 @@ Respond with the JSON array only.`;
 
 const batchSynthesisPrompt = ChatPromptTemplate.fromTemplate(BATCH_SYNTHESIS_PROMPT);
 
-const formatEntityLine = (s: ScoredEntityInput): string => {
+const formatEntityLine = (s: ScoredEntity): string => {
   const entityDoc = JSON.stringify(s.entity.record);
   return `  - ${s.entity.type} "${s.entity.name}" (priority: ${s.priority}/10)\n    Entity document: ${entityDoc}`;
 };
@@ -83,7 +84,7 @@ const formatEntityLine = (s: ScoredEntityInput): string => {
  * entity has, how many OTHER candidate entities share it. Returns an empty
  * string when no peers share any of the lead's signals.
  */
-const formatPeerContext = (entity: ScoredEntityInput, cohort?: CohortContext): string => {
+const formatPeerContext = (entity: ScoredEntity, cohort?: CohortContext): string => {
   if (!cohort) return '';
 
   const entityTypes = new Set(entity.observations.map((o) => o.type));
@@ -112,7 +113,7 @@ const SHORT_WINDOW_ESCALATION_TYPES = new Set(['risk_escalation_24h', 'risk_esca
  * in the prompt — see the corresponding prompt rule — so the LLM never has
  * to infer or invent one from an unrelated observation's signal strength.
  */
-const formatRiskEscalation = (entity: ScoredEntityInput): string => {
+const formatRiskEscalation = (entity: ScoredEntity): string => {
   const escalation = entity.observations
     .filter((o) => SHORT_WINDOW_ESCALATION_TYPES.has(o.type))
     .sort((a, b) => Number(b.metadata.delta ?? 0) - Number(a.metadata.delta ?? 0))[0];
@@ -129,8 +130,18 @@ const formatRiskEscalation = (entity: ScoredEntityInput): string => {
   )} (+${Math.round(delta)}) over the last ${window}.`;
 };
 
+const formatRelatedEntities = (entity: ScoredEntity): string => {
+  if (entity.topRelatedEntities.length === 0) return '';
+  const lines = entity.topRelatedEntities.map((r) => `  - ${formatRelatedEntity(r)}`).join('\n');
+  const omitted = formatOmittedRelatedEntityCounts(
+    entity.topRelatedEntities,
+    entity.relatedEntityCounts
+  );
+  return `  Related entities:\n${lines}${omitted ? `\n  (not shown: ${omitted})` : ''}`;
+};
+
 const formatLeadsPayload = (
-  entities: ReadonlyArray<ScoredEntityInput>,
+  entities: ReadonlyArray<ScoredEntity>,
   cohort?: CohortContext
 ): string => {
   return entities
@@ -152,7 +163,10 @@ const formatLeadsPayload = (
       const header = `### Lead ${i + 1}`;
       const riskEscalation = formatRiskEscalation(entity);
       const peerContext = formatPeerContext(entity, cohort);
-      return [header, entityLine, obsLines, riskEscalation, peerContext].filter(Boolean).join('\n');
+      const relatedEntities = formatRelatedEntities(entity);
+      return [header, entityLine, obsLines, riskEscalation, peerContext, relatedEntities]
+        .filter(Boolean)
+        .join('\n');
     })
     .join('\n\n');
 };
@@ -164,7 +178,7 @@ const formatLeadsPayload = (
  */
 export const llmSynthesizeBatch = async (
   chatModel: InferenceChatModel,
-  entities: ReadonlyArray<ScoredEntityInput>,
+  entities: ReadonlyArray<ScoredEntity>,
   logger: Logger,
   cohort?: CohortContext
 ): Promise<LlmSynthesisResult[]> => {
@@ -242,4 +256,5 @@ const stripMarkdown = (text: string): string =>
 export const __testables = {
   formatLeadsPayload,
   formatRiskEscalation,
+  formatRelatedEntities,
 };
