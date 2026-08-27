@@ -2,4 +2,4 @@
 
 Prettify uses a generic image attachment (Files / `file_id`) as visual evidence. The auto-sent user prompt is what selects the Prettify playbook. Dashboard Review is a skill-inline tool on dashboard-management, not bound to a dedicated screenshot type.
 
-A distinct `dashboard_screenshot` type would keep Dashboard Review off unrelated image chats, but `getInlineTools` cannot see conversation metadata today, and we do not want Prettify identity to live on a file type. The cost is that Dashboard Review is registered whenever the skill loads; the skill text and a fail-closed handler (dashboard + image required) are what stop misuse.
+A distinct `dashboard_screenshot` type would keep Dashboard Review off unrelated image chats, but `getInlineTools` cannot see conversation metadata today, and we do not want Prettify identity to live on a file type. The cost is that Dashboard Review is registered whenever the skill loads; a short stub plus a fail-closed handler (dashboard + image required) are what stop misuse. The finding-to-operation playbook lives in referenced content `prettify-playbook` so ordinary dashboard-management loads do not pay for it.

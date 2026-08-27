@@ -5,13 +5,17 @@
  * 2.0.
  */
 
-import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
+import {
+  defineSkillType,
+  type ReferencedContent,
+} from '@kbn/agent-builder-server/skills/type_definition';
 import { generateDashboardTool, reviewDashboardTool, type GetImageBytes } from '../tools';
 import { dashboardGeneration } from './generation_guidance';
 import { kibanaRendering } from './rendering_guidance';
 
-const PRETTIFY_PLAYBOOK = `
-## Prettify
+export const PRETTIFY_PLAYBOOK_REFERENCE_NAME = 'prettify-playbook';
+
+const PRETTIFY_PLAYBOOK = `## Prettify
 
 When the user asked to prettify this dashboard and an image is attached:
 
@@ -39,6 +43,12 @@ When the user asked to prettify this dashboard and an image is attached:
 Without an image, this is a normal dashboard edit, not Prettify.
 `;
 
+const prettifyPlaybookReference: ReferencedContent = {
+  name: PRETTIFY_PLAYBOOK_REFERENCE_NAME,
+  relativePath: '.',
+  content: PRETTIFY_PLAYBOOK,
+};
+
 export const createDashboardManagementSkill = ({
   getCustomContentEnabled,
   getImageBytes,
@@ -63,12 +73,17 @@ Use this skill when:
 Do **not** use this skill when:
 - The user asks for a standalone visualization and does not mention a dashboard context.
 - The user needs help exploring data, fields, or query logic.
-${PRETTIFY_PLAYBOOK}
+
+## Prettify
+
+When the user asked to prettify this dashboard and an image is attached, read referenced content \`${PRETTIFY_PLAYBOOK_REFERENCE_NAME}\` and follow it. Call \`platform.dashboard.review_dashboard\` once; do not describe the screenshot yourself. Without an image, this is a normal dashboard edit — do not follow that playbook.
+
 ${dashboardGeneration.guidance}
 
 ${kibanaRendering.guidance}
 `,
     referencedContent: [
+      prettifyPlaybookReference,
       ...(dashboardGeneration.referencedContent ?? []),
       ...(kibanaRendering.referencedContent ?? []),
     ],
