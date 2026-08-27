@@ -141,13 +141,6 @@ const makeRoundCompleteEvent = (roundId: string = 'round-1'): RoundCompleteEvent
     data: { round: createRound({ id: roundId }) },
   } as RoundCompleteEvent);
 
-/**
- * Configures `executeAgent$` to return a stream. `mode: 'sync'` is fine when the caller
- * only awaits the terminal event, but `mode: 'asyncShared'` is required whenever the test
- * needs `finalize` to fire — either because it asserts cleanup after failure, or because
- * the persistence pipeline must observe individual events before the run tears down.
- * When `error` is provided the emitted events are followed by a `throwError`.
- */
 const mockAgentStream = (
   events: ChatAgentEvent[],
   mode: 'sync' | 'asyncShared' = 'sync',
@@ -171,10 +164,6 @@ const mockAgentStream = (
   );
 };
 
-/**
- * Every handleAgentExecution test needs the same `resolveServices` stub — wraps the
- * supplied conversation client with the standard connector + model provider mocks.
- */
 const stubResolveServices = (
   conversationClient: ReturnType<typeof createConversationClientMock>
 ): void => {
@@ -185,12 +174,6 @@ const stubResolveServices = (
   } as never);
 };
 
-/**
- * Invokes `handleAgentExecution` with the standard execution + deps envelope. Callers
- * only supply the fields that vary between tests: the `agentParams` (agentId,
- * conversationId?, nextInput, readOnly?, origin?) and the conversation client the deps
- * should be wired to.
- */
 const runHandle = ({
   agentParams,
   conversationClient,
@@ -209,8 +192,6 @@ const runHandle = ({
     abortSignal: new AbortController().signal,
   });
 
-// Cleanup after failure waits on `inFlightWrites.settled()`, so any cleanup assertion
-// (`delete` on CREATE, no-op on UPDATE) must run one microtask tick after the stream errors.
 const flushMicrotasks = () => new Promise((resolve) => setImmediate(resolve));
 
 describe('handleAgentExecution', () => {
@@ -477,9 +458,6 @@ describe('handleAgentExecution', () => {
       const conversationClient = createConversationClientMock();
       conversationClient.create.mockResolvedValue(createdConversation);
       conversationClient.appendEvents.mockResolvedValue(createdConversation);
-      // `appendRoundTerminated$` writes the canonical round projection through
-      // `replaceRoundEvents`, so the mock has to resolve with a conversation for the
-      // downstream `conversationCreated/Updated` event to be built.
       conversationClient.replaceRoundEvents.mockResolvedValue(createdConversation);
 
       mockAgentStream([makeRoundStartedEvent(), makeRoundCompleteEvent()]);
@@ -536,12 +514,8 @@ describe('handleAgentExecution', () => {
       const conversationClient = createConversationClientMock();
       conversationClient.get.mockResolvedValue(conversation);
       conversationClient.appendEvents.mockResolvedValue(conversation);
-      // Round-end write goes through `replaceRoundEvents`; if it resolves to `undefined`
-      // the downstream `conversationUpdated` event cannot be built and the whole run errors.
       conversationClient.replaceRoundEvents.mockResolvedValue(conversation);
 
-      // `asyncShared` so the persistence pipeline sees `round_started` before `round_complete`
-      // rather than a single synchronous flush.
       mockAgentStream([makeRoundStartedEvent(), makeRoundCompleteEvent()], 'asyncShared');
       stubResolveServices(conversationClient);
 
@@ -556,9 +530,6 @@ describe('handleAgentExecution', () => {
 
       await lastValueFrom(events$.pipe(toArray()));
 
-      // The receipt-time input write is the first `appendEvents` call: exactly one
-      // `user_message` event, appended (not part of the round-end canonical projection —
-      // that one now goes through `replaceRoundEvents`).
       const [firstAppendCall] = conversationClient.appendEvents.mock.calls;
       expect(firstAppendCall[0].events).toHaveLength(1);
       expect(firstAppendCall[0].events[0]).toMatchObject({
@@ -570,9 +541,6 @@ describe('handleAgentExecution', () => {
 
   describe('two-phase failure cleanup', () => {
     it('keeps the receipt-time user_message on UPDATE when the run fails after round start (no cleanup write)', async () => {
-      // Execution-derived events are now written in a single batch at round completion, so a
-      // mid-run failure never persisted anything past the receipt-time `user_message`. The
-      // input is deliberately kept so the UI can still surface what the user asked.
       const conversation = createEmptyConversation({
         id: 'conversation-1',
         agent_id: 'test-agent',
@@ -603,9 +571,6 @@ describe('handleAgentExecution', () => {
     });
 
     it('hard-deletes the whole doc on CREATE when the first round fails before completing', async () => {
-      // No conversationId + no origin → getConversation returns a placeholder with
-      // operation === 'CREATE'. `persistRoundInput$` created the doc with just the
-      // user_message seed, so failure needs to sweep the whole placeholder.
       const conversationClient = createConversationClientMock();
       conversationClient.create.mockResolvedValue(
         createEmptyConversation({ id: 'new-conversation' })
