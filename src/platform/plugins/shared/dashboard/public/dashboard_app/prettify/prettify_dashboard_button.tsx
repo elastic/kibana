@@ -10,6 +10,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { type UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { layoutVar } from '@kbn/core-chrome-layout-constants';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { AiButton } from '@kbn/shared-ux-ai-components';
 import type { Action } from '@kbn/ui-actions-plugin/public';
@@ -92,9 +93,15 @@ const buttonStyles = {
   overlay: ({ euiTheme }: UseEuiTheme) =>
     css({
       position: 'fixed',
-      bottom: euiTheme.size.l,
-      left: '50%',
-      transform: 'translateX(-50%)',
+      bottom: `calc(${layoutVar('application.content.bottom', '0px')} + ${euiTheme.size.l})`,
+      left: layoutVar('application.content.left', '0px'),
+      right: layoutVar('application.content.right', '0px'),
+      display: 'flex',
+      justifyContent: 'center',
+      pointerEvents: 'none',
       zIndex: euiTheme.levels.header,
+      '& > *': {
+        pointerEvents: 'auto',
+      },
     }),
 };
