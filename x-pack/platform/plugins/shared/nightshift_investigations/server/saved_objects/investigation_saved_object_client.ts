@@ -49,16 +49,13 @@ export type FindInvestigationsResult = PaginatedResponse<
 
 export interface InvestigationSavedObjectClientDeps {
   savedObjectsClient: SavedObjectsClientContract;
-  namespace?: string;
 }
 
 export class InvestigationSavedObjectClient {
   private readonly savedObjectsClient: SavedObjectsClientContract;
-  private readonly namespace?: string;
 
-  constructor({ savedObjectsClient, namespace }: InvestigationSavedObjectClientDeps) {
+  constructor({ savedObjectsClient }: InvestigationSavedObjectClientDeps) {
     this.savedObjectsClient = savedObjectsClient;
-    this.namespace = namespace;
   }
 
   async create({
@@ -71,7 +68,7 @@ export class InvestigationSavedObjectClient {
     await this.savedObjectsClient.create<NightshiftInvestigationAttributes>(
       NIGHTSHIFT_INVESTIGATION_SO_TYPE,
       attributes,
-      { id, namespace: this.namespace }
+      { id }
     );
   }
 
@@ -79,8 +76,7 @@ export class InvestigationSavedObjectClient {
     try {
       const so = await this.savedObjectsClient.get<NightshiftInvestigationAttributes>(
         NIGHTSHIFT_INVESTIGATION_SO_TYPE,
-        id,
-        { namespace: this.namespace }
+        id
       );
       return so.attributes;
     } catch (error) {
@@ -92,9 +88,7 @@ export class InvestigationSavedObjectClient {
   }
 
   async update(id: string, attributes: InvestigationSavedObjectUpdateAttributes): Promise<void> {
-    await this.savedObjectsClient.update(NIGHTSHIFT_INVESTIGATION_SO_TYPE, id, attributes, {
-      namespace: this.namespace,
-    });
+    await this.savedObjectsClient.update(NIGHTSHIFT_INVESTIGATION_SO_TYPE, id, attributes);
   }
 
   async findByConcurrencyKey(
@@ -108,7 +102,6 @@ export class InvestigationSavedObjectClient {
       perPage: 1,
       sortField: 'created_at',
       sortOrder: 'desc',
-      namespaces: this.namespace ? [this.namespace] : undefined,
     });
 
     return result.saved_objects[0];
@@ -145,7 +138,6 @@ export class InvestigationSavedObjectClient {
       sortOrder: options.sortOrder ?? 'desc',
       page: options.page,
       perPage: options.perPage,
-      namespaces: this.namespace ? [this.namespace] : undefined,
       ...(options.fields?.length ? { fields: options.fields } : {}),
     });
 

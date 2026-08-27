@@ -166,12 +166,13 @@ export class NightshiftInvestigationsPlugin
     if (!this.savedObjects) {
       throw new Error('savedObjects is not available — plugin start() has not been called');
     }
-    const savedObjectsClient = this.savedObjects.getScopedClient(request, {
-      excludedExtensions: [SECURITY_EXTENSION_ID],
-      includedHiddenTypes: [NIGHTSHIFT_INVESTIGATION_SO_TYPE],
-    });
-    const namespace = spaceId !== DEFAULT_SPACE_ID ? spaceId : undefined;
-    return new InvestigationSavedObjectClient({ savedObjectsClient, namespace });
+    const savedObjectsClient = this.savedObjects
+      .getScopedClient(request, {
+        excludedExtensions: [SECURITY_EXTENSION_ID],
+        includedHiddenTypes: [NIGHTSHIFT_INVESTIGATION_SO_TYPE],
+      })
+      .asScopedToNamespace(spaceId);
+    return new InvestigationSavedObjectClient({ savedObjectsClient });
   };
 
   /**
