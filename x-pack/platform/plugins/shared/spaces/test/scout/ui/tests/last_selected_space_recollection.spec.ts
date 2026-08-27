@@ -55,7 +55,9 @@ test.describe('last selected space recollection', { tag: tags.stateful.classic }
 
     // page.goto races the root redirect chain into the space (it throws "interrupted by another
     // navigation"), so drive the load from a neutral page and wait on the landed URL + selector.
-    await page.goto(kbnUrl.get('/spaces/space_selector'));
+    // Wait only for domcontentloaded here: the selector page's full 'load' is slow under parallel
+    // load, and waitForSpaceSelector is the actual readiness gate.
+    await page.goto(kbnUrl.get('/spaces/space_selector'), { waitUntil: 'domcontentloaded' });
     await pageObjects.spaces.waitForSpaceSelector();
 
     await page.evaluate((url) => {
