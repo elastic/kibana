@@ -79,7 +79,15 @@ export const rssAdapter: FetchAdapter = {
       const title = collapseWhitespace(entry.title || parsed.feedTitle || source._source.name);
       // Keep the untruncated text for the fingerprint so a revision that only
       // differs past the stored-body cap is still detected as a change.
-      const fullBodyText = stripHtml(entry.bodyHtml ?? '');
+      //
+      // `parse_rss.ts` has already decided whether this entry's body is markup or plain
+      // text — markup goes through stripHtml, text is already safe and is used as-is, and
+      // only the markup case has anything to archive as `body_html`. A text-typed Atom
+      // construct (untyped, or `type="text"`) is genuinely not HTML, so storing it as
+      // `body_html` would mislabel it; omitting it here is a deliberate correctness fix,
+      // not an oversight — no existing report shape depended on that mislabeling.
+      const fullBodyText =
+        entry.body?.kind === 'markup' ? stripHtml(entry.body.html) : entry.body?.text ?? '';
       const bodyText = truncate(fullBodyText, BODY_TEXT_MAX_LENGTH);
       // Per-item fingerprint seed: feed URL + stable item id + canonical title,
       // plus the publish timestamp and a hash of the body. Advisories commonly
@@ -108,7 +116,7 @@ export const rssAdapter: FetchAdapter = {
         content: buildReportContent({
           title: truncate(title, TITLE_MAX_LENGTH),
           bodyText,
-          bodyHtml: entry.bodyHtml,
+          bodyHtml: entry.body?.kind === 'markup' ? entry.body.html : undefined,
           language,
         }),
         severity: {

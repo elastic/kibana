@@ -8,6 +8,18 @@
 import xml2js from 'xml2js';
 
 /**
+ * Resolved payload of a feed entry's description/content, disambiguated once,
+ * here, where the feed's actual XML structure and namespace declarations are
+ * visible. Downstream HTML processing never needs to know whether this was
+ * entity-encoded HTML, inline XML child elements, or CDATA — those are all
+ * XML-parse-time distinctions that are fully resolved by the time this leaves
+ * this file. Only the html/text distinction survives, because that's the one
+ * decision the RSS adapter still needs to make: whether to run `stripHtml`
+ * over it and whether to store it as `content.body_html`.
+ */
+export type EntryBody = { kind: 'markup'; html: string } | { kind: 'text'; text: string };
+
+/**
  * Format-agnostic representation of a single feed entry. The RSS
  * adapter emits one `NormalizedReport` per `RssEntry` regardless of
  * whether the upstream feed is RSS 2.0, Atom, or RDF — keeping the
@@ -28,15 +40,8 @@ export interface RssEntry {
   link?: string;
   /** ISO-8601 string when the feed exposes a publish/update timestamp. */
   publishedAt?: string;
-  /**
-   * Best-effort plaintext body. The adapter strips HTML before writing
-   * to `content.body_text`; the original markup is preserved on
-   * `content.body_html` (mapped `index: false`) so extraction can be re-run
-   * without re-fetching. It is unsanitized feed markup and must not be rendered.
-   */
-  body: string;
-  /** Original markup preserved verbatim. */
-  bodyHtml?: string;
+  /** Undefined when the feed provides no description/content/summary at all. */
+  body?: EntryBody;
 }
 
 export interface ParsedFeed {
@@ -64,6 +69,21 @@ export const parseRssFeed = async (xml: string): Promise<ParsedFeed> => {
   // `explicitArray: true` matches the existing siem_migrations XmlParser
   // convention so all child accessors are arrays — which simplifies the
   // walk below (no `Array.isArray` branches per field).
+  //
+  // `explicitChildren`/`preserveChildrenOrder`/`charsAsChildren`/`includeWhiteChars`
+  // add an ordered `$$` child list (text runs included, in position) alongside the
+  // existing by-name-grouped arrays. This is what lets an Atom `type="xhtml"` construct's
+  // real child markup be captured and re-serialized instead of being silently dropped —
+  // the by-name shape only exposed the concatenated *text* of a subtree, which for mixed
+  // element/text content loses structure entirely.
+  //
+  // Deliberately NOT using xml2js's own `xmlns: true` option: it couples to the
+  // underlying SAX parser's strict mode, which throws on an undeclared namespace
+  // prefix. Real feeds routinely use `dc:`/`content:` without a declaration in scope,
+  // which is exactly the kind of spec violation this parser exists to tolerate — verified
+  // by running it, an undeclared prefix throws with `xmlns: true` and does not without it.
+  // Namespace resolution for the one case that needs it (`content:encoded` under an
+  // aliased prefix) is done separately, below, over the same lenient parse.
   const parsed = await xml2js.parseStringPromise(trimmed, {
     explicitArray: true,
     explicitCharkey: true,
@@ -71,21 +91,40 @@ export const parseRssFeed = async (xml: string): Promise<ParsedFeed> => {
     attrkey: '$',
     trim: false,
     normalizeTags: false,
+    explicitChildren: true,
+    preserveChildrenOrder: true,
+    charsAsChildren: true,
+    includeWhiteChars: true,
+    childkey: '$$',
   });
 
   // Atom: <feed xmlns="http://www.w3.org/2005/Atom">
   if (parsed.feed) return parseAtom(parsed.feed);
   // RSS 2.0: <rss><channel>...</channel></rss>
-  if (parsed.rss?.channel?.[0]) return parseRss2(parsed.rss.channel[0]);
+  if (parsed.rss?.channel?.[0]) {
+    // `xmlns:*` declarations for a module like Content commonly sit on the outermost
+    // <rss> element, one level above <channel>, so the root's own attributes have to
+    // seed the scope before descending — `parseRss2` never sees <rss> itself otherwise.
+    const rootScope = extendScope(EMPTY_SCOPE, (parsed.rss as XmlNode).$);
+    return parseRss2(parsed.rss.channel[0], rootScope);
+  }
   // RDF / RSS 1.0: <rdf:RDF><channel/><item/>...</rdf:RDF>
-  const rdfRoot = parsed['rdf:RDF'] ?? parsed.RDF ?? parsed['rss:RDF'] ?? parsed.feed ?? undefined;
+  const rdfRoot = parsed['rdf:RDF'] ?? parsed.RDF ?? parsed['rss:RDF'] ?? undefined;
   if (rdfRoot) return parseRdf(rdfRoot);
 
   return { feedTitle: '', entries: [] };
 };
 
+interface XmlChildNode {
+  '#name'?: string;
+  _?: string;
+  $?: Record<string, string>;
+  $$?: XmlChildNode[];
+}
+
 interface XmlNode {
   $?: Record<string, string>;
+  $$?: XmlChildNode[];
   _?: string;
   [key: string]: unknown;
 }
@@ -133,14 +172,173 @@ const dropEmpty = (entries: RssEntry[]): RssEntry[] =>
   // Items without any identifier would generate a fresh fingerprint on
   // every run, defeating the dedup gate. Better to drop them than to
   // pollute the reports index.
-  //
-  // `bodyHtml` has to be in the content check. Every parser branch below leaves
-  // `body` as an empty string and puts the actual description in `bodyHtml`, so
-  // testing `title || body` dropped every RSS 2.0 item that had a description but
-  // no title, which the spec permits and real advisory feeds do publish.
-  entries.filter((entry) => entry.id && (entry.title || entry.body || entry.bodyHtml));
+  entries.filter((entry) => entry.id && (entry.title || entry.body));
 
-const parseRss2 = (channel: XmlNode): ParsedFeed => {
+const markupBody = (html: string | undefined): EntryBody | undefined =>
+  html ? { kind: 'markup', html } : undefined;
+
+// --- RSS Content Module (content:encoded) namespace resolution ------------------------
+
+const CONTENT_MODULE_NS = 'http://purl.org/rss/1.0/modules/content/';
+
+/**
+ * `prefix -> namespace URI`, accumulated top-down from `xmlns`/`xmlns:*` attributes.
+ * Empty string is the key for the default (unprefixed) namespace.
+ */
+type NamespaceScope = ReadonlyMap<string, string>;
+
+const EMPTY_SCOPE: NamespaceScope = new Map();
+
+/** Extends `scope` with any `xmlns`/`xmlns:*` declarations on this node's attributes. */
+const extendScope = (
+  scope: NamespaceScope,
+  attrs: Record<string, string> | undefined
+): NamespaceScope => {
+  if (!attrs) return scope;
+  const declared = Object.entries(attrs).filter(
+    ([name]) => name === 'xmlns' || name.startsWith('xmlns:')
+  );
+  if (declared.length === 0) return scope;
+  const next = new Map(scope);
+  for (const [name, uri] of declared) {
+    next.set(name === 'xmlns' ? '' : name.slice('xmlns:'.length), uri);
+  }
+  return next;
+};
+
+/**
+ * Finds a child of `parent` (from its by-name-grouped keys, not `$$`) whose local name
+ * (the part after `:`, or the whole key if unprefixed) matches `localName`, and returns
+ * its qualified key alongside the first element. Used to find `content:encoded` under
+ * whatever prefix a feed actually used, including a non-conventional alias.
+ */
+const findChildByLocalName = (
+  parent: XmlNode,
+  localName: string
+): { qualifiedName: string; node: XmlNode } | undefined => {
+  const candidateKeys = Object.keys(parent).filter((key) => {
+    if (key === '$' || key === '_' || key === '$$') return false;
+    const colon = key.indexOf(':');
+    const local = colon > 0 ? key.slice(colon + 1) : key;
+    return local === localName;
+  });
+
+  for (const key of candidateKeys) {
+    const value = parent[key];
+    const node = Array.isArray(value) ? value[0] : value;
+    if (node && typeof node === 'object') return { qualifiedName: key, node: node as XmlNode };
+  }
+  return undefined;
+};
+
+/**
+ * Resolves the RSS Content Module's `encoded` element, under any prefix, and returns its
+ * text when found.
+ *
+ * The conventional `content:` prefix is accepted even when undeclared — feeds that use it
+ * virtually always mean the Content Module, and requiring a declaration would reject working
+ * feeds this parser has always accepted. Any *other* prefix has to resolve, via an actual
+ * `xmlns:` declaration on the item or the document root, to the module's namespace URI —
+ * an aliased prefix (`<ti:encoded>`) is only the Content Module when a feed actually says so.
+ */
+const resolveContentEncoded = (item: XmlNode, rootScope: NamespaceScope): string | undefined => {
+  const found = findChildByLocalName(item, 'encoded');
+  if (!found) return undefined;
+
+  const colon = found.qualifiedName.indexOf(':');
+  const prefix = colon > 0 ? found.qualifiedName.slice(0, colon) : '';
+  if (prefix === 'content') return text(found.node);
+
+  // The declaration can sit on the item, or on the found element itself — both are valid
+  // XML, and a declaration on the element only ever widens the scope for the check below.
+  const scope = extendScope(extendScope(rootScope, item.$), found.node.$);
+  if (scope.get(prefix) === CONTENT_MODULE_NS) return text(found.node);
+
+  return undefined;
+};
+
+// --- Atom text-construct type resolution -----------------------------------------------
+
+type AtomContentKind = 'text' | 'html' | 'inline-xml';
+
+/**
+ * RFC 4287 §4.1.3: `title`/`summary`/`rights`/`subtitle` take `text`|`html`|`xhtml`.
+ * `content` additionally accepts any MIME type, of which `text/html` is the encoded-markup
+ * case and anything ending `+xml` (or `text/xml`/`application/xml`) is inline XML markup,
+ * same as the `xhtml` shorthand. Unrecognized or absent types default to `text` — preserving
+ * content rather than deleting it.
+ */
+const resolveAtomContentKind = (rawType: string | undefined): AtomContentKind => {
+  const type = (rawType ?? 'text').split(';', 1)[0].trim().toLowerCase();
+  if (type === 'html' || type === 'text/html') return 'html';
+  if (
+    type === 'xhtml' ||
+    type === 'text/xml' ||
+    type === 'application/xml' ||
+    type.endsWith('+xml')
+  ) {
+    return 'inline-xml';
+  }
+  return 'text';
+};
+
+const HTML_ESCAPES: Record<string, string> = { '&': '&amp;', '<': '&lt;', '>': '&gt;' };
+const escapeText = (value: string): string => value.replace(/[&<>]/g, (c) => HTML_ESCAPES[c]);
+
+const ATTR_ESCAPES: Record<string, string> = { '&': '&amp;', '"': '&quot;', '<': '&lt;' };
+const escapeAttr = (value: string): string => value.replace(/[&"<]/g, (c) => ATTR_ESCAPES[c]);
+
+/**
+ * Re-serializes an xml2js `explicitChildren` subtree into an HTML string.
+ *
+ * `xml2js.Builder` cannot do this — verified by running it against this exact shape, it
+ * throws `Invalid character in name` because it iterates `$$`/`#name` bookkeeping keys as
+ * if they were element names. This walker is small because the shape is fully known here;
+ * `#name: '__text__'` marks a text run (added by `charsAsChildren`), anything else is an
+ * element.
+ */
+const serializeXmlNode = (node: XmlChildNode): string => {
+  const name = node['#name'];
+  if (name === undefined || name === '__text__') return escapeText(node._ ?? '');
+
+  const attrs = Object.entries(node.$ ?? {})
+    .filter(([attrName]) => attrName !== 'xmlns' && !attrName.startsWith('xmlns:'))
+    .map(([attrName, value]) => ` ${attrName}="${escapeAttr(value)}"`)
+    .join('');
+
+  const children = node.$$ ?? [];
+  return `<${name}${attrs}>${children.map(serializeXmlNode).join('')}</${name}>`;
+};
+
+/**
+ * Serializes the child markup of an xhtml/inline-XML Atom text construct back into an HTML
+ * string, so downstream HTML processing sees ordinary markup and never needs to know this
+ * started life as inline XML rather than entity-encoded HTML.
+ */
+const serializeInlineXmlContent = (node: XmlChildNode): string =>
+  (node.$$ ?? []).map(serializeXmlNode).join('');
+
+/** Resolves an Atom `<content>`/`<summary>` node into its disambiguated body payload. */
+const resolveTextConstruct = (node: XmlChildNode | undefined): EntryBody | undefined => {
+  if (node === undefined) return undefined;
+  const kind = resolveAtomContentKind(firstAttr(node, 'type'));
+
+  if (kind === 'text') {
+    const value = (node._ ?? '').trim();
+    return value ? { kind: 'text', text: value } : undefined;
+  }
+  if (kind === 'html') {
+    // Already entity-decoded by xml2js's own XML parse.
+    return markupBody((node._ ?? '').trim() || undefined);
+  }
+  // 'inline-xml': RFC 4287 requires exactly one child element (typically xhtml:div).
+  return markupBody(serializeInlineXmlContent(node).trim() || undefined);
+};
+
+// --- Per-format parsing -------------------------------------------------------------------
+
+const parseRss2 = (channel: XmlNode, rssRootScope: NamespaceScope): ParsedFeed => {
+  const rootScope = extendScope(rssRootScope, channel.$);
   const items = (channel.item as XmlNode[] | undefined) ?? [];
   const entries: RssEntry[] = items.map((item) => {
     const guid = text(item.guid);
@@ -151,8 +349,7 @@ const parseRss2 = (channel: XmlNode): ParsedFeed => {
     // <content:encoded> ships the full HTML article body when the
     // feed wants to provide more than the summary. Some feeds use it,
     // some don't — fall back to the description.
-    const contentEncoded = text((item as XmlNode)['content:encoded']);
-    const bodyHtml = contentEncoded || description || undefined;
+    const contentEncoded = resolveContentEncoded(item, rootScope);
     const publishedAt =
       toIsoDate(text(item.pubDate)) ?? toIsoDate(text((item as XmlNode)['dc:date']));
     return {
@@ -160,8 +357,7 @@ const parseRss2 = (channel: XmlNode): ParsedFeed => {
       title,
       link: link || undefined,
       publishedAt,
-      body: '',
-      bodyHtml,
+      body: markupBody(contentEncoded || description || undefined),
     };
   });
   return {
@@ -186,17 +382,16 @@ const parseAtom = (feed: XmlNode): ParsedFeed => {
         return rel === undefined || rel === 'alternate';
       }) ?? linkArr[0];
     const linkHref = firstAttr(link, 'href') ?? text(link);
-    const summary = text(entry.summary);
-    const content = text(entry.content);
-    const bodyHtml = content || summary || undefined;
+    const content = ((entry.content as XmlChildNode[] | undefined) ?? [])[0];
+    const summary = ((entry.summary as XmlChildNode[] | undefined) ?? [])[0];
+    const body = resolveTextConstruct(content) ?? resolveTextConstruct(summary);
     const publishedAt = toIsoDate(text(entry.updated)) ?? toIsoDate(text(entry.published));
     return {
       id: id || linkHref,
       title,
       link: linkHref || undefined,
       publishedAt,
-      body: '',
-      bodyHtml,
+      body,
     };
   });
   return {
@@ -211,6 +406,7 @@ const parseRdf = (rdf: XmlNode): ParsedFeed => {
   // than nested under it; the channel's `<items><rdf:Seq>` only references
   // them by `rdf:about`. We don't need the order — we just walk the
   // siblings.
+  const rootScope = extendScope(EMPTY_SCOPE, rdf.$);
   const channel = ((rdf.channel as XmlNode[] | undefined) ?? [])[0] ?? {};
   const items = (rdf.item as XmlNode[] | undefined) ?? [];
   const entries: RssEntry[] = items.map((item) => {
@@ -219,6 +415,9 @@ const parseRdf = (rdf: XmlNode): ParsedFeed => {
     const id = about || link || text(item.guid);
     const title = text(item.title);
     const description = text(item.description);
+    // RSS 1.0's Content Module support, same as parseRss2 — RDF feeds that ship
+    // <content:encoded> alongside the bare <description> want the fuller body used.
+    const contentEncoded = resolveContentEncoded(item, rootScope);
     const publishedAt =
       toIsoDate(text((item as XmlNode)['dc:date'])) ?? toIsoDate(text(item.pubDate));
     return {
@@ -226,8 +425,7 @@ const parseRdf = (rdf: XmlNode): ParsedFeed => {
       title,
       link: link || undefined,
       publishedAt,
-      body: '',
-      bodyHtml: description || undefined,
+      body: markupBody(contentEncoded || description || undefined),
     };
   });
   return {

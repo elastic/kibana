@@ -83,8 +83,9 @@ describe('parseRssFeed', () => {
       link: 'https://acme.example/posts/apt1',
       publishedAt: new Date('Mon, 12 May 2025 09:30:00 GMT').toISOString(),
     });
-    // CDATA contents preserved as-is on bodyHtml.
-    expect(parsed.entries[0].bodyHtml).toContain('<b>APT-1</b>');
+    // CDATA contents preserved as-is on the markup body.
+    expect(parsed.entries[0].body).toMatchObject({ kind: 'markup' });
+    expect((parsed.entries[0].body as { html: string }).html).toContain('<b>APT-1</b>');
   });
 
   it('parses an Atom feed and prefers updated over published', async () => {
@@ -94,8 +95,11 @@ describe('parseRssFeed', () => {
     expect(parsed.entries).toHaveLength(2);
     expect(parsed.entries[0].publishedAt).toBe('2025-05-12T09:30:00.000Z');
     expect(parsed.entries[0].link).toBe('https://vendor.example/post-1');
-    expect(parsed.entries[0].bodyHtml).toBe('<p>Long body</p>');
+    expect(parsed.entries[0].body).toEqual({ kind: 'markup', html: '<p>Long body</p>' });
     expect(parsed.entries[1].publishedAt).toBe('2025-05-11T08:00:00.000Z');
+    // Second entry has no `type` on its <summary>, which defaults to `text` per RFC 4287 —
+    // literal text, not markup, so it must not land in body_html.
+    expect(parsed.entries[1].body).toEqual({ kind: 'text', text: 'Only a summary.' });
   });
 
   it('parses an RDF / RSS 1.0 feed using rdf:about as the id', async () => {
@@ -137,7 +141,8 @@ describe('parseRssFeed — description-only items', () => {
 
     expect(parsed.entries).toHaveLength(1);
     expect(parsed.entries[0].id).toBe('adv-1');
-    expect(parsed.entries[0].bodyHtml).toContain('ransomware');
+    expect(parsed.entries[0].body).toMatchObject({ kind: 'markup' });
+    expect((parsed.entries[0].body as { html: string }).html).toContain('ransomware');
   });
 
   it('still drops an item with no identifier', async () => {
@@ -150,5 +155,182 @@ describe('parseRssFeed — description-only items', () => {
 </rss>`;
 
     expect((await parseRssFeed(feed)).entries).toHaveLength(0);
+  });
+});
+
+// Namespace resolution for the RSS Content Module: the conventional `content:` prefix is
+// accepted unconditionally (real feeds routinely omit the declaration and always mean the
+// module), but any other prefix has to actually resolve, via a real `xmlns:` declaration, to
+// the module's namespace URI. An aliased prefix that resolves to something else is not the
+// Content Module and must not be treated as one.
+describe('parseRssFeed — RSS Content Module namespace resolution', () => {
+  it('resolves content:encoded under an aliased prefix declared on the root', async () => {
+    const feed = `<?xml version="1.0"?>
+<rss xmlns:ti="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>F</title>
+    <item><guid>1</guid><title>T</title><ti:encoded>&lt;p&gt;full&lt;/p&gt;</ti:encoded></item>
+  </channel>
+</rss>`;
+
+    const parsed = await parseRssFeed(feed);
+
+    expect(parsed.entries[0].body).toEqual({ kind: 'markup', html: '<p>full</p>' });
+  });
+
+  it('resolves content:encoded under an alias declared on the element itself', async () => {
+    const feed = `<?xml version="1.0"?>
+<rss>
+  <channel>
+    <title>F</title>
+    <item><guid>1</guid><title>T</title>
+      <ti:encoded xmlns:ti="http://purl.org/rss/1.0/modules/content/">&lt;p&gt;full&lt;/p&gt;</ti:encoded>
+    </item>
+  </channel>
+</rss>`;
+
+    const parsed = await parseRssFeed(feed);
+
+    expect(parsed.entries[0].body).toEqual({ kind: 'markup', html: '<p>full</p>' });
+  });
+
+  it('accepts the conventional content: prefix even when undeclared', async () => {
+    const feed = `<?xml version="1.0"?>
+<rss>
+  <channel>
+    <title>F</title>
+    <item><guid>1</guid><title>T</title><content:encoded>&lt;p&gt;full&lt;/p&gt;</content:encoded></item>
+  </channel>
+</rss>`;
+
+    const parsed = await parseRssFeed(feed);
+
+    expect(parsed.entries[0].body).toEqual({ kind: 'markup', html: '<p>full</p>' });
+  });
+
+  it('does not treat an aliased prefix bound to an unrelated namespace as the Content Module', async () => {
+    const feed = `<?xml version="1.0"?>
+<rss xmlns:foo="urn:literal">
+  <channel>
+    <title>F</title>
+    <item><guid>1</guid><title>T</title><description>fallback</description><foo:encoded>not the module</foo:encoded></item>
+  </channel>
+</rss>`;
+
+    const parsed = await parseRssFeed(feed);
+
+    // Falls back to <description>, since the aliased <foo:encoded> did not resolve.
+    expect(parsed.entries[0].body).toEqual({ kind: 'markup', html: 'fallback' });
+  });
+
+  it('resolves content:encoded on the RDF / RSS 1.0 branch too', async () => {
+    const feed = `<?xml version="1.0"?>
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel><title>F</title></channel>
+  <item rdf:about="https://example.com/1">
+    <title>T</title>
+    <description>summary only</description>
+    <content:encoded>&lt;p&gt;full RDF body&lt;/p&gt;</content:encoded>
+  </item>
+</rdf:RDF>`;
+
+    const parsed = await parseRssFeed(feed);
+
+    expect(parsed.entries[0].body).toEqual({ kind: 'markup', html: '<p>full RDF body</p>' });
+  });
+});
+
+// Atom's `type=` attribute decides whether <content>/<summary> is literal text, entity-encoded
+// HTML, or inline XML markup. Ignoring it either mislabels plain text as HTML or — for
+// type="xhtml" — silently drops the real child markup, since a plain-text extraction of that
+// node only sees the (mostly empty) text between the child elements.
+describe('parseRssFeed — Atom content-type resolution', () => {
+  const entryWith = (contentOrSummary: string) => `<?xml version="1.0"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>F</title>
+  <entry><id>1</id><title>T</title>${contentOrSummary}</entry>
+</feed>`;
+
+  it('keeps a text-typed summary literal, not markup', async () => {
+    const feed = entryWith(
+      '<summary type="text">Exploit uses &lt;script&gt; and c2.evil.test</summary>'
+    );
+
+    const parsed = await parseRssFeed(feed);
+
+    expect(parsed.entries[0].body).toEqual({
+      kind: 'text',
+      text: 'Exploit uses <script> and c2.evil.test',
+    });
+  });
+
+  it('keeps an untyped content literal, since the default is text', async () => {
+    const feed = entryWith('<content>Exploit uses &lt;script&gt; and c2.evil.test</content>');
+
+    const parsed = await parseRssFeed(feed);
+
+    expect(parsed.entries[0].body).toEqual({
+      kind: 'text',
+      text: 'Exploit uses <script> and c2.evil.test',
+    });
+  });
+
+  it('captures type="xhtml" child markup instead of dropping it', async () => {
+    const feed = entryWith(
+      '<content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">' +
+        '<p>evil.com</p><p>bad.net</p></div></content>'
+    );
+
+    const parsed = await parseRssFeed(feed);
+
+    // The xhtml:div wrapper is real structural markup and is kept — text.ts's block
+    // boundary handling treats it like any other <div>, so this changes nothing about
+    // the extracted IOCs.
+    expect(parsed.entries[0].body).toEqual({
+      kind: 'markup',
+      html: '<div><p>evil.com</p><p>bad.net</p></div>',
+    });
+  });
+
+  it('treats a text/html media type on content as markup', async () => {
+    const feed = entryWith('<content type="text/html">&lt;p&gt;evil.com&lt;/p&gt;</content>');
+
+    const parsed = await parseRssFeed(feed);
+
+    expect(parsed.entries[0].body).toEqual({ kind: 'markup', html: '<p>evil.com</p>' });
+  });
+
+  it('treats an application/xhtml+xml media type on content as inline XML', async () => {
+    const feed = entryWith(
+      '<content type="application/xhtml+xml"><div xmlns="http://www.w3.org/1999/xhtml">' +
+        '<p>evil.com</p></div></content>'
+    );
+
+    const parsed = await parseRssFeed(feed);
+
+    expect(parsed.entries[0].body).toEqual({ kind: 'markup', html: '<div><p>evil.com</p></div>' });
+  });
+
+  it('treats a non-html media type as literal text', async () => {
+    const feed = entryWith(
+      '<content type="text/plain">Exploit uses &lt;script&gt; and c2.evil.test</content>'
+    );
+
+    const parsed = await parseRssFeed(feed);
+
+    expect(parsed.entries[0].body).toEqual({
+      kind: 'text',
+      text: 'Exploit uses <script> and c2.evil.test',
+    });
+  });
+
+  it('prefers content over summary when both are present', async () => {
+    const feed = entryWith(
+      '<summary>short</summary><content type="html">&lt;p&gt;full&lt;/p&gt;</content>'
+    );
+
+    const parsed = await parseRssFeed(feed);
+
+    expect(parsed.entries[0].body).toEqual({ kind: 'markup', html: '<p>full</p>' });
   });
 });
