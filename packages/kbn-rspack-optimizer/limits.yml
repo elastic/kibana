@@ -2,7 +2,7 @@ pageLoadAssetSize:
   actions: 3496
   advancedSettings: 1981
   agentBuilder: 375
-  agentBuilderDashboards: 3074
+  agentBuilderDashboards: 3743
   agentBuilderPlatform: 21685
   agentBuilderSml: 328
   agentBuilderVisualizations: 1282
@@ -39,7 +39,7 @@ pageLoadAssetSize:
   crossClusterReplication: 7691
   customContent: 2127
   customIntegrations: 636
-  dashboard: 452
+  dashboard: 536
   dashboardMarkdown: 4012
   data: 11798
   dataFederation: 4838
