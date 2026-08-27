@@ -206,7 +206,7 @@ export function getDashboardApi({
   });
 
   const historyManager = initializeHistoryManager({
-    anyStateChange$: layoutManager.internalApi.anyStateChange$,
+    anyStateChange$,
     hasOverlays$: trackOverlayApi.hasOverlays$,
     setState,
     getState,
