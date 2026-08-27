@@ -99,6 +99,8 @@ export interface SecuritySharedParams<TParams extends RuleParams = RuleParams> {
   dateNanosTimestampFields: string[];
   /** Timestamp fields mapped as both date and date_nanos across the input indices */
   mixedTimestampFields: string[];
+  /** Fields mapped as constant_keyword in at least one of the input indices, detected only when the reducedEventFieldsRequestEnabled experimental feature is on */
+  constantKeywordFields: string[];
   aggregatableTimestampField: string;
   unprocessedExceptions: ExceptionListItemSchema[];
   exceptionFilter: Filter | undefined;

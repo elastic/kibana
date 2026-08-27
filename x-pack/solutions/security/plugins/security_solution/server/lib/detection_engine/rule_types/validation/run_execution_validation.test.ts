@@ -39,7 +39,8 @@ describe('runExecutionValidation', () => {
 
   const run = (
     params: RuleParams = getQueryRuleParams(),
-    secondaryTimestamp: string | undefined = undefined
+    secondaryTimestamp: string | undefined = undefined,
+    detectConstantKeywordFields = false
   ) =>
     runExecutionValidation({
       params,
@@ -51,6 +52,7 @@ describe('runExecutionValidation', () => {
       secondaryTimestamp,
       ruleExecutionLogger,
       isServerless: false,
+      detectConstantKeywordFields,
     });
 
   beforeEach(() => {
@@ -124,6 +126,47 @@ describe('runExecutionValidation', () => {
       const result = await run(getMlRuleParams());
       expect(result.dateNanosTimestampFields).toEqual([]);
       expect(scopedClusterClient.asCurrentUser.fieldCaps).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('constantKeywordFields', () => {
+    it('requests capabilities of the timestamp fields only when detection is off', async () => {
+      mockFieldCaps({ '@timestamp': { date: { type: 'date' } } });
+      const result = await run();
+      expect(result.constantKeywordFields).toEqual([]);
+      expect(scopedClusterClient.asCurrentUser.fieldCaps).toHaveBeenCalledWith(
+        expect.objectContaining({ fields: ['@timestamp'] }),
+        { meta: true }
+      );
+    });
+
+    it('requests capabilities of all fields and collects constant_keyword fields when detection is on', async () => {
+      mockFieldCaps({
+        '@timestamp': { date: { type: 'date' } },
+        'data_stream.dataset': { constant_keyword: { type: 'constant_keyword' } },
+        'event.module': {
+          constant_keyword: { type: 'constant_keyword' },
+          unmapped: { type: 'unmapped' },
+        },
+        'host.name': { keyword: { type: 'keyword' } },
+      });
+      const result = await run(getQueryRuleParams(), undefined, true);
+      expect(result.constantKeywordFields).toEqual(['data_stream.dataset', 'event.module']);
+      expect(scopedClusterClient.asCurrentUser.fieldCaps).toHaveBeenCalledWith(
+        expect.objectContaining({ fields: ['*'] }),
+        { meta: true }
+      );
+    });
+
+    it('is empty when the fieldCaps request fails', async () => {
+      scopedClusterClient.asCurrentUser.fieldCaps.mockRejectedValue(new Error('boom'));
+      const result = await run(getQueryRuleParams(), undefined, true);
+      expect(result.constantKeywordFields).toEqual([]);
+    });
+
+    it('is empty for machine learning rules', async () => {
+      const result = await run(getMlRuleParams(), undefined, true);
+      expect(result.constantKeywordFields).toEqual([]);
     });
   });
 });

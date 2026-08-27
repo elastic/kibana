@@ -26,6 +26,8 @@ interface BuildEventsSearchQuery<
   trackTotalHits?: boolean;
   additionalFilters?: estypes.QueryDslQueryContainer[];
   overrideBody?: OverrideBodyQuery;
+  /** Explicit list of fields to request instead of the `fields: '*'` wildcard */
+  requestedFields?: string[];
   dateNanosTimestampFields?: string[];
   mixedTimestampFields?: string[];
 }
@@ -132,6 +134,7 @@ export const buildEventsSearchQuery = <
   overrideBody,
   dateNanosTimestampFields,
   mixedTimestampFields,
+  requestedFields,
 }: BuildEventsSearchQuery<TAggs>) => {
   const timestamps = secondaryTimestamp
     ? [primaryTimestamp, secondaryTimestamp]
@@ -193,10 +196,9 @@ export const buildEventsSearchQuery = <
       },
     },
     fields: [
-      {
-        field: '*',
-        include_unmapped: true,
-      },
+      // `include_unmapped` keeps values of fields unmapped in some of the backing indices
+      // available to the fields-only consumers: alert suppression and value list exceptions
+      ...(requestedFields ?? ['*']).map((field) => ({ field, include_unmapped: true })),
       ...docFields,
     ],
     aggregations,

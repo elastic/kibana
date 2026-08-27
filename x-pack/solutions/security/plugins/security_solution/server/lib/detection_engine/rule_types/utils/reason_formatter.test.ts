@@ -53,6 +53,46 @@ describe('reason_formatter', () => {
         );
       });
     });
+    describe('when mergedDoc contains both _source and fields', () => {
+      it('should build the reason message from _source', () => {
+        const updatedMergedDoc = {
+          ...mergedDoc,
+          fields: {
+            '@timestamp': mergedDoc.fields['@timestamp'],
+          },
+          _source: {
+            'destination.ip': '9.99.99.9',
+            'destination.port': '6789',
+            'event.category': 'test',
+            'file.name': 'sample',
+            'host.name': 'host',
+            'process.name': 'doingThings.exe',
+            'process.parent.name': 'didThings.exe',
+            'source.ip': '1.11.11.1',
+            'source.port': '1234',
+            'user.name': 'test-user',
+            '@timestamp': '2021-08-11T02:28:59.101Z',
+          },
+        };
+        expect(
+          buildReasonMessageUtil({ name: ruleName, severity, mergedDoc: updatedMergedDoc })
+        ).toMatchInlineSnapshot(
+          `"test event with process doingThings.exe, parent process didThings.exe, file sample, source 1.11.11.1:1234, destination 9.99.99.9:6789, by test-user on host created medium alert my-rule."`
+        );
+      });
+
+      it('should build the same reason message from array-wrapped _source values', () => {
+        const updatedMergedDoc = {
+          ...mergedDoc,
+          _source: { ...mergedDoc.fields },
+        };
+        expect(
+          buildReasonMessageUtil({ name: ruleName, severity, mergedDoc: updatedMergedDoc })
+        ).toMatchInlineSnapshot(
+          `"test event with process doingThings.exe, parent process didThings.exe, file sample, source 1.11.11.1:1234, destination 9.99.99.9:6789, by test-user on host created medium alert my-rule."`
+        );
+      });
+    });
     describe('when event category contains multiple items', () => {
       it('should return the reason message with all categories showing', () => {
         const updatedMergedDoc = {

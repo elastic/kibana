@@ -301,6 +301,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             frozenIndicesQueriedCount,
             dateNanosTimestampFields,
             mixedTimestampFields,
+            constantKeywordFields,
           } = await runExecutionValidation({
             params,
             inputIndex,
@@ -311,6 +312,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             secondaryTimestamp,
             ruleExecutionLogger,
             isServerless: isServerless ?? false,
+            detectConstantKeywordFields: experimentalFeatures.reducedEventFieldsRequestEnabled,
           });
 
           warnings.forEach((warningMessage) => ruleExecutionLogger.warn(warningMessage));
@@ -436,6 +438,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     secondaryTimestamp,
                     dateNanosTimestampFields,
                     mixedTimestampFields,
+                    constantKeywordFields,
                     ruleExecutionLogger,
                     aggregatableTimestampField,
                     alertTimestampOverride,

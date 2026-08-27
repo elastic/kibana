@@ -28,6 +28,7 @@ export interface RunExecutionValidationParams {
   secondaryTimestamp: string | undefined;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
   isServerless: boolean;
+  detectConstantKeywordFields: boolean;
 }
 
 export interface RunExecutionValidationResult {
@@ -36,6 +37,13 @@ export interface RunExecutionValidationResult {
   frozenIndicesQueriedCount: number;
   dateNanosTimestampFields: string[];
   mixedTimestampFields: string[];
+  /**
+   * Fields mapped as `constant_keyword` in at least one of the input indices. Their values
+   * are typically absent from `_source`, so event searches requesting an explicit fields
+   * list instead of `fields: '*'` must request them to keep alert contents unchanged.
+   * Populated only when `detectConstantKeywordFields` is set.
+   */
+  constantKeywordFields: string[];
 }
 
 /**
@@ -56,6 +64,7 @@ export const runExecutionValidation = async (
     secondaryTimestamp,
     ruleExecutionLogger,
     isServerless,
+    detectConstantKeywordFields,
   } = options;
 
   const warnings: string[] = [];
@@ -63,6 +72,7 @@ export const runExecutionValidation = async (
   let frozenIndicesQueriedCount = 0;
   let dateNanosTimestampFields: string[] = [];
   let mixedTimestampFields: string[] = [];
+  let constantKeywordFields: string[] = [];
 
   if (isMachineLearningParams(params)) {
     return {
@@ -71,6 +81,7 @@ export const runExecutionValidation = async (
       frozenIndicesQueriedCount: 0,
       dateNanosTimestampFields: [],
       mixedTimestampFields: [],
+      constantKeywordFields: [],
     };
   }
 
@@ -147,6 +158,7 @@ export const runExecutionValidation = async (
       frozenIndicesQueriedCount,
       dateNanosTimestampFields,
       mixedTimestampFields,
+      constantKeywordFields,
     };
   }
 
@@ -155,7 +167,8 @@ export const runExecutionValidation = async (
       scopedClusterClient.asCurrentUser.fieldCaps(
         {
           index: inputIndex,
-          fields: timestampFields,
+          // constant_keyword detection requires capabilities of all fields, not just the timestamps
+          fields: detectConstantKeywordFields ? ['*'] : timestampFields,
           include_unmapped: true,
           runtime_mappings: runtimeMappings,
           ignore_unavailable: true,
@@ -181,6 +194,12 @@ export const runExecutionValidation = async (
       const types = fieldCapsResponse.body.fields[field];
       return types != null && 'date' in types && 'date_nanos' in types;
     });
+
+    if (detectConstantKeywordFields) {
+      constantKeywordFields = Object.entries(fieldCapsResponse.body.fields)
+        .filter(([, capabilities]) => 'constant_keyword' in capabilities)
+        .map(([fieldName]) => fieldName);
+    }
   } catch (exc) {
     warnings.push(`Timestamp fields check failed to execute ${exc}`);
   }
@@ -211,5 +230,6 @@ export const runExecutionValidation = async (
     frozenIndicesQueriedCount,
     dateNanosTimestampFields,
     mixedTimestampFields,
+    constantKeywordFields,
   };
 };

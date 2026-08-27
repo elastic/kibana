@@ -314,6 +314,15 @@ export const allowedExperimentalValues = Object.freeze({
   prebuiltRulesDeprecationUIEnabled: true,
 
   /**
+   * Requests an explicit list of fields instead of `fields: '*'` in detection engine event
+   * searches to reduce the fetched data size. Without it every event is fetched twice: once
+   * as `_source` and once as every leaf value duplicated under its dotted path in `fields`,
+   * which can exceed `elasticsearch.maxResponseSize` on large documents.
+   * Has no effect for rules running with the `allFields` merge strategy.
+   */
+  reducedEventFieldsRequestEnabled: false,
+
+  /**
    * Enables the Detection Rule Changes History API endpoint
    * (`GET /api/detection_engine/rules/_history`).
    *
