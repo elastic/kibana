@@ -253,7 +253,7 @@ evaluate.describe(
 
         expectCoverageSkillRan((response.steps ?? []) as ToolCallStep[]);
         // A too-narrow rule is not coverage: the verdict is no_coverage, but the close rule
-        // must be named so the analyst can decide to widen it instead of creating a twin.
+        // must be named so the analyst can decide to widen it instead of creating a duplicate.
         expectSingleVerdict(answerOf(response), 'no_coverage');
         expect(mentionsRule(answerOf(response), COVERAGE_RULE_NAMES.kubectlStaging)).toBe(true);
       }
@@ -293,7 +293,7 @@ evaluate.describe(
 
       const steps = (response.steps ?? []) as ToolCallStep[];
       expect(toolCalls(steps, CREATE_RULE_TOOL_ID)).toHaveLength(0);
-      // The route still has to be actionable for the user: a link, not a shrug.
+      // The route still has to be actionable for the user, with a link to the rule page.
       const linked =
         toolCalls(steps, REDIRECT_TOOL_ID).length > 0 ||
         /\/app\/security\/rules/.test(answerOf(response));

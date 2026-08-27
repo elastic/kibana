@@ -29,9 +29,9 @@ describe('detection-coverage', () => {
     expect(skill.content).toMatch(/load_skill.*recommend-prebuilt-rules/s);
   });
 
-  // The loaded siblings say "never suggest enabling or installing". This skill's purpose is
-  // the opposite, so the precedence statement is load-bearing: without it the two loaded
-  // read-only stances can talk the model out of its own verdict.
+  // The loaded siblings say "never suggest enabling or installing". This skill intentionally
+  // can recommend those routes, so the precedence statement prevents the loaded read-only
+  // stances from overriding its verdict.
   it('states that its routing wins over the loaded skills read-only stance', () => {
     expect(skill.content).toMatch(/Precedence/);
     expect(skill.content).toMatch(/That restriction is theirs, not yours/);

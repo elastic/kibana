@@ -34,8 +34,6 @@ const MANAGEMENT = {
   versionStrategy: 'auto',
 } as const;
 
-// Reinstall note: managed definitions reconcile by content hash on plugin start; a
-// yaml-only edit does not restart the dev server, so touch this file to reload.
 const PLUGIN_ID = 'pnd';
 
 /** Discoverable in Watch catalog / WorkflowSelector surfaces that opt into `watch`. */
