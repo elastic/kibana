@@ -51,7 +51,7 @@ import {
   getTitle,
   logStateDiff,
   shouldLogStateDiff,
-  UNSAVED_CHANGES_DEBOUNCE,
+  STATE_CHANGE_DEBOUNCE,
 } from '@kbn/presentation-publishing';
 import { asyncForEach } from '@kbn/std';
 import type { MaybePromise } from '@kbn/utility-types';
@@ -528,7 +528,7 @@ export function initializeLayoutManager(
     internalApi: {
       anyStateChange$: merge(
         layout$.pipe(skip(1)),
-        latestChildrenState$.pipe(debounceTime(UNSAVED_CHANGES_DEBOUNCE))
+        latestChildrenState$.pipe(debounceTime(STATE_CHANGE_DEBOUNCE))
       ).pipe(
         debounceTime(0), // batch state + layout updates
         map(() => undefined)

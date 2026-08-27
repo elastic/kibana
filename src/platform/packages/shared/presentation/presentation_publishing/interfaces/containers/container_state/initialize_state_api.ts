@@ -16,7 +16,7 @@ import { apiHasLastSavedChildState } from '../last_saved_child_state';
 import type { PresentationContainer } from '../presentation_container';
 import type { HasUniqueId } from '../../has_uuid';
 import type { HasParentApi } from '../../has_parent_api';
-export const UNSAVED_CHANGES_DEBOUNCE = 100;
+export const STATE_CHANGE_DEBOUNCE = 100;
 
 export const initializeStateApi = <StateType extends object = object>({
   uuid,
@@ -36,7 +36,7 @@ export const initializeStateApi = <StateType extends object = object>({
     // anyStateChange$ does not emit on subscribe
     // use startWith to get latest state on subscribe
     startWith(undefined),
-    debounceTime(UNSAVED_CHANGES_DEBOUNCE),
+    debounceTime(STATE_CHANGE_DEBOUNCE),
     map(() => serializeState())
   );
 
@@ -51,7 +51,7 @@ export const initializeStateApi = <StateType extends object = object>({
   }
 
   const hasUnsavedChanges$ = latestState$.pipe(
-    combineLatestWith(parentApi.lastSavedStateForChild$(uuid)),
+    combineLatestWith(parentApi.lastSSTATE_CHANGE_DEBOUNCE),
     map(([currentState, lastSavedState]) => {
       // check state equality
       return !areComparatorsEqual(
