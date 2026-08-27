@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
-
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
 import type {
   CreateUiamOAuthClientParams,
   UiamOAuthClientResponse,
@@ -21,7 +18,7 @@ import type {
 
 import type { SecurityLicense } from '../../../common';
 import { getDetailedErrorMessage } from '../../errors';
-import type { UiamServicePublic } from '../../uiam';
+import { getUiamAccessTokenFromRequest, type UiamServicePublic } from '../../uiam';
 
 export interface UiamOAuthOptions {
   logger: Logger;
@@ -307,16 +304,6 @@ export class UiamOAuth implements UiamOAuthType {
    * Extracts the Bearer access token from the request. The token must be a UIAM credential.
    */
   static getAccessToken(request: KibanaRequest): string {
-    const authorization = HTTPAuthorizationHeader.parseFromRequest(request);
-
-    if (!authorization) {
-      throw Boom.unauthorized('Request does not contain an authorization header');
-    }
-
-    if (!isUiamCredential(authorization)) {
-      throw Boom.badRequest('Provided credential is not compatible with UIAM');
-    }
-
-    return authorization.credentials;
+    return getUiamAccessTokenFromRequest(request);
   }
 }

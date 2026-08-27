@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+export { getUiamAccessTokenFromRequest } from './get_uiam_access_token';
+export { KIBANA_SOLUTION_TO_UIAM_PROJECT_TYPE } from './project_type';
 export {
   UiamService,
   type UiamServicePublic,
   type ConvertUiamApiKeyRequestEntry,
   type ConvertUiamApiKeysResponse,
   type CreateOAuthClientRequestBody,
+  type CreateServiceAccountRequestBody,
   type PatchOAuthClientRequestBody,
   type OAuthClientResponse,
   type OAuthConnectionResponse,
