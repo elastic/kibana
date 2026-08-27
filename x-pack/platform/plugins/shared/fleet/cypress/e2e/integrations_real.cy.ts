@@ -91,7 +91,6 @@ function getAllIntegrations() {
 }
 
 describe('Add Integration - Real API', () => {
-
   beforeEach(() => {
     login();
 
