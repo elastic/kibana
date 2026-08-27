@@ -32,6 +32,8 @@ import {
   ingestDoc,
   normalizeKeywordList,
   searchDocById,
+  setupLogsTestDataStream,
+  teardownLogsTestDataStream,
 } from '../../../common/fixtures/helpers';
 import { LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT } from '../../../../../server/domain/saved_objects';
 
@@ -39,7 +41,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
   let defaultHeaders: Record<string, string>;
   let internalHeaders: Record<string, string>;
 
-  apiTest.beforeAll(async ({ samlAuth, apiClient, esArchiver, kbnClient }) => {
+  apiTest.beforeAll(async ({ samlAuth, apiClient, esClient, kbnClient, esArchiver }) => {
     const credentials = await samlAuth.asInteractiveUser('admin');
     defaultHeaders = {
       ...credentials.cookieHeader,
@@ -83,8 +85,9 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
     });
     expect(response.statusCode).toBe(201);
 
+    await setupLogsTestDataStream(esClient);
     await esArchiver.loadIfNeeded(
-      'x-pack/platform/plugins/shared/entity_store/test/scout/common/es_archives/updates'
+      'x-pack/platform/plugins/shared/entity_store/test/scout/common/es_archives/logs'
     );
   });
 
@@ -96,6 +99,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
     });
     expect(response.statusCode).toBe(200);
     await clearEntityStoreIndices(esClient);
+    await teardownLogsTestDataStream(esClient);
   });
 
   apiTest('Should extract properly extract host', async ({ apiClient, esClient, log }) => {
