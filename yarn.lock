@@ -4232,6 +4232,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/agent-builder-sml-test-types-plugin@link:x-pack/platform/test/agent_builder_sml/plugins/sml_test_types":
+  version "0.0.0"
+  uid ""
+
 "@kbn/agent-builder-tools-base@link:x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base":
   version "0.0.0"
   uid ""
