@@ -10,9 +10,9 @@ paths:
       operationId: UpdateWatch
       description: >-
         Update a Security Watch and its settings. A watch and its settings are patched through one
-        endpoint because they are one thing to the user, and because settings will eventually be
-        applied to the managed workflow definition the watch is projected from. Every field is
-        optional so the UI sends only what changed.
+        endpoint because they are one thing to the user and settings are applied to the managed
+        workflow definition the watch is projected from. Settings writes carry the revision returned
+        by GET for best-effort stale-read detection; this is not an atomic write guard.
       summary: Update watch
       tags:
         - PND API
@@ -33,8 +33,16 @@ paths:
                 enabled:
                   type: boolean
                   description: >-
-                    Written to the backing workflow as an enablement-only update, which is the one
-                    mutation permitted on a managed workflow.
+                    Enables or disables the backing workflow. Enabling an uninstalled built-in watch
+                    first installs its per-space managed document.
+                settingsRevision:
+                  type: integer
+                  format: int64
+                  minimum: 0
+                  nullable: true
+                  description: >-
+                    Revision returned by GET. Required when any settings field is present; null
+                    asserts that the per-space managed watch has not been installed yet.
                 autonomyLevel:
                   $ref: '../components/watch_settings.schema.yaml#/components/schemas/WatchAutonomyLevel'
                 triggers:
@@ -115,5 +123,16 @@ paths:
                     $ref: '../components/watch.schema.yaml#/components/schemas/Watch'
                   settings:
                     $ref: '../components/watch_settings.schema.yaml#/components/schemas/WatchSettings'
+                  settingsRevision:
+                    type: integer
+                    format: int64
+                    minimum: 0
+                    nullable: true
+                    description: Current logical workflow version after the update
                 required:
                   - watch
+                  - settingsRevision
+        '409':
+          description: The settings changed before this request began applying its patch
+        '400':
+          description: The settings patch is unsupported or omitted its revision
