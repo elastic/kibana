@@ -44,9 +44,11 @@ export function getProjectRoutingFromEsqlQuery(queryString: string): string | un
       if (!valueArg || Array.isArray(valueArg)) continue;
 
       if (isLiteral(valueArg)) {
+        // For string literals, extract the unquoted value
         if (valueArg.literalType === 'keyword') {
           return valueArg.valueUnquoted;
         }
+        // For other literal types, use the printer to get proper string representation
         return LeafPrinter.literal(valueArg);
       }
     }

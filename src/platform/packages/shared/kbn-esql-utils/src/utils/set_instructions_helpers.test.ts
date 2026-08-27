@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EsqlQuery } from '@elastic/esql';
 import { getProjectRoutingFromEsqlQuery } from './set_instructions_helpers';
 
 describe('set instructions helpers', () => {

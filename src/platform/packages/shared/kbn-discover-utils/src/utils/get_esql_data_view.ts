@@ -63,7 +63,7 @@ export async function getEsqlDataView(
         createNewInstanceEvenIfCachedOneAvailable: !currentDataView || onlyTimeFieldChanged,
       },
       http: services.http,
-      projectRouting,
+      effectiveProjectRouting,
     });
     dataViewRoutingMap.set(newDataView, effectiveProjectRouting);
     return newDataView;

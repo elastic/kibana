@@ -17,7 +17,6 @@ import {
 } from '@kbn/esql-types';
 import { getIndexPatternFromESQLQuery } from './get_index_pattern_from_query';
 import { getESQLTimeField } from './get_time_field';
-import { getProjectRoutingFromEsqlQuery } from './set_instructions_helpers';
 
 // uses browser sha256 method with fallback if unavailable
 async function sha256(str: string) {
@@ -72,7 +71,8 @@ async function getESQLAdHocDataviewId({
  * @param options.id - Explicit DataView ID. When provided, this ID is used as-is instead of generating one via SHA-256. Useful when the caller already knows the ID (e.g. from a persisted ad-hoc DataView spec) and wants the DataViewService cache to be populated under that exact key.
  * @param options.idPrefix - Custom prefix for the DataView ID (defaults to 'esql'). Use a different prefix to avoid cache collisions between consumers.
  * @param http - Optional HTTP service for fetching time field information. If not provided, no time field detection is performed
- * @param projectRouting - Optional CPS project picker routing. An explicit `SET project_routing` in the query takes precedence.
+ * @param effectiveProjectRouting - The resolved CPS project routing to use. Callers must resolve
+ * precedence themselves (i.e. `getProjectRoutingFromEsqlQuery(query) ?? pickerRouting`) before passing.
  *
  * @returns Promise that resolves to the created DataView with the detected time field (if any)
  *
@@ -82,7 +82,7 @@ export async function getESQLAdHocDataview({
   query,
   options,
   http,
-  projectRouting,
+  effectiveProjectRouting,
 }: {
   // the data views service to use to create the data view
   dataViewsService: DataViewsPublicPluginStart;
@@ -97,9 +97,8 @@ export async function getESQLAdHocDataview({
   };
   // optional http service to use to fetch the time field, if needed
   http?: HttpStart;
-  projectRouting?: string;
+  effectiveProjectRouting?: string;
 }) {
-  const effectiveProjectRouting = getProjectRoutingFromEsqlQuery(query) ?? projectRouting;
   const timeFieldName = await getESQLTimeField({ query, http, projectRouting: effectiveProjectRouting });
 
   const indexPattern = getIndexPatternFromESQLQuery(query);
