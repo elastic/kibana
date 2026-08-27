@@ -1161,9 +1161,7 @@ describe('AgentlessPoliciesService', () => {
         ['agentless-pp'],
         expect.anything()
       );
-      expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('non-agentless-pp')
-      );
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('non-agentless-pp'));
       expect(deleteAgentlessAgentSpy).toHaveBeenCalledWith(agentPolicyId);
 
       deleteAgentlessAgentSpy.mockRestore();
@@ -1270,8 +1268,12 @@ describe('AgentlessPoliciesService', () => {
       const logger = loggingSystemMock.createLogger();
 
       await expect(
-        new AgentlessPoliciesServiceImpl(packagePolicyService, soClient, esClient, logger)
-          .deleteAgentlessPolicy(packagePolicyId)
+        new AgentlessPoliciesServiceImpl(
+          packagePolicyService,
+          soClient,
+          esClient,
+          logger
+        ).deleteAgentlessPolicy(packagePolicyId)
       ).rejects.toThrow('No agentless package policies found');
 
       expect(deleteAgentlessAgentSpy).toHaveBeenCalledWith(agentPolicyId);
@@ -1310,8 +1312,12 @@ describe('AgentlessPoliciesService', () => {
       const logger = loggingSystemMock.createLogger();
 
       await expect(
-        new AgentlessPoliciesServiceImpl(packagePolicyService, soClient, esClient, logger)
-          .deleteAgentlessPolicy(packagePolicyId)
+        new AgentlessPoliciesServiceImpl(
+          packagePolicyService,
+          soClient,
+          esClient,
+          logger
+        ).deleteAgentlessPolicy(packagePolicyId)
       ).rejects.toThrow('Failed to delete some package policies');
 
       // deployment teardown must still run before the error is thrown
