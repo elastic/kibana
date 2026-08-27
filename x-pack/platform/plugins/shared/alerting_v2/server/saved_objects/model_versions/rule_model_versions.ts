@@ -10,6 +10,7 @@ import {
   ruleSavedObjectAttributesSchemaV1,
   ruleSavedObjectAttributesSchemaV2,
   ruleSavedObjectAttributesSchemaV3,
+  ruleSavedObjectAttributesSchemaV4,
 } from '../schemas/rule_saved_object_attributes';
 import { migrateRuleArtifactsToData } from './migrate_rule_artifacts_to_data';
 
@@ -74,6 +75,34 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
     schemas: {
       forwardCompatibility: ruleSavedObjectAttributesSchemaV3.extends({}, { unknowns: 'ignore' }),
       create: ruleSavedObjectAttributesSchemaV3,
+    },
+  },
+  '5': {
+    // Add optional `metadata.source` — a framework-agnostic { type, data }
+    // envelope tracking the originating spec or content pack. `source.type` is
+    // indexed so rules can be filtered by source type; `source.data` is flattened
+    // so per-type payload keys can be filtered. No backfill: pre-existing
+    // user-authored rules have no source.
+    changes: [
+      {
+        type: 'mappings_addition',
+        addedMappings: {
+          metadata: {
+            properties: {
+              source: {
+                properties: {
+                  type: { type: 'keyword', ignore_above: 256 },
+                  data: { type: 'flattened' },
+                },
+              },
+            },
+          },
+        },
+      },
+    ],
+    schemas: {
+      forwardCompatibility: ruleSavedObjectAttributesSchemaV4.extends({}, { unknowns: 'ignore' }),
+      create: ruleSavedObjectAttributesSchemaV4,
     },
   },
 };

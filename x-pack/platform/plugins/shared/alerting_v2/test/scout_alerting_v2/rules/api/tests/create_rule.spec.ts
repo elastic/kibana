@@ -526,6 +526,36 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
     }
   );
 
+  apiTest(
+    'create: returns 201 with metadata.source and persists it',
+    async ({ apiClient, apiServices }) => {
+      const body = buildCreateRuleData({
+        metadata: {
+          name: 'rule-with-source',
+          source: {
+            type: 'prebuilt_rule',
+            data: { rule_id: 'abc-123', version: 1 },
+          },
+        },
+      });
+      const response = await apiClient.post(testData.RULE_API_PATH, {
+        headers: writerHeaders,
+        body,
+      });
+      expect(response).toHaveStatusCode(201);
+      expect(response.body.metadata.source).toStrictEqual({
+        type: 'prebuilt_rule',
+        data: { rule_id: 'abc-123', version: 1 },
+      });
+
+      const persisted = await apiServices.alertingV2.rules.get(response.body.id);
+      expect(persisted.metadata.source).toStrictEqual({
+        type: 'prebuilt_rule',
+        data: { rule_id: 'abc-123', version: 1 },
+      });
+    }
+  );
+
   apiTest('validation: rejects body with missing kind', async ({ apiClient }) => {
     const { kind: _kind, ...rest } = buildCreateRuleData({ metadata: { name: 'no-kind' } });
     const response = await apiClient.post(testData.RULE_API_PATH, {

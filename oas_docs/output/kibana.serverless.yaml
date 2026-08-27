@@ -89156,6 +89156,9 @@ components:
           description: Owner of the rule.
           maxLength: 256
           type: string
+        source:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_source'
+          description: Tracks the originating rule spec or content pack. Framework-agnostic envelope; consumers define the data shape per type.
         tags:
           description: Tags for categorization, e.g. ["production", "infra"].
           items:
@@ -89335,6 +89338,9 @@ components:
           description: Owner of the rule.
           maxLength: 256
           type: string
+        source:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_source'
+          description: Tracks the originating rule spec or content pack. Framework-agnostic envelope; consumers define the data shape per type.
         tags:
           description: Tags for categorization, e.g. ["production", "infra"].
           items:
@@ -89365,6 +89371,22 @@ components:
           type: string
       required:
         - every
+    Kibana_HTTP_APIs_alerting_rule_source:
+      additionalProperties: false
+      type: object
+      properties:
+        data:
+          additionalProperties: {}
+          description: Per-type payload. Shape is a consumer-side convention, not enforced by the framework.
+          type: object
+        type:
+          description: Source type discriminator, e.g. "prebuilt_rule", "content_pack". Namespaced by convention.
+          maxLength: 128
+          minLength: 1
+          type: string
+      required:
+        - type
+        - data
     Kibana_HTTP_APIs_alerting_rule_tags_response:
       additionalProperties: false
       description: All unique tags across rules.
@@ -89596,6 +89618,10 @@ components:
               description: Owner of the rule.
               maxLength: 256
               type: string
+            source:
+              allOf:
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_source'
+              nullable: true
             tags:
               description: Tags for categorization, e.g. ["production", "infra"].
               items:

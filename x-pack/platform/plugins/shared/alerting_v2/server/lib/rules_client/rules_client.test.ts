@@ -769,6 +769,91 @@ describe('RulesClient', () => {
       });
     });
 
+    it('creates a rule with metadata.source and includes it in the response', async () => {
+      const client = createClient();
+      rulesSavedObjectService.create.mockResolvedValueOnce({ id: 'rule-id-source' });
+
+      const res = await client.createRule({
+        data: {
+          ...baseCreateData,
+          metadata: {
+            name: 'rule-with-source',
+            source: { type: 'prebuilt_rule', data: { rule_id: 'abc', version: 1 } },
+          },
+        },
+        options: { id: 'rule-id-source' },
+      });
+
+      expect(rulesSavedObjectService.create).toHaveBeenCalledWith({
+        attrs: expect.objectContaining({
+          metadata: expect.objectContaining({
+            source: { type: 'prebuilt_rule', data: { rule_id: 'abc', version: 1 } },
+          }),
+        }),
+        id: 'rule-id-source',
+      });
+
+      expect(res.metadata.source).toEqual({
+        type: 'prebuilt_rule',
+        data: { rule_id: 'abc', version: 1 },
+      });
+    });
+
+    it('preserves metadata.source when update omits it', async () => {
+      const client = createClient();
+
+      const existingAttributes: RuleSavedObjectAttributes = {
+        ...baseSoAttrs,
+        metadata: {
+          ...baseSoAttrs.metadata,
+          source: { type: 'prebuilt_rule', data: { rule_id: 'abc', version: 1 } },
+        },
+      };
+
+      rulesSavedObjectService.get.mockResolvedValueOnce({
+        id: 'rule-id-keep-source',
+        attributes: existingAttributes,
+        version: 'WzEsMV0=',
+      });
+
+      await client.updateRule({
+        id: 'rule-id-keep-source',
+        data: { metadata: { name: 'updated name' } },
+      });
+
+      const { attrs } = rulesSavedObjectService.update.mock.calls[0][0];
+      expect(attrs.metadata.source).toEqual({
+        type: 'prebuilt_rule',
+        data: { rule_id: 'abc', version: 1 },
+      });
+    });
+
+    it('clears metadata.source when update sets it to null', async () => {
+      const client = createClient();
+
+      const existingAttributes: RuleSavedObjectAttributes = {
+        ...baseSoAttrs,
+        metadata: {
+          ...baseSoAttrs.metadata,
+          source: { type: 'prebuilt_rule', data: { rule_id: 'abc', version: 1 } },
+        },
+      };
+
+      rulesSavedObjectService.get.mockResolvedValueOnce({
+        id: 'rule-id-clear-source',
+        attributes: existingAttributes,
+        version: 'WzEsMV0=',
+      });
+
+      await client.updateRule({
+        id: 'rule-id-clear-source',
+        data: { metadata: { source: null } },
+      });
+
+      const { attrs } = rulesSavedObjectService.update.mock.calls[0][0];
+      expect(attrs.metadata.source).toBeUndefined();
+    });
+
     it('uses the client-provided version when supplied', async () => {
       const client = createClient();
 
