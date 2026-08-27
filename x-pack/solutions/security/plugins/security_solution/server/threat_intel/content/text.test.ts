@@ -2289,3 +2289,62 @@ describe('report-boundary resets are scoped to feeds', () => {
     expect(result).not.toContain(leaked);
   });
 });
+
+/**
+ * Section state is restored on the way out of a report container, not just reset on the way in.
+ *
+ * Resetting only on entry left a heading from inside the container active for whatever followed
+ * it, so an item ending in `<h2>IOCs</h2>` lifted the href in the channel-level `<description>`
+ * after it and published ordinary feed metadata as an indicator. `inFeed` travels on the walk
+ * frame, but section state is renderer-global, so leaving a container needs an explicit event.
+ */
+describe('section state is restored when a report container ends', () => {
+  it('does not lift channel metadata that follows an item', () => {
+    const result = htmlToStructured(
+      '<rss><channel><item><p>body</p><h2>IOCs</h2></item>' +
+        '<description>&lt;a href="https://citation.test"&gt;homepage&lt;/a&gt;</description>' +
+        '</channel></rss>'
+    );
+
+    expect(result).toBe('body\n## IOCs\nhomepage');
+    expect(result).not.toContain('citation.test');
+  });
+
+  // A heading outside the items does not survive into one, since an item is a new report.
+  it('resets a channel-level heading inside an item', () => {
+    expect(
+      htmlToStructured(
+        '<rss><channel><h2>IOCs</h2><item><p><a href="https://cite.test">read</a></p></item></channel></rss>'
+      )
+    ).toBe('## IOCs\nread');
+  });
+
+  // Everything the reset already had to do still holds.
+  it.each([
+    [
+      'resets between items',
+      '<rss><channel><item><h2>IOCs</h2><p><a href="https://a.test/x">ioc</a></p></item>' +
+        '<item><p><a href="https://cite.test">read</a></p></item></channel></rss>',
+      '## IOCs\nioc https://a.test/x\nread',
+    ],
+    [
+      'lifts every href within one item',
+      '<rss><channel><item><h2>IOCs</h2><p><a href="https://a.test/x">ioc</a></p>' +
+        '<p><a href="https://b.test/y">two</a></p></item></channel></rss>',
+      '## IOCs\nioc https://a.test/x\ntwo https://b.test/y',
+    ],
+    [
+      'lifts inside a wrapper payload in an item',
+      '<rss><channel><item><description>&lt;h2&gt;IOCs&lt;/h2&gt;' +
+        '&lt;p&gt;&lt;a href="https://c2.evil.test/x"&gt;ioc&lt;/a&gt;&lt;/p&gt;</description></item></channel></rss>',
+      '## IOCs\nioc https://c2.evil.test/x',
+    ],
+    [
+      'ignores a non-feed item',
+      '<h2>IOCs</h2><item>domain values</item><p><a href="https://c2.evil.test/x">indicator</a></p>',
+      '## IOCs\ndomain values\nindicator https://c2.evil.test/x',
+    ],
+  ])('still %s', (_label, html, expected) => {
+    expect(htmlToStructured(html)).toBe(expected);
+  });
+});

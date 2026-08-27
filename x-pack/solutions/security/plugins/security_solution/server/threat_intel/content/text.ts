@@ -695,7 +695,10 @@ const shouldReparse = (nodes: ParsedNode[], decoded: string, inWrapper = false):
 /** Stack entry: a node still to visit, or literal output to append after its subtree. */
 type WalkStep =
   | { kind: 'node'; node: ParsedNode; cdataDepth: number; literalCdata: boolean; inFeed: boolean }
-  | { kind: 'emit'; text: string };
+  | { kind: 'emit'; text: string }
+  // Restores section state after a report container's subtree. Only the structured renderer
+  // produces these, because only it carries section state.
+  | { kind: 'section'; sectionKind: SectionKind; sectionDepth: number };
 
 /** Feed document roots. Their descendants are report containers; elsewhere the names are not. */
 const FEED_ROOT_NAMES = new Set(['rss', 'feed']);
@@ -862,6 +865,8 @@ const inlineTextOf = (nodes: ParsedNode[], liftHrefs: boolean): string => {
 
     if (step.kind === 'emit') {
       out.push(step.text);
+    } else if (step.kind === 'section') {
+      // Never produced by this walker; it carries no section state.
     } else {
       const { node, cdataDepth, literalCdata, inFeed } = step;
       const liftedHref =
@@ -1046,6 +1051,9 @@ const renderStructured = (html: string): string => {
 
     if (step.kind === 'emit') {
       out.push(step.text);
+    } else if (step.kind === 'section') {
+      sectionKind = step.sectionKind;
+      sectionDepth = step.sectionDepth;
     } else {
       const { node, cdataDepth, literalCdata, inFeed } = step;
       const name = elementName(node);
@@ -1085,6 +1093,12 @@ const renderStructured = (html: string): string => {
         stack.push({ kind: 'emit', text: '\n' });
         pushNodes(stack, childrenOf(node), cdataDepth, literalCdata, true);
       } else if (inFeed && STRUCTURAL_FEED_CONTAINERS.has(localName(name))) {
+        // Restored on the way out as well as reset on the way in. Resetting only on entry left a
+        // heading from inside the container active for whatever followed it, so an item ending in
+        // `<h2>IOCs</h2>` lifted the href in the channel-level `<description>` after it and
+        // published ordinary feed metadata as an indicator. `inFeed` travels on the frame, but
+        // section state is renderer-global, so leaving a container needs an explicit event.
+        stack.push({ kind: 'section', sectionKind, sectionDepth });
         // Section state resets at a report boundary. It is walker-local, which is what lets a
         // wrapper payload inherit it, but one walk covers a whole feed document, so an `IOCs`
         // heading in one item left href lifting on for every later item and an ordinary citation
