@@ -30,15 +30,12 @@ jest.mock('../delete_conversation_modal', () => ({
   DeleteConversationModal: () => null,
 }));
 
-const mockUseEmbeddableConversationTitle = jest.mocked(useConversationTitle);
+const mockUseConversationTitle = jest.mocked(useConversationTitle);
 const mockUseHasPersistedConversation = jest.mocked(useHasPersistedConversation);
 const mockUseConversationPermissions = jest.mocked(useConversationPermissions);
 
 const renderTitle = (permissions: Partial<ConversationPermissions>) => {
-  mockUseEmbeddableConversationTitle.mockReturnValue({
-    title: 'My conversation',
-    isLoading: false,
-  });
+  mockUseConversationTitle.mockReturnValue({ title: 'My conversation', isLoading: false });
   mockUseHasPersistedConversation.mockReturnValue(true);
   mockUseConversationPermissions.mockReturnValue({
     rename: false,

@@ -31,7 +31,7 @@ export const ChatInfoButton: React.FC = () => {
         size="s"
         color="text"
         iconType={isFlyoutOpen ? 'transitionLeftIn' : 'transitionLeftOut'}
-        onClick={() => setIsFlyoutOpen(true)}
+        onClick={() => setIsFlyoutOpen((open) => !open)}
         aria-label={labels.chatInfo}
         data-test-subj="agentBuilderChatInfoButton"
       >

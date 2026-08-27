@@ -202,7 +202,7 @@ export const ConversationMetadataFlyout: React.FC<ConversationMetadataFlyoutProp
       size="s"
       type="push"
       aria-labelledby={titleId}
-      data-test-subj="agentBuilderConversationMetadataFlyout"
+      data-test-subj="agentBuilderConversationMetadataFlyout-live"
     >
       {conversation ? (
         <ConversationMetadataFlyoutContent

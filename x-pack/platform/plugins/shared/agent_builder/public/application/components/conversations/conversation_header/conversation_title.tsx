@@ -51,12 +51,8 @@ export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabell
     );
   }
 
-  const titleRowStyles = css`
-    gap: ${euiTheme.size.s};
-  `;
-
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false} css={titleRowStyles}>
+    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       <EuiFlexItem grow={false}>
         <ConversationTitleMetadata ariaLabelledBy={ariaLabelledBy} />
       </EuiFlexItem>
