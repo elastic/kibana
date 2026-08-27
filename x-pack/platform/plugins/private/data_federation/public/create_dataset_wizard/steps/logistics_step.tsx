@@ -20,6 +20,7 @@ import { useController } from 'react-hook-form';
 
 import type { DataSource } from '../../../common';
 import { DATA_SOURCE_TYPES_TO_HELP_TEXT } from '../../../common';
+import { datasetSettingsFieldsWidthCss } from '../../create_dataset_flyout/dataset_settings_fields_layout';
 import { DataSourceSuperSelect } from '../data_source_super_select';
 import { datasetWizardStrings } from '../dataset_wizard_i18n';
 import { isDatasetWizardFlow3, type DatasetWizardFlowVariant } from '../dataset_wizard_flow_variant';
@@ -133,88 +134,90 @@ export const LogisticsStep: FunctionComponent<LogisticsStepProps> = ({
       <EuiSpacer size="l" />
 
       <EuiForm component="div">
-        <EuiFormRow
-          label={datasetWizardStrings.dataSourceLabel()}
-          fullWidth
-          isInvalid={Boolean(dataSourceFieldState.error)}
-          error={dataSourceFieldState.error?.message}
-        >
-          <DataSourceSuperSelect
-            dataSources={dataSources}
-            data-test-subj="datasetWizardDataSource"
+        <div css={datasetSettingsFieldsWidthCss}>
+          <EuiFormRow
+            label={datasetWizardStrings.dataSourceLabel()}
             fullWidth
-            aria-label={datasetWizardStrings.dataSourceLabel()}
-            placeholder={datasetWizardStrings.dataSourcePlaceholder()}
-            searchPlaceholder={datasetWizardStrings.dataSourceSearchPlaceholder()}
-            connectNewDataSourceLabel={datasetWizardStrings.connectNewDataSource()}
-            value={dataSourceField.value || undefined}
-            onChange={onDataSourceChange}
-            onConnectNewDataSource={onConnectNewDataSource}
-            name={dataSourceField.name}
-            buttonRef={dataSourceField.ref}
             isInvalid={Boolean(dataSourceFieldState.error)}
-          />
-        </EuiFormRow>
+            error={dataSourceFieldState.error?.message}
+          >
+            <DataSourceSuperSelect
+              dataSources={dataSources}
+              data-test-subj="datasetWizardDataSource"
+              fullWidth
+              aria-label={datasetWizardStrings.dataSourceLabel()}
+              placeholder={datasetWizardStrings.dataSourcePlaceholder()}
+              searchPlaceholder={datasetWizardStrings.dataSourceSearchPlaceholder()}
+              connectNewDataSourceLabel={datasetWizardStrings.connectNewDataSource()}
+              value={dataSourceField.value || undefined}
+              onChange={onDataSourceChange}
+              onConnectNewDataSource={onConnectNewDataSource}
+              name={dataSourceField.name}
+              buttonRef={dataSourceField.ref}
+              isInvalid={Boolean(dataSourceFieldState.error)}
+            />
+          </EuiFormRow>
 
-        <EuiFormRow
-          label={datasetWizardStrings.datasetNameLabel()}
-          helpText={datasetWizardStrings.datasetNameHelp()}
-          fullWidth
-          isInvalid={Boolean(nameFieldState.error)}
-          error={nameFieldState.error?.message}
-        >
-          <EuiFieldText
-            data-test-subj="datasetWizardName"
+          <EuiFormRow
+            label={datasetWizardStrings.datasetNameLabel()}
+            helpText={datasetWizardStrings.datasetNameHelp()}
             fullWidth
-            placeholder={datasetWizardStrings.datasetNamePlaceholder()}
             isInvalid={Boolean(nameFieldState.error)}
-            value={nameField.value}
-            onChange={(e) => nameField.onChange(e.target.value)}
-            name={nameField.name}
-            inputRef={nameField.ref}
-          />
-        </EuiFormRow>
+            error={nameFieldState.error?.message}
+          >
+            <EuiFieldText
+              data-test-subj="datasetWizardName"
+              fullWidth
+              placeholder={datasetWizardStrings.datasetNamePlaceholder()}
+              isInvalid={Boolean(nameFieldState.error)}
+              value={nameField.value}
+              onChange={(e) => nameField.onChange(e.target.value)}
+              name={nameField.name}
+              inputRef={nameField.ref}
+            />
+          </EuiFormRow>
 
-        <EuiFormRow label={datasetWizardStrings.descriptionLabel()} fullWidth>
-          <EuiFieldText
-            data-test-subj="datasetWizardDescription"
-            fullWidth
-            placeholder={datasetWizardStrings.descriptionPlaceholder()}
-            value={descriptionField.value}
-            onChange={(e) => descriptionField.onChange(e.target.value)}
-            name={descriptionField.name}
-            inputRef={descriptionField.ref}
-          />
-        </EuiFormRow>
+          <EuiFormRow label={datasetWizardStrings.descriptionLabel()} fullWidth>
+            <EuiFieldText
+              data-test-subj="datasetWizardDescription"
+              fullWidth
+              placeholder={datasetWizardStrings.descriptionPlaceholder()}
+              value={descriptionField.value}
+              onChange={(e) => descriptionField.onChange(e.target.value)}
+              name={descriptionField.name}
+              inputRef={descriptionField.ref}
+            />
+          </EuiFormRow>
 
-        <EuiFormRow
-          label={datasetWizardStrings.resourceLabel()}
-          helpText={resourceHelpText}
-          fullWidth
-          isInvalid={Boolean(resourceFieldState.error)}
-          error={resourceFieldState.error?.message}
-        >
-          <EuiFieldText
-            data-test-subj="datasetWizardResource"
+          <EuiFormRow
+            label={datasetWizardStrings.resourceLabel()}
+            helpText={resourceHelpText}
             fullWidth
-            placeholder={datasetWizardStrings.resourcePlaceholder()}
-            autoComplete="off"
             isInvalid={Boolean(resourceFieldState.error)}
-            value={resourceField.value}
-            onChange={(e) => resourceField.onChange(e.target.value)}
-            onBlur={onResourceBlur}
-            name={resourceField.name}
-            inputRef={resourceField.ref}
-          />
-        </EuiFormRow>
+            error={resourceFieldState.error?.message}
+          >
+            <EuiFieldText
+              data-test-subj="datasetWizardResource"
+              fullWidth
+              placeholder={datasetWizardStrings.resourcePlaceholder()}
+              autoComplete="off"
+              isInvalid={Boolean(resourceFieldState.error)}
+              value={resourceField.value}
+              onChange={(e) => resourceField.onChange(e.target.value)}
+              onBlur={onResourceBlur}
+              name={resourceField.name}
+              inputRef={resourceField.ref}
+            />
+          </EuiFormRow>
 
-        {showRegion ? (
-          <WizardRegionField
-            control={control}
-            autoDetectedRegion={autoDetectedRegion}
-            onRegionManualChange={onRegionManualChange}
-          />
-        ) : null}
+          {showRegion ? (
+            <WizardRegionField
+              control={control}
+              autoDetectedRegion={autoDetectedRegion}
+              onRegionManualChange={onRegionManualChange}
+            />
+          ) : null}
+        </div>
       </EuiForm>
     </>
   );

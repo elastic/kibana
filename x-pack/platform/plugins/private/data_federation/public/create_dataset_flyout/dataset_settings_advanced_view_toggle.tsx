@@ -190,6 +190,7 @@ export const DatasetSettingsAdvancedViewToggle: FunctionComponent<
       fields={advancedFields}
       testSubjPrefix={testSubjPrefix}
       columns={1}
+      rowSpacerSize="m"
     />
   );
 };

@@ -152,11 +152,6 @@ export const datasetWizardStrings = {
       values: { stepTitle },
     }),
 
-  cancelButton: () =>
-    i18n.translate('xpack.dataFederation.datasetWizard.cancelButton', {
-      defaultMessage: 'Cancel',
-    }),
-
   backButton: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.backButton', {
       defaultMessage: 'Back',

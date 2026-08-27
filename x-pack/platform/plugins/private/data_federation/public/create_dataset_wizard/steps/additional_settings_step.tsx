@@ -279,17 +279,15 @@ export const AdditionalSettingsStep: FunctionComponent<AdditionalSettingsStepPro
       <EuiSpacer size="l" />
 
       <EuiForm component="div">
-        {isDatasetWizardFlow3(flowVariant) ? (
-          <div css={datasetSettingsFieldsWidthCss}>
+        <div css={datasetSettingsFieldsWidthCss}>
+          {isDatasetWizardFlow3(flowVariant) ? (
             <WizardRegionField
               control={control}
               autoDetectedRegion={autoDetectedRegion}
               onRegionManualChange={onRegionManualChange}
             />
-          </div>
-        ) : null}
+          ) : null}
 
-        <div css={datasetSettingsFieldsWidthCss}>
           <EuiFormRow label={createDatasetFlyoutStrings.settingsFormatLabel()} fullWidth>
             <EuiSuperSelect
               options={formatSuperSelectOptions}

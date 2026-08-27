@@ -89,7 +89,6 @@ describe('DatasetWizard step navigation', () => {
             defaultValues={defaultValues}
             flowVariant={flowVariant}
             reloadDataSources={jest.fn().mockResolvedValue(undefined)}
-            onCancel={jest.fn()}
             onSave={jest.fn().mockResolvedValue(null)}
           />
         </EuiProvider>

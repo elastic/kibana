@@ -8,7 +8,7 @@
 import type { FunctionComponent } from 'react';
 import React from 'react';
 import { css } from '@emotion/react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, type EuiSpacerProps } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
 
 import type { CreateDatasetFormValues } from './create_dataset_flyout_form_state';
@@ -34,6 +34,7 @@ export interface DatasetSettingsFieldsLayoutProps {
   fields: readonly DatasetSettingsFieldId[];
   testSubjPrefix: string;
   columns?: number;
+  rowSpacerSize?: EuiSpacerProps['size'];
 }
 
 export const DatasetSettingsFieldsLayout: FunctionComponent<DatasetSettingsFieldsLayoutProps> = ({
@@ -41,6 +42,7 @@ export const DatasetSettingsFieldsLayout: FunctionComponent<DatasetSettingsField
   fields,
   testSubjPrefix,
   columns = 3,
+  rowSpacerSize = 'l',
 }) => {
   if (fields.length === 0) {
     return null;
@@ -52,7 +54,7 @@ export const DatasetSettingsFieldsLayout: FunctionComponent<DatasetSettingsField
     <div css={datasetSettingsFieldsWidthCss}>
       {rows.map((rowFields, rowIndex) => (
         <React.Fragment key={rowFields.join('-') || `empty-row-${rowIndex}`}>
-          {rowIndex > 0 ? <EuiSpacer size="l" /> : null}
+          {rowIndex > 0 ? <EuiSpacer size={rowSpacerSize} /> : null}
           <EuiFlexGroup>
             {Array.from({ length: columns }, (_, columnIndex) => {
               const fieldId = rowFields[columnIndex];

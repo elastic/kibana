@@ -91,7 +91,6 @@ export interface DatasetWizardProps {
   defaultValues: DatasetWizardFormValues;
   flowVariant: DatasetWizardFlowVariant;
   reloadDataSources: () => Promise<void>;
-  onCancel: () => void;
   onSave: (data: DataSetWithName, previousId?: string) => Promise<string | null>;
 }
 
@@ -103,7 +102,6 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
   defaultValues,
   flowVariant,
   reloadDataSources,
-  onCancel,
   onSave,
 }) => {
   const {
@@ -199,11 +197,6 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
 
     return () => subscription.unsubscribe();
   }, [draftStorageKey, watch]);
-
-  const handleCancel = useCallback(() => {
-    clearWizardFormDraft(draftStorageKey);
-    onCancel();
-  }, [draftStorageKey, onCancel]);
 
   const existingDataSourceNames = useMemo(
     () => dataSources.map((dataSource) => dataSource.name),
@@ -676,37 +669,26 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
         ) : null}
 
         <div css={footerCss} data-test-subj="datasetWizardFooter">
-          <EuiSpacer size="xl" />
+          <EuiSpacer size="xxl" />
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty data-test-subj="datasetWizardCancel" onClick={handleCancel}>
-                {datasetWizardStrings.cancelButton()}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="s" responsive={false}>
                 {showBackButton ? (
                   <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty data-test-subj="datasetWizardBack" onClick={handleBack}>
+                    <EuiButtonEmpty
+                      iconType="chevronSingleLeft"
+                      data-test-subj="datasetWizardBack"
+                      onClick={handleBack}
+                    >
                       {datasetWizardStrings.backButton()}
                     </EuiButtonEmpty>
-                  </EuiFlexItem>
-                ) : null}
-                {showTestConfiguration ? (
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      data-test-subj="datasetWizardTestConfiguration"
-                      isLoading={isTestConfigLoading}
-                      onClick={handleTestConfiguration}
-                    >
-                      {datasetWizardStrings.testConfigurationButton()}
-                    </EuiButton>
                   </EuiFlexItem>
                 ) : null}
                 <EuiFlexItem grow={false}>
                   {isLastStep ? (
                     <EuiButton
                       fill
+                      iconType="check"
                       data-test-subj="datasetWizardSubmit"
                       isLoading={isSaving}
                       disabled={isSaving}
@@ -719,6 +701,8 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
                   ) : (
                     <EuiButton
                       fill
+                      iconType="chevronSingleRight"
+                      iconSide="right"
                       data-test-subj="datasetWizardNext"
                       onClick={() => void handleNext()}
                     >
@@ -728,7 +712,19 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
+            {showTestConfiguration ? (
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  data-test-subj="datasetWizardTestConfiguration"
+                  isLoading={isTestConfigLoading}
+                  onClick={handleTestConfiguration}
+                >
+                  {datasetWizardStrings.testConfigurationButton()}
+                </EuiButton>
+              </EuiFlexItem>
+            ) : null}
           </EuiFlexGroup>
+          <EuiSpacer size="m" />
         </div>
       </EuiPageSection>
       {isCreateDataSourceFlyoutOpen ? (

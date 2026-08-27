@@ -25,6 +25,7 @@ import {
   emptyDatasetWizardFormValues,
 } from './dataset_wizard_form_state';
 import {
+  clearWizardFormDraft,
   getWizardFormDraftStorageKey,
   loadWizardFormDraft,
   mergeWizardFormValues,
@@ -72,6 +73,11 @@ export const DatasetWizardPage: FunctionComponent = () => {
 
   const existingDataSetNames = useMemo(() => dataSets.map((ds) => ds.name), [dataSets]);
 
+  const draftStorageKey = useMemo(
+    () => getWizardFormDraftStorageKey(isEditMode, datasetName),
+    [datasetName, isEditMode]
+  );
+
   const defaultValues = useMemo(() => {
     if (isCloneMode && sourceDataSet) {
       return {
@@ -84,10 +90,10 @@ export const DatasetWizardPage: FunctionComponent = () => {
       isEditMode && sourceDataSet
         ? dataSetToWizardFormValues(sourceDataSet)
         : emptyDatasetWizardFormValues();
-    const draft = loadWizardFormDraft(getWizardFormDraftStorageKey(isEditMode, datasetName));
+    const draft = loadWizardFormDraft(draftStorageKey);
 
     return draft ? mergeWizardFormValues(base, draft) : base;
-  }, [datasetName, existingDataSetNames, isCloneMode, isEditMode, sourceDataSet]);
+  }, [draftStorageKey, existingDataSetNames, isCloneMode, isEditMode, sourceDataSet]);
 
   const flowVariant = useMemo(
     () =>
@@ -109,9 +115,10 @@ export const DatasetWizardPage: FunctionComponent = () => {
   const onBack = useCallback(
     (event: MouseEvent) => {
       event.preventDefault();
+      clearWizardFormDraft(draftStorageKey);
       history.push('/');
     },
-    [history]
+    [draftStorageKey, history]
   );
 
   const back = useMemo(
@@ -122,10 +129,6 @@ export const DatasetWizardPage: FunctionComponent = () => {
     }),
     [onBack]
   );
-
-  const onCancel = useCallback(() => {
-    history.push('/');
-  }, [history]);
 
   const onSave = useCallback(
     async (dataSet: DataSetWithName, previousId?: string): Promise<string | null> => {
@@ -189,7 +192,6 @@ export const DatasetWizardPage: FunctionComponent = () => {
         defaultValues={defaultValues}
         flowVariant={flowVariant}
         reloadDataSources={reloadDataSources}
-        onCancel={onCancel}
         onSave={onSave}
       />
     </>
