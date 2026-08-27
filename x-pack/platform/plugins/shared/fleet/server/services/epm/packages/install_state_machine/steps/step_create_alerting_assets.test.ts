@@ -92,6 +92,7 @@ describe('createAlertingRuleFromTemplate', () => {
         tags: [],
       },
       options: { id: 'fleet-default-test-package-template-id' },
+      templateId: 'template-id',
     });
     expect(result).toEqual({
       id: 'fleet-default-test-package-template-id',
@@ -201,6 +202,7 @@ describe('createAlertingRuleFromTemplate', () => {
         tags: [],
       },
       options: { id: 'fleet-my-space-test-package-template-id' },
+      templateId: 'template-id',
     });
     expect(result).toEqual({
       id: 'fleet-my-space-test-package-template-id',
