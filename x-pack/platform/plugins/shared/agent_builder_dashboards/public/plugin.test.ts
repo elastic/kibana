@@ -60,7 +60,7 @@ describe('AgentBuilderDashboardsPlugin', () => {
     openChat.mockClear();
   });
 
-  it('registers lazy chat and prettify actions when Agent Builder is available', async () => {
+  it('registers the lazy chat action when Agent Builder is available and does not register prettify while it is not enabled', async () => {
     const plugin = new AgentBuilderDashboardsPlugin({} as PluginInitializerContext);
 
     plugin.start(createCoreStart(true), createStartDependencies());
@@ -69,7 +69,7 @@ describe('AgentBuilderDashboardsPlugin', () => {
       OPEN_DASHBOARD_CHAT_ACTION_ID,
       expect.any(Function)
     );
-    expect(registerActionAsync).toHaveBeenCalledWith(
+    expect(registerActionAsync).not.toHaveBeenCalledWith(
       PRETTIFY_DASHBOARD_ACTION_ID,
       expect.any(Function)
     );
@@ -81,9 +81,6 @@ describe('AgentBuilderDashboardsPlugin', () => {
       trigger: { id: OPEN_DASHBOARD_CHAT_ACTION_ID },
     });
     expect(openChat).toHaveBeenCalled();
-
-    const prettifyAction = await registerActionAsync.mock.calls[1][1]();
-    expect(prettifyAction.id).toBe(PRETTIFY_DASHBOARD_ACTION_ID);
   });
 
   it('does not register dashboard Chat entry points without Agent Builder capabilities', () => {
