@@ -476,7 +476,18 @@ const isEncodedHtmlWrapper = (node: ParsedNode): boolean => {
   const name = localName(elementName(node));
   if (FEED_WRAPPER_NAMES.has(name)) return true;
   if (!ATOM_TEXT_CONSTRUCTS.has(name)) return false;
-  return (node.attribs?.type ?? '').toLowerCase() === 'html';
+
+  // Parameters stripped before comparing, since a media type may carry them
+  // (`text/html; charset=utf-8`).
+  const type = (node.attribs?.type ?? '').split(';', 1)[0].trim().toLowerCase();
+  if (type === 'html') return true;
+
+  // Only `atom:content` accepts a media type. RFC 4287 limits the other text constructs to
+  // the `text`/`html`/`xhtml` shorthand, and `content` additionally permits any MIME type,
+  // of which `text/html` is the encoded-markup one. An XML media type or anything ending in
+  // `+xml` is inline markup rather than encoded markup, so it is excluded for the same reason
+  // the `xhtml` shorthand is.
+  return name === 'content' && type === 'text/html';
 };
 
 const localName = (name: string): string => name.slice(name.lastIndexOf(':') + 1);

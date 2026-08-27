@@ -1658,3 +1658,53 @@ describe('packaging nodes inside an encoded wrapper', () => {
     );
   });
 });
+
+/**
+ * `atom:content` accepts a media type as well as the shorthand.
+ *
+ * RFC 4287 limits the other text constructs to `text`/`html`/`xhtml`, and additionally lets
+ * `content` carry any MIME type, of which `text/html` is the encoded-markup one. Comparing
+ * against the shorthand alone left a valid `type="text/html"` body as literal markup, so its
+ * decoded script and image URLs stayed in body_text and could be mined as indicators.
+ */
+describe('Atom content with a media type', () => {
+  const ENCODED = '&lt;script&gt;fetch("https://false-ioc.test")&lt;/script&gt;safe';
+
+  it.each([
+    ['a bare media type', `<content type="text/html">${ENCODED}</content>`],
+    [
+      'a media type with parameters',
+      `<content type="text/html; charset=utf-8">${ENCODED}</content>`,
+    ],
+    ['an uppercase media type', `<content type="TEXT/HTML">${ENCODED}</content>`],
+    ['the shorthand', `<content type="html">${ENCODED}</content>`],
+  ])('expands content declared with %s', (_label, html) => {
+    const result = stripHtml(html);
+
+    expect(result).toBe('safe');
+    expect(result).not.toContain('false-ioc.test');
+  });
+
+  it('keeps structured boundaries for a media-typed content', () => {
+    expect(
+      htmlToStructured(
+        '<content type="text/html">&lt;p&gt;evil.com&lt;/p&gt;&lt;p&gt;bad.net&lt;/p&gt;</content>'
+      )
+    ).toBe('evil.com\nbad.net');
+  });
+
+  // The media type is accepted only for `content`. The other text constructs are limited to
+  // the shorthand, and an XML media type is inline markup rather than encoded markup, so
+  // both are left literal.
+  it.each([
+    [
+      'a media type on summary, which the spec does not allow',
+      `<summary type="text/html">${ENCODED}</summary>`,
+    ],
+    ['an xml media type', `<content type="application/xhtml+xml">${ENCODED}</content>`],
+    ['a non-html media type', `<content type="text/plain">${ENCODED}</content>`],
+    ['the xhtml shorthand', `<content type="xhtml">${ENCODED}</content>`],
+  ])('leaves content declared with %s literal', (_label, html) => {
+    expect(stripHtml(html)).toContain('<script>');
+  });
+});
