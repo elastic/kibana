@@ -34,9 +34,12 @@ jest.mock(
     getActiveMaintenanceWindows: jest.fn(),
   })
 );
-jest.mock('../application/maintenance_window/methods/bulk_get/bulk_get_maintenance_windows', () => ({
-  bulkGetMaintenanceWindows: jest.fn(),
-}));
+jest.mock(
+  '../application/maintenance_window/methods/bulk_get/bulk_get_maintenance_windows',
+  () => ({
+    bulkGetMaintenanceWindows: jest.fn(),
+  })
+);
 
 import { MaintenanceWindowClient } from './maintenance_window_client';
 
