@@ -1202,7 +1202,6 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       bulkInstallPackagesFromRegistryHandler
     );
 
-  // Only allow upload for superuser
   router.versioned
     .post({
       path: EPM_API_ROUTES.INSTALL_BY_UPLOAD_PATTERN,
@@ -1216,7 +1215,7 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       },
       security: INSTALL_PACKAGES_SECURITY,
       summary: `Install a package by upload`,
-      description: `Install a package by uploading a .zip or .tar.gz archive (max 100MB). Only available to superusers.`,
+      description: `Install a package by uploading a .zip or .tar.gz archive (max 100MB).`,
     })
     .addVersion(
       {
