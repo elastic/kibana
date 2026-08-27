@@ -111,7 +111,20 @@ interface ParsedNode {
  * cut at `MAX_PARSE_BYTES` can lose its closing `</script>`, and the parser treats the
  * remainder as raw script text rather than leaking it into report text.
  */
-const RAW_TEXT_NAMES = new Set(['script', 'style']);
+/**
+ * Elements whose subtree never becomes report text.
+ *
+ * `script` and `style` because their content is code. `template` because it is inert: the
+ * parser puts its children in a document fragment that no reader ever sees, so component
+ * templates carrying example or stale URLs were feeding `body_text` values a human never
+ * read, which extraction then promoted as indicators.
+ *
+ * Named for what it does rather than for raw text, since `template` is not a raw-text
+ * element and calling it one would invite the next reader to assume its content is
+ * unparsed. `noscript` is deliberately absent: its content is fallback that a reader with
+ * scripting disabled does see.
+ */
+const SKIPPED_SUBTREE_NAMES = new Set(['script', 'style', 'template']);
 
 /**
  * Rewrites an explicitly self-closed `<script/>` or `<style/>` into an empty element
@@ -731,7 +744,7 @@ const inlineTextOf = (nodes: ParsedNode[], liftHrefs: boolean): string => {
         // as a live IOC; emitting the boundary is what keeps `evil.com<!-- x -->bad.net`
         // from merging into one unextractable token.
         out.push(' ');
-      } else if (RAW_TEXT_NAMES.has(elementName(node))) {
+      } else if (SKIPPED_SUBTREE_NAMES.has(elementName(node))) {
         out.push(' ');
       } else if (cdataDepth < MAX_CDATA_DEPTH && isTextOnlyEncodedWrapper(node)) {
         // A feed wrapper whose payload is text is that feed's encoded body, wherever it sits
@@ -880,7 +893,7 @@ const renderStructured = (html: string): string => {
       } else if (!isElement(node)) {
         // Comments and doctype contribute a boundary only.
         out.push(' ');
-      } else if (RAW_TEXT_NAMES.has(name)) {
+      } else if (SKIPPED_SUBTREE_NAMES.has(name)) {
         out.push(' ');
       } else if (cdataDepth < MAX_CDATA_DEPTH && isTextOnlyEncodedWrapper(node)) {
         // Same as the plain-text walker. Section state is walker-local, so feeding the

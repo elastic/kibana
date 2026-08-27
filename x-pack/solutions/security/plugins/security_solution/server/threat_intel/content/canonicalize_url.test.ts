@@ -116,9 +116,14 @@ describe('canonicalizeUrl', () => {
     expect(canonicalizeUrl('https://example.com:8443/api')).toBe('https://example.com:8443/api');
   });
 
-  it('does not include the default 443 port in the key', () => {
-    // URL parser strips the default port so this should produce no port token
+  it('does not include port 443 after normalizing the scheme', () => {
+    // The https case proves nothing on its own: WHATWG `URL` has already dropped `:443` as
+    // the default port for that scheme, so it passes with the explicit handling deleted. The
+    // http case is the regression, because `URL` keeps `:443` there and only the output
+    // scheme makes it default. Without both, the two spellings can drift back to different
+    // dedup keys unnoticed.
     expect(canonicalizeUrl('https://example.com:443/path')).toBe('https://example.com/path');
+    expect(canonicalizeUrl('http://example.com:443/path')).toBe('https://example.com/path');
   });
 
   // --- Malformed input ----------------------------------------------------

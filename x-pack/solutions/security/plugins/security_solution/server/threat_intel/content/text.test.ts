@@ -1708,3 +1708,48 @@ describe('Atom content with a media type', () => {
     expect(stripHtml(html)).toContain('<script>');
   });
 });
+
+/**
+ * `<template>` is inert. The parser puts its children in a document fragment that no reader
+ * ever sees, so component templates carrying example or stale URLs were feeding body_text
+ * values a human never read, which extraction then promoted as indicators.
+ */
+describe('non-rendered subtrees', () => {
+  it.each([
+    ['a template at top level', '<template><p>c2.stale.test</p></template><p>safe</p>', 'safe'],
+    [
+      'a template nested in content',
+      '<div><template><a href="http://c2.stale.test/x">l</a></template>keep</div>',
+      'keep',
+    ],
+    [
+      'a template under an IOC heading',
+      '<h2>IOCs</h2><template><a href="http://c2.stale.test/x">l</a></template><p>real.test</p>',
+      'IOCs real.test',
+    ],
+  ])('drops %s', (_label, html, expected) => {
+    const result = stripHtml(html);
+
+    expect(result).toBe(expected);
+    expect(result).not.toContain('c2.stale.test');
+  });
+
+  it('drops a template subtree from structured output too', () => {
+    expect(
+      htmlToStructured(
+        '<h2>IOCs</h2><template><a href="http://c2.stale.test/x">l</a></template><p>real.test</p>'
+      )
+    ).toBe('## IOCs\nreal.test');
+  });
+
+  // The element still separates the text on either side, same as script and style.
+  it('still emits a boundary where the template was', () => {
+    expect(stripHtml('evil.com<template>x</template>bad.net')).toBe('evil.com bad.net');
+  });
+
+  // `noscript` content is fallback that a reader with scripting disabled does see, so it is
+  // deliberately not skipped.
+  it('keeps noscript content', () => {
+    expect(stripHtml('<noscript><p>fallback.test</p></noscript>after')).toBe('fallback.test after');
+  });
+});
