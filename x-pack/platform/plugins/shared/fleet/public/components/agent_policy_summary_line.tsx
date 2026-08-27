@@ -65,6 +65,8 @@ export const AgentPolicySummaryLine = memo<{
     const showIncompatibilityBadge =
       incompatibleIntegrations.length > 0 && Boolean(policy.min_agent_version);
 
+    const showVersionSpecificTooltip = isVersionSpecific && incompatibleIntegrations.length > 0;
+
     if (agent?.type === 'OPAMP') {
       return <EuiText>-</EuiText>;
     }
@@ -118,15 +120,16 @@ export const AgentPolicySummaryLine = memo<{
             justifyContent="flexStart"
             wrap={false}
           >
-            {(isVersionSpecific || isManaged) && (
+            {(showVersionSpecificTooltip || isManaged) && (
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-                  {isVersionSpecific && (
+                  {showVersionSpecificTooltip && (
                     <EuiFlexItem grow={false}>
                       <EuiIconTip
                         type="info"
                         size="m"
                         color="subdued"
+                        data-test-subj="agentPolicyVersionSpecificTooltip"
                         content={
                           <FormattedMessage
                             id="xpack.fleet.agentPolicySummaryLine.versionSpecificPolicyTooltip"
