@@ -426,23 +426,14 @@ export const formatEnumValuesList = (values: readonly string[]): string =>
 // ---------------------------------------------------------------------------
 
 export const generateSloIndicatorsDoc = (): string => {
-  const jsonSchema = zodToJsonSchema(sloIndicatorSchema);
-  throwIfMissingVariantDescribes(
-    ((jsonSchema as JsonSchemaNode).oneOf ?? (jsonSchema as JsonSchemaNode).anyOf) as
-      | JsonSchemaNode[]
-      | undefined,
-    'type',
-    'SLO Indicator Types'
-  );
-  const variantSections = formatVariantSchemas(jsonSchema);
-
+  const jsonSchema = toVariantJsonSchema(sloIndicatorSchema, 'type', 'SLO Indicator Types');
   return [
     '# SLO Indicator Types',
     '',
     '`indicator` defines how the SLI is computed. Pick the variant by data source.',
     'Each indicator type maps to a specific `type` discriminator value.',
     '',
-    variantSections,
+    formatVariantSchemas(jsonSchema),
   ].join('\n');
 };
 

@@ -54,7 +54,7 @@ const durationString = ({
   maxMinutesExclusive,
   describe: describeText,
 }: {
-  units: string[];
+  units: Array<keyof typeof DURATION_UNIT_MINUTES>;
   minMinutes?: number;
   maxMinutesExclusive?: number;
   describe: string;
@@ -65,16 +65,10 @@ const durationString = ({
     message: `Must match format <number>(${units.join('|')}), e.g. "5m", "1h".`,
   });
 
-  if (minMinutes === undefined && maxMinutesExclusive === undefined) {
-    return base.describe(describeText);
-  }
-
   return base
     .superRefine((value, ctx) => {
-      const match = /^(\d+)([a-zA-Z]+)$/.exec(value);
-      if (!match) return;
-      const num = parseInt(match[1], 10);
-      const unit = match[2];
+      const num = parseInt(value, 10);
+      const unit = value.slice(String(num).length);
       const factor = DURATION_UNIT_MINUTES[unit];
       if (factor === undefined) return;
       const totalMinutes = num * factor;
@@ -221,7 +215,7 @@ const metricCustomBasicMetricSchema = z
   })
   .strict();
 
-const metricCustomDocCountMetricSchema = z
+const docCountMetricSchema = z
   .object({
     name: z
       .string()
@@ -235,7 +229,7 @@ const metricCustomDocCountMetricSchema = z
 const metricCustomMetricDefSchema = z
   .object({
     metrics: z
-      .array(z.union([metricCustomBasicMetricSchema, metricCustomDocCountMetricSchema]))
+      .array(z.union([metricCustomBasicMetricSchema, docCountMetricSchema]))
       .min(1)
       .max(MAX_METRICS)
       .describe('List of metric definitions referenced by name in the equation.'),
@@ -290,16 +284,6 @@ const timesliceMetricBasicMetricSchema = z
   })
   .strict();
 
-const timesliceMetricDocCountMetricSchema = z
-  .object({
-    name: z
-      .string()
-      .max(MAX_FIELD_NAME_LENGTH)
-      .describe('Variable name used in the equation, e.g. "A".'),
-    aggregation: z.literal('doc_count'),
-    filter: kqlFilterSchema.optional(),
-  })
-  .strict();
 
 const timesliceMetricPercentileMetricSchema = z
   .object({
@@ -320,7 +304,7 @@ const timesliceMetricDefSchema = z
       .array(
         z.union([
           timesliceMetricBasicMetricSchema,
-          timesliceMetricDocCountMetricSchema,
+          docCountMetricSchema,
           timesliceMetricPercentileMetricSchema,
         ])
       )
