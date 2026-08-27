@@ -47,12 +47,20 @@ export const forwardCasesAlertStatusToSecuritySolution = (
   request: KibanaRequest,
   payload: CasesAlertStatusPayload
 ): void => {
+  // Pre-index known previous statuses so we can skip confirmed no-ops (previousStatus === status).
+  // IDs absent from the map are kept: an unknown previous status must be treated as changing.
+  const prevStatusMap = new Map(payload.previousStatuses.map((p) => [p.id, p.previousStatus]));
+  const isNoOp = (id: string): boolean => {
+    const prev = prevStatusMap.get(id);
+    return prev !== undefined && prev === payload.status;
+  };
+
   const attackIds: string[] = [];
   const alertIds: string[] = [];
 
   for (const id of payload.alertIds) {
     const index = payload.alertIdToIndex[id];
-    if (index !== undefined && isSecurityIndex(index)) {
+    if (index !== undefined && isSecurityIndex(index) && !isNoOp(id)) {
       if (isAttackDiscoveryIndex(index)) {
         attackIds.push(id);
       } else {

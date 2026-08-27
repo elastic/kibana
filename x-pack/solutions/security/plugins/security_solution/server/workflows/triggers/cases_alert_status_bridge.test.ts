@@ -173,6 +173,8 @@ describe('forwardCasesAlertStatusToSecuritySolution', () => {
     const listener = jest.fn();
     bus.onAlertStatusChanged(listener);
 
+    // Use status: 'closed' so all IDs (previously 'open') are genuinely transitioning and
+    // not filtered by the no-op check before the cap is applied.
     const oversizedPrev = Array.from({ length: MAX_ALERTS_PER_TRIGGER + 3 }, (_, i) => ({
       id: `id-${i}`,
       previousStatus: 'open' as const,
@@ -181,7 +183,7 @@ describe('forwardCasesAlertStatusToSecuritySolution', () => {
     const alertIdToIndex = Object.fromEntries(oversizedIds.map((id) => [id, securityAliasIndex]));
     forwardCasesAlertStatusToSecuritySolution(bus, mockLogger as Logger, mockRequest, {
       alertIds: oversizedIds,
-      status: 'open',
+      status: 'closed',
       previousStatuses: oversizedPrev,
       alertIdToIndex,
       indices: [securityAliasIndex],
@@ -189,6 +191,33 @@ describe('forwardCasesAlertStatusToSecuritySolution', () => {
 
     const { payload } = listener.mock.calls[0][0];
     expect(payload.previousStatuses).toHaveLength(MAX_ALERTS_PER_TRIGGER);
+  });
+
+  it('does not emit for IDs already at the target status (confirmed no-ops)', () => {
+    const listener = jest.fn();
+    bus.onAlertStatusChanged(listener);
+
+    forwardCasesAlertStatusToSecuritySolution(bus, mockLogger as Logger, mockRequest, {
+      alertIds: ['a1', 'a2', 'a3'],
+      status: 'acknowledged',
+      previousStatuses: [
+        { id: 'a1', previousStatus: 'acknowledged' }, // already at target → no-op
+        { id: 'a2', previousStatus: 'open' }, // transitioning
+        // a3 has no previousStatuses entry → unknown, treat as changing
+      ],
+      alertIdToIndex: {
+        a1: securityAliasIndex,
+        a2: securityAliasIndex,
+        a3: securityAliasIndex,
+      },
+      indices: [securityAliasIndex],
+    });
+
+    expect(listener).toHaveBeenCalledTimes(1);
+    const { payload } = listener.mock.calls[0][0];
+    expect(payload.alertIds).not.toContain('a1');
+    expect(payload.alertIds).toContain('a2');
+    expect(payload.alertIds).toContain('a3');
   });
 
   it('excludes previousStatuses entries for IDs truncated from the emitted alertIds list', () => {
