@@ -31,7 +31,7 @@ export const ruleUpdatedTriggerCommonDefinition: CommonTriggerDefinition<
         'xpack.alertingV2.workflowTriggers.ruleUpdated.documentation.notes.subscribe',
         {
           defaultMessage:
-            'When enabled state changes through the dedicated enable or disable action, alerting.ruleEnabled or alerting.ruleDisabled is also emitted. Subscribe to this trigger for configuration updates, or to the enable/disable triggers for state changes only.',
+            'When enabled state changes through the dedicated enable or disable action, only alerting.ruleEnabled or alerting.ruleDisabled is emitted. Subscribe to this trigger for configuration updates, or to the enable/disable triggers for state changes only.',
         }
       ),
     ],
