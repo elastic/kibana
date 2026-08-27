@@ -10,7 +10,8 @@ import { securityMock } from '@kbn/security-plugin/server/mocks';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { DocumentResponse, RunCaseWorkflowRequest } from '../../../common/types/api';
 import type { Case } from '../../../common/types/domain';
-import { createCasesClientMock } from '../../client/mocks';
+import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
+import { createCasesClientMock, createCasesClientMockArgs } from '../../client/mocks';
 import type { CasesRequestHandlerContext } from '../../types';
 import { CasesWorkflowRunService } from './service';
 
@@ -21,6 +22,7 @@ describe('CasesWorkflowRunService', () => {
   const auditLogger = audit.asScoped(request);
   const auditLog = auditLogger.log as jest.MockedFunction<typeof auditLogger.log>;
   const casesClient = createCasesClientMock();
+  const clientArgs = createCasesClientMockArgs();
   let workflowsAvailable = true;
   let licenseValid = true;
   const license = {
@@ -42,9 +44,11 @@ describe('CasesWorkflowRunService', () => {
     management,
     logger,
     audit,
+    getClientArgs: () => clientArgs,
   });
   const theCase = {
     id: 'case-1',
+    owner: SECURITY_SOLUTION_OWNER,
     observables: [],
   } as unknown as Case;
   const createAttachedAlerts = (
@@ -75,10 +79,14 @@ describe('CasesWorkflowRunService', () => {
     jest.clearAllMocks();
     workflowsAvailable = true;
     licenseValid = true;
-    casesClient.cases.ensureAuthorizedToRunWorkflow.mockResolvedValue();
+    casesClient.cases.ensureAuthorizedToRunWorkflow.mockImplementation(async ({ ids }) =>
+      ids.map((id) => ({ id, owner: SECURITY_SOLUTION_OWNER }))
+    );
     casesClient.cases.get.mockResolvedValue(theCase);
-    casesClient.userActions.preflightWorkflowExecution.mockResolvedValue(undefined);
-    casesClient.userActions.recordWorkflowExecution.mockResolvedValue(undefined);
+    clientArgs.services.userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({});
+    clientArgs.services.userActionService.creator.bulkCreateUserAction.mockResolvedValue(
+      undefined as never
+    );
     casesClient.attachments.getAllDocumentsAttachedToCase.mockResolvedValue([]);
     management.getWorkflow.mockResolvedValue({
       id: 'workflow-1',
@@ -127,19 +135,28 @@ describe('CasesWorkflowRunService', () => {
       },
     });
     // preflightWorkflowExecution runs before the workflow to enforce the user-action limit.
-    expect(casesClient.userActions.preflightWorkflowExecution).toHaveBeenCalledWith({
+    expect(
+      clientArgs.services.userActionService.getMultipleCasesUserActionsTotal
+    ).toHaveBeenCalledWith({
       caseIds: ['case-1'],
     });
     // recordWorkflowExecution persists the activity log entry after a successful run.
-    expect(casesClient.userActions.recordWorkflowExecution).toHaveBeenCalledWith(
+    expect(clientArgs.services.userActionService.creator.bulkCreateUserAction).toHaveBeenCalledWith(
       expect.objectContaining({
-        caseIds: ['case-1'],
-        workflow: expect.objectContaining({
-          id: 'workflow-1',
-          name: 'Investigate case',
-          executionId: 'execution-1',
-        }),
-        origin: { type: 'cases.case', id: 'case-1' },
+        userActions: [
+          expect.objectContaining({
+            caseId: 'case-1',
+            owner: SECURITY_SOLUTION_OWNER,
+            payload: {
+              workflow: {
+                id: 'workflow-1',
+                name: 'Investigate case',
+                executionId: 'execution-1',
+              },
+              origin: { type: 'cases.case', id: 'case-1' },
+            },
+          }),
+        ],
       })
     );
     expect(auditLog).toHaveBeenCalledWith(
@@ -153,6 +170,25 @@ describe('CasesWorkflowRunService', () => {
         }),
       })
     );
+  });
+
+  it('records activity with the owner from the already-loaded case', async () => {
+    casesClient.cases.ensureAuthorizedToRunWorkflow.mockResolvedValue([
+      { id: 'case-1', owner: 'owner-from-authorization' },
+    ]);
+    casesClient.cases.get.mockResolvedValue({
+      ...theCase,
+      owner: 'owner-from-loaded-case',
+    } as Case);
+
+    await run();
+
+    expect(clientArgs.services.userActionService.creator.bulkCreateUserAction).toHaveBeenCalledWith(
+      expect.objectContaining({
+        userActions: [expect.objectContaining({ owner: 'owner-from-loaded-case' })],
+      })
+    );
+    expect(clientArgs.services.caseService.getCases).not.toHaveBeenCalled();
   });
 
   it('passes alert preprocessing context with event intact', async () => {
@@ -239,15 +275,25 @@ describe('CasesWorkflowRunService', () => {
 
     it('passes all caseIds to preflightWorkflowExecution', async () => {
       await run(bulkBody);
-      expect(casesClient.userActions.preflightWorkflowExecution).toHaveBeenCalledWith({
+      expect(
+        clientArgs.services.userActionService.getMultipleCasesUserActionsTotal
+      ).toHaveBeenCalledWith({
         caseIds: ['case-a', 'case-b', 'case-c'],
       });
     });
 
-    it('passes all caseIds to recordWorkflowExecution', async () => {
+    it('records activity for all authorized cases', async () => {
       await run(bulkBody);
-      expect(casesClient.userActions.recordWorkflowExecution).toHaveBeenCalledWith(
-        expect.objectContaining({ caseIds: ['case-a', 'case-b', 'case-c'] })
+      expect(
+        clientArgs.services.userActionService.creator.bulkCreateUserAction
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          userActions: expect.arrayContaining(
+            ['case-a', 'case-b', 'case-c'].map((caseId) =>
+              expect.objectContaining({ caseId, owner: SECURITY_SOLUTION_OWNER })
+            )
+          ),
+        })
       );
     });
 
@@ -382,7 +428,7 @@ describe('CasesWorkflowRunService', () => {
   });
 
   it('rejects execution when preflight fails (user-action limit reached)', async () => {
-    casesClient.userActions.preflightWorkflowExecution.mockRejectedValue(
+    clientArgs.services.userActionService.getMultipleCasesUserActionsTotal.mockRejectedValue(
       new Error('User action limit reached')
     );
 
@@ -584,7 +630,7 @@ describe('CasesWorkflowRunService', () => {
   });
 
   it('returns activityStatus: failed when recordWorkflowExecution throws, without rethrowing', async () => {
-    casesClient.userActions.recordWorkflowExecution.mockRejectedValue(
+    clientArgs.services.userActionService.creator.bulkCreateUserAction.mockRejectedValue(
       new Error('activity recording failed')
     );
 

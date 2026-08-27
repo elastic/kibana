@@ -22,6 +22,9 @@ import type { TemplatesSubClient } from './templates/client';
 import { createTemplatesSubClient } from './templates/client';
 import type { FieldDefinitionsSubClient } from './field_definitions/client';
 import { createFieldDefinitionsSubClient } from './field_definitions/client';
+
+const clientArgsByCasesClient = new WeakMap<CasesClient, CasesClientArgs>();
+
 /**
  * Client wrapper that contains accessor methods for individual entities within the cases system.
  */
@@ -36,6 +39,7 @@ export class CasesClient {
   private readonly _fieldDefinitions: FieldDefinitionsSubClient;
 
   constructor(args: CasesClientArgs) {
+    clientArgsByCasesClient.set(this, args);
     this._casesClientInternal = createCasesClientInternal(args);
     this._cases = createCasesSubClient(args, this, this._casesClientInternal);
     this._attachments = createAttachmentsSubClient(args, this, this._casesClientInternal);
@@ -106,4 +110,13 @@ export class CasesClient {
  */
 export const createCasesClient = (args: CasesClientArgs): CasesClient => {
   return new CasesClient(args);
+};
+
+export const getCasesClientInternalArgs = (client: CasesClient): CasesClientArgs => {
+  const args = clientArgsByCasesClient.get(client);
+  if (!args) {
+    throw new Error('Cases client was not created by createCasesClient');
+  }
+
+  return args;
 };

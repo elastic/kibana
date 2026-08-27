@@ -17,10 +17,14 @@ import {
 } from '../../../common/constants';
 import { CasesWorkflowExecutionMetadataSchema } from '../../../common/types/api/workflow/v1';
 import type { RunCaseWorkflowRequest, RunCaseWorkflowResponse } from '../../../common/types/api';
-import { AttachmentType } from '../../../common/types/domain';
+import { AttachmentType, type Case } from '../../../common/types/domain';
 import type { CasesClient } from '../../client';
+import { getCasesClientInternalArgs } from '../../client/client';
+import type { AuthorizedCase } from '../../client/cases/ensure_authorized_to_run_workflow';
+import type { CasesClientArgs } from '../../client/types';
 import type { CasesRequestHandlerContext } from '../../types';
 import { buildActivityOrigin } from './build_activity_origin';
+import { preflightWorkflowExecution, recordWorkflowExecution } from './record_workflow_execution';
 import { getSelectedAlertPairs, validateOrigin } from './validate_origin';
 
 interface RunWorkflowParams {
@@ -36,17 +40,28 @@ interface CasesWorkflowRunServiceDeps {
   management: WorkflowsServerPluginSetup['management'];
   logger: Logger;
   audit: SecurityPluginSetup['audit'];
+  getClientArgs?: (client: CasesClient) => CasesClientArgs;
 }
+
+const getActivityCases = (authorizedCases: AuthorizedCase[], theCase?: Case): AuthorizedCase[] =>
+  theCase ? [{ id: theCase.id, owner: theCase.owner }] : authorizedCases;
 
 export class CasesWorkflowRunService {
   private readonly management: WorkflowsServerPluginSetup['management'];
   private readonly logger: Logger;
   private readonly audit: SecurityPluginSetup['audit'];
+  private readonly getClientArgs: (client: CasesClient) => CasesClientArgs;
 
-  constructor({ management, logger, audit }: CasesWorkflowRunServiceDeps) {
+  constructor({
+    management,
+    logger,
+    audit,
+    getClientArgs = getCasesClientInternalArgs,
+  }: CasesWorkflowRunServiceDeps) {
     this.management = management;
     this.logger = logger;
     this.audit = audit;
+    this.getClientArgs = getClientArgs;
   }
 
   public async run({
@@ -105,7 +120,8 @@ export class CasesWorkflowRunService {
     // All-or-nothing: throws 403 if the caller lacks cases:<owner>/updateCase on any case.
     // Authorizes before reporting not-found errors so an unauthorized caller cannot learn
     // which IDs exist. One privilege round-trip for all owners via ensureAuthorized.
-    await casesClient.cases.ensureAuthorizedToRunWorkflow({ ids: caseIds });
+    const authorizedCases = await casesClient.cases.ensureAuthorizedToRunWorkflow({ ids: caseIds });
+    const clientArgs = this.getClientArgs(casesClient);
 
     // `origin` is optional. When absent the run is a list-surface (bulk) run: the caller
     // was not looking at any specific sub-entity, alert inputs are not permitted, and no
@@ -140,7 +156,7 @@ export class CasesWorkflowRunService {
     }
 
     // Fail fast before anything irreversible: check the per-case user-action limit for all cases.
-    await casesClient.userActions.preflightWorkflowExecution({ caseIds });
+    await preflightWorkflowExecution({ caseIds }, clientArgs);
 
     const workflow = await this.management.getWorkflow(workflowId, spaceId);
     if (!workflow) {
@@ -202,15 +218,18 @@ export class CasesWorkflowRunService {
     // Record the case activity immediately after the execution starts.
     // A failure to record must NOT be reported as an execution failure — the run did succeed.
     try {
-      await casesClient.userActions.recordWorkflowExecution({
-        caseIds,
-        workflow: {
-          id: workflow.id,
-          name: workflow.name,
-          executionId: workflowExecutionId,
+      await recordWorkflowExecution(
+        {
+          cases: getActivityCases(authorizedCases, theCase),
+          workflow: {
+            id: workflow.id,
+            name: workflow.name,
+            executionId: workflowExecutionId,
+          },
+          origin: buildActivityOrigin({ origin: body.origin, theCase }),
         },
-        origin: buildActivityOrigin({ origin: body.origin, theCase }),
-      });
+        clientArgs
+      );
       return { workflowExecutionId, activityStatus: 'succeeded' };
     } catch (error) {
       this.logger.error(

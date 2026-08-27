@@ -38,6 +38,11 @@ export interface EnsureAuthorizedToRunWorkflowParams {
   ids: string[];
 }
 
+export interface AuthorizedCase {
+  id: string;
+  owner: string;
+}
+
 /**
  * Authorizes the caller to run a workflow against all the given case IDs.
  *
@@ -49,7 +54,7 @@ export interface EnsureAuthorizedToRunWorkflowParams {
 export const ensureAuthorizedToRunWorkflow = async (
   { ids }: EnsureAuthorizedToRunWorkflowParams,
   clientArgs: CasesClientArgs
-): Promise<void> => {
+): Promise<AuthorizedCase[]> => {
   const {
     authorization,
     logger,
@@ -90,6 +95,8 @@ export const ensureAuthorizedToRunWorkflow = async (
         );
       }
     }
+
+    return entities;
   } catch (error) {
     throw createCaseError({
       message: `Failed to authorize workflow run for case ids: ${ids.join(', ')}: ${error}`,

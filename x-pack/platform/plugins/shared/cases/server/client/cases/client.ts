@@ -56,7 +56,10 @@ import {
 import type { GetApplicableFieldsParams } from './applicable_fields';
 import { getApplicableFields } from './applicable_fields';
 import type { ApplicableFieldsResponse } from '../../../common/types/domain/template/applicable_field';
-import type { EnsureAuthorizedToRunWorkflowParams } from './ensure_authorized_to_run_workflow';
+import type {
+  AuthorizedCase,
+  EnsureAuthorizedToRunWorkflowParams,
+} from './ensure_authorized_to_run_workflow';
 import { ensureAuthorizedToRunWorkflow } from './ensure_authorized_to_run_workflow';
 import { withUsageCounter } from '../usage_counters';
 
@@ -170,7 +173,9 @@ export interface CasesSubClient {
    * Uses `cases:<owner>/updateCase` as the privilege name, emitting a `case_workflow_run_authz`
    * audit action so no misleading "case updated" record is written.
    */
-  ensureAuthorizedToRunWorkflow(params: EnsureAuthorizedToRunWorkflowParams): Promise<void>;
+  ensureAuthorizedToRunWorkflow(
+    params: EnsureAuthorizedToRunWorkflowParams
+  ): Promise<AuthorizedCase[]>;
 }
 
 // Keep this exhaustive so every new client method requires an explicit telemetry decision.

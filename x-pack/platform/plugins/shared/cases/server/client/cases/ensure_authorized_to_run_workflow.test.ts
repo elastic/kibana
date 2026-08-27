@@ -25,7 +25,9 @@ describe('ensureAuthorizedToRunWorkflow', () => {
       saved_objects: [caseA],
     });
 
-    await ensureAuthorizedToRunWorkflow({ ids: [caseA.id] }, clientArgs);
+    await expect(ensureAuthorizedToRunWorkflow({ ids: [caseA.id] }, clientArgs)).resolves.toEqual([
+      { id: caseA.id, owner: caseA.attributes.owner },
+    ]);
 
     expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledWith({
       // The operation reuses WriteOperations.UpdateCase as the privilege name so the
