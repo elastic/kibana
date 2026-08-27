@@ -63,3 +63,6 @@ reselect-v4
 @swc/plugin-emotion
 graphql
 @cfworker/json-schema
+css-tree
+parse5
+@types/css-tree
