@@ -67,12 +67,6 @@ const IMPLICIT_REGISTRY_CONSUMERS: readonly ImplicitConsumerRule[] = [
     ],
     consumers: ['@kbn/workflows-extensions'],
   },
-  {
-    reason:
-      'Scout workflows_extensions server args decide which trigger publishers load. Those files are not a static edge to workflows_extensions.',
-    patterns: ['**/kbn-scout/**/config_sets/workflows_extensions/**/*.ts'],
-    consumers: ['@kbn/workflows-extensions'],
-  },
 ];
 
 /**
