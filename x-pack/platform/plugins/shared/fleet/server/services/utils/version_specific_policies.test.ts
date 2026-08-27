@@ -294,7 +294,7 @@ describe('getVersionSpecificPolicies', () => {
       })
     );
 
-    const fleetServerPolicy = {
+    const localFleetServerPolicy = {
       data: { inputs: [], secret_references: [{ id: 'base-secret' }] },
     } as any;
     const fullPolicy = {
@@ -303,7 +303,7 @@ describe('getVersionSpecificPolicies', () => {
       secret_references: [{ id: 'base-secret' }],
     } as any;
 
-    const policies = await getVersionSpecificPolicies(soClient, fleetServerPolicy, fullPolicy, [
+    const policies = await getVersionSpecificPolicies(soClient, localFleetServerPolicy, fullPolicy, [
       '9.3',
       '8.9',
     ]);

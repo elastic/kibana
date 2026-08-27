@@ -253,7 +253,7 @@ export async function getFullAgentPolicy(
       ? collectCompiledSecretRefIds([agentInputs, otelcolConfig])
       : new Set<string>();
   let packagePolicySecretReferences = compiledSecretIds
-    ? rawPackagePolicySecretReferences.filter(({ id }) => compiledSecretIds.has(id))
+    ? rawPackagePolicySecretReferences.filter(({ id: refId }) => compiledSecretIds.has(refId))
     : rawPackagePolicySecretReferences;
 
   if (
@@ -261,8 +261,8 @@ export async function getFullAgentPolicy(
     packagePolicySecretReferences.length < rawPackagePolicySecretReferences.length
   ) {
     const droppedIds = rawPackagePolicySecretReferences
-      .filter(({ id }) => !compiledSecretIds.has(id))
-      .map(({ id }) => id);
+      .filter(({ id: refId }) => !compiledSecretIds.has(refId))
+      .map(({ id: refId }) => refId);
     appContextService
       .getLogger()
       .info(
@@ -275,10 +275,10 @@ export async function getFullAgentPolicy(
   }
 
   // Deduplicate: two package policies on one agent policy can legitimately share a secret id.
-  const seenIds = new Set<string>();
-  packagePolicySecretReferences = packagePolicySecretReferences.filter(({ id }) => {
-    if (seenIds.has(id)) return false;
-    seenIds.add(id);
+  const seenSecretIds = new Set<string>();
+  packagePolicySecretReferences = packagePolicySecretReferences.filter(({ id: refId }) => {
+    if (seenSecretIds.has(refId)) return false;
+    seenSecretIds.add(refId);
     return true;
   });
 
