@@ -60,7 +60,6 @@ export const triggerInvestigationWorkflow = async ({
         event_id,
         status,
         severity,
-        summary,
         confidence,
         causal_features: causal_features ?? [],
         blast_radius: blast_radius ?? [],

@@ -17,7 +17,6 @@ import type {
   GetInvestigationResponse,
   InvestigationStatus,
   InvestigationSubject,
-  InvestigationSubjectReference,
   InvestigationTriggerType,
   ListInvestigationItem,
   ListInvestigationsRequest,
@@ -126,21 +125,6 @@ function recoverTriggerTypeFromInput(
     : undefined;
 }
 
-function asNonEmptyText(value: unknown): string | undefined {
-  if (typeof value !== 'string') return undefined;
-  return value.trim() || undefined;
-}
-
-function toSubjectReference(
-  subject: InvestigationSubject,
-  input: Record<string, unknown> | undefined
-): InvestigationSubjectReference {
-  const ctx = isPlainObject(input?.context) ? input.context : undefined;
-  const summary = asNonEmptyText(ctx?.subject_summary);
-
-  return summary ? { ...subject, summary } : subject;
-}
-
 export interface NightshiftInvestigationsClientDeps {
   request: KibanaRequest;
   workflowsManagement?: WorkflowsServerPluginSetup;
@@ -221,7 +205,7 @@ export class NightshiftInvestigationsClient {
         source: subject.type,
         [`${subject.type}_id`]: subject.id,
         trigger_type: trigger_type ?? DEFAULT_INVESTIGATION_TRIGGER_TYPE,
-        ...(summary ? { subject_summary: summary } : {}),
+        ...(summary ? { summary } : {}),
       },
     };
 
@@ -289,10 +273,12 @@ export class NightshiftInvestigationsClient {
 
     const subject = recoverSubjectFromInput(rawInput);
     const recoveredTriggerType = recoverTriggerTypeFromInput(rawInput);
+    const rawContext = isPlainObject(rawInput?.context) ? rawInput.context : undefined;
+    const subjectSummary = asString(rawContext?.summary);
 
     return {
       investigation_id: investigationId,
-      subject: subject && toSubjectReference(subject, rawInput),
+      subject: subject && subjectSummary ? { ...subject, summary: subjectSummary } : subject,
       trigger_type: recoveredTriggerType,
       status,
       started_at: execution.startedAt,
