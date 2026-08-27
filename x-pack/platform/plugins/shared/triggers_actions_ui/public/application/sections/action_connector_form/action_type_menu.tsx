@@ -37,6 +37,7 @@ import { loadActionTypes } from '../../lib/action_connector_api';
 import { actionTypeCompare } from '../../lib/action_type_compare';
 import { useKibana } from '../../../common/lib/kibana';
 import { SectionLoading } from '../../components/section_loading';
+import { isActionTypeCreatable } from './is_action_type_creatable';
 
 interface Props {
   onActionTypeChange: (actionType: ActionType) => void;
@@ -158,7 +159,7 @@ export const ActionTypeMenu = ({
   }, []);
   const registeredActionTypes = Object.entries(actionTypesIndex ?? {})
     .filter(([id, actionType]) => {
-      if (actionType.isDeprecated) return false;
+      if (!isActionTypeCreatable(actionType)) return false;
 
       const actionTypeModel = actionTypeRegistry.has(id) ? actionTypeRegistry.get(id) : undefined;
       if (actionType.source === ACTION_TYPE_SOURCES.spec) {
@@ -166,7 +167,7 @@ export const ActionTypeMenu = ({
           return false;
         }
 
-        return actionType.enabledInConfig === true;
+        return true;
       }
 
       if (!actionTypeModel) {
@@ -177,7 +178,7 @@ export const ActionTypeMenu = ({
         actionTypesIndex ? Object.values(actionTypesIndex) : []
       );
 
-      return actionType.enabledInConfig === true && !shouldHideInUi;
+      return !shouldHideInUi;
     })
     .map(([id, actionType]) => {
       if (actionType.source === ACTION_TYPE_SOURCES.spec) {

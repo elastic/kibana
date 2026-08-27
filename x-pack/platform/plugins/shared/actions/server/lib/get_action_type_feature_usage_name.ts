@@ -8,5 +8,5 @@
 import type { ActionType } from '../types';
 
 export function getActionTypeFeatureUsageName(actionType: ActionType) {
-  return `Connector: ${actionType.name}`;
+  return `Connector: ${actionType.featureUsageName ?? actionType.name}`;
 }

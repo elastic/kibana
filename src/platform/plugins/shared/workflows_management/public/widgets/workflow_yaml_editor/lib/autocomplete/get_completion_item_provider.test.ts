@@ -8,6 +8,7 @@
  */
 
 import { monaco, YAML_LANG_ID } from '@kbn/monaco';
+import { buildAutocompleteContext as mockedBuildAutocompleteContext } from './context/build_autocomplete_context';
 import {
   getCompletionItemProvider,
   WORKFLOW_COMPLETION_PROVIDER_ID,
@@ -16,8 +17,9 @@ import {
   clearAllYamlProviders,
   interceptMonacoYamlProvider,
 } from './intercept_monaco_yaml_provider';
-
+import { getSuggestions as mockedGetSuggestions } from './suggestions/get_suggestions';
 import { isDeprecatedStepType } from '../../../../../common/schema';
+import { setMockStabilityBadgeThemeForTests } from '../stability/set_mock_stability_badge_theme_for_tests';
 
 // Mock dependencies
 jest.mock('./suggestions/get_suggestions', () => ({
@@ -43,6 +45,10 @@ describe('getCompletionItemProvider', () => {
   let mockPosition: monaco.Position;
   let mockCompletionContext: monaco.languages.CompletionContext;
   let getState: jest.Mock;
+
+  beforeAll(() => {
+    setMockStabilityBadgeThemeForTests();
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -248,6 +254,95 @@ describe('getCompletionItemProvider', () => {
 
       expect(result?.suggestions).toHaveLength(1);
       expect(result?.suggestions?.[0].label).toBe('scheduled');
+    });
+
+    it('should mark unsupported actions as unavailable for the selected connector', async () => {
+      (mockedBuildAutocompleteContext as jest.Mock).mockReturnValueOnce({
+        path: ['steps', 0, 'type'],
+        yamlDocument: { getIn: jest.fn().mockReturnValue('slack-webhook') },
+        dynamicConnectorTypes: {
+          '.slack2': {
+            actionTypeId: '.slack2',
+            displayName: 'Slack',
+            enabled: true,
+            enabledInConfig: true,
+            enabledInLicense: true,
+            minimumLicenseRequired: 'enterprise',
+            subActions: [
+              { name: 'searchMessages', displayName: 'Search messages' },
+              { name: 'sendMessage', displayName: 'Send message' },
+            ],
+            instances: [
+              {
+                id: 'slack-webhook',
+                name: 'Slack webhook',
+                isPreconfigured: false,
+                isDeprecated: false,
+                supportedSubActions: ['sendMessage'],
+              },
+            ],
+          },
+        },
+        lineParseResult: { matchType: 'type' },
+        isInEsqlQueryField: false,
+      });
+      (mockedGetSuggestions as jest.Mock).mockReturnValueOnce([
+        {
+          label: 'slack2.searchMessages',
+          insertText: 'slack2.searchMessages',
+          filterText: 'slack2.searchMessages',
+          documentation: 'Slack - Search Messages',
+        },
+        {
+          label: 'slack2.sendMessage',
+          insertText: 'slack2.sendMessage',
+          filterText: 'slack2.sendMessage',
+        },
+      ]);
+      monaco.languages.registerCompletionItemProvider(YAML_LANG_ID, {
+        provideCompletionItems: jest.fn().mockResolvedValue({
+          suggestions: [
+            {
+              label: 'slack2.searchMessages',
+              insertText: 'slack2.searchMessages',
+              filterText: 'slack2.searchMessages',
+            },
+          ],
+        }),
+      });
+
+      const provider = getCompletionItemProvider(getState);
+      const result = await provider.provideCompletionItems!(
+        mockModel,
+        mockPosition,
+        mockCompletionContext,
+        {} as monaco.CancellationToken
+      );
+
+      expect(result?.suggestions?.map((suggestion) => suggestion.filterText)).toEqual([
+        'slack2.searchMessages',
+        'slack2.sendMessage',
+      ]);
+      const unavailableSuggestion = result?.suggestions?.find(
+        ({ filterText }) => filterText === 'slack2.searchMessages'
+      );
+      expect(unavailableSuggestion).toMatchObject({
+        label: {
+          label: 'slack2.searchMessages',
+          description: 'Unavailable',
+        },
+        sortText: 'zzzz-slack2.searchMessages',
+        preselect: false,
+      });
+      expect(unavailableSuggestion?.documentation).toMatchObject({
+        supportHtml: true,
+        value: expect.stringContaining(
+          'This action is not available for connector "Slack webhook" with its current credentials.\n\nSlack - Search Messages'
+        ),
+      });
+      expect((unavailableSuggestion?.documentation as monaco.IMarkdownString).value).toContain(
+        'alt="Unavailable"'
+      );
     });
 
     it('should deduplicate event-driven triggers from YAML schema and workflow provider by technical id', async () => {

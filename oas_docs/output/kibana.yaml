@@ -99447,6 +99447,9 @@ components:
         id:
           description: The identifier for the connector.
           type: string
+        is_create_disabled:
+          description: Indicates whether new connectors of this type can be created.
+          type: boolean
         is_deprecated:
           description: Indicates whether the connector type is deprecated.
           type: boolean

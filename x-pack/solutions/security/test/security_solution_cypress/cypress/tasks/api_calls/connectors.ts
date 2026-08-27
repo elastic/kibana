@@ -15,12 +15,37 @@ export const createConnector = (connector: Record<string, unknown>) =>
     body: connector,
   });
 
-const slackConnectorAPIPayload = {
-  connector_type_id: '.slack',
-  secrets: {
-    webhookUrl: 'http://localhost:123',
+const emailConnectorAPIPayload = {
+  connector_type_id: '.email',
+  config: {
+    service: '__json',
+    from: 'test@example.com',
+    hasAuth: false,
   },
-  name: 'Slack cypress test e2e connector',
+  secrets: {},
+  name: 'Email cypress test e2e connector',
+};
+
+const webhookConnectorAPIPayload = {
+  connector_type_id: '.webhook',
+  config: {
+    method: 'post',
+    hasAuth: false,
+    authType: null,
+    url: 'http://localhost:123',
+    headers: {},
+  },
+  secrets: {
+    secretHeaders: {},
+  },
+  name: 'Webhook cypress test e2e connector',
+};
+
+const serverLogConnectorAPIPayload = {
+  connector_type_id: '.server-log',
+  config: {},
+  secrets: {},
+  name: 'Server log cypress test e2e connector',
 };
 
 export const azureConnectorAPIPayload = {
@@ -48,6 +73,8 @@ export const bedrockConnectorAPIPayload = {
   name: 'Bedrock cypress test e2e connector',
 };
 
-export const createSlackConnector = () => createConnector(slackConnectorAPIPayload);
+export const createEmailConnector = () => createConnector(emailConnectorAPIPayload);
+export const createWebhookConnector = () => createConnector(webhookConnectorAPIPayload);
+export const createServerLogConnector = () => createConnector(serverLogConnectorAPIPayload);
 export const createAzureConnector = () => createConnector(azureConnectorAPIPayload);
 export const createBedrockConnector = () => createConnector(bedrockConnectorAPIPayload);

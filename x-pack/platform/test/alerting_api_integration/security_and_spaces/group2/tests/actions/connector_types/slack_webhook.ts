@@ -45,14 +45,16 @@ export default function slackTest({ getService }: FtrProviderContext) {
       );
     });
 
-    it('should return 200 when creating a slack action successfully', async () => {
+    it('should return 200 when creating a Slack V2 webhook connector successfully', async () => {
       const { body: createdAction } = await supertest
         .post('/api/actions/connector')
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'A slack action',
-          connector_type_id: '.slack',
+          connector_type_id: '.slack2',
+          config: {},
           secrets: {
+            authType: 'webhook',
             webhookUrl: slackSimulatorURL,
           },
         })
@@ -65,9 +67,10 @@ export default function slackTest({ getService }: FtrProviderContext) {
         is_deprecated: false,
         is_missing_secrets: false,
         name: 'A slack action',
-        connector_type_id: '.slack',
-        config: {},
+        connector_type_id: '.slack2',
+        config: { authType: 'webhook' },
         is_connector_type_deprecated: false,
+        auth_mode: 'shared',
       });
 
       expect(typeof createdAction.id).to.be('string');
@@ -83,72 +86,29 @@ export default function slackTest({ getService }: FtrProviderContext) {
         is_deprecated: false,
         is_missing_secrets: false,
         name: 'A slack action',
-        connector_type_id: '.slack',
-        config: {},
+        connector_type_id: '.slack2',
+        config: { authType: 'webhook' },
         is_connector_type_deprecated: false,
         auth_mode: 'shared',
       });
     });
 
-    it('should respond with a 400 Bad Request when creating a slack action with no webhookUrl', async () => {
+    it('should reject creating a V1 Slack webhook connector', async () => {
       await supertest
         .post('/api/actions/connector')
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'A slack action',
           connector_type_id: '.slack',
-          secrets: {},
-        })
-        .expect(400)
-        .then((resp: any) => {
-          expect(resp.body).to.eql({
-            statusCode: 400,
-            error: 'Bad Request',
-            message: `error validating connector type secrets: ✖ Invalid input: expected string, received undefined\n  → at webhookUrl`,
-          });
-        });
-    });
-
-    it('should respond with a 400 Bad Request when creating a slack action with not present in allowedHosts webhookUrl', async () => {
-      await supertest
-        .post('/api/actions/connector')
-        .set('kbn-xsrf', 'foo')
-        .send({
-          name: 'A slack action',
-          connector_type_id: '.slack',
+          config: {},
           secrets: {
-            webhookUrl: 'http://slack.mynonexistent.com/other/stuff/in/the/path',
+            webhookUrl: slackSimulatorURL,
           },
         })
-        .expect(400)
-        .then((resp: any) => {
-          expect(resp.body).to.eql({
-            statusCode: 400,
-            error: 'Bad Request',
-            message: `error validating connector type secrets: error configuring slack action: target url \"http://slack.mynonexistent.com/other/stuff/in/the/path\" is not added to the Kibana config xpack.actions.allowedHosts`,
-          });
-        });
-    });
-
-    it('should respond with a 400 Bad Request when creating a slack action with a webhookUrl with no hostname', async () => {
-      await supertest
-        .post('/api/actions/connector')
-        .set('kbn-xsrf', 'foo')
-        .send({
-          name: 'A slack action',
-          connector_type_id: '.slack',
-          secrets: {
-            webhookUrl: 'fee-fi-fo-fum',
-          },
-        })
-        .expect(400)
-        .then((resp: any) => {
-          expect(resp.body).to.eql({
-            statusCode: 400,
-            error: 'Bad Request',
-            message:
-              'error validating connector type secrets: error configuring slack action: unable to parse host name from webhookUrl',
-          });
+        .expect(400, {
+          statusCode: 400,
+          error: 'Bad Request',
+          message: 'New connectors of action type .slack cannot be created.',
         });
     });
 
@@ -158,8 +118,10 @@ export default function slackTest({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'A slack simulator',
-          connector_type_id: '.slack',
+          connector_type_id: '.slack2',
+          config: {},
           secrets: {
+            authType: 'webhook',
             webhookUrl: slackSimulatorURL,
           },
         })
@@ -174,7 +136,10 @@ export default function slackTest({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
-            message: 'success',
+            subAction: 'sendMessage',
+            subActionParams: {
+              text: 'success',
+            },
           },
         })
         .expect(200);
@@ -196,7 +161,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
       });
 
       const executeEvent = events.find((e) => e?.event?.action === 'execute');
-      expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(18);
+      expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(0);
     });
 
     it('should handle an empty message error', async () => {
@@ -205,13 +170,16 @@ export default function slackTest({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
-            message: '',
+            subAction: 'sendMessage',
+            subActionParams: {
+              text: '',
+            },
           },
         })
         .expect(200);
       expect(result.status).to.eql('error');
       expect(result.message).to.eql(
-        `error validating action params: ✖ Too small: expected string to have >=1 characters\n  → at message`
+        `error validating action params: ✖ Too small: expected string to have >=1 characters\n  → at subActionParams.text`
       );
     });
 
@@ -221,31 +189,35 @@ export default function slackTest({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
-            message: 'invalid_payload',
+            subAction: 'sendMessage',
+            subActionParams: {
+              text: 'invalid_payload',
+            },
           },
         })
         .expect(200);
       expect(result.status).to.equal('error');
-      expect(result.message).to.match(/unexpected http response from slack: /);
+      expect(result.message).to.equal('Request failed with status code 400');
     });
 
-    it('should handle a 429 slack error', async () => {
+    it('should retry and report a 429 slack error', async () => {
       const dateStart = new Date().getTime();
       const { body: result } = await supertest
         .post(`/api/actions/connector/${simulatedActionId}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
-            message: 'rate_limit',
+            subAction: 'sendMessage',
+            subActionParams: {
+              text: 'rate_limit',
+            },
           },
         })
         .expect(200);
 
       expect(result.status).to.equal('error');
-      expect(result.message).to.match(/error posting a slack message, retry at \d\d\d\d-/);
-
-      const dateRetry = new Date(result.retry).getTime();
-      expect(dateRetry).to.greaterThan(dateStart);
+      expect(result.message).to.equal('Request failed with status code 429');
+      expect(new Date().getTime() - dateStart).to.be.greaterThan(5000);
     });
 
     it('should handle a 500 slack error', async () => {
@@ -254,14 +226,16 @@ export default function slackTest({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
-            message: 'status_500',
+            subAction: 'sendMessage',
+            subActionParams: {
+              text: 'status_500',
+            },
           },
         })
         .expect(200);
 
       expect(result.status).to.equal('error');
-      expect(result.message).to.match(/error posting a slack message, retry later/);
-      expect(result.retry).to.equal(true);
+      expect(result.message).to.equal('Request failed with status code 500');
     });
 
     after(() => {

@@ -27,12 +27,13 @@ export function getTestAlertData(overwrites = {}) {
 
 export function getTestConnectorData(overwrites = {}) {
   return {
-    name: `slack-${Date.now()}`,
-    connector_type_id: '.slack',
-    config: {},
-    secrets: {
-      webhookUrl: 'https://test',
+    name: `webhook-${Date.now()}`,
+    connector_type_id: '.webhook',
+    config: {
+      url: 'https://test',
+      hasAuth: false,
     },
+    secrets: {},
     ...overwrites,
   };
 }

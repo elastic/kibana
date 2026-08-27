@@ -295,6 +295,7 @@ export class ActionTypeRegistry {
             }
           : {}),
         isDeprecated: !!actionType.isDeprecated,
+        ...(actionType.isCreateDisabled ? { isCreateDisabled: true } : {}),
         allowMultipleSystemActions: actionType.allowMultipleSystemActions,
         description: actionType.description,
         isExperimental: actionType.isExperimental,

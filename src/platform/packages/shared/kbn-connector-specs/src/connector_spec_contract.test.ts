@@ -38,6 +38,9 @@ describe('connector spec contracts', () => {
     expect(metadata.id).toMatch(CONNECTOR_ID_PATTERN);
     expect(metadata.id.length).toBeLessThanOrEqual(MAX_CONNECTOR_TYPE_ID_LENGTH);
     expect(metadata.displayName.trim()).not.toHaveLength(0);
+    if (metadata.featureUsageName !== undefined) {
+      expect(metadata.featureUsageName.trim()).not.toHaveLength(0);
+    }
     expect(metadata.description.trim()).not.toHaveLength(0);
     // supportedFeatureIds may be [] for support-only connectors (not yet feature-enabled).
     // Non-empty entries must be valid feature ID strings.
@@ -67,6 +70,41 @@ describe('connector spec contracts', () => {
         const inSchema = registeredAuthType && defaultField in registeredAuthType.schema.shape;
         if (!inSchema) {
           violations.push(`${authType.type}.${defaultField} is not defined by the auth type`);
+        }
+      }
+    }
+
+    expect(violations).toEqual([]);
+  });
+
+  it.each(allSpecs)('%s has valid action authentication constraints', (_exportName, spec) => {
+    const authTypeIds = new Set((spec.auth?.types ?? []).map(getAuthTypeId));
+    const violations: string[] = [];
+
+    for (const [actionName, action] of Object.entries(spec.actions)) {
+      if (action.supportedAuthTypes === undefined) {
+        continue;
+      }
+
+      if (action.supportedAuthTypes.length === 0) {
+        violations.push(`${actionName} must support at least one auth type`);
+      }
+      if (new Set(action.supportedAuthTypes).size !== action.supportedAuthTypes.length) {
+        violations.push(`${actionName} supported auth types must be unique`);
+      }
+      for (const authTypeId of action.supportedAuthTypes) {
+        if (!authTypeIds.has(authTypeId)) {
+          violations.push(`${actionName} references unknown auth type ${authTypeId}`);
+        }
+      }
+      for (const [authTypeId, message] of Object.entries(
+        action.unsupportedAuthTypeMessages ?? {}
+      )) {
+        if (!authTypeIds.has(authTypeId)) {
+          violations.push(`${actionName} has a message for unknown auth type ${authTypeId}`);
+        }
+        if (message.trim().length === 0) {
+          violations.push(`${actionName} has an empty message for auth type ${authTypeId}`);
         }
       }
     }

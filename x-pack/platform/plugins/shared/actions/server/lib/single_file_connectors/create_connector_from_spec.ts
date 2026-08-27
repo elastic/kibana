@@ -8,6 +8,7 @@
 import type { ConnectorSpec } from '@kbn/connector-specs';
 import { TEST_CONNECTOR_SUB_ACTION } from '@kbn/connector-specs';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
+import type { Logger } from '@kbn/core/server';
 import { z as z4 } from '@kbn/zod/v4';
 
 import type {
@@ -23,6 +24,8 @@ import { generateSecretsSchema } from './generate_secrets_schema';
 import { generateExecutorFunction } from './generate_executor_function';
 import { generateConfigSchema } from './generate_config_schema';
 import { createConnectorNetworkSettings } from './create_connector_network_settings';
+import type { Escape } from '../mustache_renderer';
+import { renderMustacheObject } from '../mustache_renderer';
 
 const buildExecutableActions = (spec: ConnectorSpec): ConnectorSpec['actions'] => {
   if (spec.actions?.[TEST_CONNECTOR_SUB_ACTION]) {
@@ -46,6 +49,15 @@ const buildExecutableActions = (spec: ConnectorSpec): ConnectorSpec['actions'] =
   };
 };
 
+const getTemplateEscape = (spec: ConnectorSpec): Escape | undefined => {
+  const templates = spec.transformations?.templates;
+  if (!templates?.enabled || (templates.format !== undefined && templates.format !== 'mustache')) {
+    return undefined;
+  }
+
+  return templates.escaping ?? 'none';
+};
+
 export const createConnectorTypeFromSpec = (
   spec: ConnectorSpec,
   actions: ActionsPluginSetupContract
@@ -57,6 +69,7 @@ export const createConnectorTypeFromSpec = (
   const hasActions = Boolean(spec.actions);
   const executableActions = buildExecutableActions(spec);
   const hasExecutableActions = hasActions || hasTest;
+  const templateEscape = getTemplateEscape(spec);
 
   const executor = hasExecutableActions
     ? generateExecutorFunction({
@@ -76,6 +89,7 @@ export const createConnectorTypeFromSpec = (
     id: spec.metadata.id,
     minimumLicenseRequired: spec.metadata.minimumLicense,
     name: spec.metadata.displayName,
+    featureUsageName: spec.metadata.featureUsageName,
     supportedFeatureIds: spec.metadata.supportedFeatureIds,
     validate: {
       config: generateConfigSchema(spec.schema),
@@ -83,6 +97,15 @@ export const createConnectorTypeFromSpec = (
       ...(paramsValidator ? { params: paramsValidator } : {}),
     },
     ...(executor ? { executor } : {}),
+    ...(templateEscape
+      ? {
+          renderParameterTemplates: (
+            logger: Logger,
+            params: ActionTypeParams,
+            variables: Record<string, unknown>
+          ) => renderMustacheObject(logger, params, variables, templateEscape),
+        }
+      : {}),
     globalAuthHeaders: spec.auth?.headers,
     source: ACTION_TYPE_SOURCES.spec,
     description: spec.metadata.description,

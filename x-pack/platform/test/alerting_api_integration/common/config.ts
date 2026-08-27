@@ -68,6 +68,7 @@ const enabledActionTypes = [
   CROWDSTRIKE_CONNECTOR_ID,
   MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID,
   '.slack',
+  '.slack2',
   '.slack_api',
   '.thehive',
   '.tines',

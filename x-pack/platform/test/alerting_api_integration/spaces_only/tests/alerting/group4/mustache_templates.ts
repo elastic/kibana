@@ -89,7 +89,10 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
           id: slackConnector.id,
           group: 'default',
           params: {
-            message: `message {{rule.id}} - ${template}`,
+            subAction: 'sendMessage',
+            subActionParams: {
+              text: `message {{rule.id}} - ${template}`,
+            },
           },
         });
 
@@ -107,7 +110,10 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
           id: slackConnector.id,
           group: 'default',
           params: {
-            message: `message {{rule.id}} - ${template}`,
+            subAction: 'sendMessage',
+            subActionParams: {
+              text: `message {{rule.id}} - ${template}`,
+            },
           },
         });
         const body = await retry.try(async () => waitForActionBody(slackSimulatorURL, rule.id));
@@ -122,7 +128,10 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
           id: slackConnector.id,
           group: 'default',
           params: {
-            message: `message {{rule.id}} - ${template}`,
+            subAction: 'sendMessage',
+            subActionParams: {
+              text: `message {{rule.id}} - ${template}`,
+            },
           },
         });
 
@@ -193,7 +202,10 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
           id: slackConnector.id,
           group: 'default',
           params: {
-            message: `message {{rule.id}} - ${template}`,
+            subAction: 'sendMessage',
+            subActionParams: {
+              text: `message {{rule.id}} - ${template}`,
+            },
           },
         });
         const body = await retry.try(async () => waitForActionBody(slackSimulatorURL, rule.id));
@@ -210,7 +222,10 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
           id: slackConnector.id,
           group: 'default',
           params: {
-            message: `message {{rule.id}} - ${template}`,
+            subAction: 'sendMessage',
+            subActionParams: {
+              text: `message {{rule.id}} - ${template}`,
+            },
           },
         });
         const body = await retry.try(async () => waitForActionBody(slackSimulatorURL, rule.id));
@@ -228,7 +243,10 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
         id: slackConnector.id,
         group: 'default',
         params: {
-          message: `message {{rule.id}} - ${template}`,
+          subAction: 'sendMessage',
+          subActionParams: {
+            text: `message {{rule.id}} - ${template}`,
+          },
         },
       });
       const body = await retry.try(async () => waitForActionBody(slackSimulatorURL, rule.id));
@@ -243,7 +261,10 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
         id: slackConnector.id,
         group: 'default',
         params: {
-          message: `message {{rule.id}} - ${template}`,
+          subAction: 'sendMessage',
+          subActionParams: {
+            text: `message {{rule.id}} - ${template}`,
+          },
         },
       });
       const body = await retry.try(async () => waitForActionBody(slackSimulatorURL, rule.id));
@@ -258,7 +279,10 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
         id: slackConnector.id,
         group: 'default',
         params: {
-          message: `message {{rule.id}} - ${template}`,
+          subAction: 'sendMessage',
+          subActionParams: {
+            text: `message {{rule.id}} - ${template}`,
+          },
         },
       });
       const body = await retry.try(async () => waitForActionBody(slackSimulatorURL, rule.id));
@@ -305,8 +329,10 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
         .set('kbn-xsrf', 'test')
         .send({
           name: 'testing mustache for slack',
-          connector_type_id: '.slack',
+          connector_type_id: '.slack2',
+          config: {},
           secrets: {
+            authType: 'webhook',
             webhookUrl: url,
           },
         });

@@ -39,6 +39,8 @@ export const getConnectorType = (): SlackApiConnectorType => {
     id: CONNECTOR_ID,
     minimumLicenseRequired: 'gold',
     name: CONNECTOR_NAME,
+    isDeprecated: true,
+    isCreateDisabled: true,
     supportedFeatureIds: [
       UptimeConnectorFeatureId,
       AlertingConnectorFeatureId,

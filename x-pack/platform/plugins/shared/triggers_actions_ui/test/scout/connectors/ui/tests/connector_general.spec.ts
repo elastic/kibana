@@ -19,8 +19,16 @@ import {
   searchAndOpenConnector,
 } from '../fixtures';
 
-const SLACK_SECRETS = {
-  webhookUrl: 'https://example.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX',
+const WEBHOOK_CONFIG = {
+  method: 'post',
+  hasAuth: false,
+  authType: null,
+  url: 'https://example.com/webhook',
+  headers: {},
+};
+
+const WEBHOOK_SECRETS = {
+  secretHeaders: {},
 };
 
 // The connector flyout body (ConnectorForm) mounts and lazy-loads its fields after the
@@ -51,7 +59,7 @@ test.describe('General connector functionality', { tag: tags.stateful.classic },
   test('should create a connector', async ({ page, kbnUrl, apiServices }) => {
     await navigateToConnectors(page, kbnUrl);
 
-    const connectorName = `scout-slack-${uuidv4().slice(0, 8)}`;
+    const connectorName = `scout-webhook-${uuidv4().slice(0, 8)}`;
 
     await page.testSubj.click('createConnectorButton');
 
@@ -60,16 +68,17 @@ test.describe('General connector functionality', { tag: tags.stateful.classic },
     // the action-type list/capabilities resolve, silently losing the selection so
     // the back button never appears. Waiting for a sibling card proves the grid is
     // painted; then confirm the selection registered before navigating back.
-    await page.testSubj.locator('.slack-card').waitFor({ state: 'visible' });
+    await page.testSubj.locator('.webhook-card').waitFor({ state: 'visible' });
     await page.testSubj.click('.index-card');
     const backBtn = page.testSubj.locator('create-connector-flyout-back-btn');
     await backBtn.waitFor({ state: 'visible' });
     await backBtn.click();
-    await page.testSubj.click('.slack-card');
+    await page.testSubj.click('.webhook-card');
 
+    await page.testSubj.locator('authNone').click();
     await waitForConnectorForm(page);
     await page.testSubj.locator('nameInput').fill(connectorName);
-    await page.testSubj.locator('slackWebhookUrlInput').fill('https://test.com');
+    await page.testSubj.locator('webhookUrlText').fill('https://test.com');
 
     await expect(page.testSubj.locator('create-connector-flyout-save-btn')).toBeEnabled();
     await page.testSubj.click('create-connector-flyout-save-btn');
@@ -82,7 +91,7 @@ test.describe('General connector functionality', { tag: tags.stateful.classic },
     const row = page.testSubj.locator('connectors-row');
     await expect(row).toHaveCount(1);
     await expect(row.getByTestId('connectorsTableCell-name')).toContainText(connectorName);
-    await expect(row.getByTestId('connectorsTableCell-actionType')).toContainText('Slack');
+    await expect(row.getByTestId('connectorsTableCell-actionType')).toContainText('Webhook');
 
     const all = await apiServices.alerting.connectors.getAll();
     const created = (all as Array<{ id: string; name: string }>).find(
@@ -99,23 +108,24 @@ test.describe('General connector functionality', { tag: tags.stateful.classic },
   }) => {
     await navigateToConnectors(page, kbnUrl);
 
-    const connectorName = `scout-slack-${uuidv4().slice(0, 8)}`;
+    const connectorName = `scout-webhook-${uuidv4().slice(0, 8)}`;
     const customId = `custom-${uuidv4().slice(0, 28)}`;
     createdConnectorIds.push(customId);
 
     await page.testSubj.click('createConnectorButton');
 
-    await page.testSubj.locator('.slack-card').waitFor({ state: 'visible' });
+    await page.testSubj.locator('.webhook-card').waitFor({ state: 'visible' });
     await page.testSubj.click('.index-card');
     const backBtn = page.testSubj.locator('create-connector-flyout-back-btn');
     await backBtn.waitFor({ state: 'visible' });
     await backBtn.click();
-    await page.testSubj.click('.slack-card');
+    await page.testSubj.click('.webhook-card');
 
+    await page.testSubj.locator('authNone').click();
     await waitForConnectorForm(page);
     await page.testSubj.locator('nameInput').fill(connectorName);
     await page.testSubj.locator('connectorIdInput').fill(customId);
-    await page.testSubj.locator('slackWebhookUrlInput').fill('https://test.com');
+    await page.testSubj.locator('webhookUrlText').fill('https://test.com');
 
     await expect(page.testSubj.locator('create-connector-flyout-save-btn')).toBeEnabled();
     await page.testSubj.click('create-connector-flyout-save-btn');
@@ -136,13 +146,14 @@ test.describe('General connector functionality', { tag: tags.stateful.classic },
 
     await page.testSubj.click('createConnectorButton');
 
-    await page.testSubj.locator('.slack-card').waitFor({ state: 'visible' });
+    await page.testSubj.locator('.webhook-card').waitFor({ state: 'visible' });
     await page.testSubj.click('.index-card');
     const backBtn2 = page.testSubj.locator('create-connector-flyout-back-btn');
     await backBtn2.waitFor({ state: 'visible' });
     await backBtn2.click();
-    await page.testSubj.click('.slack-card');
+    await page.testSubj.click('.webhook-card');
 
+    await page.testSubj.locator('authNone').click();
     await waitForConnectorForm(page);
     await page.testSubj.locator('nameInput').fill('My Test Connector');
 
@@ -156,12 +167,12 @@ test.describe('General connector functionality', { tag: tags.stateful.classic },
     kbnUrl,
     apiServices,
   }) => {
-    const connectorName = `scout-slack-${Date.now()}`;
+    const connectorName = `scout-webhook-${Date.now()}`;
     const { id: connectorId } = await apiServices.alerting.connectors.create({
       name: connectorName,
-      connectorTypeId: '.slack',
-      config: {},
-      secrets: SLACK_SECRETS,
+      connectorTypeId: '.webhook',
+      config: WEBHOOK_CONFIG,
+      secrets: WEBHOOK_SECRETS,
     });
     createdConnectorIds.push(connectorId);
 
@@ -177,13 +188,13 @@ test.describe('General connector functionality', { tag: tags.stateful.classic },
   });
 
   test('should edit a connector', async ({ page, kbnUrl, apiServices }) => {
-    const connectorName = `scout-slack-${Date.now()}`;
+    const connectorName = `scout-webhook-${Date.now()}`;
     const updatedName = `${connectorName}-updated`;
     const { id: connectorId } = await apiServices.alerting.connectors.create({
       name: connectorName,
-      connectorTypeId: '.slack',
-      config: {},
-      secrets: SLACK_SECRETS,
+      connectorTypeId: '.webhook',
+      config: WEBHOOK_CONFIG,
+      secrets: WEBHOOK_SECRETS,
     });
     createdConnectorIds.push(connectorId);
 
@@ -194,7 +205,7 @@ test.describe('General connector functionality', { tag: tags.stateful.classic },
 
     await waitForConnectorForm(page);
     await page.testSubj.locator('nameInput').fill(updatedName);
-    await page.testSubj.locator('slackWebhookUrlInput').fill('https://test.com');
+    await page.testSubj.locator('webhookUrlText').fill('https://test.com');
 
     await expect(page.testSubj.locator('edit-connector-flyout-save-btn')).toBeEnabled();
     await page.testSubj.click('edit-connector-flyout-save-btn');
@@ -209,7 +220,7 @@ test.describe('General connector functionality', { tag: tags.stateful.classic },
     const row = page.testSubj.locator('connectors-row');
     await expect(row).toHaveCount(1);
     await expect(row.getByTestId('connectorsTableCell-name')).toContainText(updatedName);
-    await expect(row.getByTestId('connectorsTableCell-actionType')).toContainText('Slack');
+    await expect(row.getByTestId('connectorsTableCell-actionType')).toContainText('Webhook');
   });
 
   test('should test a connector and display a successful result', async ({
@@ -291,12 +302,12 @@ test.describe('General connector functionality', { tag: tags.stateful.classic },
   });
 
   test('should reset connector when canceling an edit', async ({ page, kbnUrl, apiServices }) => {
-    const connectorName = `scout-slack-${Date.now()}`;
+    const connectorName = `scout-webhook-${Date.now()}`;
     const { id: connectorId } = await apiServices.alerting.connectors.create({
       name: connectorName,
-      connectorTypeId: '.slack',
-      config: {},
-      secrets: SLACK_SECRETS,
+      connectorTypeId: '.webhook',
+      config: WEBHOOK_CONFIG,
+      secrets: WEBHOOK_SECRETS,
     });
     createdConnectorIds.push(connectorId);
 
@@ -319,12 +330,12 @@ test.describe('General connector functionality', { tag: tags.stateful.classic },
   });
 
   test('should delete a connector', async ({ page, kbnUrl, apiServices }) => {
-    const connectorName = `scout-slack-del-${Date.now()}`;
+    const connectorName = `scout-webhook-del-${Date.now()}`;
     const { id: connectorId } = await apiServices.alerting.connectors.create({
       name: connectorName,
-      connectorTypeId: '.slack',
-      config: {},
-      secrets: SLACK_SECRETS,
+      connectorTypeId: '.webhook',
+      config: WEBHOOK_CONFIG,
+      secrets: WEBHOOK_SECRETS,
     });
     createdConnectorIds.push(connectorId);
 
@@ -348,12 +359,12 @@ test.describe('General connector functionality', { tag: tags.stateful.classic },
   });
 
   test('should bulk delete connectors', async ({ page, kbnUrl, apiServices }) => {
-    const connectorName = `scout-slack-bulk-${Date.now()}`;
+    const connectorName = `scout-webhook-bulk-${Date.now()}`;
     const { id: connectorId } = await apiServices.alerting.connectors.create({
       name: connectorName,
-      connectorTypeId: '.slack',
-      config: {},
-      secrets: SLACK_SECRETS,
+      connectorTypeId: '.webhook',
+      config: WEBHOOK_CONFIG,
+      secrets: WEBHOOK_SECRETS,
     });
     createdConnectorIds.push(connectorId);
 

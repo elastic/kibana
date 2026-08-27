@@ -124,6 +124,7 @@ export interface SubActionConnectorType<Config, Secrets> {
   renderParameterTemplates?: RenderParameterTemplates<ExecutorParams>;
   isSystemActionType?: boolean;
   isDeprecated?: boolean;
+  isCreateDisabled?: boolean;
   subFeature?: SubFeature;
   getKibanaPrivileges?: (args?: {
     params?: { subAction: string; subActionParams: Record<string, unknown> };

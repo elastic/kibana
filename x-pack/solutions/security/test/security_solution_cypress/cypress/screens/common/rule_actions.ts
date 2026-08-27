@@ -11,6 +11,8 @@ export const WEBHOOK_ACTION_BTN = '[data-test-subj=".webhook-siem-ActionTypeSele
 
 export const SERVER_LOG_ACTION_BTN = '[data-test-subj=".server-log-siem-ActionTypeSelectOption"]';
 
+export const SERVER_LOG_ACTION_MESSAGE_TEXTAREA = '[data-test-subj="messageTextArea"]';
+
 export const XMATTERS_ACTION_BTN = '[data-test-subj=".xmatters-siem-ActionTypeSelectOption"]';
 
 export const CASES_SYSTEM_ACTION_BTN = '[data-test-subj=".cases-siem-ActionTypeSelectOption"]';

@@ -367,14 +367,14 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       it('should show and update deleted connectors when there are existing connectors of the same type', async () => {
         const testRunUuid = uuidv4();
 
-        const connector1 = await alertingApi.helpers.createSlackConnector({
+        const connector1 = await alertingApi.helpers.createServerLogConnector({
           roleAuthc,
-          name: `slack-${testRunUuid}-${0}`,
+          name: `server-log-${testRunUuid}-${0}`,
         });
 
-        const connector2 = await alertingApi.helpers.createSlackConnector({
+        const connector2 = await alertingApi.helpers.createServerLogConnector({
           roleAuthc,
-          name: `slack-${testRunUuid}-${1}`,
+          name: `server-log-${testRunUuid}-${1}`,
         });
 
         connectorIdList = [connector2.id];
@@ -446,7 +446,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await retry.tryForTime(15 * 1000, async () => {
           const connectorTitle = await ruleActionItems[0].getVisibleText();
-          expect(connectorTitle.includes('Slack')).toBe(true);
+          expect(connectorTitle.includes('Server log')).toBe(true);
         });
       });
     });
@@ -475,14 +475,14 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         const testRunUuid = uuidv4();
         const RULE_TYPE_ID = '.es-query';
 
-        const connector1 = await alertingApi.helpers.createSlackConnector({
+        const connector1 = await alertingApi.helpers.createServerLogConnector({
           roleAuthc,
-          name: `slack-${testRunUuid}-${0}`,
+          name: `server-log-${testRunUuid}-${0}`,
         });
 
-        const connector2 = await alertingApi.helpers.createSlackConnector({
+        const connector2 = await alertingApi.helpers.createServerLogConnector({
           roleAuthc,
-          name: `slack-${testRunUuid}-${1}`,
+          name: `server-log-${testRunUuid}-${1}`,
         });
 
         connectorIdList = [connector1.id, connector2.id];

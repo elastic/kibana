@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-export const getSlackAction = () => ({
-  connector_type_id: '.slack',
-  secrets: {
-    webhookUrl: 'http://localhost:123',
-  },
-  name: 'Slack connector',
+export const getServerLogAction = () => ({
+  connector_type_id: '.server-log',
+  name: 'Server log connector',
 });

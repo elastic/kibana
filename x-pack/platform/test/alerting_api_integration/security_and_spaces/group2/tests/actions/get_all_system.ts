@@ -166,7 +166,7 @@ export default function getAllConnectorTests({ getService }: FtrProviderContext)
                   connector_type_id: '.slack',
                   name: 'Slack#xyz',
                   referenced_by_count: 0,
-                  is_connector_type_deprecated: false,
+                  is_connector_type_deprecated: true,
                   auth_mode: 'shared',
                 },
                 {
@@ -432,7 +432,7 @@ export default function getAllConnectorTests({ getService }: FtrProviderContext)
                   connector_type_id: '.slack',
                   name: 'Slack#xyz',
                   referenced_by_count: 0,
-                  is_connector_type_deprecated: false,
+                  is_connector_type_deprecated: true,
                   auth_mode: 'shared',
                 },
                 {
@@ -660,7 +660,7 @@ export default function getAllConnectorTests({ getService }: FtrProviderContext)
                   connector_type_id: '.slack',
                   name: 'Slack#xyz',
                   referenced_by_count: 0,
-                  is_connector_type_deprecated: false,
+                  is_connector_type_deprecated: true,
                   auth_mode: 'shared',
                 },
                 {

@@ -161,9 +161,15 @@ test.describe('Rule action alerts filter', { tag: tags.stateful.classic }, () =>
     const connectorName = `scout-is-one-of-${Date.now()}`;
     const created = await apiServices.alerting.connectors.create({
       name: connectorName,
-      connectorTypeId: '.slack',
-      config: {},
-      secrets: { webhookUrl: 'https://test.com' },
+      connectorTypeId: '.webhook',
+      config: {
+        method: 'get',
+        hasAuth: false,
+        authType: null,
+        url: 'https://example.com/webhook',
+        headers: {},
+      },
+      secrets: { secretHeaders: {} },
     });
     createdConnectorIds.push(created.id);
 

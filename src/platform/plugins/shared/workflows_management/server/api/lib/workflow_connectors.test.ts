@@ -67,7 +67,10 @@ describe('getAvailableConnectors', () => {
       request,
     });
 
-    expect(result.connectorTypes['.email'].instances).toEqual([]);
+    expect(result.connectorTypes['.email']).toMatchObject({
+      instances: [],
+      subActions: [],
+    });
     expect(result.totalConnectors).toBe(0);
   });
 
@@ -149,6 +152,52 @@ describe('getAvailableConnectors', () => {
       id: 'inf-1',
       config: { taskType: 'text_classification' },
     });
+  });
+
+  it('returns supported sub-actions for spec connectors based on auth type', async () => {
+    const actionsClient = {
+      getAll: jest.fn().mockResolvedValue([
+        mockConnector({
+          id: 'slack-webhook',
+          actionTypeId: '.slack2',
+          config: { authType: 'webhook' },
+        }),
+        mockConnector({
+          id: 'slack-bot',
+          actionTypeId: '.slack2',
+          config: { authType: 'bearer' },
+        }),
+        mockConnector({
+          id: 'slack-missing-auth',
+          actionTypeId: '.slack2',
+          config: {},
+        }),
+        mockConnector({
+          id: 'slack-preconfigured',
+          actionTypeId: '.slack2',
+          isPreconfigured: true,
+          config: undefined,
+          authType: 'webhook',
+        }),
+      ]),
+    };
+    const actionsClientWithRequest = {
+      listTypes: jest.fn().mockResolvedValue([mockActionType({ id: '.slack2', name: 'Slack' })]),
+    };
+
+    const result = await getAvailableConnectors({
+      getActionsClient: jest.fn().mockResolvedValue(actionsClient),
+      getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientWithRequest),
+      spaceId: 'default',
+      request,
+    });
+
+    const [webhook, bot, missingAuth, preconfigured] = result.connectorTypes['.slack2'].instances;
+    expect(webhook.supportedSubActions).toEqual(['sendMessage']);
+    expect(bot.supportedSubActions).toContain('sendMessage');
+    expect(bot.supportedSubActions).not.toContain('searchMessages');
+    expect(missingAuth.supportedSubActions).toEqual([]);
+    expect(preconfigured.supportedSubActions).toEqual(['sendMessage']);
   });
 
   it('returns an empty payload when there are neither connectors nor action types', async () => {

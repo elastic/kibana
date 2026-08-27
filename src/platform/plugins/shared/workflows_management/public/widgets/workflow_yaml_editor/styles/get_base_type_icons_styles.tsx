@@ -46,13 +46,15 @@ export function getBaseTypeIconsStyles(euiThemeContext: UseEuiTheme) {
       color: ${euiTheme.colors.textParagraph};
     }
 
-    /* Tech preview: flask icon + full-height separator inside the highlight box */
-    .type-inline-highlight.type-tech-preview {
+    /* Status badge + full-height separator inside the highlight box */
+    .type-inline-highlight.type-tech-preview,
+    .type-inline-highlight.type-unavailable {
       padding-right: 24px !important;
       position: relative !important;
     }
 
-    .type-inline-highlight.type-tech-preview::before {
+    .type-inline-highlight.type-tech-preview::before,
+    .type-inline-highlight.type-unavailable::before {
       content: '';
       position: absolute;
       right: 0;
@@ -61,13 +63,19 @@ export function getBaseTypeIconsStyles(euiThemeContext: UseEuiTheme) {
       width: 20px;
       background: linear-gradient(${borderColor}, ${borderColor}) no-repeat left / 1px 100%,
         ${euiTheme.colors.textPrimary};
-      /* Two mask layers composited: 1px separator line + flask icon */
-      mask-image: linear-gradient(#000, #000), url('${HardcodedIcons.flask}');
       mask-size: 1px 100%, 11px 11px;
       mask-repeat: no-repeat;
       mask-position: left center, center center;
       mask-composite: add;
       -webkit-mask-composite: source-over;
+    }
+
+    .type-inline-highlight.type-tech-preview::before {
+      mask-image: linear-gradient(#000, #000), url('${HardcodedIcons.flask}');
+    }
+
+    .type-inline-highlight.type-unavailable::before {
+      mask-image: linear-gradient(#000, #000), url('${HardcodedIcons.alert}');
     }
   `;
 }

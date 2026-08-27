@@ -33,6 +33,7 @@ export interface ActionType {
   source?: ActionTypeSource;
   subFeature?: SubFeature;
   isDeprecated: boolean;
+  isCreateDisabled?: boolean;
   allowMultipleSystemActions?: boolean;
   description?: string;
   isExperimental?: boolean;

@@ -158,16 +158,12 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('@skipInServerless should update a single rule property and remove the action', async () => {
         const [connector1] = await Promise.all([
-          supertest
-            .post(`/api/actions/connector`)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              name: 'My action',
-              connector_type_id: '.slack',
-              secrets: {
-                webhookUrl: 'http://localhost:1234',
-              },
-            }),
+          supertest.post(`/api/actions/connector`).set('kbn-xsrf', 'foo').send({
+            name: 'My action',
+            connector_type_id: '.server-log',
+            config: {},
+            secrets: {},
+          }),
         ]);
 
         const action1 = {
@@ -175,6 +171,7 @@ export default ({ getService }: FtrProviderContext) => {
           id: connector1.body.id,
           action_type_id: connector1.body.connector_type_id,
           params: {
+            level: 'info',
             message: 'message',
           },
         };

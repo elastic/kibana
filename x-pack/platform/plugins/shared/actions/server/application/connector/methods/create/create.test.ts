@@ -336,6 +336,35 @@ describe('create()', () => {
     });
   });
 
+  describe('create-disabled connectors', () => {
+    test('rejects creating a new connector instance', async () => {
+      (actionTypeRegistry.get as jest.Mock).mockReturnValue(
+        getConnectorType({
+          id: 'my-connector-type',
+          isCreateDisabled: true,
+          validate: {
+            config: { schema: z.any() },
+            secrets: { schema: z.any() },
+            params: { schema: z.object({}) },
+          },
+        })
+      );
+
+      await expect(
+        create({
+          context: mockContext,
+          action: {
+            name: 'my name',
+            actionTypeId: 'my-connector-type',
+            config: {},
+            secrets: {},
+          },
+        })
+      ).rejects.toThrow('New connectors of action type my-connector-type cannot be created.');
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    });
+  });
+
   describe('basic connector creation', () => {
     test('creates an action with all given properties', async () => {
       const savedObjectCreateResult = {

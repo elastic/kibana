@@ -5,26 +5,13 @@
  * 2.0.
  */
 
-import type http from 'http';
-import getPort from 'get-port';
-import { getSlackServer } from '@kbn/actions-simulators-plugin/server/plugin';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 export default function slackTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('slack connector', () => {
-    let slackSimulatorURL: string = '';
-    let slackServer: http.Server;
-
-    before(async () => {
-      slackServer = await getSlackServer();
-      const availablePort = await getPort({ port: 9000 });
-      slackServer.listen(availablePort);
-      slackSimulatorURL = `http://localhost:${availablePort}`;
-    });
-
-    it('should return 403 when creating a slack connector', async () => {
+    it('should reject creating a V1 Slack connector before checking its license', async () => {
       await supertest
         .post('/api/actions/connector')
         .set('kbn-xsrf', 'foo')
@@ -32,19 +19,14 @@ export default function slackTest({ getService }: FtrProviderContext) {
           name: 'A slack connector',
           connector_type_id: '.slack',
           secrets: {
-            webhookUrl: slackSimulatorURL,
+            webhookUrl: 'https://hooks.slack.com/services/test',
           },
         })
-        .expect(403, {
-          statusCode: 403,
-          error: 'Forbidden',
-          message:
-            'Action type .slack is disabled because your basic license does not support it. Please upgrade your license.',
+        .expect(400, {
+          statusCode: 400,
+          error: 'Bad Request',
+          message: 'New connectors of action type .slack cannot be created.',
         });
-    });
-
-    after(() => {
-      slackServer.close();
     });
   });
 }

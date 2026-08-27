@@ -130,6 +130,11 @@ export const connectorTypeResponseSchema = schema.object(
     is_deprecated: schema.boolean({
       meta: { description: 'Indicates whether the connector type is deprecated.' },
     }),
+    is_create_disabled: schema.maybe(
+      schema.boolean({
+        meta: { description: 'Indicates whether new connectors of this type can be created.' },
+      })
+    ),
     allow_multiple_system_actions: schema.maybe(
       schema.boolean({
         meta: {

@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { buildStabilityBadgeHtml, getStabilityBadgeHtml } from './get_stability_badge_html';
+import {
+  buildStabilityBadgeHtml,
+  getHollowBadgeHtml,
+  getStabilityBadgeHtml,
+} from './get_stability_badge_html';
 import { setMockStabilityBadgeThemeForTests } from './set_mock_stability_badge_theme_for_tests';
 import {
   getStabilityBadgeColors,
@@ -28,6 +32,11 @@ describe('getStabilityBadgeHtml', () => {
   it('returns beta badge markup', () => {
     const html = getStabilityBadgeHtml('beta');
     expect(html).toContain('Beta');
+  });
+
+  it('returns a themed hollow badge for arbitrary labels', () => {
+    const html = getHollowBadgeHtml('Unavailable');
+    expect(html).toContain('alt="Unavailable"');
   });
 
   it('returns empty string for stable stability without requiring theme', () => {

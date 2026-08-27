@@ -255,6 +255,10 @@ auth: {
 }
 ```
 
+The shared `webhook` auth type stores a sensitive `webhookUrl` and validates it against the
+Actions allowed-host configuration. It does not add an authorization header; connector actions
+send requests to the webhook URL explicitly.
+
 ### Schema
 
 A single Zod schema containing all connector config fields and any secrets fields outside of the standard auth schemas
@@ -277,6 +281,10 @@ Actions define what the connector can do:
 actions: {
   actionName: {
     isTool?: boolean,              // Whether this action is a tool (for AI workflows)
+    supportedAuthTypes?: ['basic'], // Auth types allowed to execute this action
+    unsupportedAuthTypeMessages?: { // Optional auth-specific execution errors
+      oauth: 'Use basic authentication for this action.',
+    },
     input: z.ZodSchema,            // Input validation schema
     output?: z.ZodSchema,          // Output validation schema (optional)
     handler: async (ctx, input) => {
@@ -289,6 +297,12 @@ actions: {
   },
 }
 ```
+
+Omit `supportedAuthTypes` when every auth type can execute the action. When present, the list is
+validated against the connector's declared auth types and enforced before the action handler runs.
+Consumers such as Workflows can also use it to hide actions unsupported by a selected connector
+instance. Use `unsupportedAuthTypeMessages` to provide a more actionable error for a particular
+unsupported auth type; auth types without a custom message use the framework's generic error.
 
 ### Test
 

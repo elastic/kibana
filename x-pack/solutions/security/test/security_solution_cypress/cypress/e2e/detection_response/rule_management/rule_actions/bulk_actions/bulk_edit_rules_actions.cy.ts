@@ -18,13 +18,15 @@ import {
   RULES_BULK_EDIT_ACTIONS_WARNING,
   BULK_ACTIONS_BTN,
 } from '../../../../../screens/rules_bulk_actions';
-import { actionFormSelector } from '../../../../../screens/common/rule_actions';
+import {
+  actionFormSelector,
+  SERVER_LOG_ACTION_BTN,
+  SERVER_LOG_ACTION_MESSAGE_TEXTAREA,
+} from '../../../../../screens/common/rule_actions';
 
 import { deleteAlertsAndRules, deleteConnectors } from '../../../../../tasks/api_calls/common';
 import type { RuleActionCustomFrequency } from '../../../../../tasks/common/rule_actions';
 import {
-  addSlackRuleAction,
-  assertSlackRuleAction,
   addEmailConnectorAndRuleAction,
   assertEmailRuleAction,
   assertSelectedCustomFrequencyOption,
@@ -52,7 +54,7 @@ import { login } from '../../../../../tasks/login';
 import { visitRulesManagementTable } from '../../../../../tasks/rules_management';
 
 import { createRule } from '../../../../../tasks/api_calls/rules';
-import { createSlackConnector } from '../../../../../tasks/api_calls/connectors';
+import { createServerLogConnector } from '../../../../../tasks/api_calls/connectors';
 
 import {
   getEqlRule,
@@ -70,8 +72,20 @@ import {
 
 const ruleNameToAssert = 'Custom rule name with actions';
 
-const expectedExistingSlackMessage = 'Existing slack action';
-const expectedSlackMessage = 'Slack action test message';
+const expectedExistingServerLogMessage = 'Existing server log action';
+const expectedServerLogMessage = 'Server log action test message';
+
+const addServerLogRuleAction = (message: string) => {
+  cy.get(SERVER_LOG_ACTION_BTN).click();
+  cy.get(SERVER_LOG_ACTION_MESSAGE_TEXTAREA).clear();
+  cy.get(SERVER_LOG_ACTION_MESSAGE_TEXTAREA).type(message);
+};
+
+const assertServerLogRuleAction = (message: string, position: number = 0) =>
+  cy
+    .get(actionFormSelector(position))
+    .find(SERVER_LOG_ACTION_MESSAGE_TEXTAREA)
+    .should('have.value', message);
 
 describe(
   'Detection rules, bulk edit of rule actions',
@@ -86,14 +100,15 @@ describe(
       deleteAlertsAndRules();
       deleteConnectors();
 
-      createSlackConnector().then(({ body }) => {
+      createServerLogConnector().then(({ body }) => {
         const actions: RuleActionArray = [
           {
             id: body.id,
-            action_type_id: '.slack',
+            action_type_id: '.server-log',
             group: 'default',
             params: {
-              message: expectedExistingSlackMessage,
+              level: 'info',
+              message: expectedExistingServerLogMessage,
             },
             frequency: {
               summary: true,
@@ -131,7 +146,7 @@ describe(
         getNewRule({ saved_id: 'mocked', rule_id: '7', name: 'New Rule Test', enabled: false })
       );
 
-      createSlackConnector();
+      createServerLogConnector();
 
       // Prevent prebuilt rules package installation and mock two prebuilt rules
       preventPrebuiltRulesPackageInstallation();
@@ -203,7 +218,7 @@ describe(
           // ensure rule actions info callout displayed on the form
           cy.get(RULES_BULK_EDIT_ACTIONS_INFO).should('be.visible');
 
-          addSlackRuleAction(expectedSlackMessage);
+          addServerLogRuleAction(expectedServerLogMessage);
           pickSummaryOfAlertsOption();
           pickCustomFrequencyOption(expectedActionFrequency);
 
@@ -215,8 +230,8 @@ describe(
 
           assertSelectedSummaryOfAlertsOption();
           assertSelectedCustomFrequencyOption(expectedActionFrequency, 1);
-          assertSlackRuleAction(expectedExistingSlackMessage, 0);
-          assertSlackRuleAction(expectedSlackMessage, 1);
+          assertServerLogRuleAction(expectedExistingServerLogMessage, 0);
+          assertServerLogRuleAction(expectedServerLogMessage, 1);
           // ensure there is no third action
           cy.get(actionFormSelector(2)).should('not.exist');
         });
@@ -228,7 +243,7 @@ describe(
           selectAllRules();
           openBulkEditRuleActionsForm();
 
-          addSlackRuleAction(expectedSlackMessage);
+          addServerLogRuleAction(expectedServerLogMessage);
           pickSummaryOfAlertsOption();
           pickPerRuleRunFrequencyOption();
 
@@ -246,7 +261,7 @@ describe(
 
           assertSelectedSummaryOfAlertsOption();
           assertSelectedPerRuleRunFrequencyOption();
-          assertSlackRuleAction(expectedSlackMessage);
+          assertServerLogRuleAction(expectedServerLogMessage);
           // ensure existing action was overwritten
           cy.get(actionFormSelector(1)).should('not.exist');
         });
@@ -266,13 +281,13 @@ describe(
           throttle: 2,
           throttleUnit: 'h',
         };
-        const expectedEmail = 'test@example.com';
-        const expectedSubject = 'Subject';
+        const expectedNewConnectorEmail = 'test@example.com';
+        const expectedNewConnectorSubject = 'Subject';
 
         selectRulesByName(rulesToSelect);
         openBulkEditRuleActionsForm();
 
-        addEmailConnectorAndRuleAction(expectedEmail, expectedSubject);
+        addEmailConnectorAndRuleAction(expectedNewConnectorEmail, expectedNewConnectorSubject);
         pickSummaryOfAlertsOption();
         pickCustomFrequencyOption(expectedActionFrequency);
 
@@ -284,7 +299,7 @@ describe(
 
         assertSelectedSummaryOfAlertsOption();
         assertSelectedCustomFrequencyOption(expectedActionFrequency, 1);
-        assertEmailRuleAction(expectedEmail, expectedSubject);
+        assertEmailRuleAction(expectedNewConnectorEmail, expectedNewConnectorSubject);
       });
     });
   }

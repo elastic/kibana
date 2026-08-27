@@ -22,6 +22,7 @@ export interface ConnectorType {
   source: ConnectorTypeSchemaType['source'];
   subFeature?: ConnectorTypeSchemaType['subFeature'];
   isDeprecated: ConnectorTypeSchemaType['isDeprecated'];
+  isCreateDisabled?: ConnectorTypeSchemaType['isCreateDisabled'];
   allowMultipleSystemActions?: ConnectorTypeSchemaType['allowMultipleSystemActions'];
   description?: ConnectorTypeSchemaType['description'];
   isExperimental?: ConnectorTypeSchemaType['isExperimental'];

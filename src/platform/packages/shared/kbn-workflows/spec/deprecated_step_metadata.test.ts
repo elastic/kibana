@@ -109,9 +109,10 @@ describe('deprecated_step_metadata', () => {
       expect(prefixes).toContain('gemini.');
     });
 
-    it('all prefix entries suggest ai.prompt as replacement', () => {
-      for (const entry of DEPRECATED_STEP_PREFIX_METADATA) {
-        expect(entry.deprecation.replacementStepType).toBe('ai.prompt');
+    it('AI connector prefixes suggest ai.prompt as replacement', () => {
+      for (const prefix of ['inference.', 'bedrock.', 'gen-ai.', 'gemini.']) {
+        const entry = DEPRECATED_STEP_PREFIX_METADATA.find((item) => item.prefix === prefix);
+        expect(entry?.deprecation.replacementStepType).toBe('ai.prompt');
       }
     });
   });

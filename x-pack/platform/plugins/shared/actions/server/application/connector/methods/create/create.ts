@@ -74,6 +74,14 @@ export async function create({
   }
 
   const actionType = context.actionTypeRegistry.get(actionTypeId);
+  if (actionType.isCreateDisabled) {
+    throw Boom.badRequest(
+      i18n.translate('xpack.actions.serverSideErrors.actionTypeCreationDisabled', {
+        defaultMessage: 'New connectors of action type {actionTypeId} cannot be created.',
+        values: { actionTypeId },
+      })
+    );
+  }
   const configurationUtilities = context.actionTypeRegistry.getUtils();
   const validatedActionTypeConfig = validateConfig(actionType, config, {
     configurationUtilities,

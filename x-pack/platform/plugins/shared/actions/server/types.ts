@@ -229,6 +229,7 @@ export interface ActionTypeCoreFields<
 > {
   id: string;
   name: string;
+  featureUsageName?: string;
   maxAttempts?: number;
   minimumLicenseRequired: LicenseType;
   supportedFeatureIds: string[];
@@ -236,6 +237,7 @@ export interface ActionTypeCoreFields<
   source?: ActionTypeSource;
   subFeature?: SubFeature;
   isDeprecated?: boolean;
+  isCreateDisabled?: boolean;
   /**
    * Allows multiple instances of the same system action in a single rule.
    * By default, system actions can only be used once per rule.

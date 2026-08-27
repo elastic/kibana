@@ -37,7 +37,7 @@ import {
   getCustomQueryRuleParams,
   getSimpleRule,
   getSimpleRuleOutput,
-  getSlackAction,
+  getServerLogAction,
   getWebHookAction,
   installMockPrebuiltRules,
   removeServerGeneratedProperties,
@@ -98,7 +98,7 @@ export default ({ getService }: FtrProviderContext): void => {
     ).body;
 
   const createWebHookConnector = () => createConnector(getWebHookAction());
-  const createSlackConnector = () => createConnector(getSlackAction());
+  const createServerLogConnector = () => createConnector(getServerLogAction());
 
   describe('@ess @serverless perform_bulk_action', () => {
     beforeEach(async () => {
@@ -1843,7 +1843,7 @@ export default ({ getService }: FtrProviderContext): void => {
           it('should add action correctly to non empty actions list of a different type', async () => {
             // create new actions
             const webHookAction = await createWebHookConnector();
-            const slackConnector = await createSlackConnector();
+            const serverLogConnector = await createServerLogConnector();
 
             const defaultRuleAction = {
               id: webHookAction.id,
@@ -1854,10 +1854,11 @@ export default ({ getService }: FtrProviderContext): void => {
               },
             };
 
-            const slackConnectorMockProps = {
+            const serverLogConnectorMockProps = {
               group: 'default',
               params: {
-                message: 'test slack message',
+                level: 'info',
+                message: 'test server log message',
               },
             };
 
@@ -1879,8 +1880,8 @@ export default ({ getService }: FtrProviderContext): void => {
                       throttle: '1h',
                       actions: [
                         {
-                          ...slackConnectorMockProps,
-                          id: slackConnector.id,
+                          ...serverLogConnectorMockProps,
+                          id: serverLogConnector.id,
                         },
                       ],
                     },
@@ -1896,9 +1897,9 @@ export default ({ getService }: FtrProviderContext): void => {
                 frequency: { summary: true, throttle: '1d', notifyWhen: 'onThrottleInterval' },
               },
               {
-                ...slackConnectorMockProps,
-                id: slackConnector.id,
-                action_type_id: '.slack',
+                ...serverLogConnectorMockProps,
+                id: serverLogConnector.id,
+                action_type_id: '.server-log',
                 uuid: body.attributes.results.updated[0].actions[1].uuid,
                 frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
               },

@@ -16,7 +16,7 @@ subject: ""
 message: ""
 `;
 
-// ToDo: add a channel selector to the Slack (v2) step form
+// ToDo: add a channel selector to the Slack step form
 const SLACK2_PARAMS_TEMPLATE = `channel: ""
 text: ""
 `;

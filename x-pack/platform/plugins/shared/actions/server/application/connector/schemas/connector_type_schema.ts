@@ -25,6 +25,7 @@ export const connectorTypeSchema = schema.object({
   isSystemActionType: schema.boolean(),
   source: schema.oneOf([schema.literal('yml'), schema.literal('spec'), schema.literal('stack')]),
   isDeprecated: schema.boolean({ defaultValue: false }),
+  isCreateDisabled: schema.maybe(schema.boolean()),
   subFeature: schema.maybe(schema.oneOf([schema.literal('endpointSecurity')])),
   allowMultipleSystemActions: schema.maybe(schema.boolean()),
   description: schema.maybe(schema.string()),

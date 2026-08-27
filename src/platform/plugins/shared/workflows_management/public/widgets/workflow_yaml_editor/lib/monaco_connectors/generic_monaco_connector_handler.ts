@@ -9,15 +9,12 @@
 
 import type { monaco } from '@kbn/code-editor';
 import { BaseMonacoConnectorHandler } from './base_monaco_connector_handler';
-import type {
-  ConnectorExamples,
-  ConnectorInfo,
-  HoverContext,
-} from '../monaco_providers/provider_interfaces';
+import { getCachedAllConnectors } from '../connectors_cache';
+import type { ConnectorExamples, HoverContext } from '../monaco_providers/provider_interfaces';
 
 /**
  * Generic Monaco connector handler for unknown/unsupported connector types
- * Provides basic hover information and examples for any connector type
+ * Provides basic hover information for any connector type
  */
 export class GenericMonacoConnectorHandler extends BaseMonacoConnectorHandler {
   constructor() {
@@ -43,26 +40,23 @@ export class GenericMonacoConnectorHandler extends BaseMonacoConnectorHandler {
         return null;
       }
 
-      // Determine connector category
-      const connectorInfo = this.getConnectorInfo(connectorType);
-      if (!connectorInfo) {
+      const connector = getCachedAllConnectors().find(({ type }) => type === connectorType);
+      if (!connector) {
         return null;
       }
 
       const bodyLines = [
-        `**Workflow Connector**: \`${connectorType}\``,
-        '',
         this.createConnectorOverview(
           connectorType,
-          `${connectorInfo.name} connector for workflow automation`,
+          connector.description ?? connector.summary ?? 'Workflow connector action',
           [
-            `**Type**: ${connectorInfo.description}`,
+            connector.summary ? `**Action**: ${connector.summary}` : '',
             '**Usage**: Configure parameters in the `with` block to customize the connector behavior.',
-            connectorInfo.documentation ? `**Documentation**: ${connectorInfo.documentation}` : '',
+            connector.documentation ? `**Documentation**: ${connector.documentation}` : '',
           ].filter(Boolean)
         ),
         '',
-        this.generateGenericParameterHelp(connectorType),
+        this.generateGenericParameterHelp(),
         '',
         '_💡 Tip: Check the connector documentation for specific parameter details_',
       ];
@@ -80,129 +74,21 @@ export class GenericMonacoConnectorHandler extends BaseMonacoConnectorHandler {
   }
 
   /**
-   * Get basic examples for generic connector types
+   * Generic connector actions do not have safe fallback examples
    */
-  getExamples(connectorType: string): ConnectorExamples | null {
-    const connectorInfo = this.getConnectorInfo(connectorType);
-    if (!connectorInfo) {
-      return null;
-    }
-
-    // Return category-specific examples
-    if (connectorInfo.examples) {
-      return {
-        params: connectorInfo.examples.params,
-        snippet: `- name: ${connectorType.replace(/[^a-zA-Z0-9]/g, '_')}_step
-  type: ${connectorType}
-  with:
-${Object.entries(connectorInfo.examples.params || {})
-  .map(
-    ([key, value]) =>
-      `    ${key}: ${typeof value === 'string' ? `"${value}"` : JSON.stringify(value)}`
-  )
-  .join('\n')}`,
-      };
-    }
-
-    return null;
-  }
-
-  /**
-   * Categorize connector types to provide better help
-   */
-  private getConnectorInfo(connectorType: string): ConnectorInfo | null {
-    // Slack connectors
-    if (connectorType.includes('slack')) {
-      return {
-        name: 'Slack',
-        description: 'Slack messaging connector for notifications',
-        documentation: 'Configure message content and channel settings',
-        examples: {
-          params: {
-            message: 'Hello from workflow!',
-          },
-        },
-      };
-    }
-
-    // Email connectors
-    if (connectorType.includes('email') || connectorType.includes('mail')) {
-      return {
-        name: 'Email',
-        description: 'Email connector for sending notifications',
-        documentation: 'Configure recipient, subject, and message content',
-        examples: {
-          params: {
-            to: ['user@example.com', 'other@example.com'],
-            subject: 'Workflow Notification',
-            message: 'Your workflow has completed successfully.',
-          },
-        },
-      };
-    }
-
-    // Console/logging connectors
-    if (connectorType.includes('console')) {
-      return {
-        name: 'Console',
-        description: 'Logging connector for debugging and monitoring',
-        documentation: 'Configure message content for workflow logging',
-        examples: {
-          params: {
-            message: 'Workflow step completed',
-            level: 'info',
-          },
-        },
-      };
-    }
-
-    // AI/ML connectors
-    if (
-      connectorType.includes('inference') ||
-      connectorType.includes('ai') ||
-      connectorType.includes('ml')
-    ) {
-      return {
-        name: 'AI/ML',
-        description: 'AI/ML connector for inference and analysis',
-        documentation: 'Configure model parameters and input data',
-        examples: {
-          params: {
-            model: 'gpt-3.5-turbo',
-            prompt: 'Analyze this data...',
-          },
-        },
-      };
-    }
-
+  getExamples(_connectorType: string): ConnectorExamples | null {
     return null;
   }
 
   /**
    * Generate generic parameter help
    */
-  private generateGenericParameterHelp(connectorType: string): string {
-    const lines = [
+  private generateGenericParameterHelp(): string {
+    return [
       '**Common Parameters:**',
       '- Configure parameters in the `with` block',
       '- Use template variables like `{{ inputs.value }}` for dynamic values',
       '- Reference previous step outputs with `{{ steps.step_name.output }}`',
-    ];
-
-    // Add connector-specific hints
-    const connectorInfo = this.getConnectorInfo(connectorType);
-    if (!connectorInfo) {
-      return '';
-    }
-    if (connectorInfo.examples?.params) {
-      lines.push('', '**Example Parameters:**');
-      for (const [key, value] of Object.entries(connectorInfo.examples.params)) {
-        lines.push(
-          `- \`${key}\`: ${typeof value === 'string' ? `"${value}"` : JSON.stringify(value)}`
-        );
-      }
-    }
-
-    return lines.join('\n');
+    ].join('\n');
   }
 }

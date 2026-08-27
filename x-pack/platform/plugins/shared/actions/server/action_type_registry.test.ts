@@ -171,6 +171,21 @@ describe('actionTypeRegistry', () => {
       );
     });
 
+    test('uses the feature usage name when it differs from the display name', () => {
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      actionTypeRegistry.register(
+        getConnectorType({
+          name: 'Slack',
+          featureUsageName: 'Slack (v2)',
+          minimumLicenseRequired: 'enterprise',
+        })
+      );
+      expect(actionTypeRegistryParams.licensing.featureUsage.register).toHaveBeenCalledWith(
+        'Connector: Slack (v2)',
+        'enterprise'
+      );
+    });
+
     test(`doesn't register basic connector types to the licensing feature usage API`, () => {
       const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
       actionTypeRegistry.register(getConnectorType());
@@ -255,6 +270,14 @@ describe('actionTypeRegistry', () => {
       ]);
       expect(mockedActionsConfig.isActionTypeEnabled).toHaveBeenCalled();
       expect(mockedLicenseState.isLicenseValidForActionType).toHaveBeenCalled();
+    });
+
+    test('exposes create-disabled connector types', () => {
+      mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      actionTypeRegistry.register(getConnectorType({ isCreateDisabled: true }));
+
+      expect(actionTypeRegistry.list()[0]).toMatchObject({ isCreateDisabled: true });
     });
 
     test('returns list of connector types with parameter schema', () => {

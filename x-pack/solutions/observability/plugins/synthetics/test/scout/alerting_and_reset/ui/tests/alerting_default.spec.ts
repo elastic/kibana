@@ -32,9 +32,13 @@ test.describe(
 
     test('configures alerting defaults: add Slack connector', async ({ pageObjects, page }) => {
       await pageObjects.syntheticsApp.openCreateConnectorFlyout();
-      await pageObjects.syntheticsApp.selectConnectorType('slack');
+      await pageObjects.syntheticsApp.selectConnectorType('slack2');
       await page.testSubj.fill('nameInput', 'Test slack');
-      await page.testSubj.fill('slackWebhookUrlInput', 'https://www.slack.com');
+      await page.testSubj.click('form-generator-field-secrets-webhook');
+      await page.testSubj.fill(
+        'generator-field-secrets-webhookUrl',
+        'https://hooks.slack.com/services/test'
+      );
       await pageObjects.syntheticsApp.saveConnectorInFlyout();
 
       const defaultConnectors = pageObjects.syntheticsApp.getDefaultConnectorsComboBox();

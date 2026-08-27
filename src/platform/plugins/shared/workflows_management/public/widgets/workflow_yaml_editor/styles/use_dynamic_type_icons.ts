@@ -12,7 +12,10 @@ import type React from 'react';
 import { useEffect, useRef } from 'react';
 import { type TriggerType, TriggerTypes } from '@kbn/workflows';
 import { HardcodedIconDataUrls } from '@kbn/workflows-ui';
-import { buildSuggestTechPreviewBadgeRules } from './get_suggest_tech_preview_badge_styles';
+import {
+  buildSuggestTechPreviewBadgeRules,
+  buildSuggestUnavailableBadgeRules,
+} from './get_suggest_tech_preview_badge_styles';
 import type { ConnectorsResponse } from '../../../entities/connectors/model/types';
 import { useKibana } from '../../../hooks/use_kibana';
 import {
@@ -267,7 +270,7 @@ export function useDynamicTypeIcons(
       const allTypes = getAllTypes();
       const { colorMode } = euiThemeContext;
       await injectDynamicConnectorIcons(allTypes, editorContainer, colorMode);
-      injectSuggestTechPreviewBadges(editorContainer, euiThemeContext);
+      injectSuggestBadges(editorContainer, euiThemeContext);
       await injectDynamicShadowIcons(
         allTypes,
         editorContainer,
@@ -406,14 +409,16 @@ async function injectDynamicConnectorIcons(
   }
 }
 
-function injectSuggestTechPreviewBadges(
+function injectSuggestBadges(
   editorContainer: HTMLElement | undefined,
   euiThemeContext: UseEuiTheme
 ): void {
-  const styleId = 'dynamic-suggest-tech-preview-badges';
+  const styleId = 'dynamic-suggest-badges';
   const targetDoc = editorContainer?.ownerDocument ?? document;
   const ariaLabelPrefixes = collectTechPreviewSuggestAriaPrefixes();
-  const cssToInject = buildSuggestTechPreviewBadgeRules(ariaLabelPrefixes, euiThemeContext);
+  const cssToInject =
+    buildSuggestTechPreviewBadgeRules(ariaLabelPrefixes, euiThemeContext) +
+    buildSuggestUnavailableBadgeRules(euiThemeContext);
 
   if (!cssToInject) {
     return;

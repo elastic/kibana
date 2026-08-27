@@ -9,6 +9,11 @@
 
 import { monaco } from '@kbn/monaco';
 import { KIBANA_WORKFLOW_INPUT_DEFINITION_REF_PREFIX } from '@kbn/workflows';
+import {
+  getUnavailableConnectorActionBadgeHtml,
+  getUnavailableConnectorActionMessage,
+  UNAVAILABLE_CONNECTOR_ACTION_LABEL,
+} from './connector_action_availability';
 import { buildAutocompleteContext } from './context/build_autocomplete_context';
 import { getAllYamlProviders } from './intercept_monaco_yaml_provider';
 import { getSuggestions, isInsideLoopBody } from './suggestions/get_suggestions';
@@ -18,6 +23,7 @@ import type { WorkflowEsqlCompletionServices } from './suggestions/workflow_esql
 import type { WorkflowKqlCompletionServices } from './suggestions/workflow_kql_completion_services';
 import { isDeprecatedStepType } from '../../../../../common/schema';
 import type { WorkflowDetailState } from '../../../../entities/workflows/store';
+import { getConnectorActionCapabilities } from '../../../../shared/lib/action_type_utils';
 
 // Unique identifier for the workflow completion provider
 export const WORKFLOW_COMPLETION_PROVIDER_ID = 'workflows-yaml-completion-provider';
@@ -111,6 +117,36 @@ function getDeduplicationKey(suggestion: monaco.languages.CompletionItem): strin
     return suggestion.filterText;
   }
   return typeof suggestion.label === 'string' ? suggestion.label : suggestion.label.label;
+}
+
+function markConnectorActionUnavailable(
+  suggestion: monaco.languages.CompletionItem,
+  connectorName: string
+): monaco.languages.CompletionItem {
+  const unavailableMessage = getUnavailableConnectorActionMessage(connectorName);
+  const documentationNotice = `${getUnavailableConnectorActionBadgeHtml()}\n\n${unavailableMessage}`;
+  const existingDocumentation =
+    typeof suggestion.documentation === 'string'
+      ? suggestion.documentation
+      : suggestion.documentation?.value;
+  const documentation = {
+    ...(typeof suggestion.documentation === 'object' ? suggestion.documentation : {}),
+    supportHtml: true,
+    value: existingDocumentation
+      ? `${documentationNotice}\n\n${existingDocumentation}`
+      : documentationNotice,
+  };
+
+  return {
+    ...suggestion,
+    label:
+      typeof suggestion.label === 'string'
+        ? { label: suggestion.label, description: UNAVAILABLE_CONNECTOR_ACTION_LABEL }
+        : { ...suggestion.label, description: UNAVAILABLE_CONNECTOR_ACTION_LABEL },
+    documentation,
+    sortText: `zzzz-${suggestion.sortText ?? getDeduplicationKey(suggestion)}`,
+    preselect: false,
+  };
 }
 
 /**
@@ -235,6 +271,33 @@ export function getCompletionItemProvider(
       }
 
       let suggestions = Array.from(deduplicatedMap.values());
+
+      if (matchType === 'type' && autocompleteContext.path && autocompleteContext.yamlDocument) {
+        const connectorId = autocompleteContext.yamlDocument.getIn([
+          ...autocompleteContext.path.slice(0, -1),
+          'connector-id',
+        ]);
+        const connectorTypes = autocompleteContext.dynamicConnectorTypes;
+        const capabilities =
+          typeof connectorId === 'string' && !connectorId.includes('{{') && connectorTypes
+            ? getConnectorActionCapabilities(connectorId, connectorTypes)
+            : undefined;
+        if (capabilities) {
+          suggestions = suggestions.flatMap((suggestion) => {
+            const key = getDeduplicationKey(suggestion);
+            if (!capabilities.connectorStepTypes.has(key)) {
+              return [suggestion];
+            }
+            if (!capabilities.selectedConnectorStepTypes.has(key)) {
+              return [];
+            }
+            if (capabilities.supportedStepTypes.has(key)) {
+              return [suggestion];
+            }
+            return [markConnectorActionUnavailable(suggestion, capabilities.connectorName)];
+          });
+        }
+      }
 
       if (!isInsideLoopBody(autocompleteContext)) {
         suggestions = suggestions.filter((s) => {

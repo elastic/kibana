@@ -54,6 +54,8 @@ export function createI18nKeys(connectorId: string) {
 export interface ConnectorMetadata {
   id: string;
   displayName: string;
+  /** Stable name used for licensing feature usage when it differs from the user-facing display name. */
+  featureUsageName?: string;
   icon?: string;
   description: string;
   /**
@@ -232,6 +234,8 @@ export type ActionScope = 'read' | 'write' | 'destroy';
 
 export interface ActionDefinition<TInput = unknown, TOutput = unknown, TError = unknown> {
   isTool?: boolean;
+  supportedAuthTypes?: readonly string[];
+  unsupportedAuthTypeMessages?: Readonly<Record<string, string>>;
   input: z.ZodSchema<TInput>;
   output?: z.ZodSchema<TOutput>;
   error?: z.ZodSchema<TError>;
@@ -275,7 +279,7 @@ export interface ActionContext {
 export interface TemplateRendering {
   enabled: boolean;
   format?: 'mustache' | 'handlebars' | 'custom';
-  escaping?: 'html' | 'json' | 'markdown' | 'none';
+  escaping?: 'html' | 'json' | 'markdown' | 'slack' | 'none';
 }
 
 export interface Transformations {
@@ -380,6 +384,32 @@ export function supportsStreaming(connector: ConnectorSpec): boolean {
 
 export function getActionNames(connector: ConnectorSpec): string[] {
   return Object.keys(connector.actions);
+}
+
+export function getConnectorAuthType({
+  secrets,
+  config,
+}: Pick<ActionContext, 'secrets' | 'config'>): string | undefined {
+  const authType = secrets?.authType ?? config?.authType;
+  return typeof authType === 'string' ? authType : undefined;
+}
+
+export function isActionSupportedForAuthType(
+  action: ActionDefinition,
+  authType: string | undefined
+): boolean {
+  return (
+    action.supportedAuthTypes === undefined || action.supportedAuthTypes.includes(authType ?? '')
+  );
+}
+
+export function getSupportedActionNames(
+  connector: ConnectorSpec,
+  authType: string | undefined
+): string[] {
+  return Object.entries(connector.actions)
+    .filter(([, action]) => isActionSupportedForAuthType(action, authType))
+    .map(([actionName]) => actionName);
 }
 
 export function isToolAction(connector: ConnectorSpec, actionName: string): boolean {
