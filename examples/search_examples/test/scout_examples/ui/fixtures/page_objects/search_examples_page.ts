@@ -113,11 +113,28 @@ export class SearchExamplesPage {
   }
 
   /**
-   * Configures the Search Sessions demo: data view and metric field.
+   * Configures the Search Sessions demo: data view, metric, and time range.
+   * Finishes after startSearch is actionable so date-picker query resets
+   * cannot clear the session after the spec starts it.
    */
   async configureSearchSessionDemo(): Promise<void> {
     await this.selectSingleComboOption('dataViewSelector', DATA_VIEW);
     await this.selectSingleComboOption('searchMetricField', 'bytes');
+    await this.datePicker.setAbsoluteRange(LOGSTASH_TIME_RANGE);
+    await this.page.testSubj
+      .locator('dateRangePickerCustomRangePanel')
+      .waitFor({ state: 'hidden' });
+    await this.startSearch.click({ trial: true });
+  }
+
+  /**
+   * Saves via the query-bar split button while the search is in-flight.
+   * The secondary control is disabled for 500ms after Loading and unmounts
+   * when the search completes.
+   */
+  async saveBackgroundSearch(): Promise<void> {
+    await this.page.testSubj.locator('queryCancelButton').waitFor({ state: 'visible' });
+    await this.saveBackgroundSearchButton.click();
   }
 
   /**
