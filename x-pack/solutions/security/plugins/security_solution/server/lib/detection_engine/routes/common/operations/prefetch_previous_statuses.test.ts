@@ -11,6 +11,7 @@ import type { SecuritySolutionRequestHandlerContextMock } from '../../__mocks__/
 import { requestContextMock } from '../../__mocks__';
 import { MAX_ALERTS_PER_TRIGGER } from '../../../../../../common/workflows/triggers';
 import {
+  collectChangedIdsByFamily,
   collectStatusTransitions,
   extractWorkflowStatus,
   fetchAlertIdToIndex,
@@ -406,9 +407,8 @@ describe('prefetchPreviousStatusesByQuery', () => {
 
     await prefetchPreviousStatusesByQuery(esClient, 'index', query);
 
-    expect(esClient.search).toHaveBeenCalledWith(
-      expect.objectContaining({ query: { bool: { filter: query } } })
-    );
+    const call = (esClient.search as unknown as jest.Mock).mock.calls[0][0];
+    expect(call.query.bool.filter).toEqual(query);
   });
 
   it('uses MAX_ALERTS_PER_TRIGGER as the search size and sets track_total_hits to detect truncation', async () => {
@@ -475,38 +475,62 @@ describe('prefetchPreviousStatusesByQuery', () => {
     expect(call).not.toHaveProperty('runtime_mappings');
   });
 
-  it('adds must_not for modern field AND legacy-only docs when excludeStatus is provided', async () => {
-    const query = { term: { 'some.field': 'value' } };
+  // Status-less documents are never mutated by the update script. They must be excluded at
+  // the ES level, not just post-filtered, because `truncated` is derived from hits.total —
+  // counting them would report truncation for a request that changes nothing.
+  const STATUS_FIELD_REQUIRED = {
+    bool: {
+      must_not: [
+        { exists: { field: ALERT_WORKFLOW_STATUS } },
+        { exists: { field: 'signal.status' } },
+      ],
+    },
+  };
 
-    await prefetchPreviousStatusesByQuery(esClient, 'index', query, undefined, 'closed');
-
-    expect(esClient.search).toHaveBeenCalledWith(
-      expect.objectContaining({
-        query: {
-          bool: {
-            filter: query,
-            must_not: [
-              { term: { [ALERT_WORKFLOW_STATUS]: 'closed' } },
-              {
-                bool: {
-                  must: [{ term: { 'signal.status': 'closed' } }],
-                  must_not: [{ exists: { field: ALERT_WORKFLOW_STATUS } }],
-                },
-              },
-            ],
-          },
-        },
-      })
-    );
-  });
-
-  it('omits must_not when excludeStatus is not provided', async () => {
+  it('always excludes documents with neither a modern nor a legacy status field', async () => {
     const query = { term: { 'some.field': 'value' } };
 
     await prefetchPreviousStatusesByQuery(esClient, 'index', query);
 
     const call = (esClient.search as unknown as jest.Mock).mock.calls[0][0];
-    expect(call.query.bool).not.toHaveProperty('must_not');
+    expect(call.query.bool.must_not).toEqual([STATUS_FIELD_REQUIRED]);
+  });
+
+  it('does not report truncation when every match over the cap is status-less', async () => {
+    // ES applies the must_not, so a query matching more than MAX_ALERTS_PER_TRIGGER
+    // status-less documents comes back empty and total 0 — not truncated.
+    esClient.search.mockResolvedValue(
+      searchResponse({ hits: { total: { value: 0, relation: 'eq' }, hits: [] } })
+    );
+
+    const result = await prefetchPreviousStatusesByQuery(
+      esClient,
+      'index',
+      { match_all: {} },
+      undefined,
+      'closed'
+    );
+
+    expect(result.truncated).toBe(false);
+    expect(result.ids).toEqual([]);
+  });
+
+  it('adds must_not for modern field AND legacy-only docs when excludeStatus is provided', async () => {
+    const query = { term: { 'some.field': 'value' } };
+
+    await prefetchPreviousStatusesByQuery(esClient, 'index', query, undefined, 'closed');
+
+    const call = (esClient.search as unknown as jest.Mock).mock.calls[0][0];
+    expect(call.query.bool.must_not).toEqual([
+      STATUS_FIELD_REQUIRED,
+      { term: { [ALERT_WORKFLOW_STATUS]: 'closed' } },
+      {
+        bool: {
+          must: [{ term: { 'signal.status': 'closed' } }],
+          must_not: [{ exists: { field: ALERT_WORKFLOW_STATUS } }],
+        },
+      },
+    ]);
   });
 });
 
@@ -895,5 +919,76 @@ describe('collectStatusTransitions', () => {
     );
     expect(result.ids).toEqual(['changing']);
     expect(result.previousStatuses.map(({ id }) => id)).toEqual(['changing']);
+  });
+});
+
+describe('collectChangedIdsByFamily', () => {
+  const DETECTION_INDEX = '.alerts-security.alerts-default';
+  const SCHEDULED_AD_INDEX = '.alerts-security.attack.discovery.alerts-default';
+  const ADHOC_AD_INDEX = '.adhoc.alerts-security.attack.discovery.alerts-default';
+  const changed = () => true;
+
+  it('routes hits to the family matching their index', () => {
+    const result = collectChangedIdsByFamily(
+      [
+        { id: 'alert-1', index: DETECTION_INDEX, source: {} },
+        { id: 'attack-1', index: SCHEDULED_AD_INDEX, source: {} },
+      ],
+      changed
+    );
+    expect(result.alertIds).toEqual(['alert-1']);
+    expect(result.attackIds).toEqual(['attack-1']);
+  });
+
+  // The prefetch keeps one hit per (id, index) to survive cross-index _id collisions. Emitting
+  // the same ID twice in one family makes a workflow process it repeatedly, and enough
+  // duplicates can consume the payload cap and push out uniquely affected IDs.
+  it('deduplicates an id present in both attack discovery indices', () => {
+    const result = collectChangedIdsByFamily(
+      [
+        { id: 'shared', index: SCHEDULED_AD_INDEX, source: {} },
+        { id: 'shared', index: ADHOC_AD_INDEX, source: {} },
+      ],
+      changed
+    );
+    expect(result.attackIds).toEqual(['shared']);
+    expect(result.alertIds).toEqual([]);
+  });
+
+  // Cross-family collisions are legitimate: the same _id can be a detection alert in one index
+  // and an attack in another, and both documents are mutated.
+  it('emits an id once per family when it exists in both families', () => {
+    const result = collectChangedIdsByFamily(
+      [
+        { id: 'shared', index: DETECTION_INDEX, source: {} },
+        { id: 'shared', index: SCHEDULED_AD_INDEX, source: {} },
+      ],
+      changed
+    );
+    expect(result.alertIds).toEqual(['shared']);
+    expect(result.attackIds).toEqual(['shared']);
+  });
+
+  it('excludes hits the predicate reports as unchanged', () => {
+    const result = collectChangedIdsByFamily(
+      [
+        { id: 'noop', index: DETECTION_INDEX, source: { tags: ['a'] } },
+        { id: 'changing', index: DETECTION_INDEX, source: { tags: [] } },
+      ],
+      (source) => !Array.isArray(source.tags) || source.tags.length === 0
+    );
+    expect(result.alertIds).toEqual(['changing']);
+  });
+
+  it('does not let a duplicate suppress a later unique id', () => {
+    const result = collectChangedIdsByFamily(
+      [
+        { id: 'dup', index: SCHEDULED_AD_INDEX, source: {} },
+        { id: 'dup', index: ADHOC_AD_INDEX, source: {} },
+        { id: 'unique', index: SCHEDULED_AD_INDEX, source: {} },
+      ],
+      changed
+    );
+    expect(result.attackIds).toEqual(['dup', 'unique']);
   });
 });

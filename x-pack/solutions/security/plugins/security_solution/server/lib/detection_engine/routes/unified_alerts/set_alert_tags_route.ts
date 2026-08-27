@@ -28,8 +28,10 @@ import {
   MAX_TAG_LENGTH,
   MAX_TAGS_PER_OPERATION,
 } from '../../../../../common/workflows/triggers';
-import { fetchAllAlertIdIndexWithSource } from '../common/operations/prefetch_previous_statuses';
-import { isAttackDiscoveryIndex } from '../common/operations/is_attack_discovery_index';
+import {
+  fetchAllAlertIdIndexWithSource,
+  collectChangedIdsByFamily,
+} from '../common/operations/prefetch_previous_statuses';
 
 export const setUnifiedAlertsTagsRoute = (
   router: SecuritySolutionPluginRouter,
@@ -68,8 +70,8 @@ export const setUnifiedAlertsTagsRoute = (
 
         const index = await getUnifiedAlertsIndex({ context, ruleDataClient });
 
-        const alertIds: string[] = [];
-        const attackIds: string[] = [];
+        let alertIds: string[] = [];
+        let attackIds: string[] = [];
 
         // All length-valid tags — used for no-op detection so that tags beyond the payload cap
         // still trigger an emit when they would actually change a document.
@@ -92,25 +94,19 @@ export const setUnifiedAlertsTagsRoute = (
             const hits = await fetchAllAlertIdIndexWithSource(esClient, index, ids, [
               ALERT_WORKFLOW_TAGS,
             ]);
-            for (const hit of hits) {
+            ({ alertIds, attackIds } = collectChangedIdsByFamily(hits, (source) => {
               const currentTags = new Set<string>(
-                Array.isArray(hit.source[ALERT_WORKFLOW_TAGS])
-                  ? (hit.source[ALERT_WORKFLOW_TAGS] as string[])
+                Array.isArray(source[ALERT_WORKFLOW_TAGS])
+                  ? (source[ALERT_WORKFLOW_TAGS] as string[])
                   : []
               );
               // Use allValid* (not the capped arrays) so a tag beyond position 100 that would
               // actually change the document still triggers the event.
-              if (
+              return (
                 allValidTagsToAdd.some((t) => !currentTags.has(t)) ||
                 allValidTagsToRemove.some((t) => currentTags.has(t))
-              ) {
-                if (isAttackDiscoveryIndex(hit.index)) {
-                  attackIds.push(hit.id);
-                } else {
-                  alertIds.push(hit.id);
-                }
-              }
-            }
+              );
+            }));
           } catch {
             logger.warn('Failed to pre-fetch alert indices for workflow trigger (tags)');
           }

@@ -494,6 +494,42 @@ describe('set signal status', () => {
         );
       });
 
+      test('does not report truncation for a large all-status-less query', async () => {
+        // ES now excludes status-less docs from the prefetch, so hits.total reflects only
+        // documents that can actually transition. Without that, `truncated` stayed true after
+        // every hit was filtered out and fired the trigger with an empty alertIds list.
+        context.core.elasticsearch.client.asCurrentUser.search.mockResponse({
+          took: 1,
+          timed_out: false,
+          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+          hits: { hits: [], total: { value: 0, relation: 'eq' }, max_score: 0 },
+        });
+        await server.inject(
+          getSetSignalStatusByQueryRequest(),
+          requestContextMock.convertContext(context)
+        );
+        await new Promise((r) => setTimeout(r, 0));
+        expect(mockEventBus.emitAlertStatusChanged).not.toHaveBeenCalled();
+      });
+
+      test('requires a non-null status field in the prefetch query', async () => {
+        await server.inject(
+          getSetSignalStatusByQueryRequest(),
+          requestContextMock.convertContext(context)
+        );
+        const call = context.core.elasticsearch.client.asCurrentUser.search.mock.calls[0][0] as {
+          query: { bool: { must_not: unknown[] } };
+        };
+        expect(call.query.bool.must_not).toContainEqual({
+          bool: {
+            must_not: [
+              { exists: { field: 'kibana.alert.workflow_status' } },
+              { exists: { field: 'signal.status' } },
+            ],
+          },
+        });
+      });
+
       test('does not emit when prefetch fails', async () => {
         context.core.elasticsearch.client.asCurrentUser.search.mockRejectedValue(
           new Error('ES search error')

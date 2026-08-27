@@ -28,8 +28,10 @@ import {
   MAX_ASSIGNEE_UID_LENGTH,
   MAX_ASSIGNEES_PER_OPERATION,
 } from '../../../../../common/workflows/triggers';
-import { fetchAllAlertIdIndexWithSource } from '../common/operations/prefetch_previous_statuses';
-import { isAttackDiscoveryIndex } from '../common/operations/is_attack_discovery_index';
+import {
+  fetchAllAlertIdIndexWithSource,
+  collectChangedIdsByFamily,
+} from '../common/operations/prefetch_previous_statuses';
 
 export const setUnifiedAlertsAssigneesRoute = (
   router: SecuritySolutionPluginRouter,
@@ -68,8 +70,8 @@ export const setUnifiedAlertsAssigneesRoute = (
 
         const index = await getUnifiedAlertsIndex({ context, ruleDataClient });
 
-        const alertIds: string[] = [];
-        const attackIds: string[] = [];
+        let alertIds: string[] = [];
+        let attackIds: string[] = [];
 
         // All length-valid UIDs — used for no-op detection so that UIDs beyond the payload cap
         // still trigger an emit when they would actually change a document.
@@ -99,25 +101,19 @@ export const setUnifiedAlertsAssigneesRoute = (
             const hits = await fetchAllAlertIdIndexWithSource(esClient, index, ids, [
               ALERT_WORKFLOW_ASSIGNEE_IDS,
             ]);
-            for (const hit of hits) {
+            ({ alertIds, attackIds } = collectChangedIdsByFamily(hits, (source) => {
               const currentAssignees = new Set<string>(
-                Array.isArray(hit.source[ALERT_WORKFLOW_ASSIGNEE_IDS])
-                  ? (hit.source[ALERT_WORKFLOW_ASSIGNEE_IDS] as string[])
+                Array.isArray(source[ALERT_WORKFLOW_ASSIGNEE_IDS])
+                  ? (source[ALERT_WORKFLOW_ASSIGNEE_IDS] as string[])
                   : []
               );
               // Use allValid* (not the capped arrays) so a UID beyond position 100 that would
               // actually change the document still triggers the event.
-              if (
+              return (
                 allValidAssigneesToAdd.some((uid) => !currentAssignees.has(uid)) ||
                 allValidAssigneesToRemove.some((uid) => currentAssignees.has(uid))
-              ) {
-                if (isAttackDiscoveryIndex(hit.index)) {
-                  attackIds.push(hit.id);
-                } else {
-                  alertIds.push(hit.id);
-                }
-              }
-            }
+              );
+            }));
           } catch {
             logger.warn('Failed to pre-fetch alert indices for workflow trigger (assignees)');
           }

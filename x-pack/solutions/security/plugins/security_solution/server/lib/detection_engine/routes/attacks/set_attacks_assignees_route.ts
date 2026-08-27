@@ -123,12 +123,20 @@ export const setAttacksAssigneesRoute = (
                     params: {
                       query: { bool: { filter: { terms: { _id: ids } } } },
                       _source: false,
-                      size: Math.min(ids.length, MAX_ALERTS_PER_TRIGGER),
+                      // `attackIndex` spans the scheduled and adhoc families and an _id can
+                      // exist in both, so reserve a slot per family rather than one per id.
+                      size: Math.min(ids.length * attackIndex.length, MAX_ALERTS_PER_TRIGGER),
                     },
                   });
-                  verifiedAttackIds = attackDocs.hits.hits
-                    .map((hit) => hit._id)
-                    .filter((id): id is string => id != null);
+                  // Deduplicate: an attack present in both families returns two hits, and
+                  // emitting the id twice makes a workflow process it repeatedly.
+                  verifiedAttackIds = Array.from(
+                    new Set(
+                      attackDocs.hits.hits
+                        .map((hit) => hit._id)
+                        .filter((id): id is string => id != null)
+                    )
+                  );
                 } catch (err) {
                   logger?.warn(`Failed to verify attack IDs for workflow trigger: ${err}`);
                 }
@@ -165,13 +173,19 @@ export const setAttacksAssigneesRoute = (
               params: {
                 query: { bool: { filter: { terms: { _id: ids } } } },
                 _source: [ALERT_ATTACK_DISCOVERY_ALERT_IDS],
-                size: Math.min(ids.length, MAX_ALERTS_PER_TRIGGER),
+                // `attackIndex` spans the scheduled and adhoc families and an _id can exist
+                // in both, so reserve a slot per family rather than one per requested id.
+                size: Math.min(ids.length * attackIndex.length, MAX_ALERTS_PER_TRIGGER),
               },
             });
 
-            const verifiedAttackIds = attackDocs.hits.hits
-              .map((hit) => hit._id)
-              .filter((id): id is string => id != null);
+            // Deduplicate: an attack present in both families returns two hits, and emitting
+            // the id twice makes a workflow process it repeatedly.
+            const verifiedAttackIds = Array.from(
+              new Set(
+                attackDocs.hits.hits.map((hit) => hit._id).filter((id): id is string => id != null)
+              )
+            );
 
             const relatedAlertIds = Array.from(
               new Set(

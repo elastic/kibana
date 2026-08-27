@@ -141,6 +141,34 @@ export const collectStatusTransitions = (
   return { ids, previousStatuses };
 };
 
+/**
+ * Splits hits into detection-alert and attack-discovery ID lists, keeping only those the
+ * caller reports as changing and deduplicating within each family. The prefetch deliberately
+ * returns one hit per (id, index) to handle cross-index `_id` collisions, so the same ID can
+ * legitimately appear once in each family — but never twice in the same one, which would make
+ * a workflow process it repeatedly and let duplicates consume the emitted-ID cap.
+ */
+export const collectChangedIdsByFamily = (
+  hits: readonly IdIndexPairWithSource[],
+  hasChanged: (source: Record<string, unknown>) => boolean
+): { alertIds: string[]; attackIds: string[] } => {
+  const alertIds: string[] = [];
+  const attackIds: string[] = [];
+  const seenAlertIds = new Set<string>();
+  const seenAttackIds = new Set<string>();
+  for (const { id, index, source } of hits) {
+    if (hasChanged(source)) {
+      const isAttack = isAttackDiscoveryIndex(index);
+      const seen = isAttack ? seenAttackIds : seenAlertIds;
+      if (!seen.has(id)) {
+        seen.add(id);
+        (isAttack ? attackIds : alertIds).push(id);
+      }
+    }
+  }
+  return { alertIds, attackIds };
+};
+
 export const prefetchPreviousStatusesByIds = async (
   esClient: ElasticsearchClient,
   index: string | string[],
@@ -229,6 +257,22 @@ export const prefetchPreviousStatusesByQuery = async (
   truncated: boolean;
 }> => {
   const boolQuery: estypes.QueryDslBoolQuery = { filter: query };
+  // Require at least one non-null status field. The update script only assigns when a status
+  // field is non-null, so status-less documents never transition — and because `truncated` is
+  // derived from `hits.total`, counting them would report truncation (and fire the trigger with
+  // an empty ID list) for a large request that mutates nothing. `exists` is false for both a
+  // missing field and an explicit null, matching the script's `!= null` guards. Applied
+  // unconditionally: this helper exists to find documents that will actually change.
+  boolQuery.must_not = [
+    {
+      bool: {
+        must_not: [
+          { exists: { field: ALERT_WORKFLOW_STATUS } },
+          { exists: { field: 'signal.status' } },
+        ],
+      },
+    },
+  ];
   if (excludeStatus !== undefined) {
     // Exclude confirmed no-ops at ES level using the same precedence as extractWorkflowStatus:
     // 1. Modern field (kibana.alert.workflow_status) takes precedence — exclude if it equals target.
@@ -237,15 +281,15 @@ export const prefetchPreviousStatusesByQuery = async (
     //    but disagree (modern field wins and they are genuinely transitioning).
     // This ensures truncated only counts potentially-transitioning docs, preventing the
     // || truncated condition from firing for all-legacy-no-op requests over 10,000 documents.
-    boolQuery.must_not = [
+    boolQuery.must_not.push(
       { term: { [ALERT_WORKFLOW_STATUS]: excludeStatus } },
       {
         bool: {
           must: [{ term: { 'signal.status': excludeStatus } }],
           must_not: [{ exists: { field: ALERT_WORKFLOW_STATUS } }],
         },
-      },
-    ];
+      }
+    );
   }
   const searchResponse = await esClient.search({
     index: resolveIndex(index),

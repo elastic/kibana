@@ -435,6 +435,37 @@ describe('set unified alerts tags', () => {
       );
     });
 
+    test('emits an id once per family when it exists in both attack discovery indices', async () => {
+      // The prefetch keeps one hit per (id, index) to survive cross-index _id collisions.
+      // Emitting the same attack twice would make a workflow process it repeatedly, and
+      // enough duplicates could consume the payload cap and push out unique IDs.
+      context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValueOnce(
+        makeSearchResponse([
+          { _id: 'shared-attack', _index: '.alerts-security.attack.discovery.alerts-default' },
+          {
+            _id: 'shared-attack',
+            _index: '.adhoc.alerts-security.attack.discovery.alerts-default',
+          },
+          { _id: 'other-attack', _index: '.alerts-security.attack.discovery.alerts-default' },
+        ])
+      );
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_TAGS_URL,
+        body: {
+          ids: ['shared-attack', 'other-attack'],
+          tags: { tags_to_add: ['tag-add'], tags_to_remove: [] },
+        },
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAttackTagsChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ attackIds: ['shared-attack', 'other-attack'] })
+      );
+      expect(mockEventBus.emitAlertTagsChanged).not.toHaveBeenCalled();
+    });
+
     test('does not emit for documents where the tag operation is a no-op', async () => {
       // Both docs already have 'tag-add'; neither has 'tag-remove' → no change for either doc.
       context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValueOnce(
