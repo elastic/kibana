@@ -80,7 +80,8 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
   '5': {
     // Add optional `metadata.source` — a framework-agnostic { type, data }
     // envelope tracking the originating spec or content pack. `source.type` is
-    // indexed so rules can be filtered by source type. No backfill: pre-existing
+    // indexed so rules can be filtered by source type; `source.data` is flattened
+    // so per-type payload keys can be filtered. No backfill: pre-existing
     // user-authored rules have no source.
     changes: [
       {
@@ -91,6 +92,7 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
               source: {
                 properties: {
                   type: { type: 'keyword', ignore_above: 256 },
+                  data: { type: 'flattened' },
                 },
               },
             },

@@ -24,6 +24,7 @@ export const ruleMappings: SavedObjectsTypeMappingDefinition = {
         source: {
           properties: {
             type: { type: 'keyword', ignore_above: 256 },
+            data: { type: 'flattened' },
           },
         },
       },
