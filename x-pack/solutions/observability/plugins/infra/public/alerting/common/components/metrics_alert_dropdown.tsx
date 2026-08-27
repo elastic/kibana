@@ -232,7 +232,7 @@ export const MetricsAlertDropdown = () => {
       >
         <EuiContextMenu initialPanelId={0} panels={panels} data-test-subj="metrics-alert-menu" />
       </EuiPopover>
-      <AlertFlyout
+      <MetricsAlertFlyout
         visibleFlyoutType={visibleFlyoutType}
         onClose={closeFlyout}
         focusTrapProps={focusTrapProps}
@@ -241,13 +241,19 @@ export const MetricsAlertDropdown = () => {
   );
 };
 
+export type MetricsAlertFlyoutType = VisibleFlyoutType;
+
 interface AlertFlyoutProps {
   visibleFlyoutType: VisibleFlyoutType | null;
   onClose(): void;
   focusTrapProps?: EuiFlyoutResizableProps['focusTrapProps'];
 }
 
-const AlertFlyout = ({ visibleFlyoutType, onClose, focusTrapProps }: AlertFlyoutProps) => {
+export const MetricsAlertFlyout = ({
+  visibleFlyoutType,
+  onClose,
+  focusTrapProps,
+}: AlertFlyoutProps): React.ReactElement | null => {
   switch (visibleFlyoutType) {
     case 'inventory':
       return <PrefilledInventoryAlertFlyout onClose={onClose} focusTrapProps={focusTrapProps} />;
