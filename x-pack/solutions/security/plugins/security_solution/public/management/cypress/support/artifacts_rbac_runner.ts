@@ -25,11 +25,11 @@ import { SECURITY_FEATURE_ID } from '../../../../common';
 /**
  * Notes:
  * ESS:
- *  - testing WRITE privileges with custom roles
+ *  - testing NONE, READ, WRITE privileges with custom roles
  *  - also, all SIEM feature versions are tested to check backward compatibility
  *
  * Serverless: a subset of tests.
- *  - WRITE privileges are tested with predefined roles
+ *  - only NONE and WRITE privileges are tested with predefined roles
  *  - and only the latest SIEM feature (SECURITY_FEATURE_ID)
  *
  * Possible improvement: use custom roles on serverless to test the same as on ESS.
@@ -45,6 +45,8 @@ export const getArtifactMockedDataTests = (testData: ArtifactsFixtureType) => ()
         (version) => getVersionNumber(version) >= getVersionNumber(firstSiemVersion)
       );
 
+  let loginWithoutAccess: () => void;
+  let loginWithReadAccess: () => void;
   let loginWithWriteAccess: () => void;
 
   before(() => {
@@ -81,9 +83,52 @@ export const getArtifactMockedDataTests = (testData: ArtifactsFixtureType) => ()
               });
             }
           };
+
+          loginWithReadAccess = () => {
+            expect(isServerless, 'Testing read access is implemented only on ESS').to.equal(false);
+            login.withCustomKibanaPrivileges({
+              [siemVersion]: ['read', `${privilegePrefix}read`],
+            });
+          };
+
+          loginWithoutAccess = () => {
+            if (isServerless) {
+              login(ROLE.t1_analyst);
+            } else {
+              login.withCustomKibanaPrivileges({ [siemVersion]: ['read'] });
+            }
+          };
         });
 
         describe('given there are no artifacts yet', () => {
+          it(`no access - should show no privileges callout`, () => {
+            loginWithoutAccess();
+            loadPage(`/app/security/administration/${testData.urlPath}`);
+            cy.getByTestSubj('noPrivilegesPage').should('exist');
+            cy.getByTestSubj('empty-page-feature-action').should('exist');
+            cy.getByTestSubj(testData.emptyState).should('not.exist');
+            cy.getByTestSubj(`${testData.pagePrefix}-emptyState-addButton`).should('not.exist');
+          });
+
+          it(
+            `read - should show empty state page if there is no ${testData.title} entry and the add button does not exist`,
+            // there is no such role in Serverless environment that only reads artifacts
+            { tags: ['@skipInServerless'] },
+            () => {
+              loginWithReadAccess();
+              loadPage(`/app/security/administration/${testData.urlPath}`);
+              cy.getByTestSubj(testData.emptyState).should('exist');
+              cy.getByTestSubj(`${testData.pagePrefix}-emptyState-addButton`).should('not.exist');
+            }
+          );
+
+          it(`write - should show empty state page if there is no ${testData.title} entry and the add button exists`, () => {
+            loginWithWriteAccess();
+            loadPage(`/app/security/administration/${testData.urlPath}`);
+            cy.getByTestSubj(testData.emptyState).should('exist');
+            cy.getByTestSubj(`${testData.pagePrefix}-emptyState-addButton`).should('exist');
+          });
+
           it(`write - should create new ${testData.title} entry`, () => {
             loginWithWriteAccess();
             loadPage(`/app/security/administration/${testData.urlPath}`);
@@ -107,6 +152,34 @@ export const getArtifactMockedDataTests = (testData: ArtifactsFixtureType) => ()
             createArtifactList(testData.createRequestBody.list_id);
             createPerPolicyArtifact(testData.artifactName, testData.createRequestBody);
           });
+
+          it(
+            `read - should not be able to update/delete an existing ${testData.title} entry`,
+            // there is no such role in Serverless environment that only reads artifacts
+            { tags: ['@skipInServerless'] },
+            () => {
+              loginWithReadAccess();
+              loadPage(`/app/security/administration/${testData.urlPath}`);
+              cy.getByTestSubj(`${testData.pagePrefix}-container`).should('be.visible');
+              cy.getByTestSubj(`${testData.pagePrefix}-card-header-actions-button`).should(
+                'not.exist'
+              );
+              cy.getByTestSubj(`${testData.pagePrefix}-card-cardEditAction`).should('not.exist');
+              cy.getByTestSubj(`${testData.pagePrefix}-card-cardDeleteAction`).should('not.exist');
+            }
+          );
+
+          it(
+            `read - should not be able to create a new ${testData.title} entry`,
+            // there is no such role in Serverless environment that only reads artifacts
+            { tags: ['@skipInServerless'] },
+            () => {
+              loginWithReadAccess();
+              loadPage(`/app/security/administration/${testData.urlPath}`);
+              cy.getByTestSubj(`${testData.pagePrefix}-container`).should('be.visible');
+              cy.getByTestSubj(`${testData.pagePrefix}-pageAddButton`).should('not.exist');
+            }
+          );
 
           it(`write - should be able to update an existing ${testData.title} entry`, () => {
             loginWithWriteAccess();
