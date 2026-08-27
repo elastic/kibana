@@ -107,6 +107,7 @@ export const createMockEndpointAppContextService = (
   const fleetServices = createEndpointFleetServicesFactoryMock({
     fleetDependencies: fleetStartServices,
   }).service.asInternalUser();
+  (fleetServices.packagePolicy.get as jest.Mock).mockResolvedValue(null);
   const endpointMetadataService = new EndpointMetadataService(
     esClient,
     savedObjectsClientMock.create(),
