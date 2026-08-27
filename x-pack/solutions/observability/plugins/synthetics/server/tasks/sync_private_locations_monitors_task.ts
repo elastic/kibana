@@ -48,6 +48,12 @@ export type CustomTaskInstance = Omit<ConcreteTaskInstance, 'state'> & {
   state: Partial<SyncTaskState>;
 };
 
+// TM forbids `runAt` and `schedule` on the same result object.
+export type SyncTaskRunResult =
+  | { state: SyncTaskState; error?: Error; schedule: IntervalSchedule | RruleSchedule }
+  | { state: SyncTaskState; error?: Error; runAt: Date }
+  | { state: SyncTaskState; error?: Error };
+
 export class SyncPrivateLocationMonitorsTask {
   public deployPackagePolicies: DeployPrivateLocationMonitors;
   constructor(
@@ -79,12 +85,11 @@ export class SyncPrivateLocationMonitorsTask {
     });
   }
 
-  public async runTask({ taskInstance }: { taskInstance: CustomTaskInstance }): Promise<{
-    state: SyncTaskState;
-    error?: Error;
-    schedule?: IntervalSchedule | RruleSchedule;
-    runAt?: Date;
-  }> {
+  public async runTask({
+    taskInstance,
+  }: {
+    taskInstance: CustomTaskInstance;
+  }): Promise<SyncTaskRunResult> {
     this.debugLog(
       `Syncing private location monitors, current task state is ${JSON.stringify(
         taskInstance.state
