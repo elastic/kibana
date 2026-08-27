@@ -409,7 +409,7 @@ describe('set unified alerts workflow status', () => {
       expect(mockEventBus.emitAlertStatusChanged).not.toHaveBeenCalled();
       expect(mockEventBus.emitAttackStatusChanged).not.toHaveBeenCalled();
       expect(mockLogger.warn).toHaveBeenCalledWith(
-        'Failed to pre-fetch previous alert statuses for workflow trigger'
+        expect.stringContaining('Failed to pre-fetch previous alert statuses for workflow trigger')
       );
     });
 

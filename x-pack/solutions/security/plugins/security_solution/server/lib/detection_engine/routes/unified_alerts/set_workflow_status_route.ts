@@ -22,12 +22,13 @@ import { getUnifiedAlertsIndex } from '../common/index_patterns/get_unified_aler
 import { withSiemErrorHandling } from '../with_siem_error_handling';
 import { buildSiemResponse } from '../utils';
 import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
-import {
-  prefetchAllPreviousStatusesByIds,
-  type PreviousStatus,
-} from '../common/operations/prefetch_previous_statuses';
+import { prefetchAllPreviousStatusesByIds } from '../common/operations/prefetch_previous_statuses';
+import type { PreviousStatus } from '../../../../events/types';
 import { isAttackDiscoveryIndex } from '../common/operations/is_attack_discovery_index';
-import { MAX_ALERTS_PER_TRIGGER } from '../../../../../common/workflows/triggers';
+import {
+  emitAttackStatusChangedWithCap,
+  emitAlertStatusChangedWithCap,
+} from '../../../../workflows/triggers/emit_status_changed';
 
 export const setUnifiedAlertsWorkflowStatusRoute = (
   router: SecuritySolutionPluginRouter,
@@ -115,31 +116,23 @@ export const setUnifiedAlertsWorkflowStatusRoute = (
             status,
             reason: closingReason.reason,
           });
-          if (prefetchSucceeded) {
-            if (attackIds.length > 0) {
-              const cappedAttackIds = attackIds.slice(0, MAX_ALERTS_PER_TRIGGER);
-              const cappedAttackIdSet = new Set(cappedAttackIds);
-              void eventBus?.emitAttackStatusChanged(request, {
-                attackIds: cappedAttackIds,
-                status,
-                // Filter to the capped set so previousStatuses never references an ID
-                // that was truncated out of attackIds (the two arrays are independent).
-                previousStatuses: attackPreviousStatuses.filter((ps) =>
-                  cappedAttackIdSet.has(ps.id)
-                ),
-                truncated: attackIds.length > MAX_ALERTS_PER_TRIGGER,
-              });
-            }
-            if (alertIds.length > 0) {
-              const cappedAlertIds = alertIds.slice(0, MAX_ALERTS_PER_TRIGGER);
-              const cappedAlertIdSet = new Set(cappedAlertIds);
-              void eventBus?.emitAlertStatusChanged(request, {
-                alertIds: cappedAlertIds,
-                status,
-                previousStatuses: alertPreviousStatuses.filter((ps) => cappedAlertIdSet.has(ps.id)),
-                truncated: alertIds.length > MAX_ALERTS_PER_TRIGGER,
-              });
-            }
+          if (prefetchSucceeded && eventBus) {
+            emitAttackStatusChangedWithCap(
+              eventBus,
+              request,
+              status,
+              attackIds,
+              attackPreviousStatuses,
+              logger
+            );
+            emitAlertStatusChangedWithCap(
+              eventBus,
+              request,
+              status,
+              alertIds,
+              alertPreviousStatuses,
+              logger
+            );
           }
           return result;
         });

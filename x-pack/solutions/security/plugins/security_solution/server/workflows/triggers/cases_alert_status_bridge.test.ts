@@ -14,11 +14,11 @@ const mockRequest = {} as KibanaRequest;
 
 describe('forwardCasesAlertStatusToSecuritySolution', () => {
   let bus: SecuritySolutionEventBus;
-  let mockLogger: Pick<Logger, 'warn'>;
+  let mockLogger: Pick<Logger, 'warn' | 'debug'>;
 
   beforeEach(() => {
     bus = new SecuritySolutionEventBus();
-    mockLogger = { warn: jest.fn() };
+    mockLogger = { warn: jest.fn(), debug: jest.fn() };
   });
 
   afterEach(() => {
@@ -240,7 +240,7 @@ describe('forwardCasesAlertStatusToSecuritySolution', () => {
     ).not.toThrow();
 
     expect(mockLogger.warn).toHaveBeenCalledWith(
-      expect.stringContaining('Failed to forward Cases alertStatusChanged event')
+      expect.stringContaining('Failed to emit alertStatusChanged workflow trigger')
     );
   });
 
@@ -266,7 +266,7 @@ describe('forwardCasesAlertStatusToSecuritySolution', () => {
 
     expect(alertListener).toHaveBeenCalledTimes(1);
     expect(mockLogger.warn).toHaveBeenCalledWith(
-      expect.stringContaining('Failed to forward Cases attackStatusChanged event')
+      expect.stringContaining('Failed to emit attackStatusChanged workflow trigger')
     );
   });
 

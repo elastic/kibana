@@ -23,16 +23,17 @@ const makeSearchResponse = (
   hits: Array<{ _id: string; status: string; _index?: string }>,
   total: number,
   relation: 'eq' | 'gte' = 'eq'
-) => ({
-  hits: {
-    total: { value: total, relation },
-    hits: hits.map(({ _id, status, _index = 'test-index' }) => ({
-      _id,
-      _index,
-      _source: { [ALERT_WORKFLOW_STATUS]: status },
-    })),
-  },
-});
+): estypes.SearchResponse =>
+  ({
+    hits: {
+      total: { value: total, relation },
+      hits: hits.map(({ _id, status, _index = 'test-index' }) => ({
+        _id,
+        _index,
+        _source: { [ALERT_WORKFLOW_STATUS]: status },
+      })),
+    },
+  } as estypes.SearchResponse);
 
 describe('extractWorkflowStatus', () => {
   it('returns undefined for null source', () => {
@@ -79,8 +80,7 @@ describe('prefetchPreviousStatusesByIds', () => {
     jest.clearAllMocks();
     ({ context } = requestContextMock.createTools());
     esClient = context.core.elasticsearch.client.asCurrentUser;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    esClient.search.mockResolvedValue(makeSearchResponse([], 0) as any);
+    esClient.search.mockResolvedValue(makeSearchResponse([], 0));
   });
 
   afterEach(() => {
@@ -106,8 +106,7 @@ describe('prefetchPreviousStatusesByIds', () => {
           { _id: 'id2', status: 'closed', _index: '.alerts-security.alerts-default' },
         ],
         2
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ) as any
+      )
     );
 
     const { previousStatuses, idToIndex } = await prefetchPreviousStatusesByIds(esClient, 'index', [
@@ -133,8 +132,7 @@ describe('prefetchPreviousStatusesByIds', () => {
         total: { value: 1, relation: 'eq' },
         hits: [{ _id: 'id1', _source: { [ALERT_WORKFLOW_STATUS]: 'open' } }],
       },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any);
+    });
 
     const { previousStatuses, idToIndex } = await prefetchPreviousStatusesByIds(esClient, 'index', [
       'id1',
@@ -145,10 +143,7 @@ describe('prefetchPreviousStatusesByIds', () => {
   });
 
   it('only processes docs returned as search hits (not-found docs are simply absent)', async () => {
-    esClient.search.mockResolvedValue(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      makeSearchResponse([{ _id: 'id1', status: 'open' }], 1) as any
-    );
+    esClient.search.mockResolvedValue(makeSearchResponse([{ _id: 'id1', status: 'open' }], 1));
 
     const { previousStatuses } = await prefetchPreviousStatusesByIds(esClient, 'index', [
       'id1',
@@ -164,8 +159,7 @@ describe('prefetchPreviousStatusesByIds', () => {
         total: { value: 1, relation: 'eq' },
         hits: [{ _id: 'id1', _index: 'test-index', _source: { [ALERT_WORKFLOW_STATUS]: null } }],
       },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any);
+    });
 
     const { previousStatuses } = await prefetchPreviousStatusesByIds(esClient, 'index', ['id1']);
 
@@ -232,8 +226,7 @@ describe('prefetchPreviousStatusesByQuery', () => {
     jest.clearAllMocks();
     ({ context } = requestContextMock.createTools());
     esClient = context.core.elasticsearch.client.asCurrentUser;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    esClient.search.mockResolvedValue(makeSearchResponse([], 0) as any);
+    esClient.search.mockResolvedValue(makeSearchResponse([], 0));
   });
 
   afterEach(() => {
@@ -262,8 +255,7 @@ describe('prefetchPreviousStatusesByQuery', () => {
           { _id: 'id2', status: 'open', _index: '.alerts-security.alerts-default' },
         ],
         2
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ) as any
+      )
     );
 
     const { ids, previousStatuses, idToIndex } = await prefetchPreviousStatusesByQuery(
@@ -291,8 +283,7 @@ describe('prefetchPreviousStatusesByQuery', () => {
         total: { value: 1, relation: 'eq' },
         hits: [{ _id: 'id1', _source: { [ALERT_WORKFLOW_STATUS]: 'open' } }],
       },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any);
+    });
 
     const { previousStatuses, idToIndex } = await prefetchPreviousStatusesByQuery(
       esClient,
@@ -305,8 +296,7 @@ describe('prefetchPreviousStatusesByQuery', () => {
   });
 
   it('sets truncated to true when total exceeds MAX_ALERTS_PER_TRIGGER (eq relation)', async () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    esClient.search.mockResolvedValue(makeSearchResponse([], MAX_ALERTS_PER_TRIGGER + 1) as any);
+    esClient.search.mockResolvedValue(makeSearchResponse([], MAX_ALERTS_PER_TRIGGER + 1));
 
     const result = await prefetchPreviousStatusesByQuery(esClient, 'index', { match_all: {} });
 
@@ -316,10 +306,7 @@ describe('prefetchPreviousStatusesByQuery', () => {
   it('sets truncated to true when ES returns gte relation at the track_total_hits boundary', async () => {
     // Real ES returns relation:'gte' when total > track_total_hits (MAX_ALERTS_PER_TRIGGER + 1).
     // value equals exactly MAX_ALERTS_PER_TRIGGER + 1 in that case.
-    esClient.search.mockResolvedValue(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      makeSearchResponse([], MAX_ALERTS_PER_TRIGGER + 1, 'gte') as any
-    );
+    esClient.search.mockResolvedValue(makeSearchResponse([], MAX_ALERTS_PER_TRIGGER + 1, 'gte'));
 
     const result = await prefetchPreviousStatusesByQuery(esClient, 'index', { match_all: {} });
 
@@ -327,8 +314,7 @@ describe('prefetchPreviousStatusesByQuery', () => {
   });
 
   it('does not set truncated when total equals MAX_ALERTS_PER_TRIGGER exactly', async () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    esClient.search.mockResolvedValue(makeSearchResponse([], MAX_ALERTS_PER_TRIGGER) as any);
+    esClient.search.mockResolvedValue(makeSearchResponse([], MAX_ALERTS_PER_TRIGGER));
 
     const result = await prefetchPreviousStatusesByQuery(esClient, 'index', { match_all: {} });
 
@@ -338,8 +324,7 @@ describe('prefetchPreviousStatusesByQuery', () => {
   it('handles numeric total hits format', async () => {
     esClient.search.mockResolvedValue({
       hits: { total: MAX_ALERTS_PER_TRIGGER + 1, hits: [] },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any);
+    });
 
     const result = await prefetchPreviousStatusesByQuery(esClient, 'index', { match_all: {} });
 
@@ -470,8 +455,7 @@ describe('fetchAlertIdToIndex', () => {
     jest.clearAllMocks();
     ({ context } = requestContextMock.createTools());
     esClient = context.core.elasticsearch.client.asCurrentUser;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    esClient.search.mockResolvedValue(makeIdToIndexResponse([]) as any);
+    esClient.search.mockResolvedValue(makeIdToIndexResponse([]));
   });
 
   afterEach(() => {
@@ -489,8 +473,7 @@ describe('fetchAlertIdToIndex', () => {
       { _id: 'id-1', _index: '.alerts-security.alerts-default' },
       { _id: 'id-2', _index: '.internal.alerts-security.alerts-default-000001' },
     ]);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    esClient.search.mockResolvedValue(response as any);
+    esClient.search.mockResolvedValue(response);
     const result = await fetchAlertIdToIndex(esClient, 'index', ['id-1', 'id-2']);
     expect(result.find((p) => p.id === 'id-1')?.index).toBe('.alerts-security.alerts-default');
     expect(result.find((p) => p.id === 'id-2')?.index).toBe(
@@ -503,8 +486,7 @@ describe('fetchAlertIdToIndex', () => {
       { _id: 'shared', _index: '.alerts-security.alerts-default' },
       { _id: 'shared', _index: '.alerts-security.attack.discovery.alerts-default' },
     ]);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    esClient.search.mockResolvedValue(response as any);
+    esClient.search.mockResolvedValue(response);
     const result = await fetchAlertIdToIndex(esClient, 'index', ['shared']);
     expect(result).toHaveLength(2);
     expect(result.map((p) => p.index)).toEqual(
@@ -644,8 +626,7 @@ describe('fetchAlertIdIndexWithSource', () => {
     jest.clearAllMocks();
     ({ context } = requestContextMock.createTools());
     esClient = context.core.elasticsearch.client.asCurrentUser;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    esClient.search.mockResolvedValue(makeSourceResponse([]) as any);
+    esClient.search.mockResolvedValue(makeSourceResponse([]));
   });
 
   afterEach(() => {
@@ -661,8 +642,7 @@ describe('fetchAlertIdIndexWithSource', () => {
         _source: { 'kibana.alert.workflow_tags': ['tag-a'] },
       },
     ]);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    esClient.search.mockResolvedValue(mockResp as any);
+    esClient.search.mockResolvedValue(mockResp);
     const result = await fetchAlertIdIndexWithSource(
       esClient,
       'my-index',
@@ -679,8 +659,7 @@ describe('fetchAlertIdIndexWithSource', () => {
     const mockResp = makeSourceResponse([
       { _id: 'id-1', _index: '.alerts-security.alerts-default' },
     ]);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    esClient.search.mockResolvedValue(mockResp as any);
+    esClient.search.mockResolvedValue(mockResp);
     const result = await fetchAlertIdIndexWithSource(esClient, 'my-index', ['id-1'], []);
     expect(result[0].source).toEqual({});
   });
