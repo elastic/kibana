@@ -28,6 +28,7 @@ This section provides a complete guide for contributors who want to add custom s
 Create a shared definition file (e.g., `common/step_types/my_step.ts`) that contains the step ID and schemas:
 
 ```typescript
+import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 
@@ -42,9 +43,21 @@ export const MyStepTypeId = 'my-namespace.myCustomStep';
  * Defines what parameters the step accepts.
  */
 export const InputSchema = z.object({
-  message: z.string().describe('The message to process.'),
-  count: z.number().optional().describe('How many times to process the message.'),
-  mode: z.enum(['partial', 'full']).describe('Processing mode.'),
+  message: z.string().describe(
+    i18n.translate('myPlugin.myStep.schema.message', {
+      defaultMessage: 'The message to process.',
+    })
+  ),
+  count: z.number().optional().describe(
+    i18n.translate('myPlugin.myStep.schema.count', {
+      defaultMessage: 'How many times to process the message.',
+    })
+  ),
+  mode: z.enum(['partial', 'full']).describe(
+    i18n.translate('myPlugin.myStep.schema.mode', {
+      defaultMessage: 'Processing mode.',
+    })
+  ),
 });
 
 /**
@@ -72,7 +85,11 @@ export type MyStepOutput = z.infer<typeof OutputSchema>;
  * Example: `id`.
  */
 export const ConfigSchema = z.object({
-  'connector-id': z.string().optional().describe('The connector to use. Defaults to the workflow default if omitted.'),
+  'connector-id': z.string().optional().describe(
+    i18n.translate('myPlugin.myStep.schema.connectorId', {
+      defaultMessage: 'The connector to use. Defaults to the workflow default if omitted.',
+    })
+  ),
 });
 
 /**
@@ -111,7 +128,7 @@ export const myStepCommonDefinition: CommonStepDefinition = {
 | `documentation.examples` | Titled YAML snippets (`## Title` + fenced yaml) |
 | `documentation.notes` | Warnings/gotchas after the schema |
 
-- Use `.describe()` on every schema field. Keep parameter lists out of `details`.
+- Use `.describe(i18n.translate(...))` on every schema field so generated parameter tables stay translatable. Keep parameter lists out of `details`.
 - Set `stability: 'stable'` explicitly for GA custom steps (extension-registered steps otherwise default to tech_preview in the UI).
 
 ### Step 2: Implement Server-Side Definition

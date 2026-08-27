@@ -37,9 +37,21 @@ import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
 export const MY_TRIGGER_ID = 'my-plugin.myTrigger' as const;
 
 export const myTriggerEventSchema = z.object({
-  message: z.string().describe('The message text for the event.'),
-  source: z.string().optional().describe('The source that emitted the event.'),
-  category: z.string().optional().describe('Category for filtering in workflow conditions.'),
+  message: z.string().describe(
+    i18n.translate('myPlugin.myTrigger.schema.message', {
+      defaultMessage: 'The message text for the event.',
+    })
+  ),
+  source: z.string().optional().describe(
+    i18n.translate('myPlugin.myTrigger.schema.source', {
+      defaultMessage: 'The source that emitted the event.',
+    })
+  ),
+  category: z.string().optional().describe(
+    i18n.translate('myPlugin.myTrigger.schema.category', {
+      defaultMessage: 'Category for filtering in workflow conditions.',
+    })
+  ),
 });
 
 export type MyTriggerEvent = z.infer<typeof myTriggerEventSchema>;
@@ -64,7 +76,7 @@ export const commonMyTriggerDefinition: CommonTriggerDefinition = {
 ```
 
 - Set `stability` (required) to `'tech_preview'`, `'beta'`, or `'stable'` based on the trigger's maturity. Use `'stable'` for GA triggers (no badge in the editor).
-- Use `.describe()` on every `eventSchema` field so generated payload tables have Parameter / Type / Description.
+- Use `.describe(i18n.translate(...))` on every `eventSchema` field so generated payload tables have Parameter / Type / Description and stay translatable.
 - Engine-level YAML (`on.condition`, `on.workflowEvents`) is documented by the shared `CustomTriggerOnSchema` in `@kbn/workflows` — do not duplicate those fields on `eventSchema`. Envelope fields (`event.spaceId`, `event.timestamp`) live on the shared event envelope, not per trigger.
 - `eventSchema` must be a Zod object schema; payloads are validated at emit time.
 - When you provide `documentation.examples`, each example must only reference fields present on `eventSchema` (agents pattern-match YAML examples).

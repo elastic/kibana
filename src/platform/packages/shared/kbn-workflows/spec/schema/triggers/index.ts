@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import { AlertRuleTriggerSchema } from './alert_trigger_schema';
 import { ManualTriggerSchema } from './manual_trigger_schema';
@@ -44,13 +45,16 @@ export const CustomTriggerOnSchema = z
       .string()
       .optional()
       .describe(
-        'Optional KQL predicate evaluated against the event payload. The trigger fires only when the condition matches.'
+        i18n.translate('workflows.customTriggerOn.schema.condition', {
+          defaultMessage:
+            'Optional KQL predicate evaluated against the event payload. The trigger fires only when the condition matches.',
+        })
       ),
     workflowEvents: WorkflowEventsSchema.optional().describe(
-      'How this trigger responds when the event originated from a workflow run. ' +
-        '`avoid-loop` (default) fires on workflow-generated events but skips scheduling when this workflow is already in the event chain; ' +
-        '`ignore` skips workflow-generated events and reacts only to external signals; ' +
-        '`allow-all` bypasses the cycle guard (the maximum chain depth still applies as a backstop).'
+      i18n.translate('workflows.customTriggerOn.schema.workflowEvents', {
+        defaultMessage:
+          'How this trigger responds when the event originated from a workflow run. `avoid-loop` (default) fires on workflow-generated events but skips scheduling when this workflow is already in the event chain; `ignore` skips workflow-generated events and reacts only to external signals; `allow-all` bypasses the cycle guard (the maximum chain depth still applies as a backstop).',
+      })
     ),
   })
   .optional();
