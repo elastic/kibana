@@ -8,12 +8,7 @@
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import type { ApiServicesFixture } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import {
-  buildBytesMetricVisualization,
-  createLogstashLensEditorSuiteSetup,
-  spaceTest,
-  testData,
-} from '../fixtures';
+import { createLogstashLensEditorSuiteSetup, spaceTest, testData } from '../fixtures';
 
 const SHOW_CONFIG_ACTION = 'embeddablePanelAction-ACTION_SHOW_CONFIG_PANEL';
 
@@ -65,7 +60,7 @@ spaceTest.describe(
   { tag: '@local-stateful-classic' },
   () => {
     const suiteSetup = createLogstashLensEditorSuiteSetup({
-      // Tests start from Visualize or a dashboard, not an empty Lens editor.
+      // Tests start from API-created dashboards, not an empty Lens editor.
       skipEmptyLensOpen: true,
     });
 
@@ -75,20 +70,22 @@ spaceTest.describe(
 
     spaceTest(
       'hides the show-config action for a user with write access',
-      async ({ page, pageObjects }) => {
-        const { dashboard, lens, visualize } = pageObjects;
+      async ({ apiServices, page, pageObjects, scoutSpace }) => {
+        const { dashboard } = pageObjects;
+        let dashboardId = '';
 
-        await spaceTest.step('create a metric panel on a new saved dashboard', async () => {
-          await buildBytesMetricVisualization({ visualize, lens });
-          // `saveToLibrary: false` (FTR parity): the modal's "Add to library"
-          // checkbox defaults to checked, which would leak a library saved
-          // object — this test exercises a by-value panel.
-          await lens.save('New Lens from Modal', { addToDashboard: 'new', saveToLibrary: false });
-          await dashboard.waitForRenderComplete();
-          await dashboard.saveDashboard('My read only testing dashboard');
+        await spaceTest.step('create a dashboard with a Lens panel via API', async () => {
+          // API setup (instead of the FTR UI build flow) keeps this test focused
+          // on the action-visibility assertion; the panel is by-value, matching FTR.
+          dashboardId = await createDashboardWithLensPanel(
+            apiServices,
+            scoutSpace.id,
+            'My read only testing dashboard'
+          );
         });
 
         await spaceTest.step('the action is absent in edit mode', async () => {
+          await dashboard.openDashboardWithIdInEditMode(dashboardId);
           expect(await dashboard.panelHasAction(SHOW_CONFIG_ACTION)).toBe(false);
         });
 
