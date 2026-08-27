@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ConversationSharingButton } from './conversation_sharing_button';
+import { ConversationShareButton } from './conversation_share_button';
 import { ChatInfoButton } from './chat_info_button';
 import { useConversation } from '../../../hooks/use_conversation';
 
@@ -31,7 +31,7 @@ export const ConversationRightActions: React.FC = () => {
       responsive={false}
     >
       <EuiFlexItem grow={false}>
-        <ConversationSharingButton />
+        <ConversationShareButton />
       </EuiFlexItem>
       {hasTemplate && (
         <EuiFlexItem grow={false}>
