@@ -142,4 +142,4 @@ export const ProjectsView = ({ request }: DetailViewProps) => {
 // A project row is derived from the same per-cluster response details as the Clusters view,
 // to avoid recreating the logic at the moment we want to show the projects view when the clusters view is not shown
 ProjectsView.shouldShow = (request: Request, isCpsMultiProject?: boolean) =>
-  !!isCpsMultiProject && !ClustersView.shouldShow(request, isCpsMultiProject);
+  !!isCpsMultiProject && ClustersView.shouldShow(request);
