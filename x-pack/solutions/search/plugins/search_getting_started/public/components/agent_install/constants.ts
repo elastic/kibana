@@ -19,4 +19,4 @@ export const CLI_VERIFY_COMMAND = 'elastic es info';
 export const CLI_CONTEXT_NAME = 'my-deployment';
 export const CLI_API_KEY_PLACEHOLDER = '<your-api-key>';
 export const CLI_REPO_URL = 'https://github.com/elastic/cli';
-export const CLI_COMMAND_REFERENCE_URL = 'https://github.com/elastic/cli/blob/main/README.md';
+export const CLI_COMMAND_REFERENCE_URL = 'https://github.com/elastic/cli#commands';
