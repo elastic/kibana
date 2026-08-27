@@ -27,7 +27,4 @@ echo -e "\n[Security Solution OpenAPI Code Generation] Entity Store Plugin\n"
 echo -e "\n[Security Solution OpenAPI Code Generation] kbn-discoveries Package\n"
 (cd x-pack/solutions/security/packages/kbn-discoveries && yarn openapi:generate)
 
-echo -e "\n[Security Solution OpenAPI Code Generation] kbn-discoveries-schemas Package\n"
-(cd x-pack/solutions/security/packages/kbn-discoveries-schemas && yarn openapi:generate)
-
 check_for_changed_files "yarn openapi:generate" true
