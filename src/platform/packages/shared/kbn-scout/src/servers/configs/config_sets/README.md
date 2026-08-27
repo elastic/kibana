@@ -9,7 +9,7 @@ Each folder here is a server config set: the `ScoutServerConfig` Scout uses to b
 - Scout follows a [write it once, run it everywhere](https://www.elastic.co/docs/extend/kibana/testing/scout-best-practices#design-tests-with-a-cloud-first-mindset) philosophy: we want most tests to run against both local deployments and Elastic Cloud.
 - A clean baseline keeps `default/` representative of the default customer experience, and lets UI and API configs from different solutions share one set of servers.
 
-Our guidance is to not enable a feature flag in `default/` unless it's also enabled by default on Cloud. Experimental behavior doesn't belong in that baseline.
+Our guidance is to not enable a feature flag in the `default` config set unless it's also enabled by default on Cloud.
 
 ## Adding a custom set
 
