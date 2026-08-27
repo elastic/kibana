@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render } from '../../../utils/testing/rtl_helpers';
+import { render } from '@testing-library/react';
 import type { AgentStat, LocationAgentStats } from '../../../../../../common/types';
 import { LocationHealth } from './location_health';
 
@@ -61,5 +61,21 @@ describe('LocationHealth', () => {
     );
 
     expect(getByTestId('syntheticsLocationHealth')).toHaveTextContent('1/2 healthy');
+  });
+
+  it('renders an error when the agent stats fetch failed and no cached stats exist', () => {
+    const { getByTestId, queryByTestId } = render(<LocationHealth error />);
+
+    expect(getByTestId('syntheticsLocationHealthError')).toHaveTextContent('Unable to load');
+    expect(queryByTestId('syntheticsLocationHealthEmpty')).not.toBeInTheDocument();
+  });
+
+  it('keeps a cached health summary when a later fetch fails', () => {
+    const { getByTestId, queryByTestId } = render(
+      <LocationHealth stats={stats([agent()])} error />
+    );
+
+    expect(getByTestId('syntheticsLocationHealth')).toHaveTextContent('1/1 healthy');
+    expect(queryByTestId('syntheticsLocationHealthError')).not.toBeInTheDocument();
   });
 });

@@ -49,7 +49,11 @@ const mockLocationStats = (
 ];
 
 const setByLocation = (entries: Array<[string, LocationAgentStats]>) => {
-  mockUseAgentStats.mockReturnValue({ byLocation: new Map(entries), loading: false });
+  mockUseAgentStats.mockReturnValue({
+    byLocation: new Map(entries),
+    loading: false,
+    error: null,
+  });
 };
 
 describe('useOutdatedMwAgentLocationIds', () => {

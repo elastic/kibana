@@ -171,7 +171,8 @@ const SELECT_POLICY_HOSTS = i18n.translate('xpack.synthetics.monitorManagement.s
 const SELECT_POLICY_HOSTS_HELP_TEXT = i18n.translate(
   'xpack.synthetics.monitorManagement.selectPolicyHost.helpText',
   {
-    defaultMessage: 'We recommend using a single Elastic agent per agent policy.',
+    defaultMessage:
+      'Classic locations use one Elastic Agent per policy. Scalable locations can enroll several agents on the same policy.',
   }
 );
 

@@ -72,8 +72,9 @@ export const toSavedObjectContract = (location: PrivateLocation): PrivateLocatio
   };
 };
 
-// This should be called when changing the label of a private location because the label is also stored
-// in the locations array of monitors attributes
+// Label and sharding edits must rewrite this location's monitors: the label is
+// stored on each monitor's locations array, and toggling isAgentSharding
+// restamps (or clears) per-monitor `${agent.id}` package-policy conditions.
 export const updatePrivateLocationMonitors = async ({
   locationId,
   newLocationLabel,

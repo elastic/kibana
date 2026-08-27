@@ -13,12 +13,22 @@ import type { LocationAgentStats } from '../../../../../../common/types';
 export const LocationHealth = ({
   stats,
   loading = false,
+  error = false,
 }: {
   stats?: LocationAgentStats;
   loading?: boolean;
+  error?: boolean;
 }) => {
   if (loading && !stats) {
     return <EuiLoadingSpinner size="s" />;
+  }
+
+  if (error && !stats) {
+    return (
+      <EuiText size="s" color="subdued" data-test-subj="syntheticsLocationHealthError">
+        {UNABLE_TO_LOAD_LABEL}
+      </EuiText>
+    );
   }
 
   const agents = stats?.agents ?? [];
@@ -45,6 +55,13 @@ const NO_AGENTS_LABEL = i18n.translate(
   'xpack.synthetics.monitorManagement.locationHealthEmptyLabel',
   {
     defaultMessage: 'No agents',
+  }
+);
+
+const UNABLE_TO_LOAD_LABEL = i18n.translate(
+  'xpack.synthetics.monitorManagement.locationHealthErrorLabel',
+  {
+    defaultMessage: 'Unable to load',
   }
 );
 

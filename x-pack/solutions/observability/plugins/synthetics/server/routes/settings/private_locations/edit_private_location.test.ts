@@ -8,14 +8,15 @@
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { editPrivateLocationRoute } from './edit_private_location';
 import { PrivateLocationRepository } from '../../../repositories/private_location_repository';
+import { updatePrivateLocationMonitors } from './helpers';
 
 jest.mock('../../../synthetics_service/get_private_locations', () => ({
   getPrivateLocations: jest.fn().mockResolvedValue([]),
   getPrivateLocationsForNamespaces: jest.fn().mockResolvedValue([]),
 }));
 
-// Only the privilege-check path (assertions below) is under test here; the
-// actual monitor-label sync is exercised by helpers.test.ts.
+// Privilege-check and sharding-sync wiring are under test here; the actual
+// monitor rewrite is exercised by helpers.test.ts.
 jest.mock('./helpers', () => {
   const actual = jest.requireActual('./helpers');
   return {
@@ -64,7 +65,10 @@ const makeRouteContext = (body: Record<string, unknown>, { hasEnterprise = false
 };
 
 describe('editPrivateLocationRoute isAgentSharding', () => {
-  afterEach(() => jest.restoreAllMocks());
+  afterEach(() => {
+    jest.restoreAllMocks();
+    jest.clearAllMocks();
+  });
 
   const stubRepo = (updatedAttributes = {}, existingAttributes = {}) => {
     const location = {
@@ -90,6 +94,12 @@ describe('editPrivateLocationRoute isAgentSharding', () => {
 
     expect(edit).toHaveBeenCalledWith('loc-1', expect.objectContaining({ isAgentSharding: true }));
     expect(result).toEqual(expect.objectContaining({ isAgentSharding: true }));
+    expect(updatePrivateLocationMonitors).toHaveBeenCalledWith(
+      expect.objectContaining({
+        locationId: 'loc-1',
+        newLocationLabel: 'Loc',
+      })
+    );
   });
 
   it('rejects enabling isAgentSharding without an Enterprise license', async () => {
@@ -118,6 +128,12 @@ describe('editPrivateLocationRoute isAgentSharding', () => {
 
     expect(edit).toHaveBeenCalledWith('loc-1', expect.objectContaining({ isAgentSharding: false }));
     expect(result).not.toHaveProperty('isAgentSharding');
+    expect(updatePrivateLocationMonitors).toHaveBeenCalledWith(
+      expect.objectContaining({
+        locationId: 'loc-1',
+        newLocationLabel: 'Loc',
+      })
+    );
   });
 
   it('does not write when the body omits isAgentSharding and other fields', async () => {
@@ -127,6 +143,7 @@ describe('editPrivateLocationRoute isAgentSharding', () => {
     await editPrivateLocationRoute().handler(routeContext);
 
     expect(edit).not.toHaveBeenCalled();
+    expect(updatePrivateLocationMonitors).not.toHaveBeenCalled();
   });
 
   it('returns forbidden when a monitor using the location belongs to an unauthorized space', async () => {
@@ -175,6 +192,51 @@ describe('editPrivateLocationRoute isAgentSharding', () => {
 
     expect(result).toBe(forbidden);
     expect(edit).not.toHaveBeenCalled();
+  });
+
+  it('returns forbidden when turning sharding off and a monitor belongs to an unauthorized space', async () => {
+    const response = httpServerMock.createResponseFactory();
+    const forbidden = { statusCode: 403 };
+    response.forbidden.mockReturnValue(forbidden as any);
+    const edit = jest.spyOn(PrivateLocationRepository.prototype, 'editPrivateLocation');
+    jest.spyOn(PrivateLocationRepository.prototype, 'getPrivateLocation').mockResolvedValue({
+      id: 'location-1',
+      namespaces: ['default'],
+      attributes: {
+        id: 'location-1',
+        label: 'Loc',
+        agentPolicyId: 'agent-policy-1',
+        isServiceManaged: false,
+        isAgentSharding: true,
+      },
+    } as any);
+
+    const result = await editPrivateLocationRoute().handler({
+      request: { params: { locationId: 'location-1' }, body: { isAgentSharding: false } },
+      response,
+      savedObjectsClient: {},
+      monitorConfigRepository: {
+        findDecryptedMonitors: jest
+          .fn()
+          .mockResolvedValue([{ namespaces: ['default', 'restricted-space'] }]),
+      },
+      server: {
+        coreStart: {
+          savedObjects: { createInternalRepository: jest.fn().mockReturnValue({}) },
+        },
+        security: {
+          authz: {
+            checkSavedObjectsPrivilegesWithRequest: jest
+              .fn()
+              .mockReturnValue(jest.fn().mockResolvedValue({ hasAllRequested: false })),
+          },
+        },
+      },
+    } as any);
+
+    expect(result).toBe(forbidden);
+    expect(edit).not.toHaveBeenCalled();
+    expect(updatePrivateLocationMonitors).not.toHaveBeenCalled();
   });
 
   it('checks privileges across every monitor namespace, deduped, not just the first', async () => {

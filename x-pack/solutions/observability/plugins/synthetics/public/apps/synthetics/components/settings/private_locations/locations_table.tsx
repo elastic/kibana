@@ -77,7 +77,11 @@ export const PrivateLocationsTable = ({
   const [locationPendingDelete, setLocationPendingDelete] = useState<string | null>(null);
 
   const { locationMonitors, loading } = useLocationMonitors();
-  const { byLocation: agentStatsByLocation, loading: agentStatsLoading } = useAgentStats();
+  const {
+    byLocation: agentStatsByLocation,
+    loading: agentStatsLoading,
+    error: agentStatsError,
+  } = useAgentStats();
   const { refreshApp, lastRefresh } = useSyntheticsRefreshContext();
 
   // Expanded rows: per-agent health/capacity breakdown for a location's agents.
@@ -166,7 +170,11 @@ export const PrivateLocationsTable = ({
     {
       name: HEALTH_LABEL,
       render: (item: ListItem) => (
-        <LocationHealth stats={agentStatsByLocation.get(item.id)} loading={agentStatsLoading} />
+        <LocationHealth
+          stats={agentStatsByLocation.get(item.id)}
+          loading={agentStatsLoading}
+          error={Boolean(agentStatsError)}
+        />
       ),
     },
     {

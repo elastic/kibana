@@ -47,6 +47,9 @@ const isPrivateLocationLabelChanged = (oldLabel: string, newLabel?: string): new
   return typeof newLabel === 'string' && oldLabel !== newLabel;
 };
 
+const isPrivateLocationShardingChanged = (existing?: boolean, next?: boolean): boolean =>
+  typeof next === 'boolean' && next !== Boolean(existing);
+
 const isPrivateLocationChanged = ({
   privateLocation,
   newParams,
@@ -63,9 +66,10 @@ const isPrivateLocationChanged = ({
     (!privateLocation.attributes.tags ||
       (privateLocation.attributes.tags &&
         !isEqual(privateLocation.attributes.tags, newParams.tags)));
-  const isShardingChanged =
-    typeof newParams.isAgentSharding === 'boolean' &&
-    newParams.isAgentSharding !== Boolean(privateLocation.attributes.isAgentSharding);
+  const isShardingChanged = isPrivateLocationShardingChanged(
+    privateLocation.attributes.isAgentSharding,
+    newParams.isAgentSharding
+  );
 
   return isLabelChanged || areTagsChanged || isShardingChanged;
 };
@@ -155,11 +159,19 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
       if (
         isPrivateLocationChanged({ privateLocation: existingLocation, newParams: request.body })
       ) {
-        // This privileges check is done only when changing the label, because changing the label will update also the monitors in that location
-        if (
-          isPrivateLocationLabelChanged(existingLocation.attributes.label, newLocationLabel) &&
-          monitorsInLocation.length
-        ) {
+        const isLabelChanged = isPrivateLocationLabelChanged(
+          existingLocation.attributes.label,
+          newLocationLabel
+        );
+        const isShardingChanged = isPrivateLocationShardingChanged(
+          existingLocation.attributes.isAgentSharding,
+          newIsAgentSharding
+        );
+        const shouldSyncMonitors = isLabelChanged || isShardingChanged;
+
+        // Label and sharding edits rewrite this location's monitors (package-policy
+        // conditions, and the label stored on each monitor).
+        if (shouldSyncMonitors && monitorsInLocation.length) {
           const privilegeResponse = await checkPrivileges({
             routeContext,
             monitorsSpaces: [
@@ -179,10 +191,10 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
             : {}),
         });
 
-        if (isPrivateLocationLabelChanged(existingLocation.attributes.label, newLocationLabel)) {
+        if (shouldSyncMonitors) {
           await updatePrivateLocationMonitors({
             locationId,
-            newLocationLabel,
+            newLocationLabel: newLocationLabel || existingLocation.attributes.label,
             allPrivateLocations: await getPrivateLocations(savedObjectsClient),
             routeContext,
             monitorsInLocation,
