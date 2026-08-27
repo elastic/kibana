@@ -28,6 +28,7 @@ import type {
 } from '../events/rule_event_publisher/rule_event_publisher';
 import { createRuleEventPublisher } from '../events/rule_event_publisher/rule_event_publisher.mock';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
+import { ArtifactTypeRegistry, registerBuiltinArtifactTypes } from '../artifact_types';
 import { RulesClient } from './rules_client';
 import type { CreateRuleParams } from './types';
 import { ALERTING_LOG_CODES } from '../errors/error_codes';
@@ -69,6 +70,7 @@ describe('RulesClient', () => {
   let mockLogger: ReturnType<typeof createLoggerService>['mockLogger'];
   let rulesSavedObjectService: RulesSavedObjectServiceMock;
   let ruleEventPublisher: RuleEventPublisher;
+  let artifactTypeRegistry: ArtifactTypeRegistry;
 
   beforeAll(() => {
     jest.useFakeTimers().setSystemTime(new Date('2025-01-01T00:00:00.000Z'));
@@ -78,7 +80,8 @@ describe('RulesClient', () => {
     jest.clearAllMocks();
 
     rulesSavedObjectService = createRulesSavedObjectServiceMock();
-
+    artifactTypeRegistry = new ArtifactTypeRegistry();
+    registerBuiltinArtifactTypes(artifactTypeRegistry);
     ({ publisher: ruleEventPublisher } = createRuleEventPublisher());
     jest.spyOn(ruleEventPublisher, 'emitRuleCreated');
     jest.spyOn(ruleEventPublisher, 'emitRuleUpdated');
@@ -124,7 +127,8 @@ describe('RulesClient', () => {
       pluginConfigAccessor,
       rulesSavedObjectService,
       ruleEventPublisher,
-      loggerService
+      loggerService,
+      artifactTypeRegistry
     );
   }
 
@@ -167,6 +171,22 @@ describe('RulesClient', () => {
           updated_at: '2025-01-01T00:00:00.000Z',
         })
       );
+    });
+
+    it('rejects artifact data that its registered type does not allow', async () => {
+      const client = createClient();
+
+      await expect(
+        client.createRule({
+          data: {
+            ...baseCreateData,
+            artifacts: [{ id: 'run-1', type: 'runbook', data: { content: '' } }],
+          },
+        })
+      ).rejects.toMatchObject({
+        output: { statusCode: 400 },
+        data: { code: 'INVALID_ARTIFACT_DATA' },
+      });
     });
 
     it('cleans up the saved object if scheduling fails', async () => {
