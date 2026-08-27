@@ -13,9 +13,6 @@ export const FILE_KIND = 'defaultImage';
 
 export const FILES_API = {
   CREATE: `/api/files/files/${FILE_KIND}`,
-  // Kind-agnostic list, matching what the management table shows (it lists every
-  // non-excluded kind, not just `defaultImage`), so cleanup can clear all of them.
-  FIND: `/api/files/find`,
-  // Delete is per-kind, so the file's own `fileKind` has to be threaded back in.
+  // Delete is a per-kind route, so the kind is part of the path.
   delete: (fileKind: string, id: string) => `/api/files/files/${fileKind}/${id}`,
 };

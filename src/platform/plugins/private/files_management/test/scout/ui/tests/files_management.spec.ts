@@ -7,70 +7,47 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// Files are not scoped to a Kibana space, so these tests share one global list:
-// the empty-state assertion only holds once every pre-existing file is gone.
-// Hence the sequential suite and the delete-everything hooks.
+// Files are not space-scoped, so this suite shares one global list with every
+// other suite on the server. It therefore only asserts the data-present path
+// (the diagnostics flyout) and cleans up just the files it creates — never the
+// whole deployment. The empty-state ("No files found") branch cannot be
+// guaranteed on a shared server, so it is covered by a unit test instead:
+// public/components/empty_prompt.test.tsx.
 //
 // FTR source: src/platform/test/functional/apps/management/group4/_files.ts
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import type { KbnClient } from '@kbn/scout';
 import { test, testData } from '../fixtures';
 
-const { FILES_API } = testData;
-
-interface FileSummary {
-  id: string;
-  fileKind: string;
-}
-
-// The management table lists every non-excluded file kind, so the empty-state
-// assertion only holds once files of ALL kinds are gone — not just defaultImage.
-// `find` is paginated, so drain page-by-page until nothing is left.
-const deleteAllFiles = async (kbnClient: KbnClient): Promise<void> => {
-  for (;;) {
-    const { data } = await kbnClient.request<{ files: FileSummary[] }>({
-      method: 'POST',
-      path: FILES_API.FIND,
-      body: {},
-    });
-
-    if (data.files.length === 0) {
-      return;
-    }
-
-    for (const file of data.files) {
-      await kbnClient.request({ method: 'DELETE', path: FILES_API.delete(file.fileKind, file.id) });
-    }
-  }
-};
+const { FILES_API, FILE_KIND } = testData;
 
 test.describe('Files management', { tag: tags.stateful.classic }, () => {
-  test.beforeEach(async ({ browserAuth, kbnClient }) => {
-    await deleteAllFiles(kbnClient);
+  const createdFileIds: string[] = [];
+
+  test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsAdmin();
   });
 
   test.afterEach(async ({ kbnClient }) => {
-    await deleteAllFiles(kbnClient);
-  });
-
-  test('shows an empty prompt when no files exist', async ({ pageObjects }) => {
-    await pageObjects.filesManagement.goto();
-
-    await expect(pageObjects.filesManagement.app).toContainText('No files found');
+    while (createdFileIds.length > 0) {
+      const id = createdFileIds.pop()!;
+      await kbnClient.request({ method: 'DELETE', path: FILES_API.delete(FILE_KIND, id) });
+    }
   });
 
   test('breaks files down by extension and status in the diagnostics flyout', async ({
     kbnClient,
     pageObjects,
   }) => {
-    await kbnClient.request({
+    // Files are not space-scoped, so the name is namespaced per run to avoid
+    // colliding with anything another suite on the shared server creates.
+    const { data } = await kbnClient.request<{ file: { id: string } }>({
       method: 'POST',
       path: FILES_API.CREATE,
-      body: { name: 'test', mimeType: 'image/png' },
+      body: { name: `diagnostics-${Math.random().toString(36).slice(2)}`, mimeType: 'image/png' },
     });
+    createdFileIds.push(data.file.id);
 
     await pageObjects.filesManagement.goto();
     await pageObjects.filesManagement.openDiagnosticsFlyout();
