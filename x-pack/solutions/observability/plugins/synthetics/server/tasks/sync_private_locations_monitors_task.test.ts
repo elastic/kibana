@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CustomTaskInstance } from './sync_private_locations_monitors_task';
+import type { CustomTaskInstance, SyncTaskRunResult } from './sync_private_locations_monitors_task';
 import {
   SyncPrivateLocationMonitorsTask,
   runSynPrivateLocationMonitorsTaskSoon,
@@ -75,6 +75,17 @@ const getMockTaskInstance = (state: Record<string, any> = {}): CustomTaskInstanc
     },
     params: {},
   };
+};
+
+const scheduleOf = (result: SyncTaskRunResult) => {
+  if ('schedule' in result) {
+    return result.schedule;
+  }
+};
+const runAtOf = (result: SyncTaskRunResult) => {
+  if ('runAt' in result) {
+    return result.runAt;
+  }
 };
 
 describe('SyncPrivateLocationMonitorsTask', () => {
@@ -265,8 +276,8 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       const result = await task.runTask({ taskInstance });
 
       expect(result.state.lastStartedAt).toBe(startedAt.toISOString());
-      expect(result.schedule).toEqual({ interval: DEFAULT_TASK_SCHEDULE });
-      expect(result.runAt).toBeUndefined();
+      expect(scheduleOf(result)).toEqual({ interval: DEFAULT_TASK_SCHEDULE });
+      expect(runAtOf(result)).toBeUndefined();
     });
 
     it('schedules an immediate follow-up when an MW is updated after this run started', async () => {
@@ -294,8 +305,8 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       const result = await task.runTask({ taskInstance });
 
       expect(result.error).toBeUndefined();
-      expect(result.runAt).toBeInstanceOf(Date);
-      expect(result.schedule).toBeUndefined();
+      expect(runAtOf(result)).toBeInstanceOf(Date);
+      expect(scheduleOf(result)).toBeUndefined();
       expect(mockLogger.debug).toHaveBeenCalledWith(
         expect.stringContaining('scheduling an immediate follow-up')
       );
@@ -330,8 +341,8 @@ describe('SyncPrivateLocationMonitorsTask', () => {
 
       const result = await task.runTask({ taskInstance });
 
-      expect(result.schedule).toEqual({ interval: DEFAULT_TASK_SCHEDULE });
-      expect(result.runAt).toBeUndefined();
+      expect(scheduleOf(result)).toEqual({ interval: DEFAULT_TASK_SCHEDULE });
+      expect(runAtOf(result)).toBeUndefined();
     });
 
     it('should sync only for provided privateLocationId and clear it from state', async () => {
@@ -369,7 +380,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         ...taskInstance.state,
         privateLocationId: undefined,
       });
-      expect(result.schedule).toBeUndefined();
+      expect(scheduleOf(result)).toBeUndefined();
     });
 
     it('should not return a schedule when a per-location sync fails', async () => {
@@ -394,7 +405,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
 
       expect(result.error).toBeDefined();
       // a schedule here would convert this one-shot task into a recurring one
-      expect(result.schedule).toBeUndefined();
+      expect(scheduleOf(result)).toBeUndefined();
       expect(result.state.privateLocationId).toBeUndefined();
     });
 
@@ -522,7 +533,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
 
       // the recreate did not fully succeed, so cleanup must be able to re-attempt it
       expect(result.error).toBeDefined();
-      expect(result.schedule).toBeUndefined();
+      expect(scheduleOf(result)).toBeUndefined();
     });
 
     it('should stop re-running cleanup once the retry budget is exhausted across task runs', async () => {
@@ -964,13 +975,13 @@ describe('SyncPrivateLocationMonitorsTask', () => {
     it('uses the task schedule interval when present', async () => {
       const taskInstance = { ...getMockTaskInstance(), schedule: { interval: '15m' } };
       const result = await task.runTask({ taskInstance });
-      expect(result.schedule).toEqual({ interval: '15m' });
+      expect(scheduleOf(result)).toEqual({ interval: '15m' });
     });
 
     it('falls back to DEFAULT_TASK_SCHEDULE when task has no schedule', async () => {
       const taskInstance = getMockTaskInstance();
       const result = await task.runTask({ taskInstance });
-      expect(result.schedule).toEqual({ interval: DEFAULT_TASK_SCHEDULE });
+      expect(scheduleOf(result)).toEqual({ interval: DEFAULT_TASK_SCHEDULE });
     });
   });
 
