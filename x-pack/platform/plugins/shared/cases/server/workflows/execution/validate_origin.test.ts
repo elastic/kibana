@@ -8,7 +8,7 @@
 import type { DocumentResponse } from '../../../common/types/api';
 import type { Case } from '../../../common/types/domain';
 import { getAlertInfoFromComments } from '../../common/utils';
-import { validateOrigin as validateOriginWithAttachments } from './validate_origin';
+import { parseSelectedAlertPairs, validateOrigin as validateOriginWithAttachments } from './validate_origin';
 
 const theCase = {
   id: 'case-1',
@@ -16,8 +16,16 @@ const theCase = {
   comments: [] as unknown[],
 } as unknown as Case;
 
+/**
+ * Test wrapper: derives `attachedAlerts` from the case comments (mirroring the source used in
+ * production for the legacy alert attachment shape) and parses `inputs` through
+ * `parseSelectedAlertPairs` — the same code path the service uses — so the validated set is
+ * identical to what alert preprocessing later fetches.
+ */
 const validateOrigin = (
-  params: Omit<Parameters<typeof validateOriginWithAttachments>[0], 'attachedAlerts'>
+  params: Omit<Parameters<typeof validateOriginWithAttachments>[0], 'attachedAlerts' | 'selectedAlerts'> & {
+    inputs: Record<string, unknown>;
+  }
 ): void => {
   const attachedAlerts: DocumentResponse = getAlertInfoFromComments(params.theCase.comments).map(
     ({ id, index }) => ({
@@ -26,8 +34,11 @@ const validateOrigin = (
       attached_at: '2026-08-26T00:00:00.000Z',
     })
   );
+  const selectedAlerts = parseSelectedAlertPairs(params.inputs);
+  const { inputs: _inputs, ...rest } = params;
   validateOriginWithAttachments({
-    ...params,
+    ...rest,
+    selectedAlerts,
     attachedAlerts,
   });
 };
@@ -333,5 +344,64 @@ describe('unified v2 alert attachment', () => {
         theCase: caseWithUnifiedAlert,
       })
     ).toThrow('All selected alerts must belong to the case.');
+  });
+});
+
+// ── parseSelectedAlertPairs input validation ──────────────────────────────────
+
+describe('parseSelectedAlertPairs', () => {
+  it('returns empty array when inputs.event.alertIds is absent', () => {
+    expect(parseSelectedAlertPairs({})).toEqual([]);
+    expect(parseSelectedAlertPairs({ event: {} })).toEqual([]);
+    expect(parseSelectedAlertPairs({ event: { alertIds: null } })).toEqual([]);
+    expect(parseSelectedAlertPairs({ event: { alertIds: undefined } })).toEqual([]);
+  });
+
+  it('throws 400 when alertIds is not an array', () => {
+    expect(() =>
+      parseSelectedAlertPairs({ event: { alertIds: 'alert-1' } })
+    ).toThrow('inputs.event.alertIds must be an array.');
+    expect(() =>
+      parseSelectedAlertPairs({ event: { alertIds: 42 } })
+    ).toThrow('inputs.event.alertIds must be an array.');
+  });
+
+  it('throws 400 when an entry has a non-string _id', () => {
+    expect(() =>
+      parseSelectedAlertPairs({ event: { alertIds: [{ _id: 4242, _index: '.alerts' }] } })
+    ).toThrow('Every inputs.event.alertIds entry must be an object with string "_id" and "_index" properties.');
+  });
+
+  it('throws 400 when an entry has a non-string _index', () => {
+    expect(() =>
+      parseSelectedAlertPairs({ event: { alertIds: [{ _id: 'alert-1', _index: 99 }] } })
+    ).toThrow('Every inputs.event.alertIds entry must be an object with string "_id" and "_index" properties.');
+  });
+
+  it('throws 400 when an entry is not an object', () => {
+    expect(() =>
+      parseSelectedAlertPairs({ event: { alertIds: ['alert-1'] } })
+    ).toThrow('Every inputs.event.alertIds entry must be an object with string "_id" and "_index" properties.');
+  });
+
+  it(`throws 400 when alertIds exceeds MAX_ALERTS_PER_CASE entries`, () => {
+    const oversized = Array.from({ length: 1001 }, (_, i) => ({
+      _id: `alert-${i}`,
+      _index: '.alerts',
+    }));
+    expect(() =>
+      parseSelectedAlertPairs({ event: { alertIds: oversized } })
+    ).toThrow(/cannot contain more than/);
+  });
+
+  it('returns the correct pairs for a valid array', () => {
+    expect(
+      parseSelectedAlertPairs({
+        event: { alertIds: [{ _id: 'alert-1', _index: '.alerts-a' }, { _id: 'alert-2', _index: '.alerts-b' }] },
+      })
+    ).toEqual([
+      { _id: 'alert-1', _index: '.alerts-a' },
+      { _id: 'alert-2', _index: '.alerts-b' },
+    ]);
   });
 });

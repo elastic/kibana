@@ -12,6 +12,7 @@ import {
   ALERT_WORKFLOW_ORIGIN_TYPE,
   ALERTS_WORKFLOW_ORIGIN_TYPE,
   CASE_WORKFLOW_ORIGIN_TYPE,
+  MAX_ALERTS_PER_CASE,
   OBSERVABLE_WORKFLOW_ORIGIN_TYPE,
 } from '../../../common/constants';
 import type { Case } from '../../../common/types/domain';
@@ -20,29 +21,53 @@ const isRecord = (value: unknown): value is Record<string, unknown> => isPlainOb
 const getRecord = (value: unknown): Record<string, unknown> | undefined =>
   isRecord(value) ? value : undefined;
 
-interface AlertPair {
+export interface AlertPair {
   _id: string;
   _index: string;
 }
 
 /**
- * Reads the (id, index) pairs from `inputs.event.alertIds`. Both fields are
- * required: entries missing either value are silently dropped so they can
- * never accidentally match an attached pair.
+ * Reads the (id, index) pairs from `inputs.event.alertIds`.
+ *
+ * Malformed entries are rejected, never skipped. The pairs returned here are the ones
+ * `validateOrigin` checks for case membership, while alert preprocessing fetches from the *raw*
+ * `inputs.event.alertIds` array — so dropping an entry would let it escape the membership check
+ * and still be fetched and injected into the workflow event. A nullish `alertIds` is treated as
+ * "no alert inputs" to match how preprocessing decides whether to expand alerts at all.
  */
-export const getSelectedAlertPairs = (inputs: Record<string, unknown>): AlertPair[] => {
-  const event = getRecord(inputs.event);
-  if (!event || !Array.isArray(event.alertIds)) {
+export const parseSelectedAlertPairs = (inputs: Record<string, unknown>): AlertPair[] => {
+  const { alertIds } = getRecord(inputs.event) ?? {};
+
+  if (alertIds === undefined || alertIds === null) {
     return [];
   }
 
-  return event.alertIds
-    .map(getRecord)
-    .filter(
-      (alert): alert is Record<string, unknown> =>
-        alert !== undefined && typeof alert._id === 'string' && typeof alert._index === 'string'
-    )
-    .map((alert) => ({ _id: alert._id as string, _index: alert._index as string }));
+  if (!Array.isArray(alertIds)) {
+    throw Boom.badRequest('inputs.event.alertIds must be an array.');
+  }
+
+  // A selected alert must be attached to the case, and a case holds at most MAX_ALERTS_PER_CASE
+  // alerts, so anything larger cannot be legitimate — and would become an mget of that size.
+  if (alertIds.length > MAX_ALERTS_PER_CASE) {
+    throw Boom.badRequest(
+      `inputs.event.alertIds cannot contain more than ${MAX_ALERTS_PER_CASE} alerts.`
+    );
+  }
+
+  return alertIds.map((alert) => {
+    const record = getRecord(alert);
+    if (
+      record === undefined ||
+      typeof record._id !== 'string' ||
+      typeof record._index !== 'string'
+    ) {
+      throw Boom.badRequest(
+        'Every inputs.event.alertIds entry must be an object with string "_id" and "_index" properties.'
+      );
+    }
+
+    return { _id: record._id, _index: record._index };
+  });
 };
 
 /**
@@ -53,17 +78,21 @@ export const getSelectedAlertPairs = (inputs: Record<string, unknown>): AlertPai
  * The alert-membership check is enforced regardless of `origin.type` so callers
  * cannot bypass it by using a `cases.case` or `cases.observable` origin type while
  * still injecting arbitrary alert documents into the workflow via `inputs.event.alertIds`.
+ *
+ * `selectedAlerts` must come from `parseSelectedAlertPairs` — it is the only reader of
+ * `inputs.event.alertIds`, which keeps the validated set identical to the set that alert
+ * preprocessing later fetches.
  */
 export const validateOrigin = ({
   origin,
   caseId,
-  inputs,
+  selectedAlerts,
   theCase,
   attachedAlerts,
 }: {
   origin: CaseWorkflowRunOrigin;
   caseId: string;
-  inputs: Record<string, unknown>;
+  selectedAlerts: AlertPair[];
   theCase: Case;
   attachedAlerts: DocumentResponse;
 }): void => {
@@ -89,16 +118,17 @@ export const validateOrigin = ({
 
   // Step 2 — alert-membership check: applied whenever alertIds appear in inputs,
   // regardless of origin type, using (id, index) pairs for precise matching.
-  const selectedPairs = getSelectedAlertPairs(inputs);
-  if (selectedPairs.length > 0) {
+  // `selectedAlerts` comes from `parseSelectedAlertPairs` — the same parsed set that alert
+  // preprocessing will later fetch, so the validated set and the fetched set are identical.
+  if (selectedAlerts.length > 0) {
     const attachedPairs = new Set(attachedAlerts.map(({ id, index }) => `${id}|${index}`));
-    if (selectedPairs.some(({ _id, _index }) => !attachedPairs.has(`${_id}|${_index}`))) {
+    if (selectedAlerts.some(({ _id, _index }) => !attachedPairs.has(`${_id}|${_index}`))) {
       throw Boom.badRequest('All selected alerts must belong to the case.');
     }
     // For a single-alert origin the named alert must also be among the selected ones.
     if (
       origin.type === ALERT_WORKFLOW_ORIGIN_TYPE &&
-      !selectedPairs.some(({ _id }) => _id === origin.alertId)
+      !selectedAlerts.some(({ _id }) => _id === origin.alertId)
     ) {
       throw Boom.badRequest(`Alert workflow origin "${origin.alertId}" is not selected.`);
     }
