@@ -71,6 +71,7 @@ describe('DatastreamInitializer', () => {
       expect.objectContaining({
         template: expect.objectContaining({
           settings: expect.objectContaining({
+            'index.auto_expand_replicas': '0-1',
             'index.mapping.total_fields.limit': 2500,
             'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
             'index.lifecycle.prefer_ilm': false,

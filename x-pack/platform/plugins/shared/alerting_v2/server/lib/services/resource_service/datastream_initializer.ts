@@ -38,6 +38,9 @@ export class DatastreamInitializer implements IResourceInitializer {
         mappings: this.resourceDefinition.mappings,
         lifecycle: this.resourceDefinition.lifecycle,
         settings: {
+          // Drop the replica requirement on single-node clusters so backing
+          // indices don't leave the cluster health permanently yellow.
+          'index.auto_expand_replicas': '0-1',
           'index.mapping.total_fields.limit': TOTAL_FIELDS_LIMIT,
           'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
           'index.lifecycle.prefer_ilm': false,
