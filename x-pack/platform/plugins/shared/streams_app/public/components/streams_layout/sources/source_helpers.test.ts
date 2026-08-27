@@ -229,6 +229,30 @@ describe('source helpers', () => {
     }
   );
 
+  it.each([
+    ['otlp', 'source_scoped', {}],
+    ['async_bulk', 'source_scoped', {}],
+    [
+      'prometheus_remote_write',
+      'source_scoped',
+      { managedInputBaseUrl: 'https://cluster.ingest.elastic.cloud' },
+    ],
+    ['bulk', 'elasticsearch_ingest', {}],
+    ['es_otlp', 'elasticsearch_ingest', {}],
+    ['es_prometheus_remote_write', 'elasticsearch_ingest', {}],
+  ] as const)(
+    'marks %s unavailable when its required environment is missing',
+    (type, apiKeyStrategy, environment) => {
+      expect(
+        resolveSourceCapabilities({
+          type,
+          sourceId: 'source-id',
+          ...environment,
+        })
+      ).toMatchObject({ isAvailable: false, apiKeyStrategy, endpoint: undefined });
+    }
+  );
+
   it('enables managed Prometheus with the fully qualified feature capability', () => {
     expect(
       resolveSourceCapabilities({
