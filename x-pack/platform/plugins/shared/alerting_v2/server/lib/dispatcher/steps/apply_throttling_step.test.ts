@@ -6,16 +6,19 @@
  */
 
 import { ApplyThrottlingStep, applyThrottling } from './apply_throttling_step';
-import { createQueryService } from '../../services/query_service/query_service.mock';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
+import { createQueryService } from '../../services/query_service/query_service.mock';
 import { createLastNotifiedTimestampsResponse } from '../fixtures/dispatcher';
 import {
-  createAlertEpisode,
   createActionGroup,
   createActionPolicy,
+  createAlertEpisode,
   createDispatcherPipelineState,
+  createStepLogger,
 } from '../fixtures/test_utils';
 import type { ActionGroupId, LastNotifiedInfo } from '../types';
+
+const logger = createStepLogger();
 
 const NOW = new Date('2026-01-22T10:00:00.000Z');
 
@@ -464,13 +467,43 @@ describe('applyThrottling', () => {
       expect(throttled).toHaveLength(0);
     });
   });
+
+  describe('invalid throttle interval', () => {
+    it('warns once per policy however many groups it covers', () => {
+      const { loggerService, mockLogger } = createLoggerService();
+      const policy = createActionPolicy({
+        id: 'p1',
+        groupingMode: 'all',
+        throttle: { strategy: 'time_interval', interval: 'not-a-duration' },
+      });
+      const groups = ['g1', 'g2', 'g3'].map((id) => createActionGroup({ id, policyId: 'p1' }));
+
+      const { dispatch } = applyThrottling(
+        groups,
+        new Map([['p1', policy]]),
+        new Map<ActionGroupId, LastNotifiedInfo>(
+          groups.map((group) => [group.id, info('2026-01-22T09:30:00.000Z')])
+        ),
+        NOW,
+        loggerService
+      );
+
+      expect(dispatch).toHaveLength(3);
+      expect(mockLogger.warn).toHaveBeenCalledTimes(1);
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        'Action policy throttle interval is invalid',
+        expect.objectContaining({
+          labels: expect.objectContaining({ policy_id: 'p1' }),
+        })
+      );
+    });
+  });
 });
 
 describe('ApplyThrottlingStep', () => {
   it('issues multiple ES|QL requests and concatenates results when input exceeds the size budget', async () => {
     const { queryService, mockEsClient } = createQueryService();
-    const { loggerService } = createLoggerService();
-    const step = new ApplyThrottlingStep(queryService, loggerService);
+    const step = new ApplyThrottlingStep(queryService);
 
     const longSegment = 'q'.repeat(10_000);
     const groups = Array.from({ length: 200 }, (_, i) =>
@@ -497,7 +530,7 @@ describe('ApplyThrottlingStep', () => {
     });
 
     const state = createDispatcherPipelineState({ groups, policies });
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
     expect(mockEsClient.esql.query.mock.calls.length).toBeGreaterThanOrEqual(2);
     for (const [args] of mockEsClient.esql.query.mock.calls) {
@@ -513,10 +546,9 @@ describe('ApplyThrottlingStep', () => {
 
   it('returns empty dispatch and throttled when no groups', async () => {
     const { queryService, mockEsClient } = createQueryService();
-    const { loggerService } = createLoggerService();
-    const step = new ApplyThrottlingStep(queryService, loggerService);
+    const step = new ApplyThrottlingStep(queryService);
 
-    const result = await step.execute(createDispatcherPipelineState({ groups: [] }));
+    const result = await step.execute(createDispatcherPipelineState({ groups: [] }), logger);
 
     expect(mockEsClient.esql.query).not.toHaveBeenCalled();
     expect(result.type).toBe('continue');

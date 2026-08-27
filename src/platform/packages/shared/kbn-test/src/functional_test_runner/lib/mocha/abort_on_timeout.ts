@@ -8,13 +8,9 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
+import { isMochaTimeoutError } from '../../../mocha';
 import type { Lifecycle } from '../lifecycle';
 import type { Runner } from '../../fake_mocha_types';
-
-// Mocha's own `Runnable.constants.TIMEOUT` (see `createTimeoutError()` in mocha's `lib/errors.js`),
-// not exported on the public `mocha` API. Every genuine Mocha runnable timeout carries this code,
-// regardless of the error message.
-const MOCHA_TIMEOUT_ERROR_CODE = 'ERR_MOCHA_TIMEOUT';
 
 /**
  * On the first Mocha timeout (test or hook), abort the whole config run via
@@ -26,19 +22,17 @@ const MOCHA_TIMEOUT_ERROR_CODE = 'ERR_MOCHA_TIMEOUT';
  * via its own timer (`Runnable#resetTimeout`) without ever rejecting the runnable's
  * promise, so those lifecycle events never fire for timeouts.
  *
- * Detection relies on the error's `code` rather than its message: ordinary request
- * libraries (e.g. superagent, which underlies supertest) build their own timeout errors
- * with a message like "Timeout of 5000ms exceeded", which would be indistinguishable from
- * a real Mocha timeout if we matched on message text alone. Mocha's own timeout error is
- * always tagged with `MOCHA_TIMEOUT_ERROR_CODE`, so checking `err.code` avoids false
- * positives on ordinary (non-timeout) test failures.
+ * Detection relies on `isMochaTimeoutError` (the error's `code`) rather than its message:
+ * ordinary request libraries (e.g. superagent, which underlies supertest) build their own
+ * timeout errors with a message like "Timeout of 5000ms exceeded", which would be
+ * indistinguishable from a real Mocha timeout if we matched on message text alone.
  *
  * Ordinary (non-timeout) failures are left alone so Smart Retry's failing-test set
  * stays meaningful.
  */
 export function registerAbortOnTimeout(runner: Runner, lifecycle: Lifecycle, log: ToolingLog) {
   runner.on('fail', (_runnable: unknown, err: Error & { code?: string }) => {
-    if (lifecycle.isAborting || err?.code !== MOCHA_TIMEOUT_ERROR_CODE) {
+    if (lifecycle.isAborting || !isMochaTimeoutError(err)) {
       return;
     }
 

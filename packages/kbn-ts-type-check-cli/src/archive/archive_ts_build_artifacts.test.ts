@@ -8,12 +8,12 @@
  */
 
 import type { SomeDevLog } from '@kbn/some-dev-log';
-import globby from 'globby';
+import { globby } from 'globby';
 import { archiveTSBuildArtifacts } from './archive_ts_build_artifacts';
 import { LocalFileSystem } from './file_system/local_file_system';
 import { getPullRequestNumber, isCiEnvironment, resolveCurrentCommitSha } from './utils';
 
-jest.mock('globby', () => jest.fn());
+jest.mock('globby', () => ({ globby: jest.fn() }));
 
 jest.mock('./utils', () => ({
   getPullRequestNumber: jest.fn(),

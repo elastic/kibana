@@ -159,6 +159,7 @@ toc:
           - file: setup-scout.md
           - file: run-scout-tests.md
           - file: debugging.md
+          - file: logging.md
           - file: scout-best-practices.md
           - file: fixtures.md
           - file: page-objects.md

@@ -10,9 +10,9 @@ import type { FtrProviderContext } from './ftr_provider_context';
 
 export function SearchQueryRulesPageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
-  const find = getService('find');
   const comboBox = getService('comboBox');
   const browser = getService('browser');
+  const retry = getService('retry');
 
   return {
     QueryRulesEmptyPromptPage: {
@@ -95,10 +95,12 @@ export function SearchQueryRulesPageProvider({ getService }: FtrProviderContext)
     },
     QueryRulesDetailPage: {
       TEST_IDS: {
-        RULESET_DETAILS_PAGE_BACK_BUTTON: 'queryRulesetDetailBackButton',
+        // Migrated to the shared AppHeader: back button and title come from @kbn/app-header,
+        // and the "More" actions collapse into the AppMenu overflow popover.
+        RULESET_DETAILS_PAGE_BACK_BUTTON: 'appHeaderBack',
         RULESET_DETAILS_PAGE_SAVE_BUTTON: 'queryRulesetDetailHeaderSaveButton',
-        RULESET_DETAILS_PAGE_HEADER: 'queryRulesetDetailHeader',
-        RULESET_DETAILS_PAGE_ACTIONS_BUTTON: 'searchQueryRulesQueryRulesetActionsButton',
+        RULESET_DETAILS_PAGE_TITLE: 'appHeaderTitle',
+        RULESET_DETAILS_PAGE_ACTIONS_BUTTON: 'app-menu-overflow-button',
         RULESET_DETAILS_PAGE_DELETE_BUTTON: 'queryRulesetDetailDeleteButton',
         RULESET_RULES_CONTAINER: 'searchQueryRulesDroppable',
         RULESET_RULE_ITEM_NAME: 'searchQueryRulesDraggableItem',
@@ -107,13 +109,14 @@ export function SearchQueryRulesPageProvider({ getService }: FtrProviderContext)
         RULESET_RULE_ITEM_ACTIONS_EDIT_BUTTON: 'searchQueryRulesQueryRulesetDetailEditButton',
       },
       async expectQueryRulesDetailPageNavigated(name: string) {
-        const h1Element = await find.byCssSelector(
-          `main header[data-test-subj="${this.TEST_IDS.RULESET_DETAILS_PAGE_HEADER}"] h1`
-        );
-        const text = await h1Element.getVisibleText();
-        if (text !== name) {
-          throw new Error(`Expected page title to be "${name}" but got "${text}"`);
-        }
+        // The app header title exists on both the list and the detail page, so retry
+        // until navigation lands on the detail page and the title matches.
+        await retry.tryForTime(5000, async () => {
+          const text = await testSubjects.getVisibleText(this.TEST_IDS.RULESET_DETAILS_PAGE_TITLE);
+          if (text !== name) {
+            throw new Error(`Expected page title to be "${name}" but got "${text}"`);
+          }
+        });
       },
       async expectQueryRulesDetailPageBackButtonToExist() {
         await testSubjects.existOrFail(this.TEST_IDS.RULESET_DETAILS_PAGE_BACK_BUTTON);

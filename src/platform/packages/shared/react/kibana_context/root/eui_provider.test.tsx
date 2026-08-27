@@ -17,7 +17,6 @@ import { useEuiTheme, EuiProvider } from '@elastic/eui';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import type { KibanaTheme } from '@kbn/react-kibana-context-common';
-import { euiIncludeSelectorInFocusTrap } from '@kbn/core-chrome-layout-constants';
 
 import { KibanaEuiProvider } from './eui_provider';
 
@@ -115,7 +114,7 @@ describe('KibanaEuiProvider', () => {
       expect.objectContaining({
         componentDefaults: {
           EuiFlyout: {
-            includeSelectorInFocusTrap: euiIncludeSelectorInFocusTrap.selector,
+            includeSelectorInFocusTrap: '[data-eui-includes-in-flyout-focus-trap="true"]',
             container: '#app-main-scroll',
           },
           EuiPopover: {
