@@ -592,3 +592,27 @@ describe('noscript is not chrome', () => {
     expect(result).toBe('IOC: evil.test');
   });
 });
+
+/**
+ * CDATA is left opaque by article extraction so the type-aware parser downstream can honor the
+ * enclosing Atom `type`. Unwrapping it here turned a literal `type="text"` payload's
+ * `<script>` into a real raw-text element and chrome removal took the sentence with it.
+ */
+describe('CDATA stays opaque through article extraction', () => {
+  it('keeps a text-typed Atom construct literal end to end', () => {
+    const html =
+      '<summary type="text"><![CDATA[Exploit uses <script> and c2.evil.test]]></summary>';
+
+    expect(stripHtml(extractArticleHtml(html))).toBe('Exploit uses <script> and c2.evil.test');
+  });
+
+  it('still extracts a CDATA article body', () => {
+    expect(
+      stripHtml(
+        extractArticleHtml(
+          '<html><body><article><![CDATA[<p>IOC: evil.test</p>]]></article></body></html>'
+        )
+      )
+    ).toBe('IOC: evil.test');
+  });
+});

@@ -1821,6 +1821,8 @@ describe('Atom literal types with a CDATA payload', () => {
   it.each([
     ['an explicit text type', `<summary type="text">${CDATA}</summary>`],
     ['an omitted type', `<summary>${CDATA}</summary>`],
+    // CDATA is character data in XML, so it stays literal even inside an xhtml construct.
+    // The construct's *element* children are walked; see the xhtml suite below.
     ['an xhtml type', `<summary type="xhtml">${CDATA}</summary>`],
     ['a text-typed title', `<title type="text">${CDATA}</title>`],
   ])('keeps the payload literal for %s', (_label, html) => {
@@ -1859,5 +1861,91 @@ describe('Atom literal types with a CDATA payload', () => {
     ],
   ])('still parses CDATA as markup for %s', (_label, html, expected) => {
     expect(stripHtml(html)).toBe(expected);
+  });
+});
+
+/**
+ * Atom `type="xhtml"` content is inline markup, so its element subtree is walked. Treating it
+ * as literal text merged its block boundaries and emitted its script bodies, which both
+ * misses real indicators and manufactures false ones.
+ */
+describe('Atom xhtml content is walked as markup', () => {
+  const SCRIPT = "<script>fetch('https://false-ioc.test')</script>";
+  const XHTML = `<div><p>evil.com</p><p>bad.net</p>${SCRIPT}</div>`;
+
+  it('preserves block boundaries and drops script bodies', () => {
+    const result = stripHtml(`<summary type="xhtml">${XHTML}</summary>`);
+
+    expect(result).toBe('evil.com bad.net');
+    expect(result).not.toContain('false-ioc.test');
+  });
+
+  it('preserves structured boundaries', () => {
+    expect(
+      htmlToStructured('<summary type="xhtml"><div><p>evil.com</p><p>bad.net</p></div></summary>')
+    ).toBe('evil.com\nbad.net');
+  });
+
+  it('walks a media-typed xhtml content the same way', () => {
+    expect(stripHtml(`<content type="xhtml">${XHTML}</content>`)).toBe('evil.com bad.net');
+  });
+
+  // A CDATA child is character data per XML, so it is not parsed as HTML even here.
+  it('keeps a CDATA child literal inside an xhtml construct', () => {
+    expect(
+      stripHtml(
+        '<summary type="xhtml"><![CDATA[Exploit uses <script> and c2.evil.test]]></summary>'
+      )
+    ).toBe('Exploit uses <script> and c2.evil.test');
+  });
+});
+
+/**
+ * `content:encoded` is RSS and only qualifies with its namespace prefix. Matching the local
+ * name meant any ordinary unnamespaced `<encoded>` element had its literal text reparsed as
+ * live HTML, which is the same false-positive class as the speculative `value` entry.
+ */
+describe('encoded requires its namespace', () => {
+  it('leaves an unqualified encoded element literal', () => {
+    const result = stripHtml('<encoded>Exploit uses &lt;script&gt; and c2.evil.test</encoded>');
+
+    expect(result).toBe('Exploit uses <script> and c2.evil.test');
+    expect(result).toContain('c2.evil.test');
+  });
+
+  it('still expands the namespaced form', () => {
+    expect(stripHtml('<content:encoded>&lt;p&gt;evil.com&lt;/p&gt;</content:encoded>')).toBe(
+      'evil.com'
+    );
+  });
+});
+
+/**
+ * Wrapped encoded bodies are expanded per element during the walk, so the document-level gate
+ * must not parse that output again. It did, and a `<description>` holding an escaped `<code>`
+ * snippet came out empty while the identical snippet at top level was preserved.
+ */
+describe('already-expanded output is not parsed twice', () => {
+  it('keeps an escaped snippet displayed inside a wrapped body', () => {
+    const snippet = "fetch('https://c2.evil.test')";
+    const result = stripHtml(
+      `<description>&lt;code&gt;&amp;lt;script&amp;gt;${snippet}&amp;lt;/script&amp;gt;&lt;/code&gt;</description>`
+    );
+
+    expect(result).toBe("<script>fetch('https://c2.evil.test')</script>");
+    expect(result).toContain('c2.evil.test');
+  });
+
+  it('behaves the same as the top-level case', () => {
+    expect(
+      stripHtml("<code>&lt;script&gt;fetch('https://c2.evil.test')&lt;/script&gt;</code>")
+    ).toBe("<script>fetch('https://c2.evil.test')</script>");
+  });
+
+  // The bare-input path still needs the closing-tag signal.
+  it('still expands a bare encoded document', () => {
+    expect(stripHtml('&lt;script&gt;fetch("https://false-ioc.test")&lt;/script&gt;safe')).toBe(
+      'safe'
+    );
   });
 });

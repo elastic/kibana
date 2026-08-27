@@ -6,13 +6,7 @@
  */
 
 import * as cheerio from 'cheerio';
-import {
-  capToParseBytes,
-  normalizeSelfClosedRawText,
-  PARSER_OPTIONS,
-  stripHtml,
-  unwrapCdata,
-} from './text';
+import { capToParseBytes, normalizeSelfClosedRawText, PARSER_OPTIONS, stripHtml } from './text';
 
 /**
  * Strip known page chrome (nav/header/footer/sidebar) from raw vendor HTML,
@@ -224,13 +218,12 @@ const selectArticleHtml = (html: string): string => {
   // `<article><script src="x.js"/><p>IOC: evil.test</p></article>` as a script whose body
   // is that paragraph. Chrome removal then deleted the script and the report with it,
   // leaving `<article></article>`. XHTML-style feeds write this form legitimately.
-  // CDATA is unwrapped before the parse, not handled after it. Selectors cannot see inside
-  // a CDATA node, so chrome removal missed a `<script>` bundle carried that way while the
-  // scoring walk still counted its bytes as visible text: a teaser whose CDATA held a large
-  // bundle outscored the real report, won selection, and then collapsed to nothing once
-  // `stripHtml` expanded the CDATA and dropped the script. Unwrapping first means both see
-  // the same document the downstream stage will.
-  const $ = cheerio.load(normalizeSelfClosedRawText(unwrapCdata(html)), PARSER_OPTIONS);
+  // CDATA is left opaque. Unwrapping it here destroyed literal Atom text before the
+  // type-aware parser downstream could honor it: a `type="text"` construct carrying CDATA had
+  // its `<script>` turned into a real raw-text element and chrome removal took the rest of the
+  // sentence with it. The reason the pre-pass existed, keeping candidate scoring honest about
+  // markup that disappears later, no longer applies, because scoring calls `stripHtml`.
+  const $ = cheerio.load(normalizeSelfClosedRawText(html), PARSER_OPTIONS);
 
   // The one cast in this file, at the boundary where the transitive `@types/cheerio@0.22`
   // stops describing the DOM the installed cheerio actually returns.
