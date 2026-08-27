@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
-
 const HOUR_MS = 60 * 60 * 1000;
 const DAY_MS = 24 * HOUR_MS;
 
 /**
- * Keep generated dashboard defaults focused and cheap to render.
+ * Cap for generated default time ranges so they stay focused and cheap to render.
  *
  * Data newer than this is shown relative to `now`; older data gets an absolute
  * range anchored to the dataset's newest timestamp.
@@ -41,8 +39,11 @@ export interface DatasetTimeRange {
   maxMs: number;
 }
 
-/** A dashboard time range, shaped to the attachment schema's `time_range`. */
-type SelectedTimeRange = NonNullable<DashboardAttachmentData['time_range']>;
+export interface SelectedTimeRange {
+  from: string;
+  to: string;
+  mode?: 'relative' | 'absolute';
+}
 
 interface SelectedWindow {
   fromMs: number;
@@ -123,8 +124,8 @@ const renderTimeRange = (window: SelectedWindow, nowMs: number): SelectedTimeRan
 };
 
 /**
- * Pick a data-aware default dashboard time range from the probed datasets, or
- * `undefined` when none of them hold data (caller keeps today's default).
+ * Pick a data-aware default time range from the probed datasets, or
+ * `undefined` when none of them hold data (caller leaves the surface unset).
  */
 export const selectTimeRange = (
   datasets: DatasetTimeRange[],

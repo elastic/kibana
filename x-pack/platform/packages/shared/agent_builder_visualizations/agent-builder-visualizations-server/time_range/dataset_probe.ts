@@ -8,59 +8,14 @@
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import { getIndexPatternFromESQLQuery, parseTimeFieldFromESQLQuery } from '@kbn/esql-utils';
-import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
-import { getEsqlDataSourceCarriers } from '@kbn/agent-builder-visualizations-server';
-import { isSection, type DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
-import { getErrorMessage } from '../core';
 import type { DatasetTimeRange } from './select_time_range';
 
 const DEFAULT_TIME_FIELD = '@timestamp';
 /** Shared log prefix for the default-time-range step. */
 export const LOG_PREFIX = '[default-time-range]';
 
-/**
- * Extract ES|QL queries from every `data_source` carrier in a Lens config.
- *
- * Some Lens configs store the query on the root config, while layered charts
- * store one query per layer.
- */
-const getEsqlQueriesFromConfig = (config: unknown): string[] => {
-  const queries: string[] = [];
-  for (const { data_source: dataSource } of getEsqlDataSourceCarriers(config)) {
-    if (dataSource?.type === 'esql' && dataSource.query) {
-      queries.push(dataSource.query);
-    }
-  }
-  return queries;
-};
-
-/**
- * Distinct ES|QL queries backing the dashboard's Lens panels, including panels
- * nested inside sections. Markdown and any non-ES|QL Lens panels carry no query
- * and are ignored.
- */
-export const extractEsqlQueries = (panels: DashboardAttachmentData['panels']): string[] => {
-  const queries = new Set<string>();
-  const collect = (config: unknown) => {
-    for (const query of getEsqlQueriesFromConfig(config)) {
-      queries.add(query);
-    }
-  };
-
-  for (const widget of panels) {
-    if (isSection(widget)) {
-      for (const panel of widget.panels) {
-        if (panel.type === LENS_EMBEDDABLE_TYPE) {
-          collect(panel.config);
-        }
-      }
-    } else if (widget.type === LENS_EMBEDDABLE_TYPE) {
-      collect(widget.config);
-    }
-  }
-
-  return [...queries];
-};
+const getErrorMessage = (error: unknown): string =>
+  error instanceof Error ? error.message : String(error);
 
 interface ResolvedDataset {
   index: string;
@@ -82,7 +37,7 @@ const indexHasTimestamp = async (
 };
 
 /**
- * Resolve the time field used for the dashboard-level time range.
+ * Resolve the time field used for the default time range.
  *
  * Prefer the field referenced by `?_tstart` / `?_tend` in the ES|QL query. If the
  * query has no explicit time-bound field, fall back to `@timestamp` when the
@@ -158,7 +113,7 @@ export const probeDatasetTimeRanges = async ({
     queries.map((query) =>
       resolveDataset(esClient, query, projectRouting).catch((error) => {
         logger.debug(
-          `${LOG_PREFIX} could not resolve a time field; skipping that panel: ${getErrorMessage(
+          `${LOG_PREFIX} could not resolve a time field; skipping that query: ${getErrorMessage(
             error
           )}`
         );
