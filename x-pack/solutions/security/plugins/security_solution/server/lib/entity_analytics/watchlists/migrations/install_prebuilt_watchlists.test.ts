@@ -392,4 +392,18 @@ describe('installPrebuiltWatchlists', function () {
     const names = getPrebuiltWatchlists('default').map((w) => w.name);
     expect(new Set(names).size).toBe(names.length);
   });
+
+  it('registers an index template for .entity_analytics.watchlists.*', async () => {
+    mockSoClient.find.mockResolvedValue(buildEmptySpacesResponse());
+    mockWatchlistGet.mockRejectedValue(new Error('not found'));
+
+    await callInstall();
+
+    expect(mockEsClient.indices.putIndexTemplate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'entity_analytics_watchlists',
+        index_patterns: ['.entity_analytics.watchlists.*'],
+      })
+    );
+  });
 });
