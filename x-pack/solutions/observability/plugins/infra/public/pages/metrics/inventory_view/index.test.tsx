@@ -13,12 +13,54 @@ import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { SnapshotPage } from '.';
 import { inventoryTitle } from '../../../translations';
 
+type MockFetchStatus = 'loading' | 'success' | 'failure' | 'not_initiated' | 'pending';
+
+const mockFetcherState: { hasData: boolean; status: MockFetchStatus } = {
+  hasData: true,
+  status: 'success',
+};
+
 jest.mock('@kbn/observability-shared-plugin/public', () => ({
   useTrackPageview: jest.fn(),
 }));
 
 jest.mock('../../../hooks/use_metrics_breadcrumbs', () => ({
   useMetricsBreadcrumbs: jest.fn(),
+}));
+
+jest.mock('../../../hooks/use_fetcher', () => ({
+  FETCH_STATUS: {
+    LOADING: 'loading',
+    SUCCESS: 'success',
+    FAILURE: 'failure',
+    NOT_INITIATED: 'not_initiated',
+    PENDING: 'pending',
+  },
+  isPending: (status: string) =>
+    status === 'loading' || status === 'not_initiated' || status === 'pending',
+  useFetcher: () => ({
+    data: { hasData: mockFetcherState.hasData },
+    status: mockFetcherState.status,
+  }),
+}));
+
+jest.mock('../../../hooks/use_kibana', () => ({
+  useKibanaContextForPlugin: () => ({
+    services: {
+      share: {
+        url: {
+          locators: {
+            get: () => ({ getRedirectUrl: () => '/app/observabilityOnboarding' }),
+          },
+        },
+      },
+      docLinks: { links: { observability: { guide: 'https://docs.elastic.co' } } },
+    },
+  }),
+}));
+
+jest.mock('@kbn/shared-ux-page-no-data', () => ({
+  NoDataPage: () => <div data-test-subj="kbnNoDataPage" />,
 }));
 
 jest.mock('../../../components/shared/templates/infra_page_template', () => ({
@@ -58,20 +100,55 @@ jest.mock('../header/use_metrics_app_header_menu', () => ({
   }),
 }));
 
+const renderSnapshotPage = () =>
+  render(
+    <EuiProvider>
+      <MockAppHeaderProvider>
+        <SnapshotPage />
+      </MockAppHeaderProvider>
+    </EuiProvider>
+  );
+
 describe('SnapshotPage', () => {
-  it('renders AppHeader with the inventory title and no back control', async () => {
-    render(
-      <EuiProvider>
-        <MockAppHeaderProvider>
-          <SnapshotPage />
-        </MockAppHeaderProvider>
-      </EuiProvider>
-    );
+  beforeEach(() => {
+    mockFetcherState.hasData = true;
+    mockFetcherState.status = 'success';
+  });
+
+  it('renders AppHeader with the inventory title and no back control when metrics exist', async () => {
+    renderSnapshotPage();
 
     expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
       inventoryTitle
     );
     expect(screen.queryByTestId(APP_HEADER_TEST_SUBJECTS.back)).not.toBeInTheDocument();
+    expect(screen.getByTestId('inventorySnapshotContainer')).toBeInTheDocument();
+    expect(screen.queryByTestId('kbnNoDataPage')).not.toBeInTheDocument();
+  });
+
+  it('keeps AppHeader and shows onboarding instead of the waffle when there is no metrics data', async () => {
+    mockFetcherState.hasData = false;
+
+    renderSnapshotPage();
+
+    expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+      inventoryTitle
+    );
+    expect(screen.queryByTestId(APP_HEADER_TEST_SUBJECTS.back)).not.toBeInTheDocument();
+    expect(screen.getByTestId('kbnNoDataPage')).toBeInTheDocument();
+    expect(screen.queryByTestId('inventorySnapshotContainer')).not.toBeInTheDocument();
+  });
+
+  it('does not show onboarding while metrics data is loading', async () => {
+    mockFetcherState.hasData = false;
+    mockFetcherState.status = 'loading';
+
+    renderSnapshotPage();
+
+    expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+      inventoryTitle
+    );
+    expect(screen.queryByTestId('kbnNoDataPage')).not.toBeInTheDocument();
     expect(screen.getByTestId('inventorySnapshotContainer')).toBeInTheDocument();
   });
 });
