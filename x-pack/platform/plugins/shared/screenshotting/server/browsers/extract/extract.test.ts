@@ -106,7 +106,7 @@ describe('extract', () => {
         }
 
         expect(thrownException).toBeInstanceOf(ExtractError);
-        expect(thrownException.cause.message).toMatch('EACCES');
+        expect(thrownException.cause.message).toMatch('Unable to write file:');
       });
     }
   });

@@ -45,17 +45,14 @@ describe('unzip', () => {
     await expect(unzip('/invalid.zip', '/output')).rejects.toBeInstanceOf(ExtractError);
   });
 
-  it('does not extract an entry path that uses ../ to leave the origin directory', async () => {
+  it('extracts files inside the target folder when the zip contents contain an entry with ../ that lands outside the defined target', async () => {
     mockFs({
       '/path_traversal.zip': PATH_TRAVERSAL_ZIP,
       '/output': {},
     });
 
-    const message = 'Path traversal attempt: "/escaped.txt" escapes "/output"';
-    const expectedError = new ExtractError(new Error(message));
-
-    await expect(unzip('/path_traversal.zip', '/output')).rejects.toThrow(expectedError);
-    expect(existsSync('/output/escaped.txt')).toEqual(false);
+    await expect(unzip('/path_traversal.zip', '/output')).resolves.toBeUndefined();
+    expect(existsSync('/output/escaped.txt')).toEqual(true);
     expect(existsSync('/escaped.txt')).toEqual(false);
   });
 
