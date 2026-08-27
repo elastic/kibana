@@ -50,6 +50,7 @@ import type {
   DuplicateExceptionListResponse,
 } from './duplicate_exception_list/duplicate_exception_list.gen';
 import type { ExportExceptionListRequestQueryInput } from './export_exception_list/export_exception_list.gen';
+import type { ExportExceptionListsRequestQueryInput } from './export_exception_lists/export_exception_lists.gen';
 import type {
   FindExceptionListItemsRequestQueryInput,
   FindExceptionListItemsResponse,
@@ -243,6 +244,23 @@ an exception list that no longer exists.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+   * Returns a streaming NDJSON file with list records, item records, and a summary footer.
+   */
+  async exportExceptionLists(props: ExportExceptionListsProps) {
+    this.log.info(`${new Date().toISOString()} Calling API ExportExceptionLists`);
+    return this.kbnClient
+      .request({
+        path: '/api/exception_lists/_bulk_export',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+
+        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
    * Get a list of all exception list items in the specified list.
    */
   async findExceptionListItems(props: FindExceptionListItemsProps) {
@@ -402,6 +420,9 @@ export interface DuplicateExceptionListProps {
 }
 export interface ExportExceptionListProps {
   query: ExportExceptionListRequestQueryInput;
+}
+export interface ExportExceptionListsProps {
+  query: ExportExceptionListsRequestQueryInput;
 }
 export interface FindExceptionListItemsProps {
   query: FindExceptionListItemsRequestQueryInput;
