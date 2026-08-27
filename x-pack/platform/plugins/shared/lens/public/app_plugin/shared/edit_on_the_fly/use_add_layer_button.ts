@@ -9,7 +9,6 @@ import type { ReactElement } from 'react';
 import { useCallback, useMemo } from 'react';
 
 import type { CoreStart } from '@kbn/core/public';
-import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { AddLayerFunction, FramePublicAPI } from '@kbn/lens-common';
 
 import type { LensPluginStartDependencies } from '../../../plugin';
@@ -36,7 +35,7 @@ export const useAddLayerButton = (
   setIsInlineFlyoutVisible: (flag: boolean) => void
 ): ReactElement | null => {
   const { visualizationMap } = useEditorFrameService();
-  const { visualization, datasourceStates, query } = useLensSelector((state) => state.lens);
+  const { visualization, datasourceStates } = useLensSelector((state) => state.lens);
   const dispatchLens = useLensDispatch();
 
   const activeVisualization = visualization.activeId
@@ -74,13 +73,7 @@ export const useAddLayerButton = (
     LayerPanelProps['registerLibraryAnnotationGroup']
   >((groupInfo) => dispatchLens(registerLibraryAnnotationGroup(groupInfo)), [dispatchLens]);
 
-  const hideAddLayerButton = query && isOfAggregateQueryType(query);
-
   return useMemo(() => {
-    if (hideAddLayerButton) {
-      return null;
-    }
-
     return (
       activeVisualization?.getAddLayerButtonComponent?.({
         state: visualization.state,
@@ -129,7 +122,6 @@ export const useAddLayerButton = (
     addLayer,
     datasourceStates,
     dispatchLens,
-    hideAddLayerButton,
     indexPatternService,
     dataViews,
     framePublicAPI,

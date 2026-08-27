@@ -187,7 +187,10 @@ export function convertFormBasedToTextBasedLayer({
   datasourceStates,
   framePublicAPI,
 }: ConvertToEsqlParams): TypedLensSerializedState['attributes'] | undefined {
-  if (layersToConvert.length === 0) {
+  const validLayersToConvert = layersToConvert.filter(
+    (layer) => layer.type === 'data' && layer.isConvertibleToEsql && layer.query.trim().length > 0
+  );
+  if (validLayersToConvert.length === 0) {
     return undefined;
   }
 
@@ -197,7 +200,7 @@ export function convertFormBasedToTextBasedLayer({
   }
 
   const newDatasourceState = buildTextBasedState(
-    layersToConvert,
+    validLayersToConvert,
     formBasedState.layers,
     framePublicAPI
   );
@@ -207,21 +210,30 @@ export function convertFormBasedToTextBasedLayer({
   }
 
   // Get the ES|QL query from the first converted layer
-  const firstLayerId = layersToConvert[0].id;
+  const firstLayerId = validLayersToConvert[0].id;
   const esqlQuery = newDatasourceState.layers[firstLayerId]?.query;
 
-  if (!esqlQuery) {
+  if (!esqlQuery?.esql.trim()) {
     return undefined;
   }
 
-  // Build new attributes with textBased datasource
-  // Keep visualization state unchanged - original column IDs are preserved in the text-based layer
+  const convertedLayerIds = new Set(validLayersToConvert.map(({ id }) => id));
+  const remainingFormBasedLayers = Object.fromEntries(
+    Object.entries(formBasedState.layers).filter(([id]) => !convertedLayerIds.has(id))
+  );
+  const hasRemainingFormBasedLayers = Object.keys(remainingFormBasedLayers).length > 0;
+
+  // Build new attributes with converted layers in the text-based datasource and preserve
+  // non-data or unsupported layers in the form-based datasource.
   const newAttributes: TypedLensSerializedState['attributes'] = {
     ...attributes,
     state: {
       ...attributes.state,
       query: { esql: esql(esqlQuery.esql).print('wrapping') },
       datasourceStates: {
+        ...(hasRemainingFormBasedLayers
+          ? { formBased: { ...formBasedState, layers: remainingFormBasedLayers } }
+          : {}),
         textBased: newDatasourceState,
       },
       visualization: visualizationState,

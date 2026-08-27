@@ -103,6 +103,13 @@ export const metricTrendlineFunction = (): TrendlineExpressionFunctionDefinition
 
     const trends: Record<string, MetricWTrend['trend']> = {};
 
+    // ES|QL returns date strings while esaggs returns epoch ms — normalize to numbers
+    const toEpochMs = (val: unknown): number => {
+      if (typeof val === 'number') return val;
+      if (typeof val === 'string') return new Date(val).getTime();
+      return NaN;
+    };
+
     if (!args.breakdownBy) {
       trends[DEFAULT_TRENDLINE_NAME] = table.rows.map((row) => ({
         x: toEpochMs(row[timeColId]),
@@ -127,7 +134,7 @@ export const metricTrendlineFunction = (): TrendlineExpressionFunctionDefinition
       for (const breakdownTerm in rowsByBreakdown) {
         if (!Object.hasOwn(rowsByBreakdown, breakdownTerm)) continue;
         trends[breakdownTerm] = rowsByBreakdown[breakdownTerm].map((row) => ({
-          x: toEpochMs(row[timeColId]),
+          x: row[timeColId] !== null ? toEpochMs(row[timeColId]) : NaN,
           y: row[metricColId] !== null ? row[metricColId] : NaN,
         }));
       }

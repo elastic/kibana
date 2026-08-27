@@ -25,6 +25,9 @@ export const lensLayerTypeTabDisplayNames = {
   metricTrendline: i18n.translate('xpack.lens.layerTypes.tabDisplayName.metricTrendline', {
     defaultMessage: 'Metric trendline',
   }),
+  esql: i18n.translate('xpack.lens.layerTypes.tabDisplayName.esql', {
+    defaultMessage: 'ES|QL layer',
+  }),
   unknown: i18n.translate('xpack.lens.layerTypes.tabDisplayName.unknown', {
     defaultMessage: 'Unknown layer',
   }),

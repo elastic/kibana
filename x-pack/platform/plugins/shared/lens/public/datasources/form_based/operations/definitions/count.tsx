@@ -184,12 +184,18 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
     if (column.params?.emptyAsNull === false || column.timeShift) return;
 
     const field = indexPattern.getFieldByName(column.sourceField);
+    let esqlTemplate;
     if (!field || field?.type === 'document') {
-      return { template: 'COUNT(*)' };
+      esqlTemplate = { template: 'COUNT(*)' };
+    } else {
+      esqlTemplate = { template: `COUNT(${esql.col(field.name)})` };
     }
-    return {
-      template: `COUNT(${esql.col(field.name)})`,
-    };
+    if (column.filter) {
+      if (column.filter.language === 'kquery') return undefined;
+      return undefined; // esql += ` WHERE QSTR("${sanitazeESQLInput(column.filter.query)}")`;
+    }
+
+    return esqlTemplate;
   },
   toEsAggsFn: (column, columnId, indexPattern) => {
     const field = indexPattern.getFieldByName(column.sourceField);

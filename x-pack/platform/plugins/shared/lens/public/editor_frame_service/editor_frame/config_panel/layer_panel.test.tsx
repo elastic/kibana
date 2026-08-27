@@ -40,6 +40,10 @@ import { onActiveDataChange } from '../../../state_management';
 
 jest.mock('../../../id_generator');
 
+jest.mock('@kbn/esql/public', () => ({
+  ESQLLangEditor: () => <div data-test-subj="mockESQLLangEditor" />,
+}));
+
 jest.mock('@kbn/kibana-utils-plugin/public', () => {
   const original = jest.requireActual('@kbn/kibana-utils-plugin/public');
   return {
@@ -93,6 +97,9 @@ describe('LayerPanel', () => {
   let mockVisualization: jest.Mocked<Visualization>;
 
   let mockDatasource = createMockDatasource('formBased');
+  let mockTextBasedDatasource = createMockDatasource('textBased', {
+    isTextBasedLanguage: jest.fn(() => true),
+  });
 
   function getDefaultProps(): LayerPanelProps {
     return {
@@ -148,6 +155,7 @@ describe('LayerPanel', () => {
               }}
               datasourceMap={{
                 formBased: mockDatasource,
+                textBased: mockTextBasedDatasource,
               }}
             >
               {children}
@@ -168,6 +176,9 @@ describe('LayerPanel', () => {
     mockVisualization = createMockVisualization(faker.string.alphanumeric());
     mockVisualization.getLayerIds.mockReturnValue(['first']);
     mockDatasource = createMockDatasource();
+    mockTextBasedDatasource = createMockDatasource('textBased', {
+      isTextBasedLanguage: jest.fn(() => true),
+    });
   });
 
   afterEach(() => {
@@ -1123,6 +1134,56 @@ describe('LayerPanel', () => {
       const droppable = within(dimensionGroups[1]).getAllByTestId('lnsDragDrop-domDroppable')[0];
       fireEvent.dragOver(droppable);
       fireEvent.drop(droppable);
+    });
+  });
+
+  describe('ES|QL editor visibility', () => {
+    const esqlQuery = { esql: 'FROM test-index | LIMIT 10' };
+
+    const makeMixedDatasourceFrameAPI = (): FramePublicAPI => ({
+      ...createMockFramePublicAPI(),
+      datasourceLayers: {
+        data: mockTextBasedDatasource.publicAPIMock,
+        annotation: mockDatasource.publicAPIMock,
+      },
+    });
+
+    const mixedDatasourceState: Partial<LensAppState> = {
+      query: esqlQuery,
+      datasourceStates: {
+        textBased: {
+          isLoading: false,
+          state: { layers: { data: { query: esqlQuery } } },
+        },
+        formBased: {
+          isLoading: false,
+          state: { layers: { annotation: {} } },
+        },
+      },
+    };
+
+    it('renders the editor for the selected text-based layer', () => {
+      renderLayerPanel({
+        propsOverrides: {
+          layerId: 'data',
+          framePublicAPI: makeMixedDatasourceFrameAPI(),
+        },
+        preloadedState: mixedDatasourceState,
+      });
+
+      expect(screen.getByTestId('mockESQLLangEditor')).toBeInTheDocument();
+    });
+
+    it('does not render the editor for a selected static annotation layer', () => {
+      renderLayerPanel({
+        propsOverrides: {
+          layerId: 'annotation',
+          framePublicAPI: makeMixedDatasourceFrameAPI(),
+        },
+        preloadedState: mixedDatasourceState,
+      });
+
+      expect(screen.queryByTestId('mockESQLLangEditor')).not.toBeInTheDocument();
     });
   });
 
