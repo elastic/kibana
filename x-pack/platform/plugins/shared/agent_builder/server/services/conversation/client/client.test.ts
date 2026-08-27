@@ -363,7 +363,7 @@ describe('ConversationClient', () => {
 
     // --- pagination ---
 
-    it('sends from=0, size=50, descending sort, and track_total_hits=10000 by default', async () => {
+    it('sends from=0, size=1000, descending sort, and track_total_hits=10000 by default', async () => {
       mockEsClient.search.mockResolvedValue({
         hits: { hits: [], total: { value: 0, relation: 'eq' } },
       });
@@ -373,7 +373,7 @@ describe('ConversationClient', () => {
       expect(mockEsClient.search).toHaveBeenCalledWith(
         expect.objectContaining({
           from: 0,
-          size: 50,
+          size: 1000,
           sort: [{ updated_at: { order: 'desc' } }, { created_at: { order: 'desc' } }],
           track_total_hits: 10_000,
         })

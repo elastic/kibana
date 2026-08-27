@@ -7,10 +7,12 @@
 
 import { useMemo } from 'react';
 import { useInfiniteQuery } from '@kbn/react-query';
-import { MAX_CONVERSATIONS_PER_PAGE, MAX_RESULT_WINDOW } from '../../../common/constants';
+import { MAX_RESULT_WINDOW } from '../../../common/constants';
 import type { ListConversationsResponseItem } from '../../../common/http_api/conversations';
 import { queryKeys } from '../query_keys';
 import { useAgentBuilderServices } from './use_agent_builder_service';
+
+const DEFAULT_CONVERSATIONS_PAGE_SIZE = 50;
 
 /**
  * Deduplicates an array of conversations by id, keeping the first occurrence.
@@ -58,7 +60,7 @@ export const useConversationList = ({
         agentId,
         pinned,
         page: pageParam ?? 1,
-        perPage: perPage ?? MAX_CONVERSATIONS_PER_PAGE,
+        perPage: perPage ?? DEFAULT_CONVERSATIONS_PAGE_SIZE,
       }),
     getNextPageParam: (lastPage) => {
       const { page, per_page: pp, total } = lastPage.pagination;

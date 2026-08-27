@@ -10,7 +10,7 @@ responses:
               pagination:
                 total: 128
                 page: 1
-                per_page: 50
+                per_page: 1000
               results:
               - id: bcc176c5-38f6-40be-be0c-898e34fa1480
                 agent_id: elastic-ai-agent
@@ -28,7 +28,7 @@ responses:
               pagination:
                 total: 3
                 page: 1
-                per_page: 50
+                per_page: 1000
               results:
               - id: a1b2c3d4-1234-5678-abcd-000000000001
                 agent_id: elastic-ai-agent
@@ -45,7 +45,7 @@ x-codeSamples:
 - lang: curl
   source: |
     curl \
-      -X GET "${KIBANA_URL}/api/agent_builder/conversations?page=1&per_page=50&sort_order=desc" \
+      -X GET "${KIBANA_URL}/api/agent_builder/conversations?page=1&sort_order=desc" \
       -H "Authorization: ApiKey ${API_KEY}" \
       -H "elastic-api-version: 2023-10-31"
 - lang: curl
@@ -57,4 +57,4 @@ x-codeSamples:
       -H "elastic-api-version: 2023-10-31"
 - lang: Console
   source: |
-    GET kbn://api/agent_builder/conversations?page=1&per_page=50&sort_order=desc
+    GET kbn://api/agent_builder/conversations?page=1&sort_order=desc

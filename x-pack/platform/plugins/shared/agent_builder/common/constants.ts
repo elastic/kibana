@@ -15,7 +15,7 @@ export const AGENTBUILDER_PLUGIN_ID = 'agentBuilder';
 export const PREFERRED_DEFAULT_CONNECTOR_ID = 'Anthropic-Claude-Sonnet-4-5';
 
 /** Maximum number of conversations returned per page. Also the default. */
-export const MAX_CONVERSATIONS_PER_PAGE = 50;
+export const MAX_CONVERSATIONS_PER_PAGE = 1000;
 
 /**
  * ES default `index.max_result_window`. Conversations beyond this offset are

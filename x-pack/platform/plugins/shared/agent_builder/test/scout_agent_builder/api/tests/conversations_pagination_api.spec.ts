@@ -143,7 +143,7 @@ apiTest.describe(
     apiTest('per_page exceeding the maximum returns 400', async ({ asAdmin }) => {
       const res = await asAdmin.get(
         `${CONVERSATIONS_PATH}?${new URLSearchParams({
-          per_page: '999',
+          per_page: String(MAX_CONVERSATIONS_PER_PAGE + 1),
         })}`,
         { responseType: 'json' }
       );
@@ -215,8 +215,7 @@ apiTest.describe(
     );
 
     apiTest('page * per_page exceeding MAX_RESULT_WINDOW returns 400', async ({ asAdmin }) => {
-      // MAX_RESULT_WINDOW = 10_000; page=200 * per_page=51 = 10_200 > 10_000.
-      // per_page is capped at 50 by the API, so use per_page=50 and page=201.
+      // MAX_RESULT_WINDOW = 10_000; page=201 * per_page=50 = 10_050 > 10_000.
       const res = await asAdmin.get(
         `${CONVERSATIONS_PATH}?${new URLSearchParams({
           per_page: '50',
