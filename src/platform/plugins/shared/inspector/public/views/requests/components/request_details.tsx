@@ -10,7 +10,9 @@
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiTab, EuiTabs } from '@elastic/eui';
-import type { DetailViewData } from './types';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useIsCpsMultiProject } from '@kbn/cps-utils';
+import type { DetailViewData, InspectorKibanaServices } from './types';
 import { getNextTab } from './get_next_tab';
 import type { Request } from '../../../../common/adapters/request/types';
 
@@ -42,6 +44,13 @@ const DETAILS: DetailViewData[] = [
     component: ClustersView,
   },
   {
+    name: 'Projects',
+    label: i18n.translate('inspector.requests.projectsTabLabel', {
+      defaultMessage: 'Projects',
+    }),
+    component: ClustersView,
+  },
+  {
     name: 'Request',
     label: i18n.translate('inspector.requests.requestTabLabel', {
       defaultMessage: 'Request',
@@ -60,11 +69,18 @@ const DETAILS: DetailViewData[] = [
 export function RequestDetails(props: Props) {
   const [availableDetails, setAvailableDetails] = useState<DetailViewData[]>([]);
   const [selectedDetail, setSelectedDetail] = useState<DetailViewData | null>(null);
+  const { services } = useKibana<InspectorKibanaServices>();
+  // undefined while CPS is still loading; only a definitive `true` swaps the tabs
+  const isCpsMultiProject = useIsCpsMultiProject(services.cpsManager) === true;
 
   useEffect(() => {
-    const nextAvailableDetails = DETAILS.filter((detail: DetailViewData) =>
-      detail.component.shouldShow?.(props.request)
-    );
+    const nextAvailableDetails = DETAILS.filter((detail: DetailViewData) => {
+      // "Projects" replaces "Clusters and shards" when the deployment has linked CPS projects
+      if (detail.name === (isCpsMultiProject ? 'Clusters' : 'Projects')) {
+        return false;
+      }
+      return detail.component.shouldShow?.(props.request);
+    });
     setAvailableDetails(nextAvailableDetails);
 
     // If the previously selected detail is still available we want to stay
@@ -77,7 +93,7 @@ export function RequestDetails(props: Props) {
 
     // do not re-run on selectedDetail change
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [props.initialTabs, props.request]);
+  }, [props.initialTabs, props.request, isCpsMultiProject]);
 
   return selectedDetail ? (
     <>
