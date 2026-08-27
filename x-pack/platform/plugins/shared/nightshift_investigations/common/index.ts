@@ -14,6 +14,17 @@ export interface InvestigationSubject {
   id: string;
 }
 
+/**
+ * What started an investigation, derived server-side from the workflow inputs persisted at start
+ * time. Never model-generated. `summary` is a brief description of the trigger; `url` is a
+ * relative Kibana app path (consumers prepend the basePath) that opens the trigger item.
+ */
+export interface InvestigationTrigger {
+  type: InvestigationSubjectType;
+  summary?: string;
+  url?: string;
+}
+
 export interface InvestigationContext {
   [key: string]: unknown;
 }
@@ -55,6 +66,7 @@ export type InvestigationStatus = (typeof INVESTIGATION_STATUSES)[number];
 export interface GetInvestigationResponse {
   investigation_id: string;
   subject: InvestigationSubject;
+  trigger: InvestigationTrigger;
   status: InvestigationStatus;
   started_at?: string;
   completed_at?: string;

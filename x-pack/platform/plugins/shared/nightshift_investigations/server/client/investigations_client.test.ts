@@ -172,6 +172,124 @@ describe('NightshiftInvestigationsClient.get()', () => {
     });
   });
 
+  describe('trigger derivation', () => {
+    it('derives a significant_event trigger with summary and flyout deep link', async () => {
+      mockManagement.getWorkflowExecution.mockResolvedValue(
+        makeExecution({
+          context: {
+            inputs: {
+              message: 'Checkout p99 latency breach',
+              context: {
+                source: 'significant_event',
+                event_id: 'event-42',
+                summary: 'Latency breached the SLO on checkout',
+              },
+            },
+          },
+        })
+      );
+      const result = await makeClient().get('inv-1');
+      expect(result.trigger).toEqual({
+        type: 'significant_event',
+        summary: 'Latency breached the SLO on checkout',
+        url: '/app/significant_events/significant_events?openEvent=event-42',
+      });
+    });
+
+    it('resolves the deep-link id with the same precedence as subject.id', async () => {
+      mockManagement.getWorkflowExecution.mockResolvedValue(
+        makeExecution({
+          context: {
+            inputs: {
+              context: {
+                source: 'significant_event',
+                event_id: 'event-42',
+                significant_event_id: 'uuid-1',
+              },
+            },
+          },
+        })
+      );
+      const result = await makeClient().get('inv-1');
+      expect(result.subject.id).toBe('uuid-1');
+      expect(result.trigger?.url).toBe(
+        '/app/significant_events/significant_events?openEvent=uuid-1'
+      );
+    });
+
+    it('omits the url when a significant_event trigger has no usable id', async () => {
+      mockManagement.getWorkflowExecution.mockResolvedValue(
+        makeExecution({
+          context: { inputs: { context: { source: 'significant_event', summary: 'No id here' } } },
+        })
+      );
+      const result = await makeClient().get('inv-1');
+      expect(result.trigger).toEqual({ type: 'significant_event', summary: 'No id here' });
+    });
+
+    it('derives an alert trigger falling back to message for the summary', async () => {
+      mockManagement.getWorkflowExecution.mockResolvedValue(
+        makeExecution({
+          context: {
+            inputs: {
+              message: 'CPU saturation alert\n\nDetails follow.',
+              context: { source: 'alert', alert_id: 'alert/99?x=1' },
+            },
+          },
+        })
+      );
+      const result = await makeClient().get('inv-1');
+      expect(result.trigger).toEqual({
+        type: 'alert',
+        summary: 'CPU saturation alert',
+        url: `/app/observability/alerts/${encodeURIComponent('alert/99?x=1')}`,
+      });
+    });
+
+    it('prefers context.name over message for alert summaries', async () => {
+      mockManagement.getWorkflowExecution.mockResolvedValue(
+        makeExecution({
+          context: {
+            inputs: {
+              message: 'Generic message',
+              context: { source: 'alert', alert_id: 'alert-99', name: 'High CPU' },
+            },
+          },
+        })
+      );
+      const result = await makeClient().get('inv-1');
+      expect(result.trigger?.summary).toBe('High CPU');
+    });
+
+    it('derives a manual trigger from the message when no recognized source exists', async () => {
+      mockManagement.getWorkflowExecution.mockResolvedValue(
+        makeExecution({ context: { inputs: { message: 'Why did checkout fail?\n\nMore text.' } } })
+      );
+      const result = await makeClient().get('inv-1');
+      expect(result.trigger).toEqual({ type: 'manual', summary: 'Why did checkout fail?' });
+    });
+
+    it('omits optional fields when the inputs carry nothing usable', async () => {
+      mockManagement.getWorkflowExecution.mockResolvedValue(makeExecution());
+      const result = await makeClient().get('inv-1');
+      expect(result.trigger).toEqual({ type: 'manual' });
+    });
+
+    it('caps long summaries', async () => {
+      const longSummary = 'x'.repeat(500);
+      mockManagement.getWorkflowExecution.mockResolvedValue(
+        makeExecution({
+          context: {
+            inputs: { context: { source: 'alert', alert_id: 'a-1', summary: longSummary } },
+          },
+        })
+      );
+      const result = await makeClient().get('inv-1');
+      expect(result.trigger?.summary).toBe(`${'x'.repeat(200)}…`);
+      expect(result.trigger?.summary?.length).toBe(201);
+    });
+  });
+
   describe('terminal state handling', () => {
     it('sets completed_at when status is completed', async () => {
       mockManagement.getWorkflowExecution.mockResolvedValue(

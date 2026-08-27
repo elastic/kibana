@@ -17,6 +17,7 @@ import type {
   GetInvestigationResponse,
   InvestigationStatus,
   InvestigationSubject,
+  InvestigationTrigger,
   ListInvestigationItem,
   ListInvestigationsRequest,
   ListInvestigationsResponse,
@@ -110,6 +111,64 @@ function recoverSubjectFromInput(input: Record<string, unknown> | undefined): In
     }
   }
   return { type: 'manual', id: '' };
+}
+
+/** Deep link that opens an event's flyout in the significant events app (app id + page route). */
+const SIGNIFICANT_EVENT_URL_PATH = '/app/significant_events/significant_events';
+const ALERT_DETAILS_URL_PATH = '/app/observability/alerts';
+
+/** Summaries render inline next to an investigation; cap them so callers cannot bloat responses. */
+const MAX_TRIGGER_SUMMARY_LENGTH = 200;
+
+function asBriefText(value: unknown): string | undefined {
+  if (typeof value !== 'string') return undefined;
+  const text = value.trim();
+  if (!text) return undefined;
+  return text.length > MAX_TRIGGER_SUMMARY_LENGTH
+    ? `${text.slice(0, MAX_TRIGGER_SUMMARY_LENGTH)}…`
+    : text;
+}
+
+function firstNonEmptyLine(value: unknown): string | undefined {
+  if (typeof value !== 'string') return undefined;
+  const line = value
+    .split('\n')
+    .map((l) => l.trim())
+    .find((l) => l.length > 0);
+  return line || undefined;
+}
+
+/**
+ * Derives the trigger reference from the workflow inputs persisted at start time, reusing the
+ * same subject resolution as the response's `subject` field so both always name the same entity.
+ * Consumers render what started the investigation without a second call; URLs are relative app
+ * paths (the basePath is prepended client-side), and the significant-event link opens the event
+ * flyout via the app's `openEvent` deep-link param, which resolves when the event is loadable by
+ * the app.
+ */
+export function buildTriggerFromInput(
+  input: Record<string, unknown> | undefined
+): InvestigationTrigger {
+  const ctx = isPlainObject(input?.context) ? input.context : undefined;
+  const summary =
+    asBriefText(ctx?.summary) ??
+    asBriefText(ctx?.name) ??
+    asBriefText(firstNonEmptyLine(input?.message));
+  const subject = recoverSubjectFromInput(input);
+
+  if (subject.type === 'significant_event' || subject.type === 'alert') {
+    const url =
+      subject.type === 'significant_event'
+        ? `${SIGNIFICANT_EVENT_URL_PATH}?openEvent=${encodeURIComponent(subject.id)}`
+        : `${ALERT_DETAILS_URL_PATH}/${encodeURIComponent(subject.id)}`;
+    return {
+      type: subject.type,
+      ...(summary ? { summary } : {}),
+      ...(subject.id ? { url } : {}),
+    };
+  }
+
+  return { type: 'manual', ...(summary ? { summary } : {}) };
 }
 
 export interface NightshiftInvestigationsClientDeps {
@@ -259,6 +318,7 @@ export class NightshiftInvestigationsClient {
     return {
       investigation_id: investigationId,
       subject,
+      trigger: buildTriggerFromInput(rawInput),
       status,
       started_at: execution.startedAt,
       completed_at: isTerminal ? execution.finishedAt : undefined,
