@@ -156,6 +156,34 @@ describe('sourceExists', () => {
   it('should handle empty string gracefully (false)', () => {
     expect(sourceExists('', mockSources)).toBe(false);
   });
+
+  describe('cross-project search (CPS) prefix matching', () => {
+    const cpsSources = new Set([
+      'linked_local_project:cps-timefield-test',
+      'linked_local_project:another-index',
+      'local-index',
+    ]);
+
+    it('should return true when the index matches the local part of a project-prefixed source', () => {
+      expect(sourceExists('cps-timefield-test', cpsSources)).toBe(true);
+    });
+
+    it('should return true when the fully prefixed name is used', () => {
+      expect(sourceExists('linked_local_project:cps-timefield-test', cpsSources)).toBe(true);
+    });
+
+    it('should return true for a local (non-prefixed) source alongside CPS sources', () => {
+      expect(sourceExists('local-index', cpsSources)).toBe(true);
+    });
+
+    it('should return false when the index does not match any source or its local part', () => {
+      expect(sourceExists('nonexistent-index', cpsSources)).toBe(false);
+    });
+
+    it('should handle comma-separated indices where one is a CPS local name', () => {
+      expect(sourceExists('local-index,cps-timefield-test', cpsSources)).toBe(true);
+    });
+  });
 });
 
 describe('buildSourcesDefinitions', () => {
