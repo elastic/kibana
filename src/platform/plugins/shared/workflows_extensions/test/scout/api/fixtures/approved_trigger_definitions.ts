@@ -129,20 +129,24 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
     schemaHash: '9f825d6e3cd79ed834759edfec89c88eef2be3a3e33b5872f53bddc365915593',
   },
   {
+    id: 'nightshift-investigations.completed',
+    schemaHash: '68cd1e9afb5c33b505325d097d77595bf2e30e3222b26a8f0b5f2d3ace99c7ff',
+  },
+  {
+    id: 'nightshift-investigations.failed',
+    schemaHash: '391f552b9dfc3214c3f41e8df0c2a255d68478a76277b2aaebba926c9860d5d6',
+  },
+  {
+    id: 'nightshift-investigations.started',
+    schemaHash: '2cfb1c09d421df1f1810116a6c8d477b0c87329e816fef8e5b4fbe828c61b681',
+  },
+  {
     id: 'significant-events.eventCreated',
     schemaHash: '537230a2eb86302d4a80e93f396effd93681ba4a2e11fd70c5b7b5b56fe4c3fb',
   },
   {
     id: 'significant-events.eventStatusChanged',
     schemaHash: 'f140133a6ecef997484c3d4ef94b326207b4f1124cce889d34fef6e38fa019fe',
-  },
-  {
-    id: 'significant-events.investigationCompleted',
-    schemaHash: '06dde7e48728d9cfcb26cb572df53194f99106d4c9b73a722fa781c379da59f5',
-  },
-  {
-    id: 'significant-events.investigationStarted',
-    schemaHash: '1d7cbaf4aae2266d95fc9f30fa3d7df10af006cc4b9dccfd2024e991317de805',
   },
   {
     id: 'workflows.failed',
