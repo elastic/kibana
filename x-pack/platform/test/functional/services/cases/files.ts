@@ -32,6 +32,9 @@ export function CasesFilesTableServiceProvider({ getService, getPageObject }: Ft
 
       // hide the upload notification
       await (await find.byCssSelector('[data-test-subj="toastCloseButton"]')).click();
+
+      // wait for the modal (and its overlay mask) to be removed so the caller's next click isn't intercepted
+      await testSubjects.missingOrFail('cases-files-add-modal');
     },
 
     async searchByFileName(fileName: string) {
@@ -62,6 +65,9 @@ export function CasesFilesTableServiceProvider({ getService, getPageObject }: Ft
       await (await testSubjects.find('cases-files-delete-button', 1000)).click();
 
       await testSubjects.click('confirmModalConfirmButton');
+
+      // wait for the confirm modal (and its overlay mask) to be removed so the next test's click isn't intercepted
+      await testSubjects.missingOrFail('confirmModalConfirmButton');
     },
 
     async openFilePreview(index: number = 0) {
