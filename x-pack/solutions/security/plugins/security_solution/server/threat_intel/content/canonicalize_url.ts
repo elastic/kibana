@@ -103,7 +103,7 @@ export const canonicalizeUrl = (rawUrl: string): string | undefined => {
     const lowerKey = key.toLowerCase();
     const isTracking =
       lowerKey.startsWith('utm_') ||
-      TRACKING_PARAMS.has(key) ||
+      TRACKING_PARAMS.has(lowerKey) ||
       (lowerKey === 'ref' && TRACKING_REF_VALUES.has(value.toLowerCase()));
     if (!isTracking) {
       params.append(key, value);

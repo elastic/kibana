@@ -1250,3 +1250,84 @@ describe('the parse cap does not split a surrogate pair', () => {
     expect(LONE_SURROGATE.test(result)).toBe(false);
   });
 });
+
+/**
+ * CDATA payloads are expanded into the current walk, not by re-entering the parser.
+ *
+ * Recursing undid the iterative guarantee the rest of this file maintains. Malformed
+ * nesting was quadratic and then fatal: 10ms at 200 openers, 740ms at 2,000, `RangeError`
+ * at 20,000. It also walked the payload with href-lifting forced off and, in the structured
+ * renderer, with section state reset to prose, so an anchor inside CDATA under an IOC
+ * heading lost the href that was the indicator.
+ */
+describe('CDATA expansion is bounded and inherits walk state', () => {
+  it.each([
+    ['200 openers', 200],
+    ['20000 openers', 20000],
+    ['100000 openers', 100000],
+  ])('does not overflow or go quadratic on %s', (_label, count) => {
+    const input = `${'<![CDATA['.repeat(count)}x]]>`;
+
+    const started = process.hrtime.bigint();
+    expect(() => stripHtml(input)).not.toThrow();
+    expect(() => htmlToStructured(input)).not.toThrow();
+    const elapsedMs = Number(process.hrtime.bigint() - started) / 1e6;
+
+    expect(elapsedMs).toBeLessThan(3000);
+  });
+
+  // Past the bound the payload is dropped, not emitted. Emitting unparsed markup put a
+  // script body and its URL into body_text as an extractable indicator.
+  it.each([[1], [2], [4], [5], [6], [100]])(
+    'never emits unparsed markup at %s levels of nesting',
+    (depth) => {
+      const input = `${'<![CDATA['.repeat(
+        depth
+      )}<script>fetch("https://false-ioc.test")</script>safe]]>`;
+
+      expect(stripHtml(input)).not.toContain('false-ioc.test');
+      expect(htmlToStructured(input)).not.toContain('false-ioc.test');
+    }
+  );
+
+  it('keeps the payload at legitimate nesting depth', () => {
+    expect(stripHtml('<![CDATA[<script>fetch("https://false-ioc.test")</script>safe]]>')).toBe(
+      'safe'
+    );
+  });
+
+  it('inherits the IOC section so an anchor inside CDATA keeps its href', () => {
+    expect(
+      htmlToStructured('<h2>IOCs</h2><![CDATA[<a href="https://c2.evil.test/x">indicator</a>]]>')
+    ).toBe('## IOCs\nindicator https://c2.evil.test/x');
+  });
+
+  it('inherits a references section too', () => {
+    expect(
+      htmlToStructured('<h2>References</h2><![CDATA[<a href="https://r.test/y">cite</a>]]>')
+    ).toBe('## References\ncite https://r.test/y');
+  });
+
+  // Prose sections deliberately do not lift, and inheriting state must not change that.
+  it('does not lift hrefs for CDATA under a prose heading', () => {
+    expect(
+      htmlToStructured('<h2>Analysis</h2><![CDATA[<a href="https://x.test/y">link</a>]]>')
+    ).toBe('## Analysis\nlink');
+  });
+
+  // CDATA content is literal, so a feed that encoded its body and also wrapped it in CDATA
+  // arrives still encoded after one parse.
+  it.each([
+    [
+      'a script',
+      '<![CDATA[&lt;script&gt;fetch("https://false-ioc.test")&lt;/script&gt;safe]]>',
+      'safe',
+    ],
+    ['a paragraph', '<![CDATA[&lt;p&gt;evil.com&lt;/p&gt;]]>', 'evil.com'],
+  ])('re-parses %s that was entity-encoded inside CDATA', (_label, html, expected) => {
+    const result = stripHtml(html);
+
+    expect(result).toBe(expected);
+    expect(result).not.toContain('false-ioc.test');
+  });
+});

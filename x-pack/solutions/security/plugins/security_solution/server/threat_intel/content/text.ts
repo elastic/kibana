@@ -417,7 +417,26 @@ const carriesOwnMarkup = (nodes: ParsedNode[]): boolean =>
   peelFeedWrappers(nodes).some((node) => isElement(node) || node.type === 'cdata');
 
 /** Stack entry: a node still to visit, or literal output to append after its subtree. */
-type WalkStep = { kind: 'node'; node: ParsedNode } | { kind: 'emit'; text: string };
+type WalkStep =
+  | { kind: 'node'; node: ParsedNode; cdataDepth: number }
+  | { kind: 'emit'; text: string };
+
+/**
+ * How many times a CDATA payload may be expanded into the walk.
+ *
+ * CDATA cannot legally nest, so real feeds need one. The bound exists because malformed
+ * input can look like it nests: `'<![CDATA['.repeat(n)` parses as one unterminated node per
+ * pass, and expanding each one re-parsed the remaining text. Measured before the bound at
+ * 10ms for n=200, 740ms for n=2,000, and a hard `RangeError` at n=20,000.
+ *
+ * Past the bound the payload is dropped rather than emitted as text. Emitting it was the
+ * first thing I tried and it was worse than the bug: unparsed markup went into `body_text`,
+ * so `<![CDATA[` five deep around `<script>fetch("https://attacker.test")</script>` handed
+ * extraction the attacker's URL as an indicator. Dropping cannot lose real report content,
+ * because CDATA does not nest at all and anything past four levels is malformed by
+ * construction.
+ */
+const MAX_CDATA_DEPTH = 4;
 
 /**
  * Pushed in reverse so the stack pops in document order.
@@ -427,9 +446,9 @@ type WalkStep = { kind: 'node'; node: ParsedNode } | { kind: 'emit'; text: strin
  * builds an arbitrarily deep tree; a recursive walk would exhaust the call stack and
  * take the task worker down with it.
  */
-const pushNodes = (stack: WalkStep[], nodes: ParsedNode[]): void => {
+const pushNodes = (stack: WalkStep[], nodes: ParsedNode[], cdataDepth = 0): void => {
   for (let i = nodes.length - 1; i >= 0; i--) {
-    stack.push({ kind: 'node', node: nodes[i] });
+    stack.push({ kind: 'node', node: nodes[i], cdataDepth });
   }
 };
 
@@ -474,6 +493,23 @@ const rawTextOf = (nodes: ParsedNode[]): string => {
   return out.join('');
 };
 
+/**
+ * Parse a CDATA payload into nodes.
+ *
+ * CDATA content is literal, so a feed that entity-encoded its body *and* wrapped it in
+ * CDATA arrives with the markup still encoded after one parse. That left
+ * `<![CDATA[&lt;script&gt;fetch("…")&lt;/script&gt;safe]]>` yielding the script body and its
+ * URL as visible text for extraction to mine. Same decision `stripHtml` makes on its own
+ * input, applied to the payload, and bounded to one extra parse.
+ */
+const parseCdataPayload = (raw: string): ParsedNode[] => {
+  const nodes = parseTopLevelNodes(raw);
+  if (carriesOwnMarkup(nodes)) return nodes;
+
+  const decoded = inlineTextOf(nodes, false);
+  return RESIDUAL_CLOSING_TAG.test(decoded) ? parseTopLevelNodes(decoded) : nodes;
+};
+
 const inlineTextOf = (nodes: ParsedNode[], liftHrefs: boolean): string => {
   const out: string[] = [];
   const stack: WalkStep[] = [];
@@ -486,7 +522,7 @@ const inlineTextOf = (nodes: ParsedNode[], liftHrefs: boolean): string => {
     if (step.kind === 'emit') {
       out.push(step.text);
     } else {
-      const { node } = step;
+      const { node, cdataDepth } = step;
       const liftedHref =
         isElement(node) && liftHrefs && elementName(node) === 'a' ? hrefOf(node) : undefined;
 
@@ -494,11 +530,18 @@ const inlineTextOf = (nodes: ParsedNode[], liftHrefs: boolean): string => {
         out.push(node.data ?? '');
       } else if (node.type === 'cdata') {
         // RSS and Atom carry an entire HTML document inside `<![CDATA[ ... ]]>`, and the
-        // parser hands the payload back as opaque text rather than a parsed subtree.
-        // Emitting a boundary and moving on discarded the whole article body for every
-        // feed that ships its content this way, so the payload is parsed instead. One
-        // level is enough: CDATA cannot nest.
-        out.push(` ${extractPlainText(rawTextOf(childrenOf(node)))} `);
+        // parser hands the payload back as opaque text rather than a parsed subtree, so it
+        // has to be parsed or the whole article body is lost.
+        //
+        // Parsed into *this* walk rather than by re-entering the parser. Recursing undid the
+        // iterative guarantee the rest of this file maintains: malformed nesting overflowed
+        // the stack outright, and it also meant the payload was walked with `liftHrefs`
+        // forced off, so an anchor inside CDATA under an IOC heading lost its href.
+        out.push(' ');
+        stack.push({ kind: 'emit', text: ' ' });
+        if (cdataDepth < MAX_CDATA_DEPTH) {
+          pushNodes(stack, parseCdataPayload(rawTextOf(childrenOf(node))), cdataDepth + 1);
+        }
       } else if (!isElement(node)) {
         // Comments and directives carry no report text, but they did separate
         // the text on either side, so they still emit a boundary. Dropping the node
@@ -511,11 +554,11 @@ const inlineTextOf = (nodes: ParsedNode[], liftHrefs: boolean): string => {
       } else if (liftedHref !== undefined) {
         out.push(` ${collapseWhitespace(inlineTextOf(childrenOf(node), false))} ${liftedHref} `);
       } else if (INLINE_NAMES.has(elementName(node))) {
-        pushNodes(stack, childrenOf(node));
+        pushNodes(stack, childrenOf(node), cdataDepth);
       } else {
         out.push(' ');
         stack.push({ kind: 'emit', text: ' ' });
-        pushNodes(stack, childrenOf(node));
+        pushNodes(stack, childrenOf(node), cdataDepth);
       }
     }
   }
@@ -626,7 +669,7 @@ const renderStructured = (html: string): string => {
     if (step.kind === 'emit') {
       out.push(step.text);
     } else {
-      const { node } = step;
+      const { node, cdataDepth } = step;
       const name = elementName(node);
       // Anchors are lifted only under an IOC or references heading, where the link
       // target is itself the indicator.
@@ -635,9 +678,16 @@ const renderStructured = (html: string): string => {
       if (node.type === 'text') {
         out.push(node.data ?? '');
       } else if (node.type === 'cdata') {
-        // Same as the plain-text walker: the CDATA payload is an HTML document the
-        // parser did not parse, so it is parsed here rather than dropped.
-        out.push(`\n${renderStructured(rawTextOf(childrenOf(node)))}\n`);
+        // Same as the plain-text walker, and parsed into this walk for the same reasons.
+        // Re-entering `renderStructured` also started a fresh walk whose section state was
+        // `prose`, so CDATA sitting under an `<h2>Indicators of Compromise</h2>` was
+        // rendered as prose and every href-only indicator inside it was dropped. Section
+        // state is walker-local, so feeding the nodes into this stack inherits it.
+        out.push('\n');
+        stack.push({ kind: 'emit', text: '\n' });
+        if (cdataDepth < MAX_CDATA_DEPTH) {
+          pushNodes(stack, parseCdataPayload(rawTextOf(childrenOf(node))), cdataDepth + 1);
+        }
       } else if (!isElement(node)) {
         // Comments and doctype contribute a boundary only.
         out.push(' ');
@@ -679,10 +729,10 @@ const renderStructured = (html: string): string => {
       } else if (BLOCK_NAMES.has(name)) {
         out.push('\n');
         stack.push({ kind: 'emit', text: '\n' });
-        pushNodes(stack, childrenOf(node));
+        pushNodes(stack, childrenOf(node), cdataDepth);
       } else if (INLINE_NAMES.has(name)) {
         // Inline element: no boundary, contents kept.
-        pushNodes(stack, childrenOf(node));
+        pushNodes(stack, childrenOf(node), cdataDepth);
       } else {
         // Unknown or custom element. Same conservative default as the plain-text
         // walker: treating these as inline merged adjacent indicators, so
@@ -691,7 +741,7 @@ const renderStructured = (html: string): string => {
         // one thing this structured form exists to preserve.
         out.push('\n');
         stack.push({ kind: 'emit', text: '\n' });
-        pushNodes(stack, childrenOf(node));
+        pushNodes(stack, childrenOf(node), cdataDepth);
       }
     }
   }
