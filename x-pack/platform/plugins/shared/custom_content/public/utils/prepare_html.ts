@@ -58,7 +58,9 @@ export function applyHtmlTheme(
   colorMode: EuiThemeColorModeStandard,
   euiTheme: EuiThemeComputed
 ): string {
-  return injectStyleTag(injectCsp(html, colorMode), buildThemeCss(euiTheme, colorMode));
+  // CSP is injected last so the meta tag precedes every other node in <head>. A meta CSP only
+  // governs resources fetched after it is parsed, so anything inserted ahead of it is ungoverned.
+  return injectCsp(injectStyleTag(html, buildThemeCss(euiTheme, colorMode)), colorMode);
 }
 
 export function sanitizeHtml(html: string): string {
@@ -66,5 +68,5 @@ export function sanitizeHtml(html: string): string {
     FORBID_TAGS: ['a'],
     WHOLE_DOCUMENT: true,
     FORCE_BODY: false,
-  }) as string;
+  });
 }
