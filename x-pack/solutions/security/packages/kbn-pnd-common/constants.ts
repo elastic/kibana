@@ -167,10 +167,10 @@ export const PROPOSAL_STATUSES = [
 
 export const CONVERSATION_CATEGORY_COLORS: Record<
   RecommendedAction,
-  'danger' | 'warning' | 'primary' | 'accent'
+  'danger' | 'warning' | 'accentSecondary' | 'accent'
 > = {
   contain: 'danger',
   escalate: 'warning',
-  investigate: 'primary',
+  investigate: 'accentSecondary',
   tune: 'accent',
 };
