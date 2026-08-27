@@ -214,20 +214,29 @@ export const installPrebuiltWatchlists = async ({
   logger,
   getStartServices,
   hasEncryptionKey,
+  spaceId,
 }: EntityAnalyticsMigrationsParams) => {
   const [coreStart] = await getStartServices();
-  const internalRepo = coreStart.savedObjects.createInternalRepository();
   const esClient = coreStart.elasticsearch.client.asInternalUser;
 
-  const spacesResponse = await internalRepo.find({
-    type: 'space',
-    perPage: 1000,
-  });
+  let namespaces: Set<string>;
 
-  // Always include 'default' — it may not have an explicit saved object
-  const namespaces = new Set<string>(['default']);
-  for (const so of spacesResponse.saved_objects) {
-    namespaces.add(so.id);
+  if (spaceId) {
+    namespaces = new Set([spaceId]);
+  } else {
+    // 'space' is a hidden saved object type, so it must be explicitly included or
+    // `find` silently returns an empty result and custom spaces are never discovered.
+    const internalRepo = coreStart.savedObjects.createInternalRepository(['space']);
+    const spacesResponse = await internalRepo.find({
+      type: 'space',
+      perPage: 1000,
+    });
+
+    // Always include 'default' — it may not have an explicit saved object
+    namespaces = new Set<string>(['default']);
+    for (const so of spacesResponse.saved_objects) {
+      namespaces.add(so.id);
+    }
   }
 
   for (const namespace of namespaces) {

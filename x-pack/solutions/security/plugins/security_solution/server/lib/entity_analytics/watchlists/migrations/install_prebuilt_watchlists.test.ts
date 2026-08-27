@@ -69,6 +69,7 @@ describe('installPrebuiltWatchlists', function () {
   const mockLogger = loggingSystemMock.createLogger();
   const mockEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
   const mockSoClient = mockSavedObjectsClient.create();
+  let mockCreateInternalRepository: jest.Mock;
 
   const callInstall = () =>
     installPrebuiltWatchlists({
@@ -94,10 +95,23 @@ describe('installPrebuiltWatchlists', function () {
     mockEntitySourceCreate.mockResolvedValue({ id: 'entity-source-id' });
     mockEntitySourceList.mockResolvedValue({ sources: [] });
     mockAddEntitySourceReference.mockResolvedValue(undefined);
+    // Mirror core `find` behavior: the hidden `space` type is only queryable when
+    // it is explicitly passed via `includedHiddenTypes`; otherwise `find` returns
+    // an empty result. This guards against regressing back to an un-scoped repo.
+    mockCreateInternalRepository = jest
+      .fn()
+      .mockImplementation((includedHiddenTypes?: string[]) => {
+        if (includedHiddenTypes?.includes('space')) {
+          return mockSoClient;
+        }
+        const repoWithoutSpaceAccess = mockSavedObjectsClient.create();
+        repoWithoutSpaceAccess.find.mockResolvedValue(buildEmptySpacesResponse());
+        return repoWithoutSpaceAccess;
+      });
     mockGetStartServices.mockResolvedValue([
       {
         savedObjects: {
-          createInternalRepository: jest.fn().mockReturnValue(mockSoClient),
+          createInternalRepository: mockCreateInternalRepository,
         },
         elasticsearch: {
           client: {
@@ -232,5 +246,28 @@ describe('installPrebuiltWatchlists', function () {
 
     // default is in the spaces response AND always added — should still only run twice, not three times
     expect(mockWatchlistCreate).toHaveBeenCalledTimes(2);
+  });
+
+  describe('with spaceId defined', () => {
+    it('skips space discovery and installs only for the specified space', async () => {
+      mockWatchlistGet.mockRejectedValue(new Error('Saved object not found'));
+
+      await installPrebuiltWatchlists({
+        auditLogger: mockAuditLogger,
+        logger: mockLogger,
+        getStartServices: mockGetStartServices,
+        kibanaVersion: '9.0.0',
+        hasEncryptionKey: true,
+        spaceId: 'my-space',
+      });
+
+      // Space discovery should be skipped — no call with the hidden 'space' type
+      expect(mockCreateInternalRepository).not.toHaveBeenCalledWith(['space']);
+      // Only one watchlist created — for 'my-space', not for 'default' or any other space
+      expect(mockWatchlistCreate).toHaveBeenCalledTimes(1);
+      expect(mockWatchlistCreate).toHaveBeenCalledWith(expect.anything(), {
+        id: getPrivilegedUserWatchlistSavedObjectId('my-space'),
+      });
+    });
   });
 });
