@@ -36,6 +36,7 @@ import * as skillI18n from '../skills/translations';
 
 interface SkillRow {
   skillId: string;
+  name: string;
   skill: WatchSkill | undefined;
 }
 
@@ -65,8 +66,9 @@ export const WatchSkillsTable: React.FC<WatchSkillsTableProps> = ({ attachments 
 
   const rows = useMemo<SkillRow[]>(() => {
     const byId = new Map((data?.skills ?? []).map((skill) => [skill.id, skill]));
-    return attachments.map(({ id }) => ({
+    return attachments.map(({ id, name }) => ({
       skillId: id,
+      name,
       skill: byId.get(id),
     }));
   }, [attachments, data?.skills]);
@@ -83,7 +85,7 @@ export const WatchSkillsTable: React.FC<WatchSkillsTableProps> = ({ attachments 
                 <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
                   <EuiFlexItem grow={false}>
                     <EuiText size="s">
-                      <strong>{skillI18n.skillName(skillId)}</strong>
+                      <strong>{row.name || skillI18n.skillName(skillId)}</strong>
                     </EuiText>
                   </EuiFlexItem>
                   {row.skill?.lifecycle && row.skill.lifecycle !== 'ga' ? (

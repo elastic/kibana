@@ -40,18 +40,19 @@ export class SkillsProjectionService {
   }
 
   private buildSkillsFromWatches(watches: Watch[], previousSkills: WatchSkill[]): WatchSkill[] {
-    const skillMap = new Map<string, { watchIds: Set<string>; summary?: string }>();
+    const skillMap = new Map<string, { watchIds: Set<string>; name?: string; summary?: string }>();
     for (const watch of watches) {
       for (const skill of watch.skills) {
         const entry = skillMap.get(skill.id) ?? { watchIds: new Set<string>() };
         entry.watchIds.add(watch.id);
+        if (!entry.name && skill.name) entry.name = skill.name;
         if (!entry.summary && skill.summary) entry.summary = skill.summary;
         skillMap.set(skill.id, entry);
       }
     }
-    return [...skillMap.entries()].map(([id, { watchIds, summary }]) => {
+    return [...skillMap.entries()].map(([id, { watchIds, name, summary }]) => {
       const prev = previousSkills.find((s) => s.id === id);
-      return { id, watchIds: [...watchIds], lastRun: prev?.lastRun ?? null, summary };
+      return { id, watchIds: [...watchIds], lastRun: prev?.lastRun ?? null, name, summary };
     });
   }
 

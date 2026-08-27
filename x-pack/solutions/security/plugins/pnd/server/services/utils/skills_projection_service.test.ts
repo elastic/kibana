@@ -72,6 +72,7 @@ describe('SkillsProjectionService', () => {
       const skills = await service.list(mockRequest, spaceId);
 
       expect(skills.map((s) => s.id).sort()).toEqual(['skill-1', 'skill-2', 'skill-3']);
+      expect(skills.find((s) => s.id === 'skill-1')?.name).toBe('skill-1');
     });
 
     it('includes all watch IDs for a skill shared across watches', async () => {
@@ -85,7 +86,23 @@ describe('SkillsProjectionService', () => {
       const [skill] = await service.list(mockRequest, spaceId);
 
       expect(skill.id).toBe('shared');
+      expect(skill.name).toBe('shared');
       expect(skill.watchIds.sort()).toEqual(['watch-a', 'watch-b']);
+    });
+
+    it('preserves the name from the first watch that resolves it', async () => {
+      management.getWorkflows.mockResolvedValue(
+        makeWorkflowListDto([{ id: 'watch-a' }, { id: 'watch-b' }])
+      );
+      const watchA = makeWatch('watch-a', ['shared']);
+      watchA.skills[0].name = 'First Name';
+      const watchB = makeWatch('watch-b', ['shared']);
+      watchB.skills[0].name = 'Second Name';
+      mockProjectWatch.mockReturnValueOnce(watchA).mockReturnValueOnce(watchB);
+
+      const [skill] = await service.list(mockRequest, spaceId);
+
+      expect(skill.name).toBe('First Name');
     });
 
     it('returns empty when no watches have skills', async () => {

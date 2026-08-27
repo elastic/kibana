@@ -71,6 +71,10 @@ components:
           type: string
           description: >-
             Copy key — the UI resolves name and description from this id. Unique among skills only.
+        name:
+          type: string
+          description: >-
+            Display name resolved from the Agent Builder registry at projection time.
         watchIds:
           type: array
           items:

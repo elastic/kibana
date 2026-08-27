@@ -36,7 +36,7 @@ export const SkillsTable: React.FC = () => {
                 <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
                   <EuiFlexItem grow={false}>
                     <EuiText size="s">
-                      <strong>{i18n.skillName(skill.id)}</strong>
+                      <strong>{skill.name ?? i18n.skillName(skill.id)}</strong>
                     </EuiText>
                   </EuiFlexItem>
                   {skill.lifecycle && skill.lifecycle !== 'ga' ? (

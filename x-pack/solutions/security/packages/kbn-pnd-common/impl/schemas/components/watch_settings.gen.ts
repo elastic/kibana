@@ -78,6 +78,10 @@ export const WatchSkill = lazySchema(() =>
      */
     id: z.string(),
     /**
+     * Display name resolved from the Agent Builder registry at projection time.
+     */
+    name: z.string().optional(),
+    /**
      * Watches whose workers may call this skill
      */
     watchIds: z.array(z.string()),
