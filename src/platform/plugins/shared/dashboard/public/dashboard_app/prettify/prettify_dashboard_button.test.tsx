@@ -11,9 +11,8 @@ import React from 'react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
-import type { DashboardApi } from '../../../dashboard_api/types';
-import { DashboardContext } from '../../../dashboard_api/use_dashboard_api';
-import { uiActionsService } from '../../../services/kibana_services';
+import type { DashboardApi } from '../../dashboard_api/types';
+import { uiActionsService } from '../../services/kibana_services';
 import { PRETTIFY_DASHBOARD_ACTION_ID } from './prettify_dashboard_action';
 import { PrettifyDashboardButton } from './prettify_dashboard_button';
 
@@ -30,9 +29,7 @@ const createDashboardApi = (): TestDashboardApi =>
 const renderButton = (dashboardApi = createDashboardApi()) => {
   render(
     <EuiThemeProvider>
-      <DashboardContext.Provider value={dashboardApi}>
-        <PrettifyDashboardButton />
-      </DashboardContext.Provider>
+      <PrettifyDashboardButton dashboardApi={dashboardApi} />
     </EuiThemeProvider>
   );
   return dashboardApi;
