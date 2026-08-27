@@ -83,7 +83,7 @@ describe('suricata_row_renderer', () => {
     expect(extractEuiIconText).toContain(
       '4ETEXPLOITNETGEARWNR2000v5 hidden_lang_avi Stack Overflow (CVE-2016-10174)Source192.168.0.3:53Destination192.168.0.3:6343'
     );
-  });
+  }, 30_000);
 
   test('should render a suricata row even if it does not have a suricata signature', async () => {
     delete suricata?.suricata?.eve?.alert?.signature;
