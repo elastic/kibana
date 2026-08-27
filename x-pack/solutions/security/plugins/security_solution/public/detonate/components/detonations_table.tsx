@@ -9,11 +9,11 @@ import React, { useCallback, useMemo } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBadge,
+  EuiButtonIcon,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
-  EuiLink,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
@@ -37,6 +37,7 @@ import {
   COLUMN_TIMESTAMP,
   DETECTION_ALERTS_LABEL,
   ENDPOINT_ALERTS_LABEL,
+  HASH_ALERTS_ACTION,
   HASH_LINK_TOOLTIP,
   NO_DETONATIONS,
   NO_DETONATIONS_BODY,
@@ -114,15 +115,31 @@ const DetonationsTableComponent: React.FC<DetonationsTableProps> = ({ detonation
             return <EuiText size="s">{'—'}</EuiText>;
           }
           return (
-            <EuiToolTip content={HASH_LINK_TOOLTIP}>
-              <EuiLink
-                onClick={() => openAlertsForDetonation(detonation)}
-                data-test-subj="detonateHashLink"
-              >
-                <code>{sampleHash.slice(0, SHORT_HASH_LENGTH)}</code>
-                {detonation.sampleExtension ? ` .${detonation.sampleExtension}` : ''}
-              </EuiLink>
-            </EuiToolTip>
+            <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiToolTip content={HASH_LINK_TOOLTIP}>
+                  <SecuritySolutionLinkAnchor
+                    deepLinkId={SecurityPageName.detonate}
+                    path={`/${detonation.taskId}`}
+                    data-test-subj="detonateHashLink"
+                  >
+                    <code>{sampleHash.slice(0, SHORT_HASH_LENGTH)}</code>
+                    {detonation.sampleExtension ? ` .${detonation.sampleExtension}` : ''}
+                  </SecuritySolutionLinkAnchor>
+                </EuiToolTip>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiToolTip content={HASH_ALERTS_ACTION} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    iconType="maximize"
+                    color="text"
+                    aria-label={HASH_ALERTS_ACTION}
+                    onClick={() => openAlertsForDetonation(detonation)}
+                    data-test-subj="detonateAlertsAction"
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           );
         },
       },
@@ -177,19 +194,6 @@ const DetonationsTableComponent: React.FC<DetonationsTableProps> = ({ detonation
               {'—'}
             </EuiText>
           ),
-      },
-      {
-        name: '',
-        width: '4%',
-        render: (detonation: DetonationSummary) => (
-          <SecuritySolutionLinkAnchor
-            deepLinkId={SecurityPageName.detonate}
-            path={`/${detonation.taskId}`}
-            data-test-subj="detonateDetailLink"
-          >
-            {'›'}
-          </SecuritySolutionLinkAnchor>
-        ),
       },
     ],
     [openAlertsForDetonation]

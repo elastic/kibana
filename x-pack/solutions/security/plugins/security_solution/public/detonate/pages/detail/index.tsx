@@ -26,9 +26,11 @@ import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { AiSummaryPanel } from '../../components/ai_summary_panel';
 import { DetonationAlertsTable } from '../../components/detonation_alerts_table';
 import { FamilyBadges } from '../../components/family_badges';
+import { MitrePanel } from '../../components/mitre_panel';
 import { ProtectionsBadges } from '../../components/protections_badges';
 import { useDetonation } from '../../hooks/use_detonations';
 import { useDetonationAlerts } from '../../hooks/use_detonation_alerts';
+import { useDetonationMitre } from '../../hooks/use_detonation_mitre';
 import { useNavigateToDetonationAlerts } from '../../hooks/use_navigate_to_detonation_alerts';
 import {
   DETAIL_AGENT_VERSION,
@@ -61,6 +63,11 @@ export const DetonationDetailPage = React.memo(function DetonationDetailPage() {
   const agentId = detonation?.agentId ?? null;
 
   const { alerts, isLoading: isLoadingAlerts } = useDetonationAlerts({
+    agentId,
+    skip: !agentId,
+  });
+
+  const { tactics, isLoading: isLoadingMitre } = useDetonationMitre({
     agentId,
     skip: !agentId,
   });
@@ -134,6 +141,13 @@ export const DetonationDetailPage = React.memo(function DetonationDetailPage() {
 
       <EuiSpacer size="l" />
 
+      <MitrePanel
+        tactics={tactics}
+        isLoading={isLoadingMitre}
+        agentId={agentId}
+        timestamp={detonation.timestamp}
+      />
+
       <EuiFlexGroup gutterSize="l">
         <EuiFlexItem grow={2}>
           <EuiPanel hasBorder paddingSize="m">
@@ -145,7 +159,10 @@ export const DetonationDetailPage = React.memo(function DetonationDetailPage() {
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
-          <AiSummaryPanel taskId={taskId} />
+          <AiSummaryPanel
+            taskId={taskId}
+            hasAlerts={detonation.endpointAlertsCount + detonation.detectionAlertsCount > 0}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
 

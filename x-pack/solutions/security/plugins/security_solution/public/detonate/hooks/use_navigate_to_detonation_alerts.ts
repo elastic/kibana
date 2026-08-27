@@ -45,6 +45,8 @@ export interface DetonationAlertsPivot {
   agentId?: string | null;
   /** A single alert, matched against `kibana.alert.uuid`. Narrows the pivot to that one alert. */
   alertId?: string | null;
+  /** A MITRE technique, narrowing the scope below to the alerts that map to it. */
+  techniqueId?: string | null;
   /** Detonation time, used to build the absolute range the pivot opens with. */
   timestamp?: string | null;
 }
@@ -59,7 +61,7 @@ export interface DetonationAlertsPivot {
  * detonation produces are behavioural and carry no `file.hash.sha256` at all, so requiring both
  * hides the majority of them and, for detonations that only fired behaviour rules, all of them.
  */
-const buildQuery = ({ sampleHash, agentId, alertId }: DetonationAlertsPivot): string | null => {
+const buildScope = ({ sampleHash, agentId, alertId }: DetonationAlertsPivot): string | null => {
   if (alertId) {
     return `kibana.alert.uuid: "${escapeKqlValue(alertId)}"`;
   }
@@ -70,6 +72,30 @@ const buildQuery = ({ sampleHash, agentId, alertId }: DetonationAlertsPivot): st
     return `file.hash.sha256: "${escapeKqlValue(sampleHash)}"`;
   }
   return null;
+};
+
+/**
+ * Both fields are matched because a technique reaches an alert either from the endpoint behavior
+ * rule, as `threat`, or from the detection rule's own mapping, as `kibana.alert.rule.threat`.
+ */
+const buildTechniqueClause = (techniqueId: string): string => {
+  const escaped = escapeKqlValue(techniqueId);
+  return `(threat.technique.id: "${escaped}" or kibana.alert.rule.threat.technique.id: "${escaped}")`;
+};
+
+/**
+ * Unlike the identifiers, a technique narrows rather than replaces: it is combined with whichever
+ * scope was resolved, so pivoting from the ATT&CK panel stays inside the one detonation.
+ */
+const buildQuery = (pivot: DetonationAlertsPivot): string | null => {
+  const scope = buildScope(pivot);
+  if (scope === null) {
+    return null;
+  }
+  if (!pivot.techniqueId) {
+    return scope;
+  }
+  return `${scope} and ${buildTechniqueClause(pivot.techniqueId)}`;
 };
 
 /**

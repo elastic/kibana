@@ -29,6 +29,7 @@ import {
   AI_SUMMARY_DISCLAIMER,
   AI_SUMMARY_ERROR,
   AI_SUMMARY_GENERATE,
+  AI_SUMMARY_GENERATING,
   AI_SUMMARY_IOCS,
   AI_SUMMARY_NO_CONNECTOR,
   AI_SUMMARY_NO_CONNECTOR_BODY,
@@ -41,9 +42,14 @@ const DETONATE_AI_FEATURE_ID = 'detonate_summary';
 
 interface AiSummaryPanelProps {
   taskId: string;
+  /**
+   * Whether the detonation produced any alerts. A detonation that produced none has nothing for the
+   * model to describe, so it keeps the summary behind the button rather than spending a call on it.
+   */
+  hasAlerts: boolean;
 }
 
-const AiSummaryPanelComponent: React.FC<AiSummaryPanelProps> = ({ taskId }) => {
+const AiSummaryPanelComponent: React.FC<AiSummaryPanelProps> = ({ taskId, hasAlerts }) => {
   const { http, settings } = useKibana().services;
   const { data: anonymizationFields } = useFetchAnonymizationFields();
   const { data: aiConnectors, isLoading: isLoadingConnectors } = useLoadConnectors({
@@ -54,10 +60,13 @@ const AiSummaryPanelComponent: React.FC<AiSummaryPanelProps> = ({ taskId }) => {
 
   const connectorId = useMemo(() => aiConnectors?.[0]?.id ?? '', [aiConnectors]);
 
+  // Left undefined until the configuration loads, which holds the generation back rather than
+  // letting it run with nothing anonymized.
   const { summary, isGenerating, error, generate } = useDetonationAiSummary({
     taskId,
     connectorId,
-    anonymizationFields: anonymizationFields?.data ?? [],
+    anonymizationFields: anonymizationFields?.data,
+    autoStart: hasAlerts,
   });
 
   const body = (() => {
@@ -91,9 +100,18 @@ const AiSummaryPanelComponent: React.FC<AiSummaryPanelProps> = ({ taskId }) => {
         )}
 
         {summary === null ? (
-          <EuiText size="s" color="subdued">
-            <p>{AI_SUMMARY_PROMPT}</p>
-          </EuiText>
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            {isGenerating && (
+              <EuiFlexItem grow={false}>
+                <EuiLoadingSpinner size="m" />
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem grow={false}>
+              <EuiText size="s" color="subdued">
+                {isGenerating ? AI_SUMMARY_GENERATING : AI_SUMMARY_PROMPT}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         ) : (
           <>
             <EuiText size="s">

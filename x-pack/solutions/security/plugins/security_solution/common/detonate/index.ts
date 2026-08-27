@@ -24,6 +24,15 @@ export {
 } from './malware_signature';
 export type { MalwareSignature } from './malware_signature';
 
+export { mergeThreatBlocks } from './mitre';
+export type {
+  DetonationThreatBucket,
+  MitreNodeSummary,
+  MitreTacticSummary,
+  MitreTechniqueSummary,
+  RawThreatBlock,
+} from './mitre';
+
 export { DETONATION_SEVERITY_ORDER } from './types';
 export type {
   BreakdownCount,

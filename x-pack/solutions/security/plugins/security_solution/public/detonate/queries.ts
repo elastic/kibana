@@ -153,9 +153,7 @@ export const getDetonationsQuery = (filters: DetonationQueryFilters): string =>
  */
 export const getDetonationKpisQuery = (): string =>
   `${COMPLETED_TASKS}
-| EVAL hasAlerts = endpointAlertsCount > 0 OR detectionAlertsCount > 0
 | STATS totalDetonations = COUNT(*),
-        detonationsWithAlerts = COUNT(*) WHERE hasAlerts,
         endpointAlerts = SUM(endpointAlertsCount),
         detectionAlerts = SUM(detectionAlertsCount)`;
 

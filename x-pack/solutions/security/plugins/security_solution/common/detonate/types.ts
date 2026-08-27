@@ -60,10 +60,15 @@ export interface BreakdownCount {
   count: number;
 }
 
-/** Aggregate figures shown in the page header. */
+/**
+ * Aggregate figures shown in the page header.
+ *
+ * Every figure is a total rather than a share of the detonations. A count of detonations that
+ * produced alerts would read as a detection rate, and the shortfall is mostly samples that failed
+ * to execute in the VM rather than protections that missed.
+ */
 export interface DetonationKpis {
   totalDetonations: number;
-  detonationsWithAlerts: number;
   namedFamilies: number;
   endpointAlerts: number;
   detectionAlerts: number;

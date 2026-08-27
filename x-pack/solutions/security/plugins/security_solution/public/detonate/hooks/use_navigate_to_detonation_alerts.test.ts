@@ -77,6 +77,44 @@ describe('useNavigateToDetonationAlerts', () => {
     expect(dispatchedQuery()).toBe('agent.id: "a\\"gent\\\\1"');
   });
 
+  it('narrows to a technique without leaving the detonation', () => {
+    navigate({ agentId: 'agent-1', techniqueId: 'T1059' });
+
+    expect(dispatchedQuery()).toBe(
+      'agent.id: "agent-1" and (threat.technique.id: "T1059" or kibana.alert.rule.threat.technique.id: "T1059")'
+    );
+  });
+
+  it('matches both threat fields, since either can carry the technique', () => {
+    // `threat` comes from the endpoint behavior rule, `kibana.alert.rule.threat` from the
+    // detection rule, and a technique shown in the panel may have arrived on either one.
+    navigate({ agentId: 'agent-1', techniqueId: 'T1053.005' });
+
+    expect(dispatchedQuery()).toContain('threat.technique.id: "T1053.005"');
+    expect(dispatchedQuery()).toContain('kibana.alert.rule.threat.technique.id: "T1053.005"');
+  });
+
+  it('escapes the technique so a crafted value cannot break out of the clause', () => {
+    navigate({ agentId: 'agent-1', techniqueId: 'T1" or *: *' });
+
+    expect(dispatchedQuery()).toBe(
+      'agent.id: "agent-1" and (threat.technique.id: "T1\\" or *: *" or kibana.alert.rule.threat.technique.id: "T1\\" or *: *")'
+    );
+  });
+
+  it('leaves the query untouched when no technique is given', () => {
+    navigate({ agentId: 'agent-1', techniqueId: null });
+
+    expect(dispatchedQuery()).toBe('agent.id: "agent-1"');
+  });
+
+  it('does nothing when a technique arrives with no scope to narrow', () => {
+    navigate({ techniqueId: 'T1059' });
+
+    expect(mockDispatch).not.toHaveBeenCalled();
+    expect(mockNavigateTo).not.toHaveBeenCalled();
+  });
+
   it('does nothing when the pivot carries no identifier', () => {
     navigate({ timestamp: '2026-06-04T10:40:24.965Z' });
 

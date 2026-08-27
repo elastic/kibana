@@ -9,6 +9,7 @@ import { useCallback, useState } from 'react';
 import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common';
 import type { ToolSchema } from '@kbn/inference-common';
 import { isInferenceRequestAbortedError } from '@kbn/inference-common';
+import { useQuery } from '@kbn/react-query';
 
 import { API_VERSIONS } from '../../../common/constants';
 import type { DetonationAiSummary } from '../../../common/detonate';
@@ -63,38 +64,54 @@ interface RawSummaryOutput {
 }
 
 /**
+ * A summary of one detonation never goes out of date, and every fetch is a paid model call, so the
+ * result is held for the whole visit and only the Regenerate button asks for another one.
+ */
+const SUMMARY_CACHE_MS = 60 * 60 * 1000;
+
+/**
  * Generates the AI summary for a detonation.
  *
  * The server route supplies anonymized context and the system prompt; the model call is made from
  * the browser through the inference plugin, matching the entity summary implementation.
+ *
+ * Generation starts on its own only when `autoStart` is set. Otherwise it waits for `generate`,
+ * which is what keeps a page visit from spending a model call on a detonation with nothing to
+ * summarise. `anonymizationFields` being undefined means the configuration is still loading and
+ * holds the call back either way: running before it arrives would send the context unanonymized.
  */
 export const useDetonationAiSummary = ({
   taskId,
   connectorId,
   anonymizationFields,
+  autoStart,
 }: {
   taskId: string;
   connectorId: string;
-  anonymizationFields: AnonymizationFieldResponse[];
+  anonymizationFields: AnonymizationFieldResponse[] | undefined;
+  autoStart: boolean;
 }) => {
   const { http, inference } = useKibana().services;
   const { addError } = useAppToasts();
-  const [summary, setSummary] = useState<DetonationAiSummary | null>(null);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+  const [isRequested, setIsRequested] = useState(false);
 
-  const generate = useCallback(async () => {
-    setError(null);
-    setIsGenerating(true);
-    const controller = new AbortController();
+  const isReady = Boolean(taskId) && Boolean(connectorId) && anonymizationFields !== undefined;
+  const enabled = isReady && (autoStart || isRequested);
 
-    try {
+  const {
+    data: summary,
+    isFetching,
+    error,
+    refetch,
+  } = useQuery<DetonationAiSummary, Error>(
+    ['detonate', 'ai-summary', taskId, connectorId],
+    async ({ signal }) => {
       const { context, prompt } = await http.post<DetonateAiSummaryResponse>(
         DETONATE_AI_SUMMARY_PATH,
         {
           version: API_VERSIONS.internal.v1,
           body: JSON.stringify({ taskId, connectorId, anonymizationFields }),
-          signal: controller.signal,
+          signal,
         }
       );
 
@@ -104,27 +121,43 @@ export const useDetonationAiSummary = ({
         schema: detonationSummarySchema,
         system: prompt,
         input: `Detonation context:\n${JSON.stringify(context)}`,
-        abortSignal: controller.signal,
+        abortSignal: signal,
       });
 
       const typedOutput = output as RawSummaryOutput;
 
-      setSummary({
+      return {
         summary: typedOutput.summary,
         iocs: (typedOutput.iocs ?? []).slice(0, MAX_IOCS),
         recommendedActions: (typedOutput.recommended_actions ?? []).slice(0, MAX_ACTIONS),
-      });
-    } catch (e) {
-      if (isInferenceRequestAbortedError(e)) {
-        return;
-      }
-      const caughtError = e instanceof Error ? e : new Error(String(e));
-      addError(caughtError, { title: AI_SUMMARY_ERROR });
-      setError(caughtError);
-    } finally {
-      setIsGenerating(false);
+      };
+    },
+    {
+      enabled,
+      staleTime: Infinity,
+      cacheTime: SUMMARY_CACHE_MS,
+      refetchOnWindowFocus: false,
+      // A failed generation is expensive to repeat and rarely succeeds on a second try.
+      retry: false,
+      onError: (e) => {
+        // Navigating away mid-generation aborts the call, which is not worth a toast.
+        if (isInferenceRequestAbortedError(e)) {
+          return;
+        }
+        addError(e, { title: AI_SUMMARY_ERROR });
+      },
     }
-  }, [http, inference, taskId, connectorId, anonymizationFields, addError]);
+  );
 
-  return { summary, isGenerating, error, generate };
+  // Enabling the query is what starts the first run, so a refetch is only right once it already is.
+  // Going through `refetch` in both cases would rely on it firing while the query is disabled.
+  const generate = useCallback(() => {
+    if (enabled) {
+      refetch();
+      return;
+    }
+    setIsRequested(true);
+  }, [enabled, refetch]);
+
+  return { summary: summary ?? null, isGenerating: isFetching, error, generate };
 };

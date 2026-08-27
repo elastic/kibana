@@ -23,8 +23,6 @@ import {
   KPI_ENDPOINT_ALERTS,
   KPI_FAMILIES,
   KPI_FAMILIES_TOOLTIP,
-  KPI_WITH_ALERTS,
-  KPI_WITH_ALERTS_TOOLTIP,
 } from '../translations';
 
 interface KpiCardProps {
@@ -77,13 +75,6 @@ interface DetonationKpisProps {
 const DetonationKpisComponent: React.FC<DetonationKpisProps> = ({ kpis, isLoading }) => (
   <EuiFlexGroup gutterSize="m" data-test-subj="detonateKpis">
     <KpiCard title={kpis.totalDetonations} description={KPI_DETONATIONS} isLoading={isLoading} />
-    <KpiCard
-      title={kpis.detonationsWithAlerts}
-      description={KPI_WITH_ALERTS}
-      tooltip={KPI_WITH_ALERTS_TOOLTIP}
-      isLoading={isLoading}
-      color="success"
-    />
     <KpiCard
       title={kpis.namedFamilies}
       description={KPI_FAMILIES}

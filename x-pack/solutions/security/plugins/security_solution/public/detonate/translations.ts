@@ -30,17 +30,6 @@ export const KPI_DETONATIONS = i18n.translate('xpack.securitySolution.detonate.k
   defaultMessage: 'Detonations',
 });
 
-export const KPI_WITH_ALERTS = i18n.translate('xpack.securitySolution.detonate.kpi.withAlerts', {
-  defaultMessage: 'Detected',
-});
-
-export const KPI_WITH_ALERTS_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.detonate.kpi.withAlertsTooltip',
-  {
-    defaultMessage: 'Detonations that produced at least one endpoint or detection alert.',
-  }
-);
-
 export const KPI_FAMILIES = i18n.translate('xpack.securitySolution.detonate.kpi.families', {
   defaultMessage: 'Malware families',
 });
@@ -152,7 +141,12 @@ export const VIEW_DETONATION = i18n.translate(
 
 export const HASH_LINK_TOOLTIP = i18n.translate(
   'xpack.securitySolution.detonate.table.hashLinkTooltip',
-  { defaultMessage: 'Open the alerts this detonation produced' }
+  { defaultMessage: 'Open this detonation' }
+);
+
+export const HASH_ALERTS_ACTION = i18n.translate(
+  'xpack.securitySolution.detonate.table.hashAlertsAction',
+  { defaultMessage: 'Explore alerts in the Alerts page' }
 );
 
 export const NO_DETONATIONS = i18n.translate('xpack.securitySolution.detonate.table.empty', {
@@ -451,6 +445,34 @@ export const DETAIL_NO_ALERTS = i18n.translate('xpack.securitySolution.detonate.
   defaultMessage: 'This detonation produced no alerts',
 });
 
+/* MITRE ATT&CK */
+
+export const MITRE_TITLE = i18n.translate('xpack.securitySolution.detonate.mitre.title', {
+  defaultMessage: 'MITRE ATT&CK',
+});
+
+export const MITRE_SUBTITLE = i18n.translate('xpack.securitySolution.detonate.mitre.subtitle', {
+  defaultMessage: 'Tactics and techniques mapped by the rules that alerted on this detonation',
+});
+
+export const MITRE_REFERENCE_TOOLTIP = (name: string) =>
+  i18n.translate('xpack.securitySolution.detonate.mitre.referenceTooltip', {
+    defaultMessage: 'Read about {name} on attack.mitre.org',
+    values: { name },
+  });
+
+export const MITRE_ALERTS_TOOLTIP = (name: string) =>
+  i18n.translate('xpack.securitySolution.detonate.mitre.alertsTooltip', {
+    defaultMessage: 'Show the alerts mapped to {name} on the Alerts page',
+    values: { name },
+  });
+
+export const MITRE_ALERT_COUNT = (count: number) =>
+  i18n.translate('xpack.securitySolution.detonate.mitre.alertCount', {
+    defaultMessage: '{count, plural, one {# alert} other {# alerts}}',
+    values: { count },
+  });
+
 /* AI summary */
 
 export const AI_SUMMARY_TITLE = i18n.translate('xpack.securitySolution.detonate.ai.title', {
@@ -470,6 +492,11 @@ export const AI_SUMMARY_PROMPT = i18n.translate('xpack.securitySolution.detonate
   defaultMessage:
     'Summarise what this sample did on the endpoint, and extract the indicators worth pivoting on.',
 });
+
+export const AI_SUMMARY_GENERATING = i18n.translate(
+  'xpack.securitySolution.detonate.ai.generating',
+  { defaultMessage: 'Summarising this detonation…' }
+);
 
 export const AI_SUMMARY_NO_CONNECTOR = i18n.translate(
   'xpack.securitySolution.detonate.ai.noConnector',

@@ -212,9 +212,8 @@ const UNFILTERED: DetonationQueryFilters = {
 /**
  * Header figures across the whole selected range.
  *
- * Deliberately ignores the filters, unlike everything below them: "722 of 1,066 detonations
- * detected" is the page's opening claim, and narrowing it by "detected only" would collapse the
- * two numbers into one.
+ * Deliberately ignores the filters, unlike everything below them: these state the reach of the
+ * detonation programme itself rather than of whatever the user is currently looking at.
  */
 export const useDetonationKpis = ({
   timeRange,
@@ -225,7 +224,6 @@ export const useDetonationKpis = ({
 
   const { records, isLoading, isError } = useDetonateEsqlQuery<{
     totalDetonations: number;
-    detonationsWithAlerts: number;
     endpointAlerts: number;
     detectionAlerts: number;
   }>({ query, timeRange, queryKey: 'detonationKpis' });
@@ -248,7 +246,6 @@ export const useDetonationKpis = ({
     const row = records[0];
     return {
       totalDetonations: row?.totalDetonations ?? 0,
-      detonationsWithAlerts: row?.detonationsWithAlerts ?? 0,
       endpointAlerts: row?.endpointAlerts ?? 0,
       detectionAlerts: row?.detectionAlerts ?? 0,
       namedFamilies,
