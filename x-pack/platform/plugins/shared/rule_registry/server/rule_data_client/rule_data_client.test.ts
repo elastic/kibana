@@ -499,6 +499,100 @@ describe('RuleDataClient', () => {
           expect(ruleDataClient.isWriteEnabled()).toBe(true);
         });
 
+        test('does not log an error when all bulk failures are benign create version conflicts', async () => {
+          scopedClusterClient.bulk.mockResponseOnce({
+            took: 12,
+            errors: true,
+            items: [
+              {
+                create: {
+                  _index: 'test',
+                  _id: '1',
+                  _version: 1,
+                  result: 'created',
+                  _shards: { total: 2, successful: 1, failed: 0 },
+                  status: 201,
+                  _seq_no: 1,
+                  _primary_term: 1,
+                },
+              },
+              {
+                create: {
+                  _index: 'test',
+                  _id: '2',
+                  status: 409,
+                  error: {
+                    type: 'version_conflict_engine_exception',
+                    reason: '[2]: version conflict, document already exists (current version [1])',
+                  },
+                },
+              },
+            ],
+          });
+          const ruleDataClient = new RuleDataClient(
+            getRuleDataClientOptions({ isUsingDataStreams })
+          );
+          expect(ruleDataClient.isWriteEnabled()).toBe(true);
+          const writer = await ruleDataClient.getWriter();
+
+          // Previously, a delay between calling getWriter() and using a writer function
+          // would cause an Unhandled promise rejection if there were any errors getting a writer
+          // Adding this delay in the tests to ensure this does not pop up again.
+          await delay();
+
+          await writer.bulk({});
+
+          expect(logger.error).not.toHaveBeenCalled();
+          expect(logger.debug).toHaveBeenCalled();
+          expect(ruleDataClient.isWriteEnabled()).toBe(true);
+        });
+
+        test('logs an error when bulk failures include a non-version-conflict error', async () => {
+          scopedClusterClient.bulk.mockResponseOnce({
+            took: 12,
+            errors: true,
+            items: [
+              {
+                create: {
+                  _index: 'test',
+                  _id: '1',
+                  status: 409,
+                  error: {
+                    type: 'version_conflict_engine_exception',
+                    reason: '[1]: version conflict, document already exists (current version [1])',
+                  },
+                },
+              },
+              {
+                create: {
+                  _index: 'test',
+                  _id: '2',
+                  status: 400,
+                  error: {
+                    type: 'mapper_parsing_exception',
+                    reason: 'failed to parse field',
+                  },
+                },
+              },
+            ],
+          });
+          const ruleDataClient = new RuleDataClient(
+            getRuleDataClientOptions({ isUsingDataStreams })
+          );
+          expect(ruleDataClient.isWriteEnabled()).toBe(true);
+          const writer = await ruleDataClient.getWriter();
+
+          // Previously, a delay between calling getWriter() and using a writer function
+          // would cause an Unhandled promise rejection if there were any errors getting a writer
+          // Adding this delay in the tests to ensure this does not pop up again.
+          await delay();
+
+          await writer.bulk({});
+
+          expect(logger.error).toHaveBeenCalledTimes(1);
+          expect(ruleDataClient.isWriteEnabled()).toBe(true);
+        });
+
         test('waits until cluster client is ready before calling bulk', async () => {
           scopedClusterClient.bulk.mockResolvedValueOnce(
             elasticsearchClientMock.createSuccessTransportRequestPromise(
