@@ -1,5 +1,5 @@
 {
-  "sha1": "bc87b067473ac65df746b61b86fa9233694637b9",
+  "sha1": "9f4ae06174898bc23b4ea01dbb8ad4ad53f60190",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -3017,6 +3017,123 @@
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/matcher_value_suggestions.spec.ts",
         "line": 62,
         "column": 8
+      }
+    },
+    {
+      "id": "8a0f9c4b951e191-ea3ba7758654b28",
+      "title": "Rule artifacts API create: round-trips artifacts of registered types",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/rule_artifacts.spec.ts",
+        "line": 30,
+        "column": 86
+      }
+    },
+    {
+      "id": "8a0f9c4b951e191-63886d3245a8e7a",
+      "title": "Rule artifacts API create: an unregistered artifact type is stored as-is",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/rule_artifacts.spec.ts",
+        "line": 44,
+        "column": 78
+      }
+    },
+    {
+      "id": "8a0f9c4b951e191-b1963f8aa4a55e9",
+      "title": "Rule artifacts API validation: rejects whitespace-only runbook content with INVALID_ARTIFACT_DATA",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/rule_artifacts.spec.ts",
+        "line": 59,
+        "column": 81
+      }
+    },
+    {
+      "id": "8a0f9c4b951e191-a4b66a0f368e86b",
+      "title": "Rule artifacts API validation: rejects an undeclared field because registered schemas are closed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/rule_artifacts.spec.ts",
+        "line": 76,
+        "column": 14
+      }
+    },
+    {
+      "id": "8a0f9c4b951e191-00195ad99bdf27b",
+      "title": "Rule artifacts API validation: rejects runbook content above the per-type limit",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/rule_artifacts.spec.ts",
+        "line": 95,
+        "column": 10
+      }
+    },
+    {
+      "id": "8a0f9c4b951e191-0bcd1410580fbda",
+      "title": "Rule artifacts API validation: rejects a missing required field for a registered type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/rule_artifacts.spec.ts",
+        "line": 109,
+        "column": 8
+      }
+    },
+    {
+      "id": "8a0f9c4b951e191-85ceec71ce5bb29",
+      "title": "Rule artifacts API validation: rejects duplicate artifact ids",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/rule_artifacts.spec.ts",
+        "line": 126,
+        "column": 10
+      }
+    },
+    {
+      "id": "8a0f9c4b951e191-6f79e145da59d4a",
+      "title": "Rule artifacts API validation: an unregistered type is never rejected, even with large data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/rule_artifacts.spec.ts",
+        "line": 163,
+        "column": 27
+      }
+    },
+    {
+      "id": "8a0f9c4b951e191-bbdfa5752bcd79d",
+      "title": "Rule artifacts API validation: a registered type accepts data at its declared limit",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/rule_artifacts.spec.ts",
+        "line": 160,
+        "column": 84
       }
     },
     {
