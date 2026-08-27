@@ -5,9 +5,12 @@
  * 2.0.
  */
 
+import type { Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import path from 'node:path';
 import { editableToolTypes } from '@kbn/agent-builder-common';
+import type { ApiTarget } from '@kbn/agent-builder-common';
+import { isKnownApi } from '@kbn/agent-builder-common/apis/known_apis';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { toDescriptor, toDescriptorWithSchema } from '../services/tools/utils/tool_conversion';
@@ -458,6 +461,50 @@ export function registerToolsRoutes({
                   },
                 })
               ),
+              approvals: schema.maybe(
+                schema.object(
+                  {
+                    auto_approved_apis: schema.maybe(
+                      schema.arrayOf(
+                        schema.object(
+                          {
+                            target: schema.oneOf(
+                              [schema.literal('elasticsearch'), schema.literal('kibana')],
+                              { meta: { description: 'Backend the API belongs to.' } }
+                            ) satisfies Type<ApiTarget>,
+                            api: schema.string({
+                              maxLength: 256,
+                              meta: {
+                                description:
+                                  'API identifier, formed from the namespace and name (for example `indices.create`).',
+                              },
+                            }),
+                          },
+                          {
+                            validate: (entry) =>
+                              isKnownApi(entry)
+                                ? undefined
+                                : `Unknown api "${entry.api}" for target "${entry.target}".`,
+                          }
+                        ),
+                        {
+                          maxSize: 100,
+                          meta: {
+                            description:
+                              'Destructive Elasticsearch or Kibana APIs the tool may call without a user confirmation. A tool run has no live user to answer the confirmation prompt, so a destructive API is refused unless it is listed here.',
+                          },
+                        }
+                      )
+                    ),
+                  },
+                  {
+                    meta: {
+                      description:
+                        'Actions the tool run may take that would otherwise need a live user to approve them. Applies to this run and any sub-agents it spawns.',
+                    },
+                  }
+                )
+              ),
             }),
           },
         },
@@ -470,6 +517,7 @@ export function registerToolsRoutes({
           tool_id: id,
           tool_params: toolParams,
           connector_id: defaultConnectorId,
+          approvals,
         } = request.body;
         const { tools: toolService } = getInternalServices();
         const registry = await toolService.getRegistry({ request });
@@ -489,6 +537,7 @@ export function registerToolsRoutes({
           toolParams,
           source: 'user',
           defaultConnectorId,
+          ...(approvals ? { approvals: { autoApprovedApis: approvals.auto_approved_apis } } : {}),
         });
 
         return response.ok({

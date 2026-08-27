@@ -7,6 +7,7 @@
 
 import {
   agentBuilderDefaultAgentId,
+  createNonInteractiveConfig,
   ConversationAccessControlMode,
   isConversationCreatedEvent,
   isConversationUpdatedEvent,
@@ -70,6 +71,7 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
           attachments,
           metadata,
           configuration_overrides: configurationOverrides,
+          approvals,
         } = context.input;
 
         const {
@@ -135,6 +137,7 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
           request,
           abortSignal: context.abortSignal,
           metadata,
+          interactive: createNonInteractiveConfig(approvals?.auto_approved_apis),
           params: {
             agentId: effectiveAgentId,
             connectorId: effectiveConnectorId,

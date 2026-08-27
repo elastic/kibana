@@ -5131,6 +5131,32 @@ paths:
               additionalProperties: false
               type: object
               properties:
+                approvals:
+                  additionalProperties: false
+                  description: Actions the tool run may take that would otherwise need a live user to approve them. Applies to this run and any sub-agents it spawns.
+                  type: object
+                  properties:
+                    auto_approved_apis:
+                      description: Destructive Elasticsearch or Kibana APIs the tool may call without a user confirmation. A tool run has no live user to answer the confirmation prompt, so a destructive API is refused unless it is listed here.
+                      items:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          api:
+                            description: API identifier, formed from the namespace and name (for example `indices.create`).
+                            maxLength: 256
+                            type: string
+                          target:
+                            description: Backend the API belongs to.
+                            enum:
+                              - elasticsearch
+                              - kibana
+                            type: string
+                        required:
+                          - target
+                          - api
+                      maxItems: 100
+                      type: array
                 connector_id:
                   description: Optional connector ID for tools that require external integrations.
                   type: string

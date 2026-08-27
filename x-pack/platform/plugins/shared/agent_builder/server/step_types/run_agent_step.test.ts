@@ -5,8 +5,17 @@
  * 2.0.
  */
 
+jest.mock('@elastic/schemas/es/tools/manifest.js', () => ({
+  esManifest: [{ id: 'indices.create' }, { id: 'indices.delete' }],
+}));
+
+jest.mock('@elastic/schemas/kibana/tools/manifest.js', () => ({
+  kibanaManifest: [{ id: 'cases.create' }],
+}));
+
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { of, throwError } from 'rxjs';
+import { z } from '@kbn/zod/v4';
 import { ChatEventType, createRequestAbortedError } from '@kbn/agent-builder-common';
 import {
   AGGREGATE_BY_REQUIRES_PLUGIN_ID_MESSAGE,
@@ -406,6 +415,117 @@ describe('ai.agent workflow step (Agent Builder)', () => {
       })
     );
     expect(res.output?.message).toBe('ok');
+  });
+
+  describe('approvals', () => {
+    const runStep = async (input: Record<string, unknown>) => {
+      const events$ = of({
+        type: ChatEventType.roundComplete,
+        data: { round: { id: 'r-1', response: { message: 'ok' } } },
+      });
+      const execution = createExecutionMock(events$);
+      const serviceManager = { internalStart: { execution } } as any;
+
+      const step = getRunAgentStepDefinition(serviceManager);
+      await step.handler(createContext({ input }));
+
+      return execution;
+    };
+
+    it('grants the listed APIs without ever enabling interactivity', async () => {
+      const autoApprovedApis = [{ target: 'elasticsearch', api: 'indices.create' }];
+
+      const execution = await runStep({
+        message: 'hello',
+        approvals: { auto_approved_apis: autoApprovedApis },
+      });
+
+      expect(execution.executeAgent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          interactive: { enabled: false, auto_approved_apis: autoApprovedApis },
+        })
+      );
+    });
+
+    it.each<{ description: string; input: Record<string, unknown> }>([
+      { description: 'omitted', input: { message: 'hello' } },
+      { description: 'an empty object', input: { message: 'hello', approvals: {} } },
+      {
+        description: 'an empty list',
+        input: { message: 'hello', approvals: { auto_approved_apis: [] } },
+      },
+    ])(
+      'runs non-interactively with no grants when the field is $description',
+      async ({ input }) => {
+        const execution = await runStep(input);
+
+        expect(execution.executeAgent.mock.calls[0][0].interactive).toEqual({ enabled: false });
+      }
+    );
+
+    it('emits a per-target identifier enum, which is what drives editor autocomplete', () => {
+      const jsonSchema = z.toJSONSchema(InputSchema, {
+        unrepresentable: 'any',
+        io: 'input',
+      }) as Record<string, any>;
+
+      const apis = jsonSchema.properties.approvals.properties.auto_approved_apis;
+      const branches = apis.items.anyOf ?? apis.items.oneOf;
+
+      const byTarget = Object.fromEntries(
+        branches.map((branch: any) => [branch.properties.target.const, branch.properties.api.enum])
+      );
+
+      expect(byTarget.elasticsearch).toContain('indices.create');
+      expect(byTarget.elasticsearch).not.toContain('cases.create');
+      expect(byTarget.kibana).toContain('cases.create');
+      expect(byTarget.kibana).not.toContain('indices.create');
+    });
+
+    it('accepts a well-formed list', () => {
+      const parsed = InputSchema.safeParse({
+        message: 'hello',
+        approvals: {
+          auto_approved_apis: [
+            { target: 'elasticsearch', api: 'indices.create' },
+            { target: 'kibana', api: 'cases.create' },
+          ],
+        },
+      });
+      expect(parsed.success).toBe(true);
+    });
+
+    it.each<{ description: string; autoApprovedApis: unknown }>([
+      {
+        description: 'an identifier that names no real API',
+        autoApprovedApis: [{ target: 'elasticsearch', api: 'indices.crate' }],
+      },
+      {
+        description: 'an identifier that only exists on the other target',
+        autoApprovedApis: [{ target: 'kibana', api: 'indices.create' }],
+      },
+      {
+        description: 'a bare namespace instead of a full identifier',
+        autoApprovedApis: [{ target: 'elasticsearch', api: 'indices' }],
+      },
+      {
+        description: 'an unknown target',
+        autoApprovedApis: [{ target: 'postgres', api: 'indices.create' }],
+      },
+      {
+        description: 'a list exceeding 100 entries',
+        autoApprovedApis: Array.from({ length: 101 }, () => ({
+          target: 'elasticsearch',
+          api: 'indices.create',
+        })),
+      },
+    ])('rejects $description', ({ autoApprovedApis }) => {
+      const parsed = InputSchema.safeParse({
+        message: 'hello',
+        approvals: { auto_approved_apis: autoApprovedApis },
+      });
+      expect(parsed.success).toBe(false);
+    });
   });
 
   describe('configuration_overrides (InputSchema)', () => {
