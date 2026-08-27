@@ -55,8 +55,8 @@ export interface AdapterRunContext {
    * state such as TAXII cursors. No adapter uses it yet.
    *
    * It runs as the requesting user, so in practice it CANNOT touch the plugin-owned
-   * `.kibana-threat-*` indices: a Kibana feature privilege is not an Elasticsearch
-   * privilege, and nothing in this plugin grants an index privilege on them, so every
+   * threat intel indices: a Kibana feature privilege is not an Elasticsearch privilege,
+   * and nothing grants the requesting user an index privilege on them, so every
    * non-superuser gets a security_exception. Anything reading or writing those has to
    * go through the internal user, as the routes and tasks do.
    *
@@ -66,6 +66,11 @@ export interface AdapterRunContext {
    * on one of these reads it fine without `allow_restricted_indices`. Verified against
    * a live cluster. The distinction matters because it is the difference between "no
    * role can be given access" and "no role has been given access yet".
+   *
+   * `.threat-intel-indicators` is the exception that proves the point. It sits outside
+   * `.kibana-` precisely so Elasticsearch's reserved roles can grant its per-space
+   * aliases to Detection Engine rules. That makes it grantable, not granted: this
+   * client still has no privilege on it.
    */
   esClient: ElasticsearchClient;
   /** Step-scoped logger. Per-adapter messages are tagged with the adapter type. */
