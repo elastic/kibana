@@ -16,18 +16,16 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { createErrorResult } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { isDashboardAttachment } from '@kbn/agent-builder-dashboards-common';
-import { createCustomContentTemplateResolver } from '@kbn/custom-content-server';
 import { dashboardTools } from '../../../common';
-import {
-  createVisPanelResolver,
-  executeDashboardOperations,
-  getErrorMessage,
-} from '../generate/core';
-import { applyDefaultDashboardTimeRange } from '../generate/time_range';
+import { applyDashboardOperations } from '../generate/apply_dashboard_operations';
+import { getErrorMessage } from '../generate/core';
 import { inspectDashboardImage as defaultInspectDashboardImage } from '../review_dashboard/inspect_dashboard_image';
 import type { InspectDashboardImage } from '../review_dashboard/types';
 import type { GetImageBytes } from '../review_dashboard';
-import { findingsToPrettifyOperations } from './findings_to_prettify_operations';
+import {
+  planPrettifyOperations as defaultPlanPrettifyOperations,
+  type PlanPrettifyOperations,
+} from './plan_prettify_operations';
 
 const MISSING_PRETTIFY_EVIDENCE =
   'Prettify requires a dashboard attachment and an image of the painted dashboard. Without the image this is a normal dashboard edit.';
@@ -40,17 +38,19 @@ const summarizeFindings = (findings: Array<{ rule: string; what: string }>) =>
 export const prettifyDashboardTool = ({
   getImageBytes,
   inspectDashboardImage = defaultInspectDashboardImage,
+  planPrettifyOperations = defaultPlanPrettifyOperations,
   customContentEnabled = true,
 }: {
   getImageBytes: GetImageBytes;
   inspectDashboardImage?: InspectDashboardImage;
+  planPrettifyOperations?: PlanPrettifyOperations;
   customContentEnabled?: boolean;
 }): BuiltinSkillBoundedTool<typeof prettifyDashboardSchema> => ({
   id: dashboardTools.prettifyDashboard,
   type: ToolType.builtin,
-  description: `Prettify a painted Kibana dashboard: inspect the screenshot, then apply typed layout and chart-type fixes to the same dashboard attachment.
+  description: `Prettify a painted Kibana dashboard: inspect the screenshot, decide generate operations, and apply them to the same dashboard attachment.
 
-Requires a dashboard attachment and an image in the conversation. Inspects the image (Dashboard Review) and, when there are findings, mutates the dashboard in this same call. Does not add or remove visualization panels. Do not call generate_dashboard for a Prettify request. Do not read the image yourself.
+Requires a dashboard attachment and an image in the conversation. Inspects the image (Dashboard Review), then an inner planner writes operations[] and this tool runs the same generate core. Does not add or remove visualization panels. Do not call generate_dashboard for a Prettify request. Do not read the image yourself.
 
 Call this once when the user asked to prettify a dashboard and an image is attached.`,
   schema: prettifyDashboardSchema,
@@ -84,16 +84,14 @@ Call this once when the user asked to prettify a dashboard and an image is attac
         modelProvider,
       });
       const findingSummaries = summarizeFindings(findings);
-      const operations = findingsToPrettifyOperations(findings);
 
-      if (operations.length === 0) {
+      if (findings.length === 0) {
         return {
           results: [
             {
               type: ToolResultType.other,
               data: {
                 findings: findingSummaries,
-                applied: false,
                 attachment_id: dashboardAttachment.id,
                 version: dashboardAttachment.current_version ?? 1,
               },
@@ -102,35 +100,35 @@ Call this once when the user asked to prettify a dashboard and an image is attac
         };
       }
 
-      const { dashboardData: nextDashboard, failures } = await executeDashboardOperations({
-        dashboardData,
-        operations,
-        logger,
-        resolvePanelContent: createVisPanelResolver({
-          logger,
-          modelProvider,
-          events,
-          esClient,
-        }),
-        resolveCustomContentTemplate: customContentEnabled
-          ? createCustomContentTemplateResolver({ logger, modelProvider, esClient })
-          : undefined,
-      });
+      const operations = await planPrettifyOperations({ findings, modelProvider });
 
-      const finalDashboardData = await applyDefaultDashboardTimeRange({
-        dashboardData: nextDashboard,
-        esClient,
-        logger,
-      });
-
-      const attachment = await attachments.update(dashboardAttachment.id, {
-        data: finalDashboardData,
-        description: `Dashboard: ${finalDashboardData.title}`,
-      });
-
-      if (!attachment) {
-        throw new Error(`Failed to persist dashboard attachment "${dashboardAttachment.id}".`);
+      if (operations.length === 0) {
+        return {
+          results: [
+            {
+              type: ToolResultType.other,
+              data: {
+                findings: findingSummaries,
+                attachment_id: dashboardAttachment.id,
+                version: dashboardAttachment.current_version ?? 1,
+              },
+            },
+          ],
+        };
       }
+
+      const { attachment, failures } = await applyDashboardOperations({
+        attachments,
+        dashboardAttachmentId: dashboardAttachment.id,
+        existingDashboard: dashboardData,
+        operations,
+        createNew: false,
+        logger,
+        events,
+        esClient,
+        modelProvider,
+        customContentEnabled,
+      });
 
       logger.info('Prettify updated the dashboard attachment');
 
@@ -140,7 +138,6 @@ Call this once when the user asked to prettify a dashboard and an image is attac
             type: ToolResultType.other,
             data: {
               findings: findingSummaries,
-              applied: true,
               attachment_id: attachment.id,
               version: attachment.current_version ?? 1,
               failures: failures.length > 0 ? failures : undefined,

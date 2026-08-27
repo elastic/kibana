@@ -66,21 +66,21 @@ const parsePackLayout = (finding: Record<string, unknown>): PackLayoutFinding | 
   }
   const panels: PackLayoutPanelFix[] = [];
   for (const item of finding.fix.panels) {
-    if (!isRecord(item) || !isNonEmptyString(item.panel_id)) {
+    if (!isRecord(item) || !isNonEmptyString(item.panelId)) {
       return undefined;
     }
     const grid = parseGrid(item.grid);
     if (!grid) {
       return undefined;
     }
-    const sectionId = item.section_id;
+    const sectionId = item.sectionId;
     if (sectionId !== undefined && sectionId !== null && !isNonEmptyString(sectionId)) {
       return undefined;
     }
     panels.push({
-      panel_id: item.panel_id,
+      panelId: item.panelId,
       grid,
-      ...(sectionId === undefined ? {} : { section_id: sectionId }),
+      ...(sectionId === undefined ? {} : { sectionId }),
     });
   }
   return { rule: 'pack_layout', what: finding.what, fix: { panels } };
@@ -96,19 +96,14 @@ const parseWeakSections = (finding: Record<string, unknown>): WeakSectionsFindin
   }
   const sections: WeakSectionsFinding['fix']['sections'] = [];
   for (const item of finding.fix.sections) {
-    if (
-      !isRecord(item) ||
-      !isNonEmptyString(item.id) ||
-      !isNonEmptyString(item.title) ||
-      !Array.isArray(item.panel_ids)
-    ) {
+    if (!isRecord(item) || !isNonEmptyString(item.id) || !isNonEmptyString(item.title)) {
       return undefined;
     }
-    const panelIds = item.panel_ids.filter(isNonEmptyString);
-    if (panelIds.length !== item.panel_ids.length || panelIds.length === 0) {
+    const grid = isRecord(item.grid) ? item.grid : undefined;
+    if (!grid || !isFiniteNumber(grid.y) || grid.y < 0) {
       return undefined;
     }
-    sections.push({ id: item.id, title: item.title, panel_ids: panelIds });
+    sections.push({ id: item.id, title: item.title, grid: { y: grid.y } });
   }
   if (sections.length === 0) {
     return undefined;
@@ -170,7 +165,7 @@ const parseMetricFill = (finding: Record<string, unknown>): MetricFillFinding | 
     !isNonEmptyString(finding.panel_id) ||
     !isNonEmptyString(finding.what) ||
     !isRecord(finding.fix) ||
-    finding.fix.clear_background !== true
+    finding.fix.clear_metric_fill !== true
   ) {
     return undefined;
   }
@@ -178,7 +173,7 @@ const parseMetricFill = (finding: Record<string, unknown>): MetricFillFinding | 
     rule: 'metric_fill',
     panel_id: finding.panel_id,
     what: finding.what,
-    fix: { clear_background: true },
+    fix: { clear_metric_fill: true },
   };
 };
 
@@ -187,7 +182,7 @@ const parseThinMetric = (finding: Record<string, unknown>): ThinMetricFinding | 
     !isNonEmptyString(finding.panel_id) ||
     !isNonEmptyString(finding.what) ||
     !isRecord(finding.fix) ||
-    finding.fix.enhance !== 'trendline'
+    finding.fix.metric_trendline !== true
   ) {
     return undefined;
   }
@@ -195,7 +190,7 @@ const parseThinMetric = (finding: Record<string, unknown>): ThinMetricFinding | 
     rule: 'thin_metric',
     panel_id: finding.panel_id,
     what: finding.what,
-    fix: { enhance: 'trendline' },
+    fix: { metric_trendline: true },
   };
 };
 
@@ -209,10 +204,10 @@ const parseMonotone = (finding: Record<string, unknown>): MonotoneChartTypesFind
   }
   const changes: MonotoneChartTypesFinding['fix']['changes'] = [];
   for (const item of finding.fix.changes) {
-    if (!isRecord(item) || !isNonEmptyString(item.panel_id) || !isNonEmptyString(item.chartType)) {
+    if (!isRecord(item) || !isNonEmptyString(item.panelId) || !isNonEmptyString(item.chartType)) {
       return undefined;
     }
-    changes.push({ panel_id: item.panel_id, chartType: item.chartType });
+    changes.push({ panelId: item.panelId, chartType: item.chartType });
   }
   if (changes.length === 0) {
     return undefined;
@@ -223,13 +218,13 @@ const parseMonotone = (finding: Record<string, unknown>): MonotoneChartTypesFind
 const parseWeakControls = (finding: Record<string, unknown>): WeakControlsFinding | undefined => {
   if (
     !isRecord(finding.fix) ||
-    !Array.isArray(finding.fix.add) ||
+    !Array.isArray(finding.fix.controls) ||
     !isNonEmptyString(finding.what)
   ) {
     return undefined;
   }
-  const add: WeakControlsFinding['fix']['add'] = [];
-  for (const item of finding.fix.add) {
+  const controls: WeakControlsFinding['fix']['controls'] = [];
+  for (const item of finding.fix.controls) {
     if (
       !isRecord(item) ||
       item.type !== OPTIONS_LIST_CONTROL ||
@@ -238,17 +233,17 @@ const parseWeakControls = (finding: Record<string, unknown>): WeakControlsFindin
     ) {
       return undefined;
     }
-    add.push({
+    controls.push({
       type: OPTIONS_LIST_CONTROL,
       field_name: item.field_name,
       index: item.index,
       ...(isNonEmptyString(item.title) ? { title: item.title } : {}),
     });
   }
-  if (add.length === 0) {
+  if (controls.length === 0) {
     return undefined;
   }
-  return { rule: 'weak_controls', what: finding.what, fix: { add } };
+  return { rule: 'weak_controls', what: finding.what, fix: { controls } };
 };
 
 const isCompletePack = ({
@@ -266,15 +261,15 @@ const isCompletePack = ({
   const seen = new Set<string>();
   const panelsById = new Map(panels.map((entry) => [entry.id, entry]));
   for (const item of finding.fix.panels) {
-    if (seen.has(item.panel_id) || !panelsById.has(item.panel_id)) {
+    if (seen.has(item.panelId) || !panelsById.has(item.panelId)) {
       return false;
     }
-    seen.add(item.panel_id);
-    const catalogPanel = panelsById.get(item.panel_id);
+    seen.add(item.panelId);
+    const catalogPanel = panelsById.get(item.panelId);
     if (catalogPanel?.chart_type === 'data_table' && item.grid.w < MIN_TABLE_WIDTH) {
       return false;
     }
-    if (item.section_id != null && !allowedSectionIds.has(item.section_id)) {
+    if (item.sectionId != null && !allowedSectionIds.has(item.sectionId)) {
       return false;
     }
   }
@@ -283,30 +278,20 @@ const isCompletePack = ({
 
 const isValidWeakSections = ({
   finding,
-  panels,
   sections,
 }: {
   finding: WeakSectionsFinding;
-  panels: PanelCatalogEntry[];
   sections: SectionCatalogEntry[];
 }): boolean => {
   if (sections.length > 0) {
     return false;
   }
-  const panelIds = new Set(panels.map((entry) => entry.id));
   const seenSectionIds = new Set<string>();
-  const seenPanelIds = new Set<string>();
   for (const section of finding.fix.sections) {
     if (seenSectionIds.has(section.id)) {
       return false;
     }
     seenSectionIds.add(section.id);
-    for (const panelId of section.panel_ids) {
-      if (!panelIds.has(panelId) || seenPanelIds.has(panelId)) {
-        return false;
-      }
-      seenPanelIds.add(panelId);
-    }
   }
   return true;
 };
@@ -457,7 +442,7 @@ export const filterDashboardFindings = ({
 
   for (const finding of parsed) {
     if (finding.rule === 'weak_sections') {
-      if (!isValidWeakSections({ finding, panels, sections })) {
+      if (!isValidWeakSections({ finding, sections })) {
         continue;
       }
       for (const section of finding.fix.sections) {
@@ -523,13 +508,13 @@ export const filterDashboardFindings = ({
       }
       const changes = finding.fix.changes.filter((change) => {
         if (
-          !panelIds.has(change.panel_id) ||
-          invertPanelIds.has(change.panel_id) ||
-          oneCategoryPanelIds.has(change.panel_id)
+          !panelIds.has(change.panelId) ||
+          invertPanelIds.has(change.panelId) ||
+          oneCategoryPanelIds.has(change.panelId)
         ) {
           return false;
         }
-        const chartType = panelsById.get(change.panel_id)?.chart_type;
+        const chartType = panelsById.get(change.panelId)?.chart_type;
         return chartType === undefined || !VARIETY_SKIP_CHART_TYPES.has(chartType);
       });
       const capped = changes.slice(0, VARIETY_CAP);
@@ -546,7 +531,7 @@ export const filterDashboardFindings = ({
     if (dropdownCount >= 2) {
       continue;
     }
-    const add = finding.fix.add
+    const add = finding.fix.controls
       .filter((control) =>
         catalogContainsFieldAndIndex({
           panels,
@@ -556,7 +541,7 @@ export const filterDashboardFindings = ({
       )
       .slice(0, OPTIONS_LIST_CAP);
     if (add.length > 0) {
-      kept.push({ ...finding, fix: { add } });
+      kept.push({ ...finding, fix: { controls: add } });
     }
   }
 

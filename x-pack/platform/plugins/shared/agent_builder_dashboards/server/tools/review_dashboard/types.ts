@@ -28,9 +28,9 @@ export interface PanelGrid {
 }
 
 export interface PackLayoutPanelFix {
-  panel_id: string;
+  panelId: string;
   grid: PanelGrid;
-  section_id?: string | null;
+  sectionId?: string | null;
 }
 
 export interface PackLayoutFinding {
@@ -42,13 +42,13 @@ export interface PackLayoutFinding {
 export interface WeakSectionsFinding {
   rule: 'weak_sections';
   what: string;
-  fix: { sections: Array<{ id: string; title: string; panel_ids: string[] }> };
+  fix: { sections: Array<{ id: string; title: string; grid: { y: number } }> };
 }
 
 export interface MonotoneChartTypesFinding {
   rule: 'monotone_chart_types';
   what: string;
-  fix: { changes: Array<{ panel_id: string; chartType: string }> };
+  fix: { changes: Array<{ panelId: string; chartType: string }> };
 }
 
 export interface WrongChartTypeFinding {
@@ -76,21 +76,21 @@ export interface MetricFillFinding {
   rule: 'metric_fill';
   panel_id: string;
   what: string;
-  fix: { clear_background: true };
+  fix: { clear_metric_fill: true };
 }
 
 export interface ThinMetricFinding {
   rule: 'thin_metric';
   panel_id: string;
   what: string;
-  fix: { enhance: 'trendline' };
+  fix: { metric_trendline: true };
 }
 
 export interface WeakControlsFinding {
   rule: 'weak_controls';
   what: string;
   fix: {
-    add: Array<{
+    controls: Array<{
       type: 'options_list_control';
       field_name: string;
       index: string;

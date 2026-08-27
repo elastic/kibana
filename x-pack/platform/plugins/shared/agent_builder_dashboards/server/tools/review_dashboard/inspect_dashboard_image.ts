@@ -35,9 +35,9 @@ const dashboardReviewSchema = z.object({
         fix: z.object({
           panels: z.array(
             z.object({
-              panel_id: z.string(),
+              panelId: z.string(),
               grid: panelGridSchema,
-              section_id: z.string().nullable().optional(),
+              sectionId: z.string().nullable().optional(),
             })
           ),
         }),
@@ -50,7 +50,7 @@ const dashboardReviewSchema = z.object({
             z.object({
               id: z.string(),
               title: z.string(),
-              panel_ids: z.array(z.string()),
+              grid: z.object({ y: z.number() }),
             })
           ),
         }),
@@ -61,7 +61,7 @@ const dashboardReviewSchema = z.object({
         fix: z.object({
           changes: z.array(
             z.object({
-              panel_id: z.string(),
+              panelId: z.string(),
               chartType: z.string(),
             })
           ),
@@ -89,19 +89,19 @@ const dashboardReviewSchema = z.object({
         rule: z.literal('metric_fill'),
         panel_id: z.string(),
         what: z.string(),
-        fix: z.object({ clear_background: z.literal(true) }),
+        fix: z.object({ clear_metric_fill: z.literal(true) }),
       }),
       z.object({
         rule: z.literal('thin_metric'),
         panel_id: z.string(),
         what: z.string(),
-        fix: z.object({ enhance: z.literal('trendline') }),
+        fix: z.object({ metric_trendline: z.literal(true) }),
       }),
       z.object({
         rule: z.literal('weak_controls'),
         what: z.string(),
         fix: z.object({
-          add: z.array(
+          controls: z.array(
             z.object({
               type: z.literal('options_list_control'),
               field_name: z.string(),
@@ -117,13 +117,13 @@ const dashboardReviewSchema = z.object({
 
 const DASHBOARD_REVIEW_PROMPT = `You are Dashboard Review, a high-precision vision sensor for a Kibana dashboard screenshot.
 
-Findings trigger an automated generate. Every false positive has a real cost: the agent may rebuild working visualizations. Report a finding ONLY when you are confident it is a real, observable defect in the painted dashboard and fixing it would materially change what a viewer sees.
+Findings become input to an inner planner that writes generate_dashboard operations. Every false positive has a real cost: the planner may rebuild working visualizations. Report a finding ONLY when you are confident it is a real, observable defect in the painted dashboard and fixing it would materially change what a viewer sees.
 
 You receive:
 - A PNG of the painted dashboard
 - The full dashboard attachment (title, description, time range, panels with type/id/grid/config, sections, controls)
 
-The attachment is the source of truth for panel ids, grid, chart type (\`config.type\`), ES|QL (\`config.data_source\`), hide_title, metric color (\`apply_color_to\`), secondary metrics, and trendlines. The PNG is how it looks. Infer each finding's \`fix\` directly from that attachment: packed grids, chartType, hide_title, control field_name/index from ES|QL. Do not invent ES|QL. Do not invent control fields. Do not treat a table as a metric.
+The attachment is the source of truth for panel ids, grid, chart type (\`config.type\`), ES|QL (\`config.data_source\`), hide_title, metric color (\`apply_color_to\`), secondary metrics, and trendlines. The PNG is how it looks. Infer each finding's \`fix\` in generate_dashboard field names: packed grids use panelId/sectionId; hide_title, clear_metric_fill, and metric_trendline match update_panel_layouts; chartType matches edit_panels; controls match add_controls. Do not invent ES|QL. Do not invent control fields. Do not treat a table as a metric.
 
 Judge the screenshot against the dashboard design practices below. Use those practices to decide layout packing, section grouping, chart-type invert, chart-type variety, missing filters, stacked panel titles, one-category charts, invented metric backgrounds, and sparse KPIs. Do not invent extra rules. Do not add or remove panels.
 
@@ -133,15 +133,15 @@ Zero findings is valid and expected for a well-composed dashboard. When in doubt
 
 ## Rules (only these)
 
-- pack_layout: the grid has holes, a row's widths do not sum to 48, or side-by-side panels do not share height. Also shrink too-tall xy (prefer h around 10, not 20+), stretched KPIs (metric w 6–12, h 5–6), and oversized pies (w: 12). Widen a panel whose legend is clipped. Prefer a primary time series at w: 48 and other series at w: 24. fix.panels MUST list EVERY attachment panel exactly once with a packed {x,y,w,h}. Inside a section, coordinates are section-relative (that section starts at y: 0). Set section_id to an existing section id, or to an id from weak_sections on a flat dashboard, or omit/null for top-level. Prefer w values that divide 48: 6, 8, 12, 24, 48. Never shrink a data table below w 24 (prefer 48).
-- weak_sections: the dashboard is FLAT (no section widgets in the attachment), has roughly 6 or more visualization panels or distinct topics, and needs grouping. fix.sections: review-chosen ids (e.g. section-overview), titles, and existing panel_ids. Do not add charts. Do not emit this when sections already exist.
-- wrong_chart_type: ONE panel's chart family inverts the data (a pie or treemap for a time series; a metric for a distribution). Not "a bar could also be a line". fix: { chartType } from the chart-type practices, keeping the same data.
+- pack_layout: the grid has holes, a row's widths do not sum to 48, or side-by-side panels do not share height. Also shrink too-tall xy (prefer h around 10, not 20+), stretched KPIs (metric w 6–12, h 5–6), and oversized pies (w: 12). Widen a panel whose legend is clipped. Prefer a primary time series at w: 48 and other series at w: 24. fix.panels MUST list EVERY attachment panel exactly once with a packed {panelId, grid: {x,y,w,h}}. This is an update_panel_layouts payload. Inside a section, coordinates are section-relative (that section starts at y: 0). Set sectionId to an existing section id, or to an id from weak_sections on a flat dashboard, or omit/null for top-level. Prefer w values that divide 48: 6, 8, 12, 24, 48. Never shrink a data table below w 24 (prefer 48).
+- weak_sections: the dashboard is FLAT (no section widgets in the attachment), has roughly 6 or more visualization panels or distinct topics, and needs grouping. fix.sections: add_section payloads with review-chosen ids (e.g. section-overview), titles, and grid: { y } (0, 1, 2…). Assign those ids on pack_layout panels via sectionId. Do not add charts. Do not emit this when sections already exist.
+- wrong_chart_type: ONE panel's chart family inverts the data (a pie or treemap for a time series; a metric for a distribution). Not "a bar could also be a line". fix: { chartType } from the chart-type practices, keeping the same data (edit_panels).
 - one_category_chart: a bar/xy with a SINGLE category (one bar, one slice, one ranking row painted as a chart) should be a metric (one number) or pie (part-to-whole). Same ES|QL. At most 3. Never change metric, gauge, pie, or data_table. invert wins on the same panel. fix: { chartType: "metric" | "pie" }.
-- monotone_chart_types: a MAJORITY of visualizations share one family (e.g. all xy/line) even though the attachment shows mixed data shapes. At most 3 changes. Keep the primary time series. Prefer converting categorical breakdowns (one-bar lines, rankings) to bar/pie/heatmap. Never change metric, gauge, or data_table. Same ES|QL. Skip panels already in invert or one_category_chart. fix.changes: [{ panel_id, chartType }].
-- weak_controls: fewer than 2 options_list_control dropdowns AND attachment ES|QL has unused low-cardinality fields in BY/WHERE. At most 3 adds. field_name and index MUST appear in attachment ES|QL. type must be options_list_control. Do not remove controls. Do not report control widths or filter-bar chrome.
-- duplicate_inner_title: the dashboard panel chrome title AND the visualization's inner title are both painted and say the same thing (typical for metric/gauge: "Requests" above the box and "Requests" inside). fix: { hide_title: true } to hide the chrome title. Do not rewrite the inner title. Skip if config.hide_title is already true.
-- metric_fill: a metric paints an invented BACKGROUND color (mustard, brown, pink, etc.), not a colored value. Attachment apply_color_to is "background". fix: { clear_background: true }. Do not restyle bar/pie palettes. Do not report value coloring.
-- thin_metric: a sparse KPI that is only a number on white, with no secondary value and no sparkline (no secondary metric and no background_chart on the primary). fix: { enhance: "trendline" } to add a sparkline from the same query. At most 4. Do not invent a second ES|QL column (no secondary metric). Skip if the metric already has a secondary or background_chart.
+- monotone_chart_types: a MAJORITY of visualizations share one family (e.g. all xy/line) even though the attachment shows mixed data shapes. At most 3 changes. Keep the primary time series. Prefer converting categorical breakdowns (one-bar lines, rankings) to bar/pie/heatmap. Never change metric, gauge, or data_table. Same ES|QL. Skip panels already in invert or one_category_chart. fix.changes: [{ panelId, chartType }].
+- weak_controls: fewer than 2 options_list_control dropdowns AND attachment ES|QL has unused low-cardinality fields in BY/WHERE. At most 3 adds. field_name and index MUST appear in attachment ES|QL. type must be options_list_control. fix.controls is an add_controls payload. Do not remove controls. Do not report control widths or filter-bar chrome.
+- duplicate_inner_title: the dashboard panel chrome title AND the visualization's inner title are both painted and say the same thing (typical for metric/gauge: "Requests" above the box and "Requests" inside). fix: { hide_title: true } for update_panel_layouts. Do not rewrite the inner title. Skip if config.hide_title is already true.
+- metric_fill: a metric paints an invented BACKGROUND color (mustard, brown, pink, etc.), not a colored value. Attachment apply_color_to is "background". fix: { clear_metric_fill: true }. Do not restyle bar/pie palettes. Do not report value coloring.
+- thin_metric: a sparse KPI that is only a number on white, with no secondary value and no sparkline (no secondary metric and no background_chart on the primary). fix: { metric_trendline: true } to add a sparkline from the same query. At most 4. Do not invent a second ES|QL column (no secondary metric). Skip if the metric already has a secondary or background_chart.
 
 ## Non-issues — never report
 

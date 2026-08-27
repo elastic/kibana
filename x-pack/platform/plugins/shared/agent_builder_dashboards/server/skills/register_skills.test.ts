@@ -65,6 +65,9 @@ describe('registerSkills', () => {
     expect(skill.content).toContain('Do not read the image');
     expect(skill.content).toContain('Without an image, this is a normal dashboard edit');
     expect(skill.content).toContain('attachment_id');
+    expect(skill.content).toContain(
+      'Do not call `platform.dashboard.generate_dashboard` for this request'
+    );
     expect(skill.content).not.toContain('platform.dashboard.review_dashboard');
     expect(skill.content).not.toContain('prettify-playbook');
     expect(skill.content).not.toContain('pack_layout');

@@ -40,6 +40,23 @@ export const dashboardOperationSchema = z.discriminatedUnion(
 
 export type DashboardOperation = z.infer<typeof dashboardOperationSchema>;
 
+const prettifyOperationSchemas = [
+  addSectionOperation.schema,
+  updatePanelLayoutsOperation.schema,
+  editPanelsOperation.schema,
+  addControlsOperation.schema,
+] as const;
+
+export const prettifyDashboardOperationSchema = z.discriminatedUnion(
+  'operation',
+  prettifyOperationSchemas as unknown as [
+    (typeof prettifyOperationSchemas)[number],
+    ...(typeof prettifyOperationSchemas)[number][]
+  ]
+);
+
+export type PrettifyDashboardOperation = z.infer<typeof prettifyDashboardOperationSchema>;
+
 const operationDefinitionByType = new Map(
   operationDefinitions.map((definition) => [definition.schema.shape.operation.value, definition])
 );

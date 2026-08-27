@@ -37,7 +37,7 @@ Do **not** use this skill when:
 
 ## Prettify
 
-When the user asked to prettify this dashboard and an image is attached, call \`platform.dashboard.prettify_dashboard\` once. Do not read the image. Do not describe the screenshot. Do not call \`platform.dashboard.generate_dashboard\` for this request. It returns findings plus \`attachment_id\` and \`version\`; render that attachment. Without an image, this is a normal dashboard edit.
+When the user asked to prettify this dashboard and an image is attached, call \`platform.dashboard.prettify_dashboard\` once. Do not read the image. Do not describe the screenshot. Do not call \`platform.dashboard.generate_dashboard\` for this request. It inspects the screenshot, decides operations, and applies them. It returns findings plus \`attachment_id\` and \`version\`; render that attachment. Without an image, this is a normal dashboard edit.
 
 ${dashboardGeneration.guidance}
 

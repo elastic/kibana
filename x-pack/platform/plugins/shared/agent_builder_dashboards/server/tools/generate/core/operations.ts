@@ -13,13 +13,15 @@ import type { PanelFailure } from './utils';
 import type { PanelAuthoringNote } from './resolve_panel';
 import {
   dashboardOperationSchema,
+  prettifyDashboardOperationSchema,
   executeOperationHandler,
   prepareOperationExecution,
   type DashboardOperation,
+  type PrettifyDashboardOperation,
 } from './operations/registry';
 
-export { dashboardOperationSchema };
-export type { DashboardOperation };
+export { dashboardOperationSchema, prettifyDashboardOperationSchema };
+export type { DashboardOperation, PrettifyDashboardOperation };
 
 interface ExecuteDashboardOperationsParams {
   dashboardData?: DashboardAttachmentData;

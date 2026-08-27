@@ -18,8 +18,8 @@ const panel = (id: string, extra?: Partial<PanelCatalogEntry>): PanelCatalogEntr
 });
 
 const packed = (...ids: string[]) => ({
-  panels: ids.map((panel_id, index) => ({
-    panel_id,
+  panels: ids.map((panelId, index) => ({
+    panelId,
     grid: { x: (index % 2) * 24, y: Math.floor(index / 2) * 12, w: 24, h: 12 },
   })),
 });
@@ -85,8 +85,8 @@ describe('filterDashboardFindings', () => {
             what: 'gap',
             fix: {
               panels: [
-                { panel_id: 'a', grid: { x: 0, y: 0, w: 24, h: 12 } },
-                { panel_id: 'a', grid: { x: 24, y: 0, w: 24, h: 12 } },
+                { panelId: 'a', grid: { x: 0, y: 0, w: 24, h: 12 } },
+                { panelId: 'a', grid: { x: 24, y: 0, w: 24, h: 12 } },
               ],
             },
           },
@@ -105,8 +105,8 @@ describe('filterDashboardFindings', () => {
             what: 'gap',
             fix: {
               panels: [
-                { panel_id: 'a', grid: { x: 40, y: 0, w: 24, h: 12 } },
-                { panel_id: 'b', grid: { x: 0, y: 12, w: 24, h: 12 } },
+                { panelId: 'a', grid: { x: 40, y: 0, w: 24, h: 12 } },
+                { panelId: 'b', grid: { x: 0, y: 12, w: 24, h: 12 } },
               ],
             },
           },
@@ -130,8 +130,8 @@ describe('filterDashboardFindings', () => {
             what: 'pack',
             fix: {
               panels: [
-                { panel_id: 'table-1', grid: { x: 0, y: 0, w: 12, h: 12 } },
-                { panel_id: 'a', grid: { x: 12, y: 0, w: 36, h: 12 } },
+                { panelId: 'table-1', grid: { x: 0, y: 0, w: 12, h: 12 } },
+                { panelId: 'a', grid: { x: 12, y: 0, w: 36, h: 12 } },
               ],
             },
           },
@@ -150,8 +150,8 @@ describe('filterDashboardFindings', () => {
             what: 'gap',
             fix: {
               panels: [
-                { panel_id: 'a', grid: { x: 0, y: 0, w: 24, h: 12 }, section_id: 'missing' },
-                { panel_id: 'b', grid: { x: 24, y: 0, w: 24, h: 12 } },
+                { panelId: 'a', grid: { x: 0, y: 0, w: 24, h: 12 }, sectionId: 'missing' },
+                { panelId: 'b', grid: { x: 24, y: 0, w: 24, h: 12 } },
               ],
             },
           },
@@ -167,7 +167,7 @@ describe('filterDashboardFindings', () => {
         {
           rule: 'weak_sections',
           what: 'no groups',
-          fix: { sections: [{ id: 'section-overview', title: 'Overview', panel_ids: ['a', 'b'] }] },
+          fix: { sections: [{ id: 'section-overview', title: 'Overview', grid: { y: 0 } }] },
         },
         {
           rule: 'pack_layout',
@@ -175,14 +175,14 @@ describe('filterDashboardFindings', () => {
           fix: {
             panels: [
               {
-                panel_id: 'a',
+                panelId: 'a',
                 grid: { x: 0, y: 0, w: 24, h: 12 },
-                section_id: 'section-overview',
+                sectionId: 'section-overview',
               },
               {
-                panel_id: 'b',
+                panelId: 'b',
                 grid: { x: 24, y: 0, w: 24, h: 12 },
-                section_id: 'section-overview',
+                sectionId: 'section-overview',
               },
             ],
           },
@@ -204,14 +204,14 @@ describe('filterDashboardFindings', () => {
           {
             rule: 'weak_sections',
             what: 'rebuild groups',
-            fix: { sections: [{ id: 'section-new', title: 'New', panel_ids: ['a', 'b'] }] },
+            fix: { sections: [{ id: 'section-new', title: 'New', grid: { y: 0 } }] },
           },
         ],
       })
     ).toEqual([]);
   });
 
-  it('drops weak_sections that name an unknown panel', () => {
+  it('drops weak_sections with duplicate section ids', () => {
     expect(
       filterDashboardFindings({
         ...twoXy,
@@ -220,7 +220,10 @@ describe('filterDashboardFindings', () => {
             rule: 'weak_sections',
             what: 'groups',
             fix: {
-              sections: [{ id: 'section-overview', title: 'Overview', panel_ids: ['a', 'nope'] }],
+              sections: [
+                { id: 'section-overview', title: 'Overview', grid: { y: 0 } },
+                { id: 'section-overview', title: 'Also overview', grid: { y: 1 } },
+              ],
             },
           },
         ],
@@ -270,12 +273,12 @@ describe('filterDashboardFindings', () => {
           what: 'all lines',
           fix: {
             changes: [
-              { panel_id: 'm', chartType: 'xy' },
-              { panel_id: 't', chartType: 'xy' },
-              { panel_id: 'l1', chartType: 'bar' },
-              { panel_id: 'l2', chartType: 'pie' },
-              { panel_id: 'l3', chartType: 'heatmap' },
-              { panel_id: 'l4', chartType: 'bar' },
+              { panelId: 'm', chartType: 'xy' },
+              { panelId: 't', chartType: 'xy' },
+              { panelId: 'l1', chartType: 'bar' },
+              { panelId: 'l2', chartType: 'pie' },
+              { panelId: 'l3', chartType: 'heatmap' },
+              { panelId: 'l4', chartType: 'bar' },
             ],
           },
         },
@@ -288,9 +291,9 @@ describe('filterDashboardFindings', () => {
         what: 'all lines',
         fix: {
           changes: [
-            { panel_id: 'l1', chartType: 'bar' },
-            { panel_id: 'l2', chartType: 'pie' },
-            { panel_id: 'l3', chartType: 'heatmap' },
+            { panelId: 'l1', chartType: 'bar' },
+            { panelId: 'l2', chartType: 'pie' },
+            { panelId: 'l3', chartType: 'heatmap' },
           ],
         },
       },
@@ -312,7 +315,7 @@ describe('filterDashboardFindings', () => {
           {
             rule: 'monotone_chart_types',
             what: 'mix',
-            fix: { changes: [{ panel_id: 'a', chartType: 'bar' }] },
+            fix: { changes: [{ panelId: 'a', chartType: 'bar' }] },
           },
         ],
       })
@@ -340,8 +343,8 @@ describe('filterDashboardFindings', () => {
           what: 'all lines',
           fix: {
             changes: [
-              { panel_id: 'a', chartType: 'bar' },
-              { panel_id: 'b', chartType: 'pie' },
+              { panelId: 'a', chartType: 'bar' },
+              { panelId: 'b', chartType: 'pie' },
             ],
           },
         },
@@ -358,7 +361,7 @@ describe('filterDashboardFindings', () => {
       {
         rule: 'monotone_chart_types',
         what: 'all lines',
-        fix: { changes: [{ panel_id: 'b', chartType: 'pie' }] },
+        fix: { changes: [{ panelId: 'b', chartType: 'pie' }] },
       },
     ]);
   });
@@ -379,7 +382,7 @@ describe('filterDashboardFindings', () => {
             rule: 'weak_controls',
             what: 'no host filter',
             fix: {
-              add: [
+              controls: [
                 {
                   type: 'options_list_control',
                   field_name: 'host.name',
@@ -396,7 +399,7 @@ describe('filterDashboardFindings', () => {
         rule: 'weak_controls',
         what: 'no host filter',
         fix: {
-          add: [
+          controls: [
             {
               type: 'options_list_control',
               field_name: 'host.name',
@@ -429,7 +432,9 @@ describe('filterDashboardFindings', () => {
             rule: 'weak_controls',
             what: 'add region',
             fix: {
-              add: [{ type: 'options_list_control', field_name: 'host.name', index: 'logs-*' }],
+              controls: [
+                { type: 'options_list_control', field_name: 'host.name', index: 'logs-*' },
+              ],
             },
           },
         ],
@@ -451,7 +456,7 @@ describe('filterDashboardFindings', () => {
             rule: 'weak_controls',
             what: 'invented',
             fix: {
-              add: [{ type: 'options_list_control', field_name: 'region', index: 'logs-*' }],
+              controls: [{ type: 'options_list_control', field_name: 'region', index: 'logs-*' }],
             },
           },
         ],
@@ -624,8 +629,8 @@ describe('filterDashboardFindings', () => {
           what: 'all lines',
           fix: {
             changes: [
-              { panel_id: 'b', chartType: 'heatmap' },
-              { panel_id: 'e', chartType: 'bar' },
+              { panelId: 'b', chartType: 'heatmap' },
+              { panelId: 'e', chartType: 'bar' },
             ],
           },
         },
@@ -660,7 +665,7 @@ describe('filterDashboardFindings', () => {
       {
         rule: 'monotone_chart_types',
         what: 'all lines',
-        fix: { changes: [{ panel_id: 'e', chartType: 'bar' }] },
+        fix: { changes: [{ panelId: 'e', chartType: 'bar' }] },
       },
     ]);
   });
@@ -676,7 +681,7 @@ describe('filterDashboardFindings', () => {
             rule: 'metric_fill',
             panel_id: 'm',
             what: 'mustard background',
-            fix: { clear_background: true },
+            fix: { clear_metric_fill: true },
           },
         ],
       })
@@ -685,7 +690,7 @@ describe('filterDashboardFindings', () => {
         rule: 'metric_fill',
         panel_id: 'm',
         what: 'mustard background',
-        fix: { clear_background: true },
+        fix: { clear_metric_fill: true },
       },
     ]);
   });
@@ -704,13 +709,13 @@ describe('filterDashboardFindings', () => {
             rule: 'metric_fill',
             panel_id: 'm',
             what: 'value color is not fill',
-            fix: { clear_background: true },
+            fix: { clear_metric_fill: true },
           },
           {
             rule: 'metric_fill',
             panel_id: 'xy',
             what: 'not a metric',
-            fix: { clear_background: true },
+            fix: { clear_metric_fill: true },
           },
         ],
       })
@@ -739,43 +744,43 @@ describe('filterDashboardFindings', () => {
           rule: 'thin_metric',
           panel_id: 'm1',
           what: 'empty KPI',
-          fix: { enhance: 'trendline' },
+          fix: { metric_trendline: true },
         },
         {
           rule: 'thin_metric',
           panel_id: 'm2',
           what: 'empty KPI',
-          fix: { enhance: 'trendline' },
+          fix: { metric_trendline: true },
         },
         {
           rule: 'thin_metric',
           panel_id: 'm3',
           what: 'empty KPI',
-          fix: { enhance: 'trendline' },
+          fix: { metric_trendline: true },
         },
         {
           rule: 'thin_metric',
           panel_id: 'm4',
           what: 'empty KPI',
-          fix: { enhance: 'trendline' },
+          fix: { metric_trendline: true },
         },
         {
           rule: 'thin_metric',
           panel_id: 'm5',
           what: 'empty KPI',
-          fix: { enhance: 'trendline' },
+          fix: { metric_trendline: true },
         },
         {
           rule: 'thin_metric',
           panel_id: 'rich',
           what: 'already enhanced',
-          fix: { enhance: 'trendline' },
+          fix: { metric_trendline: true },
         },
         {
           rule: 'thin_metric',
           panel_id: 'xy',
           what: 'not a metric',
-          fix: { enhance: 'trendline' },
+          fix: { metric_trendline: true },
         },
       ],
     });
@@ -785,25 +790,25 @@ describe('filterDashboardFindings', () => {
         rule: 'thin_metric',
         panel_id: 'm1',
         what: 'empty KPI',
-        fix: { enhance: 'trendline' },
+        fix: { metric_trendline: true },
       },
       {
         rule: 'thin_metric',
         panel_id: 'm2',
         what: 'empty KPI',
-        fix: { enhance: 'trendline' },
+        fix: { metric_trendline: true },
       },
       {
         rule: 'thin_metric',
         panel_id: 'm3',
         what: 'empty KPI',
-        fix: { enhance: 'trendline' },
+        fix: { metric_trendline: true },
       },
       {
         rule: 'thin_metric',
         panel_id: 'm4',
         what: 'empty KPI',
-        fix: { enhance: 'trendline' },
+        fix: { metric_trendline: true },
       },
     ]);
   });

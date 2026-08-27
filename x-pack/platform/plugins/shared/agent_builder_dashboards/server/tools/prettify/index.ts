@@ -6,4 +6,3 @@
  */
 
 export { prettifyDashboardTool } from './prettify_dashboard_tool';
-export { findingsToPrettifyOperations } from './findings_to_prettify_operations';

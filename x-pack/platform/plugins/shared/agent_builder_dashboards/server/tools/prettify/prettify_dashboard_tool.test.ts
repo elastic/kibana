@@ -68,11 +68,13 @@ const createContext = async (options?: { withDashboard?: boolean; withImage?: bo
 
 describe('prettifyDashboardTool', () => {
   const inspectDashboardImage = jest.fn();
+  const planPrettifyOperations = jest.fn();
   const getImageBytes = jest.fn();
 
   const createTool = () =>
     prettifyDashboardTool({
       inspectDashboardImage,
+      planPrettifyOperations,
       getImageBytes,
     });
 
@@ -82,8 +84,14 @@ describe('prettifyDashboardTool', () => {
         rule: 'pack_layout',
         what: 'gap beside the metric',
         fix: {
-          panels: [{ panel_id: 'lens-1', grid: { x: 0, y: 0, w: 48, h: 10 } }],
+          panels: [{ panelId: 'lens-1', grid: { x: 0, y: 0, w: 48, h: 10 } }],
         },
+      },
+    ]);
+    planPrettifyOperations.mockReset().mockResolvedValue([
+      {
+        operation: 'update_panel_layouts',
+        panels: [{ panelId: 'lens-1', grid: { x: 0, y: 0, w: 48, h: 10 } }],
       },
     ]);
     getImageBytes.mockReset().mockResolvedValue(Buffer.from('png'));
@@ -101,6 +109,7 @@ describe('prettifyDashboardTool', () => {
 
     expect(getImageBytes).not.toHaveBeenCalled();
     expect(inspectDashboardImage).not.toHaveBeenCalled();
+    expect(planPrettifyOperations).not.toHaveBeenCalled();
     expect(result).toEqual({
       results: [
         expect.objectContaining({
@@ -120,6 +129,7 @@ describe('prettifyDashboardTool', () => {
     const result = await tool.handler({}, context);
 
     expect(inspectDashboardImage).not.toHaveBeenCalled();
+    expect(planPrettifyOperations).not.toHaveBeenCalled();
     expect(result).toEqual({
       results: [
         expect.objectContaining({
@@ -139,13 +149,13 @@ describe('prettifyDashboardTool', () => {
 
     const result = await tool.handler({}, context);
 
+    expect(planPrettifyOperations).not.toHaveBeenCalled();
     expect(result).toEqual({
       results: [
         expect.objectContaining({
           type: 'other',
           data: {
             findings: [],
-            applied: false,
             attachment_id: 'dash-1',
             version: 1,
           },
@@ -156,7 +166,7 @@ describe('prettifyDashboardTool', () => {
     expect(dashboard?.current_version).toBe(1);
   });
 
-  it('inspects the image, applies pack_layout, and persists a new dashboard version', async () => {
+  it('inspects the image, lets the inner planner choose operations, and persists a new dashboard version', async () => {
     const tool = createTool();
     const context = await createContext();
 
@@ -175,20 +185,31 @@ describe('prettifyDashboardTool', () => {
         }),
       })
     );
+    expect(planPrettifyOperations).toHaveBeenCalledWith(
+      expect.objectContaining({
+        findings: [
+          expect.objectContaining({
+            rule: 'pack_layout',
+            fix: {
+              panels: [{ panelId: 'lens-1', grid: { x: 0, y: 0, w: 48, h: 10 } }],
+            },
+          }),
+        ],
+      })
+    );
     expect(JSON.stringify(result)).not.toContain('png');
-    expect(JSON.stringify(result)).not.toContain('"dashboard"');
     expect(result).toEqual({
       results: [
         expect.objectContaining({
           type: 'other',
           data: {
             findings: [{ rule: 'pack_layout', what: 'gap beside the metric' }],
-            applied: true,
             attachment_id: 'dash-1',
             version: 2,
           },
         }),
       ],
     });
+    expect(context.attachments.getAttachmentRecord('dash-1')?.current_version).toBe(2);
   });
 });

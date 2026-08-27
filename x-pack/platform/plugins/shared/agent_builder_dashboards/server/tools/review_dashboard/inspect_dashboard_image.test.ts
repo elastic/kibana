@@ -78,8 +78,8 @@ describe('inspectDashboardImage', () => {
           what: 'gap beside the metric',
           fix: {
             panels: [
-              { panel_id: 'lens-1', grid: { x: 0, y: 0, w: 24, h: 12 } },
-              { panel_id: 'lens-2', grid: { x: 24, y: 0, w: 24, h: 12 } },
+              { panelId: 'lens-1', grid: { x: 0, y: 0, w: 24, h: 12 } },
+              { panelId: 'lens-2', grid: { x: 24, y: 0, w: 24, h: 12 } },
             ],
           },
         },
@@ -152,8 +152,8 @@ describe('inspectDashboardImage', () => {
         what: 'gap beside the metric',
         fix: {
           panels: [
-            { panel_id: 'lens-1', grid: { x: 0, y: 0, w: 24, h: 12 } },
-            { panel_id: 'lens-2', grid: { x: 24, y: 0, w: 24, h: 12 } },
+            { panelId: 'lens-1', grid: { x: 0, y: 0, w: 24, h: 12 } },
+            { panelId: 'lens-2', grid: { x: 24, y: 0, w: 24, h: 12 } },
           ],
         },
       },
@@ -167,7 +167,7 @@ describe('inspectDashboardImage', () => {
           rule: 'pack_layout',
           what: 'resize one panel',
           fix: {
-            panels: [{ panel_id: 'table-1', grid: { x: 0, y: 60, w: 24, h: 19 } }],
+            panels: [{ panelId: 'table-1', grid: { x: 0, y: 60, w: 24, h: 19 } }],
           },
         },
         {

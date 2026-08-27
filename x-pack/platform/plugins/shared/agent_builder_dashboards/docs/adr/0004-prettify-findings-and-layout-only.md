@@ -11,4 +11,6 @@ The single mutate in a Prettify session may:
 
 It must not restyle every Lens panel through the inner visualization agent, must not add or remove visualization panels unless the user already agreed to adds, must not rebuild existing sections, and must not remove controls.
 
+An inner planner chooses how to batch those payload suggestions into `operations[]`. The generate core applies them. Findings suggest generate fields; they are not a deterministic mapper.
+
 Blanket restyle, from-scratch redesign, and isolated per-panel size nits were tried; they cost inner LLM calls and left holes in the grid.
