@@ -25,7 +25,7 @@ import type { CasesClientArgs } from '../../client/types';
 import type { CasesRequestHandlerContext } from '../../types';
 import { buildActivityOrigin } from './build_activity_origin';
 import { preflightWorkflowExecution, recordWorkflowExecution } from './record_workflow_execution';
-import { getSelectedAlertPairs, validateOrigin } from './validate_origin';
+import { parseSelectedAlertPairs, validateOrigin } from './validate_origin';
 
 interface RunWorkflowParams {
   workflowId: string;
@@ -127,9 +127,12 @@ export class CasesWorkflowRunService {
     // was not looking at any specific sub-entity, alert inputs are not permitted, and no
     // case fetch is needed. When present the run is scoped to a single case with a specific
     // sub-entity context; origin-entity membership and alert attachment are validated.
+    // Parse and validate alertIds shape eagerly — any malformed entry throws 400 here,
+    // before any case fetch, so the validated set equals what preprocessing later fetches.
+    const selectedAlerts = parseSelectedAlertPairs(body.inputs);
     let theCase: Awaited<ReturnType<typeof casesClient.cases.get>> | undefined;
     if (body.origin === undefined) {
-      if (getSelectedAlertPairs(body.inputs).length > 0) {
+      if (selectedAlerts.length > 0) {
         throw Boom.badRequest('Alert inputs can only be used with a single case.');
       }
     } else {
@@ -140,7 +143,7 @@ export class CasesWorkflowRunService {
       }
       theCase = await casesClient.cases.get({ id: caseIds[0], includeComments: true });
       const attachedAlerts =
-        getSelectedAlertPairs(body.inputs).length > 0
+        selectedAlerts.length > 0
           ? await casesClient.attachments.getAllDocumentsAttachedToCase({
               caseId: caseIds[0],
               attachmentTypes: [AttachmentType.alert],
@@ -149,7 +152,7 @@ export class CasesWorkflowRunService {
       validateOrigin({
         origin: body.origin,
         caseId: caseIds[0],
-        inputs: body.inputs,
+        selectedAlerts,
         theCase,
         attachedAlerts,
       });
