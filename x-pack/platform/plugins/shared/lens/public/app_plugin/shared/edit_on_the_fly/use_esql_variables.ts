@@ -23,7 +23,7 @@ export const useESQLVariables = ({
   parentApi: unknown;
   attributes?: TypedLensSerializedState['attributes'];
   panelId?: string;
-  layerId?: string;
+  layerId: string;
   closeFlyout?: () => void;
 }) => {
   const dashboardPanels = useStateFromPublishingSubject(
@@ -66,9 +66,9 @@ export const useESQLVariables = ({
         // ES|QL lives exclusively on the text-based layers; update only the
         // layer being edited — sibling layers keep their own queries
         const textBasedState = attributes.state.datasourceStates.textBased;
-        const editedLayer = layerId ? textBasedState?.layers?.[layerId] : undefined;
+        const editedLayer = textBasedState?.layers?.[layerId];
         const updatedTextBasedState =
-          textBasedState && layerId && editedLayer
+          textBasedState && editedLayer
             ? {
                 ...textBasedState,
                 layers: {

@@ -40,7 +40,7 @@ const getParentApi = (panel: { updateAttributes: jest.Mock; onEdit: jest.Mock })
 });
 
 describe('useESQLVariables', () => {
-  const setup = (layerId?: string) => {
+  const setup = (layerId: string) => {
     const panel = {
       updateAttributes: jest.fn(),
       onEdit: jest.fn().mockResolvedValue(undefined),
@@ -70,16 +70,6 @@ describe('useESQLVariables', () => {
       layer2: expect.objectContaining({ query: { esql: 'FROM index2 | WHERE a == ?var' } }),
     });
     expect(panel.onEdit).toHaveBeenCalled();
-  });
-
-  it('should not touch any layer when layerId is missing', async () => {
-    const { result, panel } = setup(undefined);
-
-    await act(() => result.current.onSaveControl({}, 'FROM index1 | WHERE a == ?var'));
-
-    expect(panel.updateAttributes).toHaveBeenCalledTimes(1);
-    const updated = panel.updateAttributes.mock.calls[0][0];
-    expect(updated.state.datasourceStates).toEqual(getAttributes().state.datasourceStates);
   });
 
   it('should not touch any layer for an unknown layerId', async () => {
