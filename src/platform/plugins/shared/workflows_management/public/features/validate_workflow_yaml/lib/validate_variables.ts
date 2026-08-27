@@ -59,15 +59,34 @@ export function validateVariables(
   const pathContextCache = new Map<string, typeof DynamicStepContextSchema>();
   const fullContextCache = new Map<string, typeof DynamicStepContextSchema>();
 
-  for (const variableItem of variableItems) {
+  variableItems.forEach((variableItem) => {
     const { yamlPath: path, offset } = variableItem;
 
     let context: typeof DynamicStepContextSchema;
     try {
       const nearestStepPath = getNearestStepPath(path);
       const nearestStep = nearestStepPath
-        ? getValueAtYamlPath<{ name?: string }>(workflowDefinition, nearestStepPath)
+        ? getValueAtYamlPath<{ name?: string; type?: string; 'connector-id'?: string }>(
+            workflowDefinition,
+            nearestStepPath
+          )
         : undefined;
+      if (
+        nearestStep?.type === 'http' &&
+        typeof nearestStep['connector-id'] === 'string' &&
+        nearestStepPath &&
+        path[nearestStepPath.length] === 'with' &&
+        variableItem.key?.match(/^connector\.secrets\.[A-Za-z_][A-Za-z0-9_]*$/)
+      ) {
+        errors.push({
+          ...variableItem,
+          message: null,
+          severity: null,
+          owner: 'variable-validation',
+          hoverMessage: 'Encrypted parameter from the configured HTTP connector',
+        });
+        return;
+      }
       const cacheKey = nearestStep?.name ?? ROOT_CACHE_KEY;
 
       let stepSchema = stepSchemaCache.get(cacheKey);
@@ -123,7 +142,7 @@ export function validateVariables(
         hoverMessage: null,
       });
     }
-  }
+  });
 
   return errors;
 }

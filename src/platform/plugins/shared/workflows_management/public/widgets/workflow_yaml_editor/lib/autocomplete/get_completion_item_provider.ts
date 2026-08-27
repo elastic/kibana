@@ -21,6 +21,7 @@ import type { WorkflowDetailState } from '../../../../entities/workflows/store';
 
 // Unique identifier for the workflow completion provider
 export const WORKFLOW_COMPLETION_PROVIDER_ID = 'workflows-yaml-completion-provider';
+export type GetConnectorSecretParamKeys = (connectorId: string) => Promise<string[]>;
 // Snippet enum alias to improve code readability
 const INSERT_AS_SNIPPET = monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet;
 
@@ -147,7 +148,8 @@ export function getCompletionItemProvider(
   getState: () => WorkflowDetailState,
   getKqlServices?: () => WorkflowKqlCompletionServices,
   getPropertyHandler?: GetStepPropertyHandler,
-  getEsqlServices?: () => WorkflowEsqlCompletionServices
+  getEsqlServices?: () => WorkflowEsqlCompletionServices,
+  getConnectorSecretParamKeys?: GetConnectorSecretParamKeys
 ): monaco.languages.CompletionItemProvider {
   const provider: monaco.languages.CompletionItemProvider & { __providerId?: string } = {
     // Unique identifier to distinguish our provider from others
@@ -216,16 +218,41 @@ export function getCompletionItemProvider(
         }
       }
 
-      const workflowSuggestions = await getSuggestions(
-        {
-          ...autocompleteContext,
-          model,
-          position,
-        },
-        getKqlServices?.(),
-        getPropertyHandler,
-        getEsqlServices?.()
+      const connectorSecretMatch = (autocompleteContext.lineUpToCursor ?? '').match(
+        /\{\{\s*connector\.secrets\.([A-Za-z_][A-Za-z0-9_]*)?$/
       );
+      let workflowSuggestions: monaco.languages.CompletionItem[];
+      const connectorId = autocompleteContext.focusedStepInfo?.stepYamlNode.get('connector-id');
+      if (
+        connectorSecretMatch &&
+        autocompleteContext.focusedStepInfo?.stepType === 'http' &&
+        autocompleteContext.path?.includes('with') &&
+        typeof connectorId === 'string' &&
+        getConnectorSecretParamKeys
+      ) {
+        const prefix = connectorSecretMatch[1] ?? '';
+        const keys = await getConnectorSecretParamKeys(connectorId);
+        workflowSuggestions = keys
+          .filter((key) => key.startsWith(prefix))
+          .map((key) => ({
+            label: key,
+            kind: monaco.languages.CompletionItemKind.Variable,
+            insertText: key,
+            range: autocompleteContext.range,
+            detail: 'Encrypted HTTP connector parameter',
+          }));
+      } else {
+        workflowSuggestions = await getSuggestions(
+          {
+            ...autocompleteContext,
+            model,
+            position,
+          },
+          getKqlServices?.(),
+          getPropertyHandler,
+          getEsqlServices?.()
+        );
+      }
       // Workflow suggestions always win over YAML duplicates.
       for (const suggestion of workflowSuggestions) {
         const key = getDeduplicationKey(suggestion);

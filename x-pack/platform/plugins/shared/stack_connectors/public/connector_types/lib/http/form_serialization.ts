@@ -24,6 +24,8 @@ type HttpConnectorForm = ConnectorFormSchema & {
     hasProxy?: boolean;
     hasQueryParams?: boolean;
     queryParams?: Array<{ key: string; value: string }>;
+    hasSecretParams?: boolean;
+    secretParams?: Array<{ key: string; value: string }>;
   };
 };
 
@@ -83,6 +85,11 @@ export const formSerializer = (formData: HttpConnectorForm): ConnectorFormSchema
     }
     return acc;
   }, {});
+  const secretParams = Object.fromEntries(
+    (formData?.__internal__?.secretParams ?? [])
+      .filter(({ key, value }) => key?.trim() && value?.trim())
+      .map(({ key, value }) => [key, value])
+  );
 
   return {
     ...formData,
@@ -100,6 +107,7 @@ export const formSerializer = (formData: HttpConnectorForm): ConnectorFormSchema
       ...formData.secrets,
       secretHeaders: isEmpty(secretHeaders) ? undefined : secretHeaders,
       secretQueryParams: isEmpty(secretQueryParams) ? undefined : secretQueryParams,
+      secretParams: isEmpty(secretParams) ? undefined : secretParams,
       ...(supportsProxy &&
         (!hasProxy || !formData.config?.hasProxyAuth) && {
           proxyUsername: null,

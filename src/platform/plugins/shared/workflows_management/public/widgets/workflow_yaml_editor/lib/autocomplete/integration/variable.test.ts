@@ -10,18 +10,26 @@
 import type { monaco } from '@kbn/code-editor';
 import type { ConnectorTypeInfo } from '@kbn/workflows';
 import { getFakeAutocompleteContextParams } from '../context/build_autocomplete_context.test';
-import { getCompletionItemProvider } from '../get_completion_item_provider';
+import {
+  getCompletionItemProvider,
+  type GetConnectorSecretParamKeys,
+} from '../get_completion_item_provider';
 
 async function getSuggestions(
   yamlContent: string,
-  connectorTypes?: Record<string, ConnectorTypeInfo>
+  connectorTypes?: Record<string, ConnectorTypeInfo>,
+  getConnectorSecretParamKeys?: GetConnectorSecretParamKeys
 ): Promise<monaco.languages.CompletionItem[]> {
   const fakeAutocompleteContextParams = getFakeAutocompleteContextParams(
     yamlContent,
     connectorTypes
   );
   const completionProvider = getCompletionItemProvider(
-    () => fakeAutocompleteContextParams.editorState
+    () => fakeAutocompleteContextParams.editorState,
+    undefined,
+    undefined,
+    undefined,
+    getConnectorSecretParamKeys
   );
 
   const result = await completionProvider.provideCompletionItems(
@@ -40,6 +48,45 @@ async function getSuggestions(
 }
 
 describe('getCompletionItemProvider - Variable expressions', () => {
+  it('suggests encrypted parameters from the configured HTTP connector', async () => {
+    const getConnectorSecretParamKeys = jest.fn().mockResolvedValue(['client_id', 'client_secret']);
+    const yamlContent = `
+name: "test"
+triggers:
+  - type: manual
+steps:
+  - name: exchange
+    type: http
+    connector-id: connector-123
+    with:
+      body: "{{ connector.secrets.|<- }}"
+`.trim();
+
+    const suggestions = await getSuggestions(yamlContent, undefined, getConnectorSecretParamKeys);
+
+    expect(getConnectorSecretParamKeys).toHaveBeenCalledWith('connector-123');
+    expect(suggestions.map(({ label }) => label)).toEqual(['client_id', 'client_secret']);
+  });
+
+  it('does not suggest connector secrets outside the HTTP with block', async () => {
+    const getConnectorSecretParamKeys = jest.fn().mockResolvedValue(['client_secret']);
+    const yamlContent = `
+name: "test"
+triggers:
+  - type: manual
+steps:
+  - name: "{{ connector.secrets.|<- }}"
+    type: http
+    connector-id: connector-123
+    with:
+      method: GET
+`.trim();
+
+    await getSuggestions(yamlContent, undefined, getConnectorSecretParamKeys);
+
+    expect(getConnectorSecretParamKeys).not.toHaveBeenCalled();
+  });
+
   it('should provide basic completions inside variable expression', async () => {
     const yamlContent = `
 version: "1"

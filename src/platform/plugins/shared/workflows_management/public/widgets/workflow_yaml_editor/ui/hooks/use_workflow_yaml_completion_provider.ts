@@ -19,11 +19,16 @@ import type { WorkflowEsqlCompletionServices } from '../../lib/autocomplete/sugg
 import type { WorkflowKqlCompletionServices } from '../../lib/autocomplete/suggestions/workflow_kql_completion_services';
 import { useWorkflowEsqlCallbacks } from '../../lib/esql_validation/use_workflow_esql_callbacks';
 
+const SECRET_PARAM_KEYS_CACHE_TTL_MS = 30_000;
+
 export const useWorkflowYamlCompletionProvider = (): monaco.languages.CompletionItemProvider => {
   const { services } = useKibana();
   const getPropertyHandler = useGetPropertyHandler();
   const editorState = useSelector(selectDetail);
   const editorStateRef = useRef<WorkflowDetailState>(editorState);
+  const secretParamKeysCache = useRef(
+    new Map<string, { expiresAt: number; request: Promise<string[]> }>()
+  );
   editorStateRef.current = editorState;
 
   // Independent from the validator's instance — completion and validation
@@ -47,13 +52,33 @@ export const useWorkflowYamlCompletionProvider = (): monaco.languages.Completion
     const getEsqlServices = (): WorkflowEsqlCompletionServices => ({
       callbacks: esqlCallbacksRef.current,
     });
+    const getConnectorSecretParamKeys = async (connectorId: string): Promise<string[]> => {
+      const cached = secretParamKeysCache.current.get(connectorId);
+      if (cached && cached.expiresAt > Date.now()) {
+        return cached.request;
+      }
+      const request = services.http.get<string[]>(
+        `/internal/stack_connectors/${encodeURIComponent(connectorId)}/secret_params`
+      );
+      secretParamKeysCache.current.set(connectorId, {
+        expiresAt: Date.now() + SECRET_PARAM_KEYS_CACHE_TTL_MS,
+        request,
+      });
+      try {
+        return await request;
+      } catch {
+        secretParamKeysCache.current.delete(connectorId);
+        return [];
+      }
+    };
     return getCompletionItemProvider(
       () => editorStateRef.current,
       getKqlServices,
       getPropertyHandler,
-      getEsqlServices
+      getEsqlServices,
+      getConnectorSecretParamKeys
     );
-  }, [getPropertyHandler, services.fieldFormats, services.kql]);
+  }, [getPropertyHandler, services.fieldFormats, services.http, services.kql]);
 
   return completionProvider;
 };

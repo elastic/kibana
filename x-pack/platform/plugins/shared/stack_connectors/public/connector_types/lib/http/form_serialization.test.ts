@@ -101,6 +101,51 @@ describe('formSerializer', () => {
     );
   });
 
+  it('should correctly serialize secret parameters', () => {
+    const formData = {
+      actionTypeId: '.http',
+      isDeprecated: false,
+      __internal__: {
+        headers: [],
+        hasProxy: false,
+        hasSecretParams: true,
+        secretParams: [
+          { key: 'client_id', value: 'id-value' },
+          { key: 'client_secret', value: 'secret-value' },
+        ],
+      },
+      config: {},
+      secrets: {},
+      isMissingSecrets: false,
+    };
+
+    expect(formSerializer(formData)).toEqual(
+      expect.objectContaining({
+        secrets: expect.objectContaining({
+          secretParams: { client_id: 'id-value', client_secret: 'secret-value' },
+        }),
+      })
+    );
+  });
+
+  it('should preserve secret parameter names that match object prototype properties', () => {
+    const result = formSerializer({
+      actionTypeId: '.http',
+      isDeprecated: false,
+      __internal__: {
+        headers: [],
+        hasProxy: false,
+        hasSecretParams: true,
+        secretParams: [{ key: '__proto__', value: 'secret-value' }],
+      },
+      config: {},
+      secrets: {},
+    });
+
+    expect(Object.hasOwn(result.secrets.secretParams as object, '__proto__')).toBe(true);
+    expect((result.secrets.secretParams as Record<string, string>).__proto__).toBe('secret-value');
+  });
+
   it('should set secretQueryParams to undefined when empty', () => {
     const formData = {
       actionTypeId: '.connector-test',

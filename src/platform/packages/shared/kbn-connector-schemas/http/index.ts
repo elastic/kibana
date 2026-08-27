@@ -8,7 +8,8 @@
  */
 export * from './constants';
 
-export { ConfigSchema, ParamsSchema, HTTP_METHODS } from './schemas/latest';
+export { ConfigSchema, ParamsSchema, SecretsSchema, HTTP_METHODS } from './schemas/latest';
+export { CONNECTOR_SECRET_TOKEN_PATTERN, getConnectorSecretToken } from './secret_references';
 
 export type {
   ConnectorTypeConfigType,
