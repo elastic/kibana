@@ -80,7 +80,9 @@ export const setUnifiedAlertsWorkflowStatusRoute = (
         if (eventBus) {
           try {
             const esClient = core.elasticsearch.client.asCurrentUser;
-            const { hits } = await prefetchAllPreviousStatusesByIds(esClient, index, ids);
+            // The unified index spans both detection-alert and attack-discovery families;
+            // a given _id can appear in both, so reserve room for 2 hits per requested ID.
+            const { hits } = await prefetchAllPreviousStatusesByIds(esClient, index, ids, 2);
             // Iterate ES hits directly (keyed by (index, id)) so that cross-index
             // _id collisions are handled correctly — ES only guarantees _id
             // uniqueness within an index, not across indices.

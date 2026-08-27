@@ -23,6 +23,7 @@ import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
 import {
   prefetchPreviousStatusesByIds,
   extractWorkflowStatus,
+  type FoundHit,
   type PreviousStatus,
 } from '../common/operations/prefetch_previous_statuses';
 import { MAX_ALERTS_PER_TRIGGER } from '../../../../../common/workflows/triggers';
@@ -120,15 +121,15 @@ export const setAttacksStatusRoute = (
           if (eventBus) {
             try {
               const esClient = core.elasticsearch.client.asCurrentUser;
-              const { previousStatuses: fetched } = await prefetchPreviousStatusesByIds(
+              const { previousStatuses: fetched, hits } = await prefetchPreviousStatusesByIds(
                 esClient,
                 attackIndex,
                 ids
               );
-              // Only emit for attacks confirmed by prefetch whose status is actually changing
-              const changing = fetched.filter((ps) => ps.previousStatus !== status);
-              filteredAttackIds = changing.map((ps) => ps.id);
-              filteredPreviousStatuses = changing;
+              // Use hits (all found docs) rather than previousStatuses (recognized-status docs only)
+              // so attacks with an unrecognized stored status (e.g. "triaged") are included.
+              filteredAttackIds = hits.filter((h) => h.previousStatus !== status).map((h) => h.id);
+              filteredPreviousStatuses = fetched.filter((ps) => ps.previousStatus !== status);
             } catch (err) {
               logger?.warn(
                 `Failed to pre-fetch previous statuses for workflow trigger (attacks status): ${err}`
@@ -200,15 +201,17 @@ export const setAttacksStatusRoute = (
             const index = await getUnifiedAlertsIndex({ context, ruleDataClient });
 
             const relatedAlertPreviousStatuses: PreviousStatus[] = [];
+            let relatedAlertHits: FoundHit[] = [];
             if (eventBus && relatedAlertIds.length > 0) {
               try {
                 const esClient = core.elasticsearch.client.asCurrentUser;
-                const { previousStatuses: fetched } = await prefetchPreviousStatusesByIds(
+                const { previousStatuses: fetched, hits } = await prefetchPreviousStatusesByIds(
                   esClient,
                   index,
                   relatedAlertIds
                 );
                 relatedAlertPreviousStatuses.push(...fetched);
+                relatedAlertHits = hits;
               } catch (err) {
                 logger?.warn(
                   `Failed to pre-fetch previous statuses for workflow trigger (attacks cascade status): ${err}`
@@ -224,10 +227,16 @@ export const setAttacksStatusRoute = (
               reason: closingReason.reason,
             });
 
+            // Use verifiedAttackIds (all found attacks) rather than attackPreviousStatuses
+            // (recognized-status docs only) so attacks with an unrecognized stored status are
+            // included. Exclude only those we know are already at the target status.
+            const noOpAttackIds = new Set(
+              attackPreviousStatuses.filter((ps) => ps.previousStatus === status).map((ps) => ps.id)
+            );
+            const changingAttackIds = verifiedAttackIds.filter((id) => !noOpAttackIds.has(id));
             const changingAttacks = attackPreviousStatuses.filter(
               (ps) => ps.previousStatus !== status
             );
-            const changingAttackIds = changingAttacks.map((ps) => ps.id);
             if (changingAttackIds.length > 0) {
               void eventBus?.emitAttackStatusChanged(request, {
                 attackIds: changingAttackIds.slice(0, MAX_ALERTS_PER_TRIGGER),
@@ -236,10 +245,18 @@ export const setAttacksStatusRoute = (
                 truncated: verifiedAttackIds.length > MAX_ALERTS_PER_TRIGGER,
               });
             }
+            // Same pattern for related detection alerts.
+            const noOpRelatedIds = new Set(
+              relatedAlertPreviousStatuses
+                .filter((ps) => ps.previousStatus === status)
+                .map((ps) => ps.id)
+            );
+            const changingRelatedIds = relatedAlertHits
+              .filter((h) => !noOpRelatedIds.has(h.id))
+              .map((h) => h.id);
             const changingRelated = relatedAlertPreviousStatuses.filter(
               (ps) => ps.previousStatus !== status
             );
-            const changingRelatedIds = changingRelated.map((ps) => ps.id);
             if (changingRelatedIds.length > 0) {
               void eventBus?.emitAlertStatusChanged(request, {
                 alertIds: changingRelatedIds.slice(0, MAX_ALERTS_PER_TRIGGER),

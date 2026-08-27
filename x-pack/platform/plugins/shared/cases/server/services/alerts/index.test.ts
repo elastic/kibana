@@ -1026,7 +1026,7 @@ describe('updateAlertsStatus — event bus', () => {
     bus.removeAllListeners();
   });
 
-  it('does not emit when the only alert has an unrecognised previous status value', async () => {
+  it('emits with the affected ID but no previousStatuses row when the alert has an unrecognised previous status value', async () => {
     const bus = new CasesEventBus();
     const listener = jest.fn();
     bus.onAlertStatusChanged(listener);
@@ -1047,7 +1047,11 @@ describe('updateAlertsStatus — event bus', () => {
       { id: 'a1', index: '.siem-signals', status: CaseStatuses.closed },
     ]);
 
-    expect(listener).not.toHaveBeenCalled();
+    // The mutation succeeds; the event schema does not require a previousStatuses row per ID.
+    expect(listener).toHaveBeenCalledTimes(1);
+    const { payload } = listener.mock.calls[0][0];
+    expect(payload.alertIds).toEqual(['a1']);
+    expect(payload.previousStatuses).toEqual([]);
 
     bus.removeAllListeners();
   });

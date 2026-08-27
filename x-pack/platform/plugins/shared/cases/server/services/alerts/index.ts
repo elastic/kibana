@@ -97,10 +97,12 @@ export class AlertService {
       const bucketedAlerts = this.bucketAlerts(alerts);
       const indexBuckets = Array.from(bucketedAlerts.entries());
 
-      let previousStatusMap: Map<string, STATUS_VALUES> | undefined;
+      let prefetchResult:
+        | { previousStatusMap: Map<string, STATUS_VALUES>; foundKeys: Set<string> }
+        | undefined;
       if (this.casesEventBus?.hasAlertStatusChangedListeners() && this.request) {
         try {
-          previousStatusMap = await pRetry(() => this.prefetchPreviousStatuses(alerts), {
+          prefetchResult = await pRetry(() => this.prefetchPreviousStatuses(alerts), {
             retries: 3,
           });
         } catch (err) {
@@ -116,10 +118,16 @@ export class AlertService {
         { concurrency: MAX_CONCURRENT_SEARCHES }
       );
 
-      if (this.casesEventBus && this.request && previousStatusMap !== undefined) {
+      if (this.casesEventBus && this.request && prefetchResult !== undefined) {
         // Isolate event dispatch: a listener exception must not change the mutation result.
         try {
-          this.emitStatusChangedEvents(alerts, previousStatusMap, this.casesEventBus, this.request);
+          this.emitStatusChangedEvents(
+            alerts,
+            prefetchResult.previousStatusMap,
+            prefetchResult.foundKeys,
+            this.casesEventBus,
+            this.request
+          );
         } catch (err) {
           this.logger.error(`Failed to emit alertStatusChanged events: ${err}`);
         }
@@ -163,35 +171,40 @@ export class AlertService {
     return undefined;
   }
 
-  private async prefetchPreviousStatuses(
-    alerts: UpdateAlertStatusRequest[]
-  ): Promise<Map<string, STATUS_VALUES>> {
+  private async prefetchPreviousStatuses(alerts: UpdateAlertStatusRequest[]): Promise<{
+    previousStatusMap: Map<string, STATUS_VALUES>;
+    foundKeys: Set<string>;
+  }> {
     const docs = alerts.reduce<Array<{ _id: string; _index: string }>>((acc, a) => {
       if (!AlertService.isEmptyAlert(a)) {
         acc.push({ _id: a.id, _index: a.index });
       }
       return acc;
     }, []);
-    if (docs.length === 0) return new Map();
+    if (docs.length === 0) return { previousStatusMap: new Map(), foundKeys: new Set() };
     const response = await this.scopedClusterClient.mget({
       docs,
       _source_includes: [ALERT_WORKFLOW_STATUS, 'signal.status'],
     });
-    const result = new Map<string, STATUS_VALUES>();
+    const previousStatusMap = new Map<string, STATUS_VALUES>();
+    const foundKeys = new Set<string>();
     for (const doc of response.docs) {
       if ('found' in doc && doc.found && doc._id != null && doc._index != null) {
+        const key = `${doc._index}:${doc._id}`;
+        foundKeys.add(key);
         const previousStatus = AlertService.parseWorkflowStatus(doc._source);
         if (previousStatus !== undefined) {
-          result.set(`${doc._index}:${doc._id}`, previousStatus);
+          previousStatusMap.set(key, previousStatus);
         }
       }
     }
-    return result;
+    return { previousStatusMap, foundKeys };
   }
 
   private emitStatusChangedEvents(
     alerts: UpdateAlertStatusRequest[],
     previousStatusMap: Map<string, STATUS_VALUES>,
+    foundKeys: Set<string>,
     casesEventBus: CasesEventBus,
     request: KibanaRequest
   ) {
@@ -200,9 +213,13 @@ export class AlertService {
     for (const alert of alerts) {
       if (!AlertService.isEmptyAlert(alert)) {
         const translatedStatus = this.translateStatus(alert);
-        const previousStatus = previousStatusMap.get(`${alert.index}:${alert.id}`);
-        // Only emit for alerts the prefetch confirmed exist and whose status is actually changing
-        const isActualChange = previousStatus !== undefined && previousStatus !== translatedStatus;
+        const key = `${alert.index}:${alert.id}`;
+        const previousStatus = previousStatusMap.get(key);
+        // Emit for alerts confirmed found by prefetch whose status is actually changing.
+        // Alerts with an unrecognized stored status (previousStatus === undefined) are
+        // included — the mutation still succeeds and the event schema does not require
+        // a previousStatuses row for every emitted ID.
+        const isActualChange = foundKeys.has(key) && previousStatus !== translatedStatus;
         if (isActualChange) {
           idToIndex.set(alert.id, alert.index);
           const bucket = byStatus.get(translatedStatus);

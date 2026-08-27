@@ -441,7 +441,8 @@ describe('set unified alerts workflow status', () => {
 
     test('makes multiple ES calls when ids.length exceeds MAX_ALERTS_PER_TRIGGER', async () => {
       const oversizedIds = Array.from({ length: MAX_ALERTS_PER_TRIGGER + 1 }, (_, i) => `id-${i}`);
-      // First chunk returns id-0; second chunk (the single overflow id) returns nothing.
+      // chunkSize = MAX_ALERTS_PER_TRIGGER / hitsPerIdCap = 10000/2 = 5000, so 10001 IDs → 3 chunks.
+      // First chunk returns id-0; second and third chunks return nothing.
       context.core.elasticsearch.client.asCurrentUser.search
         .mockResolvedValueOnce(
           makeSearchResponse([
@@ -452,6 +453,7 @@ describe('set unified alerts workflow status', () => {
             },
           ])
         )
+        .mockResolvedValueOnce(makeSearchResponse([]))
         .mockResolvedValueOnce(makeSearchResponse([]));
       const request = requestMock.create({
         method: 'post',
@@ -461,8 +463,8 @@ describe('set unified alerts workflow status', () => {
       await server.inject(request, requestContextMock.convertContext(context));
       await new Promise((r) => setTimeout(r, 0));
 
-      // Chunked: 2 ES calls for MAX_ALERTS_PER_TRIGGER+1 IDs
-      expect(context.core.elasticsearch.client.asCurrentUser.search.mock.calls.length).toBe(2);
+      // Chunked: 3 ES calls for MAX_ALERTS_PER_TRIGGER+1 IDs (chunkSize = MAX_ALERTS_PER_TRIGGER/2)
+      expect(context.core.elasticsearch.client.asCurrentUser.search.mock.calls.length).toBe(3);
       // Each individual call is still capped at MAX_ALERTS_PER_TRIGGER
       const searchCall = context.core.elasticsearch.client.asCurrentUser.search.mock.calls[0][0];
       expect((searchCall as { size?: number }).size).toBeLessThanOrEqual(MAX_ALERTS_PER_TRIGGER);
@@ -507,17 +509,23 @@ describe('set unified alerts workflow status', () => {
     });
 
     test('caps previousStatuses alongside alertIds when the batch overflows MAX_ALERTS_PER_TRIGGER', async () => {
-      // First chunk: MAX_ALERTS_PER_TRIGGER hits all changing status (open → closed).
-      // Second chunk: 1 more hit also changing status.
+      // chunkSize = MAX_ALERTS_PER_TRIGGER / hitsPerIdCap = 5000.
+      // Three chunks for 10001 IDs: 5000 + 5000 + 1 hits, all changing status (open → closed).
       // After accumulation alertPreviousStatuses has MAX_ALERTS_PER_TRIGGER+1 entries;
       // the fix must slice it to MAX_ALERTS_PER_TRIGGER before emitting.
-      const firstChunkHits = Array.from({ length: MAX_ALERTS_PER_TRIGGER }, (_, i) => ({
+      const halfChunkHits = Array.from({ length: MAX_ALERTS_PER_TRIGGER / 2 }, (_, i) => ({
         _id: `id-${i}`,
         _index: '.alerts-security.alerts-default',
         _source: { 'kibana.alert.workflow_status': 'open' },
       }));
+      const secondHalfChunkHits = Array.from({ length: MAX_ALERTS_PER_TRIGGER / 2 }, (_, i) => ({
+        _id: `id-${MAX_ALERTS_PER_TRIGGER / 2 + i}`,
+        _index: '.alerts-security.alerts-default',
+        _source: { 'kibana.alert.workflow_status': 'open' },
+      }));
       context.core.elasticsearch.client.asCurrentUser.search
-        .mockResolvedValueOnce(makeSearchResponse(firstChunkHits))
+        .mockResolvedValueOnce(makeSearchResponse(halfChunkHits))
+        .mockResolvedValueOnce(makeSearchResponse(secondHalfChunkHits))
         .mockResolvedValueOnce(
           makeSearchResponse([
             {
@@ -543,7 +551,7 @@ describe('set unified alerts workflow status', () => {
 
     test('does not emit when all IDs are already at the target status across multiple chunks', async () => {
       const oversizedIds = Array.from({ length: MAX_ALERTS_PER_TRIGGER + 1 }, (_, i) => `id-${i}`);
-      // First chunk: id-0 already at target; second chunk returns nothing.
+      // chunkSize = 5000, so 3 chunks. First chunk: id-0 already at target; others return nothing.
       context.core.elasticsearch.client.asCurrentUser.search
         .mockResolvedValueOnce(
           makeSearchResponse([
@@ -554,6 +562,7 @@ describe('set unified alerts workflow status', () => {
             },
           ])
         )
+        .mockResolvedValueOnce(makeSearchResponse([]))
         .mockResolvedValueOnce(makeSearchResponse([]));
       const request = requestMock.create({
         method: 'post',

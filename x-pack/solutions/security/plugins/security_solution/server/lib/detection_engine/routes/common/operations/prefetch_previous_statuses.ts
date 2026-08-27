@@ -59,7 +59,12 @@ export const extractWorkflowStatus = (source: unknown): WorkflowStatus | undefin
 export const prefetchPreviousStatusesByIds = async (
   esClient: ElasticsearchClient,
   index: string | string[],
-  ids: string[]
+  ids: string[],
+  // When the same _id can appear in multiple index families (e.g. detection alerts AND
+  // attack-discovery alerts), pass hitsPerIdCap = 2 so the size calculation reserves
+  // room for both hits. Capped IDs are reduced accordingly to stay within
+  // index.max_result_window (MAX_ALERTS_PER_TRIGGER).
+  hitsPerIdCap = 1
 ): Promise<{
   previousStatuses: PreviousStatus[];
   idToIndex: Map<string, string>;
@@ -67,13 +72,14 @@ export const prefetchPreviousStatusesByIds = async (
 }> => {
   // Use search (not mget) so ignore_unavailable: true tolerates missing indices
   // (e.g. the adhoc attack-discovery index may not exist yet).
-  // Slice to MAX_ALERTS_PER_TRIGGER to stay within ES index.max_result_window.
-  const cappedIds = ids.slice(0, MAX_ALERTS_PER_TRIGGER);
+  const maxIds = Math.floor(MAX_ALERTS_PER_TRIGGER / hitsPerIdCap);
+  const cappedIds = ids.slice(0, maxIds);
   const searchResponse = await esClient.search({
     index: resolveIndex(index),
     query: { ids: { values: cappedIds } },
     _source_includes: [ALERT_WORKFLOW_STATUS, 'signal.status'],
-    size: cappedIds.length,
+    // cappedIds.length * hitsPerIdCap ≤ maxIds * hitsPerIdCap = MAX_ALERTS_PER_TRIGGER
+    size: cappedIds.length * hitsPerIdCap,
     ignore_unavailable: true,
   });
   const previousStatuses: PreviousStatus[] = [];
@@ -254,7 +260,8 @@ export const fetchAllAlertIdIndexWithSource = async (
 export const prefetchAllPreviousStatusesByIds = async (
   esClient: ElasticsearchClient,
   index: string | string[],
-  ids: string[]
+  ids: string[],
+  hitsPerIdCap = 1
 ): Promise<{
   previousStatuses: PreviousStatus[];
   idToIndex: Map<string, string>;
@@ -263,11 +270,13 @@ export const prefetchAllPreviousStatusesByIds = async (
   const allPreviousStatuses: PreviousStatus[] = [];
   const allIdToIndex = new Map<string, string>();
   const allHits: FoundHit[] = [];
-  for (let i = 0; i < ids.length; i += MAX_ALERTS_PER_TRIGGER) {
+  const chunkSize = Math.floor(MAX_ALERTS_PER_TRIGGER / hitsPerIdCap);
+  for (let i = 0; i < ids.length; i += chunkSize) {
     const { previousStatuses, idToIndex, hits } = await prefetchPreviousStatusesByIds(
       esClient,
       index,
-      ids.slice(i, i + MAX_ALERTS_PER_TRIGGER)
+      ids.slice(i, i + chunkSize),
+      hitsPerIdCap
     );
     for (const ps of previousStatuses) {
       allPreviousStatuses.push(ps);
