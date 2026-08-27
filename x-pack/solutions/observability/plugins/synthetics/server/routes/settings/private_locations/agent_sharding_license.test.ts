@@ -7,7 +7,12 @@
 
 import { assertCanEnableAgentSharding } from './agent_sharding_license';
 
-const license = (hasEnterprise: boolean) => ({
+const license = (
+  hasEnterprise: boolean,
+  { isAvailable = true, isActive = true }: { isAvailable?: boolean; isActive?: boolean } = {}
+) => ({
+  isAvailable,
+  isActive,
   hasAtLeast: (level: string) => level === 'enterprise' && hasEnterprise,
 });
 
@@ -35,5 +40,14 @@ describe('assertCanEnableAgentSharding', () => {
   it('allows enabling sharding with Enterprise', () => {
     expect(assertCanEnableAgentSharding(license(true), true)).toBeUndefined();
     expect(assertCanEnableAgentSharding(license(true), true, false)).toBeUndefined();
+  });
+
+  it('rejects enabling sharding with an expired or unavailable Enterprise license', () => {
+    expect(assertCanEnableAgentSharding(license(true, { isActive: false }), true)).toEqual(
+      expect.any(String)
+    );
+    expect(assertCanEnableAgentSharding(license(true, { isAvailable: false }), true)).toEqual(
+      expect.any(String)
+    );
   });
 });

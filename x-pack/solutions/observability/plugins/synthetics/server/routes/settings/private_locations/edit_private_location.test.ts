@@ -52,7 +52,11 @@ const makeRouteContext = (body: Record<string, unknown>, { hasEnterprise = false
     },
     context: {
       licensing: Promise.resolve({
-        license: { hasAtLeast: (level: string) => level === 'enterprise' && hasEnterprise },
+        license: {
+          isAvailable: true,
+          isActive: true,
+          hasAtLeast: (level: string) => level === 'enterprise' && hasEnterprise,
+        },
       }),
     },
   } as any;
@@ -145,6 +149,11 @@ describe('editPrivateLocationRoute isAgentSharding', () => {
       request: { params: { locationId: 'location-1' }, body: { label: 'New label' } },
       response,
       savedObjectsClient: {},
+      context: {
+        licensing: Promise.resolve({
+          license: { isAvailable: true, isActive: true, hasAtLeast: () => false },
+        }),
+      },
       monitorConfigRepository: {
         findDecryptedMonitors: jest
           .fn()

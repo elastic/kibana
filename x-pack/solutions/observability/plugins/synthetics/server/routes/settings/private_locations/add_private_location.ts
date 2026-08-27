@@ -50,11 +50,12 @@ export const addPrivateLocationRoute: SyntheticsRestApiRouteFactory<PrivateLocat
   handler: async (routeContext) => {
     const { response, request, server, spaceId, context } = routeContext;
     const location = request.body as PrivateLocationObject;
-    if (location.isAgentSharding === true) {
-      const licenseError = assertCanEnableAgentSharding((await context.licensing).license, true);
-      if (licenseError) {
-        return response.forbidden({ body: { message: licenseError } });
-      }
+    const licenseError = assertCanEnableAgentSharding(
+      (await context.licensing).license,
+      location.isAgentSharding
+    );
+    if (licenseError) {
+      return response.forbidden({ body: { message: licenseError } });
     }
 
     const internalSOClient = server.coreStart.savedObjects.createInternalRepository();

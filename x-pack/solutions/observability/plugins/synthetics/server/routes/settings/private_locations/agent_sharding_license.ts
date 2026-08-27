@@ -25,15 +25,22 @@ export const getAgentShardingLicenseError = (): string =>
  * without an Enterprise license. Classic create/edit and turning sharding off
  * are allowed on any license.
  */
+const hasAgentShardingLicense = (
+  license?: Pick<ILicense, 'hasAtLeast' | 'isAvailable' | 'isActive'>
+): boolean =>
+  Boolean(
+    license?.isAvailable && license.isActive && license.hasAtLeast(AGENT_SHARDING_MIN_LICENSE)
+  );
+
 export const assertCanEnableAgentSharding = (
-  license?: Pick<ILicense, 'hasAtLeast'>,
+  license?: Pick<ILicense, 'hasAtLeast' | 'isAvailable' | 'isActive'>,
   requestedIsAgentSharding?: boolean,
   existingIsAgentSharding?: boolean
 ): string | undefined => {
   if (!isEnablingAgentSharding(requestedIsAgentSharding, existingIsAgentSharding)) {
     return undefined;
   }
-  if (license?.hasAtLeast(AGENT_SHARDING_MIN_LICENSE)) {
+  if (hasAgentShardingLicense(license)) {
     return undefined;
   }
   return getAgentShardingLicenseError();

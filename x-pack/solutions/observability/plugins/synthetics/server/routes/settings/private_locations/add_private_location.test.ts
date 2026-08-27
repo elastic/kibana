@@ -71,7 +71,11 @@ describe('addPrivateLocationRoute handler - space containment', () => {
       savedObjectsClient: {},
       context: {
         licensing: Promise.resolve({
-          license: { hasAtLeast: (level: string) => level === 'enterprise' && hasEnterprise },
+          license: {
+            isAvailable: true,
+            isActive: true,
+            hasAtLeast: (level: string) => level === 'enterprise' && hasEnterprise,
+          },
         }),
       },
     } as any;

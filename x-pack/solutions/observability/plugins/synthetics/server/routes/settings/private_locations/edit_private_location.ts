@@ -141,15 +141,13 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
         }),
       ]);
 
-      if (newIsAgentSharding === true && existingLocation.attributes.isAgentSharding !== true) {
-        const licenseError = assertCanEnableAgentSharding(
-          (await context.licensing).license,
-          true,
-          existingLocation.attributes.isAgentSharding
-        );
-        if (licenseError) {
-          return response.forbidden({ body: { message: licenseError } });
-        }
+      const licenseError = assertCanEnableAgentSharding(
+        (await context.licensing).license,
+        newIsAgentSharding,
+        existingLocation.attributes.isAgentSharding
+      );
+      if (licenseError) {
+        return response.forbidden({ body: { message: licenseError } });
       }
 
       let newLocation: Awaited<ReturnType<typeof repo.editPrivateLocation>> | undefined;
