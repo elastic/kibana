@@ -60,7 +60,8 @@ const buildSortClause = (sort: SortOrder[]): string[] => {
 
 // The episodes list is the page's query (the `$.alert-episodes` view), time-scoped
 // and capped. Unlike the KPIs there's no aggregation — we want the episode rows,
-// plus the ECS columns pulled out of `data`.
+// plus the ECS columns pulled out of `data`. The whole row is handed to the document
+// flyout as-is, so we don't need the rule-event doc id/index.
 const buildEpisodesTableQuery = (baseEsql: string, sort: SortOrder[]): string => {
   const evalExpr = ECS_DATA_COLUMNS.map(
     (field) => `\`${field}\` = JSON_EXTRACT(data::keyword, "$['${field}']")`

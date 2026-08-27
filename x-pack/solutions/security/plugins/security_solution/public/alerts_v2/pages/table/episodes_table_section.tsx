@@ -19,23 +19,25 @@ import { i18n } from '@kbn/i18n';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { AggregateQuery, TimeRange } from '@kbn/es-query';
 import {
-  UnifiedDataTable,
-  DataLoadingState,
-  type SortOrder,
   type CustomCellRenderer,
   type CustomGridColumnsConfiguration,
+  DataLoadingState,
+  type SortOrder,
+  UnifiedDataTable,
 } from '@kbn/unified-data-table';
 import {
   EpisodeSeverityCell,
   EpisodeStatusCell,
 } from '@kbn/alerting-v2-episodes-ui/components/episodes_table_cell_renderers';
 import { useAlertingRulesCache } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rules_cache';
+import type { RowControlColumn } from '@kbn/discover-utils';
 import { useKibana } from '../../../common/lib/kibana';
 import { EsqlInspectButton } from '../kpis/esql_inspect_button';
 import { useEpisodesTableData } from './use_episodes_table_data';
 import { HostNameCell } from './host_name_cell';
 import { UserNameCell } from './user_name_cell';
 import { NetworkIpCell } from './network_ip_cell';
+import { useFlyoutApi } from '../../../flyout_v2/use_flyout_api';
 
 const TITLE = i18n.translate('xpack.securitySolution.alertsV2.episodesTable.title', {
   defaultMessage: 'Episodes',
@@ -65,6 +67,10 @@ const GRID_HEIGHT = 500;
 const DEFAULT_SORT: SortOrder[] = [['@timestamp', 'desc']];
 const COLUMNS_STORAGE_KEY = 'securitySolution.alertsV2.episodesTableColumns';
 const SORT_STORAGE_KEY = 'securitySolution.alertsV2.episodesTableSort';
+const VIEW_DETAILS_LABEL = i18n.translate(
+  'xpack.securitySolution.alertsV2.episodesTable.viewDetails',
+  { defaultMessage: 'View details' }
+);
 
 /** Human-readable column headers, mirroring the v1 alerts table labels. */
 const COLUMN_DISPLAY_NAMES: Record<string, string> = {
@@ -157,7 +163,9 @@ export const EpisodesTableSection = ({ query, timeRange }: EpisodesTableSectionP
   // Resolve rule.id (UUID) → rule name via the RnA rules-by-ids lookup.
   const ruleIds = useMemo(
     () =>
-      Array.from(new Set(rows.map((row) => String(row.flattened['rule.id'] ?? '')).filter(Boolean))),
+      Array.from(
+        new Set(rows.map((row) => String(row.flattened['rule.id'] ?? '')).filter(Boolean))
+      ),
     [rows]
   );
   const { rulesCache } = useAlertingRulesCache({ ruleIds, services: { http: services.http } });
@@ -177,6 +185,27 @@ export const EpisodesTableSection = ({ query, timeRange }: EpisodesTableSectionP
       },
     }),
     [rulesCache]
+  );
+
+  // Row action: open the document flyout on the v2 alert. The episode row already is a
+  // DataTableRecord, so we hand it straight to the flyout (no `_id`/`_index` re-fetch).
+  const { openDocumentFlyoutFromHit } = useFlyoutApi();
+  const rowAdditionalLeadingControls = useMemo<RowControlColumn[]>(
+    () => [
+      {
+        id: 'openDocumentFlyout',
+        render: (Control, { record }) => (
+          <Control
+            data-test-subj="alertsV2OpenDocumentFlyout"
+            iconType="maximize"
+            label={VIEW_DETAILS_LABEL}
+            tooltipContent={VIEW_DETAILS_LABEL}
+            onClick={() => openDocumentFlyoutFromHit({ hit: record })}
+          />
+        ),
+      },
+    ],
+    [openDocumentFlyoutFromHit]
   );
 
   return (
@@ -231,6 +260,7 @@ export const EpisodesTableSection = ({ query, timeRange }: EpisodesTableSectionP
             isSortEnabled
             isInMemorySortEnabled={false}
             controlColumnIds={[]}
+            rowAdditionalLeadingControls={rowAdditionalLeadingControls}
             services={tableServices}
           />
         </div>
