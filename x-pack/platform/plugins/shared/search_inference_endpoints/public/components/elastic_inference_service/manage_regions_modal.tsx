@@ -10,10 +10,7 @@ import { css } from '@emotion/react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiEmptyPrompt,
-  EuiFlexGroup,
   EuiHorizontalRule,
-  EuiLoadingSpinner,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -34,9 +31,8 @@ import { ConfirmRegionSelectionModal } from './confirm_region_selection_modal';
 import { ConfirmDeleteRegionPolicyModal } from './confirm_delete_region_policy_modal';
 import { RestrictTrafficToggle } from './restrict_traffic_toggle';
 import { LocationTypeSelector } from './location_type_selector';
-import { GeoZoneList } from './geo_zone_list';
-import { RegionZoneList } from './region_zone_list';
-import { RegionSelectionToolbar } from './region_selection_toolbar';
+import { GeoTabContent } from './geo_tab_content';
+import { RegionsTabContent } from './regions_tab_content';
 
 interface ManageRegionsModalProps {
   onClose: () => void;
@@ -89,89 +85,26 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
   const showTabContent = useCustomPolicy || isLoading;
   const showCallOut = useCustomPolicy && !isCallOutDismissed;
 
-  const renderGeoContent = () => {
-    if (isLoading) {
-      return (
-        <EuiEmptyPrompt icon={<EuiLoadingSpinner size="xl" />} data-test-subj="manageGeosLoading" />
-      );
-    }
-    if (geoTab.totalGeos === 0) {
-      if (isError) return null;
-      return (
-        <KbnWarningCallout
-          announceOnMount
-          title={i18n.translate('xpack.searchInferenceEndpoints.manageRegions.noGeos.title', {
-            defaultMessage: 'No geographies available',
-          })}
-          data-test-subj="manageRegionsNoGeos"
-          text={i18n.translate('xpack.searchInferenceEndpoints.manageRegions.noGeos.description', {
-            defaultMessage:
-              'No geographic zone information is available for the current Elastic Inference Service endpoints.',
-          })}
-        />
-      );
-    }
-    return (
-      <EuiFlexGroup direction="column" gutterSize="s">
-        <RegionSelectionToolbar
-          totalSelected={geoTab.totalGeosSelected}
-          totalRegions={geoTab.totalGeos}
-          allSelected={geoTab.allGeosSelected}
-          onSelectAll={geoTab.onSelectAll}
-        />
-        <GeoZoneList
-          availableGeos={geoTab.availableGeos}
-          checkedGeos={geoTab.checkedGeos}
-          onToggleGeo={geoTab.onToggleGeo}
-        />
-      </EuiFlexGroup>
-    );
-  };
+  const tabs = useMemo(
+    () => [
+      {
+        id: 'geo' as const,
+        content: <GeoTabContent isLoading={isLoading} isError={isError} geoTab={geoTab} />,
+      },
+      {
+        id: 'regions' as const,
+        content: (
+          <RegionsTabContent isLoading={isLoading} isError={isError} regionTab={regionTab} />
+        ),
+      },
+    ],
+    [isLoading, isError, geoTab, regionTab]
+  );
 
-  const renderRegionContent = () => {
-    if (isLoading) {
-      return (
-        <EuiEmptyPrompt
-          icon={<EuiLoadingSpinner size="xl" />}
-          data-test-subj="manageRegionsLoading"
-        />
-      );
-    }
-    if (regionTab.totalRegions === 0) {
-      if (isError) return null;
-      return (
-        <KbnWarningCallout
-          announceOnMount
-          title={i18n.translate('xpack.searchInferenceEndpoints.manageRegions.noRegions.title', {
-            defaultMessage: 'No regions available',
-          })}
-          data-test-subj="manageRegionsNoRegions"
-          text={i18n.translate(
-            'xpack.searchInferenceEndpoints.manageRegions.noRegions.description',
-            {
-              defaultMessage:
-                'No region information is available for the current Elastic Inference Service endpoints.',
-            }
-          )}
-        />
-      );
-    }
-    return (
-      <EuiFlexGroup direction="column" gutterSize="s">
-        <RegionSelectionToolbar
-          totalSelected={regionTab.totalSelected}
-          totalRegions={regionTab.totalRegions}
-          allSelected={regionTab.allSelected}
-          onSelectAll={regionTab.onSelectAll}
-        />
-        <RegionZoneList
-          zoneGroups={regionTab.zoneGroups}
-          checkedKeys={regionTab.checkedKeys}
-          onToggleRegion={regionTab.onToggleRegion}
-        />
-      </EuiFlexGroup>
-    );
-  };
+  const selectedTab = useMemo(
+    () => tabs.find((tab) => tab.id === activeTab) ?? tabs[0],
+    [tabs, activeTab]
+  );
 
   return (
     <>
@@ -261,7 +194,7 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
                 onChange={handleLocationTypeChange}
               />
               <EuiSpacer size="m" />
-              {activeTab === 'geo' ? renderGeoContent() : renderRegionContent()}
+              {selectedTab.content}
             </>
           )}
         </EuiModalBody>

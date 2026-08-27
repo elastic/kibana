@@ -23,14 +23,10 @@ export interface RegionTabState {
   totalRegions: number;
   totalSelected: number;
   allSelected: boolean;
-  isAllExpanded: boolean;
   zoneGroups: ZoneGroup[];
   checkedKeys: Set<string>;
-  expandedZones: Set<string>;
   onSelectAll: () => void;
-  onExpandAll: () => void;
   onToggleRegion: (key: string) => void;
-  onToggleExpand: (zoneId: string, isOpen: boolean) => void;
 }
 
 export interface RegionsTabContentProps {
@@ -46,14 +42,10 @@ export const RegionsTabContent: React.FC<RegionsTabContentProps> = ({
     totalRegions,
     totalSelected,
     allSelected,
-    isAllExpanded,
     zoneGroups,
     checkedKeys,
-    expandedZones,
     onSelectAll,
-    onExpandAll,
     onToggleRegion,
-    onToggleExpand,
   },
 }) => {
   if (isLoading) {
@@ -90,16 +82,12 @@ export const RegionsTabContent: React.FC<RegionsTabContentProps> = ({
         totalSelected={totalSelected}
         totalRegions={totalRegions}
         allSelected={allSelected}
-        isAllExpanded={isAllExpanded}
         onSelectAll={onSelectAll}
-        onExpandAll={onExpandAll}
       />
       <RegionZoneList
         zoneGroups={zoneGroups}
         checkedKeys={checkedKeys}
-        expandedZones={expandedZones}
         onToggleRegion={onToggleRegion}
-        onToggleExpand={onToggleExpand}
       />
     </EuiFlexGroup>
   );
