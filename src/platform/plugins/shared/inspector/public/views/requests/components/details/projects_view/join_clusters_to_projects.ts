@@ -18,7 +18,7 @@ export const ORIGIN_CLUSTER_KEY = '_origin';
 export interface ProjectClusterItem {
   key: string;
   name: string;
-  status: string;
+  status: Exclude<estypes.ClusterSearchStatus, 'running'>;
   responseTime?: number;
   isOrigin: boolean;
   project?: CPSProject;
@@ -49,7 +49,7 @@ export function joinClustersToProjects(
     return {
       key,
       name: project?._alias ?? key,
-      status: clusterDetails.status,
+      status: clusterDetails.status as Exclude<estypes.ClusterSearchStatus, 'running'>,
       responseTime: clusterDetails.took ?? undefined,
       isOrigin: isOriginKey || (project !== undefined && project === originProject),
       project,

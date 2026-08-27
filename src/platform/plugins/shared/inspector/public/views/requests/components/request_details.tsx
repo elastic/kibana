@@ -80,8 +80,10 @@ export function RequestDetails(props: Props) {
       if (detail.name === (isCpsMultiProject ? 'Clusters' : 'Projects')) {
         return false;
       }
+
       return detail.component.shouldShow?.(props.request);
     });
+
     setAvailableDetails(nextAvailableDetails);
 
     // If the previously selected detail is still available we want to stay

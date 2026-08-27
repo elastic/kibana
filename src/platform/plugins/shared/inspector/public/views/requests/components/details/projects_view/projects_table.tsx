@@ -8,7 +8,7 @@
  */
 
 import type { ReactNode } from 'react';
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Criteria } from '@elastic/eui';
 import {
@@ -26,7 +26,7 @@ import {
 } from '@elastic/eui';
 import { getSolutionIcon } from '@kbn/cps-utils';
 import { ClusterView } from '../clusters_view/clusters_table/cluster_view';
-import { ClusterHealth } from '../clusters_view/clusters_health';
+import { ClusterHealth, type ClusterHealthStatus } from '../clusters_view/clusters_health';
 import type { ProjectClusterItem } from './join_clusters_to_projects';
 
 function getInitialExpandedRow(items: ProjectClusterItem[]) {
@@ -46,15 +46,17 @@ export function ProjectsTable({ items }: Props) {
   const [sortField, setSortField] = useState<undefined | keyof ProjectClusterItem>();
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
-  const toggleDetails = (item: ProjectClusterItem) => {
-    const nextExpandedRows = { ...expandedRows };
-    if (item.key in nextExpandedRows) {
-      delete nextExpandedRows[item.key];
-    } else {
-      nextExpandedRows[item.key] = <ClusterView clusterDetails={item.clusterDetails} />;
-    }
-    setExpandedRows(nextExpandedRows);
-  };
+  const toggleDetails = useCallback((item: ProjectClusterItem) => {
+    setExpandedRows((prevExpandedRows) => {
+      const nextExpandedRows = { ...prevExpandedRows };
+      if (item.key in nextExpandedRows) {
+        delete nextExpandedRows[item.key];
+      } else {
+        nextExpandedRows[item.key] = <ClusterView clusterDetails={item.clusterDetails} />;
+      }
+      return nextExpandedRows;
+    });
+  }, []);
 
   const columns: Array<EuiBasicTableColumn<ProjectClusterItem>> = [
     {
@@ -114,7 +116,7 @@ export function ProjectsTable({ items }: Props) {
       name: i18n.translate('inspector.requests.projects.table.statusLabel', {
         defaultMessage: 'Last status',
       }),
-      render: (status: string) => {
+      render: (status: ClusterHealthStatus) => {
         return <ClusterHealth status={status} />;
       },
       sortable: items.length > 1,

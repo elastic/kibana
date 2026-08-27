@@ -21,7 +21,7 @@ import { PROJECT_ROUTING, useFetchProjects } from '@kbn/cps-utils';
 import type { Request } from '../../../../../../common/adapters/request/types';
 import type { InspectorKibanaServices } from '../../types';
 import type { DetailViewProps } from '../types';
-import { ClusterHealth } from '../clusters_view/clusters_health';
+import { ClusterHealth, type ClusterHealthStatus } from '../clusters_view/clusters_health';
 import { ClustersView } from '../clusters_view/clusters_view';
 import { findClusters } from '../clusters_view/find_clusters';
 import { joinClustersToProjects, type ProjectClusterItem } from './join_clusters_to_projects';
@@ -66,10 +66,12 @@ export const ProjectsView = ({ request }: DetailViewProps) => {
           defaultMessage: 'Last status',
         }),
         multiSelect: 'or',
-        options: (['successful', 'partial', 'skipped', 'failed'] as const).map((status) => ({
-          value: status,
-          view: <ClusterHealth status={status} textProps={{ size: 'm', color: 'text' }} />,
-        })),
+        options: (['successful', 'partial', 'skipped', 'failed'] as ClusterHealthStatus[]).map(
+          (status) => ({
+            value: status,
+            view: <ClusterHealth status={status} textProps={{ size: 'm', color: 'text' }} />,
+          })
+        ),
       },
       {
         type: 'field_value_selection',
@@ -121,6 +123,7 @@ export const ProjectsView = ({ request }: DetailViewProps) => {
             }}
             filters={filters}
             onChange={onSearchChange}
+            data-test-subj="inspectorRequestProjectsSearchBar"
           />
           <EuiSpacer size="m" />
         </>
