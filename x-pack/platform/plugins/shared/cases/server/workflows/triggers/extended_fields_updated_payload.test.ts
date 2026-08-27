@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { MAX_WORKFLOW_TRIGGER_EXTENDED_FIELD_VALUE_LENGTH } from '../../../common/constants';
 import { buildExtendedFieldsUpdatedPayload } from './extended_fields_updated_payload';
 
 const BASE = { owner: 'securitySolution', caseId: 'case-1' };
@@ -41,7 +40,7 @@ describe('buildExtendedFieldsUpdatedPayload', () => {
     expect(result?.caseId).toBe('case-1');
   });
 
-  it('includes changedFields, extendedFields, previousExtendedFields, and empty truncatedFields on a clean change', () => {
+  it('includes changedFields on a clean change', () => {
     const result = buildExtendedFieldsUpdatedPayload({
       ...BASE,
       previousExtendedFields: { priority: 'low' },
@@ -51,80 +50,52 @@ describe('buildExtendedFieldsUpdatedPayload', () => {
       owner: 'securitySolution',
       caseId: 'case-1',
       changedFields: ['priority'],
-      extendedFields: { priority: 'high' },
+    });
+  });
+
+  it('does not include field values in the payload', () => {
+    const result = buildExtendedFieldsUpdatedPayload({
+      ...BASE,
       previousExtendedFields: { priority: 'low' },
-      truncatedFields: [],
-    });
-  });
-
-  it('does not truncate a value exactly at the cap', () => {
-    const atCap = 'x'.repeat(MAX_WORKFLOW_TRIGGER_EXTENDED_FIELD_VALUE_LENGTH);
-    const result = buildExtendedFieldsUpdatedPayload({
-      ...BASE,
-      previousExtendedFields: {},
-      extendedFields: { priority: atCap },
-    });
-    expect(result?.extendedFields.priority).toHaveLength(
-      MAX_WORKFLOW_TRIGGER_EXTENDED_FIELD_VALUE_LENGTH
-    );
-    expect(result?.truncatedFields).toEqual([]);
-  });
-
-  it('truncates a value one character over the cap', () => {
-    const overCap = 'x'.repeat(MAX_WORKFLOW_TRIGGER_EXTENDED_FIELD_VALUE_LENGTH + 1);
-    const result = buildExtendedFieldsUpdatedPayload({
-      ...BASE,
-      previousExtendedFields: {},
-      extendedFields: { priority: overCap },
-    });
-    expect(result?.extendedFields.priority).toHaveLength(
-      MAX_WORKFLOW_TRIGGER_EXTENDED_FIELD_VALUE_LENGTH
-    );
-    expect(result?.truncatedFields).toEqual(['priority']);
-  });
-
-  it('also truncates previousExtendedFields when the previous value is over the cap', () => {
-    const overCap = 'y'.repeat(MAX_WORKFLOW_TRIGGER_EXTENDED_FIELD_VALUE_LENGTH + 1);
-    const result = buildExtendedFieldsUpdatedPayload({
-      ...BASE,
-      previousExtendedFields: { priority: overCap },
       extendedFields: { priority: 'high' },
     });
-    expect(result?.previousExtendedFields.priority).toHaveLength(
-      MAX_WORKFLOW_TRIGGER_EXTENDED_FIELD_VALUE_LENGTH
-    );
-    expect(result?.truncatedFields).toEqual(['priority']);
+    expect(result).not.toHaveProperty('extendedFields');
+    expect(result).not.toHaveProperty('previousExtendedFields');
   });
 
-  it('deduplicates and sorts truncatedFields when a key is truncated in both maps', () => {
-    const overCap = 'z'.repeat(MAX_WORKFLOW_TRIGGER_EXTENDED_FIELD_VALUE_LENGTH + 1);
+  it('reports changed fields alphabetically sorted', () => {
     const result = buildExtendedFieldsUpdatedPayload({
       ...BASE,
-      previousExtendedFields: { beta: overCap },
-      extendedFields: { beta: `${overCap.slice(0, overCap.length - 1)}X` },
+      previousExtendedFields: { charlie: '1', alpha: '2', beta: '3' },
+      extendedFields: { charlie: 'x', alpha: 'y', beta: 'z' },
     });
-    // beta is truncated in both maps but should appear only once in truncatedFields
-    expect(result?.truncatedFields).toEqual(['beta']);
+    expect(result?.changedFields).toEqual(['alpha', 'beta', 'charlie']);
   });
 
-  it('sorts truncatedFields alphabetically when multiple keys are truncated', () => {
-    const overCap = 'x'.repeat(MAX_WORKFLOW_TRIGGER_EXTENDED_FIELD_VALUE_LENGTH + 1);
-    const result = buildExtendedFieldsUpdatedPayload({
-      ...BASE,
-      previousExtendedFields: { charlie: 'old', alpha: 'old', beta: 'old' },
-      extendedFields: { charlie: overCap, alpha: overCap, beta: overCap },
-    });
-    expect(result?.truncatedFields).toEqual(['alpha', 'beta', 'charlie']);
-  });
-
-  it('keeps a truncated key present in extendedFields (absence signals removal)', () => {
-    const overCap = 'x'.repeat(MAX_WORKFLOW_TRIGGER_EXTENDED_FIELD_VALUE_LENGTH + 1);
+  it('detects a newly-added field (absent → present)', () => {
     const result = buildExtendedFieldsUpdatedPayload({
       ...BASE,
       previousExtendedFields: {},
-      extendedFields: { priority: overCap },
+      extendedFields: { priority: 'high' },
     });
-    // Key must still be present even though the value is truncated
-    expect(result?.extendedFields).toHaveProperty('priority');
+    expect(result?.changedFields).toEqual(['priority']);
+  });
+
+  it('detects a removed field (present → absent)', () => {
+    const result = buildExtendedFieldsUpdatedPayload({
+      ...BASE,
+      previousExtendedFields: { priority: 'high' },
+      extendedFields: {},
+    });
+    expect(result?.changedFields).toEqual(['priority']);
+  });
+
+  it('does not include unchanged sibling keys in changedFields', () => {
+    const result = buildExtendedFieldsUpdatedPayload({
+      ...BASE,
+      previousExtendedFields: { priority: 'low', severity: 'medium' },
+      extendedFields: { priority: 'high', severity: 'medium' },
+    });
+    expect(result?.changedFields).toEqual(['priority']);
   });
 });

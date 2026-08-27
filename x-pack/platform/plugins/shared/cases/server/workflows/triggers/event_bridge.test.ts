@@ -18,7 +18,6 @@ import {
   CaseStatusUpdatedTriggerId,
   ExtendedFieldsUpdatedTriggerId,
 } from '../../../common/workflows/triggers';
-import { MAX_WORKFLOW_TRIGGER_EXTENDED_FIELD_VALUE_LENGTH } from '../../../common/constants';
 import { CasesEventBus } from '../../events/event_bus';
 import { registerCasesWorkflowEventBridge } from './event_bridge';
 
@@ -194,9 +193,6 @@ describe('registerCasesWorkflowEventBridge', () => {
       expect(mockClient.emitEvent).toHaveBeenNthCalledWith(2, ExtendedFieldsUpdatedTriggerId, {
         ...basePayload,
         changedFields: ['priority'],
-        extendedFields: { priority: 'high' },
-        previousExtendedFields: { priority: 'low' },
-        truncatedFields: [],
       });
     });
 
@@ -222,9 +218,6 @@ describe('registerCasesWorkflowEventBridge', () => {
       expect(mockClient.emitEvent).toHaveBeenNthCalledWith(2, ExtendedFieldsUpdatedTriggerId, {
         ...basePayload,
         changedFields: ['priority'],
-        extendedFields: { priority: 'high' },
-        previousExtendedFields: { priority: 'low' },
-        truncatedFields: [],
       });
     });
 
@@ -284,9 +277,6 @@ describe('registerCasesWorkflowEventBridge', () => {
       expect(mockClient.emitEvent).toHaveBeenNthCalledWith(2, ExtendedFieldsUpdatedTriggerId, {
         ...basePayload,
         changedFields: ['priority'],
-        extendedFields: { priority: '' },
-        previousExtendedFields: {},
-        truncatedFields: [],
       });
     });
 
@@ -307,13 +297,10 @@ describe('registerCasesWorkflowEventBridge', () => {
       expect(mockClient.emitEvent).toHaveBeenNthCalledWith(2, ExtendedFieldsUpdatedTriggerId, {
         ...basePayload,
         changedFields: ['priority'],
-        extendedFields: { priority: 'high' },
-        previousExtendedFields: { priority: '' },
-        truncatedFields: [],
       });
     });
 
-    it('fires on value → absent (linked-field clear); extendedFields is empty', async () => {
+    it('fires on value → absent (linked-field clear)', async () => {
       /*
        * FAILURE SCENARIO: buildExtendedFieldsUserActions structurally cannot see removals
        * (one-sided loop). This test verifies the trigger catches it.
@@ -334,9 +321,6 @@ describe('registerCasesWorkflowEventBridge', () => {
       expect(mockClient.emitEvent).toHaveBeenNthCalledWith(2, ExtendedFieldsUpdatedTriggerId, {
         ...basePayload,
         changedFields: ['priority'],
-        extendedFields: {},
-        previousExtendedFields: { priority: 'high' },
-        truncatedFields: [],
       });
     });
 
@@ -357,9 +341,6 @@ describe('registerCasesWorkflowEventBridge', () => {
       expect(mockClient.emitEvent).toHaveBeenNthCalledWith(2, ExtendedFieldsUpdatedTriggerId, {
         ...basePayload,
         changedFields: ['priority'],
-        extendedFields: {},
-        previousExtendedFields: { priority: '' },
-        truncatedFields: [],
       });
     });
 
@@ -383,7 +364,7 @@ describe('registerCasesWorkflowEventBridge', () => {
       );
     });
 
-    it('does not include unchanged sibling keys in either map', async () => {
+    it('does not include unchanged sibling keys in changedFields', async () => {
       eventBus.emitCaseUpdated(
         request,
         { ...basePayload, updatedFields: ['extended_fields'] },
@@ -398,8 +379,7 @@ describe('registerCasesWorkflowEventBridge', () => {
       await flushMicrotasks();
 
       const [, payload] = jest.mocked(mockClient.emitEvent).mock.calls[1];
-      expect(payload).not.toHaveProperty('extendedFields.severity');
-      expect(payload).not.toHaveProperty('previousExtendedFields.severity');
+      expect((payload as { changedFields: string[] }).changedFields).toEqual(['priority']);
     });
 
     it('reports changedFields alphabetically sorted for multiple changes', async () => {
@@ -424,32 +404,24 @@ describe('registerCasesWorkflowEventBridge', () => {
       ]);
     });
 
-    it('truncates values over the cap and lists the key in truncatedFields', async () => {
-      const overCap = 'x'.repeat(MAX_WORKFLOW_TRIGGER_EXTENDED_FIELD_VALUE_LENGTH + 1);
+    it('does not expose field values in the payload (only changed keys)', async () => {
       eventBus.emitCaseUpdated(
         request,
         { ...basePayload, updatedFields: ['extended_fields'] },
         {
           // @ts-expect-error - partial case objects for testing
-          previousCase: { attributes: { extended_fields: {} } },
+          previousCase: { attributes: { extended_fields: { priority: 'low' } } },
           // @ts-expect-error - partial case objects for testing
-          updatedCase: { extended_fields: { priority: overCap } },
+          updatedCase: { extended_fields: { priority: 'high' } },
         }
       );
 
       await flushMicrotasks();
 
       const [, payload] = jest.mocked(mockClient.emitEvent).mock.calls[1];
-      const p = payload as {
-        extendedFields: Record<string, string>;
-        truncatedFields: string[];
-      };
-      expect(p.extendedFields.priority).toHaveLength(
-        MAX_WORKFLOW_TRIGGER_EXTENDED_FIELD_VALUE_LENGTH
-      );
-      expect(p.truncatedFields).toEqual(['priority']);
-      // Key must be present even though truncated (absence would signal removal)
-      expect(p.extendedFields).toHaveProperty('priority');
+      expect(payload).not.toHaveProperty('extendedFields');
+      expect(payload).not.toHaveProperty('previousExtendedFields');
+      expect(payload).not.toHaveProperty('truncatedFields');
     });
 
     it('emits caseUpdated, caseStatusUpdated, extendedFieldsUpdated in order when both status and extended_fields change', async () => {
@@ -537,13 +509,8 @@ describe('registerCasesWorkflowEventBridge', () => {
       await flushMicrotasks();
 
       const [, payload] = jest.mocked(mockClient.emitEvent).mock.calls[1];
-      const p = payload as {
-        changedFields: string[];
-        extendedFields: Record<string, string>;
-        previousExtendedFields: Record<string, string>;
-      };
+      const p = payload as { changedFields: string[] };
       expect(p.changedFields).toEqual(['count']);
-      expect(p.previousExtendedFields).toEqual({ count: '5' });
     });
 
     it('does not fire for a non-string SO value equal after coercion', async () => {

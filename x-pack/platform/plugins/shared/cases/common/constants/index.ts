@@ -235,14 +235,6 @@ export const MAX_FIELDS_PER_TEMPLATE = 200 as const;
 export const MAX_EXTENDED_FIELD_VALUE_BYTES = 30000 as const;
 
 /**
- * Maximum character length for extended-field values written into the `trigger_events` data
- * stream. Much smaller than MAX_EXTENDED_FIELD_VALUE_BYTES (30 000) because the full payload is
- * indexed on every emit — even with zero subscribers. Worst case without this cap:
- * 200 fields × 30 000 chars × 2 maps ≈ 12 MB per case update.
- */
-export const MAX_WORKFLOW_TRIGGER_EXTENDED_FIELD_VALUE_LENGTH = 1024 as const;
-
-/**
  * Single source of truth for the allowed character sets in templates-v2 extended-field keys.
  *
  * The key stored for a field is `${name}_as_${type}` (see `getFieldSnakeKey` in

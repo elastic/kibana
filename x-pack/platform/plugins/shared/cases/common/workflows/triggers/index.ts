@@ -19,9 +19,6 @@ import {
   CASE_STATUS_UPDATED_TRIGGER_EVENT_SCHEMA_STATUS_DESCRIPTION,
   CASE_STATUS_UPDATED_TRIGGER_EVENT_SCHEMA_PREVIOUS_STATUS_DESCRIPTION,
   EXTENDED_FIELDS_UPDATED_TRIGGER_EVENT_SCHEMA_CHANGED_FIELDS_DESCRIPTION,
-  EXTENDED_FIELDS_UPDATED_TRIGGER_EVENT_SCHEMA_EXTENDED_FIELDS_DESCRIPTION,
-  EXTENDED_FIELDS_UPDATED_TRIGGER_EVENT_SCHEMA_PREVIOUS_EXTENDED_FIELDS_DESCRIPTION,
-  EXTENDED_FIELDS_UPDATED_TRIGGER_EVENT_SCHEMA_TRUNCATED_FIELDS_DESCRIPTION,
 } from '../translations';
 
 export const CaseCreatedTriggerId = 'cases.caseCreated' as const;
@@ -257,32 +254,10 @@ triggers:
 
 export const ExtendedFieldsUpdatedTriggerId = 'cases.extendedFieldsUpdated' as const;
 
-// IMPORTANT: Do not "improve" this schema shape.
-//
-// • ZodRecord with a scalar value type (z.record(z.string(), z.string())) contributes ZERO child
-//   paths to `extractSchemaPropertyPaths`, so `event.extendedFields.<key>: "value"` is rejected
-//   at workflow-save time by `validateKqlAgainstSchema`. This is intentional — value-based
-//   key filtering is a platform constraint, not a Cases choice.
-//
-// • An array-of-change-objects shape ({ key, value, previousValue }[]) passes save-time
-//   validation (ZodArray recurses) but `readContextPath` in @kbn/eval-kql never flattens
-//   arrays, so conditions would silently evaluate to false forever — a hidden trap.
-//
-// Key-level filtering works correctly through `event.changedFields` (ZodArray of strings).
-// Document this constraint to users; do not try to work around it in the schema.
 const extendedFieldsUpdatedEventSchema = baseCaseEventSchema.extend({
   changedFields: z
     .array(z.string())
     .meta({ description: EXTENDED_FIELDS_UPDATED_TRIGGER_EVENT_SCHEMA_CHANGED_FIELDS_DESCRIPTION }),
-  extendedFields: z.record(z.string(), z.string()).meta({
-    description: EXTENDED_FIELDS_UPDATED_TRIGGER_EVENT_SCHEMA_EXTENDED_FIELDS_DESCRIPTION,
-  }),
-  previousExtendedFields: z.record(z.string(), z.string()).meta({
-    description: EXTENDED_FIELDS_UPDATED_TRIGGER_EVENT_SCHEMA_PREVIOUS_EXTENDED_FIELDS_DESCRIPTION,
-  }),
-  truncatedFields: z.array(z.string()).meta({
-    description: EXTENDED_FIELDS_UPDATED_TRIGGER_EVENT_SCHEMA_TRUNCATED_FIELDS_DESCRIPTION,
-  }),
 });
 
 export type ExtendedFieldsUpdatedPayload = z.infer<typeof extendedFieldsUpdatedEventSchema>;
@@ -301,17 +276,16 @@ export const extendedFieldsUpdatedTriggerCommonDefinition: CommonTriggerDefiniti
     details: i18n.translate(
       'xpack.cases.workflowTriggers.extendedFieldsUpdated.documentation.details',
       {
-        defaultMessage: `Emitted after a case update changes at least one extended-field value. The payload includes only the keys that changed.
+        defaultMessage: `Emitted after a case update changes at least one extended-field value.
 
 **Payload fields**
-- event.changedFields — sorted list of extended-field keys that changed. Use this for trigger conditions.
-- event.extendedFields — new values for changed keys only. A key present in changedFields but absent here was cleared.
-- event.previousExtendedFields — previous values for changed keys only. A key present in changedFields but absent here was newly added.
-- event.truncatedFields — keys whose values were truncated to 1024 characters. Use cases.getCase to read full values.
+- event.changedFields — sorted list of extended-field keys that changed. Use this for trigger conditions and to know which fields were affected.
 
 **Filtering**
 Filter by field key: event.changedFields: "priority_as_keyword"
-Filtering by value (event.extendedFields.priority_as_keyword: "P1") is not supported — the trigger condition validator rejects it.
+
+**Reading current values**
+Use a cases.getCase step after the trigger to read the current extended-field values.
 
 **Mirror-driven changes**
 This trigger fires when extended fields change via any write path, including a customFields patch on a field linked to a global field definition. In that case event.updatedFields on the caseUpdated trigger may only contain "customFields", not "extended_fields".
