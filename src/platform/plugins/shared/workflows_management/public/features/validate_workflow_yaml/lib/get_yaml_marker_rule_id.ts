@@ -7,13 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useChromeService } from '@kbn/core-chrome-browser-context';
+export type YamlMarkerRuleId = 'schemaViolation' | 'yamlSyntaxError';
 
-/**
- * Always `true`. Kept so existing call sites do not need to change.
- * Combine with `useChromeStyle` to check classic vs project.
- */
-export function useIsNextChrome(): boolean {
-  const chrome = useChromeService();
-  return chrome.next.isEnabled;
-}
+/** Maps Monaco YAML marker provenance to the semantic rule that produced it. */
+export const getYamlMarkerRuleId = (source?: string): YamlMarkerRuleId =>
+  source?.startsWith('yaml-schema:') ? 'schemaViolation' : 'yamlSyntaxError';
