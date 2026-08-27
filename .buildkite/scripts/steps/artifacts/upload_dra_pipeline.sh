@@ -37,6 +37,7 @@ steps:
     trigger: "unified-release-dra-processing"
     async: true
     depends_on: "dra-prep"
+    if: 'build.env("DRY_RUN") != "true" && build.env("DRY_RUN") != "1"'
     build:
       env:
         DRA_PRODUCT_ID: kibana
