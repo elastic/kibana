@@ -1331,3 +1331,60 @@ describe('CDATA expansion is bounded and inherits walk state', () => {
     expect(result).not.toContain('false-ioc.test');
   });
 });
+
+/**
+ * A raw-text opener is only an opener where the document is actually in markup context.
+ *
+ * Identifying one from the bytes after `<` alone meant `<!-- <script> -->` registered as a
+ * real opener. It has no matching close, so the scan ran to end of input and never
+ * normalized the genuine `<script/>` after it; the parser then read the following paragraph
+ * as script content and the whole report extracted to nothing. The scanner now skips
+ * comments, CDATA sections and directives as whole regions, and skips ordinary tags whole
+ * so a `<script/>` inside one of their attribute values is not mistaken for a tag.
+ */
+describe('raw-text openers in non-markup context', () => {
+  it.each([
+    ['inside a comment', '<!-- <script> --><script/><p>IOC: evil.test</p>'],
+    ['style inside a comment', '<!-- <style> --><style/><p>IOC: evil.test</p>'],
+    ['inside a CDATA section', '<![CDATA[<script>]]><script/><p>IOC: evil.test</p>'],
+    ['inside an attribute value', '<p title="<script/>">IOC: evil.test</p>'],
+    ['no preceding context', '<script/><p>IOC: evil.test</p>'],
+  ])('still finds the real indicator with an opener %s', (_label, html) => {
+    expect(stripHtml(html)).toContain('IOC: evil.test');
+  });
+
+  it('still removes a genuine terminated script', () => {
+    const result = stripHtml('<script>tracker=1</script><p>IOC: evil.test</p>');
+
+    expect(result).toBe('IOC: evil.test');
+    expect(result).not.toContain('tracker');
+  });
+
+  // Skipping regions must not reopen the escape the raw-text skip exists to prevent.
+  it.each([
+    [
+      'a string literal',
+      '<script>const x="<script/>"; fetch("https://false-ioc.test")</script><p>safe</p>',
+    ],
+    [
+      'a bogus close then a literal',
+      '<script>const x="</scriptfoo><script/>"; fetch("https://false-ioc.test")</script><p>safe</p>',
+    ],
+  ])('keeps a script body contained through %s', (_label, html) => {
+    const result = stripHtml(html);
+
+    expect(result).toBe('safe');
+    expect(result).not.toContain('false-ioc.test');
+  });
+
+  // An unterminated tag means no `>` exists from that point on, so no later tag can be
+  // complete and the scan stops. Retrying from the next character rescanned the whole
+  // remaining input per position, which hung the suite outright at 512,000 openers.
+  it('stays linear when a tag never terminates', () => {
+    const started = process.hrtime.bigint();
+    stripHtml(`<p title="${'a'.repeat(1000000)}`);
+    const elapsedMs = Number(process.hrtime.bigint() - started) / 1e6;
+
+    expect(elapsedMs).toBeLessThan(400);
+  });
+});

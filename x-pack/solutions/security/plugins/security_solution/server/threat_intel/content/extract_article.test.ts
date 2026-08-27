@@ -508,3 +508,33 @@ describe('CDATA survives article extraction', () => {
     expect(stripHtml(extracted)).toBe('IOC: evil.test');
   });
 });
+
+/**
+ * Selectors cannot see inside a CDATA node, so chrome removal missed a `<script>` bundle
+ * carried that way while the scoring walk still counted its bytes as visible text. A teaser
+ * whose CDATA held a large bundle outscored the real report, won selection, and then
+ * collapsed to almost nothing once `stripHtml` expanded the CDATA and dropped the script,
+ * losing the real indicator entirely. CDATA is now unwrapped before the parse so both see
+ * the same document.
+ */
+describe('CDATA-backed script does not win selection', () => {
+  it('prefers the real report over a teaser inflated by a CDATA bundle', () => {
+    const bundle = 'var x=1;'.repeat(4000);
+    const page =
+      `<html><body><article><![CDATA[<script>${bundle}</script>teaser]]></article>` +
+      '<main><p>actual report with evil.test</p></main></body></html>';
+
+    const result = stripHtml(extractArticleHtml(page));
+
+    expect(result).toContain('evil.test');
+    expect(result).not.toContain('var x=1');
+  });
+
+  it('still keeps a CDATA article body that is the real content', () => {
+    const extracted = extractArticleHtml(
+      '<html><body><article><![CDATA[<p>IOC: evil.test</p>]]></article></body></html>'
+    );
+
+    expect(stripHtml(extracted)).toBe('IOC: evil.test');
+  });
+});

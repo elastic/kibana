@@ -154,3 +154,32 @@ describe('trailing punctuation around a parenthetical', () => {
     expect(elapsedMs).toBeLessThan(200);
   });
 });
+
+/**
+ * The trailing-parenthetical group is `[^()]*` so a failed attempt cannot scan past another
+ * opening parenthesis. With `[^)]*`, a heading shaped `'('.repeat(n) + ')(ok)'` made every
+ * opener scan to the same close and fail the end anchor: 27ms at n=8,000, 403ms at 32,000
+ * and 6.2s at 128,000, and the strip loop runs it up to four times. Headings come from
+ * `<h2>` content in a page capped at 10MB, so n is not small.
+ */
+describe('heading normalization resists backtracking', () => {
+  it('stays cheap on an unbalanced nested-prefix heading', () => {
+    const started = process.hrtime.bigint();
+    normalizeHeader(`${'('.repeat(128000)})(ok)`);
+    const elapsedMs = Number(process.hrtime.bigint() - started) / 1e6;
+
+    expect(elapsedMs).toBeLessThan(500);
+  });
+
+  it.each([
+    ['indicators of compromise (iocs)', 'indicators of compromise'],
+    ['iocs (updated)', 'iocs'],
+    ['references (2024)', 'references'],
+    // The strip repeats by design, so a heading with two trailing parentheticals loses
+    // both. That is a deliberate consequence of looping to handle `(IOCs):`, and it is the
+    // direction that classifies more headings rather than fewer.
+    ['a (b) (c)', 'a'],
+  ])('still strips the trailing parenthetical of %s', (heading, expected) => {
+    expect(normalizeHeader(heading)).toBe(expected);
+  });
+});
