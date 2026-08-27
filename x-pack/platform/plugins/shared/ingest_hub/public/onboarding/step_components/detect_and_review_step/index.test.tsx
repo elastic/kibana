@@ -15,31 +15,72 @@ jest.mock('../../onboarding_flow_context', () => ({
 
 jest.mock('react-use/lib/useSessionStorage', () => jest.fn());
 
+jest.mock('@kbn/fleet-plugin/public', () => ({
+  useGetPackageInfoByKeyQuery: jest.fn(),
+}));
+
+jest.mock('./use_service_data_detection', () => ({
+  useServiceDataDetection: jest.fn(),
+}));
+
+jest.mock('./deployment_summary', () => ({
+  DeploymentSummary: ({ totalCount }: { totalCount: number }) => (
+    <div data-test-subj="mock-deployment-summary">{totalCount} services</div>
+  ),
+}));
+
+jest.mock('./installed_content', () => ({
+  InstalledContent: () => <div data-test-subj="mock-installed-content" />,
+}));
+
+jest.mock('./agent_setup_callout', () => ({
+  AgentSetupCallout: () => (
+    <div data-test-subj="mock-agent-callout">
+      <button
+        data-test-subj="detectAndReviewStep-agentSetupCallout-dismiss"
+        onClick={() => {}}
+      >
+        Dismiss
+      </button>
+    </div>
+  ),
+}));
+
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  useKibana: () => ({ services: {} }),
+}));
+
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
+import { useGetPackageInfoByKeyQuery } from '@kbn/fleet-plugin/public';
+import { useServiceDataDetection } from './use_service_data_detection';
 import { DetectAndReviewStep } from '.';
-import { AWS_SERVICES_MAP } from '../../aws_service_matrix';
 
 const mockUseOnboardingFlow = useOnboardingFlow as jest.Mock;
 const mockUseSessionStorage = useSessionStorage as jest.Mock;
+const mockUseGetPackageInfoByKeyQuery = useGetPackageInfoByKeyQuery as jest.Mock;
+const mockUseServiceDataDetection = useServiceDataDetection as jest.Mock;
 
 function setupMocks({
-  serviceStatuses = {} as Record<string, string>,
-  instances = undefined as
-    | Array<{ instanceId: string; serviceId: string; name: string; isDuplicate: boolean }>
-    | undefined,
+  deploymentMethod = 'managed_integration' as 'managed_integration' | 'agent_based' | 'ecf',
+  selectedServiceIds = [] as string[],
+  packageData = undefined as object | undefined,
 } = {}) {
   mockUseOnboardingFlow.mockReturnValue({
-    detectAndReviewStep: {
-      serviceStatuses,
-      policyIdsByInstance: {},
-    },
-    awsServicesMap: AWS_SERVICES_MAP,
+    servicesStep: { selectedServiceIds },
+    detectAndReviewStep: { serviceStatuses: {}, policyIdsByInstance: {}, failedInstances: [], deployErrors: {} },
+    deploymentMethod,
+    awsServicesMap: new Map(),
+    updateDetectAndReviewStep: jest.fn(),
   });
-  mockUseSessionStorage.mockReturnValue([
-    { instances, serviceVars: {}, globalRegion: '' },
-    jest.fn(),
-  ]);
+  mockUseSessionStorage.mockReturnValue([{ globalRegion: 'us-east-1', serviceVars: {}, instances: [] }, jest.fn()]);
+  mockUseGetPackageInfoByKeyQuery.mockReturnValue({ data: packageData });
+  mockUseServiceDataDetection.mockReturnValue({
+    statusByInstanceId: {},
+    receivingCount: 0,
+    totalCount: 0,
+    isTimedOut: false,
+  });
 }
 
 function renderStep(props: { onContinue?: () => void; onBack?: () => void } = {}) {
@@ -53,90 +94,110 @@ function renderStep(props: { onContinue?: () => void; onBack?: () => void } = {}
 describe('DetectAndReviewStep', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  describe('chip labels', () => {
-    it('shows instance name from session storage when instanceId matches', () => {
-      // Use an agentless service (ec2_metrics) — cloudtrail is an ECF service and is filtered
-      // out of the agentless chip row, so it would not appear here.
-      setupMocks({
-        serviceStatuses: { 'ec2_metrics__dup-1': 'instantiating' },
-        instances: [
-          {
-            instanceId: 'ec2_metrics__dup-1',
-            serviceId: 'ec2_metrics',
-            name: 'AWS EC2 [Duplicate]',
-            isDuplicate: true,
-          },
-        ],
-      });
-
+  describe('step header', () => {
+    it('renders title and subtitle', () => {
+      setupMocks();
       renderStep();
-      expect(screen.getByText('AWS EC2 [Duplicate]')).toBeInTheDocument();
+      expect(screen.getByText('Detect & Review')).toBeInTheDocument();
+      expect(screen.getByText(/Review your deployment/)).toBeInTheDocument();
+    });
+  });
+
+  describe('agent setup callout', () => {
+    it('shows callout for agent_based deployment method', () => {
+      setupMocks({ deploymentMethod: 'agent_based' });
+      renderStep();
+      expect(screen.getByTestId('mock-agent-callout')).toBeInTheDocument();
     });
 
-    it('falls back to AWS_SERVICES_MAP name when instanceId is a known serviceId (original instance)', () => {
-      // Original instances keep instanceId === serviceId; no session storage entry needed for them
-      // since AWS_SERVICES_MAP covers all known service ids.
-      setupMocks({
-        serviceStatuses: { ec2_metrics: 'instantiating' },
-        instances: undefined,
-      });
-
+    it('does not show callout for managed_integration', () => {
+      setupMocks({ deploymentMethod: 'managed_integration' });
       renderStep();
-      // AWS_SERVICES_MAP has no manifest data; name falls back to entry.id ('ec2_metrics').
-      // In production the matrix hook enriches this with the manifest title ('AWS EC2 metrics').
-      expect(screen.getByText('ec2_metrics')).toBeInTheDocument();
-    });
-
-    it('falls back to the raw instanceId when neither session storage nor service map has a match', () => {
-      setupMocks({
-        serviceStatuses: { unknown_instance_xyz: 'instantiating' },
-        instances: undefined,
-      });
-
-      renderStep();
-      expect(screen.getByText('unknown_instance_xyz')).toBeInTheDocument();
-    });
-
-    it('renders a chip for each entry in serviceStatuses', () => {
-      setupMocks({
-        serviceStatuses: {
-          inst_a: 'instantiating',
-          inst_b: 'receiving',
-          inst_c: 'error',
-        },
-        instances: [
-          { instanceId: 'inst_a', serviceId: 'svc', name: 'Service A', isDuplicate: false },
-          { instanceId: 'inst_b', serviceId: 'svc', name: 'Service B', isDuplicate: false },
-          { instanceId: 'inst_c', serviceId: 'svc', name: 'Service C', isDuplicate: false },
-        ],
-      });
-
-      renderStep();
-      expect(screen.getByText('Service A')).toBeInTheDocument();
-      expect(screen.getByText('Service B')).toBeInTheDocument();
-      expect(screen.getByText('Service C')).toBeInTheDocument();
+      expect(screen.queryByTestId('mock-agent-callout')).not.toBeInTheDocument();
     });
   });
 
   describe('continue button', () => {
-    it('shows continue button when serviceStatuses has entries', () => {
-      setupMocks({
-        serviceStatuses: { inst_a: 'receiving' },
-      });
+    it('is always enabled — step is non-blocking', () => {
+      setupMocks();
+      renderStep();
+      const btn = screen.getByTestId('detectAndReviewStep-continueButton');
+      expect(btn).not.toBeDisabled();
+    });
 
+    it('calls onContinue when clicked', () => {
+      setupMocks();
       const onContinue = jest.fn();
       renderStep({ onContinue });
-      const btn = screen.getByTestId('detectAndReviewStep-continueButton');
-      expect(btn).toBeInTheDocument();
-      fireEvent.click(btn);
+      fireEvent.click(screen.getByTestId('detectAndReviewStep-continueButton'));
       expect(onContinue).toHaveBeenCalledTimes(1);
     });
 
-    it('does not show continue button when serviceStatuses is empty', () => {
-      setupMocks({ serviceStatuses: {} });
+    it('shows Back button when onBack is provided', () => {
+      setupMocks();
+      const onBack = jest.fn();
+      renderStep({ onBack });
+      fireEvent.click(screen.getByText('Back'));
+      expect(onBack).toHaveBeenCalledTimes(1);
+    });
+  });
 
+  describe('deployment summary', () => {
+    it('shows deployment summary when there are selected services', () => {
+      setupMocks({ selectedServiceIds: ['ec2'] });
+      mockUseServiceDataDetection.mockReturnValue({
+        statusByInstanceId: { ec2: 'detecting' },
+        receivingCount: 0,
+        totalCount: 1,
+        isTimedOut: false,
+      });
       renderStep();
-      expect(screen.queryByTestId('detectAndReviewStep-continueButton')).not.toBeInTheDocument();
+      expect(screen.getByTestId('mock-deployment-summary')).toBeInTheDocument();
+    });
+
+    it('does not show deployment summary when no services are selected', () => {
+      setupMocks({ selectedServiceIds: [] });
+      renderStep();
+      expect(screen.queryByTestId('mock-deployment-summary')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('installed content', () => {
+    it('shows installed content when package has installed_kibana', () => {
+      setupMocks({
+        packageData: {
+          item: {
+            installation: {
+              installed_kibana: [{ id: 'dash-1', type: 'dashboard' }],
+              installed_es: [],
+            },
+          },
+        },
+      });
+      renderStep();
+      expect(screen.getByTestId('mock-installed-content')).toBeInTheDocument();
+    });
+
+    it('does not show installed content when package has no assets', () => {
+      setupMocks({ packageData: undefined });
+      renderStep();
+      expect(screen.queryByTestId('mock-installed-content')).not.toBeInTheDocument();
+    });
+
+    it('does not render Remove, Install, or checkbox — read-only guard', () => {
+      setupMocks({
+        packageData: {
+          item: {
+            installation: {
+              installed_kibana: [{ id: 'dash-1', type: 'dashboard' }],
+              installed_es: [],
+            },
+          },
+        },
+      });
+      renderStep();
+      expect(screen.queryByText('Remove')).not.toBeInTheDocument();
+      expect(screen.queryByRole('checkbox')).not.toBeInTheDocument();
     });
   });
 });

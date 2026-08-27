@@ -8,36 +8,31 @@
 import React, { useMemo } from 'react';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import {
-  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiSpacer,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 
-import { AWS_SERVICES_MAP } from '../../aws_service_matrix';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
-import type { ServiceChipState } from '../../onboarding_flow_context';
 import {
   SERVICE_SETTINGS_SESSION_KEY,
-  type ServiceInstance,
   type ServiceSettingsPersistedState,
 } from '../service_settings_step/use_service_settings';
-import { useEcfDeployment, EcfDeploymentSection } from '../ecf_deployment_section';
-
-const CHIP_COLORS: Record<ServiceChipState, string> = {
-  instantiating: 'default',
-  detecting: 'primary',
-  receiving: 'success',
-  error: 'danger',
-  timeout: 'warning',
-};
+import { useGetPackageInfoByKeyQuery } from '@kbn/fleet-plugin/public';
+import { useServiceDataDetection } from './use_service_data_detection';
+import { DeploymentSummary } from './deployment_summary';
+import { AgentSetupCallout } from './agent_setup_callout';
+import { InstalledContent } from './installed_content';
+import type { EsAssetReference, KibanaAssetReference } from '@kbn/fleet-plugin/common';
 
 const DEFAULT_SERVICE_SETTINGS: ServiceSettingsPersistedState = {
   globalRegion: '',
@@ -50,117 +45,121 @@ interface DetectAndReviewStepProps {
 }
 
 export function DetectAndReviewStep({ onContinue, onBack }: DetectAndReviewStepProps) {
-  const { services } = useKibana<CoreStart & { cloud?: CloudStart }>();
-  const { detectAndReviewStep } = useOnboardingFlow();
-  const { serviceStatuses } = detectAndReviewStep;
+  useKibana<CoreStart & { cloud?: CloudStart }>();
 
-  // Read service settings (global region + per-instance vars + instances) from session storage.
+  const { servicesStep, awsServicesMap, deploymentMethod } = useOnboardingFlow();
+  const { selectedServiceIds } = servicesStep;
+
   const [serviceSettings] = useSessionStorage<ServiceSettingsPersistedState>(
     SERVICE_SETTINGS_SESSION_KEY,
     DEFAULT_SERVICE_SETTINGS
   );
-  const { globalRegion, serviceVars } = serviceSettings ?? DEFAULT_SERVICE_SETTINGS;
 
-  const instances: ServiceInstance[] = useMemo(
-    () => serviceSettings?.instances ?? [],
-    [serviceSettings?.instances]
-  );
-
-  // Instance lookup map — used to resolve display names for deployment status chips.
-  const instancesById = useMemo(() => {
-    const map = new Map<string, ServiceInstance>();
-    for (const inst of instances) {
-      map.set(inst.instanceId, inst);
+  // Build a display name map: instanceId → name from settings, falling back to matrix name.
+  const serviceNames: Record<string, string> = useMemo(() => {
+    const names: Record<string, string> = {};
+    for (const id of selectedServiceIds) {
+      const entry = awsServicesMap?.get(id);
+      names[id] = entry?.name ?? id;
     }
-    return map;
-  }, [instances]);
+    // Also include instances from session storage (for duplicates with custom names).
+    for (const inst of serviceSettings?.instances ?? []) {
+      names[inst.instanceId] = inst.name;
+    }
+    return names;
+  }, [selectedServiceIds, awsServicesMap, serviceSettings]);
 
-  const getChipLabel = (instanceId: string): string => {
-    const inst = instancesById.get(instanceId);
-    if (inst) return inst.name;
-    return AWS_SERVICES_MAP.get(instanceId)?.name ?? instanceId;
-  };
+  const { statusByInstanceId, receivingCount, totalCount } = useServiceDataDetection();
 
-  const otlpEndpoint = services.cloud?.managedOtlp?.url;
+  // Installed content — read from AWS package installation.
+  const { data: awsPackageData } = useGetPackageInfoByKeyQuery('aws');
+  const installation = (awsPackageData?.item as any)?.installation;
+  const installedKibana: KibanaAssetReference[] = installation?.installed_kibana ?? [];
+  const installedEs: EsAssetReference[] = installation?.installed_es ?? [];
 
-  // ── ECF section ──────────────────────────────────────────────────────────
-
-  const { hasAnyEcf, ecfServiceIds, sectionProps } = useEcfDeployment({
-    instances,
-    serviceVars,
-    globalRegion,
-    otlpEndpoint,
-  });
-
-  // ── Agentless section ────────────────────────────────────────────────────
-
-  // ECF services are deployed via CloudFormation — filter them out of the agentless status chips
-  // so they don't appear redundantly alongside the ECF panels above.
-  const agentlessStatuses = useMemo(
-    () =>
-      Object.entries(serviceStatuses).filter(([instanceId]) => {
-        const serviceId = instancesById.get(instanceId)?.serviceId ?? instanceId;
-        return !ecfServiceIds.has(serviceId);
-      }),
-    [serviceStatuses, instancesById, ecfServiceIds]
-  );
-
-  const hasStarted = agentlessStatuses.length > 0;
-
-  // ── Render ───────────────────────────────────────────────────────────────
+  const hasDeployedServices = selectedServiceIds.length > 0;
 
   return (
     <div data-test-subj="onboardingStep-detect-and-review">
-      {/* ── ECF section ─────────────────────────────────────────────────── */}
-      {hasAnyEcf && <EcfDeploymentSection {...sectionProps} />}
-      {hasAnyEcf && hasStarted && <EuiHorizontalRule />}
+      {/* ── Step header ─────────────────────────────────────────────────────── */}
+      <EuiTitle size="s">
+        <h2>
+          <FormattedMessage
+            id="xpack.ingestHub.detectAndReviewStep.title"
+            defaultMessage="Detect & Review"
+          />
+        </h2>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiText color="subdued">
+        <p>
+          <FormattedMessage
+            id="xpack.ingestHub.detectAndReviewStep.subtitle"
+            defaultMessage="Review your deployment and the prebuilt content installed for your services — keep what you need, remove the rest."
+          />
+        </p>
+      </EuiText>
+      <EuiSpacer size="l" />
 
-      {/* ── Agentless status chips ───────────────────────────────────────── */}
-      {hasStarted && (
+      {/* ── Agent setup callout (agent_based only) ───────────────────────── */}
+      {deploymentMethod === 'agent_based' && (
         <>
-          <EuiSpacer size="m" />
-          <EuiFlexGroup wrap gutterSize="s" data-test-subj="detectAndReviewStep-serviceChips">
-            {agentlessStatuses.map(([instanceId, state]) => (
-              <EuiFlexItem grow={false} key={instanceId}>
-                <EuiBadge color={CHIP_COLORS[state]}>{getChipLabel(instanceId)}</EuiBadge>
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGroup>
-        </>
-      )}
-
-      {/* ── Navigation ──────────────────────────────────────────────────── */}
-      {(onBack || hasStarted || hasAnyEcf) && (
-        <>
+          <AgentSetupCallout />
           <EuiSpacer size="l" />
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              {onBack && (
-                <EuiButtonEmpty iconType="chevronSingleLeft" iconSide="left" onClick={onBack}>
-                  <FormattedMessage
-                    id="xpack.ingestHub.detectAndReviewStep.backButton"
-                    defaultMessage="Back"
-                  />
-                </EuiButtonEmpty>
-              )}
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              {(hasStarted || hasAnyEcf) && (
-                <EuiButton
-                  fill
-                  onClick={onContinue}
-                  data-test-subj="detectAndReviewStep-continueButton"
-                >
-                  <FormattedMessage
-                    id="xpack.ingestHub.detectAndReviewStep.continueButton"
-                    defaultMessage="AWS Overview"
-                  />
-                </EuiButton>
-              )}
-            </EuiFlexItem>
-          </EuiFlexGroup>
         </>
       )}
+
+      {/* ── Deployment summary ───────────────────────────────────────────── */}
+      {hasDeployedServices && (
+        <>
+          <DeploymentSummary
+            selectedServiceIds={selectedServiceIds}
+            awsServicesMap={awsServicesMap}
+            serviceNames={serviceNames}
+            statusByInstanceId={statusByInstanceId}
+            deploymentMethod={deploymentMethod}
+            receivingCount={receivingCount}
+            totalCount={totalCount}
+          />
+          <EuiHorizontalRule />
+        </>
+      )}
+
+      {/* ── Installed content ────────────────────────────────────────────── */}
+      {(installedKibana.length > 0 || installedEs.length > 0) && (
+        <>
+          <InstalledContent installedKibana={installedKibana} installedEs={installedEs} />
+          <EuiSpacer size="l" />
+        </>
+      )}
+
+      {/* ── Footer ──────────────────────────────────────────────────────── */}
+      <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexItem grow={false}>
+          {onBack && (
+            <EuiButtonEmpty iconType="chevronSingleLeft" iconSide="left" onClick={onBack}>
+              <FormattedMessage
+                id="xpack.ingestHub.detectAndReviewStep.backButton"
+                defaultMessage="Back"
+              />
+            </EuiButtonEmpty>
+          )}
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            fill
+            iconType="arrowRight"
+            iconSide="right"
+            onClick={onContinue}
+            data-test-subj="detectAndReviewStep-continueButton"
+          >
+            <FormattedMessage
+              id="xpack.ingestHub.detectAndReviewStep.continueButton"
+              defaultMessage="Take me to my data"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </div>
   );
 }

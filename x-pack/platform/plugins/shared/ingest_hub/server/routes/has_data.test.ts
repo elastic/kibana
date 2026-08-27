@@ -6,7 +6,6 @@
  */
 
 import { httpServiceMock, httpServerMock } from '@kbn/core/server/mocks';
-import { coreMock } from '@kbn/core/server/mocks';
 import { registerHasDataRoute } from './has_data';
 
 function makeRouter() {
