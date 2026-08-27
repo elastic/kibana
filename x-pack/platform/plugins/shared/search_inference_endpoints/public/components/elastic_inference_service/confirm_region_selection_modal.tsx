@@ -57,6 +57,7 @@ export const ConfirmRegionSelectionModal: React.FC<ConfirmRegionSelectionModalPr
   const unresolvedConflict = hasConflict && !ignoreErrors;
   const isConfirmSaveDisabled = isSaving || unresolvedConflict;
   const isIgnoreCheckboxDisabled = !hasConflict || isSaving;
+  const isGeoMode = mode === 'geo';
 
   useEffect(() => {
     if (hasConflict) {
@@ -87,13 +88,21 @@ export const ConfirmRegionSelectionModal: React.FC<ConfirmRegionSelectionModalPr
       <EuiModalBody>
         <EuiText size="s">
           <p>
-            {i18n.translate(
-              'xpack.searchInferenceEndpoints.confirmRegionSelection.policyUpdateDescription',
-              {
-                defaultMessage:
-                  'Your region policy will be updated to only allow from the selected regions. This will apply to all spaces in your project.',
-              }
-            )}
+            {isGeoMode
+              ? i18n.translate(
+                  'xpack.searchInferenceEndpoints.confirmRegionSelection.policyUpdateGeoDescription',
+                  {
+                    defaultMessage:
+                      'Your region policy will be updated to only allow from the selected geography. This will apply to all spaces in your project.',
+                  }
+                )
+              : i18n.translate(
+                  'xpack.searchInferenceEndpoints.confirmRegionSelection.policyUpdateRegionDescription',
+                  {
+                    defaultMessage:
+                      'Your region policy will be updated to only allow from the selected region. This will apply to all spaces in your project.',
+                  }
+                )}
           </p>
         </EuiText>
 

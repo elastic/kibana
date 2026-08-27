@@ -175,14 +175,15 @@ export const useManageRegionsState = (onClose: () => void) => {
     setIsCallOutDismissed(true);
   }, []);
 
+  const { clear: clearGeoSelection } = geoSelection;
+  const { clear: clearRegionSelection } = regionTab.regionSelection;
   const handleLocationTypeChange = useCallback(
     (next: PolicyMode) => {
       setActiveTab(next);
-      geoSelection.clear();
-      regionTab.regionSelection.clear();
+      clearGeoSelection();
+      clearRegionSelection();
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [geoSelection.clear, regionTab.regionSelection.clear]
+    [setActiveTab, clearGeoSelection, clearRegionSelection]
   );
 
   const regionTabReturn = useMemo(
