@@ -852,4 +852,69 @@ describe('duration chart attributes', () => {
       'elastic-us-central-qa-flyout-duration-chart-default',
     ]);
   });
+
+  it('renders the duration chart for a stale remote monitor with no local saved object', () => {
+    exploratoryViewEmbeddableMock.mockClear();
+
+    const { getByText, queryByRole } = render<{
+      exploratoryView: { ExploratoryViewEmbeddable: typeof exploratoryViewEmbeddableMock };
+    }>(
+      <MonitorDetailFlyout
+        configId="stale-remote-config-id"
+        id="stale-remote-monitor-id"
+        location="europe-west3-a"
+        locationId="europe-west3-a"
+        onClose={jest.fn()}
+        onEnabledChange={jest.fn()}
+        onLocationChange={jest.fn()}
+      />,
+      {
+        core: {
+          exploratoryView: { ExploratoryViewEmbeddable: exploratoryViewEmbeddableMock },
+        },
+        state: {
+          monitorDetails: {
+            syntheticsMonitor: null,
+            syntheticsMonitorLoading: false,
+          },
+          overviewStatus: {
+            status: {
+              upConfigs: {},
+              downConfigs: {},
+              pendingConfigs: {},
+              disabledConfigs: {},
+              staleConfigs: {
+                'stale-remote-config-id-europe-west3-a': {
+                  monitorQueryId: 'stale-remote-monitor-id',
+                  configId: 'stale-remote-config-id',
+                  name: 'Stale remote monitor',
+                  type: 'http',
+                  schedule: '10',
+                  tags: [],
+                  isEnabled: true,
+                  isStatusAlertEnabled: false,
+                  overallStatus: 'stale',
+                  remote: {
+                    remoteName: 'remote-cluster-1',
+                    kibanaUrl: 'https://remote-kibana.example.com',
+                  },
+                  locations: [{ id: 'europe-west3-a', label: 'europe-west3-a', status: 'stale' }],
+                },
+              },
+            },
+          },
+        },
+      }
+    );
+
+    fireEvent.click(getByText('Performance'));
+    expect(queryByRole('progressbar')).not.toBeInTheDocument();
+    const embeddableCall = exploratoryViewEmbeddableMock.mock.calls[0];
+    if (!embeddableCall) {
+      throw new Error('Expected the duration chart embeddable to render');
+    }
+    expect(embeddableCall[0].attributes[0].reportDefinitions['monitor.id']).toEqual([
+      'stale-remote-monitor-id',
+    ]);
+  });
 });

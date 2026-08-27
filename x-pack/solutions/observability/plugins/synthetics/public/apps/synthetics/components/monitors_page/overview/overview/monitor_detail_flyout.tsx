@@ -300,6 +300,10 @@ export function MonitorDetailFlyout(props: Props) {
       ...(overviewStatus.upConfigs ?? {}),
       ...(overviewStatus.downConfigs ?? {}),
       ...(overviewStatus.pendingConfigs ?? {}),
+      // The grid lists stale monitors from `staleConfigs`. Without this, a
+      // stale remote monitor is not recognized as remote and the duration-chart
+      // gate stays on a spinner (no local saved object, `monitor` is undefined).
+      ...(overviewStatus.staleConfigs ?? {}),
       ...(overviewStatus.disabledConfigs ?? {}),
     });
     return allConfigs.find((ov) => ov.configId === configId);
