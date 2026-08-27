@@ -68,4 +68,8 @@ export class BrowseIntegrationPage {
   async expectIntegrationCardToBeVisible(integrationName: string) {
     return expect(this.page.getByTestId(`integration-card:epr:${integrationName}`)).toBeVisible();
   }
+
+  async expectCollectionCardToBeVisible(groupId: string) {
+    return expect(this.page.getByTestId(`integration-card:collection:${groupId}`)).toBeVisible();
+  }
 }
