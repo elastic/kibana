@@ -23,8 +23,7 @@ export interface ScheduledExecutionBucket {
   max_timestamp: { value: number; value_as_string: string };
   agent_count: { value: number };
   total_rows: { value: number };
-  // `agents.value` is the agent cardinality; `doc_count` counts documents and is only
-  // a fallback for degraded aggregation shapes, so it must not be preferred.
+  // `agents.value` is the agent cardinality; `doc_count` counts documents.
   success_count: { doc_count: number; agents?: { value: number } };
   error_count: { doc_count: number; agents?: { value: number } };
   pack_id?: LabelTermsAggregation;
@@ -133,8 +132,9 @@ export const processScheduledHistory = ({
       packId: packContext?.packId ?? firstLabel(bucket.pack_id),
       spaceId,
       agentCount: bucket.agent_count.value,
-      successCount: bucket.success_count.agents?.value ?? bucket.success_count.doc_count,
-      errorCount: bucket.error_count.agents?.value ?? bucket.error_count.doc_count,
+      // No `doc_count` fallback on purpose: it would report documents as agents.
+      successCount: bucket.success_count.agents?.value ?? 0,
+      errorCount: bucket.error_count.agents?.value ?? 0,
       totalRows: bucket.total_rows.value,
       scheduleId,
       executionCount,

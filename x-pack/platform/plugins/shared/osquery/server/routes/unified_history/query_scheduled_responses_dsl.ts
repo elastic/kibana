@@ -101,9 +101,8 @@ export const buildScheduledResponsesQuery = ({
           aggs: {
             planned_time: { max: { field: 'planned_schedule_time' } },
             max_timestamp: { max: { field: '@timestamp' } },
-            // ES-default cardinality precision on purpose: this agg fans out over
-            // thousands of buckets and sketch memory scales with precision PER
-            // BUCKET. The details endpoint reports the exact number when it matters.
+            // ES-default precision required: this agg fans out over 10k+ buckets and
+            // `precision_threshold: 40000` here trips the request circuit breaker.
             agent_count: { cardinality: { field: 'agent_id' } },
             // Constant within a schedule bucket; lets rows whose pack saved object is not
             // in this space (cross-project reads) still resolve their labels.
@@ -113,8 +112,7 @@ export const buildScheduledResponsesQuery = ({
             total_rows: {
               sum: { field: 'action_response.osquery.count' },
             },
-            // Expose agent cardinality per outcome; the filters' own `doc_count`
-            // counts documents and must not be mixed with `agent_count`.
+            // Per-outcome agent cardinality; the filters' `doc_count` counts documents.
             success_count: {
               filter: {
                 bool: { must_not: { exists: { field: 'error' } } },

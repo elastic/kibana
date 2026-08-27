@@ -23,8 +23,9 @@ const createMockBucket = (
     max_timestamp: { value: 1710936100000, value_as_string: '2024-03-20T12:01:40.000Z' },
     agent_count: { value: 3 },
     total_rows: { value: 15 },
-    success_count: { doc_count: 2 },
-    error_count: { doc_count: 1 },
+    // `doc_count` differs from `agents` so a regression to it cannot pass.
+    success_count: { doc_count: 5, agents: { value: 2 } },
+    error_count: { doc_count: 3, agents: { value: 1 } },
     ...overrides,
   } as ScheduledExecutionBucket);
 
@@ -150,7 +151,8 @@ describe('process_scheduled_history', () => {
       expect(result[0].errorCount).toBe(1);
     });
 
-    it('falls back to doc counts when cardinality sub-aggregations are absent', () => {
+    it('reports zero rather than doc counts when cardinality sub-aggregations are absent', () => {
+      // A `doc_count` fallback would report documents as agents.
       const bucket = createMockBucket({
         success_count: { doc_count: 7 },
         error_count: { doc_count: 3 },
@@ -162,8 +164,8 @@ describe('process_scheduled_history', () => {
         spaceId: 'default',
       });
 
-      expect(result[0].successCount).toBe(7);
-      expect(result[0].errorCount).toBe(3);
+      expect(result[0].successCount).toBe(0);
+      expect(result[0].errorCount).toBe(0);
     });
 
     it('keeps a zero agent cardinality instead of falling through to doc_count', () => {

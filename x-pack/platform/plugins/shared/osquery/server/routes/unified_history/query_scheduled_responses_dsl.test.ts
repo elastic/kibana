@@ -136,9 +136,8 @@ describe('buildScheduledResponsesQuery', () => {
     });
 
     test('leaves cardinality precision at the ES default on every agent agg', () => {
-      // Sketch memory scales with precision per bucket and this agg fans out over
-      // thousands of them. All three numbers must also share one precision, or the
-      // derived `pending = agents - success - errors` shows phantom agents.
+      // Measured: `precision_threshold: 40000` on this agg trips the request
+      // circuit breaker at 10k+ buckets. All three must also share one precision.
       const subAggs = getSubAggs();
       const successAggs = (subAggs.success_count as { aggs: Record<string, unknown> }).aggs;
       const errorAggs = (subAggs.error_count as { aggs: Record<string, unknown> }).aggs;

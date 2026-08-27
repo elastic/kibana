@@ -34,9 +34,6 @@ interface ScheduledActionResultsAggregations {
       responded_agents?: { value: number };
       success_agents?: { agents: { value: number } };
       error_agents?: { agents: { value: number } };
-      responses: {
-        buckets: Array<{ key: string; doc_count: number }>;
-      };
     };
   };
 }
@@ -154,24 +151,14 @@ export const getScheduledActionResultsRoute = (
             | undefined;
           const responsesBySchedule = aggs?.aggs?.responses_by_schedule;
           const rowsCount = responsesBySchedule?.rows_count?.value ?? 0;
-          const responsesBuckets = responsesBySchedule?.responses?.buckets;
 
-          // The DSL requesting these sub-aggs ships in this same process, so the
-          // `doc_count` fallback only covers degraded aggregation shapes — it counts
-          // documents, i.e. the inflated numbers this route exists to fix.
-          const successful =
-            responsesBySchedule?.success_agents?.agents?.value ??
-            responsesBuckets?.find((b) => b.key === 'success')?.doc_count ??
-            0;
-          const failed =
-            responsesBySchedule?.error_agents?.agents?.value ??
-            responsesBuckets?.find((b) => b.key === 'error')?.doc_count ??
-            0;
+          // Agent counts. No `doc_count` fallback on purpose: it would report
+          // documents as agents, the bug this route exists to fix.
+          const successful = responsesBySchedule?.success_agents?.agents?.value ?? 0;
+          const failed = responsesBySchedule?.error_agents?.agents?.value ?? 0;
 
-          // Overall cardinality, NOT `successful + failed` — an agent with both
-          // a success and an error doc would be double-counted by the sum.
-          const totalResponded =
-            responsesBySchedule?.responded_agents?.value ?? successful + failed;
+          // Not `successful + failed`: an agent with both outcomes is in both buckets.
+          const totalResponded = responsesBySchedule?.responded_agents?.value ?? 0;
 
           const total =
             typeof res.rawResponse.hits.total === 'number'

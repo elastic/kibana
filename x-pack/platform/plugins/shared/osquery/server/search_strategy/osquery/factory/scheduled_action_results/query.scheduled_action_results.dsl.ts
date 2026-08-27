@@ -66,10 +66,8 @@ export const buildScheduledActionResultsQuery = ({
                   field: 'action_response.osquery.count',
                 },
               },
-              // Agent counts must use `agent_id` cardinality, not `doc_count`:
-              // a bucket can hold many response docs per agent (e.g. every run
-              // stamped `schedule_execution_count: 0` when the policy lacks
-              // `start_date`), which made doc counts render as inflated agents.
+              // Agent cardinality, not `doc_count`: a bucket can hold many
+              // response docs per agent, which rendered as inflated agent counts.
               responded_agents: {
                 cardinality: {
                   field: 'agent_id',
@@ -96,16 +94,6 @@ export const buildScheduledActionResultsQuery = ({
                       precision_threshold: AGENT_CARDINALITY_PRECISION,
                     },
                   },
-                },
-              },
-              // Doc counts retained: the status grid paginates response documents.
-              responses: {
-                terms: {
-                  script: {
-                    lang: 'painless',
-                    source:
-                      "if (doc['error.keyword'].size()==0) { return 'success' } else { return 'error' }",
-                  } as const,
                 },
               },
             },

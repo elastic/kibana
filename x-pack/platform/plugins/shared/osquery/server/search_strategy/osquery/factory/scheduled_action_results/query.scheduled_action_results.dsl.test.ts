@@ -54,7 +54,10 @@ describe('buildScheduledActionResultsQuery', () => {
     expect((responsesBySchedule.aggs as Record<string, unknown>).rows_count).toEqual({
       sum: { field: 'action_response.osquery.count' },
     });
-    expect((responsesBySchedule.aggs as Record<string, unknown>).responses).toBeDefined();
+    // The painless `responses` agg is gone with the `doc_count` fallbacks that
+    // were its only consumers; its `error.keyword` predicate was also fragile.
+    expect((responsesBySchedule.aggs as Record<string, unknown>).responses).toBeUndefined();
+    expect(JSON.stringify(responsesBySchedule)).not.toContain('painless');
   });
 
   describe('agent cardinality sub-aggregations', () => {
@@ -75,8 +78,7 @@ describe('buildScheduledActionResultsQuery', () => {
     });
 
     it('nests agent cardinality under the success filter', () => {
-      // The route reads `success_agents.agents.value`; a flat cardinality would
-      // silently leave it on the doc_count fallback.
+      // The route reads `success_agents.agents.value`; flat cardinality -> 0.
       expect(getSubAggs().success_agents).toEqual({
         filter: { bool: { must_not: { exists: { field: 'error' } } } },
         aggs: {
