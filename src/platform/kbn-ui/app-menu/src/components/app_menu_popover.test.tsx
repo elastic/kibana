@@ -102,4 +102,53 @@ describe('AppMenuPopover', () => {
       expect(contextMenu).toHaveStyle({ width: '300px' });
     });
   });
+
+  it('should render item descriptions when provided', async () => {
+    render(
+      <AppMenuPopover
+        {...defaultProps}
+        isOpen={true}
+        items={[
+          {
+            id: 'item1',
+            label: 'Item 1',
+            run: jest.fn(),
+            order: 1,
+            testId: 'described-item',
+            description: 'Supporting text',
+          },
+        ]}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Item 1')).toBeInTheDocument();
+      expect(screen.getByTestId('described-item-description')).toBeInTheDocument();
+    });
+  });
+
+  it('should render item descriptions on disabled items', async () => {
+    render(
+      <AppMenuPopover
+        {...defaultProps}
+        isOpen={true}
+        items={[
+          {
+            id: 'item1',
+            label: 'Item 1',
+            run: jest.fn(),
+            order: 1,
+            testId: 'disabled-described-item',
+            description: 'Unavailable right now',
+            disableButton: true,
+          },
+        ]}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Item 1')).toBeInTheDocument();
+      expect(screen.getByTestId('disabled-described-item-description')).toBeInTheDocument();
+    });
+  });
 });

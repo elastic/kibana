@@ -7,6 +7,7 @@
 
 import {
   getCombinedProperties,
+  isLinkedProjectScopedSourceIndexUnavailableError,
   isProjectScopedSourceIndexUnavailableError,
   isSourceIndexUnavailableError,
 } from './use_transform_config_data';
@@ -111,6 +112,43 @@ describe('isSourceIndexUnavailableError', () => {
     expect(
       isProjectScopedSourceIndexUnavailableError(sourceIndexUnavailableError, PROJECT_ROUTING.ALL)
     ).toBe(false);
+    expect(
+      isProjectScopedSourceIndexUnavailableError(
+        sourceIndexUnavailableError,
+        PROJECT_ROUTING.ORIGIN
+      )
+    ).toBe(true);
     expect(isProjectScopedSourceIndexUnavailableError(sourceIndexUnavailableError)).toBe(false);
+  });
+
+  test('treats source index unavailable errors as linked-project-scoped only outside origin routing', () => {
+    expect(
+      isLinkedProjectScopedSourceIndexUnavailableError(
+        sourceIndexUnavailableError,
+        '_id:linked-id',
+        'origin-id'
+      )
+    ).toBe(true);
+    expect(
+      isLinkedProjectScopedSourceIndexUnavailableError(
+        sourceIndexUnavailableError,
+        PROJECT_ROUTING.ORIGIN,
+        'origin-id'
+      )
+    ).toBe(false);
+    expect(
+      isLinkedProjectScopedSourceIndexUnavailableError(
+        sourceIndexUnavailableError,
+        '_id:origin-id',
+        'origin-id'
+      )
+    ).toBe(false);
+    expect(
+      isLinkedProjectScopedSourceIndexUnavailableError(
+        sourceIndexUnavailableError,
+        PROJECT_ROUTING.ALL,
+        'origin-id'
+      )
+    ).toBe(false);
   });
 });

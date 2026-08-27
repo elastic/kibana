@@ -15,7 +15,6 @@ import {
   createRuleResponse,
   createEsqlResponse,
 } from '../test_utils';
-import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import { createQueryService } from '../../services/query_service/query_service.mock';
 import { buildGroupHash } from '../build_alert_events';
 import type { AlertEvent } from '../../../resources/datastreams/alert_events';
@@ -33,6 +32,7 @@ const createPluginConfigAccessor = () => {
       maxScheduledPerMinute: 400,
       run: { alerts: { max: 10000 }, query: { maxResponseSize: 50 * 1024 * 1024 } },
     },
+    esql: { responseFormat: 'json' },
   };
   return coreMock.createPluginInitializerContext<PluginConfig>(config).config;
 };
@@ -45,13 +45,10 @@ const hashFor = (host: string): string =>
   });
 
 describe('ClassifyAbsentGroupsStep', () => {
-  const { loggerService } = createLoggerService();
-
   function createStep() {
     const internal = createQueryService();
     const scoped = createQueryService();
     const step = new ClassifyAbsentGroupsStep(
-      loggerService,
       internal.queryService,
       scoped.queryService,
       createPluginConfigAccessor()

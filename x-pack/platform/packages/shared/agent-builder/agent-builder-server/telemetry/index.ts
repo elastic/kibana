@@ -6,3 +6,4 @@
  */
 
 export type { AgentBuilderAnalytics, AgentBuilderTracking, SkillInvokedEvent } from './skills';
+export { toHashedId } from './hashing';

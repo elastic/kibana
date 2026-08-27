@@ -34,7 +34,7 @@ export class AlertsTablePage {
     this.actionsContextMenu = this.page.testSubj.locator('actions-context-menu');
     this.runWorkflowMenuItem = this.page.testSubj.locator('run-workflow-action');
     this.workflowPanel = this.page.testSubj.locator('alert-workflow-context-menu-panel');
-    this.executeWorkflowButton = this.page.testSubj.locator('execute-alert-workflow-button');
+    this.executeWorkflowButton = this.page.testSubj.locator('run-workflow-execute-button');
     this.bulkRunWorkflowMenuItem = this.page.testSubj.locator('bulk-run-alert-workflow-action');
     this.bulkWorkflowPanel = this.page.testSubj.locator('bulk-alert-workflow-context-menu-panel');
     this.selectedShowBulkActionsButton = this.page.testSubj.locator(

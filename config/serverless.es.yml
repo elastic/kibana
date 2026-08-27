@@ -86,8 +86,8 @@ no_data_page.analyticsNoDataPageFlavor: 'serverless_search'
 # Disable Dev tools
 xpack.painless_lab.enabled: false
 
-xpack.ml.ad.enabled: false
-xpack.ml.dfa.enabled: false
+xpack.ml.ad.enabled: true
+xpack.ml.dfa.enabled: true
 xpack.ml.nlp.enabled: true
 
 xpack.ml.compatibleModuleType: 'search'

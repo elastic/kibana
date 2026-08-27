@@ -1,8 +1,7 @@
 {
-  "sha1": "",
+  "sha1": "27ccd3fe231a0ff084a7a50cf51361ca3122efae",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -189,8 +188,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_execution/concurrency_control.spec.ts",
-        "line": 108,
-        "column": 14
+        "line": 109,
+        "column": 21
       }
     },
     {
@@ -209,8 +208,28 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_execution/concurrency_control.spec.ts",
-        "line": 133,
-        "column": 11
+        "line": 137,
+        "column": 15
+      }
+    },
+    {
+      "id": "71ab25cab01b404-352e475f30bcd04",
+      "title": "Workflow execution concurrency control queue strategy queues new executions and runs them sequentially until all complete",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_execution/concurrency_control.spec.ts",
+        "line": 165,
+        "column": 22
       }
     },
     {

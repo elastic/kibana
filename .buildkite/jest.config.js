@@ -19,6 +19,9 @@ module.exports = {
     ...tsJestTransformCfg,
   },
   transformIgnorePatterns: [
-    'node_modules/(?!(@octokit/.*|universal-user-agent|before-after-hook)/)',
+    'node_modules/(?!(@octokit/.*|universal-user-agent|before-after-hook|globby|unicorn-magic|is-path-inside|slash|@sindresorhus/merge-streams)/)',
   ],
+  moduleNameMapper: {
+    '^unicorn-magic/node$': '<rootDir>/node_modules/unicorn-magic/node.js',
+  },
 };

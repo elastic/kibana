@@ -382,7 +382,25 @@ describe('runTool', () => {
     );
   });
 
-  it('scopes the ES client with space-level project routing for CPS support', async () => {
+  it('scopes the ES client to the run project routing expression when one is provided', async () => {
+    const managerWithRouting = new RunnerManager({ ...runnerDeps, projectRouting: '_alias:*' });
+    const params: ScopedRunnerRunToolsParams = {
+      toolId: 'test-tool',
+      toolParams: { foo: 'bar' },
+    };
+
+    await runTool({
+      toolExecutionParams: params,
+      parentManager: managerWithRouting,
+    });
+
+    expect(runnerDeps.elasticsearch.client.asScoped).toHaveBeenCalledWith(runnerDeps.request, {
+      projectRouting: 'expression',
+      value: '_alias:*',
+    });
+  });
+
+  it('defaults the ES client to space routing when no project routing is provided', async () => {
     const params: ScopedRunnerRunToolsParams = {
       toolId: 'test-tool',
       toolParams: { foo: 'bar' },
@@ -477,6 +495,40 @@ describe('runInternalTool - confirmation policy', () => {
         })
       );
       expect(toolHandler).not.toHaveBeenCalled();
+    });
+
+    it('passes toolParams and toolHandlerContext to getConfirmation', async () => {
+      const getConfirmation = jest.fn().mockResolvedValue({
+        title: 'Confirm',
+        message: 'Proceed?',
+      });
+      tool.confirmation = { askUser: 'always', getConfirmation };
+      runnerDeps.promptManager.getConfirmationStatus.mockReturnValue({
+        status: ConfirmationStatus.unprompted,
+      });
+
+      const params: ScopedRunnerRunInternalToolParams = {
+        tool,
+        toolParams: { foo: 'bar' },
+        toolCallId: 'call-789',
+        source: 'agent',
+      };
+
+      await runInternalTool({
+        toolExecutionParams: params,
+        parentManager: runnerManager,
+      });
+
+      expect(getConfirmation).toHaveBeenCalledWith(
+        expect.objectContaining({
+          toolParams: { foo: 'bar' },
+          context: expect.objectContaining({
+            attachments: runnerDeps.attachmentStateManager,
+            request: runnerDeps.request,
+            spaceId: expect.any(String),
+          }),
+        })
+      );
     });
 
     it('should execute tool when confirmation status is accepted', async () => {
@@ -955,8 +1007,9 @@ describe('runInternalTool - sub-agent HITL blocking', () => {
     tool.getHandler.mockReturnValue(toolHandler);
   });
 
-  it('returns error result instead of confirmation prompt when executionMode is standalone', async () => {
+  it('returns error result instead of confirmation prompt when interactivity is disabled', async () => {
     runnerDeps.executionMode = AgentExecutionMode.standalone;
+    runnerDeps.interactivity = { enabled: false };
     const runnerManager = new RunnerManager(runnerDeps);
 
     tool.confirmation = { askUser: 'always' };
@@ -983,8 +1036,9 @@ describe('runInternalTool - sub-agent HITL blocking', () => {
     expect(toolHandler).not.toHaveBeenCalled();
   });
 
-  it('returns error result instead of on-demand prompt when executionMode is standalone', async () => {
+  it('returns error result instead of on-demand prompt when interactivity is disabled', async () => {
     runnerDeps.executionMode = AgentExecutionMode.standalone;
+    runnerDeps.interactivity = { enabled: false };
     const runnerManager = new RunnerManager(runnerDeps);
 
     toolHandler.mockReturnValue({

@@ -29,6 +29,7 @@ import { notificationsMock } from '@kbn/notifications-plugin/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { lazyObject } from '@kbn/lazy-object';
+import type { CasesClientSource } from './types';
 import type { CasesFindRequestWithCustomFields, CasesSearchRequest } from '../../common/types/api';
 import type { CasesClient, CasesClientInternal } from '.';
 import type { AttachmentsSubClient } from './attachments/client';
@@ -294,6 +295,7 @@ export const createCasesClientMockArgs = () => {
     },
     casesEventBus: createCasesEventBusMock(),
     request: httpServerMock.createKibanaRequest(),
+    clientSource: 'rest_api' as CasesClientSource,
   };
 };
 

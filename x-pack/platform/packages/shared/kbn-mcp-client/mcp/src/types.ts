@@ -45,7 +45,14 @@ import type {
   EmbeddedResource as SdkEmbeddedResource,
   ResourceLink as SdkResourceLink,
   TextContent as SdkTextContent,
+  ToolAnnotations as SdkToolAnnotations,
 } from '@modelcontextprotocol/sdk/types.js';
+
+/**
+ * Advisory hints about a tool's behavior, forwarded verbatim from the MCP spec.
+ * See: https://modelcontextprotocol.io/docs/concepts/tools#tool-annotations
+ */
+export type ToolAnnotations = SdkToolAnnotations;
 
 /**
  * A resource link returned as part of a tool call response.
@@ -154,6 +161,8 @@ export interface Tool {
   name: string;
   description?: string;
   inputSchema: Record<string, unknown>;
+  /** Advisory hints about the tool's behavior, forwarded from the MCP server. */
+  annotations?: ToolAnnotations;
   /**
    * Optional provider metadata for attribution and audit trails.
    * When present, indicates the source of the tool (e.g., which MCP connector).

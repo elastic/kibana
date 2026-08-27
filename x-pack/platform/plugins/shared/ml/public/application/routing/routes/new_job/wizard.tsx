@@ -191,7 +191,11 @@ const PageWrapper: FC<WizardPageProps> = ({ location, jobType }) => {
     ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE
   );
 
-  const { index, savedSearchId }: Record<string, any> = parse(location.search, { sort: false });
+  const {
+    index,
+    savedSearchId,
+    project_routing: projectRoutingFromUrl,
+  }: Record<string, any> = parse(location.search, { sort: false });
 
   const {
     services: {
@@ -199,8 +203,13 @@ const PageWrapper: FC<WizardPageProps> = ({ location, jobType }) => {
       savedSearch: savedSearchService,
       mlServices: { mlApi },
       notifications,
+      cps,
     },
   } = useMlKibana();
+  const projectRouting =
+    typeof projectRoutingFromUrl === 'string' && projectRoutingFromUrl !== ''
+      ? projectRoutingFromUrl
+      : cps?.cpsManager?.getDefaultProjectRouting() ?? undefined;
   const { context, results } = useRouteResolver('full', ['canGetJobs', 'canCreateJob'], {
     ...basicResolvers(),
     // TODO useRouteResolver should be responsible for the redirect
@@ -213,7 +222,8 @@ const PageWrapper: FC<WizardPageProps> = ({ location, jobType }) => {
         dataViewsService,
         savedSearchService,
         ANOMALY_DETECTOR,
-        notifications
+        notifications,
+        projectRouting
       ),
     existingJobsAndGroups: () => mlApi.jobs.getAllJobAndGroupIds(),
   });

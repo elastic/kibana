@@ -12,6 +12,8 @@ export {
   SECURITY_GET_ENTITY_TOOL_ID,
   getEntityGraphTool,
   SECURITY_GET_ENTITY_GRAPH_TOOL_ID,
+  getEntityRiskScoreHistoryTool,
+  SECURITY_GET_ENTITY_RISK_SCORE_HISTORY_TOOL_ID,
   entityRelationshipHistoryTool,
   SECURITY_ENTITY_RELATIONSHIP_HISTORY_TOOL_ID,
   listWatchlistsTool,

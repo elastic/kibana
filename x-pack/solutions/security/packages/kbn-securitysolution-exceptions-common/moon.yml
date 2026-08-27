@@ -25,14 +25,18 @@ dependsOn:
   - '@kbn/core-http-common'
   - '@kbn/securitysolution-utils'
   - '@kbn/zod'
+  - '@kbn/i18n'
 tags:
   - shared-common
   - package
   - prod
   - group-security
   - private
+  - jest-unit-tests
 fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
+  jest-config:
+    - jest.config.js
 tasks: {}

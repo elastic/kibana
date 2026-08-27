@@ -17,7 +17,7 @@ import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugi
 import type { ProductFeaturesService } from '../../../lib/product_features_service';
 import { securityTool } from '../constants';
 import { buildRenderAttachmentTag } from './attachment_utils';
-import { getEntityStoreV2ToolAvailability } from './entity_store_v2_availability';
+import { getEntityAnalyticsToolAvailability } from './entity_analytics_availability';
 import { requireResolvedEntity } from './entity_resolution';
 import {
   buildEntityGraphAttachmentId,
@@ -60,18 +60,26 @@ This tool resolves the entity, then stores a \`security.entity_graph\` attachmen
 When the id/name resolves to multiple candidate entities, no attachment is stored, no \`renderTag\` is returned, and you must NOT emit a render tag — instead ask the user to supply the exact entity id (EUID) from the returned candidates. This tool renders a compact preview; the full interactive graph investigation lives in the Security UI and is reachable from the preview's "Open full graph" affordance.`,
     schema,
     tags: ['security', 'entity-store', 'entity-analytics', 'graph'],
+    annotations: {
+      title: 'Get Entity Graph',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     availability: {
       cacheMode: 'space',
       handler: async ({ request, spaceId }: ToolAvailabilityContext) => {
-        const entityStoreAvailability = await getEntityStoreV2ToolAvailability({
+        const entityAnalyticsAvailability = await getEntityAnalyticsToolAvailability({
           core,
           request,
           spaceId,
           experimentalFeatures,
           logger,
+          minLicense: 'platinum',
         });
-        if (entityStoreAvailability.status !== 'available') {
-          return entityStoreAvailability;
+        if (entityAnalyticsAvailability.status !== 'available') {
+          return entityAnalyticsAvailability;
         }
 
         try {
@@ -79,15 +87,6 @@ When the id/name resolves to multiple candidate entities, no attachment is store
             return {
               status: 'unavailable',
               reason: 'The entity relationship graph is not enabled for this project tier.',
-            };
-          }
-
-          const [, startPlugins] = await core.getStartServices();
-          const license = await startPlugins.licensing.getLicense();
-          if (!license.hasAtLeast('platinum')) {
-            return {
-              status: 'unavailable',
-              reason: 'The entity relationship graph requires a Platinum license or above.',
             };
           }
         } catch (error) {
@@ -125,13 +124,12 @@ When the id/name resolves to multiple candidate entities, no attachment is store
           entityId,
           entityType,
         });
-
         if (!resolved.ok) {
           return { results: resolved.results };
         }
 
         const { identifierType, identifier, entityStoreId } = resolved.identity;
-        const attachmentLabel = `Graph — ${identifierType}: ${identifier}`;
+        const attachmentLabel = `${identifierType}: ${identifier}`;
 
         const attachmentResult = await ensureEntityGraphAttachment({
           attachments,
