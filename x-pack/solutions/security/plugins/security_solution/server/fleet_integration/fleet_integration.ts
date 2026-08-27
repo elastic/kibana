@@ -265,7 +265,7 @@ export const getPackagePolicyUpdateCallback = (
 
     validateEndpointPackagePolicy(endpointIntegrationData.inputs);
 
-    const policyValue = endpointIntegrationData.inputs?.[0]?.config?.policy?.value as
+    const policyValue = endpointIntegrationData.inputs?.[0]?.config?.policy?.value as unknown as
       | Record<string, unknown>
       | undefined;
 
