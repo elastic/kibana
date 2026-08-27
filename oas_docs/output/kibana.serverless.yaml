@@ -99590,15 +99590,6 @@ components:
                                 - direction
                             maxItems: 100
                             type: array
-                          source_display_mode:
-                            anyOf:
-                              - enum:
-                                  - summary
-                                type: string
-                              - enum:
-                                  - json
-                                type: string
-                            description: 'Source column display mode: "summary" for the formatted summary, or "json" for the raw JSON tree. When set, overrides the referenced saved object or the inline tab config in `tabs`.'
                           view_mode:
                             anyOf:
                               - enum:
@@ -99719,15 +99710,6 @@ components:
                                 - direction
                             maxItems: 100
                             type: array
-                          source_display_mode:
-                            anyOf:
-                              - enum:
-                                  - summary
-                                type: string
-                              - enum:
-                                  - json
-                                type: string
-                            description: 'Source column display mode: "summary" for the formatted summary, or "json" for the raw JSON tree. When set, overrides the referenced saved object or the inline tab config in `tabs`.'
                         required:
                           - data_source
                   maxItems: 1
@@ -99896,15 +99878,6 @@ components:
                           - direction
                       maxItems: 100
                       type: array
-                    source_display_mode:
-                      anyOf:
-                        - enum:
-                            - summary
-                          type: string
-                        - enum:
-                            - json
-                          type: string
-                      description: 'Source column display mode: "summary" for the formatted summary, or "json" for the raw JSON tree. When set, overrides the referenced saved object or the inline tab config in `tabs`.'
                 ref_id:
                   type: string
                 selected_tab_id:
