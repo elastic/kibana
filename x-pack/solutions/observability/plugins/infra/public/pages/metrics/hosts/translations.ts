@@ -44,7 +44,7 @@ export const TABLE_COLUMN_LABEL = {
     defaultMessage: 'Normalized Load (avg.)',
   }),
 
-  viewDetailsAction: i18n.translate('xpack.infra.hostsViewPage.table.viewDetails', {
+  viewDetailsAction: i18n.translate('xpack.infra.hostsViewPage.table.toggleDialogWithDetails', {
     defaultMessage: 'View details',
   }),
 
