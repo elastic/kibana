@@ -514,6 +514,44 @@ describe('AgentlessPoliciesService', () => {
       deleteAgentlessAgentSpy.mockRestore();
     });
 
+
+    it('should throw PackagePolicyRequestError and still call deleteAgentlessAgent when delete has per-item failures', async () => {
+      const packagePolicyId = 'orphaned-package-policy-id';
+
+      const deleteAgentlessAgentSpy = jest
+        .spyOn(agentlessAgentService, 'deleteAgentlessAgent')
+        .mockResolvedValueOnce(undefined as any);
+
+      jest
+        .mocked(agentPolicyService.get)
+        .mockRejectedValueOnce(SavedObjectsErrorHelpers.createGenericNotFoundError('test'));
+
+      packagePolicyService.findAllForAgentPolicy.mockResolvedValueOnce([
+        { id: 'agentless-pp-1', supports_agentless: true },
+        { id: 'agentless-pp-2', supports_agentless: true },
+      ] as any);
+
+      packagePolicyService.delete.mockResolvedValueOnce([
+        { id: 'agentless-pp-1', success: true },
+        { id: 'agentless-pp-2', success: false, body: { message: 'ES unavailable' } },
+      ] as any);
+
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const logger = loggingSystemMock.createLogger();
+
+      await expect(
+        new AgentlessPoliciesServiceImpl(packagePolicyService, soClient, esClient, logger)
+          .deleteAgentlessPolicy(packagePolicyId)
+      ).rejects.toThrow('Failed to delete some package policies');
+
+      // deployment teardown must still run before the error is thrown
+      expect(deleteAgentlessAgentSpy).toHaveBeenCalledWith(packagePolicyId);
+
+      deleteAgentlessAgentSpy.mockRestore();
+    });
+
+
       deleteAgentlessAgentSpy.mockRestore();
     });
 
