@@ -85,7 +85,7 @@ describe('initializeHistoryManager', () => {
       setup.hasOverlays$.next(true);
       setup.anyStateChange$.next(undefined);
       // once disabledActions$ fires, we know that stateSubscription has run
-      await firstValueFrom(setup.api.disabledActions$.pipe(skip(1)));
+      await firstValueFrom(setup.api.disabledActions$);
       expect(setup.getState).not.toHaveBeenCalled();
       setup.cleanup();
     });
@@ -94,7 +94,7 @@ describe('initializeHistoryManager', () => {
       const setup = await makeSetup();
       setup.dataLoading$.next(true);
       setup.anyStateChange$.next(undefined);
-      await firstValueFrom(setup.api.disabledActions$.pipe(skip(1)));
+      await firstValueFrom(setup.api.disabledActions$);
       expect(setup.getState).not.toHaveBeenCalled();
       setup.cleanup();
     });
@@ -103,7 +103,7 @@ describe('initializeHistoryManager', () => {
       const setup = await makeSetup();
       setup.hasOverlays$.next(true);
       setup.anyStateChange$.next(undefined);
-      await firstValueFrom(setup.api.disabledActions$.pipe(skip(1)));
+      await firstValueFrom(setup.api.disabledActions$);
       expect(setup.getState).not.toHaveBeenCalled();
 
       setup.hasOverlays$.next(false);
@@ -118,14 +118,14 @@ describe('initializeHistoryManager', () => {
       const setup = await makeSetup();
       await pushStateChange(setup, 'Change 1');
       await waitFor(async () =>
-        expect(await firstValueFrom(setup.api.disabledActions$.pipe(skip(1)))).toEqual({
+        expect(await firstValueFrom(setup.api.disabledActions$)).toEqual({
           undo: false,
           redo: true,
         })
       );
 
       setup.hasOverlays$.next(true);
-      expect(await firstValueFrom(setup.api.disabledActions$.pipe(skip(1)))).toEqual({
+      expect(await firstValueFrom(setup.api.disabledActions$)).toEqual({
         undo: true,
         redo: true,
       });
@@ -135,13 +135,13 @@ describe('initializeHistoryManager', () => {
     it('disables undo and redo when dataLoading$ becomes true', async () => {
       const setup = await makeSetup();
       await pushStateChange(setup, 'Change 1');
-      expect(await firstValueFrom(setup.api.disabledActions$.pipe(skip(1)))).toEqual({
+      expect(await firstValueFrom(setup.api.disabledActions$)).toEqual({
         undo: false,
         redo: true,
       });
 
       setup.dataLoading$.next(true);
-      expect(await firstValueFrom(setup.api.disabledActions$.pipe(skip(1)))).toEqual({
+      expect(await firstValueFrom(setup.api.disabledActions$)).toEqual({
         undo: true,
         redo: true,
       });
@@ -151,11 +151,11 @@ describe('initializeHistoryManager', () => {
     it('re-enables undo once overlays are dismissed', async () => {
       const setup = await makeSetup();
       await pushStateChange(setup, 'Change 1');
-      expect((await firstValueFrom(setup.api.disabledActions$.pipe(skip(1)))).undo).toEqual(false);
+      expect((await firstValueFrom(setup.api.disabledActions$)).undo).toEqual(false);
       setup.hasOverlays$.next(true);
-      expect((await firstValueFrom(setup.api.disabledActions$.pipe(skip(1)))).undo).toEqual(true);
+      expect((await firstValueFrom(setup.api.disabledActions$)).undo).toEqual(true);
       setup.hasOverlays$.next(false);
-      expect((await firstValueFrom(setup.api.disabledActions$.pipe(skip(1)))).undo).toEqual(false);
+      expect((await firstValueFrom(setup.api.disabledActions$)).undo).toEqual(false);
       setup.cleanup();
     });
   });
@@ -164,7 +164,7 @@ describe('initializeHistoryManager', () => {
     it('calls setState with the previous state', async () => {
       const setup = await makeSetup();
       await pushStateChange(setup, 'Change 1');
-      expect(await firstValueFrom(setup.api.disabledActions$.pipe(skip(1)))).toEqual({
+      expect(await firstValueFrom(setup.api.disabledActions$)).toEqual({
         undo: false,
         redo: true,
       });
@@ -176,7 +176,7 @@ describe('initializeHistoryManager', () => {
     it('does not call setState when overlays are open', async () => {
       const setup = await makeSetup();
       await pushStateChange(setup, 'Change 1');
-      expect(await firstValueFrom(setup.api.disabledActions$.pipe(skip(1)))).toEqual({
+      expect(await firstValueFrom(setup.api.disabledActions$)).toEqual({
         undo: false,
         redo: true,
       });
@@ -231,7 +231,7 @@ describe('initializeHistoryManager', () => {
       await waitFor(() => expect(setup.getState).toBeCalledTimes(1));
 
       // aait for undo to be enabled — confirms exactly one history entry was recorded.
-      expect(await firstValueFrom(setup.api.disabledActions$.pipe(skip(1)))).toEqual({
+      expect(await firstValueFrom(setup.api.disabledActions$)).toEqual({
         undo: false,
         redo: true,
       });
