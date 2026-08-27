@@ -51,113 +51,120 @@ steps:
         Evidence: {{ inputs.evidence }}
         Confidence: {{ inputs.confidence }}
 
-        Echo the tool's returned rule fields and attachment metadata into the
-        structured output. Never return id or rule_id.
+        Echo the tool's returned rule fields under "rule" and the attachment
+        metadata alongside it. Never return id or rule_id.
       schema:
         type: object
+        additionalProperties: false
         properties:
-          name:
-            type: string
-          description:
-            type: string
-          query:
-            type: string
-          language:
-            type: string
-            enum: [esql]
-          type:
-            type: string
-            enum: [esql]
-          interval:
-            type: string
-          from:
-            type: string
-          to:
-            type: string
-          severity:
-            type: string
-            enum: [low, medium, high, critical]
-          risk_score:
-            type: number
-          threat:
-            type: array
-            items:
-              type: object
-              additionalProperties: true
-          tags:
-            type: array
-            items:
-              type: string
+          rule:
+            type: object
+            additionalProperties: false
+            properties:
+              name:
+                type: string
+              description:
+                type: string
+              query:
+                type: string
+              language:
+                type: string
+                enum: [esql]
+              type:
+                type: string
+                enum: [esql]
+              interval:
+                type: string
+              from:
+                type: string
+              to:
+                type: string
+              severity:
+                type: string
+                enum: [low, medium, high, critical]
+              risk_score:
+                type: number
+              threat:
+                type: array
+                items:
+                  type: object
+                  additionalProperties: true
+              tags:
+                type: array
+                items:
+                  type: string
+            required:
+              - name
+              - description
+              - query
+              - language
+              - type
+              - interval
+              - from
+              - to
+              - severity
+              - risk_score
+              - threat
+              - tags
           attachment_id:
             type: string
           attachment_version:
             type: number
         required:
-          - name
-          - description
-          - query
-          - language
-          - type
-          - interval
-          - from
-          - to
-          - severity
-          - risk_score
-          - threat
-          - tags
+          - rule
           - attachment_id
 
   - name: preview_creation
     type: workflow.execute
     if: >-
-      ${{ steps.draft_creation.output.structured_output.query != null
-        and steps.draft_creation.output.structured_output.query != ''
+      ${{ steps.draft_creation.output.structured_output.rule.query != null
+        and steps.draft_creation.output.structured_output.rule.query != ''
         and steps.draft_creation.output.structured_output.attachment_id != null }}
     with:
       workflow-id: system-security-rule-preview
       inputs:
         space_id: "{{ workflow.spaceId }}"
         preview_body:
-          name: "{{ steps.draft_creation.output.structured_output.name }}"
-          description: "{{ steps.draft_creation.output.structured_output.description }}"
-          query: "{{ steps.draft_creation.output.structured_output.query }}"
+          name: "{{ steps.draft_creation.output.structured_output.rule.name }}"
+          description: "{{ steps.draft_creation.output.structured_output.rule.description }}"
+          query: "{{ steps.draft_creation.output.structured_output.rule.query }}"
           language: esql
           type: esql
-          interval: "{{ steps.draft_creation.output.structured_output.interval }}"
-          from: "{{ steps.draft_creation.output.structured_output.from }}"
-          to: "{{ steps.draft_creation.output.structured_output.to }}"
-          severity: "{{ steps.draft_creation.output.structured_output.severity }}"
-          risk_score: "${{ steps.draft_creation.output.structured_output.risk_score }}"
-          threat: "${{ steps.draft_creation.output.structured_output.threat }}"
-          tags: "${{ steps.draft_creation.output.structured_output.tags }}"
+          interval: "{{ steps.draft_creation.output.structured_output.rule.interval }}"
+          from: "{{ steps.draft_creation.output.structured_output.rule.from }}"
+          to: "{{ steps.draft_creation.output.structured_output.rule.to }}"
+          severity: "{{ steps.draft_creation.output.structured_output.rule.severity }}"
+          risk_score: "${{ steps.draft_creation.output.structured_output.rule.risk_score }}"
+          threat: "${{ steps.draft_creation.output.structured_output.rule.threat }}"
+          tags: "${{ steps.draft_creation.output.structured_output.rule.tags }}"
           invocationCount: "${{ inputs.preview_invocation_count }}"
           timeframeEnd: '{{ "now" | date: "%Y-%m-%dT%H:%M:%S.%LZ", "UTC" }}'
 
   - name: review_creation
     type: waitForApproval
     if: >-
-      ${{ steps.draft_creation.output.structured_output.query != null
-        and steps.draft_creation.output.structured_output.query != ''
+      ${{ steps.draft_creation.output.structured_output.rule.query != null
+        and steps.draft_creation.output.structured_output.rule.query != ''
         and steps.draft_creation.output.structured_output.attachment_id != null }}
     timeout: "72h"
     with:
       approveLabel: Create rule
       rejectLabel: Dismiss
       message: |-
-        New ES|QL detection rule: {{ steps.draft_creation.output.structured_output.name }}
+        New ES|QL detection rule: {{ steps.draft_creation.output.structured_output.rule.name }}
 
-        {{ steps.draft_creation.output.structured_output.description }}
+        {{ steps.draft_creation.output.structured_output.rule.description }}
 
         Query:
-        {{ steps.draft_creation.output.structured_output.query }}
+        {{ steps.draft_creation.output.structured_output.rule.query }}
 
         ATT&CK technique: {{ inputs.technique }}
         Expected matches: {% if steps.preview_creation.output.succeeded and steps.preview_creation.output.is_aborted == false %}{{ steps.preview_creation.output.alert_count }}{% else %}preview inconclusive{% endif %}
         {% if steps.preview_creation.output.error_text != '' %}
         Preview errors: {{ steps.preview_creation.output.error_text }}
         {% endif %}
-        Severity: {{ steps.draft_creation.output.structured_output.severity }}
-        Risk score: {{ steps.draft_creation.output.structured_output.risk_score }}
+        Severity: {{ steps.draft_creation.output.structured_output.rule.severity }}
+        Risk score: {{ steps.draft_creation.output.structured_output.rule.risk_score }}
 
         Review the draft: /app/agent_builder/conversations/{{ steps.draft_creation.output.conversation_id }}
 
@@ -176,35 +183,15 @@ steps:
         {%- endif -%}
 
   - name: create_rule
-    type: kibana.request
+    type: security.createRule
     if: >-
       ${{ steps.review_creation.output.response.approved == true }}
     with:
-      method: POST
-      path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules"
-      headers:
-        kbn-xsrf: string
-        elastic-api-version: "2023-10-31"
-        Content-Type: application/json
-      body:
-        name: "{{ steps.draft_creation.output.structured_output.name }}"
-        description: "{{ steps.draft_creation.output.structured_output.description }}"
-        query: "{{ steps.draft_creation.output.structured_output.query }}"
-        language: esql
-        type: esql
-        interval: "{{ steps.draft_creation.output.structured_output.interval }}"
-        from: "{{ steps.draft_creation.output.structured_output.from }}"
-        to: "{{ steps.draft_creation.output.structured_output.to }}"
-        severity: "{{ steps.draft_creation.output.structured_output.severity }}"
-        risk_score: "${{ steps.draft_creation.output.structured_output.risk_score }}"
-        threat: "${{ steps.draft_creation.output.structured_output.threat }}"
-        tags: "${{ steps.draft_creation.output.structured_output.tags }}"
-        enabled: false
-        building_block_type: default
+      rule: "${{ steps.draft_creation.output.structured_output.rule }}"
 
   - name: emit_result
     type: workflow.output
     status: completed
     with:
       created: "${{ steps.create_rule.error == null and steps.create_rule.output.id != null }}"
-      rule_name: "{{ steps.draft_creation.output.structured_output.name }}"
+      rule_name: "{{ steps.draft_creation.output.structured_output.rule.name }}"
