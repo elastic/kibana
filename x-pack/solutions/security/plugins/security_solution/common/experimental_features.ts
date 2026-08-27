@@ -224,6 +224,13 @@ export const allowedExperimentalValues = Object.freeze({
   kubernetesEnabled: true,
 
   /**
+   * Enables the Detonate malware sandbox pages and their APIs.
+   * Ships dark: the UI routes, the nav link and the server routes are all gated on this
+   * flag, so no Detonate surface is reachable while it is off.
+   */
+  detonateEnabled: false,
+
+  /**
    * Enables the Entity Analytics Watchlist feature.
    */
   entityAnalyticsWatchlistEnabled: true,

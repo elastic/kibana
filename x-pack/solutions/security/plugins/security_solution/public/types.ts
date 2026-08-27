@@ -98,6 +98,7 @@ import type { SiemMigrations } from './siem_migrations';
 import type { Configurations } from './configurations';
 
 import type { Dashboards } from './dashboards';
+import type { Detonate } from './detonate';
 import type { BreadcrumbsNav } from './common/breadcrumbs/types';
 import type { TopValuesPopoverService } from './app/components/top_values_popover/top_values_popover_service';
 import type { ExperimentalFeatures } from '../common/experimental_features';
@@ -265,6 +266,7 @@ export interface SubPlugins {
   cloudDefend: CloudDefend;
   cloudSecurityPosture: CloudSecurityPosture;
   dashboards: Dashboards;
+  detonate: Detonate;
   exceptions: Exceptions;
   explore: Explore;
   kubernetes: Kubernetes;
@@ -290,6 +292,7 @@ export interface StartedSubPlugins {
   cloudDefend: ReturnType<CloudDefend['start']>;
   cloudSecurityPosture: ReturnType<CloudSecurityPosture['start']>;
   dashboards: ReturnType<Dashboards['start']>;
+  detonate: ReturnType<Detonate['start']>;
   exceptions: ReturnType<Exceptions['start']>;
   explore: ReturnType<Explore['start']>;
   kubernetes: ReturnType<Kubernetes['start']>;

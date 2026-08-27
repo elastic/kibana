@@ -44,6 +44,7 @@ export enum SecurityPageName {
   dataQuality = 'data_quality',
   detections = 'detections',
   detectionAndResponse = 'detection_response',
+  detonate = 'detonate',
   endpoints = 'endpoints',
   endpointExceptions = 'endpoint_exceptions',
   eventFilters = 'event_filters',

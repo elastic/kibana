@@ -42,5 +42,11 @@ export const createDashboardsNavigationTree = (): NodeDefinition => ({
       id: SecurityPageName.kubernetes,
       link: securityLink(SecurityPageName.kubernetes),
     },
+    // Gated by the `detonateEnabled` experimental flag. Like Kubernetes above, the node is listed
+    // unconditionally: when the flag is off the deep link is never registered, so it does not render.
+    {
+      id: SecurityPageName.detonate,
+      link: securityLink(SecurityPageName.detonate),
+    },
   ],
 });

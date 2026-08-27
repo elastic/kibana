@@ -47,6 +47,7 @@ import { registerResolverRoutes } from '../endpoint/routes/resolver';
 import { registerWorkflowInsightsRoutes } from '../endpoint/routes/workflow_insights';
 import { registerManageExceptionsRoutes } from '../lib/exceptions/api/register_routes';
 import { registerDashboardsRoutes } from '../lib/dashboards/routes';
+import { registerDetonateRoutes } from '../lib/detonate/register_routes';
 import { registerTagsRoutes } from '../lib/tags/routes';
 import { setAlertTagsRoute } from '../lib/detection_engine/routes/signals/set_alert_tags_route';
 import { setAlertAssigneesRoute } from '../lib/detection_engine/routes/signals/set_alert_assignees_route';
@@ -142,6 +143,8 @@ export const initRoutes = (
   // Dashboards
   registerDashboardsRoutes(router, logger);
   registerTagsRoutes(router, logger);
+
+  registerDetonateRoutes(router, config, logger);
 
   registerAttacksRoutes(router, ruleDataClient, telemetrySender);
 

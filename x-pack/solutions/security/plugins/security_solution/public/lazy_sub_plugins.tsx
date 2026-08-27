@@ -27,6 +27,7 @@ import { CloudDefend } from './cloud_defend';
 import { CloudSecurityPosture } from './cloud_security_posture';
 import { ThreatIntelligence } from './threat_intelligence';
 import { Dashboards } from './dashboards';
+import { Detonate } from './detonate';
 import { EntityAnalytics } from './entity_analytics';
 import { SiemMigrations } from './siem_migrations';
 import { SiemReadiness } from './siem_readiness';
@@ -49,6 +50,7 @@ const subPluginClasses = {
   Timelines,
   Management,
   Dashboards,
+  Detonate,
   CloudDefend,
   CloudSecurityPosture,
   ThreatIntelligence,
