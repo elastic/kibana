@@ -156,6 +156,41 @@ describe('SkillsProjectionService', () => {
   });
 
   describe('caching', () => {
+    it('re-fetches immediately after invalidation', async () => {
+      management.getWorkflows.mockResolvedValue(makeWorkflowListDto([]));
+      mockProjectWatch.mockReturnValue(makeWatch('w', []));
+
+      const first = await service.list(mockRequest, spaceId);
+      expect(first).toEqual([]);
+      expect(management.getWorkflows).toHaveBeenCalledTimes(1);
+
+      service.invalidate(spaceId);
+
+      management.getWorkflows.mockResolvedValue(makeWorkflowListDto([{ id: 'watch-floor' }]));
+      mockProjectWatch.mockReturnValueOnce(makeWatch('watch-floor', ['alert-analysis']));
+
+      const second = await service.list(mockRequest, spaceId);
+      expect(management.getWorkflows).toHaveBeenCalledTimes(2);
+      expect(second.map((s) => s.id)).toEqual(['alert-analysis']);
+    });
+
+    it('only invalidates the targeted space', async () => {
+      management.getWorkflows.mockResolvedValue(makeWorkflowListDto([{ id: 'w' }]));
+      mockProjectWatch.mockReturnValue(makeWatch('w', ['s']));
+
+      await service.list(mockRequest, 'space-1');
+      await service.list(mockRequest, 'space-2');
+      expect(management.getWorkflows).toHaveBeenCalledTimes(2);
+
+      service.invalidate('space-1');
+
+      mockProjectWatch.mockReturnValue(makeWatch('w', ['s']));
+      await service.list(mockRequest, 'space-1'); // must re-fetch
+      await service.list(mockRequest, 'space-2'); // still cached
+
+      expect(management.getWorkflows).toHaveBeenCalledTimes(3);
+    });
+
     it('does not re-fetch within the 5-minute TTL', async () => {
       management.getWorkflows.mockResolvedValue(makeWorkflowListDto([{ id: 'watch-a' }]));
       mockProjectWatch.mockReturnValue(makeWatch('watch-a', ['skill-1']));

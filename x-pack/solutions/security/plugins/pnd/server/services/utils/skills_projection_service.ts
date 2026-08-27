@@ -92,6 +92,10 @@ export class SkillsProjectionService {
     return this.cacheBySpace.get(spaceId)?.skills ?? [];
   }
 
+  invalidate(spaceId: string): void {
+    this.cacheBySpace.delete(spaceId);
+  }
+
   async list(request: KibanaRequest, spaceId: string): Promise<WatchSkill[]> {
     return this.getCached(request, spaceId);
   }

@@ -426,6 +426,7 @@ export class WatchesService {
       const detail = await management.getWorkflow(watchId, spaceId);
       if (!detail) return { outcome: 'not-found' };
       await management.updateWorkflow(watchId, { enabled }, spaceId, request);
+      this.skillsProjectionService?.invalidate(spaceId);
     }
     const response = await this.get(request, watchId, spaceId);
     return response ? { outcome: 'updated', response } : { outcome: 'not-found' };
@@ -522,6 +523,7 @@ export class WatchesService {
       );
     }
 
+    this.skillsProjectionService?.invalidate(spaceId);
     const response = await this.get(request, registration.id, spaceId);
     return response ? { outcome: 'updated', response } : { outcome: 'not-found' };
   }
