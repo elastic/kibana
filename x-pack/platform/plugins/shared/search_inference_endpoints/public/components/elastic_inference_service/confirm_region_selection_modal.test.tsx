@@ -75,7 +75,7 @@ describe('ConfirmRegionSelectionModal', () => {
         'Review changes'
       );
       expect(screen.getByTestId('confirmRegionSelectionModal')).toHaveTextContent(
-        'selected region'
+        'selected regions'
       );
       const list = screen.getByTestId('confirmRegionSelectionRegionList');
       expect(list.querySelectorAll('li')).toHaveLength(selectedRegions.length);
@@ -102,7 +102,7 @@ describe('ConfirmRegionSelectionModal', () => {
       );
       expect(screen.getByTestId('confirmRegionSelectionSelectedBadge')).toHaveTextContent('2');
       expect(screen.getByTestId('confirmRegionSelectionModal')).toHaveTextContent(
-        'selected geography'
+        'selected regions'
       );
       expect(screen.getByTestId('confirmRegionSelectionGeoList')).toBeInTheDocument();
       expect(screen.queryByTestId('confirmRegionSelectionRegionList')).not.toBeInTheDocument();

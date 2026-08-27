@@ -13,6 +13,7 @@ import {
   EuiTabbedContent,
   EuiText,
   type EuiTabbedContentTab,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { CspRegion } from '../../../common/types';
@@ -40,6 +41,7 @@ export const ConfirmRegionSelectionTabs: React.FC<ConfirmRegionSelectionTabsProp
   selectedGeos,
   conflictArtifacts,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const [selectedTabId, setSelectedTabId] = useState<TabId>(TAB_IDS.selected);
   const hasConflict = Boolean(conflictArtifacts?.length);
   const isGeoMode = mode === 'geo';
@@ -65,15 +67,19 @@ export const ConfirmRegionSelectionTabs: React.FC<ConfirmRegionSelectionTabsProp
             ),
         append: (
           <EuiNotificationBadge
-            size="s"
-            color="subdued"
+            size="xs"
+            color="accent"
             data-test-subj="confirmRegionSelectionSelectedBadge"
           >
             {selectedCount}
           </EuiNotificationBadge>
         ),
         content: (
-          <EuiText size="s" data-test-subj="confirmRegionSelectionSelectedList">
+          <EuiText
+            style={{ paddingTop: euiTheme.size.m }}
+            size="s"
+            data-test-subj="confirmRegionSelectionSelectedList"
+          >
             {isGeoMode ? (
               <ul data-test-subj="confirmRegionSelectionGeoList">
                 {selectedGeos.map((geo) => (
@@ -128,6 +134,7 @@ export const ConfirmRegionSelectionTabs: React.FC<ConfirmRegionSelectionTabsProp
     ];
   }, [
     conflictArtifacts,
+    euiTheme.size.m,
     hasConflict,
     isGeoMode,
     issuesCount,
@@ -151,5 +158,7 @@ export const ConfirmRegionSelectionTabs: React.FC<ConfirmRegionSelectionTabsProp
     }
   }, []);
 
-  return <EuiTabbedContent tabs={tabs} selectedTab={selectedTab} onTabClick={onTabClick} />;
+  return (
+    <EuiTabbedContent tabs={tabs} selectedTab={selectedTab} size="s" onTabClick={onTabClick} />
+  );
 };
