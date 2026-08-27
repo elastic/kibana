@@ -50,6 +50,14 @@ describe('convertToRuntimeState - secondary name visibility', () => {
     );
   });
 
+  it('hides the name when a legacy secondaryPrefix was explicitly emptied', () => {
+    expect(
+      secondaryNameState(convertToRuntimeState({ ...baseState, secondaryPrefix: '' }))
+    ).toEqual({
+      secondaryNameVisibility: 'hidden',
+    });
+  });
+
   it('shows the name before the value when no legacy label was persisted', () => {
     expect(secondaryNameState(convertToRuntimeState(baseState))).toEqual({
       secondaryNameVisibility: 'before',
