@@ -131,18 +131,6 @@ function asNonEmptyText(value: unknown): string | undefined {
   return value.trim() || undefined;
 }
 
-/**
- * Adds the text a consumer needs to render the triggering item inline.
- *
- * `subject_summary` is what the caller declared through `start`, where the route bounds its
- * length; it is returned verbatim, because shortening it to fit a card is the consumer's
- * decision, not this layer's. `summary` and `name` are read as a fallback for investigations
- * started before the field was declared.
- *
- * `inputs.message` is deliberately not a fallback: callers that supply no summary also supply no
- * message, so the message is the generic prompt `start` synthesizes, and surfacing that would
- * label every such subject "Investigation requested for ...".
- */
 function toSubjectReference(
   subject: InvestigationSubject,
   input: Record<string, unknown> | undefined

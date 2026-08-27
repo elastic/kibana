@@ -34,8 +34,6 @@ export const startInvestigationRoute = createNightshiftInvestigationsServerRoute
         type: z.enum(INVESTIGATION_SUBJECT_TYPES),
         id: z.string().min(1).max(500),
       }),
-      // Bounded by the significant events summary limit, so the sig-events caller is never
-      // rejected for passing an event summary through verbatim.
       summary: z.string().max(MAX_TEXT_LENGTH).optional(),
       concurrency_key: z.string().max(500).optional(),
       context: z
