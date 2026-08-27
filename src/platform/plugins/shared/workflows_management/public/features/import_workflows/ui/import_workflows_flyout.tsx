@@ -398,7 +398,7 @@ export const ImportWorkflowsFlyout: React.FC<ImportWorkflowsFlyoutProps> = ({ on
             if (status === 'failed') {
               return (
                 <EuiIcon
-                  type="crossInACircleFilled"
+                  type="error"
                   color="danger"
                   data-test-subj={`import-preview-failed-${id}`}
                   aria-label={i18n.translate('workflows.importFlyout.preview.failedIcon', {

@@ -30,6 +30,7 @@ import { treeifyError, type z } from '@kbn/zod/v4';
 import { inject, injectable } from 'inversify';
 import { type RuleSavedObjectAttributes } from '../../saved_objects';
 import { withApm as withApmDecorator } from '../apm/with_apm_decorator';
+import { ArtifactTypeRegistry } from '../artifact_types';
 import { ALERTING_ERROR_CODES, ALERTING_LOG_CODES } from '../errors/error_codes';
 import {
   getInvalidRuleDataMessage,
@@ -135,6 +136,7 @@ const mapSortField = (sortField?: FindRulesSortField): string | undefined => {
 @injectable()
 export class RulesClient {
   private readonly config: PluginConfig;
+  private readonly logger: LoggerServiceContract;
 
   constructor(
     @inject(Request) private readonly request: KibanaRequest,
@@ -149,9 +151,11 @@ export class RulesClient {
     @inject(RulesSavedObjectServiceInternalToken)
     private readonly rulesSavedObjectServiceInternal: RulesSavedObjectServiceContract,
     @inject(RuleEventPublisher) private readonly ruleEventPublisher: RuleEventPublisher,
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
+    @inject(LoggerServiceToken) loggerService: LoggerServiceContract,
+    @inject(ArtifactTypeRegistry) private readonly artifactTypeRegistry: ArtifactTypeRegistry
   ) {
     this.config = pluginConfigAccessor.get<PluginConfig>();
+    this.logger = loggerService.forSubsystem('rulesClient');
   }
 
   private getSpaceContext(): { spaceId: string } {
@@ -335,6 +339,7 @@ export class RulesClient {
   public async createRule(params: CreateRuleParams): Promise<RuleResponse> {
     const { spaceId } = this.getSpaceContext();
     const parsed = this.parseRuleData(createRuleDataSchema, params.data, 'create');
+    this.artifactTypeRegistry.validate(parsed.artifacts);
 
     const userProfileUid = await this.userService.getCurrentUserProfileUid();
 
@@ -406,6 +411,9 @@ export class RulesClient {
   public async updateRule({ id, data, options }: UpdateRuleParams): Promise<RuleResponse> {
     const { spaceId } = this.getSpaceContext();
     const parsed = this.parseRuleData(updateRuleDataSchema, data, 'update');
+    if (parsed.artifacts !== undefined) {
+      this.artifactTypeRegistry.validate(parsed.artifacts ?? undefined);
+    }
 
     const userProfileUid = await this.userService.getCurrentUserProfileUid();
     const nowIso = new Date().toISOString();
@@ -1164,7 +1172,8 @@ export class RulesClient {
       }
 
       affectedCount += 1;
-      updatedRules.push({ ruleId: item.id, spaceId });
+      const rule = transformRuleSoAttributesToRuleApiResponse(item.id, item.attrs);
+      updatedRules.push({ ruleId: rule.id, spaceId, rule });
     }
 
     this.ruleEventPublisher.emitRuleUpdated(this.request, updatedRules);
@@ -1417,6 +1426,7 @@ export class RulesClient {
     data: CreateRuleData;
   }): Promise<{ rule: RuleResponse; created: boolean }> {
     const parsed = this.parseRuleData(createRuleDataSchema, data, 'upsert');
+    this.artifactTypeRegistry.validate(parsed.artifacts);
 
     const exists = await this.ruleExists({ id });
 

@@ -9,7 +9,7 @@ import type { EsqlQueryRequest, EsqlQueryResponse } from '@elastic/elasticsearch
 import type { ElasticsearchClient, PluginInitializerContext } from '@kbn/core/server';
 import { inject, injectable } from 'inversify';
 import { PluginInitializer } from '@kbn/core-di-server';
-import type { AsyncRecordBatchStreamReader } from 'apache-arrow/Arrow.node';
+import { Type, type AsyncRecordBatchStreamReader } from 'apache-arrow/Arrow.node';
 import type { LoggerServiceContract } from '../logger_service/logger_service';
 import { LoggerServiceToken } from '../logger_service/logger_service';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
@@ -51,7 +51,7 @@ export class QueryService implements QueryServiceContract {
     maxResponseSize,
   }: ExecuteQueryParams): Promise<EsqlQueryResponse> {
     this.logger.debug({
-      message: () => `QueryService: Executing query - ${JSON.stringify({ query, filter, params })}`,
+      message: 'QueryService: Executing query',
     });
 
     try {
@@ -131,7 +131,7 @@ export class QueryService implements QueryServiceContract {
 
       context.throwIfAborted();
 
-      const rows = this.toRows<T>(response);
+      const rows = this.toRows<T>(response, { normalizeDates: true });
 
       this.logger.debug({
         message: `QueryService: Streaming query completed successfully (json)`,
@@ -232,7 +232,12 @@ export class QueryService implements QueryServiceContract {
           continue;
         }
 
-        const rows = batch.toArray().map((row) => coerceBigInts(row.toJSON()) as T);
+        const dateColumns = new Set(
+          batch.schema.fields
+            .filter((field) => field.typeId === Type.Timestamp)
+            .map((field) => field.name)
+        );
+        const rows = batch.toArray().map((row) => coerceRow(row.toJSON(), dateColumns) as T);
         yield rows;
       }
     } catch (error) {
@@ -273,31 +278,79 @@ export class QueryService implements QueryServiceContract {
     return new Error(`Failed to parse ES|QL response. Error: ${message}`);
   }
 
-  private toRows<T>(response: EsqlQueryResponse): T[] {
+  /**
+   * Builds row objects from an ES|QL response.
+   *
+   * `normalizeDates` coerces `date` / `date_nanos` columns to integer epoch millis
+   * via {@link toEpochMillis}, keeping the JSON and Arrow formats consistent. It
+   * defaults to `false` because the `executeQueryRows` callers expect ISO-8601 date
+   * strings today; only the streaming path, which must match Arrow format, opts in.
+   */
+  private toRows<T>(
+    response: EsqlQueryResponse,
+    { normalizeDates = false }: { normalizeDates?: boolean } = {}
+  ): T[] {
     const columnNames = response.columns.map((column) => column.name);
+    const dateColumnNames = normalizeDates
+      ? new Set(
+          response.columns
+            .filter((column) => column.type === 'date' || column.type === 'date_nanos')
+            .map((column) => column.name)
+        )
+      : undefined;
+
     return response.values.map((valueRow) => {
       const row = columnNames.reduce<Record<string, unknown>>((acc, columnName, index) => {
         acc[columnName] = valueRow[index];
         return acc;
       }, {});
 
-      return coerceBigInts(row) as T;
+      return coerceRow(row, dateColumnNames) as T;
     });
   }
 }
 
 /**
+ * Coerces a raw row into a plain object in a single pass.
+ *
  * Apache Arrow returns BigInt for integer/long columns.
  * JSON.stringify cannot serialize BigInt, so we coerce to Number
  * at the parsing boundary. ES|QL integer values are within safe
  * Number range.
+ * Columns listed in `dateColumns` are normalized to integer epoch millis instead, via {@link toEpochMillis}.
  */
-const coerceBigInts = (row: Record<string, unknown>): Record<string, unknown> => {
+const coerceRow = (
+  row: Record<string, unknown>,
+  dateColumns?: ReadonlySet<string>
+): Record<string, unknown> => {
   const coerced: Record<string, unknown> = {};
 
   for (const [key, value] of Object.entries(row)) {
-    coerced[key] = typeof value === 'bigint' ? Number(value) : value;
+    if (dateColumns?.has(key)) {
+      coerced[key] = toEpochMillis(value);
+    } else {
+      coerced[key] = typeof value === 'bigint' ? Number(value) : value;
+    }
   }
 
   return coerced;
+};
+
+/**
+ * Normalizes an ES|QL `date` / `date_nanos` value to integer epoch millis, handling both response formats.
+ *
+ */
+const toEpochMillis = (value: unknown): unknown => {
+  if (Array.isArray(value)) {
+    return value.map(toEpochMillis);
+  } else if (typeof value === 'string') {
+    const millis = Date.parse(value);
+    // Defensive: date-typed columns are always parseable ISO-8601, so this
+    // fallback is unreachable in practice; keep the raw string over `NaN`.
+    return Number.isNaN(millis) ? value : millis;
+  } else if (typeof value === 'number') {
+    return Math.trunc(value);
+  }
+
+  return value;
 };

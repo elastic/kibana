@@ -1,21 +1,9 @@
 {
-  "sha1": "d3651c4bf568f479835bf7ce1677283a3f08eabd",
+  "sha1": "5c9fd8ffa5d2f022fb316e56aef5f61bca7c184a",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
-    {
-      "id": "8462d8fddf362e8-7bb8b3164f5f9d7",
-      "title": "Teardown logs experience tests data",
-      "expectedStatus": "passed",
-      "tags": [],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/logs_experience/ui/parallel_tests/global.teardown.ts",
-        "line": 7,
-        "column": 1
-      }
-    },
     {
       "id": "ed5fca72264a666-459c2f711f8e499",
       "title": "Setup logs experience tests data",
@@ -41,7 +29,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/logs_experience/ui/parallel_tests/recommended_fields.spec.ts",
-        "line": 31,
+        "line": 32,
         "column": 15
       }
     },
@@ -60,7 +48,7 @@
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/logs_experience/ui/parallel_tests/recommended_fields.spec.ts",
         "line": 45,
-        "column": 24
+        "column": 42
       }
     },
     {
@@ -77,8 +65,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/logs_experience/ui/parallel_tests/recommended_fields.spec.ts",
-        "line": 78,
-        "column": 13
+        "line": 75,
+        "column": 20
       }
     },
     {
@@ -96,7 +84,18 @@
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/logs_experience/ui/parallel_tests/recommended_fields.spec.ts",
         "line": 92,
-        "column": 24
+        "column": 29
+      }
+    },
+    {
+      "id": "8462d8fddf362e8-7bb8b3164f5f9d7",
+      "title": "Teardown logs experience tests data",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/logs_experience/ui/parallel_tests/global.teardown.ts",
+        "line": 7,
+        "column": 1
       }
     }
   ]
