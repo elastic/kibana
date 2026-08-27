@@ -63,7 +63,10 @@ import {
   createContinuousKiOnboardingWorkflowService,
   type ContinuousKiOnboardingWorkflowService,
 } from './lib/workflows/continuous_onboarding_workflow';
-import { createSyncWorkflowService, type SyncWorkflowService } from './lib/workflows/sync_workflow';
+import {
+  createCleanupWorkflowService,
+  type CleanupWorkflowService,
+} from './lib/workflows/cleanup_workflow';
 import {
   createSignificantEventsScheduledWorkflowsService,
   type SignificantEventsScheduledWorkflowsService,
@@ -290,7 +293,7 @@ export class SignificantEventsPlugin
     }
 
     let continuousKiOnboardingWorkflowService: ContinuousKiOnboardingWorkflowService | undefined;
-    let syncWorkflowService: SyncWorkflowService | undefined;
+    let cleanupWorkflowService: CleanupWorkflowService | undefined;
     let significantEventsScheduledWorkflowsService:
       | SignificantEventsScheduledWorkflowsService
       | undefined;
@@ -304,7 +307,7 @@ export class SignificantEventsPlugin
     }
 
     if (plugins.workflowsManagement) {
-      syncWorkflowService = createSyncWorkflowService({
+      cleanupWorkflowService = createCleanupWorkflowService({
         logger: this.logger,
         managementApi: plugins.workflowsManagement.management,
       });
@@ -351,7 +354,7 @@ export class SignificantEventsPlugin
         telemetry: telemetryClient,
         getScopedClients: this.getScopedClients,
         continuousKiOnboardingWorkflowService,
-        syncWorkflowService,
+        cleanupWorkflowService,
         significantEventsScheduledWorkflowsService,
         workflowClients,
         maintenanceService: this.maintenanceService,

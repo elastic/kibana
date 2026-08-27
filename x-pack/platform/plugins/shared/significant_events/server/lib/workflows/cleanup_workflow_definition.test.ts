@@ -6,18 +6,17 @@
  */
 
 import {
-  SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID,
   getManagedWorkflowDefinition,
 } from '@kbn/workflows/managed';
 
-// The KI sync workflow YAML lives in the managed workflow definition
-// (kbn-workflows/managed/definitions/significant_events/knowledge_indicators/sync.yaml).
+// The cleanup workflow YAML lives in the managed Significant Events definition.
 // These tests keep that YAML in sync with the significant_events constants.
-const definition = getManagedWorkflowDefinition(SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID);
+const definition = getManagedWorkflowDefinition(SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID);
 
 const getWorkflowYaml = (): string => {
   if (!definition || !('yaml' in definition) || typeof definition.yaml !== 'string') {
-    throw new Error('KI sync managed workflow definition is missing inline YAML');
+    throw new Error('Significant Events cleanup workflow definition is missing inline YAML');
   }
   return definition.yaml;
 };
@@ -28,17 +27,17 @@ const assertYamlContains = (expected: string) => {
   expect(WORKFLOW_YAML).toContain(expected);
 };
 
-describe('sync.yaml managed workflow definition', () => {
+describe('cleanup.yaml managed workflow definition', () => {
   it('is registered as a restorable managed workflow', () => {
     expect(definition?.management.enablement).toBe('restorable');
   });
 
-  it('is disabled by default so SyncWorkflowService controls enablement', () => {
+  it('is disabled by default so CleanupWorkflowService controls enablement', () => {
     assertYamlContains('enabled: false');
   });
 
   it('drops overlapping runs via a single-instance concurrency key', () => {
-    assertYamlContains('key: significant-events-ki-sync');
+    assertYamlContains('key: significant-events-cleanup');
     assertYamlContains('strategy: drop');
     assertYamlContains('max: 1');
   });

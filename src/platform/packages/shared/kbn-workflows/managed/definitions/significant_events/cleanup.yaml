@@ -11,7 +11,7 @@
 # and each _reconcile call retries transient failures on its own.
 #
 # This is a managed workflow installed by the significant_events plugin. It is
-# created disabled and enabled on demand by SyncWorkflowService.ensureEnabled,
+# created disabled and enabled on demand by CleanupWorkflowService.ensureEnabled,
 # bootstrapped from the feature-extraction path. Once enabled it keeps running on
 # its own schedule, independent of extraction.
 
@@ -23,14 +23,13 @@ tags:
   - observability
   - streams
   - significant-events
-  - knowledge-indicators
-  - sync
+  - cleanup
 settings:
   # Max duration of one sweep — independent of the schedule interval below.
   timeout: '60m'
   # Only one instance of this workflow runs at a time; overlapping triggers are dropped.
   concurrency:
-    key: significant-events-ki-sync
+    key: significant-events-cleanup
     strategy: drop
     max: 1
 triggers:

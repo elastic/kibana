@@ -11,7 +11,6 @@ import CONTINUOUS_ONBOARDING_YAML from './continuous_onboarding.yaml';
 import FEATURES_IDENTIFICATION_YAML from './features_identification.yaml';
 import ONBOARDING_YAML from './onboarding.yaml';
 import QUERIES_GENERATION_YAML from './queries_generation.yaml';
-import SYNC_YAML from './sync.yaml';
 import type { ManagedWorkflowDefinition } from '../../../types';
 
 export const SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID =
@@ -21,7 +20,6 @@ export const SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW_ID =
 export const SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID = 'system-streams-ki-onboarding';
 export const SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID =
   'system-streams-ki-continuous-onboarding';
-export const SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID = 'system-streams-ki-sync';
 
 // lifecycle: 'static' — definition is fixed in code, not user-editable.
 // versionStrategy: 'auto' — version bumps are handled automatically on install.
@@ -75,16 +73,5 @@ export const SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW = {
   version: 2,
   billable: false,
   yaml: CONTINUOUS_ONBOARDING_YAML,
-  management: SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_MANAGEMENT,
-} as const satisfies ManagedWorkflowDefinition;
-
-// The daily cleanup workflow retains the original sync ID because it extends that
-// sweep. It is installed disabled and enabled on demand by SyncWorkflowService.
-export const SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW = {
-  id: SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
-  pluginId: 'significantEvents',
-  version: 2,
-  billable: false,
-  yaml: SYNC_YAML,
   management: SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_MANAGEMENT,
 } as const satisfies ManagedWorkflowDefinition;

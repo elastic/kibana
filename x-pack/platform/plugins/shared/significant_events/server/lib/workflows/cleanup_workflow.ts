@@ -8,15 +8,15 @@
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import { SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID } from '@kbn/workflows/managed';
+import { SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID } from '@kbn/workflows/managed';
 
-// The sync workflow is installed and scheduled in the default space, matching the
-// continuous onboarding precedent (streams/KIs are global).
+// The cleanup workflow is installed and scheduled in the default space because
+// Significant Events data is deployment-wide rather than scoped per Kibana space.
 const MANAGED_WORKFLOW_SPACE_ID = DEFAULT_SPACE_ID;
 
-export interface SyncWorkflowService {
+export interface CleanupWorkflowService {
   /**
-   * Ensures the managed KI sync (groundedness) sweep workflow is enabled.
+   * Ensures the managed Significant Events cleanup workflow is enabled.
    *
    * Enabling schedules the workflow's trigger task under the API key minted from
    * the given request (the startup install path only writes the document and
@@ -28,25 +28,25 @@ export interface SyncWorkflowService {
   ensureEnabled(params: { request: KibanaRequest }): Promise<void>;
 }
 
-export const createSyncWorkflowService = ({
+export const createCleanupWorkflowService = ({
   logger,
   managementApi,
 }: {
   logger: Logger;
   managementApi: WorkflowsServerPluginSetup['management'];
-}): SyncWorkflowService => {
-  const log = logger.get('ki-sync-workflow');
+}): CleanupWorkflowService => {
+  const log = logger.get('cleanup-workflow');
 
   return {
     async ensureEnabled({ request }) {
       const existing = await managementApi.getWorkflow(
-        SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
+        SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID,
         MANAGED_WORKFLOW_SPACE_ID
       );
 
       if (!existing) {
         log.warn(
-          `Managed KI sync workflow ${SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID} is not installed yet; skipping enablement`
+          `Managed cleanup workflow ${SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID} is not installed yet; skipping enablement`
         );
         return;
       }
@@ -56,13 +56,13 @@ export const createSyncWorkflowService = ({
       }
 
       await managementApi.updateWorkflow(
-        SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
+        SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID,
         { enabled: true },
         MANAGED_WORKFLOW_SPACE_ID,
         request
       );
 
-      log.info(`Enabled KI sync workflow`);
+      log.info(`Enabled Significant Events cleanup workflow`);
     },
   };
 };

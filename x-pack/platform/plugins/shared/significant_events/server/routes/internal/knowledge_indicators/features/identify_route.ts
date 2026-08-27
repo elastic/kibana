@@ -28,27 +28,27 @@ import {
 } from '../../../../lib/significant_events/features';
 import { shouldIdentifyFeatures } from '../../../../lib/significant_events/features/should_identify_features';
 import { isSignificantEventsSemanticCodeSearchGroundingEnabled } from '../../../../lib/semantic_code_search_grounding/is_significant_events_semantic_code_search_grounding_enabled';
-import type { SyncWorkflowService } from '../../../../lib/workflows/sync_workflow';
+import type { CleanupWorkflowService } from '../../../../lib/workflows/cleanup_workflow';
 import type { SignificantEventsMaintenanceService } from '../../../../lib/maintenance/maintenance_service';
 import { stateBlocksNewActivity } from '../../../../../common/maintenance/state_machine';
 
-// Best-effort bootstrap of the standalone KI sync (groundedness) sweep workflow,
+// Best-effort bootstrap of the standalone Significant Events cleanup workflow,
 // which runs under a request whose API key can schedule the workflow trigger.
 // Only the inferred route bootstraps: it runs at least once per identification
 // pass and always precedes computed identification, so hooking it covers every
 // path. Idempotent and non-blocking — a failure here must never fail extraction.
-const bootstrapSyncWorkflow = async ({
-  syncWorkflowService,
+const bootstrapCleanupWorkflow = async ({
+  cleanupWorkflowService,
   maintenanceService,
   request,
   logger,
 }: {
-  syncWorkflowService: SyncWorkflowService | undefined;
+  cleanupWorkflowService: CleanupWorkflowService | undefined;
   maintenanceService: SignificantEventsMaintenanceService;
-  request: Parameters<SyncWorkflowService['ensureEnabled']>[0]['request'];
+  request: Parameters<CleanupWorkflowService['ensureEnabled']>[0]['request'];
   logger: { warn: (message: string) => void };
 }): Promise<void> => {
-  if (!syncWorkflowService) {
+  if (!cleanupWorkflowService) {
     return;
   }
   try {
@@ -56,10 +56,10 @@ const bootstrapSyncWorkflow = async ({
     if (stateBlocksNewActivity(state)) {
       return;
     }
-    await syncWorkflowService.ensureEnabled({ request });
+    await cleanupWorkflowService.ensureEnabled({ request });
   } catch (error) {
     logger.warn(
-      `Failed to ensure KI sync workflow is enabled: ${
+      `Failed to ensure Significant Events cleanup workflow is enabled: ${
         error instanceof Error ? error.message : String(error)
       }`
     );
@@ -109,7 +109,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
     server,
     logger,
     telemetry,
-    syncWorkflowService,
+    cleanupWorkflowService,
     maintenanceService,
   }) => {
     const scopedClients = await getScopedClients({ request });
@@ -200,8 +200,8 @@ const identifyInferredFeaturesRoute = createServerRoute({
           : {}),
       });
 
-      await bootstrapSyncWorkflow({
-        syncWorkflowService,
+      await bootstrapCleanupWorkflow({
+        cleanupWorkflowService,
         maintenanceService,
         request,
         logger: routeLogger,

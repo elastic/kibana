@@ -8,8 +8,8 @@
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import { SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID } from '@kbn/workflows/managed';
-import { createSyncWorkflowService } from './sync_workflow';
+import { SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID } from '@kbn/workflows/managed';
+import { createCleanupWorkflowService } from './cleanup_workflow';
 
 const createLogger = (): Logger => {
   const logger = {
@@ -33,7 +33,7 @@ const createManagementApi = () =>
 
 const request = {} as KibanaRequest;
 
-describe('SyncWorkflowService', () => {
+describe('CleanupWorkflowService', () => {
   let logger: Logger;
   let managementApi: ReturnType<typeof createManagementApi>;
 
@@ -45,15 +45,15 @@ describe('SyncWorkflowService', () => {
   it('enables the workflow when it is installed but disabled', async () => {
     (managementApi.getWorkflow as jest.Mock).mockResolvedValue({ enabled: false });
 
-    const service = createSyncWorkflowService({ logger, managementApi });
+    const service = createCleanupWorkflowService({ logger, managementApi });
     await service.ensureEnabled({ request });
 
     expect(managementApi.getWorkflow).toHaveBeenCalledWith(
-      SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
+      SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID,
       DEFAULT_SPACE_ID
     );
     expect(managementApi.updateWorkflow).toHaveBeenCalledWith(
-      SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
+      SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID,
       { enabled: true },
       DEFAULT_SPACE_ID,
       request
@@ -63,7 +63,7 @@ describe('SyncWorkflowService', () => {
   it('is a no-op when the workflow is already enabled', async () => {
     (managementApi.getWorkflow as jest.Mock).mockResolvedValue({ enabled: true });
 
-    const service = createSyncWorkflowService({ logger, managementApi });
+    const service = createCleanupWorkflowService({ logger, managementApi });
     await service.ensureEnabled({ request });
 
     expect(managementApi.updateWorkflow).not.toHaveBeenCalled();
@@ -72,7 +72,7 @@ describe('SyncWorkflowService', () => {
   it('does not update when the workflow is not installed yet', async () => {
     (managementApi.getWorkflow as jest.Mock).mockResolvedValue(undefined);
 
-    const service = createSyncWorkflowService({ logger, managementApi });
+    const service = createCleanupWorkflowService({ logger, managementApi });
     await service.ensureEnabled({ request });
 
     expect(managementApi.updateWorkflow).not.toHaveBeenCalled();

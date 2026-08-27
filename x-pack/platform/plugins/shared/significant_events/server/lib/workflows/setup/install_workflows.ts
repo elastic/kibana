@@ -8,7 +8,7 @@
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import {
   SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID,
   type ManagedWorkflowId,
   type TemplatedManagedWorkflowId,
 } from '@kbn/workflows/managed';
@@ -33,11 +33,11 @@ const WORKFLOWS_TO_INSTALL: Array<{
     workflowId: SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
     spaceId: DEFAULT_SPACE_ID,
   },
-  // Installed disabled in the default space (streams/KIs are global); enabled on
-  // demand by SyncWorkflowService.ensureEnabled from the extraction path, which
+  // Installed disabled in the default space; enabled on demand by
+  // CleanupWorkflowService.ensureEnabled from the extraction path, which
   // schedules its trigger. Restorable + `enabled: false` YAML => installed disabled.
   {
-    workflowId: SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
+    workflowId: SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID,
     spaceId: DEFAULT_SPACE_ID,
   },
 ];
