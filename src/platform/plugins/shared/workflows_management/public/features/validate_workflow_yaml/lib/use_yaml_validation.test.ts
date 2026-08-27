@@ -520,6 +520,50 @@ steps: []
     expect(result.current.validationResults).toEqual([]);
   });
 
+  it('clears stale results when connector metadata goes back to loading', async () => {
+    const yamlContent = `
+version: "1"
+name: "Test Workflow"
+enabled: true
+triggers:
+  - type: manual
+    enabled: true
+steps:
+  - name: duplicate
+    type: console
+  - name: duplicate
+    type: console
+`;
+    const mockEditor = createMockEditor(yamlContent);
+    const { result, rerender } = renderHookWithProviders(mockEditor as any, yamlContent);
+
+    await act(async () => {
+      jest.advanceTimersByTime(500);
+      await Promise.resolve();
+    });
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+      expect(result.current.validationResults.length).toBeGreaterThan(0);
+    });
+
+    // A connector refresh puts the store back into `loading`.
+    jest.mocked(useWorkflowYamlValidationContext).mockReturnValue({
+      ...readyValidationContext,
+      connectorTypes: { status: 'loading' },
+    });
+    await act(async () => {
+      rerender();
+      jest.advanceTimersByTime(500);
+      await Promise.resolve();
+    });
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(true);
+    });
+    expect(result.current.validationResults).toEqual([]);
+    expect(getLastBatchedMarkers()).toEqual([]);
+  });
+
   it('reports failed connector metadata as a prerequisite error, not a diagnostic', async () => {
     jest.mocked(useWorkflowYamlValidationContext).mockReturnValue({
       ...readyValidationContext,

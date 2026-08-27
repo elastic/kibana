@@ -93,6 +93,13 @@ export function useYamlValidation(
       }
 
       if (validationContext.connectorTypes.status === 'loading') {
+        // Connector types gate connector-id validation, so stale results would
+        // outlive the run that produced them. Change-history clears the same way.
+        if (decorationsCollection.current) {
+          decorationsCollection.current.clear();
+        }
+        monaco.editor.setModelMarkers(model, BATCHED_CUSTOM_MARKER_OWNER, []);
+        setStableValidationResults([]);
         setIsLoading(true);
         setError(null);
         return;
