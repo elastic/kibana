@@ -128,6 +128,7 @@ export default function ({
       });
 
       it('in light mode', async () => {
+        await browser.refresh();
         await waitForPageReady();
         const percentDifference = await screenshot.compareAgainstBaseline(
           'dashboard_controls_light',
