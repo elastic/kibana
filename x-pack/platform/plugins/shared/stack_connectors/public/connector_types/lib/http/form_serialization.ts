@@ -68,6 +68,15 @@ const buildHeaderRecords = (
     }, {});
 };
 
+const buildKeyValueRecord = (
+  fields: Array<{ key: string; value: string }>
+): Record<string, string> =>
+  Object.fromEntries(
+    fields
+      .filter(({ key, value }) => key?.trim() && value?.trim())
+      .map(({ key, value }) => [key, value])
+  );
+
 export const formSerializer = (formData: HttpConnectorForm): ConnectorFormSchema => {
   const headers = formData?.__internal__?.headers ?? [];
   const configHeaders = buildHeaderRecords(headers, 'config');
@@ -79,17 +88,8 @@ export const formSerializer = (formData: HttpConnectorForm): ConnectorFormSchema
   const supportsProxy = hasProxy !== undefined;
 
   const queryParams = formData?.__internal__?.queryParams ?? [];
-  const secretQueryParams = queryParams.reduce<Record<string, string>>((acc, { key, value }) => {
-    if (key?.trim() && value?.trim()) {
-      acc[key] = value;
-    }
-    return acc;
-  }, {});
-  const secretParams = Object.fromEntries(
-    (formData?.__internal__?.secretParams ?? [])
-      .filter(({ key, value }) => key?.trim() && value?.trim())
-      .map(({ key, value }) => [key, value])
-  );
+  const secretQueryParams = buildKeyValueRecord(queryParams);
+  const secretParams = buildKeyValueRecord(formData?.__internal__?.secretParams ?? []);
 
   return {
     ...formData,

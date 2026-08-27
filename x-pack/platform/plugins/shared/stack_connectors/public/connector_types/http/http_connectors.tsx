@@ -26,8 +26,7 @@ import {
   type ActionConnectorFieldsProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
 
-import { useSecretQueryParams } from '../../common/auth/use_secret_query_params';
-import { useSecretParams } from '../../common/auth/use_secret_params';
+import { useSecretParams, useSecretQueryParams } from '../../common/auth/use_secret_keys';
 import { QueryParamFields } from '../../common/auth/query_param_fields';
 import { SecretParamFields } from '../../common/auth/secret_param_fields';
 import * as i18n from './translations';

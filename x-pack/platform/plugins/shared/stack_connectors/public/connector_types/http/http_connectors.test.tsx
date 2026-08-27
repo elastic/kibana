@@ -19,12 +19,9 @@ jest.mock('../../common/auth/auth_config', () => ({
   default: () => <div data-test-subj="authConfigMock">Auth</div>,
 }));
 
-jest.mock('../../common/auth/use_secret_query_params', () => ({
-  useSecretQueryParams: () => ({ isLoading: false, isFetching: false, data: [] }),
-}));
-
 const mockUseSecretParams = jest.fn();
-jest.mock('../../common/auth/use_secret_params', () => ({
+jest.mock('../../common/auth/use_secret_keys', () => ({
+  useSecretQueryParams: () => ({ isLoading: false, isFetching: false, data: [] }),
   useSecretParams: (...args: unknown[]) => mockUseSecretParams(...args),
 }));
 

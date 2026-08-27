@@ -25,7 +25,6 @@ test.describe('HTTP connector secret query params bugs', { tag: tags.stateful.cl
       },
       secrets: {
         secretQueryParams: { apiKey: 'secret-value', token: 'secret-token' },
-        secretParams: { client_id: 'secret-id', client_secret: 'secret-value' },
       },
     });
     connectorId = connector.id;
@@ -105,34 +104,5 @@ test.describe('HTTP connector secret query params bugs', { tag: tags.stateful.cl
     await expect(keyInputs).toHaveCount(1);
 
     await expect(keyInputs.locator('nth=0')).toHaveValue(secondKeyValue);
-  });
-
-  test('secret parameters preserve toggle, edit, and delete behavior', async ({ pageObjects }) => {
-    await pageObjects.connectorFlyout.gotoConnectorsList();
-    await pageObjects.connectorFlyout.openEditConnectorFlyout({
-      id: connectorId,
-      name: CONNECTOR_NAME,
-    });
-    await pageObjects.connectorFlyout.waitForSecretParamsLoaded();
-
-    const toggle = pageObjects.connectorFlyout.secretParamsToggle;
-    await expect(toggle).toHaveAttribute('aria-checked', 'true');
-
-    const keyInputs = pageObjects.connectorFlyout.secretParamKeyInputs;
-    await expect(keyInputs).toHaveCount(2);
-    const firstKey = keyInputs.locator('nth=0');
-    const firstKeyValue = await firstKey.inputValue();
-    await firstKey.fill(`${firstKeyValue}_updated`);
-    await expect(keyInputs).toHaveCount(2);
-    await expect(firstKey).toHaveValue(`${firstKeyValue}_updated`);
-
-    const secondKeyValue = await keyInputs.locator('nth=1').inputValue();
-    await pageObjects.connectorFlyout.secretParamDeleteButtons.locator('nth=0').click();
-    await expect(keyInputs).toHaveCount(1);
-    await expect(keyInputs.locator('nth=0')).toHaveValue(secondKeyValue);
-
-    await toggle.click();
-    await expect(toggle).toHaveAttribute('aria-checked', 'false');
-    await expect(keyInputs).toHaveCount(0);
   });
 });

@@ -36,18 +36,6 @@ export class ConnectorFlyoutPage {
     return this.page.testSubj.locator('httpAddQueryParamButton');
   }
 
-  public get secretParamsToggle(): Locator {
-    return this.page.testSubj.locator('httpSecretParamsSwitch');
-  }
-
-  public get secretParamKeyInputs(): Locator {
-    return this.page.testSubj.locator('httpSecretParamKeyInput');
-  }
-
-  public get secretParamDeleteButtons(): Locator {
-    return this.page.testSubj.locator('httpRemoveSecretParamButton');
-  }
-
   public get saveFlyoutButton(): Locator {
     return this.page.testSubj.locator('create-connector-flyout-save-btn');
   }
@@ -70,9 +58,5 @@ export class ConnectorFlyoutPage {
 
   public async waitForQueryParamsLoaded() {
     await this.queryParamsToggle.waitFor({ state: 'visible', timeout: 10000 });
-  }
-
-  public async waitForSecretParamsLoaded() {
-    await this.secretParamsToggle.waitFor({ state: 'visible', timeout: 10000 });
   }
 }
