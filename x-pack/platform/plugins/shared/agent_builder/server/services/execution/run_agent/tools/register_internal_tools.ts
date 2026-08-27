@@ -26,7 +26,12 @@ import { createAskUserQuestionTool } from './ask_user_question';
 import { createReadFileTool } from './read_file';
 import { createListFilesTool } from './list_files';
 import { createBashTool } from './bash';
-import { createDiscoverApisTool, createDescribeApiTool, createExecuteApiTool } from './api';
+import {
+  createDiscoverApisTool,
+  createDescribeApiTool,
+  createDescribeApiTypeTool,
+  createExecuteApiTool,
+} from './api';
 import { createTodoTool } from '../../../tools/builtin/todo';
 import { createSetConversationMetadataTool } from '../../../tools/builtin/set_conversation_metadata';
 import { builtinToolToExecutable } from '../utils/select_tools';
@@ -119,6 +124,7 @@ export const registerInternalTools = async ({
   if (experimentalFeatures.apiTools) {
     tools.push(createDiscoverApisTool());
     tools.push(createDescribeApiTool());
+    tools.push(createDescribeApiTypeTool());
     tools.push(createExecuteApiTool({ selfClient }));
   }
 
