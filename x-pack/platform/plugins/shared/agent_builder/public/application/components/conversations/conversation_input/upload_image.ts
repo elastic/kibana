@@ -64,7 +64,6 @@ export const processImageFile = async ({
   abortSignal?: AbortSignal;
 }): Promise<boolean> => {
   if (!(SUPPORTED_IMAGE_MIME_TYPES as readonly string[]).includes(file.type)) {
-    console.log('Invalid MIME type:', file.type)
     addErrorToast({ title: labels.invalidType });
     return false;
   }
@@ -82,11 +81,9 @@ export const processImageFile = async ({
   }
 
   if (file.size > MAX_IMAGE_BYTES) {
-    console.log('File size too large:', file.size)
     addErrorToast({ title: labels.tooLarge });
     return false;
   }
-  console.log('Processing file:', file)
 
   try {
     const { file: fileEntry } = await filesClient.create({ name, mimeType: file.type });
