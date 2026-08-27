@@ -53,15 +53,19 @@ const hybridTab: ApiStepTab = {
   consoleRequest: 'POST my-vectors/_search\n{ "hybrid": true }',
 };
 
-const services = {
-  application: {},
-  share: {},
-  console: {},
-} as unknown as OnboardingServices;
+const isInTrial = jest.fn();
+
+const makeServices = () =>
+  ({
+    application: {},
+    share: {},
+    console: {},
+    cloud: { isInTrial },
+  } as unknown as OnboardingServices);
 
 const renderComponent = (props: Partial<React.ComponentProps<typeof ApiStep>> = {}) =>
   render(
-    <KibanaContextProvider services={services}>
+    <KibanaContextProvider services={makeServices()}>
       <ApiStep
         tabs={[semanticTab, hybridTab]}
         consoleComment="Test console comment"
@@ -89,6 +93,45 @@ describe('ApiStep', () => {
       elasticsearchUrl: null,
       apiKey: null,
       isLoading: false,
+    });
+    isInTrial.mockReturnValue(false);
+  });
+
+  describe('pills', () => {
+    const trialPill = {
+      id: 'freeTrialEmbeddings',
+      label: 'Free trial embeddings',
+      content: 'Trial content',
+      trialOnly: true,
+    };
+    const standardPill = {
+      id: 'jinaModels',
+      label: 'Jina embedding models',
+      content: 'Jina content',
+    };
+
+    it('shows trial pills while the project is in trial', () => {
+      isInTrial.mockReturnValue(true);
+
+      renderComponent({ pills: [trialPill, standardPill] });
+
+      expect(screen.getByTestId('vectordbWizardPill-freeTrialEmbeddings')).toBeInTheDocument();
+      expect(screen.getByTestId('vectordbWizardPill-jinaModels')).toBeInTheDocument();
+    });
+
+    it('hides trial pills outside of a trial', () => {
+      renderComponent({ pills: [trialPill, standardPill] });
+
+      expect(
+        screen.queryByTestId('vectordbWizardPill-freeTrialEmbeddings')
+      ).not.toBeInTheDocument();
+      expect(screen.getByTestId('vectordbWizardPill-jinaModels')).toBeInTheDocument();
+    });
+
+    it('hides the pill group when every pill is trial only', () => {
+      renderComponent({ pills: [trialPill] });
+
+      expect(screen.queryByTestId('vectordbWizardPills')).not.toBeInTheDocument();
     });
   });
 

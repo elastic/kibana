@@ -111,7 +111,6 @@ dependsOn:
   - '@kbn/tooling-log'
   - '@kbn/traced-es-client'
   - '@kbn/typed-react-router-config'
-  - '@kbn/ui-side-navigation'
   - '@kbn/unified-data-table'
   - '@kbn/unified-doc-viewer'
   - '@kbn/unified-doc-viewer-plugin'
@@ -120,6 +119,7 @@ dependsOn:
   - '@kbn/utility-types'
   - '@kbn/xstate-utils'
   - '@kbn/zod'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod

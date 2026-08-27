@@ -11,7 +11,6 @@ import { useActions, useValues } from 'kea';
 
 import {
   EuiButton,
-  EuiCallOut,
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
@@ -22,6 +21,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+
+import { KbnInfoCallout } from '@kbn/ui-callout';
 
 import type { CloudDetails } from '../../../../shared/cloud_details/cloud_details';
 import { useCloudDetails } from '../../../../shared/cloud_details/cloud_details';
@@ -223,72 +224,65 @@ export const SearchApplicationAPI = () => {
           searchApplicationName={searchApplicationName}
         />
       ) : null}
-      <EuiCallOut
-        iconType="info"
+      <KbnInfoCallout
         title={
           <FormattedMessage
             id="xpack.enterpriseSearch.searchApplications.searchApplication.searchApi.searchApiCallout.title"
             defaultMessage="What is Search API?"
           />
         }
-      >
-        <FormattedMessage
-          id="xpack.enterpriseSearch.searchApplications.searchApplication.searchApi.searchApiCallout.body"
-          defaultMessage="The {searchApiDocumentation} allows you to create a secure, public-facing search endpoint for your search application. This endpoint only accepts queries that match the parameters defined in your {searchTemplateDocumenation}."
-          values={{
-            searchApiDocumentation: (
-              <EuiLink
-                data-test-subj="search-documentation-link"
-                href={docLinks.searchApplicationsSearchApi}
-                data-telemetry-id="entSearchApplications-searchApi-documentation-viewDocumentaion"
-              >
-                {i18n.translate(
-                  'xpack.enterpriseSearch.searchApplications.searchApplication.searchApi.searchApiCallout.body.searchApiDocLink',
-                  {
-                    defaultMessage: 'Search API',
-                  }
-                )}
-              </EuiLink>
+        text={
+          <FormattedMessage
+            id="xpack.enterpriseSearch.searchApplications.searchApplication.searchApi.searchApiCallout.body"
+            defaultMessage="The {searchApiDocumentation} allows you to create a secure, public-facing search endpoint for your search application. This endpoint only accepts queries that match the parameters defined in your {searchTemplateDocumenation}."
+            values={{
+              searchApiDocumentation: (
+                <EuiLink
+                  data-test-subj="search-documentation-link"
+                  href={docLinks.searchApplicationsSearchApi}
+                  data-telemetry-id="entSearchApplications-searchApi-documentation-viewDocumentaion"
+                >
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.searchApplications.searchApplication.searchApi.searchApiCallout.body.searchApiDocLink',
+                    {
+                      defaultMessage: 'Search API',
+                    }
+                  )}
+                </EuiLink>
+              ),
+              searchTemplateDocumenation: (
+                <EuiLink
+                  data-test-subj="search-template-documentation-link"
+                  href={docLinks.searchTemplates}
+                  data-telemetry-id="entSearchApplications-searchTemplate-documentation-viewDocumentaion"
+                >
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.searchApplications.searchApplication.searchApi.searchApiCallout.body.searchTemplateDocLink',
+                    {
+                      defaultMessage: 'search template',
+                    }
+                  )}
+                </EuiLink>
+              ),
+            }}
+          />
+        }
+        actionProps={{
+          primary: {
+            href: docLinks.searchApplicationsSearchApi,
+            target: '_blank',
+            'data-test-subj': 'search-documentation-link',
+            'data-telemetry-id':
+              'entSearchApplications-searchApi-learnMoreDocumentation-viewDocumentaion',
+            children: i18n.translate(
+              'xpack.enterpriseSearch.searchApplications.searchApplication.searchApi.searchApiCallout.body.searchApiDocumentationLink',
+              {
+                defaultMessage: 'Learn more about the Search API',
+              }
             ),
-            searchTemplateDocumenation: (
-              <EuiLink
-                data-test-subj="search-template-documentation-link"
-                href={docLinks.searchTemplates}
-                data-telemetry-id="entSearchApplications-searchTemplate-documentation-viewDocumentaion"
-              >
-                {i18n.translate(
-                  'xpack.enterpriseSearch.searchApplications.searchApplication.searchApi.searchApiCallout.body.searchTemplateDocLink',
-                  {
-                    defaultMessage: 'search template',
-                  }
-                )}
-              </EuiLink>
-            ),
-          }}
-        />
-        <EuiSpacer size="l" />
-        <FormattedMessage
-          id="xpack.enterpriseSearch.searchApplications.searchApplication.searchApi.searchApiCallout.searchApiLearnMore"
-          defaultMessage="{searchApiDocumentation}"
-          values={{
-            searchApiDocumentation: (
-              <EuiLink
-                data-test-subj="search-documentation-link"
-                href={docLinks.searchApplicationsSearchApi}
-                target="_blank"
-                data-telemetry-id="entSearchApplications-searchApi-learnMoreDocumentation-viewDocumentaion"
-              >
-                {i18n.translate(
-                  'xpack.enterpriseSearch.searchApplications.searchApplication.searchApi.searchApiCallout.body.searchApiDocumentationLink',
-                  {
-                    defaultMessage: 'Learn more about the Search API',
-                  }
-                )}
-              </EuiLink>
-            ),
-          }}
-        />
-      </EuiCallOut>
+          },
+        }}
+      />
       <EuiSpacer />
       <EuiSteps headingElement="h2" steps={steps} />
     </>

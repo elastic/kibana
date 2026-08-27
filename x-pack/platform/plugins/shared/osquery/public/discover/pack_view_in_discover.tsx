@@ -7,17 +7,13 @@
 
 import React from 'react';
 import { usePackQueryLastResults } from '../packs/use_pack_query_last_results';
+import type { PackQueryStatusItem } from '../live_queries/form/pack_queries_status_table';
 import { ViewResultsActionButtonType } from '../live_queries/form/pack_queries_status_table';
 import { ViewResultsInDiscoverAction } from './view_results_in_discover';
 import { getPackViewDateWindow } from '../common/pack_view_date_window';
 
 interface PackViewInActionProps {
-  item: {
-    id: string;
-    interval: number;
-    action_id?: string;
-    agents: string[];
-  };
+  item: Pick<PackQueryStatusItem, 'action_id' | 'interval'>;
   actionId?: string;
   scheduleId?: string;
   executionCount?: number;

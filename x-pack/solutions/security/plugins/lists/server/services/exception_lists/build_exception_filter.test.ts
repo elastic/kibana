@@ -9,9 +9,13 @@ import type {
   EntryList,
   EntryMatchAny,
   ExceptionListItemSchema,
+  ListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { MAXIMUM_SMALL_IP_RANGE_VALUE_LIST_DASH_SIZE } from '@kbn/securitysolution-list-constants';
 
 import { ENTRIES } from '../../../common/constants.mock';
+import { getListItemResponseMock } from '../../../common/schemas/response/list_item_schema.mock';
+import { getFoundListItemSchemaMock } from '../../../common/schemas/response/found_list_item_schema.mock';
 import {
   getEntryMatchAnyExcludeMock,
   getEntryMatchAnyMock,
@@ -34,6 +38,7 @@ import {
   getEntryMatchExcludeMock,
   getEntryMatchMock,
 } from '../../../common/schemas/types/entry_match.mock';
+import type { ListClient } from '../lists/list_client';
 import { getListClientMock } from '../lists/list_client.mock';
 import {
   getEntryListExcludedMock,
@@ -62,6 +67,36 @@ const modifiedGetEntryMatchAnyMock = (): EntryMatchAny => ({
 });
 
 const listClient = getListClientMock();
+
+const generateDashIpRanges = (count: number): ListItemSchema[] =>
+  Array.from({ length: count }, (_, i) => ({
+    ...getListItemResponseMock(),
+    type: 'ip_range' as const,
+    value: `10.0.${Math.floor(i / 256)}.${i % 256}-10.0.${Math.floor(i / 256)}.${(i % 256) + 1}`,
+  }));
+
+const createIpRangeListClientMock = (dashCount: number): ListClient => {
+  const freshListClient = getListClientMock();
+  (freshListClient.findAllListItems as jest.Mock).mockResolvedValue({
+    data: generateDashIpRanges(dashCount),
+    total: dashCount,
+  });
+  // This total stays below MAXIMUM_SMALL_VALUE_LIST_SIZE. So the item passes
+  // filterOutUnprocessableValueLists. buildListClause then rejects the item with the
+  // dash-size gate. This forces the item to the createOrClauses path (unprocessableExceptionItems).
+  (freshListClient.findListItem as jest.Mock).mockResolvedValue({
+    ...getFoundListItemSchemaMock(),
+    total: 1,
+  });
+  return freshListClient;
+};
+
+const getIpRangeListEntry = (): EntryList => ({
+  field: 'source.ip',
+  list: { id: 'ip-range-list-id', type: 'ip_range' },
+  operator: 'included',
+  type: 'list',
+});
 
 describe('build_exceptions_filter', () => {
   describe('buildExceptionFilter', () => {
@@ -575,6 +610,101 @@ describe('build_exceptions_filter', () => {
         }
       `);
     });
+
+    test('it should include unprocessable ip_range items in unprocessedExceptions', async () => {
+      const freshListClient = createIpRangeListClientMock(
+        MAXIMUM_SMALL_IP_RANGE_VALUE_LIST_DASH_SIZE + 1
+      );
+      const unprocessableItem = getExceptionListItemSchemaMock({
+        entries: [getIpRangeListEntry()],
+      });
+      const processableItem: ExceptionListItemSchema = {
+        ...getExceptionListItemSchemaMock(),
+        entries: [{ field: 'host.name', operator: 'included', type: 'match', value: 'linux' }],
+      };
+
+      const { filter, unprocessedExceptions } = await buildExceptionFilter({
+        alias: null,
+        chunkSize: 10,
+        excludeExceptions: false,
+        listClient: freshListClient,
+        lists: [unprocessableItem, processableItem],
+        startedAt: new Date(),
+      });
+
+      expect(filter).toBeDefined();
+      // buildListClause is the only caller of findAllListItems. This assertion proves
+      // the item reached the createOrClauses path. It did not take the earlier
+      // value-list path (findListItem).
+      expect(freshListClient.findAllListItems).toHaveBeenCalled();
+      expect(unprocessedExceptions).toEqual([unprocessableItem]);
+    });
+
+    test('it should accumulate unprocessable items from both rejection paths', async () => {
+      const freshListClient = createIpRangeListClientMock(
+        MAXIMUM_SMALL_IP_RANGE_VALUE_LIST_DASH_SIZE + 1
+      );
+      const textListItem = getExceptionListItemSchemaMock({
+        entries: [
+          {
+            field: 'host.name',
+            list: { id: 'text-list-id', type: 'text' },
+            operator: 'included',
+            type: 'list',
+          },
+        ],
+      });
+      const ipRangeItem = getExceptionListItemSchemaMock({
+        entries: [getIpRangeListEntry()],
+      });
+      const processableItem: ExceptionListItemSchema = {
+        ...getExceptionListItemSchemaMock(),
+        entries: [{ field: 'host.name', operator: 'included', type: 'match', value: 'linux' }],
+      };
+
+      const { filter, unprocessedExceptions } = await buildExceptionFilter({
+        alias: null,
+        chunkSize: 10,
+        excludeExceptions: false,
+        listClient: freshListClient,
+        lists: [textListItem, ipRangeItem, processableItem],
+        startedAt: new Date(),
+      });
+
+      expect(filter).toBeDefined();
+      expect(freshListClient.findAllListItems).toHaveBeenCalled();
+      // The order is a contract. Value-list rejects (filterOutUnprocessableValueLists)
+      // come first. createOrClauses rejects (unprocessableExceptionItems) come second.
+      expect(unprocessedExceptions).toEqual([textListItem, ipRangeItem]);
+    });
+
+    test('it should return empty unprocessedExceptions when no items provided', async () => {
+      const { filter, unprocessedExceptions } = await buildExceptionFilter({
+        alias: null,
+        chunkSize: 1,
+        excludeExceptions: false,
+        listClient,
+        lists: [],
+        startedAt: new Date(),
+      });
+
+      expect(filter).toBeUndefined();
+      expect(unprocessedExceptions).toEqual([]);
+    });
+
+    test('it should return empty unprocessedExceptions when all items are processable', async () => {
+      const { filter, unprocessedExceptions } = await buildExceptionFilter({
+        alias: null,
+        chunkSize: 1,
+        excludeExceptions: false,
+        listClient,
+        lists: [getExceptionListItemSchemaMock()],
+        startedAt: new Date(),
+      });
+
+      expect(filter).toBeDefined();
+      expect(unprocessedExceptions).toEqual([]);
+    });
   });
 
   describe('createOrClauses', () => {
@@ -821,6 +951,50 @@ describe('build_exceptions_filter', () => {
           "unprocessableExceptionItems": Array [],
         }
       `);
+    });
+
+    test('it should return unprocessable items when buildExceptionItemFilter returns undefined', async () => {
+      const freshListClient = createIpRangeListClientMock(
+        MAXIMUM_SMALL_IP_RANGE_VALUE_LIST_DASH_SIZE + 1
+      );
+      const unprocessableItem = getExceptionListItemSchemaMock({
+        entries: [getIpRangeListEntry()],
+      });
+
+      const { orClauses, unprocessableExceptionItems } = await createOrClauses({
+        chunkSize: 10,
+        exceptionsWithValueLists: [unprocessableItem],
+        exceptionsWithoutValueLists: [],
+        listClient: freshListClient,
+      });
+
+      expect(orClauses).toHaveLength(0);
+      expect(unprocessableExceptionItems).toHaveLength(1);
+      expect(unprocessableExceptionItems).toContainEqual(unprocessableItem);
+    });
+
+    test('it should separate processable and unprocessable items', async () => {
+      const freshListClient = createIpRangeListClientMock(
+        MAXIMUM_SMALL_IP_RANGE_VALUE_LIST_DASH_SIZE + 1
+      );
+      const unprocessableItem = getExceptionListItemSchemaMock({
+        entries: [getIpRangeListEntry()],
+      });
+      const processableItem: ExceptionListItemSchema = {
+        ...getExceptionListItemSchemaMock(),
+        entries: [{ field: 'host.name', operator: 'included', type: 'match', value: 'linux' }],
+      };
+
+      const { orClauses, unprocessableExceptionItems } = await createOrClauses({
+        chunkSize: 10,
+        exceptionsWithValueLists: [unprocessableItem],
+        exceptionsWithoutValueLists: [processableItem],
+        listClient: freshListClient,
+      });
+
+      expect(orClauses.length).toBeGreaterThan(0);
+      expect(unprocessableExceptionItems).toHaveLength(1);
+      expect(unprocessableExceptionItems).toContainEqual(unprocessableItem);
     });
   });
 
@@ -1361,6 +1535,26 @@ describe('build_exceptions_filter', () => {
           ],
         },
       });
+    });
+
+    test('it should return a filter when ip_range has exactly 200 dash entries', async () => {
+      const freshListClient = createIpRangeListClientMock(
+        MAXIMUM_SMALL_IP_RANGE_VALUE_LIST_DASH_SIZE
+      );
+
+      const result = await buildListClause(getIpRangeListEntry(), freshListClient);
+
+      expect(result).toBeDefined();
+    });
+
+    test('it should return undefined when ip_range exceeds 200 dash entries', async () => {
+      const freshListClient = createIpRangeListClientMock(
+        MAXIMUM_SMALL_IP_RANGE_VALUE_LIST_DASH_SIZE + 1
+      );
+
+      const result = await buildListClause(getIpRangeListEntry(), freshListClient);
+
+      expect(result).toBeUndefined();
     });
   });
 

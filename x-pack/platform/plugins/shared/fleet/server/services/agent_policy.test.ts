@@ -979,6 +979,64 @@ describe('Agent policy', () => {
       );
     });
 
+    it('should delete .fleet-policies entries BEFORE deleting the saved object', async () => {
+      // Arrange: track call order
+      const callOrder: string[] = [];
+
+      esClient.deleteByQuery.mockImplementationOnce(async () => {
+        callOrder.push('deleteByQuery');
+        return { deleted: 2 };
+      });
+
+      soClient.delete.mockImplementationOnce(async () => {
+        callOrder.push('soDelete');
+        return {};
+      });
+
+      await agentPolicyService.delete(soClient, esClient, 'mocked');
+
+      const deleteByQueryIdx = callOrder.indexOf('deleteByQuery');
+      const soDeleteIdx = callOrder.indexOf('soDelete');
+
+      expect(deleteByQueryIdx).toBeGreaterThanOrEqual(0);
+      expect(soDeleteIdx).toBeGreaterThanOrEqual(0);
+      expect(deleteByQueryIdx).toBeLessThan(soDeleteIdx);
+    });
+
+    it('should not delete the saved object when the .fleet-policies deleteByQuery fails', async () => {
+      // Fix 1: if ES is unavailable when we try to delete .fleet-policies docs, the SO must be
+      // preserved so the caller can retry the full delete later.
+      esClient.deleteByQuery.mockRejectedValueOnce(new Error('ES unavailable'));
+
+      await expect(agentPolicyService.delete(soClient, esClient, 'mocked')).rejects.toThrow(
+        'ES unavailable'
+      );
+
+      expect(soClient.delete).not.toHaveBeenCalled();
+    });
+
+    it('should attempt to redeploy .fleet-policies documents when saved object delete fails', async () => {
+      // Fix 6: if the SO delete fails after .fleet-policies docs were already removed, we must
+      // try to redeploy them so fleet-server can continue delivering the policy.
+      esClient.deleteByQuery.mockResolvedValueOnce({ deleted: 2 });
+      soClient.delete.mockRejectedValueOnce(new Error('SO delete failed'));
+      const deploySpy = jest
+        .spyOn(agentPolicyService, 'deployPolicy')
+        .mockResolvedValue(undefined as any);
+
+      try {
+        await expect(agentPolicyService.delete(soClient, esClient, 'mocked')).rejects.toThrow(
+          'SO delete failed'
+        );
+        expect(deploySpy).toHaveBeenCalledWith(soClient, 'mocked');
+      } finally {
+        // Restore the original so subsequent deployPolicy tests are not affected.
+        // jest.resetAllMocks() (used in beforeEach) clears implementations but does not
+        // restore spies, so without this the deployPolicy describe block would call a no-op.
+        deploySpy.mockRestore();
+      }
+    });
+
     it('should only delete package polices that are not shared with other agent policies', async () => {
       mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue([
         {
@@ -1090,6 +1148,21 @@ describe('Agent policy', () => {
           package_agent_version_conditions: null,
         })
       );
+    });
+
+    it('should not fetch full package policies when deploying asynchronously', async () => {
+      const soClient = getSavedObjectMock({ revision: 1, monitoring_enabled: [] });
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      await agentPolicyService.bumpRevision(soClient, esClient, 'agent-policy', {
+        asyncDeploy: true,
+      });
+
+      // computeMinAgentVersionData always fetches package policies once, but `_update`'s eager
+      // full fetch (for the deploy event it never triggers on this branch) should now be skipped,
+      // so the total should stay at 1 instead of the 2 it would be if `_update` also fetched.
+      expect(mockedPackagePolicyService.findAllForAgentPolicy).toHaveBeenCalledTimes(1);
+      expect(scheduleDeployAgentPoliciesTask).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -3611,6 +3684,34 @@ describe('Agent policy', () => {
         type: 'password',
         value: 'ext-id-secret',
       });
+    });
+
+    it('should omit credentials_external_id when the AWS connector has no external_id', async () => {
+      const connectorWithoutExternalId = {
+        ...baseConnector,
+        attributes: {
+          ...baseConnector.attributes,
+          vars: {
+            role_arn: { type: 'text' as const, value: 'arn:aws:iam::123456:role/test' },
+          },
+        },
+      };
+
+      await agentPolicyService.createVerifierPolicy(
+        soClient,
+        esClient,
+        connectorWithoutExternalId as any,
+        baseVerificationInfo
+      );
+
+      const { streams: awsStreams } = mockedPackagePolicyService.create.mock.calls[0][2].inputs[0];
+      const vars = awsStreams[0].vars!;
+
+      expect(vars.credentials_role_arn).toEqual({
+        type: 'text',
+        value: 'arn:aws:iam::123456:role/test',
+      });
+      expect(vars.credentials_external_id).toBeUndefined();
     });
 
     it('should include Azure credential vars for azure provider', async () => {

@@ -132,7 +132,7 @@ const NO_DATA_STRATEGY_LABELS: Record<NoDataStrategy, string> = {
     defaultMessage: 'Use no data status',
   }),
   recover: i18n.translate('xpack.alertingV2.ruleDetails.noDataStrategy.recover', {
-    defaultMessage: 'Recover',
+    defaultMessage: 'Recover immediately',
   }),
   none: i18n.translate('xpack.alertingV2.ruleDetails.noDataStrategy.none', {
     defaultMessage: 'Do nothing',

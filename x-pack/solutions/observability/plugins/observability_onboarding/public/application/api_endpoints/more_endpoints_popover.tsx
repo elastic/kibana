@@ -77,7 +77,7 @@ export const MoreEndpointsPopover = ({
                 defaultMessage: 'More',
               })}
               <EuiIcon
-                type={isPopoverOpen ? 'arrowUp' : 'arrowDown'}
+                type={isPopoverOpen ? 'chevronSingleUp' : 'chevronSingleDown'}
                 size="s"
                 aria-hidden={true}
                 css={css`
