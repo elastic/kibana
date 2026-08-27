@@ -67,7 +67,6 @@ interface OnboardingFlowState {
   updateDeployAndDetectStep: (update: Partial<DeployAndDetectStepState>) => void;
   removeDeployInstance: (instanceId: string) => void;
   getLatestFailedInstances: () => string[];
-  registerDeployHandler: (fn: (instanceIds?: string[]) => void) => void;
   awsServiceMatrix: AwsServiceMatrixEntry[] | undefined;
   awsServicesMap: Map<string, AwsServiceMatrixEntry> | undefined;
   awsServiceMatrixError: boolean;
@@ -151,8 +150,6 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
   // isDeploying is intentionally not persisted — it resets to false on page reload
   const [isDeploying, setIsDeploying] = useState(false);
 
-  const deployHandlerRef = useRef<((instanceIds?: string[]) => void) | null>(null);
-
   // Ref always holds the latest persisted value so updateDeployAndDetectStep
   // reads current state even when called after an await (stale closure prevention).
   const persistedDeployAndDetectStepRef = useRef(persistedDeployAndDetectStep);
@@ -204,10 +201,6 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
     () => persistedDeployAndDetectStepRef.current?.failedInstances ?? [],
     []
   );
-
-  const registerDeployHandler = useCallback((fn: (instanceIds?: string[]) => void) => {
-    deployHandlerRef.current = fn;
-  }, []);
 
   const {
     matrix: awsServiceMatrix,
@@ -264,7 +257,6 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         updateDeployAndDetectStep,
         removeDeployInstance,
         getLatestFailedInstances,
-        registerDeployHandler,
         awsServiceMatrix,
         awsServicesMap,
         awsServiceMatrixError,

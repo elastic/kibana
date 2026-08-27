@@ -692,7 +692,6 @@ function setupMocks({
     awsServicesMap: (useAwsServicesMap as jest.Mock)(),
     updateDeployAndDetectStep: jest.fn(),
     getLatestFailedInstances: jest.fn().mockReturnValue([]),
-    registerDeployHandler: jest.fn(),
   });
 
   mockUseSessionStorage.mockReturnValue([{ globalRegion, serviceVars: {}, instances }, jest.fn()]);
