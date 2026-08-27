@@ -45,7 +45,7 @@ describe('startTrackingHistory', () => {
     it('enables undo after a state change is recorded', async () => {
       const { state$, api, cleanup } = setupHistory({ initial: { value: 0 } });
       state$.next({ value: 1 });
-      expect(await firstValueFrom(api.disabledActions$.pipe(skip(1)))).toMatchObject({
+      expect(await firstValueFrom(api.disabledActions$)).toMatchObject({
         undo: false,
         redo: true,
       });
@@ -65,7 +65,7 @@ describe('startTrackingHistory', () => {
       });
 
       state$.next({ value: 0, ignored: 'b' }); // only the mapped-away field changed
-      const isDisabled = await firstValueFrom(api.disabledActions$.pipe(skip(1)));
+      const isDisabled = await firstValueFrom(api.disabledActions$);
       expect(isDisabled.undo).toBe(true);
 
       cleanup();
@@ -131,7 +131,7 @@ describe('startTrackingHistory', () => {
 
       state$.next({ value: 1 });
       api.undo();
-      const isDisabled = await firstValueFrom(api.disabledActions$.pipe(skip(1)));
+      const isDisabled = await firstValueFrom(api.disabledActions$);
       expect(isDisabled.redo).toBe(false);
 
       cleanup();
@@ -142,7 +142,7 @@ describe('startTrackingHistory', () => {
 
       state$.next({ value: 1 });
       api.undo();
-      const isDisabled = await firstValueFrom(api.disabledActions$.pipe(skip(1)));
+      const isDisabled = await firstValueFrom(api.disabledActions$);
       expect(isDisabled.undo).toBe(true);
 
       cleanup();
@@ -212,7 +212,7 @@ describe('startTrackingHistory', () => {
       state$.next({ value: 1 });
       api.undo();
       api.redo();
-      const isDisabled = await firstValueFrom(api.disabledActions$.pipe(skip(1)));
+      const isDisabled = await firstValueFrom(api.disabledActions$);
       expect(isDisabled.redo).toBe(true);
 
       cleanup();
@@ -230,7 +230,7 @@ describe('startTrackingHistory', () => {
       state$.next({ value: 1 });
       state$.next({ value: 99 }); // new branch — prunes the future history
 
-      const isDisabled = await firstValueFrom(api.disabledActions$.pipe(skip(1)));
+      const isDisabled = await firstValueFrom(api.disabledActions$);
       expect(isDisabled.redo).toBe(true);
 
       cleanup();
@@ -245,7 +245,7 @@ describe('startTrackingHistory', () => {
       api.undo(); // 3→2
       api.undo(); // 2→1  — now at bottom; 0→1 no longer exists
 
-      const isDisabled = await firstValueFrom(api.disabledActions$.pipe(skip(1)));
+      const isDisabled = await firstValueFrom(api.disabledActions$);
       expect(isDisabled.undo).toBe(true);
 
       cleanup();
@@ -258,12 +258,12 @@ describe('startTrackingHistory', () => {
 
       // First, wait for undo to be enabled so we can verify the override.
       state$.next({ value: 1 });
-      expect(await firstValueFrom(api.disabledActions$.pipe(skip(1)))).toEqual({
+      expect(await firstValueFrom(api.disabledActions$)).toEqual({
         undo: false,
         redo: true,
       });
       disableUndoRedo$.next(true);
-      expect(await firstValueFrom(api.disabledActions$.pipe(skip(1)))).toEqual({
+      expect(await firstValueFrom(api.disabledActions$)).toEqual({
         undo: true,
         redo: true,
       });
@@ -276,12 +276,12 @@ describe('startTrackingHistory', () => {
 
       state$.next({ value: 1 });
       disableUndoRedo$.next(true);
-      expect(await firstValueFrom(api.disabledActions$.pipe(skip(1)))).toEqual({
+      expect(await firstValueFrom(api.disabledActions$)).toEqual({
         undo: true,
         redo: true,
       });
       disableUndoRedo$.next(false);
-      expect(await firstValueFrom(api.disabledActions$.pipe(skip(1)))).toEqual({
+      expect(await firstValueFrom(api.disabledActions$)).toEqual({
         undo: false,
         redo: true,
       });
