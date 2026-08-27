@@ -18,7 +18,6 @@ import {
 } from '../../common/workflow_anonymization';
 import { getPiiTokenizationContext } from './capabilities';
 import { createCompletionTextRecords } from './message_records';
-import { replaceKnownOriginals } from './token_map';
 
 interface IndexedEntity extends DetectedPiiEntity {
   readonly detectionIndex: number;
@@ -47,13 +46,11 @@ const validateEntity = (entity: DetectedPiiEntity, record: PiiTextRecord | undef
 const applyDetectedEntities = ({
   records,
   entities,
-  tokenMap,
   tokenize,
   logger,
 }: {
   records: readonly PiiTextRecord[];
   entities: readonly DetectedPiiEntity[];
-  tokenMap: TokenMap;
   tokenize: (entityClass: string, value: string) => string;
   logger: PiiProtectionLogger;
 }): { values: ReadonlyMap<string, string>; tokenMap: TokenMap } => {
@@ -67,7 +64,7 @@ const applyDetectedEntities = ({
     entitiesByRecord.set(entity.recordId, recordEntities);
   });
 
-  const nextTokenMap: TokenMap = { ...tokenMap };
+  const nextTokenMap: TokenMap = {};
   const values = new Map<string, string>();
 
   records.forEach((record) => {
@@ -129,16 +126,7 @@ export const executePiiProtection = async ({
   logger: PiiProtectionLogger;
 }): Promise<AnonymizedCompletion> => {
   const pii = getPiiTokenizationContext(capabilities);
-  const previousTokenMap = input.tokenMap ?? {};
-  const initialRecords = createCompletionTextRecords(input);
-  const knownReplacementValues = new Map(
-    initialRecords.records.map((record) => [
-      record.id,
-      replaceKnownOriginals(record.text, previousTokenMap),
-    ])
-  );
-  const protectedInput = initialRecords.replace(knownReplacementValues);
-  const detectionRecords = createCompletionTextRecords(protectedInput);
+  const detectionRecords = createCompletionTextRecords(input);
   const entities = await pii.detectEntities({
     records: detectionRecords.records,
     rules: input.rules,
@@ -149,7 +137,6 @@ export const executePiiProtection = async ({
   const protectedRecords = applyDetectedEntities({
     records: detectionRecords.records,
     entities,
-    tokenMap: previousTokenMap,
     tokenize: pii.tokenize,
     logger,
   });
