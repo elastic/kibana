@@ -18054,8 +18054,6 @@
     "xpack.crossClusterReplication.pauseFollowerIndex.confirmModal.pauseMultipleTitle": "Suspendre la réplication vers les {count} index suiveurs ?",
     "xpack.crossClusterReplication.pauseFollowerIndex.confirmModal.pauseSingleTitle": "Suspendre la réplication vers l'index suiveur \"{name}\" ?",
     "xpack.crossClusterReplication.pauseFollowerIndex.confirmModal.singlePauseDescriptionWithSettingWarning": "La suspension de la réplication sur cet index suiveur effacera ses paramètres avancés personnalisés.",
-    "xpack.crossClusterReplication.readDocsAutoFollowPatternButtonLabel": "Documents du modèle de suivi automatique",
-    "xpack.crossClusterReplication.readDocsFollowerIndexButtonLabel": "Documents de l'index suiveur",
     "xpack.crossClusterReplication.remoteClustersFormField.addRemoteClusterButtonLabel": "Ajouter un cluster distant",
     "xpack.crossClusterReplication.remoteClustersFormField.currentRemoteClusterNotConnectedCallOutDescription": "Modifiez le cluster distant ou sélectionnez un cluster connecté.",
     "xpack.crossClusterReplication.remoteClustersFormField.currentRemoteClusterNotConnectedCallOutTitle": "Le cluster distant \"{name}\" n'est pas connecté",

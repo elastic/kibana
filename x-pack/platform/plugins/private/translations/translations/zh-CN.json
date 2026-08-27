@@ -18147,8 +18147,6 @@
     "xpack.crossClusterReplication.pauseFollowerIndex.confirmModal.pauseMultipleTitle": "暂停复制到 {count} 个 Follower 索引？",
     "xpack.crossClusterReplication.pauseFollowerIndex.confirmModal.pauseSingleTitle": "暂停复制到 Follower 索引“{name}”？",
     "xpack.crossClusterReplication.pauseFollowerIndex.confirmModal.singlePauseDescriptionWithSettingWarning": "暂停复制到此 Follower 索引可清除其定制高级设置。",
-    "xpack.crossClusterReplication.readDocsAutoFollowPatternButtonLabel": "自动跟随模式文档",
-    "xpack.crossClusterReplication.readDocsFollowerIndexButtonLabel": "Follower 索引文档",
     "xpack.crossClusterReplication.remoteClustersFormField.addRemoteClusterButtonLabel": "添加远程集群",
     "xpack.crossClusterReplication.remoteClustersFormField.currentRemoteClusterNotConnectedCallOutDescription": "编辑远程集群或选择连接的集群。",
     "xpack.crossClusterReplication.remoteClustersFormField.currentRemoteClusterNotConnectedCallOutTitle": "远程集群“{name}”未连接",
