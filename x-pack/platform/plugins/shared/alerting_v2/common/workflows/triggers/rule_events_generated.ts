@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import { ID_MAX_LENGTH, ruleKindSchema, tagsSchema } from '@kbn/alerting-v2-schemas';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
+import { ALERTING_V2_EXPERIMENTAL_NOTE } from './docs';
 
 /**
  * Fires when a rule execution succeeds AND persists at least one rule event.
@@ -119,6 +120,7 @@ export const ruleEventsGeneratedTriggerCommonDefinition: CommonTriggerDefinition
       'Emitted when a rule execution completes successfully and produces at least one rule event.',
   }),
   documentation: {
+    notes: [ALERTING_V2_EXPERIMENTAL_NOTE],
     details: i18n.translate(
       'xpack.alertingV2.workflowTriggers.ruleEventsGenerated.documentation.details',
       {

@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { dataParseJsonStepCommonDefinition } from '../../../common/steps/data';
+import {
+  dataParseJsonStepCommonDefinition,
+  MAX_PARSE_JSON_SOURCE_BYTES,
+} from '../../../common/steps/data';
 import { createServerStepDefinition } from '../../step_registry/types';
-
-const MAX_SOURCE_LENGTH = 10 * 1024 * 1024; // 10 MB
 
 export const dataParseJsonStepDefinition = createServerStepDefinition({
   ...dataParseJsonStepCommonDefinition,
@@ -27,10 +28,10 @@ export const dataParseJsonStepDefinition = createServerStepDefinition({
         return { output: source };
       }
 
-      if (source.length > MAX_SOURCE_LENGTH) {
+      if (source.length > MAX_PARSE_JSON_SOURCE_BYTES) {
         return {
           error: new Error(
-            `Source exceeds maximum allowed size of ${MAX_SOURCE_LENGTH / 1024 / 1024} MB`
+            `Source exceeds maximum allowed size of ${MAX_PARSE_JSON_SOURCE_BYTES / 1024 / 1024} MB`
           ),
         };
       }

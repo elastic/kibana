@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
+import { ALERTING_RULE_TRIGGER_EXAMPLES, ALERTING_RULE_TRIGGER_NOTES } from './docs';
 import { ruleLifecycleEventSchema } from './schemas';
 
 export const RuleDeletedTriggerId = 'alerting.ruleDeleted' as const;
@@ -24,11 +25,13 @@ export const ruleDeletedTriggerCommonDefinition: CommonTriggerDefinition<
     defaultMessage: 'Emitted when an alerting rule is deleted.',
   }),
   documentation: {
+    notes: ALERTING_RULE_TRIGGER_NOTES,
     details: i18n.translate('xpack.alertingV2.workflowTriggers.ruleDeleted.documentation.details', {
       defaultMessage:
         'Emitted after rule deletion. The payload includes event.rule with ruleId, spaceId, and tags. Bulk deletes emit one event per successfully deleted rule.',
     }),
     examples: [
+      ...ALERTING_RULE_TRIGGER_EXAMPLES,
       i18n.translate('xpack.alertingV2.workflowTriggers.ruleDeleted.documentation.example', {
         defaultMessage: `## Run for a specific rule
 \`\`\`yaml

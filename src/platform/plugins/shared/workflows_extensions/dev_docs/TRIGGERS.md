@@ -22,9 +22,11 @@ Trigger IDs use the following convention:
 - ⚠️ Allowed: Inherited forms from OpenAPI/connectors/platform-owned contracts
 - ❌ Bad: `"my_trigger"` (no namespace), `"custom_trigger"` (event not camelCase)
 
+**⚠️ IMPORTANT: Treat `id` as a public contract.** Saved workflows store the trigger id in YAML (`triggers: - type: <id>`). Renaming or removing an id can leave customer workflow definitions invalid (they fail validation, cannot save, or no longer run). Choose the id carefully the first time. If you must change or retire one, plan a migration (and workflows-eng review) — do not silently rename or delete it.
+
 ### Step 1: Define common trigger (id, eventSchema, title, description; optional documentation and snippets)
 
-Create a shared definition (e.g. `common/triggers/my_trigger.ts`) in your plugin. **title** and **description** are required. **documentation** (details + YAML examples) and **snippets** (e.g. a default `on.condition`) are optional but strongly recommended so the YAML editor, hover docs, and agent tools can guide users (aligned with custom steps):
+Create a shared definition (e.g. `common/triggers/my_trigger.ts`) in your plugin. **title** and **description** are required. **documentation** (details + YAML examples + notes) and **snippets** (e.g. a default `on.condition`) are optional but strongly recommended so the YAML editor, hover docs, generated catalogs, and agent tools can guide users (aligned with custom steps):
 
 ```typescript
 import { i18n } from '@kbn/i18n';
@@ -35,9 +37,21 @@ import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
 export const MY_TRIGGER_ID = 'my-plugin.myTrigger' as const;
 
 export const myTriggerEventSchema = z.object({
-  message: z.string().describe('The message text for the event.'),
-  source: z.string().optional().describe('The source that emitted the event.'),
-  category: z.string().optional().describe('Category for filtering in workflow conditions.'),
+  message: z.string().describe(
+    i18n.translate('myPlugin.myTrigger.schema.message', {
+      defaultMessage: 'The message text for the event.',
+    })
+  ),
+  source: z.string().optional().describe(
+    i18n.translate('myPlugin.myTrigger.schema.source', {
+      defaultMessage: 'The source that emitted the event.',
+    })
+  ),
+  category: z.string().optional().describe(
+    i18n.translate('myPlugin.myTrigger.schema.category', {
+      defaultMessage: 'Category for filtering in workflow conditions.',
+    })
+  ),
 });
 
 export type MyTriggerEvent = z.infer<typeof myTriggerEventSchema>;
@@ -52,6 +66,7 @@ export const commonMyTriggerDefinition: CommonTriggerDefinition = {
   }),
   documentation: {
     details: 'Filter when this workflow runs using KQL on event properties (e.g. event.category, event.message).',
+    notes: ['Warnings rendered after the event-payload table (e.g. how to prevent loops).'],
     examples: [
       `## Match by category\n\`\`\`yaml\ntriggers:\n  - type: ${MY_TRIGGER_ID}\n    on:\n      condition: 'event.category: "alerts"'\n\`\`\``,
     ],
@@ -61,7 +76,8 @@ export const commonMyTriggerDefinition: CommonTriggerDefinition = {
 ```
 
 - Set `stability` (required) to `'tech_preview'`, `'beta'`, or `'stable'` based on the trigger's maturity. Use `'stable'` for GA triggers (no badge in the editor).
-- Use `.describe()` on schema fields so the UI and docs show helpful text.
+- Use `.describe(i18n.translate(...))` on every `eventSchema` field so generated payload tables have Parameter / Type / Description and stay translatable.
+- Engine-level YAML (`on.condition`, `on.workflowEvents`) is documented by the shared `CustomTriggerOnSchema` in `@kbn/workflows` — do not duplicate those fields on `eventSchema`. Envelope fields (`event.spaceId`, `event.timestamp`) live on the shared event envelope, not per trigger.
 - `eventSchema` must be a Zod object schema; payloads are validated at emit time.
 - When you provide `documentation.examples`, each example must only reference fields present on `eventSchema` (agents pattern-match YAML examples).
 - When you provide `snippets.condition`, it must be valid KQL using only `event.*` fields from `eventSchema` (validated at registration).
@@ -195,6 +211,24 @@ All event-driven trigger definitions must be approved by the workflows-eng team 
 4. **Get approval** from the workflows-eng team (via PR review).
 
 If you change the trigger's `eventSchema`, the schema hash changes; update the approved list and get re-approval.
+
+**⚠️ Feature-flagged triggers:** If the trigger is registered only when a feature flag is on, enable that flag in the Scout configuration used by the event-driven trigger approval test. Otherwise `GET internal/workflows_extensions/trigger_definitions` will not return it, you cannot record a `schemaHash` in `test/scout/api/fixtures/approved_trigger_definitions.ts`, and CI will not cover the trigger that customers get when the flag is enabled.
+
+Enable the flag on the Scout Kibana server (plugin setup / registration time):
+
+```text
+--feature_flags.overrides.<your.feature.flag>=true
+```
+
+Add that argument to the Scout server config (`kbnTestServer.serverArgs`) that `test/scout/api` uses. If registration is deferred until after Kibana is up, you can instead set it in the approval spec before the GET:
+
+```typescript
+await apiServices.core.settings({
+  'feature_flags.overrides': { 'your.feature.flag': true },
+});
+```
+
+Prefer server args when the flag is read at plugin `setup()`; runtime `core.settings` is too late for that path.
 
 ## Event-driven guardrails
 

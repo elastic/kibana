@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { z } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
+import { ALERTING_EPISODE_TRIGGER_EXAMPLES, ALERTING_EPISODE_TRIGGER_NOTES } from './docs';
 import { episodeActionEnvelopeSchema } from './episode_action_envelope';
 
 export const EPISODE_UNASSIGNED_TRIGGER_ID = 'alerting.episodeUnassigned' as const;
@@ -29,6 +30,8 @@ export const episodeUnassignedTriggerCommonDefinition: CommonTriggerDefinition<
     defaultMessage: 'Emitted when the assignee is cleared from an alerting episode.',
   }),
   documentation: {
+    notes: ALERTING_EPISODE_TRIGGER_NOTES,
+    examples: ALERTING_EPISODE_TRIGGER_EXAMPLES,
     details: i18n.translate(
       'xpack.alertingVTwo.workflowTriggers.episodeUnassigned.documentation.details',
       {

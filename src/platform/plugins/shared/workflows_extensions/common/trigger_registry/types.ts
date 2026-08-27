@@ -6,22 +6,28 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
 import type { StabilityLevel } from '@kbn/workflows';
 import type { z } from '@kbn/zod/v4';
 
 /**
  * Documentation for a trigger (aligned with steps: details + examples).
+ *
+ * Together with Zod `.describe()` on `eventSchema` fields, this is the source of
+ * truth for generated reference docs.
  */
 export interface TriggerDocumentation {
   /**
-   * Detailed description with usage examples (markdown supported)
+   * Detailed description with usage notes (markdown supported).
    */
   details?: string;
   /**
    * Usage examples as markdown strings (e.g. "## Title\n```yaml\n...").
    */
   examples?: string[];
+  /**
+   * Warnings and gotchas rendered after the schema (e.g. handler-loop prevention).
+   */
+  notes?: string[];
 }
 
 /**

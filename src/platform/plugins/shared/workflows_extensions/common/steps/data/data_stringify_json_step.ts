@@ -15,14 +15,30 @@ import type { CommonStepDefinition } from '../../step_registry/types';
 export const DataStringifyJsonStepTypeId = 'data.stringifyJson' as const;
 
 export const ConfigSchema = z.object({
-  source: z.unknown(),
+  source: z.unknown().describe(
+    i18n.translate('workflowsExtensions.dataStringifyJsonStep.schema.source', {
+      defaultMessage: 'Value to serialize. Can be any structured type.',
+    })
+  ),
 });
 
 export const InputSchema = z.object({
-  pretty: z.boolean().optional().default(false),
+  pretty: z
+    .boolean()
+    .optional()
+    .default(false)
+    .describe(
+      i18n.translate('workflowsExtensions.dataStringifyJsonStep.schema.pretty', {
+        defaultMessage: 'Pretty-print the output with 2-space indentation.',
+      })
+    ),
 });
 
-export const OutputSchema = z.string();
+export const OutputSchema = z.string().describe(
+  i18n.translate('workflowsExtensions.dataStringifyJsonStep.schema.output', {
+    defaultMessage: 'A JSON string representation of the source value.',
+  })
+);
 
 export type DataStringifyJsonStepConfigSchema = typeof ConfigSchema;
 export type DataStringifyJsonStepInputSchema = typeof InputSchema;
@@ -42,44 +58,34 @@ export const dataStringifyJsonStepCommonDefinition: CommonStepDefinition<
     defaultMessage: 'Convert a structured object or array to a JSON string',
   }),
   documentation: {
-    details: `# Stringify JSON
-
-Convert a structured value (object, array, etc.) into a JSON string for transport or presentation.
-
-## Basic Usage
-
+    details: i18n.translate('workflowsExtensions.dataStringifyJsonStep.documentation.details', {
+      defaultMessage:
+        'Convert a structured value (object, array, etc.) into a JSON string for transport or presentation.',
+    }),
+    notes: [
+      i18n.translate('workflowsExtensions.dataStringifyJsonStep.documentation.notes.errors', {
+        defaultMessage:
+          'Circular references produce a clear error. Non-serializable values (for example, functions) fail the step.',
+      }),
+    ],
+    examples: [
+      `## Basic usage
 \`\`\`yaml
 - name: stringify-payload
   type: data.stringifyJson
   source: "\${{ steps.build_payload.output }}"
   with:
     pretty: false
-\`\`\`
-
-## Pretty Print
-
+\`\`\``,
+      `## Pretty-print
 \`\`\`yaml
-- name: debug-output
+- name: to_string
   type: data.stringifyJson
-  source: "\${{ steps.build_payload.output }}"
+  source: "\${{ steps.search.output }}"
   with:
     pretty: true
-\`\`\`
-
-## Configuration
-
-- **source** (required): The value to stringify. Can be any structured type.
-- **pretty** (optional, default: false): When true, outputs indented JSON with 2-space indentation.
-
-## Output
-
-Returns a JSON string representation of the source value.
-
-## Error Handling
-
-- Circular references produce a clear error message.
-- Non-serializable values (e.g., functions) return an error.
-`,
+\`\`\``,
+    ],
   },
   inputSchema: InputSchema,
   outputSchema: OutputSchema,

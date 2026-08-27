@@ -8,10 +8,10 @@
  */
 
 import { stableStringify } from '@kbn/std';
-import { dataConcatStepCommonDefinition } from '../../../common/steps/data';
+import { dataConcatStepCommonDefinition, MAX_CONCAT_ITEMS } from '../../../common/steps/data';
 import { createServerStepDefinition } from '../../step_registry/types';
 
-export const MAX_CONCAT_ITEMS = 100_000;
+export { MAX_CONCAT_ITEMS };
 const ABORT_CHECK_INTERVAL = 1000;
 
 function deduplicateKey(item: unknown): string {

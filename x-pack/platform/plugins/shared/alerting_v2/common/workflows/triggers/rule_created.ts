@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
+import { ALERTING_RULE_TRIGGER_EXAMPLES, ALERTING_RULE_TRIGGER_NOTES } from './docs';
 import { ruleLifecycleEventSchema } from './schemas';
 
 export const RuleCreatedTriggerId = 'alerting.ruleCreated' as const;
@@ -24,11 +25,13 @@ export const ruleCreatedTriggerCommonDefinition: CommonTriggerDefinition<
     defaultMessage: 'Emitted when an alerting rule is created.',
   }),
   documentation: {
+    notes: ALERTING_RULE_TRIGGER_NOTES,
     details: i18n.translate('xpack.alertingV2.workflowTriggers.ruleCreated.documentation.details', {
       defaultMessage:
         'Emitted after rule creation. The payload includes event.rule with ruleId, spaceId, and tags. Use KQL on event.rule.* for trigger conditions.',
     }),
     examples: [
+      ...ALERTING_RULE_TRIGGER_EXAMPLES,
       i18n.translate('xpack.alertingV2.workflowTriggers.ruleCreated.documentation.example', {
         defaultMessage: `## Run for a specific rule
 \`\`\`yaml

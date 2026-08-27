@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { i18n } from '@kbn/i18n';
 import { StepCategory } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '../../step_registry/types';
@@ -14,33 +15,127 @@ import type { CommonStepDefinition } from '../../step_registry/types';
 export const DataAggregateStepTypeId = 'data.aggregate' as const;
 
 const MetricSchema = z.object({
-  name: z.string(),
-  operation: z.enum(['count', 'sum', 'avg', 'min', 'max']),
-  field: z.string().optional(),
+  name: z.string().describe(
+    i18n.translate('workflowsExtensions.dataAggregateStep.schema.metric.name', {
+      defaultMessage: 'Name of the metric in the output.',
+    })
+  ),
+  operation: z.enum(['count', 'sum', 'avg', 'min', 'max']).describe(
+    i18n.translate('workflowsExtensions.dataAggregateStep.schema.metric.operation', {
+      defaultMessage:
+        'Aggregation operation. count is the number of items in each group and does not need a field; sum, avg, min, and max do (min/max work on numbers and dates).',
+    })
+  ),
+  field: z
+    .string()
+    .optional()
+    .describe(
+      i18n.translate('workflowsExtensions.dataAggregateStep.schema.metric.field', {
+        defaultMessage: 'Field to aggregate. Required for sum, avg, min, and max.',
+      })
+    ),
 });
 
 const BucketRangeSchema = z.object({
-  from: z.number().optional(),
-  to: z.number().optional(),
-  label: z.string().optional(),
+  from: z
+    .number()
+    .optional()
+    .describe(
+      i18n.translate('workflowsExtensions.dataAggregateStep.schema.bucketRange.from', {
+        defaultMessage: 'Range start (inclusive). Omit for an open-ended lower bound.',
+      })
+    ),
+  to: z
+    .number()
+    .optional()
+    .describe(
+      i18n.translate('workflowsExtensions.dataAggregateStep.schema.bucketRange.to', {
+        defaultMessage: 'Range end (exclusive). Omit for an open-ended upper bound.',
+      })
+    ),
+  label: z
+    .string()
+    .optional()
+    .describe(
+      i18n.translate('workflowsExtensions.dataAggregateStep.schema.bucketRange.label', {
+        defaultMessage: 'Label for this range in the output.',
+      })
+    ),
 });
 
 const BucketConfigSchema = z.object({
-  field: z.string(),
-  ranges: z.array(BucketRangeSchema).min(1),
+  field: z.string().describe(
+    i18n.translate('workflowsExtensions.dataAggregateStep.schema.buckets.field', {
+      defaultMessage: 'Numeric field to bucket.',
+    })
+  ),
+  ranges: z
+    .array(BucketRangeSchema)
+    .min(1)
+    .describe(
+      i18n.translate('workflowsExtensions.dataAggregateStep.schema.buckets.ranges', {
+        defaultMessage:
+          'Bucket ranges. Each range has from, to, and label; from or to can be omitted.',
+      })
+    ),
 });
 
 export const ConfigSchema = z.object({
-  items: z.unknown(),
+  items: z.unknown().describe(
+    i18n.translate('workflowsExtensions.dataAggregateStep.schema.items', {
+      defaultMessage: 'Source array.',
+    })
+  ),
 });
 
 export const InputSchema = z.object({
-  group_by: z.array(z.string()).min(1),
-  metrics: z.array(MetricSchema).min(1),
-  buckets: BucketConfigSchema.optional(),
-  order_by: z.string().optional(),
-  order: z.enum(['asc', 'desc']).optional().default('asc'),
-  limit: z.number().positive().optional(),
+  group_by: z
+    .array(z.string())
+    .min(1)
+    .describe(
+      i18n.translate('workflowsExtensions.dataAggregateStep.schema.groupBy', {
+        defaultMessage: 'Fields to group by.',
+      })
+    ),
+  metrics: z
+    .array(MetricSchema)
+    .min(1)
+    .describe(
+      i18n.translate('workflowsExtensions.dataAggregateStep.schema.metrics', {
+        defaultMessage: 'Array of { name, operation, field? } metrics.',
+      })
+    ),
+  buckets: BucketConfigSchema.optional().describe(
+    i18n.translate('workflowsExtensions.dataAggregateStep.schema.buckets', {
+      defaultMessage: 'Optional numeric range bucketing.',
+    })
+  ),
+  order_by: z
+    .string()
+    .optional()
+    .describe(
+      i18n.translate('workflowsExtensions.dataAggregateStep.schema.orderBy', {
+        defaultMessage: 'Metric name to order by.',
+      })
+    ),
+  order: z
+    .enum(['asc', 'desc'])
+    .optional()
+    .default('asc')
+    .describe(
+      i18n.translate('workflowsExtensions.dataAggregateStep.schema.order', {
+        defaultMessage: 'asc or desc.',
+      })
+    ),
+  limit: z
+    .number()
+    .positive()
+    .optional()
+    .describe(
+      i18n.translate('workflowsExtensions.dataAggregateStep.schema.limit', {
+        defaultMessage: 'Max number of buckets to return.',
+      })
+    ),
 });
 
 export const OutputSchema = z.array(z.record(z.string(), z.unknown()));
@@ -56,23 +151,19 @@ export const dataAggregateStepCommonDefinition: CommonStepDefinition<
 > = {
   id: DataAggregateStepTypeId,
   category: StepCategory.Data,
-  label: 'Aggregate Collection',
-  description: 'Group records and compute metrics like count, sum, avg, min, and max',
+  label: i18n.translate('workflowsExtensions.dataAggregateStep.label', {
+    defaultMessage: 'Aggregate Collection',
+  }),
+  description: i18n.translate('workflowsExtensions.dataAggregateStep.description', {
+    defaultMessage: 'Group records and compute metrics like count, sum, avg, min, and max',
+  }),
   documentation: {
-    details: `# Aggregate Collection
-
-Group items by one or more keys and compute summary metrics per group.
-
-## Supported Operations
-
-- **count** - Number of items in each group (no field needed)
-- **sum** - Sum of numeric values
-- **avg** - Average of numeric values
-- **min** - Minimum value (numbers and dates)
-- **max** - Maximum value (numbers and dates)
-
-## Basic Usage
-
+    details: i18n.translate('workflowsExtensions.dataAggregateStep.documentation.details', {
+      defaultMessage:
+        'Group a collection by one or more keys and compute metrics per group. Supported operations: count (no field needed), sum, avg, min, and max (min/max work on numbers and dates).',
+    }),
+    examples: [
+      `## Basic usage
 \`\`\`yaml
 - name: summarize-by-status
   type: data.aggregate
@@ -89,10 +180,8 @@ Group items by one or more keys and compute summary metrics per group.
       - name: "max_severity"
         operation: "max"
         field: "severity"
-\`\`\`
-
-## With Ordering and Limit
-
+\`\`\``,
+      `## With ordering and limit
 \`\`\`yaml
 - name: top-categories
   type: data.aggregate
@@ -109,20 +198,32 @@ Group items by one or more keys and compute summary metrics per group.
     order_by: "total_revenue"
     order: "desc"
     limit: 5
-\`\`\`
-
-## With Bucketed Aggregation
-
+\`\`\``,
+      `## Basic grouping
 \`\`\`yaml
-- name: age-distribution
+- name: count_by_host
   type: data.aggregate
-  items: "\${{ steps.fetch_users.output }}"
+  items: "\${{ event.alerts }}"
   with:
-    group_by:
-      - "department"
+    group_by: ["host.name"]
     metrics:
       - name: "count"
         operation: "count"
+    order: "desc"
+    order_by: "count"
+    limit: 10
+\`\`\``,
+      `## With bucketed aggregation
+\`\`\`yaml
+- name: age_distribution
+  type: data.aggregate
+  items: "\${{ steps.fetch_users.output }}"
+  with:
+    group_by: ["department"]
+    metrics:
+      - name: "count"
+        operation: "count"
+    order: "desc"
     buckets:
       field: "age"
       ranges:
@@ -133,18 +234,8 @@ Group items by one or more keys and compute summary metrics per group.
           label: "mid"
         - from: 50
           label: "senior"
-\`\`\`
-
-## Configuration
-
-- **items** (required): Array of objects to aggregate
-- **group_by** (required): Array of field names to group by
-- **metrics** (required): Array of metric definitions (name, operation, field)
-- **buckets** (optional): Numeric range bucketing config
-- **order_by** (optional): Field name to sort results by
-- **order** (optional): "asc" (default) or "desc"
-- **limit** (optional): Maximum number of groups to return
-`,
+\`\`\``,
+    ],
   },
   inputSchema: InputSchema,
   outputSchema: OutputSchema,

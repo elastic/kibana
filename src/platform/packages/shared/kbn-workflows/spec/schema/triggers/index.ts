@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import { AlertRuleTriggerSchema } from './alert_trigger_schema';
 import { ManualTriggerSchema } from './manual_trigger_schema';
@@ -34,17 +35,27 @@ export type WorkflowEventsValue = (typeof WORKFLOW_EVENTS_VALUES)[number];
 export const WORKFLOW_EVENTS_VALUES_SET = new Set<string>(WORKFLOW_EVENTS_VALUES);
 export const WorkflowEventsSchema = z.enum(WORKFLOW_EVENTS_VALUES);
 
-/** Schema for the `on` block of custom triggers (KQL condition to filter when the workflow runs). */
-const CustomTriggerOnSchema = z
+/**
+ * Schema for the `on` block of custom (event-driven) triggers.
+ * Engine-level YAML — not part of a trigger's `eventSchema`.
+ */
+export const CustomTriggerOnSchema = z
   .object({
-    condition: z.string().optional(),
-    /**
-     * How this trigger responds when the event was emitted from a workflow-attributed chain:
-     * `ignore` — do not schedule;
-     * `avoid-loop` — schedule with cycle guard (default when omitted);
-     * `allow-all` — schedule without cycle guard (max chain depth still applies).
-     */
-    workflowEvents: WorkflowEventsSchema.optional(),
+    condition: z
+      .string()
+      .optional()
+      .describe(
+        i18n.translate('workflows.customTriggerOn.schema.condition', {
+          defaultMessage:
+            'Optional KQL predicate evaluated against the event payload. The trigger fires only when the condition matches.',
+        })
+      ),
+    workflowEvents: WorkflowEventsSchema.optional().describe(
+      i18n.translate('workflows.customTriggerOn.schema.workflowEvents', {
+        defaultMessage:
+          'How this trigger responds when the event originated from a workflow run. `avoid-loop` (default) fires on workflow-generated events but skips scheduling when this workflow is already in the event chain; `ignore` skips workflow-generated events and reacts only to external signals; `allow-all` bypasses the cycle guard (the maximum chain depth still applies as a backstop).',
+      })
+    ),
   })
   .optional();
 

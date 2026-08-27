@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { StepCategory } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
+import { AI_CONNECTOR_FIELD_NOTES } from './docs';
 
 /**
  * Step type ID for the AI classify step.
@@ -16,7 +17,14 @@ import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 export const AiClassifyStepTypeId = 'ai.classify';
 
 export const ConfigSchema = z.object({
-  'connector-id': z.string().optional(),
+  'connector-id': z
+    .string()
+    .optional()
+    .describe(
+      i18n.translate('xpack.inferenceWorkflows.AiClassifyStep.schema.connectorId', {
+        defaultMessage: 'GenAI connector to use.',
+      })
+    ),
 });
 
 export const CategorySchema = z.union([
@@ -32,13 +40,60 @@ export const getCategoryName = (category: Category): string =>
  * Input schema for the AI classify step.
  */
 export const InputSchema = z.object({
-  input: z.union([z.string(), z.array(z.unknown()), z.record(z.string(), z.unknown())]),
-  categories: z.array(CategorySchema).min(1),
-  instructions: z.string().optional(),
-  allowMultipleCategories: z.boolean().optional(),
-  fallbackCategory: CategorySchema.optional(),
-  includeRationale: z.boolean().optional(),
-  temperature: z.number().min(0).max(1).optional(),
+  input: z.union([z.string(), z.array(z.unknown()), z.record(z.string(), z.unknown())]).describe(
+    i18n.translate('xpack.inferenceWorkflows.AiClassifyStep.schema.input', {
+      defaultMessage: 'Input to classify (string, array, or object).',
+    })
+  ),
+  categories: z
+    .array(CategorySchema)
+    .min(1)
+    .describe(
+      i18n.translate('xpack.inferenceWorkflows.AiClassifyStep.schema.categories', {
+        defaultMessage:
+          'Allowed categories. Each entry is a plain category-name string, or an object with name and description.',
+      })
+    ),
+  instructions: z
+    .string()
+    .optional()
+    .describe(
+      i18n.translate('xpack.inferenceWorkflows.AiClassifyStep.schema.instructions', {
+        defaultMessage: 'Guidance for the classifier.',
+      })
+    ),
+  allowMultipleCategories: z
+    .boolean()
+    .optional()
+    .describe(
+      i18n.translate('xpack.inferenceWorkflows.AiClassifyStep.schema.allowMultipleCategories', {
+        defaultMessage: 'Allow the output to include more than one category.',
+      })
+    ),
+  fallbackCategory: CategorySchema.optional().describe(
+    i18n.translate('xpack.inferenceWorkflows.AiClassifyStep.schema.fallbackCategory', {
+      defaultMessage:
+        'Category returned when the model cannot confidently choose. Accepts a string or an object with name and description.',
+    })
+  ),
+  includeRationale: z
+    .boolean()
+    .optional()
+    .describe(
+      i18n.translate('xpack.inferenceWorkflows.AiClassifyStep.schema.includeRationale', {
+        defaultMessage: "Include the model's reasoning in the output.",
+      })
+    ),
+  temperature: z
+    .number()
+    .min(0)
+    .max(1)
+    .optional()
+    .describe(
+      i18n.translate('xpack.inferenceWorkflows.AiClassifyStep.schema.temperature', {
+        defaultMessage: 'Model temperature (0–1).',
+      })
+    ),
 });
 
 /**
@@ -46,10 +101,36 @@ export const InputSchema = z.object({
  * This is the base schema - the dynamic schema will be created based on input parameters.
  */
 export const OutputSchema = z.object({
-  category: z.string().optional(),
-  categories: z.array(z.string()).optional(),
-  rationale: z.string().optional(),
-  metadata: z.record(z.string(), z.any()),
+  category: z
+    .string()
+    .optional()
+    .describe(
+      i18n.translate('xpack.inferenceWorkflows.AiClassifyStep.schema.output.category', {
+        defaultMessage:
+          'Present when allowMultipleCategories is false (default). Always the category name, even when you define the category as an object.',
+      })
+    ),
+  categories: z
+    .array(z.string())
+    .optional()
+    .describe(
+      i18n.translate('xpack.inferenceWorkflows.AiClassifyStep.schema.output.categories', {
+        defaultMessage: 'Present when allowMultipleCategories is true.',
+      })
+    ),
+  rationale: z
+    .string()
+    .optional()
+    .describe(
+      i18n.translate('xpack.inferenceWorkflows.AiClassifyStep.schema.output.rationale', {
+        defaultMessage: 'Present when includeRationale is true.',
+      })
+    ),
+  metadata: z.record(z.string(), z.any()).describe(
+    i18n.translate('xpack.inferenceWorkflows.AiClassifyStep.schema.output.metadata', {
+      defaultMessage: 'Always present.',
+    })
+  ),
 });
 
 export type AiClassifyStepConfigSchema = typeof ConfigSchema;
@@ -77,9 +158,22 @@ export const AiClassifyStepCommonDefinition: CommonStepDefinition<
   documentation: {
     details: i18n.translate('xpack.inferenceWorkflows.AiClassifyStep.documentation.details', {
       defaultMessage:
-        'The {stepTypeId} step categorizes input data into predefined categories using an AI connector. The classification result can be referenced in later steps using template syntax.',
-      values: { stepTypeId: AiClassifyStepTypeId },
+        'Classify input into one of a fixed set of categories. Optionally includes a rationale and supports multi-label classification. Category names in the output are always the name, never the description.',
     }),
+    notes: [
+      ...AI_CONNECTOR_FIELD_NOTES,
+      i18n.translate('xpack.inferenceWorkflows.AiClassifyStep.documentation.notes.fallback', {
+        defaultMessage:
+          'Always set fallbackCategory in production. Without a fallback, a confused model can fail the step. With one, every invocation produces a usable category you can branch on with a switch or if.',
+      }),
+      i18n.translate(
+        'xpack.inferenceWorkflows.AiClassifyStep.documentation.notes.categoryObjects',
+        {
+          defaultMessage:
+            'Since 9.5, categories and fallbackCategory also accept an object with name and description. Descriptions are included in the classification prompt and do not appear in the output. You can mix plain strings and objects in the same categories list.',
+        }
+      ),
+    ],
     examples: [
       `## Basic Classification
 \`\`\`yaml
@@ -111,6 +205,27 @@ The default AI connector configured for the workflow will be used.`,
     fallbackCategory: "Unknown"
 \`\`\`
 When the model cannot confidently match input to defined categories, the fallback category is used.`,
+
+      `## Category descriptions
+\`\`\`yaml
+- name: classify_alert
+  type: ${AiClassifyStepTypeId}
+  connector-id: "my-bedrock"
+  with:
+    input: "{{ inputs.alert_narrative }}"
+    categories:
+      - name: "Phishing"
+        description: "User-targeted deception to steal credentials or deliver malicious links; no sustained host compromise pattern required."
+      - name: "Malware"
+        description: "Execution of malicious code, ransomware, or clear C2/beaconing on an endpoint."
+      - name: "Credential Access"
+        description: "Brute force, password spraying, or secret dumping without confirmed large outbound data transfer."
+    fallbackCategory:
+      name: "Unknown"
+      description: "Insufficient signal to map confidently to any defined category."
+    includeRationale: true
+\`\`\`
+When you supply a description, the step includes it in the classification prompt. Output \`category\` / \`categories\` still contain only the category name.`,
 
       `## Multi-label Classification with Rationale
 \`\`\`yaml

@@ -10,19 +10,50 @@
 import { i18n } from '@kbn/i18n';
 import { StepCategory } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
+import { REGEX_STEP_SECURITY_NOTES } from './regex_docs';
 import type { CommonStepDefinition } from '../../step_registry/types';
 
 export const DataRegexReplaceStepTypeId = 'data.regexReplace' as const;
 
 export const ConfigSchema = z.object({
-  source: z.unknown(),
-  detailed: z.boolean().optional().default(false),
+  source: z.unknown().describe(
+    i18n.translate('workflowsExtensions.dataRegexReplaceStep.schema.source', {
+      defaultMessage: 'Source string (or array of strings).',
+    })
+  ),
+  detailed: z
+    .boolean()
+    .optional()
+    .default(false)
+    .describe(
+      i18n.translate('workflowsExtensions.dataRegexReplaceStep.schema.detailed', {
+        defaultMessage: 'Include match details in the output.',
+      })
+    ),
 });
 
 export const InputSchema = z.object({
-  pattern: z.string().max(10000, 'Pattern exceeds maximum allowed length of 10,000 characters'),
-  replacement: z.string(),
-  flags: z.string().optional(),
+  pattern: z
+    .string()
+    .max(10000, 'Pattern exceeds maximum allowed length of 10,000 characters')
+    .describe(
+      i18n.translate('workflowsExtensions.dataRegexReplaceStep.schema.pattern', {
+        defaultMessage: 'Regular expression.',
+      })
+    ),
+  replacement: z.string().describe(
+    i18n.translate('workflowsExtensions.dataRegexReplaceStep.schema.replacement', {
+      defaultMessage: 'Replacement string.',
+    })
+  ),
+  flags: z
+    .string()
+    .optional()
+    .describe(
+      i18n.translate('workflowsExtensions.dataRegexReplaceStep.schema.flags', {
+        defaultMessage: 'Regex flags.',
+      })
+    ),
 });
 
 export const OutputSchema = z.union([
@@ -54,10 +85,10 @@ export const dataRegexReplaceStepCommonDefinition: CommonStepDefinition<
   }),
   documentation: {
     details: i18n.translate('workflowsExtensions.dataRegexReplaceStep.documentation.details', {
-      defaultMessage: `The ${DataRegexReplaceStepTypeId} step performs pattern-based text replacements using regular expressions. It supports backreferences, named groups, and can process single strings or arrays.
-
-**Security Note**: Complex regex patterns can cause performance issues (ReDoS - Regular Expression Denial of Service). The step enforces a maximum input length of 100KB per string. Avoid patterns with nested quantifiers like (a+)+, (a*)+, or (a|a)* which can cause catastrophic backtracking and hang the server.`,
+      defaultMessage: `The {stepTypeId} step performs pattern-based text replacements using regular expressions. It supports backreferences, named groups, and can process single strings or arrays.`,
+      values: { stepTypeId: DataRegexReplaceStepTypeId },
     }),
+    notes: REGEX_STEP_SECURITY_NOTES,
     examples: [
       `## Simple text replacement
 \`\`\`yaml

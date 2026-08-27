@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
+import { ALERTING_RULE_TRIGGER_EXAMPLES, ALERTING_RULE_TRIGGER_NOTES } from './docs';
 import { ruleLifecycleEventSchema } from './schemas';
 
 export const RuleDisabledTriggerId = 'alerting.ruleDisabled' as const;
@@ -24,14 +25,16 @@ export const ruleDisabledTriggerCommonDefinition: CommonTriggerDefinition<
     defaultMessage: 'Emitted when an alerting rule is disabled.',
   }),
   documentation: {
+    notes: ALERTING_RULE_TRIGGER_NOTES,
     details: i18n.translate(
       'xpack.alertingV2.workflowTriggers.ruleDisabled.documentation.details',
       {
         defaultMessage:
-          'Emitted when a rule transitions to disabled. The payload includes event.rule with ruleId, spaceId, and tags.',
+          'Emitted when a rule is disabled. The payload includes event.rule with ruleId, spaceId, and tags.',
       }
     ),
     examples: [
+      ...ALERTING_RULE_TRIGGER_EXAMPLES,
       i18n.translate('xpack.alertingV2.workflowTriggers.ruleDisabled.documentation.example', {
         defaultMessage: `## Run for a specific rule
 \`\`\`yaml

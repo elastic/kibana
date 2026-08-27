@@ -28,6 +28,7 @@ This section provides a complete guide for contributors who want to add custom s
 Create a shared definition file (e.g., `common/step_types/my_step.ts`) that contains the step ID and schemas:
 
 ```typescript
+import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 
@@ -42,9 +43,21 @@ export const MyStepTypeId = 'my-namespace.myCustomStep';
  * Defines what parameters the step accepts.
  */
 export const InputSchema = z.object({
-  message: z.string(),
-  count: z.number().optional(),
-  mode: z.enum(['partial', 'full'])
+  message: z.string().describe(
+    i18n.translate('myPlugin.myStep.schema.message', {
+      defaultMessage: 'The message to process.',
+    })
+  ),
+  count: z.number().optional().describe(
+    i18n.translate('myPlugin.myStep.schema.count', {
+      defaultMessage: 'How many times to process the message.',
+    })
+  ),
+  mode: z.enum(['partial', 'full']).describe(
+    i18n.translate('myPlugin.myStep.schema.mode', {
+      defaultMessage: 'Processing mode.',
+    })
+  ),
 });
 
 /**
@@ -52,9 +65,7 @@ export const InputSchema = z.object({
  *
  * Defines the structure and types of data that this step will return.
  * This schema is used for validation and type checking to ensure data consistency
- * across workflow steps.
- */
- * Defines all possible structures the step returns.
+ * across workflow steps. Defines all possible structures the step returns.
  */
 export const OutputSchema = z.union([
     z.object({
@@ -74,7 +85,11 @@ export type MyStepOutput = z.infer<typeof OutputSchema>;
  * Example: `id`.
  */
 export const ConfigSchema = z.object({
-  'id': z.string(),
+  'connector-id': z.string().optional().describe(
+    i18n.translate('myPlugin.myStep.schema.connectorId', {
+      defaultMessage: 'The connector to use. Defaults to the workflow default if omitted.',
+    })
+  ),
 });
 
 /**
@@ -85,8 +100,36 @@ export const myStepCommonDefinition: CommonStepDefinition = {
   inputSchema: InputSchema,
   outputSchema: OutputSchema,
   configSchema: ConfigSchema, // Optional: only needed if step has config properties
+  stability: 'tech_preview',
+  documentation: {
+    details: 'Intro prose for generated docs. Keep parameter lists out of here — they come from Zod `.describe()`.',
+    notes: ['Warnings and gotchas rendered after the schema table.'],
+    examples: [
+      `## Basic usage
+\`\`\`yaml
+- name: process_message
+  type: ${MyStepTypeId}
+  with:
+    message: "Hello World"
+\`\`\``,
+    ],
+  },
 };
 ```
+
+**Documentation is the source of truth for generated reference docs.** Put everything a published catalog page needs on the definition:
+
+| Source | Renders as |
+|---|---|
+| `documentation.details` | Intro prose (not the parameter table) |
+| `configSchema` field `.describe()` | Parameter table rows with `Location: top level` |
+| `inputSchema` field `.describe()` | Parameter table rows with `Location: with` |
+| `outputSchema` field `.describe()` | Output-shape table |
+| `documentation.examples` | Titled YAML snippets (`## Title` + fenced yaml) |
+| `documentation.notes` | Warnings/gotchas after the schema |
+
+- Use `.describe(i18n.translate(...))` on every schema field so generated parameter tables stay translatable. Keep parameter lists out of `details`.
+- Set `stability: 'stable'` explicitly for GA custom steps (extension-registered steps otherwise default to tech_preview in the UI).
 
 ### Step 2: Implement Server-Side Definition
 

@@ -27,10 +27,21 @@ export const StepCategories = Object.values(StepCategory) as StepCategory[];
 
 /**
  * Documentation information for a workflow step.
+ *
+ * Together with Zod `.describe()` on `inputSchema` / `configSchema` / `outputSchema`
+ * fields, this is the source of truth for generated reference docs:
+ * - `details` — intro prose (not the parameter table)
+ * - schema `.describe()` — Parameter / Type / Required / Description table
+ *   (`configSchema` = YAML top-level, `inputSchema` = `with:`)
+ * - `outputSchema` `.describe()` — output-shape table
+ * - `examples` — titled YAML snippets (`## Title` + fenced yaml)
+ * - `notes` — warnings and gotchas rendered after the schema
+ *
  */
 export interface StepDocumentation {
   /**
-   * Detailed description with usage examples (markdown supported)
+   * Detailed description with usage notes (markdown supported).
+   * Keep parameter lists out of here — put them on Zod `.describe()` instead.
    * @example "This step allows you to set variables that can be accessed in subsequent steps via `{{ steps.stepName.variableName }}`"
    */
   details?: string;
@@ -53,6 +64,24 @@ export interface StepDocumentation {
    * ```
    */
   examples?: string[];
+
+  /**
+   * Warnings and gotchas rendered after the schema table. Each string becomes
+   * one bullet in a Notes callout.
+   *
+   * @example
+   * notes: [
+   *   'Always set fallbackCategory in production. Without a fallback, a confused model can fail the step.',
+   * ]
+   *
+   * Renders as:
+   * ```md
+   * ::::{note}
+   * - Always set fallbackCategory in production. Without a fallback, a confused model can fail the step.
+   * ::::
+   * ```
+   */
+  notes?: string[];
 }
 
 /**
@@ -89,13 +118,15 @@ export interface BaseStepDefinition<
 
   /**
    * Zod schema for validating step input (the `with` block in YAML).
-   * The input type is automatically inferred from this schema.
+   * Put `.describe()` on every field — generated docs use it for the parameter table
+   * (`Location: with`).
    */
   inputSchema: InputSchema;
 
   /**
    * Zod schema for validating step output.
-   * The output type is automatically inferred from this schema.
+   * Put `.describe()` on every field, including when a field is only present
+   * under certain inputs (e.g. "Present when allowMultipleCategories is true").
    */
   outputSchema: OutputSchema;
 
@@ -103,6 +134,8 @@ export interface BaseStepDefinition<
    * Zod schema for validating step config properties.
    * Defines config properties that appear at the step level (outside the `with` block).
    * Example: `connector-id` for connector steps, `condition` for if steps.
+   * Put `.describe()` on every field — generated docs use it for the parameter table
+   * (`Location: top level`).
    */
   configSchema?: ConfigSchema;
 
