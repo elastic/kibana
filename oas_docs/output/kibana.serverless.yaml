@@ -15273,7 +15273,7 @@ paths:
             application/json:
               examples:
                 bulkCreateSeriesActionResponse:
-                  summary: Two actions processed, one series not found
+                  summary: Two actions processed, one series not found.
                   value:
                     affected_count: 2
                     errors:
@@ -15405,7 +15405,7 @@ paths:
             application/json:
               examples:
                 invalidRequest:
-                  summary: Path is missing required group_hash
+                  summary: Path is missing required group_hash.
                   value:
                     code: BAD_REQUEST
                     details:
@@ -15538,7 +15538,7 @@ paths:
             application/json:
               examples:
                 invalidRequest:
-                  summary: Path is missing required group_hash
+                  summary: Path is missing required group_hash.
                   value:
                     code: BAD_REQUEST
                     details:
@@ -15668,7 +15668,7 @@ paths:
             application/json:
               examples:
                 invalidRequest:
-                  summary: Path is missing required group_hash
+                  summary: Path is missing required group_hash.
                   value:
                     code: BAD_REQUEST
                     details:
