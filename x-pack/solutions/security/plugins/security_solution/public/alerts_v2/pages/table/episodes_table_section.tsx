@@ -82,6 +82,10 @@ const ANALYZE_EVENT_LABEL = i18n.translate(
   'xpack.securitySolution.alertsV2.episodesTable.analyzeEvent',
   { defaultMessage: 'Analyze event' }
 );
+const SESSION_VIEW_LABEL = i18n.translate(
+  'xpack.securitySolution.alertsV2.episodesTable.openSessionView',
+  { defaultMessage: 'Open Session View' }
+);
 
 /** Human-readable column headers, mirroring the v1 alerts table labels. */
 const COLUMN_DISPLAY_NAMES: Record<string, string> = {
@@ -181,7 +185,8 @@ export const EpisodesTableSection = ({ query, timeRange }: EpisodesTableSectionP
   );
   const { rulesCache } = useAlertingRulesCache({ ruleIds, services: { http: services.http } });
 
-  const { openDocumentFlyoutFromHit, openRuleFlyout, openAnalyzer } = useFlyoutApi();
+  const { openDocumentFlyoutFromHit, openRuleFlyout, openAnalyzer, openSessionView } =
+    useFlyoutApi();
 
   const externalCustomRenderers = useMemo<CustomCellRenderer>(
     () => ({
@@ -243,6 +248,18 @@ export const EpisodesTableSection = ({ query, timeRange }: EpisodesTableSectionP
           />
         ),
       },
+      {
+        id: 'openSessionView',
+        render: (Control, { record }) => (
+          <Control
+            data-test-subj="alertsV2OpenSessionView"
+            iconType="sessionViewer"
+            label={SESSION_VIEW_LABEL}
+            tooltipContent={SESSION_VIEW_LABEL}
+            onClick={() => openSessionView({ hit: record })}
+          />
+        ),
+      },
     ];
     if (isEsqlAdvancedSettingEnabled) {
       controls.push({
@@ -267,6 +284,7 @@ export const EpisodesTableSection = ({ query, timeRange }: EpisodesTableSectionP
   }, [
     openDocumentFlyoutFromHit,
     openAnalyzer,
+    openSessionView,
     isEsqlAdvancedSettingEnabled,
     investigateEpisodeInTimeline,
   ]);
