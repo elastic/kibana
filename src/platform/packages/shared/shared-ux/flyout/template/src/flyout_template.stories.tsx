@@ -133,6 +133,7 @@ export const MenuBarPagination: Story = {
     titleIcon: { table: { disable: true } },
     description: { table: { disable: true } },
     footer: { table: { disable: true } },
+    numTabs: { table: { disable: true } },
   },
   args: {
     numUnstructuredBlocks: 1,
@@ -220,6 +221,7 @@ export const MenuBarHistory: Story = {
     description: { table: { disable: true } },
     numPages: { table: { disable: true } },
     footer: { table: { disable: true } },
+    numTabs: { table: { disable: true } },
   },
   args: {
     numLeadingActions: 0,
@@ -265,6 +267,7 @@ const HeaderCollapseOnScrollRender = (args: Args): React.JSX.Element => {
 export const HeaderCollapseOnScroll: Story = {
   argTypes: {
     numPages: { table: { disable: true } },
+    numTabs: { table: { disable: true } },
     headerIsCollapsed: {
       name: 'Force collapsed',
       control: { type: 'boolean' },
@@ -341,6 +344,7 @@ const TabsRender = (args: Args): React.JSX.Element => {
         <FlyoutTemplate.Body>
           {visibleTabs.map(({ id, label, detail }) => (
             <FlyoutTemplate.Body.TabPanel key={id} tabId={id}>
+              {unstructuredBlocks(args.numUnstructuredBlocks)}
               <EuiText size="s">
                 <p>{fillContent(detail)}</p>
                 <p>{fillContent()}</p>
@@ -367,11 +371,10 @@ export const Tabs: StoryObj<Args> = {
       control: { type: 'boolean' },
       table: { category: 'Header' },
     },
-    numLeadingActions: { table: { disable: true } },
-    numTrailingActions: { table: { disable: true } },
+    numLeadingActions: { name: 'Leading actions', table: { category: 'Menu bar' } },
+    numTrailingActions: { name: 'Trailing actions', table: { category: 'Menu bar' } },
     numPages: { table: { disable: true } },
     paginationJump: { table: { disable: true } },
-    numUnstructuredBlocks: { table: { disable: true } },
   },
   args: {
     numTabs: 4,
@@ -379,6 +382,9 @@ export const Tabs: StoryObj<Args> = {
     description: true,
     footer: true,
     headerIsCollapsed: false,
+    numLeadingActions: 0,
+    numTrailingActions: 0,
+    numUnstructuredBlocks: 1,
   },
   render: TabsRender,
 };
