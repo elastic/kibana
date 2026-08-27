@@ -14,7 +14,12 @@ import { SECURITY_ATTACK_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
  * and risking a 400 on an over-long attack title or summary.
  */
 export const MAX_ATTACK_TITLE_LENGTH = 1000;
-export const MAX_ATTACK_SUMMARY_MARKDOWN_LENGTH = 2048;
+export const MAX_ATTACK_SUMMARY_MARKDOWN_LENGTH = 4096;
+export const MAX_ATTACK_DETAILS_MARKDOWN_LENGTH = 16384;
+export const MAX_ATTACK_ENTITY_SUMMARY_MARKDOWN_LENGTH = 1024;
+export const MAX_ATTACK_MITRE_ATTACK_TACTICS = 20;
+export const MAX_ATTACK_MITRE_ATTACK_TACTIC_LENGTH = 128;
+export const MAX_ATTACK_TIMESTAMP_LENGTH = 64;
 export const MAX_ATTACK_INDEX_LENGTH = 256;
 
 /**
@@ -29,10 +34,40 @@ export const MAX_ATTACK_INDEX_LENGTH = 256;
  */
 const AttackAttachmentMetadataSchema = z
   .object({
-    /** The attack's plain-text title, used as the link label in the attachment view. */
+    /**
+     * The attack's plain-text title, used as the link label in the attachment view.
+     *
+     * De-anonymised at attach time, unlike `AttackDiscoveryAlert.title`.
+     */
     title: z.string().max(MAX_ATTACK_TITLE_LENGTH),
-    /** Truncated attack summary markdown captured at attach time. */
+    /**
+     * Truncated attack summary markdown captured at attach time.
+     *
+     * De-anonymised at attach time, unlike `AttackDiscoveryAlert.summaryMarkdown`, so the
+     * activity card can render it without a `replacements` map.
+     */
     summaryMarkdown: z.string().max(MAX_ATTACK_SUMMARY_MARKDOWN_LENGTH).optional(),
+    /**
+     * Truncated attack details markdown captured at attach time, rendered as the activity
+     * card's "Details" section.
+     *
+     * De-anonymised at attach time, unlike `AttackDiscoveryAlert.detailsMarkdown`. Optional
+     * because attachments written before this field existed cannot be backfilled.
+     */
+    detailsMarkdown: z.string().max(MAX_ATTACK_DETAILS_MARKDOWN_LENGTH).optional(),
+    /**
+     * Truncated one-line entity summary markdown captured at attach time.
+     *
+     * De-anonymised at attach time, unlike `AttackDiscoveryAlert.entitySummaryMarkdown`.
+     */
+    entitySummaryMarkdown: z.string().max(MAX_ATTACK_ENTITY_SUMMARY_MARKDOWN_LENGTH).optional(),
+    /** The MITRE ATT&CK tactic names the attack maps to, rendered as the attack chain. */
+    mitreAttackTactics: z
+      .array(z.string().max(MAX_ATTACK_MITRE_ATTACK_TACTIC_LENGTH))
+      .max(MAX_ATTACK_MITRE_ATTACK_TACTICS)
+      .optional(),
+    /** ISO timestamp the attack was detected on, rendered as the card's "Detected on" line. */
+    timestamp: z.string().max(MAX_ATTACK_TIMESTAMP_LENGTH).optional(),
     /** Optional risk score captured at attach time. The attack document has no `severity`. */
     riskScore: z.number().int().min(0).optional(),
     /** Number of de-anonymised constituent alerts attached alongside the attack. */

@@ -15,7 +15,11 @@ import {
 } from '@kbn/cases-plugin/common';
 import { MAX_ALERTS_PER_CASE } from '@kbn/cases-plugin/common/constants';
 import type { AttackAttachmentPayload } from '../../../../common/cases/attachments/attack';
-import { AttackAttachmentPayloadSchema } from '../../../../common/cases/attachments/attack';
+import {
+  AttackAttachmentPayloadSchema,
+  MAX_ATTACK_SUMMARY_MARKDOWN_LENGTH,
+  MAX_ATTACK_TITLE_LENGTH,
+} from '../../../../common/cases/attachments/attack';
 import {
   buildAttackAttachments,
   generateAttackAttachmentsWithoutOwner,
@@ -343,12 +347,15 @@ describe('buildAttackAttachments', () => {
 
   it('truncates the title and summary to the schema bounds', () => {
     const { attachments } = buildAttackAttachments(
-      attackToAttach({ title: 'a'.repeat(1200), summaryMarkdown: 'b'.repeat(3000) })
+      attackToAttach({
+        title: 'a'.repeat(MAX_ATTACK_TITLE_LENGTH + 200),
+        summaryMarkdown: 'b'.repeat(MAX_ATTACK_SUMMARY_MARKDOWN_LENGTH + 1000),
+      })
     );
 
     const metadata = attachments[0].metadata as { title: string; summaryMarkdown: string };
-    expect(metadata.title).toHaveLength(1000);
-    expect(metadata.summaryMarkdown).toHaveLength(2048);
+    expect(metadata.title).toHaveLength(MAX_ATTACK_TITLE_LENGTH);
+    expect(metadata.summaryMarkdown).toHaveLength(MAX_ATTACK_SUMMARY_MARKDOWN_LENGTH);
     expect(
       AttackAttachmentPayloadSchema.safeParse({ ...attachments[0], owner: 'securitySolution' })
         .success
