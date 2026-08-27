@@ -92,6 +92,8 @@ export class WebElementWrapper {
     return elements;
   }
 
+  // Locator is re-found from the document root on retry. Omit it for child finds
+  // so retry cannot click a different element.
   private _wrap(otherWebElement: WebElement | WebElementWrapper, locator: By | null = null) {
     return WebElementWrapper.create(
       otherWebElement,
@@ -137,8 +139,7 @@ export class WebElementWrapper {
       );
 
       await setTimeoutAsync(200);
-      // Locators are resolved from the document root. Child finds must not
-      // attach a parent-relative locator, or retry clicks a different element.
+      // WebElement reference id will be updated if element is no longer in DOM (StaleElementReferenceError)
       this._webElement = await this.driver.findElement(this.locator);
       return await this.retryCall(fn, attemptsRemaining - 1);
     }
