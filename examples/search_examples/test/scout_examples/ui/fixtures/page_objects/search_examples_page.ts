@@ -139,9 +139,9 @@ export class SearchExamplesPage {
 
   /**
    * Temporary until Apps DX supports replace-without-clear on comboBox.
-   * Select by typing + exact option click (no clear). Skip when the value is
-   * already selected — EUI hides that option ("You've selected all available
-   * options") and a click wait times out.
+   * Skip when the value is already selected — EUI singleSelection hides that
+   * option ("You've selected all available options"). Re-check after opening:
+   * IndexPatternSelect may hydrate the plain-text input only then.
    */
   private async selectSingleComboOption(
     testSubj: string,
@@ -152,11 +152,16 @@ export class SearchExamplesPage {
     const root = this.page.testSubj.locator(testSubj);
     await root.locator('[data-test-subj="comboBoxInput"]').waitFor({ state: 'visible' });
 
-    if ((await this.getSingleComboSelectedLabel(root)) === normalizedLabel) {
+    if (await this.isSingleComboOptionSelected(root, normalizedLabel)) {
       return;
     }
 
     await root.locator('[data-test-subj="comboBoxInput"]').click();
+    if (await this.isSingleComboOptionSelected(root, normalizedLabel)) {
+      await this.page.keyboard.press('Escape');
+      return;
+    }
+
     const searchInput = root.locator('[data-test-subj="comboBoxSearchInput"]');
     await searchInput.fill(label);
 
@@ -166,6 +171,11 @@ export class SearchExamplesPage {
     await option.waitFor({ state: 'visible', timeout });
     await option.click();
     await listbox.waitFor({ state: 'hidden', timeout });
+  }
+
+  private async isSingleComboOptionSelected(root: Locator, label: string): Promise<boolean> {
+    const selected = await this.getSingleComboSelectedLabel(root);
+    return selected?.toLowerCase() === label.toLowerCase();
   }
 
   private async getSingleComboSelectedLabel(root: Locator): Promise<string | undefined> {
