@@ -269,7 +269,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
                   </ul>
                 </>
               }
-              type="indexMapping"
+              type="mapping"
             />
           </>
         );

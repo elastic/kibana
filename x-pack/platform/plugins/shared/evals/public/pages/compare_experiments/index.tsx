@@ -18,7 +18,6 @@ import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiLink,
-  EuiCallOut,
   EuiLoadingSpinner,
   EuiPageSection,
   EuiPanel,
@@ -31,6 +30,7 @@ import {
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { useHistory, useLocation } from 'react-router-dom';
 import { TraceWaterfall, useTraceSpans } from '@kbn/llm-trace-waterfall';
 import type { PairedTTestResult } from '@kbn/evals-common';
@@ -40,6 +40,7 @@ import {
   useEvaluationExperiment,
   useExperimentDatasetExamples,
 } from '../../hooks/use_evals_api';
+import { EvaluatorModelsBadge } from '../../components/evaluator_models_badge';
 import * as i18n from './translations';
 
 const SIGNIFICANCE_THRESHOLD = 0.05;
@@ -145,8 +146,10 @@ const ExperimentHeader: React.FC<{
   const branch = experimentData?.git_branch;
   const timestamp = experimentData?.timestamp;
   const taskModel = experimentData?.task_model?.id;
-  const evaluatorModel = experimentData?.evaluator_model?.id;
-  const displayName = experimentData?.experiment_name || experimentId;
+  const evaluatorModels = experimentData?.evaluator_models ?? [];
+  const suiteId =
+    experimentData?.suite_id !== 'unknown-suite' ? experimentData?.suite_id : undefined;
+  const displayName = suiteId ?? experimentData?.experiment_name ?? experimentId;
   const detailLocation = {
     pathname: `/experiments/${encodeURIComponent(experimentId)}`,
     search: executionId ? `?execution_id=${encodeURIComponent(executionId)}` : '',
@@ -237,18 +240,17 @@ const ExperimentHeader: React.FC<{
               </EuiFlexItem>
             </>
           )}
-          {evaluatorModel && (
-            <>
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs">
-                  <strong>{i18n.STAT_EVALUATOR_MODEL}</strong>
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiBadge color="accent">{evaluatorModel}</EuiBadge>
-              </EuiFlexItem>
-            </>
-          )}
+          {/* Always shown, unlike the task model above: an experiment scored only by code
+              evaluators has no judge, and the badge says so rather than leaving the reader to
+              guess whether the field is missing or empty. */}
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs">
+              <strong>{i18n.STAT_EVALUATOR_MODEL}</strong>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EvaluatorModelsBadge models={evaluatorModels} />
+          </EuiFlexItem>
         </EuiFlexGroup>
       )}
     </EuiPanel>
@@ -429,7 +431,7 @@ const ExampleDrilldownFlyout: React.FC<{
                 <EuiToolTip content={i18n.FLYOUT_TRACE_A} disableScreenReaderOutput>
                   <EuiButtonIcon
                     size="xs"
-                    iconType="apmTrace"
+                    iconType="chartWaterfall"
                     color="primary"
                     aria-label={i18n.FLYOUT_TRACE_A}
                     onClick={() => setSelectedTraceId(item.traceIdA)}
@@ -442,7 +444,7 @@ const ExampleDrilldownFlyout: React.FC<{
                 <EuiToolTip content={i18n.FLYOUT_TRACE_B} disableScreenReaderOutput>
                   <EuiButtonIcon
                     size="xs"
-                    iconType="apmTrace"
+                    iconType="chartWaterfall"
                     color="accent"
                     aria-label={i18n.FLYOUT_TRACE_B}
                     onClick={() => setSelectedTraceId(item.traceIdB)}
@@ -477,7 +479,7 @@ const ExampleDrilldownFlyout: React.FC<{
         <EuiFlyoutBody>
           {!isLoading && pairs.length === 0 ? (
             <EuiEmptyPrompt
-              iconType="search"
+              iconType="magnify"
               title={<h3>{i18n.FLYOUT_NO_EXAMPLES_TITLE}</h3>}
               body={<p>{i18n.FLYOUT_NO_EXAMPLES_BODY}</p>}
             />
@@ -795,7 +797,7 @@ export const CompareExperimentsPage: React.FC = () => {
                   ? 'check'
                   : csvCopyState === 'failed'
                   ? 'warning'
-                  : 'exportAction'
+                  : 'upload'
               }
               onClick={handleCsvExport}
               disabled={csvCopyState !== 'idle'}
@@ -868,15 +870,12 @@ export const CompareExperimentsPage: React.FC = () => {
         <>
           {(data.pairing.truncatedA || data.pairing.truncatedB) && (
             <>
-              <EuiCallOut
+              <KbnWarningCallout
                 announceOnMount
                 title={i18n.TRUNCATION_WARNING_TITLE}
-                color="warning"
-                iconType="warning"
+                text={i18n.TRUNCATION_WARNING_BODY}
                 size="s"
-              >
-                <p>{i18n.TRUNCATION_WARNING_BODY}</p>
-              </EuiCallOut>
+              />
               <EuiSpacer size="m" />
             </>
           )}
@@ -930,7 +929,7 @@ export const CompareExperimentsPage: React.FC = () => {
 
           {sortedResults.length === 0 ? (
             <EuiEmptyPrompt
-              iconType="search"
+              iconType="magnify"
               title={<h3>{i18n.NO_RESULTS_TITLE}</h3>}
               body={<p>{i18n.NO_RESULTS_BODY}</p>}
               actions={[

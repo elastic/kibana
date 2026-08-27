@@ -15,6 +15,7 @@
     "@kbn/management-plugin",
     "@kbn/kibana-react-plugin",
     "@kbn/storage-adapter",
+    "@kbn/occ",
     "@kbn/es-errors",
     "@kbn/evals-common",
     "@kbn/zod-helpers",
@@ -47,6 +48,8 @@
     "@kbn/core-spaces-common",
     "@kbn/crypto",
     "@kbn/std",
-    "@kbn/repo-info"
+    "@kbn/repo-info",
+    "@kbn/ui-callout",
+    "@kbn/core-http-browser-mocks"
   ]
 }

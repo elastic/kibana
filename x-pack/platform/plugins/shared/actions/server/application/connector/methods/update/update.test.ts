@@ -734,6 +734,31 @@ describe('update()', () => {
         expect.objectContaining({ connectorId: 'connector-id', skipRevocation: true })
       );
     });
+
+    test('evicts clients before deleting connector tokens', async () => {
+      const callOrder: string[] = [];
+      const evictClientPool = jest.fn().mockImplementation(async () => {
+        callOrder.push('evictClientPoolStarted');
+        await Promise.resolve();
+        callOrder.push('evictClientPoolFinished');
+      });
+      connectorTokenClient.deleteConnectorTokens.mockImplementationOnce(async () => {
+        callOrder.push('deleteConnectorTokens');
+      });
+
+      await update({
+        context: { ...mockContext, evictClientPool },
+        id: 'connector-id',
+        action: { name: 'new name', config: {}, secrets: {} },
+      });
+
+      expect(evictClientPool).toHaveBeenCalledWith('connector-id');
+      expect(callOrder).toEqual([
+        'evictClientPoolStarted',
+        'evictClientPoolFinished',
+        'deleteConnectorTokens',
+      ]);
+    });
   });
 
   describe('auditLogger', () => {

@@ -475,7 +475,6 @@ export const OpensearchAwsOpensearchService: ConnectorSpec = {
         '/_cluster/health'
       );
       return {
-        ok: true,
         message: `Successfully connected to OpenSearch cluster "${health.cluster_name}" (status: ${health.status}).`,
       };
     },

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { apiTest, tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import { ENTITY_STORE_ROUTES } from '@kbn/entity-store/common';
@@ -126,39 +127,83 @@ apiTest.describe(
       });
       packagePolicyId = packagePolicyRes.body?.item?.id ?? '';
 
+      // The pad-ml module registers asynchronously after the PAD integration install, so retry
+      // until it is recognized instead of firing a setup that fails silently before it exists.
+      const setupMlModuleWithRetry = async (
+        module: string,
+        body: Record<string, unknown>
+      ): Promise<void> => {
+        const maxAttempts = 10;
+        for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+          const response = await apiClient.post(`/internal/ml/modules/setup/${module}`, {
+            headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+            responseType: 'json',
+            body,
+          });
+          const jobs: Array<{ success?: boolean; error?: { status?: number } }> =
+            response.body?.jobs ?? [];
+          const succeeded =
+            response.statusCode === 200 &&
+            jobs.length > 0 &&
+            jobs.every((job) => job.success || (job.error?.status ?? 500) < 500);
+          if (succeeded) {
+            return;
+          }
+          if (attempt < maxAttempts) {
+            await setTimeoutAsync(3000);
+          }
+        }
+        throw new Error(`Failed to set up ML module "${module}" after ${maxAttempts} attempts`);
+      };
+
       // Create PAD ML jobs
       log.debug(`Setting up PAD ML jobs...`);
-      await apiClient
-        .post('/internal/ml/modules/setup/pad-ml', {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
-          responseType: 'json',
-          body: {
-            prefix: '',
-            groups: ['security', 'ftr'],
-            indexPatternName: 'logs-*',
-            useDedicatedIndex: false,
-            startDatafeed: true,
-            start: startMs,
-          },
-        })
-        .catch(() => {});
+      await setupMlModuleWithRetry('pad-ml', {
+        prefix: '',
+        groups: ['security', 'ftr'],
+        indexPatternName: 'logs-*',
+        useDedicatedIndex: false,
+        startDatafeed: true,
+        start: startMs,
+      });
+
+      // DIAGNOSTIC (theory 1): verify the PAD ML job was created with a non-empty config.
+      // In MKI the job config has been theorised to be empty, which would cause baseline
+      // enrichment to silently fail.
+      try {
+        const padJobRes = await esClient.ml.getJobs({
+          job_id: 'pad_windows_rare_region_name_by_user_ea',
+        });
+        const padJob = padJobRes.jobs?.[0];
+        if (!padJob) {
+          log.info(`[DIAG] PAD job not found — job config is missing entirely`);
+        } else {
+          const analysisConfig = padJob.analysis_config;
+          const detectorCount = analysisConfig?.detectors?.length ?? 0;
+          log.info(
+            `[DIAG] PAD job config: detectors=${detectorCount}, ` +
+              `analysisConfig=${JSON.stringify(analysisConfig)}`
+          );
+          if (detectorCount === 0) {
+            log.info(
+              `[DIAG] WARNING: PAD job analysis_config.detectors is empty — theory 1 confirmed`
+            );
+          }
+        }
+      } catch (err) {
+        log.info(`[DIAG] Failed to fetch PAD job config: ${err}`);
+      }
 
       // Create Security: Authentication ML jobs
       log.debug(`Setting up Security: Authentication ML jobs...`);
-      await apiClient
-        .post('/internal/ml/modules/setup/security_auth', {
-          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
-          responseType: 'json',
-          body: {
-            prefix: '',
-            groups: ['security', 'authentication', 'ftr'],
-            indexPatternName: 'logs-*',
-            useDedicatedIndex: false,
-            startDatafeed: true,
-            start: startMs,
-          },
-        })
-        .catch(() => {});
+      await setupMlModuleWithRetry('security_auth', {
+        prefix: '',
+        groups: ['security', 'authentication', 'ftr'],
+        indexPatternName: 'logs-*',
+        useDedicatedIndex: false,
+        startDatafeed: true,
+        start: startMs,
+      });
 
       // Index source events that determine baseline behavior for the rare detector.
       log.debug(`Indexing test source events...`);
@@ -170,6 +215,73 @@ apiTest.describe(
         ]),
         refresh: true,
       });
+
+      // DIAGNOSTIC (theory 2): verify the source index mappings applied the right types for
+      // the fields the PAD rare detector queries.  If dynamic mapping mapped
+      // source.geo.region_name or user.name as non-keyword the baseline lookup will
+      // return nothing and baselineValues will be empty.
+      try {
+        const mappingRes = await esClient.indices.getMapping({ index: SOURCE_EVENTS_INDEX });
+        const indexNames = Object.keys(mappingRes);
+        for (const indexName of indexNames) {
+          const props = (mappingRes[indexName]?.mappings?.properties ?? {}) as Record<
+            string,
+            unknown
+          >;
+          const sourceGeo = (props.source as Record<string, unknown> | undefined)?.properties as
+            | Record<string, unknown>
+            | undefined;
+          const regionNameMapping = (sourceGeo?.geo as Record<string, unknown> | undefined)
+            ?.properties as Record<string, unknown> | undefined;
+          const regionNameType = (
+            regionNameMapping?.region_name as Record<string, unknown> | undefined
+          )?.type;
+          const userProps = (props.user as Record<string, unknown> | undefined)?.properties as
+            | Record<string, unknown>
+            | undefined;
+          const userNameType = (userProps?.name as Record<string, unknown> | undefined)?.type;
+          log.info(
+            `[DIAG] ${indexName} mappings: source.geo.region_name.type=${regionNameType}, user.name.type=${userNameType}`
+          );
+          if (regionNameType !== 'keyword' && regionNameType !== undefined) {
+            log.info(
+              `[DIAG] WARNING: source.geo.region_name mapped as "${regionNameType}" not keyword — theory 2 confirmed`
+            );
+          }
+        }
+      } catch (err) {
+        log.info(`[DIAG] Failed to fetch source index mappings: ${err}`);
+      }
+
+      // DIAGNOSTIC (theory 2 continued): confirm the source events were actually indexed with
+      // the expected geo data so we can tell mapping issues apart from indexing failures.
+      try {
+        const searchRes = await esClient.search({
+          index: SOURCE_EVENTS_INDEX,
+          query: {
+            bool: {
+              must: [
+                { term: { 'user.name': 'carol.davis' } },
+                { exists: { field: 'source.geo.region_name' } },
+              ],
+            },
+          },
+          _source: ['user.name', 'source.geo.region_name', '@timestamp'],
+          size: 10,
+        });
+        const hits = searchRes.hits?.hits ?? [];
+        log.info(
+          `[DIAG] Source events for carol.davis with source.geo.region_name: count=${hits.length}, ` +
+            `docs=${JSON.stringify(hits.map((h) => h._source))}`
+        );
+        if (hits.length === 0) {
+          log.info(
+            `[DIAG] WARNING: no carol.davis source events with geo region found — baseline enrichment will return empty`
+          );
+        }
+      } catch (err) {
+        log.info(`[DIAG] Failed to search source events: ${err}`);
+      }
 
       // Index anomaly records for the test entities.
       log.debug(`Indexing test anomaly records...`);

@@ -14,12 +14,6 @@
       ],
       "@kbn/ui-chrome-layout": [
         "../../chrome-layout/target/index.d.ts"
-      ],
-      "@kbn/ui-chrome-layout-constants": [
-        "../../chrome-layout-constants/target/index.d.ts"
-      ],
-      "@kbn/ui-chrome-layout-utils": [
-        "../../chrome-layout-utils/target/index.d.ts"
       ]
     }
   },

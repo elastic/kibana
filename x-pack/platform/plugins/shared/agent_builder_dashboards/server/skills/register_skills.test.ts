@@ -6,7 +6,7 @@
  */
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
-import { dashboardManagementSkill } from './dashboard_management_skill';
+import { dashboardManagementSkill as skill } from './dashboard_management_skill';
 import { registerSkills } from './register_skills';
 
 describe('registerSkills', () => {
@@ -16,30 +16,30 @@ describe('registerSkills', () => {
       skills: { register },
     } as unknown as AgentBuilderPluginSetup;
 
-    await registerSkills(agentBuilder);
+    registerSkills(agentBuilder);
 
     expect(register).toHaveBeenCalledTimes(1);
-    expect(register).toHaveBeenCalledWith(dashboardManagementSkill);
+    expect(register).toHaveBeenCalledWith(expect.objectContaining({ id: 'dashboard-management' }));
   });
 
   it('includes SML discovery instructions in the skill content', () => {
-    expect(dashboardManagementSkill.content).toContain('platform.core.sml_search');
-    expect(dashboardManagementSkill.content).toContain('platform.core.sml_attach');
+    expect(skill.content).toContain('platform.core.sml_search');
+    expect(skill.content).toContain('platform.core.sml_attach');
   });
 
   it('inlines the dashboard design guidance directly in the skill body', () => {
-    expect(dashboardManagementSkill.content).toContain('Dashboard Composition Guidelines');
-    expect(dashboardManagementSkill.content).toContain('Grid Packing Rules');
+    expect(skill.content).toContain('Dashboard Composition Guidelines');
+    expect(skill.content).toContain('Grid Packing Rules');
   });
 
   it('includes the shared chart type selection guidance', () => {
-    expect(dashboardManagementSkill.content).toContain('Chart Type Guidance');
-    expect(dashboardManagementSkill.content).toContain('Available chart types:');
-    expect(dashboardManagementSkill.content).toContain('- region_map:');
-    expect(dashboardManagementSkill.content).toContain(
-      "Choose 'mosaic' when visualizing the joint distribution of two categorical dimensions"
+    expect(skill.content).toContain('Chart Type Guidance');
+    expect(skill.content).toContain('Available chart types');
+    expect(skill.content).toContain('- region_map:');
+    expect(skill.content).toContain(
+      'Choose for cross-tabulations (e.g. "request methods by status code"'
     );
-    expect(dashboardManagementSkill.content).toContain(
+    expect(skill.content).toContain(
       'provide a new `chartType` when the request changes the chart family'
     );
   });

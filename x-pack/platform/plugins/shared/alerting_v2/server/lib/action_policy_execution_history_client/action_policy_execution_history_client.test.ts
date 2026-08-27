@@ -10,7 +10,7 @@ import { EXECUTION_HISTORY_DEFAULT_PER_PAGE } from '@kbn/alerting-v2-schemas';
 import type { ActionPolicyClient } from '../action_policy_client/action_policy_client';
 import type { RulesClient } from '../rules_client';
 import type { EventLogServiceContract } from '../services/event_log_service/event_log_service';
-import type { LoggerServiceContract } from '../services/logger_service/logger_service';
+import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import type { AlertingServerStartDependencies } from '../../types';
 import { ACTION_POLICY_EVENT_ACTIONS } from '../dispatcher/steps/constants';
 import { ACTION_POLICY_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
@@ -82,12 +82,7 @@ const createMocks = () => {
       getSpaceId: jest.fn().mockReturnValue('default'),
     },
   } as unknown as AlertingServerStartDependencies['spaces'];
-  const logger: jest.Mocked<LoggerServiceContract> = {
-    debug: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
-  };
+  const { loggerService, mockLogger } = createLoggerService();
 
   const client = new ActionPolicyExecutionHistoryClient(
     eventLogService,
@@ -95,7 +90,7 @@ const createMocks = () => {
     rulesClient,
     workflowsManagement as any,
     spaces,
-    logger
+    loggerService
   );
 
   return {
@@ -105,7 +100,7 @@ const createMocks = () => {
     rulesClient,
     workflowsManagement,
     spaces,
-    logger,
+    logger: mockLogger,
   };
 };
 
@@ -559,8 +554,11 @@ describe('ActionPolicyExecutionHistoryClient', () => {
           rules: [{ name: 'Rule 1' }],
           workflows: [{ id: 'w-1', name: null }],
         });
-        expect(mocks.logger.error).toHaveBeenCalledWith(
-          expect.objectContaining({ code: 'EXECUTION_HISTORY_WORKFLOW_LOOKUP_FAILED' })
+        expect(mocks.logger.warn).toHaveBeenCalledWith(
+          'Execution history lookup failed',
+          expect.objectContaining({
+            labels: { code: 'EXECUTION_HISTORY_WORKFLOW_LOOKUP_FAILED' },
+          })
         );
       });
 
@@ -572,8 +570,11 @@ describe('ActionPolicyExecutionHistoryClient', () => {
         const result = await mocks.client.listExecutionHistory({ request });
 
         expect(result.items[0].policy).toEqual({ id: 'p-1', name: null });
-        expect(mocks.logger.error).toHaveBeenCalledWith(
-          expect.objectContaining({ code: 'EXECUTION_HISTORY_POLICY_LOOKUP_FAILED' })
+        expect(mocks.logger.warn).toHaveBeenCalledWith(
+          'Execution history lookup failed',
+          expect.objectContaining({
+            labels: { code: 'EXECUTION_HISTORY_POLICY_LOOKUP_FAILED' },
+          })
         );
       });
 
@@ -585,8 +586,11 @@ describe('ActionPolicyExecutionHistoryClient', () => {
         const result = await mocks.client.listExecutionHistory({ request });
 
         expect(result.items[0].rules[0]).toEqual({ id: 'r-1', name: null });
-        expect(mocks.logger.error).toHaveBeenCalledWith(
-          expect.objectContaining({ code: 'EXECUTION_HISTORY_RULE_LOOKUP_FAILED' })
+        expect(mocks.logger.warn).toHaveBeenCalledWith(
+          'Execution history lookup failed',
+          expect.objectContaining({
+            labels: { code: 'EXECUTION_HISTORY_RULE_LOOKUP_FAILED' },
+          })
         );
       });
     });

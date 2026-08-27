@@ -102,6 +102,9 @@ export class InspectorService extends FtrService {
    * @param size rows count
    */
   public async setTablePageSize(size: number): Promise<void> {
+    // open() only waits for the panel, not the data table, so wait for the table to render
+    // before touching pagination — clicking the toggle mid-render no-ops the popover.
+    await this.testSubjects.existOrFail('inspectorTable', { timeout: 20_000 });
     await this.testSubjects.click('tablePaginationPopoverButton');
     // The buttons for setting table page size are in a popover element. This popover
     // element appears as if it's part of the inspectorPanel but it's really attached

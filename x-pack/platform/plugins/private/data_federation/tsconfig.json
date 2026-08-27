@@ -18,7 +18,10 @@
     "@kbn/cloud-plugin",
     "@kbn/shared-ux-router",
     "@kbn/features-plugin",
-    "@kbn/kibana-react-plugin"
+    "@kbn/kibana-react-plugin",
+    "@kbn/app-header",
+    "@kbn/core-doc-links-browser",
+    "@kbn/ui-callout",
   ],
   "exclude": [
     "target/**/*",

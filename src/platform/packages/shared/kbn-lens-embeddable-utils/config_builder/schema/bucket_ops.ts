@@ -12,7 +12,6 @@ import { filterWithLabelSchema } from './filter';
 import {
   LENS_HISTOGRAM_EMPTY_ROWS_DEFAULT,
   LENS_HISTOGRAM_GRANULARITY_DEFAULT_VALUE,
-  LENS_HISTOGRAM_GRANULARITY_MAX,
   LENS_HISTOGRAM_GRANULARITY_MIN,
   LENS_TERMS_LIMIT_DEFAULT,
   LENS_DATE_HISTOGRAM_EMPTY_ROWS_DEFAULT,
@@ -328,12 +327,19 @@ export const bucketHistogramOperationSchema = z
       description: 'Field to be used for the histogram.',
     }),
     /**
-     * Granularity of the histogram
+     * Granularity of the histogram: the target number of buckets (bars). This maps directly to the
+     * Lens `maxBars` value and controls how finely the field is divided into evenly spaced,
+     * "nice"-valued intervals. It is a target, not a guarantee: the effective ceiling is the
+     * `histogram:maxBars` advanced setting (default 1000), which is deployment-configurable and can
+     * be raised or lowered by an admin. Because that ceiling is only known at render time, no upper
+     * bound is enforced here — values above the configured ceiling are clamped when the chart runs.
+     * Use `'auto'` (the default) to let Lens pick the granularity.
      */
     granularity: z
       .union([
-        z.number().min(LENS_HISTOGRAM_GRANULARITY_MIN).max(LENS_HISTOGRAM_GRANULARITY_MAX).meta({
-          description: 'Granularity of the histogram.',
+        z.number().min(LENS_HISTOGRAM_GRANULARITY_MIN).meta({
+          description:
+            'Target number of histogram buckets (bars). The maximum is controlled by the `histogram:maxBars` advanced setting, which defaults to 1000.',
         }),
         z.literal('auto'),
       ])

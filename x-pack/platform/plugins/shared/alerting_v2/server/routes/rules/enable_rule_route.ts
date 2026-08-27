@@ -17,6 +17,7 @@ import { ALERTING_V2_RULE_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ruleIdParamsSchema } from './route_schemas';
+import { enableRuleOasExamples } from './enable_rule_oas_example';
 
 @injectable()
 export class EnableRuleRoute extends BaseAlertingRoute {
@@ -30,6 +31,7 @@ export class EnableRuleRoute extends BaseAlertingRoute {
   static routeOptions = {
     summary: 'Enable a rule',
     description: 'Enable a rule by identifier.',
+    oasOperationObject: enableRuleOasExamples,
   } as const;
   static schemas = {
     request: {

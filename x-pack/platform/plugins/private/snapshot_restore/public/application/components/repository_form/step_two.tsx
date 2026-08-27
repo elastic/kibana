@@ -10,7 +10,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiDescribedFormGroup,
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,6 +19,7 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import type { Repository } from '../../../../common/types';
 import { REPOSITORY_TYPES } from '../../../../common/constants';
@@ -270,7 +270,7 @@ export const RepositoryFormStepTwo: React.FunctionComponent<Props> = ({
     }
     return (
       <Fragment>
-        <EuiCallOut
+        <KbnDangerCallout
           title={
             <FormattedMessage
               id="xpack.snapshotRestore.repositoryForm.validationErrorTitle"
@@ -278,8 +278,6 @@ export const RepositoryFormStepTwo: React.FunctionComponent<Props> = ({
             />
           }
           role="alert"
-          color="danger"
-          iconType="cross"
           data-test-subj="repositoryFormError"
         />
         <EuiSpacer size="m" />

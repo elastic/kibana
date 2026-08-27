@@ -6,8 +6,10 @@
  */
 
 import type { HttpSetup } from '@kbn/core-http-browser';
-import type { Conversation, ConversationWithoutRounds } from '@kbn/agent-builder-common';
+import type { FeedbackChipId } from '@kbn/agent-builder-common';
 import type {
+  ListConversationsResponseItem,
+  GetConversationResponse,
   ListConversationsResponse,
   DeleteConversationResponse,
   MarkPinnedConversationResponse,
@@ -29,7 +31,7 @@ export class ConversationsService {
     this.http = http;
   }
 
-  async list({ agentId }: ConversationListOptions): Promise<ConversationWithoutRounds[]> {
+  async list({ agentId }: ConversationListOptions): Promise<ListConversationsResponseItem[]> {
     const response = await this.http.get<ListConversationsResponse>(
       `${publicApiPath}/conversations`,
       {
@@ -42,7 +44,9 @@ export class ConversationsService {
   }
 
   async get({ conversationId }: ConversationGetOptions) {
-    return await this.http.get<Conversation>(`${publicApiPath}/conversations/${conversationId}`);
+    return await this.http.get<GetConversationResponse>(
+      `${publicApiPath}/conversations/${conversationId}`
+    );
   }
 
   async delete({ conversationId }: ConversationDeleteOptions) {
@@ -70,6 +74,25 @@ export class ConversationsService {
     return await this.http.post<MarkReadConversationResponse>(
       `${internalApiPath}/conversations/${conversationId}/_mark_read`,
       { body: JSON.stringify({ read }) }
+    );
+  }
+
+  async submitRoundFeedback({
+    conversationId,
+    roundId,
+    vote,
+    chips,
+    comment,
+  }: {
+    conversationId: string;
+    roundId: string;
+    vote: 'up' | 'down' | null;
+    chips?: FeedbackChipId[];
+    comment?: string;
+  }): Promise<void> {
+    await this.http.post(
+      `${internalApiPath}/conversations/${conversationId}/rounds/${roundId}/_feedback`,
+      { body: JSON.stringify({ vote, chips, comment }) }
     );
   }
 

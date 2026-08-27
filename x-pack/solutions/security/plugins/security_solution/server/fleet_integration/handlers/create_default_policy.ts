@@ -12,6 +12,7 @@ import type { ExperimentalFeatures } from '../../../common';
 import type { TelemetryConfigProvider } from '../../../common/telemetry_config/telemetry_config_provider';
 import {
   policyFactory as policyConfigFactory,
+  policyFactoryWithoutPaidEnterpriseFeatures as policyConfigFactoryWithoutPaidEnterpriseFeatures,
   policyFactoryWithoutPaidFeatures as policyConfigFactoryWithoutPaidFeatures,
 } from '../../../common/endpoint/models/policy_config';
 import type { LicenseService } from '../../../common/license/license';
@@ -62,6 +63,8 @@ export const createDefaultPolicy = (
 
   if (!licenseService.isPlatinumPlus()) {
     defaultPolicyPerType = policyConfigFactoryWithoutPaidFeatures(defaultPolicyPerType);
+  } else if (!licenseService.isEnterprise()) {
+    defaultPolicyPerType = policyConfigFactoryWithoutPaidEnterpriseFeatures(defaultPolicyPerType);
   }
 
   // If no Policy Protection allowed (ex. serverless)

@@ -11,13 +11,17 @@ import {
   EuiFieldNumber,
   EuiFieldText,
   EuiFormRow,
+  EuiLink,
   EuiSelect,
   EuiSpacer,
+  EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
 import { useController } from 'react-hook-form';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
+import type { DataFederationKibanaServices } from '../types';
 import { createDatasetFlyoutStrings } from './create_dataset_flyout_i18n';
 import {
   validateMaxErrorRatio,
@@ -105,6 +109,11 @@ export function CreateDatasetFlyoutSettings({
 }: {
   control: Control<CreateDatasetFormValues>;
 }) {
+  const {
+    services: { docLinks },
+  } = useKibana<DataFederationKibanaServices>();
+  const dataFederationLinks = docLinks.links.dataFederation;
+
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
   const advancedId = useGeneratedHtmlId({ prefix: 'createDatasetFlyoutAdvancedSettings' });
 
@@ -148,7 +157,7 @@ export function CreateDatasetFlyoutSettings({
       <EuiButtonEmpty
         size="s"
         flush="left"
-        iconType={isAdvancedOpen ? 'arrowDown' : 'arrowRight'}
+        iconType={isAdvancedOpen ? 'chevronSingleDown' : 'chevronSingleRight'}
         aria-expanded={isAdvancedOpen}
         aria-controls={advancedId}
         onClick={() => setIsAdvancedOpen((v) => !v)}
@@ -159,6 +168,12 @@ export function CreateDatasetFlyoutSettings({
           : createDatasetFlyoutStrings.advancedSettingsShow()}
       </EuiButtonEmpty>
       <div id={advancedId} hidden={!isAdvancedOpen}>
+        <EuiSpacer size="s" />
+        <EuiText size="xs" color="subdued">
+          <EuiLink href={dataFederationLinks.datasetSettings} target="_blank">
+            {createDatasetFlyoutStrings.settingsLearnMore()}
+          </EuiLink>
+        </EuiText>
         <EuiSpacer size="s" />
         {/* Format-independent advanced settings */}
         <UniversalAdvancedSettings control={control} />

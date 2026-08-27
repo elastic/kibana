@@ -109,6 +109,31 @@ export const getRangesliderControlFactory = (): EmbeddablePublicDefinition<
         ...panelIsRelatedByGlobalFilters(dataControlManager.api.useGlobalFilters$),
       });
 
+      const controlFetch$ = fetch$({ uuid, parentApi });
+      const { minMax$: minMaxObservable$, cancelRequests: cancelMinMaxRequests } = minMax$({
+        controlFetch$,
+        dataViews$: dataControlManager.api.dataViews$,
+        fieldName$: dataControlManager.api.fieldName$,
+        esqlQuery$: dataControlManager.api.esqlQuery$,
+        valuesSource$: dataControlManager.api.valuesSource$,
+        useGlobalFilters$: dataControlManager.api.useGlobalFilters$,
+        setIsLoading: (isLoading: boolean) => {
+          // clear previous loading error on next loading start
+          if (isLoading && dataControlManager.api.blockingError$.value) {
+            dataControlManager.api.setBlockingError(undefined);
+          }
+          loadingMinMax$.next(isLoading);
+        },
+      });
+      const { hasNoResults$: hasNoResultsObservable$, cancelRequests: cancelHasNoResultsRequests } =
+        hasNoResults$({
+          api: dataControlManager.api,
+          controlFetch$,
+          setIsLoading: (isLoading: boolean) => {
+            loadingHasNoResults$.next(isLoading);
+          },
+        });
+
       const api = finalizeApi({
         ...stateApi,
         ...dataControlManager.api,
@@ -119,6 +144,10 @@ export const getRangesliderControlFactory = (): EmbeddablePublicDefinition<
         },
         hasSelections$: selections.hasRangeSelection$,
         supportsJsonExport: true,
+        cancelRequests: () => {
+          cancelMinMaxRequests();
+          cancelHasNoResultsRequests();
+        },
       });
 
       const dataLoadingSubscription = combineLatest([
@@ -145,24 +174,9 @@ export const getRangesliderControlFactory = (): EmbeddablePublicDefinition<
           selections.setValue(undefined);
         });
 
-      const controlFetch$ = fetch$({ uuid, parentApi });
       const max$ = new BehaviorSubject<number | undefined>(undefined);
       const min$ = new BehaviorSubject<number | undefined>(undefined);
-      const minMaxSubscription = minMax$({
-        controlFetch$,
-        dataViews$: dataControlManager.api.dataViews$,
-        fieldName$: dataControlManager.api.fieldName$,
-        esqlQuery$: dataControlManager.api.esqlQuery$,
-        valuesSource$: dataControlManager.api.valuesSource$,
-        useGlobalFilters$: dataControlManager.api.useGlobalFilters$,
-        setIsLoading: (isLoading: boolean) => {
-          // clear previous loading error on next loading start
-          if (isLoading && dataControlManager.api.blockingError$.value) {
-            dataControlManager.api.setBlockingError(undefined);
-          }
-          loadingMinMax$.next(isLoading);
-        },
-      }).subscribe(
+      const minMaxSubscription = minMaxObservable$.subscribe(
         ({
           error,
           min,
@@ -209,13 +223,7 @@ export const getRangesliderControlFactory = (): EmbeddablePublicDefinition<
         });
 
       const selectionHasNoResults$ = new BehaviorSubject(false);
-      const hasNotResultsSubscription = hasNoResults$({
-        api: dataControlManager.api,
-        controlFetch$,
-        setIsLoading: (isLoading: boolean) => {
-          loadingHasNoResults$.next(isLoading);
-        },
-      }).subscribe((hasNoResults) => {
+      const hasNotResultsSubscription = hasNoResultsObservable$.subscribe((hasNoResults) => {
         selectionHasNoResults$.next(hasNoResults);
       });
 

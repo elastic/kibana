@@ -85,7 +85,7 @@ export const Breadcrumb = ({ treeNavSelection, onSelect }: BreadcrumbDeps) => {
           {hasRightArrow && (
             <EuiIcon
               css={styles.breadcrumbRightIcon}
-              type="arrowRight"
+              type="chevronSingleRight"
               size="s"
               aria-hidden={true}
             />

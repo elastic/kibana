@@ -8,6 +8,7 @@
 import type { BoundInferenceClient, Model } from '@kbn/inference-common';
 import type { HttpHandler } from '@kbn/core/public';
 import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
+import type { DatasetMaturity, Model as ScoreModel } from '@kbn/evals-common';
 import type { EsClient, ScoutWorkerFixtures } from '@kbn/scout';
 import type { EvaluationCriterion } from './evaluators/criteria';
 import { type EvaluationReporter } from './utils/reporting/evaluation_reporter';
@@ -22,6 +23,9 @@ import type { AgentBuilderClient } from './utils/agent_builder_client';
 export interface EvaluationDataset<TExample extends Example = Example> {
   name: string;
   description: string;
+  tags?: string[];
+  /** How curated this dataset is. Omitting it leaves the stored value as-is. */
+  maturity?: DatasetMaturity;
   examples: TExample[];
   id?: undefined;
 }
@@ -46,14 +50,8 @@ export interface Example<
   input?: TInput;
   /**
    * Expected output/ground truth for the example.
-   *
-   * Note: kept intentionally loose to stay compatible with existing datasets and
-   * the Phoenix-backed executor types.
    */
   output?: TExpected;
-  /**
-   * Phoenix may return `null` metadata in stored examples.
-   */
   metadata?: TMetadata;
 }
 
@@ -71,8 +69,7 @@ export interface EvaluatorParams<TExample extends Example, TTaskOutput extends T
  * standardized score/label/explanation outputs. The `metadata` field can carry trace
  * references and evaluator-specific details for explainability.
  *
- * This shape is intentionally compatible with the existing evaluator implementations and
- * the Phoenix client types:
+ * This shape is intentionally compatible with the existing evaluator implementations:
  * - `score` may be omitted or `null` for "unavailable"/"error" cases
  * - `label`/`explanation` are used widely in tests and reporting
  */
@@ -108,6 +105,14 @@ export interface Evaluator<
   name: string;
   kind: EvaluatorKind;
   evaluate: EvaluatorCallback<TExample, TTaskOutput>;
+  /**
+   * Model this evaluator judges with, used to attribute its scores. Read after
+   * `evaluate` resolves because evaluators backed by `POST /_evaluate` only learn
+   * their model from the response. Undefined for CODE evaluators.
+   */
+  getModel?: () => ScoreModel | undefined;
+  /** Resolved evaluator version, read after `evaluate` for API-backed evaluators. */
+  getVersion?: () => string | undefined;
 }
 export interface DefaultEvaluators {
   criteria: (criteria: EvaluationCriterion[]) => Evaluator;
@@ -127,9 +132,9 @@ export type ExperimentTask<TExample extends Example, TTaskOutput extends TaskOut
 ) => Promise<TTaskOutput>;
 
 /**
- * Shared executor interface implemented by both the in-Kibana and Phoenix-backed executors.
+ * Shared executor interface for eval runners.
  *
- * Note: the eval suites should depend on this interface (or structural typing), not Phoenix-specific types.
+ * Note: the eval suites should depend on this interface (or structural typing), not executor-specific types.
  */
 export interface EvalsExecutorClient {
   runExperiment<
@@ -150,13 +155,6 @@ export interface EvalsExecutorClient {
       metadata?: Record<string, unknown>;
       task: ExperimentTask<TEvaluationDataset['examples'][number], TTaskOutput>;
       concurrency?: number;
-      /**
-       * Phoenix-only: when true, the executor may trust that the dataset already exists upstream
-       * and should be resolved/loaded externally (e.g. by name) rather than created from the
-       * provided examples.
-       *
-       * The in-Kibana executor ignores this option.
-       */
       trustUpstreamDataset?: boolean;
     },
     evaluators: Array<Evaluator<TEvaluationDataset['examples'][number], TTaskOutput>>
@@ -181,10 +179,14 @@ export interface TaskRun {
 
 export interface EvaluationRun {
   name: string;
+  version?: string;
   result?: EvaluationResult;
   experimentRunId: string;
   traceId?: string | null;
   exampleId?: string;
+  kind?: EvaluatorKind;
+  /** Model the evaluator judged with; absent for CODE evaluators. */
+  model?: ScoreModel;
 }
 
 export interface DatasetRunResult {

@@ -72,7 +72,11 @@ describe('GuidedTour', () => {
       </>
     );
 
-    expect(scrollIntoViewMock).toHaveBeenCalledWith({ behavior: 'smooth', block: 'center' });
+    expect(scrollIntoViewMock).toHaveBeenCalledWith({
+      // Instant, so the anchor has settled before EuiTourStep measures it.
+      behavior: 'auto',
+      block: 'center',
+    });
   });
 
   it('does not scroll when the tour is inactive', () => {

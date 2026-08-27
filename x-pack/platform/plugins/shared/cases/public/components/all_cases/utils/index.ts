@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CUSTOM_FIELD_KEY_PREFIX } from '../constants';
+import { CUSTOM_FIELD_KEY_PREFIX, EXTENDED_FIELD_KEY_PREFIX } from '../constants';
 
 export const isFlattenCustomField = (key: string): boolean =>
   key.startsWith(CUSTOM_FIELD_KEY_PREFIX);
@@ -14,6 +14,15 @@ export const flattenCustomFieldKey = (key: string): string => `${CUSTOM_FIELD_KE
 
 export const deflattenCustomFieldKey = (key: string): string =>
   key.replace(CUSTOM_FIELD_KEY_PREFIX, '');
+
+export const isFlattenExtendedField = (key: string): boolean =>
+  key.startsWith(EXTENDED_FIELD_KEY_PREFIX);
+
+export const flattenExtendedFieldKey = (columnKey: string): string =>
+  `${EXTENDED_FIELD_KEY_PREFIX}${columnKey}`;
+
+export const deflattenExtendedFieldKey = (key: string): string =>
+  key.replace(EXTENDED_FIELD_KEY_PREFIX, '');
 
 export const stringToInteger = (value?: string | number): number | undefined => {
   const num = Number(value);

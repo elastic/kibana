@@ -297,4 +297,44 @@ describe('ESQLControlApi', () => {
       embeddableApi.setTitle('cute puppies');
     });
   });
+
+  describe('cancelRequests', () => {
+    test('should expose cancelRequests function on api', async () => {
+      const initialState: OptionsListESQLControlState = {
+        ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
+        selected_options: ['option1'],
+        available_options: ['option1', 'option2'],
+        variable_name: 'variable1',
+        variable_type: 'values',
+        control_type: 'STATIC_VALUES',
+      };
+      const { api } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: jest.fn(),
+        initialState,
+        finalizeApi,
+        uuid,
+        parentApi: dashboardApi,
+      });
+      expect(typeof api.cancelRequests).toBe('function');
+    });
+
+    test('calling cancelRequests should not throw', async () => {
+      const initialState: OptionsListESQLControlState = {
+        ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
+        selected_options: ['option1'],
+        available_options: ['option1', 'option2'],
+        variable_name: 'variable1',
+        variable_type: 'values',
+        control_type: 'STATIC_VALUES',
+      };
+      const { api } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: jest.fn(),
+        initialState,
+        finalizeApi,
+        uuid,
+        parentApi: dashboardApi,
+      });
+      expect(() => api.cancelRequests()).not.toThrow();
+    });
+  });
 });

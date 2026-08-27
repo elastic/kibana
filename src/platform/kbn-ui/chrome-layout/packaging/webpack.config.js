@@ -57,17 +57,6 @@ module.exports = {
 
   resolve: {
     extensions: ['.js', '.ts', '.tsx'],
-
-    alias: {
-      '@kbn/ui-chrome-layout-constants': path.resolve(
-        __dirname,
-        '../../chrome-layout-constants/target/index.js'
-      ),
-      '@kbn/ui-chrome-layout-utils': path.resolve(
-        __dirname,
-        '../../chrome-layout-utils/target/index.js'
-      ),
-    },
   },
 
   optimization: {

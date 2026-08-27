@@ -61,6 +61,7 @@ describe('findLiveQueryRoute', () => {
     jest.clearAllMocks();
 
     mockOsqueryContext = {
+      cpsEnabled: false,
       service: {
         getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
       },
@@ -473,5 +474,101 @@ describe('findLiveQueryRoute', () => {
       data: { items: Array<{ _source: Record<string, unknown> }> };
     };
     expect(responseBody.data.items[0]._source).toEqual({ action_id: 'action-1' });
+  });
+
+  describe('when CPS is enabled', () => {
+    const mockScopedEsClient = { search: jest.fn() };
+
+    beforeEach(() => {
+      mockOsqueryContext = {
+        ...mockOsqueryContext,
+        cpsEnabled: true,
+        getStartServices: jest.fn().mockResolvedValue([
+          { elasticsearch: { client: { asInternalUser: mockEsClient } } },
+          {
+            data: {
+              search: {
+                asScoped: jest.fn().mockReturnValue({ search: mockScopedEsClient.search }),
+              },
+            },
+          },
+        ]),
+      } as unknown as OsqueryAppContext;
+    });
+
+    it('uses the CPS-scoped search client for the actions query', async () => {
+      mockScopedEsClient.search.mockReturnValue(
+        of({ edges: [], rawResponse: { hits: { total: 0 } }, total: 0 })
+      );
+      const contextSearchFn = jest.fn();
+
+      setupRoute();
+
+      await routeHandler(
+        createRouteContext(contextSearchFn),
+        httpServerMock.createKibanaRequest({
+          query: { kuery: undefined, page: 0, pageSize: 20 },
+        }),
+        httpServerMock.createResponseFactory()
+      );
+
+      expect(mockScopedEsClient.search).toHaveBeenCalled();
+      expect(contextSearchFn).not.toHaveBeenCalled();
+    });
+
+    it('passes the scoped ES client to getResultCountsForActions when withResultCounts is set', async () => {
+      const edges = [
+        {
+          _source: {
+            action_id: 'action-1',
+            queries: [{ action_id: 'query-1', query: 'select 1;', agents: ['agent-1'] }],
+          },
+          fields: { action_id: ['action-1'] },
+        },
+      ];
+
+      mockScopedEsClient.search.mockReturnValue(
+        of({ edges, rawResponse: { hits: { total: 1 } }, total: 1 })
+      );
+      (getResultCountsForActions as jest.Mock).mockResolvedValue(
+        new Map([
+          ['query-1', { totalRows: 5, respondedAgents: 1, successfulAgents: 1, errorAgents: 0 }],
+        ])
+      );
+
+      mockOsqueryContext.getStartServices = jest.fn().mockResolvedValue([
+        {
+          elasticsearch: {
+            client: {
+              asInternalUser: mockEsClient,
+              asScoped: jest.fn().mockReturnValue({ asCurrentUser: mockScopedEsClient }),
+            },
+          },
+        },
+        {
+          data: {
+            search: { asScoped: jest.fn().mockReturnValue({ search: mockScopedEsClient.search }) },
+          },
+        },
+      ]);
+
+      setupRoute();
+
+      await routeHandler(
+        createRouteContext(jest.fn()),
+        httpServerMock.createKibanaRequest({
+          query: { kuery: undefined, page: 0, pageSize: 20, withResultCounts: true },
+        }),
+        httpServerMock.createResponseFactory()
+      );
+
+      expect(getResultCountsForActions).toHaveBeenCalledWith(
+        mockScopedEsClient,
+        ['query-1'],
+        'default',
+        undefined,
+        false
+      );
+    });
   });
 });

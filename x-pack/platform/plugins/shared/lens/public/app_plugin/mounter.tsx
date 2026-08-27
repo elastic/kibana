@@ -121,7 +121,6 @@ export async function getLensServices(
     eventAnnotationService,
     uiActions: startDependencies.uiActions,
     lensDocumentService: new LensDocumentService(coreStart.http),
-    presentationUtil: startDependencies.presentationUtil,
     dataViewEditor: startDependencies.dataViewEditor,
     dataViewFieldEditor: startDependencies.dataViewFieldEditor,
     charts: startDependencies.charts,

@@ -257,11 +257,9 @@ describe('Databricks', () => {
 
   describe('test handler', () => {
     it('returns ok with tool count on successful connection', async () => {
-      if (!Databricks.test) throw new Error('test handler not defined');
       const result = await Databricks.test.handler(mockContext);
       expect(mockListTools).toHaveBeenCalled();
       expect(result).toEqual({
-        ok: true,
         message: 'Connected to Databricks MCP server. 3 tools available.',
       });
     });

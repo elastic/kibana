@@ -36,14 +36,12 @@ import {
   type PublishesEsqlUsage,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
-import { LazyLabsFlyout, withSuspense } from '@kbn/presentation-util-plugin/public';
 
 import { AppHeader, ChromeAppHeaderRegistration } from '@kbn/app-header';
-import type { AppHeaderBack, AppHeaderBadge } from '@kbn/app-header';
+import type { AppHeaderBack, AppHeaderBadge, AppHeaderShareAction } from '@kbn/app-header';
 import { useFavorite } from '@kbn/content-management-favorites-public';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import { useChromeStyle, useIsNextChrome } from '@kbn/core-chrome-browser-hooks';
-import { UI_SETTINGS } from '../../common/constants';
 import { DASHBOARD_APP_ID, LANDING_PAGE_PATH } from '../../common/page_bundle_constants';
 import type { SaveDashboardReturn } from '../dashboard_api/save_modal/types';
 import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
@@ -56,12 +54,14 @@ import {
 } from '../dashboard_app/_dashboard_app_strings';
 import { useDashboardMountContext } from '../dashboard_app/hooks/dashboard_mount_context';
 import { useDashboardMenuItems } from '../dashboard_app/top_nav/use_dashboard_menu_items';
+import { useDashboardShareAction } from '../dashboard_app/top_nav/use_dashboard_share_action';
 import type { DashboardEmbedSettings, DashboardRedirect } from '../dashboard_app/types';
 import { openSettingsFlyout } from '../dashboard_renderer/settings/open_settings_flyout';
 import { getDashboardRecentlyAccessedService } from '../services/dashboard_recently_accessed_service';
 import {
   coreServices,
   dataService,
+  screenshotModeService,
   serverlessService,
   unifiedSearchService,
 } from '../services/kibana_services';
@@ -81,8 +81,6 @@ export interface InternalDashboardTopNavProps {
   showResetChange?: boolean;
 }
 
-const LabsFlyout = withSuspense(LazyLabsFlyout, null);
-
 interface DashboardChromeNextHeaderProps {
   headerMode: 'inline' | 'registered';
   title: string;
@@ -91,6 +89,7 @@ interface DashboardChromeNextHeaderProps {
   badges: AppHeaderBadge[];
   dashboardId?: string;
   viewMode: string;
+  share?: AppHeaderShareAction;
 }
 
 /**
@@ -104,6 +103,7 @@ const DashboardChromeNextHeader = ({
   badges,
   dashboardId,
   viewMode,
+  share,
 }: DashboardChromeNextHeaderProps) => {
   const favorite = useFavorite({ id: dashboardId });
 
@@ -119,6 +119,7 @@ const DashboardChromeNextHeader = ({
         menu={menu}
         badges={badges}
         favorite={favorite}
+        share={share}
         spacing="compact"
       />
     );
@@ -130,6 +131,7 @@ const DashboardChromeNextHeader = ({
       menu={menu}
       badges={badges}
       favorite={favorite}
+      share={share}
       spacing="compact"
     />
   );
@@ -145,7 +147,6 @@ export function InternalDashboardTopNav({
   showResetChange = true,
 }: InternalDashboardTopNavProps) {
   const [isChromeVisible, setIsChromeVisible] = useState(false);
-  const [isLabsShown, setIsLabsShown] = useState(false);
   const dashboardTitleRef = useRef<HTMLHeadingElement>(null);
 
   const chromeStyle = useChromeStyle();
@@ -158,7 +159,6 @@ export function InternalDashboardTopNav({
   const isAppHeaderActive = useIsNextChrome() && chromeStyle === 'project';
   const headerMode = !isAppHeaderActive ? 'legacy' : isEmbedded ? 'registered' : 'inline';
 
-  const isLabsEnabled = useMemo(() => coreServices.uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI), []);
   const { onAppLeave } = useDashboardMountContext();
 
   const dashboardApi = useDashboardApi();
@@ -393,11 +393,12 @@ export function InternalDashboardTopNav({
     [redirectTo]
   );
 
+  const shareAction = useDashboardShareAction({ maybeRedirect });
+
   const { viewModeTopNavConfig, editModeTopNavConfig } = useDashboardMenuItems({
-    isLabsShown,
-    setIsLabsShown,
     maybeRedirect,
     showResetChange,
+    shareAction,
   });
 
   UseUnmount(() => {
@@ -500,6 +501,7 @@ export function InternalDashboardTopNav({
             badges={appHeaderBadges}
             dashboardId={lastSavedId}
             viewMode={viewMode}
+            share={shareAction}
           />
         </DashboardFavoritesProvider>
       )}
@@ -544,11 +546,16 @@ export function InternalDashboardTopNav({
           }}
         />
       )}
-      {viewMode !== 'print' && isLabsEnabled && isLabsShown ? (
-        <LabsFlyout solutions={['dashboard']} onClose={() => setIsLabsShown(false)} />
-      ) : null}
 
-      {viewMode !== 'print' ? <DashboardControlsRenderer /> : null}
+      <span
+        // ControlsRenderer must always be rendered
+        // so that control filters are applied to dashboard
+        //
+        // do not display ControlsRenderer in reports
+        style={screenshotModeService.isScreenshotMode() ? { display: 'none' } : undefined}
+      >
+        <DashboardControlsRenderer />
+      </span>
 
       {showBorderBottom && <EuiHorizontalRule margin="none" />}
     </div>
