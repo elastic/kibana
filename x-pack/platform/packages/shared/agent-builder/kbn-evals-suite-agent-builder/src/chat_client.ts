@@ -63,7 +63,7 @@ export class AgentBuilderEvaluationChatClient {
     private readonly fetch: HttpHandler,
     private readonly log: ToolingLog,
     private readonly connectorId: string
-  ) { }
+  ) {}
 
   private async executeWithRetry<T>(operationName: string, fn: () => Promise<T>): Promise<T> {
     return pRetry(fn, {
@@ -144,9 +144,9 @@ export class AgentBuilderEvaluationChatClient {
           if (rounds >= MAX_AUTO_CONFIRM_ROUNDS) {
             throw new Error(
               `autoConfirm: exceeded ${MAX_AUTO_CONFIRM_ROUNDS} continuation rounds. ` +
-              `Outstanding prompt ids: ${Object.keys(autoConfirmPrompts).join(', ')}. ` +
-              `This indicates a stuck agent — increase MAX_AUTO_CONFIRM_ROUNDS only if ` +
-              `more than ${MAX_AUTO_CONFIRM_ROUNDS} sequential confirmations are genuinely expected.`
+                `Outstanding prompt ids: ${Object.keys(autoConfirmPrompts).join(', ')}. ` +
+                `This indicates a stuck agent — increase MAX_AUTO_CONFIRM_ROUNDS only if ` +
+                `more than ${MAX_AUTO_CONFIRM_ROUNDS} sequential confirmations are genuinely expected.`
             );
           }
 
