@@ -9,7 +9,7 @@ import React, { createContext, useContext, useCallback, useMemo, useRef, useStat
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import type { AwsStaticKeyCredentials } from '@kbn/fleet-plugin/public';
 
-import type { AwsServiceMatrixEntry } from './aws_service_matrix';
+import type { AwsServiceMatrixEntry, DeploymentMethod } from './aws_service_matrix';
 import { useAwsServiceMatrix } from './use_aws_service_matrix';
 import { getOnboardingSessionKey } from './onboarding_session_storage';
 
@@ -33,6 +33,7 @@ interface PersistedAuthenticateAndDeployStep {
   connectorId?: string;
   authType?: 'identity_federation' | 'static_keys';
   accessKeyId?: string;
+  deploymentMethod?: DeploymentMethod;
 }
 
 export interface ServicesStepState {
@@ -56,6 +57,8 @@ interface OnboardingFlowState {
   authenticateAndDeployStep: AuthenticateAndDeployStepState;
   setConnectorId: (id: string | undefined) => void;
   setStaticKeys: (keys: AwsStaticKeyCredentials | undefined) => void;
+  deploymentMethod: DeploymentMethod;
+  setDeploymentMethod: (method: DeploymentMethod) => void;
   servicesStep: ServicesStepState;
   setSelectedServiceIds: (ids: string[]) => void;
   detectAndReviewStep: DetectAndReviewStepState;
@@ -219,6 +222,19 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
     [selectedServiceIds]
   );
 
+  const deploymentMethod: DeploymentMethod =
+    persistedAuthenticateAndDeployStep?.deploymentMethod ?? 'managed_integration';
+
+  const setDeploymentMethod = useCallback(
+    (method: DeploymentMethod) => {
+      setPersistedAuthenticateAndDeployStep({
+        ...persistedAuthenticateAndDeployStep,
+        deploymentMethod: method,
+      });
+    },
+    [persistedAuthenticateAndDeployStep, setPersistedAuthenticateAndDeployStep]
+  );
+
   const authenticateAndDeployStep: AuthenticateAndDeployStepState = {
     connectorId: persistedAuthenticateAndDeployStep?.connectorId,
     staticKeys,
@@ -235,6 +251,8 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         authenticateAndDeployStep,
         setConnectorId,
         setStaticKeys,
+        deploymentMethod,
+        setDeploymentMethod,
         servicesStep,
         setSelectedServiceIds,
         detectAndReviewStep,

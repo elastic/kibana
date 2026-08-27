@@ -63,6 +63,8 @@ export interface DataStreamInfo {
   inputs: string[];
   /** Inputs enabled by default (stream.enabled !== false in the manifest). */
   defaultEnabledInputs: string[];
+  /** Data stream dataset value (e.g. "aws.vpcflow"). Used to build index patterns. */
+  dataset?: string;
   /** Manifest var definitions keyed by input type, then var name. */
   varDefsByInput: Record<string, Record<string, RegistryVarsEntry>>;
   /** Var names the user must configure to activate this data stream. */
@@ -534,6 +536,7 @@ export function buildAwsServiceMatrix(
           varDefsByDataStream[dsId] = {
             title: (ds as any).title as string | undefined,
             type: (ds as any).type as SignalType | undefined,
+            dataset: (ds as any).dataset as string | undefined,
             inputs: dsEffectiveInputs,
             defaultEnabledInputs: dsDefaultEnabledInputs,
             varDefsByInput: dsVarDefsByInput,

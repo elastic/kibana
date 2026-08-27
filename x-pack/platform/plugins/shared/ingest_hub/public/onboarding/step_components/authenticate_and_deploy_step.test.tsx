@@ -83,6 +83,8 @@ describe('AuthenticateAndDeployStep', () => {
     mockUseOnboardingFlow.mockReturnValue({
       servicesStep: { selectedServiceIds: ['guardduty'] },
       awsServicesMap: awsServicesMapWithMI,
+      deploymentMethod: 'managed_integration',
+      setDeploymentMethod: jest.fn(),
     });
     mockUseDeploy.mockReturnValue(makeDeployReturn());
     MockManagedIntegrationsSection.mockImplementation(
@@ -169,6 +171,8 @@ describe('AuthenticateAndDeployStep', () => {
       mockUseOnboardingFlow.mockReturnValue({
         servicesStep: { selectedServiceIds: [] },
         awsServicesMap: awsServicesMapEmpty,
+        deploymentMethod: 'managed_integration',
+        setDeploymentMethod: jest.fn(),
       });
       renderStep();
       expect(screen.getByTestId('authenticateAndDeployStep-nextButton')).not.toBeDisabled();
