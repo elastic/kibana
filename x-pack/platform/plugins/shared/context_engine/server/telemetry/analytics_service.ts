@@ -7,7 +7,11 @@
 
 import type { AnalyticsServiceSetup } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import type { ContextEngineWriteOutcome, ReportKiWriteEventParams } from './events';
+import type {
+  ContextEngineOutcome,
+  ReportKiVerificationEventParams,
+  ReportKiWriteEventParams,
+} from './events';
 import { CONTEXT_ENGINE_EVENT_TYPES, contextEngineServerEbtEvents } from './events';
 
 export type KiWriteAction = 'create' | 'update' | 'delete';
@@ -44,7 +48,7 @@ export class ContextEngineAnalyticsService {
     action: KiWriteAction;
     aiIndexId: string;
     managed?: boolean;
-    outcome: ContextEngineWriteOutcome;
+    outcome: ContextEngineOutcome;
     errorType?: string;
   }): void {
     try {
@@ -57,6 +61,36 @@ export class ContextEngineAnalyticsService {
     } catch (error) {
       // Do not fail the write if telemetry fails
       this.logger.debug(`Failed to report KI ${action} telemetry event`, { error });
+    }
+  }
+
+  reportKiVerification({
+    outcome,
+    passed,
+    verifiersRun,
+    failedVerifierIds,
+    errorType,
+  }: {
+    outcome: ContextEngineOutcome;
+    passed?: boolean;
+    verifiersRun?: number;
+    failedVerifierIds?: string[];
+    errorType?: string;
+  }): void {
+    try {
+      this.analytics.reportEvent<ReportKiVerificationEventParams>(
+        CONTEXT_ENGINE_EVENT_TYPES.KiVerification,
+        {
+          outcome,
+          ...(passed !== undefined && { passed }),
+          ...(verifiersRun !== undefined && { verifiers_run: verifiersRun }),
+          ...(failedVerifierIds !== undefined &&
+            failedVerifierIds.length > 0 && { failed_verifier_ids: failedVerifierIds }),
+          ...(errorType !== undefined && { error_type: errorType }),
+        }
+      );
+    } catch (error) {
+      this.logger.debug('Failed to report KI verification telemetry event', { error });
     }
   }
 }
