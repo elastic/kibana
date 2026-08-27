@@ -2959,7 +2959,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.alerts.reputation_requests_transparency',
       {
         defaultMessage:
-          'Log all messages sent to Elastic reputation service, Personally Identifiable Information stripped, at desired log level. Log the PII filter during configuration. Allowed values: info, debug, or empty (disabled). Default disabled.',
+          "Log all messages sent to Elastic reputation service, Personally Identifiable Information stripped, at desired log level. Log the PII filter during configuration. Allowed values are 'info' and 'debug'. Default: none (disabled).",
       }
     ),
   },
@@ -2970,7 +2970,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.alerts.reputation_requests_transparency',
       {
         defaultMessage:
-          'Log all messages sent to Elastic reputation service, Personally Identifiable Information stripped, at desired log level. Log the PII filter during configuration. Allowed values: info, debug, or empty (disabled). Default disabled.',
+          "Log all messages sent to Elastic reputation service, Personally Identifiable Information stripped, at desired log level. Log the PII filter during configuration. Allowed values are 'info' and 'debug'. Default: none (disabled).",
       }
     ),
   },
@@ -2981,7 +2981,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.alerts.reputation_requests_transparency',
       {
         defaultMessage:
-          'Log all messages sent to Elastic reputation service, Personally Identifiable Information stripped, at desired log level. Log the PII filter during configuration. Allowed values: info, debug, or empty (disabled). Default disabled.',
+          "Log all messages sent to Elastic reputation service, Personally Identifiable Information stripped, at desired log level. Log the PII filter during configuration. Allowed values are 'info' and 'debug'. Default: none (disabled).",
       }
     ),
   },
