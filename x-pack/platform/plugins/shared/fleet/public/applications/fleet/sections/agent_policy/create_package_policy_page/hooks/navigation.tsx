@@ -6,6 +6,7 @@
  */
 
 import { useCallback, useMemo, useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 
 import { splitPkgKey } from '../../../../../../../common/services';
@@ -26,10 +27,11 @@ interface UseCancelParams {
 export const useCancelAddPackagePolicy = (params: UseCancelParams) => {
   const { from, pkgkey, agentPolicyId } = params;
   const {
-    application: { navigateToApp },
+    application: { navigateToApp, getUrlForApp },
   } = useStartServices();
   const routeState = useIntraAppState<CreatePackagePolicyRouteState>();
   const { getHref } = useLink();
+  const { search } = useLocation();
 
   const cancelClickHandler = useCallback(
     (ev: React.SyntheticEvent) => {
@@ -45,6 +47,16 @@ export const useCancelAddPackagePolicy = (params: UseCancelParams) => {
     if (routeState && routeState.onCancelUrl) {
       return routeState.onCancelUrl;
     }
+
+    // The collection flyout navigates via href and appends returnPath/returnAppId as query
+    // params. When present, use them so Cancel returns to the catalog with the flyout open.
+    const searchParams = new URLSearchParams(search);
+    const returnPath = searchParams.get('returnPath');
+    const returnAppId = searchParams.get('returnAppId');
+    if (returnPath && returnAppId === 'integrations') {
+      return getUrlForApp(INTEGRATIONS_PLUGIN_ID, { path: returnPath });
+    }
+
     if (from === 'installed-integrations' || from === 'copy-from-installed-integrations') {
       return `${getHref('integrations_installed', {})}?viewPolicies=${splitPkgKey(pkgkey).pkgName}`;
     }
@@ -54,7 +66,7 @@ export const useCancelAddPackagePolicy = (params: UseCancelParams) => {
           policyId: agentPolicyId,
         })
       : getHref('integration_details_overview', { pkgkey });
-  }, [routeState, from, agentPolicyId, getHref, pkgkey]);
+  }, [routeState, search, from, agentPolicyId, getHref, getUrlForApp, pkgkey]);
 
   return { cancelClickHandler, cancelUrl };
 };
