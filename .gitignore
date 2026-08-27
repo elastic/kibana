@@ -214,3 +214,6 @@ src/platform/plugins/shared/workflows_execution_engine/docs/parallel_step_gaps.m
 src/platform/plugins/shared/workflows_execution_engine/docs/parallel_step_red_flags.md
 src/platform/plugins/shared/workflows_execution_engine/docs/parallel_step_p1_scope_brief.md
 src/platform/plugins/shared/workflows_execution_engine/docs/parallel_step_nested_flow_control_tradeoff.md
+
+# XSOAR gap-analysis outputs (regenerate with inventory + ingest)
+xsoar_workflow_corpus/corpus/

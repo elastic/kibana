@@ -1,0 +1,92 @@
+id: Fixture Phishing Parent
+name: Fixture Phishing Parent
+description: Tiny playbook for unit tests
+starttaskid: "0"
+system: true
+fromversion: 6.8.0
+inputs:
+  - key: Role
+    required: true
+    description: Analyst role
+tasks:
+  "0":
+    id: "0"
+    type: start
+    task:
+      id: "0"
+      name: ""
+      iscommand: false
+      brand: ""
+    nexttasks:
+      '#none#':
+        - "1"
+    skipunavailable: false
+  "1":
+    id: "1"
+    type: regular
+    task:
+      id: "1"
+      name: Enrich hash
+      description: Checks the file reputation of the specified hash.
+      script: VirusTotal (API v3)|||file
+      type: regular
+      iscommand: true
+      brand: VirusTotal (API v3)
+    nexttasks:
+      '#none#':
+        - "2"
+        - "3"
+    skipunavailable: false
+  "2":
+    id: "2"
+    type: regular
+    task:
+      id: "2"
+      name: Acknowledge
+      script: '|||send-mail'
+      type: regular
+      iscommand: true
+      brand: ""
+    nexttasks:
+      '#none#':
+        - "4"
+    skipunavailable: false
+  "3":
+    id: "3"
+    type: playbook
+    task:
+      id: "3"
+      name: Detonate File - CrowdStrike Falcon Sandbox v2
+      playbookName: Detonate File - CrowdStrike Falcon Sandbox v2
+      type: playbook
+      iscommand: false
+      brand: ""
+    nexttasks:
+      '#none#':
+        - "4"
+    skipunavailable: true
+  "4":
+    id: "4"
+    type: regular
+    task:
+      id: "4"
+      name: Set incident severity
+      script: Builtin|||setIncident
+      type: regular
+      iscommand: true
+      brand: Builtin
+    nexttasks:
+      '#none#':
+        - "5"
+    skipunavailable: false
+  "5":
+    id: "5"
+    type: regular
+    task:
+      id: "5"
+      name: Manually review the incident
+      description: Reviews the incident to determine if the email is malicious.
+      type: regular
+      iscommand: false
+      brand: ""
+    skipunavailable: false

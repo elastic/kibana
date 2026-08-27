@@ -1,0 +1,25 @@
+{
+  "name": "xsoar-workflow-corpus",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "XSOAR playbook inventory, Kibana workflow YAML conversion, and gap analysis",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "scripts": {
+    "inventory": "node --import tsx src/cli.ts inventory",
+    "convert": "node --import tsx src/cli.ts convert --pack Phishing",
+    "ingest": "node --import tsx src/cli.ts ingest",
+    "dashboard": "node --import tsx src/cli.ts dashboard",
+    "test": "node --import tsx --test src/tests/*.test.ts"
+  },
+  "dependencies": {
+    "yaml": "^2.8.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.0",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2"
+  }
+}
