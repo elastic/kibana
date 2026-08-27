@@ -299,9 +299,7 @@ describe('ConversationClient', () => {
                 },
                 // Hide sub-agent conversations from the nav list
                 { bool: { must_not: [{ exists: { field: 'parent_conversation' } }] } },
-                // Hide empty events-native placeholders — docs whose creation completed
-                // but whose first round never landed anything on the timeline. Legacy
-                // docs without schema_version are unaffected.
+                // Hide empty events-native placeholders - we do have an empty conversations API but let's filter for now.
                 {
                   bool: {
                     must_not: [
