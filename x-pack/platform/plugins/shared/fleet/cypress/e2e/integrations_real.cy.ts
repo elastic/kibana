@@ -91,7 +91,6 @@ function getAllIntegrations() {
 }
 
 describe('Add Integration - Real API', () => {
-  const integration = 'apache';
 
   beforeEach(() => {
     login();
