@@ -35,12 +35,11 @@ import {
 } from './bulk_close_runtime_mappings';
 import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
 import {
-  prefetchPreviousStatusesByIds,
+  prefetchAllPreviousStatusesByIds,
   prefetchPreviousStatusesByQuery,
-  type FoundHit,
   type PreviousStatus,
 } from '../common/operations/prefetch_previous_statuses';
-import { MAX_ALERTS_PER_TRIGGER } from '../../../../../common/workflows/triggers';
+import { emitAlertStatusChangedWithCap } from '../../../../workflows/triggers/emit_status_changed';
 
 export const setSignalsStatusRoute = (
   router: SecuritySolutionPluginRouter,
@@ -122,17 +121,25 @@ export const setSignalsStatusRoute = (
         try {
           if ('signal_ids' in request.body) {
             const signalIds = request.body.signal_ids;
-            const previousStatuses: PreviousStatus[] = [];
-            let prefetchedHits: FoundHit[] = [];
+            const changingIds: string[] = [];
+            const changingStatuses: PreviousStatus[] = [];
             if (eventBus) {
               try {
-                const { previousStatuses: fetched, hits } = await prefetchPreviousStatusesByIds(
+                // Fetch all IDs in chunks so requests larger than MAX_ALERTS_PER_TRIGGER
+                // don't silently suppress the trigger when the first chunk is all no-ops.
+                const { hits } = await prefetchAllPreviousStatusesByIds(
                   esClient,
                   alertsIndex,
                   signalIds
                 );
-                previousStatuses.push(...fetched);
-                prefetchedHits = hits;
+                for (const hit of hits) {
+                  if (hit.hasStatusField && hit.previousStatus !== status) {
+                    changingIds.push(hit.id);
+                    if (hit.previousStatus !== undefined) {
+                      changingStatuses.push({ id: hit.id, previousStatus: hit.previousStatus });
+                    }
+                  }
+                }
               } catch (err) {
                 logger.warn(
                   `Failed to pre-fetch previous alert statuses for workflow trigger: ${err}`
@@ -149,21 +156,15 @@ export const setSignalsStatusRoute = (
               reason,
             });
 
-            const changingSignals = previousStatuses.filter((ps) => ps.previousStatus !== status);
-            // Use hits (all found docs) rather than previousStatuses (recognized-status docs only)
-            // so alerts with an unrecognized stored status (e.g. "triaged") are included.
-            // Exclude status-less docs: the update script guards on != null so they are not mutated.
-            const changingIds = prefetchedHits
-              .filter((h) => h.hasStatusField && h.previousStatus !== status)
-              .map((h) => h.id)
-              .slice(0, MAX_ALERTS_PER_TRIGGER);
-            if (changingIds.length > 0) {
-              void eventBus?.emitAlertStatusChanged(request, {
-                alertIds: changingIds,
+            if (eventBus) {
+              emitAlertStatusChangedWithCap(
+                eventBus,
+                request,
                 status,
-                previousStatuses: changingSignals.slice(0, MAX_ALERTS_PER_TRIGGER),
-                truncated: signalIds.length > MAX_ALERTS_PER_TRIGGER,
-              });
+                changingIds,
+                changingStatuses,
+                logger
+              );
             }
 
             return response.ok({ body });

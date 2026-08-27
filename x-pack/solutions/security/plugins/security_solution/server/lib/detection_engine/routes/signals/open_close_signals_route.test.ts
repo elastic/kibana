@@ -310,7 +310,7 @@ describe('set signal status', () => {
 
     describe('by-ids path', () => {
       beforeEach(() => {
-        // prefetchPreviousStatusesByIds uses esClient.search internally
+        // prefetchAllPreviousStatusesByIds uses esClient.search internally
         context.core.elasticsearch.client.asCurrentUser.search.mockResponse({
           took: 1,
           timed_out: false,
