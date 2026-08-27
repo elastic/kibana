@@ -9,7 +9,11 @@ import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 
-import { BEATS_OUTPUT_TYPES } from '../../../common/constants';
+import {
+  BEATS_OUTPUT_TYPES,
+  ECH_AGENTLESS_MANAGED_BULK_OUTPUT_ID,
+  SERVERLESS_AGENTLESS_MANAGED_BULK_OUTPUT_ID,
+} from '../../../common/constants';
 import { appContextService } from '..';
 import { outputService } from '../output';
 
@@ -251,6 +255,50 @@ describe('validateOutputForPolicy', () => {
         ['logstash', 'elasticsearch']
       );
     });
+  });
+});
+
+describe('validateOutputForPolicy managed bulk guard', () => {
+  it('should reject a non-agentless policy setting data_output_id to the ECH managed bulk output', async () => {
+    mockHasLicence(true);
+    await expect(
+      validateOutputForPolicy(
+        savedObjectsClientMock.create(),
+        { data_output_id: ECH_AGENTLESS_MANAGED_BULK_OUTPUT_ID, monitoring_output_id: null },
+        {},
+        BEATS_OUTPUT_TYPES
+      )
+    ).rejects.toThrow(
+      `Output "${ECH_AGENTLESS_MANAGED_BULK_OUTPUT_ID}" can only be used with an agentless agent policy.`
+    );
+  });
+
+  it('should reject a non-agentless policy setting monitoring_output_id to the serverless managed bulk output', async () => {
+    mockHasLicence(true);
+    await expect(
+      validateOutputForPolicy(
+        savedObjectsClientMock.create(),
+        { data_output_id: null, monitoring_output_id: SERVERLESS_AGENTLESS_MANAGED_BULK_OUTPUT_ID },
+        {},
+        BEATS_OUTPUT_TYPES
+      )
+    ).rejects.toThrow(
+      `Output "${SERVERLESS_AGENTLESS_MANAGED_BULK_OUTPUT_ID}" can only be used with an agentless agent policy.`
+    );
+  });
+
+  it('should allow an agentless policy to use the managed bulk output via newData', async () => {
+    mockHasLicence(true);
+    await validateOutputForPolicy(
+      savedObjectsClientMock.create(),
+      {
+        supports_agentless: true,
+        data_output_id: ECH_AGENTLESS_MANAGED_BULK_OUTPUT_ID,
+        monitoring_output_id: ECH_AGENTLESS_MANAGED_BULK_OUTPUT_ID,
+      },
+      {},
+      BEATS_OUTPUT_TYPES
+    );
   });
 });
 
