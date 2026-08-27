@@ -11,8 +11,8 @@ export const formatRelatedEntity = (related: RelatedEntity): string => {
   const details = [
     related.criticality ? `criticality: ${related.criticality}` : undefined,
     related.riskLevel ? `risk: ${related.riskLevel}` : undefined,
-    related.accessedByAtLeast !== undefined && related.accessedByAtLeast > 1
-      ? `accessed by at least ${related.accessedByAtLeast} entities`
+    related.interactedWithAtLeast !== undefined && related.interactedWithAtLeast > 1
+      ? `interacted with: at least ${related.interactedWithAtLeast} entities`
       : undefined,
   ]
     .filter(Boolean)

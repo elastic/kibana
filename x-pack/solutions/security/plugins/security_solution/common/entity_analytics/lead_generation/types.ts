@@ -61,7 +61,7 @@ export const relatedEntitySchema = z.object({
   kinds: z.array(z.string()),
   riskLevel: z.string().optional(),
   criticality: z.string().optional(),
-  accessedByAtLeast: z.number().optional(),
+  interactedWithAtLeast: z.number().optional(),
 });
 export type RelatedEntity = z.infer<typeof relatedEntitySchema>;
 

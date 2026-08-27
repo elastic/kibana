@@ -164,7 +164,7 @@ interface EsRelatedEntityDoc {
   kinds: string[];
   risk_level?: string;
   criticality?: string;
-  accessed_by_at_least?: number;
+  interacted_with_at_least?: number;
 }
 interface EsRelatedEntityCountDoc {
   kind: string;
@@ -199,7 +199,7 @@ const toEsRelatedEntity = (entity: RelatedEntity): EsRelatedEntityDoc => ({
   kinds: entity.kinds,
   risk_level: entity.riskLevel,
   criticality: entity.criticality,
-  accessed_by_at_least: entity.accessedByAtLeast,
+  interacted_with_at_least: entity.interactedWithAtLeast,
 });
 const fromEsRelatedEntity = (doc: EsRelatedEntityDoc): RelatedEntity => ({
   id: doc.id,
@@ -208,7 +208,7 @@ const fromEsRelatedEntity = (doc: EsRelatedEntityDoc): RelatedEntity => ({
   kinds: doc.kinds ?? [],
   riskLevel: doc.risk_level,
   criticality: doc.criticality,
-  accessedByAtLeast: doc.accessed_by_at_least,
+  interactedWithAtLeast: doc.interacted_with_at_least,
 });
 
 const toEsRelatedEntityCounts = (counts: Record<string, number>): EsRelatedEntityCountDoc[] =>

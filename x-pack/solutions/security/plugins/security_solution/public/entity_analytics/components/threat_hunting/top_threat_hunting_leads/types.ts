@@ -23,7 +23,7 @@ export interface RelatedEntity {
   kinds: string[];
   riskLevel?: string;
   criticality?: string;
-  accessedByAtLeast?: number;
+  interactedWithAtLeast?: number;
 }
 
 export interface HuntingLead {

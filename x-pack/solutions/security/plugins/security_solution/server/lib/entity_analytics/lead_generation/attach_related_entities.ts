@@ -10,16 +10,16 @@ import type { LeadEntity, RelatedEntity } from './types';
 import type { LeadCandidate } from './engine/lead_generation_engine';
 import {
   getEntityRelationships,
-  countEntitiesAccessingTargets,
+  countInteractingEntities,
   ALL_KINDS,
-  ACCESS_KINDS,
-  type AccessKind,
+  INTERACTION_KINDS,
+  type InteractionKind,
   type RelatedEntityKind,
 } from './entities_relationships';
 import { getAssetCriticality, getEntityRisk } from './observation_modules/utils';
 
-const isAccessKind = (kind: RelatedEntityKind): kind is AccessKind =>
-  (ACCESS_KINDS as readonly string[]).includes(kind);
+const isInteractionKind = (kind: RelatedEntityKind): kind is InteractionKind =>
+  (INTERACTION_KINDS as readonly string[]).includes(kind);
 
 const PER_KIND_CAP: Record<RelatedEntityKind, number> = {
   administers: 10,
@@ -71,7 +71,7 @@ const resolveRelatedEntities = (
       resolved.push({
         entity,
         kinds,
-        hasAccessKind: [...kinds].some(isAccessKind),
+        hasInteractionKind: [...kinds].some(isInteractionKind),
         significanceScore: getSignificanceScore(entity),
       });
     }
@@ -81,25 +81,29 @@ const resolveRelatedEntities = (
 };
 
 /**
- * For access kinds: ranks shared entities (> 1 accessor count) first, then by significance.
- * For other kinds: ranks by significance
- * Final tie-breaker: accessor count
+ * Ranks by significance first
+ * For interaction kinds: then ranks shared entities (> 1 interaction count) first.
+ * Final tie-breaker: lower interaction count, since a target nearly every entity
+ * touches says less than one only a few do.
  */
-const compareBySignificance = (
+const compareWithinKind = (
   a: Resolved,
   b: Resolved,
-  accessorCounts: ReadonlyMap<string, number>,
+  interactionCounts: ReadonlyMap<string, number>,
   kind: RelatedEntityKind
 ) => {
-  const considerAccessorCount = isAccessKind(kind);
-  if (considerAccessorCount) {
-    const aShared = (accessorCounts.get(a.entity.id) ?? 0) > 1;
-    const bShared = (accessorCounts.get(b.entity.id) ?? 0) > 1;
-    if (aShared !== bShared) return aShared ? -1 : 1;
-  }
   if (b.significanceScore !== a.significanceScore) return b.significanceScore - a.significanceScore;
-  if (!considerAccessorCount) return 0;
-  return (accessorCounts.get(b.entity.id) ?? 0) - (accessorCounts.get(a.entity.id) ?? 0);
+
+  if (!isInteractionKind(kind)) return 0;
+
+  const aCount = interactionCounts.get(a.entity.id) ?? 0;
+  const bCount = interactionCounts.get(b.entity.id) ?? 0;
+  const aShared = aCount > 1;
+  const bShared = bCount > 1;
+
+  if (aShared !== bShared) return aShared ? -1 : 1;
+  if (aShared && bShared) return aCount - bCount;
+  return 0;
 };
 
 /**
@@ -111,7 +115,7 @@ const compareBySignificance = (
  */
 const selectPerKind = (
   resolved: readonly Resolved[],
-  accessorCounts: ReadonlyMap<string, number>
+  interactionCounts: ReadonlyMap<string, number>
 ): { selected: Resolved[]; counts: Record<string, number> } => {
   const counts: Record<string, number> = {};
   const selectedIds = new Set<string>();
@@ -122,7 +126,7 @@ const selectPerKind = (
     // so it's capped and counted independently of every other kind's bucket.
     const bucket = resolved
       .filter((r) => r.kinds.has(kind))
-      .sort((a, b) => compareBySignificance(a, b, accessorCounts, kind));
+      .sort((a, b) => compareWithinKind(a, b, interactionCounts, kind));
     if (bucket.length > 0) counts[kind] = bucket.length;
 
     // Keep track of already-selected entities so that, when a mixed-kind
@@ -142,7 +146,7 @@ const selectPerKind = (
 interface Resolved {
   readonly entity: LeadEntity;
   readonly kinds: ReadonlySet<RelatedEntityKind>;
-  readonly hasAccessKind: boolean;
+  readonly hasInteractionKind: boolean;
   readonly significanceScore: number;
 }
 
@@ -166,35 +170,37 @@ export const attachRelatedEntities = async ({
     resolveRelatedEntities(candidate, entitiesMap)
   );
 
-  // get access/communication relationships and count how many other entities are accessing them
-  const accessTargetIds = new Set(
+  // get access/communication relationships and count how many other entities are interacting with them
+  const interactionTargetIds = new Set(
     resolvedByCandidate
       .flat()
-      .filter((r) => r.hasAccessKind)
+      .filter((r) => r.hasInteractionKind)
       .map(({ entity }) => entity.id)
   );
-  const accessorCounts = await countEntitiesAccessingTargets(
+  const interactionCounts = await countInteractingEntities(
     esClient,
     spaceId,
-    [...accessTargetIds],
+    [...interactionTargetIds],
     logger
   );
 
   const candidatesWithRelated = candidates.map((candidate, i) => {
     // select the top entities per kind
-    const { selected, counts } = selectPerKind(resolvedByCandidate[i], accessorCounts);
+    const { selected, counts } = selectPerKind(resolvedByCandidate[i], interactionCounts);
 
-    const topRelatedEntities: RelatedEntity[] = selected.map(({ entity, kinds, hasAccessKind }) => {
-      return {
-        id: entity.id,
-        type: entity.type,
-        name: entity.name,
-        kinds: [...kinds],
-        riskLevel: getEntityRisk(entity)?.calculatedLevel,
-        criticality: getAssetCriticality(entity),
-        accessedByAtLeast: hasAccessKind ? accessorCounts.get(entity.id) : undefined,
-      };
-    });
+    const topRelatedEntities: RelatedEntity[] = selected.map(
+      ({ entity, kinds, hasInteractionKind }) => {
+        return {
+          id: entity.id,
+          type: entity.type,
+          name: entity.name,
+          kinds: [...kinds],
+          riskLevel: getEntityRisk(entity)?.calculatedLevel,
+          criticality: getAssetCriticality(entity),
+          interactedWithAtLeast: hasInteractionKind ? interactionCounts.get(entity.id) : undefined,
+        };
+      }
+    );
 
     return { ...candidate, topRelatedEntities, relatedEntityCounts: counts };
   });

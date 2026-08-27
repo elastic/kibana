@@ -40,7 +40,7 @@ export interface RelatedEntity {
   readonly kinds: string[];
   readonly riskLevel?: string;
   readonly criticality?: string;
-  readonly accessedByAtLeast?: number;
+  readonly interactedWithAtLeast?: number;
 }
 
 export type ObservationSeverity = 'low' | 'medium' | 'high' | 'critical';

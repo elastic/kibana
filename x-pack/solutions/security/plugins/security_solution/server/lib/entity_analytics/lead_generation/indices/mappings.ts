@@ -50,7 +50,7 @@ export const generateLeadIndexMappings = (): MappingTypeMapping => ({
         kinds: { type: 'keyword' },
         risk_level: { type: 'keyword' },
         criticality: { type: 'keyword' },
-        accessed_by_at_least: { type: 'integer' },
+        interacted_with_at_least: { type: 'integer' },
       },
     },
     related_entity_counts: {

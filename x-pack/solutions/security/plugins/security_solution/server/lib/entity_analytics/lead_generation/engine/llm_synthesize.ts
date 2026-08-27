@@ -55,7 +55,7 @@ Rules:
 - Never mention, quote, or paraphrase the \`signal_strength\` value anywhere (title, byline, description, tags). It is an internal ranking signal, not something meaningful to an analyst, and must not be shown.
 - Only state a numeric risk score when a "Risk escalation" line is present for that lead; use exactly the from/to numbers and window given, and never invent, estimate, or restate a risk score from any other field (including \`signal_strength\`). If no "Risk escalation" line is present, do not mention a risk score at all.
 - Reference other entities only by name from those explicitly listed under "Related entities" for that lead; never infer or invent a connection. When that section is absent, do not mention related entities or their absence.
-- "Accessed by at least N entities" is a lower bound, not an exact count — write "at least N", never "only N" or "exactly N".
+- "interacted with: at least N entities" is a lower bound, not an exact count — write "at least N", never "only N" or "exactly N".
 - A "(not shown: N more X)" note means the list was truncated, not an additional entity — you may mention that more exist (e.g. "among dozens of other hosts it accesses"), but never treat it as a specific, nameable entity.
 
 You will receive data for {lead_count} lead(s). Respond ONLY with a valid JSON array (no markdown fences, no extra text) containing exactly {lead_count} objects in the same order as the input, each matching this schema:

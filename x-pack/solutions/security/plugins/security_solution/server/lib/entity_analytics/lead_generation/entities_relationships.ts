@@ -32,12 +32,12 @@ export const ALL_KINDS = Object.keys(EntityRelationshipsSchema.shape) as Readonl
   keyof EntityRelationships
 >;
 export type RelatedEntityKind = (typeof ALL_KINDS)[number];
-export const ACCESS_KINDS = [
+export const INTERACTION_KINDS = [
   'accesses_frequently',
   'accesses_infrequently',
   'communicates_with',
 ] as const satisfies readonly RelationshipKind[];
-export type AccessKind = (typeof ACCESS_KINDS)[number];
+export type InteractionKind = (typeof INTERACTION_KINDS)[number];
 
 export const getEntityRelationships = (entity: LeadEntity): undefined | EntityRelationships => {
   const entityField = getEntityField(entity);
@@ -141,16 +141,16 @@ const fetchMissingEntities = async (
   return fetched;
 };
 
-type AccessKindAggregations = Record<AccessKind, AggregationsStringTermsAggregate>;
+type InteractionKindAggregations = Record<InteractionKind, AggregationsStringTermsAggregate>;
 
-const idsFieldFor = (kind: AccessKind): string => `entity.relationships.${kind}.ids`;
+const idsFieldFor = (kind: InteractionKind): string => `entity.relationships.${kind}.ids`;
 
 const TARGET_CHUNK_SIZE = 300;
 /**
- * For each of `targetEuids`, counts distinct entities that access it under any
- * access kind, returning the max count across kinds.
+ * For each of `targetEuids`, counts how many distinct entities interact with it
+ * under any {@link INTERACTION_KINDS} kind, returning the max count across kinds.
  */
-export const countEntitiesAccessingTargets = async (
+export const countInteractingEntities = async (
   esClient: ElasticsearchClient,
   spaceId: string,
   targetEuids: readonly string[],
@@ -163,25 +163,25 @@ export const countEntitiesAccessingTargets = async (
     for (let offset = 0; offset < targetEuids.length; offset += TARGET_CHUNK_SIZE) {
       const selectedIds = targetEuids.slice(offset, offset + TARGET_CHUNK_SIZE);
 
-      const response = await esClient.search<never, AccessKindAggregations>({
+      const response = await esClient.search<never, InteractionKindAggregations>({
         index: getLatestEntitiesIndexName(spaceId),
         size: 0,
         query: {
           bool: {
-            should: ACCESS_KINDS.map((kind) => ({
+            should: INTERACTION_KINDS.map((kind) => ({
               terms: { [idsFieldFor(kind)]: selectedIds },
             })),
           },
         },
         aggs: Object.fromEntries(
-          ACCESS_KINDS.map((kind) => [
+          INTERACTION_KINDS.map((kind) => [
             kind,
             { terms: { field: idsFieldFor(kind), include: selectedIds, size: selectedIds.length } },
           ])
         ),
       });
 
-      for (const kind of ACCESS_KINDS) {
+      for (const kind of INTERACTION_KINDS) {
         const buckets = response.aggregations?.[kind]?.buckets;
         if (Array.isArray(buckets)) {
           for (const bucket of buckets) {
@@ -192,9 +192,7 @@ export const countEntitiesAccessingTargets = async (
       }
     }
   } catch (error) {
-    logger.warn(
-      `[LeadGeneration] Error counting entities accessing targets: ${errorMessage(error)}`
-    );
+    logger.warn(`[LeadGeneration] Error counting interacting entities: ${errorMessage(error)}`);
   }
 
   return counts;

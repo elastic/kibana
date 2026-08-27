@@ -64,8 +64,8 @@ const buildCandidate = (entity: LeadEntity): LeadCandidate => ({
   relatedEntityCounts: {},
 });
 
-/** Terms aggregation response used by `countEntitiesAccessingTargets`. */
-const accessorCountsResponse = (counts: Record<string, number>) => {
+/** Terms aggregation response used by `countInteractingEntities`. */
+const interactionCountsResponse = (counts: Record<string, number>) => {
   const buckets = Object.entries(counts).map(([key, doc_count]) => ({ key, doc_count }));
   return {
     aggregations: {
@@ -103,7 +103,7 @@ describe('attachRelatedEntities', () => {
         administers: { ids: ['host:shared'] },
       },
     });
-    esClient.search.mockResolvedValueOnce(accessorCountsResponse({ 'host:shared': 3 }));
+    esClient.search.mockResolvedValueOnce(interactionCountsResponse({ 'host:shared': 3 }));
 
     const [result] = await attachRelatedEntities({
       candidates: [buildCandidate(candidateEntity)],
@@ -117,12 +117,12 @@ describe('attachRelatedEntities', () => {
     expect(result.topRelatedEntities[0]).toMatchObject({
       id: 'host:shared',
       kinds: ['administers', 'communicates_with'],
-      accessedByAtLeast: 3,
+      interactedWithAtLeast: 3,
     });
     expect(result.relatedEntityCounts).toEqual({ administers: 1, communicates_with: 1 });
   });
 
-  it('does not let an accessor count from an unrelated access kind drag an entity down in a declarative bucket', async () => {
+  it('does not let an interaction count from an unrelated interaction kind drag an entity down in a declarative bucket', async () => {
     const mixedKind = buildEntity({ id: 'host:mixed-kind', criticality: 'extreme_impact' });
     const administersOnly = buildEntity({ id: 'host:administers-only', criticality: 'low_impact' });
     const candidateEntity = buildEntity({
@@ -132,7 +132,7 @@ describe('attachRelatedEntities', () => {
         communicates_with: { ids: [mixedKind.id] },
       },
     });
-    esClient.search.mockResolvedValueOnce(accessorCountsResponse({ [mixedKind.id]: 1 }));
+    esClient.search.mockResolvedValueOnce(interactionCountsResponse({ [mixedKind.id]: 1 }));
 
     const [result] = await attachRelatedEntities({
       candidates: [buildCandidate(candidateEntity)],
@@ -166,13 +166,13 @@ describe('attachRelatedEntities', () => {
     expect(esClient.search).not.toHaveBeenCalled();
   });
 
-  it('keeps a solo access-kind edge when there is nothing more shared competing for its kind', async () => {
+  it('keeps a solo interaction-kind edge when there is nothing more shared competing for its kind', async () => {
     const target = buildEntity({ id: 'host:solo' });
     const candidateEntity = buildEntity({
       id: 'user:alice',
       relationships: { accesses_frequently: { ids: ['host:solo'] } },
     });
-    esClient.search.mockResolvedValueOnce(accessorCountsResponse({ 'host:solo': 1 }));
+    esClient.search.mockResolvedValueOnce(interactionCountsResponse({ 'host:solo': 1 }));
 
     const [result] = await attachRelatedEntities({
       candidates: [buildCandidate(candidateEntity)],
@@ -183,26 +183,25 @@ describe('attachRelatedEntities', () => {
     });
 
     expect(result.topRelatedEntities).toEqual([
-      expect.objectContaining({ id: 'host:solo', accessedByAtLeast: 1 }),
+      expect.objectContaining({ id: 'host:solo', interactedWithAtLeast: 1 }),
     ]);
     expect(result.relatedEntityCounts).toEqual({ accesses_frequently: 1 });
   });
 
   it('drops the entity that falls in the unshared tier once a kind is over its per-kind cap', async () => {
     // accesses_frequently caps at 5; 6 candidates means one must be dropped. All
-    // have significanceScore 0 (no criticality/risk), so within the shared tier
-    // (count > 1) they're ordered by the final accessor-count tiebreak; the one
-    // unshared entity (count 1) is ranked last regardless and loses its slot.
-    const accessorCountByIndex = [5, 4, 3, 2, 2, 1];
-    const targets = accessorCountByIndex.map((count, i) =>
+    // have significanceScore 0, so the shared tier decides: least ubiquitous
+    // first, and the one unshared entity (count 1) loses the slot.
+    const interactionCountByIndex = [5, 4, 3, 2, 2, 1];
+    const targets = interactionCountByIndex.map((count, i) =>
       buildEntity({ id: `host:target-${i}-count-${count}` })
     );
     const candidateEntity = buildEntity({
       id: 'user:alice',
       relationships: { accesses_frequently: { ids: targets.map((t) => t.id) } },
     });
-    const counts = Object.fromEntries(targets.map((t, i) => [t.id, accessorCountByIndex[i]]));
-    esClient.search.mockResolvedValueOnce(accessorCountsResponse(counts));
+    const counts = Object.fromEntries(targets.map((t, i) => [t.id, interactionCountByIndex[i]]));
+    esClient.search.mockResolvedValueOnce(interactionCountsResponse(counts));
 
     const [result] = await attachRelatedEntities({
       candidates: [buildCandidate(candidateEntity)],
@@ -212,20 +211,21 @@ describe('attachRelatedEntities', () => {
       logger,
     });
 
+    // counts [5, 4, 3, 2, 2, 1] — ascending, stable for the two tied on 2.
     expect(result.topRelatedEntities.map((e) => e.id)).toEqual([
-      targets[0].id,
-      targets[1].id,
-      targets[2].id,
       targets[3].id,
       targets[4].id,
+      targets[2].id,
+      targets[1].id,
+      targets[0].id,
     ]);
     expect(result.topRelatedEntities.map((e) => e.id)).not.toContain(targets[5].id);
     expect(result.relatedEntityCounts).toEqual({ accesses_frequently: 6 });
   });
 
-  it('within the shared tier, ranks by significance rather than by the accessor count itself', async () => {
+  it('within the shared tier, ranks by significance rather than by the interaction count itself', async () => {
     // Both are shared (count > 1), so significance should decide the order,
-    // even though lessShared has a higher raw accessor count than moreShared.
+    // even though lessShared has a higher raw interaction count than moreShared.
     const moreSignificantButLessShared = buildEntity({
       id: 'host:more-significant',
       riskScoreNorm: 50,
@@ -243,7 +243,7 @@ describe('attachRelatedEntities', () => {
       },
     });
     esClient.search.mockResolvedValueOnce(
-      accessorCountsResponse({
+      interactionCountsResponse({
         [moreSignificantButLessShared.id]: 2,
         [lessSignificantButMoreShared.id]: 3,
       })
@@ -265,13 +265,78 @@ describe('attachRelatedEntities', () => {
     ]);
   });
 
-  it('keeps access-kind edges accessed by more than one entity, with accessedByAtLeast set', async () => {
+  it('ranks a significant unshared target above an insignificant shared one', async () => {
+    // Significance outranks sharing.
+    const dedicatedCriticalServer = buildEntity({
+      id: 'host:backup-server',
+      criticality: 'extreme_impact',
+    });
+    const unremarkableSharedBox = buildEntity({ id: 'host:shared-box' });
+    const candidateEntity = buildEntity({
+      id: 'user:svc-backup',
+      relationships: {
+        accesses_frequently: { ids: [unremarkableSharedBox.id, dedicatedCriticalServer.id] },
+      },
+    });
+    esClient.search.mockResolvedValueOnce(
+      interactionCountsResponse({
+        [dedicatedCriticalServer.id]: 1,
+        [unremarkableSharedBox.id]: 6,
+      })
+    );
+
+    const [result] = await attachRelatedEntities({
+      candidates: [buildCandidate(candidateEntity)],
+      entitiesMap: new Map([dedicatedCriticalServer, unremarkableSharedBox].map((e) => [e.id, e])),
+      esClient,
+      spaceId,
+      logger,
+    });
+
+    expect(result.topRelatedEntities.map((e) => e.id)).toEqual([
+      dedicatedCriticalServer.id,
+      unremarkableSharedBox.id,
+    ]);
+  });
+
+  it('prefers the less ubiquitous of two equally significant shared targets', async () => {
+    // A handful of co-accessors is a lead; hundreds is background.
+    const nearlyEverything = buildEntity({ id: 'host:file-server' });
+    const handfulOfEntities = buildEntity({ id: 'host:build-server' });
+    const candidateEntity = buildEntity({
+      id: 'user:alice',
+      relationships: {
+        accesses_infrequently: { ids: [nearlyEverything.id, handfulOfEntities.id] },
+      },
+    });
+    esClient.search.mockResolvedValueOnce(
+      interactionCountsResponse({
+        [nearlyEverything.id]: 380,
+        [handfulOfEntities.id]: 4,
+      })
+    );
+
+    const [result] = await attachRelatedEntities({
+      candidates: [buildCandidate(candidateEntity)],
+      entitiesMap: new Map([nearlyEverything, handfulOfEntities].map((e) => [e.id, e])),
+      esClient,
+      spaceId,
+      logger,
+    });
+
+    expect(result.topRelatedEntities.map((e) => e.id)).toEqual([
+      handfulOfEntities.id,
+      nearlyEverything.id,
+    ]);
+  });
+
+  it('keeps interaction-kind edges touched by more than one entity, with interactedWithAtLeast set', async () => {
     const target = buildEntity({ id: 'host:shared' });
     const candidateEntity = buildEntity({
       id: 'user:alice',
       relationships: { accesses_frequently: { ids: ['host:shared'] } },
     });
-    esClient.search.mockResolvedValueOnce(accessorCountsResponse({ 'host:shared': 4 }));
+    esClient.search.mockResolvedValueOnce(interactionCountsResponse({ 'host:shared': 4 }));
 
     const [result] = await attachRelatedEntities({
       candidates: [buildCandidate(candidateEntity)],
@@ -282,7 +347,7 @@ describe('attachRelatedEntities', () => {
     });
 
     expect(result.topRelatedEntities).toEqual([
-      expect.objectContaining({ id: 'host:shared', accessedByAtLeast: 4 }),
+      expect.objectContaining({ id: 'host:shared', interactedWithAtLeast: 4 }),
     ]);
   });
 
@@ -303,7 +368,7 @@ describe('attachRelatedEntities', () => {
 
     expect(esClient.search).not.toHaveBeenCalled();
     expect(result.topRelatedEntities).toEqual([
-      expect.objectContaining({ id: 'host:owned', accessedByAtLeast: undefined }),
+      expect.objectContaining({ id: 'host:owned', interactedWithAtLeast: undefined }),
     ]);
   });
 
@@ -327,7 +392,7 @@ describe('attachRelatedEntities', () => {
     extras.forEach((e) => {
       counts[e.id] = 2;
     });
-    esClient.search.mockResolvedValueOnce(accessorCountsResponse(counts));
+    esClient.search.mockResolvedValueOnce(interactionCountsResponse(counts));
 
     const entitiesMap = new Map(
       [owned, highValueAccess, lowValueAccess, ...extras].map((e) => [e.id, e])

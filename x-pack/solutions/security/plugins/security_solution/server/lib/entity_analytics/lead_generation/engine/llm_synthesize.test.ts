@@ -478,7 +478,7 @@ describe('formatRelatedEntities', () => {
     expect(formatRelatedEntities(entity)).toBe('');
   });
 
-  it('renders kind, type, name, criticality, risk, and accessor count in a compact line', () => {
+  it('renders kind, type, name, criticality, risk, and interaction count in a compact line', () => {
     const entity = createScoredEntity('alice', 8, undefined, [
       {
         id: 'host:web-01',
@@ -498,20 +498,20 @@ describe('formatRelatedEntities', () => {
     );
   });
 
-  it('renders accessedByAtLeast as a lower-bound phrase', () => {
+  it('renders interactedWithAtLeast as a lower-bound phrase', () => {
     const entity = createScoredEntity('alice', 8, undefined, [
       {
         id: 'host:build-3',
         type: 'host',
         name: 'build-3',
         kinds: ['accesses_infrequently'],
-        accessedByAtLeast: 4,
+        interactedWithAtLeast: 4,
       },
     ]);
 
     const section = formatRelatedEntities(entity);
 
-    expect(section).toContain('accessed by at least 4 entities');
+    expect(section).toContain('interacted with: at least 4 entities');
   });
 
   it('joins multiple kinds for the same entity', () => {
@@ -529,7 +529,7 @@ describe('formatRelatedEntities', () => {
     expect(section).toContain('  - administers, communicates_with host "shared"');
   });
 
-  it('omits the parenthetical when there is no criticality, risk, or accessor count', () => {
+  it('omits the parenthetical when there is no criticality, risk, or interaction count', () => {
     const entity = createScoredEntity('alice', 8, undefined, [
       { id: 'host:bare', type: 'host', name: 'bare', kinds: ['owns'] },
     ]);

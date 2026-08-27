@@ -9,7 +9,7 @@ import { formatRelatedEntity, formatOmittedRelatedEntityCounts } from './format_
 import type { RelatedEntity } from './types';
 
 describe('formatRelatedEntity', () => {
-  it('renders kind, type, name, criticality, risk, and accessor count', () => {
+  it('renders kind, type, name, criticality, risk, and interaction count', () => {
     const related: RelatedEntity = {
       id: 'host:web-01',
       type: 'host',
@@ -24,25 +24,25 @@ describe('formatRelatedEntity', () => {
     );
   });
 
-  it('renders accessedByAtLeast as a lower-bound phrase', () => {
+  it('renders interactedWithAtLeast as a lower-bound phrase', () => {
     const related: RelatedEntity = {
       id: 'host:build-3',
       type: 'host',
       name: 'build-3',
       kinds: ['accesses_infrequently'],
-      accessedByAtLeast: 4,
+      interactedWithAtLeast: 4,
     };
 
-    expect(formatRelatedEntity(related)).toContain('accessed by at least 4 entities');
+    expect(formatRelatedEntity(related)).toContain('interacted with: at least 4 entities');
   });
 
-  it('omits accessedByAtLeast when the count is not greater than 1', () => {
+  it('omits interactedWithAtLeast when the count is not greater than 1', () => {
     const related: RelatedEntity = {
       id: 'host:solo',
       type: 'host',
       name: 'solo',
       kinds: ['accesses_frequently'],
-      accessedByAtLeast: 1,
+      interactedWithAtLeast: 1,
     };
 
     expect(formatRelatedEntity(related)).toBe('accesses_frequently host "solo"');
@@ -59,7 +59,7 @@ describe('formatRelatedEntity', () => {
     expect(formatRelatedEntity(related)).toBe('administers, communicates_with host "shared"');
   });
 
-  it('omits the parenthetical when there is no criticality, risk, or accessor count', () => {
+  it('omits the parenthetical when there is no criticality, risk, or interaction count', () => {
     const related: RelatedEntity = { id: 'host:bare', type: 'host', name: 'bare', kinds: ['owns'] };
 
     expect(formatRelatedEntity(related)).toBe('owns host "bare"');

@@ -291,7 +291,7 @@ describe('LeadDataClient', () => {
             kinds: ['administers'],
             riskLevel: 'High',
             criticality: 'extreme_impact',
-            accessedByAtLeast: 4,
+            interactedWithAtLeast: 4,
           },
         ],
         relatedEntityCounts: { administers: 1 },
@@ -317,7 +317,7 @@ describe('LeadDataClient', () => {
           kinds: ['administers'],
           risk_level: 'High',
           criticality: 'extreme_impact',
-          accessed_by_at_least: 4,
+          interacted_with_at_least: 4,
         },
       ]);
       expect(script.params.related_entity_counts).toEqual([{ kind: 'administers', count: 1 }]);
@@ -534,7 +534,7 @@ describe('LeadDataClient', () => {
             kinds: ['administers'],
             risk_level: 'High',
             criticality: 'extreme_impact',
-            accessed_by_at_least: 4,
+            interacted_with_at_least: 4,
           },
         ],
         related_entity_counts: [{ kind: 'administers', count: 1 }],
@@ -563,7 +563,7 @@ describe('LeadDataClient', () => {
           kinds: ['administers'],
           riskLevel: 'High',
           criticality: 'extreme_impact',
-          accessedByAtLeast: 4,
+          interactedWithAtLeast: 4,
         },
       ]);
       expect(result.leads[0].relatedEntityCounts).toEqual({ administers: 1 });

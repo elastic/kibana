@@ -11,7 +11,7 @@ import type { LeadEntity } from './types';
 import {
   buildEntityLookupMap,
   getEntityRelationships,
-  countEntitiesAccessingTargets,
+  countInteractingEntities,
 } from './entities_relationships';
 
 const logger = loggingSystemMock.createLogger();
@@ -176,7 +176,7 @@ describe('getEntityRelationships', () => {
   });
 });
 
-describe('countEntitiesAccessingTargets', () => {
+describe('countInteractingEntities', () => {
   const termsAgg = (buckets: Array<{ key: string; doc_count: number }>) => ({ buckets });
 
   beforeEach(() => {
@@ -184,7 +184,7 @@ describe('countEntitiesAccessingTargets', () => {
   });
 
   it('returns an empty map without querying when there are no targets', async () => {
-    const counts = await countEntitiesAccessingTargets(esClient, spaceId, [], logger);
+    const counts = await countInteractingEntities(esClient, spaceId, [], logger);
 
     expect(counts.size).toBe(0);
     expect(esClient.search).not.toHaveBeenCalled();
@@ -199,7 +199,7 @@ describe('countEntitiesAccessingTargets', () => {
       },
     } as never);
 
-    await countEntitiesAccessingTargets(esClient, spaceId, ['host:a', 'host:b'], logger);
+    await countInteractingEntities(esClient, spaceId, ['host:a', 'host:b'], logger);
 
     expect(esClient.search).toHaveBeenCalledTimes(1);
     const call = esClient.search.mock.calls[0][0] as {
@@ -220,7 +220,7 @@ describe('countEntitiesAccessingTargets', () => {
       },
     } as never);
 
-    const counts = await countEntitiesAccessingTargets(esClient, spaceId, ['host:a'], logger);
+    const counts = await countInteractingEntities(esClient, spaceId, ['host:a'], logger);
 
     expect(counts.get('host:a')).toBe(8);
   });
@@ -234,12 +234,7 @@ describe('countEntitiesAccessingTargets', () => {
       },
     } as never);
 
-    const counts = await countEntitiesAccessingTargets(
-      esClient,
-      spaceId,
-      ['host:a', 'host:b'],
-      logger
-    );
+    const counts = await countInteractingEntities(esClient, spaceId, ['host:a', 'host:b'], logger);
 
     expect(counts.get('host:a')).toBe(3);
     expect(counts.get('host:b')).toBe(1);
@@ -263,7 +258,7 @@ describe('countEntitiesAccessingTargets', () => {
         },
       } as never);
 
-    const counts = await countEntitiesAccessingTargets(esClient, spaceId, targets, logger);
+    const counts = await countInteractingEntities(esClient, spaceId, targets, logger);
 
     expect(esClient.search).toHaveBeenCalledTimes(2);
     expect(counts.get('host:0')).toBe(4);
@@ -273,7 +268,7 @@ describe('countEntitiesAccessingTargets', () => {
   it('fails open: returns an empty map (unresolved targets are kept) when the search fails', async () => {
     esClient.search.mockRejectedValueOnce(new Error('es unavailable'));
 
-    const counts = await countEntitiesAccessingTargets(esClient, spaceId, ['host:a'], logger);
+    const counts = await countInteractingEntities(esClient, spaceId, ['host:a'], logger);
 
     expect(counts.size).toBe(0);
   });
