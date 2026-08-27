@@ -15,10 +15,6 @@ import {
 } from '@elastic/esql';
 import { SettingNames } from '@kbn/esql-language';
 
-// Nested ES|QL helpers resolve routing for the same query in quick succession, so avoid reparsing it.
-let lastQueryString: string | undefined;
-let lastProjectRouting: string | undefined;
-
 /**
  * Extracts the project routing value from an ES|QL query string.
  *
@@ -33,13 +29,6 @@ let lastProjectRouting: string | undefined;
  * // Returns: undefined
  */
 export function getProjectRoutingFromEsqlQuery(queryString: string): string | undefined {
-  if (queryString === lastQueryString) {
-    return lastProjectRouting;
-  }
-
-  lastQueryString = queryString;
-  lastProjectRouting = undefined;
-
   try {
     const parsedQuery = EsqlQuery.fromSrc(queryString);
     const headerInstructions = parsedQuery.ast.header ?? [];
@@ -57,12 +46,10 @@ export function getProjectRoutingFromEsqlQuery(queryString: string): string | un
       if (isLiteral(valueArg)) {
         // For string literals, extract the unquoted value
         if (valueArg.literalType === 'keyword') {
-          lastProjectRouting = valueArg.valueUnquoted;
-          return lastProjectRouting;
+          return valueArg.valueUnquoted;
         }
         // For other literal types, use the printer to get proper string representation
-        lastProjectRouting = LeafPrinter.literal(valueArg);
-        return lastProjectRouting;
+        return LeafPrinter.literal(valueArg);
       }
     }
   } catch (error) {

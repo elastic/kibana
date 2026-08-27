@@ -100,12 +100,12 @@ describe('getESQLAdHocDataview', () => {
       const originResult = await getESQLAdHocDataview({
         dataViewsService,
         query,
-        projectRouting: '_alias:_origin',
+        effectiveProjectRouting: '_alias:_origin',
       });
       const allProjectsResult = await getESQLAdHocDataview({
         dataViewsService,
         query,
-        projectRouting: '_alias:*',
+        effectiveProjectRouting: '_alias:*',
       });
 
       expect(originResult.id).not.toBe(allProjectsResult.id);
@@ -193,7 +193,7 @@ describe('getESQLAdHocDataview', () => {
       );
     });
 
-    it('should forward project routing to the time field route', async () => {
+    it('should forward effective project routing to the time field route', async () => {
       const http = createMockHttp('@timestamp');
       const query = uniqueQuery();
 
@@ -201,27 +201,11 @@ describe('getESQLAdHocDataview', () => {
         dataViewsService,
         query,
         http,
-        projectRouting: '_alias:*',
+        effectiveProjectRouting: '_alias:*',
       });
 
       expect(http.post).toHaveBeenCalledWith(TIMEFIELD_ROUTE, {
         body: JSON.stringify({ query, projectRouting: '_alias:*' }),
-      });
-    });
-
-    it('should prefer SET project_routing over the provided project routing', async () => {
-      const http = createMockHttp('@timestamp');
-      const query = `SET project_routing = "_alias:linked"; ${uniqueQuery()}`;
-
-      await getESQLAdHocDataview({
-        dataViewsService,
-        query,
-        http,
-        projectRouting: '_alias:_origin',
-      });
-
-      expect(http.post).toHaveBeenCalledWith(TIMEFIELD_ROUTE, {
-        body: JSON.stringify({ query, projectRouting: '_alias:linked' }),
       });
     });
 
@@ -284,13 +268,13 @@ describe('getESQLAdHocDataview', () => {
         dataViewsService,
         query,
         http,
-        projectRouting: '_alias:_origin',
+        effectiveProjectRouting: '_alias:_origin',
       });
       await getESQLAdHocDataview({
         dataViewsService,
         query,
         http,
-        projectRouting: '_alias:*',
+        effectiveProjectRouting: '_alias:*',
       });
 
       expect(http.post).toHaveBeenCalledTimes(2);
