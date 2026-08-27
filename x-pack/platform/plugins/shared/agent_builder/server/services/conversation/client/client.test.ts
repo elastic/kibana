@@ -299,33 +299,6 @@ describe('ConversationClient', () => {
                 },
                 // Hide sub-agent conversations from the nav list
                 { bool: { must_not: [{ exists: { field: 'parent_conversation' } }] } },
-                // Hide empty events-native placeholders - we do have an empty conversations API but let's filter for now.
-                {
-                  bool: {
-                    must_not: [
-                      {
-                        bool: {
-                          must: [
-                            { exists: { field: 'schema_version' } },
-                            {
-                              bool: {
-                                must_not: [
-                                  {
-                                    nested: {
-                                      path: 'events',
-                                      query: { match_all: {} },
-                                      ignore_unmapped: true,
-                                    },
-                                  },
-                                ],
-                              },
-                            },
-                          ],
-                        },
-                      },
-                    ],
-                  },
-                },
               ],
             },
           },
@@ -593,35 +566,6 @@ describe('ConversationClient', () => {
       // Values must be stored as strings so the flattened field stays string-only.
       expect((indexedDoc.metadata as Record<string, unknown>).flag).toBe('true');
       expect((indexedDoc.metadata as Record<string, unknown>).count).toBe('42');
-    });
-  });
-
-  describe('list filter — empty placeholders', () => {
-    it('applies a nested-events filter that hides events-native placeholder docs', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: { hits: [] },
-      });
-
-      await client.list();
-
-      const [call] = mockEsClient.search.mock.calls;
-      const filterList: unknown[] = (call[0] as { query: { bool: { filter: unknown[] } } }).query
-        .bool.filter;
-
-      const placeholderFilter = filterList.find((f) => {
-        const filter = f as { bool?: { must_not?: unknown[] } };
-        const mustNot = filter?.bool?.must_not?.[0] as { bool?: { must?: unknown[] } };
-        const must = mustNot?.bool?.must;
-        return (
-          Array.isArray(must) &&
-          must.some((m) => {
-            const clause = m as { exists?: { field?: string } };
-            return clause?.exists?.field === 'schema_version';
-          })
-        );
-      });
-
-      expect(placeholderFilter).toBeDefined();
     });
   });
 

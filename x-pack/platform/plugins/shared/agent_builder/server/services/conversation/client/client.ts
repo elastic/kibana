@@ -228,32 +228,6 @@ class ConversationClientImpl implements ConversationClient {
             buildReadAccessFilter({ user: this.user, agentIds }),
             // Hide sub-agent conversations from the nav list - hardcoded until we need to do better
             { bool: { must_not: [{ exists: { field: 'parent_conversation' } }] } },
-            {
-              bool: {
-                must_not: [
-                  {
-                    bool: {
-                      must: [
-                        { exists: { field: 'schema_version' } },
-                        {
-                          bool: {
-                            must_not: [
-                              {
-                                nested: {
-                                  path: 'events',
-                                  query: { match_all: {} },
-                                  ignore_unmapped: true,
-                                },
-                              },
-                            ],
-                          },
-                        },
-                      ],
-                    },
-                  },
-                ],
-              },
-            },
           ],
         },
       },
