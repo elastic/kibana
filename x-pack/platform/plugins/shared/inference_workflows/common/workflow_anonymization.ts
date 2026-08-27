@@ -134,7 +134,6 @@ export const aiPiiInputSchema = z
     system: z.string().optional(),
     messages: z.array(workflowChatMessageSchema),
     rules: z.array(anonymizationRuleSchema),
-    tokenMap: tokenMapSchema.optional(),
   })
   .strict();
 

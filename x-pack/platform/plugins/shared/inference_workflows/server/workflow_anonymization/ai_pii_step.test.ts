@@ -105,31 +105,6 @@ describe('executePiiProtection', () => {
     );
   });
 
-  it('uses a previous map only within the supplied execution input without mutating it', async () => {
-    const tokenMap = {
-      EXISTING_TOKEN: { original: 'known secret', entityClass: 'ENTITY_NAME' },
-    };
-    const capabilities = createCapabilities({
-      detectEntities: jest.fn().mockResolvedValue([]),
-      tokenize: jest.fn(),
-    });
-
-    const output = await executePiiProtection({
-      input: {
-        messages: [{ role: MessageRole.User, content: 'repeat known secret' }],
-        rules: [],
-        tokenMap,
-      },
-      capabilities,
-      abortSignal: new AbortController().signal,
-      logger: createLogger(),
-    });
-
-    expect(output.messages).toEqual([{ role: MessageRole.User, content: 'repeat EXISTING_TOKEN' }]);
-    expect(output.tokenMap).toEqual(tokenMap);
-    expect(output.tokenMap).not.toBe(tokenMap);
-  });
-
   it('fails closed when the detector returns an invalid range', async () => {
     const capabilities = createCapabilities({
       detectEntities: jest
@@ -244,18 +219,37 @@ describe('executePiiProtection', () => {
 
   it('logs token collisions without recording sensitive values and then fails closed', async () => {
     const logger = createLogger();
+    // Two different emails both tokenize to the same token — within-call collision.
     const capabilities = createCapabilities({
-      detectEntities: jest.fn(({ records }) => Promise.resolve(detectEmailEntities(records))),
-      tokenize: () => 'EXISTING_TOKEN',
+      detectEntities: jest.fn(({ records }) =>
+        Promise.resolve(
+          records.flatMap((record) => {
+            const entities: DetectedPiiEntity[] = [];
+            for (const value of ['person@example.com', 'other@example.com']) {
+              const start = record.text.indexOf(value);
+              if (start !== -1) {
+                entities.push({
+                  recordId: record.id,
+                  start,
+                  end: start + value.length,
+                  value,
+                  entityClass: 'EMAIL',
+                });
+              }
+            }
+            return entities;
+          })
+        )
+      ),
+      tokenize: () => 'COLLISION_TOKEN',
     });
 
     await expect(
       executePiiProtection({
         input: {
-          ...input,
-          tokenMap: {
-            EXISTING_TOKEN: { original: 'different secret', entityClass: 'ENTITY_NAME' },
-          },
+          system: 'person@example.com and other@example.com',
+          messages: [],
+          rules: [rule],
         },
         capabilities,
         abortSignal: new AbortController().signal,
@@ -264,9 +258,9 @@ describe('executePiiProtection', () => {
     ).rejects.toThrow('PII token collision detected');
     expect(logger.warn).toHaveBeenCalledWith(
       'PII token collision detected; failing workflow protection',
-      { existingEntityClass: 'ENTITY_NAME', detectedEntityClass: 'EMAIL' }
+      { existingEntityClass: 'EMAIL', detectedEntityClass: 'EMAIL' }
     );
     expect(JSON.stringify(logger.warn.mock.calls)).not.toContain('person@example.com');
-    expect(JSON.stringify(logger.warn.mock.calls)).not.toContain('different secret');
+    expect(JSON.stringify(logger.warn.mock.calls)).not.toContain('other@example.com');
   });
 });

@@ -7,15 +7,6 @@
 
 import type { TokenMap } from '../../common/workflow_anonymization';
 
-export const replaceKnownOriginals = (value: string, tokenMap: TokenMap): string =>
-  Object.entries(tokenMap)
-    .sort(([, left], [, right]) => right.original.length - left.original.length)
-    .reduce(
-      (current, [token, entry]) =>
-        entry.original ? current.split(entry.original).join(token) : current,
-      value
-    );
-
 export const restoreTokens = (value: string, tokenMap: TokenMap): string =>
   Object.entries(tokenMap)
     .sort(([left], [right]) => right.length - left.length)
