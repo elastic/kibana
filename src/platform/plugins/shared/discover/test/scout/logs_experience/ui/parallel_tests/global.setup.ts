@@ -41,6 +41,27 @@ globalSetupHook('Setup logs experience tests data', async ({ esClient, log, conf
   ]);
   log.debug('[setup:logs] synthtrace logs data indexed');
 
+  // Doc-viewer data. Every document carries a stack trace and an oversized `log.level`, so every
+  // row offers both leading controls and no spec needs a query to narrow the grid. One document per
+  // minute keeps `@timestamp` unique, which makes "row 0" and "row 1" stable under the default sort.
+  await logsEsClient.index([
+    timerange(from, to)
+      .interval('1m')
+      .rate(1)
+      .generator((timestamp: number) =>
+        logDoc
+          .create()
+          .message(LOGS.SYNTH_LOGS_MESSAGE)
+          .hostName(LOGS.SYNTH_LOGS_HOST)
+          .timestamp(timestamp)
+          .dataset(LOGS.SYNTH_DOCVIEWER_DATASET)
+          .namespace(LOGS.SYNTH_LOGS_NAMESPACE)
+          .logLevel(LOGS.OVERSIZED_LOG_LEVEL)
+          .defaults({ 'error.stack_trace': LOGS.STACK_TRACE })
+      ),
+  ]);
+  log.debug('[setup:logs] synthtrace doc viewer data indexed');
+
   // Metric-shaped data for the negative cases: a data source that must NOT match the logs
   // profile. Indexed directly rather than via `infraEsClient`, whose `metrics-*` data streams
   // are TSDB and reject timestamps outside a moving window around now.
