@@ -172,7 +172,7 @@ export const GroupFields = () => {
             onClick: () => {
               handleChange({
                 field: 'origin' as const,
-                order: groupOrder,
+                order: 'asc',
               });
             },
           },
