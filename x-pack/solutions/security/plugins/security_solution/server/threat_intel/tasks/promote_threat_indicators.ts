@@ -531,8 +531,8 @@ export const registerPromoteThreatIndicatorsTask = ({
     [PROMOTE_THREAT_INDICATORS_TASK_TYPE]: {
       title: 'Threat Intelligence — Promote threat indicators',
       description:
-        'Mirror newly extracted IOCs from .kibana-threat-reports-* into ' +
-        '.kibana-threat-intel-indicators so Detection Engine Indicator Match rules ' +
+        `Mirror newly extracted IOCs from ${THREAT_REPORTS_INDEX_PATTERN} into ` +
+        `${THREAT_INTEL_INDICATORS_INDEX} so Detection Engine Indicator Match rules ` +
         'can match them against alert/event data without a parallel matcher.',
       timeout: TASK_TIMEOUT,
       // One-shot semantics per scheduled run — re-running on transient
