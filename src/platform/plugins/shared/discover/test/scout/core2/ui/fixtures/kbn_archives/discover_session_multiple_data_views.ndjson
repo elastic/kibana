@@ -1,0 +1,107 @@
+{
+  "attributes": {
+    "fields": "[]",
+    "timeFieldName": "@timestamp",
+    "title": "logstash-*"
+  },
+  "coreMigrationVersion": "8.0.0",
+  "id": "discover-embeddable-logstash-data-view",
+  "migrationVersion": {
+    "index-pattern": "7.11.0"
+  },
+  "references": [],
+  "type": "index-pattern"
+}
+
+{
+  "attributes": {
+    "fields": "[]",
+    "timeFieldName": "@timestamp",
+    "title": "discover-embeddable-animals-*"
+  },
+  "coreMigrationVersion": "8.0.0",
+  "id": "discover-embeddable-animals-data-view",
+  "migrationVersion": {
+    "index-pattern": "7.11.0"
+  },
+  "references": [],
+  "type": "index-pattern"
+}
+
+{
+  "attributes": {
+    "columns": [
+      "bytes",
+      "clientip"
+    ],
+    "description": "",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"query\":{\"language\":\"lucene\",\"query\":\"\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+    },
+    "sort": [
+      [
+        "@timestamp",
+        "desc"
+      ]
+    ],
+    "title": "Rendering Test: saved search",
+    "version": 1
+  },
+  "coreMigrationVersion": "8.0.0",
+  "id": "discover-embeddable-saved-search",
+  "migrationVersion": {
+    "search": "7.9.3"
+  },
+  "references": [
+    {
+      "id": "discover-embeddable-logstash-data-view",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "search"
+}
+
+{
+  "attributes": {
+    "version": 3,
+    "description": "",
+    "refreshInterval": {
+      "pause": true,
+      "value": 60000
+    },
+    "timeRestore": true,
+    "timeFrom": "now-15y",
+    "title": "discover session multiple data views",
+    "timeTo": "now",
+    "controlGroupInput": {
+      "chainingSystem": "HIERARCHICAL",
+      "controlStyle": "oneLine",
+      "ignoreParentSettingsJSON": "{\"ignoreFilters\":false,\"ignoreQuery\":false,\"ignoreTimerange\":false,\"ignoreValidations\":false}",
+      "panelsJSON": "{}",
+      "showApplySelections": false
+    },
+    "optionsJSON": "{\"useMargins\":true,\"syncColors\":false,\"syncCursor\":true,\"syncTooltips\":false,\"hidePanelTitles\":false}",
+    "panelsJSON": "[{\"type\":\"search\",\"title\":\"Rendering Test: saved search\",\"panelRefName\":\"panel_acc95967-6664-4922-b4e8-5cdeed30d5d8\",\"embeddableConfig\":{\"description\":\"\",\"enhancements\":{\"dynamicActions\":{\"events\":[]}},\"columns\":[\"bytes\",\"clientip\"],\"rowsPerPage\":10,\"grid\":{}},\"panelIndex\":\"acc95967-6664-4922-b4e8-5cdeed30d5d8\",\"gridData\":{\"x\":0,\"y\":0,\"w\":24,\"h\":15,\"i\":\"acc95967-6664-4922-b4e8-5cdeed30d5d8\"}}]",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[{\"meta\":{\"disabled\":false,\"negate\":false,\"alias\":null,\"key\":\"animal\",\"field\":\"animal\",\"type\":\"exists\",\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\"},\"query\":{\"exists\":{\"field\":\"animal\"}},\"$state\":{\"store\":\"appState\"}}],\"query\":{\"query\":\"\",\"language\":\"kuery\"}}"
+    }
+  },
+  "coreMigrationVersion": "8.8.0",
+  "id": "discover-embeddable-multiple-data-views-dashboard",
+  "references": [
+    {
+      "id": "discover-embeddable-animals-data-view",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "type": "index-pattern"
+    },
+    {
+      "id": "discover-embeddable-saved-search",
+      "name": "acc95967-6664-4922-b4e8-5cdeed30d5d8:panel_acc95967-6664-4922-b4e8-5cdeed30d5d8",
+      "type": "search"
+    }
+  ],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0"
+}
