@@ -16,7 +16,7 @@ describe('piiRestoreStepDefinition', () => {
           EMAIL_TOKEN: { original: 'person@example.com', entityClass: 'EMAIL' },
         },
       },
-    });
+    } as unknown as Parameters<typeof piiRestoreStepDefinition.handler>[0]);
     expect(result).toEqual({ output: { content: 'Contact person@example.com' } });
   });
 

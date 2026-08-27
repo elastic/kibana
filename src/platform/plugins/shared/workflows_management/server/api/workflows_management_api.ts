@@ -63,9 +63,7 @@ import type {
   WorkflowExecutionCapabilities,
 } from '@kbn/workflows-extensions/server';
 import {
-  parseWorkflowYamlToJSON,
   parseYamlToJSONWithoutValidation,
-  stringifyWorkflowDefinition,
   WorkflowConflictError,
   WorkflowValidationError,
 } from '@kbn/workflows-yaml';
@@ -483,7 +481,7 @@ export class WorkflowsManagementApi {
 
     if (workflow.enabled === true) {
       const hasAroundCompletionTrigger = originalWorkflow.definition?.triggers?.some(
-        (t) => t.type === 'inference.aroundCompletion'
+        (t) => String(t.type) === 'inference.aroundCompletion'
       );
       if (hasAroundCompletionTrigger) {
         const alreadyEnabled = await this.getWorkflowsSubscribedToTrigger(
