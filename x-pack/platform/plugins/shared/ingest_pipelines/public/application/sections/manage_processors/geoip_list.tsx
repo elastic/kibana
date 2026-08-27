@@ -64,11 +64,16 @@ export const GeoipList: React.FunctionComponent = () => {
   };
   let content: JSX.Element;
   const addDatabaseButton = (
-    <EuiButton fill iconType="plusCircle" onClick={openAddDatabaseModal}>
+    <EuiButton
+      fill
+      iconType="plusCircle"
+      onClick={openAddDatabaseModal}
+      data-test-subj="addGeoipDatabaseButton"
+    >
       {addDatabaseButtonLabel}
     </EuiButton>
   );
-  const showAddInHeader = Array.isArray(data) && !error;
+  const showAddInHeader = Boolean(data && data.length > 0) && !error;
   const menu: AppHeaderMenu | undefined = showAddInHeader
     ? {
         primaryActionItem: {
