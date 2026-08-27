@@ -7,16 +7,13 @@
 
 import type { RoleApiCredentials } from '@kbn/scout';
 import { tags } from '@kbn/scout';
-import { expect } from '@kbn/scout/api';
 import { createLlmProxy, type LlmProxy } from '@kbn/ftr-llm-proxy';
 import {
   createGenAiConnectorForProxy,
   deleteConnectorById,
 } from '../../../scout_agent_builder_shared/lib/connector_kbn';
-import { setupAgentDirectAnswer } from '../../../scout_agent_builder_shared/lib/proxy_scenario';
 import { apiTest } from '../fixtures';
 import { API_AGENT_BUILDER } from '../fixtures/constants';
-import { getConversation, postConverse } from '../fixtures/converse_http';
 
 apiTest.describe(
   'Agent Builder — concurrent conversation writes API',
