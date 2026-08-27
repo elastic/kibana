@@ -14,9 +14,14 @@ import {
   SECURITY_ATTACK_ATTACHMENT_TYPE,
 } from '@kbn/cases-plugin/common';
 import { MAX_ALERTS_PER_CASE } from '@kbn/cases-plugin/common/constants';
+import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';
 import type { AttackAttachmentPayload } from '../../../../common/cases/attachments/attack';
 import {
   AttackAttachmentPayloadSchema,
+  MAX_ATTACK_DETAILS_MARKDOWN_LENGTH,
+  MAX_ATTACK_ENTITY_SUMMARY_MARKDOWN_LENGTH,
+  MAX_ATTACK_MITRE_ATTACK_TACTIC_LENGTH,
+  MAX_ATTACK_MITRE_ATTACK_TACTICS,
   MAX_ATTACK_SUMMARY_MARKDOWN_LENGTH,
   MAX_ATTACK_TITLE_LENGTH,
 } from '../../../../common/cases/attachments/attack';
@@ -219,6 +224,118 @@ describe('buildAttackAttachments', () => {
     ).toBe(true);
   });
 
+  it('builds a schema-valid payload for a fully populated attack', () => {
+    const { attachments } = buildAttackAttachments(
+      attackToAttach({
+        alertIds: ['alert-1'],
+        detailsMarkdown: '- An adversary ran `curl` on {{ host.name host-1 }}.',
+        entitySummaryMarkdown: '{{ user.name user-1 }} on {{ host.name host-1 }}',
+        mitreAttackTactics: ['Credential Access', 'Exfiltration'],
+        timestamp: '2026-08-27T10:00:00.000Z',
+        entityCount: 3,
+      })
+    );
+
+    expect(
+      AttackAttachmentPayloadSchema.safeParse({ ...attachments[0], owner: 'securitySolution' })
+        .success
+    ).toBe(true);
+  });
+
+  it('builds a schema-valid payload for an attack carrying only the required fields', () => {
+    const { attachments } = buildAttackAttachments({
+      id: 'attack-id-1',
+      index: ATTACK_INDEX,
+      title: 'Credential harvesting on host-1',
+      alertsIndex: ALERTS_INDEX,
+    });
+
+    expect(
+      AttackAttachmentPayloadSchema.safeParse({ ...attachments[0], owner: 'securitySolution' })
+        .success
+    ).toBe(true);
+  });
+
+  it('snapshots the narrative fields de-anonymised', () => {
+    const { attachments } = buildAttackAttachments(
+      attackToAttach({
+        title: 'Credential harvesting on {{ host.name Host-abc }}',
+        summaryMarkdown: 'An adversary targeted {{ user.name User-xyz }}.',
+        detailsMarkdown: '- {{ user.name User-xyz }} authenticated to {{ host.name Host-abc }}.',
+        entitySummaryMarkdown: '{{ user.name User-xyz }} on {{ host.name Host-abc }}',
+        replacements: { 'Host-abc': 'host-1', 'User-xyz': 'jdoe' },
+      })
+    );
+
+    expect(attachments[0].metadata).toEqual(
+      expect.objectContaining({
+        title: 'Credential harvesting on {{ host.name host-1 }}',
+        summaryMarkdown: 'An adversary targeted {{ user.name jdoe }}.',
+        detailsMarkdown: '- {{ user.name jdoe }} authenticated to {{ host.name host-1 }}.',
+        entitySummaryMarkdown: '{{ user.name jdoe }} on {{ host.name host-1 }}',
+      })
+    );
+  });
+
+  it('leaves an already de-anonymised snapshot untouched when the replacements are re-applied', () => {
+    const replacements = { 'Host-abc': 'host-1' };
+    const { attachments } = buildAttackAttachments(
+      attackToAttach({ title: 'Attack on {{ host.name Host-abc }}', replacements })
+    );
+    const { title } = attachments[0].metadata as { title: string };
+
+    // The Attachments tab re-applies the replacements over whichever title it renders.
+    expect(replaceAnonymizedValuesWithOriginalValues({ messageContent: title, replacements })).toBe(
+      title
+    );
+  });
+
+  it('snapshots the MITRE tactics and the detected-on timestamp', () => {
+    const { attachments } = buildAttackAttachments(
+      attackToAttach({
+        mitreAttackTactics: ['Credential Access', 'Exfiltration'],
+        timestamp: '2026-08-27T10:00:00.000Z',
+      })
+    );
+
+    expect(attachments[0].metadata).toEqual(
+      expect.objectContaining({
+        mitreAttackTactics: ['Credential Access', 'Exfiltration'],
+        timestamp: '2026-08-27T10:00:00.000Z',
+      })
+    );
+  });
+
+  it('caps the MITRE tactics at the schema bounds', () => {
+    const { attachments } = buildAttackAttachments(
+      attackToAttach({
+        mitreAttackTactics: Array.from({ length: MAX_ATTACK_MITRE_ATTACK_TACTICS + 5 }, () =>
+          'a'.repeat(MAX_ATTACK_MITRE_ATTACK_TACTIC_LENGTH + 10)
+        ),
+      })
+    );
+
+    const { mitreAttackTactics } = attachments[0].metadata as { mitreAttackTactics: string[] };
+    expect(mitreAttackTactics).toHaveLength(MAX_ATTACK_MITRE_ATTACK_TACTICS);
+    expect(
+      mitreAttackTactics.every((tactic) => tactic.length === MAX_ATTACK_MITRE_ATTACK_TACTIC_LENGTH)
+    ).toBe(true);
+    expect(
+      AttackAttachmentPayloadSchema.safeParse({ ...attachments[0], owner: 'securitySolution' })
+        .success
+    ).toBe(true);
+  });
+
+  it('omits the narrative fields the attack does not carry rather than persisting empty strings', () => {
+    const { attachments } = buildAttackAttachments(attackToAttach({ summaryMarkdown: undefined }));
+
+    expect(attachments[0].metadata).not.toHaveProperty('summaryMarkdown');
+    expect(attachments[0].metadata).not.toHaveProperty('detailsMarkdown');
+    expect(attachments[0].metadata).not.toHaveProperty('entitySummaryMarkdown');
+    expect(attachments[0].metadata).not.toHaveProperty('mitreAttackTactics');
+    expect(attachments[0].metadata).not.toHaveProperty('timestamp');
+  });
+
   it('de-anonymises the alert ids via the attack replacements', () => {
     const { attachments } = buildAttackAttachments(
       attackToAttach({
@@ -360,6 +477,73 @@ describe('buildAttackAttachments', () => {
       AttackAttachmentPayloadSchema.safeParse({ ...attachments[0], owner: 'securitySolution' })
         .success
     ).toBe(true);
+  });
+
+  it('cuts back to the previous complete token when the bound falls mid-token', () => {
+    const firstToken = '{{ host.name host-1 }}';
+    const secondToken = '{{ user.name jdoe }}';
+    // Positions the second token so the bound lands five characters into it.
+    const filler = 'x'.repeat(
+      MAX_ATTACK_ENTITY_SUMMARY_MARKDOWN_LENGTH - 5 - firstToken.length - 2
+    );
+
+    const { attachments } = buildAttackAttachments(
+      attackToAttach({
+        entitySummaryMarkdown: `${firstToken} ${filler} ${secondToken} and more`,
+      })
+    );
+
+    const { entitySummaryMarkdown } = attachments[0].metadata as {
+      entitySummaryMarkdown: string;
+    };
+    expect(entitySummaryMarkdown).toBe(firstToken);
+    expect(entitySummaryMarkdown).not.toContain(`${firstToken} ${filler}`);
+  });
+
+  it('drops a partial token outright when no complete token precedes the bound', () => {
+    const filler = 'x'.repeat(MAX_ATTACK_ENTITY_SUMMARY_MARKDOWN_LENGTH - 5);
+
+    const { attachments } = buildAttackAttachments(
+      attackToAttach({ entitySummaryMarkdown: `${filler}{{ host.name host-1 }}` })
+    );
+
+    const { entitySummaryMarkdown } = attachments[0].metadata as {
+      entitySummaryMarkdown: string;
+    };
+    expect(entitySummaryMarkdown).toBe(filler);
+    expect(entitySummaryMarkdown).not.toContain('{{');
+  });
+
+  it('truncates at the bound when the cut does not fall inside a token', () => {
+    const { attachments } = buildAttackAttachments(
+      attackToAttach({
+        detailsMarkdown: `{{ host.name host-1 }}${'x'.repeat(MAX_ATTACK_DETAILS_MARKDOWN_LENGTH)}`,
+      })
+    );
+
+    const { detailsMarkdown } = attachments[0].metadata as { detailsMarkdown: string };
+    expect(detailsMarkdown).toHaveLength(MAX_ATTACK_DETAILS_MARKDOWN_LENGTH);
+  });
+
+  it('truncates the de-anonymised text, not the anonymised original', () => {
+    const anonymised = 'Host-abc';
+    const original = 'a-much-longer-original-host-name';
+    // Exactly at the bound while anonymised, over it once the longer original is substituted in.
+    const prefix = 'y'.repeat(MAX_ATTACK_ENTITY_SUMMARY_MARKDOWN_LENGTH - anonymised.length);
+
+    const { attachments } = buildAttackAttachments(
+      attackToAttach({
+        entitySummaryMarkdown: `${prefix}${anonymised}`,
+        replacements: { [anonymised]: original },
+      })
+    );
+
+    const { entitySummaryMarkdown } = attachments[0].metadata as {
+      entitySummaryMarkdown: string;
+    };
+    expect(entitySummaryMarkdown).toHaveLength(MAX_ATTACK_ENTITY_SUMMARY_MARKDOWN_LENGTH);
+    expect(entitySummaryMarkdown.endsWith(original.slice(0, anonymised.length))).toBe(true);
+    expect(entitySummaryMarkdown).not.toContain(anonymised);
   });
 
   it('returns nothing when the attack has no id', () => {

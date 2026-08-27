@@ -21,14 +21,23 @@ import { MAX_ALERTS_PER_CASE } from '@kbn/cases-plugin/common/constants';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { getOriginalAlertIds, type Replacements } from '@kbn/elastic-assistant-common';
+import {
+  getOriginalAlertIds,
+  replaceAnonymizedValuesWithOriginalValues,
+  type Replacements,
+} from '@kbn/elastic-assistant-common';
 import type {
   AttackAttachmentMetadata,
   AttackAttachmentPayload,
 } from '../../../../common/cases/attachments/attack';
 import {
   AttackAttachmentPayloadSchema,
+  MAX_ATTACK_DETAILS_MARKDOWN_LENGTH,
+  MAX_ATTACK_ENTITY_SUMMARY_MARKDOWN_LENGTH,
+  MAX_ATTACK_MITRE_ATTACK_TACTIC_LENGTH,
+  MAX_ATTACK_MITRE_ATTACK_TACTICS,
   MAX_ATTACK_SUMMARY_MARKDOWN_LENGTH,
+  MAX_ATTACK_TIMESTAMP_LENGTH,
   MAX_ATTACK_TITLE_LENGTH,
 } from '../../../../common/cases/attachments/attack';
 
@@ -48,10 +57,30 @@ export interface AttackToAttach {
    * passes whichever the document was read from so the distinction is preserved.
    */
   index: string;
-  /** The attack's plain-text title. Truncated to the schema bound if longer. */
+  /**
+   * The attack's plain-text title, as it sits on the document — still anonymised. De-anonymised
+   * and truncated to the schema bound when it is snapshotted.
+   */
   title: string;
-  /** The attack's summary markdown. Truncated to the schema bound if longer. */
+  /**
+   * The attack's summary markdown, still anonymised. De-anonymised and truncated when
+   * snapshotted.
+   */
   summaryMarkdown?: string;
+  /**
+   * The attack's details markdown, still anonymised. De-anonymised and truncated when
+   * snapshotted.
+   */
+  detailsMarkdown?: string;
+  /**
+   * The attack's one-line entity summary markdown, still anonymised. De-anonymised and truncated
+   * when snapshotted.
+   */
+  entitySummaryMarkdown?: string;
+  /** The MITRE ATT&CK tactic names the attack maps to, rendered as the attack chain. */
+  mitreAttackTactics?: string[];
+  /** The time the attack was generated, rendered as the card's "Detected on" line. */
+  timestamp?: string;
   /** The attack's risk score. The attack document has no `severity`. */
   riskScore?: number;
   /**
@@ -149,8 +178,51 @@ export const getAttackAttachment = () =>
     }),
   });
 
-const truncate = (value: string, maxLength: number): string =>
-  value.length > maxLength ? value.slice(0, maxLength) : value;
+const FIELD_TOKEN_OPEN = '{{';
+const FIELD_TOKEN_CLOSE = '}}';
+
+/**
+ * Truncates to `maxLength` without ever cutting inside a `{{ field value }}` token — a half a
+ * token renders as literal braces in the markdown formatter, so the cut falls back to the end of
+ * the last complete token before the bound.
+ */
+const truncate = (value: string, maxLength: number): string => {
+  if (value.length <= maxLength) {
+    return value;
+  }
+
+  const truncated = value.slice(0, maxLength);
+  const tokenStart = truncated.lastIndexOf(FIELD_TOKEN_OPEN);
+  const isCutMidToken = tokenStart !== -1 && !truncated.includes(FIELD_TOKEN_CLOSE, tokenStart);
+
+  if (!isCutMidToken) {
+    return truncated;
+  }
+
+  const previousTokenEnd = truncated.lastIndexOf(FIELD_TOKEN_CLOSE, tokenStart);
+
+  // Nothing complete to fall back to: drop the opening braces rather than emit an unclosed token.
+  return previousTokenEnd === -1
+    ? truncated.slice(0, tokenStart)
+    : truncated.slice(0, previousTokenEnd + FIELD_TOKEN_CLOSE.length);
+};
+
+/**
+ * De-anonymises then truncates one narrative field, so the snapshot holds text the activity card
+ * can render with no `replacements` map. Returns `undefined` for an absent field so it stays out
+ * of the metadata rather than being persisted as an empty string.
+ */
+const snapshotNarrative = (
+  value: string | undefined,
+  replacements: Replacements | undefined,
+  maxLength: number
+): string | undefined =>
+  value == null
+    ? undefined
+    : truncate(
+        replaceAnonymizedValuesWithOriginalValues({ messageContent: value, replacements }),
+        maxLength
+      );
 
 /** The `security.attack` attachment as posted to a case — the cases UI injects the `owner`. */
 export type AttackAttachmentWithoutOwner = Omit<AttackAttachmentPayload, 'owner'>;
@@ -188,6 +260,9 @@ export interface AttackAttachmentsResult {
  * The constituent alerts are always included — attaching an attack means attaching the alerts it
  * comprises, so there is no at-attach-time choice about them.
  *
+ * The narrative fields are de-anonymised here, once, so nothing downstream of the attachment
+ * needs the attack's `replacements` map.
+ *
  * Returns the truncation counts alongside the attachments so the caller can warn the user when
  * an attack carries more alerts than one request may hold. Use
  * {@link generateAttackAttachmentsWithoutOwner} where that reporting isn't needed.
@@ -199,6 +274,10 @@ export const buildAttackAttachments = ({
   index,
   title,
   summaryMarkdown,
+  detailsMarkdown,
+  entitySummaryMarkdown,
+  mitreAttackTactics,
+  timestamp,
   riskScore,
   entityCount,
   alertIds,
@@ -218,20 +297,53 @@ export const buildAttackAttachments = ({
   // let the caller surface what was left off rather than failing the whole attach.
   const attachedAlertIds = originalAlertIds.slice(0, MAX_ALERTS_PER_CASE);
 
+  // Snapshot the narrative de-anonymised: the activity card renders straight from metadata and
+  // is never handed a replacements map, so anything left anonymised here stays that way on screen.
+  const snapshot = {
+    summaryMarkdown: snapshotNarrative(
+      summaryMarkdown,
+      replacements,
+      MAX_ATTACK_SUMMARY_MARKDOWN_LENGTH
+    ),
+    detailsMarkdown: snapshotNarrative(
+      detailsMarkdown,
+      replacements,
+      MAX_ATTACK_DETAILS_MARKDOWN_LENGTH
+    ),
+    entitySummaryMarkdown: snapshotNarrative(
+      entitySummaryMarkdown,
+      replacements,
+      MAX_ATTACK_ENTITY_SUMMARY_MARKDOWN_LENGTH
+    ),
+  };
+
   const attackAttachment: AttackAttachmentWithoutOwner = {
     type: SECURITY_ATTACK_ATTACHMENT_TYPE,
     attachmentId: id,
     metadata: {
-      title: truncate(title, MAX_ATTACK_TITLE_LENGTH),
+      title: truncate(
+        replaceAnonymizedValuesWithOriginalValues({ messageContent: title, replacements }),
+        MAX_ATTACK_TITLE_LENGTH
+      ),
       // The attack's own alert count, which is what the preview card means by "alerts" — it can
       // exceed the number of alert attachments created when the batch above was capped.
       alertCount: originalAlertIds.length,
       // Lets the Cases platform pair this attachment's id with an index so the "already attached"
       // duplicate check works, and so status sync knows which index to write to.
       index,
-      ...(summaryMarkdown != null
-        ? { summaryMarkdown: truncate(summaryMarkdown, MAX_ATTACK_SUMMARY_MARKDOWN_LENGTH) }
+      ...(snapshot.summaryMarkdown != null ? { summaryMarkdown: snapshot.summaryMarkdown } : {}),
+      ...(snapshot.detailsMarkdown != null ? { detailsMarkdown: snapshot.detailsMarkdown } : {}),
+      ...(snapshot.entitySummaryMarkdown != null
+        ? { entitySummaryMarkdown: snapshot.entitySummaryMarkdown }
         : {}),
+      ...(mitreAttackTactics != null
+        ? {
+            mitreAttackTactics: mitreAttackTactics
+              .slice(0, MAX_ATTACK_MITRE_ATTACK_TACTICS)
+              .map((tactic) => truncate(tactic, MAX_ATTACK_MITRE_ATTACK_TACTIC_LENGTH)),
+          }
+        : {}),
+      ...(timestamp != null ? { timestamp: truncate(timestamp, MAX_ATTACK_TIMESTAMP_LENGTH) } : {}),
       ...(riskScore != null ? { riskScore } : {}),
       ...(entityCount != null ? { entityCount } : {}),
     } satisfies AttackAttachmentMetadata,
