@@ -51,7 +51,7 @@ const IMPLICIT_REGISTRY_CONSUMERS: readonly ImplicitConsumerRule[] = [
   },
   {
     reason:
-      'Event-driven trigger registration is a runtime workflows_extensions catalog. Publishers sit upstream, so schema or registration changes would skip the approval Scout test.',
+      'Workflow triggers are registered into workflows_extensions at runtime. Changes to these files would not select the trigger-approval tests by default.',
     patterns: [
       '**/common/triggers/**/*.{ts,tsx}',
       '**/common/workflows/triggers/**/*.{ts,tsx}',
