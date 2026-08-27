@@ -484,7 +484,6 @@ describe('handleAgentExecution', () => {
       });
       conversationClient.create.mockResolvedValue(createdConversation);
       conversationClient.appendEvents.mockResolvedValue(createdConversation);
-      // `replaceRoundEvents` must resolve so the round-end write can build a `conversationCreated` event.
       conversationClient.replaceRoundEvents.mockResolvedValue(createdConversation);
 
       mockAgentStream([makeRoundStartedEvent(), makeRoundCompleteEvent()]);

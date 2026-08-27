@@ -480,7 +480,6 @@ export const updateConversation = ({
     };
   }
 
-  // Legacy rounds-only doc with no events being written: never auto-promote — leave it rounds-only.
   if (!isEventsNativeVersion(merged.schema_version)) {
     return merged;
   }
