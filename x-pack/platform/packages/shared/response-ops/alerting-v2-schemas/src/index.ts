@@ -17,8 +17,10 @@ export {
   validateMaxDuration,
   validateMinDuration,
   validateEsqlQuery,
+  validateDataRecordFields,
   parseDurationToMs,
 } from './validation';
+export type { DataFieldIssue, ValidateDataRecordFieldsOptions } from './validation';
 export * from './action_policy_data_schema';
 export * from './action_policy_response_schema';
 export * from './action_policy_attachment_schema';

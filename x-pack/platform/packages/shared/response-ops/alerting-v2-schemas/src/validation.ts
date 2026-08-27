@@ -89,3 +89,78 @@ export function composeEsqlQuery(base: string, segment: string): string {
   };
   return BasicPrettyPrinter.query(composedRoot);
 }
+
+export interface DataFieldIssue {
+  code: 'custom';
+  path: (string | number)[];
+  message: string;
+  input: unknown;
+  [key: string]: unknown;
+}
+
+export interface ValidateDataRecordFieldsOptions {
+  data: Record<string, unknown>;
+  maxFields: number;
+  fieldSizeLimit: number;
+  /** Label prefix for messages, e.g. "Source data" or "Artifact data" */
+  label: string;
+  /** Optional suffix appended to per-field size messages, e.g. ' for type "runbook"' */
+  fieldMessageSuffix?: string;
+  /** Fields validated separately by a type-specific schema — skipped by generic size checks */
+  declaredFields?: ReadonlySet<string>;
+}
+
+/**
+ * Validates field count and per-field size for a `data` record used in
+ * `{ type, data }` envelopes (artifacts, source). Returns issues rather than
+ * throwing so callers can push them into a Zod `.check()` context.
+ */
+export function validateDataRecordFields({
+  data,
+  maxFields,
+  fieldSizeLimit,
+  label,
+  fieldMessageSuffix = '',
+  declaredFields,
+}: ValidateDataRecordFieldsOptions): DataFieldIssue[] {
+  const issues: DataFieldIssue[] = [];
+  const fields = Object.entries(data);
+
+  if (fields.length > maxFields) {
+    issues.push({
+      code: 'custom',
+      path: ['data'],
+      message: `${label} must have at most ${maxFields} fields.`,
+      input: data,
+    });
+  }
+
+  for (const [field, value] of fields) {
+    if (declaredFields?.has(field)) {
+      continue;
+    }
+
+    if (typeof value === 'string') {
+      if (value.length > fieldSizeLimit) {
+        issues.push({
+          code: 'custom',
+          path: ['data', field],
+          message: `${label} field "${field}" must be at most ${fieldSizeLimit} characters${fieldMessageSuffix}.`,
+          input: value,
+        });
+      }
+      continue;
+    }
+
+    if ((JSON.stringify(value) ?? '').length > fieldSizeLimit) {
+      issues.push({
+        code: 'custom',
+        path: ['data', field],
+        message: `${label} field "${field}" must serialize to at most ${fieldSizeLimit} characters${fieldMessageSuffix}.`,
+        input: value,
+      });
+    }
+  }
+
+  return issues;
+}

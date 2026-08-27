@@ -11,7 +11,10 @@ export const RUNBOOK_ARTIFACT_TYPE = 'runbook';
 /** Artifact type identifier for linked dashboards */
 export const DASHBOARD_ARTIFACT_TYPE = 'dashboard';
 
-/** Default maximum length for a string field inside an artifact's `data` record. */
+/**
+ * Default maximum character length for a single field inside a `data` record
+ * (artifacts, source, or any future `{ type, data }` envelope).
+ */
 export const DEFAULT_ARTIFACT_DATA_FIELD_LIMIT = 1024;
 
 /** Maximum length for a runbook artifact's `data.content` field. */

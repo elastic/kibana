@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { DEFAULT_ARTIFACT_DATA_FIELD_LIMIT, DEFAULT_TIME_FIELD } from '@kbn/alerting-v2-constants';
 import { ARTIFACT_DATA_SCHEMAS } from './artifact_data_schemas';
-import { validateEsqlQuery, validateMinDuration, composeEsqlQuery } from './validation';
+import { validateEsqlQuery, validateMinDuration, composeEsqlQuery, validateDataRecordFields } from './validation';
 import { durationSchema, tagsResponseSchema, tagsSchema } from './common';
 import {
   MAX_CONSECUTIVE_BREACHES,
@@ -78,40 +78,13 @@ export const sourceSchema = z
   })
   .strict()
   .check((ctx) => {
-    const fields = Object.entries(ctx.value.data);
-
-    if (fields.length > MAX_SOURCE_DATA_FIELDS) {
-      ctx.issues.push({
-        code: 'custom',
-        path: ['data'],
-        message: `Source data must have at most ${MAX_SOURCE_DATA_FIELDS} fields.`,
-        input: ctx.value.data,
-      });
-    }
-
-    for (const [field, value] of fields) {
-      const limit = DEFAULT_ARTIFACT_DATA_FIELD_LIMIT;
-
-      if (typeof value === 'string') {
-        if (value.length > limit) {
-          ctx.issues.push({
-            code: 'custom',
-            path: ['data', field],
-            message: `Source data field "${field}" must be at most ${limit} characters.`,
-            input: value,
-          });
-        }
-        continue;
-      }
-
-      if ((JSON.stringify(value) ?? '').length > limit) {
-        ctx.issues.push({
-          code: 'custom',
-          path: ['data', field],
-          message: `Source data field "${field}" must serialize to at most ${limit} characters.`,
-          input: value,
-        });
-      }
+    for (const issue of validateDataRecordFields({
+      data: ctx.value.data,
+      maxFields: MAX_SOURCE_DATA_FIELDS,
+      fieldSizeLimit: DEFAULT_ARTIFACT_DATA_FIELD_LIMIT,
+      label: 'Source data',
+    })) {
+      ctx.issues.push(issue);
     }
   })
   .meta({ id: 'alerting_rule_source' });
@@ -462,17 +435,6 @@ const artifactSchema = z
   })
   .strict()
   .check((ctx) => {
-    const fields = Object.entries(ctx.value.data);
-
-    if (fields.length > MAX_ARTIFACT_DATA_FIELDS) {
-      ctx.issues.push({
-        code: 'custom',
-        path: ['data'],
-        message: `Artifact data must have at most ${MAX_ARTIFACT_DATA_FIELDS} fields.`,
-        input: ctx.value.data,
-      });
-    }
-
     const typeSchema = ARTIFACT_DATA_SCHEMAS[ctx.value.type];
     const declared = typeSchema ? new Set(Object.keys(typeSchema.shape)) : undefined;
     const typeResult = typeSchema?.safeParse(ctx.value.data);
@@ -488,38 +450,15 @@ const artifactSchema = z
       }
     }
 
-    // Fields declared by the type schema use that schema's own limits (e.g.
-    // runbook content at 50k). Everything else gets the generic default so
-    // unregistered types stay bounded without a framework change.
-    for (const [field, value] of fields) {
-      if (declared?.has(field)) {
-        continue;
-      }
-
-      const limit = DEFAULT_ARTIFACT_DATA_FIELD_LIMIT;
-
-      if (typeof value === 'string') {
-        if (value.length > limit) {
-          ctx.issues.push({
-            code: 'custom',
-            path: ['data', field],
-            message: `Artifact data field "${field}" must be at most ${limit} characters for type "${ctx.value.type}".`,
-            input: value,
-          });
-        }
-        continue;
-      }
-
-      // Structured values are measured serialized, so nesting a payload in an
-      // object or an array cannot buy more room than a plain string field gets.
-      if ((JSON.stringify(value) ?? '').length > limit) {
-        ctx.issues.push({
-          code: 'custom',
-          path: ['data', field],
-          message: `Artifact data field "${field}" must serialize to at most ${limit} characters for type "${ctx.value.type}".`,
-          input: value,
-        });
-      }
+    for (const issue of validateDataRecordFields({
+      data: ctx.value.data,
+      maxFields: MAX_ARTIFACT_DATA_FIELDS,
+      fieldSizeLimit: DEFAULT_ARTIFACT_DATA_FIELD_LIMIT,
+      label: 'Artifact data',
+      fieldMessageSuffix: ` for type "${ctx.value.type}"`,
+      declaredFields: declared,
+    })) {
+      ctx.issues.push(issue);
     }
   })
   .meta({ id: 'alerting_rule_artifact' });
