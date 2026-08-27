@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { filter, finalize, from, merge, ReplaySubject, share, shareReplay } from 'rxjs';
+import { filter, finalize, from, merge, ReplaySubject, shareReplay } from 'rxjs';
 import { Command } from '@langchain/langgraph';
 import {
   isStreamEvent,
@@ -43,8 +43,6 @@ import {
   getPendingRound,
   evictInternalEvents,
   estimatePerRoundTokens,
-  emitExecutionStepEvents,
-  buildRoundPrefixSteps,
 } from './utils';
 import { registerInternalTools } from './tools/register_internal_tools';
 import {
@@ -420,8 +418,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       pendingRound,
       structuredOutput,
     }),
-    finalize(() => manualEvents$.complete()),
-    share()
+    finalize(() => manualEvents$.complete())
   );
 
   const processedInput: RoundInput = {
@@ -442,17 +439,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     },
   });
 
-  if (!pendingRound && action !== 'regenerate') {
-    emitExecutionStepEvents({
-      graphEvents$,
-      manualEvents$,
-      roundId,
-      executionId: `${roundId}::execution`,
-      initialSequence: buildRoundPrefixSteps({ compactionResult, relevantSkillsSelection }).length,
-    });
-  }
-
-  // Use provided overrides, or fall back to pending round's overrides (for HITL resume)
   const effectiveOverrides = configurationOverrides ?? pendingRound?.configuration_overrides;
 
   const events$ = merge(graphEvents$, manualEvents$).pipe(

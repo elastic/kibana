@@ -38,7 +38,6 @@ import {
   agentBuilderDefaultAgentId,
   isRoundCompleteEvent,
   isRoundStartedEvent,
-  isRoundStepEvent,
   isConversationCreatedEvent,
   isAgentBuilderError,
   AgentBuilderErrorCode,
@@ -71,9 +70,7 @@ import {
   updateConversation$,
   createConversation$,
   persistRoundInput$,
-  appendExecutionStarted$,
   appendRoundTerminated$,
-  streamRoundSteps$,
   createInFlightWrites,
   resolveServices,
   convertErrors,
@@ -336,7 +333,7 @@ const handleConversationExecution = async ({
         : EMPTY;
 
       return merge(conversationIdEvent$, agentEvents$, persistenceEvents$, titleAttr$).pipe(
-        filter((event) => !isRoundStartedEvent(event) && !isRoundStepEvent(event)),
+        filter((event) => !isRoundStartedEvent(event)),
         handleCancellation(abortSignal),
         tap((event) => {
           if (isConversationCreatedEvent(event) && !author) {
@@ -554,8 +551,11 @@ const buildPersistenceEvents = ({
   const useTwoPhase = !isRegenerate && !isResume;
 
   if (useTwoPhase) {
+    // Persist the raw `user_message` at request receipt time (before execution starts) and
+    // defer all execution-derived events to a single write at round completion. `round_started`
+    // is used only as a gate — it correlates the correct terminal event and marks that the
+    // round reached the point where a completion write is expected.
     const roundStartedEvents$ = agentEvents$.pipe(filter(isRoundStartedEvent));
-    const roundStepEvents$ = agentEvents$.pipe(filter(isRoundStepEvent));
     const endTitle$ =
       conversation.operation === 'CREATE' || conversationNeedsTitle(conversation)
         ? title$
@@ -578,51 +578,34 @@ const buildPersistenceEvents = ({
       inFlightWrites,
     });
 
-    const stepStream$ = streamRoundSteps$({
-      conversation,
-      conversationClient,
-      roundStepEvents$,
-      inFlightWrites,
-      logger,
-    });
-
     const twoPhase$ = roundStartedEvents$.pipe(
       concatMap((startEvent) =>
-        concat(
-          appendExecutionStarted$({
-            conversation,
-            conversationClient,
-            roundStartedEvents$: of(startEvent),
-            inFlightWrites,
-          }),
-          appendRoundTerminated$({
-            conversation,
-            conversationClient,
-            roundCompletedEvents$: roundCompletedEvents$.pipe(
-              filter((event) => event.data.round.id === startEvent.data.round_id),
-              take(1),
-              tap(() => {
-                roundReachedTerminal = true;
-              })
-            ),
-            title$: endTitle$,
-          })
-        )
+        appendRoundTerminated$({
+          conversation,
+          conversationClient,
+          roundCompletedEvents$: roundCompletedEvents$.pipe(
+            filter((event) => event.data.round.id === startEvent.data.round_id),
+            take(1),
+            tap(() => {
+              roundReachedTerminal = true;
+            })
+          ),
+          title$: endTitle$,
+        })
       )
     );
 
-    return concat(input$, merge(stepStream$, twoPhase$)).pipe(
+    return concat(input$, twoPhase$).pipe(
       finalize(() => {
         if (roundReachedTerminal) {
           return;
         }
+        if (conversation.operation !== 'CREATE') {
+          return;
+        }
         const cleanup = async () => {
           await inFlightWrites.settled();
-          if (conversation.operation === 'CREATE') {
-            await conversationClient.delete(conversation.id);
-            return;
-          }
-          await conversationClient.discardRoundEvents(conversation.id, roundId);
+          await conversationClient.delete(conversation.id);
         };
         cleanup().catch((error) => {
           logger.warn(
@@ -696,7 +679,7 @@ const handleStandaloneExecution = async ({
   });
 
   return agentEvents$.pipe(
-    filter((event) => !isRoundStartedEvent(event) && !isRoundStepEvent(event)),
+    filter((event) => !isRoundStartedEvent(event)),
     handleCancellation(abortSignal),
     catchError((err) => {
       logger.error(`Error executing standalone agent: ${err.stack ?? err.message}`);

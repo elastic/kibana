@@ -209,8 +209,8 @@ const runHandle = ({
     abortSignal: new AbortController().signal,
   });
 
-// Cleanup after failure waits on `inFlightWrites.settled()`, so the assertions on
-// `discardRoundEvents` / `delete` must run one microtask tick after the stream errors.
+// Cleanup after failure waits on `inFlightWrites.settled()`, so any cleanup assertion
+// (`delete` on CREATE, no-op on UPDATE) must run one microtask tick after the stream errors.
 const flushMicrotasks = () => new Promise((resolve) => setImmediate(resolve));
 
 describe('handleAgentExecution', () => {
@@ -522,7 +522,8 @@ describe('handleAgentExecution', () => {
       expect(conversationClient.create).toHaveBeenCalledWith(
         expect.objectContaining({ read_only: true })
       );
-      expect(conversationClient.discardRoundEvents).not.toHaveBeenCalled();
+      // Happy path on CREATE — no cleanup runs.
+      expect(conversationClient.delete).not.toHaveBeenCalled();
     });
   });
 
@@ -568,7 +569,10 @@ describe('handleAgentExecution', () => {
   });
 
   describe('two-phase failure cleanup', () => {
-    it('discards the round-derived events when the run fails after round start', async () => {
+    it('keeps the receipt-time user_message on UPDATE when the run fails after round start (no cleanup write)', async () => {
+      // Execution-derived events are now written in a single batch at round completion, so a
+      // mid-run failure never persisted anything past the receipt-time `user_message`. The
+      // input is deliberately kept so the UI can still surface what the user asked.
       const conversation = createEmptyConversation({
         id: 'conversation-1',
         agent_id: 'test-agent',
@@ -592,62 +596,16 @@ describe('handleAgentExecution', () => {
       await expect(lastValueFrom(events$.pipe(toArray()))).rejects.toThrow();
       await flushMicrotasks();
 
-      expect(conversationClient.discardRoundEvents).toHaveBeenCalledWith(
-        'conversation-1',
-        'round-1'
-      );
-      // On UPDATE we keep prior rounds — only the failed round's execution-derived
-      // events are swept. The doc itself is preserved.
-      expect(conversationClient.delete).not.toHaveBeenCalled();
-    });
-
-    it('waits for the in-flight start write to settle before discarding, so a late write cannot resurrect events', async () => {
-      const conversation = createEmptyConversation({
-        id: 'conversation-1',
-        agent_id: 'test-agent',
-      });
-      const conversationClient = createConversationClientMock();
-      conversationClient.get.mockResolvedValue(conversation);
-      // The START append hangs until we resolve it — simulating a write still on the wire
-      // when the run dies. Unsubscription cannot cancel it.
-      let resolveStartWrite!: (value: typeof conversation) => void;
-      conversationClient.appendEvents.mockReturnValue(
-        new Promise<typeof conversation>((resolve) => {
-          resolveStartWrite = resolve;
-        })
-      );
-
-      mockAgentStream([makeRoundStartedEvent()], 'asyncShared', new Error('agent exploded'));
-      stubResolveServices(conversationClient);
-
-      const events$ = await runHandle({
-        agentParams: {
-          agentId: 'test-agent',
-          conversationId: 'conversation-1',
-          nextInput: { message: 'Hello' },
-        },
-        conversationClient,
-      });
-
-      await expect(lastValueFrom(events$.pipe(toArray()))).rejects.toThrow();
-      await flushMicrotasks();
-
-      // The stream is dead but the START write is still pending: no discard yet.
-      expect(conversationClient.discardRoundEvents).not.toHaveBeenCalled();
-
-      resolveStartWrite(conversation);
-      await flushMicrotasks();
-
-      expect(conversationClient.discardRoundEvents).toHaveBeenCalledWith(
-        'conversation-1',
-        'round-1'
-      );
+      // Only the receipt-time user_message write happened; no cleanup or terminal write.
+      expect(conversationClient.appendEvents).toHaveBeenCalledTimes(1);
+      expect(conversationClient.replaceRoundEvents).not.toHaveBeenCalled();
       expect(conversationClient.delete).not.toHaveBeenCalled();
     });
 
     it('hard-deletes the whole doc on CREATE when the first round fails before completing', async () => {
       // No conversationId + no origin → getConversation returns a placeholder with
-      // operation === 'CREATE'. This is the first-round-of-a-fresh-doc case.
+      // operation === 'CREATE'. `persistRoundInput$` created the doc with just the
+      // user_message seed, so failure needs to sweep the whole placeholder.
       const conversationClient = createConversationClientMock();
       conversationClient.create.mockResolvedValue(
         createEmptyConversation({ id: 'new-conversation' })
@@ -669,7 +627,37 @@ describe('handleAgentExecution', () => {
       await flushMicrotasks();
 
       expect(conversationClient.delete).toHaveBeenCalledTimes(1);
-      expect(conversationClient.discardRoundEvents).not.toHaveBeenCalled();
+      expect(conversationClient.replaceRoundEvents).not.toHaveBeenCalled();
+    });
+
+    it('waits for the in-flight input write to settle on CREATE before deleting the placeholder doc', async () => {
+      const conversationClient = createConversationClientMock();
+      let resolveInputWrite!: (value: ReturnType<typeof createEmptyConversation>) => void;
+      conversationClient.create.mockReturnValue(
+        new Promise((resolve) => {
+          resolveInputWrite = resolve;
+        })
+      );
+      conversationClient.delete.mockResolvedValue(true);
+
+      mockAgentStream([makeRoundStartedEvent()], 'asyncShared', new Error('agent exploded'));
+      stubResolveServices(conversationClient);
+
+      const events$ = await runHandle({
+        agentParams: { agentId: 'test-agent', nextInput: { message: 'Hello' } },
+        conversationClient,
+      });
+
+      await expect(lastValueFrom(events$.pipe(toArray()))).rejects.toThrow();
+      await flushMicrotasks();
+
+      // The stream is dead but the input write is still pending: no delete yet.
+      expect(conversationClient.delete).not.toHaveBeenCalled();
+
+      resolveInputWrite(createEmptyConversation({ id: 'new-conversation' }));
+      await flushMicrotasks();
+
+      expect(conversationClient.delete).toHaveBeenCalledTimes(1);
     });
   });
 });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { lastValueFrom, of, Subject, toArray } from 'rxjs';
+import { lastValueFrom, of, toArray } from 'rxjs';
 import type { Observable } from 'rxjs';
 import type {
   ChatEvent,
@@ -13,8 +13,6 @@ import type {
   ConversationRoundAuthor,
   ConversationRoundStep,
   RoundCompleteEvent,
-  RoundStartedEvent,
-  RoundStepEvent,
 } from '@kbn/agent-builder-common';
 import {
   ChatEventType,
@@ -26,7 +24,6 @@ import {
   createConversationNotFoundError,
   DEFAULT_CONVERSATION_TITLE,
 } from '@kbn/agent-builder-common';
-import { loggerMock } from '@kbn/logging-mocks';
 import {
   createEmptyConversation,
   createRound,
@@ -34,13 +31,10 @@ import {
 } from '../../../test_utils';
 import type { ConversationWithOperation } from './conversations';
 import {
-  STEP_FLUSH_MS,
-  appendExecutionStarted$,
   appendRoundTerminated$,
   createInFlightWrites,
   getConversation,
   persistRoundInput$,
-  streamRoundSteps$,
   updateConversation$,
 } from './conversations';
 
@@ -534,50 +528,6 @@ describe('conversations utils', () => {
     });
   });
 
-  describe('appendExecutionStarted$ (run-start write)', () => {
-    const makeStartEvent = (parts: Partial<RoundStartedEvent['data']> = {}): RoundStartedEvent => ({
-      type: ChatEventType.roundStarted,
-      data: {
-        round_id: 'round-1',
-        input: { message: 'hi' },
-        started_at: '2024-01-01T00:00:00.000Z',
-        ...parts,
-      },
-    });
-
-    const withOperation = (
-      conversation: Conversation,
-      operation: 'CREATE' | 'UPDATE'
-    ): ConversationWithOperation => ({ ...conversation, operation });
-
-    it('appends a single execution_started event (no user_message, no create call)', async () => {
-      const conversationClient = createConversationClientMock();
-      const conversation = withOperation(createEmptyConversation({ id: 'conv-1' }), 'UPDATE');
-      conversationClient.appendEvents.mockResolvedValue(conversation);
-      const inFlightWrites = createInFlightWrites();
-
-      const events$ = appendExecutionStarted$({
-        conversation,
-        conversationClient,
-        roundStartedEvents$: of(makeStartEvent()),
-        inFlightWrites,
-      });
-      await lastValueFrom(events$, { defaultValue: undefined });
-      await inFlightWrites.settled();
-
-      expect(conversationClient.create).not.toHaveBeenCalled();
-      expect(conversationClient.appendEvents).toHaveBeenCalledTimes(1);
-      const [appendArgs] = conversationClient.appendEvents.mock.calls[0];
-      expect(appendArgs.events).toHaveLength(1);
-      expect(appendArgs.events[0]).toMatchObject({
-        id: 'round-1::execution_started',
-        type: TimelineEventType.executionStarted,
-        execution_id: 'round-1::execution',
-        trigger_event_id: 'round-1::user_message',
-      });
-    });
-  });
-
   describe('appendRoundTerminated$', () => {
     const withOperation = (
       conversation: Conversation,
@@ -753,180 +703,6 @@ describe('conversations utils', () => {
         'round-x::step::1',
         'round-x::execution_terminated',
       ]);
-    });
-  });
-
-  describe('streamRoundSteps$', () => {
-    beforeEach(() => {
-      jest.useFakeTimers();
-    });
-    afterEach(() => {
-      jest.useRealTimers();
-    });
-
-    const withOperation = (
-      conversation: Conversation,
-      operation: 'CREATE' | 'UPDATE'
-    ): ConversationWithOperation => ({ ...conversation, operation });
-
-    const stepEvent = (roundId: string, sequence: number): RoundStepEvent => ({
-      type: ChatEventType.executionStep,
-      data: {
-        round_id: roundId,
-        execution_id: `${roundId}::execution`,
-        step: {
-          type: ConversationRoundStepType.reasoning,
-          reasoning: `step-${sequence}`,
-        } as ConversationRoundStep,
-        sequence,
-      },
-    });
-
-    it('debounces a burst of step events into a single `appendEvents` call and dedupes by id', async () => {
-      const conversationClient = createConversationClientMock();
-      conversationClient.appendEvents.mockResolvedValue(createEmptyConversation({ id: 'c1' }));
-      const conversation = withOperation(createEmptyConversation({ id: 'c1' }), 'UPDATE');
-
-      const stepEvents$ = new Subject<RoundStepEvent>();
-      const done = lastValueFrom(
-        streamRoundSteps$({
-          conversation,
-          conversationClient,
-          roundStepEvents$: stepEvents$,
-          inFlightWrites: createInFlightWrites(),
-          logger: loggerMock.create(),
-        }).pipe(toArray())
-      );
-
-      stepEvents$.next(stepEvent('round-1', 0));
-      stepEvents$.next(stepEvent('round-1', 1));
-      stepEvents$.next(stepEvent('round-1', 2));
-
-      // Nothing flushed yet — the debounce window has not elapsed.
-      expect(conversationClient.appendEvents).not.toHaveBeenCalled();
-
-      jest.advanceTimersByTime(STEP_FLUSH_MS);
-      // Allow the microtask queue (concatMap -> from(promise)) to drain.
-      await Promise.resolve();
-
-      stepEvents$.complete();
-      await done;
-
-      expect(conversationClient.appendEvents).toHaveBeenCalledTimes(1);
-      const [args] = conversationClient.appendEvents.mock.calls[0];
-      // Ids follow the `${roundId}::step::${sequence}` convention shared with `roundStepEvents`
-      // so streamed and reconciled projections dedupe cleanly.
-      expect(args.events.map((event: { id: string }) => event.id)).toEqual([
-        'round-1::step::0',
-        'round-1::step::1',
-        'round-1::step::2',
-      ]);
-      expect(
-        args.events.every(
-          (event: { type: string }) => event.type === TimelineEventType.executionStep
-        )
-      ).toBe(true);
-    });
-
-    it('is side-effect only (emits no chat events into the outward stream)', async () => {
-      const conversationClient = createConversationClientMock();
-      conversationClient.appendEvents.mockResolvedValue(createEmptyConversation({ id: 'c1' }));
-      const conversation = withOperation(createEmptyConversation({ id: 'c1' }), 'UPDATE');
-
-      const stepEvents$ = new Subject<RoundStepEvent>();
-      const emittedPromise = lastValueFrom(
-        streamRoundSteps$({
-          conversation,
-          conversationClient,
-          roundStepEvents$: stepEvents$,
-          inFlightWrites: createInFlightWrites(),
-          logger: loggerMock.create(),
-        }).pipe(toArray())
-      );
-
-      stepEvents$.next(stepEvent('round-1', 0));
-      jest.advanceTimersByTime(STEP_FLUSH_MS);
-      await Promise.resolve();
-      stepEvents$.complete();
-
-      const emitted = await emittedPromise;
-      expect(emitted).toEqual([]);
-    });
-
-    it('treats a failed flush as best-effort: logs a warning and keeps the stream alive for later flushes', async () => {
-      const conversationClient = createConversationClientMock();
-      conversationClient.appendEvents
-        .mockRejectedValueOnce(new Error('es blip'))
-        .mockResolvedValue(createEmptyConversation({ id: 'c1' }));
-      const conversation = withOperation(createEmptyConversation({ id: 'c1' }), 'UPDATE');
-      const logger = loggerMock.create();
-
-      const stepEvents$ = new Subject<RoundStepEvent>();
-      const done = lastValueFrom(
-        streamRoundSteps$({
-          conversation,
-          conversationClient,
-          roundStepEvents$: stepEvents$,
-          inFlightWrites: createInFlightWrites(),
-          logger,
-        }).pipe(toArray())
-      );
-
-      // First flush fails…
-      stepEvents$.next(stepEvent('round-1', 0));
-      jest.advanceTimersByTime(STEP_FLUSH_MS);
-      await Promise.resolve();
-      await Promise.resolve();
-
-      // …the second flush still runs and the stream completes without error.
-      stepEvents$.next(stepEvent('round-1', 1));
-      jest.advanceTimersByTime(STEP_FLUSH_MS);
-      await Promise.resolve();
-      stepEvents$.complete();
-
-      await expect(done).resolves.toEqual([]);
-      expect(conversationClient.appendEvents).toHaveBeenCalledTimes(2);
-      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('es blip'));
-    });
-
-    it('registers every flush with the in-flight tracker so teardown can wait for it', async () => {
-      const conversationClient = createConversationClientMock();
-      let resolveFlush!: (value: Conversation) => void;
-      conversationClient.appendEvents.mockReturnValue(
-        new Promise<Conversation>((resolve) => {
-          resolveFlush = resolve;
-        })
-      );
-      const conversation = withOperation(createEmptyConversation({ id: 'c1' }), 'UPDATE');
-      const inFlightWrites = createInFlightWrites();
-
-      const stepEvents$ = new Subject<RoundStepEvent>();
-      const subscription = streamRoundSteps$({
-        conversation,
-        conversationClient,
-        roundStepEvents$: stepEvents$,
-        inFlightWrites,
-        logger: loggerMock.create(),
-      }).subscribe();
-
-      stepEvents$.next(stepEvent('round-1', 0));
-      jest.advanceTimersByTime(STEP_FLUSH_MS);
-      await Promise.resolve();
-      expect(conversationClient.appendEvents).toHaveBeenCalledTimes(1);
-
-      // Unsubscribing does not cancel the dispatched write; `settled` must wait for it.
-      subscription.unsubscribe();
-      let settledResolved = false;
-      const settledPromise = inFlightWrites.settled().then(() => {
-        settledResolved = true;
-      });
-      await Promise.resolve();
-      await Promise.resolve();
-      expect(settledResolved).toBe(false);
-
-      resolveFlush(createEmptyConversation({ id: 'c1' }));
-      await settledPromise;
-      expect(settledResolved).toBe(true);
     });
   });
 

@@ -24,7 +24,6 @@ import {
   CONVERSATION_SCHEMA_VERSION,
   CONVERSATION_TITLE_MAX_LENGTH,
   ConversationAccessControlMode,
-  TimelineEventType,
   isConversationAccessControlRole,
   normalizeConversationAccessControl,
   createBadRequestError,
@@ -73,7 +72,6 @@ import { serializeMetadataValue, buildMetadataFromTemplate } from '../templates/
 import { reconcileAttachments, upsertRound as upsertRoundInList } from './round_writes';
 import { applyAttachmentRefsToRounds } from './migrate_attachments';
 import { updateReadBy } from './read_by';
-import { ROUND_DERIVED_EVENT_ID_SUFFIXES } from './rounds_to_events';
 import {
   fromEs,
   fromEsWithoutRounds,
@@ -113,7 +111,6 @@ export interface ConversationClient {
     request: ReplaceRoundEventsRequest,
     options?: { access: ConversationAccess }
   ): Promise<Conversation>;
-  discardRoundEvents(conversationId: string, roundId: string): Promise<void>;
   markRead(conversationId: string, read: boolean): Promise<Conversation>;
   updateRoundFeedback(
     conversationId: string,
@@ -512,12 +509,8 @@ class ConversationClientImpl implements ConversationClient {
         const existingIds = new Set(currentEvents.map((event) => event.id));
         const newEvents = events.filter((event) => !existingIds.has(event.id));
         const appended = [...currentEvents, ...newEvents];
-        const isStepOnlyBatch = events.every(
-          (event) => event.type === TimelineEventType.executionStep
-        );
         return {
           events: appended,
-          ...(isStepOnlyBatch ? { rounds: current.rounds } : {}),
           schema_version: CONVERSATION_SCHEMA_VERSION,
           ...(title !== undefined ? { title } : {}),
           ...(status ? { status } : {}),
@@ -582,22 +575,6 @@ class ConversationClientImpl implements ConversationClient {
           read_by: [],
           read: false,
         };
-      },
-    });
-  }
-
-  async discardRoundEvents(conversationId: string, roundId: string): Promise<void> {
-    await this.writeConversation({
-      conversationId,
-      access: 'converse',
-      fields: (current) => {
-        const events = current.events ?? [];
-        const userMessageId = `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.userMessage}`;
-        // Drop everything id-prefixed with `${roundId}::` except the input event.
-        const remaining = events.filter(
-          (event) => event.id === userMessageId || !event.id.startsWith(`${roundId}::`)
-        );
-        return remaining.length === events.length ? {} : { events: remaining };
       },
     });
   }

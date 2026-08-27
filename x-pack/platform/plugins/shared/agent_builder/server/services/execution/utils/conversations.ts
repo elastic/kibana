@@ -7,20 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { Observable } from 'rxjs';
-import {
-  of,
-  forkJoin,
-  switchMap,
-  from,
-  ignoreElements,
-  firstValueFrom,
-  bufferTime,
-  catchError,
-  concatMap,
-  filter,
-  EMPTY,
-} from 'rxjs';
-import type { Logger } from '@kbn/logging';
+import { of, forkJoin, switchMap, from, ignoreElements, firstValueFrom } from 'rxjs';
 import type {
   Conversation,
   ConversationAccessControl,
@@ -29,8 +16,6 @@ import type {
   ConversationRoundOrigin,
   ConverseInput,
   RoundCompleteEvent,
-  RoundStartedEvent,
-  RoundStepEvent,
   ConversationAction,
   TimelineEvent,
   UserIdAndName,
@@ -38,23 +23,13 @@ import type {
 } from '@kbn/agent-builder-common';
 import {
   ConversationParentRelation,
-  TimelineEventType,
   isConversationAlreadyExistsError,
   normalizeConversationAccessControl,
   DEFAULT_CONVERSATION_TITLE,
 } from '@kbn/agent-builder-common';
 import type { ConversationClient } from '../../conversation';
-import {
-  agentActor,
-  executionStartedEvent,
-  roundStepEventId,
-  roundToEvents,
-  userMessageEvent,
-} from '../../conversation/client/rounds_to_events';
+import { roundToEvents, userMessageEvent } from '../../conversation/client/rounds_to_events';
 import { createConversationUpdatedEvent, createConversationCreatedEvent } from './events';
-
-export const STEP_FLUSH_MS = 500;
-export const STEP_FLUSH_MAX = 10;
 
 export interface InFlightWrites {
   /** Registers a write. Returns the original promise so call sites can keep chaining on it. */
@@ -284,95 +259,6 @@ export const persistRoundInput$ = ({
       })()
     )
   ).pipe(ignoreElements());
-};
-
-export const appendExecutionStarted$ = ({
-  conversation,
-  conversationClient,
-  roundStartedEvents$,
-  inFlightWrites,
-}: {
-  conversation: ConversationWithOperation;
-  conversationClient: ConversationClient;
-  roundStartedEvents$: Observable<RoundStartedEvent>;
-  inFlightWrites: InFlightWrites;
-}): Observable<ChatEvent> => {
-  return roundStartedEvents$.pipe(
-    switchMap((roundStartedEvent) => {
-      const { round_id: id, started_at: startedAt } = roundStartedEvent.data;
-      return from(
-        inFlightWrites.track(
-          conversationClient.appendEvents(
-            {
-              id: conversation.id,
-              events: [executionStartedEvent({ id, started_at: startedAt }, conversation)],
-            },
-            { access: 'converse' }
-          )
-        )
-      );
-    }),
-    ignoreElements()
-  );
-};
-
-export const streamRoundSteps$ = ({
-  conversation,
-  conversationClient,
-  roundStepEvents$,
-  inFlightWrites,
-  logger,
-}: {
-  conversation: ConversationWithOperation;
-  conversationClient: ConversationClient;
-  roundStepEvents$: Observable<RoundStepEvent>;
-  /** Every flush is registered so teardown cleanup can wait for in-flight writes to settle. */
-  inFlightWrites: InFlightWrites;
-  logger: Logger;
-}): Observable<ChatEvent> => {
-  return roundStepEvents$.pipe(
-    bufferTime(STEP_FLUSH_MS, null, STEP_FLUSH_MAX),
-    filter((batch) => batch.length > 0),
-    concatMap((batch) =>
-      from(
-        inFlightWrites.track(
-          conversationClient.appendEvents(
-            {
-              id: conversation.id,
-              events: batch.map((event) => stepChatEventToTimelineEvent(event, conversation)),
-            },
-            { access: 'converse' }
-          )
-        )
-      ).pipe(
-        catchError((error) => {
-          logger.warn(
-            `Failed to flush step events for conversation ${conversation.id}: ${error.message}`
-          );
-          return EMPTY;
-        })
-      )
-    ),
-    ignoreElements()
-  );
-};
-
-const stepChatEventToTimelineEvent = (
-  event: RoundStepEvent,
-  conversation: Pick<Conversation, 'agent_id'>
-): TimelineEvent => {
-  const { round_id: roundId, execution_id: executionId, step, sequence } = event.data;
-  return {
-    id: roundStepEventId(roundId, sequence),
-    type: TimelineEventType.executionStep,
-    // Timestamped at emission time; `eventsToRounds` sorts by `sequence`, not by `created_at`,
-    // so this is purely for observability/debug.
-    created_at: new Date().toISOString(),
-    actor: agentActor(conversation),
-    execution_id: executionId,
-    trigger_event_id: `${roundId}::user_message`,
-    data: { step, sequence },
-  };
 };
 
 export const appendRoundTerminated$ = ({

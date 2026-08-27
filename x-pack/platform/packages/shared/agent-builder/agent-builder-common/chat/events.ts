@@ -13,7 +13,6 @@ import type {
   ConversationRound,
   ConversationRoundAuthor,
   ConversationRoundOrigin,
-  ConversationRoundStep,
   RoundInput,
   BackgroundExecutionState,
   SubagentRosterEntry,
@@ -41,7 +40,6 @@ export enum ChatEventType {
   thinkingComplete = 'thinking_complete',
   promptRequest = 'prompt_request',
   roundStarted = 'round_started',
-  executionStep = 'execution_step',
   roundComplete = 'round_complete',
   conversationCreated = 'conversation_created',
   conversationUpdated = 'conversation_updated',
@@ -319,30 +317,6 @@ export const isRoundStartedEvent = (
   return event.type === ChatEventType.roundStarted;
 };
 
-// Round step (a single finalized step, streamed between round_started and round_complete)
-
-/**
- * A single finalized step of an agent run.
- */
-export interface RoundStepEventData {
-  /** id of the round the step belongs to; matches the eventual `round_complete` round id */
-  round_id: string;
-  /** id of the execution the step belongs to (`${roundId}::execution`) */
-  execution_id: string;
-  /** the finalized step, unmodified from what will appear in `round.steps` */
-  step: ConversationRoundStep;
-  /** the step's index in the round's `steps` array (0-based, monotonic within a run) */
-  sequence: number;
-}
-
-export type RoundStepEvent = ChatEventBase<ChatEventType.executionStep, RoundStepEventData>;
-
-export const isRoundStepEvent = (
-  event: AgentBuilderEvent<string, any>
-): event is RoundStepEvent => {
-  return event.type === ChatEventType.executionStep;
-};
-
 // Round complete
 
 export interface RoundCompleteEventData {
@@ -530,7 +504,6 @@ export type ChatAgentEvent =
   | MessageCompleteEvent
   | ThinkingCompleteEvent
   | RoundStartedEvent
-  | RoundStepEvent
   | RoundCompleteEvent
   | CompactionStartedEvent
   | CompactionCompletedEvent
