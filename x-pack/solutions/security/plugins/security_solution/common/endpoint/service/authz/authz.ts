@@ -156,6 +156,7 @@ export const calculateEndpointAuthz = (
     canReadEventFilters,
     canReadEndpointExceptions,
     canWriteEndpointExceptions,
+    canWriteAdminData: hasEndpointManagementAccess,
   };
 
   // Response console is only accessible when license is Enterprise and user has access to any
@@ -214,6 +215,7 @@ export const getEndpointAuthzInitialState = (): EndpointAuthz => {
     canWriteEndpointExceptions: false,
     canReadWorkflowInsights: false,
     canWriteWorkflowInsights: false,
+    canWriteAdminData: false,
   };
 };
 

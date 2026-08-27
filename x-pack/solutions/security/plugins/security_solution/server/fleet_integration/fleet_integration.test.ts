@@ -652,7 +652,8 @@ describe('Fleet integrations', () => {
           endpointMetadataService,
           cloudService,
           esClient,
-          productFeaturesService
+          productFeaturesService,
+          createMockEndpointAppContextService()
         );
         const policyConfig = generator.generatePolicyPackagePolicy();
         policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
@@ -672,7 +673,8 @@ describe('Fleet integrations', () => {
           endpointMetadataService,
           cloudService,
           esClient,
-          productFeaturesService
+          productFeaturesService,
+          createMockEndpointAppContextService()
         );
         const policyConfig = generator.generatePolicyPackagePolicy();
         policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
@@ -706,7 +708,8 @@ describe('Fleet integrations', () => {
           endpointMetadataService,
           cloudService,
           esClient,
-          productFeaturesService
+          productFeaturesService,
+          createMockEndpointAppContextService()
         );
         const policyConfig = generator.generatePolicyPackagePolicy();
         policyConfig.inputs[0]!.config!.policy.value.global_manifest_version = '2023-01-01';
@@ -728,7 +731,8 @@ describe('Fleet integrations', () => {
           endpointMetadataService,
           cloudService,
           esClient,
-          productFeaturesService
+          productFeaturesService,
+          createMockEndpointAppContextService()
         );
         const policyConfig = generator.generatePolicyPackagePolicy();
         policyConfig.inputs[0]!.config!.policy.value.windows.popup.ransomware.message = 'foo';
@@ -796,7 +800,8 @@ describe('Fleet integrations', () => {
             endpointMetadataService,
             cloudService,
             esClient,
-            productFeaturesService
+            productFeaturesService,
+            createMockEndpointAppContextService()
           );
           const policyConfig = generator.generatePolicyPackagePolicy();
           policyConfig.inputs[0]!.config!.policy.value = {
@@ -861,7 +866,8 @@ describe('Fleet integrations', () => {
             endpointMetadataService,
             cloudService,
             esClient,
-            productFeaturesService
+            productFeaturesService,
+            createMockEndpointAppContextService()
           );
           const policyConfig = generator.generatePolicyPackagePolicy();
           policyConfig.inputs[0]!.config!.policy.value = {
@@ -904,7 +910,8 @@ describe('Fleet integrations', () => {
           endpointMetadataService,
           cloudService,
           esClient,
-          productFeaturesService
+          productFeaturesService,
+          createMockEndpointAppContextService()
         );
         const policyConfig = generator.generatePolicyPackagePolicy();
         policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
@@ -929,7 +936,8 @@ describe('Fleet integrations', () => {
           endpointMetadataService,
           cloudService,
           esClient,
-          productFeaturesService
+          productFeaturesService,
+          createMockEndpointAppContextService()
         );
 
         const updatedPolicy = await callback(
@@ -1008,7 +1016,8 @@ describe('Fleet integrations', () => {
           endpointMetadataService,
           cloudService,
           esClient,
-          productFeaturesService
+          productFeaturesService,
+          createMockEndpointAppContextService()
         );
         const policyConfig = generator.generatePolicyPackagePolicy();
 
@@ -1046,7 +1055,8 @@ describe('Fleet integrations', () => {
           endpointMetadataService,
           cloudService,
           esClient,
-          productFeaturesService
+          productFeaturesService,
+          createMockEndpointAppContextService()
         );
         const policyConfig = generator.generatePolicyPackagePolicy();
         // values should be updated
@@ -1088,7 +1098,8 @@ describe('Fleet integrations', () => {
           endpointMetadataService,
           cloudService,
           esClient,
-          productFeaturesService
+          productFeaturesService,
+          createMockEndpointAppContextService()
         );
 
         inputPolicyConfig = generator.generatePolicyPackagePolicy();
@@ -1187,7 +1198,8 @@ describe('Fleet integrations', () => {
         endpointMetadataService,
         cloudService,
         esClient,
-        productFeaturesService
+        productFeaturesService,
+        createMockEndpointAppContextService()
       );
       const policyConfig = generator.generatePolicyPackagePolicy();
 
@@ -1237,10 +1249,14 @@ describe('Fleet integrations', () => {
     describe('update callback', () => {
       const buildUpdateCallback = () =>
         getPackagePolicyUpdateCallback(
-          endpointAppContextServiceMock,
+          logger,
+          licenseService,
+          endpointAppContextStartContract.featureUsageService,
+          endpointMetadataService,
           cloudService,
+          esClient,
           productFeaturesService,
-          experimentalFeatures
+          endpointAppContextServiceMock
         );
 
       it('throws 403 with apiPassThrough when non-superuser changes artifacts.global.public_key', async () => {
