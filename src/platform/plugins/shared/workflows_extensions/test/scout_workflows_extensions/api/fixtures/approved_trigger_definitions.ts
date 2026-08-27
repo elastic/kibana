@@ -124,7 +124,7 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
   },
   {
     id: 'cases.extendedFieldsUpdated',
-    schemaHash: '73c831d00e4374919a6ad697dbfd26374d40094b0f8511375f36ff60918da8bc',
+    schemaHash: 'cfb4b84727e79d6826fa8a786b7591ea1a86661c7fff2bb2fa768abbc3aaf37c',
   },
   {
     id: 'entityStore.entityAssetCriticalityUpdated',
