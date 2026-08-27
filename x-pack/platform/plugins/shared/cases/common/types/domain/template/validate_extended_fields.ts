@@ -277,7 +277,12 @@ export const validateExtendedFields = (
       const isRequired =
         field.validation?.required === true ||
         (field.validation?.required_when
-          ? evaluateCondition(field.validation.required_when, fieldValues, fieldTypeMap, fieldControlMap)
+          ? evaluateCondition(
+              field.validation.required_when,
+              fieldValues,
+              fieldTypeMap,
+              fieldControlMap
+            )
           : false) ||
         (onClose && field.validation?.required_on_close === true);
 

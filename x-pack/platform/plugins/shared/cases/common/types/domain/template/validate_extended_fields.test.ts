@@ -361,25 +361,29 @@ describe('validateExtendedFields', () => {
       // Template-only field set (no global keys). The request sends "priority" which is close to
       // the global field "priority_as_keyword". Without hintFields the error cannot point at the
       // global key; with hintFields it can.
-      const templateField = makeInputTextField({ name: 'summary', label: 'Summary', type: 'keyword' });
+      const templateField = makeInputTextField({
+        name: 'summary',
+        label: 'Summary',
+        type: 'keyword',
+      });
       const globalField = makeSelectField(); // name: 'priority', key: 'priority_as_keyword'
-      const errors = validateExtendedFields(
-        { priority: 'high' },
-        [templateField],
-        { hintFields: [globalField] as InlineField[] }
-      );
+      const errors = validateExtendedFields({ priority: 'high' }, [templateField], {
+        hintFields: [globalField] as InlineField[],
+      });
       expect(errors).toHaveLength(1);
       expect(errors[0]).toContain('priority_as_keyword');
     });
 
     it('uses only the validated field set for "Available keys" when hintFields have no match', () => {
-      const templateField = makeInputTextField({ name: 'summary', label: 'Summary', type: 'keyword' });
+      const templateField = makeInputTextField({
+        name: 'summary',
+        label: 'Summary',
+        type: 'keyword',
+      });
       const globalField = makeSelectField(); // unrelated — "completely_different_as_keyword"
-      const errors = validateExtendedFields(
-        { totally_unknown: 'value' },
-        [templateField],
-        { hintFields: [globalField] as InlineField[] }
-      );
+      const errors = validateExtendedFields({ totally_unknown: 'value' }, [templateField], {
+        hintFields: [globalField] as InlineField[],
+      });
       expect(errors).toHaveLength(1);
       // Falls through to the "Available keys" branch — should list both sets.
       expect(errors[0]).toContain('Unknown extended field key');
@@ -402,10 +406,10 @@ describe('validateExtendedFields', () => {
       });
       // Empty CHECKBOX_GROUP → dependent field should NOT be required.
       expect(
-        validateExtendedFields(
-          { systems_as_keyword: '[]', escalation_reason_as_keyword: '' },
-          [controlField, dependentField]
-        )
+        validateExtendedFields({ systems_as_keyword: '[]', escalation_reason_as_keyword: '' }, [
+          controlField,
+          dependentField,
+        ])
       ).toEqual([]);
       // Non-empty CHECKBOX_GROUP → dependent field IS required.
       expect(
@@ -429,10 +433,10 @@ describe('validateExtendedFields', () => {
       });
       // Empty CHECKBOX_GROUP → dependent field is hidden → not required.
       expect(
-        validateExtendedFields(
-          { systems_as_keyword: '[]', escalation_reason_as_keyword: '' },
-          [controlField, dependentField]
-        )
+        validateExtendedFields({ systems_as_keyword: '[]', escalation_reason_as_keyword: '' }, [
+          controlField,
+          dependentField,
+        ])
       ).toEqual([]);
     });
 
@@ -447,10 +451,10 @@ describe('validateExtendedFields', () => {
         },
       });
       expect(
-        validateExtendedFields(
-          { assignee_as_keyword: '[]', assignment_reason_as_keyword: '' },
-          [controlField, dependentField]
-        )
+        validateExtendedFields({ assignee_as_keyword: '[]', assignment_reason_as_keyword: '' }, [
+          controlField,
+          dependentField,
+        ])
       ).toEqual([]);
     });
   });
