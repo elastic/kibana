@@ -14,9 +14,9 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { AiButton } from '@kbn/shared-ux-ai-components';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { merge, skip, startWith, switchMap } from 'rxjs';
-import { anyChildrenChanges$ } from '../../../dashboard_api/layout_manager/any_children_changes';
-import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
-import { uiActionsService } from '../../../services/kibana_services';
+import { anyChildrenChanges$ } from '../../dashboard_api/layout_manager/any_children_changes';
+import type { DashboardApi } from '../../dashboard_api/types';
+import { uiActionsService } from '../../services/kibana_services';
 import {
   PRETTIFY_DASHBOARD_ACTION_ID,
   type PrettifyDashboardActionContext,
@@ -27,8 +27,7 @@ const getPrettifyAction = async (): Promise<Action<PrettifyDashboardActionContex
     PRETTIFY_DASHBOARD_ACTION_ID
   )) as Action<PrettifyDashboardActionContext>;
 
-export const PrettifyDashboardButton = () => {
-  const dashboardApi = useDashboardApi();
+export const PrettifyDashboardButton = ({ dashboardApi }: { dashboardApi: DashboardApi }) => {
   const [action, setAction] = useState<Action<PrettifyDashboardActionContext> | null>(null);
   const styles = useMemoCss(buttonStyles);
   const context = useMemo(
