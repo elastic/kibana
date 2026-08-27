@@ -37,7 +37,6 @@ export interface BuildLensConfigParams {
   esql?: string;
   existingConfig?: string;
   parsedExistingConfig?: VisualizationConfig | null;
-  includeTimeRange?: boolean;
   modelProvider: ModelProvider;
   logger: Logger;
   events: ToolEventEmitter;
@@ -49,7 +48,6 @@ interface BuildLensConfigResult {
   validatedConfig: VisualizationConfig;
   authoringNote?: string;
   esqlQuery: string;
-  timeRange?: { from: string; to: string };
 }
 
 export const buildLensConfig = async ({
@@ -59,7 +57,6 @@ export const buildLensConfig = async ({
   esql,
   existingConfig,
   parsedExistingConfig = null,
-  includeTimeRange = true,
   modelProvider,
   logger,
   events,
@@ -73,13 +70,7 @@ export const buildLensConfig = async ({
   }
 
   const schema = getSchemaForChartType(selectedChartType);
-  const graph = await createVisualizationGraph(
-    modelProvider,
-    logger,
-    events,
-    esClient,
-    includeTimeRange
-  );
+  const graph = await createVisualizationGraph(modelProvider, logger, events, esClient);
 
   // If the user provides ES|QL, use it only when validation says it is safe.
   // If validation cannot run, keep the query and let the next step handle it.
@@ -116,8 +107,7 @@ export const buildLensConfig = async ({
     error: null,
   });
 
-  const { validatedConfig, authoringNote, error, currentAttempt, esqlQuery, timeRange } =
-    finalState;
+  const { validatedConfig, authoringNote, error, currentAttempt, esqlQuery } = finalState;
 
   if (!validatedConfig) {
     throw new Error(
@@ -132,6 +122,5 @@ export const buildLensConfig = async ({
     validatedConfig,
     ...(authoringNote ? { authoringNote } : {}),
     esqlQuery,
-    ...(timeRange && { timeRange }),
   };
 };
