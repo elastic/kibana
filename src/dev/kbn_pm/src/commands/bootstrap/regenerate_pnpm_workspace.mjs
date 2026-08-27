@@ -13,9 +13,6 @@ import Path from 'path';
 import { REPO_ROOT } from '../../lib/paths.mjs';
 
 const WORKSPACE_PATH = Path.resolve(REPO_ROOT, 'pnpm-workspace.yaml');
-const GITIGNORE_PATH = Path.resolve(REPO_ROOT, '.gitignore');
-const GITIGNORE_START = '# START GENERATED PNPM PACKAGE JSONS';
-const GITIGNORE_END = '# END GENERATED PNPM PACKAGE JSONS';
 
 // We own the packages: block (derived from kibana.jsonc discovery) and the
 // fenced overrides block (derived from package.json#resolutions). The rest of
@@ -48,8 +45,7 @@ const AUTHORED_EQUIVALENTS = new Map([
  */
 export async function regeneratePnpmWorkspace(pkgs, rootVersion, log) {
   await writeWorkspaceFile(pkgs, await readResolutions(), log);
-  const generatedRepoRels = await synthesizeMissingPackageJsons(pkgs, rootVersion, log);
-  await updateGitignore(generatedRepoRels, log);
+  await synthesizeMissingPackageJsons(pkgs, rootVersion, log);
 }
 
 async function writeWorkspaceFile(pkgs, resolutions, log) {
@@ -189,25 +185,6 @@ async function synthesizeMissingPackageJsons(pkgs, rootVersion, log) {
 
 function isGeneratedManifest(pkg) {
   return !!pkg && pkg.kbnGenerated === true;
-}
-
-async function updateGitignore(generatedRepoRels, log) {
-  const block = [
-    GITIGNORE_START,
-    ...generatedRepoRels.map((d) => `/${d}/package.json`),
-    GITIGNORE_END,
-  ].join('\n');
-
-  const current = (await readIfExists(GITIGNORE_PATH)) ?? '';
-  const re = new RegExp(`${GITIGNORE_START}[\\s\\S]*?${GITIGNORE_END}`);
-  const next = re.test(current)
-    ? current.replace(re, block)
-    : `${current.replace(/\n*$/, '')}\n\n${block}\n`;
-
-  if (next !== current) {
-    await Fsp.writeFile(GITIGNORE_PATH, next);
-    log.warning('updated .gitignore with generated package.json paths');
-  }
 }
 
 function generatedPackageJson(id, version) {
