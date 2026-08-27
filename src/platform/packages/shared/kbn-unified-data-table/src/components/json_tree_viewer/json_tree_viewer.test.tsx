@@ -27,6 +27,7 @@ const copyToClipboardMock = jest.mocked(copyToClipboard);
 
 const rowTestId = (path: string) => `jsonTreeViewerRow-${getNodeId(path.split('.'))}`;
 const copyTestId = (path: string) => `jsonTreeViewerCopy-${getNodeId(path.split('.'))}`;
+const lockTestId = (path: string) => `jsonTreeViewerLock-${getNodeId(path.split('.'))}`;
 const pagerTestId = (collectionId: string = ROOT_ID) => `jsonTreeViewerPager-${collectionId}`;
 const moreTestId = (collectionId: string = ROOT_ID) => `jsonTreeViewerMore-${collectionId}`;
 const fewerTestId = (collectionId: string = ROOT_ID) => `jsonTreeViewerFewer-${collectionId}`;
@@ -476,6 +477,89 @@ describe('JsonTreeViewer', () => {
       expect(screen.getByTestId(copyTestId('message'))).toHaveFocus();
       await userEvent.keyboard('{ArrowLeft}');
       expect(row).toHaveFocus();
+    });
+  });
+
+  describe('pinned leaves', () => {
+    it('does not render a lock button unless the host can toggle pins', () => {
+      render(<JsonTreeViewer json={{ message: 'hello' }} />);
+
+      expect(screen.queryByTestId(lockTestId('message'))).not.toBeInTheDocument();
+    });
+
+    it('renders a lock button after the copy and host actions on a leaf', () => {
+      render(
+        <JsonTreeViewer
+          json={{ message: 'hello' }}
+          onTogglePinnedPath={jest.fn()}
+          getLeafActions={() => [
+            {
+              id: 'filterFor',
+              iconType: 'plusCircle',
+              label: 'Filter for',
+              'data-test-subj': 'treeFilterFor-message',
+              onClick: jest.fn(),
+            },
+          ]}
+        />
+      );
+
+      const actions = within(screen.getByTestId(rowTestId('message')));
+      expect(actions.getByTestId(copyTestId('message'))).toBeInTheDocument();
+      expect(actions.getByTestId('treeFilterFor-message')).toBeInTheDocument();
+      expect(actions.getByTestId(lockTestId('message'))).toBeInTheDocument();
+    });
+
+    it('toggles pinning with the leaf path when the lock is clicked', async () => {
+      const onTogglePinnedPath = jest.fn();
+      render(
+        <JsonTreeViewer json={{ message: 'hello' }} onTogglePinnedPath={onTogglePinnedPath} />
+      );
+
+      await userEvent.click(screen.getByTestId(lockTestId('message')));
+
+      expect(onTogglePinnedPath).toHaveBeenCalledTimes(1);
+      expect(onTogglePinnedPath.mock.calls[0][0]).toEqual(['message']);
+    });
+
+    it('expands ancestors so a pinned nested leaf is visible', () => {
+      render(
+        <JsonTreeViewer
+          json={{ user: { address: { city: 'Berlin' } }, org: { name: 'Acme' } }}
+          pinnedNodeIds={new Set([getNodeId(['user', 'address', 'city'])])}
+        />
+      );
+
+      expect(screen.getByTestId(rowTestId('user.address.city'))).toHaveTextContent('"Berlin"');
+      expect(screen.queryByTestId(rowTestId('org.name'))).not.toBeInTheDocument();
+    });
+
+    it('reveals a pinned leaf hidden past the collection pager budget', () => {
+      const nestedDoc = {
+        logs: Object.fromEntries(
+          Array.from({ length: 15 }, (_, i) => [`field_${i}`, `value_${i}`])
+        ),
+      };
+      render(
+        <JsonTreeViewer
+          json={nestedDoc}
+          pinnedNodeIds={new Set([getNodeId(['logs', 'field_12'])])}
+        />
+      );
+
+      expect(screen.getByTestId(rowTestId('logs.field_12'))).toHaveTextContent('"value_12"');
+    });
+
+    it('marks the lock as pressed when that leaf is pinned', () => {
+      render(
+        <JsonTreeViewer
+          json={{ message: 'hello' }}
+          pinnedNodeIds={new Set([getNodeId(['message'])])}
+          onTogglePinnedPath={jest.fn()}
+        />
+      );
+
+      expect(screen.getByTestId(lockTestId('message'))).toHaveAttribute('aria-pressed', 'true');
     });
   });
 

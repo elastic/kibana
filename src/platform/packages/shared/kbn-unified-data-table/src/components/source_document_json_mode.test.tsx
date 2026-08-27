@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { screen } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { buildDataTableRecord } from '@kbn/discover-utils';
@@ -23,10 +23,12 @@ import { dataTableContextMock } from '../../__mocks__/table_context';
 import { getNodeId } from './json_tree_viewer/tree_model';
 import type { JsonModeSettings } from '../types';
 import { MAX_TREE_VALUES } from '../utils/build_document_tree';
+import { resetJsonTreePins } from './json_tree_viewer/pin_store';
 
 const rowTestId = (path: string) => `jsonTreeViewerRow-${getNodeId(path.split('.'))}`;
 const filterForTestId = (path: string) => `jsonTreeViewerFilterFor-${path}`;
 const filterOutTestId = (path: string) => `jsonTreeViewerFilterOut-${path}`;
+const lockTestId = (path: string) => `jsonTreeViewerLock-${getNodeId(path.split('.'))}`;
 
 const fieldFormats = fieldFormatsServiceMock.createStartContract();
 
@@ -100,6 +102,9 @@ const renderCell = (
 };
 
 describe('SourceDocumentJsonMode', () => {
+  beforeEach(() => {
+    resetJsonTreePins();
+  });
   it('warns when the document is too large and gets truncated', () => {
     // One field past the budget forces flattenedToNestedDocument to cap the document.
     const fields = Object.fromEntries(
@@ -256,6 +261,109 @@ describe('SourceDocumentJsonMode', () => {
 
       expect(screen.getByTestId('jsonTreeViewer')).toBeVisible();
       expect(screen.queryByTestId(filterForTestId('computedField'))).not.toBeInTheDocument();
+    });
+  });
+
+  describe('lock expansion across rows', () => {
+    it('renders a lock button on every leaf, including fields that cannot be filtered', () => {
+      renderCell({ _id: '1', _index: 'test', _source: { message: 'hello' } });
+
+      expect(screen.getByTestId(lockTestId('message'))).toBeInTheDocument();
+    });
+
+    it('expands a nested leaf in every rendered cell when it is locked', async () => {
+      const hitA: EsHitRecord = {
+        _id: 'a',
+        _index: 'test',
+        _source: { user: { city: 'Berlin' } },
+      };
+      const hitB: EsHitRecord = {
+        _id: 'b',
+        _index: 'test',
+        _source: { user: { city: 'Paris' } },
+      };
+
+      renderWithI18n(
+        <>
+          <div data-test-subj="cell-a">
+            <SourceDocumentJsonMode
+              row={buildDataTableRecord(hitA, dataViewMock)}
+              dataView={dataViewMock}
+              columnsMeta={undefined}
+              shouldShowFieldHandler={() => true}
+              fieldFormats={fieldFormats}
+            />
+          </div>
+          <div data-test-subj="cell-b">
+            <SourceDocumentJsonMode
+              row={buildDataTableRecord(hitB, dataViewMock)}
+              dataView={dataViewMock}
+              columnsMeta={undefined}
+              shouldShowFieldHandler={() => true}
+              fieldFormats={fieldFormats}
+            />
+          </div>
+        </>
+      );
+
+      const cellA = screen.getByTestId('cell-a');
+      const cellB = screen.getByTestId('cell-b');
+
+      expect(within(cellB).queryByTestId(rowTestId('user.city'))).not.toBeInTheDocument();
+
+      await userEvent.click(within(cellA).getByTestId(rowTestId('user')));
+      await userEvent.click(within(cellA).getByTestId(lockTestId('user.city')));
+
+      expect(within(cellB).getByTestId(rowTestId('user.city'))).toHaveTextContent('"Paris"');
+      expect(within(cellA).getByTestId(lockTestId('user.city'))).toHaveAttribute(
+        'aria-pressed',
+        'true'
+      );
+    });
+
+    it('collapses the pinned path in other rows when the lock is released', async () => {
+      const hitA: EsHitRecord = {
+        _id: 'a',
+        _index: 'test',
+        _source: { user: { city: 'Berlin' } },
+      };
+      const hitB: EsHitRecord = {
+        _id: 'b',
+        _index: 'test',
+        _source: { user: { city: 'Paris' } },
+      };
+
+      renderWithI18n(
+        <>
+          <div data-test-subj="cell-a">
+            <SourceDocumentJsonMode
+              row={buildDataTableRecord(hitA, dataViewMock)}
+              dataView={dataViewMock}
+              columnsMeta={undefined}
+              shouldShowFieldHandler={() => true}
+              fieldFormats={fieldFormats}
+            />
+          </div>
+          <div data-test-subj="cell-b">
+            <SourceDocumentJsonMode
+              row={buildDataTableRecord(hitB, dataViewMock)}
+              dataView={dataViewMock}
+              columnsMeta={undefined}
+              shouldShowFieldHandler={() => true}
+              fieldFormats={fieldFormats}
+            />
+          </div>
+        </>
+      );
+
+      const cellA = screen.getByTestId('cell-a');
+      const cellB = screen.getByTestId('cell-b');
+
+      await userEvent.click(within(cellA).getByTestId(rowTestId('user')));
+      await userEvent.click(within(cellA).getByTestId(lockTestId('user.city')));
+      await userEvent.click(within(cellA).getByTestId(lockTestId('user.city')));
+
+      expect(within(cellB).queryByTestId(rowTestId('user.city'))).not.toBeInTheDocument();
     });
   });
 

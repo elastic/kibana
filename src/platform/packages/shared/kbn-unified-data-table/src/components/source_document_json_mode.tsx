@@ -28,6 +28,8 @@ import type { JsonModeSettings } from '../types';
 import type { FormatValue, GetLeafActions } from './json_tree_viewer/json_tree_viewer';
 import { JsonTreeViewer, type TreeExpansionState } from './json_tree_viewer/json_tree_viewer';
 import { getDocumentText } from './json_tree_viewer/doc_scan';
+import { getNodeId } from './json_tree_viewer/tree_model';
+import { toggleJsonTreePinnedNodeId, useJsonTreePinnedNodeIds } from './json_tree_viewer/pin_store';
 import { UnifiedDataTableContext } from '../table_context';
 
 // Virtualization destroys and recreats cells while navigating, in order to keep which nodes are expanded
@@ -59,6 +61,10 @@ export const SourceDocumentJsonMode = ({
     useContext(InTableSearchCellContext);
   const { onFilter, hideFilteringOnComputedColumns, isPlainRecord } =
     useContext(UnifiedDataTableContext);
+  const pinnedNodeIds = useJsonTreePinnedNodeIds();
+  const onTogglePinnedPath = useCallback((path: readonly string[]) => {
+    toggleJsonTreePinnedNodeId(getNodeId(path));
+  }, []);
 
   const hideNulls = jsonModeSettings?.hideNulls ?? false;
   const wrapLines = jsonModeSettings?.wrapLines ?? true;
@@ -193,6 +199,8 @@ export const SourceDocumentJsonMode = ({
         expandNodesContainingTerm={inTableSearchTerm}
         formatValue={formatTreeValue}
         getLeafActions={getLeafActions}
+        pinnedNodeIds={pinnedNodeIds}
+        onTogglePinnedPath={onTogglePinnedPath}
         wrapLines={wrapLines}
         defaultExpandedLevels={expandedLevels}
       />

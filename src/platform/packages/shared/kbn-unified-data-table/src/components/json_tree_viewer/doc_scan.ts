@@ -31,6 +31,40 @@ export const EMPTY_SEARCH_MATCHES: SearchMatches = {
   reveals: new Map(),
 };
 
+const bumpReveal = (reveals: Map<string, number>, listId: string, index: number): void => {
+  const needed = index + 1;
+  if (
+    needed > INITIAL_CHILDREN &&
+    needed <= MAX_SEARCH_REVEAL &&
+    needed > (reveals.get(listId) ?? 0)
+  ) {
+    reveals.set(listId, needed);
+  }
+};
+
+const mergeReveals = (
+  a: ReadonlyMap<string, number>,
+  b: ReadonlyMap<string, number>
+): ReadonlyMap<string, number> => {
+  if (a.size === 0) return b;
+  if (b.size === 0) return a;
+  const merged = new Map(a);
+  for (const [id, count] of b) {
+    merged.set(id, Math.max(merged.get(id) ?? 0, count));
+  }
+  return merged;
+};
+
+/** Unions two auto-expand plans (search matches and pinned leaves) so both stay visible. */
+export const mergeSearchMatches = (a: SearchMatches, b: SearchMatches): SearchMatches => {
+  if (a.containers.size === 0 && a.reveals.size === 0) return b;
+  if (b.containers.size === 0 && b.reveals.size === 0) return a;
+  return {
+    containers: new Set([...a.containers, ...b.containers]),
+    reveals: mergeReveals(a.reveals, b.reveals),
+  };
+};
+
 const documentTextCache = new WeakMap<object, string>();
 
 /**
@@ -40,17 +74,6 @@ const documentTextCache = new WeakMap<object, string>();
 export const collectSearchMatches = (nodes: JsonNode[], termLower: string): SearchMatches => {
   const containers = new Set<string>();
   const reveals = new Map<string, number>();
-
-  const bumpReveal = (listId: string, index: number) => {
-    const needed = index + 1;
-    if (
-      needed > INITIAL_CHILDREN &&
-      needed <= MAX_SEARCH_REVEAL &&
-      needed > (reveals.get(listId) ?? 0)
-    ) {
-      reveals.set(listId, needed);
-    }
-  };
 
   const visit = (node: JsonNode, listId: string, index: number): boolean => {
     const keyMatches = !node.isArrayItem && node.key.toLowerCase().includes(termLower);
@@ -68,7 +91,38 @@ export const collectSearchMatches = (nodes: JsonNode[], termLower: string): Sear
     }
 
     // Check if the node needs to be revealed.
-    if (hasMatch) bumpReveal(listId, index);
+    if (hasMatch) bumpReveal(reveals, listId, index);
+    return hasMatch;
+  };
+
+  nodes.forEach((node, index) => visit(node, ROOT_ID, index));
+  return { containers, reveals };
+};
+
+/**
+ * Collects the nodes that need to be expanded / revealed so each pinned leaf is visible
+ * in this document (ancestors open, pager budget lifted past the pinned index).
+ */
+export const collectPinnedMatches = (
+  nodes: JsonNode[],
+  pinnedNodeIds: ReadonlySet<string>
+): SearchMatches => {
+  if (pinnedNodeIds.size === 0) return EMPTY_SEARCH_MATCHES;
+
+  const containers = new Set<string>();
+  const reveals = new Map<string, number>();
+
+  const visit = (node: JsonNode, listId: string, index: number): boolean => {
+    let hasMatch = pinnedNodeIds.has(node.id);
+    if (node.kind === 'collection') {
+      let descendantMatch = false;
+      node.children.forEach((child, childIndex) => {
+        if (visit(child, node.id, childIndex)) descendantMatch = true;
+      });
+      if (descendantMatch) containers.add(node.id);
+      hasMatch = descendantMatch || hasMatch;
+    }
+    if (hasMatch) bumpReveal(reveals, listId, index);
     return hasMatch;
   };
 

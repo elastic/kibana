@@ -20,7 +20,12 @@ import {
   type GetLeafActions,
   type JsonValue,
 } from './tree_model';
-import { collectSearchMatches, EMPTY_SEARCH_MATCHES } from './doc_scan';
+import {
+  collectPinnedMatches,
+  collectSearchMatches,
+  EMPTY_SEARCH_MATCHES,
+  mergeSearchMatches,
+} from './doc_scan';
 import {
   useRovingTreeNavigation,
   useTreeExpansion,
@@ -61,6 +66,13 @@ export interface JsonTreeViewerProps {
   wrapLines?: boolean;
   /** Nested levels opened when a fresh cell is seeded (0 = fully collapsed). Defaults to 0. */
   defaultExpandedLevels?: number;
+  /**
+   * Node ids whose path should stay expanded/revealed (e.g. leaves locked across every table row).
+   * Unioned with search-driven expansion; not persisted as the user's own expand/collapse state.
+   */
+  pinnedNodeIds?: ReadonlySet<string>;
+  /** When set, each leaf renders a lock button that toggles pinning that field's path. */
+  onTogglePinnedPath?: (path: readonly string[]) => void;
 }
 
 export const JsonTreeViewer = memo(function JsonTreeViewer({
@@ -73,6 +85,8 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
   extraHeaderContent,
   wrapLines = true,
   defaultExpandedLevels = 0,
+  pinnedNodeIds,
+  onTogglePinnedPath,
 }: JsonTreeViewerProps) {
   const styles = useEuiMemoizedStyles(treeStyles);
 
@@ -91,11 +105,19 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
     () => (searchTermLower ? collectSearchMatches(nodes, searchTermLower) : EMPTY_SEARCH_MATCHES),
     [nodes, searchTermLower]
   );
+  const pinnedMatches = useMemo(
+    () => (pinnedNodeIds?.size ? collectPinnedMatches(nodes, pinnedNodeIds) : EMPTY_SEARCH_MATCHES),
+    [nodes, pinnedNodeIds]
+  );
+  const autoMatches = useMemo(
+    () => mergeSearchMatches(searchMatches, pinnedMatches),
+    [searchMatches, pinnedMatches]
+  );
 
   const expansion = useTreeExpansion({
     initialState,
     onStateChange,
-    expandedBySearchNodes: searchMatches.containers,
+    expandedBySearchNodes: autoMatches.containers,
     expandableIds,
     seedExpandedIds,
     defaultExpandedLevels,
@@ -111,9 +133,9 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
         rootType,
         expansion.effectiveExpanded,
         expansion.revealed,
-        searchMatches.reveals
+        autoMatches.reveals
       ),
-    [nodes, rootType, expansion.effectiveExpanded, expansion.revealed, searchMatches.reveals]
+    [nodes, rootType, expansion.effectiveExpanded, expansion.revealed, autoMatches.reveals]
   );
 
   const nav = useRovingTreeNavigation(rows, expansion);
@@ -221,6 +243,8 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
                   onKeyDown={(event) => onRowKeyDown(event, row)}
                   formatValue={formatValue}
                   getLeafActions={getLeafActions}
+                  pinnedNodeIds={pinnedNodeIds}
+                  onTogglePinnedPath={onTogglePinnedPath}
                 />
               );
             })

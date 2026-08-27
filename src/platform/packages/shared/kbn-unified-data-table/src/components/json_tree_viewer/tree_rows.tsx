@@ -63,6 +63,8 @@ interface NodeRowViewProps extends FocusableRowProps {
   onActivate: (event: React.MouseEvent) => void;
   formatValue?: FormatValue;
   getLeafActions?: GetLeafActions;
+  pinnedNodeIds?: ReadonlySet<string>;
+  onTogglePinnedPath?: (path: readonly string[]) => void;
 }
 export const NodeRowView = memo(function NodeRowView({
   row,
@@ -73,6 +75,8 @@ export const NodeRowView = memo(function NodeRowView({
   onKeyDown,
   formatValue,
   getLeafActions,
+  pinnedNodeIds,
+  onTogglePinnedPath,
 }: NodeRowViewProps) {
   const styles = useEuiMemoizedStyles(treeStyles);
   const { euiTheme } = useEuiTheme();
@@ -105,7 +109,13 @@ export const NodeRowView = memo(function NodeRowView({
       ) : (
         <span css={styles.caret} aria-hidden />
       )}
-      <NodeLabel row={row} formatValue={formatValue} getLeafActions={getLeafActions} />
+      <NodeLabel
+        row={row}
+        formatValue={formatValue}
+        getLeafActions={getLeafActions}
+        pinnedNodeIds={pinnedNodeIds}
+        onTogglePinnedPath={onTogglePinnedPath}
+      />
     </div>
   );
 });
@@ -423,15 +433,61 @@ const RowActionButton = memo(function RowActionButton({ action }: { action: Json
   );
 });
 
+const PinButton = memo(function PinButton({
+  nodeId,
+  path,
+  isPinned,
+  onToggle,
+}: {
+  nodeId: string;
+  path: readonly string[];
+  isPinned: boolean;
+  onToggle: (path: readonly string[]) => void;
+}) {
+  const styles = useEuiMemoizedStyles(treeStyles);
+  const label = isPinned
+    ? i18n.translate('unifiedDataTable.jsonTreeViewer.unlockExpansion', {
+        defaultMessage: 'Stop expanding this field in every row',
+      })
+    : i18n.translate('unifiedDataTable.jsonTreeViewer.lockExpansion', {
+        defaultMessage: 'Expand this field in every row',
+      });
+
+  return (
+    <EuiToolTip content={label} disableScreenReaderOutput>
+      <EuiButtonIcon
+        aria-label={label}
+        aria-pressed={isPinned}
+        className={`jsonTreeViewerRowAction${isPinned ? ' jsonTreeViewerRowAction-pinned' : ''}`}
+        color={isPinned ? 'primary' : 'text'}
+        css={styles.rowActionButton}
+        data-test-subj={`jsonTreeViewerLock-${nodeId}`}
+        iconSize="s"
+        iconType={isPinned ? 'lock' : 'lockOpen'}
+        onClick={(event: React.MouseEvent) => {
+          event.stopPropagation();
+          onToggle(path);
+        }}
+        onKeyDown={rowActionKeyDown}
+        size="xs"
+      />
+    </EuiToolTip>
+  );
+});
+
 // The body of a node row: key prefix + value/brackets + comma.
 const NodeLabel = memo(function NodeLabel({
   row,
   formatValue,
   getLeafActions,
+  pinnedNodeIds,
+  onTogglePinnedPath,
 }: {
   row: NodeRow;
   formatValue?: FormatValue;
   getLeafActions?: GetLeafActions;
+  pinnedNodeIds?: ReadonlySet<string>;
+  onTogglePinnedPath?: (path: readonly string[]) => void;
 }) {
   const styles = useEuiMemoizedStyles(treeStyles);
   const { node, isExpanded, hasChildren, trailingComma } = row;
@@ -455,6 +511,14 @@ const NodeLabel = memo(function NodeLabel({
           {leafActions.map((action) => (
             <RowActionButton key={action.id} action={action} />
           ))}
+          {onTogglePinnedPath && (
+            <PinButton
+              nodeId={node.id}
+              path={node.path}
+              isPinned={pinnedNodeIds?.has(node.id) ?? false}
+              onToggle={onTogglePinnedPath}
+            />
+          )}
         </span>
       </span>
     );
@@ -673,7 +737,7 @@ const treeStyles = ({ euiTheme }: UseEuiTheme) => ({
     flexShrink: 0,
     opacity: 0,
     marginInlineStart: euiTheme.size.xs,
-    '&:focus-visible': { opacity: 1 },
+    '&:focus-visible, &.jsonTreeViewerRowAction-pinned': { opacity: 1 },
   }),
   value: css({ minWidth: 0, overflowWrap: 'anywhere', whiteSpace: 'pre-wrap' }),
   wrap: css({
