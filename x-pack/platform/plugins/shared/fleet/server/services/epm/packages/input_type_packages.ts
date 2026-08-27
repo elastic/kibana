@@ -55,7 +55,7 @@ interface CustomDatasetStream {
 
 export const getCustomDatasetStreams = (
   packagePolicy: NewPackagePolicy | PackagePolicy,
-  pkgInfo: PackageInfo
+  pkgInfo: Pick<PackageInfo, 'type' | 'data_streams' | 'policy_templates'>
 ): CustomDatasetStream[] => {
   if (pkgInfo.type === 'input') {
     const datasetName = getDatasetName(packagePolicy.inputs);
@@ -380,7 +380,7 @@ async function installAssetsForDataStreamType(opts: {
       soClient,
       installedPkgWithAssets.installation.name,
       [],
-      generateESIndexPatterns([{ ...dataStream, path: datasetName }])
+      generateESIndexPatterns([{ ...dataStream, path: datasetName }], pkgInfo)
     );
   } catch (error) {
     logger.warn(`installAssetsForInputPackagePolicy error: ${error}`);

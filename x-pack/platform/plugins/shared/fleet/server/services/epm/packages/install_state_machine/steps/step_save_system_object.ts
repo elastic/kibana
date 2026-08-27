@@ -27,6 +27,7 @@ import { withPackageSpan } from '../../utils';
 
 import { clearLatestFailedAttempts } from '../../install_errors_helpers';
 import { generateESIndexPatterns } from '../../../elasticsearch/template/template';
+import { getCustomDatasetStreams } from '../../input_type_packages';
 
 import type { InstallContext } from '../_state_machine_package_install';
 
@@ -87,6 +88,40 @@ export async function stepSaveSystemObject(context: InstallContext) {
     ),
     packageInfo
   );
+
+  // Per-policy datasets aren't in the manifest; recompute from attached
+  // policies so stale .otel suffixes self-heal.
+  if (packageInfo.type === 'input') {
+    try {
+      const { items: packagePolicies } = await packagePolicyService.list(savedObjectsClient, {
+        page: 1,
+        perPage: SO_SEARCH_LIMIT,
+        kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${pkgName}`,
+      });
+      for (const packagePolicy of packagePolicies) {
+        for (const { datasetName, dataStreamType } of getCustomDatasetStreams(
+          packagePolicy,
+          packageInfo
+        )) {
+          const [dataStream] = getNormalizedDataStreams(
+            packageInfo,
+            datasetName,
+            dataStreamType
+          ).filter((ds): ds is RegistryDataStream => !!ds.type);
+          if (dataStream) {
+            Object.assign(
+              recomputedEsIndexPatterns,
+              generateESIndexPatterns([{ ...dataStream, path: datasetName }], packageInfo)
+            );
+          }
+        }
+      }
+    } catch (error) {
+      logger.warn(
+        `Failed to recompute input-package es_index_patterns for ${pkgName}: ${error.message}`
+      );
+    }
+  }
 
   const updateEsIndexPatterns = async () => {
     const latest = await savedObjectsClient.get<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName);
