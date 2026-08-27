@@ -2,8 +2,9 @@
 $schema: https://moonrepo.dev/schemas/v2/workspace.json
 
 projects:
-  # Glob-based discovery skips dotfile directories, so `.buildkite` is registered
-  # explicitly via `sources` below.
+  # Glob-based discovery skips dotfile directories, so projects living under one are
+  # registered explicitly via `sources` below. `regenerate_moon_projects --check`
+  # fails when a generated project is missing here.
   globs:
     - src/**/moon.yml
     - x-pack/**/moon.yml
@@ -11,6 +12,7 @@ projects:
     - packages/**/moon.yml
   sources:
     kibana-buildkite: .buildkite
+    '@kbn/esql-resource-browser-storybook-config': src/platform/packages/shared/kbn-esql-resource-browser/.storybook
 vcs:
   defaultBranch: main
   client: git
