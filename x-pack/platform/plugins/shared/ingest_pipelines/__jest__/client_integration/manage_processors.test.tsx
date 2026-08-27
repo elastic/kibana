@@ -196,6 +196,7 @@ describe('<ManageProcessors />', () => {
       httpRequestsMockHelpers.setLoadDatabasesResponse([]);
       await renderManageProcessors('geoipEmptyListPrompt');
       expect(screen.getByTestId('geoipEmptyListPrompt')).toBeInTheDocument();
+      expect(screen.getByTestId('addGeoipDatabaseButton')).toBeInTheDocument();
     });
   });
 

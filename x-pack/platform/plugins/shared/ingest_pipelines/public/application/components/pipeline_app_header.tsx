@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import { AppHeader } from '@kbn/app-header';
+import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import type { History } from 'history';
 import { getListPath } from '../services/navigation';
@@ -20,9 +20,10 @@ interface Props {
   title: string;
   history: Pick<History, 'createHref'>;
   docLink?: string;
+  menu?: AppHeaderMenu;
 }
 
-export const PipelineAppHeader = ({ title, history, docLink }: Props) => (
+export const PipelineAppHeader = ({ title, history, docLink, menu }: Props) => (
   <>
     <AppHeader
       title={title}
@@ -31,6 +32,7 @@ export const PipelineAppHeader = ({ title, history, docLink }: Props) => (
         label: ingestPipelinesListTitle,
       }}
       docLink={docLink}
+      menu={menu}
       spacing="bleed"
     />
     <EuiSpacer size="l" />
