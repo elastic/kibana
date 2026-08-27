@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { randomUUID } from 'crypto';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import type { WorkflowExecutionDto } from '@kbn/workflows/types/latest';
@@ -27,9 +28,11 @@ triggers:
           type: string
         problem:
           type: string
+        runId:
+          type: string
 settings:
   concurrency:
-    key: "{{inputs.env}}-{{inputs.problem}}"
+    key: "{{inputs.env}}-{{inputs.problem}}-{{inputs.runId}}"
     strategy: "${strategy}"
 
 
@@ -63,14 +66,14 @@ spaceTest.describe(
     async function runConcurrencyWorkflow(
       workflowsApi: WorkflowsApiService,
       workflowId: string,
-      { waitTimeout = 20_000 }: { waitTimeout?: number } = {}
+      { waitTimeout = 20_000, runId = randomUUID() }: { waitTimeout?: number; runId?: string } = {}
     ) {
       const events = [
-        { env: 'dev', problem: 'issue-1' },
-        { env: 'prod', problem: 'issue-2' },
-        { env: 'dev', problem: 'issue-1' },
-        { env: 'dev', problem: 'issue-3' },
-        { env: 'dev', problem: 'issue-1' },
+        { env: 'dev', problem: 'issue-1', runId },
+        { env: 'prod', problem: 'issue-2', runId },
+        { env: 'dev', problem: 'issue-1', runId },
+        { env: 'dev', problem: 'issue-3', runId },
+        { env: 'dev', problem: 'issue-1', runId },
       ];
 
       const scheduledExecutions: { workflowExecutionId: string; concurrencyKey: string }[] = [];
@@ -189,13 +192,13 @@ spaceTest.describe(
           getConcurrencyWorkflowYaml('queue')
         );
 
-        // The queue strategy serialises executions per concurrency key. With 3 queued
-        // dev/issue-1 runs each taking ~10s, the last one finishes at ~30s. We use a
-        // 60s timeout so waitForTermination does not expire prematurely.
+        // Serialises 3 ~10s runs for the same key (~30s) plus inter-run delays.
+        // waitForTermination must match the 120s test timeout: 60s flakes when
+        // remaining wait time parks on Task Manager (diff >= 5s).
         const groupedExecutionsByConcurrencyKey = await runConcurrencyWorkflow(
           apiServices.workflowsApi,
           createdWorkflow.id,
-          { waitTimeout: 60_000 }
+          { waitTimeout: 120_000 }
         );
 
         Object.entries(groupedExecutionsByConcurrencyKey).forEach(([, executions]) => {
