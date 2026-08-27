@@ -39,7 +39,7 @@ const TRACKING_REF_VALUES = new Set(['newsletter', 'email', 'twitter', 'rss', 's
  *
  * Normalizations applied:
  *   - scheme: http → https (treat as equivalent for key purposes)
- *   - host: lowercased, leading `www.` stripped
+ *   - host: lowercased, trailing DNS dot and leading `www.` stripped
  *   - path: trailing slash removed (except bare-root, which stays `/`)
  *   - query: tracking params removed (utm_*, fbclid, gclid, ref, mc_cid, mc_eid)
  *   - fragment: dropped entirely
@@ -65,8 +65,13 @@ export const canonicalizeUrl = (rawUrl: string): string | undefined => {
     return undefined;
   }
 
-  // Normalize host: lowercase + strip leading www.
+  // Normalize host: lowercase, strip a trailing DNS dot, then strip leading www.
   let host = parsed.hostname.toLowerCase();
+  // A fully qualified DNS name's trailing dot names the same host. Keeping it produced a
+  // different reconciliation key for two citations of the same page.
+  if (host.length > 1 && host.endsWith('.')) {
+    host = host.slice(0, -1);
+  }
   // Only strip `www.` when something is left that still looks like a domain.
   // `www.com` is a registered domain, and slicing it blindly produced the bare TLD
   // `com` as a canonical key. Requiring a dot after position 4 means at least three

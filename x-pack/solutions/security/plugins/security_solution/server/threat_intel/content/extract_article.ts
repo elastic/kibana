@@ -259,6 +259,21 @@ const visibleLengths = (
   return lengths;
 };
 
+/** Keeps wrapper visibility semantics when returning only an element's inner HTML. */
+const innerHtmlWithRenderState = (
+  innerHtml: string,
+  node: ParsedNode,
+  visibilities: Map<ParsedNode, boolean>,
+  excluded: Map<ParsedNode, boolean>
+): string => {
+  if (excluded.get(node)) {
+    return '';
+  }
+  return visibilities.get(node) === false
+    ? `<div style="visibility:hidden">${innerHtml}</div>`
+    : innerHtml;
+};
+
 const selectArticleHtml = (html: string): string => {
   // Normalized before parsing, for the same reason `text.ts` does it: HTML has no
   // self-closing syntax for raw-text elements, so a spec-compliant parser reads
@@ -377,23 +392,22 @@ const selectArticleHtml = (html: string): string => {
   // that marked it non-content, so downstream had no way to tell.
   const candidates = candidateEls.map(({ el, priority }) => {
     const node = el as unknown as ParsedNode;
-    const visible = visibilities.get(node) ?? true;
     const innerHtml = $(el).html() ?? '';
-    const scoreHtml = visible ? innerHtml : `<div style="visibility:hidden">${innerHtml}</div>`;
+    const scoreHtml = innerHtmlWithRenderState(innerHtml, node, visibilities, excluded);
     let length = 0;
     if (!excluded.get(node)) {
       length = usePreciseScore ? stripHtml(scoreHtml).length : lengths?.get(node) ?? 0;
     }
     return {
       el,
+      node,
       priority,
-      visible,
       length,
     };
   });
 
   let $container: ReturnType<typeof $> | null = null;
-  let containerVisible = true;
+  let containerNode: ParsedNode | null = null;
   if (candidates.length > 0) {
     const best = candidates.reduce((a, b) => {
       if (b.length !== a.length) return b.length > a.length ? b : a;
@@ -404,17 +418,17 @@ const selectArticleHtml = (html: string): string => {
     // empty article satisfied the selector loop and suppressed the body fallback.
     if (best.length > 0) {
       $container = $(best.el);
-      containerVisible = best.visible;
+      containerNode = best.node;
     }
   }
 
-  if ($container !== null && $container.length > 0) {
+  if ($container !== null && $container.length > 0 && containerNode !== null) {
     // No page-chrome removal needed. The winning container sits outside page chrome, since
     // candidates inside it score zero, and only the container's inner HTML is returned, so
     // removing chrome from elsewhere in the document could not change the result. The earlier
     // version removed it here and that was a no-op dressed up as a step.
     const innerHtml = $container.html() ?? html;
-    return containerVisible ? innerHtml : `<div style="visibility:hidden">${innerHtml}</div>`;
+    return innerHtmlWithRenderState(innerHtml, containerNode, visibilities, excluded);
   }
 
   // Fall back to the document body, or to the whole fragment when there is no body
@@ -422,9 +436,15 @@ const selectArticleHtml = (html: string): string => {
   // `<html>/<head>/<body>` the way parse5 does, so a `<description>` fragment has no body to
   // fall back to and would otherwise return nothing at all.
   const $body = $('body');
-  const $fallback = $body.length > 0 ? $body : $.root();
+  if ($body.length > 0) {
+    const bodyNode = $body.get(0) as unknown as ParsedNode | undefined;
+    const innerHtml = $body.html() ?? html;
+    return bodyNode === undefined
+      ? innerHtml
+      : innerHtmlWithRenderState(innerHtml, bodyNode, visibilities, excluded);
+  }
 
-  return $fallback.html() ?? html;
+  return $.root().html() ?? html;
 };
 
 /**

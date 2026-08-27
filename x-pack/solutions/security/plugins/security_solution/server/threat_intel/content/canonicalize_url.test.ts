@@ -39,6 +39,10 @@ describe('canonicalizeUrl', () => {
     expect(canonicalizeUrl('https://Blog.EXAMPLE.COM/post')).toBe('https://blog.example.com/post');
   });
 
+  it('removes a DNS-equivalent trailing dot from the host', () => {
+    expect(canonicalizeUrl('https://www.EXAMPLE.com./post')).toBe('https://example.com/post');
+  });
+
   // --- Trailing slash removal ---------------------------------------------
 
   it('removes a trailing slash from the path', () => {

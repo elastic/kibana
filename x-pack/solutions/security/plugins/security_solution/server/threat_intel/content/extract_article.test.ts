@@ -362,9 +362,10 @@ describe('deeply nested markup', () => {
   });
 
   it('does not swallow a genuine programming error', () => {
-    // The fallback is scoped to RangeError, so a TypeError from a real defect still
-    // surfaces instead of being reported as a page that could not be simplified.
-    expect(() => extractArticleHtml(undefined as unknown as string)).not.toThrow();
+    // A truthy non-string reaches the parser and throws TypeError. The fallback is scoped to
+    // RangeError, so a real programming error still surfaces instead of being reported as a
+    // page that could not be simplified.
+    expect(() => extractArticleHtml({} as unknown as string)).toThrow(TypeError);
   });
 });
 
@@ -617,6 +618,40 @@ describe('page-level chrome and the body fallback', () => {
     );
 
     expect(result).toBe('report evil.test');
+  });
+});
+
+describe('the body fallback preserves wrapper render state', () => {
+  it.each([
+    ['the hidden attribute', '<body hidden>c2.stale.test</body>'],
+    ['display:none', '<body style="display:none">c2.stale.test</body>'],
+    ['a hidden html ancestor', '<html hidden><body>c2.stale.test</body></html>'],
+    [
+      'a display:none html ancestor',
+      '<html style="display:none"><body>c2.stale.test</body></html>',
+    ],
+  ])('drops a body hidden by %s', (_label, html) => {
+    expect(stripHtml(extractArticleHtml(html))).toBe('');
+  });
+
+  it('keeps a visible descendant of a visibility:hidden body', () => {
+    const result = stripHtml(
+      extractArticleHtml(
+        '<body style="visibility:hidden">c2.stale.test<span style="visibility:visible">real.test</span></body>'
+      )
+    );
+
+    expect(result).toBe('real.test');
+  });
+
+  it('keeps a visible descendant of a visibility:hidden html ancestor', () => {
+    const result = stripHtml(
+      extractArticleHtml(
+        '<html style="visibility:hidden"><body>c2.stale.test<span style="visibility:visible">real.test</span></body></html>'
+      )
+    );
+
+    expect(result).toBe('real.test');
   });
 });
 

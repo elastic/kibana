@@ -1452,6 +1452,28 @@ describe('hidden subtrees', () => {
     expect(htmlToStructured('<div hidden>c2.stale.test</div><p>safe</p>')).toBe('safe');
   });
 
+  it.each([
+    ['the hidden attribute', 'td', 'hidden'],
+    ['display:none', 'td', 'style="display:none"'],
+    ['visibility:hidden', 'th', 'style="visibility:hidden"'],
+  ])('applies %s to table-cell wrappers', (_label, cellName, attributes) => {
+    const result = htmlToStructured(
+      `<h2>IOCs</h2><table><tr><${cellName} ${attributes}>c2.stale.test</${cellName}><td>real.test</td></tr></table>`
+    );
+
+    expect(result).toContain('real.test');
+    expect(result).not.toContain('c2.stale.test');
+  });
+
+  it('lets a table-cell descendant restore visibility without restoring the hidden text', () => {
+    const result = htmlToStructured(
+      '<table><tr><td style="visibility:hidden">c2.stale.test<span style="visibility:visible">real.test</span></td></tr></table>'
+    );
+
+    expect(result).toContain('real.test');
+    expect(result).not.toContain('c2.stale.test');
+  });
+
   // Inline CSS hides content just as effectively as the `hidden` attribute, and this
   // predicate is the shared source of truth for both text walkers and article scoring.
   it.each([
@@ -1477,6 +1499,23 @@ describe('hidden subtrees', () => {
     [
       'important display:none followed by a non-important all reset',
       '<div style="display:none!important;all:initial">c2.stale.test</div><p>safe</p>',
+    ],
+    [
+      'an escaped display property name',
+      '<div style="d\\69splay:none">c2.stale.test</div><p>safe</p>',
+    ],
+    [
+      'a simple escaped display property name',
+      '<div style="d\\isplay:none">c2.stale.test</div><p>safe</p>',
+    ],
+    ['an escaped display value', '<div style="display:n\\6f ne">c2.stale.test</div><p>safe</p>'],
+    [
+      'an escaped visibility property name',
+      '<div style="v\\69sibility:hidden">c2.stale.test</div><p>safe</p>',
+    ],
+    [
+      'an escaped important keyword',
+      '<div style="display:none !\\69mportant;display:block">c2.stale.test</div><p>safe</p>',
     ],
   ])('drops an element styled with %s', (_label, html) => {
     const result = stripHtml(html);
@@ -1520,6 +1559,22 @@ describe('hidden subtrees', () => {
       'display:none text inside a quoted value',
       `<div style="content:'x; display:none;';color:red">keep.test</div><p>safe</p>`,
     ],
+    [
+      'a non-CSS whitespace character after a hex escape',
+      '<div style="display:n\\6f\u00a0ne">keep.test</div><p>safe</p>',
+    ],
+    [
+      'non-CSS whitespace before a property name',
+      '<div style="\u00a0display:none">keep.test</div><p>safe</p>',
+    ],
+    [
+      'escaped whitespace before a display value',
+      '<div style="display:\\20 none">keep.test</div><p>safe</p>',
+    ],
+    [
+      'an escaped important delimiter',
+      '<div style="display:none \\!important;display:block">keep.test</div><p>safe</p>',
+    ],
   ])('keeps a visible element styled with %s', (_label, html) => {
     expect(stripHtml(html)).toBe('keep.test safe');
   });
@@ -1529,6 +1584,16 @@ describe('hidden subtrees', () => {
       '<div style="visibility:hidden">stale.test<span style="visibility:visible">keep.test</span></div><p>safe</p>';
 
     expect(stripHtml(html)).toBe('keep.test safe');
+  });
+
+  it('stays linear over many invalid priority delimiters', () => {
+    const html = `<div style="display:${'!'.repeat(100000)}">keep.test</div>`;
+    const started = process.hrtime.bigint();
+    const result = stripHtml(html);
+    const elapsedMs = Number(process.hrtime.bigint() - started) / 1e6;
+
+    expect(result).toBe('keep.test');
+    expect(elapsedMs).toBeLessThan(1000);
   });
 
   it('keeps token boundaries around visibility:hidden text', () => {

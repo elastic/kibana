@@ -138,6 +138,80 @@ interface InlineStyleState {
 
 const CSS_WIDE_KEYWORDS = new Set(['initial', 'inherit', 'unset', 'revert', 'revert-layer']);
 const INHERITED_CSS_WIDE_KEYWORDS = new Set(['inherit', 'unset']);
+const trimCssWhitespace = (input: string): string =>
+  input.replace(/^[ \t\r\n\f]+|[ \t\r\n\f]+$/g, '');
+
+/** Decodes CSS escapes before comparing property names and keyword values. */
+const decodeCssEscapes = (input: string): string => {
+  let decoded = '';
+  let index = 0;
+
+  while (index < input.length) {
+    if (input[index] !== '\\' || index + 1 >= input.length) {
+      decoded += input[index];
+      index += 1;
+    } else if (!/[0-9a-f]/i.test(input[index + 1])) {
+      const escaped = input[index + 1];
+      // A newline cannot be escaped in an identifier. Keep the backslash so an invalid
+      // spelling cannot become a valid hidden-state keyword in this conservative parser.
+      if (/\r|\n|\f/.test(escaped)) {
+        decoded += '\\';
+      } else {
+        decoded += escaped;
+      }
+      index += 2;
+    } else {
+      let hexEnd = index + 1;
+      while (hexEnd < input.length && hexEnd < index + 7 && /[0-9a-f]/i.test(input[hexEnd])) {
+        hexEnd += 1;
+      }
+      const codePoint = Number.parseInt(input.slice(index + 1, hexEnd), 16);
+      decoded +=
+        codePoint === 0 || codePoint > 0x10ffff || (codePoint >= 0xd800 && codePoint <= 0xdfff)
+          ? '\uFFFD'
+          : String.fromCodePoint(codePoint);
+      // A single whitespace character after a hexadecimal escape is its terminator, not part
+      // of the value. Treat CRLF as that one terminator too.
+      if (/[ \t\r\n\f]/.test(input[hexEnd] ?? '')) {
+        if (input[hexEnd] === '\r' && input[hexEnd + 1] === '\n') {
+          hexEnd += 1;
+        }
+        hexEnd += 1;
+      }
+      index = hexEnd;
+    }
+  }
+
+  return decoded;
+};
+
+const hasEscapedCharacterAt = (input: string, index: number): boolean => {
+  let backslashes = 0;
+  for (let cursor = index - 1; cursor >= 0 && input[cursor] === '\\'; cursor--) {
+    backslashes += 1;
+  }
+  return backslashes % 2 === 1;
+};
+
+const cssPropertyValue = (rawValue: string): CssPropertyValue => {
+  const trimmed = trimCssWhitespace(rawValue);
+  for (let index = trimmed.length - 1; index >= 0; index--) {
+    if (trimmed[index] === '!' && !hasEscapedCharacterAt(trimmed, index)) {
+      const priority = decodeCssEscapes(trimCssWhitespace(trimmed.slice(index + 1))).toLowerCase();
+      if (priority === 'important') {
+        return {
+          value: decodeCssEscapes(trimCssWhitespace(trimmed.slice(0, index))).toLowerCase(),
+          important: true,
+        };
+      }
+      // Only the final unescaped priority delimiter can make the declaration important.
+      // Anything after an earlier one invalidates that suffix, so retrying at every `!`
+      // would be both incorrect and quadratic on attacker-controlled style text.
+      break;
+    }
+  }
+  return { value: decodeCssEscapes(trimmed).toLowerCase(), important: false };
+};
 
 /** Splits an inline style at declaration boundaries, not semicolons inside CSS values. */
 const splitCssDeclarations = (style: string): string[] => {
@@ -205,14 +279,11 @@ const inlineStyleState = (style: string | undefined): InlineStyleState => {
   for (const declaration of splitCssDeclarations(style)) {
     const colon = declaration.indexOf(':');
     if (colon !== -1) {
-      const property = declaration.slice(0, colon).trim().toLowerCase();
+      const property = decodeCssEscapes(
+        trimCssWhitespace(declaration.slice(0, colon))
+      ).toLowerCase();
       if (property === 'display' || property === 'visibility' || property === 'all') {
-        const rawValue = declaration.slice(colon + 1).trim();
-        const important = /!\s*important\s*$/i.test(rawValue);
-        const value = rawValue
-          .replace(/!\s*important\s*$/i, '')
-          .trim()
-          .toLowerCase();
+        const { value, important } = cssPropertyValue(declaration.slice(colon + 1));
         if (property === 'all') {
           if (CSS_WIDE_KEYWORDS.has(value)) {
             setProperty('display', { value: '', important });
@@ -807,7 +878,13 @@ const renderStructured = (nodes: ParsedNode[]): string => {
       } else if (name === 'tr') {
         const cellTexts = childrenOf(node)
           .filter((child) => ['td', 'th'].includes(elementName(child)))
-          .map((cell) => collapseWhitespace(inlineTextOf(childrenOf(cell), lift, visible)));
+          .flatMap((cell) => {
+            const cellRenderState = elementRenderState(cell, visible);
+            if (cellRenderState.subtreeHidden) return [];
+            return [
+              collapseWhitespace(inlineTextOf(childrenOf(cell), lift, cellRenderState.visible)),
+            ];
+          });
         out.push(cellTexts.length > 0 ? `\n| ${cellTexts.join(' | ')} |\n` : '\n');
       } else if (name === 'li') {
         const text = collapseWhitespace(inlineTextOf(childrenOf(node), lift, visible));
