@@ -9,6 +9,9 @@ import { z } from '@kbn/zod/v4';
 import { platformCoreCasesTools, ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { CoreSetup } from '@kbn/core/server';
+import type { CasesServerStartDependencies } from '../../types';
+import { getCasesToolAvailability } from '../utils/get_cases_tool_availability';
 import { addCommentStepCommonDefinition } from '../../../common/workflows/steps/add_comment';
 import { addAlertsStepCommonDefinition } from '../../../common/workflows/steps/add_alerts';
 import { addEventsStepCommonDefinition } from '../../../common/workflows/steps/add_events';
@@ -101,6 +104,7 @@ const getAuthorableTypeIds = (registry: UnifiedAttachmentTypeRegistry): string[]
  * Retained for backward compatibility with agents that reference the old tool ID.
  */
 export const attachmentsTool = (
+  coreSetup: CoreSetup<CasesServerStartDependencies>,
   getCasesClientFn: GetCasesClientFn,
   unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry,
   isCasesAttachmentsEnabled: boolean
@@ -131,6 +135,10 @@ export const attachmentsTool = (
   return {
     id: platformCoreCasesTools.attachments,
     type: ToolType.builtin,
+    availability: {
+      cacheMode: 'space',
+      handler: async ({ request }) => getCasesToolAvailability({ core: coreSetup, request }),
+    },
     description: `DEPRECATED — this tool will be removed in a future release. Use these tools instead:
 - To retrieve attachments for a case: \`${platformCoreCasesTools.getAttachments}\`
 - To add attachments (comments, alerts, events, or other): \`${platformCoreCasesTools.manageAttachments}\`
