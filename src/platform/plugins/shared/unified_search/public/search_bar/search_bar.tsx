@@ -49,7 +49,7 @@ import { SavedQueryManagementList } from '../saved_query_management';
 import type { QueryBarMenuProps } from '../query_string_input/query_bar_menu';
 import { QueryBarMenu } from '../query_string_input/query_bar_menu';
 import type { DataViewPickerProps } from '../dataview_picker';
-import type { QueryBarTopRowProps } from '../query_string_input/query_bar_top_row';
+import type { QueryBarTopRowProps, ShowDatePicker } from '../query_string_input/query_bar_top_row';
 import { QueryBarTopRow } from '../query_string_input/query_bar_top_row';
 import { FilterBar, FilterItems } from '../filter_bar';
 import { searchBarStyles } from './search_bar.styles';
@@ -77,11 +77,8 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   showQueryMenu?: boolean;
   showQueryInput?: boolean;
   showFilterBar?: boolean;
-  showDatePicker?: boolean;
-  /**
-   * Disables the date picker for KQL/Lucene when every data view is known to have no time field.
-   */
-  disableDatePickerOnNoTimeField?: boolean;
+  // Toggle the datepicker with a boolean, or use `{ disabled: true }` to show it disabled
+  showDatePicker?: ShowDatePicker;
   showAutoRefreshOnly?: boolean;
   /**
    * Whether to use the new DateRangePicker. Defaults to `true`; pass `false`
@@ -793,7 +790,6 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
           fillSubmitButton={this.props.fillSubmitButton || false}
           prepend={this.props.showFilterBar || this.props.showQueryInput ? queryBarMenu : undefined}
           showDatePicker={this.props.showDatePicker}
-          disableDatePickerOnNoTimeField={this.props.disableDatePickerOnNoTimeField}
           dateRangeFrom={this.state.dateRangeFrom}
           dateRangeTo={this.state.dateRangeTo}
           isRefreshPaused={this.props.isRefreshPaused}

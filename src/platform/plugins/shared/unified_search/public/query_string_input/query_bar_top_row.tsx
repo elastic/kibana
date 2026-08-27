@@ -149,11 +149,14 @@ const getWrapperWithTooltip = (
   }
 
   return (
+    // The `{ disabled }` API is generic, but today's only consumers disable due to a missing time field.
     <EuiToolTip position="top" content={strings.getNoTimeFieldTooltip()}>
       {children}
     </EuiToolTip>
   );
 };
+
+export type ShowDatePicker = boolean | { disabled: boolean };
 
 // @internal
 export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> {
@@ -190,11 +193,7 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   screenTitle?: string;
   showQueryInput?: boolean;
   showAddFilter?: boolean;
-  showDatePicker?: boolean;
-  /**
-   * Disables the date picker for KQL/Lucene when every data view is known to have no time field.
-   */
-  disableDatePickerOnNoTimeField?: boolean;
+  showDatePicker?: ShowDatePicker;
   isDisabled?: boolean;
   showAutoRefreshOnly?: boolean;
   timeHistory?: TimeHistoryContract;
@@ -835,30 +834,27 @@ export const QueryBarTopRow = React.memo(
         return null;
       }
       let isDisabled: boolean | { display: React.ReactNode } = Boolean(props.isDisabled);
-      let enableTooltip = false;
-      const resolvedDataViews = (props.indexPatterns ?? []).filter(
-        (indexPattern): indexPattern is DataView => typeof indexPattern !== 'string'
-      );
-      // ES|QL: skip while the query is dirty so the picker doesn't flicker as the
-      // derived data view (and its time field) is still being resolved.
-      const shouldEvaluateTimeField = Boolean(isQueryLangSelected)
-        ? !props.isDirty
-        : Boolean(props.disableDatePickerOnNoTimeField);
-      let hasTimeField: boolean | undefined;
-      if (isQueryLangSelected) {
-        const [dataView] = resolvedDataViews;
-        if (dataView && 'timeFieldName' in dataView) {
-          hasTimeField = Boolean(dataView.timeFieldName);
-        }
-      } else if (
-        resolvedDataViews.length > 0 &&
-        resolvedDataViews.every((indexPattern) => 'timeFieldName' in indexPattern)
-      ) {
-        hasTimeField = resolvedDataViews.some((indexPattern) =>
-          Boolean(indexPattern.timeFieldName)
-        );
-      }
-      if (shouldEvaluateTimeField && hasTimeField === false) {
+
+      // Consumers (e.g. Discover, Dashboard) opt into a disabled picker via `showDatePicker={{ disabled: true }}`.
+      const isConsumerDisabled =
+        typeof props.showDatePicker === 'object' && props.showDatePicker.disabled === true;
+
+      // ES|QL self-detects a missing @timestamp on its ad-hoc data view, unless the consumer already disabled it.
+      const esqlNoTimeField =
+        !isConsumerDisabled &&
+        Boolean(isQueryLangSelected) &&
+        !props.isDirty &&
+        (() => {
+          const adHocDataview = props.indexPatterns?.[0];
+          return (
+            !!adHocDataview && typeof adHocDataview !== 'string' && !adHocDataview.timeFieldName
+          );
+        })();
+
+      const isDatePickerDisabled = isConsumerDisabled || esqlNoTimeField;
+      const enableTooltip = isDatePickerDisabled;
+
+      if (isDatePickerDisabled) {
         isDisabled = {
           display: (
             <span data-test-subj="kbnQueryBar-datePicker-disabled">
@@ -866,7 +862,6 @@ export const QueryBarTopRow = React.memo(
             </span>
           ),
         };
-        enableTooltip = true;
       }
 
       const wrapperClasses = classNames('kbnQueryBar__datePickerWrapper');
@@ -916,16 +911,14 @@ export const QueryBarTopRow = React.memo(
           />
         );
       } else {
-        const noTimeFieldNameDisabled =
-          typeof isDisabled === 'object' && isDisabled.display !== undefined;
         // In auto-refresh-only mode (`isAutoRefreshOnly`) the picker renders
         // readOnly — like the legacy picker's read-only date display, no time
         // filtering is possible but the auto-refresh play/pause button (which
         // ignores `readOnly`, unlike `disabled`) stays operable.
-        const pickerDisabled = Boolean(props.isDisabled) || noTimeFieldNameDisabled;
+        const pickerDisabled = Boolean(props.isDisabled) || isDatePickerDisabled;
         datePicker = (
           <>
-            {(noTimeFieldNameDisabled || isAutoRefreshOnly) && (
+            {(isDatePickerDisabled || isAutoRefreshOnly) && (
               // Hidden sibling so FTR tests can detect that the time filter is off
               // via testSubjects.existOrFail('kbnQueryBar-datePicker-disabled'),
               // matching the span the legacy picker renders inside its
@@ -935,7 +928,7 @@ export const QueryBarTopRow = React.memo(
             <DateRangePicker
               className="kbnQueryBar__datePicker"
               value={
-                noTimeFieldNameDisabled || isAutoRefreshOnly
+                isDatePickerDisabled || isAutoRefreshOnly
                   ? strings.getDisabledDatePickerLabel()
                   : dateRangeValue
               }
