@@ -13,8 +13,7 @@ import { getTimeseriesIndices } from './timeseries_indices';
 
 const mockResult = { indices: [{ name: 'my_ts_index', mode: 'time_series', aliases: [] }] };
 
-const createHttp = () =>
-  ({ get: jest.fn().mockResolvedValue(mockResult) } as unknown as HttpStart);
+const createHttp = () => ({ get: jest.fn().mockResolvedValue(mockResult) } as unknown as HttpStart);
 
 describe('getTimeseriesIndices', () => {
   it('calls the correct route', async () => {

@@ -13,8 +13,7 @@ import { getJoinIndices } from './lookup_indices';
 
 const mockResult = { indices: [{ name: 'my_lookup', mode: 'lookup', aliases: [] }] };
 
-const createHttp = () =>
-  ({ get: jest.fn().mockResolvedValue(mockResult) } as unknown as HttpStart);
+const createHttp = () => ({ get: jest.fn().mockResolvedValue(mockResult) } as unknown as HttpStart);
 
 describe('getJoinIndices', () => {
   it('calls the correct route', async () => {
