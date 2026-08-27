@@ -223,7 +223,7 @@ const JsonModeDisplaySettings = ({
 }) => {
   const hideNulls = jsonModeSettings.hideNulls ?? false;
   const wrapLines = jsonModeSettings.wrapLines ?? true;
-  const expandedLevels = jsonModeSettings.expandedLevels ?? 0;
+  const expandedLevels = jsonModeSettings.expandedLevels ?? 1;
 
   const hideNullsLabel = i18n.translate('unifiedDataTable.hideNullsLabel', {
     defaultMessage: 'Hide nulls',
