@@ -260,13 +260,13 @@ async function uninstallIndicesAndDataStreams(
         deleteIndexTemplate(esClient, getLegacySecurityUpdatesIndexTemplateId(namespace)),
       ]);
       logger.debug(`deleted entity updates index templates`);
+      await Promise.all(
+        ALL_ENTITY_TYPES.map((type) =>
+          deleteComponentTemplate(esClient, getUpdatesComponentTemplateName(type, namespace))
+        )
+      );
+      logger.debug(`deleted entity updates component templates`);
     })(),
-    ...ALL_ENTITY_TYPES.map((type) =>
-      (async () => {
-        await deleteComponentTemplate(esClient, getUpdatesComponentTemplateName(type, namespace));
-        logger.debug(`deleted entity updates component template for: ${type}`);
-      })()
-    ),
     (async () => {
       await deleteDataStream(esClient, getMetadataEntitiesDataStreamName(namespace));
       if (!colliding) {
