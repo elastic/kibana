@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { getChartTypeSelectionPromptContent } from '@kbn/agent-builder-visualizations-server';
 import { dashboardTools } from '../../../common';
 import type { DashboardGuidanceModule } from '../guidance_module';
-import { dashboardDesignGuidancePrompt } from './design';
-
-const chartTypeSelectionGuidance = getChartTypeSelectionPromptContent();
+import {
+  DASHBOARD_DESIGN_PRACTICES_REFERENCE_NAME,
+  dashboardDesignPracticesReference,
+} from './design';
 
 const guidance = `## Building a Dashboard
 
@@ -21,7 +21,7 @@ Every dashboard MUST have a non-empty \`title\`. If the current dashboard's titl
 Operations run in order, so earlier operations should set up state needed by later ones. Batch all operations into a single ${dashboardTools.generateDashboard} call whenever possible.
 
 When a dashboard needs sections, prefer a single batched call:
-1. Use \`add_section\` with its optional \`panels\` array when you already know the panels that belong in the new section.
+1. Use \`add_section\` with its optional \`panels\` array when you already know the panels that belong in the new section. Pass optional \`id\` when a later operation in the same batch must reference the new section (\`update_panel_layouts.sectionId\`).
 2. Use a follow-up \`add_panels\` with per-item \`sectionId\` only when you need to target an existing section returned by an earlier tool result.
 
 For a new dashboard:
@@ -32,7 +32,7 @@ For a new dashboard:
 For an existing dashboard:
 - Prefer \`edit_panels\` to change existing panel content in place rather than removing and re-adding a panel.
 - If a requested change targets a DSL, form-based, or other non-ES|QL Lens visualization panel, explicitly tell the user direct editing is not supported and ask for confirmation before replacing that panel with a newly created ES|QL-based Lens panel.
-- Use \`update_panel_layouts\` to resize, reposition, or move existing panels between top-level and sections without changing panel content.
+- Use \`update_panel_layouts\` to resize, reposition, or move existing panels between top-level and sections without changing panel content. Set \`hide_title: true\` on a panel when the visualization already draws the same title inside (typical for metric/gauge) so the dashboard chrome title is not stacked on top. Set \`clear_metric_fill: true\` to strip an invented metric background color. Set \`metric_trendline: true\` to add a sparkline behind a sparse metric.
 
 ## Panel Inputs
 
@@ -52,9 +52,7 @@ Choose the panel type in this priority order:
 
 For every new Lens panel, choose and pass \`chartType\`; it is required. For a new Vega panel, \`chartType\` is an optional authoring hint — omit it when no Lens chart type represents the requested visualization. On edits, \`chartType\` is optional because the existing panel configuration provides the current visual form. When editing a Lens panel, omit \`chartType\` to preserve its current chart family; provide a new \`chartType\` when the request changes the chart family, such as from \`xy\` to \`pie\`.
 
-${chartTypeSelectionGuidance}
-
-${dashboardDesignGuidancePrompt}
+When choosing a chart type, composing the dashboard, or packing the grid, follow referenced content \`${DASHBOARD_DESIGN_PRACTICES_REFERENCE_NAME}\`.
 
 ## ES|QL
 
@@ -95,13 +93,12 @@ Do not add controls to dashboards already scoped to a single entity (one host, o
 /**
  * Environment-agnostic dashboard *generation* guidance.
  *
- * The `guidance` describes how to build a dashboard, including the detailed design guidance
- * (composition + panel layout) inlined directly. It deliberately says nothing about how the
- * current dashboard is referenced or how the result is returned/surfaced. Those are
- * environment-specific and avoided here so the block can be reused across environments. Pair it with
- * an environment-specific rendering guidance block (e.g. the Kibana one) that explains how the
- * generated dashboard is surfaced.
+ * Visual good practices (chart types, composition, grid) live in referenced
+ * content so generate and Dashboard Review share one copy. This `guidance` is
+ * the operations vocabulary only. Pair it with environment-specific rendering
+ * guidance for how the current dashboard is referenced and surfaced.
  */
 export const dashboardGeneration: DashboardGuidanceModule = {
   guidance,
+  referencedContent: [dashboardDesignPracticesReference],
 };

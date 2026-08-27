@@ -6,5 +6,5 @@
  */
 
 export { generateDashboardTool } from './generate';
-export { reviewPanelsTool, getChatImageBytes } from './review_panels';
-export type { GetImageBytes } from './review_panels';
+export { reviewDashboardTool, getChatImageBytes } from './review_dashboard';
+export type { GetImageBytes } from './review_dashboard';

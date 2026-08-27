@@ -421,6 +421,67 @@ describe('executeDashboardOperations', () => {
     });
   });
 
+  it('honors a client-supplied add_section id so a later layout op in the same batch can move panels into it', async () => {
+    const result = await executeDashboardOperations({
+      dashboardData: {
+        title: 'Test dashboard',
+        description: 'Description',
+        panels: [createLensPanel('panel-1')],
+      },
+      operations: [
+        {
+          operation: 'add_section',
+          id: 'section-overview',
+          title: 'Overview',
+          grid: { y: 0 },
+        },
+        {
+          operation: 'update_panel_layouts',
+          panels: [
+            {
+              panelId: 'panel-1',
+              grid: { x: 0, y: 0, w: 24, h: 9 },
+              sectionId: 'section-overview',
+            },
+          ],
+        },
+      ],
+      logger,
+    });
+
+    const sections = getSections(result.dashboardData.panels);
+    expect(sections).toHaveLength(1);
+    expect(sections[0].id).toBe('section-overview');
+    expect(sections[0].panels).toEqual([
+      expect.objectContaining({
+        id: 'panel-1',
+        grid: { x: 0, y: 0, w: 24, h: 9 },
+      }),
+    ]);
+    expect(getPanelsOnly(result.dashboardData.panels)).toEqual([]);
+  });
+
+  it('rejects add_section when the supplied id already exists', async () => {
+    await expect(
+      executeDashboardOperations({
+        dashboardData: {
+          title: 'Test dashboard',
+          description: 'Description',
+          panels: [createSection('section-overview', 'Overview', 0)],
+        },
+        operations: [
+          {
+            operation: 'add_section',
+            id: 'section-overview',
+            title: 'Duplicate',
+            grid: { y: 1 },
+          },
+        ],
+        logger,
+      })
+    ).rejects.toThrow('Section "section-overview" already exists.');
+  });
+
   it('adds a section with inline visualization panels in a single operation', async () => {
     const result = await executeDashboardOperations({
       dashboardData: {
@@ -1119,6 +1180,120 @@ describe('executeDashboardOperations', () => {
           identifier: 'missing-panel',
           error: 'Panel "missing-panel" not found.',
         },
+      ]);
+    });
+
+    it('sets hide_title on panel config without changing grid', async () => {
+      const result = await executeDashboardOperations({
+        dashboardData: {
+          title: 'Test dashboard',
+          description: 'Description',
+          panels: [createLensPanel('metric-1')],
+        },
+        operations: [
+          {
+            operation: 'update_panel_layouts',
+            panels: [{ panelId: 'metric-1', hide_title: true }],
+          },
+        ],
+        logger,
+      });
+
+      expect(getPanelsOnly(result.dashboardData.panels)).toEqual([
+        expect.objectContaining({
+          id: 'metric-1',
+          grid: { x: 0, y: 0, w: 24, h: 9 },
+          config: { type: 'metric', hide_title: true },
+        }),
+      ]);
+    });
+
+    it('clears metric background fill without changing grid', async () => {
+      const result = await executeDashboardOperations({
+        dashboardData: {
+          title: 'Test dashboard',
+          description: 'Description',
+          panels: [
+            {
+              type: LENS_EMBEDDABLE_TYPE,
+              id: 'metric-1',
+              config: {
+                type: 'metric',
+                metrics: [
+                  {
+                    type: 'primary',
+                    column: 'count',
+                    color: { type: 'static', color: '#F5C518' },
+                    apply_color_to: 'background',
+                  },
+                ],
+              },
+              grid: { x: 0, y: 0, w: 24, h: 9 },
+            },
+          ],
+        },
+        operations: [
+          {
+            operation: 'update_panel_layouts',
+            panels: [{ panelId: 'metric-1', clear_metric_fill: true }],
+          },
+        ],
+        logger,
+      });
+
+      expect(getPanelsOnly(result.dashboardData.panels)).toEqual([
+        expect.objectContaining({
+          id: 'metric-1',
+          grid: { x: 0, y: 0, w: 24, h: 9 },
+          config: {
+            type: 'metric',
+            metrics: [{ type: 'primary', column: 'count' }],
+          },
+        }),
+      ]);
+    });
+
+    it('adds a trendline background chart on a sparse metric', async () => {
+      const result = await executeDashboardOperations({
+        dashboardData: {
+          title: 'Test dashboard',
+          description: 'Description',
+          panels: [
+            {
+              type: LENS_EMBEDDABLE_TYPE,
+              id: 'metric-1',
+              config: {
+                type: 'metric',
+                metrics: [{ type: 'primary', column: 'count' }],
+              },
+              grid: { x: 0, y: 0, w: 24, h: 9 },
+            },
+          ],
+        },
+        operations: [
+          {
+            operation: 'update_panel_layouts',
+            panels: [{ panelId: 'metric-1', metric_trendline: true }],
+          },
+        ],
+        logger,
+      });
+
+      expect(getPanelsOnly(result.dashboardData.panels)).toEqual([
+        expect.objectContaining({
+          id: 'metric-1',
+          grid: { x: 0, y: 0, w: 24, h: 9 },
+          config: {
+            type: 'metric',
+            metrics: [
+              {
+                type: 'primary',
+                column: 'count',
+                background_chart: { type: 'trend' },
+              },
+            ],
+          },
+        }),
       ]);
     });
   });

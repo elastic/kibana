@@ -5,14 +5,28 @@
  * 2.0.
  */
 
+import { getChartTypeSelectionPromptContent } from '@kbn/agent-builder-visualizations-server';
+import type { ReferencedContent } from '@kbn/agent-builder-server/skills/type_definition';
 import { dashboardCompositionPrompt } from './composition';
 import { gridLayoutPrompt } from './grid_layout';
 
 /**
- * Dashboard design guidance (composition + panel layout) inlined directly into the dashboard
- * generation guidance so the agent always has the composition and layout rules available while
- * building or editing a dashboard.
+ * Shared visual good practices (chart types, composition, grid).
+ * Referenced by dashboard-management and injected into Dashboard Review —
+ * do not copy this text into other prompts.
  */
-export const dashboardDesignGuidancePrompt = `${dashboardCompositionPrompt}
+export const DASHBOARD_DESIGN_PRACTICES_REFERENCE_NAME = 'dashboard-design-practices';
+
+export const dashboardDesignPracticesPrompt = `## Chart Type Selection
+
+${getChartTypeSelectionPromptContent()}
+
+${dashboardCompositionPrompt}
 
 ${gridLayoutPrompt}`;
+
+export const dashboardDesignPracticesReference: ReferencedContent = {
+  name: DASHBOARD_DESIGN_PRACTICES_REFERENCE_NAME,
+  relativePath: '.',
+  content: dashboardDesignPracticesPrompt,
+};

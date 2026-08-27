@@ -15,38 +15,40 @@ import {
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { createErrorResult } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import {
-  isDashboardAttachment,
-} from '@kbn/agent-builder-dashboards-common';
+import { isDashboardAttachment } from '@kbn/agent-builder-dashboards-common';
 import { dashboardTools } from '../../../common';
-import { catalogDashboardPanels } from './catalog_dashboard_panels';
+import {
+  catalogDashboardControls,
+  catalogDashboardPanels,
+  catalogDashboardSections,
+} from './catalog_dashboard_panels';
 import { inspectDashboardImage as defaultInspectDashboardImage } from './inspect_dashboard_image';
 import type { InspectDashboardImage } from './types';
 
 const MISSING_PRETTIFY_EVIDENCE =
-  'Panel Review requires a dashboard attachment and an image of the painted dashboard. Without the image this is a normal dashboard edit, not Prettify.';
+  'Dashboard Review requires a dashboard attachment and an image of the painted dashboard. Without the image this is a normal dashboard edit, not Prettify.';
 
-const reviewPanelsSchema = z.object({});
+const reviewDashboardSchema = z.object({});
 
 export type GetImageBytes = (fileId: string) => Promise<Buffer>;
 
-export const reviewPanelsTool = ({
+export const reviewDashboardTool = ({
   getImageBytes,
   inspectDashboardImage = defaultInspectDashboardImage,
 }: {
   getImageBytes: GetImageBytes;
   inspectDashboardImage?: InspectDashboardImage;
-}): BuiltinSkillBoundedTool<typeof reviewPanelsSchema> => ({
-  id: dashboardTools.reviewPanels,
+}): BuiltinSkillBoundedTool<typeof reviewDashboardSchema> => ({
+  id: dashboardTools.reviewDashboard,
   type: ToolType.builtin,
-  description: `Inspect a painted dashboard screenshot for panel-level visual findings.
+  description: `Inspect a painted dashboard screenshot for visual findings using the same design practices as generate_dashboard (chart types, composition, grid, controls).
 
-Requires a dashboard attachment and an image in the conversation. Returns structured findings (panel id, rule, what, fix). Does not mutate the dashboard.
+Requires a dashboard attachment and an image in the conversation. Returns structured findings (pack_layout, weak_sections, monotone_chart_types, wrong_chart_type, one_category_chart, weak_controls, duplicate_inner_title, metric_fill, thin_metric). Does not mutate the dashboard.
 
-Only reports layout size problems and chart types that invert the data. Does not report title phrasing or Kibana chrome.
+Reports dashboard-level packing, section grouping on a flat canvas, chart-type invert, limited chart-type variety, one-category charts, missing filters from catalog ES|QL, stacked chrome/inner titles, invented metric backgrounds, and sparse KPI trendlines. Does not report title phrasing or Kibana chrome.
 
 Call this when the user asked to prettify a dashboard and an image is attached. Do not call it on a dashboard without an image.`,
-  schema: reviewPanelsSchema,
+  schema: reviewDashboardSchema,
   handler: async (_args, { attachments, modelProvider, logger }) => {
     const active = attachments.getActive();
     const dashboardAttachment = [...active].reverse().find(isDashboardAttachment);
@@ -70,8 +72,11 @@ Call this when the user asked to prettify a dashboard and an image is attached. 
 
     try {
       const bytes = await getImageBytes(imageData.data.file_id);
+      const dashboardData = dashboardVersion.data;
       const findings = await inspectDashboardImage({
-        panels: catalogDashboardPanels(dashboardVersion.data),
+        panels: catalogDashboardPanels(dashboardData),
+        sections: catalogDashboardSections(dashboardData),
+        controls: catalogDashboardControls(dashboardData),
         image: { bytes, mimeType: imageData.data.mime_type },
         modelProvider,
       });
@@ -86,11 +91,11 @@ Call this when the user asked to prettify a dashboard and an image is attached. 
       };
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      logger.error(`Panel Review failed: ${message}`);
+      logger.error(`Dashboard Review failed: ${message}`);
       return {
         results: [
           createErrorResult({
-            message: `Panel Review failed: ${message}`,
+            message: `Dashboard Review failed: ${message}`,
           }),
         ],
       };

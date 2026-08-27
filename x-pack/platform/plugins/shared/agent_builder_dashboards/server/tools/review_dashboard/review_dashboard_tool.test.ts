@@ -11,7 +11,7 @@ import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachme
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server';
 import { dashboardTools } from '../../../common';
-import { reviewPanelsTool } from './review_panels_tool';
+import { reviewDashboardTool } from './review_dashboard_tool';
 
 const grid = { x: 0, y: 0, w: 24, h: 12 };
 
@@ -63,12 +63,12 @@ const createContext = async (options?: { withDashboard?: boolean; withImage?: bo
     modelProvider: {},
   } as unknown as ToolHandlerContext);
 
-describe('reviewPanelsTool', () => {
+describe('reviewDashboardTool', () => {
   const inspectDashboardImage = jest.fn();
   const getImageBytes = jest.fn();
 
   const createTool = () =>
-    reviewPanelsTool({
+    reviewDashboardTool({
       inspectDashboardImage,
       getImageBytes,
     });
@@ -76,17 +76,18 @@ describe('reviewPanelsTool', () => {
   beforeEach(() => {
     inspectDashboardImage.mockReset().mockResolvedValue([
       {
-        panel_id: 'lens-1',
-        rule: 'disproportionate_size',
-        what: 'metric is stretched full width',
-        fix: '{ x: 0, y: 0, w: 12, h: 5 }',
+        rule: 'pack_layout',
+        what: 'gap beside the metric',
+        fix: {
+          panels: [{ panel_id: 'lens-1', grid: { x: 0, y: 0, w: 24, h: 12 } }],
+        },
       },
     ]);
     getImageBytes.mockReset().mockResolvedValue(Buffer.from('png'));
   });
 
-  it('uses the review_panels tool id', () => {
-    expect(createTool().id).toBe(dashboardTools.reviewPanels);
+  it('uses the review_dashboard tool id', () => {
+    expect(createTool().id).toBe(dashboardTools.reviewDashboard);
   });
 
   it('fails closed without an image and does not call vision', async () => {
@@ -128,7 +129,7 @@ describe('reviewPanelsTool', () => {
     });
   });
 
-  it('inspects the painted dashboard image and returns panel findings without image bytes', async () => {
+  it('inspects the painted dashboard image and returns findings without image bytes', async () => {
     const tool = createTool();
     const context = await createContext();
 
@@ -138,6 +139,8 @@ describe('reviewPanelsTool', () => {
     expect(inspectDashboardImage).toHaveBeenCalledWith(
       expect.objectContaining({
         panels: [expect.objectContaining({ id: 'lens-1', title: 'Error rate' })],
+        sections: [],
+        controls: [],
         image: expect.objectContaining({
           bytes: Buffer.from('png'),
           mimeType: 'image/png',
@@ -152,10 +155,11 @@ describe('reviewPanelsTool', () => {
           data: {
             findings: [
               {
-                panel_id: 'lens-1',
-                rule: 'disproportionate_size',
-                what: 'metric is stretched full width',
-                fix: '{ x: 0, y: 0, w: 12, h: 5 }',
+                rule: 'pack_layout',
+                what: 'gap beside the metric',
+                fix: {
+                  panels: [{ panel_id: 'lens-1', grid: { x: 0, y: 0, w: 24, h: 12 } }],
+                },
               },
             ],
           },
