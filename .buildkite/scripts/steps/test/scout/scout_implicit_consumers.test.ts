@@ -52,12 +52,12 @@ describe('expandWithImplicitConsumers — workflow trigger catalog', () => {
     expect(expanded.has(WORKFLOWS_EXTENSIONS_MODULE)).toBe(true);
   });
 
-  it('adds workflows_extensions when Scout default server args change', () => {
+  it('adds workflows_extensions when Scout workflows_extensions server args change', () => {
     const log = createMockLog();
     const expanded = expandWithImplicitConsumers(
       new Set(['@kbn/scout']),
       [
-        'src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/default/stateful/base.config.ts',
+        'src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/workflows_extensions/stateful/classic.stateful.config.ts',
       ],
       log
     );
