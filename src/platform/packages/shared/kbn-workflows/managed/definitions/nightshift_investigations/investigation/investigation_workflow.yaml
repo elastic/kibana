@@ -571,6 +571,44 @@ steps:
     on-failure:
       continue: true
 
+  # Persists the investigation structured output to the nightshift-investigation saved object.
+  # Runs after `investigate` when the agent completed successfully. Writes completed status +
+  # all structured output fields. The persist route is idempotent — the progress report tool
+  # may have already set status to 'running' mid-investigation.
+  - name: persist_investigation_completed
+    type: kibana.request
+    if: '${{ steps.investigate.error == null }}'
+    with:
+      method: PATCH
+      path: '/internal/nightshift/investigations/{{ execution.id }}'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+      body:
+        status: "completed"
+        summary: "${{ steps.investigate.output.structured_output.summary }}"
+        conclusion: "${{ steps.investigate.output.structured_output.conclusion }}"
+        hypotheses: ${{ steps.investigate.output.structured_output.hypotheses }}
+        recommendations: ${{ steps.investigate.output.structured_output.recommendations }}
+        blind_spots: ${{ steps.investigate.output.structured_output.blind_spots }}
+        significant_event_updates: ${{ steps.investigate.output.structured_output.significant_event_updates }}
+    on-failure:
+      continue: true
+
+  # Persists failure status when the investigate step errored.
+  - name: persist_investigation_failed
+    type: kibana.request
+    if: '${{ steps.investigate.error != null }}'
+    with:
+      method: PATCH
+      path: '/internal/nightshift/investigations/{{ execution.id }}'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+      body:
+        status: "failed"
+        error: "${{ steps.investigate.error.message | default: 'Investigation failed' }}"
+    on-failure:
+      continue: true
+
   # Connects this investigation back to the Significant Event that triggered it, so the
   # UI can surface investigation history and link to the full RCA result, and — in the same
   # append-only version — applies any field changes the agent proposed via

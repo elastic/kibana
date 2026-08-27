@@ -9,12 +9,14 @@ import { startInvestigationRoute } from './start_investigation';
 import { getInvestigationRoute } from './get_investigation';
 import { emitLifecycleEventRoute } from './emit_lifecycle_event';
 import { listInvestigationsRoute } from './list_investigations';
+import { updateInvestigationRoute } from './update_investigation';
 
 export const nightshiftInvestigationsRouteRepository = {
   ...startInvestigationRoute,
   ...getInvestigationRoute,
   ...emitLifecycleEventRoute,
   ...listInvestigationsRoute,
+  ...updateInvestigationRoute,
 };
 
 export type NightshiftInvestigationsRouteRepository =

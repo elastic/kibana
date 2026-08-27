@@ -1,0 +1,134 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { expect } from '@kbn/scout/api';
+import { tags } from '@kbn/scout';
+import type { ApiClientFixture, KibanaRole } from '@kbn/scout';
+import {
+  apiTest,
+  COMMON_HEADERS,
+  INVESTIGATIONS_READ_ROLE,
+  seedInvestigation,
+  deleteInvestigation,
+} from '../fixtures';
+
+const INVESTIGATIONS_WRITE_ROLE: KibanaRole = {
+  elasticsearch: { cluster: [], indices: [] },
+  kibana: [{ base: [], feature: { agentBuilder: ['all'] }, spaces: ['*'] }],
+};
+
+const SO_TYPE = 'nightshift-investigation';
+
+const updateInvestigation = async (
+  apiClient: ApiClientFixture,
+  cookieHeader: Record<string, string>,
+  id: string,
+  body: Record<string, unknown>
+) =>
+  apiClient.patch(`internal/nightshift/investigations/${id}`, {
+    headers: { ...COMMON_HEADERS, ...cookieHeader },
+    body,
+    responseType: 'json',
+  });
+
+apiTest.describe(
+  'PATCH /internal/nightshift/investigations/{id}',
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  () => {
+    const TEST_ID = 'persist-test-investigation';
+    let cookieHeader: Record<string, string>;
+
+    apiTest.beforeAll(async ({ samlAuth }) => {
+      ({ cookieHeader } = await samlAuth.asInteractiveUser(INVESTIGATIONS_WRITE_ROLE));
+    });
+
+    apiTest.beforeEach(async ({ kbnClient }) => {
+      await seedInvestigation(kbnClient, { id: TEST_ID, status: 'running' });
+    });
+
+    apiTest.afterEach(async ({ kbnClient }) => {
+      await deleteInvestigation(kbnClient, TEST_ID);
+    });
+
+    apiTest('returns 400 when status is missing', async ({ apiClient }) => {
+      const response = await updateInvestigation(apiClient, cookieHeader, TEST_ID, {});
+      expect(response).toHaveStatusCode(400);
+    });
+
+    apiTest('returns 400 for an invalid status value', async ({ apiClient }) => {
+      const response = await updateInvestigation(apiClient, cookieHeader, TEST_ID, {
+        status: 'not_a_valid_status',
+      });
+      expect(response).toHaveStatusCode(400);
+    });
+
+    apiTest('returns 400 when pending is used as status', async ({ apiClient }) => {
+      const response = await updateInvestigation(apiClient, cookieHeader, TEST_ID, {
+        status: 'pending',
+      });
+      expect(response).toHaveStatusCode(400);
+    });
+
+    apiTest('returns 404 when the investigation does not exist', async ({ apiClient }) => {
+      const response = await updateInvestigation(apiClient, cookieHeader, 'non-existent-id', {
+        status: 'completed',
+        summary: 'All clear.',
+      });
+      expect(response).toHaveStatusCode(404);
+    });
+
+    apiTest('updates status and structured output', async ({ apiClient, kbnClient }) => {
+      const response = await updateInvestigation(apiClient, cookieHeader, TEST_ID, {
+        status: 'completed',
+        summary: 'Root cause identified.',
+        conclusion: 'Memory leak in service X.',
+        hypotheses: [{ candidate: 'memory leak', confidence: 0.95, status: 'confirmed' }],
+        recommendations: [{ title: 'Restart pod' }],
+        blind_spots: [{ title: 'Network logs', description: 'Not available' }],
+      });
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.acknowledged).toBe(true);
+
+      const so = await kbnClient.savedObjects.get({ type: SO_TYPE, id: TEST_ID });
+      expect(so.attributes.status).toBe('completed');
+      expect(so.attributes.summary).toBe('Root cause identified.');
+      expect(so.attributes.conclusion).toBe('Memory leak in service X.');
+      expect(so.attributes.hypotheses).toStrictEqual([
+        { candidate: 'memory leak', confidence: 0.95, status: 'confirmed' },
+      ]);
+      expect(so.attributes.recommendations).toStrictEqual([{ title: 'Restart pod' }]);
+      expect(so.attributes.blind_spots).toStrictEqual([
+        { title: 'Network logs', description: 'Not available' },
+      ]);
+      expect(so.attributes.completed_at).toBeDefined();
+    });
+
+    apiTest('updates error field for failed investigations', async ({ apiClient, kbnClient }) => {
+      const response = await updateInvestigation(apiClient, cookieHeader, TEST_ID, {
+        status: 'failed',
+        error: 'Agent timed out.',
+      });
+      expect(response).toHaveStatusCode(200);
+
+      const so = await kbnClient.savedObjects.get({ type: SO_TYPE, id: TEST_ID });
+      expect(so.attributes.status).toBe('failed');
+      expect(so.attributes.error).toBe('Agent timed out.');
+      expect(so.attributes.completed_at).toBeDefined();
+    });
+
+    apiTest(
+      'returns 403 for a user without agentBuilder:write',
+      async ({ apiClient, samlAuth }) => {
+        const unauthorized = await samlAuth.asInteractiveUser(INVESTIGATIONS_READ_ROLE);
+        const response = await updateInvestigation(apiClient, unauthorized.cookieHeader, 'any-id', {
+          status: 'completed',
+        });
+        expect(response).toHaveStatusCode(403);
+      }
+    );
+  }
+);

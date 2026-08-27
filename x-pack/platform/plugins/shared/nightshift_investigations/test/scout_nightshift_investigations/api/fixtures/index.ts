@@ -7,3 +7,4 @@
 
 export { apiTest } from '@kbn/scout';
 export { COMMON_HEADERS, INVESTIGATIONS_READ_ROLE, NO_AGENT_BUILDER_ROLE } from './constants';
+export { seedInvestigation, deleteInvestigation } from './helpers';

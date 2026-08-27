@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { ExecutionStatus } from '@kbn/workflows';
 import { SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
@@ -18,51 +18,50 @@ import type {
   InvestigationStatus,
   InvestigationSubject,
   InvestigationTriggerType,
-  ListInvestigationItem,
   ListInvestigationsRequest,
   ListInvestigationsResponse,
+  UpdatableInvestigationStatus,
   StartInvestigationRequest,
   StartInvestigationResponse,
 } from '../../common';
-import { DEFAULT_INVESTIGATION_TRIGGER_TYPE, INVESTIGATION_TRIGGER_TYPES } from '../../common';
+import { DEFAULT_INVESTIGATION_TRIGGER_TYPE } from '../../common';
+import type {
+  InvestigationSavedObjectClient,
+  InvestigationSavedObjectUpdateAttributes,
+  InvestigationStructuredOutput,
+} from '../saved_objects';
+import type { NightshiftInvestigationAttributes } from '../saved_objects';
+
 import { InvestigationNotFoundError } from './errors';
 import { InvestigationUnavailableError } from './investigation_unavailable_error';
 export { InvestigationNotFoundError, InvestigationUnavailableError };
 
-const SORT_FIELD_MAP: Record<
-  NonNullable<ListInvestigationsRequest['sort_field']>,
-  'createdAt' | 'finishedAt'
-> = {
-  created_at: 'createdAt',
-  finished_at: 'finishedAt',
-};
-
-function toExecutionStatuses(status: InvestigationStatus): ExecutionStatus[] {
-  switch (status) {
-    case 'pending':
-      return [ExecutionStatus.PENDING, ExecutionStatus.QUEUED];
-    case 'running':
-      return [
-        ExecutionStatus.RUNNING,
-        ExecutionStatus.WAITING,
-        ExecutionStatus.WAITING_FOR_INPUT,
-        ExecutionStatus.WAITING_FOR_CHILD,
-      ];
-    case 'completed':
-      return [ExecutionStatus.COMPLETED];
-    case 'failed':
-      return [ExecutionStatus.FAILED, ExecutionStatus.TIMED_OUT];
-    case 'cancelled':
-      return [ExecutionStatus.CANCELLED, ExecutionStatus.SKIPPED];
-  }
+export interface UpdateInvestigationRequest extends InvestigationStructuredOutput {
+  status: UpdatableInvestigationStatus;
+  error?: string;
 }
 
-function isPlainObject(v: unknown): v is Record<string, unknown> {
-  return v != null && typeof v === 'object' && !Array.isArray(v);
-}
-
-function asString(v: unknown): string | undefined {
-  return typeof v === 'string' ? v || undefined : undefined;
+function toInvestigationResponse(
+  id: string,
+  attrs: NightshiftInvestigationAttributes
+): GetInvestigationResponse {
+  return {
+    investigation_id: id,
+    subject: { type: attrs.subject_type, id: attrs.subject_id },
+    trigger_type: attrs.trigger_type,
+    status: attrs.status,
+    started_at: attrs.created_at,
+    completed_at: attrs.completed_at,
+    concurrency_key: attrs.concurrency_key,
+    executed_by: attrs.executed_by,
+    error: attrs.error,
+    summary: attrs.summary,
+    conclusion: attrs.conclusion,
+    hypotheses: attrs.hypotheses,
+    recommendations: attrs.recommendations,
+    blind_spots: attrs.blind_spots,
+    significant_event_updates: attrs.significant_event_updates,
+  };
 }
 
 function toInvestigationStatus(status: ExecutionStatus, logger: Logger): InvestigationStatus {
@@ -98,44 +97,15 @@ function isTerminalStatus(status: InvestigationStatus): boolean {
   return status === 'completed' || status === 'failed' || status === 'cancelled';
 }
 
-function recoverSubjectFromInput(
-  input: Record<string, unknown> | undefined
-): InvestigationSubject | undefined {
-  const ctx = input?.context;
-  if (!isPlainObject(ctx)) return undefined;
-  if (ctx.source === 'significant_event') {
-    const id = asString(ctx.event_id) ?? asString(ctx.significant_event_id);
-    return id ? { type: 'significant_event', id } : undefined;
-  }
-  if (ctx.source === 'alert') {
-    const id = asString(ctx.alert_id);
-    return id ? { type: 'alert', id } : undefined;
-  }
-  return undefined;
-}
-
-function recoverTriggerTypeFromInput(
-  input: Record<string, unknown> | undefined
-): InvestigationTriggerType | undefined {
-  const ctx = input?.context;
-  if (!isPlainObject(ctx)) return undefined;
-  const valid: readonly string[] = INVESTIGATION_TRIGGER_TYPES;
-  return valid.includes(String(ctx.trigger_type))
-    ? (ctx.trigger_type as InvestigationTriggerType)
-    : undefined;
-}
-
 export interface NightshiftInvestigationsClientDeps {
   request: KibanaRequest;
   workflowsManagement?: WorkflowsServerPluginSetup;
   spaces?: SpacesPluginStart;
   logger: Logger;
-  /**
-   * Explicit override for contexts where the request cannot carry space info (e.g. workflow step
-   * definitions using getFakeRequest). See https://github.com/elastic/kibana/issues/284786.
-   */
   spaceIdOverride?: string;
   agentBuilder?: AgentBuilderPluginStart;
+  investigationSoClient: InvestigationSavedObjectClient;
+  security?: CoreStart['security'];
 }
 
 export class NightshiftInvestigationsClient {
@@ -145,6 +115,8 @@ export class NightshiftInvestigationsClient {
   private readonly logger: Logger;
   private readonly spaceIdOverride?: string;
   private readonly agentBuilder?: AgentBuilderPluginStart;
+  private readonly investigationSoClient: InvestigationSavedObjectClient;
+  private readonly security?: CoreStart['security'];
 
   constructor(deps: NightshiftInvestigationsClientDeps) {
     this.request = deps.request;
@@ -153,6 +125,8 @@ export class NightshiftInvestigationsClient {
     this.logger = deps.logger;
     this.spaceIdOverride = deps.spaceIdOverride;
     this.agentBuilder = deps.agentBuilder;
+    this.investigationSoClient = deps.investigationSoClient;
+    this.security = deps.security;
   }
 
   private getSpaceId(): string {
@@ -163,13 +137,17 @@ export class NightshiftInvestigationsClient {
     );
   }
 
+  private getCurrentUsername(): string | undefined {
+    return this.security?.authc.getCurrentUser(this.request)?.username;
+  }
+
   async start({
     subject,
     trigger_type,
     message,
     stream_names,
     concurrency_key,
-    context = {},
+    context,
   }: StartInvestigationRequest): Promise<StartInvestigationResponse> {
     if (!this.workflowsManagement) {
       throw new InvestigationUnavailableError('workflowsManagement is not available');
@@ -219,77 +197,134 @@ export class NightshiftInvestigationsClient {
       `Started investigation for ${subject.type}/${subject.id}, execution_id=${executionId}`
     );
 
+    await this.createInvestigationSavedObject({
+      executionId,
+      subject,
+      trigger_type: trigger_type ?? DEFAULT_INVESTIGATION_TRIGGER_TYPE,
+      concurrency_key,
+    });
+
     return { investigation_id: executionId };
   }
 
+  private async createInvestigationSavedObject({
+    executionId,
+    subject,
+    trigger_type,
+    concurrency_key,
+  }: {
+    executionId: string;
+    subject: InvestigationSubject;
+    trigger_type: InvestigationTriggerType;
+    concurrency_key?: string;
+  }): Promise<void> {
+    if (concurrency_key) {
+      await this.cancelSupersededInvestigation({ concurrency_key });
+    }
+
+    await this.investigationSoClient.create({
+      id: executionId,
+      attributes: {
+        investigation_id: executionId,
+        status: 'running',
+        subject_type: subject.type,
+        subject_id: subject.id,
+        trigger_type,
+        concurrency_key,
+        executed_by: this.getCurrentUsername(),
+        created_at: new Date().toISOString(),
+      },
+    });
+  }
+
+  private async cancelSupersededInvestigation({
+    concurrency_key,
+  }: {
+    concurrency_key: string;
+  }): Promise<void> {
+    const superseded = await this.investigationSoClient.findByConcurrencyKey(concurrency_key);
+
+    if (superseded && !isTerminalStatus(superseded.attributes.status)) {
+      await this.investigationSoClient.update(superseded.id, {
+        status: 'cancelled',
+        completed_at: new Date().toISOString(),
+      });
+    }
+  }
+
+  async update(investigationId: string, state: UpdateInvestigationRequest): Promise<void> {
+    const { status, error, ...output } = state;
+
+    const attrs: InvestigationSavedObjectUpdateAttributes = {
+      status,
+      ...(isTerminalStatus(status) && { completed_at: new Date().toISOString() }),
+      ...(error !== undefined && { error }),
+      ...output,
+    };
+
+    await this.investigationSoClient.update(investigationId, attrs);
+  }
+
   async get(investigationId: string): Promise<GetInvestigationResponse> {
+    const soAttrs = await this.investigationSoClient.get(investigationId);
+
+    if (!soAttrs) {
+      throw new InvestigationNotFoundError(investigationId);
+    }
+
+    const response = toInvestigationResponse(investigationId, soAttrs);
+
+    if (soAttrs.status === 'running') {
+      const reconciled = await this.reconcileStaleRunningStatus(investigationId);
+      if (reconciled) {
+        response.status = reconciled.status;
+        response.completed_at = reconciled.completed_at;
+        response.error = reconciled.error;
+      }
+    }
+
+    return response;
+  }
+
+  private async reconcileStaleRunningStatus(
+    investigationId: string
+  ): Promise<{ status: InvestigationStatus; completed_at?: string; error?: string } | undefined> {
     if (!this.workflowsManagement) {
-      throw new Error('workflowsManagement is not available');
+      return undefined;
     }
 
     const spaceId = this.getSpaceId();
     const execution = await this.workflowsManagement.management.getWorkflowExecution(
       investigationId,
       spaceId,
-      { includeOutput: true }
+      { includeOutput: false }
     );
 
     if (!execution) {
-      throw new InvestigationNotFoundError(investigationId);
+      return undefined;
     }
 
-    if (execution.workflowId !== SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID) {
-      throw new InvestigationNotFoundError(investigationId);
+    const workflowStatus = toInvestigationStatus(execution.status, this.logger);
+    if (!isTerminalStatus(workflowStatus)) {
+      return undefined;
     }
 
-    const status = toInvestigationStatus(execution.status, this.logger);
-    const isTerminal = isTerminalStatus(status);
+    const correction: InvestigationSavedObjectUpdateAttributes = {
+      status: workflowStatus,
+      completed_at: execution.finishedAt ?? new Date().toISOString(),
+      ...(workflowStatus === 'failed' && { error: 'Investigation failed' }),
+    };
 
-    // runWorkflow stores inputs at context.inputs in the execution document.
-    const executionInputs = execution.context?.inputs;
-    const rawInput = isPlainObject(executionInputs) ? executionInputs : undefined;
-
-    // Step-level output is populated when includeOutput: true. Search in reverse for
-    // the last ai.agent step that produced a conclusion or summary. The workflow engine
-    // wraps the agent's structured schema output in a `structured_output` envelope, so
-    // conclusion/summary live at output.structured_output.{conclusion,summary}, not at
-    // the top-level output object. Confirmed by investigation_workflow.yaml line references
-    // to `steps.investigate.output.structured_output.*`.
-    const conclusionStep = execution.stepExecutions
-      ?.slice()
-      .reverse()
-      .find((s) => {
-        if (!isPlainObject(s.output)) return false;
-        const structured = s.output.structured_output;
-        return isPlainObject(structured) && ('conclusion' in structured || 'summary' in structured);
-      });
-    const rawOutput = (() => {
-      if (!isPlainObject(conclusionStep?.output)) return undefined;
-      const structured = conclusionStep.output.structured_output;
-      return isPlainObject(structured) ? structured : undefined;
-    })();
-
-    const subject = recoverSubjectFromInput(rawInput);
-    const recoveredTriggerType = recoverTriggerTypeFromInput(rawInput);
+    await this.investigationSoClient.update(investigationId, correction).catch((err) => {
+      this.logger.warn(
+        `Failed to reconcile stale SO status for investigation "${investigationId}": ${err.message}`
+      );
+    });
 
     return {
-      investigation_id: investigationId,
-      subject,
-      trigger_type: recoveredTriggerType,
-      status,
-      started_at: execution.startedAt,
-      completed_at: isTerminal ? execution.finishedAt : undefined,
-      conclusions:
-        status === 'completed'
-          ? asString(rawOutput?.conclusion) ?? asString(rawOutput?.summary)
-          : undefined,
-      error: (() => {
-        if (status !== 'failed') return undefined;
-        if (execution.error?.message) {
-          this.logger.warn(`Investigation "${investigationId}" failed: ${execution.error.message}`);
-        }
-        return 'Investigation failed';
-      })(),
+      status: workflowStatus,
+      completed_at: correction.completed_at,
+      error: correction.error,
     };
   }
 
@@ -304,42 +339,19 @@ export class NightshiftInvestigationsClient {
     page = 1,
     size = 20,
   }: ListInvestigationsRequest = {}): Promise<ListInvestigationsResponse> {
-    if (!this.workflowsManagement) {
-      throw new Error('workflowsManagement is not available');
-    }
-
-    const spaceId = this.getSpaceId();
-    const executionStatuses = statuses?.flatMap(toExecutionStatuses);
-
-    const result = await this.workflowsManagement.management.getWorkflowExecutions(
-      {
-        workflowId: SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
-        omitStepRuns: true,
-        ...(executionStatuses?.length ? { statuses: executionStatuses } : {}),
-        startedAfter: started_after,
-        startedBefore: started_before,
-        finishedAfter: finished_after,
-        finishedBefore: finished_before,
-        sortField: sort_field != null ? SORT_FIELD_MAP[sort_field] : 'createdAt',
-        sortOrder: sort_order,
-        page,
-        size,
-      },
-      spaceId
-    );
-
-    const results: ListInvestigationItem[] = result.results.map((execution) => {
-      const status = toInvestigationStatus(execution.status, this.logger);
-      const isTerminal = isTerminalStatus(status);
-      return {
-        investigation_id: execution.id,
-        status,
-        started_at: execution.startedAt,
-        completed_at: isTerminal ? execution.finishedAt : undefined,
-        concurrency_key: execution.concurrencyGroupKey,
-        executed_by: execution.executedBy,
-      };
+    const result = await this.investigationSoClient.find({
+      statuses,
+      createdAfter: started_after,
+      createdBefore: started_before,
+      completedAfter: finished_after,
+      completedBefore: finished_before,
+      sortField: sort_field === 'finished_at' ? 'completed_at' : 'created_at',
+      sortOrder: sort_order,
+      page,
+      perPage: size,
     });
+
+    const results = result.results.map((so) => toInvestigationResponse(so.id, so.attributes));
 
     return { results, page: result.page, size: result.size, total: result.total };
   }

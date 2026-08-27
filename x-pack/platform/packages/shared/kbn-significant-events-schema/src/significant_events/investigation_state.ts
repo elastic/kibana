@@ -210,10 +210,13 @@ export type SignificantEventUpdate = z.infer<typeof significantEventUpdateSchema
  * Because both paths share this shape, a consumer renders identically whether it's following the
  * live stream or reading the persisted final result.
  */
+/** Max hypotheses an investigation can track. Keep in sync with the YAML maxItems. */
+export const MAX_HYPOTHESES = 50;
+
 export const investigationStateSchema = z.object({
   /** Current ("what's happening now") or final narrative summary of the investigation. */
   summary: z.string().max(MAX_TEXT_LENGTH),
-  hypotheses: z.array(investigationHypothesisSchema).max(50),
+  hypotheses: z.array(investigationHypothesisSchema).max(MAX_HYPOTHESES),
   /**
    * The final answer — the mechanism/root-cause narrative, as plain prose (no markdown headings
    * or bullet lists). Populated once a hypothesis is `confirmed`; absent while still

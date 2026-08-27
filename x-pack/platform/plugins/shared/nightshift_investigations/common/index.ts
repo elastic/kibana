@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+import type {
+  InvestigationBlindSpot,
+  InvestigationHypothesis,
+  InvestigationRecommendation,
+  SignificantEventUpdate,
+} from '@kbn/significant-events-schema';
 import type { InvestigationSubjectType, InvestigationTriggerType } from './workflows/triggers';
 
 export {
@@ -62,6 +68,14 @@ export const INVESTIGATION_STATUSES = [
 ] as const;
 export type InvestigationStatus = (typeof INVESTIGATION_STATUSES)[number];
 
+export const UPDATABLE_INVESTIGATION_STATUSES = [
+  'running',
+  'completed',
+  'failed',
+  'cancelled',
+] as const;
+export type UpdatableInvestigationStatus = (typeof UPDATABLE_INVESTIGATION_STATUSES)[number];
+
 export interface GetInvestigationResponse {
   investigation_id: string;
   /** Undefined for runs initiated without a subject (e.g. a bare manual workflow run). */
@@ -70,8 +84,15 @@ export interface GetInvestigationResponse {
   status: InvestigationStatus;
   started_at?: string;
   completed_at?: string;
-  conclusions?: string;
+  concurrency_key?: string;
+  executed_by?: string;
   error?: string;
+  summary?: string;
+  conclusion?: string;
+  hypotheses?: InvestigationHypothesis[];
+  recommendations?: InvestigationRecommendation[];
+  blind_spots?: InvestigationBlindSpot[];
+  significant_event_updates?: SignificantEventUpdate[];
 }
 
 export interface ListInvestigationsRequest {
@@ -86,21 +107,14 @@ export interface ListInvestigationsRequest {
   size?: number;
 }
 
-export interface ListInvestigationItem {
-  investigation_id: string;
-  status: InvestigationStatus;
-  started_at?: string;
-  completed_at?: string;
-  concurrency_key?: string;
-  executed_by?: string;
-}
-
-export interface ListInvestigationsResponse {
-  results: ListInvestigationItem[];
+export interface PaginatedResponse<T> {
+  results: T[];
   page: number;
   size: number;
   total: number;
 }
+
+export type ListInvestigationsResponse = PaginatedResponse<GetInvestigationResponse>;
 
 export {
   INVESTIGATION_STARTED_TRIGGER_ID,
