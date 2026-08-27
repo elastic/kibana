@@ -12,6 +12,7 @@ import Fs from 'fs';
 import { rspack, type Compiler, type Stats } from '@rspack/core';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { DEFAULT_THEME_TAGS } from '@kbn/core-ui-settings-common';
+import type { KibanaGroup } from '@kbn/projects-solutions-groups';
 import { createSingleCompileConfig } from './config/create_single_compile_config';
 import { isHmrEnabled } from './hmr/hmr_enabled';
 import { HmrServer } from './hmr/hmr_server';
@@ -46,6 +47,8 @@ export interface BuildOptions {
   pluginPaths?: string[];
   /** Directories scanned for plugins */
   pluginScanDirs?: string[];
+  /** Restrict discovery to plugins belonging to these groups */
+  allowlistPluginGroups?: readonly KibanaGroup[];
   themeTags?: ThemeTag[];
   log?: ToolingLog;
   /** Enable profiling - writes stats.json and RsDoctor report */
@@ -96,6 +99,7 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
     testPlugins = false,
     pluginPaths,
     pluginScanDirs,
+    allowlistPluginGroups,
     themeTags = [...DEFAULT_THEME_TAGS],
     log,
     profile = false,
@@ -135,6 +139,7 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
       testPlugins,
       pluginPaths,
       pluginScanDirs,
+      allowlistPluginGroups,
       themeTags,
       log,
       profile,

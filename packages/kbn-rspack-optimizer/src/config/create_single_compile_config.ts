@@ -14,6 +14,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import { NodeLibsBrowserPlugin } from '@kbn/node-libs-browser-webpack-plugin';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
 import { DEFAULT_THEME_TAGS } from '@kbn/core-ui-settings-common';
+import type { KibanaGroup } from '@kbn/projects-solutions-groups';
 import { discoverPlugins } from '../utils/plugin_discovery';
 import {
   findTargetEntry,
@@ -84,6 +85,8 @@ export interface SingleCompileConfigOptions {
   pluginPaths?: string[];
   /** Directories scanned for plugins */
   pluginScanDirs?: string[];
+  /** Restrict discovery to plugins belonging to these groups */
+  allowlistPluginGroups?: readonly KibanaGroup[];
   themeTags?: ThemeTag[];
   /** ToolingLog instance for consistent logging with Kibana's dev mode */
   log?: ToolingLog;
@@ -123,6 +126,7 @@ export async function createSingleCompileConfig(
     testPlugins = false,
     pluginPaths,
     pluginScanDirs,
+    allowlistPluginGroups,
     themeTags = [...DEFAULT_THEME_TAGS],
     log,
     profile = false,
@@ -147,6 +151,7 @@ export async function createSingleCompileConfig(
     testPlugins,
     paths: pluginPaths,
     parentDirs: pluginScanDirs,
+    allowlistPluginGroups,
   });
 
   // Create a SINGLE unified entry that imports ALL plugins
@@ -345,11 +350,11 @@ export async function createSingleCompileConfig(
             },
             buildDependencies: CACHE_CONFIG_FILES.map((f) => Path.resolve(repoRoot, f)),
             // Version includes hash of this config file for reliable invalidation
-            // RSPack's buildDependencies may not trigger on TypeScript file changes
-            version: `v8-${dist ? 'prod' : 'dev'}-${computeConfigHash(
-              repoRoot,
-              CACHE_CONFIG_FILES
-            )}`,
+            // RSPack's buildDependencies may not trigger on TypeScript file changes.
+            // The group allowlist changes which plugins are in the entry, so it's part of the key.
+            version: `v8-${dist ? 'prod' : 'dev'}-${
+              allowlistPluginGroups ? [...allowlistPluginGroups].sort().join(',') : 'all'
+            }-${computeConfigHash(repoRoot, CACHE_CONFIG_FILES)}`,
             // Use separate cache directories for dev vs dist to avoid stale cache issues
             // Structure: .rspack-cache/dev or .rspack-cache/dist
             // Clear all: rm -rf node_modules/.cache/.rspack-cache
