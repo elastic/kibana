@@ -7,4 +7,3 @@
 
 export { ConversationTemplatesService } from './conversation_templates_service';
 export { createPublicConversationTemplatesContract } from './create_public_conversation_templates_contract';
-export { registerMockTemplateUIDefinitions } from './register_mock_template_ui_definitions';

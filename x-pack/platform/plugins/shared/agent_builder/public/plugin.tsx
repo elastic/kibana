@@ -31,7 +31,6 @@ import {
   ChatService,
   ConversationsService,
   ConversationTemplatesService,
-  registerMockTemplateUIDefinitions,
   DocLinksService,
   NavigationService,
   ToolsService,
@@ -167,8 +166,6 @@ export class AgentBuilderPlugin
     const chatService = new ChatService({ http, events: eventsService });
     const conversationsService = new ConversationsService({ http });
     const conversationTemplatesService = new ConversationTemplatesService();
-    // TODO: remove mock template definitions before merge
-    registerMockTemplateUIDefinitions(conversationTemplatesService);
     const docLinksService = new DocLinksService(core.docLinks.links);
     const toolsService = new ToolsService({ http });
     const skillsService = new SkillsService({ http });

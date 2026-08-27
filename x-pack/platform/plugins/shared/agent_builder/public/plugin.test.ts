@@ -41,7 +41,6 @@ jest.mock('./services', () => ({
     registerTemplateUIDefinition: jest.fn(),
     getTemplateUIDefinition: jest.fn(),
   })),
-  registerMockTemplateUIDefinitions: jest.fn(),
   DocLinksService: jest.fn(),
   NavigationService: jest.fn(),
   ToolsService: jest.fn(),
