@@ -1729,7 +1729,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
         (event) => Date.parse(event['@timestamp']) > Date.parse(lastActiveTimestamp)
       );
       expect(newActiveEvents).toHaveLength(0);
-      expect(activeEventsAfter.length).toBe(eventCountBefore);
+      expect(activeEventsAfter).toHaveLength(eventCountBefore);
 
       // Latest episode state is still active.
       const latestStates = await apiServices.alertingV2.ruleEvents.getLatestEpisodeStates(rule.id);
