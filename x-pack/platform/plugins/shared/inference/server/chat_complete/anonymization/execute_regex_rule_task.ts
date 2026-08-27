@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { RE2JS } from 're2js';
 import type { RegexAnonymizationRule } from '@kbn/inference-common';
 import type { DetectedMatch } from './types';
 
@@ -12,6 +13,7 @@ import type { DetectedMatch } from './types';
  * Executes multiple regex anonymization rules against records to detect all matches.
  * - Processes rules in order, preserving rule precedence via ruleIndex
  * - Returns all matches with their original positions in the unmodified text
+ * - Uses RE2JS for linear-time matching, which eliminates ReDoS by design
  *
  * @param rules - Array of regex anonymization rules to execute
  * @param records - Array of record objects with string field values to search
@@ -25,9 +27,9 @@ export const executeRegexRulesTask = ({
   records: Array<Record<string, string>>;
 }): DetectedMatch[] =>
   rules.flatMap((rule, ruleIndex) => {
-    let regex: RegExp;
+    let pattern: RE2JS;
     try {
-      regex = new RegExp(rule.pattern, 'g');
+      pattern = RE2JS.compile(rule.pattern);
     } catch {
       return [];
     }
@@ -38,21 +40,15 @@ export const executeRegexRulesTask = ({
           return [];
         }
 
-        // Reset regex state for each field
-        regex.lastIndex = 0;
-
+        const matcher = pattern.matcher(value);
         const matches: DetectedMatch[] = [];
-        let match: RegExpExecArray | null;
-        while ((match = regex.exec(value)) !== null) {
-          // get position of match in the record
-          const start = match.index;
-          const matchedText = match[0];
-          const end = start + matchedText.length;
 
-          // Guard against zero-length matches that could cause infinite loops
+        while (matcher.find()) {
+          const start = matcher.start();
+          const end = matcher.end();
+
           if (end <= start) {
-            regex.lastIndex = start + 1;
-            continue;
+            break;
           }
 
           matches.push({
@@ -61,7 +57,8 @@ export const executeRegexRulesTask = ({
             recordKey: key,
             start,
             end,
-            matchValue: matchedText,
+            // group() returns null only when find() has not been called yet; safe to assert here
+            matchValue: matcher.group()!,
             class_name: rule.entityClass,
           });
         }
