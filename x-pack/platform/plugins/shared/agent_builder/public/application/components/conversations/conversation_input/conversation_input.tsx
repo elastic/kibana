@@ -26,7 +26,6 @@ import { MessageEditor, useMessageEditor, CommandBadgeSerializationError } from 
 import { useToasts } from '../../../hooks/use_toasts';
 import { InputActions } from './input_actions';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
-import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { AttachmentPillsRow } from './attachment_pills_row';
 import { useImageUpload } from './use_image_upload';
 
@@ -96,7 +95,6 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
   onEditorFocus,
   onSubmitOverride,
 }) => {
-  const { filesClient } = useAgentBuilderServices();
   const [hoveredImageName, setHoveredImageName] = useState<string | null>(null);
 
   const { pendingMessage, error, isResuming, isResponseLoading } = useConversationStream();
@@ -113,7 +111,6 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
   const {
     attachments,
     upsertAttachments,
-    removeAttachment,
     initialMessage,
     autoSendInitialMessage,
     resetInitialMessage,
@@ -122,10 +119,6 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
 
   const { uploadingNames, handlePasteFile, handleAfterInput, handleRemoveAttachment } =
     useImageUpload({
-      attachments,
-      upsertAttachments,
-      removeAttachment,
-      filesClient,
       addErrorToast,
       messageEditorController,
     });
@@ -247,7 +240,6 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
           ariaLabel={messageEditorAriaLabel}
           data-test-subj="agentBuilderConversationInputEditor"
           onPasteFile={upsertAttachments ? handlePasteFile : undefined}
-          insertImagePlaceholderOnPaste
           onAfterInput={handleAfterInput}
           onHoveredPlaceholderChange={setHoveredImageName}
           uploadingNames={uploadingNames}

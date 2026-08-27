@@ -7,29 +7,23 @@
 
 import { useCallback, useRef, useState } from 'react';
 import type { ToastInput } from '@kbn/core/public';
-import type { ScopedFilesClient } from '@kbn/files-plugin/public';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import type { ConversationAttachment } from '@kbn/agent-builder-common/attachments';
 import type { MessageEditorController } from './message_editor/use_message_editor';
 import { processImageFile, getUniqueName } from './upload_image';
 import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
+import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
+import { useConversationContext } from '../../../context/conversation/conversation_context';
 
 export interface UseImageUploadParams {
-  attachments: ConversationAttachment[] | undefined;
-  upsertAttachments?: (attachments: ConversationAttachment[]) => void;
-  removeAttachment?: (attachmentIndex: number) => void;
-  filesClient: ScopedFilesClient;
   addErrorToast: (input: ToastInput) => void;
   messageEditorController: MessageEditorController;
 }
 
 export interface UseImageUploadResult {
   uploadingNames: Set<string>;
-  /** Returns a unique name synchronously; kicks off the async upload in the background. */
   handlePasteFile: (file: File) => string | undefined;
-  /** Text → pill sync: placeholder deleted in editor → remove matching image attachment + abort upload. */
   handleAfterInput: () => void;
-  /** Pill → text sync: thumbnail pill removed → remove editor placeholder + abort upload. */
   handleRemoveAttachment: (attachment: ConversationAttachment) => void;
 }
 
@@ -38,13 +32,11 @@ const NOOP = () => {};
 const NOOP_HANDLE_PASTE_FILE = (): string | undefined => undefined;
 
 export const useImageUpload = ({
-  attachments,
-  upsertAttachments,
-  removeAttachment,
-  filesClient,
   addErrorToast,
   messageEditorController,
 }: UseImageUploadParams): UseImageUploadResult => {
+  const { filesClient } = useAgentBuilderServices();
+  const { attachments, upsertAttachments, removeAttachment } = useConversationContext();
   const [uploadingNames, setUploadingNames] = useState<Set<string>>(new Set());
   const uploadControllers = useRef<Map<string, AbortController>>(new Map());
 
@@ -97,25 +89,38 @@ export const useImageUpload = ({
   );
 
   const handleAfterInput = useCallback(() => {
-    const current = attachmentsRef.current;
-    if (!current || !removeAttachment) return;
     const placeholderNames = new Set(messageEditorController.getPlaceholderNames());
-    for (let i = current.length - 1; i >= 0; i--) {
-      const a = current[i];
-      if ('items' in a || a.type !== AttachmentType.image) continue;
-      const name = (a.data as { name?: string }).name;
-      if (name && !placeholderNames.has(name)) {
-        uploadControllers.current.get(name)?.abort();
-        uploadControllers.current.delete(name);
-        setUploadingNames((prev) => {
-          const next = new Set(prev);
-          next.delete(name);
-          return next;
-        });
-        removeAttachment(i);
+
+    const abortUpload = (name: string) => {
+      uploadControllers.current.get(name)?.abort();
+      uploadControllers.current.delete(name);
+      setUploadingNames((prev) => {
+        const next = new Set(prev);
+        next.delete(name);
+        return next;
+      });
+    };
+
+    const current = attachmentsRef.current;
+    if (current && removeAttachment) {
+      for (let i = current.length - 1; i >= 0; i--) {
+        const a = current[i];
+        if ('items' in a || a.type !== AttachmentType.image) continue;
+        const name = (a.data as { name?: string }).name;
+        if (name && !placeholderNames.has(name)) {
+          abortUpload(name);
+          removeAttachment(i);
+        }
       }
     }
-  }, [removeAttachment, messageEditorController]);
+
+    // To remove a pill if a placeholder was removed before upload completes.
+    for (const name of uploadingNames) {
+      if (!placeholderNames.has(name)) {
+        abortUpload(name);
+      }
+    }
+  }, [removeAttachment, messageEditorController, uploadingNames]);
 
   const handleRemoveAttachment = useCallback(
     (attachment: ConversationAttachment) => {

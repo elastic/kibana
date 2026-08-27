@@ -44,7 +44,6 @@ const sanitizeHtmlIncludeOnlyTextAndBadges = (html: string): DocumentFragment =>
 
 export interface HandleEditorPasteOpts {
   onPasteFile?: (file: File) => string | undefined;
-  insertImagePlaceholderOnPaste: boolean;
   editorRef: RefObject<HTMLDivElement>;
   onChange: () => void;
   onAfterInput?: () => void;
@@ -52,7 +51,7 @@ export interface HandleEditorPasteOpts {
 
 /** Handles the image-file branch of a paste event. Returns true if consumed. */
 const handleImageFilePaste = (event: ClipboardEvent, opts: HandleEditorPasteOpts): boolean => {
-  const { onPasteFile, insertImagePlaceholderOnPaste, onChange } = opts;
+  const { onPasteFile, onChange } = opts;
   if (!onPasteFile || !event.clipboardData) return false;
 
   const imageItem = Array.from(event.clipboardData.items).find(
@@ -64,7 +63,7 @@ const handleImageFilePaste = (event: ClipboardEvent, opts: HandleEditorPasteOpts
   const file = imageItem.getAsFile();
   if (file) {
     const label = onPasteFile(file);
-    if (insertImagePlaceholderOnPaste && label) {
+    if (label) {
       insertImagePlaceholderChip(label);
       onChange();
     }

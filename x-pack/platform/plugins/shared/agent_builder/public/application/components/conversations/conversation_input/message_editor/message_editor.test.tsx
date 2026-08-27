@@ -381,7 +381,6 @@ describe('MessageEditor', () => {
         messageEditor={messageEditor}
         onSubmit={mockOnSubmit}
         onPasteFile={onPasteFile}
-        insertImagePlaceholderOnPaste
         data-test-subj="messageEditor"
       />
     );
@@ -415,7 +414,6 @@ describe('MessageEditor', () => {
         messageEditor={messageEditor}
         onSubmit={mockOnSubmit}
         onPasteFile={onPasteFile}
-        insertImagePlaceholderOnPaste
         uploadingNames={new Set(['screenshot.png'])}
         data-test-subj="messageEditor"
       />
@@ -451,7 +449,6 @@ describe('MessageEditor', () => {
         messageEditor={messageEditor}
         onSubmit={mockOnSubmit}
         onPasteFile={onPasteFile}
-        insertImagePlaceholderOnPaste
         uploadingNames={new Set(['screenshot.png'])}
         data-test-subj="messageEditor"
       />
@@ -480,7 +477,6 @@ describe('MessageEditor', () => {
         messageEditor={messageEditor}
         onSubmit={mockOnSubmit}
         onPasteFile={onPasteFile}
-        insertImagePlaceholderOnPaste
         uploadingNames={new Set()}
         data-test-subj="messageEditor"
       />
@@ -499,7 +495,6 @@ describe('MessageEditor', () => {
         messageEditor={messageEditor}
         onSubmit={mockOnSubmit}
         onPasteFile={onPasteFile}
-        insertImagePlaceholderOnPaste
         data-test-subj="messageEditor"
       />
     );
@@ -545,7 +540,6 @@ describe('MessageEditor', () => {
         messageEditor={messageEditor}
         onSubmit={mockOnSubmit}
         onPasteFile={onPasteFile}
-        insertImagePlaceholderOnPaste
         data-test-subj="messageEditor"
       />
     );
@@ -570,7 +564,6 @@ describe('MessageEditor', () => {
         messageEditor={messageEditor}
         onSubmit={mockOnSubmit}
         onPasteFile={onPasteFile}
-        insertImagePlaceholderOnPaste
         data-test-subj="messageEditor"
       />
     );

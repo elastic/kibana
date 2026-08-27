@@ -20,6 +20,7 @@ import {
 import { serializeEditorContent } from './serialize';
 import {
   handleImagePlaceholderRemoveClick,
+  syncChipsUploadingState,
   IMAGE_PLACEHOLDER_ATTRIBUTE,
 } from './image_placeholder';
 import { useEditorFontStyles, useImagePlaceholderStyles } from './use_editor_styles';
@@ -78,8 +79,6 @@ interface MessageEditorProps {
   'data-test-subj'?: string;
   /** Called with the pasted file. Returns the name used for the placeholder, or undefined to skip. */
   onPasteFile?: (file: File) => string | undefined;
-  /** When true, a chip is inserted at the caret after onPasteFile returns a name. */
-  insertImagePlaceholderOnPaste?: boolean;
   /** Called on every editor input event (after onChange). Use to detect placeholder removals. */
   onAfterInput?: () => void;
   /** Called when the pointer enters or leaves an image placeholder span. */
@@ -96,7 +95,6 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
   ariaLabel,
   'data-test-subj': dataTestSubj,
   onPasteFile,
-  insertImagePlaceholderOnPaste = false,
   onAfterInput,
   onHoveredPlaceholderChange,
   uploadingNames,
@@ -146,18 +144,10 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
     imagePlaceholderStyles,
   ];
 
-  // Sync data-uploading attribute on chips whenever the uploading set changes.
-  // The paste handler also sets data-uploading immediately on insertion (before the React
-  // state update propagates), so this effect primarily handles removal when upload finishes.
+  // Flips loading state
   useEffect(() => {
     if (!ref.current) return;
-    ref.current.querySelectorAll<HTMLElement>(`[${IMAGE_PLACEHOLDER_ATTRIBUTE}]`).forEach((el) => {
-      if (uploadingNames?.has(el.dataset.placeholderName ?? '')) {
-        el.setAttribute('data-uploading', 'true');
-      } else {
-        el.removeAttribute('data-uploading');
-      }
-    });
+    syncChipsUploadingState(ref.current, uploadingNames);
   }, [uploadingNames, ref]);
 
   const handleCompositionStart = () => setIsComposing(true);
@@ -209,7 +199,6 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
         onPaste={(event) =>
           handleEditorPaste(event.nativeEvent, {
             onPasteFile,
-            insertImagePlaceholderOnPaste,
             editorRef: ref,
             onChange,
             onAfterInput,

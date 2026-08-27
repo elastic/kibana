@@ -115,6 +115,20 @@ export const removePlaceholderByName = (el: HTMLElement, name: string): void => 
   }
 };
 
+/** Sets `data-uploading` on every chip in `el` whose name is in `uploadingNames`, clears it otherwise. */
+export const syncChipsUploadingState = (
+  el: HTMLElement,
+  uploadingNames: ReadonlySet<string> | undefined
+): void => {
+  el.querySelectorAll<HTMLElement>(`[${IMAGE_PLACEHOLDER_ATTRIBUTE}]`).forEach((chip) => {
+    if (uploadingNames?.has(chip.dataset.placeholderName ?? '')) {
+      chip.setAttribute('data-uploading', 'true');
+    } else {
+      chip.removeAttribute('data-uploading');
+    }
+  });
+};
+
 export interface HandleImagePlaceholderRemoveClickOpts {
   onChange: () => void;
   onAfterInput?: () => void;
