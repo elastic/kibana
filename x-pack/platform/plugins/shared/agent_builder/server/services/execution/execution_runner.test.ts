@@ -157,13 +157,15 @@ const mockAgentStream = (
     executeAgentMock.mockReturnValue(of(...events) as Observable<ChatAgentEvent>);
     return;
   }
+  const stream$: Observable<ChatAgentEvent> = error
+    ? (concat(
+        of(...events),
+        throwError(() => error)
+      ) as Observable<ChatAgentEvent>)
+    : (of(...events) as Observable<ChatAgentEvent>);
   executeAgentMock.mockReturnValue(
     timer(0).pipe(
-      mergeMap(() =>
-        error
-          ? concat(of<ChatAgentEvent>(...events), throwError(() => error))
-          : (of(...events) as Observable<ChatAgentEvent>)
-      ),
+      mergeMap(() => stream$),
       shareReplay()
     )
   );
@@ -575,11 +577,7 @@ describe('handleAgentExecution', () => {
       conversationClient.get.mockResolvedValue(conversation);
       conversationClient.appendEvents.mockResolvedValue(conversation);
 
-      mockAgentStream(
-        [makeRoundStartedEvent()],
-        'asyncShared',
-        new Error('agent exploded')
-      );
+      mockAgentStream([makeRoundStartedEvent()], 'asyncShared', new Error('agent exploded'));
       stubResolveServices(conversationClient);
 
       const events$ = await runHandle({
@@ -619,11 +617,7 @@ describe('handleAgentExecution', () => {
         })
       );
 
-      mockAgentStream(
-        [makeRoundStartedEvent()],
-        'asyncShared',
-        new Error('agent exploded')
-      );
+      mockAgentStream([makeRoundStartedEvent()], 'asyncShared', new Error('agent exploded'));
       stubResolveServices(conversationClient);
 
       const events$ = await runHandle({
@@ -663,11 +657,7 @@ describe('handleAgentExecution', () => {
       );
       conversationClient.delete.mockResolvedValue(true);
 
-      mockAgentStream(
-        [makeRoundStartedEvent()],
-        'asyncShared',
-        new Error('agent exploded')
-      );
+      mockAgentStream([makeRoundStartedEvent()], 'asyncShared', new Error('agent exploded'));
       stubResolveServices(conversationClient);
 
       const events$ = await runHandle({
