@@ -95,6 +95,7 @@ describe('FlyoutTemplate tabs', () => {
   });
 
   it('switches panel on tab click (uncontrolled)', async () => {
+    const user = userEvent.setup();
     renderTemplate(
       <FlyoutTemplate onClose={noop} session="never">
         <FlyoutTemplate.Header title="Alert">
@@ -112,13 +113,14 @@ describe('FlyoutTemplate tabs', () => {
       </FlyoutTemplate>
     );
 
-    await userEvent.click(screen.getByRole('tab', { name: 'Metadata' }));
+    await user.click(screen.getByRole('tab', { name: 'Metadata' }));
 
     expect(screen.getByText('metadata content')).toBeInTheDocument();
     expect(screen.queryByText('overview content')).not.toBeInTheDocument();
   });
 
   it('calls onTabChange and respects selectedTabId in controlled mode', async () => {
+    const user = userEvent.setup();
     const onTabChange = jest.fn();
     const { rerender } = renderTemplate(
       <FlyoutTemplate
@@ -142,7 +144,7 @@ describe('FlyoutTemplate tabs', () => {
       </FlyoutTemplate>
     );
 
-    await userEvent.click(screen.getByRole('tab', { name: 'Metadata' }));
+    await user.click(screen.getByRole('tab', { name: 'Metadata' }));
     expect(onTabChange).toHaveBeenCalledWith('metadata');
     // Panel has not switched because the consumer drives the value.
     expect(screen.getByText('overview content')).toBeInTheDocument();
@@ -294,8 +296,9 @@ describe('FlyoutTemplate tabs', () => {
       </FlyoutTemplate>
     );
 
+    const user = userEvent.setup();
     const { rerender } = renderTemplate(renderFlyout(true));
-    await userEvent.click(screen.getByRole('tab', { name: 'Metadata' }));
+    await user.click(screen.getByRole('tab', { name: 'Metadata' }));
     expect(screen.getByText('metadata content')).toBeInTheDocument();
 
     rerender(<KibanaErrorBoundaryProvider>{renderFlyout(false)}</KibanaErrorBoundaryProvider>);
@@ -380,6 +383,7 @@ describe('FlyoutTemplate tabs', () => {
   });
 
   it('supports a consumer that supplies only the selected panel', async () => {
+    const user = userEvent.setup();
     const OnDemandPanels = () => {
       const [tabId, setTabId] = React.useState('overview');
       return (
@@ -403,13 +407,13 @@ describe('FlyoutTemplate tabs', () => {
     expect(screen.getAllByRole('tab')).toHaveLength(3);
     expect(screen.getByText('overview content')).toBeInTheDocument();
 
-    await userEvent.click(screen.getByRole('tab', { name: 'Timeline' }));
+    await user.click(screen.getByRole('tab', { name: 'Timeline' }));
 
     // Every tab survives the switch even though only one panel is ever declared.
     expect(screen.getAllByRole('tab')).toHaveLength(3);
     expect(screen.getByText('timeline content')).toBeInTheDocument();
 
-    await userEvent.click(screen.getByRole('tab', { name: 'Metadata' }));
+    await user.click(screen.getByRole('tab', { name: 'Metadata' }));
 
     expect(screen.getAllByRole('tab')).toHaveLength(3);
     expect(screen.getByText('metadata content')).toBeInTheDocument();
