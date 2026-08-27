@@ -1,5 +1,5 @@
 {
-  "sha1": "ae1da36fec37b4988922204f31f097d7301f47f7",
+  "sha1": "62c94183c87efdf02428489412a1615ee0ab101d",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -73,13 +73,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/ui/tests/custom_status_alert.spec.ts",
         "line": 23,
-        "column": 53
+        "column": 28
       }
     },
     {
