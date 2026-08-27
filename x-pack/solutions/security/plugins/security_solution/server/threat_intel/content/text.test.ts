@@ -912,3 +912,99 @@ describe('self-closing normalization stays linear', () => {
     expect(stripHtml('<article><style/><p>IOC: evil.test</p></article>')).toBe('IOC: evil.test');
   });
 });
+
+/**
+ * A `<script/>`-looking token inside a raw-text body is not a tag.
+ *
+ * Normalizing it inserted a closing tag inside the outer element, which ended that
+ * element early and spilled the remainder of the script or stylesheet into `body_text`.
+ * That is a false-IOC injection primitive, not cosmetic noise: the escaping suffix
+ * carries whatever URL the attacker put after it, and extraction then publishes it as a
+ * real indicator.
+ */
+describe('self-closing normalization respects raw-text bodies', () => {
+  it('does not let a script body escape via a self-closing string literal', () => {
+    const result = stripHtml(
+      '<script>const x="<script/>"; fetch("https://false-ioc.test")</script><p>safe</p>'
+    );
+
+    expect(result).toBe('safe');
+    expect(result).not.toContain('false-ioc.test');
+  });
+
+  it('does not let a style body escape the same way', () => {
+    const result = stripHtml(
+      '<style>a{content:"<style/>"} .x{background:url(https://false-ioc.test/a.png)}</style><p>safe</p>'
+    );
+
+    expect(result).toBe('safe');
+    expect(result).not.toContain('false-ioc.test');
+  });
+
+  it('discards an unterminated script body rather than emitting it', () => {
+    expect(stripHtml('<script>fetch("https://false-ioc.test")')).toBe('');
+  });
+
+  // Skipping raw-text bodies must not stop the normalizer finding later candidates.
+  it('still normalizes a self-closed script that follows a real one', () => {
+    expect(stripHtml('<script>var a=1;</script><script src="y.js"/><p>keep.test</p>')).toBe(
+      'keep.test'
+    );
+  });
+});
+
+/**
+ * Custom and namespaced element names are exactly what vendor feeds encode, so the
+ * residual-tag probe has to recognize them or their tags leak into plain text and the
+ * structured renderer never reaches its custom-element boundaries.
+ */
+describe('entity-encoded custom elements', () => {
+  it('re-parses an encoded custom element', () => {
+    expect(stripHtml('&lt;ioc-value&gt;evil.com&lt;/ioc-value&gt;')).toBe('evil.com');
+  });
+
+  it('re-parses an encoded namespaced element', () => {
+    expect(stripHtml('&lt;ns:tag&gt;evil.com&lt;/ns:tag&gt;')).toBe('evil.com');
+  });
+
+  it('applies custom-element boundaries after re-parsing', () => {
+    expect(
+      htmlToStructured(
+        '&lt;ioc-value&gt;evil.com&lt;/ioc-value&gt;&lt;ioc-value&gt;bad.net&lt;/ioc-value&gt;'
+      )
+    ).toBe('evil.com\nbad.net');
+  });
+
+  // The wider name pattern must not defeat the guard that protects displayed markup.
+  it('still leaves an encoded custom element displayed inside real markup', () => {
+    expect(stripHtml('<code>&lt;ioc-value&gt;x&lt;/ioc-value&gt;</code>')).toBe(
+      '<ioc-value>x</ioc-value>'
+    );
+  });
+});
+
+/**
+ * Truncation counts UTF-16 code units, so a cap landing inside a surrogate pair used to
+ * keep the high half alone. An unpaired surrogate renders as a replacement character and
+ * is not valid UTF-8 for anything reading the field downstream.
+ */
+describe('truncate never splits a surrogate pair', () => {
+  const LONE_SURROGATE = /[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/;
+
+  it.each([
+    ['cap inside a pair', 'a\u{1F600}b', 3],
+    ['cap after a pair', 'a\u{1F600}b', 4],
+    ['leading pair', '\u{1F600}\u{1F600}', 3],
+    ['several pairs', '\u{1F600}\u{1F600}\u{1F600}', 5],
+    ['pair at the very cap', 'a\u{1F600}', 2],
+  ])('emits no lone surrogate: %s', (_label, input, cap) => {
+    const result = truncate(input, cap);
+
+    expect(LONE_SURROGATE.test(result)).toBe(false);
+    expect(result.length).toBeLessThanOrEqual(cap);
+  });
+
+  it('drops the orphaned half rather than the whole character before it', () => {
+    expect(truncate('a\u{1F600}b', 3)).toBe('a…');
+  });
+});

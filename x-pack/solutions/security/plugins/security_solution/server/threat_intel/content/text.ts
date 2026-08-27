@@ -176,7 +176,16 @@ export const normalizeSelfClosedRawText = (html: string): string => {
         copiedTo = scan + 1;
         cursor = scan + 1;
       } else {
-        cursor = scan + 1;
+        // A real open tag, so everything up to the matching close is raw text as far as
+        // the parser is concerned, and a `<script/>` sitting in a JavaScript string
+        // literal is not a tag at all. Rewriting it inserted a close tag *inside* the
+        // outer body, ending that element early and spilling the rest of the script into
+        // `body_text`. That is a false-IOC injection primitive rather than cosmetic
+        // noise: `const x="<script/>"; fetch("https://attacker.test")` published the
+        // attacker's URL as an extractable indicator. Skip the body instead.
+        const closeTag = `</${name}`;
+        const closeAt = lower.indexOf(closeTag, scan + 1);
+        cursor = closeAt === -1 ? html.length : closeAt + closeTag.length;
       }
     }
   }
@@ -234,8 +243,14 @@ const childrenOf = (node: ParsedNode): ParsedNode[] => node.children ?? [];
  * bounded re-parse resolves that. Requiring a *closing* tag is what keeps prose safe:
  * a threat report discussing `use &lt;script&gt; carefully` decodes to text with no
  * closing tag and is left alone.
+ *
+ * The name pattern admits hyphens, colons, and underscores, because custom and
+ * namespaced elements are exactly what vendor feeds encode. Restricting it to
+ * `[a-z0-9]*` meant `&lt;ioc-value&gt;evil.com&lt;/ioc-value&gt;` never qualified, so
+ * the tags leaked into output that is supposed to be plain text and the structured
+ * renderer never reached the custom-element boundaries it applies deliberately.
  */
-const RESIDUAL_CLOSING_TAG = /<\/[a-z][a-z0-9]*\s*>/i;
+const RESIDUAL_CLOSING_TAG = /<\/[a-z][a-z0-9:_-]*\s*>/i;
 
 /**
  * A closing tag alone is not enough to justify re-parsing, because escaped markup is
@@ -410,7 +425,13 @@ export const truncate = (input: string, maxLength: number): string => {
   // put every truncated value one character over, so a field truncated to the stored
   // title or body cap still failed a downstream length check at exactly that cap.
   const contentLength = maxLength - 1;
-  const slice = input.slice(0, contentLength);
+  // `slice` counts UTF-16 code units, so a cap landing inside a surrogate pair kept the
+  // high half on its own: `truncate('a\u{1F600}b', 3)` stored an unpaired surrogate,
+  // which renders as a replacement character and is not valid UTF-8 for anything reading
+  // the field downstream. Dropping the orphan costs one code unit. Done before the
+  // word-boundary logic so that still operates on well-formed text.
+  const rawSlice = input.slice(0, contentLength);
+  const slice = /[\uD800-\uDBFF]$/.test(rawSlice) ? rawSlice.slice(0, -1) : rawSlice;
   const lastBoundary = slice.lastIndexOf(' ');
   // Only honor the boundary if it's reasonably close to the cap — otherwise
   // a title like "x ".repeat(N) + "very long word" would shrink to two
