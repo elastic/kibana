@@ -20,7 +20,7 @@ import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import type { AggregateQuery } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { Reference } from '@kbn/content-management-utils';
-import type { ExpressionsStart, DatatableColumn } from '@kbn/expressions-plugin/public';
+import type { ExpressionsStart, Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';
 import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import memoizeOne from 'memoize-one';
@@ -41,6 +41,7 @@ import type {
   TextBasedField,
   Datasource,
   DatasourceSuggestion,
+  IndexPatternMap,
 } from '@kbn/lens-common';
 import { TextBasedDimensionEditor } from './components/dimension_editor';
 import { TextBasedDimensionTrigger } from './components/dimension_trigger';
@@ -55,6 +56,7 @@ import {
   isNotNumeric,
   isNumeric,
   MAX_NUM_OF_COLUMNS,
+  resolveTextBasedColumnType,
 } from './utils';
 import {
   getColumnsFromCache,
@@ -82,7 +84,8 @@ const getSelectedFieldsFromColumns = memoizeOne(
 const getUnchangedSuggestionTable = (
   state: TextBasedPrivateState,
   allColumns: TextBasedLayerColumn[],
-  id: string
+  id: string,
+  resolveType: (column: TextBasedLayerColumn) => DataType
 ) => {
   return {
     state: {
@@ -94,14 +97,14 @@ const getUnchangedSuggestionTable = (
       layerId: id,
       columns:
         state.layers[id].columns?.map((f) => {
-          const inMetricDimension = canColumnBeUsedBeInMetricDimension(allColumns, f?.meta?.type);
+          const dataType = resolveType(f);
+          const inMetricDimension = canColumnBeUsedBeInMetricDimension(allColumns, dataType);
           return {
             columnId: f.columnId,
             operation: {
-              dataType: f?.meta?.type as DataType,
+              dataType,
               label: f.fieldName,
-              isBucketed: Boolean(isNotNumeric(f)),
-              // makes non-number fields to act as metrics, used for datatable suggestions
+              isBucketed: dataType !== 'number',
               ...(inMetricDimension && {
                 inMetricDimension,
               }),
@@ -117,12 +120,14 @@ const getSuggestionsByRules = (
   state: TextBasedPrivateState,
   allColumns: TextBasedLayerColumn[],
   id: string,
-  rules: Array<{ isBucketed: boolean; allowAll?: boolean }>
+  rules: Array<{ isBucketed: boolean; allowAll?: boolean }>,
+  resolveType: (column: TextBasedLayerColumn) => DataType
 ) => {
   const columnsToKeep = rules.reduce<TextBasedLayerColumn[]>((acc, rule) => {
-    const fn = rule.isBucketed ? isNotNumeric : isNumeric;
+    const matchesRule = (col: TextBasedLayerColumn) =>
+      rule.isBucketed ? resolveType(col) !== 'number' : resolveType(col) === 'number';
     let column = state.layers[id].columns?.find(
-      (col) => fn(col) && !acc.some((c) => c.columnId === col.columnId)
+      (col) => matchesRule(col) && !acc.some((c) => c.columnId === col.columnId)
     );
     if (!column && rule.allowAll) {
       column = state.layers[id].columns?.find(
@@ -151,11 +156,12 @@ const getSuggestionsByRules = (
       layerId: id,
       columns:
         columnsToKeep?.map((f, i) => {
-          const inMetricDimension = canColumnBeUsedBeInMetricDimension(allColumns, f?.meta?.type);
+          const dataType = resolveType(f);
+          const inMetricDimension = canColumnBeUsedBeInMetricDimension(allColumns, dataType);
           return {
             columnId: f.columnId,
             operation: {
-              dataType: f?.meta?.type as DataType,
+              dataType,
               label: f.fieldName,
               isBucketed: !!rules[i].isBucketed,
               // makes non-number fields to act as metrics, used for datatable suggestions
@@ -183,7 +189,12 @@ export function getTextBasedDatasource({
   expressions: ExpressionsStart;
   dataViews: DataViewsPublicPluginStart;
 }) {
-  const getSuggestionsForState = (state: TextBasedPrivateState) => {
+  const getSuggestionsForState = (
+    state: TextBasedPrivateState,
+    _indexPatterns?: IndexPatternMap,
+    _filterFn?: (layerId: string) => boolean,
+    activeData?: Record<string, Datatable>
+  ) => {
     return Object.entries(state.layers)?.flatMap(([id, layer]) => {
       const allColumns = retrieveLayerColumnsFromCache(layer.columns, layer.query);
 
@@ -196,19 +207,46 @@ export function getTextBasedDatasource({
         addColumnsToCache(layer.query, layerColumns);
       }
 
-      const unchangedSuggestionTable = getUnchangedSuggestionTable(state, allColumns, id);
+      const activeTable = activeData?.[id];
+      const resolveType = (column: TextBasedLayerColumn) =>
+        resolveTextBasedColumnType(
+          column,
+          activeTable?.columns.find((col) => col.id === column.columnId)
+        );
+
+      const unchangedSuggestionTable = getUnchangedSuggestionTable(
+        state,
+        allColumns,
+        id,
+        resolveType
+      );
 
       // we are trying here to cover the most common cases for the charts we offer
-      const metricTable = getSuggestionsByRules(state, allColumns, id, [{ isBucketed: false }]);
-      const metricBucketTable = getSuggestionsByRules(state, allColumns, id, [
-        { isBucketed: false },
-        { isBucketed: true, allowAll: true },
-      ]);
-      const metricBucketBucketTable = getSuggestionsByRules(state, allColumns, id, [
-        { isBucketed: false },
-        { isBucketed: true, allowAll: true },
-        { isBucketed: true, allowAll: true },
-      ]);
+      const metricTable = getSuggestionsByRules(
+        state,
+        allColumns,
+        id,
+        [{ isBucketed: false }],
+        resolveType
+      );
+      const metricBucketTable = getSuggestionsByRules(
+        state,
+        allColumns,
+        id,
+        [{ isBucketed: false }, { isBucketed: true, allowAll: true }],
+        resolveType
+      );
+      const metricBucketBucketTable = getSuggestionsByRules(
+        state,
+        allColumns,
+        id,
+        [
+          { isBucketed: false },
+          { isBucketed: true, allowAll: true },
+          { isBucketed: true, allowAll: true },
+        ],
+        resolveType
+      );
 
       return [unchangedSuggestionTable, metricBucketBucketTable, metricBucketTable, metricTable]
         .filter(nonNullable)
@@ -838,7 +876,7 @@ export function getTextBasedDatasource({
     },
     getDatasourceSuggestionsForVisualizeField: getSuggestionsForVisualizeField,
     getDatasourceSuggestionsFromCurrentState: getSuggestionsForState,
-    getDatasourceSuggestionsForVisualizeCharts: getSuggestionsForState,
+    getDatasourceSuggestionsForVisualizeCharts: (state) => getSuggestionsForState(state),
     isEqual: (
       persistableState1: TextBasedPersistedState,
       references1: Reference[],

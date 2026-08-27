@@ -7,6 +7,7 @@
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DatatableColumn } from '@kbn/expressions-plugin/public';
 import type {
+  DataType,
   ValueFormatConfig,
   IndexPatternRef,
   TextBasedPrivateState,
@@ -70,6 +71,13 @@ export const isNumeric = (column: TextBasedLayerColumn | DatatableColumn) =>
   column?.meta?.type === 'number';
 
 export const isNotNumeric = (column: TextBasedLayerColumn | DatatableColumn) => !isNumeric(column);
+
+export function resolveTextBasedColumnType(
+  column: TextBasedLayerColumn,
+  activeColumn?: DatatableColumn
+): DataType {
+  return (activeColumn?.meta?.type ?? column.meta?.type) as DataType;
+}
 
 export function canColumnBeDroppedInMetricDimension(
   columns: TextBasedLayerColumn[] | DatatableColumn[],

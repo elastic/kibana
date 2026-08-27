@@ -7,7 +7,12 @@
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DatatableColumn } from '@kbn/expressions-plugin/public';
 import { mockDataViewsService } from '../../data_views_service/mocks';
-import { loadIndexPatternRefs, getAllColumns, canColumnBeUsedBeInMetricDimension } from './utils';
+import {
+  loadIndexPatternRefs,
+  getAllColumns,
+  canColumnBeUsedBeInMetricDimension,
+  resolveTextBasedColumnType,
+} from './utils';
 import type { TextBasedLayerColumn } from '@kbn/lens-common';
 
 describe('Text based languages utils', () => {
@@ -237,6 +242,28 @@ describe('Text based languages utils', () => {
       ] as DatatableColumn[];
       const flag = canColumnBeUsedBeInMetricDimension(fieldList, 'date');
       expect(flag).toBeTruthy();
+    });
+  });
+
+  describe('resolveTextBasedColumnType', () => {
+    const column = {
+      columnId: 'col-uuid',
+      fieldName: '@timestamp',
+      meta: { type: 'string' },
+    } satisfies TextBasedLayerColumn;
+
+    it('prefers activeData column type', () => {
+      expect(
+        resolveTextBasedColumnType(column, {
+          id: 'col-uuid',
+          name: '@timestamp',
+          meta: { type: 'date' },
+        })
+      ).toEqual('date');
+    });
+
+    it('falls back to persisted meta.type', () => {
+      expect(resolveTextBasedColumnType(column)).toEqual('string');
     });
   });
 });
