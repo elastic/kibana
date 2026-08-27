@@ -71,8 +71,13 @@ apiTest.describe(
     );
 
     // Without this, every negative test above would still pass if the alert branch rejected
-    // every body it was given. Which success code comes back depends on whether the workflow is
-    // installed in this environment, so this asserts only that validation let the body through.
+    // every body it was given.
+    //
+    // Both outcomes are listed rather than asserting a single code, because whether a workflow
+    // run starts depends on the environment: 200 where the managed workflow is installed, 503
+    // (InvestigationUnavailableError) where it is not. Neither is a validation failure, which is
+    // the only thing this test speaks to. Listing them beats `not.toBe(400)`, which also passed
+    // on a 500 and would have hidden a genuine fault in the alert branch.
     apiTest('accepts a well-formed alert body', async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asInteractiveUser(INVESTIGATIONS_WRITE_ROLE);
       const response = await apiClient.post(START_PATH, {
@@ -83,7 +88,7 @@ apiTest.describe(
         },
         responseType: 'json',
       });
-      expect(response.statusCode).not.toBe(400);
+      expect([200, 503]).toContain(response.statusCode);
     });
 
     // An alert investigation is not also a significant-event investigation. `event_uuid` is the
