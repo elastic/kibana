@@ -174,7 +174,7 @@ describe('NightshiftInvestigationsClient.get()', () => {
     });
   });
 
-  describe('conclusions', () => {
+  describe('conclusion', () => {
     // The workflow engine wraps ai.agent structured output in a `structured_output` envelope.
     // Real shape: stepExecution.output = { structured_output: { conclusion: '...', summary: '...' } }
     // Confirmed by investigation_workflow.yaml: steps.investigate.output.structured_output.*
@@ -190,7 +190,7 @@ describe('NightshiftInvestigationsClient.get()', () => {
         })
       );
       const result = await makeClient().get('inv-1');
-      expect(result.conclusions).toBe('All clear.');
+      expect(result.conclusion).toBe('All clear.');
     });
 
     it('prefers the last step with structured_output when multiple steps have it', async () => {
@@ -204,7 +204,7 @@ describe('NightshiftInvestigationsClient.get()', () => {
         })
       );
       const result = await makeClient().get('inv-1');
-      expect(result.conclusions).toBe('Last conclusion.');
+      expect(result.conclusion).toBe('Last conclusion.');
     });
 
     it('falls back to summary when structured_output has summary but no conclusion', async () => {
@@ -215,7 +215,7 @@ describe('NightshiftInvestigationsClient.get()', () => {
         })
       );
       const result = await makeClient().get('inv-1');
-      expect(result.conclusions).toBe('Summary text.');
+      expect(result.conclusion).toBe('Summary text.');
     });
 
     it('does not match steps whose output has conclusion at the top level (old/wrong shape)', async () => {
@@ -226,7 +226,7 @@ describe('NightshiftInvestigationsClient.get()', () => {
         })
       );
       const result = await makeClient().get('inv-1');
-      expect(result.conclusions).toBeUndefined();
+      expect(result.conclusion).toBeUndefined();
     });
 
     it('returns undefined when no step has structured_output', async () => {
@@ -237,10 +237,10 @@ describe('NightshiftInvestigationsClient.get()', () => {
         })
       );
       const result = await makeClient().get('inv-1');
-      expect(result.conclusions).toBeUndefined();
+      expect(result.conclusion).toBeUndefined();
     });
 
-    it('does not return conclusions when status is not completed', async () => {
+    it('does not return conclusion when status is not completed', async () => {
       mockManagement.getWorkflowExecution.mockResolvedValue(
         makeExecution({
           status: ExecutionStatus.RUNNING,
@@ -248,7 +248,112 @@ describe('NightshiftInvestigationsClient.get()', () => {
         })
       );
       const result = await makeClient().get('inv-1');
-      expect(result.conclusions).toBeUndefined();
+      expect(result.conclusion).toBeUndefined();
+    });
+  });
+
+  describe('result', () => {
+    // The full agent output, validated against the same schema the workflow declares to the model.
+    // The hypotheses, the ES|QL behind each verdict and the recommendations are the expensive part
+    // of a run, so a caller that only gets `conclusion` cannot show why the answer is believable.
+    const fullState = {
+      summary: 'Three candidates investigated.',
+      conclusion: 'Pool exhaustion after the pool_max change.',
+      hypotheses: [
+        {
+          candidate: 'pool_max reduced from 80 to 50',
+          confidence: 0.97,
+          status: 'confirmed',
+          reason: 'v2.3.1 saturates at 49 of 50 connections.',
+          evidence: [
+            {
+              description: 'Pool metrics by version.',
+              esql_query: 'FROM logs-infra-services | STATS AVG(connections.active) BY version',
+              time_range: { from: '2026-08-27T01:00:00Z', to: '2026-08-27T03:40:00Z' },
+            },
+          ],
+        },
+        {
+          candidate: 'Downstream dependency degradation',
+          confidence: 0.05,
+          status: 'dismissed',
+          reason: 'Neighbouring services sit at their baseline.',
+        },
+      ],
+      blind_spots: [{ title: 'No APM traces', description: 'Could not identify the error class.' }],
+      recommendations: [{ title: 'Roll back to v2.1.0', description: 'Restores pool_max to 80.' }],
+    };
+
+    it('returns the whole investigation state, not just the conclusion', async () => {
+      mockManagement.getWorkflowExecution.mockResolvedValue(
+        makeExecution({
+          status: ExecutionStatus.COMPLETED,
+          stepExecutions: [{ output: { structured_output: fullState } }],
+        })
+      );
+
+      const result = await makeClient().get('inv-1');
+
+      expect(result.result).toEqual(fullState);
+      // A dismissed hypothesis is as much of the record as a confirmed one.
+      expect(result.result?.hypotheses.map((h) => h.status)).toEqual(['confirmed', 'dismissed']);
+      // Evidence keeps the query and its window, so a reader can re-run it.
+      expect(result.result?.hypotheses[0].evidence?.[0].esql_query).toContain('FROM logs-infra');
+      expect(result.result?.hypotheses[0].evidence?.[0].time_range?.from).toBe(
+        '2026-08-27T01:00:00Z'
+      );
+    });
+
+    it('keeps the conclusion string alongside the structured result', async () => {
+      mockManagement.getWorkflowExecution.mockResolvedValue(
+        makeExecution({
+          status: ExecutionStatus.COMPLETED,
+          stepExecutions: [{ output: { structured_output: fullState } }],
+        })
+      );
+
+      const result = await makeClient().get('inv-1');
+
+      expect(result.conclusion).toBe('Pool exhaustion after the pool_max change.');
+    });
+
+    it('drops output that does not match the schema but still returns the narrative', async () => {
+      mockManagement.getWorkflowExecution.mockResolvedValue(
+        makeExecution({
+          status: ExecutionStatus.COMPLETED,
+          stepExecutions: [
+            {
+              // `hypotheses` is required by the schema and a confidence above 1 is out of range:
+              // half-parsed output would be worse than none, because a consumer cannot tell.
+              output: {
+                structured_output: {
+                  summary: 'A summary.',
+                  conclusion: 'Still readable.',
+                  hypotheses: [{ candidate: 'c', confidence: 42, status: 'confirmed' }],
+                },
+              },
+            },
+          ],
+        })
+      );
+
+      const result = await makeClient().get('inv-1');
+
+      expect(result.result).toBeUndefined();
+      expect(result.conclusion).toBe('Still readable.');
+    });
+
+    it('does not return a result while the investigation is still running', async () => {
+      mockManagement.getWorkflowExecution.mockResolvedValue(
+        makeExecution({
+          status: ExecutionStatus.RUNNING,
+          stepExecutions: [{ output: { structured_output: fullState } }],
+        })
+      );
+
+      const result = await makeClient().get('inv-1');
+
+      expect(result.result).toBeUndefined();
     });
   });
 

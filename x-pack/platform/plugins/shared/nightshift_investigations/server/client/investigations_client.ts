@@ -7,6 +7,9 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { z } from '@kbn/zod/v4';
+import type { InvestigationState } from '@kbn/significant-events-schema';
+import { investigationStateSchema } from '@kbn/significant-events-schema';
 import { ExecutionStatus } from '@kbn/workflows';
 import { SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
@@ -303,10 +306,11 @@ export class NightshiftInvestigationsClient {
       status,
       started_at: execution.startedAt,
       completed_at: isTerminal ? execution.finishedAt : undefined,
-      conclusions:
+      conclusion:
         status === 'completed'
           ? asString(rawOutput?.conclusion) ?? asString(rawOutput?.summary)
           : undefined,
+      result: status === 'completed' ? this.toResult(investigationId, rawOutput) : undefined,
       error: (() => {
         if (status !== 'failed') return undefined;
         if (execution.error?.message) {
@@ -315,6 +319,36 @@ export class NightshiftInvestigationsClient {
         return 'Investigation failed';
       })(),
     };
+  }
+
+  /**
+   * The agent's full output, validated against the schema it was generated from.
+   *
+   * `investigationStateSchema` is not a description of this payload written after the fact: the
+   * workflow's `investigate` step declares its output schema from it, and the progress-report tool
+   * streams the same shape while the run is live. Validating here means a caller reading a
+   * finished investigation and one following a live stream can use a single renderer.
+   *
+   * Output that fails the schema is dropped rather than returned half-parsed, and logged so the
+   * mismatch is visible. `conclusion` is populated separately from the raw payload, so the caller
+   * still gets the narrative and loses only the structure around it.
+   */
+  private toResult(
+    investigationId: string,
+    rawOutput: Record<string, unknown> | undefined
+  ): InvestigationState | undefined {
+    if (!rawOutput) return undefined;
+
+    const parsed = investigationStateSchema.safeParse(rawOutput);
+    if (!parsed.success) {
+      this.logger.warn(
+        `Investigation "${investigationId}" produced output that does not match ` +
+          `investigationStateSchema: ${z.prettifyError(parsed.error)}`
+      );
+      return undefined;
+    }
+
+    return parsed.data;
   }
 
   async list({

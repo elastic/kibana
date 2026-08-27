@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { InvestigationState } from '@kbn/significant-events-schema';
+
 /**
  * The alert-facing types are derived from the zod schemas in `./schemas`, so the validation a
  * caller is held to and the type the code is written against cannot disagree.
@@ -73,7 +75,22 @@ export interface GetInvestigationResponse {
   status: InvestigationStatus;
   started_at?: string;
   completed_at?: string;
-  conclusions?: string;
+  /**
+   * The conclusion narrative on its own, for a caller that wants the answer and nothing else.
+   * Falls back to the summary while no hypothesis is confirmed yet. Also the only output a caller
+   * gets when `result` had to be dropped for failing validation.
+   */
+  conclusion?: string;
+  /**
+   * Everything the investigation produced: the hypotheses it considered with the evidence and
+   * ES|QL behind each verdict, the gaps it could not see past, and what it recommends doing.
+   *
+   * This is the same `InvestigationState` the progress-report tool streams while the run is live,
+   * so one renderer serves a finished investigation and a running one. Only the list endpoint
+   * stays narrow — it omits step runs entirely, because this payload runs to several kilobytes
+   * and no list view needs it per row.
+   */
+  result?: InvestigationState;
   error?: string;
 }
 
