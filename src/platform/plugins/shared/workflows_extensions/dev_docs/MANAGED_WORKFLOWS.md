@@ -520,14 +520,15 @@ Every managed definition declares a `version: number` (positive integer, startin
 
 The definition's `version` is persisted as `managedVersion` on the workflow document. It serves three main purposes:
 
-1. **yamlTemplate migration** — For definitions using `yamlTemplate`, the version drives migrations when the template value structure changes between versions. This is not relevant for definitions using static `yaml`.
+1. **Owner-defined template migration** — The platform does not migrate `yamlTemplate` value shapes. Owners must version and migrate persisted values before calling `ready()` when automatic reconciliation could render them with a new template.
 2. **Telemetry & visibility** — The `managedVersion` is a human-readable label logged in telemetry and audit events, and returned in API responses (to the user in the GET workflow endpoint, or plugin-to-plugin via `managedWorkflowClient.getWorkflowStatus`). It helps answer "is this workflow up to date?"
 3. **Non-YAML config updates** — While YAML content changes trigger managed workflow updates automatically (based on content hash), other config properties (e.g. `billable`) do not. Bumping the version explicitly forces the workflow and its full config to be updated.
 
 **When to bump `version`:**
 
 - **Bump** when the change involves non-YAML config (e.g. `billable`, `management` policy changes), or when it is a YAML change you want explicit visibility/auditability for.
-- **Optional** when the change is YAML-only and minor (e.g. a display name fix) — the content hash diff will trigger the upgrade regardless, and the version bump adds no functional value in this case.
+- **Optional** for YAML-only changes on a fixed `yaml` definition because its content hash triggers the upgrade.
+- **Required** when a `yamlTemplate` closes over imported YAML or another external constant. The template hash covers the function source, not closed-over content, so changing only the imported content does not change the hash.
 
 ### `billable` — execution metering
 
@@ -573,6 +574,20 @@ The status API accepts the same identity options as install/uninstall, except te
 - pass `workflowIdSuffix` to check a deterministic suffixed instance
 
 `getWorkflowStatus` does not mutate workflow state. To repair `missing` or `drifted` workflows, call `install` through the same plugin-scoped client.
+
+### Reading persisted owner state
+
+Owners that need persisted template values can read them through the same plugin-scoped client. Ownership is bound by `initManagedWorkflowsClient`, so callers cannot read another plugin's managed workflows.
+
+```ts
+const state = await managed.getInstalledWorkflowState(status.workflowId, 'my-space');
+
+if (state?.templateValues) {
+  await migrateTemplateValues(state.templateValues);
+}
+```
+
+Use `listInstalledWorkflowStates()` when the owner must inspect all of its installed instances across spaces, such as migrating versioned template values before calling `ready()`. These methods expose persisted managed-workflow state to the owner plugin only; they are not public HTTP workflow APIs.
 
 ## 11) Executing managed workflows
 
