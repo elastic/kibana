@@ -6,19 +6,24 @@
  */
 
 import { injectable } from 'inversify';
+import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 import type {
   AlertEpisode,
   AlertEpisodeSuppression,
-  DispatcherStep,
   DispatcherPipelineState,
+  DispatcherStep,
   DispatcherStepOutput,
 } from '../types';
+import { suppressionEpisodeKey, suppressionSeriesKey } from './utils/suppression_key';
 
 @injectable()
 export class ApplySuppressionStep implements DispatcherStep {
   public readonly name = 'apply_suppression';
 
-  public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
+  public async execute(
+    state: Readonly<DispatcherPipelineState>,
+    _: LoggerServiceContract
+  ): Promise<DispatcherStepOutput> {
     const { episodes = [], suppressions = [] } = state;
 
     const { suppressed, dispatchable } = applySuppression(episodes, suppressions);
@@ -35,9 +40,9 @@ export function applySuppression(
 
   for (const s of suppressions) {
     if (s.episode_id) {
-      suppressionMap.set(`${s.rule_id}:${s.group_hash}:${s.episode_id}`, s);
+      suppressionMap.set(suppressionEpisodeKey({ ...s, episode_id: s.episode_id }), s);
     } else {
-      suppressionMap.set(`${s.rule_id}:${s.group_hash}:*`, s);
+      suppressionMap.set(suppressionSeriesKey(s), s);
     }
   }
 
@@ -45,11 +50,8 @@ export function applySuppression(
   const dispatchable: AlertEpisode[] = [];
 
   for (const ep of episodes) {
-    const episodeKey = `${ep.rule_id}:${ep.group_hash}:${ep.episode_id}`;
-    const seriesKey = `${ep.rule_id}:${ep.group_hash}:*`;
-
-    const episodeSuppression = suppressionMap.get(episodeKey);
-    const seriesSuppression = suppressionMap.get(seriesKey);
+    const episodeSuppression = suppressionMap.get(suppressionEpisodeKey(ep));
+    const seriesSuppression = suppressionMap.get(suppressionSeriesKey(ep));
 
     if (episodeSuppression?.should_suppress || seriesSuppression?.should_suppress) {
       const matchingSuppression = episodeSuppression?.should_suppress

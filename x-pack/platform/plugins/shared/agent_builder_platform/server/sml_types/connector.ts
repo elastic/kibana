@@ -9,12 +9,12 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
 import type { SmlTypeDefinition } from '@kbn/agent-builder-sml-plugin/server';
-import { kibanaSavedObjectPermissions } from '@kbn/agent-builder-sml-plugin/server';
+import { kibanaPermissions } from '@kbn/agent-builder-sml-plugin/server';
 import type { ConnectorAttachmentData } from '@kbn/agent-builder-common/attachments';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import { getConnectorSpec } from '@kbn/connector-specs';
-
-const CONNECTOR_SML_TYPE = 'connector';
+import { CONNECTOR_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
+import { isChatCallableConnectorType } from '../skills/connector_authoring/utils';
 
 interface ConnectorSmlTypeDeps {
   /**
@@ -36,7 +36,7 @@ export const createConnectorSmlType = (deps: ConnectorSmlTypeDeps): SmlTypeDefin
   const { getActionSavedObjectsClient, logger } = deps;
 
   return {
-    id: CONNECTOR_SML_TYPE,
+    id: CONNECTOR_KI_TYPE,
 
     async *list(context) {
       const finder = context.savedObjectsClient.createPointInTimeFinder({
@@ -46,11 +46,16 @@ export const createConnectorSmlType = (deps: ConnectorSmlTypeDeps): SmlTypeDefin
       });
       try {
         for await (const response of finder.find()) {
-          yield response.saved_objects.map((so) => ({
-            id: so.id,
-            updatedAt: so.updated_at ?? new Date().toISOString(),
-            spaces: so.namespaces ?? [],
-          }));
+          yield response.saved_objects
+            .filter((so) => {
+              const { actionTypeId } = so.attributes as { actionTypeId?: string };
+              return isChatCallableConnectorType(actionTypeId ?? '');
+            })
+            .map((so) => ({
+              id: so.id,
+              updatedAt: so.updated_at ?? new Date().toISOString(),
+              spaces: so.namespaces ?? [],
+            }));
         }
       } finally {
         await finder.close();
@@ -80,10 +85,9 @@ export const createConnectorSmlType = (deps: ConnectorSmlTypeDeps): SmlTypeDefin
         ];
 
         return {
-          type: CONNECTOR_SML_TYPE,
+          type: CONNECTOR_KI_TYPE,
           title: name,
           content: contentParts.join('\n'),
-          discovery_labels: [{ kind: 'shortcut', value: `${CONNECTOR_SML_TYPE}/${name}` }],
         };
       } catch (error) {
         context.logger.warn(
@@ -95,7 +99,7 @@ export const createConnectorSmlType = (deps: ConnectorSmlTypeDeps): SmlTypeDefin
 
     requiredHiddenTypes: ['action'],
 
-    getPermissions: () => kibanaSavedObjectPermissions({ savedObjectType: 'action' }),
+    getPermissions: () => kibanaPermissions({ kiType: CONNECTOR_KI_TYPE }),
 
     toAttachment: async (item, context) => {
       try {

@@ -1,0 +1,34 @@
+{
+  "sha1": "abc5e8d3b270aa866ad822d0b24dd54ecdb0324c",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "32625cadcd78019-874d7863722b7a1",
+      "title": "License Management shows the active trial license in the page header",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/license_management/test/scout_trial_license/ui/tests/license_management.spec.ts",
+        "line": 13,
+        "column": 41
+      }
+    },
+    {
+      "id": "32625cadcd78019-5df065160a3155e",
+      "title": "License Management reverts the trial license to basic",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/license_management/test/scout_trial_license/ui/tests/license_management.spec.ts",
+        "line": 19,
+        "column": 8
+      }
+    }
+  ]
+}

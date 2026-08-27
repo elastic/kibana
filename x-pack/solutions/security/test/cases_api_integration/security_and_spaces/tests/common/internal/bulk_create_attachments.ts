@@ -23,7 +23,7 @@ import {
   getPostCaseRequest,
   getFilesAttachmentReq,
   fileAttachmentMetadata,
-  postExternalReferenceSOReq,
+  postExternalReferenceESReq,
   fileMetadata,
   postCommentAlertMultipleIdsReq,
   postCommentActionsReq,
@@ -207,7 +207,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await bulkCreateAttachments({
             supertest,
             caseId: postedCase.id,
-            params: [postExternalReferenceSOReq],
+            params: [postExternalReferenceESReq],
           });
 
           await bulkCreateAttachments({
@@ -718,7 +718,10 @@ export default ({ getService }: FtrProviderContext): void => {
           });
         });
 
-        it('400s when attempting to bulk create persistable state attachments reaching the 100 limit', async () => {
+        // Skipped pending the attachment-cap redesign: these rely on a custom `.test` ER/PS subtype to
+        // reach MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES (100), which no longer exists once the
+        // ER/PS registries are removed. Re-enable when the cap is revisited (UNIFIED_ATTACHMENT_PLAN "Deferred").
+        it.skip('400s when attempting to bulk create persistable state attachments reaching the 100 limit', async () => {
           const postedCase = await createCase(supertest, postCaseReq);
 
           await createComment({
@@ -753,7 +756,8 @@ export default ({ getService }: FtrProviderContext): void => {
           });
         });
 
-        it('400s when attempting to bulk create >100 external reference attachments reaching the 100 limit', async () => {
+        // Skipped pending the attachment-cap redesign (see the sibling persistable-state limit test above).
+        it.skip('400s when attempting to bulk create >100 external reference attachments reaching the 100 limit', async () => {
           const postedCase = await createCase(supertest, postCaseReq);
 
           await createComment({

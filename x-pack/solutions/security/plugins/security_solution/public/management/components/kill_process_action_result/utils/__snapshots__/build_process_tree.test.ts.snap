@@ -1,0 +1,76 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`buildProcessTree() should return a full process tree 1`] = `
+Object {
+  "456": Object {
+    "children": Object {
+      "567": Object {
+        "children": Object {
+          "5671": Object {
+            "children": Object {
+              "56711": Object {
+                "children": Object {},
+                "data": Object {
+                  "command": "56711_command.exe",
+                  "entity_id": "ksuqwn8364fnbks.56711",
+                  "parent_entity_id": "ksuqwn8364fnbks.5671",
+                  "parent_pid": 5671,
+                  "pid": 56711,
+                  "was_killed": true,
+                },
+              },
+              "56712": Object {
+                "children": Object {},
+                "data": Object {
+                  "command": "56712_command.exe",
+                  "entity_id": "ksuqwn8364fnbks.56712",
+                  "parent_entity_id": "ksuqwn8364fnbks.5671",
+                  "parent_pid": 5671,
+                  "pid": 56712,
+                  "was_killed": true,
+                },
+              },
+            },
+            "data": Object {
+              "command": "5671_command.exe",
+              "entity_id": "ksuqwn8364fnbks.5671",
+              "parent_entity_id": "ksuqwn8364fnbks.567",
+              "parent_pid": 567,
+              "pid": 5671,
+              "was_killed": true,
+            },
+          },
+        },
+        "data": Object {
+          "command": "567_command.exe",
+          "entity_id": "ksuqwn8364fnbks.567",
+          "parent_entity_id": "ksuqwn8364fnbks.456",
+          "parent_pid": 456,
+          "pid": 567,
+          "was_killed": true,
+        },
+      },
+    },
+    "data": Object {
+      "command": "456_command.exe",
+      "entity_id": "ksuqwn8364fnbks.456",
+      "parent_entity_id": "ksuqwn8364fnbks.234",
+      "parent_pid": 234,
+      "pid": 456,
+      "was_killed": true,
+    },
+  },
+  "654": Object {
+    "children": Object {},
+    "data": Object {
+      "command": "654_command.exe",
+      "entity_id": "ksuqwn8364fnbks.654",
+      "error": "process is protected",
+      "parent_entity_id": "ksuqwn8364fnbks.234",
+      "parent_pid": 234,
+      "pid": 654,
+      "was_killed": false,
+    },
+  },
+}
+`;

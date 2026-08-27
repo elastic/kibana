@@ -6,6 +6,7 @@
  */
 
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { isSavedObjectErrorResult } from '@kbn/core-saved-objects-api-server';
 import type { CspBenchmarkRulesStates } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import type { FindResult, RulesClient } from '@kbn/alerting-plugin/server';
 import type { RuleParams } from '@kbn/alerting-plugin/server/application/rule/types';
@@ -75,8 +76,8 @@ export const getBenchmarkRules = async (
   }));
   const cspBenchmarkRulesSo = await soClient.bulkGet<CspBenchmarkRule>(bulkGetObject);
 
-  const benchmarkRules = cspBenchmarkRulesSo.saved_objects.map(
-    (cspBenchmarkRule) => cspBenchmarkRule.attributes
+  const benchmarkRules = cspBenchmarkRulesSo.saved_objects.map((cspBenchmarkRule) =>
+    isSavedObjectErrorResult(cspBenchmarkRule) ? undefined : cspBenchmarkRule.attributes
   );
   return benchmarkRules;
 };

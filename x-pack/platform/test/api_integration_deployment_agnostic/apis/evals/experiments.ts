@@ -158,6 +158,54 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           scoresResponse.scores.every((score) => score.experiment_id === baselineExperimentId)
         ).to.be(true);
       });
+
+      it('excludes the unbounded task.output/example.input/example.metadata/evaluator.metadata fields', async () => {
+        const largeFieldsExperimentId = `experiment-large-fields-${suiteId}`;
+        const body = buildScoresRequestBody({
+          experimentId: largeFieldsExperimentId,
+          suiteId,
+          scores: [
+            {
+              example: {
+                id: 'example-large-fields',
+                index: 0,
+                input: { rawHits: 'x'.repeat(1000) },
+                metadata: { rawHits: 'x'.repeat(1000) },
+                dataset: { id: datasetId, name: datasetName },
+              },
+              task: {
+                repetition_index: 0,
+                output: { rawHits: 'x'.repeat(1000) },
+              },
+              evaluator: {
+                name: evaluatorName,
+                score: 1,
+                label: 'correct',
+                explanation: 'seeded for unbounded-field exclusion test',
+                metadata: { rationale: 'x'.repeat(1000) },
+              },
+            },
+          ],
+        });
+        await adminClient.post(EVALS_SCORES_URL).send(body).expect(200);
+
+        const path = EVALS_EXPERIMENT_SCORES_URL.replace(
+          '{experimentId}',
+          encodeURIComponent(largeFieldsExperimentId)
+        );
+        const { body: responseBody } = await adminClient.get(path).expect(200);
+
+        const scoresResponse = responseBody as GetEvaluationExperimentScoresResponse;
+        expect(scoresResponse.total).to.eql(1);
+        const [score] = scoresResponse.scores;
+        expect(score.experiment_id).to.eql(largeFieldsExperimentId);
+        expect(score.evaluator.score).to.eql(1);
+        expect(score.evaluator.name).to.eql(evaluatorName);
+        expect(score.task.output).to.be(undefined);
+        expect(score.example.input).to.be(undefined);
+        expect(score.example.metadata).to.be(undefined);
+        expect(score.evaluator.metadata).to.be(undefined);
+      });
     });
 
     describe('dataset examples', () => {

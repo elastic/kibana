@@ -12,7 +12,8 @@ export {
   DEFAULT_STORED_PRESETS,
   MAX_PRESETS,
   getPresetKey,
-  normalize,
+  mergePresets,
+  migrateStoredPresets,
 } from './src/common';
 export type {
   DateRangePickerPresetsService,
@@ -20,4 +21,5 @@ export type {
   SavePresetOutcome,
   StoredPresets,
   StoredPresetsV1,
+  StoredPresetsV2,
 } from './src/common';

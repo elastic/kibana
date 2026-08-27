@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { expect } from '@kbn/scout/ui';
 import type { EsClient } from '@kbn/scout';
 
 /**
@@ -53,4 +54,35 @@ export async function ensureSnapshotRepository(
       }
     },
   };
+}
+
+/**
+ * Waits for the snapshot an SLM policy run produced to reach a terminal state. Running a policy is
+ * asynchronous, so waiting on the cluster keeps the browser-side waits short and deterministic
+ * instead of polling the snapshots table for minutes.
+ */
+export async function waitForSlmSnapshotToFinish(
+  esClient: EsClient,
+  repository: string,
+  snapshotPrefix: string
+): Promise<void> {
+  const readSnapshotState = async () => {
+    // Missing right after the run surfaces as `snapshot_missing_exception`; treat as not ready.
+    const snapshots = await esClient.snapshot
+      .get({ repository, snapshot: `${snapshotPrefix}-*`, ignore_unavailable: true })
+      .then((response) => response.snapshots)
+      .catch(() => undefined);
+    return snapshots?.[0]?.state;
+  };
+
+  // Includes `FAILED`: polling only for success states would spend the whole budget on an
+  // already-failed snapshot and report a timeout instead of the real cause.
+  await expect
+    .poll(readSnapshotState, { timeout: 30_000, intervals: [500, 1_000, 2_000] })
+    .toMatch(/SUCCESS|PARTIAL|FAILED/);
+
+  expect(
+    await readSnapshotState(),
+    `snapshot "${snapshotPrefix}-*" in repository "${repository}" did not complete successfully`
+  ).toMatch(/SUCCESS|PARTIAL/);
 }

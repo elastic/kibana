@@ -142,4 +142,22 @@ describe('resolveApiKeyFactory', () => {
       expect(createShipperApiKey).toHaveBeenCalledWith(esClient, 'name', true);
     });
   });
+
+  describe.each([ApiEndpointId.Supabase, ApiEndpointId.Vercel])('%s', (id) => {
+    it('creates a managed OTLP service key', async () => {
+      const factory = resolveApiKeyFactory(id, {
+        isManagedOtlpServiceAvailable: true,
+        isServerless: false,
+        managedOtlpPrwEndpointEnabled: false,
+        isManagedElasticsearchBulkEndpointAvailable: false,
+      });
+
+      await factory(esClient, 'name');
+
+      expect(createManagedOtlpServiceApiKey).toHaveBeenCalledWith(esClient, 'name');
+      expect(createShipperApiKey).not.toHaveBeenCalled();
+      expect(createPrometheusApiKey).not.toHaveBeenCalled();
+      expect(createEsOtlpApiKey).not.toHaveBeenCalled();
+    });
+  });
 });

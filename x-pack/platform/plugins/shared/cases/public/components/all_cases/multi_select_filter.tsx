@@ -16,6 +16,7 @@ import {
   EuiSelectable,
   EuiFilterButton,
   EuiTextColor,
+  EuiToolTip,
   EuiSpacer,
   useEuiTheme,
   EuiText,
@@ -76,7 +77,36 @@ interface UseFilterParams<T extends string, K extends string = string> {
   selectedOptionKeys?: string[];
   isLoading: boolean;
   buttonCss?: SerializedStyles;
+  /**
+   * Applied to the popover that anchors the filter button, rather than to the button itself. Nudging
+   * the button alone moves it out of alignment with the cell it sits in, so its hover and selected
+   * backgrounds paint offset from the filter group's border; shifting the anchor moves the button
+   * and its backgrounds together.
+   */
+  anchorCss?: SerializedStyles;
+  /**
+   * Names the button and explains it on hover. Required for an icon-only filter: without a label the
+   * control has no accessible name, and nothing on screen says what it does.
+   */
+  buttonTooltip?: string;
 }
+
+/** Wraps children in a tooltip only when there is something to say. */
+const ConditionalTooltip: React.FC<{ content?: string; children: React.ReactElement }> = ({
+  content,
+  children,
+}) =>
+  content ? (
+    // The button already carries `aria-label`, so the tooltip must not announce it a second time.
+    <EuiToolTip content={content} disableScreenReaderOutput>
+      {children}
+    </EuiToolTip>
+  ) : (
+    children
+  );
+
+ConditionalTooltip.displayName = 'ConditionalTooltip';
+
 export const MultiSelectFilter = <T extends string, K extends string = string>({
   buttonLabel,
   buttonIconType,
@@ -90,6 +120,8 @@ export const MultiSelectFilter = <T extends string, K extends string = string>({
   renderOption,
   isLoading,
   buttonCss,
+  anchorCss,
+  buttonTooltip,
 }: UseFilterParams<T, K>) => {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -125,25 +157,30 @@ export const MultiSelectFilter = <T extends string, K extends string = string>({
 
   return (
     <EuiPopover
+      aria-label={i18n.FILTER_OPTIONS_POPOVER_ARIA_LABEL}
+      css={anchorCss}
       ownFocus
       button={
-        <EuiFilterButton
-          css={css`
-            max-width: 186px;
-            ${buttonCss}
-          `}
-          data-test-subj={`options-filter-popover-button-${id}`}
-          iconType={buttonIconType || 'chevronSingleDown'}
-          onClick={toggleIsPopoverOpen}
-          isSelected={isPopoverOpen}
-          numFilters={showActiveOptionsNumber ? options.length : undefined}
-          hasActiveFilters={showActiveOptionsNumber ? selectedOptionKeys.length > 0 : undefined}
-          numActiveFilters={showActiveOptionsNumber ? selectedOptionKeys.length : undefined}
-        >
-          <EuiText size="s" className="eui-textTruncate">
-            {buttonLabel}
-          </EuiText>
-        </EuiFilterButton>
+        <ConditionalTooltip content={buttonTooltip}>
+          <EuiFilterButton
+            aria-label={buttonTooltip}
+            css={css`
+              max-width: 186px;
+              ${buttonCss}
+            `}
+            data-test-subj={`options-filter-popover-button-${id}`}
+            iconType={buttonIconType || 'chevronSingleDown'}
+            onClick={toggleIsPopoverOpen}
+            isSelected={isPopoverOpen}
+            numFilters={showActiveOptionsNumber ? options.length : undefined}
+            hasActiveFilters={showActiveOptionsNumber ? selectedOptionKeys.length > 0 : undefined}
+            numActiveFilters={showActiveOptionsNumber ? selectedOptionKeys.length : undefined}
+          >
+            <EuiText size="s" className="eui-textTruncate">
+              {buttonLabel}
+            </EuiText>
+          </EuiFilterButton>
+        </ConditionalTooltip>
       }
       isOpen={isPopoverOpen}
       closePopover={() => setIsPopoverOpen(false)}

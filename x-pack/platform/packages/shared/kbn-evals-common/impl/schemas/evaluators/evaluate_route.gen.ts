@@ -16,11 +16,17 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
+import { Model } from '../common_attributes.gen';
+
 export const EvaluateResultEvaluator = lazySchema(() =>
   z.object({
     name: z.string().max(256),
     version: z.string().max(64),
     kind: z.enum(['llm', 'code']),
+    /**
+     * Model resolved from the evaluator's `connector_id`. Absent for code evaluators, which invoke no model.
+     */
+    model: Model.optional(),
   })
 );
 export type EvaluateResultEvaluator = z.infer<typeof EvaluateResultEvaluator>;

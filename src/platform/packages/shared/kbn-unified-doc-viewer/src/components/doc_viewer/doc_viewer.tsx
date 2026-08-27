@@ -13,6 +13,7 @@ import type { EuiTabbedContentTab } from '@elastic/eui';
 import { EuiTabbedContent } from '@elastic/eui';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { AnalyticsServiceStart } from '@kbn/core/public';
+import { getDocViewTabEbtProps } from './get_doc_view_tab_ebt_props';
 import { DocViewerTab } from './doc_viewer_tab';
 import type { DocView, DocViewRenderProps } from '../../types';
 import { useDocViewerTabViewedEvent } from '../../analytics';
@@ -47,6 +48,7 @@ const InternalDocViewer = forwardRef<InternalDocViewerApi, InternalDocViewerProp
       .map((docView: DocView) => ({
         id: getFullTabId(docView.id), // `id` value is used to persist the selected tab in localStorage
         name: docView.title,
+        prepend: docView.prepend,
         content: (
           <DocViewerTab
             key={`${renderProps.hit.id}_${docView.id}`}
@@ -55,6 +57,7 @@ const InternalDocViewer = forwardRef<InternalDocViewerApi, InternalDocViewerProp
           />
         ),
         ['data-test-subj']: `docViewerTab-${docView.id}`,
+        ...getDocViewTabEbtProps(docView),
       }));
 
     const [storedInitialTabId, setInitialTabId] = useLocalStorage<string>(INITIAL_TAB);

@@ -31,11 +31,12 @@ import type {
   EvalsStartDependencies,
 } from './types';
 import { registerRoutes } from './routes/register_routes';
-import { DatasetService } from './storage/dataset_service';
-import { EvaluationScoreService } from './storage/evaluation_score_service';
+import { DatasetService } from './storage/datasets/dataset_service';
+import { EvaluatorDefinitionService } from './storage/evaluators/evaluator_definition_service';
+import { EvaluationScoreService } from './storage/scores/evaluation_score_service';
+import { evaluationsDataStreamDefinition } from './storage/scores/scores_index_template';
 import { OnlineScoreService } from './storage/online_score_service';
 import { onlineScoresDataStreamDefinition } from './storage/online_scores_index_template';
-import { evaluationsDataStreamDefinition } from './storage/scores_index_template';
 import { createTaskProviderRegistry } from './task_providers/registry';
 import type { TaskProviderRegistry } from './task_providers/types';
 import { registerEvalsWorkflowSteps } from './workflows';
@@ -50,6 +51,7 @@ export class EvalsPlugin
   private evaluatorRegistry?: EvaluatorRegistry;
   private datasetService?: DatasetService;
   private evaluationScoreService?: EvaluationScoreService;
+  private evaluatorDefinitionService?: EvaluatorDefinitionService;
   private taskProviderRegistry?: TaskProviderRegistry;
   private onlineScoreService?: OnlineScoreService;
 
@@ -85,7 +87,9 @@ export class EvalsPlugin
       attributesToEncrypt: new Set(['apiKey']),
       attributesToIncludeInAAD: new Set(['createdAt', 'url']),
     });
-    this.evaluatorRegistry = createEvaluatorRegistry();
+    this.evaluatorRegistry = createEvaluatorRegistry({
+      getDefinitionClient: ({ spaceId }) => this.evaluatorDefinitionService?.getClient({ spaceId }),
+    });
 
     coreSetup.http.registerRouteHandlerContext<EvalsRequestHandlerContext, 'evals'>(
       'evals',
@@ -94,6 +98,7 @@ export class EvalsPlugin
           !this.datasetService ||
           !this.evaluationScoreService ||
           !this.onlineScoreService ||
+          !this.evaluatorDefinitionService ||
           !this.evaluatorRegistry
         ) {
           throw new Error('Evals storage services have not been initialized');
@@ -103,6 +108,7 @@ export class EvalsPlugin
           datasetService: this.datasetService,
           evaluationScoreService: this.evaluationScoreService,
           onlineScoreService: this.onlineScoreService,
+          evaluatorDefinitionService: this.evaluatorDefinitionService,
           evaluatorRegistry: this.evaluatorRegistry,
         };
       }
@@ -154,6 +160,11 @@ export class EvalsPlugin
       return pluginsStart.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
     };
 
+    const getCurrentUsername = async (request: KibanaRequest): Promise<string | undefined> => {
+      const [, pluginsStart] = await coreSetup.getStartServices();
+      return pluginsStart.security?.authc.getCurrentUser(request)?.username;
+    };
+
     // When security is disabled there is no per-space authz to enforce, so grant.
     const checkManageEvalsPrivileges = async (
       request: KibanaRequest,
@@ -172,6 +183,21 @@ export class EvalsPlugin
       return hasAllRequested;
     };
 
+    /**
+     * Spaces the caller can see, for rejecting writes that name an unknown one
+     * and redacting the rest out of reads. The spaces client already filters by
+     * authorization.
+     */
+    const getAccessibleSpaceIds = async (request: KibanaRequest): Promise<string[]> => {
+      const [, pluginsStart] = await coreSetup.getStartServices();
+      const spaces = pluginsStart.spaces;
+      if (!spaces) {
+        return [DEFAULT_SPACE_ID];
+      }
+      const allSpaces = await spaces.spacesService.createSpacesClient(request).getAll();
+      return allSpaces.map(({ id }) => id);
+    };
+
     registerRoutes({
       router,
       logger: this.logger,
@@ -182,7 +208,9 @@ export class EvalsPlugin
         coreSetup.getStartServices().then(([, pluginsStart]) => pluginsStart.encryptedSavedObjects),
       getInternalRemoteConfigsSoClient: () => internalRemoteConfigsSoClientPromise,
       getSpaceId,
+      getCurrentUsername,
       checkManageEvalsPrivileges,
+      getAccessibleSpaceIds,
       taskProviderRegistry: this.taskProviderRegistry,
       workflowsManagement,
     });
@@ -211,45 +239,40 @@ export class EvalsPlugin
       return {};
     }
 
+    const evaluatorRegistry = this.evaluatorRegistry;
+    if (!evaluatorRegistry) {
+      throw new Error('Evaluator registry has not been initialized');
+    }
+
     this.datasetService = new DatasetService(
       this.logger,
       coreStart.elasticsearch.client.asInternalUser,
       this.isServerless
     );
     this.evaluationScoreService = new EvaluationScoreService(this.logger, coreStart.dataStreams);
+    this.evaluatorDefinitionService = new EvaluatorDefinitionService(
+      this.logger,
+      coreStart.elasticsearch.client.asInternalUser,
+      this.isServerless,
+      evaluatorRegistry.isBuiltIn
+    );
     this.onlineScoreService = new OnlineScoreService(this.logger, coreStart.dataStreams);
-
-    // Fire-and-forget backfill of the denormalized `examples_count` for datasets
-    // created before the field existed. Idempotent and a no-op once complete (and
-    // on fresh/empty deployments), so it is safe to run on every start. Only runs
-    // when the plugin is enabled, since we early-return above otherwise.
-    this.datasetService
-      .getClient()
-      .backfillDatasetCounts()
-      .then(({ updated }) => {
-        if (updated > 0) {
-          this.logger.info(`Backfilled examples_count for ${updated} evaluation dataset(s)`);
-        }
-      })
-      .catch((error) => {
-        this.logger.warn(
-          `Failed to backfill evaluation dataset example counts: ${
-            error instanceof Error ? error.message : error
-          }`
-        );
-      });
 
     return {
       datasetService: this.datasetService,
       evaluationScoreService: this.evaluationScoreService,
-      listEvaluators: () =>
-        (this.evaluatorRegistry?.list() ?? []).map((def) => ({
+      listEvaluators: async ({ spaceId }) => {
+        const definitions = await evaluatorRegistry.asScoped({ spaceId }).list();
+
+        return definitions.map((def) => ({
           name: def.name,
           version: def.version,
           kind: def.kind,
+          origin: def.origin,
           description: def.description,
           needsJudgeConnector: def.kind === 'llm',
-        })),
+        }));
+      },
       listModelConnectors: async (request) => {
         const connectors = await plugins.inference.getConnectorList(request);
         return connectors.map((connector) => ({

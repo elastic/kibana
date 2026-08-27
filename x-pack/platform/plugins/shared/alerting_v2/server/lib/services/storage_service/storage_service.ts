@@ -10,6 +10,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { inject, injectable } from 'inversify';
 import type { LoggerServiceContract } from '../logger_service/logger_service';
 import { LoggerServiceToken } from '../logger_service/logger_service';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 
 /** Parameters for {@link StorageServiceContract.bulkIndexDocs}. */
 export interface BulkIndexDocsParams<TDocument extends Record<string, unknown>> {
@@ -32,7 +33,7 @@ export interface BulkIndexDocsParams<TDocument extends Record<string, unknown>> 
  *
  * - `code` here is Elasticsearch's `error.type` (e.g.
  *   `'mapper_parsing_exception'`). It is NOT part of the alerting v2 HTTP
- *   API contract and is not governed by `ALERTING_V2_ERROR_CODES` — the
+ *   API contract and is not governed by `ALERTING_ERROR_CODES` — the
  *   catalog is owned by Elasticsearch.
  * - ES's HTTP-shaped per-item status is demoted to `details.statusCode`.
  *   Envelope-level `statusCode` would leak an HTTP concern into an internal
@@ -182,8 +183,7 @@ export class StorageService implements StorageServiceContract {
     } catch (error) {
       this.logger.error({
         error,
-        code: 'BULK_INDEX_ERROR',
-        type: 'StorageServiceError',
+        code: ALERTING_LOG_CODES.STORAGE_BULK_INDEX_FAILED,
       });
 
       throw error;
@@ -258,8 +258,7 @@ export class StorageService implements StorageServiceContract {
     const error = firstErrorItem.create?.error;
     this.logger.error({
       error: new Error(`[${error?.type ?? 'UNKNOWN_ERROR'}] ${error?.reason ?? 'UNKNOWN_REASON'}`),
-      code: 'BULK_INDEX_ERROR',
-      type: 'StorageServiceError',
+      code: ALERTING_LOG_CODES.STORAGE_BULK_INDEX_FAILED,
     });
   }
 

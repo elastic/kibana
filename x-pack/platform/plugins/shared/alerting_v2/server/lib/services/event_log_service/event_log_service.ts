@@ -18,12 +18,9 @@ import type { PolicyExecutionOutcome } from '@kbn/alerting-v2-schemas';
 import type { AlertingServerSetupDependencies } from '../../../types';
 import { EsServiceInternalToken } from '../es_service/tokens';
 import { LoggerServiceToken, type LoggerServiceContract } from '../logger_service/logger_service';
-import { ALERTING_V2_LOG_CODES } from '../../errors/error_codes';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import { EventLoggerToken } from './tokens';
-import {
-  buildCountActionPolicyEventsQuery,
-  buildFindActionPolicyEventsQuery,
-} from './queries/action_policy_events_query';
+import { buildFindActionPolicyEventsQuery } from './queries/action_policy_events_query';
 import { buildRuleExecutionsQuery } from './queries/rule_executions_query';
 import { normalizeRuleExecution } from './normalizers/rule_execution_normalizer';
 import type { FindRuleExecutionsQuery, PaginatedResult, RuleExecution } from './types';
@@ -36,7 +33,7 @@ export interface FindActionPolicyExecutionEventsParams {
   startDate: string;
   page?: number;
   perPage?: number;
-  outcome?: PolicyExecutionOutcome;
+  outcomes?: PolicyExecutionOutcome[];
   policyIds?: string[];
   ruleIds?: string[];
   mandatoryRuleIds?: string[];
@@ -50,39 +47,27 @@ export interface FindActionPolicyExecutionEventsResult {
   total: number;
 }
 
-export interface CountActionPolicyExecutionEventsSinceParams {
-  spaceId: string;
-  since: string;
-  outcome?: PolicyExecutionOutcome;
-  policyIds?: string[];
-  ruleIds?: string[];
-  mandatoryRuleIds?: string[];
-}
-
-export interface CountActionPolicyExecutionEventsSinceResult {
-  count: number;
-}
-
 export interface EventLogServiceContract {
   logEvent(event: IEvent, id?: string): void;
   findActionPolicyExecutionEvents(
     params: FindActionPolicyExecutionEventsParams
   ): Promise<FindActionPolicyExecutionEventsResult>;
-  countActionPolicyExecutionEventsSince(
-    params: CountActionPolicyExecutionEventsSinceParams
-  ): Promise<CountActionPolicyExecutionEventsSinceResult>;
   findRuleExecutions(query: FindRuleExecutionsQuery): Promise<PaginatedResult<RuleExecution>>;
 }
 
 @injectable()
 export class EventLogService implements EventLogServiceContract {
+  private readonly logger: LoggerServiceContract;
+
   constructor(
     @inject(EventLoggerToken) private readonly eventLogger: IEventLogger,
     @inject(PluginSetup<AlertingServerSetupDependencies['eventLog']>('eventLog'))
     private readonly eventLogService: IEventLogService,
     @inject(EsServiceInternalToken) private readonly esClient: ElasticsearchClient,
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
-  ) {}
+    @inject(LoggerServiceToken) loggerService: LoggerServiceContract
+  ) {
+    this.logger = loggerService.forSubsystem('executionHistory');
+  }
 
   public logEvent(event: IEvent, id?: string): void {
     this.eventLogger.logEvent(event, id);
@@ -93,7 +78,7 @@ export class EventLogService implements EventLogServiceContract {
     startDate,
     page = DEFAULT_PAGE,
     perPage = DEFAULT_PAGE_SIZE,
-    outcome,
+    outcomes,
     policyIds,
     ruleIds,
     mandatoryRuleIds,
@@ -102,7 +87,7 @@ export class EventLogService implements EventLogServiceContract {
     const body = buildFindActionPolicyEventsQuery({
       spaceId,
       startDate,
-      outcome,
+      outcomes,
       policyIds,
       ruleIds,
       mandatoryRuleIds,
@@ -122,29 +107,6 @@ export class EventLogService implements EventLogServiceContract {
       perPage,
       total: extractTotal(response.hits.total),
     };
-  }
-
-  public async countActionPolicyExecutionEventsSince({
-    spaceId,
-    since,
-    outcome,
-    policyIds,
-    ruleIds,
-    mandatoryRuleIds,
-  }: CountActionPolicyExecutionEventsSinceParams): Promise<CountActionPolicyExecutionEventsSinceResult> {
-    const body = buildCountActionPolicyEventsQuery({
-      spaceId,
-      startDate: since,
-      outcome,
-      policyIds,
-      ruleIds,
-      mandatoryRuleIds,
-    });
-    const index = this.eventLogService.getIndexPattern();
-
-    const response = await this.esClient.search<IValidatedEvent>({ index, ...body });
-
-    return { count: extractTotal(response.hits.total) };
   }
 
   /**
@@ -182,11 +144,11 @@ export class EventLogService implements EventLogServiceContract {
       // code points at either upstream schema drift in Task Manager or a
       // filter in the query that has fallen out of sync with the
       // normalizer.
-      this.logger.error({
-        error: new Error(
-          `Dropped ${droppedCount} of ${response.hits.hits.length} task-run hit(s) on the rule executions read path. The normalizer rejected rows the ES query is supposed to have excluded. Investigate Task Manager schema drift or rule_executions_query filter coverage.`
-        ),
-        code: ALERTING_V2_LOG_CODES.EXECUTION_HISTORY_NORMALIZER_REJECTED_EVENTS,
+      this.logger.warn({
+        message: () =>
+          `Rule execution history normalizer dropped ${droppedCount} of ` +
+          `${response.hits.hits.length} task-run hits the ES query should have excluded`,
+        code: ALERTING_LOG_CODES.EXECUTION_HISTORY_NORMALIZER_DEGRADED,
       });
     }
 

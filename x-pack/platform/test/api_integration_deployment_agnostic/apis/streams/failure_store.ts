@@ -50,7 +50,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           description: parsedDef.stream.description || '',
           ingest: {
             ...parsedDef.stream.ingest,
-            processing: omit(parsedDef.stream.ingest.processing, ['updated_at']),
+            processing: omit(
+              parsedDef.stream.ingest.processing,
+              'updated_at'
+            ) as Streams.WiredStream.UpsertRequest['stream']['ingest']['processing'],
             failure_store: failureStore,
           },
         },
@@ -64,7 +67,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           description: parsedDef.stream.description || '',
           ingest: {
             ...parsedDef.stream.ingest,
-            processing: omit(parsedDef.stream.ingest.processing, ['updated_at']),
+            processing: omit(
+              parsedDef.stream.ingest.processing,
+              'updated_at'
+            ) as Streams.ClassicStream.UpsertRequest['stream']['ingest']['processing'],
             failure_store: failureStore,
           },
         },

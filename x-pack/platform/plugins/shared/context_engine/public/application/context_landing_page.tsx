@@ -5,19 +5,44 @@
  * 2.0.
  */
 
-import { useEuiTheme } from '@elastic/eui';
+import { EuiHorizontalRule, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { ContentList, ContentListFooter, ContentListToolbar } from '@kbn/content-list';
+import { ContentListClientProvider, createFilterControl } from '@kbn/content-list-provider-client';
+import { useContentListItems } from '@kbn/content-list-provider';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React from 'react';
+import { AiIndexCardGrid, AiIndexListEmpty, AiIndexListError } from './components/ai_index_list';
 import { CreateAiIndexButton } from './components/create_ai_index_button';
-import { AiIndexCards } from './components/ai_index_cards';
+import { useAiIndexFindItems } from './hooks/use_list_ai_indices';
+import { useKibana } from './hooks/use_kibana';
+import {
+  ContextEnginePageSection,
+  ContextEnginePageTemplate,
+} from './layout/context_engine_page_template';
+import {
+  AI_INDICES_PER_PAGE,
+  AI_INDEX_LIST_LABELS,
+  aiIndexOwnerFilter,
+  aiIndexTypeFilter,
+} from './utils/ai_index_content_list_utils';
 
-export const ContextLandingPage = () => {
+const AiIndexTypeFilter = createFilterControl(aiIndexTypeFilter, {
+  'data-test-subj': 'contextAiIndexListTypeFilter',
+});
+
+const AiIndexOwnerFilter = createFilterControl(aiIndexOwnerFilter, {
+  'data-test-subj': 'contextAiIndexListOwnerFilter',
+});
+
+const ContextLandingPageContent = () => {
   const { euiTheme } = useEuiTheme();
+  const { error, hasNoItems } = useContentListItems();
+  const showHeaderCreateButton = !hasNoItems;
 
   return (
-    <KibanaPageTemplate data-test-subj="contextLandingPage">
+    <ContextEnginePageTemplate data-test-subj="contextLandingPage">
       <KibanaPageTemplate.Header
         pageTitle={i18n.translate('xpack.contextEngine.landing.title', {
           defaultMessage: 'Context',
@@ -26,15 +51,60 @@ export const ContextLandingPage = () => {
           defaultMessage:
             'Manage AI Indexes to organize and retrieve contextual knowledge for your agents.',
         })}
+        restrictWidth
+        bottomBorder={false}
         css={css`
           background-color: ${euiTheme.colors.backgroundBasePlain};
-          border-block-end: none;
         `}
-        rightSideItems={[<CreateAiIndexButton key="create-ai-index-button" />]}
+        rightSideItems={
+          showHeaderCreateButton ? [<CreateAiIndexButton key="create-ai-index-button" />] : []
+        }
       />
-      <KibanaPageTemplate.Section>
-        <AiIndexCards />
-      </KibanaPageTemplate.Section>
-    </KibanaPageTemplate>
+      <EuiHorizontalRule margin="none" data-test-subj="contextLandingPageHeaderDivider" />
+      <ContextEnginePageSection>
+        {error ? (
+          <AiIndexListError error={error} />
+        ) : (
+          <ContentList emptyState={<AiIndexListEmpty />}>
+            <ContentListToolbar data-test-subj="contextAiIndexList">
+              <ContentListToolbar.Filters>
+                <AiIndexTypeFilter />
+                <AiIndexOwnerFilter />
+              </ContentListToolbar.Filters>
+            </ContentListToolbar>
+            <AiIndexCardGrid />
+            <ContentListFooter data-test-subj="contextAiIndexListFooter" />
+          </ContentList>
+        )}
+      </ContextEnginePageSection>
+    </ContextEnginePageTemplate>
+  );
+};
+
+export const ContextLandingPage = () => {
+  const { services } = useKibana();
+  const findItems = useAiIndexFindItems();
+
+  return (
+    <ContentListClientProvider
+      id="context-engine-ai-indices"
+      core={services}
+      labels={AI_INDEX_LIST_LABELS}
+      findItems={findItems}
+      features={{
+        sorting: false,
+        selection: false,
+        pagination: {
+          initialPageSize: AI_INDICES_PER_PAGE,
+          pageSizeOptions: [AI_INDICES_PER_PAGE],
+        },
+        filters: {
+          aiIndexType: aiIndexTypeFilter,
+          aiIndexOwner: aiIndexOwnerFilter,
+        },
+      }}
+    >
+      <ContextLandingPageContent />
+    </ContentListClientProvider>
   );
 };

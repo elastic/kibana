@@ -10,7 +10,7 @@
 import type { ApiServicesFixture, KbnClient, ScoutParallelWorkerFixtures } from '@kbn/scout';
 import { spaceTest as spaceBaseTest } from '@kbn/scout';
 import type { ScoutSpaceParallelFixture } from '@kbn/scout/src/playwright/fixtures/scope/worker';
-import { WorkflowsApiService } from '../../../scout_workflows_ui/common/apis/workflows';
+import { WorkflowsApiService } from '../../../scout/common/apis/workflows';
 
 export type { WorkflowsApiService };
 

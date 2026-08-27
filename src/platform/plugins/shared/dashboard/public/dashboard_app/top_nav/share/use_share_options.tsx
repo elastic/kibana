@@ -101,10 +101,7 @@ export const useShareOptions = () => {
         locator: shareService?.url.locators.get(
           DASHBOARD_APP_LOCATOR
         ) as LocatorPublic<DashboardLocatorParams>,
-        params: {
-          ...params,
-          timeRange: params.time_range,
-        },
+        params,
       },
     };
   }, [dashboardTitle, lastSavedId, timeRange, viewMode, unsavedChanges]);

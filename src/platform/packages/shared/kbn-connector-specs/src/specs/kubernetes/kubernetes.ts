@@ -330,7 +330,7 @@ export const KubernetesConnector: ConnectorSpec = {
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['agentBuilder'],
+    supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
 
   auth: {
@@ -417,6 +417,7 @@ export const KubernetesConnector: ConnectorSpec = {
   actions: {
     request: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Make an authenticated request to any Kubernetes API path. This is the flexible escape hatch — ' +
         'prefer the typed actions (listResources, getResource, createResource, applyResource, patchResource, ' +
@@ -581,6 +582,7 @@ export const KubernetesConnector: ConnectorSpec = {
 
     createResource: {
       isTool: true,
+      scope: 'write',
       description:
         'Create a new resource from a manifest (POST to the collection). Use applyResource instead if ' +
         'the resource may already exist and you want create-or-update semantics.',
@@ -602,6 +604,7 @@ export const KubernetesConnector: ConnectorSpec = {
 
     applyResource: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Create or update a resource using server-side apply (PATCH with apply-patch semantics). ' +
         'This is the idempotent, declarative way to reconcile a resource to a desired manifest.',
@@ -629,6 +632,7 @@ export const KubernetesConnector: ConnectorSpec = {
 
     patchResource: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Apply a partial update to an existing resource. Supports strategic-merge (default), merge, ' +
         'and JSON Patch strategies.',
@@ -657,6 +661,7 @@ export const KubernetesConnector: ConnectorSpec = {
 
     deleteResource: {
       isTool: true,
+      scope: 'destroy',
       description: 'Delete a resource by name.',
       input: DeleteResourceInputSchema,
       handler: async (ctx, input: DeleteResourceInput) => {
@@ -675,6 +680,7 @@ export const KubernetesConnector: ConnectorSpec = {
 
     scaleWorkload: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Scale a Deployment, StatefulSet, or ReplicaSet to a desired number of replicas via the ' +
         'scale subresource.',

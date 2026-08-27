@@ -17,6 +17,7 @@ project:
   owner: '@elastic/obs-sig-events-team'
   sourceRoot: x-pack/platform/plugins/shared/significant_events
 dependsOn:
+  - '@kbn/agent-builder-elastic-ai-index-ki-types'
   - '@kbn/streams-plugin'
   - '@kbn/core'
   - '@kbn/core-pricing-common'
@@ -61,25 +62,25 @@ dependsOn:
   - '@kbn/search-inference-endpoints'
   - '@kbn/core-analytics-server'
   - '@kbn/server-route-repository'
+  - '@kbn/server-route-repository-client'
   - '@kbn/server-route-repository-utils'
   - '@kbn/workflows-extensions'
   - '@kbn/zod-helpers'
   - '@kbn/licensing-plugin'
   - '@kbn/fields-metadata-plugin'
   - '@kbn/actions-plugin'
-  - '@kbn/global-search-plugin'
   - '@kbn/encrypted-saved-objects-plugin'
-  - '@kbn/features-plugin'
   - '@kbn/inference-plugin'
   - '@kbn/security-plugin'
   - '@kbn/cloud-plugin'
-  - '@kbn/usage-collection-plugin'
-  - '@kbn/console-plugin'
   - '@kbn/scout'
   - '@kbn/core-http-server-mocks'
   - '@kbn/apm-utils'
   - '@kbn/datemath'
   - '@kbn/core-http-server-utils'
+  - '@kbn/cps-server-utils'
+  - '@kbn/inference-prompt-utils'
+  - '@kbn/nightshift-investigations-plugin'
 tags:
   - plugin
   - prod
@@ -89,11 +90,9 @@ tags:
 fileGroups:
   src:
     - common/**/*
-    - docs/**/*
     - scripts/**/*
     - server/**/*
     - public/**/*
-    - types/**/*
     - test/**/*
     - '!target/**/*'
   jest-config:

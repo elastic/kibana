@@ -8,6 +8,7 @@
  */
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
+import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowApi } from './workflows_api';
 
 const VERSION = '2023-10-31';
@@ -304,6 +305,27 @@ describe('WorkflowApi', () => {
 
       expect(http.post).toHaveBeenCalledWith('/api/workflows/step/test', {
         body: JSON.stringify(params),
+        version: VERSION,
+      });
+    });
+  });
+
+  describe('searchExecutions', () => {
+    it('should call GET /api/workflows/workflow/executions with structured params', async () => {
+      const params = {
+        kql: 'status: completed',
+        statuses: [ExecutionStatus.COMPLETED],
+        sortField: 'startedAt',
+        sortOrder: 'desc' as const,
+        startedAfter: 'now-15m',
+        page: 1,
+        size: 25,
+        trackTotalHits: true,
+      };
+      await api.searchExecutions(params);
+
+      expect(http.get).toHaveBeenCalledWith('/api/workflows/workflow/executions', {
+        query: params,
         version: VERSION,
       });
     });

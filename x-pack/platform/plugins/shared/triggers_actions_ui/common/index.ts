@@ -12,6 +12,7 @@ export type {
   DateRangeInfo,
   GetDateRangeInfoParams,
   BuildAggregationOpts,
+  ParsedAggregationBucket,
   ParsedAggregationResults,
   TimeSeriesResult,
   TimeSeriesResultRow,

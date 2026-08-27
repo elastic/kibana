@@ -904,7 +904,6 @@ describe(`POST ${URL}`, () => {
               statusCode: 503,
               type: 'unknown',
             },
-            managed: false,
           },
         ],
         warnings: [],

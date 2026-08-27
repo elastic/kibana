@@ -61,11 +61,11 @@ export function SvlDatastreamsHelpers({ getService }: FtrProviderContext) {
   };
 
   const deleteComposableIndexTemplate = async (name: string) => {
-    await es.indices.deleteIndexTemplate({ name });
+    await es.indices.deleteIndexTemplate({ name }, { ignore: [404] });
   };
 
   const deleteDataStream = async (name: string) => {
-    await es.indices.deleteDataStream({ name });
+    await es.indices.deleteDataStream({ name }, { ignore: [404] });
     await deleteComposableIndexTemplate(name);
   };
 

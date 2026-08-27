@@ -24,4 +24,10 @@ export interface CoreEnv {
   packageInfo: Readonly<PackageInfo>;
   airgapped: boolean;
   isCoreRenderingInReactConcurrentMode: boolean;
+  /**
+   * When `true`, browser core exposes an inert `window.__kbnNavDependencies__()`
+   * bridge reporting cross-plugin navigation dependencies. Enabled only via the
+   * internal `plugins.exposeNavDependencies` config (off by default).
+   */
+  exposeNavDependencies?: boolean;
 }

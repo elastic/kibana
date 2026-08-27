@@ -32,6 +32,7 @@ import { RuleHeaderDescription, RuleTitleWithBadges } from '../../rule_details/r
 import { RuleConditions } from '../../rule_details/sidebar/rule_conditions';
 import { RuleMetadata } from '../../rule_details/sidebar/rule_metadata';
 import type { RuleApiResponse } from '../../../services/rules_api';
+import { useRuleAutoAttach } from '../../../agent_builder/use_rule_auto_attach';
 
 const FLYOUT_TITLE_ID = 'ruleSummaryFlyoutTitle';
 
@@ -44,6 +45,7 @@ export interface RuleSummaryFlyoutProps {
   onDelete: (rule: RuleApiResponse) => void;
   onToggleEnabled: (rule: RuleApiResponse) => void;
   onRun: (rule: RuleApiResponse) => void;
+  onUpdateApiKey?: (rule: RuleApiResponse) => void;
   canWrite?: boolean;
   session?: EuiFlyoutProps['session'];
   ownFocus?: EuiFlyoutProps['ownFocus'];
@@ -59,12 +61,14 @@ export const RuleSummaryFlyout = ({
   onDelete,
   onToggleEnabled,
   onRun,
+  onUpdateApiKey,
   canWrite = true,
   session,
   ownFocus = true,
   hasAnimation = true,
 }: RuleSummaryFlyoutProps) => {
   const { basePath } = useService(CoreStart('http'));
+  useRuleAutoAttach(rule);
   const detailsHref = basePath.prepend(paths.ruleDetails(rule.id));
 
   return (
@@ -118,11 +122,13 @@ export const RuleSummaryFlyout = ({
               <EuiFlexItem grow={false}>
                 <RuleActionsMenu
                   rule={rule}
+                  canWrite={canWrite}
                   onEdit={onEdit}
                   onClone={onClone}
                   onDelete={onDelete}
                   onToggleEnabled={onToggleEnabled}
                   onRun={onRun}
+                  onUpdateApiKey={onUpdateApiKey}
                 />
               </EuiFlexItem>
             )}

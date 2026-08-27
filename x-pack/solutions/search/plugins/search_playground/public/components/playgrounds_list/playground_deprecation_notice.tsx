@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiLink, EuiText } from '@elastic/eui';
+import { EuiLink, EuiText } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { useKibana } from '../../hooks/use_kibana';
 
 export const PlaygroundDeprecationNotice = () => {
@@ -18,8 +20,10 @@ export const PlaygroundDeprecationNotice = () => {
     await agentBuilderLocator?.navigate({});
   }, [share]);
   return (
-    <EuiCallOut
-      iconType="info"
+    <KbnWarningCallout
+      css={css`
+        text-align: left;
+      `}
       title={i18n.translate('xpack.searchPlayground.playgroundDeprecationNotice.calloutTitle', {
         defaultMessage: 'Deprecation Notice',
       })}
@@ -29,7 +33,6 @@ export const PlaygroundDeprecationNotice = () => {
           defaultMessage: 'Playground deprecation Notice',
         }
       )}
-      color="warning"
       heading="h4"
       data-test-subj="playgroundDeprecationNotice"
       announceOnMount
@@ -70,6 +73,6 @@ export const PlaygroundDeprecationNotice = () => {
           />
         </p>
       </EuiText>
-    </EuiCallOut>
+    </KbnWarningCallout>
   );
 };

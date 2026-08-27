@@ -62,7 +62,7 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
         validate: {
           request: {
             query: schema.object({
-              indexName: schema.maybe(schema.string()),
+              indexName: schema.maybe(schema.string({ maxLength: 1000 })),
               checkCreateDataView: schema.boolean(),
               checkHasManagePipeline: schema.boolean(),
             }),
@@ -237,10 +237,10 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
         validate: {
           request: {
             query: schema.object({
-              id: schema.maybe(schema.string()),
+              id: schema.maybe(schema.string({ maxLength: 1000 })),
             }),
             body: schema.object({
-              index: schema.string(),
+              index: schema.string({ maxLength: 1000 }),
               data: schema.arrayOf(schema.any(), { maxSize: 50000 }),
               settings: schema.maybe(schema.any()),
               /** Mappings */
@@ -248,7 +248,7 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
               /** Ingest pipeline definition */
               ingestPipeline: schema.maybe(
                 schema.object({
-                  id: schema.maybe(schema.string()),
+                  id: schema.maybe(schema.string({ maxLength: 1000 })),
                   pipeline: schema.maybe(schema.any()),
                 })
               ),
@@ -256,7 +256,7 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
                 schema.arrayOf(
                   schema.maybe(
                     schema.object({
-                      id: schema.maybe(schema.string()),
+                      id: schema.maybe(schema.string({ maxLength: 1000 })),
                       pipeline: schema.maybe(schema.any()),
                     })
                   ),
@@ -364,7 +364,7 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
         version: '1',
         validate: {
           request: {
-            body: schema.object({ index: schema.string() }),
+            body: schema.object({ index: schema.string({ maxLength: 1000 }) }),
           },
         },
       },
@@ -409,15 +409,15 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
             body: schema.object({
               /** Index or indexes for which to return the time range. */
               index: schema.oneOf([
-                schema.string(),
-                schema.arrayOf(schema.string(), { maxSize: 10000 }),
+                schema.string({ maxLength: 1000 }),
+                schema.arrayOf(schema.string({ maxLength: 1000 }), { maxSize: 10000 }),
               ]),
               /** Name of the time field in the index. */
-              timeFieldName: schema.string(),
+              timeFieldName: schema.string({ maxLength: 1000 }),
               /** Query to match documents in the index(es). */
               query: schema.maybe(schema.any()),
               runtimeMappings: schema.maybe(runtimeMappingsSchema),
-              projectRouting: schema.maybe(schema.string()),
+              projectRouting: schema.maybe(schema.string({ maxLength: 10000 })),
             }),
           },
         },
@@ -469,7 +469,7 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
             body: schema.object({
               docs: schema.arrayOf(schema.any(), { maxSize: 10000 }),
               pipeline: schema.any(),
-              timeField: schema.string(),
+              timeField: schema.string({ maxLength: 1000 }),
             }),
           },
         },
@@ -518,7 +518,7 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
         validate: {
           request: {
             body: schema.object({
-              base64File: schema.string(),
+              base64File: schema.string({ maxLength: MAX_TIKA_FILE_SIZE_BYTES }),
             }),
           },
         },
@@ -560,7 +560,7 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
         version: '1',
         validate: {
           request: {
-            params: schema.object({ pipelineIds: schema.string() }),
+            params: schema.object({ pipelineIds: schema.string({ maxLength: 1000 }) }),
           },
         },
       },
@@ -604,7 +604,10 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
         version: '1',
         validate: {
           request: {
-            body: schema.object({ index: schema.string(), expectedCount: schema.number() }),
+            body: schema.object({
+              index: schema.string({ maxLength: 1000 }),
+              expectedCount: schema.number(),
+            }),
           },
         },
       },

@@ -21,8 +21,6 @@ import type {
   CasesPermissions,
 } from '../../containers/types';
 import type { ReleasePhase } from '../types';
-import type { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
-import type { PersistableStateAttachmentTypeRegistry } from '../../client/attachment_framework/persistable_state_registry';
 import type { UnifiedAttachmentTypeRegistry } from '../../client/attachment_framework/unified_attachment_registry';
 
 import { CasesGlobalComponents } from './cases_global_components';
@@ -38,8 +36,6 @@ import { casesQueryClient } from './query_client';
 type CasesContextValueDispatch = Dispatch<CasesContextStoreAction>;
 
 export interface CasesContextValue {
-  externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
-  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry;
   owner: string[];
   permissions: CasesPermissions;
@@ -50,14 +46,7 @@ export interface CasesContextValue {
 }
 
 export interface CasesContextProps
-  extends Pick<
-    CasesContextValue,
-    | 'owner'
-    | 'permissions'
-    | 'externalReferenceAttachmentTypeRegistry'
-    | 'persistableStateAttachmentTypeRegistry'
-    | 'unifiedAttachmentTypeRegistry'
-  > {
+  extends Pick<CasesContextValue, 'owner' | 'permissions' | 'unifiedAttachmentTypeRegistry'> {
   basePath?: string;
   features?: CasesFeatures;
   releasePhase?: ReleasePhase;
@@ -74,8 +63,6 @@ export const CasesProvider: FC<
 > = ({
   children,
   value: {
-    externalReferenceAttachmentTypeRegistry,
-    persistableStateAttachmentTypeRegistry,
     unifiedAttachmentTypeRegistry,
     owner,
     permissions,
@@ -90,8 +77,6 @@ export const CasesProvider: FC<
 
   const value: CasesContextValue = useMemo(
     () => ({
-      externalReferenceAttachmentTypeRegistry,
-      persistableStateAttachmentTypeRegistry,
       unifiedAttachmentTypeRegistry,
       owner,
       permissions: {

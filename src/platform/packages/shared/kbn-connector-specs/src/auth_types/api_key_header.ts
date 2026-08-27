@@ -73,4 +73,16 @@ export const ApiKeyHeaderAuth: AuthTypeSpec<AuthSchemaType> = {
 
     return axiosInstance;
   },
+  getAuthHeaders: async (
+    _: AuthContext,
+    secret: NormalizedAuthSchemaType
+  ): Promise<Record<string, string>> => {
+    const headers: Record<string, string> = {};
+    Object.keys(secret)
+      .filter((key) => key !== 'authType')
+      .forEach((key) => {
+        headers[key] = secret[key];
+      });
+    return headers;
+  },
 };

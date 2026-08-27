@@ -11,7 +11,11 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
-import { VECTORDB_APP_ID, TUTORIALS_DEEP_LINK_ID } from '../common/constants';
+import {
+  VECTORDB_APP_ID,
+  GETTING_STARTED_DEEP_LINK_ID,
+  GETTING_STARTED_PATH,
+} from '../common/constants';
 import { createNavigationTree } from './navigation_tree';
 import type {
   ServerlessVectordbPluginSetup,
@@ -42,10 +46,10 @@ export class ServerlessVectordbPlugin
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       deepLinks: [
         {
-          id: TUTORIALS_DEEP_LINK_ID,
-          path: '/tutorials',
-          title: i18n.translate('xpack.serverlessVectordb.tutorials.title', {
-            defaultMessage: 'Tutorials',
+          id: GETTING_STARTED_DEEP_LINK_ID,
+          path: GETTING_STARTED_PATH,
+          title: i18n.translate('xpack.serverlessVectordb.gettingStarted.title', {
+            defaultMessage: 'Getting started',
           }),
           visibleIn: ['globalSearch', 'projectSideNav'],
         },

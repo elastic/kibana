@@ -157,16 +157,20 @@ Two invariants worth understanding before you touch this file:
   anything newer than me still open?" and swallow stale eviction callbacks correctly. Don't replace this with a simpler
   check.
 
-### Restore on mount (`use_flyout_v2_restore.ts`)
+### Restore (`use_flyout_v2_restore.ts`)
 
-`useFlyoutV2RestoreFromUrl(urlParamKey)` runs once per mount (gated on `useIsNewFlyoutEnabled()`):
+`useFlyoutV2RestoreFromUrl(urlParamKey)` (gated on `useIsNewFlyoutEnabled()`):
 
-1. Reads the param once (via a `useState` initializer).
+1. **Mount:** reads the param once (via a `useState` initializer).
 2. For kinds that need a document/attack `DataTableRecord` or an IOC `Indicator`, resolves it via `useEsDocSearch` (the
    same single-doc search the document flyout uses — deliberately **not** `useTimelineEventsDetails`, which can't
    resolve a concrete alerts backing index). Uses `PageScope.default`, and `PageScope.attacks` for attack descriptors.
 3. Once fetches are settled, replays the array: first entry via `openDescriptorAsStart`, second via
    `openDescriptorAsChild`, deferred to a macrotask (`setTimeout(…, 0)`) to avoid z-index races with Timeline restore.
+4. **Same-app deep links:** `history.listen` opens when an *external* navigation writes a new `flyoutV2` value
+   (e.g. Agent Builder redirects). Writer
+   self-updates are ignored via `markFlyoutV2UrlWrite` / `consumeFlyoutV2UrlWrite`. Unrelated `history.replace`
+   calls that preserve the initial URL stack are ignored until that stack has been opened.
 
 `openDescriptorAsStart` / `openDescriptorAsChild` are the exhaustive `switch` mapping each descriptor kind back to the
 right `useFlyoutApi()` method. **When you add a descriptor kind, you must add a case here** (and the child variant, or
@@ -210,7 +214,7 @@ a "what happened" description onto an EBT event. Event types and schemas live in
 - `useOpenFlyout()` — the instrumented wrapper around `overlays.openSystemFlyout(flyoutProviders({...}))`. Handles
   Suspense fallback (`FlyoutLoading`), the `FlyoutSessionContextProvider`, and telemetry. All open methods go through
   it.
-- `useDefaultDocumentFlyoutProperties()` / `defaultToolsFlyoutProperties` — consistent size/width/padding options.
+- `useDefaultDocumentFlyoutProperties()` / `useDefaultToolsFlyoutProperties()` — consistent size/width/padding options.
   Spread these into your flyout properties.
 - `useTabs<T>()` — generic tab selection with localStorage persistence and optional tab-click telemetry. Priority:
   `initialTabId` → localStorage → `validTabIds[0]`.

@@ -724,7 +724,7 @@ describe('SentinelOneActionsClient class', () => {
     // tested the same
     describe.each`
       actionName             | requestData                                                         | responseOutputContent
-      ${'kill-process'}      | ${{ command: 'kill-process', parameters: { process_name: 'foo' } }} | ${{ code: 'ok', command: 'kill-process', process_name: 'foo' }}
+      ${'kill-process'}      | ${{ command: 'kill-process', parameters: { process_name: 'foo' } }} | ${{ code: 'ok', process_name: 'foo' }}
       ${'running-processes'} | ${{ command: 'running-processes', parameters: undefined }}          | ${{ code: '', entries: [] }}
     `('for $actionName response action', ({ actionName, requestData, responseOutputContent }) => {
       let actionRequestsSearchResponse: SearchResponse<LogsEndpointAction>;

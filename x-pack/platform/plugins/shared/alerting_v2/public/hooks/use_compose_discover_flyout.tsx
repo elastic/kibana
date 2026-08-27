@@ -11,6 +11,7 @@ import type {
   RuleFormServices,
 } from '@kbn/alerting-v2-rule-form';
 import { ComposeDiscoverFlyout, RULE_BUILDER_REGISTRY } from '@kbn/alerting-v2-rule-form';
+import type { RuleTemplateResponse } from '@kbn/alerting-v2-schemas';
 import { getBreachEsqlQuery, getRecoverEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { PluginStart } from '@kbn/core-di';
 import { CoreStart, useService } from '@kbn/core-di-browser';
@@ -39,6 +40,20 @@ const tryParseBuilderState = (
   return null;
 };
 
+const templateToSyntheticRule = (template: RuleTemplateResponse): RuleApiResponse => ({
+  ...template.rule,
+  id: '',
+  enabled: false,
+  created_by: null,
+  created_at: new Date().toISOString(),
+  updated_by: null,
+  updated_at: new Date().toISOString(),
+  metadata: {
+    ...template.rule.metadata,
+    version: 1,
+  },
+});
+
 interface UseComposeDiscoverFlyoutOptions {
   createSuccessRedirectPath?: string;
 }
@@ -49,6 +64,8 @@ export const useComposeDiscoverFlyout = ({
   const http = useService(CoreStart('http'));
   const notifications = useService(CoreStart('notifications'));
   const application = useService(CoreStart('application'));
+  const uiSettings = useService(CoreStart('uiSettings'));
+  const featureFlags = useService(CoreStart('featureFlags'));
   const data = useService(PluginStart('data')) as DataPublicPluginStart;
   const dataViews = useService(PluginStart('dataViews')) as DataViewsPublicPluginStart;
   const lens = useService(PluginStart('lens')) as LensPublicStart;
@@ -66,6 +83,7 @@ export const useComposeDiscoverFlyout = ({
   const [builderType, setBuilderType] = useState<string | null>(null);
   const [initialBuilderState, setInitialBuilderState] = useState<BuilderState>(undefined);
   const historyKey = useMemo(() => Symbol('ruleAuthoring'), []);
+
   const createRuleMutation = useCreateRule();
   const setupNotificationsMutation = useSetupRuleNotifications();
   const updateRuleMutation = useUpdateRule();
@@ -76,12 +94,26 @@ export const useComposeDiscoverFlyout = ({
       dataViews,
       notifications,
       application,
+      uiSettings,
+      featureFlags,
       lens,
       uiActions,
       dashboard,
       cps,
     }),
-    [http, data, dataViews, notifications, application, lens, uiActions, dashboard, cps]
+    [
+      http,
+      data,
+      dataViews,
+      notifications,
+      application,
+      uiSettings,
+      featureFlags,
+      lens,
+      uiActions,
+      dashboard,
+      cps,
+    ]
   );
 
   const closeFlyout = useCallback(() => {
@@ -180,6 +212,36 @@ export const useComposeDiscoverFlyout = ({
     [openRuleFlyout]
   );
 
+  const openCreateFromTemplateFlyout = useCallback((template: RuleTemplateResponse) => {
+    const syntheticRule = templateToSyntheticRule(template);
+    setTargetRule(syntheticRule);
+    setFlyoutMode('create');
+
+    if (syntheticRule.metadata.builder_type) {
+      const query = syntheticRule.query ? getBreachEsqlQuery(syntheticRule.query) : '';
+      const recoveryQuery = syntheticRule.query
+        ? getRecoverEsqlQuery(syntheticRule.query, syntheticRule.recovery_strategy)
+        : undefined;
+      const state = query
+        ? tryParseBuilderState(syntheticRule.metadata.builder_type, query, recoveryQuery)
+        : null;
+      if (state && typeof state === 'object') {
+        const stateWithTimeField = {
+          ...state,
+          timeField: syntheticRule.time_field ?? '@timestamp',
+        };
+        setBuilderType(syntheticRule.metadata.builder_type);
+        setInitialBuilderState(stateWithTimeField);
+        setFlyoutOpen(true);
+        return;
+      }
+    }
+
+    setBuilderType(null);
+    setInitialBuilderState(undefined);
+    setFlyoutOpen(true);
+  }, []);
+
   const flyout = flyoutOpen ? (
     <ComposeDiscoverFlyout
       historyKey={historyKey}
@@ -191,19 +253,22 @@ export const useComposeDiscoverFlyout = ({
       builderType={builderType ?? undefined}
       initialBuilderState={initialBuilderState}
       onCreateRule={(payload, ruleNotifications) =>
-        createRuleMutation.mutate(payload, {
-          onSuccess: (rule) => {
-            const actions = ruleNotifications?.workflows ?? [];
-            if (actions.length > 0) {
-              setupNotificationsMutation.mutate(
-                { rule, actions },
-                { onSuccess: closeAndRedirect, onError: closeAndRedirect }
-              );
-            } else {
-              closeAndRedirect();
-            }
-          },
-        })
+        createRuleMutation.mutate(
+          { payload },
+          {
+            onSuccess: (rule) => {
+              const actions = ruleNotifications?.workflows ?? [];
+              if (actions.length > 0) {
+                setupNotificationsMutation.mutate(
+                  { rule, actions },
+                  { onSuccess: closeAndRedirect, onError: closeAndRedirect }
+                );
+              } else {
+                closeAndRedirect();
+              }
+            },
+          }
+        )
       }
       onUpdateRule={(id, payload, ruleNotifications) =>
         updateRuleMutation.mutate(
@@ -233,6 +298,7 @@ export const useComposeDiscoverFlyout = ({
     flyout,
     openCreateFlyout,
     openCreateBuilderFlyout,
+    openCreateFromTemplateFlyout,
     openEditFlyout,
     openCloneFlyout,
   };

@@ -150,7 +150,7 @@ export const EntityStoreUtils = (getService: FtrProviderContext['getService']) =
   const clearAllEntityStoreData = async () => {
     await es
       .deleteByQuery(
-        { index: '.entities.v2.latest.security_default*', query: { match_all: {} }, refresh: true },
+        { index: '.entities.v2.latest.default*', query: { match_all: {} }, refresh: true },
         { ignore: [404] }
       )
       .catch((err) => {

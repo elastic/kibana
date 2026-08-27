@@ -30,7 +30,6 @@ describe('TaskPoller', () => {
       initialPollInterval: pollInterval,
       logger: loggingSystemMock.create().get(),
       pollInterval$: of(pollInterval),
-      pollIntervalDelay$: of(0),
       getCapacity: () => 1,
       work,
     }).start();
@@ -61,7 +60,6 @@ describe('TaskPoller', () => {
       initialPollInterval: pollInterval,
       logger: loggingSystemMock.create().get(),
       pollInterval$,
-      pollIntervalDelay$: of(0),
       getCapacity: () => 1,
       work,
     }).start();
@@ -100,7 +98,6 @@ describe('TaskPoller', () => {
       initialPollInterval: pollInterval,
       logger,
       pollInterval$,
-      pollIntervalDelay$: of(0),
       getCapacity: () => 1,
       work,
     }).start();
@@ -151,7 +148,6 @@ describe('TaskPoller', () => {
       initialPollInterval: pollInterval,
       logger: loggingSystemMock.create().get(),
       pollInterval$: of(pollInterval),
-      pollIntervalDelay$: of(0),
       work,
       getCapacity: () => (hasCapacity ? 1 : 0),
     }).start();
@@ -204,7 +200,6 @@ describe('TaskPoller', () => {
       initialPollInterval: pollInterval,
       logger: loggingSystemMock.create().get(),
       pollInterval$: of(pollInterval),
-      pollIntervalDelay$: of(0),
       work: async (...args) => {
         await worker;
         return args;
@@ -244,7 +239,6 @@ describe('TaskPoller', () => {
       initialPollInterval: pollInterval,
       logger: loggingSystemMock.create().get(),
       pollInterval$: of(pollInterval),
-      pollIntervalDelay$: of(0),
       work: async (...args) => {
         throw workError;
       },
@@ -275,7 +269,6 @@ describe('TaskPoller', () => {
       initialPollInterval: pollInterval,
       logger: loggingSystemMock.create().get(),
       pollInterval$: of(pollInterval),
-      pollIntervalDelay$: of(0),
       work: async (...args) => {
         throw workError;
       },
@@ -314,7 +307,6 @@ describe('TaskPoller', () => {
       initialPollInterval: pollInterval,
       logger: loggingSystemMock.create().get(),
       pollInterval$: of(pollInterval),
-      pollIntervalDelay$: of(0),
       work,
       getCapacity: () => 5,
     });
@@ -355,7 +347,6 @@ describe('TaskPoller', () => {
       initialPollInterval: pollInterval,
       logger: loggingSystemMock.create().get(),
       pollInterval$: of(pollInterval),
-      pollIntervalDelay$: of(0),
       work,
       getCapacity: () => {
         callCount++;
@@ -399,7 +390,6 @@ describe('TaskPoller', () => {
       initialPollInterval: pollInterval,
       logger: loggingSystemMock.create().get(),
       pollInterval$: of(pollInterval),
-      pollIntervalDelay$: of(0),
       getCapacity: () => 1,
       work,
     });
@@ -432,7 +422,6 @@ describe('TaskPoller', () => {
       initialPollInterval: pollInterval,
       logger: loggingSystemMock.create().get(),
       pollInterval$: of(pollInterval),
-      pollIntervalDelay$: of(0),
       getCapacity: () => 1,
       work,
     });

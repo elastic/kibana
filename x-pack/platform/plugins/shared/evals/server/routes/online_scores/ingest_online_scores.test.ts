@@ -17,6 +17,7 @@ import {
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import { createEvaluatorRegistry } from '../../evaluators/registry';
 import { registerIngestOnlineScoresRoute } from './ingest_online_scores';
 
 const getBasePayload = (): IngestOnlineScoresRequestBodyInput => ({
@@ -71,7 +72,7 @@ describe('POST /internal/evals/online_scores', () => {
       router,
       logger,
       canEncrypt: false,
-      evaluatorRegistry: { list: () => [], get: () => undefined },
+      evaluatorRegistry: createEvaluatorRegistry(),
       getInferenceStart: async () => ({ getClient: jest.fn() } as unknown as InferenceServerStart),
       getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
       getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),

@@ -10,7 +10,7 @@ import type { Client } from '@elastic/elasticsearch';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { createGcsRepository, restoreSnapshot } from '@kbn/es-snapshot-loader';
-import type { Detection, Discovery, Feature } from '@kbn/significant-events-schema';
+import type { Detection, Feature, SignificantEvent } from '@kbn/significant-events-schema';
 import type { GcsConfig } from './snapshot_run_config';
 import { resolveBasePath } from './snapshot_run_config';
 import {
@@ -182,15 +182,15 @@ export async function loadKnowledgeIndicatorsFromSnapshot(
 }
 
 /**
- * Restores sigevents-captured discovery documents and returns all {@link Discovery} documents.
+ * Restores sigevents-captured event documents.
  */
 export async function loadDiscoveriesFromSnapshot(
   esClient: Client,
   log: ToolingLog,
   snapshotName: string,
   gcs: GcsConfig
-): Promise<Discovery[]> {
-  return loadDocsFromSnapshot<Discovery>({
+): Promise<SignificantEvent[]> {
+  return loadDocsFromSnapshot<SignificantEvent>({
     esClient,
     log,
     snapshotName,

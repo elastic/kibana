@@ -385,7 +385,7 @@ const PacksTableComponent = ({ hasAssetsToInstall }: { hasAssetsToInstall?: bool
         <EuiFlexItem grow={false}>
           <EuiButton
             {...newPackLinkProps}
-            iconType="plusInCircle"
+            iconType="plusCircle"
             isDisabled={!permissions.writePacks}
             data-test-subj="add-pack-button"
           >

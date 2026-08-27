@@ -34,7 +34,7 @@ import type { Transaction } from '../../../../typings/es_schemas/ui/transaction'
 import { SpanMetadata } from '../metadata_table/span_metadata';
 import { getSpanLinksTabContent } from '../span_links/span_links_tab_content';
 import { getGenAiTabContent } from '../genai_tab/get_genai_tab_content';
-import { getGenAiFields, hasGenAiData } from '../genai_tab/get_genai_fields';
+import { useGenAiData } from '../genai_tab/use_genai_data';
 import { Summary } from '../summary';
 import { CompositeSpanDurationSummaryItem } from '../summary/composite_span_duration_summary_item';
 import { HttpInfoSummaryItem } from '../summary/http_info_summary_item';
@@ -45,6 +45,7 @@ import { SpanDatabase } from './span_db';
 import { StickySpanProperties } from './sticky_span_properties';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { useFetcher, isPending } from '../../../hooks/use_fetcher';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { getTimestampUs } from '../../../../common/utils/get_timestamp_us';
 import type { SpanLinksCount } from '../span_links';
 
@@ -240,26 +241,21 @@ function SpanFlyoutBody({
     processorEvent: ProcessorEvent.span,
   });
 
-  const spanId = span.span?.id;
-  const { data: eventMetadata, status: metadataStatus } = useFetcher(
-    (callApmApi) => {
-      if (!spanId) return;
-      return callApmApi('GET /internal/apm/event_metadata/{processorEvent}/{id}', {
-        params: {
-          path: { processorEvent: ProcessorEvent.span, id: spanId },
-          query: { start: span['@timestamp'], end: span['@timestamp'] },
-        },
-      });
-    },
-    [spanId, span]
-  );
+  const { metadata, isMetadataLoading, isGenAiSpan, genAi } = useGenAiData({
+    processorEvent: ProcessorEvent.span,
+    id: span.span?.id,
+    timestamp: span['@timestamp'],
+  });
 
-  const metadata = eventMetadata?.metadata ?? {};
-  const isMetadataLoading = isPending(metadataStatus);
-  const isGenAiSpan = hasGenAiData(metadata);
-  const genAi = isGenAiSpan ? getGenAiFields(metadata) : undefined;
+  const { core } = useApmPluginContext();
 
-  const genAiTabContent = getGenAiTabContent({ isGenAiSpan, genAi });
+  const genAiTabContent = getGenAiTabContent({
+    isGenAiSpan,
+    genAi,
+    ebt: { element: SPAN_FLYOUT_EBT_ELEMENTS.TABS },
+    reportEvent: core.analytics.reportEvent,
+    resourceId: span.span?.id,
+  });
 
   const tabs = [
     {

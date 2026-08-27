@@ -8,8 +8,11 @@
  */
 import type { BenchmarkRunnable } from '@kbn/bench';
 import getPort from 'get-port';
+import Path from 'path';
 import type { ExecaChildProcess } from 'execa';
 import { startEs, startKibana, stopGracefully } from './utils';
+
+export const WARM_START_POST_READY_SETTLING_MS = 30_000;
 
 // eslint-disable-next-line import/no-default-export
 export default async (): Promise<BenchmarkRunnable> => {
@@ -20,6 +23,9 @@ export default async (): Promise<BenchmarkRunnable> => {
   let kbnProc: ExecaChildProcess | undefined;
 
   return {
+    monitoring: {
+      collectForcedGcHeapStatsOnStop: true,
+    },
     async beforeAll({ workspace, log, buildDir }) {
       if (!buildDir) {
         await workspace.ensureBuild();
@@ -28,6 +34,13 @@ export default async (): Promise<BenchmarkRunnable> => {
       const { port, proc } = await startEs({
         cwd: workspace.getDir(),
         log,
+        basePath: Path.join(
+          workspace.getDir(),
+          'data',
+          'warm_start_memory',
+          workspace.getDisplayName(),
+          String(kbnPort)
+        ),
       });
 
       esProc = proc;
@@ -53,6 +66,7 @@ export default async (): Promise<BenchmarkRunnable> => {
       });
 
       kbnProc = proc;
+      await new Promise<void>((resolve) => setTimeout(resolve, WARM_START_POST_READY_SETTLING_MS));
     },
     async after({ log }) {
       // intentionally keep ES running across iterations; only killing Kibana

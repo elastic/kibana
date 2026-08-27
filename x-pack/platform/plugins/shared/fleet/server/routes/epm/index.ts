@@ -87,6 +87,8 @@ import {
   BulkNamespaceCustomizationRequestSchema,
   BulkNamespaceCustomizationResponseSchema,
   InstallRuleAssetsRequestSchema,
+  NamespacePreflightCheckRequestSchema,
+  NamespacePreflightCheckResponseSchema,
 } from '../../types';
 import type { FleetConfigType } from '../../config';
 import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
@@ -117,6 +119,7 @@ import {
   rollbackAvailableCheckHandler,
   bulkRollbackAvailableCheckHandler,
   reviewUpgradeHandler,
+  namespacePreflightCheckHandler,
 } from './handlers';
 import { getFileHandler } from './file_handler';
 import {
@@ -1196,6 +1199,37 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
     );
 
   router.versioned
+    .post({
+      path: EPM_API_ROUTES.NAMESPACE_PREFLIGHT_CHECK_PATTERN,
+      security: INSTALL_PACKAGES_SECURITY,
+      access: 'internal',
+      summary: `Check for pre-existing index template conflicts before namespace opt-in`,
+      description:
+        `Runs a non-mutating pre-flight check to detect index templates that would ` +
+        `conflict with the Fleet-managed namespace index templates for the given namespaces. ` +
+        `Does not modify any saved objects or ES resources.`,
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.internal.v1,
+        validate: {
+          request: NamespacePreflightCheckRequestSchema,
+          response: {
+            200: {
+              body: () => NamespacePreflightCheckResponseSchema,
+              description: 'OK: A successful request.',
+            },
+            400: {
+              body: genericErrorResponse,
+              description: 'A bad request.',
+            },
+          },
+        },
+      },
+      namespacePreflightCheckHandler
+    );
+
+  router.versioned
     .get({
       path: EPM_API_ROUTES.BULK_UNINSTALL_INFO_PATTERN,
       security: INSTALL_PACKAGES_SECURITY,
@@ -1297,7 +1331,6 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       bulkInstallPackagesFromRegistryHandler
     );
 
-  // Only allow upload for superuser
   router.versioned
     .post({
       path: EPM_API_ROUTES.INSTALL_BY_UPLOAD_PATTERN,
@@ -1311,7 +1344,7 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       },
       security: INSTALL_PACKAGES_SECURITY,
       summary: `Install a package by upload`,
-      description: `Install a package by uploading a .zip or .tar.gz archive (max 100MB). Only available to superusers.`,
+      description: `Install a package by uploading a .zip or .tar.gz archive (max 100MB).`,
     })
     .addVersion(
       {

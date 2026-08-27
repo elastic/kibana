@@ -54,6 +54,7 @@ import { suggestUserProfilesRoute } from '../lib/detection_engine/routes/users/s
 import { registerTimelineRoutes } from '../lib/timeline/routes';
 import { getFleetManagedIndexTemplatesRoute } from '../lib/security_integrations/cribl/routes';
 import { registerEntityAnalyticsRoutes } from '../lib/entity_analytics/register_entity_analytics_routes';
+import { registerInferenceConnectorRoutes } from '../lib/inference_connector/register_inference_connector_routes';
 import { registerSiemMigrationsRoutes } from '../lib/siem_migrations/routes';
 import { registerAssetInventoryRoutes } from '../lib/asset_inventory/routes';
 import { registerSiemReadinessRoutes } from '../lib/siem_readiness';
@@ -83,7 +84,8 @@ export const initRoutes = (
   docLinks: DocLinksServiceSetup,
   endpointContext: EndpointAppContext,
   trialCompanionDeps: TrialCompanionRoutesDeps,
-  enableDataGeneratorRoutes: boolean
+  enableDataGeneratorRoutes: boolean,
+  platformCpsEnabled: boolean
 ) => {
   registerFleetIntegrationsRoutes(router, logger);
   registerLegacyRuleActionsRoutes(router, logger);
@@ -104,7 +106,7 @@ export const initRoutes = (
     isServerless
   );
 
-  registerResolverRoutes(router, getStartServices);
+  registerResolverRoutes(router, getStartServices, platformCpsEnabled);
 
   registerTimelineRoutes(router, config, getStartServices);
 
@@ -160,6 +162,7 @@ export const initRoutes = (
     ml,
     hasEncryptionKey,
   });
+  registerInferenceConnectorRoutes({ router, getStartServices, logger });
   registerSiemMigrationsRoutes(router, config, logger);
 
   // Security Integrations

@@ -12,6 +12,7 @@ import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../../services/logger_service/logger_service';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import type { MetricRecorder } from './types';
 import { MetricRecorderToken } from './tokens';
 
@@ -40,10 +41,14 @@ import { MetricRecorderToken } from './tokens';
 export class MetricsMiddleware implements RuleExecutionMiddleware {
   public readonly name = 'metrics';
 
+  private readonly logger: LoggerServiceContract;
+
   constructor(
     @multiInject(MetricRecorderToken) private readonly recorders: MetricRecorder[],
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
-  ) {}
+    @inject(LoggerServiceToken) loggerService: LoggerServiceContract
+  ) {
+    this.logger = loggerService.forSubsystem('ruleExecutor');
+  }
 
   public execute(
     ctx: RuleExecutionMiddlewareContext,
@@ -78,9 +83,10 @@ export class MetricsMiddleware implements RuleExecutionMiddleware {
               });
             } catch (error) {
               logger.warn({
-                message: `[metrics] recorder "${recorder.name}" failed at step "${stepName}": ${
-                  error instanceof Error ? error.message : String(error)
-                }`,
+                message: 'Metrics recorder failed',
+                error,
+                code: ALERTING_LOG_CODES.RULE_EXECUTION_METRICS_RECORDER_FAILED,
+                labels: { step: stepName, resource: recorder.name },
               });
             }
           }

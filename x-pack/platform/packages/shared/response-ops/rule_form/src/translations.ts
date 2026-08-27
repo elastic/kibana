@@ -402,6 +402,13 @@ export const RULE_FLYOUT_HEADER_CREATE_TITLE = i18n.translate(
   }
 );
 
+export const RULE_FLYOUT_STEPS_ARIA_LABEL = i18n.translate(
+  'responseOpsRuleForm.ruleForm.ruleFlyoutHeader.stepsAriaLabel',
+  {
+    defaultMessage: 'Create rule steps',
+  }
+);
+
 export const RULE_FLYOUT_HEADER_EDIT_TITLE = i18n.translate(
   'responseOpsRuleForm.ruleForm.ruleFlyoutHeader.editTitle',
   {
@@ -782,13 +789,6 @@ export const ACTION_UNABLE_TO_LOAD_CONNECTOR_DESCRIPTION = i18n.translate(
   'responseOpsRuleForm.ruleActionsItem.actionUnableToLoadConnectorTitle',
   {
     defaultMessage: `Create a connector and try again. If you can't create a connector, contact your system administrator.`,
-  }
-);
-
-export const ACTION_USE_AAD_TEMPLATE_FIELDS_LABEL = i18n.translate(
-  'responseOpsRuleForm.ruleActionsItem.actionUseAadTemplateFieldsLabel',
-  {
-    defaultMessage: 'Use template fields from alerts index',
   }
 );
 

@@ -19,12 +19,6 @@ export type {
 
 export { MemoryServiceImpl } from './memory_service';
 
-export {
-  formatExistingPages,
-  createReadMemoryPageCallback,
-  createWriteMemoryPageCallback,
-} from './tool_callbacks';
-
 export { memoriesDataStream } from './data_stream';
 export type { StoredMemoryPage } from './data_stream';
 

@@ -16,7 +16,7 @@ export interface AiIndexDest {
   value: string;
 }
 
-export type AiIndexSourceType = 'esql';
+export type AiIndexSourceType = 'esql' | 'connector';
 
 export interface AiIndexSource {
   type: AiIndexSourceType;
@@ -35,6 +35,8 @@ export interface AiIndexProperties {
   dest: AiIndexDest;
   automations: AiIndexAutomation[];
   sources: AiIndexSource[];
+  /** Agent Builder agent id used for this index's Analyze & improve analysis. */
+  feedback_agent_id?: string;
 }
 
 export interface AiIndexHttpItem extends AiIndexProperties {
@@ -64,4 +66,9 @@ export interface PutAiIndexResponse {
 
 export interface DeleteAiIndexResponse {
   acknowledged: boolean;
+}
+
+export interface KiTypeCount {
+  type: string;
+  count: number;
 }

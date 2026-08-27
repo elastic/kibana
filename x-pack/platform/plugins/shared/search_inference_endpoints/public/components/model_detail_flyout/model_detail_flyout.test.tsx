@@ -6,20 +6,13 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, within } from '@testing-library/react';
-import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { render, screen, fireEvent, within, waitFor } from '@testing-library/react';
 import type { EisInferenceEndpoint } from '../../../common/types';
 import { ModelDetailFlyout } from './model_detail_flyout';
 import { useKibana } from '../../hooks/use_kibana';
-import { INFERENCE_PREFERENCES_FEATURE_FLAG_ID } from '../../../common/constants';
 
 jest.mock('../../hooks/use_kibana');
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  ...jest.requireActual('@kbn/kibana-react-plugin/public'),
-  useUiSetting: jest.fn((key: string, defaultValue?: unknown) => defaultValue),
-}));
 
-const mockUseUiSetting = useUiSetting as jest.Mock;
 const mockUseKibana = useKibana as jest.Mock;
 
 const MODEL_ID = 'test-model';
@@ -40,10 +33,6 @@ describe('ModelDetailFlyout', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseUiSetting.mockImplementation((key: string, defaultValue?: unknown) => {
-      if (key === INFERENCE_PREFERENCES_FEATURE_FLAG_ID) return false;
-      return defaultValue;
-    });
     mockUseKibana.mockReturnValue({ services: {} });
   });
 
@@ -185,21 +174,103 @@ describe('ModelDetailFlyout', () => {
       },
     } as unknown as EisInferenceEndpoint;
 
-    it('renders region badges when FF is enabled and endpoint has region metadata', () => {
-      mockUseUiSetting.mockImplementation((key: string, defaultValue?: unknown) => {
-        if (key === INFERENCE_PREFERENCES_FEATURE_FLAG_ID) return true;
-        return defaultValue;
-      });
+    it('renders region badges when endpoint has region metadata', () => {
       renderFlyout(MODEL_ID, [endpointWithRegions]);
 
       expect(screen.getByTestId('flyoutRegionBadges')).toBeInTheDocument();
       expect(screen.getByTestId('flyoutRegionBadge-us')).toBeInTheDocument();
     });
 
-    it('does not render region badges when FF is disabled', () => {
+    it('shows region_display_name in the region badge tooltip', async () => {
+      const endpoint = {
+        ...createEndpoint(),
+        metadata: {
+          regions: [
+            {
+              csp: 'aws',
+              region: 'eu-west-1',
+              geo: 'eu',
+              region_display_name: 'EU West (Ireland)',
+            },
+          ],
+        },
+      } as unknown as EisInferenceEndpoint;
+      renderFlyout(MODEL_ID, [endpoint]);
+
+      fireEvent.mouseOver(screen.getByTestId('flyoutRegionBadge-eu'));
+      await waitFor(() => {
+        expect(screen.getByTestId('flyoutRegionBadgeTooltip-eu')).toHaveTextContent(
+          'EU West (Ireland)'
+        );
+      });
+    });
+
+    it('shows the region id in the tooltip when region_display_name is missing', async () => {
       renderFlyout(MODEL_ID, [endpointWithRegions]);
 
+      fireEvent.mouseOver(screen.getByTestId('flyoutRegionBadge-us'));
+      await waitFor(() => {
+        expect(screen.getByTestId('flyoutRegionBadgeTooltip-us')).toHaveTextContent('us-east-1');
+      });
+    });
+
+    it('does not render region badges when endpoint has no region metadata', () => {
+      renderFlyout();
+
       expect(screen.queryByTestId('flyoutRegionBadges')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('region preferences unavailable callout', () => {
+    const deniedEndpoint = createEndpoint({ metadata: { denied_by_region_policy: true } });
+
+    it('shows the callout when any endpoint is denied by region policy', () => {
+      renderFlyout(MODEL_ID, [
+        deniedEndpoint,
+        createEndpoint({
+          inference_id: 'ep-custom',
+          metadata: { denied_by_region_policy: false },
+        }),
+      ]);
+
+      const callout = screen.getByTestId('modelDetailFlyoutRegionUnavailableCallout');
+      expect(callout).toHaveTextContent('Model not available based on region preferences');
+      expect(callout).toHaveTextContent(
+        "This model isn't available in the locations allowed by your region preferences. To use it, update your region preferences to include a supported location."
+      );
+    });
+
+    it('hides the callout when denied_by_region_policy is missing', () => {
+      renderFlyout();
+
+      expect(
+        screen.queryByTestId('modelDetailFlyoutRegionUnavailableCallout')
+      ).not.toBeInTheDocument();
+    });
+
+    it('hides the callout when only a different model is denied by region policy', () => {
+      renderFlyout(MODEL_ID, [
+        createEndpoint(),
+        createEndpoint({
+          inference_id: 'ep-other',
+          service_settings: { model_id: 'other-model' },
+          metadata: { denied_by_region_policy: true },
+        }),
+      ]);
+
+      expect(
+        screen.queryByTestId('modelDetailFlyoutRegionUnavailableCallout')
+      ).not.toBeInTheDocument();
+    });
+
+    it('hides the callout after it is dismissed', () => {
+      renderFlyout(MODEL_ID, [deniedEndpoint]);
+
+      fireEvent.click(screen.getByTestId('modelDetailFlyoutRegionUnavailableCalloutDismiss'));
+
+      expect(
+        screen.queryByTestId('modelDetailFlyoutRegionUnavailableCallout')
+      ).not.toBeInTheDocument();
     });
   });
 

@@ -135,7 +135,7 @@ export const getActionPoliciesApiService = ({
           method: 'POST',
           path: `${ALERTING_V2_ACTION_POLICY_API_PATH}/${encodeURIComponent(id)}/_snooze`,
           headers: COMMON_HEADERS,
-          body: { snoozedUntil },
+          body: { snoozed_until: snoozedUntil },
         });
         return response.data;
       }),
@@ -169,7 +169,7 @@ export const getActionPoliciesApiService = ({
 
     cleanUp: () =>
       measurePerformanceAsync(log, 'actionPolicies.cleanUp', async () => {
-        const { items } = await list({ perPage: 100 });
+        const { items } = await list({ per_page: 100 });
         if (items.length === 0) return;
 
         await postBulk('bulk_delete', { ids: items.map((item) => item.id) });

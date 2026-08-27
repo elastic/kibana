@@ -65,6 +65,19 @@ describe('enforceSpaceScope', () => {
     ]);
   });
 
+  it('uses a strict default-space term when matchMissingSpaceId is false', () => {
+    const dsl = {
+      query: { bool: { filter: [{ term: { action_id: 'a-1' } }] } },
+    } as unknown as ISearchRequestParams;
+
+    const scoped = enforceSpaceScope(dsl, 'default', { matchMissingSpaceId: false });
+
+    expect((scoped.query as any).bool.filter).toEqual([
+      { term: { action_id: 'a-1' } },
+      { term: { space_id: 'default' } },
+    ]);
+  });
+
   it('preserves other query and dsl fields (e.g. must_not, pit, sort)', () => {
     const dsl = {
       pit: { id: 'pit-1' },

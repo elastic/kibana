@@ -9,10 +9,6 @@ import Boom from '@hapi/boom';
 import { createHash } from 'crypto';
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, Logger } from '@kbn/core/server';
-import type {
-  ExternalReferenceAttachmentType,
-  PersistableStateAttachmentTypeSetup,
-} from '@kbn/cases-plugin/server/attachment_framework/types';
 import type { BulkCreateCasesRequest, CasesPatchRequest } from '@kbn/cases-plugin/common/types/api';
 import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/types';
 import {
@@ -26,14 +22,6 @@ const hashParts = (parts: string[]): string => {
   const hash = createHash('sha1');
   const hashFeed = parts.join('-');
   return hash.update(hashFeed).digest('hex');
-};
-
-const getExternalReferenceAttachmentTypeHash = (type: ExternalReferenceAttachmentType) => {
-  return hashParts([type.id]);
-};
-
-const getPersistableStateAttachmentTypeHash = (type: PersistableStateAttachmentTypeSetup) => {
-  return hashParts([type.id]);
 };
 
 const getUnifiedAttachmentTypeHash = (type: { id: string }) => {
@@ -69,74 +57,6 @@ export const registerRoutes = (core: CoreSetup<FixtureStartDeps>, logger: Logger
         });
       } catch (error) {
         logger.error(`CasesClientUser failure: ${error}`);
-        throw error;
-      }
-    }
-  );
-
-  router.get(
-    {
-      path: '/api/cases_fixture/registered_external_reference_attachments',
-      security: {
-        authz: {
-          enabled: false,
-          reason: 'This route is opted out from authorization',
-        },
-      },
-      validate: {},
-    },
-    async (context, request, response) => {
-      try {
-        const [_, { cases }] = await core.getStartServices();
-        const externalReferenceAttachmentTypeRegistry =
-          cases.getExternalReferenceAttachmentTypeRegistry();
-
-        const allTypes = externalReferenceAttachmentTypeRegistry.list();
-
-        const hashMap = allTypes.reduce((map, type) => {
-          map[type.id] = getExternalReferenceAttachmentTypeHash(type);
-          return map;
-        }, {} as Record<string, string>);
-
-        return response.ok({
-          body: hashMap,
-        });
-      } catch (error) {
-        logger.error(`Error : ${error}`);
-        throw error;
-      }
-    }
-  );
-
-  router.get(
-    {
-      path: '/api/cases_fixture/registered_persistable_state_attachments',
-      security: {
-        authz: {
-          enabled: false,
-          reason: 'This route is opted out from authorization',
-        },
-      },
-      validate: {},
-    },
-    async (context, request, response) => {
-      try {
-        const [_, { cases }] = await core.getStartServices();
-        const persistableStateAttachmentTypeRegistry =
-          cases.getPersistableStateAttachmentTypeRegistry();
-
-        const allTypes = persistableStateAttachmentTypeRegistry.list();
-
-        const hashMap = allTypes.reduce((map, type) => {
-          map[type.id] = getPersistableStateAttachmentTypeHash(type);
-          return map;
-        }, {} as Record<string, string>);
-
-        return response.ok({
-          body: hashMap,
-        });
-      } catch (error) {
-        logger.error(`Error : ${error}`);
         throw error;
       }
     }

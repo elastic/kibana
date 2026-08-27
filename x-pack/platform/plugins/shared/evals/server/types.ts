@@ -14,10 +14,11 @@ import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extens
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
-import type { DatasetService } from './storage/dataset_service';
-import type { EvaluationScoreService } from './storage/evaluation_score_service';
+import type { DatasetService } from './storage/datasets/dataset_service';
+import type { EvaluatorDefinitionService } from './storage/evaluators/evaluator_definition_service';
+import type { EvaluationScoreService } from './storage/scores/evaluation_score_service';
+import type { EvaluatorOrigin, EvaluatorRegistry } from './evaluators/types';
 import type { OnlineScoreService } from './storage/online_score_service';
-import type { EvaluatorRegistry } from './evaluators/types';
 import type { EvalsTaskProvider } from './task_providers/types';
 
 export interface EvalsPluginSetup {
@@ -29,6 +30,7 @@ export interface EvaluatorSummary {
   name: string;
   version: string;
   kind: 'llm' | 'code';
+  origin: EvaluatorOrigin;
   description: string;
   needsJudgeConnector: boolean;
 }
@@ -42,7 +44,8 @@ export interface ModelConnectorSummary {
 export interface EvalsPluginStart {
   datasetService?: DatasetService;
   evaluationScoreService?: EvaluationScoreService;
-  listEvaluators?: () => EvaluatorSummary[];
+  /** Scoped by space, because which evaluators exist depends on it. */
+  listEvaluators?: (options: { spaceId: string }) => Promise<EvaluatorSummary[]>;
 
   listModelConnectors?: (request: KibanaRequest) => Promise<ModelConnectorSummary[]>;
   onlineScoreService?: OnlineScoreService;
@@ -70,6 +73,7 @@ export interface EvalsRouteHandlerContext {
   datasetService: DatasetService;
   evaluationScoreService: EvaluationScoreService;
   onlineScoreService: OnlineScoreService;
+  evaluatorDefinitionService: EvaluatorDefinitionService;
   evaluatorRegistry: EvaluatorRegistry;
 }
 

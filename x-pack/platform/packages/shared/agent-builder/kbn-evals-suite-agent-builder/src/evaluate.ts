@@ -6,12 +6,9 @@
  */
 
 import { evaluate as evalsBase } from '@kbn/evals';
-import { withPhoenixExecutor } from '@kbn/evals-phoenix-executor';
 import { AgentBuilderEvaluationChatClient } from './chat_client';
 
-const base = withPhoenixExecutor(evalsBase);
-
-export const evaluate = base.extend<
+export const evaluate = evalsBase.extend<
   {},
   {
     chatClient: AgentBuilderEvaluationChatClient;

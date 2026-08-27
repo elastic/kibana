@@ -23,6 +23,7 @@ import {
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import { createEvaluatorRegistry } from '../evaluators/registry';
 import { onlineScoresDataStreamDefinition } from '../storage/online_scores_index_template';
 import { computeOnlineScoreDocumentId, OnlineScoreService } from '../storage/online_score_service';
 import { registerIngestOnlineScoresRoute } from '../routes/online_scores/ingest_online_scores';
@@ -133,7 +134,7 @@ describe('online scores ingestion and listing integration', () => {
       router,
       logger,
       canEncrypt: false,
-      evaluatorRegistry: { list: () => [], get: () => undefined },
+      evaluatorRegistry: createEvaluatorRegistry(),
       getInferenceStart: async () => ({ getClient: jest.fn() } as unknown as InferenceServerStart),
       getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
       getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
@@ -142,7 +143,7 @@ describe('online scores ingestion and listing integration', () => {
       router,
       logger,
       canEncrypt: false,
-      evaluatorRegistry: { list: () => [], get: () => undefined },
+      evaluatorRegistry: createEvaluatorRegistry(),
       getInferenceStart: async () => ({ getClient: jest.fn() } as unknown as InferenceServerStart),
       getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
       getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),

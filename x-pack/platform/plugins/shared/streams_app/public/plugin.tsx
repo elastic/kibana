@@ -15,13 +15,11 @@ import {
   type PluginInitializerContext,
 } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
-import { significantEventsDeepLinkIds, type SigEventsLinkId } from '@kbn/deeplinks-observability';
-import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/streams-plugin/common';
 import { DataStreamsStatsService } from '@kbn/dataset-quality-plugin/public';
 import { dynamic } from '@kbn/shared-ux-utility';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { combineLatest, from, map, switchMap } from 'rxjs';
+import { from, map, switchMap } from 'rxjs';
 import { css } from '@emotion/css';
 import ReactDOM from 'react-dom';
 import type {
@@ -38,8 +36,6 @@ import {
   createDiscoverFlyoutStreamProcessingLink,
 } from './discover_features';
 import { StreamsTelemetryService } from './telemetry/service';
-import { registerSignificantEventAttachment } from './components/significant_events/significant_event_attachment/significant_event_attachment';
-import { FocusedSignificantEventService } from './services/significant_events/focused_significant_event_service';
 import { StreamsAppLocatorDefinition } from '../common/locators';
 
 const StreamsApplication = dynamic(() =>
@@ -94,9 +90,6 @@ export class StreamsAppPlugin
 {
   logger: Logger;
   telemetry: StreamsTelemetryService = new StreamsTelemetryService();
-  private readonly focusedSignificantEventService = new FocusedSignificantEventService();
-  private cleanupSignificantEventAttachment?: () => void;
-
   private readonly version: string;
 
   constructor(private readonly context: PluginInitializerContext<ConfigSchema>) {
@@ -116,84 +109,19 @@ export class StreamsAppPlugin
       appRoute: '/app/streams',
       category: DEFAULT_APP_CATEGORIES.management,
       order: 10000,
-      deepLinks: [
-        {
-          id: 'significantEventsDiscovery' satisfies SigEventsLinkId,
-          title: i18n.translate('xpack.streams.significantEventsDiscovery.deepLinkTitle', {
-            defaultMessage: 'Significant Events',
-          }),
-          path: '/_discovery',
-          visibleIn: [],
-          keywords: ['significant events', 'sig events', 'discovery'],
-        },
-        {
-          id: 'significantEventsKnowledgeIndicators' satisfies SigEventsLinkId,
-          title: i18n.translate('xpack.streams.significantEventsDiscovery.kiDeepLinkTitle', {
-            defaultMessage: 'Significant Events / KIs',
-          }),
-          path: '/_discovery/knowledge_indicators',
-          visibleIn: [],
-          keywords: [
-            'knowledge indicators',
-            'ki',
-            'kis',
-            'significant events',
-            'sig events',
-            'sig events kis',
-          ],
-        },
-        {
-          id: 'significantEventsEvents' satisfies SigEventsLinkId,
-          title: i18n.translate('xpack.streams.significantEventsDiscovery.eventsDeepLinkTitle', {
-            defaultMessage: 'Significant Events / Events',
-          }),
-          path: '/_discovery/significant_events',
-          visibleIn: [],
-          keywords: ['events', 'significant events', 'sig events', 'sig events events'],
-        },
-        {
-          id: 'significantEventsRules' satisfies SigEventsLinkId,
-          title: i18n.translate('xpack.streams.significantEventsDiscovery.rulesDeepLinkTitle', {
-            defaultMessage: 'Significant Events / Rules',
-          }),
-          path: '/_discovery/queries',
-          visibleIn: [],
-          keywords: ['rules', 'queries', 'significant events', 'sig events', 'sig events rules'],
-        },
-      ],
       updater$: from(startServicesPromise).pipe(
-        switchMap(([coreStart, pluginsStart]) =>
-          combineLatest([
-            pluginsStart.streams.navigationStatus$,
-            coreStart.featureFlags.getBooleanValue$(
-              STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG,
-              false
-            ),
-          ]).pipe(
-            map(([{ status }, isSignificantEventsAvailable]): AppUpdater => {
-              return (app) => {
+        switchMap(([, pluginsStart]) =>
+          pluginsStart.streams.navigationStatus$.pipe(
+            map(({ status }): AppUpdater => {
+              return () => {
                 if (status !== 'enabled') {
                   return {
                     visibleIn: [],
-                    deepLinks: (app.deepLinks ?? []).map((link) => ({ ...link, visibleIn: [] })),
                   };
                 }
 
                 return {
                   visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'],
-                  deepLinks: (app.deepLinks ?? []).map((link) => {
-                    if (significantEventsDeepLinkIds.includes(link.id as SigEventsLinkId)) {
-                      // Significant events entry points stay hidden until the rollout flag is on,
-                      // mirroring the server-side gate so the feature is fully absent from the UI
-                      // in deployments where it has not been enabled.
-                      return {
-                        ...link,
-                        visibleIn: isSignificantEventsAvailable ? ['globalSearch'] : [],
-                      };
-                    }
-
-                    return link;
-                  }),
                 };
               };
             })
@@ -208,7 +136,6 @@ export class StreamsAppPlugin
           dataStreamsClient: new DataStreamsStatsService()
             .start({ http: coreStart.http })
             .getClient(),
-          focusedSignificantEventService: this.focusedSignificantEventService,
           telemetryClient: this.telemetry.getClient(),
           version: this.version,
         };
@@ -232,14 +159,6 @@ export class StreamsAppPlugin
   }
 
   start(coreStart: CoreStart, pluginsStart: StreamsAppStartDependencies): StreamsAppPublicStart {
-    if (pluginsStart.agentBuilder) {
-      this.cleanupSignificantEventAttachment = registerSignificantEventAttachment({
-        agentBuilder: pluginsStart.agentBuilder,
-        chrome: coreStart.chrome,
-        focusedSignificantEventService: this.focusedSignificantEventService,
-      });
-    }
-
     const locator = pluginsStart.share.url.locators.create(new StreamsAppLocatorDefinition());
     pluginsStart.streams.navigationStatus$.subscribe((status) => {
       if (status.status !== 'enabled') return;
@@ -267,9 +186,5 @@ export class StreamsAppPlugin
     });
 
     return {};
-  }
-
-  stop() {
-    this.cleanupSignificantEventAttachment?.();
   }
 }

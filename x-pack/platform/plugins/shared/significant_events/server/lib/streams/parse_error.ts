@@ -74,13 +74,3 @@ export function parseError(error: unknown): ParsedError {
     cause: error,
   };
 }
-
-/**
- * Convenience function to get just the error message from an unknown error.
- * This is a simpler alternative to parseError when only the message is needed.
- *
- * @deprecated Prefer using parseError() for more complete error information
- */
-export function getErrorMessage(error: unknown): string {
-  return parseError(error).message;
-}

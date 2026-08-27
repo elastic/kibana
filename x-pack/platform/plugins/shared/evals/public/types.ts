@@ -63,7 +63,7 @@ export interface AddToDatasetActionConfig extends AddToDatasetFlyoutOpenOptions 
    */
   ariaLabel?: string;
   /**
-   * Icon type for the CTA (defaults to `beaker`).
+   * Icon type for the CTA (defaults to `flask`).
    */
   iconType?: string;
   /**

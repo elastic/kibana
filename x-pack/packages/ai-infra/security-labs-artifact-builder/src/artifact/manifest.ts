@@ -13,7 +13,7 @@ export interface SecurityLabsManifest {
   formatVersion: string;
   /** Resource type identifier */
   resourceType: 'security_labs';
-  /** Date-based version (YYYY.MM.DD) */
+  /** Artifact version (`YYYY.MM.DD-HHMMSS` UTC, or legacy `YYYY.MM.DD`) */
   version: string;
 }
 

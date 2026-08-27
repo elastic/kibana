@@ -19,6 +19,8 @@ import { NotePreviews } from '.';
 import { useDeleteNote } from './hooks/use_delete_note';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
+import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
+import { withIndices } from '../../../../data_view_manager/hooks/__mocks__/use_data_view';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { DocumentDetailsRightPanelKey } from '../../../../flyout/document_details/shared/constants/panel_keys';
 import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
@@ -31,6 +33,7 @@ const mockDispatch = jest.fn();
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/hooks/use_selector');
 jest.mock('../../../../data_view_manager/hooks/use_selected_patterns');
+jest.mock('../../../../data_view_manager/hooks/use_data_view');
 jest.mock('@kbn/expandable-flyout');
 jest.mock('../../../../flyout_v2/use_flyout_api');
 jest.mock('../../../../common/hooks/use_is_new_flyout_enabled');
@@ -74,6 +77,7 @@ describe('NotePreviews', () => {
       },
     });
     (useSelectedPatterns as jest.Mock).mockReturnValue(['test1', 'test2']);
+    jest.mocked(useDataView).mockReturnValue(withIndices(['test1', 'test2']));
     (useExpandableFlyoutApi as jest.Mock).mockReturnValue({ openFlyout: jest.fn() });
     flyoutApi = createFlyoutApiMock();
     jest.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
