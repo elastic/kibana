@@ -42,7 +42,11 @@ export const startInvestigationRoute = createNightshiftInvestigationsServerRoute
   }),
   handler: async ({ request, params, getInvestigationsClient }) => {
     const client = getInvestigationsClient(request);
-    const result = await client.start(params.body);
+    // User-initiated starts are always manual.
+    const result = await client.start({
+      ...params.body,
+      trigger_type: 'manual',
+    });
     return result;
   },
 });

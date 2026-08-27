@@ -5,9 +5,15 @@
  * 2.0.
  */
 
-import type { InvestigationSubjectType } from './workflows/triggers';
+import type { InvestigationSubjectType, InvestigationTriggerType } from './workflows/triggers';
 
-export { INVESTIGATION_SUBJECT_TYPES, type InvestigationSubjectType } from './workflows/triggers';
+export {
+  INVESTIGATION_SUBJECT_TYPES,
+  type InvestigationSubjectType,
+  INVESTIGATION_TRIGGER_TYPES,
+  DEFAULT_INVESTIGATION_TRIGGER_TYPE,
+  type InvestigationTriggerType,
+} from './workflows/triggers';
 
 export interface InvestigationSubject {
   type: InvestigationSubjectType;
@@ -15,12 +21,12 @@ export interface InvestigationSubject {
 }
 
 /**
- * What started an investigation, derived server-side from the workflow inputs persisted at start
- * time. Never model-generated. `summary` is a brief description of the trigger; `url` is a
- * relative Kibana app path (consumers prepend the basePath) that opens the trigger item.
+ * The subject as returned by reads, carrying what a consumer needs to render the triggering item
+ * inline and navigate back to it. Both fields are derived server-side from the workflow inputs
+ * persisted at start time, never model-generated. `url` is a relative Kibana app path, so
+ * consumers prepend the basePath.
  */
-export interface InvestigationTrigger {
-  type: InvestigationSubjectType;
+export interface InvestigationSubjectReference extends InvestigationSubject {
   summary?: string;
   url?: string;
 }
@@ -31,6 +37,10 @@ export interface InvestigationContext {
 
 export interface StartInvestigationRequest {
   subject: InvestigationSubject;
+  /**
+   * What initiated the investigation. Defaults to "manual" when omitted.
+   */
+  trigger_type?: InvestigationTriggerType;
   /**
    * Caller-supplied prompt for the investigation agent. Falls back to a generic
    * message derived from the subject when omitted.
@@ -65,8 +75,9 @@ export type InvestigationStatus = (typeof INVESTIGATION_STATUSES)[number];
 
 export interface GetInvestigationResponse {
   investigation_id: string;
-  subject: InvestigationSubject;
-  trigger: InvestigationTrigger;
+  /** Undefined for runs initiated without a subject (e.g. a bare manual workflow run). */
+  subject?: InvestigationSubjectReference;
+  trigger_type?: InvestigationTriggerType;
   status: InvestigationStatus;
   started_at?: string;
   completed_at?: string;

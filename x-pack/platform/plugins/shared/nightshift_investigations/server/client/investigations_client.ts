@@ -17,13 +17,15 @@ import type {
   GetInvestigationResponse,
   InvestigationStatus,
   InvestigationSubject,
-  InvestigationTrigger,
+  InvestigationSubjectReference,
+  InvestigationTriggerType,
   ListInvestigationItem,
   ListInvestigationsRequest,
   ListInvestigationsResponse,
   StartInvestigationRequest,
   StartInvestigationResponse,
 } from '../../common';
+import { DEFAULT_INVESTIGATION_TRIGGER_TYPE, INVESTIGATION_TRIGGER_TYPES } from '../../common';
 import { InvestigationNotFoundError } from './errors';
 import { InvestigationUnavailableError } from './investigation_unavailable_error';
 export { InvestigationNotFoundError, InvestigationUnavailableError };
@@ -97,20 +99,31 @@ function isTerminalStatus(status: InvestigationStatus): boolean {
   return status === 'completed' || status === 'failed' || status === 'cancelled';
 }
 
-function recoverSubjectFromInput(input: Record<string, unknown> | undefined): InvestigationSubject {
+function recoverSubjectFromInput(
+  input: Record<string, unknown> | undefined
+): InvestigationSubject | undefined {
   const ctx = input?.context;
-  if (isPlainObject(ctx)) {
-    if (ctx.source === 'significant_event') {
-      return {
-        type: 'significant_event',
-        id: String(ctx.significant_event_id ?? ctx.event_id ?? ''),
-      };
-    }
-    if (ctx.source === 'alert') {
-      return { type: 'alert', id: String(ctx.alert_id ?? '') };
-    }
+  if (!isPlainObject(ctx)) return undefined;
+  if (ctx.source === 'significant_event') {
+    const id = asString(ctx.event_id) ?? asString(ctx.significant_event_id);
+    return id ? { type: 'significant_event', id } : undefined;
   }
-  return { type: 'manual', id: '' };
+  if (ctx.source === 'alert') {
+    const id = asString(ctx.alert_id);
+    return id ? { type: 'alert', id } : undefined;
+  }
+  return undefined;
+}
+
+function recoverTriggerTypeFromInput(
+  input: Record<string, unknown> | undefined
+): InvestigationTriggerType | undefined {
+  const ctx = input?.context;
+  if (!isPlainObject(ctx)) return undefined;
+  const valid: readonly string[] = INVESTIGATION_TRIGGER_TYPES;
+  return valid.includes(String(ctx.trigger_type))
+    ? (ctx.trigger_type as InvestigationTriggerType)
+    : undefined;
 }
 
 /** Deep link that opens an event's flyout in the significant events app (app id + page route). */
@@ -118,14 +131,14 @@ const SIGNIFICANT_EVENT_URL_PATH = '/app/significant_events/significant_events';
 const ALERT_DETAILS_URL_PATH = '/app/observability/alerts';
 
 /** Summaries render inline next to an investigation; cap them so callers cannot bloat responses. */
-const MAX_TRIGGER_SUMMARY_LENGTH = 200;
+const MAX_SUBJECT_SUMMARY_LENGTH = 200;
 
 function asBriefText(value: unknown): string | undefined {
   if (typeof value !== 'string') return undefined;
   const text = value.trim();
   if (!text) return undefined;
-  return text.length > MAX_TRIGGER_SUMMARY_LENGTH
-    ? `${text.slice(0, MAX_TRIGGER_SUMMARY_LENGTH)}…`
+  return text.length > MAX_SUBJECT_SUMMARY_LENGTH
+    ? `${text.slice(0, MAX_SUBJECT_SUMMARY_LENGTH)}…`
     : text;
 }
 
@@ -139,36 +152,26 @@ function firstNonEmptyLine(value: unknown): string | undefined {
 }
 
 /**
- * Derives the trigger reference from the workflow inputs persisted at start time, reusing the
- * same subject resolution as the response's `subject` field so both always name the same entity.
- * Consumers render what started the investigation without a second call; URLs are relative app
- * paths (the basePath is prepended client-side), and the significant-event link opens the event
- * flyout via the app's `openEvent` deep-link param, which resolves when the event is loadable by
- * the app.
+ * Adds what a consumer needs to render the triggering item inline and navigate back to it, taken
+ * from the same persisted inputs the subject itself came from. URLs are relative app paths; the
+ * significant-event one opens the event flyout through the app's `openEvent` deep-link param,
+ * which resolves when the event is loadable by that app.
  */
-export function buildTriggerFromInput(
+function toSubjectReference(
+  subject: InvestigationSubject,
   input: Record<string, unknown> | undefined
-): InvestigationTrigger {
+): InvestigationSubjectReference {
   const ctx = isPlainObject(input?.context) ? input.context : undefined;
   const summary =
     asBriefText(ctx?.summary) ??
     asBriefText(ctx?.name) ??
     asBriefText(firstNonEmptyLine(input?.message));
-  const subject = recoverSubjectFromInput(input);
+  const url =
+    subject.type === 'significant_event'
+      ? `${SIGNIFICANT_EVENT_URL_PATH}?openEvent=${encodeURIComponent(subject.id)}`
+      : `${ALERT_DETAILS_URL_PATH}/${encodeURIComponent(subject.id)}`;
 
-  if (subject.type === 'significant_event' || subject.type === 'alert') {
-    const url =
-      subject.type === 'significant_event'
-        ? `${SIGNIFICANT_EVENT_URL_PATH}?openEvent=${encodeURIComponent(subject.id)}`
-        : `${ALERT_DETAILS_URL_PATH}/${encodeURIComponent(subject.id)}`;
-    return {
-      type: subject.type,
-      ...(summary ? { summary } : {}),
-      ...(subject.id ? { url } : {}),
-    };
-  }
-
-  return { type: 'manual', ...(summary ? { summary } : {}) };
+  return { ...subject, ...(summary ? { summary } : {}), url };
 }
 
 export interface NightshiftInvestigationsClientDeps {
@@ -211,6 +214,7 @@ export class NightshiftInvestigationsClient {
 
   async start({
     subject,
+    trigger_type,
     message,
     stream_names,
     concurrency_key,
@@ -248,6 +252,7 @@ export class NightshiftInvestigationsClient {
         ...context,
         source: subject.type,
         [`${subject.type}_id`]: subject.id,
+        trigger_type: trigger_type ?? DEFAULT_INVESTIGATION_TRIGGER_TYPE,
       },
     };
 
@@ -314,11 +319,12 @@ export class NightshiftInvestigationsClient {
     })();
 
     const subject = recoverSubjectFromInput(rawInput);
+    const recoveredTriggerType = recoverTriggerTypeFromInput(rawInput);
 
     return {
       investigation_id: investigationId,
-      subject,
-      trigger: buildTriggerFromInput(rawInput),
+      subject: subject && toSubjectReference(subject, rawInput),
+      trigger_type: recoveredTriggerType,
       status,
       started_at: execution.startedAt,
       completed_at: isTerminal ? execution.finishedAt : undefined,
