@@ -248,7 +248,7 @@ describe('Monitor Detail Flyout', () => {
 
     const { getByRole, getByText, getAllByRole } = render(
       <MonitorDetailFlyout
-        configId="123456"
+        configId="test-id"
         id="test-id"
         location="US East"
         locationId="us-east"
