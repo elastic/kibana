@@ -348,7 +348,7 @@ export const LensTopNavMenu = ({
     getOriginatingAppName,
   } = useKibana<LensAppServices>().services;
 
-  const isChromeNextAppHeader = chrome.next.isEnabled && chrome.getChromeStyle() === 'project';
+  const isChromeNextAppHeader = chrome.getChromeStyle() === 'project';
 
   const { datasourceMap, visualizationMap } = useEditorFrameService();
 

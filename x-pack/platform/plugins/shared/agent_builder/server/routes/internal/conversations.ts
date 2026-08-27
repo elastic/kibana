@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import type { FeedbackChipId } from '@kbn/agent-builder-common';
 import {
   CONVERSATION_ID_MAX_LENGTH,
   CONVERSATION_TITLE_MAX_LENGTH,
@@ -184,6 +185,54 @@ export function registerInternalConversationRoutes({
           read: updatedConversation.read!,
         },
       });
+    })
+  );
+
+  // submit round feedback
+  router.post(
+    {
+      path: `${internalApiPath}/conversations/{conversation_id}/rounds/{round_id}/_feedback`,
+      validate: {
+        params: schema.object({
+          conversation_id: schema.string({ maxLength: 256 }),
+          round_id: schema.string({ maxLength: 256 }),
+        }),
+        body: schema.object({
+          vote: schema.nullable(schema.oneOf([schema.literal('up'), schema.literal('down')])),
+          chips: schema.maybe(
+            schema.arrayOf(
+              schema.oneOf([
+                schema.literal('inaccurate'),
+                schema.literal('incomplete'),
+                schema.literal('didnt_follow_instructions'),
+                schema.literal('accurate'),
+                schema.literal('useful'),
+                schema.literal('well_explained'),
+              ]),
+              { maxSize: 3 }
+            )
+          ),
+          comment: schema.maybe(schema.string({ maxLength: 500 })),
+        }),
+      },
+      options: { access: 'internal' },
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
+      },
+    },
+    wrapHandler(async (ctx, request, response) => {
+      const { conversations: conversationsService } = getInternalServices();
+      const { conversation_id: conversationId, round_id: roundId } = request.params;
+      const { vote, chips, comment } = request.body;
+
+      const client = await conversationsService.getScopedClient({ request });
+      await client.updateRoundFeedback(conversationId, roundId, {
+        vote,
+        chips: chips as FeedbackChipId[] | undefined,
+        comment,
+      });
+
+      return response.noContent();
     })
   );
 

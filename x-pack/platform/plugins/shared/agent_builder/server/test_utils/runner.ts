@@ -350,6 +350,7 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
     toolManager: createToolManagerMock(),
     experimentalFeatures: {
       skills: false,
+      aiIndices: false,
       relevantSkills: false,
       subagents: false,
       todos: false,
@@ -417,6 +418,7 @@ export const createToolHandlerContextMock = (): ToolHandlerContextMock => {
     runContext: { runId: 'mock-run-id', stack: [] },
     experimentalFeatures: {
       skills: false,
+      aiIndices: false,
       relevantSkills: false,
       subagents: false,
       todos: false,
@@ -475,6 +477,7 @@ export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
     toolManager: createToolManagerMock(),
     experimentalFeatures: {
       skills: false,
+      aiIndices: false,
       relevantSkills: false,
       subagents: false,
       todos: false,
