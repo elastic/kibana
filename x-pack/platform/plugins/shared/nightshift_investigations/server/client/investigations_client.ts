@@ -142,30 +142,22 @@ function asBriefText(value: unknown): string | undefined {
     : text;
 }
 
-function firstNonEmptyLine(value: unknown): string | undefined {
-  if (typeof value !== 'string') return undefined;
-  const line = value
-    .split('\n')
-    .map((l) => l.trim())
-    .find((l) => l.length > 0);
-  return line || undefined;
-}
-
 /**
  * Adds what a consumer needs to render the triggering item inline and navigate back to it, taken
  * from the same persisted inputs the subject itself came from. URLs are relative app paths; the
  * significant-event one opens the event flyout through the app's `openEvent` deep-link param,
  * which resolves when the event is loadable by that app.
+ *
+ * The summary deliberately does not fall back to `inputs.message`: callers that supply no summary
+ * also supply no message, so the message is the generic prompt `start` synthesizes, and surfacing
+ * that would label every such subject "Investigation requested for ...".
  */
 function toSubjectReference(
   subject: InvestigationSubject,
   input: Record<string, unknown> | undefined
 ): InvestigationSubjectReference {
   const ctx = isPlainObject(input?.context) ? input.context : undefined;
-  const summary =
-    asBriefText(ctx?.summary) ??
-    asBriefText(ctx?.name) ??
-    asBriefText(firstNonEmptyLine(input?.message));
+  const summary = asBriefText(ctx?.summary) ?? asBriefText(ctx?.name);
   const url =
     subject.type === 'significant_event'
       ? `${SIGNIFICANT_EVENT_URL_PATH}?openEvent=${encodeURIComponent(subject.id)}`

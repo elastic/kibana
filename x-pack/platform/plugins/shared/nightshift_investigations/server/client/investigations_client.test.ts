@@ -268,13 +268,12 @@ describe('NightshiftInvestigationsClient.get()', () => {
       );
     });
 
-    it('links an alert subject to its details page and falls back to the message for the summary', async () => {
+    it('links an alert subject to its details page and encodes the id', async () => {
       mockManagement.getWorkflowExecution.mockResolvedValue(
         makeExecution({
           context: {
             inputs: {
-              message: 'CPU saturation alert\n\nDetails follow.',
-              context: { source: 'alert', alert_id: 'alert/99?x=1' },
+              context: { source: 'alert', alert_id: 'alert/99?x=1', summary: 'CPU saturation' },
             },
           },
         })
@@ -283,19 +282,16 @@ describe('NightshiftInvestigationsClient.get()', () => {
       expect(result.subject).toEqual({
         type: 'alert',
         id: 'alert/99?x=1',
-        summary: 'CPU saturation alert',
+        summary: 'CPU saturation',
         url: `/app/observability/alerts/${encodeURIComponent('alert/99?x=1')}`,
       });
     });
 
-    it('prefers context.name over the message for the summary', async () => {
+    it('falls back to context.name when no summary was supplied', async () => {
       mockManagement.getWorkflowExecution.mockResolvedValue(
         makeExecution({
           context: {
-            inputs: {
-              message: 'Generic message',
-              context: { source: 'alert', alert_id: 'alert-99', name: 'High CPU' },
-            },
+            inputs: { context: { source: 'alert', alert_id: 'alert-99', name: 'High CPU' } },
           },
         })
       );
@@ -303,10 +299,15 @@ describe('NightshiftInvestigationsClient.get()', () => {
       expect(result.subject?.summary).toBe('High CPU');
     });
 
-    it('omits the summary when the inputs carry nothing usable', async () => {
+    it('omits the summary rather than surfacing the generic message start() synthesizes', async () => {
       mockManagement.getWorkflowExecution.mockResolvedValue(
         makeExecution({
-          context: { inputs: { context: { source: 'alert', alert_id: 'alert-99' } } },
+          context: {
+            inputs: {
+              message: 'Investigation requested for alert alert-99',
+              context: { source: 'alert', alert_id: 'alert-99' },
+            },
+          },
         })
       );
       const result = await makeClient().get('inv-1');
