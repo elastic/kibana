@@ -303,10 +303,12 @@ describe('getVersionSpecificPolicies', () => {
       secret_references: [{ id: 'base-secret' }],
     } as any;
 
-    const policies = await getVersionSpecificPolicies(soClient, localFleetServerPolicy, fullPolicy, [
-      '9.3',
-      '8.9',
-    ]);
+    const policies = await getVersionSpecificPolicies(
+      soClient,
+      localFleetServerPolicy,
+      fullPolicy,
+      ['9.3', '8.9']
+    );
 
     const policy93 = policies.find((p) => p.policy_id === 'policy1#9.3');
     const policy89 = policies.find((p) => p.policy_id === 'policy1#8.9');
