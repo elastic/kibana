@@ -36,11 +36,15 @@ export class EsqlService {
    * Get indices by their mode (lookup or time_series).
    * @param mode The mode to filter indices by.
    * @param remoteClusters Optional comma-separated list of remote clusters to include.
+   * @param projectRouting Optional CPS project routing value forwarded to Elasticsearch as
+   *   `project_routing` so that index resolution reflects the project picker selection or an
+   *   explicit `SET project_routing` pre-statement.
    * @returns A promise that resolves to the indices autocomplete result.
    */
   public async getIndicesByIndexMode(
     mode: 'lookup' | 'time_series',
-    remoteClusters?: string
+    remoteClusters?: string,
+    projectRouting?: string
   ): Promise<IndicesAutocompleteResult> {
     const { client } = this.options;
 
@@ -55,12 +59,14 @@ export class EsqlService {
       sourcesToQuery.push(...clustersArray);
     }
 
+    const cpsParams = projectRouting ? { project_routing: projectRouting } : {};
     // It doesn't return hidden indices
     const sources = (await client.indices.resolveIndex({
       name: sourcesToQuery,
       expand_wildcards: mode === 'lookup' ? ['open', 'closed'] : 'open',
       mode,
-    })) as ResolveIndexResponse;
+      ...cpsParams,
+    } as Parameters<typeof client.indices.resolveIndex>[0])) as ResolveIndexResponse;
 
     const mappedMode = this.getIndexSourceType(mode);
 

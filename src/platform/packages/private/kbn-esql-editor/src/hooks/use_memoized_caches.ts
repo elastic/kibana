@@ -137,10 +137,15 @@ export const useMemoizedCaches = ({
 
   const getJoinIndicesCallback = useCallback<Required<ESQLCallbacks>['getJoinIndices']>(
     async (cacheOptions) => {
-      const result = await getJoinIndices(minimalQueryRef.current, core.http, cacheOptions);
+      const result = await getJoinIndices(
+        minimalQueryRef.current,
+        core.http,
+        cacheOptions,
+        effectiveProjectRouting
+      );
       return result;
     },
-    [core.http]
+    [core.http, effectiveProjectRouting]
   );
 
   return {

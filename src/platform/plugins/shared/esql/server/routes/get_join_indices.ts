@@ -23,6 +23,8 @@ export const registerGetJoinIndicesRoute = (
         query: schema.object({
           // remoteClusters may hold a comma-separated list of cluster names.
           remoteClusters: schema.maybe(schema.string({ maxLength: 1000 })),
+          // CPS project routing value forwarded to Elasticsearch for index resolution.
+          projectRouting: schema.maybe(schema.string({ maxLength: 10000 })),
         }),
       },
       security: {
@@ -35,9 +37,9 @@ export const registerGetJoinIndicesRoute = (
     async (requestHandlerContext, request, response) => {
       try {
         const core = await requestHandlerContext.core;
-        const { remoteClusters } = request.query;
+        const { remoteClusters, projectRouting } = request.query;
         const service = new EsqlService({ client: core.elasticsearch.client.asCurrentUser });
-        const result = await service.getIndicesByIndexMode('lookup', remoteClusters);
+        const result = await service.getIndicesByIndexMode('lookup', remoteClusters, projectRouting);
 
         return response.ok({
           body: result,

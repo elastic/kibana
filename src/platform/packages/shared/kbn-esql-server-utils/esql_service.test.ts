@@ -114,3 +114,27 @@ describe('EsqlService.getAllIndices', () => {
     });
   });
 });
+
+describe('EsqlService.getIndicesByIndexMode', () => {
+  it('forwards projectRouting to resolveIndex as project_routing when provided', async () => {
+    const resolveIndex = jest.fn().mockResolvedValue(emptyResponse);
+    const service = new EsqlService({ client: makeClient(resolveIndex) });
+
+    await service.getIndicesByIndexMode('lookup', undefined, 'my-project');
+
+    expect(resolveIndex).toHaveBeenCalledTimes(1);
+    expect(resolveIndex).toHaveBeenCalledWith(
+      expect.objectContaining({ project_routing: 'my-project' })
+    );
+  });
+
+  it('does not set project_routing when projectRouting is omitted', async () => {
+    const resolveIndex = jest.fn().mockResolvedValue(emptyResponse);
+    const service = new EsqlService({ client: makeClient(resolveIndex) });
+
+    await service.getIndicesByIndexMode('lookup');
+
+    expect(resolveIndex).toHaveBeenCalledTimes(1);
+    expect(resolveIndex.mock.calls[0][0]).not.toHaveProperty('project_routing');
+  });
+});
