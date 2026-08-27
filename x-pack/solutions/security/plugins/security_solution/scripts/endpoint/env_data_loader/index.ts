@@ -29,6 +29,7 @@ export const cli = () => {
         trustedAppsCount: Number(cliContext.flags.trustedAppsCount),
         eventFiltersCount: Number(cliContext.flags.eventFiltersCount),
         blocklistsCount: Number(cliContext.flags.blocklistsCount),
+        customYaraSignaturesCount: Number(cliContext.flags.customYaraSignaturesCount),
         hostIsolationExceptionsCount: Number(cliContext.flags.hostIsolationExceptionsCount),
         endpointExceptionsCount: Number(cliContext.flags.endpointExceptionsCount),
         globalArtifactRatio: Number(cliContext.flags.globalArtifactRatio),
@@ -61,6 +62,7 @@ ${HORIZONTAL_LINE}
           trustedAppsCount: 10,
           eventFiltersCount: 10,
           blocklistsCount: 10,
+          customYaraSignaturesCount: 10,
           hostIsolationExceptionsCount: 10,
           endpointExceptionsCount: 10,
           globalArtifactRatio: 50,
@@ -76,6 +78,7 @@ ${HORIZONTAL_LINE}
         --trustedAppsCount              How many Trusted Applications to create (Default: 10)
         --eventFiltersCount             How many Event Filters to create (Default: 10)
         --blocklistsCount               How many Blocklists to create (Default: 10)
+        --customYaraSignaturesCount     How many Custom YARA Signatures to create (Default: 10)
         --hostIsolationExceptionsCount  How many Host Isolation Exceptions to create (Default: 10)
         --endpointExceptionsCount       How many Endpoint Exceptions to create (Default: 10)
         --globalArtifactRatio           The percentage ratio of all artifacts that should be global
