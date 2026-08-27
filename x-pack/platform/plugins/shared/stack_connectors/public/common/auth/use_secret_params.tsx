@@ -26,7 +26,9 @@ export function useSecretParams(
     ['secretParams', connectorId],
     async () =>
       await http.get<string[]>(
-        `${INTERNAL_BASE_STACK_CONNECTORS_API_PATH}/${connectorId}/secret_params`
+        `${INTERNAL_BASE_STACK_CONNECTORS_API_PATH}/${encodeURIComponent(
+          connectorId ?? ''
+        )}/secret_params`
       ),
     {
       enabled: isEdit && Boolean(connectorId),

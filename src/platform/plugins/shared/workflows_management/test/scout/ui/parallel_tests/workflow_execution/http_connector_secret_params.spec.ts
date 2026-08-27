@@ -64,9 +64,7 @@ test.describe(
       await clientSecretValueInput.fill(CLIENT_SECRET);
 
       const saveButton = page.testSubj.locator('create-connector-flyout-save-btn');
-      if (await saveButton.isDisabled()) {
-        throw new Error(await page.testSubj.locator('create-connector-flyout').innerText());
-      }
+      await expect(saveButton).toBeEnabled();
       const createResponsePromise = page.waitForResponse(
         (response) =>
           response.request().method() === 'POST' &&
