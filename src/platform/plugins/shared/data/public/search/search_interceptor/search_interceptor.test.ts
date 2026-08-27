@@ -2336,6 +2336,180 @@ describe('SearchInterceptor', () => {
         expect(error).toHaveBeenCalled();
       });
     });
+
+    describe('cancel on browser navigation (beforeunload)', () => {
+      let originalFetch: typeof global.fetch;
+      let mockFetch: jest.Mock;
+
+      beforeEach(() => {
+        originalFetch = global.fetch;
+        mockFetch = jest.fn().mockResolvedValue({} as Response);
+        global.fetch = mockFetch;
+      });
+
+      afterEach(() => {
+        global.fetch = originalFetch;
+      });
+
+      test('should send DELETE via fetch with keepalive when beforeunload fires during active async search', async () => {
+        const responses = [
+          {
+            time: 10,
+            value: getMockSearchResponse({
+              isPartial: true,
+              isRunning: true,
+              rawResponse: {},
+              id: 'async-id-1',
+            }),
+          },
+          {
+            time: 1000,
+            value: getMockSearchResponse({
+              isPartial: false,
+              isRunning: false,
+              rawResponse: {},
+              id: 'async-id-1',
+            }),
+          },
+        ];
+        mockCoreSetup.http.post.mockImplementation(getHttpMock(responses));
+
+        const response = searchInterceptor.search({}, { pollInterval: 0 });
+        response.subscribe({ next, error, complete });
+
+        await timeTravel(10); // First response arrives (still running)
+
+        expect(next).toHaveBeenCalled();
+
+        window.dispatchEvent(new Event('beforeunload'));
+
+        // Filter to calls for our specific search ID only (other stale handlers may also fire)
+        const callsForOurSearch = (mockFetch.mock.calls as Array<[string, RequestInit]>).filter(
+          ([url]) => url.includes('async-id-1')
+        );
+        expect(callsForOurSearch).toHaveLength(1);
+        expect(callsForOurSearch[0]).toEqual([
+          '/internal/search/ese/async-id-1',
+          expect.objectContaining({
+            method: 'DELETE',
+            keepalive: true,
+            headers: expect.objectContaining({
+              'kbn-xsrf': 'true',
+              'elastic-api-version': '1',
+            }),
+          }),
+        ]);
+      });
+
+      test('should not send DELETE via fetch if search completes before beforeunload', async () => {
+        const responses = [
+          {
+            time: 10,
+            value: getMockSearchResponse({
+              isPartial: false,
+              isRunning: false,
+              rawResponse: {},
+              id: 'async-id-2',
+            }),
+          },
+        ];
+        mockCoreSetup.http.post.mockImplementation(getHttpMock(responses));
+
+        const response = searchInterceptor.search({}, { pollInterval: 0 });
+        response.subscribe({ next, error, complete });
+
+        await timeTravel(10); // Search completes
+
+        expect(complete).toHaveBeenCalled();
+
+        window.dispatchEvent(new Event('beforeunload'));
+
+        const callsForOurSearch = (mockFetch.mock.calls as Array<[string, RequestInit]>).filter(
+          ([url]) => url.includes('async-id-2')
+        );
+        expect(callsForOurSearch).toHaveLength(0);
+      });
+
+      test('should not send DELETE via fetch for searches saved to background', async () => {
+        const sessionId = 'session-bg-1';
+        sessionService.isCurrentSession.mockImplementation(
+          (_sessionId) => _sessionId === sessionId
+        );
+        sessionService.isSaving.mockReturnValue(false);
+
+        mockCoreSetup.http.post.mockResolvedValue(
+          getMockSearchResponse({
+            isPartial: true,
+            isRunning: true,
+            rawResponse: {},
+            id: 'async-id-3',
+          })
+        );
+
+        const response = searchInterceptor.search({}, { pollInterval: 0, sessionId });
+        response.subscribe({ next, error, complete });
+
+        await timeTravel(10);
+
+        expect(next).toHaveBeenCalled();
+
+        sessionState$.next(SearchSessionState.BackgroundLoading);
+
+        await timeTravel(10);
+
+        window.dispatchEvent(new Event('beforeunload'));
+
+        const callsForOurSearch = (mockFetch.mock.calls as Array<[string, RequestInit]>).filter(
+          ([url]) => url.includes('async-id-3')
+        );
+        expect(callsForOurSearch).toHaveLength(0);
+      });
+
+      test('should send DELETE via fetch for active searches when stop() is called', async () => {
+        const responses = [
+          {
+            time: 10,
+            value: getMockSearchResponse({
+              isPartial: true,
+              isRunning: true,
+              rawResponse: {},
+              id: 'async-id-4',
+            }),
+          },
+          {
+            time: 1000,
+            value: getMockSearchResponse({
+              isPartial: false,
+              isRunning: false,
+              rawResponse: {},
+              id: 'async-id-4',
+            }),
+          },
+        ];
+        mockCoreSetup.http.post.mockImplementation(getHttpMock(responses));
+
+        const response = searchInterceptor.search({}, { pollInterval: 0 });
+        response.subscribe({ next, error, complete });
+
+        await timeTravel(10); // First response arrives (still running)
+
+        expect(next).toHaveBeenCalled();
+
+        searchInterceptor.stop();
+
+        const callsForOurSearch = (mockFetch.mock.calls as Array<[string, RequestInit]>).filter(
+          ([url]) => url.includes('async-id-4')
+        );
+        expect(callsForOurSearch).toHaveLength(1);
+        expect(callsForOurSearch[0]).toEqual([
+          '/internal/search/ese/async-id-4',
+          expect.objectContaining({
+            method: 'DELETE',
+            keepalive: true,
+          }),
+        ]);
+      });
+    });
   });
 
   describe('project_routing parameter handling', () => {

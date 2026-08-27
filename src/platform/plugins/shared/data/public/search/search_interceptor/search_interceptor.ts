@@ -125,6 +125,8 @@ export class SearchInterceptor {
   );
   private protocolSupportsMultiplexing: boolean = false;
   private performanceObserver?: PerformanceObserver;
+  private readonly activeAsyncSearches = new Map<string, string>(); // id -> strategy
+  private boundBeforeUnloadHandler: (() => void) | null = null;
 
   /**
    * Observable that emits when the number of pending requests changes.
@@ -188,11 +190,54 @@ export class SearchInterceptor {
   }
 
   public stop() {
+    this.cancelAllActiveSearches();
+    if (this.boundBeforeUnloadHandler) {
+      window.removeEventListener('beforeunload', this.boundBeforeUnloadHandler);
+      this.boundBeforeUnloadHandler = null;
+    }
+
     this.responseCache.clear();
     this.uiSettingsSubs.forEach((s) => s.unsubscribe());
     if (this.performanceObserver) {
       this.performanceObserver.disconnect();
     }
+  }
+
+  private updateBeforeUnloadHandler(): void {
+    const hasActiveSearches = this.activeAsyncSearches.size > 0;
+    const handlerRegistered = this.boundBeforeUnloadHandler !== null;
+
+    if (hasActiveSearches && !handlerRegistered) {
+      this.boundBeforeUnloadHandler = this.handleBeforeUnload.bind(this);
+      window.addEventListener('beforeunload', this.boundBeforeUnloadHandler);
+    } else if (!hasActiveSearches && handlerRegistered) {
+      window.removeEventListener('beforeunload', this.boundBeforeUnloadHandler!);
+      this.boundBeforeUnloadHandler = null;
+    }
+  }
+
+  private handleBeforeUnload(): void {
+    this.cancelAllActiveSearches();
+  }
+
+  private cancelAllActiveSearches(): void {
+    const basePath = this.deps.http.basePath.get();
+
+    for (const [searchId, strategy] of this.activeAsyncSearches) {
+      const path = `/internal/search/${strategy}/${searchId}`;
+      const url = `${basePath}${path}`;
+
+      fetch(url, {
+        method: 'DELETE',
+        keepalive: true,
+        headers: {
+          'kbn-xsrf': 'true',
+          'elastic-api-version': '1',
+        },
+      }).catch(() => {}); // Fire-and-forget
+    }
+
+    this.activeAsyncSearches.clear();
   }
 
   /*
@@ -400,6 +445,10 @@ export class SearchInterceptor {
         .subscribe(() => {
           searchAbortController.cleanup();
           isSavedToBackground = true;
+          if (id) {
+            this.activeAsyncSearches.delete(id);
+            this.updateBeforeUnloadHandler();
+          }
         });
 
     const sendCancelRequest = once(() =>
@@ -460,8 +509,17 @@ export class SearchInterceptor {
 
         id = response.id;
 
+        if (response.id && isRunningResponse(response) && !isSavedToBackground) {
+          this.activeAsyncSearches.set(response.id, strategyToString(strategy));
+          this.updateBeforeUnloadHandler();
+        }
+
         if (!isRunningResponse(response)) {
           searchTracker?.complete(response);
+          if (response.id) {
+            this.activeAsyncSearches.delete(response.id);
+            this.updateBeforeUnloadHandler();
+          }
         }
       }),
       map((response) => {
@@ -518,6 +576,10 @@ export class SearchInterceptor {
         searchAbortController.cleanup();
         if (savedToBackgroundSub) {
           savedToBackgroundSub.unsubscribe();
+        }
+        if (id) {
+          this.activeAsyncSearches.delete(id);
+          this.updateBeforeUnloadHandler();
         }
       }),
       // This observable is cached in the responseCache.
