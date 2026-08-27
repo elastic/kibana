@@ -333,6 +333,52 @@ describe('Metric', () => {
     });
   });
 
+  describe('legacy secondaryLabel on API round-trip', () => {
+    const LEGACY_LABEL = 'Custom Name (label)';
+
+    const getLegacyAttributes = () => {
+      const attributes = structuredClone(complexMetricAttributes);
+      const visualization = attributes.state.visualization as MetricVisualizationState;
+      visualization.secondaryLabel = LEGACY_LABEL;
+      const layer = attributes.state.datasourceStates.formBased!.layers[visualization.layerId];
+      const column = layer.columns[visualization.secondaryMetricAccessor!];
+      column.label = 'Custom Name';
+      column.customLabel = true;
+      return attributes;
+    };
+
+    it('emits leftover vis secondaryLabel as the secondary metric label', () => {
+      const builder = new LensConfigBuilder(undefined, true);
+      const api = builder.toAPIFormat(getLegacyAttributes()) as MetricConfig;
+      const secondary = api.metrics.find((metric) => metric.type === 'secondary');
+
+      expect(secondary?.label).toBe(LEGACY_LABEL);
+    });
+
+    it('writes leftover vis secondaryLabel onto the column and drops it from visualization', () => {
+      const builder = new LensConfigBuilder(undefined, true);
+      const so = builder.fromAPIFormat(builder.toAPIFormat(getLegacyAttributes()));
+      const visualization = so.state.visualization as MetricVisualizationState;
+      const column =
+        so.state.datasourceStates.formBased!.layers[DEFAULT_LAYER_ID].columns
+          .metric_accessor_secondary;
+
+      expect(visualization).not.toHaveProperty('secondaryLabel');
+      expect(column.label).toBe(LEGACY_LABEL);
+      expect(column.customLabel).toBe(true);
+    });
+
+    it('does not overlay an empty leftover secondaryLabel', () => {
+      const attributes = getLegacyAttributes();
+      (attributes.state.visualization as MetricVisualizationState).secondaryLabel = '';
+      const builder = new LensConfigBuilder(undefined, true);
+      const api = builder.toAPIFormat(attributes) as MetricConfig;
+      const secondary = api.metrics.find((metric) => metric.type === 'secondary');
+
+      expect(secondary?.label).toBe('Custom Name');
+    });
+  });
+
   describe('color by value named palette', () => {
     it('(API -> SO -> API) round-trips a named palette on a single-value metric as a numeric range', () => {
       const config = {

@@ -540,6 +540,11 @@ function enrichConfigurationWithVisualizationProperties(
   }
 
   if (secondaryMetric) {
+    // Leftover vis Label is what the chart paints; emit it as the API name so GET+PUT cannot change appearance.
+    if (visualization.secondaryLabel) {
+      secondaryMetric.label = visualization.secondaryLabel;
+    }
+
     if (visualization.secondaryTrend?.type === 'dynamic') {
       secondaryMetric.compare = fromCompareLensStateToAPI(visualization.secondaryTrend);
     }
