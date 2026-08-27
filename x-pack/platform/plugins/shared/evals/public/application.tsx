@@ -90,6 +90,10 @@ const DATASETS_PATH = '/datasets' as const;
 const TRACING_PATH = '/tracing' as const;
 const REMOTES_PATH = '/remotes' as const;
 const ONLINE_PATH = '/online' as const;
+
+// TODO: Show online evaluations tab when the feature is ready
+const SHOW_ONLINE_EVALS_TAB = false;
+
 const experimentDetailBreadcrumbLabel = i18n.translate('xpack.evals.breadcrumbs.experimentDetail', {
   defaultMessage: 'Experiment details',
 });
@@ -225,9 +229,11 @@ const EvalsNavigation: React.FC = () => {
         <EuiTab isSelected={isRemotesSelected} onClick={() => history.push(REMOTES_PATH)}>
           {remotesTabLabel}
         </EuiTab>
-        <EuiTab isSelected={isOnlineSelected} onClick={() => history.push(ONLINE_PATH)}>
-          {onlineTabLabel}
-        </EuiTab>
+        {SHOW_ONLINE_EVALS_TAB ? (
+          <EuiTab isSelected={isOnlineSelected} onClick={() => history.push(ONLINE_PATH)}>
+            {onlineTabLabel}
+          </EuiTab>
+        ) : null}
       </EuiTabs>
     </div>
   );
