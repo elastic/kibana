@@ -8,7 +8,6 @@
 import pRetry from 'p-retry';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { TaskAlreadyRunningError } from '@kbn/task-manager-plugin/server';
 import { MaintenanceWindowSyncTasks } from './sync_tasks';
 
 // Use 0ms delays so retry tests run synchronously without fake timers.
@@ -22,6 +21,9 @@ jest.mock('p-retry', () => {
   (mockFn as any).AbortError = actual.AbortError;
   return { __esModule: true, default: mockFn, AbortError: actual.AbortError };
 });
+
+const currentlyRunningError = (taskId: string) =>
+  new Error(`Failed to run task "${taskId}" as it is currently running`);
 
 const flushRetries = async (iterations = 6) => {
   for (let i = 0; i < iterations; i++) {
@@ -113,7 +115,7 @@ describe('MaintenanceWindowSyncTasks', () => {
     const syncTasks = new MaintenanceWindowSyncTasks(logger);
     const taskManager = taskManagerMock.createStart();
     taskManager.runSoon
-      .mockRejectedValueOnce(new TaskAlreadyRunningError('my-sync-task'))
+      .mockRejectedValueOnce(currentlyRunningError('my-sync-task'))
       .mockResolvedValueOnce({} as any);
     syncTasks.setTaskManager(taskManager);
 
@@ -130,7 +132,7 @@ describe('MaintenanceWindowSyncTasks', () => {
   it('logs an error once retries are exhausted for a task stuck as already running', async () => {
     const syncTasks = new MaintenanceWindowSyncTasks(logger);
     const taskManager = taskManagerMock.createStart();
-    taskManager.runSoon.mockRejectedValue(new TaskAlreadyRunningError('stuck-task'));
+    taskManager.runSoon.mockRejectedValue(currentlyRunningError('stuck-task'));
     syncTasks.setTaskManager(taskManager);
 
     syncTasks.register('stuck-task');

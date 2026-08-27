@@ -36,13 +36,6 @@ jest.mock('./telemetry/sender', () => ({
   })),
 }));
 
-jest.mock('./tasks/rebalance_private_location_shards_task', () => ({
-  RebalancePrivateLocationShardsTask: jest.fn().mockImplementation(() => ({
-    registerTaskDefinition: jest.fn(),
-    start: jest.fn().mockResolvedValue(undefined),
-  })),
-}));
-
 jest.mock('./tasks/sync_global_params_task', () => ({
   SyncGlobalParamsPrivateLocationsTask: jest.fn().mockImplementation(() => ({
     registerTaskDefinition: jest.fn(),

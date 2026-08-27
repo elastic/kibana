@@ -8,9 +8,12 @@
 import pRetry from 'p-retry';
 import type { Logger } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import { TaskAlreadyRunningError } from '@kbn/task-manager-plugin/server';
 
 const RUN_SOON_RETRIES = 3;
+
+function isTaskCurrentlyRunningError(error: unknown): boolean {
+  return error instanceof Error && error.message.includes('as it is currently running');
+}
 
 /**
  * Consumers register Task Manager task instance IDs. On maintenance window
@@ -69,7 +72,7 @@ export class MaintenanceWindowSyncTasks {
           try {
             await taskManager.runSoon(taskId);
           } catch (error) {
-            if (!(error instanceof TaskAlreadyRunningError)) {
+            if (!isTaskCurrentlyRunningError(error)) {
               throw new pRetry.AbortError(error as Error);
             }
             // Retry so an MW mutation that lands as the run finishes still wakes
