@@ -10,7 +10,7 @@
 import { MOCK_IDP_UIAM_ORG_ADMIN_API_KEY } from '@kbn/mock-idp-utils';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import { spaceTest } from '../../../scout_workflows_ui/api/fixtures';
+import { spaceTest } from '../../../scout/api/fixtures';
 
 const ORG_API_KEY_HEADERS = {
   Authorization: `ApiKey ${MOCK_IDP_UIAM_ORG_ADMIN_API_KEY}`,

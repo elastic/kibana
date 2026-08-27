@@ -271,20 +271,26 @@ const identifyComputedFeaturesRoute = createServerRoute({
         start: z.number().optional(),
         end: z.number().optional(),
         runId: z.string().max(MAX_ID_LENGTH).optional(),
+        computedFeaturesTimeoutMs: z.number().int().min(1_000).max(240_000).optional(),
       })
       .nullable()
       .optional(),
   }),
   handler: async ({ params, request, getScopedClients, server, logger, telemetry }) => {
     const scopedClients = await getScopedClients({ request });
-    const { streamDataEsClient, streamsClient, licensing } = scopedClients;
+    const { streamDataEsClient, streamsClient, licensing, tuningConfig } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
 
     const { streamName } = params.path;
     const routeLogger = logger.get('features_identification', 'computed', streamName);
     const now = Date.now();
-    const { start = now - MS_PER_DAY, end = now, runId = uuidv4() } = params.body ?? {};
+    const {
+      start = now - MS_PER_DAY,
+      end = now,
+      runId = uuidv4(),
+      computedFeaturesTimeoutMs = tuningConfig.computed_features_timeout_ms,
+    } = params.body ?? {};
 
     const [kiClient, stream] = await Promise.all([
       scopedClients.getKnowledgeIndicatorClient(),
@@ -299,7 +305,7 @@ const identifyComputedFeaturesRoute = createServerRoute({
       (await isSignificantEventsSemanticCodeSearchGroundingEnabled(server.core.featureFlags));
 
     try {
-      const computedFeatures = await identifyComputedFeatures({
+      const { features: computedFeatures, errors } = await identifyComputedFeatures({
         stream,
         streamName,
         start,
@@ -308,6 +314,8 @@ const identifyComputedFeaturesRoute = createServerRoute({
         kiClient,
         logger: routeLogger,
         runId,
+        signal: getRequestAbortSignal(request),
+        timeoutMs: computedFeaturesTimeoutMs,
         ...(codeGroundingEnabled
           ? { agentBuilderTools: server.agentBuilder?.tools, request, telemetry }
           : {}),
@@ -316,6 +324,7 @@ const identifyComputedFeaturesRoute = createServerRoute({
       return {
         computedFeatures,
         computedFeaturesCount: computedFeatures.length,
+        errors,
       };
     } catch (error) {
       routeLogger.error(

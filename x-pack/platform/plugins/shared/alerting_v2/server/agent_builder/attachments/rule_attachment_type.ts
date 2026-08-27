@@ -94,10 +94,10 @@ export const createRuleAttachmentType = ({
     try {
       const rulesClient = getRulesClient(context);
       const rule = await rulesClient.getRule({ id: attachment.origin });
-      if (Date.parse(rule.updatedAt) > Date.parse(attachment.origin_snapshot_at)) {
+      if (Date.parse(rule.updated_at) > Date.parse(attachment.origin_snapshot_at)) {
         const latestVersion = getLatestVersion(attachment);
         if (!latestVersion) return false;
-        return rule.updatedAt !== latestVersion.data.updatedAt;
+        return rule.updated_at !== latestVersion.data.updated_at;
       }
       return false;
     } catch (error) {

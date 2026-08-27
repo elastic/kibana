@@ -10,9 +10,14 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { parse as yamlParse } from 'yaml';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import type { CoreStart } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
 import { CreateTemplatePage } from './page';
-import { TestProviders } from '../../../../common/mock';
-import { LOCAL_STORAGE_KEYS } from '../../../../../common/constants';
+import { mockedTestProvidersOwner, TestProviders } from '../../../../common/mock';
+import {
+  CASES_TEMPLATE_CREATED_EVENT_TYPE,
+  LOCAL_STORAGE_KEYS,
+} from '../../../../../common/constants';
 import { exampleTemplateDefinition } from '../../field_types/constants';
 import * as i18n from '../../translations';
 
@@ -68,8 +73,6 @@ jest.mock('../../../use_breadcrumbs', () => ({
   useCasesTemplatesBreadcrumbs: jest.fn(),
 }));
 
-const observablesEnabledFeatures = { observables: { enabled: true, autoExtract: true } };
-
 /**
  * The template name is the editable page title, so naming a template is a header interaction rather
  * than a trip to the Configuration tab.
@@ -81,8 +84,11 @@ const nameTemplateFromPageTitle = async (name: string) => {
 };
 
 describe('CreateTemplatePage', () => {
+  let coreStart: CoreStart;
+
   beforeEach(() => {
     jest.clearAllMocks();
+    coreStart = coreMock.createStart() as unknown as CoreStart;
     localStorage.clear();
     // Create resolves to the new template; the page then switches to edit mode for that id.
     mockMutateAsync.mockResolvedValue({ templateId: 'new-tpl-id' });
@@ -204,7 +210,7 @@ describe('CreateTemplatePage', () => {
 
   it('defaults a new template to sync alerts + extract observables on (Security) in the saved definition', async () => {
     render(
-      <TestProviders features={observablesEnabledFeatures}>
+      <TestProviders>
         <CreateTemplatePage />
       </TestProviders>
     );
@@ -225,10 +231,8 @@ describe('CreateTemplatePage', () => {
   });
 
   it('defaults extract observables off where the feature is unavailable (e.g. Observability/Stack)', async () => {
-    // Default test context uses DEFAULT_FEATURES (observables autoExtract off) and a basic license,
-    // so the toggle is hidden and the persisted default must be off.
     render(
-      <TestProviders>
+      <TestProviders owner={['observability']}>
         <CreateTemplatePage />
       </TestProviders>
     );
@@ -244,7 +248,7 @@ describe('CreateTemplatePage', () => {
       mockMutateAsync.mock.calls[0][0] as { template: { definition: string } }
     ).template;
     const parsed = yamlParse(definition) as { settings?: Record<string, boolean> };
-    expect(parsed.settings).toEqual({ syncAlerts: true, extractObservables: false });
+    expect(parsed.settings).toEqual({ syncAlerts: false, extractObservables: false });
   });
 
   it('resets the panel config (settings/connector) draft to the defaults on successful creation', async () => {
@@ -258,7 +262,7 @@ describe('CreateTemplatePage', () => {
     );
 
     render(
-      <TestProviders features={observablesEnabledFeatures}>
+      <TestProviders>
         <CreateTemplatePage />
       </TestProviders>
     );
@@ -275,5 +279,52 @@ describe('CreateTemplatePage', () => {
     const storedConfig = localStorage.getItem(configKey);
     const parsedConfig = storedConfig ? JSON.parse(storedConfig) : {};
     expect(parsedConfig.settings).toEqual({ syncAlerts: true, extractObservables: true });
+  });
+
+  describe('telemetry', () => {
+    it('reports one created event with the blank mode when the save succeeds', async () => {
+      render(
+        <TestProviders coreStart={coreStart}>
+          <CreateTemplatePage />
+        </TestProviders>
+      );
+
+      // Opening the editor is not a confirmed action.
+      expect(coreStart.analytics.reportEvent).not.toHaveBeenCalled();
+
+      await nameTemplateFromPageTitle('My template');
+      await userEvent.click(screen.getByTestId('saveTemplateHeaderButton'));
+
+      await waitFor(() => {
+        expect(coreStart.analytics.reportEvent).toHaveBeenCalledTimes(1);
+      });
+      expect(coreStart.analytics.reportEvent).toHaveBeenCalledWith(
+        CASES_TEMPLATE_CREATED_EVENT_TYPE,
+        {
+          owner: mockedTestProvidersOwner[0],
+          entry_point: 'template_editor',
+          creation_mode: 'blank',
+        }
+      );
+    });
+
+    it('reports nothing when the save fails', async () => {
+      mockMutateAsync.mockRejectedValueOnce(new Error('Creation failed'));
+
+      render(
+        <TestProviders coreStart={coreStart}>
+          <CreateTemplatePage />
+        </TestProviders>
+      );
+
+      await nameTemplateFromPageTitle('My template');
+      await userEvent.click(screen.getByTestId('saveTemplateHeaderButton'));
+
+      await waitFor(() => {
+        expect(mockMutateAsync).toHaveBeenCalledTimes(1);
+      });
+
+      expect(coreStart.analytics.reportEvent).not.toHaveBeenCalled();
+    });
   });
 });

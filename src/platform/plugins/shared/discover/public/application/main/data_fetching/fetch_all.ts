@@ -120,7 +120,7 @@ export function fetchAll(
           timeRange: currentTab.dataRequestParams.timeRangeAbsolute,
           esqlVariables: currentTab.esqlVariables,
           searchSessionId: params.searchSessionId,
-          isApproximate: currentTab.appState.isApproximate ?? false,
+          esqlApproximation: currentTab.appState.esqlApproximation ?? false,
         })
       : fetchDocuments(searchSource, params);
 

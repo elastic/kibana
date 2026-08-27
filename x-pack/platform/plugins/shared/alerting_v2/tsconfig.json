@@ -15,6 +15,7 @@
     "test/scout_alerting_v2/**/*"
   ],
   "kbn_references": [
+    "@kbn/agent-builder-elastic-ai-index-ki-types",
     "@kbn/core",
     "@kbn/task-manager-plugin",
     "@kbn/features-plugin",
@@ -78,6 +79,7 @@
     "@kbn/kql",
     "@kbn/scout",
     "@kbn/object-utils",
+    "@kbn/alerting-v2-browser-shared",
     "@kbn/alerting-v2-constants",
     "@kbn/alerting-v2-common-queries",
     "@kbn/alerting-v2-utils",
@@ -131,6 +133,7 @@
     "@kbn/app-header",
     "@kbn/core-chrome-browser-context-mocks",
     "@kbn/change-history",
+    "@kbn/change-history-ui",
     "@kbn/content-list",
     "@kbn/content-list-provider",
     "@kbn/content-list-toolbar",

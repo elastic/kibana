@@ -10,7 +10,12 @@
 import { isColumn, isFunctionExpression, isInlineCast, isLiteral, within } from '@elastic/esql';
 import type { ESQLSingleAstItem, ESQLFunction } from '@elastic/esql/types';
 import type { ESQLColumnData } from '../../../../registry/types';
-import { getIncompleteOperatorReason, getRightmostOperator, isNullCheckOperator } from './utils';
+import {
+  getIncompleteOperatorReason,
+  getRightmostOperator,
+  isNullCheckOperator,
+  isTupleExpression,
+} from './utils';
 import { getExpressionType } from '../../expressions';
 import { escapeRegExp } from '../../regex';
 
@@ -50,6 +55,12 @@ export function getPosition(
 
   if (!expressionRoot) {
     return 'empty_expression';
+  }
+
+  if (isTupleExpression(expressionRoot)) {
+    const isCursorInsideTuple = within(innerText.length, expressionRoot);
+
+    return isCursorInsideTuple ? 'empty_expression' : 'after_complete';
   }
 
   if (isColumn(expressionRoot)) {

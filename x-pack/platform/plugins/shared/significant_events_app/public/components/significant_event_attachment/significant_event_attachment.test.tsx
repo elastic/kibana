@@ -139,7 +139,7 @@ describe('significantEventAttachmentDefinition', () => {
     );
 
     expect(screen.getByText('Payments are failing.')).toBeInTheDocument();
-    expect(screen.getByText('logs.payment')).toBeInTheDocument();
+    expect(screen.getByText('Description')).toBeInTheDocument();
   });
 
   it('does not render inline content', () => {

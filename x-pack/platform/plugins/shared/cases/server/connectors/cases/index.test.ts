@@ -36,11 +36,13 @@ describe('getCasesConnectorType', () => {
 
     caseConnectorType = getCasesConnectorType({
       getCasesClient: jest.fn(),
+      getActionsClient: jest.fn(),
       getUnsecuredSavedObjectsClient: jest.fn(),
       getUiSettingsClient: jest.fn(),
       getSpaceId: jest.fn(),
       isCasesAttachmentsEnabled: false,
       isTemplatesEnabled: false,
+      isAtLeastPlatinum: jest.fn().mockResolvedValue(true),
     });
   });
 
@@ -58,11 +60,13 @@ describe('getCasesConnectorType', () => {
   it('threads isTemplatesEnabled: true through to the CasesConnector when enabled', () => {
     const caseConnectorTypeWithTemplatesEnabled = getCasesConnectorType({
       getCasesClient: jest.fn(),
+      getActionsClient: jest.fn(),
       getUnsecuredSavedObjectsClient: jest.fn(),
       getUiSettingsClient: jest.fn(),
       getSpaceId: jest.fn(),
       isCasesAttachmentsEnabled: false,
       isTemplatesEnabled: true,
+      isAtLeastPlatinum: jest.fn().mockResolvedValue(true),
     });
 
     // @ts-expect-error: only the subset of params used by getService is provided

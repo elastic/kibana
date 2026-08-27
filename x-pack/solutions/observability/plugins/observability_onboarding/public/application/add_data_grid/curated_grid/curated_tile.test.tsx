@@ -7,9 +7,12 @@
 
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { matchers } from '@emotion/jest';
 import React from 'react';
 import type { CuratedTile } from '../types';
 import { CuratedTileCard } from './curated_tile';
+
+expect.extend(matchers);
 
 const baseTile: CuratedTile = {
   id: 'kubernetes',
@@ -36,5 +39,55 @@ describe('CuratedTileCard', () => {
     render(<CuratedTileCard tile={{ ...baseTile, href: '/kubernetes', onClick }} />);
     await user.click(screen.getByTestId('observabilityOnboardingIntegrationTile-kubernetes'));
     expect(onClick).toHaveBeenCalled();
+  });
+
+  it('renders the host-provided badge inside the card', () => {
+    render(
+      <CuratedTileCard
+        tile={{ ...baseTile, badge: <span data-test-subj="tileBadge">2 variants</span> }}
+      />
+    );
+    const card = screen.getByTestId('observabilityOnboardingIntegrationTile-kubernetes');
+    expect(card).toContainElement(screen.getByTestId('tileBadge'));
+  });
+
+  it('reserves two description lines so a short description still fills the tile', () => {
+    render(
+      <CuratedTileCard
+        tile={{
+          id: 'short',
+          title: 'Short',
+          description: 'One line.',
+          icon: <span />,
+        }}
+      />
+    );
+    const description = screen.getByText('One line.');
+    expect(description).toHaveStyleRule('-webkit-line-clamp', '2');
+    expect(description).toHaveStyleRule('block-size', 'calc(2 * 1lh)');
+  });
+
+  it('holds the title to a single line so a long name cannot grow the tile', () => {
+    const { container } = render(
+      <CuratedTileCard
+        tile={{ ...baseTile, title: 'Nginx Ingress Controller OpenTelemetry Logs' }}
+      />
+    );
+    const wrapper = container.firstChild;
+    expect(wrapper).toHaveStyleRule('-webkit-line-clamp', '1', { target: '.euiCard__title' });
+    expect(wrapper).toHaveStyleRule('block-size', 'calc(1 * 1lh)', { target: '.euiCard__title' });
+  });
+
+  it('matches the design spec for card padding and the title-description gap', () => {
+    const { container } = render(<CuratedTileCard tile={baseTile} />);
+    const wrapper = container.firstChild;
+    expect(wrapper).toHaveStyleRule('padding', '12px', { target: '.euiCard' });
+    expect(wrapper).toHaveStyleRule('margin-top', '2px', { target: 'euiCard__description' });
+  });
+
+  it('does not affect the grid layout, the wrapper stays out of the box tree', () => {
+    const { container } = render(<CuratedTileCard tile={baseTile} />);
+    const wrapper = container.firstChild;
+    expect(wrapper).toHaveStyleRule('display', 'contents');
   });
 });

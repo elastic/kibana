@@ -128,11 +128,11 @@ export const DASHBOARD_TITLES = {
 
 export const AVERAGE_OF_BYTES = 'Average of bytes' as const;
 export const MAX_BYTES_LABEL = 'Maximum of bytes' as const;
-export const MAX_BYTES_VALUE = '19,986' as const;
 export const TOP_VALUES_OF_IP = 'Top 3 values of ip' as const;
 
 export const DATA_TEST_SUBJECTS = {
   OPEN_IN_LENS_ACTION: 'embeddablePanelAction-ACTION_EDIT_IN_LENS',
+  OPEN_IN_DISCOVER_ACTION: 'embeddablePanelAction-ACTION_OPEN_IN_DISCOVER',
 } as const;
 
 export const ESQL_CONVERSION_DASHBOARD_ID = '3cda479c-8797-4492-99f4-2259e1377f85';
