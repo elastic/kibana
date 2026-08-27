@@ -2473,3 +2473,63 @@ describe('the conventional prefix does not override its binding', () => {
     expect(stripHtml(html)).toBe('evil.com');
   });
 });
+
+/**
+ * Browsers do not render `<iframe>` contents, so embedded fallback or tracking text is not report
+ * text. It was reaching body_text and, because article scoring shares this rule, an iframe-heavy
+ * teaser could also outweigh the visible report.
+ */
+describe('iframe contents are not report text', () => {
+  it('drops an iframe body from plain text', () => {
+    const result = stripHtml('<iframe>https://stale.example</iframe><p>safe</p>');
+
+    expect(result).toBe('safe');
+    expect(result).not.toContain('stale.example');
+  });
+
+  it('drops an iframe body from structured output', () => {
+    expect(htmlToStructured('<iframe>https://stale.example</iframe><p>safe</p>')).toBe('safe');
+  });
+
+  // `noscript` is still kept, since a reader with scripting disabled does see it.
+  it('keeps noscript content', () => {
+    expect(stripHtml('<noscript><p>fallback.test</p></noscript>after')).toBe('fallback.test after');
+  });
+});
+
+/**
+ * XML's default namespace qualifies unprefixed element names, so
+ * `<encoded xmlns="…/modules/content/">` is namespace-equivalent to a prefixed module element.
+ * Requiring a prefix rejected those feeds and left their encoded script bodies visible.
+ */
+describe('the content module as a default namespace', () => {
+  it('expands an unprefixed encoded element bound by the default namespace', () => {
+    const result = stripHtml(
+      '<encoded xmlns="http://purl.org/rss/1.0/modules/content/">' +
+        "&lt;script&gt;fetch('https://false-ioc.test')&lt;/script&gt;safe</encoded>"
+    );
+
+    expect(result).toBe('safe');
+    expect(result).not.toContain('false-ioc.test');
+  });
+
+  it('resolves a default namespace inherited from an ancestor', () => {
+    expect(
+      stripHtml(
+        '<rss xmlns="http://purl.org/rss/1.0/modules/content/"><channel><item><encoded>' +
+          '&lt;p&gt;evil.com&lt;/p&gt;</encoded></item></channel></rss>'
+      )
+    ).toBe('evil.com');
+  });
+
+  // A genuinely unqualified element, or one in another default namespace, stays literal.
+  it.each([
+    ['no namespace at all', '<encoded>Exploit uses &lt;script&gt; and c2.evil.test</encoded>'],
+    [
+      'an unrelated default namespace',
+      '<encoded xmlns="urn:literal">Exploit uses &lt;script&gt; and c2.evil.test</encoded>',
+    ],
+  ])('leaves an encoded element with %s literal', (_label, html) => {
+    expect(stripHtml(html)).toBe('Exploit uses <script> and c2.evil.test');
+  });
+});

@@ -136,11 +136,19 @@ const SKIPPED_SUBTREE_NAMES = new Set(['script', 'style', 'template']);
  * same text: hidden subtrees took three rounds to cover, and `template` was skipped by the
  * walkers while a `<template class="post-content">` could still win article selection and have
  * its contents returned as the report. One definition, four call sites.
+ *
+ * `iframe` is here for the same reason as `template`: browsers do not render its contents, so
+ * embedded fallback or tracking text was reaching `body_text` and could also outweigh the real
+ * report during candidate scoring. Adding it was one line rather than a fifth report, which is
+ * what unifying the rule bought.
  */
+const NON_RENDERED_NAMES = new Set(['template', 'iframe']);
+
 export const isNonRenderedElement = (node: {
   name?: string;
   attribs?: Record<string, string>;
-}): boolean => node.name?.toLowerCase() === 'template' || node.attribs?.hidden !== undefined;
+}): boolean =>
+  NON_RENDERED_NAMES.has(node.name?.toLowerCase() ?? '') || node.attribs?.hidden !== undefined;
 
 const isSkippedSubtree = (node: ParsedNode): boolean =>
   SKIPPED_SUBTREE_NAMES.has(elementName(node)) || isNonRenderedElement(node);
@@ -554,7 +562,7 @@ const resolveNamespace = (node: ParsedNode, prefix: string): string | undefined 
       break;
     }
 
-    const bound = current.attribs?.[`xmlns:${prefix}`];
+    const bound = current.attribs?.[prefix === '' ? 'xmlns' : `xmlns:${prefix}`];
     if (bound !== undefined) {
       found = bound.trim();
       break;
@@ -593,7 +601,15 @@ const resolveNamespace = (node: ParsedNode, prefix: string): string | undefined 
  */
 const isContentModuleEncoded = (node: ParsedNode, qualified: string): boolean => {
   const colon = qualified.indexOf(':');
-  if (colon <= 0 || qualified.slice(colon + 1) !== 'encoded') return false;
+  const local = colon > 0 ? qualified.slice(colon + 1) : qualified;
+  if (local !== 'encoded') return false;
+
+  // XML's default namespace qualifies unprefixed element names too, so
+  // `<encoded xmlns="…/modules/content/">` is namespace-equivalent to a prefixed module element.
+  // Requiring a prefix rejected those feeds and left their encoded script bodies visible. An
+  // `<encoded>` with no default namespace in scope is genuinely unqualified and still rejected,
+  // which is the distinction an earlier finding on this set asked for.
+  if (colon <= 0) return resolveNamespace(node, '') === CONTENT_MODULE_NS;
 
   const prefix = qualified.slice(0, colon);
   const bound = resolveNamespace(node, prefix);

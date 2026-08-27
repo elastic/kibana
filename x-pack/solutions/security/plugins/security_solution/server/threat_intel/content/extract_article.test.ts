@@ -795,3 +795,22 @@ describe('template subtrees cannot win selection', () => {
     expect(result).not.toContain('c2.stale.test');
   });
 });
+
+/**
+ * Candidate scoring shares the non-rendered rule, so an iframe-heavy teaser must not outweigh the
+ * visible report on either scoring path.
+ */
+describe('iframe contents do not inflate candidate scores', () => {
+  it('prefers the visible report over a teaser inflated by an iframe', () => {
+    const page =
+      `<html><body><article><iframe>${'stale '.repeat(
+        4000
+      )}c2.stale.test</iframe>teaser</article>` +
+      `${'<article>x</article>'.repeat(32)}<main><p>report evil.test</p></main></body></html>`;
+
+    const result = stripHtml(extractArticleHtml(page));
+
+    expect(result).toContain('evil.test');
+    expect(result).not.toContain('c2.stale.test');
+  });
+});
