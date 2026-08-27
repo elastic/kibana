@@ -7,12 +7,17 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { LockAcquisitionError } from '@kbn/lock-manager';
+import { ReplaySubject } from 'rxjs';
 import {
   installResourcesWithLock,
   type ResourceInstallLockManager,
 } from './install_resources_with_lock';
 
 const logger = loggingSystemMock.createLogger();
+
+const createLockManager = (
+  withLock: ResourceInstallLockManager['withLock']
+): ResourceInstallLockManager => ({ withLock });
 
 describe('installResourcesWithLock', () => {
   beforeEach(() => jest.clearAllMocks());
@@ -27,13 +32,16 @@ describe('installResourcesWithLock', () => {
 
   it('runs the install inside the lock when acquired', async () => {
     const installFn = jest.fn().mockResolvedValue(undefined);
-    const lockManager: ResourceInstallLockManager = {
-      withLock: jest.fn(async (_lockId, cb) => cb()),
-    };
+    const lockManager = createLockManager(jest.fn(async (_lockId, cb) => cb()));
 
-    await installResourcesWithLock({ lockManager, lockId: 'lock-a', logger, installFn });
+    await installResourcesWithLock({
+      lockManager,
+      lockId: 'lock-a',
+      logger,
+      installFn,
+    });
 
-    expect(lockManager.withLock).toHaveBeenCalledWith('lock-a', installFn);
+    expect(lockManager.withLock).toHaveBeenCalledWith('lock-a', expect.any(Function));
     expect(installFn).toHaveBeenCalledTimes(1);
   });
 
@@ -46,7 +54,7 @@ describe('installResourcesWithLock', () => {
       .mockImplementationOnce(async (_lockId: string, cb: () => Promise<void>) => cb());
 
     await installResourcesWithLock({
-      lockManager: { withLock },
+      lockManager: createLockManager(withLock),
       lockId: 'lock-a',
       logger,
       installFn,
@@ -57,25 +65,63 @@ describe('installResourcesWithLock', () => {
     expect(installFn).toHaveBeenCalledTimes(1);
   });
 
-  it('falls back to installing without the lock after maxAttempts', async () => {
+  it('fails without installing outside the lock after maxAttempts', async () => {
     const installFn = jest.fn().mockResolvedValue(undefined);
     const withLock = jest.fn().mockRejectedValue(new LockAcquisitionError('held'));
 
-    await installResourcesWithLock({
-      lockManager: { withLock },
+    await expect(
+      installResourcesWithLock({
+        lockManager: createLockManager(withLock),
+        lockId: 'lock-a',
+        logger,
+        installFn,
+        maxAttempts: 3,
+        retryDelayMs: 0,
+      })
+    ).rejects.toThrow('Could not acquire install lock "lock-a" after 3 attempts');
+
+    expect(withLock).toHaveBeenCalledTimes(3);
+    expect(installFn).not.toHaveBeenCalled();
+  });
+
+  it('aborts lock retries when the plugin stops', async () => {
+    const pluginStop$ = new ReplaySubject<void>(1);
+    const installFn = jest.fn().mockResolvedValue(undefined);
+    const withLock = jest.fn().mockRejectedValue(new LockAcquisitionError('held'));
+
+    const installation = installResourcesWithLock({
+      lockManager: createLockManager(withLock),
       lockId: 'lock-a',
       logger,
       installFn,
-      maxAttempts: 3,
-      retryDelayMs: 0,
+      pluginStop$,
+      retryDelayMs: 1000,
+    });
+    pluginStop$.next();
+
+    await expect(installation).rejects.toThrow('Server is stopping');
+    expect(installFn).not.toHaveBeenCalled();
+  });
+
+  it('does not start installation when the plugin stops during acquisition', async () => {
+    const pluginStop$ = new ReplaySubject<void>(1);
+    const installFn = jest.fn().mockResolvedValue(undefined);
+    const withLock = jest.fn(async (_lockId: string, cb: () => Promise<void>) => {
+      pluginStop$.next();
+      await cb();
     });
 
-    expect(withLock).toHaveBeenCalledTimes(3);
-    // installed directly as the fallback
-    expect(installFn).toHaveBeenCalledTimes(1);
-    expect(logger.warn).toHaveBeenCalledWith(
-      'Could not acquire install lock "lock-a" after 3 attempts; installing without the lock'
-    );
+    await expect(
+      installResourcesWithLock({
+        lockManager: createLockManager(withLock),
+        lockId: 'lock-a',
+        logger,
+        installFn,
+        pluginStop$,
+      })
+    ).rejects.toThrow('Server is stopping');
+
+    expect(installFn).not.toHaveBeenCalled();
   });
 
   it('propagates install failures (non lock-acquisition errors) without retrying', async () => {
@@ -85,7 +131,7 @@ describe('installResourcesWithLock', () => {
 
     await expect(
       installResourcesWithLock({
-        lockManager: { withLock },
+        lockManager: createLockManager(withLock),
         lockId: 'lock-a',
         logger,
         installFn,

@@ -436,6 +436,7 @@ export class AlertsService implements IAlertsService {
         lockManager: this.options.lockManager,
         lockId: `${RESOURCE_INSTALL_LOCK_PREFIX}:common`,
         logger: this.options.logger,
+        pluginStop$: this.options.pluginStop$,
         installFn: async () => {
           await Promise.all(
             initFns.map((fn) =>
@@ -558,6 +559,7 @@ export class AlertsService implements IAlertsService {
       lockManager: this.options.lockManager,
       lockId: `${RESOURCE_INSTALL_LOCK_PREFIX}:${context}:${namespace}`,
       logger: this.options.logger,
+      pluginStop$: this.options.pluginStop$,
       installFn: async () => {
         for (const fn of initFns) {
           await installWithTimeout({
