@@ -6,7 +6,7 @@
  */
 
 import * as cheerio from 'cheerio';
-import { capToParseBytes, normalizeSelfClosedRawText } from './text';
+import { capToParseBytes, normalizeSelfClosedRawText, PARSER_OPTIONS, unwrapCdata } from './text';
 
 /**
  * Strip known page chrome (nav/header/footer/sidebar) from raw vendor HTML,
@@ -111,14 +111,6 @@ interface ParsedNode {
  * function, 112ms at 5,000 nested elements, 433ms at 10,000, and 2.2s at 20,000. Bounding
  * the output could not have helped, because the cost is in the parse itself.
  */
-const PARSER_OPTIONS = {
-  _useHtmlParser2: true,
-  // Same reason `text.ts` sets it: HTML reads `<![CDATA[ ... ]]>` as a bogus comment, so a
-  // feed body carried that way was serialized back out as a comment and then dropped by
-  // `stripHtml`, losing the whole article. This file has to agree with the parser options
-  // in `text.ts`, or the two stages disagree about what the document contains.
-  recognizeCDATA: true,
-} as const;
 
 /**
  * Nesting depth past which the page is not simplified at all.
@@ -211,7 +203,13 @@ const selectArticleHtml = (html: string): string => {
   // `<article><script src="x.js"/><p>IOC: evil.test</p></article>` as a script whose body
   // is that paragraph. Chrome removal then deleted the script and the report with it,
   // leaving `<article></article>`. XHTML-style feeds write this form legitimately.
-  const $ = cheerio.load(normalizeSelfClosedRawText(html), PARSER_OPTIONS);
+  // CDATA is unwrapped before the parse, not handled after it. Selectors cannot see inside
+  // a CDATA node, so chrome removal missed a `<script>` bundle carried that way while the
+  // scoring walk still counted its bytes as visible text: a teaser whose CDATA held a large
+  // bundle outscored the real report, won selection, and then collapsed to nothing once
+  // `stripHtml` expanded the CDATA and dropped the script. Unwrapping first means both see
+  // the same document the downstream stage will.
+  const $ = cheerio.load(normalizeSelfClosedRawText(unwrapCdata(html)), PARSER_OPTIONS);
 
   // The one cast in this file, at the boundary where the transitive `@types/cheerio@0.22`
   // stops describing the DOM the installed cheerio actually returns.

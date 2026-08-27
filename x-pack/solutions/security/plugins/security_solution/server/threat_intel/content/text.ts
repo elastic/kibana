@@ -189,76 +189,148 @@ export const normalizeSelfClosedRawText = (html: string): string => {
 
   while (cursor < html.length) {
     const open = lower.indexOf('<', cursor);
-    const name =
-      open === -1
-        ? undefined
-        : RAW_TEXT_TAG_NAMES.find((candidate) => lower.startsWith(`<${candidate}`, open));
-    const afterName = open === -1 || name === undefined ? -1 : open + 1 + name.length;
-    // A tag boundary has to follow the name, or `<scriptfoo` would be treated as one.
-    const isTagStart =
-      afterName !== -1 && (afterName >= html.length || /[\s/>]/.test(html[afterName]));
-    const tagEnd = isTagStart ? tagEndFrom(html, afterName) : -1;
 
     if (open === -1) {
       cursor = html.length;
-    } else if (!isTagStart) {
-      cursor = open + 1;
-    } else if (tagEnd === -1) {
-      cursor = html.length;
-    } else if (html[tagEnd - 1] === '/') {
-      // The self-closed open tag this function exists for.
-      pieces.push(html.slice(copiedTo, tagEnd - 1), `></${name}>`);
-      copiedTo = tagEnd + 1;
-      cursor = tagEnd + 1;
+    } else if (lower.startsWith('<!--', open)) {
+      // Comments, CDATA sections and directives are skipped as whole regions rather than
+      // scanned for candidates. Identifying an opener from the bytes after `<` alone meant
+      // `<!-- <script> -->` registered as a real raw-text opener; it has no matching close,
+      // so the scan ran to end of input and never normalized the genuine `<script/>` after
+      // it. The parser then read the following paragraph as script content and
+      // `<!-- <script> --><script/><p>IOC: evil.test</p>` extracted to nothing at all.
+      const commentEnd = lower.indexOf('-->', open + 4);
+      cursor = commentEnd === -1 ? html.length : commentEnd + 3;
+    } else if (lower.startsWith('<![cdata[', open)) {
+      const cdataEnd = lower.indexOf(']]>', open + 9);
+      cursor = cdataEnd === -1 ? html.length : cdataEnd + 3;
+    } else if (lower.startsWith('<!', open) || lower.startsWith('<?', open)) {
+      const directiveEnd = lower.indexOf('>', open + 2);
+      cursor = directiveEnd === -1 ? html.length : directiveEnd + 1;
     } else {
-      // A real open tag, so everything up to the matching close is raw text as far as the
-      // parser is concerned, and a `<script/>` sitting in a JavaScript string literal is
-      // not a tag at all. Rewriting it inserted a close tag *inside* the outer body,
-      // ending that element early and spilling the rest of the script into `body_text`.
-      // That is a false-IOC injection primitive rather than cosmetic noise:
-      // `const x="<script/>"; fetch("https://attacker.test")` published the attacker's URL
-      // as an extractable indicator. Skip the body instead.
-      //
-      // The close tag's name has to end at a tag boundary. A bare prefix match accepted
-      // `</scriptfoo>`, which resumed the scan inside a body the parser still considers
-      // open and let a later `<script/>` there escape the same way. Trailing junk after
-      // the name is legal and does close the element, so the test is the character after
-      // the name, not the absence of one.
-      const closeTag = `</${name}`;
-      let searchFrom = tagEnd + 1;
-      let closeAt = -1;
-      while (closeAt === -1 && searchFrom < html.length) {
-        const found = lower.indexOf(closeTag, searchFrom);
-        const after = found === -1 ? -1 : found + closeTag.length;
-        if (found === -1) {
-          searchFrom = html.length;
-        } else if (after >= html.length || /[\s/>]/.test(html[after])) {
-          closeAt = found;
+      const name = RAW_TEXT_TAG_NAMES.find((candidate) => lower.startsWith(`<${candidate}`, open));
+      const afterName = name === undefined ? -1 : open + 1 + name.length;
+      // A tag boundary has to follow the name, or `<scriptfoo` would be treated as one.
+      const isRawTextStart =
+        afterName !== -1 && (afterName >= html.length || /[\s/>]/.test(html[afterName]));
+
+      if (!isRawTextStart) {
+        // Any other tag is skipped whole, quote-aware, so a `<script/>` sitting in one of
+        // its attribute values is never mistaken for a tag of its own.
+        const isTag = /[a-z/]/.test(lower[open + 1] ?? '');
+        const otherTagEnd = isTag ? tagEndFrom(html, open + 1) : -1;
+
+        if (!isTag) {
+          // A bare `<` in prose. Advance one character.
+          cursor = open + 1;
+        } else if (otherTagEnd === -1) {
+          // The tag never terminates, so no `>` exists from here on and no later tag can be
+          // complete either. Stopping is both correct and what keeps this linear: retrying
+          // from the next character rescanned the whole remaining input per position, which
+          // on `'<script'.repeat(n)` is quadratic and hung outright at n=512,000.
+          cursor = html.length;
         } else {
-          searchFrom = found + 1;
+          cursor = otherTagEnd + 1;
+        }
+      } else {
+        const tagEnd = tagEndFrom(html, afterName);
+
+        if (tagEnd === -1) {
+          cursor = html.length;
+        } else if (html[tagEnd - 1] === '/') {
+          // The self-closed open tag this function exists for.
+          pieces.push(html.slice(copiedTo, tagEnd - 1), `></${name}>`);
+          copiedTo = tagEnd + 1;
+          cursor = tagEnd + 1;
+        } else {
+          // A real open tag, so everything up to the matching close is raw text as far as
+          // the parser is concerned, and a `<script/>` sitting in a JavaScript string
+          // literal is not a tag at all. Rewriting it inserted a close tag *inside* the
+          // outer body, ending that element early and spilling the rest of the script into
+          // `body_text` as a false IOC. Skip the body instead.
+          //
+          // The close tag's name has to end at a tag boundary. A bare prefix match accepted
+          // `</scriptfoo>`, which resumed the scan inside a body the parser still considers
+          // open and let a later `<script/>` there escape the same way.
+          const closeTag = `</${name}`;
+          let searchFrom = tagEnd + 1;
+          let closeAt = -1;
+          while (closeAt === -1 && searchFrom < html.length) {
+            const found = lower.indexOf(closeTag, searchFrom);
+            const after = found === -1 ? -1 : found + closeTag.length;
+            if (found === -1) {
+              searchFrom = html.length;
+            } else if (after >= html.length || /[\s/>]/.test(html[after])) {
+              closeAt = found;
+            } else {
+              searchFrom = found + 1;
+            }
+          }
+
+          if (closeAt === -1) {
+            cursor = html.length;
+          } else {
+            // htmlparser2 ends an end tag at the first `>` and rejects a trailing slash,
+            // where the spec and parse5 both read the junk and close the element. That cost
+            // content twice: `</script/>` kept the element open and swallowed the rest of
+            // the document, and `</script foo="a>URL">` closed at the `>` inside the
+            // attribute value and spilled the remainder into `body_text` as a false IOC.
+            // Rewriting a junk-carrying end tag to its plain form is semantically free,
+            // since the junk is ignored either way.
+            const junkFrom = closeAt + closeTag.length;
+            const closeEnd = tagEndFrom(html, junkFrom);
+            if (closeEnd !== -1 && closeEnd > junkFrom) {
+              pieces.push(html.slice(copiedTo, closeAt), `</${name}>`);
+              copiedTo = closeEnd + 1;
+              cursor = closeEnd + 1;
+            } else {
+              cursor = junkFrom;
+            }
+          }
         }
       }
+    }
+  }
 
-      if (closeAt === -1) {
+  if (copiedTo === 0) return html;
+  pieces.push(html.slice(copiedTo));
+  return pieces.join('');
+};
+
+/**
+ * Textually unwrap CDATA sections, leaving their payload as markup.
+ *
+ * For `extract_article` only. That stage reasons about the document with selectors, and a
+ * selector cannot see inside a CDATA node, so a `<script>` bundle carried in CDATA was
+ * invisible to chrome removal while still counting as visible text during scoring. A teaser
+ * whose CDATA held a large bundle therefore outscored the real report, won selection, and
+ * then collapsed to almost nothing once `stripHtml` expanded the CDATA and dropped the
+ * script. Unwrapping before the parse turns the payload into real elements, so chrome
+ * removal and scoring both see what the downstream stage will see.
+ *
+ * Single pass, so a run of unterminated openers costs no more than the input length.
+ */
+export const unwrapCdata = (html: string): string => {
+  const lower = asciiLower(html);
+  const pieces: string[] = [];
+  let copiedTo = 0;
+  let cursor = 0;
+
+  while (cursor < html.length) {
+    const open = lower.indexOf('<![cdata[', cursor);
+
+    if (open === -1) {
+      cursor = html.length;
+    } else {
+      pieces.push(html.slice(copiedTo, open));
+      const close = lower.indexOf(']]>', open + 9);
+      if (close === -1) {
+        copiedTo = open + 9;
         cursor = html.length;
       } else {
-        // htmlparser2 ends an end tag at the first `>` and rejects a trailing slash, where
-        // the spec and parse5 both read the junk and close the element. Two content
-        // failures followed: `</script/>` kept the element open and swallowed the rest of
-        // the document, and `</script foo="a>URL">` closed at the `>` inside the attribute
-        // value, spilling the remainder of the end tag into `body_text` as a false IOC with
-        // an attacker-chosen URL. Rewriting any junk-carrying end tag to its plain form is
-        // the same job as the open-tag case above: make a raw-text tag parse the way a
-        // browser reads it. Semantically free, since the junk is ignored either way.
-        const junkFrom = closeAt + closeTag.length;
-        const closeEnd = tagEndFrom(html, junkFrom);
-        if (closeEnd !== -1 && closeEnd > junkFrom) {
-          pieces.push(html.slice(copiedTo, closeAt), `</${name}>`);
-          copiedTo = closeEnd + 1;
-          cursor = closeEnd + 1;
-        } else {
-          cursor = junkFrom;
-        }
+        pieces.push(html.slice(open + 9, close));
+        copiedTo = close + 3;
+        cursor = close + 3;
       }
     }
   }
@@ -283,7 +355,15 @@ export const normalizeSelfClosedRawText = (html: string): string => {
  * `</td>` and raw-text `<script>` bodies; parse5's extra fidelity is table foster
  * parenting and formatting-element reconstruction, none of which affects text extraction.
  */
-const PARSER_OPTIONS = {
+/**
+ * The single copy of the parser configuration, shared with `extract_article`.
+ *
+ * It was duplicated per file and the two drifted: `recognizeCDATA` was set here and not
+ * there, so one stage saw a CDATA article body and the other saw a comment and discarded
+ * it. Any option that changes what the document *contains* has to be identical across
+ * stages or they disagree, so there is one copy and it is exported rather than described.
+ */
+export const PARSER_OPTIONS = {
   _useHtmlParser2: true,
   // HTML treats `<![CDATA[ ... ]]>` as a bogus comment, which is right for a web page and
   // wrong for a feed: RSS and Atom use CDATA precisely to carry an HTML document, and

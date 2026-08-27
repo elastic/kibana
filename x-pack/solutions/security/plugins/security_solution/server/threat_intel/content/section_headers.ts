@@ -37,12 +37,19 @@
  *
  * Bounded at four passes rather than run to a fixed point, because headings come from
  * attacker-controlled markup and `(a)(a)(a)…` would otherwise cost one pass per group.
+ *
+ * The inner group is `[^()]*` rather than `[^)]*` so a failed attempt cannot scan past
+ * another opening parenthesis. With `[^)]*`, a heading shaped `'('.repeat(n) + ')(ok)'`
+ * made every opener scan to the same close and fail the end anchor, which is quadratic:
+ * measured 27ms at n=8,000, 403ms at 32,000 and 6.2s at 128,000, and the loop above runs
+ * it up to four times. Headings come from `<h2>` content in a page capped at 10MB, so n is
+ * not small. Identical output on every well-formed heading.
  */
 export const normalizeHeader = (header: string): string => {
   let normalized = header.toLowerCase();
 
   for (let pass = 0; pass < 4; pass++) {
-    const stripped = normalized.replace(/[:.\s]+$/, '').replace(/\s*\([^)]*\)\s*$/, '');
+    const stripped = normalized.replace(/[:.\s]+$/, '').replace(/\s*\([^()]*\)\s*$/, '');
     if (stripped === normalized) break;
     normalized = stripped;
   }
