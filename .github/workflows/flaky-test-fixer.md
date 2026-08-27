@@ -512,8 +512,9 @@ Follow this format:
   ```markdown
   ### 🕒 Pre-fix CI lag, not a regression
 
-  This failure ran on a build that doesn't yet include the fix; it should clear once the Cloud image catches up with `main`. cc @<requester-github-handle-here-if-not-a-bot>
+  This failure ran on Kibana `<short-sha>`, which doesn't yet include the fix; it should clear once the Cloud image catches up with `main`. cc @<requester-github-handle-here-if-not-a-bot>
   ```
+  Fill `<short-sha>` with the failing run's `Build hash` (the commit you compared against the fix — see the pipelines reference), abbreviated to 12 chars.
 - **Backport the existing fix** (fix already on `main`, contained PR — no PR opened):
   ```markdown
   ### The fix is already on `main` — it needs backporting
