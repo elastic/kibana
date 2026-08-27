@@ -71,8 +71,7 @@ export class GlobalSearch {
     const item = this.resultLabels.filter({ hasText: label });
     const list = this.page.testSubj
       .locator('chromeNextSearchModal')
-      .locator('.euiSelectableList__list')
-      .first();
+      .locator('.euiSelectableList__list');
 
     await expect(async () => {
       if ((await item.count()) === 0) {
@@ -80,7 +79,7 @@ export class GlobalSearch {
           el.scrollTop += 200;
         });
       }
-      await expect(item.first()).toBeVisible({ timeout: 1000 });
+      await expect(item).toBeVisible({ timeout: 1000 });
     }).toPass({ timeout: 15000 });
   }
 
