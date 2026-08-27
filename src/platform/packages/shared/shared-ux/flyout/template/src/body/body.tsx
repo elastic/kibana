@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Fragment } from 'react';
+import React, { Fragment, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { EuiFlyoutBody } from '@elastic/eui';
 import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
 import type { ParsedItem } from '@kbn/ui-react-assembly';
+import type { HeaderTabDescriptor } from '../header/tab';
 import type { FlyoutBodyProps } from '../types';
 import { bodyAssembly, flyoutAssembly, partsOf } from '../assembly';
 import {
@@ -27,6 +28,43 @@ const renderBodyItems = (items: ParsedItem[]) =>
   items.map((item, index) =>
     item.type === 'child' ? <Fragment key={`passthrough-${index}`}>{item.node}</Fragment> : null
   );
+
+const ActiveTabPanel = ({
+  activeTab,
+  activePanel,
+  bodyTestSubj,
+  scrollContainerRef,
+}: {
+  activeTab: HeaderTabDescriptor;
+  activePanel: ParsedItem;
+  bodyTestSubj: string | undefined;
+  scrollContainerRef: (node: HTMLElement | null) => void;
+}) => {
+  const panelChildren = activePanel.attributes.children as ReactNode;
+  const content = useMemo(
+    () =>
+      renderBodyItems(bodyAssembly.parseChildren(panelChildren, { supportsOtherChildren: true })),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [activePanel]
+  );
+  return (
+    <KibanaErrorBoundaryProvider>
+      <EuiFlyoutBody data-test-subj={bodyTestSubj} scrollContainerRef={scrollContainerRef}>
+        <KibanaErrorBoundary>
+          <div
+            role="tabpanel"
+            id={activeTab.panelDomId}
+            aria-labelledby={activeTab.tabDomId}
+            tabIndex={0}
+            data-test-subj={activePanel.attributes['data-test-subj'] as string | undefined}
+          >
+            {content}
+          </div>
+        </KibanaErrorBoundary>
+      </EuiFlyoutBody>
+    </KibanaErrorBoundaryProvider>
+  );
+};
 
 /** Part name used for identifying the `Body` zone. */
 export const BODY_PART_NAME = 'body';
@@ -77,27 +115,13 @@ export const BodyZone = ({ items, 'data-test-subj': dataTestSubj }: BodyZoneProp
       );
     }
 
-    const panelChildren = activePanel.attributes.children as ReactNode;
-    const activePanelContent = renderBodyItems(
-      bodyAssembly.parseChildren(panelChildren, { supportsOtherChildren: true })
-    );
-
     return (
-      <KibanaErrorBoundaryProvider>
-        <EuiFlyoutBody data-test-subj={bodyTestSubj} scrollContainerRef={scrollContainerRef}>
-          <KibanaErrorBoundary>
-            <div
-              role="tabpanel"
-              id={activeTab.panelDomId}
-              aria-labelledby={activeTab.tabDomId}
-              tabIndex={0}
-              data-test-subj={activePanel.attributes['data-test-subj'] as string | undefined}
-            >
-              {activePanelContent}
-            </div>
-          </KibanaErrorBoundary>
-        </EuiFlyoutBody>
-      </KibanaErrorBoundaryProvider>
+      <ActiveTabPanel
+        activeTab={activeTab}
+        activePanel={activePanel}
+        bodyTestSubj={bodyTestSubj}
+        scrollContainerRef={scrollContainerRef}
+      />
     );
   }
 
