@@ -473,6 +473,15 @@ export async function fetchAllAgentsByKuery(
     spaceId?: string;
     runtimeFields?: estypes.SearchRequest['runtime_mappings'];
     showInactive?: boolean;
+    /**
+     * Optional ES `_source` filtering, passed through verbatim.
+     * WARNING: when set, `searchHitToAgent` can only populate the requested fields, so every
+     * other `Agent` property is `undefined` despite its non-optional type. Only use this when
+     * you know exactly which fields the caller reads.
+     */
+    _source?: estypes.SearchRequest['_source'];
+    /** Overrides the ES `fields` param. Defaults to all runtime field keys. */
+    fetchFields?: string[];
   }
 ): Promise<AsyncIterable<Agent[]>> {
   const {
@@ -512,7 +521,8 @@ export async function fetchAllAgentsByKuery(
         rest_total_hits_as_int: true,
         track_total_hits: true,
         runtime_mappings: runtimeFields,
-        fields: Object.keys(runtimeFields),
+        fields: options.fetchFields ?? Object.keys(runtimeFields),
+        ...(options._source !== undefined ? { _source: options._source } : {}),
         sort,
         ...query,
       },

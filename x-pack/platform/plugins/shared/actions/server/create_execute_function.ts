@@ -35,6 +35,12 @@ export interface ExecuteOptions
   spaceId: string;
   apiKeyId?: string;
   apiKey: string | null;
+  /**
+   * True when `apiKey` is an external (user-created Cloud) UIAM API key. Marks the execution
+   * fake request so the Elasticsearch cluster client does not attach the UIAM shared secret,
+   * which UIAM rejects for external keys.
+   */
+  uiamApiKeyExternal?: boolean;
   executionId: string;
   actionTypeId: string;
   priority?: TaskPriority;
@@ -174,6 +180,9 @@ export function createBulkExecutionEnqueuerFunction({
           consumer: actionToExecute.consumer,
           relatedSavedObjects: relatedSavedObjectWithRefs,
           apiKeyId: actionToExecute.apiKeyId,
+          ...(actionToExecute.uiamApiKeyExternal !== undefined
+            ? { uiamApiKeyExternal: actionToExecute.uiamApiKeyExternal }
+            : {}),
           ...(actionToExecute.source ? { source: actionToExecute.source.type } : {}),
         },
         references: taskReferences,
