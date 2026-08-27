@@ -18,17 +18,10 @@ const MAX_AUTO_CONFIRM_ROUNDS = 3;
 interface Options {
   agentId?: string;
   /**
-   * When true, the client automatically answers any pending structured prompts
-   * that the agent emits after each API call:
-   *   - `confirmation`      → allows (`allow: true`)
-   *
-   * The client loops until no unanswered prompts remain (capped at
-   * {@link MAX_AUTO_CONFIRM_ROUNDS} continuations), merging all steps from
-   * continuation calls into the final `steps[]` response. Callers see a clean
-   * "send message → get response" interface with no prompt-ID handling.
-   *
-   * The loop throws if the cap is exceeded or if the server echoes a prompt id
-   * that was already answered (both indicate a stuck agent rather than progress).
+   * Auto-allow `confirmation` prompts. All confirmations in one response are batched
+   * into a single continuation POST; the loop only repeats for prompts emitted in
+   * later cycles. Capped at {@link MAX_AUTO_CONFIRM_ROUNDS}; throws if exceeded.
+   * Non-`confirmation` prompts end the loop and return the interrupted round as-is.
    */
   autoConfirm?: boolean;
 }
@@ -70,7 +63,7 @@ export class AgentBuilderEvaluationChatClient {
     private readonly fetch: HttpHandler,
     private readonly log: ToolingLog,
     private readonly connectorId: string
-  ) {}
+  ) { }
 
   private async executeWithRetry<T>(operationName: string, fn: () => Promise<T>): Promise<T> {
     return pRetry(fn, {
@@ -145,16 +138,15 @@ export class AgentBuilderEvaluationChatClient {
 
       if (autoConfirm) {
         let autoConfirmPrompts = this.getConfirmationPrompts(lastResponse);
-        const answeredPromptIds = new Set<string>(Object.keys(autoConfirmPrompts));
         let rounds = 0;
 
         while (Object.keys(autoConfirmPrompts).length > 0) {
           if (rounds >= MAX_AUTO_CONFIRM_ROUNDS) {
             throw new Error(
               `autoConfirm: exceeded ${MAX_AUTO_CONFIRM_ROUNDS} continuation rounds. ` +
-                `Outstanding prompt ids: ${Object.keys(autoConfirmPrompts).join(', ')}. ` +
-                `This indicates a stuck agent — increase MAX_AUTO_CONFIRM_ROUNDS only if ` +
-                `more than ${MAX_AUTO_CONFIRM_ROUNDS} sequential confirmations are genuinely expected.`
+              `Outstanding prompt ids: ${Object.keys(autoConfirmPrompts).join(', ')}. ` +
+              `This indicates a stuck agent — increase MAX_AUTO_CONFIRM_ROUNDS only if ` +
+              `more than ${MAX_AUTO_CONFIRM_ROUNDS} sequential confirmations are genuinely expected.`
             );
           }
 
@@ -175,19 +167,6 @@ export class AgentBuilderEvaluationChatClient {
           rounds++;
 
           autoConfirmPrompts = this.getConfirmationPrompts(continuation.response);
-
-          // A prompt id that was already answered means the agent is looping — fail loudly.
-          const repeated = Object.keys(autoConfirmPrompts).filter((id) =>
-            answeredPromptIds.has(id)
-          );
-          if (repeated.length > 0) {
-            throw new Error(
-              `autoConfirm: server re-emitted already-answered prompt id(s): ${repeated.join(
-                ', '
-              )}. ` + `This indicates a stuck agent.`
-            );
-          }
-          Object.keys(autoConfirmPrompts).forEach((id) => answeredPromptIds.add(id));
         }
       }
 
