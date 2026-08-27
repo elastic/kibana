@@ -13,7 +13,6 @@ import type {
   ConversationRoundAuthor,
   ConverseInput,
   ChatAgentEvent,
-  AgentCapabilities,
   AgentConfigurationOverrides,
   ConversationAction,
   AgentExecutionMode,
@@ -100,7 +99,6 @@ export interface ExecuteSubAgentParams {
   parentExecutionId: string;
   prompt: string;
   connectorId?: string;
-  capabilities?: AgentCapabilities;
   abortSignal?: AbortSignal;
 }
 
@@ -115,7 +113,6 @@ export interface CreateSubAgentParams {
   conversationId: string;
   prompt: string;
   connectorId?: string;
-  capabilities?: AgentCapabilities;
   abortSignal?: AbortSignal;
 }
 
@@ -126,7 +123,6 @@ export interface SendToSubAgentParams {
   conversationId: string;
   prompt: string;
   connectorId?: string;
-  capabilities?: AgentCapabilities;
   abortSignal?: AbortSignal;
 }
 
@@ -160,6 +156,8 @@ export interface SubAgentExecution {
 export interface ExperimentalFeatures {
   /** Whether the skills feature is enabled */
   skills: boolean;
+  /** Whether AI index instructions are enabled by Context Engine and Agent Builder settings */
+  aiIndices: boolean;
   /** Whether context-aware skill filtering is enabled */
   relevantSkills: boolean;
   /** Whether the sub-agent execution feature is enabled */
@@ -362,10 +360,6 @@ export interface AgentParams {
    * public conversations). Stamped onto the completed round.
    */
   author?: ConversationRoundAuthor;
-  /**
-   * Agent capabilities to enable.
-   */
-  capabilities?: AgentCapabilities;
   browserApiTools?: BrowserApiToolMetadata[];
   /**
    * Whether to use structured output mode. When true, the agent will return structured data instead of plain text.

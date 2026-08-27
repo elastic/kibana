@@ -79,6 +79,15 @@ steps:
       cache: yarn
   - name: Bootstrap Kibana
     run: yarn kbn bootstrap
+  - name: Expose Kibana's Node.js path to the agent
+    # the sandbox rebuilds PATH from every `bin` dir under RUNNER_TOOL_CACHE, so the agent's
+    # `node` is whichever version the runner cached first, not the one setup-node just
+    # picked, and `node scripts/*` then trips Kibana's version guard. Pass the resolved path
+    # through so the agent can fix PATH itself instead of via `nvm` (mirrors are firewalled).
+    run: |
+      KBN_NODE_BIN="$(dirname "$(command -v node)")"
+      echo "KBN_NODE_BIN=$KBN_NODE_BIN" >> "$GITHUB_ENV"
+      echo "Pinned Node for the agent: $KBN_NODE_BIN ($("$KBN_NODE_BIN/node" --version))"
   - name: Detect duplicate fix PRs
     # Shortlist the `flaky-test-fixer` PRs whose `failed-test` issue is owned by the same
     # team as this issue, so the agent can spot an already-in-flight fix and bail out before
@@ -280,7 +289,15 @@ Many `failed-test` issues share a single **root cause**, so the fixer can open s
 
 ## Environment
 
-Kibana is already bootstrapped for you. The `bk` (Buildkite) CLI is installed and authenticated and `BUILDKITE_ORGANIZATION_SLUG` is `elastic`, so you can inspect CI builds and download failure artifacts (JUnit XML, screenshots, server logs) when you need to re-investigate. Use the exact `bk artifacts list` / `bk artifacts download` recipes in the [`flaky-test-investigator` skill](#validate-the-investigation-is-current) — don't rediscover the CLI syntax by trial and error.
+Kibana is already bootstrapped for you. Kibana's pinned Node is in `$KBN_NODE_BIN` — put it on PATH in every Bash call that runs `node` or `yarn`, since each call starts a fresh shell:
+
+```bash
+export PATH="$KBN_NODE_BIN:$PATH"
+```
+
+Don't use `nvm`; it can't reach the Node mirrors from here.
+
+The `bk` (Buildkite) CLI is installed and authenticated and `BUILDKITE_ORGANIZATION_SLUG` is `elastic`, so you can inspect CI builds and download failure artifacts (JUnit XML, screenshots, server logs) when you need to re-investigate. Use the exact `bk artifacts list` / `bk artifacts download` recipes in the [`flaky-test-investigator` skill](#validate-the-investigation-is-current) — don't rediscover the CLI syntax by trial and error.
 
 ## Working efficiently
 
@@ -297,7 +314,7 @@ This run has a fixed AI-credit budget, and every tool result you read stays in t
 3. Read the failing test and the helpers, fixtures, and page objects it imports — and the application code the failing assertions exercise, so a product-side root cause isn't missed.
 4. Decide where the fix should land. The default target is `main`. But if the failure is on a **version branch** (check the issue's CI data / investigator comment) and `main` already carries the fix, don't target `main` — follow "Fix already on `main`", which decides between recommending a backport of the existing PR and handing over a best-effort fix for the version branch. Neither path opens a PR.
 5. Apply the smallest patch that addresses the root cause on the target branch, whether that's in test code or application code, staying within the [Fix guardrails](#fix-guardrails). Re-enable the test suite(s) or test case(s) if they were skipped. Remove any stale flaky comments (e.g., `// FLAKY: <issue-url>` / `// Failing: See <issue-url>`, etc.) if they carry any. Don't add explanatory code comments to the patch by default — a good fix is self-explanatory. Add one only when the fix is particularly involved or non-obvious, and keep it strictly to 1 comment line; a simple change like a timeout bump never warrants a comment.
-6. Verify the patch. Lint with `node scripts/eslint <changed files>`. **Don't type check** — `node scripts/type_check` builds a large project graph and is slow and memory-heavy on this runner (an unscoped run is even OOM-killed with `SIGKILL`), and the PR's CI type-checks the change anyway, so leave that to CI. For a Jest test, repeat it as described in [Verifying a Jest fix](#verifying-a-jest-fix). For an application-side fix, also run the Jest tests nearest the changed code. FTR/Scout tests need a live Elasticsearch + Kibana and cannot be run here.
+6. Verify the patch. Lint with `node scripts/eslint <changed files>`, after the PATH export from [Environment](#environment). **Don't type check** — `node scripts/type_check` builds a large project graph and is slow and memory-heavy on this runner (an unscoped run is even OOM-killed with `SIGKILL`), and the PR's CI type-checks the change anyway, so leave that to CI. For a Jest test, repeat it as described in [Verifying a Jest fix](#verifying-a-jest-fix). For an application-side fix, also run the Jest tests nearest the changed code. FTR/Scout tests need a live Elasticsearch + Kibana and cannot be run here.
 7. Decide the backport strategy and open the PR (see "PR format" and "Backport label" below). If the fix has to land on a version branch rather than `main`, don't open a PR at all — hand it over in the outcome comment instead (see "Fixes that must target a version branch").
 8. Post the outcome comment on the issue (see "Outcome comment" below). Do this in every run, whether or not you opened a PR.
 9. Remove the `ai:fix-flaky` label from the issue via the `remove-labels` safe output. Do this in **every** run once you have a result — whether you opened a PR, found an existing one, or opened none.
@@ -325,6 +342,7 @@ To re-investigate, follow the `flaky-test-investigator` skill at `.agents/skills
 Run this loop twice: once on the unpatched test, once with the fix applied.
 
 ```bash
+export PATH="$KBN_NODE_BIN:$PATH"
 : > /tmp/gh-aw/agent/jest-durations
 fails=0
 for i in $(seq 1 25); do
@@ -337,7 +355,7 @@ awk '{total += $1; if ($1 > max) max = $1} END {printf "avg %dms, max %dms\n", t
 
 - **Run it on the unpatched test first** (`git stash` the patch if you already wrote it). If it never fails there, the flake doesn't reproduce here and a clean post-fix loop proves nothing: say so under "Not verified locally".
 - **Report both loops** on the Jest line of "Verified locally", as `<failures>/<runs> before the fix (avg, max), then the same after`. Add under "Not verified locally" that neither loop ran under CI's parallel load.
-- **Read the timings, not only the counts.** An average that jumps after the patch means it bought reliability by waiting longer, which the body has to justify. A max far above the average means something is still racing.
+- **Read the timings, not only the counts.** A patch meant to make the test cheaper — an async step removed, a smaller unit under test, heavy children mocked — must show a clearly lower average, not a few percent. An average that barely moves means the expensive work is still there and the patch only changed how the test waits; that is the shape of Jest fix that comes back. An average that jumps after the patch means it bought reliability by waiting longer, which the body has to justify. A max far above the average means something is still racing. A deliberate timeout bump is the exception: it is not meant to lower the average. Two traps in the durations file — a `0` line means the test name did not match, not a fast run, and a run that crashed adds no line at all, so check you have one line per run.
 - **25 runs is the floor**, 50 when a run takes only seconds. A loop this size catches a test that fails every few runs, not one that fails weekly.
 - **Any failure in the post-fix loop means the fix did not hold.** Revise the patch and run both loops again.
 
@@ -508,6 +526,13 @@ Follow this format:
   The failure is infrastructure-side (the CI agent lost its Elasticsearch connection mid-run), so there's nothing to patch in this repo. cc @<requester-github-handle-here-if-not-a-bot>
   ```
   Swap in the actual one-clause reason — e.g. the test already passes on `main`, the failure is infrastructure-side, or the root cause can't be confidently identified.
+- **Pre-fix CI lag** (the reported failure ran a Cloud image that predates the fix — confirm via the `flaky-test-investigator` skill's pipelines reference — so no PR was opened):
+  ```markdown
+  ### 🕒 Pre-fix CI lag, not a regression
+
+  This failure ran on Kibana `<short-sha>`, which doesn't yet include the fix; it should clear once the Cloud image catches up with `main`. cc @<requester-github-handle-here-if-not-a-bot>
+  ```
+  Fill `<short-sha>` with the failing run's `Build hash` (the commit you compared against the fix — see the pipelines reference), abbreviated to 12 chars.
 - **Backport the existing fix** (fix already on `main`, contained PR — no PR opened):
   ```markdown
   ### The fix is already on `main` — it needs backporting

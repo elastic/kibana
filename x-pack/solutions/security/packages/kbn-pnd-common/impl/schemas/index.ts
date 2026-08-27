@@ -27,7 +27,6 @@ export {
   ApprovalRequirement,
   WatchApprovalGate,
   WatchAutonomyLevel,
-  WatchGeneralSettings,
   WatchLedgerEntry,
   WatchRunOutcome,
   WatchScopeRoutingSettings,
