@@ -99,11 +99,36 @@ const SKIPPED_SUBTREE_NAMES = new Set(['script', 'style', 'template']);
  */
 const NON_RENDERED_NAMES = new Set(['template', 'iframe']);
 
+/**
+ * `display: none` or `visibility: hidden` among the element's inline style declarations.
+ * Parsed per declaration rather than matched with a regex on the whole string, so a
+ * decoy — a custom property (`--display:none`) or another property's value that happens
+ * to contain the text (`content: 'display:none'`) — can't false-positive and hide content
+ * that is genuinely visible.
+ */
+const isCssHidden = (style: string | undefined): boolean =>
+  (style ?? '').split(';').some((declaration) => {
+    const colon = declaration.indexOf(':');
+    if (colon === -1) return false;
+    const property = declaration.slice(0, colon).trim().toLowerCase();
+    const value = declaration
+      .slice(colon + 1)
+      .split('!')[0]
+      .trim()
+      .toLowerCase();
+    return (
+      (property === 'display' && value === 'none') ||
+      (property === 'visibility' && value === 'hidden')
+    );
+  });
+
 export const isNonRenderedElement = (node: {
   name?: string;
   attribs?: Record<string, string>;
 }): boolean =>
-  NON_RENDERED_NAMES.has(node.name?.toLowerCase() ?? '') || node.attribs?.hidden !== undefined;
+  NON_RENDERED_NAMES.has(node.name?.toLowerCase() ?? '') ||
+  node.attribs?.hidden !== undefined ||
+  isCssHidden(node.attribs?.style);
 
 const isSkippedSubtree = (node: ParsedNode): boolean =>
   SKIPPED_SUBTREE_NAMES.has(elementName(node)) || isNonRenderedElement(node);
@@ -399,6 +424,25 @@ const rawTextOf = (nodes: ParsedNode[]): string => {
 };
 
 /**
+ * Whether `raw` contains a `<script>`/`<style>` opener with no matching close anywhere in
+ * the payload (self-closed forms normalized first, so `<script/>` doesn't count). CDATA is
+ * literal, unescaped text, so an opener like this parses as a real raw-text element that
+ * swallows the rest of the payload as its body — `payloadCarriesMarkup` alone can't tell
+ * that apart from genuine markup, and once parsed that way the swallowed text is
+ * unrecoverable, since a skipped subtree never contributes to the walk. Checked on the raw
+ * string, before parsing, for the same reason `shouldReparse` decides from text rather than
+ * from a parse it doesn't yet trust.
+ */
+const hasUnclosedRawTextOpener = (raw: string): boolean => {
+  const normalized = normalizeSelfClosedRawText(raw);
+  return RAW_TEXT_TAG_NAMES.some((name) => {
+    const opener = new RegExp(`<${name}(?=[\\s/>])`, 'i');
+    const closer = new RegExp(`</${name}(?=[\\s/>])`, 'i');
+    return opener.test(normalized) && !closer.test(normalized);
+  });
+};
+
+/**
  * Parses a CDATA payload into nodes. RSS and Atom carry an entire HTML document inside
  * `<![CDATA[ ... ]]>`, so it has to be parsed or the article body is lost. CDATA content
  * is also literal, so a document that entity-encoded its body *and* wrapped it in CDATA
@@ -406,6 +450,7 @@ const rawTextOf = (nodes: ParsedNode[]): string => {
  * to the payload and bounded to one extra parse.
  */
 const parseCdataPayload = (raw: string): ParsedNode[] => {
+  if (hasUnclosedRawTextOpener(raw)) return [{ type: 'text', data: raw }];
   const nodes = parseTopLevelNodes(raw);
   if (payloadCarriesMarkup(nodes)) return nodes;
   return parseTopLevelNodes(inlineTextOf(nodes, false));

@@ -808,6 +808,48 @@ describe('CDATA payloads', () => {
 });
 
 /**
+ * CDATA is literal, unescaped text, so a `<script>`/`<style>` opener with no matching
+ * close anywhere in the payload is not real markup — it just looks that way to a parser,
+ * which reads it as a raw-text element that swallows the rest of the payload as its body.
+ * Trusting that parse the way real, closed markup is trusted would drop everything after
+ * the opener, including the literal tag text and whatever followed it.
+ */
+describe('an unclosed raw-text opener inside CDATA stays literal', () => {
+  it.each([
+    [
+      'script',
+      '<![CDATA[Exploit uses <script> and c2.evil.test]]>',
+      'Exploit uses <script> and c2.evil.test',
+    ],
+    [
+      'style',
+      '<![CDATA[Exploit uses <style> and c2.evil.test]]>',
+      'Exploit uses <style> and c2.evil.test',
+    ],
+  ])('keeps the whole payload for an unclosed %s', (_label, html, expected) => {
+    expect(stripHtml(html)).toBe(expected);
+  });
+
+  it('keeps structured output literal too', () => {
+    expect(htmlToStructured('<![CDATA[Exploit uses <script> and c2.evil.test]]>')).toBe(
+      'Exploit uses <script> and c2.evil.test'
+    );
+  });
+
+  // A self-closed opener is not an unclosed one, and a genuinely closed script is still
+  // parsed and removed as markup.
+  it('still treats a self-closed script inside CDATA as real markup', () => {
+    expect(stripHtml('<![CDATA[<script/><p>evil.test</p>]]>')).toBe('evil.test');
+  });
+
+  it('still removes a genuinely closed script inside CDATA', () => {
+    expect(stripHtml('<![CDATA[<script>fetch("https://false-ioc.test")</script>safe]]>')).toBe(
+      'safe'
+    );
+  });
+});
+
+/**
  * Escaped markup is also how a report displays markup on purpose, so re-parse eligibility
  * depends on whether the input brought markup of its own — a `<code>` block displaying an
  * escaped script is content the author chose to show, not an encoded document to decode.
@@ -1360,6 +1402,50 @@ describe('hidden subtrees', () => {
 
   it('drops a hidden subtree from structured output too', () => {
     expect(htmlToStructured('<div hidden>c2.stale.test</div><p>safe</p>')).toBe('safe');
+  });
+
+  // Inline CSS hides content just as effectively as the `hidden` attribute, and this
+  // predicate is the shared source of truth for both text walkers and article scoring.
+  it.each([
+    ['display:none', '<div style="display:none">c2.stale.test</div><p>safe</p>'],
+    ['display: none with a space', '<div style="display: none">c2.stale.test</div><p>safe</p>'],
+    ['visibility:hidden', '<div style="visibility:hidden">c2.stale.test</div><p>safe</p>'],
+    [
+      'display:none with !important',
+      '<div style="display:none !important">c2.stale.test</div><p>safe</p>',
+    ],
+    [
+      'display:none among other declarations',
+      '<div style="color:red;display:none">c2.stale.test</div><p>safe</p>',
+    ],
+  ])('drops an element styled with %s', (_label, html) => {
+    const result = stripHtml(html);
+
+    expect(result).toBe('safe');
+    expect(result).not.toContain('c2.stale.test');
+  });
+
+  it('drops a display:none subtree from structured output too', () => {
+    expect(htmlToStructured('<div style="display:none">c2.stale.test</div><p>safe</p>')).toBe(
+      'safe'
+    );
+  });
+
+  // Matched by parsing declarations, not by a regex over the whole string, so a decoy
+  // can't false-positive and hide content that is genuinely visible.
+  it.each([
+    [
+      'an unrecognized display value',
+      '<div style="display:nonexistent">keep.test</div><p>safe</p>',
+    ],
+    ['an unrelated style property', '<div style="color:red">keep.test</div><p>safe</p>'],
+    ['a custom property named display', '<div style="--display:none">keep.test</div><p>safe</p>'],
+    [
+      "a value that mentions display:none in another property's content",
+      `<div style="content: 'display:none'">keep.test</div><p>safe</p>`,
+    ],
+  ])('keeps a visible element styled with %s', (_label, html) => {
+    expect(stripHtml(html)).toBe('keep.test safe');
   });
 
   it('keeps a visible sibling of the same shape', () => {
