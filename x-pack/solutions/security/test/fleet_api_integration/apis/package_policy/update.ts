@@ -943,7 +943,7 @@ export default function (providerContext: FtrProviderContext) {
         package: {
           name: 'endpoint',
           title: 'Elastic Defend',
-          version: endpointVersion,
+          version: '8.6.1',
         },
       });
 
