@@ -215,4 +215,19 @@ describe('test_configuration_preview_utils', () => {
     });
     expect(fields[fields.length - 1]).toEqual({ name: 'extra_field', type: 'boolean' });
   });
+
+  it('uses only mapped fields when dynamic fields are disabled', () => {
+    const values = {
+      ...emptyDatasetWizardFormValues(),
+      settings: applySettingsForFormat(emptyCreateDatasetSettingsFormValues(), 'csv'),
+      automatic_field_types: {
+        message: 'keyword',
+      },
+      dynamic_fields_enabled: false,
+    };
+
+    expect(getEffectiveTestConfigurationPreviewFields(values)).toEqual([
+      { name: 'message', type: 'keyword' },
+    ]);
+  });
 });

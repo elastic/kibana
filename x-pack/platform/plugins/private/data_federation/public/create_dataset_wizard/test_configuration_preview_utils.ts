@@ -196,11 +196,18 @@ export const applyAutomaticFieldTypesToPreviewFields = (
 
 export const getEffectiveTestConfigurationPreviewFields = (
   values: DatasetWizardFormValues
-): TestConfigurationPreviewField[] =>
-  applyAutomaticFieldTypesToPreviewFields(
+): TestConfigurationPreviewField[] => {
+  const mappedFieldTypes = values.automatic_field_types ?? {};
+
+  if (values.dynamic_fields_enabled === false) {
+    return Object.entries(mappedFieldTypes).map(([name, type]) => ({ name, type }));
+  }
+
+  return applyAutomaticFieldTypesToPreviewFields(
     getTestConfigurationPreviewFields(values),
-    values.automatic_field_types ?? {}
+    mappedFieldTypes
   );
+};
 
 const getPrefixedColumnSampleField = (
   field: TestConfigurationPreviewField

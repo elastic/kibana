@@ -36,6 +36,12 @@ export const mappingsToAutomaticFieldTypes = (
   );
 };
 
+export const getDynamicInferredFields = (
+  inferredFields: readonly TestConfigurationPreviewField[],
+  mappedFieldTypes: Record<string, string>
+): TestConfigurationPreviewField[] =>
+  inferredFields.filter((field) => !(field.name in mappedFieldTypes));
+
 export const mergeMissingAutomaticFieldTypes = (
   currentFieldTypes: Record<string, string>,
   inferredFieldTypes: Record<string, string>

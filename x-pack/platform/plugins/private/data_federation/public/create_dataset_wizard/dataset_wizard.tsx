@@ -91,6 +91,7 @@ export interface DatasetWizardProps {
   defaultValues: DatasetWizardFormValues;
   flowVariant: DatasetWizardFlowVariant;
   reloadDataSources: () => Promise<void>;
+  onCancel: () => void;
   onSave: (data: DataSetWithName, previousId?: string) => Promise<string | null>;
 }
 
@@ -102,6 +103,7 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
   defaultValues,
   flowVariant,
   reloadDataSources,
+  onCancel,
   onSave,
 }) => {
   const {
@@ -197,6 +199,11 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
 
     return () => subscription.unsubscribe();
   }, [draftStorageKey, watch]);
+
+  const handleCancel = useCallback(() => {
+    clearWizardFormDraft(draftStorageKey);
+    onCancel();
+  }, [draftStorageKey, onCancel]);
 
   const existingDataSourceNames = useMemo(
     () => dataSources.map((dataSource) => dataSource.name),
@@ -669,14 +676,21 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
         ) : null}
 
         <div css={footerCss} data-test-subj="datasetWizardFooter">
-          <EuiSpacer size="xxl" />
+          <EuiSpacer size={isFlow3 ? 'xxl' : 'xl'} />
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
+            {isFlow3 ? null : (
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty data-test-subj="datasetWizardCancel" onClick={handleCancel}>
+                  {datasetWizardStrings.cancelButton()}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            )}
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="s" responsive={false}>
                 {showBackButton ? (
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty
-                      iconType="chevronSingleLeft"
+                      iconType={isFlow3 ? 'chevronSingleLeft' : undefined}
                       data-test-subj="datasetWizardBack"
                       onClick={handleBack}
                     >
@@ -684,11 +698,22 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
                     </EuiButtonEmpty>
                   </EuiFlexItem>
                 ) : null}
+                {!isFlow3 && showTestConfiguration ? (
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      data-test-subj="datasetWizardTestConfiguration"
+                      isLoading={isTestConfigLoading}
+                      onClick={handleTestConfiguration}
+                    >
+                      {datasetWizardStrings.testConfigurationButton()}
+                    </EuiButton>
+                  </EuiFlexItem>
+                ) : null}
                 <EuiFlexItem grow={false}>
                   {isLastStep ? (
                     <EuiButton
                       fill
-                      iconType="check"
+                      iconType={isFlow3 ? 'check' : undefined}
                       data-test-subj="datasetWizardSubmit"
                       isLoading={isSaving}
                       disabled={isSaving}
@@ -701,8 +726,8 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
                   ) : (
                     <EuiButton
                       fill
-                      iconType="chevronSingleRight"
-                      iconSide="right"
+                      iconType={isFlow3 ? 'chevronSingleRight' : undefined}
+                      iconSide={isFlow3 ? 'right' : undefined}
                       data-test-subj="datasetWizardNext"
                       onClick={() => void handleNext()}
                     >
@@ -712,7 +737,7 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
-            {showTestConfiguration ? (
+            {isFlow3 && showTestConfiguration ? (
               <EuiFlexItem grow={false}>
                 <EuiButton
                   data-test-subj="datasetWizardTestConfiguration"
@@ -724,7 +749,7 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
               </EuiFlexItem>
             ) : null}
           </EuiFlexGroup>
-          <EuiSpacer size="m" />
+          {isFlow3 ? <EuiSpacer size="m" /> : null}
         </div>
       </EuiPageSection>
       {isCreateDataSourceFlyoutOpen ? (

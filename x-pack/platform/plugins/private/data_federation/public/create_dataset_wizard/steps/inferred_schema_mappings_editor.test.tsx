@@ -24,19 +24,11 @@ const FakeMappedFieldsEditor: FunctionComponent<MappedFieldsEditorProps> = ({
   const [mappings, setMappings] = useState(value ?? {});
   const [isCreateFieldFormOpen, setIsCreateFieldFormOpen] = useState(false);
 
-  const addManualField = () => {
-    setIsCreateFieldFormOpen(true);
-  };
+  const properties =
+    (mappings as { properties?: Record<string, { type?: string }> }).properties ?? {};
 
-  const confirmManualField = () => {
-    const nextMappings = {
-      properties: {
-        ...((mappings as { properties?: Record<string, unknown> }).properties ?? {}),
-        manual_field: { type: 'keyword' },
-      },
-    };
+  const updateMappings = (nextMappings: Record<string, unknown>) => {
     setMappings(nextMappings);
-    setIsCreateFieldFormOpen(false);
     onChange({
       getData: () => nextMappings,
       validate: () => Promise.resolve(true),
@@ -44,9 +36,38 @@ const FakeMappedFieldsEditor: FunctionComponent<MappedFieldsEditorProps> = ({
     });
   };
 
+  const addManualField = () => {
+    setIsCreateFieldFormOpen(true);
+  };
+
+  const confirmManualField = () => {
+    updateMappings({
+      properties: {
+        ...properties,
+        manual_field: { type: 'keyword' },
+      },
+    });
+    setIsCreateFieldFormOpen(false);
+  };
+
+  const deleteField = (name: string) => {
+    const { [name]: _removed, ...remainingProperties } = properties;
+    updateMappings({ properties: remainingProperties });
+  };
+
   return (
     <div>
       <div data-test-subj="fakeMappedFieldsValue">{JSON.stringify(mappings)}</div>
+      {Object.keys(properties).map((name) => (
+        <button
+          key={name}
+          type="button"
+          data-test-subj={`fakeDeleteField-${name}`}
+          onClick={() => deleteField(name)}
+        >
+          Delete {name}
+        </button>
+      ))}
       {isCreateFieldFormOpen ? (
         <div data-test-subj="createFieldForm">
           <button type="button" data-test-subj="fakeConfirmAddField" onClick={confirmManualField}>
@@ -102,18 +123,27 @@ const TestHarness = ({
 };
 
 describe('InferredSchemaMappingsEditor', () => {
-  it('renders the mapped fields editor with an Infer schema split button', () => {
+  it('renders Mapped fields above Dynamic fields without Infer missing fields', () => {
     const { getByTestId, queryByTestId } = render(<TestHarness />);
 
     expect(getByTestId('datasetWizardInferredSchemaMappingsEditor')).toBeInTheDocument();
+    expect(getByTestId('datasetWizardMappedFields')).toBeInTheDocument();
+    expect(getByTestId('datasetWizardDynamicFields')).toBeInTheDocument();
+    expect(
+      getByTestId('datasetWizardMappedFields').compareDocumentPosition(
+        getByTestId('datasetWizardDynamicFields')
+      ) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
     expect(getByTestId('datasetWizardAddField')).toBeInTheDocument();
-    expect(getByTestId('datasetWizardInferSchemaSplitButton')).toBeInTheDocument();
     expect(getByTestId('datasetWizardInferSchema')).toBeInTheDocument();
-    expect(getByTestId('datasetWizardInferSchemaMenuButton')).toBeInTheDocument();
+    expect(getByTestId('datasetWizardInferSchema')).toBeEnabled();
+    expect(getByTestId('datasetWizardDynamicFieldsEnabled')).toBeChecked();
+    expect(getByTestId('datasetWizardDynamicFieldsEmpty')).toBeInTheDocument();
+    expect(queryByTestId('datasetWizardInferSchemaSplitButton')).toBeNull();
     expect(queryByTestId('datasetWizardInferMissingFields')).toBeNull();
   });
 
-  it('replaces all fields with the inferred schema when Infer schema is clicked', async () => {
+  it('fills Dynamic fields from Infer schema without writing mapped field types', async () => {
     const { getByTestId } = render(
       <TestHarness automaticFieldTypes={{ manual_field: 'keyword' }} />
     );
@@ -121,51 +151,95 @@ describe('InferredSchemaMappingsEditor', () => {
     fireEvent.click(getByTestId('datasetWizardInferSchema'));
 
     await waitFor(() => {
-      expect(getByTestId('automaticFieldTypesValue')).toHaveTextContent(
-        JSON.stringify({ '@timestamp': 'date', message: 'text' })
-      );
+      expect(getByTestId('datasetWizardDynamicFieldsTable')).toBeInTheDocument();
+      expect(getByTestId('datasetWizardMapField-@timestamp')).toBeInTheDocument();
+      expect(getByTestId('datasetWizardMapField-message')).toBeInTheDocument();
     });
+
+    expect(getByTestId('automaticFieldTypesValue')).toHaveTextContent(
+      JSON.stringify({ manual_field: 'keyword' })
+    );
+    expect(getByTestId('datasetWizardDynamicFieldsEmpty')).toBeInTheDocument();
   });
 
-  it('only adds missing inferred fields when Infer missing fields is clicked, preserving manual edits', async () => {
-    const { getByTestId } = render(<TestHarness automaticFieldTypes={{ message: 'keyword' }} />);
-
-    fireEvent.click(getByTestId('datasetWizardInferSchemaMenuButton'));
-
-    await waitFor(() => {
-      expect(getByTestId('datasetWizardInferMissingFields')).toBeInTheDocument();
-    });
-
-    fireEvent.click(getByTestId('datasetWizardInferMissingFields'));
-
-    await waitFor(() => {
-      expect(getByTestId('automaticFieldTypesValue')).toHaveTextContent(
-        JSON.stringify({ message: 'keyword', '@timestamp': 'date' })
-      );
-    });
-  });
-
-  it('disables Infer missing fields until a field is present', async () => {
+  it('maps a Dynamic field into Mapped and removes it from Dynamic', async () => {
     const { getByTestId, queryByTestId } = render(<TestHarness />);
 
-    fireEvent.click(getByTestId('datasetWizardInferSchemaMenuButton'));
+    fireEvent.click(getByTestId('datasetWizardInferSchema'));
 
     await waitFor(() => {
-      expect(getByTestId('datasetWizardInferMissingFields')).toBeDisabled();
+      expect(getByTestId('datasetWizardMapField-message')).toBeInTheDocument();
     });
 
-    fireEvent.click(getByTestId('datasetWizardInferSchemaMenuButton'));
+    fireEvent.click(getByTestId('datasetWizardMapField-message'));
 
     await waitFor(() => {
-      expect(queryByTestId('datasetWizardInferMissingFields')).toBeNull();
+      expect(getByTestId('automaticFieldTypesValue')).toHaveTextContent(
+        JSON.stringify({ message: 'text' })
+      );
+      expect(queryByTestId('datasetWizardMapField-message')).toBeNull();
+      expect(getByTestId('datasetWizardMapField-@timestamp')).toBeInTheDocument();
+    });
+  });
+
+  it('returns a deleted mapping to Dynamic when it is still in the inferred snapshot', async () => {
+    const { getByTestId, queryByTestId } = render(
+      <TestHarness automaticFieldTypes={{ message: 'keyword' }} />
+    );
+
+    fireEvent.click(getByTestId('datasetWizardInferSchema'));
+
+    await waitFor(() => {
+      expect(queryByTestId('datasetWizardMapField-message')).toBeNull();
+      expect(getByTestId('datasetWizardMapField-@timestamp')).toBeInTheDocument();
     });
 
-    fireEvent.click(getByTestId('datasetWizardAddField'));
-    fireEvent.click(getByTestId('fakeConfirmAddField'));
-    fireEvent.click(getByTestId('datasetWizardInferSchemaMenuButton'));
+    fireEvent.click(getByTestId('fakeDeleteField-message'));
 
     await waitFor(() => {
-      expect(getByTestId('datasetWizardInferMissingFields')).toBeEnabled();
+      expect(getByTestId('automaticFieldTypesValue')).toHaveTextContent('{}');
+      expect(getByTestId('datasetWizardMapField-message')).toBeInTheDocument();
+    });
+  });
+
+  it('does not overwrite existing mapped types when Infer schema runs', async () => {
+    const { getByTestId, queryByTestId } = render(
+      <TestHarness automaticFieldTypes={{ message: 'keyword' }} />
+    );
+
+    fireEvent.click(getByTestId('datasetWizardInferSchema'));
+
+    await waitFor(() => {
+      expect(getByTestId('datasetWizardMapField-@timestamp')).toBeInTheDocument();
+      expect(queryByTestId('datasetWizardMapField-message')).toBeNull();
+    });
+
+    expect(getByTestId('automaticFieldTypesValue')).toHaveTextContent(
+      JSON.stringify({ message: 'keyword' })
+    );
+    expect(getByTestId('fakeMappedFieldsValue')).toHaveTextContent(
+      JSON.stringify({ properties: { message: { type: 'keyword' } } })
+    );
+  });
+
+  it('lets the user infer schema while Dynamic fields is off', async () => {
+    const { getByTestId, queryByTestId } = render(<TestHarness />);
+
+    fireEvent.click(getByTestId('datasetWizardDynamicFieldsEnabled'));
+
+    await waitFor(() => {
+      expect(getByTestId('datasetWizardDynamicFieldsEnabled')).not.toBeChecked();
+      expect(getByTestId('datasetWizardInferSchema')).toBeEnabled();
+      expect(getByTestId('datasetWizardDynamicFieldsDisabled')).toBeInTheDocument();
+      expect(queryByTestId('datasetWizardDynamicFieldsTable')).toBeNull();
+    });
+
+    fireEvent.click(getByTestId('datasetWizardInferSchema'));
+
+    await waitFor(() => {
+      expect(getByTestId('datasetWizardDynamicFieldsTable')).toBeInTheDocument();
+      expect(getByTestId('datasetWizardMapField-message')).toBeInTheDocument();
+      expect(getByTestId('datasetWizardDynamicFieldsDisabled')).toBeInTheDocument();
     });
   });
 
@@ -186,6 +260,9 @@ describe('InferredSchemaMappingsEditor', () => {
     await waitFor(() => {
       expect(queryByTestId('createFieldForm')).toBeNull();
       expect(getByTestId('datasetWizardAddField')).toBeInTheDocument();
+      expect(getByTestId('automaticFieldTypesValue')).toHaveTextContent(
+        JSON.stringify({ manual_field: 'keyword' })
+      );
     });
   });
 });

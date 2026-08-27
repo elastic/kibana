@@ -63,6 +63,7 @@ export const DatasetSettingsCommonPanel: FunctionComponent<DatasetSettingsCommon
           fields={commonFields}
           testSubjPrefix={testSubjPrefix}
           columns={2}
+          constrainWidth={false}
         />
       </EuiPanel>
     </>

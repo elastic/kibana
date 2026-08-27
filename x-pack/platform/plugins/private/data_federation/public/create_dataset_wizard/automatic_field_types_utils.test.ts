@@ -8,6 +8,7 @@
 import {
   automaticFieldTypesToMappings,
   countModifiedAutomaticFieldTypesForFlow3,
+  getDynamicInferredFields,
   mappingsToAutomaticFieldTypes,
   mergeMissingAutomaticFieldTypes,
   seedAutomaticFieldTypesFromInferred,
@@ -64,6 +65,16 @@ describe('automatic_field_types_utils', () => {
     });
 
     expect(mergeMissingAutomaticFieldTypes({}, {})).toEqual({});
+  });
+
+  it('excludes mapped fields from the Dynamic inferred list', () => {
+    expect(getDynamicInferredFields(inferredFields, {})).toEqual(inferredFields);
+    expect(getDynamicInferredFields(inferredFields, { message: 'keyword' })).toEqual([
+      { name: '@timestamp', type: 'date' },
+    ]);
+    expect(
+      getDynamicInferredFields(inferredFields, { '@timestamp': 'date', message: 'text' })
+    ).toEqual([]);
   });
 
   it('counts schema edits against the inferred baseline in flow 3', () => {

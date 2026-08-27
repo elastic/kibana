@@ -35,6 +35,7 @@ export interface DatasetSettingsFieldsLayoutProps {
   testSubjPrefix: string;
   columns?: number;
   rowSpacerSize?: EuiSpacerProps['size'];
+  constrainWidth?: boolean;
 }
 
 export const DatasetSettingsFieldsLayout: FunctionComponent<DatasetSettingsFieldsLayoutProps> = ({
@@ -43,6 +44,7 @@ export const DatasetSettingsFieldsLayout: FunctionComponent<DatasetSettingsField
   testSubjPrefix,
   columns = 3,
   rowSpacerSize = 'l',
+  constrainWidth = true,
 }) => {
   if (fields.length === 0) {
     return null;
@@ -51,7 +53,7 @@ export const DatasetSettingsFieldsLayout: FunctionComponent<DatasetSettingsField
   const rows = chunkFields(fields, columns);
 
   return (
-    <div css={datasetSettingsFieldsWidthCss}>
+    <div css={constrainWidth ? datasetSettingsFieldsWidthCss : undefined}>
       {rows.map((rowFields, rowIndex) => (
         <React.Fragment key={rowFields.join('-') || `empty-row-${rowIndex}`}>
           {rowIndex > 0 ? <EuiSpacer size={rowSpacerSize} /> : null}

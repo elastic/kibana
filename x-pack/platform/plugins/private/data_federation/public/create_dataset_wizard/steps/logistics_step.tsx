@@ -134,7 +134,7 @@ export const LogisticsStep: FunctionComponent<LogisticsStepProps> = ({
       <EuiSpacer size="l" />
 
       <EuiForm component="div">
-        <div css={datasetSettingsFieldsWidthCss}>
+        <div css={isDatasetWizardFlow3(flowVariant) ? datasetSettingsFieldsWidthCss : undefined}>
           <EuiFormRow
             label={datasetWizardStrings.dataSourceLabel()}
             fullWidth

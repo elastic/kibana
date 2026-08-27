@@ -271,15 +271,15 @@ export const AdditionalSettingsStep: FunctionComponent<AdditionalSettingsStepPro
             size="s"
             title={datasetWizardStrings.dataSourceSetupWarningTitle()}
             data-test-subj="datasetWizardDataSourceSetupWarning"
-          >
-            <p>{datasetWizardStrings.dataSourceSetupWarningDescription()}</p>
-          </EuiCallOut>
+          />
         </>
       ) : null}
       <EuiSpacer size="l" />
 
       <EuiForm component="div">
-        <div css={datasetSettingsFieldsWidthCss}>
+        <div
+          css={isDatasetWizardFlow3(flowVariant) ? datasetSettingsFieldsWidthCss : undefined}
+        >
           {isDatasetWizardFlow3(flowVariant) ? (
             <WizardRegionField
               control={control}

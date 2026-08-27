@@ -48,9 +48,7 @@ import {
   type DatasetWizardFlowVariant,
 } from './dataset_wizard_flow_variant';
 import type { DatasetWizardFormValues, SchemaMappingMode } from './dataset_wizard_form_state';
-import { countModifiedAutomaticFieldTypesForFlow3 } from './automatic_field_types_utils';
 import { inferFormatFromResource } from './infer_format_from_resource';
-import { getTestConfigurationPreviewFields } from './test_configuration_preview_utils';
 
 export type ReviewSettingBadge = 'default' | 'modified';
 
@@ -370,20 +368,30 @@ export const getReviewSchemaMappingRows = (
   }
 
   if (values.schema_mapping_mode === 'automatic' && flowVariant !== DATASET_WIZARD_FLOW_VARIANT_1) {
-    const modifiedFieldTypeCount = isDatasetWizardFlow3(flowVariant)
-      ? countModifiedAutomaticFieldTypesForFlow3(
-          getTestConfigurationPreviewFields({
-            ...values,
-            schema_mapping_mode: 'automatic',
-          }),
-          values.automatic_field_types ?? {}
-        )
-      : Object.keys(values.automatic_field_types ?? {}).length;
+    const mappedFieldCount = Object.keys(values.automatic_field_types ?? {}).length;
 
-    if (modifiedFieldTypeCount > 0) {
+    if (isDatasetWizardFlow3(flowVariant)) {
+      const isDynamicEnabled = values.dynamic_fields_enabled !== false;
+
+      rows.push({
+        label: datasetWizardStrings.dynamicFieldsTitle(),
+        displayValue: isDynamicEnabled
+          ? datasetWizardStrings.reviewDynamicFieldsOn()
+          : datasetWizardStrings.reviewDynamicFieldsOff(),
+        badge: isDynamicEnabled ? 'default' : 'modified',
+      });
+
+      if (mappedFieldCount > 0) {
+        rows.push({
+          label: datasetWizardStrings.reviewManualMappingsLabel(),
+          displayValue: datasetWizardStrings.reviewManualMappingsCount(mappedFieldCount),
+          badge: 'modified',
+        });
+      }
+    } else if (mappedFieldCount > 0) {
       rows.push({
         label: datasetWizardStrings.reviewAutomaticFieldTypesLabel(),
-        displayValue: datasetWizardStrings.reviewAutomaticFieldTypesCount(modifiedFieldTypeCount),
+        displayValue: datasetWizardStrings.reviewAutomaticFieldTypesCount(mappedFieldCount),
         badge: 'modified',
       });
     }

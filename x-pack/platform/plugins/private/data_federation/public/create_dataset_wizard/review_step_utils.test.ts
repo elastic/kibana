@@ -9,7 +9,10 @@ import type { DataSource } from '../../common';
 import { getDataSetByIdApiPath } from '../../common';
 import { applySettingsForFormat } from '../create_dataset_flyout/dataset_settings_defaults';
 import { emptyCreateDatasetSettingsFormValues } from '../create_dataset_flyout/create_dataset_flyout_form_state';
-import { DATASET_WIZARD_FLOW_VARIANT_2 } from './dataset_wizard_flow_variant';
+import {
+  DATASET_WIZARD_FLOW_VARIANT_2,
+  DATASET_WIZARD_FLOW_VARIANT_3,
+} from './dataset_wizard_flow_variant';
 import { emptyDatasetWizardFormValues } from './dataset_wizard_form_state';
 import {
   buildDatasetPayloadFromWizardValues,
@@ -292,6 +295,54 @@ describe('review_step_utils', () => {
         expect.objectContaining({
           label: 'Manual changes',
           displayValue: '2 types',
+          badge: 'modified',
+        }),
+      ])
+    );
+  });
+
+  it('returns mapped field count for flow 3 automatic schema mapping', () => {
+    const values = {
+      ...emptyDatasetWizardFormValues(),
+      schema_mapping_mode: 'automatic' as const,
+      automatic_field_types: {
+        message: 'keyword',
+      },
+    };
+
+    const rows = getReviewSchemaMappingRows(values, DATASET_WIZARD_FLOW_VARIANT_3);
+
+    expect(rows).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ displayValue: 'Inferred from dataset', badge: 'default' }),
+        expect.objectContaining({
+          label: 'Dynamic fields',
+          displayValue: 'On',
+          badge: 'default',
+        }),
+        expect.objectContaining({
+          label: 'Mapped fields',
+          displayValue: '1 field',
+          badge: 'modified',
+        }),
+      ])
+    );
+  });
+
+  it('marks Dynamic fields as off in flow 3 review when disabled', () => {
+    const values = {
+      ...emptyDatasetWizardFormValues(),
+      schema_mapping_mode: 'automatic' as const,
+      dynamic_fields_enabled: false,
+    };
+
+    const rows = getReviewSchemaMappingRows(values, DATASET_WIZARD_FLOW_VARIANT_3);
+
+    expect(rows).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          label: 'Dynamic fields',
+          displayValue: 'Off',
           badge: 'modified',
         }),
       ])

@@ -152,6 +152,11 @@ export const datasetWizardStrings = {
       values: { stepTitle },
     }),
 
+  cancelButton: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.cancelButton', {
+      defaultMessage: 'Cancel',
+    }),
+
   backButton: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.backButton', {
       defaultMessage: 'Back',
@@ -235,13 +240,8 @@ export const datasetWizardStrings = {
 
   dataSourceSetupWarningTitle: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.dataSourceSetupWarningTitle', {
-      defaultMessage: 'Unable to verify data source setup',
-    }),
-
-  dataSourceSetupWarningDescription: () =>
-    i18n.translate('xpack.dataFederation.datasetWizard.dataSourceSetupWarningDescription', {
       defaultMessage:
-        'We could not auto-detect the region or file format from your resource URI. You can continue, but consider reviewing your logistics settings and data source configuration from the previous step.',
+        "We couldn't reach this data source. You can continue, but review your setup if a connection was expected.",
     }),
 
   formatAutoDetectedSuffix: () =>
@@ -357,12 +357,55 @@ export const datasetWizardStrings = {
   schemaMappingsDescriptionFlow3: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.schemaMappingsDescriptionFlow3', {
       defaultMessage:
-        "Optional definition of how documents should be indexed. Elastic infers the schema at query time by default. You can manually map desired fields below, and we'll infer the rest of the schema, or click to infer the schema now and review and update the fields as needed.",
+        "Optional definition of how documents should be indexed. Elastic infers the schema at query time by default. You can manually map desired fields below, and we'll infer the rest of the schema.",
     }),
 
   inferSchemaButton: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.inferSchemaButton', {
-      defaultMessage: 'Infer schema',
+      defaultMessage: 'Preview inferred schema',
+    }),
+
+  dynamicFieldsTitle: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.dynamicFieldsTitle', {
+      defaultMessage: 'Dynamic fields',
+    }),
+
+  dynamicFieldsEnabledToggle: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.dynamicFieldsEnabledToggleSwitch', {
+      defaultMessage: 'Enabled',
+    }),
+
+  dynamicFieldsDisabled: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.dynamicFieldsDisabled', {
+      defaultMessage:
+        'Only mapped fields will be used. Unmapped fields will not be inferred at query time.',
+    }),
+
+  mappedFieldsTitle: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.mappedFieldsTitle', {
+      defaultMessage: 'Mapped fields',
+    }),
+
+  mapFieldButton: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.mapFieldButton', {
+      defaultMessage: 'Map',
+    }),
+
+  mapFieldAriaLabel: (fieldName: string) =>
+    i18n.translate('xpack.dataFederation.datasetWizard.mapFieldAriaLabel', {
+      defaultMessage: 'Map {fieldName}',
+      values: { fieldName },
+    }),
+
+  dynamicFieldsEmpty: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.dynamicFieldsEmpty', {
+      defaultMessage:
+        'Fields that are not mapped will remain dynamic and will be inferred at query time. You can infer schema now to preview what the mapping would look like based on what is currently stored on your dataset.',
+    }),
+
+  dynamicFieldsTableCaption: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.dynamicFieldsTableCaption', {
+      defaultMessage: 'Dynamic fields',
     }),
 
   inferMissingFieldsButton: () =>
@@ -648,6 +691,16 @@ export const datasetWizardStrings = {
   reviewManualMappingsLabel: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.reviewManualMappingsLabel', {
       defaultMessage: 'Mapped fields',
+    }),
+
+  reviewDynamicFieldsOn: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.reviewDynamicFieldsOn', {
+      defaultMessage: 'On',
+    }),
+
+  reviewDynamicFieldsOff: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.reviewDynamicFieldsOff', {
+      defaultMessage: 'Off',
     }),
 
   reviewManualMappingsCount: (count: number) =>

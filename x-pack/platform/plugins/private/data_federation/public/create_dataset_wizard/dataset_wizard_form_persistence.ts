@@ -68,6 +68,13 @@ export const isDatasetWizardFormValues = (value: unknown): value is DatasetWizar
   }
 
   if (
+    candidate.dynamic_fields_enabled !== undefined &&
+    typeof candidate.dynamic_fields_enabled !== 'boolean'
+  ) {
+    return false;
+  }
+
+  if (
     !Object.values(candidate.manual_mappings).every(
       (mappingValue) => mappingValue !== null && typeof mappingValue === 'object'
     )
@@ -106,6 +113,7 @@ export const mergeWizardFormValues = (
     ...draft.settings,
   },
   settings_custom_json: draft.settings_custom_json ?? base.settings_custom_json,
+  dynamic_fields_enabled: draft.dynamic_fields_enabled ?? base.dynamic_fields_enabled,
 });
 
 export const loadWizardFormDraft = (storageKey: string): DatasetWizardFormValues | undefined => {

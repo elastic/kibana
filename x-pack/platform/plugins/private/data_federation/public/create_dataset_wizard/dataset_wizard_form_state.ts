@@ -24,8 +24,14 @@ export interface DatasetWizardFormValues extends CreateDatasetFormValues {
   schema_mapping_mode: SchemaMappingMode;
   /** Prototype-only field; not persisted to the API yet. */
   manual_mappings: Record<string, object>;
-  /** Prototype-only overrides for automatic schema field types. */
+  /**
+   * Prototype-only mapped field types.
+   * In Flow 3 this is only pinned (mapped) fields; everything else stays dynamic
+   * when `dynamic_fields_enabled` is on.
+   */
   automatic_field_types: Record<string, string>;
+  /** Prototype-only. When off, only mapped fields are used (closed schema). */
+  dynamic_fields_enabled: boolean;
   /** Prototype-only field; not persisted to the API yet. */
   glue_database: string;
   /** Prototype-only field; not persisted to the API yet. */
@@ -44,6 +50,7 @@ export const emptyDatasetWizardFormValues = (): DatasetWizardFormValues => ({
   schema_mapping_mode: 'automatic',
   manual_mappings: {},
   automatic_field_types: {},
+  dynamic_fields_enabled: true,
   glue_database: '',
   glue_table_name: '',
   glue_catalog_region: '',
@@ -57,6 +64,7 @@ export const dataSetToWizardFormValues = (data: DataSetWithName): DatasetWizardF
   schema_mapping_mode: 'automatic',
   manual_mappings: {},
   automatic_field_types: {},
+  dynamic_fields_enabled: true,
   glue_database: '',
   glue_table_name: '',
   glue_catalog_region: '',

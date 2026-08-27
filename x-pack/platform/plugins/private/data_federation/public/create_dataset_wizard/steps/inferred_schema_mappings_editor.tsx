@@ -7,16 +7,20 @@
 
 import type { FunctionComponent } from 'react';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
-import type { MappedFieldsEditorProps } from '@kbn/index-management-shared-types';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiButton,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
-  EuiSplitButton,
-  useEuiTheme,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiInMemoryTable,
+  EuiSpacer,
+  EuiSwitch,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
+import type { MappedFieldsEditorProps } from '@kbn/index-management-shared-types';
 import type { Control } from 'react-hook-form';
 import { useController } from 'react-hook-form';
 import { debounce } from 'lodash';
@@ -25,12 +29,12 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataFederationKibanaServices } from '../../types';
 import {
   automaticFieldTypesToMappings,
+  getDynamicInferredFields,
   mappingsToAutomaticFieldTypes,
-  mergeMissingAutomaticFieldTypes,
-  seedAutomaticFieldTypesFromInferred,
 } from '../automatic_field_types_utils';
 import { datasetWizardStrings } from '../dataset_wizard_i18n';
 import type { DatasetWizardFormValues } from '../dataset_wizard_form_state';
+import { FieldTypeWithIcon } from '../field_type_with_icon';
 import type { TestConfigurationPreviewField } from '../test_configuration_preview_utils';
 
 export interface InferredSchemaMappingsEditorProps {
@@ -38,16 +42,70 @@ export interface InferredSchemaMappingsEditorProps {
   inferredFields: readonly TestConfigurationPreviewField[];
 }
 
-const ACTIONS_MOUNT_TEST_SUBJ = 'datasetWizardSchemaFieldsActionsMount';
+interface DynamicFieldRow {
+  id: string;
+  name: string;
+  type: string;
+}
+
+const DynamicFieldsTable: FunctionComponent<{
+  items: DynamicFieldRow[];
+  onMapField: (name: string, type: string) => void;
+}> = ({ items, onMapField }) => {
+  const columns = useMemo<Array<EuiBasicTableColumn<DynamicFieldRow>>>(
+    () => [
+      {
+        field: 'name',
+        name: datasetWizardStrings.automaticSchemaSampleFieldColumn(),
+        truncateText: true,
+        'data-test-subj': 'datasetWizardDynamicFieldNameColumn',
+      },
+      {
+        field: 'type',
+        name: datasetWizardStrings.automaticSchemaSampleTypeColumn(),
+        render: (type: string) => <FieldTypeWithIcon type={type} />,
+        'data-test-subj': 'datasetWizardDynamicFieldTypeColumn',
+      },
+      {
+        name: '',
+        width: '80px',
+        align: 'right',
+        render: (item: DynamicFieldRow) => (
+          <EuiButtonEmpty
+            size="s"
+            flush="right"
+            data-test-subj={`datasetWizardMapField-${item.name}`}
+            aria-label={datasetWizardStrings.mapFieldAriaLabel(item.name)}
+            onClick={() => onMapField(item.name, item.type)}
+          >
+            {datasetWizardStrings.mapFieldButton()}
+          </EuiButtonEmpty>
+        ),
+      },
+    ],
+    [onMapField]
+  );
+
+  return (
+    <EuiInMemoryTable<DynamicFieldRow>
+      items={items}
+      itemId="id"
+      columns={columns}
+      pagination={false}
+      tableLayout="auto"
+      responsiveBreakpoint={false}
+      data-test-subj="datasetWizardDynamicFieldsTable"
+      tableCaption={datasetWizardStrings.dynamicFieldsTableCaption()}
+    />
+  );
+};
 
 export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappingsEditorProps> = ({
   control,
   inferredFields,
 }) => {
-  const { euiTheme } = useEuiTheme();
   const containerRef = useRef<HTMLDivElement>(null);
   const addFieldButtonRef = useRef<HTMLElement | null>(null);
-  const [actionsMount, setActionsMount] = useState<HTMLElement | null>(null);
   const {
     services: { indexManagement, scopedHistory },
   } = useKibana<DataFederationKibanaServices>();
@@ -55,21 +113,32 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
     control,
     name: 'automatic_field_types',
   });
+  const { field: dynamicFieldsEnabledField } = useController({
+    control,
+    name: 'dynamic_fields_enabled',
+  });
+  const isDynamicEnabled = dynamicFieldsEnabledField.value !== false;
 
   const [schemaEditorKey, setSchemaEditorKey] = useState(0);
-  const [isInferMenuOpen, setIsInferMenuOpen] = useState(false);
   const [isAddFieldFormOpen, setIsAddFieldFormOpen] = useState(false);
+  const [inferredSnapshot, setInferredSnapshot] = useState<TestConfigurationPreviewField[]>([]);
+  const [mappedFieldTypes, setMappedFieldTypes] = useState<Record<string, string>>(
+    () => field.value ?? {}
+  );
   const [seedFieldTypes, setSeedFieldTypes] = useState<Record<string, string>>(
     () => field.value ?? {}
   );
-  const [hasFields, setHasFields] = useState(() => Object.keys(field.value ?? {}).length > 0);
   const latestFieldTypesRef = useRef<Record<string, string>>(field.value ?? {});
 
   const mappings = useMemo(() => automaticFieldTypesToMappings(seedFieldTypes), [seedFieldTypes]);
-
-  const inferredFieldTypes = useMemo(
-    () => seedAutomaticFieldTypesFromInferred(inferredFields),
-    [inferredFields]
+  const dynamicItems = useMemo<DynamicFieldRow[]>(
+    () =>
+      getDynamicInferredFields(inferredSnapshot, mappedFieldTypes).map((dynamicField) => ({
+        id: dynamicField.name,
+        name: dynamicField.name,
+        type: dynamicField.type ?? 'keyword',
+      })),
+    [inferredSnapshot, mappedFieldTypes]
   );
 
   const debouncedSyncToForm = useMemo(
@@ -100,7 +169,7 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
       const nextMappings = (getData() ?? {}) as Record<string, unknown>;
       const nextFieldTypes = mappingsToAutomaticFieldTypes(nextMappings);
       latestFieldTypesRef.current = nextFieldTypes;
-      setHasFields(Object.keys(nextFieldTypes).length > 0);
+      setMappedFieldTypes(nextFieldTypes);
       debouncedSyncToForm(nextFieldTypes);
     },
     [debouncedSyncToForm]
@@ -111,23 +180,26 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
       debouncedSyncToForm.cancel();
       latestFieldTypesRef.current = nextFieldTypes;
       field.onChange(nextFieldTypes);
+      setMappedFieldTypes(nextFieldTypes);
       setSeedFieldTypes(nextFieldTypes);
-      setHasFields(Object.keys(nextFieldTypes).length > 0);
       setSchemaEditorKey((currentKey) => currentKey + 1);
     },
     [debouncedSyncToForm, field]
   );
 
   const handleInferSchema = useCallback(() => {
-    applyFieldTypes(inferredFieldTypes);
-  }, [applyFieldTypes, inferredFieldTypes]);
+    setInferredSnapshot([...inferredFields]);
+  }, [inferredFields]);
 
-  const handleInferMissingFields = useCallback(() => {
-    setIsInferMenuOpen(false);
-    applyFieldTypes(
-      mergeMissingAutomaticFieldTypes(latestFieldTypesRef.current, inferredFieldTypes)
-    );
-  }, [applyFieldTypes, inferredFieldTypes]);
+  const handleMapField = useCallback(
+    (name: string, type: string) => {
+      applyFieldTypes({
+        ...latestFieldTypesRef.current,
+        [name]: type,
+      });
+    },
+    [applyFieldTypes]
+  );
 
   const handleAddField = useCallback(() => {
     addFieldButtonRef.current?.click();
@@ -154,44 +226,28 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
     };
   }, [schemaEditorKey]);
 
-  // Hides the editor's own "Add field" control and portals a matching outlined
-  // primary button into a sibling mount, alongside a split Infer schema control.
-  // The extra node is untracked by the editor, so it won't fight React
-  // reconciliation the way relocating existing nodes would.
   useLayoutEffect(() => {
     const root = containerRef.current;
     if (!root) {
       return;
     }
 
-    const setupMount = (): boolean => {
+    const setupAddFieldButton = (): boolean => {
       const addFieldButton = root.querySelector<HTMLElement>('[data-test-subj="addFieldButton"]');
-      if (!addFieldButton?.parentElement) {
+      if (!addFieldButton) {
         return false;
       }
 
       addFieldButtonRef.current = addFieldButton;
-
-      let mount = root.querySelector<HTMLElement>(`[data-test-subj="${ACTIONS_MOUNT_TEST_SUBJ}"]`);
-      if (!mount) {
-        mount = document.createElement('span');
-        mount.dataset.testSubj = ACTIONS_MOUNT_TEST_SUBJ;
-        mount.style.display = 'inline-flex';
-        mount.style.alignItems = 'center';
-        mount.style.gap = euiTheme.size.s;
-        addFieldButton.insertAdjacentElement('afterend', mount);
-      }
-
-      setActionsMount(mount);
       return true;
     };
 
-    if (setupMount()) {
+    if (setupAddFieldButton()) {
       return;
     }
 
     const observer = new MutationObserver(() => {
-      if (setupMount()) {
+      if (setupAddFieldButton()) {
         observer.disconnect();
       }
     });
@@ -201,7 +257,7 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
     return () => {
       observer.disconnect();
     };
-  }, [euiTheme.size.s, schemaEditorKey]);
+  }, [schemaEditorKey]);
 
   return (
     <div
@@ -213,72 +269,96 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
         }
       `}
     >
-      <MappedFieldsEditorComponent
-        key={schemaEditorKey}
-        value={mappings}
-        compressed
-        fieldEditDisplay="inline"
-        onChange={onMappingsChange}
-      />
-      {actionsMount
-        ? createPortal(
-            <>
-              {!isAddFieldFormOpen ? (
-                <EuiButton
-                  iconType="plusCircle"
-                  color="primary"
-                  size="s"
-                  data-test-subj="datasetWizardAddField"
-                  onClick={handleAddField}
-                >
-                  {datasetWizardStrings.addFieldButton()}
-                </EuiButton>
-              ) : null}
-              <EuiSplitButton
-                color="text"
-                fill={false}
+      <div data-test-subj="datasetWizardMappedFields">
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xs">
+              <h4>{datasetWizardStrings.mappedFieldsTitle()}</h4>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            {!isAddFieldFormOpen ? (
+              <EuiButton
+                iconType="plusCircle"
+                color="primary"
                 size="s"
-                data-test-subj="datasetWizardInferSchemaSplitButton"
+                data-test-subj="datasetWizardAddField"
+                onClick={handleAddField}
               >
-                <EuiSplitButton.ActionPrimary
-                  iconType="indexMapping"
-                  data-test-subj="datasetWizardInferSchema"
-                  onClick={handleInferSchema}
-                >
-                  {datasetWizardStrings.inferSchemaButton()}
-                </EuiSplitButton.ActionPrimary>
-                <EuiSplitButton.ActionSecondary
-                  iconType="arrowDown"
-                  aria-label={datasetWizardStrings.inferSchemaMoreOptionsAriaLabel()}
-                  data-test-subj="datasetWizardInferSchemaMenuButton"
-                  onClick={() => setIsInferMenuOpen((isOpen) => !isOpen)}
-                  popoverProps={{
-                    isOpen: isInferMenuOpen,
-                    closePopover: () => setIsInferMenuOpen(false),
-                    anchorPosition: 'downRight',
-                    panelPaddingSize: 'none',
-                    children: (
-                      <EuiContextMenuPanel
-                        items={[
-                          <EuiContextMenuItem
-                            key="inferMissingFields"
-                            icon="listBullet"
-                            disabled={!hasFields}
-                            data-test-subj="datasetWizardInferMissingFields"
-                            onClick={handleInferMissingFields}
-                          >
-                            {datasetWizardStrings.inferMissingFieldsButton()}
-                          </EuiContextMenuItem>,
-                        ]}
-                      />
-                    ),
+                {datasetWizardStrings.addFieldButton()}
+              </EuiButton>
+            ) : null}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="m" />
+        <MappedFieldsEditorComponent
+          key={schemaEditorKey}
+          value={mappings}
+          compressed
+          fieldEditDisplay="inline"
+          onChange={onMappingsChange}
+        />
+      </div>
+
+      <EuiSpacer size="xl" />
+
+      <div data-test-subj="datasetWizardDynamicFields">
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="xs">
+                  <h4>{datasetWizardStrings.dynamicFieldsTitle()}</h4>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiSwitch
+                  compressed
+                  label={datasetWizardStrings.dynamicFieldsEnabledToggle()}
+                  checked={isDynamicEnabled}
+                  onChange={(event) => {
+                    dynamicFieldsEnabledField.onChange(event.target.checked);
                   }}
+                  data-test-subj="datasetWizardDynamicFieldsEnabled"
                 />
-              </EuiSplitButton>
-            </>,
-            actionsMount
-          )
-        : null}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              iconType="indexMapping"
+              color="text"
+              size="s"
+              data-test-subj="datasetWizardInferSchema"
+              onClick={handleInferSchema}
+            >
+              {datasetWizardStrings.inferSchemaButton()}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="m" />
+        <EuiText
+          size="s"
+          color="subdued"
+          data-test-subj={
+            isDynamicEnabled
+              ? 'datasetWizardDynamicFieldsEmpty'
+              : 'datasetWizardDynamicFieldsDisabled'
+          }
+        >
+          <p>
+            {isDynamicEnabled
+              ? datasetWizardStrings.dynamicFieldsEmpty()
+              : datasetWizardStrings.dynamicFieldsDisabled()}
+          </p>
+        </EuiText>
+        {dynamicItems.length > 0 ? (
+          <>
+            <EuiSpacer size="m" />
+            <DynamicFieldsTable items={dynamicItems} onMapField={handleMapField} />
+          </>
+        ) : null}
+      </div>
     </div>
   );
 };

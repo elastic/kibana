@@ -151,6 +151,7 @@ const DatasetSettingsAccordionItem: FunctionComponent<DatasetSettingsAccordionIt
             fields={fields}
             testSubjPrefix={testSubjPrefix}
             columns={columns}
+            constrainWidth={false}
           />
         </EuiPanel>
       </EuiAccordion>

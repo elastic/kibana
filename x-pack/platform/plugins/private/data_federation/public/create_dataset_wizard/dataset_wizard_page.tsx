@@ -33,6 +33,7 @@ import {
 import {
   DATASET_WIZARD_FLOW_VARIANT_1,
   DATASET_WIZARD_FLOW_VARIANT_3,
+  isDatasetWizardFlow3,
   resolveWizardFlowVariant,
 } from './dataset_wizard_flow_variant';
 
@@ -115,10 +116,12 @@ export const DatasetWizardPage: FunctionComponent = () => {
   const onBack = useCallback(
     (event: MouseEvent) => {
       event.preventDefault();
-      clearWizardFormDraft(draftStorageKey);
+      if (isDatasetWizardFlow3(flowVariant)) {
+        clearWizardFormDraft(draftStorageKey);
+      }
       history.push('/');
     },
-    [draftStorageKey, history]
+    [draftStorageKey, flowVariant, history]
   );
 
   const back = useMemo(
@@ -129,6 +132,10 @@ export const DatasetWizardPage: FunctionComponent = () => {
     }),
     [onBack]
   );
+
+  const onCancel = useCallback(() => {
+    history.push('/');
+  }, [history]);
 
   const onSave = useCallback(
     async (dataSet: DataSetWithName, previousId?: string): Promise<string | null> => {
@@ -192,6 +199,7 @@ export const DatasetWizardPage: FunctionComponent = () => {
         defaultValues={defaultValues}
         flowVariant={flowVariant}
         reloadDataSources={reloadDataSources}
+        onCancel={onCancel}
         onSave={onSave}
       />
     </>

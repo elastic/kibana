@@ -89,6 +89,7 @@ describe('DatasetWizard step navigation', () => {
             defaultValues={defaultValues}
             flowVariant={flowVariant}
             reloadDataSources={jest.fn().mockResolvedValue(undefined)}
+            onCancel={jest.fn()}
             onSave={jest.fn().mockResolvedValue(null)}
           />
         </EuiProvider>
@@ -156,6 +157,22 @@ describe('DatasetWizard step navigation', () => {
     const { getByTestId } = renderWizard();
 
     expect(getByTestId('datasetWizardSettingsFormat')).not.toBeVisible();
+  });
+
+  it('keeps the Cancel button in the footer for flow 1 and flow 2', () => {
+    const { getByTestId } = renderWizard();
+
+    expect(getByTestId('datasetWizardCancel')).toBeInTheDocument();
+  });
+
+  it('omits the Cancel button from the footer in flow 3', () => {
+    const { queryByTestId } = renderWizard(
+      '/create?flow=flow_3',
+      emptyDatasetWizardFormValues(),
+      DATASET_WIZARD_FLOW_VARIANT_3
+    );
+
+    expect(queryByTestId('datasetWizardCancel')).toBeNull();
   });
 
   it('restores the wizard step from the URL on load when logistics are valid', async () => {
