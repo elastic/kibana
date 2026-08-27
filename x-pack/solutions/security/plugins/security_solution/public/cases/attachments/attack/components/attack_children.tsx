@@ -20,6 +20,7 @@ import { AttackSummarySections } from '../../../../attack_discovery/components/a
 import type { AttackAttachmentMetadata } from '../../../../../common/cases/attachments/attack';
 import {
   ATTACK_ALERT_COUNT_TEST_ID,
+  ATTACK_CARD_TEST_ID,
   ATTACK_SUMMARY_TEST_ID,
   ATTACK_TITLE_TEST_ID,
 } from '../../../../../common/cases/attachments/attack/test_ids';
@@ -79,7 +80,7 @@ export const AttackChildren: FC<AttackChildrenProps> = ({ metadata }) => {
   const hasTactics = mitreAttackTactics != null && mitreAttackTactics.length > 0;
 
   return (
-    <EuiFlexGroup gutterSize="s" direction="column">
+    <EuiFlexGroup data-test-subj={ATTACK_CARD_TEST_ID} gutterSize="s" direction="column">
       <EuiFlexItem grow={false}>
         <EuiTitle size="xs">
           <h4 data-test-subj={ATTACK_TITLE_TEST_ID}>{title}</h4>

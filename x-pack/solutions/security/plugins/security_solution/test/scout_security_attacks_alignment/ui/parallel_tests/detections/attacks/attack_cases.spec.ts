@@ -11,9 +11,12 @@
  *
  * Covers:
  *  - "Add to new case" on the Attacks page take-action menu creates the attachment, and the
- *    case shows the attack preview card in the Activity log and an Attacks section in the
- *    consolidated Attachments tab.
- *  - The "Show attack details" affordance on the preview card opens the attack flyout.
+ *    case shows the attack card in the Activity log and an Attacks section in the consolidated
+ *    Attachments tab.
+ *  - The Activity log card reads like the Attacks page: the detected-on line, the clamped entity
+ *    summary, the summary markdown, the Details section and the attack chain, all rendered as
+ *    formatted markdown, and none of the Attacks page's calls to action.
+ *  - The "Show attack details" affordance on the card opens the attack flyout.
  *  - Removing the attack from the Attacks section, with the prompt's "also remove related
  *    alerts" checkbox ticked, takes the attack and the alerts it brought in off the case.
  *
@@ -35,6 +38,13 @@ const ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING =
 const ENABLE_NEW_FLYOUT_SETTING = 'securitySolution:enableNewFlyout';
 
 const CASE_DESCRIPTION = 'Created by the Scout attack case-attachment test';
+
+// The narrative of the seeded attacks, from `apiServices.attackDiscovery.seedAttackData`. Both
+// seeded attacks share these prefixes, so the assertions hold whichever group the table lists
+// first, and the manual one only appends " (manual)".
+const SEEDED_SUMMARY = 'Seeded with synthetic alert IDs';
+const SEEDED_DETAILS = 'Seeded by Scout attacks space setup';
+const SEEDED_ENTITY_SUMMARY = 'Seeded entity summary';
 
 spaceTest.describe(
   'Attack case attachments',
@@ -83,11 +93,40 @@ spaceTest.describe(
           await attackCases.clickCaseToastLink();
         });
 
-        await spaceTest.step('the activity log renders the attack preview card', async () => {
-          await expect(attackCases.activityAttackTitle).toBeVisible();
-          // Rendered straight from the persisted metadata snapshot — no follow-up query.
-          await expect(attackCases.activityAttackAlertCount).toBeVisible();
-          await expect(attackCases.showAttackButton).toBeVisible();
+        await spaceTest.step(
+          'the activity log renders the attack with the Attacks page sections',
+          async () => {
+            // Every section is rendered straight from the persisted metadata snapshot — the card
+            // never queries the attack back.
+            await expect(attackCases.activityAttackTitle).toBeVisible();
+            await expect(attackCases.activityAttackDetectedOn).toBeVisible();
+            await expect(attackCases.activityAttackAlertCount).toBeVisible();
+            await expect(attackCases.activityAttackEntitySummary).toContainText(
+              SEEDED_ENTITY_SUMMARY
+            );
+            await expect(attackCases.activityAttackSummaryContent).toContainText(SEEDED_SUMMARY);
+            await expect(attackCases.activityAttackDetailsTitle).toBeVisible();
+            await expect(attackCases.activityAttackDetailsContent).toContainText(SEEDED_DETAILS);
+            // Both seeded attacks carry MITRE tactics, so the attack chain is always present here.
+            await expect(attackCases.activityAttackChainTitle).toBeVisible();
+            await expect(attackCases.showAttackButton).toBeVisible();
+          }
+        );
+
+        await spaceTest.step('the narrative is rendered as formatted markdown', async () => {
+          // The snapshot is de-anonymised at attach time and rendered by the markdown formatter,
+          // so no field token syntax may reach the screen. The seeded narrative carries no
+          // `{{ field value }}` tokens today, so this guards the wiring rather than the parser —
+          // token resolution itself is covered by `attack_children.test.tsx`.
+          expect(await attackCases.getActivityAttackCardText()).not.toContain('{{');
+        });
+
+        await spaceTest.step('the card renders none of the Attacks page CTAs', async () => {
+          // "Add to chat" / "View in AI Assistant" and "Investigate in timeline" stay behind on the
+          // Attacks page: the card is a read-only snapshot, and mounting the assistant button
+          // registers a global prompt context per attachment.
+          await expect(attackCases.activityAttackAiAssistantCta).toHaveCount(0);
+          await expect(attackCases.activityAttackInvestigateInTimelineCta).toHaveCount(0);
         });
 
         await spaceTest.step(

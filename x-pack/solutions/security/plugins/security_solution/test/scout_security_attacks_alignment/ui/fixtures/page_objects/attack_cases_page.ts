@@ -12,6 +12,7 @@ import {
   SECURITY_ATTACK_ATTACHMENT_TYPE,
 } from '@kbn/cases-plugin/common';
 import {
+  ATTACK_CARD_TEST_ID,
   ATTACK_TITLE_TEST_ID,
   ATTACK_ALERT_COUNT_TEST_ID,
   ATTACK_TAB_ROW_TITLE_TEST_ID,
@@ -21,6 +22,32 @@ import {
   REMOVE_ATTACK_MODAL_TEST_ID,
   SHOW_ATTACK_BUTTON_TEST_ID,
 } from '../../../../../common/cases/attachments/attack/test_ids';
+
+/**
+ * The card body is built from the presentational components the Detections → Attacks page uses,
+ * so these ids belong to those components rather than to the case attachment. They are inlined
+ * because importing them would pull React, EUI and Emotion into the Playwright process; keep them
+ * in step with the exports named in the comments.
+ */
+// public/attack_discovery/components/attack_detected_on
+const ATTACK_DETECTED_ON_TEST_ID = 'attackDetectedOn';
+// public/attack_discovery/components/attack_entity_summary
+const ATTACK_ENTITY_SUMMARY_TEST_ID = 'attack-subtitle-summary-text';
+// public/attack_discovery/components/attack_summary_sections
+const SUMMARY_CONTENT_TEST_ID = 'summaryContent';
+const DETAILS_TITLE_TEST_ID = 'detailsTitle';
+const DETAILS_CONTENT_TEST_ID = 'detailsContent';
+const ATTACK_CHAIN_TITLE_TEST_ID = 'attackChainTitle';
+
+/**
+ * The calls to action the Attacks page renders under its summary, which the case card must not.
+ * `newAgentBuilderAttachment` and `viewInAiAssistant` are the two variants of the assistant CTA —
+ * which one the page renders depends on whether the agent builder chat experience is enabled.
+ */
+// public/detections/components/attacks/table/attack_details/attack_ai_assistant_button
+const AI_ASSISTANT_CTA_TEST_IDS = ['newAgentBuilderAttachment', 'viewInAiAssistant'] as const;
+// public/detections/components/attacks/table/attack_details/summary_tab
+const INVESTIGATE_IN_TIMELINE_BUTTON_TEST_ID = 'investigateInTimelineButton';
 
 /**
  * Page object for the attack case-attachment flow:
@@ -46,9 +73,19 @@ export class AttackCasesPage {
   public readonly createCaseSubmitButton: Locator;
   public readonly caseToastLink: Locator;
 
-  // Case view – Activity log preview card
+  // Case view – Activity log attack card. The card is rendered from the persisted metadata
+  // snapshot with the same components as the Attacks page, minus that page's calls to action.
+  public readonly activityAttackCard: Locator;
   public readonly activityAttackTitle: Locator;
+  public readonly activityAttackDetectedOn: Locator;
   public readonly activityAttackAlertCount: Locator;
+  public readonly activityAttackEntitySummary: Locator;
+  public readonly activityAttackSummaryContent: Locator;
+  public readonly activityAttackDetailsTitle: Locator;
+  public readonly activityAttackDetailsContent: Locator;
+  public readonly activityAttackChainTitle: Locator;
+  public readonly activityAttackAiAssistantCta: Locator;
+  public readonly activityAttackInvestigateInTimelineCta: Locator;
   public readonly showAttackButton: Locator;
 
   // Case view – Attachments tab + Attacks accordion
@@ -82,8 +119,21 @@ export class AttackCasesPage {
     this.createCaseSubmitButton = page.testSubj.locator('create-case-submit');
     this.caseToastLink = page.testSubj.locator('toaster-content-case-view-link');
 
+    this.activityAttackCard = page.testSubj.locator(ATTACK_CARD_TEST_ID);
     this.activityAttackTitle = page.testSubj.locator(ATTACK_TITLE_TEST_ID);
     this.activityAttackAlertCount = page.testSubj.locator(ATTACK_ALERT_COUNT_TEST_ID);
+    // The section ids are shared with the Attacks page, so scope them to the card rather than to
+    // the page: nothing else in the case view may satisfy these assertions.
+    this.activityAttackDetectedOn = this.cardSection(ATTACK_DETECTED_ON_TEST_ID);
+    this.activityAttackEntitySummary = this.cardSection(ATTACK_ENTITY_SUMMARY_TEST_ID);
+    this.activityAttackSummaryContent = this.cardSection(SUMMARY_CONTENT_TEST_ID);
+    this.activityAttackDetailsTitle = this.cardSection(DETAILS_TITLE_TEST_ID);
+    this.activityAttackDetailsContent = this.cardSection(DETAILS_CONTENT_TEST_ID);
+    this.activityAttackChainTitle = this.cardSection(ATTACK_CHAIN_TITLE_TEST_ID);
+    this.activityAttackAiAssistantCta = this.cardSection(...AI_ASSISTANT_CTA_TEST_IDS);
+    this.activityAttackInvestigateInTimelineCta = this.cardSection(
+      INVESTIGATE_IN_TIMELINE_BUTTON_TEST_ID
+    );
     // The button's test subject is suffixed with the attachment saved object id, which is
     // generated server-side, so match on the stable prefix.
     this.showAttackButton = page.locator(`[data-test-subj^="${SHOW_ATTACK_BUTTON_TEST_ID}-"]`);
@@ -114,15 +164,47 @@ export class AttackCasesPage {
     this.attackDetailsFlyoutBody = page.testSubj.locator('attack-details-flyout-body');
   }
 
+  /**
+   * The attack card's visible text, used to assert that the narrative is rendered as formatted
+   * markdown rather than as the raw `{{ field value }}` token syntax.
+   */
+  async getActivityAttackCardText(): Promise<string> {
+    await this.activityAttackCard.waitFor({ state: 'visible', timeout: 30_000 });
+
+    return this.activityAttackCard.innerText();
+  }
+
+  /**
+   * Resolves the first element a locator matches, once at least one has rendered. Both the
+   * attacks table and the case's Attacks section list several rows, so a strict-mode
+   * single-element locator will not do; waiting on the count first keeps the resolution from
+   * racing the render, which `all()` on its own does not.
+   */
+  private async resolveFirst(locator: Locator, notFoundMessage: string): Promise<Locator> {
+    await expect(locator).not.toHaveCount(0, { timeout: 30_000 });
+
+    const [first] = await locator.all();
+
+    if (!first) {
+      throw new Error(notFoundMessage);
+    }
+
+    return first;
+  }
+
+  /** Resolves one or more test subjects within the activity log's attack card. */
+  private cardSection(...testSubjects: readonly string[]): Locator {
+    const selector = testSubjects.map((subject) => `[data-test-subj="${subject}"]`).join(', ');
+
+    return this.activityAttackCard.locator(selector);
+  }
+
   /** Opens the "Take action" popover on the first attack group in the Attacks table. */
   async openFirstAttackTakeActionMenu() {
-    // The seeded data has more than one attack group, so resolve the matches and take the
-    // first rather than using a strict-mode single-element locator.
-    const [firstTakeActionButton] = await this.takeActionButtons.all();
-
-    if (!firstTakeActionButton) {
-      throw new Error('No take action button found in the attacks table');
-    }
+    const firstTakeActionButton = await this.resolveFirst(
+      this.takeActionButtons,
+      'No take action button found in the attacks table'
+    );
 
     await firstTakeActionButton.click();
     await this.addToNewCaseItem.waitFor({ state: 'visible', timeout: 30_000 });
@@ -176,11 +258,10 @@ export class AttackCasesPage {
 
   /** Opens the removal prompt for the first row of the Attacks section. */
   async openRemoveAttackPrompt() {
-    const [firstRemoveButton] = await this.removeAttackButtons.all();
-
-    if (!firstRemoveButton) {
-      throw new Error('No remove attack button found in the attacks section');
-    }
+    const firstRemoveButton = await this.resolveFirst(
+      this.removeAttackButtons,
+      'No remove attack button found in the attacks section'
+    );
 
     await firstRemoveButton.click();
     await this.removeAttackModal.waitFor({ state: 'visible', timeout: 30_000 });

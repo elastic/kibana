@@ -13,7 +13,12 @@ import {
   bulkDeleteFileAttachments,
   retrieveFilesIgnoringNotFound,
 } from './bulk_delete';
-import { MAX_BULK_DELETE_ATTACHMENTS, MAX_DELETE_FILES } from '../../../common/constants';
+import {
+  CASE_ATTACHMENT_SAVED_OBJECT,
+  MAX_BULK_DELETE_ATTACHMENTS,
+  MAX_DELETE_FILES,
+} from '../../../common/constants';
+import { SECURITY_ATTACK_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
 import { Operations } from '../../authorization';
 import { mockCaseComments } from '../../mocks';
 import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
@@ -45,6 +50,25 @@ describe('bulk_delete', () => {
     const userComment = mockCaseComments[0];
     const otherUserComment = mockCaseComments[1];
     const alertAttachment = mockCaseComments[3];
+    // `security.attack` is a unified-only type: it exists solely in the unified saved object and
+    // cannot be transformed into the legacy attachment schema.
+    const attackAttachment = {
+      type: CASE_ATTACHMENT_SAVED_OBJECT,
+      id: 'mock-attack-attachment-1',
+      attributes: {
+        ...userComment.attributes,
+        type: SECURITY_ATTACK_ATTACHMENT_TYPE,
+        attachmentId: 'attack-doc-1',
+        metadata: {
+          title: 'Credential harvesting',
+          alertCount: 1,
+          index: '.alerts-security.attack.discovery.alerts-default',
+        },
+      },
+      references: [{ type: 'cases', name: 'associated-cases', id: 'mock-id-1' }],
+      updated_at: '2019-11-25T22:32:30.608Z',
+      version: 'WzYsMV0=',
+    } as unknown as (typeof mockCaseComments)[number];
 
     beforeEach(() => {
       jest.clearAllMocks();
@@ -81,7 +105,7 @@ describe('bulk_delete', () => {
 
       expect(clientArgs.services.attachmentService.getter.bulkGet).toHaveBeenCalledWith(
         ['mock-comment-1'],
-        'legacy'
+        'unified'
       );
       expect(clientArgs.services.attachmentService.bulkDelete).toHaveBeenCalledWith({
         savedObjectIds: ['mock-comment-1'],
@@ -152,6 +176,22 @@ describe('bulk_delete', () => {
       expect(clientArgs.services.alertsService.removeCaseIdFromAlerts).toHaveBeenCalledWith({
         alerts: [{ id: 'test-id', index: 'test-index' }],
         caseId: 'mock-id-4',
+      });
+    });
+
+    it('deletes a unified-only attachment, which has no legacy representation', async () => {
+      clientArgs.services.attachmentService.getter.bulkGet.mockResolvedValue({
+        saved_objects: [attackAttachment],
+      });
+
+      await bulkDeleteAttachments(
+        { caseId: 'mock-id-1', attachmentIds: ['mock-attack-attachment-1'] },
+        clientArgs
+      );
+
+      expect(clientArgs.services.attachmentService.bulkDelete).toHaveBeenCalledWith({
+        savedObjectIds: ['mock-attack-attachment-1'],
+        refresh: true,
       });
     });
 

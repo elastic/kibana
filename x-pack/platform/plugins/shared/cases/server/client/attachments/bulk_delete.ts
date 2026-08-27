@@ -55,9 +55,12 @@ export const bulkDeleteAttachments = async (
     const request = decodeWithExcessOrThrow(BulkDeleteAttachmentsRequestRt)({ ids: attachmentIds });
     const uniqueIds = [...new Set(request.ids)];
 
+    // Read in unified mode: unified-only types (e.g. `security.attack`) have no legacy
+    // representation, so a legacy read of one throws. Attachments still stored in the legacy
+    // saved object come back in their legacy shape, which every consumer below accepts.
     const { saved_objects: soAttachments } = await attachmentService.getter.bulkGet(
       uniqueIds,
-      'legacy'
+      'unified'
     );
 
     const missingIds = soAttachments

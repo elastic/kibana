@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+export const ATTACK_CARD_TEST_ID = 'adCasesAttackCard';
 export const ATTACK_TITLE_TEST_ID = 'adCasesAttackTitle';
 export const ATTACK_SUMMARY_TEST_ID = 'adCasesAttackSummary';
 export const ATTACK_ALERT_COUNT_TEST_ID = 'adCasesAttackAlertCount';

@@ -11,6 +11,7 @@ import type { AttackAttachmentMetadata } from '../../../../../common/cases/attac
 import { AttackChildren } from './attack_children';
 import {
   ATTACK_ALERT_COUNT_TEST_ID,
+  ATTACK_CARD_TEST_ID,
   ATTACK_SUMMARY_TEST_ID,
   ATTACK_TITLE_TEST_ID,
 } from '../../../../../common/cases/attachments/attack/test_ids';
@@ -110,6 +111,7 @@ describe('AttackChildren', () => {
       renderCard(metadata);
 
       expect(screen.getByTestId(ATTACK_SUMMARY_TEST_ID).textContent).not.toContain('{{');
+      expect(screen.getByTestId(ATTACK_CARD_TEST_ID).textContent).not.toContain('{{');
     });
 
     it('renders every markdown field with the actions disabled', () => {
