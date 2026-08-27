@@ -106,6 +106,7 @@ interface ParsedNode {
   type: string;
   data?: string;
   attribs?: Record<string, string>;
+  parent?: ParsedNode | null;
   children?: ParsedNode[];
 }
 
@@ -303,19 +304,37 @@ const selectArticleHtml = (html: string): string => {
   // against a tree that still contained chrome is the bug the removals exist to prevent.
   const lengths = usePreciseScore ? undefined : visibleLengths(roots);
 
-  // A hidden candidate scores zero in both paths.
+  // A candidate that is hidden, or sits inside page-level chrome, scores zero.
   //
-  // Neither path could see the candidate's own `hidden` attribute: the precise path passes
-  // `$(el).html()`, which is the inner HTML and drops the wrapper, and the length map is built
-  // from text nodes. So a large `<article hidden>` outscored the visible `<main>` report, and
-  // returning its inner HTML stripped the very attribute that marked it non-rendered, so
-  // downstream treated stale hidden text as the report and lost every real indicator.
-  const isHidden = (el: unknown): boolean => (el as ParsedNode).attribs?.hidden !== undefined;
+  // Both have to be judged on the ancestor chain rather than the element, because neither
+  // scoring path can see anything above the candidate: the precise path passes `$(el).html()`,
+  // which is inner HTML and drops even the candidate's own wrapper, and the fallback map is
+  // built from text nodes.
+  //
+  // Checking only the element was wrong twice over. `<div hidden><article>stale</article></div>`
+  // has an unhidden candidate under a hidden ancestor, and it beat the visible `<main>`; and a
+  // teaser in `body > header` competed on equal terms, because page chrome is only removed after
+  // selection and removing an ancestor afterwards does not un-select the already-detached
+  // container. In both cases returning the candidate's inner HTML also discards the very context
+  // that marked it non-content, so downstream had no way to tell.
+  const pageChrome = new Set<unknown>($(PAGE_CHROME_SELECTORS).toArray());
+
+  const isExcludedCandidate = (el: unknown): boolean => {
+    // Bounded by the depth guard above, which has already rejected anything deeper than
+    // MAX_NESTING_DEPTH.
+    let node: ParsedNode | null | undefined = el as ParsedNode;
+    while (node) {
+      if (node.attribs?.hidden !== undefined) return true;
+      if (pageChrome.has(node)) return true;
+      node = node.parent;
+    }
+    return false;
+  };
 
   const candidates = candidateEls.map(({ el, priority }) => ({
     el,
     priority,
-    length: isHidden(el)
+    length: isExcludedCandidate(el)
       ? 0
       : usePreciseScore
       ? stripHtml($(el).html() ?? '').length
@@ -337,9 +356,10 @@ const selectArticleHtml = (html: string): string => {
   }
 
   if ($container !== null && $container.length > 0) {
-    // A narrower container won, so page-level chrome is chrome and cannot be the report.
-    // Removing it now rather than before selection is what keeps the fallback below honest.
-    $(PAGE_CHROME_SELECTORS).remove();
+    // No page-chrome removal needed. The winning container sits outside page chrome, since
+    // candidates inside it score zero, and only the container's inner HTML is returned, so
+    // removing chrome from elsewhere in the document could not change the result. The earlier
+    // version removed it here and that was a no-op dressed up as a step.
     return $container.html() ?? html;
   }
 

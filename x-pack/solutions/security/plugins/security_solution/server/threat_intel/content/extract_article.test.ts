@@ -687,6 +687,30 @@ describe('hidden candidates cannot win selection', () => {
       'main',
       `<html><body><main hidden>${STALE}</main><article><p>report evil.test</p></article></body></html>`,
     ],
+    // Judged on the ancestor chain, not the element. Neither scoring path can see above the
+    // candidate, so one under a hidden ancestor, or inside page-level chrome, has to be excluded
+    // here or it competes on equal terms and its stale text is returned as the report. Removing
+    // the ancestor after selection does not un-select an already-detached container.
+    [
+      'article under a hidden ancestor',
+      `<html><body><div hidden><article>${STALE}</article></div><main><p>report evil.test</p></main></body></html>`,
+    ],
+    [
+      'article under a deep hidden ancestor',
+      `<html><body><div hidden><div><div><article>${STALE}</article></div></div></div><main><p>report evil.test</p></main></body></html>`,
+    ],
+    [
+      'article inside a body header',
+      `<html><body><header><article>${STALE}</article></header><main><p>report evil.test</p></main></body></html>`,
+    ],
+    [
+      'article inside a body footer',
+      `<html><body><footer><article>${STALE}</article></footer><main><p>report evil.test</p></main></body></html>`,
+    ],
+    [
+      'article inside a body aside',
+      `<html><body><aside><article>${STALE}</article></aside><main><p>report evil.test</p></main></body></html>`,
+    ],
   ])('prefers the visible report over a hidden %s', (_label, html) => {
     const result = stripHtml(extractArticleHtml(html));
 
