@@ -52,6 +52,17 @@ export const registerUpdateWatchRoute = ({
       async (_context, request, response) => {
         try {
           const { watchId } = request.params;
+          if (request.body.autonomyLevel != null) {
+            return response.badRequest({
+              body: {
+                message: i18n.translate('xpack.pnd.watchAutonomyRejectedErrorMessage', {
+                  defaultMessage: 'Cannot apply autonomy level to watch "{watchId}"',
+                  values: { watchId },
+                }),
+              },
+            });
+          }
+
           const result = await getWatchesService().update(
             watchId,
             request.body,

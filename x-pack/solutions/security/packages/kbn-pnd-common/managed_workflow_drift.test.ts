@@ -8,6 +8,7 @@
 import {
   getManagedWorkflowDefinition,
   PND_INSTALLABLE_WORKFLOW_IDS,
+  PND_MANAGED_WATCH_WORKFLOW_IDS as MANAGED_PND_MANAGED_WATCH_WORKFLOW_IDS,
   // Both packages export `PND_WATCH_WORKFLOW_IDS`. The name collision is exactly the mistake this
   // file exists to catch, so every managed-side import is aliased and every unaliased name below is
   // the `@kbn/pnd-common` one.
@@ -124,11 +125,11 @@ const stepNames = (steps: readonly ParsedStep[] | undefined): string[] =>
   (steps ?? []).map(({ name }) => name);
 
 /**
- * Workstream F3. The install list and the resume allow-list are two independent arrays in two
+ * Workstream F3. The boot-install list and the resume allow-list are two independent arrays in two
  * packages, and that separation is the whole point: `SYSTEM_SECURITY_WATCH_IDS` is what `_respond`
- * and `_auto_respond` will resume (S1) **and** the only guard on autonomy uiSettings key construction
- * against an internal saved-objects client with no SO-level authz. #283488's Detection Watch and its
- * three rule workers are installed beside the five watches and must never become resumable.
+ * and `_auto_respond` will resume (S1). Catalog watches are dynamic and installed per-space on
+ * enable/save; #283488's Detection Watch, its three rule workers, and the auto-approver are the
+ * static helpers installed at boot and must never become resumable.
  *
  * `constants.test.ts` pins one of those ids by name. These tests pin the *relationship*, so a new
  * definition cannot be added to the install list and silently widen the boundary.
@@ -141,9 +142,8 @@ describe('resume allow-list vs install list (F3)', () => {
    * They are `pluginId: 'pnd'` static definitions, so `PND_INSTALLABLE_WORKFLOW_IDS` must name them
    * or `reconcilePluginManagedWorkflows` orphan-deletes all five on the next boot. They must equally
    * stay out of {@link SYSTEM_SECURITY_WATCH_IDS}: that array is the S1 `_respond` / `_auto_respond` allow-
-   * list **and** the only guard on autonomy uiSettings key construction against an internal
-   * saved-objects client with no SO-level authz. `system-security-rule-tuning` PATCHes production
-   * detection rules straight from YAML, which is precisely what must not be reachable from a resume.
+   * list. `system-security-rule-tuning` PATCHes production detection rules straight from YAML, which
+   * is precisely what must not be reachable from a resume.
    *
    * Enumerated rather than derived, because the whole point is that a *newly* installable workflow
    * fails the accounting test below and has to be classified by hand.
@@ -156,14 +156,18 @@ describe('resume allow-list vs install list (F3)', () => {
     MANAGED_PND_WATCH_DETECTION_WORKFLOW_ID,
   ] as const;
 
-  it('installs every watch that PND is allowed to resume', () => {
-    expect(PND_INSTALLABLE_WORKFLOW_IDS).toEqual(
-      expect.arrayContaining([...SYSTEM_SECURITY_WATCH_IDS])
-    );
+  it('does not boot-install catalog watches that PND is allowed to resume', () => {
+    SYSTEM_SECURITY_WATCH_IDS.forEach((watchId) => {
+      expect(PND_INSTALLABLE_WORKFLOW_IDS).not.toContain(watchId);
+    });
   });
 
-  it('is a STRICT subset: something is installed that may never be resumed', () => {
-    expect(PND_INSTALLABLE_WORKFLOW_IDS.length).toBeGreaterThan(SYSTEM_SECURITY_WATCH_IDS.length);
+  it('keeps the resume allow-list and the boot-install list disjoint', () => {
+    expect(
+      PND_INSTALLABLE_WORKFLOW_IDS.some((workflowId) =>
+        (SYSTEM_SECURITY_WATCH_IDS as readonly string[]).includes(workflowId)
+      )
+    ).toBe(false);
   });
 
   it('never admits a non-resumable installable to the resume allow-list', () => {
@@ -181,10 +185,14 @@ describe('resume allow-list vs install list (F3)', () => {
   // The drift catcher: a newly installable workflow must be classified as a resumable watch or as a
   // non-resumable definition PND merely installs. An unclassified addition fails here rather than
   // quietly inheriting whatever the next `startsWith` heuristic decides.
-  it('accounts for every installable id under exactly one classification', () => {
+  it('accounts for every installable id as a non-resumable static helper', () => {
     expect([...PND_INSTALLABLE_WORKFLOW_IDS].sort()).toEqual(
-      [...SYSTEM_SECURITY_WATCH_IDS, ...NON_RESUMABLE_INSTALLABLE_IDS].sort()
+      [...NON_RESUMABLE_INSTALLABLE_IDS].sort()
     );
+  });
+
+  it('keeps the managed catalog id list identical to the resume allow-list', () => {
+    expect([...MANAGED_PND_MANAGED_WATCH_WORKFLOW_IDS]).toEqual([...SYSTEM_SECURITY_WATCH_IDS]);
   });
 
   /**

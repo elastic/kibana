@@ -25,8 +25,8 @@ describe('PND workflow id lists', () => {
   // Derived, not enumerated: `ready()` orphan-deletes any `pluginId: 'pnd'` static definition PND
   // did not install that boot, so the install list must follow `PND_WORKFLOWS` automatically. Pinned
   // against the same filter rather than against a spelled-out list of ids, so adding a definition
-  // cannot fail here for the wrong reason. `install_static.test.ts` pins it against the full
-  // registry, which is the set the reconciler actually compares against.
+  // cannot fail here for the wrong reason. `initialize_managed_workflows.test.ts` pins it against
+  // the static helper list the reconciler actually installs.
   it('installs every pnd static definition PND owns', () => {
     expect(PND_INSTALLABLE_WORKFLOW_IDS).toEqual(
       PND_WORKFLOWS.filter(
@@ -53,8 +53,8 @@ describe('PND workflow id lists', () => {
     ]);
   });
 
-  it('keeps both relocation watches installable, exactly as before the move', () => {
-    expect(PND_INSTALLABLE_WORKFLOW_IDS).toEqual(
+  it('keeps both relocation watches as dynamic catalog watches, not boot-installed', () => {
+    expect(PND_INSTALLABLE_WORKFLOW_IDS).not.toEqual(
       expect.arrayContaining(['system-security-watch-deep', 'system-security-watch-floor'])
     );
   });

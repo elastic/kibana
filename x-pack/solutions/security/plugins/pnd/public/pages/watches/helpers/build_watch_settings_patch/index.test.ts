@@ -17,7 +17,6 @@ import { buildWatchSettingsPatch, hasWatchSettingsChanges } from '.';
 
 const settings: WatchSettings = {
   autonomy: 'manual',
-  general: { runAsIdentity: 'svc-watch-floor', showMvpScopeWarning: true },
   scopeRouting: {
     assigneeQueue: { optionIds: ['unassigned', 'threat-hunting'], selectedId: 'unassigned' },
     dataSources: { optionIds: ['alerts-only', 'alerts-entities'], selectedId: 'alerts-only' },

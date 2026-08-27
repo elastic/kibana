@@ -42,7 +42,7 @@ import {
  *
  * The subject was the lifecycle stub until kibana-phf4.12 retired it. It is now
  * `system-security-rule-preview`, one of #283488's detection-rule workers: installed by
- * `install_static`, called by a Watch through `workflow.execute`, and never resumable — the same
+ * `initializeManagedWorkflows`, called by a Watch through `workflow.execute`, and never resumable — the same
  * shape the stub had, on a definition that is still here. Keeping this pin subjected on a live id
  * is the point: a guard whose subject no longer exists cannot fail.
  */

@@ -7,6 +7,7 @@
 
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
+import type { RouteDependencies } from '../register_routes';
 import { registerUpdateWatchRoute } from './update_watch';
 
 const registerHandler = () => {
@@ -17,10 +18,10 @@ const registerHandler = () => {
   registerUpdateWatchRoute({
     router,
     logger: loggerMock.create(),
-    config: { enabled: true, ui: { useMockData: false } },
+    config: { demo: { forceIncident: false }, enabled: true, ui: { useMockData: false } },
     getSpaceId: () => 'space-a',
     getWatchesService: () => ({ update } as never),
-  });
+  } as unknown as RouteDependencies);
   return { handler: addVersion.mock.calls[0][1], update };
 };
 
@@ -37,7 +38,7 @@ describe('update watch route', () => {
     update.mockResolvedValue(result);
     const request = httpServerMock.createKibanaRequest({
       params: { watchId: 'system-security-watch-floor' },
-      body: { autonomyLevel: 'assisted', settingsRevision: null },
+      body: { enabled: true },
     });
     const response = httpServerMock.createResponseFactory();
 
@@ -51,12 +52,26 @@ describe('update watch route', () => {
     update.mockResolvedValue({ outcome: 'failed' });
     const request = httpServerMock.createKibanaRequest({
       params: { watchId: 'system-security-watch-floor' },
-      body: { autonomyLevel: 'assisted', settingsRevision: null },
+      body: { enabled: true },
     });
     const response = httpServerMock.createResponseFactory();
 
     await handler(createContext(), request, response);
 
     expect(response.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 500 }));
+  });
+
+  it('refuses autonomyLevel so PATCH cannot bypass pnd_manage_autonomy', async () => {
+    const { handler, update } = registerHandler();
+    const request = httpServerMock.createKibanaRequest({
+      params: { watchId: 'system-security-watch-floor' },
+      body: { autonomyLevel: 'assisted', settingsRevision: null },
+    });
+    const response = httpServerMock.createResponseFactory();
+
+    await handler(createContext(), request, response);
+
+    expect(response.badRequest).toHaveBeenCalled();
+    expect(update).not.toHaveBeenCalled();
   });
 });

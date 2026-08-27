@@ -169,6 +169,13 @@ const createDeps = (
     getStartServices: jest
       .fn()
       .mockResolvedValue([{ http: {}, savedObjects: { id: 'so' }, uiSettings: { id: 'ui' } }, {}]),
+    getWatchesService: jest.fn().mockReturnValue({
+      get: jest.fn().mockResolvedValue({
+        settings: { autonomy: 'supervised' },
+        settingsRevision: null,
+      }),
+      update: jest.fn().mockResolvedValue({ outcome: 'updated' }),
+    }),
     getWatchProjection: jest.fn(),
     getWorkflowsManagementClient: jest.fn(),
     logger: loggerMock.create(),
@@ -275,7 +282,7 @@ describe('PND security regression — S1 (_respond/_auto_respond resume primitiv
    * F3: PND *installs* the detection-rule workers (`PND_INSTALLABLE_WORKFLOW_IDS`) but must never be
    * able to *resume* one. These cases are the route-boundary proof that widening the install list did
    * not widen the resume boundary — the install list and the resume allow-list are independent
-   * arrays in two packages, and `install_static.test.ts` pins that at the constant layer.
+   * arrays in two packages, and `managed_workflow_drift.test.ts` pins that at the constant layer.
    *
    * `system-security-rule-tuning` is the sharpest subject available: it PATCHes detection rules
    * straight from YAML, so resuming it would run that PATCH under the resumer's identity. It replaced
@@ -865,27 +872,32 @@ describe('PND security regression — D4 (listPendingPndGates is not a superset)
 });
 
 describe('PND security regression — S4 (arbitrary-key write via autonomy)', () => {
-  const autonomyHandler = () => {
+  const autonomySetup = () => {
     const deps = createDeps();
     registerPutAutonomyRoute(deps);
-    return deps.router.versioned.getRoute('put', PND_AUTONOMY_URL).versions['1']
-      .handler as unknown as (...args: unknown[]) => Promise<unknown>;
+    return {
+      deps,
+      handler: deps.router.versioned.getRoute('put', PND_AUTONOMY_URL).versions['1']
+        .handler as unknown as (...args: unknown[]) => Promise<unknown>,
+    };
   };
 
-  it('rejects a watchId outside the managed set before building any settings key', async () => {
-    const response = await invoke(autonomyHandler(), {
+  it('rejects a watchId outside the managed set before writing template values', async () => {
+    const { handler } = autonomySetup();
+    const response = await invoke(handler, {
       body: { autonomyLevel: 'assisted', watchId: '../../evil' },
     });
 
     expect(response.badRequest).toHaveBeenCalledTimes(1);
   });
 
-  it('does not construct a scoped settings client for a non-allow-listed watchId', async () => {
-    await invoke(autonomyHandler(), {
+  it('does not write template values for a non-allow-listed watchId', async () => {
+    const { deps, handler } = autonomySetup();
+    await invoke(handler, {
       body: { autonomyLevel: 'assisted', watchId: '../../evil' },
     });
 
-    expect(getScopedInternalUiSettingsClientMock).not.toHaveBeenCalled();
+    expect(deps.getWatchesService).not.toHaveBeenCalled();
   });
 
   // Includes the legacy 1..3 ordinals: the dial is a name now, so an ordinal must be refused
@@ -893,7 +905,8 @@ describe('PND security regression — S4 (arbitrary-key write via autonomy)', ()
   it.each(['autonomous', 'Supervised', 1, 3, 2.5, null])(
     'rejects the level %p before any write',
     async (autonomyLevel) => {
-      const response = await invoke(autonomyHandler(), {
+      const { handler } = autonomySetup();
+      const response = await invoke(handler, {
         body: { autonomyLevel, watchId: SYSTEM_SECURITY_WATCH_FLOOR_ID },
       });
 
@@ -902,11 +915,12 @@ describe('PND security regression — S4 (arbitrary-key write via autonomy)', ()
   );
 
   it('does not write when the level is outside the shared scale', async () => {
-    await invoke(autonomyHandler(), {
+    const { deps, handler } = autonomySetup();
+    await invoke(handler, {
       body: { autonomyLevel: 'autonomous', watchId: SYSTEM_SECURITY_WATCH_FLOOR_ID },
     });
 
-    expect(getScopedInternalUiSettingsClientMock).not.toHaveBeenCalled();
+    expect(deps.getWatchesService).not.toHaveBeenCalled();
   });
 });
 

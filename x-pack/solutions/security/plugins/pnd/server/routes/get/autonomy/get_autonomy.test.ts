@@ -8,35 +8,26 @@
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import {
-  PND_AUTONOMY_URL,
-  SYSTEM_SECURITY_WATCH_FLOOR_ID,
-  buildWatchAutonomyUiSettingKey,
-} from '@kbn/pnd-common';
+import { PND_AUTONOMY_URL, SYSTEM_SECURITY_WATCH_FLOOR_ID } from '@kbn/pnd-common';
 import { PND_API_PRIVILEGE_READ } from '../../../../common/constants';
 import type { RouteDependencies } from '../../register_routes';
-import { getScopedInternalUiSettingsClient } from '../../../lib/scoped_internal_ui_settings_client';
 import { registerGetAutonomyRoute } from './get_autonomy';
-
-jest.mock('../../../lib/scoped_internal_ui_settings_client');
-
-const getScopedInternalUiSettingsClientMock = getScopedInternalUiSettingsClient as jest.Mock;
-
-const savedObjects = { id: 'savedObjects' };
-const uiSettings = { id: 'uiSettings' };
 
 const createDeps = () => {
   const router = mockRouter.create();
+  const get = jest.fn().mockResolvedValue({
+    settings: { autonomy: 'assisted', watchId: SYSTEM_SECURITY_WATCH_FLOOR_ID },
+    settingsRevision: null,
+  });
   const deps = {
     config: { enabled: true, ui: { useMockData: false } },
     getSpaceId: jest.fn().mockReturnValue('agent-3'),
-    getStartServices: jest.fn().mockResolvedValue([{ savedObjects, uiSettings }, {}, {}]),
-    getWatchProjection: jest.fn(),
+    getWatchesService: jest.fn().mockReturnValue({ get }),
     logger: loggerMock.create(),
     router,
   } as unknown as RouteDependencies & { router: ReturnType<typeof mockRouter.create> };
 
-  return deps;
+  return { deps, get };
 };
 
 const getHandler = (router: ReturnType<typeof mockRouter.create>) =>
@@ -53,16 +44,8 @@ const invoke = async (handler: ReturnType<typeof getHandler>, query: { watchId: 
 };
 
 describe('registerGetAutonomyRoute', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-    getScopedInternalUiSettingsClientMock.mockReturnValue({
-      get: jest.fn().mockResolvedValue('assisted'),
-      set: jest.fn(),
-    });
-  });
-
   it('registers the route gated on only the low read privilege', () => {
-    const deps = createDeps();
+    const { deps } = createDeps();
 
     registerGetAutonomyRoute(deps);
 
@@ -72,7 +55,7 @@ describe('registerGetAutonomyRoute', () => {
   });
 
   it('returns the autonomy response for a managed watch', async () => {
-    const deps = createDeps();
+    const { deps } = createDeps();
     registerGetAutonomyRoute(deps);
 
     const response = await invoke(getHandler(deps.router), {
@@ -92,56 +75,45 @@ describe('registerGetAutonomyRoute', () => {
     });
   });
 
-  it('reads the setting keyed by the watch id', async () => {
-    const deps = createDeps();
-    const uiSettingsClient = { get: jest.fn().mockResolvedValue('assisted'), set: jest.fn() };
-    getScopedInternalUiSettingsClientMock.mockReturnValue(uiSettingsClient);
+  it('reads template values for the request space without installing', async () => {
+    const { deps, get } = createDeps();
     registerGetAutonomyRoute(deps);
 
     await invoke(getHandler(deps.router), { watchId: SYSTEM_SECURITY_WATCH_FLOOR_ID });
 
-    expect(uiSettingsClient.get).toHaveBeenCalledWith(
-      buildWatchAutonomyUiSettingKey(SYSTEM_SECURITY_WATCH_FLOOR_ID)
+    expect(deps.getWatchesService).toHaveBeenCalled();
+    expect(get).toHaveBeenCalledWith(SYSTEM_SECURITY_WATCH_FLOOR_ID, 'agent-3', expect.any(Object));
+  });
+
+  it('returns the default manual level when the watch is not installed', async () => {
+    const { deps, get } = createDeps();
+    get.mockResolvedValue({ settings: { autonomy: 'manual' }, settingsRevision: null });
+    registerGetAutonomyRoute(deps);
+
+    const response = await invoke(getHandler(deps.router), {
+      watchId: SYSTEM_SECURITY_WATCH_FLOOR_ID,
+    });
+
+    expect(response.ok).toHaveBeenCalledWith(
+      expect.objectContaining({
+        body: expect.objectContaining({ autonomyLevel: 'manual' }),
+      })
     );
   });
 
-  it('scopes the read to the space resolved from the request', async () => {
-    const deps = createDeps();
-    registerGetAutonomyRoute(deps);
-
-    await invoke(getHandler(deps.router), { watchId: SYSTEM_SECURITY_WATCH_FLOOR_ID });
-
-    expect(getScopedInternalUiSettingsClientMock).toHaveBeenCalledWith({
-      savedObjects,
-      spaceId: 'agent-3',
-      uiSettings,
-    });
-  });
-
   it('rejects an unknown watch id with a 400 (security finding S4)', async () => {
-    const deps = createDeps();
+    const { deps, get } = createDeps();
     registerGetAutonomyRoute(deps);
 
     const response = await invoke(getHandler(deps.router), { watchId: '../../evil' });
 
     expect(response.badRequest).toHaveBeenCalledTimes(1);
+    expect(get).not.toHaveBeenCalled();
   });
 
-  it('does not build a settings client for an unknown watch id', async () => {
-    const deps = createDeps();
-    registerGetAutonomyRoute(deps);
-
-    await invoke(getHandler(deps.router), { watchId: '../../evil' });
-
-    expect(getScopedInternalUiSettingsClientMock).not.toHaveBeenCalled();
-  });
-
-  it('returns a 500 when reading the setting throws', async () => {
-    const deps = createDeps();
-    getScopedInternalUiSettingsClientMock.mockReturnValue({
-      get: jest.fn().mockRejectedValue(new Error('boom')),
-      set: jest.fn(),
-    });
+  it('returns a 500 when reading settings throws', async () => {
+    const { deps, get } = createDeps();
+    get.mockRejectedValue(new Error('boom'));
     registerGetAutonomyRoute(deps);
 
     const response = await invoke(getHandler(deps.router), {

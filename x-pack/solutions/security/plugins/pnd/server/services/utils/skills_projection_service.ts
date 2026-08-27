@@ -67,20 +67,21 @@ export class SkillsProjectionService {
     return cached === undefined || Date.now() - cached.fetchedAt > CACHE_TTL_MS;
   }
 
-  private async refresh(spaceId: string): Promise<void> {
+  private async refresh(request: KibanaRequest, spaceId: string): Promise<void> {
     const managedWorkflows = await this.managedWorkflows;
     const { items } = await fetchWatchWorkflows(
       this.management,
       managedWorkflows,
       spaceId,
-      this.logger
+      this.logger,
+      { request }
     );
     this.cacheBySpace.set(spaceId, { workflows: items, fetchedAt: Date.now() });
   }
 
   private async getCached(request: KibanaRequest, spaceId: string): Promise<WatchSkill[]> {
     if (this.isStale(spaceId)) {
-      await this.refresh(spaceId);
+      await this.refresh(request, spaceId);
     }
     const cached = this.cacheBySpace.get(spaceId);
     if (!cached) return [];

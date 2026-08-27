@@ -20,3 +20,14 @@ export const PND_RULE_WORKFLOW_MANAGEMENT = {
   lifecycle: 'static',
   versionStrategy: 'auto',
 } as const;
+
+/** Catalog watches: visible in Watch pickers. */
+export const PND_WATCH_VISIBILITY = {
+  selectors: ['watch'],
+  solutions: ['security'],
+} as const;
+
+/** Static helpers: Security-solution-visible, never a Watch catalog row. */
+export const PND_WORKER_VISIBILITY = {
+  solutions: ['security'],
+} as const;

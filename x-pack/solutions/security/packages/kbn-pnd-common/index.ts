@@ -205,7 +205,6 @@ export {
   WatchApprovalGate,
   WatchAutonomyLevel,
   WatchCallableRef,
-  WatchGeneralSettings,
   WatchLedgerEntry,
   WatchMetrics,
   WatchRecentRun,
@@ -230,6 +229,7 @@ export {
 export {
   compareWatchesForDisplay,
   coverageFromSchedule,
+  createCatalogWatchPlaceholder,
   isOnDutyNow,
 } from './impl/watches/watch_helpers';
 export type {

@@ -12,22 +12,22 @@ import {
   PND_WATCH_MANAGEMENT,
   PND_WATCH_VISIBILITY,
 } from './constants';
-import WATCH_DARK_YAML from './watch_dark.yaml';
+import WATCH_POST_INCIDENT_YAML from './watch_post_incident.yaml';
 import type { PndWatchTemplateValues } from './watch_template_values';
 import type { ManagedWorkflowDefinition } from '../../types';
 
-export const PND_WATCH_DARK_WORKFLOW_ID = 'system-security-watch-dark';
+export const PND_WATCH_POST_INCIDENT_WORKFLOW_ID = 'system-security-watch-post-incident';
 
-export const PND_WATCH_DARK_WORKFLOW = {
+export const PND_WATCH_POST_INCIDENT_WORKFLOW = {
   billable: false,
-  id: PND_WATCH_DARK_WORKFLOW_ID,
+  id: PND_WATCH_POST_INCIDENT_WORKFLOW_ID,
   management: PND_WATCH_MANAGEMENT,
   pluginId: PND_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 6,
+  version: 14,
   visibility: PND_WATCH_VISIBILITY,
   yamlTemplate: ({ settingsVersion, autonomyLevel }: PndWatchTemplateValues): string =>
-    WATCH_DARK_YAML.replaceAll('__WATCH_SETTINGS_VERSION__', String(settingsVersion)).replaceAll(
-      '__WATCH_AUTONOMY_LEVEL__',
-      autonomyLevel
-    ),
+    WATCH_POST_INCIDENT_YAML.replaceAll(
+      '__WATCH_SETTINGS_VERSION__',
+      String(settingsVersion)
+    ).replaceAll('__WATCH_AUTONOMY_LEVEL__', autonomyLevel),
 } as const satisfies ManagedWorkflowDefinition<PndWatchTemplateValues>;

@@ -9,7 +9,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import {
   PND_MANAGED_WATCH_WORKFLOW_IDS,
   PND_WATCH_FLOOR_WORKFLOW_ID,
-  PND_RULE_WORKFLOW_IDS,
+  PND_STATIC_HELPER_WORKFLOW_IDS,
 } from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { ManagedWorkflowInstanceState } from '@kbn/workflows/server/types';
@@ -34,12 +34,12 @@ const createDependencies = () => {
 };
 
 describe('initializeManagedWorkflows', () => {
-  it('installs only global rule workflows before reconciliation', async () => {
+  it('installs only global static helper workflows before reconciliation', async () => {
     const { client, workflowsExtensions, logger } = createDependencies();
 
     await initializeManagedWorkflows({ workflowsExtensions, logger });
 
-    expect(client.install.mock.calls.map(([id]) => id)).toEqual(PND_RULE_WORKFLOW_IDS);
+    expect(client.install.mock.calls.map(([id]) => id)).toEqual(PND_STATIC_HELPER_WORKFLOW_IDS);
     expect(client.install).not.toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({ workflowIdSuffix: expect.any(String) })
@@ -177,7 +177,7 @@ describe('initializeManagedWorkflows', () => {
 
     await initializeManagedWorkflows({ workflowsExtensions, logger });
 
-    expect(client.install.mock.calls.map(([id]) => id)).toEqual(PND_RULE_WORKFLOW_IDS);
+    expect(client.install.mock.calls.map(([id]) => id)).toEqual(PND_STATIC_HELPER_WORKFLOW_IDS);
     expect(client.ready).toHaveBeenCalledTimes(1);
   });
 

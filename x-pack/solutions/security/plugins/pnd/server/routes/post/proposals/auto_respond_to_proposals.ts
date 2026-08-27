@@ -12,7 +12,6 @@ import {
   PND_AUTO_RESPOND_CHANNELS,
   PND_AUTO_RESPOND_RATIONALE_PREFIX,
   PND_PROPOSALS_AUTO_RESPOND_URL,
-  buildWatchAutonomyUiSettingKey,
 } from '@kbn/pnd-common';
 import type { AutoRespondToProposalsResponse } from '@kbn/pnd-common';
 import { WorkflowsManagementApiActions } from '@kbn/workflows';
@@ -24,7 +23,6 @@ import {
   PND_PENDING_GATES_MAX_RUNS,
 } from '../../../lib/list_pending_pnd_gates';
 import { asWatchAutonomyLevel } from '../../../lib/as_watch_autonomy_level';
-import { getScopedInternalUiSettingsClient } from '../../../lib/scoped_internal_ui_settings_client';
 import { isSystemSecurityWatchId } from '../../../lib/is_system_security_watch_id';
 import type { RouteDependencies } from '../../register_routes';
 import { approveGate } from './helpers/approve_gate';
@@ -60,12 +58,12 @@ const PND_AUTO_RESPOND_PAGE_SIZE = PND_PENDING_GATES_MAX_RUNS;
  * resume call site — so a bypassed partition still fails closed. Every accepted
  * gate is resumed through that seam (never the engine directly), so the audit
  * stamp and first-writer-wins still apply. The space is always the request's,
- * never a parameter and never `'*'` (S9). Autonomy is always read from
- * uiSettings — never trusted from the request body.
+ * never a parameter and never `'*'` (S9). Autonomy is always read from the
+ * per-space template values — never trusted from the request body.
  */
 export const registerAutoRespondToProposalsRoute = ({
   getSpaceId,
-  getStartServices,
+  getWatchesService,
   getWorkflowsManagementClient,
   logger,
   router,
@@ -112,19 +110,11 @@ export const registerAutoRespondToProposalsRoute = ({
         }
 
         try {
-          const [{ savedObjects, uiSettings }] = await getStartServices();
           const spaceId = getSpaceId(request);
-
-          const uiSettingsClient = getScopedInternalUiSettingsClient({
-            savedObjects,
-            spaceId,
-            uiSettings,
-          });
+          const current = await getWatchesService().get(watchId, spaceId, request);
           // Narrowed rather than trusted, for the same reason `GET /autonomy` narrows it: a legacy
           // ordinal must auto-respond to nothing rather than clamp up to Supervised and accept gates.
-          const autonomyLevel = asWatchAutonomyLevel(
-            await uiSettingsClient.get<unknown>(buildWatchAutonomyUiSettingKey(watchId))
-          );
+          const autonomyLevel = asWatchAutonomyLevel(current?.settings?.autonomy);
 
           // Reads the watch's parked runs directly, so gates owned by a global (`'*'`)
           // managed watch are found rather than silently dropped (bead `kibana-idjb.21`).

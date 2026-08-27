@@ -15,7 +15,7 @@ description: >
   (await_apply_tuning): no autonomy level ever bypasses it, matching the four-phase doc's
   4.3 "Always gated". The consequential rule write happens from the PND UI in the approving
   user's request context, not from this workflow — see the note on the terminal marker.
-enabled: true
+enabled: false
 tags:
   - watch
   - watch-post-incident
@@ -61,13 +61,17 @@ triggers:
   - type: manual
 consts:
   # `autonomyLevel` here is the watch's intended DEFAULT, and documentation only: the projection
-  # no longer reads it, and the level the gates resolve against is the per-space
-  # `pnd:autonomy:<watchId>` uiSetting that `GET /internal/pnd/autonomy` serves. It is spelled with
-  # the shared scale's name rather than an ordinal so there is one vocabulary everywhere.
+  # no longer reads it, and the level the gates resolve against is the per-space template value
+  # that `GET /internal/pnd/autonomy` serves. It is spelled with the shared scale's name rather
+  # than an ordinal so there is one vocabulary everywhere.
   # `manual` — every proposal requires confirmation — is the only consistent choice for a watch
   # whose single gate is alwaysGate: a raised level could never auto-accept it anyway (see the gate
   # registry: apply_tuning.alwaysGate = true).
   watch_policy:
+    settingsVersion: __WATCH_SETTINGS_VERSION__
+    # Persisted plumbing only; runtime autonomy is request-time from template values.
+    # `autonomyLevel` below is the watch's intended DEFAULT, and documentation only.
+    autonomy: "__WATCH_AUTONOMY_LEVEL__"
     mandate: Detection tuning from closed incidents
     autonomyLevel: manual
     handoff: records

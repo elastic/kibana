@@ -45,7 +45,6 @@ const catalogEntry = (deepLinkId: string): Pick<Watch, 'id' | 'name' | 'color' |
 const floorWatchBase: Watch = {
   ...catalogEntry('watch_floor'),
   tags: [WATCH_TAG, WATCH_FLOOR_TAG],
-  icon: 'alert',
   enabled: true,
   draft: false,
   managed: true,
@@ -88,9 +87,6 @@ const floorWatchBase: Watch = {
     },
   ],
   metrics: {
-    runs7d: 847,
-    acceptedPct: 91,
-    timeSaved: '42h',
     lastRun: '2026-07-20T14:02:00Z',
   },
   recentRuns: [
@@ -121,7 +117,6 @@ const floorWatchBase: Watch = {
 const officerWatchBase: Watch = {
   ...catalogEntry('watch_officer'),
   tags: [WATCH_TAG, WATCH_OFFICER_TAG],
-  icon: 'bell',
   enabled: true,
   draft: false,
   managed: true,
@@ -149,9 +144,6 @@ const officerWatchBase: Watch = {
   ],
   callables: [],
   metrics: {
-    runs7d: 23,
-    acceptedPct: 78,
-    timeSaved: '8h',
     lastRun: '2026-07-20T11:30:00Z',
   },
   recentRuns: [
@@ -173,7 +165,6 @@ const officerWatchBase: Watch = {
 const darkWatchBase: Watch = {
   ...catalogEntry('watch_dark'),
   tags: [WATCH_TAG, WATCH_DARK_TAG],
-  icon: 'bolt',
   enabled: true,
   draft: false,
   managed: true,
@@ -207,9 +198,6 @@ const darkWatchBase: Watch = {
   ],
   callables: [],
   metrics: {
-    runs7d: 56,
-    acceptedPct: 65,
-    timeSaved: '18h',
     lastRun: '2026-07-20T03:00:00Z',
   },
   recentRuns: [
@@ -228,7 +216,6 @@ const darkWatchBase: Watch = {
 const deepWatchBase: Watch = {
   ...catalogEntry('watch_deep'),
   tags: [WATCH_TAG, WATCH_DEEP_TAG],
-  icon: 'console',
   enabled: true,
   draft: false,
   managed: true,
@@ -256,9 +243,6 @@ const deepWatchBase: Watch = {
   ],
   callables: [],
   metrics: {
-    runs7d: 4,
-    acceptedPct: null,
-    timeSaved: '6h',
     lastRun: '2026-07-19T16:45:00Z',
   },
   recentRuns: [
@@ -277,7 +261,6 @@ const deepWatchBase: Watch = {
 const detectionWatchBase: Watch = {
   ...catalogEntry('watch_post_incident'),
   tags: [WATCH_TAG, WATCH_POST_INCIDENT_TAG],
-  icon: 'crosshairs',
   enabled: true,
   draft: false,
   managed: true,
@@ -308,9 +291,6 @@ const detectionWatchBase: Watch = {
   ],
   callables: [],
   metrics: {
-    runs7d: 412,
-    acceptedPct: 83,
-    timeSaved: '15h',
     lastRun: '2026-07-20T13:44:00Z',
   },
   recentRuns: [

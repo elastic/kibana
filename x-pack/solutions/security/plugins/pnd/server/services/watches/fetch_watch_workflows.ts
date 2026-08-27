@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import {
   getManagedWorkflowSelectorVisibilityContext,
   type WorkflowDetailDto,
@@ -59,7 +59,7 @@ export const fetchWatchWorkflows = async (
   managedWorkflows: PluginScopedManagedWorkflowsApi | undefined,
   spaceId: string,
   logger: Logger,
-  opts: { includeExecutionHistory?: boolean } = {}
+  opts: { includeExecutionHistory?: boolean; request: KibanaRequest }
 ): Promise<FetchedWatchWorkflows> => {
   // Paginate until all results are collected or the safety cap is hit.
   const allResults: WorkflowListItemDto[] = [];
@@ -75,6 +75,7 @@ export const fetchWatchWorkflows = async (
         visibilityContext: [WATCH_VISIBILITY_CONTEXT],
       },
       spaceId,
+      opts.request,
       {
         includeExecutionHistory: opts.includeExecutionHistory ?? false,
         includeManagedExecutionHistory: opts.includeExecutionHistory ?? false,
@@ -133,7 +134,7 @@ export const fetchWatchWorkflows = async (
       .map(async ({ registration, status }) => {
         if (status.installed) {
           try {
-            const detail = await management.getWorkflow(status.workflowId, spaceId);
+            const detail = await management.getWorkflow(status.workflowId, spaceId, opts.request);
             if (detail) {
               items.push({ ...toWatchListItem(detail), id: registration.id });
               return;

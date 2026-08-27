@@ -12,7 +12,7 @@ description: >
   surfaces). Each conversation carries the attack discovery as a
   security.alert attachment, and records every HITL ask and its outcome — including a
   dismissal — so the thread is the durable audit surface for the loop.
-enabled: true
+enabled: false
 tags:
   - watch
   - watch-floor
@@ -32,6 +32,9 @@ triggers:
   - type: manual
 consts:
   watch_policy:
+    settingsVersion: __WATCH_SETTINGS_VERSION__
+    # Persisted plumbing only; runtime autonomy is request-time from template values.
+    autonomy: "__WATCH_AUTONOMY_LEVEL__"
     mandate: Frontline triage
     autonomyLevel: supervised
     handoff: officer

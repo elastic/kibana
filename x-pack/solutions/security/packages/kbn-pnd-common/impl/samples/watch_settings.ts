@@ -68,7 +68,6 @@ const ESCALATION_CONTACT_OPTION_IDS = ['none', 'soc-lead-on-call', 'ir-on-call',
 const floorSettings: WatchSettingsSeed = {
   watchId: SYSTEM_SECURITY_WATCH_FLOOR_ID,
   autonomy: 'manual',
-  general: { runAsIdentity: 'svc-watch-floor', showMvpScopeWarning: true },
   triggers: {
     sharedWithAttackDiscovery: true,
     schedule: { optionIds: SCHEDULE_OPTION_IDS, selectedId: 'every-15m' },
@@ -135,7 +134,6 @@ const floorSettings: WatchSettingsSeed = {
 const officerSettings: WatchSettingsSeed = {
   watchId: SYSTEM_SECURITY_WATCH_OFFICER_ID,
   autonomy: 'manual',
-  general: { runAsIdentity: 'svc-watch-officer', showMvpScopeWarning: false },
   // No Triggers section — the Officer runs off Floor hand-offs, not its own schedule.
   scopeRouting: {
     dataSources: { optionIds: DATA_SOURCE_OPTION_IDS, selectedId: 'alerts-entities' },
@@ -169,7 +167,6 @@ const officerSettings: WatchSettingsSeed = {
 const darkSettings: WatchSettingsSeed = {
   watchId: SYSTEM_SECURITY_WATCH_DARK_ID,
   autonomy: 'manual',
-  general: { runAsIdentity: 'svc-watch-dark', showMvpScopeWarning: false },
   triggers: {
     // Dark Watch owns its own sweep schedule — nothing shared with Attack Discovery here.
     sharedWithAttackDiscovery: false,
@@ -208,7 +205,6 @@ const darkSettings: WatchSettingsSeed = {
 const deepSettings: WatchSettingsSeed = {
   watchId: SYSTEM_SECURITY_WATCH_DEEP_ID,
   autonomy: 'manual',
-  general: { runAsIdentity: 'svc-watch-deep', showMvpScopeWarning: false },
   // No Triggers section — Deep Watch is specialist and on-demand only.
   scopeRouting: {
     dataSources: { optionIds: DATA_SOURCE_OPTION_IDS, selectedId: 'alerts-entities-timelines-edr' },
@@ -234,7 +230,6 @@ const detectionSettings: WatchSettingsSeed = {
   // Invented value — #18718 gives the three levels but explicitly leaves the mapping from the old
   // numeric scale open, so no other watch asserts anything beyond the Manual default.
   autonomy: 'assisted',
-  general: { runAsIdentity: 'svc-watch-post-incident', showMvpScopeWarning: false },
   triggers: {
     sharedWithAttackDiscovery: false,
     schedule: { optionIds: SCHEDULE_OPTION_IDS, selectedId: 'hourly' },

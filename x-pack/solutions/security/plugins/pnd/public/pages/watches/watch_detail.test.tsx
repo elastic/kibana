@@ -160,12 +160,6 @@ const triggersSeed: NonNullable<WatchSettings['triggers']> = {
 
 const settings: WatchSettings = {
   autonomy: 'manual',
-  /**
-   * `showMvpScopeWarning: true` on purpose. The 2026-08-17 simplification removed the MVP-scope callout
-   * outright, so the payload asking for it and the page still not drawing it is the assertion — a
-   * fixture with the flag off would pass whether or not the callout had been removed.
-   */
-  general: { runAsIdentity: 'svc-watch-deep', showMvpScopeWarning: true },
   runsLedger: [
     {
       action: 'draft',
@@ -818,10 +812,10 @@ describe('WatchDetailPage', () => {
       expect(screen.queryByText(RETIRED_COPY.generalSectionTitle)).not.toBeInTheDocument();
     });
 
-    it('shows the run-as identity as a bare account line instead', () => {
+    it('does not render a run-as identity; that field is not on WatchSettings', () => {
       renderWatchDetail();
 
-      expect(screen.getByTestId('pndWatchRunAsIdentity')).toHaveTextContent('svc-watch-deep');
+      expect(screen.queryByTestId('pndWatchRunAsIdentity')).not.toBeInTheDocument();
     });
 
     it('gives that line no field label, which is what collapsing it removed', () => {

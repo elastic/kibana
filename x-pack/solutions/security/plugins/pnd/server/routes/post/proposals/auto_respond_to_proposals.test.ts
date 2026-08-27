@@ -19,12 +19,7 @@ import type { PndAutoRespondOrigin, WatchAutonomyLevel } from '@kbn/pnd-common';
 import { PND_API_PRIVILEGE_AUTONOMY_WRITE } from '../../../../common/constants';
 import { createPendingGatesManagementClientMock } from '../../../lib/list_pending_pnd_gates/mocks';
 import type { RouteDependencies } from '../../register_routes';
-import { getScopedInternalUiSettingsClient } from '../../../lib/scoped_internal_ui_settings_client';
 import { registerAutoRespondToProposalsRoute } from './auto_respond_to_proposals';
-
-jest.mock('../../../lib/scoped_internal_ui_settings_client');
-
-const getScopedInternalUiSettingsClientMock = getScopedInternalUiSettingsClient as jest.Mock;
 
 const step = (stepId: string) => ({
   id: `exec-${stepId}`,
@@ -46,14 +41,20 @@ const createManagementClient = (steps: Array<ReturnType<typeof step>>) => ({
   resumeWorkflowExecution: jest.fn().mockResolvedValue({ resumedBy: 'analyst' }),
 });
 
-const createDeps = (managementClient: ReturnType<typeof createManagementClient> | undefined) => {
+const createDeps = (
+  managementClient: ReturnType<typeof createManagementClient> | undefined,
+  autonomyLevel: WatchAutonomyLevel = 'supervised'
+) => {
   const router = mockRouter.create();
   const deps = {
     config: { enabled: true, ui: { useMockData: false } },
     getSpaceId: jest.fn().mockReturnValue('agent-3'),
-    getStartServices: jest
-      .fn()
-      .mockResolvedValue([{ savedObjects: { id: 'so' }, uiSettings: { id: 'ui' } }, {}, {}]),
+    getWatchesService: jest.fn().mockReturnValue({
+      get: jest.fn().mockResolvedValue({
+        settings: { autonomy: autonomyLevel },
+        settingsRevision: null,
+      }),
+    }),
     getWatchProjection: jest.fn(),
     getWorkflowsManagementClient: jest.fn().mockReturnValue(managementClient),
     logger: loggerMock.create(),
@@ -82,16 +83,9 @@ const invoke = async (
   return response;
 };
 
-const mockLevel = (autonomyLevel: WatchAutonomyLevel) =>
-  getScopedInternalUiSettingsClientMock.mockReturnValue({
-    get: jest.fn().mockResolvedValue(autonomyLevel),
-    set: jest.fn(),
-  });
-
 describe('registerAutoRespondToProposalsRoute', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockLevel('supervised');
   });
 
   it('registers the route gated on BOTH the autonomy-write and Workflows execute privileges (D1)', () => {

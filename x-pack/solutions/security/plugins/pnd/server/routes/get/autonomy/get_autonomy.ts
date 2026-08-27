@@ -9,7 +9,6 @@ import {
   API_VERSIONS,
   INTERNAL_API_ACCESS,
   PND_AUTONOMY_URL,
-  buildWatchAutonomyUiSettingKey,
   GetAutonomyRequestQuery,
 } from '@kbn/pnd-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
@@ -17,7 +16,6 @@ import { PND_API_PRIVILEGE_READ } from '../../../../common/constants';
 import type { RouteDependencies } from '../../register_routes';
 import { asWatchAutonomyLevel } from '../../../lib/as_watch_autonomy_level';
 import { buildAutonomyResponse } from '../../../lib/build_autonomy_response';
-import { getScopedInternalUiSettingsClient } from '../../../lib/scoped_internal_ui_settings_client';
 import { isSystemSecurityWatchId } from '../../../lib/is_system_security_watch_id';
 
 /**
@@ -26,13 +24,14 @@ import { isSystemSecurityWatchId } from '../../../lib/is_system_security_watch_i
  * Gated on the narrowest PND privilege ({@link PND_API_PRIVILEGE_READ}) so the
  * Task Manager API key that drives the watch (which carries the scheduling
  * user's privileges, NOT the autonomy-write privilege) can still read the dial.
- * The level is read as the internal user, space-scoped to the request.
+ * The level is the per-space template value. An uninstalled watch returns the
+ * default `manual` without installing.
  */
 export const registerGetAutonomyRoute = ({
   router,
   logger,
   getSpaceId,
-  getStartServices,
+  getWatchesService,
 }: RouteDependencies) => {
   router.versioned
     .get({
@@ -55,7 +54,7 @@ export const registerGetAutonomyRoute = ({
       async (_context, request, response) => {
         const { watchId } = request.query;
 
-        // Security finding S4: allow-list the watchId BEFORE building the key.
+        // Security finding S4: allow-list the watchId BEFORE reading settings.
         if (!isSystemSecurityWatchId(watchId)) {
           return response.badRequest({
             body: { message: `Unknown watchId "${watchId}"` },
@@ -63,20 +62,9 @@ export const registerGetAutonomyRoute = ({
         }
 
         try {
-          const [{ savedObjects, uiSettings }] = await getStartServices();
           const spaceId = getSpaceId(request);
-          const uiSettingsClient = getScopedInternalUiSettingsClient({
-            savedObjects,
-            spaceId,
-            uiSettings,
-          });
-
-          // Narrowed rather than trusted: the uiSettings `schema` bounds every write, but a space
-          // seeded before the scale became a name can still hold an ordinal, and that must read as
-          // no autonomy rather than clamp up to Supervised.
-          const autonomyLevel = asWatchAutonomyLevel(
-            await uiSettingsClient.get<unknown>(buildWatchAutonomyUiSettingKey(watchId))
-          );
+          const current = await getWatchesService().get(watchId, spaceId, request);
+          const autonomyLevel = asWatchAutonomyLevel(current?.settings?.autonomy);
 
           return response.ok({ body: buildAutonomyResponse(watchId, autonomyLevel) });
         } catch (error) {

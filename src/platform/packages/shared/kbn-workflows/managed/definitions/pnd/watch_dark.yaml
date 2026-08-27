@@ -3,7 +3,7 @@ name: Dark Watch
 description: >
   Dark Watch skeleton. Continuous, technology-aware hunting with overnight UTC
   sweeps and reviewable findings.
-enabled: true
+enabled: false
 tags:
   - watch
   - watch-dark
@@ -19,6 +19,9 @@ triggers:
   - type: manual
 consts:
   watch_policy:
+    settingsVersion: __WATCH_SETTINGS_VERSION__
+    # Persisted plumbing only; runtime autonomy is request-time from template values.
+    autonomy: "__WATCH_AUTONOMY_LEVEL__"
     mandate: Continuous, technology-aware hunting for relevant threats and coverage gaps
     autonomyLevel: assisted
     handoff: brief

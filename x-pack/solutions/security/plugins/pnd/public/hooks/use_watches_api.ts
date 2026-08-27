@@ -5,8 +5,12 @@
  * 2.0.
  */
 
+import { useRef } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
+import type { IToasts } from '@kbn/core/public';
+import { isHttpFetchError } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { API_VERSIONS, PND_WATCHES_URL, buildWatchUrl } from '@kbn/pnd-common';
 import type {
   GetWatchResponse,
@@ -16,6 +20,37 @@ import type {
 } from '@kbn/pnd-common';
 import { queryKeys } from '../query_keys';
 import { retryOnTransientError } from './retry_on_transient_error';
+
+const WATCH_SETTINGS_CONFLICT_MESSAGE = i18n.translate(
+  'xpack.pnd.watchSettingsConflictErrorMessage',
+  { defaultMessage: 'Watch settings changed; reload and try again' }
+);
+
+const WATCH_SETTINGS_FORBIDDEN_MESSAGE = i18n.translate(
+  'xpack.pnd.watchSettingsForbiddenErrorMessage',
+  { defaultMessage: 'You do not have permission to update this watch' }
+);
+
+const WATCH_UPDATE_ERROR_TITLE = i18n.translate('xpack.pnd.watchUpdateErrorMessage', {
+  defaultMessage: 'Unable to update the watch',
+});
+
+/**
+ * 409/403 are expected outcomes — warning/danger without a stack. Everything else is addError.
+ */
+export const notifyWatchUpdateError = (toasts: IToasts, error: unknown): void => {
+  const status = isHttpFetchError(error) ? error.response?.status : undefined;
+  if (status === 409) {
+    toasts.addWarning(WATCH_SETTINGS_CONFLICT_MESSAGE);
+    return;
+  }
+  if (status === 403) {
+    toasts.addDanger(WATCH_SETTINGS_FORBIDDEN_MESSAGE);
+    return;
+  }
+  const cause = error instanceof Error ? error : new Error(String(error));
+  toasts.addError(cause, { title: WATCH_UPDATE_ERROR_TITLE });
+};
 
 export const useWatches = () => {
   const { services } = useKibana();
@@ -65,13 +100,29 @@ export const useUpdateWatch = (watchId: string) => {
   const { services } = useKibana();
   const queryClient = useQueryClient();
   const queryKey = queryKeys.watches.detail(watchId);
+  const mutationQueue = useRef<Promise<void>>(Promise.resolve());
 
   return useMutation({
-    mutationFn: async (patch: UpdateWatchRequestBody): Promise<UpdateWatchResponse> =>
-      services.http!.patch<UpdateWatchResponse>(buildWatchUrl(watchId), {
-        version: API_VERSIONS.internal.v1,
-        body: JSON.stringify(patch),
-      }),
+    mutationFn: (patch: UpdateWatchRequestBody): Promise<UpdateWatchResponse> => {
+      const execute = async (): Promise<UpdateWatchResponse> => {
+        const current = queryClient.getQueryData<GetWatchResponse>(queryKey);
+        const body = touchesSettings(patch)
+          ? { ...patch, settingsRevision: current?.settingsRevision ?? null }
+          : patch;
+        const response = await services.http!.patch<UpdateWatchResponse>(buildWatchUrl(watchId), {
+          version: API_VERSIONS.internal.v1,
+          body: JSON.stringify(body),
+        });
+        queryClient.setQueryData(queryKey, response);
+        return response;
+      };
+      const operation = mutationQueue.current.then(execute, execute);
+      mutationQueue.current = operation.then(
+        () => undefined,
+        () => undefined
+      );
+      return operation;
+    },
     onMutate: async (patch) => {
       await queryClient.cancelQueries({ queryKey });
 
@@ -81,10 +132,11 @@ export const useUpdateWatch = (watchId: string) => {
       }
       return { previous };
     },
-    onError: (_error, _patch, context) => {
+    onError: (error, _patch, context) => {
       if (context?.previous) {
         queryClient.setQueryData(queryKey, context.previous);
       }
+      notifyWatchUpdateError(services.notifications!.toasts, error);
     },
     onSuccess: (data) => {
       queryClient.setQueryData(queryKey, data);
@@ -113,7 +165,7 @@ const applyWatchPatch = (
   current: GetWatchResponse,
   patch: UpdateWatchRequestBody
 ): GetWatchResponse => {
-  const { enabled, triggers, scopeRouting, skills } = patch;
+  const { enabled, triggers, scopeRouting, skill } = patch;
   const watch = enabled == null ? current.watch : { ...current.watch, enabled };
   const settings = current.settings;
 
@@ -122,6 +174,7 @@ const applyWatchPatch = (
   }
 
   return {
+    ...current,
     watch,
     settings: {
       ...settings,
@@ -151,18 +204,31 @@ const applyWatchPatch = (
               ),
             }
           : settings.scopeRouting,
-      // Skills arrive as a batch, because one Save could send every attachment it changed in a single
-      // request (kibana-phf4.21). A row no entry names is left alone. Nothing in the UI produces such
-      // an entry since the 2026-08-10 declutter removed the toggle, but the route still accepts one.
-      skills: skills?.length
-        ? settings.skills?.map((attachment) => {
-            const skillPatch = skills.find(({ skillId }) => skillId === attachment.skillId);
-            return skillPatch ? { ...attachment, enabled: skillPatch.enabled } : attachment;
-          })
+      skills: skill
+        ? settings.skills?.map((attachment) =>
+            attachment.skillId === skill.skillId
+              ? { ...attachment, enabled: skill.enabled }
+              : attachment
+          )
         : settings.skills,
     },
   };
 };
+
+const touchesSettings = ({
+  autonomyLevel,
+  triggers,
+  scopeRouting,
+  approvalGate,
+  worker,
+  skill,
+}: UpdateWatchRequestBody): boolean =>
+  autonomyLevel != null ||
+  triggers != null ||
+  scopeRouting != null ||
+  approvalGate != null ||
+  worker != null ||
+  skill != null;
 
 const applySelect = <T extends { selectedId: string }>(setting: T, selectedId?: string): T =>
   selectedId == null ? setting : { ...setting, selectedId };
