@@ -82,7 +82,7 @@ describe('events_write tool', () => {
     expect(eventsWriteSchema.safeParse(input).success).toBe(false);
   });
 
-  it('rejects duplicate detection rules across event items', () => {
+  it('rejects duplicate detection rules anywhere in a write', () => {
     const signal = {
       type: 'detection' as const,
       stream_name: 'logs.test',
@@ -97,19 +97,24 @@ describe('events_write tool', () => {
       },
     };
 
-    const result = eventsWriteSchema.safeParse({
+    const duplicateAcrossItems = eventsWriteSchema.safeParse({
       items: [
         { ...input, signals: [signal] },
         { ...input, signals: [signal] },
       ],
     });
+    const duplicateWithinItem = eventsWriteSchema.safeParse({
+      items: [{ ...input, signals: [signal, signal] }],
+    });
 
-    expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.error.issues.at(-1)?.message).toBe(
-        'Each detection rule UUID may appear in only one event item per write'
-      );
-    }
+    [duplicateAcrossItems, duplicateWithinItem].forEach((result) => {
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues.at(-1)?.message).toBe(
+          'Each detection rule UUID may appear exactly once in the complete write, including within a single event item. Correct ownership before the single write; never retry with an empty placeholder.'
+        );
+      }
+    });
   });
 
   describe('open high-severity confirms invariant', () => {
@@ -219,6 +224,14 @@ describe('events_write tool', () => {
     });
 
     expect(result.items[0].event_id).toBeUndefined();
+  });
+
+  it('accepts 40-medium for known-ongoing events', () => {
+    const result = eventsWriteSchema.safeParse({
+      items: [{ ...input, severity: '40-medium' }],
+    });
+
+    expect(result.success).toBe(true);
   });
 
   it('enriches causal features from their Knowledge Indicators', async () => {
