@@ -16722,10 +16722,10 @@ babel-preset-jest@^29.6.3:
     babel-plugin-jest-hoist "^29.6.3"
     babel-preset-current-node-syntax "^1.0.0"
 
-backport@12.0.0:
-  version "12.0.0"
-  resolved "https://registry.yarnpkg.com/backport/-/backport-12.0.0.tgz#67afab479799a40b6dc62c9468fc9ae29f1af652"
-  integrity sha512-UrUJHMXzQynhFvH6+7MbzzRD2cY7+I3RALrGoxRZS/KI6SeSuDZxN0xaGA6keHECKZCYX6Zr5UAeu/8hlnzL1Q==
+backport@12.0.4:
+  version "12.0.4"
+  resolved "https://registry.yarnpkg.com/backport/-/backport-12.0.4.tgz#73285f03e9f437677d4c1021f3a193d66f1c21d4"
+  integrity sha512-C6AK8/4uy7ok3GEYtqBnQyratt7Bgd0+3TZ3AcIKVvvAKd/YsstyXsak/ZHljw2Cy/rLhyQXDq8ga+V+9FSw8A==
   dependencies:
     "@graphql-typed-document-node/core" "^3.2.0"
     "@inquirer/prompts" "8.4.2"

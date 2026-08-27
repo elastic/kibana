@@ -2124,7 +2124,7 @@
     "babel-plugin-transform-react-remove-prop-types": "0.4.24",
     "babel-plugin-transform-require-default": "0.1.7",
     "babel-plugin-transform-typescript-metadata": "0.3.2",
-    "backport": "12.0.0",
+    "backport": "12.0.4",
     "browserslist": "4.28.8",
     "buildkite-test-collector": "1.8.1",
     "cache-manager": "7.0.0",
