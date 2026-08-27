@@ -70,9 +70,7 @@ export class EvalsPublicPlugin
     if (management) {
       management.sections.section.ai.registerApp({
         id: PLUGIN_ID,
-        title: i18n.translate('xpack.evals.stackManagement.aiNavTitle', {
-          defaultMessage: 'Evaluations',
-        }),
+        title: APP_TITLE,
         order: 2,
         keywords: [...MANAGEMENT_KEYWORDS],
         capabilitiesId: PLUGIN_ID,
