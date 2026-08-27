@@ -143,7 +143,12 @@ describe('prettifyDashboardTool', () => {
       results: [
         expect.objectContaining({
           type: 'other',
-          data: { findings: [], applied: false },
+          data: {
+            findings: [],
+            applied: false,
+            attachment_id: 'dash-1',
+            version: 1,
+          },
         }),
       ],
     });
@@ -171,29 +176,19 @@ describe('prettifyDashboardTool', () => {
       })
     );
     expect(JSON.stringify(result)).not.toContain('png');
+    expect(JSON.stringify(result)).not.toContain('"dashboard"');
     expect(result).toEqual({
-      results: expect.arrayContaining([
+      results: [
         expect.objectContaining({
           type: 'other',
           data: {
             findings: [{ rule: 'pack_layout', what: 'gap beside the metric' }],
             applied: true,
-          },
-        }),
-        expect.objectContaining({
-          type: 'dashboard',
-          data: expect.objectContaining({
             attachment_id: 'dash-1',
             version: 2,
-            dashboard: expect.objectContaining({
-              title: 'Metrics',
-              panels: [
-                expect.objectContaining({ id: 'lens-1', grid: { x: 0, y: 0, w: 48, h: 10 } }),
-              ],
-            }),
-          }),
+          },
         }),
-      ]),
+      ],
     });
   });
 });

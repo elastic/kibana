@@ -23,6 +23,5 @@ const dashboardTool = (toolName: string) => {
  */
 export const dashboardTools = {
   generateDashboard: dashboardTool('generate_dashboard'),
-  reviewDashboard: dashboardTool('review_dashboard'),
   prettifyDashboard: dashboardTool('prettify_dashboard'),
 } as const;

@@ -6,6 +6,6 @@
  */
 
 export { generateDashboardTool } from './generate';
-export { reviewDashboardTool, getChatImageBytes } from './review_dashboard';
+export { getChatImageBytes } from './review_dashboard';
 export type { GetImageBytes } from './review_dashboard';
 export { prettifyDashboardTool } from './prettify';

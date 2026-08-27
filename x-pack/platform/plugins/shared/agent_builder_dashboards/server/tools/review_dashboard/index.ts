@@ -5,7 +5,5 @@
  * 2.0.
  */
 
-export { reviewDashboardTool } from './review_dashboard_tool';
-export type { GetImageBytes } from './review_dashboard_tool';
-export { getChatImageBytes } from './get_chat_image_bytes';
-export type { DashboardFinding, PanelFinding } from './types';
+export { getChatImageBytes, type GetImageBytes } from './get_chat_image_bytes';
+export type { DashboardFinding } from './types';

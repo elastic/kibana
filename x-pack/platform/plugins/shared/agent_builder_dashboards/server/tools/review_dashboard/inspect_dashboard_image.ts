@@ -160,21 +160,6 @@ Zero findings is valid and expected for a well-composed dashboard. When in doubt
 
 Use attachment panel ids. If you cannot tell which panel, skip. Consult each panel's \`config.type\`.`;
 
-export const getDashboardReviewPayloadSizes = (
-  dashboard: DashboardAttachmentData
-): { catalogBytes: number; attachmentBytes: number } => {
-  const catalogJson = JSON.stringify({
-    panels: catalogDashboardPanels(dashboard),
-    sections: catalogDashboardSections(dashboard),
-    controls: catalogDashboardControls(dashboard),
-  });
-  const attachmentJson = JSON.stringify(dashboard);
-  return {
-    catalogBytes: Buffer.byteLength(catalogJson, 'utf8'),
-    attachmentBytes: Buffer.byteLength(attachmentJson, 'utf8'),
-  };
-};
-
 export const inspectDashboardImage = async ({
   dashboard,
   image,

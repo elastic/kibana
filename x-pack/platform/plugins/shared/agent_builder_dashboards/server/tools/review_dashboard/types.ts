@@ -110,8 +110,6 @@ export type DashboardFinding =
   | ThinMetricFinding
   | WeakControlsFinding;
 
-export type PanelFinding = DashboardFinding;
-
 export type InspectDashboardImage = (args: {
   dashboard: DashboardAttachmentData;
   image: DashboardImage;

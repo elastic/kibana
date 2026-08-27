@@ -13,7 +13,7 @@ import {
   imageAttachmentDataSchema,
 } from '@kbn/agent-builder-common/attachments';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import { createErrorResult, getToolResultId } from '@kbn/agent-builder-server';
+import { createErrorResult } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { isDashboardAttachment } from '@kbn/agent-builder-dashboards-common';
 import { createCustomContentTemplateResolver } from '@kbn/custom-content-server';
@@ -23,7 +23,6 @@ import {
   executeDashboardOperations,
   getErrorMessage,
 } from '../generate/core';
-import { summarizeDashboard } from '../generate/summarize_dashboard';
 import { applyDefaultDashboardTimeRange } from '../generate/time_range';
 import { inspectDashboardImage as defaultInspectDashboardImage } from '../review_dashboard/inspect_dashboard_image';
 import type { InspectDashboardImage } from '../review_dashboard/types';
@@ -92,17 +91,18 @@ Call this once when the user asked to prettify a dashboard and an image is attac
           results: [
             {
               type: ToolResultType.other,
-              data: { findings: findingSummaries, applied: false },
+              data: {
+                findings: findingSummaries,
+                applied: false,
+                attachment_id: dashboardAttachment.id,
+                version: dashboardAttachment.current_version ?? 1,
+              },
             },
           ],
         };
       }
 
-      const {
-        dashboardData: nextDashboard,
-        failures,
-        panelAuthoringNotes,
-      } = await executeDashboardOperations({
+      const { dashboardData: nextDashboard, failures } = await executeDashboardOperations({
         dashboardData,
         operations,
         logger,
@@ -138,20 +138,11 @@ Call this once when the user asked to prettify a dashboard and an image is attac
         results: [
           {
             type: ToolResultType.other,
-            data: { findings: findingSummaries, applied: true },
-          },
-          {
-            type: ToolResultType.dashboard,
-            tool_result_id: getToolResultId(),
             data: {
+              findings: findingSummaries,
+              applied: true,
               attachment_id: attachment.id,
               version: attachment.current_version ?? 1,
-              dashboard: summarizeDashboard(
-                finalDashboardData,
-                new Map(
-                  panelAuthoringNotes.map(({ panelId, authoringNote }) => [panelId, authoringNote])
-                )
-              ),
               failures: failures.length > 0 ? failures : undefined,
             },
           },

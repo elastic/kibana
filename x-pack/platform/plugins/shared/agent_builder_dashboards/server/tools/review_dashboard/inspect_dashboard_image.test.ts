@@ -7,7 +7,7 @@
 
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
-import { getDashboardReviewPayloadSizes, inspectDashboardImage } from './inspect_dashboard_image';
+import { inspectDashboardImage } from './inspect_dashboard_image';
 
 const fatDashboard: DashboardAttachmentData = {
   title: 'Metrics',
@@ -158,13 +158,6 @@ describe('inspectDashboardImage', () => {
         },
       },
     ]);
-  });
-
-  it('measures how much larger the attachment JSON is than the compact catalog', () => {
-    expect(getDashboardReviewPayloadSizes(fatDashboard)).toEqual({
-      catalogBytes: 449,
-      attachmentBytes: 1061,
-    });
   });
 
   it('drops an incomplete pack_layout and keeps invert findings', async () => {

@@ -8,6 +8,8 @@
 import type { Readable } from 'stream';
 import type { FilesStart } from '@kbn/files-plugin/server';
 
+export type GetImageBytes = (fileId: string) => Promise<Buffer>;
+
 const streamToBuffer = (stream: Readable): Promise<Buffer> =>
   new Promise((resolve, reject) => {
     const chunks: Buffer[] = [];
