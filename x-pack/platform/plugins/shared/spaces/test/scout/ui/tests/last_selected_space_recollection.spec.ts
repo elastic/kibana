@@ -53,9 +53,15 @@ test.describe('last selected space recollection', { tag: tags.stateful.classic }
     await pageObjects.spaces.switchToSpaceFromNav(TARGET_SPACE_ID);
     await waitForLastSelectedSpaceId(apiClient, samlAuth, 'admin', TARGET_SPACE_ID);
 
-    await page.goto(kbnUrl.get('/'), { waitUntil: 'commit' });
+    // Loading `/` 302s through the enter-space page on to the remembered space, and that client hop supersedes page.goto's own navigation, so drive the load from the page and follow the redirect chain out of and back into the space via waitForURL instead.
+    await Promise.all([
+      page.waitForURL((url) => !url.pathname.startsWith(`/s/${TARGET_SPACE_ID}/`)),
+      page.evaluate((url) => {
+        window.location.href = url;
+      }, kbnUrl.get('/')),
+    ]);
+    await page.waitForURL(`**/s/${TARGET_SPACE_ID}/**`);
 
-    await expect.poll(() => pageObjects.spaces.getCurrentUrl()).toContain(`/s/${TARGET_SPACE_ID}`);
     await expect(pageObjects.spaces.spaceSelectorLocator()).toBeHidden();
   });
 
