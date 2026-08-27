@@ -17,26 +17,31 @@ jest.mock('@kbn/es-query', () => ({
   isNonLocalIndexName: jest.fn((indexName: string) => indexName.includes('::')),
 }));
 
+const mockTakeActionItemsProps = jest.fn();
+
 jest.mock('../../../detections/components/attacks/table/attacks_group_take_action_items', () => ({
-  AttacksGroupTakeActionItems: ({
-    onActionSuccess,
-    isRemoteDocument,
-    telemetrySource,
-  }: {
+  AttacksGroupTakeActionItems: (props: {
+    attack: AttackDiscoveryAlert;
     onActionSuccess?: () => void;
     isRemoteDocument: boolean;
     telemetrySource: string;
-  }) => (
-    <div
-      data-test-subj="mockAttacksGroupTakeActionItems"
-      data-is-remote={String(isRemoteDocument)}
-      data-telemetry-source={telemetrySource}
-    >
-      <button type="button" data-test-subj="mockActionButton" onClick={onActionSuccess}>
-        {'Action'}
-      </button>
-    </div>
-  ),
+  }) => {
+    const { attack, onActionSuccess, isRemoteDocument, telemetrySource } = props;
+    mockTakeActionItemsProps(props);
+
+    return (
+      <div
+        data-test-subj="mockAttacksGroupTakeActionItems"
+        data-attack-id={attack.id}
+        data-is-remote={String(isRemoteDocument)}
+        data-telemetry-source={telemetrySource}
+      >
+        <button type="button" data-test-subj="mockActionButton" onClick={onActionSuccess}>
+          {'Action'}
+        </button>
+      </div>
+    );
+  },
 }));
 
 jest.mock(
@@ -152,6 +157,22 @@ describe('<Footer />', () => {
       'data-is-remote',
       'true'
     );
+  });
+
+  it('forwards the attack unchanged so the flyout attaches the same snapshot as the table', () => {
+    const attack = createMockAttack({
+      index: '.alerts-security.attack.discovery.alerts-default',
+      summaryMarkdown: 'Malware detected on {{ host.name SRVMAC08 }}.',
+      detailsMarkdown: 'The attack began with {{ process.name unix1 }}.',
+      entitySummaryMarkdown: 'Malware on {{ host.name SRVMAC08 }}.',
+      mitreAttackTactics: ['Execution', 'Persistence'],
+      timestamp: '2025-05-05T17:36:50.533Z',
+    });
+    const { getByTestId } = renderFooter({ attack });
+
+    fireEvent.click(getByTestId(FOOTER_TAKE_ACTION_BUTTON_TEST_ID));
+
+    expect(mockTakeActionItemsProps).toHaveBeenCalledWith(expect.objectContaining({ attack }));
   });
 
   it('identifies the flyout as the telemetry source for take action events', () => {

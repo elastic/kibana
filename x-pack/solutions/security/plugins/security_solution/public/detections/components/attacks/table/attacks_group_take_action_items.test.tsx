@@ -20,6 +20,8 @@ import { useAttackCaseContextMenuItems } from '../../../hooks/attacks/bulk_actio
 import { useAttackRunWorkflowContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_run_workflow_context_menu_items';
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
 import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
+import type { AttackToAttach } from '../../../../cases/attachments/attack';
+import { buildAttackAttachments } from '../../../../cases/attachments/attack';
 
 jest.mock(
   '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_view_in_ai_assistant_context_menu_items'
@@ -312,10 +314,37 @@ describe('AttacksGroupTakeActionItems', () => {
             index: attack.index,
             title: attack.title,
             summaryMarkdown: attack.summaryMarkdown,
+            detailsMarkdown: attack.detailsMarkdown,
+            entitySummaryMarkdown: attack.entitySummaryMarkdown,
+            mitreAttackTactics: attack.mitreAttackTactics,
+            timestamp: attack.timestamp,
             riskScore: attack.riskScore,
             alertIds: attack.alertIds,
             replacements: attack.replacements,
           },
+        })
+      );
+    });
+
+    it('builds a de-anonymised narrative snapshot from what it passes', () => {
+      const attack = { ...mockAttack, index: '.alerts-security.attack.discovery.alerts-default' };
+      renderAttack(attack);
+
+      const { attackToAttach } = mockUseAttackCaseContextMenuItems.mock.calls[0][0];
+      const [attackAttachment] = buildAttackAttachments({
+        ...(attackToAttach as Omit<AttackToAttach, 'alertsIndex'>),
+        alertsIndex: '.alerts-security.alerts-default',
+      }).attachments;
+
+      expect(attackAttachment).toEqual(
+        expect.objectContaining({
+          metadata: expect.objectContaining({
+            detailsMarkdown: expect.stringContaining('SRVMAC08'),
+            entitySummaryMarkdown: expect.stringContaining('SRVMAC08'),
+            summaryMarkdown: expect.stringContaining('SRVMAC08'),
+            mitreAttackTactics: attack.mitreAttackTactics,
+            timestamp: attack.timestamp,
+          }),
         })
       );
     });

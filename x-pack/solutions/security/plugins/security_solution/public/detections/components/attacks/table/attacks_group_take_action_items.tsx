@@ -168,7 +168,13 @@ export function AttacksGroupTakeActionItems({
             id: attack.id,
             index: attack.index,
             title: attack.title,
+            // The narrative the activity card renders from. Still anonymised here; the payload
+            // builder de-anonymises and truncates it.
             summaryMarkdown: attack.summaryMarkdown,
+            detailsMarkdown: attack.detailsMarkdown,
+            entitySummaryMarkdown: attack.entitySummaryMarkdown,
+            mitreAttackTactics: attack.mitreAttackTactics,
+            timestamp: attack.timestamp,
             riskScore: attack.riskScore,
             // Raw (possibly anonymised) ids plus the replacements that reverse them; the payload
             // builder de-anonymises and dedupes.
@@ -178,11 +184,15 @@ export function AttacksGroupTakeActionItems({
         : undefined,
     [
       attack.alertIds,
+      attack.detailsMarkdown,
+      attack.entitySummaryMarkdown,
       attack.id,
       attack.index,
+      attack.mitreAttackTactics,
       attack.replacements,
       attack.riskScore,
       attack.summaryMarkdown,
+      attack.timestamp,
       attack.title,
     ]
   );
