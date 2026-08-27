@@ -43,9 +43,9 @@ function buildEventSchemaFromTriggers(
     : BaseEventSchema;
 
   for (const trigger of triggers) {
-    if (typeof trigger?.type === 'string' && isZodObject(eventSchema)) {
+    const type = trigger?.type;
+    if (typeof type === 'string' && isZodObject(eventSchema)) {
       if (
-        isTriggerType(trigger.type) &&
         isManualTrigger(trigger) &&
         isZodObject(inputsZodSchema) &&
         Object.keys(inputsZodSchema.shape).length > 0
@@ -54,9 +54,8 @@ function buildEventSchemaFromTriggers(
           ...eventSchema.shape,
           inputs: inputsZodSchema,
         });
-      } else {
-        const def = triggerSchemas.getTriggerDefinition(trigger.type);
-
+      } else if (!isTriggerType(type)) {
+        const def = triggerSchemas.getTriggerDefinition(type);
         if (def?.eventSchema && isZodObject(def.eventSchema)) {
           eventSchema = z.object({
             ...eventSchema.shape,

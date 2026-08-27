@@ -49,6 +49,19 @@ describe('buildTriggerContextFromExecution', () => {
     });
   });
 
+  it('should detect manual trigger when context event type is manual (synthesized event)', () => {
+    const inputs = { severity: 'high', hostId: 'host-1' };
+    const result = buildTriggerContextFromExecution({
+      event: { type: 'manual', inputs, spaceId: 'default' },
+      inputs,
+    });
+
+    expect(result).toEqual({
+      triggerType: 'manual',
+      input: inputs, // context.inputs, not the full synthesized event object
+    });
+  });
+
   it('should detect alert trigger when context event has alerts', () => {
     const result = buildTriggerContextFromExecution({ event: { alerts: [{ id: 'a1' }] } });
 
@@ -196,6 +209,39 @@ describe('buildTriggerStepExecutionFromContext', () => {
 
     expect(result?.stepId).toBe('event');
     expect(result?.stepType).toBe('trigger_event');
+  });
+
+  it('should use context.inputs as trigger input when event is the synthesized manual event', () => {
+    const inputs = { severity: 'high' };
+    const execution = createWorkflowExecution({
+      status: ExecutionStatus.COMPLETED,
+      stepExecutions: [
+        {
+          id: 'step-1',
+          stepId: 'action-1',
+          stepType: 'action',
+          status: ExecutionStatus.COMPLETED,
+          scopeStack: [],
+          workflowRunId: 'exec-1',
+          workflowId: 'wf-1',
+          startedAt: '',
+          topologicalIndex: 0,
+          globalExecutionIndex: 0,
+          stepExecutionIndex: 0,
+        },
+      ],
+      context: {
+        event: { type: 'manual', inputs, spaceId: 'default' },
+        inputs,
+      },
+    });
+
+    const result = buildTriggerStepExecutionFromContext(execution);
+
+    expect(result).not.toBeNull();
+    expect(result?.stepId).toBe('manual');
+    expect(result?.stepType).toBe('trigger_manual');
+    expect(result?.input).toEqual(inputs); // context.inputs, not the synthesized event
   });
 
   it('should expose manual inputs as output when both event and inputs are present', () => {

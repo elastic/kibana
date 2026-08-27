@@ -50,9 +50,12 @@ export function buildTriggerContextFromExecution(
     }
   }
 
-  const inputData = (executionContext as { event?: JsonValue; inputs?: JsonValue }).event
-    ? executionContext.event
-    : executionContext.inputs;
+  // For manual triggers (including the synthesized-event path), always surface
+  // context.inputs rather than the full synthesized event object.
+  const inputData =
+    triggerType === 'manual'
+      ? (executionContext as { inputs?: JsonValue }).inputs
+      : (executionContext as { event?: JsonValue }).event;
 
   return {
     triggerType,

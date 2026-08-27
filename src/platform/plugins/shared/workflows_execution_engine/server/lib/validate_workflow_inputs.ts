@@ -129,9 +129,17 @@ export const validateWorkflowInputs = async (
   }
 
   if (hasInputChanges(renderContext.inputs, inputsWithDefaults)) {
+    const existingContext = workflowExecution.context ?? {};
+    const existingEvent = existingContext.event as Record<string, unknown> | undefined;
+    // Keep event.inputs in sync with context.inputs when defaults are applied on the manual trigger path.
+    const updatedEvent =
+      existingEvent?.type === 'manual' && inputsWithDefaults !== undefined
+        ? { ...existingEvent, inputs: inputsWithDefaults }
+        : existingEvent;
     const context = {
-      ...(workflowExecution.context ?? {}),
+      ...existingContext,
       ...(inputsWithDefaults !== undefined ? { inputs: inputsWithDefaults } : {}),
+      ...(updatedEvent !== existingEvent ? { event: updatedEvent } : {}),
     };
     workflowExecution.context = context;
     await workflowExecutionRepository.updateWorkflowExecution({
