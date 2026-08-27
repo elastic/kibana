@@ -357,7 +357,7 @@ describe('duration chart attributes', () => {
             syntheticsMonitor: {
               config_id: 'test-id',
               created_at: createdAt,
-            },
+            } as any,
           },
         },
       }
@@ -410,7 +410,7 @@ describe('duration chart attributes', () => {
             syntheticsMonitor: {
               config_id: 'previous-monitor',
               created_at: moment().subtract(2, 'hours').toISOString(),
-            },
+            } as any,
           },
         },
       }
@@ -443,6 +443,8 @@ describe('duration chart attributes', () => {
             syntheticsMonitor: null,
             syntheticsMonitorLoading: false,
             syntheticsMonitorError: {
+              name: 'Error',
+              requestUrl: '/internal/synthetics/monitor',
               body: { statusCode: 404, error: 'Not Found', message: 'Monitor not found' },
             },
           },
@@ -458,9 +460,10 @@ describe('duration chart attributes', () => {
                   tags: [],
                   isEnabled: true,
                   isStatusAlertEnabled: false,
-                  overallStatus: 'up',
+                  status: 'up',
+                  locationId: 'us-east',
+                  locationLabel: 'US East',
                   spaces: ['team-a'],
-                  locations: [{ id: 'us-east', label: 'US East', status: 'up' }],
                 },
               },
               downConfigs: {},
@@ -502,7 +505,7 @@ describe('duration chart attributes', () => {
             syntheticsMonitor: {
               config_id: '01435ca1-2c1f-44de-ba4e-b0a7bd14ef5c',
               created_at: moment().subtract(3, 'days').toISOString(),
-            },
+            } as any,
           },
           overviewStatus: {
             status: {
@@ -516,8 +519,9 @@ describe('duration chart attributes', () => {
                   tags: ['flyout-duration-chart'],
                   isEnabled: true,
                   isStatusAlertEnabled: false,
-                  overallStatus: 'up',
-                  locations: [{ id: 'us_central_qa', label: 'US Central QA', status: 'up' }],
+                  status: 'up',
+                  locationId: 'us_central_qa',
+                  locationLabel: 'US Central QA',
                 },
               },
               downConfigs: {},
