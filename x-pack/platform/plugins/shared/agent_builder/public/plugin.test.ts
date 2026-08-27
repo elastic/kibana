@@ -49,6 +49,7 @@ jest.mock('./services', () => ({
   OAuthClientsService: jest.fn(),
   PluginsService: jest.fn(),
   EventsService: jest.fn(),
+  SpaceSettingsService: jest.fn(),
   AgentBuilderAccessChecker: jest.fn(),
 }));
 
@@ -181,6 +182,7 @@ const openSidebarAndRegisterCallbacks = (
     updateProps: mockUpdateProps,
     resetBrowserApiTools: jest.fn(),
     addAttachment: jest.fn(),
+    removeAttachmentById: jest.fn(),
   });
   return { mockUpdateProps };
 };

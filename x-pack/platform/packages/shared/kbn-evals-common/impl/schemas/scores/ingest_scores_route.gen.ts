@@ -61,6 +61,10 @@ export const IngestScoresRequestBody = lazySchema(() =>
           }),
           evaluator: z.object({
             name: z.string().max(256),
+            /**
+             * The evaluator version that produced the score, so a run stays reproducible after the definition moves on.
+             */
+            version: z.string().max(64).optional(),
             score: z.number().nullable().optional(),
             label: z.string().max(256).nullable().optional(),
             explanation: z.string().max(4096).nullable().optional(),
