@@ -74,7 +74,7 @@ export class NavigationalSearchPageObject extends FtrService {
   }
 
   async isPopoverDisplayed() {
-    return await this.find.existsByCssSelector('.navSearch__panel');
+    return await this.testSubjects.exists(SEARCH_MODAL, { timeout: 0 });
   }
 
   async clickOnOption(index: number) {

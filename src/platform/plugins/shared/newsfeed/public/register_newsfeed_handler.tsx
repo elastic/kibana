@@ -46,6 +46,7 @@ export const registerNewsfeedHandler = ({
         />,
         {
           size: 's',
+          'data-test-subj': 'NewsfeedFlyout',
         }
       );
     },

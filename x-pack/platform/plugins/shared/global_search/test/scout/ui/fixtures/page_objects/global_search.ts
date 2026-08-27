@@ -6,6 +6,7 @@
  */
 
 import type { ScoutPage, Locator } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 
 export class GlobalSearch {
   constructor(private readonly page: ScoutPage) {}
@@ -45,6 +46,8 @@ export class GlobalSearch {
       await this.clearField();
     }
     await this.page.testSubj.fill('nav-search-input', term);
+    // Results arrive in batches with no UI "done" signal; wait for the list to settle.
+    await this.page.waitForTimeout(1500);
   }
 
   async getFieldValue() {
@@ -62,6 +65,23 @@ export class GlobalSearch {
   async clickOnOption(index: number) {
     const options = await this.page.testSubj.locator('nav-search-option').all();
     await options[index].click();
+  }
+
+  async expectResultVisible(label: string) {
+    const item = this.resultLabels.filter({ hasText: label });
+    const list = this.page.testSubj
+      .locator('chromeNextSearchModal')
+      .locator('.euiSelectableList__list')
+      .first();
+
+    await expect(async () => {
+      if ((await item.count()) === 0) {
+        await list.evaluate((el) => {
+          el.scrollTop += 200;
+        });
+      }
+      await expect(item.first()).toBeVisible({ timeout: 1000 });
+    }).toPass({ timeout: 15000 });
   }
 
   async isNoResultsPlaceholderDisplayed() {

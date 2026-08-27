@@ -59,7 +59,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('passes with searchbox open', async () => {
-      await testSubjects.click('nav-search-popover');
+      await testSubjects.click('chromeNextGlobalHeaderSearchButton');
+      await testSubjects.existOrFail('chromeNextSearchModal');
       await a11y.testAppSnapshot();
     });
   });

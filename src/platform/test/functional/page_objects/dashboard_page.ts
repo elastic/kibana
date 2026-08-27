@@ -248,6 +248,11 @@ export class DashboardPageObject extends FtrService {
     this.log.debug('gotoDashboardLandingPage');
     if (await this.onDashboardLandingPage()) return;
 
+    if (await this.testSubjects.exists('chromeNextSearchModal', { timeout: 0 })) {
+      await this.browser.pressKeys(this.browser.keys.ESCAPE);
+      await this.testSubjects.missingOrFail('chromeNextSearchModal');
+    }
+
     if (await this.globalNav.isNextProjectChrome()) {
       await this.testSubjects.click('appHeaderBack');
     } else {

@@ -9,7 +9,6 @@ import { encode } from '@kbn/rison';
 
 import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '@kbn/security-solution-plugin/common/constants';
 import { GET_STARTED_URL, hostDetailsUrl, userDetailsUrl } from '../urls/navigation';
-import { IS_SERVERLESS } from '../env_var_names_constants';
 
 export const visit = (
   url: string,
@@ -116,10 +115,18 @@ const navSearchText = {
 } as const;
 
 export const navigateUsingGlobalSearch = (page: keyof typeof navSearchText) => {
-  const isServerless = Cypress.env(IS_SERVERLESS);
-  if (isServerless) {
-    cy.get('[data-test-subj="nav-search-reveal"]').click();
-  }
+  openGlobalSearch();
   cy.get('[data-test-subj="nav-search-input"]').type(navSearchText[page]);
   cy.get('[data-test-subj="nav-search-option"]').first().click();
+};
+
+export const openGlobalSearch = () => {
+  cy.get('body').then(($body) => {
+    if ($body.find('[data-test-subj="chromeNextGlobalHeaderSearchButton"]').length) {
+      cy.get('[data-test-subj="chromeNextGlobalHeaderSearchButton"]').click();
+    } else if ($body.find('[data-test-subj="nav-search-reveal"]').length) {
+      cy.get('[data-test-subj="nav-search-reveal"]').click();
+    }
+  });
+  cy.get('[data-test-subj="nav-search-input"]').should('be.visible');
 };

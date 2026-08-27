@@ -16,12 +16,17 @@ export class SavedObjectsFinderService extends FtrService {
   private readonly find = this.ctx.getService('find');
   private readonly log = this.ctx.getService('log');
   private readonly retry = this.ctx.getService('retry');
+  private readonly browser = this.ctx.getService('browser');
 
   public async toggleFilterPopover() {
     this.log.debug('SavedObjectsFinder.toggleFilter');
-    const filtersHolder = await this.find.byClassName('euiSearchBar__filtersHolder');
-    const filtersButton = await filtersHolder.findByCssSelector('button');
-    await filtersButton.click();
+    if (await this.testSubjects.exists('chromeNextSearchModal', { timeout: 0 })) {
+      await this.browser.pressKeys(this.browser.keys.ESCAPE);
+      await this.testSubjects.missingOrFail('chromeNextSearchModal');
+    }
+    // Keep the locator scoped to the finder. A nested `button` retry is global and
+    // hits chrome.next's header Search button, which opens a modal over the flyout.
+    await this.find.clickByCssSelector('.euiSearchBar__filtersHolder button');
   }
 
   public async toggleFilter(type: string) {

@@ -71,7 +71,7 @@ test.describe('GlobalSearchBar', { tag: '@local-stateful-classic' }, () => {
     ];
 
     for (const label of expectedLabels) {
-      await expect(pageObjects.globalSearch.resultLabels.filter({ hasText: label })).toBeVisible();
+      await pageObjects.globalSearch.expectResultVisible(label);
     }
   });
 
@@ -110,7 +110,7 @@ test.describe('GlobalSearchBar', { tag: '@local-stateful-classic' }, () => {
     ];
 
     for (const label of expectedLabels) {
-      await expect(pageObjects.globalSearch.resultLabels.filter({ hasText: label })).toBeVisible();
+      await pageObjects.globalSearch.expectResultVisible(label);
     }
   });
 
@@ -133,7 +133,7 @@ test.describe('GlobalSearchBar', { tag: '@local-stateful-classic' }, () => {
     ];
 
     for (const label of expectedLabels) {
-      await expect(pageObjects.globalSearch.resultLabels.filter({ hasText: label })).toBeVisible();
+      await pageObjects.globalSearch.expectResultVisible(label);
     }
   });
 
@@ -181,7 +181,7 @@ test.describe('GlobalSearchBar', { tag: '@local-stateful-classic' }, () => {
     ];
 
     for (const label of expectedLabels) {
-      await expect(pageObjects.globalSearch.resultLabels.filter({ hasText: label })).toBeVisible();
+      await pageObjects.globalSearch.expectResultVisible(label);
     }
   });
 
