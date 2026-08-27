@@ -27,6 +27,7 @@ import { selectOverviewStatus } from '../../../../../state/overview_status';
 
 export const HEARTBEAT_GROUP_ID = '__heartbeat__' as const;
 export const REMOTE_GROUP_ID = '__remote__' as const;
+export const LOCAL_GROUP_ID = '__local__' as const;
 
 const HEARTBEAT_MONITORS_LABEL = i18n.translate(
   'xpack.synthetics.monitorsPage.overview.gridItemsByGroup.heartbeatMonitors',
@@ -75,6 +76,7 @@ export const GridItemsByGroup = ({
     items: OverviewGroupValue[];
     values: OverviewGroupValue[];
     otherValues: {
+      id?: typeof LOCAL_GROUP_ID;
       label: string;
       items: typeof allConfigs;
     };
@@ -177,6 +179,7 @@ export const GridItemsByGroup = ({
         items: remoteValues,
         values: remoteValues,
         otherValues: {
+          id: LOCAL_GROUP_ID,
           label: LOCAL_MONITORS_LABEL,
           items: allConfigs?.filter((monitor) => !monitor.remote && monitor.origin !== 'heartbeat'),
         },
@@ -212,6 +215,7 @@ export const GridItemsByGroup = ({
         items: originValues,
         values: originValues,
         otherValues: {
+          id: LOCAL_GROUP_ID,
           label: LOCAL_MONITORS_LABEL,
           items: allConfigs?.filter((monitor) => monitor.origin !== 'heartbeat' && !monitor.remote),
         },
@@ -222,6 +226,7 @@ export const GridItemsByGroup = ({
   }
 
   const selectedValues = orderBy(selectedGroup.values, 'label', groupOrder ?? 'asc');
+  const otherGroupKey = selectedGroup.otherValues.id ?? selectedGroup.otherValues.label;
 
   if (monitorTypes.length === 0) {
     return <OverviewLoader />;
@@ -279,8 +284,9 @@ export const GridItemsByGroup = ({
         );
       })}
       {(selectedGroup.otherValues.items ?? []).length > 0 && (
-        <WrappedPanel isFullScreen={fullScreenGroup === selectedGroup.otherValues.label}>
+        <WrappedPanel isFullScreen={fullScreenGroup === otherGroupKey}>
           <GroupGridItem
+            groupId={otherGroupKey}
             groupLabel={selectedGroup.otherValues.label}
             groupMonitors={selectedGroup.otherValues.items ?? []}
             loaded={loaded}

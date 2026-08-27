@@ -9,7 +9,12 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { useSelector } from 'react-redux-v7';
 
-import { GridItemsByGroup, HEARTBEAT_GROUP_ID, REMOTE_GROUP_ID } from './grid_items_by_group';
+import {
+  GridItemsByGroup,
+  HEARTBEAT_GROUP_ID,
+  LOCAL_GROUP_ID,
+  REMOTE_GROUP_ID,
+} from './grid_items_by_group';
 import type { OverviewStatusMetaData } from '../../types';
 import { WrappedHelper } from '../../../../../utils/testing';
 import { selectOverviewGroupBy, selectServiceLocationsState } from '../../../../../state';
@@ -26,7 +31,7 @@ jest.mock('../../../common/monitor_filters/use_filters', () => ({
 }));
 
 // Stub the accordion so the test doesn't pull in trend-fetching internals; it
-// just exposes each rendered group's label and its member monitor ids.
+// just exposes each rendered group's stable id and its member monitor ids.
 jest.mock('./grid_group_item', () => ({
   GroupGridItem: ({
     groupId,
@@ -84,8 +89,8 @@ const renderGrid = () =>
     </WrappedHelper>
   );
 
-const idsIn = (groupLabel: string) => {
-  const group = document.querySelector(`[data-test-subj="group-${groupLabel}"]`);
+const idsIn = (groupId: string) => {
+  const group = document.querySelector(`[data-test-subj="group-${groupId}"]`);
   return Array.from(group?.querySelectorAll('span') ?? []).map((el) => el.textContent);
 };
 
@@ -98,7 +103,7 @@ describe('GridItemsByGroup origin grouping', () => {
 
     expect(idsIn(HEARTBEAT_GROUP_ID)).toEqual(['hb1']);
     expect(idsIn(REMOTE_GROUP_ID)).toEqual(['rm1']);
-    expect(idsIn('Local monitors')).toEqual(['ui1']);
+    expect(idsIn(LOCAL_GROUP_ID)).toEqual(['ui1']);
   });
 
   it('does not put heartbeat monitors into the Remote bucket even if they have remote metadata', () => {
@@ -112,7 +117,7 @@ describe('GridItemsByGroup origin grouping', () => {
 
     expect(idsIn(HEARTBEAT_GROUP_ID)).toEqual(['hb-remote']);
     expect(idsIn(REMOTE_GROUP_ID)).toEqual(['rm1']);
-    expect(idsIn('Local monitors')).toEqual(['ui1']);
+    expect(idsIn(LOCAL_GROUP_ID)).toEqual(['ui1']);
   });
 
   // Regression: heartbeat monitors used to hide inside the "Local monitors"
@@ -123,7 +128,7 @@ describe('GridItemsByGroup origin grouping', () => {
 
     expect(idsIn('edge-a')).toEqual(['rm1']);
     expect(idsIn(HEARTBEAT_GROUP_ID)).toEqual(['hb1']);
-    expect(idsIn('Local monitors')).toEqual(['ui1']);
+    expect(idsIn(LOCAL_GROUP_ID)).toEqual(['ui1']);
   });
 
   it('does not treat a remote cluster named Heartbeat monitors as the Heartbeat bucket', () => {
@@ -137,6 +142,6 @@ describe('GridItemsByGroup origin grouping', () => {
 
     expect(idsIn(HEARTBEAT_GROUP_ID)).toEqual(['hb1']);
     expect(idsIn('Heartbeat monitors')).toEqual(['rm-hb-name']);
-    expect(idsIn('Local monitors')).toEqual(['ui1']);
+    expect(idsIn(LOCAL_GROUP_ID)).toEqual(['ui1']);
   });
 });
