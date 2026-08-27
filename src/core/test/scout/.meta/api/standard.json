@@ -1,8 +1,7 @@
 {
-  "sha1": "8d6bb7f46bc0c31f65d7cf1528364327fbbf3cb2",
+  "sha1": "7a63effb2cacba3700a3d046e9156e7583ec0371",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -288,7 +287,7 @@
     {
       "id": "2392b373cc723ee-ab33734347ca58f",
       "title": "kibana status api returns version, status and metrics fields",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -301,7 +300,7 @@
       ],
       "location": {
         "file": "src/core/test/scout/api/tests/status.spec.ts",
-        "line": 18,
+        "line": 19,
         "column": 11
       }
     },

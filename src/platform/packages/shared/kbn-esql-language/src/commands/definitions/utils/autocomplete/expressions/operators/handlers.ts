@@ -13,6 +13,7 @@ import type { ISuggestionItem } from '../../../../../registry/types';
 import {
   listCompleteItem,
   commaCompleteItem,
+  commaWithAutoSuggestCompleteItem,
   buildSubqueryCompleteItems,
   likePatternItems,
   rlikePatternItems,
@@ -27,7 +28,6 @@ import {
 } from './utils';
 import { shouldSuggestComma } from '../comma_decision_engine';
 import { SuggestionBuilder } from '../suggestion_builder';
-import { withAutoSuggest } from '../../helpers';
 
 // ============================================================================
 // eg. IN / NOT IN Operators
@@ -97,7 +97,7 @@ export async function handleListOperator(ctx: ExpressionContext): Promise<ISugge
         listHasValues: rightOperand.values && rightOperand.values.length > 0,
       })
     ) {
-      return [withAutoSuggest({ ...commaCompleteItem, text: ',' })];
+      return [commaWithAutoSuggestCompleteItem];
     }
 
     // After comma or empty list: suggest values

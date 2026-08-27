@@ -201,6 +201,13 @@ const ebtAction = {
     VIEW_TOOL_RESPONSE: 'view_tool_response',
     VIEW_SUB_AGENT_EXECUTION: 'view_sub_agent_execution',
     OPEN_ESQL_IN_DISCOVER: 'open_esql_in_discover',
+    FEEDBACK_THUMB_UP: 'feedback_thumb_up',
+    FEEDBACK_THUMB_DOWN: 'feedback_thumb_down',
+    FEEDBACK_RETRACT: 'feedback_retract',
+    FEEDBACK_SUBMIT: 'feedback_submit',
+    FEEDBACK_MODAL_CANCEL: 'feedback_modal_cancel',
+    FEEDBACK_INVITE_TELL_US_MORE: 'feedback_invite_tell_us_more',
+    FEEDBACK_INVITE_DISMISSED: 'feedback_invite_dismissed',
   },
   libraryPanel: {
     MANAGE_ALL: 'manage_all',
