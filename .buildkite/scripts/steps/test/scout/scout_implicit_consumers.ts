@@ -49,6 +49,30 @@ const IMPLICIT_REGISTRY_CONSUMERS: readonly ImplicitConsumerRule[] = [
       '@kbn/lens-plugin',
     ],
   },
+  {
+    reason:
+      'Event-driven trigger registration is a runtime workflows_extensions catalog. Publishers sit upstream, so schema or registration changes would skip the approval Scout test.',
+    patterns: [
+      '**/common/triggers/**/*.{ts,tsx}',
+      '**/common/workflows/triggers/**/*.{ts,tsx}',
+      '**/common/workflow/triggers/**/*.{ts,tsx}',
+      '**/server/triggers/**/*.{ts,tsx}',
+      '**/server/workflows/triggers/**/*.{ts,tsx}',
+      '**/server/workflow/triggers/**/*.{ts,tsx}',
+      '**/public/triggers/**/*.{ts,tsx}',
+      '**/public/workflows/triggers/**/*.{ts,tsx}',
+      '**/public/workflow/triggers/**/*.{ts,tsx}',
+      '**/workflow_extensions/**/*.{ts,tsx}',
+      '**/register_trigger_definitions.ts',
+    ],
+    consumers: ['@kbn/workflows-extensions'],
+  },
+  {
+    reason:
+      'Scout default server args decide which trigger publishers load. Those files are not a static edge to workflows_extensions.',
+    patterns: ['**/kbn-scout/**/config_sets/default/**/*.ts'],
+    consumers: ['@kbn/workflows-extensions'],
+  },
 ];
 
 /**

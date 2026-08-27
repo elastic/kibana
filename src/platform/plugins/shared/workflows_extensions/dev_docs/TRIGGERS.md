@@ -212,7 +212,7 @@ If you change the trigger's `eventSchema`, the schema hash changes; update the a
 
 Some triggers are only registered when the owning plugin is loaded (Kibana `enabled` config, e.g. `xpack.nightshift_investigations.enabled`). That is boot-time config, not a runtime LaunchDarkly flag — `feature_flags.overrides` cannot load a disabled plugin.
 
-If you add a trigger gated by a plugin `enabled` flag that is **not already default-on**, add `--xpack.<plugin>.enabled=true` to the default Scout stateful config (`src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/default/stateful/base.config.ts`). Do not add flags that already default to `true` (for example `xpack.alerting_v2.enabled` and `xpack.significantEvents.enabled` on stateful).
+If you add a trigger gated by a plugin `enabled` flag that is **not already default-on**, add `--xpack.<plugin>.enabled=true` to the default Scout stateful config (`src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/default/stateful/base.config.ts`).
 
 ## Event-driven guardrails
 

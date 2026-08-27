@@ -165,7 +165,7 @@ When adding a new trigger:
 6. **Approval gate** — see [TRIGGERS.md approval process](../../dev_docs/TRIGGERS.md#trigger-definition-approval-process)
    - [ ] Scout API test run or GET `internal/workflows_extensions/trigger_definitions` for `schemaHash`
    - [ ] Entry added to `APPROVED_TRIGGER_DEFINITIONS` (alphabetically sorted) in `test/scout`
-   - [ ] If registration is gated by a plugin `enabled` config that is not already default-on, add `--xpack.<plugin>.enabled=true` to the default Scout stateful config (`kbn-scout` `config_sets/default/stateful/base.config.ts`)
+   - [ ] If registration is gated by a plugin `enabled` config that is not already default-on, add `--xpack.<plugin>.enabled=true` to the default Scout stateful config (`kbn-scout` `config_sets/default/stateful/base.config.ts`) so PR CI still runs the approval test
    - [ ] PR description requests review from `@elastic/workflows-eng`
 
 ## Reviewer checklist
