@@ -1310,6 +1310,8 @@ export const AllEntitiesView = ({
                     entities={filteredEntities}
                     onSelectEntity={openEntity}
                     groupCloudByProvider={cloudHierarchyEnabled}
+                    enableColumnSettings={isElasticOn}
+                    refreshTick={refreshTick}
                   />
                 )}
               </>

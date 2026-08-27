@@ -29,6 +29,7 @@ import {
 import type { Entity, EntityCategoryId, EntityHealth } from './fake_entities';
 import { ENTITY_CATEGORIES, HEALTH_RANK, getCategoryDescriptor } from './fake_entities';
 import { CLOUD_PROVIDERS, type CloudProviderDescriptor } from './cloud_providers';
+import { EntityDataGridSection } from './entities_data_grid';
 import {
   KUBERNETES_CLUSTER_FILTER_ALL,
   KUBERNETES_SUB_TYPE_ORDER,
@@ -46,6 +47,15 @@ interface Props {
    * Driven by the discreet toolbar toggle (`useCloudHierarchyEnabled`).
    */
   readonly groupCloudByProvider?: boolean;
+  /**
+   * ElasticOn only: render each table as an `EuiDataGrid` with native
+   * per-table column controls (reorder / show-hide / add columns) plus a
+   * "Reset to default" control. Other modes keep the classic
+   * `EuiInMemoryTable`.
+   */
+  readonly enableColumnSettings?: boolean;
+  /** Bumped by the ElasticOn auto-refresh tick so live metric cells re-roll. */
+  readonly refreshTick?: number;
 }
 
 const HEALTH_BADGE_COLOR: Record<EntityHealth, 'success' | 'warning' | 'danger'> = {
@@ -425,6 +435,8 @@ export const EntitiesListView = ({
   entities,
   onSelectEntity,
   groupCloudByProvider = false,
+  enableColumnSettings = false,
+  refreshTick,
 }: Props) => {
   const columns = useColumns(onSelectEntity);
 
@@ -600,13 +612,24 @@ export const EntitiesListView = ({
         }
         return (
           <EuiFlexItem key={`${item.category}-${item.subTypeLabel ?? ''}`} grow={false}>
-            <TableSection
-              category={item.category}
-              subTypeLabel={item.subTypeLabel}
-              nested={item.nested}
-              rows={item.rows}
-              columns={columns}
-            />
+            {enableColumnSettings ? (
+              <EntityDataGridSection
+                category={item.category}
+                subTypeLabel={item.subTypeLabel}
+                nested={item.nested}
+                rows={item.rows}
+                onSelectEntity={onSelectEntity}
+                refreshTick={refreshTick}
+              />
+            ) : (
+              <TableSection
+                category={item.category}
+                subTypeLabel={item.subTypeLabel}
+                nested={item.nested}
+                rows={item.rows}
+                columns={columns}
+              />
+            )}
           </EuiFlexItem>
         );
       })}
