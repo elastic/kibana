@@ -16,7 +16,9 @@ import {
   EuiText,
   EuiLoadingSpinner,
   useGeneratedHtmlId,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useQuery } from '@kbn/react-query';
 import type { Conversation } from '@kbn/agent-builder-common';
@@ -58,19 +60,37 @@ const buildTabs = (
   });
 };
 
-const FlyoutFrame: React.FC<{ titleId: string; children: React.ReactNode }> = ({
-  titleId,
-  children,
-}) => (
-  <>
-    <EuiFlyoutHeader hasBorder>
-      <EuiTitle size="m">
-        <h2 id={titleId}>{FLYOUT_TITLE}</h2>
-      </EuiTitle>
-    </EuiFlyoutHeader>
-    <EuiFlyoutBody>{children}</EuiFlyoutBody>
-  </>
-);
+interface FlyoutFrameProps {
+  titleId: string;
+  tabs?: React.ReactNode;
+  children: React.ReactNode;
+}
+
+const FlyoutFrame = ({ titleId, tabs, children }: FlyoutFrameProps) => {
+  const { euiTheme } = useEuiTheme();
+
+  // EUI's documented flyout-tabs pattern: pull the tabs down over the header's bottom
+  // padding and border so the selected-tab underline sits on the header's full-width rule.
+  const tabsStyles = css`
+    margin-block-end: calc(-${euiTheme.size.base} - ${euiTheme.border.width.thin});
+  `;
+
+  return (
+    <>
+      <EuiFlyoutHeader hasBorder>
+        <EuiTitle size="xs">
+          <h4 id={titleId}>{FLYOUT_TITLE}</h4>
+        </EuiTitle>
+        {tabs && (
+          <EuiTabs css={tabsStyles} bottomBorder={false}>
+            {tabs}
+          </EuiTabs>
+        )}
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>{children}</EuiFlyoutBody>
+    </>
+  );
+};
 
 export interface ConversationMetadataFlyoutContentProps {
   conversation: Conversation;
@@ -99,29 +119,22 @@ export const ConversationMetadataFlyoutContent: React.FC<
   const SelectedTabContent = selectedTab?.content;
 
   return (
-    <>
-      <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
-          <h2 id={titleId}>{FLYOUT_TITLE}</h2>
-        </EuiTitle>
-        <EuiTabs>
-          {tabs.map((entry) => (
-            <EuiTab
-              key={entry.id}
-              isSelected={entry.id === effectiveSelectedTabId}
-              onClick={() => setSelectedTabId(entry.id)}
-            >
-              {entry.label}
-            </EuiTab>
-          ))}
-        </EuiTabs>
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        {SelectedTabContent && (
-          <SelectedTabContent key={selectedTab.id} conversation={conversation} />
-        )}
-      </EuiFlyoutBody>
-    </>
+    <FlyoutFrame
+      titleId={titleId}
+      tabs={tabs.map((entry) => (
+        <EuiTab
+          key={entry.id}
+          isSelected={entry.id === effectiveSelectedTabId}
+          onClick={() => setSelectedTabId(entry.id)}
+        >
+          {entry.label}
+        </EuiTab>
+      ))}
+    >
+      {SelectedTabContent && (
+        <SelectedTabContent key={selectedTab.id} conversation={conversation} />
+      )}
+    </FlyoutFrame>
   );
 };
 
@@ -201,6 +214,7 @@ export const ConversationMetadataFlyout: React.FC<ConversationMetadataFlyoutProp
       onClose={onClose}
       size="s"
       type="push"
+      paddingSize="m"
       aria-labelledby={titleId}
       data-test-subj="agentBuilderConversationMetadataFlyout-live"
     >

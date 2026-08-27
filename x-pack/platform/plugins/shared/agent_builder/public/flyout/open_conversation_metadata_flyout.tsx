@@ -49,6 +49,7 @@ export const openConversationMetadataFlyout = async ({
     {
       size: 's',
       type: 'push',
+      paddingSize: 'm',
       'data-test-subj': 'agentBuilderConversationMetadataFlyout-snapshot',
       'aria-labelledby': titleId,
       onClose: (ref) => ref.close(),

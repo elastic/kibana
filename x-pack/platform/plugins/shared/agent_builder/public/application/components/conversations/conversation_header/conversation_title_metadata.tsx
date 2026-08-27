@@ -28,7 +28,7 @@ import { useConversationTemplateDisplay } from '../../../hooks/use_conversation_
 import { DeleteConversationModal } from '../delete_conversation_modal';
 import { RenameConversationModal } from '../rename_conversation_modal';
 
-const POPOVER_WIDTH = 330;
+const POPOVER_WIDTH = 280;
 
 const labels = {
   editTitle: i18n.translate('xpack.agentBuilder.conversationTitleMetadata.editTitle', {
@@ -162,14 +162,7 @@ export const ConversationTitleMetadata: React.FC<ConversationTitleMetadataProps>
       })}
     >
       <EuiTitle size="xs">
-        <h3
-          id={ariaLabelledBy}
-          css={css`
-            font-weight: ${euiTheme.font.weight.semiBold};
-          `}
-        >
-          {displayedTitle}
-        </h3>
+        <h4 id={ariaLabelledBy}>{displayedTitle}</h4>
       </EuiTitle>
     </EuiButtonEmpty>
   );
@@ -243,7 +236,7 @@ export const ConversationTitleMetadata: React.FC<ConversationTitleMetadataProps>
                   <EuiButtonEmpty
                     color="danger"
                     iconType="trash"
-                    size="s"
+                    size="xs"
                     flush="left"
                     onClick={() => {
                       setIsPopoverOpen(false);
@@ -264,7 +257,7 @@ export const ConversationTitleMetadata: React.FC<ConversationTitleMetadataProps>
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
                     iconType="pencil"
-                    size="s"
+                    size="xs"
                     flush="right"
                     onClick={() => {
                       setIsPopoverOpen(false);
