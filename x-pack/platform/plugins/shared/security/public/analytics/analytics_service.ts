@@ -60,6 +60,14 @@ export class AnalyticsService {
           type: 'keyword',
           _meta: { description: 'The new display language locale code.' },
         },
+        preferred_language_kibana_locale: {
+          type: 'keyword',
+          _meta: {
+            optional: true,
+            description:
+              'Deprecated and no longer sent. Superseded by the `display_language_browser_preference` context field, which is present on every browser event rather than only on picker interactions, and which uses the same Accept-Language matching the server uses. Retained here to document rows written before that change.',
+          },
+        },
       },
     });
   }

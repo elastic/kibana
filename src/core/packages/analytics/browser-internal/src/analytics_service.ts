@@ -212,12 +212,15 @@ export class AnalyticsService {
           type: 'keyword',
           _meta: {
             description:
-              'Which step of the resolution chain chose `display_language`: profile, cookie, config, browser, or default.',
+              'What chose `display_language`: `profile` (the user saved a language), `cookie` (a previous choice remembered in the browser), `config` (the deployment default, because the user has made no choice), `browser` (the Accept-Language header), or `default` (nothing else applied, so English).',
           },
         },
         display_language_config_default: {
           type: 'keyword',
-          _meta: { description: "The deployment's configured `i18n.defaultLocale`." },
+          _meta: {
+            description:
+              "The deployment's configured `i18n.defaultLocale`. Any value other than `en` means the deployment forces a non-English default on users who have made no choice of their own.",
+          },
         },
       },
     });
