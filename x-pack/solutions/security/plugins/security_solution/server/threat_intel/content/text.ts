@@ -95,6 +95,7 @@ interface ParsedNode {
   data?: string;
   name?: string;
   attribs?: Record<string, string>;
+  parent?: ParsedNode | null;
   children?: ParsedNode[];
 }
 
@@ -498,22 +499,40 @@ const ENCODED_HTML_WRAPPER_BARE_NAMES = new Set(['description']);
  */
 const ENCODED_HTML_WRAPPER_QUALIFIED_NAMES = new Set(['content:encoded']);
 
+const CONTENT_MODULE_NS = 'http://purl.org/rss/1.0/modules/content/';
+
 /**
- * Whether a name is the RSS Content Module's `encoded`, under any prefix.
+ * Whether this element is the RSS Content Module's `encoded`, resolved by namespace.
  *
- * XML prefixes are aliases for a namespace URI, so a feed binding the Content Module to `ti:`
- * writes `ti:encoded` and means exactly `content:encoded`. Matching the conventional QName
- * alone left those feeds' encoded script bodies as visible report text.
+ * XML prefixes are aliases, so a feed binding the module to `ti:` writes `ti:encoded` and means
+ * exactly `content:encoded`. Matching the conventional QName alone left those feeds' encoded
+ * script bodies as visible report text.
  *
- * Prefix presence is the test rather than the declared URI. Resolving the URI properly means
- * tracking `xmlns:` scope through the tree, which the HTML parse does not model, and the
- * distinction that mattered in the earlier report was bare `encoded` versus namespaced: an
- * unprefixed `<encoded>` is an ordinary custom element, while a prefixed one is a module
- * element. If prefix presence proves too loose, URI resolution is the stricter next step.
+ * Prefix presence alone was the first attempt and it was too loose: an `encoded` element in an
+ * unrelated namespace, `<foo:encoded xmlns:foo="urn:literal">`, had its literal text reparsed as
+ * live markup and lost the sentence after the escaped script token. The in-scope `xmlns:` binding
+ * is resolved from the ancestor chain instead.
+ *
+ * The conventional `content:` prefix is accepted without a declaration, because feed bodies reach
+ * this code as fragments whose root element, and with it the declaration, is often gone.
  */
-const isNamespacedEncoded = (qualified: string): boolean => {
+const isContentModuleEncoded = (node: ParsedNode, qualified: string): boolean => {
   const colon = qualified.indexOf(':');
-  return colon > 0 && qualified.slice(colon + 1) === 'encoded';
+  if (colon <= 0 || qualified.slice(colon + 1) !== 'encoded') return false;
+
+  const prefix = qualified.slice(0, colon);
+  if (prefix === 'content') return true;
+
+  const declaration = `xmlns:${prefix}`;
+  // Bounded by the tree, and the tree is bounded by the parse cap.
+  let ancestor: ParsedNode | null | undefined = node;
+  while (ancestor) {
+    const bound = ancestor.attribs?.[declaration];
+    if (bound !== undefined) return bound.trim() === CONTENT_MODULE_NS;
+    ancestor = ancestor.parent;
+  }
+
+  return false;
 };
 
 /**
@@ -593,7 +612,7 @@ const isEncodedHtmlWrapper = (node: ParsedNode): boolean => {
   const qualified = elementName(node);
   const name = localName(qualified);
   if (ENCODED_HTML_WRAPPER_QUALIFIED_NAMES.has(qualified)) return true;
-  if (isNamespacedEncoded(qualified)) return true;
+  if (isContentModuleEncoded(node, qualified)) return true;
   if (ENCODED_HTML_WRAPPER_BARE_NAMES.has(qualified)) return true;
 
   // A namespaced description has to declare HTML, mirroring the Atom rule below. Media RSS

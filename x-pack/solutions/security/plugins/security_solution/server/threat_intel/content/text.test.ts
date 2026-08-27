@@ -2222,6 +2222,32 @@ describe('the content module under an aliased prefix', () => {
     );
   });
 
+  // A prefix is only an alias, so it has to resolve to the Content Module namespace. Prefix
+  // presence alone was the first attempt at this and it was too loose.
+  it.each([
+    [
+      'an unrelated namespace',
+      '<foo:encoded xmlns:foo="urn:literal">Exploit uses &lt;script&gt; and c2.evil.test</foo:encoded>',
+    ],
+    [
+      'a prefix with no declaration in scope',
+      '<foo:encoded>Exploit uses &lt;script&gt; and c2.evil.test</foo:encoded>',
+    ],
+  ])('leaves an encoded element in %s literal', (_label, html) => {
+    const result = stripHtml(html);
+
+    expect(result).toBe('Exploit uses <script> and c2.evil.test');
+    expect(result).toContain('c2.evil.test');
+  });
+
+  it('expands an aliased prefix declared on the element itself', () => {
+    expect(
+      stripHtml(
+        '<ti:encoded xmlns:ti="http://purl.org/rss/1.0/modules/content/">&lt;p&gt;evil.com&lt;/p&gt;</ti:encoded>'
+      )
+    ).toBe('evil.com');
+  });
+
   // The unprefixed name is an ordinary custom element and stays literal.
   it('leaves a bare encoded element literal', () => {
     expect(stripHtml('<encoded>Exploit uses &lt;script&gt; and c2.evil.test</encoded>')).toBe(

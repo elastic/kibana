@@ -728,3 +728,25 @@ describe('hidden candidates cannot win selection', () => {
     ).toBe('');
   });
 });
+
+/**
+ * The fallback scorer has to discount hidden descendants too. Excluding only hidden candidates
+ * and hidden ancestors left this path summing them, so once precise scoring is off, past 32
+ * candidates or 2MB, a teaser inflated by a hidden block beat the visible report and `stripHtml`
+ * removed that block after selection.
+ */
+describe('the fallback scorer discounts hidden descendants', () => {
+  it('prefers the visible report when the fallback path is in use', () => {
+    const teaser = `<article><div hidden>${'stale '.repeat(
+      4000
+    )}c2.stale.test</div>teaser</article>`;
+    const page =
+      `<html><body>${teaser}${'<article>x</article>'.repeat(32)}` +
+      '<main><p>report evil.test</p></main></body></html>';
+
+    const result = stripHtml(extractArticleHtml(page));
+
+    expect(result).toContain('evil.test');
+    expect(result).not.toContain('c2.stale.test');
+  });
+});

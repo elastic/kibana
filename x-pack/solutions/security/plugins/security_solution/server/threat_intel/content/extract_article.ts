@@ -197,6 +197,12 @@ const visibleLengths = (roots: ParsedNode[]): Map<ParsedNode, number> => {
 
     if (node.type === 'text') {
       lengths.set(node, (node.data ?? '').replace(/\s/g, '').length);
+    } else if (node.attribs?.hidden !== undefined) {
+      // Hidden descendants count for nothing here, the same as in the walkers. Excluding only
+      // hidden candidates and hidden ancestors left this path summing them, so once precise
+      // scoring is off, past 32 candidates or 2MB, a teaser inflated by a hidden block beat the
+      // visible report and `stripHtml` then removed that block after selection.
+      lengths.set(node, 0);
     } else if (!expanded) {
       stack.push({ node, expanded: true });
       for (const child of node.children ?? []) {
