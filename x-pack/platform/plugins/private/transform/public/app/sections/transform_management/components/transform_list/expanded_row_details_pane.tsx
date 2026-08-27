@@ -146,12 +146,7 @@ export const ExpandedRowDetailsPane: FC<ExpandedRowDetailsPaneProps> = ({ item, 
       ...(isDefined(item.config.source.project_routing)
         ? [
             {
-              title: i18n.translate(
-                'xpack.transform.transformList.transformDetails.projectRoutingLabel',
-                {
-                  defaultMessage: 'project_routing',
-                }
-              ),
+              title: 'project_routing'
               description: item.config.source.project_routing,
             },
           ]
