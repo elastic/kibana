@@ -325,7 +325,7 @@ export function datafeedsProvider(client: IScopedClusterClient, mlClient: MlClie
     // stop any running jobs
     const stopErrors = new Map<string, unknown>();
     if (restartRunningJobs && simulate !== true && runningDatafeeds.size > 0) {
-      const stopResults = await stopDatafeeds([...runningDatafeeds], false);
+      const stopResults = await stopDatafeeds([...runningDatafeeds], true);
       for (const datafeedId of runningDatafeeds) {
         const r = stopResults[datafeedId];
         if (r === undefined || r.stopped !== true) {
@@ -385,16 +385,35 @@ export function datafeedsProvider(client: IScopedClusterClient, mlClient: MlClie
           continue;
         }
         try {
+          await openJob(jobId);
+        } catch (error) {
+          // Ignore 409 — the job may already be open.
+          if (error.statusCode !== 409) {
+            const previous = results[jobId] ?? { success: false, datafeedId };
+            const restartError = error.body ?? error;
+            results[jobId] = {
+              ...previous,
+              datafeedId: previous.datafeedId ?? datafeedId,
+              success: false,
+              restartError,
+            };
+            continue;
+          }
+        }
+        try {
           await mlClient.startDatafeed({ datafeed_id: datafeedId });
         } catch (error) {
-          const previous = results[jobId] ?? { success: false, datafeedId };
-          const restartError = (error as { body?: unknown }).body ?? error;
-          results[jobId] = {
-            ...previous,
-            datafeedId: previous.datafeedId ?? datafeedId,
-            success: false,
-            restartError,
-          };
+          // Ignore 409 — the datafeed may already be started.
+          if (error.statusCode !== 409) {
+            const previous = results[jobId] ?? { success: false, datafeedId };
+            const restartError = error.body ?? error;
+            results[jobId] = {
+              ...previous,
+              datafeedId: previous.datafeedId ?? datafeedId,
+              success: false,
+              restartError,
+            };
+          }
         }
       }
     }
