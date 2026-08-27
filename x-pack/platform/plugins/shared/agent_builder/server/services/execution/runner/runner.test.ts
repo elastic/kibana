@@ -33,6 +33,11 @@ import { createAgentHandler } from '../run_agent/create_handler';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId } from '@kbn/agent-builder-server/tools/utils';
 import { HookLifecycle } from '@kbn/agent-builder-common';
+import {
+  AGENT_BUILDER_BASH_SUPPORT_SETTING_ID,
+  AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
+  CONTEXT_ENGINE_ENABLED_SETTING_ID,
+} from '@kbn/management-settings-ids';
 
 jest.mock('../run_agent/create_handler');
 jest.mock('@kbn/agent-builder-server/tools/utils');
@@ -233,5 +238,64 @@ describe('AgentBuilder runner', () => {
         result: 'someResult',
       });
     });
+
+    it.each([
+      {
+        experimentalEnabled: false,
+        contextEngineEnabled: false,
+        expectedAiIndices: false,
+      },
+      {
+        experimentalEnabled: false,
+        contextEngineEnabled: true,
+        expectedAiIndices: false,
+      },
+      {
+        experimentalEnabled: true,
+        contextEngineEnabled: false,
+        expectedAiIndices: false,
+      },
+      {
+        experimentalEnabled: true,
+        contextEngineEnabled: true,
+        expectedAiIndices: true,
+      },
+    ])(
+      'sets AI index instructions to $expectedAiIndices when experimental=$experimentalEnabled and contextEngine=$contextEngineEnabled',
+      async ({ experimentalEnabled, contextEngineEnabled, expectedAiIndices }) => {
+        const runnerDeps = createRunnerDepsMock();
+        runnerDeps.agentsService.getRegistry.mockResolvedValue(agentClient);
+        (runnerDeps.uiSettings.asScopedToClient as jest.Mock).mockReturnValue({
+          get: jest.fn((settingId: string) => {
+            if (settingId === AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID) {
+              return Promise.resolve(experimentalEnabled);
+            }
+            if (settingId === CONTEXT_ENGINE_ENABLED_SETTING_ID) {
+              return Promise.resolve(contextEngineEnabled);
+            }
+            if (settingId === AGENT_BUILDER_BASH_SUPPORT_SETTING_ID) {
+              return Promise.resolve(false);
+            }
+            return Promise.resolve(false);
+          }),
+        } as any);
+
+        const runner = createRunner(runnerDeps);
+        await runner.runAgent({
+          agentId: 'test-tool',
+          agentParams: { nextInput: { message: 'dolly' } },
+          request: scopedRunnerDeps.request,
+        });
+
+        expect(agentHandler).toHaveBeenCalledWith(
+          expect.any(Object),
+          expect.objectContaining({
+            experimentalFeatures: expect.objectContaining({
+              aiIndices: expectedAiIndices,
+            }),
+          })
+        );
+      }
+    );
   });
 });
