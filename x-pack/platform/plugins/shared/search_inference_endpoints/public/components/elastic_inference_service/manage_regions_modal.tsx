@@ -59,11 +59,13 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
     isSaveDisabled,
     useCustomPolicy,
     setUseCustomPolicy,
+    isCallOutDismissed,
     showConfirmation,
     showDeleteConfirmation,
     conflictArtifacts,
     isRedesignEnabled,
     handleLocationTypeChange,
+    handleDismissCallOut,
     handleRequestSave,
     handleConfirmSave,
     handleCancelConfirmation,
@@ -84,19 +86,8 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
     ? handleCancelDeleteConfirmation
     : handleCancelConfirmation;
 
-  const showLocationSelection = useCustomPolicy || isLoading;
-
-  const description = useCustomPolicy ? (
-    <FormattedMessage
-      id="xpack.searchInferenceEndpoints.manageRegions.descriptionOn"
-      defaultMessage="Elastic's default policy routes traffic to any available location for best performance. Set a custom policy to restrict it to the geographies or regions you choose."
-    />
-  ) : (
-    <FormattedMessage
-      id="xpack.searchInferenceEndpoints.manageRegions.descriptionOff"
-      defaultMessage="Set a custom policy to restrict inference traffic to the geographies or regions you choose."
-    />
-  );
+  const showTabContent = useCustomPolicy || isLoading;
+  const showCallOut = useCustomPolicy && !isCallOutDismissed;
 
   const renderGeoContent = () => {
     if (isLoading) {
@@ -219,7 +210,19 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
           {isError && <EuiSpacer size="m" />}
 
           <EuiText size="s" data-test-subj="manageRegionsDescription">
-            <p>{description}</p>
+            <p>
+              {useCustomPolicy ? (
+                <FormattedMessage
+                  id="xpack.searchInferenceEndpoints.manageRegions.descriptionOn"
+                  defaultMessage="Elastic's default policy routes traffic to any available location for best performance. Set a custom policy to restrict it to the geographies or regions you choose."
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.searchInferenceEndpoints.manageRegions.descriptionOff"
+                  defaultMessage="Set a custom policy to restrict inference traffic to the geographies or regions you choose."
+                />
+              )}
+            </p>
           </EuiText>
 
           <EuiSpacer size="m" />
@@ -230,19 +233,37 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
             onChange={setUseCustomPolicy}
           />
 
-          {showLocationSelection && <EuiSpacer size="m" />}
-          {showLocationSelection && <EuiHorizontalRule margin="none" />}
-          {showLocationSelection && <EuiSpacer size="m" />}
-          {showLocationSelection && (
-            <LocationTypeSelector
-              activeTab={activeTab}
-              isDisabled={isLoading || isSaving || isDeleting}
-              onChange={handleLocationTypeChange}
+          {showCallOut && <EuiSpacer size="m" />}
+          {showCallOut && (
+            <KbnWarningCallout
+              title={i18n.translate('xpack.searchInferenceEndpoints.manageRegions.callout.title', {
+                defaultMessage: "Some models aren't available in every region.",
+              })}
+              announceOnMount={false}
+              onDismiss={handleDismissCallOut}
+              dismissButtonProps={{ 'data-test-subj': 'manageRegionsCalloutDismiss' }}
+              data-test-subj="manageRegionsCallout"
+              text={i18n.translate('xpack.searchInferenceEndpoints.manageRegions.callout.body', {
+                defaultMessage:
+                  "Some models are only available in specific regions. Restricting regions might make those models unavailable. Check each model's details to verify its supported regions.",
+              })}
             />
           )}
-          {showLocationSelection && <EuiSpacer size="m" />}
-          {showLocationSelection &&
-            (activeTab === 'geo' ? renderGeoContent() : renderRegionContent())}
+
+          {showTabContent && (
+            <>
+              <EuiSpacer size="m" />
+              <EuiHorizontalRule margin="none" />
+              <EuiSpacer size="m" />
+              <LocationTypeSelector
+                activeTab={activeTab}
+                isDisabled={isLoading || isSaving || isDeleting}
+                onChange={handleLocationTypeChange}
+              />
+              <EuiSpacer size="m" />
+              {activeTab === 'geo' ? renderGeoContent() : renderRegionContent()}
+            </>
+          )}
         </EuiModalBody>
 
         <EuiModalFooter>
