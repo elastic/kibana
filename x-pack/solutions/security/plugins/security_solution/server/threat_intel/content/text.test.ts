@@ -418,11 +418,8 @@ describe('stripHtml — entity table lookup safety', () => {
     expect(stripHtml('<p>&#65;&#x42;</p>')).toBe('AB');
   });
 
-  // The point of this case is that an out-of-range reference cannot crash extraction.
-  // The regex decoder guarded `String.fromCodePoint` by leaving the reference as
-  // literal text; the parser instead substitutes U+FFFD, which is what the HTML spec
-  // requires and what a browser shows. Either way the input is survivable, and no
-  // reference escapes as something that could be re-read as markup.
+  // An out-of-range reference can't crash extraction or escape as re-readable markup —
+  // the parser substitutes U+FFFD, per the HTML spec.
   it('replaces an out-of-range code point rather than throwing', () => {
     expect(stripHtml('<p>&#9999999;</p>')).toBe('\ufffd');
   });
@@ -633,12 +630,9 @@ describe('stripHtml — HTML comments are removed as whole nodes', () => {
 });
 
 /**
- * These four cases are why this file parses HTML instead of pattern-matching it.
- *
- * Each one is a place where "find the tag with a regex" is not just imprecise but
- * wrong in a way that changes what reaches IOC extraction: `[^>]*` cannot know
- * whether a `>` is inside a quoted attribute, and a paired-tag pattern applied
- * globally rescans the suffix from every opener.
+ * Why this file parses HTML instead of pattern-matching it: `[^>]*` can't know whether a
+ * `>` is inside a quoted attribute, and a paired-tag regex applied globally rescans the
+ * suffix from every opener.
  */
 describe('markup that only a parser reads correctly', () => {
   describe('a > inside a quoted attribute value is not a tag terminator', () => {
@@ -705,18 +699,10 @@ describe('markup that only a parser reads correctly', () => {
     });
   });
 
-  /**
-   * Timing assertions, deliberately with a wide margin.
-   *
-   * The bounds are ~100x the measured cost, so they are not sensitive to a slow or
-   * contended CI worker, but a return to quadratic behavior overruns them by orders of
-   * magnitude. These inputs sit well inside MAX_PARSE_BYTES, so a quadratic path here is
-   * reachable by any feed and pegs a task worker rather than merely being slow.
-   */
+  // Timing bounds are ~100x the measured cost, so they're not CI-flaky, but a return to
+  // quadratic behavior overruns them by orders of magnitude.
   describe('adversarial markup stays linear', () => {
     it('handles many unterminated script openers', () => {
-      // The old paired-tag pattern restarted at each opener and scanned the remaining
-      // suffix for an absent `</script>`: 486ms at 480KB, and ~21s at this size.
       const input = '<script>'.repeat(400000);
       const started = process.hrtime.bigint();
       const result = stripHtml(input);
@@ -727,8 +713,6 @@ describe('markup that only a parser reads correctly', () => {
     });
 
     it('handles deeply nested elements without recursing', () => {
-      // Two separate hazards: a recursive walk would exhaust the call stack, and
-      // resolving script/style with a CSS selector was quadratic in depth (2.6s here).
       const input = `${'<div>'.repeat(100000)}evil.test`;
       const started = process.hrtime.bigint();
       const result = stripHtml(input);
@@ -751,14 +735,8 @@ describe('markup that only a parser reads correctly', () => {
 });
 
 /**
- * Inline markup must not create a token boundary.
- *
- * Threat reports split indicators across inline formatting constantly, and the regex
- * implementation could not tell an inline element from a block one: it substituted a
- * space for every tag, so `c2.<strong>evil</strong>.test` reached IOC extraction as
- * `c2. evil .test` and the domain was never matched. Preserved here as an allowlist, so
- * an unknown or custom element still yields a boundary; a spurious boundary splits one
- * token, a missing one merges two indicators into an unextractable value.
+ * Inline markup must not create a token boundary, or `c2.<strong>evil</strong>.test`
+ * reaches extraction as three words instead of one domain.
  */
 describe('inline markup does not split tokens', () => {
   it.each([
@@ -791,11 +769,8 @@ describe('inline markup does not split tokens', () => {
 });
 
 /**
- * CDATA carries an HTML document, not a comment.
- *
- * HTML treats `<![CDATA[ ... ]]>` as a bogus comment, which is correct for a web page and
- * wrong for a feed: RSS and Atom use it precisely to ship article content. Read as a
- * comment, the entire body was discarded and the report reached enrichment empty.
+ * CDATA carries an HTML document, not a comment — HTML's default reading of
+ * `<![CDATA[ ... ]]>` as a bogus comment would discard the entire body.
  */
 describe('CDATA payloads', () => {
   it('extracts text from a CDATA article body', () => {
@@ -833,12 +808,9 @@ describe('CDATA payloads', () => {
 });
 
 /**
- * Escaped markup is also how a report displays markup on purpose.
- *
- * A single decode cannot tell an entity-encoded document from a snippet the author chose
- * to show, so re-parse eligibility is decided from whether the input brought markup of
- * its own. Re-parsing unconditionally deleted the escaped script in a `<code>` block and
- * with it the IOC the report was published to communicate.
+ * Escaped markup is also how a report displays markup on purpose, so re-parse eligibility
+ * depends on whether the input brought markup of its own — a `<code>` block displaying an
+ * escaped script is content the author chose to show, not an encoded document to decode.
  */
 describe('re-parsing entity-encoded markup', () => {
   it('keeps an escaped snippet displayed inside real markup', () => {
@@ -860,11 +832,7 @@ describe('re-parsing entity-encoded markup', () => {
   });
 });
 
-/**
- * The structured walker has to default unknown elements to a boundary for the same reason
- * the plain-text walker does. Treating them as inline merged separate indicators, and
- * vendor web components make that common.
- */
+/** Unknown elements default to a boundary, or vendor web components merge adjacent indicators. */
 describe('structured output boundaries for unknown elements', () => {
   it('separates adjacent custom elements', () => {
     expect(
@@ -879,14 +847,8 @@ describe('structured output boundaries for unknown elements', () => {
   });
 });
 
-/**
- * The self-closing normalizer runs on every page before the parser, so its own cost has
- * to stay linear. The regex form restarted at every `<script` and spent its full
- * attribute allowance before failing: about 293 character checks per input byte, or
- * roughly 4.5 seconds at the 10MB cap. `'<script>'` openers exit that regex immediately
- * at the `>` and never exercised the path, which is why the earlier adversarial test
- * missed it.
- */
+// Runs on every page before the parser, so its own cost has to stay linear over many
+// unterminated openers, not just terminated ones.
 describe('self-closing normalization stays linear', () => {
   it('handles many unterminated openers cheaply', () => {
     const input = '<script'.repeat(512000);
@@ -914,13 +876,8 @@ describe('self-closing normalization stays linear', () => {
 });
 
 /**
- * A `<script/>`-looking token inside a raw-text body is not a tag.
- *
- * Normalizing it inserted a closing tag inside the outer element, which ended that
- * element early and spilled the remainder of the script or stylesheet into `body_text`.
- * That is a false-IOC injection primitive, not cosmetic noise: the escaping suffix
- * carries whatever URL the attacker put after it, and extraction then publishes it as a
- * real indicator.
+ * A `<script/>`-looking token inside a raw-text body is not a tag — normalizing it would
+ * end the element early and spill the rest of the script into `body_text` as a false IOC.
  */
 describe('self-closing normalization respects raw-text bodies', () => {
   it('does not let a script body escape via a self-closing string literal', () => {
@@ -953,11 +910,7 @@ describe('self-closing normalization respects raw-text bodies', () => {
   });
 });
 
-/**
- * Custom and namespaced element names are exactly what vendor feeds encode, so the
- * residual-tag probe has to recognize them or their tags leak into plain text and the
- * structured renderer never reaches its custom-element boundaries.
- */
+// Custom and namespaced element names are exactly what vendor feeds encode.
 describe('entity-encoded custom elements', () => {
   it('re-parses an encoded custom element', () => {
     expect(stripHtml('&lt;ioc-value&gt;evil.com&lt;/ioc-value&gt;')).toBe('evil.com');
@@ -983,11 +936,8 @@ describe('entity-encoded custom elements', () => {
   });
 });
 
-/**
- * Truncation counts UTF-16 code units, so a cap landing inside a surrogate pair used to
- * keep the high half alone. An unpaired surrogate renders as a replacement character and
- * is not valid UTF-8 for anything reading the field downstream.
- */
+// `truncate` counts UTF-16 code units, so a cap inside a surrogate pair could otherwise
+// leave an unpaired one behind.
 describe('truncate never splits a surrogate pair', () => {
   const LONE_SURROGATE = /[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/;
 
@@ -1010,12 +960,9 @@ describe('truncate never splits a surrogate pair', () => {
 });
 
 /**
- * A raw-text close tag has to end at a tag boundary.
- *
- * Matching any `</script` prefix meant `</scriptfoo>` looked like the close, so the scan
- * resumed inside a body the parser still considers open and a later `<script/>` there was
- * rewritten, letting the suffix escape as a false IOC again. Trailing junk after the name
- * is legal and does close the element, so the test is the character after the name.
+ * A raw-text close tag has to end at a tag boundary — a bare `</script` prefix match would
+ * accept `</scriptfoo>` and resume the scan inside a body the parser still considers open.
+ * Trailing junk after the name is still legal and does close the element.
  */
 describe('raw-text close tags must end at a tag boundary', () => {
   it('does not accept a longer element name as the close tag', () => {
@@ -1057,12 +1004,9 @@ describe('raw-text close tags must end at a tag boundary', () => {
   });
 });
 
-/**
- * htmlparser2 ends an end tag at the first `>` and rejects a trailing slash, where the
- * spec and parse5 both read the junk and close the element. Both divergences lost or
- * leaked content, so the normalizer rewrites a junk-carrying raw-text end tag to its
- * plain form before parsing. Semantically free, since the junk is ignored either way.
- */
+// htmlparser2 ends an end tag at the first `>` and rejects a trailing slash, where the
+// spec and parse5 both read the junk and close the element — the normalizer rewrites a
+// junk-carrying raw-text end tag to its plain form first.
 describe('raw-text end tags carrying junk', () => {
   // `</script foo="a>URL">` closed at the `>` inside the attribute value, spilling the
   // rest of the end tag into body_text with an attacker-chosen URL in it.
@@ -1100,11 +1044,7 @@ describe('raw-text end tags carrying junk', () => {
   });
 });
 
-/**
- * An end tag may legally carry junk, and the raw-parser path normalizes that form, so the
- * probe that decides whether to re-parse an entity-encoded document has to accept it too or
- * the script body stays in body_text.
- */
+// An end tag may legally carry junk, so the re-parse probe has to accept it too.
 describe('encoded documents whose end tag carries junk', () => {
   it('re-parses a bare document with a junk-carrying close tag', () => {
     const result = stripHtml(
@@ -1116,13 +1056,8 @@ describe('encoded documents whose end tag carries junk', () => {
   });
 });
 
-/**
- * `String.prototype.toLowerCase` is not length-preserving: `İ` becomes two code units. The
- * scanner took offsets from a lowercased copy and applied them to the original, so one such
- * character anywhere in the page shifted every later offset, the enclosing-element check
- * read the wrong character, and a fake `<script/>` inside a real script body was rewritten,
- * letting the suffix escape as a false IOC.
- */
+// `String.prototype.toLowerCase` is not length-preserving (`İ` becomes two code units),
+// which would shift every scanner offset after it if not folded ASCII-only.
 describe('non-ASCII characters do not shift scanner offsets', () => {
   it('keeps a script body contained when the page contains a dotted capital I', () => {
     const result = stripHtml(
@@ -1160,13 +1095,9 @@ describe('the parse cap does not split a surrogate pair', () => {
 });
 
 /**
- * CDATA payloads are expanded into the current walk, not by re-entering the parser.
- *
- * Recursing undid the iterative guarantee the rest of this file maintains. Malformed
- * nesting was quadratic and then fatal: 10ms at 200 openers, 740ms at 2,000, `RangeError`
- * at 20,000. It also walked the payload with href-lifting forced off and, in the structured
- * renderer, with section state reset to prose, so an anchor inside CDATA under an IOC
- * heading lost the href that was the indicator.
+ * CDATA payloads are expanded into the current walk, not by re-entering the parser —
+ * recursing would undo the iterative guarantee the rest of this file maintains, and lose
+ * both href-lifting and the current section state for anything nested inside.
  */
 describe('CDATA expansion is bounded and inherits walk state', () => {
   it.each([
@@ -1242,13 +1173,8 @@ describe('CDATA expansion is bounded and inherits walk state', () => {
 
 /**
  * A raw-text opener is only an opener where the document is actually in markup context.
- *
- * Identifying one from the bytes after `<` alone meant `<!-- <script> -->` registered as a
- * real opener. It has no matching close, so the scan ran to end of input and never
- * normalized the genuine `<script/>` after it; the parser then read the following paragraph
- * as script content and the whole report extracted to nothing. The scanner now skips
- * comments, CDATA sections and directives as whole regions, and skips ordinary tags whole
- * so a `<script/>` inside one of their attribute values is not mistaken for a tag.
+ * Identifying one from the bytes after `<` alone would register `<script>` inside a
+ * comment as a real opener with no matching close, running the scan to end of input.
  */
 describe('raw-text openers in non-markup context', () => {
   it.each([
@@ -1297,12 +1223,8 @@ describe('raw-text openers in non-markup context', () => {
   });
 });
 
-/**
- * Without any enclosing element there is no context, so a residual closing tag is the only
- * signal a decoded payload was entity-encoded markup. Void elements never close, so a body
- * of only void elements, or one truncated before its close tag, has no such signal and stays
- * literal — same as prose that merely mentions a tag.
- */
+// A residual closing tag is the only re-parse signal without a wrapper, so void elements
+// (which never close) or a body truncated before its close tag stay literal.
 describe('bodies without a closing tag stay literal without one', () => {
   it('re-parses a CDATA payload of only void elements', () => {
     expect(stripHtml('<![CDATA[evil.com&lt;br/&gt;bad.net]]>')).toBe('evil.com bad.net');
@@ -1327,11 +1249,7 @@ describe('bodies without a closing tag stay literal without one', () => {
   });
 });
 
-/**
- * `<template>` is inert. The parser puts its children in a document fragment that no reader
- * ever sees, so component templates carrying example or stale URLs were feeding body_text
- * values a human never read, which extraction then promoted as indicators.
- */
+// `<template>` is inert: the parser puts its children in a fragment no reader ever sees.
 describe('non-rendered subtrees', () => {
   it.each([
     ['a template at top level', '<template><p>c2.stale.test</p></template><p>safe</p>', 'safe'],
@@ -1372,12 +1290,8 @@ describe('non-rendered subtrees', () => {
   });
 });
 
-/**
- * A close tag that never terminates leaves the element open to end of input, so the remainder
- * is raw text. Resuming the scan inside that body let a `<script/>`-looking string in it be
- * rewritten, which introduced the `>` needed to end the outer element and spilled the rest of
- * the code into body_text as a false indicator.
- */
+// A close tag that never terminates leaves the element open to end of input, so the
+// remainder is raw text and must not be scanned for a `<script/>`-looking string to rewrite.
 describe('unterminated raw-text close tags stay opaque', () => {
   it.each([
     ['a script body', '<script>a=1</script foo="<script/>'],
@@ -1391,13 +1305,8 @@ describe('unterminated raw-text close tags stay opaque', () => {
   });
 });
 
-/**
- * `summary` is a standard HTML element as well as an Atom construct, and the predicate matched
- * on name alone. An Atom text construct holds character data and nothing else, so an element
- * child means this is the HTML element, and the literal branch emits raw text without applying
- * subtree filtering: `<details><summary><script>…</script>Visible</summary></details>` put the
- * script body and its URL into body_text.
- */
+// `summary` is a standard HTML element (as in `<details><summary>`) as well as an Atom
+// construct name, and has to be walked normally rather than treated as literal text.
 describe('HTML elements sharing an Atom construct name', () => {
   it('walks an HTML summary normally and skips its script', () => {
     const html =
@@ -1436,11 +1345,8 @@ describe('multiple hrefs lift within the same section', () => {
   });
 });
 
-/**
- * An element carrying the HTML `hidden` attribute is not rendered, so its text is not report
- * content. It was being stored and promoted as an indicator, and because article scoring calls
- * `stripHtml`, a candidate holding a large hidden subtree could outscore the real report.
- */
+// An element carrying the HTML `hidden` attribute is not rendered, so its text is not
+// report content.
 describe('hidden subtrees', () => {
   it.each([
     ['a bare hidden attribute', '<div hidden>c2.stale.test</div><p>safe</p>'],
@@ -1461,11 +1367,8 @@ describe('hidden subtrees', () => {
   });
 });
 
-/**
- * In HTML an unquoted attribute value may contain `/`, so a trailing slash there belongs to the
- * value and is not a self-closing flag. Reading `<script src=x/>` as self-closing rewrote it to
- * an empty script pair, which exposed the real script body as report text with its URL in it.
- */
+// In HTML an unquoted attribute value may contain `/`, so a trailing slash there belongs
+// to the value, not a self-closing flag.
 describe('self-closing detection and unquoted attribute values', () => {
   it.each([
     [
@@ -1496,11 +1399,8 @@ describe('self-closing detection and unquoted attribute values', () => {
   });
 });
 
-/**
- * Browsers do not render `<iframe>` contents, so embedded fallback or tracking text is not report
- * text. It was reaching body_text and, because article scoring shares this rule, an iframe-heavy
- * teaser could also outweigh the visible report.
- */
+// Browsers don't render `<iframe>` contents, so embedded fallback or tracking text is not
+// report text.
 describe('iframe contents are not report text', () => {
   it('drops an iframe body from plain text', () => {
     const result = stripHtml('<iframe>https://stale.example</iframe><p>safe</p>');

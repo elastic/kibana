@@ -339,15 +339,9 @@ describe('extractArticleHtml — class-based sections and empty candidates', () 
   });
 });
 
-/**
- * Deeply nested markup used to crash extraction outright.
- *
- * Two separate recursive sites, both inside libraries: `clone()` bottomed out in
- * domhandler's `cloneNode` at around 1,600 levels, and parse5's serializer gives out
- * somewhere past 3,000. Both are reachable in well under 10KB of input, so a single
- * malformed or hostile page took down report extraction, and because the threshold moves
- * with stack already in use it read as an intermittent failure.
- */
+// Deeply nested markup used to crash extraction outright, at two separate recursive sites
+// inside libraries (domhandler's `cloneNode`, parse5's serializer), both reachable in well
+// under 10KB of input.
 describe('deeply nested markup', () => {
   const nest = (depth: number, payload: string) =>
     `<html><body><article>${'<div>'.repeat(depth)}${payload}</article></body></html>`;
@@ -374,13 +368,8 @@ describe('deeply nested markup', () => {
   });
 });
 
-/**
- * Simplification must stay cheap on hostile input.
- *
- * Every case here was measured before it was fixed. The timing bounds are roughly 100x
- * the measured cost so they are not sensitive to a contended CI worker, but the
- * quadratic behavior they replaced overruns them by orders of magnitude.
- */
+// Timing bounds are roughly 100x the measured cost, so they're not CI-flaky, but the
+// quadratic behavior they replaced overruns them by orders of magnitude.
 describe('hostile markup stays cheap', () => {
   const within = (budgetMs: number, fn: () => string): string => {
     const started = process.hrtime.bigint();
@@ -431,12 +420,8 @@ describe('hostile markup stays cheap', () => {
   });
 });
 
-/**
- * HTML has no self-closing syntax for raw-text elements, so a spec-compliant parser reads
- * `<script src="x.js"/>` as a script whose body is everything after it. Chrome removal
- * then deleted the script and the report along with it. RSS payloads are frequently
- * XHTML, where the form is legitimately self-closing.
- */
+// HTML has no self-closing syntax for raw-text elements, so a spec-compliant parser reads
+// `<script src="x.js"/>` as a script whose body is everything after it.
 describe('self-closed raw-text elements', () => {
   it('keeps the report following a self-closed script', () => {
     const result = extractArticleHtml(
@@ -464,13 +449,9 @@ describe('self-closed raw-text elements', () => {
   });
 });
 
-/**
- * `$container.find(selectorList)` is quadratic in the container's child count. Measured
- * through this function: 2.7s at 50,000 children, 10.7s at 100,000, 44s at 200,000, on a
- * page well inside the byte cap and far too shallow for the depth guard to fire. The same
- * selector list evaluated from the document root is linear (18ms / 34ms / 80ms), so chrome
- * is now removed document-wide before the container is chosen.
- */
+// `$container.find(selectorList)` is quadratic in the container's child count; the same
+// selector list evaluated from the document root is linear, which is why chrome is removed
+// document-wide before the container is chosen.
 describe('chrome removal cost', () => {
   it('does not go quadratic in the container child count', () => {
     const input = `<html><body><article>${'<b>x</b>'.repeat(
@@ -497,11 +478,8 @@ describe('chrome removal cost', () => {
   });
 });
 
-/**
- * The two stages have to agree about what the document contains. `text.ts` recognizes
- * CDATA; this file did not, so a feed body carried that way was serialized back out as a
- * comment and then discarded by `stripHtml`, losing the whole article.
- */
+// The two stages have to agree about what the document contains — `text.ts` recognizes
+// CDATA, so this file must too, or a CDATA body serializes back out as a comment.
 describe('CDATA survives article extraction', () => {
   it('keeps a CDATA article body through extraction', () => {
     const extracted = extractArticleHtml(
@@ -513,12 +491,9 @@ describe('CDATA survives article extraction', () => {
 });
 
 /**
- * Selectors cannot see inside a CDATA node, so chrome removal missed a `<script>` bundle
- * carried that way while the scoring walk still counted its bytes as visible text. A teaser
- * whose CDATA held a large bundle outscored the real report, won selection, and then
- * collapsed to almost nothing once `stripHtml` expanded the CDATA and dropped the script,
- * losing the real indicator entirely. CDATA is now unwrapped before the parse so both see
- * the same document.
+ * Selectors can't see inside a CDATA node, so a teaser whose CDATA held a large script
+ * bundle could outscore the real report during selection, then collapse to almost nothing
+ * once `stripHtml` expanded the CDATA and dropped the script — losing the real indicator.
  */
 describe('a teaser inflated by disappearing markup does not win selection', () => {
   const BUNDLE = 'var x=1;'.repeat(4000);
@@ -566,11 +541,7 @@ describe('a teaser inflated by disappearing markup does not win selection', () =
   });
 });
 
-/**
- * `noscript` is reader-visible fallback, not chrome, and `text.ts` keeps it for that reason.
- * Removing it here made the two stages disagree, so an article serving its body as fallback
- * reached `stripHtml` empty.
- */
+// `noscript` is reader-visible fallback, not chrome — same rule `text.ts` applies.
 describe('noscript is not chrome', () => {
   it('keeps an article body served as noscript fallback', () => {
     const result = stripHtml(
@@ -619,15 +590,8 @@ describe('hidden subtrees do not inflate candidate scores', () => {
   });
 });
 
-/**
- * Page-level chrome is removed only when a narrower container wins.
- *
- * Removing it before selection lost report content on any page with no article container:
- * `<body><header><p>IOC: c2.evil.test</p></header><div>…</div></body>` had the header deleted
- * and then the body fallback returned only the div. A body-level `header` or `aside` is
- * unambiguously chrome only when something narrower is the report, and this file's rule is that
- * a false-keep is noise the section miner handles while a false-strip can drop an indicator.
- */
+// Page-level chrome is removed only when a narrower container wins — removing it before
+// selection would lose report content on any page with no article container at all.
 describe('page-level chrome and the body fallback', () => {
   it.each([
     [
@@ -656,13 +620,8 @@ describe('page-level chrome and the body fallback', () => {
   });
 });
 
-/**
- * A hidden candidate scores zero. Neither scoring path could see the candidate's own `hidden`
- * attribute: the precise path passes inner HTML, which drops the wrapper, and the length map is
- * built from text nodes. So a large `<article hidden>` outscored the visible report, and
- * returning its inner HTML stripped the attribute that marked it non-rendered, so downstream
- * treated stale hidden text as the report.
- */
+// A hidden candidate scores zero — neither scoring path can see the candidate's own
+// `hidden` attribute on its own (precise scoring passes inner HTML, dropping the wrapper).
 describe('hidden candidates cannot win selection', () => {
   const STALE = `${'stale '.repeat(3000)}c2.stale.test`;
 
@@ -717,12 +676,8 @@ describe('hidden candidates cannot win selection', () => {
   });
 });
 
-/**
- * The fallback scorer has to discount hidden descendants too. Excluding only hidden candidates
- * and hidden ancestors left this path summing them, so once precise scoring is off, past 32
- * candidates or 2MB, a teaser inflated by a hidden block beat the visible report and `stripHtml`
- * removed that block after selection.
- */
+// The fallback scorer (used past 32 candidates or 2MB) has to discount hidden descendants
+// too, or a teaser inflated by a hidden block beats the visible report.
 describe('the fallback scorer discounts hidden descendants', () => {
   it('prefers the visible report when the fallback path is in use', () => {
     const teaser = `<article><div hidden>${'stale '.repeat(
@@ -739,15 +694,8 @@ describe('the fallback scorer discounts hidden descendants', () => {
   });
 });
 
-/**
- * `template` is non-rendered, like `hidden`, and selection has to know that. Precise scoring and
- * the returned value both use the candidate's inner HTML, which discards the wrapper that makes
- * the contents inert, so a `<template class="post-content">` could beat a visible `<main>` and
- * have its stale contents returned as the report.
- *
- * Fourth site for this rule after both text walkers and candidate exclusion, so it now comes
- * from one shared predicate rather than a fourth copy of the condition.
- */
+// `template` is non-rendered, like `hidden`, and selection has to know that — its inner
+// HTML discards the wrapper that makes the contents inert.
 describe('template subtrees cannot win selection', () => {
   const STALE = `${'stale '.repeat(1000)}c2.stale.test`;
 

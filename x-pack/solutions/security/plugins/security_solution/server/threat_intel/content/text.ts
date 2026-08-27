@@ -9,24 +9,16 @@ import * as cheerio from 'cheerio';
 import { classifyHeader, type SectionKind } from './section_headers';
 
 /**
- * Largest input the parsers will touch.
- *
- * These entry points take fetched web pages, so the input is attacker-influenced
- * and unbounded. An ad-heavy page is realistically several megabytes, and this runs
- * inside a task worker, where cheerio builds a full DOM. Truncating rather than
- * throwing keeps a fat page degraded instead of failed, since the article body is
- * nearly always near the top.
- *
- * 10MB matches the `body_html` bound the report API already enforces.
+ * Largest input the parsers will touch, matching the `body_html` bound the report API
+ * already enforces. Input is an attacker-influenced fetched page, and this runs in a task
+ * worker where cheerio builds a full DOM, so truncating degrades a fat page instead of
+ * failing it outright.
  */
 export const MAX_PARSE_BYTES = 10 * 1024 * 1024;
 
 /**
- * Truncate to the parse cap without splitting a surrogate pair.
- *
- * `slice` counts UTF-16 code units, so a cap landing mid-pair left the high half alone and
- * `stripHtml` returned an unpaired surrogate in `body_text`. Same defect `truncate` has,
- * one layer earlier, so fixing it there was not enough.
+ * Truncates without splitting a surrogate pair — `slice` counts UTF-16 code units, so a
+ * cap landing mid-pair would otherwise leave an unpaired surrogate in `body_text`.
  */
 export const capToParseBytes = (html: string): string => {
   if (html.length <= MAX_PARSE_BYTES) return html;
@@ -35,18 +27,10 @@ export const capToParseBytes = (html: string): string => {
 };
 
 /**
- * Inline elements, which carry no token boundary.
- *
- * Everything else does. Threat reports routinely split an indicator across inline
- * formatting, and `<p>c2.<strong>evil</strong>.test</p>` has to yield `c2.evil.test`
- * rather than `c2. evil .test`, or extraction misses the domain entirely. The regex
- * implementation could not draw this distinction at all, because it only ever saw a
- * `<tag>` to substitute; the parser knows which element it is looking at.
- *
- * Listed as an allowlist rather than a blocklist so an unknown or custom element still
- * produces a boundary. That is the safe default: a spurious boundary splits one token,
- * whereas a missing one silently merges two adjacent indicators into an unextractable
- * value.
+ * Elements that carry no token boundary; everything else does, so `c2.<strong>evil</strong>.test`
+ * extracts as `c2.evil.test` rather than three separate words. An allowlist rather than a
+ * blocklist, since an unknown or custom element defaulting to a boundary only risks
+ * splitting one token, where the reverse would silently merge two indicators into one.
  */
 const INLINE_NAMES = new Set([
   'a',
@@ -82,13 +66,10 @@ const INLINE_NAMES = new Set([
 ]);
 
 /**
- * Minimal shape of a parsed DOM node.
- *
- * Declared here rather than imported from cheerio. A transitive `@types/cheerio@0.22`
- * shadows the types bundled with the installed cheerio 1.0.0-rc.12, predating both the
- * node types and `contents()` by several majors. Projects that pin an explicit `types`
- * array in their tsconfig resolve the correct types; `security_solution` does not, and
- * narrowing type resolution for a plugin this size to fix one import is the wrong trade.
+ * Minimal shape of a parsed DOM node, declared here rather than imported from cheerio: a
+ * transitive `@types/cheerio@0.22` shadows the types bundled with the installed
+ * cheerio 1.0.0-rc.12, and `security_solution` doesn't pin the tsconfig `types` array that
+ * would resolve the correct ones.
  */
 interface ParsedNode {
   type: string;
@@ -100,47 +81,21 @@ interface ParsedNode {
 }
 
 /**
- * Elements whose subtree is markup machinery rather than report text.
- *
- * Skipped during the walk rather than removed up front with `$('script, style').remove()`.
- * That selector pass is quadratic in nesting depth (measured on `'<div>'.repeat(n)`: 23ms
- * at n=12,500 rising to 2.6s at n=100,000) because the selector engine re-checks
- * ancestors per candidate node, which would have reintroduced the same denial of service
- * the parser swap was meant to remove. Skipping the subtree in the walk is O(1) per node.
- *
- * Dropping these as whole subtrees is also what makes truncation safe: a valid document
- * cut at `MAX_PARSE_BYTES` can lose its closing `</script>`, and the parser treats the
- * remainder as raw script text rather than leaking it into report text.
- */
-/**
- * Elements whose subtree never becomes report text.
- *
- * `script` and `style` because their content is code. `template` because it is inert: the
- * parser puts its children in a document fragment that no reader ever sees, so component
- * templates carrying example or stale URLs were feeding `body_text` values a human never
- * read, which extraction then promoted as indicators.
- *
- * Named for what it does rather than for raw text, since `template` is not a raw-text
- * element and calling it one would invite the next reader to assume its content is
- * unparsed. `noscript` is deliberately absent: its content is fallback that a reader with
- * scripting disabled does see.
+ * Elements whose subtree never becomes report text: `script`/`style` because their content
+ * is code, `template` because the parser puts its children in an inert fragment no reader
+ * sees. Skipped during the walk rather than removed up front with a selector — a `.remove()`
+ * pass is quadratic in nesting depth, where skipping in the walk is O(1) per node. This also
+ * makes truncation safe: a document cut mid-`<script>` at `MAX_PARSE_BYTES` is read as raw
+ * script text by the parser rather than leaking into report text. `noscript` is deliberately
+ * absent — its content is fallback a scripting-disabled reader does see.
  */
 const SKIPPED_SUBTREE_NAMES = new Set(['script', 'style', 'template']);
 
 /**
- * Whether this element's content never reaches a reader.
- *
- * Exported and shared with `extract_article` because this rule has now had to be applied in
- * four places: both text walkers, candidate exclusion, and fallback candidate scoring. Each
- * time it was added where a finding pointed, and each time another path was still counting the
- * same text: hidden subtrees took three rounds to cover, and `template` was skipped by the
- * walkers while a `<template class="post-content">` could still win article selection and have
- * its contents returned as the report. One definition, four call sites.
- *
- * `iframe` is here for the same reason as `template`: browsers do not render its contents, so
- * embedded fallback or tracking text was reaching `body_text` and could also outweigh the real
- * report during candidate scoring. Adding it was one line rather than a fifth report, which is
- * what unifying the rule bought.
+ * Whether this element's content never reaches a reader. Exported and shared with
+ * `extract_article`, which needs the same rule for candidate exclusion and scoring so a
+ * `<template>` or hidden block can't win article selection there either. `iframe` is here
+ * for the same reason as `template`: browsers don't render its contents.
  */
 const NON_RENDERED_NAMES = new Set(['template', 'iframe']);
 
@@ -153,41 +108,15 @@ export const isNonRenderedElement = (node: {
 const isSkippedSubtree = (node: ParsedNode): boolean =>
   SKIPPED_SUBTREE_NAMES.has(elementName(node)) || isNonRenderedElement(node);
 
-/**
- * Rewrites an explicitly self-closed `<script/>` or `<style/>` into an empty element
- * pair before parsing.
- *
- * HTML has no self-closing syntax for raw-text elements, so a spec-compliant parser
- * reads `<script src="x.js"/><p>evil.test</p>` as a script whose *body* is that
- * paragraph, and the whole remainder of the document is discarded with it. Browsers
- * agree, but feeds do not: RSS payloads are frequently XHTML, where the form is
- * legitimately self-closing, and honoring the HTML reading there silently drops every
- * indicator after the tag.
- *
- * The attribute run is quote-aware so a `>` inside an attribute value cannot end the
- * match early, and bounded so many unterminated openers cannot make this quadratic.
- * Overshooting the bound only means the tag is left for the parser to read per spec,
- * which is the safe direction.
- */
+/** `<script>`/`<style>` — the elements HTML treats as raw text. */
 const RAW_TEXT_TAG_NAMES = ['script', 'style'] as const;
 
 /**
- * Scanned in a single pass rather than matched with a regex.
- *
- * The regex form bounded its attribute run to keep one opener cheap, but it still
- * restarted at every `<script` in the input, and each attempt spent the whole allowance
- * before failing. On `'<script'.repeat(n)` that is about 293 character checks per input
- * byte, or billions inside the 10MB cap: measured 405ms at 896KB, extrapolating to
- * roughly 4.5 seconds of pegged CPU for one page. Linear rather than quadratic, but a
- * constant that large is still a worker the queue does not get back.
- *
- * This visits each character at most once. Attribute scanning stays quote-aware, so a
- * `>` inside an attribute value cannot end a tag early, and an unterminated tag runs to
- * end of input and is left for the parser to read per spec, which is the safe direction.
- */
-/**
- * Index of the `>` that terminates the tag starting at `from`, or -1 if the tag never
- * terminates. Quote-aware, so a `>` inside an attribute value does not end it early.
+ * Index of the `>` that terminates the tag starting at `from`, in one linear scan rather
+ * than a regex per candidate (a regex restarting at every `<script` opener is quadratic
+ * over an adversarial repeat). Quote-aware, so a `>` inside an attribute value can't end
+ * the tag early; an unterminated tag runs to end of input and is left for the parser to
+ * read per spec, which is the safe direction.
  */
 interface TagEnd {
   /** Index of the `>` that terminates the tag, or -1 if it never terminates. */
@@ -233,18 +162,22 @@ const tagEndFrom = (html: string, from: number): TagEnd => {
 };
 
 /**
- * ASCII-only, length-preserving lowercase.
- *
- * `String.prototype.toLowerCase` is not length preserving: `İ` (U+0130) lowercases to two
- * code units. The scanner took offsets from a lowercased copy and used them to index the
- * original, so a single such character anywhere in the page shifted every offset after it.
- * The enclosing-element check then read the wrong character, a fake `<script/>` inside a
- * real script body got rewritten, and the script suffix escaped into `body_text` as a false
- * IOC. Tag names are ASCII, so folding only A-Z keeps offsets aligned by construction.
+ * ASCII-only, length-preserving lowercase. `String.prototype.toLowerCase` is not
+ * length-preserving (`İ` lowercases to two code units), which would shift every later
+ * offset the scanner takes from this copy and applies back to the original. Tag names are
+ * ASCII, so folding only A-Z keeps offsets aligned by construction.
  */
 const asciiLower = (input: string): string =>
   input.replace(/[A-Z]/g, (char) => String.fromCharCode(char.charCodeAt(0) + 32));
 
+/**
+ * Rewrites an explicitly self-closed `<script/>` or `<style/>` into an empty element pair
+ * before parsing. HTML has no self-closing syntax for raw-text elements, so a
+ * spec-compliant parser reads `<script src="x.js"/><p>evil.test</p>` as a script whose
+ * body is that paragraph, discarding the rest of the document. Feeds routinely ship XHTML,
+ * where the form is legitimately self-closing, so the HTML reading has to be corrected
+ * before the real parser ever sees it.
+ */
 export const normalizeSelfClosedRawText = (html: string): string => {
   const lower = asciiLower(html);
   const pieces: string[] = [];
@@ -257,12 +190,9 @@ export const normalizeSelfClosedRawText = (html: string): string => {
     if (open === -1) {
       cursor = html.length;
     } else if (lower.startsWith('<!--', open)) {
-      // Comments, CDATA sections and directives are skipped as whole regions rather than
-      // scanned for candidates. Identifying an opener from the bytes after `<` alone meant
-      // `<!-- <script> -->` registered as a real raw-text opener; it has no matching close,
-      // so the scan ran to end of input and never normalized the genuine `<script/>` after
-      // it. The parser then read the following paragraph as script content and
-      // `<!-- <script> --><script/><p>IOC: evil.test</p>` extracted to nothing at all.
+      // Comments, CDATA sections and directives are skipped as whole regions, since a
+      // `<script>`-looking opener inside a comment has no matching close and would run
+      // the scan to end of input, never reaching a genuine opener after it.
       const commentEnd = lower.indexOf('-->', open + 4);
       cursor = commentEnd === -1 ? html.length : commentEnd + 3;
     } else if (lower.startsWith('<![cdata[', open)) {
@@ -279,8 +209,8 @@ export const normalizeSelfClosedRawText = (html: string): string => {
         afterName !== -1 && (afterName >= html.length || /[\s/>]/.test(html[afterName]));
 
       if (!isRawTextStart) {
-        // Any other tag is skipped whole, quote-aware, so a `<script/>` sitting in one of
-        // its attribute values is never mistaken for a tag of its own.
+        // Any other tag is skipped whole, quote-aware, so a `<script/>` inside one of its
+        // attribute values is never mistaken for a tag of its own.
         const isTag = /[a-z/]/.test(lower[open + 1] ?? '');
         const otherTagEnd = isTag ? tagEndFrom(html, open + 1).end : -1;
 
@@ -288,10 +218,8 @@ export const normalizeSelfClosedRawText = (html: string): string => {
           // A bare `<` in prose. Advance one character.
           cursor = open + 1;
         } else if (otherTagEnd === -1) {
-          // The tag never terminates, so no `>` exists from here on and no later tag can be
-          // complete either. Stopping is both correct and what keeps this linear: retrying
-          // from the next character rescanned the whole remaining input per position, which
-          // on `'<script'.repeat(n)` is quadratic and hung outright at n=512,000.
+          // No `>` exists from here on, so no later tag can be complete either — stop
+          // rather than retry per position, which would be quadratic.
           cursor = html.length;
         } else {
           cursor = otherTagEnd + 1;
@@ -307,15 +235,11 @@ export const normalizeSelfClosedRawText = (html: string): string => {
           copiedTo = tagEnd + 1;
           cursor = tagEnd + 1;
         } else {
-          // A real open tag, so everything up to the matching close is raw text as far as
-          // the parser is concerned, and a `<script/>` sitting in a JavaScript string
-          // literal is not a tag at all. Rewriting it inserted a close tag *inside* the
-          // outer body, ending that element early and spilling the rest of the script into
-          // `body_text` as a false IOC. Skip the body instead.
-          //
-          // The close tag's name has to end at a tag boundary. A bare prefix match accepted
-          // `</scriptfoo>`, which resumed the scan inside a body the parser still considers
-          // open and let a later `<script/>` there escape the same way.
+          // A real open tag, so its raw-text body is skipped rather than scanned for a
+          // `<script/>`-looking string, which is not a tag inside a JS string literal.
+          // The close tag's name has to end at a tag boundary too, or `</scriptfoo>` would
+          // be accepted and the scan would resume inside a body the parser still considers
+          // open.
           const closeTag = `</${name}`;
           let searchFrom = tagEnd + 1;
           let closeAt = -1;
@@ -335,21 +259,15 @@ export const normalizeSelfClosedRawText = (html: string): string => {
             cursor = html.length;
           } else {
             // htmlparser2 ends an end tag at the first `>` and rejects a trailing slash,
-            // where the spec and parse5 both read the junk and close the element. That cost
-            // content twice: `</script/>` kept the element open and swallowed the rest of
-            // the document, and `</script foo="a>URL">` closed at the `>` inside the
-            // attribute value and spilled the remainder into `body_text` as a false IOC.
-            // Rewriting a junk-carrying end tag to its plain form is semantically free,
-            // since the junk is ignored either way.
+            // where the spec and parse5 both read the junk and close the element. Rewriting
+            // a junk-carrying end tag to its plain form is semantically free either way, and
+            // avoids the element staying open (`</script/>`) or closing early inside a junk
+            // attribute value (`</script foo="a>URL">`).
             const junkFrom = closeAt + closeTag.length;
             const { end: closeEnd } = tagEndFrom(html, junkFrom);
             if (closeEnd === -1) {
-              // The close tag never terminates, so the element stays open to end of input and
-              // the remainder is raw text. Resuming at `junkFrom` scanned inside that still-open
-              // body, and a `<script/>`-looking string in it got rewritten, which introduced the
-              // `>` htmlparser2 needed to end the outer element and spilled the rest of the code
-              // into `body_text` as a false indicator. Stop, exactly as the missing-close-tag
-              // path above does.
+              // The close tag itself never terminates — same as the missing-close-tag path
+              // above, stop rather than resume the scan inside a still-open body.
               cursor = html.length;
             } else if (closeEnd > junkFrom) {
               pieces.push(html.slice(copiedTo, closeAt), `</${name}>`);
@@ -370,41 +288,27 @@ export const normalizeSelfClosedRawText = (html: string): string => {
 };
 
 /**
- * Fragment mode (`isDocument: false`), so a `<description>` snippet is not wrapped in
- * `<html>/<head>/<body>`. It also keeps bare table and list fragments intact, which
- * matters because feed HTML routinely ships a `<tr>` with no enclosing `<table>`.
+ * The single copy of the parser configuration, shared with `extract_article` so the two
+ * can't drift on what a document *contains* (they did once, over `recognizeCDATA`, and
+ * disagreed about whether a feed body was CDATA or a comment).
  *
- * htmlparser2 rather than cheerio's default parse5, because parse5 implements the full
- * HTML5 tree construction algorithm and several of its steps ("has an element in button
- * scope") walk the open-element stack, making it quadratic in nesting depth. Measured on
- * `'<div>'.repeat(n)`: parse5 takes 14ms at n=2,000, 257ms at n=10,000 and 8.3s at
- * n=50,000, so a few hundred KB of nested divs inside the 10MB cap pegs a task worker
- * for minutes. htmlparser2 is linear over the same inputs (2ms / 5ms / 18ms). Both parse
- * the malformed feed markup this file exists to handle, including implicit `</li>` and
- * `</td>` and raw-text `<script>` bodies; parse5's extra fidelity is table foster
- * parenting and formatting-element reconstruction, none of which affects text extraction.
- */
-/**
- * The single copy of the parser configuration, shared with `extract_article`.
- *
- * It was duplicated per file and the two drifted: `recognizeCDATA` was set here and not
- * there, so one stage saw a CDATA article body and the other saw a comment and discarded
- * it. Any option that changes what the document *contains* has to be identical across
- * stages or they disagree, so there is one copy and it is exported rather than described.
+ * `_useHtmlParser2: true` picks htmlparser2 over cheerio's default parse5: parse5's tree
+ * construction walks the open-element stack per step, making it quadratic in nesting depth,
+ * where htmlparser2 is linear over the same adversarial input. Fragment mode
+ * (`isDocument: false`, the default) keeps a `<description>` snippet or a bare `<tr>` intact
+ * rather than wrapped in `<html>/<head>/<body>`.
  */
 export const PARSER_OPTIONS = {
   _useHtmlParser2: true,
-  // HTML treats `<![CDATA[ ... ]]>` as a bogus comment, which is right for a web page and
-  // wrong for a feed: RSS and Atom use CDATA precisely to carry an HTML document, and
-  // reading it as a comment dropped the whole article body. Only affects `<![CDATA[`;
-  // ordinary `<!-- -->` comments still parse as comments and are still discarded.
+  // RSS and Atom use CDATA to carry an HTML document; HTML treats it as a bogus comment,
+  // which would drop the whole body. Only affects `<![CDATA[` — `<!-- -->` still discards.
   recognizeCDATA: true,
 } as const;
 
 const parseTopLevelNodes = (html: string): ParsedNode[] => {
   const $ = cheerio.load(normalizeSelfClosedRawText(html), PARSER_OPTIONS);
   // The one cast in this file, at the boundary where the stale typings stop describing
-  // the runtime. `toArray()` is declared, its element type is not.
+  // the runtime: `toArray()` is declared, its element type is not.
   const roots = $.root().toArray() as unknown as ParsedNode[];
   return roots.flatMap((root) => root.children ?? []);
 };
@@ -417,26 +321,13 @@ const elementName = (node: ParsedNode): string => node.name?.toLowerCase() ?? ''
 const childrenOf = (node: ParsedNode): ParsedNode[] => node.children ?? [];
 
 /**
- * A closing tag in text that came out of a parse means the input carried
- * entity-encoded markup, which the parser correctly decoded to text.
- *
- * RSS and Atom routinely encode a whole HTML body inside `<description>`, so one
- * decode leaves `<p>...</p>` sitting in what is supposed to be plain text. A single
- * bounded re-parse resolves that. Requiring a *closing* tag is what keeps prose safe:
- * a threat report discussing `use &lt;script&gt; carefully` decodes to text with no
- * closing tag and is left alone.
- *
- * The name pattern admits hyphens, colons, and underscores, because custom and
- * namespaced elements are exactly what vendor feeds encode. Restricting it to
- * `[a-z0-9]*` meant `&lt;ioc-value&gt;evil.com&lt;/ioc-value&gt;` never qualified, so
- * the tags leaked into output that is supposed to be plain text and the structured
- * renderer never reached the custom-element boundaries it applies deliberately.
- *
- * The name is followed by a lookahead for a tag boundary rather than `\s*>`, because an end
- * tag may legally carry junk. Requiring the bracket meant an encoded document whose end tag
- * was `&lt;/script foo&gt;` never qualified, so it was never re-parsed and the script body
- * and its URL stayed in `body_text` for extraction to mine. The raw-parser path already
- * handled that end-tag form; this probe did not, and the two have to agree.
+ * A closing tag surviving into decoded text means the input carried entity-encoded
+ * markup that the parser correctly decoded to text — e.g. an RSS `<description>` with a
+ * whole HTML body inside it. Requiring a closing tag (not just an opening one) is what
+ * keeps prose safe: `use &lt;script&gt; carefully` decodes with no closing tag and is left
+ * alone. The name pattern allows hyphens/colons/underscores for custom and namespaced
+ * elements, and looks ahead for a tag boundary rather than requiring `>` directly, since an
+ * end tag may legally carry junk (`&lt;/script foo&gt;`).
  */
 const RESIDUAL_CLOSING_TAG = /<\/[a-z][a-z0-9:_-]*(?=[\s/>])/i;
 
@@ -444,13 +335,10 @@ const payloadCarriesMarkup = (payload: ParsedNode[]): boolean =>
   payload.some((node) => isElement(node) || node.type === 'cdata');
 
 /**
- * Whether a decoded result should be parsed a second time.
- *
- * Markup of its own disqualifies the input, because escaped markup inside a real document
- * is content the author chose to display, and re-parsing it deleted the indicator the report
- * was published to communicate — see `RESIDUAL_CLOSING_TAG`'s doc for the specific case.
- * Otherwise a residual closing tag surviving into the decoded text is the only remaining
- * signal available, since a whole encoded document and an escaped snippet are
+ * Whether a decoded result should be parsed a second time. Markup of its own disqualifies
+ * the input — escaped markup inside a real document is content the author chose to
+ * display, and re-parsing it would delete that content. Otherwise a residual closing tag
+ * is the only remaining signal, since a whole encoded document and an escaped snippet are
  * indistinguishable once decoded.
  */
 const shouldReparse = (nodes: ParsedNode[], decoded: string): boolean =>
@@ -462,29 +350,18 @@ type WalkStep =
   | { kind: 'emit'; text: string };
 
 /**
- * How many times a CDATA payload may be expanded into the walk.
- *
- * CDATA cannot legally nest, so a well-formed document needs one. The bound exists because
- * malformed input can look like it nests: `'<![CDATA['.repeat(n)` parses as one unterminated
- * node per pass, and expanding each one re-parsed the remaining text. Measured before the
- * bound at 10ms for n=200, 740ms for n=2,000, and a hard `RangeError` at n=20,000.
- *
- * Past the bound the payload is dropped rather than emitted as text. Emitting it was the
- * first thing I tried and it was worse than the bug: unparsed markup went into `body_text`,
- * so `<![CDATA[` five deep around `<script>fetch("https://attacker.test")</script>` handed
- * extraction the attacker's URL as an indicator. Dropping cannot lose real report content,
- * because CDATA does not nest at all and anything past four levels is malformed by
- * construction.
+ * How many times a CDATA payload may be expanded into the walk. CDATA can't legally nest,
+ * so a well-formed document needs one; the bound exists because malformed input can look
+ * like it nests (`'<![CDATA['.repeat(n)`). Past the bound the payload is dropped rather
+ * than emitted as text — dropping can't lose real content, since CDATA never nests this
+ * deep legitimately, where emitting unparsed markup would hand extraction a live indicator.
  */
 const MAX_CDATA_DEPTH = 4;
 
 /**
- * Pushed in reverse so the stack pops in document order.
- *
- * The walks in this file are iterative rather than recursive on purpose. This content is
- * attacker-controlled and the parser imposes no nesting limit, so `'<div>'.repeat(n)`
- * builds an arbitrarily deep tree; a recursive walk would exhaust the call stack and
- * take the task worker down with it.
+ * Pushed in reverse so the stack pops in document order. The walks in this file are
+ * iterative rather than recursive on purpose: this content is attacker-controlled with no
+ * nesting limit, and a recursive walk would exhaust the call stack.
  */
 const pushNodes = (stack: WalkStep[], nodes: ParsedNode[], cdataDepth = 0): void => {
   for (let i = nodes.length - 1; i >= 0; i--) {
@@ -498,10 +375,8 @@ const hrefOf = (node: ParsedNode): string | undefined => {
 };
 
 /**
- * Concatenated text of a subtree, ignoring element structure.
- *
- * Used for CDATA, whose payload the parser hands back as opaque text rather than as a
- * parsed subtree.
+ * Concatenated text of a subtree, ignoring element structure. Used for CDATA, whose
+ * payload the parser hands back as opaque text rather than a parsed subtree.
  */
 const rawTextOf = (nodes: ParsedNode[]): string => {
   const out: string[] = [];
@@ -524,15 +399,11 @@ const rawTextOf = (nodes: ParsedNode[]): string => {
 };
 
 /**
- * Parse a CDATA payload into nodes.
- *
- * RSS and Atom carry an entire HTML document inside `<![CDATA[ ... ]]>`, and the parser
- * hands the payload back as opaque text rather than a parsed subtree, so it has to be
- * parsed or the whole article body is lost. CDATA content is also literal, so a document
- * that entity-encoded its body *and* wrapped it in CDATA arrives with the markup still
- * encoded after one parse: `<![CDATA[&lt;script&gt;fetch("…")&lt;/script&gt;safe]]>` would
- * otherwise yield the script body and its URL as visible text. Same decision `shouldReparse`
- * makes on a top-level document, applied to the payload, and bounded to one extra parse.
+ * Parses a CDATA payload into nodes. RSS and Atom carry an entire HTML document inside
+ * `<![CDATA[ ... ]]>`, so it has to be parsed or the article body is lost. CDATA content
+ * is also literal, so a document that entity-encoded its body *and* wrapped it in CDATA
+ * arrives still encoded after one parse — the same `shouldReparse` decision, applied here
+ * to the payload and bounded to one extra parse.
  */
 const parseCdataPayload = (raw: string): ParsedNode[] => {
   const nodes = parseTopLevelNodes(raw);
@@ -559,25 +430,17 @@ const inlineTextOf = (nodes: ParsedNode[], liftHrefs: boolean): string => {
       if (node.type === 'text') {
         out.push(node.data ?? '');
       } else if (node.type === 'cdata') {
-        // RSS and Atom carry an entire HTML document inside `<![CDATA[ ... ]]>`, and the
-        // parser hands the payload back as opaque text rather than a parsed subtree, so it
-        // has to be parsed or the whole article body is lost.
-        //
-        // Parsed into *this* walk rather than by re-entering the parser. Recursing undid the
-        // iterative guarantee the rest of this file maintains: malformed nesting overflowed
-        // the stack outright, and it also meant the payload was walked with `liftHrefs`
-        // forced off, so an anchor inside CDATA under an IOC heading lost its href.
+        // Parsed into *this* walk rather than by re-entering the parser, which would undo
+        // the iterative guarantee this file maintains and force `liftHrefs` off for the
+        // payload.
         out.push(' ');
         stack.push({ kind: 'emit', text: ' ' });
         if (cdataDepth < MAX_CDATA_DEPTH) {
           pushNodes(stack, parseCdataPayload(rawTextOf(childrenOf(node))), cdataDepth + 1);
         }
       } else if (!isElement(node)) {
-        // Comments and directives carry no report text, but they did separate
-        // the text on either side, so they still emit a boundary. Dropping the node
-        // wholesale is what keeps `<!-- hidden > c2.evil.test -->` from being extracted
-        // as a live IOC; emitting the boundary is what keeps `evil.com<!-- x -->bad.net`
-        // from merging into one unextractable token.
+        // Comments and directives carry no report text but still separate the text on
+        // either side, so a boundary is emitted without the node itself.
         out.push(' ');
       } else if (isSkippedSubtree(node)) {
         out.push(' ');
@@ -599,19 +462,11 @@ const inlineTextOf = (nodes: ParsedNode[], liftHrefs: boolean): string => {
 const extractPlainText = (html: string): string => inlineTextOf(parseTopLevelNodes(html), false);
 
 /**
- * Strip HTML tags and decode entities, yielding the plain text stored as
- * `content.body_text`.
- *
- * RSS feeds embed HTML in `<description>` and `<content:encoded>`. `body_text` feeds
- * inference (`semantic_text`) and the BM25 sibling field, and the downstream
- * `enrich_threat_report` workflow re-runs IOC regex extraction over it, so it needs to
- * be text with intact token boundaries rather than intact markup.
- *
- * The original HTML is preserved as `content.body_html` (mapped `index: false`) for
- * archival, so extraction can be re-run without re-fetching. It is unsanitized
- * attacker-controlled feed markup and must not be rendered: `extractArticleHtml`
- * removes a little chrome but preserves everything dangerous, so a consumer that
- * injects it has stored XSS. Render `body_text`.
+ * Strips HTML tags and decodes entities into the plain text stored as `content.body_text`,
+ * which feeds inference and IOC regex extraction and so needs intact token boundaries
+ * rather than intact markup. The original HTML is preserved separately as
+ * `content.body_html` (mapped `index: false`) for archival — it's unsanitized
+ * attacker-controlled markup and must never be rendered.
  */
 export const stripHtml = (html: string | undefined | null): string => {
   if (!html) return '';
@@ -622,34 +477,28 @@ export const stripHtml = (html: string | undefined | null): string => {
 };
 
 /**
- * Collapse runs of whitespace (including unicode line separators) and
- * trim. A naive `\s+` would leave the leading/trailing whitespace that
- * `<description><![CDATA[ ... ]]></description>` introduces.
+ * Collapses whitespace runs (including unicode separators) and trims. A naive `\s+` would
+ * leave the leading/trailing whitespace a CDATA payload introduces.
  */
 export const collapseWhitespace = (input: string): string => input.replace(/\s+/g, ' ').trim();
 
 /**
- * Truncate to a max length, keeping a sensible word boundary if one
- * lands close to the cap. Titles are semantic_text so shorter strings save inference tokens.
+ * Truncates to a max length, keeping a sensible word boundary if one lands close to the
+ * cap. Titles are semantic_text so shorter strings save inference tokens.
  */
 export const truncate = (input: string, maxLength: number): string => {
   if (input.length <= maxLength) return input;
   if (maxLength <= 0) return '';
-  // Reserve the ellipsis inside the cap. Slicing to `maxLength` and then appending
-  // put every truncated value one character over, so a field truncated to the stored
-  // title or body cap still failed a downstream length check at exactly that cap.
+  // Reserved so the appended ellipsis doesn't push the result one character over the cap.
   const contentLength = maxLength - 1;
-  // `slice` counts UTF-16 code units, so a cap landing inside a surrogate pair kept the
-  // high half on its own: `truncate('a\u{1F600}b', 3)` stored an unpaired surrogate,
-  // which renders as a replacement character and is not valid UTF-8 for anything reading
-  // the field downstream. Dropping the orphan costs one code unit. Done before the
-  // word-boundary logic so that still operates on well-formed text.
+  // `slice` counts UTF-16 code units, so a cap inside a surrogate pair would otherwise
+  // leave an unpaired one. Done before the word-boundary logic so that operates on
+  // well-formed text.
   const rawSlice = input.slice(0, contentLength);
   const slice = /[\uD800-\uDBFF]$/.test(rawSlice) ? rawSlice.slice(0, -1) : rawSlice;
   const lastBoundary = slice.lastIndexOf(' ');
-  // Only honor the boundary if it's reasonably close to the cap — otherwise
-  // a title like "x ".repeat(N) + "very long word" would shrink to two
-  // characters.
+  // Only honor the boundary if it's reasonably close to the cap, or a title like
+  // "x ".repeat(N) + "very long word" would shrink to two characters.
   if (lastBoundary > contentLength * 0.6) {
     return `${slice.slice(0, lastBoundary).trimEnd()}…`;
   }
@@ -680,11 +529,9 @@ const BLOCK_NAMES = new Set([
 ]);
 
 const renderStructured = (html: string): string => {
-  // Section state, advanced in document order as headings are met. A heading that
-  // classifies as ioc or references becomes the anchor for everything below it, and a
-  // deeper unclassified heading is treated as its subsection: without that,
-  // `<h2>Indicators of Compromise</h2><h3>Domains</h3>` fell back to prose at `Domains`
-  // and dropped every href under it.
+  // Section state, advanced in document order as headings are met. A classified heading
+  // becomes the anchor for everything below it; a deeper unclassified heading is its
+  // subsection and doesn't reset the anchor.
   let sectionKind: SectionKind = 'prose';
   let sectionDepth = 0;
 
@@ -708,11 +555,9 @@ const renderStructured = (html: string): string => {
       if (node.type === 'text') {
         out.push(node.data ?? '');
       } else if (node.type === 'cdata') {
-        // Same as the plain-text walker, and parsed into this walk for the same reasons.
-        // Re-entering `renderStructured` also started a fresh walk whose section state was
-        // `prose`, so CDATA sitting under an `<h2>Indicators of Compromise</h2>` was
-        // rendered as prose and every href-only indicator inside it was dropped. Section
-        // state is walker-local, so feeding the nodes into this stack inherits it.
+        // Same as the plain-text walker. Parsed into this walk rather than by re-entering
+        // `renderStructured`, which would start a fresh walk with section state reset to
+        // `prose` and lose the current heading's anchor.
         out.push('\n');
         stack.push({ kind: 'emit', text: '\n' });
         if (cdataDepth < MAX_CDATA_DEPTH) {
@@ -749,10 +594,8 @@ const renderStructured = (html: string): string => {
       } else if (name === 'a') {
         const text = collapseWhitespace(inlineTextOf(childrenOf(node), false));
         const href = lift ? hrefOf(node) : undefined;
-        // Prose anchors collapse to their visible text. Clickable inline citations
-        // (vendor docs, GitHub tool links, blog navigation) would otherwise flood
-        // extraction with reference noise, and a real inline IOC appears as defanged
-        // literal text that the regex path picks up regardless.
+        // Prose anchors collapse to visible text only, so ordinary citation links don't
+        // flood extraction with reference noise.
         out.push(href !== undefined ? `${text} ${href} ` : `${text} `);
       } else if (name === 'br') {
         out.push('\n');
@@ -764,11 +607,9 @@ const renderStructured = (html: string): string => {
         // Inline element: no boundary, contents kept.
         pushNodes(stack, childrenOf(node), cdataDepth);
       } else {
-        // Unknown or custom element. Same conservative default as the plain-text
-        // walker: treating these as inline merged adjacent indicators, so
-        // `<ioc-value>evil.com</ioc-value><ioc-value>bad.net</ioc-value>` came out as
-        // `evil.combad.net`. Vendor web components make that common, and it defeats the
-        // one thing this structured form exists to preserve.
+        // Unknown or custom element: same conservative default as the plain-text walker.
+        // Treating these as inline would merge adjacent indicators in vendor web
+        // components, which is exactly what this structured form exists to keep separate.
         out.push('\n');
         stack.push({ kind: 'emit', text: '\n' });
         pushNodes(stack, childrenOf(node), cdataDepth);
@@ -785,26 +626,20 @@ const renderStructured = (html: string): string => {
 };
 
 /**
- * Convert HTML to a structured text form that preserves block boundaries,
- * table rows, headers, and lists so that IOC extraction can see table-cell
- * values as recoverable tokens rather than a collapsed space-run.
+ * Converts HTML to a structured text form that preserves block boundaries, table rows,
+ * headers, and lists, so IOC extraction can see table-cell values as recoverable tokens
+ * rather than a collapsed space-run. TRANSIENT — used only inside `extract_iocs`, never
+ * stored or indexed; `body_text`/`stripHtml` are unaffected.
  *
- * TRANSIENT — the result is used only inside `extract_iocs`; it is never
- * stored, indexed, or emitted to any search field. `body_text` storage and
- * `stripHtml` are UNCHANGED.
- *
- * Transformations:
  *   <script>/<style>          → removed as whole elements
  *   <h1>–<h6>                 → ## heading text
  *   <tr> with <td>/<th> cells → | cell1 | cell2 | pipe-delimited row
  *   <li>                      → - item text
  *   block elements (p, div, br, …) → newline boundary
  *   <a href> in IOC/References sections → "anchortext URL" (href lifted as token)
- *   <a href> in prose         → anchor text only (href dropped, mirrors reader-mode)
+ *   <a href> in prose         → anchor text only
  *   inline tags               → removed; content kept
  *   HTML entities             → decoded by the parser
- *
- * The anchor-href lift is SCOPED to IOC and References heading sections only.
  */
 export const htmlToStructured = (html: string | undefined | null): string => {
   if (!html) return '';
@@ -821,28 +656,22 @@ export interface ReportContentDocument {
   body_html?: string;
   language: string;
   /**
-   * Set when `body_text` is the title rather than a real body.
-   *
-   * Without it the document is indistinguishable from one that genuinely repeats its
-   * title, so enrichment runs inference over the same string twice at full cost and
-   * has no way to know the input is a headline. Present only when true, so it does
-   * not clutter every report.
+   * Set when `body_text` is the title rather than a real body, so a consumer can tell a
+   * headline-only report from one that genuinely repeats its title and skip or cheapen
+   * enrichment accordingly. Present only when true.
    */
   body_is_title_fallback?: true;
 }
 
 /**
- * Build the `content` object for a threat report. The `content.title_bm25` /
- * `content.body_text_bm25` siblings are populated by Elasticsearch `copy_to`
- * on index (see `setup/index_templates.ts`) so ingest paths stay aligned with
- * the strict mapping and `normalizedReportSchema`.
+ * Builds the `content` object for a threat report. `content.title_bm25` /
+ * `content.body_text_bm25` siblings are populated by Elasticsearch `copy_to` on index (see
+ * `setup/index_templates.ts`).
  *
- * An empty `body_text` falls back to the title. Every enrichment route requires a
- * non-empty `text`, so a report stored with no body can never be enriched: it stays
- * `pending`, `load_pending_reports` keeps picking it up, and it occupies a slot in
- * the scheduled batch indefinitely. Title-only entries are common in RSS and Atom
- * feeds that carry only a headline and a link, and a headline is thin but real
- * input. This is done here rather than in each adapter so all six get it.
+ * An empty `body_text` falls back to the title: every enrichment route requires
+ * non-empty text, so a report stored with none would stay `pending` forever. Title-only
+ * entries are common in feeds that carry only a headline and a link. Done here rather
+ * than per adapter so every adapter gets it.
  */
 export const buildReportContent = ({
   title,
