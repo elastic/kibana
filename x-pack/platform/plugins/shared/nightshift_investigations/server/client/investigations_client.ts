@@ -126,37 +126,32 @@ function recoverTriggerTypeFromInput(
     : undefined;
 }
 
-/** Summaries render inline next to an investigation; cap them so callers cannot bloat responses. */
-const MAX_SUBJECT_SUMMARY_LENGTH = 200;
-
-function asBriefText(value: unknown): string | undefined {
+function asNonEmptyText(value: unknown): string | undefined {
   if (typeof value !== 'string') return undefined;
-  const text = value.trim();
-  if (!text) return undefined;
-  return text.length > MAX_SUBJECT_SUMMARY_LENGTH
-    ? `${text.slice(0, MAX_SUBJECT_SUMMARY_LENGTH)}…`
-    : text;
+  return value.trim() || undefined;
 }
 
 /**
- * Adds the text a consumer needs to render the triggering item inline, taken from the same
- * persisted inputs the subject itself came from.
+ * Adds the text a consumer needs to render the triggering item inline.
  *
- * Deliberately no URL: linking back to the item is presentation, and the apps that own those
- * routes expose locators (e.g. `SIGNIFICANT_EVENTS_APP_LOCATOR_ID`) that only resolve on the
- * client. Building the path here would duplicate another app's routing with nothing to catch a
- * rename. Consumers resolve `type` + `id` through the locator instead.
+ * `subject_summary` is what the caller declared through `start`, where the route bounds its
+ * length; it is returned verbatim, because shortening it to fit a card is the consumer's
+ * decision, not this layer's. `summary` and `name` are read as a fallback for investigations
+ * started before the field was declared.
  *
- * The summary deliberately does not fall back to `inputs.message`: callers that supply no summary
- * also supply no message, so the message is the generic prompt `start` synthesizes, and surfacing
- * that would label every such subject "Investigation requested for ...".
+ * `inputs.message` is deliberately not a fallback: callers that supply no summary also supply no
+ * message, so the message is the generic prompt `start` synthesizes, and surfacing that would
+ * label every such subject "Investigation requested for ...".
  */
 function toSubjectReference(
   subject: InvestigationSubject,
   input: Record<string, unknown> | undefined
 ): InvestigationSubjectReference {
   const ctx = isPlainObject(input?.context) ? input.context : undefined;
-  const summary = asBriefText(ctx?.summary) ?? asBriefText(ctx?.name);
+  const summary =
+    asNonEmptyText(ctx?.subject_summary) ??
+    asNonEmptyText(ctx?.summary) ??
+    asNonEmptyText(ctx?.name);
 
   return summary ? { ...subject, summary } : subject;
 }
@@ -202,6 +197,7 @@ export class NightshiftInvestigationsClient {
   async start({
     subject,
     trigger_type,
+    summary,
     message,
     stream_names,
     concurrency_key,
@@ -240,6 +236,7 @@ export class NightshiftInvestigationsClient {
         source: subject.type,
         [`${subject.type}_id`]: subject.id,
         trigger_type: trigger_type ?? DEFAULT_INVESTIGATION_TRIGGER_TYPE,
+        ...(summary ? { subject_summary: summary } : {}),
       },
     };
 

@@ -224,7 +224,8 @@ describe('NightshiftInvestigationsClient.get()', () => {
   });
 
   describe('subject reference', () => {
-    it('adds the summary to a significant_event subject', async () => {
+    it('returns the declared summary verbatim, however long', async () => {
+      const long = `${'x'.repeat(400)} and a trailing clause that must not be cut mid-sentence.`;
       mockManagement.getWorkflowExecution.mockResolvedValue(
         makeExecution({
           context: {
@@ -232,7 +233,7 @@ describe('NightshiftInvestigationsClient.get()', () => {
               context: {
                 source: 'significant_event',
                 event_id: 'event-42',
-                summary: 'Latency breached the SLO on checkout',
+                subject_summary: long,
               },
             },
           },
@@ -242,16 +243,16 @@ describe('NightshiftInvestigationsClient.get()', () => {
       expect(result.subject).toEqual({
         type: 'significant_event',
         id: 'event-42',
-        summary: 'Latency breached the SLO on checkout',
+        summary: long,
       });
     });
 
-    it('adds the summary to an alert subject', async () => {
+    it('adds the declared summary to an alert subject', async () => {
       mockManagement.getWorkflowExecution.mockResolvedValue(
         makeExecution({
           context: {
             inputs: {
-              context: { source: 'alert', alert_id: 'alert-99', summary: 'CPU saturation' },
+              context: { source: 'alert', alert_id: 'alert-99', subject_summary: 'CPU saturation' },
             },
           },
         })
@@ -264,17 +265,43 @@ describe('NightshiftInvestigationsClient.get()', () => {
       });
     });
 
-    it('falls back to context.name when no summary was supplied', async () => {
+    it('prefers the declared summary over the legacy context keys', async () => {
       mockManagement.getWorkflowExecution.mockResolvedValue(
         makeExecution({
           context: {
-            inputs: { context: { source: 'alert', alert_id: 'alert-99', name: 'High CPU' } },
+            inputs: {
+              context: {
+                source: 'alert',
+                alert_id: 'alert-99',
+                subject_summary: 'Declared',
+                summary: 'Legacy summary',
+                name: 'Legacy name',
+              },
+            },
           },
         })
       );
       const result = await makeClient().get('inv-1');
-      expect(result.subject?.summary).toBe('High CPU');
+      expect(result.subject?.summary).toBe('Declared');
     });
+
+    it.each([
+      ['summary', { summary: 'Legacy summary' }, 'Legacy summary'],
+      ['name', { name: 'Legacy name' }, 'Legacy name'],
+    ])(
+      'falls back to context.%s for investigations started before the field was declared',
+      async (_label, legacyContext, expected) => {
+        mockManagement.getWorkflowExecution.mockResolvedValue(
+          makeExecution({
+            context: {
+              inputs: { context: { source: 'alert', alert_id: 'alert-99', ...legacyContext } },
+            },
+          })
+        );
+        const result = await makeClient().get('inv-1');
+        expect(result.subject?.summary).toBe(expected);
+      }
+    );
 
     it('omits the summary rather than surfacing the generic message start() synthesizes', async () => {
       mockManagement.getWorkflowExecution.mockResolvedValue(
@@ -289,20 +316,6 @@ describe('NightshiftInvestigationsClient.get()', () => {
       );
       const result = await makeClient().get('inv-1');
       expect(result.subject).toEqual({ type: 'alert', id: 'alert-99' });
-    });
-
-    it('caps long summaries', async () => {
-      mockManagement.getWorkflowExecution.mockResolvedValue(
-        makeExecution({
-          context: {
-            inputs: {
-              context: { source: 'alert', alert_id: 'a-1', summary: 'x'.repeat(500) },
-            },
-          },
-        })
-      );
-      const result = await makeClient().get('inv-1');
-      expect(result.subject?.summary).toBe(`${'x'.repeat(200)}\u2026`);
     });
   });
 
@@ -635,6 +648,29 @@ describe('NightshiftInvestigationsClient.start()', () => {
       expect.anything(),
       'nightshift-investigations'
     );
+  });
+
+  it('persists a declared summary into the workflow context', async () => {
+    mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+    mockManagement.runWorkflow.mockResolvedValue('exec-123');
+
+    await makeClient().start({
+      subject: { type: 'alert', id: 'alert-1' },
+      summary: 'CPU saturation on checkout-api',
+    });
+
+    const [, , inputs] = mockManagement.runWorkflow.mock.calls[0];
+    expect(inputs.context.subject_summary).toBe('CPU saturation on checkout-api');
+  });
+
+  it('omits subject_summary when no summary was supplied', async () => {
+    mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+    mockManagement.runWorkflow.mockResolvedValue('exec-123');
+
+    await makeClient().start({ subject: { type: 'alert', id: 'alert-1' } });
+
+    const [, , inputs] = mockManagement.runWorkflow.mock.calls[0];
+    expect(inputs.context).not.toHaveProperty('subject_summary');
   });
 
   it('includes concurrency_key in inputs when provided', async () => {

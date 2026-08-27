@@ -22,9 +22,10 @@ export interface InvestigationSubject {
 
 /**
  * The subject as returned by reads, carrying the text a consumer needs to render the triggering
- * item inline. Derived server-side from the workflow inputs persisted at start time, never
- * model-generated. Linking back to the item is left to consumers, which resolve `type` and `id`
- * through the owning app's locator.
+ * item inline. `summary` is the value the caller declared at start time, returned verbatim, never
+ * model-generated and never truncated: shortening it for display is the consumer's call. Linking
+ * back to the item is left to consumers too, which resolve `type` and `id` through the owning
+ * app's locator.
  */
 export interface InvestigationSubjectReference extends InvestigationSubject {
   summary?: string;
@@ -40,6 +41,11 @@ export interface StartInvestigationRequest {
    * What initiated the investigation. Defaults to "manual" when omitted.
    */
   trigger_type?: InvestigationTriggerType;
+  /**
+   * Short description of the subject, for consumers to render next to the investigation.
+   * Stored verbatim and returned on reads as `subject.summary`.
+   */
+  summary?: string;
   /**
    * Caller-supplied prompt for the investigation agent. Falls back to a generic
    * message derived from the subject when omitted.
