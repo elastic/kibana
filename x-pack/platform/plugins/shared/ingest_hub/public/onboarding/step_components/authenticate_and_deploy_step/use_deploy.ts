@@ -74,7 +74,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
       deployGroups.every((group) =>
         group.members.every(({ instance }) => {
           const status = deployAndDetectStep.serviceStatuses[instance.instanceId];
-          return status === 'receiving' || status === 'detecting';
+          return status === 'receiving' || status === 'detecting' || status === 'timeout';
         })
       ),
     [deployGroups, deployAndDetectStep.serviceStatuses]
@@ -184,7 +184,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
         failedInstances: newFailed,
         errorsByInstance,
       } = collectDeployResults(results, groupsToDeploy);
-      const newServiceStatuses = buildInstanceStatuses(deployedTargets, newFailed, 'receiving');
+      const newServiceStatuses = buildInstanceStatuses(deployedTargets, newFailed, 'detecting');
 
       // Merge with instances that failed in a prior run but weren't retried in this one.
       const deployedSet = new Set(deployedTargets);

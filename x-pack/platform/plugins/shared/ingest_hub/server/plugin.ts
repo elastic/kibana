@@ -5,16 +5,24 @@
  * 2.0.
  */
 
-import type { Plugin, CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/server';
+import type { Plugin, CoreSetup, CoreStart, PluginInitializerContext, Logger } from '@kbn/core/server';
 
 import type { IngestHubServerSetupDeps, IngestHubServerStartDeps } from './types';
+import { registerRoutes } from './routes';
 
 export class IngestHubPlugin
   implements Plugin<void, void, IngestHubServerSetupDeps, IngestHubServerStartDeps>
 {
-  constructor(initializerContext: PluginInitializerContext) {}
+  private readonly logger: Logger;
 
-  public setup(core: CoreSetup<IngestHubServerStartDeps, void>): void {}
+  constructor(initializerContext: PluginInitializerContext) {
+    this.logger = initializerContext.logger.get();
+  }
+
+  public setup(core: CoreSetup<IngestHubServerStartDeps, void>): void {
+    const router = core.http.createRouter();
+    registerRoutes({ router, logger: this.logger });
+  }
 
   public start(_core: CoreStart, plugins: IngestHubServerStartDeps): void {}
 

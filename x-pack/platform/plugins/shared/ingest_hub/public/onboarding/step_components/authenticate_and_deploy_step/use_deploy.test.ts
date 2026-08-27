@@ -635,8 +635,8 @@ describe('buildInstanceStatuses', () => {
   });
 
   it('sets succeeded instance ids to the provided succeededState', () => {
-    const statuses = buildInstanceStatuses(['inst-a'], [], 'receiving');
-    expect(statuses['inst-a']).toBe('receiving');
+    const statuses = buildInstanceStatuses(['inst-a'], [], 'detecting');
+    expect(statuses['inst-a']).toBe('detecting');
   });
 
   it('sets failed instance ids to "error"', () => {
@@ -866,7 +866,7 @@ describe('useDeploy', () => {
   it('navigates without resubmitting when all selected instances are already deployed', async () => {
     setupMocks({
       selectedServiceIds: ['ec2'],
-      detectAndReviewStep: { serviceStatuses: { ec2: 'receiving' } },
+      detectAndReviewStep: { serviceStatuses: { ec2: 'detecting' } },
     });
     const onContinue = jest.fn();
     const { result } = renderHook(() => useDeploy({ onContinue }));
@@ -972,8 +972,8 @@ describe('useDeploy', () => {
       instances,
       detectAndReviewStep: {
         serviceStatuses: {
-          ec2: 'receiving',
-          'ec2__dup-1': 'receiving',
+          ec2: 'detecting',
+          'ec2__dup-1': 'detecting',
         },
       },
     });
@@ -1094,6 +1094,33 @@ describe('useDeploy', () => {
       });
       const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
       expect(result.current.isAlreadyDeployed).toBe(true);
+    });
+
+    it('is true when all members have status timeout — a timed-out deploy must not un-complete step 3', () => {
+      setupMocks({
+        selectedServiceIds: ['ec2'],
+        detectAndReviewStep: { serviceStatuses: { ec2: 'timeout' } },
+      });
+      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+      expect(result.current.isAlreadyDeployed).toBe(true);
+    });
+
+    it('is true with a mixed set — one receiving, one detecting (the state during incremental polling promotion)', () => {
+      setupMocks({
+        selectedServiceIds: ['ec2', 'guardduty'],
+        detectAndReviewStep: { serviceStatuses: { ec2: 'receiving', guardduty: 'detecting' } },
+      });
+      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+      expect(result.current.isAlreadyDeployed).toBe(true);
+    });
+
+    it('is false with a mixed set — one detecting, one instantiating (deploy still in progress)', () => {
+      setupMocks({
+        selectedServiceIds: ['ec2', 'guardduty'],
+        detectAndReviewStep: { serviceStatuses: { ec2: 'detecting', guardduty: 'instantiating' } },
+      });
+      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+      expect(result.current.isAlreadyDeployed).toBe(false);
     });
   });
 
