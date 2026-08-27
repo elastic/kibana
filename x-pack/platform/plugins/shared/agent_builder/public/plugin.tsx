@@ -72,7 +72,6 @@ import {
   setSidebarRuntimeContext,
   clearSidebarRuntimeContext,
 } from './sidebar';
-import { openConversationMetadataFlyout } from './flyout/open_conversation_metadata_flyout';
 import { storageKeys } from './application/storage_keys';
 import { AGENTBUILDER_APP_ID } from '../common/features';
 
@@ -232,10 +231,13 @@ export class AgentBuilderPlugin
       return { chatRef: sidebarRef };
     };
 
-    const handleOpenConversationMetadata = ({
+    const handleOpenConversationMetadata = async ({
       conversationId,
       onClose,
     }: OpenConversationMetadataOptions): Promise<() => void> => {
+      const { openConversationMetadataFlyout } = await import(
+        './flyout/open_conversation_metadata_flyout'
+      );
       return openConversationMetadataFlyout({
         core,
         conversationsService,
