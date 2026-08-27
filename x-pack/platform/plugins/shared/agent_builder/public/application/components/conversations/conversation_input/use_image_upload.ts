@@ -12,6 +12,7 @@ import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import type { ConversationAttachment } from '@kbn/agent-builder-common/attachments';
 import type { MessageEditorController } from './message_editor/use_message_editor';
 import { processImageFile, getUniqueName } from './upload_image';
+import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
 
 export interface UseImageUploadParams {
   attachments: ConversationAttachment[] | undefined;
@@ -31,6 +32,10 @@ export interface UseImageUploadResult {
   /** Pill → text sync: thumbnail pill removed → remove editor placeholder + abort upload. */
   handleRemoveAttachment: (attachment: ConversationAttachment) => void;
 }
+
+const EMPTY_UPLOADING_NAMES = new Set<string>();
+const NOOP = () => {};
+const NOOP_HANDLE_PASTE_FILE = (): string | undefined => undefined;
 
 export const useImageUpload = ({
   attachments,
@@ -132,5 +137,23 @@ export const useImageUpload = ({
     [removeAttachment, messageEditorController]
   );
 
-  return { uploadingNames, handlePasteFile, handleAfterInput, handleRemoveAttachment };
+  const result: UseImageUploadResult = {
+    uploadingNames,
+    handlePasteFile,
+    handleAfterInput,
+    handleRemoveAttachment,
+  };
+
+  // #region FEATURE FLAG: image-upload
+  // This is the only code required to be deleted when the feature goes GA
+  const isImageUploadEnabled = useExperimentalFeatures();
+  if (!isImageUploadEnabled) {
+    result.uploadingNames = EMPTY_UPLOADING_NAMES;
+    result.handlePasteFile = NOOP_HANDLE_PASTE_FILE;
+    result.handleAfterInput = NOOP;
+    result.handleRemoveAttachment = NOOP;
+  }
+  // #endregion FEATURE FLAG
+
+  return result;
 };

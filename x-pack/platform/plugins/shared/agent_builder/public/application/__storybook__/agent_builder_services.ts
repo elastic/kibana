@@ -82,6 +82,7 @@ const defaultServices: AgentBuilderInternalService = {
   toolsService: {} as never,
   skillsService: {} as never,
   smlService: {} as never,
+  spaceSettingsService: {} as never,
   pluginsService: {} as never,
   oauthClientsService: {} as never,
   startDependencies: {} as never,

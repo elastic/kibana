@@ -23,6 +23,7 @@ import { useSubmitMessage } from '../../../hooks/use_submit_message';
 import { useToasts } from '../../../hooks/use_toasts';
 import { useMessageEditor } from './message_editor';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
+import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
 
 jest.mock('../../../hooks/use_conversation_stream', () => ({
   useConversationStream: jest.fn(),
@@ -69,6 +70,9 @@ jest.mock('./attachment_pills_row', () => ({
 jest.mock('../../../hooks/use_agent_builder_service', () => ({
   useAgentBuilderServices: jest.fn(),
 }));
+jest.mock('../../../hooks/use_experimental_features', () => ({
+  useExperimentalFeatures: jest.fn(),
+}));
 jest.mock('@kbn/agent-builder-browser', () => ({
   ConversationInputShell: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
@@ -86,6 +90,7 @@ const mockedUseSubmitMessage = jest.mocked(useSubmitMessage);
 const mockedUseToasts = jest.mocked(useToasts);
 const mockedUseMessageEditor = jest.mocked(useMessageEditor);
 const mockedUseAgentBuilderServices = jest.mocked(useAgentBuilderServices);
+const mockedUseExperimentalFeatures = jest.mocked(useExperimentalFeatures);
 
 const submitMessage = jest.fn();
 const editorController = {
@@ -132,6 +137,7 @@ describe('ConversationInput', () => {
         upload: jest.fn().mockResolvedValue(undefined),
       },
     } as never);
+    mockedUseExperimentalFeatures.mockReturnValue(true);
     mockedUseSubmitMessage.mockReturnValue(submitMessage);
     mockedUseToasts.mockReturnValue({
       addErrorToast: jest.fn(),
