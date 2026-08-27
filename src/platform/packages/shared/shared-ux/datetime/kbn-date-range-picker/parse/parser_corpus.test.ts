@@ -567,6 +567,14 @@ describe('parser corpus: textToTimeRange (English)', () => {
           isInvalid: true,
         },
       },
+      {
+        input: '/d',
+        note: 'leading slash is not a valid datemath start',
+        expected: {
+          isInvalid: true,
+          start: '',
+        },
+      },
     ]);
   });
 });
