@@ -83,6 +83,7 @@ export class SyncPrivateLocationMonitorsTask {
     state: SyncTaskState;
     error?: Error;
     schedule?: IntervalSchedule | RruleSchedule;
+    runAt?: Date;
   }> {
     this.debugLog(
       `Syncing private location monitors, current task state is ${JSON.stringify(
@@ -224,6 +225,15 @@ export class SyncPrivateLocationMonitorsTask {
           );
         }
       }
+
+      // Only `updatedAt` after this run's start — missing IDs persist after a
+      // sync and would schedule follow-ups forever.
+      if (await this.haveMWsUpdatedSince(taskState.lastStartedAt)) {
+        this.debugLog(
+          `Maintenance windows changed during this run; scheduling an immediate follow-up`
+        );
+        return { state: taskState, runAt: new Date() };
+      }
     } catch (error) {
       logger.error(`Sync of private location monitors failed: ${error.message}`);
       return { error, state: taskState, schedule: { interval } };
@@ -350,6 +360,15 @@ export class SyncPrivateLocationMonitorsTask {
       missingMWIds,
       maintenanceWindows: maintenanceWindows.filter((mw) => monitorMwsIds.includes(mw.id)),
     };
+  }
+
+  async haveMWsUpdatedSince(sinceIso: string): Promise<boolean> {
+    const { syntheticsService } = this.syntheticsMonitorClient;
+    const maintenanceWindows = (await syntheticsService.getMaintenanceWindows(ALL_SPACES_ID)) ?? [];
+    return maintenanceWindows.some((mw) => {
+      const updatedAt = mw.updatedAt;
+      return Boolean(updatedAt) && moment(updatedAt).isAfter(moment(sinceIso));
+    });
   }
 
   async cleanUpDuplicatedPackagePolicies(

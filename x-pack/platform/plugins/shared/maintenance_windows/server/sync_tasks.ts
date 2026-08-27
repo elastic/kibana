@@ -5,17 +5,15 @@
  * 2.0.
  */
 
-import pRetry from 'p-retry';
 import type { Logger } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { TaskAlreadyRunningError } from '@kbn/task-manager-plugin/server';
-
-const RUN_SOON_RETRIES = 3;
 
 /**
  * Consumers register Task Manager task instance IDs. On maintenance window
  * mutations, this registry only calls `taskManager.runSoon` — no arbitrary
  * callbacks, so work stays inside the consumer's own task runner.
+ * Already-running tasks are skipped; consumers schedule their own follow-up.
  */
 export class MaintenanceWindowSyncTasks {
   // Counts registrations per task ID so two registrations of the same ID
@@ -55,33 +53,21 @@ export class MaintenanceWindowSyncTasks {
     }
 
     for (const taskId of this.taskIdCounts.keys()) {
-      void this.runSoonWithRetry(taskManager, taskId);
+      void this.schedule(taskManager, taskId);
     }
   };
 
-  private runSoonWithRetry = async (
+  private schedule = async (
     taskManager: TaskManagerStartContract,
     taskId: string
   ): Promise<void> => {
     try {
-      await pRetry(
-        async () => {
-          try {
-            await taskManager.runSoon(taskId);
-          } catch (error) {
-            if (!(error instanceof TaskAlreadyRunningError)) {
-              // Not the expected claiming/running race — fail fast, no retries.
-              throw new pRetry.AbortError(error as Error);
-            }
-            this.logger.debug(
-              `Sync task "${taskId}" is already running; retrying runSoon shortly.`
-            );
-            throw error;
-          }
-        },
-        { retries: RUN_SOON_RETRIES }
-      );
+      await taskManager.runSoon(taskId);
     } catch (error) {
+      if (error instanceof TaskAlreadyRunningError) {
+        this.logger.debug(`Sync task "${taskId}" is already running; skipping runSoon.`);
+        return;
+      }
       this.logger.error(
         `Failed to schedule registered sync task "${taskId}" after maintenance window change: ${
           (error as Error).message
