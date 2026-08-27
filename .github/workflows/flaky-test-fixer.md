@@ -508,6 +508,12 @@ Follow this format:
   The failure is infrastructure-side (the CI agent lost its Elasticsearch connection mid-run), so there's nothing to patch in this repo. cc @<requester-github-handle-here-if-not-a-bot>
   ```
   Swap in the actual one-clause reason — e.g. the test already passes on `main`, the failure is infrastructure-side, or the root cause can't be confidently identified.
+- **Pre-fix CI lag** (the reported failure ran a Cloud image that predates the fix — confirm via the `flaky-test-investigator` skill's pipelines reference — so no PR was opened):
+  ```markdown
+  ### 🕒 Pre-fix CI lag, not a regression
+
+  This failure ran on a build that doesn't yet include the fix; it should clear once the Cloud image catches up with `main`. cc @<requester-github-handle-here-if-not-a-bot>
+  ```
 - **Backport the existing fix** (fix already on `main`, contained PR — no PR opened):
   ```markdown
   ### The fix is already on `main` — it needs backporting
