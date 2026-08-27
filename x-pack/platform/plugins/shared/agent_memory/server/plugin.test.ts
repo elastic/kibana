@@ -71,9 +71,9 @@ describe('AgentMemoryPlugin', () => {
     ]);
     const registeredTools = agentBuilder.tools.register.mock.calls.map(([tool]) => tool);
     expect(registeredTools).toEqual([
-      expect.objectContaining({ id: platformMemoryTools.recall, excludeFromMcp: true }),
-      expect.objectContaining({ id: platformMemoryTools.remember, excludeFromMcp: true }),
-      expect.objectContaining({ id: platformMemoryTools.forget, excludeFromMcp: true }),
+      expect.objectContaining({ id: platformMemoryTools.recall }),
+      expect.objectContaining({ id: platformMemoryTools.remember }),
+      expect.objectContaining({ id: platformMemoryTools.forget }),
     ]);
     expect(registeredTools.find(({ id }) => id === platformMemoryTools.remember)).toEqual(
       expect.objectContaining({

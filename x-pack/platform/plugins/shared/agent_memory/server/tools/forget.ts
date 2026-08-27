@@ -49,7 +49,6 @@ Returns { result: 'deleted' } or { result: 'not_found' }.
   `.trim(),
   schema: forgetInputSchema,
   tags: [],
-  excludeFromMcp: true,
   confirmation: {
     askUser: writeConfirmation,
     getConfirmation: ({ toolParams }) => ({

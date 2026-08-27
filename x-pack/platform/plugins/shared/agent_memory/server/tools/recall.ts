@@ -52,7 +52,6 @@ Fails open: if the memory service is unavailable, returns an empty list without 
   `.trim(),
   schema: recallInputSchema,
   tags: [],
-  excludeFromMcp: true,
   annotations: {
     title: 'Recall Memories',
     readOnlyHint: true,

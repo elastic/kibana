@@ -20,10 +20,9 @@ The tools and workflow steps share the same core write, recall, and soft-delete 
 Explicit tool and workflow recall can require generic exact-match tags such as project,
 customer, case, workflow, or Watch identifiers. Every requested tag must be present.
 Automatic recall remains unchanged and does not add a tag constraint.
-All memory tools set `excludeFromMcp` and are omitted from the Agent Builder MCP
-server. Agent Builder's registered-tool REST execution endpoint remains an
-inherent Agent Builder surface; it is subject to Agent Builder access checks and
-the caller's native Elasticsearch permissions.
+Memory tools are available through the Agent Builder MCP server at `/api/agent_builder/mcp`.
+Agent Builder's registered-tool REST execution endpoint is subject to Agent Builder
+access checks and the caller's native Elasticsearch permissions.
 
 ## Elasticsearch storage
 
@@ -31,8 +30,8 @@ Memories are stored in `ai-index-idx-agent-memory` through
 `StorageIndexAdapter`. The index template composes:
 
 1. Elasticsearch's required `ai-index@mappings` component
-2. The plugin-owned `ai-index-agent-memory@mappings` component
-3. Elasticsearch's optional `ai-index@custom` component
+2. Elasticsearch's optional `ai-index@custom` component
+3. The plugin-owned `ai-index-agent-memory@mappings` component
 
 The plugin-owned component defines only Agent Memory fields. Common AI-index
 fields such as `title`, `description`, `content`, `content.semantic`, and
@@ -47,24 +46,36 @@ are now required and document IDs are deterministic over
 
 ## Authorization and isolation
 
-Agent Memory has no custom Kibana feature privileges. Tools, workflows, and
-automatic recall perform data operations with the request-scoped
-`asCurrentUser` client, so authorization relies solely on native Elasticsearch
-permissions. Core security is used only to resolve a stable identity.
+The index is non-hidden and has no native document-level security (DLS). Broad
+direct Elasticsearch reads can cross user and space boundaries, bypassing the
+application filters. A principal with direct write access could also forge
+another user's scope. Normal viewer/editor broad grants are read-only. Because
+these direct paths bypass application enforcement, this POC remains
+disabled-by-default and is not production-ready.
 
-Current application paths enforce personal scope with `space_id`,
-`memory.scope_kind=user`, and `memory.scope_id` set to that identity.
-`memory.provenance.author` is creator metadata only; it does not control
-visibility or ownership. Team scope is reserved in the schema and deterministic
-key design, but team memories are not implemented.
+Supported Agent Memory application paths derive a stable authenticated identity
+and enforce `space_id`, `memory.scope_kind=user`, and `memory.scope_id` set to
+that identity. Forget checks the same ownership tuple before soft-deleting a
+memory. `memory.provenance.author` is creator metadata only; it does not control
+visibility or ownership. Team scope is reserved but is not implemented.
 
-The index is intentionally non-hidden and has no per-document native
-document-level security. Built-in viewer/editor-style broad index reads can
-therefore query memories across users directly with ES|QL, bypassing the
-application's personal-scope filters. Normal roles do not receive write access
-by default. This direct Elasticsearch cross-user access makes the POC unsafe for
-production. Principal-aware and team-aware native authorization remains an
-unresolved production blocker.
+Writes stamp `permissions.kibana.privileges` with nested per-space entries such
+as `{ space, name: ['ai_index:agent_memory/read'], count }`, matching merged
+Kibana [PR #285559](https://github.com/elastic/kibana/pull/285559). Agent
+Builder's `read` and `all` privileges grant `ai_index:agent_memory/read` as a
+Kibana AI-index feature action, not an Elasticsearch index privilege. Agent
+Memory reads do not consume these stamps, and the stamps do not currently
+create native DLS.
+
+Kibana PR #285559 applies to SML's `ai-index-idx-sml-data` path. Open
+Elasticsearch [PR #156990](https://github.com/elastic/elasticsearch/pull/156990)
+is hard-coded to that same SML index and enforces space and action only, not
+`memory.scope_id`.
+
+Even a generalized version of the SML DLS would not isolate Alice and Bob in the
+same space when both have `ai_index:agent_memory/read`. Principal-aware native
+DLS, or a private index accessible only through trusted Kibana paths, remains a
+production blocker.
 
 Deployments must grant Elasticsearch index privileges on
 `ai-index-idx-agent-memory*` separately:
@@ -79,20 +90,12 @@ internal management client rather than the current-user client.
 
 ## Storage Adapter follow-up
 
-[PR #285258](https://github.com/elastic/kibana/pull/285258) addresses mapping and
-component-template composition settings only; it does not address authorization.
-After it merges, adopt its public `composedOf`,
-`ignoreMissingComponentTemplates`, and `inlineSchemaMappings` APIs for
-overlapping composition behavior.
+[PR #285258](https://github.com/elastic/kibana/pull/285258) is closed because its
+SML-specific implementation did not satisfy
+[elastic/search-team#15599](https://github.com/elastic/search-team/issues/15599),
+which requires removing SML's dedicated priority-600 index template.
 
-This branch also requires a separate internal `indexManagementClient` and owned
-component-template dependency, lifecycle, and reconciliation behavior that
-#285258 does not provide. Those needs must be replaced upstream or relocated
-before all five branch-owned Storage Adapter diffs can be removed. The
-convergence/removal target remains:
-
-- `index.ts`
-- `src/get_schema_version.ts`
-- `src/index_adapter/index.test.ts`
-- `src/index_adapter/index.ts`
-- `src/index_adapter/integration_tests/index.test.ts`
+This branch needs the composition capabilities `composedOf`,
+`ignoreMissingComponentTemplates`, and `inlineSchemaMappings`, plus the separate
+`indexManagementClient` capability. These adapter capabilities need focused
+upstream ownership.

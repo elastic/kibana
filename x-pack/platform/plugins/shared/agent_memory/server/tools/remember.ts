@@ -47,7 +47,6 @@ Returns { id, revision, action } where action is 'created' or 'updated'.
   `.trim(),
   schema: rememberInputSchema,
   tags: [],
-  excludeFromMcp: true,
   confirmation: {
     askUser: writeConfirmation,
     getConfirmation: ({ toolParams }) => ({
