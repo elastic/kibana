@@ -202,6 +202,10 @@ const runLeadGenerationTask = async ({
     // Entity Store indices (entities-latest-*) are not accessible to kibana_system.
     const esClient = core.elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
     const crudClient = startPlugins.entityStore.createCRUDClient(esClient, state.namespace);
+    const relationshipsClient = startPlugins.entityStore.createRelationshipsClient(
+      esClient,
+      state.namespace
+    );
     const riskScoreDataClient = new RiskScoreDataClient({
       logger,
       kibanaVersion,
@@ -239,6 +243,7 @@ const runLeadGenerationTask = async ({
       ml,
       request: fakeRequest,
       soClient,
+      relationshipsClient,
     });
 
     await updateLeadGenerationConfig(soClient, state.namespace, {

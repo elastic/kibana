@@ -9,7 +9,11 @@ import { v4 as uuidv4 } from 'uuid';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import { OccWriter, isElasticsearchWriteConflict } from '@kbn/occ';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
-import type { ConversationOrigin } from '@kbn/agent-builder-common';
+import type {
+  ConversationOrigin,
+  ConversationRoundFeedback,
+  FeedbackChipId,
+} from '@kbn/agent-builder-common';
 import {
   type CurrentUser,
   type Conversation,
@@ -97,6 +101,11 @@ export interface ConversationClient {
     options?: { access: ConversationAccess }
   ): Promise<Conversation>;
   markRead(conversationId: string, read: boolean): Promise<Conversation>;
+  updateRoundFeedback(
+    conversationId: string,
+    roundId: string,
+    feedback: { vote: 'up' | 'down' | null; chips?: FeedbackChipId[]; comment?: string }
+  ): Promise<void>;
   list(options?: ConversationListOptions): Promise<ConversationWithoutRoundsWithPermissions[]>;
   delete(conversationId: string): Promise<boolean>;
   updateAccessControl(
@@ -458,6 +467,46 @@ class ConversationClientImpl implements ConversationClient {
           currentRead: current.read ?? false,
           nextRead: read,
         }),
+    });
+  }
+
+  async updateRoundFeedback(
+    conversationId: string,
+    roundId: string,
+    feedback: { vote: 'up' | 'down' | null; chips?: FeedbackChipId[]; comment?: string }
+  ): Promise<void> {
+    await this.writeConversation({
+      conversationId,
+      access: 'owner',
+      fields: (current) => {
+        const roundIndex = current.rounds.findIndex((r) => r.id === roundId);
+
+        if (roundIndex === -1) {
+          throw createConversationNotFoundError({ conversationId });
+        }
+
+        const round = current.rounds[roundIndex];
+        const { feedback: _removed, ...roundWithoutFeedback } = round;
+
+        const updatedRound =
+          feedback.vote === null
+            ? roundWithoutFeedback
+            : {
+                ...round,
+                feedback: {
+                  vote: feedback.vote,
+                  chips: feedback.chips ?? [],
+                  comment: feedback.comment ?? '',
+                  submitted_at: new Date().toISOString(),
+                  connector_id: round.model_usage?.connector_id,
+                  model: round.model_usage?.model,
+                } satisfies ConversationRoundFeedback,
+              };
+
+        return {
+          rounds: current.rounds.map((r, i) => (i === roundIndex ? updatedRound : r)),
+        };
+      },
     });
   }
 

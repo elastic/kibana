@@ -42,6 +42,21 @@ const findStepByType = (steps: unknown[], type: string): Record<string, unknown>
   return undefined;
 };
 
+const collectStepsByType = (steps: unknown[], type: string): Array<Record<string, unknown>> => {
+  const matches: Array<Record<string, unknown>> = [];
+  for (const step of steps) {
+    const s = step as Record<string, unknown>;
+    if (s.type === type) matches.push(s);
+    for (const key of ['steps', 'else']) {
+      const nested = s[key];
+      if (Array.isArray(nested)) {
+        matches.push(...collectStepsByType(nested, type));
+      }
+    }
+  }
+  return matches;
+};
+
 describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
   // The workflow is installed statically (no template rendering); it reads per-space config at run
   // time. These assertions run against the static yaml the definition ships.
@@ -64,6 +79,23 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(fetchStep.with.path).toBe(
       '/s/{{ workflow.spaceId }}/internal/security_solution/alert_analysis_workflow/runtime_config'
     );
+  });
+
+  it('space-scopes the path of every kibana.request step', () => {
+    // Only generated `kibana.*` connector steps get a space prefix from the engine; a raw
+    // `kibana.request` is sent verbatim, so an unprefixed path writes to the default space and
+    // still returns 200. Asserting over every request step, rather than the ones that exist
+    // today, keeps steps added later covered too.
+    const requestSteps = collectStepsByType(workflow.steps, 'kibana.request') as Array<{
+      name: string;
+      with: { path: string };
+    }>;
+    const unscoped = requestSteps.filter(
+      ({ with: { path } }) => !path.startsWith('/s/{{ workflow.spaceId }}/')
+    );
+
+    expect(requestSteps.length).toBeGreaterThan(0);
+    expect(unscoped.map(({ name, with: { path } }) => `${name}: ${path}`)).toEqual([]);
   });
 
   it('reads the tag prefix from runtime config and does not bake it into consts', () => {
