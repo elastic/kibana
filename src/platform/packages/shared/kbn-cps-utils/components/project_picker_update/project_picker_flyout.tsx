@@ -221,8 +221,13 @@ export function ProjectPickerFlyoutContent({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        <ProjectPickerFrameBody scrollContainerRef={scrollContainerRef}>
+      <EuiFlyoutBody
+        css={{
+          '& .euiFlyoutBody__overflowContent': { padding: 0, height: 'inherit' },
+        }}
+        scrollContainerRef={scrollContainerRef}
+      >
+        <ProjectPickerFrameBody>
           <ProjectPickerList scrollContainerRef={scrollContainerRef} />
         </ProjectPickerFrameBody>
       </EuiFlyoutBody>
@@ -251,6 +256,7 @@ export function ProjectPickerFlyout(props: ProjectPickerFlyoutProps) {
       hideCloseButton
       onClose={props.onClose}
       size="m"
+      paddingSize="m"
     >
       <ProjectPickerFlyoutContent {...props} titleId={titleId} />
     </EuiFlyout>

@@ -42,6 +42,7 @@ export const createSmlAttachTool = ({
     'Entries that cannot be resolved return individual errors without failing the entire call.',
   schema: smlAttachSchema,
   tags: ['sml', 'attachment'],
+  excludeFromMcp: true,
   annotations: {
     title: 'Attach SML Item',
     readOnlyHint: true,

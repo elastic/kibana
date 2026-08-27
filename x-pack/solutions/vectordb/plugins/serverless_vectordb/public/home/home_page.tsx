@@ -46,10 +46,11 @@ export const HomePage = () => {
   return (
     <EuiPageTemplate restrictWidth panelled={false} grow={false}>
       <EuiPageTemplate.Section paddingSize="xl" grow={false}>
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" wrap>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup
               responsive={false}
+              wrap
               alignItems="center"
               gutterSize="s"
               data-test-subj="vectordbHomepageHeaderLeftsideGroup"

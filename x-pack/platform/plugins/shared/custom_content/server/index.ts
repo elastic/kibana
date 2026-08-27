@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext } from '@kbn/core/server';
-
 export type { CustomContentEmbeddableState } from './embeddable/schemas';
 
-export const plugin = async (initializerContext: PluginInitializerContext) => {
+export const plugin = async () => {
   const { CustomContentPlugin } = await import('./plugin');
-  return new CustomContentPlugin(initializerContext);
+  return new CustomContentPlugin();
 };

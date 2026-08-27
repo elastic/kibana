@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type {
   WorkflowsExtensionsServerPluginSetup,
   WorkflowsExtensionsServerPluginStart,
@@ -13,6 +14,7 @@ import type {
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { NightshiftInvestigationsClient } from './client/investigations_client';
+import type { TriggerEmitter } from './workflows/triggers/emit';
 
 export type NightshiftInvestigationsServerSetup = void;
 
@@ -21,11 +23,15 @@ export interface NightshiftInvestigationsServerStart {
 }
 
 export interface NightshiftInvestigationsSetupDeps {
+  agentBuilder?: AgentBuilderPluginSetup;
   workflowsExtensions?: WorkflowsExtensionsServerPluginSetup;
   workflowsManagement?: WorkflowsServerPluginSetup;
 }
 
 export interface NightshiftInvestigationsStartDeps {
+  agentBuilder?: AgentBuilderPluginStart;
   spaces?: SpacesPluginStart;
   workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
 }
+
+export type GetTriggerEmitter = (request: KibanaRequest) => TriggerEmitter | undefined;
