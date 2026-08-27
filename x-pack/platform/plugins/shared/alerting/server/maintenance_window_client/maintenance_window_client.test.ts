@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import {
+  loggingSystemMock,
+  savedObjectsClientMock,
+  uiSettingsServiceMock,
+} from '@kbn/core/server/mocks';
+import { Frequency } from '@kbn/rrule';
+import type { CreateMaintenanceWindowParams } from '../application/maintenance_window/methods/create/types';
+import type { UpdateMaintenanceWindowParams } from '../application/maintenance_window/methods/update/types';
 
 jest.mock('../application/maintenance_window/methods/create/create_maintenance_window', () => ({
   createMaintenanceWindow: jest.fn().mockResolvedValue({ id: 'mw-1' }),
@@ -43,19 +50,37 @@ jest.mock(
 
 import { MaintenanceWindowClient } from './maintenance_window_client';
 
+const createParams: CreateMaintenanceWindowParams = {
+  data: {
+    title: 'test-title',
+    duration: 3600000,
+    rRule: {
+      tzid: 'UTC',
+      dtstart: '2023-02-26T00:00:00.000Z',
+      freq: Frequency.WEEKLY,
+      count: 2,
+    } as CreateMaintenanceWindowParams['data']['rRule'],
+  },
+};
+
+const updateParams: UpdateMaintenanceWindowParams = {
+  id: 'mw-1',
+  data: { title: 'test-title' },
+};
+
 describe('MaintenanceWindowClient notifyChange', () => {
   it('notifies after create, update, delete, archive, and finish', async () => {
     const notifyChange = jest.fn();
     const client = new MaintenanceWindowClient({
       logger: loggingSystemMock.createLogger(),
       savedObjectsClient: savedObjectsClientMock.create(),
-      uiSettings: {} as any,
+      uiSettings: uiSettingsServiceMock.createClient(),
       getUserName: async () => null,
       notifyChange,
     });
 
-    await client.create({ data: {} as any });
-    await client.update({ id: 'mw-1', data: {} as any });
+    await client.create(createParams);
+    await client.update(updateParams);
     await client.delete({ id: 'mw-1' });
     await client.archive({ id: 'mw-1', archive: true });
     await client.finish({ id: 'mw-1' });
@@ -73,12 +98,12 @@ describe('MaintenanceWindowClient notifyChange', () => {
     const client = new MaintenanceWindowClient({
       logger: loggingSystemMock.createLogger(),
       savedObjectsClient: savedObjectsClientMock.create(),
-      uiSettings: {} as any,
+      uiSettings: uiSettingsServiceMock.createClient(),
       getUserName: async () => null,
       notifyChange,
     });
 
-    await expect(client.create({ data: {} as any })).rejects.toThrow('create failed');
+    await expect(client.create(createParams)).rejects.toThrow('create failed');
     expect(notifyChange).not.toHaveBeenCalled();
   });
 });

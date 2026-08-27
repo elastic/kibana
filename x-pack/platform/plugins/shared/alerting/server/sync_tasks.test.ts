@@ -10,22 +10,30 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { MaintenanceWindowSyncTasks } from './sync_tasks';
 
+type PRetryInput = Parameters<typeof pRetry>[0];
+type PRetryOptions = Parameters<typeof pRetry>[1];
+
 // Use 0ms delays so retry tests run synchronously without fake timers.
 jest.mock('p-retry', () => {
-  const actual = jest.requireActual<typeof import('p-retry')>('p-retry');
-  const mockFn = jest
-    .fn()
-    .mockImplementation((fn: Parameters<typeof actual.default>[0], options: any) =>
+  const actual = jest.requireActual('p-retry') as {
+    default: typeof pRetry;
+    AbortError: typeof pRetry.AbortError;
+  };
+  const mockFn = Object.assign(
+    jest.fn((fn: PRetryInput, options?: PRetryOptions) =>
       actual.default(fn, { ...options, minTimeout: 0, maxTimeout: 0, randomize: false })
-    );
-  (mockFn as any).AbortError = actual.AbortError;
+    ),
+    { AbortError: actual.AbortError }
+  );
   return { __esModule: true, default: mockFn, AbortError: actual.AbortError };
 });
 
-const currentlyRunningError = (taskId: string) =>
+const currentlyRunningError = (taskId: string): Error =>
   new Error(`Failed to run task "${taskId}" as it is currently running`);
 
-const flushRetries = async (iterations = 6) => {
+const runSoonResult = (id: string): { id: string } => ({ id });
+
+const flushRetries = async (iterations = 6): Promise<void> => {
   for (let i = 0; i < iterations; i++) {
     await new Promise((resolve) => setTimeout(resolve, 10));
   }
@@ -42,7 +50,7 @@ describe('MaintenanceWindowSyncTasks', () => {
   it('registers task ids and runs them soon', async () => {
     const syncTasks = new MaintenanceWindowSyncTasks(logger);
     const taskManager = taskManagerMock.createStart();
-    taskManager.runSoon.mockResolvedValue({} as any);
+    taskManager.runSoon.mockResolvedValue(runSoonResult('my-sync-task'));
     syncTasks.setTaskManager(taskManager);
 
     const unsubscribe = syncTasks.register('my-sync-task');
@@ -59,7 +67,7 @@ describe('MaintenanceWindowSyncTasks', () => {
   it('keeps the task registered until every registration for it is unsubscribed', async () => {
     const syncTasks = new MaintenanceWindowSyncTasks(logger);
     const taskManager = taskManagerMock.createStart();
-    taskManager.runSoon.mockResolvedValue({} as any);
+    taskManager.runSoon.mockResolvedValue(runSoonResult('shared-task'));
     syncTasks.setTaskManager(taskManager);
 
     const unsubscribeFirst = syncTasks.register('shared-task');
@@ -78,7 +86,7 @@ describe('MaintenanceWindowSyncTasks', () => {
   it('is safe to call the same unsubscribe function more than once', async () => {
     const syncTasks = new MaintenanceWindowSyncTasks(logger);
     const taskManager = taskManagerMock.createStart();
-    taskManager.runSoon.mockResolvedValue({} as any);
+    taskManager.runSoon.mockResolvedValue(runSoonResult('shared-task'));
     syncTasks.setTaskManager(taskManager);
 
     const unsubscribeFirst = syncTasks.register('shared-task');
@@ -96,7 +104,7 @@ describe('MaintenanceWindowSyncTasks', () => {
     const taskManager = taskManagerMock.createStart();
     taskManager.runSoon
       .mockRejectedValueOnce(new Error('missing'))
-      .mockResolvedValueOnce({} as any);
+      .mockResolvedValueOnce(runSoonResult('good-task'));
     syncTasks.setTaskManager(taskManager);
 
     syncTasks.register('bad-task');
@@ -116,7 +124,7 @@ describe('MaintenanceWindowSyncTasks', () => {
     const taskManager = taskManagerMock.createStart();
     taskManager.runSoon
       .mockRejectedValueOnce(currentlyRunningError('my-sync-task'))
-      .mockResolvedValueOnce({} as any);
+      .mockResolvedValueOnce(runSoonResult('my-sync-task'));
     syncTasks.setTaskManager(taskManager);
 
     syncTasks.register('my-sync-task');

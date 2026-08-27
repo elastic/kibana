@@ -34,7 +34,7 @@ const maintenanceWindowClientFactoryParams: jest.Mocked<MaintenanceWindowClientF
 
 beforeEach(() => {
   jest.clearAllMocks();
-  uiSettings.asScopedToClient.mockReturnValue({} as any);
+  uiSettings.asScopedToClient.mockReturnValue(uiSettingsServiceMock.createClient());
 });
 
 test('creates a maintenance window client with proper constructor arguments when security is enabled', async () => {
