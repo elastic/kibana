@@ -6,6 +6,7 @@
  */
 
 import { extractArticleHtml } from './extract_article';
+import { stripHtml } from './text';
 
 describe('extractArticleHtml', () => {
   it('returns empty string for empty input', () => {
@@ -457,5 +458,53 @@ describe('self-closed raw-text elements', () => {
 
     expect(result).toContain('evil.test');
     expect(result).not.toContain('tracker');
+  });
+});
+
+/**
+ * `$container.find(selectorList)` is quadratic in the container's child count. Measured
+ * through this function: 2.7s at 50,000 children, 10.7s at 100,000, 44s at 200,000, on a
+ * page well inside the byte cap and far too shallow for the depth guard to fire. The same
+ * selector list evaluated from the document root is linear (18ms / 34ms / 80ms), so chrome
+ * is now removed document-wide before the container is chosen.
+ */
+describe('chrome removal cost', () => {
+  it('does not go quadratic in the container child count', () => {
+    const input = `<html><body><article>${'<b>x</b>'.repeat(
+      200000
+    )}<nav>menu</nav></article></body></html>`;
+
+    const started = process.hrtime.bigint();
+    const result = extractArticleHtml(input);
+    const elapsedMs = Number(process.hrtime.bigint() - started) / 1e6;
+
+    expect(elapsedMs).toBeLessThan(5000);
+    expect(result).not.toContain('menu');
+    expect(result).toContain('x');
+  });
+
+  it('stays linear in the number of candidates', () => {
+    const input = `<html><body>${'<article>x</article>'.repeat(80000)}</body></html>`;
+
+    const started = process.hrtime.bigint();
+    extractArticleHtml(input);
+    const elapsedMs = Number(process.hrtime.bigint() - started) / 1e6;
+
+    expect(elapsedMs).toBeLessThan(3000);
+  });
+});
+
+/**
+ * The two stages have to agree about what the document contains. `text.ts` recognizes
+ * CDATA; this file did not, so a feed body carried that way was serialized back out as a
+ * comment and then discarded by `stripHtml`, losing the whole article.
+ */
+describe('CDATA survives article extraction', () => {
+  it('keeps a CDATA article body through extraction', () => {
+    const extracted = extractArticleHtml(
+      '<html><body><article><![CDATA[<p>IOC: evil.test</p>]]></article></body></html>'
+    );
+
+    expect(stripHtml(extracted)).toBe('IOC: evil.test');
   });
 });

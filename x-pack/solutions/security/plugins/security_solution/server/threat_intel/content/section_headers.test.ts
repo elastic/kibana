@@ -120,3 +120,37 @@ describe('singular and plural heading spellings', () => {
     expect(classifyHeader('Indicator of Compromise (IOC)')).toBe('ioc');
   });
 });
+
+/**
+ * A trailing parenthetical and trailing punctuation can appear in either order, and
+ * stripping the parenthetical first meant a trailing colon defeated the anchored match.
+ * `Indicators of Compromise (IOCs):` then classified as prose and dropped every indicator
+ * beneath it. All of these are ordinary vendor heading formatting.
+ */
+describe('trailing punctuation around a parenthetical', () => {
+  it.each([
+    ['Indicators of Compromise (IOCs)', 'ioc'],
+    ['Indicators of Compromise (IOCs):', 'ioc'],
+    ['Indicators of Compromise (IOCs) :', 'ioc'],
+    ['IOCs (updated).', 'ioc'],
+    ['References (2024):', 'references'],
+    ['Sources:', 'references'],
+    ['iocs.', 'ioc'],
+  ])('classifies %s as %s', (heading, expected) => {
+    expect(classifyHeader(heading)).toBe(expected);
+  });
+
+  it('still leaves a heading with trailing prose as prose', () => {
+    expect(classifyHeader('IOC (list) extra words')).toBe('prose');
+  });
+
+  // Headings come from attacker-controlled markup, so the strip loop is bounded rather
+  // than run to a fixed point.
+  it('stays cheap on a heading built from many parenthetical groups', () => {
+    const started = process.hrtime.bigint();
+    normalizeHeader('(a)'.repeat(20000));
+    const elapsedMs = Number(process.hrtime.bigint() - started) / 1e6;
+
+    expect(elapsedMs).toBeLessThan(200);
+  });
+});

@@ -75,8 +75,14 @@ export const canonicalizeUrl = (rawUrl: string): string | undefined => {
     host = host.slice(4);
   }
 
-  // Include non-default port explicitly so https://foo:8443/x ≠ https://foo/x
-  const port = parsed.port ? `:${parsed.port}` : '';
+  // Include non-default port explicitly so https://foo:8443/x ≠ https://foo/x.
+  //
+  // Judged against the *output* scheme, which is always https by this point. `URL` only
+  // drops a port that is default for the input scheme, so `http://example.com:443/path`
+  // kept its port and canonicalized to `https://example.com:443/path` while
+  // `https://example.com/path` gave `https://example.com/path`. Two spellings of the same
+  // page failed to reconcile, which is the one thing this function exists to prevent.
+  const port = parsed.port && parsed.port !== '443' ? `:${parsed.port}` : '';
 
   // Normalize path: remove trailing slash unless path is bare root
   let path = parsed.pathname;
@@ -91,10 +97,14 @@ export const canonicalizeUrl = (rawUrl: string): string | undefined => {
     // doc comment promises all of them. Google keeps adding fields
     // (`utm_source_platform`, `utm_creative_format`), and any one left in the key
     // stops two citations of the same article from deduplicating.
+    // Lowercased before matching. Query keys are case-sensitive in general, but a tracker
+    // spelled `UTM_source` is the same tracker and leaving it in stops two citations of one
+    // article from reconciling, which is the whole point of this key.
+    const lowerKey = key.toLowerCase();
     const isTracking =
-      key.startsWith('utm_') ||
+      lowerKey.startsWith('utm_') ||
       TRACKING_PARAMS.has(key) ||
-      (key === 'ref' && TRACKING_REF_VALUES.has(value.toLowerCase()));
+      (lowerKey === 'ref' && TRACKING_REF_VALUES.has(value.toLowerCase()));
     if (!isTracking) {
       params.append(key, value);
     }

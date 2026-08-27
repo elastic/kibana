@@ -6,7 +6,7 @@
  */
 
 import * as cheerio from 'cheerio';
-import { MAX_PARSE_BYTES, normalizeSelfClosedRawText } from './text';
+import { capToParseBytes, normalizeSelfClosedRawText } from './text';
 
 /**
  * Strip known page chrome (nav/header/footer/sidebar) from raw vendor HTML,
@@ -111,7 +111,14 @@ interface ParsedNode {
  * function, 112ms at 5,000 nested elements, 433ms at 10,000, and 2.2s at 20,000. Bounding
  * the output could not have helped, because the cost is in the parse itself.
  */
-const PARSER_OPTIONS = { _useHtmlParser2: true } as const;
+const PARSER_OPTIONS = {
+  _useHtmlParser2: true,
+  // Same reason `text.ts` sets it: HTML reads `<![CDATA[ ... ]]>` as a bogus comment, so a
+  // feed body carried that way was serialized back out as a comment and then dropped by
+  // `stripHtml`, losing the whole article. This file has to agree with the parser options
+  // in `text.ts`, or the two stages disagree about what the document contains.
+  recognizeCDATA: true,
+} as const;
 
 /**
  * Nesting depth past which the page is not simplified at all.
@@ -153,22 +160,21 @@ const maxDepthOf = (roots: ParsedNode[]): number => {
 };
 
 /**
- * Visible-character count of every node's subtree, excluding chrome, in one pass.
+ * Visible-character count of every node's subtree in one pass.
  *
  * Scoring each candidate with its own subtree traversal was quadratic whenever candidates
  * nest, and `ARTICLE_SELECTORS` nest readily: `'<article>'.repeat(n)` produces n
  * candidates whose subtrees all overlap. Measured through this function, 16ms at n=200
  * rising to 770ms at n=1,600, from 14KB of input.
  *
- * Computing bottom-up makes every candidate a map lookup instead. A chrome subtree
- * contributes zero, which is what the per-candidate `find(CHROME).remove()` used to
- * achieve, and because chrome is chrome wherever it sits the result is identical.
+ * Computing bottom-up makes every candidate a map lookup instead. Chrome needs no special
+ * case here, because it has already been removed from the document above.
  *
  * Counts non-whitespace characters rather than trimming: the previous `.text().trim()`
  * could not be expressed as a sum over subtrees, and the only thing the score is used for
  * is comparing candidates and rejecting empty ones. Both survive the change.
  */
-const visibleLengths = (roots: ParsedNode[], chrome: Set<unknown>): Map<ParsedNode, number> => {
+const visibleLengths = (roots: ParsedNode[]): Map<ParsedNode, number> => {
   const lengths = new Map<ParsedNode, number>();
   const stack: Array<{ node: ParsedNode; expanded: boolean }> = roots.map((node) => ({
     node,
@@ -180,9 +186,7 @@ const visibleLengths = (roots: ParsedNode[], chrome: Set<unknown>): Map<ParsedNo
     if (!frame) break;
     const { node, expanded } = frame;
 
-    if (chrome.has(node)) {
-      lengths.set(node, 0);
-    } else if (node.type === 'text') {
+    if (node.type === 'text') {
       lengths.set(node, (node.data ?? '').replace(/\s/g, '').length);
     } else if (!expanded) {
       stack.push({ node, expanded: true });
@@ -218,6 +222,19 @@ const selectArticleHtml = (html: string): string => {
   // score, while an article's own header/footer/aside still does.
   $(PAGE_CHROME_SELECTORS).remove();
 
+  // Chrome removed document-wide, up front, rather than from the chosen container at the
+  // end. Two reasons, and the first is severe: `$container.find(selectorList)` is quadratic
+  // in the container's child count, measured at 2.7s for 50,000 children, 10.7s for 100,000
+  // and 44s for 200,000, on a page well inside the byte cap and shallow enough that the
+  // depth guard never fires. The identical selector list evaluated from the document root
+  // is linear over the same inputs: 18ms, 34ms, 80ms. Second, it removes the need to
+  // discount chrome during scoring, since it is gone before any candidate is measured.
+  //
+  // Equivalent to the previous behavior. Only the chosen container is ever returned, so
+  // removing this chrome from outside it as well changes nothing, and scoring already
+  // treated chrome as chrome wherever it sat.
+  $(CHROME_SELECTORS).remove();
+
   /**
    * Pick the container with the most text across *all* selectors, rather than the
    * first match of the first selector that hits.
@@ -232,12 +249,14 @@ const selectArticleHtml = (html: string): string => {
    * actually separates a card from a body. Selector order survives only as a tie-break,
    * so a precise `article` still beats a `main` of identical length.
    *
-   * Scored *after* discounting the same chrome the returned container gets. Measuring
-   * before meant a teaser carrying a large inline script or style could outweigh the real
-   * report on raw text length, win selection, and then be stripped to almost nothing.
+   * Scored after chrome removal, so a teaser carrying a large inline script or style
+   * cannot outweigh the real report on raw text length, win selection, and then be
+   * stripped to almost nothing.
    */
-  const chrome = new Set<unknown>($(CHROME_SELECTORS).toArray());
-  const lengths = visibleLengths(roots, chrome);
+  // `roots` was captured before the removals above, which mutate the tree in place, so this
+  // walk sees the post-removal document. That ordering is load-bearing: scoring candidates
+  // against a tree that still contained chrome is the bug the removals exist to prevent.
+  const lengths = visibleLengths(roots);
 
   const candidates = ARTICLE_SELECTORS.flatMap((selector, priority) =>
     $(selector)
@@ -272,9 +291,6 @@ const selectArticleHtml = (html: string): string => {
     $container = $body.length > 0 ? $body : $.root();
   }
 
-  // Strip chrome subtrees from within the container.
-  $container.find(CHROME_SELECTORS).remove();
-
   return $container.html() ?? html;
 };
 
@@ -300,7 +316,7 @@ export const extractArticleHtml = (rawHtml: string): string => {
   // Fetched pages are attacker-influenced and unbounded, and cheerio builds a full
   // DOM. Truncating keeps a very fat page degraded rather than failed, since the
   // article body is nearly always near the top.
-  const html = rawHtml.length > MAX_PARSE_BYTES ? rawHtml.slice(0, MAX_PARSE_BYTES) : rawHtml;
+  const html = capToParseBytes(rawHtml);
 
   try {
     return selectArticleHtml(html);

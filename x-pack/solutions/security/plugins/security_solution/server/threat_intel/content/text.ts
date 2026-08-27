@@ -21,8 +21,18 @@ import { classifyHeader, type SectionKind } from './section_headers';
  */
 export const MAX_PARSE_BYTES = 10 * 1024 * 1024;
 
-const capInput = (html: string): string =>
-  html.length > MAX_PARSE_BYTES ? html.slice(0, MAX_PARSE_BYTES) : html;
+/**
+ * Truncate to the parse cap without splitting a surrogate pair.
+ *
+ * `slice` counts UTF-16 code units, so a cap landing mid-pair left the high half alone and
+ * `stripHtml` returned an unpaired surrogate in `body_text`. Same defect `truncate` has,
+ * one layer earlier, so fixing it there was not enough.
+ */
+export const capToParseBytes = (html: string): string => {
+  if (html.length <= MAX_PARSE_BYTES) return html;
+  const capped = html.slice(0, MAX_PARSE_BYTES);
+  return /[\uD800-\uDBFF]$/.test(capped) ? capped.slice(0, -1) : capped;
+};
 
 /**
  * Inline elements, which carry no token boundary.
@@ -158,8 +168,21 @@ const tagEndFrom = (html: string, from: number): number => {
   return -1;
 };
 
+/**
+ * ASCII-only, length-preserving lowercase.
+ *
+ * `String.prototype.toLowerCase` is not length preserving: `İ` (U+0130) lowercases to two
+ * code units. The scanner took offsets from a lowercased copy and used them to index the
+ * original, so a single such character anywhere in the page shifted every offset after it.
+ * The enclosing-element check then read the wrong character, a fake `<script/>` inside a
+ * real script body got rewritten, and the script suffix escaped into `body_text` as a false
+ * IOC. Tag names are ASCII, so folding only A-Z keeps offsets aligned by construction.
+ */
+const asciiLower = (input: string): string =>
+  input.replace(/[A-Z]/g, (char) => String.fromCharCode(char.charCodeAt(0) + 32));
+
 export const normalizeSelfClosedRawText = (html: string): string => {
-  const lower = html.toLowerCase();
+  const lower = asciiLower(html);
   const pieces: string[] = [];
   let copiedTo = 0;
   let cursor = 0;
@@ -299,8 +322,14 @@ const childrenOf = (node: ParsedNode): ParsedNode[] => node.children ?? [];
  * `[a-z0-9]*` meant `&lt;ioc-value&gt;evil.com&lt;/ioc-value&gt;` never qualified, so
  * the tags leaked into output that is supposed to be plain text and the structured
  * renderer never reached the custom-element boundaries it applies deliberately.
+ *
+ * The name is followed by a lookahead for a tag boundary rather than `\s*>`, because an end
+ * tag may legally carry junk. Requiring the bracket meant an encoded document whose end tag
+ * was `&lt;/script foo&gt;` never qualified, so it was never re-parsed and the script body
+ * and its URL stayed in `body_text` for extraction to mine. The raw-parser path already
+ * handled that end-tag form; this probe did not, and the two have to agree.
  */
-const RESIDUAL_CLOSING_TAG = /<\/[a-z][a-z0-9:_-]*\s*>/i;
+const RESIDUAL_CLOSING_TAG = /<\/[a-z][a-z0-9:_-]*(?=[\s/>])/i;
 
 /**
  * A closing tag alone is not enough to justify re-parsing, because escaped markup is
@@ -362,9 +391,14 @@ const peelFeedWrappers = (nodes: ParsedNode[]): ParsedNode[] => {
   let current = nodes;
 
   for (let depth = 0; depth < 8; depth++) {
-    const meaningful = current.filter(
-      (node) => node.type !== 'text' || (node.data ?? '').trim() !== ''
-    );
+    // Comments and directives are not content, and excluding them matters for the common
+    // case rather than an exotic one: every RSS document opens with `<?xml version="1.0"?>`,
+    // which counted as a second top-level node and stopped the wrapper from ever peeling,
+    // leaving the encoded body's tags in `body_text`.
+    const meaningful = current.filter((node) => {
+      if (node.type === 'comment' || node.type === 'directive') return false;
+      return node.type !== 'text' || (node.data ?? '').trim() !== '';
+    });
     const [only] = meaningful;
     const isWrapper =
       meaningful.length === 1 &&
@@ -508,7 +542,7 @@ const extractPlainText = (html: string): string => inlineTextOf(parseTopLevelNod
  */
 export const stripHtml = (html: string | undefined | null): string => {
   if (!html) return '';
-  const nodes = parseTopLevelNodes(capInput(html));
+  const nodes = parseTopLevelNodes(capToParseBytes(html));
   const first = inlineTextOf(nodes, false);
   const reparse = RESIDUAL_CLOSING_TAG.test(first) && !carriesOwnMarkup(nodes);
   return collapseWhitespace(reparse ? extractPlainText(first) : first);
@@ -694,7 +728,7 @@ const renderStructured = (html: string): string => {
  */
 export const htmlToStructured = (html: string | undefined | null): string => {
   if (!html) return '';
-  const capped = capInput(html);
+  const capped = capToParseBytes(html);
   const first = renderStructured(capped);
   const reparse = RESIDUAL_CLOSING_TAG.test(first) && !carriesOwnMarkup(parseTopLevelNodes(capped));
   return reparse ? renderStructured(first) : first;

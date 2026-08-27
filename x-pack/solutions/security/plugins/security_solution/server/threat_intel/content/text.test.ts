@@ -1155,3 +1155,98 @@ describe('entity-encoded bodies inside feed wrappers', () => {
     );
   });
 });
+
+/**
+ * Every RSS document opens with `<?xml version="1.0"?>`, which counted as a second
+ * top-level node and stopped the feed wrapper from ever peeling, so the encoded body kept
+ * its tags in body_text. Comments and directives are packaging, not content.
+ */
+describe('feed wrappers behind an xml declaration', () => {
+  it('peels a wrapper that follows an xml declaration', () => {
+    expect(
+      stripHtml('<?xml version="1.0"?><description>&lt;p&gt;evil.com&lt;/p&gt;</description>')
+    ).toBe('evil.com');
+  });
+
+  it('peels through a declaration, a comment and the full rss nesting', () => {
+    const result = stripHtml(
+      '<?xml version="1.0"?><!-- generated --><rss><channel><item><description>' +
+        '&lt;script&gt;fetch("https://false-ioc.test")&lt;/script&gt;safe' +
+        '</description></item></channel></rss>'
+    );
+
+    expect(result).toBe('safe');
+    expect(result).not.toContain('false-ioc.test');
+  });
+
+  it('applies structured boundaries behind a declaration', () => {
+    expect(
+      htmlToStructured(
+        '<?xml version="1.0"?><description>&lt;p&gt;evil.com&lt;/p&gt;&lt;p&gt;bad.net&lt;/p&gt;</description>'
+      )
+    ).toBe('evil.com\nbad.net');
+  });
+});
+
+/**
+ * An end tag may legally carry junk, and the raw-parser path normalizes that form, so the
+ * probe that decides whether to re-parse an encoded document has to accept it too or the
+ * two disagree and the script body stays in body_text.
+ */
+describe('encoded documents whose end tag carries junk', () => {
+  it.each([
+    ['bare', '&lt;script&gt;fetch("https://false-ioc.test")&lt;/script foo&gt;safe'],
+    [
+      'inside a wrapper',
+      '<description>&lt;script&gt;fetch("https://false-ioc.test")&lt;/script foo&gt;safe</description>',
+    ],
+  ])('re-parses %s', (_label, html) => {
+    const result = stripHtml(html);
+
+    expect(result).toBe('safe');
+    expect(result).not.toContain('false-ioc.test');
+  });
+});
+
+/**
+ * `String.prototype.toLowerCase` is not length-preserving: `İ` becomes two code units. The
+ * scanner took offsets from a lowercased copy and applied them to the original, so one such
+ * character anywhere in the page shifted every later offset, the enclosing-element check
+ * read the wrong character, and a fake `<script/>` inside a real script body was rewritten,
+ * letting the suffix escape as a false IOC.
+ */
+describe('non-ASCII characters do not shift scanner offsets', () => {
+  it('keeps a script body contained when the page contains a dotted capital I', () => {
+    const result = stripHtml(
+      'İ<script>const x="<script/>"; fetch("https://false-ioc.test")</script><p>safe</p>'
+    );
+
+    expect(result).not.toContain('false-ioc.test');
+    expect(result).toContain('safe');
+  });
+
+  it.each([['İ'], ['ẛ'], ['ΐ']])('still normalizes a self-closed script after %s', (prefix) => {
+    expect(
+      stripHtml(`${prefix}<article><script src="x.js"/><p>IOC: evil.test</p></article>`)
+    ).toContain('IOC: evil.test');
+  });
+
+  it('still handles uppercase raw-text tags', () => {
+    expect(stripHtml('<SCRIPT>bad()</SCRIPT>ok')).toBe('ok');
+    expect(stripHtml('<SCRIPT SRC="x.js"/><P>IOC: evil.test</P>')).toBe('IOC: evil.test');
+  });
+});
+
+/**
+ * The parse cap counts UTF-16 code units, so it could split a surrogate pair one layer
+ * earlier than `truncate` and put an unpaired surrogate into body_text.
+ */
+describe('the parse cap does not split a surrogate pair', () => {
+  const LONE_SURROGATE = /[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/;
+
+  it('emits no lone surrogate when the cap lands mid-pair', () => {
+    const result = stripHtml(`${'a'.repeat(MAX_PARSE_BYTES - 1)}\u{1F600}x`);
+
+    expect(LONE_SURROGATE.test(result)).toBe(false);
+  });
+});

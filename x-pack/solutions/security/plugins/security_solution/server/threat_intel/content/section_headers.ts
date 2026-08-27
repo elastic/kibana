@@ -25,17 +25,33 @@
  *
  * Steps (applied in order):
  *   1. lowercase
- *   2. strip trailing parenthetical — e.g. " (IOCs)" so "Indicators of Compromise (IOCs)" → "indicators of compromise"
- *   3. strip trailing punctuation/whitespace — e.g. "Sources:" → "sources"
- *   4. collapse internal whitespace — handles any double-spaces left by step 2
+ *   2. strip trailing punctuation and a trailing parenthetical, repeatedly
+ *   3. collapse internal whitespace
+ *
+ * Step 2 loops because the two can appear in either order and applying each once lets one
+ * block the other. Stripping the parenthetical first meant
+ * `Indicators of Compromise (IOCs):` kept it, since the trailing colon defeated the
+ * anchored match, and the heading then classified as prose and dropped every indicator
+ * beneath it. The same held for `IOCs (updated).` and `References (2024):`, all ordinary
+ * vendor formatting.
+ *
+ * Bounded at four passes rather than run to a fixed point, because headings come from
+ * attacker-controlled markup and `(a)(a)(a)…` would otherwise cost one pass per group.
  */
-export const normalizeHeader = (header: string): string =>
-  header
-    .toLowerCase()
-    .replace(/\s*\([^)]*\)\s*$/, '')
-    .replace(/[:\.\s]+$/, '')
+export const normalizeHeader = (header: string): string => {
+  let normalized = header.toLowerCase();
+
+  for (let pass = 0; pass < 4; pass++) {
+    const stripped = normalized.replace(/[:.\s]+$/, '').replace(/\s*\([^)]*\)\s*$/, '');
+    if (stripped === normalized) break;
+    normalized = stripped;
+  }
+
+  return normalized
+    .replace(/[:.\s]+$/, '')
     .replace(/\s+/g, ' ')
     .trim();
+};
 
 /** Normalized header strings that declare an Indicators-of-Compromise block. */
 export const IOC_HEADER_TERMS = new Set([
