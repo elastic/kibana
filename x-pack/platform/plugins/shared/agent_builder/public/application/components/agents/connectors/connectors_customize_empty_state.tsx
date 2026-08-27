@@ -29,7 +29,7 @@ export const ConnectorsCustomizeEmptyState: React.FC<ConnectorsCustomizeEmptySta
   return (
     <CustomizeLandingEmptyState
       dataTestSubj="agentConnectorsCustomizeEmptyState"
-      illustration={<EuiIllustration type={handshake} alt=""  />}
+      illustration={<EuiIllustration type={handshake} alt="" />}
       title={labels.agentConnectors.emptyStateTitle}
       description={labels.agentConnectors.emptyStateDescription}
       learnMoreHref={docLinksService.agentBuilderConnectors}
