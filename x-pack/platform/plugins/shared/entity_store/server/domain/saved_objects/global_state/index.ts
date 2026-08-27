@@ -66,7 +66,11 @@ export class EntityStoreGlobalStateClient {
 
     const { attributes } = await this.soClient.create<EntityStoreGlobalStateOverrides>(
       EntityStoreGlobalStateTypeName,
-      EntityStoreGlobalStateOverrides.parse({ ...initialState, defaultsVersion: 'latest' }),
+      EntityStoreGlobalStateOverrides.parse({
+        ...initialState,
+        logsExtraction: initialState?.logsExtraction ?? {},
+        defaultsVersion: 'latest',
+      }),
       { id }
     );
 
