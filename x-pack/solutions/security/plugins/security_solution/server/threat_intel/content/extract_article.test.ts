@@ -750,3 +750,48 @@ describe('the fallback scorer discounts hidden descendants', () => {
     expect(result).not.toContain('c2.stale.test');
   });
 });
+
+/**
+ * `template` is non-rendered, like `hidden`, and selection has to know that. Precise scoring and
+ * the returned value both use the candidate's inner HTML, which discards the wrapper that makes
+ * the contents inert, so a `<template class="post-content">` could beat a visible `<main>` and
+ * have its stale contents returned as the report.
+ *
+ * Fourth site for this rule after both text walkers and candidate exclusion, so it now comes
+ * from one shared predicate rather than a fourth copy of the condition.
+ */
+describe('template subtrees cannot win selection', () => {
+  const STALE = `${'stale '.repeat(1000)}c2.stale.test`;
+
+  it.each([
+    [
+      'a template candidate',
+      `<html><body><template class="post-content">${STALE}</template><main><p>report evil.test</p></main></body></html>`,
+    ],
+    [
+      'a candidate inside a template',
+      `<html><body><template><article>${STALE}</article></template><main><p>report evil.test</p></main></body></html>`,
+    ],
+  ])('prefers the visible report over %s', (_label, html) => {
+    const result = stripHtml(extractArticleHtml(html));
+
+    expect(result).toContain('evil.test');
+    expect(result).not.toContain('c2.stale.test');
+  });
+
+  // The fallback scorer needs the same rule, which is the path that took three rounds to cover
+  // for `hidden`.
+  it.each([
+    ['a template', `<template>${'stale '.repeat(4000)}c2.stale.test</template>`],
+    ['a hidden block', `<div hidden>${'stale '.repeat(4000)}c2.stale.test</div>`],
+  ])('discounts %s on the fallback scoring path', (_label, block) => {
+    const page =
+      `<html><body><article>${block}teaser</article>${'<article>x</article>'.repeat(32)}` +
+      '<main><p>report evil.test</p></main></body></html>';
+
+    const result = stripHtml(extractArticleHtml(page));
+
+    expect(result).toContain('evil.test');
+    expect(result).not.toContain('c2.stale.test');
+  });
+});

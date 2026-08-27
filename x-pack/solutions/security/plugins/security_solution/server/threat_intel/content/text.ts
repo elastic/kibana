@@ -128,15 +128,22 @@ interface ParsedNode {
 const SKIPPED_SUBTREE_NAMES = new Set(['script', 'style', 'template']);
 
 /**
- * Whether this element's subtree never reaches a reader.
+ * Whether this element's content never reaches a reader.
  *
- * Name alone was not enough: an element carrying the HTML `hidden` attribute is not rendered
- * either, and its text was being stored and promoted as an indicator. It also inflated article
- * scoring, which calls `stripHtml`, so a candidate holding a large hidden subtree could
- * outscore the real report and drop it.
+ * Exported and shared with `extract_article` because this rule has now had to be applied in
+ * four places: both text walkers, candidate exclusion, and fallback candidate scoring. Each
+ * time it was added where a finding pointed, and each time another path was still counting the
+ * same text: hidden subtrees took three rounds to cover, and `template` was skipped by the
+ * walkers while a `<template class="post-content">` could still win article selection and have
+ * its contents returned as the report. One definition, four call sites.
  */
+export const isNonRenderedElement = (node: {
+  name?: string;
+  attribs?: Record<string, string>;
+}): boolean => node.name?.toLowerCase() === 'template' || node.attribs?.hidden !== undefined;
+
 const isSkippedSubtree = (node: ParsedNode): boolean =>
-  SKIPPED_SUBTREE_NAMES.has(elementName(node)) || node.attribs?.hidden !== undefined;
+  SKIPPED_SUBTREE_NAMES.has(elementName(node)) || isNonRenderedElement(node);
 
 /**
  * Rewrites an explicitly self-closed `<script/>` or `<style/>` into an empty element
@@ -502,6 +509,52 @@ const ENCODED_HTML_WRAPPER_QUALIFIED_NAMES = new Set(['content:encoded']);
 const CONTENT_MODULE_NS = 'http://purl.org/rss/1.0/modules/content/';
 
 /**
+ * Resolved `xmlns:` bindings, memoized per node.
+ *
+ * Walking the ancestor chain independently for each element is quadratic in nesting depth, and
+ * these elements are attacker-controlled with no nesting limit: `'<ti:encoded>'.repeat(n)` with
+ * the declaration at the root made the deepest lookup inspect n ancestors, the next n-1, and so
+ * on. Measured 2ms at depth 500 rising to 38ms at 4,000, which extrapolates to minutes at the
+ * byte cap. Memoizing every node visited on the way up means each edge is resolved once, so the
+ * whole document costs one pass. A `WeakMap` because the nodes live only as long as the parse.
+ */
+const namespaceCache = new WeakMap<object, Map<string, string | null>>();
+
+const resolveNamespace = (node: ParsedNode, prefix: string): string | undefined => {
+  const unresolved: ParsedNode[] = [];
+  let current: ParsedNode | null | undefined = node;
+  let found: string | null = null;
+
+  while (current) {
+    const cached = namespaceCache.get(current);
+    if (cached?.has(prefix)) {
+      found = cached.get(prefix) ?? null;
+      break;
+    }
+
+    const bound = current.attribs?.[`xmlns:${prefix}`];
+    if (bound !== undefined) {
+      found = bound.trim();
+      break;
+    }
+
+    unresolved.push(current);
+    current = current.parent;
+  }
+
+  for (const visited of unresolved) {
+    let bindings = namespaceCache.get(visited);
+    if (!bindings) {
+      bindings = new Map();
+      namespaceCache.set(visited, bindings);
+    }
+    bindings.set(prefix, found);
+  }
+
+  return found ?? undefined;
+};
+
+/**
  * Whether this element is the RSS Content Module's `encoded`, resolved by namespace.
  *
  * XML prefixes are aliases, so a feed binding the module to `ti:` writes `ti:encoded` and means
@@ -523,16 +576,7 @@ const isContentModuleEncoded = (node: ParsedNode, qualified: string): boolean =>
   const prefix = qualified.slice(0, colon);
   if (prefix === 'content') return true;
 
-  const declaration = `xmlns:${prefix}`;
-  // Bounded by the tree, and the tree is bounded by the parse cap.
-  let ancestor: ParsedNode | null | undefined = node;
-  while (ancestor) {
-    const bound = ancestor.attribs?.[declaration];
-    if (bound !== undefined) return bound.trim() === CONTENT_MODULE_NS;
-    ancestor = ancestor.parent;
-  }
-
-  return false;
+  return resolveNamespace(node, prefix) === CONTENT_MODULE_NS;
 };
 
 /**

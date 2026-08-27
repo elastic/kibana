@@ -2374,3 +2374,38 @@ describe('section state is restored when a report container ends', () => {
     expect(htmlToStructured(html)).toBe(expected);
   });
 });
+
+/**
+ * Namespace resolution is memoized, because walking the ancestor chain independently per element
+ * is quadratic in nesting depth and these elements are attacker-controlled with no nesting limit.
+ * Measured before memoizing: 2ms at depth 500 rising to 38ms at 4,000, which extrapolates to
+ * minutes at the byte cap.
+ */
+describe('namespace resolution stays linear', () => {
+  it('resolves a deep chain of aliased elements cheaply', () => {
+    const html = `<rss xmlns:ti="${'http://purl.org/rss/1.0/modules/content/'}">${'<ti:encoded>'.repeat(
+      64000
+    )}x</rss>`;
+
+    const started = process.hrtime.bigint();
+    stripHtml(html);
+    const elapsedMs = Number(process.hrtime.bigint() - started) / 1e6;
+
+    expect(elapsedMs).toBeLessThan(2000);
+  });
+
+  it('still resolves correctly in both directions after memoizing', () => {
+    expect(
+      stripHtml(
+        '<rss xmlns:ti="http://purl.org/rss/1.0/modules/content/"><channel><item><ti:encoded>' +
+          '&lt;p&gt;evil.com&lt;/p&gt;</ti:encoded></item></channel></rss>'
+      )
+    ).toBe('evil.com');
+
+    expect(
+      stripHtml(
+        '<foo:encoded xmlns:foo="urn:literal">Exploit uses &lt;script&gt; and c2.evil.test</foo:encoded>'
+      )
+    ).toBe('Exploit uses <script> and c2.evil.test');
+  });
+});

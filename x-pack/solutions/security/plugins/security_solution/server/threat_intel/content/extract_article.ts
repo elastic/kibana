@@ -6,7 +6,13 @@
  */
 
 import * as cheerio from 'cheerio';
-import { capToParseBytes, normalizeSelfClosedRawText, PARSER_OPTIONS, stripHtml } from './text';
+import {
+  capToParseBytes,
+  isNonRenderedElement,
+  normalizeSelfClosedRawText,
+  PARSER_OPTIONS,
+  stripHtml,
+} from './text';
 
 /**
  * Strip known page chrome (nav/header/footer/sidebar) from raw vendor HTML,
@@ -105,6 +111,7 @@ const PAGE_CHROME_SELECTORS = [
 interface ParsedNode {
   type: string;
   data?: string;
+  name?: string;
   attribs?: Record<string, string>;
   parent?: ParsedNode | null;
   children?: ParsedNode[];
@@ -197,11 +204,11 @@ const visibleLengths = (roots: ParsedNode[]): Map<ParsedNode, number> => {
 
     if (node.type === 'text') {
       lengths.set(node, (node.data ?? '').replace(/\s/g, '').length);
-    } else if (node.attribs?.hidden !== undefined) {
-      // Hidden descendants count for nothing here, the same as in the walkers. Excluding only
-      // hidden candidates and hidden ancestors left this path summing them, so once precise
-      // scoring is off, past 32 candidates or 2MB, a teaser inflated by a hidden block beat the
-      // visible report and `stripHtml` then removed that block after selection.
+    } else if (isNonRenderedElement(node)) {
+      // Non-rendered descendants count for nothing here, the same as in the walkers. Excluding
+      // only the candidate and its ancestors left this path summing them, so once precise
+      // scoring is off, past 32 candidates or 2MB, a teaser inflated by a hidden or template
+      // block beat the visible report and `stripHtml` then removed that block after selection.
       lengths.set(node, 0);
     } else if (!expanded) {
       stack.push({ node, expanded: true });
@@ -330,7 +337,7 @@ const selectArticleHtml = (html: string): string => {
     // MAX_NESTING_DEPTH.
     let node: ParsedNode | null | undefined = el as ParsedNode;
     while (node) {
-      if (node.attribs?.hidden !== undefined) return true;
+      if (isNonRenderedElement(node)) return true;
       if (pageChrome.has(node)) return true;
       node = node.parent;
     }
