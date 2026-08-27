@@ -61,17 +61,14 @@ export function startTrackingHistory<T extends object = {}>({
       pointer$.next(history.length - 1); // note: this is safer than incrementing, just in case things get out of sync
     });
 
-  const disabledActionsSubscription = combineLatest([
-    pointer$,
-    disableUndoRedo$.pipe(
-      debounceTime(200) // prevent flickering of undo/redo disabled state
-    ),
-  ]).subscribe(([pointer, disableUndoRedo]) => {
-    disabledActions$.next({
-      undo: disableUndoRedo || pointer <= -1, // at the bottom of the history stack
-      redo: disableUndoRedo || pointer + 1 >= history.length, // at the top of the history stack
-    });
-  });
+  const disabledActionsSubscription = combineLatest([pointer$, disableUndoRedo$]).subscribe(
+    ([pointer, disableUndoRedo]) => {
+      disabledActions$.next({
+        undo: disableUndoRedo || pointer <= -1, // at the bottom of the history stack
+        redo: disableUndoRedo || pointer + 1 >= history.length, // at the top of the history stack
+      });
+    }
+  );
 
   const undoPatch = () => {
     if (disableUndoRedo$.getValue()) return false;
