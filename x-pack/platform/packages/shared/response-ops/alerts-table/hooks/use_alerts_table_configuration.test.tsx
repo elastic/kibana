@@ -154,6 +154,26 @@ describe('useAlertsTableConfiguration', () => {
     expect(mockStorageWrapper.set).not.toHaveBeenCalled();
   });
 
+  it('should save and restore pageSize from configuration', () => {
+    const { result } = renderHook(() =>
+      useAlertsTableConfiguration({
+        id: 'test-id',
+        configurationStorage: mockStorageWrapper,
+        notifications,
+      })
+    );
+
+    act(() => {
+      result.current[1]({ pageSize: 100 });
+    });
+
+    expect(result.current[0]).toEqual({ pageSize: 100 });
+    expect(mockStorageWrapper.set).toHaveBeenCalledWith(
+      'test-id',
+      JSON.stringify({ pageSize: 100 })
+    );
+  });
+
   it('should remove saved configuration when setConfiguration is called with null', () => {
     const initialConfig = {
       columns: [{ id: 'column1', initialWidth: 100 }],
