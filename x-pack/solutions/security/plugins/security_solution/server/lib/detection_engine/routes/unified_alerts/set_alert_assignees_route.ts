@@ -93,15 +93,12 @@ export const setUnifiedAlertsAssigneesRoute = (
         if (eventBus) {
           try {
             const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-            // hitsPerIdCap=2: the unified index spans detection-alert and attack-discovery
-            // families; a given _id can appear in both, so reserve room for 2 hits per ID.
-            const hits = await fetchAllAlertIdIndexWithSource(
-              esClient,
-              index,
-              ids,
-              [ALERT_WORKFLOW_ASSIGNEE_IDS],
-              2
-            );
+            // The helper reserves one hit per index family in `index`, so an _id present
+            // in several of them (detection alerts, scheduled and adhoc attack discovery)
+            // is fully retrieved and cannot push another ID out of the result window.
+            const hits = await fetchAllAlertIdIndexWithSource(esClient, index, ids, [
+              ALERT_WORKFLOW_ASSIGNEE_IDS,
+            ]);
             for (const hit of hits) {
               const currentAssignees = new Set<string>(
                 Array.isArray(hit.source[ALERT_WORKFLOW_ASSIGNEE_IDS])

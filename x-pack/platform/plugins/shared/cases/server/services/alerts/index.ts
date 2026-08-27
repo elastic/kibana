@@ -98,7 +98,7 @@ export class AlertService {
       const indexBuckets = Array.from(bucketedAlerts.entries());
 
       let prefetchResult:
-        | { previousStatusMap: Map<string, STATUS_VALUES>; foundKeys: Set<string> }
+        | { previousStatusMap: Map<string, STATUS_VALUES>; changeableKeys: Set<string> }
         | undefined;
       if (this.casesEventBus?.hasAlertStatusChangedListeners() && this.request) {
         try {
@@ -124,7 +124,7 @@ export class AlertService {
           this.emitStatusChangedEvents(
             alerts,
             prefetchResult.previousStatusMap,
-            prefetchResult.foundKeys,
+            prefetchResult.changeableKeys,
             this.casesEventBus,
             this.request
           );
@@ -141,6 +141,23 @@ export class AlertService {
         logger: this.logger,
       });
     }
+  }
+
+  /**
+   * True when the document has a non-null workflow status field. `getUpdateAlertsStatusScript`
+   * sets `ctx.op = 'noop'` when both `kibana.alert.workflow_status` and `signal.status` are
+   * null or missing, so such documents never transition and must not emit status events.
+   */
+  private static hasWorkflowStatusField(source: unknown): boolean {
+    if (typeof source !== 'object' || source === null) return false;
+    const s = source as Record<string, unknown>;
+    if (s[ALERT_WORKFLOW_STATUS] != null) return true;
+    const signal = s.signal;
+    return (
+      typeof signal === 'object' &&
+      signal !== null &&
+      (signal as Record<string, unknown>).status != null
+    );
   }
 
   private static parseWorkflowStatus(source: unknown): STATUS_VALUES | undefined {
@@ -177,7 +194,10 @@ export class AlertService {
 
   private async prefetchPreviousStatuses(alerts: UpdateAlertStatusRequest[]): Promise<{
     previousStatusMap: Map<string, STATUS_VALUES>;
-    foundKeys: Set<string>;
+    // Keys of documents the update script can actually mutate, i.e. found AND carrying a
+    // non-null status field. Narrower than "found" on purpose: a status-less attachment is
+    // a guaranteed Elasticsearch no-op and must not start a workflow.
+    changeableKeys: Set<string>;
   }> {
     const docs = alerts.reduce<Array<{ _id: string; _index: string }>>((acc, a) => {
       if (!AlertService.isEmptyAlert(a)) {
@@ -185,30 +205,35 @@ export class AlertService {
       }
       return acc;
     }, []);
-    if (docs.length === 0) return { previousStatusMap: new Map(), foundKeys: new Set() };
+    if (docs.length === 0) return { previousStatusMap: new Map(), changeableKeys: new Set() };
     const response = await this.scopedClusterClient.mget({
       docs,
       _source_includes: [ALERT_WORKFLOW_STATUS, 'signal.status'],
     });
     const previousStatusMap = new Map<string, STATUS_VALUES>();
-    const foundKeys = new Set<string>();
+    const changeableKeys = new Set<string>();
     for (const doc of response.docs) {
       if ('found' in doc && doc.found && doc._id != null && doc._index != null) {
         const key = `${doc._index}:${doc._id}`;
-        foundKeys.add(key);
+        // Track status-field presence separately from parseWorkflowStatus, which returns
+        // undefined both for an invalid non-null status (a real, repairable transition)
+        // and for a document with no status field at all (an Elasticsearch no-op).
+        if (AlertService.hasWorkflowStatusField(doc._source)) {
+          changeableKeys.add(key);
+        }
         const previousStatus = AlertService.parseWorkflowStatus(doc._source);
         if (previousStatus !== undefined) {
           previousStatusMap.set(key, previousStatus);
         }
       }
     }
-    return { previousStatusMap, foundKeys };
+    return { previousStatusMap, changeableKeys };
   }
 
   private emitStatusChangedEvents(
     alerts: UpdateAlertStatusRequest[],
     previousStatusMap: Map<string, STATUS_VALUES>,
-    foundKeys: Set<string>,
+    changeableKeys: Set<string>,
     casesEventBus: CasesEventBus,
     request: KibanaRequest
   ) {
@@ -219,11 +244,11 @@ export class AlertService {
         const translatedStatus = this.translateStatus(alert);
         const key = `${alert.index}:${alert.id}`;
         const previousStatus = previousStatusMap.get(key);
-        // Emit for alerts confirmed found by prefetch whose status is actually changing.
-        // Alerts with an unrecognized stored status (previousStatus === undefined) are
-        // included — the mutation still succeeds and the event schema does not require
-        // a previousStatuses row for every emitted ID.
-        const isActualChange = foundKeys.has(key) && previousStatus !== translatedStatus;
+        // Emit only for alerts the update script can mutate (found, with a non-null status
+        // field) whose status is actually changing. Alerts with an unrecognized stored
+        // status (previousStatus === undefined) are included — the mutation still succeeds
+        // and the event schema does not require a previousStatuses row for every emitted ID.
+        const isActualChange = changeableKeys.has(key) && previousStatus !== translatedStatus;
         if (isActualChange) {
           idToIndex.set(alert.id, alert.index);
           const bucket = byStatus.get(translatedStatus);

@@ -37,6 +37,8 @@ import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
 import {
   prefetchAllPreviousStatusesByIds,
   prefetchPreviousStatusesByQuery,
+  collectStatusTransitions,
+  type FoundHit,
   type PreviousStatus,
 } from '../common/operations/prefetch_previous_statuses';
 import { emitAlertStatusChangedWithCap } from '../../../../workflows/triggers/emit_status_changed';
@@ -121,8 +123,8 @@ export const setSignalsStatusRoute = (
         try {
           if ('signal_ids' in request.body) {
             const signalIds = request.body.signal_ids;
-            const changingIds: string[] = [];
-            const changingStatuses: PreviousStatus[] = [];
+            let changingIds: string[] = [];
+            let changingStatuses: PreviousStatus[] = [];
             if (eventBus) {
               try {
                 // Fetch all IDs in chunks so requests larger than MAX_ALERTS_PER_TRIGGER
@@ -132,14 +134,8 @@ export const setSignalsStatusRoute = (
                   alertsIndex,
                   signalIds
                 );
-                for (const hit of hits) {
-                  if (hit.hasStatusField && hit.previousStatus !== status) {
-                    changingIds.push(hit.id);
-                    if (hit.previousStatus !== undefined) {
-                      changingStatuses.push({ id: hit.id, previousStatus: hit.previousStatus });
-                    }
-                  }
-                }
+                ({ ids: changingIds, previousStatuses: changingStatuses } =
+                  collectStatusTransitions(hits, status));
               } catch (err) {
                 logger.warn(
                   `Failed to pre-fetch previous alert statuses for workflow trigger: ${err}`
@@ -197,16 +193,11 @@ export const setSignalsStatusRoute = (
             // result to the underlying `_update_by_query`.
             const runtimeMappings = buildRuntimeMappingsFromFieldTypes(runtimeFields);
 
-            let previousStatuses: PreviousStatus[] = [];
-            let prefetchedIds: string[] = [];
+            let prefetchedHits: FoundHit[] = [];
             let truncated = false;
             if (eventBus) {
               try {
-                ({
-                  previousStatuses,
-                  ids: prefetchedIds,
-                  truncated,
-                } = await prefetchPreviousStatusesByQuery(
+                ({ hits: prefetchedHits, truncated } = await prefetchPreviousStatusesByQuery(
                   esClient,
                   alertsIndex,
                   query,
@@ -230,15 +221,13 @@ export const setSignalsStatusRoute = (
             );
 
             // Post-filter: excludeStatus pre-filters modern docs at ES level, but legacy
-            // docs (signal.status only) may still appear. Remove no-ops explicitly.
-            // Build a set of IDs we know are already at the target status so they can be excluded.
-            // Docs with unrecognized stored status (previousStatus === undefined) are included since
-            // they are definitively changing.
-            const noOpIds = new Set(
-              previousStatuses.filter((ps) => ps.previousStatus === status).map((ps) => ps.id)
-            );
-            const changingIds = prefetchedIds.filter((id) => !noOpIds.has(id));
-            const changingStatuses = previousStatuses.filter((ps) => ps.previousStatus !== status);
+            // docs (signal.status only) and status-less docs may still appear. Drop both
+            // the remaining no-ops and the status-less docs the update script never
+            // mutates; docs with an unrecognized non-null status are kept since they do
+            // transition. No cap is applied here — the by-query prefetch already returns
+            // at most MAX_ALERTS_PER_TRIGGER hits, and `truncated` reports the overflow.
+            const { ids: changingIds, previousStatuses: changingStatuses } =
+              collectStatusTransitions(prefetchedHits, status);
             if (changingIds.length > 0 || truncated) {
               void eventBus?.emitAlertStatusChanged(request, {
                 alertIds: changingIds,

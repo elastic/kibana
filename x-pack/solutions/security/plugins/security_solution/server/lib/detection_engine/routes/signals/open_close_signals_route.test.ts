@@ -437,6 +437,63 @@ describe('set signal status', () => {
         expect(mockEventBus.emitAlertStatusChanged).not.toHaveBeenCalled();
       });
 
+      test('does not emit for hits with no workflow status field', async () => {
+        // The update script only assigns when a status field is non-null, so a status-less
+        // hit is an Elasticsearch no-op and must not start a workflow.
+        context.core.elasticsearch.client.asCurrentUser.search.mockResponse({
+          took: 1,
+          timed_out: false,
+          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+          hits: {
+            hits: [
+              {
+                _id: 'status-less',
+                _index: '.siem-signals-default',
+                _source: { 'some.other.field': 'value' },
+              },
+            ],
+            total: { value: 1, relation: 'eq' },
+            max_score: 0,
+          },
+        });
+        await server.inject(
+          getSetSignalStatusByQueryRequest(),
+          requestContextMock.convertContext(context)
+        );
+        await new Promise((r) => setTimeout(r, 0));
+        expect(mockEventBus.emitAlertStatusChanged).not.toHaveBeenCalled();
+      });
+
+      test('still emits a hit whose stored status is non-null but unrecognized', async () => {
+        // "triaged" is overwritten by the update script, so the ID transitions even though
+        // it produces no previousStatuses row.
+        context.core.elasticsearch.client.asCurrentUser.search.mockResponse({
+          took: 1,
+          timed_out: false,
+          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+          hits: {
+            hits: [
+              {
+                _id: 'unrecognized',
+                _index: '.siem-signals-default',
+                _source: { 'kibana.alert.workflow_status': 'triaged' },
+              },
+            ],
+            total: { value: 1, relation: 'eq' },
+            max_score: 0,
+          },
+        });
+        await server.inject(
+          getSetSignalStatusByQueryRequest(),
+          requestContextMock.convertContext(context)
+        );
+        await new Promise((r) => setTimeout(r, 0));
+        expect(mockEventBus.emitAlertStatusChanged).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.objectContaining({ alertIds: ['unrecognized'], previousStatuses: [] })
+        );
+      });
+
       test('does not emit when prefetch fails', async () => {
         context.core.elasticsearch.client.asCurrentUser.search.mockRejectedValue(
           new Error('ES search error')

@@ -21,11 +21,16 @@ import type { SecuritySolutionPluginRouter } from '../../../../types';
 import type { ITelemetryEventsSender } from '../../../telemetry/sender';
 import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
 import {
-  prefetchPreviousStatusesByIds,
-  extractWorkflowStatus,
+  prefetchAllPreviousStatusesByIds,
+  collectStatusTransitions,
+  toFoundHit,
   type FoundHit,
   type PreviousStatus,
 } from '../common/operations/prefetch_previous_statuses';
+import {
+  emitAlertStatusChangedWithCap,
+  emitAttackStatusChangedWithCap,
+} from '../../../../workflows/triggers/emit_status_changed';
 import { MAX_ALERTS_PER_TRIGGER } from '../../../../../common/workflows/triggers';
 import { INSIGHTS_CHANNEL } from '../../../telemetry/constants';
 import {
@@ -122,15 +127,12 @@ export const setAttacksStatusRoute = (
           if (eventBus) {
             try {
               const esClient = core.elasticsearch.client.asCurrentUser;
-              const { previousStatuses: fetched, hits } = await prefetchPreviousStatusesByIds(
-                esClient,
-                attackIndex,
-                ids
-              );
-              // Use hits (all found docs) rather than previousStatuses (recognized-status docs only)
-              // so attacks with an unrecognized stored status (e.g. "triaged") are included.
-              filteredAttackIds = hits.filter((h) => h.previousStatus !== status).map((h) => h.id);
-              filteredPreviousStatuses = fetched.filter((ps) => ps.previousStatus !== status);
+              // Chunked so an oversized request still sees every ID, and the helper reserves
+              // one hit per attack index family (scheduled + adhoc) so an _id present in both
+              // cannot push another requested ID out of the result window.
+              const { hits } = await prefetchAllPreviousStatusesByIds(esClient, attackIndex, ids);
+              ({ ids: filteredAttackIds, previousStatuses: filteredPreviousStatuses } =
+                collectStatusTransitions(hits, status));
             } catch (err) {
               logger?.warn(
                 `Failed to pre-fetch previous statuses for workflow trigger (attacks status): ${err}`
@@ -149,13 +151,15 @@ export const setAttacksStatusRoute = (
                 status,
                 reason: closingReason.reason,
               });
-              if (filteredAttackIds.length > 0) {
-                void eventBus?.emitAttackStatusChanged(request, {
-                  attackIds: filteredAttackIds.slice(0, MAX_ALERTS_PER_TRIGGER),
+              if (eventBus) {
+                emitAttackStatusChangedWithCap(
+                  eventBus,
+                  request,
                   status,
-                  previousStatuses: filteredPreviousStatuses.slice(0, MAX_ALERTS_PER_TRIGGER),
-                  truncated: ids.length > MAX_ALERTS_PER_TRIGGER,
-                });
+                  filteredAttackIds,
+                  filteredPreviousStatuses,
+                  logger
+                );
               }
               return result;
             }
@@ -174,20 +178,20 @@ export const setAttacksStatusRoute = (
               index: attackIndex,
               params: {
                 query: { bool: { filter: { terms: { _id: ids } } } },
-                _source: [ALERT_ATTACK_DISCOVERY_ALERT_IDS, ALERT_WORKFLOW_STATUS],
-                size: Math.min(ids.length, MAX_ALERTS_PER_TRIGGER),
+                _source: [ALERT_ATTACK_DISCOVERY_ALERT_IDS, ALERT_WORKFLOW_STATUS, 'signal.status'],
+                // `attackIndex` spans the scheduled and adhoc families and an _id can exist
+                // in both, so reserve a slot per family rather than one per requested ID.
+                size: Math.min(ids.length * attackIndex.length, MAX_ALERTS_PER_TRIGGER),
               },
             });
 
-            const verifiedAttackIds = attackDocs.hits.hits
-              .map((hit) => hit._id)
-              .filter((id): id is string => id != null);
-
-            const attackPreviousStatuses = attackDocs.hits.hits.flatMap((hit) => {
-              if (hit._id == null) return [];
-              const previousStatus = extractWorkflowStatus(hit._source);
-              return previousStatus !== undefined ? [{ id: hit._id, previousStatus }] : [];
+            // Map to FoundHit so status-less attacks — which the update script never
+            // mutates — are distinguishable from attacks with an unrecognized status.
+            const attackHits = attackDocs.hits.hits.flatMap((hit) => {
+              const found = toFoundHit(hit);
+              return found !== undefined ? [found] : [];
             });
+            const verifiedAttackIds = Array.from(new Set(attackHits.map((hit) => hit.id)));
 
             const relatedAlertIds = attackDocs.hits.hits.flatMap((hit) => {
               const source = hit._source as Record<string, unknown> | undefined;
@@ -201,17 +205,17 @@ export const setAttacksStatusRoute = (
             // the target to the unified index pattern for the cascade update.
             const index = await getUnifiedAlertsIndex({ context, ruleDataClient });
 
-            const relatedAlertPreviousStatuses: PreviousStatus[] = [];
             let relatedAlertHits: FoundHit[] = [];
             if (eventBus && relatedAlertIds.length > 0) {
               try {
                 const esClient = core.elasticsearch.client.asCurrentUser;
-                const { previousStatuses: fetched, hits } = await prefetchPreviousStatusesByIds(
+                // Chunked, and one reserved hit per unified index family, so no related
+                // alert is dropped by the result window.
+                const { hits } = await prefetchAllPreviousStatusesByIds(
                   esClient,
                   index,
                   relatedAlertIds
                 );
-                relatedAlertPreviousStatuses.push(...fetched);
                 relatedAlertHits = hits;
               } catch (err) {
                 logger?.warn(
@@ -228,51 +232,34 @@ export const setAttacksStatusRoute = (
               reason: closingReason.reason,
             });
 
-            // Use verifiedAttackIds (all found attacks) rather than attackPreviousStatuses
-            // (recognized-status docs only) so attacks with an unrecognized stored status are
-            // included. Exclude only those we know are already at the target status.
-            const noOpAttackIds = new Set(
-              attackPreviousStatuses.filter((ps) => ps.previousStatus === status).map((ps) => ps.id)
-            );
-            const changingAttackIds = verifiedAttackIds.filter((id) => !noOpAttackIds.has(id));
-            const changingAttacks = attackPreviousStatuses.filter(
-              (ps) => ps.previousStatus !== status
-            );
-            if (changingAttackIds.length > 0) {
-              void eventBus?.emitAttackStatusChanged(request, {
-                attackIds: changingAttackIds.slice(0, MAX_ALERTS_PER_TRIGGER),
-                status,
-                previousStatuses: changingAttacks.slice(0, MAX_ALERTS_PER_TRIGGER),
-                truncated: verifiedAttackIds.length > MAX_ALERTS_PER_TRIGGER,
-              });
-            }
+            const { ids: changingAttackIds, previousStatuses: changingAttacks } =
+              collectStatusTransitions(attackHits, status);
             // Same pattern for related detection alerts.
             // Exclude any hits that landed in an Attack Discovery index: the unified index
             // contains both families, so a stale related-alert ID that collides with an AD
             // doc _id must not be emitted as a detection-alert event.
-            const nonAdRelatedHits = relatedAlertHits.filter(
-              (h) => !isAttackDiscoveryIndex(h.index)
-            );
-            const nonAdRelatedIdSet = new Set(nonAdRelatedHits.map((h) => h.id));
-            const nonAdPreviousStatuses = relatedAlertPreviousStatuses.filter((ps) =>
-              nonAdRelatedIdSet.has(ps.id)
-            );
-            const noOpRelatedIds = new Set(
-              nonAdPreviousStatuses.filter((ps) => ps.previousStatus === status).map((ps) => ps.id)
-            );
-            const changingRelatedIds = nonAdRelatedHits
-              .filter((h) => h.hasStatusField && !noOpRelatedIds.has(h.id))
-              .map((h) => h.id);
-            const changingRelated = nonAdPreviousStatuses.filter(
-              (ps) => ps.previousStatus !== status
-            );
-            if (changingRelatedIds.length > 0) {
-              void eventBus?.emitAlertStatusChanged(request, {
-                alertIds: changingRelatedIds.slice(0, MAX_ALERTS_PER_TRIGGER),
+            const { ids: changingRelatedIds, previousStatuses: changingRelated } =
+              collectStatusTransitions(
+                relatedAlertHits.filter((hit) => !isAttackDiscoveryIndex(hit.index)),
+                status
+              );
+            if (eventBus) {
+              emitAttackStatusChangedWithCap(
+                eventBus,
+                request,
                 status,
-                previousStatuses: changingRelated.slice(0, MAX_ALERTS_PER_TRIGGER),
-                truncated: relatedAlertIds.length > MAX_ALERTS_PER_TRIGGER,
-              });
+                changingAttackIds,
+                changingAttacks,
+                logger
+              );
+              emitAlertStatusChangedWithCap(
+                eventBus,
+                request,
+                status,
+                changingRelatedIds,
+                changingRelated,
+                logger
+              );
             }
             return result;
           }

@@ -32,7 +32,7 @@ const DETECTION_ALERTS_INDEX = '.alerts-security.alerts-default';
 const defaultTags = { tags_to_add: ['investigation'], tags_to_remove: [] };
 
 const getSearchResponse = (
-  hits: Array<{ _id: string; alertIds?: string[] }>
+  hits: Array<{ _id: string; alertIds?: string[]; _index?: string }>
 ): estypes.SearchResponse<unknown> => ({
   took: 1,
   timed_out: false,
@@ -40,9 +40,9 @@ const getSearchResponse = (
   hits: {
     total: { value: hits.length, relation: 'eq' },
     max_score: 0,
-    hits: hits.map(({ _id, alertIds }) => ({
+    hits: hits.map(({ _id, alertIds, _index = SCHEDULED_INDEX }) => ({
       _id,
-      _index: SCHEDULED_INDEX,
+      _index,
       _source: alertIds === undefined ? {} : { [ALERT_ATTACK_DISCOVERY_ALERT_IDS]: alertIds },
     })),
   },
@@ -389,9 +389,12 @@ describe('set attacks tags', () => {
       context.core.elasticsearch.client.asCurrentUser.search.mockResponseOnce(
         getSearchResponse([{ _id: 'attack1', alertIds: ['alertA'] }])
       );
-      // Call 2: related alert verification — alertA exists in the unified index
+      // Call 2: related alert verification — alertA exists in the unified index as a
+      // detection alert. It must not be mocked in an Attack Discovery index: those hits
+      // are deliberately excluded so a stale related-alert ID colliding with an AD doc
+      // is never emitted as a detection-alert event.
       context.core.elasticsearch.client.asCurrentUser.search.mockResponseOnce(
-        getSearchResponse([{ _id: 'alertA' }])
+        getSearchResponse([{ _id: 'alertA', _index: DETECTION_ALERTS_INDEX }])
       );
       await server.inject(
         getRequest({ ...defaultBody, update_related_alerts: true }),

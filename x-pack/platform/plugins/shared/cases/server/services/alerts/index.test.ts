@@ -1056,6 +1056,93 @@ describe('updateAlertsStatus — event bus', () => {
     bus.removeAllListeners();
   });
 
+  it('does not emit for an alert with no workflow status field at all', async () => {
+    // getUpdateAlertsStatusScript sets ctx.op = 'noop' when both kibana.alert.workflow_status
+    // and signal.status are null/missing, so Elasticsearch performs no mutation. Emitting here
+    // would start an external workflow for a status change that never happened.
+    const bus = new CasesEventBus();
+    const listener = jest.fn();
+    bus.onAlertStatusChanged(listener);
+
+    esClient.mget.mockResolvedValueOnce({
+      docs: [
+        {
+          found: true,
+          _id: 'a1',
+          _index: '.siem-signals',
+          _source: { 'some.other.field': 'value' },
+        },
+        {
+          found: true,
+          _id: 'a2',
+          _index: '.siem-signals',
+          _source: { 'kibana.alert.workflow_status': 'open' },
+        },
+      ],
+    } as never);
+
+    const alertService = new AlertService(esClient, logger, alertsClient, bus, request);
+    await alertService.updateAlertsStatus([
+      { id: 'a1', index: '.siem-signals', status: CaseStatuses.closed },
+      { id: 'a2', index: '.siem-signals', status: CaseStatuses.closed },
+    ]);
+
+    expect(listener).toHaveBeenCalledTimes(1);
+    const { payload } = listener.mock.calls[0][0];
+    expect(payload.alertIds).toEqual(['a2']);
+
+    bus.removeAllListeners();
+  });
+
+  it('does not emit at all when every alert is status-less', async () => {
+    const bus = new CasesEventBus();
+    const listener = jest.fn();
+    bus.onAlertStatusChanged(listener);
+
+    esClient.mget.mockResolvedValueOnce({
+      docs: [{ found: true, _id: 'a1', _index: '.siem-signals', _source: {} }],
+    } as never);
+
+    const alertService = new AlertService(esClient, logger, alertsClient, bus, request);
+    await alertService.updateAlertsStatus([
+      { id: 'a1', index: '.siem-signals', status: CaseStatuses.closed },
+    ]);
+
+    expect(listener).not.toHaveBeenCalled();
+
+    bus.removeAllListeners();
+  });
+
+  it('emits for an alert whose only status field is a non-null signal.status', async () => {
+    // The legacy branch of the script mutates signal.status, so this doc does transition.
+    const bus = new CasesEventBus();
+    const listener = jest.fn();
+    bus.onAlertStatusChanged(listener);
+
+    esClient.mget.mockResolvedValueOnce({
+      docs: [
+        {
+          found: true,
+          _id: 'a1',
+          _index: '.siem-signals',
+          _source: { signal: { status: 'open' } },
+        },
+      ],
+    } as never);
+
+    const alertService = new AlertService(esClient, logger, alertsClient, bus, request);
+    await alertService.updateAlertsStatus([
+      { id: 'a1', index: '.siem-signals', status: CaseStatuses.closed },
+    ]);
+
+    expect(listener).toHaveBeenCalledTimes(1);
+    const { payload } = listener.mock.calls[0][0];
+    expect(payload.alertIds).toEqual(['a1']);
+    expect(payload.previousStatuses).toEqual([{ id: 'a1', previousStatus: 'open' }]);
+
+    bus.removeAllListeners();
+  });
+
   it('emits with the affected ID when unrecognized modern status coexists with a valid signal.status', async () => {
     // parseWorkflowStatus must not fall back to signal.status when the modern field is non-null.
     // Without the guard, signal.status 'closed' would equal the target and suppress the event,

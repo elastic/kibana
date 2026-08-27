@@ -22,7 +22,10 @@ import { getUnifiedAlertsIndex } from '../common/index_patterns/get_unified_aler
 import { withSiemErrorHandling } from '../with_siem_error_handling';
 import { buildSiemResponse } from '../utils';
 import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
-import { prefetchAllPreviousStatusesByIds } from '../common/operations/prefetch_previous_statuses';
+import {
+  prefetchAllPreviousStatusesByIds,
+  collectStatusTransitions,
+} from '../common/operations/prefetch_previous_statuses';
 import type { PreviousStatus } from '../../../../events/types';
 import { isAttackDiscoveryIndex } from '../common/operations/is_attack_discovery_index';
 import {
@@ -72,48 +75,30 @@ export const setUnifiedAlertsWorkflowStatusRoute = (
 
         const index = await getUnifiedAlertsIndex({ context, ruleDataClient });
 
-        const alertIds: string[] = [];
-        const attackIds: string[] = [];
-        const alertPreviousStatuses: PreviousStatus[] = [];
-        const attackPreviousStatuses: PreviousStatus[] = [];
+        let alertIds: string[] = [];
+        let attackIds: string[] = [];
+        let alertPreviousStatuses: PreviousStatus[] = [];
+        let attackPreviousStatuses: PreviousStatus[] = [];
         let prefetchSucceeded = false;
 
         if (eventBus) {
           try {
             const esClient = core.elasticsearch.client.asCurrentUser;
-            // The unified index spans both detection-alert and attack-discovery families;
-            // a given _id can appear in both, so reserve room for 2 hits per requested ID.
-            const { hits } = await prefetchAllPreviousStatusesByIds(esClient, index, ids, 2);
-            // Iterate ES hits directly (keyed by (index, id)) so that cross-index
-            // _id collisions are handled correctly — ES only guarantees _id
-            // uniqueness within an index, not across indices.
-            for (const hit of hits) {
-              // Exclude documents with no status field: the update script guards on
-              // `!= null`, so status-less docs are not mutated and must not emit events.
-              // A hit with hasStatusField=true but previousStatus=undefined has an
-              // unrecognized non-null value (e.g. "triaged") and IS updated by the script.
-              if (hit.hasStatusField) {
-                // Only emit for IDs that are actually changing status
-                const isNoOp = hit.previousStatus !== undefined && hit.previousStatus === status;
-                if (!isNoOp) {
-                  if (isAttackDiscoveryIndex(hit.index)) {
-                    attackIds.push(hit.id);
-                    if (hit.previousStatus !== undefined)
-                      attackPreviousStatuses.push({
-                        id: hit.id,
-                        previousStatus: hit.previousStatus,
-                      });
-                  } else {
-                    alertIds.push(hit.id);
-                    if (hit.previousStatus !== undefined)
-                      alertPreviousStatuses.push({
-                        id: hit.id,
-                        previousStatus: hit.previousStatus,
-                      });
-                  }
-                }
-              }
-            }
+            // The helper reserves one hit per index family in `index` (detection alerts
+            // plus the scheduled and adhoc attack-discovery indices), so a given _id that
+            // exists in several of them is fully retrieved.
+            const { hits } = await prefetchAllPreviousStatusesByIds(esClient, index, ids);
+            // Split by (index, id) rather than id alone: ES only guarantees _id uniqueness
+            // within an index, so the same _id can be a detection alert and an attack.
+            ({ ids: attackIds, previousStatuses: attackPreviousStatuses } =
+              collectStatusTransitions(
+                hits.filter((hit) => isAttackDiscoveryIndex(hit.index)),
+                status
+              ));
+            ({ ids: alertIds, previousStatuses: alertPreviousStatuses } = collectStatusTransitions(
+              hits.filter((hit) => !isAttackDiscoveryIndex(hit.index)),
+              status
+            ));
             prefetchSucceeded = true;
           } catch (err) {
             logger.warn(`Failed to pre-fetch previous alert statuses for workflow trigger: ${err}`);

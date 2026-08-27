@@ -31,6 +31,9 @@ const makeSearchResponse = (
   _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
 });
 
+const requestedIds = (params: unknown): string[] =>
+  (params as { query?: { terms?: { _id?: string[] } } }).query?.terms?._id ?? [];
+
 describe('set unified alerts tags', () => {
   let server: ReturnType<typeof serverMock.create>;
   let context: SecuritySolutionRequestHandlerContextMock;
@@ -366,16 +369,18 @@ describe('set unified alerts tags', () => {
       expect(mockEventBus.emitAttackTagsChanged).not.toHaveBeenCalled();
     });
 
-    test('makes multiple ES calls and classifies all IDs when ids.length exceeds MAX_ALERTS_PER_TRIGGER', async () => {
+    test('chunks an oversized batch so every id is classified without exceeding the result window', async () => {
       const oversizedIds = Array.from({ length: MAX_ALERTS_PER_TRIGGER + 1 }, (_, i) => `id-${i}`);
-      // hitsPerIdCap=2 → chunkSize=5000; 10001 IDs → 3 chunks (5000+5000+1).
-      // First chunk returns id-0; second and third return nothing.
-      context.core.elasticsearch.client.asCurrentUser.search
-        .mockResolvedValueOnce(
-          makeSearchResponse([{ _id: oversizedIds[0], _index: '.alerts-security.alerts-default' }])
-        )
-        .mockResolvedValueOnce(makeSearchResponse([]))
-        .mockResolvedValueOnce(makeSearchResponse([]));
+      // Only id-0 exists. The chunk size is derived from the number of index families in
+      // the unified pattern, so assert on coverage and window size rather than call count.
+      context.core.elasticsearch.client.asCurrentUser.search.mockImplementation(async (params) => {
+        const chunk = requestedIds(params);
+        return makeSearchResponse(
+          chunk.includes(oversizedIds[0])
+            ? [{ _id: oversizedIds[0], _index: '.alerts-security.alerts-default' }]
+            : []
+        );
+      });
       const request = requestMock.create({
         method: 'post',
         path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_TAGS_URL,
@@ -386,8 +391,16 @@ describe('set unified alerts tags', () => {
       });
       await server.inject(request, requestContextMock.convertContext(context));
       await new Promise((r) => setTimeout(r, 0));
-      // Chunked: 3 ES calls for MAX_ALERTS_PER_TRIGGER+1 IDs with hitsPerIdCap=2 (chunkSize=5000)
-      expect(context.core.elasticsearch.client.asCurrentUser.search.mock.calls.length).toBe(3);
+      const searchCalls = context.core.elasticsearch.client.asCurrentUser.search.mock.calls;
+      expect(searchCalls.length).toBeGreaterThan(1);
+      // No chunk may ask for more hits than index.max_result_window allows...
+      for (const [params] of searchCalls) {
+        expect((params as { size?: number }).size).toBeLessThanOrEqual(MAX_ALERTS_PER_TRIGGER);
+      }
+      // ...and together the chunks must still cover every requested id.
+      expect(searchCalls.flatMap(([params]) => requestedIds(params)).sort()).toEqual(
+        [...oversizedIds].sort()
+      );
       // Only id-0 was found; truncated is false because alertIds.length (1) <= MAX_ALERTS_PER_TRIGGER
       expect(mockEventBus.emitAlertTagsChanged).toHaveBeenCalledWith(
         expect.anything(),

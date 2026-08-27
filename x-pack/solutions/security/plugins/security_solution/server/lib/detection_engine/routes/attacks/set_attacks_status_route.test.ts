@@ -155,7 +155,12 @@ describe('set attacks workflow status', () => {
       expect(context.core.elasticsearch.client.asCurrentUser.search).toHaveBeenCalledWith(
         expect.objectContaining({
           index: [SCHEDULED_INDEX, ADHOC_INDEX],
-          _source: [ALERT_ATTACK_DISCOVERY_ALERT_IDS, ALERT_WORKFLOW_STATUS],
+          // signal.status is requested so status-less attacks — which the update script
+          // never mutates — can be told apart from attacks with an unrecognized status.
+          _source: [ALERT_ATTACK_DISCOVERY_ALERT_IDS, ALERT_WORKFLOW_STATUS, 'signal.status'],
+          // One result slot per attack index family, so an _id present in both the
+          // scheduled and adhoc indices cannot displace another requested attack.
+          size: 2 * 2,
         })
       );
     });
@@ -458,6 +463,19 @@ describe('set attacks workflow status', () => {
       });
     });
 
+    test('does not emit for a status-less attack in the non-cascade path', async () => {
+      context.core.elasticsearch.client.asCurrentUser.search.mockReset();
+      context.core.elasticsearch.client.asCurrentUser.search.mockResponseOnce(
+        getSearchResponse([{ _id: 'attack1' }])
+      );
+      await server.inject(
+        getRequest({ ids: ['attack1'], status: 'acknowledged' }),
+        requestContextMock.convertContext(context)
+      );
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAttackStatusChanged).not.toHaveBeenCalled();
+    });
+
     describe('cascade', () => {
       beforeEach(() => {
         // First search: searchAlerts — returns attack doc with related alert IDs and previous status
@@ -496,6 +514,59 @@ describe('set attacks workflow status', () => {
             alertIds: ['alertA', 'alertB'],
             status: 'acknowledged',
           })
+        );
+      });
+
+      test('does not emit a status-less attack, and still emits an unrecognized-status one', async () => {
+        // `updateAlertsWorkflowStatus` only assigns when the status field is non-null, so a
+        // status-less attack never transitions. An unrecognized non-null value ("triaged")
+        // IS overwritten, so it must still be emitted.
+        context.core.elasticsearch.client.asCurrentUser.search.mockReset();
+        context.core.elasticsearch.client.asCurrentUser.search.mockResponseOnce(
+          getSearchResponse([
+            { _id: 'status-less-attack', alertIds: [] },
+            { _id: 'unrecognized-attack', alertIds: [], workflowStatus: 'triaged' },
+          ])
+        );
+
+        await server.inject(
+          getRequest({
+            ids: ['status-less-attack', 'unrecognized-attack'],
+            status: 'acknowledged',
+            update_related_alerts: true,
+          }),
+          requestContextMock.convertContext(context)
+        );
+        await new Promise((r) => setTimeout(r, 0));
+        expect(mockEventBus.emitAttackStatusChanged).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.objectContaining({ attackIds: ['unrecognized-attack'], previousStatuses: [] })
+        );
+      });
+
+      test('does not emit alertStatusChanged for a status-less related alert', async () => {
+        context.core.elasticsearch.client.asCurrentUser.search.mockReset();
+        context.core.elasticsearch.client.asCurrentUser.search.mockResponseOnce(
+          getSearchResponse([
+            { _id: 'attack1', alertIds: ['alertA', 'alertB'], workflowStatus: 'open' },
+          ])
+        );
+        context.core.elasticsearch.client.asCurrentUser.search.mockResponseOnce(
+          getSearchResponse([
+            // alertA has no status field at all — the update script leaves it untouched.
+            { _id: 'alertA', _index: DETECTION_ALERTS_INDEX },
+            { _id: 'alertB', workflowStatus: 'open', _index: DETECTION_ALERTS_INDEX },
+          ])
+        );
+
+        await server.inject(
+          getRequest({ ...defaultBody, update_related_alerts: true }),
+          requestContextMock.convertContext(context)
+        );
+        await new Promise((r) => setTimeout(r, 0));
+        expect(mockEventBus.emitAlertStatusChanged).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.objectContaining({ alertIds: ['alertB'] })
         );
       });
 

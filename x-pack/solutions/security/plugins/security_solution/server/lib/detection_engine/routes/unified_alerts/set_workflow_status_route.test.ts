@@ -34,11 +34,34 @@ const makeSearchResponse = (
   _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
 });
 
+const requestedIds = (params: unknown): string[] =>
+  (params as { query?: { ids?: { values?: string[] } } }).query?.ids?.values ?? [];
+
 describe('set unified alerts workflow status', () => {
   let server: ReturnType<typeof serverMock.create>;
   let context: SecuritySolutionRequestHandlerContextMock;
   let ruleDataClient: RuleDataClientMock;
   let mockLogger: ReturnType<typeof loggingSystemMock.createLogger>;
+
+  // Answers each prefetch chunk with the ids that chunk actually asked for, so overflow
+  // tests assert on the emitted payload instead of hard-coding an internal chunk size
+  // (which is derived from the number of index families in the unified pattern).
+  const mockChunkedSearch = (sourceForId: (id: string) => Record<string, unknown> | undefined) =>
+    context.core.elasticsearch.client.asCurrentUser.search.mockImplementation(async (params) =>
+      makeSearchResponse(
+        requestedIds(params).flatMap((id) => {
+          const source = sourceForId(id);
+          return source === undefined
+            ? []
+            : [{ _id: id, _index: '.alerts-security.alerts-default', _source: source }];
+        })
+      )
+    );
+
+  const requestedIdsAcrossSearches = (): string[] =>
+    context.core.elasticsearch.client.asCurrentUser.search.mock.calls.flatMap(([params]) =>
+      requestedIds(params)
+    );
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -439,22 +462,13 @@ describe('set unified alerts workflow status', () => {
       expect(mockEventBus.emitAttackStatusChanged).not.toHaveBeenCalled();
     });
 
-    test('makes multiple ES calls when ids.length exceeds MAX_ALERTS_PER_TRIGGER', async () => {
+    test('chunks an oversized batch so every id is prefetched without exceeding the result window', async () => {
       const oversizedIds = Array.from({ length: MAX_ALERTS_PER_TRIGGER + 1 }, (_, i) => `id-${i}`);
-      // chunkSize = MAX_ALERTS_PER_TRIGGER / hitsPerIdCap = 10000/2 = 5000, so 10001 IDs → 3 chunks.
-      // First chunk returns id-0; second and third chunks return nothing.
-      context.core.elasticsearch.client.asCurrentUser.search
-        .mockResolvedValueOnce(
-          makeSearchResponse([
-            {
-              _id: oversizedIds[0],
-              _index: '.alerts-security.alerts-default',
-              _source: { 'kibana.alert.workflow_status': 'open' },
-            },
-          ])
-        )
-        .mockResolvedValueOnce(makeSearchResponse([]))
-        .mockResolvedValueOnce(makeSearchResponse([]));
+      // Only id-0 exists. The chunk size is derived from the number of index families in
+      // the unified pattern, so assert on coverage and window size rather than call count.
+      mockChunkedSearch((id) =>
+        id === oversizedIds[0] ? { 'kibana.alert.workflow_status': 'open' } : undefined
+      );
       const request = requestMock.create({
         method: 'post',
         path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_WORKFLOW_STATUS_URL,
@@ -463,11 +477,14 @@ describe('set unified alerts workflow status', () => {
       await server.inject(request, requestContextMock.convertContext(context));
       await new Promise((r) => setTimeout(r, 0));
 
-      // Chunked: 3 ES calls for MAX_ALERTS_PER_TRIGGER+1 IDs (chunkSize = MAX_ALERTS_PER_TRIGGER/2)
-      expect(context.core.elasticsearch.client.asCurrentUser.search.mock.calls.length).toBe(3);
-      // Each individual call is still capped at MAX_ALERTS_PER_TRIGGER
-      const searchCall = context.core.elasticsearch.client.asCurrentUser.search.mock.calls[0][0];
-      expect((searchCall as { size?: number }).size).toBeLessThanOrEqual(MAX_ALERTS_PER_TRIGGER);
+      const searchCalls = context.core.elasticsearch.client.asCurrentUser.search.mock.calls;
+      expect(searchCalls.length).toBeGreaterThan(1);
+      // No chunk may ask for more hits than index.max_result_window allows...
+      for (const [params] of searchCalls) {
+        expect((params as { size?: number }).size).toBeLessThanOrEqual(MAX_ALERTS_PER_TRIGGER);
+      }
+      // ...and together the chunks must still cover every requested id.
+      expect(requestedIdsAcrossSearches().sort()).toEqual([...oversizedIds].sort());
 
       // Only id-0 was actually found; truncated is false because alertIds.length (1) <= MAX_ALERTS_PER_TRIGGER
       expect(mockEventBus.emitAlertStatusChanged).toHaveBeenCalledWith(
@@ -509,32 +526,9 @@ describe('set unified alerts workflow status', () => {
     });
 
     test('caps previousStatuses alongside alertIds when the batch overflows MAX_ALERTS_PER_TRIGGER', async () => {
-      // chunkSize = MAX_ALERTS_PER_TRIGGER / hitsPerIdCap = 5000.
-      // Three chunks for 10001 IDs: 5000 + 5000 + 1 hits, all changing status (open → closed).
-      // After accumulation alertPreviousStatuses has MAX_ALERTS_PER_TRIGGER+1 entries;
-      // the fix must slice it to MAX_ALERTS_PER_TRIGGER before emitting.
-      const halfChunkHits = Array.from({ length: MAX_ALERTS_PER_TRIGGER / 2 }, (_, i) => ({
-        _id: `id-${i}`,
-        _index: '.alerts-security.alerts-default',
-        _source: { 'kibana.alert.workflow_status': 'open' },
-      }));
-      const secondHalfChunkHits = Array.from({ length: MAX_ALERTS_PER_TRIGGER / 2 }, (_, i) => ({
-        _id: `id-${MAX_ALERTS_PER_TRIGGER / 2 + i}`,
-        _index: '.alerts-security.alerts-default',
-        _source: { 'kibana.alert.workflow_status': 'open' },
-      }));
-      context.core.elasticsearch.client.asCurrentUser.search
-        .mockResolvedValueOnce(makeSearchResponse(halfChunkHits))
-        .mockResolvedValueOnce(makeSearchResponse(secondHalfChunkHits))
-        .mockResolvedValueOnce(
-          makeSearchResponse([
-            {
-              _id: `id-${MAX_ALERTS_PER_TRIGGER}`,
-              _index: '.alerts-security.alerts-default',
-              _source: { 'kibana.alert.workflow_status': 'open' },
-            },
-          ])
-        );
+      // All MAX_ALERTS_PER_TRIGGER+1 documents are changing status (open → closed), so the
+      // accumulated previousStatuses overflows too and must be capped in lockstep with the IDs.
+      mockChunkedSearch(() => ({ 'kibana.alert.workflow_status': 'open' }));
       const oversizedIds = Array.from({ length: MAX_ALERTS_PER_TRIGGER + 1 }, (_, i) => `id-${i}`);
       const request = requestMock.create({
         method: 'post',
@@ -551,38 +545,12 @@ describe('set unified alerts workflow status', () => {
 
     test('excludes previousStatuses entries for IDs truncated from alertIds', async () => {
       // Scenario: id-0 has unrecognized status 'triaged' (appears in alertIds but not
-      // previousStatuses). id-1..id-4999 and id-5000..id-9999 have recognised 'open'.
-      // id-10000 (overflow) also has recognised 'open'. Without the fix, previousStatuses
-      // would include {id-10000, 'open'} even though id-10000 is not in the emitted alertIds.
-      const firstChunkHits = [
-        {
-          _id: 'id-0',
-          _index: '.alerts-security.alerts-default',
-          _source: { 'kibana.alert.workflow_status': 'triaged' }, // unrecognized
-        },
-        ...Array.from({ length: MAX_ALERTS_PER_TRIGGER / 2 - 1 }, (_, i) => ({
-          _id: `id-${i + 1}`,
-          _index: '.alerts-security.alerts-default',
-          _source: { 'kibana.alert.workflow_status': 'open' },
-        })),
-      ];
-      const secondChunkHits = Array.from({ length: MAX_ALERTS_PER_TRIGGER / 2 }, (_, i) => ({
-        _id: `id-${MAX_ALERTS_PER_TRIGGER / 2 + i}`,
-        _index: '.alerts-security.alerts-default',
-        _source: { 'kibana.alert.workflow_status': 'open' },
+      // previousStatuses); every other id has recognised 'open'. id-10000 overflows the cap,
+      // so without the fix previousStatuses would include {id-10000, 'open'} even though
+      // id-10000 is not in the emitted alertIds.
+      mockChunkedSearch((id) => ({
+        'kibana.alert.workflow_status': id === 'id-0' ? 'triaged' : 'open',
       }));
-      context.core.elasticsearch.client.asCurrentUser.search
-        .mockResolvedValueOnce(makeSearchResponse(firstChunkHits))
-        .mockResolvedValueOnce(makeSearchResponse(secondChunkHits))
-        .mockResolvedValueOnce(
-          makeSearchResponse([
-            {
-              _id: `id-${MAX_ALERTS_PER_TRIGGER}`,
-              _index: '.alerts-security.alerts-default',
-              _source: { 'kibana.alert.workflow_status': 'open' },
-            },
-          ])
-        );
       const oversizedIds = Array.from({ length: MAX_ALERTS_PER_TRIGGER + 1 }, (_, i) => `id-${i}`);
       const request = requestMock.create({
         method: 'post',

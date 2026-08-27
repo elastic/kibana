@@ -30,7 +30,7 @@ export const emitAttackStatusChangedWithCap = (
   status: WorkflowStatus,
   attackIds: readonly string[],
   previousStatuses: readonly PreviousStatus[],
-  logger: Logger
+  logger?: Logger
 ): void => {
   if (attackIds.length === 0) return;
   const { capped, filteredPrev, truncated } = capAndFilter(attackIds, previousStatuses);
@@ -41,11 +41,11 @@ export const emitAttackStatusChangedWithCap = (
       previousStatuses: filteredPrev,
       truncated,
     });
-    logger.debug(
+    logger?.debug(
       `[workflow-trigger] attackStatusChanged fired: count=${capped.length} truncated=${truncated}`
     );
   } catch (err) {
-    logger.warn(`Failed to emit attackStatusChanged workflow trigger: ${err}`);
+    logger?.warn(`Failed to emit attackStatusChanged workflow trigger: ${err}`);
   }
 };
 
@@ -55,7 +55,7 @@ export const emitAlertStatusChangedWithCap = (
   status: WorkflowStatus,
   alertIds: readonly string[],
   previousStatuses: readonly PreviousStatus[],
-  logger: Logger
+  logger?: Logger
 ): void => {
   if (alertIds.length === 0) return;
   const { capped, filteredPrev, truncated } = capAndFilter(alertIds, previousStatuses);
@@ -66,10 +66,10 @@ export const emitAlertStatusChangedWithCap = (
       previousStatuses: filteredPrev,
       truncated,
     });
-    logger.debug(
+    logger?.debug(
       `[workflow-trigger] alertStatusChanged fired: count=${capped.length} truncated=${truncated}`
     );
   } catch (err) {
-    logger.warn(`Failed to emit alertStatusChanged workflow trigger: ${err}`);
+    logger?.warn(`Failed to emit alertStatusChanged workflow trigger: ${err}`);
   }
 };

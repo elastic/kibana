@@ -41,6 +41,15 @@ export interface IdIndexPairWithSource {
 const resolveIndex = (index: string | string[]): string =>
   Array.isArray(index) ? index.join(',') : index;
 
+// The same _id can exist in every index a pattern resolves to — Elasticsearch only
+// guarantees _id uniqueness within a single index — and `_update_by_query` mutates all
+// of them. Reserve one hit per index family so the result window never drops a document
+// the update touches. Callers must not hard-code this: `getUnifiedAlertsIndex()` returns
+// three families (detection alerts + scheduled and adhoc attack discovery) while
+// `getAttackAlertsIndex()` returns two, and those counts change independently.
+const resolveHitsPerIdCap = (index: string | string[]): number =>
+  Array.isArray(index) ? Math.max(index.length, 1) : 1;
+
 const isWorkflowStatus = (v: unknown): v is WorkflowStatus =>
   typeof v === 'string' && (WORKFLOW_STATUS_VALUES as readonly string[]).includes(v);
 
@@ -79,15 +88,67 @@ export const extractWorkflowStatus = (source: unknown): WorkflowStatus | undefin
   return undefined;
 };
 
+/**
+ * Builds a `FoundHit` from a raw search hit, returning undefined when the hit lacks the
+ * `_id`/`_index` needed to place it in an index family.
+ */
+export const toFoundHit = (hit: {
+  _id?: string;
+  _index?: string;
+  _source?: unknown;
+}): FoundHit | undefined => {
+  const { _id: id, _index: index, _source: source } = hit;
+  if (id == null || index == null) return undefined;
+  return {
+    id,
+    index,
+    previousStatus: extractWorkflowStatus(source),
+    hasStatusField: hasAnyStatusField(source),
+  };
+};
+
+/**
+ * True when the workflow-status update will actually transition this document: the update
+ * script only mutates documents whose status field is non-null, and a document already at
+ * the target status is a no-op. A hit with an unrecognized non-null status
+ * (`previousStatus === undefined`) does transition and is included.
+ */
+export const isStatusTransition = (hit: FoundHit, targetStatus: WorkflowStatus): boolean =>
+  hit.hasStatusField && hit.previousStatus !== targetStatus;
+
+/**
+ * Splits found hits into the IDs whose workflow status will actually transition and the
+ * matching `previousStatuses` rows, deduplicating IDs that appear in more than one index
+ * family. Building both lists in a single pass is what guarantees `previousStatuses`
+ * never references an ID missing from the emitted ID list.
+ */
+export const collectStatusTransitions = (
+  hits: readonly FoundHit[],
+  targetStatus: WorkflowStatus
+): { ids: string[]; previousStatuses: PreviousStatus[] } => {
+  const ids: string[] = [];
+  const previousStatuses: PreviousStatus[] = [];
+  const seen = new Set<string>();
+  for (const hit of hits) {
+    if (isStatusTransition(hit, targetStatus) && !seen.has(hit.id)) {
+      seen.add(hit.id);
+      ids.push(hit.id);
+      if (hit.previousStatus !== undefined) {
+        previousStatuses.push({ id: hit.id, previousStatus: hit.previousStatus });
+      }
+    }
+  }
+  return { ids, previousStatuses };
+};
+
 export const prefetchPreviousStatusesByIds = async (
   esClient: ElasticsearchClient,
   index: string | string[],
   ids: string[],
-  // When the same _id can appear in multiple index families (e.g. detection alerts AND
-  // attack-discovery alerts), pass hitsPerIdCap = 2 so the size calculation reserves
-  // room for both hits. Capped IDs are reduced accordingly to stay within
-  // index.max_result_window (MAX_ALERTS_PER_TRIGGER).
-  hitsPerIdCap = 1
+  // Defaults to one hit per index family the pattern resolves to; see resolveHitsPerIdCap.
+  // Capped IDs are reduced accordingly to stay within index.max_result_window
+  // (MAX_ALERTS_PER_TRIGGER).
+  hitsPerIdCap?: number
 ): Promise<{
   previousStatuses: PreviousStatus[];
   idToIndex: Map<string, string>;
@@ -95,14 +156,15 @@ export const prefetchPreviousStatusesByIds = async (
 }> => {
   // Use search (not mget) so ignore_unavailable: true tolerates missing indices
   // (e.g. the adhoc attack-discovery index may not exist yet).
-  const maxIds = Math.floor(MAX_ALERTS_PER_TRIGGER / hitsPerIdCap);
+  const cap = hitsPerIdCap ?? resolveHitsPerIdCap(index);
+  const maxIds = Math.floor(MAX_ALERTS_PER_TRIGGER / cap);
   const cappedIds = ids.slice(0, maxIds);
   const searchResponse = await esClient.search({
     index: resolveIndex(index),
     query: { ids: { values: cappedIds } },
     _source_includes: [ALERT_WORKFLOW_STATUS, 'signal.status'],
-    // cappedIds.length * hitsPerIdCap ≤ maxIds * hitsPerIdCap = MAX_ALERTS_PER_TRIGGER
-    size: cappedIds.length * hitsPerIdCap,
+    // cappedIds.length * cap ≤ maxIds * cap ≤ MAX_ALERTS_PER_TRIGGER
+    size: cappedIds.length * cap,
     ignore_unavailable: true,
   });
   const previousStatuses: PreviousStatus[] = [];
@@ -114,16 +176,12 @@ export const prefetchPreviousStatusesByIds = async (
       if (previousStatus !== undefined) {
         previousStatuses.push({ id: hit._id, previousStatus });
       }
-      if (hit._index != null) {
-        idToIndex.set(hit._id, hit._index);
-        // Collect each (id, index) pair individually so callers can handle
-        // cross-index _id collisions (ES only guarantees uniqueness within an index).
-        hits.push({
-          id: hit._id,
-          index: hit._index,
-          previousStatus,
-          hasStatusField: hasAnyStatusField(hit._source),
-        });
+      // Collect each (id, index) pair individually so callers can handle
+      // cross-index _id collisions (ES only guarantees uniqueness within an index).
+      const found = toFoundHit(hit);
+      if (found !== undefined) {
+        idToIndex.set(found.id, found.index);
+        hits.push(found);
       }
     }
   }
@@ -133,17 +191,19 @@ export const prefetchPreviousStatusesByIds = async (
 export const fetchAlertIdToIndex = async (
   esClient: ElasticsearchClient,
   index: string | string[],
-  ids: string[]
+  ids: string[],
+  hitsPerIdCap?: number
 ): Promise<IdIndexPair[]> => {
-  const cappedIds = ids.slice(0, MAX_ALERTS_PER_TRIGGER);
+  const cap = hitsPerIdCap ?? resolveHitsPerIdCap(index);
+  const cappedIds = ids.slice(0, Math.floor(MAX_ALERTS_PER_TRIGGER / cap));
   const searchResponse = await esClient.search({
     index: resolveIndex(index),
     query: { terms: { _id: cappedIds } },
     _source: false,
-    // Use MAX_ALERTS_PER_TRIGGER (not cappedIds.length) so cross-index duplicates
-    // (same _id in both detection-alert and Attack Discovery indices) are not
-    // truncated when the chunk is smaller than the cap.
-    size: MAX_ALERTS_PER_TRIGGER,
+    // Reserve one slot per index family so cross-index duplicates (same _id in the
+    // detection-alert and Attack Discovery indices) never push another ID out of the
+    // result window.
+    size: cappedIds.length * cap,
     ignore_unavailable: true,
   });
   const pairs: IdIndexPair[] = [];
@@ -165,6 +225,7 @@ export const prefetchPreviousStatusesByQuery = async (
   ids: string[];
   previousStatuses: PreviousStatus[];
   idToIndex: Map<string, string>;
+  hits: FoundHit[];
   truncated: boolean;
 }> => {
   const boolQuery: estypes.QueryDslBoolQuery = { filter: query };
@@ -203,6 +264,7 @@ export const prefetchPreviousStatusesByQuery = async (
   const ids: string[] = [];
   const previousStatuses: PreviousStatus[] = [];
   const idToIndex = new Map<string, string>();
+  const hits: FoundHit[] = [];
   for (const hit of searchResponse.hits.hits) {
     if (hit._id != null) {
       ids.push(hit._id);
@@ -210,12 +272,16 @@ export const prefetchPreviousStatusesByQuery = async (
       if (previousStatus !== undefined) {
         previousStatuses.push({ id: hit._id, previousStatus });
       }
-      if (hit._index != null) {
-        idToIndex.set(hit._id, hit._index);
+      // `hits` carries hasStatusField so callers can drop documents the update script
+      // will not mutate; `ids` alone cannot distinguish those from real transitions.
+      const found = toFoundHit(hit);
+      if (found !== undefined) {
+        idToIndex.set(found.id, found.index);
+        hits.push(found);
       }
     }
   }
-  return { ids, previousStatuses, idToIndex, truncated };
+  return { ids, previousStatuses, idToIndex, hits, truncated };
 };
 
 export const verifyAlertIdsInIndex = async (
@@ -238,13 +304,11 @@ export const fetchAllAlertIdToIndex = async (
   index: string | string[],
   ids: string[]
 ): Promise<IdIndexPair[]> => {
+  const cap = resolveHitsPerIdCap(index);
+  const chunkSize = Math.floor(MAX_ALERTS_PER_TRIGGER / cap);
   const allPairs: IdIndexPair[] = [];
-  for (let i = 0; i < ids.length; i += MAX_ALERTS_PER_TRIGGER) {
-    const partial = await fetchAlertIdToIndex(
-      esClient,
-      index,
-      ids.slice(i, i + MAX_ALERTS_PER_TRIGGER)
-    );
+  for (let i = 0; i < ids.length; i += chunkSize) {
+    const partial = await fetchAlertIdToIndex(esClient, index, ids.slice(i, i + chunkSize), cap);
     for (const pair of partial) {
       allPairs.push(pair);
     }
@@ -257,14 +321,15 @@ export const fetchAlertIdIndexWithSource = async (
   index: string | string[],
   ids: string[],
   sourceFields: string[],
-  hitsPerIdCap = 1
+  hitsPerIdCap?: number
 ): Promise<IdIndexPairWithSource[]> => {
-  const cappedIds = ids.slice(0, Math.floor(MAX_ALERTS_PER_TRIGGER / hitsPerIdCap));
+  const cap = hitsPerIdCap ?? resolveHitsPerIdCap(index);
+  const cappedIds = ids.slice(0, Math.floor(MAX_ALERTS_PER_TRIGGER / cap));
   const searchResponse = await esClient.search({
     index: resolveIndex(index),
     query: { terms: { _id: cappedIds } },
     _source_includes: sourceFields,
-    size: cappedIds.length * hitsPerIdCap,
+    size: cappedIds.length * cap,
     ignore_unavailable: true,
   });
   const pairs: IdIndexPairWithSource[] = [];
@@ -285,9 +350,10 @@ export const fetchAllAlertIdIndexWithSource = async (
   index: string | string[],
   ids: string[],
   sourceFields: string[],
-  hitsPerIdCap = 1
+  hitsPerIdCap?: number
 ): Promise<IdIndexPairWithSource[]> => {
-  const chunkSize = Math.floor(MAX_ALERTS_PER_TRIGGER / hitsPerIdCap);
+  const cap = hitsPerIdCap ?? resolveHitsPerIdCap(index);
+  const chunkSize = Math.floor(MAX_ALERTS_PER_TRIGGER / cap);
   const allPairs: IdIndexPairWithSource[] = [];
   for (let i = 0; i < ids.length; i += chunkSize) {
     const partial = await fetchAlertIdIndexWithSource(
@@ -295,7 +361,7 @@ export const fetchAllAlertIdIndexWithSource = async (
       index,
       ids.slice(i, i + chunkSize),
       sourceFields,
-      hitsPerIdCap
+      cap
     );
     for (const pair of partial) {
       allPairs.push(pair);
@@ -308,7 +374,7 @@ export const prefetchAllPreviousStatusesByIds = async (
   esClient: ElasticsearchClient,
   index: string | string[],
   ids: string[],
-  hitsPerIdCap = 1
+  hitsPerIdCap?: number
 ): Promise<{
   previousStatuses: PreviousStatus[];
   idToIndex: Map<string, string>;
@@ -317,13 +383,14 @@ export const prefetchAllPreviousStatusesByIds = async (
   const allPreviousStatuses: PreviousStatus[] = [];
   const allIdToIndex = new Map<string, string>();
   const allHits: FoundHit[] = [];
-  const chunkSize = Math.floor(MAX_ALERTS_PER_TRIGGER / hitsPerIdCap);
+  const cap = hitsPerIdCap ?? resolveHitsPerIdCap(index);
+  const chunkSize = Math.floor(MAX_ALERTS_PER_TRIGGER / cap);
   for (let i = 0; i < ids.length; i += chunkSize) {
     const { previousStatuses, idToIndex, hits } = await prefetchPreviousStatusesByIds(
       esClient,
       index,
       ids.slice(i, i + chunkSize),
-      hitsPerIdCap
+      cap
     );
     for (const ps of previousStatuses) {
       allPreviousStatuses.push(ps);

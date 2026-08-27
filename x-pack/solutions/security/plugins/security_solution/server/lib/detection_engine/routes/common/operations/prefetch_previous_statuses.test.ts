@@ -11,20 +11,34 @@ import type { SecuritySolutionRequestHandlerContextMock } from '../../__mocks__/
 import { requestContextMock } from '../../__mocks__';
 import { MAX_ALERTS_PER_TRIGGER } from '../../../../../../common/workflows/triggers';
 import {
+  collectStatusTransitions,
   extractWorkflowStatus,
   fetchAlertIdToIndex,
   fetchAlertIdIndexWithSource,
+  prefetchAllPreviousStatusesByIds,
   prefetchPreviousStatusesByIds,
   prefetchPreviousStatusesByQuery,
   verifyAlertIdsInIndex,
+  type FoundHit,
 } from './prefetch_previous_statuses';
+
+// `esClient.search` is typed to resolve a complete SearchResponse, but these tests only
+// exercise the `hits` handling. Wrap the partial body in the mandatory response envelope
+// so the mocks stay focused on what is under test.
+const searchResponse = (body: { hits: unknown }): estypes.SearchResponse =>
+  ({
+    took: 1,
+    timed_out: false,
+    _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+    ...body,
+  } as estypes.SearchResponse);
 
 const makeSearchResponse = (
   hits: Array<{ _id: string; status: string; _index?: string }>,
   total: number,
   relation: 'eq' | 'gte' = 'eq'
 ): estypes.SearchResponse =>
-  ({
+  searchResponse({
     hits: {
       total: { value: total, relation },
       hits: hits.map(({ _id, status, _index = 'test-index' }) => ({
@@ -33,7 +47,7 @@ const makeSearchResponse = (
         _source: { [ALERT_WORKFLOW_STATUS]: status },
       })),
     },
-  } as estypes.SearchResponse);
+  });
 
 describe('extractWorkflowStatus', () => {
   it('returns undefined for null source', () => {
@@ -127,12 +141,14 @@ describe('prefetchPreviousStatusesByIds', () => {
   });
 
   it('omits id from idToIndex when hit._index is absent, but still includes it in previousStatuses', async () => {
-    esClient.search.mockResolvedValue({
-      hits: {
-        total: { value: 1, relation: 'eq' },
-        hits: [{ _id: 'id1', _source: { [ALERT_WORKFLOW_STATUS]: 'open' } }],
-      },
-    });
+    esClient.search.mockResolvedValue(
+      searchResponse({
+        hits: {
+          total: { value: 1, relation: 'eq' },
+          hits: [{ _id: 'id1', _source: { [ALERT_WORKFLOW_STATUS]: 'open' } }],
+        },
+      })
+    );
 
     const { previousStatuses, idToIndex } = await prefetchPreviousStatusesByIds(esClient, 'index', [
       'id1',
@@ -154,12 +170,14 @@ describe('prefetchPreviousStatusesByIds', () => {
   });
 
   it('omits the previousStatus entry when source status is not a valid WorkflowStatus', async () => {
-    esClient.search.mockResolvedValue({
-      hits: {
-        total: { value: 1, relation: 'eq' },
-        hits: [{ _id: 'id1', _index: 'test-index', _source: { [ALERT_WORKFLOW_STATUS]: null } }],
-      },
-    });
+    esClient.search.mockResolvedValue(
+      searchResponse({
+        hits: {
+          total: { value: 1, relation: 'eq' },
+          hits: [{ _id: 'id1', _index: 'test-index', _source: { [ALERT_WORKFLOW_STATUS]: null } }],
+        },
+      })
+    );
 
     const { previousStatuses } = await prefetchPreviousStatusesByIds(esClient, 'index', ['id1']);
 
@@ -173,37 +191,43 @@ describe('prefetchPreviousStatusesByIds', () => {
   });
 
   it('sets hasStatusField=true for a doc with an unrecognized non-null modern status', async () => {
-    esClient.search.mockResolvedValue({
-      hits: {
-        total: { value: 1, relation: 'eq' },
-        hits: [
-          { _id: 'id1', _index: 'test-index', _source: { [ALERT_WORKFLOW_STATUS]: 'triaged' } },
-        ],
-      },
-    });
+    esClient.search.mockResolvedValue(
+      searchResponse({
+        hits: {
+          total: { value: 1, relation: 'eq' },
+          hits: [
+            { _id: 'id1', _index: 'test-index', _source: { [ALERT_WORKFLOW_STATUS]: 'triaged' } },
+          ],
+        },
+      })
+    );
     const { hits } = await prefetchPreviousStatusesByIds(esClient, 'index', ['id1']);
     expect(hits[0].hasStatusField).toBe(true);
     expect(hits[0].previousStatus).toBeUndefined();
   });
 
   it('sets hasStatusField=false for a doc with no status fields', async () => {
-    esClient.search.mockResolvedValue({
-      hits: {
-        total: { value: 1, relation: 'eq' },
-        hits: [{ _id: 'id1', _index: 'test-index', _source: {} }],
-      },
-    });
+    esClient.search.mockResolvedValue(
+      searchResponse({
+        hits: {
+          total: { value: 1, relation: 'eq' },
+          hits: [{ _id: 'id1', _index: 'test-index', _source: {} }],
+        },
+      })
+    );
     const { hits } = await prefetchPreviousStatusesByIds(esClient, 'index', ['id1']);
     expect(hits[0].hasStatusField).toBe(false);
   });
 
   it('sets hasStatusField=false when the modern field is null', async () => {
-    esClient.search.mockResolvedValue({
-      hits: {
-        total: { value: 1, relation: 'eq' },
-        hits: [{ _id: 'id1', _index: 'test-index', _source: { [ALERT_WORKFLOW_STATUS]: null } }],
-      },
-    });
+    esClient.search.mockResolvedValue(
+      searchResponse({
+        hits: {
+          total: { value: 1, relation: 'eq' },
+          hits: [{ _id: 'id1', _index: 'test-index', _source: { [ALERT_WORKFLOW_STATUS]: null } }],
+        },
+      })
+    );
     const { hits } = await prefetchPreviousStatusesByIds(esClient, 'index', ['id1']);
     expect(hits[0].hasStatusField).toBe(false);
   });
@@ -320,12 +344,14 @@ describe('prefetchPreviousStatusesByQuery', () => {
   });
 
   it('omits id from idToIndex when hit._index is absent, but still includes it in previousStatuses', async () => {
-    esClient.search.mockResolvedValue({
-      hits: {
-        total: { value: 1, relation: 'eq' },
-        hits: [{ _id: 'id1', _source: { [ALERT_WORKFLOW_STATUS]: 'open' } }],
-      },
-    });
+    esClient.search.mockResolvedValue(
+      searchResponse({
+        hits: {
+          total: { value: 1, relation: 'eq' },
+          hits: [{ _id: 'id1', _source: { [ALERT_WORKFLOW_STATUS]: 'open' } }],
+        },
+      })
+    );
 
     const { previousStatuses, idToIndex } = await prefetchPreviousStatusesByQuery(
       esClient,
@@ -364,9 +390,11 @@ describe('prefetchPreviousStatusesByQuery', () => {
   });
 
   it('handles numeric total hits format', async () => {
-    esClient.search.mockResolvedValue({
-      hits: { total: MAX_ALERTS_PER_TRIGGER + 1, hits: [] },
-    });
+    esClient.search.mockResolvedValue(
+      searchResponse({
+        hits: { total: MAX_ALERTS_PER_TRIGGER + 1, hits: [] },
+      })
+    );
 
     const result = await prefetchPreviousStatusesByQuery(esClient, 'index', { match_all: {} });
 
@@ -486,12 +514,13 @@ describe('fetchAlertIdToIndex', () => {
   let context: SecuritySolutionRequestHandlerContextMock;
   let esClient: SecuritySolutionRequestHandlerContextMock['core']['elasticsearch']['client']['asCurrentUser'];
 
-  const makeIdToIndexResponse = (hits: Array<{ _id: string; _index: string }>) => ({
-    hits: {
-      total: { value: hits.length, relation: 'eq' },
-      hits: hits.map((h) => ({ _id: h._id, _index: h._index })),
-    },
-  });
+  const makeIdToIndexResponse = (hits: Array<{ _id: string; _index: string }>) =>
+    searchResponse({
+      hits: {
+        total: { value: hits.length, relation: 'eq' },
+        hits: hits.map((h) => ({ _id: h._id, _index: h._index })),
+      },
+    });
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -657,12 +686,13 @@ describe('fetchAlertIdIndexWithSource', () => {
 
   const makeSourceResponse = (
     hits: Array<{ _id: string; _index: string; _source?: Record<string, unknown> }>
-  ) => ({
-    hits: {
-      total: { value: hits.length, relation: 'eq' },
-      hits: hits.map((h) => ({ ...h })),
-    },
-  });
+  ) =>
+    searchResponse({
+      hits: {
+        total: { value: hits.length, relation: 'eq' },
+        hits: hits.map((h) => ({ ...h })),
+      },
+    });
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -719,5 +749,151 @@ describe('fetchAlertIdIndexWithSource', () => {
         ignore_unavailable: true,
       })
     );
+  });
+});
+
+describe('hits-per-id reservation derived from the index pattern', () => {
+  let context: SecuritySolutionRequestHandlerContextMock;
+  let esClient: ReturnType<
+    typeof requestContextMock.createTools
+  >['context']['core']['elasticsearch']['client']['asCurrentUser'];
+
+  const DETECTION_INDEX = '.alerts-security.alerts-default';
+  const SCHEDULED_AD_INDEX = '.alerts-security.attack.discovery.alerts-default';
+  const ADHOC_AD_INDEX = '.adhoc.alerts-security.attack.discovery.alerts-default';
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    ({ context } = requestContextMock.createTools());
+    esClient = context.core.elasticsearch.client.asCurrentUser;
+    esClient.search.mockResolvedValue(searchResponse({ hits: { total: 0, hits: [] } }));
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
+  });
+
+  // The same _id can exist in every index a pattern resolves to and update-by-query mutates
+  // all of them, so the result window must reserve a slot per family. Hard-coding the count
+  // at each call site is what previously let a three-family pattern drop a changing document.
+  it('reserves one hit per index family when prefetching statuses', async () => {
+    await prefetchPreviousStatusesByIds(
+      esClient,
+      [DETECTION_INDEX, SCHEDULED_AD_INDEX, ADHOC_AD_INDEX],
+      ['id-1', 'id-2']
+    );
+    expect(esClient.search).toHaveBeenCalledWith(expect.objectContaining({ size: 2 * 3 }));
+  });
+
+  it('reserves one hit per index family when resolving id-to-index pairs', async () => {
+    await fetchAlertIdToIndex(esClient, [SCHEDULED_AD_INDEX, ADHOC_AD_INDEX], ['id-1', 'id-2']);
+    expect(esClient.search).toHaveBeenCalledWith(expect.objectContaining({ size: 2 * 2 }));
+  });
+
+  it('reserves one hit per index family when fetching sources', async () => {
+    await fetchAlertIdIndexWithSource(
+      esClient,
+      [DETECTION_INDEX, SCHEDULED_AD_INDEX, ADHOC_AD_INDEX],
+      ['id-1'],
+      ['kibana.alert.workflow_tags']
+    );
+    expect(esClient.search).toHaveBeenCalledWith(expect.objectContaining({ size: 1 * 3 }));
+  });
+
+  it('uses a single reserved hit for a single-index pattern', async () => {
+    await prefetchPreviousStatusesByIds(esClient, DETECTION_INDEX, ['id-1', 'id-2']);
+    expect(esClient.search).toHaveBeenCalledWith(expect.objectContaining({ size: 2 }));
+  });
+
+  it('shrinks the chunk size so a full chunk never exceeds MAX_ALERTS_PER_TRIGGER', async () => {
+    const ids = Array.from({ length: MAX_ALERTS_PER_TRIGGER }, (_, i) => `id-${i}`);
+    await prefetchAllPreviousStatusesByIds(
+      esClient,
+      [DETECTION_INDEX, SCHEDULED_AD_INDEX, ADHOC_AD_INDEX],
+      ids
+    );
+    const requested = esClient.search.mock.calls.flatMap(
+      ([params]) => (params as { query?: { ids?: { values?: string[] } } }).query?.ids?.values ?? []
+    );
+    // Every id is still covered...
+    expect(requested).toEqual(ids);
+    // ...and no chunk asks Elasticsearch for more than index.max_result_window hits.
+    for (const [params] of esClient.search.mock.calls) {
+      expect((params as { size?: number }).size).toBeLessThanOrEqual(MAX_ALERTS_PER_TRIGGER);
+    }
+  });
+});
+
+describe('collectStatusTransitions', () => {
+  const hit = (overrides: Partial<FoundHit> & { id: string }): FoundHit => ({
+    index: '.alerts-security.alerts-default',
+    hasStatusField: true,
+    ...overrides,
+  });
+
+  // The update script only assigns when the status field is non-null, so a status-less
+  // document is an Elasticsearch no-op and emitting for it starts a workflow for nothing.
+  it('excludes hits with no status field', () => {
+    const result = collectStatusTransitions(
+      [hit({ id: 'no-status', hasStatusField: false })],
+      'closed'
+    );
+    expect(result.ids).toEqual([]);
+    expect(result.previousStatuses).toEqual([]);
+  });
+
+  it('excludes hits already at the target status', () => {
+    const result = collectStatusTransitions(
+      [hit({ id: 'noop', previousStatus: 'closed' })],
+      'closed'
+    );
+    expect(result.ids).toEqual([]);
+  });
+
+  // An unrecognized non-null value (e.g. "triaged") is still overwritten by the script, so
+  // the ID must be emitted even though there is no valid previousStatuses row for it.
+  it('includes a hit with an unrecognized non-null status but omits its previousStatuses row', () => {
+    const result = collectStatusTransitions(
+      [hit({ id: 'unrecognized', previousStatus: undefined })],
+      'closed'
+    );
+    expect(result.ids).toEqual(['unrecognized']);
+    expect(result.previousStatuses).toEqual([]);
+  });
+
+  it('deduplicates an id that transitions in more than one index family', () => {
+    const result = collectStatusTransitions(
+      [
+        hit({
+          id: 'shared',
+          index: '.alerts-security.attack.discovery.alerts-default',
+          previousStatus: 'open',
+        }),
+        hit({
+          id: 'shared',
+          index: '.adhoc.alerts-security.attack.discovery.alerts-default',
+          previousStatus: 'open',
+        }),
+      ],
+      'closed'
+    );
+    expect(result.ids).toEqual(['shared']);
+    expect(result.previousStatuses).toEqual([{ id: 'shared', previousStatus: 'open' }]);
+  });
+
+  // Alignment is the invariant the event schema depends on: a consumer must never see a
+  // previousStatuses row for an ID that is not in the emitted ID list.
+  it('never returns a previousStatuses row for an id absent from ids', () => {
+    const result = collectStatusTransitions(
+      [
+        hit({ id: 'changing', previousStatus: 'open' }),
+        hit({ id: 'noop', previousStatus: 'closed' }),
+        hit({ id: 'status-less', hasStatusField: false, previousStatus: 'open' }),
+      ],
+      'closed'
+    );
+    expect(result.ids).toEqual(['changing']);
+    expect(result.previousStatuses.map(({ id }) => id)).toEqual(['changing']);
   });
 });
