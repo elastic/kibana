@@ -9,6 +9,7 @@ import {
   getAncestors,
   getSegments,
   isDescendantOf,
+  isIlmLifecycle,
   LOGS_ECS_STREAM_NAME,
   LOGS_OTEL_STREAM_NAME,
   Streams,
@@ -184,7 +185,13 @@ const getStreamType = (stream: Streams.all.Definition): EnrichedStream['type'] =
 };
 
 export const enrichStream = (node: StreamTree | ListStreamDetail): EnrichedStream => {
-  const retentionMs = lifecycleToRetentionMs(node.effective_lifecycle);
+  const lifecycle = node.effective_lifecycle;
+  // Stream list ranks ILM with indefinite DSL. Destinations keep NaN via lifecycleToRetentionMs.
+  const mappedRetentionMs =
+    lifecycle && isIlmLifecycle(lifecycle)
+      ? Number.POSITIVE_INFINITY
+      : lifecycleToRetentionMs(lifecycle);
+  const retentionMs = Number.isNaN(mappedRetentionMs) ? 0 : mappedRetentionMs;
   const nameSortKey =
     'children' in node
       ? `${getSegments(node.stream.name).length}_${node.stream.name.toLowerCase()}`
