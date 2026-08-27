@@ -269,7 +269,10 @@ export class WorkflowsApiService {
       condition: (execution) => !!execution && isTerminalStatus(execution.status ?? ''),
       interval: 1000,
       timeout,
-      errorMessage: `Execution with id ${workflowExecutionId} did not reach a terminal status`,
+      errorMessage: (execution) => {
+        const lastStatus = execution?.status ?? 'not found';
+        return `Execution with id ${workflowExecutionId} did not reach a terminal status (last status: ${lastStatus})`;
+      },
     });
   }
 
