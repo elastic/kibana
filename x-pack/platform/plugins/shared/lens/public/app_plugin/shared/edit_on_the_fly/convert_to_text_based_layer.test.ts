@@ -13,6 +13,7 @@ import type {
   IndexPattern,
   IndexPatternField,
 } from '@kbn/lens-common';
+import { esql } from '@elastic/esql';
 import { createMockFramePublicAPI } from '../../../mocks';
 import { convertFormBasedToTextBasedLayer } from './convert_to_text_based_layer';
 import type { ConvertibleLayer, EsqlConversionData } from './esql_conversion_types';
@@ -233,8 +234,9 @@ describe('convertFormBasedToTextBasedLayer', () => {
     const convertedLayers = Object.values(
       (result?.state.datasourceStates.textBased as TextBasedPersistedState).layers
     );
+    // Layer queries are stored pretty-printed with line-wrapping
     expect(convertedLayers[0]?.query).toEqual({
-      esql: defaultConvertibleLayers[0].query,
+      esql: esql(defaultConvertibleLayers[0].query).print('wrapping'),
     });
   });
 

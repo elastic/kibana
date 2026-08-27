@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { esql } from '@elastic/esql';
+
 import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
 import type {
   DataType,
@@ -157,7 +159,7 @@ function buildTextBasedState(
 
     newLayers[layerId] = {
       index: layer.indexPatternId,
-      query: { esql: conversionResult.esql },
+      query: { esql: esql(conversionResult.esql).print('wrapping') },
       columns: newColumns,
       timeField: framePublicAPI.dataViews.indexPatterns[layer.indexPatternId]?.timeFieldName,
     };
