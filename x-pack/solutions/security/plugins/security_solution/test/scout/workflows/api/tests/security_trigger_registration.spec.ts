@@ -29,18 +29,18 @@ apiTest.describe(
   'Security Solution - Workflow Trigger Registration',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
-    let adminHeaders: Record<string, string>;
+    let headers: Record<string, string>;
 
     apiTest.beforeAll(async ({ samlAuth }) => {
-      const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
-      adminHeaders = { ...cookieHeader, ...COMMON_HEADERS };
+      const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
+      headers = { ...cookieHeader, ...COMMON_HEADERS };
     });
 
     apiTest(
       'should register all expected Security Solution event-driven trigger definitions',
       async ({ apiClient }) => {
         const response = await apiClient.get('internal/workflows_extensions/trigger_definitions', {
-          headers: adminHeaders,
+          headers,
           responseType: 'json',
         });
 

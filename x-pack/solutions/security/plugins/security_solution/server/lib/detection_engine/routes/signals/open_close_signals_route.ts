@@ -37,6 +37,7 @@ import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
 import {
   prefetchPreviousStatusesByIds,
   prefetchPreviousStatusesByQuery,
+  type FoundHit,
   type PreviousStatus,
 } from '../common/operations/prefetch_previous_statuses';
 import { MAX_ALERTS_PER_TRIGGER } from '../../../../../common/workflows/triggers';
@@ -122,14 +123,16 @@ export const setSignalsStatusRoute = (
           if ('signal_ids' in request.body) {
             const signalIds = request.body.signal_ids;
             const previousStatuses: PreviousStatus[] = [];
+            let prefetchedHits: FoundHit[] = [];
             if (eventBus) {
               try {
-                const { previousStatuses: fetched } = await prefetchPreviousStatusesByIds(
+                const { previousStatuses: fetched, hits } = await prefetchPreviousStatusesByIds(
                   esClient,
                   alertsIndex,
                   signalIds
                 );
                 previousStatuses.push(...fetched);
+                prefetchedHits = hits;
               } catch {
                 logger.warn('Failed to pre-fetch previous alert statuses for workflow trigger');
               }
@@ -145,9 +148,15 @@ export const setSignalsStatusRoute = (
             });
 
             const changingSignals = previousStatuses.filter((ps) => ps.previousStatus !== status);
-            if (changingSignals.length > 0) {
+            // Use hits (all found docs) rather than previousStatuses (recognized-status docs only)
+            // so alerts with an unrecognized stored status (e.g. "triaged") are included.
+            const changingIds = prefetchedHits
+              .filter((h) => h.previousStatus !== status)
+              .map((h) => h.id)
+              .slice(0, MAX_ALERTS_PER_TRIGGER);
+            if (changingIds.length > 0) {
               void eventBus?.emitAlertStatusChanged(request, {
-                alertIds: changingSignals.map((ps) => ps.id).slice(0, MAX_ALERTS_PER_TRIGGER),
+                alertIds: changingIds,
                 status,
                 previousStatuses: changingSignals.slice(0, MAX_ALERTS_PER_TRIGGER),
                 truncated: signalIds.length > MAX_ALERTS_PER_TRIGGER,
@@ -185,10 +194,15 @@ export const setSignalsStatusRoute = (
             const runtimeMappings = buildRuntimeMappingsFromFieldTypes(runtimeFields);
 
             let previousStatuses: PreviousStatus[] = [];
+            let prefetchedIds: string[] = [];
             let truncated = false;
             if (eventBus) {
               try {
-                ({ previousStatuses, truncated } = await prefetchPreviousStatusesByQuery(
+                ({
+                  previousStatuses,
+                  ids: prefetchedIds,
+                  truncated,
+                } = await prefetchPreviousStatusesByQuery(
                   esClient,
                   alertsIndex,
                   query,
@@ -213,10 +227,17 @@ export const setSignalsStatusRoute = (
 
             // Post-filter: excludeStatus pre-filters modern docs at ES level, but legacy
             // docs (signal.status only) may still appear. Remove no-ops explicitly.
+            // Build a set of IDs we know are already at the target status so they can be excluded.
+            // Docs with unrecognized stored status (previousStatus === undefined) are included since
+            // they are definitively changing.
+            const noOpIds = new Set(
+              previousStatuses.filter((ps) => ps.previousStatus === status).map((ps) => ps.id)
+            );
+            const changingIds = prefetchedIds.filter((id) => !noOpIds.has(id));
             const changingStatuses = previousStatuses.filter((ps) => ps.previousStatus !== status);
-            if (changingStatuses.length > 0 || truncated) {
+            if (changingIds.length > 0 || truncated) {
               void eventBus?.emitAlertStatusChanged(request, {
-                alertIds: changingStatuses.map((ps) => ps.id),
+                alertIds: changingIds,
                 status,
                 previousStatuses: changingStatuses,
                 truncated,
