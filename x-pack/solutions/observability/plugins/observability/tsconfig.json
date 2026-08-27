@@ -163,7 +163,8 @@
     "@kbn/core-spaces-common",
     "@kbn/app-header",
     "@kbn/core-chrome-app-menu-components",
-    "@kbn/global-search-plugin"
+    "@kbn/global-search-plugin",
+    "@kbn/ui-callout"
   ],
   "exclude": ["target/**/*"]
 }
