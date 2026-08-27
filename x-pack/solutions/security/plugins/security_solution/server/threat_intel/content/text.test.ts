@@ -2095,3 +2095,106 @@ describe('wrapper expansion drops past its depth bound', () => {
     }
   );
 });
+
+/**
+ * A text construct is literal unless it declares markup. Enumerating the literal types instead
+ * sent every spelling not on the list to the HTML parser, which is the destructive direction:
+ * `type="text/plain"` carrying CDATA had its literal `<script>` read as an unterminated element
+ * and lost the rest of the sentence, while the entity spelling was preserved.
+ */
+describe('Atom types default to literal', () => {
+  const CDATA = '<![CDATA[Exploit uses <script> and c2.evil.test]]>';
+  const DECODED = 'Exploit uses <script> and c2.evil.test';
+
+  it.each([
+    ['content with text/plain', `<content type="text/plain">${CDATA}</content>`],
+    ['content with text/markdown', `<content type="text/markdown">${CDATA}</content>`],
+    ['summary with a media type it may not carry', `<summary type="text/plain">${CDATA}</summary>`],
+    ['an unrecognized type', `<content type="application/json">${CDATA}</content>`],
+  ])('keeps %s literal', (_label, html) => {
+    const result = stripHtml(html);
+
+    expect(result).toBe(DECODED);
+    expect(result).toContain('c2.evil.test');
+  });
+
+  it.each([
+    [
+      'the html shorthand',
+      '<summary type="html">&lt;p&gt;evil.com&lt;/p&gt;</summary>',
+      'evil.com',
+    ],
+    [
+      'a text/html media type',
+      '<content type="text/html"><![CDATA[<p>evil.com</p>]]></content>',
+      'evil.com',
+    ],
+  ])('still parses %s as markup', (_label, html, expected) => {
+    expect(stripHtml(html)).toBe(expected);
+  });
+
+  // The XML media-type spellings are inline markup, like the `xhtml` shorthand.
+  it.each([
+    ['the xhtml shorthand', 'xhtml'],
+    ['an xhtml media type', 'application/xhtml+xml'],
+    ['a generic xml media type', 'application/xml'],
+  ])('walks %s as markup', (_label, type) => {
+    expect(
+      stripHtml(
+        `<content type="${type}"><div><p>evil.com</p><p>bad.net</p><script>x</script></div></content>`
+      )
+    ).toBe('evil.com bad.net');
+  });
+});
+
+/**
+ * Section state is walker-local, which is what lets a wrapper payload inherit it, but one walk
+ * covers a whole feed document. An `IOCs` heading in the first item left href lifting on for
+ * every later item, so an ordinary citation anchor in the next entry was emitted as an
+ * indicator. It resets at report boundaries.
+ */
+describe('section state does not leak across feed items', () => {
+  it.each([
+    [
+      'rss items',
+      '<rss><channel><item><h2>IOCs</h2><p><a href="https://c2.evil.test/x">ioc</a></p></item>' +
+        '<item><p><a href="https://citation.test">read</a></p></item></channel></rss>',
+    ],
+    [
+      'atom entries',
+      '<feed><entry><h2>IOCs</h2><p><a href="https://c2.evil.test/x">ioc</a></p></entry>' +
+        '<entry><p><a href="https://cite.test">read</a></p></entry></feed>',
+    ],
+  ])('does not lift a citation in the next of two %s', (_label, html) => {
+    const result = htmlToStructured(html);
+
+    expect(result).toContain('ioc https://c2.evil.test/x');
+    expect(result).not.toContain('citation.test');
+    expect(result).not.toContain('cite.test');
+  });
+
+  // Lifting still applies to everything inside the item that declared the section.
+  it('still lifts every href within the same item', () => {
+    expect(
+      htmlToStructured(
+        '<rss><channel><item><h2>IOCs</h2><p><a href="https://c2.evil.test/x">ioc</a></p>' +
+          '<p><a href="https://b.test/y">two</a></p></item></channel></rss>'
+      )
+    ).toBe('## IOCs\nioc https://c2.evil.test/x\ntwo https://b.test/y');
+  });
+
+  it('is unaffected without a feed container', () => {
+    expect(htmlToStructured('<h2>IOCs</h2><p><a href="https://c2.evil.test/x">ioc</a></p>')).toBe(
+      '## IOCs\nioc https://c2.evil.test/x'
+    );
+  });
+
+  it('still lifts inside an encoded wrapper payload', () => {
+    expect(
+      htmlToStructured(
+        '<rss><channel><item><description>&lt;h2&gt;IOCs&lt;/h2&gt;' +
+          '&lt;p&gt;&lt;a href="https://c2.evil.test/x"&gt;ioc&lt;/a&gt;&lt;/p&gt;</description></item></channel></rss>'
+      )
+    ).toBe('## IOCs\nioc https://c2.evil.test/x');
+  });
+});

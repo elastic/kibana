@@ -546,8 +546,13 @@ const isLiteralTextConstruct = (node: ParsedNode): boolean => {
   // walked: taking the literal branch merged its block boundaries and emitted its script
   // bodies, so `<summary type="xhtml"><div><p>a</p><p>b</p><script>…</script></div></summary>`
   // produced `ab` joined together with the script text appended.
-  const type = atomType(node);
-  return type === '' || type === 'text';
+  // Literal unless the construct declares markup. Enumerating the literal types instead meant
+  // every spelling not on the list went to the HTML parser, which is the destructive direction:
+  // `<content type="text/plain">` and `<summary type="text/plain">` carrying CDATA had their
+  // literal `<script>` read as an unterminated element and lost the rest of the sentence and the
+  // indicator, while the entity spelling of the same content was preserved. Defaulting to
+  // literal makes an unrecognized or invalid type preserve content rather than delete it.
+  return !isEncodedHtmlWrapper(node) && !isInlineXmlConstruct(node);
 };
 
 /** An element whose text payload is an entity-encoded HTML document. */
@@ -705,10 +710,14 @@ const pushNodes = (
  * in XML, so they are not parsed as HTML. Parsing them read a `<script>` inside the payload
  * as a real raw-text element and lost the rest of the sentence with it.
  */
-const isInlineXmlConstruct = (node: ParsedNode): boolean =>
-  isElement(node) &&
-  ATOM_TEXT_CONSTRUCTS.has(localName(elementName(node))) &&
-  atomType(node) === 'xhtml';
+const isInlineXmlConstruct = (node: ParsedNode): boolean => {
+  if (!isElement(node) || !ATOM_TEXT_CONSTRUCTS.has(localName(elementName(node)))) return false;
+  const type = atomType(node);
+  // The shorthand plus the media-type spellings RFC 4287 treats as inline XML.
+  return (
+    type === 'xhtml' || type.endsWith('+xml') || type === 'text/xml' || type === 'application/xml'
+  );
+};
 
 const hrefOf = (node: ParsedNode): string | undefined => {
   const href = node.attribs?.href;
@@ -1034,6 +1043,17 @@ const renderStructured = (html: string): string => {
         out.push(' ');
       } else if (SKIPPED_SUBTREE_NAMES.has(name)) {
         out.push(' ');
+      } else if (STRUCTURAL_FEED_CONTAINERS.has(localName(name))) {
+        // Section state resets at a report boundary. It is walker-local, which is what lets a
+        // wrapper payload inherit it, but one walk covers a whole feed document, so an `IOCs`
+        // heading in one item left href lifting on for every later item and an ordinary citation
+        // anchor in the next entry was emitted as an indicator. One stack, many reports, so the
+        // reset has to be explicit.
+        sectionKind = 'prose';
+        sectionDepth = 0;
+        out.push('\n');
+        stack.push({ kind: 'emit', text: '\n' });
+        pushNodes(stack, childrenOf(node), cdataDepth, literalCdata);
       } else if (isInlineXmlConstruct(node)) {
         pushNodes(stack, childrenOf(node), cdataDepth, true);
       } else if (isLiteralTextConstruct(node)) {
