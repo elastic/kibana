@@ -63,14 +63,15 @@ export const forwardCasesAlertStatusToSecuritySolution = (
   }
 
   if (attackIds.length > 0) {
-    const attackIdSet = new Set(attackIds);
+    const cappedAttackIds = attackIds.slice(0, MAX_ALERTS_PER_TRIGGER);
+    const cappedAttackIdSet = new Set(cappedAttackIds);
     try {
       void securitySolutionEventBus.emitAttackStatusChanged(request, {
-        attackIds: attackIds.slice(0, MAX_ALERTS_PER_TRIGGER),
+        attackIds: cappedAttackIds,
         status: payload.status,
-        previousStatuses: payload.previousStatuses
-          .filter(({ id }) => attackIdSet.has(id))
-          .slice(0, MAX_ALERTS_PER_TRIGGER),
+        // Filter against the capped set so previousStatuses never references an ID
+        // that was truncated out of attackIds (the two arrays are independent).
+        previousStatuses: payload.previousStatuses.filter(({ id }) => cappedAttackIdSet.has(id)),
         truncated: attackIds.length > MAX_ALERTS_PER_TRIGGER,
       });
     } catch (err) {
@@ -79,14 +80,13 @@ export const forwardCasesAlertStatusToSecuritySolution = (
   }
 
   if (alertIds.length > 0) {
-    const alertIdSet = new Set(alertIds);
+    const cappedAlertIds = alertIds.slice(0, MAX_ALERTS_PER_TRIGGER);
+    const cappedAlertIdSet = new Set(cappedAlertIds);
     try {
       void securitySolutionEventBus.emitAlertStatusChanged(request, {
-        alertIds: alertIds.slice(0, MAX_ALERTS_PER_TRIGGER),
+        alertIds: cappedAlertIds,
         status: payload.status,
-        previousStatuses: payload.previousStatuses
-          .filter(({ id }) => alertIdSet.has(id))
-          .slice(0, MAX_ALERTS_PER_TRIGGER),
+        previousStatuses: payload.previousStatuses.filter(({ id }) => cappedAlertIdSet.has(id)),
         truncated: alertIds.length > MAX_ALERTS_PER_TRIGGER,
       });
     } catch (err) {

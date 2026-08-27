@@ -191,6 +191,39 @@ describe('forwardCasesAlertStatusToSecuritySolution', () => {
     expect(payload.previousStatuses).toHaveLength(MAX_ALERTS_PER_TRIGGER);
   });
 
+  it('excludes previousStatuses entries for IDs truncated from the emitted alertIds list', () => {
+    // id-0 has no previousStatuses entry (e.g. unrecognised stored status); id-1..id-10000 do.
+    // Without the fix, previousStatuses would include {id-10000} even though id-10000 is not
+    // in the emitted alertIds (which caps at MAX_ALERTS_PER_TRIGGER = id-0..id-9999).
+    const listener = jest.fn();
+    bus.onAlertStatusChanged(listener);
+
+    const oversizedIds = Array.from({ length: MAX_ALERTS_PER_TRIGGER + 1 }, (_, i) => `id-${i}`);
+    const prevWithoutFirst = Array.from({ length: MAX_ALERTS_PER_TRIGGER }, (_, i) => ({
+      id: `id-${i + 1}`,
+      previousStatus: 'open' as const,
+    }));
+    const alertIdToIndex = Object.fromEntries(oversizedIds.map((id) => [id, securityAliasIndex]));
+    forwardCasesAlertStatusToSecuritySolution(bus, mockLogger as Logger, mockRequest, {
+      alertIds: oversizedIds,
+      status: 'closed',
+      previousStatuses: prevWithoutFirst,
+      alertIdToIndex,
+      indices: [securityAliasIndex],
+    });
+
+    const { payload } = listener.mock.calls[0][0];
+    expect(payload.alertIds).toHaveLength(MAX_ALERTS_PER_TRIGGER);
+    // id-10000 was truncated from alertIds and must be absent from previousStatuses too
+    expect(
+      payload.previousStatuses.find(
+        (ps: { id: string }) => ps.id === `id-${MAX_ALERTS_PER_TRIGGER}`
+      )
+    ).toBeUndefined();
+    // Only id-1..id-9999 are in both the capped alertIds and previousStatuses (9999 entries)
+    expect(payload.previousStatuses).toHaveLength(MAX_ALERTS_PER_TRIGGER - 1);
+  });
+
   it('logs a warning and does not rethrow if emitAlertStatusChanged throws', () => {
     jest.spyOn(bus, 'emitAlertStatusChanged').mockImplementation(() => {
       throw new Error('bus failure');

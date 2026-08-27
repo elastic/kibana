@@ -600,6 +600,31 @@ describe('verifyAlertIdsInIndex', () => {
     const result = await verifyAlertIdsInIndex(esClient, 'index', ['missing']);
     expect(result).toEqual([]);
   });
+
+  it('excludes IDs whose only hit is in an Attack Discovery index', async () => {
+    // A stale related-alert ID may collide with an AD doc _id in the unified index.
+    // The helper must NOT return such IDs through the detection-alert path.
+    esClient.search.mockResolvedValueOnce(
+      makeIdResponse([
+        { _id: 'alert-1', _index: '.alerts-security.alerts-default' },
+        { _id: 'ad-only', _index: '.alerts-security.attack.discovery.alerts-default' },
+      ])
+    );
+    const result = await verifyAlertIdsInIndex(esClient, 'index', ['alert-1', 'ad-only']);
+    expect(result).toEqual(['alert-1']);
+  });
+
+  it('returns an ID that appears in both a detection-alert index and an AD index (non-AD hit wins)', async () => {
+    // Same _id in both families: the detection-alert hit should survive AD-exclusion.
+    esClient.search.mockResolvedValueOnce(
+      makeIdResponse([
+        { _id: 'shared', _index: '.alerts-security.alerts-default' },
+        { _id: 'shared', _index: '.alerts-security.attack.discovery.alerts-default' },
+      ])
+    );
+    const result = await verifyAlertIdsInIndex(esClient, 'index', ['shared']);
+    expect(result).toEqual(['shared']);
+  });
 });
 
 describe('fetchAlertIdIndexWithSource', () => {

@@ -13,6 +13,7 @@ import {
   WORKFLOW_STATUS_VALUES,
 } from '../../../../../../common/workflows/triggers';
 import type { WorkflowStatus } from '../../../../../../common/workflows/triggers';
+import { isAttackDiscoveryIndex } from './is_attack_discovery_index';
 
 export interface PreviousStatus {
   id: string;
@@ -202,7 +203,13 @@ export const verifyAlertIdsInIndex = async (
   ids: string[]
 ): Promise<string[]> => {
   const pairs = await fetchAllAlertIdToIndex(esClient, index, ids);
-  return Array.from(new Set(pairs.map((p) => p.id)));
+  // Exclude Attack Discovery hits: the unified index contains both detection-alert
+  // and attack-discovery families, but this helper is used specifically to verify
+  // related detection-alert IDs. An AD hit whose _id collides with a stale detection
+  // alert reference must not be emitted through alertTagsChanged/alertAssigneesChanged.
+  return Array.from(
+    new Set(pairs.filter((p) => !isAttackDiscoveryIndex(p.index)).map((p) => p.id))
+  );
 };
 
 export const fetchAllAlertIdToIndex = async (
