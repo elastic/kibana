@@ -78,11 +78,9 @@ const CaseContainerComponent: React.FC = () => {
               CaseMetricsFeature.LIFESPAN,
             ],
             alerts: {
-              isExperimental: false,
               read: hasAlertsRead,
               all: hasAlertsAll,
             },
-            events: { enabled: true },
           },
           refreshRef,
           timelineIntegration: {
