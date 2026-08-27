@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { AppHeaderView } from '@kbn/ui-app-header';
+import { AppHeaderView } from '@kbn/app-header';
 import { css } from '@emotion/react';
 import { transparentize, useEuiTheme } from '@elastic/eui';
 import { useLocation } from 'react-router-dom';
