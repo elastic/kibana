@@ -43,6 +43,8 @@ export function createTestConfig(options: CreateTestConfigOptions) {
             { product_line: 'security', product_tier: 'essentials' },
             { product_line: 'endpoint', product_tier: 'essentials' },
           ])}`,
+          // Mock prebuilt-rules setup uploads the bundled security_detection_engine package name.
+          `--xpack.fleet.internal.allowRegistryPackageUploads=true`,
           ...(options.kbnTestServerArgs || []),
         ],
         env: {
