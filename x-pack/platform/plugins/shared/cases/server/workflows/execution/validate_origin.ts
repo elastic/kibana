@@ -6,6 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
+import { isPlainObject } from 'lodash';
 import type { CaseWorkflowRunOrigin, DocumentResponse } from '../../../common/types/api';
 import {
   ALERT_WORKFLOW_ORIGIN_TYPE,
@@ -15,8 +16,12 @@ import {
 } from '../../../common/constants';
 import type { Case } from '../../../common/types/domain';
 
+// `@types/lodash` types `isPlainObject` as `boolean`, so we wrap it to get a
+// `value is Record<string, unknown>` predicate. Same pattern as `isRecord` in
+// server/common/attachments/alert.ts.
+const isRecord = (value: unknown): value is Record<string, unknown> => isPlainObject(value);
 const getRecord = (value: unknown): Record<string, unknown> | undefined =>
-  typeof value === 'object' && value !== null ? (value as Record<string, unknown>) : undefined;
+  isRecord(value) ? value : undefined;
 
 interface AlertPair {
   _id: string;
