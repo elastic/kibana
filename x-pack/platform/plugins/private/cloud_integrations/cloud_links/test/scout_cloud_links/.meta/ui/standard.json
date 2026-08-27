@@ -1,5 +1,5 @@
 {
-  "sha1": "65ec61ebc2a08258e91693a78442962a905ef6d2",
+  "sha1": "9502751567cc1d26a898e1d6209aa0d2b483b173",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -170,6 +170,34 @@
         "file": "x-pack/platform/plugins/private/cloud_integrations/cloud_links/test/scout_cloud_links/ui/tests/cloud_onboarding.spec.ts",
         "line": 142,
         "column": 9
+      }
+    },
+    {
+      "id": "ba9caf2bad05dd1-6bbe606e48badb6",
+      "title": "Spaces preferences modal persists remember last selected space preference when saving",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/cloud_integrations/cloud_links/test/scout_cloud_links/ui/tests/spaces_preferences.spec.ts",
+        "line": 23,
+        "column": 8
+      }
+    },
+    {
+      "id": "ba9caf2bad05dd1-db13a3b8711401d",
+      "title": "Spaces preferences modal does not persist when discarding after toggle",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/cloud_integrations/cloud_links/test/scout_cloud_links/ui/tests/spaces_preferences.spec.ts",
+        "line": 31,
+        "column": 16
       }
     },
     {
