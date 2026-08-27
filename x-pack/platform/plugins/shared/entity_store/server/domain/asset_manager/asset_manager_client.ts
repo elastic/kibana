@@ -176,7 +176,9 @@ export class AssetManagerClient {
       // schedules are created — those tasks self-delete when they find zero engines,
       // so scheduling them in parallel with initEntity can tear down a freshly
       // scheduled status task mid-install.
-      await Promise.all(entityTypes.map((type) => this.initEntity(request, type, globalState.logsExtraction)));
+      await Promise.all(
+        entityTypes.map((type) => this.initEntity(request, type, globalState.logsExtraction))
+      );
 
       // Phase 3: Schedule namespace-scoped background tasks after descriptors exist.
       await Promise.all([
@@ -692,4 +694,3 @@ export class AssetManagerClient {
     return ENTITY_STORE_STATUS.RUNNING;
   }
 }
-

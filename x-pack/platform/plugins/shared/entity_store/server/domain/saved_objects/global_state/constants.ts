@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { isEqual } from 'lodash';
 import { z } from '@kbn/zod/v4';
 
 export const DEFAULT_HISTORY_SNAPSHOT_FREQUENCY = '24h';
@@ -112,21 +111,3 @@ export const EntityStoreGlobalStateOverrides = z
     logsExtraction: LogExtractionShape.partial(),
   })
   .partial();
-
-export const omitEqualToBaseline = (
-  config: Partial<LogExtractionConfig>,
-  baseline: LogExtractionConfig
-): Partial<LogExtractionConfig> => {
-  const overrides: Partial<LogExtractionConfig> = {};
-  for (const key of Object.keys(baseline) as Array<keyof LogExtractionConfig>) {
-    const value = config[key];
-    if (value !== undefined && !isEqual(value, baseline[key])) {
-      (overrides as Record<string, unknown>)[key] = value;
-    }
-  }
-  return overrides;
-};
-
-export const getLatestLogExtractionOverrides = (
-  config: Partial<LogExtractionConfig>
-): Partial<LogExtractionConfig> => omitEqualToBaseline(config, LATEST_LOG_EXTRACTION_DEFAULTS);

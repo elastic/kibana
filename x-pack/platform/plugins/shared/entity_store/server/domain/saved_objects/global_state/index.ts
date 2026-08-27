@@ -46,14 +46,6 @@ export class EntityStoreGlobalStateClient {
     return raw === undefined ? undefined : getWithLatestDefaults(raw.attributes);
   }
 
-  async getDefaultsVersion(): Promise<EntityStoreGlobalStateOverrides['defaultsVersion']> {
-    const raw = await this.findRaw();
-    if (raw === undefined) {
-      return undefined;
-    }
-    return raw.attributes.defaultsVersion ?? 'legacy';
-  }
-
   async findOrThrow(): Promise<EntityStoreGlobalState> {
     const response = await this.find();
     if (response === undefined) {

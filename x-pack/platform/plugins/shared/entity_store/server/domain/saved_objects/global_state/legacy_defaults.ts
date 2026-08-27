@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { omitEqualToBaseline, type LogExtractionConfig } from './constants';
+import { isEqual } from 'lodash';
+import { type LogExtractionConfig } from './constants';
 
 // Frozen snapshot of the defaults that pre-overrides-format code baked into stored docs
 // (docs with defaultsVersion !== 'latest'). Never change these values — they describe what
@@ -24,6 +25,20 @@ const LEGACY_LOG_EXTRACTION_DEFAULTS = {
   maxLogsPerWindow: 100_000,
   maxLogsPerWindowCapBehavior: 'drop',
 } as const satisfies LogExtractionConfig;
+
+const omitEqualToBaseline = (
+  config: Partial<LogExtractionConfig>,
+  baseline: LogExtractionConfig
+): Partial<LogExtractionConfig> => {
+  const overrides: Partial<LogExtractionConfig> = {};
+  for (const key of Object.keys(baseline) as Array<keyof LogExtractionConfig>) {
+    const value = config[key];
+    if (value !== undefined && !isEqual(value, baseline[key])) {
+      (overrides as Record<string, unknown>)[key] = value;
+    }
+  }
+  return overrides;
+};
 
 export const getLegacyLogExtractionOverrides = (
   stored: Partial<LogExtractionConfig>

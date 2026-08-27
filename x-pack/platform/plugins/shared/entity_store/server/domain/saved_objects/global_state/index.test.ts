@@ -76,45 +76,26 @@ describe('EntityStoreGlobalStateClient', () => {
     });
   });
 
-  describe('getDefaultsVersion', () => {
-    it('returns undefined when no global state exists', async () => {
-      mockStored(undefined);
-
-      await expect(client.getDefaultsVersion()).resolves.toBeUndefined();
-    });
-
-    it('returns legacy for docs without a marker', async () => {
-      mockStored({ logsExtraction: {} });
-
-      await expect(client.getDefaultsVersion()).resolves.toBe('legacy');
-    });
-
-    it('returns the stored marker', async () => {
-      mockStored({ defaultsVersion: 'latest', logsExtraction: {} });
-
-      await expect(client.getDefaultsVersion()).resolves.toBe('latest');
-    });
-  });
-
   describe('init', () => {
-    it('fresh install persists only values that differ from the defaults', async () => {
+    it('fresh install persists provided overrides including values equal to current defaults', async () => {
       mockStored(undefined);
 
-      // frequency '1m' equals the default, so it must not be persisted as an override
+      // frequency '1m' equals the default but is explicitly passed — it is preserved as an override
+      // so that future default changes don't silently affect this store
       const state = await client.init({ logsExtraction: { delay: '2m', frequency: '1m' } });
 
       expect(soClient.create).toHaveBeenCalledWith(
         EntityStoreGlobalStateTypeName,
         {
           defaultsVersion: 'latest',
-          historySnapshot: { status: 'started', frequency: DEFAULT_HISTORY_SNAPSHOT_FREQUENCY },
-          logsExtraction: { delay: '2m' },
+          logsExtraction: { delay: '2m', frequency: '1m' },
         },
         { id: soId }
       );
       expect(state.logsExtraction).toEqual({
         ...LATEST_LOG_EXTRACTION_DEFAULTS,
         delay: '2m',
+        frequency: '1m',
       });
     });
 
@@ -167,7 +148,7 @@ describe('EntityStoreGlobalStateClient', () => {
       });
     });
 
-    it('strips values persisted as defaults by legacy-format docs on the next write', async () => {
+    it('strips legacy-era defaults from the doc and preserves actual overrides on next write', async () => {
       // a doc written before the overrides format has every default of that era baked in
       mockStored({
         defaultsVersion: 'legacy',
@@ -179,7 +160,10 @@ describe('EntityStoreGlobalStateClient', () => {
       expect(soClient.update).toHaveBeenCalledWith(
         EntityStoreGlobalStateTypeName,
         soId,
-        expect.objectContaining({ defaultsVersion: 'latest', logsExtraction: { delay: '9m' } }),
+        expect.objectContaining({
+          defaultsVersion: 'latest',
+          logsExtraction: expect.objectContaining({ delay: '9m' }),
+        }),
         expect.anything()
       );
     });
@@ -229,10 +213,11 @@ describe('EntityStoreGlobalStateClient', () => {
       });
     });
 
-    it('removes an override when it is set back to the default value', async () => {
+    it('preserves an explicitly-set value even when it equals the current default', async () => {
       mockStored({ logsExtraction: { delay: '9m' } });
 
-      // '1m' is the default delay, so the override must disappear from the stored object
+      // '1m' is the default delay, but explicitly setting it pins it as an override so that
+      // a future default change does not silently affect this store
       const state = await client.update({
         logsExtraction: { delay: LATEST_LOG_EXTRACTION_DEFAULTS.delay },
       });
@@ -240,7 +225,7 @@ describe('EntityStoreGlobalStateClient', () => {
       expect(soClient.update).toHaveBeenCalledWith(
         EntityStoreGlobalStateTypeName,
         soId,
-        expect.objectContaining({ logsExtraction: {} }),
+        expect.objectContaining({ logsExtraction: { delay: '1m' } }),
         expect.objectContaining({ mergeAttributes: false })
       );
       expect(state.logsExtraction.delay).toBe(LATEST_LOG_EXTRACTION_DEFAULTS.delay);

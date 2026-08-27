@@ -167,7 +167,7 @@ async function runTask({
 
   const errors: string[] = [];
 
-  const { assetManagerClient, esClient, globalStateClient } = await createAssetManagerClient({
+  const { assetManagerClient, esClient } = await createAssetManagerClient({
     core,
     fakeRequest,
     logger,
@@ -225,15 +225,9 @@ async function runTask({
 
   // Report status
   try {
-    const [statusResult, configDefaultsVersion] = await Promise.all([
-      assetManagerClient.getStatus(true),
-      // tracks how many stores still carry legacy-format config docs; lets us know when the
-      // legacy defaults handling can be removed (see global_state/legacy_defaults.ts)
-      globalStateClient.getDefaultsVersion(),
-    ]);
+    const statusResult = await assetManagerClient.getStatus(true);
     telemetryReporter.reportEvent(ENTITY_STORE_HEALTH_REPORT_EVENT, {
       namespace,
-      configDefaultsVersion,
       ...toHealthReportPayload(statusResult),
     });
   } catch (e) {
