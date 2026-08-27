@@ -39,7 +39,11 @@ export const registerGetJoinIndicesRoute = (
         const core = await requestHandlerContext.core;
         const { remoteClusters, projectRouting } = request.query;
         const service = new EsqlService({ client: core.elasticsearch.client.asCurrentUser });
-        const result = await service.getIndicesByIndexMode('lookup', remoteClusters, projectRouting);
+        const result = await service.getIndicesByIndexMode(
+          'lookup',
+          remoteClusters,
+          projectRouting
+        );
 
         return response.ok({
           body: result,
