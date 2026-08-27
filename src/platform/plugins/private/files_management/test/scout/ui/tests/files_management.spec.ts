@@ -27,15 +27,22 @@ interface FileSummary {
 
 // The management table lists every non-excluded file kind, so the empty-state
 // assertion only holds once files of ALL kinds are gone — not just defaultImage.
+// `find` is paginated, so drain page-by-page until nothing is left.
 const deleteAllFiles = async (kbnClient: KbnClient): Promise<void> => {
-  const { data } = await kbnClient.request<{ files: FileSummary[] }>({
-    method: 'POST',
-    path: FILES_API.FIND,
-    body: {},
-  });
+  for (;;) {
+    const { data } = await kbnClient.request<{ files: FileSummary[] }>({
+      method: 'POST',
+      path: FILES_API.FIND,
+      body: {},
+    });
 
-  for (const file of data.files) {
-    await kbnClient.request({ method: 'DELETE', path: FILES_API.delete(file.fileKind, file.id) });
+    if (data.files.length === 0) {
+      return;
+    }
+
+    for (const file of data.files) {
+      await kbnClient.request({ method: 'DELETE', path: FILES_API.delete(file.fileKind, file.id) });
+    }
   }
 };
 

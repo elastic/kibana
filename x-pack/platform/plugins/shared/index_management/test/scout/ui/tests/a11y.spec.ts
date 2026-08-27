@@ -48,8 +48,10 @@ test.describe('Index Management - accessibility', { tag: tags.stateful.classic }
 
   test('indices list has no a11y violations', async ({ page, pageObjects }) => {
     // Scanning a table with rows, not whichever state the deployment happens
-    // to be in.
-    await expect(pageObjects.indexManagement.indexLink(testIndexName)).toBeVisible();
+    // to be in. The list can be slow to load under CI parallelism.
+    await expect(pageObjects.indexManagement.indexLink(testIndexName)).toBeVisible({
+      timeout: 30_000,
+    });
 
     const { violations } = await page.checkA11y({ include: A11Y_SELECTORS });
     expect(violations).toStrictEqual([]);
@@ -58,6 +60,7 @@ test.describe('Index Management - accessibility', { tag: tags.stateful.classic }
   test('index details tabs have no a11y violations', async ({ page, pageObjects }) => {
     const { indexManagement } = pageObjects;
 
+    await expect(indexManagement.indexLink(testIndexName)).toBeVisible({ timeout: 30_000 });
     await indexManagement.indexLink(testIndexName).click();
     await indexManagement.indexDetailsPage.expectIndexDetailsPageIsLoaded();
 
