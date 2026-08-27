@@ -1007,21 +1007,8 @@ export class WorkflowsExecutionEnginePlugin
       authenticatedUser: string;
       now: Date;
     }): Promise<WorkflowExecutionForInputRendering> => {
-      const { event: eventFromRawContext, inputs } = args.context;
-      // Callers that pass inputs without an event are using the manual trigger path.
-      // Synthesize a minimal event so Liquid templates can access `event.inputs`.
-      const event =
-        !eventFromRawContext && inputs && Object.keys(inputs).length
-          ? { type: 'manual', inputs, spaceId: args.context.spaceId }
-          : eventFromRawContext;
-      const newContext = {
-        ...args.context,
-        event,
-      };
-
       return buildWorkflowExecutionDocument({
         ...args,
-        context: newContext,
         maxEventChainDepth: this.config.eventDriven.maxChainDepth,
         getConcurrencyGroupKey: (execution) =>
           this.getConcurrencyGroupKey(

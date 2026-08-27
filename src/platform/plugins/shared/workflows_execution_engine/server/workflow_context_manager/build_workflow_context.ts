@@ -87,8 +87,19 @@ export function buildWorkflowContext(
   const renderContext = buildInputDefaultRenderContext(workflowExecution, coreStart, dependencies);
   const inputsWithDefaults = applyInputDefaults(renderContext.inputs, normalizedInputsSchema);
 
+  // For manual triggers (no persisted event, or a previously-synthesized manual event),
+  // alias event.inputs to the fully-defaulted inputs so Liquid templates can access
+  // `event.inputs.*` without a fake event being stored in the DB.
+  const rawEvent = renderContext.event as Record<string, unknown> | undefined;
+  const event = (
+    !rawEvent || rawEvent.type === 'manual'
+      ? { spaceId: workflowExecution.spaceId, ...rawEvent, inputs: inputsWithDefaults }
+      : rawEvent
+  ) as WorkflowContext['event'];
+
   return {
     ...renderContext,
     inputs: inputsWithDefaults,
+    event,
   };
 }

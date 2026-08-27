@@ -13,9 +13,6 @@ import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
 
-jest.mock('../common', () => ({
-  createIndexes: jest.fn().mockResolvedValue(undefined),
-}));
 jest.mock('./lib/check_license', () => ({
   checkLicense: jest.fn().mockResolvedValue(undefined),
 }));
@@ -97,7 +94,7 @@ const createWorkflow = (
   ...overrides,
 });
 
-describe('executeWorkflow – event/inputs synthesis', () => {
+describe('executeWorkflow – context passthrough', () => {
   let pluginStart: Awaited<ReturnType<WorkflowsExecutionEnginePlugin['start']>>;
   const request = { isFakeRequest: false } as unknown as KibanaRequest;
 
@@ -130,7 +127,7 @@ describe('executeWorkflow – event/inputs synthesis', () => {
     });
   });
 
-  it('synthesizes event from inputs when context has inputs but no event', async () => {
+  it('passes context through to buildWorkflowExecutionDocument without modification', async () => {
     const inputs = { alertId: 'abc', severity: 'high' };
 
     await pluginStart.executeWorkflow(
@@ -139,35 +136,19 @@ describe('executeWorkflow – event/inputs synthesis', () => {
       request
     );
 
+    // event.inputs aliasing happens in buildWorkflowContext at render time, not here
     expect(mockBuildWorkflowExecutionDocument).toHaveBeenCalledWith(
       expect.objectContaining({
-        context: expect.objectContaining({
-          event: { type: 'manual', inputs, spaceId: 'default' },
-          inputs,
-        }),
+        context: expect.objectContaining({ inputs }),
       })
+    );
+    // confirm no synthetic event is written into the stored context
+    expect(mockBuildWorkflowExecutionDocument).not.toHaveBeenCalledWith(
+      expect.objectContaining({ context: expect.objectContaining({ event: expect.anything() }) })
     );
   });
 
-  it('includes spaceId in the synthesized manual event', async () => {
-    const inputs = { foo: 'bar' };
-
-    await pluginStart.executeWorkflow(
-      createWorkflow('wf-1'),
-      { spaceId: 'my-space', inputs },
-      request
-    );
-
-    expect(mockBuildWorkflowExecutionDocument).toHaveBeenCalledWith(
-      expect.objectContaining({
-        context: expect.objectContaining({
-          event: expect.objectContaining({ type: 'manual', spaceId: 'my-space' }),
-        }),
-      })
-    );
-  });
-
-  it('preserves the original event when context already has an event', async () => {
+  it('preserves a real event when already present in context', async () => {
     const event = { type: 'alert', id: 'alert-1' };
     const inputs = { foo: 'bar' };
 
@@ -180,30 +161,6 @@ describe('executeWorkflow – event/inputs synthesis', () => {
     expect(mockBuildWorkflowExecutionDocument).toHaveBeenCalledWith(
       expect.objectContaining({
         context: expect.objectContaining({ event }),
-      })
-    );
-  });
-
-  it('does not synthesize event when inputs is an empty object', async () => {
-    await pluginStart.executeWorkflow(
-      createWorkflow('wf-1'),
-      { spaceId: 'default', inputs: {} },
-      request
-    );
-
-    expect(mockBuildWorkflowExecutionDocument).toHaveBeenCalledWith(
-      expect.objectContaining({
-        context: expect.objectContaining({ event: undefined }),
-      })
-    );
-  });
-
-  it('does not synthesize event when context has neither event nor inputs', async () => {
-    await pluginStart.executeWorkflow(createWorkflow('wf-1'), { spaceId: 'default' }, request);
-
-    expect(mockBuildWorkflowExecutionDocument).toHaveBeenCalledWith(
-      expect.objectContaining({
-        context: expect.objectContaining({ event: undefined }),
       })
     );
   });
