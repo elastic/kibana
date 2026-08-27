@@ -12735,19 +12735,21 @@
     "@sinonjs/commons" "^3.0.1"
     type-detect "^4.1.0"
 
-"@slack/types@^2.9.0":
-  version "2.11.0"
-  resolved "https://registry.yarnpkg.com/@slack/types/-/types-2.11.0.tgz#948c556081c3db977dfa8433490cc2ff41f47203"
-  integrity sha512-UlIrDWvuLaDly3QZhCPnwUSI/KYmV1N9LyhuH6EDKCRS1HWZhyTG3Ja46T3D0rYfqdltKYFXbJSSRPwZpwO0cQ==
+"@slack/types@^3.0.0":
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/@slack/types/-/types-3.0.0.tgz#be620fb6ff6e7150b26f189c09760ffbb026428d"
+  integrity sha512-KNOqpnNAlsFt5Jk9XBclslQ0lobRIg/0tnhpmvZJAglHJx9E8oceN8hC3gaBzkR6UzQ9Wzq4rLsJ98wUcxWPfw==
 
-"@slack/webhook@7.0.6":
-  version "7.0.6"
-  resolved "https://registry.yarnpkg.com/@slack/webhook/-/webhook-7.0.6.tgz#558dbd00e6400be0e339312a44b8104bf88884a4"
-  integrity sha512-RvNCcOjNbzl5uQ2TZsbTJ+A+5ptoWMwnyd/W4lKzeXFToIwebeaZiuntcP0usmhZHj1LH9H1T9WN6Bt1B/DLyg==
+"@slack/webhook@8.0.0":
+  version "8.0.0"
+  resolved "https://registry.yarnpkg.com/@slack/webhook/-/webhook-8.0.0.tgz#95aeb73a3f425d3e98262cc79fcb7e996ca7374d"
+  integrity sha512-j3VhO6u1rZYDvY2LXDzymGQGHW4NqWLyKkOgrXeE20CsrI39j0E5gHuss+PgVDqSBx4OTUKccF/Vcm9ICC4S5w==
   dependencies:
-    "@slack/types" "^2.9.0"
-    "@types/node" ">=18.0.0"
-    axios "^1.11.0"
+    "@slack/types" "^3.0.0"
+    "@types/node" ">=20"
+    "@types/retry" "0.12.0"
+    p-retry "^4"
+    retry "^0.13.1"
 
 "@smithy/core@^3.29.4", "@smithy/core@^3.29.5", "@smithy/core@^3.31.1":
   version "3.31.1"
@@ -14569,7 +14571,7 @@
   dependencies:
     "@types/node" "*"
 
-"@types/node@*", "@types/node@14 || 16 || 17", "@types/node@24.10.13", "@types/node@>=10.0.0", "@types/node@>=13.7.0", "@types/node@>=18.0.0", "@types/node@^18.0.0", "@types/node@^18.11.18", "@types/node@^24.0.3":
+"@types/node@*", "@types/node@14 || 16 || 17", "@types/node@24.10.13", "@types/node@>=10.0.0", "@types/node@>=13.7.0", "@types/node@>=20", "@types/node@^18.0.0", "@types/node@^18.11.18", "@types/node@^24.0.3":
   version "24.10.13"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-24.10.13.tgz#2fac25c0e30f3848e19912c3b8791a28370e9e07"
   integrity sha512-oH72nZRfDv9lADUBSo104Aq7gPHpQZc4BTx38r9xf9pg5LfP6EzSyH2n7qFmmxRQXh7YlUXODcYsg6PuTDSxGg==
@@ -16546,7 +16548,7 @@ axe-core@^4.2.0, axe-core@^4.6.2:
   resolved "https://registry.yarnpkg.com/axe-core/-/axe-core-4.7.2.tgz#040a7342b20765cb18bb50b628394c21bccc17a0"
   integrity sha512-zIURGIS1E1Q4pcrMjp+nnEh+16G56eG/MUllJH8yEvw7asDo7Ac9uhC9KIH5jzpITueEZolfYglnCGIuSBz39g==
 
-axios@1.19.0, axios@^1.11.0, axios@^1.19.0, axios@^1.8.2:
+axios@1.19.0, axios@^1.19.0, axios@^1.8.2:
   version "1.19.0"
   resolved "https://registry.yarnpkg.com/axios/-/axios-1.19.0.tgz#ddf864d4c8233c0e6873746ab59361537d05ad39"
   integrity sha512-ht/iuYZXEjFxLH/Hkezgd7m6JKlHHXEUSneaDz8uZe1Gj5QZtCnpyDsckvAiEnT89OEbCLmnte4R4sn7P0EKFw==
@@ -27790,7 +27792,7 @@ p-queue@^9.0.1:
     eventemitter3 "^5.0.1"
     p-timeout "^7.0.0"
 
-p-retry@4.6.2:
+p-retry@4.6.2, p-retry@^4:
   version "4.6.2"
   resolved "https://registry.yarnpkg.com/p-retry/-/p-retry-4.6.2.tgz#9baae7184057edd4e17231cee04264106e092a16"
   integrity sha512-312Id396EbJdvRONlngUx0NydfrIQ5lsYu0znKVUzVvArzEIt08V1qhtyESbGVd1FGX7UKtiFp5uwKZdM8wIuQ==
