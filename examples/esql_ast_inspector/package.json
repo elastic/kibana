@@ -1,5 +1,5 @@
 {
-  "name": "@kbn/esql-language-inspector-plugin",
+  "name": "@kbn/esql-ast-inspector-plugin",
   "version": "1.0.0",
   "private": true,
   "license": "Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0",
