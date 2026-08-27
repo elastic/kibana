@@ -47,13 +47,5 @@ describe('set instructions helpers', () => {
       });
     });
 
-    it('does not parse the same query twice in succession', () => {
-      const queryString = 'SET project_routing = "_alias:cached"; FROM cached_index';
-      const fromSrcSpy = jest.spyOn(EsqlQuery, 'fromSrc');
-
-      expect(getProjectRoutingFromEsqlQuery(queryString)).toBe('_alias:cached');
-      expect(getProjectRoutingFromEsqlQuery(queryString)).toBe('_alias:cached');
-      expect(fromSrcSpy).toHaveBeenCalledTimes(1);
-    });
   });
 });

@@ -33,8 +33,7 @@ async function sha256(str: string) {
   }
 }
 
-/** Returns the deterministic ID for an ES|QL ad-hoc DataView. */
-export async function getESQLAdHocDataviewId({
+async function getESQLAdHocDataviewId({
   indexPattern,
   timeFieldName,
   effectiveProjectRouting,
@@ -101,7 +100,7 @@ export async function getESQLAdHocDataview({
   projectRouting?: string;
 }) {
   const effectiveProjectRouting = getProjectRoutingFromEsqlQuery(query) ?? projectRouting;
-  const timeFieldName = await getESQLTimeField({ query, http, projectRouting });
+  const timeFieldName = await getESQLTimeField({ query, http, projectRouting: effectiveProjectRouting });
 
   const indexPattern = getIndexPatternFromESQLQuery(query);
   const dataViewId =

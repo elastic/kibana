@@ -10,7 +10,6 @@
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { TIMEFIELD_ROUTE } from '@kbn/esql-types';
-import { getESQLAdHocDataviewId } from '@kbn/esql-utils';
 import { getEsqlDataView } from './get_esql_data_view';
 import { dataViewMock } from '../__mocks__';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
@@ -67,19 +66,27 @@ describe('getEsqlDataView', () => {
   it('returns the current dataview if it is adhoc with no named params and query index pattern is the same as the dataview index pattern', async () => {
     const query = { esql: 'from data-view-ad-hoc-title' };
     jest.mocked(services.cps.cpsManager!.getProjectRouting).mockReturnValue('_alias:_origin');
-    const currentDataView = {
-      ...dataViewAdHocNoAtTimestamp,
-      id: await getESQLAdHocDataviewId({
-        indexPattern: 'data-view-ad-hoc-title',
-        timeFieldName: undefined,
-        effectiveProjectRouting: '_alias:_origin',
-      }),
-    } as DataView;
-    const dataView = await getEsqlDataView(query, currentDataView, services);
 
-    expect(dataView).toStrictEqual(currentDataView);
+    const savedCreate = services.dataViews.create;
+    const savedPost = services.http.post;
+
+    // First call creates the DataView and registers it in the routing WeakMap
+    const createdDataView = { ...dataViewAdHocNoAtTimestamp };
+    services.dataViews.create = jest.fn().mockResolvedValue(createdDataView);
+    services.http.post = jest.fn().mockResolvedValue({});
+    const firstDataView = await getEsqlDataView(query, undefined, services);
+
+    // Second call: same query + same routing → must return the same instance with no I/O
+    jest.mocked(services.dataViews.create).mockClear();
+    jest.mocked(services.http.post).mockClear();
+    const dataView = await getEsqlDataView(query, firstDataView, services);
+
+    expect(dataView).toBe(firstDataView);
     expect(services.http.post).not.toHaveBeenCalled();
     expect(services.dataViews.create).not.toHaveBeenCalled();
+
+    services.dataViews.create = savedCreate;
+    services.http.post = savedPost;
   });
 
   it('returns an adhoc dataview if it is adhoc with named params and query index pattern is the same as the dataview index pattern', async () => {

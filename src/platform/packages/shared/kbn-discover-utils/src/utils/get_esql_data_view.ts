@@ -11,7 +11,6 @@ import type { AggregateQuery } from '@kbn/es-query';
 import type { CPSPluginStart } from '@kbn/cps/public';
 import {
   getESQLAdHocDataview,
-  getESQLAdHocDataviewId,
   getIndexPatternFromESQLQuery,
   getProjectRoutingFromEsqlQuery,
   parseTimeFieldFromESQLQuery,
@@ -19,6 +18,10 @@ import {
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+
+// Tracks the effectiveProjectRouting used to create each ad-hoc DataView instance.
+// WeakMap so entries are GC'd when the DataView is no longer referenced.
+const dataViewRoutingMap = new WeakMap<DataView, string | undefined>();
 
 export async function getEsqlDataView(
   query: AggregateQuery,
@@ -36,22 +39,21 @@ export async function getEsqlDataView(
   const onlyTimeFieldChanged =
     indexPatternFromQuery === currentDataView?.getIndexPattern() &&
     newTimeField !== currentTimeField;
+
   const projectRouting = services.cps?.cpsManager?.getProjectRouting();
   const effectiveProjectRouting = getProjectRoutingFromEsqlQuery(query.esql) ?? projectRouting;
-  const nextDataViewId = await getESQLAdHocDataviewId({
-    indexPattern: indexPatternFromQuery,
-    timeFieldName: currentTimeField,
-    effectiveProjectRouting,
-  });
+  const routingChanged =
+    currentDataView != null &&
+    dataViewRoutingMap.get(currentDataView) !== effectiveProjectRouting;
 
   if (
     currentDataView?.isPersisted() ||
     indexPatternFromQuery !== currentDataView?.getIndexPattern() ||
     // here the pattern hasn't changed but the time field has
     onlyTimeFieldChanged ||
-    currentDataView.id !== nextDataViewId
+    routingChanged
   ) {
-    return await getESQLAdHocDataview({
+    const newDataView = await getESQLAdHocDataview({
       dataViewsService: services.dataViews,
       query: query.esql,
       options: {
@@ -63,7 +65,8 @@ export async function getEsqlDataView(
       http: services.http,
       projectRouting,
     });
+    dataViewRoutingMap.set(newDataView, effectiveProjectRouting);
+    return newDataView;
   }
-
   return currentDataView;
 }

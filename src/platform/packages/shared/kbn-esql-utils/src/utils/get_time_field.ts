@@ -9,9 +9,8 @@
 import type { HttpStart } from '@kbn/core/public';
 import { TIMEFIELD_ROUTE } from '@kbn/esql-types';
 import { LRUCache } from 'lru-cache';
-import { getProjectRoutingFromEsqlQuery } from './set_instructions_helpers';
 
-// Caches the in-flight or resolved TIMEFIELD_ROUTE promise by query and project routing.
+// Caches the in-flight or resolved TIMEFIELD_ROUTE promise by query + routing.
 // Storing the Promise (not the resolved value) deduplicates concurrent calls:
 // if multiple callers request the same query and routing before the first resolves,
 // they all await the same promise instead of each firing a separate HTTP request.
@@ -26,8 +25,11 @@ const timeFieldCache = new LRUCache<string, Promise<string | undefined>>({ max: 
  * For synchronous/server-side contexts where only local parsing is needed,
  * use `parseTimeFieldFromESQLQuery` instead.
  *
- * Concurrent requests for the same query share one HTTP request via an LRU-backed
- * promise cache.
+ * Concurrent requests for the same query and routing share one HTTP request via an
+ * LRU-backed promise cache.
+ *
+ * @param projectRouting - The effective project routing to forward to the server. Callers
+ * should resolve precedence (SET instruction vs picker) before passing this value.
  */
 export async function getESQLTimeField({
   query,
@@ -38,8 +40,7 @@ export async function getESQLTimeField({
   http?: HttpStart;
   projectRouting?: string;
 }): Promise<string | undefined> {
-  const effectiveProjectRouting = getProjectRoutingFromEsqlQuery(query) ?? projectRouting;
-  const cacheKey = JSON.stringify([query, effectiveProjectRouting]);
+  const cacheKey = JSON.stringify([query, projectRouting]);
   const cached = timeFieldCache.get(cacheKey);
   if (cached !== undefined) {
     return cached;
@@ -48,9 +49,7 @@ export async function getESQLTimeField({
     return undefined;
   }
   const pendingRequest = http
-    .post(TIMEFIELD_ROUTE, {
-      body: JSON.stringify({ query, projectRouting: effectiveProjectRouting }),
-    })
+    .post(TIMEFIELD_ROUTE, { body: JSON.stringify({ query, projectRouting }) })
     .then((response) => (response as { timeField?: string } | undefined)?.timeField)
     .catch((error) => {
       // eslint-disable-next-line no-console
