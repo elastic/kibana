@@ -551,10 +551,6 @@ const buildPersistenceEvents = ({
   const useTwoPhase = !isRegenerate && !isResume;
 
   if (useTwoPhase) {
-    // Persist the raw `user_message` at request receipt time (before execution starts) and
-    // defer all execution-derived events to a single write at round completion. `round_started`
-    // is used only as a gate — it correlates the correct terminal event and marks that the
-    // round reached the point where a completion write is expected.
     const roundStartedEvents$ = agentEvents$.pipe(filter(isRoundStartedEvent));
     const endTitle$ =
       conversation.operation === 'CREATE' || conversationNeedsTitle(conversation)
