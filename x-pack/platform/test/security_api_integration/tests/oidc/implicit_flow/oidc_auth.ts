@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { JSDOM } from 'jsdom';
+import { JSDOM, ResourceLoader } from 'jsdom';
+import type { AbortablePromise, FetchOptions } from 'jsdom';
 import type { Cookie } from 'tough-cookie';
-import { format as formatURL } from 'url';
 
 import expect from '@kbn/expect';
 import { findSessionCookie } from '@kbn/security-api-integration-helpers';
@@ -20,7 +20,6 @@ import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
-  const config = getService('config');
 
   describe('OpenID Connect Implicit Flow authentication', () => {
     describe('finishing handshake', () => {
@@ -45,29 +44,45 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should return an HTML page that will parse URL fragment', async () => {
         const response = await supertest.get('/api/security/oidc/implicit').expect(200);
-        const dom = new JSDOM(response.text, {
-          url: formatURL({ ...config.get('servers.kibana'), auth: false }),
-          runScripts: 'dangerously',
-          resources: 'usable',
-          beforeParse(window) {
-            // JSDOM doesn't support changing of `window.location` and throws an exception if script
-            // tries to do that and we have to workaround this behaviour. We also need to wait until our
-            // script is loaded and executed, __isScriptExecuted__ is used exactly for that.
-            (window as Record<string, any>).__isScriptExecuted__ = new Promise<void>((resolve) => {
-              Object.defineProperty(window, 'location', {
-                value: {
-                  href: 'https://kibana.com/api/security/oidc/implicit#token=some_token&access_token=some_access_token',
-                  replace(newLocation: string) {
-                    this.href = newLocation;
-                    resolve();
-                  },
-                },
+        const implicitFlowUrl =
+          'https://kibana.com/api/security/oidc/implicit#token=some_token&access_token=some_access_token';
+        const implicitFlowScript = (
+          await supertest.get('/internal/security/oidc/implicit.js').expect(200)
+        ).text.replace('window.location.replace(', 'window.__replaceLocation(');
+        class ImplicitFlowResourceLoader extends ResourceLoader {
+          override fetch(url: string, options: FetchOptions): AbortablePromise<Buffer> | null {
+            if (url.endsWith('/internal/security/oidc/implicit.js')) {
+              return Object.assign(Promise.resolve(Buffer.from(implicitFlowScript)), {
+                abort: () => undefined,
               });
+            }
+
+            return super.fetch(url, options);
+          }
+        }
+
+        let redirectUrl: string | undefined;
+        interface ImplicitFlowWindow {
+          __isScriptExecuted__: Promise<void>;
+          __replaceLocation: (newLocation: string) => void;
+        }
+        const dom = new JSDOM(response.text, {
+          url: implicitFlowUrl,
+          runScripts: 'dangerously',
+          resources: new ImplicitFlowResourceLoader(),
+          beforeParse(window) {
+            const implicitFlowWindow = window as typeof window & ImplicitFlowWindow;
+
+            implicitFlowWindow.__isScriptExecuted__ = new Promise<void>((resolve) => {
+              implicitFlowWindow.__replaceLocation = (newLocation: string) => {
+                redirectUrl = newLocation;
+                resolve();
+              };
             });
           },
         });
 
-        await (dom.window as Record<string, any>).__isScriptExecuted__;
+        await (dom.window as typeof dom.window & ImplicitFlowWindow).__isScriptExecuted__;
 
         // Check that proxy page is returned with proper headers.
         expect(response.headers['content-type']).to.be('text/html; charset=utf-8');
@@ -77,7 +92,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(response.headers['content-security-policy']).to.be.a('string');
 
         // Check that script that forwards URL fragment worked correctly.
-        expect(dom.window.location.href).to.be(
+        expect(redirectUrl).to.be(
           '/api/security/oidc/callback?authenticationResponseURI=https%3A%2F%2Fkibana.com%2Fapi%2Fsecurity%2Foidc%2Fimplicit%23token%3Dsome_token%26access_token%3Dsome_access_token'
         );
       });

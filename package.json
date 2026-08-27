@@ -133,7 +133,8 @@
     "@types/react": "18.2.79",
     "@types/react-dom": "18.2.25",
     "apache-arrow": "20.x - 21.x",
-    "globby/fast-glob": "3.3.3"
+    "globby/fast-glob": "3.3.3",
+    "jest-environment-jsdom/**/nwsapi": "2.2.2"
   },
   "dependencies": {
     "@a2a-js/sdk": "0.3.4",
@@ -1519,7 +1520,7 @@
     "joi-to-json": "5.0.0",
     "jquery": "3.7.1",
     "js-search": "1.4.3",
-    "jsdom": "20.0.1",
+    "jsdom": "26.1.0",
     "json-schema-to-ts": "3.1.1",
     "jsonwebtoken": "9.0.2",
     "jsts": "1.6.2",
@@ -2049,7 +2050,7 @@
     "@types/jest": "29.5.3",
     "@types/jquery": "3.5.33",
     "@types/js-search": "1.4.0",
-    "@types/jsdom": "20.0.1",
+    "@types/jsdom": "21.1.7",
     "@types/json-schema": "7.0.15",
     "@types/jsonwebtoken": "9.0.10",
     "@types/license-checker": "25.0.6",
