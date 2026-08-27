@@ -21,6 +21,7 @@ import {
   WorkflowExecutionCollapseFields,
   WorkflowExecutionSortFields,
 } from '@kbn/workflows';
+import { toExecutionSummaryDto } from './utils/to_execution_summary_dto';
 import type { SearchWorkflowExecutionsParams } from '../../workflows_management_service';
 import type { RouteDependencies } from '../types';
 import { API_VERSION, AVAILABILITY, MAX_PAGE_SIZE, OAS_TAG } from '../utils/route_constants';
@@ -30,7 +31,6 @@ import {
   hasWorkflowReadPrivilege,
   WORKFLOW_EXECUTION_READ_WITH_MANAGED_SECURITY,
 } from '../utils/route_security';
-import { toExecutionSummaryDto } from './utils/to_execution_summary_dto';
 import { workflowIdParamSchema } from '../utils/schemas';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
 

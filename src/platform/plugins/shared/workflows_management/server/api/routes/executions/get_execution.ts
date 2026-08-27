@@ -9,6 +9,7 @@
 
 import path from 'path';
 import { schema } from '@kbn/config-schema';
+import { toExecutionSummaryDto } from './utils/to_execution_summary_dto';
 import type { RouteDependencies } from '../types';
 import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
@@ -19,7 +20,6 @@ import {
 } from '../utils/route_security';
 import { executionIdParamSchema } from '../utils/schemas';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
-import { toExecutionSummaryDto } from './utils/to_execution_summary_dto';
 
 export function registerGetExecutionRoute({ router, api, spaces }: RouteDependencies) {
   router.versioned
