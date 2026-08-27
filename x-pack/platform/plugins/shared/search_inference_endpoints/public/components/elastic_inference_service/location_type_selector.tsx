@@ -39,23 +39,28 @@ export const LocationTypeSelector: React.FC<LocationTypeSelectorProps> = ({
   isDisabled,
   onChange,
 }) => {
-  const label =
+  const { label, hint } =
     activeTab === 'geo'
-      ? i18n.translate('xpack.searchInferenceEndpoints.manageRegions.locationTypeLabel.geo', {
-          defaultMessage: 'Choose location type:',
-        })
-      : i18n.translate('xpack.searchInferenceEndpoints.manageRegions.locationTypeLabel.regions', {
-          defaultMessage: 'Choose locations:',
-        });
-
-  const hint =
-    activeTab === 'geo'
-      ? i18n.translate('xpack.searchInferenceEndpoints.manageRegions.locationTypeHint.geo', {
-          defaultMessage: 'Switching location type will clear the current selection.',
-        })
-      : i18n.translate('xpack.searchInferenceEndpoints.manageRegions.locationTypeHint.regions', {
-          defaultMessage: 'All regions within the zone will be allowed.',
-        });
+      ? {
+          label: i18n.translate(
+            'xpack.searchInferenceEndpoints.manageRegions.locationTypeLabel.geo',
+            { defaultMessage: 'Choose location type:' }
+          ),
+          hint: i18n.translate(
+            'xpack.searchInferenceEndpoints.manageRegions.locationTypeHint.geo',
+            { defaultMessage: 'Switching location type will clear the current selection.' }
+          ),
+        }
+      : {
+          label: i18n.translate(
+            'xpack.searchInferenceEndpoints.manageRegions.locationTypeLabel.regions',
+            { defaultMessage: 'Choose locations:' }
+          ),
+          hint: i18n.translate(
+            'xpack.searchInferenceEndpoints.manageRegions.locationTypeHint.regions',
+            { defaultMessage: 'All regions within the zone will be allowed.' }
+          ),
+        };
 
   return (
     <EuiFlexGroup direction="column" gutterSize="xs">
