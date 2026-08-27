@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { getDateRange } from '@kbn/timerange';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server';
@@ -98,6 +99,17 @@ const createVisualizationSchema = z
           .describe(
             'End of the time range. Use "now" for the current time, or an ISO 8601 string for an absolute end.'
           ),
+      })
+      .check((ctx) => {
+        try {
+          getDateRange(ctx.value);
+        } catch (err) {
+          ctx.issues.push({
+            code: 'custom',
+            message: err instanceof Error ? err.message : 'Invalid time_range',
+            input: ctx.value,
+          });
+        }
       })
       .optional()
       .describe(

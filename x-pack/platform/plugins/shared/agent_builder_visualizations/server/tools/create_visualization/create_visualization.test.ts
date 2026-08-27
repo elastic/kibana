@@ -125,6 +125,33 @@ describe('createVisualizationTool schema', () => {
       }).success
     ).toBe(false);
   });
+
+  it('rejects a time_range whose endpoints are not valid Kibana date math', () => {
+    const base = { query: 'errors over time', chartType: SupportedChartType.XY };
+
+    expect(schema.safeParse({ ...base, time_range: { from: '', to: 'not-a-date' } }).success).toBe(
+      false
+    );
+    expect(
+      schema.safeParse({ ...base, time_range: { from: 'yesterday', to: 'today' } }).success
+    ).toBe(false);
+    expect(
+      schema.safeParse({
+        ...base,
+        time_range: { from: '2026-01-02T00:00:00.000Z', to: '2026-01-01T00:00:00.000Z' },
+      }).success
+    ).toBe(false);
+
+    expect(schema.safeParse({ ...base, time_range: { from: 'now-7d', to: 'now' } }).success).toBe(
+      true
+    );
+    expect(
+      schema.safeParse({
+        ...base,
+        time_range: { from: '2024-05-20T00:00:00.000Z', to: '2024-05-24T23:59:59.999Z' },
+      }).success
+    ).toBe(true);
+  });
 });
 
 describe('createVisualizationTool handler', () => {
