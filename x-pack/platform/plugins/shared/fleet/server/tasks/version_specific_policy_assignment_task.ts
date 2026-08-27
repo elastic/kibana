@@ -515,7 +515,12 @@ export class VersionSpecificPolicyAssignmentTask {
         agentVersionGroups,
         async (versionGroup) => {
           throwIfAborted(abortController);
-          await this.reassignAgentsToVersionedPolicy(esClient, soClient, versionGroup, abortController);
+          await this.reassignAgentsToVersionedPolicy(
+            esClient,
+            soClient,
+            versionGroup,
+            abortController
+          );
         },
         {
           concurrency: MAX_CONCURRENT_REASSIGNMENTS,
@@ -674,7 +679,12 @@ export class VersionSpecificPolicyAssignmentTask {
       );
       for (const parentPolicyId of noConditionParentIds) {
         throwIfAborted(abortController);
-        await this.reassignOrphanedAgentsToBasePolicy(esClient, soClient, parentPolicyId, abortController);
+        await this.reassignOrphanedAgentsToBasePolicy(
+          esClient,
+          soClient,
+          parentPolicyId,
+          abortController
+        );
       }
     }
 
