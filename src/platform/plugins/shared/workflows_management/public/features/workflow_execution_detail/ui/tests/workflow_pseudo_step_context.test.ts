@@ -67,6 +67,18 @@ describe('buildTriggerContextFromExecution', () => {
     });
   });
 
+  it('should not treat custom provenance strings as event-driven without an event payload', () => {
+    const result = buildTriggerContextFromExecution(
+      { inputs: { query: 'gen' } },
+      'attack-discovery-pipeline'
+    );
+
+    expect(result).toEqual({
+      triggerType: 'manual',
+      input: { query: 'gen' },
+    });
+  });
+
   it('should use event trigger type when triggeredBy is event-driven and event is present', () => {
     const event = { workflow: { name: 'Parent' } };
     const result = buildTriggerContextFromExecution({ event }, 'workflows.failed');
