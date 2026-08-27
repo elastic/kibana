@@ -300,6 +300,7 @@ export class OtelAppender implements DisposableAppender {
   private readonly useStructuredBody: boolean;
   private readonly transformAttributes?: OtelAttributesTransform;
   private readonly promotedAttributes: Attributes;
+  private disposed = false;
 
   constructor(config: OtelAppenderPluginConfig) {
     const meterProvider = metrics.getMeterProvider();
@@ -408,6 +409,8 @@ export class OtelAppender implements DisposableAppender {
   }
 
   public async dispose(): Promise<void> {
+    if (this.disposed) return;
+    this.disposed = true;
     // Wrap shutdown in a timeout to prevent indefinite hangs when the remote
     // endpoint is unreachable or slow (the spike confirmed this is a real risk).
     // Attach .catch() so that a late rejection from shutdown() after the timeout

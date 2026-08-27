@@ -54,6 +54,7 @@ export const createInvestigationProgressReportTool = ({
   },
   schema: investigationStateSchema,
   tags: ['streams', 'investigation'],
+  excludeFromMcp: true,
   handler: async (state, context) => {
     context.events.sendUiEvent(INVESTIGATION_PROGRESS_UI_EVENT, state);
     logger.debug('Reported investigation progress');
