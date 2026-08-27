@@ -76,6 +76,7 @@ test.describe('last selected space recollection', { tag: tags.stateful.classic }
     await pageObjects.spaces.navigateToHome();
     await pageObjects.spaces.openSpacesNav();
     await pageObjects.spaces.switchToSpaceFromNav(TARGET_SPACE_ID);
+    await expect.poll(() => pageObjects.spaces.getCurrentUrl()).toContain(`/s/${TARGET_SPACE_ID}`);
 
     await page.goto(kbnUrl.get('/'));
 
