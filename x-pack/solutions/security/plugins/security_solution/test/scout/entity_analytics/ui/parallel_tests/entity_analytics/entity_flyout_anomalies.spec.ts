@@ -374,10 +374,14 @@ spaceTest.describe(
         await pageObjects.entityFlyoutAnomaliesPage.navigateToHostBothPanels();
         await pageObjects.entityFlyoutAnomaliesPage.clickAnomaliesTab();
         await pageObjects.entityFlyoutAnomaliesPage.openRowActionsMenu();
-        await pageObjects.entityFlyoutAnomaliesPage.getRowAction('add-to-timeline').click();
+        await pageObjects.entityFlyoutAnomaliesPage.clickRowAction('add-to-timeline');
 
         await expect(pageObjects.timelinePage.panel).toBeVisible({ timeout: 30000 });
-        await expect(pageObjects.timelinePage.kqlTextarea).toHaveValue(/"host\.name":"test-host"/);
+        // Container is mounted before QueryBarTimeline; retries until KQL paints.
+        await expect(pageObjects.timelinePage.searchContainer).toContainText(
+          /"host\.name":"test-host"/,
+          { timeout: 30000 }
+        );
       }
     );
 
