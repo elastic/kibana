@@ -18139,8 +18139,6 @@
     "xpack.crossClusterReplication.pauseFollowerIndex.confirmModal.pauseMultipleTitle": "{count} 件のフォロワーインデックスへの複製を一時停止しますか？",
     "xpack.crossClusterReplication.pauseFollowerIndex.confirmModal.pauseSingleTitle": "フォロワーインデックス''{name}''への複製を一時停止しますか？",
     "xpack.crossClusterReplication.pauseFollowerIndex.confirmModal.singlePauseDescriptionWithSettingWarning": "このフォロワーインデックスへの複製を一時停止することで、高度な設定のカスタマイズが消去されます。",
-    "xpack.crossClusterReplication.readDocsAutoFollowPatternButtonLabel": "自動フォローパターンドキュメント",
-    "xpack.crossClusterReplication.readDocsFollowerIndexButtonLabel": "フォロワーインデックスドキュメント",
     "xpack.crossClusterReplication.remoteClustersFormField.addRemoteClusterButtonLabel": "リモートクラスターを追加",
     "xpack.crossClusterReplication.remoteClustersFormField.currentRemoteClusterNotConnectedCallOutDescription": "リモートクラスターを編集するか、接続されているクラスターを選択します。",
     "xpack.crossClusterReplication.remoteClustersFormField.currentRemoteClusterNotConnectedCallOutTitle": "リモートクラスター''{name}''が接続されていません",
