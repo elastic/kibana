@@ -476,7 +476,6 @@ describe('UiamService', () => {
           headers: {
             'Content-Type': 'application/json',
             'User-Agent': 'Kibana/9.0.0',
-            [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
             Authorization: 'Bearer essu_oauth_access_token',
           },
           dispatcher: AGENT_MOCK,
@@ -504,7 +503,11 @@ describe('UiamService', () => {
       );
       expect(securityTelemetry.recordOAuthTokenExchangeAttempt).toHaveBeenCalledWith(
         expect.any(Number),
-        { outcome: 'failure', errorType: 'KIBANA.AUDIENCE_MISMATCH' }
+        {
+          outcome: 'failure',
+          oauthErrorType: 'KIBANA.AUDIENCE_MISMATCH',
+          oauthErrorCode: undefined,
+        }
       );
     });
 
@@ -519,7 +522,7 @@ describe('UiamService', () => {
       await expect(uiamService.exchangeOAuthToken('essu_invalid_token')).rejects.toThrow();
       expect(securityTelemetry.recordOAuthTokenExchangeAttempt).toHaveBeenCalledWith(
         expect.any(Number),
-        { outcome: 'failure', errorType: 'UNKNOWN' }
+        { outcome: 'failure', oauthErrorType: 'UNKNOWN', oauthErrorCode: undefined }
       );
     });
 
@@ -542,7 +545,7 @@ describe('UiamService', () => {
       await expect(uiamService.exchangeOAuthToken('essu_expired_token')).rejects.toThrow();
       expect(securityTelemetry.recordOAuthTokenExchangeAttempt).toHaveBeenCalledWith(
         expect.any(Number),
-        { outcome: 'failure', errorType: 'AUTHENTICATION.TOKEN' }
+        { outcome: 'failure', oauthErrorType: 'AUTHENTICATION.TOKEN', oauthErrorCode: '0x7E0116' }
       );
     });
   });
