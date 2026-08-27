@@ -6,6 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
+import { isPlainObject } from 'lodash';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { AuditLogger, SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
@@ -159,12 +160,11 @@ export class CasesWorkflowRunService {
     // Strip any client-supplied event.caseIds so the client cannot pre-seed the value;
     // the server re-injects the authorized set via eventOverrides after preprocessing.
     const { event: rawEvent, ...otherInputs } = body.inputs;
-    const strippedEvent =
-      typeof rawEvent === 'object' && rawEvent !== null && !Array.isArray(rawEvent)
-        ? (({ caseIds: _dropped, ...rest }: Record<string, unknown>) => rest)(
-            rawEvent as Record<string, unknown>
-          )
-        : rawEvent;
+    const strippedEvent = isPlainObject(rawEvent)
+      ? (({ caseIds: _dropped, ...rest }: Record<string, unknown>) => rest)(
+          rawEvent as Record<string, unknown>
+        )
+      : rawEvent;
     const sanitizedInputs =
       strippedEvent !== undefined ? { ...otherInputs, event: strippedEvent } : otherInputs;
 
