@@ -170,8 +170,12 @@ async function synthesizeMissingPackageJsons(pkgs, rootVersion, log) {
       if (p.pkg && !isGeneratedManifest(p.pkg)) return;
       generatedRepoRels.push(p.normalizedRepoRelativeDir);
       const path = Path.resolve(p.directory, 'package.json');
-      const contents = generatedPackageJson(p.id, rootVersion);
-      if ((await readIfExists(path)) !== contents) {
+      const contents = generatedPackageJson(
+        p.id,
+        '1.0.0',
+        p.normalizedRepoRelativeDir.startsWith('x-pack/')
+      );
+      if (!(await readIfExists(path))) {
         await Fsp.writeFile(path, contents);
         written += 1;
       }
@@ -187,13 +191,13 @@ function isGeneratedManifest(pkg) {
   return !!pkg && pkg.kbnGenerated === true;
 }
 
-function generatedPackageJson(id, version) {
+function generatedPackageJson(id, version, isXpack) {
   return `${JSON.stringify(
     {
       name: id,
       version,
       private: true,
-      license: 'Elastic-2.0',
+      license: isXpack ? 'Elastic License 2.0' : 'Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0',
       kbnGenerated: true,
     },
     null,
