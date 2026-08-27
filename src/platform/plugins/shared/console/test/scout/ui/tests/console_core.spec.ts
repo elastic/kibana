@@ -14,6 +14,9 @@ import { test } from '../fixtures';
 
 const stripWhitespace = (value: string) => value.replace(/\s/g, '');
 
+// Unique per worker so parallel workers cannot collide on the index name.
+const multiRequestIndexName = (workerIndex: number) => `console-core-multi-request-${workerIndex}`;
+
 test.describe('Console core', { tag: tags.deploymentAgnostic }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
@@ -23,9 +26,17 @@ test.describe('Console core', { tag: tags.deploymentAgnostic }, () => {
 
   // The default welcome script (`DEFAULT_INPUT_VALUE`) creates `my-index` under a fixed
   // name, so it can't be made worker-unique — delete it even if a test failed partway,
-  // or a later bare `GET /_search` picks up the leftover doc.
-  test.afterEach(async ({ esClient }) => {
-    await esClient.indices.delete({ index: 'my-index' }, { ignore: [404] });
+  // or a later bare `GET /_search` picks up the leftover doc. The multi-request index is
+  // deleted for the same reason: an interrupted run must not leave it behind, or the next
+  // run's PUT would return a non-200 response.
+  test.afterEach(async ({ esClient }, testInfo) => {
+    await esClient.indices.delete(
+      {
+        index: ['my-index', multiRequestIndexName(testInfo.workerIndex)],
+        ignore_unavailable: true,
+      },
+      { ignore: [404] }
+    );
   });
 
   test('opens on the Shell tab with the default request and an empty output panel', async ({
@@ -109,8 +120,7 @@ test.describe('Console core', { tag: tags.deploymentAgnostic }, () => {
   test('prefixes each response of a multi-request run with its input line number', async ({
     pageObjects,
   }) => {
-    // Unique per worker so parallel workers cannot collide on the index name.
-    const indexName = `console-core-multi-request-${test.info().workerIndex}`;
+    const indexName = multiRequestIndexName(test.info().workerIndex);
 
     await pageObjects.console.clearEditorText();
     // The leading newline keeps the requests on lines 2 and 3, which is what the
@@ -137,6 +147,12 @@ test.describe('Console core', { tag: tags.deploymentAgnostic }, () => {
 
     await expect(pageObjects.console.outputEditorContent).toContainText(
       '# 2: GET /_search?pretty [200 OK]'
+    );
+    // The second response starts below the fold of the output panel, and Monaco only
+    // renders the lines in the viewport, so bring it into view before asserting on it.
+    await pageObjects.console.scrollOutputToBottom();
+    await expect(pageObjects.console.outputEditorContent).toContainText(
+      '# 3: GET /_search?pretty [200 OK]'
     );
   });
 
