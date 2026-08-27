@@ -27,6 +27,15 @@ import {
  * enforces. Detection Engine Indicator Match rules point at an alias name and
  * cannot forget to add a filter.
  *
+ * What the alias does NOT solve is access. An Indicator Match rule reads its threat
+ * index as the rule's own API key, which inherits the rule author's Elasticsearch
+ * roles, not their Kibana feature privileges. Nothing in this plugin grants an index
+ * privilege on the indicator index or its aliases, so a rule pointed at one fails for
+ * every non-superuser until an operator adds `read` on
+ * `.kibana-threat-intel-indicators*` to the relevant role. That is a gap in the
+ * pipeline, not a property of the alias: the alias narrows what a reader sees, it does
+ * not make them a reader.
+ *
  * The space id is never at the start of the name, so a space id beginning with `-`
  * or `_` (which Kibana permits and Elasticsearch rejects in an alias) cannot
  * produce an invalid name.
