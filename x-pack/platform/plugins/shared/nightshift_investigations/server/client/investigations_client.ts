@@ -126,7 +126,18 @@ function recoverTriggerTypeFromInput(
     : undefined;
 }
 
-/** Deep link that opens an event's flyout in the significant events app (app id + page route). */
+/**
+ * App paths are duplicated here rather than imported, because neither owner can be depended on
+ * from this plugin: `observability` is a private solution module and this is a platform module,
+ * and `significant_events` already depends on this plugin, so importing its
+ * `SIGNIFICANT_EVENTS_APP_ROUTE` back would close a cycle. Sharing them properly means promoting
+ * both routes into a platform-visible package such as `@kbn/deeplinks-observability`.
+ *
+ * `selectedEvent` is the significant events app's addressable deep-link param (it also appears in
+ * `SignificantEventsAppLocatorParams`): it filters the list to that event server-side, bypassing
+ * the time range, and the app then opens the flyout itself. `openEvent` is internal flyout state
+ * and only resolves against the already-loaded page of results.
+ */
 const SIGNIFICANT_EVENT_URL_PATH = '/app/significant_events/significant_events';
 const ALERT_DETAILS_URL_PATH = '/app/observability/alerts';
 
@@ -144,9 +155,7 @@ function asBriefText(value: unknown): string | undefined {
 
 /**
  * Adds what a consumer needs to render the triggering item inline and navigate back to it, taken
- * from the same persisted inputs the subject itself came from. URLs are relative app paths; the
- * significant-event one opens the event flyout through the app's `openEvent` deep-link param,
- * which resolves when the event is loadable by that app.
+ * from the same persisted inputs the subject itself came from. URLs are relative app paths.
  *
  * The summary deliberately does not fall back to `inputs.message`: callers that supply no summary
  * also supply no message, so the message is the generic prompt `start` synthesizes, and surfacing
@@ -160,7 +169,7 @@ function toSubjectReference(
   const summary = asBriefText(ctx?.summary) ?? asBriefText(ctx?.name);
   const url =
     subject.type === 'significant_event'
-      ? `${SIGNIFICANT_EVENT_URL_PATH}?openEvent=${encodeURIComponent(subject.id)}`
+      ? `${SIGNIFICANT_EVENT_URL_PATH}?selectedEvent=${encodeURIComponent(subject.id)}`
       : `${ALERT_DETAILS_URL_PATH}/${encodeURIComponent(subject.id)}`;
 
   return { ...subject, ...(summary ? { summary } : {}), url };

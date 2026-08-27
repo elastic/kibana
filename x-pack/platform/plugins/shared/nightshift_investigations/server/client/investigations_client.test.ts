@@ -244,7 +244,7 @@ describe('NightshiftInvestigationsClient.get()', () => {
         type: 'significant_event',
         id: 'event-42',
         summary: 'Latency breached the SLO on checkout',
-        url: '/app/significant_events/significant_events?openEvent=event-42',
+        url: '/app/significant_events/significant_events?selectedEvent=event-42',
       });
     });
 
@@ -264,7 +264,7 @@ describe('NightshiftInvestigationsClient.get()', () => {
       );
       const result = await makeClient().get('inv-1');
       expect(result.subject?.url).toBe(
-        `/app/significant_events/significant_events?openEvent=${result.subject?.id}`
+        `/app/significant_events/significant_events?selectedEvent=${result.subject?.id}`
       );
     });
 
