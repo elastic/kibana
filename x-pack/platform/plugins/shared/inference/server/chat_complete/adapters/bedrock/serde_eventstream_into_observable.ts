@@ -10,10 +10,12 @@ import { fromUtf8, toUtf8 } from '@smithy/util-utf8';
 import { identity } from 'lodash';
 import { Observable } from 'rxjs';
 import type { Readable } from 'stream';
-import { createInferenceInternalError, createInferenceRequestError } from '@kbn/inference-common';
+import {
+  createInferenceInternalError,
+  createInferenceRequestError,
+  MAX_STREAM_DURATION_MS,
+} from '@kbn/inference-common';
 import type { ConverseBedrockChunkMember } from './converse_type';
-
-const MAX_STREAM_DURATION_MS = 10 * 60 * 1000;
 
 interface ModelStreamErrorException {
   name: 'ModelStreamErrorException';
