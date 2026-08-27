@@ -64,6 +64,7 @@ export { CONVERSATION_QUEUE_CATEGORIES, CONVERSATION_QUEUE_LABELS } from './tran
 
 export {
   ApprovalRequirement,
+  ConversationEntity,
   EvidenceRef,
   GetInvestigationResponse,
   GetWatchResponse,
@@ -118,6 +119,11 @@ export {
   coverageFromSchedule,
   isOnDutyNow,
 } from './impl/watches/watch_helpers';
+
+export { extractConversationEntities } from './impl/attachments/entity_attachment';
+
+export { aggregateBlastRadius } from './impl/blast_radius/blast_radius';
+export type { BlastRadiusEntry } from './impl/blast_radius/blast_radius';
 export type {
   WatchDisplaySortable,
   WatchScheduleCoverageInput,
