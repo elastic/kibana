@@ -261,11 +261,16 @@ export class RecommendedEndpointsPoller {
   }
 
   private handleError(error: unknown, _caught$: Observable<unknown>): Observable<never> {
-    this.logger.error('Error polling EIS for recommended model updates.');
+    // Log at warn, not error: this handler fires on every retry attempt (catchError is
+    // inside the retry scope), so a transient ES outage would otherwise flood error logs.
+    // Persistent failures are visible through the warn cadence (one entry per 5-minute retry).
+    this.logger.warn('Error polling EIS for recommended model updates; will retry.');
     if (Error.isError(error)) {
-      this.logger.error(error);
-    } else if (typeof error === 'object') {
-      this.logger.error(JSON.stringify(error));
+      this.logger.warn(error.message);
+    } else if (typeof error === 'string') {
+      this.logger.warn(error);
+    } else if (error !== null && typeof error === 'object') {
+      this.logger.warn(JSON.stringify(error));
     }
     return Rx.throwError(() => error);
   }
