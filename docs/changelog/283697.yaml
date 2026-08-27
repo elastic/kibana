@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/283697
+issues:
+- https://github.com/elastic/kibana/issues/283672
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+title: Fix legacy hash dashboard links in Security markdown panels

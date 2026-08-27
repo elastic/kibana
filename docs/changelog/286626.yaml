@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/286626
+issues:
+- https://github.com/elastic/kibana/issues/286589
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+title: Fix SLO dashboard panels when Elasticsearch query inspection is enabled

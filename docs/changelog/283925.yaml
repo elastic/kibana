@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/283925
+type: feature
+products:
+- product: cloud-serverless
+- product: kibana
+areas:
+- Alerting and reporting
+title: Enable the UniFi connector in Workflows

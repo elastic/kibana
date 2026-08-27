@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/286704
+issues:
+- https://github.com/elastic/kibana/issues/284086
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+areas:
+- Search and data
+title: Fix duplicate Cut, Copy, and Paste actions in Dev Tools Console

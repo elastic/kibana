@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/286360
+issues:
+- https://github.com/elastic/kibana/issues/209914
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+title: Fix missing border on YAML fields in Fleet integration settings

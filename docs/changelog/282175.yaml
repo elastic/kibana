@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/282175
+issues:
+- https://github.com/elastic/kibana/issues/273654
+type: enhancement
+products:
+- product: cloud-serverless
+- product: kibana
+areas:
+- Discover and ES|QL
+title: Add document flyout deep links in Discover

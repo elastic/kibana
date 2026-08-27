@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/286383
+issues:
+- https://github.com/elastic/kibana/issues/243607
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+title: Fix host column sorting on the Fleet Agents page

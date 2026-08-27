@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/286982
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+areas:
+- Alerting and reporting
+title: Fix alert rules stuck after UIAM API key failures
+description: 'Fixes alert rules that could not recover after an unusable UIAM API key. Rule settings and SLO lookup failures are now visible to repair logic. UIAM keys leaked onto rules with user-created API keys are removed so the rule falls back to the user key.'

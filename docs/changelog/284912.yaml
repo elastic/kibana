@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/284912
+issues:
+- https://github.com/elastic/security-team/issues/18360
+type: feature
+products:
+- product: cloud-serverless
+- product: kibana
+areas:
+- Alerting and reporting
+title: Add write actions to the Gmail connector
+description: 'Adds eight write actions to the Gmail connector — `listLabels`, `modifyLabels`, `markAsRead`, `markAsUnread`, `trashMessage`, `untrashMessage`, `sendMessage`, and `replyMessage`. They enable phishing-remediation workflows that can label, quarantine, and reply to emails directly from Kibana. Write actions require OAuth 2.0 authorization code authentication with the `gmail.modify` scope.'

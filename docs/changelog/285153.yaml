@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/285153
+issues:
+- https://github.com/elastic/kibana/issues/258232
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+areas:
+- Kibana platform
+title: 'Fix unexpected PKI logouts when HTTP/2 streams are cancelled'
+description: 'Fixes an issue where PKI authentication sessions were unexpectedly invalidated when in-flight requests were cancelled over HTTP/2, logging users out. This issue affected deployments on `server.protocol: http2`, which became the default in 9.0.0 when TLS is enabled.'

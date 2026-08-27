@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/284910
+issues:
+- https://github.com/elastic/security-team/issues/18354
+type: feature
+products:
+- product: cloud-serverless
+- product: kibana
+areas:
+- Alerting and reporting
+title: Add write actions to the Jira Cloud connector
+description: Adds 14 write actions to the Jira Cloud connector, enabling workflows and agents to create and update issues, post comments, transition statuses, assign users, manage attachments, and more.

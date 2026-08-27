@@ -1,0 +1,7 @@
+prs:
+- https://github.com/elastic/kibana/pull/286952
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+title: Fix vertical alignment in the document flyout Entities section
