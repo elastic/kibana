@@ -2409,3 +2409,67 @@ describe('namespace resolution stays linear', () => {
     ).toBe('Exploit uses <script> and c2.evil.test');
   });
 });
+
+/**
+ * In HTML an unquoted attribute value may contain `/`, so a trailing slash there belongs to the
+ * value and is not a self-closing flag. Reading `<script src=x/>` as self-closing rewrote it to
+ * an empty script pair, which exposed the real script body as report text with its URL in it.
+ */
+describe('self-closing detection and unquoted attribute values', () => {
+  it.each([
+    [
+      'a script with an unquoted value',
+      '<script src=x/>fetch("https://false-ioc.test")</script><p>safe</p>',
+    ],
+    [
+      'a style with an unquoted value',
+      '<style src=x/>a{b:url(https://false-ioc.test)}</style><p>safe</p>',
+    ],
+  ])('does not treat the value slash in %s as self-closing', (_label, html) => {
+    const result = stripHtml(html);
+
+    expect(result).toBe('safe');
+    expect(result).not.toContain('false-ioc.test');
+  });
+
+  it.each([
+    ['a quoted value', '<article><script src="x.js"/><p>IOC: evil.test</p></article>'],
+    ['no attributes', '<script/><p>IOC: evil.test</p>'],
+    ['whitespace before the slash', '<script src=x /><p>IOC: evil.test</p>'],
+  ])('still normalizes a genuine self-closed script with %s', (_label, html) => {
+    expect(stripHtml(html)).toBe('IOC: evil.test');
+  });
+
+  it('still handles a quoted > in the open tag', () => {
+    expect(stripHtml('<script src="a>b.js"/>kept')).toBe('kept');
+  });
+});
+
+/**
+ * A declared namespace binding is authoritative, including when it contradicts the conventional
+ * prefix. The hard-coded `content:encoded` fast path returned true before resolution could look,
+ * so an explicitly unrelated `content` namespace was reparsed as module HTML and lost its text.
+ */
+describe('the conventional prefix does not override its binding', () => {
+  it('leaves content:encoded literal when bound to another namespace', () => {
+    const result = stripHtml(
+      '<content:encoded xmlns:content="urn:literal">Exploit uses &lt;script&gt; and c2.evil.test</content:encoded>'
+    );
+
+    expect(result).toBe('Exploit uses <script> and c2.evil.test');
+    expect(result).toContain('c2.evil.test');
+  });
+
+  it.each([
+    [
+      'undeclared, as a fragment fallback',
+      '<content:encoded>&lt;p&gt;evil.com&lt;/p&gt;</content:encoded>',
+    ],
+    [
+      'bound to the module namespace',
+      '<content:encoded xmlns:content="http://purl.org/rss/1.0/modules/content/">&lt;p&gt;evil.com&lt;/p&gt;</content:encoded>',
+    ],
+  ])('still expands content:encoded %s', (_label, html) => {
+    expect(stripHtml(html)).toBe('evil.com');
+  });
+});

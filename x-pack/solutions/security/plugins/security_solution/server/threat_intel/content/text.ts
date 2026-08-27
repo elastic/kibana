@@ -181,23 +181,47 @@ const RAW_TEXT_TAG_NAMES = ['script', 'style'] as const;
  * Index of the `>` that terminates the tag starting at `from`, or -1 if the tag never
  * terminates. Quote-aware, so a `>` inside an attribute value does not end it early.
  */
-const tagEndFrom = (html: string, from: number): number => {
+interface TagEnd {
+  /** Index of the `>` that terminates the tag, or -1 if it never terminates. */
+  end: number;
+  /** Whether the tag carries a real self-closing flag. */
+  selfClosing: boolean;
+}
+
+const tagEndFrom = (html: string, from: number): TagEnd => {
   let scan = from;
   let quote = '';
+  // In HTML an unquoted attribute value may contain `/`, so a trailing slash there belongs to the
+  // value rather than being a self-closing flag. Reading `<script src=x/>` as self-closing
+  // rewrote it to an empty script pair, which exposed the real script body as report text with
+  // its URL in it.
+  let expectingValue = false;
+  let inUnquotedValue = false;
 
   while (scan < html.length) {
     const char = html[scan];
+
     if (quote !== '') {
       if (char === quote) quote = '';
+    } else if (char === '>') {
+      return { end: scan, selfClosing: !inUnquotedValue && html[scan - 1] === '/' };
     } else if (char === '"' || char === "'") {
       quote = char;
-    } else if (char === '>') {
-      return scan;
+      expectingValue = false;
+    } else if (char === '=') {
+      expectingValue = true;
+      inUnquotedValue = false;
+    } else if (/\s/.test(char)) {
+      inUnquotedValue = false;
+    } else if (expectingValue) {
+      expectingValue = false;
+      inUnquotedValue = true;
     }
+
     scan += 1;
   }
 
-  return -1;
+  return { end: -1, selfClosing: false };
 };
 
 /**
@@ -250,7 +274,7 @@ export const normalizeSelfClosedRawText = (html: string): string => {
         // Any other tag is skipped whole, quote-aware, so a `<script/>` sitting in one of
         // its attribute values is never mistaken for a tag of its own.
         const isTag = /[a-z/]/.test(lower[open + 1] ?? '');
-        const otherTagEnd = isTag ? tagEndFrom(html, open + 1) : -1;
+        const otherTagEnd = isTag ? tagEndFrom(html, open + 1).end : -1;
 
         if (!isTag) {
           // A bare `<` in prose. Advance one character.
@@ -265,11 +289,11 @@ export const normalizeSelfClosedRawText = (html: string): string => {
           cursor = otherTagEnd + 1;
         }
       } else {
-        const tagEnd = tagEndFrom(html, afterName);
+        const { end: tagEnd, selfClosing } = tagEndFrom(html, afterName);
 
         if (tagEnd === -1) {
           cursor = html.length;
-        } else if (html[tagEnd - 1] === '/') {
+        } else if (selfClosing) {
           // The self-closed open tag this function exists for.
           pieces.push(html.slice(copiedTo, tagEnd - 1), `></${name}>`);
           copiedTo = tagEnd + 1;
@@ -310,7 +334,7 @@ export const normalizeSelfClosedRawText = (html: string): string => {
             // Rewriting a junk-carrying end tag to its plain form is semantically free,
             // since the junk is ignored either way.
             const junkFrom = closeAt + closeTag.length;
-            const closeEnd = tagEndFrom(html, junkFrom);
+            const { end: closeEnd } = tagEndFrom(html, junkFrom);
             if (closeEnd === -1) {
               // The close tag never terminates, so the element stays open to end of input and
               // the remainder is raw text. Resuming at `junkFrom` scanned inside that still-open
@@ -504,8 +528,6 @@ const ENCODED_HTML_WRAPPER_BARE_NAMES = new Set(['description']);
  * from the script token onward. Same false-positive class as the speculative `value` entry,
  * reached through the namespaced name instead of a bare one.
  */
-const ENCODED_HTML_WRAPPER_QUALIFIED_NAMES = new Set(['content:encoded']);
-
 const CONTENT_MODULE_NS = 'http://purl.org/rss/1.0/modules/content/';
 
 /**
@@ -574,9 +596,14 @@ const isContentModuleEncoded = (node: ParsedNode, qualified: string): boolean =>
   if (colon <= 0 || qualified.slice(colon + 1) !== 'encoded') return false;
 
   const prefix = qualified.slice(0, colon);
-  if (prefix === 'content') return true;
+  const bound = resolveNamespace(node, prefix);
 
-  return resolveNamespace(node, prefix) === CONTENT_MODULE_NS;
+  // A declared binding is authoritative, including when it contradicts the conventional prefix:
+  // `<content:encoded xmlns:content="urn:literal">` is not the module, and the hard-coded fast
+  // path for that QName was returning true before this helper could look. The undeclared
+  // conventional prefix stays a fallback, because feed bodies reach this code as fragments whose
+  // root declaration is usually gone.
+  return bound === undefined ? prefix === 'content' : bound === CONTENT_MODULE_NS;
 };
 
 /**
@@ -655,7 +682,6 @@ const atomType = (node: ParsedNode): string =>
 const isEncodedHtmlWrapper = (node: ParsedNode): boolean => {
   const qualified = elementName(node);
   const name = localName(qualified);
-  if (ENCODED_HTML_WRAPPER_QUALIFIED_NAMES.has(qualified)) return true;
   if (isContentModuleEncoded(node, qualified)) return true;
   if (ENCODED_HTML_WRAPPER_BARE_NAMES.has(qualified)) return true;
 
