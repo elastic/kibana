@@ -315,13 +315,13 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
     );
 
     const agentlessPackagePolicies = allPackagePolicies.filter((pp) => pp.supports_agentless);
-    const skippedIds = allPackagePolicies
-      .filter((pp) => !pp.supports_agentless)
-      .map((pp) => pp.id);
+    const skippedIds = allPackagePolicies.filter((pp) => !pp.supports_agentless).map((pp) => pp.id);
 
     if (skippedIds.length > 0) {
       this.logger.warn(
-        `Skipping deletion of non-agentless package policies for orphaned agent policy ${policyId}: ${skippedIds.join(', ')}`
+        `Skipping deletion of non-agentless package policies for orphaned agent policy ${policyId}: ${skippedIds.join(
+          ', '
+        )}`
       );
     }
 
@@ -361,7 +361,9 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
 
     if (deleteErrors.length > 0) {
       throw new PackagePolicyRequestError(
-        `Failed to delete some package policies for orphaned agent policy ${policyId}: ${deleteErrors.join('; ')}`
+        `Failed to delete some package policies for orphaned agent policy ${policyId}: ${deleteErrors.join(
+          '; '
+        )}`
       );
     }
   }
