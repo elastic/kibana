@@ -781,6 +781,44 @@ describe('duration chart attributes', () => {
     }
   });
 
+  it('does not refetch after a non-404 saved-object error for the current monitor', () => {
+    const mockDispatch = jest.fn();
+    const dispatchSpy = jest.spyOn(reduxHooks, 'useDispatch').mockReturnValue(mockDispatch);
+
+    try {
+      render(
+        <MonitorDetailFlyout
+          configId="monitor-b"
+          id="monitor-b"
+          location="US East"
+          locationId="us-east"
+          onClose={jest.fn()}
+          onEnabledChange={jest.fn()}
+          onLocationChange={jest.fn()}
+        />,
+        {
+          state: {
+            monitorDetails: {
+              syntheticsMonitor: null,
+              syntheticsMonitorLoading: false,
+              syntheticsMonitorError: {
+                body: { statusCode: 500, message: 'Internal Server Error' },
+                getPayload: { monitorId: 'monitor-b' },
+              },
+            },
+          },
+        }
+      );
+
+      const getMonitorCalls = mockDispatch.mock.calls.filter(
+        ([action]) => action?.type === getMonitorAction.get.type
+      );
+      expect(getMonitorCalls).toHaveLength(1);
+    } finally {
+      dispatchSpy.mockRestore();
+    }
+  });
+
   it('renders the default window when the saved object 404s but overview metadata is available', () => {
     exploratoryViewEmbeddableMock.mockClear();
 

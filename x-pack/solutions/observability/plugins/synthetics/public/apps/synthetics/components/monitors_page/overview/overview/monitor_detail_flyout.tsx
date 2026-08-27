@@ -390,9 +390,9 @@ export function MonitorDetailFlyout(props: Props) {
     isRemote || Boolean(currentMonitorObject) || Boolean(monitor && error && !isLoading);
 
   const upsertSuccess = upsertStatus?.status === 'success';
-  const isMonitorMissing =
-    error?.body?.statusCode === 404 &&
-    (error.getPayload as { monitorId?: string } | undefined)?.monitorId === configId;
+  const errorMonitorId = (error?.getPayload as { monitorId?: string } | undefined)?.monitorId;
+  const isCurrentMonitorFetchError =
+    Boolean(error) && (errorMonitorId === undefined || errorMonitorId === configId);
 
   const fetchSavedObject = useCallback(() => {
     if (isRemote || !space) return;
@@ -417,10 +417,11 @@ export function MonitorDetailFlyout(props: Props) {
 
   // After an in-flight request for another monitor settles, retry if this
   // flyout still has no matching saved object (`useSelectedMonitor` does the same).
+  // Stop on any error for this configId so a 403/500 does not refetch forever.
   useEffect(() => {
-    if (isLoading || currentMonitorObject || isMonitorMissing) return;
+    if (isLoading || currentMonitorObject || isCurrentMonitorFetchError) return;
     fetchSavedObject();
-  }, [currentMonitorObject, fetchSavedObject, isLoading, isMonitorMissing]);
+  }, [currentMonitorObject, fetchSavedObject, isCurrentMonitorFetchError, isLoading]);
 
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
 
