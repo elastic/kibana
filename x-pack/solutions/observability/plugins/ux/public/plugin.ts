@@ -27,7 +27,7 @@ import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/public';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
-import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type {
   ExploratoryViewPublicSetup,
   ExploratoryViewPublicStart,
@@ -51,6 +51,7 @@ import type { SLOPublicStart } from '@kbn/slo-plugin/public';
 import type { ApmSharedPluginStart } from '@kbn/apm-shared/public';
 import { OBLT_UX_APP_ID } from '@kbn/deeplinks-observability';
 import { UX_APP_TITLE } from './application/ux_breadcrumbs';
+import { registerUxEmbeddables } from './embeddable/register_embeddables';
 
 export type UxPluginSetup = void;
 export type UxPluginStart = void;
@@ -64,6 +65,7 @@ export interface ApmPluginSetupDeps {
   observability: ObservabilityPublicSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicSetup;
+  embeddable: EmbeddableSetup;
 }
 
 export interface ApmPluginStartDeps {
@@ -94,8 +96,9 @@ async function getDataStartPlugin(core: CoreSetup) {
 export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
   constructor(private readonly initContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup, plugins: ApmPluginSetupDeps) {
+  public setup(core: CoreSetup<ApmPluginStartDeps>, plugins: ApmPluginSetupDeps) {
     const pluginSetupDeps = plugins;
+    registerUxEmbeddables(core, plugins);
     if (plugins.observability) {
       const getUxDataHelper = async () => {
         const { fetchUxOverviewDate, hasRumData, createCallApmApi } = await import(

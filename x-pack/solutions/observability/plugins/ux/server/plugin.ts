@@ -37,6 +37,7 @@ import {
 import type { UXConfig } from '../common/config';
 import { configureUxInspect } from './lib/inspect/inspectable_es_queries_map';
 import { configureRumSessionsTransform } from './transforms/rum_sessions';
+import { registerUxOverviewPanelEmbeddable } from './embeddables/register_overview_panel_embeddable';
 
 export type { UxPluginSetupDeps, UxPluginStartDeps } from './plugin_types';
 
@@ -101,6 +102,10 @@ export class Plugin implements PluginType {
         logger: this.logger,
         taskManager: plugins.taskManager,
       });
+    }
+
+    if (plugins.embeddable) {
+      registerUxOverviewPanelEmbeddable(plugins.embeddable);
     }
 
     return {};

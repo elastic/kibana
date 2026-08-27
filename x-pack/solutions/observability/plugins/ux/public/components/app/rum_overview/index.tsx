@@ -42,6 +42,7 @@ import { TrendChartTypeGroup, TrendMetric, useTrendChartType } from './trend_met
 import { VisitorCountriesPanel } from './visitor_countries';
 import { ClickMapPanel } from './click_map_panel';
 import { FrustrationSignalsPanel } from './frustration_signals';
+import { AddToDashboardButton } from './dashboard_actions';
 import { useRumAlertFlyout } from '../rum_alerts/alert_flyout_context';
 import { useRumBudgetFlyout } from '../rum_budgets/budget_flyout_context';
 import { BudgetChips } from '../rum_budgets/budget_chips';
@@ -502,18 +503,25 @@ export function RumOverviewV2() {
       <EuiFlexGroup alignItems="stretch">
         <EuiFlexItem grow={2}>
           <EuiPanel hasBorder paddingSize="m" style={{ height: '100%' }}>
-            <EuiTitle size="xs">
-              <h3>
-                <EuiLink
-                  data-test-subj="uxOverviewCwvLink"
-                  onClick={() => pushRumPath(history, '/pages')}
-                >
-                  {i18n.translate('xpack.ux.overview.cwvTitle', {
-                    defaultMessage: 'Core Web Vitals',
-                  })}
-                </EuiLink>
-              </h3>
-            </EuiTitle>
+            <EuiFlexGroup alignItems="flexStart" justifyContent="spaceBetween" gutterSize="s">
+              <EuiFlexItem>
+                <EuiTitle size="xs">
+                  <h3>
+                    <EuiLink
+                      data-test-subj="uxOverviewCwvLink"
+                      onClick={() => pushRumPath(history, '/pages')}
+                    >
+                      {i18n.translate('xpack.ux.overview.cwvTitle', {
+                        defaultMessage: 'Core Web Vitals',
+                      })}
+                    </EuiLink>
+                  </h3>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <AddToDashboardButton panel="vitals" />
+              </EuiFlexItem>
+            </EuiFlexGroup>
             <EuiSpacer size="s" />
             {CoreVitals}
             <EuiSpacer size="s" />
@@ -544,7 +552,14 @@ export function RumOverviewV2() {
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <TrendChartTypeGroup chartType={trendChartType} onChange={setTrendChartType} />
+                <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <AddToDashboardButton panel="trends" />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <TrendChartTypeGroup chartType={trendChartType} onChange={setTrendChartType} />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer size="m" />
@@ -599,6 +614,7 @@ export function RumOverviewV2() {
             sessions={data.kpis.sessions}
             budgets={budgets}
             pageUrl={pageUrl}
+            headerExtra={<AddToDashboardButton panel="frustration" />}
           />
         </EuiFlexItem>
         <EuiFlexItem style={{ display: 'flex' }}>
@@ -607,13 +623,20 @@ export function RumOverviewV2() {
             paddingSize="m"
             style={{ flex: 1, display: 'flex', flexDirection: 'column' }}
           >
-            <EuiTitle size="xs">
-              <h3>
-                {i18n.translate('xpack.ux.overview.breakdownTitle', {
-                  defaultMessage: 'Browsers & OS',
-                })}
-              </h3>
-            </EuiTitle>
+            <EuiFlexGroup alignItems="flexStart" justifyContent="spaceBetween" gutterSize="s">
+              <EuiFlexItem>
+                <EuiTitle size="xs">
+                  <h3>
+                    {i18n.translate('xpack.ux.overview.breakdownTitle', {
+                      defaultMessage: 'Browsers & OS',
+                    })}
+                  </h3>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <AddToDashboardButton panel="browsers" />
+              </EuiFlexItem>
+            </EuiFlexGroup>
             <EuiSpacer size="s" />
             {data.browsers.slice(0, 5).map((bucket) => (
               <div key={`browser-${bucket.key}`}>
@@ -694,6 +717,7 @@ export function RumOverviewV2() {
         countries={data.countries}
         activeLocation={locationFilter}
         maxPageViews={Math.max(1, ...data.countries.map((row) => row.pageViews))}
+        headerExtra={<AddToDashboardButton panel="countries" />}
       />
 
       <EuiSpacer />
@@ -708,14 +732,21 @@ export function RumOverviewV2() {
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiLink
-              data-test-subj="uxRumOverviewV2ViewAllPagesLink"
-              onClick={() => pushRumPath(history, '/pages')}
-            >
-              {i18n.translate('xpack.ux.overview.viewAllPages', {
-                defaultMessage: 'View all pages',
-              })}
-            </EuiLink>
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <AddToDashboardButton panel="pages" />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiLink
+                  data-test-subj="uxRumOverviewV2ViewAllPagesLink"
+                  onClick={() => pushRumPath(history, '/pages')}
+                >
+                  {i18n.translate('xpack.ux.overview.viewAllPages', {
+                    defaultMessage: 'View all pages',
+                  })}
+                </EuiLink>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="s" />

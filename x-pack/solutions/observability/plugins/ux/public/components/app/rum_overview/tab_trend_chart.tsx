@@ -34,7 +34,17 @@ export function TabTrendChart({ accessor }: { accessor: TrendAccessor }) {
   return (
     <EuiPanel hasBorder paddingSize="m" data-test-subj={`uxTabTrend-${accessor}`}>
       {loading && points.length === 0 ? (
-        <EuiLoadingSpinner size="m" />
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            minHeight: 120,
+            width: '100%',
+          }}
+        >
+          <EuiLoadingSpinner size="m" />
+        </div>
       ) : (
         <TrendMetric
           id={accessor}

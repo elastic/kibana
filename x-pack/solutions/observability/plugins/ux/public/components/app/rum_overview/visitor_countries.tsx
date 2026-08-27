@@ -60,6 +60,9 @@ export interface VisitorCountriesPanelProps {
   countries: RumCountryRow[];
   activeLocation?: string;
   maxPageViews: number;
+  hideHeader?: boolean;
+  headerExtra?: React.ReactNode;
+  flush?: boolean;
 }
 
 /** Ranked country breakdown with filter + session deep-links (OTel client.geo.*). */
@@ -67,6 +70,9 @@ export function VisitorCountriesPanel({
   countries,
   activeLocation,
   maxPageViews,
+  hideHeader = false,
+  headerExtra,
+  flush = false,
 }: VisitorCountriesPanelProps) {
   const history = useHistory();
   const { euiTheme } = useEuiTheme();
@@ -194,42 +200,53 @@ export function VisitorCountriesPanel({
   ];
 
   return (
-    <EuiPanel hasBorder paddingSize="m" data-test-subj="uxOverviewVisitorCountries">
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <UxTourAnchor stepId="countryMap">
-            <div>
-              <EuiTitle size="xs">
-                <h3>
-                  {i18n.translate('xpack.ux.overview.countriesTitle', {
-                    defaultMessage: 'Visitors by country',
-                  })}
-                </h3>
-              </EuiTitle>
-              <EuiText size="xs" color="subdued">
-                {i18n.translate('xpack.ux.overview.countriesSubtitle', {
-                  defaultMessage:
-                    'Volume, LCP, and errors by client.geo. Filter Overview or open Sessions for a country.',
-                })}
-              </EuiText>
-            </div>
-          </UxTourAnchor>
-        </EuiFlexItem>
-        {activeLocation && (
+    <EuiPanel
+      hasBorder={!flush}
+      paddingSize={flush ? 'none' : 'm'}
+      data-test-subj="uxOverviewVisitorCountries"
+    >
+      {!hideHeader && (
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              data-test-subj="uxOverviewCountryClear"
-              size="xs"
-              iconType="cross"
-              onClick={() => pushRumPath(history, '/', { location: '' })}
-            >
-              {i18n.translate('xpack.ux.overview.countries.clear', {
-                defaultMessage: 'Clear country filter',
-              })}
-            </EuiButtonEmpty>
+            <UxTourAnchor stepId="countryMap">
+              <div>
+                <EuiTitle size="xs">
+                  <h3>
+                    {i18n.translate('xpack.ux.overview.countriesTitle', {
+                      defaultMessage: 'Visitors by country',
+                    })}
+                  </h3>
+                </EuiTitle>
+                <EuiText size="xs" color="subdued">
+                  {i18n.translate('xpack.ux.overview.countriesSubtitle', {
+                    defaultMessage:
+                      'Volume, LCP, and errors by client.geo. Filter Overview or open Sessions for a country.',
+                  })}
+                </EuiText>
+              </div>
+            </UxTourAnchor>
           </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              {headerExtra ? <EuiFlexItem grow={false}>{headerExtra}</EuiFlexItem> : null}
+              {activeLocation ? (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    data-test-subj="uxOverviewCountryClear"
+                    size="xs"
+                    iconType="cross"
+                    onClick={() => pushRumPath(history, '/', { location: '' })}
+                  >
+                    {i18n.translate('xpack.ux.overview.countries.clear', {
+                      defaultMessage: 'Clear country filter',
+                    })}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              ) : null}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
 
       {activeLocation && (
         <>

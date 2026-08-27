@@ -875,7 +875,7 @@ export function SessionDetailPage() {
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <SummaryStat
-                        icon="documents"
+                        icon="document"
                         iconColor={euiTheme.colors.accent}
                         value={String(detail.pageCount)}
                         label={i18n.translate('xpack.ux.sessionDetail.stat.pages', {

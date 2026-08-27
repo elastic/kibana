@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { PluginSetupContract, PluginStartContract } from '@kbn/actions-plugin/server';
 import type { AlertingServerStart } from '@kbn/alerting-v2-plugin/server';
@@ -22,6 +23,7 @@ export interface UxPluginSetupDeps {
   taskManager?: TaskManagerSetupContract;
   actions?: PluginSetupContract;
   workflowsManagement?: WorkflowsServerPluginSetup;
+  embeddable?: EmbeddableSetup;
 }
 
 export interface UxPluginStartDeps {

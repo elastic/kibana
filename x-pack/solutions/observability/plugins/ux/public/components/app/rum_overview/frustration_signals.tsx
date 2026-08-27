@@ -86,34 +86,49 @@ export function FrustrationSignalsPanel({
   sessions,
   budgets,
   pageUrl,
+  hideHeader = false,
+  headerExtra,
+  flush = false,
 }: {
   frustration: RumFrustrationCounts;
   sessions: number;
   budgets: RumBudgetItem[];
   pageUrl?: string;
+  hideHeader?: boolean;
+  headerExtra?: React.ReactNode;
+  flush?: boolean;
 }) {
   const history = useHistory();
 
   return (
     <EuiPanel
-      hasBorder
-      paddingSize="m"
+      hasBorder={!flush}
+      paddingSize={flush ? 'none' : 'm'}
       style={{ flex: 1, display: 'flex', flexDirection: 'column' }}
       data-test-subj="uxOverviewFrustrationPanel"
     >
-      <EuiTitle size="xs">
-        <h3>
-          {i18n.translate('xpack.ux.overview.frustrationTitle', {
-            defaultMessage: 'Frustration signals',
-          })}
-        </h3>
-      </EuiTitle>
-      <EuiText size="xs" color="subdued">
-        {i18n.translate('xpack.ux.overview.frustration.subtitleDescription', {
-          defaultMessage: 'Share of sessions in this range',
-        })}
-      </EuiText>
-      <EuiSpacer size="s" />
+      {!hideHeader && (
+        <>
+          <EuiFlexGroup alignItems="flexStart" justifyContent="spaceBetween" gutterSize="s">
+            <EuiFlexItem>
+              <EuiTitle size="xs">
+                <h3>
+                  {i18n.translate('xpack.ux.overview.frustrationTitle', {
+                    defaultMessage: 'Frustration signals',
+                  })}
+                </h3>
+              </EuiTitle>
+              <EuiText size="xs" color="subdued">
+                {i18n.translate('xpack.ux.overview.frustration.subtitleDescription', {
+                  defaultMessage: 'Share of sessions in this range',
+                })}
+              </EuiText>
+            </EuiFlexItem>
+            {headerExtra ? <EuiFlexItem grow={false}>{headerExtra}</EuiFlexItem> : null}
+          </EuiFlexGroup>
+          <EuiSpacer size="s" />
+        </>
+      )}
       <EuiFlexGroup direction="column" gutterSize="m" style={{ flex: 1 }}>
         {SIGNALS.map((signal) => {
           const count = signal.count(frustration);

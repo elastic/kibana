@@ -53,6 +53,7 @@ import { RumKueryBar } from '../rum_filters/rum_kuery_bar';
 import { RumPageLoadingBar, RumPageLoadingProvider } from './rum_page_loading';
 import { UxTourAnchor } from '../rum_tour/ux_tour_anchor';
 import { UxProductTour } from '../rum_tour/ux_tour_context';
+import { ConvertToDashboardButton } from '../rum_overview/dashboard_actions';
 
 export const DASHBOARD_LABEL = i18n.translate('xpack.ux.overview.tab', {
   defaultMessage: 'Overview',
@@ -307,6 +308,11 @@ function DashboardToolbar({ tab }: { tab: UxHomeTab }) {
             <EuiFlexItem grow={false}>
               <AppSettingsButton />
             </EuiFlexItem>
+            {tab === 'overview' ? (
+              <EuiFlexItem grow={false}>
+                <ConvertToDashboardButton />
+              </EuiFlexItem>
+            ) : null}
             <EuiFlexItem grow={false}>
               <RumDatePicker />
             </EuiFlexItem>

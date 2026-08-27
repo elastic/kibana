@@ -451,7 +451,7 @@ export function ConversionGoalPanel({
                   <EuiButtonEmpty
                     data-test-subj="uxGoalNewButton"
                     size="s"
-                    iconType="plusInCircle"
+                    iconType="plusCircle"
                     onClick={() => setPresetOpen((open) => !open)}
                   >
                     {i18n.translate('xpack.ux.goals.newButtonLabel', { defaultMessage: 'New' })}
@@ -494,7 +494,7 @@ export function ConversionGoalPanel({
               {showDraftRow ? (
                 <FunnelListRow
                   active={true}
-                  icon="plusInCircle"
+                  icon="plusCircle"
                   name={
                     editor.name.trim() ||
                     i18n.translate('xpack.ux.funnels.draftListLabel', {
@@ -1096,7 +1096,7 @@ function DropOffSessionsPopover({ rowId, sessionIds }: { rowId: string; sessionI
         <EuiButtonEmpty
           size="s"
           flush="left"
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           iconSide="right"
           data-test-subj={`uxGoalDroppedSessions-${rowId}`}
           onClick={() => setOpen((current) => !current)}
@@ -1145,7 +1145,7 @@ function DropOffSessionsPopover({ rowId, sessionIds }: { rowId: string; sessionI
             <EuiButtonEmpty
               size="s"
               flush="left"
-              iconType="popout"
+              iconType="popper"
               data-test-subj={`uxGoalDroppedSessionsAll-${rowId}`}
               onClick={() => {
                 setOpen(false);
