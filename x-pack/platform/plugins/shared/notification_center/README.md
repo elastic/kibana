@@ -156,6 +156,21 @@ The server annotates per-user read state, it does not filter or order by it.
 
 An older high-severity notification can now fall outside the cap; server-side pagination and/or a higher cap will address this.
 
+### Read state
+
+Read state is per user, lives in `userStorage`, and never touches the notification document. The
+list route **annotates** each item with `isRead` and returns the same order to every caller.
+
+- `readAllBefore` is a single timestamp marker for a user ("mark all as read")
+  any notifications whose timestamp is at or before this show up as read.
+  It is stamped on the user's first read, so a new user doesn't get a giant unread backlog.
+- `_mark_all_read` advances the marker to now and clears the individual overrides
+- `_mark_read` adds an override for a specific notification id with a timestamp.
+  a later re-push of the same `notification_id` postdates the override and shows as unread again.
+  marking it read again updates the override timestamp (i.e. this is not "mute")
+- Callers with no user profile (API keys, headless consumers) get the list with `isRead` absent
+  rather than a 403. The mark routes reject them, since there is no read state to write.
+
 ## Submitting notifications (`forType`)
 
 The server **setup** contract exposes `forType(ref)`, which binds a submitter to a registered

@@ -41,6 +41,18 @@ triggers:
       additionalProperties: false
 
 steps:
+  - name: emit_investigation_started
+    type: kibana.request
+    with:
+      method: POST
+      path: '/internal/nightshift/investigations/{{ execution.id }}/lifecycle_events'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+      body:
+        status: 'running'
+    on-failure:
+      continue: true
+
   # Records a pending investigation on the Significant Event as soon as the workflow starts,
   # so the UI can show an in-progress indicator before the agent step finishes.
   # Only runs when a sig-event context was supplied (discovery or chat-agent paths).
@@ -53,7 +65,7 @@ steps:
       headers:
         x-elastic-internal-origin: 'kibana'
       body:
-        workflow_execution_id: "{{ execution.id }}"
+        workflow_execution_id: '{{ execution.id }}'
         started_at: '{{ execution.startedAt | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
     on-failure:
       continue: true
@@ -76,7 +88,7 @@ steps:
       # up the agent execution's (auto-generated) id via findExecutions and follow its live
       # progress before this step returns.
       metadata:
-        workflow_execution_id: "{{ execution.id }}"
+        workflow_execution_id: '{{ execution.id }}'
       message: |
         Investigate the root cause of the following issue:
 
@@ -583,7 +595,7 @@ steps:
       headers:
         x-elastic-internal-origin: 'kibana'
       body:
-        workflow_execution_id: "{{ execution.id }}"
+        workflow_execution_id: '{{ execution.id }}'
         started_at: '{{ execution.startedAt | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
         completed_at: '{{ "now" | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
         severity: "${{ steps.investigate.output.structured_output.significant_event_updates | default: [] | where: 'field', 'severity' | map: 'to' | first }}"
@@ -616,3 +628,33 @@ steps:
         Read the current _gaps/overview page with platform_sig_events_memory_read. Compare the filtered gaps against it. If every gap is already reflected there, stop and write nothing. If there are genuinely new gaps, weave them into the existing sections (do not add a separate section) and save the page with platform_sig_events_memory_write using categories ["_system/gaps"].
     on-failure:
       continue: true
+
+  - name: emit_investigation_completed
+    type: kibana.request
+    if: '${{ steps.investigate.error == null }}'
+    with:
+      method: POST
+      path: '/internal/nightshift/investigations/{{ execution.id }}/lifecycle_events'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+      body:
+        status: 'completed'
+    on-failure:
+      continue: true
+
+  - name: emit_investigation_failed
+    type: kibana.request
+    if: '${{ steps.investigate.error != null }}'
+    with:
+      method: POST
+      path: '/internal/nightshift/investigations/{{ execution.id }}/lifecycle_events'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+      body:
+        status: 'failed'
+    on-failure:
+      continue: true
+
+  - name: fail_investigation
+    type: workflow.fail
+    if: '${{ steps.investigate.error != null }}'
