@@ -7,7 +7,6 @@
 
 import type { PrebuiltRuleFixture } from './types';
 
-
 export const sentinelPrebuiltRules: PrebuiltRuleFixture[] = [
   {
     // sentinel-prebuilt-match-001
