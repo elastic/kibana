@@ -164,7 +164,10 @@ export const GridItemsByGroup = ({
       // of the "Local monitors" catch-all they'd otherwise hide in. Heartbeat
       // and remote are mutually exclusive; everything else is local (UI/project).
       const heartbeatItems = allConfigs?.filter((monitor) => monitor.origin === 'heartbeat') ?? [];
-      const remoteItems = allConfigs?.filter((monitor) => Boolean(monitor.remote)) ?? [];
+      const remoteItems =
+        allConfigs?.filter(
+          (monitor) => Boolean(monitor.remote) && monitor.origin !== 'heartbeat'
+        ) ?? [];
       const originValues = [
         ...(heartbeatItems.length
           ? [{ label: HEARTBEAT_MONITORS_LABEL, count: heartbeatItems.length }]
@@ -208,7 +211,7 @@ export const GridItemsByGroup = ({
             }
             if (selectedGroup.key === 'origin') {
               if (groupItem.label === REMOTE_MONITORS_LABEL) {
-                return Boolean(monitor.remote);
+                return Boolean(monitor.remote) && monitor.origin !== 'heartbeat';
               }
               return false;
             }

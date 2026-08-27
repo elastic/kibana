@@ -99,6 +99,20 @@ describe('GridItemsByGroup origin grouping', () => {
     expect(idsIn('Local monitors')).toEqual(['ui1']);
   });
 
+  it('does not put heartbeat monitors into the Remote bucket even if they have remote metadata', () => {
+    const heartbeatWithRemote = {
+      ...heartbeatMonitor,
+      configId: 'hb-remote',
+      remote: { remoteName: 'edge-a' },
+    } as unknown as OverviewStatusMetaData;
+    setupSelectors('origin', [heartbeatWithRemote, remoteMonitor, localMonitor]);
+    renderGrid();
+
+    expect(idsIn('Heartbeat monitors')).toEqual(['hb-remote']);
+    expect(idsIn('Remote monitors')).toEqual(['rm1']);
+    expect(idsIn('Local monitors')).toEqual(['ui1']);
+  });
+
   // Regression: heartbeat monitors used to hide inside the "Local monitors"
   // catch-all when grouping by Remote cluster. They now get their own bucket.
   it('splits heartbeat out of Local when grouping by Remote cluster', () => {
