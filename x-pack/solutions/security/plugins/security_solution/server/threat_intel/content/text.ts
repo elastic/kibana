@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import * as cheerio from 'cheerio';
+import { parseHtml, type ParsedNode } from './html_parser';
 import { elementRenderState } from './inline_style';
-import type { ParsedNode } from './parsed_node';
-import { sanitizeRawText } from './raw_text';
 import { classifyHeader, type SectionKind } from './section_headers';
 
 /**
@@ -86,37 +84,12 @@ const INLINE_NAMES = new Set([
   'wbr',
 ]);
 
-/**
- * Elements whose subtree never becomes report text: `script`/`style` because their content
- * is code, `template` because the parser puts its children in an inert fragment no reader
- * sees. Skipped during the walk rather than removed up front with a selector — a `.remove()`
- * pass is quadratic in nesting depth, where skipping in the walk is O(1) per node. This also
- * makes truncation safe: a document cut mid-`<script>` at `MAX_PARSE_BYTES` is read as raw
- * script text by the parser rather than leaking into report text. `noscript` is deliberately
- * absent — its content is fallback a scripting-disabled reader does see.
- */
+/** Skipped during the walk so deep input never pays recursive DOM removal cost. */
 const SKIPPED_SUBTREE_NAMES = new Set(['script', 'style', 'template']);
+const LITERAL_TEXT_NAMES = new Set(['plaintext', 'xmp']);
 
 const isAlwaysSkippedSubtree = (node: ParsedNode): boolean =>
   SKIPPED_SUBTREE_NAMES.has(elementName(node));
-
-/**
- * The single copy of the parser configuration, shared with `extract_article` so the two
- * can't drift on what a document *contains* (they did once, over `recognizeCDATA`, and
- * disagreed about whether a feed body was CDATA or a comment).
- *
- * `_useHtmlParser2: true` picks htmlparser2 over cheerio's default parse5: parse5's tree
- * construction walks the open-element stack per step, making it quadratic in nesting depth,
- * where htmlparser2 is linear over the same adversarial input. Fragment mode
- * (`isDocument: false`, the default) keeps a `<description>` snippet or a bare `<tr>` intact
- * rather than wrapped in `<html>/<head>/<body>`.
- */
-export const PARSER_OPTIONS = {
-  _useHtmlParser2: true,
-  // RSS and Atom use CDATA to carry an HTML document; HTML treats it as a bogus comment,
-  // which would drop the whole body. Only affects `<![CDATA[` — `<!-- -->` still discards.
-  recognizeCDATA: true,
-} as const;
 
 interface ParsedFragment {
   nodes: ParsedNode[];
@@ -124,15 +97,8 @@ interface ParsedFragment {
 }
 
 const parseFragment = (html: string): ParsedFragment => {
-  const sanitized = sanitizeRawText(html);
-  const $ = cheerio.load(sanitized.html, PARSER_OPTIONS);
-  // The one cast in this file, at the boundary where the stale typings stop describing
-  // the runtime: `toArray()` is declared, its element type is not.
-  const roots = $.root().toArray() as unknown as ParsedNode[];
-  return {
-    nodes: roots.flatMap((root) => root.children ?? []),
-    hasUnclosedRawText: sanitized.hasUnclosedRawText,
-  };
+  const { nodes, hasUnclosedRawText } = parseHtml(html);
+  return { nodes, hasUnclosedRawText };
 };
 
 const parseTopLevelNodes = (html: string): ParsedNode[] => parseFragment(html).nodes;
@@ -143,6 +109,14 @@ const isElement = (node: ParsedNode): boolean =>
 const elementName = (node: ParsedNode): string => node.name?.toLowerCase() ?? '';
 
 const childrenOf = (node: ParsedNode): ParsedNode[] => node.children ?? [];
+
+const renderStateFor = (node: ParsedNode, parentVisible: boolean) =>
+  isElement(node)
+    ? elementRenderState(node, parentVisible)
+    : { subtreeHidden: false, visible: parentVisible };
+
+const shouldEmitHref = (href: string | undefined, text: string, visible: boolean): boolean =>
+  href !== undefined && (visible || text.length > 0);
 
 /**
  * A closing tag surviving into decoded text means the input carried entity-encoded
@@ -263,15 +237,8 @@ const inlineTextOf = (
       out.push(step.text);
     } else {
       const { node, cdataDepth, visible: parentVisible } = step;
-      const renderState = isElement(node)
-        ? elementRenderState(node, parentVisible)
-        : { subtreeHidden: false, visible: parentVisible };
+      const renderState = renderStateFor(node, parentVisible);
       const { visible } = renderState;
-      const liftedHref =
-        isElement(node) && visible && liftHrefs && elementName(node) === 'a'
-          ? hrefOf(node)
-          : undefined;
-
       if (node.type === 'text') {
         if (visible) out.push(node.data ?? '');
       } else if (node.type === 'cdata') {
@@ -289,17 +256,18 @@ const inlineTextOf = (
         out.push(' ');
       } else if (isAlwaysSkippedSubtree(node) || renderState.subtreeHidden) {
         out.push(' ');
-      } else if (!visible) {
-        // `visibility` may be restored by a descendant, so walk the subtree while keeping
-        // boundaries around any visible text it contains.
-        out.push(' ');
-        stack.push({ kind: 'emit', text: ' ' });
-        pushNodes(stack, childrenOf(node), cdataDepth, visible);
-      } else if (liftedHref !== undefined) {
-        out.push(
-          ` ${collapseWhitespace(inlineTextOf(childrenOf(node), false, visible))} ${liftedHref} `
-        );
+      } else if (LITERAL_TEXT_NAMES.has(elementName(node))) {
+        if (visible) out.push(rawTextOf(childrenOf(node)));
+      } else if (liftHrefs && elementName(node) === 'a') {
+        const text = collapseWhitespace(inlineTextOf(childrenOf(node), false, visible));
+        const href = hrefOf(node);
+        if (shouldEmitHref(href, text, visible)) out.push(` ${text} ${href} `);
+        else if (!visible) out.push(' ');
       } else if (INLINE_NAMES.has(elementName(node))) {
+        if (!visible) {
+          out.push(' ');
+          stack.push({ kind: 'emit', text: ' ' });
+        }
         pushNodes(stack, childrenOf(node), cdataDepth, visible);
       } else {
         out.push(' ');
@@ -381,12 +349,94 @@ const BLOCK_NAMES = new Set([
   'tfoot',
 ]);
 
+interface StructuredSectionState {
+  kind: SectionKind;
+  depth: number;
+}
+
+const renderHeading = (
+  node: ParsedNode,
+  name: string,
+  visible: boolean,
+  state: StructuredSectionState,
+  out: string[]
+): void => {
+  const text = collapseWhitespace(inlineTextOf(childrenOf(node), false, visible));
+  if (!text) return;
+
+  const depth = Number(name.slice(1));
+  const classified = classifyHeader(text);
+  if (classified !== 'prose') {
+    state.kind = classified;
+    state.depth = depth;
+  } else if (state.kind === 'prose' || depth <= state.depth) {
+    state.kind = 'prose';
+    state.depth = depth;
+  }
+  out.push(`\n## ${text}\n`);
+};
+
+const renderStructuredElement = ({
+  node,
+  name,
+  visible,
+  lift,
+  cdataDepth,
+  state,
+  out,
+  stack,
+}: {
+  node: ParsedNode;
+  name: string;
+  visible: boolean;
+  lift: boolean;
+  cdataDepth: number;
+  state: StructuredSectionState;
+  out: string[];
+  stack: WalkStep[];
+}): void => {
+  if (HEADING_NAMES.has(name)) {
+    renderHeading(node, name, visible, state, out);
+  } else if (name === 'tr') {
+    const cellTexts = childrenOf(node)
+      .filter((child) => ['td', 'th'].includes(elementName(child)))
+      .flatMap((cell) => {
+        const cellRenderState = elementRenderState(cell, visible);
+        if (cellRenderState.subtreeHidden) return [];
+        return [collapseWhitespace(inlineTextOf(childrenOf(cell), lift, cellRenderState.visible))];
+      });
+    out.push(cellTexts.length > 0 ? `\n| ${cellTexts.join(' | ')} |\n` : '\n');
+  } else if (name === 'li') {
+    const text = collapseWhitespace(inlineTextOf(childrenOf(node), lift, visible));
+    if (text) out.push(`\n- ${text}\n`);
+  } else if (name === 'a') {
+    const text = collapseWhitespace(inlineTextOf(childrenOf(node), false, visible));
+    const href = lift && (visible || text.length > 0) ? hrefOf(node) : undefined;
+    out.push(href !== undefined ? `${text} ${href} ` : `${text} `);
+  } else if (name === 'br') {
+    out.push('\n');
+  } else if (BLOCK_NAMES.has(name)) {
+    out.push('\n');
+    stack.push({ kind: 'emit', text: '\n' });
+    pushNodes(stack, childrenOf(node), cdataDepth, visible);
+  } else if (INLINE_NAMES.has(name)) {
+    if (!visible) {
+      out.push('\n');
+      stack.push({ kind: 'emit', text: '\n' });
+    }
+    pushNodes(stack, childrenOf(node), cdataDepth, visible);
+  } else {
+    out.push('\n');
+    stack.push({ kind: 'emit', text: '\n' });
+    pushNodes(stack, childrenOf(node), cdataDepth, visible);
+  }
+};
+
 const renderStructured = (nodes: ParsedNode[]): string => {
   // Section state, advanced in document order as headings are met. A classified heading
   // becomes the anchor for everything below it; a deeper unclassified heading is its
   // subsection and doesn't reset the anchor.
-  let sectionKind: SectionKind = 'prose';
-  let sectionDepth = 0;
+  const section: StructuredSectionState = { kind: 'prose', depth: 0 };
 
   const out: string[] = [];
   const stack: WalkStep[] = [];
@@ -401,13 +451,11 @@ const renderStructured = (nodes: ParsedNode[]): string => {
     } else {
       const { node, cdataDepth, visible: parentVisible } = step;
       const name = elementName(node);
-      const renderState = isElement(node)
-        ? elementRenderState(node, parentVisible)
-        : { subtreeHidden: false, visible: parentVisible };
+      const renderState = renderStateFor(node, parentVisible);
       const { visible } = renderState;
       // Anchors are lifted only under an IOC or references heading, where the link
       // target is itself the indicator.
-      const lift = sectionKind === 'ioc' || sectionKind === 'references';
+      const lift = section.kind === 'ioc' || section.kind === 'references';
 
       if (node.type === 'text') {
         if (visible) out.push(node.data ?? '');
@@ -425,63 +473,19 @@ const renderStructured = (nodes: ParsedNode[]): string => {
         out.push(' ');
       } else if (isAlwaysSkippedSubtree(node) || renderState.subtreeHidden) {
         out.push(' ');
-      } else if (!visible) {
-        // Unlike display:none, visibility can be restored by a descendant. Preserve that
-        // text without letting the hidden wrapper affect section state or merge tokens.
-        out.push('\n');
-        stack.push({ kind: 'emit', text: '\n' });
-        pushNodes(stack, childrenOf(node), cdataDepth, visible);
-      } else if (HEADING_NAMES.has(name)) {
-        const depth = Number(name.slice(1));
-        const text = collapseWhitespace(inlineTextOf(childrenOf(node), false, visible));
-        const classified = classifyHeader(text);
-        if (classified !== 'prose') {
-          // An explicitly classified heading becomes the new anchor.
-          sectionKind = classified;
-          sectionDepth = depth;
-        } else if (sectionKind === 'prose' || depth <= sectionDepth) {
-          sectionKind = 'prose';
-          sectionDepth = depth;
-        }
-        // The remaining case is a deeper unclassified heading inside a classified
-        // section, which is a subsection: the anchor stays put.
-        if (text) out.push(`\n## ${text}\n`);
-      } else if (name === 'tr') {
-        const cellTexts = childrenOf(node)
-          .filter((child) => ['td', 'th'].includes(elementName(child)))
-          .flatMap((cell) => {
-            const cellRenderState = elementRenderState(cell, visible);
-            if (cellRenderState.subtreeHidden) return [];
-            return [
-              collapseWhitespace(inlineTextOf(childrenOf(cell), lift, cellRenderState.visible)),
-            ];
-          });
-        out.push(cellTexts.length > 0 ? `\n| ${cellTexts.join(' | ')} |\n` : '\n');
-      } else if (name === 'li') {
-        const text = collapseWhitespace(inlineTextOf(childrenOf(node), lift, visible));
-        if (text) out.push(`\n- ${text}\n`);
-      } else if (name === 'a') {
-        const text = collapseWhitespace(inlineTextOf(childrenOf(node), false, visible));
-        const href = lift ? hrefOf(node) : undefined;
-        // Prose anchors collapse to visible text only, so ordinary citation links don't
-        // flood extraction with reference noise.
-        out.push(href !== undefined ? `${text} ${href} ` : `${text} `);
-      } else if (name === 'br') {
-        out.push('\n');
-      } else if (BLOCK_NAMES.has(name)) {
-        out.push('\n');
-        stack.push({ kind: 'emit', text: '\n' });
-        pushNodes(stack, childrenOf(node), cdataDepth, visible);
-      } else if (INLINE_NAMES.has(name)) {
-        // Inline element: no boundary, contents kept.
-        pushNodes(stack, childrenOf(node), cdataDepth, visible);
+      } else if (LITERAL_TEXT_NAMES.has(name)) {
+        if (visible) out.push(rawTextOf(childrenOf(node)));
       } else {
-        // Unknown or custom element: same conservative default as the plain-text walker.
-        // Treating these as inline would merge adjacent indicators in vendor web
-        // components, which is exactly what this structured form exists to keep separate.
-        out.push('\n');
-        stack.push({ kind: 'emit', text: '\n' });
-        pushNodes(stack, childrenOf(node), cdataDepth, visible);
+        renderStructuredElement({
+          node,
+          name,
+          visible,
+          lift,
+          cdataDepth,
+          state: section,
+          out,
+          stack,
+        });
       }
     }
   }

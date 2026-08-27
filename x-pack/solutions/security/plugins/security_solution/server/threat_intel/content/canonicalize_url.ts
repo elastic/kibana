@@ -41,7 +41,7 @@ const TRACKING_REF_VALUES = new Set(['newsletter', 'email', 'twitter', 'rss', 's
  *   - scheme: http → https (treat as equivalent for key purposes)
  *   - host: lowercased, trailing DNS dot and leading `www.` stripped
  *   - path: trailing slash removed (except bare-root, which stays `/`)
- *   - query: tracking params removed (utm_*, fbclid, gclid, ref, mc_cid, mc_eid)
+ *   - query: tracking params removed (utm_*, fbclid, gclid, mc_cid, mc_eid, selected ref values)
  *   - fragment: dropped entirely
  *
  * Returns `undefined` for unparseable input so callers can safely skip the field.

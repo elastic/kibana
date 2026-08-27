@@ -18,6 +18,13 @@ describe('inline style render state', () => {
     ['valid declaration after invalid raw syntax', 'broken;display:none'],
     ['delimiters inside another value', 'content:"x;y:z";display:none'],
     ['invalid later display value', 'display:none;display:potato'],
+    ['fallback for an absent custom property', 'display:var(--missing, none)'],
+    ['same-element custom property', '--state:none;display:var(--state)'],
+    ['custom property declared after its use', 'display:var(--state);--state:none'],
+    ['nested fallback', 'display:var(--one, var(--two, none))'],
+    ['invalid custom property with fallback', '--state:var(--missing);display:var(--state,none)'],
+    ['important custom property', '--state:none!important;--state:block;display:var(--state)'],
+    ['escaped custom property name', '--st\\61te:none;display:var(--state)'],
   ])('recognizes hidden display from %s', (_label, style) => {
     expect(stateFor(style)).toEqual({ subtreeHidden: true, visible: true });
   });
@@ -39,6 +46,8 @@ describe('inline style render state', () => {
     ['raw malformed value', 'display:var(;visibility:hidden'],
     ['unresolved display substitution', 'display:none;display:var(--missing)'],
     ['unresolved all substitution', 'display:none;all:var(--missing)'],
+    ['same-element visible custom property', '--state:block;display:var(--state,none)'],
+    ['cyclic custom property without a fallback', '--state:var(--state);display:var(--state)'],
     ['non-CSS property whitespace', '\u00a0display:none'],
   ])('keeps display visible with %s', (_label, style) => {
     expect(stateFor(style)).toEqual({ subtreeHidden: false, visible: true });

@@ -7,1701 +7,252 @@
 
 import { Tokenizer } from 'parse5';
 import {
+  MAX_PARSE_BYTES,
   buildReportContent,
   capToParseBytes,
   collapseWhitespace,
   htmlToStructured,
   stripHtml,
   truncate,
-  MAX_PARSE_BYTES,
 } from './text';
 
 describe('stripHtml', () => {
-  it('returns an empty string for nullish input', () => {
-    expect(stripHtml(undefined)).toBe('');
-    expect(stripHtml(null)).toBe('');
-    expect(stripHtml('')).toBe('');
+  it.each([
+    [undefined, ''],
+    [null, ''],
+    ['', ''],
+    ['<p>Hello <strong>world</strong></p>', 'Hello world'],
+    ['<p>5 &lt; 10 and CVSS &gt; 7</p>', '5 < 10 and CVSS > 7'],
+    ['<p>&copy;&nbsp;Acme &mdash; &ldquo;hello&rdquo;</p>', '© Acme — “hello”'],
+    ['<p>&#65; &#x42;</p>', 'A B'],
+    ['<p>one</p><!-- hidden.test --><p>two</p>', 'one two'],
+  ])('extracts visible text from %j', (html, expected) => {
+    expect(stripHtml(html)).toBe(expected);
   });
 
-  it('drops <script> and <style> bodies before tag stripping', () => {
-    const html = `<p>before</p><script>alert("xss")</script><style>body{color:red}</style><p>after</p>`;
-    const result = stripHtml(html);
-    expect(result).toBe('before after');
+  it.each([
+    '<script>false.test</script><p>safe.test</p>',
+    '<style>.false{display:block}</style><p>safe.test</p>',
+    '<script>false.test</script ><p>safe.test</p>',
+    '<script>false.test</script\t junk><p>safe.test</p>',
+    '<script>false.test</script foo="a>b"><p>safe.test</p>',
+    '<script>false.test</script/><p>safe.test</p>',
+    '<script src="x.js"/><p>safe.test</p>',
+    '<style/><p>safe.test</p>',
+    '<script src=x/>false.test</script><p>safe.test</p>',
+    '<script>x</script\u00a0>false.test</script><p>safe.test</p>',
+    '<script>x</scriptfoo>false.test</script><p>safe.test</p>',
+  ])('removes raw-text nodes without losing a following sibling', (html) => {
+    expect(stripHtml(html)).toBe('safe.test');
   });
 
-  it('drops script bodies whose end tag carries whitespace or junk', () => {
-    for (const closeTag of ['</script >', '</script\t\n bar>', '</script foo="1">']) {
-      const result = stripHtml(`<p>before</p><script>alert("xss")${closeTag}<p>after</p>`);
-      expect(result).not.toContain('alert');
-      expect(result).toBe('before after');
-    }
+  it.each([
+    ['<p>safe.test</p><script>false.test', 'safe.test'],
+    ['<p>safe.test</p><style>false.test', 'safe.test'],
+    ['<script>false.test', ''],
+  ])('removes an unterminated raw-text node through EOF', (html, expected) => {
+    expect(stripHtml(html)).toBe(expected);
   });
 
-  it('fails closed if tokenization fails inside a CDATA payload', () => {
-    const realWrite = Tokenizer.prototype.write;
-    let calls = 0;
-    const write = jest
-      .spyOn(Tokenizer.prototype, 'write')
-      .mockImplementation(function (this: Tokenizer, ...args: Parameters<Tokenizer['write']>) {
-        calls += 1;
-        if (calls === 2) throw new Error('injected tokenizer failure');
-        return realWrite.apply(this, args);
-      });
+  it.each([
+    [
+      '<title>Analysis of <script> malware</title><article>IOC: safe.test</article>',
+      'IOC: safe.test',
+    ],
+    ['<textarea><style>false.test</style></textarea><p>safe.test</p>', 'safe.test'],
+    ['<!-- <script>false.test</script> --><p>safe.test</p>', 'safe.test'],
+    ['<p title="<script>false.test</script>">safe.test</p>', 'safe.test'],
+  ])('keeps raw-text-looking syntax in its parser-defined context', (html, expected) => {
+    expect(stripHtml(html)).toBe(expected);
+  });
 
+  it.each([
+    ['&lt;p&gt;safe.test&lt;/p&gt;', 'safe.test'],
+    ['&lt;p&gt;safe&lt;/p&gt;&lt;script&gt;false.test&lt;/script&gt;', 'safe'],
+    ['Use &lt;script&gt; carefully', 'Use <script> carefully'],
+    ['<p>Show &lt;script&gt;example&lt;/script&gt;</p>', 'Show <script>example</script>'],
+  ])('handles entity-encoded markup without recursive interpretation', (html, expected) => {
+    expect(stripHtml(html)).toBe(expected);
+  });
+
+  it.each([
+    ['<![CDATA[<article><p>safe.test</p></article>]]>', 'safe.test'],
+    ['<![CDATA[<script>false.test</script><p>safe.test</p>]]>', 'safe.test'],
+    ['<![CDATA[Use <script> literally]]>', 'Use <script> literally'],
+    ['<![CDATA[Use <style> literally]]>', 'Use <style> literally'],
+  ])('handles CDATA payloads', (html, expected) => {
+    expect(stripHtml(html)).toBe(expected);
+  });
+
+  it.each([
+    ['<template>false.test</template><p>safe.test</p>', 'safe.test'],
+    ['<iframe>false.test</iframe><p>safe.test</p>', 'safe.test'],
+    ['<noembed>false.test</noembed><p>safe.test</p>', 'safe.test'],
+    ['<noframes>false.test</noframes><p>safe.test</p>', 'safe.test'],
+    ['<title>false.test</title><p>safe.test</p>', 'safe.test'],
+    ['<textarea>false.test</textarea><p>safe.test</p>', 'safe.test'],
+    ['<noscript>safe.test</noscript>', 'safe.test'],
+    ['<xmp>safe-xmp.test<script>safe-nested.test</script></xmp>', 'safe-xmp.testsafe-nested.test'],
+    [
+      '<plaintext>safe-plain.test<script>safe-nested.test</script></plaintext>',
+      'safe-plain.testsafe-nested.test',
+    ],
+  ])('matches reader-visible subtree behavior', (html, expected) => {
+    expect(stripHtml(html)).toBe(expected);
+  });
+
+  it.each([
+    ['c2.<strong>evil</strong>.test', 'c2.evil.test'],
+    ['<span>evil.test</span><span>bad.test</span>', 'evil.testbad.test'],
+    ['<custom>evil.test</custom><custom>bad.test</custom>', 'evil.test bad.test'],
+  ])('preserves intentional token boundaries', (html, expected) => {
+    expect(stripHtml(html)).toBe(expected);
+  });
+
+  it.each([
+    ['<div hidden>false.test</div><p>safe.test</p>', 'safe.test'],
+    ['<div style="display:none">false.test</div><p>safe.test</p>', 'safe.test'],
+    ['<div style="display:var(--missing, none)">false.test</div><p>safe.test</p>', 'safe.test'],
+    ['<xmp hidden>false.test</xmp><p>safe.test</p>', 'safe.test'],
+    ['<plaintext style="display:none">false.test', ''],
+    [
+      '<div style="visibility:hidden">false.test<span style="visibility:visible">safe.test</span></div>',
+      'safe.test',
+    ],
+    ['evil.test<span style="visibility:hidden">hidden</span>bad.test', 'evil.test bad.test'],
+  ])('applies shared render state', (html, expected) => {
+    expect(stripHtml(html)).toBe(expected);
+  });
+
+  it('fails closed if exact raw-text tokenization fails', () => {
+    const write = jest.spyOn(Tokenizer.prototype, 'write').mockImplementationOnce(() => {
+      throw new Error('injected failure');
+    });
     try {
-      expect(stripHtml('<![CDATA[<p>must-not-survive.test</p>]]>')).toBe('');
+      expect(stripHtml('<script>false.test</script><p>must-not-survive.test</p>')).toBe('');
     } finally {
       write.mockRestore();
     }
   });
 
-  it('decodes the named entities feeds use most often', () => {
-    const html = '<p>&copy;&nbsp;Acme &mdash; &ldquo;hello&rdquo;</p>';
-    expect(stripHtml(html)).toBe('\u00a9 Acme \u2014 \u201chello\u201d');
-  });
-
-  it('decodes numeric (decimal and hex) entities', () => {
-    expect(stripHtml('&#65; &#x42;')).toBe('A B');
-  });
-
-  it('collapses whitespace runs introduced by tag-stripping', () => {
-    expect(stripHtml('<p>a</p>\n<p>  b  </p>')).toBe('a b');
-  });
-});
-
-describe('collapseWhitespace', () => {
-  it('replaces runs of whitespace (including unicode separators) with a single space', () => {
-    expect(collapseWhitespace('  hello\n\tworld\u2028!  ')).toBe('hello world !');
-  });
-});
-
-describe('truncate', () => {
-  it('returns the input unchanged when shorter than max', () => {
-    expect(truncate('short', 100)).toBe('short');
-  });
-
-  it('appends an ellipsis when truncated', () => {
-    // Nine characters plus the ellipsis, so the result is exactly the cap. Slicing to
-    // maxLength and then appending put every truncated value one over.
-    expect(truncate('a'.repeat(50), 10)).toBe('aaaaaaaaa\u2026');
-  });
-
-  // The bound is what callers pass to satisfy a downstream length check, so a result
-  // one character over defeats the point of truncating at all.
-  it.each([1, 2, 5, 10, 64, 1024])('never exceeds the cap of %i', (cap) => {
-    expect(truncate('a'.repeat(5000), cap).length).toBeLessThanOrEqual(cap);
-  });
-
-  it.each([1, 2, 5, 10, 64, 1024])('never exceeds the cap of %i with word boundaries', (cap) => {
-    expect(truncate('word '.repeat(1000), cap).length).toBeLessThanOrEqual(cap);
-  });
-
-  it('returns empty for a zero or negative cap rather than a bare ellipsis', () => {
-    expect(truncate('anything', 0)).toBe('');
-    expect(truncate('anything', -5)).toBe('');
-  });
-
-  it('respects a word boundary close to the cap', () => {
-    // The boundary heuristic only honors `lastIndexOf(' ')` when it
-    // lands past 60% of the cap. For maxLength=12, the heuristic
-    // requires a space at index >= 7.2; the trailing space at index 11
-    // (after "hello world") qualifies, so we cut on that boundary.
-    const input = 'hello world goodbye';
-    expect(truncate(input, 12)).toBe('hello world\u2026');
-  });
-
-  it('falls back to a hard cut when the boundary is too far back', () => {
-    // The "word" is the entire string, so there's no boundary close
-    // to the cap. The hard cut wins.
-    const input = 'noboundariesatallnoboundariesatall';
-    // Four characters of content plus the ellipsis, so five total.
-    expect(truncate(input, 5)).toBe('nobo\u2026');
+  it('walks deeply nested input iteratively', () => {
+    const html = `${'<div>'.repeat(20_000)}safe.test${'</div>'.repeat(20_000)}`;
+    expect(stripHtml(html)).toBe('safe.test');
   });
 });
 
 describe('htmlToStructured', () => {
-  it('returns empty string for nullish input', () => {
-    expect(htmlToStructured(undefined)).toBe('');
-    expect(htmlToStructured(null)).toBe('');
-    expect(htmlToStructured('')).toBe('');
+  it.each([[undefined], [null], ['']])('returns empty for %j', (html) => {
+    expect(htmlToStructured(html)).toBe('');
   });
 
-  it('converts an IOC table so header labels and values appear on recoverable rows', () => {
-    const html = `
-      <table>
-        <tr><th>Type</th><th>Indicator</th></tr>
-        <tr><td>Domain</td><td>evil[.]com</td></tr>
-        <tr><td>IP</td><td>192.0.2.1</td></tr>
-      </table>
-    `;
-    const result = htmlToStructured(html);
-    // Header row must survive as pipe-delimited
-    expect(result).toContain('Type | Indicator');
-    // Value rows must survive — domain and IP on recoverable lines
-    expect(result).toContain('Domain | evil[.]com');
-    expect(result).toContain('IP | 192.0.2.1');
-    // Must NOT be collapsed into a single space-run (the stripHtml failure mode)
-    expect(result).not.toMatch(/Type\s+Indicator\s+Domain\s+evil/);
-  });
-
-  it('converts headings to ## prefix', () => {
-    const html = '<h2>Indicators of Compromise</h2><p>See table below.</p>';
-    const result = htmlToStructured(html);
-    expect(result).toContain('## Indicators of Compromise');
-  });
-
-  it('converts list items to - prefix', () => {
-    const html = '<ul><li>evil.com</li><li>bad.net</li></ul>';
-    const result = htmlToStructured(html);
-    expect(result).toContain('- evil.com');
-    expect(result).toContain('- bad.net');
-  });
-
-  it('drops prose anchor hrefs (collapses to visible text only)', () => {
-    // Prose <a href> links are clickable citations, not IOCs. Dropping hrefs prevents
-    // reference-noise URLs from flooding anchor-eligible extraction. Real inline IOCs
-    // appear as defanged literal text in prose and are extracted via the regex path.
-    const html = '<p>See <a href="https://learn.microsoft.com/docs">this link</a> for details.</p>';
-    const result = htmlToStructured(html);
-    expect(result).not.toContain('https://learn.microsoft.com/docs');
-    expect(result).toContain('this link');
-  });
-
-  it('lifts anchor href URLs as plain text inside an IOC section', () => {
-    // Hrefs ARE lifted inside IOC and References heading sections (the original
-    // motivation for the lift: capture citation URLs in References, C2 links in IOC tables).
+  it('preserves headings, rows, lists, and block boundaries', () => {
     const html =
-      '<h2>Indicators of Compromise</h2><p>See <a href="https://c2.evil.com/beacon">this link</a>.</p>';
+      '<h2>Indicators of Compromise</h2>' +
+      '<table><tr><th>Type</th><th>Value</th></tr><tr><td>domain</td><td>evil.test</td></tr></table>' +
+      '<ul><li>bad.test</li></ul><p>done</p>';
+    expect(htmlToStructured(html)).toBe(
+      '## Indicators of Compromise\n| Type | Value |\n| domain | evil.test |\n- bad.test\ndone'
+    );
+  });
+
+  it.each([
+    ['<h2>IOCs</h2><a href="https://evil.test/path">indicator</a>', 'https://evil.test/path'],
+    ['<h2>References</h2><a href=https://evil.test/path>source</a>', 'https://evil.test/path'],
+    ['<h2>Summary</h2><a href="https://noise.test">citation</a>', 'citation'],
+  ])('lifts hrefs only in semantic sections', (html, expected) => {
     const result = htmlToStructured(html);
-    expect(result).toContain('https://c2.evil.com/beacon');
+    expect(result).toContain(expected);
+    if (expected === 'citation') expect(result).not.toContain('noise.test');
   });
 
-  it('strips script and style bodies', () => {
-    const html = '<script>alert(1)</script><p>safe</p><style>body{}</style>';
-    const result = htmlToStructured(html);
-    expect(result).toContain('safe');
-    expect(result).not.toContain('alert');
-    expect(result).not.toContain('body{}');
-  });
-
-  it('strips script bodies whose end tag carries whitespace or junk', () => {
-    for (const closeTag of ['</script >', '</script\t\n bar>', '</script foo="1">']) {
-      const result = htmlToStructured(`<script>alert(1)${closeTag}<p>safe</p>`);
-      expect(result).toContain('safe');
-      expect(result).not.toContain('alert');
-    }
-  });
-
-  it('leaves no reassembled tag from nested angle brackets', () => {
-    const result = htmlToStructured('<scr<script>ipt>payload');
-    expect(result).not.toContain('<script');
-    expect(result).not.toContain('<scr');
-  });
-
-  it('decodes HTML entities in structured output', () => {
-    const html = '<p>server at 10[.]0[.]0[.]1 &mdash; evil&amp;co.com</p>';
-    const result = htmlToStructured(html);
-    expect(result).toContain('—'); // mdash decoded
-    expect(result).toContain('evil&co.com'); // &amp; decoded
-  });
-
-  it('does not produce markdown link [label](url) syntax in IOC sections', () => {
+  it('keeps a classified section through deeper prose and ends it at the same depth', () => {
     const html =
-      '<h2>Indicators of Compromise</h2><a href="https://c2.evil.com/beacon">click here</a>';
+      '<h2>IOCs</h2><h3>Domains</h3><a href="https://kept.test">one</a>' +
+      '<h2>Analysis</h2><a href="https://dropped.test">two</a>';
     const result = htmlToStructured(html);
-    expect(result).not.toMatch(/\[.*\]\(.*\)/);
-    // href still present as plain text in the IOC section
-    expect(result).toContain('https://c2.evil.com/beacon');
+    expect(result).toContain('kept.test');
+    expect(result).not.toContain('dropped.test');
   });
 
-  it('preserves anchor href URL inside a list item in References section (anchor-lift ordering fix)', () => {
-    // Href-lift must run before <li> processing so the URL survives the inner-tag strip.
-    // This test verifies the fix in a References heading context (where href-lift is active).
+  it('classifies visible text restored inside a hidden heading wrapper', () => {
     const html =
-      '<h2>References</h2><ul><li><a href="https://socket.dev/blog">Socket writeup</a></li></ul>';
-    const result = htmlToStructured(html);
-    expect(result).toContain('https://socket.dev/blog');
+      '<h2 style="visibility:hidden"><span style="visibility:visible">IOCs</span></h2>' +
+      '<a href="https://c2.evil.test/x">indicator</a>';
+    expect(htmlToStructured(html)).toContain('https://c2.evil.test/x');
   });
 
-  it('drops prose anchor href but collapses to anchor text in list items', () => {
-    // Without a heading context, <a href> collapses to visible text only.
-    const html = '<ul><li><a href="https://blog.example.com/nav">Read more</a></li></ul>';
-    const result = htmlToStructured(html);
-    expect(result).not.toContain('https://blog.example.com/nav');
-    expect(result).toContain('Read more');
+  it('keeps a boundary around a visibility-hidden anchor in an IOC row', () => {
+    const html =
+      '<h2>IOCs</h2><table><tr><td>evil.test<a style="visibility:hidden" href="https://false.test">hidden</a>bad.test</td></tr></table>';
+    expect(htmlToStructured(html)).toContain('| evil.test bad.test |');
   });
 
-  it('preserves multi-column IOC table structure for downstream regex extraction', () => {
-    // Realistic vendor HTML snippet: Type/Indicator columns
-    const html = `
-      <table>
-        <thead><tr><th>Indicator Type</th><th>Value</th><th>Description</th></tr></thead>
-        <tbody>
-          <tr><td>Domain</td><td>c2.attacker[.]top</td><td>Stage 2 C2</td></tr>
-          <tr><td>IP Address</td><td>198.51.100[.]42</td><td>Pivot host</td></tr>
-          <tr><td>Hash (MD5)</td><td>d41d8cd98f00b204e9800998ecf8427e</td><td>Loader</td></tr>
-        </tbody>
-      </table>
-    `;
+  it.each([
+    ['<ul><li>one<li>two</ul>', '- one\n- two'],
+    ['<table><tr><td>one<td>two<tr><td>three<td>four</table>', '| one | two |\n| three | four |'],
+    ['<![CDATA[<h2>IOCs</h2><a href="https://evil.test">indicator</a>]]>', 'https://evil.test'],
+  ])('preserves structure through parser recovery', (html, expected) => {
+    expect(htmlToStructured(html)).toContain(expected);
+  });
+
+  it.each([
+    '<h2>IOCs</h2><script>false.test</script><p>safe.test</p>',
+    '<h2>IOCs</h2><div style="display:none">false.test</div><p>safe.test</p>',
+    '<h2>IOCs</h2><xmp hidden>false.test</xmp><p>safe.test</p>',
+    '<h2>IOCs</h2><template>false.test</template><p>safe.test</p>',
+  ])('omits non-rendered structured content', (html) => {
     const result = htmlToStructured(html);
-    // Each row must be on its own line with | separators
-    const lines = result.split('\n');
-    const domainRow = lines.find((l) => l.includes('c2.attacker[.]top'));
-    const ipRow = lines.find((l) => l.includes('198.51.100[.]42'));
-    const hashRow = lines.find((l) => l.includes('d41d8cd98f00b204e9800998ecf8427e'));
-    expect(domainRow).toBeDefined();
-    expect(ipRow).toBeDefined();
-    expect(hashRow).toBeDefined();
-    // Values must not be merged onto a single line
-    expect(domainRow).not.toContain('198.51.100');
-    expect(ipRow).not.toContain('d41d8cd98f00b204e9800998ecf8427e');
+    expect(result).toContain('safe.test');
+    expect(result).not.toContain('false.test');
+  });
+});
+
+describe('text utilities', () => {
+  it('collapses Unicode whitespace', () => {
+    expect(collapseWhitespace('\t one\u2028\u00a0two \n')).toBe('one two');
+  });
+
+  it.each([1, 2, 5, 10, 64, 1024])('keeps truncation within %i code units', (max) => {
+    expect(truncate('word '.repeat(1000), max).length).toBeLessThanOrEqual(max);
+  });
+
+  it('uses a nearby word boundary without splitting a surrogate pair', () => {
+    expect(truncate('one two three four', 14)).toBe('one two three…');
+    expect(truncate('ab😀cd', 4)).toBe('ab…');
+    expect(truncate('value', 0)).toBe('');
+  });
+
+  it('caps parser input by UTF-8 bytes at a complete code point', () => {
+    const capped = capToParseBytes('😀'.repeat(MAX_PARSE_BYTES));
+    expect(Buffer.byteLength(capped, 'utf8')).toBeLessThanOrEqual(MAX_PARSE_BYTES);
+    expect(capped).not.toMatch(/[\uD800-\uDBFF]$/);
   });
 });
 
 describe('buildReportContent', () => {
-  it('builds the strict-mapping content block without bm25 siblings', () => {
+  it('builds a real body without a fallback flag', () => {
     expect(
-      buildReportContent({
-        title: 'Ransomware uptick',
-        bodyText: 'Campaign details',
-        language: 'en',
-      })
+      buildReportContent({ title: 'Title', bodyText: 'Body', bodyHtml: '<p>Body</p>' })
     ).toEqual({
-      title: 'Ransomware uptick',
-      body_text: 'Campaign details',
-      language: 'en',
-    });
-    expect(
-      buildReportContent({
-        title: 'Advisory',
-        bodyText: 'Details',
-        bodyHtml: '<p>Details</p>',
-      })
-    ).toEqual({
-      title: 'Advisory',
-      body_text: 'Details',
-      body_html: '<p>Details</p>',
+      title: 'Title',
+      body_text: 'Body',
+      body_html: '<p>Body</p>',
       language: 'en',
     });
   });
-});
 
-// A report stored with no body can never be enriched: every enrichment route
-// requires a non-empty text, so it stays pending, load_pending_reports keeps
-// picking it up, and it occupies a slot in the scheduled batch indefinitely.
-describe('buildReportContent — empty body fallback', () => {
-  it('falls back to the title when the body is empty', () => {
-    const content = buildReportContent({ title: 'Ransomware advisory', bodyText: '' });
-    expect(content.body_text).toBe('Ransomware advisory');
-  });
-
-  it('falls back when the body is only whitespace', () => {
-    const content = buildReportContent({ title: 'Ransomware advisory', bodyText: '   \n  ' });
-    expect(content.body_text).toBe('Ransomware advisory');
-  });
-
-  it('leaves a real body alone', () => {
-    const content = buildReportContent({ title: 'Title', bodyText: 'Real body text.' });
-    expect(content.body_text).toBe('Real body text.');
-  });
-});
-
-// ── Review fixes ─────────────────────────────────────────────────────────────
-
-describe('htmlToStructured — heading classification', () => {
-  // `Indicators&nbsp;of&nbsp;Compromise` is an entirely ordinary heading. Classifying
-  // the raw form read it as prose, so anchor hrefs under it were dropped rather than
-  // lifted, losing href-only indicators.
-  it('classifies a heading whose words are separated by entities', () => {
-    const html =
-      '<h2>Indicators&nbsp;of&nbsp;Compromise</h2><ul><li><a href="https://c2.evil.test/b">beacon</a></li></ul>';
-    expect(htmlToStructured(html)).toContain('https://c2.evil.test/b');
-  });
-
-  // `<h2>IOC</h2><h3>Domains</h3>` used to fall back to prose at `Domains`, dropping
-  // every href in the subsection that actually holds the indicators.
-  it('keeps an IOC section through an unclassified deeper subsection', () => {
-    const html =
-      '<h2>Indicators of Compromise</h2><h3>Domains</h3><ul><li><a href="https://evil.test/x">x</a></li></ul>';
-    expect(htmlToStructured(html)).toContain('https://evil.test/x');
-  });
-
-  it('ends the IOC section at a same-level heading', () => {
-    const html =
-      '<h2>Indicators of Compromise</h2><h2>Attribution</h2><ul><li><a href="https://blog.test/p">p</a></li></ul>';
-    expect(htmlToStructured(html)).not.toContain('https://blog.test/p');
-  });
-
-  it('ends the IOC section at an explicit terminator, even a deeper one', () => {
-    const html =
-      '<h2>Indicators of Compromise</h2><h3>References</h3><ul><li><a href="https://vendor.test/r">r</a></li></ul>';
-    // References is classified, so it wins over subsection inheritance. The href is
-    // still lifted (references sections lift too) but as a reference, not an IOC.
-    expect(htmlToStructured(html)).toContain('https://vendor.test/r');
-  });
-
-  // Unquoted href is valid HTML, and without support the generic tag stripper
-  // removed the attribute so an href-only IOC vanished entirely.
-  it('lifts an unquoted href', () => {
-    const html =
-      '<h2>Indicators of Compromise</h2><p><a href=https://c2.evil.test/beacon>indicator</a></p>';
-    expect(htmlToStructured(html)).toContain('https://c2.evil.test/beacon');
-  });
-
-  it('still lifts a quoted href', () => {
-    const html = '<h2>IOCs</h2><p><a href="https://c2.evil.test/q">indicator</a></p>';
-    expect(htmlToStructured(html)).toContain('https://c2.evil.test/q');
-  });
-});
-
-describe('parser input bounds', () => {
-  // These take fetched pages, so the input is attacker-influenced and unbounded, and
-  // this runs in a task worker. Truncating degrades a fat page instead of failing it.
-  it('caps a huge input rather than parsing all of it', () => {
-    const huge = `<p>${'a'.repeat(MAX_PARSE_BYTES + 5000)}</p>`;
-    const out = stripHtml(huge);
-    expect(out.length).toBeLessThanOrEqual(MAX_PARSE_BYTES);
-  });
-
-  it('leaves a normal document untouched', () => {
-    expect(stripHtml('<p>hello</p>')).toBe('hello');
-  });
-
-  it('caps the UTF-8 byte length rather than the UTF-16 code-unit length', () => {
-    const capped = capToParseBytes('\u20ac'.repeat(Math.ceil(MAX_PARSE_BYTES / 3) + 1));
-
-    expect(Buffer.byteLength(capped, 'utf8')).toBeLessThanOrEqual(MAX_PARSE_BYTES);
-  });
-});
-
-describe('buildReportContent — title fallback is observable', () => {
-  // Without the flag the document is indistinguishable from one that genuinely
-  // repeats its title, so enrichment pays to run inference over the same string
-  // twice with no way to know the input is only a headline.
-  it('flags a title fallback', () => {
-    const content = buildReportContent({ title: 'Ransomware advisory', bodyText: '' });
-    expect(content.body_text).toBe('Ransomware advisory');
-    expect(content.body_is_title_fallback).toBe(true);
-  });
-
-  it('omits the flag when the body is real', () => {
-    const content = buildReportContent({ title: 'T', bodyText: 'Real body.' });
-    expect(content.body_is_title_fallback).toBeUndefined();
-  });
-
-  // A title fallback needs a real title to fall back to. Without this check, a report
-  // with both fields empty stored an empty body_text (unavoidable) but was still labeled
-  // a title fallback, misrepresenting a genuinely empty report as a real headline-only one.
-  it.each([
-    ['an empty title', ''],
-    ['a whitespace-only title', '   '],
-  ])('omits the flag when the body is empty and the title is %s', (_label, title) => {
-    const content = buildReportContent({ title, bodyText: '' });
-    expect(content.body_text).toBe(title);
-    expect(content.body_is_title_fallback).toBeUndefined();
-  });
-});
-
-describe('htmlToStructured — anchor attribute boundaries', () => {
-  // Without a real attribute boundary the greedy prefix could run past
-  // `data-href="..."` and lift the tracker instead of the link, which in an IOC
-  // section both loses the indicator and invents a false one.
-  it('lifts href, not data-href', () => {
-    const html =
-      '<h2>IOCs</h2><p><a href="https://c2.evil.test/real" data-href="https://tracker.test/x">IOC</a></p>';
-    const out = htmlToStructured(html);
-    expect(out).toContain('https://c2.evil.test/real');
-    expect(out).not.toContain('https://tracker.test/x');
-  });
-
-  it('lifts href when data-href comes first', () => {
-    const html =
-      '<h2>IOCs</h2><p><a data-href="https://tracker.test/x" href="https://c2.evil.test/real">IOC</a></p>';
-    const out = htmlToStructured(html);
-    expect(out).toContain('https://c2.evil.test/real');
-    expect(out).not.toContain('https://tracker.test/x');
-  });
-
-  it('does not treat a data-href-only anchor as a link', () => {
-    const html = '<h2>IOCs</h2><p><a data-href="https://tracker.test/x">not a link</a></p>';
-    expect(htmlToStructured(html)).not.toContain('https://tracker.test/x');
-  });
-
-  it('tolerates whitespace around the equals sign', () => {
-    const html = '<h2>IOCs</h2><p><a href = "https://c2.evil.test/spaced">IOC</a></p>';
-    expect(htmlToStructured(html)).toContain('https://c2.evil.test/spaced');
-  });
-});
-
-describe('stripHtml — entity table lookup safety', () => {
-  // A bare object literal inherits Object.prototype, so these names resolved to
-  // functions and the `!== undefined` guard treated them as valid replacements,
-  // injecting `function Object() { [native code] }` into the report body from
-  // untrusted feed HTML.
-  it.each(['constructor', 'toString', 'valueOf', 'hasOwnProperty', '__proto__'])(
-    'leaves &%s; alone instead of resolving a prototype member',
-    (name) => {
-      const out = stripHtml(`<p>value &${name}; here</p>`);
-      expect(out).toBe(`value &${name}; here`);
-      expect(out).not.toContain('native code');
-      expect(out).not.toContain('[object Object]');
-    }
-  );
-
-  it('still decodes the real named entities', () => {
-    expect(stripHtml('<p>a &amp; b &nbsp; c &hellip;</p>')).toBe('a & b c \u2026');
-  });
-
-  it('still decodes numeric and hex entities', () => {
-    expect(stripHtml('<p>&#65;&#x42;</p>')).toBe('AB');
-  });
-
-  // An out-of-range reference can't crash extraction or escape as re-readable markup —
-  // the parser substitutes U+FFFD, per the HTML spec.
-  it('replaces an out-of-range code point rather than throwing', () => {
-    expect(stripHtml('<p>&#9999999;</p>')).toBe('\ufffd');
-  });
-});
-
-describe('script and style removal without a closing tag', () => {
-  // The bigger source of these is not malformed feeds, it is `capInput`: a valid
-  // document truncated at MAX_PARSE_BYTES can lose the closing tag, and the generic
-  // tag stripper then removes only the opening tag and leaves the whole body as
-  // report text, which goes to the LLM stages and IOC extraction.
-  it('discards an unterminated script through end of input', () => {
-    expect(stripHtml('<p>before</p><script>alert(1)')).toBe('before');
-  });
-
-  it('discards an unterminated style through end of input', () => {
-    expect(stripHtml('<p>before</p><style>.c { color: red; }')).toBe('before');
-  });
-
-  it('still keeps a sibling after a terminated script', () => {
-    expect(stripHtml('<p>a</p><script>x</script><p>b</p>')).toBe('a b');
-  });
-
-  it('handles a terminated script followed by an unterminated one', () => {
-    expect(stripHtml('<p>a</p><script>x</script><p>b</p><script>y')).toBe('a b');
-  });
-
-  it('applies to the structured path too', () => {
-    const out = htmlToStructured('<p>before</p><script>var leak = "aaaa";');
-    expect(out).not.toContain('leak');
-    expect(out).toContain('before');
-  });
-
-  // The realistic route: truncation cuts a valid script mid-body.
-  it('does not leak a script body that the input cap truncated', () => {
-    const html = `<p>before</p><script>${'var x = 1; '.repeat(20)}`;
-    const capped = `${html.slice(0, 80)}`;
-    expect(stripHtml(capped)).toBe('before');
-  });
-});
-
-describe('stripHtml — prose containing angle brackets', () => {
-  // A bare `<[^>]+>` treated any `<...>` span as a tag, so a comparison in prose was
-  // eaten whole. Threat reports are full of `payload < 4KB` and `CVSS > 7`.
-  it('keeps a comparison between two numbers', () => {
-    expect(stripHtml('<p>5 < 10 and 3 > 1</p>')).toBe('5 < 10 and 3 > 1');
-  });
-
-  it('keeps a size threshold', () => {
-    expect(stripHtml('<p>payload < 4KB, CVSS > 7.5</p>')).toBe('payload < 4KB, CVSS > 7.5');
-  });
-
-  it('still removes real tags around it', () => {
-    expect(stripHtml('<div><span>a < b</span></div>')).toBe('a < b');
-  });
-
-  it('still removes comments and processing instructions', () => {
-    expect(stripHtml('<!-- note --><p>body</p>')).toBe('body');
-  });
-
-  it('still removes a closing tag', () => {
-    expect(stripHtml('<p>text</p>')).toBe('text');
-  });
-});
-
-describe('script/style removal respects exact tag names', () => {
-  // `\b` also matches before a hyphen, so a valid custom element was read as an
-  // unterminated `<script>` and the end-of-input pass discarded the entire rest of the
-  // document, report body and IOCs included.
-  it('does not treat a custom element as an unterminated script', () => {
-    const out = stripHtml('<p>before</p><script-loader></script-loader><p>c2.evil.test</p>');
-    expect(out).toContain('c2.evil.test');
-    expect(out).toContain('before');
-  });
-
-  it('does not treat a custom style element as an unterminated style', () => {
-    const out = stripHtml('<p>before</p><style-sheet></style-sheet><p>c2.evil.test</p>');
-    expect(out).toContain('c2.evil.test');
-  });
-
-  it('still removes a real terminated script', () => {
-    expect(stripHtml('<p>a</p><script>x</script><p>b</p>')).toBe('a b');
-  });
-
-  it('still removes a real unterminated script', () => {
-    expect(stripHtml('<p>a</p><script>leak')).toBe('a');
-  });
-
-  it('still removes a script with attributes', () => {
-    expect(stripHtml('<p>a</p><script type="text/javascript">x</script><p>b</p>')).toBe('a b');
-  });
-
-  // This assertion used to check only that the *preceding* text survived, which is why
-  // it passed while every following sibling was being discarded. The content after the
-  // tag is the part that matters.
-  it('removes a self-closing script without dropping what follows', () => {
-    expect(stripHtml('<p>a</p><script/><p>b</p>')).toBe('a b');
-  });
-
-  it('removes a self-closing script with attributes without dropping what follows', () => {
-    expect(stripHtml('<p>a</p><script src="x.js"/><p>c2.evil.test</p>')).toBe('a c2.evil.test');
-  });
-
-  it('removes a self-closing style without dropping what follows', () => {
-    expect(stripHtml('<p>a</p><style/><p>b</p>')).toBe('a b');
-  });
-});
-
-describe('tag stripping is idempotent', () => {
-  // A single pass is not enough: removing a tag can reassemble a new one from the text
-  // on either side. CodeQL flags single-pass tag removal for this reason.
-  it.each([
-    ['single reassembly', '<scr<script>ipt>payload'],
-    ['double reassembly', '<scr<scr<script>ipt>ipt>payload'],
-    ['triple reassembly', '<scr<scr<scr<script>ipt>ipt>ipt>payload'],
-  ])('leaves no script tag after %s', (_label, input) => {
-    const out = stripHtml(input);
-    expect(out.toLowerCase()).not.toContain('<script');
-    expect(out).not.toContain('<scr');
-  });
-
-  it('leaves no tag-like fragment even on deeply adversarial nesting', () => {
-    const input = `${'<scr'.repeat(20)}<script>${'ipt>'.repeat(20)}payload`;
-    const out = stripHtml(input);
-    expect(out.toLowerCase()).not.toContain('<script');
-    expect(out).not.toContain('<scr');
-  });
-
-  it('still leaves ordinary prose comparisons alone', () => {
-    expect(stripHtml('<p>5 < 10 and 3 > 1</p>')).toBe('5 < 10 and 3 > 1');
-  });
-
-  it('is stable, so a second pass over the output changes nothing', () => {
-    const once = stripHtml('<scr<script>ipt>payload <p>text</p>');
-    expect(stripHtml(once)).toBe(once);
-  });
-});
-
-describe('htmlToStructured — implicit end tags', () => {
-  // HTML permits omitting </li>, </td>, </th> and </tr>. Requiring them made compact
-  // vendor markup fall through to generic tag removal, running adjacent indicators
-  // together into one token that no IOC pattern can match.
-  it('separates list items with omitted </li>', () => {
-    const out = htmlToStructured('<h2>IOCs</h2><ul><li>evil.com<li>bad.net</ul>');
-    expect(out).not.toContain('evil.combad.net');
-    expect(out).toContain('evil.com');
-    expect(out).toContain('bad.net');
-  });
-
-  it('still handles fully closed list items', () => {
-    const out = htmlToStructured('<h2>IOCs</h2><ul><li>evil.com</li><li>bad.net</li></ul>');
-    expect(out).toContain('evil.com');
-    expect(out).toContain('bad.net');
-  });
-
-  it('separates table cells with omitted </td>', () => {
-    const out = htmlToStructured('<h2>IOCs</h2><table><tr><td>evil.com<td>bad.net</tr></table>');
-    expect(out).not.toContain('evil.combad.net');
-    expect(out).toContain('evil.com');
-    expect(out).toContain('bad.net');
-  });
-
-  it('separates rows with omitted </tr>', () => {
-    const out = htmlToStructured('<h2>IOCs</h2><table><tr><td>evil.com<tr><td>bad.net</table>');
-    expect(out).toContain('evil.com');
-    expect(out).toContain('bad.net');
-    expect(out).not.toContain('evil.combad.net');
-  });
-
-  it('still handles fully closed tables', () => {
-    const out = htmlToStructured(
-      '<h2>IOCs</h2><table><tr><td>evil.com</td><td>bad.net</td></tr></table>'
-    );
-    expect(out).toContain('evil.com');
-    expect(out).toContain('bad.net');
-  });
-});
-
-describe('stripHtml — HTML comments are removed as whole nodes', () => {
-  // The generic tag pattern stops at the first `>`, so a comment containing one leaked
-  // its contents into report text. A commented-out indicator then becomes a live IOC.
-  it('removes a comment containing a greater-than sign', () => {
-    expect(stripHtml('before<!-- hidden > c2.evil.test -->after')).toBe('before after');
-  });
-
-  it('does not leak a commented-out indicator into the text', () => {
-    expect(stripHtml('<p>real.test</p><!-- old > commented.test -->')).not.toContain(
-      'commented.test'
-    );
-  });
-
-  it('removes an ordinary comment', () => {
-    expect(stripHtml('before<!-- note -->after')).toBe('before after');
-  });
-
-  it('removes an unterminated comment through end of input', () => {
-    expect(stripHtml('before<!-- hidden c2.evil.test')).toBe('before');
-  });
-
-  it('removes a multiline comment', () => {
-    expect(stripHtml('a<!--\n line > one\n line two\n-->b')).toBe('a b');
-  });
-
-  it('applies to the structured path too', () => {
-    expect(
-      htmlToStructured('<h2>IOCs</h2><!-- hidden > commented.test --><p>real.test</p>')
-    ).not.toContain('commented.test');
-  });
-});
-
-/**
- * Why this file parses HTML instead of pattern-matching it: `[^>]*` can't know whether a
- * `>` is inside a quoted attribute, and a paired-tag regex applied globally rescans the
- * suffix from every opener.
- */
-describe('markup that only a parser reads correctly', () => {
-  describe('a > inside a quoted attribute value is not a tag terminator', () => {
-    // `[^>]*` ended the tag at the attribute's `>`, so the rest of the attribute plus
-    // the real tag close leaked out as text. In an IOC section that both invents an
-    // indicator (`c2.evil.test`) and hands extraction a mangled token.
-    it('keeps hidden attribute text out of body_text', () => {
-      expect(stripHtml('<p title="score > c2.evil.test">real</p>')).toBe('real');
+  it('marks a title fallback only when a title exists', () => {
+    expect(buildReportContent({ title: 'Title', bodyText: '  ' })).toEqual({
+      title: 'Title',
+      body_text: 'Title',
+      language: 'en',
+      body_is_title_fallback: true,
     });
-
-    it('does not leak the attribute of an unquoted-then-quoted mix', () => {
-      expect(stripHtml('<p data-x=1 title="a > b">real</p>')).toBe('real');
+    expect(buildReportContent({ title: '', bodyText: '' })).toEqual({
+      title: '',
+      body_text: '',
+      language: 'en',
     });
-
-    // The previous heading regex had its own `[^>]*`, so this silently disabled IOC-section
-    // handling: the heading text became `7">Indicators of Compromise`, classified as
-    // prose, and every href below it was dropped instead of lifted.
-    it('still classifies a heading carrying a quoted >', () => {
-      const structured = htmlToStructured(
-        '<h2 title="CVSS > 7">Indicators of Compromise</h2><p><a href="http://bad.test/x">link</a></p>'
-      );
-      expect(structured).toContain('## Indicators of Compromise');
-      expect(structured).toContain('http://bad.test/x');
-    });
-  });
-
-  describe('entity-encoded markup does not survive as markup', () => {
-    // RSS and Atom routinely encode a whole HTML body inside <description>. One decode
-    // leaves tags sitting in what is supposed to be plain text, which violates the
-    // body_text contract and feeds markup to the LLM stages and IOC extraction.
-    it('resolves encoded tags to text', () => {
-      expect(stripHtml('&lt;p&gt;evil.test&lt;/p&gt;')).toBe('evil.test');
-    });
-
-    it('removes an encoded script body rather than keeping its contents', () => {
-      expect(stripHtml('&lt;script&gt;fetch("http://c2.evil.test")&lt;/script&gt;ok')).toBe('ok');
-    });
-
-    it('does not reparse a close-tag spelling delimited by NBSP', () => {
-      expect(stripHtml('&lt;script&gt;visible prose&lt;/script&nbsp;&gt;')).toBe(
-        '<script>visible prose</script >'
-      );
-    });
-
-    it('applies the same resolution in the structured form', () => {
-      expect(htmlToStructured('&lt;p&gt;evil.test&lt;/p&gt;')).toBe('evil.test');
-    });
-
-    it('recovers encoded table cells as separate tokens', () => {
-      expect(
-        htmlToStructured(
-          '&lt;tr&gt;&lt;td&gt;evil.com&lt;/td&gt;&lt;td&gt;bad.net&lt;/td&gt;&lt;/tr&gt;'
-        )
-      ).toBe('| evil.com | bad.net |');
-    });
-
-    // The guard that keeps the re-parse from eating prose. A report explaining a
-    // technique mentions tags without closing them, and that text has to survive: the
-    // re-parse only runs when the decoded text contains a closing tag.
-    it('leaves prose that merely mentions a tag alone', () => {
-      expect(stripHtml('<p>use &lt;script&gt; carefully</p>')).toBe('use <script> carefully');
-    });
-
-    it('does not recurse past one re-parse', () => {
-      // Doubly-encoded input resolves one level per pass and then stops, so the second
-      // level is preserved as text rather than being chased to a fixpoint.
-      expect(stripHtml('&amp;lt;p&amp;gt;evil.test&amp;lt;/p&amp;gt;')).toBe(
-        '&lt;p&gt;evil.test&lt;/p&gt;'
-      );
-    });
-  });
-
-  // Timing bounds are ~100x the measured cost, so they're not CI-flaky, but a return to
-  // quadratic behavior overruns them by orders of magnitude.
-  describe('adversarial markup stays linear', () => {
-    it('handles many unterminated script openers', () => {
-      const input = '<script>'.repeat(400000);
-      const started = process.hrtime.bigint();
-      const result = stripHtml(input);
-      const elapsedMs = Number(process.hrtime.bigint() - started) / 1e6;
-
-      expect(result).toBe('');
-      expect(elapsedMs).toBeLessThan(5000);
-    });
-
-    it('handles deeply nested elements without recursing', () => {
-      const input = `${'<div>'.repeat(100000)}evil.test`;
-      const started = process.hrtime.bigint();
-      const result = stripHtml(input);
-      const elapsedMs = Number(process.hrtime.bigint() - started) / 1e6;
-
-      expect(result).toBe('evil.test');
-      expect(elapsedMs).toBeLessThan(5000);
-    });
-
-    it('keeps the structured form linear over the same input', () => {
-      const input = `${'<div>'.repeat(100000)}evil.test`;
-      const started = process.hrtime.bigint();
-      const result = htmlToStructured(input);
-      const elapsedMs = Number(process.hrtime.bigint() - started) / 1e6;
-
-      expect(result).toBe('evil.test');
-      expect(elapsedMs).toBeLessThan(5000);
-    });
-  });
-});
-
-/**
- * Inline markup must not create a token boundary, or `c2.<strong>evil</strong>.test`
- * reaches extraction as three words instead of one domain.
- */
-describe('inline markup does not split tokens', () => {
-  it.each([
-    ['strong inside a domain', '<p>c2.<strong>evil</strong>.test</p>', 'c2.evil.test'],
-    ['bold separator', '<p>evil<b>.</b>com</p>', 'evil.com'],
-    ['span mid-token', '<p>evi<span>l</span>.com</p>', 'evil.com'],
-    ['code mid-token', '<p>evil<code>.</code>com</p>', 'evil.com'],
-    ['anchor mid-token', '<p>c2.<a href="http://x">evil</a>.test</p>', 'c2.evil.test'],
-  ])('keeps %s intact', (_label, html, expected) => {
-    expect(stripHtml(html)).toBe(expected);
-  });
-
-  it.each([
-    ['paragraphs', '<p>evil.com</p><p>bad.net</p>'],
-    ['table cells', '<tr><td>evil.com</td><td>bad.net</td></tr>'],
-    ['list items', '<ul><li>evil.com<li>bad.net</ul>'],
-    ['line breaks', 'evil.com<br>bad.net'],
-    ['divs', '<div>evil.com</div><div>bad.net</div>'],
-    ['comments', 'evil.com<!-- x -->bad.net'],
-    ['unknown elements', '<my-widget>evil.com</my-widget><my-widget>bad.net</my-widget>'],
-  ])('still separates %s', (_label, html) => {
-    expect(stripHtml(html)).toBe('evil.com bad.net');
-  });
-
-  it('keeps inline content joined inside a table cell', () => {
-    expect(htmlToStructured('<tr><td>evi<span>l</span>.com</td><td>bad.net</td></tr>')).toBe(
-      '| evil.com | bad.net |'
-    );
-  });
-});
-
-/**
- * CDATA carries an HTML document, not a comment — HTML's default reading of
- * `<![CDATA[ ... ]]>` as a bogus comment would discard the entire body.
- */
-describe('CDATA payloads', () => {
-  it('extracts text from a CDATA article body', () => {
-    expect(stripHtml('<description><![CDATA[<p>IOC: evil.test</p>]]></description>')).toBe(
-      'IOC: evil.test'
-    );
-  });
-
-  it('keeps structure from a CDATA article body', () => {
-    expect(
-      htmlToStructured(
-        '<description><![CDATA[<h2>Indicators of Compromise</h2><p>evil.test</p>]]></description>'
-      )
-    ).toBe('## Indicators of Compromise\nevil.test');
-  });
-
-  it('preserves table cell boundaries inside CDATA', () => {
-    expect(
-      htmlToStructured(
-        '<description><![CDATA[<tr><td>evil.com</td><td>bad.net</td></tr>]]></description>'
-      )
-    ).toBe('| evil.com | bad.net |');
-  });
-
-  // The payload is parsed, so script bodies inside it are removed as elements rather than
-  // surfacing as text that extraction would mine for IOCs.
-  it('removes a script carried inside CDATA', () => {
-    expect(stripHtml('<description><![CDATA[<script>bad()</script>ok]]></description>')).toBe('ok');
-  });
-
-  // Enabling CDATA recognition must not turn ordinary comments into content.
-  it('still discards ordinary comments', () => {
-    expect(stripHtml('visible<!-- hidden > c2.evil.test -->text')).toBe('visible text');
-  });
-});
-
-/**
- * CDATA is literal, unescaped text, so a `<script>`/`<style>` opener with no matching
- * close anywhere in the payload is not real markup — it just looks that way to a parser,
- * which reads it as a raw-text element that swallows the rest of the payload as its body.
- * Trusting that parse the way real, closed markup is trusted would drop everything after
- * the opener, including the literal tag text and whatever followed it.
- */
-describe('an unclosed raw-text opener inside CDATA stays literal', () => {
-  it.each([
-    [
-      'script',
-      '<![CDATA[Exploit uses <script> and c2.evil.test]]>',
-      'Exploit uses <script> and c2.evil.test',
-    ],
-    [
-      'style',
-      '<![CDATA[Exploit uses <style> and c2.evil.test]]>',
-      'Exploit uses <style> and c2.evil.test',
-    ],
-  ])('keeps the whole payload for an unclosed %s', (_label, html, expected) => {
-    expect(stripHtml(html)).toBe(expected);
-  });
-
-  it('keeps structured output literal too', () => {
-    expect(htmlToStructured('<![CDATA[Exploit uses <script> and c2.evil.test]]>')).toBe(
-      'Exploit uses <script> and c2.evil.test'
-    );
-  });
-
-  // A self-closed opener is not an unclosed one, and a genuinely closed script is still
-  // parsed and removed as markup.
-  it('still treats a self-closed script inside CDATA as real markup', () => {
-    expect(stripHtml('<![CDATA[<script/><p>evil.test</p>]]>')).toBe('evil.test');
-  });
-
-  it('still removes a genuinely closed script inside CDATA', () => {
-    expect(stripHtml('<![CDATA[<script>fetch("https://false-ioc.test")</script>safe]]>')).toBe(
-      'safe'
-    );
-  });
-
-  it.each([
-    ['plain text', stripHtml],
-    ['structured text', htmlToStructured],
-  ])('keeps an entity-encoded unclosed script as %s', (_label, render) => {
-    expect(render('<![CDATA[use &lt;script&gt; carefully]]>')).toBe('use <script> carefully');
-  });
-
-  it.each([
-    [
-      'a closer before the opener',
-      '<![CDATA[before </script> use <script> carefully]]>',
-      'carefully',
-    ],
-    [
-      'a closed script before the unclosed opener',
-      '<![CDATA[<script>closed()</script> safe <script> and c2.evil.test]]>',
-      'c2.evil.test',
-    ],
-  ])('keeps the payload when it contains %s', (_label, html, expected) => {
-    expect(stripHtml(html)).toContain(expected);
-  });
-
-  it.each([
-    ['a comment', '<![CDATA[<script>closed()</script><!-- <script> --><p>safe</p>]]>'],
-    ['an attribute value', '<![CDATA[<script>closed()</script><p title="<script>">safe</p>]]>'],
-  ])('does not treat an opener inside %s as markup context', (_label, html) => {
-    expect(stripHtml(html)).toBe('safe');
-  });
-});
-
-/**
- * Escaped markup is also how a report displays markup on purpose, so re-parse eligibility
- * depends on whether the input brought markup of its own — a `<code>` block displaying an
- * escaped script is content the author chose to show, not an encoded document to decode.
- */
-describe('re-parsing entity-encoded markup', () => {
-  it('keeps an escaped snippet displayed inside real markup', () => {
-    expect(
-      stripHtml(`<code>&lt;script&gt;fetch('https://c2.evil.test')&lt;/script&gt;</code>`)
-    ).toBe(`<script>fetch('https://c2.evil.test')</script>`);
-  });
-
-  it('still decodes an entity-encoded document', () => {
-    expect(stripHtml('&lt;p&gt;evil.test&lt;/p&gt;')).toBe('evil.test');
-  });
-
-  it('still removes a script from an entity-encoded document', () => {
-    expect(stripHtml('&lt;script&gt;fetch("http://c2.evil.test")&lt;/script&gt;ok')).toBe('ok');
-  });
-
-  it('leaves prose mentioning an unclosed tag alone', () => {
-    expect(stripHtml('use &lt;script&gt; carefully')).toBe('use <script> carefully');
-  });
-});
-
-/** Unknown elements default to a boundary, or vendor web components merge adjacent indicators. */
-describe('structured output boundaries for unknown elements', () => {
-  it('separates adjacent custom elements', () => {
-    expect(
-      htmlToStructured('<h2>IOCs</h2><ioc-value>evil.com</ioc-value><ioc-value>bad.net</ioc-value>')
-    ).toBe('## IOCs\nevil.com\nbad.net');
-  });
-
-  it('still joins inline markup inside a paragraph', () => {
-    expect(htmlToStructured('<h2>IOCs</h2><p>c2.<strong>evil</strong>.test</p>')).toBe(
-      '## IOCs\nc2.evil.test'
-    );
-  });
-});
-
-// Runs on every page before htmlparser2, so its own cost has to stay linear over many
-// unterminated openers, not just terminated ones.
-describe('raw-text sanitization stays linear', () => {
-  it('handles many unterminated openers cheaply', () => {
-    const input = '<script'.repeat(512000);
-    const started = process.hrtime.bigint();
-    stripHtml(input);
-    const elapsedMs = Number(process.hrtime.bigint() - started) / 1e6;
-
-    expect(elapsedMs).toBeLessThan(400);
-  });
-
-  it('does not end a tag at a > inside a quoted attribute', () => {
-    expect(stripHtml('<script src="a>b.js"/>kept')).toBe('kept');
-  });
-
-  it('does not treat a longer element name as a raw-text tag', () => {
-    expect(stripHtml('<scriptfoo>not a script</scriptfoo>')).toBe('not a script');
-  });
-
-  it('removes a self-closed script and style token', () => {
-    expect(stripHtml('<article><script src="x.js"/><p>IOC: evil.test</p></article>')).toBe(
-      'IOC: evil.test'
-    );
-    expect(stripHtml('<article><style/><p>IOC: evil.test</p></article>')).toBe('IOC: evil.test');
-  });
-});
-
-/**
- * A `<script/>`-looking token inside a raw-text body is not a tag. Treating it as one would
- * end the element early and spill the rest of the script into `body_text` as a false IOC.
- */
-describe('raw-text sanitization respects raw-text bodies', () => {
-  it('does not let a script body escape via a self-closing string literal', () => {
-    const result = stripHtml(
-      '<script>const x="<script/>"; fetch("https://false-ioc.test")</script><p>safe</p>'
-    );
-
-    expect(result).toBe('safe');
-    expect(result).not.toContain('false-ioc.test');
-  });
-
-  it('does not let a style body escape the same way', () => {
-    const result = stripHtml(
-      '<style>a{content:"<style/>"} .x{background:url(https://false-ioc.test/a.png)}</style><p>safe</p>'
-    );
-
-    expect(result).toBe('safe');
-    expect(result).not.toContain('false-ioc.test');
-  });
-
-  it('discards an unterminated script body rather than emitting it', () => {
-    expect(stripHtml('<script>fetch("https://false-ioc.test")')).toBe('');
-  });
-
-  // Skipping raw-text bodies must not stop the tokenizer finding later candidates.
-  it('still removes a self-closed script that follows a real one', () => {
-    expect(stripHtml('<script>var a=1;</script><script src="y.js"/><p>keep.test</p>')).toBe(
-      'keep.test'
-    );
-  });
-});
-
-// Custom and namespaced element names are exactly what vendor feeds encode.
-describe('entity-encoded custom elements', () => {
-  it('re-parses an encoded custom element', () => {
-    expect(stripHtml('&lt;ioc-value&gt;evil.com&lt;/ioc-value&gt;')).toBe('evil.com');
-  });
-
-  it('re-parses an encoded namespaced element', () => {
-    expect(stripHtml('&lt;ns:tag&gt;evil.com&lt;/ns:tag&gt;')).toBe('evil.com');
-  });
-
-  it('applies custom-element boundaries after re-parsing', () => {
-    expect(
-      htmlToStructured(
-        '&lt;ioc-value&gt;evil.com&lt;/ioc-value&gt;&lt;ioc-value&gt;bad.net&lt;/ioc-value&gt;'
-      )
-    ).toBe('evil.com\nbad.net');
-  });
-
-  // The wider name pattern must not defeat the guard that protects displayed markup.
-  it('still leaves an encoded custom element displayed inside real markup', () => {
-    expect(stripHtml('<code>&lt;ioc-value&gt;x&lt;/ioc-value&gt;</code>')).toBe(
-      '<ioc-value>x</ioc-value>'
-    );
-  });
-});
-
-// `truncate` counts UTF-16 code units, so a cap inside a surrogate pair could otherwise
-// leave an unpaired one behind.
-describe('truncate never splits a surrogate pair', () => {
-  const LONE_SURROGATE = /[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/;
-
-  it.each([
-    ['cap inside a pair', 'a\u{1F600}b', 3],
-    ['cap after a pair', 'a\u{1F600}b', 4],
-    ['leading pair', '\u{1F600}\u{1F600}', 3],
-    ['several pairs', '\u{1F600}\u{1F600}\u{1F600}', 5],
-    ['pair at the very cap', 'a\u{1F600}', 2],
-  ])('emits no lone surrogate: %s', (_label, input, cap) => {
-    const result = truncate(input, cap);
-
-    expect(LONE_SURROGATE.test(result)).toBe(false);
-    expect(result.length).toBeLessThanOrEqual(cap);
-  });
-
-  it('drops the orphaned half rather than the whole character before it', () => {
-    expect(truncate('a\u{1F600}b', 3)).toBe('a…');
-  });
-});
-
-/**
- * A raw-text close tag has to end at a tag boundary — a bare `</script` prefix match would
- * accept `</scriptfoo>` and resume in a body the parser still considers open.
- * Trailing junk after the name is still legal and does close the element.
- */
-describe('raw-text close tags must end at a tag boundary', () => {
-  it('does not accept NBSP as an HTML close-tag boundary', () => {
-    const result = stripHtml(
-      '<script>const x="</script\u00a0>"; fetch("https://false-ioc.test")</script><p>safe</p>'
-    );
-
-    expect(result).toBe('safe');
-  });
-
-  it('does not accept a longer element name as the close tag', () => {
-    const result = stripHtml(
-      '<script>const x="</scriptfoo><script/>"; fetch("https://false-ioc.test")</script><p>safe</p>'
-    );
-
-    expect(result).toBe('safe');
-    expect(result).not.toContain('false-ioc.test');
-  });
-
-  it('does not accept a longer style name either', () => {
-    const result = stripHtml(
-      '<style>a{c:"</stylefoo><style/>"} .x{background:url(https://false-ioc.test/a.png)}</style><p>safe</p>'
-    );
-
-    expect(result).toBe('safe');
-    expect(result).not.toContain('false-ioc.test');
-  });
-
-  // Per spec a close tag may carry trailing junk and still close the element, so the
-  // stricter check must not reject these.
-  it.each([
-    ['trailing attribute junk', '<script>a=1</script foo><p>safe</p>'],
-    ['tab before the bracket', '<script>a=1</script\t><p>safe</p>'],
-    ['slash before the bracket', '<script>a=1</script/><p>safe</p>'],
-  ])('still treats %s as a close tag', (_label, html) => {
-    expect(stripHtml(html)).toBe('safe');
-  });
-
-  // The rejection path searches forward, so it must not become quadratic.
-  it('stays linear over many non-closing prefix matches', () => {
-    const input = `<script>${'</scriptfoo>'.repeat(320000)}`;
-    const started = process.hrtime.bigint();
-    stripHtml(input);
-    const elapsedMs = Number(process.hrtime.bigint() - started) / 1e6;
-
-    expect(elapsedMs).toBeLessThan(1500);
-  });
-});
-
-// htmlparser2 ends an end tag at the first `>` and rejects a trailing slash, while parse5
-// consumes the complete standards-defined range before htmlparser2 sees the fragment.
-describe('raw-text end tags carrying junk', () => {
-  // `</script foo="a>URL">` closed at the `>` inside the attribute value, spilling the
-  // rest of the end tag into body_text with an attacker-chosen URL in it.
-  it.each([
-    ['double-quoted attribute', '<script>a=1</script foo="a>https://false-ioc.test/x"><p>safe</p>'],
-    ['single-quoted attribute', "<script>a=1</script foo='a>https://false-ioc.test/y'><p>safe</p>"],
-    ['style element', '<style>a{b:1}</style foo="a>https://false-ioc.test/s"><p>safe</p>'],
-  ])('does not end the tag at a > inside a quoted attribute: %s', (_label, html) => {
-    const result = stripHtml(html);
-
-    expect(result).toBe('safe');
-    expect(result).not.toContain('false-ioc.test');
-  });
-
-  // `</script/>` kept the element open and swallowed the remainder of the document.
-  it.each([
-    ['trailing slash', '<script>a=1</script/><p>safe</p>'],
-    ['space then slash', '<script>a=1</script /><p>safe</p>'],
-    ['style trailing slash', '<style>a{b:1}</style/><p>safe</p>'],
-  ])('still closes the element: %s', (_label, html) => {
-    expect(stripHtml(html)).toBe('safe');
-  });
-
-  it('leaves an ordinary close tag untouched', () => {
-    expect(stripHtml('<p>a</p><script>x</script><p>b</p><script>y</script><p>c</p>')).toBe('a b c');
-  });
-
-  it('stays linear over many junk-carrying end tags', () => {
-    const input = '<script>a</script foo="x">'.repeat(150000);
-    const started = process.hrtime.bigint();
-    stripHtml(input);
-    const elapsedMs = Number(process.hrtime.bigint() - started) / 1e6;
-
-    expect(elapsedMs).toBeLessThan(1500);
-  });
-});
-
-// An end tag may legally carry junk, so the re-parse probe has to accept it too.
-describe('encoded documents whose end tag carries junk', () => {
-  it('re-parses a bare document with a junk-carrying close tag', () => {
-    const result = stripHtml(
-      '&lt;script&gt;fetch("https://false-ioc.test")&lt;/script foo&gt;safe'
-    );
-
-    expect(result).toBe('safe');
-    expect(result).not.toContain('false-ioc.test');
-  });
-});
-
-// Source offsets must stay in the original UTF-16 coordinate space even when a character's
-// lowercase representation has a different length (`İ` becomes two code units).
-describe('non-ASCII characters do not shift tokenizer source offsets', () => {
-  it('keeps a script body contained when the page contains a dotted capital I', () => {
-    const result = stripHtml(
-      'İ<script>const x="<script/>"; fetch("https://false-ioc.test")</script><p>safe</p>'
-    );
-
-    expect(result).not.toContain('false-ioc.test');
-    expect(result).toContain('safe');
-  });
-
-  it.each([['İ'], ['ẛ'], ['ΐ']])('still removes a self-closed script after %s', (prefix) => {
-    expect(
-      stripHtml(`${prefix}<article><script src="x.js"/><p>IOC: evil.test</p></article>`)
-    ).toContain('IOC: evil.test');
-  });
-
-  it('still handles uppercase raw-text tags', () => {
-    expect(stripHtml('<SCRIPT>bad()</SCRIPT>ok')).toBe('ok');
-    expect(stripHtml('<SCRIPT SRC="x.js"/><P>IOC: evil.test</P>')).toBe('IOC: evil.test');
-  });
-});
-
-/**
- * The parse cap counts UTF-16 code units, so it could split a surrogate pair one layer
- * earlier than `truncate` and put an unpaired surrogate into body_text.
- */
-describe('the parse cap does not split a surrogate pair', () => {
-  const LONE_SURROGATE = /[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/;
-
-  it('emits no lone surrogate when the cap lands mid-pair', () => {
-    const result = stripHtml(`${'a'.repeat(MAX_PARSE_BYTES - 1)}\u{1F600}x`);
-
-    expect(LONE_SURROGATE.test(result)).toBe(false);
-  });
-});
-
-/**
- * CDATA payloads are expanded into the current walk, not by re-entering the parser —
- * recursing would undo the iterative guarantee the rest of this file maintains, and lose
- * both href-lifting and the current section state for anything nested inside.
- */
-describe('CDATA expansion is bounded and inherits walk state', () => {
-  it.each([
-    ['200 openers', 200],
-    ['20000 openers', 20000],
-    ['100000 openers', 100000],
-  ])('does not overflow or go quadratic on %s', (_label, count) => {
-    const input = `${'<![CDATA['.repeat(count)}x]]>`;
-
-    const started = process.hrtime.bigint();
-    expect(() => stripHtml(input)).not.toThrow();
-    expect(() => htmlToStructured(input)).not.toThrow();
-    const elapsedMs = Number(process.hrtime.bigint() - started) / 1e6;
-
-    expect(elapsedMs).toBeLessThan(3000);
-  });
-
-  // Past the bound the payload is dropped, not emitted. Emitting unparsed markup put a
-  // script body and its URL into body_text as an extractable indicator.
-  it.each([[1], [2], [4], [5], [6], [100]])(
-    'never emits unparsed markup at %s levels of nesting',
-    (depth) => {
-      const input = `${'<![CDATA['.repeat(
-        depth
-      )}<script>fetch("https://false-ioc.test")</script>safe]]>`;
-
-      expect(stripHtml(input)).not.toContain('false-ioc.test');
-      expect(htmlToStructured(input)).not.toContain('false-ioc.test');
-    }
-  );
-
-  it('keeps the payload at legitimate nesting depth', () => {
-    expect(stripHtml('<![CDATA[<script>fetch("https://false-ioc.test")</script>safe]]>')).toBe(
-      'safe'
-    );
-  });
-
-  it('inherits the IOC section so an anchor inside CDATA keeps its href', () => {
-    expect(
-      htmlToStructured('<h2>IOCs</h2><![CDATA[<a href="https://c2.evil.test/x">indicator</a>]]>')
-    ).toBe('## IOCs\nindicator https://c2.evil.test/x');
-  });
-
-  it('inherits a references section too', () => {
-    expect(
-      htmlToStructured('<h2>References</h2><![CDATA[<a href="https://r.test/y">cite</a>]]>')
-    ).toBe('## References\ncite https://r.test/y');
-  });
-
-  // Prose sections deliberately do not lift, and inheriting state must not change that.
-  it('does not lift hrefs for CDATA under a prose heading', () => {
-    expect(
-      htmlToStructured('<h2>Analysis</h2><![CDATA[<a href="https://x.test/y">link</a>]]>')
-    ).toBe('## Analysis\nlink');
-  });
-
-  // CDATA content is literal, so a feed that encoded its body and also wrapped it in CDATA
-  // arrives still encoded after one parse.
-  it.each([
-    [
-      'a script',
-      '<![CDATA[&lt;script&gt;fetch("https://false-ioc.test")&lt;/script&gt;safe]]>',
-      'safe',
-    ],
-    ['a paragraph', '<![CDATA[&lt;p&gt;evil.com&lt;/p&gt;]]>', 'evil.com'],
-  ])('re-parses %s that was entity-encoded inside CDATA', (_label, html, expected) => {
-    const result = stripHtml(html);
-
-    expect(result).toBe(expected);
-    expect(result).not.toContain('false-ioc.test');
-  });
-});
-
-/**
- * A raw-text opener is only an opener where the document is actually in markup context.
- * Identifying one from the bytes after `<` alone would register `<script>` inside a
- * comment as a real opener with no matching close and discard everything through end of input.
- */
-describe('raw-text openers in non-markup context', () => {
-  it.each([
-    ['inside a comment', '<!-- <script> --><script/><p>IOC: evil.test</p>'],
-    ['style inside a comment', '<!-- <style> --><style/><p>IOC: evil.test</p>'],
-    ['inside a CDATA section', '<![CDATA[<script>]]><script/><p>IOC: evil.test</p>'],
-    ['inside an attribute value', '<p title="<script/>">IOC: evil.test</p>'],
-    ['no preceding context', '<script/><p>IOC: evil.test</p>'],
-  ])('still finds the real indicator with an opener %s', (_label, html) => {
-    expect(stripHtml(html)).toContain('IOC: evil.test');
-  });
-
-  it('still removes a genuine terminated script', () => {
-    const result = stripHtml('<script>tracker=1</script><p>IOC: evil.test</p>');
-
-    expect(result).toBe('IOC: evil.test');
-    expect(result).not.toContain('tracker');
-  });
-
-  // Skipping regions must not reopen the escape the raw-text skip exists to prevent.
-  it.each([
-    [
-      'a string literal',
-      '<script>const x="<script/>"; fetch("https://false-ioc.test")</script><p>safe</p>',
-    ],
-    [
-      'a bogus close then a literal',
-      '<script>const x="</scriptfoo><script/>"; fetch("https://false-ioc.test")</script><p>safe</p>',
-    ],
-  ])('keeps a script body contained through %s', (_label, html) => {
-    const result = stripHtml(html);
-
-    expect(result).toBe('safe');
-    expect(result).not.toContain('false-ioc.test');
-  });
-
-  // An unterminated tag means no `>` exists from that point on. The standards tokenizer
-  // must keep this linear rather than retrying a suffix search from every character.
-  it('stays linear when a tag never terminates', () => {
-    const started = process.hrtime.bigint();
-    stripHtml(`<p title="${'a'.repeat(1000000)}`);
-    const elapsedMs = Number(process.hrtime.bigint() - started) / 1e6;
-
-    expect(elapsedMs).toBeLessThan(400);
-  });
-});
-
-// A residual closing tag is the only re-parse signal without a wrapper, so void elements
-// (which never close) or a body truncated before its close tag stay literal.
-describe('bodies without a closing tag stay literal without one', () => {
-  it('re-parses a CDATA payload of only void elements', () => {
-    expect(stripHtml('<![CDATA[evil.com&lt;br/&gt;bad.net]]>')).toBe('evil.com bad.net');
-  });
-
-  it.each([
-    ['a bare void element', 'evil.com&lt;br/&gt;bad.net', 'evil.com<br/>bad.net'],
-    ['prose mentioning a tag', 'use &lt;br/&gt; carefully', 'use <br/> carefully'],
-    ['a snippet displayed in code', '<code>&lt;br/&gt;</code>', '<br/>'],
-  ])('leaves %s alone', (_label, html, expected) => {
-    expect(stripHtml(html)).toBe(expected);
-  });
-
-  // The walker reaches this path through `inlineTextOf`, which walks CDATA by calling back
-  // into it, so decoding before the markup check made the pair unboundedly recursive.
-  it('does not recurse on nested CDATA', () => {
-    const started = process.hrtime.bigint();
-    expect(() => stripHtml(`${'<![CDATA['.repeat(1000)}x]]>`)).not.toThrow();
-    const elapsedMs = Number(process.hrtime.bigint() - started) / 1e6;
-
-    expect(elapsedMs).toBeLessThan(2000);
-  });
-});
-
-// `<template>` is inert: the parser puts its children in a fragment no reader ever sees.
-describe('non-rendered subtrees', () => {
-  it.each([
-    ['a template at top level', '<template><p>c2.stale.test</p></template><p>safe</p>', 'safe'],
-    [
-      'a template nested in content',
-      '<div><template><a href="http://c2.stale.test/x">l</a></template>keep</div>',
-      'keep',
-    ],
-    [
-      'a template under an IOC heading',
-      '<h2>IOCs</h2><template><a href="http://c2.stale.test/x">l</a></template><p>real.test</p>',
-      'IOCs real.test',
-    ],
-  ])('drops %s', (_label, html, expected) => {
-    const result = stripHtml(html);
-
-    expect(result).toBe(expected);
-    expect(result).not.toContain('c2.stale.test');
-  });
-
-  it('drops a template subtree from structured output too', () => {
-    expect(
-      htmlToStructured(
-        '<h2>IOCs</h2><template><a href="http://c2.stale.test/x">l</a></template><p>real.test</p>'
-      )
-    ).toBe('## IOCs\nreal.test');
-  });
-
-  // The element still separates the text on either side, same as script and style.
-  it('still emits a boundary where the template was', () => {
-    expect(stripHtml('evil.com<template>x</template>bad.net')).toBe('evil.com bad.net');
-  });
-
-  // `noscript` content is fallback that a reader with scripting disabled does see, so it is
-  // deliberately not skipped.
-  it('keeps noscript content', () => {
-    expect(stripHtml('<noscript><p>fallback.test</p></noscript>after')).toBe('fallback.test after');
-  });
-});
-
-// A close tag that never terminates leaves the element open to end of input, so a
-// `<script/>`-looking string in the remainder must stay opaque raw text.
-describe('unterminated raw-text close tags stay opaque', () => {
-  it.each([
-    ['a script body', '<script>a=1</script foo="<script/>'],
-    ['a style body', '<style>a{b:1}</style foo="<style/>'],
-  ])('does not reinterpret markup-looking text inside %s', (_label, html) => {
-    expect(stripHtml(html)).toBe('');
-  });
-
-  it('still handles a terminated junk-carrying close tag', () => {
-    expect(stripHtml('<script>a=1</script foo="x"><p>safe</p>')).toBe('safe');
-  });
-});
-
-// `summary` is a standard HTML element (as in `<details><summary>`) as well as an Atom
-// construct name, and has to be walked normally rather than treated as literal text.
-describe('HTML elements sharing an Atom construct name', () => {
-  it('walks an HTML summary normally and skips its script', () => {
-    const html =
-      '<details><summary><script>fetch("https://false-ioc.test")</script>Visible</summary></details>';
-    const result = stripHtml(html);
-
-    expect(result).toBe('Visible');
-    expect(result).not.toContain('false-ioc.test');
-  });
-
-  it('does the same in structured output', () => {
-    expect(
-      htmlToStructured(
-        '<details><summary><script>fetch("https://false-ioc.test")</script>Visible</summary></details>'
-      )
-    ).toBe('Visible');
-  });
-
-  it('skips a template inside an HTML summary too', () => {
-    expect(
-      stripHtml(
-        '<details><summary><template><p>c2.stale.test</p></template>Visible</summary></details>'
-      )
-    ).toBe('Visible');
-  });
-});
-
-describe('multiple hrefs lift within the same section', () => {
-  it('lifts every href under one heading', () => {
-    expect(
-      htmlToStructured(
-        '<h2>IOCs</h2><p><a href="https://c2.evil.test/x">ioc</a></p>' +
-          '<p><a href="https://b.test/y">two</a></p>'
-      )
-    ).toBe('## IOCs\nioc https://c2.evil.test/x\ntwo https://b.test/y');
-  });
-});
-
-// An element carrying the HTML `hidden` attribute is not rendered, so its text is not
-// report content.
-describe('hidden subtrees', () => {
-  it.each([
-    ['a bare hidden attribute', '<div hidden>c2.stale.test</div><p>safe</p>'],
-    ['hidden with a value', '<div hidden="hidden">c2.stale.test</div><p>safe</p>'],
-  ])('drops %s', (_label, html) => {
-    const result = stripHtml(html);
-
-    expect(result).toBe('safe');
-    expect(result).not.toContain('c2.stale.test');
-  });
-
-  it('drops a hidden subtree from structured output too', () => {
-    expect(htmlToStructured('<div hidden>c2.stale.test</div><p>safe</p>')).toBe('safe');
-  });
-
-  it.each([
-    ['the hidden attribute', 'td', 'hidden'],
-    ['display:none', 'td', 'style="display:none"'],
-    ['visibility:hidden', 'th', 'style="visibility:hidden"'],
-  ])('applies %s to table-cell wrappers', (_label, cellName, attributes) => {
-    const result = htmlToStructured(
-      `<h2>IOCs</h2><table><tr><${cellName} ${attributes}>c2.stale.test</${cellName}><td>real.test</td></tr></table>`
-    );
-
-    expect(result).toContain('real.test');
-    expect(result).not.toContain('c2.stale.test');
-  });
-
-  it('lets a table-cell descendant restore visibility without restoring the hidden text', () => {
-    const result = htmlToStructured(
-      '<table><tr><td style="visibility:hidden">c2.stale.test<span style="visibility:visible">real.test</span></td></tr></table>'
-    );
-
-    expect(result).toContain('real.test');
-    expect(result).not.toContain('c2.stale.test');
-  });
-
-  // Inline CSS hides content just as effectively as the `hidden` attribute, and this
-  // predicate is the shared source of truth for both text walkers and article scoring.
-  it.each([
-    ['display:none', '<div style="display:none">c2.stale.test</div><p>safe</p>'],
-    ['display: none with a space', '<div style="display: none">c2.stale.test</div><p>safe</p>'],
-    ['visibility:hidden', '<div style="visibility:hidden">c2.stale.test</div><p>safe</p>'],
-    [
-      'CSS comments in a property name',
-      '<div style="display/**/:none">c2.stale.test</div><p>safe</p>',
-    ],
-    [
-      'display:none with !important',
-      '<div style="display:none !important">c2.stale.test</div><p>safe</p>',
-    ],
-    [
-      'display:none among other declarations',
-      '<div style="color:red;display:none">c2.stale.test</div><p>safe</p>',
-    ],
-    [
-      'display:none followed by a normal declaration before an important one',
-      '<div style="display:none;display:block;display:none!important">c2.stale.test</div><p>safe</p>',
-    ],
-    [
-      'important display:none followed by a non-important all reset',
-      '<div style="display:none!important;all:initial">c2.stale.test</div><p>safe</p>',
-    ],
-    [
-      'an escaped display property name',
-      '<div style="d\\69splay:none">c2.stale.test</div><p>safe</p>',
-    ],
-    [
-      'a simple escaped display property name',
-      '<div style="d\\isplay:none">c2.stale.test</div><p>safe</p>',
-    ],
-    ['an escaped display value', '<div style="display:n\\6f ne">c2.stale.test</div><p>safe</p>'],
-    [
-      'an escaped visibility property name',
-      '<div style="v\\69sibility:hidden">c2.stale.test</div><p>safe</p>',
-    ],
-    [
-      'an escaped important keyword',
-      '<div style="display:none !\\69mportant;display:block">c2.stale.test</div><p>safe</p>',
-    ],
-  ])('drops an element styled with %s', (_label, html) => {
-    const result = stripHtml(html);
-
-    expect(result).toBe('safe');
-    expect(result).not.toContain('c2.stale.test');
-  });
-
-  it('drops a display:none subtree from structured output too', () => {
-    expect(htmlToStructured('<div style="display:none">c2.stale.test</div><p>safe</p>')).toBe(
-      'safe'
-    );
-  });
-
-  // Matched by parsing declarations, not by a regex over the whole string, so a decoy
-  // can't false-positive and hide content that is genuinely visible.
-  it.each([
-    [
-      'an unrecognized display value',
-      '<div style="display:nonexistent">keep.test</div><p>safe</p>',
-    ],
-    ['an unrelated style property', '<div style="color:red">keep.test</div><p>safe</p>'],
-    ['a custom property named display', '<div style="--display:none">keep.test</div><p>safe</p>'],
-    [
-      "a value that mentions display:none in another property's content",
-      `<div style="content: 'display:none'">keep.test</div><p>safe</p>`,
-    ],
-    [
-      'a later display declaration that overrides display:none',
-      '<div style="display:none;display:block">keep.test</div><p>safe</p>',
-    ],
-    [
-      'a later important display declaration that overrides display:none',
-      '<div style="display:none;display:block!important">keep.test</div><p>safe</p>',
-    ],
-    [
-      'a later all reset that overrides display:none',
-      '<div style="display:none;all:initial">keep.test</div><p>safe</p>',
-    ],
-    [
-      'display:none text inside a quoted value',
-      `<div style="content:'x; display:none;';color:red">keep.test</div><p>safe</p>`,
-    ],
-    [
-      'a non-CSS whitespace character after a hex escape',
-      '<div style="display:n\\6f\u00a0ne">keep.test</div><p>safe</p>',
-    ],
-    [
-      'non-CSS whitespace before a property name',
-      '<div style="\u00a0display:none">keep.test</div><p>safe</p>',
-    ],
-    [
-      'escaped whitespace before a display value',
-      '<div style="display:\\20 none">keep.test</div><p>safe</p>',
-    ],
-    [
-      'an escaped important delimiter',
-      '<div style="display:none \\!important;display:block">keep.test</div><p>safe</p>',
-    ],
-  ])('keeps a visible element styled with %s', (_label, html) => {
-    expect(stripHtml(html)).toBe('keep.test safe');
-  });
-
-  it('keeps a visible descendant of a visibility:hidden parent', () => {
-    const html =
-      '<div style="visibility:hidden">stale.test<span style="visibility:visible">keep.test</span></div><p>safe</p>';
-
-    expect(stripHtml(html)).toBe('keep.test safe');
-  });
-
-  it('stays linear over many invalid priority delimiters', () => {
-    const html = `<div style="display:${'!'.repeat(100000)}">keep.test</div>`;
-    const started = process.hrtime.bigint();
-    const result = stripHtml(html);
-    const elapsedMs = Number(process.hrtime.bigint() - started) / 1e6;
-
-    expect(result).toBe('keep.test');
-    expect(elapsedMs).toBeLessThan(1000);
-  });
-
-  it('keeps token boundaries around visibility:hidden text', () => {
-    const html = '<span>evil.test<span style="visibility:hidden">hidden</span>bad.test</span>';
-
-    expect(stripHtml(html)).toBe('evil.test bad.test');
-  });
-
-  it.each([
-    ['visibility:initial', 'visibility:initial'],
-    ['all:initial', 'all:initial'],
-  ])('lets %s restore a descendant to visible', (_label, style) => {
-    const html = `<div style="visibility:hidden">stale.test<span style="${style}">keep.test</span></div><p>safe</p>`;
-
-    expect(stripHtml(html)).toBe('keep.test safe');
-  });
-
-  it('does not let a hidden heading end the visible IOC section', () => {
-    const html =
-      '<h2>IOCs</h2><h2 style="visibility:hidden">Hidden prose</h2><a href="https://c2.evil.test/path">indicator</a>';
-
-    expect(htmlToStructured(html)).toContain('https://c2.evil.test/path');
-  });
-
-  it('keeps a visible sibling of the same shape', () => {
-    expect(stripHtml('<div>keep.test</div><p>safe</p>')).toBe('keep.test safe');
-  });
-});
-
-// In HTML an unquoted attribute value may contain `/`, so a trailing slash there belongs
-// to the value, not a self-closing flag.
-describe('self-closing detection and unquoted attribute values', () => {
-  it.each([
-    [
-      'a script with an unquoted value',
-      '<script src=x/>fetch("https://false-ioc.test")</script><p>safe</p>',
-    ],
-    [
-      'a style with an unquoted value',
-      '<style src=x/>a{b:url(https://false-ioc.test)}</style><p>safe</p>',
-    ],
-  ])('does not treat the value slash in %s as self-closing', (_label, html) => {
-    const result = stripHtml(html);
-
-    expect(result).toBe('safe');
-    expect(result).not.toContain('false-ioc.test');
-  });
-
-  it.each([
-    ['a quoted value', '<article><script src="x.js"/><p>IOC: evil.test</p></article>'],
-    ['no attributes', '<script/><p>IOC: evil.test</p>'],
-    ['whitespace before the slash', '<script src=x /><p>IOC: evil.test</p>'],
-  ])('still removes a genuine self-closed script with %s', (_label, html) => {
-    expect(stripHtml(html)).toBe('IOC: evil.test');
-  });
-
-  it('still handles a quoted > in the open tag', () => {
-    expect(stripHtml('<script src="a>b.js"/>kept')).toBe('kept');
-  });
-});
-
-// Browsers don't render `<iframe>` contents, so embedded fallback or tracking text is not
-// report text.
-describe('iframe contents are not report text', () => {
-  it('drops an iframe body from plain text', () => {
-    const result = stripHtml('<iframe>https://stale.example</iframe><p>safe</p>');
-
-    expect(result).toBe('safe');
-    expect(result).not.toContain('stale.example');
-  });
-
-  it('drops an iframe body from structured output', () => {
-    expect(htmlToStructured('<iframe>https://stale.example</iframe><p>safe</p>')).toBe('safe');
-  });
-
-  // `noscript` is still kept, since a reader with scripting disabled does see it.
-  it('keeps noscript content', () => {
-    expect(stripHtml('<noscript><p>fallback.test</p></noscript>after')).toBe('fallback.test after');
   });
 });

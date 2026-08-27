@@ -33,6 +33,9 @@ const markersIn = (text: string): string[] => MARKERS.filter((marker) => text.in
 const tag = fc.constantFrom('article', 'div', 'main', 'p', 'section', 'span');
 const hiddenStyle = fc.constantFrom(
   'display:none',
+  'display:var(--missing, none)',
+  '--state:none;display:var(--state)',
+  'display:var(--state);--state:none',
   'd\\69splay:n\\6f ne',
   'display:none !\\69mportant;display:block',
   'visibility:hidden',
@@ -166,6 +169,17 @@ const malformedCommentFragment = fc
     ({ wrapper }) => `<${wrapper}>TI_MARKER_VISIBLE</${wrapper}><!-- TI_MARKER_COMMENT <script>`
   );
 
+const rcdataFragment = fc.constantFrom(
+  '<title>Analysis of <script> malware</title><article>TI_MARKER_VISIBLE</article>',
+  '<textarea>Example <style>TI_MARKER_NESTED</style></textarea><p>TI_MARKER_VISIBLE</p>',
+  '<xmp>Example <script>TI_MARKER_NESTED</script></xmp><p>TI_MARKER_VISIBLE</p>',
+  '<xmp hidden>TI_MARKER_HIDDEN</xmp><p>TI_MARKER_VISIBLE</p>',
+  '<plaintext>Example <script>TI_MARKER_NESTED</script></plaintext><p>TI_MARKER_VISIBLE</p>',
+  '<plaintext style="display:none">TI_MARKER_HIDDEN',
+  '<noembed>Example <script>TI_MARKER_NESTED</script></noembed><p>TI_MARKER_VISIBLE</p>',
+  '<noframes>Example <script>TI_MARKER_NESTED</script></noframes><p>TI_MARKER_VISIBLE</p>'
+);
+
 const fragment = fc.oneof(
   styledFragment,
   inheritedVisibilityFragment,
@@ -175,7 +189,8 @@ const fragment = fc.oneof(
   rawTextDecoyFragment,
   unterminatedRawTextFragment,
   nonMarkupFragment,
-  malformedCommentFragment
+  malformedCommentFragment,
+  rcdataFragment
 );
 
 const renderedTexts = async (
@@ -220,7 +235,7 @@ describe('content extraction agrees with Chromium marker visibility', () => {
     await browser?.close();
   });
 
-  it('matches a deterministic generated corpus', async () => {
+  it('matches deterministic generated cases', async () => {
     if (pages.length !== FRAGMENTS_PER_BATCH || sessions.length !== FRAGMENTS_PER_BATCH) {
       throw new Error('Browser oracle pages were not initialized');
     }
