@@ -291,8 +291,7 @@ export default ({ getService }: FtrProviderContext): void => {
           commentId: legacyId,
         });
 
-        // The legacy `/comments/{id}` route reads with mode=legacy, which preserves
-        // the legacy `event` type; unified projection only happens on mode=unified reads.
+        // Public GET /comments rebuilds the v1 `event` wire shape at the route.
         expect(fetched.type).to.be('event');
       });
 

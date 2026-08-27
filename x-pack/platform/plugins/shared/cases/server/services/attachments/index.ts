@@ -26,7 +26,6 @@ import {
   UNIFIED_ALERT_TYPES_ARRAY,
   isAlertAttachmentType,
 } from '../../../common/utils/attachments';
-import type { AttachmentMode } from '../../../common/types/domain/attachment/v2';
 import {
   AttachmentAttributesRtV2,
   AttachmentPatchAttributesRtV2,
@@ -89,7 +88,7 @@ import { isSOError } from '../../common/error';
 import {
   assertLegacyWriteableAttachmentType,
   getTransformerForPatchAttributes,
-  transformAttributesForMode,
+  toUnifiedAttributes,
 } from './operations/utils';
 
 const PERSISTABLE_ATTACHMENT_TYPES_ARRAY = Array.from(PERSISTABLE_ATTACHMENT_TYPES);
@@ -1077,10 +1076,8 @@ export class AttachmentService {
 
   public async find({
     options,
-    mode,
   }: {
     options?: SavedObjectFindOptionsKueryNode;
-    mode: AttachmentMode;
   }): Promise<SavedObjectsFindResponse<AttachmentAttributesV2>> {
     try {
       this.context.log.debug(`Attempting to find comments`);
@@ -1097,9 +1094,8 @@ export class AttachmentService {
         const injectedSo = injectAttachmentSOAttributesFromRefs(
           so as unknown as SavedObject<AttachmentPersistedAttributes>
         ) as unknown as SavedObjectsFindResult<AttachmentAttributesV2>;
-        const transformed = transformAttributesForMode({
+        const transformed = toUnifiedAttributes({
           attributes: injectedSo.attributes,
-          mode,
         });
         if (transformed.isUnified) {
           const validatedAttributes = decodeOrThrow(AttachmentAttributesRtV2)(

@@ -17,6 +17,7 @@ import { isSavedObjectErrorResult } from '@kbn/core/server';
 import {
   isLegacyAttachmentRequest,
   isUnifiedAttachmentRequest,
+  isUnifiedCommentAttachment,
   isAlertAttachmentType,
   isEventAttachmentType,
 } from '../../../common/utils/attachments';
@@ -25,7 +26,6 @@ import type {
   AttachmentAttributes,
   Case,
   EventAttachmentPayload,
-  UserCommentAttachmentPayload,
 } from '../../../common/types/domain';
 import {
   CaseRt,
@@ -40,6 +40,7 @@ import type { CasesClientArgs } from '../../client';
 import type { RefreshSetting } from '../../services/types';
 import type { AttachmentSavedObjectType } from '../../services/user_actions/types';
 import { createCaseError } from '../error';
+import { decodeOrThrow } from '../runtime_types';
 import { AttachmentLimitChecker } from '../limiter_checker';
 import type { AlertInfo } from '../types';
 import type { CaseSavedObjectTransformed } from '../types/case';
@@ -55,7 +56,7 @@ import {
   isCommentRequestTypeEvent,
   countEventsForID,
 } from '../utils';
-import { decodeOrThrow } from '../runtime_types';
+import { extractCommentContent } from '../attachments/comment';
 import type {
   AttachmentRequest,
   AttachmentPatchRequestV2,
@@ -63,12 +64,21 @@ import type {
 } from '../../../common/types/api';
 import type {
   AttachmentAttributesV2,
-  AttachmentMode,
   UnifiedAttachmentPayload,
 } from '../../../common/types/domain/attachment/v2';
 
 type CaseCommentModelParams = Omit<CasesClientArgs, 'authorization'>;
 type CommentRequestWithId = Array<{ id: string } & (AttachmentRequest | UnifiedAttachmentPayload)>;
+
+const getCommentTextFromPayload = (payload: AttachmentRequestV2): string | undefined => {
+  if ('comment' in payload && typeof payload.comment === 'string') {
+    return payload.comment;
+  }
+  if (isUnifiedCommentAttachment(payload)) {
+    return payload.data.content;
+  }
+  return undefined;
+};
 
 /**
  * This class represents a case that can have a comment attached to it.
@@ -104,12 +114,10 @@ export class CaseCommentModel {
     updateRequest,
     updatedAt,
     owner,
-    mode = 'legacy',
   }: {
     updateRequest: AttachmentPatchRequestV2;
     updatedAt: string;
     owner: string;
-    mode?: AttachmentMode;
   }): Promise<CaseCommentModel> {
     try {
       const { id, version, ...queryRestAttributes } = updateRequest;
@@ -125,20 +133,23 @@ export class CaseCommentModel {
         refresh: false,
       };
 
-      if (
-        queryRestAttributes.type === AttachmentType.user &&
-        'comment' in queryRestAttributes &&
-        queryRestAttributes.comment
-      ) {
-        const currentComment = (await this.params.services.attachmentService.getter.get({
+      const patchCommentText = getCommentTextFromPayload(
+        queryRestAttributes as AttachmentRequestV2
+      );
+
+      if (patchCommentText != null) {
+        const currentComment = await this.params.services.attachmentService.getter.get({
           savedObjectId: id,
-          mode,
-        })) as SavedObject<UserCommentAttachmentPayload>;
+        });
+        const currentCommentText = extractCommentContent(currentComment.attributes);
 
         const updatedReferences = getOrUpdateLensReferences(
           this.params.lensEmbeddableFactory,
-          queryRestAttributes.comment,
-          currentComment
+          patchCommentText,
+          {
+            references: currentComment.references,
+            attributes: { comment: currentCommentText },
+          }
         );
 
         /**
@@ -660,7 +671,7 @@ export class CaseCommentModel {
     };
   }
 
-  public async encodeWithComments({ mode }: { mode: AttachmentMode }): Promise<Case> {
+  public async encodeWithComments(): Promise<Case> {
     try {
       const comments = await this.params.services.caseService.getAllCaseComments({
         id: this.caseInfo.id,
@@ -669,7 +680,6 @@ export class CaseCommentModel {
           page: 1,
           perPage: MAX_DOCS_PER_PAGE,
         },
-        mode,
       });
       const totalAlerts =
         countAlertsForID({

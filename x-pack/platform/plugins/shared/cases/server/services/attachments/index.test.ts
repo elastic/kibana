@@ -1860,7 +1860,6 @@ describe('AttachmentService', () => {
       );
 
       await service.find({
-        mode: 'legacy',
         options: {
           page: 1,
           perPage: 10,
@@ -1877,7 +1876,7 @@ describe('AttachmentService', () => {
       );
     });
 
-    it('transforms unified comment find results to legacy output', async () => {
+    it('keeps unified comment find results in unified shape', async () => {
       const serviceWithFlagOn = new AttachmentService({
         log: mockLogger,
         unsecuredSavedObjectsClient,
@@ -1907,18 +1906,17 @@ describe('AttachmentService', () => {
         ])
       );
 
-      const res = await serviceWithFlagOn.find({ mode: 'legacy' });
+      const res = await serviceWithFlagOn.find({});
 
       expect(res.saved_objects[0].attributes).toMatchObject({
-        type: 'user',
-        comment: 'from unified',
+        type: 'comment',
+        data: { content: 'from unified' },
         owner: SECURITY_SOLUTION_OWNER,
       });
     });
 
-    // A Lens-by-reference attachment has no legacy form, so a legacy-mode read
-    // must return it in the unified shape instead of throwing or corrupting it.
-    it('returns a Lens-by-reference attachment in unified shape for legacy mode reads', async () => {
+    // A Lens-by-reference attachment has no legacy form, so it stays unified.
+    it('returns a Lens-by-reference attachment in unified shape', async () => {
       const serviceWithFlagOn = new AttachmentService({
         log: mockLogger,
         unsecuredSavedObjectsClient,
@@ -1948,7 +1946,7 @@ describe('AttachmentService', () => {
         ])
       );
 
-      const res = await serviceWithFlagOn.find({ mode: 'legacy' });
+      const res = await serviceWithFlagOn.find({});
 
       expect(res.saved_objects[0].attributes).toMatchObject({
         type: LENS_ATTACHMENT_TYPE,
@@ -1963,7 +1961,7 @@ describe('AttachmentService', () => {
           createSOFindResponse([{ ...createUserAttachment(), score: 0 }])
         );
 
-        await expect(service.find({ mode: 'legacy' })).resolves.not.toThrow();
+        await expect(service.find({})).resolves.not.toThrow();
       });
 
       it('strips excess fields', async () => {
@@ -1971,12 +1969,17 @@ describe('AttachmentService', () => {
           createSOFindResponse([{ ...createUserAttachment({ foo: 'bar' }), score: 0 }])
         );
 
-        const res = await service.find({ mode: 'legacy' });
+        const res = await service.find({});
 
-        expect(res).toStrictEqual(createSOFindResponse([{ ...createUserAttachment(), score: 0 }]));
+        expect(res.saved_objects[0].attributes).toMatchObject({
+          type: 'comment',
+          data: { content: 'Wow, good luck catching that bad meanie!' },
+          owner: SECURITY_SOLUTION_OWNER,
+        });
+        expect(res.saved_objects[0].attributes).not.toHaveProperty('foo');
       });
 
-      it('throws when the response is missing the attributes.rule.name field', async () => {
+      it('maps a missing comment field to empty unified content', async () => {
         const invalidAttachment = createUserAttachment();
         unset(invalidAttachment, 'attributes.comment');
 
@@ -1984,9 +1987,11 @@ describe('AttachmentService', () => {
           createSOFindResponse([{ ...invalidAttachment, score: 0 }])
         );
 
-        await expect(service.find({ mode: 'legacy' })).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Invalid value \\"undefined\\" supplied to \\"comment\\",Invalid value \\"user\\" supplied to \\"type\\",Invalid value \\"undefined\\" supplied to \\"alertId\\",Invalid value \\"undefined\\" supplied to \\"index\\",Invalid value \\"undefined\\" supplied to \\"rule\\",Invalid value \\"undefined\\" supplied to \\"eventId\\",Invalid value \\"undefined\\" supplied to \\"actions\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceMetadata\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceId\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceStorage\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentState\\""`
-        );
+        const res = await service.find({});
+        expect(res.saved_objects[0].attributes).toMatchObject({
+          type: 'comment',
+          data: { content: '' },
+        });
       });
     });
   });
