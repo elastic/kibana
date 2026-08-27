@@ -1,9 +1,9 @@
 # Scout server config sets
 
-Each folder here is a custom server config set: a bunch of `ScoutServerConfig` overrides that make Scout boot its own Kibana (and Elasticsearch) instead of sharing the `default` set.
+Each folder here is a custom server config set: `ScoutServerConfig` overrides that make Scout boot its own Kibana (and Elasticsearch) instead of sharing the `default` set.
 
 > [!WARNING]
-> **Only add a new set as a last resort.** Each one needs its own dedicated server in CI, and you can't turn it on or off per suite. Most settings don't need a set at all: Kibana Core feature flags can be flipped at runtime with `apiServices.core.settings()` (no restart, shares the default servers).
+> **Only add a new set as a last resort.** Each one needs its own dedicated server in CI, and you can't turn it on or off per suite. Most settings don't need a set at all: Kibana Core feature flags can be [flipped at runtime](https://www.elastic.co/docs/extend/kibana/testing/feature-flags#scout-feature-flags-runtime) with `apiServices.core.settings()` (no restart, shares the default servers).
 >
 > **Ask the Apps DX team first (`#kibana-qa`).** This folder is owned by `@elastic/appex-qa` in `.github/CODEOWNERS`, so any new set needs their review anyway. Asking first saves you writing a config that gets rejected.
 
@@ -12,7 +12,7 @@ Each folder here is a custom server config set: a bunch of `ScoutServerConfig` o
 The `default` set is meant to match a real Elastic Cloud deployment as closely as possible (a [Cloud-first approach](https://www.elastic.co/docs/extend/kibana/testing/scout-best-practices#design-tests-with-a-cloud-first-mindset)). Two reasons that matters:
 
 - If a test passes locally, that's a good sign it'll pass in the Cloud pipelines. Write it once, run it everywhere.
-- A clean default is what lets UI and API configs from different solutions share one set of servers. Lots of suites count on that staying stable.
+- A clean default is what lets UI and API configs from different solutions share one set of servers. Many suites count on that staying stable.
 
 So the rule is: **don't enable a feature flag in `default/` unless it's also on in Cloud.** Experimental behavior shouldn't live in the environment that stands in for the normal customer experience. A suite that tests a flipped flag should flip it at runtime where possible, and only get its own set when Kibana needs the setting at boot.
 
@@ -20,9 +20,8 @@ So the rule is: **don't enable a feature flag in `default/` unless it's also on 
 
 Don't copy the docs into here: just read them.
 
-- [Feature flags: runtime vs. server-level](https://www.elastic.co/docs/extend/kibana/testing/feature-flags#scout-feature-flags-when-to-use) (the decision table, and why runtime flags win).
-- [Feature flags: custom server configs](https://www.elastic.co/docs/extend/kibana/testing/feature-flags#scout-feature-flags-custom-servers) (when a set is truly unavoidable, how Scout finds one via `test/scout_<name>/` or `--serverConfigSet <name>`, the file naming rules, and a worked example).
-- [Scout best practices: prefer runtime feature flags](https://www.elastic.co/docs/extend/kibana/testing/scout-best-practices#prefer-runtime-feature-flags) (the short version).
+- [Feature flags](https://www.elastic.co/docs/extend/kibana/testing/feature-flags)
+- [Scout best practices](https://www.elastic.co/docs/extend/kibana/testing/scout-best-practices)
 
 ## Check these first
 
