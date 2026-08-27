@@ -66,31 +66,6 @@ describe('ExecutionListFilters', () => {
     expect(screen.getByText('Status')).toBeInTheDocument();
   });
 
-  it('dedupes status options that share a display label', async () => {
-    renderComponent();
-    await openPopover();
-
-    expect(screen.getAllByText('Waiting')).toHaveLength(1);
-  });
-
-  it('selecting Waiting applies all waiting statuses', async () => {
-    const onFiltersChange = jest.fn();
-    renderComponent({ onFiltersChange });
-    await openPopover();
-
-    fireEvent.click(screen.getByText('Waiting'));
-
-    expect(onFiltersChange).toHaveBeenCalledWith({
-      statuses: [
-        ExecutionStatus.WAITING,
-        ExecutionStatus.WAITING_FOR_INPUT,
-        ExecutionStatus.WAITING_FOR_CHILD,
-      ],
-      executionTypes: [],
-      executedBy: [],
-    });
-  });
-
   it('shows Run type options with Production and Test run labels', async () => {
     renderComponent();
     await openPopover();
@@ -111,6 +86,34 @@ describe('ExecutionListFilters', () => {
     expect(onFiltersChange).toHaveBeenCalledWith({
       statuses: [],
       executionTypes: [ExecutionType.PRODUCTION],
+      executedBy: [],
+    });
+  });
+
+  it('shows distinct labels for wait-related statuses', async () => {
+    renderComponent();
+    fireEvent.click(screen.getByLabelText('Filter executions'));
+
+    await waitFor(() => {
+      expect(screen.getByText('Waiting')).toBeInTheDocument();
+      expect(screen.getByText('Waiting for input')).toBeInTheDocument();
+      expect(screen.getByText('Waiting for child workflow')).toBeInTheDocument();
+    });
+  });
+
+  it.each([
+    ['Waiting', ExecutionStatus.WAITING],
+    ['Waiting for input', ExecutionStatus.WAITING_FOR_INPUT],
+    ['Waiting for child workflow', ExecutionStatus.WAITING_FOR_CHILD],
+  ])('applies %s filter as %s', async (label, status) => {
+    const onFiltersChange = jest.fn();
+    renderComponent({ onFiltersChange });
+    fireEvent.click(screen.getByLabelText('Filter executions'));
+    fireEvent.click(await screen.findByText(label));
+
+    expect(onFiltersChange).toHaveBeenCalledWith({
+      statuses: [status],
+      executionTypes: [],
       executedBy: [],
     });
   });

@@ -1182,6 +1182,54 @@ describe('ui settings', () => {
         expect(savedObjectsClient.get).toHaveBeenCalledTimes(2);
       });
 
+      it('invalidates cache repopulated by a concurrent read during the write window', async () => {
+        const savedObjectsClient = savedObjectsClientMock.create();
+        const sharedCache = new NamespacedCache<Record<string, any>>();
+
+        // The concurrent read (during the write) sees the pre-write value; the read after the
+        // write commits sees the new value.
+        savedObjectsClient.get.mockResolvedValueOnce({
+          attributes: { foo: 'before-write' },
+        } as any);
+        savedObjectsClient.get.mockResolvedValueOnce({ attributes: { foo: 'after-write' } } as any);
+
+        // Hold the ES write open so a concurrent read can slip into the [invalidate -> commit] window.
+        let resolveUpdate: (value: any) => void;
+        savedObjectsClient.update.mockReturnValue(
+          new Promise((resolve) => {
+            resolveUpdate = resolve;
+          }) as any
+        );
+
+        const uiSettings = new UiSettingsClient({
+          type: TYPE,
+          id: ID,
+          buildNum: BUILD_NUM,
+          defaults: {},
+          savedObjectsClient,
+          overrides: {},
+          log: logger,
+          namespace: 'default',
+          sharedUserProvidedCache: sharedCache,
+        });
+
+        // Start the write: the pre-write invalidation has run and the ES update is now pending.
+        const writePromise = uiSettings.setMany({ foo: 'after-write' });
+
+        // A concurrent read lands in the window and repopulates the cache with the pre-write value.
+        const concurrentRead = await uiSettings.getUserProvided();
+        expect(concurrentRead.foo).toEqual({ userValue: 'before-write' });
+
+        // The write commits.
+        resolveUpdate!({});
+        await writePromise;
+
+        // The next read must not be served the stale pre-write value.
+        const afterWrite = await uiSettings.getUserProvided();
+        expect(afterWrite.foo).toEqual({ userValue: 'after-write' });
+        expect(savedObjectsClient.get).toHaveBeenCalledTimes(2);
+      });
+
       it('does not allow old promise cleanup to delete new promise', async () => {
         const sharedCache = new NamespacedCache<Record<string, any>>();
 

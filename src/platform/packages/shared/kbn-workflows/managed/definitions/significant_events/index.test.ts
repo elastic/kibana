@@ -40,7 +40,14 @@ const discovery = parse(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.yaml) as ParsedWor
 
 describe('significant events persistence workflow contracts', () => {
   it('bumps managed workflow versions for the bulk persistence contract', () => {
-    expect(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.version).toBe(16);
+    expect(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.version).toBe(18);
+  });
+
+  it('marks discovery-triggered investigations as automatic', () => {
+    const triggerStep = requireStep(discovery, 'trigger_investigation') as {
+      with?: { inputs?: { context?: { trigger_type?: string } } };
+    };
+    expect(triggerStep.with?.inputs?.context?.trigger_type).toBe('automatic');
   });
 
   it('stamps discovery detections only from confirmed write outcomes', () => {

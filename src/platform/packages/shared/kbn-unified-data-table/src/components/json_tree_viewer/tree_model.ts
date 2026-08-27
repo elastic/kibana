@@ -138,8 +138,7 @@ const buildNode = ({
   };
 };
 
-// ---- Flatten visible rows, decides what to show and what not ----
-
+// ---- Flatten visible rows (drives rendering order and keyboard navigation) ----
 export interface NodeRow {
   kind: 'node';
   node: JsonNode;
@@ -314,52 +313,4 @@ export const nodeToJsonValue = (node: JsonNode): JsonValue => {
     object[child.key] = nodeToJsonValue(child);
   }
   return object;
-};
-
-export interface SearchMatches {
-  /** Every collection whose subtree contains a match; auto-expanded so the match renders. */
-  containers: ReadonlySet<string>;
-  /**
-   * The minimum number of children that list must reveal ("Show more") a node containing a match is visible.
-   */
-  reveals: ReadonlyMap<string, number>;
-}
-
-/**
- * Collects the nodes that needs to be expanded / reveladed to display a search match.
- */
-export const collectSearchMatches = (nodes: JsonNode[], termLower: string): SearchMatches => {
-  const containers = new Set<string>();
-  const reveals = new Map<string, number>();
-
-  const bumpReveal = (listId: string, index: number) => {
-    const needed = index + 1;
-    if (
-      needed > INITIAL_CHILDREN &&
-      needed <= MAX_SEARCH_REVEAL &&
-      needed > (reveals.get(listId) ?? 0)
-    ) {
-      reveals.set(listId, needed);
-    }
-  };
-
-  const visit = (node: JsonNode, listId: string, index: number): boolean => {
-    let hasMatch: boolean;
-    if (node.kind === 'leaf') {
-      hasMatch = String(node.value).toLowerCase().includes(termLower);
-    } else {
-      hasMatch = false;
-      node.children.forEach((child, childIndex) => {
-        if (visit(child, node.id, childIndex)) hasMatch = true;
-      });
-      if (hasMatch) containers.add(node.id);
-    }
-
-    // Check if the node needs to be revealed.
-    if (hasMatch) bumpReveal(listId, index);
-    return hasMatch;
-  };
-
-  nodes.forEach((node, index) => visit(node, ROOT_ID, index));
-  return { containers, reveals };
 };

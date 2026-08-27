@@ -10,7 +10,6 @@ import { type Interval, intervalFromDate } from '@kbn/task-manager-plugin/server
 import {
   Action,
   type HealthDiagnosticQuery,
-  type HealthDiagnosticQueryBase,
   type HealthDiagnosticQueryStats,
 } from './health_diagnostic_service.types';
 import { unflatten } from '../helpers';
@@ -66,7 +65,7 @@ export async function applyFilterlist(
   data: unknown[],
   rules: Record<string, Action>,
   salt: string,
-  query?: Pick<HealthDiagnosticQueryBase, 'encryptionKeyId'>,
+  query?: { encryptionKeyId?: string },
   encryptionPublicKeys?: Record<string, string>
 ): Promise<unknown[]> {
   const filteredResult: unknown[] = [];

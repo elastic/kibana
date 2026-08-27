@@ -12,9 +12,10 @@ import type {
   SearchResponse,
   Sort,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import type { EsWorkflowExecution, WorkflowExecutionListDto } from '@kbn/workflows';
 import { pickWorkflowDocumentVersion } from '@kbn/workflows';
+import type { WorkflowExecutionsDataClient } from '@kbn/workflows-execution-engine/server';
 import {
   getElasticsearchErrorMessage,
   isElasticsearchQueryError,
@@ -22,9 +23,8 @@ import {
 } from './es_error_helpers';
 
 interface SearchWorkflowExecutionsParams {
-  esClient: ElasticsearchClient;
+  workflowExecutionsDataClient: WorkflowExecutionsDataClient;
   logger: Logger;
-  workflowExecutionIndex: string;
   query: QueryDslQueryContainer;
   sort?: Sort;
   collapse?: { field: string };
@@ -62,9 +62,8 @@ export const WORKFLOW_EXECUTION_LIST_SOURCE_INCLUDES = [
 const DEFAULT_SORT: Sort = [{ createdAt: 'desc' }, { id: 'desc' }];
 
 export const searchWorkflowExecutions = async ({
-  esClient,
+  workflowExecutionsDataClient,
   logger,
-  workflowExecutionIndex,
   query,
   sort = DEFAULT_SORT,
   collapse,
@@ -74,9 +73,8 @@ export const searchWorkflowExecutions = async ({
   searchAfter,
 }: SearchWorkflowExecutionsParams): Promise<WorkflowExecutionListDto> => {
   try {
-    logger.debug(`Searching workflow executions in index ${workflowExecutionIndex}`);
-    const response = await esClient.search<EsWorkflowExecution>({
-      index: workflowExecutionIndex,
+    logger.debug('Searching workflow executions');
+    const response = await workflowExecutionsDataClient.search({
       query,
       _source: { includes: [...WORKFLOW_EXECUTION_LIST_SOURCE_INCLUDES] },
       sort,

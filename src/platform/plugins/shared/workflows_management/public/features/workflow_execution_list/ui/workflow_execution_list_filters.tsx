@@ -53,11 +53,32 @@ type StatusFilterOption = EuiSelectableOption<{ statuses: ExecutionStatus[] }>;
 
 const EQUAL_HEIGHT_OFFSET = 2; // to avoid changes in the header's height after "Clear all" button appears
 
+const getExecutionFilterStatusLabel = (status: ExecutionStatus): string => {
+  switch (status) {
+    case ExecutionStatus.WAITING_FOR_INPUT:
+      return i18n.translate(
+        'workflows.workflowExecutionList.filterIconButton.waitingForInputLabel',
+        {
+          defaultMessage: 'Waiting for input',
+        }
+      );
+    case ExecutionStatus.WAITING_FOR_CHILD:
+      return i18n.translate(
+        'workflows.workflowExecutionList.filterIconButton.waitingForChildLabel',
+        {
+          defaultMessage: 'Waiting for child workflow',
+        }
+      );
+    default:
+      return getStatusLabel(status);
+  }
+};
+
 const buildStatusFilterOptions = (selected: ExecutionStatus[]): StatusFilterOption[] => {
   const statusesByLabel = new Map<string, ExecutionStatus[]>();
 
   for (const status of Object.values(ExecutionStatus)) {
-    const label = getStatusLabel(status);
+    const label = getExecutionFilterStatusLabel(status);
     const group = statusesByLabel.get(label);
     if (group) {
       group.push(status);

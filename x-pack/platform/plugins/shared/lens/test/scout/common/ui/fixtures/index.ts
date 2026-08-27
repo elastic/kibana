@@ -17,6 +17,7 @@ import { extendPageObjects } from './page_objects';
 
 export * as testData from './constants';
 export * from './helpers';
+export * from './open_discover_popup';
 export * from './page_objects';
 export * from './saved_object_helpers';
 
