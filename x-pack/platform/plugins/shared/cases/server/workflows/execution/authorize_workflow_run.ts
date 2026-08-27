@@ -6,11 +6,14 @@
  */
 
 import Boom from '@hapi/boom';
+import type { Logger } from '@kbn/core/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { WriteOperations } from '../../authorization';
 import type { OperationDetails } from '../../authorization';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import { createCaseError, createCaseErrorFromSOError, isSOError } from '../../common/error';
-import type { CasesClientArgs } from '../types';
+import type { Authorization } from '../../authorization/authorization';
+import type { CasesService } from '../../services/cases';
 
 /**
  * Authorization operation for running a workflow from a case.
@@ -38,6 +41,12 @@ export interface EnsureAuthorizedToRunWorkflowParams {
   ids: string[];
 }
 
+export interface WorkflowRunAuthorizationDeps {
+  authorization: PublicMethodsOf<Authorization>;
+  caseService: Pick<CasesService, 'getCases'>;
+  logger: Logger;
+}
+
 /**
  * Authorizes the caller to run a workflow against all the given case IDs.
  *
@@ -48,14 +57,8 @@ export interface EnsureAuthorizedToRunWorkflowParams {
  */
 export const ensureAuthorizedToRunWorkflow = async (
   { ids }: EnsureAuthorizedToRunWorkflowParams,
-  clientArgs: CasesClientArgs
+  { authorization, caseService, logger }: WorkflowRunAuthorizationDeps
 ): Promise<void> => {
-  const {
-    authorization,
-    logger,
-    services: { caseService },
-  } = clientArgs;
-
   try {
     const { saved_objects: cases } = await caseService.getCases({ caseIds: ids });
 

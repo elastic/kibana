@@ -39,10 +39,13 @@ describe('CasesWorkflowRunService', () => {
     getWorkflow: jest.fn(),
     runWorkflowWithAlertPreprocessing: jest.fn(),
   } as unknown as jest.Mocked<WorkflowsServerPluginSetup['management']>;
+  const ensureAuthorizedToRunWorkflow = jest.fn();
+  const getWorkflowRunAuthorizer = jest.fn(async () => ({ ensureAuthorizedToRunWorkflow }));
   const service = new CasesWorkflowRunService({
     management,
     logger,
     audit,
+    getWorkflowRunAuthorizer,
   });
   const theCase = {
     id: 'case-1',
@@ -76,7 +79,7 @@ describe('CasesWorkflowRunService', () => {
     jest.clearAllMocks();
     workflowsAvailable = true;
     licenseValid = true;
-    casesClient.cases.ensureAuthorizedToRunWorkflow.mockResolvedValue();
+    ensureAuthorizedToRunWorkflow.mockResolvedValue(undefined);
     casesClient.cases.get.mockResolvedValue(theCase);
     casesClient.attachments.getAllDocumentsAttachedToCase.mockResolvedValue([]);
     management.getWorkflow.mockResolvedValue({
@@ -94,14 +97,14 @@ describe('CasesWorkflowRunService', () => {
   it('starts the workflow with server-owned metadata', async () => {
     await expect(run()).resolves.toEqual({ workflowExecutionId: 'execution-1' });
 
-    expect(casesClient.cases.ensureAuthorizedToRunWorkflow).toHaveBeenCalledWith({
+    expect(ensureAuthorizedToRunWorkflow).toHaveBeenCalledWith({
       ids: ['case-1'],
     });
     expect(casesClient.cases.get).toHaveBeenCalledWith({ id: 'case-1' });
     expect(casesClient.attachments.getAllDocumentsAttachedToCase).not.toHaveBeenCalled();
-    expect(
-      casesClient.cases.ensureAuthorizedToRunWorkflow.mock.invocationCallOrder[0]
-    ).toBeLessThan(management.runWorkflowWithAlertPreprocessing.mock.invocationCallOrder[0]);
+    expect(ensureAuthorizedToRunWorkflow.mock.invocationCallOrder[0]).toBeLessThan(
+      management.runWorkflowWithAlertPreprocessing.mock.invocationCallOrder[0]
+    );
     expect(management.runWorkflowWithAlertPreprocessing).toHaveBeenCalledWith({
       workflow: expect.objectContaining({ id: 'workflow-1', name: 'Investigate case' }),
       spaceId: 'default',
@@ -237,9 +240,7 @@ describe('CasesWorkflowRunService', () => {
     // SECURITY REGRESSION TEST: a user authorized on case-a but not case-b must NOT be able
     // to start a workflow that acts on case-b.
     it('refuses to start the workflow when the caller is not authorized on all cases', async () => {
-      casesClient.cases.ensureAuthorizedToRunWorkflow.mockRejectedValue(
-        new Error('Unauthorized: case-b')
-      );
+      ensureAuthorizedToRunWorkflow.mockRejectedValue(new Error('Unauthorized: case-b'));
 
       await expect(run(bulkBody)).rejects.toThrow('Unauthorized: case-b');
       expect(management.runWorkflowWithAlertPreprocessing).not.toHaveBeenCalled();
@@ -338,7 +339,7 @@ describe('CasesWorkflowRunService', () => {
   });
 
   it('rejects execution when the case update is unauthorized', async () => {
-    casesClient.cases.ensureAuthorizedToRunWorkflow.mockRejectedValue(new Error('not authorized'));
+    ensureAuthorizedToRunWorkflow.mockRejectedValue(new Error('not authorized'));
 
     await expect(run()).rejects.toThrow('not authorized');
     expect(management.runWorkflowWithAlertPreprocessing).not.toHaveBeenCalled();

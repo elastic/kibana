@@ -21,6 +21,7 @@ import { AttachmentType } from '../../../common/types/domain';
 import type { CasesClient } from '../../client';
 import type { CasesRequestHandlerContext } from '../../types';
 import { getSelectedAlertPairs, validateOrigin } from './validate_origin';
+import type { EnsureAuthorizedToRunWorkflowParams } from './authorize_workflow_run';
 
 interface RunWorkflowParams {
   workflowId: string;
@@ -35,17 +36,27 @@ interface CasesWorkflowRunServiceDeps {
   management: WorkflowsServerPluginSetup['management'];
   logger: Logger;
   audit: SecurityPluginSetup['audit'];
+  getWorkflowRunAuthorizer: (request: KibanaRequest) => Promise<{
+    ensureAuthorizedToRunWorkflow: (params: EnsureAuthorizedToRunWorkflowParams) => Promise<void>;
+  }>;
 }
 
 export class CasesWorkflowRunService {
   private readonly management: WorkflowsServerPluginSetup['management'];
   private readonly logger: Logger;
   private readonly audit: SecurityPluginSetup['audit'];
+  private readonly getWorkflowRunAuthorizer: CasesWorkflowRunServiceDeps['getWorkflowRunAuthorizer'];
 
-  constructor({ management, logger, audit }: CasesWorkflowRunServiceDeps) {
+  constructor({
+    management,
+    logger,
+    audit,
+    getWorkflowRunAuthorizer,
+  }: CasesWorkflowRunServiceDeps) {
     this.management = management;
     this.logger = logger;
     this.audit = audit;
+    this.getWorkflowRunAuthorizer = getWorkflowRunAuthorizer;
   }
 
   public async run({
@@ -104,7 +115,8 @@ export class CasesWorkflowRunService {
     // All-or-nothing: throws 403 if the caller lacks cases:<owner>/updateCase on any case.
     // Authorizes before reporting not-found errors so an unauthorized caller cannot learn
     // which IDs exist. One privilege round-trip for all owners via ensureAuthorized.
-    await casesClient.cases.ensureAuthorizedToRunWorkflow({ ids: caseIds });
+    const { ensureAuthorizedToRunWorkflow } = await this.getWorkflowRunAuthorizer(request);
+    await ensureAuthorizedToRunWorkflow({ ids: caseIds });
 
     // `origin` is optional. When absent the run is a list-surface (bulk) run: the caller
     // was not looking at any specific sub-entity, alert inputs are not permitted, and no

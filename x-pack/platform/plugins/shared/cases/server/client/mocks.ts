@@ -103,7 +103,6 @@ const createCasesSubClientMock = (): CasesSubClientMock => {
     deleteObservable: jest.fn(),
     bulkAddObservables: jest.fn(),
     getApplicableFields: jest.fn(),
-    ensureAuthorizedToRunWorkflow: jest.fn(),
   });
 };
 
@@ -234,6 +233,7 @@ export const createCasesClientFactory = (): CasesClientFactoryMock => {
   const factory: PublicMethodsOf<CasesClientFactory> = {
     initialize: jest.fn(),
     create: jest.fn(),
+    createWorkflowRunAuthorizer: jest.fn(),
   };
 
   return factory as unknown as CasesClientFactoryMock;

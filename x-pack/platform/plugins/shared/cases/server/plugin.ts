@@ -237,6 +237,13 @@ export class CasePlugin
             management: plugins.workflowsManagement.management,
             logger: this.logger,
             audit: plugins.security.audit,
+            getWorkflowRunAuthorizer: async (request) => {
+              const [{ savedObjects }] = await core.getStartServices();
+              return this.clientFactory.createWorkflowRunAuthorizer({
+                request,
+                savedObjectsService: savedObjects,
+              });
+            },
           })
         : undefined;
 

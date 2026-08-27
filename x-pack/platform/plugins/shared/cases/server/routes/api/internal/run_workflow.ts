@@ -89,10 +89,10 @@ export const createRunWorkflowRoute = ({ service, getSpaceId }: RunWorkflowRoute
     //    `all` does NOT implicitly grant it, so admins must explicitly assign the sub-privilege.
     //
     // 2. Handler-level (inside CasesWorkflowRunService): `cases:<owner>/updateCase` — checked
-    //    by the internal workflow authorization helper. This is owner-scoped and cannot be
-    //    declared statically on the route (which is why `DEFAULT_CASES_ROUTE_SECURITY` opts out
-    //    for all other Cases routes). It ensures the caller can only trigger workflows for the
-    //    authorized cases within the current space.
+    //    by `ensureAuthorizedToRunWorkflow` in `workflows/execution/authorize_workflow_run.ts`.
+    //    This is owner-scoped and cannot be declared statically on the route (which is why
+    //    `DEFAULT_CASES_ROUTE_SECURITY` opts out for all other Cases routes). It ensures the
+    //    caller can only trigger workflows for the authorized cases within the current space.
     security: {
       authz: {
         requiredPrivileges: [...WorkflowsManagementOperationPrivileges.execute],
