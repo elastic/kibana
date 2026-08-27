@@ -82,12 +82,23 @@ export const CasesWorkflowExecutionMetadataSchema = z
 
 export type CasesWorkflowExecutionMetadata = z.infer<typeof CasesWorkflowExecutionMetadataSchema>;
 
-export interface RunCaseWorkflowRequest {
-  caseIds: string[];
-  inputs: Record<string, unknown>;
-  origin?: CaseWorkflowRunOrigin;
-}
+/** Maximum byte length of the serialised `inputs` object. Enforced server-side; mirrored here for documentation. */
+const MAX_WORKFLOW_INPUT_KEY_LENGTH = 1024;
 
-export interface RunCaseWorkflowResponse {
-  workflowExecutionId: string;
-}
+export const RunCaseWorkflowRequestSchema = z
+  .object({
+    caseIds: z.array(idField).min(1).max(MAX_CASES_PER_WORKFLOW_RUN),
+    inputs: z.record(z.string().max(MAX_WORKFLOW_INPUT_KEY_LENGTH), z.unknown()),
+    origin: CaseWorkflowRunOriginSchema.optional(),
+  })
+  .strict();
+
+export type RunCaseWorkflowRequest = z.infer<typeof RunCaseWorkflowRequestSchema>;
+
+export const RunCaseWorkflowResponseSchema = z
+  .object({
+    workflowExecutionId: z.string(),
+  })
+  .strict();
+
+export type RunCaseWorkflowResponse = z.infer<typeof RunCaseWorkflowResponseSchema>;
