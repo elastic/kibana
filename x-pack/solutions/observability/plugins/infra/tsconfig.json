@@ -47,6 +47,7 @@
     "@kbn/datemath",
     "@kbn/core-notifications-browser",
     "@kbn/shared-ux-page-kibana-template",
+    "@kbn/shared-ux-page-no-data",
     "@kbn/safer-lodash-set",
     "@kbn/test-jest-helpers",
     "@kbn/controls-plugin",
