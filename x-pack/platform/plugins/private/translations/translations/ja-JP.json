@@ -58404,7 +58404,6 @@
     "xpack.triggersActionsUI.connectors.home.connectorsTabTitle": "コネクター",
     "xpack.triggersActionsUI.connectors.home.createConnector": "コネクターを作成",
     "xpack.triggersActionsUI.connectors.home.description": "サードパーティソフトウェアをアラートデータに連携します。",
-    "xpack.triggersActionsUI.connectors.home.documentationButtonLabel": "ドキュメンテーション",
     "xpack.triggersActionsUI.connectors.home.logsTabTitle": "ログ",
     "xpack.triggersActionsUI.connectors.home.preconfiguredSkippedWarning": "{count, plural, one {Preconfigured connector} other {事前設定されたコネクター}}（{count, plural, one {ID} other {ID}} [{ids}]）{count, plural, one {was} other {は}}既存のコネクターと{count, plural, one {it conflicts} other {競合}}するためスキップされました。",
     "xpack.triggersActionsUI.createConnectorFlyout": "{headerName} フライアウト",

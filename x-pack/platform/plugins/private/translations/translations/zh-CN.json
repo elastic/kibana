@@ -58407,7 +58407,6 @@
     "xpack.triggersActionsUI.connectors.home.connectorsTabTitle": "连接器",
     "xpack.triggersActionsUI.connectors.home.createConnector": "创建连接器",
     "xpack.triggersActionsUI.connectors.home.description": "连接第三方软件与您的告警数据。",
-    "xpack.triggersActionsUI.connectors.home.documentationButtonLabel": "文档",
     "xpack.triggersActionsUI.connectors.home.logsTabTitle": "日志",
     "xpack.triggersActionsUI.createConnectorFlyout": "{headerName} 浮出控件",
     "xpack.triggersActionsUI.createConnectorForm.formErrorTitle": "表单中存在错误",
