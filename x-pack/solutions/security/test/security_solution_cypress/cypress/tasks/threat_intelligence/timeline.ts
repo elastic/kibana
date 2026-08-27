@@ -15,7 +15,6 @@ import {
 } from '../../screens/threat_intelligence/timeline';
 import {
   BARCHART_TIMELINE_BUTTON,
-  FLYOUT_BLOCK_MORE_ACTIONS_BUTTON,
   FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCK_ITEM,
   INDICATOR_TYPE_CELL,
 } from '../../screens/threat_intelligence/indicators';
@@ -26,12 +25,6 @@ const ADD_TO_TIMELINE_ACTION =
 const clickFlyoutAddToTimelineAction = (selector: string) => {
   cy.get(selector).filter(':visible').first().scrollIntoView();
   cy.get(selector).filter(':visible').first().realHover();
-
-  cy.get(FLYOUT_BLOCK_MORE_ACTIONS_BUTTON)
-    .filter(':visible')
-    .should('have.length.at.least', 1)
-    .first()
-    .click();
 
   cy.get(ADD_TO_TIMELINE_ACTION).should('be.visible').click();
 };
