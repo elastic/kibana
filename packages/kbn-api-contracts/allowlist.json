@@ -212,6 +212,22 @@
       "approvedBy": "@elastic/security-detection-engineering",
       "oasdiffId": "request-body-any-of-removed",
       "prUrl": "https://github.com/elastic/kibana/pull/286518"
+    },
+    {
+      "path": "/api/agent_builder/converse",
+      "method": "post",
+      "reason": "Param was only used by the Kibana UI and feature is removed",
+      "approvedBy": "@elastic/workchat-eng",
+      "oasdiffId": "request-property-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/287255"
+    },
+    {
+      "path": "/api/agent_builder/converse/async",
+      "method": "post",
+      "reason": "Param was only used by the Kibana UI and feature is removed",
+      "approvedBy": "@elastic/workchat-eng",
+      "oasdiffId": "request-property-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/287255"
     }
   ]
 }

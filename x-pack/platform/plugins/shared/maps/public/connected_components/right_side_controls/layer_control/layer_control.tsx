@@ -15,8 +15,10 @@ import {
   EuiTitle,
   EuiSpacer,
   EuiToolTip,
+  euiShadow,
   useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { LayerTOC } from './layer_toc';
@@ -49,7 +51,8 @@ export function LayerControl({
   showAllLayers,
   zoom,
 }: Props) {
-  const { euiTheme } = useEuiTheme();
+  const euiThemeContext = useEuiTheme();
+  const { euiTheme } = euiThemeContext;
   if (!isLayerTOCOpen) {
     if (isScreenshotMode()) {
       return null;
@@ -85,6 +88,11 @@ export function LayerControl({
         <EuiButton
           isDisabled={isFlyoutOpen}
           className="mapLayerControl__addLayerButton"
+          css={css`
+            &:enabled {
+              ${euiShadow(euiThemeContext, 'm')}
+            }
+          `}
           fill
           fullWidth
           onClick={showAddLayerWizard}
@@ -101,11 +109,7 @@ export function LayerControl({
 
   return (
     <Fragment>
-      <EuiPanel
-        className="mapWidgetControl mapWidgetControl-hasShadow"
-        paddingSize="none"
-        grow={false}
-      >
+      <EuiPanel className="mapWidgetControl" paddingSize="none" grow={false}>
         <EuiFlexItem className="mapWidgetControl__headerFlexItem" grow={false}>
           <EuiFlexGroup
             justifyContent="spaceBetween"
@@ -165,7 +169,7 @@ export function LayerControl({
               >
                 <EuiButtonIcon
                   className="mapLayerControl__closeLayerTOCButton"
-                  css={{ backgroundColor: `${euiTheme.colors.emptyShade} !important` }}
+                  css={{ backgroundColor: `${euiTheme.colors.backgroundBasePlain} !important` }}
                   onClick={closeLayerTOC}
                   iconType="menuRight"
                   color="text"
