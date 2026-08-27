@@ -110,7 +110,11 @@ export function validateVariables(
         }
       }
     } catch {
-      // Context construction is best-effort; keep validating independent variables.
+      // Unreachable on any known input: the "step not in graph" throws are guarded by
+      // the early return in getContextSchemaForStep, and every InvalidForeachParameterError
+      // is already degraded to z.unknown() by getForeachStateSchema. Kept so that a throw
+      // introduced here later costs one variable rather than the whole document, which the
+      // document-level boundary in useYamlValidation would otherwise clear.
       context = null;
     }
 
