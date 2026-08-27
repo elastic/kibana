@@ -13,7 +13,7 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { DEFAULT_APP_CATEGORIES, SavedObjectsClient } from '@kbn/core/server';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { LockAcquisitionError, LockManagerService } from '@kbn/lock-manager';
 import { AlertsLocatorDefinition, sloFeatureId } from '@kbn/observability-plugin/common';
@@ -27,7 +27,7 @@ import { registerAlertsEmbeddable } from './lib/embeddables/register_alerts_embe
 import { registerBurnRateEmbeddable } from './lib/embeddables/register_burn_rate_embeddable';
 import { registerErrorBudgetEmbeddable } from './lib/embeddables/register_error_budget_embeddable';
 import { registerOverviewEmbeddable } from './lib/embeddables/register_overview_embeddable';
-import { getScopedClusterClientWithInspect } from './lib/inspect/create_inspectable_scoped_cluster_client';
+import { createGetScopedClients } from './lib/get_scoped_clients';
 import { registerBurnRateRule } from './lib/rules/register_burn_rate_rule';
 import { getSloServerRouteRepository } from './routes/utils/get_slo_server_route_repository';
 import { registerServerRoutes } from './routes/utils/register_routes';
@@ -41,23 +41,13 @@ import {
   SO_SLO_TEMPLATE_TYPE,
   SO_SLO_TYPE,
 } from './saved_objects';
-import {
-  DefaultResourceInstaller,
-  DefaultSLODefinitionRepository,
-  DefaultSummaryTransformManager,
-  DefaultTransformManager,
-} from './services';
-import { DefaultCompositeSLORepository } from './services/composites/composite_slo_repository';
-import { DefaultSLOSettingsRepository } from './services/slo_settings_repository';
-import { DefaultSLOTemplateRepository } from './services/slo_template_repository';
-import { DefaultSummaryTransformGenerator } from './services/summary_transform_generator/summary_transform_generator';
+import { DefaultResourceInstaller } from './services';
 import { BulkDeleteTask } from './services/tasks/bulk_delete/bulk_delete_task';
 import { CompositeSloSummaryTask } from './services/tasks/composite_slo_summary_task/composite_slo_summary_task';
 import { HealthScanTask } from './services/tasks/health_scan_task/health_scan_task';
 import { OrphanSummaryCleanupTask } from './services/tasks/orphan_summary_cleanup_task/orphan_summary_cleanup_task';
 import { StaleInstancesCleanupTask } from './services/tasks/stale_instances_cleanup_task/stale_instances_cleanup_task';
 import { TempSummaryCleanupTask } from './services/tasks/temp_summary_cleanup_task/temp_summary_cleanup_task';
-import { createTransformGenerators } from './services/transform_generators';
 import type {
   SLOConfig,
   SLOPluginSetupDependencies,
@@ -175,6 +165,16 @@ export class SLOPlugin
 
     registerDataProviders({ core, plugins, logger: this.logger });
 
+    const getScopedClients = createGetScopedClients({
+      core,
+      plugins,
+      config: {
+        isDev: this.isDev,
+        isServerless: this.isServerless,
+        getIsCpsEnabled: () => this.isCpsEnabled,
+      },
+    });
+
     registerServerRoutes({
       core,
       dependencies: {
@@ -185,72 +185,7 @@ export class SLOPlugin
           isCpsEnabled: this.isCpsEnabled,
           compositeSloSummaryTaskEnabled: this.config.compositeSloSummaryTaskEnabled,
         },
-        getScopedClients: async ({ request, logger }) => {
-          const [coreStart, pluginsStart] = await core.getStartServices();
-
-          const internalSoClient = new SavedObjectsClient(
-            coreStart.savedObjects.createInternalRepository()
-          );
-
-          const soClient = coreStart.savedObjects.getScopedClient(request, {
-            includedHiddenTypes: [SO_SLO_TEMPLATE_TYPE, SO_SLO_COMPOSITE_TYPE],
-          });
-          const rawScopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
-
-          const uiSettingsClient = coreStart.uiSettings.asScopedToClient(soClient);
-
-          const scopedClusterClient = await getScopedClusterClientWithInspect({
-            scopedClusterClient: rawScopedClusterClient,
-            uiSettingsClient,
-            request,
-            isDev: this.isDev,
-          });
-
-          const [dataViewsService, rulesClient, { id: spaceId }, racClient, isCpsAvailable] =
-            await Promise.all([
-              pluginsStart.dataViews.dataViewsServiceFactory(
-                soClient,
-                scopedClusterClient.asCurrentUser
-              ),
-              pluginsStart.alerting.getRulesClientWithRequest(request),
-              pluginsStart.spaces?.spacesService.getActiveSpace(request) ?? { id: 'default' },
-              pluginsStart.ruleRegistry.getRacClientWithRequest(request),
-              this.isCpsEnabled ? plugins.cps?.isTierEligible() ?? false : false,
-            ]);
-
-          const repository = new DefaultSLODefinitionRepository(soClient, logger);
-          const compositeRepository = new DefaultCompositeSLORepository(soClient, logger);
-          const settingsRepository = new DefaultSLOSettingsRepository(soClient);
-          const templateRepository = new DefaultSLOTemplateRepository(soClient);
-
-          const transformManager = new DefaultTransformManager(
-            createTransformGenerators(spaceId, dataViewsService, this.isServerless, isCpsAvailable),
-            scopedClusterClient,
-            logger
-          );
-          const summaryTransformManager = new DefaultSummaryTransformManager(
-            new DefaultSummaryTransformGenerator(this.isServerless, isCpsAvailable),
-            scopedClusterClient,
-            logger
-          );
-
-          return {
-            scopedClusterClient,
-            soClient,
-            internalSoClient,
-            dataViewsService,
-            rulesClient,
-            spaceId,
-            isCpsAvailable,
-            repository,
-            compositeRepository,
-            settingsRepository,
-            templateRepository,
-            transformManager,
-            summaryTransformManager,
-            racClient,
-          };
-        },
+        getScopedClients,
       },
       logger: this.logger,
       repository: getSloServerRouteRepository({
