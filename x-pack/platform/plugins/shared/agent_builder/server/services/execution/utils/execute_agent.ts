@@ -11,7 +11,6 @@ import type {
   ConverseInput,
   Conversation,
   ChatAgentEvent,
-  AgentCapabilities,
   AgentConfigurationOverrides,
   ConversationAction,
   AgentExecutionMode,
@@ -27,7 +26,6 @@ export const executeAgent$ = ({
   agentId,
   executionId,
   request,
-  capabilities,
   structuredOutput,
   outputSchema,
   runAgent,
@@ -51,7 +49,6 @@ export const executeAgent$ = ({
   agentId: string;
   executionId: string;
   request: KibanaRequest;
-  capabilities?: AgentCapabilities;
   structuredOutput?: boolean;
   outputSchema?: Record<string, unknown>;
   runAgent: RunAgentFn;
@@ -90,7 +87,6 @@ export const executeAgent$ = ({
         conversation,
         origin,
         author,
-        capabilities,
         browserApiTools,
         configurationOverrides,
         structuredOutput,

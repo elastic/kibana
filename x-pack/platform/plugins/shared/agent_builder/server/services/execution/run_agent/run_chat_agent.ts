@@ -52,7 +52,6 @@ import {
   buildRecentContext,
   type RelevantSkillSelection,
 } from './utils/relevant_skills/select_relevant_skills';
-import { resolveCapabilities } from './utils/capabilities';
 import { resolveConfiguration } from './utils/configuration';
 import { ensureValidInput } from './utils/preflight_checks';
 import { buildPendingRoundActions } from './utils/build_pending_round_actions';
@@ -97,7 +96,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     origin,
     author,
     agentConfiguration,
-    capabilities,
     runId = uuidv4(),
     agentId,
     abortSignal,
@@ -154,7 +152,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const subagentTracker = new SubagentTracker(conversation?.state?.subagents);
 
   const model = await modelProvider.getDefaultModel();
-  const resolvedCapabilities = resolveCapabilities(capabilities);
   const resolvedConfiguration = resolveConfiguration(agentConfiguration);
 
   // Context-aware skill filtering is active only when its flag is on AND a dedicated fast model is
@@ -276,7 +273,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     context,
     agentId,
     executionId,
-    capabilities,
     abortSignal,
     backgroundExecutionService,
     updateConversationMetadata,
@@ -354,7 +350,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
 
   const promptFactory = createPromptFactory({
     configuration: resolvedConfiguration,
-    capabilities: resolvedCapabilities,
     spaceId: context.spaceId,
     skills: filteredSkills,
     processedConversation,
@@ -375,7 +370,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     chatModel: model.chatModel,
     toolManager,
     configuration: resolvedConfiguration,
-    capabilities: resolvedCapabilities,
     structuredOutput,
     outputSchema,
     processedConversation,
