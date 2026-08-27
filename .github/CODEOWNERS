@@ -151,7 +151,6 @@ src/core/packages/chrome/browser-hooks @elastic/appex-sharedux
 src/core/packages/chrome/browser-internal @elastic/appex-sharedux
 src/core/packages/chrome/browser-internal-types @elastic/appex-sharedux
 src/core/packages/chrome/browser-mocks @elastic/appex-sharedux
-src/core/packages/chrome/feature-flags @elastic/appex-sharedux
 src/core/packages/chrome/layout/core-chrome-layout @elastic/appex-sharedux
 src/core/packages/chrome/layout/core-chrome-layout-constants @elastic/appex-sharedux
 src/core/packages/chrome/layout/core-chrome-layout-utils @elastic/appex-sharedux
@@ -3140,6 +3139,20 @@ x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/
 # Significant Events managed workflows
 src/platform/packages/shared/kbn-workflows/managed/definitions/significant_events @elastic/obs-sig-events-team
 
+# PND managed workflows (shared files: index, constants, template values, rule workflows)
+src/platform/packages/shared/kbn-workflows/managed/definitions/pnd @elastic/security-solution
+# Per-watch definitions. Keep @elastic/security-solution until product-team ownership is settled.
+src/platform/packages/shared/kbn-workflows/managed/definitions/pnd/watch_floor.ts @elastic/security-solution
+src/platform/packages/shared/kbn-workflows/managed/definitions/pnd/watch_floor.yaml @elastic/security-solution
+src/platform/packages/shared/kbn-workflows/managed/definitions/pnd/watch_officer.ts @elastic/security-solution
+src/platform/packages/shared/kbn-workflows/managed/definitions/pnd/watch_officer.yaml @elastic/security-solution
+src/platform/packages/shared/kbn-workflows/managed/definitions/pnd/watch_dark.ts @elastic/security-solution
+src/platform/packages/shared/kbn-workflows/managed/definitions/pnd/watch_dark.yaml @elastic/security-solution
+src/platform/packages/shared/kbn-workflows/managed/definitions/pnd/watch_deep.ts @elastic/security-solution
+src/platform/packages/shared/kbn-workflows/managed/definitions/pnd/watch_deep.yaml @elastic/security-solution
+src/platform/packages/shared/kbn-workflows/managed/definitions/pnd/watch_detection.ts @elastic/security-solution
+src/platform/packages/shared/kbn-workflows/managed/definitions/pnd/watch_detection.yaml @elastic/security-solution
+
 # Alert analysis workflow
 src/platform/packages/shared/kbn-workflows/managed/definitions/alert_analysis @elastic/security-threat-hunting
 
@@ -3779,6 +3792,7 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 /.github/workflows/failed-test-investigator.* @elastic/kibana-operations @elastic/appex-qa
 /.github/workflows/flaky-test-fixer.* @elastic/kibana-operations @elastic/appex-qa
 /.github/workflows/flaky-fix-verifier.* @elastic/kibana-operations @elastic/appex-qa
+/.github/workflows/shared/flaky-test-fix-guardrails.md @elastic/kibana-operations @elastic/appex-qa
 /.github/workflows/flaky-fix-review-reminder.yml @elastic/appex-qa
 /.github/scripts/flaky_fix_review_reminder* @elastic/appex-qa
 /.github/aw/ @elastic/kibana-operations
