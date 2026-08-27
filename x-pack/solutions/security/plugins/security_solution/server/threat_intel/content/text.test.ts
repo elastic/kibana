@@ -1151,11 +1151,12 @@ describe('entity-encoded bodies inside feed wrappers', () => {
     expect(stripHtml(html)).toContain('<script>');
   });
 
-  // A wrapper alongside real content is not sole-child packaging, so it stays put.
-  it('does not peel a wrapper that sits beside real content', () => {
-    expect(stripHtml('<description>&lt;p&gt;a&lt;/p&gt;</description><p>real</p>')).toBe(
-      '<p>a</p> real'
-    );
+  // Originally asserted that a wrapper beside real content stays put, which was the
+  // sole-child restriction rather than a desired behavior. A `<description>` carrying an
+  // encoded body is that body wherever it sits, and requiring it to be the only child meant
+  // no realistic feed ever qualified.
+  it('expands a wrapper that sits beside real content', () => {
+    expect(stripHtml('<description>&lt;p&gt;a&lt;/p&gt;</description><p>real</p>')).toBe('a real');
   });
 });
 
@@ -1515,5 +1516,92 @@ describe('Atom text constructs respect their type attribute', () => {
         '<summary type="html">&lt;p&gt;evil.com&lt;/p&gt;&lt;p&gt;bad.net&lt;/p&gt;</summary>'
       )
     ).toBe('evil.com\nbad.net');
+  });
+});
+
+/**
+ * An encoded feed body is expanded wherever its wrapper sits, not only when the wrapper is
+ * the sole meaningful child at every level.
+ *
+ * The sole-child restriction meant no realistic feed qualified: `<channel>` has a `<title>`
+ * beside its `<item>`, an Atom `<entry>` has a title and a link beside its summary, and a
+ * feed has more than one item. Peeling stopped at the first level with siblings, so the
+ * encoded body kept its markup in body_text and a hidden script URL reached IOC extraction.
+ * The only shape that worked was the single-child chain the earlier test happened to use.
+ */
+describe('encoded bodies in realistic feed documents', () => {
+  const ENCODED = '&lt;script&gt;fetch("https://false-ioc.test")&lt;/script&gt;safe';
+
+  it.each([
+    [
+      'a channel with feed metadata beside the item',
+      `<rss><channel><title>Feed</title><item><description>${ENCODED}</description></item></channel></rss>`,
+      'Feed safe',
+    ],
+    [
+      'multiple items',
+      `<rss><channel><item><description>${ENCODED}</description></item><item><description>x</description></item></channel></rss>`,
+      'safe x',
+    ],
+    [
+      'an atom entry with a title and link beside the summary',
+      `<feed><entry><title>T</title><link href="x"/><summary type="html">${ENCODED}</summary></entry></feed>`,
+      'T safe',
+    ],
+    [
+      'a wrapper beside unrelated content',
+      '<description>&lt;p&gt;a&lt;/p&gt;</description><p>real</p>',
+      'a real',
+    ],
+  ])('expands the encoded body in %s', (_label, html, expected) => {
+    const result = stripHtml(html);
+
+    expect(result).toBe(expected);
+    expect(result).not.toContain('false-ioc.test');
+  });
+
+  it('keeps structured boundaries through a realistic feed', () => {
+    expect(
+      htmlToStructured(
+        '<rss><channel><title>F</title><item><description>' +
+          '&lt;p&gt;evil.com&lt;/p&gt;&lt;p&gt;bad.net&lt;/p&gt;' +
+          '</description></item></channel></rss>'
+      )
+    ).toBe('F\nevil.com\nbad.net');
+  });
+
+  // Everything the previous rounds established has to survive expanding in place.
+  it.each([
+    [
+      'a text-typed atom summary',
+      '<feed><entry><title>T</title><summary type="text">Uses &lt;script&gt; c2.evil.test</summary></entry></feed>',
+      'T Uses <script> c2.evil.test',
+    ],
+    [
+      'a snippet displayed in code',
+      '<code>&lt;script&gt;fetch("https://c2.evil.test")&lt;/script&gt;</code>',
+      '<script>fetch("https://c2.evil.test")</script>',
+    ],
+    ['prose mentioning a tag', 'use &lt;br/&gt; carefully', 'use <br/> carefully'],
+    [
+      'a CDATA body',
+      '<description><![CDATA[<p>IOC: evil.test</p>]]></description>',
+      'IOC: evil.test',
+    ],
+  ])('still preserves %s', (_label, html, expected) => {
+    expect(stripHtml(html)).toBe(expected);
+  });
+
+  // Expansion is bounded by the same depth counter CDATA uses, so a wrapper nested in a
+  // wrapper cannot spin and a document full of wrappers stays linear.
+  it.each([
+    ['deeply nested wrappers', `${'<description>'.repeat(50000)}x`],
+    ['many sibling wrappers', '<description>&lt;p&gt;x&lt;/p&gt;</description>'.repeat(50000)],
+  ])('stays bounded on %s', (_label, input) => {
+    const started = process.hrtime.bigint();
+    expect(() => stripHtml(input)).not.toThrow();
+    const elapsedMs = Number(process.hrtime.bigint() - started) / 1e6;
+
+    expect(elapsedMs).toBeLessThan(3000);
   });
 });

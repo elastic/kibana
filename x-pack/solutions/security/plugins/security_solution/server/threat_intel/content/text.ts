@@ -604,6 +604,30 @@ const hrefOf = (node: ParsedNode): string | undefined => {
  * Used for CDATA, whose payload the parser hands back as opaque text rather than as a
  * parsed subtree.
  */
+/**
+ * An encoded-HTML wrapper carrying nothing but text, which is a payload to re-parse.
+ *
+ * Handled per element during the walk rather than by peeling the whole document, because
+ * requiring the wrapper to be the sole meaningful child at every level meant no realistic
+ * feed qualified. `<channel>` has a `<title>` beside its `<item>`, an Atom `<entry>` has a
+ * title and a link beside its summary, and a feed has more than one item, so peeling stopped
+ * at the first level with siblings and the encoded body kept its markup in `body_text`. The
+ * only shape that worked was the single-child chain my own test happened to use.
+ *
+ * Requiring text-only children is what keeps this from firing on the structural containers
+ * that share the wrapper name list: `<item>` and `<channel>` hold elements, so they are
+ * walked normally.
+ */
+const isTextOnlyEncodedWrapper = (node: ParsedNode): boolean => {
+  if (!isElement(node) || !isEncodedHtmlWrapper(node)) return false;
+  const children = childrenOf(node);
+  return (
+    children.length > 0 &&
+    children.every((child) => child.type === 'text') &&
+    rawTextOf(children).trim() !== ''
+  );
+};
+
 const rawTextOf = (nodes: ParsedNode[]): string => {
   const out: string[] = [];
   const stack: ParsedNode[] = [...nodes].reverse();
@@ -689,6 +713,13 @@ const inlineTextOf = (nodes: ParsedNode[], liftHrefs: boolean): string => {
         out.push(' ');
       } else if (RAW_TEXT_NAMES.has(elementName(node))) {
         out.push(' ');
+      } else if (cdataDepth < MAX_CDATA_DEPTH && isTextOnlyEncodedWrapper(node)) {
+        // A feed wrapper whose payload is text is that feed's encoded body, wherever it sits
+        // in the document. Parsed into this walk, bounded by the same depth counter CDATA
+        // uses, so a wrapper nested in a wrapper cannot spin.
+        out.push(' ');
+        stack.push({ kind: 'emit', text: ' ' });
+        pushNodes(stack, parseTopLevelNodes(rawTextOf(childrenOf(node))), cdataDepth + 1);
       } else if (liftedHref !== undefined) {
         out.push(` ${collapseWhitespace(inlineTextOf(childrenOf(node), false))} ${liftedHref} `);
       } else if (INLINE_NAMES.has(elementName(node))) {
@@ -831,6 +862,12 @@ const renderStructured = (html: string): string => {
         out.push(' ');
       } else if (RAW_TEXT_NAMES.has(name)) {
         out.push(' ');
+      } else if (cdataDepth < MAX_CDATA_DEPTH && isTextOnlyEncodedWrapper(node)) {
+        // Same as the plain-text walker. Section state is walker-local, so feeding the
+        // payload onto this stack inherits it.
+        out.push('\n');
+        stack.push({ kind: 'emit', text: '\n' });
+        pushNodes(stack, parseTopLevelNodes(rawTextOf(childrenOf(node))), cdataDepth + 1);
       } else if (HEADING_NAMES.has(name)) {
         const depth = Number(name.slice(1));
         const text = collapseWhitespace(inlineTextOf(childrenOf(node), false));
