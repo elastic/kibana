@@ -361,7 +361,7 @@ The AI Index schema has these base fields (all required unless noted):
 | `content` | text + semantic | Free-text for semantic retrieval: purpose, questions answered, access patterns |
 | `tags` | keyword[] | Filter facets |
 | `attributes` | flattened | **Structured, keyword-queryable metadata** — use for any field that agents or users will filter/aggregate on. Also holds every quality, grounding, and lifecycle field (`confidence`, `coverage`, `evidence`, `expires_at`, `excluded`, …) — see below. |
-| `@timestamp` | date | When this KI was last profiled; enables recency guards on scheduled runs. Set automatically by `context-engine.createKi` — never include it in the `ki` object. |
+| `@timestamp` | date | When this KI was last profiled; enables recency guards on scheduled runs. Exists on the **stored document** only — `context-engine.createKi` sets it at write time, so leave it out of the `ki` step input (a supplied value would override the step's). |
 
 **Everything else lives inside `attributes`.** Rather than declaring bespoke mappings for quality/lifecycle fields — which would risk mapping conflicts on long-lived indices — put them all inside `attributes`. Because `attributes` is `flattened`, arbitrary nested keys are accepted without explicit mappings and can never conflict, while staying keyword-queryable. This applies to both the quality/grounding fields and the lifecycle fields:
 
@@ -463,8 +463,8 @@ setting (`contextEngine:enabled`); confirm availability and exact params with
   re-runs with the same `ki_id` replace the KI, making writes idempotent (see the KI upsert
   below). Index-backed AI indices accept `ki_id`; data-stream-backed AI indices generate the
   id and **reject** a supplied `ki_id` (the write fails).
-- The `ki` object is the "KI document shape" above: `type` and `title` required;
-  `description`, `content`, `tags`, `attributes` optional.
+- The `ki` object is the "KI document shape" above minus `@timestamp` (the step writes
+  that): `type` and `title` required; `description`, `content`, `tags`, `attributes` optional.
 
 ### Verification gate — required on every write
 
@@ -490,6 +490,11 @@ writes:
    passes. In the `else` branch, surface `steps.verify_ki.output.results` (verifier +
    reason) with a `console` step so failures are visible, never silently dropped.
 4. The write — `context-engine.createKi`, or `context-engine.updateKi` on a collision.
+
+The gate is identical for index-backed and data-stream-backed AI indices; only the `ki_id`
+rules above differ. Data streams generate the document id, so their writes are always
+`createKi` without `ki_id` — each run appends a new entry (the timeseries model) — and the
+upsert pattern below applies only to index-backed AI indices.
 
 ### KI upsert (dedup across runs)
 
