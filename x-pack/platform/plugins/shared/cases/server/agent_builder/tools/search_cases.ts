@@ -394,7 +394,7 @@ Returns metadata only; for comments/alert/event attachments call \`platform.core
     },
     tags: ['cases'],
     availability: {
-      cacheMode: 'space' as const,
+      cacheMode: 'space',
       handler: async ({ request }) => getCasesToolAvailability({ core: coreSetup, request }),
     },
   };

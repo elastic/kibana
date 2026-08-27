@@ -149,7 +149,7 @@ export const manageCasesTool = (
     schema: manageCasesSchema,
     tags: ['cases'],
     availability: {
-      cacheMode: 'space' as const,
+      cacheMode: 'space',
       handler: async ({ request }) => getCasesToolAvailability({ core: coreSetup, request }),
     },
     handler: async (args, toolContext) => {
