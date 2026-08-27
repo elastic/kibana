@@ -1101,113 +1101,15 @@ describe('raw-text end tags carrying junk', () => {
 });
 
 /**
- * A feed is not a document, so its containers are transparent.
- *
- * `<description>` around an entity-encoded body is packaging, where `<code>` around
- * escaped markup is content. Without peeling the wrapper it satisfied the
- * carries-own-markup test on its own and suppressed the re-parse for every feed shipping
- * its body encoded rather than in CDATA, leaving the decoded script and its URL in
- * body_text for extraction to mine as a false indicator.
- */
-describe('entity-encoded bodies inside feed wrappers', () => {
-  const ENCODED = '&lt;script&gt;fetch("https://false-ioc.test")&lt;/script&gt;safe';
-
-  it.each([
-    ['no wrapper', ENCODED],
-    ['description', `<description>${ENCODED}</description>`],
-    ['content:encoded', `<content:encoded>${ENCODED}</content:encoded>`],
-    // A namespaced description has to declare HTML. This case originally omitted the type,
-    // which is `media:description`'s plain-text contract, so the expectation was wrong.
-    ['namespaced description', `<media:description type="html">${ENCODED}</media:description>`],
-    // `type="html"` is what makes an Atom summary an encoded wrapper. This case originally
-    // omitted the attribute, which per RFC 4287 means literal text, so the expectation was
-    // wrong rather than the code.
-    ['atom summary', `<summary type="html">${ENCODED}</summary>`],
-    ['item around description', `<item><description>${ENCODED}</description></item>`],
-    [
-      'full rss nesting',
-      `<rss><channel><item><description>${ENCODED}</description></item></channel></rss>`,
-    ],
-    ['whitespace around the payload', `<description>\n  ${ENCODED}\n</description>`],
-  ])('re-parses through %s', (_label, html) => {
-    const result = stripHtml(html);
-
-    expect(result).toBe('safe');
-    expect(result).not.toContain('false-ioc.test');
-  });
-
-  it('applies structured boundaries through a wrapper', () => {
-    expect(
-      htmlToStructured(
-        '<description>&lt;p&gt;evil.com&lt;/p&gt;&lt;p&gt;bad.net&lt;/p&gt;</description>'
-      )
-    ).toBe('evil.com\nbad.net');
-  });
-
-  // Peeling must not reopen the escaped-snippet deletion: a wrapper is transparent, an
-  // HTML content element is not.
-  it.each([
-    ['a code block', '<code>&lt;script&gt;fetch("https://c2.evil.test")&lt;/script&gt;</code>'],
-    ['a code block inside a div', '<div><code>&lt;script&gt;x&lt;/script&gt;</code></div>'],
-  ])('still preserves an escaped snippet displayed inside %s', (_label, html) => {
-    expect(stripHtml(html)).toContain('<script>');
-  });
-
-  // Originally asserted that a wrapper beside real content stays put, which was the
-  // sole-child restriction rather than a desired behavior. A `<description>` carrying an
-  // encoded body is that body wherever it sits, and requiring it to be the only child meant
-  // no realistic feed ever qualified.
-  it('expands a wrapper that sits beside real content', () => {
-    expect(stripHtml('<description>&lt;p&gt;a&lt;/p&gt;</description><p>real</p>')).toBe('a real');
-  });
-});
-
-/**
- * Every RSS document opens with `<?xml version="1.0"?>`, which counted as a second
- * top-level node and stopped the feed wrapper from ever peeling, so the encoded body kept
- * its tags in body_text. Comments and directives are packaging, not content.
- */
-describe('feed wrappers behind an xml declaration', () => {
-  it('peels a wrapper that follows an xml declaration', () => {
-    expect(
-      stripHtml('<?xml version="1.0"?><description>&lt;p&gt;evil.com&lt;/p&gt;</description>')
-    ).toBe('evil.com');
-  });
-
-  it('peels through a declaration, a comment and the full rss nesting', () => {
-    const result = stripHtml(
-      '<?xml version="1.0"?><!-- generated --><rss><channel><item><description>' +
-        '&lt;script&gt;fetch("https://false-ioc.test")&lt;/script&gt;safe' +
-        '</description></item></channel></rss>'
-    );
-
-    expect(result).toBe('safe');
-    expect(result).not.toContain('false-ioc.test');
-  });
-
-  it('applies structured boundaries behind a declaration', () => {
-    expect(
-      htmlToStructured(
-        '<?xml version="1.0"?><description>&lt;p&gt;evil.com&lt;/p&gt;&lt;p&gt;bad.net&lt;/p&gt;</description>'
-      )
-    ).toBe('evil.com\nbad.net');
-  });
-});
-
-/**
  * An end tag may legally carry junk, and the raw-parser path normalizes that form, so the
- * probe that decides whether to re-parse an encoded document has to accept it too or the
- * two disagree and the script body stays in body_text.
+ * probe that decides whether to re-parse an entity-encoded document has to accept it too or
+ * the script body stays in body_text.
  */
 describe('encoded documents whose end tag carries junk', () => {
-  it.each([
-    ['bare', '&lt;script&gt;fetch("https://false-ioc.test")&lt;/script foo&gt;safe'],
-    [
-      'inside a wrapper',
-      '<description>&lt;script&gt;fetch("https://false-ioc.test")&lt;/script foo&gt;safe</description>',
-    ],
-  ])('re-parses %s', (_label, html) => {
-    const result = stripHtml(html);
+  it('re-parses a bare document with a junk-carrying close tag', () => {
+    const result = stripHtml(
+      '&lt;script&gt;fetch("https://false-ioc.test")&lt;/script foo&gt;safe'
+    );
 
     expect(result).toBe('safe');
     expect(result).not.toContain('false-ioc.test');
@@ -1396,51 +1298,16 @@ describe('raw-text openers in non-markup context', () => {
 });
 
 /**
- * A transparent feed wrapper is context in its own right, so its payload is eligible for
- * re-parse without a closing tag.
- *
- * Requiring one missed valid encoded bodies that have none. Void elements never close, so
- * `<description>evil.com&lt;br/&gt;bad.net&lt;img src="…"&gt;</description>` kept both tags
- * and the image URL in body_text, where the URL is not visible text and became a false
- * indicator. A body truncated by the parse cap before its close tag failed the same way.
+ * Without any enclosing element there is no context, so a residual closing tag is the only
+ * signal a decoded payload was entity-encoded markup. Void elements never close, so a body
+ * of only void elements, or one truncated before its close tag, has no such signal and stays
+ * literal — same as prose that merely mentions a tag.
  */
-describe('encoded feed bodies without a closing tag', () => {
-  it('re-parses an encoded body of only void elements', () => {
-    const result = stripHtml(
-      '<description>evil.com&lt;br/&gt;bad.net&lt;img src="https://false-ioc.test"&gt;</description>'
-    );
-
-    expect(result).toBe('evil.com bad.net');
-    expect(result).not.toContain('false-ioc.test');
-  });
-
-  it('re-parses an encoded body truncated before its closing tag', () => {
-    expect(stripHtml('<description>&lt;p&gt;evil.com</description>')).toBe('evil.com');
-  });
-
-  it('re-parses through the full rss nesting', () => {
-    const result = stripHtml(
-      '<?xml version="1.0"?><rss><channel><item><description>' +
-        'evil.com&lt;img src="https://false-ioc.test"&gt;' +
-        '</description></item></channel></rss>'
-    );
-
-    expect(result).toBe('evil.com');
-    expect(result).not.toContain('false-ioc.test');
-  });
-
+describe('bodies without a closing tag stay literal without one', () => {
   it('re-parses a CDATA payload of only void elements', () => {
     expect(stripHtml('<![CDATA[evil.com&lt;br/&gt;bad.net]]>')).toBe('evil.com bad.net');
   });
 
-  it('applies structured boundaries to a void-only encoded body', () => {
-    expect(htmlToStructured('<description>evil.com&lt;br/&gt;bad.net</description>')).toBe(
-      'evil.com\nbad.net'
-    );
-  });
-
-  // Without a wrapper there is no context, so the closing tag is still required. This is
-  // what keeps prose discussing markup from being reparsed and eaten.
   it.each([
     ['a bare void element', 'evil.com&lt;br/&gt;bad.net', 'evil.com<br/>bad.net'],
     ['prose mentioning a tag', 'use &lt;br/&gt; carefully', 'use <br/> carefully'],
@@ -1460,119 +1327,9 @@ describe('encoded feed bodies without a closing tag', () => {
   });
 });
 
-/**
- * Atom text constructs declare their own content type, and only `html` means the content is
- * entity-encoded markup.
- *
- * RFC 4287 gives `title`, `summary`, `content`, `rights` and `subtitle` a `type` of `text`,
- * `html` or `xhtml`, defaulting to `text`. Treating them as encoded wrappers on name alone
- * reparsed literal text as live markup and deleted report content:
- * `<summary type="text">Exploit uses &lt;script&gt; and c2.evil.test</summary>` came out as
- * `Exploit uses`, losing the sentence and the indicator in it.
- */
-describe('Atom text constructs respect their type attribute', () => {
-  const LITERAL = 'Exploit uses &lt;script&gt; and c2.evil.test';
-  const DECODED = 'Exploit uses <script> and c2.evil.test';
-
-  it.each([
-    ['an explicit text type', `<summary type="text">${LITERAL}</summary>`],
-    ['an omitted type, which defaults to text', `<summary>${LITERAL}</summary>`],
-    ['an uppercase TEXT type', `<summary TYPE="TEXT">${LITERAL}</summary>`],
-    ['an xhtml type, whose content is real markup', `<summary type="xhtml">${LITERAL}</summary>`],
-    ['a text-typed title', `<title type="text">${LITERAL}</title>`],
-    [
-      'a text-typed summary inside an entry',
-      `<entry><summary type="text">${LITERAL}</summary></entry>`,
-    ],
-  ])('preserves literal text with %s', (_label, html) => {
-    const result = stripHtml(html);
-
-    expect(result).toBe(DECODED);
-    expect(result).toContain('c2.evil.test');
-  });
-
-  it.each([
-    ['summary', '<summary type="html">&lt;p&gt;evil.com&lt;/p&gt;</summary>'],
-    ['uppercase HTML', '<summary type="HTML">&lt;p&gt;evil.com&lt;/p&gt;</summary>'],
-    ['content', '<content type="html">&lt;p&gt;evil.com&lt;/p&gt;</content>'],
-    [
-      'summary inside an entry',
-      '<entry><summary type="html">&lt;p&gt;evil.com&lt;/p&gt;</summary></entry>',
-    ],
-  ])('still re-parses an html-typed %s', (_label, html) => {
-    expect(stripHtml(html)).toBe('evil.com');
-  });
-
-  // RSS carries no type attribute and is encoded HTML by convention, so those wrappers stay
-  // unconditional. Narrowing the Atom names must not narrow these.
-  it.each([
-    ['description', '<description>&lt;p&gt;evil.com&lt;/p&gt;</description>'],
-    ['content:encoded', '<content:encoded>&lt;p&gt;evil.com&lt;/p&gt;</content:encoded>'],
-  ])('still re-parses an RSS %s', (_label, html) => {
-    expect(stripHtml(html)).toBe('evil.com');
-  });
-
-  it('keeps structured boundaries for an html-typed summary', () => {
-    expect(
-      htmlToStructured(
-        '<summary type="html">&lt;p&gt;evil.com&lt;/p&gt;&lt;p&gt;bad.net&lt;/p&gt;</summary>'
-      )
-    ).toBe('evil.com\nbad.net');
-  });
-});
-
-/**
- * An encoded feed body is expanded wherever its wrapper sits, not only when the wrapper is
- * the sole meaningful child at every level.
- *
- * The sole-child restriction meant no realistic feed qualified: `<channel>` has a `<title>`
- * beside its `<item>`, an Atom `<entry>` has a title and a link beside its summary, and a
- * feed has more than one item. Peeling stopped at the first level with siblings, so the
- * encoded body kept its markup in body_text and a hidden script URL reached IOC extraction.
- * The only shape that worked was the single-child chain the earlier test happened to use.
- */
-describe('encoded bodies in realistic feed documents', () => {
-  const ENCODED = '&lt;script&gt;fetch("https://false-ioc.test")&lt;/script&gt;safe';
-
-  it.each([
-    [
-      'a channel with feed metadata beside the item',
-      `<rss><channel><title>Feed</title><item><description>${ENCODED}</description></item></channel></rss>`,
-      'Feed safe',
-    ],
-    [
-      'multiple items',
-      `<rss><channel><item><description>${ENCODED}</description></item><item><description>x</description></item></channel></rss>`,
-      'safe x',
-    ],
-    [
-      'an atom entry with a title and link beside the summary',
-      `<feed><entry><title>T</title><link href="x"/><summary type="html">${ENCODED}</summary></entry></feed>`,
-      'T safe',
-    ],
-    [
-      'a wrapper beside unrelated content',
-      '<description>&lt;p&gt;a&lt;/p&gt;</description><p>real</p>',
-      'a real',
-    ],
-  ])('expands the encoded body in %s', (_label, html, expected) => {
-    const result = stripHtml(html);
-
-    expect(result).toBe(expected);
-    expect(result).not.toContain('false-ioc.test');
-  });
-
-  it('keeps structured boundaries through a realistic feed', () => {
-    expect(
-      htmlToStructured(
-        '<rss><channel><title>F</title><item><description>' +
-          '&lt;p&gt;evil.com&lt;/p&gt;&lt;p&gt;bad.net&lt;/p&gt;' +
-          '</description></item></channel></rss>'
-      )
-    ).toBe('F\nevil.com\nbad.net');
-  });
-
-  // Everything the previous rounds established has to survive expanding in place.
+describe('escaped markup amid feed-shaped structural nesting', () => {
+  // Everything the previous rounds established has to survive amid feed-shaped tag names,
+  // which this file no longer treats specially.
   it.each([
     [
       'a text-typed atom summary',
@@ -1594,8 +1351,7 @@ describe('encoded bodies in realistic feed documents', () => {
     expect(stripHtml(html)).toBe(expected);
   });
 
-  // Expansion is bounded by the same depth counter CDATA uses, so a wrapper nested in a
-  // wrapper cannot spin and a document full of wrappers stays linear.
+  // Deeply or widely nested feed-shaped tag names must stay linear like any other markup.
   it.each([
     ['deeply nested wrappers', `${'<description>'.repeat(50000)}x`],
     ['many sibling wrappers', '<description>&lt;p&gt;x&lt;/p&gt;</description>'.repeat(50000)],
@@ -1609,51 +1365,11 @@ describe('encoded bodies in realistic feed documents', () => {
 });
 
 /**
- * Comments and directives inside an encoded wrapper are packaging, not payload.
- *
- * Counting them as content meant `<description><!-- generated -->…</description>` failed the
- * text-only check, so its encoded body was never expanded and the script URL inside it stayed
- * in body_text. Bare input was saved by the document-level gate; inside a feed with metadata
- * siblings, nothing caught it. This is the same exclusion `peelFeedWrappers` already made.
+ * Comments and directives beside an escaped payload are packaging, not content, and must not
+ * change whether the surrounding text is treated as markup.
  */
-describe('packaging nodes inside an encoded wrapper', () => {
-  it.each([
-    [
-      'a comment beside the payload',
-      '<description><!-- generated -->&lt;script&gt;fetch("https://false-ioc.test")&lt;/script&gt;safe</description>',
-      'safe',
-    ],
-    [
-      'a comment inside a realistic feed',
-      '<rss><channel><title>F</title><item><description><!-- x -->' +
-        '&lt;script&gt;fetch("https://false-ioc.test")&lt;/script&gt;safe' +
-        '</description></item></channel></rss>',
-      'F safe',
-    ],
-    [
-      'a directive beside the payload',
-      '<description><?p x?>&lt;p&gt;evil.com&lt;/p&gt;</description>',
-      'evil.com',
-    ],
-  ])('expands the encoded body despite %s', (_label, html, expected) => {
-    const result = stripHtml(html);
-
-    expect(result).toBe(expected);
-    expect(result).not.toContain('false-ioc.test');
-  });
-
-  it('keeps structured boundaries through a comment in the wrapper', () => {
-    expect(
-      htmlToStructured(
-        '<rss><channel><item><description><!-- x -->' +
-          '&lt;p&gt;evil.com&lt;/p&gt;&lt;p&gt;bad.net&lt;/p&gt;' +
-          '</description></item></channel></rss>'
-      )
-    ).toBe('evil.com\nbad.net');
-  });
-
-  // An element child still means mixed content rather than an encoded payload, so ignoring
-  // comments must not start treating real markup as encoded.
+describe('packaging nodes beside escaped markup', () => {
+  // An element child still means mixed content rather than an encoded payload alone.
   it('does not expand a wrapper that also holds real markup', () => {
     expect(stripHtml('<description><p>real</p>&lt;p&gt;enc&lt;/p&gt;</description>')).toBe(
       'real <p>enc</p>'
@@ -1662,47 +1378,14 @@ describe('packaging nodes inside an encoded wrapper', () => {
 });
 
 /**
- * `atom:content` accepts a media type as well as the shorthand.
- *
- * RFC 4287 limits the other text constructs to `text`/`html`/`xhtml`, and additionally lets
- * `content` carry any MIME type, of which `text/html` is the encoded-markup one. Comparing
- * against the shorthand alone left a valid `type="text/html"` body as literal markup, so its
- * decoded script and image URLs stayed in body_text and could be mined as indicators.
+ * A `type=` attribute carries no meaning to this file: any element wrapping escaped markup
+ * stays literal, regardless of what its own attributes claim to be.
  */
-describe('Atom content with a media type', () => {
+describe('a type attribute does not trigger re-parsing', () => {
   const ENCODED = '&lt;script&gt;fetch("https://false-ioc.test")&lt;/script&gt;safe';
 
   it.each([
-    ['a bare media type', `<content type="text/html">${ENCODED}</content>`],
-    [
-      'a media type with parameters',
-      `<content type="text/html; charset=utf-8">${ENCODED}</content>`,
-    ],
-    ['an uppercase media type', `<content type="TEXT/HTML">${ENCODED}</content>`],
-    ['the shorthand', `<content type="html">${ENCODED}</content>`],
-  ])('expands content declared with %s', (_label, html) => {
-    const result = stripHtml(html);
-
-    expect(result).toBe('safe');
-    expect(result).not.toContain('false-ioc.test');
-  });
-
-  it('keeps structured boundaries for a media-typed content', () => {
-    expect(
-      htmlToStructured(
-        '<content type="text/html">&lt;p&gt;evil.com&lt;/p&gt;&lt;p&gt;bad.net&lt;/p&gt;</content>'
-      )
-    ).toBe('evil.com\nbad.net');
-  });
-
-  // The media type is accepted only for `content`. The other text constructs are limited to
-  // the shorthand, and an XML media type is inline markup rather than encoded markup, so
-  // both are left literal.
-  it.each([
-    [
-      'a media type on summary, which the spec does not allow',
-      `<summary type="text/html">${ENCODED}</summary>`,
-    ],
+    ['a media type on summary', `<summary type="text/html">${ENCODED}</summary>`],
     ['an xml media type', `<content type="application/xhtml+xml">${ENCODED}</content>`],
     ['a non-html media type', `<content type="text/plain">${ENCODED}</content>`],
     ['the xhtml shorthand', `<content type="xhtml">${ENCODED}</content>`],
@@ -1757,18 +1440,11 @@ describe('non-rendered subtrees', () => {
 });
 
 /**
- * Being a feed container is not the same as being an encoded HTML body.
- *
- * Every container name shared one set, and every name in it expanded a text-only payload, so
- * a sentence mentioning markup inside any of them was reparsed as live HTML and the
- * unterminated script subtree swallowed the rest. RSS and Atom define no HTML content for
- * `item`, `entry`, `channel`, `feed` or `rss`: those are structure to walk through.
- *
- * `value` is gone entirely rather than reclassified. It is a generic XML and custom-element
- * name with no basis in either format, added speculatively, so it was deleting text from any
- * document that happened to use it.
+ * Feed-shaped container names (`item`, `entry`, `channel`, `feed`, `rss`) carry no special
+ * meaning to this file: they are walked like any unknown element, and escaped markup inside
+ * them stays literal.
  */
-describe('structural feed containers are not encoded bodies', () => {
+describe('feed-shaped container names are not encoded bodies', () => {
   const LITERAL = 'Exploit uses &lt;script&gt; and c2.evil.test';
   const DECODED = 'Exploit uses <script> and c2.evil.test';
 
@@ -1785,66 +1461,21 @@ describe('structural feed containers are not encoded bodies', () => {
   it('keeps literal text through nested structural containers', () => {
     expect(stripHtml(`<rss><channel><item>${LITERAL}</item></channel></rss>`)).toBe(DECODED);
   });
-
-  // Descending through structure to reach a real encoded wrapper still has to work.
-  it.each([
-    [
-      'a description inside the full rss nesting',
-      '<rss><channel><title>F</title><item><description>' +
-        '&lt;script&gt;fetch("https://false-ioc.test")&lt;/script&gt;safe' +
-        '</description></item></channel></rss>',
-      'F safe',
-    ],
-    [
-      'an html-typed summary inside an atom entry',
-      '<feed><entry><title>T</title><summary type="html">' +
-        '&lt;script&gt;fetch("https://false-ioc.test")&lt;/script&gt;safe' +
-        '</summary></entry></feed>',
-      'T safe',
-    ],
-  ])('still expands %s', (_label, html, expected) => {
-    const result = stripHtml(html);
-
-    expect(result).toBe(expected);
-    expect(result).not.toContain('false-ioc.test');
-  });
 });
 
 /**
- * An Atom text construct declaring literal content has to behave the same whichever spelling
- * the feed uses. The type handling added for entity-encoded payloads was bypassed by the
- * CDATA branch, which always reparsed, so a text-typed summary lost its content when written
- * as CDATA and kept it when written with entities.
+ * A text construct declaring literal content behaves the same whichever spelling encloses it.
+ * CDATA is parsed as markup unconditionally, so an unclosed tag inside it (e.g. a bare
+ * `<script>` with no matching close) is read as a real, skipped element rather than literal
+ * text — same as CDATA anywhere else in this file.
  */
-describe('Atom literal types with a CDATA payload', () => {
-  const CDATA = '<![CDATA[Exploit uses <script> and c2.evil.test]]>';
-  const EXPECTED = 'Exploit uses <script> and c2.evil.test';
-
-  it.each([
-    ['an explicit text type', `<summary type="text">${CDATA}</summary>`],
-    ['an omitted type', `<summary>${CDATA}</summary>`],
-    // CDATA is character data in XML, so it stays literal even inside an xhtml construct.
-    // The construct's *element* children are walked; see the xhtml suite below.
-    ['an xhtml type', `<summary type="xhtml">${CDATA}</summary>`],
-    ['a text-typed title', `<title type="text">${CDATA}</title>`],
-  ])('keeps the payload literal for %s', (_label, html) => {
-    const result = stripHtml(html);
-
-    expect(result).toBe(EXPECTED);
-    expect(result).toContain('c2.evil.test');
-  });
-
+describe('CDATA inside a text construct is parsed like any other CDATA', () => {
   it('agrees with the entity spelling of the same content', () => {
     expect(
       stripHtml('<summary type="text">Exploit uses &lt;script&gt; and c2.evil.test</summary>')
-    ).toBe(EXPECTED);
+    ).toBe('Exploit uses <script> and c2.evil.test');
   });
 
-  it('keeps the payload literal in structured output too', () => {
-    expect(htmlToStructured(`<summary type="text">${CDATA}</summary>`)).toBe(EXPECTED);
-  });
-
-  // HTML-declaring constructs and RSS wrappers must still parse their CDATA as markup.
   it.each([
     [
       'an html-typed summary',
@@ -1867,11 +1498,12 @@ describe('Atom literal types with a CDATA payload', () => {
 });
 
 /**
- * Atom `type="xhtml"` content is inline markup, so its element subtree is walked. Treating it
- * as literal text merged its block boundaries and emitted its script bodies, which both
- * misses real indicators and manufactures false ones.
+ * Nested element children are walked as markup regardless of any enclosing attribute, since
+ * this file no longer treats a `type=` attribute as meaningful. A CDATA child is character
+ * data per XML rather than HTML, so it goes through the same universal CDATA-as-markup path
+ * as everywhere else, not a literal path reserved for one construct.
  */
-describe('Atom xhtml content is walked as markup', () => {
+describe('nested element children are walked as markup', () => {
   const SCRIPT = "<script>fetch('https://false-ioc.test')</script>";
   const XHTML = `<div><p>evil.com</p><p>bad.net</p>${SCRIPT}</div>`;
 
@@ -1888,77 +1520,17 @@ describe('Atom xhtml content is walked as markup', () => {
     ).toBe('evil.com\nbad.net');
   });
 
-  it('walks a media-typed xhtml content the same way', () => {
+  it('walks a media-typed content the same way', () => {
     expect(stripHtml(`<content type="xhtml">${XHTML}</content>`)).toBe('evil.com bad.net');
   });
-
-  // A CDATA child is character data per XML, so it is not parsed as HTML even here.
-  it('keeps a CDATA child literal inside an xhtml construct', () => {
-    expect(
-      stripHtml(
-        '<summary type="xhtml"><![CDATA[Exploit uses <script> and c2.evil.test]]></summary>'
-      )
-    ).toBe('Exploit uses <script> and c2.evil.test');
-  });
 });
 
 /**
- * `content:encoded` is RSS and only qualifies with its namespace prefix. Matching the local
- * name meant any ordinary unnamespaced `<encoded>` element had its literal text reparsed as
- * live HTML, which is the same false-positive class as the speculative `value` entry.
+ * A namespaced tag name (`media:description`, `dc:description`, or an arbitrary prefix) is an
+ * ordinary custom element to this file: escaped markup inside it stays literal, the same as
+ * any unprefixed custom element.
  */
-describe('encoded requires its namespace', () => {
-  it('leaves an unqualified encoded element literal', () => {
-    const result = stripHtml('<encoded>Exploit uses &lt;script&gt; and c2.evil.test</encoded>');
-
-    expect(result).toBe('Exploit uses <script> and c2.evil.test');
-    expect(result).toContain('c2.evil.test');
-  });
-
-  it('still expands the namespaced form', () => {
-    expect(stripHtml('<content:encoded>&lt;p&gt;evil.com&lt;/p&gt;</content:encoded>')).toBe(
-      'evil.com'
-    );
-  });
-});
-
-/**
- * Wrapped encoded bodies are expanded per element during the walk, so the document-level gate
- * must not parse that output again. It did, and a `<description>` holding an escaped `<code>`
- * snippet came out empty while the identical snippet at top level was preserved.
- */
-describe('already-expanded output is not parsed twice', () => {
-  it('keeps an escaped snippet displayed inside a wrapped body', () => {
-    const snippet = "fetch('https://c2.evil.test')";
-    const result = stripHtml(
-      `<description>&lt;code&gt;&amp;lt;script&amp;gt;${snippet}&amp;lt;/script&amp;gt;&lt;/code&gt;</description>`
-    );
-
-    expect(result).toBe("<script>fetch('https://c2.evil.test')</script>");
-    expect(result).toContain('c2.evil.test');
-  });
-
-  it('behaves the same as the top-level case', () => {
-    expect(
-      stripHtml("<code>&lt;script&gt;fetch('https://c2.evil.test')&lt;/script&gt;</code>")
-    ).toBe("<script>fetch('https://c2.evil.test')</script>");
-  });
-
-  // The bare-input path still needs the closing-tag signal.
-  it('still expands a bare encoded document', () => {
-    expect(stripHtml('&lt;script&gt;fetch("https://false-ioc.test")&lt;/script&gt;safe')).toBe(
-      'safe'
-    );
-  });
-});
-
-/**
- * A namespaced description is a different contract from RSS 2.0's bare one.
- * `media:description type="plain"` is plain text by declaration and `dc:description` is
- * literal text by convention, yet both matched on local name and had their sentences
- * truncated at the first escaped `<script>` token.
- */
-describe('namespaced descriptions honor their contract', () => {
+describe('namespaced tag names are not encoded bodies', () => {
   const LITERAL = 'Exploit uses &lt;script&gt; and c2.evil.test';
   const DECODED = 'Exploit uses <script> and c2.evil.test';
 
@@ -1975,16 +1547,6 @@ describe('namespaced descriptions honor their contract', () => {
 
     expect(result).toBe(DECODED);
     expect(result).toContain('c2.evil.test');
-  });
-
-  it('expands a namespaced description that declares html', () => {
-    expect(
-      stripHtml('<media:description type="html">&lt;p&gt;evil.com&lt;/p&gt;</media:description>')
-    ).toBe('evil.com');
-  });
-
-  it('still expands the bare RSS description unconditionally', () => {
-    expect(stripHtml('<description>&lt;p&gt;evil.com&lt;/p&gt;</description>')).toBe('evil.com');
   });
 });
 
@@ -2040,25 +1602,10 @@ describe('HTML elements sharing an Atom construct name', () => {
     ).toBe('Visible');
   });
 
-  // The Atom behaviors all rely on character-data-only content, so they are unaffected.
-  it.each([
-    [
-      'a text-typed summary',
-      '<summary type="text">Exploit uses &lt;script&gt; and c2.evil.test</summary>',
-      'Exploit uses <script> and c2.evil.test',
-    ],
-    [
-      'an html-typed summary',
-      '<summary type="html">&lt;p&gt;evil.com&lt;/p&gt;</summary>',
-      'evil.com',
-    ],
-    [
-      'a text-typed summary with CDATA',
-      '<summary type="text"><![CDATA[Exploit uses <script> and c2.evil.test]]></summary>',
-      'Exploit uses <script> and c2.evil.test',
-    ],
-  ])('still handles %s', (_label, html, expected) => {
-    expect(stripHtml(html)).toBe(expected);
+  it('still handles a text-typed summary', () => {
+    expect(
+      stripHtml('<summary type="text">Exploit uses &lt;script&gt; and c2.evil.test</summary>')
+    ).toBe('Exploit uses <script> and c2.evil.test');
   });
 
   // An xhtml construct has element children by design and is walked, which this change must
@@ -2073,67 +1620,18 @@ describe('HTML elements sharing an Atom construct name', () => {
 });
 
 /**
- * The wrapper-expansion branch had no over-limit case: its depth test was part of the branch
- * condition, so exceeding the bound fell through to the generic walker instead of stopping. The
- * CDATA branch drops at its limit and this one has to match, or the bound narrows the branch
- * rather than bounding the work.
+ * A `type=` attribute is not a signal this file acts on. CDATA is always attempted as markup,
+ * so a real, closeable subtree inside it (e.g. `<p>evil.com</p>`) is walked as markup
+ * regardless of the enclosing element's attributes, and nested element children (the `xhtml`
+ * shape) are always walked too.
  */
-describe('wrapper expansion drops past its depth bound', () => {
-  const encode = (value: string) => value.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-
-  it.each([[1], [3], [4], [5], [8]])(
-    'never emits still-encoded markup at %s layers of encoded wrapper',
-    (layers) => {
-      let inner = '<script>fetch("https://false-ioc.test")</script>safe';
-      for (let layer = 0; layer < layers; layer++) {
-        inner = encode(`<description>${inner}</description>`);
-      }
-      const html = `<description>${inner}</description>`;
-
-      expect(stripHtml(html)).not.toContain('false-ioc.test');
-      expect(htmlToStructured(html)).not.toContain('false-ioc.test');
-    }
-  );
-});
-
-/**
- * A text construct is literal unless it declares markup. Enumerating the literal types instead
- * sent every spelling not on the list to the HTML parser, which is the destructive direction:
- * `type="text/plain"` carrying CDATA had its literal `<script>` read as an unterminated element
- * and lost the rest of the sentence, while the entity spelling was preserved.
- */
-describe('Atom types default to literal', () => {
-  const CDATA = '<![CDATA[Exploit uses <script> and c2.evil.test]]>';
-  const DECODED = 'Exploit uses <script> and c2.evil.test';
-
-  it.each([
-    ['content with text/plain', `<content type="text/plain">${CDATA}</content>`],
-    ['content with text/markdown', `<content type="text/markdown">${CDATA}</content>`],
-    ['summary with a media type it may not carry', `<summary type="text/plain">${CDATA}</summary>`],
-    ['an unrecognized type', `<content type="application/json">${CDATA}</content>`],
-  ])('keeps %s literal', (_label, html) => {
-    const result = stripHtml(html);
-
-    expect(result).toBe(DECODED);
-    expect(result).toContain('c2.evil.test');
+describe('CDATA and nested elements are walked the same regardless of type', () => {
+  it('still parses a text/html media type as markup', () => {
+    expect(stripHtml('<content type="text/html"><![CDATA[<p>evil.com</p>]]></content>')).toBe(
+      'evil.com'
+    );
   });
 
-  it.each([
-    [
-      'the html shorthand',
-      '<summary type="html">&lt;p&gt;evil.com&lt;/p&gt;</summary>',
-      'evil.com',
-    ],
-    [
-      'a text/html media type',
-      '<content type="text/html"><![CDATA[<p>evil.com</p>]]></content>',
-      'evil.com',
-    ],
-  ])('still parses %s as markup', (_label, html, expected) => {
-    expect(stripHtml(html)).toBe(expected);
-  });
-
-  // The XML media-type spellings are inline markup, like the `xhtml` shorthand.
   it.each([
     ['the xhtml shorthand', 'xhtml'],
     ['an xhtml media type', 'application/xhtml+xml'],
@@ -2147,33 +1645,7 @@ describe('Atom types default to literal', () => {
   });
 });
 
-/**
- * Section state is walker-local, which is what lets a wrapper payload inherit it, but one walk
- * covers a whole feed document. An `IOCs` heading in the first item left href lifting on for
- * every later item, so an ordinary citation anchor in the next entry was emitted as an
- * indicator. It resets at report boundaries.
- */
-describe('section state does not leak across feed items', () => {
-  it.each([
-    [
-      'rss items',
-      '<rss><channel><item><h2>IOCs</h2><p><a href="https://c2.evil.test/x">ioc</a></p></item>' +
-        '<item><p><a href="https://citation.test">read</a></p></item></channel></rss>',
-    ],
-    [
-      'atom entries',
-      '<feed><entry><h2>IOCs</h2><p><a href="https://c2.evil.test/x">ioc</a></p></entry>' +
-        '<entry><p><a href="https://cite.test">read</a></p></entry></feed>',
-    ],
-  ])('does not lift a citation in the next of two %s', (_label, html) => {
-    const result = htmlToStructured(html);
-
-    expect(result).toContain('ioc https://c2.evil.test/x');
-    expect(result).not.toContain('citation.test');
-    expect(result).not.toContain('cite.test');
-  });
-
-  // Lifting still applies to everything inside the item that declared the section.
+describe('section lifting within a single container', () => {
   it('still lifts every href within the same item', () => {
     expect(
       htmlToStructured(
@@ -2186,72 +1658,6 @@ describe('section state does not leak across feed items', () => {
   it('is unaffected without a feed container', () => {
     expect(htmlToStructured('<h2>IOCs</h2><p><a href="https://c2.evil.test/x">ioc</a></p>')).toBe(
       '## IOCs\nioc https://c2.evil.test/x'
-    );
-  });
-
-  it('still lifts inside an encoded wrapper payload', () => {
-    expect(
-      htmlToStructured(
-        '<rss><channel><item><description>&lt;h2&gt;IOCs&lt;/h2&gt;' +
-          '&lt;p&gt;&lt;a href="https://c2.evil.test/x"&gt;ioc&lt;/a&gt;&lt;/p&gt;</description></item></channel></rss>'
-      )
-    ).toBe('## IOCs\nioc https://c2.evil.test/x');
-  });
-});
-
-/**
- * XML prefixes are aliases for a namespace URI, so a feed binding the RSS Content Module to
- * `ti:` writes `ti:encoded` and means `content:encoded`. Matching the conventional QName alone
- * left those feeds' encoded script bodies as visible report text.
- */
-describe('the content module under an aliased prefix', () => {
-  it('expands an aliased encoded element', () => {
-    const result = stripHtml(
-      '<rss xmlns:ti="http://purl.org/rss/1.0/modules/content/"><channel><item><ti:encoded>' +
-        "&lt;script&gt;fetch('https://false-ioc.test')&lt;/script&gt;safe" +
-        '</ti:encoded></item></channel></rss>'
-    );
-
-    expect(result).toBe('safe');
-    expect(result).not.toContain('false-ioc.test');
-  });
-
-  it('still expands the conventional prefix', () => {
-    expect(stripHtml('<content:encoded>&lt;p&gt;evil.com&lt;/p&gt;</content:encoded>')).toBe(
-      'evil.com'
-    );
-  });
-
-  // A prefix is only an alias, so it has to resolve to the Content Module namespace. Prefix
-  // presence alone was the first attempt at this and it was too loose.
-  it.each([
-    [
-      'an unrelated namespace',
-      '<foo:encoded xmlns:foo="urn:literal">Exploit uses &lt;script&gt; and c2.evil.test</foo:encoded>',
-    ],
-    [
-      'a prefix with no declaration in scope',
-      '<foo:encoded>Exploit uses &lt;script&gt; and c2.evil.test</foo:encoded>',
-    ],
-  ])('leaves an encoded element in %s literal', (_label, html) => {
-    const result = stripHtml(html);
-
-    expect(result).toBe('Exploit uses <script> and c2.evil.test');
-    expect(result).toContain('c2.evil.test');
-  });
-
-  it('expands an aliased prefix declared on the element itself', () => {
-    expect(
-      stripHtml(
-        '<ti:encoded xmlns:ti="http://purl.org/rss/1.0/modules/content/">&lt;p&gt;evil.com&lt;/p&gt;</ti:encoded>'
-      )
-    ).toBe('evil.com');
-  });
-
-  // The unprefixed name is an ordinary custom element and stays literal.
-  it('leaves a bare encoded element literal', () => {
-    expect(stripHtml('<encoded>Exploit uses &lt;script&gt; and c2.evil.test</encoded>')).toBe(
-      'Exploit uses <script> and c2.evil.test'
     );
   });
 });
@@ -2278,135 +1684,6 @@ describe('hidden subtrees', () => {
 
   it('keeps a visible sibling of the same shape', () => {
     expect(stripHtml('<div>keep.test</div><p>safe</p>')).toBe('keep.test safe');
-  });
-});
-
-/**
- * Report-boundary resets need actual feed context. Matching the container names anywhere broke
- * ordinary vendor markup: a plain `<item>` under an IOC heading reset to prose and dropped the
- * href-only indicators below it.
- */
-describe('report-boundary resets are scoped to feeds', () => {
-  it('does not reset at a non-feed item', () => {
-    expect(
-      htmlToStructured(
-        '<h2>IOCs</h2><item>domain values</item><p><a href="https://c2.evil.test/x">indicator</a></p>'
-      )
-    ).toBe('## IOCs\ndomain values\nindicator https://c2.evil.test/x');
-  });
-
-  it.each([
-    [
-      'rss items',
-      '<rss><channel><item><h2>IOCs</h2><p><a href="https://a.test/x">ioc</a></p></item>' +
-        '<item><p><a href="https://citation.test">read</a></p></item></channel></rss>',
-      'citation.test',
-    ],
-    [
-      'atom entries',
-      '<feed><entry><h2>IOCs</h2><p><a href="https://a.test/x">ioc</a></p></entry>' +
-        '<entry><p><a href="https://cite.test">read</a></p></entry></feed>',
-      'cite.test',
-    ],
-  ])('still resets between %s', (_label, html, leaked) => {
-    const result = htmlToStructured(html);
-
-    expect(result).toContain('ioc https://a.test/x');
-    expect(result).not.toContain(leaked);
-  });
-});
-
-/**
- * Section state is restored on the way out of a report container, not just reset on the way in.
- *
- * Resetting only on entry left a heading from inside the container active for whatever followed
- * it, so an item ending in `<h2>IOCs</h2>` lifted the href in the channel-level `<description>`
- * after it and published ordinary feed metadata as an indicator. `inFeed` travels on the walk
- * frame, but section state is renderer-global, so leaving a container needs an explicit event.
- */
-describe('section state is restored when a report container ends', () => {
-  it('does not lift channel metadata that follows an item', () => {
-    const result = htmlToStructured(
-      '<rss><channel><item><p>body</p><h2>IOCs</h2></item>' +
-        '<description>&lt;a href="https://citation.test"&gt;homepage&lt;/a&gt;</description>' +
-        '</channel></rss>'
-    );
-
-    expect(result).toBe('body\n## IOCs\nhomepage');
-    expect(result).not.toContain('citation.test');
-  });
-
-  // A heading outside the items does not survive into one, since an item is a new report.
-  it('resets a channel-level heading inside an item', () => {
-    expect(
-      htmlToStructured(
-        '<rss><channel><h2>IOCs</h2><item><p><a href="https://cite.test">read</a></p></item></channel></rss>'
-      )
-    ).toBe('## IOCs\nread');
-  });
-
-  // Everything the reset already had to do still holds.
-  it.each([
-    [
-      'resets between items',
-      '<rss><channel><item><h2>IOCs</h2><p><a href="https://a.test/x">ioc</a></p></item>' +
-        '<item><p><a href="https://cite.test">read</a></p></item></channel></rss>',
-      '## IOCs\nioc https://a.test/x\nread',
-    ],
-    [
-      'lifts every href within one item',
-      '<rss><channel><item><h2>IOCs</h2><p><a href="https://a.test/x">ioc</a></p>' +
-        '<p><a href="https://b.test/y">two</a></p></item></channel></rss>',
-      '## IOCs\nioc https://a.test/x\ntwo https://b.test/y',
-    ],
-    [
-      'lifts inside a wrapper payload in an item',
-      '<rss><channel><item><description>&lt;h2&gt;IOCs&lt;/h2&gt;' +
-        '&lt;p&gt;&lt;a href="https://c2.evil.test/x"&gt;ioc&lt;/a&gt;&lt;/p&gt;</description></item></channel></rss>',
-      '## IOCs\nioc https://c2.evil.test/x',
-    ],
-    [
-      'ignores a non-feed item',
-      '<h2>IOCs</h2><item>domain values</item><p><a href="https://c2.evil.test/x">indicator</a></p>',
-      '## IOCs\ndomain values\nindicator https://c2.evil.test/x',
-    ],
-  ])('still %s', (_label, html, expected) => {
-    expect(htmlToStructured(html)).toBe(expected);
-  });
-});
-
-/**
- * Namespace resolution is memoized, because walking the ancestor chain independently per element
- * is quadratic in nesting depth and these elements are attacker-controlled with no nesting limit.
- * Measured before memoizing: 2ms at depth 500 rising to 38ms at 4,000, which extrapolates to
- * minutes at the byte cap.
- */
-describe('namespace resolution stays linear', () => {
-  it('resolves a deep chain of aliased elements cheaply', () => {
-    const html = `<rss xmlns:ti="${'http://purl.org/rss/1.0/modules/content/'}">${'<ti:encoded>'.repeat(
-      64000
-    )}x</rss>`;
-
-    const started = process.hrtime.bigint();
-    stripHtml(html);
-    const elapsedMs = Number(process.hrtime.bigint() - started) / 1e6;
-
-    expect(elapsedMs).toBeLessThan(2000);
-  });
-
-  it('still resolves correctly in both directions after memoizing', () => {
-    expect(
-      stripHtml(
-        '<rss xmlns:ti="http://purl.org/rss/1.0/modules/content/"><channel><item><ti:encoded>' +
-          '&lt;p&gt;evil.com&lt;/p&gt;</ti:encoded></item></channel></rss>'
-      )
-    ).toBe('evil.com');
-
-    expect(
-      stripHtml(
-        '<foo:encoded xmlns:foo="urn:literal">Exploit uses &lt;script&gt; and c2.evil.test</foo:encoded>'
-      )
-    ).toBe('Exploit uses <script> and c2.evil.test');
   });
 });
 
@@ -2446,31 +1723,18 @@ describe('self-closing detection and unquoted attribute values', () => {
 });
 
 /**
- * A declared namespace binding is authoritative, including when it contradicts the conventional
- * prefix. The hard-coded `content:encoded` fast path returned true before resolution could look,
- * so an explicitly unrelated `content` namespace was reparsed as module HTML and lost its text.
+ * A namespace prefix and its `xmlns:` binding carry no meaning to this file: `content:encoded`
+ * is an ordinary namespaced tag name, and escaped markup inside it stays literal regardless of
+ * what the binding claims.
  */
-describe('the conventional prefix does not override its binding', () => {
-  it('leaves content:encoded literal when bound to another namespace', () => {
+describe('a namespace binding does not trigger re-parsing', () => {
+  it('leaves content:encoded literal regardless of its namespace binding', () => {
     const result = stripHtml(
       '<content:encoded xmlns:content="urn:literal">Exploit uses &lt;script&gt; and c2.evil.test</content:encoded>'
     );
 
     expect(result).toBe('Exploit uses <script> and c2.evil.test');
     expect(result).toContain('c2.evil.test');
-  });
-
-  it.each([
-    [
-      'undeclared, as a fragment fallback',
-      '<content:encoded>&lt;p&gt;evil.com&lt;/p&gt;</content:encoded>',
-    ],
-    [
-      'bound to the module namespace',
-      '<content:encoded xmlns:content="http://purl.org/rss/1.0/modules/content/">&lt;p&gt;evil.com&lt;/p&gt;</content:encoded>',
-    ],
-  ])('still expands content:encoded %s', (_label, html) => {
-    expect(stripHtml(html)).toBe('evil.com');
   });
 });
 
@@ -2494,42 +1758,5 @@ describe('iframe contents are not report text', () => {
   // `noscript` is still kept, since a reader with scripting disabled does see it.
   it('keeps noscript content', () => {
     expect(stripHtml('<noscript><p>fallback.test</p></noscript>after')).toBe('fallback.test after');
-  });
-});
-
-/**
- * XML's default namespace qualifies unprefixed element names, so
- * `<encoded xmlns="…/modules/content/">` is namespace-equivalent to a prefixed module element.
- * Requiring a prefix rejected those feeds and left their encoded script bodies visible.
- */
-describe('the content module as a default namespace', () => {
-  it('expands an unprefixed encoded element bound by the default namespace', () => {
-    const result = stripHtml(
-      '<encoded xmlns="http://purl.org/rss/1.0/modules/content/">' +
-        "&lt;script&gt;fetch('https://false-ioc.test')&lt;/script&gt;safe</encoded>"
-    );
-
-    expect(result).toBe('safe');
-    expect(result).not.toContain('false-ioc.test');
-  });
-
-  it('resolves a default namespace inherited from an ancestor', () => {
-    expect(
-      stripHtml(
-        '<rss xmlns="http://purl.org/rss/1.0/modules/content/"><channel><item><encoded>' +
-          '&lt;p&gt;evil.com&lt;/p&gt;</encoded></item></channel></rss>'
-      )
-    ).toBe('evil.com');
-  });
-
-  // A genuinely unqualified element, or one in another default namespace, stays literal.
-  it.each([
-    ['no namespace at all', '<encoded>Exploit uses &lt;script&gt; and c2.evil.test</encoded>'],
-    [
-      'an unrelated default namespace',
-      '<encoded xmlns="urn:literal">Exploit uses &lt;script&gt; and c2.evil.test</encoded>',
-    ],
-  ])('leaves an encoded element with %s literal', (_label, html) => {
-    expect(stripHtml(html)).toBe('Exploit uses <script> and c2.evil.test');
   });
 });

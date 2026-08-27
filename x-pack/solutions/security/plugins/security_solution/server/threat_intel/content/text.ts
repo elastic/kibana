@@ -370,49 +370,6 @@ export const normalizeSelfClosedRawText = (html: string): string => {
 };
 
 /**
- * Textually unwrap CDATA sections, leaving their payload as markup.
- *
- * For `extract_article` only. That stage reasons about the document with selectors, and a
- * selector cannot see inside a CDATA node, so a `<script>` bundle carried in CDATA was
- * invisible to chrome removal while still counting as visible text during scoring. A teaser
- * whose CDATA held a large bundle therefore outscored the real report, won selection, and
- * then collapsed to almost nothing once `stripHtml` expanded the CDATA and dropped the
- * script. Unwrapping before the parse turns the payload into real elements, so chrome
- * removal and scoring both see what the downstream stage will see.
- *
- * Single pass, so a run of unterminated openers costs no more than the input length.
- */
-export const unwrapCdata = (html: string): string => {
-  const lower = asciiLower(html);
-  const pieces: string[] = [];
-  let copiedTo = 0;
-  let cursor = 0;
-
-  while (cursor < html.length) {
-    const open = lower.indexOf('<![cdata[', cursor);
-
-    if (open === -1) {
-      cursor = html.length;
-    } else {
-      pieces.push(html.slice(copiedTo, open));
-      const close = lower.indexOf(']]>', open + 9);
-      if (close === -1) {
-        copiedTo = open + 9;
-        cursor = html.length;
-      } else {
-        pieces.push(html.slice(open + 9, close));
-        copiedTo = close + 3;
-        cursor = close + 3;
-      }
-    }
-  }
-
-  if (copiedTo === 0) return html;
-  pieces.push(html.slice(copiedTo));
-  return pieces.join('');
-};
-
-/**
  * Fragment mode (`isDocument: false`), so a `<description>` snippet is not wrapped in
  * `<html>/<head>/<body>`. It also keeps bare table and list fragments intact, which
  * matters because feed HTML routinely ships a `<tr>` with no enclosing `<table>`.
@@ -483,338 +440,34 @@ const childrenOf = (node: ParsedNode): ParsedNode[] => node.children ?? [];
  */
 const RESIDUAL_CLOSING_TAG = /<\/[a-z][a-z0-9:_-]*(?=[\s/>])/i;
 
-/**
- * A closing tag alone is not enough to justify re-parsing, because escaped markup is
- * also how a report *displays* markup on purpose.
- *
- * `<code>&lt;script&gt;fetch('https://c2.evil.test')&lt;/script&gt;</code>` decodes to
- * text carrying a complete escaped snippet. Re-parsing that read it as a live script
- * element and deleted it, losing the IOC the report was published to communicate. A
- * whole encoded document and an escaped snippet are indistinguishable once decoded, so
- * the decision has to be made from the input instead.
- *
- * The signal is whether the input brought any markup of its own. An entity-encoded
- * document parses to a single text node and nothing else, so a re-parse is the only way
- * to reach its content. Anything with real elements is an already-parsed document, and
- * escaped markup inside it is content the author chose to show.
- *
- * Checked at the top level only, which is where the distinction lives and costs nothing.
- * The trade-off is a mixed document, real markup plus an encoded document inside it,
- * which keeps its encoded tags visible in `body_text`. That is the safe direction: noise
- * the section miner mostly absorbs, against silently deleting indicators.
- */
-/**
- * Feed container elements, which wrap an encoded document without being part of one.
- *
- * A feed is not a document, so its containers are transparent: `<description>` around an
- * entity-encoded body is packaging, where a `<code>` around escaped markup is content.
- * Without peeling them, the wrapper itself satisfied `carriesOwnMarkup` and suppressed the
- * re-parse for every feed that ships its body encoded rather than in CDATA, leaving the
- * decoded `<script>` and its URL in `body_text` for extraction to mine as a false IOC.
- *
- * Matched on the local name, so namespaced spellings (`content:encoded`,
- * `media:description`, `dc:description`) resolve without listing each prefix. `summary` and
- * `title` are HTML element names too, but they only peel as the sole top-level element,
- * which a real HTML document never presents.
- */
-/**
- * Wrappers recognized by their bare, unprefixed name.
- *
- * RSS 2.0 `<description>` only. A namespaced `description` is a different contract and is
- * handled below, because `media:description type="plain"` is plain text by declaration and
- * `dc:description` is literal text by convention, yet both matched here on local name and had
- * their sentences truncated at the first escaped `<script>` token.
- */
-const ENCODED_HTML_WRAPPER_BARE_NAMES = new Set(['description']);
-
-/**
- * Wrappers that only qualify with their namespace prefix.
- *
- * `content:encoded` is RSS. Matching it by local name meant any unnamespaced `<encoded>`
- * element, a perfectly ordinary custom or XML name, had its literal text reparsed as live
- * HTML, so `<encoded>Exploit uses &lt;script&gt; and c2.evil.test</encoded>` lost everything
- * from the script token onward. Same false-positive class as the speculative `value` entry,
- * reached through the namespaced name instead of a bare one.
- */
-const CONTENT_MODULE_NS = 'http://purl.org/rss/1.0/modules/content/';
-
-/**
- * Resolved `xmlns:` bindings, memoized per node.
- *
- * Walking the ancestor chain independently for each element is quadratic in nesting depth, and
- * these elements are attacker-controlled with no nesting limit: `'<ti:encoded>'.repeat(n)` with
- * the declaration at the root made the deepest lookup inspect n ancestors, the next n-1, and so
- * on. Measured 2ms at depth 500 rising to 38ms at 4,000, which extrapolates to minutes at the
- * byte cap. Memoizing every node visited on the way up means each edge is resolved once, so the
- * whole document costs one pass. A `WeakMap` because the nodes live only as long as the parse.
- */
-const namespaceCache = new WeakMap<object, Map<string, string | null>>();
-
-const resolveNamespace = (node: ParsedNode, prefix: string): string | undefined => {
-  const unresolved: ParsedNode[] = [];
-  let current: ParsedNode | null | undefined = node;
-  let found: string | null = null;
-
-  while (current) {
-    const cached = namespaceCache.get(current);
-    if (cached?.has(prefix)) {
-      found = cached.get(prefix) ?? null;
-      break;
-    }
-
-    const bound = current.attribs?.[prefix === '' ? 'xmlns' : `xmlns:${prefix}`];
-    if (bound !== undefined) {
-      found = bound.trim();
-      break;
-    }
-
-    unresolved.push(current);
-    current = current.parent;
-  }
-
-  for (const visited of unresolved) {
-    let bindings = namespaceCache.get(visited);
-    if (!bindings) {
-      bindings = new Map();
-      namespaceCache.set(visited, bindings);
-    }
-    bindings.set(prefix, found);
-  }
-
-  return found ?? undefined;
-};
-
-/**
- * Whether this element is the RSS Content Module's `encoded`, resolved by namespace.
- *
- * XML prefixes are aliases, so a feed binding the module to `ti:` writes `ti:encoded` and means
- * exactly `content:encoded`. Matching the conventional QName alone left those feeds' encoded
- * script bodies as visible report text.
- *
- * Prefix presence alone was the first attempt and it was too loose: an `encoded` element in an
- * unrelated namespace, `<foo:encoded xmlns:foo="urn:literal">`, had its literal text reparsed as
- * live markup and lost the sentence after the escaped script token. The in-scope `xmlns:` binding
- * is resolved from the ancestor chain instead.
- *
- * The conventional `content:` prefix is accepted without a declaration, because feed bodies reach
- * this code as fragments whose root element, and with it the declaration, is often gone.
- */
-const isContentModuleEncoded = (node: ParsedNode, qualified: string): boolean => {
-  const colon = qualified.indexOf(':');
-  const local = colon > 0 ? qualified.slice(colon + 1) : qualified;
-  if (local !== 'encoded') return false;
-
-  // XML's default namespace qualifies unprefixed element names too, so
-  // `<encoded xmlns="…/modules/content/">` is namespace-equivalent to a prefixed module element.
-  // Requiring a prefix rejected those feeds and left their encoded script bodies visible. An
-  // `<encoded>` with no default namespace in scope is genuinely unqualified and still rejected,
-  // which is the distinction an earlier finding on this set asked for.
-  if (colon <= 0) return resolveNamespace(node, '') === CONTENT_MODULE_NS;
-
-  const prefix = qualified.slice(0, colon);
-  const bound = resolveNamespace(node, prefix);
-
-  // A declared binding is authoritative, including when it contradicts the conventional prefix:
-  // `<content:encoded xmlns:content="urn:literal">` is not the module, and the hard-coded fast
-  // path for that QName was returning true before this helper could look. The undeclared
-  // conventional prefix stays a fallback, because feed bodies reach this code as fragments whose
-  // root declaration is usually gone.
-  return bound === undefined ? prefix === 'content' : bound === CONTENT_MODULE_NS;
-};
-
-/**
- * Feed containers that are descended through but never treated as an encoded body.
- *
- * These were in the same set as `description` and it cost report content. Every name in the
- * old set expanded its payload when that payload was text-only, so a sentence mentioning
- * markup inside any of them was reparsed as live HTML and the unterminated script subtree
- * swallowed the rest: `<item>Exploit uses &lt;script&gt; and c2.evil.test</item>` came out as
- * `Exploit uses`, losing the indicator. RSS and Atom define no HTML content for `item`,
- * `entry`, `channel`, `feed` or `rss`, so they are structure to walk through and nothing more.
- *
- * `value` is gone entirely rather than moved. It is a generic XML and custom-element name
- * with no basis in either format, and I had added it speculatively, so it was deleting text
- * from any document that happened to use it.
- */
-const STRUCTURAL_FEED_CONTAINERS = new Set(['item', 'entry', 'channel', 'feed', 'rss']);
-
-/**
- * Atom text constructs, which declare their own content type.
- *
- * RFC 4287 gives `title`, `summary`, `content`, `rights` and `subtitle` a `type` attribute
- * of `text`, `html` or `xhtml`, defaulting to `text`. Only `html` means the content is
- * entity-encoded markup. Treating these as wrappers on name alone reparsed literal text as
- * live markup and deleted report content:
- * `<summary type="text">Exploit uses &lt;script&gt; and c2.evil.test</summary>` came out as
- * `Exploit uses`, losing the sentence and the indicator in it.
- *
- * `xhtml` is excluded along with `text`, since its content is real markup rather than
- * encoded markup and needs no second parse. RSS `<description>` and `content:encoded` carry
- * no type attribute and are encoded HTML by convention, so they stay unconditional above.
- *
- * The structural containers are deliberately not here and not in the encoded set: they are
- * walked through, never expanded.
- */
-const ATOM_TEXT_CONSTRUCTS = new Set(['title', 'summary', 'content', 'rights', 'subtitle']);
-
-/**
- * An Atom text construct declaring content that is NOT encoded markup.
- *
- * Its payload is literal, so it is emitted as text rather than walked. The type handling
- * added for entity-encoded payloads was bypassed by the CDATA branch, which always reparsed:
- * `<summary type="text"><![CDATA[Exploit uses <script> and c2.evil.test]]></summary>` had the
- * `<script>` read as an unterminated raw-text element and lost the rest of the sentence and
- * the indicator, while the entity spelling of the same content was preserved. Two spellings
- * of one thing behaving differently is the bug.
- */
-const isLiteralTextConstruct = (node: ParsedNode): boolean => {
-  if (!isElement(node) || !ATOM_TEXT_CONSTRUCTS.has(localName(elementName(node)))) return false;
-
-  // An Atom text construct holds character data and nothing else, so an element child means
-  // this is the HTML element of the same name rather than the Atom one. `summary` is both, and
-  // taking the literal branch for `<details><summary><script>…</script>Visible</summary>` put
-  // the script body and its URL into `body_text`, because that branch emits raw text and does
-  // not apply subtree filtering. Element children now fall through to the normal walk, where
-  // `script` is skipped.
-  if (childrenOf(node).some(isElement)) return false;
-  // Only a text-valued construct is literal. `xhtml` content is inline markup and has to be
-  // walked: taking the literal branch merged its block boundaries and emitted its script
-  // bodies, so `<summary type="xhtml"><div><p>a</p><p>b</p><script>…</script></div></summary>`
-  // produced `ab` joined together with the script text appended.
-  // Literal unless the construct declares markup. Enumerating the literal types instead meant
-  // every spelling not on the list went to the HTML parser, which is the destructive direction:
-  // `<content type="text/plain">` and `<summary type="text/plain">` carrying CDATA had their
-  // literal `<script>` read as an unterminated element and lost the rest of the sentence and the
-  // indicator, while the entity spelling of the same content was preserved. Defaulting to
-  // literal makes an unrecognized or invalid type preserve content rather than delete it.
-  return !isEncodedHtmlWrapper(node) && !isInlineXmlConstruct(node);
-};
-
-/** An element whose text payload is an entity-encoded HTML document. */
-/** Declared type of an Atom text construct, without media-type parameters. */
-const atomType = (node: ParsedNode): string =>
-  (node.attribs?.type ?? '').split(';', 1)[0].trim().toLowerCase();
-
-const isEncodedHtmlWrapper = (node: ParsedNode): boolean => {
-  const qualified = elementName(node);
-  const name = localName(qualified);
-  if (isContentModuleEncoded(node, qualified)) return true;
-  if (ENCODED_HTML_WRAPPER_BARE_NAMES.has(qualified)) return true;
-
-  // A namespaced description has to declare HTML, mirroring the Atom rule below. Media RSS
-  // spells the plain case `type="plain"`, and Dublin Core carries no type at all, so neither
-  // qualifies without saying so.
-  if (ENCODED_HTML_WRAPPER_BARE_NAMES.has(name)) return atomType(node) === 'html';
-
-  if (!ATOM_TEXT_CONSTRUCTS.has(name)) return false;
-
-  const type = atomType(node);
-  if (type === 'html') return true;
-
-  // Only `atom:content` accepts a media type. RFC 4287 limits the other text constructs to
-  // the `text`/`html`/`xhtml` shorthand, and `content` additionally permits any MIME type,
-  // of which `text/html` is the encoded-markup one. An XML media type or anything ending in
-  // `+xml` is inline markup rather than encoded markup, so it is excluded for the same reason
-  // the `xhtml` shorthand is.
-  return name === 'content' && type === 'text/html';
-};
-
-const localName = (name: string): string => name.slice(name.lastIndexOf(':') + 1);
-
-/**
- * Strip transparent feed wrappers so eligibility is judged on the payload.
- *
- * Only peels a wrapper that is the sole meaningful child, so a wrapper sitting alongside
- * real content is left in place. Depth-bounded because the loop is driven by input shape.
- */
-const peelFeedWrappers = (nodes: ParsedNode[]): ParsedNode[] => {
-  let current = nodes;
-
-  for (let depth = 0; depth < 8; depth++) {
-    // Comments and directives are not content, and excluding them matters for the common
-    // case rather than an exotic one: every RSS document opens with `<?xml version="1.0"?>`,
-    // which counted as a second top-level node and stopped the wrapper from ever peeling,
-    // leaving the encoded body's tags in `body_text`.
-    const meaningful = current.filter((node) => {
-      if (node.type === 'comment' || node.type === 'directive') return false;
-      return node.type !== 'text' || (node.data ?? '').trim() !== '';
-    });
-    const [only] = meaningful;
-    const isWrapper =
-      meaningful.length === 1 &&
-      only !== undefined &&
-      isElement(only) &&
-      (isEncodedHtmlWrapper(only) || STRUCTURAL_FEED_CONTAINERS.has(localName(elementName(only))));
-
-    if (!isWrapper || only === undefined) return current;
-    current = childrenOf(only);
-  }
-
-  return current;
-};
-
 const payloadCarriesMarkup = (payload: ParsedNode[]): boolean =>
   payload.some((node) => isElement(node) || node.type === 'cdata');
 
 /**
  * Whether a decoded result should be parsed a second time.
  *
- * One gate rather than the two that had drifted apart in `stripHtml` and
- * `htmlToStructured`. Two conditions, and the second is what makes a wrapper worth
- * detecting:
- *
  * Markup of its own disqualifies the input, because escaped markup inside a real document
- * is content the author chose to display and re-parsing it deleted the indicator the report
- * was published to communicate.
- *
- * Otherwise a residual closing tag is the signal, *or* the payload arrived inside a
- * transparent feed wrapper. A closing tag alone missed valid encoded bodies that have none:
- * void elements never close, so
- * `<description>evil.com&lt;br/&gt;bad.net&lt;img src="…"&gt;</description>` kept both tags
- * and the image URL in `body_text`, where the URL is not visible text and became a false
- * indicator. A body truncated by the parse cap before its close tag failed the same way. The
- * wrapper is enough context on its own: a `<description>` whose only child is text is that
- * feed's encoded body, closing tag or not.
- *
- * A bare payload with no wrapper still needs the closing tag, which is what keeps prose
- * discussing `use &lt;br/&gt; carefully` from being reparsed and eaten.
+ * is content the author chose to display, and re-parsing it deleted the indicator the report
+ * was published to communicate — see `RESIDUAL_CLOSING_TAG`'s doc for the specific case.
+ * Otherwise a residual closing tag surviving into the decoded text is the only remaining
+ * signal available, since a whole encoded document and an escaped snippet are
+ * indistinguishable once decoded.
  */
-const shouldReparse = (nodes: ParsedNode[], decoded: string, inWrapper = false): boolean => {
-  const payload = peelFeedWrappers(nodes);
-  if (payloadCarriesMarkup(payload)) return false;
-
-  // A wrapper disqualifies the input rather than qualifying it, which is the reverse of what
-  // this gate used to do. Wrapped encoded bodies are expanded per element during the walk, so
-  // by the time we get here that work is done and `decoded` is the expanded output. Running it
-  // through a second parse deleted markup the report displayed on purpose: a `<description>`
-  // holding an escaped `<code>` snippet came out empty, while the identical snippet at top
-  // level was preserved. Structural containers are peeled here too, and they are also handled
-  // by the walk, so the same reasoning covers them.
-  if (payload !== nodes) return false;
-
-  // Bare input only. No wrapper said what this is, so a closing tag in the decoded text is
-  // the signal, and that is what keeps prose discussing markup from being reparsed and eaten.
-  return inWrapper || RESIDUAL_CLOSING_TAG.test(decoded);
-};
+const shouldReparse = (nodes: ParsedNode[], decoded: string): boolean =>
+  !payloadCarriesMarkup(nodes) && RESIDUAL_CLOSING_TAG.test(decoded);
 
 /** Stack entry: a node still to visit, or literal output to append after its subtree. */
 type WalkStep =
-  | { kind: 'node'; node: ParsedNode; cdataDepth: number; literalCdata: boolean; inFeed: boolean }
-  | { kind: 'emit'; text: string }
-  // Restores section state after a report container's subtree. Only the structured renderer
-  // produces these, because only it carries section state.
-  | { kind: 'section'; sectionKind: SectionKind; sectionDepth: number };
-
-/** Feed document roots. Their descendants are report containers; elsewhere the names are not. */
-const FEED_ROOT_NAMES = new Set(['rss', 'feed']);
+  | { kind: 'node'; node: ParsedNode; cdataDepth: number }
+  | { kind: 'emit'; text: string };
 
 /**
  * How many times a CDATA payload may be expanded into the walk.
  *
- * CDATA cannot legally nest, so real feeds need one. The bound exists because malformed
- * input can look like it nests: `'<![CDATA['.repeat(n)` parses as one unterminated node per
- * pass, and expanding each one re-parsed the remaining text. Measured before the bound at
- * 10ms for n=200, 740ms for n=2,000, and a hard `RangeError` at n=20,000.
+ * CDATA cannot legally nest, so a well-formed document needs one. The bound exists because
+ * malformed input can look like it nests: `'<![CDATA['.repeat(n)` parses as one unterminated
+ * node per pass, and expanding each one re-parsed the remaining text. Measured before the
+ * bound at 10ms for n=200, 740ms for n=2,000, and a hard `RangeError` at n=20,000.
  *
  * Past the bound the payload is dropped rather than emitted as text. Emitting it was the
  * first thing I tried and it was worse than the bug: unparsed markup went into `body_text`,
@@ -828,37 +481,15 @@ const MAX_CDATA_DEPTH = 4;
 /**
  * Pushed in reverse so the stack pops in document order.
  *
- * The walks in this file are iterative rather than recursive on purpose. Feed HTML is
+ * The walks in this file are iterative rather than recursive on purpose. This content is
  * attacker-controlled and the parser imposes no nesting limit, so `'<div>'.repeat(n)`
  * builds an arbitrarily deep tree; a recursive walk would exhaust the call stack and
  * take the task worker down with it.
  */
-const pushNodes = (
-  stack: WalkStep[],
-  nodes: ParsedNode[],
-  cdataDepth = 0,
-  literalCdata = false,
-  inFeed = false
-): void => {
+const pushNodes = (stack: WalkStep[], nodes: ParsedNode[], cdataDepth = 0): void => {
   for (let i = nodes.length - 1; i >= 0; i--) {
-    stack.push({ kind: 'node', node: nodes[i], cdataDepth, literalCdata, inFeed });
+    stack.push({ kind: 'node', node: nodes[i], cdataDepth });
   }
-};
-
-/**
- * An Atom construct whose content is inline XML markup.
- *
- * Walked like any element subtree, but its CDATA children are character data by definition
- * in XML, so they are not parsed as HTML. Parsing them read a `<script>` inside the payload
- * as a real raw-text element and lost the rest of the sentence with it.
- */
-const isInlineXmlConstruct = (node: ParsedNode): boolean => {
-  if (!isElement(node) || !ATOM_TEXT_CONSTRUCTS.has(localName(elementName(node)))) return false;
-  const type = atomType(node);
-  // The shorthand plus the media-type spellings RFC 4287 treats as inline XML.
-  return (
-    type === 'xhtml' || type.endsWith('+xml') || type === 'text/xml' || type === 'application/xml'
-  );
 };
 
 const hrefOf = (node: ParsedNode): string | undefined => {
@@ -867,54 +498,11 @@ const hrefOf = (node: ParsedNode): string | undefined => {
 };
 
 /**
- * Text of a subtree with a space at every element boundary.
- *
- * The boundary is the whole point: `<td>evil.com</td><td>bad.net</td>` has to yield two
- * tokens, not `evil.combad.net`. Concatenating text nodes (what a plain `.text()` does)
- * merges adjacent indicators into one value that IOC extraction can never match.
- *
- * `liftHrefs` reproduces the anchor-href lift for IOC and reference sections, where the
- * link target is itself the indicator.
- */
-/**
  * Concatenated text of a subtree, ignoring element structure.
  *
  * Used for CDATA, whose payload the parser hands back as opaque text rather than as a
  * parsed subtree.
  */
-/**
- * An encoded-HTML wrapper carrying nothing but text, which is a payload to re-parse.
- *
- * Handled per element during the walk rather than by peeling the whole document, because
- * requiring the wrapper to be the sole meaningful child at every level meant no realistic
- * feed qualified. `<channel>` has a `<title>` beside its `<item>`, an Atom `<entry>` has a
- * title and a link beside its summary, and a feed has more than one item, so peeling stopped
- * at the first level with siblings and the encoded body kept its markup in `body_text`. The
- * only shape that worked was the single-child chain my own test happened to use.
- *
- * Requiring text-only children is what keeps this from firing on the structural containers
- * that share the wrapper name list: `<item>` and `<channel>` hold elements, so they are
- * walked normally.
- */
-const isTextOnlyEncodedWrapper = (node: ParsedNode): boolean => {
-  if (!isElement(node) || !isEncodedHtmlWrapper(node)) return false;
-
-  // Comments and directives are packaging, not payload, and `rawTextOf` already contributes
-  // nothing for them. Counting them as content meant a feed writing
-  // `<description><!-- generated -->…</description>` failed the text-only check, so its
-  // encoded body was never expanded and the script URL inside it stayed in `body_text`. This
-  // is the same exclusion `peelFeedWrappers` makes, which I applied there and not here.
-  const children = childrenOf(node).filter(
-    (child) => child.type !== 'comment' && child.type !== 'directive'
-  );
-
-  return (
-    children.length > 0 &&
-    children.every((child) => child.type === 'text') &&
-    rawTextOf(children).trim() !== ''
-  );
-};
-
 const rawTextOf = (nodes: ParsedNode[]): string => {
   const out: string[] = [];
   const stack: ParsedNode[] = [...nodes].reverse();
@@ -938,24 +526,17 @@ const rawTextOf = (nodes: ParsedNode[]): string => {
 /**
  * Parse a CDATA payload into nodes.
  *
- * CDATA content is literal, so a feed that entity-encoded its body *and* wrapped it in
- * CDATA arrives with the markup still encoded after one parse. That left
- * `<![CDATA[&lt;script&gt;fetch("…")&lt;/script&gt;safe]]>` yielding the script body and its
- * URL as visible text for extraction to mine. Same decision `stripHtml` makes on its own
- * input, applied to the payload, and bounded to one extra parse.
+ * RSS and Atom carry an entire HTML document inside `<![CDATA[ ... ]]>`, and the parser
+ * hands the payload back as opaque text rather than a parsed subtree, so it has to be
+ * parsed or the whole article body is lost. CDATA content is also literal, so a document
+ * that entity-encoded its body *and* wrapped it in CDATA arrives with the markup still
+ * encoded after one parse: `<![CDATA[&lt;script&gt;fetch("…")&lt;/script&gt;safe]]>` would
+ * otherwise yield the script body and its URL as visible text. Same decision `shouldReparse`
+ * makes on a top-level document, applied to the payload, and bounded to one extra parse.
  */
 const parseCdataPayload = (raw: string): ParsedNode[] => {
   const nodes = parseTopLevelNodes(raw);
-  const payload = peelFeedWrappers(nodes);
-
-  // Checked before anything decodes the payload. `inlineTextOf` walks CDATA nodes by calling
-  // back into this function, so computing the decoded text first turned the pair into
-  // unbounded mutual recursion: the walker's depth bound lives on its stack and does not
-  // reach this path. `'<![CDATA['.repeat(1000)` hung outright.
-  if (payloadCarriesMarkup(payload)) return nodes;
-
-  // No closing tag required, because the CDATA section is itself the context: its payload is
-  // the feed's body whether or not that body happens to contain one.
+  if (payloadCarriesMarkup(nodes)) return nodes;
   return parseTopLevelNodes(inlineTextOf(nodes, false));
 };
 
@@ -970,17 +551,13 @@ const inlineTextOf = (nodes: ParsedNode[], liftHrefs: boolean): string => {
 
     if (step.kind === 'emit') {
       out.push(step.text);
-    } else if (step.kind === 'section') {
-      // Never produced by this walker; it carries no section state.
     } else {
-      const { node, cdataDepth, literalCdata, inFeed } = step;
+      const { node, cdataDepth } = step;
       const liftedHref =
         isElement(node) && liftHrefs && elementName(node) === 'a' ? hrefOf(node) : undefined;
 
       if (node.type === 'text') {
         out.push(node.data ?? '');
-      } else if (node.type === 'cdata' && literalCdata) {
-        out.push(` ${rawTextOf(childrenOf(node))} `);
       } else if (node.type === 'cdata') {
         // RSS and Atom carry an entire HTML document inside `<![CDATA[ ... ]]>`, and the
         // parser hands the payload back as opaque text rather than a parsed subtree, so it
@@ -993,12 +570,7 @@ const inlineTextOf = (nodes: ParsedNode[], liftHrefs: boolean): string => {
         out.push(' ');
         stack.push({ kind: 'emit', text: ' ' });
         if (cdataDepth < MAX_CDATA_DEPTH) {
-          pushNodes(
-            stack,
-            parseCdataPayload(rawTextOf(childrenOf(node))),
-            cdataDepth + 1,
-            literalCdata
-          );
+          pushNodes(stack, parseCdataPayload(rawTextOf(childrenOf(node))), cdataDepth + 1);
         }
       } else if (!isElement(node)) {
         // Comments and directives carry no report text, but they did separate
@@ -1009,44 +581,14 @@ const inlineTextOf = (nodes: ParsedNode[], liftHrefs: boolean): string => {
         out.push(' ');
       } else if (isSkippedSubtree(node)) {
         out.push(' ');
-      } else if (isInlineXmlConstruct(node)) {
-        pushNodes(stack, childrenOf(node), cdataDepth, true, inFeed);
-      } else if (isLiteralTextConstruct(node)) {
-        // Atom says this payload is text, so it is emitted rather than walked.
-        //
-        // Markers unwrapped rather than left in place, because HTML treats `<title>` as an
-        // escapable raw-text element and so hands back `<![CDATA[ … ]]>` as literal
-        // characters, where `<summary>` gets a parsed CDATA node. Without this, one Atom text
-        // construct showed the markers and the other did not, for the same input.
-        out.push(` ${unwrapCdata(rawTextOf(childrenOf(node)))} `);
-      } else if (isTextOnlyEncodedWrapper(node)) {
-        // A feed wrapper whose payload is text is that feed's encoded body, wherever it sits
-        // in the document. Parsed into this walk, bounded by the same depth counter CDATA
-        // uses, so a wrapper nested in a wrapper cannot spin.
-        //
-        // Past the bound the payload is dropped rather than falling through to the generic
-        // walker, which would emit the still-encoded markup as visible text. The CDATA branch
-        // already dropped at its limit; this one had no over-limit case at all, so the bound
-        // narrowed the branch instead of bounding it.
-        out.push(' ');
-        stack.push({ kind: 'emit', text: ' ' });
-        if (cdataDepth < MAX_CDATA_DEPTH) {
-          pushNodes(
-            stack,
-            parseTopLevelNodes(rawTextOf(childrenOf(node))),
-            cdataDepth + 1,
-            literalCdata,
-            inFeed
-          );
-        }
       } else if (liftedHref !== undefined) {
         out.push(` ${collapseWhitespace(inlineTextOf(childrenOf(node), false))} ${liftedHref} `);
       } else if (INLINE_NAMES.has(elementName(node))) {
-        pushNodes(stack, childrenOf(node), cdataDepth, literalCdata, inFeed);
+        pushNodes(stack, childrenOf(node), cdataDepth);
       } else {
         out.push(' ');
         stack.push({ kind: 'emit', text: ' ' });
-        pushNodes(stack, childrenOf(node), cdataDepth, literalCdata, inFeed);
+        pushNodes(stack, childrenOf(node), cdataDepth);
       }
     }
   }
@@ -1156,11 +698,8 @@ const renderStructured = (html: string): string => {
 
     if (step.kind === 'emit') {
       out.push(step.text);
-    } else if (step.kind === 'section') {
-      sectionKind = step.sectionKind;
-      sectionDepth = step.sectionDepth;
     } else {
-      const { node, cdataDepth, literalCdata, inFeed } = step;
+      const { node, cdataDepth } = step;
       const name = elementName(node);
       // Anchors are lifted only under an IOC or references heading, where the link
       // target is itself the indicator.
@@ -1168,8 +707,6 @@ const renderStructured = (html: string): string => {
 
       if (node.type === 'text') {
         out.push(node.data ?? '');
-      } else if (node.type === 'cdata' && literalCdata) {
-        out.push(`\n${rawTextOf(childrenOf(node))}\n`);
       } else if (node.type === 'cdata') {
         // Same as the plain-text walker, and parsed into this walk for the same reasons.
         // Re-entering `renderStructured` also started a fresh walk whose section state was
@@ -1179,63 +716,13 @@ const renderStructured = (html: string): string => {
         out.push('\n');
         stack.push({ kind: 'emit', text: '\n' });
         if (cdataDepth < MAX_CDATA_DEPTH) {
-          pushNodes(
-            stack,
-            parseCdataPayload(rawTextOf(childrenOf(node))),
-            cdataDepth + 1,
-            literalCdata
-          );
+          pushNodes(stack, parseCdataPayload(rawTextOf(childrenOf(node))), cdataDepth + 1);
         }
       } else if (!isElement(node)) {
         // Comments and doctype contribute a boundary only.
         out.push(' ');
       } else if (isSkippedSubtree(node)) {
         out.push(' ');
-      } else if (FEED_ROOT_NAMES.has(localName(name))) {
-        // Entering a feed document. Everything below is report containers, which is the only
-        // context where the container names mean what they say.
-        out.push('\n');
-        stack.push({ kind: 'emit', text: '\n' });
-        pushNodes(stack, childrenOf(node), cdataDepth, literalCdata, true);
-      } else if (inFeed && STRUCTURAL_FEED_CONTAINERS.has(localName(name))) {
-        // Restored on the way out as well as reset on the way in. Resetting only on entry left a
-        // heading from inside the container active for whatever followed it, so an item ending in
-        // `<h2>IOCs</h2>` lifted the href in the channel-level `<description>` after it and
-        // published ordinary feed metadata as an indicator. `inFeed` travels on the frame, but
-        // section state is renderer-global, so leaving a container needs an explicit event.
-        stack.push({ kind: 'section', sectionKind, sectionDepth });
-        // Section state resets at a report boundary. It is walker-local, which is what lets a
-        // wrapper payload inherit it, but one walk covers a whole feed document, so an `IOCs`
-        // heading in one item left href lifting on for every later item and an ordinary citation
-        // anchor in the next entry was emitted as an indicator.
-        //
-        // Gated on feed context, because resetting on the name alone broke ordinary vendor
-        // markup: `<h2>IOCs</h2><item>domain values</item><p><a href="…">indicator</a></p>` reset
-        // to prose at a plain `<item>` and dropped the href that was still under the heading.
-        sectionKind = 'prose';
-        sectionDepth = 0;
-        out.push('\n');
-        stack.push({ kind: 'emit', text: '\n' });
-        pushNodes(stack, childrenOf(node), cdataDepth, literalCdata, inFeed);
-      } else if (isInlineXmlConstruct(node)) {
-        pushNodes(stack, childrenOf(node), cdataDepth, true, inFeed);
-      } else if (isLiteralTextConstruct(node)) {
-        // Same as the plain-text walker.
-        out.push(`\n${unwrapCdata(rawTextOf(childrenOf(node)))}\n`);
-      } else if (isTextOnlyEncodedWrapper(node)) {
-        // Same as the plain-text walker, including dropping past the depth bound rather than
-        // letting a still-encoded payload through as visible text.
-        out.push('\n');
-        stack.push({ kind: 'emit', text: '\n' });
-        if (cdataDepth < MAX_CDATA_DEPTH) {
-          pushNodes(
-            stack,
-            parseTopLevelNodes(rawTextOf(childrenOf(node))),
-            cdataDepth + 1,
-            literalCdata,
-            inFeed
-          );
-        }
       } else if (HEADING_NAMES.has(name)) {
         const depth = Number(name.slice(1));
         const text = collapseWhitespace(inlineTextOf(childrenOf(node), false));
@@ -1272,10 +759,10 @@ const renderStructured = (html: string): string => {
       } else if (BLOCK_NAMES.has(name)) {
         out.push('\n');
         stack.push({ kind: 'emit', text: '\n' });
-        pushNodes(stack, childrenOf(node), cdataDepth, literalCdata, inFeed);
+        pushNodes(stack, childrenOf(node), cdataDepth);
       } else if (INLINE_NAMES.has(name)) {
         // Inline element: no boundary, contents kept.
-        pushNodes(stack, childrenOf(node), cdataDepth, literalCdata, inFeed);
+        pushNodes(stack, childrenOf(node), cdataDepth);
       } else {
         // Unknown or custom element. Same conservative default as the plain-text
         // walker: treating these as inline merged adjacent indicators, so
@@ -1284,7 +771,7 @@ const renderStructured = (html: string): string => {
         // one thing this structured form exists to preserve.
         out.push('\n');
         stack.push({ kind: 'emit', text: '\n' });
-        pushNodes(stack, childrenOf(node), cdataDepth, literalCdata, inFeed);
+        pushNodes(stack, childrenOf(node), cdataDepth);
       }
     }
   }
