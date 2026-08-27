@@ -43,6 +43,12 @@ describe('timeRangeToDisplayText', () => {
     expect(toDisplay('-15m to -5m')).toBe('15 minutes ago → 5 minutes ago');
   });
 
+  it('keeps chained date math as-is instead of resolving to absolute dates', () => {
+    expect(toDisplay('now/y+3M')).toBe('now/y+3M → now');
+    expect(toDisplay('now-3M/y+3M')).toBe('now-3M/y+3M → now');
+    expect(toDisplay('-1y/y+3M to now/y+3M')).toBe('now-1y/y+3M → now/y+3M');
+  });
+
   it('handles relative to now', () => {
     expect(toDisplay('-1w')).toBe('Last 1 week');
   });
