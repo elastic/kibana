@@ -246,7 +246,8 @@ async function resolveMatchGroup(
   if (row.unresolvedNamespaces.length < row.unresolvedCount) {
     // Two unresolved entities in one namespace (including two `local` hosts
     // sharing an email) decline the whole group, including a clear IDP pair
-    // sitting next to them. That is intentional until product picks otherwise.
+    // sitting next to them. Decline-all is intentional: dropping the doubled
+    // namespace can promote a worse target (two ADs + one Okta → Okta wins).
     stats.skippedAmbiguousBuckets++;
     logger.warn(
       `${ruleId}: declining ambiguous bucket '${row.matchValue}': ${row.unresolvedCount} unresolved entities across ${row.unresolvedNamespaces.length} namespaces`
