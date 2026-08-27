@@ -1,7 +1,7 @@
 ---
 navigation_title: "Google threat intelligence"
 type: reference
-description: "Use the Google threat intelligence connector to retrieve file sandbox behaviour reports and MITRE ATT&CK technique mappings from Google Threat Intelligence."
+description: "Use the Google threat intelligence connector to retrieve file sandbox behavior reports and MITRE ATT&CK technique mappings from Google Threat Intelligence."
 applies_to:
   stack: preview 9.6
   serverless: preview
@@ -9,7 +9,7 @@ applies_to:
 
 # Google threat intelligence connector [google-threat-intelligence-action-type]
 
-The Google threat intelligence connector communicates with the [Google Threat Intelligence (GTI) API](https://gtidocs.virustotal.com/reference/api-overview) to retrieve file sandbox behaviour reports and MITRE ATT&CK technique mappings for a file hash.
+The Google threat intelligence connector communicates with the [Google Threat Intelligence (GTI) API](https://gtidocs.virustotal.com/reference/api-overview) to retrieve file sandbox behavior reports and MITRE ATT&CK technique mappings for a file hash.
 
 ## Create connectors in {{kib}} [define-google-threat-intelligence-ui]
 
@@ -33,7 +33,7 @@ The Google threat intelligence connector has the following actions:
 Get File Behaviours
 :   Retrieve sandbox detonation reports for a file by hash. Each report covers one sandbox run: process tree, files, registry keys and network activity it touched, plus the verdict. Returns an empty collection when the hash is known to GTI but has not been sandboxed.
     - **File hash** (required): SHA-256, SHA-1, or MD5 hash identifying the file.
-    - **Limit** (optional): Maximum number of behaviour reports to retrieve. Minimum 0, maximum 40. Defaults to 10 if omitted.
+    - **Limit** (optional): Maximum number of behavior reports to retrieve. Minimum 0, maximum 40. Defaults to 10 if omitted.
     - **Cursor** (optional): Continuation cursor from a previous response, used to retrieve the next page of results.
 
 Get File MITRE ATT&CK Techniques

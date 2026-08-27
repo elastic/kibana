@@ -49,7 +49,7 @@ export const GoogleThreatIntelligenceConnector: ConnectorSpec = {
     displayName: 'Google Threat Intelligence',
     description: i18n.translate('connectorSpecs.googleThreatIntelligence.metadata.description', {
       defaultMessage:
-        'Get file sandbox behaviour reports and MITRE ATT&CK technique mappings from Google Threat Intelligence',
+        'Get file sandbox behavior reports and MITRE ATT&CK technique mappings from Google Threat Intelligence',
     }),
     minimumLicense: 'enterprise',
     supportedFeatureIds: ['workflows', 'agentBuilder'],
@@ -60,7 +60,21 @@ export const GoogleThreatIntelligenceConnector: ConnectorSpec = {
       {
         type: 'api_key_header',
         defaults: { headerField: 'x-apikey' },
-        overrides: { meta: { 'x-apikey': { placeholder: 'gti-...' } } },
+        overrides: {
+          meta: {
+            'x-apikey': {
+              placeholder: 'gti-...',
+              helpText: i18n.translate(
+                'connectorSpecs.googleThreatIntelligence.auth.apiKey.helpText',
+                {
+                  defaultMessage:
+                    'The key must belong to an account with the GTI Enterprise subscription tier; ' +
+                    'a key without that entitlement fails the Test connector check.',
+                }
+              ),
+            },
+          },
+        },
       },
     ],
   },
@@ -116,7 +130,7 @@ export const GoogleThreatIntelligenceConnector: ConnectorSpec = {
   skill: [
     '## Google Threat Intelligence connector',
     '',
-    '## File sandbox behaviour',
+    '## File sandbox behavior',
     '- `getFileBehaviours` supports paging: pass `limit` (0-40, defaults to 10) to bound the response ' +
       'size, and pass the `cursor` from a previous response to fetch the next page.',
     '',
@@ -140,7 +154,8 @@ export const GoogleThreatIntelligenceConnector: ConnectorSpec = {
         const hasGtiAssessment = Boolean(response.data?.data?.attributes?.gti_assessment);
         if (!hasGtiAssessment) {
           throw new Error(
-            'Your Google Threat Intelligence API Key does not have an Enterprise subscription. Verify your GTI subscription tier.'
+            'This API key does not have an Enterprise subscription. Use a key from an account ' +
+              'with the GTI Enterprise subscription tier.'
           );
         }
         return {};

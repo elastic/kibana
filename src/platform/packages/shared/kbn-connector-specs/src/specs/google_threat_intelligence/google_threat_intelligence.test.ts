@@ -55,34 +55,11 @@ describe('GoogleThreatIntelligenceConnector', () => {
       );
     });
 
-    it('throws on a network/API failure with no response envelope', async () => {
+    it('throws on API/network failure, same as every action (see "GTI API error handling" below)', async () => {
       mockClient.get.mockRejectedValue(new Error('ECONNREFUSED'));
 
       await expect(GoogleThreatIntelligenceConnector.test.handler(mockContext)).rejects.toThrow(
         'ECONNREFUSED'
-      );
-    });
-
-    it('throws an enriched GTI error when the API returns an error envelope', async () => {
-      mockClient.get.mockRejectedValue({
-        response: {
-          status: 401,
-          data: { error: { code: 'WrongCredentialsError', message: 'Wrong API key' } },
-        },
-      });
-
-      await expect(GoogleThreatIntelligenceConnector.test.handler(mockContext)).rejects.toThrow(
-        'GTI API error (401): Wrong API key'
-      );
-    });
-
-    it('falls back to the error code when the envelope has no message', async () => {
-      mockClient.get.mockRejectedValue({
-        response: { status: 400, data: { error: { code: 'BadRequestError' } } },
-      });
-
-      await expect(GoogleThreatIntelligenceConnector.test.handler(mockContext)).rejects.toThrow(
-        'GTI API error (400): BadRequestError'
       );
     });
   });
@@ -92,6 +69,11 @@ describe('GoogleThreatIntelligenceConnector', () => {
 
     it('rejects a malformed hash at the schema level, before the handler runs', () => {
       const result = GetFileBehavioursInputSchema.safeParse({ fileHash: 'test' });
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects a hash longer than 64 characters at the schema level', () => {
+      const result = GetFileBehavioursInputSchema.safeParse({ fileHash: `${SHA256_HASH}a` });
       expect(result.success).toBe(false);
     });
 
@@ -157,12 +139,6 @@ describe('GoogleThreatIntelligenceConnector', () => {
         `GTI API error (404): File "${SHA256_HASH}" not found`
       );
     });
-
-    it('throws on a bare network error with no response envelope', async () => {
-      mockClient.get.mockRejectedValue(new Error('ECONNREFUSED'));
-
-      await expect(handler(mockContext, { fileHash: SHA256_HASH })).rejects.toThrow('ECONNREFUSED');
-    });
   });
 
   describe('getFileMitreAttackTechniques', () => {
@@ -225,8 +201,35 @@ describe('GoogleThreatIntelligenceConnector', () => {
         `GTI API error (404): File "${SHA256_HASH}" not found`
       );
     });
+  });
 
-    it('throws on a bare network error with no response envelope', async () => {
+  describe('GTI API error handling', () => {
+    const handler = GoogleThreatIntelligenceConnector.actions.getFileBehaviours.handler;
+
+    it('throws an enriched GTI error when the API returns an error envelope', async () => {
+      mockClient.get.mockRejectedValue({
+        response: {
+          status: 401,
+          data: { error: { code: 'WrongCredentialsError', message: 'Wrong API key' } },
+        },
+      });
+
+      await expect(handler(mockContext, { fileHash: SHA256_HASH })).rejects.toThrow(
+        'GTI API error (401): Wrong API key'
+      );
+    });
+
+    it('falls back to the error code when the envelope has no message', async () => {
+      mockClient.get.mockRejectedValue({
+        response: { status: 400, data: { error: { code: 'BadRequestError' } } },
+      });
+
+      await expect(handler(mockContext, { fileHash: SHA256_HASH })).rejects.toThrow(
+        'GTI API error (400): BadRequestError'
+      );
+    });
+
+    it('rethrows the original error when the response body is not GTI-shaped, e.g. a bare network error', async () => {
       mockClient.get.mockRejectedValue(new Error('ECONNREFUSED'));
 
       await expect(handler(mockContext, { fileHash: SHA256_HASH })).rejects.toThrow('ECONNREFUSED');

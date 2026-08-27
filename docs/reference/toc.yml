@@ -105,6 +105,7 @@ toc:
           - file: connectors-kibana/google-cloud-monitoring-action-type.md
           - file: connectors-kibana/google-cloud-storage-action-type.md
           - file: connectors-kibana/google-drive-action-type.md
+          - file: connectors-kibana/google-threat-intelligence-action-type.md
           - file: connectors-kibana/grafana-action-type.md
           - file: connectors-kibana/graphql-action-type.md
           - file: connectors-kibana/greynoise-action-type.md
@@ -145,7 +146,6 @@ toc:
           - file: connectors-kibana/zabbix-action-type.md
           - file: connectors-kibana/zendesk-action-type.md
           - file: connectors-kibana/zoom-action-type.md
-          - file: connectors-kibana/google-threat-intelligence-action-type.md
       - file: connectors-kibana/pre-configured-connectors.md
   - file: kibana-plugins.md
   - file: commands.md
