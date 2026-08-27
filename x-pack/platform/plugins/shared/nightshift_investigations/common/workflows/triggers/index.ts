@@ -14,7 +14,7 @@ export type InvestigationSubjectType = (typeof INVESTIGATION_SUBJECT_TYPES)[numb
 
 export const INVESTIGATION_TRIGGER_TYPES = ['automatic', 'manual'] as const;
 export type InvestigationTriggerType = (typeof INVESTIGATION_TRIGGER_TYPES)[number];
-export const DEFAULT_INVESTIGATION_TRIGGER_TYPE: InvestigationTriggerType = 'automatic';
+export const DEFAULT_INVESTIGATION_TRIGGER_TYPE: InvestigationTriggerType = 'manual';
 
 export const INVESTIGATION_STARTED_TRIGGER_ID = 'nightshift-investigations.started' as const;
 export const INVESTIGATION_COMPLETED_TRIGGER_ID = 'nightshift-investigations.completed' as const;
@@ -67,10 +67,13 @@ export interface InvestigationsTriggerPayloadMap {
 
 export type InvestigationsTriggerId = keyof InvestigationsTriggerPayloadMap;
 
-const notifyExample = (messageLine: string): string => `## Notify on a lifecycle change
+const notifyExample = (
+  triggerId: string,
+  messageLine: string
+): string => `## Notify on a lifecycle change
 \`\`\`yaml
 triggers:
-  - type: {triggerId}
+  - type: ${triggerId}
 steps:
   - name: notify
     type: action.slack
@@ -101,14 +104,9 @@ export const investigationStartedTriggerCommonDefinition: CommonTriggerDefinitio
       }
     ),
     examples: [
-      i18n.translate(
-        'xpack.nightshiftInvestigations.workflowTriggers.investigationStarted.documentation.example',
-        {
-          defaultMessage: notifyExample(
-            'Investigation started for {{event.subject.type}} {{event.subject.id}}'
-          ),
-          values: { triggerId: INVESTIGATION_STARTED_TRIGGER_ID },
-        }
+      notifyExample(
+        INVESTIGATION_STARTED_TRIGGER_ID,
+        'Investigation started for {{event.subject.type}} {{event.subject.id}}'
       ),
     ],
   },
@@ -138,12 +136,9 @@ export const investigationCompletedTriggerCommonDefinition: CommonTriggerDefinit
       }
     ),
     examples: [
-      i18n.translate(
-        'xpack.nightshiftInvestigations.workflowTriggers.investigationCompleted.documentation.example',
-        {
-          defaultMessage: notifyExample('Investigation {{event.investigation_id}} completed'),
-          values: { triggerId: INVESTIGATION_COMPLETED_TRIGGER_ID },
-        }
+      notifyExample(
+        INVESTIGATION_COMPLETED_TRIGGER_ID,
+        'Investigation {{event.investigation_id}} completed'
       ),
     ],
   },
@@ -175,12 +170,9 @@ export const investigationFailedTriggerCommonDefinition: CommonTriggerDefinition
       }
     ),
     examples: [
-      i18n.translate(
-        'xpack.nightshiftInvestigations.workflowTriggers.investigationFailed.documentation.example',
-        {
-          defaultMessage: notifyExample('Investigation {{event.investigation_id}} failed'),
-          values: { triggerId: INVESTIGATION_FAILED_TRIGGER_ID },
-        }
+      notifyExample(
+        INVESTIGATION_FAILED_TRIGGER_ID,
+        'Investigation {{event.investigation_id}} failed'
       ),
     ],
   },

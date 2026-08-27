@@ -104,13 +104,12 @@ function recoverSubjectFromInput(
   const ctx = input?.context;
   if (!isPlainObject(ctx)) return undefined;
   if (ctx.source === 'significant_event') {
-    return {
-      type: 'significant_event',
-      id: String(ctx.significant_event_id ?? ctx.event_id ?? ''),
-    };
+    const id = asString(ctx.event_id) ?? asString(ctx.significant_event_id);
+    return id ? { type: 'significant_event', id } : undefined;
   }
   if (ctx.source === 'alert') {
-    return { type: 'alert', id: String(ctx.alert_id ?? '') };
+    const id = asString(ctx.alert_id);
+    return id ? { type: 'alert', id } : undefined;
   }
   return undefined;
 }

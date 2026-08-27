@@ -157,6 +157,39 @@ describe('NightshiftInvestigationsClient.get()', () => {
       expect(result.subject).toEqual({ type: 'alert', id: 'alert-99' });
     });
 
+    it('prefers the stable event_id over significant_event_id when both are present', async () => {
+      mockManagement.getWorkflowExecution.mockResolvedValue(
+        makeExecution({
+          context: {
+            inputs: {
+              context: {
+                source: 'significant_event',
+                event_id: 'checkout-latency-breach',
+                significant_event_id: 'event-uuid-1',
+              },
+            },
+          },
+        })
+      );
+      const result = await makeClient().get('inv-1');
+      expect(result.subject).toEqual({
+        type: 'significant_event',
+        id: 'checkout-latency-breach',
+      });
+    });
+
+    it('returns no subject when the recovered significant_event id is empty', async () => {
+      mockManagement.getWorkflowExecution.mockResolvedValue(
+        makeExecution({
+          context: {
+            inputs: { context: { source: 'significant_event', significant_event_id: '' } },
+          },
+        })
+      );
+      const result = await makeClient().get('inv-1');
+      expect(result.subject).toBeUndefined();
+    });
+
     it('returns no subject when context is missing', async () => {
       mockManagement.getWorkflowExecution.mockResolvedValue(makeExecution());
       const result = await makeClient().get('inv-1');
@@ -492,7 +525,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
         context: expect.objectContaining({
           source: 'alert',
           alert_id: 'alert-1',
-          trigger_type: 'automatic',
+          trigger_type: 'manual',
         }),
       }),
       expect.anything(),
@@ -507,14 +540,14 @@ describe('NightshiftInvestigationsClient.start()', () => {
 
     await makeClient().start({
       subject: { type: 'alert', id: 'alert-2' },
-      trigger_type: 'manual',
+      trigger_type: 'automatic',
     });
 
     expect(mockManagement.runWorkflow).toHaveBeenCalledWith(
       expect.anything(),
       SPACE_ID,
       expect.objectContaining({
-        context: expect.objectContaining({ trigger_type: 'manual' }),
+        context: expect.objectContaining({ trigger_type: 'automatic' }),
       }),
       expect.anything(),
       'nightshift-investigations'

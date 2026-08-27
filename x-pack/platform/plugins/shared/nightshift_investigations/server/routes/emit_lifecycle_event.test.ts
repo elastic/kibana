@@ -54,7 +54,7 @@ it('emits the started trigger with identity taken from the execution', async () 
   });
 });
 
-it('defaults trigger_type to automatic for executions started before it was tracked', async () => {
+it('defaults trigger_type to manual for executions started before it was tracked', async () => {
   const emitter = jest.fn();
   const client = makeClient({ trigger_type: undefined });
   const resources = makeResources(
@@ -70,7 +70,7 @@ it('defaults trigger_type to automatic for executions started before it was trac
 
   expect(emitter).toHaveBeenCalledWith(
     'nightshift-investigations.started',
-    expect.objectContaining({ trigger_type: 'automatic' })
+    expect.objectContaining({ trigger_type: 'manual' })
   );
 });
 

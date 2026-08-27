@@ -27,7 +27,7 @@ export interface InvestigationContext {
 export interface StartInvestigationRequest {
   subject: InvestigationSubject;
   /**
-   * What initiated the investigation. Defaults to "automatic" when omitted.
+   * What initiated the investigation. Defaults to "manual" when omitted.
    */
   trigger_type?: InvestigationTriggerType;
   /**
