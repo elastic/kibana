@@ -83,7 +83,7 @@ export const BlastRadius: React.FC<BlastRadiusProps> = ({
                   </EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiBadge color="danger">
+                  <EuiBadge color="primary">
                     {investigations.filter((i) => i.affectedSurface === surface).length}
                   </EuiBadge>
                 </EuiFlexItem>
