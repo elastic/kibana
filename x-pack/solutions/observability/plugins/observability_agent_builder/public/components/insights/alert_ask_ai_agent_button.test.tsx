@@ -45,9 +45,7 @@ const setupMocks = ({
   hasAgentBuilder?: boolean;
 } = {}) => {
   mockUseLicense.mockReturnValue({
-    getLicense: () => ({
-      hasAtLeast: (type: string) => (type === 'enterprise' ? hasEnterpriseLicense : false),
-    }),
+    hasAtLeast: (level: string) => (level === 'enterprise' ? hasEnterpriseLicense : false),
   });
 
   mockUseUiSetting$.mockReturnValue([
@@ -168,7 +166,7 @@ describe('AlertAskAiAgentButton', () => {
 
   it('renders the button but click is silent when agentBuilder has no openChat method', () => {
     mockUseLicense.mockReturnValue({
-      getLicense: () => ({ hasAtLeast: () => true }),
+      hasAtLeast: () => true,
     });
     mockUseUiSetting$.mockReturnValue([AIChatExperience.Agent]);
     mockUseGenAIConnectors.mockReturnValue({ hasConnectors: true });
