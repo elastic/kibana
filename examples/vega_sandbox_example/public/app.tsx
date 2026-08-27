@@ -163,11 +163,14 @@ interface VegaSandboxExampleAppProps {
 export const VegaSandboxExampleApp = ({ http }: VegaSandboxExampleAppProps) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const renderCountRef = useRef(0);
+  // Per-instance prefix prevents renderId collisions across multiple panels on a dashboard.
+  const renderPrefixRef = useRef(`${crypto.randomUUID()}-`);
   const didInitRef = useRef(false);
   const renderSpecRef = useRef<(spec: Spec, extraEntries?: ProtocolLogEntry[]) => void>(() => {});
   const [frameSrc, setFrameSrc] = useState<string | undefined>();
   const [frameEpoch, setFrameEpoch] = useState(0);
   const [frameReady, setFrameReady] = useState(false);
+  const [bootstrapFailed, setBootstrapFailed] = useState(false);
   const [protocolLog, setProtocolLog] = useState<ProtocolLogEntry[]>([]);
   const [appliedCategory, setAppliedCategory] = useState<string | undefined>();
   const [iframeHeight, setIframeHeight] = useState(IFRAME_HEIGHT);
@@ -185,7 +188,7 @@ export const VegaSandboxExampleApp = ({ http }: VegaSandboxExampleAppProps) => {
     (spec: Spec, extraEntries: ProtocolLogEntry[] = []) => {
       const iframe = iframeRef.current;
       renderCountRef.current += 1;
-      const renderId = `r${renderCountRef.current}`;
+      const renderId = `${renderPrefixRef.current}${renderCountRef.current}`;
       const inbound: VegaSandboxInboundMessage[] = [];
       if (!didInitRef.current) {
         didInitRef.current = true;
@@ -238,6 +241,10 @@ export const VegaSandboxExampleApp = ({ http }: VegaSandboxExampleAppProps) => {
 
   useEffect(() => {
     const onMessage = (event: MessageEvent) => {
+      // Authenticate source: only accept messages from our own sandbox iframe.
+      if (event.source !== iframeRef.current?.contentWindow) {
+        return;
+      }
       if (isExampleMessage(event.data)) {
         if (event.data.type === 'isolationProbe') {
           setIsolation({
@@ -246,7 +253,17 @@ export const VegaSandboxExampleApp = ({ http }: VegaSandboxExampleAppProps) => {
         }
         if (event.data.type === 'bootstrapReady') {
           didInitRef.current = false;
+          setBootstrapFailed(false);
           setFrameReady(true);
+        }
+        if (event.data.type === 'bootstrapError') {
+          // Log for developer diagnostics. Production hosts (visTypeVega) should also
+          // call window.elasticApm?.captureError() to surface this in APM.
+          // eslint-disable-next-line no-console
+          console.error(
+            '[vega-sandbox] Bootstrap bundle failed to load. Ensure the package has been built.'
+          );
+          setBootstrapFailed(true);
         }
         return;
       }
@@ -302,11 +319,13 @@ export const VegaSandboxExampleApp = ({ http }: VegaSandboxExampleAppProps) => {
 
   const onReset = () => {
     renderCountRef.current = 0;
+    renderPrefixRef.current = `${crypto.randomUUID()}-`;
     didInitRef.current = false;
     setProtocolLog([]);
     setAppliedCategory(undefined);
     setIframeHeight(IFRAME_HEIGHT);
     setIsolation(undefined);
+    setBootstrapFailed(false);
     setFrameReady(false);
     setFrameEpoch((current) => current + 1);
   };
@@ -378,6 +397,11 @@ export const VegaSandboxExampleApp = ({ http }: VegaSandboxExampleAppProps) => {
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer />
+        {bootstrapFailed ? (
+          <EuiText color="danger" data-test-subj="vegaSandboxExampleBootstrapError">
+            <p>Visualization sandbox failed to load.</p>
+          </EuiText>
+        ) : null}
         {isolation ? (
           <EuiText data-test-subj="vegaSandboxExampleIsolationProbe">
             <p>

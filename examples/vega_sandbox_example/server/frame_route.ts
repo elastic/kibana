@@ -22,6 +22,13 @@ const createExampleFrameCsp = (nonce: string): string =>
     `script-src 'nonce-${nonce}' 'strict-dynamic'`,
     "img-src 'none'",
     "style-src 'unsafe-inline'",
+    // Server-enforced containment — opaque origin and embedding restrictions independent of
+    // the iframe sandbox attribute. Production visTypeVega must include the same directives.
+    'sandbox allow-scripts',
+    "frame-ancestors 'self'",
+    "base-uri 'none'",
+    "form-action 'none'",
+    "object-src 'none'",
   ].join('; ');
 
 const renderFrameDocument = (nonce: string, bundleSrc: string): string => `<!doctype html>
@@ -70,6 +77,12 @@ const renderFrameDocument = (nonce: string, bundleSrc: string): string => `<!doc
         window.parent.postMessage({
           source: 'vega-sandbox-example',
           type: 'bootstrapReady',
+        }, '*');
+      };
+      script.onerror = function () {
+        window.parent.postMessage({
+          source: 'vega-sandbox-example',
+          type: 'bootstrapError',
         }, '*');
       };
       document.head.appendChild(script);

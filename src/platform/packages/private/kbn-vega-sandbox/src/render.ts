@@ -78,10 +78,24 @@ const createViewConfig = (
   const vegaLoader = loader();
   const originalSanitize = vegaLoader.sanitize.bind(vegaLoader);
   vegaLoader.sanitize = async (uri, options) => {
+    // href navigation is handled by the openHref protocol message, not the loader.
+    if (options?.context === 'href') {
+      throw new Error('href navigation is handled via the openHref protocol message');
+    }
+
+    // data.url fetches (no context) are not supported in the sandbox in phase 1 — there is no
+    // connect-src and no parent fetch-proxy. Fail with an actionable error rather than a silent
+    // CSP block. Pending product decision on string data.url support (see design Open Questions).
+    if (!options?.context) {
+      const code = VegaSandboxErrorCode.DataUrlsUnsupported;
+      onError?.({ code, values: { uri } });
+      throw new Error(code);
+    }
+
     // Image marks load inside the opaque iframe under CSP img-src. Validate with the parent
     // first so policy denials surface the same admin-facing errors as the unsandboxed path,
     // instead of a Canvas drawImage InvalidStateError on a broken image.
-    if (options?.context === 'image' && onValidateExternalUrl) {
+    if (options.context === 'image' && onValidateExternalUrl) {
       const decision = await onValidateExternalUrl(uri);
       if (!decision.allowed) {
         const code =

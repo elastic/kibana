@@ -31,12 +31,29 @@ declare global {
   }
 }
 
+// Self-check: refuse to process any messages if the parent document is reachable.
+// This indicates sandbox="allow-scripts" is missing from the embedding iframe.
+const isolationOk: boolean = (() => {
+  try {
+    void window.parent.document;
+    window.parent.postMessage(
+      { type: 'error', error: { code: VegaSandboxErrorCode.IsolationFailure } },
+      '*'
+    );
+    return false;
+  } catch {
+    return true;
+  }
+})();
+
 let controller: VegaSandboxRenderController | undefined;
 let initialized = false;
 let hrefInterceptorInstalled = false;
 let pendingRestoreState: unknown | undefined;
 let renderGeneration = 0;
 let validateRequestCounter = 0;
+// Captured from the first valid init message; narrows targetOrigin for outbound posts.
+let parentOrigin = '*';
 const pendingExternalUrlValidations = new Map<
   string,
   {
@@ -73,7 +90,7 @@ const applyTooltipCss = (tooltipCss?: string): void => {
 };
 
 const postToParent = (message: VegaSandboxOutboundMessage): void => {
-  window.parent.postMessage(message, '*');
+  window.parent.postMessage(message, parentOrigin);
 };
 
 const inspectorSession = createSandboxInspectorSession({
@@ -117,24 +134,32 @@ const handleValidateExternalUrlResult = (
   pending.resolve({ allowed: message.allowed, reason: message.reason });
 };
 
+const isAllowedHref = (href: string): boolean => {
+  try {
+    const { protocol } = new URL(href);
+    return protocol === 'http:' || protocol === 'https:';
+  } catch {
+    return false;
+  }
+};
+
 const installHrefInterceptor = (): void => {
   if (hrefInterceptorInstalled) return;
   hrefInterceptorInstalled = true;
 
-  const originalOpen = window.open;
   window.open = ((url?: string | URL, _target?: string, _features?: string) => {
     const href = typeof url === 'string' ? url : url instanceof URL ? url.toString() : undefined;
-    if (href) {
+    // Sandbox disallows popups/top-navigation; only forward http/https hrefs to the parent.
+    if (href && isAllowedHref(href)) {
       postToParent({ type: 'openHref', href });
     }
-    // The sandbox disallows top navigation/popups, so we never attempt to open directly.
     return null;
   }) as typeof window.open;
 
   const originalAnchorClick = HTMLAnchorElement.prototype.click;
   HTMLAnchorElement.prototype.click = function () {
     const href = this.getAttribute('href') ?? this.href;
-    if (href) {
+    if (href && isAllowedHref(href)) {
       postToParent({ type: 'openHref', href });
       return;
     }
@@ -146,15 +171,12 @@ const installHrefInterceptor = (): void => {
   const originalDispatchEvent = HTMLAnchorElement.prototype.dispatchEvent;
   HTMLAnchorElement.prototype.dispatchEvent = function (event: Event): boolean {
     const href = this.getAttribute('href') ?? this.href;
-    if (href && event.type === 'click') {
+    if (href && event.type === 'click' && isAllowedHref(href)) {
       postToParent({ type: 'openHref', href });
       return false;
     }
     return originalDispatchEvent.call(this, event);
   };
-
-  // Keep a reference so bundlers don't elide it; also helps debugging.
-  void originalOpen;
 };
 
 const isInboundMessage = (value: unknown): value is VegaSandboxInboundMessage =>
@@ -163,11 +185,10 @@ const isInboundMessage = (value: unknown): value is VegaSandboxInboundMessage =>
   !Array.isArray(value) &&
   typeof (value as { type?: unknown }).type === 'string';
 
-const handleInit = ({
-  protocolVersion,
-  colorMode,
-  tooltipCss,
-}: Extract<VegaSandboxInboundMessage, { type: 'init' }>): void => {
+const handleInit = (
+  { protocolVersion, colorMode, tooltipCss }: Extract<VegaSandboxInboundMessage, { type: 'init' }>,
+  origin: string
+): void => {
   if (protocolVersion !== VEGA_SANDBOX_PROTOCOL_VERSION) {
     postToParent({
       type: 'error',
@@ -181,6 +202,9 @@ const handleInit = ({
     });
     return;
   }
+
+  // Narrow targetOrigin for all subsequent outbound posts to the verified parent origin.
+  parentOrigin = origin || '*';
 
   if (colorMode) {
     document.documentElement.style.colorScheme = colorMode === 'DARK' ? 'dark' : 'light';
@@ -209,6 +233,14 @@ const toRestorableState = (state: unknown): unknown => {
 
 const handleRender = async (message: Extract<VegaSandboxInboundMessage, { type: 'render' }>) => {
   if (!initialized) {
+    postToParent({
+      type: 'error',
+      renderId: message.renderId,
+      error: {
+        code: VegaSandboxErrorCode.RenderFailed,
+        values: { message: 'Sandbox not initialized' },
+      },
+    });
     return;
   }
 
@@ -315,13 +347,16 @@ const handleRestoreState = async (state: unknown): Promise<void> => {
 };
 
 const handleMessage = (message: MessageEvent): void => {
+  if (!isolationOk || message.source !== window.parent) {
+    return;
+  }
   if (!isInboundMessage(message.data)) {
     return;
   }
 
   switch (message.data.type) {
     case 'init':
-      handleInit(message.data);
+      handleInit(message.data, message.origin);
       return;
     case 'render':
       handleRender(message.data).catch((error) => {
