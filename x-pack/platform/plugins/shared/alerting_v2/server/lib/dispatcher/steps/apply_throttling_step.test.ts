@@ -481,7 +481,7 @@ describe('applyThrottling', () => {
 
       const { dispatch } = applyThrottling(
         groups,
-        new Map([['p1', policy]]),
+        PolicyCatalog.of(new Map([['p1', policy]])),
         new Map<ActionGroupId, LastNotifiedInfo>(
           groups.map((group) => [group.id, info('2026-01-22T09:30:00.000Z')])
         ),
