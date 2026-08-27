@@ -55,8 +55,6 @@ describe('DeployAndDetectStep', () => {
 
   describe('chip labels', () => {
     it('shows instance name from session storage when instanceId matches', () => {
-      // Use an agentless service (ec2_metrics) — cloudtrail is an ECF service and is filtered
-      // out of the agentless chip row, so it would not appear here.
       setupMocks({
         serviceStatuses: { 'ec2_metrics__dup-1': 'instantiating' },
         instances: [

@@ -5,19 +5,25 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiBadge,
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
+  EuiIcon,
+  EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
+  useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import useSessionStorage from 'react-use/lib/useSessionStorage';
 
 import { AWS_SERVICES_MAP } from '../aws_service_matrix';
 import {
@@ -27,7 +33,18 @@ import {
   buildEcfCrowdstrikeCloudFormationUrl,
 } from '../ecf_cloudformation';
 import type { EcfServiceConfig } from '../ecf_cloudformation';
+import { getOnboardingSessionKey } from '../onboarding_session_storage';
 import type { ServiceInstance, ServiceVars } from './service_settings_step/use_service_settings';
+
+// ── Types ──────────────────────────────────────────────────────────────────────
+
+type EcfTemplateFamily = 'unified' | 'otel' | 'crowdstrike';
+
+interface PersistedEcfLaunchStep {
+  launchedFamilies: EcfTemplateFamily[];
+}
+
+// ── Hook ──────────────────────────────────────────────────────────────────────
 
 interface UseEcfDeploymentOpts {
   instances: ServiceInstance[];
@@ -37,27 +54,41 @@ interface UseEcfDeploymentOpts {
 }
 
 interface UseEcfDeploymentResult {
-  /** True when at least one ECF panel is relevant to the selected services. */
+  /** True when at least one ECF template family is relevant to the selected services. */
   hasAnyEcf: boolean;
   /** Service IDs handled by ECF — used by the parent to exclude them from agentless chips. */
   ecfServiceIds: Set<string>;
+  /** True when all relevant ECF template families have had their Launch button clicked. */
+  isDone: boolean;
   /** Props to spread onto <EcfDeploymentSection />. */
   sectionProps: EcfDeploymentSectionProps;
 }
 
-/** Encapsulates all ECF-related state and URL derivation for the Deploy & Detect step. */
+/** Encapsulates all ECF-related state and URL derivation for the Authenticate & Deploy step. */
 export const useEcfDeployment = ({
   instances,
   serviceVars,
   globalRegion,
   otlpEndpoint,
 }: UseEcfDeploymentOpts): UseEcfDeploymentResult => {
+  const [persistedLaunchStep, setPersistedLaunchStep] = useSessionStorage<PersistedEcfLaunchStep>(
+    getOnboardingSessionKey('aws', 'ecfLaunchStep'),
+    { launchedFamilies: [] }
+  );
+
+  const launchedFamilies: EcfTemplateFamily[] = persistedLaunchStep?.launchedFamilies ?? [];
+
+  const onLaunch = (family: EcfTemplateFamily) => {
+    setPersistedLaunchStep({
+      launchedFamilies: [...new Set([...launchedFamilies, family])],
+    });
+  };
+
   const allEcfConfigs = useMemo(
     () => getEcfServiceConfigs(instances, serviceVars),
     [instances, serviceVars]
   );
 
-  // Unique service IDs across instances — used for template-family detection.
   const selectedServiceIds = useMemo(
     () => [...new Set(instances.map((i) => i.serviceId))],
     [instances]
@@ -89,6 +120,11 @@ export const useEcfDeployment = ({
   const hasEcfOtel = ecfOtelConfigs.length > 0;
   const hasEcfCrowdstrike = ecfCrowdstrikeServices.length > 0;
   const hasAnyEcf = hasEcfUnified || hasEcfOtel || hasEcfCrowdstrike;
+
+  const isDone =
+    (!hasEcfUnified || launchedFamilies.includes('unified')) &&
+    (!hasEcfOtel || launchedFamilies.includes('otel')) &&
+    (!hasEcfCrowdstrike || launchedFamilies.includes('crowdstrike'));
 
   const ecfServiceIds = useMemo(
     () => new Set([...allEcfConfigs.map((c) => c.serviceId), ...ecfCrowdstrikeServices]),
@@ -130,6 +166,7 @@ export const useEcfDeployment = ({
   return {
     hasAnyEcf,
     ecfServiceIds,
+    isDone,
     sectionProps: {
       ecfUnifiedConfigs,
       ecfOtelConfigs,
@@ -137,11 +174,88 @@ export const useEcfDeployment = ({
       unifiedLaunchUrl,
       otelLaunchUrl,
       crowdstrikeLaunchUrl,
+      globalRegion,
+      launchedFamilies,
+      onLaunch,
     },
   };
 };
 
-// ── Component ─────────────────────────────────────────────────────────────────
+// ── EcfFamilyPanel ─────────────────────────────────────────────────────────────
+
+interface EcfFamilyPanelProps {
+  title: React.ReactNode;
+  description: React.ReactNode;
+  serviceIds: string[];
+  launchUrl: string | undefined;
+  isLaunched: boolean;
+  onLaunch: () => void;
+  launchButtonTestSubj: string;
+}
+
+/** Renders the content for one ECF template family (description, launch/deploying UI). */
+const EcfFamilyPanel = ({
+  title,
+  description,
+  serviceIds,
+  launchUrl,
+  isLaunched,
+  onLaunch,
+  launchButtonTestSubj,
+}: EcfFamilyPanelProps) => (
+  <EuiPanel paddingSize="m" hasBorder={false} hasShadow={false}>
+    <EuiTitle size="xs">
+      <h3>{title}</h3>
+    </EuiTitle>
+    <EuiSpacer size="s" />
+    <EuiText size="s" color="subdued">
+      <p>{description}</p>
+    </EuiText>
+    <EuiSpacer size="m" />
+
+    {isLaunched ? (
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiLoadingSpinner size="m" aria-hidden />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="s">
+            <FormattedMessage
+              id="xpack.ingestHub.authenticateAndDeployStep.ecfSection.deployingText"
+              defaultMessage="CloudFormation stack deploying…"
+            />
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ) : (
+      <EuiButton
+        href={launchUrl}
+        target="_blank"
+        iconType="external"
+        iconSide="right"
+        fill
+        onClick={onLaunch}
+        data-test-subj={launchButtonTestSubj}
+      >
+        <FormattedMessage
+          id="xpack.ingestHub.authenticateAndDeployStep.ecfSection.launchButton"
+          defaultMessage="Launch CloudFormation"
+        />
+      </EuiButton>
+    )}
+
+    <EuiHorizontalRule margin="m" />
+    <EuiFlexGroup wrap gutterSize="s">
+      {serviceIds.map((serviceId) => (
+        <EuiFlexItem grow={false} key={serviceId}>
+          <EuiBadge color="hollow">{AWS_SERVICES_MAP.get(serviceId)?.name ?? serviceId}</EuiBadge>
+        </EuiFlexItem>
+      ))}
+    </EuiFlexGroup>
+  </EuiPanel>
+);
+
+// ── EcfDeploymentSection ──────────────────────────────────────────────────────
 
 interface EcfDeploymentSectionProps {
   ecfUnifiedConfigs: EcfServiceConfig[];
@@ -150,9 +264,12 @@ interface EcfDeploymentSectionProps {
   unifiedLaunchUrl: string | undefined;
   otelLaunchUrl: string | undefined;
   crowdstrikeLaunchUrl: string | undefined;
+  globalRegion: string;
+  launchedFamilies: EcfTemplateFamily[];
+  onLaunch: (family: EcfTemplateFamily) => void;
 }
 
-/** Renders the Elastic Cloud Forwarder panels (one per template family) in the Deploy step. */
+/** Collapsible accordion for all Elastic Cloud Forwarder template families in Step 3. */
 export const EcfDeploymentSection = ({
   ecfUnifiedConfigs,
   ecfOtelConfigs,
@@ -160,212 +277,168 @@ export const EcfDeploymentSection = ({
   unifiedLaunchUrl,
   otelLaunchUrl,
   crowdstrikeLaunchUrl,
+  globalRegion,
+  launchedFamilies,
+  onLaunch,
 }: EcfDeploymentSectionProps) => {
+  const { euiTheme } = useEuiTheme();
+  const contentId = useGeneratedHtmlId({ prefix: 'ecfContent' });
+
   const hasEcfUnified = ecfUnifiedConfigs.length > 0;
   const hasEcfOtel = ecfOtelConfigs.length > 0;
   const hasEcfCrowdstrike = ecfCrowdstrikeServices.length > 0;
 
+  const isDone =
+    (!hasEcfUnified || launchedFamilies.includes('unified')) &&
+    (!hasEcfOtel || launchedFamilies.includes('otel')) &&
+    (!hasEcfCrowdstrike || launchedFamilies.includes('crowdstrike'));
+
+  const totalServiceCount =
+    ecfUnifiedConfigs.length + ecfOtelConfigs.length + ecfCrowdstrikeServices.length;
+
+  const [isOpen, setIsOpen] = useState(!isDone);
+
+  useEffect(() => {
+    if (isDone) setIsOpen(false);
+  }, [isDone]);
+
+  const headerButtonCss = css`
+    display: block;
+    width: 100%;
+    text-align: left;
+    background-color: ${euiTheme.colors.backgroundBaseSubdued};
+    border: none;
+    padding: ${euiTheme.size.l} ${euiTheme.size.m};
+    cursor: pointer;
+    border-bottom: ${isOpen ? `1px solid ${euiTheme.colors.borderBaseSubdued}` : 'none'};
+  `;
+
   return (
-    <>
-      <EuiTitle size="s">
-        <h2>
-          <FormattedMessage
-            id="xpack.ingestHub.deployAndDetectStep.ecf.title"
-            defaultMessage="Elastic Cloud Forwarder"
-          />
-        </h2>
-      </EuiTitle>
-      <EuiSpacer size="m" />
-
-      {/* Unified ECS template card */}
-      {hasEcfUnified && (
-        <EuiPanel hasBorder paddingSize="m" data-test-subj="deployAndDetectStep-ecfUnifiedPanel">
-          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="m">
-            <EuiFlexItem>
-              <EuiTitle size="xs">
-                <h3>
-                  <FormattedMessage
-                    id="xpack.ingestHub.deployAndDetectStep.ecf.unifiedStack.title"
-                    defaultMessage="Multi-service stack"
-                  />
-                </h3>
-              </EuiTitle>
-            </EuiFlexItem>
+    <EuiPanel
+      hasBorder
+      paddingSize="none"
+      style={{ overflow: 'hidden', borderColor: euiTheme.colors.borderBaseSubdued }}
+      data-test-subj="ecfDeploymentSection"
+    >
+      <button
+        type="button"
+        css={headerButtonCss}
+        aria-expanded={isOpen}
+        aria-controls={contentId}
+        onClick={() => setIsOpen((v) => !v)}
+        data-test-subj="ecfDeploymentSection-headerButton"
+      >
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="cloud" size="m" color="subdued" aria-hidden />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText size="s">
+              <strong>
+                <FormattedMessage
+                  id="xpack.ingestHub.authenticateAndDeployStep.ecfSection.title"
+                  defaultMessage="Elastic Cloud Forwarder"
+                />
+              </strong>
+            </EuiText>
+          </EuiFlexItem>
+          {isDone && (
             <EuiFlexItem grow={false}>
-              <EuiText size="s" color="subdued">
+              <EuiBadge color="success" iconType="check">
                 <FormattedMessage
-                  id="xpack.ingestHub.deployAndDetectStep.ecf.unifiedStack.serviceCount"
-                  defaultMessage="{count, plural, one {# service} other {# services}}"
-                  values={{ count: ecfUnifiedConfigs.length }}
+                  id="xpack.ingestHub.authenticateAndDeployStep.ecfSection.doneBadge"
+                  defaultMessage="Done"
                 />
-              </EuiText>
+              </EuiBadge>
             </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="s" />
-          <EuiText size="s" color="subdued">
-            <p>
+          )}
+          <EuiFlexItem grow={false}>
+            <EuiText size="s" color="subdued">
               <FormattedMessage
-                id="xpack.ingestHub.deployAndDetectStep.ecf.unifiedStack.description"
-                defaultMessage="Log collection via a single AWS CloudFormation stack — no agents required. Trigger source (S3 or CloudWatch) is configured per service in Service settings."
+                id="xpack.ingestHub.authenticateAndDeployStep.ecfSection.serviceCount"
+                defaultMessage="{count, plural, one {# service} other {# services}}"
+                values={{ count: totalServiceCount }}
               />
-            </p>
-          </EuiText>
-          <EuiSpacer size="m" />
-          <EuiButton
-            href={unifiedLaunchUrl}
-            target="_blank"
-            iconType="external"
-            iconSide="right"
-            fill
-            data-test-subj="deployAndDetectStep-ecfUnifiedLaunchButton"
-          >
-            <FormattedMessage
-              id="xpack.ingestHub.deployAndDetectStep.ecf.unifiedStack.launchButton"
-              defaultMessage="Launch CloudFormation"
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </button>
+
+      {isOpen && (
+        <div id={contentId} role="region">
+          {hasEcfUnified && (
+            <EcfFamilyPanel
+              title={
+                <FormattedMessage
+                  id="xpack.ingestHub.authenticateAndDeployStep.ecfSection.unified.title"
+                  defaultMessage="Multi-service stack"
+                />
+              }
+              description={
+                <FormattedMessage
+                  id="xpack.ingestHub.authenticateAndDeployStep.ecfSection.unified.description"
+                  defaultMessage="Log collection via a single AWS CloudFormation stack — no agents required. Deploys the ECS-compatible template, per the data format chosen in Step 1. Trigger source (S3 or CloudWatch) is configured per service in Service settings. Launch CloudFormation to deploy."
+                />
+              }
+              serviceIds={ecfUnifiedConfigs.map((c) => c.serviceId)}
+              launchUrl={unifiedLaunchUrl}
+              isLaunched={launchedFamilies.includes('unified')}
+              onLaunch={() => onLaunch('unified')}
+              launchButtonTestSubj="ecfDeploymentSection-unifiedLaunchButton"
             />
-          </EuiButton>
-          <EuiHorizontalRule margin="m" />
-          <EuiFlexGroup wrap gutterSize="s">
-            {ecfUnifiedConfigs.map(({ serviceId }) => (
-              <EuiFlexItem grow={false} key={serviceId}>
-                <EuiBadge color="hollow">
-                  {AWS_SERVICES_MAP.get(serviceId)?.name ?? serviceId}
-                </EuiBadge>
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGroup>
-        </EuiPanel>
-      )}
+          )}
 
-      {/* OTel template card */}
-      {hasEcfOtel && (
-        <>
-          {hasEcfUnified && <EuiSpacer size="s" />}
-          <EuiPanel hasBorder paddingSize="m" data-test-subj="deployAndDetectStep-ecfOtelPanel">
-            <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="m">
-              <EuiFlexItem>
-                <EuiTitle size="xs">
-                  <h3>
-                    <FormattedMessage
-                      id="xpack.ingestHub.deployAndDetectStep.ecf.otelStack.title"
-                      defaultMessage="OpenTelemetry stack"
-                    />
-                  </h3>
-                </EuiTitle>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText size="s" color="subdued">
+          {hasEcfOtel && (
+            <>
+              {hasEcfUnified && <EuiHorizontalRule margin="none" />}
+              <EcfFamilyPanel
+                title={
                   <FormattedMessage
-                    id="xpack.ingestHub.deployAndDetectStep.ecf.otelStack.serviceCount"
-                    defaultMessage="{count, plural, one {# service} other {# services}}"
-                    values={{ count: ecfOtelConfigs.length }}
+                    id="xpack.ingestHub.authenticateAndDeployStep.ecfSection.otel.title"
+                    defaultMessage="OpenTelemetry stack"
                   />
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer size="s" />
-            <EuiText size="s" color="subdued">
-              <p>
-                <FormattedMessage
-                  id="xpack.ingestHub.deployAndDetectStep.ecf.otelStack.description"
-                  defaultMessage="Log collection in OpenTelemetry format via a single AWS CloudFormation stack — no agents required. Trigger source (S3 or CloudWatch) is configured per service in Service settings."
-                />
-              </p>
-            </EuiText>
-            <EuiSpacer size="m" />
-            <EuiButton
-              href={otelLaunchUrl}
-              target="_blank"
-              iconType="external"
-              iconSide="right"
-              fill
-              data-test-subj="deployAndDetectStep-ecfOtelLaunchButton"
-            >
-              <FormattedMessage
-                id="xpack.ingestHub.deployAndDetectStep.ecf.otelStack.launchButton"
-                defaultMessage="Launch CloudFormation"
+                }
+                description={
+                  <FormattedMessage
+                    id="xpack.ingestHub.authenticateAndDeployStep.ecfSection.otel.description"
+                    defaultMessage="Log collection in OpenTelemetry format via a single AWS CloudFormation stack — no agents required. Trigger source (S3 or CloudWatch) is configured per service in Service settings."
+                  />
+                }
+                serviceIds={ecfOtelConfigs.map((c) => c.serviceId)}
+                launchUrl={otelLaunchUrl}
+                isLaunched={launchedFamilies.includes('otel')}
+                onLaunch={() => onLaunch('otel')}
+                launchButtonTestSubj="ecfDeploymentSection-otelLaunchButton"
               />
-            </EuiButton>
-            <EuiHorizontalRule margin="m" />
-            <EuiFlexGroup wrap gutterSize="s">
-              {ecfOtelConfigs.map(({ serviceId }) => (
-                <EuiFlexItem grow={false} key={serviceId}>
-                  <EuiBadge color="hollow">
-                    {AWS_SERVICES_MAP.get(serviceId)?.name ?? serviceId}
-                  </EuiBadge>
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
-          </EuiPanel>
-        </>
-      )}
+            </>
+          )}
 
-      {/* CrowdStrike FDR dedicated template card */}
-      {hasEcfCrowdstrike && (
-        <>
-          {(hasEcfUnified || hasEcfOtel) && <EuiSpacer size="s" />}
-          <EuiPanel
-            hasBorder
-            paddingSize="m"
-            data-test-subj="deployAndDetectStep-ecfCrowdstrikePanel"
-          >
-            <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="m">
-              <EuiFlexItem>
-                <EuiTitle size="xs">
-                  <h3>
-                    <FormattedMessage
-                      id="xpack.ingestHub.deployAndDetectStep.ecf.crowdstrikeStack.title"
-                      defaultMessage="CrowdStrike FDR stack"
-                    />
-                  </h3>
-                </EuiTitle>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText size="s" color="subdued">
+          {hasEcfCrowdstrike && (
+            <>
+              {(hasEcfUnified || hasEcfOtel) && <EuiHorizontalRule margin="none" />}
+              <EcfFamilyPanel
+                title={
                   <FormattedMessage
-                    id="xpack.ingestHub.deployAndDetectStep.ecf.crowdstrikeStack.serviceCount"
-                    defaultMessage="{count, plural, one {# service} other {# services}}"
-                    values={{ count: ecfCrowdstrikeServices.length }}
+                    id="xpack.ingestHub.authenticateAndDeployStep.ecfSection.crowdstrike.title"
+                    defaultMessage="CrowdStrike FDR stack"
                   />
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer size="s" />
-            <EuiText size="s" color="subdued">
-              <p>
-                <FormattedMessage
-                  id="xpack.ingestHub.deployAndDetectStep.ecf.crowdstrikeStack.description"
-                  defaultMessage="Log collection via a dedicated AWS CloudFormation stack for CrowdStrike Falcon Data Replicator — no agents required."
-                />
-              </p>
-            </EuiText>
-            <EuiSpacer size="m" />
-            <EuiButton
-              href={crowdstrikeLaunchUrl}
-              target="_blank"
-              iconType="external"
-              iconSide="right"
-              fill
-              data-test-subj="deployAndDetectStep-ecfCrowdstrikeLaunchButton"
-            >
-              <FormattedMessage
-                id="xpack.ingestHub.deployAndDetectStep.ecf.crowdstrikeStack.launchButton"
-                defaultMessage="Launch CloudFormation"
+                }
+                description={
+                  <FormattedMessage
+                    id="xpack.ingestHub.authenticateAndDeployStep.ecfSection.crowdstrike.description"
+                    defaultMessage="Log collection via a dedicated AWS CloudFormation stack for CrowdStrike Falcon Data Replicator — no agents required."
+                  />
+                }
+                serviceIds={ecfCrowdstrikeServices}
+                launchUrl={crowdstrikeLaunchUrl}
+                isLaunched={launchedFamilies.includes('crowdstrike')}
+                onLaunch={() => onLaunch('crowdstrike')}
+                launchButtonTestSubj="ecfDeploymentSection-crowdstrikeLaunchButton"
               />
-            </EuiButton>
-            <EuiHorizontalRule margin="m" />
-            <EuiFlexGroup wrap gutterSize="s">
-              {ecfCrowdstrikeServices.map((serviceId) => (
-                <EuiFlexItem grow={false} key={serviceId}>
-                  <EuiBadge color="hollow">
-                    {AWS_SERVICES_MAP.get(serviceId)?.name ?? serviceId}
-                  </EuiBadge>
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
-          </EuiPanel>
-        </>
+            </>
+          )}
+        </div>
       )}
-    </>
+    </EuiPanel>
   );
 };
