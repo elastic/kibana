@@ -53,7 +53,7 @@ test.describe('last selected space recollection', { tag: tags.stateful.classic }
     await pageObjects.spaces.switchToSpaceFromNav(TARGET_SPACE_ID);
     await waitForLastSelectedSpaceId(apiClient, samlAuth, 'admin', TARGET_SPACE_ID);
 
-    await page.goto(kbnUrl.get('/'));
+    await page.goto(kbnUrl.get('/'), { waitUntil: 'commit' });
 
     await expect.poll(() => pageObjects.spaces.getCurrentUrl()).toContain(`/s/${TARGET_SPACE_ID}`);
     await expect(pageObjects.spaces.spaceSelectorLocator()).toBeHidden();
