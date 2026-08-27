@@ -91,6 +91,7 @@ export const getAvailableConnectors = async (params: {
         isPreconfigured: connector.isPreconfigured,
         isDeprecated: connector.isDeprecated,
         ...(connector.specVersion ? { specVersion: connector.specVersion } : {}),
+        ...(connector.activeSpecVersion ? { activeSpecVersion: connector.activeSpecVersion } : {}),
         ...(actionInputSchemas ? { actionInputSchemas } : {}),
         ...getConnectorInstanceConfig(connector),
       });

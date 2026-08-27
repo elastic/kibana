@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import semverGt from 'semver/functions/gt';
+import semverValid from 'semver/functions/valid';
 import { i18n } from '@kbn/i18n';
 import type { ConnectorTypeInfo } from '@kbn/workflows';
 import { isTemplateReference } from './is_template_reference';
@@ -35,6 +37,17 @@ const TRANSLATIONS = {
   editConnector: i18n.translate('workflows.validateConnectorIds.editConnectorMessage', {
     defaultMessage: 'Edit connector',
   }),
+};
+
+const isNewerSpecVersionAvailable = (specVersion: string, activeSpecVersion: string): boolean => {
+  const validSpecVersion = semverValid(specVersion);
+  const validActiveSpecVersion = semverValid(activeSpecVersion);
+
+  return (
+    validSpecVersion !== null &&
+    validActiveSpecVersion !== null &&
+    semverGt(validActiveSpecVersion, validSpecVersion)
+  );
 };
 
 export function validateConnectorIds(
@@ -141,18 +154,43 @@ export function validateConnectorIds(
       );
       const uuidMessage = `Connector uuid: <code>${instance.id}</code>`;
       const actionsMessage = actions.join(' | ');
+      let updateMessage: string | null = null;
+      let beforeMessage = `✓ ${instance.name}`;
+
+      if (
+        !instance.isPreconfigured &&
+        instance.specVersion &&
+        instance.activeSpecVersion &&
+        isNewerSpecVersionAvailable(instance.specVersion, instance.activeSpecVersion)
+      ) {
+        updateMessage = i18n.translate(
+          'workflows.validateConnectorIds.connectorUpdateAvailableMessage',
+          {
+            defaultMessage:
+              'Connector "{name}" uses version {specVersion}. Version {activeSpecVersion} is available.',
+            values: {
+              name: instance.name,
+              specVersion: instance.specVersion,
+              activeSpecVersion: instance.activeSpecVersion,
+            },
+          }
+        );
+        beforeMessage = `⚠ ${instance.name}: ${instance.specVersion} → ${instance.activeSpecVersion}`;
+      }
 
       const validResult: YamlValidationResult = {
         id: connectorIdItem.id,
-        severity: 'info',
-        message: null,
+        severity: updateMessage ? 'warning' : 'info',
+        message: updateMessage,
         owner: 'connector-id-validation',
         startLineNumber: connectorIdItem.startLineNumber,
         startColumn: connectorIdItem.startColumn,
         endLineNumber: connectorIdItem.endLineNumber,
         endColumn: connectorIdItem.endColumn,
-        beforeMessage: `✓ ${instance.name}`,
-        hoverMessage: `${connectedMessage}\n\n${uuidMessage}\n\n${actionsMessage}`,
+        beforeMessage,
+        hoverMessage: `${
+          updateMessage ? `${updateMessage}\n\n` : `${connectedMessage}\n\n`
+        }${uuidMessage}\n\n${actionsMessage}`,
       };
       results.push(validResult);
     }

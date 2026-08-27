@@ -572,6 +572,7 @@ export interface ConnectorInstance {
   isDeprecated: boolean;
   config?: ConnectorInstanceConfig;
   specVersion?: string;
+  activeSpecVersion?: string;
   actionInputSchemas?: Record<string, Record<string, unknown>>;
 }
 

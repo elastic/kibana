@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ConnectorTypeInfo } from '@kbn/workflows';
+import type { ConnectorInstance, ConnectorTypeInfo } from '@kbn/workflows';
 import { validateConnectorIds } from './validate_connector_ids';
 import type { ConnectorIdItem } from '../model/types';
 
 describe('validateConnectorIds', () => {
-  const mockConnectorInstance = {
+  const mockConnectorInstance: ConnectorInstance = {
     id: 'slack-connector-1',
     name: 'My Slack Connector',
     isPreconfigured: false,
@@ -51,6 +51,16 @@ describe('validateConnectorIds', () => {
       subActions: [],
     },
   };
+
+  const withConnectorInstance = (
+    overrides: Partial<ConnectorInstance>
+  ): Record<string, ConnectorTypeInfo> => ({
+    ...mockConnectorTypes,
+    '.slack': {
+      ...mockConnectorTypes['.slack'],
+      instances: [{ ...mockConnectorInstance, ...overrides }],
+    },
+  });
 
   const createConnectorIdItem = (overrides: Partial<ConnectorIdItem> = {}): ConnectorIdItem => ({
     id: 'test-id-1-2-3-4',
@@ -113,6 +123,58 @@ describe('validateConnectorIds', () => {
       });
       expect(results[0].hoverMessage).toBeDefined();
       expect(typeof results[0].hoverMessage).toBe('string');
+    });
+  });
+
+  describe('when a newer connector specification is available', () => {
+    it('returns a non-blocking warning with the connector name and versions', () => {
+      const connectorTypes = withConnectorInstance({
+        specVersion: '1.0.0',
+        activeSpecVersion: '1.1.0',
+      });
+
+      const results = validateConnectorIds([createConnectorIdItem()], connectorTypes, '');
+
+      expect(results).toHaveLength(1);
+      expect(results[0]).toMatchObject({
+        severity: 'warning',
+        message: 'Connector "My Slack Connector" uses version 1.0.0. Version 1.1.0 is available.',
+        beforeMessage: '⚠ My Slack Connector: 1.0.0 → 1.1.0',
+      });
+      expect(results[0].hoverMessage).toContain('Edit connector');
+    });
+
+    it.each([
+      {
+        name: 'the connector is current',
+        overrides: { specVersion: '1.1.0', activeSpecVersion: '1.1.0' },
+      },
+      {
+        name: 'the active version is older',
+        overrides: { specVersion: '2.0.0', activeSpecVersion: '1.1.0' },
+      },
+      {
+        name: 'a version is invalid',
+        overrides: { specVersion: '1.0.0', activeSpecVersion: 'latest' },
+      },
+      {
+        name: 'the connector is preconfigured',
+        overrides: {
+          specVersion: '1.0.0',
+          activeSpecVersion: '1.1.0',
+          isPreconfigured: true,
+        },
+      },
+    ])('keeps the normal connector decoration when $name', ({ overrides }) => {
+      const connectorTypes = withConnectorInstance(overrides);
+
+      const results = validateConnectorIds([createConnectorIdItem()], connectorTypes, '');
+
+      expect(results[0]).toMatchObject({
+        severity: 'info',
+        message: null,
+        beforeMessage: '✓ My Slack Connector',
+      });
     });
   });
 

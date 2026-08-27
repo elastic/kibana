@@ -78,6 +78,7 @@ describe('getAvailableConnectors', () => {
           id: 'okta-v1',
           actionTypeId: '.declarative-okta',
           specVersion: '1.0.0',
+          activeSpecVersion: '1.1.0',
         }),
       ]),
     };
@@ -135,6 +136,7 @@ describe('getAvailableConnectors', () => {
       expect.objectContaining({
         id: 'okta-v1',
         specVersion: '1.0.0',
+        activeSpecVersion: '1.1.0',
         actionInputSchemas: {
           listUsers: {
             type: 'object',
