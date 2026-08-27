@@ -10,9 +10,10 @@
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../../fixtures';
 
-const ANIMALS_INDEX = 'discover-embeddable-animals-000001';
+const ANIMALS_INDEX = 'animals-discover-embeddable-000001';
 const DASHBOARD_ARCHIVE =
-  'src/platform/plugins/shared/discover/test/scout/core2/ui/fixtures/kbn_archives/discover_session_multiple_data_views.ndjson';
+  'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/kibana';
+const DASHBOARD_TITLE = 'discover session multiple data views';
 const IGNORE_FILTER_SETTING = 'courier:ignoreFilterIfFieldNotInIndex';
 
 spaceTest.describe(
@@ -32,7 +33,9 @@ spaceTest.describe(
       });
 
       const savedObjects = await scoutSpace.savedObjects.load(DASHBOARD_ARCHIVE);
-      const dashboard = savedObjects.find(({ type }) => type === 'dashboard');
+      const dashboard = savedObjects.find(
+        ({ type, title }) => type === 'dashboard' && title === DASHBOARD_TITLE
+      );
       if (!dashboard) {
         throw new Error('Multiple data views dashboard was not imported');
       }
