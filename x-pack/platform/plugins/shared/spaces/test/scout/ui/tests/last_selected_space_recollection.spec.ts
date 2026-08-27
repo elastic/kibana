@@ -53,16 +53,12 @@ test.describe('last selected space recollection', { tag: tags.stateful.classic }
     await pageObjects.spaces.switchToSpaceFromNav(TARGET_SPACE_ID);
     await waitForLastSelectedSpaceId(apiClient, samlAuth, 'admin', TARGET_SPACE_ID);
 
-    // page.goto races the root redirect chain into the space (it throws "interrupted by another
-    // navigation"), so drive the load from a neutral page and wait on the landed URL + selector.
-    // Wait only for domcontentloaded here: the selector page's full 'load' is slow under parallel
-    // load, and waitForSpaceSelector is the actual readiness gate.
-    await page.goto(kbnUrl.get('/spaces/space_selector'), { waitUntil: 'domcontentloaded' });
-    await pageObjects.spaces.waitForSpaceSelector();
-
-    await page.evaluate((url) => {
-      window.location.href = url;
-    }, kbnUrl.get('/'));
+    // Requesting the Kibana root triggers a server 302 into the remembered space's /spaces/enter,
+    // which then client-navigates on to the space's app. Resolve `goto` on 'commit' so it settles
+    // on that first navigation commit rather than waiting on a 'load' the subsequent hop supersedes
+    // (which surfaces as an "interrupted by another navigation" error or a goto timeout). The poll
+    // is the terminal readiness gate for the landed redirect.
+    await page.goto(kbnUrl.get('/'), { waitUntil: 'commit' });
 
     await expect
       .poll(() => pageObjects.spaces.getCurrentUrl())
