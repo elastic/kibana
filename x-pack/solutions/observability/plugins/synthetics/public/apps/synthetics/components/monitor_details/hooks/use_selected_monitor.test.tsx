@@ -179,16 +179,28 @@ describe('useSelectedMonitor', () => {
       expect(result.current.loading).toBe(true);
     });
 
-    it('never reports isMonitorMissing for remote (the 404 path is local-only)', () => {
-      const localError = {
-        body: { statusCode: 404 },
-        getPayload: () => ({ monitorId: 'config-1' }),
-      };
-      setupMocks({ remoteName: 'cluster-a', externalMonitor: undefined, localError });
+    it('holds off on isMonitorMissing while the remote probe is loading', () => {
+      setupMocks({
+        remoteName: 'cluster-a',
+        externalMonitor: undefined,
+        externalLoading: true,
+      });
 
       const { result } = renderHook(() => useSelectedMonitor());
 
       expect(result.current.isMonitorMissing).toBe(false);
+    });
+
+    it('reports isMonitorMissing when the remote probe finds no pings', () => {
+      setupMocks({
+        remoteName: 'cluster-a',
+        externalMonitor: undefined,
+        externalLoading: false,
+      });
+
+      const { result } = renderHook(() => useSelectedMonitor());
+
+      expect(result.current.isMonitorMissing).toBe(true);
     });
 
     it('reports null error for remote (local HTTP-fetch error shape is suppressed)', () => {

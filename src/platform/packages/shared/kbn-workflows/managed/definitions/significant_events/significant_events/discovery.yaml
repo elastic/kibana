@@ -421,6 +421,7 @@ steps:
                                 concurrency_key: '{{ foreach.item.event_id }}'
                                 context:
                                   source: 'significant_event'
+                                  trigger_type: 'automatic'
                                   event_uuid: '{{ foreach.item.event_uuid }}'
                                   event_id: '{{ foreach.item.event_id }}'
                                   status: '{{ foreach.item.status }}'
