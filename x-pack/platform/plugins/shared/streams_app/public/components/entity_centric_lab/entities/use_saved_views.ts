@@ -9,6 +9,7 @@ import { useCallback, useEffect, useState } from 'react';
 import type { Filter } from '@kbn/es-query';
 import type { ActiveExtraFilters, ActiveTagFilters, EntityCategoryId } from './fake_entities';
 import { EMPTY_TAG_FILTERS, TAG_KEYS, isKnownCategoryId } from './fake_entities';
+import { DEFAULT_GROUP_BY, type GroupByFieldId } from './entity_group_by';
 
 /**
  * Saved views for the entity-centric lab prototype.
@@ -83,6 +84,12 @@ export interface SavedViewState {
    * Stored as-is (supports relative like `now-15m` and absolute values).
    */
   readonly timeRange?: { readonly from: string; readonly to: string };
+  /**
+   * ElasticOn "Group by" selection (1–2 field ids, in order). Absent means the
+   * built-in Category → Type layout ({@link DEFAULT_GROUP_BY}). Optional for
+   * backward compatibility with views saved before this field existed.
+   */
+  readonly groupBy?: readonly GroupByFieldId[];
 }
 
 export interface SavedView {
@@ -119,6 +126,7 @@ const DEFAULT_APPLIED_SESSION_KEY = 'entityCentricLab.savedViews.defaultApplied.
 const CATEGORY_TAB_STORAGE_KEY = 'entityCentricLab.categoryTab.v1';
 const TAG_FILTERS_STORAGE_KEY = 'entityCentricLab.entitiesTagFilters.v1';
 const VIEW_MODE_STORAGE_KEY = 'entityCentricLab.entitiesViewMode.v1';
+const GROUP_BY_STORAGE_KEY = 'entityCentricLab.entitiesGroupBy.v1';
 
 /**
  * Cross-mount signal so a second copy of the bar (e.g. after
@@ -167,6 +175,11 @@ const parseExtraFilters = (value: unknown): ActiveExtraFilters => {
 const parseQueryFilters = (value: unknown): Filter[] =>
   Array.isArray(value) ? (value as Filter[]) : [];
 
+const parseGroupBy = (value: unknown): readonly GroupByFieldId[] | undefined =>
+  Array.isArray(value) && value.every((item) => typeof item === 'string')
+    ? (value as readonly GroupByFieldId[])
+    : undefined;
+
 const parseTimeRange = (value: unknown): { from: string; to: string } | undefined => {
   if (!value || typeof value !== 'object') return undefined;
   const source = value as Record<string, unknown>;
@@ -203,6 +216,7 @@ const parseState = (value: unknown): SavedViewState | undefined => {
     queryFilters: parseQueryFilters(source.queryFilters),
     storeTime: source.storeTime === true,
     timeRange: parseTimeRange(source.timeRange),
+    groupBy: parseGroupBy(source.groupBy),
   };
 };
 
@@ -549,6 +563,10 @@ const canonicalState = (state: SavedViewState) => ({
   timeRange: state.storeTime
     ? { from: state.timeRange?.from ?? '', to: state.timeRange?.to ?? '' }
     : null,
+  // Absent group-by == the built-in default, so a legacy view (no field) and a
+  // page at the default grouping compare equal and don't spuriously light the
+  // "Modified" badge. Order is significant (level 1 vs 2), so don't sort.
+  groupBy: [...(state.groupBy && state.groupBy.length > 0 ? state.groupBy : DEFAULT_GROUP_BY)],
 });
 
 export const areStatesEqual = (a: SavedViewState, b: SavedViewState): boolean => {
@@ -583,6 +601,14 @@ export const applyViewToStorage = (view: SavedView): void => {
     window.localStorage.setItem(CATEGORY_TAB_STORAGE_KEY, view.state.tab);
     window.localStorage.setItem(TAG_FILTERS_STORAGE_KEY, JSON.stringify(view.state.filters));
     window.localStorage.setItem(VIEW_MODE_STORAGE_KEY, view.state.viewMode);
+    window.localStorage.setItem(
+      GROUP_BY_STORAGE_KEY,
+      JSON.stringify([
+        ...(view.state.groupBy && view.state.groupBy.length > 0
+          ? view.state.groupBy
+          : DEFAULT_GROUP_BY),
+      ])
+    );
   } catch {
     // Same trade-off as the other write helpers: the in-memory copy
     // still works for the current session; the view just won't survive

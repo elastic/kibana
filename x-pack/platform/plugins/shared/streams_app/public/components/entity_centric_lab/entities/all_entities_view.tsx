@@ -123,6 +123,15 @@ import { EntitiesListView } from './entities_list_view';
 import { GeomapView } from './geomap_view';
 import { EntitiesTagFilters } from './entities_tag_filters';
 import { EntityExtraFilters } from './entity_extra_filters';
+import { EntityGroupByControls } from './entity_group_by_controls';
+import {
+  DEFAULT_GROUP_BY,
+  getGroupByFields,
+  isDefaultGroupBy,
+  resolveGroupByFields,
+  type GroupByFieldDef,
+  type GroupByFieldId,
+} from './entity_group_by';
 import { AllEntitiesOverviewView } from './all_entities_overview_view';
 import { MonitoringAssetsView } from './monitoring_assets_view';
 import { SavedViewsBar } from './saved_views_bar';
@@ -290,6 +299,49 @@ const useEntitiesTagFilters = (): [
     });
   }, []);
   return [filters, setFilters];
+};
+
+// --- Group-by persistence (ElasticOn) -------------------------------
+//
+// Same lazy-hydrate-from-localStorage pattern as the view mode / tag
+// filters so a chosen grouping survives the left-nav walk between
+// categories. Mirrored in `use_saved_views.ts` (GROUP_BY_STORAGE_KEY)
+// so `applyViewToStorage` can write it synchronously before a route
+// change.
+const GROUP_BY_STORAGE_KEY = 'entityCentricLab.entitiesGroupBy.v1';
+
+const parseStoredGroupBy = (raw: string | null): GroupByFieldId[] => {
+  if (!raw) return [...DEFAULT_GROUP_BY];
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    if (Array.isArray(parsed) && parsed.every((item) => typeof item === 'string')) {
+      return parsed as GroupByFieldId[];
+    }
+  } catch {
+    // fall through
+  }
+  return [...DEFAULT_GROUP_BY];
+};
+
+const useEntitiesGroupBy = (): [GroupByFieldId[], (next: GroupByFieldId[]) => void] => {
+  const [groupBy, setGroupByState] = useState<GroupByFieldId[]>(() => {
+    if (typeof window === 'undefined') return [...DEFAULT_GROUP_BY];
+    try {
+      return parseStoredGroupBy(window.localStorage.getItem(GROUP_BY_STORAGE_KEY));
+    } catch {
+      return [...DEFAULT_GROUP_BY];
+    }
+  });
+  const setGroupBy = useCallback((next: GroupByFieldId[]) => {
+    setGroupByState(next);
+    if (typeof window === 'undefined') return;
+    try {
+      window.localStorage.setItem(GROUP_BY_STORAGE_KEY, JSON.stringify(next));
+    } catch {
+      // Storage blocked — keep the in-memory value for this session.
+    }
+  }, []);
+  return [groupBy, setGroupBy];
 };
 
 const VIEW_MODE_OPTIONS = [
@@ -469,6 +521,7 @@ export const AllEntitiesView = ({
   useEffect(() => {
     setActiveExtraFilters(EMPTY_EXTRA_FILTERS);
   }, [categoryScope, cloudProviderScope, cloudServiceScope]);
+
   const categoryDescriptor = categoryScope ? getCategoryDescriptor(categoryScope) : undefined;
   // Cloud provider / service descriptors resolved from the scope, used
   // to swap the page header (icon + label) to the provider logo and
@@ -505,6 +558,37 @@ export const AllEntitiesView = ({
   // entity query is per-view, not a preference.
   const [activeTagFilters, setActiveTagFilters] = useEntitiesTagFilters();
   const [viewMode, setViewMode] = useEntitiesViewMode();
+  // ElasticOn "Group by" (1–2 fields). Non-ElasticOn modes never surface the
+  // control, so this stays at the built-in Category → Type default there.
+  const [groupBy, setGroupBy] = useEntitiesGroupBy();
+
+  // "Group by" fields offered on this page (core + category-scoped attributes)
+  // and the resolved defs for the active selection. `customGroupBy` is only set
+  // when ElasticOn and the selection differs from the built-in Category → Type
+  // default — that's the signal the grid/list use to switch to the generic,
+  // health-coloured layout. A selection whose fields don't resolve on the
+  // current page (e.g. a Hosts-only attribute after navigating away) collapses
+  // back to the default layout rather than rendering an empty grouping.
+  const groupByFields = useMemo(() => getGroupByFields(categoryScope), [categoryScope]);
+  const activeGroupByFields = useMemo(
+    () => resolveGroupByFields(groupBy, groupByFields),
+    [groupBy, groupByFields]
+  );
+  // `undefined` → built-in Category → Type layout (the rich per-type one).
+  // `[]`        → flat / ungrouped (single "All entities" block).
+  // `[fields…]` → generic custom grouping.
+  const customGroupBy = useMemo<readonly GroupByFieldDef[] | undefined>(() => {
+    if (!isElasticOn) return undefined;
+    // Explicitly cleared → flat, ungrouped view (not the built-in default).
+    if (groupBy.length === 0) return [];
+    // The built-in default reproduces the rich Category → Type layout.
+    if (isDefaultGroupBy(groupBy)) return undefined;
+    // A non-empty selection whose fields don't resolve on this page (e.g. a
+    // Hosts-only attribute after walking to Kubernetes) — the intent was to
+    // group, so fall back to the built-in layout rather than flattening.
+    if (activeGroupByFields.length === 0) return undefined;
+    return activeGroupByFields;
+  }, [isElasticOn, groupBy, activeGroupByFields]);
 
   // Pending-search consumption: the `search` string can't ride the
   // persisted-state pipeline (it's per-mount `useState`, not
@@ -576,6 +660,7 @@ export const AllEntitiesView = ({
     setSearch(view.state.search);
     setActiveExtraFilters(view.state.extraFilters ?? EMPTY_EXTRA_FILTERS);
     setLabFilters(view.state.queryFilters ?? []);
+    setGroupBy([...(view.state.groupBy ?? DEFAULT_GROUP_BY)]);
     // "Store time with view": reset the shared time filter to the captured range.
     if (view.state.storeTime && view.state.timeRange) {
       updateTimeRange({ from: view.state.timeRange.from, to: view.state.timeRange.to });
@@ -587,6 +672,7 @@ export const AllEntitiesView = ({
     setActiveTagFilters,
     setCategoryTab,
     setViewMode,
+    setGroupBy,
     updateTimeRange,
   ]);
 
@@ -671,6 +757,18 @@ export const AllEntitiesView = ({
     activeExtraFilters,
     extraFilterDefs,
   ]);
+
+  // ElasticOn summary "· N Groups": count distinct level-1 buckets under the
+  // active grouping (Category by default), so the header stays truthful when
+  // the user regroups (e.g. by Environment).
+  const elasticOnGroupCount = useMemo(() => {
+    if (!isElasticOn) return 0;
+    // Flat / ungrouped: everything sits in a single "All entities" block.
+    if (groupBy.length === 0) return filteredEntities.length > 0 ? 1 : 0;
+    const field = activeGroupByFields[0] ?? groupByFields[0];
+    if (!field) return 0;
+    return new Set(filteredEntities.map((entity) => field.valueOf(entity))).size;
+  }, [isElasticOn, groupBy, activeGroupByFields, groupByFields, filteredEntities]);
 
   // Any filter dimension active (tags, extra facets, "+ Add filter" chips, or a
   // typed KQL query) — drives the unified "Clear filters" affordance below.
@@ -883,6 +981,9 @@ export const AllEntitiesView = ({
       // time is left out of the comparison entirely.
       storeTime: loadedView?.state.storeTime ?? false,
       timeRange: loadedView?.state.storeTime ? { from: rangeFrom, to: rangeTo } : undefined,
+      // ElasticOn "Group by" — tracked so the "Unsaved changes" badge lights on
+      // change and Save/Update persists the grouping.
+      groupBy,
     }),
     [
       categoryScope,
@@ -897,6 +998,7 @@ export const AllEntitiesView = ({
       loadedView,
       rangeFrom,
       rangeTo,
+      groupBy,
     ]
   );
 
@@ -982,6 +1084,7 @@ export const AllEntitiesView = ({
         setSearch(view.state.search);
         setActiveExtraFilters(view.state.extraFilters ?? EMPTY_EXTRA_FILTERS);
         setLabFilters(view.state.queryFilters ?? []);
+        setGroupBy([...(view.state.groupBy ?? DEFAULT_GROUP_BY)]);
         if (view.state.storeTime && view.state.timeRange) {
           updateTimeRange({ from: view.state.timeRange.from, to: view.state.timeRange.to });
         }
@@ -1015,6 +1118,7 @@ export const AllEntitiesView = ({
       setActiveTagFilters,
       setCategoryTab,
       setViewMode,
+      setGroupBy,
       updateTimeRange,
     ]
   );
@@ -1208,6 +1312,14 @@ export const AllEntitiesView = ({
                       />
                     </EuiFlexItem>
                   ) : null}
+                  <EuiFlexItem grow={false}>
+                    <EntityGroupByControls
+                      fields={groupByFields}
+                      groupBy={groupBy}
+                      onChange={setGroupBy}
+                      compressed
+                    />
+                  </EuiFlexItem>
                   {hasActiveFilters ? (
                     <EuiFlexItem grow={false}>
                       <EuiButtonEmpty
@@ -1217,10 +1329,9 @@ export const AllEntitiesView = ({
                         onClick={handleClearFilters}
                         data-test-subj="entityCentricLabClearFilters"
                       >
-                        {i18n.translate(
-                          'xpack.streams.entityCentricLab.entities.clearFilters',
-                          { defaultMessage: 'Clear filters' }
-                        )}
+                        {i18n.translate('xpack.streams.entityCentricLab.entities.clearFilters', {
+                          defaultMessage: 'Clear filters',
+                        })}
                       </EuiButtonEmpty>
                     </EuiFlexItem>
                   ) : null}
@@ -1240,7 +1351,9 @@ export const AllEntitiesView = ({
                           defaultMessage: '{entities} Entities · {groups} Groups',
                           values: {
                             entities: filteredEntities.length.toLocaleString(),
-                            groups: categoryScope
+                            groups: isElasticOn
+                              ? elasticOnGroupCount
+                              : categoryScope
                               ? filteredEntities.length > 0
                                 ? 1
                                 : 0
@@ -1251,20 +1364,6 @@ export const AllEntitiesView = ({
                     </EuiTitle>
                   </EuiFlexItem>
                   <EuiFlexItem />
-                  {showCloudHierarchyToggle ? (
-                    <EuiFlexItem grow={false}>
-                      <EuiSwitch
-                        compressed
-                        label={i18n.translate(
-                          'xpack.streams.entityCentricLab.entities.cloudHierarchyToggle',
-                          { defaultMessage: 'Group by provider' }
-                        )}
-                        checked={cloudHierarchyEnabled}
-                        onChange={(event) => setCloudHierarchyEnabled(event.target.checked)}
-                        data-test-subj="entityCentricLabCloudHierarchyToggle"
-                      />
-                    </EuiFlexItem>
-                  ) : null}
                   <EuiFlexItem grow={false}>
                     <EuiButtonGroup
                       legend={i18n.translate(
@@ -1329,17 +1428,19 @@ export const AllEntitiesView = ({
                     entities={filteredEntities}
                     onSelectEntity={openEntity}
                     selectedEntityName={selectedEntityName}
-                    groupCloudByProvider={cloudHierarchyEnabled}
+                    groupCloudByProvider={false}
                     enablePaletteColoring={isElasticOn}
                     refreshTick={refreshTick}
+                    customGroupBy={customGroupBy}
                   />
                 ) : (
                   <EntitiesListView
                     entities={filteredEntities}
                     onSelectEntity={openEntity}
-                    groupCloudByProvider={cloudHierarchyEnabled}
+                    groupCloudByProvider={false}
                     enableColumnSettings={isElasticOn}
                     refreshTick={refreshTick}
+                    customGroupBy={customGroupBy}
                   />
                 )}
               </>

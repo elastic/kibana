@@ -30,6 +30,7 @@ import type { Entity, EntityCategoryId, EntityHealth } from './fake_entities';
 import { ENTITY_CATEGORIES, HEALTH_RANK, getCategoryDescriptor } from './fake_entities';
 import { CLOUD_PROVIDERS, type CloudProviderDescriptor } from './cloud_providers';
 import { EntityDataGridSection } from './entities_data_grid';
+import { UNGROUPED_LABEL, groupEntities, type GroupByFieldDef } from './entity_group_by';
 import {
   KUBERNETES_CLUSTER_FILTER_ALL,
   KUBERNETES_SUB_TYPE_ORDER,
@@ -56,6 +57,14 @@ interface Props {
   readonly enableColumnSettings?: boolean;
   /** Bumped by the ElasticOn auto-refresh tick so live metric cells re-roll. */
   readonly refreshTick?: number;
+  /**
+   * ElasticOn "Group by" override. When set (a non-default grouping of 1–2
+   * fields), the list groups by those fields instead of Category → Type: one
+   * section per level-1 bucket, one table panel per level-2 bucket (or per
+   * level-1 bucket when a single field is active). Undefined keeps the
+   * built-in layout untouched.
+   */
+  readonly customGroupBy?: readonly GroupByFieldDef[];
 }
 
 const HEALTH_BADGE_COLOR: Record<EntityHealth, 'success' | 'warning' | 'danger'> = {
@@ -384,7 +393,23 @@ type ListItem =
     }
   | { kind: 'kubernetes-header'; total: number }
   | { kind: 'category-header'; category: EntityCategoryId; total: number }
-  | { kind: 'cloud-provider-header'; provider: CloudProviderDescriptor; total: number };
+  | { kind: 'cloud-provider-header'; provider: CloudProviderDescriptor; total: number }
+  // Generic level-1 header for a custom "Group by" bucket (ElasticOn).
+  | { kind: 'group-header'; label: string; total: number };
+
+/** A simple level-1 header for a custom-grouping bucket (no category icon). */
+const GroupSectionHeader = ({ label, total }: { label: string; total: number }) => (
+  <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+    <EuiFlexItem grow={false}>
+      <EuiTitle size="xxs">
+        <h4>{label}</h4>
+      </EuiTitle>
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <EuiBadge color="hollow">{total.toLocaleString()}</EuiBadge>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
 
 const KubernetesSectionHeader = ({
   total,
@@ -437,8 +462,12 @@ export const EntitiesListView = ({
   groupCloudByProvider = false,
   enableColumnSettings = false,
   refreshTick,
+  customGroupBy,
 }: Props) => {
   const columns = useColumns(onSelectEntity);
+  // `undefined` keeps the built-in Category → Type layout; an empty array means
+  // "no grouping" (one flat "All entities" table); 1–2 fields drive grouping.
+  const useCustomGrouping = customGroupBy !== undefined;
 
   // Subscribe to chaos-mode flips so PayFlow storyline rows can swap
   // their health between the seeded "unhealthy" and the rollback
@@ -468,6 +497,54 @@ export const EntitiesListView = ({
   );
 
   const items = useMemo<ListItem[]>(() => {
+    // ElasticOn "Group by" override: group by the chosen 1–2 fields instead of
+    // the built-in Category → Type layout. Level-1 buckets become section
+    // headers; level-2 buckets (or the level-1 bucket itself for a single
+    // field) become table panels labelled by the bucket value.
+    if (useCustomGrouping && customGroupBy) {
+      // Flat / ungrouped: a single "All entities" table (nested so the header
+      // shows the label, not the first entity's category name).
+      if (customGroupBy.length === 0) {
+        return effectiveEntities.length === 0
+          ? []
+          : [
+              {
+                kind: 'panel',
+                category: effectiveEntities[0].category,
+                subTypeLabel: UNGROUPED_LABEL,
+                nested: true,
+                rows: [...effectiveEntities],
+              },
+            ];
+      }
+      const nodes = groupEntities(effectiveEntities, customGroupBy);
+      const custom: ListItem[] = [];
+      const hasSubLevel = customGroupBy.length > 1;
+      for (const node of nodes) {
+        if (hasSubLevel && node.children.length > 0) {
+          custom.push({ kind: 'group-header', label: node.label, total: node.entities.length });
+          for (const child of node.children) {
+            custom.push({
+              kind: 'panel',
+              category: child.entities[0].category,
+              subTypeLabel: child.label,
+              nested: true,
+              rows: child.entities,
+            });
+          }
+        } else {
+          custom.push({
+            kind: 'panel',
+            category: node.entities[0].category,
+            subTypeLabel: node.label,
+            nested: true,
+            rows: node.entities,
+          });
+        }
+      }
+      return custom;
+    }
+
     const buckets = new Map<EntityCategoryId, Entity[]>();
     for (const entity of effectiveEntities) {
       const list = buckets.get(entity.category) ?? [];
@@ -570,7 +647,14 @@ export const EntitiesListView = ({
       }
     }
     return result;
-  }, [effectiveEntities, clusterFilter, clusterNames, groupCloudByProvider]);
+  }, [
+    effectiveEntities,
+    clusterFilter,
+    clusterNames,
+    groupCloudByProvider,
+    useCustomGrouping,
+    customGroupBy,
+  ]);
 
   if (effectiveEntities.length === 0) {
     return (
@@ -625,8 +709,15 @@ export const EntitiesListView = ({
             </EuiFlexItem>
           );
         }
+        if (item.kind === 'group-header') {
+          return (
+            <EuiFlexItem key={`group-header-${item.label}-${index}`} grow={false}>
+              <GroupSectionHeader label={item.label} total={item.total} />
+            </EuiFlexItem>
+          );
+        }
         return (
-          <EuiFlexItem key={`${item.category}-${item.subTypeLabel ?? ''}`} grow={false}>
+          <EuiFlexItem key={`${item.category}-${item.subTypeLabel ?? ''}-${index}`} grow={false}>
             {enableColumnSettings ? (
               <EntityDataGridSection
                 category={item.category}

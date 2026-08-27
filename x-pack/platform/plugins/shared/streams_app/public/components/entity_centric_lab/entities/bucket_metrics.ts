@@ -259,7 +259,7 @@ const ENTITY_HEALTH_VALUES: readonly CategoricalValue[] = [
   },
 ];
 
-const ENTITY_HEALTH_METRIC: MetricDescriptor = {
+export const ENTITY_HEALTH_METRIC: MetricDescriptor = {
   id: ENTITY_HEALTH_METRIC_ID,
   label: i18n.translate('xpack.streams.entityCentricLab.entities.bucket.metric.entityHealth', {
     defaultMessage: 'Health',

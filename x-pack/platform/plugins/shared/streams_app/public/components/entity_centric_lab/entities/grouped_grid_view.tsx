@@ -60,6 +60,7 @@ import type { Entity, EntityCategoryId } from './fake_entities';
 import { ENTITY_CATEGORIES, getCategoryDescriptor } from './fake_entities';
 import { CLOUD_PROVIDERS, type CloudProviderDescriptor } from './cloud_providers';
 import {
+  ENTITY_HEALTH_METRIC,
   STAT_OPTIONS,
   bucketKeyFor,
   effectiveStatForMetric,
@@ -78,6 +79,12 @@ import {
   type StatId,
 } from './bucket_metrics';
 import { useBucketMetricSelection, type BucketSelection } from './use_bucket_metric_selection';
+import {
+  UNGROUPED_LABEL,
+  groupEntities,
+  type EntityGroupNode,
+  type GroupByFieldDef,
+} from './entity_group_by';
 import {
   MAX_RULES,
   MAX_STEPS,
@@ -134,6 +141,14 @@ interface Props {
    * values come from the salted hash.
    */
   readonly refreshTick?: number;
+  /**
+   * ElasticOn "Group by" override. When set (a non-default grouping of 1–2
+   * fields), the grid abandons the per-category / per-type layout and renders
+   * one card per level-1 bucket, health-coloured (mixed types can share a
+   * bucket, so a per-type metric catalog no longer applies). Undefined keeps
+   * the built-in Category → Type layout untouched.
+   */
+  readonly customGroupBy?: readonly GroupByFieldDef[];
 }
 
 /**
@@ -2275,6 +2290,87 @@ const CategoryCardInner = ({
 };
 
 // ---------------------------------------------------------------------------
+// Custom "Group by" layout (ElasticOn)
+// ---------------------------------------------------------------------------
+
+/**
+ * A generic health-coloured tile row for one bucket of a custom grouping.
+ * Custom buckets can mix entity types (e.g. "group by Environment"), so there's
+ * no single metric catalog to color by — tiles fall back to Entity health,
+ * which is meaningful for every entity.
+ */
+const CustomGroupTiles = ({
+  entities,
+  onSelectEntity,
+}: {
+  entities: readonly Entity[];
+  onSelectEntity: (entityName: string) => void;
+}) => (
+  <BucketTileRow
+    entities={entities}
+    metric={ENTITY_HEALTH_METRIC}
+    statId="last"
+    onSelectEntity={onSelectEntity}
+  />
+);
+
+/** A simple section header for a custom-grouping bucket (no category icon). */
+const GroupBucketHeader = ({ label, total }: { label: string; total: number }) => (
+  <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+    <EuiFlexItem grow={false}>
+      <EuiTitle size="xxs">
+        <h4>{label}</h4>
+      </EuiTitle>
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <EuiBadge color="hollow">{total.toLocaleString()}</EuiBadge>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
+
+/**
+ * One card per level-1 bucket of a custom grouping. When a second grouping
+ * field is active the card shows a sub-row per level-2 bucket; otherwise the
+ * bucket's tiles span the card directly.
+ */
+const CustomGroupCard = ({
+  node,
+  hasSubLevel,
+  onSelectEntity,
+}: {
+  node: EntityGroupNode;
+  hasSubLevel: boolean;
+  onSelectEntity: (entityName: string) => void;
+}) => (
+  <EuiPanel hasBorder hasShadow={false} paddingSize="m">
+    <GroupBucketHeader label={node.label} total={node.entities.length} />
+    <EuiSpacer size="s" />
+    {hasSubLevel && node.children.length > 0 ? (
+      <EuiFlexGroup direction="column" gutterSize="m">
+        {node.children.map((child) => (
+          <EuiFlexItem key={child.key} grow={false}>
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiText size="s">
+                  <strong>{child.label}</strong>
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="hollow">{child.entities.length.toLocaleString()}</EuiBadge>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="s" />
+            <CustomGroupTiles entities={child.entities} onSelectEntity={onSelectEntity} />
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+    ) : (
+      <CustomGroupTiles entities={node.entities} onSelectEntity={onSelectEntity} />
+    )}
+  </EuiPanel>
+);
+
+// ---------------------------------------------------------------------------
 // Public entry
 // ---------------------------------------------------------------------------
 
@@ -2285,6 +2381,7 @@ export const GroupedGridView = ({
   groupCloudByProvider = false,
   enablePaletteColoring = false,
   refreshTick = 0,
+  customGroupBy,
 }: Props) => {
   // Subscribe to chaos-mode flips so PayFlow storyline tiles can
   // swap colour the moment the user rolls back. `getEffectiveEntityHealth`
@@ -2300,6 +2397,30 @@ export const GroupedGridView = ({
     [entities, chaosOn]
   );
 
+  // `customGroupBy === undefined` keeps the built-in Category → Type layout;
+  // an empty array means "no grouping" (a single flat "All entities" block);
+  // 1–2 fields drive the generic grouping.
+  const useCustomGrouping = customGroupBy !== undefined;
+  const isFlatGrouping = customGroupBy?.length === 0;
+
+  const customGroups = useMemo(() => {
+    if (!useCustomGrouping) return [];
+    if (isFlatGrouping) {
+      return effectiveEntities.length === 0
+        ? []
+        : [
+            {
+              key: 'all',
+              label: UNGROUPED_LABEL,
+              entities: [...effectiveEntities],
+              children: [] as EntityGroupNode[],
+            },
+          ];
+    }
+    return groupEntities(effectiveEntities, customGroupBy ?? []);
+  }, [useCustomGrouping, isFlatGrouping, effectiveEntities, customGroupBy]);
+  const hasCustomSubLevel = (customGroupBy?.length ?? 0) > 1;
+
   const grouped = useMemo(() => {
     const buckets = new Map<EntityCategoryId, Entity[]>();
     for (const entity of effectiveEntities) {
@@ -2313,7 +2434,9 @@ export const GroupedGridView = ({
     })).filter((section) => section.rows.length > 0);
   }, [effectiveEntities]);
 
-  if (grouped.length === 0) {
+  const isEmpty = useCustomGrouping ? customGroups.length === 0 : grouped.length === 0;
+
+  if (isEmpty) {
     return (
       <EuiEmptyPrompt
         iconType="filter"
@@ -2342,23 +2465,33 @@ export const GroupedGridView = ({
       <PaletteColoringEnabledContext.Provider value={enablePaletteColoring}>
         <RefreshTickContext.Provider value={refreshTick}>
           <EuiFlexGroup direction="column" gutterSize="m">
-            {grouped.map((section) =>
-              section.category === 'cloud' && groupCloudByProvider ? (
-                <CloudGroupedCards
-                  key={section.category}
-                  entities={section.rows}
-                  onSelectEntity={onSelectEntity}
-                />
-              ) : (
-                <EuiFlexItem key={section.category} grow={false}>
-                  <CategoryCard
-                    category={section.category}
-                    entities={section.rows}
-                    onSelectEntity={onSelectEntity}
-                  />
-                </EuiFlexItem>
-              )
-            )}
+            {useCustomGrouping
+              ? customGroups.map((node) => (
+                  <EuiFlexItem key={node.key} grow={false}>
+                    <CustomGroupCard
+                      node={node}
+                      hasSubLevel={hasCustomSubLevel}
+                      onSelectEntity={onSelectEntity}
+                    />
+                  </EuiFlexItem>
+                ))
+              : grouped.map((section) =>
+                  section.category === 'cloud' && groupCloudByProvider ? (
+                    <CloudGroupedCards
+                      key={section.category}
+                      entities={section.rows}
+                      onSelectEntity={onSelectEntity}
+                    />
+                  ) : (
+                    <EuiFlexItem key={section.category} grow={false}>
+                      <CategoryCard
+                        category={section.category}
+                        entities={section.rows}
+                        onSelectEntity={onSelectEntity}
+                      />
+                    </EuiFlexItem>
+                  )
+                )}
           </EuiFlexGroup>
         </RefreshTickContext.Provider>
       </PaletteColoringEnabledContext.Provider>
