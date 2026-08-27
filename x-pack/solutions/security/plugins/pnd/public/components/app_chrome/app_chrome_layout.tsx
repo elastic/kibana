@@ -9,7 +9,6 @@ import React from 'react';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 import { useLocation } from 'react-router-dom';
-import { AskPndFab } from './pnd_chrome';
 
 /** Routes that render a fixed-height layout of their own and must not be scrolled as one block. */
 const FIXED_HEIGHT_ROUTES = ['/chats'];
@@ -60,7 +59,6 @@ export const AppChromeLayout: React.FC<AppChromeLayoutProps> = ({ children }) =>
       data-test-subj="pndAppChromeLayout"
     >
       {children}
-      <AskPndFab />
     </div>
   );
 };

@@ -10,6 +10,7 @@
 import React, { type MouseEventHandler } from 'react';
 import { EuiSplitButton, EuiIcon, EuiIconTip, useEuiTheme, type IconType } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { asOptionalPlainText, asPlainText } from '../as_plain_text';
 import { APP_MENU_TEST_SUBJECTS } from '../test_subjects';
 
 export interface SplitButtonWithNotificationProps {
@@ -56,6 +57,9 @@ export const SplitButtonWithNotification = ({
   notificationIndicatorTooltipContent,
 }: SplitButtonWithNotificationProps) => {
   const { euiTheme } = useEuiTheme();
+  const buttonLabel = asPlainText(label);
+  const secondaryAriaLabel = asPlainText(secondaryButtonAriaLabel);
+  const notificationTooltip = asOptionalPlainText(notificationIndicatorTooltipContent);
 
   return (
     <EuiSplitButton
@@ -113,7 +117,7 @@ export const SplitButtonWithNotification = ({
                     type="dot"
                     size="m"
                     color="primary"
-                    content={notificationIndicatorTooltipContent}
+                    content={notificationTooltip}
                     iconProps={{
                       onClick:
                         isDisabled || isLoading || isMainButtonLoading
@@ -126,12 +130,12 @@ export const SplitButtonWithNotification = ({
             )}
           </span>
         )}
-        {label}
+        {buttonLabel}
       </EuiSplitButton.ActionPrimary>
       <EuiSplitButton.ActionSecondary
         data-test-subj={dataTestSubj ? `${dataTestSubj}-secondary-button` : undefined}
         iconType="chevronSingleDown"
-        aria-label={secondaryButtonAriaLabel}
+        aria-label={secondaryAriaLabel}
         onClick={onSecondaryButtonClick}
         isDisabled={isSecondaryButtonDisabled}
         isSelected={isSelected}

@@ -140,6 +140,15 @@ export const GENERATE_QUERIES_TOOLTIP = i18n.translate(
   }
 );
 
+/** Disclosure shown next to generation triggers when cross-project search is live. */
+export const CROSS_PROJECT_GENERATION_DISCLOSURE = i18n.translate(
+  'xpack.significantEventsApp.streamsView.crossProjectGenerationDisclosure',
+  {
+    defaultMessage:
+      'Generation analyzes data from all projects linked through cross-project search, regardless of the project scope configured for this space.',
+  }
+);
+
 export const CHANGE_TYPE_LABELS: Record<string, string> = {
   dip: i18n.translate('xpack.significantEventsApp.changeType.dip', {
     defaultMessage: 'Dip',

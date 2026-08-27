@@ -66,8 +66,8 @@ The [`scout-migrate-from-ftr`](https://github.com/elastic/kibana/blob/main/.agen
 
 ### Cypress → Scout
 
-The [`cypress-to-scout-migration`](https://github.com/elastic/kibana/tree/main/x-pack/solutions/security/plugins/security_solution/.agents/skills/cypress-to-scout-migration) skill, maintained by the Security Engineering Productivity team, ports Cypress tests to Scout.
+The [`security-cypress-to-scout-migration`](https://github.com/elastic/kibana/tree/main/x-pack/solutions/security/plugins/security_solution/.agents/skills/security-cypress-to-scout-migration) skill, maintained by the Security Engineering Productivity team, ports Security Solution Cypress tests to Scout.
 
 ### Best practices review
 
-Run the [`scout-best-practices-reviewer`](https://github.com/elastic/kibana/blob/main/.agents/skills/scout-best-practices-reviewer/SKILL.md) skill on the migrated tests to make sure they follow our [Scout best practices](./scout-best-practices.md). The Security solution created their own version of the skill [here](https://github.com/elastic/kibana/tree/main/x-pack/solutions/security/plugins/security_solution/.agents/skills/scout-best-practices-reviewer).
+Run the [`scout-best-practices-reviewer`](https://github.com/elastic/kibana/blob/main/.agents/skills/scout-best-practices-reviewer/SKILL.md) skill on the migrated tests to make sure they follow our [Scout best practices](./scout-best-practices.md). For Security Solution tests, follow it with the additive [`security-scout-best-practices-reviewer`](https://github.com/elastic/kibana/tree/main/x-pack/solutions/security/plugins/security_solution/.agents/skills/security-scout-best-practices-reviewer) skill.

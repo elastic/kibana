@@ -12,33 +12,24 @@ import {
   ResourceManager,
   type ResourceManagerContract,
 } from '../../services/resource_service/resource_manager';
-import {
-  LoggerServiceToken,
-  type LoggerServiceContract,
-} from '../../services/logger_service/logger_service';
 
 @injectable()
 export class WaitForResourcesStep implements RuleExecutionStep {
   public readonly name = 'wait_for_resources';
 
   constructor(
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
     @inject(ResourceManager) private readonly resourcesService: ResourceManagerContract
   ) {}
 
   public executeStream(streamState: PipelineStateStream): PipelineStateStream {
     return mapStep(streamState, async (state) => {
-      const { input } = state;
+      const logger = state.logger.withLabels({ step: this.name });
 
-      this.logger.debug({
-        message: `[${this.name}] Starting step for rule ${input.ruleId}`,
-      });
+      logger.debug({ message: 'Waiting for resources' });
 
       await this.resourcesService.waitUntilReady();
 
-      this.logger.debug({
-        message: `[${this.name}] Resources ready for rule ${input.ruleId}`,
-      });
+      logger.debug({ message: 'Resources ready' });
 
       return { type: 'continue', state };
     });

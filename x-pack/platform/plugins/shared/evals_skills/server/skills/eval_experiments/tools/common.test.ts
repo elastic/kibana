@@ -8,6 +8,7 @@
 import type { GeneratedExperimentRun } from '@kbn/evals-plugin/server';
 import {
   EvalExperimentConfigError,
+  assertDatasetsVisible,
   buildResultsLink,
   buildWorkflowLink,
   evalExperimentConfigSchema,
@@ -185,5 +186,46 @@ describe('buildWorkflowLink', () => {
     expect(buildWorkflowLink('/base', 'team-a', 'wf 1')).toBe(
       '/base/s/team-a/app/workflows/wf%201'
     );
+  });
+});
+
+describe('assertDatasetsVisible', () => {
+  const createDatasetService = (visibleBySpace: Record<string, string[]>) => {
+    const getClient = jest.fn(({ spaceId }: { spaceId: string }) => ({
+      datasetExists: async (datasetId: string) =>
+        (visibleBySpace[spaceId] ?? []).includes(datasetId),
+    }));
+
+    return {
+      datasetService: { getClient } as unknown as Parameters<
+        typeof assertDatasetsVisible
+      >[0]['datasetService'],
+      getClient,
+    };
+  };
+
+  it('passes the datasets the space can see', async () => {
+    const { datasetService, getClient } = createDatasetService({ marketing: ['d1', 'd2'] });
+
+    await expect(
+      assertDatasetsVisible({ datasetService, spaceId: 'marketing', datasetIds: ['d1', 'd2'] })
+    ).resolves.toBeUndefined();
+
+    expect(getClient).toHaveBeenCalledWith({ spaceId: 'marketing' });
+  });
+
+  it('names every dataset the space cannot see', async () => {
+    const { datasetService } = createDatasetService({ marketing: ['d1'], sales: ['d2', 'd3'] });
+
+    const rejection = assertDatasetsVisible({
+      datasetService,
+      spaceId: 'marketing',
+      datasetIds: ['d1', 'd2', 'd3'],
+    });
+
+    // The ids exist, just not here: the message has to say so, or the answer
+    // reads as the datasets having been deleted.
+    await expect(rejection).rejects.toBeInstanceOf(EvalExperimentConfigError);
+    await expect(rejection).rejects.toThrow(/not found in this space: d2, d3/);
   });
 });

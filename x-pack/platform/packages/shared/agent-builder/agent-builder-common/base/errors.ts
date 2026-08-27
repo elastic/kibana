@@ -23,6 +23,7 @@ export enum AgentBuilderErrorCode {
   agentUnavailable = 'agentUnavailable',
   conversationNotFound = 'conversationNotFound',
   conversationWriteConflict = 'conversationWriteConflict',
+  conversationAlreadyExists = 'conversationAlreadyExists',
   pluginNotFound = 'pluginNotFound',
   agentExecutionError = 'agentExecutionError',
   requestAborted = 'requestAborted',
@@ -291,6 +292,35 @@ export const createConversationWriteConflictError = ({
   return new AgentBuilderError(
     AgentBuilderErrorCode.conversationWriteConflict,
     `Conversation ${conversationId} was modified concurrently and the change could not be saved`,
+    { ...meta, conversationId, statusCode: 409 }
+  );
+};
+
+/**
+ * Error thrown when a conversation with the given ID already exists.
+ */
+export type AgentBuilderConversationAlreadyExistsError =
+  AgentBuilderError<AgentBuilderErrorCode.conversationAlreadyExists>;
+
+/**
+ * Checks if the given error is a {@link AgentBuilderConversationAlreadyExistsError}
+ */
+export const isConversationAlreadyExistsError = (
+  err: unknown
+): err is AgentBuilderConversationAlreadyExistsError => {
+  return isAgentBuilderError(err) && err.code === AgentBuilderErrorCode.conversationAlreadyExists;
+};
+
+export const createConversationAlreadyExistsError = ({
+  conversationId,
+  meta = {},
+}: {
+  conversationId: string;
+  meta?: Record<string, any>;
+}): AgentBuilderConversationAlreadyExistsError => {
+  return new AgentBuilderError(
+    AgentBuilderErrorCode.conversationAlreadyExists,
+    `Conversation ${conversationId} already exists`,
     { ...meta, conversationId, statusCode: 409 }
   );
 };
