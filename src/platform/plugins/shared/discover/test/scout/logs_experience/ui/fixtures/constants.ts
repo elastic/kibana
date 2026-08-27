@@ -14,8 +14,7 @@ export const LOGS_EXPERIENCE_TAGS = [...tags.stateful.all, ...tags.serverless.ob
 /**
  * The doc viewer flyout is a push flyout only from EUI's `xl` breakpoint up; below it, EUI falls
  * back to an overlay whose mask swallows clicks on the grid behind it. The doc-viewer specs click
- * leading controls while the flyout is open, so they need the push layout. Matches the window size
- * the FTR suite ran at.
+ * leading controls while the flyout is open, so they need the push layout.
  */
 export const PUSH_FLYOUT_VIEWPORT = { width: 1600, height: 1200 };
 

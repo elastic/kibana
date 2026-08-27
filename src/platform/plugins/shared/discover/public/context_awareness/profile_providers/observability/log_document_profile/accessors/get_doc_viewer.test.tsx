@@ -25,7 +25,7 @@ const mockOpenAndScrollToSection = jest.fn();
 const mockLogsOverviewApi = { openAndScrollToSection: mockOpenAndScrollToSection };
 
 // The accordion is opened through the imperative handle the logs-overview component hands back, so
-// the stub only needs to surrender a ref — everything it renders is covered by logs_overview.test.tsx.
+// the stub only needs to surrender a ref; what it renders is not this accessor's concern.
 jest.mock('@kbn/unified-doc-viewer-plugin/public', () => {
   const actualReact: typeof React = jest.requireActual('react');
 
@@ -85,16 +85,24 @@ describe('createGetDocViewer (logs) accordion expansion', () => {
     mockOpenAndScrollToSection.mockClear();
   });
 
-  it('registers the log overview tab ahead of the tabs the previous profile contributed', () => {
+  it('registers the log overview tab ahead of tabs from the preceding profile', () => {
     const logOverviewContext$ = new BehaviorSubject<LogOverviewContext | undefined>(undefined);
+    // Ids and orders mirror the core doc views in `unified_doc_viewer/public/plugin.tsx`, so this
+    // is the ordering a log document actually gets — and the reason the flyout opens on Log
+    // overview rather than on the table.
     const { registry } = buildDocViewer(logOverviewContext$, [
       { id: 'doc_view_table', title: 'Table', order: 10, render: () => <div /> },
+      { id: 'doc_view_source', title: 'JSON', order: 20, render: () => <div /> },
     ]);
 
-    expect(registry.getAll().map(({ id }) => id)).toEqual([LOGS_OVERVIEW_TAB_ID, 'doc_view_table']);
+    expect(registry.getAll().map(({ id }) => id)).toEqual([
+      LOGS_OVERVIEW_TAB_ID,
+      'doc_view_table',
+      'doc_view_source',
+    ]);
   });
 
-  it('opens the section already queued on the context when the tab mounts', async () => {
+  it('opens the section queued on the context when the tab mounts', async () => {
     const record = buildRecord('doc-1');
     const logOverviewContext$ = new BehaviorSubject<LogOverviewContext | undefined>({
       recordId: record.id,
@@ -109,15 +117,15 @@ describe('createGetDocViewer (logs) accordion expansion', () => {
     expect(logOverviewContext$.getValue()).toBeUndefined();
   });
 
-  // Both orderings, because the FTR suite covered each: a stacktrace-then-quality-issue sequence
-  // and the reverse.
+  // `openAndScrollToSection` only ever opens, never closes, so each ordering starts the hook from a
+  // different section and the pair covers both arms.
   const directions = [
     { first: 'stacktrace', second: 'quality_issues' },
     { first: 'quality_issues', second: 'stacktrace' },
   ] as const;
 
   directions.forEach(({ first, second }) => {
-    it(`opens ${second} on top of ${first} when the context targets the mounted record`, async () => {
+    it(`keeps ${first} open when ${second} is requested for the same record`, async () => {
       const record = buildRecord('doc-1');
       const logOverviewContext$ = new BehaviorSubject<LogOverviewContext | undefined>({
         recordId: record.id,
@@ -137,7 +145,7 @@ describe('createGetDocViewer (logs) accordion expansion', () => {
       expect(logOverviewContext$.getValue()).toBeUndefined();
     });
 
-    it(`ignores a ${second} update aimed at a different record than the mounted ${first} one`, async () => {
+    it(`leaves a ${second} request for the tab that mounts for a different record`, async () => {
       const record = buildRecord('doc-1');
       const otherRecordId = buildRecord('doc-2').id;
       const logOverviewContext$ = new BehaviorSubject<LogOverviewContext | undefined>({
@@ -151,8 +159,8 @@ describe('createGetDocViewer (logs) accordion expansion', () => {
 
       logOverviewContext$.next({ recordId: otherRecordId, initialAccordionSection: second });
 
-      // Left on the subject for the tab that will mount for that other record. The remount itself is
-      // keyed in @kbn/unified-doc-viewer and is covered by doc_viewer_controls.spec.ts.
+      // The request survives for whichever tab mounts next. That remount is keyed on the record id
+      // inside the doc viewer itself, so only a browser test can prove it happens.
       expect(mockOpenAndScrollToSection).toHaveBeenCalledTimes(1);
       expect(logOverviewContext$.getValue()).toEqual({
         recordId: otherRecordId,

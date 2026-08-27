@@ -73,71 +73,43 @@ const setup = ({
   return { controls, logOverviewContext$ };
 };
 
+const clickTargets = [
+  { controlId: DEGRADED_DOCS_CONTROL_ID, section: 'quality_issues' },
+  { controlId: STACKTRACE_CONTROL_ID, section: 'stacktrace' },
+] as const;
+
+const degradedDocsGating = [
+  { esql: 'FROM logs-* | LIMIT 10', requests: 'does not request', enabled: false },
+  { esql: 'FROM logs-* METADATA _ignored | LIMIT 10', requests: 'requests', enabled: true },
+] as const;
+
 describe('getRowAdditionalLeadingControls (logs)', () => {
-  it('appends the quality-issue and stacktrace controls when the host can expand a document', () => {
-    const { controls } = setup({ setExpandedDoc: jest.fn() });
+  clickTargets.forEach(({ controlId, section }) => {
+    it(`queues the ${section} section and opens the log overview tab when its control is clicked`, () => {
+      const setExpandedDoc = jest.fn();
+      const { controls, logOverviewContext$ } = setup({ setExpandedDoc });
 
-    expect(controls?.map(({ id }) => id)).toEqual([
-      DEGRADED_DOCS_CONTROL_ID,
-      STACKTRACE_CONTROL_ID,
-    ]);
-  });
+      getOnClick(findControl(controls, controlId))(rowProps);
 
-  it('adds no controls when the host cannot expand a document', () => {
-    const { controls } = setup();
-
-    expect(controls).toEqual([]);
-  });
-
-  it('opens the log overview tab with the quality-issue section when its control is clicked', () => {
-    const setExpandedDoc = jest.fn();
-    const { controls, logOverviewContext$ } = setup({ setExpandedDoc });
-
-    getOnClick(findControl(controls, DEGRADED_DOCS_CONTROL_ID))(rowProps);
-
-    expect(logOverviewContext$.getValue()).toEqual({
-      recordId: record.id,
-      initialAccordionSection: 'quality_issues',
-    });
-    expect(setExpandedDoc).toHaveBeenCalledWith(record, {
-      initialTabId: 'doc_view_logs_overview',
+      expect(logOverviewContext$.getValue()).toEqual({
+        recordId: record.id,
+        initialAccordionSection: section,
+      });
+      expect(setExpandedDoc).toHaveBeenCalledWith(record, {
+        initialTabId: 'doc_view_logs_overview',
+      });
     });
   });
 
-  it('opens the log overview tab with the stacktrace section when its control is clicked', () => {
-    const setExpandedDoc = jest.fn();
-    const { controls, logOverviewContext$ } = setup({ setExpandedDoc });
+  degradedDocsGating.forEach(({ esql, requests, enabled }) => {
+    it(`${
+      enabled ? 'enables' : 'disables'
+    } quality-issue detection for an ES|QL query that ${requests} _ignored`, () => {
+      const { controls } = setup({ setExpandedDoc: jest.fn(), query: { esql } });
 
-    getOnClick(findControl(controls, STACKTRACE_CONTROL_ID))(rowProps);
+      const element = findControl(controls, DEGRADED_DOCS_CONTROL_ID).render(noopControl, rowProps);
 
-    expect(logOverviewContext$.getValue()).toEqual({
-      recordId: record.id,
-      initialAccordionSection: 'stacktrace',
+      expect(element.props.enabled).toBe(enabled);
     });
-    expect(setExpandedDoc).toHaveBeenCalledWith(record, {
-      initialTabId: 'doc_view_logs_overview',
-    });
-  });
-
-  it('disables quality-issue detection for an ES|QL query that does not request _ignored', () => {
-    const { controls } = setup({
-      setExpandedDoc: jest.fn(),
-      query: { esql: 'FROM logs-* | LIMIT 10' },
-    });
-
-    const element = findControl(controls, DEGRADED_DOCS_CONTROL_ID).render(noopControl, rowProps);
-
-    expect(element.props.enabled).toBe(false);
-  });
-
-  it('keeps quality-issue detection enabled for an ES|QL query that requests _ignored', () => {
-    const { controls } = setup({
-      setExpandedDoc: jest.fn(),
-      query: { esql: 'FROM logs-* METADATA _ignored | LIMIT 10' },
-    });
-
-    const element = findControl(controls, DEGRADED_DOCS_CONTROL_ID).render(noopControl, rowProps);
-
-    expect(element.props.enabled).toBe(true);
   });
 });
