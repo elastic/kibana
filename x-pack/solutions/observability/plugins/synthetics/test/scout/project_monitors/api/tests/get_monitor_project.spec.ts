@@ -27,6 +27,7 @@ import {
 import { deleteAllSyntheticsPackagePolicies } from '../../../common/fixtures/fleet';
 import { tryForTime } from '../../../common/fixtures/retry';
 import { projectBrowserMonitorFixture } from '../fixtures/data/project_browser_monitor';
+import { projectApiMonitorFixture } from '../fixtures/data/project_api_monitor';
 import { projectHttpMonitorFixture } from '../fixtures/data/project_http_monitor';
 import { projectTcpMonitorFixture } from '../fixtures/data/project_tcp_monitor';
 import { projectIcmpMonitorFixture } from '../../../common/fixtures/data/project_icmp_monitor';
@@ -140,6 +141,27 @@ apiTest.describe(
       const monitors = buildMonitors(
         projectBrowserMonitorFixture.monitors[0],
         'test browser id',
+        TOTAL_MONITORS
+      );
+      try {
+        await pushProjectMonitors(apiClient, editorHeaders, project, monitors);
+        await runTwoPageScenario(apiClient, project, monitors);
+      } finally {
+        await deleteProjectMonitors(
+          apiClient,
+          editorHeaders,
+          project,
+          monitors.map((m) => m.id)
+        ).catch(() => {});
+      }
+    });
+
+    apiTest('project monitors - fetches all monitors - api', async ({ apiClient }) => {
+      apiTest.setTimeout(TEST_TIMEOUT);
+      const project = `test-api-suite-${uuidv4()}`;
+      const monitors = buildMonitors(
+        projectApiMonitorFixture.monitors[0],
+        'test api id',
         TOTAL_MONITORS
       );
       try {

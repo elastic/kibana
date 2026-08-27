@@ -99,7 +99,14 @@ export const TestRunsTable = ({
   const { remoteName } = useGetUrlParams();
   const isTabletOrGreater = useIsWithinMinBreakpoint('s');
 
-  const isBrowserMonitor = monitor?.[ConfigKey.MONITOR_TYPE] === MonitorTypeEnum.BROWSER;
+  // API monitors run via the same synthexec pipeline as browser monitors and
+  // produce step-based test runs, so they share most of the multi-step UI
+  // (test detail link, no IP column, no inline expand). They do NOT however
+  // have a browser context, so the Screenshot column must be hidden — track
+  // that on its own flag instead of overloading isBrowserMonitor.
+  const monitorType = monitor?.[ConfigKey.MONITOR_TYPE];
+  const isBrowserMonitor = monitorType === MonitorTypeEnum.BROWSER;
+  const isMultiStepMonitor = isBrowserMonitor || monitorType === MonitorTypeEnum.API;
 
   const { expandedRows, setExpandedRows } = useExpandedPingList(pings);
 
@@ -156,14 +163,14 @@ export const TestRunsTable = ({
       name: '@timestamp',
       sortable: true,
       render: (timestamp: string, ping: Ping) => (
-        <TestDetailsLink isBrowserMonitor={isBrowserMonitor} timestamp={timestamp} ping={ping} />
+        <TestDetailsLink isBrowserMonitor={isMultiStepMonitor} timestamp={timestamp} ping={ping} />
       ),
       mobileOptions: {
         header: false,
         render: (item) => (
           <MobileRowDetails
             ping={item}
-            isBrowserMonitor={isBrowserMonitor}
+            isBrowserMonitor={isMultiStepMonitor}
             basePath={basePath}
             locationId={selectedLocation?.id}
             spaceId={spaceId}
@@ -203,7 +210,7 @@ export const TestRunsTable = ({
         show: false,
       },
     },
-    ...(!isBrowserMonitor
+    ...(!isMultiStepMonitor
       ? [
           {
             align: 'left',
@@ -255,7 +262,7 @@ export const TestRunsTable = ({
         },
       ],
     },
-    ...(!isBrowserMonitor
+    ...(!isMultiStepMonitor
       ? [
           {
             align: 'right',

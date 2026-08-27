@@ -21,6 +21,7 @@ import type {
   SyntheticsMonitor,
 } from '../../../common/runtime_types';
 import {
+  APIFieldsCodec,
   BrowserFieldsCodec,
   CodeEditorMode,
   ConfigKey,
@@ -39,19 +40,27 @@ import {
   DEFAULT_FIELDS,
   HEARTBEAT_BROWSER_MONITOR_TIMEOUT_OVERHEAD_SECONDS,
 } from '../../../common/constants/monitor_defaults';
+import {
+  hasPublicServiceLocation,
+  monitorTypeRequiresPrivateLocations,
+} from '../../../common/utils/monitor_location_support';
 import { privateLocationCoversAllMonitorSpaces } from './monitor_locations_utils';
 
 type MonitorCodecType =
   | typeof ICMPFieldsCodec
   | typeof TCPFieldsCodec
   | typeof HTTPFieldsCodec
-  | typeof BrowserFieldsCodec;
+  | typeof BrowserFieldsCodec
+  | typeof APIFieldsCodec;
 
 const monitorTypeToCodecMap: Record<MonitorTypeEnum, MonitorCodecType> = {
   [MonitorTypeEnum.ICMP]: ICMPFieldsCodec,
   [MonitorTypeEnum.TCP]: TCPFieldsCodec,
   [MonitorTypeEnum.HTTP]: HTTPFieldsCodec,
   [MonitorTypeEnum.BROWSER]: BrowserFieldsCodec,
+  // APIFieldsCodec === BrowserFieldsCodec by construction (see APIFields docs);
+  // listed explicitly so adding a future API-specific codec is a one-line swap.
+  [MonitorTypeEnum.API]: APIFieldsCodec,
 };
 
 export interface ValidationResult {
@@ -79,7 +88,11 @@ export function validateMonitor(monitorFields: MonitorFields, spaceId: string): 
   const { [ConfigKey.MONITOR_TYPE]: monitorType, [ConfigKey.KIBANA_SPACES]: kSpaces } =
     monitorFields;
 
-  if (monitorType !== MonitorTypeEnum.BROWSER && !monitorFields.name) {
+  if (
+    monitorType !== MonitorTypeEnum.BROWSER &&
+    monitorType !== MonitorTypeEnum.API &&
+    !monitorFields.name
+  ) {
     monitorFields.name = monitorFields.urls || monitorFields.hosts;
   }
 
@@ -150,34 +163,56 @@ export function validateMonitor(monitorFields: MonitorFields, spaceId: string): 
     };
   }
 
-  if (monitorType === MonitorTypeEnum.BROWSER) {
+  if (monitorType === MonitorTypeEnum.BROWSER || monitorType === MonitorTypeEnum.API) {
     const inlineScript = monitorFields[ConfigKey.SOURCE_INLINE];
     const projectContent = monitorFields[ConfigKey.SOURCE_PROJECT_CONTENT];
     if (!inlineScript && !projectContent) {
       return {
         valid: false,
-        reason: 'Monitor is not a valid monitor of type browser',
+        reason:
+          monitorType === MonitorTypeEnum.API
+            ? 'Monitor is not a valid monitor of type api'
+            : 'Monitor is not a valid monitor of type browser',
         details: i18n.translate('xpack.synthetics.createMonitor.validation.noScript', {
-          defaultMessage: 'source.inline.script: Script is required for browser monitor.',
+          defaultMessage: 'source.inline.script: Script is required for {monitorType} monitor.',
+          values: { monitorType },
         }),
         payload: monitorFields,
       };
     }
 
-    const timeout = monitorFields[ConfigKey.TIMEOUT];
-    if (timeout) {
-      const timeoutSeconds = typeof timeout === 'string' ? parseInt(timeout, 10) : timeout;
-      const hasPrivateLocations = monitorFields.locations?.some((loc) => !loc.isServiceManaged);
-      if (
-        timeoutSeconds < HEARTBEAT_BROWSER_MONITOR_TIMEOUT_OVERHEAD_SECONDS &&
-        hasPrivateLocations
-      ) {
-        return {
-          valid: false,
-          reason: BROWSER_INVALID_TIMEOUT_ERROR,
-          details: BROWSER_INVALID_TIMEOUT_DETAILS(timeoutSeconds),
-          payload: monitorFields,
-        };
+    if (
+      monitorTypeRequiresPrivateLocations(monitorType) &&
+      hasPublicServiceLocation(monitorFields.locations)
+    ) {
+      return {
+        valid: false,
+        reason: API_PUBLIC_LOCATION_ERROR,
+        details: API_PUBLIC_LOCATION_DETAILS,
+        payload: monitorFields,
+      };
+    }
+
+    // The 30s overhead requirement exists because Chromium needs ~30s to spin
+    // up on a private location. API monitors do not launch Chromium (per
+    // Heartbeat's `api` plugin, elastic/beats#50802), so the lower bound does
+    // not apply.
+    if (monitorType === MonitorTypeEnum.BROWSER) {
+      const timeout = monitorFields[ConfigKey.TIMEOUT];
+      if (timeout) {
+        const timeoutSeconds = typeof timeout === 'string' ? parseInt(timeout, 10) : timeout;
+        const hasPrivateLocations = monitorFields.locations?.some((loc) => !loc.isServiceManaged);
+        if (
+          timeoutSeconds < HEARTBEAT_BROWSER_MONITOR_TIMEOUT_OVERHEAD_SECONDS &&
+          hasPrivateLocations
+        ) {
+          return {
+            valid: false,
+            reason: BROWSER_INVALID_TIMEOUT_ERROR,
+            details: BROWSER_INVALID_TIMEOUT_DETAILS(timeoutSeconds),
+            payload: monitorFields,
+          };
+        }
       }
     }
   }
@@ -255,11 +290,14 @@ export const normalizeAPIConfig = (monitor: CreateMonitorPayLoad) => {
     rawConfig[ConfigKey.HOSTS] = rawHost;
   }
   if (
-    monitor.type === 'browser' &&
-    monitor[ConfigKey.FORM_MONITOR_TYPE] !== FormMonitorType.SINGLE &&
-    monitor[ConfigKey.FORM_MONITOR_TYPE] !== FormMonitorType.MULTISTEP
+    (monitor.type === MonitorTypeEnum.BROWSER &&
+      monitor[ConfigKey.FORM_MONITOR_TYPE] !== FormMonitorType.SINGLE &&
+      monitor[ConfigKey.FORM_MONITOR_TYPE] !== FormMonitorType.MULTISTEP) ||
+    // API monitors never use URLs at the SO level; the script defines its own
+    // request targets via Playwright's APIRequestContext.
+    monitor.type === MonitorTypeEnum.API
   ) {
-    // urls isn't supported for browser but is needed for SO AAD
+    // urls isn't supported for browser/api but is needed for SO AAD
     supportedKeys = supportedKeys.filter((key) => key !== ConfigKey.URLS);
   }
   // needed for SO AAD
@@ -418,6 +456,10 @@ export function validateLocation(
   const hasPublicLocationsConfigured = (monitorFields.locations || []).length > 0;
   const hasPrivateLocationsConfigured = (monitorFields.privateLocations || []).length > 0;
 
+  if (monitorTypeRequiresPrivateLocations(monitorFields.type) && hasPublicLocationsConfigured) {
+    return API_PUBLIC_LOCATION_PROJECT_ERROR;
+  }
+
   if (hasPublicLocationsConfigured) {
     let invalidLocation = '';
     const hasValidPublicLocation = monitorFields.locations?.some((location) => {
@@ -569,6 +611,29 @@ export const LOCATION_REQUIRED_ERROR = i18n.translate(
   {
     defaultMessage:
       'At least one location is required, either elastic managed or private e.g locations: ["us-east"] or private_locations:["test private location"]',
+  }
+);
+
+const API_PUBLIC_LOCATION_ERROR = i18n.translate(
+  'xpack.synthetics.server.monitors.apiPublicLocationErrorMessage',
+  {
+    defaultMessage: 'API Journey monitors cannot run on Elastic managed locations',
+  }
+);
+
+const API_PUBLIC_LOCATION_DETAILS = i18n.translate(
+  'xpack.synthetics.server.monitors.apiPublicLocationDetailsErrorMessage',
+  {
+    defaultMessage:
+      'API Journey monitors can only run on private locations. Remove Elastic managed locations from this monitor.',
+  }
+);
+
+const API_PUBLIC_LOCATION_PROJECT_ERROR = i18n.translate(
+  'xpack.synthetics.server.projectMonitors.apiPublicLocationErrorMessage',
+  {
+    defaultMessage:
+      'API Journey monitors can only run on private locations. Remove "locations" or replace them with "privateLocations".',
   }
 );
 
