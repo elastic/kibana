@@ -61,7 +61,7 @@ export interface FleetConfigType {
       tls?: {
         certificate?: string;
         key?: string;
-        ca?: string | string[];
+        ca?: string;
       };
     };
   };
@@ -107,6 +107,7 @@ export interface FleetConfigType {
     onlyAllowAgentUpgradeToKnownVersions: boolean;
     activeAgentsSoftLimit?: number;
     retrySetupOnBoot: boolean;
+    allowRegistryPackageUploads?: boolean;
     registry: {
       kibanaVersionCheckEnabled: boolean;
       capabilities: string[];

@@ -13,29 +13,16 @@ const mockListEntities = jest.fn();
 
 const mockPrepareLeadCandidates = jest.fn();
 const mockSynthesizeLeads = jest.fn();
-const mockRegisterModule = jest.fn();
 jest.mock('./engine/lead_generation_engine', () => ({
   createLeadGenerationEngine: () => ({
-    registerModule: mockRegisterModule,
     prepareLeadCandidates: mockPrepareLeadCandidates,
     synthesizeLeads: mockSynthesizeLeads,
   }),
 }));
 
-jest.mock('./observation_modules/risk_score_module', () => ({
-  createRiskScoreModule: jest.fn(() => ({ config: { id: 'risk' } })),
-}));
-jest.mock('./observation_modules/temporal_state_module', () => ({
-  createTemporalStateModule: jest.fn(() => ({ config: { id: 'temporal' } })),
-}));
-jest.mock('./observation_modules/behavioral_analysis_module', () => ({
-  createBehavioralAnalysisModule: jest.fn(() => ({ config: { id: 'alert' } })),
-}));
-jest.mock('./observation_modules/entity_profile_module', () => ({
-  createEntityProfileModule: jest.fn(() => ({ config: { id: 'entity_profile' } })),
-}));
-jest.mock('./observation_modules/anomaly_detection_module', () => ({
-  createAnomalyDetectionModule: jest.fn(() => ({ config: { id: 'anomaly_detection' } })),
+const mockRegisterObservationModules = jest.fn();
+jest.mock('./observation_modules/register_modules', () => ({
+  registerObservationModules: (...args: unknown[]) => mockRegisterObservationModules(...args),
 }));
 
 const mockClassifyLeadCandidates = jest.fn();
@@ -55,6 +42,17 @@ describe('runLeadGenerationPipeline', () => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
   const riskScoreDataClient = riskScoreDataClientMock.create();
   const fakeChatModel = { invoke: jest.fn() } as unknown as InferenceChatModel;
+  const relationshipsClient = { getEarliestObservationByTarget: jest.fn() };
+
+  const pipelineParams = {
+    listEntities: mockListEntities,
+    esClient,
+    logger,
+    spaceId: 'default' as const,
+    riskScoreDataClient,
+    chatModel: fakeChatModel,
+    relationshipsClient: relationshipsClient as never,
+  };
 
   afterEach(() => {
     jest.clearAllMocks();
@@ -69,16 +67,12 @@ describe('runLeadGenerationPipeline', () => {
     mockListEntities.mockResolvedValueOnce([]);
 
     await runLeadGenerationPipeline({
-      listEntities: mockListEntities,
-      esClient,
-      logger,
-      spaceId: 'default',
-      riskScoreDataClient,
+      ...pipelineParams,
       sourceType: 'scheduled',
-      chatModel: fakeChatModel,
     });
 
     expect(mockListEntities).toHaveBeenCalled();
+    expect(mockRegisterObservationModules).not.toHaveBeenCalled();
     expect(mockPrepareLeadCandidates).not.toHaveBeenCalled();
     expect(mockSynthesizeLeads).not.toHaveBeenCalled();
   });
@@ -123,14 +117,9 @@ describe('runLeadGenerationPipeline', () => {
     ]);
 
     await runLeadGenerationPipeline({
-      listEntities: mockListEntities,
-      esClient,
-      logger,
-      spaceId: 'default',
-      riskScoreDataClient,
+      ...pipelineParams,
       sourceType: 'adhoc',
       executionId: 'exec-123',
-      chatModel: fakeChatModel,
     });
 
     expect(mockSynthesizeLeads).toHaveBeenCalledWith([], expect.any(Object));
@@ -187,17 +176,24 @@ describe('runLeadGenerationPipeline', () => {
     mockSynthesizeLeads.mockResolvedValueOnce([mockLead]);
 
     await runLeadGenerationPipeline({
-      listEntities: mockListEntities,
-      esClient,
-      logger,
-      spaceId: 'default',
-      riskScoreDataClient,
+      ...pipelineParams,
       sourceType: 'adhoc',
       executionId: 'exec-123',
-      chatModel: fakeChatModel,
     });
 
-    expect(mockRegisterModule).toHaveBeenCalledTimes(5);
+    expect(mockRegisterObservationModules).toHaveBeenCalledWith(
+      expect.objectContaining({
+        prepareLeadCandidates: mockPrepareLeadCandidates,
+        synthesizeLeads: mockSynthesizeLeads,
+      }),
+      expect.objectContaining({
+        logger,
+        esClient,
+        spaceId: 'default',
+        riskScoreDataClient,
+        relationshipsClient,
+      })
+    );
     expect(mockSynthesizeLeads).toHaveBeenCalledWith(
       [candidate],
       expect.objectContaining({ chatModel: fakeChatModel })
@@ -268,13 +264,9 @@ describe('runLeadGenerationPipeline', () => {
     ]);
 
     await runLeadGenerationPipeline({
-      listEntities: mockListEntities,
-      esClient,
-      logger,
+      ...pipelineParams,
       spaceId: 'test-space',
-      riskScoreDataClient,
       sourceType: 'scheduled',
-      chatModel: fakeChatModel,
     });
 
     expect(mockPersistLeads).toHaveBeenCalledWith(
@@ -314,13 +306,8 @@ describe('runLeadGenerationPipeline', () => {
     mockClassifyLeadCandidates.mockResolvedValueOnce([{ candidate, decision: { type: 'skip' } }]);
 
     await runLeadGenerationPipeline({
-      listEntities: mockListEntities,
-      esClient,
-      logger,
-      spaceId: 'default',
-      riskScoreDataClient,
+      ...pipelineParams,
       sourceType: 'adhoc',
-      chatModel: fakeChatModel,
     });
 
     expect(mockSynthesizeLeads).toHaveBeenCalledWith([], expect.any(Object));
@@ -394,13 +381,8 @@ describe('runLeadGenerationPipeline', () => {
     const analytics = { reportEvent: jest.fn() };
 
     await runLeadGenerationPipeline({
-      listEntities: mockListEntities,
-      esClient,
-      logger,
-      spaceId: 'default',
-      riskScoreDataClient,
+      ...pipelineParams,
       sourceType: 'scheduled',
-      chatModel: fakeChatModel,
       analytics: analytics as never,
     });
 

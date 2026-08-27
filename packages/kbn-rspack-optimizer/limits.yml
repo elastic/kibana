@@ -26,7 +26,7 @@ pageLoadAssetSize:
   cloudDefend: 3030
   cloudExperiments: 67356
   cloudFullStory: 1373
-  cloudLinks: 17938
+  cloudLinks: 21692
   cloudSecurityPosture: 12224
   console: 24516
   contentConnectors: 2789
@@ -37,7 +37,7 @@ pageLoadAssetSize:
   core: 320
   cps: 6032
   crossClusterReplication: 7691
-  customContent: 2127
+  customContent: 2354
   customIntegrations: 636
   dashboard: 452
   dashboardMarkdown: 4012
@@ -133,7 +133,7 @@ pageLoadAssetSize:
   navigation: 332
   newsfeed: 10708
   nightshift: 1961
-  nightshiftInvestigations: 419
+  nightshiftInvestigations: 952
   noDataPage: 630
   notificationCenter: 332
   observability: 3614
@@ -191,7 +191,7 @@ pageLoadAssetSize:
   shared-misc: 141281
   shared-packages: 5010040
   shared-plugins: 13536562
-  shared-solution-packages: 347767
+  shared-solution-packages: 347762
   significantEvents: 3153
   significantEventsApp: 5212
   slo: 19531
