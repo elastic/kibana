@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { of, type Observable } from 'rxjs';
+import { distinctUntilChanged, map, of, type Observable } from 'rxjs';
 import type {
   SidebarSetup,
   SidebarStart,
@@ -77,6 +77,10 @@ export class SidebarService {
     appId: SidebarAppId
   ): SidebarApp<TState, TActions> {
     const def = this.registry.getApp(appId);
+    const isOpen$ = this.state.getCurrentAppId$().pipe(
+      map((currentAppId) => currentAppId === appId),
+      distinctUntilChanged()
+    );
 
     const base = {
       open: () => this.state.open(appId),
@@ -85,6 +89,8 @@ export class SidebarService {
           this.state.close();
         }
       },
+      isOpen: () => this.state.getCurrentAppId() === appId,
+      isOpen$: () => isOpen$,
       getStatus: () => this.registry.getApp(appId).status,
       getStatus$: () => this.registry.getStatus$(appId),
     };
