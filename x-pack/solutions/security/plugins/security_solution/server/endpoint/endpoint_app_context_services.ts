@@ -202,7 +202,8 @@ export class EndpointAppContextService {
         endpointMetadataService,
         this.setupDependencies.cloud,
         esClient,
-        productFeaturesService
+        productFeaturesService,
+        this
       )
     );
 
