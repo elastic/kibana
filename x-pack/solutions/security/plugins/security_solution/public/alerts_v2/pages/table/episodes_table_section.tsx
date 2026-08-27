@@ -78,6 +78,10 @@ const INVESTIGATE_IN_TIMELINE_LABEL = i18n.translate(
   'xpack.securitySolution.alertsV2.episodesTable.investigateInTimeline',
   { defaultMessage: 'Investigate in Timeline' }
 );
+const ANALYZE_EVENT_LABEL = i18n.translate(
+  'xpack.securitySolution.alertsV2.episodesTable.analyzeEvent',
+  { defaultMessage: 'Analyze event' }
+);
 
 /** Human-readable column headers, mirroring the v1 alerts table labels. */
 const COLUMN_DISPLAY_NAMES: Record<string, string> = {
@@ -177,7 +181,7 @@ export const EpisodesTableSection = ({ query, timeRange }: EpisodesTableSectionP
   );
   const { rulesCache } = useAlertingRulesCache({ ruleIds, services: { http: services.http } });
 
-  const { openDocumentFlyoutFromHit, openRuleFlyout } = useFlyoutApi();
+  const { openDocumentFlyoutFromHit, openRuleFlyout, openAnalyzer } = useFlyoutApi();
 
   const externalCustomRenderers = useMemo<CustomCellRenderer>(
     () => ({
@@ -227,6 +231,18 @@ export const EpisodesTableSection = ({ query, timeRange }: EpisodesTableSectionP
           />
         ),
       },
+      {
+        id: 'openAnalyzer',
+        render: (Control, { record }) => (
+          <Control
+            data-test-subj="alertsV2OpenAnalyzer"
+            iconType="analyzeEvent"
+            label={ANALYZE_EVENT_LABEL}
+            tooltipContent={ANALYZE_EVENT_LABEL}
+            onClick={() => openAnalyzer({ hit: record })}
+          />
+        ),
+      },
     ];
     if (isEsqlAdvancedSettingEnabled) {
       controls.push({
@@ -248,7 +264,12 @@ export const EpisodesTableSection = ({ query, timeRange }: EpisodesTableSectionP
       });
     }
     return controls;
-  }, [openDocumentFlyoutFromHit, isEsqlAdvancedSettingEnabled, investigateEpisodeInTimeline]);
+  }, [
+    openDocumentFlyoutFromHit,
+    openAnalyzer,
+    isEsqlAdvancedSettingEnabled,
+    investigateEpisodeInTimeline,
+  ]);
 
   return (
     <EuiPanel hasBorder paddingSize="m" data-test-subj="alertsV2EpisodesTableSection">
@@ -303,6 +324,7 @@ export const EpisodesTableSection = ({ query, timeRange }: EpisodesTableSectionP
             isInMemorySortEnabled={false}
             controlColumnIds={[]}
             rowAdditionalLeadingControls={rowAdditionalLeadingControls}
+            visibleRowLeadingControls={rowAdditionalLeadingControls.length}
             services={tableServices}
           />
         </div>
