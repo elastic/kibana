@@ -2598,17 +2598,21 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         return acc;
       }, new Set());
 
-      const agentPolicies = await agentPolicyService.getByIds(soClient, uniquePolicyIdsR);
-
-      await this.bumpAgentPoliciesRevision(
-        { soClient, esClient },
-        agentPolicies.map((p) => p.id),
-        {
-          user: options?.user,
-          asyncDeploy: options?.asyncDeploy,
-          removeProtectionFn: (policyId) => agentPoliciesWithEndpointPackagePolicies.has(policyId),
-        }
-      );
+      if (options?.bumpRevision ?? true) {
+        const agentPolicies = await agentPolicyService.getByIds(soClient, uniquePolicyIdsR, {
+          ignoreMissing: true,
+        });
+        await this.bumpAgentPoliciesRevision(
+          { soClient, esClient },
+          agentPolicies.filter(Boolean).map((p) => p.id),
+          {
+            user: options?.user,
+            asyncDeploy: options?.asyncDeploy,
+            removeProtectionFn: (policyId) =>
+              agentPoliciesWithEndpointPackagePolicies.has(policyId),
+          }
+        );
+      }
     }
 
     if (secretsToDelete.length > 0) {
