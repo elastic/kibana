@@ -636,7 +636,11 @@ export function initRoutes(
           reason: 'This route is opted out from authorization',
         },
       },
-      validate: { body: schema.object({ ids: schema.arrayOf(schema.string()) }) },
+      validate: {
+        body: schema.object({
+          ids: schema.arrayOf(schema.string({ maxLength: 1024 }), { maxSize: 100 }),
+        }),
+      },
     },
     async (context, request, response) => {
       const { ids } = request.body;

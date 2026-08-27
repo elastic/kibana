@@ -26,13 +26,6 @@ describe('detectCustomConfigDir', () => {
     expect(result).toBe('custom');
   });
 
-  it('should detect custom config directory when scout_<name> is nested under a subdirectory', () => {
-    const configPath =
-      'x-pack/platform/test/security_api_integration/scout_session_idle/api/playwright.config.ts';
-    const result = detectCustomConfigDir(configPath);
-    expect(result).toBe('session_idle');
-  });
-
   it('should return null for regular scout directory', () => {
     const configPath = 'x-pack/solutions/security/test/scout/ui/playwright.config.ts';
     const result = detectCustomConfigDir(configPath);

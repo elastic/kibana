@@ -160,7 +160,6 @@ dependsOn:
   - '@kbn/synthtrace-client'
   - '@kbn/significant-events-plugin'
   - '@kbn/alerting-v2-schemas'
-  - '@kbn/scout'
 tags:
   - test-helper
   - package

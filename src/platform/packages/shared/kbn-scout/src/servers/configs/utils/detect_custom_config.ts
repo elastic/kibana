@@ -19,8 +19,8 @@ import type { ScoutTestTarget } from '@kbn/scout-info';
 export function detectCustomConfigDir(playwrightConfigPath: string): string | null {
   const normalizedPath = playwrightConfigPath.replace(/\\/g, '/');
 
-  // Look for pattern: /scout_<name>/
-  const match = normalizedPath.match(/\/scout_([^/]+)\//);
+  // Look for pattern: /test/scout_<name>/
+  const match = normalizedPath.match(/\/test\/scout_([^/]+)\//);
   if (match && match[1]) {
     return match[1];
   }
