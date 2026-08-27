@@ -149,6 +149,39 @@ describe('ConnectorStepImpl', () => {
     );
   });
 
+  it('does not tokenize connector secret references for non-HTTP connector steps', async () => {
+    const { stepExecutionRuntime, connectorExecutor, workflowRuntime, workflowLogger } =
+      createMocks();
+    connectorExecutor.execute.mockResolvedValue({ status: 'ok', data: { result: 'success' } });
+    const step = {
+      name: 'slack-step',
+      stepId: 'slack-step',
+      type: 'slack',
+      'connector-id': 'conn-123',
+      with: {
+        text: '{{ connector.secrets.client_secret }}',
+      },
+    };
+    const impl = new ConnectorStepImpl(
+      step,
+      stepExecutionRuntime as any,
+      connectorExecutor as any,
+      workflowRuntime as any,
+      workflowLogger as any
+    );
+
+    await impl.run();
+
+    expect(connectorExecutor.execute).toHaveBeenCalledWith(
+      expect.objectContaining({
+        connectorType: 'slack',
+        input: {
+          text: '{{ connector.secrets.client_secret }}',
+        },
+      })
+    );
+  });
+
   it('does not treat a connector secret expression introduced by rendered input as a secret', async () => {
     const { stepExecutionRuntime, connectorExecutor, workflowRuntime, workflowLogger } =
       createMocks();
