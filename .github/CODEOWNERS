@@ -2318,7 +2318,6 @@ x-pack/platform/test/plugin_api_integration/*.ts @elastic/kibana-core @elastic/r
 x-pack/platform/test/plugin_api_integration/plugins/elasticsearch_client @elastic/kibana-core
 x-pack/platform/test/plugin_api_integration/test_suites/licensed_feature_usage @elastic/kibana-core
 x-pack/platform/test/plugin_api_integration/test_suites/platform/ @elastic/kibana-core
-/x-pack/platform/test/functional/page_objects/navigational_search.ts @elastic/kibana-core
 /x-pack/platform/test/stack_functional_integration/apps/savedobjects_upgrade_testing @elastic/kibana-core
 /x-pack/platform/test/functional/page_objects/status_page.ts @elastic/kibana-core
 /x-pack/platform/test/functional/page_objects/share_saved_objects_to_space_page.ts @elastic/kibana-core
@@ -2362,6 +2361,8 @@ x-pack/platform/test/plugin_api_integration/test_suites/platform/ @elastic/kiban
 /src/platform/test/functional/page_objects/app_menu.ts @elastic/appex-sharedux
 /src/platform/test/functional/page_objects/export_page.ts @elastic/appex-sharedux
 /src/platform/test/functional/page_objects/solution_navigation.ts @elastic/appex-sharedux
+/x-pack/platform/test/functional/page_objects/navigational_search.ts @elastic/appex-sharedux
+/x-pack/platform/plugins/shared/global_search/test/scout/ui/fixtures/page_objects/global_search.ts @elastic/appex-sharedux
 /src/platform/test/functional/fixtures/es_archiver/deprecations_service @elastic/kibana-core
 /src/platform/test/health_gateway @elastic/kibana-core
 /src/platform/test/api_integration/apis/saved_objects* @elastic/kibana-core
