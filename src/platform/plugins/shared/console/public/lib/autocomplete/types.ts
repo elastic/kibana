@@ -14,17 +14,17 @@ export interface ResultTerm {
   meta?: string;
   context?: AutoCompleteContext;
   insertValue?: string;
-  name?: string | boolean;
+  name?: string | number | boolean;
   value?: string;
   score?: number;
-  template?: { __raw?: boolean; value?: string; [key: string]: unknown };
+  template?: unknown;
 }
 
 export interface DataAutoCompleteRulesOneOf {
   __condition?: {
     lines_regex: string;
   };
-  __template: Record<string, unknown>;
+  __template?: unknown;
   [key: string]: unknown;
 }
 
