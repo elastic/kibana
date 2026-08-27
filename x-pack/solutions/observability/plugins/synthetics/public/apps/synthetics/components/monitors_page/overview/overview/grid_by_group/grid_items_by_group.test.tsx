@@ -9,7 +9,7 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { useSelector } from 'react-redux-v7';
 
-import { GridItemsByGroup } from './grid_items_by_group';
+import { GridItemsByGroup, HEARTBEAT_GROUP_ID, REMOTE_GROUP_ID } from './grid_items_by_group';
 import type { OverviewStatusMetaData } from '../../types';
 import { WrappedHelper } from '../../../../../utils/testing';
 import { selectOverviewGroupBy, selectServiceLocationsState } from '../../../../../state';
@@ -29,13 +29,15 @@ jest.mock('../../../common/monitor_filters/use_filters', () => ({
 // just exposes each rendered group's label and its member monitor ids.
 jest.mock('./grid_group_item', () => ({
   GroupGridItem: ({
+    groupId,
     groupLabel,
     groupMonitors,
   }: {
+    groupId?: string;
     groupLabel: string;
     groupMonitors: OverviewStatusMetaData[];
   }) => (
-    <div data-test-subj={`group-${groupLabel}`}>
+    <div data-test-subj={`group-${groupId ?? groupLabel}`}>
       {groupMonitors.map((monitor) => (
         <span key={monitor.configId}>{monitor.configId}</span>
       ))}
@@ -94,8 +96,8 @@ describe('GridItemsByGroup origin grouping', () => {
     setupSelectors('origin', [heartbeatMonitor, remoteMonitor, localMonitor]);
     renderGrid();
 
-    expect(idsIn('Heartbeat monitors')).toEqual(['hb1']);
-    expect(idsIn('Remote monitors')).toEqual(['rm1']);
+    expect(idsIn(HEARTBEAT_GROUP_ID)).toEqual(['hb1']);
+    expect(idsIn(REMOTE_GROUP_ID)).toEqual(['rm1']);
     expect(idsIn('Local monitors')).toEqual(['ui1']);
   });
 
@@ -108,8 +110,8 @@ describe('GridItemsByGroup origin grouping', () => {
     setupSelectors('origin', [heartbeatWithRemote, remoteMonitor, localMonitor]);
     renderGrid();
 
-    expect(idsIn('Heartbeat monitors')).toEqual(['hb-remote']);
-    expect(idsIn('Remote monitors')).toEqual(['rm1']);
+    expect(idsIn(HEARTBEAT_GROUP_ID)).toEqual(['hb-remote']);
+    expect(idsIn(REMOTE_GROUP_ID)).toEqual(['rm1']);
     expect(idsIn('Local monitors')).toEqual(['ui1']);
   });
 
@@ -120,7 +122,21 @@ describe('GridItemsByGroup origin grouping', () => {
     renderGrid();
 
     expect(idsIn('edge-a')).toEqual(['rm1']);
-    expect(idsIn('Heartbeat monitors')).toEqual(['hb1']);
+    expect(idsIn(HEARTBEAT_GROUP_ID)).toEqual(['hb1']);
+    expect(idsIn('Local monitors')).toEqual(['ui1']);
+  });
+
+  it('does not treat a remote cluster named Heartbeat monitors as the Heartbeat bucket', () => {
+    const remoteNamedHeartbeat = {
+      configId: 'rm-hb-name',
+      remote: { remoteName: 'Heartbeat monitors' },
+      locations: [{ label: 'edge' }],
+    } as unknown as OverviewStatusMetaData;
+    setupSelectors('remoteName', [heartbeatMonitor, remoteNamedHeartbeat, localMonitor]);
+    renderGrid();
+
+    expect(idsIn(HEARTBEAT_GROUP_ID)).toEqual(['hb1']);
+    expect(idsIn('Heartbeat monitors')).toEqual(['rm-hb-name']);
     expect(idsIn('Local monitors')).toEqual(['ui1']);
   });
 });
