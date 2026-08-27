@@ -50,6 +50,7 @@ import {
   getOrUpdateLensReferences,
   isCommentRequestTypeAlert,
   getAlertInfoFromComments,
+  getEventInfoFromComments,
   getIDsAndIndicesAsArrays,
   isCommentRequestTypeEvent,
   countEventsForID,
@@ -288,6 +289,8 @@ export class CaseCommentModel {
       }
 
       const { id: commentId, ...attachment } = attachmentsWithoutDuplicates[0];
+
+      await this.ensureIndexedAttachmentsValid([attachment]);
 
       const references = [...this.buildRefsToCase(), ...this.getCommentReferences(attachment)];
 
@@ -561,13 +564,32 @@ export class CaseCommentModel {
     return references;
   }
 
+  /**
+   * Validates alert/event attachments before the saved object is persisted, so a failure here
+   * never leaves an already-created attachment on the case.
+   */
+  private async ensureIndexedAttachmentsValid(attachments: AttachmentRequestV2[]) {
+    const alertAttachments = attachments.filter((a) => isAlertAttachmentType(a.type));
+    const alerts = getAlertInfoFromComments(alertAttachments, true);
+
+    if (alerts.length > 0) {
+      await this.params.services.alertsService.ensureAlertsAuthorized({ alerts });
+    }
+
+    const eventAttachments = attachments.filter((a) => isEventAttachmentType(a.type));
+    const events = getEventInfoFromComments(eventAttachments, true);
+
+    if (events.length > 0) {
+      await this.params.services.alertsService.ensureDocumentsExist({ alerts: events });
+    }
+  }
+
   private async handleAlertComments(attachments: AttachmentRequestV2[]) {
     const alertAttachments = attachments.filter((a) => isAlertAttachmentType(a.type));
 
     const alerts = getAlertInfoFromComments(alertAttachments);
 
     if (alerts.length > 0) {
-      await this.params.services.alertsService.ensureAlertsAuthorized({ alerts });
       await this.updateAlertsSchemaWithCaseInfo(alerts);
 
       if (this.caseInfo.attributes.settings.syncAlerts) {
@@ -689,6 +711,8 @@ export class CaseCommentModel {
       if (attachmentWithoutDuplicateAlerts.length === 0) {
         return this;
       }
+
+      await this.ensureIndexedAttachmentsValid(attachmentWithoutDuplicateAlerts);
 
       const caseReference = this.buildRefsToCase();
 

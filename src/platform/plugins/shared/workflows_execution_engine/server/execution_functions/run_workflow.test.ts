@@ -18,6 +18,7 @@ import {
   buildMockSetupDependenciesReturn,
   createFakeKibanaRequest,
   createMockLogger,
+  createMockStepExecutionRepository,
   createMockWorkflowExecutionEngineConfig,
   createMockWorkflowExecutionRepository,
   createMockWorkflowRuntime,
@@ -72,6 +73,7 @@ describe('runWorkflow', () => {
     let taskAbortController: AbortController;
     let workflowRuntime: ReturnType<typeof createMockWorkflowRuntime>;
     let workflowExecutionRepository: ReturnType<typeof createMockWorkflowExecutionRepository>;
+    let stepExecutionRepository: ReturnType<typeof createMockStepExecutionRepository>;
     let mockGetWorkflowExecutionFromState: jest.Mock;
     const recordedSpans: Array<{ end: jest.Mock; setOutcome: jest.Mock }> = [];
 
@@ -100,6 +102,8 @@ describe('runWorkflow', () => {
         workflowsExecutionEngine:
           overrides?.workflowsExecutionEngine ?? mockWorkflowExecutionEngine,
         meteringService: overrides?.meteringService,
+        workflowExecutionRepository: workflowExecutionRepository as any,
+        stepExecutionRepository,
       });
 
     beforeEach(() => {
@@ -120,6 +124,7 @@ describe('runWorkflow', () => {
 
       workflowRuntime = createMockWorkflowRuntime();
       workflowExecutionRepository = createMockWorkflowExecutionRepository();
+      stepExecutionRepository = createMockStepExecutionRepository();
 
       mockGetWorkflowExecutionFromState = jest.fn().mockImplementation(defaultRunningExecution);
 
@@ -144,6 +149,8 @@ describe('runWorkflow', () => {
           logger,
           mockConfig,
           dependencies,
+          workflowExecutionRepository,
+          stepExecutionRepository,
           fakeRequest,
           mockWorkflowExecutionEngine
         );
@@ -470,6 +477,8 @@ describe('runWorkflow', () => {
     let mockGetWorkflowExecution: jest.Mock;
     let mockGetWorkflowExecutionFromState: jest.Mock;
     let mockRuntimeStart: jest.Mock;
+    const mockWorkflowExecutionRepositoryForEmit = createMockWorkflowExecutionRepository();
+    const mockStepExecutionRepositoryForEmit = createMockStepExecutionRepository();
 
     const mockWorkflowExecutionEngineLocal = workflowsExecutionEngineMock.createStart();
 
@@ -554,6 +563,8 @@ describe('runWorkflow', () => {
           fakeRequest,
           dependencies,
           workflowsExecutionEngine: mockWorkflowExecutionEngineLocal,
+          workflowExecutionRepository: mockWorkflowExecutionRepositoryForEmit as any,
+          stepExecutionRepository: mockStepExecutionRepositoryForEmit,
         })
       ).rejects.toThrow('Step failed');
 
@@ -614,6 +625,8 @@ describe('runWorkflow', () => {
           fakeRequest,
           dependencies,
           workflowsExecutionEngine: mockWorkflowExecutionEngineLocal,
+          workflowExecutionRepository: mockWorkflowExecutionRepositoryForEmit as any,
+          stepExecutionRepository: mockStepExecutionRepositoryForEmit,
         })
       ).rejects.toThrow('Runtime error');
 
@@ -638,9 +651,14 @@ describe('runWorkflow', () => {
         fakeRequest,
         dependencies,
         workflowsExecutionEngine: mockWorkflowExecutionEngineLocal,
+        workflowExecutionRepository: mockWorkflowExecutionRepositoryForEmit as any,
+        stepExecutionRepository: mockStepExecutionRepositoryForEmit,
       });
 
-      expect(mockGetWorkflowExecutionById).toHaveBeenCalledWith(workflowRunId, spaceId);
+      expect(mockWorkflowExecutionRepositoryForEmit.getWorkflowExecutionById).toHaveBeenCalledWith(
+        workflowRunId,
+        spaceId
+      );
     });
 
     it('does not emit when execution status is not FAILED', async () => {
@@ -663,6 +681,8 @@ describe('runWorkflow', () => {
           fakeRequest,
           dependencies,
           workflowsExecutionEngine: mockWorkflowExecutionEngineLocal,
+          workflowExecutionRepository: mockWorkflowExecutionRepositoryForEmit as any,
+          stepExecutionRepository: mockStepExecutionRepositoryForEmit,
         })
       ).rejects.toThrow('Step failed');
 
@@ -696,6 +716,8 @@ describe('runWorkflow', () => {
           fakeRequest,
           dependencies,
           workflowsExecutionEngine: mockWorkflowExecutionEngineLocal,
+          workflowExecutionRepository: mockWorkflowExecutionRepositoryForEmit as any,
+          stepExecutionRepository: mockStepExecutionRepositoryForEmit,
         })
       ).rejects.toThrow('Step failed');
 
@@ -725,6 +747,8 @@ describe('runWorkflow', () => {
         dependencies,
         workflowsExecutionEngine: mockWorkflowExecutionEngineLocal,
         meteringService: { reportWorkflowExecution } as any,
+        workflowExecutionRepository: mockWorkflowExecutionRepositoryForEmit as any,
+        stepExecutionRepository: mockStepExecutionRepositoryForEmit,
       });
 
       expect(mockRuntimeStart).not.toHaveBeenCalled();

@@ -14,7 +14,6 @@ import { RULE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
 import { RULE_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import type { RulesClient } from '../../lib/rules_client';
 import { RULE_SAVED_OBJECT_TYPE, type RuleSavedObjectAttributes } from '../../saved_objects';
-import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { createRuleSmlType } from './rule_sml_type';
 
 const baseRuleAttrs: RuleSavedObjectAttributes = {
@@ -251,10 +250,10 @@ describe('createRuleSmlType', () => {
   });
 
   describe('getPermissions', () => {
-    it('returns the rules-read API privilege', () => {
+    it('returns the registered ai_index read action for rules', () => {
       const permissions = buildDefinition().getPermissions!('rule-1', buildSmlContext());
       expect(permissions).toEqual({
-        kibana: { privileges: [{ name: `api:${ALERTING_V2_API_PRIVILEGES.rules.read}` }] },
+        kibana: { privileges: { name: [`ai_index:${RULE_KI_TYPE}/read`] } },
       });
     });
   });
