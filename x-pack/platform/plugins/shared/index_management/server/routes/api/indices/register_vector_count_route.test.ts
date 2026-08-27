@@ -32,10 +32,10 @@ describe('[Index management API Routes] vector count', () => {
     hasPrivileges.mockResolvedValue({ has_all_requested: true });
   });
 
-  it('sums the dense and sparse vector counts across primaries', async () => {
+  it('sums the dense and sparse vector counts across primaries and replicas', async () => {
     getIndicesStats.mockResolvedValue({
       _all: {
-        primaries: {
+        total: {
           dense_vector: { value_count: 100 },
           sparse_vector: { value_count: 25 },
         },
@@ -55,7 +55,7 @@ describe('[Index management API Routes] vector count', () => {
   });
 
   it('treats missing vector stats as zero', async () => {
-    getIndicesStats.mockResolvedValue({ _all: { primaries: {} } });
+    getIndicesStats.mockResolvedValue({ _all: { total: {} } });
 
     await expect(router.runRequest(mockRequest)).resolves.toEqual({
       body: { vectorCount: 0 },

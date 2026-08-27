@@ -85,8 +85,8 @@ const countVectors = async (client: IScopedClusterClient): Promise<number> => {
     metric: ['dense_vector', 'sparse_vector'],
   });
 
-  const primaries = stats._all?.primaries as IndexStatsWithVectors | undefined;
-  return (primaries?.dense_vector?.value_count ?? 0) + (primaries?.sparse_vector?.value_count ?? 0);
+  const total = stats._all?.total as IndexStatsWithVectors | undefined;
+  return (total?.dense_vector?.value_count ?? 0) + (total?.sparse_vector?.value_count ?? 0);
 };
 
 /**

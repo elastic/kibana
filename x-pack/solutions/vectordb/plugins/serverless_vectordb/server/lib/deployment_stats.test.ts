@@ -90,7 +90,7 @@ describe('fetchIndexStats', () => {
   const mockVectorStats = (denseCount: number, sparseCount = 0) => {
     client.asInternalUser.indices.stats.mockResolvedValue({
       _all: {
-        primaries: {
+        total: {
           dense_vector: { value_count: denseCount },
           sparse_vector: { value_count: sparseCount },
         },
@@ -134,7 +134,7 @@ describe('fetchIndexStats', () => {
   it('treats missing dense/sparse stats as zero', async () => {
     mockMetering([{ name: 'products', num_docs: 10, size_in_bytes: 100 }]);
     client.asInternalUser.indices.stats.mockResolvedValue({
-      _all: { primaries: {} },
+      _all: { total: {} },
       indices: {},
     } as any);
 

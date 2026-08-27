@@ -45,7 +45,7 @@ export const fetchIndexVectorCount = async (
     metric: ['dense_vector', 'sparse_vector'],
   });
 
-  const primaries = all?.primaries as IndexStatsWithVectors | undefined;
+  const total = all?.total as IndexStatsWithVectors | undefined;
 
-  return (primaries?.dense_vector?.value_count ?? 0) + (primaries?.sparse_vector?.value_count ?? 0);
+  return (total?.dense_vector?.value_count ?? 0) + (total?.sparse_vector?.value_count ?? 0);
 };
