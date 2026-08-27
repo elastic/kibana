@@ -180,11 +180,15 @@ export default function ({ getService }: FtrProviderContext) {
           authorized: boolean | null;
           peerCertificateNull: boolean;
         }> => {
-          // The hold status route has authc.enabled=false — no client cert required.
-          // CA cert is still needed because Kibana is running with TLS enabled.
+          // The client certificate is required even though this route sets authc.enabled=false:
+          // pki.config.ts runs Kibana with `server.ssl.clientAuthentication=required`, which maps to
+          // Node TLS `requestCert: true, rejectUnauthorized: true` (see kbn-server-http-tools
+          // ssl_config.ts). A certless connection is rejected during the TLS handshake, before
+          // routing — so skipping app-layer auth does not remove the mutual-TLS requirement.
           const response = await supertest
             .get(`/authentication/preauth_holds/${holdId}`)
             .ca(CA_CERT)
+            .pfx(FIRST_CLIENT_CERT)
             .set('kbn-xsrf', 'xxx')
             .expect(200);
           return response.body;
@@ -203,7 +207,9 @@ export default function ({ getService }: FtrProviderContext) {
 
         // Wait until parked — the hold route reports parked=true once the wrapped authenticate
         // function has received the request and is waiting for the release signal.
-        await retry.tryForTime(8000, async () => {
+        // Kept well under PREAUTH_HOLD_TIMEOUT_MS (10s): that budget starts when the request parks
+        // and has to cover step 3 too, so a failure to park must surface quickly rather than eat it.
+        await retry.tryForTime(5000, async () => {
           const status = await getHoldStatus();
           if (!status.parked) {
             throw new Error(`Hold ${holdId} not yet parked`);
@@ -222,26 +228,43 @@ export default function ({ getService }: FtrProviderContext) {
         // normal hold timeout, which would also degrade the socket after the fact).
         victim.stream.close(http2.constants.NGHTTP2_CANCEL);
 
+        // continuedAfterHold latches true permanently once the hold resolves, so once it is true the
+        // condition below can never be satisfied: the RST failed to degrade the socket before
+        // PREAUTH_HOLD_TIMEOUT_MS (10s) expired and the hold self-released. retry.tryForTime() retries
+        // on any throw, so signalling that by throwing would just poll for the full timeout and report
+        // a misleading "not yet degraded". Instead, record it and return so the retry exits at once,
+        // then surface the real cause outside the loop.
+        let holdExpiredBeforeDegradation: string | undefined;
+
         await retry.tryForTime(8000, async () => {
           const hold = await getHoldStatus();
-          if (
-            !(
-              hold.continuedAfterHold === false &&
-              hold.peerCertificateNull === true &&
-              hold.authorized !== true
-            )
-          ) {
+
+          if (hold.continuedAfterHold === true) {
+            holdExpiredBeforeDegradation =
+              `Hold ${holdId} self-released before the RST degraded the socket ` +
+              `(PREAUTH_HOLD_TIMEOUT_MS elapsed). The test is not exercising the ` +
+              `destroyed-socket-during-auth path. ` +
+              `peerCertificateNull=${hold.peerCertificateNull} authorized=${hold.authorized}`;
+            return;
+          }
+
+          if (!(hold.peerCertificateNull === true && hold.authorized !== true)) {
             throw new Error(
               `Socket not yet degraded while parked: continuedAfterHold=${hold.continuedAfterHold} peerCertificateNull=${hold.peerCertificateNull} authorized=${hold.authorized}`
             );
           }
         });
 
+        if (holdExpiredBeforeDegradation) {
+          throw new Error(holdExpiredBeforeDegradation);
+        }
+
         // Step 4: release — let PKI authenticate continue with the degraded socket.
-        // The release route also has authc.enabled=false.
+        // Client certificate required for the TLS handshake, as above.
         await supertest
           .post(`/authentication/preauth_holds/${holdId}/release`)
           .ca(CA_CERT)
+          .pfx(FIRST_CLIENT_CERT)
           .set('kbn-xsrf', 'xxx')
           .expect(200);
 
@@ -273,7 +296,10 @@ export default function ({ getService }: FtrProviderContext) {
 
         const followUpBody = JSON.parse(followUpResponse.body);
         expect(followUpBody.username).to.be('first_client');
-        expect(followUpBody.authentication_provider).to.eql({ type: 'pki', name: 'pki1' });
+        // The Kibana *provider* is named 'pki' because pki.config.ts uses the array form
+        // `authc.providers=['pki','basic']`, where the provider name equals its type. 'pki1' is the
+        // Elasticsearch *realm* name and surfaces in `authentication_realm`, not here.
+        expect(followUpBody.authentication_provider).to.eql({ name: 'pki', type: 'pki' });
       } finally {
         pkiHttp2.close();
       }
