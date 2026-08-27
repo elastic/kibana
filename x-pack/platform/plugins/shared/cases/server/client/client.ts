@@ -22,7 +22,6 @@ import type { TemplatesSubClient } from './templates/client';
 import { createTemplatesSubClient } from './templates/client';
 import type { FieldDefinitionsSubClient } from './field_definitions/client';
 import { createFieldDefinitionsSubClient } from './field_definitions/client';
-
 /**
  * Client wrapper that contains accessor methods for individual entities within the cases system.
  */

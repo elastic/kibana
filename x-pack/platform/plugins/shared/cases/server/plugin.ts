@@ -231,21 +231,12 @@ export class CasePlugin
 
       return plugins.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
     };
-    // Cache the latest license validity so the workflow run service can perform
-    // a synchronous per-request check without holding an Observable in the hot path.
-    // This mirrors how wrapRouteWithLicenseCheck caches the license internally.
-    let licenseValid = false;
-    plugins.licensing.license$.subscribe((license) => {
-      licenseValid = license.isActive && license.hasAtLeast('enterprise');
-    });
-
     const workflowRunService =
       this.caseConfig.runWorkflows.enabled && plugins.workflowsManagement
         ? new CasesWorkflowRunService({
             management: plugins.workflowsManagement.management,
             logger: this.logger,
             audit: plugins.security.audit,
-            isLicenseValid: () => licenseValid,
           })
         : undefined;
 

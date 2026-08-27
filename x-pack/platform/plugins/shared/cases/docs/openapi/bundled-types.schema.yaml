@@ -4412,7 +4412,7 @@ components:
                 - cases.alerts
             id:
               type: string
-              description: The primary identifier (caseId, observableId, alertId, commentId, or attachmentId).
+              description: The primary identifier (caseId, observableId, or alertId).
             index:
               type: string
               description: For alert origins, the Elasticsearch index the alert lives in.

@@ -26,7 +26,7 @@ import type { CasesConfigurationUI } from '../../containers/types';
 
 interface WorkflowActivityLabelProps {
   workflow: SnakeToCamelCase<WorkflowUserAction>['payload']['workflow'];
-  origin: WorkflowOrigin;
+  origin?: WorkflowOrigin;
   casesConfiguration: CasesConfigurationUI;
 }
 
@@ -61,7 +61,7 @@ const WorkflowActivityLabel: React.FC<WorkflowActivityLabelProps> = ({
   );
 
   const label = (() => {
-    switch (origin.type) {
+    switch (origin?.type) {
       case OBSERVABLE_WORKFLOW_ORIGIN_TYPE: {
         if (origin.typeKey && origin.value) {
           const allObservableTypes = [

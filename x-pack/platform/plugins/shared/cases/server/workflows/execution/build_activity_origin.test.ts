@@ -43,23 +43,37 @@ const makeCase = (overrides: Partial<Case> = {}): Case =>
   } as unknown as Case);
 
 describe('buildActivityOrigin', () => {
+  it('returns undefined when no origin was provided', () => {
+    expect(buildActivityOrigin({ origin: undefined })).toBeUndefined();
+  });
+
   describe('cases.case origin', () => {
-    it('returns the origin unchanged', () => {
-      const origin = { type: CASE_WORKFLOW_ORIGIN_TYPE, id: 'case-1' };
-      expect(buildActivityOrigin({ origin, theCase: makeCase() })).toEqual(origin);
+    it('maps the API origin to the persisted activity shape', () => {
+      const origin = { type: CASE_WORKFLOW_ORIGIN_TYPE, caseId: 'case-1' };
+      expect(buildActivityOrigin({ origin, theCase: makeCase() })).toEqual({
+        type: CASE_WORKFLOW_ORIGIN_TYPE,
+        id: 'case-1',
+      });
     });
   });
 
   describe('cases.alerts origin', () => {
-    it('returns the origin unchanged', () => {
-      const origin = { type: ALERTS_WORKFLOW_ORIGIN_TYPE, id: 'case-1' };
-      expect(buildActivityOrigin({ origin, theCase: makeCase() })).toEqual(origin);
+    it('maps the API origin to the persisted activity shape', () => {
+      const origin = { type: ALERTS_WORKFLOW_ORIGIN_TYPE, caseId: 'case-1' };
+      expect(buildActivityOrigin({ origin, theCase: makeCase() })).toEqual({
+        type: ALERTS_WORKFLOW_ORIGIN_TYPE,
+        id: 'case-1',
+      });
     });
   });
 
   describe('cases.observable origin', () => {
     it('adds typeKey and value from the matching observable', () => {
-      const origin = { type: OBSERVABLE_WORKFLOW_ORIGIN_TYPE, id: 'obs-1' };
+      const origin = {
+        type: OBSERVABLE_WORKFLOW_ORIGIN_TYPE,
+        caseId: 'case-1',
+        observableId: 'obs-1',
+      };
       const theCase = makeCase({
         observables: [
           {
@@ -73,21 +87,33 @@ describe('buildActivityOrigin', () => {
         ],
       });
       expect(buildActivityOrigin({ origin, theCase })).toEqual({
-        ...origin,
+        type: OBSERVABLE_WORKFLOW_ORIGIN_TYPE,
+        id: 'obs-1',
         typeKey: 'ip',
         value: '1.2.3.4',
       });
     });
 
-    it('returns the origin unchanged when observable is not found', () => {
-      const origin = { type: OBSERVABLE_WORKFLOW_ORIGIN_TYPE, id: 'missing' };
-      expect(buildActivityOrigin({ origin, theCase: makeCase() })).toEqual(origin);
+    it('returns the persisted origin without enrichment when observable is not found', () => {
+      const origin = {
+        type: OBSERVABLE_WORKFLOW_ORIGIN_TYPE,
+        caseId: 'case-1',
+        observableId: 'missing',
+      };
+      expect(buildActivityOrigin({ origin, theCase: makeCase() })).toEqual({
+        type: OBSERVABLE_WORKFLOW_ORIGIN_TYPE,
+        id: 'missing',
+      });
     });
   });
 
   describe('cases.alert origin', () => {
     it('adds the index from a legacy v1 alert attachment', () => {
-      const origin = { type: ALERT_WORKFLOW_ORIGIN_TYPE, id: 'alert-id' };
+      const origin = {
+        type: ALERT_WORKFLOW_ORIGIN_TYPE,
+        caseId: 'case-1',
+        alertId: 'alert-id',
+      };
       const theCase = makeCase({
         comments: [
           {
@@ -105,13 +131,18 @@ describe('buildActivityOrigin', () => {
         ],
       });
       expect(buildActivityOrigin({ origin, theCase })).toEqual({
-        ...origin,
+        type: ALERT_WORKFLOW_ORIGIN_TYPE,
+        id: 'alert-id',
         index: '.alerts-security.alerts-default',
       });
     });
 
     it('handles parallel alertId arrays (legacy)', () => {
-      const origin = { type: ALERT_WORKFLOW_ORIGIN_TYPE, id: 'alert-2' };
+      const origin = {
+        type: ALERT_WORKFLOW_ORIGIN_TYPE,
+        caseId: 'case-1',
+        alertId: 'alert-2',
+      };
       const theCase = makeCase({
         comments: [
           {
@@ -129,13 +160,18 @@ describe('buildActivityOrigin', () => {
         ],
       });
       expect(buildActivityOrigin({ origin, theCase })).toEqual({
-        ...origin,
+        type: ALERT_WORKFLOW_ORIGIN_TYPE,
+        id: 'alert-2',
         index: '.index-2',
       });
     });
 
     it('adds the index from a unified v2 alert attachment', () => {
-      const origin = { type: ALERT_WORKFLOW_ORIGIN_TYPE, id: 'alert-v2' };
+      const origin = {
+        type: ALERT_WORKFLOW_ORIGIN_TYPE,
+        caseId: 'case-1',
+        alertId: 'alert-v2',
+      };
       const theCase = makeCase({
         comments: [
           {
@@ -153,14 +189,22 @@ describe('buildActivityOrigin', () => {
         ],
       });
       expect(buildActivityOrigin({ origin, theCase })).toEqual({
-        ...origin,
+        type: ALERT_WORKFLOW_ORIGIN_TYPE,
+        id: 'alert-v2',
         index: '.unified-index',
       });
     });
 
-    it('returns the origin unchanged when alert is not found', () => {
-      const origin = { type: ALERT_WORKFLOW_ORIGIN_TYPE, id: 'missing' };
-      expect(buildActivityOrigin({ origin, theCase: makeCase() })).toEqual(origin);
+    it('returns the persisted origin without enrichment when alert is not found', () => {
+      const origin = {
+        type: ALERT_WORKFLOW_ORIGIN_TYPE,
+        caseId: 'case-1',
+        alertId: 'missing',
+      };
+      expect(buildActivityOrigin({ origin, theCase: makeCase() })).toEqual({
+        type: ALERT_WORKFLOW_ORIGIN_TYPE,
+        id: 'missing',
+      });
     });
   });
 });

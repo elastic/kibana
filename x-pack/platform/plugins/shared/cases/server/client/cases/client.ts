@@ -56,9 +56,9 @@ import {
 import type { GetApplicableFieldsParams } from './applicable_fields';
 import { getApplicableFields } from './applicable_fields';
 import type { ApplicableFieldsResponse } from '../../../common/types/domain/template/applicable_field';
+import type { EnsureAuthorizedToRunWorkflowParams } from './ensure_authorized_to_run_workflow';
+import { ensureAuthorizedToRunWorkflow } from './ensure_authorized_to_run_workflow';
 import { withUsageCounter } from '../usage_counters';
-import type { EnsureAuthorizedToUpdateParams } from './ensure_authorized_to_update';
-import { ensureAuthorizedToUpdate } from './ensure_authorized_to_update';
 
 /**
  * API for interacting with the cases entities.
@@ -92,10 +92,6 @@ export interface CasesSubClient {
    * Retrieves a single case with the specified ID.
    */
   get(params: GetParams): Promise<Case>;
-  /**
-   * Ensures the current user can update a case without mutating it.
-   */
-  ensureAuthorizedToUpdate(params: EnsureAuthorizedToUpdateParams): Promise<void>;
   /**
    * @experimental
    * Retrieves a single case resolving the specified ID.
@@ -169,6 +165,12 @@ export interface CasesSubClient {
    * applied template from an existing case, or `owner` (+ optional `templateId`) for a prospective case.
    */
   getApplicableFields(params: GetApplicableFieldsParams): Promise<ApplicableFieldsResponse>;
+  /**
+   * Authorizes the caller to run a workflow against all the given case IDs (all-or-nothing).
+   * Uses `cases:<owner>/updateCase` as the privilege name, emitting a `case_workflow_run_authz`
+   * audit action so no misleading "case updated" record is written.
+   */
+  ensureAuthorizedToRunWorkflow(params: EnsureAuthorizedToRunWorkflowParams): Promise<void>;
 }
 
 // Keep this exhaustive so every new client method requires an explicit telemetry decision.
@@ -178,7 +180,6 @@ const usageCounterByMethod = {
   find: null,
   search: null,
   get: null,
-  ensureAuthorizedToUpdate: null,
   resolve: null,
   bulkGet: null,
   push: 'push_case',
@@ -195,6 +196,7 @@ const usageCounterByMethod = {
   deleteObservable: 'delete_observable',
   bulkAddObservables: 'bulk_add_observables',
   getApplicableFields: null,
+  ensureAuthorizedToRunWorkflow: null,
 } as const satisfies Record<keyof CasesSubClient, string | null>;
 
 /**
@@ -220,8 +222,6 @@ export const createCasesSubClient = (
     find: (params: CasesFindRequestWithCustomFields) => find(params, clientArgs, casesClient),
     search: (params: CasesSearchRequest) => search(params, clientArgs, casesClient),
     get: (params: GetParams) => get(params, clientArgs),
-    ensureAuthorizedToUpdate: (params: EnsureAuthorizedToUpdateParams) =>
-      ensureAuthorizedToUpdate(params, clientArgs),
     resolve: (params: GetParams) => resolve(params, clientArgs),
     bulkGet: (params: CasesBulkGetRequest) => bulkGet(params, clientArgs),
     push: withUsageCounter(usageCounterByMethod.push, clientArgs, (params: PushParams) =>
@@ -271,6 +271,8 @@ export const createCasesSubClient = (
     ),
     getApplicableFields: (params: GetApplicableFieldsParams) =>
       getApplicableFields(params, clientArgs),
+    ensureAuthorizedToRunWorkflow: (params: EnsureAuthorizedToRunWorkflowParams) =>
+      ensureAuthorizedToRunWorkflow(params, clientArgs),
   };
 
   return Object.freeze(casesSubClient);

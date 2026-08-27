@@ -41,7 +41,7 @@ export const renderUserActionExtraActions: RenderUserActionExtraActions = ({ use
 
   const { origin } = userAction.payload;
 
-  if (origin.type === ALERT_WORKFLOW_ORIGIN_TYPE && origin.index) {
+  if (origin?.type === ALERT_WORKFLOW_ORIGIN_TYPE && origin.index) {
     return (
       <Suspense fallback={<EuiLoadingSpinner size="s" />}>
         <ShowAlertButton id={userAction.id} alertId={origin.id} index={origin.index} />
@@ -49,7 +49,7 @@ export const renderUserActionExtraActions: RenderUserActionExtraActions = ({ use
     );
   }
 
-  if (origin.type === ALERT_WORKFLOW_ORIGIN_TYPE || origin.type === ALERTS_WORKFLOW_ORIGIN_TYPE) {
+  if (origin?.type === ALERT_WORKFLOW_ORIGIN_TYPE || origin?.type === ALERTS_WORKFLOW_ORIGIN_TYPE) {
     return <ShowTableButton tabId={CASE_VIEW_PAGE_TABS.ALERTS} />;
   }
 

@@ -10,14 +10,14 @@ import type { WorkflowOrigin, Case } from '../../../common/types/domain';
 import {
   ALERT_WORKFLOW_ORIGIN_TYPE,
   OBSERVABLE_WORKFLOW_ORIGIN_TYPE,
-} from '../../../common/types/api/workflow/v1';
+} from '../../../common/constants';
 import { findAlertIndex } from './alert_attachment_utils';
 
 /**
  * Enriches an activity origin with display data derived from the already-fetched case:
  * - `cases.alert` → adds `index` from the matching alert attachment (both legacy and unified-v2 shapes).
  * - `cases.observable` → adds `typeKey` and `value` from the matching observable.
- * - all other origins → returned unchanged.
+ * - all other origins → converted to the persisted `{ type, id }` shape.
  *
  * `theCase` is optional: for multi-case runs the sub-entity origin types (`cases.alert`,
  * `cases.observable`) are rejected before this function is called, so the enrichment branches
@@ -32,21 +32,27 @@ export const buildActivityOrigin = ({
   origin,
   theCase,
 }: {
-  origin: CaseWorkflowRunOrigin;
+  origin?: CaseWorkflowRunOrigin;
   theCase?: Case;
-}): WorkflowOrigin => {
+}): WorkflowOrigin | undefined => {
+  if (origin === undefined) {
+    return undefined;
+  }
+
   if (origin.type === ALERT_WORKFLOW_ORIGIN_TYPE) {
-    const alertIndex = theCase ? findAlertIndex(origin.id, theCase.comments ?? []) : undefined;
-    return alertIndex !== undefined ? { ...origin, index: alertIndex } : origin;
+    const activityOrigin = { type: origin.type, id: origin.alertId };
+    const alertIndex = theCase ? findAlertIndex(origin.alertId, theCase.comments ?? []) : undefined;
+    return alertIndex !== undefined ? { ...activityOrigin, index: alertIndex } : activityOrigin;
   }
 
   if (origin.type === OBSERVABLE_WORKFLOW_ORIGIN_TYPE) {
-    const obs = theCase?.observables.find(({ id }) => id === origin.id);
+    const activityOrigin = { type: origin.type, id: origin.observableId };
+    const obs = theCase?.observables.find(({ id }) => id === origin.observableId);
     if (obs) {
-      return { ...origin, typeKey: obs.typeKey, value: obs.value };
+      return { ...activityOrigin, typeKey: obs.typeKey, value: obs.value };
     }
-    return origin;
+    return activityOrigin;
   }
 
-  return origin;
+  return { type: origin.type, id: origin.caseId };
 };

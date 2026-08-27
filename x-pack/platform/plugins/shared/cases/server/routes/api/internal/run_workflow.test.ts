@@ -56,7 +56,7 @@ describe('run workflow route', () => {
       body: {
         caseIds: ['case-1'],
         inputs: { event: { caseIds: ['case-1'] } },
-        origin: { type: 'cases.case', id: 'case-1' },
+        origin: { type: 'cases.case', caseId: 'case-1' },
       },
     };
     const response = { ok: jest.fn() };
@@ -92,11 +92,62 @@ describe('run workflow route', () => {
     const validBody = {
       caseIds: ['case-1'],
       inputs: {},
-      origin: { type: 'cases.case', id: 'case-1' },
+      origin: { type: 'cases.case', caseId: 'case-1' },
     };
 
     it('accepts a valid single-case body', () => {
       expect(() => runCaseWorkflowBodySchema.validate(validBody)).not.toThrow();
+    });
+
+    it('accepts a body with no origin (list-surface / bulk run)', () => {
+      const { origin: _omitted, ...bodyWithoutOrigin } = validBody;
+      expect(() => runCaseWorkflowBodySchema.validate(bodyWithoutOrigin)).not.toThrow();
+    });
+
+    it('accepts a body with no origin and multiple caseIds', () => {
+      const { origin: _omitted, ...bodyWithoutOrigin } = validBody;
+      expect(() =>
+        runCaseWorkflowBodySchema.validate({
+          ...bodyWithoutOrigin,
+          caseIds: ['case-1', 'case-2', 'case-3'],
+        })
+      ).not.toThrow();
+    });
+
+    it('accepts a cases.observable origin', () => {
+      expect(() =>
+        runCaseWorkflowBodySchema.validate({
+          ...validBody,
+          origin: { type: 'cases.observable', caseId: 'case-1', observableId: 'obs-1' },
+        })
+      ).not.toThrow();
+    });
+
+    it('accepts a cases.alert origin', () => {
+      expect(() =>
+        runCaseWorkflowBodySchema.validate({
+          ...validBody,
+          origin: { type: 'cases.alert', caseId: 'case-1', alertId: 'alert-1' },
+        })
+      ).not.toThrow();
+    });
+
+    it('accepts a cases.alerts origin', () => {
+      expect(() =>
+        runCaseWorkflowBodySchema.validate({
+          ...validBody,
+          origin: { type: 'cases.alerts', caseId: 'case-1' },
+        })
+      ).not.toThrow();
+    });
+
+    it('rejects unknown keys on cases.case (strict per-variant)', () => {
+      expect(() =>
+        runCaseWorkflowBodySchema.validate({
+          ...validBody,
+          origin: { type: 'cases.case', caseId: 'case-1', extraField: 'x' },
+        })
+      ).toThrow();
     });
 
     it(`accepts exactly ${MAX_CASES_PER_WORKFLOW_RUN} case ids (the cap)`, () => {
@@ -107,16 +158,12 @@ describe('run workflow route', () => {
     });
 
     it('rejects an empty caseIds array', () => {
-      expect(() =>
-        runCaseWorkflowBodySchema.validate({ ...validBody, caseIds: [] })
-      ).toThrow();
+      expect(() => runCaseWorkflowBodySchema.validate({ ...validBody, caseIds: [] })).toThrow();
     });
 
     it(`rejects more than ${MAX_CASES_PER_WORKFLOW_RUN} case ids`, () => {
       const ids = Array.from({ length: MAX_CASES_PER_WORKFLOW_RUN + 1 }, (_, i) => `case-${i}`);
-      expect(() =>
-        runCaseWorkflowBodySchema.validate({ ...validBody, caseIds: ids })
-      ).toThrow();
+      expect(() => runCaseWorkflowBodySchema.validate({ ...validBody, caseIds: ids })).toThrow();
     });
 
     it('rejects duplicate case ids', () => {
@@ -140,11 +187,11 @@ describe('run workflow route', () => {
       ).toThrow('Workflow inputs cannot exceed 1000000 bytes.');
     });
 
-    it('rejects invalid origins', () => {
+    it('rejects unknown origin types', () => {
       expect(() =>
         runCaseWorkflowBodySchema.validate({
           ...validBody,
-          origin: { type: 'cases.comment', id: 'comment-1' },
+          origin: { type: 'cases.bogus', id: 'x' },
         })
       ).toThrow();
     });

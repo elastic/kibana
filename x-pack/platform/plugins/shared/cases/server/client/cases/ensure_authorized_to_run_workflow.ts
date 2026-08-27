@@ -9,8 +9,7 @@ import Boom from '@hapi/boom';
 import { WriteOperations } from '../../authorization';
 import type { OperationDetails } from '../../authorization';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
-import { createCaseError, createCaseErrorFromSOError } from '../../common/error';
-import { isSOError } from '../../common/error';
+import { createCaseError, createCaseErrorFromSOError, isSOError } from '../../common/error';
 import type { CasesClientArgs } from '../types';
 
 /**
@@ -35,7 +34,7 @@ export const WORKFLOW_RUN_AUTHZ_OPERATION: OperationDetails = {
   savedObjectType: CASE_SAVED_OBJECT,
 };
 
-export interface EnsureAuthorizedToUpdateParams {
+export interface EnsureAuthorizedToRunWorkflowParams {
   ids: string[];
 }
 
@@ -47,8 +46,8 @@ export interface EnsureAuthorizedToUpdateParams {
  * `delete.ts`/`bulk_update.ts`: authorization runs before not-found errors are surfaced so an
  * unauthorized caller cannot learn which IDs exist.
  */
-export const ensureAuthorizedToUpdate = async (
-  { ids }: EnsureAuthorizedToUpdateParams,
+export const ensureAuthorizedToRunWorkflow = async (
+  { ids }: EnsureAuthorizedToRunWorkflowParams,
   clientArgs: CasesClientArgs
 ): Promise<void> => {
   const {
@@ -64,15 +63,16 @@ export const ensureAuthorizedToUpdate = async (
     // cannot distinguish "this case doesn't exist" from "you can't see it".
     const entities = cases
       .filter((c) => !isSOError(c))
-      .map((c) => ({ id: c.id, owner: (c as Exclude<typeof c, { error: unknown }>).attributes.owner }));
+      .map((c) => ({
+        id: c.id,
+        owner: (c as Exclude<typeof c, { error: unknown }>).attributes.owner,
+      }));
 
     if (entities.length === 0) {
       // ensureAuthorized({ entities: [] }) passes vacuously because it derives an empty
       // privilege set from zero owners. Reject explicitly so an unauthorized caller never
       // receives a 404 that would reveal which case ids do not exist.
-      throw Boom.forbidden(
-        'Unauthorized to run workflow on case'
-      );
+      throw Boom.forbidden('Unauthorized to run workflow on case');
     }
 
     // One privilege round-trip covers all owners; throws Boom.forbidden if any is unauthorized.
@@ -86,13 +86,13 @@ export const ensureAuthorizedToUpdate = async (
       if (isSOError(theCase)) {
         throw createCaseErrorFromSOError(
           theCase.error,
-          `Failed to authorize update for case ids: ${ids.join(', ')}`
+          `Failed to authorize workflow run for case ids: ${ids.join(', ')}`
         );
       }
     }
   } catch (error) {
     throw createCaseError({
-      message: `Failed to authorize update for case ids: ${ids.join(', ')}: ${error}`,
+      message: `Failed to authorize workflow run for case ids: ${ids.join(', ')}: ${error}`,
       error,
       logger,
     });

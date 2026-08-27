@@ -6,12 +6,11 @@
  */
 
 import Boom from '@hapi/boom';
-import { createCaseError } from '../../common/error';
-import { isSOError } from '../../common/error';
+import { createCaseError, isSOError } from '../../common/error';
 import { UserActionActions, UserActionTypes } from '../../../common/types/domain';
 import type { WorkflowOrigin, WorkflowPayload } from '../../../common/types/domain';
 import type { CasesClientArgs } from '../types';
-import { WORKFLOW_RUN_AUTHZ_OPERATION } from '../cases/ensure_authorized_to_update';
+import { WORKFLOW_RUN_AUTHZ_OPERATION } from '../cases/ensure_authorized_to_run_workflow';
 import { MAX_USER_ACTIONS_PER_CASE } from '../../../common/constants';
 
 export interface PreflightWorkflowExecutionArgs {
@@ -21,7 +20,7 @@ export interface PreflightWorkflowExecutionArgs {
 export interface RecordWorkflowExecutionArgs {
   caseIds: string[];
   workflow: WorkflowPayload;
-  origin: WorkflowOrigin;
+  origin?: WorkflowOrigin;
 }
 
 /**

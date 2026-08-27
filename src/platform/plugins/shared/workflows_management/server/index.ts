@@ -23,4 +23,3 @@ export type {
   BulkScheduleWorkflowItem,
   WorkflowsManagementApi,
 } from './api/workflows_management_api';
-export { preprocessAlertInputs } from './api/routes/executions/utils/preprocess_alert_inputs';

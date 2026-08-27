@@ -123,6 +123,15 @@ describe('createWorkflowUserActionBuilder', () => {
       );
     });
 
+    it('renders the case label when the list-surface run has no origin', () => {
+      buildAndRender({
+        workflow: { id: 'wf-1', name: WORKFLOW_NAME, executionId: 'exec-1' },
+      });
+      expect(screen.getByTestId('workflow-user-action-label')).toHaveTextContent(
+        `ran ${WORKFLOW_NAME} on this case`
+      );
+    });
+
     it('renders the observable origin label with type+value when enriched', () => {
       buildAndRender(
         makePayload(OBSERVABLE_WORKFLOW_ORIGIN_TYPE, { typeKey: 'ip', value: '1.2.3.4' })
