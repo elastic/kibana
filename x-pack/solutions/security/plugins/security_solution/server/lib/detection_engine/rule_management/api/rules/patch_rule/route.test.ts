@@ -142,11 +142,9 @@ describe('Patch rule route', () => {
       expect(response.body.anomaly_threshold).toEqual(anomalyThreshold);
     });
 
-    it('rejects patching a rule to ML if mlAuthz fails', async () => {
-      clients.detectionRulesClient.patchRule.mockImplementationOnce(async () => {
-        throw new HttpAuthzError('mocked validation message');
-      });
-
+    // PATCH cannot change a rule's type: the body is validated against the schema of the
+    // existing rule's type, so a contradicting `type` fails before the rule is patched.
+    it('rejects patching a rule to a different type', async () => {
       const request = requestMock.create({
         method: 'patch',
         path: DETECTION_ENGINE_RULES_URL,
@@ -154,11 +152,10 @@ describe('Patch rule route', () => {
       });
       const response = await server.inject(request, requestContextMock.convertContext(context));
 
-      expect(response.status).toEqual(403);
-      expect(response.body).toEqual({
-        message: 'mocked validation message',
-        status_code: 403,
-      });
+      expect(response.status).toEqual(400);
+      expect(response.body.message).toEqual(
+        expect.stringContaining('type: Invalid input: expected "query"')
+      );
     });
 
     it('rejects patching an ML rule if mlAuthz fails', async () => {
@@ -207,16 +204,19 @@ describe('Patch rule route', () => {
       expect(result.ok).toHaveBeenCalled();
     });
 
+    // Unknown/invalid values pass the loose route boundary and are rejected by the handler,
+    // which validates against the schema of the existing rule's type.
     test('rejects unknown rule type', async () => {
       const request = requestMock.create({
         method: 'patch',
         path: DETECTION_ENGINE_RULES_URL,
         body: { ...getPatchRulesSchemaMock(), type: 'unknown_type' },
       });
-      const result = server.validate(request);
+      const response = await server.inject(request, requestContextMock.convertContext(context));
 
-      expect(result.badRequest).toHaveBeenCalledWith(
-        'type: Invalid input: expected "eql", language: Invalid input: expected "eql", type: Invalid input: expected "query", type: Invalid input: expected "saved_query", type: Invalid input: expected "threshold", and 5 more'
+      expect(response.status).toEqual(400);
+      expect(response.body.message).toEqual(
+        expect.stringContaining('type: Invalid input: expected "query"')
       );
     });
 
@@ -241,8 +241,10 @@ describe('Patch rule route', () => {
           ...getPatchRulesSchemaMock(),
         },
       });
-      const result = server.validate(request);
-      expect(result.badRequest).toHaveBeenCalledWith(
+      const response = await server.inject(request, requestContextMock.convertContext(context));
+
+      expect(response.status).toEqual(400);
+      expect(response.body.message).toEqual(
         expect.stringContaining('from: Failed to parse date-math expression')
       );
     });
