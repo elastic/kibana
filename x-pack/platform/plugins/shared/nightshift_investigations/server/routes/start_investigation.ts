@@ -58,14 +58,17 @@ const freeFormContextSchema = z
   .record(z.string().max(128), z.unknown())
   .refine((v) => Object.keys(v).length <= 50, { message: 'context exceeds 50 key limit' });
 
-// Extra keys pass through rather than being stripped: the workflow gates its significant-event
-// attach steps on `context.event_uuid`, so an alert investigation has to be able to carry the
-// same context the free-form branch can.
+// Strict, so that an alert investigation carries alert data and nothing else. In particular a
+// caller cannot pass the `event_uuid` the workflow's attach steps read and have the results land
+// on a significant event: one investigation has one trigger today, and an alert is not a
+// significant event. Rejecting beats silently dropping the key, which would leave the caller
+// believing the attach happened. If a single investigation ever needs several triggers, that is a
+// deliberate change to the subject shape, not an extra key smuggled through the context.
 const alertContextSchema = z
   .object({
     alerts: z.array(alertSnapshotSchema).min(1).max(MAX_ALERTS_PER_INVESTIGATION),
   })
-  .catchall(z.unknown());
+  .strict();
 
 export const startInvestigationRoute = createNightshiftInvestigationsServerRoute({
   endpoint: 'POST /internal/nightshift/investigations',

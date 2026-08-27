@@ -86,8 +86,11 @@ apiTest.describe(
       expect(response.statusCode).not.toBe(400);
     });
 
+    // An alert investigation is not also a significant-event investigation. `event_uuid` is the
+    // key the workflow's attach steps read, so accepting it here would quietly attach an alert's
+    // findings to a significant event.
     apiTest(
-      'keeps context keys the workflow needs alongside the alerts',
+      'returns 400 for an alert context carrying keys other than alerts',
       async ({ apiClient, samlAuth }) => {
         const { cookieHeader } = await samlAuth.asInteractiveUser(INVESTIGATIONS_WRITE_ROLE);
         const response = await apiClient.post(START_PATH, {
@@ -98,7 +101,7 @@ apiTest.describe(
           },
           responseType: 'json',
         });
-        expect(response.statusCode).not.toBe(400);
+        expect(response).toHaveStatusCode(400);
       }
     );
 
