@@ -15,7 +15,7 @@ describe('isLegacySecurityAssetsMigrationEnabled', () => {
     const featureFlags = { getBooleanValue } as unknown as FeatureFlagsStart;
 
     await expect(isLegacySecurityAssetsMigrationEnabled(featureFlags)).resolves.toBe(false);
-    expect(getBooleanValue).toHaveBeenCalledWith(FF_MIGRATE_LEGACY_SECURITY_ASSETS, false);
+    expect(getBooleanValue).toHaveBeenCalledWith(FF_MIGRATE_LEGACY_SECURITY_ASSETS, true);
   });
 
   it('returns true when the feature flag is enabled', async () => {
@@ -23,6 +23,6 @@ describe('isLegacySecurityAssetsMigrationEnabled', () => {
     const featureFlags = { getBooleanValue } as unknown as FeatureFlagsStart;
 
     await expect(isLegacySecurityAssetsMigrationEnabled(featureFlags)).resolves.toBe(true);
-    expect(getBooleanValue).toHaveBeenCalledWith(FF_MIGRATE_LEGACY_SECURITY_ASSETS, false);
+    expect(getBooleanValue).toHaveBeenCalledWith(FF_MIGRATE_LEGACY_SECURITY_ASSETS, true);
   });
 });
