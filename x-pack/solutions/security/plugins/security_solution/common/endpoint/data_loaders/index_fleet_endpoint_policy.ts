@@ -152,7 +152,7 @@ export const indexFleetEndpointPolicy = usageTracker.track(
           // A retried create can 409 if a prior attempt already committed this uniquely named policy.
           if (error.status === 409) {
             const existing = await findPackagePolicyByName();
-            if (existing) {
+            if (existing?.item.policy_ids?.includes(agentPolicy.data.item.id)) {
               log?.debug(
                 `Package policy [${policyName}] already exists after 409; reusing existing policy`
               );

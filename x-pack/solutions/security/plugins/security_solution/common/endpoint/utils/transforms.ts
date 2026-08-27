@@ -27,7 +27,10 @@ export const waitForMetadataTransformsReady = usageTracker.track(
     /** The version of the Endpoint Package */
     version: string
   ): Promise<void> => {
-    await waitFor(() => areMetadataTransformsReady(esClient, version));
+    const isReady = await waitFor(() => areMetadataTransformsReady(esClient, version));
+    if (!isReady) {
+      throw new Error('Timed out waiting for metadata transforms to be ready');
+    }
   }
 );
 
@@ -179,10 +182,13 @@ async function getMetadataTransformIds(
 
 async function areMetadataTransformsReady(esClient: Client, version: string): Promise<boolean> {
   const transforms = await getMetadataTransformStats(esClient, version);
-  return !transforms.some(
-    // TODO TransformGetTransformStatsTransformStats type needs to be updated to include health
-    (transform: TransformGetTransformStatsTransformStats & { health?: { status: string } }) =>
-      transform?.health?.status !== 'green'
+  return (
+    transforms.length > 0 &&
+    !transforms.some(
+      // TODO TransformGetTransformStatsTransformStats type needs to be updated to include health
+      (transform: TransformGetTransformStatsTransformStats & { health?: { status: string } }) =>
+        transform?.health?.status !== 'green'
+    )
   );
 }
 
