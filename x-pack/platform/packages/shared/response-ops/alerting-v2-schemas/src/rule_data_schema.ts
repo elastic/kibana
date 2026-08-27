@@ -8,7 +8,12 @@
 import { z } from '@kbn/zod/v4';
 import { DEFAULT_ARTIFACT_DATA_FIELD_LIMIT, DEFAULT_TIME_FIELD } from '@kbn/alerting-v2-constants';
 import { ARTIFACT_DATA_SCHEMAS } from './artifact_data_schemas';
-import { validateEsqlQuery, validateMinDuration, composeEsqlQuery, validateDataRecordFields } from './validation';
+import {
+  validateEsqlQuery,
+  validateMinDuration,
+  composeEsqlQuery,
+  validateDataRecordFields,
+} from './validation';
 import { durationSchema, tagsResponseSchema, tagsSchema } from './common';
 import {
   MAX_CONSECUTIVE_BREACHES,
