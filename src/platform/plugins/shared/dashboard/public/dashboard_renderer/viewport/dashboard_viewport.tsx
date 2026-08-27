@@ -18,6 +18,7 @@ import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
 import { DashboardGrid } from '../grid';
 import { DashboardEmptyScreen } from './empty_screen/dashboard_empty_screen';
+import { PrettifyDashboardButton } from './prettify/prettify_dashboard_button';
 
 export const DashboardViewport = () => {
   const dashboardApi = useDashboardApi();
@@ -87,6 +88,7 @@ export const DashboardViewport = () => {
       >
         {panelCount === 0 && sectionCount === 0 ? <DashboardEmptyScreen /> : <DashboardGrid />}
       </div>
+      {(panelCount > 0 || sectionCount > 0) && <PrettifyDashboardButton />}
     </div>
   );
 };
@@ -96,6 +98,7 @@ const dashboardViewportStyles = {
     flex: 'auto',
     display: 'flex',
     flexDirection: 'column' as 'column',
+    position: 'relative' as 'relative',
     width: '100%',
     backgroundColor: euiTheme.colors.backgroundBasePlain,
     '&.dshDashboardViewportWrapper--defaultBg': {

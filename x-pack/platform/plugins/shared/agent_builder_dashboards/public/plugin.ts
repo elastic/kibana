@@ -7,14 +7,17 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
-import { OPEN_DASHBOARD_CHAT_ACTION_ID } from '@kbn/dashboard-plugin/public';
+import {
+  OPEN_DASHBOARD_CHAT_ACTION_ID,
+  PRETTIFY_DASHBOARD_ACTION_ID,
+} from '@kbn/dashboard-plugin/public';
 import type {
   AgentBuilderDashboardsPluginPublicSetup,
   AgentBuilderDashboardsPluginPublicStart,
   AgentBuilderDashboardsPluginPublicSetupDependencies,
   AgentBuilderDashboardsPluginPublicStartDependencies,
 } from './types';
-import { registerDashboardAttachmentUiDefinition } from './attachment_types';
+import { createIdGenerator, registerDashboardAttachmentUiDefinition } from './attachment_types';
 
 export class AgentBuilderDashboardsPlugin
   implements
@@ -43,14 +46,19 @@ export class AgentBuilderDashboardsPlugin
     core: CoreStart,
     plugins: AgentBuilderDashboardsPluginPublicStartDependencies
   ): AgentBuilderDashboardsPluginPublicStart {
+    const draftAttachmentId = createIdGenerator();
+    const canWriteDashboards =
+      core.application.capabilities.dashboard_v2?.showWriteControls === true;
+
     this.cleanupAttachmentUi = registerDashboardAttachmentUiDefinition({
       agentBuilder: plugins.agentBuilder,
       chrome: core.chrome,
-      canWriteDashboards: core.application.capabilities.dashboard_v2?.showWriteControls === true,
+      canWriteDashboards,
       dashboardLocator: plugins.share.url.locators.get(DASHBOARD_APP_LOCATOR),
       unifiedSearch: plugins.unifiedSearch,
       data: plugins.data,
       dashboardPlugin: plugins.dashboard,
+      draftAttachmentId,
     });
 
     if (core.application.capabilities.agentBuilder?.show === true) {
@@ -59,6 +67,18 @@ export class AgentBuilderDashboardsPlugin
           './dashboard_empty_screen/open_dashboard_chat_action'
         );
         return createOpenDashboardChatAction(plugins.agentBuilder.openChat);
+      });
+
+      plugins.uiActions.registerActionAsync(PRETTIFY_DASHBOARD_ACTION_ID, async () => {
+        const { createPrettifyDashboardAction } = await import(
+          './prettify/prettify_dashboard_action'
+        );
+        return createPrettifyDashboardAction({
+          openChat: plugins.agentBuilder.openChat,
+          getAgentBuilderAccess: plugins.agentBuilder.getAgentBuilderAccess,
+          canWriteDashboards,
+          draftAttachmentId,
+        });
       });
     }
 
