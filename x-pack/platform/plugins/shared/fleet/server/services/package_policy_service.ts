@@ -186,9 +186,7 @@ export interface PackagePolicyClient {
       bumpRevision?: boolean;
     },
     /** Request context so update callbacks can use the caller's Elasticsearch client. */
-    context?: RequestHandlerContext,
-    /** Original HTTP request, forwarded to external callbacks for privilege checks. */
-    request?: KibanaRequest
+    context?: RequestHandlerContext
   ): Promise<PackagePolicy>;
 
   delete(
