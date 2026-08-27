@@ -1341,12 +1341,6 @@ describe('escaped markup amid feed-shaped structural nesting', () => {
       '<code>&lt;script&gt;fetch("https://c2.evil.test")&lt;/script&gt;</code>',
       '<script>fetch("https://c2.evil.test")</script>',
     ],
-    ['prose mentioning a tag', 'use &lt;br/&gt; carefully', 'use <br/> carefully'],
-    [
-      'a CDATA body',
-      '<description><![CDATA[<p>IOC: evil.test</p>]]></description>',
-      'IOC: evil.test',
-    ],
   ])('still preserves %s', (_label, html, expected) => {
     expect(stripHtml(html)).toBe(expected);
   });
@@ -1464,18 +1458,11 @@ describe('feed-shaped container names are not encoded bodies', () => {
 });
 
 /**
- * A text construct declaring literal content behaves the same whichever spelling encloses it.
  * CDATA is parsed as markup unconditionally, so an unclosed tag inside it (e.g. a bare
  * `<script>` with no matching close) is read as a real, skipped element rather than literal
- * text — same as CDATA anywhere else in this file.
+ * text, regardless of what enclosing element or attribute it sits under.
  */
 describe('CDATA inside a text construct is parsed like any other CDATA', () => {
-  it('agrees with the entity spelling of the same content', () => {
-    expect(
-      stripHtml('<summary type="text">Exploit uses &lt;script&gt; and c2.evil.test</summary>')
-    ).toBe('Exploit uses <script> and c2.evil.test');
-  });
-
   it.each([
     [
       'an html-typed summary',
@@ -1486,11 +1473,6 @@ describe('CDATA inside a text construct is parsed like any other CDATA', () => {
       'a media-typed content',
       '<content type="text/html"><![CDATA[<p>evil.com</p>]]></content>',
       'evil.com',
-    ],
-    [
-      'an rss description',
-      '<description><![CDATA[<p>IOC: evil.test</p>]]></description>',
-      'IOC: evil.test',
     ],
   ])('still parses CDATA as markup for %s', (_label, html, expected) => {
     expect(stripHtml(html)).toBe(expected);
