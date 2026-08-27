@@ -38,7 +38,7 @@ export const toToolErrorResult = ({
         type: ToolResultType.error,
         data: {
           message,
-          ...(metadata ? { metadata } : {}),
+          ...(metadata && { metadata }),
         },
       },
     ],

@@ -6,8 +6,7 @@
  */
 
 import { ToolType } from '@kbn/agent-builder-common';
-import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import { getToolResultId } from '@kbn/agent-builder-server';
+import { createOtherResult } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { SLO_AGENT_TOOL_IDS } from '@kbn/slo-schema';
 import { z } from '@kbn/zod/v4';
@@ -110,9 +109,9 @@ export const listSlosTool = (
         kqlQuery: composedKql,
         page: String(page),
         perPage: String(perPage),
-        ...(sortBy !== undefined ? { sortBy } : {}),
-        ...(sortDirection !== undefined ? { sortDirection } : {}),
-        ...(hideStale !== undefined ? { hideStale } : {}),
+        ...(sortBy !== undefined && { sortBy }),
+        ...(sortDirection !== undefined && { sortDirection }),
+        ...(hideStale !== undefined && { hideStale }),
       });
 
       const trimmed = results.map((result) => ({
@@ -130,15 +129,7 @@ export const listSlosTool = (
         tags: result.tags,
       }));
 
-      return {
-        results: [
-          {
-            type: ToolResultType.other,
-            tool_result_id: getToolResultId(),
-            data: { total, page: resultPage, perPage: resultPerPage, results: trimmed },
-          },
-        ],
-      };
+      return { results: [createOtherResult({ total, page: resultPage, perPage: resultPerPage, results: trimmed })] };
     } catch (error) {
       return toToolErrorResult({ error, metadata: { params }, logger });
     }
