@@ -10,7 +10,10 @@
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../fixtures';
-import { enterRequestClearingSyntaxErrors } from '../lib/syntax_validation';
+import {
+  enterRequestFromCleanSyntaxState,
+  enterRequestFromSyntaxErrorState,
+} from '../lib/syntax_validation';
 
 const DEFAULT_URL = 'GET _search';
 
@@ -55,7 +58,7 @@ spaceTest.describe('Console comments', { tag: tags.deploymentAgnostic }, () => {
   spaceTest('accepts single line comments', async ({ pageObjects }) => {
     for (const { description, url, body } of SINGLE_LINE_COMMENTS) {
       await spaceTest.step(description, async () => {
-        await enterRequestClearingSyntaxErrors(pageObjects.console, buildRequest({ url, body }));
+        await enterRequestFromSyntaxErrorState(pageObjects.console, buildRequest({ url, body }));
         await expect(pageObjects.console.invalidSyntaxMarker).toHaveCount(0);
       });
     }
@@ -64,7 +67,7 @@ spaceTest.describe('Console comments', { tag: tags.deploymentAgnostic }, () => {
   spaceTest('accepts multiline comments', async ({ pageObjects }) => {
     for (const { description, url, body } of MULTILINE_COMMENTS) {
       await spaceTest.step(description, async () => {
-        await enterRequestClearingSyntaxErrors(pageObjects.console, buildRequest({ url, body }));
+        await enterRequestFromSyntaxErrorState(pageObjects.console, buildRequest({ url, body }));
         await expect(pageObjects.console.invalidSyntaxMarker).toHaveCount(0);
       });
     }
@@ -73,8 +76,7 @@ spaceTest.describe('Console comments', { tag: tags.deploymentAgnostic }, () => {
   spaceTest('flags invalid request bodies', async ({ pageObjects }) => {
     for (const { description, body } of INVALID_REQUESTS) {
       await spaceTest.step(description, async () => {
-        await pageObjects.console.clearEditorText();
-        await pageObjects.console.enterText(buildRequest({ body }));
+        await enterRequestFromCleanSyntaxState(pageObjects.console, buildRequest({ body }));
         await expect(pageObjects.console.invalidSyntaxMarker).not.toHaveCount(0);
       });
     }

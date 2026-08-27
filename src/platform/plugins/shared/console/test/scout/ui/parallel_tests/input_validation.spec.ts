@@ -10,7 +10,10 @@
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../fixtures';
-import { enterRequestClearingSyntaxErrors } from '../lib/syntax_validation';
+import {
+  enterRequestFromCleanSyntaxState,
+  enterRequestFromSyntaxErrorState,
+} from '../lib/syntax_validation';
 
 const ACCEPTED_REQUESTS = [
   { description: 'a plain request', request: 'GET foo/bar' },
@@ -46,7 +49,7 @@ spaceTest.describe('Console input validation', { tag: tags.deploymentAgnostic },
   spaceTest('accepts valid requests', async ({ pageObjects }) => {
     for (const { description, request } of ACCEPTED_REQUESTS) {
       await spaceTest.step(description, async () => {
-        await enterRequestClearingSyntaxErrors(pageObjects.console, request);
+        await enterRequestFromSyntaxErrorState(pageObjects.console, request);
         await expect(pageObjects.console.invalidSyntaxMarker).toHaveCount(0);
       });
     }
@@ -55,8 +58,7 @@ spaceTest.describe('Console input validation', { tag: tags.deploymentAgnostic },
   spaceTest('flags invalid requests', async ({ pageObjects }) => {
     for (const { description, request } of REJECTED_REQUESTS) {
       await spaceTest.step(description, async () => {
-        await pageObjects.console.clearEditorText();
-        await pageObjects.console.enterText(request);
+        await enterRequestFromCleanSyntaxState(pageObjects.console, request);
         await expect(pageObjects.console.invalidSyntaxMarker).not.toHaveCount(0);
       });
     }
