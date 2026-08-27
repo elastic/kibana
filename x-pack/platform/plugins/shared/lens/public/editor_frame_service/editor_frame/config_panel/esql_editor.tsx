@@ -168,6 +168,15 @@ export function ESQLEditor({
         currentAttributesRef.current,
         isApproximate
       );
+      // An aborted run (e.g. the user clicked "Cancel", or a re-render tore
+      // down the request) produced no result. Bail out *without* recording the
+      // query as submitted: `onTextLangQuerySubmit` skips queries equal to
+      // `prevQuery.current`, so marking an aborted run here would silently
+      // drop every future resubmission of the same query text.
+      if (abortController?.signal.aborted) {
+        setIsVisualizationLoading(false);
+        return;
+      }
       if (attrs) {
         setCurrentAttributes?.(attrs);
         updateSuggestion?.(attrs);
