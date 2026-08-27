@@ -316,19 +316,18 @@ export const MAX_EXTENDED_FIELD_FILTER_VALUE_LENGTH = MAX_EXTENDED_FIELD_VALUE_B
 export const MAX_EXTENDED_FIELD_FILTERS = MAX_FIELD_DEFINITIONS_PER_OWNER * 2;
 export const MAX_FILENAME_LENGTH = 160 as const;
 export const MAX_CUSTOM_OBSERVABLE_TYPES_LABEL_LENGTH = 50 as const;
+
 export const MAX_USER_ACTION_SEARCH_LENGTH = 256 as const;
 export const MAX_USER_ACTION_AUTHOR_LENGTH = 256 as const;
+export const MAX_USER_ACTION_TYPE_LENGTH = 50 as const;
 
 /**
  * Cases features
  */
 
 export const DEFAULT_FEATURES: CasesFeaturesAllRequired = Object.freeze({
-  alerts: { sync: true, enabled: true, isExperimental: false, read: true, all: true },
+  alerts: { read: true, all: true },
   metrics: [],
-  observables: { enabled: true, autoExtract: false },
-  events: { enabled: false },
-  templates: { enabled: false },
 });
 
 /**

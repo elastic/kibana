@@ -394,16 +394,20 @@ export class WorkflowsManagementApi {
     // Rewrite only the `name` field directly in the YAML text so that cloning
     // works even when the source workflow's YAML is schema-invalid. Strictly
     // parsing/validating here would reject invalid-but-editable workflows.
-    const clonedYaml = updateWorkflowYamlFields(workflow.yaml, {
-      name: `${workflow.name} ${i18n.translate('workflowsManagement.cloneSuffix', {
-        defaultMessage: 'Copy',
-      })}`,
-    });
+    const cloneName = `${workflow.name} ${i18n.translate('workflowsManagement.cloneSuffix', {
+      defaultMessage: 'Copy',
+    })}`;
+    const clonedYaml = updateWorkflowYamlFields(workflow.yaml, { name: cloneName });
 
+    // `updateWorkflowYamlFields` cannot inject a `name` key when the YAML root is not a
+    // mapping (a scalar or sequence), so it returns the YAML unchanged in that case. Pass
+    // `cloneName` as an explicit fallback so the clone is still named "<name> Copy" instead
+    // of collapsing to "Untitled workflow".
     const result = await this.workflowsService.createWorkflow(
       { yaml: clonedYaml },
       spaceId,
-      request
+      request,
+      { nameFallback: cloneName }
     );
     this.notifySml(result.id, 'create', request);
     return result;
