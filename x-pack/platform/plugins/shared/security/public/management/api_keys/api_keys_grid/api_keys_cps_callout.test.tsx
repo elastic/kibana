@@ -75,7 +75,9 @@ describe('ApiKeysCpsCallout', () => {
 
     renderCallout(cpsManager);
 
-    await waitFor(() => expect(cpsManager.whenReady).toHaveBeenCalled());
-    expect(screen.queryByTestId('apiKeysCpsCallout')).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(cpsManager.whenReady).toHaveBeenCalled();
+      expect(screen.queryByTestId('apiKeysCpsCallout')).not.toBeInTheDocument();
+    });
   });
 });
