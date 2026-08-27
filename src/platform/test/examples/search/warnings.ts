@@ -13,6 +13,13 @@ import expect from '@kbn/expect';
 import assert from 'assert';
 import type { FtrProviderContext } from '../../functional/ftr_provider_context';
 
+/**
+ * Migration recommendation: MIXED. See individual tests. Warning extraction is Jest
+ * (kbn-search-response-warnings extract_warnings.test.ts); toast/inspector chrome is
+ * badge_popover_content.test.tsx. Keep one Scout smoke that a shard-failure search shows a
+ * warning toast. Drop exact shard JSON.
+ */
+
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'timePicker']);
@@ -100,6 +107,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await toasts.dismissAll();
     });
 
+    /**
+     * Migration recommendation: MIXED. Drop `_shards` counts and inspector request/response
+     * bodies (extract_warnings.test.ts). Keep a short Scout smoke that warnings surface as
+     * toasts and can open inspector.
+     */
     it('should show search warnings as toasts', async () => {
       await testSubjects.click('searchSourceWithOther');
 
@@ -147,6 +159,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(warnings).to.eql([]);
     });
 
+    /**
+     * Migration recommendation: MIXED. Incomplete-warning typing is extract_warnings.test.ts.
+     * Keep a short Scout smoke that warnings appear on the results tab; drop exact payload.
+     */
     it('should show search warnings in results tab', async () => {
       await testSubjects.click('searchSourceWithoutOther');
 
