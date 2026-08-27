@@ -7,6 +7,7 @@
 
 import {
   buildReportContent,
+  capToParseBytes,
   collapseWhitespace,
   htmlToStructured,
   stripHtml,
@@ -345,6 +346,12 @@ describe('parser input bounds', () => {
 
   it('leaves a normal document untouched', () => {
     expect(stripHtml('<p>hello</p>')).toBe('hello');
+  });
+
+  it('caps the UTF-8 byte length rather than the UTF-16 code-unit length', () => {
+    const capped = capToParseBytes('\u20ac'.repeat(Math.ceil(MAX_PARSE_BYTES / 3) + 1));
+
+    expect(Buffer.byteLength(capped, 'utf8')).toBeLessThanOrEqual(MAX_PARSE_BYTES);
   });
 });
 
@@ -858,6 +865,35 @@ describe('an unclosed raw-text opener inside CDATA stays literal', () => {
     expect(stripHtml('<![CDATA[<script>fetch("https://false-ioc.test")</script>safe]]>')).toBe(
       'safe'
     );
+  });
+
+  it.each([
+    ['plain text', stripHtml],
+    ['structured text', htmlToStructured],
+  ])('keeps an entity-encoded unclosed script as %s', (_label, render) => {
+    expect(render('<![CDATA[use &lt;script&gt; carefully]]>')).toBe('use <script> carefully');
+  });
+
+  it.each([
+    [
+      'a closer before the opener',
+      '<![CDATA[before </script> use <script> carefully]]>',
+      'carefully',
+    ],
+    [
+      'a closed script before the unclosed opener',
+      '<![CDATA[<script>closed()</script> safe <script> and c2.evil.test]]>',
+      'c2.evil.test',
+    ],
+  ])('keeps the payload when it contains %s', (_label, html, expected) => {
+    expect(stripHtml(html)).toContain(expected);
+  });
+
+  it.each([
+    ['a comment', '<![CDATA[<script>closed()</script><!-- <script> --><p>safe</p>]]>'],
+    ['an attribute value', '<![CDATA[<script>closed()</script><p title="<script>">safe</p>]]>'],
+  ])('does not treat an opener inside %s as markup context', (_label, html) => {
+    expect(stripHtml(html)).toBe('safe');
   });
 });
 
@@ -1423,12 +1459,24 @@ describe('hidden subtrees', () => {
     ['display: none with a space', '<div style="display: none">c2.stale.test</div><p>safe</p>'],
     ['visibility:hidden', '<div style="visibility:hidden">c2.stale.test</div><p>safe</p>'],
     [
+      'CSS comments in a property name',
+      '<div style="display/**/:none">c2.stale.test</div><p>safe</p>',
+    ],
+    [
       'display:none with !important',
       '<div style="display:none !important">c2.stale.test</div><p>safe</p>',
     ],
     [
       'display:none among other declarations',
       '<div style="color:red;display:none">c2.stale.test</div><p>safe</p>',
+    ],
+    [
+      'display:none followed by a normal declaration before an important one',
+      '<div style="display:none;display:block;display:none!important">c2.stale.test</div><p>safe</p>',
+    ],
+    [
+      'important display:none followed by a non-important all reset',
+      '<div style="display:none!important;all:initial">c2.stale.test</div><p>safe</p>',
     ],
   ])('drops an element styled with %s', (_label, html) => {
     const result = stripHtml(html);
@@ -1456,8 +1504,53 @@ describe('hidden subtrees', () => {
       "a value that mentions display:none in another property's content",
       `<div style="content: 'display:none'">keep.test</div><p>safe</p>`,
     ],
+    [
+      'a later display declaration that overrides display:none',
+      '<div style="display:none;display:block">keep.test</div><p>safe</p>',
+    ],
+    [
+      'a later important display declaration that overrides display:none',
+      '<div style="display:none;display:block!important">keep.test</div><p>safe</p>',
+    ],
+    [
+      'a later all reset that overrides display:none',
+      '<div style="display:none;all:initial">keep.test</div><p>safe</p>',
+    ],
+    [
+      'display:none text inside a quoted value',
+      `<div style="content:'x; display:none;';color:red">keep.test</div><p>safe</p>`,
+    ],
   ])('keeps a visible element styled with %s', (_label, html) => {
     expect(stripHtml(html)).toBe('keep.test safe');
+  });
+
+  it('keeps a visible descendant of a visibility:hidden parent', () => {
+    const html =
+      '<div style="visibility:hidden">stale.test<span style="visibility:visible">keep.test</span></div><p>safe</p>';
+
+    expect(stripHtml(html)).toBe('keep.test safe');
+  });
+
+  it('keeps token boundaries around visibility:hidden text', () => {
+    const html = '<span>evil.test<span style="visibility:hidden">hidden</span>bad.test</span>';
+
+    expect(stripHtml(html)).toBe('evil.test bad.test');
+  });
+
+  it.each([
+    ['visibility:initial', 'visibility:initial'],
+    ['all:initial', 'all:initial'],
+  ])('lets %s restore a descendant to visible', (_label, style) => {
+    const html = `<div style="visibility:hidden">stale.test<span style="${style}">keep.test</span></div><p>safe</p>`;
+
+    expect(stripHtml(html)).toBe('keep.test safe');
+  });
+
+  it('does not let a hidden heading end the visible IOC section', () => {
+    const html =
+      '<h2>IOCs</h2><h2 style="visibility:hidden">Hidden prose</h2><a href="https://c2.evil.test/path">indicator</a>';
+
+    expect(htmlToStructured(html)).toContain('https://c2.evil.test/path');
   });
 
   it('keeps a visible sibling of the same shape', () => {

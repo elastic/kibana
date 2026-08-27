@@ -694,6 +694,46 @@ describe('the fallback scorer discounts hidden descendants', () => {
   });
 });
 
+describe('candidate enumeration counts each element once', () => {
+  it('does not force the fallback scorer when elements match several selectors', () => {
+    const classes = 'post-content article-content entry-content blog-post';
+    const inflated = `&lt;script&gt;${'x'.repeat(1000)}&lt;/script&gt;teaser`;
+    const decoys = Array.from(
+      { length: 6 },
+      (_, index) =>
+        `<article role="main" class="${classes}">${index === 0 ? inflated : `d${index}`}</article>`
+    ).join('');
+    const page = `<html><body>${decoys}<main>${'actual report evil.test '.repeat(
+      20
+    )}</main></body></html>`;
+
+    expect(stripHtml(extractArticleHtml(page))).toContain('actual report evil.test');
+  });
+});
+
+describe('visibility overrides remain selectable', () => {
+  it.each([
+    ['the precise scorer', 0],
+    ['the fallback scorer', 32],
+  ])('keeps visible descendants of a visibility:hidden candidate with %s', (_label, decoyCount) => {
+    const decoys = Array.from(
+      { length: decoyCount },
+      (_, index) => `<article>tiny decoy ${index}</article>`
+    ).join('');
+    const page = [
+      '<html><body>',
+      decoys,
+      '<article style="visibility:hidden">stale.test',
+      '<div style="visibility:visible">actual report evil.test with substantive content</div>',
+      '</article>',
+      '<main>short report</main>',
+      '</body></html>',
+    ].join('');
+
+    expect(stripHtml(extractArticleHtml(page))).toContain('actual report evil.test');
+  });
+});
+
 // `template` is non-rendered, like `hidden`, and selection has to know that — its inner
 // HTML discards the wrapper that makes the contents inert.
 describe('template subtrees cannot win selection', () => {

@@ -171,6 +171,14 @@ describe('heading normalization resists backtracking', () => {
     expect(elapsedMs).toBeLessThan(500);
   });
 
+  it('stays cheap when a long whitespace run is not followed by a parenthetical', () => {
+    const started = process.hrtime.bigint();
+    normalizeHeader(`${' '.repeat(32000)}x`);
+    const elapsedMs = Number(process.hrtime.bigint() - started) / 1e6;
+
+    expect(elapsedMs).toBeLessThan(500);
+  });
+
   it.each([
     ['indicators of compromise (iocs)', 'indicators of compromise'],
     ['iocs (updated)', 'iocs'],

@@ -17,13 +17,31 @@ import { classifyHeader, type SectionKind } from './section_headers';
 export const MAX_PARSE_BYTES = 10 * 1024 * 1024;
 
 /**
- * Truncates without splitting a surrogate pair — `slice` counts UTF-16 code units, so a
- * cap landing mid-pair would otherwise leave an unpaired surrogate in `body_text`.
+ * Truncates at a UTF-8 boundary. JavaScript string length counts UTF-16 code units, so using
+ * it as a byte count let a 10MB cap admit up to 30MB of input before building the DOM.
  */
 export const capToParseBytes = (html: string): string => {
-  if (html.length <= MAX_PARSE_BYTES) return html;
-  const capped = html.slice(0, MAX_PARSE_BYTES);
-  return /[\uD800-\uDBFF]$/.test(capped) ? capped.slice(0, -1) : capped;
+  // Every UTF-16 code unit is at most three UTF-8 bytes (a surrogate pair is four bytes
+  // across two units), so the common small-input path needs no scan at all.
+  if (html.length <= Math.floor(MAX_PARSE_BYTES / 3)) return html;
+
+  let bytes = 0;
+  let index = 0;
+  while (index < html.length) {
+    const codeUnit = html.charCodeAt(index);
+    const isSurrogatePair =
+      codeUnit >= 0xd800 &&
+      codeUnit <= 0xdbff &&
+      index + 1 < html.length &&
+      html.charCodeAt(index + 1) >= 0xdc00 &&
+      html.charCodeAt(index + 1) <= 0xdfff;
+    const width = codeUnit <= 0x7f ? 1 : codeUnit <= 0x7ff ? 2 : isSurrogatePair ? 4 : 3;
+    if (bytes + width > MAX_PARSE_BYTES) return html.slice(0, index);
+    bytes += width;
+    index += isSurrogatePair ? 2 : 1;
+  }
+
+  return html;
 };
 
 /**
@@ -92,46 +110,163 @@ interface ParsedNode {
 const SKIPPED_SUBTREE_NAMES = new Set(['script', 'style', 'template']);
 
 /**
- * Whether this element's content never reaches a reader. Exported and shared with
- * `extract_article`, which needs the same rule for candidate exclusion and scoring so a
- * `<template>` or hidden block can't win article selection there either. `iframe` is here
+ * Elements whose content never reaches a reader. The render-state helper below is shared
+ * with `extract_article`, which needs the same rule for candidate exclusion and scoring so
+ * a `<template>` or hidden block can't win article selection there either. `iframe` is here
  * for the same reason as `template`: browsers don't render its contents.
  */
 const NON_RENDERED_NAMES = new Set(['template', 'iframe']);
 
 /**
- * `display: none` or `visibility: hidden` among the element's inline style declarations.
+ * `display: none` among the element's inline style declarations.
  * Parsed per declaration rather than matched with a regex on the whole string, so a
  * decoy — a custom property (`--display:none`) or another property's value that happens
  * to contain the text (`content: 'display:none'`) — can't false-positive and hide content
- * that is genuinely visible.
+ * that is genuinely visible. `visibility: hidden` is deliberately not treated as a hidden
+ * subtree: descendants may override it with `visibility: visible`, while nothing below a
+ * `display: none` element can render.
  */
-const isCssHidden = (style: string | undefined): boolean =>
-  (style ?? '').split(';').some((declaration) => {
+interface CssPropertyValue {
+  value: string;
+  important: boolean;
+}
+
+interface InlineStyleState {
+  displayHidden: boolean;
+  visibility?: 'hidden' | 'visible';
+}
+
+const CSS_WIDE_KEYWORDS = new Set(['initial', 'inherit', 'unset', 'revert', 'revert-layer']);
+const INHERITED_CSS_WIDE_KEYWORDS = new Set(['inherit', 'unset']);
+
+/** Splits an inline style at declaration boundaries, not semicolons inside CSS values. */
+const splitCssDeclarations = (style: string): string[] => {
+  const declarations: string[] = [];
+  const current: string[] = [];
+  const blockClosers: string[] = [];
+  let quote = '';
+  let index = 0;
+
+  while (index < style.length) {
+    const char = style[index];
+    const next = style[index + 1];
+
+    if (quote !== '') {
+      current.push(char);
+      if (char === '\\' && next !== undefined) {
+        current.push(next);
+        index += 1;
+      } else if (char === quote) quote = '';
+    } else if (char === '/' && next === '*') {
+      const commentEnd = style.indexOf('*/', index + 2);
+      if (commentEnd === -1) break;
+      index = commentEnd + 1;
+    } else if (char === '"' || char === "'") {
+      quote = char;
+      current.push(char);
+    } else if (char === '\\' && next !== undefined) {
+      current.push(char, next);
+      index += 1;
+    } else if (char === '(' || char === '[' || char === '{') {
+      blockClosers.push(char === '(' ? ')' : char === '[' ? ']' : '}');
+      current.push(char);
+    } else if (char === blockClosers[blockClosers.length - 1]) {
+      blockClosers.pop();
+      current.push(char);
+    } else if (char === ';' && blockClosers.length === 0) {
+      declarations.push(current.join(''));
+      current.length = 0;
+    } else {
+      current.push(char);
+    }
+
+    index += 1;
+  }
+
+  declarations.push(current.join(''));
+  return declarations;
+};
+
+const inlineStyleState = (style: string | undefined): InlineStyleState => {
+  if (!style) return { displayHidden: false };
+
+  let display: CssPropertyValue | undefined;
+  let visibility: CssPropertyValue | undefined;
+  const setProperty = (property: 'display' | 'visibility', value: CssPropertyValue): void => {
+    const current = property === 'display' ? display : visibility;
+    // Inline declarations have equal specificity: the last one wins, except that an
+    // important declaration cannot be overridden by a later non-important declaration.
+    if (!current?.important || value.important) {
+      if (property === 'display') display = value;
+      else visibility = value;
+    }
+  };
+
+  for (const declaration of splitCssDeclarations(style)) {
     const colon = declaration.indexOf(':');
-    if (colon === -1) return false;
-    const property = declaration.slice(0, colon).trim().toLowerCase();
-    const value = declaration
-      .slice(colon + 1)
-      .split('!')[0]
-      .trim()
-      .toLowerCase();
-    return (
-      (property === 'display' && value === 'none') ||
-      (property === 'visibility' && value === 'hidden')
-    );
-  });
+    if (colon !== -1) {
+      const property = declaration.slice(0, colon).trim().toLowerCase();
+      if (property === 'display' || property === 'visibility' || property === 'all') {
+        const rawValue = declaration.slice(colon + 1).trim();
+        const important = /!\s*important\s*$/i.test(rawValue);
+        const value = rawValue
+          .replace(/!\s*important\s*$/i, '')
+          .trim()
+          .toLowerCase();
+        if (property === 'all') {
+          if (CSS_WIDE_KEYWORDS.has(value)) {
+            setProperty('display', { value: '', important });
+            // `visibility` is inherited. `initial` restores `visible`; inherit/unset keep
+            // the parent's value. Revert depends on stylesheets this parser cannot see, so
+            // visible is the conservative result for a false-strip-sensitive extractor.
+            const resetVisibility = INHERITED_CSS_WIDE_KEYWORDS.has(value) ? '' : 'visible';
+            setProperty('visibility', { value: resetVisibility, important });
+          }
+        } else {
+          setProperty(property, { value, important });
+        }
+      }
+    }
+  }
 
-export const isNonRenderedElement = (node: {
-  name?: string;
-  attribs?: Record<string, string>;
-}): boolean =>
-  NON_RENDERED_NAMES.has(node.name?.toLowerCase() ?? '') ||
-  node.attribs?.hidden !== undefined ||
-  isCssHidden(node.attribs?.style);
+  let resolvedVisibility: InlineStyleState['visibility'];
+  if (visibility?.value === 'hidden' || visibility?.value === 'collapse') {
+    resolvedVisibility = 'hidden';
+  } else if (
+    visibility?.value === 'visible' ||
+    visibility?.value === 'initial' ||
+    visibility?.value === 'revert' ||
+    visibility?.value === 'revert-layer'
+  ) {
+    resolvedVisibility = 'visible';
+  }
 
-const isSkippedSubtree = (node: ParsedNode): boolean =>
-  SKIPPED_SUBTREE_NAMES.has(elementName(node)) || isNonRenderedElement(node);
+  return { displayHidden: display?.value === 'none', visibility: resolvedVisibility };
+};
+
+interface ElementRenderState {
+  subtreeHidden: boolean;
+  visible: boolean;
+}
+
+export const elementRenderState = (
+  node: {
+    name?: string;
+    attribs?: Record<string, string>;
+  },
+  parentVisible: boolean
+): ElementRenderState => {
+  const { displayHidden, visibility } = inlineStyleState(node.attribs?.style);
+  const subtreeHidden =
+    NON_RENDERED_NAMES.has(node.name?.toLowerCase() ?? '') ||
+    node.attribs?.hidden !== undefined ||
+    displayHidden;
+  const visible = visibility === 'hidden' ? false : visibility === 'visible' || parentVisible;
+  return { subtreeHidden, visible };
+};
+
+const isAlwaysSkippedSubtree = (node: ParsedNode): boolean =>
+  SKIPPED_SUBTREE_NAMES.has(elementName(node));
 
 /** `<script>`/`<style>` — the elements HTML treats as raw text. */
 const RAW_TEXT_TAG_NAMES = ['script', 'style'] as const;
@@ -203,11 +338,17 @@ const asciiLower = (input: string): string =>
  * where the form is legitimately self-closing, so the HTML reading has to be corrected
  * before the real parser ever sees it.
  */
-export const normalizeSelfClosedRawText = (html: string): string => {
+interface RawTextNormalization {
+  html: string;
+  hasUnclosedRawText: boolean;
+}
+
+const normalizeRawText = (html: string): RawTextNormalization => {
   const lower = asciiLower(html);
   const pieces: string[] = [];
   let copiedTo = 0;
   let cursor = 0;
+  let hasUnclosedRawText = false;
 
   while (cursor < html.length) {
     const open = lower.indexOf('<', cursor);
@@ -253,6 +394,7 @@ export const normalizeSelfClosedRawText = (html: string): string => {
         const { end: tagEnd, selfClosing } = tagEndFrom(html, afterName);
 
         if (tagEnd === -1) {
+          hasUnclosedRawText = true;
           cursor = html.length;
         } else if (selfClosing) {
           // The self-closed open tag this function exists for.
@@ -281,6 +423,7 @@ export const normalizeSelfClosedRawText = (html: string): string => {
           }
 
           if (closeAt === -1) {
+            hasUnclosedRawText = true;
             cursor = html.length;
           } else {
             // htmlparser2 ends an end tag at the first `>` and rejects a trailing slash,
@@ -293,6 +436,7 @@ export const normalizeSelfClosedRawText = (html: string): string => {
             if (closeEnd === -1) {
               // The close tag itself never terminates — same as the missing-close-tag path
               // above, stop rather than resume the scan inside a still-open body.
+              hasUnclosedRawText = true;
               cursor = html.length;
             } else if (closeEnd > junkFrom) {
               pieces.push(html.slice(copiedTo, closeAt), `</${name}>`);
@@ -307,10 +451,12 @@ export const normalizeSelfClosedRawText = (html: string): string => {
     }
   }
 
-  if (copiedTo === 0) return html;
+  if (copiedTo === 0) return { html, hasUnclosedRawText };
   pieces.push(html.slice(copiedTo));
-  return pieces.join('');
+  return { html: pieces.join(''), hasUnclosedRawText };
 };
+
+export const normalizeSelfClosedRawText = (html: string): string => normalizeRawText(html).html;
 
 /**
  * The single copy of the parser configuration, shared with `extract_article` so the two
@@ -371,7 +517,7 @@ const shouldReparse = (nodes: ParsedNode[], decoded: string): boolean =>
 
 /** Stack entry: a node still to visit, or literal output to append after its subtree. */
 type WalkStep =
-  | { kind: 'node'; node: ParsedNode; cdataDepth: number }
+  | { kind: 'node'; node: ParsedNode; cdataDepth: number; visible: boolean }
   | { kind: 'emit'; text: string };
 
 /**
@@ -388,9 +534,14 @@ const MAX_CDATA_DEPTH = 4;
  * iterative rather than recursive on purpose: this content is attacker-controlled with no
  * nesting limit, and a recursive walk would exhaust the call stack.
  */
-const pushNodes = (stack: WalkStep[], nodes: ParsedNode[], cdataDepth = 0): void => {
+const pushNodes = (
+  stack: WalkStep[],
+  nodes: ParsedNode[],
+  cdataDepth = 0,
+  visible = true
+): void => {
   for (let i = nodes.length - 1; i >= 0; i--) {
-    stack.push({ kind: 'node', node: nodes[i], cdataDepth });
+    stack.push({ kind: 'node', node: nodes[i], cdataDepth, visible });
   }
 };
 
@@ -434,12 +585,7 @@ const rawTextOf = (nodes: ParsedNode[]): string => {
  * from a parse it doesn't yet trust.
  */
 const hasUnclosedRawTextOpener = (raw: string): boolean => {
-  const normalized = normalizeSelfClosedRawText(raw);
-  return RAW_TEXT_TAG_NAMES.some((name) => {
-    const opener = new RegExp(`<${name}(?=[\\s/>])`, 'i');
-    const closer = new RegExp(`</${name}(?=[\\s/>])`, 'i');
-    return opener.test(normalized) && !closer.test(normalized);
-  });
+  return normalizeRawText(raw).hasUnclosedRawText;
 };
 
 /**
@@ -453,13 +599,19 @@ const parseCdataPayload = (raw: string): ParsedNode[] => {
   if (hasUnclosedRawTextOpener(raw)) return [{ type: 'text', data: raw }];
   const nodes = parseTopLevelNodes(raw);
   if (payloadCarriesMarkup(nodes)) return nodes;
-  return parseTopLevelNodes(inlineTextOf(nodes, false));
+  const decoded = inlineTextOf(nodes, false);
+  if (hasUnclosedRawTextOpener(decoded)) return [{ type: 'text', data: decoded }];
+  return parseTopLevelNodes(decoded);
 };
 
-const inlineTextOf = (nodes: ParsedNode[], liftHrefs: boolean): string => {
+const inlineTextOf = (
+  nodes: ParsedNode[],
+  liftHrefs: boolean,
+  inheritedVisibility = true
+): string => {
   const out: string[] = [];
   const stack: WalkStep[] = [];
-  pushNodes(stack, nodes);
+  pushNodes(stack, nodes, 0, inheritedVisibility);
 
   while (stack.length > 0) {
     const step = stack.pop();
@@ -468,12 +620,18 @@ const inlineTextOf = (nodes: ParsedNode[], liftHrefs: boolean): string => {
     if (step.kind === 'emit') {
       out.push(step.text);
     } else {
-      const { node, cdataDepth } = step;
+      const { node, cdataDepth, visible: parentVisible } = step;
+      const renderState = isElement(node)
+        ? elementRenderState(node, parentVisible)
+        : { subtreeHidden: false, visible: parentVisible };
+      const { visible } = renderState;
       const liftedHref =
-        isElement(node) && liftHrefs && elementName(node) === 'a' ? hrefOf(node) : undefined;
+        isElement(node) && visible && liftHrefs && elementName(node) === 'a'
+          ? hrefOf(node)
+          : undefined;
 
       if (node.type === 'text') {
-        out.push(node.data ?? '');
+        if (visible) out.push(node.data ?? '');
       } else if (node.type === 'cdata') {
         // Parsed into *this* walk rather than by re-entering the parser, which would undo
         // the iterative guarantee this file maintains and force `liftHrefs` off for the
@@ -481,22 +639,30 @@ const inlineTextOf = (nodes: ParsedNode[], liftHrefs: boolean): string => {
         out.push(' ');
         stack.push({ kind: 'emit', text: ' ' });
         if (cdataDepth < MAX_CDATA_DEPTH) {
-          pushNodes(stack, parseCdataPayload(rawTextOf(childrenOf(node))), cdataDepth + 1);
+          pushNodes(stack, parseCdataPayload(rawTextOf(childrenOf(node))), cdataDepth + 1, visible);
         }
       } else if (!isElement(node)) {
         // Comments and directives carry no report text but still separate the text on
         // either side, so a boundary is emitted without the node itself.
         out.push(' ');
-      } else if (isSkippedSubtree(node)) {
+      } else if (isAlwaysSkippedSubtree(node) || renderState.subtreeHidden) {
         out.push(' ');
+      } else if (!visible) {
+        // `visibility` may be restored by a descendant, so walk the subtree while keeping
+        // boundaries around any visible text it contains.
+        out.push(' ');
+        stack.push({ kind: 'emit', text: ' ' });
+        pushNodes(stack, childrenOf(node), cdataDepth, visible);
       } else if (liftedHref !== undefined) {
-        out.push(` ${collapseWhitespace(inlineTextOf(childrenOf(node), false))} ${liftedHref} `);
+        out.push(
+          ` ${collapseWhitespace(inlineTextOf(childrenOf(node), false, visible))} ${liftedHref} `
+        );
       } else if (INLINE_NAMES.has(elementName(node))) {
-        pushNodes(stack, childrenOf(node), cdataDepth);
+        pushNodes(stack, childrenOf(node), cdataDepth, visible);
       } else {
         out.push(' ');
         stack.push({ kind: 'emit', text: ' ' });
-        pushNodes(stack, childrenOf(node), cdataDepth);
+        pushNodes(stack, childrenOf(node), cdataDepth, visible);
       }
     }
   }
@@ -591,14 +757,18 @@ const renderStructured = (nodes: ParsedNode[]): string => {
     if (step.kind === 'emit') {
       out.push(step.text);
     } else {
-      const { node, cdataDepth } = step;
+      const { node, cdataDepth, visible: parentVisible } = step;
       const name = elementName(node);
+      const renderState = isElement(node)
+        ? elementRenderState(node, parentVisible)
+        : { subtreeHidden: false, visible: parentVisible };
+      const { visible } = renderState;
       // Anchors are lifted only under an IOC or references heading, where the link
       // target is itself the indicator.
       const lift = sectionKind === 'ioc' || sectionKind === 'references';
 
       if (node.type === 'text') {
-        out.push(node.data ?? '');
+        if (visible) out.push(node.data ?? '');
       } else if (node.type === 'cdata') {
         // Same as the plain-text walker. Parsed into this walk rather than by re-entering
         // `renderStructured`, which would start a fresh walk with section state reset to
@@ -606,16 +776,22 @@ const renderStructured = (nodes: ParsedNode[]): string => {
         out.push('\n');
         stack.push({ kind: 'emit', text: '\n' });
         if (cdataDepth < MAX_CDATA_DEPTH) {
-          pushNodes(stack, parseCdataPayload(rawTextOf(childrenOf(node))), cdataDepth + 1);
+          pushNodes(stack, parseCdataPayload(rawTextOf(childrenOf(node))), cdataDepth + 1, visible);
         }
       } else if (!isElement(node)) {
         // Comments and doctype contribute a boundary only.
         out.push(' ');
-      } else if (isSkippedSubtree(node)) {
+      } else if (isAlwaysSkippedSubtree(node) || renderState.subtreeHidden) {
         out.push(' ');
+      } else if (!visible) {
+        // Unlike display:none, visibility can be restored by a descendant. Preserve that
+        // text without letting the hidden wrapper affect section state or merge tokens.
+        out.push('\n');
+        stack.push({ kind: 'emit', text: '\n' });
+        pushNodes(stack, childrenOf(node), cdataDepth, visible);
       } else if (HEADING_NAMES.has(name)) {
         const depth = Number(name.slice(1));
-        const text = collapseWhitespace(inlineTextOf(childrenOf(node), false));
+        const text = collapseWhitespace(inlineTextOf(childrenOf(node), false, visible));
         const classified = classifyHeader(text);
         if (classified !== 'prose') {
           // An explicitly classified heading becomes the new anchor.
@@ -631,13 +807,13 @@ const renderStructured = (nodes: ParsedNode[]): string => {
       } else if (name === 'tr') {
         const cellTexts = childrenOf(node)
           .filter((child) => ['td', 'th'].includes(elementName(child)))
-          .map((cell) => collapseWhitespace(inlineTextOf(childrenOf(cell), lift)));
+          .map((cell) => collapseWhitespace(inlineTextOf(childrenOf(cell), lift, visible)));
         out.push(cellTexts.length > 0 ? `\n| ${cellTexts.join(' | ')} |\n` : '\n');
       } else if (name === 'li') {
-        const text = collapseWhitespace(inlineTextOf(childrenOf(node), lift));
+        const text = collapseWhitespace(inlineTextOf(childrenOf(node), lift, visible));
         if (text) out.push(`\n- ${text}\n`);
       } else if (name === 'a') {
-        const text = collapseWhitespace(inlineTextOf(childrenOf(node), false));
+        const text = collapseWhitespace(inlineTextOf(childrenOf(node), false, visible));
         const href = lift ? hrefOf(node) : undefined;
         // Prose anchors collapse to visible text only, so ordinary citation links don't
         // flood extraction with reference noise.
@@ -647,17 +823,17 @@ const renderStructured = (nodes: ParsedNode[]): string => {
       } else if (BLOCK_NAMES.has(name)) {
         out.push('\n');
         stack.push({ kind: 'emit', text: '\n' });
-        pushNodes(stack, childrenOf(node), cdataDepth);
+        pushNodes(stack, childrenOf(node), cdataDepth, visible);
       } else if (INLINE_NAMES.has(name)) {
         // Inline element: no boundary, contents kept.
-        pushNodes(stack, childrenOf(node), cdataDepth);
+        pushNodes(stack, childrenOf(node), cdataDepth, visible);
       } else {
         // Unknown or custom element: same conservative default as the plain-text walker.
         // Treating these as inline would merge adjacent indicators in vendor web
         // components, which is exactly what this structured form exists to keep separate.
         out.push('\n');
         stack.push({ kind: 'emit', text: '\n' });
-        pushNodes(stack, childrenOf(node), cdataDepth);
+        pushNodes(stack, childrenOf(node), cdataDepth, visible);
       }
     }
   }

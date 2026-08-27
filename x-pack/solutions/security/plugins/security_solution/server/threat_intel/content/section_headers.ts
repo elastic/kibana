@@ -45,19 +45,29 @@
  * it up to four times. Headings come from `<h2>` content in a page capped at 10MB, so n is
  * not small. Identical output on every well-formed heading.
  */
+const stripTrailingHeaderMarks = (value: string): string => {
+  let end = value.length;
+  while (end > 0) {
+    const char = value[end - 1];
+    if (char !== ':' && char !== '.' && !/\s/.test(char)) break;
+    end -= 1;
+  }
+  return value.slice(0, end);
+};
+
 export const normalizeHeader = (header: string): string => {
   let normalized = header.toLowerCase();
 
   for (let pass = 0; pass < 4; pass++) {
-    const stripped = normalized.replace(/[:.\s]+$/, '').replace(/\s*\([^()]*\)\s*$/, '');
+    // Do not include leading whitespace in the parenthetical match. On a long whitespace
+    // run with no following `(`, `\s*` backtracked from every possible start position and
+    // made this quadratic. The next pass strips the whitespace left before a removed group.
+    const stripped = stripTrailingHeaderMarks(normalized).replace(/\([^()]*\)\s*$/, '');
     if (stripped === normalized) break;
     normalized = stripped;
   }
 
-  return normalized
-    .replace(/[:.\s]+$/, '')
-    .replace(/\s+/g, ' ')
-    .trim();
+  return stripTrailingHeaderMarks(normalized).replace(/\s+/g, ' ').trim();
 };
 
 /** Normalized header strings that declare an Indicators-of-Compromise block. */

@@ -8,7 +8,7 @@
 import * as cheerio from 'cheerio';
 import {
   capToParseBytes,
-  isNonRenderedElement,
+  elementRenderState,
   normalizeSelfClosedRawText,
   PARSER_OPTIONS,
   stripHtml,
@@ -28,7 +28,7 @@ import {
  * (the readability-failure case this pre-step must NOT reproduce).
  */
 
-/** Ordered list of container selectors. First match wins. */
+/** Ordered list of container selectors. Order breaks ties between equal-sized candidates. */
 const ARTICLE_SELECTORS = [
   'article',
   'main',
@@ -74,7 +74,7 @@ const CHROME_SELECTORS = [
 /**
  * Select the article container from raw HTML and strip known chrome subtrees.
  *
- * 1. Try ARTICLE_SELECTORS in order — first match is the container.
+ * 1. Gather candidates across ARTICLE_SELECTORS and choose the one with the most visible text.
  * 2. Fall back to <body> if none match (never drop to nothing).
  * 3. Remove CHROME_SELECTORS from within the chosen container.
  * 4. Return the cleaned container HTML.
@@ -190,7 +190,39 @@ const maxDepthOf = (roots: ParsedNode[]): number => {
  * could not be expressed as a sum over subtrees, and the only thing the score is used for
  * is comparing candidates and rejecting empty ones. Both survive the change.
  */
-const visibleLengths = (roots: ParsedNode[]): Map<ParsedNode, number> => {
+const elementStates = (
+  roots: ParsedNode[],
+  pageChrome: Set<unknown>
+): {
+  visibilities: Map<ParsedNode, boolean>;
+  excluded: Map<ParsedNode, boolean>;
+} => {
+  const visibilities = new Map<ParsedNode, boolean>();
+  const excluded = new Map<ParsedNode, boolean>();
+  const stack: Array<{ node: ParsedNode; parentVisible: boolean; parentExcluded: boolean }> =
+    roots.map((node) => ({ node, parentVisible: true, parentExcluded: false }));
+
+  while (stack.length > 0) {
+    const frame = stack.pop();
+    if (!frame) break;
+    const { node, parentVisible, parentExcluded } = frame;
+    const { subtreeHidden, visible } = elementRenderState(node, parentVisible);
+    const isExcluded = parentExcluded || subtreeHidden || pageChrome.has(node);
+    visibilities.set(node, visible);
+    excluded.set(node, isExcluded);
+    for (const child of node.children ?? []) {
+      stack.push({ node: child, parentVisible: visible, parentExcluded: isExcluded });
+    }
+  }
+
+  return { visibilities, excluded };
+};
+
+const visibleLengths = (
+  roots: ParsedNode[],
+  visibilities: Map<ParsedNode, boolean>,
+  excluded: Map<ParsedNode, boolean>
+): Map<ParsedNode, number> => {
   const lengths = new Map<ParsedNode, number>();
   const stack: Array<{ node: ParsedNode; expanded: boolean }> = roots.map((node) => ({
     node,
@@ -203,8 +235,8 @@ const visibleLengths = (roots: ParsedNode[]): Map<ParsedNode, number> => {
     const { node, expanded } = frame;
 
     if (node.type === 'text') {
-      lengths.set(node, (node.data ?? '').replace(/\s/g, '').length);
-    } else if (isNonRenderedElement(node)) {
+      lengths.set(node, visibilities.get(node) ? (node.data ?? '').replace(/\s/g, '').length : 0);
+    } else if (excluded.get(node)) {
       // Non-rendered descendants count for nothing here, the same as in the walkers. Excluding
       // only the candidate and its ancestors left this path summing them, so once precise
       // scoring is off, past 32 candidates or 2MB, a teaser inflated by a hidden or template
@@ -287,10 +319,19 @@ const selectArticleHtml = (html: string): string => {
    * cannot outweigh the real report on raw text length, win selection, and then be
    * stripped to almost nothing.
    */
+  const seenCandidates = new Set<unknown>();
+  // One element can match several selectors. Count it once at its highest priority, or a
+  // handful of multi-class elements can cross the precise-scoring candidate bound and force
+  // the less accurate fallback path even though the document has very few real candidates.
   const candidateEls = ARTICLE_SELECTORS.flatMap((selector, priority) =>
     $(selector)
       .toArray()
       .map((el) => ({ el, priority }))
+      .filter(({ el }) => {
+        if (seenCandidates.has(el)) return false;
+        seenCandidates.add(el);
+        return true;
+      })
   );
 
   // Scored with `stripHtml`, the function that actually produces `body_text`, rather than
@@ -310,14 +351,18 @@ const selectArticleHtml = (html: string): string => {
   // spending a task worker on it is not. The choice is made once per document so every
   // candidate is measured the same way.
   const usePreciseScore =
-    candidateEls.length <= PRECISE_SCORE_MAX_CANDIDATES && html.length <= PRECISE_SCORE_MAX_BYTES;
+    candidateEls.length <= PRECISE_SCORE_MAX_CANDIDATES &&
+    Buffer.byteLength(html, 'utf8') <= PRECISE_SCORE_MAX_BYTES;
 
   // `roots` was captured before the removals above, which mutate the tree in place, so this
   // walk sees the post-removal document. That ordering is load-bearing: scoring candidates
   // against a tree that still contained chrome is the bug the removals exist to prevent.
-  const lengths = usePreciseScore ? undefined : visibleLengths(roots);
+  const pageChrome = new Set<unknown>($(PAGE_CHROME_SELECTORS).toArray());
+  const { visibilities, excluded } = elementStates(roots, pageChrome);
+  const lengths = usePreciseScore ? undefined : visibleLengths(roots, visibilities, excluded);
 
-  // A candidate that is hidden, or sits inside page-level chrome, scores zero.
+  // A candidate in a subtree-final hidden state, or inside page-level chrome, scores zero.
+  // CSS visibility is handled separately because a descendant may restore it to visible.
   //
   // Both have to be judged on the ancestor chain rather than the element, because neither
   // scoring path can see anything above the candidate: the precise path passes `$(el).html()`,
@@ -330,31 +375,25 @@ const selectArticleHtml = (html: string): string => {
   // selection and removing an ancestor afterwards does not un-select the already-detached
   // container. In both cases returning the candidate's inner HTML also discards the very context
   // that marked it non-content, so downstream had no way to tell.
-  const pageChrome = new Set<unknown>($(PAGE_CHROME_SELECTORS).toArray());
-
-  const isExcludedCandidate = (el: unknown): boolean => {
-    // Bounded by the depth guard above, which has already rejected anything deeper than
-    // MAX_NESTING_DEPTH.
-    let node: ParsedNode | null | undefined = el as ParsedNode;
-    while (node) {
-      if (isNonRenderedElement(node)) return true;
-      if (pageChrome.has(node)) return true;
-      node = node.parent;
+  const candidates = candidateEls.map(({ el, priority }) => {
+    const node = el as unknown as ParsedNode;
+    const visible = visibilities.get(node) ?? true;
+    const innerHtml = $(el).html() ?? '';
+    const scoreHtml = visible ? innerHtml : `<div style="visibility:hidden">${innerHtml}</div>`;
+    let length = 0;
+    if (!excluded.get(node)) {
+      length = usePreciseScore ? stripHtml(scoreHtml).length : lengths?.get(node) ?? 0;
     }
-    return false;
-  };
-
-  const candidates = candidateEls.map(({ el, priority }) => ({
-    el,
-    priority,
-    length: isExcludedCandidate(el)
-      ? 0
-      : usePreciseScore
-      ? stripHtml($(el).html() ?? '').length
-      : lengths?.get(el as unknown as ParsedNode) ?? 0,
-  }));
+    return {
+      el,
+      priority,
+      visible,
+      length,
+    };
+  });
 
   let $container: ReturnType<typeof $> | null = null;
+  let containerVisible = true;
   if (candidates.length > 0) {
     const best = candidates.reduce((a, b) => {
       if (b.length !== a.length) return b.length > a.length ? b : a;
@@ -365,6 +404,7 @@ const selectArticleHtml = (html: string): string => {
     // empty article satisfied the selector loop and suppressed the body fallback.
     if (best.length > 0) {
       $container = $(best.el);
+      containerVisible = best.visible;
     }
   }
 
@@ -373,7 +413,8 @@ const selectArticleHtml = (html: string): string => {
     // candidates inside it score zero, and only the container's inner HTML is returned, so
     // removing chrome from elsewhere in the document could not change the result. The earlier
     // version removed it here and that was a no-op dressed up as a step.
-    return $container.html() ?? html;
+    const innerHtml = $container.html() ?? html;
+    return containerVisible ? innerHtml : `<div style="visibility:hidden">${innerHtml}</div>`;
   }
 
   // Fall back to the document body, or to the whole fragment when there is no body
