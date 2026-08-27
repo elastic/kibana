@@ -402,11 +402,11 @@ export const appendRoundTerminated$ = ({
 
           const resolvedTitle = title$ ? await firstValueFrom(title$) : undefined;
 
-          return conversationClient.appendEvents(
+          return conversationClient.replaceRoundEvents(
             {
               id: conversation.id,
+              roundId: round.id,
               events,
-              overwrite: true,
               ...(resolvedTitle !== undefined ? { title: resolvedTitle } : {}),
               status: round.status,
               ...(conversationState ? { state: conversationState } : {}),

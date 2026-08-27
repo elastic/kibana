@@ -114,7 +114,24 @@ export interface AppendEventsRequest {
   attachments?: { snapshot: VersionedAttachment[]; produced: VersionedAttachment[] };
   /** Applied only when the stored conversation has no workspace yet. */
   workspaceId?: string;
-  overwrite?: boolean;
+}
+
+export interface ReplaceRoundEventsRequest {
+  /** Conversation to update. */
+  id: string;
+  /** The round whose stored events should be replaced. */
+  roundId: string;
+  /** The fresh canonical projection for the round. */
+  events: TimelineEvent[];
+  /** Generated title to persist in the same write (rides the END append). */
+  title?: string;
+  /** Round status to persist alongside the write. */
+  status?: Conversation['status'];
+  state?: ConversationInternalState;
+  /** Reconciled into the stored list; `snapshot` is what the round started from. */
+  attachments?: { snapshot: VersionedAttachment[]; produced: VersionedAttachment[] };
+  /** Applied only when the stored conversation has no workspace yet. */
+  workspaceId?: string;
 }
 
 /**

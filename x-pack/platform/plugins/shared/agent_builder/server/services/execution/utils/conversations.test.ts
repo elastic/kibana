@@ -595,7 +595,7 @@ describe('conversations utils', () => {
       roundCompleteEvent: RoundCompleteEvent;
       title$?: Observable<string>;
     }): Promise<ChatEvent[]> => {
-      conversationClient.appendEvents.mockResolvedValue(conversation);
+      conversationClient.replaceRoundEvents.mockResolvedValue(conversation);
       return lastValueFrom(
         appendRoundTerminated$({
           conversation,
@@ -606,7 +606,7 @@ describe('conversations utils', () => {
       );
     };
 
-    it('overwrites the full canonical projection (user_message + execution_started + terminated) and folds title + status into the same write for CREATE', async () => {
+    it('replaces the round events with the full canonical projection and folds title + status into the same write for CREATE', async () => {
       const conversationClient = createConversationClientMock();
       const conversation = withOperation(createEmptyConversation({ id: 'conv-1' }), 'CREATE');
       const round = createRound({
@@ -626,14 +626,13 @@ describe('conversations utils', () => {
         title$: of('Generated title'),
       });
 
-      expect(conversationClient.appendEvents).toHaveBeenCalledTimes(1);
-      const [args] = conversationClient.appendEvents.mock.calls[0];
+      expect(conversationClient.replaceRoundEvents).toHaveBeenCalledTimes(1);
+      expect(conversationClient.appendEvents).not.toHaveBeenCalled();
+      const [args] = conversationClient.replaceRoundEvents.mock.calls[0];
       expect(args.id).toBe('conv-1');
+      expect(args.roundId).toBe('round-1');
       expect(args.title).toBe('Generated title');
       expect(args.status).toBe(ConversationRoundStatus.completed);
-      expect(args.overwrite).toBe(true);
-      // Round-end write is a full canonical projection: the receipt-time raw user_message
-      // and mid-run execution_started are replaced in place with the canonical events.
       expect(args.events.map((event: { id: string }) => event.id)).toEqual([
         'round-1::user_message',
         'round-1::execution_started',
@@ -676,7 +675,7 @@ describe('conversations utils', () => {
         },
       });
 
-      const [args] = conversationClient.appendEvents.mock.calls[0];
+      const [args] = conversationClient.replaceRoundEvents.mock.calls[0];
       expect(args).not.toHaveProperty('title');
     });
 
@@ -703,7 +702,7 @@ describe('conversations utils', () => {
         },
       });
 
-      const [args] = conversationClient.appendEvents.mock.calls[0];
+      const [args] = conversationClient.replaceRoundEvents.mock.calls[0];
       expect(args.attachments).toEqual({
         snapshot: [existingAttachment],
         produced: [producedAttachment],
@@ -738,8 +737,8 @@ describe('conversations utils', () => {
         },
       });
 
-      const [args] = conversationClient.appendEvents.mock.calls[0];
-      expect(args.overwrite).toBe(true);
+      const [args] = conversationClient.replaceRoundEvents.mock.calls[0];
+      expect(args.roundId).toBe('round-x');
       expect(args.events.map((event: { type: string; id: string }) => event.type)).toEqual([
         TimelineEventType.userMessage,
         TimelineEventType.executionStarted,

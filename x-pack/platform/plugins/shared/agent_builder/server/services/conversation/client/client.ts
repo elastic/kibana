@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import { OccWriter, isElasticsearchWriteConflict } from '@kbn/occ';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
-import type { ConversationOrigin, TimelineEvent } from '@kbn/agent-builder-common';
+import type { ConversationOrigin } from '@kbn/agent-builder-common';
 import {
   type CurrentUser,
   type Conversation,
@@ -56,6 +56,7 @@ import type {
   ConversationUpdateRequest,
   ConversationListOptions,
   NormalizedConversation,
+  ReplaceRoundEventsRequest,
   UpsertRoundRequest,
 } from './types';
 import { createSpaceDslFilter } from '../../../utils/spaces';
@@ -102,6 +103,10 @@ export interface ConversationClient {
   ): Promise<Conversation>;
   appendEvents(
     request: AppendEventsRequest,
+    options?: { access: ConversationAccess }
+  ): Promise<Conversation>;
+  replaceRoundEvents(
+    request: ReplaceRoundEventsRequest,
     options?: { access: ConversationAccess }
   ): Promise<Conversation>;
   discardRoundEvents(conversationId: string, roundId: string): Promise<void>;
@@ -487,16 +492,7 @@ class ConversationClientImpl implements ConversationClient {
     request: AppendEventsRequest,
     options: { access: ConversationAccess } = { access: 'converse' }
   ): Promise<Conversation> {
-    const {
-      id: conversationId,
-      events,
-      title,
-      status,
-      state,
-      attachments,
-      workspaceId,
-      overwrite = false,
-    } = request;
+    const { id: conversationId, events, title, status, state, attachments, workspaceId } = request;
     const { access } = options;
 
     return this.writeConversation({
@@ -504,24 +500,62 @@ class ConversationClientImpl implements ConversationClient {
       access,
       fields: (current) => {
         const currentEvents = current.events ?? [];
-        let appended: TimelineEvent[];
-        if (overwrite) {
-          const incomingById = new Map(events.map((event) => [event.id, event]));
-          const replaced = currentEvents.map((event) => incomingById.get(event.id) ?? event);
-          const replacedIds = new Set(currentEvents.map((event) => event.id));
-          const additions = events.filter((event) => !replacedIds.has(event.id));
-          appended = [...replaced, ...additions];
-        } else {
-          const existingIds = new Set(currentEvents.map((event) => event.id));
-          const newEvents = events.filter((event) => !existingIds.has(event.id));
-          appended = [...currentEvents, ...newEvents];
-        }
-
-        const isStepOnlyBatch =
-          !overwrite && events.every((event) => event.type === TimelineEventType.executionStep);
+        const existingIds = new Set(currentEvents.map((event) => event.id));
+        const newEvents = events.filter((event) => !existingIds.has(event.id));
+        const appended = [...currentEvents, ...newEvents];
+        const isStepOnlyBatch = events.every(
+          (event) => event.type === TimelineEventType.executionStep
+        );
         return {
           events: appended,
           ...(isStepOnlyBatch ? { rounds: current.rounds } : {}),
+          schema_version: CONVERSATION_SCHEMA_VERSION,
+          ...(title !== undefined ? { title } : {}),
+          ...(status ? { status } : {}),
+          ...(state ? { state } : {}),
+          ...(attachments
+            ? {
+                attachments: reconcileAttachments({
+                  snapshot: attachments.snapshot,
+                  stored: current.attachments ?? [],
+                  produced: attachments.produced,
+                }),
+              }
+            : {}),
+          ...(workspaceId && !current.workspace_id ? { workspace_id: workspaceId } : {}),
+          read_by: [],
+          read: false,
+        };
+      },
+    });
+  }
+
+  async replaceRoundEvents(
+    request: ReplaceRoundEventsRequest,
+    options: { access: ConversationAccess } = { access: 'converse' }
+  ): Promise<Conversation> {
+    const {
+      id: conversationId,
+      roundId,
+      events,
+      title,
+      status,
+      state,
+      attachments,
+      workspaceId,
+    } = request;
+    const { access } = options;
+    const roundPrefix = `${roundId}::`;
+
+    return this.writeConversation({
+      conversationId,
+      access,
+      fields: (current) => {
+        const currentEvents = current.events ?? [];
+        const nonRoundEvents = currentEvents.filter((event) => !event.id.startsWith(roundPrefix));
+        const replaced = [...nonRoundEvents, ...events];
+        return {
+          events: replaced,
           schema_version: CONVERSATION_SCHEMA_VERSION,
           ...(title !== undefined ? { title } : {}),
           ...(status ? { status } : {}),
@@ -554,8 +588,6 @@ class ConversationClientImpl implements ConversationClient {
         const remaining = events.filter(
           (event) => event.id === userMessageId || !event.id.startsWith(`${roundId}::`)
         );
-        // Nothing to discard: return no fields, so a legacy (rounds-only) document is not
-        // promoted to events-native by writing its read-derived timeline back.
         return remaining.length === events.length ? {} : { events: remaining };
       },
     });

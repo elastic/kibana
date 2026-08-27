@@ -67,6 +67,7 @@ export const createConversationClientMock = (): ConversationClientMock => {
     addAttachmentsToLastRound: jest.fn(),
     upsertRound: jest.fn(),
     appendEvents: jest.fn(),
+    replaceRoundEvents: jest.fn(),
     discardRoundEvents: jest.fn().mockResolvedValue(undefined),
     markRead: jest.fn(),
     list: jest.fn(),

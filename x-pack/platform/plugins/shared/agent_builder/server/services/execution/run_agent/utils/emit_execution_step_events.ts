@@ -41,7 +41,7 @@ export const emitExecutionStepEvents = ({
   executionId: string;
   /** starting `sequence` for the first streamed step. */
   initialSequence: number;
-}): (() => void) => {
+}): void => {
   let sequence = initialSequence;
   const pendingToolCalls = new Map<string, ToolCallEvent>();
   const pendingToolProgress = new Map<string, ToolProgressEvent[]>();
@@ -59,7 +59,7 @@ export const emitExecutionStepEvents = ({
     manualEvents$.next(roundStepEvent);
   };
 
-  const subscription = graphEvents$.subscribe({
+  graphEvents$.subscribe({
     next: (event) => {
       if (isToolCallEvent(event)) {
         pendingToolCalls.set(event.data.tool_call_id, event);
@@ -107,6 +107,4 @@ export const emitExecutionStepEvents = ({
       }
     },
   });
-
-  return () => subscription.unsubscribe();
 };
