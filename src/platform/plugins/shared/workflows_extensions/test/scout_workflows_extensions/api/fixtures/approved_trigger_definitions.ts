@@ -38,39 +38,39 @@
 export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: string }> = [
   {
     id: 'alerting.episodeAcked',
-    schemaHash: 'd280f377a1b17bcbd655e93f00ebb80b1935ef93951115cc1559305a5da01942',
+    schemaHash: '53f31d5468c0fb12a49faa3233c78a87837772cb161d1db8072803877bddf3b6',
   },
   {
     id: 'alerting.episodeActivated',
-    schemaHash: '91921d540292ae32b96893da10fd10ce746b2ede5c5f7f06e0bd19bdd31e8207',
+    schemaHash: 'c5a55a218565c7d084269021a9d6252d9ea972a8a9ce496082da5c6e76d09a01',
   },
   {
     id: 'alerting.episodeAssigned',
-    schemaHash: 'cab4d7b9ed82d802f6dd51f4d29327f7fb84bfabcf958a046c53ceb5d7136b0b',
+    schemaHash: 'b99211de1fdabb5e2a2942031495b8c34d317a3feccd7efaa81bf997c0412439',
   },
   {
     id: 'alerting.episodeDeactivated',
-    schemaHash: 'a394bb060c7cb9ec0b0d279cc47afc0366f9813273872895331b3d29a66cc9a3',
+    schemaHash: '623ec35bd18482cc9a3bc7a9ecaf3b3de4f203c8cacc207e102b8a5b14fa554a',
   },
   {
     id: 'alerting.episodeSnoozed',
-    schemaHash: 'ca2d9156382a2d132b94e6058488d1f78df92e539445403f1b315ea16a3e6270',
+    schemaHash: 'f0517884b4e0560f86a62515c0d84420fed367ef2cfdda501cfedad010f22914',
   },
   {
     id: 'alerting.episodeTagged',
-    schemaHash: '4625536d4a9c39dd3f769ec13d304d21c11ff88f6c8b3254990a3773ff9aae8e',
+    schemaHash: 'd6ad1872b85995d8088dfacbad85f775236ceb61a3982b077c7a00902c84bf95',
   },
   {
     id: 'alerting.episodeUnacked',
-    schemaHash: 'd280f377a1b17bcbd655e93f00ebb80b1935ef93951115cc1559305a5da01942',
+    schemaHash: '53f31d5468c0fb12a49faa3233c78a87837772cb161d1db8072803877bddf3b6',
   },
   {
     id: 'alerting.episodeUnassigned',
-    schemaHash: 'd280f377a1b17bcbd655e93f00ebb80b1935ef93951115cc1559305a5da01942',
+    schemaHash: '53f31d5468c0fb12a49faa3233c78a87837772cb161d1db8072803877bddf3b6',
   },
   {
     id: 'alerting.episodeUnsnoozed',
-    schemaHash: 'd280f377a1b17bcbd655e93f00ebb80b1935ef93951115cc1559305a5da01942',
+    schemaHash: '53f31d5468c0fb12a49faa3233c78a87837772cb161d1db8072803877bddf3b6',
   },
   {
     id: 'alerting.ruleCreated',
@@ -90,7 +90,7 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
   },
   {
     id: 'alerting.ruleEventsGenerated',
-    schemaHash: '31e25156a8b716955cad7a2ac7e2344d825c17d327aeb9223b3c6a836e07aa14',
+    schemaHash: '809265f7f0af6bdd32df0498a0f756a17220587024df2fe25eb69b0060b38fe1',
   },
   {
     id: 'alerting.ruleExecutionFailed',
@@ -130,19 +130,19 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
   },
   {
     id: 'significant-events.eventCreated',
-    schemaHash: '64b1eb0d83b57fc4bdd63dd44dbac0ac98477d95db49e83f4ae5ae486131dd22',
+    schemaHash: '537230a2eb86302d4a80e93f396effd93681ba4a2e11fd70c5b7b5b56fe4c3fb',
   },
   {
     id: 'significant-events.eventStatusChanged',
-    schemaHash: '9daa3d856b15e374d3697da943da7db7b2332b39b01163c5c252b8916bd4282c',
+    schemaHash: 'f140133a6ecef997484c3d4ef94b326207b4f1124cce889d34fef6e38fa019fe',
   },
   {
     id: 'significant-events.investigationCompleted',
-    schemaHash: '0b4d44bfc8622414b093116ea0301d48b25ead279a9b52db77d678674aa9d770',
+    schemaHash: '06dde7e48728d9cfcb26cb572df53194f99106d4c9b73a722fa781c379da59f5',
   },
   {
     id: 'significant-events.investigationStarted',
-    schemaHash: '24a3de21574471c92605a102767c36e876a932ac13fc974e9b2d69db6194bd83',
+    schemaHash: '1d7cbaf4aae2266d95fc9f30fa3d7df10af006cc4b9dccfd2024e991317de805',
   },
   {
     id: 'workflows.failed',
