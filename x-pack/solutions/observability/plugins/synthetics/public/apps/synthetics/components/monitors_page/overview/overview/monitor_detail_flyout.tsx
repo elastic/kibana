@@ -390,26 +390,37 @@ export function MonitorDetailFlyout(props: Props) {
     isRemote || Boolean(currentMonitorObject) || Boolean(monitor && error && !isLoading);
 
   const upsertSuccess = upsertStatus?.status === 'success';
+  const isMonitorMissing =
+    error?.body?.statusCode === 404 &&
+    (error.getPayload as { monitorId?: string } | undefined)?.monitorId === configId;
 
-  // Skip fetching the local saved object for remote monitors — they have no
-  // local SO and the request would 404.
-  useEffect(() => {
-    if (isRemote) return;
-    // `useKibanaSpace` resolves asynchronously, so `space` is undefined on
-    // the first render. `getMonitorSpaceToAppend` short-circuits to `{}` in
-    // that case, which means an early dispatch would fetch the SO from the
-    // active space and 404 for cross-space monitors. The follow-up dispatch
-    // (after `space` resolves) is silently dropped by the `takeLeading`
-    // saga while the first request is still in flight, leaving the 404 in
-    // Redux state forever. Wait for the active space before dispatching.
-    if (!space) return;
+  const fetchSavedObject = useCallback(() => {
+    if (isRemote || !space) return;
     dispatch(
       getMonitorAction.get({
         monitorId: configId,
         ...(crossSpaceId ? { spaceId: crossSpaceId } : {}),
       })
     );
-  }, [configId, crossSpaceId, dispatch, isRemote, space, upsertSuccess]);
+  }, [configId, crossSpaceId, dispatch, isRemote, space]);
+
+  // Skip fetching the local saved object for remote monitors — they have no
+  // local SO and the request would 404.
+  useEffect(() => {
+    // `useKibanaSpace` resolves asynchronously, so `space` is undefined on
+    // the first render. `getMonitorSpaceToAppend` short-circuits to `{}` in
+    // that case, which means an early dispatch would fetch the SO from the
+    // active space and 404 for cross-space monitors. Wait for the active
+    // space before dispatching.
+    fetchSavedObject();
+  }, [fetchSavedObject, upsertSuccess]);
+
+  // After an in-flight request for another monitor settles, retry if this
+  // flyout still has no matching saved object (`useSelectedMonitor` does the same).
+  useEffect(() => {
+    if (isLoading || currentMonitorObject || isMonitorMissing) return;
+    fetchSavedObject();
+  }, [currentMonitorObject, fetchSavedObject, isLoading, isMonitorMissing]);
 
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
 

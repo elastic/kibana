@@ -730,6 +730,57 @@ describe('duration chart attributes', () => {
     expect(exploratoryViewEmbeddableMock).not.toHaveBeenCalled();
   });
 
+  it('retries the saved-object fetch when a leftover monitor remains after switching in push mode', () => {
+    localStorage.setItem('synthetics.flyout.mode', 'push');
+    exploratoryViewEmbeddableMock.mockClear();
+    const mockDispatch = jest.fn();
+    const dispatchSpy = jest.spyOn(reduxHooks, 'useDispatch').mockReturnValue(mockDispatch);
+
+    try {
+      const { getByText, queryByRole } = render<{
+        exploratoryView: { ExploratoryViewEmbeddable: typeof exploratoryViewEmbeddableMock };
+      }>(
+        <MonitorDetailFlyout
+          configId="monitor-b"
+          id="monitor-b"
+          location="US East"
+          locationId="us-east"
+          onClose={jest.fn()}
+          onEnabledChange={jest.fn()}
+          onLocationChange={jest.fn()}
+        />,
+        {
+          core: {
+            exploratoryView: { ExploratoryViewEmbeddable: exploratoryViewEmbeddableMock },
+          },
+          state: {
+            monitorDetails: {
+              syntheticsMonitor: {
+                config_id: 'monitor-a',
+                created_at: moment().subtract(2, 'hours').toISOString(),
+              },
+              syntheticsMonitorLoading: false,
+            },
+          },
+        }
+      );
+
+      const getMonitorCalls = mockDispatch.mock.calls.filter(
+        ([action]) => action?.type === getMonitorAction.get.type
+      );
+      expect(getMonitorCalls.some(([action]) => action.payload?.monitorId === 'monitor-b')).toBe(
+        true
+      );
+
+      fireEvent.click(getByText('Performance'));
+      expect(queryByRole('progressbar')).toBeInTheDocument();
+      expect(exploratoryViewEmbeddableMock).not.toHaveBeenCalled();
+    } finally {
+      dispatchSpy.mockRestore();
+      localStorage.removeItem('synthetics.flyout.mode');
+    }
+  });
+
   it('renders the default window when the saved object 404s but overview metadata is available', () => {
     exploratoryViewEmbeddableMock.mockClear();
 
