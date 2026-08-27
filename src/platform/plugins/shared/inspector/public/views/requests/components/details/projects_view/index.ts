@@ -7,9 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { DetailViewProps } from './types';
-export { RequestDetailsRequest } from './req_details_request';
-export { RequestDetailsResponse } from './req_details_response';
-export { RequestDetailsStats } from './req_details_stats';
-export { ClustersView } from './clusters_view';
 export { ProjectsView } from './projects_view';

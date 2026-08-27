@@ -18,6 +18,7 @@ import type { Request } from '../../../../common/adapters/request/types';
 
 import {
   ClustersView,
+  ProjectsView,
   RequestDetailsRequest,
   RequestDetailsResponse,
   RequestDetailsStats,
@@ -48,7 +49,7 @@ const DETAILS: DetailViewData[] = [
     label: i18n.translate('inspector.requests.projectsTabLabel', {
       defaultMessage: 'Projects',
     }),
-    component: ClustersView,
+    component: ProjectsView,
   },
   {
     name: 'Request',
