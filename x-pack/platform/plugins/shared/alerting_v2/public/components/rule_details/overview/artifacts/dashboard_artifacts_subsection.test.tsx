@@ -24,6 +24,11 @@ const mockResolveArtifactId = jest.fn(
   (type: string, existingId?: string) => existingId?.trim() || `generated-${type}`
 );
 
+jest.mock('@kbn/alerting-v2-utils', () => ({
+  ...jest.requireActual('@kbn/alerting-v2-utils'),
+  resolveArtifactId: (type: string, existingId?: string) => mockResolveArtifactId(type, existingId),
+}));
+
 jest.mock('@kbn/alerting-v2-rule-form', () => ({
   getDashboardId: (artifact: { data: Record<string, unknown> }) =>
     typeof artifact.data.dashboardId === 'string' ? artifact.data.dashboardId : undefined,
@@ -33,7 +38,6 @@ jest.mock('@kbn/alerting-v2-rule-form', () => ({
     mockMapArtifacts(
       artifacts as Array<{ id: string; type: string; data: Record<string, unknown> }> | undefined
     ),
-  resolveArtifactId: (type: string, existingId?: string) => mockResolveArtifactId(type, existingId),
   partitionArtifactsByDashboardType: (
     artifacts: Array<{ id: string; type: string; data: Record<string, unknown> }>
   ) => ({
