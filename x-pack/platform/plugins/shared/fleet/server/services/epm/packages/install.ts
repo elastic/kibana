@@ -93,6 +93,7 @@ import { _stateMachineInstallPackage } from './install_state_machine/_state_mach
 import { formatVerificationResultForSO } from './package_verification';
 import { getInstallation, getInstallationObject } from './get';
 import { getPackageSavedObjects } from './get';
+import { validatePackageUpload } from './validate_package_upload';
 import { removeOldAssets } from './cleanup';
 import { getBundledPackageByPkgKey } from './bundled_packages';
 import { convertStringToTitle, generateDescription } from './custom_integrations/utils';
@@ -935,9 +936,26 @@ async function installPackageByUpload({
     const installedPkg = await getInstallationObject({
       savedObjectsClient,
       pkgName,
+      failOnUnexpectedError: !isBundledPackage,
     });
 
     installType = getInstallType({ pkgVersion, installedPkg });
+
+    const { paths, archiveIterator } = await unpackBufferToAssetsMap({
+      archiveBuffer,
+      contentType,
+      useStreaming,
+    });
+
+    if (!isBundledPackage) {
+      await validatePackageUpload({
+        packageInfo,
+        paths,
+        installedPkg,
+        savedObjectsClient,
+        esClient,
+      });
+    }
 
     // as we do not verify uploaded packages, we must invalidate the verification cache
     deleteVerificationResult(packageInfo);
@@ -946,12 +964,6 @@ async function installPackageByUpload({
       name: pkgName,
       version: pkgVersion,
       packageInfo,
-    });
-
-    const { paths, archiveIterator } = await unpackBufferToAssetsMap({
-      archiveBuffer,
-      contentType,
-      useStreaming,
     });
 
     const packageInstallContext: PackageInstallContext = {

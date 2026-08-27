@@ -361,6 +361,8 @@ export const config: PluginConfigDescriptor = {
           })
         ),
         retrySetupOnBoot: schema.boolean({ defaultValue: true }),
+        // Test/development escape hatch for uploading a package whose name exists in EPR or bundled packages.
+        allowRegistryPackageUploads: schema.boolean({ defaultValue: false }),
         // Injected by project-controller/kibana-controller when PrivateLink is enabled for this project.
         privateFleetServerHost: schema.maybe(schema.uri({ scheme: ['https'] })),
         privateElasticsearchHost: schema.maybe(schema.uri({ scheme: ['https'] })),
