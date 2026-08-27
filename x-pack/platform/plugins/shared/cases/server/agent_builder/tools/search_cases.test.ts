@@ -9,7 +9,7 @@ import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mo
 import { CaseSeverity, CaseStatuses } from '../../../common/types/domain';
 import { createCasesClientMock, type CasesClientMock } from '../../client/mocks';
 import { searchCasesTool } from './search_cases';
-import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
+import type { ToolAvailabilityContext, ToolHandlerContext } from '@kbn/agent-builder-server/tools';
 import { makeCoreWithSolution } from '../utils/mock_core_with_solution';
 
 // ---------------------------------------------------------------------------
@@ -346,7 +346,7 @@ describe('searchCasesTool availability', () => {
     const getCasesClientFn = jest.fn();
     const tool = searchCasesTool(coreSetup, getCasesClientFn, loggingSystemMock.createLogger());
     const request = httpServerMock.createKibanaRequest();
-    const result = await tool.availability!.handler({ request } as any);
+    const result = await tool.availability!.handler({ request } as ToolAvailabilityContext);
     expect(result).toEqual({ status: 'unavailable', reason: expect.any(String) });
   });
 
@@ -355,7 +355,7 @@ describe('searchCasesTool availability', () => {
     const getCasesClientFn = jest.fn();
     const tool = searchCasesTool(coreSetup, getCasesClientFn, loggingSystemMock.createLogger());
     const request = httpServerMock.createKibanaRequest();
-    const result = await tool.availability!.handler({ request } as any);
+    const result = await tool.availability!.handler({ request } as ToolAvailabilityContext);
     expect(result).toEqual({ status: 'available' });
   });
 

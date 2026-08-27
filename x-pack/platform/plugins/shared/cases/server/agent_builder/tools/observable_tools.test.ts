@@ -6,6 +6,7 @@
  */
 
 import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import type { ToolAvailabilityContext } from '@kbn/agent-builder-server/tools';
 import { observablesTool } from './observable_tools';
 import { makeCoreWithSolution } from '../utils/mock_core_with_solution';
 
@@ -14,7 +15,7 @@ describe('observablesTool availability', () => {
     const coreSetup = makeCoreWithSolution('es');
     const tool = observablesTool(coreSetup, jest.fn(), loggingSystemMock.createLogger());
     const request = httpServerMock.createKibanaRequest();
-    const result = await tool.availability!.handler({ request } as any);
+    const result = await tool.availability!.handler({ request } as ToolAvailabilityContext);
     expect(result).toEqual({ status: 'unavailable', reason: expect.any(String) });
   });
 
@@ -22,7 +23,7 @@ describe('observablesTool availability', () => {
     const coreSetup = makeCoreWithSolution('security');
     const tool = observablesTool(coreSetup, jest.fn(), loggingSystemMock.createLogger());
     const request = httpServerMock.createKibanaRequest();
-    const result = await tool.availability!.handler({ request } as any);
+    const result = await tool.availability!.handler({ request } as ToolAvailabilityContext);
     expect(result).toEqual({ status: 'available' });
   });
 

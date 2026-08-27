@@ -200,7 +200,7 @@ Returns metadata only; for comments/alert/event attachments call \`platform.core
         page,
         perPage,
       },
-      { request, spaceId, logger, attachments }
+      { request, spaceId, attachments }
     ) => {
       try {
         const [coreStart] = await coreSetup.getStartServices();

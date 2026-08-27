@@ -5,10 +5,14 @@
  * 2.0.
  */
 
+import type { CoreSetup } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
+import type { CasesServerStartDependencies } from '../../types';
 
 /** Creates a CoreSetup mock whose spaces service reports the given solution. */
-export const makeCoreWithSolution = (solution: string | undefined) => {
+export const makeCoreWithSolution = (
+  solution: string | undefined
+): CoreSetup<CasesServerStartDependencies> => {
   const coreSetup = coreMock.createSetup();
   const pluginsStart = {
     spaces: {
