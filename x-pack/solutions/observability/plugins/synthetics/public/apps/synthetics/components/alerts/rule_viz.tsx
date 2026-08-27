@@ -110,7 +110,7 @@ export const RuleViz = ({ dispatchedAction }: { dispatchedAction: PayloadAction<
           children: i18n.translate('xpack.synthetics.rules.details', {
             defaultMessage: 'Details',
           }),
-          'data-test-sub': 'syntheticsRuleVizInspectButton',
+          'data-test-subj': 'syntheticsRuleVizInspectButton',
           disabled: !isInspectorEnabled,
           iconType: 'inspect',
           onClick: inspect,
