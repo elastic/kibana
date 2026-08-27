@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { PROTECTED_POLICY_SETTING_PATHS } from '../../../../../common/endpoint/service/policy/protected_policy_settings';
 
 interface AdvancedPolicySchemaType {
   key: string;
@@ -13,6 +14,8 @@ interface AdvancedPolicySchemaType {
   last_supported_version?: string;
   documentation: string;
   license?: string;
+  /** When true, the field is hidden from users without superuser/admin privileges. */
+  requiresAdminPrivileges?: boolean;
 }
 
 export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
@@ -2808,3 +2811,13 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
 ];
+
+// Mark protected artifact settings so the UI can hide them for non-superuser callers.
+// Derived from PROTECTED_POLICY_SETTING_PATHS rather than hand-flagged so the lists
+// stay in sync automatically.
+const protectedPaths = new Set(PROTECTED_POLICY_SETTING_PATHS);
+for (const entry of AdvancedPolicySchema) {
+  if (protectedPaths.has(entry.key)) {
+    entry.requiresAdminPrivileges = true;
+  }
+}
