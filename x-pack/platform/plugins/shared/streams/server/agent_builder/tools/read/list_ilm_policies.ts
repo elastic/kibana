@@ -77,7 +77,6 @@ export const createListIlmPoliciesTool = ({
     Returns policy names, full phase definitions (with min_age, rollover, delete settings),
     managed/deprecated status, and which streams and indices currently use each policy.
     Internal system policies (managed + dot-prefixed) are filtered out.
-    On serverless deployments, returns ilm_available: false.
 
     **Efficiency:** ILM policies are cluster-global. Call once per conversation, not per stream.
     Results remain valid until the user creates or modifies policies (outside this skill's scope).
@@ -93,7 +92,7 @@ export const createListIlmPoliciesTool = ({
   schema: listIlmPoliciesSchema,
   availability: {
     cacheMode: 'global',
-    handler: async () => {
+    handler: async (_context) => {
       if (isServerless) {
         return {
           status: 'unavailable',
