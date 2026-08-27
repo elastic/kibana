@@ -144,4 +144,33 @@ describe('GridItemsByGroup origin grouping', () => {
     expect(idsIn('Heartbeat monitors')).toEqual(['rm-hb-name']);
     expect(idsIn(LOCAL_GROUP_ID)).toEqual(['ui1']);
   });
+
+  it('does not create a remote cluster bucket from heartbeat-only remote metadata', () => {
+    const heartbeatWithUniqueRemote = {
+      ...heartbeatMonitor,
+      configId: 'hb-orphan-remote',
+      remote: { remoteName: 'orphan-cluster' },
+    } as unknown as OverviewStatusMetaData;
+    setupSelectors('remoteName', [heartbeatWithUniqueRemote, remoteMonitor, localMonitor]);
+    renderGrid();
+
+    expect(document.querySelector('[data-test-subj="group-orphan-cluster"]')).toBeNull();
+    expect(idsIn('edge-a')).toEqual(['rm1']);
+    expect(idsIn(HEARTBEAT_GROUP_ID)).toEqual(['hb-orphan-remote']);
+    expect(idsIn(LOCAL_GROUP_ID)).toEqual(['ui1']);
+  });
+
+  it('keeps heartbeat monitors out of a shared remote cluster bucket', () => {
+    const heartbeatOnEdgeA = {
+      ...heartbeatMonitor,
+      configId: 'hb-on-edge',
+      remote: { remoteName: 'edge-a' },
+    } as unknown as OverviewStatusMetaData;
+    setupSelectors('remoteName', [heartbeatOnEdgeA, remoteMonitor, localMonitor]);
+    renderGrid();
+
+    expect(idsIn('edge-a')).toEqual(['rm1']);
+    expect(idsIn(HEARTBEAT_GROUP_ID)).toEqual(['hb-on-edge']);
+    expect(idsIn(LOCAL_GROUP_ID)).toEqual(['ui1']);
+  });
 });

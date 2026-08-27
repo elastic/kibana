@@ -154,8 +154,9 @@ export const GridItemsByGroup = ({
     case 'remoteName': {
       const remoteNames = [
         ...new Set(
-          allConfigs
-            ?.map((monitor) => monitor.remote?.remoteName)
+          (allConfigs ?? [])
+            .filter((monitor) => monitor.origin !== 'heartbeat')
+            .map((monitor) => monitor.remote?.remoteName)
             .filter((name): name is string => Boolean(name))
         ),
       ];
