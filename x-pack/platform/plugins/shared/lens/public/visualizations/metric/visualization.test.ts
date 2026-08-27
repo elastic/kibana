@@ -1848,7 +1848,7 @@ describe('metric visualization', () => {
       });
     };
 
-    it('clears legacy secondaryLabel when the secondary column has a custom name', () => {
+    it('keeps leftover secondaryLabel even when the secondary column already has a custom name', () => {
       const frame = createFrame(() => ({
         ...createOperationByType('number'),
         customLabel: true,
@@ -1857,7 +1857,7 @@ describe('metric visualization', () => {
         { ...fullState, secondaryLabel: 'legacy-custom' },
         frame
       );
-      expect(result).not.toHaveProperty('secondaryLabel');
+      expect(result.secondaryLabel).toBe('legacy-custom');
     });
 
     it('keeps legacy secondaryLabel when the secondary column name is not custom', () => {
