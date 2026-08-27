@@ -60,10 +60,15 @@ export interface ConversationClient {
   /**
    * Applies `updates` atomically via a Painless merge script.
    * Updates must already be serialized; callers are responsible for validation.
+   *
+   * Pass `context` when the caller already holds `templateId` and/or `parentId` (e.g.
+   * from the run-start conversation snapshot). Provided values are used directly instead
+   * of being extracted from the fetched document.
    */
   unsafeMergeMetadata(
     conversationId: string,
-    updates: Record<string, SerializedMetadataValue>
+    updates: Record<string, SerializedMetadataValue>,
+    context?: { templateId?: string; parentId?: string }
   ): Promise<void>;
 }
 

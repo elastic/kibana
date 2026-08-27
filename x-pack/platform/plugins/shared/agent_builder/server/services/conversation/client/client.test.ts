@@ -1842,12 +1842,22 @@ describe('ConversationClient', () => {
 
   describe('unsafeMergeMetadata', () => {
     const mockEsUpdate = jest.fn();
+    const mockEsGet = jest.fn();
+
+    // Build a `esClient.get` response from a Document fixture.
+    const toGetResponse = (doc: Document) => ({
+      found: true,
+      _id: doc._id,
+      _seq_no: doc._seq_no,
+      _primary_term: doc._primary_term,
+      _source: doc._source,
+    });
 
     const createClientForMerge = ({ onMetadataPatched }: { onMetadataPatched?: jest.Mock } = {}) =>
       createClient({
         space: testSpace,
         logger: loggerMock.create(),
-        esClient: { update: mockEsUpdate } as never,
+        esClient: { update: mockEsUpdate, get: mockEsGet } as never,
         agentRegistry: agentRegistry as unknown as AgentRegistry,
         user: { id: 'user-1', username: 'test-user', isAdmin: false },
         onMetadataPatched,
@@ -1859,9 +1869,9 @@ describe('ConversationClient', () => {
     });
 
     it('calls esClient.update with the Painless merge script', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: { hits: [createConversationDocumentWithTemplate({ templateId: 'tmpl-a' })] },
-      });
+      mockEsGet.mockResolvedValue(
+        toGetResponse(createConversationDocumentWithTemplate({ templateId: 'tmpl-a' }))
+      );
 
       await createClientForMerge().unsafeMergeMetadata('conversation-1', { status: 'open' });
 
@@ -1877,18 +1887,30 @@ describe('ConversationClient', () => {
       );
     });
 
+    it('uses esClient.get (real-time) rather than search for the prior-state read', async () => {
+      mockEsGet.mockResolvedValue(
+        toGetResponse(createConversationDocumentWithTemplate({ templateId: 'tmpl-a' }))
+      );
+
+      await createClientForMerge().unsafeMergeMetadata('conversation-1', { status: 'open' });
+
+      expect(mockEsGet).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'conversation-1' })
+      );
+      // search is not called — the real-time get is the only read
+      expect(mockEsClient.search).not.toHaveBeenCalled();
+    });
+
     it('fires onMetadataPatched with only the changed fields', async () => {
       const onMetadataPatched = jest.fn();
-      mockEsClient.search.mockResolvedValue({
-        hits: {
-          hits: [
-            createConversationDocumentWithTemplate({
-              templateId: 'tmpl-a',
-              metadata: { status: 'open', severity: 'low' },
-            }),
-          ],
-        },
-      });
+      mockEsGet.mockResolvedValue(
+        toGetResponse(
+          createConversationDocumentWithTemplate({
+            templateId: 'tmpl-a',
+            metadata: { status: 'open', severity: 'low' },
+          })
+        )
+      );
 
       await createClientForMerge({ onMetadataPatched }).unsafeMergeMetadata('conversation-1', {
         status: 'closed', // changed
@@ -1905,16 +1927,14 @@ describe('ConversationClient', () => {
 
     it('does not fire onMetadataPatched when no fields changed (no-op suppression)', async () => {
       const onMetadataPatched = jest.fn();
-      mockEsClient.search.mockResolvedValue({
-        hits: {
-          hits: [
-            createConversationDocumentWithTemplate({
-              templateId: 'tmpl-a',
-              metadata: { status: 'open' },
-            }),
-          ],
-        },
-      });
+      mockEsGet.mockResolvedValue(
+        toGetResponse(
+          createConversationDocumentWithTemplate({
+            templateId: 'tmpl-a',
+            metadata: { status: 'open' },
+          })
+        )
+      );
 
       await createClientForMerge({ onMetadataPatched }).unsafeMergeMetadata('conversation-1', {
         status: 'open',
@@ -1930,7 +1950,7 @@ describe('ConversationClient', () => {
         id: 'parent-conv-1',
         relation: 'subagent',
       };
-      mockEsClient.search.mockResolvedValue({ hits: { hits: [docWithParent] } });
+      mockEsGet.mockResolvedValue(toGetResponse(docWithParent));
 
       await createClientForMerge({ onMetadataPatched }).unsafeMergeMetadata('conversation-1', {
         status: 'closed',
@@ -1941,9 +1961,34 @@ describe('ConversationClient', () => {
       );
     });
 
-    it('rethrows when the access check fails (e.g. conversation not found / access denied)', async () => {
+    it('uses caller-provided context values instead of extracting from _source', async () => {
       const onMetadataPatched = jest.fn();
-      mockEsClient.search.mockRejectedValue(new Error('ES unavailable'));
+      mockEsGet.mockResolvedValue(
+        toGetResponse(
+          createConversationDocumentWithTemplate({
+            // _source has a different templateId — caller-provided value wins
+            templateId: 'tmpl-from-source',
+          })
+        )
+      );
+
+      await createClientForMerge({ onMetadataPatched }).unsafeMergeMetadata(
+        'conversation-1',
+        { status: 'closed' },
+        { templateId: 'tmpl-from-caller', parentId: 'parent-from-caller' }
+      );
+
+      expect(onMetadataPatched).toHaveBeenCalledWith(
+        expect.objectContaining({
+          templateId: 'tmpl-from-caller',
+          parentId: 'parent-from-caller',
+        })
+      );
+    });
+
+    it('rethrows when the get fails (e.g. ES unavailable)', async () => {
+      const onMetadataPatched = jest.fn();
+      mockEsGet.mockRejectedValue(new Error('ES unavailable'));
 
       await expect(
         createClientForMerge({ onMetadataPatched }).unsafeMergeMetadata('conversation-1', {
@@ -1955,13 +2000,21 @@ describe('ConversationClient', () => {
       expect(onMetadataPatched).not.toHaveBeenCalled();
     });
 
+    it('throws not-found when the document does not exist', async () => {
+      mockEsGet.mockResolvedValue({ found: false });
+
+      await expect(
+        createClientForMerge().unsafeMergeMetadata('conversation-1', { status: 'closed' })
+      ).rejects.toThrow();
+
+      expect(mockEsUpdate).not.toHaveBeenCalled();
+    });
+
     it('does not fire onMetadataPatched when the update throws', async () => {
       const onMetadataPatched = jest.fn();
-      mockEsClient.search.mockResolvedValue({
-        hits: {
-          hits: [createConversationDocumentWithTemplate({ templateId: 'tmpl-a' })],
-        },
-      });
+      mockEsGet.mockResolvedValue(
+        toGetResponse(createConversationDocumentWithTemplate({ templateId: 'tmpl-a' }))
+      );
       mockEsUpdate.mockRejectedValue(new Error('write failed'));
 
       await expect(

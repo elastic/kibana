@@ -247,7 +247,10 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const updateConversationMetadata =
     conversationId && conversation?.template_id
       ? (updates: Record<string, SerializedMetadataValue>) =>
-          conversationClient.unsafeMergeMetadata(conversationId, updates)
+          conversationClient.unsafeMergeMetadata(conversationId, updates, {
+            templateId: conversation.template_id,
+            parentId: conversation.parent_conversation?.id,
+          })
       : undefined;
 
   const conversationTemplate = conversation?.template_id
