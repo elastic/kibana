@@ -117,6 +117,7 @@ export const defaultConfig: ScoutServerConfig = {
     sourceArgs: ['--no-base-path', '--env.name=development'],
     serverArgs: [
       `--server.restrictInternalApis=true`,
+      `--server.host=${process.env.KIBANA_TEST_IPV6_ONLY === 'true' ? '::1' : 'localhost'}`,
       `--server.port=${servers.kibana.port}`,
       '--status.allowAnonymous=true',
       `--migrations.zdt.runOnRoles=${JSON.stringify(['ui'])}`,
