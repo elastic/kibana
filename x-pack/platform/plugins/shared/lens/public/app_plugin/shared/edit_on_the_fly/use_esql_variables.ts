@@ -8,7 +8,7 @@
 import { useMemo, useCallback } from 'react';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
-import type { TextBasedPersistedState, TypedLensSerializedState } from '@kbn/lens-common';
+import type { TypedLensSerializedState } from '@kbn/lens-common';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import { apiIsPresentationContainer } from '@kbn/presentation-publishing';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
@@ -65,9 +65,7 @@ export const useESQLVariables = ({
       if (panel && updatedQuery && attributes) {
         // ES|QL lives exclusively on the text-based layers; update only the
         // layer being edited — sibling layers keep their own queries
-        const textBasedState = attributes.state.datasourceStates.textBased as
-          | TextBasedPersistedState
-          | undefined;
+        const textBasedState = attributes.state.datasourceStates.textBased;
         const editedLayer = layerId ? textBasedState?.layers?.[layerId] : undefined;
         const updatedTextBasedState =
           textBasedState && layerId && editedLayer
