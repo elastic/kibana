@@ -84,8 +84,8 @@ apiTest.describe('security.createRule workflow step', { tag: [...tags.stateful.c
   apiTest.afterAll(async ({ apiClient }) => {
     // Delete workflows
     await Promise.all([
-      deleteWorkflow(apiClient, editorHeaders, validWorkflowId).catch(() => undefined),
-      deleteWorkflow(apiClient, editorHeaders, invalidWorkflowId).catch(() => undefined),
+      deleteWorkflow(apiClient, editorHeaders, validWorkflowId),
+      deleteWorkflow(apiClient, editorHeaders, invalidWorkflowId),
     ]);
 
     // Delete created rules
