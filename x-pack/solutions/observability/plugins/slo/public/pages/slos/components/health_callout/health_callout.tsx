@@ -48,9 +48,6 @@ export function HealthCallout({ sloList = [] }: { sloList: SLOWithSummaryRespons
     <KbnDangerCallout
       data-test-subj="sloHealthCallout"
       size="s"
-      onClick={(e) => {
-        setIsOpen(!isOpen);
-      }}
       onDismiss={dismiss}
       dismissButtonProps={{
         'data-test-subj': 'sloHealthCalloutDimissButton',
@@ -68,13 +65,27 @@ export function HealthCallout({ sloList = [] }: { sloList: SLOWithSummaryRespons
         <span data-test-subj="sloHealthCalloutDescription">
           <FormattedMessage
             id="xpack.slo.sloList.healthCallout.operationalProblemsDescription"
-            defaultMessage="The following {count, plural, one {SLO} other {SLOs}} might have some operational problems. You can inspect {count, plural, one {it} other {each one}} here:"
+            defaultMessage="The following {count, plural, one {SLO} other {SLOs}} might have some operational problems."
             values={{
               count: deduplicatedList.length,
             }}
           />
         </span>
       }
+      actionProps={{
+        primary: {
+          children: isOpen
+            ? i18n.translate('xpack.slo.sloList.healthCallout.collapseLabel', {
+                defaultMessage: 'Hide details',
+              })
+            : i18n.translate('xpack.slo.sloList.healthCallout.expandLabel', {
+                defaultMessage: 'Show details',
+              }),
+          iconType: isOpen ? 'chevronSingleUp' : 'chevronSingleDown',
+          iconSide: 'right',
+          onClick: () => setIsOpen(!isOpen),
+        },
+      }}
     >
       {isOpen && (
         <ul>
