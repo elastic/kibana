@@ -7,6 +7,7 @@
 
 import Path from 'path';
 import AdmZip from 'adm-zip';
+import Fs from 'fs/promises';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
   LATEST_MANIFEST_FORMAT_VERSION,
@@ -36,6 +37,8 @@ export const createArtifact = async ({
   log.info(
     `Starting to create artifact from build folder [${buildFolder}] into target [${targetFolder}]`
   );
+
+  await Fs.mkdir(targetFolder, { recursive: true });
 
   const zip = new AdmZip();
 
