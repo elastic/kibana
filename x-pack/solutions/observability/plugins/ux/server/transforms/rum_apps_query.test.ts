@@ -267,11 +267,12 @@ describe('queryRumApps', () => {
       mergeRaw: true,
       watermark: '2026-08-15T23:55:00.000Z',
     });
-    expect(search).toHaveBeenCalledTimes(1);
+    expect(search).toHaveBeenCalledTimes(2);
     expect(search.mock.calls[0][0].index).toBe(RUM_SESSIONS_INDEX);
     expect(search.mock.calls[0][0].aggs.current.aggs.apps.aggs.lcp).toEqual({
       percentiles: { field: 'lcp_p75', percents: [75] },
     });
+    expect(search.mock.calls[1][0].index).toBe(RUM_SESSION_SOURCE_INDEX);
     expect(result.source).toBe('sessions');
     expect(result.remainder).toBe(true);
   });
