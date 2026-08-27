@@ -158,7 +158,8 @@ test.describe(
         // but has no cases access.
         await browserAuth.loginWithCustomRole(ALERTS_WITH_LOGS_RULES_ROLE);
         await gotoLogsAlertDetails(pageObjects, page);
-        await page.locator('[data-test-subj="alert-details-header-actions-menu-button"]').click();
+        await page.testSubj.click('alert-details-header-actions-menu-button');
+        await expect(page.testSubj.locator('snooze-rule-button')).toBeVisible();
         // Wait for the dropdown to open before checking the button is absent.
         await expect(page.locator('[data-test-subj="untrack-alert-button"]')).toBeVisible();
         await expect(page.locator(ADD_TO_CASE_SELECTOR)).toHaveCount(0);
