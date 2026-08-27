@@ -567,14 +567,7 @@ describe('ConversationClient', () => {
       ).rejects.toBe(error);
     });
 
-    // NOTE: the "caller-supplied events win" behavior is asserted at the pure-function
-    // layer in `converters.test.ts` (createRequestToEs), and `schema_version` stamping
-    // on create is covered by the "promotes new conversations to events-native on create"
-    // test below. No need to re-assert the same contract through the client wrapper.
-
     it('serializes caller-supplied TOGGLE and NUMBER metadata to strings before indexing', async () => {
-      // Regression for: caller passes boolean/number, raw value lands in ES, and
-      // deserializeMetadataValue('true' === <boolean>) → wrong type on read-back.
       const template: ConversationTemplate = {
         id: 'tmpl-serialize',
         version: 1,
@@ -613,10 +606,6 @@ describe('ConversationClient', () => {
 
       await client.list();
 
-      // Extract the filter array so we can find the placeholder-hide clause. The
-      // deeply nested structure would be brittle to assert positionally; look for
-      // the tell-tale `exists: { field: 'schema_version' }` clause underneath a
-      // must_not/bool/must chain.
       const [call] = mockEsClient.search.mock.calls;
       const filterList: unknown[] = (call[0] as { query: { bool: { filter: unknown[] } } }).query
         .bool.filter;
