@@ -39,6 +39,27 @@ export interface RuleDataClientConstructorOptions {
 
 export type WaitResult = Either<Error, ElasticsearchClient>;
 
+const VERSION_CONFLICT_STATUS = 409;
+
+/**
+ * Returns true when a bulk response reports errors but every failing item is a benign
+ * `op_type: create` version conflict (HTTP 409). Alert documents are written with a deterministic
+ * `_id`, so concurrent or retried rule executions can legitimately attempt to create the same
+ * document twice; the resulting 409 is expected and should not be logged as an error.
+ */
+const bulkResponseHasOnlyVersionConflictErrors = (response: estypes.BulkResponse): boolean => {
+  const failedItems = response.items.filter((item) => {
+    const operation = item.create ?? item.index ?? item.update ?? item.delete;
+    return operation?.error != null;
+  });
+
+  if (failedItems.length === 0) {
+    return false;
+  }
+
+  return failedItems.every((item) => item.create?.status === VERSION_CONFLICT_STATUS);
+};
+
 export class RuleDataClient implements IRuleDataClient {
   private _isWriteEnabled: boolean = false;
   private _isWriterCacheEnabled: boolean = true;
@@ -237,15 +258,26 @@ export class RuleDataClient implements IRuleDataClient {
               return response;
             }
 
-            // TODO: #160572 - add support for version conflict errors, in case alert was updated
-            // some other way between the time it was fetched and the time it was updated.
             // Redact part of reason message that echoes back value
             const sanitizedResponse = sanitizeBulkErrorResponse(response) as TransportResult<
               estypes.BulkResponse,
               unknown
             >;
             const error = new errors.ResponseError(sanitizedResponse);
-            this.options.logger.error(error);
+
+            // A 409 version_conflict_engine_exception on an `op_type: create` write means the
+            // alert document (keyed by a deterministic alert UUID `_id`) already exists. This is
+            // an expected, benign race for concurrent or retried rule executions writing the same
+            // alert and does not indicate data loss (see #160572). Only log at ERROR when the
+            // response contains failures that are not benign create conflicts.
+            if (bulkResponseHasOnlyVersionConflictErrors(response.body)) {
+              this.options.logger.debug(
+                () =>
+                  `Ignoring benign version conflict errors while writing to index: ${error.message}`
+              );
+            } else {
+              this.options.logger.error(error);
+            }
             return sanitizedResponse;
           } else {
             this.options.logger.debug(`Writing is disabled, bulk() will not write any data.`);
