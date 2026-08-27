@@ -9,6 +9,9 @@ import { z } from '@kbn/zod/v4';
 import { platformCoreCasesTools, ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { CoreSetup } from '@kbn/core/server';
+import type { CasesServerStartDependencies } from '../../types';
+import { getCasesToolAvailability } from '../utils/get_cases_tool_availability';
 import { addCommentStepCommonDefinition } from '../../../common/workflows/steps/add_comment';
 import { addAlertsStepCommonDefinition } from '../../../common/workflows/steps/add_alerts';
 import { addEventsStepCommonDefinition } from '../../../common/workflows/steps/add_events';
@@ -94,6 +97,7 @@ const getAuthorableTypeIds = (registry: UnifiedAttachmentTypeRegistry): string[]
     .sort();
 
 export const manageAttachmentsTool = (
+  coreSetup: CoreSetup<CasesServerStartDependencies>,
   getCasesClientFn: GetCasesClientFn,
   unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry,
   isCasesAttachmentsEnabled: boolean
@@ -133,6 +137,10 @@ export const manageAttachmentsTool = (
     },
     schema,
     tags: ['cases'],
+    availability: {
+      cacheMode: 'space',
+      handler: async ({ request }) => getCasesToolAvailability({ core: coreSetup, request }),
+    },
     handler: async (args, toolContext) => {
       const { mode, case_id, attachments, ...rest } = args;
 

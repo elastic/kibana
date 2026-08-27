@@ -51,7 +51,7 @@ export function registerCasesAgentBuilderTools(
   agentBuilder.tools.register(manageCasesTool(coreSetup, getCasesClient, templatesEnabled));
   agentBuilder.tools.register(getAttachmentsTool(coreSetup, getCasesClient));
   agentBuilder.tools.register(
-    manageAttachmentsTool(getCasesClient, unifiedAttachmentTypeRegistry, attachmentsEnabled)
+    manageAttachmentsTool(coreSetup, getCasesClient, unifiedAttachmentTypeRegistry, attachmentsEnabled)
   );
   agentBuilder.tools.register(
     attachmentsTool(getCasesClient, unifiedAttachmentTypeRegistry, attachmentsEnabled)

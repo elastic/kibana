@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
 import { createCasesClientMock, type CasesClientMock } from '../../client/mocks';
 import type { UnifiedAttachmentTypeRegistry } from '../../attachment_framework/unified_attachment_registry';
@@ -46,8 +46,11 @@ describe('manageAttachmentsTool', () => {
     casesClient = createCasesClientMock();
   });
 
-  const buildTool = (registry: UnifiedAttachmentTypeRegistry, enabled: boolean) =>
-    manageAttachmentsTool(jest.fn().mockResolvedValue(casesClient), registry, enabled);
+  const buildTool = (registry: UnifiedAttachmentTypeRegistry, enabled: boolean) => {
+    const coreSetup = coreMock.createSetup();
+    coreSetup.getStartServices.mockResolvedValue([coreMock.createStart(), {}, {}]);
+    return manageAttachmentsTool(coreSetup, jest.fn().mockResolvedValue(casesClient), registry, enabled);
+  };
 
   it('has the correct tool id', () => {
     const tool = buildTool(buildRegistry([]), true);
@@ -142,5 +145,47 @@ describe('manageAttachmentsTool', () => {
     expect(attachments.add).toHaveBeenCalledTimes(1);
     const { results } = result as unknown as { results: Array<{ data: Record<string, unknown> }> };
     expect(results[0].data.attachment_ids).toEqual(['att-1']);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Tests: availability
+// ---------------------------------------------------------------------------
+
+describe('manageAttachmentsTool availability', () => {
+  const makeCore = (solution: string | undefined) => {
+    const coreSetup = coreMock.createSetup();
+    const pluginsStart = {
+      spaces: {
+        spacesService: {
+          getActiveSpace: jest.fn().mockResolvedValue({ solution }),
+        },
+      },
+    };
+    coreSetup.getStartServices.mockResolvedValue([coreMock.createStart(), pluginsStart, {}]);
+    return coreSetup;
+  };
+
+  it('returns unavailable for es solution', async () => {
+    const coreSetup = makeCore('es');
+    const tool = manageAttachmentsTool(coreSetup, jest.fn(), buildRegistry([]), true);
+    const request = httpServerMock.createKibanaRequest();
+    const result = await tool.availability!.handler({ request } as any);
+    expect(result).toEqual({ status: 'unavailable', reason: expect.any(String) });
+  });
+
+  it('returns available for security solution', async () => {
+    const coreSetup = makeCore('security');
+    const tool = manageAttachmentsTool(coreSetup, jest.fn(), buildRegistry([]), true);
+    const request = httpServerMock.createKibanaRequest();
+    const result = await tool.availability!.handler({ request } as any);
+    expect(result).toEqual({ status: 'available' });
+  });
+
+  it('cacheMode is space', () => {
+    const coreSetup = coreMock.createSetup();
+    coreSetup.getStartServices.mockResolvedValue([coreMock.createStart(), {}, {}]);
+    const tool = manageAttachmentsTool(coreSetup, jest.fn(), buildRegistry([]), true);
+    expect(tool.availability?.cacheMode).toBe('space');
   });
 });
