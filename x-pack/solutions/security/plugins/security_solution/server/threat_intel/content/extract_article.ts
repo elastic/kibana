@@ -6,13 +6,10 @@
  */
 
 import * as cheerio from 'cheerio';
-import {
-  capToParseBytes,
-  elementRenderState,
-  normalizeSelfClosedRawText,
-  PARSER_OPTIONS,
-  stripHtml,
-} from './text';
+import { elementRenderState } from './inline_style';
+import type { ParsedNode } from './parsed_node';
+import { sanitizeRawText } from './raw_text';
+import { capToParseBytes, PARSER_OPTIONS, stripHtml } from './text';
 
 /**
  * Strip known page chrome (nav/header/footer/sidebar) from raw vendor HTML,
@@ -108,15 +105,6 @@ const PAGE_CHROME_SELECTORS = [
  * Measuring in place removes the clone entirely: nothing is copied and nothing is
  * mutated, so scoring cannot disturb the tree that is ultimately serialized.
  */
-interface ParsedNode {
-  type: string;
-  data?: string;
-  name?: string;
-  attribs?: Record<string, string>;
-  parent?: ParsedNode | null;
-  children?: ParsedNode[];
-}
-
 /**
  * htmlparser2 rather than cheerio's default parse5, matching `text.ts`.
  *
@@ -275,7 +263,7 @@ const innerHtmlWithRenderState = (
 };
 
 const selectArticleHtml = (html: string): string => {
-  // Normalized before parsing, for the same reason `text.ts` does it: HTML has no
+  // Sanitized before parsing, for the same reason `text.ts` does it: HTML has no
   // self-closing syntax for raw-text elements, so a spec-compliant parser reads
   // `<article><script src="x.js"/><p>IOC: evil.test</p></article>` as a script whose body
   // is that paragraph. Chrome removal then deleted the script and the report with it,
@@ -285,7 +273,7 @@ const selectArticleHtml = (html: string): string => {
   // its `<script>` turned into a real raw-text element and chrome removal took the rest of the
   // sentence with it. The reason the pre-pass existed, keeping candidate scoring honest about
   // markup that disappears later, no longer applies, because scoring calls `stripHtml`.
-  const $ = cheerio.load(normalizeSelfClosedRawText(html), PARSER_OPTIONS);
+  const $ = cheerio.load(sanitizeRawText(html).html, PARSER_OPTIONS);
 
   // The one cast in this file, at the boundary where the transitive `@types/cheerio@0.22`
   // stops describing the DOM the installed cheerio actually returns.

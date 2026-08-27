@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Tokenizer } from 'parse5';
 import {
   buildReportContent,
   capToParseBytes,
@@ -33,6 +34,24 @@ describe('stripHtml', () => {
       const result = stripHtml(`<p>before</p><script>alert("xss")${closeTag}<p>after</p>`);
       expect(result).not.toContain('alert');
       expect(result).toBe('before after');
+    }
+  });
+
+  it('fails closed if tokenization fails inside a CDATA payload', () => {
+    const realWrite = Tokenizer.prototype.write;
+    let calls = 0;
+    const write = jest
+      .spyOn(Tokenizer.prototype, 'write')
+      .mockImplementation(function (this: Tokenizer, ...args: Parameters<Tokenizer['write']>) {
+        calls += 1;
+        if (calls === 2) throw new Error('injected tokenizer failure');
+        return realWrite.apply(this, args);
+      });
+
+    try {
+      expect(stripHtml('<![CDATA[<p>must-not-survive.test</p>]]>')).toBe('');
+    } finally {
+      write.mockRestore();
     }
   });
 
@@ -666,7 +685,7 @@ describe('markup that only a parser reads correctly', () => {
       expect(stripHtml('<p data-x=1 title="a > b">real</p>')).toBe('real');
     });
 
-    // The heading scanner had its own `[^>]*`, so this silently disabled IOC-section
+    // The previous heading regex had its own `[^>]*`, so this silently disabled IOC-section
     // handling: the heading text became `7">Indicators of Compromise`, classified as
     // prose, and every href below it was dropped instead of lifted.
     it('still classifies a heading carrying a quoted >', () => {
@@ -688,6 +707,12 @@ describe('markup that only a parser reads correctly', () => {
 
     it('removes an encoded script body rather than keeping its contents', () => {
       expect(stripHtml('&lt;script&gt;fetch("http://c2.evil.test")&lt;/script&gt;ok')).toBe('ok');
+    });
+
+    it('does not reparse a close-tag spelling delimited by NBSP', () => {
+      expect(stripHtml('&lt;script&gt;visible prose&lt;/script&nbsp;&gt;')).toBe(
+        '<script>visible prose</script >'
+      );
     });
 
     it('applies the same resolution in the structured form', () => {
@@ -937,9 +962,9 @@ describe('structured output boundaries for unknown elements', () => {
   });
 });
 
-// Runs on every page before the parser, so its own cost has to stay linear over many
+// Runs on every page before htmlparser2, so its own cost has to stay linear over many
 // unterminated openers, not just terminated ones.
-describe('self-closing normalization stays linear', () => {
+describe('raw-text sanitization stays linear', () => {
   it('handles many unterminated openers cheaply', () => {
     const input = '<script'.repeat(512000);
     const started = process.hrtime.bigint();
@@ -957,7 +982,7 @@ describe('self-closing normalization stays linear', () => {
     expect(stripHtml('<scriptfoo>not a script</scriptfoo>')).toBe('not a script');
   });
 
-  it('still normalizes a self-closed script and style', () => {
+  it('removes a self-closed script and style token', () => {
     expect(stripHtml('<article><script src="x.js"/><p>IOC: evil.test</p></article>')).toBe(
       'IOC: evil.test'
     );
@@ -966,10 +991,10 @@ describe('self-closing normalization stays linear', () => {
 });
 
 /**
- * A `<script/>`-looking token inside a raw-text body is not a tag — normalizing it would
+ * A `<script/>`-looking token inside a raw-text body is not a tag. Treating it as one would
  * end the element early and spill the rest of the script into `body_text` as a false IOC.
  */
-describe('self-closing normalization respects raw-text bodies', () => {
+describe('raw-text sanitization respects raw-text bodies', () => {
   it('does not let a script body escape via a self-closing string literal', () => {
     const result = stripHtml(
       '<script>const x="<script/>"; fetch("https://false-ioc.test")</script><p>safe</p>'
@@ -992,8 +1017,8 @@ describe('self-closing normalization respects raw-text bodies', () => {
     expect(stripHtml('<script>fetch("https://false-ioc.test")')).toBe('');
   });
 
-  // Skipping raw-text bodies must not stop the normalizer finding later candidates.
-  it('still normalizes a self-closed script that follows a real one', () => {
+  // Skipping raw-text bodies must not stop the tokenizer finding later candidates.
+  it('still removes a self-closed script that follows a real one', () => {
     expect(stripHtml('<script>var a=1;</script><script src="y.js"/><p>keep.test</p>')).toBe(
       'keep.test'
     );
@@ -1051,10 +1076,18 @@ describe('truncate never splits a surrogate pair', () => {
 
 /**
  * A raw-text close tag has to end at a tag boundary — a bare `</script` prefix match would
- * accept `</scriptfoo>` and resume the scan inside a body the parser still considers open.
+ * accept `</scriptfoo>` and resume in a body the parser still considers open.
  * Trailing junk after the name is still legal and does close the element.
  */
 describe('raw-text close tags must end at a tag boundary', () => {
+  it('does not accept NBSP as an HTML close-tag boundary', () => {
+    const result = stripHtml(
+      '<script>const x="</script\u00a0>"; fetch("https://false-ioc.test")</script><p>safe</p>'
+    );
+
+    expect(result).toBe('safe');
+  });
+
   it('does not accept a longer element name as the close tag', () => {
     const result = stripHtml(
       '<script>const x="</scriptfoo><script/>"; fetch("https://false-ioc.test")</script><p>safe</p>'
@@ -1094,9 +1127,8 @@ describe('raw-text close tags must end at a tag boundary', () => {
   });
 });
 
-// htmlparser2 ends an end tag at the first `>` and rejects a trailing slash, where the
-// spec and parse5 both read the junk and close the element — the normalizer rewrites a
-// junk-carrying raw-text end tag to its plain form first.
+// htmlparser2 ends an end tag at the first `>` and rejects a trailing slash, while parse5
+// consumes the complete standards-defined range before htmlparser2 sees the fragment.
 describe('raw-text end tags carrying junk', () => {
   // `</script foo="a>URL">` closed at the `>` inside the attribute value, spilling the
   // rest of the end tag into body_text with an attacker-chosen URL in it.
@@ -1146,9 +1178,9 @@ describe('encoded documents whose end tag carries junk', () => {
   });
 });
 
-// `String.prototype.toLowerCase` is not length-preserving (`İ` becomes two code units),
-// which would shift every scanner offset after it if not folded ASCII-only.
-describe('non-ASCII characters do not shift scanner offsets', () => {
+// Source offsets must stay in the original UTF-16 coordinate space even when a character's
+// lowercase representation has a different length (`İ` becomes two code units).
+describe('non-ASCII characters do not shift tokenizer source offsets', () => {
   it('keeps a script body contained when the page contains a dotted capital I', () => {
     const result = stripHtml(
       'İ<script>const x="<script/>"; fetch("https://false-ioc.test")</script><p>safe</p>'
@@ -1158,7 +1190,7 @@ describe('non-ASCII characters do not shift scanner offsets', () => {
     expect(result).toContain('safe');
   });
 
-  it.each([['İ'], ['ẛ'], ['ΐ']])('still normalizes a self-closed script after %s', (prefix) => {
+  it.each([['İ'], ['ẛ'], ['ΐ']])('still removes a self-closed script after %s', (prefix) => {
     expect(
       stripHtml(`${prefix}<article><script src="x.js"/><p>IOC: evil.test</p></article>`)
     ).toContain('IOC: evil.test');
@@ -1264,7 +1296,7 @@ describe('CDATA expansion is bounded and inherits walk state', () => {
 /**
  * A raw-text opener is only an opener where the document is actually in markup context.
  * Identifying one from the bytes after `<` alone would register `<script>` inside a
- * comment as a real opener with no matching close, running the scan to end of input.
+ * comment as a real opener with no matching close and discard everything through end of input.
  */
 describe('raw-text openers in non-markup context', () => {
   it.each([
@@ -1301,9 +1333,8 @@ describe('raw-text openers in non-markup context', () => {
     expect(result).not.toContain('false-ioc.test');
   });
 
-  // An unterminated tag means no `>` exists from that point on, so no later tag can be
-  // complete and the scan stops. Retrying from the next character rescanned the whole
-  // remaining input per position, which hung the suite outright at 512,000 openers.
+  // An unterminated tag means no `>` exists from that point on. The standards tokenizer
+  // must keep this linear rather than retrying a suffix search from every character.
   it('stays linear when a tag never terminates', () => {
     const started = process.hrtime.bigint();
     stripHtml(`<p title="${'a'.repeat(1000000)}`);
@@ -1380,13 +1411,13 @@ describe('non-rendered subtrees', () => {
   });
 });
 
-// A close tag that never terminates leaves the element open to end of input, so the
-// remainder is raw text and must not be scanned for a `<script/>`-looking string to rewrite.
+// A close tag that never terminates leaves the element open to end of input, so a
+// `<script/>`-looking string in the remainder must stay opaque raw text.
 describe('unterminated raw-text close tags stay opaque', () => {
   it.each([
     ['a script body', '<script>a=1</script foo="<script/>'],
     ['a style body', '<style>a{b:1}</style foo="<style/>'],
-  ])('does not resume scanning inside %s', (_label, html) => {
+  ])('does not reinterpret markup-looking text inside %s', (_label, html) => {
     expect(stripHtml(html)).toBe('');
   });
 
@@ -1646,7 +1677,7 @@ describe('self-closing detection and unquoted attribute values', () => {
     ['a quoted value', '<article><script src="x.js"/><p>IOC: evil.test</p></article>'],
     ['no attributes', '<script/><p>IOC: evil.test</p>'],
     ['whitespace before the slash', '<script src=x /><p>IOC: evil.test</p>'],
-  ])('still normalizes a genuine self-closed script with %s', (_label, html) => {
+  ])('still removes a genuine self-closed script with %s', (_label, html) => {
     expect(stripHtml(html)).toBe('IOC: evil.test');
   });
 

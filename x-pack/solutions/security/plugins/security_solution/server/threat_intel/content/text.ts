@@ -6,6 +6,9 @@
  */
 
 import * as cheerio from 'cheerio';
+import { elementRenderState } from './inline_style';
+import type { ParsedNode } from './parsed_node';
+import { sanitizeRawText } from './raw_text';
 import { classifyHeader, type SectionKind } from './section_headers';
 
 /**
@@ -84,21 +87,6 @@ const INLINE_NAMES = new Set([
 ]);
 
 /**
- * Minimal shape of a parsed DOM node, declared here rather than imported from cheerio: a
- * transitive `@types/cheerio@0.22` shadows the types bundled with the installed
- * cheerio 1.0.0-rc.12, and `security_solution` doesn't pin the tsconfig `types` array that
- * would resolve the correct ones.
- */
-interface ParsedNode {
-  type: string;
-  data?: string;
-  name?: string;
-  attribs?: Record<string, string>;
-  parent?: ParsedNode | null;
-  children?: ParsedNode[];
-}
-
-/**
  * Elements whose subtree never becomes report text: `script`/`style` because their content
  * is code, `template` because the parser puts its children in an inert fragment no reader
  * sees. Skipped during the walk rather than removed up front with a selector — a `.remove()`
@@ -109,425 +97,8 @@ interface ParsedNode {
  */
 const SKIPPED_SUBTREE_NAMES = new Set(['script', 'style', 'template']);
 
-/**
- * Elements whose content never reaches a reader. The render-state helper below is shared
- * with `extract_article`, which needs the same rule for candidate exclusion and scoring so
- * a `<template>` or hidden block can't win article selection there either. `iframe` is here
- * for the same reason as `template`: browsers don't render its contents.
- */
-const NON_RENDERED_NAMES = new Set(['template', 'iframe']);
-
-/**
- * `display: none` among the element's inline style declarations.
- * Parsed per declaration rather than matched with a regex on the whole string, so a
- * decoy — a custom property (`--display:none`) or another property's value that happens
- * to contain the text (`content: 'display:none'`) — can't false-positive and hide content
- * that is genuinely visible. `visibility: hidden` is deliberately not treated as a hidden
- * subtree: descendants may override it with `visibility: visible`, while nothing below a
- * `display: none` element can render.
- */
-interface CssPropertyValue {
-  value: string;
-  important: boolean;
-}
-
-interface InlineStyleState {
-  displayHidden: boolean;
-  visibility?: 'hidden' | 'visible';
-}
-
-const CSS_WIDE_KEYWORDS = new Set(['initial', 'inherit', 'unset', 'revert', 'revert-layer']);
-const INHERITED_CSS_WIDE_KEYWORDS = new Set(['inherit', 'unset']);
-const trimCssWhitespace = (input: string): string =>
-  input.replace(/^[ \t\r\n\f]+|[ \t\r\n\f]+$/g, '');
-
-/** Decodes CSS escapes before comparing property names and keyword values. */
-const decodeCssEscapes = (input: string): string => {
-  let decoded = '';
-  let index = 0;
-
-  while (index < input.length) {
-    if (input[index] !== '\\' || index + 1 >= input.length) {
-      decoded += input[index];
-      index += 1;
-    } else if (!/[0-9a-f]/i.test(input[index + 1])) {
-      const escaped = input[index + 1];
-      // A newline cannot be escaped in an identifier. Keep the backslash so an invalid
-      // spelling cannot become a valid hidden-state keyword in this conservative parser.
-      if (/\r|\n|\f/.test(escaped)) {
-        decoded += '\\';
-      } else {
-        decoded += escaped;
-      }
-      index += 2;
-    } else {
-      let hexEnd = index + 1;
-      while (hexEnd < input.length && hexEnd < index + 7 && /[0-9a-f]/i.test(input[hexEnd])) {
-        hexEnd += 1;
-      }
-      const codePoint = Number.parseInt(input.slice(index + 1, hexEnd), 16);
-      decoded +=
-        codePoint === 0 || codePoint > 0x10ffff || (codePoint >= 0xd800 && codePoint <= 0xdfff)
-          ? '\uFFFD'
-          : String.fromCodePoint(codePoint);
-      // A single whitespace character after a hexadecimal escape is its terminator, not part
-      // of the value. Treat CRLF as that one terminator too.
-      if (/[ \t\r\n\f]/.test(input[hexEnd] ?? '')) {
-        if (input[hexEnd] === '\r' && input[hexEnd + 1] === '\n') {
-          hexEnd += 1;
-        }
-        hexEnd += 1;
-      }
-      index = hexEnd;
-    }
-  }
-
-  return decoded;
-};
-
-const hasEscapedCharacterAt = (input: string, index: number): boolean => {
-  let backslashes = 0;
-  for (let cursor = index - 1; cursor >= 0 && input[cursor] === '\\'; cursor--) {
-    backslashes += 1;
-  }
-  return backslashes % 2 === 1;
-};
-
-const cssPropertyValue = (rawValue: string): CssPropertyValue => {
-  const trimmed = trimCssWhitespace(rawValue);
-  for (let index = trimmed.length - 1; index >= 0; index--) {
-    if (trimmed[index] === '!' && !hasEscapedCharacterAt(trimmed, index)) {
-      const priority = decodeCssEscapes(trimCssWhitespace(trimmed.slice(index + 1))).toLowerCase();
-      if (priority === 'important') {
-        return {
-          value: decodeCssEscapes(trimCssWhitespace(trimmed.slice(0, index))).toLowerCase(),
-          important: true,
-        };
-      }
-      // Only the final unescaped priority delimiter can make the declaration important.
-      // Anything after an earlier one invalidates that suffix, so retrying at every `!`
-      // would be both incorrect and quadratic on attacker-controlled style text.
-      break;
-    }
-  }
-  return { value: decodeCssEscapes(trimmed).toLowerCase(), important: false };
-};
-
-/** Splits an inline style at declaration boundaries, not semicolons inside CSS values. */
-const splitCssDeclarations = (style: string): string[] => {
-  const declarations: string[] = [];
-  const current: string[] = [];
-  const blockClosers: string[] = [];
-  let quote = '';
-  let index = 0;
-
-  while (index < style.length) {
-    const char = style[index];
-    const next = style[index + 1];
-
-    if (quote !== '') {
-      current.push(char);
-      if (char === '\\' && next !== undefined) {
-        current.push(next);
-        index += 1;
-      } else if (char === quote) quote = '';
-    } else if (char === '/' && next === '*') {
-      const commentEnd = style.indexOf('*/', index + 2);
-      if (commentEnd === -1) break;
-      index = commentEnd + 1;
-    } else if (char === '"' || char === "'") {
-      quote = char;
-      current.push(char);
-    } else if (char === '\\' && next !== undefined) {
-      current.push(char, next);
-      index += 1;
-    } else if (char === '(' || char === '[' || char === '{') {
-      blockClosers.push(char === '(' ? ')' : char === '[' ? ']' : '}');
-      current.push(char);
-    } else if (char === blockClosers[blockClosers.length - 1]) {
-      blockClosers.pop();
-      current.push(char);
-    } else if (char === ';' && blockClosers.length === 0) {
-      declarations.push(current.join(''));
-      current.length = 0;
-    } else {
-      current.push(char);
-    }
-
-    index += 1;
-  }
-
-  declarations.push(current.join(''));
-  return declarations;
-};
-
-const inlineStyleState = (style: string | undefined): InlineStyleState => {
-  if (!style) return { displayHidden: false };
-
-  let display: CssPropertyValue | undefined;
-  let visibility: CssPropertyValue | undefined;
-  const setProperty = (property: 'display' | 'visibility', value: CssPropertyValue): void => {
-    const current = property === 'display' ? display : visibility;
-    // Inline declarations have equal specificity: the last one wins, except that an
-    // important declaration cannot be overridden by a later non-important declaration.
-    if (!current?.important || value.important) {
-      if (property === 'display') display = value;
-      else visibility = value;
-    }
-  };
-
-  for (const declaration of splitCssDeclarations(style)) {
-    const colon = declaration.indexOf(':');
-    if (colon !== -1) {
-      const property = decodeCssEscapes(
-        trimCssWhitespace(declaration.slice(0, colon))
-      ).toLowerCase();
-      if (property === 'display' || property === 'visibility' || property === 'all') {
-        const { value, important } = cssPropertyValue(declaration.slice(colon + 1));
-        if (property === 'all') {
-          if (CSS_WIDE_KEYWORDS.has(value)) {
-            setProperty('display', { value: '', important });
-            // `visibility` is inherited. `initial` restores `visible`; inherit/unset keep
-            // the parent's value. Revert depends on stylesheets this parser cannot see, so
-            // visible is the conservative result for a false-strip-sensitive extractor.
-            const resetVisibility = INHERITED_CSS_WIDE_KEYWORDS.has(value) ? '' : 'visible';
-            setProperty('visibility', { value: resetVisibility, important });
-          }
-        } else {
-          setProperty(property, { value, important });
-        }
-      }
-    }
-  }
-
-  let resolvedVisibility: InlineStyleState['visibility'];
-  if (visibility?.value === 'hidden' || visibility?.value === 'collapse') {
-    resolvedVisibility = 'hidden';
-  } else if (
-    visibility?.value === 'visible' ||
-    visibility?.value === 'initial' ||
-    visibility?.value === 'revert' ||
-    visibility?.value === 'revert-layer'
-  ) {
-    resolvedVisibility = 'visible';
-  }
-
-  return { displayHidden: display?.value === 'none', visibility: resolvedVisibility };
-};
-
-interface ElementRenderState {
-  subtreeHidden: boolean;
-  visible: boolean;
-}
-
-export const elementRenderState = (
-  node: {
-    name?: string;
-    attribs?: Record<string, string>;
-  },
-  parentVisible: boolean
-): ElementRenderState => {
-  const { displayHidden, visibility } = inlineStyleState(node.attribs?.style);
-  const subtreeHidden =
-    NON_RENDERED_NAMES.has(node.name?.toLowerCase() ?? '') ||
-    node.attribs?.hidden !== undefined ||
-    displayHidden;
-  const visible = visibility === 'hidden' ? false : visibility === 'visible' || parentVisible;
-  return { subtreeHidden, visible };
-};
-
 const isAlwaysSkippedSubtree = (node: ParsedNode): boolean =>
   SKIPPED_SUBTREE_NAMES.has(elementName(node));
-
-/** `<script>`/`<style>` — the elements HTML treats as raw text. */
-const RAW_TEXT_TAG_NAMES = ['script', 'style'] as const;
-
-/**
- * Index of the `>` that terminates the tag starting at `from`, in one linear scan rather
- * than a regex per candidate (a regex restarting at every `<script` opener is quadratic
- * over an adversarial repeat). Quote-aware, so a `>` inside an attribute value can't end
- * the tag early; an unterminated tag runs to end of input and is left for the parser to
- * read per spec, which is the safe direction.
- */
-interface TagEnd {
-  /** Index of the `>` that terminates the tag, or -1 if it never terminates. */
-  end: number;
-  /** Whether the tag carries a real self-closing flag. */
-  selfClosing: boolean;
-}
-
-const tagEndFrom = (html: string, from: number): TagEnd => {
-  let scan = from;
-  let quote = '';
-  // In HTML an unquoted attribute value may contain `/`, so a trailing slash there belongs to the
-  // value rather than being a self-closing flag. Reading `<script src=x/>` as self-closing
-  // rewrote it to an empty script pair, which exposed the real script body as report text with
-  // its URL in it.
-  let expectingValue = false;
-  let inUnquotedValue = false;
-
-  while (scan < html.length) {
-    const char = html[scan];
-
-    if (quote !== '') {
-      if (char === quote) quote = '';
-    } else if (char === '>') {
-      return { end: scan, selfClosing: !inUnquotedValue && html[scan - 1] === '/' };
-    } else if (char === '"' || char === "'") {
-      quote = char;
-      expectingValue = false;
-    } else if (char === '=') {
-      expectingValue = true;
-      inUnquotedValue = false;
-    } else if (/\s/.test(char)) {
-      inUnquotedValue = false;
-    } else if (expectingValue) {
-      expectingValue = false;
-      inUnquotedValue = true;
-    }
-
-    scan += 1;
-  }
-
-  return { end: -1, selfClosing: false };
-};
-
-/**
- * ASCII-only, length-preserving lowercase. `String.prototype.toLowerCase` is not
- * length-preserving (`İ` lowercases to two code units), which would shift every later
- * offset the scanner takes from this copy and applies back to the original. Tag names are
- * ASCII, so folding only A-Z keeps offsets aligned by construction.
- */
-const asciiLower = (input: string): string =>
-  input.replace(/[A-Z]/g, (char) => String.fromCharCode(char.charCodeAt(0) + 32));
-
-/**
- * Rewrites an explicitly self-closed `<script/>` or `<style/>` into an empty element pair
- * before parsing. HTML has no self-closing syntax for raw-text elements, so a
- * spec-compliant parser reads `<script src="x.js"/><p>evil.test</p>` as a script whose
- * body is that paragraph, discarding the rest of the document. Feeds routinely ship XHTML,
- * where the form is legitimately self-closing, so the HTML reading has to be corrected
- * before the real parser ever sees it.
- */
-interface RawTextNormalization {
-  html: string;
-  hasUnclosedRawText: boolean;
-}
-
-const normalizeRawText = (html: string): RawTextNormalization => {
-  const lower = asciiLower(html);
-  const pieces: string[] = [];
-  let copiedTo = 0;
-  let cursor = 0;
-  let hasUnclosedRawText = false;
-
-  while (cursor < html.length) {
-    const open = lower.indexOf('<', cursor);
-
-    if (open === -1) {
-      cursor = html.length;
-    } else if (lower.startsWith('<!--', open)) {
-      // Comments, CDATA sections and directives are skipped as whole regions, since a
-      // `<script>`-looking opener inside a comment has no matching close and would run
-      // the scan to end of input, never reaching a genuine opener after it.
-      const commentEnd = lower.indexOf('-->', open + 4);
-      cursor = commentEnd === -1 ? html.length : commentEnd + 3;
-    } else if (lower.startsWith('<![cdata[', open)) {
-      const cdataEnd = lower.indexOf(']]>', open + 9);
-      cursor = cdataEnd === -1 ? html.length : cdataEnd + 3;
-    } else if (lower.startsWith('<!', open) || lower.startsWith('<?', open)) {
-      const directiveEnd = lower.indexOf('>', open + 2);
-      cursor = directiveEnd === -1 ? html.length : directiveEnd + 1;
-    } else {
-      const name = RAW_TEXT_TAG_NAMES.find((candidate) => lower.startsWith(`<${candidate}`, open));
-      const afterName = name === undefined ? -1 : open + 1 + name.length;
-      // A tag boundary has to follow the name, or `<scriptfoo` would be treated as one.
-      const isRawTextStart =
-        afterName !== -1 && (afterName >= html.length || /[\s/>]/.test(html[afterName]));
-
-      if (!isRawTextStart) {
-        // Any other tag is skipped whole, quote-aware, so a `<script/>` inside one of its
-        // attribute values is never mistaken for a tag of its own.
-        const isTag = /[a-z/]/.test(lower[open + 1] ?? '');
-        const otherTagEnd = isTag ? tagEndFrom(html, open + 1).end : -1;
-
-        if (!isTag) {
-          // A bare `<` in prose. Advance one character.
-          cursor = open + 1;
-        } else if (otherTagEnd === -1) {
-          // No `>` exists from here on, so no later tag can be complete either — stop
-          // rather than retry per position, which would be quadratic.
-          cursor = html.length;
-        } else {
-          cursor = otherTagEnd + 1;
-        }
-      } else {
-        const { end: tagEnd, selfClosing } = tagEndFrom(html, afterName);
-
-        if (tagEnd === -1) {
-          hasUnclosedRawText = true;
-          cursor = html.length;
-        } else if (selfClosing) {
-          // The self-closed open tag this function exists for.
-          pieces.push(html.slice(copiedTo, tagEnd - 1), `></${name}>`);
-          copiedTo = tagEnd + 1;
-          cursor = tagEnd + 1;
-        } else {
-          // A real open tag, so its raw-text body is skipped rather than scanned for a
-          // `<script/>`-looking string, which is not a tag inside a JS string literal.
-          // The close tag's name has to end at a tag boundary too, or `</scriptfoo>` would
-          // be accepted and the scan would resume inside a body the parser still considers
-          // open.
-          const closeTag = `</${name}`;
-          let searchFrom = tagEnd + 1;
-          let closeAt = -1;
-          while (closeAt === -1 && searchFrom < html.length) {
-            const found = lower.indexOf(closeTag, searchFrom);
-            const after = found === -1 ? -1 : found + closeTag.length;
-            if (found === -1) {
-              searchFrom = html.length;
-            } else if (after >= html.length || /[\s/>]/.test(html[after])) {
-              closeAt = found;
-            } else {
-              searchFrom = found + 1;
-            }
-          }
-
-          if (closeAt === -1) {
-            hasUnclosedRawText = true;
-            cursor = html.length;
-          } else {
-            // htmlparser2 ends an end tag at the first `>` and rejects a trailing slash,
-            // where the spec and parse5 both read the junk and close the element. Rewriting
-            // a junk-carrying end tag to its plain form is semantically free either way, and
-            // avoids the element staying open (`</script/>`) or closing early inside a junk
-            // attribute value (`</script foo="a>URL">`).
-            const junkFrom = closeAt + closeTag.length;
-            const { end: closeEnd } = tagEndFrom(html, junkFrom);
-            if (closeEnd === -1) {
-              // The close tag itself never terminates — same as the missing-close-tag path
-              // above, stop rather than resume the scan inside a still-open body.
-              hasUnclosedRawText = true;
-              cursor = html.length;
-            } else if (closeEnd > junkFrom) {
-              pieces.push(html.slice(copiedTo, closeAt), `</${name}>`);
-              copiedTo = closeEnd + 1;
-              cursor = closeEnd + 1;
-            } else {
-              cursor = junkFrom;
-            }
-          }
-        }
-      }
-    }
-  }
-
-  if (copiedTo === 0) return { html, hasUnclosedRawText };
-  pieces.push(html.slice(copiedTo));
-  return { html: pieces.join(''), hasUnclosedRawText };
-};
-
-export const normalizeSelfClosedRawText = (html: string): string => normalizeRawText(html).html;
 
 /**
  * The single copy of the parser configuration, shared with `extract_article` so the two
@@ -547,13 +118,24 @@ export const PARSER_OPTIONS = {
   recognizeCDATA: true,
 } as const;
 
-const parseTopLevelNodes = (html: string): ParsedNode[] => {
-  const $ = cheerio.load(normalizeSelfClosedRawText(html), PARSER_OPTIONS);
+interface ParsedFragment {
+  nodes: ParsedNode[];
+  hasUnclosedRawText: boolean;
+}
+
+const parseFragment = (html: string): ParsedFragment => {
+  const sanitized = sanitizeRawText(html);
+  const $ = cheerio.load(sanitized.html, PARSER_OPTIONS);
   // The one cast in this file, at the boundary where the stale typings stop describing
   // the runtime: `toArray()` is declared, its element type is not.
   const roots = $.root().toArray() as unknown as ParsedNode[];
-  return roots.flatMap((root) => root.children ?? []);
+  return {
+    nodes: roots.flatMap((root) => root.children ?? []),
+    hasUnclosedRawText: sanitized.hasUnclosedRawText,
+  };
 };
+
+const parseTopLevelNodes = (html: string): ParsedNode[] => parseFragment(html).nodes;
 
 const isElement = (node: ParsedNode): boolean =>
   node.type === 'tag' || node.type === 'script' || node.type === 'style';
@@ -571,7 +153,7 @@ const childrenOf = (node: ParsedNode): ParsedNode[] => node.children ?? [];
  * elements, and looks ahead for a tag boundary rather than requiring `>` directly, since an
  * end tag may legally carry junk (`&lt;/script foo&gt;`).
  */
-const RESIDUAL_CLOSING_TAG = /<\/[a-z][a-z0-9:_-]*(?=[\s/>])/i;
+const RESIDUAL_CLOSING_TAG = /<\/[a-z][a-z0-9:_-]*(?=[ \t\r\n\f/>])/i;
 
 const payloadCarriesMarkup = (payload: ParsedNode[]): boolean =>
   payload.some((node) => isElement(node) || node.type === 'cdata');
@@ -646,33 +228,22 @@ const rawTextOf = (nodes: ParsedNode[]): string => {
 };
 
 /**
- * Whether `raw` contains a `<script>`/`<style>` opener with no matching close anywhere in
- * the payload (self-closed forms normalized first, so `<script/>` doesn't count). CDATA is
- * literal, unescaped text, so an opener like this parses as a real raw-text element that
- * swallows the rest of the payload as its body — `payloadCarriesMarkup` alone can't tell
- * that apart from genuine markup, and once parsed that way the swallowed text is
- * unrecoverable, since a skipped subtree never contributes to the walk. Checked on the raw
- * string, before parsing, for the same reason `shouldReparse` decides from text rather than
- * from a parse it doesn't yet trust.
- */
-const hasUnclosedRawTextOpener = (raw: string): boolean => {
-  return normalizeRawText(raw).hasUnclosedRawText;
-};
-
-/**
  * Parses a CDATA payload into nodes. RSS and Atom carry an entire HTML document inside
  * `<![CDATA[ ... ]]>`, so it has to be parsed or the article body is lost. CDATA content
  * is also literal, so a document that entity-encoded its body *and* wrapped it in CDATA
  * arrives still encoded after one parse — the same `shouldReparse` decision, applied here
- * to the payload and bounded to one extra parse.
+ * to the payload and bounded to one extra parse. A successfully tokenized, unclosed
+ * `<script>` or `<style>` stays literal for feed compatibility, while a tokenizer failure
+ * produces no nodes and therefore no extractable text.
  */
 const parseCdataPayload = (raw: string): ParsedNode[] => {
-  if (hasUnclosedRawTextOpener(raw)) return [{ type: 'text', data: raw }];
-  const nodes = parseTopLevelNodes(raw);
-  if (payloadCarriesMarkup(nodes)) return nodes;
-  const decoded = inlineTextOf(nodes, false);
-  if (hasUnclosedRawTextOpener(decoded)) return [{ type: 'text', data: decoded }];
-  return parseTopLevelNodes(decoded);
+  const parsed = parseFragment(raw);
+  if (parsed.hasUnclosedRawText) return [{ type: 'text', data: raw }];
+  if (payloadCarriesMarkup(parsed.nodes)) return parsed.nodes;
+
+  const decoded = inlineTextOf(parsed.nodes, false);
+  const reparsed = parseFragment(decoded);
+  return reparsed.hasUnclosedRawText ? [{ type: 'text', data: decoded }] : reparsed.nodes;
 };
 
 const inlineTextOf = (
