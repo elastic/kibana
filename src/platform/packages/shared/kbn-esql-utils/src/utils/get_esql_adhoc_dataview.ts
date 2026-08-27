@@ -17,6 +17,7 @@ import {
 } from '@kbn/esql-types';
 import { getIndexPatternFromESQLQuery } from './get_index_pattern_from_query';
 import { getESQLTimeField } from './get_time_field';
+import { getProjectRoutingFromEsqlQuery } from './set_instructions_helpers';
 
 // uses browser sha256 method with fallback if unavailable
 async function sha256(str: string) {
@@ -30,6 +31,24 @@ async function sha256(str: string) {
     const { sha256: sha256fn } = await import('./sha256');
     return sha256fn(str);
   }
+}
+
+/** Returns the deterministic ID for an ES|QL ad-hoc DataView. */
+export async function getESQLAdHocDataviewId({
+  indexPattern,
+  timeFieldName,
+  effectiveProjectRouting,
+  idPrefix = 'esql',
+}: {
+  indexPattern: string;
+  timeFieldName: string | undefined;
+  effectiveProjectRouting: string | undefined;
+  idPrefix?: string;
+}): Promise<string> {
+  const dataViewIdentity = [idPrefix, indexPattern, effectiveProjectRouting, timeFieldName]
+    .filter(Boolean)
+    .join('-');
+  return sha256(dataViewIdentity);
 }
 
 /**
@@ -54,6 +73,7 @@ async function sha256(str: string) {
  * @param options.id - Explicit DataView ID. When provided, this ID is used as-is instead of generating one via SHA-256. Useful when the caller already knows the ID (e.g. from a persisted ad-hoc DataView spec) and wants the DataViewService cache to be populated under that exact key.
  * @param options.idPrefix - Custom prefix for the DataView ID (defaults to 'esql'). Use a different prefix to avoid cache collisions between consumers.
  * @param http - Optional HTTP service for fetching time field information. If not provided, no time field detection is performed
+ * @param projectRouting - Optional CPS project picker routing. An explicit `SET project_routing` in the query takes precedence.
  *
  * @returns Promise that resolves to the created DataView with the detected time field (if any)
  *
@@ -63,6 +83,7 @@ export async function getESQLAdHocDataview({
   query,
   options,
   http,
+  projectRouting,
 }: {
   // the data views service to use to create the data view
   dataViewsService: DataViewsPublicPluginStart;
@@ -77,16 +98,20 @@ export async function getESQLAdHocDataview({
   };
   // optional http service to use to fetch the time field, if needed
   http?: HttpStart;
+  projectRouting?: string;
 }) {
-  const timeFieldName = await getESQLTimeField({ query, http });
+  const effectiveProjectRouting = getProjectRoutingFromEsqlQuery(query) ?? projectRouting;
+  const timeFieldName = await getESQLTimeField({ query, http, projectRouting });
 
   const indexPattern = getIndexPatternFromESQLQuery(query);
-  const prefix = options?.idPrefix ?? 'esql';
   const dataViewId =
     options?.id ??
-    (await sha256(
-      timeFieldName ? `${prefix}-${indexPattern}-${timeFieldName}` : `${prefix}-${indexPattern}`
-    ));
+    (await getESQLAdHocDataviewId({
+      indexPattern,
+      timeFieldName,
+      effectiveProjectRouting,
+      idPrefix: options?.idPrefix,
+    }));
 
   if (options?.createNewInstanceEvenIfCachedOneAvailable) {
     // overwise it might return a cached data view with a different time field

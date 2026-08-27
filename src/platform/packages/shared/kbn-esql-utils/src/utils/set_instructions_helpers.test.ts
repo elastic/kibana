@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { EsqlQuery } from '@elastic/esql';
 import { getProjectRoutingFromEsqlQuery } from './set_instructions_helpers';
 
 describe('set instructions helpers', () => {
@@ -44,6 +45,15 @@ describe('set instructions helpers', () => {
         const result = getProjectRoutingFromEsqlQuery(queryString);
         expect(result).toBe('_alias: projectId');
       });
+    });
+
+    it('does not parse the same query twice in succession', () => {
+      const queryString = 'SET project_routing = "_alias:cached"; FROM cached_index';
+      const fromSrcSpy = jest.spyOn(EsqlQuery, 'fromSrc');
+
+      expect(getProjectRoutingFromEsqlQuery(queryString)).toBe('_alias:cached');
+      expect(getProjectRoutingFromEsqlQuery(queryString)).toBe('_alias:cached');
+      expect(fromSrcSpy).toHaveBeenCalledTimes(1);
     });
   });
 });

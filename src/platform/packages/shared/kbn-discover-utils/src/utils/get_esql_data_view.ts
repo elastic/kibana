@@ -8,9 +8,12 @@
  */
 
 import type { AggregateQuery } from '@kbn/es-query';
+import type { CPSPluginStart } from '@kbn/cps/public';
 import {
   getESQLAdHocDataview,
+  getESQLAdHocDataviewId,
   getIndexPatternFromESQLQuery,
+  getProjectRoutingFromEsqlQuery,
   parseTimeFieldFromESQLQuery,
 } from '@kbn/esql-utils';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -20,7 +23,11 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 export async function getEsqlDataView(
   query: AggregateQuery,
   currentDataView: DataView | undefined,
-  services: { dataViews: DataViewsPublicPluginStart; http: HttpStart }
+  services: {
+    dataViews: DataViewsPublicPluginStart;
+    http: HttpStart;
+    cps?: CPSPluginStart;
+  }
 ) {
   const indexPatternFromQuery = getIndexPatternFromESQLQuery(query.esql);
   // Convert undefined time fields to a string since '' and undefined are equivalent here
@@ -29,12 +36,20 @@ export async function getEsqlDataView(
   const onlyTimeFieldChanged =
     indexPatternFromQuery === currentDataView?.getIndexPattern() &&
     newTimeField !== currentTimeField;
+  const projectRouting = services.cps?.cpsManager?.getProjectRouting();
+  const effectiveProjectRouting = getProjectRoutingFromEsqlQuery(query.esql) ?? projectRouting;
+  const nextDataViewId = await getESQLAdHocDataviewId({
+    indexPattern: indexPatternFromQuery,
+    timeFieldName: currentTimeField,
+    effectiveProjectRouting,
+  });
 
   if (
     currentDataView?.isPersisted() ||
     indexPatternFromQuery !== currentDataView?.getIndexPattern() ||
     // here the pattern hasn't changed but the time field has
-    onlyTimeFieldChanged
+    onlyTimeFieldChanged ||
+    currentDataView.id !== nextDataViewId
   ) {
     return await getESQLAdHocDataview({
       dataViewsService: services.dataViews,
@@ -46,7 +61,9 @@ export async function getEsqlDataView(
         createNewInstanceEvenIfCachedOneAvailable: !currentDataView || onlyTimeFieldChanged,
       },
       http: services.http,
+      projectRouting,
     });
   }
+
   return currentDataView;
 }

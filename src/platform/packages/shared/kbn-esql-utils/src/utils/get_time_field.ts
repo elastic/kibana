@@ -9,10 +9,11 @@
 import type { HttpStart } from '@kbn/core/public';
 import { TIMEFIELD_ROUTE } from '@kbn/esql-types';
 import { LRUCache } from 'lru-cache';
+import { getProjectRoutingFromEsqlQuery } from './set_instructions_helpers';
 
-// Caches the in-flight or resolved TIMEFIELD_ROUTE promise by query.
+// Caches the in-flight or resolved TIMEFIELD_ROUTE promise by query and project routing.
 // Storing the Promise (not the resolved value) deduplicates concurrent calls:
-// if multiple callers request the same query before the first resolves,
+// if multiple callers request the same query and routing before the first resolves,
 // they all await the same promise instead of each firing a separate HTTP request.
 const timeFieldCache = new LRUCache<string, Promise<string | undefined>>({ max: 100 });
 
@@ -31,11 +32,15 @@ const timeFieldCache = new LRUCache<string, Promise<string | undefined>>({ max: 
 export async function getESQLTimeField({
   query,
   http,
+  projectRouting,
 }: {
   query: string;
   http?: HttpStart;
+  projectRouting?: string;
 }): Promise<string | undefined> {
-  const cached = timeFieldCache.get(query);
+  const effectiveProjectRouting = getProjectRoutingFromEsqlQuery(query) ?? projectRouting;
+  const cacheKey = JSON.stringify([query, effectiveProjectRouting]);
+  const cached = timeFieldCache.get(cacheKey);
   if (cached !== undefined) {
     return cached;
   }
@@ -43,14 +48,16 @@ export async function getESQLTimeField({
     return undefined;
   }
   const pendingRequest = http
-    .post(TIMEFIELD_ROUTE, { body: JSON.stringify({ query }) })
+    .post(TIMEFIELD_ROUTE, {
+      body: JSON.stringify({ query, projectRouting: effectiveProjectRouting }),
+    })
     .then((response) => (response as { timeField?: string } | undefined)?.timeField)
     .catch((error) => {
       // eslint-disable-next-line no-console
       console.error('Failed to fetch the timefield', error);
-      timeFieldCache.delete(query);
+      timeFieldCache.delete(cacheKey);
       return undefined;
     });
-  timeFieldCache.set(query, pendingRequest);
+  timeFieldCache.set(cacheKey, pendingRequest);
   return pendingRequest;
 }
