@@ -60,6 +60,19 @@ $$$kibana-285645$$$
 View [#285645]({{kib-pull}}285645).
 ::::
 
+## 9.5.2 [kibana-9.5.2-breaking-changes]
+
+$$$kibana-283150$$$
+::::{dropdown} Update HTTPS proxy TLS settings if the email connector fails after upgrade
+**Details**<br> {{kib}} now ships nodemailer 9, which validates the proxy server's TLS certificate when the email connector sends mail through an HTTPS proxy. Earlier versions skipped that check, so a proxy with a self-signed, expired, or hostname-mismatched certificate now causes sending to fail. Hosted and cloud SMTP with public certificate authorities is unaffected.
+
+**Impact**<br> Self-managed deployments that route email through an HTTPS proxy with a certificate that isn't trusted by default can no longer send email until TLS verification is updated.
+
+**Action**<br> Trust the proxy certificate, or set `xpack.actions.ssl.proxyVerificationMode: none` to restore the previous behavior. Note that `certificate` behaves the same as `full` on the proxy connection: a custom CA or relaxed hostname check does not apply there.
+
+View [#283150]({{kib-pull}}283150).
+::::
+
 ## 9.5.1 [kibana-9.5.1-breaking-changes]
 
 $$$kibana-282404$$$

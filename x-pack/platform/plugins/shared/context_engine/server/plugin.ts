@@ -32,7 +32,9 @@ import { AiIndexRegistry } from './ai_indices/registry';
 import { SignalsService } from './signals/service';
 import type { SignalsServiceApi } from './signals/service';
 import { registerSignalGeneratorTaskDefinition, scheduleSignalGenerator } from './tasks';
+import { createVerifyKiStepDefinition } from './step_types/verify_ki_step';
 import { registerStepDefinitions } from './step_types';
+import { ContextEngineAnalyticsService } from './telemetry';
 
 export class ContextEnginePlugin
   implements
@@ -49,6 +51,7 @@ export class ContextEnginePlugin
   private esClient?: ElasticsearchClient;
   private isFeedbackLoopEnabled: () => Promise<boolean> = async () => false;
   private readonly aiIndexRegistry = new AiIndexRegistry();
+  private analyticsService?: ContextEngineAnalyticsService;
 
   constructor(context: PluginInitializerContext) {
     this.logger = context.logger.get();
@@ -59,6 +62,10 @@ export class ContextEnginePlugin
     setupDeps: ContextEngineSetupDependencies
   ): ContextEnginePluginSetup {
     registerFeatures({ features: setupDeps.features });
+
+    setupDeps.workflowsExtensions.registerStepDefinition(
+      createVerifyKiStepDefinition(coreSetup, this.logger.get('ki_verification'))
+    );
 
     coreSetup.uiSettings.registerGlobal({
       [CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID]: {
@@ -95,6 +102,13 @@ export class ContextEnginePlugin
       logger: this.logger.get('signal_generator'),
     });
 
+    this.analyticsService = new ContextEngineAnalyticsService(
+      coreSetup.analytics,
+      this.logger.get('telemetry')
+    );
+    this.analyticsService.registerContextEngineEventTypes();
+    const analyticsService = this.analyticsService;
+
     const router = coreSetup.http.createRouter();
     registerAiIndexRoutes({
       router,
@@ -112,6 +126,8 @@ export class ContextEnginePlugin
 
     registerStepDefinitions({
       workflowsExtensions: setupDeps.workflowsExtensions,
+      analyticsService,
+      logger: this.logger.get('context_steps'),
       getAiIndexService: () => {
         if (!this.aiIndexService) {
           throw new Error('AI index service not available — plugin has not started');

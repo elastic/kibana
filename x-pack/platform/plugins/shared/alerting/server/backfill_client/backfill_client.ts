@@ -27,6 +27,7 @@ import type { IEventLogger, IEventLogClient } from '@kbn/event-log-plugin/server
 import { isNumber, chunk } from 'lodash';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { withSpan } from '@kbn/apm-utils';
+import { TaskTypeGroup } from '@kbn/task-manager-plugin/server/task';
 import type {
   ScheduleBackfillError,
   ScheduleBackfillParams,
@@ -108,6 +109,7 @@ export class BackfillClient {
       [BACKFILL_TASK_TYPE]: {
         title: 'Alerting Backfill Rule Run',
         priority: TaskPriority.Low,
+        taskTypeGroup: TaskTypeGroup.Alerting,
         createTaskRunner: (context: RunContext) => opts.taskRunnerFactory.createAdHoc(context),
       },
     });

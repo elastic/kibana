@@ -160,19 +160,77 @@ describe('InvestigationOutput', () => {
     expect(finalResults).toHaveTextContent('No profiling data available');
   });
 
-  it('renders agent text containing markdown control characters literally', () => {
-    const stateWithMarkdownChars: InvestigationState = {
+  it('honours the emphasis and inline code the agent wrote, without showing the markers', () => {
+    const stateWithMarkdown: InvestigationState = {
       ...finalState,
-      recommendations: [{ title: 'Bump *max_size* to 100' }],
+      recommendations: [{ title: '**Block the attacker IPs** at the firewall via `hosts.deny`' }],
       blind_spots: [{ title: 'No `apm-*` indices', description: 'Needed for _tracing_.' }],
     };
 
-    renderWithI18n(<InvestigationOutput status="complete" state={stateWithMarkdownChars} />);
+    renderWithI18n(<InvestigationOutput status="complete" state={stateWithMarkdown} />);
 
     const finalResults = screen.getByTestId('investigationOutputFinalResults');
-    expect(finalResults).toHaveTextContent('Bump *max_size* to 100');
-    expect(finalResults).toHaveTextContent('No `apm-*` indices');
-    expect(finalResults).toHaveTextContent('Needed for _tracing_.');
+    expect(finalResults).toHaveTextContent('Block the attacker IPs at the firewall via hosts.deny');
+    expect(finalResults).not.toHaveTextContent('**');
+    expect(finalResults).toHaveTextContent('No apm-* indices');
+    expect(finalResults).toHaveTextContent('Needed for tracing.');
+  });
+
+  it('renders a recovered blind spot once when its title and description are the same sentence', () => {
+    const gap = 'No GeoIP enrichment available for the attacker IPs.';
+    const stateWithRecoveredGap: InvestigationState = {
+      ...finalState,
+      blind_spots: [{ title: gap, description: gap }],
+    };
+
+    renderWithI18n(<InvestigationOutput status="complete" state={stateWithRecoveredGap} />);
+
+    const blindSpots = screen.getByTestId('investigationOutputBlindSpots');
+    expect(blindSpots.textContent?.match(/No GeoIP enrichment/g)).toHaveLength(1);
+  });
+
+  it('renders recommendations and blind spots as separate sections, with code as a snippet', () => {
+    renderWithI18n(<InvestigationOutput status="complete" state={finalState} />);
+
+    const recommendations = screen.getByTestId('investigationOutputRecommendations');
+    expect(recommendations).toHaveTextContent(
+      'Roll back the deployment that introduced the regression'
+    );
+    expect(recommendations).toHaveTextContent('kubectl rollout undo deployment/checkout-service');
+
+    const blindSpots = screen.getByTestId('investigationOutputBlindSpots');
+    expect(blindSpots).toHaveTextContent('No profiling data available');
+    expect(blindSpots).toHaveTextContent(
+      'Could not confirm whether a leak compounded the exhaustion.'
+    );
+    expect(recommendations).not.toContainElement(blindSpots);
+  });
+
+  it('renders the conclusion on its own when no recommendations or blind spots were reported', () => {
+    const conclusionOnly: InvestigationState = {
+      summary: finalState.summary,
+      hypotheses: finalState.hypotheses,
+      conclusion: finalState.conclusion,
+    };
+
+    renderWithI18n(<InvestigationOutput status="complete" state={conclusionOnly} />);
+
+    expect(screen.getByTestId('investigationOutputFinalResults')).toHaveTextContent(
+      'A deploy at 14:02 introduced a connection leak in the checkout service.'
+    );
+    expect(screen.queryByTestId('investigationOutputRecommendations')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('investigationOutputBlindSpots')).not.toBeInTheDocument();
+  });
+
+  it('renders no final results block when a complete investigation reported none of the three', () => {
+    const withoutFinalResults: InvestigationState = {
+      summary: finalState.summary,
+      hypotheses: finalState.hypotheses,
+    };
+
+    renderWithI18n(<InvestigationOutput status="complete" state={withoutFinalResults} />);
+
+    expect(screen.queryByTestId('investigationOutputFinalResults')).not.toBeInTheDocument();
   });
 
   it('renders a loading state while the persisted result is being fetched', () => {
