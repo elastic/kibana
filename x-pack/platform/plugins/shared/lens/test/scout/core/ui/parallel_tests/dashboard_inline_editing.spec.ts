@@ -56,7 +56,10 @@ spaceTest.describe('Lens dashboard inline editing', { tag: '@local-stateful-clas
 
     await spaceTest.step('create a metric panel on a new saved dashboard', async () => {
       await buildBytesMetricVisualization({ visualize, lens });
-      await lens.save('New Lens from Modal', { addToDashboard: 'new' });
+      // `saveToLibrary: false` (FTR parity): the modal's "Add to library"
+      // checkbox defaults to checked, which would leak a library saved object
+      // into the shared worker space — these tests exercise by-value panels.
+      await lens.save('New Lens from Modal', { addToDashboard: 'new', saveToLibrary: false });
       await dashboard.waitForRenderComplete();
       await dashboard.saveDashboard('My InlineEditing Dashboard');
     });
@@ -122,7 +125,8 @@ spaceTest.describe('Lens dashboard inline editing', { tag: '@local-stateful-clas
 
     await spaceTest.step('create a metric panel on a new dashboard', async () => {
       await buildBytesMetricVisualization({ visualize, lens });
-      await lens.save('New Lens from Modal', { addToDashboard: 'new' });
+      // `saveToLibrary: false` — see the comment on the first save above.
+      await lens.save('New Lens from Modal', { addToDashboard: 'new', saveToLibrary: false });
       await dashboard.waitForRenderComplete();
     });
 

@@ -80,7 +80,10 @@ spaceTest.describe(
 
         await spaceTest.step('create a metric panel on a new saved dashboard', async () => {
           await buildBytesMetricVisualization({ visualize, lens });
-          await lens.save('New Lens from Modal', { addToDashboard: 'new' });
+          // `saveToLibrary: false` (FTR parity): the modal's "Add to library"
+          // checkbox defaults to checked, which would leak a library saved
+          // object — this test exercises a by-value panel.
+          await lens.save('New Lens from Modal', { addToDashboard: 'new', saveToLibrary: false });
           await dashboard.waitForRenderComplete();
           await dashboard.saveDashboard('My read only testing dashboard');
         });
