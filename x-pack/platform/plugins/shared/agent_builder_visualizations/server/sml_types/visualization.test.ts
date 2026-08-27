@@ -260,10 +260,10 @@ describe('visualizationSmlType', () => {
   });
 
   describe('getPermissions', () => {
-    it('returns the saved_object:lens/get privilege (via kibanaSavedObjectPermissions helper)', () => {
+    it('returns the ai_index:visualization/read action (via the kibanaPermissions helper)', () => {
       const permissions = visualizationSmlType.getPermissions!('viz-1', createContext() as never);
       expect(permissions).toEqual({
-        kibana: { privileges: [{ name: 'saved_object:lens/get' }] },
+        kibana: { privileges: { name: ['ai_index:visualization/read'] } },
       });
     });
   });

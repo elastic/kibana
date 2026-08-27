@@ -25,8 +25,8 @@ interface CustomContentComponentProps {
   projectRouting: ProjectRouting | undefined;
   query: Query | AggregateQuery | undefined;
   filters: Filter[] | undefined;
-  onErrorChange?: (error: string | undefined) => void;
   previewHtml: string | null;
+  onLoadingChange: (isLoading: boolean) => void;
   onGenerateWithChat?: () => void;
 }
 
@@ -45,6 +45,10 @@ const iframeCss = css({
   background: 'transparent',
 });
 
+const IFRAME_TITLE = i18n.translate('xpack.customContent.iframeTitle', {
+  defaultMessage: 'Custom content panel',
+});
+
 export const CustomContentComponent = ({
   embeddableId,
   esqlQuery,
@@ -55,8 +59,8 @@ export const CustomContentComponent = ({
   projectRouting,
   query,
   filters,
-  onErrorChange,
   previewHtml,
+  onLoadingChange,
   onGenerateWithChat,
 }: CustomContentComponentProps) => {
   const { euiTheme, colorMode } = useEuiTheme();
@@ -77,9 +81,7 @@ export const CustomContentComponent = ({
   const { agentBuilder } = getServices();
   const isAiAvailable = Boolean(agentBuilder);
 
-  useEffect(() => {
-    onErrorChange?.(error);
-  }, [error, onErrorChange]);
+  useEffect(() => onLoadingChange(isLoading), [isLoading, onLoadingChange]);
 
   const wrapperCss = useMemo(
     () =>
@@ -95,7 +97,7 @@ export const CustomContentComponent = ({
   );
 
   return (
-    <div css={wrapperCss}>
+    <div css={wrapperCss} data-shared-item>
       {error && (
         <KbnDangerCallout
           title={i18n.translate('xpack.customContent.error.title', {
@@ -115,14 +117,14 @@ export const CustomContentComponent = ({
       )}
       {previewHtml != null ? (
         <div css={iframeContainerCss}>
-          <iframe css={iframeCss} srcDoc={previewHtml} sandbox="" title="Custom content panel" />
+          <iframe css={iframeCss} srcDoc={previewHtml} sandbox="" title={IFRAME_TITLE} />
         </div>
       ) : (
         !error &&
         !noContent &&
         html && (
           <div css={iframeContainerCss}>
-            <iframe css={iframeCss} srcDoc={html} sandbox="" title="Custom content panel" />
+            <iframe css={iframeCss} srcDoc={html} sandbox="" title={IFRAME_TITLE} />
           </div>
         )
       )}
