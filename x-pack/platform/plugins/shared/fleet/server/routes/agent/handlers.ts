@@ -406,7 +406,7 @@ async function resolveAgentlessOtelDataStreamPattern({
   agentId,
   pkgName,
   pkgVersion,
-  otelDataStreams,
+  manifestOtelDataStreams,
   packageInfo,
 }: {
   agentClient: AgentClient;
@@ -414,7 +414,7 @@ async function resolveAgentlessOtelDataStreamPattern({
   agentId: string;
   pkgName: string;
   pkgVersion: string;
-  otelDataStreams: RegistryDataStream[];
+  manifestOtelDataStreams: RegistryDataStream[];
   packageInfo: PackageInfo;
 }): Promise<string | undefined> {
   const [agent] = await agentClient.getByIds([agentId], { ignoreMissing: true });
@@ -450,7 +450,7 @@ async function resolveAgentlessOtelDataStreamPattern({
   const dataStreams =
     packageInfo.type === 'input'
       ? getOtelDataStreamsFromPackagePolicy(matchingPackagePolicy, packageInfo)
-      : otelDataStreams;
+      : manifestOtelDataStreams;
   if (dataStreams.length === 0) {
     return undefined;
   }
@@ -474,7 +474,7 @@ export const getAgentDataHandler: FleetRequestHandler<
   // If a package is specified, get data stream patterns for that package
   // and scope incoming data query to that pattern
   let dataStreamPattern: string | undefined;
-  let otelDataStreams: RegistryDataStream[] = [];
+  let manifestOtelDataStreams: RegistryDataStream[] = [];
   let nonOtelDataStreams: RegistryDataStream[] = [];
   if (pkgName && pkgVersion) {
     const packageInfo = await getPackageInfo({
@@ -484,14 +484,13 @@ export const getAgentDataHandler: FleetRequestHandler<
       pkgVersion,
     });
     const dataStreams = packageInfo.data_streams || [];
-    otelDataStreams = dataStreams.filter((ds) => isOtelDataStream(ds, packageInfo));
+    manifestOtelDataStreams = dataStreams.filter((ds) => isOtelDataStream(ds, packageInfo));
     nonOtelDataStreams = dataStreams.filter((ds) => !isOtelDataStream(ds, packageInfo));
     dataStreamPattern =
       dataStreams
         .map((ds) => generateTemplateIndexPattern(ds, isOtelDataStream(ds, packageInfo)))
         .join(',') || undefined;
 
-    // https://github.com/elastic/ingest-dev/issues/9012
     const isOtelInputPackage =
       packageInfo.type === 'input' &&
       !!appContextService.getExperimentalFeatures()?.enableOtelIntegrations &&
@@ -499,7 +498,7 @@ export const getAgentDataHandler: FleetRequestHandler<
 
     // Native OTel data has no queryable agent identity, so only a single-agent, namespace-scoped
     // lookup can answer for it.
-    if ((otelDataStreams.length > 0 || isOtelInputPackage) && agentsIds.length === 1) {
+    if ((manifestOtelDataStreams.length > 0 || isOtelInputPackage) && agentsIds.length === 1) {
       const fleetContext = await context.fleet;
       // internalSoClient reads only policy metadata for the gate below; the route still requires
       // agents:read, and ES data is queried with asCurrentUser.
@@ -509,7 +508,7 @@ export const getAgentDataHandler: FleetRequestHandler<
         agentId: agentsIds[0],
         pkgName,
         pkgVersion,
-        otelDataStreams,
+        manifestOtelDataStreams,
         packageInfo,
       });
 

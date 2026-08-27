@@ -89,8 +89,6 @@ export async function stepSaveSystemObject(context: InstallContext) {
     packageInfo
   );
 
-  // Per-policy datasets aren't in the manifest; recompute from attached
-  // policies so stale .otel suffixes self-heal.
   if (packageInfo.type === 'input') {
     try {
       const { items: packagePolicies } = await packagePolicyService.list(savedObjectsClient, {

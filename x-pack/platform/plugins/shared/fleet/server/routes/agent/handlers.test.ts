@@ -918,7 +918,7 @@ describe('Handlers', () => {
           mockResponse
         );
 
-        // With the flag off, otelDataStreams stays empty, so the gate never looks up the agent.
+        // With the flag off, manifestOtelDataStreams stays empty, so the gate never looks up the agent.
         expect(mockGetByIds).not.toHaveBeenCalled();
         expect(agentPolicyService.getByIds).not.toHaveBeenCalled();
         expect(getIncomingDataByDataStreams).not.toHaveBeenCalled();
