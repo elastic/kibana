@@ -29,6 +29,7 @@ import { PackageIcon } from '../../../../../components';
 import { sendGetFileByPath, useStartServices } from '../../../../../hooks';
 import { epmRouteService } from '../../../../../services';
 import { Readme } from '../../../../../../integrations/sections/epm/screens/detail/overview/readme';
+import { INTEGRATIONS_PLUGIN_ID } from '../../../../../../integrations/constants';
 
 interface Props {
   packageInfo: PackageInfo;
@@ -36,7 +37,7 @@ interface Props {
 }
 
 export const PackageDocumentationModal: React.FC<Props> = ({ packageInfo, onClose }) => {
-  const { http } = useStartServices();
+  const { http, application } = useStartServices();
   const [markdown, setMarkdown] = useState<string | undefined>(undefined);
   const refs = useRef(new Map<string, HTMLDivElement | null>());
 
@@ -186,12 +187,36 @@ export const PackageDocumentationModal: React.FC<Props> = ({ packageInfo, onClos
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButton onClick={onClose} fill={false} data-test-subj="packageDocumentationModalClose">
-          <FormattedMessage
-            id="xpack.fleet.packageDocumentationModal.closeButton"
-            defaultMessage="Close"
-          />
-        </EuiButton>
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              onClick={() =>
+                application.navigateToApp(INTEGRATIONS_PLUGIN_ID, {
+                  path: `/detail/${packageInfo.name}-${packageInfo.version}/overview`,
+                })
+              }
+              fill={false}
+              data-test-subj="packageDocumentationModalViewDetails"
+            >
+              <FormattedMessage
+                id="xpack.fleet.packageDocumentationModal.viewDetailsButton"
+                defaultMessage="Integration details"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              onClick={onClose}
+              fill={false}
+              data-test-subj="packageDocumentationModalClose"
+            >
+              <FormattedMessage
+                id="xpack.fleet.packageDocumentationModal.closeButton"
+                defaultMessage="Close"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiModalFooter>
     </EuiModal>
   );
