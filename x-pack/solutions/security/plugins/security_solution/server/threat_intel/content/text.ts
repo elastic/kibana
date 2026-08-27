@@ -292,7 +292,15 @@ export const normalizeSelfClosedRawText = (html: string): string => {
             // since the junk is ignored either way.
             const junkFrom = closeAt + closeTag.length;
             const closeEnd = tagEndFrom(html, junkFrom);
-            if (closeEnd !== -1 && closeEnd > junkFrom) {
+            if (closeEnd === -1) {
+              // The close tag never terminates, so the element stays open to end of input and
+              // the remainder is raw text. Resuming at `junkFrom` scanned inside that still-open
+              // body, and a `<script/>`-looking string in it got rewritten, which introduced the
+              // `>` htmlparser2 needed to end the outer element and spilled the rest of the code
+              // into `body_text` as a false indicator. Stop, exactly as the missing-close-tag
+              // path above does.
+              cursor = html.length;
+            } else if (closeEnd > junkFrom) {
               pieces.push(html.slice(copiedTo, closeAt), `</${name}>`);
               copiedTo = closeEnd + 1;
               cursor = closeEnd + 1;
@@ -458,7 +466,15 @@ const RESIDUAL_CLOSING_TAG = /<\/[a-z][a-z0-9:_-]*(?=[\s/>])/i;
  * `title` are HTML element names too, but they only peel as the sole top-level element,
  * which a real HTML document never presents.
  */
-const ENCODED_HTML_WRAPPER_LOCAL_NAMES = new Set(['description']);
+/**
+ * Wrappers recognized by their bare, unprefixed name.
+ *
+ * RSS 2.0 `<description>` only. A namespaced `description` is a different contract and is
+ * handled below, because `media:description type="plain"` is plain text by declaration and
+ * `dc:description` is literal text by convention, yet both matched here on local name and had
+ * their sentences truncated at the first escaped `<script>` token.
+ */
+const ENCODED_HTML_WRAPPER_BARE_NAMES = new Set(['description']);
 
 /**
  * Wrappers that only qualify with their namespace prefix.
@@ -535,7 +551,13 @@ const isEncodedHtmlWrapper = (node: ParsedNode): boolean => {
   const qualified = elementName(node);
   const name = localName(qualified);
   if (ENCODED_HTML_WRAPPER_QUALIFIED_NAMES.has(qualified)) return true;
-  if (ENCODED_HTML_WRAPPER_LOCAL_NAMES.has(name)) return true;
+  if (ENCODED_HTML_WRAPPER_BARE_NAMES.has(qualified)) return true;
+
+  // A namespaced description has to declare HTML, mirroring the Atom rule below. Media RSS
+  // spells the plain case `type="plain"`, and Dublin Core carries no type at all, so neither
+  // qualifies without saying so.
+  if (ENCODED_HTML_WRAPPER_BARE_NAMES.has(name)) return atomType(node) === 'html';
+
   if (!ATOM_TEXT_CONSTRUCTS.has(name)) return false;
 
   const type = atomType(node);

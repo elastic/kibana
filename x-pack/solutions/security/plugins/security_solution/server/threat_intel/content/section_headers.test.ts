@@ -237,3 +237,34 @@ describe('the about-the terminator is scoped to authorship', () => {
     }
   );
 });
+
+/**
+ * A prefix must not match part of a longer word. Trailing spaces used to do that job and only
+ * for the entries that had one, so `about the author` matched `About the authorization bypass`
+ * and `About the authoritative DNS server`, tagging real report prose as citation noise.
+ */
+describe('terminator prefixes respect word boundaries', () => {
+  it.each([
+    ['About the author'],
+    ['About the author, Jane Doe'],
+    ['About the author: Jane'],
+    ['Related articles'],
+    ['Share'],
+    ['Discover more'],
+    ['Similar posts'],
+  ])('still classifies %s as references', (heading) => {
+    expect(classifyHeader(heading)).toBe('references');
+  });
+
+  it.each([
+    ['About the authorization bypass'],
+    ['About the authoritative DNS server'],
+    ['About the authenticator'],
+    ['About the malware'],
+    ['Relatedfoo'],
+    ['Sharepoint exploitation'],
+    ['Similarity analysis'],
+  ])('classifies %s as prose', (heading) => {
+    expect(classifyHeader(heading)).toBe('prose');
+  });
+});

@@ -109,16 +109,32 @@ export const TERMINATOR_HEADER_TERMS = new Set([
  * doesn't match the set, but starts with "related ").
  */
 export const TERMINATOR_PREFIXES = [
-  'related ',
-  'similar ',
-  'share ',
+  'related',
+  'similar',
+  'share',
   // `about the author` rather than `about the `, which swept up ordinary report sections:
   // `About the malware`, `About the campaign` and `About the vulnerability` all classified as
-  // references, so real report content and its indicators were tagged as citation noise. The
-  // prefix form is kept so an author name may follow.
+  // references, so real report content and its indicators were tagged as citation noise.
   'about the author',
-  'discover ',
+  'discover',
 ];
+
+/**
+ * Characters that may follow a prefix, so a prefix cannot match part of a longer word.
+ *
+ * Trailing spaces used to do this job and only for the entries that had one. `about the author`
+ * did not, so `About the authorization bypass` and `About the authoritative DNS server`
+ * classified as references, tagging real report prose and its indicators as citation noise.
+ * Requiring a delimiter makes every prefix behave the same way and drops the need to remember
+ * the trailing space.
+ */
+const PREFIX_DELIMITER = /[\s,;:.\-]/;
+
+const matchesPrefix = (normalized: string, prefix: string): boolean => {
+  if (normalized === prefix) return true;
+  if (!normalized.startsWith(prefix)) return false;
+  return PREFIX_DELIMITER.test(normalized.charAt(prefix.length));
+};
 
 export type SectionKind = 'ioc' | 'references' | 'prose';
 
@@ -153,7 +169,10 @@ const matchesTerm = (terms: Set<string>, normalized: string): boolean => {
 export const classifyHeader = (raw: string): SectionKind => {
   const n = normalizeHeader(raw);
   if (matchesTerm(IOC_HEADER_TERMS, n)) return 'ioc';
-  if (matchesTerm(TERMINATOR_HEADER_TERMS, n) || TERMINATOR_PREFIXES.some((p) => n.startsWith(p)))
+  if (
+    matchesTerm(TERMINATOR_HEADER_TERMS, n) ||
+    TERMINATOR_PREFIXES.some((p) => matchesPrefix(n, p))
+  )
     return 'references';
   return 'prose';
 };

@@ -1116,7 +1116,9 @@ describe('entity-encoded bodies inside feed wrappers', () => {
     ['no wrapper', ENCODED],
     ['description', `<description>${ENCODED}</description>`],
     ['content:encoded', `<content:encoded>${ENCODED}</content:encoded>`],
-    ['namespaced description', `<media:description>${ENCODED}</media:description>`],
+    // A namespaced description has to declare HTML. This case originally omitted the type,
+    // which is `media:description`'s plain-text contract, so the expectation was wrong.
+    ['namespaced description', `<media:description type="html">${ENCODED}</media:description>`],
     // `type="html"` is what makes an Atom summary an encoded wrapper. This case originally
     // omitted the attribute, which per RFC 4287 means literal text, so the expectation was
     // wrong rather than the code.
@@ -1947,5 +1949,60 @@ describe('already-expanded output is not parsed twice', () => {
     expect(stripHtml('&lt;script&gt;fetch("https://false-ioc.test")&lt;/script&gt;safe')).toBe(
       'safe'
     );
+  });
+});
+
+/**
+ * A namespaced description is a different contract from RSS 2.0's bare one.
+ * `media:description type="plain"` is plain text by declaration and `dc:description` is
+ * literal text by convention, yet both matched on local name and had their sentences
+ * truncated at the first escaped `<script>` token.
+ */
+describe('namespaced descriptions honor their contract', () => {
+  const LITERAL = 'Exploit uses &lt;script&gt; and c2.evil.test';
+  const DECODED = 'Exploit uses <script> and c2.evil.test';
+
+  it.each([
+    [
+      'media:description with an explicit plain type',
+      `<media:description type="plain">${LITERAL}</media:description>`,
+    ],
+    ['media:description with no type', `<media:description>${LITERAL}</media:description>`],
+    ['dc:description', `<dc:description>${LITERAL}</dc:description>`],
+    ['an arbitrary namespaced description', `<foo:description>${LITERAL}</foo:description>`],
+  ])('keeps %s literal', (_label, html) => {
+    const result = stripHtml(html);
+
+    expect(result).toBe(DECODED);
+    expect(result).toContain('c2.evil.test');
+  });
+
+  it('expands a namespaced description that declares html', () => {
+    expect(
+      stripHtml('<media:description type="html">&lt;p&gt;evil.com&lt;/p&gt;</media:description>')
+    ).toBe('evil.com');
+  });
+
+  it('still expands the bare RSS description unconditionally', () => {
+    expect(stripHtml('<description>&lt;p&gt;evil.com&lt;/p&gt;</description>')).toBe('evil.com');
+  });
+});
+
+/**
+ * A close tag that never terminates leaves the element open to end of input, so the remainder
+ * is raw text. Resuming the scan inside that body let a `<script/>`-looking string in it be
+ * rewritten, which introduced the `>` needed to end the outer element and spilled the rest of
+ * the code into body_text as a false indicator.
+ */
+describe('unterminated raw-text close tags stay opaque', () => {
+  it.each([
+    ['a script body', '<script>a=1</script foo="<script/>'],
+    ['a style body', '<style>a{b:1}</style foo="<style/>'],
+  ])('does not resume scanning inside %s', (_label, html) => {
+    expect(stripHtml(html)).toBe('');
+  });
+
+  it('still handles a terminated junk-carrying close tag', () => {
+    expect(stripHtml('<script>a=1</script foo="x"><p>safe</p>')).toBe('safe');
   });
 });
